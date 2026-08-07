@@ -1,0 +1,368 @@
+"""Blind Chess online play — matchmaking and move relay.
+
+Stdlib only. One port serves both the page over HTTP and the game socket at
+/ws, so a browser loads http://localhost:8787/ and connects straight back to
+the origin it came from.
+
+The rules live in the browser: both clients run the same move generator, so the
+server's job is to pair players and to keep the two of them on one timeline. It
+enforces whose turn it is and that plies arrive in order — a move from the wrong
+player, or out of sequence, is refused rather than relayed. It does not judge
+legality, so a hand-rolled client could still feed its opponent nonsense; the
+receiving client rejects anything its own rules reject.
+
+Run:  python3 server/server.py [--port 8787]
+"""
+
+import json
+import os
+import random
+import socket
+import sys
+import threading
+import time
+import uuid
+
+sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+import wsproto
+from wsproto import Framer, WSClosed, WSError
+
+HERE = os.path.dirname(os.path.abspath(__file__))
+PAGE = os.path.join(os.path.dirname(HERE), "blind-chess.html")
+
+WHITE, BLACK = "w", "b"
+
+lock = threading.RLock()
+lobby = {}      # (mode, minutes) -> Client waiting for an opponent
+games = {}      # game id -> Game
+LOG = True
+
+
+def log(*a):
+    if LOG:
+        print("[%s]" % time.strftime("%H:%M:%S"), *a, flush=True)
+
+
+class Client:
+    def __init__(self, framer, addr):
+        self.framer = framer
+        self.addr = addr
+        self.send_lock = threading.Lock()
+        self.id = uuid.uuid4().hex[:8]
+        self.game = None
+        self.color = None
+        self.queue_key = None
+        self.alive = True
+
+    def send(self, obj):
+        if not self.alive:
+            return
+        try:
+            with self.send_lock:
+                self.framer.send(json.dumps(obj))
+        except (OSError, WSError):
+            self.alive = False
+
+    def __repr__(self):
+        return "<client %s>" % self.id
+
+
+class Game:
+    def __init__(self, white, black, mode, minutes):
+        self.id = uuid.uuid4().hex[:8]
+        self.players = {WHITE: white, BLACK: black}
+        self.mode = mode
+        self.minutes = minutes
+        self.moves = []          # each: {ply, from, to, promo, san}
+        self.turn = WHITE
+        self.over = None
+        self.started = time.time()
+
+    def opponent_of(self, client):
+        return self.players[BLACK if client.color == WHITE else WHITE]
+
+
+def finish_game(game, reason, winner=None, exclude=None):
+    """Mark a game over and tell whoever is still connected."""
+    if game.over:
+        return
+    game.over = reason
+    for client in game.players.values():
+        if client is not exclude:
+            client.send({"t": "over", "reason": reason, "winner": winner})
+    games.pop(game.id, None)
+    log("game %s over: %s" % (game.id, reason))
+
+
+# ---------------------------------------------------------------- messages
+
+def handle_find(client, msg):
+    mode = msg.get("mode", "blind")
+    minutes = msg.get("minutes", 10)
+    if client.game:
+        client.send({"t": "error", "msg": "already in a game"})
+        return
+    key = (mode, minutes)
+    with lock:
+        waiting = lobby.get(key)
+        if waiting and waiting is not client and waiting.alive:
+            del lobby[key]
+            # colours are the server's call, so neither client can pick for itself
+            pair = [waiting, client]
+            random.shuffle(pair)
+            white, black = pair
+            game = Game(white, black, mode, minutes)
+            white.color, black.color = WHITE, BLACK
+            white.game = black.game = game
+            white.queue_key = black.queue_key = None
+            games[game.id] = game
+            log("matched %s (w) vs %s (b) — %s, %s min" % (white.id, black.id, mode, minutes))
+            for color, player in game.players.items():
+                player.send({
+                    "t": "start",
+                    "game": game.id,
+                    "color": color,
+                    "mode": mode,
+                    "minutes": minutes,
+                })
+        else:
+            if waiting is client:
+                return
+            lobby[key] = client
+            client.queue_key = key
+            client.send({"t": "waiting"})
+            log("%s waiting — %s, %s min" % (client.id, mode, minutes))
+
+
+def handle_cancel(client):
+    with lock:
+        if client.queue_key and lobby.get(client.queue_key) is client:
+            del lobby[client.queue_key]
+        client.queue_key = None
+    client.send({"t": "cancelled"})
+
+
+def handle_move(client, msg):
+    with lock:
+        game = client.game
+        if not game or game.over:
+            client.send({"t": "error", "msg": "no game in progress"})
+            return
+        if client.color != game.turn:
+            client.send({"t": "error", "msg": "not your turn", "ply": len(game.moves)})
+            return
+        ply = msg.get("ply")
+        if ply != len(game.moves):
+            client.send({"t": "error", "msg": "out of sequence", "ply": len(game.moves)})
+            return
+        move = {
+            "ply": ply,
+            "from": msg.get("from"),
+            "to": msg.get("to"),
+            "promo": msg.get("promo"),
+            "san": msg.get("san"),
+        }
+        if not isinstance(move["from"], int) or not isinstance(move["to"], int) \
+           or not (0 <= move["from"] < 64) or not (0 <= move["to"] < 64):
+            client.send({"t": "error", "msg": "bad square"})
+            return
+        game.moves.append(move)
+        game.turn = BLACK if game.turn == WHITE else WHITE
+        opponent = game.opponent_of(client)
+    out = dict(move)
+    out["t"] = "move"
+    opponent.send(out)
+
+
+def handle_result(client, msg):
+    """A client's rules said the game ended. Record it and let the other agree."""
+    with lock:
+        game = client.game
+        if not game or game.over:
+            return
+        finish_game(game, msg.get("status", "game over"), msg.get("winner"), exclude=client)
+
+
+def handle_resign(client):
+    with lock:
+        game = client.game
+        if not game or game.over:
+            return
+        winner = BLACK if client.color == WHITE else WHITE
+        finish_game(game, "resign", winner)
+
+
+def handle_message(client, raw):
+    try:
+        msg = json.loads(raw)
+    except ValueError:
+        client.send({"t": "error", "msg": "bad json"})
+        return
+    kind = msg.get("t")
+    if kind == "find":
+        handle_find(client, msg)
+    elif kind == "cancel":
+        handle_cancel(client)
+    elif kind == "move":
+        handle_move(client, msg)
+    elif kind == "result":
+        handle_result(client, msg)
+    elif kind == "resign":
+        handle_resign(client)
+    elif kind == "ping":
+        client.send({"t": "pong"})
+    else:
+        client.send({"t": "error", "msg": "unknown message %r" % (kind,)})
+
+
+def drop_client(client):
+    client.alive = False
+    with lock:
+        if client.queue_key and lobby.get(client.queue_key) is client:
+            del lobby[client.queue_key]
+        game = client.game
+        if game and not game.over:
+            winner = BLACK if client.color == WHITE else WHITE
+            finish_game(game, "left", winner, exclude=client)
+        client.game = None
+    log("%s disconnected" % client.id)
+
+
+# ------------------------------------------------------------------- http
+
+def serve_http(sock, request_line):
+    try:
+        method, path, _ = request_line.split(" ", 2)
+    except ValueError:
+        sock.sendall(b"HTTP/1.1 400 Bad Request\r\n\r\n")
+        return
+    if method != "GET":
+        sock.sendall(b"HTTP/1.1 405 Method Not Allowed\r\n\r\n")
+        return
+    path = path.split("?", 1)[0]
+    if path in ("/", "/index.html", "/blind-chess.html"):
+        try:
+            with open(PAGE, "rb") as fh:
+                body = fh.read()
+        except OSError:
+            sock.sendall(b"HTTP/1.1 404 Not Found\r\n\r\n")
+            return
+        head = (
+            "HTTP/1.1 200 OK\r\n"
+            "Content-Type: text/html; charset=utf-8\r\n"
+            "Content-Length: %d\r\n"
+            "Cache-Control: no-store\r\n"
+            "\r\n" % len(body)
+        )
+        sock.sendall(head.encode() + body)
+    elif path == "/health":
+        with lock:
+            body = json.dumps({
+                "ok": True,
+                "waiting": len(lobby),
+                "games": len(games),
+            }).encode()
+        sock.sendall(
+            b"HTTP/1.1 200 OK\r\nContent-Type: application/json\r\nContent-Length: "
+            + str(len(body)).encode() + b"\r\n\r\n" + body
+        )
+    else:
+        sock.sendall(b"HTTP/1.1 404 Not Found\r\nContent-Length: 0\r\n\r\n")
+
+
+# ------------------------------------------------------------ connections
+
+def handle_connection(sock, addr):
+    client = None
+    try:
+        raw = wsproto.read_http_head(sock)
+        request_line, headers, rest = wsproto.parse_http_head(raw)
+
+        # A proxy may fold the upgrade into a list ("keep-alive, Upgrade") and may
+        # send it in any case, so match loosely on Upgrade alone and never require
+        # an exact Connection header — that is what breaks servers behind proxies.
+        upgrade = headers.get("upgrade", "").lower().strip()
+        if upgrade != "websocket":
+            serve_http(sock, request_line)
+            return
+
+        try:
+            path = request_line.split(" ", 2)[1].split("?", 1)[0]
+        except IndexError:
+            path = ""
+        if path.rstrip("/") not in ("/ws", ""):
+            sock.sendall(b"HTTP/1.1 404 Not Found\r\nContent-Length: 0\r\n\r\n")
+            return
+
+        version = headers.get("sec-websocket-version", "").strip()
+        if version and version != "13":
+            sock.sendall(
+                b"HTTP/1.1 426 Upgrade Required\r\n"
+                b"Sec-WebSocket-Version: 13\r\n"
+                b"Content-Length: 0\r\n\r\n"
+            )
+            return
+
+        key = headers.get("sec-websocket-key")
+        if not key:
+            sock.sendall(b"HTTP/1.1 400 Bad Request\r\n\r\n")
+            return
+        resp = (
+            "HTTP/1.1 101 Switching Protocols\r\n"
+            "Upgrade: websocket\r\n"
+            "Connection: Upgrade\r\n"
+            "Sec-WebSocket-Accept: %s\r\n"
+            "\r\n" % wsproto.accept_key(key)
+        )
+        sock.sendall(resp.encode())
+        client = Client(Framer(sock, mask_out=False, leftover=rest), addr)
+        log("%s connected from %s" % (client.id, addr[0]))
+        while True:
+            raw_msg = client.framer.read_message()
+            handle_message(client, raw_msg)
+    except (WSClosed, ConnectionResetError, BrokenPipeError):
+        pass
+    except WSError as exc:
+        log("protocol error: %s" % exc)
+    except OSError:
+        pass
+    finally:
+        if client:
+            drop_client(client)
+        try:
+            sock.close()
+        except OSError:
+            pass
+
+
+def main():
+    # $PORT is what most hosts inject; --port wins when it is given explicitly
+    port = int(os.environ.get("PORT") or 8787)
+    if "--port" in sys.argv:
+        port = int(sys.argv[sys.argv.index("--port") + 1])
+    server = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+    server.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
+    # 0.0.0.0, not 127.0.0.1: the process must be reachable from outside its
+    # container or the proxy in front of it can never connect.
+    server.bind(("0.0.0.0", port))
+    server.listen(64)
+    log("Blind Chess listening on 0.0.0.0:%d — page and socket share this port "
+        "(socket at /ws). TLS, if any, is the proxy's job." % port)
+    try:
+        while True:
+            sock, addr = server.accept()
+            # a half-open connection through a proxy should not pin a thread forever
+            try:
+                sock.setsockopt(socket.SOL_SOCKET, socket.SO_KEEPALIVE, 1)
+                sock.setsockopt(socket.IPPROTO_TCP, socket.TCP_NODELAY, 1)
+            except OSError:
+                pass
+            threading.Thread(target=handle_connection, args=(sock, addr), daemon=True).start()
+    except KeyboardInterrupt:
+        log("shutting down")
+    finally:
+        server.close()
+
+
+if __name__ == "__main__":
+    main()

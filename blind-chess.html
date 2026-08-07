@@ -1,0 +1,2588 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>BLIND CHESS</title>
+<style>
+  :root{
+    --bg-0:#0b0c10;
+    --bg-1:#14161d;
+    --bg-2:#1c1f28;
+    --line:#2b2f3a;
+    --gold:#d9a441;
+    --gold-soft:#f0c775;
+    --text:#e8e6e1;
+    --muted:#8f93a0;
+    --light-sq:#e9dcc3;
+    --dark-sq:#7a5c3e;
+    --sel:#f2c14e;
+    --danger:#e05a4d;
+    --good:#6fbf73;
+    --radius:14px;
+    --board-max:660px;
+    --btn-h:clamp(74px,17vw,120px);      /* PLAY height = SOCIAL square side */
+    --play-w:clamp(200px,48vw,360px);
+    --btn-gap:18px;
+  }
+
+  *{box-sizing:border-box;}
+  html,body{height:100%;}
+  body{
+    margin:0;
+    font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Helvetica,Arial,sans-serif;
+    color:var(--text);
+    background:
+      radial-gradient(1200px 700px at 15% -10%, #1d2130 0%, transparent 60%),
+      radial-gradient(900px 600px at 110% 20%, #241d18 0%, transparent 55%),
+      linear-gradient(180deg,#0b0c10 0%, #0e1015 60%, #0b0c10 100%);
+    background-attachment:fixed;
+    min-height:100vh;
+    padding:28px 20px 48px;
+    -webkit-font-smoothing:antialiased;
+  }
+  body::before{
+    content:"";
+    position:fixed; inset:0; pointer-events:none; z-index:0;
+    background-image:
+      repeating-linear-gradient(0deg, rgba(255,255,255,.014) 0 1px, transparent 1px 3px);
+    mix-blend-mode:overlay;
+  }
+
+  .wrap{position:relative; z-index:1; max-width:1120px; margin:0 auto;}
+
+  /* ---------- header ---------- */
+  header{text-align:center; margin-bottom:26px;}
+  .eyebrow{
+    font-size:11px; letter-spacing:.42em; text-transform:uppercase;
+    color:var(--muted); margin-bottom:12px;
+  }
+  h1{
+    margin:0;
+    font-family:Georgia,"Times New Roman",serif;
+    font-weight:400;
+    font-size:clamp(38px,8vw,68px);
+    letter-spacing:.16em;
+    text-indent:.16em;
+    background:linear-gradient(180deg,#fdf3dd 0%, var(--gold-soft) 45%, #a97821 100%);
+    -webkit-background-clip:text; background-clip:text;
+    color:transparent;
+    filter:drop-shadow(0 4px 18px rgba(217,164,65,.22));
+  }
+  .rule{
+    display:flex; align-items:center; justify-content:center; gap:14px;
+    margin:14px auto 0; max-width:460px; color:var(--gold);
+  }
+  .rule span{flex:1; height:1px; background:linear-gradient(90deg,transparent,var(--gold),transparent); opacity:.55;}
+  .rule b{font-size:15px; opacity:.8;}
+  .tagline{margin:12px 0 0; color:var(--muted); font-size:13.5px; letter-spacing:.04em;}
+
+  /* ---------- layout ---------- */
+  .layout{
+    display:grid;
+    grid-template-columns:minmax(0,1fr) 320px;
+    gap:24px;
+    align-items:start;
+  }
+  @media (max-width:900px){ .layout{grid-template-columns:minmax(0,1fr);} }
+
+  .panel{
+    background:linear-gradient(180deg, rgba(28,31,40,.92), rgba(18,20,26,.92));
+    border:1px solid var(--line);
+    border-radius:var(--radius);
+    box-shadow:0 18px 40px rgba(0,0,0,.42), inset 0 1px 0 rgba(255,255,255,.04);
+  }
+
+  /* ---------- board ---------- */
+  .board-col{display:flex; flex-direction:column; align-items:center; gap:14px;}
+
+  .board-frame{
+    padding:16px;
+    border-radius:18px;
+    background:linear-gradient(160deg,#2a2318,#171410 55%,#241d13);
+    border:1px solid #3a2f1f;
+    box-shadow:0 24px 60px rgba(0,0,0,.55), inset 0 1px 0 rgba(255,255,255,.06);
+    position:relative;
+    width:min(100%, var(--board-max));
+  }
+  .board-frame::after{
+    content:""; position:absolute; inset:8px; border-radius:12px;
+    border:1px solid rgba(217,164,65,.22); pointer-events:none;
+  }
+
+  .board{
+    position:relative;
+    width:100%; aspect-ratio:1/1;
+    container-type:size;
+    border-radius:6px; overflow:hidden;
+    box-shadow:inset 0 0 0 1px rgba(0,0,0,.5), 0 0 30px rgba(0,0,0,.35);
+  }
+  .squares{position:absolute; inset:0; display:grid; grid-template-columns:repeat(8,1fr); grid-template-rows:repeat(8,1fr);}
+  .sq{position:relative; user-select:none; cursor:pointer;}
+  .sq.light{background:linear-gradient(160deg,#efe3cc,#e2d3b5);}
+  .sq.dark{background:linear-gradient(160deg,#87684a,#6d5137);}
+  .sq .coord{
+    position:absolute; font-size:9.5px; font-weight:700; letter-spacing:.05em;
+    opacity:.5; pointer-events:none;
+  }
+  .sq .coord.file{right:3px; bottom:1px;}
+  .sq .coord.rank{left:3px; top:1px;}
+  .sq.light .coord{color:#6d5137;}
+  .sq.dark  .coord{color:#efe3cc;}
+
+  .sq.last::before{
+    content:""; position:absolute; inset:0;
+    background:rgba(242,193,78,.30);
+    box-shadow:inset 0 0 0 2px rgba(242,193,78,.45);
+  }
+  .sq.sel::before{
+    content:""; position:absolute; inset:0;
+    background:rgba(111,191,115,.30);
+    box-shadow:inset 0 0 0 3px rgba(111,191,115,.75);
+  }
+  .sq.hint::after{
+    content:""; position:absolute; left:50%; top:50%;
+    width:26%; height:26%; transform:translate(-50%,-50%);
+    border-radius:50%; background:rgba(20,20,20,.30);
+  }
+  .sq.hint.occupied::after{
+    width:88%; height:88%; background:transparent;
+    border:4px solid rgba(20,20,20,.28); border-radius:50%;
+  }
+  .sq.check::before{
+    content:""; position:absolute; inset:0;
+    background:radial-gradient(circle at 50% 50%, rgba(224,90,77,.85), rgba(224,90,77,0) 70%);
+  }
+  .sq.bad{animation:shake .38s ease;}
+  @keyframes shake{
+    0%,100%{box-shadow:inset 0 0 0 0 rgba(224,90,77,0);}
+    20%,60%{box-shadow:inset 0 0 0 4px rgba(224,90,77,.9);}
+    40%,80%{box-shadow:inset 0 0 0 4px rgba(224,90,77,.35);}
+  }
+
+  /* fog */
+  .sq .fog{
+    position:absolute; inset:0; pointer-events:none;
+    background:linear-gradient(160deg, rgba(9,10,14,.86), rgba(9,10,14,.93));
+    opacity:0; transition:opacity .35s ease;
+  }
+  .board.fog .sq.hidden .fog{opacity:1;}
+
+  .pieces{position:absolute; inset:0; pointer-events:none;}
+  .piece{
+    position:absolute; left:0; top:0; width:12.5%; height:12.5%;
+    display:flex; align-items:center; justify-content:center;
+    font-size:min(8.6vw,62px); line-height:1;
+    font-size:9.6cqmin;
+    transition:transform .22s cubic-bezier(.2,.9,.3,1), opacity .3s ease;
+    will-change:transform;
+  }
+  .piece span{
+    display:block; transform:translateY(-2%);
+    transition:opacity .35s ease, filter .35s ease;
+  }
+  .piece.w span{
+    color:#fbf6ea;
+    -webkit-text-stroke:1.6px #2a2118;
+    text-shadow:0 3px 5px rgba(0,0,0,.45);
+  }
+  .piece.b span{
+    color:#22242c;
+    -webkit-text-stroke:1.4px #0a0b0e;
+    text-shadow:0 3px 5px rgba(0,0,0,.4), 0 0 1px rgba(255,255,255,.35);
+  }
+  /* the hand-drawn bishop, sized and weighted to sit with the glyph set */
+  .pc-svg{
+    width:.72em; height:.72em; display:inline-block; vertical-align:-.08em;
+    fill:currentColor; stroke:none; overflow:visible;
+  }
+  .pc-svg .slit{fill:none;}
+  .piece span .pc-svg{display:block; filter:drop-shadow(0 3px 5px rgba(0,0,0,.45));}
+  .piece.w span .pc-svg{fill:#fbf6ea; stroke:#2a2118;}
+  .piece.b span .pc-svg{fill:#22242c; stroke:#0a0b0e;}
+  .promo .pc-svg{width:.8em; height:.8em;}
+
+  .piece.gone{opacity:0; transform-origin:center; }
+  .piece.pop span{animation:pop .3s ease;}
+  @keyframes pop{0%{transform:scale(.3) translateY(-2%);}70%{transform:scale(1.15) translateY(-2%);}100%{transform:scale(1) translateY(-2%);}}
+
+  /* blind mode hides the men */
+  .board.blind .piece span{opacity:0; filter:blur(6px);}
+  .board.blind.peek .piece span{opacity:1; filter:none;}
+  .board.fog .piece.hidden span{opacity:0; filter:blur(5px);}
+  .board.reveal .piece span{opacity:1 !important; filter:none !important;}
+
+  /* ---------- clocks ---------- */
+  .clocks{
+    width:min(100%,var(--board-max));
+    display:grid; grid-template-columns:1fr 1fr; gap:10px; padding:10px;
+  }
+  .clock{
+    display:flex; align-items:center; justify-content:space-between; gap:10px;
+    padding:9px 16px; border-radius:10px;
+    border:1px solid var(--line); background:rgba(0,0,0,.25);
+    transition:border-color .2s ease, background .2s ease;
+  }
+  .clock .who{font-size:10px; letter-spacing:.2em; font-weight:600; color:var(--muted);}
+  .clock .time{
+    font-family:ui-monospace,SFMono-Regular,Menlo,monospace;
+    font-size:clamp(19px,3.2vw,26px); font-weight:600;
+    font-variant-numeric:tabular-nums; color:var(--text);
+  }
+  .clock.active{border-color:var(--gold); background:rgba(217,164,65,.10);}
+  .clock.active .who,
+  .clock.active .time{color:var(--gold-soft);}
+  .clock.low .time{color:var(--danger);}
+  .clock.low.active{border-color:var(--danger); background:rgba(224,90,77,.12);}
+  .clock.flagged{opacity:.5;}
+  .clock-note{
+    grid-column:1 / -1; text-align:center; padding:4px 0 1px;
+    font-size:10px; letter-spacing:.18em; text-transform:uppercase; color:#6b7080;
+  }
+
+  /* ---------- status bar ---------- */
+  .status{
+    width:min(100%,var(--board-max));
+    display:flex; align-items:center; gap:12px;
+    padding:12px 16px; border-radius:12px;
+  }
+  .dot{width:10px; height:10px; border-radius:50%; background:var(--gold); box-shadow:0 0 12px var(--gold); flex:none;}
+  .dot.think{animation:pulse 1s infinite;}
+  @keyframes pulse{0%,100%{opacity:1;}50%{opacity:.25;}}
+  .status-text{font-size:14px; letter-spacing:.02em;}
+  .status-text b{color:var(--gold-soft); font-weight:600;}
+  .status .spacer{flex:1;}
+  .peeks{font-size:12px; color:var(--muted); letter-spacing:.08em; white-space:nowrap;}
+
+  /* ---------- controls ---------- */
+  .controls{width:min(100%,var(--board-max)); padding:14px; display:flex; flex-wrap:wrap; gap:8px;}
+  button{
+    font:inherit; font-size:13px; letter-spacing:.03em;
+    color:var(--text); background:linear-gradient(180deg,#262a35,#1b1e26);
+    border:1px solid var(--line); border-radius:10px;
+    padding:9px 14px; cursor:pointer;
+    transition:transform .12s ease, border-color .2s, background .2s, color .2s;
+  }
+  button:hover{border-color:#4a5062; transform:translateY(-1px);}
+  button:active{transform:translateY(0);}
+  button:disabled{opacity:.4; cursor:not-allowed; transform:none;}
+  button.primary{
+    background:linear-gradient(180deg,#e2b357,#b07f22);
+    border-color:#e2b357; color:#1a1408; font-weight:650;
+  }
+  button.primary:hover{filter:brightness(1.07);}
+  button.ghost{background:transparent;}
+
+  /* ---------- side panel ---------- */
+  .side{display:flex; flex-direction:column; gap:16px;}
+  .card{padding:16px;}
+  .card h2{
+    margin:0 0 12px; font-size:11px; letter-spacing:.24em; text-transform:uppercase;
+    color:var(--muted); font-weight:600;
+  }
+
+  /* ---------- screens ---------- */
+  .screen{display:none;}
+  .screen.show{display:block; animation:screenIn .5s cubic-bezier(.2,.8,.3,1);}
+  @keyframes screenIn{from{opacity:0; transform:translateY(14px);} to{opacity:1; transform:none;}}
+
+  /* ---------- title screen ---------- */
+  .hero{
+    min-height:min(84vh,780px);
+    display:flex; flex-direction:column; align-items:center; justify-content:flex-start;
+    text-align:center; padding:clamp(18px,5vh,54px) 0 30px;
+  }
+  .hero h1{
+    font-size:clamp(36px,8.4vw,86px);
+    position:relative;
+  }
+  .hero .rule{margin-top:clamp(24px,3.4vh,40px);}
+  .hero .rule b{font-size:clamp(19px,2.9vw,26px); opacity:.85;}
+  .hero .tagline{
+    margin-top:clamp(18px,2.6vh,30px);
+    font-size:clamp(15px,1.9vw,18.5px); line-height:1.6;
+  }
+  .hero h1::after{
+    content:"BLIND CHESS";
+    position:absolute; inset:0;
+    background:linear-gradient(100deg, transparent 35%, rgba(255,255,255,.75) 50%, transparent 65%);
+    -webkit-background-clip:text; background-clip:text; color:transparent;
+    background-size:250% 100%;
+    animation:sheen 6.5s ease-in-out infinite;
+  }
+  @keyframes sheen{0%,62%{background-position:180% 0;} 92%,100%{background-position:-80% 0;}}
+
+  /* PLAY + SOCIAL side by side, LESSON & PUZZLE spanning beneath them */
+  .hero-actions{
+    margin-top:clamp(48px,9vh,92px);     /* sits further down the page */
+    display:grid; grid-template-columns:auto auto; gap:var(--btn-gap);
+    justify-content:center;      /* cluster midpoint sits dead centre */
+  }
+  .play-btn{
+    width:var(--play-w); height:var(--btn-h);
+    font-size:clamp(18px,3.4vw,27px); font-weight:700;
+    letter-spacing:.3em; text-indent:.3em;
+    border-radius:14px; padding:0;
+    background:linear-gradient(180deg,#e9bd60,#b07f22);
+    border:1px solid #f0c775; color:#1a1408;
+    box-shadow:0 14px 34px rgba(217,164,65,.3), inset 0 1px 0 rgba(255,255,255,.45);
+  }
+  .play-btn:hover{
+    filter:brightness(1.08);
+    box-shadow:0 18px 44px rgba(217,164,65,.44), inset 0 1px 0 rgba(255,255,255,.45);
+  }
+  .social-btn{
+    width:var(--btn-h); height:var(--btn-h);
+    display:flex; flex-direction:column; align-items:center; justify-content:center; gap:7px;
+    border-radius:14px; padding:0;
+    font-size:clamp(11px,2.1vw,15px); font-weight:650; letter-spacing:.14em;
+    background:linear-gradient(180deg,#262a35,#1b1e26);
+    border:1px solid var(--line); color:var(--text);
+  }
+  .social-btn .ico{
+    font-size:clamp(20px,3.8vw,29px); line-height:1;
+    color:var(--gold); opacity:.85; letter-spacing:1px;
+  }
+  .social-btn:hover{border-color:var(--gold); color:var(--gold-soft);}
+  .social-btn:hover .ico{opacity:1;}
+
+  .lesson-btn{
+    grid-column:1 / -1; justify-self:center;
+    /* deliberately narrower than PLAY + SOCIAL together */
+    width:calc((var(--play-w) + var(--btn-h) + var(--btn-gap)) * .84);
+    height:clamp(54px,10vw,74px);
+    border-radius:12px; padding:0;
+    font-size:clamp(12px,2.2vw,15px); font-weight:600; letter-spacing:.2em;
+    background:linear-gradient(180deg,#20242e,#171a21);
+    border:1px solid var(--line); color:var(--muted);
+  }
+  .lesson-btn:hover{border-color:var(--gold); color:var(--gold-soft);}
+
+  /* gear in the top-right corner of the title screen */
+  .settings-btn{
+    position:absolute; top:0; right:0; z-index:2;
+    width:44px; height:44px; padding:0; border-radius:12px;
+    display:flex; align-items:center; justify-content:center;
+    background:linear-gradient(180deg,#20242e,#171a21);
+    border:1px solid var(--line); color:var(--muted);
+  }
+  .settings-btn svg{width:21px; height:21px; display:block;}
+  .settings-btn:hover{border-color:var(--gold); color:var(--gold-soft);}
+  .settings-btn:hover svg{transform:rotate(45deg);}
+  .settings-btn svg{transition:transform .35s cubic-bezier(.2,.8,.3,1);}
+
+  .hero-set{
+    margin-top:clamp(30px,5vh,50px); display:flex; gap:clamp(8px,2.4vw,22px);
+    font-size:clamp(19px,3.6vw,30px); color:#4a4335;
+  }
+  .hero-set span{opacity:0; animation:riseIn .7s ease forwards;}
+  @keyframes riseIn{from{opacity:0; transform:translateY(10px);} to{opacity:.85; transform:none;}}
+
+  /* ---------- setup screen ---------- */
+  .setup{
+    max-width:940px; margin:0 auto; padding:14px 0 30px;
+    min-height:min(82vh,780px);
+    display:flex; flex-direction:column; justify-content:center;
+  }
+  .setup-head{text-align:center; margin-bottom:30px;}
+  .setup-head h2{
+    margin:0; font-family:Georgia,serif; font-weight:400; font-size:clamp(26px,4.6vw,40px);
+    letter-spacing:.14em; color:var(--gold-soft);
+  }
+  .setup-head p{margin:10px 0 0; color:var(--muted); font-size:13.5px;}
+
+  .mode-grid{display:grid; grid-template-columns:repeat(3,1fr); gap:16px;}
+  /* no vision chosen — all three go red, with one caption under the middle card */
+  #modeGrid.needs{animation:nudge .34s ease;}
+  #modeGrid.needs .mode-card{border-color:var(--danger);}
+  .vision-please{grid-column:2; justify-self:center; margin-top:-2px;}
+  #modeGrid.needs .vision-please{display:block;}
+  @media (max-width:760px){ .vision-please{grid-column:1;} }
+  /* four opponents sit better two-up than squeezed into a single row */
+  #oppGrid{grid-template-columns:repeat(2,1fr); max-width:760px; margin:0 auto;}
+  @media (max-width:760px){ .mode-grid{grid-template-columns:1fr;} }
+  .mode-card{
+    display:flex; flex-direction:column; align-items:center; text-align:center;
+    padding:26px 20px 24px; border-radius:16px; line-height:1.45;
+    background:linear-gradient(180deg, rgba(28,31,40,.92), rgba(18,20,26,.92));
+    border:1px solid var(--line);
+    box-shadow:0 14px 34px rgba(0,0,0,.36);
+    cursor:pointer; color:var(--text);
+    transition:transform .16s ease, border-color .22s ease, background .22s ease;
+  }
+  /* the split card answers a hover by opening, not by lighting up — see below */
+  .mode-card:not(.split):hover{border-color:var(--gold); transform:translateY(-4px);}
+  .mode-card:not(.split):not(.soon):active{
+    transform:translateY(-1px); border-color:var(--gold);
+    background:linear-gradient(180deg, rgba(217,164,65,.24), rgba(217,164,65,.06));
+  }
+  /* .active is only ever set by an actual click — never on arriving at the screen */
+  .mode-card.active{border-color:var(--gold);}
+  .mode-card:not(.split).active{
+    background:linear-gradient(180deg, rgba(217,164,65,.15), rgba(217,164,65,.03));
+  }
+  .mode-card .icon{
+    font-size:50px; line-height:1; height:62px; color:#efe6d4;
+    display:flex; align-items:center;
+    text-shadow:0 4px 10px rgba(0,0,0,.5);
+    transition:filter .45s ease, opacity .45s ease;
+  }
+  .mode-card[data-mode="blind"]   .icon{filter:blur(8px); opacity:.7;}
+  .mode-card[data-mode="fog"]     .icon{
+    -webkit-mask-image:linear-gradient(105deg,#000 22%,rgba(0,0,0,.12) 62%);
+            mask-image:linear-gradient(105deg,#000 22%,rgba(0,0,0,.12) 62%);
+  }
+  /* the icons demonstrate the mode — they only come clear on hover */
+  .mode-card:hover .icon{filter:none; opacity:1;}
+  .mode-card[data-mode="fog"]:hover .icon{-webkit-mask-image:none; mask-image:none;}
+  .mode-card strong{display:block; margin-top:12px; font-size:16px; letter-spacing:.1em; color:var(--gold-soft);}
+  .mode-card small{display:block; margin-top:8px; color:var(--muted); font-size:12.5px;}
+  .mode-card .go{
+    margin-top:auto; padding-top:18px;
+    font-size:10.5px; letter-spacing:.26em; color:var(--gold);
+    opacity:.45; transition:opacity .25s;   /* always visible — touch devices never hover */
+  }
+  .mode-card:hover .go, .mode-card.active .go{opacity:1;}
+  .mode-card.soon{opacity:.62;}
+  .mode-card.soon .go{color:var(--muted);}
+
+  /* --- the blindfold card splits in two on hover --- */
+  .mode-card.split{padding:0; position:relative; overflow:hidden;}
+  .card-face{
+    display:flex; flex-direction:column; align-items:center;
+    width:100%; height:100%; padding:26px 20px 24px;
+    transition:opacity .26s ease, transform .26s ease;
+  }
+  .card-split{
+    position:absolute; inset:0;
+    display:grid; grid-template-rows:1fr 1fr; gap:2px;
+    background:rgba(217,164,65,.45);          /* shows through the gap as a seam */
+    opacity:0; pointer-events:none; transition:opacity .26s ease;
+  }
+  .mode-card.split:hover .card-face,
+  .mode-card.split:focus-within .card-face{opacity:0; transform:scale(.96);}
+  .mode-card.split:hover .card-split,
+  .mode-card.split:focus-within .card-split{opacity:1; pointer-events:auto;}
+
+  .half{
+    display:flex; flex-direction:column; align-items:center; justify-content:center;
+    text-align:center; padding:16px 20px; border:0; border-radius:0;
+    background:linear-gradient(180deg, rgba(31,35,45,.97), rgba(20,23,30,.97));
+    transform:translateY(-16px);
+    transition:transform .34s cubic-bezier(.2,.9,.3,1), background .2s ease;
+  }
+  .half + .half{transform:translateY(16px);}
+  .mode-card.split:hover .half,
+  .mode-card.split:focus-within .half{transform:none;}
+  /* wash the gold OVER the dark base — a bare gradient would replace it */
+  .half:hover{
+    background:
+      linear-gradient(180deg, rgba(217,164,65,.26), rgba(217,164,65,.08)),
+      linear-gradient(180deg, rgba(31,35,45,.97), rgba(20,23,30,.97));
+  }
+  .half:active{
+    background:
+      linear-gradient(180deg, rgba(217,164,65,.4), rgba(217,164,65,.14)),
+      linear-gradient(180deg, rgba(31,35,45,.97), rgba(20,23,30,.97));
+  }
+  .half:focus-visible{outline:2px solid var(--gold); outline-offset:-3px;}
+  /* the chosen half stays lit, so reopening the card shows which way you picked */
+  .half.active{
+    box-shadow:inset 0 0 0 1px rgba(217,164,65,.55);
+    background:
+      linear-gradient(180deg, rgba(217,164,65,.2), rgba(217,164,65,.05)),
+      linear-gradient(180deg, rgba(31,35,45,.97), rgba(20,23,30,.97));
+  }
+  .half-title{font-size:13px; letter-spacing:.15em; font-weight:650; color:var(--gold-soft);}
+  .half:hover .half-title, .half.active .half-title{color:#fff4dc;}
+  .half-sub{margin-top:8px; font-size:11.5px; line-height:1.45; color:var(--muted);}
+
+  /* no hover to reveal with — show both halves outright */
+  @media (hover:none){
+    .card-face{display:none;}
+    .card-split{opacity:1; pointer-events:auto;}
+    .half, .half + .half{transform:none;}
+  }
+
+  /* ---------- complete-blindfold console ---------- */
+  .console{
+    width:min(100%,var(--board-max)); padding:20px;
+    display:none; flex-direction:column;
+  }
+  .console.show{display:flex;}
+  .log{
+    height:min(48vh,380px); overflow-y:auto; padding:14px 16px; border-radius:10px;
+    background:rgba(0,0,0,.3); border:1px solid var(--line);
+    font-family:ui-monospace,SFMono-Regular,Menlo,monospace;
+    font-size:13.5px; line-height:1.75;
+  }
+  .log::-webkit-scrollbar{width:8px;}
+  .log::-webkit-scrollbar-thumb{background:#2e3340; border-radius:4px;}
+  .log div{white-space:pre-wrap;}
+  .log .you{color:var(--gold-soft);}
+  .log .them{color:#d3d7e1;}
+  .log .sys{color:var(--muted); font-style:italic;}
+  .log .err{color:var(--danger);}
+  .log .dim{color:#6b7080;}
+
+  .entry{display:flex; gap:10px; margin-top:14px;}
+  .entry input{
+    flex:1; min-width:0; font-size:16px; letter-spacing:.08em;
+    font-family:ui-monospace,SFMono-Regular,Menlo,monospace;
+    padding:14px 16px; border-radius:10px;
+    background:#12141a; border:1px solid var(--line); color:var(--text);
+  }
+  .entry input::placeholder{color:#565b69; letter-spacing:.04em;}
+  .entry input:focus{outline:none; border-color:var(--gold); box-shadow:0 0 0 3px rgba(217,164,65,.14);}
+  .entry input:disabled{opacity:.5;}
+  .entry input.bad{border-color:var(--danger); animation:nudge .34s ease;}
+  @keyframes nudge{0%,100%{transform:translateX(0);} 25%{transform:translateX(-6px);} 75%{transform:translateX(6px);}}
+  #entryLocal{display:none;}
+  .local-entry{margin-top:12px;}
+  .local-entry:first-child{margin-top:14px;}
+  .entry-tag{
+    flex:none; width:56px; align-self:center;
+    font-size:10px; letter-spacing:.18em; font-weight:700; color:var(--muted);
+  }
+  .local-entry[data-side="w"] .entry-tag{color:var(--gold-soft);}
+  .local-entry input:disabled{opacity:.35;}
+
+  .entry-hint{margin:12px 2px 0; font-size:11.5px; color:var(--muted); line-height:1.6;}
+  .entry-hint b{color:var(--gold-soft); font-weight:600; font-family:ui-monospace,Menlo,monospace;}
+
+
+  .setup-opts{
+    display:flex; flex-wrap:wrap; gap:26px; justify-content:center;
+    margin:28px 0 0; padding:16px; border-radius:14px;
+  }
+  .opt-group{display:flex; align-items:center; gap:10px;}
+  #optTime{flex-basis:100%; justify-content:center;}   /* time always gets its own row */
+  .opt-group label{font-size:10.5px; letter-spacing:.22em; text-transform:uppercase; color:var(--muted);}
+
+  /* anything left unanswered when Start Play is pressed */
+  .please{
+    display:none; font-size:10px; letter-spacing:.16em; text-transform:uppercase;
+    font-weight:650; color:var(--danger); white-space:nowrap;
+  }
+  /* every option in here is asked for on the box, so the rows inside stay untouched */
+  #setupOpts.needs{border-color:var(--danger); animation:nudge .34s ease;}
+  .box-please{margin:12px 0 0; text-align:center;}
+  #setupOpts.needs + .box-please{display:block;}
+  #screen-setup, #screen-opponent, #screen-home, #screen-settings{position:relative;}
+
+  /* ---------- settings screen ---------- */
+  .set-list{width:100%; max-width:560px; margin:0 auto; display:flex; flex-direction:column; gap:12px;}
+  .set-row{display:flex; align-items:center; gap:16px; padding:20px 22px;}
+  .set-row .txt{flex:1; min-width:0;}
+  .set-row strong{
+    display:block; font-size:12px; letter-spacing:.22em; text-transform:uppercase; font-weight:650;
+  }
+  .set-row small{display:block; margin-top:7px; color:var(--muted); font-size:12.5px; line-height:1.5;}
+  .set-state{
+    font-size:10.5px; letter-spacing:.2em; font-weight:650;
+    color:var(--muted); width:30px; text-align:right;
+  }
+  .set-state.on{color:var(--gold-soft);}
+  .switch{
+    position:relative; flex:none; width:56px; height:30px;
+    padding:0; border-radius:999px;
+    background:rgba(255,255,255,.04); border:1px solid var(--line);
+  }
+  .switch:hover{transform:none; border-color:var(--gold);}
+  .switch .knob{
+    position:absolute; top:3px; left:3px; width:22px; height:22px; border-radius:50%;
+    background:#6b7080;
+    transition:transform .22s cubic-bezier(.2,.8,.3,1), background .22s;
+  }
+  .switch[aria-checked="true"]{background:rgba(217,164,65,.16); border-color:var(--gold);}
+  .switch[aria-checked="true"] .knob{
+    transform:translateX(26px);
+    background:linear-gradient(180deg,#e9bd60,#b07f22);
+  }
+  .setup-back{position:absolute; top:0; left:0; z-index:2;}
+  .start-btn{
+    padding:15px 46px; font-size:13px; font-weight:700;
+    letter-spacing:.24em; text-indent:.24em; border-radius:12px;
+  }
+  .lock-note{
+    margin:16px 0 0; text-align:center; font-size:11.5px; letter-spacing:.16em;
+    text-transform:uppercase; color:#6b7080;
+  }
+  .setup-foot{margin-top:18px; text-align:center; display:flex; gap:10px; justify-content:center;}
+
+  /* ---------- game top bar ---------- */
+  .topbar{
+    display:flex; align-items:center; justify-content:space-between; gap:14px;
+    flex-wrap:wrap; margin-bottom:18px;
+  }
+  .chips{display:flex; gap:8px; align-items:center; flex-wrap:wrap;}
+  .brand{
+    font-family:Georgia,serif; font-size:clamp(15px,2.4vw,20px); letter-spacing:.24em;
+    color:var(--gold-soft); white-space:nowrap;
+  }
+  .vision-chip{
+    font-size:10.5px; letter-spacing:.2em; text-transform:uppercase;
+    color:var(--gold); border:1px solid rgba(217,164,65,.35);
+    padding:5px 12px; border-radius:999px; background:rgba(217,164,65,.09);
+    white-space:nowrap;
+  }
+  .vision-chip.alt{
+    color:var(--muted); border-color:var(--line); background:rgba(255,255,255,.02);
+  }
+
+  .row{display:flex; gap:8px; flex-wrap:wrap;}
+  .seg{display:flex; gap:6px;}
+  .seg button{flex:1; padding:8px 10px; font-size:12px; white-space:nowrap;}
+  .seg button.active{border-color:var(--gold); color:var(--gold-soft); background:rgba(217,164,65,.12);}
+
+  .tray{min-height:26px; font-size:20px; line-height:1.1; letter-spacing:1px; color:#cdc6b8;}
+  .tray .b{color:#7e8290;}
+  .capbar{display:flex; align-items:center; justify-content:space-between; gap:10px; margin-top:6px;}
+  .adv{font-size:12px; color:var(--good); font-variant-numeric:tabular-nums;}
+
+  .moves{
+    max-height:230px; overflow-y:auto; font-size:13px;
+    font-variant-numeric:tabular-nums;
+    display:grid; grid-template-columns:34px 1fr 1fr; gap:2px 6px; align-content:start;
+  }
+  .moves .n{color:var(--muted); font-size:12px; padding-top:2px;}
+  .moves .m{padding:2px 6px; border-radius:5px;}
+  .moves .m.cur{background:rgba(217,164,65,.18); color:var(--gold-soft);}
+  .moves .empty{grid-column:1/-1; color:var(--muted); font-size:12.5px;}
+  .moves::-webkit-scrollbar{width:8px;}
+  .moves::-webkit-scrollbar-thumb{background:#2e3340; border-radius:4px;}
+
+  /* ---------- notation rules (complete blindfold only) ---------- */
+  .rules-card{display:none;}
+  .rules-head{
+    width:100%; display:flex; align-items:center; justify-content:space-between; gap:10px;
+    background:transparent; border:0; padding:0; border-radius:6px;
+  }
+  .rules-head:hover{transform:none; border-color:transparent;}
+  .rules-title{
+    font-size:11px; letter-spacing:.24em; text-transform:uppercase;
+    color:var(--muted); font-weight:600;
+  }
+  .rules-head:hover .rules-title{color:var(--text);}
+  .rules-cap{
+    font-size:10px; letter-spacing:.2em; text-transform:uppercase;
+    color:var(--gold); opacity:.85; white-space:nowrap;
+  }
+  .rules-cap::after{content:" ▾"; font-size:9px;}
+  .rules-card.open .rules-cap::after{content:" ▴";}
+  .rules-head:hover .rules-cap{opacity:1;}
+
+  /* max-height rather than grid rows — WebKit won't interpolate grid tracks */
+  .rules-body{
+    max-height:0; overflow:hidden; opacity:0;
+    transition:max-height .42s cubic-bezier(.2,.8,.3,1), opacity .3s ease;
+  }
+  .rules-card.open .rules-body{max-height:760px; opacity:1;}
+
+  .rules-table{
+    width:100%; border-collapse:collapse; margin-top:14px;
+    font-size:11px; line-height:1.4;
+  }
+  .rules-table th{
+    text-align:left; font-size:9px; letter-spacing:.16em; text-transform:uppercase;
+    color:#6b7080; font-weight:600; padding:0 8px 7px 0;
+    border-bottom:1px solid var(--line);
+  }
+  .rules-table td{
+    padding:7px 8px 7px 0; vertical-align:top; color:var(--muted);
+    border-bottom:1px solid rgba(43,47,58,.55);
+  }
+  .rules-table tr:last-child td{border-bottom:0;}
+  .rules-table td:first-child,
+  .rules-table td:last-child{
+    font-family:ui-monospace,SFMono-Regular,Menlo,monospace;
+    white-space:nowrap;
+  }
+  .rules-table td:first-child{color:var(--gold-soft);}
+  .rules-table td:last-child{color:#cfd3dd; padding-right:0;}
+  /* ---------- overlays ---------- */
+  .overlay{
+    position:fixed; inset:0; z-index:50;
+    background:rgba(6,7,10,.78); backdrop-filter:blur(6px);
+    display:none; align-items:center; justify-content:center; padding:20px;
+  }
+  .overlay.show{display:flex; animation:fade .25s ease;}
+  @keyframes fade{from{opacity:0;}to{opacity:1;}}
+  .modal{
+    max-width:400px; width:100%; padding:28px; text-align:center;
+    border-radius:18px;
+    background:linear-gradient(180deg,#1d212a,#121419);
+    border:1px solid #38405233; box-shadow:0 30px 80px rgba(0,0,0,.6);
+    border:1px solid var(--line);
+  }
+  .modal h3{
+    margin:0 0 6px; font-family:Georgia,serif; font-weight:400;
+    font-size:30px; letter-spacing:.1em; color:var(--gold-soft);
+  }
+  .modal p{margin:0 0 20px; color:var(--muted); font-size:14px; line-height:1.5;}
+  .promo{display:flex; gap:10px; justify-content:center;}
+  .promo button{font-size:38px; padding:6px 14px; line-height:1.1; color:#fbf6ea;}
+
+  footer{margin-top:28px; text-align:center; color:#5c6070; font-size:11.5px; letter-spacing:.12em;}
+  kbd{
+    background:#22262f; border:1px solid var(--line); border-bottom-width:2px;
+    border-radius:5px; padding:1px 5px; font-size:11px; font-family:inherit; color:var(--text);
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <!-- ============ TITLE SCREEN ============ -->
+  <section class="screen show" id="screen-home">
+    <button class="settings-btn" id="btnSettings" aria-label="Settings" title="Settings">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"
+           stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+        <circle cx="12" cy="12" r="3.1"/>
+        <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 1 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 1 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.6a1.65 1.65 0 0 0 1-1.51V3a2 2 0 1 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9v0a1.65 1.65 0 0 0 1.51 1H21a2 2 0 1 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/>
+      </svg>
+    </button>
+    <div class="hero">
+      <div class="eyebrow">A Game of Memory &amp; Nerve</div>
+      <h1>BLIND CHESS</h1>
+      <div class="rule"><span></span><b>♞ ♛ ♞</b><span></span></div>
+      <p class="tagline">The board is there. The pieces are not.<br>Hold the position in your head.</p>
+
+      <div class="hero-actions">
+        <button class="play-btn" id="btnPlay">PLAY</button>
+        <button class="social-btn" id="btnSocial">
+          <span class="ico">♟♟</span>
+          <span>SOCIAL</span>
+        </button>
+        <button class="lesson-btn" id="btnLesson">LESSON &amp; PUZZLE</button>
+      </div>
+
+      <div class="hero-set" id="heroSet"></div>
+    </div>
+  </section>
+
+  <!-- ============ SETTINGS ============ -->
+  <section class="screen" id="screen-settings">
+    <button class="ghost setup-back" id="btnSetBack">← Back</button>
+    <div class="setup">
+      <div class="setup-head">
+        <h2>Settings</h2>
+        <p>These preferences carry across every game.</p>
+      </div>
+
+      <div class="set-list">
+        <div class="set-row panel">
+          <div class="txt">
+            <strong>Sound</strong>
+            <small>Move, capture and check tones. Turn it off and the game plays in silence.</small>
+          </div>
+          <span class="set-state" id="soundState">ON</span>
+          <button class="switch" id="btnSound" role="switch" aria-checked="true" aria-label="Sound">
+            <span class="knob"></span>
+          </button>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ OPPONENT SELECT ============ -->
+  <section class="screen" id="screen-opponent">
+    <button class="ghost setup-back" id="btnOppBack">← Back</button>
+    <div class="setup">
+      <div class="setup-head">
+        <h2>Choose Your Opponent</h2>
+        <p>Who is sitting across the board?</p>
+      </div>
+
+      <div class="mode-grid" id="oppGrid">
+        <button class="mode-card" data-opp="online">
+          <div class="icon">◎</div>
+          <strong>PLAY ONLINE</strong>
+          <small>A stranger somewhere else, matched on the game you both want.</small>
+          <div class="go">CHOOSE VISION →</div>
+        </button>
+        <button class="mode-card soon" data-opp="friend">
+          <div class="icon">✉︎</div>
+          <strong>PLAY WITH FRIEND</strong>
+          <small>Someone elsewhere, playing on their own screen.</small>
+          <div class="go">COMING SOON</div>
+        </button>
+        <button class="mode-card" data-opp="bot">
+          <div class="icon">♞</div>
+          <strong>PLAY WITH BOT</strong>
+          <small>The engine, at whatever strength you can stand.</small>
+          <div class="go">CHOOSE VISION →</div>
+        </button>
+        <button class="mode-card" data-opp="local">
+          <div class="icon">♚♚</div>
+          <strong>SAME COMPUTER</strong>
+          <small>Two players, one screen. The board turns to face whoever is to move.</small>
+          <div class="go">CHOOSE VISION →</div>
+        </button>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ MODE SELECT ============ -->
+  <section class="screen" id="screen-setup">
+    <button class="ghost setup-back" id="btnBackHome">← Back</button>
+    <div class="setup">
+      <div class="setup-head">
+        <h2>Choose Your Vision</h2>
+        <p>How much of the board are you willing to give up?</p>
+      </div>
+
+      <div class="mode-grid" id="modeGrid">
+        <div class="mode-card split" data-mode="blind" data-alt="total" id="cardBlind">
+          <div class="card-face">
+            <div class="icon">♚</div>
+            <strong>BLINDFOLD</strong>
+            <small>Every piece hidden, yours and theirs. Follow the game through notation alone.</small>
+            <div class="go">TWO WAYS TO PLAY →</div>
+          </div>
+          <div class="card-split">
+            <button class="half" data-mode="total">
+              <div class="half-title">COMPLETE BLINDFOLD</div>
+              <div class="half-sub">No board at all. Type your moves — three peeks to save you.</div>
+            </button>
+            <button class="half" data-mode="blind">
+              <div class="half-title">SEE THE BOARD</div>
+              <div class="half-sub">Empty squares to click. Three peeks to save you.</div>
+            </button>
+          </div>
+        </div>
+        <button class="mode-card" data-mode="fog">
+          <div class="icon">♞</div>
+          <strong>FOG OF WAR</strong>
+          <small>Only your own pieces are lit. Everything else is darkness — with three peeks to part it.</small>
+          <div class="go">SELECT</div>
+        </button>
+        <button class="mode-card" data-mode="sighted">
+          <div class="icon">♛</div>
+          <strong>SIGHTED</strong>
+          <small>Ordinary chess, with legal moves marked for you. The place to warm up first.</small>
+          <div class="go">SELECT</div>
+        </button>
+        <!-- sits under the middle card, centred beneath the row -->
+        <div class="please vision-please">Please Select</div>
+      </div>
+
+      <div class="setup-opts panel" id="setupOpts">
+        <div class="opt-group" id="optOpponent">
+          <label>Opponent</label>
+          <div class="seg" data-seg="level">
+            <button data-level="1">Novice</button>
+            <button data-level="3">Club</button>
+            <button data-level="4">Sharp</button>
+          </div>
+        </div>
+        <div class="opt-group" id="optSide">
+          <label>You Play</label>
+          <div class="seg" data-seg="side">
+            <button data-side="w">White</button>
+            <button data-side="b">Black</button>
+          </div>
+        </div>
+        <div class="opt-group" id="optTime">
+          <label>Time Each</label>
+          <div class="seg" data-seg="time">
+            <button data-time="1">1 min</button>
+            <button data-time="3">3 min</button>
+            <button data-time="5">5 min</button>
+            <button data-time="10">10 min</button>
+            <button data-time="15">15 min</button>
+            <button data-time="30">30 min</button>
+          </div>
+        </div>
+      </div>
+      <!-- time is asked for on the box itself, not on the row inside it -->
+      <p class="please box-please">Please Select</p>
+
+      <p class="lock-note">Locked in for the whole game — pick carefully.</p>
+
+      <div class="setup-foot">
+        <button class="primary start-btn" id="btnStart">Start Play</button>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ GAME ============ -->
+  <section class="screen" id="screen-game">
+  <div class="topbar">
+    <button class="ghost" id="btnMenu">← Menu</button>
+    <div class="brand">BLIND CHESS</div>
+    <div class="chips">
+      <div class="vision-chip" id="visionChip">Blindfold</div>
+      <div class="vision-chip alt" id="setupChip">Club · White</div>
+    </div>
+  </div>
+
+  <div class="layout">
+
+    <!-- BOARD -->
+    <div class="board-col">
+      <div class="console panel" id="console">
+        <h2 style="margin:0 0 12px; font-size:11px; letter-spacing:.24em; text-transform:uppercase; color:var(--muted); font-weight:600;">Blindfold Console</h2>
+        <div class="log" id="log"></div>
+        <form class="entry" id="entryForm" autocomplete="off">
+          <input id="moveInput" type="text" placeholder="your move…" autocomplete="off" autocapitalize="off" spellcheck="false">
+          <button class="primary" type="submit">Play</button>
+        </form>
+
+        <!-- two players sharing one screen each get their own box -->
+        <div id="entryLocal">
+          <form class="entry local-entry" data-side="w" autocomplete="off">
+            <span class="entry-tag">WHITE</span>
+            <input class="local-input" data-side="w" type="text" placeholder="white's move…" autocomplete="off" autocapitalize="off" spellcheck="false">
+            <button class="primary" type="submit">Play</button>
+          </form>
+          <form class="entry local-entry" data-side="b" autocomplete="off">
+            <span class="entry-tag">BLACK</span>
+            <input class="local-input" data-side="b" type="text" placeholder="black's move…" autocomplete="off" autocapitalize="off" spellcheck="false">
+            <button class="primary" type="submit">Play</button>
+          </form>
+        </div>
+        <p class="entry-hint">
+          Standard notation: <b>e4</b> · <b>Nf3</b> · <b>exd5</b> · <b>O-O</b> · <b>e8=Q</b> — or plain squares, <b>e2e4</b>.
+        </p>
+      </div>
+
+      <div class="board-frame panel" id="boardFrame" style="background:linear-gradient(160deg,#2a2318,#171410 55%,#241d13)">
+        <div class="board" id="board">
+          <div class="squares" id="squares"></div>
+          <div class="pieces" id="piecesLayer"></div>
+        </div>
+      </div>
+
+      <div class="clocks panel" id="clocks">
+        <div class="clock" id="clockW"><span class="who">WHITE</span><span class="time">10:00</span></div>
+        <div class="clock" id="clockB"><span class="who">BLACK</span><span class="time">10:00</span></div>
+        <div class="clock-note" id="clockNote">Clock starts on the first move</div>
+      </div>
+
+      <div class="status panel">
+        <div class="dot" id="dot"></div>
+        <div class="status-text" id="status">White to move</div>
+        <div class="spacer"></div>
+        <div class="peeks" id="peeks"></div>
+      </div>
+
+      <div class="controls panel">
+        <button class="primary" id="btnNew">New Game</button>
+        <button id="btnPeek">Peek</button>
+        <button id="btnUndo">Undo</button>
+        <button id="btnFlip" class="ghost">Flip Board</button>
+      </div>
+    </div>
+
+    <!-- SIDE -->
+    <div class="side">
+
+      <div class="card panel">
+        <h2>Captured</h2>
+        <div class="capbar">
+          <div class="tray" id="trayW">—</div>
+          <div class="adv" id="advW"></div>
+        </div>
+        <div class="capbar">
+          <div class="tray b" id="trayB">—</div>
+          <div class="adv" id="advB"></div>
+        </div>
+      </div>
+
+      <div class="card panel">
+        <h2>Notation</h2>
+        <div class="moves" id="moves"><div class="empty">No moves yet.</div></div>
+      </div>
+
+      <div class="card panel rules-card" id="rulesCard">
+        <button class="rules-head" id="rulesToggle" aria-expanded="false" aria-controls="rulesBody">
+          <span class="rules-title">Notation Rules</span>
+          <span class="rules-cap" id="rulesCap">Open</span>
+        </button>
+        <div class="rules-body" id="rulesBody">
+          <div>
+            <table class="rules-table">
+              <thead>
+                <tr><th>Symbol</th><th>Meaning</th><th>Example</th></tr>
+              </thead>
+              <tbody>
+                <tr><td>K Q R B N</td><td>King, queen, rook, bishop, knight</td><td>Nf3</td></tr>
+                <tr><td>—</td><td>A pawn has no letter; name the square</td><td>e4</td></tr>
+                <tr><td>a–h 1–8</td><td>File letter, then rank number</td><td>e4</td></tr>
+                <tr><td>x</td><td>Captures</td><td>Bxe5</td></tr>
+                <tr><td>file + x</td><td>A pawn capture names the file it left</td><td>exd5</td></tr>
+                <tr><td>O-O</td><td>Castles kingside (short)</td><td>O-O</td></tr>
+                <tr><td>O-O-O</td><td>Castles queenside (long)</td><td>O-O-O</td></tr>
+                <tr><td>=</td><td>Promotes a pawn on the last rank</td><td>e8=Q</td></tr>
+                <tr><td>+</td><td>Check</td><td>Qh5+</td></tr>
+                <tr><td>#</td><td>Checkmate</td><td>Qf7#</td></tr>
+                <tr><td>extra letter</td><td>Says which piece, when two could go there</td><td>Nbd2</td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+    <footer id="footHint"></footer>
+  </section>
+</div>
+
+<!-- promotion -->
+<div class="overlay" id="promoOverlay">
+  <div class="modal">
+    <h3>Promotion</h3>
+    <p>Your pawn has reached the last rank. Choose its new form.</p>
+    <div class="promo" id="promoBtns"></div>
+  </div>
+</div>
+
+<!-- leaving a game in progress -->
+<div class="overlay" id="leaveOverlay">
+  <div class="modal">
+    <h3>Leave This Game?</h3>
+    <p>Vision, opponent and colour are fixed once a game begins, so returning to the menu abandons this position.</p>
+    <div class="row" style="justify-content:center">
+      <button class="ghost" id="leaveCancel">Keep Playing</button>
+      <button class="primary" id="leaveConfirm">Leave Game</button>
+    </div>
+  </div>
+</div>
+
+<!-- waiting for the server to find someone -->
+<div class="overlay" id="waitOverlay">
+  <div class="modal">
+    <h3 id="waitTitle">Finding an Opponent</h3>
+    <p id="waitText">Connecting…</p>
+    <div class="row" style="justify-content:center">
+      <button class="ghost" id="waitCancel">Cancel</button>
+    </div>
+  </div>
+</div>
+
+<!-- game over -->
+<div class="overlay" id="endOverlay">
+  <div class="modal">
+    <h3 id="endTitle">Checkmate</h3>
+    <p id="endText"></p>
+    <div class="row" style="justify-content:center">
+      <button class="primary" id="endNew">Play Again</button>
+      <button class="ghost" id="endClose">Study Board</button>
+    </div>
+  </div>
+</div>
+
+<script>
+"use strict";
+
+/* ============================================================
+   CONSTANTS & HELPERS
+   ============================================================ */
+const W = 'w', B = 'b';
+const GLYPH = { K:'♚', Q:'♛', R:'♜', B:'♝', N:'♞', P:'♟' };
+
+// The font's bishop is a ball with a small cross — near-identical to the pawn at
+// board size. This one is a proper mitre: tall, pointed, with the diagonal slit.
+const BISHOP_SVG =
+  '<svg class="pc-svg" viewBox="0 0 45 45" aria-hidden="true">' +
+    '<g stroke-width="1.5" stroke-linejoin="round" stroke-linecap="round">' +
+      '<path d="M11 38.6h23c1.2 0 1.2 2.2 0 2.2H11c-1.2 0-1.2-2.2 0-2.2z"/>' +
+      '<path d="M14.5 33h16c2 0 3 2 1.7 3.5l-.9 1H13.7l-.9-1c-1.3-1.5-.3-3.5 1.7-3.5z"/>' +
+      '<path d="M22.5 9c4.8 5.6 7.6 11 7.1 15.6-.3 2.9-3 4.9-7.1 4.9s-6.8-2-7.1-4.9C14.9 20 17.7 14.6 22.5 9z"/>' +
+      '<circle cx="22.5" cy="7.2" r="2.4"/>' +
+      '<path class="slit" d="M19.2 17.4l6 6.4"/>' +
+    '</g>' +
+  '</svg>';
+
+const pieceHTML = t => t === 'B' ? BISHOP_SVG : GLYPH[t];
+const VAL   = { P:100, N:320, B:330, R:500, Q:900, K:20000 };
+const FILES = 'abcdefgh';
+
+const rowOf = i => i >> 3;
+const colOf = i => i & 7;
+const sqName = i => FILES[colOf(i)] + (8 - rowOf(i));
+const onBoard = (r,c) => r>=0 && r<8 && c>=0 && c<8;
+const other = c => c === W ? B : W;
+
+let idCounter = 1;
+const mk = (c,t) => ({ c, t, id: idCounter++ });
+
+function startBoard(){
+  const b = Array(64).fill(null);
+  const back = ['R','N','B','Q','K','B','N','R'];
+  for (let i=0;i<8;i++){
+    b[i]      = mk(B, back[i]);
+    b[8+i]    = mk(B, 'P');
+    b[48+i]   = mk(W, 'P');
+    b[56+i]   = mk(W, back[i]);
+  }
+  return b;
+}
+
+function newState(){
+  return { b: startBoard(), turn: W, cr:{wK:1,wQ:1,bK:1,bQ:1}, ep:-1, half:0, full:1 };
+}
+function cloneState(s){
+  return { b: s.b.slice(), turn: s.turn, cr:{...s.cr}, ep:s.ep, half:s.half, full:s.full };
+}
+function posKey(s){
+  let k = '';
+  for (let i=0;i<64;i++){ const p=s.b[i]; k += p ? p.c+p.t : '.'; }
+  return k + s.turn + s.cr.wK + s.cr.wQ + s.cr.bK + s.cr.bQ + s.ep;
+}
+
+/* ============================================================
+   MOVE GENERATION
+   ============================================================ */
+const DIR_N = [[-2,-1],[-2,1],[-1,-2],[-1,2],[1,-2],[1,2],[2,-1],[2,1]];
+const DIR_B = [[-1,-1],[-1,1],[1,-1],[1,1]];
+const DIR_R = [[-1,0],[1,0],[0,-1],[0,1]];
+const DIR_K = [...DIR_B, ...DIR_R];
+
+function slide(s, out, i, p, dirs){
+  const r = rowOf(i), c = colOf(i);
+  for (const [dr,dc] of dirs){
+    let nr = r+dr, nc = c+dc;
+    while (onBoard(nr,nc)){
+      const t = nr*8+nc, tp = s.b[t];
+      if (!tp) out.push({from:i, to:t, p});
+      else { if (tp.c !== p.c) out.push({from:i, to:t, p, cap:tp}); break; }
+      nr += dr; nc += dc;
+    }
+  }
+}
+function step(s, out, i, p, dirs){
+  const r = rowOf(i), c = colOf(i);
+  for (const [dr,dc] of dirs){
+    const nr = r+dr, nc = c+dc;
+    if (!onBoard(nr,nc)) continue;
+    const t = nr*8+nc, tp = s.b[t];
+    if (!tp) out.push({from:i, to:t, p});
+    else if (tp.c !== p.c) out.push({from:i, to:t, p, cap:tp});
+  }
+}
+function addPawn(out, from, to, p, promo, cap){
+  if (promo) for (const q of ['Q','R','B','N']) out.push({from, to, p, cap, promo:q});
+  else out.push({from, to, p, cap});
+}
+
+function pseudoMoves(s, color){
+  const out = [];
+  for (let i=0;i<64;i++){
+    const p = s.b[i];
+    if (!p || p.c !== color) continue;
+    const r = rowOf(i), c = colOf(i);
+    switch (p.t){
+      case 'P': {
+        const dir    = color === W ? -1 : 1;
+        const startR = color === W ? 6 : 1;
+        const lastR  = color === W ? 0 : 7;
+        const nr = r + dir;
+        if (nr < 0 || nr > 7) break;
+        if (!s.b[nr*8+c]){
+          addPawn(out, i, nr*8+c, p, nr === lastR);
+          const r2 = r + 2*dir;
+          if (r === startR && !s.b[r2*8+c]) out.push({from:i, to:r2*8+c, p, dbl:1});
+        }
+        for (const dc of [-1,1]){
+          const nc = c + dc;
+          if (nc < 0 || nc > 7) continue;
+          const t = nr*8+nc, tp = s.b[t];
+          if (tp && tp.c !== color) addPawn(out, i, t, p, nr === lastR, tp);
+          else if (!tp && t === s.ep) out.push({from:i, to:t, p, ep:1, cap:s.b[r*8+nc]});
+        }
+        break;
+      }
+      case 'N': step(s, out, i, p, DIR_N); break;
+      case 'B': slide(s, out, i, p, DIR_B); break;
+      case 'R': slide(s, out, i, p, DIR_R); break;
+      case 'Q': slide(s, out, i, p, DIR_K); break;
+      case 'K': {
+        step(s, out, i, p, DIR_K);
+        const home = color === W ? 60 : 4;
+        if (i === home && !isAttacked(s, home, other(color))){
+          const kRight = color === W ? s.cr.wK : s.cr.bK;
+          const qRight = color === W ? s.cr.wQ : s.cr.bQ;
+          if (kRight && !s.b[home+1] && !s.b[home+2] && !isAttacked(s, home+1, other(color)))
+            out.push({from:i, to:home+2, p, castle:'K'});
+          if (qRight && !s.b[home-1] && !s.b[home-2] && !s.b[home-3] && !isAttacked(s, home-1, other(color)))
+            out.push({from:i, to:home-2, p, castle:'Q'});
+        }
+        break;
+      }
+    }
+  }
+  return out;
+}
+
+function isAttacked(s, sq, by){
+  const r = rowOf(sq), c = colOf(sq);
+  // pawns
+  const pdir = by === W ? 1 : -1;      // square is attacked from below by white
+  for (const dc of [-1,1]){
+    const nr = r + pdir, nc = c + dc;
+    if (onBoard(nr,nc)){
+      const p = s.b[nr*8+nc];
+      if (p && p.c === by && p.t === 'P') return true;
+    }
+  }
+  // knights & king
+  for (const [dr,dc] of DIR_N){
+    const nr=r+dr, nc=c+dc;
+    if (!onBoard(nr,nc)) continue;
+    const p = s.b[nr*8+nc];
+    if (p && p.c === by && p.t === 'N') return true;
+  }
+  for (const [dr,dc] of DIR_K){
+    const nr=r+dr, nc=c+dc;
+    if (!onBoard(nr,nc)) continue;
+    const p = s.b[nr*8+nc];
+    if (p && p.c === by && p.t === 'K') return true;
+  }
+  // sliders
+  const rays = [[DIR_R,'R'],[DIR_B,'B']];
+  for (const [dirs, kind] of rays){
+    for (const [dr,dc] of dirs){
+      let nr=r+dr, nc=c+dc;
+      while (onBoard(nr,nc)){
+        const p = s.b[nr*8+nc];
+        if (p){
+          if (p.c === by && (p.t === kind || p.t === 'Q')) return true;
+          break;
+        }
+        nr+=dr; nc+=dc;
+      }
+    }
+  }
+  return false;
+}
+
+function kingSq(s, color){
+  for (let i=0;i<64;i++){ const p=s.b[i]; if (p && p.c===color && p.t==='K') return i; }
+  return -1;
+}
+function inCheck(s, color){
+  const k = kingSq(s, color);
+  return k >= 0 && isAttacked(s, k, other(color));
+}
+
+function makeMove(s, m){
+  const n = cloneState(s);
+  const b = n.b;
+  const color = m.p.c;
+  b[m.from] = null;
+  if (m.ep) b[rowOf(m.from)*8 + colOf(m.to)] = null;
+  b[m.to] = m.promo ? { c:color, t:m.promo, id:m.p.id } : m.p;
+  if (m.castle === 'K'){ const h = color===W?63:7; b[m.to-1] = b[h]; b[h] = null; }
+  if (m.castle === 'Q'){ const h = color===W?56:0; b[m.to+1] = b[h]; b[h] = null; }
+
+  // castling rights
+  if (m.p.t === 'K'){ if (color===W){ n.cr.wK=n.cr.wQ=0; } else { n.cr.bK=n.cr.bQ=0; } }
+  if (m.from === 63 || m.to === 63) n.cr.wK = 0;
+  if (m.from === 56 || m.to === 56) n.cr.wQ = 0;
+  if (m.from === 7  || m.to === 7 ) n.cr.bK = 0;
+  if (m.from === 0  || m.to === 0 ) n.cr.bQ = 0;
+
+  n.ep = m.dbl ? (m.from + m.to) / 2 : -1;
+  n.half = (m.p.t === 'P' || m.cap) ? 0 : s.half + 1;
+  if (color === B) n.full = s.full + 1;
+  n.turn = other(color);
+  return n;
+}
+
+function legalMoves(s, color){
+  color = color || s.turn;
+  const out = [];
+  for (const m of pseudoMoves(s, color)){
+    if (!inCheck(makeMove(s, m), color)) out.push(m);
+  }
+  return out;
+}
+
+/* ---- SAN ---------------------------------------------------- */
+function toSAN(s, m, all){
+  let san;
+  if (m.castle) san = m.castle === 'K' ? 'O-O' : 'O-O-O';
+  else if (m.p.t === 'P'){
+    san = (m.cap ? FILES[colOf(m.from)] + 'x' : '') + sqName(m.to);
+    if (m.promo) san += '=' + m.promo;
+  } else {
+    let dis = '';
+    const rivals = all.filter(x => x !== m && x.p.t === m.p.t && x.to === m.to && x.from !== m.from);
+    if (rivals.length){
+      const sameFile = rivals.some(x => colOf(x.from) === colOf(m.from));
+      const sameRank = rivals.some(x => rowOf(x.from) === rowOf(m.from));
+      if (!sameFile) dis = FILES[colOf(m.from)];
+      else if (!sameRank) dis = String(8 - rowOf(m.from));
+      else dis = sqName(m.from);
+    }
+    san = m.p.t + dis + (m.cap ? 'x' : '') + sqName(m.to);
+  }
+  const after = makeMove(s, m);
+  if (inCheck(after, after.turn)){
+    san += legalMoves(after, after.turn).length ? '+' : '#';
+  }
+  return san;
+}
+
+/* ============================================================
+   ENGINE  (negamax + alpha-beta + quiescence)
+   ============================================================ */
+const PST = {
+  P:[ 0,0,0,0,0,0,0,0,  50,50,50,50,50,50,50,50,  10,10,20,30,30,20,10,10,
+      5,5,10,25,25,10,5,5,  0,0,0,20,20,0,0,0,  5,-5,-10,0,0,-10,-5,5,
+      5,10,10,-20,-20,10,10,5,  0,0,0,0,0,0,0,0],
+  N:[-50,-40,-30,-30,-30,-30,-40,-50, -40,-20,0,0,0,0,-20,-40, -30,0,10,15,15,10,0,-30,
+     -30,5,15,20,20,15,5,-30, -30,0,15,20,20,15,0,-30, -30,5,10,15,15,10,5,-30,
+     -40,-20,0,5,5,0,-20,-40, -50,-40,-30,-30,-30,-30,-40,-50],
+  B:[-20,-10,-10,-10,-10,-10,-10,-20, -10,0,0,0,0,0,0,-10, -10,0,5,10,10,5,0,-10,
+     -10,5,5,10,10,5,5,-10, -10,0,10,10,10,10,0,-10, -10,10,10,10,10,10,10,-10,
+     -10,5,0,0,0,0,5,-10, -20,-10,-10,-10,-10,-10,-10,-20],
+  R:[0,0,0,0,0,0,0,0, 5,10,10,10,10,10,10,5, -5,0,0,0,0,0,0,-5,
+     -5,0,0,0,0,0,0,-5, -5,0,0,0,0,0,0,-5, -5,0,0,0,0,0,0,-5,
+     -5,0,0,0,0,0,0,-5, 0,0,0,5,5,0,0,0],
+  Q:[-20,-10,-10,-5,-5,-10,-10,-20, -10,0,0,0,0,0,0,-10, -10,0,5,5,5,5,0,-10,
+     -5,0,5,5,5,5,0,-5, 0,0,5,5,5,5,0,-5, -10,5,5,5,5,5,0,-10,
+     -10,0,5,0,0,0,0,-10, -20,-10,-10,-5,-5,-10,-10,-20],
+  K:[-30,-40,-40,-50,-50,-40,-40,-30, -30,-40,-40,-50,-50,-40,-40,-30,
+     -30,-40,-40,-50,-50,-40,-40,-30, -30,-40,-40,-50,-50,-40,-40,-30,
+     -20,-30,-30,-40,-40,-30,-30,-20, -10,-20,-20,-20,-20,-20,-20,-10,
+     20,20,0,0,0,0,20,20, 20,30,10,0,0,10,30,20]
+};
+
+// Tables are written from White's point of view with index 0 = a8,
+// so Black reads them through a rank mirror.
+function evaluate(s){
+  let score = 0;
+  for (let i=0;i<64;i++){
+    const p = s.b[i];
+    if (!p) continue;
+    const v = VAL[p.t] + PST[p.t][p.c === W ? i : mirror(i)];
+    score += p.c === W ? v : -v;
+  }
+  return s.turn === W ? score : -score;
+}
+function mirror(i){ return (7 - rowOf(i)) * 8 + colOf(i); }
+
+function orderMoves(ms){
+  return ms.sort((a,b) => scoreMove(b) - scoreMove(a));
+}
+function scoreMove(m){
+  let sc = 0;
+  if (m.cap) sc += 10 * VAL[m.cap.t] - VAL[m.p.t];
+  if (m.promo) sc += VAL[m.promo];
+  return sc;
+}
+
+let nodes = 0;
+function quiesce(s, alpha, beta, depth){
+  const stand = evaluate(s);
+  if (stand >= beta) return beta;
+  if (stand > alpha) alpha = stand;
+  if (depth <= 0) return alpha;
+  const caps = orderMoves(pseudoMoves(s, s.turn).filter(m => m.cap || m.promo));
+  for (const m of caps){
+    const n = makeMove(s, m);
+    if (inCheck(n, s.turn)) continue;
+    nodes++;
+    const sc = -quiesce(n, -beta, -alpha, depth-1);
+    if (sc >= beta) return beta;
+    if (sc > alpha) alpha = sc;
+  }
+  return alpha;
+}
+
+function negamax(s, depth, alpha, beta){
+  if (depth === 0) return quiesce(s, alpha, beta, 3);
+  const moves = orderMoves(legalMoves(s, s.turn));
+  if (!moves.length) return inCheck(s, s.turn) ? -50000 - depth : 0;
+  for (const m of moves){
+    nodes++;
+    const sc = -negamax(makeMove(s, m), depth-1, -beta, -alpha);
+    if (sc >= beta) return beta;
+    if (sc > alpha) alpha = sc;
+  }
+  return alpha;
+}
+
+function bestMove(s, depth){
+  nodes = 0;
+  const moves = orderMoves(legalMoves(s, s.turn));
+  if (!moves.length) return null;
+  let best = [], bestScore = -Infinity;
+  for (const m of moves){
+    const sc = -negamax(makeMove(s, m), depth-1, -Infinity, Infinity)
+             + (depth <= 1 ? Math.random()*30 : Math.random()*4);
+    if (sc > bestScore + 0.0001){ bestScore = sc; best = [m]; }
+    else if (Math.abs(sc - bestScore) < 8) best.push(m);
+  }
+  return best[Math.floor(Math.random()*best.length)];
+}
+
+/* ============================================================
+   GAME / UI STATE
+   ============================================================ */
+const G = {
+  st: newState(),
+  mode: 'blind',
+  opponent: 'bot',        // 'bot' | 'local' (two players, one screen)
+  level: 3,
+  human: W,
+  minutes: 10,            // same allowance for both sides
+  clock: { w: 600000, b: 600000 },
+  tickAt: 0,
+  flipped: false,
+  sound: true,
+  sel: -1,
+  lastMove: null,
+  sans: [],
+  caps: { w: [], b: [] },   // pieces captured BY that colour
+  stack: [],
+  reps: {},
+  over: null,
+  thinking: false,
+  peeksLeft: 3,
+  peeking: false,
+  pendingPromo: null,
+  revealed: false
+};
+
+const el = {
+  board: document.getElementById('board'),
+  squares: document.getElementById('squares'),
+  pieces: document.getElementById('piecesLayer'),
+  status: document.getElementById('status'),
+  dot: document.getElementById('dot'),
+  peeks: document.getElementById('peeks'),
+  moves: document.getElementById('moves'),
+  trayW: document.getElementById('trayW'),
+  trayB: document.getElementById('trayB'),
+  advW: document.getElementById('advW'),
+  advB: document.getElementById('advB'),
+  boardFrame: document.getElementById('boardFrame'),
+  console: document.getElementById('console'),
+  log: document.getElementById('log'),
+  moveInput: document.getElementById('moveInput'),
+  promoOverlay: document.getElementById('promoOverlay'),
+  promoBtns: document.getElementById('promoBtns'),
+  endOverlay: document.getElementById('endOverlay'),
+  endTitle: document.getElementById('endTitle'),
+  endText: document.getElementById('endText')
+};
+
+/* ---- board scaffolding ---- */
+const sqEls = [];
+for (let v=0; v<64; v++){
+  const d = document.createElement('div');
+  d.className = 'sq';
+  d.innerHTML = '<div class="fog"></div>';
+  el.squares.appendChild(d);
+  sqEls.push(d);
+}
+function visualIndex(i){ return G.flipped ? 63 - i : i; }
+
+let laidOutFlipped = null;
+function layoutSquares(){
+  if (laidOutFlipped === G.flipped) return;
+  laidOutFlipped = G.flipped;
+  for (let i=0;i<64;i++){
+    const v = visualIndex(i);
+    const d = sqEls[v];
+    d.dataset.sq = i;
+    d.dataset.base = (rowOf(i) + colOf(i)) % 2 === 1 ? 'dark' : 'light';
+    let html = '<div class="fog"></div>';
+    if (rowOf(v) === 7) html += `<div class="coord file">${FILES[colOf(i)]}</div>`;
+    if (colOf(v) === 0) html += `<div class="coord rank">${8 - rowOf(i)}</div>`;
+    d.innerHTML = html;
+  }
+}
+function resetSquareClasses(){
+  for (const d of sqEls) d.className = 'sq ' + d.dataset.base;
+}
+
+/* ---- pieces layer with identity-based animation ---- */
+const pieceEls = new Map();
+function renderPieces(){
+  const seen = new Set();
+  for (let i=0;i<64;i++){
+    const p = G.st.b[i];
+    if (!p) continue;
+    seen.add(p.id);
+    let e = pieceEls.get(p.id);
+    if (!e){
+      e = document.createElement('div');
+      e.innerHTML = '<span></span>';
+      e.dataset.fresh = '1';
+      el.pieces.appendChild(e);
+      pieceEls.set(p.id, e);
+    }
+    e.className = 'piece ' + p.c;
+    const span = e.firstChild;
+    if (e.dataset.t !== p.t){                    // promotion swaps the shape in place
+      e.dataset.t = p.t;
+      span.innerHTML = pieceHTML(p.t);
+      if (!e.dataset.fresh){ e.classList.add('pop'); setTimeout(()=>e.classList.remove('pop'), 320); }
+    }
+    const v = visualIndex(i);
+    e.style.transform = `translate(${colOf(v)*100}%, ${rowOf(v)*100}%)`;
+    delete e.dataset.fresh;
+  }
+  for (const [id, e] of pieceEls){
+    if (!seen.has(id)){
+      e.classList.add('gone');
+      pieceEls.delete(id);
+      setTimeout(()=>e.remove(), 320);
+    }
+  }
+}
+
+/* ---- visibility (fog of war) ----
+   Only the squares your own men stand on are lit. Everything else — empty
+   squares, enemy pieces, even the squares you attack — stays under fog. */
+function visibleSet(){
+  const vis = new Set();
+  const s = G.st, me = viewer();      // hot-seat: the side to move is the one looking
+  for (let i=0;i<64;i++){
+    const p = s.b[i];
+    if (p && p.c === me) vis.add(i);
+  }
+  return vis;
+}
+
+/* ---- full render ---- */
+// 'blind' hides the men on a visible board; 'total' does away with the board entirely
+const BLINDISH = m => m === 'blind' || m === 'total';
+// two players sharing one screen — no engine, and both sides are the player
+const LOCAL  = () => G.opponent === 'local';
+const ONLINE = () => G.opponent === 'online';
+const BOT    = () => G.opponent === 'bot';     // the only opponent the engine plays
+const humanTurn = () => LOCAL() || G.st.turn === G.human;
+// whose eyes the board is drawn through
+const viewer = () => LOCAL() ? G.st.turn : G.human;
+// modes that hide something a peek could reveal
+const CAN_PEEK = m => m === 'blind' || m === 'fog' || m === 'total';
+
+function render(){
+  layoutSquares();
+  resetSquareClasses();
+  renderPieces();
+
+  // complete blindfold shows no board at all — until you peek, or the game ends.
+  // A peek swaps the console out for the board so the reveal lands where you're looking.
+  const totalPeek = G.mode === 'total' && G.peeking;
+  const boardShown = G.mode !== 'total' || !!G.over || G.peeking;
+  el.boardFrame.style.display = boardShown ? '' : 'none';
+  el.console.classList.toggle('show', G.mode === 'total' && !totalPeek);
+
+  el.board.classList.toggle('blind', BLINDISH(G.mode) && !G.revealed);
+  el.board.classList.toggle('fog',   G.mode === 'fog'   && !G.revealed && !G.peeking);
+  el.board.classList.toggle('reveal', G.revealed);
+  el.board.classList.toggle('peek', G.peeking);
+
+  // last move + check + selection
+  if (G.lastMove && (G.mode === 'sighted' || G.revealed || G.peeking)){
+    sqEls[visualIndex(G.lastMove.from)].classList.add('last');
+    sqEls[visualIndex(G.lastMove.to)].classList.add('last');
+  }
+  if (G.sel >= 0) sqEls[visualIndex(G.sel)].classList.add('sel');
+
+  if (inCheck(G.st, G.st.turn) && (!BLINDISH(G.mode) || G.peeking || G.revealed)){
+    const k = kingSq(G.st, G.st.turn);
+    if (k >= 0) sqEls[visualIndex(k)].classList.add('check');
+  }
+
+  // legal-move hints (sighted only)
+  if (G.mode === 'sighted' && G.sel >= 0 && !G.over){
+    for (const m of legalMoves(G.st, G.st.turn)){
+      if (m.from !== G.sel) continue;
+      const d = sqEls[visualIndex(m.to)];
+      d.classList.add('hint');
+      if (G.st.b[m.to] || m.ep) d.classList.add('occupied');
+    }
+  }
+
+  // fog
+  if (G.mode === 'fog' && !G.revealed && !G.peeking){
+    const vis = visibleSet();
+    for (let i=0;i<64;i++) if (!vis.has(i)) sqEls[visualIndex(i)].classList.add('hidden');
+    for (let i=0;i<64;i++){
+      const p = G.st.b[i];
+      if (!p) continue;
+      const e = pieceEls.get(p.id);
+      if (e) e.classList.toggle('hidden', !vis.has(i));
+    }
+  }
+
+  renderStatus();
+  renderMoves();
+  renderCaptures();
+  renderClocks();
+}
+
+function renderStatus(){
+  const t = G.st.turn;
+  let txt;
+  const side = t === W ? 'White' : 'Black';
+  if (G.over){
+    txt = G.over.text;
+  } else if (G.thinking){
+    txt = 'The engine is thinking…';
+  } else if (ONLINE() && t !== G.human){
+    txt = 'Waiting for your opponent…';
+  } else if (LOCAL()){
+    txt = (inCheck(G.st, t) ? '<b>Check.</b> ' : '') + '<b>' + side + '</b> to move';
+  } else if (t === G.human){
+    txt = inCheck(G.st, t) ? '<b>Check.</b> Your move.' : 'Your move — <b>' + side + '</b>';
+  } else {
+    txt = side + ' to move';
+  }
+  el.status.innerHTML = txt;
+  el.dot.classList.toggle('think', G.thinking);
+  el.dot.style.background = G.over ? '#e05a4d' : (humanTurn() ? '#6fbf73' : '#d9a441');
+  el.dot.style.boxShadow = '0 0 12px ' + el.dot.style.background;
+
+  el.peeks.textContent = CAN_PEEK(G.mode)
+    ? `PEEKS ${'◆'.repeat(G.peeksLeft)}${'◇'.repeat(Math.max(0,3-G.peeksLeft))}`
+    : '';
+  const peekBtn = document.getElementById('btnPeek');
+  peekBtn.style.display = CAN_PEEK(G.mode) ? '' : 'none';   // nothing to peek at otherwise
+  peekBtn.disabled = G.peeksLeft <= 0 || G.peeking || !!G.over;
+
+  // the console is the only way to move in complete blindfold —
+  // one box against the bot, one box per player when sharing a screen
+  document.getElementById('entryForm').style.display = LOCAL() ? 'none' : 'flex';
+  document.getElementById('entryLocal').style.display = LOCAL() ? 'block' : 'none';
+
+  const yourTurn = !G.over && !G.thinking && G.st.turn === G.human;
+  el.moveInput.disabled = !yourTurn;
+  el.moveInput.placeholder = G.over ? 'game over'
+    : yourTurn ? 'your move…'
+    : ONLINE() ? 'their move…' : 'thinking…';
+
+  // neither a restart nor a take-back is yours alone to make against a person
+  document.getElementById('btnNew').style.display  = ONLINE() ? 'none' : '';
+  document.getElementById('btnUndo').style.display = ONLINE() ? 'none' : '';
+
+  document.querySelectorAll('.local-input').forEach(inp => {
+    const live = LOCAL() && !G.over && inp.dataset.side === t;
+    inp.disabled = !live;
+    inp.placeholder = G.over ? 'game over'
+      : live ? 'your move…'
+      : (inp.dataset.side === W ? "white's move…" : "black's move…");
+  });
+
+  // the rules crib only belongs where you have to type the notation yourself
+  rulesCard.style.display = G.mode === 'total' ? 'block' : 'none';
+
+  // no board means nothing to flip, and no peek to advertise
+  const boardShown = G.mode !== 'total' || !!G.over;
+  document.getElementById('btnFlip').style.display = boardShown ? '' : 'none';
+  // only the move-entry hint remains; Undo/Peek/New Game are buttons, not keys
+  document.getElementById('footHint').innerHTML =
+    G.mode === 'total' ? 'TYPE A MOVE AND PRESS <kbd>ENTER</kbd>' : '';
+}
+
+function renderMoves(){
+  if (!G.sans.length){ el.moves.innerHTML = '<div class="empty">No moves yet.</div>'; return; }
+  let html = '';
+  for (let i=0;i<G.sans.length;i+=2){
+    html += `<div class="n">${i/2+1}.</div>`;
+    html += `<div class="m${i===G.sans.length-1?' cur':''}">${G.sans[i]}</div>`;
+    html += G.sans[i+1] ? `<div class="m${i+1===G.sans.length-1?' cur':''}">${G.sans[i+1]}</div>` : '<div></div>';
+  }
+  el.moves.innerHTML = html;
+  el.moves.scrollTop = el.moves.scrollHeight;
+}
+
+function renderCaptures(){
+  const order = { Q:0, R:1, B:2, N:3, P:4 };
+  const fmt = arr => arr.length
+    ? arr.slice().sort((a,b)=>order[a]-order[b]).map(pieceHTML).join('')
+    : '—';
+  el.trayW.innerHTML = fmt(G.caps.w);
+  el.trayB.innerHTML = fmt(G.caps.b);
+  const sum = a => a.reduce((n,t)=>n+VAL[t],0)/100;
+  const dw = sum(G.caps.w) - sum(G.caps.b);
+  el.advW.textContent = dw > 0 ? '+' + dw : '';
+  el.advB.textContent = dw < 0 ? '+' + (-dw) : '';
+}
+
+/* ============================================================
+   CLOCK — both sides get the same allowance
+   ============================================================ */
+function fmtClock(ms){
+  if (ms <= 0) return '0:00';
+  if (ms < 10000) return (ms/1000).toFixed(1);          // last ten seconds, in tenths
+  const total = Math.ceil(ms/1000);
+  return Math.floor(total/60) + ':' + String(total%60).padStart(2,'0');
+}
+
+function renderClocks(){
+  const started = G.sans.length > 0;
+  for (const c of [W,B]){
+    const box = document.getElementById(c === W ? 'clockW' : 'clockB');
+    box.querySelector('.time').textContent = fmtClock(G.clock[c]);
+    // no side is "running" until the game is actually under way
+    box.classList.toggle('active', started && !G.over && G.st.turn === c);
+    box.classList.toggle('low', G.clock[c] <= 30000 && G.clock[c] > 0);
+    box.classList.toggle('flagged', G.clock[c] <= 0);
+  }
+  document.getElementById('clockNote').style.display = started || G.over ? 'none' : 'block';
+}
+
+let clockTimer = null;
+function clockRunning(){
+  return screenName === 'game' && !G.over &&
+         G.sans.length > 0 &&                      // nothing ticks until the first move
+         !document.getElementById('leaveOverlay').classList.contains('show');
+}
+function startClock(){
+  G.tickAt = Date.now();
+  if (!clockTimer) clockTimer = setInterval(tickClock, 100);
+}
+function stopClock(){
+  if (clockTimer){ clearInterval(clockTimer); clockTimer = null; }
+}
+function tickClock(){
+  const now = Date.now();
+  const dt = now - G.tickAt;
+  G.tickAt = now;
+  if (!clockRunning()) return;                  // paused, but keep the baseline current
+  const c = G.st.turn;
+  G.clock[c] = Math.max(0, G.clock[c] - dt);
+  renderClocks();
+  if (G.clock[c] === 0) flagFall(c);
+}
+
+// a lone king (or king and one minor) can't mate, so a flag fall there is a draw
+function hasMatingMaterial(s, c){
+  let minors = 0;
+  for (const p of s.b){
+    if (!p || p.c !== c) continue;
+    if (p.t === 'P' || p.t === 'R' || p.t === 'Q') return true;
+    if (p.t === 'N' || p.t === 'B') minors++;
+  }
+  return minors >= 2;
+}
+
+function flagFall(loser){
+  const winner = other(loser);
+  const lname = loser  === W ? 'White' : 'Black';
+  const wname = winner === W ? 'White' : 'Black';
+  if (!hasMatingMaterial(G.st, winner)){
+    finish('Draw', `${lname} ran out of time, but ${wname} has no way to force mate.`,
+           `Draw — ${lname} ran out of time`);
+  } else {
+    finish('Out of Time', `${lname} ran out of time. ${wname} wins.`,
+           `${wname} wins on time`);
+  }
+}
+
+/* ============================================================
+   SOUND
+   ============================================================ */
+let actx = null;
+function beep(freq, dur, type, vol){
+  if (!G.sound) return;
+  try{
+    actx = actx || new (window.AudioContext || window.webkitAudioContext)();
+    const o = actx.createOscillator(), g = actx.createGain();
+    o.type = type || 'triangle';
+    o.frequency.value = freq;
+    g.gain.setValueAtTime(vol || .12, actx.currentTime);
+    g.gain.exponentialRampToValueAtTime(.0001, actx.currentTime + dur);
+    o.connect(g); g.connect(actx.destination);
+    o.start(); o.stop(actx.currentTime + dur);
+  } catch(e){}
+}
+function soundFor(m, checked){
+  if (checked) { beep(880,.12,'square',.10); setTimeout(()=>beep(1180,.14,'square',.09),90); }
+  else if (m.cap) { beep(190,.16,'sawtooth',.09); }
+  else if (m.castle) { beep(420,.09); setTimeout(()=>beep(560,.09),80); }
+  else beep(520,.07);
+}
+
+/* ============================================================
+   COMPLETE BLINDFOLD — the game as pure notation
+   ============================================================ */
+const PIECE_NAME = { P:'pawn', N:'knight', B:'bishop', R:'rook', Q:'queen', K:'king' };
+const sqIndex = s => (8 - (+s[1])) * 8 + FILES.indexOf(s[0]);
+
+function logLine(text, cls){
+  if (G.mode !== 'total') return;
+  const d = document.createElement('div');
+  if (cls) d.className = cls;
+  d.textContent = text;
+  el.log.appendChild(d);
+  el.log.scrollTop = el.log.scrollHeight;
+}
+
+function resetLog(){
+  el.log.innerHTML = '';
+  if (LOCAL()){
+    logLine('New game — two players, one screen.', 'sys');
+    logLine('There is no board. Each side types into its own box, in turn.', 'sys');
+  } else {
+    logLine(`New game — you are ${G.human === W ? 'White' : 'Black'} against ${LEVEL_NAME[G.level]}.`, 'sys');
+    logLine('There is no board. Type your moves; the replies come back in notation.', 'sys');
+  }
+  logLine(' ');
+}
+
+// hand the keyboard to whichever side is now to move
+function focusLocalInput(){
+  const inp = document.querySelector(`.local-input[data-side="${G.st.turn}"]`);
+  if (inp && !inp.disabled) inp.focus();
+}
+
+// spoken form of a move, for the log
+function announce(san, m){
+  const i = G.sans.length - 1;
+  const label = (Math.floor(i/2) + 1) + (i % 2 === 0 ? '.' : '…');
+  const mine = LOCAL() ? (m.p.c === W) : (m.p.c === G.human);
+  let line = label.padEnd(6, ' ') + san;
+  const notes = [];
+  if (m.cap)    notes.push('takes a ' + PIECE_NAME[m.cap.t]);
+  if (m.castle) notes.push('castles ' + (m.castle === 'K' ? 'short' : 'long'));
+  if (m.promo)  notes.push('promotes to a ' + PIECE_NAME[m.promo]);
+  if (san.endsWith('#'))      notes.push('CHECKMATE');
+  else if (san.endsWith('+')) notes.push('check');
+  if (notes.length) line += '   · ' + notes.join(', ');
+  logLine(line, mine ? 'you' : 'them');
+}
+
+// turn what the player typed into one of the legal moves
+function parseMove(text){
+  const strip = s => s.replace(/[+#!?\s]/g, '').replace(/0/g, 'O');
+  let t = strip(text);
+  if (!t) return { error:'Type a move first.' };
+
+  if (/^[oO](-?[oO]){1,2}$/.test(t)) t = (t.match(/[oO]/g).length >= 3) ? 'O-O-O' : 'O-O';
+
+  const legal = legalMoves(G.st, G.st.turn);
+  const opts  = legal.map(m => ({ m, san: strip(toSAN(G.st, m, legal)) }));
+
+  // 1. exact standard notation
+  let hit = opts.filter(o => o.san === t);
+  if (hit.length === 1) return { move: hit[0].m };
+
+  // 2. plain coordinates — e2e4, e2-e4, e7e8q
+  const co = t.match(/^([a-h][1-8])[-x]?([a-h][1-8])([qrbnQRBN])?$/i);
+  if (co){
+    const from = sqIndex(co[1].toLowerCase()), to = sqIndex(co[2].toLowerCase());
+    const cands = legal.filter(m => m.from === from && m.to === to);
+    if (!cands.length) return { error:`${co[1]}–${co[2]} is not a legal move.` };
+    if (cands.length > 1){
+      const want = (co[3] || 'Q').toUpperCase();
+      const pick = cands.find(m => m.promo === want) || cands[0];
+      return { move: pick, note: co[3] ? null : 'promoted to a queen by default' };
+    }
+    return { move: cands[0] };
+  }
+
+  // 3. forgive casing — nf3 for Nf3
+  hit = opts.filter(o => o.san.toLowerCase() === t.toLowerCase());
+  if (hit.length === 1) return { move: hit[0].m };
+  if (hit.length > 1)  return { error:'Ambiguous — did you mean ' + hit.map(o => o.san).join(' or ') + '?' };
+
+  // 4. a promotion with no piece named
+  hit = opts.filter(o => o.m.promo && o.san.replace(/=.$/,'').toLowerCase() === t.toLowerCase());
+  if (hit.length){
+    const q = hit.find(o => o.m.promo === 'Q');
+    if (q) return { move: q.m, note:'promoted to a queen — add =R, =B or =N to choose otherwise' };
+  }
+
+  return { error:`"${text.trim()}" is not a legal move here.` };
+}
+
+// one submit path for the bot's single box and the two hot-seat boxes
+function submitEntry(inp, side){
+  if (G.mode !== 'total' || G.over || G.thinking) return;
+  if (side && G.st.turn !== side) return;              // not this player's turn
+  if (!humanTurn()) return;
+  const res = parseMove(inp.value);
+  if (res.error){
+    logLine('✗  ' + res.error, 'err');
+    beep(140,.16,'sawtooth',.08);
+    inp.classList.add('bad');
+    setTimeout(() => inp.classList.remove('bad'), 360);
+    return;
+  }
+  inp.value = '';
+  applyMove(res.move);
+  if (res.note) logLine('     · ' + res.note, 'dim');
+  if (!LOCAL() && !G.over) inp.focus();
+}
+
+document.getElementById('entryForm').addEventListener('submit', e => {
+  e.preventDefault();
+  submitEntry(el.moveInput, null);
+});
+document.querySelectorAll('.local-entry').forEach(form => {
+  form.addEventListener('submit', e => {
+    e.preventDefault();
+    submitEntry(form.querySelector('.local-input'), form.dataset.side);
+  });
+});
+
+/* ============================================================
+   PLAYING MOVES
+   ============================================================ */
+function pushSnapshot(){
+  G.stack.push({
+    st: cloneState(G.st),
+    sans: G.sans.slice(),
+    caps: { w: G.caps.w.slice(), b: G.caps.b.slice() },
+    last: G.lastMove,
+    reps: {...G.reps},
+    clock: {...G.clock}
+  });
+  if (G.stack.length > 400) G.stack.shift();
+}
+
+function applyMove(m, fromNet){
+  pushSnapshot();
+  const all = legalMoves(G.st, G.st.turn);
+  const san = toSAN(G.st, m, all);
+  const mover = G.st.turn;
+  if (m.cap) G.caps[m.p.c].push(m.cap.t);
+  G.st = makeMove(G.st, m);
+  G.sans.push(san);
+  // our own moves go out to the opponent; theirs arrive already applied elsewhere
+  if (ONLINE() && !fromNet && mover === G.human){
+    netSend({ t:'move', ply:G.sans.length - 1, from:m.from, to:m.to, promo:m.promo || null, san });
+  }
+  announce(san, m);
+  G.lastMove = m;
+  G.sel = -1;
+  const key = posKey(G.st);
+  G.reps[key] = (G.reps[key] || 0) + 1;
+  soundFor(m, san.includes('+') || san.includes('#'));
+  // sharing a screen: turn the board round to face whoever is to move
+  if (LOCAL() && G.mode !== 'total') G.flipped = (G.st.turn === B);
+  render();
+  checkEnd();
+  if (!G.over && BOT() && G.st.turn !== G.human) setTimeout(engineTurn, 260);
+  if (!G.over && LOCAL() && G.mode === 'total') focusLocalInput();
+}
+
+function checkEnd(){
+  const s = G.st;
+  const moves = legalMoves(s, s.turn);
+  if (!moves.length){
+    if (inCheck(s, s.turn)){
+      const winner = other(s.turn);
+      const name = winner === W ? 'White' : 'Black';
+      const n = Math.ceil(G.sans.length / 2);
+      finish('Checkmate',
+        (LOCAL() ? `${name} wins.`
+                 : winner === G.human ? 'You win.'
+                 : BOT() ? 'The engine wins.' : 'Your opponent wins.') +
+        ` Mate in ${n} ${n === 1 ? 'move' : 'moves'}.`,
+        `Checkmate — ${name} wins`);
+    } else {
+      finish('Stalemate', 'No legal moves, but no check. The game is drawn.', 'Stalemate — draw');
+    }
+    return;
+  }
+  if (s.half >= 100){ finish('Draw', 'Fifty moves without a capture or a pawn move.', 'Draw — fifty-move rule'); return; }
+  if (G.reps[posKey(s)] >= 3){ finish('Draw', 'The same position has occurred three times.', 'Draw — threefold repetition'); return; }
+  if (insufficient(s)){ finish('Draw', 'Neither side has enough material to force mate.', 'Draw — insufficient material'); return; }
+}
+
+function insufficient(s){
+  const men = [];
+  for (const p of s.b) if (p && p.t !== 'K') men.push(p.t);
+  if (!men.length) return true;
+  if (men.length === 1 && (men[0] === 'N' || men[0] === 'B')) return true;
+  if (men.length === 2 && men.every(t => t === 'B')) return true;
+  return false;
+}
+
+function finish(title, text, status){
+  G.over = { text: status };
+  G.revealed = true;
+  stopClock();
+  logLine(' ');
+  logLine('— ' + status + ' —', 'sys');
+  logLine('The board is shown below.', 'sys');
+  render();
+  el.endTitle.textContent = title;
+  el.endText.textContent = text;
+  document.getElementById('endNew').textContent = ONLINE() ? 'Find Another' : 'Play Again';
+  el.endOverlay.classList.add('show');
+  beep(330,.2); setTimeout(()=>beep(262,.35),180);
+  // tell the server how it ended — it only records the first word on the matter
+  if (ONLINE() && !NET.reported){
+    NET.reported = true;
+    netSend({ t:'result', status });
+  }
+}
+
+function engineTurn(){
+  if (G.over) return;
+  G.thinking = true;
+  renderStatus();
+  setTimeout(() => {
+    const m = bestMove(G.st, G.level);
+    G.thinking = false;
+    if (m) applyMove(m);
+    else { render(); checkEnd(); }
+  }, 40);
+}
+
+/* ---- clicks ---- */
+el.squares.addEventListener('click', e => {
+  const sqEl = e.target.closest('.sq');
+  if (!sqEl || G.over || G.thinking || G.pendingPromo) return;
+  const i = +sqEl.dataset.sq;
+  if (!humanTurn()) return;
+
+  if (G.sel < 0){
+    G.sel = i;                                  // always select — revealing nothing in blind mode
+    render();
+    return;
+  }
+  if (G.sel === i){ G.sel = -1; render(); return; }
+
+  const moves = legalMoves(G.st, G.st.turn).filter(m => m.from === G.sel && m.to === i);
+  if (!moves.length){
+    // re-select if the player clicked another of their own men (sighted/fog only)
+    const p = G.st.b[i];
+    if (p && p.c === viewer() && !BLINDISH(G.mode)){ G.sel = i; render(); return; }
+    G.sel = -1;
+    render();          // render first — it rewrites square classes
+    reject(sqEl);      // then flash, so the shake survives
+    return;
+  }
+  if (moves.length > 1 && moves[0].promo){ askPromotion(moves); return; }
+  applyMove(moves[0]);
+});
+
+function reject(sqEl){
+  sqEl.classList.add('bad');
+  setTimeout(()=>sqEl.classList.remove('bad'), 400);
+  beep(140,.16,'sawtooth',.08);
+}
+
+function askPromotion(moves){
+  G.pendingPromo = moves;
+  el.promoBtns.innerHTML = '';
+  for (const q of ['Q','R','B','N']){
+    const b = document.createElement('button');
+    b.innerHTML = `<span style="-webkit-text-stroke:1.4px #2a2118">${pieceHTML(q)}</span>`;
+    b.onclick = () => {
+      el.promoOverlay.classList.remove('show');
+      const m = G.pendingPromo.find(x => x.promo === q);
+      G.pendingPromo = null;
+      applyMove(m);
+    };
+    el.promoBtns.appendChild(b);
+  }
+  el.promoOverlay.classList.add('show');
+}
+
+/* ============================================================
+   ONLINE PLAY
+   The rules stay here — both clients run this same move generator.
+   The server pairs us up and carries our moves across, in order.
+   ============================================================ */
+const NET = {
+  sock: null,
+  state: 'idle',        // idle | connecting | waiting | playing
+  gameId: null,
+  reported: false       // whether the server has been told how this game ended
+};
+
+/* The socket always lives on the origin that served the page: an https page gets
+   wss, an http page gets ws, and host and port come along untouched. Nothing here
+   is hard-coded, so the same file runs against a laptop and behind a provider's
+   TLS without a rebuild. Kept pure and global-free so tests can call it directly. */
+function wsURLFrom(loc){
+  const scheme = loc.protocol === 'https:' ? 'wss:' : 'ws:';
+  return scheme + '//' + loc.host + '/ws';
+}
+
+// Online play derives its address from the page's origin, and a file:// page has
+// none to derive from. Offline play off disk is unaffected.
+const ONLINE_AVAILABLE = location.protocol === 'http:' || location.protocol === 'https:';
+
+function serverURL(){
+  const url = wsURLFrom(location);
+  // belt and braces: an https page must never be able to open an insecure socket
+  if (location.protocol === 'https:' && url.slice(0, 6) !== 'wss://'){
+    throw new Error('refusing to open an insecure socket from an https page');
+  }
+  return url;
+}
+
+function netSend(obj){
+  if (NET.sock && NET.sock.readyState === WebSocket.OPEN) NET.sock.send(JSON.stringify(obj));
+}
+
+const waitOverlay = document.getElementById('waitOverlay');
+function showWaiting(text, title){
+  document.getElementById('waitTitle').textContent = title || 'Finding an Opponent';
+  document.getElementById('waitText').textContent = text;
+  document.getElementById('waitCancel').textContent = 'Cancel';
+  waitOverlay.classList.add('show');
+}
+function waitingFailed(text){
+  if (NET.state === 'playing') return;
+  document.getElementById('waitTitle').textContent = 'No Game';
+  document.getElementById('waitText').textContent = text;
+  document.getElementById('waitCancel').textContent = 'Back';
+  waitOverlay.classList.add('show');
+  NET.state = 'idle';
+}
+function hideWaiting(){ waitOverlay.classList.remove('show'); }
+
+/* A reverse proxy will close a socket that has said nothing for a while, and a
+   blindfold player can easily think for longer than that. A quiet heartbeat keeps
+   the connection alive through the proxy without touching the game. */
+let netHeartbeat = null;
+function startHeartbeat(){
+  stopHeartbeat();
+  netHeartbeat = setInterval(() => netSend({ t:'ping' }), 25000);
+}
+function stopHeartbeat(){
+  if (netHeartbeat){ clearInterval(netHeartbeat); netHeartbeat = null; }
+}
+
+function netClose(){
+  NET.state = 'idle';
+  stopHeartbeat();
+  if (NET.sock){
+    const s = NET.sock;
+    NET.sock = null;
+    s.onclose = null;                     // deliberate — don't report it as a drop
+    try { s.close(); } catch(e){}
+  }
+}
+
+function findOpponent(){
+  netClose();
+  if (!ONLINE_AVAILABLE){
+    waitingFailed('Online play needs this page to be served over http or https. ' +
+                  'Open the address the server prints rather than the file itself.');
+    return;
+  }
+  NET.reported = false;
+  NET.state = 'connecting';
+  showWaiting('Connecting…');
+  let sock;
+  try { sock = new WebSocket(serverURL()); }
+  catch(e){ waitingFailed('Could not reach the server.'); return; }
+  NET.sock = sock;
+
+  sock.onopen = () => {
+    NET.state = 'waiting';
+    startHeartbeat();
+    netSend({ t:'find', mode:G.mode, minutes:G.minutes });
+  };
+  sock.onmessage = ev => {
+    let msg;
+    try { msg = JSON.parse(ev.data); } catch(e){ return; }
+    onNetMessage(msg);
+  };
+  sock.onerror = () => waitingFailed('Could not reach the server.');
+  sock.onclose = () => {
+    if (NET.state === 'playing' && !G.over){
+      finish('Disconnected', 'The connection to the server was lost, so the game cannot go on.',
+             'Disconnected');
+    } else if (NET.state === 'connecting' || NET.state === 'waiting'){
+      waitingFailed('The connection closed before a game could start.');
+    }
+    NET.state = 'idle';
+    NET.sock = null;
+    stopHeartbeat();
+  };
+}
+
+function onNetMessage(msg){
+  switch (msg.t){
+    case 'waiting':
+      showWaiting('Looking for someone who wants the same game…');
+      break;
+
+    case 'start':
+      NET.state = 'playing';
+      NET.gameId = msg.game;
+      G.human = msg.color === 'w' ? W : B;      // colours are the server's call
+      G.mode = msg.mode;
+      G.minutes = msg.minutes;
+      hideWaiting();
+      showScreen('game');
+      newGame();
+      logLine('Matched — you are ' + (G.human === W ? 'White' : 'Black') + '.', 'sys');
+      beep(760,.09); setTimeout(()=>beep(1010,.11), 90);
+      break;
+
+    case 'move':
+      receiveMove(msg);
+      break;
+
+    case 'over':
+      if (G.over) break;
+      if (msg.reason === 'resign'){
+        finish('Opponent Resigned', 'Your opponent resigned. You win.', 'Opponent resigned — you win');
+      } else if (msg.reason === 'left'){
+        finish('Opponent Left', 'Your opponent disconnected. You win.', 'Opponent left — you win');
+      }
+      // any other reason is a result our own rules reached a moment ago
+      break;
+
+    case 'pong':
+      break;                              // heartbeat answered, nothing to do
+
+    case 'error':
+      logLine('⚠  ' + msg.msg, 'err');
+      break;
+  }
+}
+
+function receiveMove(msg){
+  if (G.over) return;
+  const here = legalMoves(G.st, G.st.turn).filter(m => m.from === msg.from && m.to === msg.to);
+  const m = here.length > 1 ? (here.find(x => x.promo === msg.promo) || here[0]) : here[0];
+  if (!m){
+    // our rules and theirs disagree — better to stop than to drift apart quietly
+    logLine('⚠  the opponent sent a move this position does not allow.', 'err');
+    finish('Out of Step', 'The two boards no longer agree, so the game cannot continue.',
+           'Game abandoned — boards out of step');
+    return;
+  }
+  applyMove(m, true);
+}
+
+/* ============================================================
+   CONTROLS
+   ============================================================ */
+function newGame(){
+  G.st = newState();
+  G.sel = -1; G.lastMove = null; G.sans = [];
+  G.caps = { w: [], b: [] };
+  G.stack = []; G.reps = {}; G.over = null;
+  G.revealed = false; G.peeking = false;
+  G.peeksLeft = 3;
+  G.clock = { w: G.minutes * 60000, b: G.minutes * 60000 };
+  startClock();
+  G.flipped = LOCAL() ? false : (G.human === B);   // hot-seat always opens with White below
+  for (const [,e] of pieceEls) e.remove();
+  pieceEls.clear();
+  el.endOverlay.classList.remove('show');
+  resetLog();
+  render();
+  if (G.mode === 'total') setTimeout(() => LOCAL() ? focusLocalInput() : el.moveInput.focus(), 60);
+  if (BOT() && G.st.turn !== G.human) setTimeout(engineTurn, 420);
+}
+
+function undo(){
+  if (G.thinking || !G.stack.length) return;
+  if (ONLINE()) return;              // there is no taking a move back from someone else
+  // one ply back when both sides are human; past the engine's reply otherwise
+  let snap;
+  if (LOCAL()) snap = G.stack.pop();
+  else { do { snap = G.stack.pop(); } while (G.stack.length && snap.st.turn !== G.human); }
+  G.st = snap.st; G.sans = snap.sans; G.caps = snap.caps;
+  G.lastMove = snap.last; G.reps = snap.reps; G.clock = snap.clock;
+  G.tickAt = Date.now();
+  G.sel = -1; G.over = null; G.revealed = false;
+  if (LOCAL() && G.mode !== 'total') G.flipped = (G.st.turn === B);
+  el.endOverlay.classList.remove('show');
+  logLine('↺  take-back — it is ' + (LOCAL() ? (G.st.turn === W ? "White's" : "Black's") : 'your') + ' move again.', 'sys');
+  render();
+  if (G.mode === 'total') LOCAL() ? focusLocalInput() : el.moveInput.focus();
+}
+
+function peek(){
+  if (!CAN_PEEK(G.mode) || G.peeksLeft <= 0 || G.peeking || G.over) return;
+  G.peeksLeft--;
+  G.peeking = true;
+  beep(700,.08,'sine',.07);
+  render();
+  setTimeout(() => {
+    G.peeking = false;
+    beep(430,.08,'sine',.05);
+    render();                                   // console is back before we write to it
+    logLine(`👁  peek used — ${G.peeksLeft} left.`, 'sys');
+  }, 1600);
+}
+
+document.getElementById('btnNew').onclick   = newGame;
+document.getElementById('btnUndo').onclick  = undo;
+document.getElementById('btnPeek').onclick  = peek;
+document.getElementById('btnFlip').onclick  = () => { G.flipped = !G.flipped; render(); };
+/* ---- sound lives on the settings screen ---- */
+function syncSound(){
+  const on = G.sound;
+  document.getElementById('btnSound').setAttribute('aria-checked', on ? 'true' : 'false');
+  const state = document.getElementById('soundState');
+  state.textContent = on ? 'ON' : 'OFF';
+  state.classList.toggle('on', on);
+}
+document.getElementById('btnSound').onclick = () => {
+  G.sound = !G.sound;
+  syncSound();
+  if (G.sound) beep(660,.08);   // a tick back, so you hear what you just turned on
+};
+
+/* ---- notation rules panel ---- */
+const rulesCard = document.getElementById('rulesCard');
+function setRulesOpen(open){
+  rulesCard.classList.toggle('open', open);
+  document.getElementById('rulesCap').textContent = open ? 'Close' : 'Open';
+  document.getElementById('rulesToggle').setAttribute('aria-expanded', open ? 'true' : 'false');
+}
+document.getElementById('rulesToggle').onclick = () => setRulesOpen(!rulesCard.classList.contains('open'));
+
+document.getElementById('endNew').onclick   = () => {
+  // online there is no rematch button — the next game means finding someone new
+  if (ONLINE()){ el.endOverlay.classList.remove('show'); findOpponent(); return; }
+  newGame();
+};
+document.getElementById('endClose').onclick = () => el.endOverlay.classList.remove('show');
+
+/* ============================================================
+   SCREENS — title → vision select → game, with settings off the title
+   ============================================================ */
+const MODE_NAME  = { blind:'Blindfold', total:'Complete Blindfold', fog:'Fog of War', sighted:'Sighted' };
+const LEVEL_NAME = { 1:'Novice', 3:'Club', 4:'Sharp' };
+// what the two halves of the blindfold card call themselves
+const HALF_NAME  = { total:'COMPLETE BLINDFOLD', blind:'SEE THE BOARD' };
+let screenName = 'home';
+
+/* A card lights up only once it has been clicked on this visit. Arriving at a
+   choice screen shows nothing selected, however the game is actually configured. */
+const picked = { opponent:false, mode:false };
+// the three settings below the cards, likewise — and whether Start Play has
+// already been pressed with any of them still unanswered
+const chosen = { level:false, side:false, minutes:false };
+let flagged = false;
+
+function showScreen(name){
+  screenName = name;
+  if (name === 'opponent') picked.opponent = false;
+  if (name === 'setup'){
+    picked.mode = false;
+    chosen.level = chosen.side = chosen.minutes = false;
+    flagged = false;
+  }
+  document.querySelectorAll('.screen').forEach(s => s.classList.toggle('show', s.id === 'screen-' + name));
+  syncOptions();
+  if (name === 'game'){ startClock(); render(); }
+  else stopClock();
+  window.scrollTo({ top:0, behavior:'smooth' });
+}
+const gameInProgress = () => G.sans.length > 0 && !G.over;
+
+// every setting lives on the setup screen; the game screen only reports them
+function syncOptions(){
+  // the blindfold card owns two modes, so it lights up for either
+  document.querySelectorAll('.mode-card[data-mode]').forEach(c =>
+    c.classList.toggle('active', picked.mode && (c.dataset.mode === G.mode || c.dataset.alt === G.mode)));
+  document.querySelectorAll('.half').forEach(h =>
+    h.classList.toggle('active', picked.mode && h.dataset.mode === G.mode));
+
+  // the cards read as a selection, not a launch
+  document.querySelectorAll('#modeGrid .mode-card:not(.split) .go').forEach(go => {
+    go.textContent = go.closest('.mode-card').classList.contains('active') ? 'SELECTED ✓' : 'SELECT';
+  });
+  // the blindfold card must name the half you took — closed, the two look alike
+  const blindFace = document.querySelector('#cardBlind .card-face .go');
+  if (blindFace) blindFace.textContent =
+    document.getElementById('cardBlind').classList.contains('active')
+      ? HALF_NAME[G.mode] + ' ✓'
+      : 'TWO WAYS TO PLAY →';
+  document.querySelectorAll('[data-opp]').forEach(c =>
+    c.classList.toggle('active', picked.opponent && c.dataset.opp === G.opponent));
+  document.querySelectorAll('[data-level]').forEach(b =>
+    b.classList.toggle('active', chosen.level && +b.dataset.level === G.level));
+  document.querySelectorAll('[data-side]').forEach(b =>
+    b.classList.toggle('active', chosen.side && b.dataset.side === G.human));
+  document.querySelectorAll('[data-time]').forEach(b =>
+    b.classList.toggle('active', chosen.minutes && +b.dataset.time === G.minutes));
+
+  // strength and colour are meaningless sharing a board, and not yours to set online
+  const engineSettings = BOT();
+  document.getElementById('optOpponent').style.display = engineSettings ? 'flex' : 'none';
+  document.getElementById('optSide').style.display     = engineSettings ? 'flex' : 'none';
+
+  // once Start Play has been refused, each question clears its own warning as it is answered
+  const warn = (id, answered) =>
+    document.getElementById(id).classList.toggle('needs', flagged && !answered);
+  warn('modeGrid',  picked.mode);
+  warn('setupOpts', optionsAnswered());
+
+  document.getElementById('visionChip').textContent = MODE_NAME[G.mode];
+  document.getElementById('setupChip').textContent = (LOCAL()
+    ? 'Same Computer'
+    : ONLINE()
+      ? 'Online · ' + (G.human === W ? 'White' : 'Black')
+      : LEVEL_NAME[G.level] + ' · ' + (G.human === W ? 'White' : 'Black'))
+    + ' · ' + G.minutes + ' min';
+
+  syncSound();
+}
+
+document.getElementById('btnPlay').onclick     = () => { beep(620,.09); showScreen('opponent'); };
+
+// Not wired up yet — the destinations for these are still to be decided.
+document.getElementById('btnSocial').onclick = () => {};
+document.getElementById('btnLesson').onclick = () => {};
+
+document.getElementById('btnSettings').onclick = () => { beep(560,.07); showScreen('settings'); };
+document.getElementById('btnSetBack').onclick  = () => showScreen('home');
+
+document.getElementById('btnOppBack').onclick  = () => showScreen('home');
+document.getElementById('btnBackHome').onclick = () => showScreen('opponent');
+
+// who you're playing — chosen before the vision
+document.querySelectorAll('#oppGrid .mode-card').forEach(card => {
+  card.onclick = () => {
+    const opp = card.dataset.opp;
+    if (card.classList.contains('soon')) return;   // not wired up yet
+    G.opponent = opp;
+    picked.opponent = true;
+    if (opp === 'local') G.human = W;      // hot-seat always opens from White's side
+    beep(700,.09);
+    showScreen('setup');
+  };
+});
+
+// leaving mid-game means abandoning it, so make that a deliberate choice
+const leaveOverlay = document.getElementById('leaveOverlay');
+document.getElementById('btnMenu').onclick = () => {
+  // online, walking away is a resignation even before the first move
+  if (gameInProgress() || (ONLINE() && NET.state === 'playing' && !G.over)){
+    leaveOverlay.classList.add('show');
+  } else {
+    netClose();
+    showScreen('setup');
+  }
+};
+document.getElementById('leaveCancel').onclick  = () => leaveOverlay.classList.remove('show');
+document.getElementById('leaveConfirm').onclick = () => {
+  leaveOverlay.classList.remove('show');
+  if (ONLINE() && NET.state === 'playing' && !G.over) netSend({ t:'resign' });
+  netClose();
+  newGame();               // drop the abandoned position
+  showScreen('setup');
+};
+
+document.getElementById('waitCancel').onclick = () => {
+  netSend({ t:'cancel' });
+  netClose();
+  hideWaiting();
+};
+
+// the cards only choose a vision now — nothing begins until Start Play
+function selectMode(mode){
+  G.mode = mode;
+  picked.mode = true;
+  beep(660,.07);
+  syncOptions();
+}
+document.querySelectorAll('#modeGrid .mode-card:not(.split)').forEach(card => {
+  card.onclick = () => selectMode(card.dataset.mode);
+});
+document.querySelectorAll('#modeGrid .half').forEach(half => {
+  half.onclick = () => selectMode(half.dataset.mode);
+});
+
+// every choice is committed here, in one go
+// nothing here has a default — an unanswered option stops the launch and says so
+// strength and colour are only asked for against the engine, so only it can miss them
+function optionsAnswered(){
+  return chosen.minutes && (!BOT() || (chosen.level && chosen.side));
+}
+
+function unanswered(){
+  const out = [];
+  if (!picked.mode)        out.push('modeGrid');
+  if (!optionsAnswered())  out.push('setupOpts');   // the box, not the rows inside it
+  return out;
+}
+
+function startGame(){
+  if (NET.state === 'connecting' || NET.state === 'waiting') return;   // already queued
+  const missing = unanswered();
+  if (missing.length){
+    flagged = true;
+    // drop the class first so the nudge replays on every refused press
+    missing.forEach(id => document.getElementById(id).classList.remove('needs'));
+    void document.getElementById(missing[0]).offsetWidth;
+    syncOptions();
+    beep(190,.16,'sine',.09);
+    // the topmost unanswered question is the one to look at
+    document.getElementById(missing[0]).scrollIntoView({ block:'center', behavior:'smooth' });
+    return;
+  }
+  // online, the game cannot open until someone else wants the same one
+  if (ONLINE()){ beep(620,.09); findOpponent(); return; }
+  beep(760,.09); setTimeout(()=>beep(1010,.11), 90);
+  showScreen('game');
+  newGame();
+}
+document.getElementById('btnStart').onclick = startGame;
+document.querySelectorAll('[data-level]').forEach(b => {
+  b.onclick = () => { G.level = +b.dataset.level; chosen.level = true; syncOptions(); };
+});
+document.querySelectorAll('[data-side]').forEach(b => {
+  b.onclick = () => { G.human = b.dataset.side; chosen.side = true; syncOptions(); };
+});
+document.querySelectorAll('[data-time]').forEach(b => {
+  b.onclick = () => { G.minutes = +b.dataset.time; chosen.minutes = true; syncOptions(); };
+});
+
+document.addEventListener('keydown', e => {
+  if (e.metaKey || e.ctrlKey || e.altKey) return;
+  const k = e.key.toLowerCase();
+  // never let shortcuts fire while a move is being typed — 'n' lives in "Nf3"
+  if (e.target && (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA')){
+    if (k === 'escape') e.target.blur();
+    return;
+  }
+  if (screenName === 'home'){
+    // a focused button handles its own Enter/Space — don't send it to PLAY as well
+    if (e.target && e.target.tagName === 'BUTTON') return;
+    if (k === 'enter' || k === ' '){ e.preventDefault(); showScreen('opponent'); }
+    return;
+  }
+  if (screenName === 'settings'){
+    if (k === 'escape') showScreen('home');
+    return;
+  }
+  if (screenName === 'opponent'){
+    if (k === 'escape') showScreen('home');
+    return;
+  }
+  if (screenName === 'setup'){
+    if (waitOverlay.classList.contains('show')){
+      if (k === 'escape'){ netSend({ t:'cancel' }); netClose(); hideWaiting(); }
+      return;
+    }
+    if (k === 'escape') showScreen('opponent');
+    else if (k === 'enter'){ e.preventDefault(); startGame(); }
+    return;
+  }
+  if (leaveOverlay.classList.contains('show')){
+    if (k === 'escape') leaveOverlay.classList.remove('show');
+    return;
+  }
+  // Undo, Peek and New Game are button-only — no keyboard shortcuts while playing
+  if (k === 'escape'){ G.sel = -1; render(); }
+});
+
+/* ---- boot ---- */
+document.getElementById('heroSet').innerHTML =
+  ['♜','♞','♝','♛','♚','♝','♞','♜']
+    .map((g,i) => `<span style="animation-delay:${.35 + i*.09}s">${g}</span>`).join('');
+syncOptions();
+render();
+</script>
+</body>
+</html>

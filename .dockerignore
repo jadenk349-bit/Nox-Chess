@@ -1,0 +1,35 @@
+# Version control
+.git
+.gitignore
+.gitattributes
+
+# The test harness is a development tool. It talks to the server over TCP, so
+# it runs from the host against the container's mapped port — no need to ship it.
+server/test_two_clients.py
+
+# Python noise
+__pycache__/
+**/__pycache__/
+*.py[cod]
+*.egg-info/
+.pytest_cache/
+.venv/
+venv/
+
+# Docker's own files — nothing in the image needs them
+Dockerfile
+.dockerignore
+docker-compose*.yml
+
+# Editor and OS droppings
+.DS_Store
+._*
+.vscode/
+.idea/
+*.swp
+*~
+
+# Logs and scratch
+*.log
+tmp/
+scratch/
