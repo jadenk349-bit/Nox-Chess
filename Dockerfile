@@ -1,4 +1,4 @@
-# Blind Chess — online play server.
+# Nox Chess — online play server.
 #
 # The server is standard-library Python: no requirements file, nothing to
 # install, so there is no build stage and no wheel cache to worry about.

@@ -1,4 +1,4 @@
-"""Blind Chess online play — matchmaking and move relay.
+"""Nox Chess online play — matchmaking and move relay.
 
 Stdlib only. One port serves both the page over HTTP and the game socket at
 /ws, so a browser loads http://localhost:8787/ and connects straight back to
@@ -346,7 +346,7 @@ def main():
     # container or the proxy in front of it can never connect.
     server.bind(("0.0.0.0", port))
     server.listen(64)
-    log("Blind Chess listening on 0.0.0.0:%d — page and socket share this port "
+    log("Nox Chess listening on 0.0.0.0:%d — page and socket share this port "
         "(socket at /ws). TLS, if any, is the proxy's job." % port)
     try:
         while True:
