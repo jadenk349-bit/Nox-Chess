@@ -971,7 +971,6 @@
       <div class="controls panel">
         <button class="primary" id="btnNew">New Game</button>
         <button id="btnPeek">Peek</button>
-        <button id="btnUndo">Undo</button>
         <button id="btnFlip" class="ghost">Flip Board</button>
       </div>
     </div>
@@ -1441,7 +1440,6 @@ const G = {
   lastMove: null,
   sans: [],
   caps: { w: [], b: [] },   // pieces captured BY that colour
-  stack: [],
   reps: {},
   over: null,
   thinking: false,
@@ -1663,9 +1661,8 @@ function renderStatus(){
     : yourTurn ? 'your move…'
     : ONLINE() ? 'their move…' : 'thinking…';
 
-  // neither a restart nor a take-back is yours alone to make against a person
-  document.getElementById('btnNew').style.display  = ONLINE() ? 'none' : '';
-  document.getElementById('btnUndo').style.display = ONLINE() ? 'none' : '';
+  // a restart is not yours alone to make against a person
+  document.getElementById('btnNew').style.display = ONLINE() ? 'none' : '';
 
   document.querySelectorAll('.local-input').forEach(inp => {
     const live = LOCAL() && !G.over && inp.dataset.side === t;
@@ -1681,7 +1678,7 @@ function renderStatus(){
   // no board means nothing to flip, and no peek to advertise
   const boardShown = G.mode !== 'total' || !!G.over;
   document.getElementById('btnFlip').style.display = boardShown ? '' : 'none';
-  // only the move-entry hint remains; Undo/Peek/New Game are buttons, not keys
+  // only the move-entry hint remains; Peek and New Game are buttons, not keys
   document.getElementById('footHint').innerHTML =
     G.mode === 'total' ? 'TYPE A MOVE AND PRESS <kbd>ENTER</kbd>' : '';
 }
@@ -1932,20 +1929,8 @@ document.querySelectorAll('.local-entry').forEach(form => {
 /* ============================================================
    PLAYING MOVES
    ============================================================ */
-function pushSnapshot(){
-  G.stack.push({
-    st: cloneState(G.st),
-    sans: G.sans.slice(),
-    caps: { w: G.caps.w.slice(), b: G.caps.b.slice() },
-    last: G.lastMove,
-    reps: {...G.reps},
-    clock: {...G.clock}
-  });
-  if (G.stack.length > 400) G.stack.shift();
-}
-
 function applyMove(m, fromNet){
-  pushSnapshot();
+  // no snapshots: a move once played is played, so there is nothing to keep
   const all = legalMoves(G.st, G.st.turn);
   const san = toSAN(G.st, m, all);
   const mover = G.st.turn;
@@ -2266,7 +2251,7 @@ function newGame(){
   G.st = newState();
   G.sel = -1; G.lastMove = null; G.sans = [];
   G.caps = { w: [], b: [] };
-  G.stack = []; G.reps = {}; G.over = null;
+  G.reps = {}; G.over = null;
   G.revealed = false; G.peeking = false;
   G.peeksLeft = 3;
   G.clock = { w: G.minutes * 60000, b: G.minutes * 60000 };
@@ -2279,24 +2264,6 @@ function newGame(){
   render();
   if (G.mode === 'total') setTimeout(() => LOCAL() ? focusLocalInput() : el.moveInput.focus(), 60);
   if (BOT() && G.st.turn !== G.human) setTimeout(engineTurn, 420);
-}
-
-function undo(){
-  if (G.thinking || !G.stack.length) return;
-  if (ONLINE()) return;              // there is no taking a move back from someone else
-  // one ply back when both sides are human; past the engine's reply otherwise
-  let snap;
-  if (LOCAL()) snap = G.stack.pop();
-  else { do { snap = G.stack.pop(); } while (G.stack.length && snap.st.turn !== G.human); }
-  G.st = snap.st; G.sans = snap.sans; G.caps = snap.caps;
-  G.lastMove = snap.last; G.reps = snap.reps; G.clock = snap.clock;
-  G.tickAt = Date.now();
-  G.sel = -1; G.over = null; G.revealed = false;
-  if (LOCAL() && G.mode !== 'total') G.flipped = (G.st.turn === B);
-  el.endOverlay.classList.remove('show');
-  logLine('↺  take-back — it is ' + (LOCAL() ? (G.st.turn === W ? "White's" : "Black's") : 'your') + ' move again.', 'sys');
-  render();
-  if (G.mode === 'total') LOCAL() ? focusLocalInput() : el.moveInput.focus();
 }
 
 function peek(){
@@ -2314,7 +2281,6 @@ function peek(){
 }
 
 document.getElementById('btnNew').onclick   = newGame;
-document.getElementById('btnUndo').onclick  = undo;
 document.getElementById('btnPeek').onclick  = peek;
 document.getElementById('btnFlip').onclick  = () => { G.flipped = !G.flipped; render(); };
 /* ---- sound lives on the settings screen ---- */
@@ -2574,7 +2540,9 @@ document.addEventListener('keydown', e => {
     if (k === 'escape') leaveOverlay.classList.remove('show');
     return;
   }
-  // Undo, Peek and New Game are button-only — no keyboard shortcuts while playing
+  // Peek and New Game are button-only — no keyboard shortcuts while playing,
+  // and there is no take-back to bind a key to
+
   if (k === 'escape'){ G.sel = -1; render(); }
 });
 
