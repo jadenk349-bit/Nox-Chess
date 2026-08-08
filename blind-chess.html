@@ -172,8 +172,9 @@
   .piece{
     position:absolute; left:0; top:0; width:12.5%; height:12.5%;
     display:flex; align-items:center; justify-content:center;
-    font-size:min(8.6vw,62px); line-height:1;
-    font-size:9.6cqmin;
+    /* a square is 12.5cqmin of the board, so this is the glyph's share of it */
+    font-size:min(10.3vw,74px); line-height:1;   /* fallback: no container queries */
+    font-size:11.5cqmin;
     transition:transform .22s cubic-bezier(.2,.9,.3,1), opacity .3s ease;
     will-change:transform;
   }
