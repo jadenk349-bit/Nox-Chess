@@ -968,10 +968,8 @@
         <div class="peeks" id="peeks"></div>
       </div>
 
-      <div class="controls panel">
-        <button class="primary" id="btnNew">New Game</button>
+      <div class="controls panel" id="controls">
         <button id="btnPeek">Peek</button>
-        <button id="btnFlip" class="ghost">Flip Board</button>
       </div>
     </div>
 
@@ -1649,6 +1647,9 @@ function renderStatus(){
   const peekBtn = document.getElementById('btnPeek');
   peekBtn.style.display = CAN_PEEK(G.mode) ? '' : 'none';   // nothing to peek at otherwise
   peekBtn.disabled = G.peeksLeft <= 0 || G.peeking || !!G.over;
+  // Peek is the only control left, so the panel goes with it rather than
+  // leaving an empty bordered strip under the board in sighted play
+  document.getElementById('controls').style.display = CAN_PEEK(G.mode) ? '' : 'none';
 
   // the console is the only way to move in complete blindfold —
   // one box against the bot, one box per player when sharing a screen
@@ -1661,9 +1662,6 @@ function renderStatus(){
     : yourTurn ? 'your move…'
     : ONLINE() ? 'their move…' : 'thinking…';
 
-  // a restart is not yours alone to make against a person
-  document.getElementById('btnNew').style.display = ONLINE() ? 'none' : '';
-
   document.querySelectorAll('.local-input').forEach(inp => {
     const live = LOCAL() && !G.over && inp.dataset.side === t;
     inp.disabled = !live;
@@ -1675,10 +1673,7 @@ function renderStatus(){
   // the rules crib only belongs where you have to type the notation yourself
   rulesCard.style.display = G.mode === 'total' ? 'block' : 'none';
 
-  // no board means nothing to flip, and no peek to advertise
-  const boardShown = G.mode !== 'total' || !!G.over;
-  document.getElementById('btnFlip').style.display = boardShown ? '' : 'none';
-  // only the move-entry hint remains; Peek and New Game are buttons, not keys
+  // only the move-entry hint remains; Peek is a button, not a key
   document.getElementById('footHint').innerHTML =
     G.mode === 'total' ? 'TYPE A MOVE AND PRESS <kbd>ENTER</kbd>' : '';
 }
@@ -2280,9 +2275,7 @@ function peek(){
   }, 1600);
 }
 
-document.getElementById('btnNew').onclick   = newGame;
 document.getElementById('btnPeek').onclick  = peek;
-document.getElementById('btnFlip').onclick  = () => { G.flipped = !G.flipped; render(); };
 /* ---- sound lives on the settings screen ---- */
 function syncSound(){
   const on = G.sound;
