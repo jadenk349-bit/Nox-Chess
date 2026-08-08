@@ -710,6 +710,7 @@
   .overlay.show{display:flex; animation:fade .25s ease;}
   @keyframes fade{from{opacity:0;}to{opacity:1;}}
   .modal{
+    position:relative;
     max-width:400px; width:100%; padding:28px; text-align:center;
     border-radius:18px;
     background:linear-gradient(180deg,#1d212a,#121419);
@@ -721,6 +722,15 @@
     font-size:30px; letter-spacing:.1em; color:var(--gold-soft);
   }
   .modal p{margin:0 0 20px; color:var(--muted); font-size:14px; line-height:1.5;}
+  /* small dismiss in the corner of the game-over box */
+  .modal-x{
+    position:absolute; top:10px; right:10px;
+    width:30px; height:30px; padding:0; border-radius:8px;
+    display:flex; align-items:center; justify-content:center;
+    font-size:20px; line-height:1; font-weight:400;
+    color:var(--muted); background:transparent; border:1px solid transparent;
+  }
+  .modal-x:hover{color:var(--text); border-color:var(--line); transform:none;}
   .promo{display:flex; gap:10px; justify-content:center;}
   .promo button{font-size:38px; padding:6px 14px; line-height:1.1; color:#fbf6ea;}
 
@@ -1064,10 +1074,12 @@
 <!-- game over -->
 <div class="overlay" id="endOverlay">
   <div class="modal">
-    <h3 id="endTitle">Checkmate</h3>
+    <button class="modal-x" id="endX" aria-label="Close" title="Close">×</button>
+    <h3 id="endTitle">You Win</h3>
     <p id="endText"></p>
     <div class="row" style="justify-content:center">
-      <button class="primary" id="endNew">Play Again</button>
+      <button class="primary" id="endNew">New Game</button>
+      <button class="ghost" id="endRematch">Rematch</button>
       <button class="ghost" id="endClose">Study Board</button>
     </div>
   </div>
@@ -1644,6 +1656,9 @@ function renderStatus(){
   el.peeks.textContent = CAN_PEEK(G.mode)
     ? `PEEKS ${'◆'.repeat(G.peeksLeft)}${'◇'.repeat(Math.max(0,3-G.peeksLeft))}`
     : '';
+  // no walking out of a game in progress — the menu returns once it is over
+  document.getElementById('btnMenu').style.display = G.over ? '' : 'none';
+
   const peekBtn = document.getElementById('btnPeek');
   peekBtn.style.display = CAN_PEEK(G.mode) ? '' : 'none';   // nothing to peek at otherwise
   peekBtn.disabled = G.peeksLeft <= 0 || G.peeking || !!G.over;
@@ -1769,7 +1784,7 @@ function flagFall(loser){
     finish('Draw', `${lname} ran out of time, but ${wname} has no way to force mate.`,
            `Draw — ${lname} ran out of time`);
   } else {
-    finish('Out of Time', `${lname} ran out of time. ${wname} wins.`,
+    finish(resultTitle(winner), `${lname} ran out of time.`,
            `${wname} wins on time`);
   }
 }
@@ -1957,13 +1972,7 @@ function checkEnd(){
     if (inCheck(s, s.turn)){
       const winner = other(s.turn);
       const name = winner === W ? 'White' : 'Black';
-      const n = Math.ceil(G.sans.length / 2);
-      finish('Checkmate',
-        (LOCAL() ? `${name} wins.`
-                 : winner === G.human ? 'You win.'
-                 : BOT() ? 'The engine wins.' : 'Your opponent wins.') +
-        ` Mate in ${n} ${n === 1 ? 'move' : 'moves'}.`,
-        `Checkmate — ${name} wins`);
+      finish(resultTitle(winner), 'Checkmate.', `Checkmate — ${name} wins`);
     } else {
       finish('Stalemate', 'No legal moves, but no check. The game is drawn.', 'Stalemate — draw');
     }
@@ -1983,6 +1992,13 @@ function insufficient(s){
   return false;
 }
 
+/* The box leads with the result and puts the reason underneath. Sharing a
+   screen there is no "you", so it names the colour instead. */
+function resultTitle(winner){
+  if (LOCAL()) return winner === W ? 'White Win' : 'Black Win';
+  return winner === G.human ? 'You Win' : 'You Lose';
+}
+
 function finish(title, text, status){
   G.over = { text: status };
   G.revealed = true;
@@ -1993,7 +2009,8 @@ function finish(title, text, status){
   render();
   el.endTitle.textContent = title;
   el.endText.textContent = text;
-  document.getElementById('endNew').textContent = ONLINE() ? 'Find Another' : 'Play Again';
+  // sharing a screen, "again" and "a new game" are the same thing — one button
+  document.getElementById('endRematch').style.display = LOCAL() ? 'none' : '';
   el.endOverlay.classList.add('show');
   beep(330,.2); setTimeout(()=>beep(262,.35),180);
   // tell the server how it ended — it only records the first word on the matter
@@ -2209,9 +2226,9 @@ function onNetMessage(msg){
     case 'over':
       if (G.over) break;
       if (msg.reason === 'resign'){
-        finish('Opponent Resigned', 'Your opponent resigned. You win.', 'Opponent resigned — you win');
+        finish('You Win', 'Your opponent resigned.', 'Opponent resigned — you win');
       } else if (msg.reason === 'left'){
-        finish('Opponent Left', 'Your opponent disconnected. You win.', 'Opponent left — you win');
+        finish('You Win', 'Your opponent disconnected.', 'Opponent left — you win');
       }
       // any other reason is a result our own rules reached a moment ago
       break;
@@ -2299,12 +2316,20 @@ function setRulesOpen(open){
 }
 document.getElementById('rulesToggle').onclick = () => setRulesOpen(!rulesCard.classList.contains('open'));
 
-document.getElementById('endNew').onclick   = () => {
-  // online there is no rematch button — the next game means finding someone new
-  if (ONLINE()){ el.endOverlay.classList.remove('show'); findOpponent(); return; }
+// New Game goes back to the setup so a different game can be chosen; Rematch
+// runs the same one straight back.
+document.getElementById('endNew').onclick = () => {
+  el.endOverlay.classList.remove('show');
+  netClose();                       // no-op offline
+  showScreen('setup');
+};
+document.getElementById('endRematch').onclick = () => {
+  el.endOverlay.classList.remove('show');
+  if (ONLINE()){ findOpponent(); return; }   // same settings, whoever is free
   newGame();
 };
 document.getElementById('endClose').onclick = () => el.endOverlay.classList.remove('show');
+document.getElementById('endX').onclick     = () => el.endOverlay.classList.remove('show');
 
 /* ============================================================
    SCREENS — title → vision select → game, with settings off the title
