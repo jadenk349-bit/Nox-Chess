@@ -256,7 +256,72 @@ def main():
     check("an unknown kind falls back to friendly rather than its own queue",
           start_j.get("kind") == "friendly", "(%s)" % start_j)
 
-    for client in (a, b, d, e, f, g, h, i, j, k):
+    print("\n\033[1mHosted rooms\033[0m")
+    host = TestClient("HOST")
+    watcher = TestClient("WATCH")
+    joiner = TestClient("JOIN")
+
+    watcher.send(t="lobby")
+    check("the list starts empty for a new watcher", watcher.expect("rooms")["rooms"] == [])
+
+    host.send(t="lobby")
+    host.expect("rooms")
+    host.send(t="host", mode="fog", minutes=15, color="b")
+    check("the host is told its room exists", "room" in host.expect("hosting"))
+
+    seen = watcher.expect("rooms")["rooms"]
+    check("everyone watching sees the new room", len(seen) == 1, "(%s)" % seen)
+    check("the room carries its settings",
+          seen and seen[0]["mode"] == "fog" and seen[0]["minutes"] == 15
+          and seen[0]["color"] == "b", "(%s)" % seen)
+    room_id = seen[0]["id"]
+    host.expect("rooms")        # the host watches the list too, so it sees its own room
+
+    host.send(t="join", room=room_id)
+    check("a host cannot join its own room",
+          host.expect("error")["msg"] == "that is your own room")
+
+    joiner.send(t="join", room=room_id)
+    hs = host.expect("start")
+    js = joiner.expect("start")
+    check("both land in one game", hs["game"] == js["game"])
+    check("the host gets the colour it asked for", hs["color"] == "b", "(%s)" % hs)
+    check("the joiner gets the other colour", js["color"] == "w", "(%s)" % js)
+    check("the room's settings carry into the game",
+          hs["mode"] == "fog" and hs["minutes"] == 15)
+    check("the filled room leaves the list", watcher.expect("rooms")["rooms"] == [])
+
+    # the game itself must work exactly like a matched one
+    joiner.timeline = []
+    host.timeline = []
+    joiner.play(52, 36, "e4")            # joiner is White
+    got = host.receive_move()
+    check("moves flow inside a hosted game", got["san"] == "e4", "(%s)" % got)
+
+    late = TestClient("LATE")
+    late.send(t="join", room=room_id)
+    check("joining a room that is already gone is refused",
+          late.expect("error")["msg"] == "that room is gone")
+
+    print("\n\033[1mA host that vanishes\033[0m")
+    ghost = TestClient("GHOST")
+    ghost.send(t="host", mode="blind", minutes=5, color="w")
+    ghost.expect("hosting")
+    check("the room appears for watchers", len(watcher.expect("rooms")["rooms"]) == 1)
+    ghost.close()
+    check("a dropped host takes its room off the list",
+          watcher.expect("rooms", timeout=5)["rooms"] == [])
+
+    host2 = TestClient("HOST2")
+    host2.send(t="host", mode="sighted", minutes=3, color="w")
+    host2.expect("hosting")
+    watcher.expect("rooms")
+    host2.send(t="unhost")
+    check("cancelling a room removes it for everyone",
+          watcher.expect("rooms")["rooms"] == [])
+
+    for client in (a, b, d, e, f, g, h, i, j, k,
+                   host, watcher, joiner, late, host2):
         client.close()
 
     print("\n\033[1m%d passed, %d failed\033[0m\n" % (passed, failed))

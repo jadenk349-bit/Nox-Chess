@@ -488,6 +488,12 @@
       linear-gradient(180deg, rgba(31,35,45,.97), rgba(20,23,30,.97));
   }
   .half:focus-visible{outline:2px solid var(--gold); outline-offset:-3px;}
+  /* a half that is not wired up yet stays inert, and says so */
+  .half:disabled{opacity:.45; cursor:not-allowed;}
+  .half:disabled:hover{
+    background:linear-gradient(180deg, rgba(31,35,45,.97), rgba(20,23,30,.97));
+  }
+  .half:disabled:hover .half-title{color:var(--gold-soft);}
   /* the chosen half stays lit, so reopening the card shows which way you picked */
   .half.active{
     box-shadow:inset 0 0 0 1px rgba(217,164,65,.55);
@@ -504,6 +510,34 @@
     .card-face{display:none;}
     .card-split{opacity:1; pointer-events:auto;}
     .half, .half + .half{transform:none;}
+  }
+
+  /* ---------- open rooms ---------- */
+  #screen-rooms{position:relative;}
+  .rooms-top{display:flex; justify-content:center; margin-bottom:26px;}
+  #btnHostRoom{padding:14px 38px; font-size:13px; font-weight:700; letter-spacing:.2em; border-radius:12px;}
+  .room-list{
+    width:100%; max-width:620px; margin:0 auto;
+    display:flex; flex-direction:column; gap:12px;
+  }
+  .room{display:flex; align-items:center; gap:16px; padding:18px 20px;}
+  .room-main{flex:1; min-width:0; text-align:left;}
+  .room-vision{
+    font-size:13px; letter-spacing:.18em; text-transform:uppercase;
+    font-weight:650; color:var(--gold-soft);
+  }
+  .room-meta{margin-top:6px; font-size:12.5px; color:var(--muted); line-height:1.5;}
+  .room-play{flex:none; padding:10px 26px; font-size:12px; letter-spacing:.16em; font-weight:700;}
+  .room-empty{
+    text-align:center; padding:30px 20px; color:var(--muted);
+    font-size:13px; line-height:1.7;
+  }
+  .room-mine{border-color:rgba(217,164,65,.45);}
+  .room-mine .room-play{opacity:.5;}
+  .room-note{
+    max-width:620px; margin:0 auto 12px; text-align:center;
+    font-size:11.5px; letter-spacing:.14em; text-transform:uppercase;
+    font-weight:650; color:var(--danger); min-height:14px;
   }
 
   /* ---------- complete-blindfold console ---------- */
@@ -815,9 +849,9 @@
             <div class="go">TWO WAYS TO PLAY →</div>
           </div>
           <div class="card-split">
-            <button class="half" data-kind="ranked">
+            <button class="half" data-kind="ranked" disabled>
               <div class="half-title">RANKED MATCH</div>
-              <div class="half-sub">Against someone else who came to play for keeps.</div>
+              <div class="half-sub">Coming soon.</div>
             </button>
             <button class="half" data-kind="friendly">
               <div class="half-title">FRIENDLY MATCH</div>
@@ -844,6 +878,24 @@
           <div class="go">CHOOSE VISION →</div>
         </button>
       </div>
+    </div>
+  </section>
+
+  <!-- ============ OPEN ROOMS ============ -->
+  <section class="screen" id="screen-rooms">
+    <button class="ghost setup-back" id="btnRoomsBack">← Back</button>
+    <div class="setup">
+      <div class="setup-head">
+        <h2>Open Rooms</h2>
+        <p>Set up a game of your own, or take a seat at someone else's.</p>
+      </div>
+
+      <div class="rooms-top">
+        <button class="primary" id="btnHostRoom">Host a Room</button>
+      </div>
+
+      <div class="room-note" id="roomNote"></div>
+      <div class="room-list" id="roomList"></div>
     </div>
   </section>
 
@@ -1453,6 +1505,7 @@ const G = {
   mode: 'blind',
   opponent: 'bot',        // 'bot' | 'local' (two players, one screen) | 'online'
   matchKind: 'friendly',  // online only: 'ranked' | 'friendly' — separate queues
+  hosting: false,         // online only: setting up a room rather than joining one
   level: 3,
   human: W,
   minutes: 10,            // same allowance for both sides
@@ -1579,8 +1632,9 @@ function visibleSet(){
 // 'blind' hides the men on a visible board; 'total' does away with the board entirely
 const BLINDISH = m => m === 'blind' || m === 'total';
 // two players sharing one screen — no engine, and both sides are the player
-const LOCAL  = () => G.opponent === 'local';
-const ONLINE = () => G.opponent === 'online';
+const LOCAL   = () => G.opponent === 'local';
+const ONLINE  = () => G.opponent === 'online';
+const HOSTING = () => ONLINE() && G.hosting;   // setting up a room, not joining one
 const BOT    = () => G.opponent === 'bot';     // the only opponent the engine plays
 const humanTurn = () => LOCAL() || G.st.turn === G.human;
 // whose eyes the board is drawn through
@@ -2104,8 +2158,9 @@ function askPromotion(moves){
    ============================================================ */
 const NET = {
   sock: null,
-  state: 'idle',        // idle | connecting | waiting | playing
+  state: 'idle',        // idle | connecting | lobby | hosting | waiting | playing
   gameId: null,
+  myRoom: null,         // the room this browser is hosting, if any
   reported: false       // whether the server has been told how this game ended
 };
 
@@ -2175,26 +2230,24 @@ function netClose(){
   }
 }
 
-function findOpponent(){
-  netClose();
+/* One socket serves the whole online session — watching the room list, hosting,
+   joining and then playing all run over it. `ready` fires once it is open. */
+function netConnect(ready){
   if (!ONLINE_AVAILABLE){
     waitingFailed('Online play needs this page to be served over http or https. ' +
                   'Open the address the server prints rather than the file itself.');
     return;
   }
+  if (NET.sock && NET.sock.readyState === WebSocket.OPEN){ ready(); return; }
+  netClose();
   NET.reported = false;
   NET.state = 'connecting';
-  showWaiting('Connecting…');
   let sock;
   try { sock = new WebSocket(serverURL()); }
   catch(e){ waitingFailed('Could not reach the server.'); return; }
   NET.sock = sock;
 
-  sock.onopen = () => {
-    NET.state = 'waiting';
-    startHeartbeat();
-    netSend({ t:'find', mode:G.mode, minutes:G.minutes, kind:G.matchKind });
-  };
+  sock.onopen = () => { startHeartbeat(); ready(); };
   sock.onmessage = ev => {
     let msg;
     try { msg = JSON.parse(ev.data); } catch(e){ return; }
@@ -2205,13 +2258,100 @@ function findOpponent(){
     if (NET.state === 'playing' && !G.over){
       finish('Disconnected', 'The connection to the server was lost, so the game cannot go on.',
              'Disconnected');
-    } else if (NET.state === 'connecting' || NET.state === 'waiting'){
-      waitingFailed('The connection closed before a game could start.');
+    } else if (NET.state === 'hosting'){
+      waitingFailed('The connection closed, so the room is gone.');
+    } else if (NET.state === 'lobby'){
+      renderRooms(null);                  // say so rather than show a stale list
     }
     NET.state = 'idle';
     NET.sock = null;
     stopHeartbeat();
   };
+}
+
+/* ---- the room list ---- */
+function enterRooms(){
+  G.opponent = 'online';
+  showScreen('rooms');
+  renderRooms([]);
+  netConnect(() => { NET.state = 'lobby'; netSend({ t:'lobby' }); });
+}
+
+function leaveRooms(){
+  netSend({ t:'unlobby' });
+  netClose();
+}
+
+let roomNoteTimer = null;
+function roomNote(text){
+  const el = document.getElementById('roomNote');
+  el.textContent = text;
+  clearTimeout(roomNoteTimer);
+  roomNoteTimer = setTimeout(() => { el.textContent = ''; }, 4000);
+}
+
+function renderRooms(list){
+  const box = document.getElementById('roomList');
+  box.innerHTML = '';
+  if (list === null){
+    box.innerHTML = '<div class="room-empty">Lost contact with the server. Go back and try again.</div>';
+    return;
+  }
+  if (!list.length){
+    box.innerHTML = '<div class="room-empty">Nobody is hosting yet.<br>' +
+                    'Host a room and the first person to take a seat plays you.</div>';
+    return;
+  }
+  for (const r of list){
+    const mine = r.id === NET.myRoom;
+    const row = document.createElement('div');
+    row.className = 'room panel' + (mine ? ' room-mine' : '');
+
+    const main = document.createElement('div');
+    main.className = 'room-main';
+    const yours = r.color === 'w' ? 'Black' : 'White';
+    main.innerHTML =
+      '<div class="room-vision">' + (MODE_NAME[r.mode] || r.mode) + '</div>' +
+      '<div class="room-meta">' + r.minutes + ' min · ' +
+      (mine ? 'your room — waiting for someone'
+            : 'host plays ' + (r.color === 'w' ? 'White' : 'Black') + ', you play ' + yours) +
+      '</div>';
+
+    const play = document.createElement('button');
+    play.className = 'primary room-play';
+    play.textContent = 'Play';
+    play.disabled = mine;                 // you cannot sit down at your own table
+    play.onclick = () => joinRoom(r.id);
+
+    row.appendChild(main);
+    row.appendChild(play);
+    box.appendChild(row);
+  }
+}
+
+function joinRoom(id){
+  netConnect(() => netSend({ t:'join', room:id }));
+}
+
+/* ---- hosting ---- */
+function hostGame(){
+  G.opponent = 'online';
+  NET.myRoom = null;
+  showScreen('game');
+  newGame();                              // a board to look at behind the box
+  showWaiting('Nobody has taken the other seat yet. This room is on the list ' +
+              'for anyone who is looking.', 'Waiting for Opponent');
+  netConnect(() => {
+    NET.state = 'hosting';
+    netSend({ t:'host', mode:G.mode, minutes:G.minutes, color:G.human });
+  });
+}
+
+function stopHosting(){
+  netSend({ t:'unhost' });
+  NET.myRoom = null;
+  hideWaiting();
+  enterRooms();
 }
 
 function onNetMessage(msg){
@@ -2220,8 +2360,17 @@ function onNetMessage(msg){
       showWaiting('Looking for someone who wants the same game…');
       break;
 
+    case 'rooms':
+      if (screenName === 'rooms') renderRooms(msg.rooms);
+      break;
+
+    case 'hosting':
+      NET.myRoom = msg.room;
+      break;
+
     case 'start':
       NET.state = 'playing';
+      NET.myRoom = null;
       NET.gameId = msg.game;
       G.human = msg.color === 'w' ? W : B;      // colours are the server's call
       G.mode = msg.mode;
@@ -2251,7 +2400,9 @@ function onNetMessage(msg){
       break;                              // heartbeat answered, nothing to do
 
     case 'error':
-      logLine('⚠  ' + msg.msg, 'err');
+      // on the rooms page there is no game log to write to — say it there instead
+      if (screenName === 'rooms') roomNote(msg.msg);
+      else logLine('⚠  ' + msg.msg, 'err');
       break;
   }
 }
@@ -2334,12 +2485,13 @@ document.getElementById('rulesToggle').onclick = () => setRulesOpen(!rulesCard.c
 // runs the same one straight back.
 document.getElementById('endNew').onclick = () => {
   el.endOverlay.classList.remove('show');
+  const online = ONLINE();
   netClose();                       // no-op offline
-  showScreen('setup');
+  showScreen(online ? 'opponent' : 'setup');
 };
 document.getElementById('endRematch').onclick = () => {
   el.endOverlay.classList.remove('show');
-  if (ONLINE()){ findOpponent(); return; }   // same settings, whoever is free
+  if (ONLINE()){ enterRooms(); return; }     // back to the list for another game
   newGame();
 };
 document.getElementById('endClose').onclick = () => el.endOverlay.classList.remove('show');
@@ -2406,9 +2558,12 @@ function syncOptions(){
     b.classList.toggle('active', chosen.minutes && +b.dataset.time === G.minutes));
 
   // strength and colour are meaningless sharing a board, and not yours to set online
-  const engineSettings = BOT();
-  document.getElementById('optOpponent').style.display = engineSettings ? 'flex' : 'none';
-  document.getElementById('optSide').style.display     = engineSettings ? 'flex' : 'none';
+  // engine strength is only the engine's business; colour is yours to pick when
+  // you are hosting, because the room advertises which seat is left
+  document.getElementById('optOpponent').style.display = BOT() ? 'flex' : 'none';
+  document.getElementById('optSide').style.display     = (BOT() || HOSTING()) ? 'flex' : 'none';
+
+  document.getElementById('btnStart').textContent = HOSTING() ? 'Host Game' : 'Start Play';
 
   // once Start Play has been refused, each question clears its own warning as it is answered
   const warn = (id, answered) =>
@@ -2438,7 +2593,9 @@ document.getElementById('btnSettings').onclick = () => { beep(560,.07); showScre
 document.getElementById('btnSetBack').onclick  = () => showScreen('home');
 
 document.getElementById('btnOppBack').onclick  = () => showScreen('home');
-document.getElementById('btnBackHome').onclick = () => showScreen('opponent');
+// hosting reached this screen from the room list, so Back returns there
+document.getElementById('btnBackHome').onclick = () =>
+  HOSTING() ? enterRooms() : showScreen('opponent');
 
 // who you're playing — chosen before the vision. The split card has no whole-card
 // click of its own; only its two halves choose anything.
@@ -2457,10 +2614,26 @@ document.querySelectorAll('#oppGrid .mode-card:not(.split)').forEach(card => {
 });
 document.querySelectorAll('#oppGrid .half').forEach(half => {
   half.onclick = () => {
-    G.matchKind = half.dataset.kind;       // ranked and friendly queue separately
-    chooseOpponent('online');
+    if (half.disabled) return;             // ranked is not wired up yet
+    G.matchKind = half.dataset.kind;
+    G.opponent = 'online';
+    picked.opponent = true;
+    G.hosting = false;
+    beep(700,.09);
+    enterRooms();                          // friendly play goes through the room list
   };
 });
+
+document.getElementById('btnRoomsBack').onclick = () => {
+  leaveRooms();
+  showScreen('opponent');
+};
+document.getElementById('btnHostRoom').onclick = () => {
+  G.hosting = true;                        // the setup screen becomes the host form
+  leaveRooms();
+  beep(620,.09);
+  showScreen('setup');
+};
 
 // leaving mid-game means abandoning it, so make that a deliberate choice
 const leaveOverlay = document.getElementById('leaveOverlay');
@@ -2483,6 +2656,8 @@ document.getElementById('leaveConfirm').onclick = () => {
 };
 
 document.getElementById('waitCancel').onclick = () => {
+  // giving up on a room takes it off everyone's list and goes back to it
+  if (NET.state === 'hosting'){ stopHosting(); return; }
   netSend({ t:'cancel' });
   netClose();
   hideWaiting();
@@ -2506,7 +2681,10 @@ document.querySelectorAll('#modeGrid .half').forEach(half => {
 // nothing here has a default — an unanswered option stops the launch and says so
 // strength and colour are only asked for against the engine, so only it can miss them
 function optionsAnswered(){
-  return chosen.minutes && (!BOT() || (chosen.level && chosen.side));
+  if (!chosen.minutes) return false;
+  if (BOT()) return chosen.level && chosen.side;
+  if (HOSTING()) return chosen.side;      // the room advertises which seat is left
+  return true;
 }
 
 function unanswered(){
@@ -2530,8 +2708,8 @@ function startGame(){
     document.getElementById(missing[0]).scrollIntoView({ block:'center', behavior:'smooth' });
     return;
   }
-  // online, the game cannot open until someone else wants the same one
-  if (ONLINE()){ beep(620,.09); findOpponent(); return; }
+  // online, this screen is the host form — the game opens when someone joins
+  if (ONLINE()){ beep(620,.09); hostGame(); return; }
   beep(760,.09); setTimeout(()=>beep(1010,.11), 90);
   showScreen('game');
   newGame();
@@ -2569,13 +2747,21 @@ document.addEventListener('keydown', e => {
     if (k === 'escape') showScreen('home');
     return;
   }
+  if (screenName === 'rooms'){
+    if (k === 'escape'){ leaveRooms(); showScreen('opponent'); }
+    return;
+  }
   if (screenName === 'setup'){
-    if (waitOverlay.classList.contains('show')){
-      if (k === 'escape'){ netSend({ t:'cancel' }); netClose(); hideWaiting(); }
-      return;
-    }
-    if (k === 'escape') showScreen('opponent');
+    if (k === 'escape') HOSTING() ? enterRooms() : showScreen('opponent');
     else if (k === 'enter'){ e.preventDefault(); startGame(); }
+    return;
+  }
+  // waiting for someone to take the other seat — escape gives the room up
+  if (waitOverlay.classList.contains('show')){
+    if (k === 'escape'){
+      if (NET.state === 'hosting') stopHosting();
+      else { netSend({ t:'cancel' }); netClose(); hideWaiting(); }
+    }
     return;
   }
   if (leaveOverlay.classList.contains('show')){

@@ -33,8 +33,10 @@ PAGE = os.path.join(os.path.dirname(HERE), "blind-chess.html")
 WHITE, BLACK = "w", "b"
 
 lock = threading.RLock()
-lobby = {}      # (mode, minutes, kind) -> Client waiting for an opponent
-games = {}      # game id -> Game
+lobby = {}        # (mode, minutes, kind) -> Client waiting for a quick match
+rooms = {}        # room id -> Room, the open rooms anyone may sit down at
+lobby_subs = set()  # clients watching the room list right now
+games = {}        # game id -> Game
 LOG = True
 
 
@@ -52,6 +54,7 @@ class Client:
         self.game = None
         self.color = None
         self.queue_key = None
+        self.room = None          # the room this client is hosting, if any
         self.alive = True
 
     def send(self, obj):
@@ -80,6 +83,39 @@ class Game:
 
     def opponent_of(self, client):
         return self.players[BLACK if client.color == WHITE else WHITE]
+
+
+class Room:
+    """A game someone has set up and is sitting in, waiting for anyone to join."""
+
+    def __init__(self, host, mode, minutes, color):
+        self.id = uuid.uuid4().hex[:8]
+        self.host = host
+        self.mode = mode
+        self.minutes = minutes
+        self.color = color        # the colour the host will play; joiner takes the other
+        self.created = time.time()
+
+    def public(self):
+        return {
+            "id": self.id,
+            "mode": self.mode,
+            "minutes": self.minutes,
+            "color": self.color,
+        }
+
+
+def broadcast_rooms():
+    """Everyone watching the list sees it the moment it changes.
+
+    The payload is built under the lock but sent outside it — a slow socket
+    must not hold up the room list for everybody else.
+    """
+    with lock:
+        payload = {"t": "rooms", "rooms": [r.public() for r in rooms.values()]}
+        watchers = list(lobby_subs)
+    for client in watchers:
+        client.send(payload)
 
 
 def finish_game(game, reason, winner=None, exclude=None):
@@ -138,6 +174,90 @@ def handle_find(client, msg):
             client.queue_key = key
             client.send({"t": "waiting"})
             log("%s waiting — %s %s, %s min" % (client.id, kind, mode, minutes))
+
+
+def handle_lobby(client):
+    """Start watching the room list, and get it as it stands right now."""
+    with lock:
+        lobby_subs.add(client)
+        payload = {"t": "rooms", "rooms": [r.public() for r in rooms.values()]}
+    client.send(payload)
+
+
+def handle_unlobby(client):
+    with lock:
+        lobby_subs.discard(client)
+
+
+def handle_host(client, msg):
+    mode = msg.get("mode", "blind")
+    minutes = msg.get("minutes", 10)
+    color = msg.get("color", WHITE)
+    if color not in (WHITE, BLACK):
+        color = WHITE
+    with lock:
+        if client.game:
+            client.send({"t": "error", "msg": "already in a game"})
+            return
+        if client.room:                     # one room per host — replace the old one
+            rooms.pop(client.room.id, None)
+        room = Room(client, mode, minutes, color)
+        rooms[room.id] = room
+        client.room = room
+    client.send({"t": "hosting", "room": room.id})
+    log("%s hosting %s — %s, %s min, host plays %s"
+        % (client.id, room.id, mode, minutes, color))
+    broadcast_rooms()
+
+
+def handle_unhost(client):
+    with lock:
+        room = client.room
+        if room:
+            rooms.pop(room.id, None)
+            client.room = None
+    if room:
+        log("%s closed room %s" % (client.id, room.id))
+        broadcast_rooms()
+
+
+def handle_join(client, msg):
+    """Sit down at someone's room. First to arrive gets it."""
+    with lock:
+        room = rooms.get(msg.get("room"))
+        if room is None:
+            client.send({"t": "error", "msg": "that room is gone"})
+            return
+        if room.host is client:
+            client.send({"t": "error", "msg": "that is your own room"})
+            return
+        if client.game or not room.host.alive:
+            client.send({"t": "error", "msg": "that room is gone"})
+            return
+        del rooms[room.id]
+        host = room.host
+        host.room = None
+        # the host plays the colour they asked for; the joiner takes the other
+        white, black = (host, client) if room.color == WHITE else (client, host)
+        game = Game(white, black, room.mode, room.minutes)
+        white.color, black.color = WHITE, BLACK
+        white.game = black.game = game
+        games[game.id] = game
+        lobby_subs.discard(host)
+        lobby_subs.discard(client)
+        outgoing = [(player, {
+            "t": "start",
+            "game": game.id,
+            "color": color,
+            "mode": room.mode,
+            "minutes": room.minutes,
+            "kind": "friendly",
+        }) for color, player in game.players.items()]
+    for player, payload in outgoing:
+        player.send(payload)
+    log("room %s filled — %s (w) vs %s (b), %s, %s min"
+        % (room.id, white.id, black.id, room.mode, room.minutes))
+    broadcast_rooms()
 
 
 def handle_cancel(client):
@@ -207,6 +327,16 @@ def handle_message(client, raw):
     kind = msg.get("t")
     if kind == "find":
         handle_find(client, msg)
+    elif kind == "lobby":
+        handle_lobby(client)
+    elif kind == "unlobby":
+        handle_unlobby(client)
+    elif kind == "host":
+        handle_host(client, msg)
+    elif kind == "unhost":
+        handle_unhost(client)
+    elif kind == "join":
+        handle_join(client, msg)
     elif kind == "cancel":
         handle_cancel(client)
     elif kind == "move":
@@ -223,15 +353,23 @@ def handle_message(client, raw):
 
 def drop_client(client):
     client.alive = False
+    dropped_room = False
     with lock:
         if client.queue_key and lobby.get(client.queue_key) is client:
             del lobby[client.queue_key]
+        lobby_subs.discard(client)
+        if client.room:                  # a host who vanishes takes their room with them
+            rooms.pop(client.room.id, None)
+            client.room = None
+            dropped_room = True
         game = client.game
         if game and not game.over:
             winner = BLACK if client.color == WHITE else WHITE
             finish_game(game, "left", winner, exclude=client)
         client.game = None
     log("%s disconnected" % client.id)
+    if dropped_room:
+        broadcast_rooms()
 
 
 # ------------------------------------------------------------------- http
