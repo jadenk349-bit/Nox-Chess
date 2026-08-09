@@ -2225,7 +2225,10 @@ function netClose(){
   if (NET.sock){
     const s = NET.sock;
     NET.sock = null;
-    s.onclose = null;                     // deliberate — don't report it as a drop
+    // Every handler goes, not just onclose. Closing a socket that is still
+    // connecting fires onerror, and an abandoned socket must not be able to
+    // report anything over whatever replaced it.
+    s.onclose = s.onerror = s.onmessage = s.onopen = null;
     try { s.close(); } catch(e){}
   }
 }
