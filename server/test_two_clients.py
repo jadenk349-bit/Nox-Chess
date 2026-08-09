@@ -227,7 +227,36 @@ def main():
     check("players wanting different games are left waiting",
           e.nothing_arrives() and f.nothing_arrives())
 
-    for client in (a, b, d, e, f):
+    print("\n\033[1mRanked and friendly are separate queues\033[0m")
+    g = TestClient("G")
+    h = TestClient("H")
+    g.send(t="find", mode="blind", minutes=5, kind="ranked")
+    g.expect("waiting")
+    h.send(t="find", mode="blind", minutes=5, kind="friendly")
+    h.expect("waiting")
+    check("a ranked player is not handed a friendly game",
+          g.nothing_arrives() and h.nothing_arrives())
+
+    i = TestClient("I")
+    i.send(t="find", mode="blind", minutes=5, kind="ranked")
+    start_g = g.expect("start")
+    start_i = i.expect("start")
+    check("two ranked players do match each other", start_g["game"] == start_i["game"])
+    check("the game carries its kind", start_g.get("kind") == "ranked",
+          "(%s)" % start_g)
+    check("the friendly player is still waiting", h.nothing_arrives())
+
+    # an unknown kind must not open a third queue
+    j = TestClient("J")
+    k = TestClient("K")
+    j.send(t="find", mode="fog", minutes=3, kind="nonsense")
+    j.expect("waiting")
+    k.send(t="find", mode="fog", minutes=3)          # no kind at all
+    start_j = j.expect("start")
+    check("an unknown kind falls back to friendly rather than its own queue",
+          start_j.get("kind") == "friendly", "(%s)" % start_j)
+
+    for client in (a, b, d, e, f, g, h, i, j, k):
         client.close()
 
     print("\n\033[1m%d passed, %d failed\033[0m\n" % (passed, failed))

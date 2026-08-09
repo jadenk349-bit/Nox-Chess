@@ -401,7 +401,8 @@
   @media (max-width:760px){ .vision-please{grid-column:1;} }
   /* four opponents sit better two-up than squeezed into a single row */
   #oppGrid{grid-template-columns:repeat(2,1fr); max-width:760px; margin:0 auto;}
-  @media (max-width:760px){ .mode-grid{grid-template-columns:1fr;} }
+  /* #oppGrid is an id, so it has to be named again here to beat its own rule */
+  @media (max-width:760px){ .mode-grid, #oppGrid{grid-template-columns:1fr;} }
   .mode-card{
     display:flex; flex-direction:column; align-items:center; text-align:center;
     padding:26px 20px 24px; border-radius:16px; line-height:1.45;
@@ -806,12 +807,24 @@
       </div>
 
       <div class="mode-grid" id="oppGrid">
-        <button class="mode-card" data-opp="online">
-          <div class="icon">◎</div>
-          <strong>PLAY ONLINE</strong>
-          <small>A stranger somewhere else, matched on the game you both want.</small>
-          <div class="go">CHOOSE VISION →</div>
-        </button>
+        <div class="mode-card split" data-opp="online" id="cardOnline">
+          <div class="card-face">
+            <div class="icon">◎</div>
+            <strong>PLAY ONLINE</strong>
+            <small>A stranger somewhere else, matched on the game you both want.</small>
+            <div class="go">TWO WAYS TO PLAY →</div>
+          </div>
+          <div class="card-split">
+            <button class="half" data-kind="ranked">
+              <div class="half-title">RANKED MATCH</div>
+              <div class="half-sub">Against someone else who came to play for keeps.</div>
+            </button>
+            <button class="half" data-kind="friendly">
+              <div class="half-title">FRIENDLY MATCH</div>
+              <div class="half-sub">The same game, with nothing riding on it.</div>
+            </button>
+          </div>
+        </div>
         <button class="mode-card soon" data-opp="friend">
           <div class="icon">✉︎</div>
           <strong>PLAY WITH FRIEND</strong>
@@ -1438,7 +1451,8 @@ function bestMove(s, depth){
 const G = {
   st: newState(),
   mode: 'blind',
-  opponent: 'bot',        // 'bot' | 'local' (two players, one screen)
+  opponent: 'bot',        // 'bot' | 'local' (two players, one screen) | 'online'
+  matchKind: 'friendly',  // online only: 'ranked' | 'friendly' — separate queues
   level: 3,
   human: W,
   minutes: 10,            // same allowance for both sides
@@ -2179,7 +2193,7 @@ function findOpponent(){
   sock.onopen = () => {
     NET.state = 'waiting';
     startHeartbeat();
-    netSend({ t:'find', mode:G.mode, minutes:G.minutes });
+    netSend({ t:'find', mode:G.mode, minutes:G.minutes, kind:G.matchKind });
   };
   sock.onmessage = ev => {
     let msg;
@@ -2369,7 +2383,7 @@ function syncOptions(){
   // the blindfold card owns two modes, so it lights up for either
   document.querySelectorAll('.mode-card[data-mode]').forEach(c =>
     c.classList.toggle('active', picked.mode && (c.dataset.mode === G.mode || c.dataset.alt === G.mode)));
-  document.querySelectorAll('.half').forEach(h =>
+  document.querySelectorAll('#modeGrid .half').forEach(h =>
     h.classList.toggle('active', picked.mode && h.dataset.mode === G.mode));
 
   // the cards read as a selection, not a launch
@@ -2406,7 +2420,8 @@ function syncOptions(){
   document.getElementById('setupChip').textContent = (LOCAL()
     ? 'Same Computer'
     : ONLINE()
-      ? 'Online · ' + (G.human === W ? 'White' : 'Black')
+      ? (G.matchKind === 'ranked' ? 'Ranked' : 'Friendly') +
+        ' · ' + (G.human === W ? 'White' : 'Black')
       : LEVEL_NAME[G.level] + ' · ' + (G.human === W ? 'White' : 'Black'))
     + ' · ' + G.minutes + ' min';
 
@@ -2425,16 +2440,25 @@ document.getElementById('btnSetBack').onclick  = () => showScreen('home');
 document.getElementById('btnOppBack').onclick  = () => showScreen('home');
 document.getElementById('btnBackHome').onclick = () => showScreen('opponent');
 
-// who you're playing — chosen before the vision
-document.querySelectorAll('#oppGrid .mode-card').forEach(card => {
+// who you're playing — chosen before the vision. The split card has no whole-card
+// click of its own; only its two halves choose anything.
+function chooseOpponent(opp){
+  G.opponent = opp;
+  picked.opponent = true;
+  if (opp === 'local') G.human = W;        // hot-seat always opens from White's side
+  beep(700,.09);
+  showScreen('setup');
+}
+document.querySelectorAll('#oppGrid .mode-card:not(.split)').forEach(card => {
   card.onclick = () => {
-    const opp = card.dataset.opp;
     if (card.classList.contains('soon')) return;   // not wired up yet
-    G.opponent = opp;
-    picked.opponent = true;
-    if (opp === 'local') G.human = W;      // hot-seat always opens from White's side
-    beep(700,.09);
-    showScreen('setup');
+    chooseOpponent(card.dataset.opp);
+  };
+});
+document.querySelectorAll('#oppGrid .half').forEach(half => {
+  half.onclick = () => {
+    G.matchKind = half.dataset.kind;       // ranked and friendly queue separately
+    chooseOpponent('online');
   };
 });
 

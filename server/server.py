@@ -33,7 +33,7 @@ PAGE = os.path.join(os.path.dirname(HERE), "blind-chess.html")
 WHITE, BLACK = "w", "b"
 
 lock = threading.RLock()
-lobby = {}      # (mode, minutes) -> Client waiting for an opponent
+lobby = {}      # (mode, minutes, kind) -> Client waiting for an opponent
 games = {}      # game id -> Game
 LOG = True
 
@@ -99,10 +99,15 @@ def finish_game(game, reason, winner=None, exclude=None):
 def handle_find(client, msg):
     mode = msg.get("mode", "blind")
     minutes = msg.get("minutes", 10)
+    # ranked and friendly are separate queues: someone who came for a ranked game
+    # must never be handed a friendly one, or the distinction means nothing
+    kind = msg.get("kind", "friendly")
+    if kind not in ("ranked", "friendly"):
+        kind = "friendly"
     if client.game:
         client.send({"t": "error", "msg": "already in a game"})
         return
-    key = (mode, minutes)
+    key = (mode, minutes, kind)
     with lock:
         waiting = lobby.get(key)
         if waiting and waiting is not client and waiting.alive:
@@ -116,7 +121,7 @@ def handle_find(client, msg):
             white.game = black.game = game
             white.queue_key = black.queue_key = None
             games[game.id] = game
-            log("matched %s (w) vs %s (b) — %s, %s min" % (white.id, black.id, mode, minutes))
+            log("matched %s (w) vs %s (b) — %s %s, %s min" % (white.id, black.id, kind, mode, minutes))
             for color, player in game.players.items():
                 player.send({
                     "t": "start",
@@ -124,6 +129,7 @@ def handle_find(client, msg):
                     "color": color,
                     "mode": mode,
                     "minutes": minutes,
+                    "kind": kind,
                 })
         else:
             if waiting is client:
@@ -131,7 +137,7 @@ def handle_find(client, msg):
             lobby[key] = client
             client.queue_key = key
             client.send({"t": "waiting"})
-            log("%s waiting — %s, %s min" % (client.id, mode, minutes))
+            log("%s waiting — %s %s, %s min" % (client.id, kind, mode, minutes))
 
 
 def handle_cancel(client):
