@@ -313,6 +313,24 @@
   }
   @keyframes sheen{0%,62%{background-position:180% 0;} 92%,100%{background-position:-80% 0;}}
 
+  /* who you are, above the buttons — filled in once and remembered */
+  .name-box{margin-top:clamp(26px,4.2vh,44px); display:flex; justify-content:center;}
+  .name-box input{
+    width:clamp(220px,62vw,330px); text-align:center;
+    font:inherit; font-size:15px; letter-spacing:.12em;
+    padding:13px 18px; border-radius:12px;
+    background:rgba(255,255,255,.035);
+    border:1px solid var(--line); color:var(--text);
+    transition:border-color .2s, box-shadow .2s, background .2s;
+  }
+  .name-box input::placeholder{color:#b6bbc7; letter-spacing:.1em; opacity:1;}
+  .name-box input:hover{border-color:#4a5062;}
+  .name-box input:focus{
+    outline:none; border-color:var(--gold);
+    background:rgba(255,255,255,.05);
+    box-shadow:0 0 0 3px rgba(217,164,65,.14);
+  }
+
   /* PLAY + SOCIAL side by side, LESSON & PUZZLE spanning beneath them */
   .hero-actions{
     margin-top:clamp(48px,9vh,92px);     /* sits further down the page */
@@ -793,6 +811,12 @@
       <h1>NOX CHESS</h1>
       <div class="rule"><span></span><b>♞ ♛ ♞</b><span></span></div>
       <p class="tagline">The board is there. The pieces are not.<br>Hold the position in your head.</p>
+
+      <div class="name-box">
+        <input id="playerName" type="text" placeholder="Your name…" maxlength="20"
+               autocomplete="off" autocapitalize="words" spellcheck="false"
+               aria-label="Your name">
+      </div>
 
       <div class="hero-actions">
         <button class="play-btn" id="btnPlay">PLAY</button>
@@ -1506,6 +1530,7 @@ const G = {
   opponent: 'bot',        // 'bot' | 'local' (two players, one screen) | 'online'
   matchKind: 'friendly',  // online only: 'ranked' | 'friendly' — separate queues
   hosting: false,         // online only: setting up a room rather than joining one
+  playerName: '',         // what the player calls themselves, kept across visits
   level: 3,
   human: W,
   minutes: 10,            // same allowance for both sides
@@ -2775,6 +2800,20 @@ document.addEventListener('keydown', e => {
   // and there is no take-back to bind a key to
 
   if (k === 'escape'){ G.sel = -1; render(); }
+});
+
+/* ---- who you are ----
+   Kept between visits, since a name you retype every time is no name at all.
+   Storage can be refused outright (private windows, blocked cookies), so every
+   touch of it is guarded — the box still works, it just forgets. */
+const nameInput = document.getElementById('playerName');
+function storedName(){
+  try { return localStorage.getItem('nox.name') || ''; } catch(e){ return ''; }
+}
+nameInput.value = G.playerName = storedName();
+nameInput.addEventListener('input', () => {
+  G.playerName = nameInput.value.trim().slice(0, 20);
+  try { localStorage.setItem('nox.name', G.playerName); } catch(e){}
 });
 
 /* ---- boot ---- */
