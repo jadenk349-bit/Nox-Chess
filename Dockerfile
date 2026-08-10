@@ -14,6 +14,7 @@ WORKDIR /app
 # server.py serves the page from one directory above itself, so the layout
 # inside the image has to match the repository: /app/blind-chess.html.
 COPY server/ ./server/
+COPY engine/ ./engine/
 COPY blind-chess.html ./blind-chess.html
 
 # Nothing here needs root, and the process only ever reads these files.

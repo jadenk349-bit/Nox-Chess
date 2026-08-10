@@ -374,6 +374,35 @@ def drop_client(client):
 
 # ------------------------------------------------------------------- http
 
+# An explicit allowlist rather than a static directory: there is no path to
+# traverse if no part of the request ever reaches the filesystem. The wasm MIME
+# type is not decoration — browsers refuse to stream-compile without it.
+ENGINE_DIR = os.path.join(os.path.dirname(HERE), "engine")
+ENGINE_FILES = {
+    "/engine/stockfish.wasm.js": ("stockfish.wasm.js", "text/javascript; charset=utf-8"),
+    "/engine/stockfish.wasm":    ("stockfish.wasm",    "application/wasm"),
+}
+
+
+def serve_engine_file(sock, path):
+    name, ctype = ENGINE_FILES[path]
+    try:
+        with open(os.path.join(ENGINE_DIR, name), "rb") as fh:
+            body = fh.read()
+    except OSError:
+        sock.sendall(b"HTTP/1.1 404 Not Found\r\nContent-Length: 0\r\n\r\n")
+        return
+    head = (
+        "HTTP/1.1 200 OK\r\n"
+        "Content-Type: %s\r\n"
+        "Content-Length: %d\r\n"
+        # the engine only changes when we deploy a new one, so let it be cached
+        "Cache-Control: public, max-age=604800\r\n"
+        "\r\n" % (ctype, len(body))
+    )
+    sock.sendall(head.encode() + body)
+
+
 def serve_http(sock, request_line):
     try:
         method, path, _ = request_line.split(" ", 2)
@@ -399,6 +428,8 @@ def serve_http(sock, request_line):
             "\r\n" % len(body)
         )
         sock.sendall(head.encode() + body)
+    elif path in ENGINE_FILES:
+        serve_engine_file(sock, path)
     elif path == "/health":
         with lock:
             body = json.dumps({

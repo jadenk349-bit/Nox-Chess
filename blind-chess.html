@@ -532,6 +532,42 @@
     .half, .half + .half{transform:none;}
   }
 
+  /* ---------- post-game review ---------- */
+  .review{
+    width:min(100%,var(--board-max)); padding:14px 16px; margin-top:12px;
+    display:flex; align-items:center; gap:14px;
+  }
+  .rev-nav{display:flex; gap:6px; flex:none;}
+  .rev-nav button{padding:8px 13px; font-size:13px; line-height:1;}
+  .rev-body{flex:1; min-width:0;}
+  .rev-head{display:flex; align-items:center; gap:10px; flex-wrap:wrap;}
+  .rev-count{
+    font-size:10.5px; letter-spacing:.18em; text-transform:uppercase; color:var(--muted);
+  }
+  .rev-verdict{
+    font-size:10px; letter-spacing:.16em; text-transform:uppercase; font-weight:700;
+    padding:3px 9px; border-radius:999px;
+  }
+  .rev-verdict.v-best{color:#0f1a10; background:var(--good);}
+  .rev-verdict.v-good{color:var(--good); border:1px solid rgba(111,191,115,.4);}
+  .rev-verdict.v-inaccuracy{color:#e8c46b; border:1px solid rgba(232,196,107,.45);}
+  .rev-verdict.v-mistake{color:#e89a5a; border:1px solid rgba(232,154,90,.5);}
+  .rev-verdict.v-blunder{color:#fff; background:var(--danger);}
+  .rev-line{margin-top:6px; font-size:13.5px; color:var(--text); line-height:1.5;}
+  .rev-line b{color:var(--gold-soft);}
+  .rev-eval{
+    margin-left:6px; font-variant-numeric:tabular-nums;
+    font-size:12.5px; color:var(--muted);
+  }
+  .rev-done{flex:none;}
+  /* where the engine would have played */
+  .sq.best-from{box-shadow:inset 0 0 0 3px rgba(111,191,115,.55);}
+  .sq.best-to{box-shadow:inset 0 0 0 3px var(--good);}
+  @media (max-width:520px){
+    .review{flex-wrap:wrap;}
+    .rev-body{order:3; flex-basis:100%;}
+  }
+
   /* ---------- open rooms ---------- */
   #screen-rooms{position:relative;}
   .rooms-top{display:flex; justify-content:center; margin-bottom:26px;}
@@ -704,6 +740,9 @@
   .moves .n{color:var(--muted); font-size:12px; padding-top:2px;}
   .moves .m{padding:2px 6px; border-radius:5px;}
   .moves .m.cur{background:rgba(217,164,65,.18); color:var(--gold-soft);}
+  .moves .m.pick{cursor:pointer;}
+  .moves .m.pick:hover{background:rgba(255,255,255,.07);}
+  .moves .m.pick.cur:hover{background:rgba(217,164,65,.26);}
   .moves .empty{grid-column:1/-1; color:var(--muted); font-size:12.5px;}
   .moves::-webkit-scrollbar{width:8px;}
   .moves::-webkit-scrollbar-thumb{background:#2e3340; border-radius:4px;}
@@ -1072,6 +1111,22 @@
       <div class="controls panel" id="controls">
         <button id="btnPeek">Peek</button>
       </div>
+
+      <!-- post-game review: appears when Study Board is pressed -->
+      <div class="review panel" id="reviewBar" style="display:none">
+        <div class="rev-nav">
+          <button id="revBack" aria-label="Previous move">◀</button>
+          <button id="revFwd" aria-label="Next move">▶</button>
+        </div>
+        <div class="rev-body">
+          <div class="rev-head">
+            <span class="rev-count" id="revCount"></span>
+            <span class="rev-verdict" id="revVerdict"></span>
+          </div>
+          <div class="rev-line" id="revLine"></div>
+        </div>
+        <button class="ghost rev-done" id="revDone">Done</button>
+      </div>
     </div>
 
     <!-- SIDE -->
@@ -1204,6 +1259,9 @@ const FILES = 'abcdefgh';
 
 const rowOf = i => i >> 3;
 const colOf = i => i & 7;
+// board index -> "e4", and a move -> "e2e4" / "e7e8q", which is what UCI speaks
+const SQNAME = i => 'abcdefgh'[colOf(i)] + (8 - rowOf(i));
+const uciOf = m => SQNAME(m.from) + SQNAME(m.to) + (m.promo ? m.promo.toLowerCase() : '');
 const sqName = i => FILES[colOf(i)] + (8 - rowOf(i));
 const onBoard = (r,c) => r>=0 && r<8 && c>=0 && c<8;
 const other = c => c === W ? B : W;
@@ -1543,6 +1601,7 @@ const G = {
   sel: -1,
   lastMove: null,
   sans: [],
+  uci: [],               // every move in UCI form, for the post-game review
   caps: { w: [], b: [] },   // pieces captured BY that colour
   reps: {},
   over: null,
@@ -1693,6 +1752,12 @@ function render(){
   }
   if (G.sel >= 0) sqEls[visualIndex(G.sel)].classList.add('sel');
 
+  // in review, show where the engine would have gone instead
+  if (REV.on && REV.bestMove){
+    sqEls[visualIndex(REV.bestMove.from)].classList.add('best-from');
+    sqEls[visualIndex(REV.bestMove.to)].classList.add('best-to');
+  }
+
   if (inCheck(G.st, G.st.turn) && (!BLINDISH(G.mode) || G.peeking || G.revealed)){
     const k = kingSq(G.st, G.st.turn);
     if (k >= 0) sqEls[visualIndex(k)].classList.add('check');
@@ -1790,15 +1855,26 @@ function renderStatus(){
 
 function renderMoves(){
   if (!G.sans.length){ el.moves.innerHTML = '<div class="empty">No moves yet.</div>'; return; }
+  // in review the list is how you get around, so each move carries its ply and
+  // the one being examined is the one lit, rather than the last one played
+  const cur = REV.on ? REV.ply : G.sans.length - 1;
+  const cell = i => `<div class="m${i === cur ? ' cur' : ''}${REV.on ? ' pick' : ''}"` +
+                    `${REV.on ? ` data-ply="${i}"` : ''}>${G.sans[i]}</div>`;
   let html = '';
   for (let i=0;i<G.sans.length;i+=2){
     html += `<div class="n">${i/2+1}.</div>`;
-    html += `<div class="m${i===G.sans.length-1?' cur':''}">${G.sans[i]}</div>`;
-    html += G.sans[i+1] ? `<div class="m${i+1===G.sans.length-1?' cur':''}">${G.sans[i+1]}</div>` : '<div></div>';
+    html += cell(i);
+    html += G.sans[i+1] ? cell(i+1) : '<div></div>';
   }
   el.moves.innerHTML = html;
-  el.moves.scrollTop = el.moves.scrollHeight;
+  if (!REV.on) el.moves.scrollTop = el.moves.scrollHeight;
 }
+
+// jumping straight to a move, rather than stepping to it
+el.moves.addEventListener('click', e => {
+  const cell = e.target.closest('.m[data-ply]');
+  if (cell && REV.on) reviewGoto(+cell.dataset.ply);
+});
 
 function renderCaptures(){
   const order = { Q:0, R:1, B:2, N:3, P:4 };
@@ -2042,6 +2118,7 @@ function applyMove(m, fromNet){
   if (m.cap) G.caps[m.p.c].push(m.cap.t);
   G.st = makeMove(G.st, m);
   G.sans.push(san);
+  G.uci.push(uciOf(m));      // the review replays the game from these
   // our own moves go out to the opponent; theirs arrive already applied elsewhere
   if (ONLINE() && !fromNet && mover === G.human){
     netSend({ t:'move', ply:G.sans.length - 1, from:m.from, to:m.to, promo:m.promo || null, san });
@@ -2452,11 +2529,288 @@ function receiveMove(msg){
 }
 
 /* ============================================================
+   THE ENGINE — Stockfish, in a worker, spoken to in UCI.
+   Only the review uses it, so it is not loaded until Study Board is pressed.
+   ============================================================ */
+const SF = {
+  worker: null,
+  ready: false,
+  unavailable: false,
+  pending: null,        // { key, resolve } for the search in flight
+  queue: [],
+  cache: new Map()      // position key -> { best, cp, mate }
+};
+
+const SF_MOVETIME = 500;   // per position; a game of 40 moves reviews in well under a minute
+
+function engineAvailable(){
+  return typeof Worker === 'function' && typeof WebAssembly === 'object'
+      && typeof WebAssembly.validate === 'function';
+}
+
+function engineStart(){
+  if (SF.worker || SF.unavailable) return;
+  if (!engineAvailable()){ SF.unavailable = true; return; }
+  try {
+    SF.worker = new Worker('engine/stockfish.wasm.js');
+  } catch(e){ SF.unavailable = true; return; }
+  SF.worker.onerror = () => { SF.unavailable = true; SF.ready = false; reviewRender(); };
+  SF.worker.onmessage = ev => {
+    const line = typeof ev.data === 'string' ? ev.data : (ev.data && ev.data.data) || '';
+    engineLine(line);
+  };
+  SF.worker.postMessage('uci');
+}
+
+let sfInfo = null;
+function engineLine(line){
+  if (line === 'uciok'){
+    // Deliberately no "setoption name Threads": this build is single-threaded,
+    // and setting the option at all wedges it — uciok arrives, readyok never does.
+    SF.worker.postMessage('isready');
+    return;
+  }
+  if (line === 'readyok'){ SF.ready = true; enginePump(); reviewRender(); return; }
+
+  if (line.startsWith('info ') && sfInfo){
+    // keep the deepest score and principal variation seen for this search
+    const cp = line.match(/score cp (-?\d+)/);
+    const mate = line.match(/score mate (-?\d+)/);
+    const pv = line.match(/ pv ([a-h][1-8][a-h][1-8][qrbn]?)/);
+    if (cp) { sfInfo.cp = +cp[1]; sfInfo.mate = null; }
+    if (mate){ sfInfo.mate = +mate[1]; sfInfo.cp = null; }
+    if (pv) sfInfo.best = pv[1];
+    return;
+  }
+  if (line.startsWith('bestmove')){
+    const best = line.split(/\s+/)[1];
+    const p = SF.pending;
+    SF.pending = null;
+    if (p){
+      const out = {
+        best: (best && best !== '(none)') ? best : (sfInfo && sfInfo.best) || null,
+        cp:   sfInfo ? sfInfo.cp : null,
+        mate: sfInfo ? sfInfo.mate : null
+      };
+      SF.cache.set(p.key, out);
+      p.resolve(out);
+    }
+    sfInfo = null;
+    enginePump();
+  }
+}
+
+function enginePump(){
+  if (!SF.ready || SF.pending || !SF.queue.length) return;
+  const job = SF.queue.shift();
+  if (SF.cache.has(job.key)){ job.resolve(SF.cache.get(job.key)); return enginePump(); }
+  SF.pending = job;
+  sfInfo = { cp:null, mate:null, best:null };
+  SF.worker.postMessage('position startpos' + (job.moves ? ' moves ' + job.moves : ''));
+  SF.worker.postMessage('go movetime ' + SF_MOVETIME);
+}
+
+/* Ask what should be played in the position reached by `moves` (a UCI list). */
+function engineAsk(moves){
+  const key = moves.join(' ');
+  if (SF.cache.has(key)) return Promise.resolve(SF.cache.get(key));
+  if (SF.unavailable) return Promise.resolve(null);
+  engineStart();
+  if (SF.unavailable) return Promise.resolve(null);
+  return new Promise(resolve => {
+    SF.queue.push({ key, moves: key, resolve });
+    enginePump();
+  });
+}
+
+/* ============================================================
+   THE REVIEW — step through the finished game and see what was best
+   ============================================================ */
+const REV = {
+  on: false,
+  ply: 0,              // 0 = before the first move, N = final position
+  states: [],          // states[i] is the position before move i
+  moves: [],           // the move actually played at each ply
+  liveState: null      // the final position, restored on leaving
+};
+
+function reviewBuild(){
+  const states = [newState()], moves = [];
+  let s = states[0];
+  for (const u of G.uci){
+    const m = legalMoves(s, s.turn).find(x => uciOf(x) === u);
+    if (!m) break;                    // a game we cannot replay stops here
+    moves.push(m);
+    s = makeMove(s, m);
+    states.push(s);
+  }
+  REV.states = states;
+  REV.moves = moves;
+}
+
+function enterReview(){
+  if (!G.sans.length) return;         // nothing to look at
+  el.endOverlay.classList.remove('show');
+  REV.liveState = G.st;
+  reviewBuild();
+  REV.on = true;
+  REV.ply = 0;
+  G.revealed = true;                  // the board is open once the game is done
+  G.peeking = false;
+  document.getElementById('reviewBar').style.display = 'flex';
+  engineStart();
+  reviewGoto(0);
+}
+
+/* The review borrows G.st to show old positions, so every way out of it has to
+   put the real one back — or say it does not need to, when the caller is about
+   to install a position of its own. */
+function reviewClose(restore){
+  if (!REV.on) return;
+  REV.on = false;
+  REV.bestMove = null;
+  if (restore && REV.liveState) G.st = REV.liveState;
+  REV.liveState = null;
+  document.getElementById('reviewBar').style.display = 'none';
+}
+
+function exitReview(){
+  reviewClose(true);
+  G.lastMove = null;
+  render();
+}
+
+function reviewGoto(ply){
+  REV.ply = Math.max(0, Math.min(ply, REV.states.length - 1));
+  G.st = REV.states[REV.ply];
+  G.lastMove = REV.ply > 0 ? REV.moves[REV.ply - 1] : null;
+  G.sel = -1;
+  REV.bestMove = null;          // don't leave the previous arrow pointing
+  render();
+  reviewRender();
+  reviewAnalyse();
+}
+
+/* The position on screen, and the one after the move that was played from it,
+   are both wanted: the first gives the best move, the pair gives the verdict. */
+function reviewAnalyse(){
+  const ply = REV.ply;
+  const here = G.uci.slice(0, ply);
+  engineAsk(here).then(() => { if (REV.on && REV.ply === ply) reviewRender(); });
+  if (ply < REV.moves.length){
+    engineAsk(G.uci.slice(0, ply + 1)).then(() => { if (REV.on && REV.ply === ply) reviewRender(); });
+  }
+}
+
+// a score, always from the point of view of the side about to move
+function sfScore(res){
+  if (!res) return null;
+  if (res.mate !== null && res.mate !== undefined) return res.mate > 0 ? 10000 : -10000;
+  return res.cp;
+}
+function fmtScore(res, turn){
+  if (!res) return '…';
+  if (res.mate !== null && res.mate !== undefined){
+    const n = Math.abs(res.mate);
+    const winner = (res.mate > 0) === (turn === W) ? 'White' : 'Black';
+    return 'mate in ' + n + ' for ' + winner;
+  }
+  if (res.cp === null || res.cp === undefined) return '…';
+  const white = turn === W ? res.cp : -res.cp;      // show it White-positive, as books do
+  return (white > 0 ? '+' : '') + (white / 100).toFixed(2);
+}
+
+function verdictFor(loss, playedWasBest){
+  if (playedWasBest) return { cls:'v-best', text:'Best move' };
+  if (loss === null) return null;
+  if (loss >= 300) return { cls:'v-blunder',    text:'Blunder' };
+  if (loss >= 100) return { cls:'v-mistake',    text:'Mistake' };
+  if (loss >= 50)  return { cls:'v-inaccuracy', text:'Inaccuracy' };
+  return { cls:'v-good', text:'Good' };
+}
+
+function reviewRender(){
+  if (!REV.on) return;
+  const ply = REV.ply, last = REV.states.length - 1;
+  const st = REV.states[ply];
+  // ply i is the position *before* move i, so it is move i that is under the
+  // microscope here: number (i>>1)+1, and White on even plies.
+  document.getElementById('revCount').textContent =
+    ply === last
+      ? 'Final position'
+      : 'Move ' + ((ply >> 1) + 1) + (ply % 2 ? ', Black' : ', White') +
+        '  ·  ' + (ply + 1) + ' of ' + REV.moves.length;
+
+  document.getElementById('revBack').disabled = ply === 0;
+  document.getElementById('revFwd').disabled  = ply === last;
+
+  const line = document.getElementById('revLine');
+  const badge = document.getElementById('revVerdict');
+
+  if (SF.unavailable){
+    line.textContent = 'This browser cannot run the analysis engine.';
+    badge.className = 'rev-verdict'; badge.textContent = '';
+    return;
+  }
+  if (!SF.ready){
+    line.textContent = 'Starting the engine…';
+    badge.className = 'rev-verdict'; badge.textContent = '';
+    return;
+  }
+  if (ply === last){
+    line.textContent = 'End of the game.';
+    badge.className = 'rev-verdict'; badge.textContent = '';
+    return;
+  }
+
+  const before = SF.cache.get(G.uci.slice(0, ply).join(' '));
+  const after  = SF.cache.get(G.uci.slice(0, ply + 1).join(' '));
+  const played = REV.moves[ply];
+  const playedSan = G.sans[ply];
+
+  if (!before){
+    line.textContent = 'Thinking…';
+    badge.className = 'rev-verdict'; badge.textContent = '';
+    return;
+  }
+
+  // the engine's move, named the way the player reads moves
+  let bestSan = null, bestMove = null;
+  if (before.best){
+    bestMove = legalMoves(st, st.turn).find(x => uciOf(x) === before.best);
+    if (bestMove) bestSan = toSAN(st, bestMove, legalMoves(st, st.turn));
+  }
+  // only repaint when the arrow actually moves — reviewRender runs on every reply
+  const bestChanged = (REV.bestMove || null) !== (bestMove || null);
+  REV.bestMove = bestMove || null;
+
+  const playedWasBest = !!(before.best && uciOf(played) === before.best);
+  // both scores are from the mover's side; what the move cost is the difference
+  let loss = null;
+  if (after && sfScore(before) !== null && sfScore(after) !== null){
+    loss = sfScore(before) - (-sfScore(after));
+  }
+  const v = verdictFor(loss, playedWasBest);
+  badge.className = 'rev-verdict ' + (v ? v.cls : '');
+  badge.textContent = v ? v.text : '';
+
+  line.innerHTML =
+    'You played <b>' + playedSan + '</b>' +
+    (playedWasBest
+      ? ' — the engine agrees.'
+      : (bestSan ? ' · best was <b>' + bestSan + '</b>' : '')) +
+    '  <span class="rev-eval">' + fmtScore(before, st.turn) + '</span>';
+
+  if (bestChanged) render();     // the highlight is painted by render()
+}
+
+/* ============================================================
    CONTROLS
    ============================================================ */
 function newGame(){
+  reviewClose(false);        // a new game supplies its own position
   G.st = newState();
-  G.sel = -1; G.lastMove = null; G.sans = [];
+  G.sel = -1; G.lastMove = null; G.sans = []; G.uci = [];
   G.caps = { w: [], b: [] };
   G.reps = {}; G.over = null;
   G.revealed = false; G.peeking = false;
@@ -2524,8 +2878,13 @@ document.getElementById('endRematch').onclick = () => {
   if (ONLINE()){ enterRooms(); return; }     // back to the list for another game
   newGame();
 };
-document.getElementById('endClose').onclick = () => el.endOverlay.classList.remove('show');
+// Study Board is the way into the review; the x just dismisses the box
+document.getElementById('endClose').onclick = () => enterReview();
 document.getElementById('endX').onclick     = () => el.endOverlay.classList.remove('show');
+
+document.getElementById('revBack').onclick = () => reviewGoto(REV.ply - 1);
+document.getElementById('revFwd').onclick  = () => reviewGoto(REV.ply + 1);
+document.getElementById('revDone').onclick = () => exitReview();
 
 /* ============================================================
    SCREENS — title → vision select → game, with settings off the title
@@ -2545,6 +2904,7 @@ const chosen = { level:false, side:false, minutes:false };
 let flagged = false;
 
 function showScreen(name){
+  if (name !== 'game') reviewClose(false);
   screenName = name;
   if (name === 'opponent') picked.opponent = false;
   if (name === 'setup'){
@@ -2797,6 +3157,12 @@ document.addEventListener('keydown', e => {
   if (leaveOverlay.classList.contains('show')){
     if (k === 'escape') leaveOverlay.classList.remove('show');
     return;
+  }
+  // stepping through the review with the arrow keys
+  if (REV.on){
+    if (k === 'arrowleft'){  e.preventDefault(); reviewGoto(REV.ply - 1); return; }
+    if (k === 'arrowright'){ e.preventDefault(); reviewGoto(REV.ply + 1); return; }
+    if (k === 'escape'){ exitReview(); return; }
   }
   // Peek and New Game are button-only — no keyboard shortcuts while playing,
   // and there is no take-back to bind a key to
