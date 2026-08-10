@@ -297,11 +297,13 @@
     font-size:clamp(36px,8.4vw,86px);
     position:relative;
   }
-  .hero .rule{margin-top:clamp(24px,3.4vh,40px);}
-  .hero .rule b{font-size:clamp(19px,2.9vw,26px); opacity:.85;}
+  /* the flourish and the line under it sit closer to the title, and read
+     quieter, so the eye carries on down to the name box and PLAY */
+  .hero .rule{margin-top:clamp(14px,2vh,24px);}
+  .hero .rule b{font-size:clamp(15px,2.2vw,20px); opacity:.85;}
   .hero .tagline{
-    margin-top:clamp(18px,2.6vh,30px);
-    font-size:clamp(15px,1.9vw,18.5px); line-height:1.6;
+    margin-top:clamp(11px,1.7vh,18px);
+    font-size:clamp(13px,1.55vw,15.5px); line-height:1.55;
   }
   .hero h1::after{
     content:"NOX CHESS";
