@@ -532,6 +532,44 @@
     .half, .half + .half{transform:none;}
   }
 
+  /* ---------- the engine's move, explained ---------- */
+  .coach-move{
+    font-family:Georgia,serif; font-size:19px; letter-spacing:.06em;
+    color:var(--good); display:flex; align-items:baseline; gap:9px;
+  }
+  .coach-move .cm-eval{
+    font-family:inherit; font-size:12px; letter-spacing:.08em;
+    color:var(--muted); font-variant-numeric:tabular-nums;
+  }
+  .coach-why{margin-top:9px; font-size:12.5px; line-height:1.65; color:#c9cdd8;}
+  .coach-why em{color:var(--gold-soft); font-style:normal;}
+
+  /* ---------- review arrows and move marks ---------- */
+  .arrows{position:absolute; inset:0; pointer-events:none; overflow:visible;}
+  .arrows line{stroke-linecap:round;}
+  /* the default stroke-width of 1 is one whole square in this viewBox, which
+     turns every arrowhead into a giant triangle — the head is fill only */
+  .arrows polygon{stroke:none; stroke-width:0;}
+  .arrows .a-played{stroke:#e0864d; fill:#e0864d; opacity:.55;}
+  .arrows .a-best{stroke:#5fb96a; fill:#5fb96a; opacity:.62;}
+  .marks{position:absolute; inset:0; pointer-events:none;}
+  .mark{
+    position:absolute; left:0; top:0; width:12.5%; height:12.5%;
+    display:flex; align-items:flex-start; justify-content:flex-end;
+    padding:3.5%;
+  }
+  .mark b{
+    display:flex; align-items:center; justify-content:center;
+    min-width:2.1cqmin; height:2.1cqmin; padding:0 .45cqmin;
+    border-radius:.7cqmin;
+    font-family:Georgia,serif; font-weight:700; font-size:1.55cqmin; line-height:1;
+    color:#fff; box-shadow:0 .25cqmin .6cqmin rgba(0,0,0,.45);
+  }
+  .mark.m-brilliant b{background:#3fa4d8;}
+  .mark.m-good b{background:#5fb96a;}
+  .mark.m-mistake b{background:#e0a341; color:#2a1f08;}
+  .mark.m-blunder b{background:#d0453c;}
+
   /* ---------- post-game review ---------- */
   .review{
     width:min(100%,var(--board-max)); padding:14px 16px; margin-top:12px;
@@ -548,10 +586,9 @@
     font-size:10px; letter-spacing:.16em; text-transform:uppercase; font-weight:700;
     padding:3px 9px; border-radius:999px;
   }
-  .rev-verdict.v-best{color:#0f1a10; background:var(--good);}
+  .rev-verdict.v-brilliant{color:#08222e; background:#3fa4d8;}
   .rev-verdict.v-good{color:var(--good); border:1px solid rgba(111,191,115,.4);}
-  .rev-verdict.v-inaccuracy{color:#e8c46b; border:1px solid rgba(232,196,107,.45);}
-  .rev-verdict.v-mistake{color:#e89a5a; border:1px solid rgba(232,154,90,.5);}
+  .rev-verdict.v-mistake{color:#e0a341; border:1px solid rgba(224,163,65,.5);}
   .rev-verdict.v-blunder{color:#fff; background:var(--danger);}
   .rev-line{margin-top:6px; font-size:13.5px; color:var(--text); line-height:1.5;}
   .rev-line b{color:var(--gold-soft);}
@@ -560,9 +597,6 @@
     font-size:12.5px; color:var(--muted);
   }
   .rev-done{flex:none;}
-  /* where the engine would have played */
-  .sq.best-from{box-shadow:inset 0 0 0 3px rgba(111,191,115,.55);}
-  .sq.best-to{box-shadow:inset 0 0 0 3px var(--good);}
   @media (max-width:520px){
     .review{flex-wrap:wrap;}
     .rev-body{order:3; flex-basis:100%;}
@@ -1092,6 +1126,9 @@
         <div class="board" id="board">
           <div class="squares" id="squares"></div>
           <div class="pieces" id="piecesLayer"></div>
+          <!-- review only: arrows for the two moves, and the ?/!! marks -->
+          <svg class="arrows" id="arrows" viewBox="0 0 8 8" preserveAspectRatio="none" aria-hidden="true"></svg>
+          <div class="marks" id="marks"></div>
         </div>
       </div>
 
@@ -1147,6 +1184,13 @@
       <div class="card panel">
         <h2>Notation</h2>
         <div class="moves" id="moves"><div class="empty">No moves yet.</div></div>
+      </div>
+
+      <!-- review only: why the engine liked its own move -->
+      <div class="card panel coach-card" id="coachCard" style="display:none">
+        <h2>The Engine's Move</h2>
+        <div class="coach-move" id="coachMove"></div>
+        <div class="coach-why" id="coachWhy"></div>
       </div>
 
       <div class="card panel rules-card" id="rulesCard">
@@ -1752,11 +1796,6 @@ function render(){
   }
   if (G.sel >= 0) sqEls[visualIndex(G.sel)].classList.add('sel');
 
-  // in review, show where the engine would have gone instead
-  if (REV.on && REV.bestMove){
-    sqEls[visualIndex(REV.bestMove.from)].classList.add('best-from');
-    sqEls[visualIndex(REV.bestMove.to)].classList.add('best-to');
-  }
 
   if (inCheck(G.st, G.st.turn) && (!BLINDISH(G.mode) || G.peeking || G.revealed)){
     const k = kingSq(G.st, G.st.turn);
@@ -2567,19 +2606,26 @@ function engineLine(line){
   if (line === 'uciok'){
     // Deliberately no "setoption name Threads": this build is single-threaded,
     // and setting the option at all wedges it — uciok arrives, readyok never does.
+    // MultiPV is safe, and the gap between the top two moves is what tells a
+    // standout move apart from one of several equally good ones.
+    SF.worker.postMessage('setoption name MultiPV value 2');
     SF.worker.postMessage('isready');
     return;
   }
   if (line === 'readyok'){ SF.ready = true; enginePump(); reviewRender(); return; }
 
   if (line.startsWith('info ') && sfInfo){
-    // keep the deepest score and principal variation seen for this search
+    // keep the deepest line seen for each of the two ranked moves
+    const mp = line.match(/ multipv (\d+)/);
+    const idx = mp ? +mp[1] : 1;
+    if (idx > 2) return;
+    const slot = idx === 1 ? sfInfo.pv1 : sfInfo.pv2;
     const cp = line.match(/score cp (-?\d+)/);
     const mate = line.match(/score mate (-?\d+)/);
     const pv = line.match(/ pv ([a-h][1-8][a-h][1-8][qrbn]?)/);
-    if (cp) { sfInfo.cp = +cp[1]; sfInfo.mate = null; }
-    if (mate){ sfInfo.mate = +mate[1]; sfInfo.cp = null; }
-    if (pv) sfInfo.best = pv[1];
+    if (cp) { slot.cp = +cp[1]; slot.mate = null; }
+    if (mate){ slot.mate = +mate[1]; slot.cp = null; }
+    if (pv) slot.best = pv[1];
     return;
   }
   if (line.startsWith('bestmove')){
@@ -2587,10 +2633,13 @@ function engineLine(line){
     const p = SF.pending;
     SF.pending = null;
     if (p){
+      const one = sfInfo ? sfInfo.pv1 : { cp:null, mate:null, best:null };
       const out = {
-        best: (best && best !== '(none)') ? best : (sfInfo && sfInfo.best) || null,
-        cp:   sfInfo ? sfInfo.cp : null,
-        mate: sfInfo ? sfInfo.mate : null
+        best: (best && best !== '(none)') ? best : one.best,
+        cp:   one.cp,
+        mate: one.mate,
+        // absent when there was only one legal move — which is itself a fact
+        second: (sfInfo && sfInfo.pv2.best) ? sfInfo.pv2 : null
       };
       SF.cache.set(p.key, out);
       p.resolve(out);
@@ -2605,7 +2654,7 @@ function enginePump(){
   const job = SF.queue.shift();
   if (SF.cache.has(job.key)){ job.resolve(SF.cache.get(job.key)); return enginePump(); }
   SF.pending = job;
-  sfInfo = { cp:null, mate:null, best:null };
+  sfInfo = { pv1:{ cp:null, mate:null, best:null }, pv2:{ cp:null, mate:null, best:null } };
   SF.worker.postMessage('position startpos' + (job.moves ? ' moves ' + job.moves : ''));
   SF.worker.postMessage('go movetime ' + SF_MOVETIME);
 }
@@ -2672,6 +2721,9 @@ function reviewClose(restore){
   if (restore && REV.liveState) G.st = REV.liveState;
   REV.liveState = null;
   document.getElementById('reviewBar').style.display = 'none';
+  document.getElementById('coachCard').style.display = 'none';
+  document.getElementById('arrows').innerHTML = '';
+  document.getElementById('marks').innerHTML = '';
 }
 
 function exitReview(){
@@ -2720,88 +2772,214 @@ function fmtScore(res, turn){
   return (white > 0 ? '+' : '') + (white / 100).toFixed(2);
 }
 
-function verdictFor(loss, playedWasBest){
-  if (playedWasBest) return { cls:'v-best', text:'Best move' };
-  if (loss === null) return null;
-  if (loss >= 300) return { cls:'v-blunder',    text:'Blunder' };
-  if (loss >= 100) return { cls:'v-mistake',    text:'Mistake' };
-  if (loss >= 50)  return { cls:'v-inaccuracy', text:'Inaccuracy' };
-  return { cls:'v-good', text:'Good' };
+/* Four judgements, and every move gets exactly one.
+
+   ??  blunder    — gave away three pawns' worth or more
+   ?   mistake    — gave away a pawn's worth or more
+   !!  brilliant  — the engine's own move, and clearly better than the next
+                    best, so it was genuinely there to be missed
+   !   good       — anything else: it held on to what the position had
+
+   That "clearly better than the next best" is what MultiPV buys. Without it, a
+   move that is best only because every move is fine would read as brilliant. */
+function judgeMove(loss, playedWasBest, gap){
+  if (loss !== null && loss >= 300)
+    return { sym:'??', text:'Blunder',   cls:'v-blunder',   mark:'m-blunder' };
+  if (loss !== null && loss >= 100)
+    return { sym:'?',  text:'Mistake',   cls:'v-mistake',   mark:'m-mistake' };
+  if (playedWasBest && gap !== null && gap >= 150)
+    return { sym:'!!', text:'Brilliant', cls:'v-brilliant', mark:'m-brilliant' };
+  return { sym:'!', text:'Good move', cls:'v-good', mark:'m-good' };
+}
+
+/* ---- the two arrows, and the mark on the square the piece landed on ---- */
+const ARROW_HEAD = 0.26;      // measured in squares
+
+function drawArrow(svg, m, cls){
+  const a = visualIndex(m.from), b = visualIndex(m.to);
+  const x1 = colOf(a) + .5, y1 = rowOf(a) + .5;
+  const x2 = colOf(b) + .5, y2 = rowOf(b) + .5;
+  const dx = x2 - x1, dy = y2 - y1;
+  const len = Math.hypot(dx, dy) || 1;
+  const ux = dx / len, uy = dy / len;
+  // stop the shaft short so the head sits inside the destination square
+  const sx = x2 - ux * ARROW_HEAD, sy = y2 - uy * ARROW_HEAD;
+  const ns = 'http://www.w3.org/2000/svg';
+
+  const line = document.createElementNS(ns, 'line');
+  line.setAttribute('x1', x1); line.setAttribute('y1', y1);
+  line.setAttribute('x2', sx); line.setAttribute('y2', sy);
+  line.setAttribute('stroke-width', .13);
+  line.setAttribute('class', cls);
+  svg.appendChild(line);
+
+  const w = ARROW_HEAD * .62;
+  const head = document.createElementNS(ns, 'polygon');
+  head.setAttribute('points',
+    x2 + ',' + y2 + ' ' +
+    (sx - uy * w) + ',' + (sy + ux * w) + ' ' +
+    (sx + uy * w) + ',' + (sy - ux * w));
+  head.setAttribute('class', cls);
+  head.setAttribute('stroke', 'none');
+  svg.appendChild(head);
+}
+
+function drawReviewOverlay(played, best, judgement){
+  const svg = document.getElementById('arrows');
+  const marks = document.getElementById('marks');
+  svg.innerHTML = '';
+  marks.innerHTML = '';
+  if (!REV.on || !played) return;
+
+  // when the player found the engine's move there is nothing to compare, so
+  // the board stays clean
+  const same = best && uciOf(played) === uciOf(best);
+  if (!same){
+    drawArrow(svg, played, 'a-played');
+    if (best) drawArrow(svg, best, 'a-best');
+  }
+
+  if (judgement){
+    const v = visualIndex(played.to);
+    const d = document.createElement('div');
+    d.className = 'mark ' + judgement.mark;
+    d.style.transform = `translate(${colOf(v)*100}%, ${rowOf(v)*100}%)`;
+    d.innerHTML = '<b>' + judgement.sym + '</b>';
+    marks.appendChild(d);
+  }
+}
+
+/* ---- why the engine's move is the one to play ----
+   Assembled from what can actually be checked on the board — what the move
+   takes, what it threatens, what it rescues. This is not chess understanding,
+   and it only ever claims what it can see. */
+const PIECE_WORD = { P:'pawn', N:'knight', B:'bishop', R:'rook', Q:'queen', K:'king' };
+
+function describeBest(st, m, res, lossByPlayer){
+  if (!m) return '';
+  const bits = [];
+  const after = makeMove(st, m);
+  const them = other(st.turn);
+  const mated = !legalMoves(after, after.turn).length && inCheck(after, after.turn);
+
+  if (mated) bits.push('It is checkmate.');
+  else if (res && res.mate !== null && res.mate !== undefined && res.mate > 0)
+    bits.push('It forces mate in ' + Math.abs(res.mate) + '.');
+  else if (inCheck(after, after.turn)) bits.push('It puts the king in check.');
+
+  if (m.cap) bits.push('It wins the ' + PIECE_WORD[m.cap.t] + '.');
+  if (m.promo) bits.push('The pawn becomes a ' + PIECE_WORD[m.promo] + '.');
+  if (m.p.t === 'K' && Math.abs(colOf(m.to) - colOf(m.from)) === 2)
+    bits.push('Castling tucks the king away and brings a rook into play.');
+
+  // a piece that was being attacked, and is no longer standing there
+  if (!m.cap && m.p.t !== 'K' && m.p.t !== 'P' &&
+      isAttacked(st, m.from, them) && !isAttacked(after, m.to, them))
+    bits.push('It moves the ' + PIECE_WORD[m.p.t] + ' out of attack.');
+
+  if (!bits.length){
+    const backRank = st.turn === W ? 7 : 0;
+    if (m.p.t !== 'P' && m.p.t !== 'K' && rowOf(m.from) === backRank)
+      bits.push('It brings the ' + PIECE_WORD[m.p.t] + ' off the back rank.');
+    else if (m.p.t === 'P' && Math.abs(3.5 - colOf(m.to)) <= 1.5)
+      bits.push('It claims space in the centre.');
+    else
+      bits.push('No single tactic — it is simply the soundest of the options.');
+  }
+
+  // a mate score is ±10000, so pawns stop being a sensible unit long before that
+  if (lossByPlayer !== null && lossByPlayer >= 2000)
+    bits.push('What you played loses by force.');
+  else if (lossByPlayer !== null && lossByPlayer >= 100)
+    bits.push('Your move let ' + (lossByPlayer / 100).toFixed(1) + ' of a pawn slip.');
+
+  return bits.slice(0, 3).join(' ');
 }
 
 function reviewRender(){
   if (!REV.on) return;
   const ply = REV.ply, last = REV.states.length - 1;
   const st = REV.states[ply];
-  // ply i is the position *before* move i, so it is move i that is under the
-  // microscope here: number (i>>1)+1, and White on even plies.
+  // ply i is the position *before* move i, so it is move i under the microscope
+  // here: number (i>>1)+1, and White on even plies.
   document.getElementById('revCount').textContent =
     ply === last
       ? 'Final position'
       : 'Move ' + ((ply >> 1) + 1) + (ply % 2 ? ', Black' : ', White') +
-        '  ·  ' + (ply + 1) + ' of ' + REV.moves.length;
+        '  \u00b7  ' + (ply + 1) + ' of ' + REV.moves.length;
 
   document.getElementById('revBack').disabled = ply === 0;
   document.getElementById('revFwd').disabled  = ply === last;
 
-  const line = document.getElementById('revLine');
+  const line  = document.getElementById('revLine');
   const badge = document.getElementById('revVerdict');
+  const coach = document.getElementById('coachCard');
 
-  if (SF.unavailable){
-    line.textContent = 'This browser cannot run the analysis engine.';
+  const quiet = (msg) => {
+    line.textContent = msg;
     badge.className = 'rev-verdict'; badge.textContent = '';
-    return;
-  }
-  if (!SF.ready){
-    line.textContent = 'Starting the engine…';
-    badge.className = 'rev-verdict'; badge.textContent = '';
-    return;
-  }
-  if (ply === last){
-    line.textContent = 'End of the game.';
-    badge.className = 'rev-verdict'; badge.textContent = '';
-    return;
-  }
+    coach.style.display = 'none';
+    drawReviewOverlay(null, null, null);
+  };
+
+  if (SF.unavailable) return quiet('This browser cannot run the analysis engine.');
+  if (!SF.ready)      return quiet('Starting the engine\u2026');
+  if (ply === last)   return quiet('End of the game.');
 
   const before = SF.cache.get(G.uci.slice(0, ply).join(' '));
   const after  = SF.cache.get(G.uci.slice(0, ply + 1).join(' '));
   const played = REV.moves[ply];
   const playedSan = G.sans[ply];
 
-  if (!before){
-    line.textContent = 'Thinking…';
-    badge.className = 'rev-verdict'; badge.textContent = '';
-    return;
-  }
+  if (!before) return quiet('Thinking\u2026');
 
-  // the engine's move, named the way the player reads moves
+  // the engine's move, named the way a player reads moves
+  const all = legalMoves(st, st.turn);
   let bestSan = null, bestMove = null;
   if (before.best){
-    bestMove = legalMoves(st, st.turn).find(x => uciOf(x) === before.best);
-    if (bestMove) bestSan = toSAN(st, bestMove, legalMoves(st, st.turn));
+    bestMove = all.find(x => uciOf(x) === before.best) || null;
+    if (bestMove) bestSan = toSAN(st, bestMove, all);
   }
-  // only repaint when the arrow actually moves — reviewRender runs on every reply
-  const bestChanged = (REV.bestMove || null) !== (bestMove || null);
-  REV.bestMove = bestMove || null;
+  REV.bestMove = bestMove;
 
   const playedWasBest = !!(before.best && uciOf(played) === before.best);
-  // both scores are from the mover's side; what the move cost is the difference
+
+  // both scores are from the mover's side, so flipping the second gives what
+  // the move actually cost
   let loss = null;
   if (after && sfScore(before) !== null && sfScore(after) !== null){
     loss = sfScore(before) - (-sfScore(after));
   }
-  const v = verdictFor(loss, playedWasBest);
-  badge.className = 'rev-verdict ' + (v ? v.cls : '');
-  badge.textContent = v ? v.text : '';
+  // how far ahead the top move was of the runner-up
+  let gap = null;
+  if (before.second && sfScore(before) !== null && sfScore(before.second) !== null){
+    gap = sfScore(before) - sfScore(before.second);
+  }
+
+  const v = judgeMove(loss, playedWasBest, gap);
+  badge.className = 'rev-verdict ' + v.cls;
+  badge.textContent = v.sym + '  ' + v.text;
 
   line.innerHTML =
     'You played <b>' + playedSan + '</b>' +
     (playedWasBest
-      ? ' — the engine agrees.'
-      : (bestSan ? ' · best was <b>' + bestSan + '</b>' : '')) +
+      ? ' \u2014 the engine agrees.'
+      : (bestSan ? ' \u00b7 best was <b>' + bestSan + '</b>' : '')) +
     '  <span class="rev-eval">' + fmtScore(before, st.turn) + '</span>';
 
-  if (bestChanged) render();     // the highlight is painted by render()
+  // the coaching card only has something to add when there was a better move
+  if (bestMove && !playedWasBest){
+    coach.style.display = '';
+    document.getElementById('coachMove').innerHTML =
+      bestSan + ' <span class="cm-eval">' + fmtScore(before, st.turn) + '</span>';
+    document.getElementById('coachWhy').textContent = describeBest(st, bestMove, before, loss);
+  } else {
+    coach.style.display = 'none';
+    document.getElementById('coachMove').textContent = '';
+    document.getElementById('coachWhy').textContent = '';
+  }
+
+  drawReviewOverlay(played, bestMove, v);
 }
 
 /* ============================================================
