@@ -682,7 +682,9 @@
     margin:28px 0 0; padding:16px; border-radius:14px;
   }
   .opt-group{display:flex; align-items:center; gap:10px;}
-  #optTime{flex-basis:100%; justify-content:center;}   /* time always gets its own row */
+  /* ten strength buttons and six clocks each need a full line to themselves */
+  #optTime, #optOpponent{flex-basis:100%; justify-content:center;}
+  .seg{flex-wrap:wrap; justify-content:center;}
   .opt-group label{font-size:10.5px; letter-spacing:.22em; text-transform:uppercase; color:var(--muted);}
 
   /* anything left unanswered when Start Play is pressed */
@@ -1046,9 +1048,16 @@
         <div class="opt-group" id="optOpponent">
           <label>Opponent</label>
           <div class="seg" data-seg="level">
-            <button data-level="1">Novice</button>
-            <button data-level="3">Club</button>
-            <button data-level="4">Sharp</button>
+            <button data-level="100">100</button>
+            <button data-level="500">500</button>
+            <button data-level="800">800</button>
+            <button data-level="1000">1000</button>
+            <button data-level="1300">1300</button>
+            <button data-level="1600">1600</button>
+            <button data-level="2000">2000</button>
+            <button data-level="2400">2400</button>
+            <button data-level="3000">3000</button>
+            <button data-level="3200">3200</button>
           </div>
         </div>
         <div class="opt-group" id="optSide">
@@ -1088,7 +1097,7 @@
     <div class="brand">NOX CHESS</div>
     <div class="chips">
       <div class="vision-chip" id="visionChip">Blindfold</div>
-      <div class="vision-chip alt" id="setupChip">Club · White</div>
+      <div class="vision-chip alt" id="setupChip">1300 Elo · White</div>
     </div>
   </div>
 
@@ -1635,7 +1644,7 @@ const G = {
   matchKind: 'friendly',  // online only: 'ranked' | 'friendly' — separate queues
   hosting: false,         // online only: setting up a room rather than joining one
   playerName: '',         // what the player calls themselves, kept across visits
-  level: 3,
+  level: 1300,
   human: W,
   minutes: 10,            // same allowance for both sides
   clock: { w: 600000, b: 600000 },
@@ -1646,6 +1655,7 @@ const G = {
   lastMove: null,
   sans: [],
   uci: [],               // every move in UCI form, for the post-game review
+  token: 0,              // bumped per game; a late engine reply checks it
   caps: { w: [], b: [] },   // pieces captured BY that colour
   reps: {},
   over: null,
@@ -2044,7 +2054,7 @@ function resetLog(){
     logLine('New game — two players, one screen.', 'sys');
     logLine('There is no board. Each side types into its own box, in turn.', 'sys');
   } else {
-    logLine(`New game — you are ${G.human === W ? 'White' : 'Black'} against ${LEVEL_NAME[G.level]}.`, 'sys');
+    logLine(`New game — you are ${G.human === W ? 'White' : 'Black'} against ${G.level} Elo.`, 'sys');
     logLine('There is no board. Type your moves; the replies come back in notation.', 'sys');
   }
   logLine(' ');
@@ -2172,7 +2182,7 @@ function applyMove(m, fromNet){
   if (LOCAL() && G.mode !== 'total') G.flipped = (G.st.turn === B);
   render();
   checkEnd();
-  if (!G.over && BOT() && G.st.turn !== G.human) setTimeout(engineTurn, 260);
+  if (!G.over && BOT() && G.st.turn !== G.human) scheduleEngine(260);
   if (!G.over && LOCAL() && G.mode === 'total') focusLocalInput();
 }
 
@@ -2231,17 +2241,72 @@ function finish(title, text, status){
   }
 }
 
-function engineTurn(){
-  if (G.over) return;
+/* The opponent ladder.
+   This build has no UCI_Elo dial — only Skill Level 0 to 20 — and Skill 0 still
+   plays around 1300. So the rungs below that are made by searching barely at
+   all, then choosing badly on purpose: `pool` is how many candidate moves to
+   ask for, `slop` how often to take one that is not the best, and `wild` how
+   often to ignore the engine and just play something legal, which is what
+   hangs a queen the way a beginner does.
+
+   The ratings are targets I tuned by hand, not measured strength. Calibrating
+   them honestly would mean thousands of games against rated opposition. */
+const LEVELS = [
+  { elo:100,  skill:0,  depth:1,  pool:5, slop:1.00, wild:0.70, js:1 },
+  { elo:500,  skill:0,  depth:1,  pool:5, slop:0.85, wild:0.30, js:1 },
+  { elo:800,  skill:0,  depth:2,  pool:4, slop:0.60, wild:0.10, js:1 },
+  { elo:1000, skill:0,  depth:3,  pool:4, slop:0.45, wild:0.03, js:2 },
+  { elo:1300, skill:2,  depth:4,  pool:3, slop:0.30, wild:0,    js:2 },
+  { elo:1600, skill:5,  depth:6,  pool:3, slop:0.15, wild:0,    js:3 },
+  { elo:2000, skill:9,  depth:8,  pool:2, slop:0.06, wild:0,    js:3 },
+  { elo:2400, skill:14, depth:11, pool:1, slop:0,    wild:0,    js:4 },
+  { elo:3000, skill:20, movetime:400,  pool:1, slop:0, wild:0,  js:4 },
+  { elo:3200, skill:20, movetime:1500, pool:1, slop:0, wild:0,  js:4 }
+];
+const levelFor = elo => LEVELS.find(l => l.elo === elo) || LEVELS[4];
+
+function pickFrom(list){ return list[Math.random() * list.length | 0]; }
+
+/* Choose the bot's move. Falls back to the built-in search when the browser
+   cannot run WebAssembly, so a bot game still works. */
+function botPick(lvl){
+  const legal = legalMoves(G.st, G.st.turn);
+  if (!legal.length) return Promise.resolve(null);
+  if (legal.length === 1) return Promise.resolve(legal[0]);
+  if (lvl.wild && Math.random() < lvl.wild) return Promise.resolve(pickFrom(legal));
+
+  return engineAsk(G.uci.slice(), {
+    skill: lvl.skill, multipv: lvl.pool,
+    depth: lvl.depth, movetime: lvl.movetime, nocache: true
+  }).then(res => {
+    const byUci = u => legal.find(x => uciOf(x) === u);
+    if (!res) return bestMove(G.st, lvl.js) || pickFrom(legal);
+    let want = res.best;
+    const others = (res.lines || []).map(l => l.best).filter(Boolean).slice(1);
+    if (lvl.slop && others.length && Math.random() < lvl.slop) want = pickFrom(others);
+    return byUci(want) || byUci(res.best) || bestMove(G.st, lvl.js) || pickFrom(legal);
+  });
+}
+
+/* `token` is taken when the turn is *scheduled*, not when it runs: a reply
+   queued by a game that has since been abandoned must not wake up inside the
+   next one. The turn check is the second guard — without it a stray call would
+   happily play a move for the human. */
+function engineTurn(token){
+  if (G.over || token !== G.token) return;
+  if (!BOT() || G.st.turn === G.human) return;
   G.thinking = true;
   renderStatus();
-  setTimeout(() => {
-    const m = bestMove(G.st, G.level);
+  botPick(levelFor(G.level)).then(m => {
+    if (token !== G.token) return;                 // a different game now
     G.thinking = false;
+    if (G.over){ render(); return; }
+    if (!BOT() || G.st.turn === G.human){ render(); return; }
     if (m) applyMove(m);
     else { render(); checkEnd(); }
-  }, 40);
+  });
 }
+const scheduleEngine = ms => { const t = G.token; setTimeout(() => engineTurn(t), ms); };
 
 /* ---- clicks ---- */
 el.squares.addEventListener('click', e => {
@@ -2575,9 +2640,10 @@ const SF = {
   worker: null,
   ready: false,
   unavailable: false,
-  pending: null,        // { key, resolve } for the search in flight
+  pending: null,        // the search in flight
   queue: [],
-  cache: new Map()      // position key -> { best, cp, mate }
+  cache: new Map(),     // key -> result; the key includes the strength settings
+  applied: { skill:null, multipv:null }   // what the engine is set to right now
 };
 
 const SF_MOVETIME = 500;   // per position; a game of 40 moves reviews in well under a minute
@@ -2606,20 +2672,20 @@ function engineLine(line){
   if (line === 'uciok'){
     // Deliberately no "setoption name Threads": this build is single-threaded,
     // and setting the option at all wedges it — uciok arrives, readyok never does.
-    // MultiPV is safe, and the gap between the top two moves is what tells a
-    // standout move apart from one of several equally good ones.
-    SF.worker.postMessage('setoption name MultiPV value 2');
+    // Skill Level and MultiPV are both safe, and are set per search instead,
+    // so a weak bot game cannot leave the review analysing at Skill 0.
     SF.worker.postMessage('isready');
     return;
   }
   if (line === 'readyok'){ SF.ready = true; enginePump(); reviewRender(); return; }
 
   if (line.startsWith('info ') && sfInfo){
-    // keep the deepest line seen for each of the two ranked moves
+    // keep the deepest line seen for each ranked move
     const mp = line.match(/ multipv (\d+)/);
     const idx = mp ? +mp[1] : 1;
-    if (idx > 2) return;
-    const slot = idx === 1 ? sfInfo.pv1 : sfInfo.pv2;
+    if (idx > sfInfo.want) return;
+    const slot = sfInfo.lines[idx - 1] ||
+                 (sfInfo.lines[idx - 1] = { cp:null, mate:null, best:null });
     const cp = line.match(/score cp (-?\d+)/);
     const mate = line.match(/score mate (-?\d+)/);
     const pv = line.match(/ pv ([a-h][1-8][a-h][1-8][qrbn]?)/);
@@ -2633,15 +2699,19 @@ function engineLine(line){
     const p = SF.pending;
     SF.pending = null;
     if (p){
-      const one = sfInfo ? sfInfo.pv1 : { cp:null, mate:null, best:null };
+      const lines = (sfInfo && sfInfo.lines.filter(Boolean)) || [];
+      const one = lines[0] || { cp:null, mate:null, best:null };
       const out = {
+        // below Skill 20 the engine's own pick is deliberately not its top line,
+        // and that pick is the one the bot should play
         best: (best && best !== '(none)') ? best : one.best,
         cp:   one.cp,
         mate: one.mate,
         // absent when there was only one legal move — which is itself a fact
-        second: (sfInfo && sfInfo.pv2.best) ? sfInfo.pv2 : null
+        second: lines[1] || null,
+        lines: lines
       };
-      SF.cache.set(p.key, out);
+      if (!p.nocache) SF.cache.set(p.key, out);
       p.resolve(out);
     }
     sfInfo = null;
@@ -2652,22 +2722,49 @@ function engineLine(line){
 function enginePump(){
   if (!SF.ready || SF.pending || !SF.queue.length) return;
   const job = SF.queue.shift();
-  if (SF.cache.has(job.key)){ job.resolve(SF.cache.get(job.key)); return enginePump(); }
+  if (!job.nocache && SF.cache.has(job.key)){
+    job.resolve(SF.cache.get(job.key));
+    return enginePump();
+  }
   SF.pending = job;
-  sfInfo = { pv1:{ cp:null, mate:null, best:null }, pv2:{ cp:null, mate:null, best:null } };
+  sfInfo = { want: job.multipv, lines: [] };
+  if (SF.applied.skill !== job.skill){
+    SF.worker.postMessage('setoption name Skill Level value ' + job.skill);
+    SF.applied.skill = job.skill;
+  }
+  if (SF.applied.multipv !== job.multipv){
+    SF.worker.postMessage('setoption name MultiPV value ' + job.multipv);
+    SF.applied.multipv = job.multipv;
+  }
   SF.worker.postMessage('position startpos' + (job.moves ? ' moves ' + job.moves : ''));
-  SF.worker.postMessage('go movetime ' + SF_MOVETIME);
+  SF.worker.postMessage(job.limit);
 }
 
-/* Ask what should be played in the position reached by `moves` (a UCI list). */
-function engineAsk(moves){
-  const key = moves.join(' ');
-  if (SF.cache.has(key)) return Promise.resolve(SF.cache.get(key));
+/* Ask what should be played in the position reached by `moves` (a UCI list).
+   Strength travels with the request, because the review and the bot want very
+   different engines and they share one worker. */
+// settings are part of the key: the same position answers differently at
+// different strengths. One function owns the format so nothing can drift.
+function engineKey(moves, opt){
+  const skill   = opt.skill === undefined ? 20 : opt.skill;
+  const multipv = opt.multipv || 1;
+  const limit   = opt.depth ? ('go depth ' + opt.depth)
+                            : ('go movetime ' + (opt.movetime || SF_MOVETIME));
+  return { key: moves.join(' ') + '|' + skill + '|' + multipv + '|' + limit,
+           moveStr: moves.join(' '), skill, multipv, limit };
+}
+
+function engineAsk(moves, opt){
+  opt = opt || {};
+  const { key, moveStr, skill, multipv, limit } = engineKey(moves, opt);
+  // bot moves skip the cache, so a repeated position is not answered identically
+  if (!opt.nocache && SF.cache.has(key)) return Promise.resolve(SF.cache.get(key));
   if (SF.unavailable) return Promise.resolve(null);
   engineStart();
   if (SF.unavailable) return Promise.resolve(null);
   return new Promise(resolve => {
-    SF.queue.push({ key, moves: key, resolve });
+    SF.queue.push({ key, moves: moveStr, skill, multipv, limit,
+                    nocache: !!opt.nocache, resolve });
     enginePump();
   });
 }
@@ -2745,12 +2842,19 @@ function reviewGoto(ply){
 
 /* The position on screen, and the one after the move that was played from it,
    are both wanted: the first gives the best move, the pair gives the verdict. */
+// full strength, two lines: the second is what tells !! from merely best
+const REVIEW_ASK = { skill: 20, multipv: 2 };
+
+function reviewCached(ply){
+  return SF.cache.get(engineKey(G.uci.slice(0, ply), REVIEW_ASK).key);
+}
+
 function reviewAnalyse(){
   const ply = REV.ply;
-  const here = G.uci.slice(0, ply);
-  engineAsk(here).then(() => { if (REV.on && REV.ply === ply) reviewRender(); });
+  const again = () => { if (REV.on && REV.ply === ply) reviewRender(); };
+  engineAsk(G.uci.slice(0, ply), REVIEW_ASK).then(again);
   if (ply < REV.moves.length){
-    engineAsk(G.uci.slice(0, ply + 1)).then(() => { if (REV.on && REV.ply === ply) reviewRender(); });
+    engineAsk(G.uci.slice(0, ply + 1), REVIEW_ASK).then(again);
   }
 }
 
@@ -2926,8 +3030,8 @@ function reviewRender(){
   if (!SF.ready)      return quiet('Starting the engine\u2026');
   if (ply === last)   return quiet('End of the game.');
 
-  const before = SF.cache.get(G.uci.slice(0, ply).join(' '));
-  const after  = SF.cache.get(G.uci.slice(0, ply + 1).join(' '));
+  const before = reviewCached(ply);
+  const after  = reviewCached(ply + 1);
   const played = REV.moves[ply];
   const playedSan = G.sans[ply];
 
@@ -2988,6 +3092,7 @@ function reviewRender(){
 function newGame(){
   reviewClose(false);        // a new game supplies its own position
   G.st = newState();
+  G.token++;
   G.sel = -1; G.lastMove = null; G.sans = []; G.uci = [];
   G.caps = { w: [], b: [] };
   G.reps = {}; G.over = null;
@@ -3002,7 +3107,7 @@ function newGame(){
   resetLog();
   render();
   if (G.mode === 'total') setTimeout(() => LOCAL() ? focusLocalInput() : el.moveInput.focus(), 60);
-  if (BOT() && G.st.turn !== G.human) setTimeout(engineTurn, 420);
+  if (BOT() && G.st.turn !== G.human) scheduleEngine(420);
 }
 
 function peek(){
@@ -3068,7 +3173,6 @@ document.getElementById('revDone').onclick = () => exitReview();
    SCREENS — title → vision select → game, with settings off the title
    ============================================================ */
 const MODE_NAME  = { blind:'Blindfold', total:'Complete Blindfold', fog:'Fog of War', sighted:'Sighted' };
-const LEVEL_NAME = { 1:'Novice', 3:'Club', 4:'Sharp' };
 // what the two halves of the blindfold card call themselves
 const HALF_NAME  = { total:'COMPLETE BLINDFOLD', blind:'SEE THE BOARD' };
 let screenName = 'home';
@@ -3145,7 +3249,7 @@ function syncOptions(){
     : ONLINE()
       ? (G.matchKind === 'ranked' ? 'Ranked' : 'Friendly') +
         ' · ' + (G.human === W ? 'White' : 'Black')
-      : LEVEL_NAME[G.level] + ' · ' + (G.human === W ? 'White' : 'Black'))
+      : G.level + ' Elo · ' + (G.human === W ? 'White' : 'Black'))
     + ' · ' + G.minutes + ' min';
 
   syncSound();
