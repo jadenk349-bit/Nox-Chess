@@ -126,6 +126,14 @@ def finish_game(game, reason, winner=None, exclude=None):
     for client in game.players.values():
         if client is not exclude:
             client.send({"t": "over", "reason": reason, "winner": winner})
+    # Let go of the players too. Without this they stay "in a game" for the life
+    # of the connection, and every later host or join is refused — which only
+    # shows up once something reuses the socket after a game rather than
+    # reconnecting, as returning to the room list does.
+    for client in game.players.values():
+        if client.game is game:
+            client.game = None
+            client.color = None
     games.pop(game.id, None)
     log("game %s over: %s" % (game.id, reason))
 
@@ -318,6 +326,33 @@ def handle_resign(client):
         finish_game(game, "resign", winner)
 
 
+def handle_draw_offer(client):
+    """Relayed, not decided: a draw needs the other player to agree."""
+    with lock:
+        game = client.game
+        if not game or game.over:
+            return
+        opponent = game.opponent_of(client)
+    opponent.send({"t": "draw-offer"})
+
+
+def handle_draw_accept(client):
+    with lock:
+        game = client.game
+        if not game or game.over:
+            return
+        finish_game(game, "draw", None)
+
+
+def handle_draw_decline(client):
+    with lock:
+        game = client.game
+        if not game or game.over:
+            return
+        opponent = game.opponent_of(client)
+    opponent.send({"t": "draw-decline"})
+
+
 def handle_message(client, raw):
     try:
         msg = json.loads(raw)
@@ -345,6 +380,12 @@ def handle_message(client, raw):
         handle_result(client, msg)
     elif kind == "resign":
         handle_resign(client)
+    elif kind == "draw-offer":
+        handle_draw_offer(client)
+    elif kind == "draw-accept":
+        handle_draw_accept(client)
+    elif kind == "draw-decline":
+        handle_draw_decline(client)
     elif kind == "ping":
         client.send({"t": "pong"})
     else:

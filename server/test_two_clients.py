@@ -256,6 +256,68 @@ def main():
     check("an unknown kind falls back to friendly rather than its own queue",
           start_j.get("kind") == "friendly", "(%s)" % start_j)
 
+    print("\n\033[1mResigning and offering a draw\033[0m")
+    r1 = TestClient("R1"); r2 = TestClient("R2")
+    r1.send(t="find", mode="blind", minutes=45); r1.expect("waiting")
+    r2.send(t="find", mode="blind", minutes=45)
+    c1 = r1.expect("start"); r2.expect("start")
+    r_white, r_black = (r1, r2) if c1["color"] == "w" else (r2, r1)
+
+    r1.send(t="draw-offer")
+    check("a draw offer reaches the opponent", r2.expect("draw-offer")["t"] == "draw-offer")
+    check("offering does not end the game by itself", r1.nothing_arrives())
+
+    r2.send(t="draw-decline")
+    check("declining is reported back to the offerer",
+          r1.expect("draw-decline")["t"] == "draw-decline")
+    check("a declined game carries on", r2.nothing_arrives())
+
+    # a refused draw must leave the game exactly as it was
+    r_white.send(t="move", ply=0, **{"from": 52, "to": 36, "san": "e4"})
+    relayed = r_black.expect("move")
+    check("the game carries on normally after a declined draw",
+          relayed["san"] == "e4", "(%s)" % relayed)
+
+    d1 = TestClient("D1"); d2 = TestClient("D2")
+    d1.send(t="find", mode="fog", minutes=46); d1.expect("waiting")
+    d2.send(t="find", mode="fog", minutes=46)
+    d1.expect("start"); d2.expect("start")
+    d1.send(t="draw-offer"); d2.expect("draw-offer")
+    d2.send(t="draw-accept")
+    o1 = d1.expect("over"); o2 = d2.expect("over")
+    check("accepting ends the game for the offerer", o1["reason"] == "draw", "(%s)" % o1)
+    check("accepting ends the game for the accepter", o2["reason"] == "draw", "(%s)" % o2)
+    check("an agreed draw names no winner", o1.get("winner") is None, "(%s)" % o1)
+
+    s1 = TestClient("S1"); s2 = TestClient("S2")
+    s1.send(t="find", mode="sighted", minutes=47); s1.expect("waiting")
+    s2.send(t="find", mode="sighted", minutes=47)
+    st1 = s1.expect("start"); s2.expect("start")
+    s1.send(t="resign")
+    ro1 = s1.expect("over"); ro2 = s2.expect("over")
+    check("both sides hear about a resignation",
+          ro1["reason"] == "resign" and ro2["reason"] == "resign")
+    check("the winner is the player who did not resign",
+          ro1["winner"] != st1["color"], "(resigner was %s, winner %s)" % (st1["color"], ro1["winner"]))
+
+    # After a game ends the connection must be free again. Returning to the room
+    # list reuses the same socket, so a client still marked "in a game" could
+    # never host or join anything until the page was reloaded.
+    print("\n\033[1mThe connection is reusable after a game\033[0m")
+    s1.send(t="host", mode="blind", minutes=48, color="w")
+    check("a finished player can host again", "room" in s1.expect("hosting"))
+    s2.send(t="lobby")
+    listed = [r for r in s2.expect("rooms")["rooms"] if r["minutes"] == 48]
+    check("that room reaches the list", len(listed) == 1, "(%s)" % listed)
+    s2.send(t="join", room=listed[0]["id"])
+    n1 = s1.expect("start"); n2 = s2.expect("start")
+    check("a finished player can join again", n1["game"] == n2["game"])
+    check("and it is a different game from the one before",
+          n1["game"] != st1["game"], "(%s vs %s)" % (n1["game"], st1["game"]))
+
+    for c in (r1, r2, d1, d2, s1, s2):
+        c.close()
+
     print("\n\033[1mHosted rooms\033[0m")
     host = TestClient("HOST")
     watcher = TestClient("WATCH")

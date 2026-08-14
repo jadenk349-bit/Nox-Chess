@@ -273,6 +273,8 @@
   }
   button.primary:hover{filter:brightness(1.07);}
   button.ghost{background:transparent;}
+  button.danger{color:#e7908a; border-color:rgba(224,90,77,.42);}
+  button.danger:hover{color:#fff; border-color:var(--danger); background:rgba(224,90,77,.16);}
 
   /* ---------- side panel ---------- */
   .side{display:flex; flex-direction:column; gap:16px;}
@@ -1166,6 +1168,8 @@
 
       <div class="controls panel" id="controls">
         <button id="btnPeek">Peek</button>
+        <button id="btnDraw" class="ghost">Offer Draw</button>
+        <button id="btnResign" class="ghost danger">Resign</button>
       </div>
 
       <!-- post-game review: appears when Study Board is pressed -->
@@ -1265,6 +1269,30 @@
     <div class="row" style="justify-content:center">
       <button class="ghost" id="leaveCancel">Keep Playing</button>
       <button class="primary" id="leaveConfirm">Leave Game</button>
+    </div>
+  </div>
+</div>
+
+<!-- resigning is irreversible, so it is asked for twice -->
+<div class="overlay" id="resignOverlay">
+  <div class="modal">
+    <h3>Resign?</h3>
+    <p id="resignText">This hands your opponent the win. There is no taking it back.</p>
+    <div class="row" style="justify-content:center">
+      <button class="ghost" id="resignCancel">Keep Playing</button>
+      <button class="primary" id="resignConfirm">Resign</button>
+    </div>
+  </div>
+</div>
+
+<!-- a draw needs the other player to agree -->
+<div class="overlay" id="drawOverlay">
+  <div class="modal">
+    <h3 id="drawTitle">Draw Offered</h3>
+    <p id="drawText"></p>
+    <div class="row" style="justify-content:center" id="drawButtons">
+      <button class="ghost" id="drawDecline">Decline</button>
+      <button class="primary" id="drawAccept">Accept Draw</button>
     </div>
   </div>
 </div>
@@ -1666,6 +1694,7 @@ const G = {
   sans: [],
   uci: [],               // every move in UCI form, for the post-game review
   token: 0,              // bumped per game; a late engine reply checks it
+  drawPending: false,    // we have offered a draw and are awaiting an answer
   caps: { w: [], b: [] },   // pieces captured BY that colour
   reps: {},
   over: null,
@@ -1881,9 +1910,13 @@ function renderStatus(){
   const peekBtn = document.getElementById('btnPeek');
   peekBtn.style.display = CAN_PEEK(G.mode) ? '' : 'none';   // nothing to peek at otherwise
   peekBtn.disabled = G.peeksLeft <= 0 || G.peeking || !!G.over;
-  // Peek is the only control left, so the panel goes with it rather than
-  // leaving an empty bordered strip under the board in sighted play
-  document.getElementById('controls').style.display = CAN_PEEK(G.mode) ? '' : 'none';
+  // Resign and Draw are always there, so the panel always is too
+  const live = !G.over && !REV.on;
+  const resignBtn = document.getElementById('btnResign');
+  const drawBtn   = document.getElementById('btnDraw');
+  resignBtn.disabled = !live;
+  drawBtn.disabled   = !live || G.drawPending;
+  if (!G.drawPending) drawBtn.textContent = 'Offer Draw';
 
   // the console is the only way to move in complete blindfold —
   // one box against the bot, one box per player when sharing a screen
@@ -2607,12 +2640,32 @@ function onNetMessage(msg){
       receiveMove(msg);
       break;
 
+    case 'draw-offer':
+      if (G.over) break;
+      showDraw('Draw Offered', 'Your opponent offers a draw.', 'ask');
+      break;
+
+    case 'draw-decline':
+      G.drawPending = false;
+      drawButton('Offer Draw', false);
+      if (G.over) break;
+      logLine('Your opponent declined the draw.', 'sys');
+      showDraw('Draw Declined', 'Your opponent would rather play on.', 'info');
+      break;
+
     case 'over':
       if (G.over) break;
+      hideDraw();                       // an offer on screen is moot now
       if (msg.reason === 'resign'){
-        finish('You Win', 'Your opponent resigned.', 'Opponent resigned — you win');
+        // both sides are told, so the winner field says which one we are
+        const iWon = msg.winner === G.human;
+        finish(iWon ? 'You Win' : 'You Lose',
+               iWon ? 'Your opponent resigned.' : 'You resigned.',
+               iWon ? 'Opponent resigned — you win' : 'You resigned');
       } else if (msg.reason === 'left'){
         finish('You Win', 'Your opponent disconnected.', 'Opponent left — you win');
+      } else if (msg.reason === 'draw'){
+        finish('Draw', 'Both players agreed to a draw.', 'Draw — agreed');
       }
       // any other reason is a result our own rules reached a moment ago
       break;
@@ -2641,6 +2694,117 @@ function receiveMove(msg){
   }
   applyMove(m, true);
 }
+
+/* ============================================================
+   RESIGNING, AND OFFERING A DRAW
+   A draw is never unilateral: whoever is on the other side has to agree, and
+   who that is differs by opponent — the server relays it online, the other
+   player answers on the same screen in hot-seat, and the engine judges the
+   position for itself against the bot.
+   ============================================================ */
+const resignOverlay = document.getElementById('resignOverlay');
+const drawOverlay   = document.getElementById('drawOverlay');
+
+function canConcede(){ return screenName === 'game' && !G.over && !REV.on; }
+
+function showDraw(title, text, mode){
+  document.getElementById('drawTitle').textContent = title;
+  document.getElementById('drawText').textContent = text;
+  // 'ask' offers a choice; 'info' only reports. The mode is remembered because
+  // closing an 'info' box must not be mistaken for declining an offer.
+  drawOverlay.dataset.mode = mode;
+  document.getElementById('drawAccept').style.display = mode === 'ask' ? '' : 'none';
+  document.getElementById('drawDecline').textContent  = mode === 'ask' ? 'Decline' : 'Close';
+  drawOverlay.classList.add('show');
+}
+const hideDraw = () => drawOverlay.classList.remove('show');
+
+/* ---- resigning ---- */
+document.getElementById('btnResign').onclick = () => {
+  if (!canConcede()) return;
+  document.getElementById('resignText').textContent = LOCAL()
+    ? (G.st.turn === W ? 'White' : 'Black') + ' resigns, handing ' +
+      (G.st.turn === W ? 'Black' : 'White') + ' the win. There is no taking it back.'
+    : 'This hands your opponent the win. There is no taking it back.';
+  resignOverlay.classList.add('show');
+};
+document.getElementById('resignCancel').onclick = () => resignOverlay.classList.remove('show');
+document.getElementById('resignConfirm').onclick = () => {
+  resignOverlay.classList.remove('show');
+  if (!canConcede()) return;
+  // sharing a screen it is whoever is to move who gives up; otherwise it is you
+  const loser  = LOCAL() ? G.st.turn : G.human;
+  const winner = other(loser);
+  if (ONLINE()) netSend({ t:'resign' });
+  finish(resultTitle(winner),
+         LOCAL() ? (loser === W ? 'White' : 'Black') + ' resigned.' : 'You resigned.',
+         (winner === W ? 'White' : 'Black') + ' wins by resignation');
+};
+
+/* ---- offering a draw ---- */
+function drawButton(label, disabled){
+  const b = document.getElementById('btnDraw');
+  b.textContent = label;
+  b.disabled = !!disabled;
+}
+
+function agreeDraw(text){
+  finish('Draw', text, 'Draw — agreed');
+}
+
+document.getElementById('btnDraw').onclick = () => {
+  if (!canConcede() || G.drawPending) return;
+
+  if (ONLINE()){
+    G.drawPending = true;
+    drawButton('Offered…', true);
+    netSend({ t:'draw-offer' });
+    logLine('You offered a draw.', 'sys');
+    return;
+  }
+  if (LOCAL()){
+    // both players are here, so the other one answers now
+    const from = G.st.turn === W ? 'White' : 'Black';
+    const to   = G.st.turn === W ? 'Black' : 'White';
+    showDraw('Draw Offered', from + ' offers a draw. ' + to + ', do you accept?', 'ask');
+    return;
+  }
+  // the engine decides for itself, from the position
+  G.drawPending = true;
+  drawButton('Offered…', true);
+  logLine('You offered a draw.', 'sys');
+  engineAsk(G.uci.slice(), { skill:20, multipv:1, movetime:400 }).then(res => {
+    G.drawPending = false;
+    drawButton('Offer Draw', false);
+    if (G.over) return;
+    // the score is always from the side to move, so flip it when that is you
+    let cp = res ? (res.mate !== null && res.mate !== undefined
+                      ? (res.mate > 0 ? 10000 : -10000)
+                      : res.cp) : 0;
+    if (cp === null || cp === undefined) cp = 0;
+    const fromBot = (G.st.turn !== G.human) ? cp : -cp;
+    if (fromBot <= 25){          // it is not winning, so it takes the half point
+      agreeDraw('Your opponent accepted the draw.');
+    } else {
+      logLine('Your opponent declined the draw.', 'sys');
+      showDraw('Draw Declined', 'Your opponent would rather play on.', 'info');
+    }
+  });
+};
+
+document.getElementById('drawAccept').onclick = () => {
+  hideDraw();
+  if (G.over) return;
+  if (ONLINE()){ netSend({ t:'draw-accept' }); return; }   // the server ends it for both
+  agreeDraw('Both players agreed to a draw.');
+};
+document.getElementById('drawDecline').onclick = () => {
+  const wasAsking = drawOverlay.dataset.mode === 'ask';
+  hideDraw();
+  if (G.over || !wasAsking) return;      // closing an 'info' box declines nothing
+  if (ONLINE()) netSend({ t:'draw-decline' });
+  else if (LOCAL()) logLine('The draw was declined.', 'sys');
+};
 
 /* ============================================================
    THE ENGINE — Stockfish, in a worker, spoken to in UCI.
@@ -3103,6 +3267,7 @@ function newGame(){
   reviewClose(false);        // a new game supplies its own position
   G.st = newState();
   G.token++;
+  G.drawPending = false;
   G.sel = -1; G.lastMove = null; G.sans = []; G.uci = [];
   G.caps = { w: [], b: [] };
   G.reps = {}; G.over = null;
