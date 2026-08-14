@@ -377,17 +377,18 @@ def drop_client(client):
 # An explicit allowlist rather than a static directory: there is no path to
 # traverse if no part of the request ever reaches the filesystem. The wasm MIME
 # type is not decoration — browsers refuse to stream-compile without it.
-ENGINE_DIR = os.path.join(os.path.dirname(HERE), "engine")
-ENGINE_FILES = {
-    "/engine/stockfish.wasm.js": ("stockfish.wasm.js", "text/javascript; charset=utf-8"),
-    "/engine/stockfish.wasm":    ("stockfish.wasm",    "application/wasm"),
+ROOT = os.path.dirname(HERE)
+STATIC_FILES = {
+    "/engine/stockfish.wasm.js": ("engine/stockfish.wasm.js", "text/javascript; charset=utf-8"),
+    "/engine/stockfish.wasm":    ("engine/stockfish.wasm",    "application/wasm"),
+    "/assets/nox-logo.png":      ("assets/nox-logo.png",      "image/png"),
 }
 
 
-def serve_engine_file(sock, path):
-    name, ctype = ENGINE_FILES[path]
+def serve_static_file(sock, path):
+    name, ctype = STATIC_FILES[path]
     try:
-        with open(os.path.join(ENGINE_DIR, name), "rb") as fh:
+        with open(os.path.join(ROOT, name), "rb") as fh:
             body = fh.read()
     except OSError:
         sock.sendall(b"HTTP/1.1 404 Not Found\r\nContent-Length: 0\r\n\r\n")
@@ -396,7 +397,8 @@ def serve_engine_file(sock, path):
         "HTTP/1.1 200 OK\r\n"
         "Content-Type: %s\r\n"
         "Content-Length: %d\r\n"
-        # the engine only changes when we deploy a new one, so let it be cached
+        # A week is fine because every reference carries ?v= — bump that when a
+        # file changes, or browsers will serve the old one for days.
         "Cache-Control: public, max-age=604800\r\n"
         "\r\n" % (ctype, len(body))
     )
@@ -428,8 +430,8 @@ def serve_http(sock, request_line):
             "\r\n" % len(body)
         )
         sock.sendall(head.encode() + body)
-    elif path in ENGINE_FILES:
-        serve_engine_file(sock, path)
+    elif path in STATIC_FILES:
+        serve_static_file(sock, path)
     elif path == "/health":
         with lock:
             body = json.dumps({

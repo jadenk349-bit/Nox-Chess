@@ -293,9 +293,15 @@
     display:flex; flex-direction:column; align-items:center; justify-content:flex-start;
     text-align:center; padding:clamp(18px,5vh,54px) 0 30px;
   }
+  /* the wordmark is artwork now, so the h1 is only a frame for it. It is a
+     two-line mark, so it is sized narrower than the old one-line title would be */
   .hero h1{
-    font-size:clamp(36px,8.4vw,86px);
-    position:relative;
+    position:relative; line-height:0;
+    width:clamp(190px,42vw,360px);
+  }
+  .hero h1 img{
+    display:block; width:100%; height:auto;
+    filter:drop-shadow(0 5px 16px rgba(0,0,0,.5));
   }
   /* the flourish and the line under it sit closer to the title, and read
      quieter, so the eye carries on down to the name box and PLAY */
@@ -305,12 +311,16 @@
     margin-top:clamp(11px,1.7vh,18px);
     font-size:clamp(13px,1.55vw,15.5px); line-height:1.55;
   }
+  /* the same sheen, masked by the artwork instead of by text, so the shine
+     travels across the letters and the knight and nothing else */
   .hero h1::after{
-    content:"NOX CHESS";
-    position:absolute; inset:0;
-    background:linear-gradient(100deg, transparent 35%, rgba(255,255,255,.75) 50%, transparent 65%);
-    -webkit-background-clip:text; background-clip:text; color:transparent;
+    content:"";
+    position:absolute; inset:0; pointer-events:none;
+    background:linear-gradient(100deg, transparent 35%, rgba(255,255,255,.5) 50%, transparent 65%);
     background-size:250% 100%;
+    -webkit-mask-image:url("assets/nox-logo.png?v=1"); mask-image:url("assets/nox-logo.png?v=1");
+    -webkit-mask-size:100% 100%;   mask-size:100% 100%;
+    -webkit-mask-repeat:no-repeat; mask-repeat:no-repeat;
     animation:sheen 6.5s ease-in-out infinite;
   }
   @keyframes sheen{0%,62%{background-position:180% 0;} 92%,100%{background-position:-80% 0;}}
@@ -885,7 +895,7 @@
     </button>
     <div class="hero">
       <div class="eyebrow">A Game of Memory &amp; Nerve</div>
-      <h1>NOX CHESS</h1>
+      <h1><img src="assets/nox-logo.png?v=1" alt="Nox Chess" width="976" height="730"></h1>
       <div class="rule"><span></span><b>♞ ♛ ♞</b><span></span></div>
       <p class="tagline">The board is there. The pieces are not.<br>Hold the position in your head.</p>
 

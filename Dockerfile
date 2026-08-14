@@ -15,6 +15,7 @@ WORKDIR /app
 # inside the image has to match the repository: /app/blind-chess.html.
 COPY server/ ./server/
 COPY engine/ ./engine/
+COPY assets/ ./assets/
 COPY blind-chess.html ./blind-chess.html
 
 # Nothing here needs root, and the process only ever reads these files.
