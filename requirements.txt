@@ -1,0 +1,9 @@
+# Nox Chess server dependencies.
+#
+# The server is otherwise standard-library Python. The one exception is token
+# verification: Supabase signs with ES256 (elliptic curve), and checking that
+# signature is not something to hand-roll in code that guards accounts.
+#
+# PyJWT does the JWT work and pulls in `cryptography` for the curve maths.
+# Both ship manylinux wheels, so the Docker build needs no compiler.
+PyJWT[crypto]==2.13.0

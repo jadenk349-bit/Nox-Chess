@@ -25,6 +25,7 @@ import uuid
 
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 import wsproto
+import supabase_auth
 from wsproto import Framer, WSClosed, WSError
 
 HERE = os.path.dirname(os.path.abspath(__file__))
@@ -56,6 +57,11 @@ class Client:
         self.queue_key = None
         self.room = None          # the room this client is hosting, if any
         self.alive = True
+        # Identity, once the client says hello. A guest keeps user_id None:
+        # they can still play friendly games, they just aren't anybody yet.
+        self.user_id = None
+        self.name = "Guest"
+        self.verified = False
 
     def send(self, obj):
         if not self.alive:
@@ -140,6 +146,55 @@ def finish_game(game, reason, winner=None, exclude=None):
 
 # ---------------------------------------------------------------- messages
 
+def clean_guest_name(raw):
+    """A guest may call themselves anything printable and short."""
+    if not isinstance(raw, str):
+        return "Guest"
+    name = "".join(ch for ch in raw if ch.isprintable()).strip()[:20]
+    return name or "Guest"
+
+
+def handle_hello(client, msg):
+    """Identify the player, by token if they have one.
+
+    A valid token makes them a real account: the name comes from the token,
+    not from the message, so nobody can wear a name they haven't signed in
+    as. Without a token — or with a bad one — they stay a guest and may
+    still play friendly games.
+    """
+    token = msg.get("token")
+    if token:
+        try:
+            claims = supabase_auth.verify(token)
+        except supabase_auth.AuthError as err:
+            client.user_id = None
+            client.verified = False
+            client.name = clean_guest_name(msg.get("name"))
+            log("%s rejected token: %s" % (client.id, err))
+            client.send({
+                "t": "welcome",
+                "verified": False,
+                "name": client.name,
+                "reason": str(err),
+            })
+            return
+        client.user_id = claims["sub"]
+        client.name = supabase_auth.display_name(claims)
+        client.verified = True
+        log("%s signed in as %s (%s)" % (client.id, client.name, client.user_id[:8]))
+    else:
+        client.user_id = None
+        client.verified = False
+        client.name = clean_guest_name(msg.get("name"))
+
+    client.send({
+        "t": "welcome",
+        "verified": client.verified,
+        "name": client.name,
+        "accounts": supabase_auth.enabled(),
+    })
+
+
 def handle_find(client, msg):
     mode = msg.get("mode", "blind")
     minutes = msg.get("minutes", 10)
@@ -148,6 +203,13 @@ def handle_find(client, msg):
     kind = msg.get("kind", "friendly")
     if kind not in ("ranked", "friendly"):
         kind = "friendly"
+    # A rating has to belong to somebody, so ranked play needs an account —
+    # but only once this server can actually issue one. With no Supabase
+    # configured nobody can ever verify, and refusing everyone would just
+    # delete the ranked queue.
+    if kind == "ranked" and supabase_auth.enabled() and not client.verified:
+        client.send({"t": "error", "msg": "ranked play needs a signed-in account"})
+        return
     if client.game:
         client.send({"t": "error", "msg": "already in a game"})
         return
@@ -167,6 +229,7 @@ def handle_find(client, msg):
             games[game.id] = game
             log("matched %s (w) vs %s (b) — %s %s, %s min" % (white.id, black.id, kind, mode, minutes))
             for color, player in game.players.items():
+                other = game.opponent_of(player)
                 player.send({
                     "t": "start",
                     "game": game.id,
@@ -174,6 +237,8 @@ def handle_find(client, msg):
                     "mode": mode,
                     "minutes": minutes,
                     "kind": kind,
+                    "opponent": other.name,
+                    "opponentVerified": other.verified,
                 })
         else:
             if waiting is client:
@@ -260,6 +325,8 @@ def handle_join(client, msg):
             "mode": room.mode,
             "minutes": room.minutes,
             "kind": "friendly",
+            "opponent": game.opponent_of(player).name,
+            "opponentVerified": game.opponent_of(player).verified,
         }) for color, player in game.players.items()]
     for player, payload in outgoing:
         player.send(payload)
@@ -360,7 +427,9 @@ def handle_message(client, raw):
         client.send({"t": "error", "msg": "bad json"})
         return
     kind = msg.get("t")
-    if kind == "find":
+    if kind == "hello":
+        handle_hello(client, msg)
+    elif kind == "find":
         handle_find(client, msg)
     elif kind == "lobby":
         handle_lobby(client)

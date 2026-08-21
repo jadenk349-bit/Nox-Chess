@@ -8,6 +8,9 @@ game we meant to play.
 Run the server first, then:  python3 server/test_two_clients.py
 """
 
+import base64
+import hashlib
+import hmac
 import json
 import os
 import socket
@@ -53,6 +56,34 @@ def check(label, ok, detail=""):
         print("  \033[31mFAIL\033[0m %s %s" % (label, detail))
 
 
+def account_token(who):
+    """A signed token for this test client, or None if accounts are off.
+
+    Reads the same secret the server does. With no secret in the environment
+    the server cannot verify anybody, so the tests play as guests — which is
+    exactly how the game behaves before Supabase is configured.
+    """
+    secret = os.environ.get("SUPABASE_JWT_SECRET")
+    if not secret:
+        return None
+    project = os.environ.get("SUPABASE_URL", "").rstrip("/")
+
+    def seg(raw):
+        return base64.urlsafe_b64encode(raw).decode().rstrip("=")
+
+    header = seg(json.dumps({"alg": "HS256", "typ": "JWT"}).encode())
+    claims = seg(json.dumps({
+        "sub": "test-%s" % who,
+        "aud": "authenticated",
+        "exp": int(time.time()) + 600,
+        "iss": (project + "/auth/v1") if project else None,
+        "user_metadata": {"full_name": "Tester %s" % who},
+    }).encode())
+    signing_input = ("%s.%s" % (header, claims)).encode()
+    sig = seg(hmac.new(secret.encode(), signing_input, hashlib.sha256).digest())
+    return "%s.%s.%s" % (header, claims, sig)
+
+
 class TestClient:
     """One player: a socket, a reader thread, and the timeline it believes in."""
 
@@ -67,6 +98,13 @@ class TestClient:
         self.closed = False
         self.reader = threading.Thread(target=self._read_loop, daemon=True)
         self.reader.start()
+        # Every real client says hello first, so the harness does too. Against
+        # a server with accounts switched on it signs in — otherwise ranked
+        # play, which now wants an account, would be closed to the tests.
+        self.send(t="hello", token=account_token(name), name=name)
+        welcome = self.expect("welcome")
+        self.verified = welcome.get("verified", False)
+        self.accounts = welcome.get("accounts", False)
 
     def _read_loop(self):
         try:
@@ -230,31 +268,39 @@ def main():
     print("\n\033[1mRanked and friendly are separate queues\033[0m")
     g = TestClient("G")
     h = TestClient("H")
-    g.send(t="find", mode="blind", minutes=5, kind="ranked")
-    g.expect("waiting")
-    h.send(t="find", mode="blind", minutes=5, kind="friendly")
-    h.expect("waiting")
-    check("a ranked player is not handed a friendly game",
-          g.nothing_arrives() and h.nothing_arrives())
+    i = j = k = None
+    if g.accounts and not g.verified:
+        # The server checks ES256 tokens against the key Supabase publishes,
+        # and this harness has no private key to sign one with — so ranked
+        # play is out of reach here. Run with no SUPABASE_URL, or with the
+        # legacy SUPABASE_JWT_SECRET, to exercise these.
+        print("  \033[33mSKIP\033[0m ranked queues — the harness cannot sign an ES256 token")
+    else:
+        g.send(t="find", mode="blind", minutes=5, kind="ranked")
+        g.expect("waiting")
+        h.send(t="find", mode="blind", minutes=5, kind="friendly")
+        h.expect("waiting")
+        check("a ranked player is not handed a friendly game",
+              g.nothing_arrives() and h.nothing_arrives())
 
-    i = TestClient("I")
-    i.send(t="find", mode="blind", minutes=5, kind="ranked")
-    start_g = g.expect("start")
-    start_i = i.expect("start")
-    check("two ranked players do match each other", start_g["game"] == start_i["game"])
-    check("the game carries its kind", start_g.get("kind") == "ranked",
-          "(%s)" % start_g)
-    check("the friendly player is still waiting", h.nothing_arrives())
+        i = TestClient("I")
+        i.send(t="find", mode="blind", minutes=5, kind="ranked")
+        start_g = g.expect("start")
+        start_i = i.expect("start")
+        check("two ranked players do match each other", start_g["game"] == start_i["game"])
+        check("the game carries its kind", start_g.get("kind") == "ranked",
+              "(%s)" % start_g)
+        check("the friendly player is still waiting", h.nothing_arrives())
 
-    # an unknown kind must not open a third queue
-    j = TestClient("J")
-    k = TestClient("K")
-    j.send(t="find", mode="fog", minutes=3, kind="nonsense")
-    j.expect("waiting")
-    k.send(t="find", mode="fog", minutes=3)          # no kind at all
-    start_j = j.expect("start")
-    check("an unknown kind falls back to friendly rather than its own queue",
-          start_j.get("kind") == "friendly", "(%s)" % start_j)
+        # an unknown kind must not open a third queue
+        j = TestClient("J")
+        k = TestClient("K")
+        j.send(t="find", mode="fog", minutes=3, kind="nonsense")
+        j.expect("waiting")
+        k.send(t="find", mode="fog", minutes=3)      # no kind at all
+        start_j = j.expect("start")
+        check("an unknown kind falls back to friendly rather than its own queue",
+              start_j.get("kind") == "friendly", "(%s)" % start_j)
 
     print("\n\033[1mResigning and offering a draw\033[0m")
     r1 = TestClient("R1"); r2 = TestClient("R2")
@@ -384,7 +430,8 @@ def main():
 
     for client in (a, b, d, e, f, g, h, i, j, k,
                    host, watcher, joiner, late, host2):
-        client.close()
+        if client is not None:               # ranked clients may have been skipped
+            client.close()
 
     print("\n\033[1m%d passed, %d failed\033[0m\n" % (passed, failed))
     return 1 if failed else 0

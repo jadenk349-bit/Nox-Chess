@@ -284,6 +284,88 @@
     color:var(--muted); font-weight:600;
   }
 
+  /* ---------- account ---------- */
+  .account{
+    position:fixed; top:20px; right:22px; z-index:40;
+    display:flex; align-items:center; gap:10px;
+  }
+  .account.hide{display:none;}
+  .acct-btn{
+    display:flex; align-items:center; gap:10px;
+    padding:10px 16px; border-radius:10px;
+    background:#fff; color:#1f1f1f; border:1px solid #dadce0;
+    font-size:13px; font-weight:600;
+  }
+  .acct-btn:hover{background:#f4f5f7; border-color:#c4c8ce;}
+  .acct-btn svg{width:17px; height:17px; flex:none;}
+  .acct-user{
+    display:flex; align-items:center; gap:10px;
+    padding:6px 8px 6px 6px; border-radius:999px;
+    border:1px solid var(--line); background:rgba(0,0,0,.32);
+  }
+  .acct-user img{width:28px; height:28px; border-radius:50%; display:block; background:#2a2f3a;}
+  .acct-id{display:flex; flex-direction:column; line-height:1.25;}
+  .acct-name{
+    font-size:12.5px; color:var(--text); max-width:150px;
+    overflow:hidden; text-overflow:ellipsis; white-space:nowrap;
+  }
+  .acct-tier{font-size:9.5px; letter-spacing:.14em; text-transform:uppercase; color:var(--gold);}
+  .acct-user button{padding:6px 11px; font-size:11px; border-radius:999px;}
+  @media (max-width:560px){
+    .account{top:14px; right:14px;}
+    .acct-btn{padding:8px 12px; font-size:12px;}
+  }
+  .auth-steps{
+    margin:0 0 20px; padding:0 0 0 20px; text-align:left;
+    color:var(--muted); font-size:13px; line-height:1.75;
+  }
+  .auth-steps b{color:var(--gold-soft); font-weight:600;}
+  .auth-steps code{
+    font-family:ui-monospace,Menlo,monospace; font-size:12px;
+    color:var(--gold-soft); background:rgba(217,164,65,.1);
+    padding:1px 5px; border-radius:4px;
+  }
+
+  /* ---------- welcome / sign-up ---------- */
+  .welcome{
+    min-height:min(88vh,860px);
+    display:flex; flex-direction:column; align-items:center; justify-content:center;
+    text-align:center; padding:clamp(18px,4vh,48px) 0 30px;
+  }
+  .welcome h1{margin:0;}
+  .welcome h1 img{width:clamp(230px,44vw,420px); height:auto; display:block;}
+  .welcome-line{
+    margin:clamp(14px,2.4vh,26px) 0 0;
+    font-size:clamp(14px,1.9vw,17.5px); color:var(--muted); letter-spacing:.02em;
+  }
+  .welcome-perks{
+    list-style:none; margin:clamp(20px,3vh,32px) 0 0; padding:0;
+    display:flex; flex-direction:column; gap:11px; text-align:left;
+  }
+  .welcome-perks li{
+    display:flex; align-items:center; gap:12px;
+    font-size:13.5px; color:#c3c7d2;
+  }
+  .welcome-perks span{
+    width:26px; text-align:center; font-size:17px; color:var(--gold); opacity:.9;
+  }
+  .welcome-google{
+    margin-top:clamp(26px,4vh,40px);
+    padding:14px 26px; font-size:15px; border-radius:12px;
+    box-shadow:0 10px 30px rgba(0,0,0,.4);
+  }
+  .welcome-google svg{width:20px; height:20px;}
+  .guest-link{
+    margin-top:16px; background:transparent; border:0; padding:6px 10px;
+    font-size:12.5px; letter-spacing:.06em; color:var(--muted);
+    text-decoration:underline; text-underline-offset:3px;
+  }
+  .guest-link:hover{color:var(--text); transform:none;}
+  .welcome-fine{
+    margin:18px 0 0; max-width:360px;
+    font-size:11.5px; line-height:1.6; color:#5f6472;
+  }
+
   /* ---------- screens ---------- */
   .screen{display:none;}
   .screen.show{display:block; animation:screenIn .5s cubic-bezier(.2,.8,.3,1);}
@@ -884,9 +966,57 @@
 </style>
 </head>
 <body>
+<!-- account bar: sign-up / signed-in identity -->
+<div class="account" id="accountBar">
+  <button class="acct-btn" id="btnSignIn">
+    <svg viewBox="0 0 48 48" aria-hidden="true">
+      <path fill="#EA4335" d="M24 9.5c3.54 0 6.71 1.22 9.21 3.6l6.85-6.85C35.9 2.38 30.47 0 24 0 14.62 0 6.51 5.38 2.56 13.22l7.98 6.19C12.43 13.72 17.74 9.5 24 9.5z"/>
+      <path fill="#4285F4" d="M46.98 24.55c0-1.57-.15-3.09-.38-4.55H24v9.02h12.94c-.58 2.96-2.26 5.48-4.78 7.18l7.73 6c4.51-4.18 7.09-10.36 7.09-17.65z"/>
+      <path fill="#FBBC05" d="M10.53 28.59c-.48-1.45-.76-2.99-.76-4.59s.27-3.14.76-4.59l-7.98-6.19C.92 16.46 0 20.12 0 24s.92 7.54 2.56 10.78l7.97-6.19z"/>
+      <path fill="#34A853" d="M24 48c6.48 0 11.93-2.13 15.89-5.81l-7.73-6c-2.15 1.45-4.92 2.3-8.16 2.3-6.26 0-11.57-4.22-13.47-9.91l-7.98 6.19C6.51 42.62 14.62 48 24 48z"/>
+    </svg>
+    <span>Sign up with Google</span>
+  </button>
+  <div class="acct-user" id="acctUser" style="display:none">
+    <img id="acctAvatar" alt="">
+    <div class="acct-id">
+      <span class="acct-name" id="acctName"></span>
+      <span class="acct-tier" id="acctTier"></span>
+    </div>
+    <button class="ghost" id="btnSignOut">Sign out</button>
+  </div>
+</div>
+
 <div class="wrap">
 
   <!-- ============ TITLE SCREEN ============ -->
+  <!-- ============ WELCOME / SIGN-UP ============
+       The first thing a visitor arriving at the URL sees, unless they are
+       already signed in or have chosen to play as a guest before. -->
+  <section class="screen" id="screen-welcome">
+    <div class="welcome">
+      <div class="eyebrow">A Game of Memory &amp; Nerve</div>
+      <h1><img src="assets/nox-logo.png?v=1" alt="Nox Chess" width="976" height="730"></h1>
+      <p class="welcome-line">Connect your Google account to make the game yours.</p>
+      <ul class="welcome-perks">
+        <li><span>♜</span> Every game you play, kept and replayable</li>
+        <li><span>♞</span> Find friends and challenge them directly</li>
+        <li><span>♛</span> A rating and tier of your own</li>
+      </ul>
+      <button class="acct-btn welcome-google" id="btnWelcomeGoogle">
+        <svg viewBox="0 0 48 48" aria-hidden="true">
+          <path fill="#EA4335" d="M24 9.5c3.54 0 6.71 1.22 9.21 3.6l6.85-6.85C35.9 2.38 30.47 0 24 0 14.62 0 6.51 5.38 2.56 13.22l7.98 6.19C12.43 13.72 17.74 9.5 24 9.5z"/>
+          <path fill="#4285F4" d="M46.98 24.55c0-1.57-.15-3.09-.38-4.55H24v9.02h12.94c-.58 2.96-2.26 5.48-4.78 7.18l7.73 6c4.51-4.18 7.09-10.36 7.09-17.65z"/>
+          <path fill="#FBBC05" d="M10.53 28.59c-.48-1.45-.76-2.99-.76-4.59s.27-3.14.76-4.59l-7.98-6.19C.92 16.46 0 20.12 0 24s.92 7.54 2.56 10.78l7.97-6.19z"/>
+          <path fill="#34A853" d="M24 48c6.48 0 11.93-2.13 15.89-5.81l-7.73-6c-2.15 1.45-4.92 2.3-8.16 2.3-6.26 0-11.57-4.22-13.47-9.91l-7.98 6.19C6.51 42.62 14.62 48 24 48z"/>
+        </svg>
+        <span>Sign up with Google</span>
+      </button>
+      <button class="guest-link" id="btnGuest">Play as a guest</button>
+      <p class="welcome-fine">Guests can play the bot and friendly games. Rated play needs an account.</p>
+    </div>
+  </section>
+
   <section class="screen show" id="screen-home">
     <button class="settings-btn" id="btnSettings" aria-label="Settings" title="Settings">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"
@@ -1261,6 +1391,24 @@
   </div>
 </div>
 
+<!-- what's still needed before Google sign-in works -->
+<div class="overlay" id="authOverlay">
+  <div class="modal" style="max-width:480px">
+    <h3>Connect Google Sign-In</h3>
+    <p>Accounts need a Supabase project and a hosted address — Google will not redirect back to a file on disk. Five steps:</p>
+    <ol class="auth-steps">
+      <li>Create a free project at <b>supabase.com</b>.</li>
+      <li>Open the SQL editor and run <b>supabase-setup.sql</b> (next to this file).</li>
+      <li>Authentication → Providers → enable <b>Google</b>, using a Google Cloud OAuth client.</li>
+      <li>Paste your project URL and publishable key into <code>SUPABASE_URL</code> and <code>SUPABASE_ANON_KEY</code> near the top of this file's script.</li>
+      <li>Host it (a Render Static Site works) and add that https address to Supabase's redirect allow-list.</li>
+    </ol>
+    <div class="row" style="justify-content:center">
+      <button class="primary" id="authClose">Got it</button>
+    </div>
+  </div>
+</div>
+
 <!-- leaving a game in progress -->
 <div class="overlay" id="leaveOverlay">
   <div class="modal">
@@ -1324,6 +1472,20 @@
 
 <script>
 "use strict";
+
+/* ============================================================
+   ACCOUNT CONFIG — paste these two from your Supabase project
+   (Settings → API). Both are safe in client code; the data is
+   protected by the row-level security rules in supabase-setup.sql.
+   Leave them blank and the game runs exactly as before, offline.
+   ============================================================ */
+const SUPABASE_URL      = 'https://kltiqsapxfoppqaydxxv.supabase.co';
+const SUPABASE_ANON_KEY = 'sb_publishable_FixWUIJ1j8-02yTOg6-rog_ag-ctyET';
+
+// true: visitors must sign in before they can play at all — the welcome screen
+// loses its "play as a guest" way out. Guests can still play offline copies and
+// any server with accounts switched off.
+const REQUIRE_ACCOUNT   = false;
 
 /* ============================================================
    CONSTANTS & HELPERS
@@ -2501,7 +2663,13 @@ function netConnect(ready){
   catch(e){ waitingFailed('Could not reach the server.'); return; }
   NET.sock = sock;
 
-  sock.onopen = () => { startHeartbeat(); ready(); };
+  sock.onopen = () => {
+    startHeartbeat();
+    // Say who we are before anything else. With an account the token proves
+    // it; without one we're a guest under whatever name is in the box.
+    netSend({ t:'hello', token: authToken(), name: G.playerName });
+    ready();
+  };
   sock.onmessage = ev => {
     let msg;
     try { msg = JSON.parse(ev.data); } catch(e){ return; }
@@ -2610,6 +2778,15 @@ function stopHosting(){
 
 function onNetMessage(msg){
   switch (msg.t){
+    case 'welcome':
+      // The server has had its say on who we are: it verified the token, or
+      // it didn't. Trust its answer over ours.
+      NET.verified = !!msg.verified;
+      NET.serverName = msg.name || '';
+      NET.accountsOffered = !!msg.accounts;
+      if (msg.reason) console.warn('Signed-in play unavailable:', msg.reason);
+      break;
+
     case 'waiting':
       showWaiting('Looking for someone who wants the same game…');
       break;
@@ -3371,6 +3548,9 @@ function showScreen(name){
   }
   document.querySelectorAll('.screen').forEach(s => s.classList.toggle('show', s.id === 'screen-' + name));
   syncOptions();
+  // the welcome screen has sign-up as its centrepiece; a second button would just repeat it
+  document.getElementById('accountBar')
+          .classList.toggle('hide', name === 'game' || name === 'welcome');
   if (name === 'game'){ startClock(); render(); }
   else stopClock();
   window.scrollTo({ top:0, behavior:'smooth' });
@@ -3637,9 +3817,165 @@ function storedName(){
 }
 nameInput.value = G.playerName = storedName();
 nameInput.addEventListener('input', () => {
+  if (account) return;                       // signed in: the account owns the name
   G.playerName = nameInput.value.trim().slice(0, 20);
   try { localStorage.setItem('nox.name', G.playerName); } catch(e){}
 });
+
+/* Signing in takes the name over: the server reads it off the token anyway, so
+   letting the box disagree would only be misleading. Signing out hands it back. */
+function syncNameBox(){
+  if (account){
+    nameInput.value = account.name;
+    nameInput.disabled = true;
+    nameInput.title = 'Your Google account name';
+    G.playerName = account.name;
+  } else {
+    nameInput.disabled = false;
+    nameInput.title = '';
+    nameInput.value = G.playerName = storedName();
+  }
+}
+
+/* ============================================================
+   ACCOUNTS — Google sign-in via Supabase
+   The whole thing is optional: with no keys, or with the CDN
+   unreachable, the game still plays exactly as it does offline.
+   ============================================================ */
+let sb = null;          // supabase client, once it loads
+let account = null;     // { id, name, avatar, rating, tier }
+let authSession = null; // the live session, for the token we hand the server
+
+// The access token the Python server verifies on connect, or null as a guest.
+function authToken(){
+  return authSession && authSession.access_token ? authSession.access_token : null;
+}
+
+const TIERS = [
+  [2000, 'Master'], [1800, 'Expert'], [1600, 'Advanced'],
+  [1400, 'Intermediate'], [1200, 'Casual'], [0, 'Novice']
+];
+const tierFor = r => (TIERS.find(t => r >= t[0]) || TIERS[TIERS.length-1])[1];
+
+async function initAuth(){
+  updateAccountUI();
+  if (!SUPABASE_URL || !SUPABASE_ANON_KEY) return;      // not configured yet
+  try {
+    const { createClient } = await import('https://esm.sh/@supabase/supabase-js@2');
+    sb = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+    const { data } = await sb.auth.getSession();
+    await setAccount(data.session);
+    sb.auth.onAuthStateChange((_evt, session) => setAccount(session));
+  } catch (err){
+    sb = null;                                          // offline, or blocked
+    console.warn('Sign-in unavailable:', err && err.message);
+    updateAccountUI();
+  }
+}
+
+async function setAccount(session){
+  authSession = session || null;
+  const u = session && session.user;
+  if (!u){ account = null; updateAccountUI(); return; }
+  const meta = u.user_metadata || {};
+  account = {
+    id: u.id,
+    name: meta.full_name || meta.name || (u.email || '').split('@')[0] || 'Player',
+    avatar: meta.avatar_url || meta.picture || '',
+    rating: 1200,
+    tier: tierFor(1200)
+  };
+  updateAccountUI();
+  // the profile row is created by a trigger on signup; read it back for rating/tier
+  try {
+    const { data } = await sb.from('profiles')
+      .select('display_name, avatar_url, rating').eq('id', u.id).single();
+    if (data){
+      account.name   = data.display_name || account.name;
+      account.avatar = data.avatar_url   || account.avatar;
+      account.rating = data.rating;
+      account.tier   = tierFor(data.rating);
+      updateAccountUI();
+    }
+  } catch (err){ /* profile not readable yet — the identity above still stands */ }
+}
+
+function updateAccountUI(){
+  const signedIn = !!account;
+  document.getElementById('btnSignIn').style.display = signedIn ? 'none' : 'flex';
+  document.getElementById('acctUser').style.display  = signedIn ? 'flex' : 'none';
+  if (signedIn){
+    document.getElementById('acctName').textContent = account.name;
+    document.getElementById('acctTier').textContent = `${account.tier} · ${account.rating}`;
+    const img = document.getElementById('acctAvatar');
+    if (account.avatar) { img.src = account.avatar; img.style.display = ''; }
+    else img.style.display = 'none';
+  }
+  if (typeof syncNameBox === 'function') syncNameBox();
+  // signing in leaves the welcome screen; signing out can send you back to it
+  document.getElementById('btnGuest').style.display = REQUIRE_ACCOUNT ? 'none' : '';
+  decideFirstScreen();
+}
+
+/* ---- who gets asked to sign up ----
+   Only visitors who arrived at a real address on a build that has accounts.
+   Opened as a local file, or with no keys set, the welcome screen never runs
+   and the game behaves exactly as it always has. */
+function accountsAvailable(){
+  return !!(SUPABASE_URL && SUPABASE_ANON_KEY) &&
+         (location.protocol === 'http:' || location.protocol === 'https:');
+}
+function chosenGuest(){
+  try { return localStorage.getItem('nox.guest') === '1'; } catch(e){ return false; }
+}
+// Supabase parks its session in localStorage; spotting it synchronously lets a
+// returning player go straight to the board instead of blinking through a
+// sign-up screen while the SDK loads.
+function hasStoredSession(){
+  try {
+    for (let i = 0; i < localStorage.length; i++){
+      const k = localStorage.key(i);
+      if (k && k.startsWith('sb-') && k.endsWith('-auth-token')) return true;
+    }
+  } catch(e){}
+  return false;
+}
+const returningFromGoogle = () =>
+  /access_token=|[?&]code=/.test(location.hash + location.search);
+
+function shouldWelcome(){
+  if (!accountsAvailable() || account) return false;
+  return REQUIRE_ACCOUNT ? true : !chosenGuest();
+}
+
+// Only ever moves between the first two screens; never yanks someone out of a
+// menu or a game they have already walked into.
+function decideFirstScreen(){
+  if (screenName !== 'home' && screenName !== 'welcome') return;
+  const want = shouldWelcome() ? 'welcome' : 'home';
+  if (screenName !== want) showScreen(want);
+}
+
+async function signIn(){
+  if (!sb){ document.getElementById('authOverlay').classList.add('show'); return; }
+  const { error } = await sb.auth.signInWithOAuth({
+    provider: 'google',
+    options: { redirectTo: location.href.split('#')[0].split('?')[0] }
+  });
+  if (error) console.warn('Google sign-in failed:', error.message);
+}
+
+async function signOut(){ if (sb) await sb.auth.signOut(); }
+
+document.getElementById('btnSignIn').onclick      = signIn;
+document.getElementById('btnWelcomeGoogle').onclick = signIn;
+document.getElementById('btnSignOut').onclick     = signOut;
+document.getElementById('btnGuest').onclick = () => {
+  try { localStorage.setItem('nox.guest', '1'); } catch(e){}   // don't ask again
+  showScreen('home');
+};
+document.getElementById('authClose').onclick  =
+  () => document.getElementById('authOverlay').classList.remove('show');
 
 /* ---- boot ---- */
 document.getElementById('heroSet').innerHTML =
@@ -3647,6 +3983,12 @@ document.getElementById('heroSet').innerHTML =
     .map((g,i) => `<span style="animation-delay:${.35 + i*.09}s">${g}</span>`).join('');
 syncOptions();
 render();
+// Decide before the SDK loads, so an arriving visitor sees the sign-up screen
+// immediately and a returning one never sees it at all.
+if (accountsAvailable() && !hasStoredSession() && !returningFromGoogle() && shouldWelcome()){
+  showScreen('welcome');
+}
+initAuth();
 </script>
 </body>
 </html>
