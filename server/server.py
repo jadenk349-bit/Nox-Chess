@@ -147,11 +147,13 @@ def finish_game(game, reason, winner=None, exclude=None):
 # ---------------------------------------------------------------- messages
 
 def clean_guest_name(raw):
-    """A guest may call themselves anything printable and short."""
-    if not isinstance(raw, str):
-        return "Guest"
-    name = "".join(ch for ch in raw if ch.isprintable()).strip()[:20]
-    return name or "Guest"
+    """Guests are held to the same naming rule as accounts.
+
+    The page no longer offers guests a name box at all, so in practice this
+    only sees hand-written clients — but whatever an opponent ends up reading
+    on their screen should have passed the same rule either way.
+    """
+    return supabase_auth.clean_name(raw) or "Guest"
 
 
 def handle_hello(client, msg):
