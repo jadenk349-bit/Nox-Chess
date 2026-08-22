@@ -410,7 +410,23 @@
   @keyframes sheen{0%,62%{background-position:180% 0;} 92%,100%{background-position:-80% 0;}}
 
   /* who you are, above the buttons — filled in once and remembered */
-  .name-box{margin-top:clamp(26px,4.2vh,44px); display:flex; justify-content:center;}
+  .name-title{
+    margin:clamp(16px,2.6vh,28px) 0 0;
+    font-family:Georgia,serif; font-weight:400; letter-spacing:.12em;
+    font-size:clamp(24px,4.2vw,38px); color:var(--gold-soft);
+  }
+  .name-form{display:flex; flex-direction:column; align-items:center; width:100%;}
+  .name-hint{
+    margin:12px 0 0; min-height:1.4em; max-width:340px; text-align:center;
+    font-size:12px; line-height:1.5; color:var(--muted);
+  }
+  .name-hint.bad{color:var(--danger);}
+  .name-hint.good{color:var(--good);}
+  .name-save{margin-top:22px; padding:13px 40px; font-size:13px; letter-spacing:.2em;}
+  .name-save:disabled{opacity:.4; cursor:not-allowed;}
+  .name-box input.bad{border-color:var(--danger);}
+
+  .name-box{margin-top:clamp(20px,3.2vh,34px); display:flex; justify-content:center;}
   .name-box input{
     width:clamp(220px,62vw,330px); text-align:center;
     font:inherit; font-size:15px; letter-spacing:.12em;
@@ -1017,6 +1033,26 @@
     </div>
   </section>
 
+  <!-- ============ CHOOSE A NAME ============
+       Straight after signing up, before anything else. -->
+  <section class="screen" id="screen-name">
+    <div class="welcome">
+      <div class="eyebrow">Almost There</div>
+      <h2 class="name-title">Choose your name</h2>
+      <p class="welcome-line">This is the name other players will see across the board.</p>
+
+      <form class="name-form" id="nameForm" autocomplete="off">
+        <div class="name-box">
+          <input id="gameName" type="text" placeholder="Your name…" maxlength="25"
+                 autocomplete="off" autocapitalize="words" spellcheck="false"
+                 aria-label="Your name in Nox Chess">
+        </div>
+        <p class="name-hint" id="nameHint">3 to 25 characters, English letters and numbers.</p>
+        <button class="primary name-save" id="btnNameSave" type="submit" disabled>Continue</button>
+      </form>
+    </div>
+  </section>
+
   <section class="screen show" id="screen-home">
     <button class="settings-btn" id="btnSettings" aria-label="Settings" title="Settings">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"
@@ -1030,12 +1066,6 @@
       <h1><img src="assets/nox-logo.png?v=1" alt="Nox Chess" width="976" height="730"></h1>
       <div class="rule"><span></span><b>♞ ♛ ♞</b><span></span></div>
       <p class="tagline">The board is there. The pieces are not.<br>Hold the position in your head.</p>
-
-      <div class="name-box">
-        <input id="playerName" type="text" placeholder="Your name…" maxlength="20"
-               autocomplete="off" autocapitalize="words" spellcheck="false"
-               aria-label="Your name">
-      </div>
 
       <div class="hero-actions">
         <button class="play-btn" id="btnPlay">PLAY</button>
@@ -1843,7 +1873,7 @@ const G = {
   opponent: 'bot',        // 'bot' | 'local' (two players, one screen) | 'online'
   matchKind: 'friendly',  // online only: 'ranked' | 'friendly' — separate queues
   hosting: false,         // online only: setting up a room rather than joining one
-  playerName: '',         // what the player calls themselves, kept across visits
+  playerName: '',         // the account's chosen name; empty for guests
   level: 1300,
   human: W,
   minutes: 10,            // same allowance for both sides
@@ -3548,9 +3578,11 @@ function showScreen(name){
   }
   document.querySelectorAll('.screen').forEach(s => s.classList.toggle('show', s.id === 'screen-' + name));
   syncOptions();
-  // the welcome screen has sign-up as its centrepiece; a second button would just repeat it
+  // the welcome and name screens are about the account already; a second
+  // account control on them would only repeat itself
   document.getElementById('accountBar')
-          .classList.toggle('hide', name === 'game' || name === 'welcome');
+          .classList.toggle('hide', name === 'game' || name === 'welcome' || name === 'name');
+  if (name === 'name') setTimeout(() => { judgeName(); nameInput.focus(); }, 60);
   if (name === 'game'){ startClock(); render(); }
   else stopClock();
   window.scrollTo({ top:0, behavior:'smooth' });
@@ -3808,34 +3840,67 @@ document.addEventListener('keydown', e => {
 });
 
 /* ---- who you are ----
-   Kept between visits, since a name you retype every time is no name at all.
-   Storage can be refused outright (private windows, blocked cookies), so every
-   touch of it is guarded — the box still works, it just forgets. */
-const nameInput = document.getElementById('playerName');
-function storedName(){
-  try { return localStorage.getItem('nox.name') || ''; } catch(e){ return ''; }
-}
-nameInput.value = G.playerName = storedName();
-nameInput.addEventListener('input', () => {
-  if (account) return;                       // signed in: the account owns the name
-  G.playerName = nameInput.value.trim().slice(0, 20);
-  try { localStorage.setItem('nox.name', G.playerName); } catch(e){}
-});
+   Chosen once, after signing up, and kept on the account rather than in this
+   browser. Guests are simply "Guest" — a name is something an account has. */
+const NAME_MIN = 3, NAME_MAX = 25;
+const NAME_ALLOWED = /^[A-Za-z0-9 _-]+$/;    // English only: no other scripts
+const NAME_HAS_LETTER = /[A-Za-z]/;
 
-/* Signing in takes the name over: the server reads it off the token anyway, so
-   letting the box disagree would only be misleading. Signing out hands it back. */
-function syncNameBox(){
-  if (account){
-    nameInput.value = account.name;
-    nameInput.disabled = true;
-    nameInput.title = 'Your Google account name';
-    G.playerName = account.name;
-  } else {
-    nameInput.disabled = false;
-    nameInput.title = '';
-    nameInput.value = G.playerName = storedName();
-  }
+/** '' when the name is good, otherwise why not. */
+function nameProblem(raw){
+  const name = (raw || '').trim();
+  if (!name) return 'Pick a name to play under.';
+  if (name.length < NAME_MIN) return `Too short — at least ${NAME_MIN} characters.`;
+  if (name.length > NAME_MAX) return `Too long — at most ${NAME_MAX} characters.`;
+  if (!NAME_ALLOWED.test(name))
+    return 'English letters, numbers, spaces, - and _ only.';
+  if (!NAME_HAS_LETTER.test(name)) return 'Include at least one letter.';
+  return '';
 }
+
+const nameInput = document.getElementById('gameName');
+const nameHint = document.getElementById('nameHint');
+const nameSave = document.getElementById('btnNameSave');
+
+function judgeName(){
+  const raw = nameInput.value;
+  const problem = nameProblem(raw);
+  const empty = !raw.trim();
+  nameSave.disabled = !!problem;
+  nameInput.classList.toggle('bad', !!problem && !empty);
+  nameHint.className = 'name-hint' + (empty ? '' : (problem ? ' bad' : ' good'));
+  nameHint.textContent = empty
+    ? `${NAME_MIN} to ${NAME_MAX} characters, English letters and numbers.`
+    : (problem || 'Looks good.');
+  return problem;
+}
+nameInput.addEventListener('input', judgeName);
+
+document.getElementById('nameForm').addEventListener('submit', async e => {
+  e.preventDefault();
+  const name = nameInput.value.trim();
+  if (judgeName() || !sb || !account) return;
+  nameSave.disabled = true;
+  nameSave.textContent = 'Saving…';
+  try {
+    // Into the token first: the game server reads the name from there, so this
+    // is the copy that decides what other players see.
+    const { error } = await sb.auth.updateUser({ data: { game_name: name } });
+    if (error) throw error;
+    // And into the profile, which is what friend search will read later.
+    try { await sb.from('profiles').update({ display_name: name }).eq('id', account.id); }
+    catch (err){ console.warn('profile name not saved:', err && err.message); }
+    account.gameName = account.name = G.playerName = name;
+    updateAccountUI();
+    showScreen('home');
+  } catch (err){
+    nameHint.className = 'name-hint bad';
+    nameHint.textContent = 'Could not save that — ' + ((err && err.message) || 'try again.');
+  } finally {
+    nameSave.textContent = 'Continue';
+    judgeName();
+  }
+});
 
 /* ============================================================
    ACCOUNTS — Google sign-in via Supabase
@@ -3878,9 +3943,11 @@ async function setAccount(session){
   const u = session && session.user;
   if (!u){ account = null; updateAccountUI(); return; }
   const meta = u.user_metadata || {};
+  const chosen = typeof meta.game_name === 'string' ? meta.game_name.trim() : '';
   account = {
     id: u.id,
-    name: meta.full_name || meta.name || (u.email || '').split('@')[0] || 'Player',
+    gameName: nameProblem(chosen) ? '' : chosen,   // '' means: still needs asking
+    name: chosen || meta.full_name || meta.name || (u.email || '').split('@')[0] || 'Player',
     avatar: meta.avatar_url || meta.picture || '',
     rating: 1200,
     tier: tierFor(1200)
@@ -3891,7 +3958,10 @@ async function setAccount(session){
     const { data } = await sb.from('profiles')
       .select('display_name, avatar_url, rating').eq('id', u.id).single();
     if (data){
-      account.name   = data.display_name || account.name;
+      if (!account.gameName && data.display_name && !nameProblem(data.display_name)){
+        account.gameName = data.display_name.trim();   // set on a previous visit
+      }
+      account.name   = account.gameName || data.display_name || account.name;
       account.avatar = data.avatar_url   || account.avatar;
       account.rating = data.rating;
       account.tier   = tierFor(data.rating);
@@ -3911,7 +3981,7 @@ function updateAccountUI(){
     if (account.avatar) { img.src = account.avatar; img.style.display = ''; }
     else img.style.display = 'none';
   }
-  if (typeof syncNameBox === 'function') syncNameBox();
+  G.playerName = account ? account.name : '';   // guests are named by the server
   // signing in leaves the welcome screen; signing out can send you back to it
   document.getElementById('btnGuest').style.display = REQUIRE_ACCOUNT ? 'none' : '';
   decideFirstScreen();
@@ -3947,12 +4017,14 @@ function shouldWelcome(){
   if (!accountsAvailable() || account) return false;
   return REQUIRE_ACCOUNT ? true : !chosenGuest();
 }
+// Signed in but hasn't picked a name for the game yet.
+const needsName = () => !!account && !account.gameName;
 
-// Only ever moves between the first two screens; never yanks someone out of a
+// Only ever moves between the opening screens; never yanks someone out of a
 // menu or a game they have already walked into.
 function decideFirstScreen(){
-  if (screenName !== 'home' && screenName !== 'welcome') return;
-  const want = shouldWelcome() ? 'welcome' : 'home';
+  if (screenName !== 'home' && screenName !== 'welcome' && screenName !== 'name') return;
+  const want = shouldWelcome() ? 'welcome' : (needsName() ? 'name' : 'home');
   if (screenName !== want) showScreen(want);
 }
 

@@ -25,6 +25,7 @@ every token and everyone plays as a guest, exactly as before accounts existed.
 
 import json
 import os
+import re
 import threading
 import time
 import urllib.error
@@ -186,18 +187,46 @@ def verify(token):
     return claims
 
 
+# The name a player chooses for the game: 3-25 characters, English only, and
+# with at least one letter in it. The page checks this too, but user metadata
+# can be written through Supabase's own API, so the rule is applied again here
+# rather than trusting whatever arrives in the token.
+NAME_MIN, NAME_MAX = 3, 25
+_NAME_ALLOWED = re.compile(r"^[A-Za-z0-9 _-]+$")
+_NAME_HAS_LETTER = re.compile(r"[A-Za-z]")
+
+
+def clean_name(raw):
+    """The name if it passes the rules, otherwise None."""
+    if not isinstance(raw, str):
+        return None
+    name = raw.strip()
+    if not (NAME_MIN <= len(name) <= NAME_MAX):
+        return None
+    if not _NAME_ALLOWED.match(name) or not _NAME_HAS_LETTER.search(name):
+        return None
+    return name
+
+
 def display_name(claims):
     """The name to show for a verified player.
 
     Taken from the token, never from whatever the client typed — otherwise
-    signing in would be a way to wear somebody else's name.
+    signing in would be a way to wear somebody else's name. The name chosen
+    for the game wins; the Google name is only a fallback for accounts that
+    have not picked one yet, and it has to pass the same rules.
     """
     meta = claims.get("user_metadata") or {}
+    chosen = clean_name(meta.get("game_name"))
+    if chosen:
+        return chosen
     for key in ("full_name", "name", "preferred_username"):
-        value = meta.get(key)
-        if isinstance(value, str) and value.strip():
-            return value.strip()[:32]
+        fallback = clean_name(meta.get(key))
+        if fallback:
+            return fallback
     email = claims.get("email")
     if isinstance(email, str) and "@" in email:
-        return email.split("@")[0][:32]
+        fallback = clean_name(email.split("@")[0])
+        if fallback:
+            return fallback
     return "Player"
