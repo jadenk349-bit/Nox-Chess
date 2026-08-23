@@ -3978,8 +3978,10 @@ function showScreen(name){
   // the welcome and name screens are about the account already; a second
   // account control on them would only repeat itself
   const bar = document.getElementById('accountBar');
-  // rooms names you in its own corner chip, so the cluster would only repeat it
-  bar.classList.toggle('hide', name === 'welcome' || name === 'name' || name === 'rooms');
+  // Only the home page has room for the account cluster. Welcome and name are
+  // about the account already; rooms names you in its own chip; and over the
+  // game page it would sit on top of the chips describing the game.
+  bar.classList.toggle('hide', name !== 'home' && name !== 'settings');
   // On the home page the account cluster belongs in the header row, beside the
   // nav; everywhere else it floats in the corner on its own.
   const slot = document.getElementById('headRight');
