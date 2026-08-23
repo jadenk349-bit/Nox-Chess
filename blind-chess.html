@@ -726,17 +726,28 @@
     }
   }
 
+  /* No plate behind it. Against the sky a boxed gear read as a chip of
+     interface stuck on top of the photograph; bare, it sits in the dark the
+     way the wordmark does. */
   .settings-btn{
     flex:none;
-    width:44px; height:44px; padding:0; border-radius:12px;
+    width:44px; height:44px; padding:0; border-radius:50%;
     display:flex; align-items:center; justify-content:center;
-    background:linear-gradient(180deg,#20242e,#171a21);
-    border:1px solid var(--line); color:var(--muted);
+    background:transparent; border:0;
+    color:#98a0b2;                       /* it has no plate to lean on now */
+    transition:color .22s ease, transform .22s ease;
   }
-  .settings-btn svg{width:21px; height:21px; display:block;}
-  .settings-btn:hover{border-color:var(--gold); color:var(--gold-soft);}
-  .settings-btn:hover svg{transform:rotate(45deg);}
-  .settings-btn svg{transition:transform .35s cubic-bezier(.2,.8,.3,1);}
+  .settings-btn svg{
+    width:23px; height:23px; display:block;
+    /* a touch of glow, so the outline never disappears into a dark patch */
+    filter:drop-shadow(0 1px 3px rgba(0,0,0,.9));
+    transition:transform .45s cubic-bezier(.2,.8,.3,1);
+  }
+  .settings-btn:hover{color:var(--gold-soft); transform:none;}
+  .settings-btn:hover svg{transform:rotate(60deg);}
+  .settings-btn:focus-visible{
+    outline:2px solid var(--gold); outline-offset:2px; border-radius:50%;
+  }
 
   .hero-set{
     margin-top:clamp(30px,5vh,50px); display:flex; gap:clamp(8px,2.4vw,22px);
@@ -1241,7 +1252,7 @@
     <button class="ghost" id="btnSignOut">Sign out</button>
   </div>
   <button class="settings-btn" id="btnSettings" aria-label="Settings" title="Settings">
-    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9"
          stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
       <circle cx="12" cy="12" r="3.1"/>
       <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 1 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 1 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.6a1.65 1.65 0 0 0 1-1.51V3a2 2 0 1 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9v0a1.65 1.65 0 0 0 1.51 1H21a2 2 0 1 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/>
