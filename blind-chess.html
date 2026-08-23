@@ -461,22 +461,76 @@
   }
   .acct-btn:hover{background:#f4f5f7; border-color:#c4c8ce;}
   .acct-btn svg{width:17px; height:17px; flex:none;}
-  .acct-user{
-    display:flex; align-items:center; gap:10px;
-    padding:6px 8px 6px 6px; border-radius:999px;
-    border:1px solid var(--line); background:rgba(0,0,0,.32);
+  /* Signed out: the pair. Sign Up leads, Log In is the quieter one beside it. */
+  .acct-auth{display:flex; align-items:center; gap:8px;}
+  .acct-signup, .acct-login{
+    padding:9px 17px; border-radius:9px;
+    font-size:12.5px; font-weight:650; letter-spacing:.12em;
   }
-  .acct-user img{width:28px; height:28px; border-radius:50%; display:block; background:#2a2f3a;}
-  .acct-id{display:flex; flex-direction:column; line-height:1.25;}
+  .acct-signup{
+    background:linear-gradient(180deg,#e2b357,#b07f22);
+    border:1px solid #e9c069; color:#1a1408;
+    box-shadow:0 6px 16px rgba(217,164,65,.22);
+  }
+  .acct-signup:hover{filter:brightness(1.08); transform:none;}
+  .acct-login{
+    background:transparent; border:1px solid rgba(217,164,65,.34); color:var(--gold-soft);
+  }
+  .acct-login:hover{background:rgba(217,164,65,.12); border-color:var(--gold); transform:none;}
+
+  /* Signed in: the name, and nothing else. */
   .acct-name{
-    font-size:12.5px; color:var(--text); max-width:150px;
-    overflow:hidden; text-overflow:ellipsis; white-space:nowrap;
+    font-size:13px; font-weight:600; letter-spacing:.06em; color:var(--gold-soft);
+    max-width:190px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;
   }
-  .acct-tier{font-size:9.5px; letter-spacing:.14em; text-transform:uppercase; color:var(--gold);}
-  .acct-user button{padding:6px 11px; font-size:11px; border-radius:999px;}
   @media (max-width:560px){
     .account{top:14px; right:14px;}
-    .acct-btn{padding:8px 12px; font-size:12px;}
+    .acct-signup, .acct-login{padding:8px 12px; font-size:11.5px; letter-spacing:.08em;}
+  }
+
+  /* ---------- sign up / log in ----------
+     The only two pages where the wordmark leaves the top-left corner. */
+  .auth-page{
+    min-height:min(88vh,860px);
+    display:flex; flex-direction:column; align-items:center;
+    text-align:center; padding:clamp(26px,7vh,84px) 0 40px;
+  }
+  .auth-logo{
+    padding:0; background:transparent; border:0; line-height:0; border-radius:12px;
+  }
+  .auth-logo img{width:clamp(210px,34vw,360px); height:auto; display:block;}
+  .auth-logo:hover{transform:none; filter:brightness(1.08);}
+  .auth-caption{
+    margin:clamp(18px,3vh,32px) 0 0;
+    font-family:Georgia,serif; font-weight:400; letter-spacing:.1em;
+    font-size:clamp(19px,3vw,27px); color:var(--gold-soft);
+  }
+  .auth-google{
+    margin-top:clamp(26px,4.4vh,44px);
+    padding:14px 26px; font-size:15px; border-radius:12px;
+    box-shadow:0 10px 30px rgba(0,0,0,.5);
+  }
+  .auth-google svg{width:20px; height:20px;}
+  .auth-google-login{margin-top:clamp(30px,5vh,52px);}   /* no caption above it */
+  .auth-swap{
+    margin-top:20px; padding:6px 10px;
+    background:transparent; border:0;
+    font-size:12.5px; color:var(--muted);
+    text-decoration:underline; text-underline-offset:3px;
+  }
+  .auth-swap:hover{color:var(--gold-soft); transform:none;}
+
+  /* the way out, kept at the foot of the settings page */
+  .set-foot{margin-top:26px; display:flex; justify-content:center;}
+  .danger-btn{
+    padding:11px 30px; border-radius:10px;
+    font-size:12.5px; font-weight:650; letter-spacing:.16em;
+    background:rgba(224,90,77,.10);
+    border:1px solid rgba(224,90,77,.45); color:#e8695d;
+  }
+  .danger-btn:hover{
+    background:rgba(224,90,77,.20); border-color:var(--danger); color:#ff8175;
+    transform:none;
   }
   .auth-steps{
     margin:0 0 20px; padding:0 0 0 20px; text-align:left;
@@ -500,33 +554,6 @@
   .welcome-line{
     margin:clamp(14px,2.4vh,26px) 0 0;
     font-size:clamp(14px,1.9vw,17.5px); color:var(--muted); letter-spacing:.02em;
-  }
-  .welcome-perks{
-    list-style:none; margin:clamp(20px,3vh,32px) 0 0; padding:0;
-    display:flex; flex-direction:column; gap:11px; text-align:left;
-  }
-  .welcome-perks li{
-    display:flex; align-items:center; gap:12px;
-    font-size:13.5px; color:#c3c7d2;
-  }
-  .welcome-perks span{
-    width:26px; text-align:center; font-size:17px; color:var(--gold); opacity:.9;
-  }
-  .welcome-google{
-    margin-top:clamp(26px,4vh,40px);
-    padding:14px 26px; font-size:15px; border-radius:12px;
-    box-shadow:0 10px 30px rgba(0,0,0,.4);
-  }
-  .welcome-google svg{width:20px; height:20px;}
-  .guest-link{
-    margin-top:16px; background:transparent; border:0; padding:6px 10px;
-    font-size:12.5px; letter-spacing:.06em; color:var(--muted);
-    text-decoration:underline; text-underline-offset:3px;
-  }
-  .guest-link:hover{color:var(--text); transform:none;}
-  .welcome-fine{
-    margin:18px 0 0; max-width:360px;
-    font-size:11.5px; line-height:1.6; color:#5f6472;
   }
 
   /* ---------- screens ---------- */
@@ -1243,23 +1270,13 @@
 
 <!-- account bar: sign-up / signed-in identity -->
 <div class="account" id="accountBar">
-  <button class="acct-btn" id="btnSignIn">
-    <svg viewBox="0 0 48 48" aria-hidden="true">
-      <path fill="#EA4335" d="M24 9.5c3.54 0 6.71 1.22 9.21 3.6l6.85-6.85C35.9 2.38 30.47 0 24 0 14.62 0 6.51 5.38 2.56 13.22l7.98 6.19C12.43 13.72 17.74 9.5 24 9.5z"/>
-      <path fill="#4285F4" d="M46.98 24.55c0-1.57-.15-3.09-.38-4.55H24v9.02h12.94c-.58 2.96-2.26 5.48-4.78 7.18l7.73 6c4.51-4.18 7.09-10.36 7.09-17.65z"/>
-      <path fill="#FBBC05" d="M10.53 28.59c-.48-1.45-.76-2.99-.76-4.59s.27-3.14.76-4.59l-7.98-6.19C.92 16.46 0 20.12 0 24s.92 7.54 2.56 10.78l7.97-6.19z"/>
-      <path fill="#34A853" d="M24 48c6.48 0 11.93-2.13 15.89-5.81l-7.73-6c-2.15 1.45-4.92 2.3-8.16 2.3-6.26 0-11.57-4.22-13.47-9.91l-7.98 6.19C6.51 42.62 14.62 48 24 48z"/>
-    </svg>
-    <span>Sign In</span>
-  </button>
-  <div class="acct-user" id="acctUser" style="display:none">
-    <img id="acctAvatar" alt="">
-    <div class="acct-id">
-      <span class="acct-name" id="acctName"></span>
-      <span class="acct-tier" id="acctTier"></span>
-    </div>
-    <button class="ghost" id="btnSignOut">Sign out</button>
+  <div class="acct-auth" id="acctAuth">
+    <button class="acct-signup" id="btnSignUp">Sign Up</button>
+    <button class="acct-login" id="btnLogIn">Log In</button>
   </div>
+  <!-- Signed in, the pair is replaced by the name and nothing else; logging out
+       lives at the foot of the settings page. -->
+  <span class="acct-name" id="acctUser" style="display:none"></span>
   <button class="settings-btn" id="btnSettings" aria-label="Settings" title="Settings">
     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9"
          stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
@@ -1275,27 +1292,43 @@
   <!-- ============ WELCOME / SIGN-UP ============
        The first thing a visitor arriving at the URL sees, unless they are
        already signed in or have chosen to play as a guest before. -->
-  <section class="screen" id="screen-welcome">
-    <div class="welcome">
-      <div class="eyebrow">A Game of Memory &amp; Nerve</div>
-      <h1><img src="assets/nox-logo.png?v=1" alt="Nox Chess" width="976" height="730"></h1>
-      <p class="welcome-line">Connect your Google account to make the game yours.</p>
-      <ul class="welcome-perks">
-        <li><span>♜</span> Every game you play, kept and replayable</li>
-        <li><span>♞</span> Find friends and challenge them directly</li>
-        <li><span>♛</span> A rating and tier of your own</li>
-      </ul>
-      <button class="acct-btn welcome-google" id="btnWelcomeGoogle">
+  <!-- ============ SIGN UP ============
+       One of the only two pages where the wordmark leaves the top left. -->
+  <section class="screen" id="screen-signup">
+    <div class="auth-page">
+      <button class="auth-logo" data-home aria-label="Nox Chess — back to the home page">
+        <img src="assets/nox-logo.png?v=1" alt="Nox Chess" width="976" height="730">
+      </button>
+      <p class="auth-caption">Create Your Nox Chess Account</p>
+      <button class="acct-btn auth-google" id="btnSignUpGoogle">
         <svg viewBox="0 0 48 48" aria-hidden="true">
           <path fill="#EA4335" d="M24 9.5c3.54 0 6.71 1.22 9.21 3.6l6.85-6.85C35.9 2.38 30.47 0 24 0 14.62 0 6.51 5.38 2.56 13.22l7.98 6.19C12.43 13.72 17.74 9.5 24 9.5z"/>
           <path fill="#4285F4" d="M46.98 24.55c0-1.57-.15-3.09-.38-4.55H24v9.02h12.94c-.58 2.96-2.26 5.48-4.78 7.18l7.73 6c4.51-4.18 7.09-10.36 7.09-17.65z"/>
           <path fill="#FBBC05" d="M10.53 28.59c-.48-1.45-.76-2.99-.76-4.59s.27-3.14.76-4.59l-7.98-6.19C.92 16.46 0 20.12 0 24s.92 7.54 2.56 10.78l7.97-6.19z"/>
           <path fill="#34A853" d="M24 48c6.48 0 11.93-2.13 15.89-5.81l-7.73-6c-2.15 1.45-4.92 2.3-8.16 2.3-6.26 0-11.57-4.22-13.47-9.91l-7.98 6.19C6.51 42.62 14.62 48 24 48z"/>
         </svg>
-        <span>Sign up with Google</span>
+        <span>Continue with Google</span>
       </button>
-      <button class="guest-link" id="btnGuest">Play as a guest</button>
-      <p class="welcome-fine">Guests can play the bot and friendly games. Rated play needs an account.</p>
+      <button class="auth-swap" id="btnToLogIn">Do you already have an account? Click to Log in</button>
+    </div>
+  </section>
+
+  <!-- ============ LOG IN ============ -->
+  <section class="screen" id="screen-login">
+    <div class="auth-page">
+      <button class="auth-logo" data-home aria-label="Nox Chess — back to the home page">
+        <img src="assets/nox-logo.png?v=1" alt="Nox Chess" width="976" height="730">
+      </button>
+      <button class="acct-btn auth-google auth-google-login" id="btnLogInGoogle">
+        <svg viewBox="0 0 48 48" aria-hidden="true">
+          <path fill="#EA4335" d="M24 9.5c3.54 0 6.71 1.22 9.21 3.6l6.85-6.85C35.9 2.38 30.47 0 24 0 14.62 0 6.51 5.38 2.56 13.22l7.98 6.19C12.43 13.72 17.74 9.5 24 9.5z"/>
+          <path fill="#4285F4" d="M46.98 24.55c0-1.57-.15-3.09-.38-4.55H24v9.02h12.94c-.58 2.96-2.26 5.48-4.78 7.18l7.73 6c4.51-4.18 7.09-10.36 7.09-17.65z"/>
+          <path fill="#FBBC05" d="M10.53 28.59c-.48-1.45-.76-2.99-.76-4.59s.27-3.14.76-4.59l-7.98-6.19C.92 16.46 0 20.12 0 24s.92 7.54 2.56 10.78l7.97-6.19z"/>
+          <path fill="#34A853" d="M24 48c6.48 0 11.93-2.13 15.89-5.81l-7.73-6c-2.15 1.45-4.92 2.3-8.16 2.3-6.26 0-11.57-4.22-13.47-9.91l-7.98 6.19C6.51 42.62 14.62 48 24 48z"/>
+        </svg>
+        <span>Log in with Google</span>
+      </button>
+      <button class="auth-swap" id="btnToSignUp">New to Nox Chess? Click to Sign Up</button>
     </div>
   </section>
 
@@ -1304,14 +1337,14 @@
   <section class="screen" id="screen-name">
     <div class="welcome">
       <div class="eyebrow">Almost There</div>
-      <h2 class="name-title">Choose your name</h2>
+      <h2 class="name-title">Choose your username</h2>
       <p class="welcome-line">This is the name other players will see across the board.</p>
 
       <form class="name-form" id="nameForm" autocomplete="off">
         <div class="name-box">
-          <input id="gameName" type="text" placeholder="Your name…" maxlength="25"
-                 autocomplete="off" autocapitalize="words" spellcheck="false"
-                 aria-label="Your name in Nox Chess">
+          <input id="gameName" type="text" placeholder="Your username…" maxlength="25"
+                 autocomplete="off" autocapitalize="none" spellcheck="false"
+                 aria-label="Your username in Nox Chess">
         </div>
         <p class="name-hint" id="nameHint">3 to 25 characters, English letters and numbers.</p>
         <button class="primary name-save" id="btnNameSave" type="submit" disabled>Continue</button>
@@ -1393,6 +1426,11 @@
             <span class="knob"></span>
           </button>
         </div>
+      </div>
+
+      <!-- Only there to be found when it is wanted, at the very bottom. -->
+      <div class="set-foot" id="setFoot" style="display:none">
+        <button class="danger-btn" id="btnLogOut">Log out</button>
       </div>
     </div>
   </section>
@@ -1957,10 +1995,6 @@
 const SUPABASE_URL      = 'https://kltiqsapxfoppqaydxxv.supabase.co';
 const SUPABASE_ANON_KEY = 'sb_publishable_FixWUIJ1j8-02yTOg6-rog_ag-ctyET';
 
-// true: visitors must sign in before they can play at all — the welcome screen
-// loses its "play as a guest" way out. Guests can still play offline copies and
-// any server with accounts switched off.
-const REQUIRE_ACCOUNT   = false;
 
 /* ============================================================
    CONSTANTS & HELPERS
@@ -4093,12 +4127,10 @@ function showScreen(name){
   }
   document.querySelectorAll('.screen').forEach(s => s.classList.toggle('show', s.id === 'screen-' + name));
   syncOptions();
-  // the welcome and name screens are about the account already; a second
-  // account control on them would only repeat itself
+  // Only the home page has room for the account cluster. Sign up, log in and
+  // the username screen are about the account already; rooms names you in its
+  // own chip; and over a game it would sit on the chips describing the game.
   const bar = document.getElementById('accountBar');
-  // Only the home page has room for the account cluster. Welcome and name are
-  // about the account already; rooms names you in its own chip; and over the
-  // game page it would sit on top of the chips describing the game.
   bar.classList.toggle('hide', name !== 'home' && name !== 'settings');
   // On the home page the account cluster belongs in the header row, beside the
   // nav; everywhere else it floats in the corner on its own.
@@ -4410,6 +4442,10 @@ document.addEventListener('keydown', e => {
     if (k === 'escape') showScreen('home');
     return;
   }
+  if (screenName === 'signup' || screenName === 'login'){
+    if (k === 'escape') showScreen('home');
+    return;
+  }
   if (screenName === 'opponent'){
     if (k === 'escape') showScreen('home');
     return;
@@ -4564,7 +4600,10 @@ async function setAccount(session){
   // the profile row is created by a trigger on signup; read it back for rating/tier
   try {
     const { data } = await sb.from('profiles')
-      .select('display_name, avatar_url, rating').eq('id', u.id).single();
+      // maybeSingle, not single: the profile row is created by a trigger, and
+      // asking for exactly one row before it exists is an error rather than an
+      // empty answer.
+      .select('display_name, avatar_url, rating').eq('id', u.id).maybeSingle();
     if (data){
       if (!account.gameName && data.display_name && !nameProblem(data.display_name)){
         account.gameName = data.display_name.trim();   // set on a previous visit
@@ -4580,60 +4619,45 @@ async function setAccount(session){
 
 function updateAccountUI(){
   const signedIn = !!account;
-  document.getElementById('btnSignIn').style.display = signedIn ? 'none' : 'flex';
-  document.getElementById('acctUser').style.display  = signedIn ? 'flex' : 'none';
-  if (signedIn){
-    document.getElementById('acctName').textContent = account.name;
-    document.getElementById('acctTier').textContent = `${account.tier} · ${account.rating}`;
-    const img = document.getElementById('acctAvatar');
-    if (account.avatar) { img.src = account.avatar; img.style.display = ''; }
-    else img.style.display = 'none';
-  }
-  G.playerName = account ? account.name : '';   // guests are named by the server
-  // signing in leaves the welcome screen; signing out can send you back to it
-  document.getElementById('btnGuest').style.display = REQUIRE_ACCOUNT ? 'none' : '';
+  // Signed out it is the Sign Up / Log In pair; signed in it is the name alone.
+  document.getElementById('acctAuth').style.display = signedIn ? 'none' : 'flex';
+  const who = document.getElementById('acctUser');
+  who.style.display = signedIn ? 'inline-block' : 'none';
+  if (signedIn) who.textContent = account.name;
+
+  // Logging out only appears once there is something to log out of.
+  const foot = document.getElementById('setFoot');
+  if (foot) foot.style.display = signedIn ? 'flex' : 'none';
+
+  G.playerName = signedIn ? account.name : '';   // guests are named by the server
   decideFirstScreen();
 }
 
-/* ---- who gets asked to sign up ----
-   Only visitors who arrived at a real address on a build that has accounts.
-   Opened as a local file, or with no keys set, the welcome screen never runs
-   and the game behaves exactly as it always has. */
 function accountsAvailable(){
   return !!(SUPABASE_URL && SUPABASE_ANON_KEY) &&
          (location.protocol === 'http:' || location.protocol === 'https:');
 }
-function chosenGuest(){
-  try { return localStorage.getItem('nox.guest') === '1'; } catch(e){ return false; }
-}
-// Supabase parks its session in localStorage; spotting it synchronously lets a
-// returning player go straight to the board instead of blinking through a
-// sign-up screen while the SDK loads.
-function hasStoredSession(){
-  try {
-    for (let i = 0; i < localStorage.length; i++){
-      const k = localStorage.key(i);
-      if (k && k.startsWith('sb-') && k.endsWith('-auth-token')) return true;
-    }
-  } catch(e){}
-  return false;
-}
-const returningFromGoogle = () =>
-  /access_token=|[?&]code=/.test(location.hash + location.search);
 
-function shouldWelcome(){
-  if (!accountsAvailable() || account) return false;
-  return REQUIRE_ACCOUNT ? true : !chosenGuest();
-}
-// Signed in but hasn't picked a name for the game yet.
+// Signed in but has not chosen a username yet — the one thing that is asked
+// for rather than offered, since a player without a name cannot be shown to
+// anyone else.
 const needsName = () => !!account && !account.gameName;
 
-// Only ever moves between the opening screens; never yanks someone out of a
-// menu or a game they have already walked into.
+/* Arriving at the site leads to the home page: signing up is something a
+   visitor chooses from the header, not a gate they have to get past. The only
+   redirect is the username, and only for an account that has none. Never moves
+   anyone out of a menu or a game they have already walked into. */
 function decideFirstScreen(){
-  if (screenName !== 'home' && screenName !== 'welcome' && screenName !== 'name') return;
-  const want = shouldWelcome() ? 'welcome' : (needsName() ? 'name' : 'home');
-  if (screenName !== want) showScreen(want);
+  const opening = ['home', 'signup', 'login', 'name'];
+  if (opening.indexOf(screenName) === -1) return;
+  if (needsName()){
+    if (screenName !== 'name') showScreen('name');
+    return;
+  }
+  // Signing in finishes whichever of the two pages you were on.
+  if (account && (screenName === 'signup' || screenName === 'login' || screenName === 'name')){
+    showScreen('home');
+  }
 }
 
 async function signIn(){
@@ -4645,27 +4669,33 @@ async function signIn(){
   if (error) console.warn('Google sign-in failed:', error.message);
 }
 
-async function signOut(){ if (sb) await sb.auth.signOut(); }
-
-document.getElementById('btnSignIn').onclick      = signIn;
-document.getElementById('btnWelcomeGoogle').onclick = signIn;
-document.getElementById('btnSignOut').onclick     = signOut;
-document.getElementById('btnGuest').onclick = () => {
-  try { localStorage.setItem('nox.guest', '1'); } catch(e){}   // don't ask again
+async function signOut(){
+  if (sb) await sb.auth.signOut();
   showScreen('home');
-};
+}
+
+// The header pair only chooses which page to land on. Google itself makes no
+// distinction between signing up and logging in — it creates the account if it
+// has not seen this Google user before, and signs them in if it has — so both
+// pages end in the same call, and the username step is what tells a new
+// account apart from a returning one.
+document.getElementById('btnSignUp').onclick = () => { beep(620,.08); showScreen('signup'); };
+document.getElementById('btnLogIn').onclick  = () => { beep(560,.08); showScreen('login'); };
+document.getElementById('btnSignUpGoogle').onclick = signIn;
+document.getElementById('btnLogInGoogle').onclick  = signIn;
+document.getElementById('btnToLogIn').onclick  = () => showScreen('login');
+document.getElementById('btnToSignUp').onclick = () => showScreen('signup');
+document.getElementById('btnLogOut').onclick   = signOut;
+document.querySelectorAll('.auth-logo[data-home]').forEach(b => {
+  b.onclick = () => showScreen('home');
+});
 document.getElementById('authClose').onclick  =
   () => document.getElementById('authOverlay').classList.remove('show');
 
 /* ---- boot ---- */
 syncOptions();
 render();
-// Decide before the SDK loads, so an arriving visitor sees the sign-up screen
-// immediately and a returning one never sees it at all.
-if (accountsAvailable() && !hasStoredSession() && !returningFromGoogle() && shouldWelcome()){
-  showScreen('welcome');
-}
-initAuth();
+initAuth();          // arriving leads to the home page; nothing gates it
 </script>
 </body>
 </html>
