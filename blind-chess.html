@@ -21,6 +21,11 @@
     --good:#6fbf73;
     --radius:14px;
     --board-max:660px;
+    /* One logo, one size, one place — whatever screen it is on. Its box is
+       taller than the mark itself, so the position cannot drift with whatever
+       happens to sit beside it in the header row. */
+    --logo-w:clamp(84px,10vw,118px);
+    --logo-box:96px;
     --btn-h:clamp(74px,17vw,120px);      /* PLAY height = SOCIAL square side */
     --play-w:clamp(200px,48vw,360px);
     --btn-gap:18px;
@@ -218,11 +223,12 @@
     display:flex; align-items:center; justify-content:space-between;
     gap:16px; margin-bottom:14px;
   }
-  .logo-btn{
+  .site-logo, .logo-btn{
+    flex:none; display:flex; align-items:center; min-height:var(--logo-box);
     padding:0; background:transparent; border:0; border-radius:10px; line-height:0;
   }
-  .logo-btn img{width:clamp(84px,10vw,118px); height:auto; display:block;}
-  .logo-btn:hover{transform:translateY(-1px); filter:brightness(1.12);}
+  .site-logo img, .logo-btn img{width:var(--logo-w); height:auto; display:block;}
+  .logo-btn:hover{transform:none; filter:brightness(1.12);}
 
   .game-layout{
     display:grid;
@@ -526,8 +532,11 @@
 
   /* ---------- screens ---------- */
   .screen{display:none;}
-  .screen.show{display:block; animation:screenIn .5s cubic-bezier(.2,.8,.3,1);}
-  @keyframes screenIn{from{opacity:0; transform:translateY(14px);} to{opacity:1; transform:none;}}
+  /* A fade, and nothing more. Sliding the screen in moved the header with it,
+     so the logo drifted on every change of screen — the one thing on the page
+     that should never appear to move. */
+  .screen.show{display:block; animation:screenIn .32s ease;}
+  @keyframes screenIn{from{opacity:0;} to{opacity:1;}}
 
   /* ---------- title screen ---------- */
   .hero{
@@ -651,10 +660,6 @@
   /* ---------- site header: logo left, nav and account right ---------- */
   .site-head{
     display:flex; align-items:center; gap:clamp(14px,3vw,36px);
-    padding-top:4px;
-  }
-  .site-logo img{
-    width:clamp(96px,13vw,150px); height:auto; display:block;
   }
   .site-nav{
     margin-left:auto; display:flex; align-items:center; gap:clamp(4px,1vw,14px);
@@ -1344,7 +1349,11 @@
 
   <!-- ============ SETTINGS ============ -->
   <section class="screen" id="screen-settings">
-    <button class="ghost setup-back" id="btnSetBack">← Back</button>
+    <header class="game-head">
+      <button class="logo-btn" id="btnSetBack" aria-label="Nox Chess — back to the home page">
+        <img src="assets/nox-logo.png?v=1" alt="Nox Chess" width="976" height="730">
+      </button>
+    </header>
     <div class="setup">
       <div class="setup-head">
         <h2>Settings</h2>
