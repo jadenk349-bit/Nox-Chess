@@ -660,8 +660,10 @@
   .site-head{
     display:flex; align-items:center; gap:clamp(14px,3vw,36px);
   }
+  /* Sits directly beside the wordmark; the account cluster is what gets pushed
+     to the far side of the row. */
   .site-nav{
-    margin-left:auto; display:flex; align-items:center; gap:clamp(4px,1vw,14px);
+    display:flex; align-items:center; gap:clamp(2px,.6vw,10px);
   }
   .nav-item{position:relative;}
   .nav-btn{
@@ -670,46 +672,53 @@
     color:var(--text);
   }
   .nav-btn:hover, .nav-item:focus-within > .nav-btn{
-    background:rgba(255,255,255,.05); border-color:var(--line);
+    background:rgba(217,164,65,.10); border-color:rgba(217,164,65,.22);
     color:var(--gold-soft); transform:none;
   }
   .nav-btn.soon{color:var(--muted);}
 
   /* the dropdowns: open on hover, and on keyboard focus so they are reachable */
+  /* Dark glass rather than a grey panel: the sky shows through it, blurred, so
+     the menu reads as something laid over the night rather than a chip of a
+     different interface. The hairline is gold at low strength, which is the
+     only colour the rest of the page uses. */
   .menu, .submenu{
-    position:absolute; z-index:60; min-width:230px;
-    padding:7px; border-radius:12px;
-    background:linear-gradient(180deg,#20242e,#161920);
-    border:1px solid var(--line);
-    box-shadow:0 20px 44px rgba(0,0,0,.55);
+    position:absolute; z-index:60; min-width:184px;
+    padding:5px; border-radius:11px;
+    background:rgba(9,11,19,.86);
+    -webkit-backdrop-filter:blur(14px) saturate(120%);
+            backdrop-filter:blur(14px) saturate(120%);
+    border:1px solid rgba(217,164,65,.22);
+    box-shadow:0 16px 38px rgba(0,0,0,.72), inset 0 1px 0 rgba(255,255,255,.05);
     opacity:0; visibility:hidden; transform:translateY(-6px);
     transition:opacity .16s ease, transform .16s ease, visibility .16s;
   }
-  .menu{top:calc(100% + 6px); right:0;}
+  /* Opens rightward from the button it belongs to. */
+  .menu{top:calc(100% + 6px); left:0;}
   .nav-item:hover > .menu,
   .nav-item:focus-within > .menu{opacity:1; visibility:visible; transform:none;}
 
   .menu-item{position:relative;}
   .menu-btn{
-    display:flex; align-items:center; justify-content:space-between; gap:12px;
-    width:100%; text-align:left; padding:11px 13px; border-radius:8px;
-    background:transparent; border:0; color:var(--text);
-    font-size:13.5px; letter-spacing:.03em; white-space:nowrap;
+    display:flex; align-items:center; justify-content:space-between; gap:10px;
+    width:100%; text-align:left; padding:8px 11px; border-radius:7px;
+    background:transparent; border:0; color:#d8dbe4;
+    font-size:12.5px; letter-spacing:.03em; white-space:nowrap;
   }
   .menu-btn:hover, .menu-btn:focus-visible{
-    background:rgba(217,164,65,.14); color:var(--gold-soft); transform:none;
+    background:rgba(217,164,65,.16); color:var(--gold-soft); transform:none;
   }
-  .menu-btn.soon{color:var(--muted);}
-  .menu-btn.soon:hover{background:rgba(255,255,255,.05); color:var(--muted);}
-  .chev{color:var(--gold); font-size:16px; line-height:1;}
+  .menu-btn.soon{color:#6b7080;}
+  .menu-btn.soon:hover{background:rgba(255,255,255,.05); color:#6b7080;}
+  .chev{color:var(--gold); font-size:14px; line-height:1;}
 
   /* the second level opens alongside; Play is the leftmost item, so there is
      always room on that side */
-  .submenu{top:-7px; left:calc(100% + 7px); min-width:200px;}
+  .submenu{top:-5px; left:calc(100% + 6px); min-width:158px;}
   .menu-item:hover > .submenu,
   .menu-item:focus-within > .submenu{opacity:1; visibility:visible; transform:none;}
 
-  .head-right{display:flex; align-items:center; gap:10px;}
+  .head-right{margin-left:auto; display:flex; align-items:center; gap:10px;}
 
   /* Narrow: the nav cannot share a row with the account cluster, so it drops to
      one of its own. The second-level menu flattens inline rather than flying
