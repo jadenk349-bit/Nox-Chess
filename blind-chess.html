@@ -446,13 +446,11 @@
 
   /* ---------- account ---------- */
   /* the top-right cluster: Sign In (or who you are) and then settings */
-  .account{
-    position:fixed; top:18px; right:20px; z-index:50;
-    display:flex; align-items:center; gap:10px;
-  }
-  .account.hide{display:none;}
-  /* on the home page it sits in the header row rather than floating over it */
-  .account.inline{position:static; top:auto; right:auto;}
+  /* Part of the home header, in ordinary flow. It used to be fixed to the
+     corner and moved into the row by script, which left it hanging in the
+     wrong place until that script had run. Now it is simply in the row, and
+     it comes and goes with the home page because it lives inside it. */
+  .account{display:flex; align-items:center; gap:10px;}
   .acct-btn{
     display:flex; align-items:center; gap:9px;
     padding:9px 15px; border-radius:10px;
@@ -484,7 +482,6 @@
     max-width:190px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;
   }
   @media (max-width:560px){
-    .account{top:14px; right:14px;}
     .acct-signup, .acct-login{padding:8px 12px; font-size:11.5px; letter-spacing:.08em;}
   }
 
@@ -1268,23 +1265,6 @@
 <!-- the night sky the whole site sits on, drawn once and pinned to the viewport -->
 <canvas id="starfield" aria-hidden="true"></canvas>
 
-<!-- account bar: sign-up / signed-in identity -->
-<div class="account" id="accountBar">
-  <div class="acct-auth" id="acctAuth">
-    <button class="acct-signup" id="btnSignUp">Sign Up</button>
-    <button class="acct-login" id="btnLogIn">Log In</button>
-  </div>
-  <!-- Signed in, the pair is replaced by the name and nothing else; logging out
-       lives at the foot of the settings page. -->
-  <span class="acct-name" id="acctUser" style="display:none"></span>
-  <button class="settings-btn" id="btnSettings" aria-label="Settings" title="Settings">
-    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9"
-         stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-      <circle cx="12" cy="12" r="3.1"/>
-      <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 1 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 1 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.6a1.65 1.65 0 0 0 1-1.51V3a2 2 0 1 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9v0a1.65 1.65 0 0 0 1.51 1H21a2 2 0 1 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/>
-    </svg>
-  </button>
-</div>
 
 <div class="wrap">
 
@@ -1398,7 +1378,27 @@
         </div>
       </nav>
 
-      <div class="head-right" id="headRight"></div>
+      <!-- Lives in the header from the first paint, so it is never briefly
+           parked in the corner while the page finds its feet. -->
+      <div class="head-right" id="headRight">
+      <!-- account bar: sign-up / signed-in identity -->
+      <div class="account" id="accountBar">
+        <div class="acct-auth" id="acctAuth">
+          <button class="acct-signup" id="btnSignUp">Sign Up</button>
+          <button class="acct-login" id="btnLogIn">Log In</button>
+        </div>
+        <!-- Signed in, the pair is replaced by the name and nothing else; logging out
+             lives at the foot of the settings page. -->
+        <span class="acct-name" id="acctUser" style="display:none"></span>
+        <button class="settings-btn" id="btnSettings" aria-label="Settings" title="Settings">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9"
+               stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <circle cx="12" cy="12" r="3.1"/>
+            <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 1 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 1 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.6a1.65 1.65 0 0 0 1-1.51V3a2 2 0 1 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9v0a1.65 1.65 0 0 0 1.51 1H21a2 2 0 1 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/>
+          </svg>
+        </button>
+      </div>
+      </div>
     </header>
   </section>
 
@@ -4130,18 +4130,8 @@ function showScreen(name){
   // Only the home page has room for the account cluster. Sign up, log in and
   // the username screen are about the account already; rooms names you in its
   // own chip; and over a game it would sit on the chips describing the game.
-  const bar = document.getElementById('accountBar');
-  bar.classList.toggle('hide', name !== 'home' && name !== 'settings');
-  // On the home page the account cluster belongs in the header row, beside the
-  // nav; everywhere else it floats in the corner on its own.
-  const slot = document.getElementById('headRight');
-  if (name === 'home' && slot){
-    if (bar.parentElement !== slot) slot.appendChild(bar);
-    bar.classList.add('inline');
-  } else if (bar.parentElement !== document.body){
-    document.body.appendChild(bar);
-    bar.classList.remove('inline');
-  }
+  // Nothing to do for the account cluster: it sits inside the home header, so
+  // it shows and hides with that screen and is laid out by the row itself.
   if (name === 'name') setTimeout(() => { judgeName(); nameInput.focus(); }, 60);
   if (name === 'game'){ startClock(); render(); }
   else stopClock();
