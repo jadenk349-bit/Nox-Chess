@@ -213,6 +213,161 @@
   .board.fog .piece.hidden span{opacity:0; filter:blur(5px);}
   .board.reveal .piece span{opacity:1 !important; filter:none !important;}
 
+  /* ---------- the game page ---------- */
+  .game-head{
+    display:flex; align-items:center; justify-content:space-between;
+    gap:16px; margin-bottom:14px;
+  }
+  .logo-btn{
+    padding:0; background:transparent; border:0; border-radius:10px; line-height:0;
+  }
+  .logo-btn img{width:clamp(84px,10vw,118px); height:auto; display:block;}
+  .logo-btn:hover{transform:translateY(-1px); filter:brightness(1.12);}
+
+  .game-layout{
+    display:grid;
+    grid-template-columns:minmax(0,1fr) clamp(280px,26vw,360px);
+    gap:clamp(16px,2.2vw,28px);
+    align-items:start;
+    /* The board takes what the column offers, but never so much that the strip
+       under it falls off the screen — a clock you have to scroll to is no clock.
+       The subtraction is the header, both strips, the status line and padding. */
+    --board-max:min(100%, calc(100vh - 352px));
+  }
+  .board-col{align-items:stretch;}
+  @media (max-width:900px){ .game-layout{grid-template-columns:minmax(0,1fr);} }
+
+  /* the slim name-and-clock strips clamped to the board's edges */
+  .board-bar{
+    width:min(100%,var(--board-max));
+    display:flex; align-items:center; justify-content:space-between; gap:12px;
+    padding:6px 14px; border-radius:10px;
+    border:1px solid var(--line); background:rgba(0,0,0,.3);
+    min-height:44px;
+  }
+  /* the clock sits inside the strip, so it drops its own frame — and its own
+     colour caption, which the name beside it has already given */
+  .board-bar .clock{border:0; background:transparent; padding:0;}
+  .board-bar .clock .who{display:none;}
+  .board-bar .clock .time{font-size:clamp(17px,2.3vw,23px);}
+  .board-bar .clock.active{background:transparent;}
+  .board-bar .clock.active .time{color:var(--gold-soft);}
+  .board-bar:empty{display:none;}
+  .bar-name{
+    font-size:13px; letter-spacing:.06em; color:var(--text);
+    overflow:hidden; text-overflow:ellipsis; white-space:nowrap;
+  }
+  .bar-name .sub{color:var(--muted); font-size:11px; letter-spacing:.14em; margin-left:8px;}
+  #barTop{margin-bottom:8px;}
+  #barBottom{margin-top:8px;}
+  .clock-pool{display:none;}          /* the bars take these two in and out */
+
+  /* ---------- the questions asked before a game ---------- */
+  .game-side{display:flex; flex-direction:column; gap:14px;}
+  #gameSetup, #gamePlay{display:flex; flex-direction:column; gap:14px;}
+  .sec{padding:14px;}
+  .sec h2{
+    margin:0 0 11px; font-size:10.5px; letter-spacing:.24em; text-transform:uppercase;
+    color:var(--muted); font-weight:600;
+  }
+
+  .bot-grid{display:grid; grid-template-columns:repeat(3,1fr); gap:7px;}
+  .bot{
+    display:flex; flex-direction:column; align-items:center; gap:2px;
+    padding:9px 4px; border-radius:9px;
+    background:linear-gradient(180deg,#22262f,#191c23);
+    border:1px solid var(--line); color:var(--text);
+  }
+  .bot .bn{font-size:11.5px; font-weight:600; letter-spacing:.02em;}
+  .bot .be{font-size:10px; color:var(--muted); font-variant-numeric:tabular-nums;}
+  .bot:hover{border-color:#4a5062;}
+  .bot.active{
+    border-color:var(--gold); background:linear-gradient(180deg,rgba(217,164,65,.2),rgba(217,164,65,.06));
+  }
+  .bot.active .bn{color:var(--gold-soft);}
+  .bot.active .be{color:var(--gold);}
+  .bot.big{
+    width:100%; margin-top:7px; flex-direction:row; justify-content:center; gap:10px;
+    padding:12px 4px;
+  }
+  .bot.big .bn{font-size:14px; letter-spacing:.16em;}
+  .bot.big .be{font-size:12px;}
+
+  .side-squares{display:flex; gap:10px;}
+  .side-sq{
+    width:42px; height:42px; padding:0; border-radius:9px;
+    border:1px solid var(--line);
+  }
+  .side-sq.w{background:#efe6d4;}
+  .side-sq.b{background:#22242c;}
+  .side-sq.r{background:linear-gradient(135deg,#efe6d4 0 50%,#22242c 50% 100%);}
+  .side-sq:hover{border-color:#4a5062; transform:translateY(-1px);}
+  .side-sq.active{
+    border-color:var(--gold); box-shadow:0 0 0 3px rgba(217,164,65,.22);
+  }
+
+  .vis-grid{display:grid; grid-template-columns:1fr; gap:7px;}
+  .vis{
+    padding:11px 12px; border-radius:9px; text-align:left;
+    background:linear-gradient(180deg,#22262f,#191c23);
+    border:1px solid var(--line); color:var(--text);
+    font-size:12.5px; letter-spacing:.05em;
+  }
+  .vis:hover{border-color:#4a5062;}
+  .vis.active{
+    border-color:var(--gold); color:var(--gold-soft);
+    background:linear-gradient(180deg,rgba(217,164,65,.2),rgba(217,164,65,.06));
+  }
+
+  .time-grid{display:grid; grid-template-columns:repeat(3,1fr); gap:7px;}
+  .tm{
+    padding:10px 4px; border-radius:9px; font-size:12px; white-space:nowrap;
+    background:linear-gradient(180deg,#22262f,#191c23);
+    border:1px solid var(--line); color:var(--text);
+  }
+  .tm:hover{border-color:#4a5062;}
+  .tm.active{
+    border-color:var(--gold); color:var(--gold-soft);
+    background:linear-gradient(180deg,rgba(217,164,65,.2),rgba(217,164,65,.06));
+  }
+
+  /* dark until every question is answered, then it lights up */
+  #gameSetup .start-btn{
+    width:100%; margin-top:2px; padding:15px 0;
+    transition:background .25s ease, color .25s ease, box-shadow .25s ease, opacity .25s ease;
+  }
+  #gameSetup .start-btn.dim{
+    background:linear-gradient(180deg,#20242e,#171a21);
+    border-color:var(--line); color:#5f6472; box-shadow:none;
+  }
+  #gameSetup .start-btn.dim:hover{filter:none; transform:none;}
+
+  .console-title{
+    margin:0 0 12px; font-size:11px; letter-spacing:.24em;
+    text-transform:uppercase; color:var(--muted); font-weight:600;
+  }
+
+  /* ---------- open rooms ---------- */
+  .room-who{
+    font-size:13.5px; letter-spacing:.05em; color:var(--text);
+    padding:8px 14px; border-radius:999px;
+    border:1px solid var(--line); background:rgba(0,0,0,.3);
+    max-width:220px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;
+  }
+  .room-who:empty{display:none;}
+  .rooms-page{
+    display:grid; grid-template-columns:clamp(180px,20vw,240px) minmax(0,1fr);
+    gap:clamp(18px,3vw,40px); align-items:start;
+  }
+  @media (max-width:760px){ .rooms-page{grid-template-columns:minmax(0,1fr);} }
+  .rooms-aside .primary{width:100%; padding:14px 0; font-size:13px; letter-spacing:.14em;}
+  .rooms-main{max-width:620px;}
+  .rooms-title{
+    margin:0; font-family:Georgia,serif; font-weight:400;
+    font-size:clamp(22px,3.4vw,32px); letter-spacing:.12em; color:var(--gold-soft);
+  }
+  .rooms-sub{margin:8px 0 20px; font-size:13px; color:var(--muted);}
+
   /* ---------- clocks ---------- */
   .clocks{
     width:min(100%,var(--board-max));
@@ -285,14 +440,17 @@
   }
 
   /* ---------- account ---------- */
+  /* the top-right cluster: Sign In (or who you are) and then settings */
   .account{
-    position:fixed; top:20px; right:22px; z-index:40;
+    position:fixed; top:18px; right:20px; z-index:50;
     display:flex; align-items:center; gap:10px;
   }
   .account.hide{display:none;}
+  /* on the home page it sits in the header row rather than floating over it */
+  .account.inline{position:static; top:auto; right:auto;}
   .acct-btn{
-    display:flex; align-items:center; gap:10px;
-    padding:10px 16px; border-radius:10px;
+    display:flex; align-items:center; gap:9px;
+    padding:9px 15px; border-radius:10px;
     background:#fff; color:#1f1f1f; border:1px solid #dadce0;
     font-size:13px; font-weight:600;
   }
@@ -490,8 +648,82 @@
   .lesson-btn:hover{border-color:var(--gold); color:var(--gold-soft);}
 
   /* gear in the top-right corner of the title screen */
+  /* ---------- site header: logo left, nav and account right ---------- */
+  .site-head{
+    display:flex; align-items:center; gap:clamp(14px,3vw,36px);
+    padding-top:4px;
+  }
+  .site-logo img{
+    width:clamp(96px,13vw,150px); height:auto; display:block;
+  }
+  .site-nav{
+    margin-left:auto; display:flex; align-items:center; gap:clamp(4px,1vw,14px);
+  }
+  .nav-item{position:relative;}
+  .nav-btn{
+    padding:11px 18px; border-radius:10px; background:transparent; border:1px solid transparent;
+    font-size:clamp(12px,1.45vw,15px); font-weight:650; letter-spacing:.16em;
+    color:var(--text);
+  }
+  .nav-btn:hover, .nav-item:focus-within > .nav-btn{
+    background:rgba(255,255,255,.05); border-color:var(--line);
+    color:var(--gold-soft); transform:none;
+  }
+  .nav-btn.soon{color:var(--muted);}
+
+  /* the dropdowns: open on hover, and on keyboard focus so they are reachable */
+  .menu, .submenu{
+    position:absolute; z-index:60; min-width:230px;
+    padding:7px; border-radius:12px;
+    background:linear-gradient(180deg,#20242e,#161920);
+    border:1px solid var(--line);
+    box-shadow:0 20px 44px rgba(0,0,0,.55);
+    opacity:0; visibility:hidden; transform:translateY(-6px);
+    transition:opacity .16s ease, transform .16s ease, visibility .16s;
+  }
+  .menu{top:calc(100% + 6px); right:0;}
+  .nav-item:hover > .menu,
+  .nav-item:focus-within > .menu{opacity:1; visibility:visible; transform:none;}
+
+  .menu-item{position:relative;}
+  .menu-btn{
+    display:flex; align-items:center; justify-content:space-between; gap:12px;
+    width:100%; text-align:left; padding:11px 13px; border-radius:8px;
+    background:transparent; border:0; color:var(--text);
+    font-size:13.5px; letter-spacing:.03em; white-space:nowrap;
+  }
+  .menu-btn:hover, .menu-btn:focus-visible{
+    background:rgba(217,164,65,.14); color:var(--gold-soft); transform:none;
+  }
+  .menu-btn.soon{color:var(--muted);}
+  .menu-btn.soon:hover{background:rgba(255,255,255,.05); color:var(--muted);}
+  .chev{color:var(--gold); font-size:16px; line-height:1;}
+
+  /* the second level opens alongside; Play is the leftmost item, so there is
+     always room on that side */
+  .submenu{top:-7px; left:calc(100% + 7px); min-width:200px;}
+  .menu-item:hover > .submenu,
+  .menu-item:focus-within > .submenu{opacity:1; visibility:visible; transform:none;}
+
+  .head-right{display:flex; align-items:center; gap:10px;}
+
+  /* Narrow: the nav cannot share a row with the account cluster, so it drops to
+     one of its own. The second-level menu flattens inline rather than flying
+     out sideways, which there is no room for and no hover to trigger. */
+  @media (max-width:760px){
+    .site-head{flex-wrap:wrap; row-gap:10px;}
+    .site-nav{order:3; width:100%; margin-left:0; justify-content:center; flex-wrap:wrap;}
+    .menu{right:auto; left:0; min-width:200px;}
+    .nav-item:last-child .menu{right:0; left:auto;}
+    .submenu{
+      position:static; min-width:0; margin:4px 0 4px 12px; padding:4px;
+      opacity:1; visibility:visible; transform:none;
+      box-shadow:none; background:rgba(0,0,0,.25);
+    }
+  }
+
   .settings-btn{
-    position:absolute; top:0; right:0; z-index:2;
+    flex:none;
     width:44px; height:44px; padding:0; border-radius:12px;
     display:flex; align-items:center; justify-content:center;
     background:linear-gradient(180deg,#20242e,#171a21);
@@ -991,7 +1223,7 @@
       <path fill="#FBBC05" d="M10.53 28.59c-.48-1.45-.76-2.99-.76-4.59s.27-3.14.76-4.59l-7.98-6.19C.92 16.46 0 20.12 0 24s.92 7.54 2.56 10.78l7.97-6.19z"/>
       <path fill="#34A853" d="M24 48c6.48 0 11.93-2.13 15.89-5.81l-7.73-6c-2.15 1.45-4.92 2.3-8.16 2.3-6.26 0-11.57-4.22-13.47-9.91l-7.98 6.19C6.51 42.62 14.62 48 24 48z"/>
     </svg>
-    <span>Sign up with Google</span>
+    <span>Sign In</span>
   </button>
   <div class="acct-user" id="acctUser" style="display:none">
     <img id="acctAvatar" alt="">
@@ -1001,6 +1233,13 @@
     </div>
     <button class="ghost" id="btnSignOut">Sign out</button>
   </div>
+  <button class="settings-btn" id="btnSettings" aria-label="Settings" title="Settings">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"
+         stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+      <circle cx="12" cy="12" r="3.1"/>
+      <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 1 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 1 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.6a1.65 1.65 0 0 0 1-1.51V3a2 2 0 1 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9v0a1.65 1.65 0 0 0 1.51 1H21a2 2 0 1 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/>
+    </svg>
+  </button>
 </div>
 
 <div class="wrap">
@@ -1054,30 +1293,53 @@
   </section>
 
   <section class="screen show" id="screen-home">
-    <button class="settings-btn" id="btnSettings" aria-label="Settings" title="Settings">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"
-           stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-        <circle cx="12" cy="12" r="3.1"/>
-        <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 1 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 1 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.6a1.65 1.65 0 0 0 1-1.51V3a2 2 0 1 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9v0a1.65 1.65 0 0 0 1.51 1H21a2 2 0 1 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/>
-      </svg>
-    </button>
-    <div class="hero">
-      <div class="eyebrow">A Game of Memory &amp; Nerve</div>
-      <h1><img src="assets/nox-logo.png?v=1" alt="Nox Chess" width="976" height="730"></h1>
-      <div class="rule"><span></span><b>♞ ♛ ♞</b><span></span></div>
-      <p class="tagline">The board is there. The pieces are not.<br>Hold the position in your head.</p>
-
-      <div class="hero-actions">
-        <button class="play-btn" id="btnPlay">PLAY</button>
-        <button class="social-btn" id="btnSocial">
-          <span class="ico">♟♟</span>
-          <span>SOCIAL</span>
-        </button>
-        <button class="lesson-btn" id="btnLesson">LESSON &amp; PUZZLE</button>
+    <header class="site-head">
+      <div class="site-logo">
+        <img src="assets/nox-logo.png?v=1" alt="Nox Chess" width="976" height="730">
       </div>
 
-      <div class="hero-set" id="heroSet"></div>
-    </div>
+      <nav class="site-nav" id="siteNav">
+        <div class="nav-item">
+          <button class="nav-btn" aria-haspopup="true">PLAY</button>
+          <div class="menu">
+            <div class="menu-item has-sub">
+              <button class="menu-btn" aria-haspopup="true">
+                Play Online <span class="chev">›</span>
+              </button>
+              <div class="submenu">
+                <button class="menu-btn soon" id="navRanked">Ranked Match</button>
+                <button class="menu-btn" id="navFriendly">Friendly Match</button>
+              </div>
+            </div>
+            <button class="menu-btn" id="navBot">Play Bot</button>
+            <button class="menu-btn" id="navLocal">Same Computer</button>
+          </div>
+        </div>
+
+        <div class="nav-item">
+          <button class="nav-btn soon" id="navSocial">SOCIAL</button>
+        </div>
+
+        <div class="nav-item">
+          <button class="nav-btn" aria-haspopup="true">LESSON</button>
+          <div class="menu">
+            <button class="menu-btn soon" id="navHowTo">How to Play Blind Chess</button>
+            <button class="menu-btn soon" id="navPractice">Practice</button>
+          </div>
+        </div>
+
+        <div class="nav-item">
+          <button class="nav-btn" aria-haspopup="true">PUZZLE</button>
+          <div class="menu">
+            <button class="menu-btn soon" id="navOpening">Opening</button>
+            <button class="menu-btn soon" id="navMiddle">Middle Game</button>
+            <button class="menu-btn soon" id="navEnd">End Game</button>
+          </div>
+        </div>
+      </nav>
+
+      <div class="head-right" id="headRight"></div>
+    </header>
   </section>
 
   <!-- ============ SETTINGS ============ -->
@@ -1156,19 +1418,24 @@
 
   <!-- ============ OPEN ROOMS ============ -->
   <section class="screen" id="screen-rooms">
-    <button class="ghost setup-back" id="btnRoomsBack">← Back</button>
-    <div class="setup">
-      <div class="setup-head">
-        <h2>Open Rooms</h2>
-        <p>Set up a game of your own, or take a seat at someone else's.</p>
-      </div>
+    <header class="game-head">
+      <button class="logo-btn" id="btnRoomsBack" aria-label="Nox Chess — back to the home page">
+        <img src="assets/nox-logo.png?v=1" alt="Nox Chess" width="976" height="730">
+      </button>
+      <div class="room-who" id="roomWho"></div>
+    </header>
 
-      <div class="rooms-top">
+    <div class="rooms-page">
+      <div class="rooms-aside">
         <button class="primary" id="btnHostRoom">Host a Room</button>
       </div>
 
-      <div class="room-note" id="roomNote"></div>
-      <div class="room-list" id="roomList"></div>
+      <div class="rooms-main">
+        <h2 class="rooms-title">Open Rooms</h2>
+        <p class="rooms-sub">Take a seat at someone else's game, or set up your own.</p>
+        <div class="room-note" id="roomNote"></div>
+        <div class="room-list" id="roomList"></div>
+      </div>
     </div>
   </section>
 
@@ -1264,149 +1531,209 @@
 
   <!-- ============ GAME ============ -->
   <section class="screen" id="screen-game">
-  <div class="topbar">
-    <button class="ghost" id="btnMenu">← Menu</button>
-    <div class="brand">NOX CHESS</div>
-    <div class="chips">
-      <div class="vision-chip" id="visionChip">Blindfold</div>
-      <div class="vision-chip alt" id="setupChip">1300 Elo · White</div>
-    </div>
-  </div>
+    <header class="game-head">
+      <button class="logo-btn" id="btnMenu" aria-label="Nox Chess — back to the home page">
+        <img src="assets/nox-logo.png?v=1" alt="Nox Chess" width="976" height="730">
+      </button>
+      <div class="chips" id="gameChips">
+        <div class="vision-chip" id="visionChip">Blindfold</div>
+        <div class="vision-chip alt" id="setupChip">1300 Elo · White</div>
+      </div>
+    </header>
 
-  <div class="layout">
+    <div class="game-layout">
 
-    <!-- BOARD -->
-    <div class="board-col">
-      <div class="console panel" id="console">
-        <h2 style="margin:0 0 12px; font-size:11px; letter-spacing:.24em; text-transform:uppercase; color:var(--muted); font-weight:600;">Blindfold Console</h2>
-        <div class="log" id="log"></div>
-        <form class="entry" id="entryForm" autocomplete="off">
-          <input id="moveInput" type="text" placeholder="your move…" autocomplete="off" autocapitalize="off" spellcheck="false">
-          <button class="primary" type="submit">Play</button>
-        </form>
+      <!-- BOARD -->
+      <div class="board-col">
+        <div class="board-bar" id="barTop"></div>
 
-        <!-- two players sharing one screen each get their own box -->
-        <div id="entryLocal">
-          <form class="entry local-entry" data-side="w" autocomplete="off">
-            <span class="entry-tag">WHITE</span>
-            <input class="local-input" data-side="w" type="text" placeholder="white's move…" autocomplete="off" autocapitalize="off" spellcheck="false">
+        <div class="console panel" id="console">
+          <h2 class="console-title">Blindfold Console</h2>
+          <div class="log" id="log"></div>
+          <form class="entry" id="entryForm" autocomplete="off">
+            <input id="moveInput" type="text" placeholder="your move…" autocomplete="off" autocapitalize="off" spellcheck="false">
             <button class="primary" type="submit">Play</button>
           </form>
-          <form class="entry local-entry" data-side="b" autocomplete="off">
-            <span class="entry-tag">BLACK</span>
-            <input class="local-input" data-side="b" type="text" placeholder="black's move…" autocomplete="off" autocapitalize="off" spellcheck="false">
-            <button class="primary" type="submit">Play</button>
-          </form>
-        </div>
-        <p class="entry-hint">
-          Standard notation: <b>e4</b> · <b>Nf3</b> · <b>exd5</b> · <b>O-O</b> · <b>e8=Q</b> — or plain squares, <b>e2e4</b>.
-        </p>
-      </div>
 
-      <div class="board-frame panel" id="boardFrame" style="background:linear-gradient(160deg,#2a2318,#171410 55%,#241d13)">
-        <div class="board" id="board">
-          <div class="squares" id="squares"></div>
-          <div class="pieces" id="piecesLayer"></div>
-          <!-- review only: arrows for the two moves, and the ?/!! marks -->
-          <svg class="arrows" id="arrows" viewBox="0 0 8 8" preserveAspectRatio="none" aria-hidden="true"></svg>
-          <div class="marks" id="marks"></div>
+          <!-- two players sharing one screen each get their own box -->
+          <div id="entryLocal">
+            <form class="entry local-entry" data-side="w" autocomplete="off">
+              <span class="entry-tag">WHITE</span>
+              <input class="local-input" data-side="w" type="text" placeholder="white's move…" autocomplete="off" autocapitalize="off" spellcheck="false">
+              <button class="primary" type="submit">Play</button>
+            </form>
+            <form class="entry local-entry" data-side="b" autocomplete="off">
+              <span class="entry-tag">BLACK</span>
+              <input class="local-input" data-side="b" type="text" placeholder="black's move…" autocomplete="off" autocapitalize="off" spellcheck="false">
+              <button class="primary" type="submit">Play</button>
+            </form>
+          </div>
+          <p class="entry-hint">
+            Standard notation: <b>e4</b> · <b>Nf3</b> · <b>exd5</b> · <b>O-O</b> · <b>e8=Q</b> — or plain squares, <b>e2e4</b>.
+          </p>
         </div>
-      </div>
 
-      <div class="clocks panel" id="clocks">
-        <div class="clock" id="clockW"><span class="who">WHITE</span><span class="time">10:00</span></div>
-        <div class="clock" id="clockB"><span class="who">BLACK</span><span class="time">10:00</span></div>
+        <div class="board-frame panel" id="boardFrame">
+          <div class="board" id="board">
+            <div class="squares" id="squares"></div>
+            <div class="pieces" id="piecesLayer"></div>
+            <!-- review only: arrows for the two moves, and the ?/!! marks -->
+            <svg class="arrows" id="arrows" viewBox="0 0 8 8" preserveAspectRatio="none" aria-hidden="true"></svg>
+            <div class="marks" id="marks"></div>
+          </div>
+        </div>
+
+        <div class="board-bar" id="barBottom"></div>
+
+        <!-- the two clocks live in the bars above and below; kept here so the
+             markup they need exists even before a bar has claimed them -->
+        <div class="clock-pool" id="clockPool">
+          <div class="clock" id="clockW"><span class="who">WHITE</span><span class="time">10:00</span></div>
+          <div class="clock" id="clockB"><span class="who">BLACK</span><span class="time">10:00</span></div>
+        </div>
         <div class="clock-note" id="clockNote">Clock starts on the first move</div>
-      </div>
 
-      <div class="status panel">
-        <div class="dot" id="dot"></div>
-        <div class="status-text" id="status">White to move</div>
-        <div class="spacer"></div>
-        <div class="peeks" id="peeks"></div>
-      </div>
-
-      <div class="controls panel" id="controls">
-        <button id="btnPeek">Peek</button>
-        <button id="btnDraw" class="ghost">Offer Draw</button>
-        <button id="btnResign" class="ghost danger">Resign</button>
-      </div>
-
-      <!-- post-game review: appears when Study Board is pressed -->
-      <div class="review panel" id="reviewBar" style="display:none">
-        <div class="rev-nav">
-          <button id="revBack" aria-label="Previous move">◀</button>
-          <button id="revFwd" aria-label="Next move">▶</button>
+        <div class="status panel">
+          <div class="dot" id="dot"></div>
+          <div class="status-text" id="status">White to move</div>
+          <div class="spacer"></div>
+          <div class="peeks" id="peeks"></div>
         </div>
-        <div class="rev-body">
-          <div class="rev-head">
-            <span class="rev-count" id="revCount"></span>
-            <span class="rev-verdict" id="revVerdict"></span>
+
+        <!-- post-game review: appears when Study Board is pressed -->
+        <div class="review panel" id="reviewBar" style="display:none">
+          <div class="rev-nav">
+            <button id="revBack" aria-label="Previous move">◀</button>
+            <button id="revFwd" aria-label="Next move">▶</button>
           </div>
-          <div class="rev-line" id="revLine"></div>
-        </div>
-        <button class="ghost rev-done" id="revDone">Done</button>
-      </div>
-    </div>
-
-    <!-- SIDE -->
-    <div class="side">
-
-      <div class="card panel">
-        <h2>Captured</h2>
-        <div class="capbar">
-          <div class="tray" id="trayW">—</div>
-          <div class="adv" id="advW"></div>
-        </div>
-        <div class="capbar">
-          <div class="tray b" id="trayB">—</div>
-          <div class="adv" id="advB"></div>
+          <div class="rev-body">
+            <div class="rev-head">
+              <span class="rev-count" id="revCount"></span>
+              <span class="rev-verdict" id="revVerdict"></span>
+            </div>
+            <div class="rev-line" id="revLine"></div>
+          </div>
+          <button class="ghost rev-done" id="revDone">Done</button>
         </div>
       </div>
 
-      <div class="card panel">
-        <h2>Notation</h2>
-        <div class="moves" id="moves"><div class="empty">No moves yet.</div></div>
-      </div>
+      <!-- SIDE: the questions before the game, the game itself after it -->
+      <aside class="game-side">
 
-      <!-- review only: why the engine liked its own move -->
-      <div class="card panel coach-card" id="coachCard" style="display:none">
-        <h2>The Engine's Move</h2>
-        <div class="coach-move" id="coachMove"></div>
-        <div class="coach-why" id="coachWhy"></div>
-      </div>
+        <div id="gameSetup">
+          <div class="panel sec" id="secOpponent">
+            <h2>Opponent</h2>
+            <div class="bot-grid" data-seg="level">
+              <button class="bot" data-level="100"><span class="bn">Flicker</span><span class="be">100</span></button>
+              <button class="bot" data-level="500"><span class="bn">Dusk</span><span class="be">500</span></button>
+              <button class="bot" data-level="800"><span class="bn">Shade</span><span class="be">800</span></button>
+              <button class="bot" data-level="1000"><span class="bn">Raven</span><span class="be">1000</span></button>
+              <button class="bot" data-level="1300"><span class="bn">Wraith</span><span class="be">1300</span></button>
+              <button class="bot" data-level="1600"><span class="bn">Eclipse</span><span class="be">1600</span></button>
+              <button class="bot" data-level="2000"><span class="bn">Nightfall</span><span class="be">2000</span></button>
+              <button class="bot" data-level="2400"><span class="bn">Obsidian</span><span class="be">2400</span></button>
+              <button class="bot" data-level="3000"><span class="bn">Abyss</span><span class="be">3000</span></button>
+            </div>
+            <button class="bot big" data-level="3200"><span class="bn">Nox</span><span class="be">3200</span></button>
+          </div>
 
-      <div class="card panel rules-card" id="rulesCard">
-        <button class="rules-head" id="rulesToggle" aria-expanded="false" aria-controls="rulesBody">
-          <span class="rules-title">Notation Rules</span>
-          <span class="rules-cap" id="rulesCap">Open</span>
-        </button>
-        <div class="rules-body" id="rulesBody">
-          <div>
-            <table class="rules-table">
-              <thead>
-                <tr><th>Symbol</th><th>Meaning</th><th>Example</th></tr>
-              </thead>
-              <tbody>
-                <tr><td>K Q R B N</td><td>King, queen, rook, bishop, knight</td><td>Nf3</td></tr>
-                <tr><td>—</td><td>A pawn has no letter; name the square</td><td>e4</td></tr>
-                <tr><td>a–h 1–8</td><td>File letter, then rank number</td><td>e4</td></tr>
-                <tr><td>x</td><td>Captures</td><td>Bxe5</td></tr>
-                <tr><td>file + x</td><td>A pawn capture names the file it left</td><td>exd5</td></tr>
-                <tr><td>O-O</td><td>Castles kingside (short)</td><td>O-O</td></tr>
-                <tr><td>O-O-O</td><td>Castles queenside (long)</td><td>O-O-O</td></tr>
-                <tr><td>=</td><td>Promotes a pawn on the last rank</td><td>e8=Q</td></tr>
-                <tr><td>+</td><td>Check</td><td>Qh5+</td></tr>
-                <tr><td>#</td><td>Checkmate</td><td>Qf7#</td></tr>
-                <tr><td>extra letter</td><td>Says which piece, when two could go there</td><td>Nbd2</td></tr>
-              </tbody>
-            </table>
+          <div class="panel sec" id="secYouPlay">
+            <h2>You Play</h2>
+            <div class="side-squares" data-seg="side">
+              <button class="side-sq w" data-side="w" aria-label="Play as White" title="White"></button>
+              <button class="side-sq b" data-side="b" aria-label="Play as Black" title="Black"></button>
+              <button class="side-sq r" data-side="r" aria-label="Either colour" title="Either colour"></button>
+            </div>
+          </div>
+
+          <div class="panel sec" id="secVision">
+            <h2>Vision</h2>
+            <div class="vis-grid" data-seg="mode">
+              <button class="vis" data-mode="total">Complete Blindfold</button>
+              <button class="vis" data-mode="blind">Board Only</button>
+              <button class="vis" data-mode="fog">Fog of War</button>
+              <button class="vis" data-mode="sighted">Sighted</button>
+            </div>
+          </div>
+
+          <div class="panel sec" id="secTime">
+            <h2>Time Each</h2>
+            <div class="time-grid" data-seg="time">
+              <button class="tm" data-time="1">1 min</button>
+              <button class="tm" data-time="3">3 min</button>
+              <button class="tm" data-time="5">5 min</button>
+              <button class="tm" data-time="10">10 min</button>
+              <button class="tm" data-time="15">15 min</button>
+              <button class="tm" data-time="30">30 min</button>
+            </div>
+          </div>
+
+          <button class="primary start-btn" id="btnStartGame">Start Play</button>
+        </div>
+
+        <div id="gamePlay" style="display:none">
+          <div class="card panel">
+            <h2>Captured</h2>
+            <div class="capbar">
+              <div class="tray" id="trayW">—</div>
+              <div class="adv" id="advW"></div>
+            </div>
+            <div class="capbar">
+              <div class="tray b" id="trayB">—</div>
+              <div class="adv" id="advB"></div>
+            </div>
+          </div>
+
+          <div class="card panel">
+            <h2>Notation</h2>
+            <div class="moves" id="moves"><div class="empty">No moves yet.</div></div>
+          </div>
+
+          <div class="controls panel" id="controls">
+            <button id="btnPeek">Peek</button>
+            <button id="btnDraw" class="ghost">Offer Draw</button>
+            <button id="btnResign" class="ghost danger">Resign</button>
+          </div>
+
+          <!-- review only: why the engine liked its own move -->
+          <div class="card panel coach-card" id="coachCard" style="display:none">
+            <h2>The Engine's Move</h2>
+            <div class="coach-move" id="coachMove"></div>
+            <div class="coach-why" id="coachWhy"></div>
+          </div>
+
+          <div class="card panel rules-card" id="rulesCard">
+            <button class="rules-head" id="rulesToggle" aria-expanded="false" aria-controls="rulesBody">
+              <span class="rules-title">Notation Rules</span>
+              <span class="rules-cap" id="rulesCap">Open</span>
+            </button>
+            <div class="rules-body" id="rulesBody">
+              <div>
+                <table class="rules-table">
+                  <thead>
+                    <tr><th>Symbol</th><th>Meaning</th><th>Example</th></tr>
+                  </thead>
+                  <tbody>
+                    <tr><td>K Q R B N</td><td>King, queen, rook, bishop, knight</td><td>Nf3</td></tr>
+                    <tr><td>—</td><td>A pawn has no letter; name the square</td><td>e4</td></tr>
+                    <tr><td>a–h 1–8</td><td>File letter, then rank number</td><td>e4</td></tr>
+                    <tr><td>x</td><td>Captures</td><td>Bxe5</td></tr>
+                    <tr><td>file + x</td><td>A pawn capture names the file it left</td><td>exd5</td></tr>
+                    <tr><td>O-O</td><td>Castles kingside (short)</td><td>O-O</td></tr>
+                    <tr><td>O-O-O</td><td>Castles queenside (long)</td><td>O-O-O</td></tr>
+                    <tr><td>=</td><td>Promotes a pawn on the last rank</td><td>e8=Q</td></tr>
+                    <tr><td>+</td><td>Check</td><td>Qh5+</td></tr>
+                    <tr><td>#</td><td>Checkmate</td><td>Qf7#</td></tr>
+                    <tr><td>extra letter</td><td>Says which piece, when two could go there</td><td>Nbd2</td></tr>
+                  </tbody>
+                </table>
+              </div>
+            </div>
           </div>
         </div>
-      </div>
 
+      </aside>
     </div>
-  </div>
 
     <footer id="footHint"></footer>
   </section>
@@ -1875,6 +2202,7 @@ const G = {
   hosting: false,         // online only: setting up a room rather than joining one
   playerName: '',         // the account's chosen name; empty for guests
   level: 1300,
+  started: false,         // the board is only a preview until Start Play
   human: W,
   minutes: 10,            // same allowance for both sides
   clock: { w: 600000, b: 600000 },
@@ -2003,6 +2331,12 @@ function visibleSet(){
 // 'blind' hides the men on a visible board; 'total' does away with the board entirely
 const BLINDISH = m => m === 'blind' || m === 'total';
 // two players sharing one screen — no engine, and both sides are the player
+// The engine's ladder, by name. The number beside each is the Elo it plays at.
+const BOT_NAME = {
+  100:'Flicker', 500:'Dusk', 800:'Shade', 1000:'Raven', 1300:'Wraith',
+  1600:'Eclipse', 2000:'Nightfall', 2400:'Obsidian', 3000:'Abyss', 3200:'Nox'
+};
+
 const LOCAL   = () => G.opponent === 'local';
 const ONLINE  = () => G.opponent === 'online';
 const HOSTING = () => ONLINE() && G.hosting;   // setting up a room, not joining one
@@ -2018,33 +2352,37 @@ function render(){
   resetSquareClasses();
   renderPieces();
 
+  // Before a vision is chosen the board is only a preview, so it is shown plainly;
+  // from the moment one is picked it looks exactly like the game about to be played.
+  const view = (!G.started && !picked.mode) ? 'sighted' : G.mode;
+
   // complete blindfold shows no board at all — until you peek, or the game ends.
   // A peek swaps the console out for the board so the reveal lands where you're looking.
-  const totalPeek = G.mode === 'total' && G.peeking;
-  const boardShown = G.mode !== 'total' || !!G.over || G.peeking;
+  const totalPeek = view === 'total' && G.peeking;
+  const boardShown = view !== 'total' || !!G.over || G.peeking;
   el.boardFrame.style.display = boardShown ? '' : 'none';
-  el.console.classList.toggle('show', G.mode === 'total' && !totalPeek);
+  el.console.classList.toggle('show', view === 'total' && !totalPeek);
 
-  el.board.classList.toggle('blind', BLINDISH(G.mode) && !G.revealed);
-  el.board.classList.toggle('fog',   G.mode === 'fog'   && !G.revealed && !G.peeking);
+  el.board.classList.toggle('blind', BLINDISH(view) && !G.revealed);
+  el.board.classList.toggle('fog',   view === 'fog'   && !G.revealed && !G.peeking);
   el.board.classList.toggle('reveal', G.revealed);
   el.board.classList.toggle('peek', G.peeking);
 
   // last move + check + selection
-  if (G.lastMove && (G.mode === 'sighted' || G.revealed || G.peeking)){
+  if (G.lastMove && (view === 'sighted' || G.revealed || G.peeking)){
     sqEls[visualIndex(G.lastMove.from)].classList.add('last');
     sqEls[visualIndex(G.lastMove.to)].classList.add('last');
   }
   if (G.sel >= 0) sqEls[visualIndex(G.sel)].classList.add('sel');
 
 
-  if (inCheck(G.st, G.st.turn) && (!BLINDISH(G.mode) || G.peeking || G.revealed)){
+  if (inCheck(G.st, G.st.turn) && (!BLINDISH(view) || G.peeking || G.revealed)){
     const k = kingSq(G.st, G.st.turn);
     if (k >= 0) sqEls[visualIndex(k)].classList.add('check');
   }
 
   // legal-move hints (sighted only)
-  if (G.mode === 'sighted' && G.sel >= 0 && !G.over){
+  if (view === 'sighted' && G.sel >= 0 && !G.over){
     for (const m of legalMoves(G.st, G.st.turn)){
       if (m.from !== G.sel) continue;
       const d = sqEls[visualIndex(m.to)];
@@ -2054,7 +2392,7 @@ function render(){
   }
 
   // fog
-  if (G.mode === 'fog' && !G.revealed && !G.peeking){
+  if (view === 'fog' && !G.revealed && !G.peeking){
     const vis = visibleSet();
     for (let i=0;i<64;i++) if (!vis.has(i)) sqEls[visualIndex(i)].classList.add('hidden');
     for (let i=0;i<64;i++){
@@ -2096,8 +2434,9 @@ function renderStatus(){
   el.peeks.textContent = CAN_PEEK(G.mode)
     ? `PEEKS ${'◆'.repeat(G.peeksLeft)}${'◇'.repeat(Math.max(0,3-G.peeksLeft))}`
     : '';
-  // no walking out of a game in progress — the menu returns once it is over
-  document.getElementById('btnMenu').style.display = G.over ? '' : 'none';
+  // The logo is the way home and stays put; walking out of a game in progress
+  // is caught by the confirmation on the way, not by hiding the door.
+  document.getElementById('btnMenu').style.display = '';
 
   const peekBtn = document.getElementById('btnPeek');
   peekBtn.style.display = CAN_PEEK(G.mode) ? '' : 'none';   // nothing to peek at otherwise
@@ -2183,17 +2522,61 @@ function fmtClock(ms){
   return Math.floor(total/60) + ':' + String(total%60).padStart(2,'0');
 }
 
+/** Who to call each side, on the strips above and below the board. */
+function seatName(color){
+  if (LOCAL()) return color === W ? 'White' : 'Black';
+  if (BOT()){
+    if (color === G.human) return (account && account.name) || 'You';
+    return BOT_NAME[G.level] ? (BOT_NAME[G.level] + ' ' + G.level) : ('Engine ' + G.level);
+  }
+  if (ONLINE()){
+    if (color === G.human) return (account && account.name) || 'You';
+    return NET.opponent || 'Opponent';
+  }
+  return color === W ? 'White' : 'Black';
+}
+
+/* The board's own orientation decides which strip is which: whoever is playing
+   from the near side is named underneath it. */
+function layoutBoardBars(){
+  const bottom = G.flipped ? B : W;
+  const pairs = [['barTop', G.flipped ? W : B], ['barBottom', bottom]];
+  for (const [barId, color] of pairs){
+    const bar = document.getElementById(barId);
+    const clock = document.getElementById(color === W ? 'clockW' : 'clockB');
+    let label = bar.querySelector('.bar-name');
+    if (!label){
+      label = document.createElement('div');
+      label.className = 'bar-name';
+      bar.appendChild(label);
+    }
+    // Sharing a screen, the name *is* the colour, so saying it twice reads oddly;
+    // against anyone else the colour is worth spelling out beside the name.
+    label.textContent = seatName(color);
+    if (!LOCAL()){
+      const sub = document.createElement('span');
+      sub.className = 'sub';
+      sub.textContent = color === W ? 'WHITE' : 'BLACK';
+      label.appendChild(sub);
+    }
+    if (clock.parentElement !== bar) bar.appendChild(clock);
+  }
+}
+
 function renderClocks(){
-  const started = G.sans.length > 0;
+  const running = G.sans.length > 0;
+  layoutBoardBars();
   for (const c of [W,B]){
     const box = document.getElementById(c === W ? 'clockW' : 'clockB');
     box.querySelector('.time').textContent = fmtClock(G.clock[c]);
+    box.querySelector('.who').textContent = c === W ? 'WHITE' : 'BLACK';
     // no side is "running" until the game is actually under way
-    box.classList.toggle('active', started && !G.over && G.st.turn === c);
+    box.classList.toggle('active', running && !G.over && G.st.turn === c);
     box.classList.toggle('low', G.clock[c] <= 30000 && G.clock[c] > 0);
     box.classList.toggle('flagged', G.clock[c] <= 0);
   }
-  document.getElementById('clockNote').style.display = started || G.over ? 'none' : 'block';
+  document.getElementById('clockNote').style.display =
+    (G.started && !running && !G.over) ? 'block' : 'none';
 }
 
 let clockTimer = null;
@@ -2363,6 +2746,7 @@ function parseMove(text){
 
 // one submit path for the bot's single box and the two hot-seat boxes
 function submitEntry(inp, side){
+  if (!G.started) return;                             // the board is still a preview
   if (G.mode !== 'total' || G.over || G.thinking) return;
   if (side && G.st.turn !== side) return;              // not this player's turn
   if (!humanTurn()) return;
@@ -2529,6 +2913,7 @@ function botPick(lvl){
    happily play a move for the human. */
 function engineTurn(token){
   if (G.over || token !== G.token) return;
+  if (!G.started) return;                        // the board is still a preview
   if (!BOT() || G.st.turn === G.human) return;
   G.thinking = true;
   renderStatus();
@@ -2546,6 +2931,7 @@ const scheduleEngine = ms => { const t = G.token; setTimeout(() => engineTurn(t)
 /* ---- clicks ---- */
 el.squares.addEventListener('click', e => {
   const sqEl = e.target.closest('.sq');
+  if (!G.started) return;                       // nothing moves until Start Play
   if (!sqEl || G.over || G.thinking || G.pendingPromo) return;
   const i = +sqEl.dataset.sq;
   if (!humanTurn()) return;
@@ -2604,6 +2990,7 @@ const NET = {
   state: 'idle',        // idle | connecting | lobby | hosting | waiting | playing
   gameId: null,
   myRoom: null,         // the room this browser is hosting, if any
+  opponent: '',         // what the server says the other player is called
   reported: false       // whether the server has been told how this game ended
 };
 
@@ -2724,6 +3111,9 @@ function netConnect(ready){
 /* ---- the room list ---- */
 function enterRooms(){
   G.opponent = 'online';
+  // who you will be sitting down as, named in the corner
+  document.getElementById('roomWho').textContent =
+    (account && account.name) ? account.name : 'Playing as a guest';
   showScreen('rooms');
   renderRooms([]);
   netConnect(() => { NET.state = 'lobby'; netSend({ t:'lobby' }); });
@@ -3489,7 +3879,7 @@ function newGame(){
   resetLog();
   render();
   if (G.mode === 'total') setTimeout(() => LOCAL() ? focusLocalInput() : el.moveInput.focus(), 60);
-  if (BOT() && G.st.turn !== G.human) scheduleEngine(420);
+  if (G.started && BOT() && G.st.turn !== G.human) scheduleEngine(420);
 }
 
 function peek(){
@@ -3554,7 +3944,7 @@ document.getElementById('revDone').onclick = () => exitReview();
 /* ============================================================
    SCREENS — title → vision select → game, with settings off the title
    ============================================================ */
-const MODE_NAME  = { blind:'Blindfold', total:'Complete Blindfold', fog:'Fog of War', sighted:'Sighted' };
+const MODE_NAME  = { blind:'Board Only', total:'Complete Blindfold', fog:'Fog of War', sighted:'Sighted' };
 // what the two halves of the blindfold card call themselves
 const HALF_NAME  = { total:'COMPLETE BLINDFOLD', blind:'SEE THE BOARD' };
 let screenName = 'home';
@@ -3566,6 +3956,13 @@ const picked = { opponent:false, mode:false };
 // already been pressed with any of them still unanswered
 const chosen = { level:false, side:false, minutes:false };
 let flagged = false;
+
+/** Every new trip through the setup panel starts with nothing answered. */
+function resetChoices(){
+  picked.mode = false;
+  chosen.level = chosen.side = chosen.minutes = false;
+  flagged = false;
+}
 
 function showScreen(name){
   if (name !== 'game') reviewClose(false);
@@ -3580,8 +3977,19 @@ function showScreen(name){
   syncOptions();
   // the welcome and name screens are about the account already; a second
   // account control on them would only repeat itself
-  document.getElementById('accountBar')
-          .classList.toggle('hide', name === 'game' || name === 'welcome' || name === 'name');
+  const bar = document.getElementById('accountBar');
+  // rooms names you in its own corner chip, so the cluster would only repeat it
+  bar.classList.toggle('hide', name === 'welcome' || name === 'name' || name === 'rooms');
+  // On the home page the account cluster belongs in the header row, beside the
+  // nav; everywhere else it floats in the corner on its own.
+  const slot = document.getElementById('headRight');
+  if (name === 'home' && slot){
+    if (bar.parentElement !== slot) slot.appendChild(bar);
+    bar.classList.add('inline');
+  } else if (bar.parentElement !== document.body){
+    document.body.appendChild(bar);
+    bar.classList.remove('inline');
+  }
   if (name === 'name') setTimeout(() => { judgeName(); nameInput.focus(); }, 60);
   if (name === 'game'){ startClock(); render(); }
   else stopClock();
@@ -3624,11 +4032,34 @@ function syncOptions(){
 
   document.getElementById('btnStart').textContent = HOSTING() ? 'Host Game' : 'Start Play';
 
+  // the vision buttons and the colour squares on the game page
+  document.querySelectorAll('.vis[data-mode]').forEach(b =>
+    b.classList.toggle('active', picked.mode && b.dataset.mode === G.mode));
+
+  // the engine is only asked about when the engine is playing
+  document.getElementById('secOpponent').style.display = BOT() ? '' : 'none';
+  document.getElementById('secYouPlay').style.display  = BOT() ? '' : 'none';
+
+  // before the game: options showing, board a preview. After: notation and the
+  // buttons you need mid-game.
+  document.getElementById('gameSetup').style.display = G.started ? 'none' : 'flex';
+  document.getElementById('gamePlay').style.display  = G.started ? 'flex' : 'none';
+  document.getElementById('gameChips').style.visibility = G.started ? 'visible' : 'hidden';
+
+  // dark until every question has an answer, then it lights up
+  document.getElementById('btnStartGame').classList.toggle('dim', !allAnswered());
+
   // once Start Play has been refused, each question clears its own warning as it is answered
-  const warn = (id, answered) =>
-    document.getElementById(id).classList.toggle('needs', flagged && !answered);
+  const warn = (id, answered) => {
+    const el = document.getElementById(id);
+    if (el) el.classList.toggle('needs', flagged && !answered);
+  };
   warn('modeGrid',  picked.mode);
   warn('setupOpts', optionsAnswered());
+  warn('secVision', picked.mode);
+  warn('secTime',   chosen.minutes);
+  warn('secOpponent', !BOT() || chosen.level);
+  warn('secYouPlay',  !BOT() || chosen.side);
 
   document.getElementById('visionChip').textContent = MODE_NAME[G.mode];
   document.getElementById('setupChip').textContent = (LOCAL()
@@ -3642,11 +4073,38 @@ function syncOptions(){
   syncSound();
 }
 
-document.getElementById('btnPlay').onclick     = () => { beep(620,.09); showScreen('opponent'); };
+/* ---- the home nav ----
+   Each leaf goes straight where it means to; the branches are hover menus and
+   have no click of their own. Everything still unbuilt is marked .soon and
+   does nothing, rather than leading somewhere half-finished. */
+function goBot(){
+  beep(700,.09);
+  G.opponent = 'bot';
+  picked.opponent = true;
+  enterGameSetup();
+}
+function goLocal(){
+  beep(700,.09);
+  G.opponent = 'local';
+  picked.opponent = true;
+  G.human = W;                             // hot-seat always opens from White's side
+  enterGameSetup();
+}
+function goFriendly(){
+  beep(700,.09);
+  G.matchKind = 'friendly';
+  G.opponent = 'online';
+  picked.opponent = true;
+  G.hosting = false;
+  enterRooms();
+}
+document.getElementById('navBot').onclick      = goBot;
+document.getElementById('navLocal').onclick    = goLocal;
+document.getElementById('navFriendly').onclick = goFriendly;
 
-// Not wired up yet — the destinations for these are still to be decided.
-document.getElementById('btnSocial').onclick = () => {};
-document.getElementById('btnLesson').onclick = () => {};
+// Deliberately inert for now, each one waiting on a page of its own.
+['navRanked','navSocial','navHowTo','navPractice','navOpening','navMiddle','navEnd']
+  .forEach(id => { document.getElementById(id).onclick = () => {}; });
 
 document.getElementById('btnSettings').onclick = () => { beep(560,.07); showScreen('settings'); };
 document.getElementById('btnSetBack').onclick  = () => showScreen('home');
@@ -3654,7 +4112,7 @@ document.getElementById('btnSetBack').onclick  = () => showScreen('home');
 document.getElementById('btnOppBack').onclick  = () => showScreen('home');
 // hosting reached this screen from the room list, so Back returns there
 document.getElementById('btnBackHome').onclick = () =>
-  HOSTING() ? enterRooms() : showScreen('opponent');
+  HOSTING() ? enterRooms() : showScreen('home');
 
 // who you're playing — chosen before the vision. The split card has no whole-card
 // click of its own; only its two halves choose anything.
@@ -3685,7 +4143,7 @@ document.querySelectorAll('#oppGrid .half').forEach(half => {
 
 document.getElementById('btnRoomsBack').onclick = () => {
   leaveRooms();
-  showScreen('opponent');
+  showScreen('home');
 };
 document.getElementById('btnHostRoom').onclick = () => {
   G.hosting = true;                        // the setup screen becomes the host form
@@ -3696,13 +4154,14 @@ document.getElementById('btnHostRoom').onclick = () => {
 
 // leaving mid-game means abandoning it, so make that a deliberate choice
 const leaveOverlay = document.getElementById('leaveOverlay');
+// the logo doubles as the way out; a game in progress asks first
 document.getElementById('btnMenu').onclick = () => {
-  // online, walking away is a resignation even before the first move
   if (gameInProgress() || (ONLINE() && NET.state === 'playing' && !G.over)){
     leaveOverlay.classList.add('show');
   } else {
     netClose();
-    showScreen('setup');
+    G.started = false;
+    showScreen('home');
   }
 };
 document.getElementById('leaveCancel').onclick  = () => leaveOverlay.classList.remove('show');
@@ -3710,8 +4169,9 @@ document.getElementById('leaveConfirm').onclick = () => {
   leaveOverlay.classList.remove('show');
   if (ONLINE() && NET.state === 'playing' && !G.over) netSend({ t:'resign' });
   netClose();
+  G.started = false;
   newGame();               // drop the abandoned position
-  showScreen('setup');
+  showScreen('home');
 };
 
 document.getElementById('waitCancel').onclick = () => {
@@ -3735,6 +4195,10 @@ document.querySelectorAll('#modeGrid .mode-card:not(.split)').forEach(card => {
 document.querySelectorAll('#modeGrid .half').forEach(half => {
   half.onclick = () => selectMode(half.dataset.mode);
 });
+// the four vision buttons beside the board
+document.querySelectorAll('.vis[data-mode]').forEach(b => {
+  b.onclick = () => { selectMode(b.dataset.mode); render(); };   // the board follows at once
+});
 
 // every choice is committed here, in one go
 // nothing here has a default — an unanswered option stops the launch and says so
@@ -3746,8 +4210,19 @@ function optionsAnswered(){
   return true;
 }
 
+/** Everything the Start Play button waits for. */
+const allAnswered = () => picked.mode && optionsAnswered();
+
 function unanswered(){
   const out = [];
+  // on the game page each question is its own panel, so point at the one missing
+  if (screenName === 'game'){
+    if (BOT() && !chosen.level) out.push('secOpponent');
+    if (BOT() && !chosen.side)  out.push('secYouPlay');
+    if (!picked.mode)           out.push('secVision');
+    if (!chosen.minutes)        out.push('secTime');
+    return out;
+  }
   if (!picked.mode)        out.push('modeGrid');
   if (!optionsAnswered())  out.push('setupOpts');   // the box, not the rows inside it
   return out;
@@ -3770,10 +4245,25 @@ function startGame(){
   // online, this screen is the host form — the game opens when someone joins
   if (ONLINE()){ beep(620,.09); hostGame(); return; }
   beep(760,.09); setTimeout(()=>beep(1010,.11), 90);
+  // "either colour" is settled now, once, so the board can be laid out for it
+  if (G.human === 'r') G.human = Math.random() < 0.5 ? W : B;
+  G.started = true;
   showScreen('game');
   newGame();
+  syncOptions();
 }
-document.getElementById('btnStart').onclick = startGame;
+
+/* Walking into a game from the nav: a fresh board to look at while the
+   questions beside it are answered. Nothing moves until Start Play. */
+function enterGameSetup(){
+  G.started = false;
+  resetChoices();
+  newGame();
+  showScreen('game');
+  syncOptions();
+}
+document.getElementById('btnStart').onclick     = startGame;   // room host form
+document.getElementById('btnStartGame').onclick = startGame;   // beside the board
 document.querySelectorAll('[data-level]').forEach(b => {
   b.onclick = () => { G.level = +b.dataset.level; chosen.level = true; syncOptions(); };
 });
@@ -3793,9 +4283,7 @@ document.addEventListener('keydown', e => {
     return;
   }
   if (screenName === 'home'){
-    // a focused button handles its own Enter/Space — don't send it to PLAY as well
-    if (e.target && e.target.tagName === 'BUTTON') return;
-    if (k === 'enter' || k === ' '){ e.preventDefault(); showScreen('opponent'); }
+    // the nav is a set of menus now; Enter belongs to whichever button has focus
     return;
   }
   if (screenName === 'settings'){
@@ -3807,11 +4295,11 @@ document.addEventListener('keydown', e => {
     return;
   }
   if (screenName === 'rooms'){
-    if (k === 'escape'){ leaveRooms(); showScreen('opponent'); }
+    if (k === 'escape'){ leaveRooms(); showScreen('home'); }
     return;
   }
   if (screenName === 'setup'){
-    if (k === 'escape') HOSTING() ? enterRooms() : showScreen('opponent');
+    if (k === 'escape') HOSTING() ? enterRooms() : showScreen('home');
     else if (k === 'enter'){ e.preventDefault(); startGame(); }
     return;
   }
@@ -4050,9 +4538,6 @@ document.getElementById('authClose').onclick  =
   () => document.getElementById('authOverlay').classList.remove('show');
 
 /* ---- boot ---- */
-document.getElementById('heroSet').innerHTML =
-  ['♜','♞','♝','♛','♚','♝','♞','♜']
-    .map((g,i) => `<span style="animation-delay:${.35 + i*.09}s">${g}</span>`).join('');
 syncOptions();
 render();
 // Decide before the SDK loads, so an arriving visitor sees the sign-up screen
