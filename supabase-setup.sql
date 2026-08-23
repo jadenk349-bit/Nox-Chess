@@ -43,7 +43,12 @@ create table if not exists public.profiles (
 
 -- ------------------------------------------------------------
 --  2. Create the profile automatically when someone signs up
---     (Google gives us a name and avatar in raw_user_meta_data)
+--
+--     display_name starts as a neutral placeholder, NOT the Google name.
+--     This table is readable by everyone (friend search needs that), so
+--     seeding it from Google would publish a new player's real name before
+--     they had chosen anything. The username screen overwrites it moments
+--     later; until then there is nothing personal in here.
 -- ------------------------------------------------------------
 create or replace function public.handle_new_user()
 returns trigger
@@ -55,11 +60,7 @@ begin
   insert into public.profiles (id, display_name, avatar_url)
   values (
     new.id,
-    coalesce(
-      new.raw_user_meta_data ->> 'full_name',
-      new.raw_user_meta_data ->> 'name',
-      split_part(coalesce(new.email, 'player@local'), '@', 1)
-    ),
+    'player_' || substr(new.id::text, 1, 8),
     coalesce(
       new.raw_user_meta_data ->> 'avatar_url',
       new.raw_user_meta_data ->> 'picture'

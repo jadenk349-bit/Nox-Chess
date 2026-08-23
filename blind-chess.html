@@ -4605,9 +4605,10 @@ async function setAccount(session){
       // empty answer.
       .select('display_name, avatar_url, rating').eq('id', u.id).maybeSingle();
     if (data){
-      if (!account.gameName && data.display_name && !nameProblem(data.display_name)){
-        account.gameName = data.display_name.trim();   // set on a previous visit
-      }
+      // Deliberately does NOT take a username from display_name. The trigger
+      // seeds that column with the Google name at signup, so reading it back
+      // as a choice meant a new player was handed a username instead of being
+      // asked for one. Only game_name, written by the username screen, counts.
       account.name   = account.gameName || data.display_name || account.name;
       account.avatar = data.avatar_url   || account.avatar;
       account.rating = data.rating;
