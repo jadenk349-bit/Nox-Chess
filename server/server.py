@@ -56,6 +56,11 @@ class Client:
         self.color = None
         self.queue_key = None
         self.room = None          # the room this client is hosting, if any
+        # Who to hand chat to, as (client, game id). Kept apart from `game`
+        # because a finished game clears that, and "good game" is said after
+        # the result, not before it. The game id travels with the message so a
+        # word arriving late cannot land in whatever the recipient plays next.
+        self.chat_peer = None
         self.alive = True
         # Identity, once the client says hello. A guest keeps user_id None:
         # they can still play friendly games, they just aren't anybody yet.
@@ -86,6 +91,11 @@ class Game:
         self.turn = WHITE
         self.over = None
         self.started = time.time()
+        # Pairing them is also what lets them talk. Both directions are set
+        # here so every way of making a game — quick match and rooms alike —
+        # gets chat without having to remember to wire it up.
+        white.chat_peer = (black, self.id)
+        black.chat_peer = (white, self.id)
 
     def opponent_of(self, client):
         return self.players[BLACK if client.color == WHITE else WHITE]
@@ -422,6 +432,45 @@ def handle_draw_decline(client):
     opponent.send({"t": "draw-decline"})
 
 
+MAX_CHAT = 300
+
+
+def clean_chat(raw):
+    """Whatever the players say is text and only text.
+
+    Control characters are dropped rather than escaped — the page prints chat
+    with textContent, so markup is already inert there, but a stray newline or
+    escape sequence has no business in a one-line message either. Length is
+    capped here as well as in the page: the page is only one of the clients
+    that can reach this socket.
+    """
+    if not isinstance(raw, str):
+        return ""
+    # str.isprintable() keeps ordinary spaces and everything visible, and drops
+    # newlines, tabs and the control range — a message is one line by definition.
+    text = "".join(c for c in raw if c.isprintable())
+    return text.strip()[:MAX_CHAT]
+
+
+def handle_chat(client, msg):
+    """Relayed, never read: the server has no more opinion on talk than on moves.
+
+    It goes to `chat_peer` rather than to the current game's opponent, because a
+    game that has just ended has already let go of its players and "good game"
+    comes after the result.
+    """
+    text = clean_chat(msg.get("text"))
+    if not text:
+        return
+    with lock:
+        peer = client.chat_peer
+    if not peer:
+        client.send({"t": "error", "msg": "nobody to talk to"})
+        return
+    other, game_id = peer
+    other.send({"t": "chat", "game": game_id, "text": text, "from": client.name})
+
+
 def handle_message(client, raw):
     try:
         msg = json.loads(raw)
@@ -457,6 +506,8 @@ def handle_message(client, raw):
         handle_draw_accept(client)
     elif kind == "draw-decline":
         handle_draw_decline(client)
+    elif kind == "chat":
+        handle_chat(client, msg)
     elif kind == "ping":
         client.send({"t": "pong"})
     else:
@@ -479,6 +530,9 @@ def drop_client(client):
             winner = BLACK if client.color == WHITE else WHITE
             finish_game(game, "left", winner, exclude=client)
         client.game = None
+        # the other side keeps its own reference until it disconnects too, but
+        # sending to a dead socket is a no-op, so nothing piles up
+        client.chat_peer = None
     log("%s disconnected" % client.id)
     if dropped_room:
         broadcast_rooms()

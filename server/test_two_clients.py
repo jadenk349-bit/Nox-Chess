@@ -346,6 +346,48 @@ def main():
     check("the winner is the player who did not resign",
           ro1["winner"] != st1["color"], "(resigner was %s, winner %s)" % (st1["color"], ro1["winner"]))
 
+    print("\n\033[1mChat\033[0m")
+    ch1 = TestClient("CH1"); ch2 = TestClient("CH2")
+    ch1.send(t="find", mode="blind", minutes=49); ch1.expect("waiting")
+    ch2.send(t="find", mode="blind", minutes=49)
+    cg1 = ch1.expect("start"); ch2.expect("start")
+
+    ch1.send(t="chat", text="hello")
+    said = ch2.expect("chat")
+    check("a message reaches the other player", said["text"] == "hello", "(%s)" % said)
+    check("it says which game it belongs to", said.get("game") == cg1["game"], "(%s)" % said)
+    check("the sender is not sent its own message back", ch1.nothing_arrives())
+
+    ch2.send(t="chat", text="   spaced out \n and broken   ")
+    said = ch1.expect("chat")
+    check("newlines are dropped and the ends are trimmed",
+          said["text"] == "spaced out  and broken", "(%r)" % said["text"])
+
+    ch1.send(t="chat", text="   ")
+    check("a message with nothing in it is not relayed", ch2.nothing_arrives())
+
+    ch1.send(t="chat", text="x" * 400)
+    said = ch2.expect("chat")
+    check("an over-long message is cut to the cap", len(said["text"]) == 300,
+          "(%d chars)" % len(said["text"]))
+
+    # "good game" is said after the result, not before it — so chat has to
+    # outlive the game that introduced the two players
+    ch1.send(t="resign")
+    ch1.expect("over"); ch2.expect("over")
+    ch2.send(t="chat", text="good game")
+    said = ch1.expect("chat")
+    check("players can still talk once the game is over",
+          said["text"] == "good game", "(%s)" % said)
+
+    lone = TestClient("LONE")
+    lone.send(t="chat", text="anyone there?")
+    check("talking with nobody on the other side is refused",
+          lone.expect("error")["msg"] == "nobody to talk to")
+
+    for c in (ch1, ch2, lone):
+        c.close()
+
     # After a game ends the connection must be free again. Returning to the room
     # list reuses the same socket, so a client still marked "in a game" could
     # never host or join anything until the page was reloaded.

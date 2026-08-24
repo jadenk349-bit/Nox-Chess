@@ -1173,6 +1173,44 @@
   .moves::-webkit-scrollbar{width:8px;}
   .moves::-webkit-scrollbar-thumb{background:#2e3340; border-radius:4px;}
 
+  /* ---------- chat (online games only) ---------- */
+  /* Sits under Resign, in the side column, so a word with the other player is
+     never mistaken for the move console — which in complete blindfold is the
+     only way to move, and must not fill up with talk. */
+  .chat-card{display:none;}
+  .chat-log{
+    max-height:190px; overflow-y:auto;
+    display:flex; flex-direction:column; gap:7px;
+    font-size:13px; line-height:1.5;
+  }
+  .chat-log::-webkit-scrollbar{width:8px;}
+  .chat-log::-webkit-scrollbar-thumb{background:#2e3340; border-radius:4px;}
+  .chat-msg{
+    max-width:92%; padding:6px 10px; border-radius:9px;
+    overflow-wrap:anywhere;
+    background:rgba(255,255,255,.05); border:1px solid var(--line);
+  }
+  .chat-msg.mine{
+    align-self:flex-end;
+    background:rgba(217,164,65,.14); border-color:rgba(217,164,65,.3);
+  }
+  .chat-who{
+    display:block; font-size:10px; letter-spacing:.16em; text-transform:uppercase;
+    color:var(--muted); font-weight:600; margin-bottom:2px;
+  }
+  .chat-msg.mine .chat-who{color:var(--gold-soft);}
+  .chat-empty{color:var(--muted); font-size:12.5px;}
+  .chat-sys{align-self:center; color:var(--muted); font-size:11.5px; font-style:italic;}
+  .chat-entry{display:flex; gap:8px; margin-top:12px;}
+  .chat-entry input{
+    flex:1; min-width:0; font:inherit; font-size:13px;
+    padding:9px 12px; border-radius:9px;
+    background:#12141a; border:1px solid var(--line); color:var(--text);
+  }
+  .chat-entry input::placeholder{color:#565b69;}
+  .chat-entry input:focus{outline:none; border-color:var(--gold); box-shadow:0 0 0 3px rgba(217,164,65,.14);}
+  .chat-entry input:disabled{opacity:.5;}
+
   /* ---------- notation rules (complete blindfold only) ---------- */
   .rules-card{display:none;}
   .rules-head{
@@ -1762,6 +1800,17 @@
             <button id="btnPeek">Peek</button>
             <button id="btnDraw" class="ghost">Offer Draw</button>
             <button id="btnResign" class="ghost danger">Resign</button>
+          </div>
+
+          <!-- online only: a word with the person on the other side -->
+          <div class="card panel chat-card" id="chatCard">
+            <h2>Chat</h2>
+            <div class="chat-log" id="chatLog"><div class="chat-empty">Nothing said yet.</div></div>
+            <form class="chat-entry" id="chatForm" autocomplete="off">
+              <input id="chatInput" type="text" maxlength="300" placeholder="say something…"
+                     autocomplete="off" spellcheck="false" aria-label="Message your opponent">
+              <button class="primary" type="submit">Send</button>
+            </form>
           </div>
 
           <!-- review only: why the engine liked its own move -->
@@ -2623,6 +2672,10 @@ function renderStatus(){
   // the rules crib only belongs where you have to type the notation yourself
   rulesCard.style.display = G.mode === 'total' ? 'block' : 'none';
 
+  // there is only somebody to talk to across a socket
+  chatCard.style.display = ONLINE() ? 'block' : 'none';
+  chatInput.disabled = !ONLINE() || NET.state !== 'playing' || NET.oppGone;
+
   // only the move-entry hint remains; Peek is a button, not a key
   document.getElementById('footHint').innerHTML =
     G.mode === 'total' ? 'TYPE A MOVE AND PRESS <kbd>ENTER</kbd>' : '';
@@ -3143,6 +3196,7 @@ const NET = {
   gameId: null,
   myRoom: null,         // the room this browser is hosting, if any
   opponent: '',         // what the server says the other player is called
+  oppGone: false,       // set once the other side has dropped: there is nobody left to talk to
   reported: false       // whether the server has been told how this game ended
 };
 
@@ -3375,10 +3429,16 @@ function onNetMessage(msg){
       NET.state = 'playing';
       NET.myRoom = null;
       NET.gameId = msg.game;
+      NET.opponent = msg.opponent || '';        // who to name on the board bar and in chat
+      NET.oppGone = false;
       G.human = msg.color === 'w' ? W : B;      // colours are the server's call
       G.mode = msg.mode;
       G.minutes = msg.minutes;
+      // Online there is no Start Play to press: the pairing is what starts the
+      // game, so this is where the board stops being a preview.
+      G.started = true;
       hideWaiting();
+      resetChat();                              // nothing carries over from the last opponent
       showScreen('game');
       newGame();
       logLine('Matched — you are ' + (G.human === W ? 'White' : 'Black') + '.', 'sys');
@@ -3412,11 +3472,21 @@ function onNetMessage(msg){
                iWon ? 'Your opponent resigned.' : 'You resigned.',
                iWon ? 'Opponent resigned — you win' : 'You resigned');
       } else if (msg.reason === 'left'){
+        // nothing typed from here on could reach them, so stop offering
+        NET.oppGone = true;
+        chatNote('Your opponent has left.');
         finish('You Win', 'Your opponent disconnected.', 'Opponent left — you win');
       } else if (msg.reason === 'draw'){
         finish('Draw', 'Both players agreed to a draw.', 'Draw — agreed');
       }
       // any other reason is a result our own rules reached a moment ago
+      break;
+
+    case 'chat':
+      // A word from the game before this one is not part of this one
+      if (msg.game && msg.game !== NET.gameId) break;
+      if (typeof msg.text !== 'string' || !msg.text) break;
+      chatLine(msg.from || NET.opponent || 'Opponent', msg.text.slice(0, CHAT_MAX), false);
       break;
 
     case 'pong':
@@ -3443,6 +3513,63 @@ function receiveMove(msg){
   }
   applyMove(m, true);
 }
+
+/* ---- talking to the other player ----
+   The server relays chat and never reads it, exactly as it never reads a move:
+   what arrives is printed with textContent, so nothing an opponent types can
+   reach the board, the rules, or the page. Deliberately its own panel rather
+   than another voice in the blindfold console — in complete blindfold that log
+   is the position, and it must not fill up with talk.
+
+   It is online-only by construction: there is nobody to talk to against the
+   engine, and two players sharing one screen are already sitting together. */
+const chatCard  = document.getElementById('chatCard');
+const chatLog   = document.getElementById('chatLog');
+const chatInput = document.getElementById('chatInput');
+const CHAT_MAX  = 300;                    // the server holds messages to the same length
+
+function resetChat(){
+  chatLog.innerHTML = '<div class="chat-empty">Nothing said yet.</div>';
+  chatInput.value = '';
+}
+
+function chatLine(who, text, mine){
+  const empty = chatLog.querySelector('.chat-empty');
+  if (empty) empty.remove();
+  const row = document.createElement('div');
+  row.className = 'chat-msg' + (mine ? ' mine' : '');
+  const tag = document.createElement('span');
+  tag.className = 'chat-who';
+  tag.textContent = who;
+  const body = document.createElement('span');
+  body.textContent = text;                // never innerHTML — this is someone else's writing
+  row.appendChild(tag);
+  row.appendChild(body);
+  chatLog.appendChild(row);
+  chatLog.scrollTop = chatLog.scrollHeight;
+}
+
+function chatNote(text){
+  const empty = chatLog.querySelector('.chat-empty');
+  if (empty) empty.remove();
+  const row = document.createElement('div');
+  row.className = 'chat-sys';
+  row.textContent = text;
+  chatLog.appendChild(row);
+  chatLog.scrollTop = chatLog.scrollHeight;
+}
+
+function sendChat(){
+  const text = chatInput.value.trim().slice(0, CHAT_MAX);
+  chatInput.value = '';
+  // A finished game still has a socket and still has an opponent on the other
+  // end of it, so 'good game' arrives. Only their leaving closes the door.
+  if (!text || !ONLINE() || NET.state !== 'playing' || NET.oppGone) return;
+  netSend({ t:'chat', text });
+  chatLine('You', text, true);             // shown at once; the server does not echo it back
+}
+
+document.getElementById('chatForm').onsubmit = e => { e.preventDefault(); sendChat(); };
 
 /* ============================================================
    RESIGNING, AND OFFERING A DRAW
