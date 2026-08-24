@@ -34,7 +34,7 @@ PAGE = os.path.join(os.path.dirname(HERE), "blind-chess.html")
 WHITE, BLACK = "w", "b"
 
 lock = threading.RLock()
-lobby = {}        # (mode, minutes, kind) -> Client waiting for a quick match
+lobby = {}        # (mode, minutes, inc, kind) -> Client waiting for a quick match
 rooms = {}        # room id -> Room, the open rooms anyone may sit down at
 lobby_subs = set()  # clients watching the room list right now
 games = {}        # game id -> Game
@@ -82,11 +82,12 @@ class Client:
 
 
 class Game:
-    def __init__(self, white, black, mode, minutes):
+    def __init__(self, white, black, mode, minutes, inc=0):
         self.id = uuid.uuid4().hex[:8]
         self.players = {WHITE: white, BLACK: black}
         self.mode = mode
         self.minutes = minutes
+        self.inc = inc           # seconds added after each move; 0 is a plain clock
         self.moves = []          # each: {ply, from, to, promo, san}
         self.turn = WHITE
         self.over = None
@@ -104,11 +105,12 @@ class Game:
 class Room:
     """A game someone has set up and is sitting in, waiting for anyone to join."""
 
-    def __init__(self, host, mode, minutes, color):
+    def __init__(self, host, mode, minutes, inc, color):
         self.id = uuid.uuid4().hex[:8]
         self.host = host
         self.mode = mode
         self.minutes = minutes
+        self.inc = inc
         self.color = color        # the colour the host will play; joiner takes the other
         self.created = time.time()
 
@@ -117,6 +119,7 @@ class Room:
             "id": self.id,
             "mode": self.mode,
             "minutes": self.minutes,
+            "inc": self.inc,
             "color": self.color,
         }
 
@@ -166,6 +169,24 @@ def clean_guest_name(raw):
     return supabase_auth.clean_name(raw) or "Guest"
 
 
+def clean_inc(raw):
+    """The seconds added after each move, from a message we do not trust.
+
+    It goes into the lobby key, so it has to be something hashable and small;
+    anything else becomes a plain clock rather than an error.
+    """
+    try:
+        inc = int(raw)
+    except (TypeError, ValueError):
+        return 0
+    return min(max(inc, 0), 60)
+
+
+def time_label(minutes, inc):
+    """How a time control reads in the log: "3+2", or "10 min" with no increment."""
+    return "%s+%s" % (minutes, inc) if inc else "%s min" % minutes
+
+
 def handle_hello(client, msg):
     """Identify the player, by token if they have one.
 
@@ -210,6 +231,7 @@ def handle_hello(client, msg):
 def handle_find(client, msg):
     mode = msg.get("mode", "blind")
     minutes = msg.get("minutes", 10)
+    inc = clean_inc(msg.get("inc"))
     # ranked and friendly are separate queues: someone who came for a ranked game
     # must never be handed a friendly one, or the distinction means nothing
     kind = msg.get("kind", "friendly")
@@ -225,7 +247,10 @@ def handle_find(client, msg):
     if client.game:
         client.send({"t": "error", "msg": "already in a game"})
         return
-    key = (mode, minutes, kind)
+    # The increment is part of the key, not decoration: 3+2 and a flat 3 minutes
+    # are different games, and pairing across them would hand somebody a clock
+    # they did not ask for.
+    key = (mode, minutes, inc, kind)
     with lock:
         waiting = lobby.get(key)
         if waiting and waiting is not client and waiting.alive:
@@ -234,12 +259,12 @@ def handle_find(client, msg):
             pair = [waiting, client]
             random.shuffle(pair)
             white, black = pair
-            game = Game(white, black, mode, minutes)
+            game = Game(white, black, mode, minutes, inc)
             white.color, black.color = WHITE, BLACK
             white.game = black.game = game
             white.queue_key = black.queue_key = None
             games[game.id] = game
-            log("matched %s (w) vs %s (b) — %s %s, %s min" % (white.id, black.id, kind, mode, minutes))
+            log("matched %s (w) vs %s (b) — %s %s, %s" % (white.id, black.id, kind, mode, time_label(minutes, inc)))
             for color, player in game.players.items():
                 other = game.opponent_of(player)
                 player.send({
@@ -248,6 +273,7 @@ def handle_find(client, msg):
                     "color": color,
                     "mode": mode,
                     "minutes": minutes,
+                    "inc": inc,
                     "kind": kind,
                     "opponent": other.name,
                     "opponentVerified": other.verified,
@@ -258,7 +284,7 @@ def handle_find(client, msg):
             lobby[key] = client
             client.queue_key = key
             client.send({"t": "waiting"})
-            log("%s waiting — %s %s, %s min" % (client.id, kind, mode, minutes))
+            log("%s waiting — %s %s, %s" % (client.id, kind, mode, time_label(minutes, inc)))
 
 
 def handle_lobby(client):
@@ -277,6 +303,7 @@ def handle_unlobby(client):
 def handle_host(client, msg):
     mode = msg.get("mode", "blind")
     minutes = msg.get("minutes", 10)
+    inc = clean_inc(msg.get("inc"))
     color = msg.get("color", WHITE)
     if color not in (WHITE, BLACK):
         color = WHITE
@@ -286,12 +313,12 @@ def handle_host(client, msg):
             return
         if client.room:                     # one room per host — replace the old one
             rooms.pop(client.room.id, None)
-        room = Room(client, mode, minutes, color)
+        room = Room(client, mode, minutes, inc, color)
         rooms[room.id] = room
         client.room = room
     client.send({"t": "hosting", "room": room.id})
-    log("%s hosting %s — %s, %s min, host plays %s"
-        % (client.id, room.id, mode, minutes, color))
+    log("%s hosting %s — %s, %s, host plays %s"
+        % (client.id, room.id, mode, time_label(minutes, inc), color))
     broadcast_rooms()
 
 
@@ -324,7 +351,7 @@ def handle_join(client, msg):
         host.room = None
         # the host plays the colour they asked for; the joiner takes the other
         white, black = (host, client) if room.color == WHITE else (client, host)
-        game = Game(white, black, room.mode, room.minutes)
+        game = Game(white, black, room.mode, room.minutes, room.inc)
         white.color, black.color = WHITE, BLACK
         white.game = black.game = game
         games[game.id] = game
@@ -336,14 +363,15 @@ def handle_join(client, msg):
             "color": color,
             "mode": room.mode,
             "minutes": room.minutes,
+            "inc": room.inc,
             "kind": "friendly",
             "opponent": game.opponent_of(player).name,
             "opponentVerified": game.opponent_of(player).verified,
         }) for color, player in game.players.items()]
     for player, payload in outgoing:
         player.send(payload)
-    log("room %s filled — %s (w) vs %s (b), %s, %s min"
-        % (room.id, white.id, black.id, room.mode, room.minutes))
+    log("room %s filled — %s (w) vs %s (b), %s, %s"
+        % (room.id, white.id, black.id, room.mode, time_label(room.minutes, room.inc)))
     broadcast_rooms()
 
 
@@ -548,6 +576,14 @@ STATIC_FILES = {
     "/engine/stockfish.wasm.js": ("engine/stockfish.wasm.js", "text/javascript; charset=utf-8"),
     "/engine/stockfish.wasm":    ("engine/stockfish.wasm",    "application/wasm"),
     "/assets/nox-logo.png":      ("assets/nox-logo.png",      "image/png"),
+    # the seven rank badges the ranked screen shows, one per tier
+    "/assets/tier-bronze.png":      ("assets/tier-bronze.png",      "image/png"),
+    "/assets/tier-silver.png":      ("assets/tier-silver.png",      "image/png"),
+    "/assets/tier-gold.png":        ("assets/tier-gold.png",        "image/png"),
+    "/assets/tier-platinum.png":    ("assets/tier-platinum.png",    "image/png"),
+    "/assets/tier-diamond.png":     ("assets/tier-diamond.png",     "image/png"),
+    "/assets/tier-master.png":      ("assets/tier-master.png",      "image/png"),
+    "/assets/tier-grandmaster.png": ("assets/tier-grandmaster.png", "image/png"),
 }
 
 

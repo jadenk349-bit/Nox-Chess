@@ -956,7 +956,13 @@
     color:#fff; box-shadow:0 .25cqmin .6cqmin rgba(0,0,0,.45);
   }
   .mark.m-brilliant b{background:#3fa4d8;}
-  .mark.m-good b{background:#5fb96a;}
+  .mark.m-great b{background:#4fbfa8;}
+  .mark.m-best b{background:#5fb96a;}
+  /* excellent and good share a tick and differ only in colour, the way the
+     board marks players already know do */
+  .mark.m-excellent b{background:#4e9c58;}
+  .mark.m-good b{background:#5fb96a; opacity:.72;}
+  .mark.m-inaccuracy b{background:#d8c35a; color:#2a2408;}
   .mark.m-mistake b{background:#e0a341; color:#2a1f08;}
   .mark.m-blunder b{background:#d0453c;}
 
@@ -977,7 +983,11 @@
     padding:3px 9px; border-radius:999px;
   }
   .rev-verdict.v-brilliant{color:#08222e; background:#3fa4d8;}
+  .rev-verdict.v-great{color:#062a25; background:#4fbfa8;}
+  .rev-verdict.v-best{color:#08240f; background:#5fb96a;}
+  .rev-verdict.v-excellent{color:var(--good); border:1px solid rgba(111,191,115,.55);}
   .rev-verdict.v-good{color:var(--good); border:1px solid rgba(111,191,115,.4);}
+  .rev-verdict.v-inaccuracy{color:#d8c35a; border:1px solid rgba(216,195,90,.45);}
   .rev-verdict.v-mistake{color:#e0a341; border:1px solid rgba(224,163,65,.5);}
   .rev-verdict.v-blunder{color:#fff; background:var(--danger);}
   .rev-line{margin-top:6px; font-size:13.5px; color:var(--text); line-height:1.5;}
@@ -1087,6 +1097,87 @@
   .box-please{margin:12px 0 0; text-align:center;}
   #setupOpts.needs + .box-please{display:block;}
   #screen-setup, #screen-opponent, #screen-home, #screen-settings{position:relative;}
+
+  /* ---------- ranked ---------- */
+  /* One column down the middle: the badge, what it is called, the rating it
+     was earned with, how far it is to the next one, and then the two buttons.
+     The badge is artwork with transparent margins of its own, so it is sized
+     by height and left to find its own width — the seven files are not all
+     the same shape. */
+  .ranked{
+    max-width:520px; margin:0 auto; padding:10px 0 44px;
+    display:flex; flex-direction:column; align-items:center; text-align:center;
+    min-height:min(72vh,720px); justify-content:center;
+  }
+  .rank-badge{
+    height:clamp(148px,26vh,232px); width:auto; display:block;
+    filter:drop-shadow(0 22px 44px rgba(0,0,0,.55));
+  }
+  .rank-tier{
+    margin-top:16px; font-family:Georgia,serif;
+    font-size:clamp(19px,3.4vw,27px); letter-spacing:.24em;
+    text-transform:uppercase; color:var(--gold-soft);
+  }
+  .rank-elo{
+    margin-top:10px; line-height:1; font-weight:600;
+    font-size:clamp(34px,6vw,50px); font-variant-numeric:tabular-nums;
+  }
+  .rank-elo-cap{
+    margin-top:7px; font-size:10.5px; letter-spacing:.28em;
+    text-transform:uppercase; color:var(--muted);
+  }
+
+  .rank-gauge{width:100%; margin-top:24px;}
+  .gauge-track{
+    height:12px; border-radius:999px; overflow:hidden;
+    background:rgba(0,0,0,.45); border:1px solid var(--line);
+  }
+  .gauge-fill{
+    height:100%; width:0;
+    background:linear-gradient(90deg,#b07f22,#e2b357,#f0c775);
+    transition:width .45s ease;
+  }
+  .gauge-ends{
+    display:flex; justify-content:space-between; gap:10px; margin-top:8px;
+    font-size:10.5px; letter-spacing:.18em; color:var(--muted);
+    font-variant-numeric:tabular-nums;
+  }
+
+  /* The settings box is a button that turns into the sentence describing the
+     game it stands for, so what you chose is readable without opening it. */
+  .rank-pick{
+    width:100%; margin-top:28px; padding:17px 18px; border-radius:12px;
+    font-size:12.5px; letter-spacing:.18em; text-transform:uppercase;
+  }
+  .rank-pick.set{
+    border-color:var(--gold); color:var(--gold-soft); background:rgba(217,164,65,.10);
+  }
+  .rank-start{width:100%; margin-top:12px; padding:17px 0; font-size:13px; letter-spacing:.2em;}
+  /* Dark until both questions have answers, exactly as Start Play is beside
+     the board: a button you cannot use should not look like one you can. */
+  .rank-start.dim{
+    background:linear-gradient(180deg,#20242e,#171a21);
+    border-color:var(--line); color:#5f6472; box-shadow:none;
+  }
+  .rank-start.dim:hover{filter:none; transform:none;}
+  .rank-note{margin:14px 0 0; font-size:11.5px; color:var(--muted); line-height:1.6;}
+
+  /* the box those two questions are asked in — the one modal that reads as a
+     form rather than an announcement, so it is aligned left */
+  .rank-modal{max-width:420px; text-align:left;}
+  .rank-field + .rank-field{margin-top:22px;}
+  .rank-label{
+    margin-bottom:10px; font-size:11px; letter-spacing:.24em;
+    text-transform:uppercase; color:var(--muted);
+  }
+  .rank-opts{display:flex; gap:8px;}
+  .rank-opts.col{flex-direction:column;}
+  .rank-opts.col button{text-align:left; padding:12px 14px;}
+  .rank-opts.row button{flex:1; text-align:center; padding:12px 6px;}
+  .rank-opts button{font-size:12.5px; letter-spacing:.08em;}
+  .rank-opts button.active{
+    border-color:var(--gold); color:var(--gold-soft); background:rgba(217,164,65,.12);
+  }
 
   /* ---------- settings screen ---------- */
   .set-list{width:100%; max-width:560px; margin:0 auto; display:flex; flex-direction:column; gap:12px;}
@@ -1385,7 +1476,7 @@
                 Play Online <span class="chev">›</span>
               </button>
               <div class="submenu">
-                <button class="menu-btn soon" id="navRanked">Ranked Match</button>
+                <button class="menu-btn" id="navRanked">Ranked Match</button>
                 <button class="menu-btn" id="navFriendly">Friendly Match</button>
               </div>
             </div>
@@ -1440,6 +1531,39 @@
     </header>
   </section>
 
+  <!-- ============ RANKED ============
+       Where a ranked game is arranged. The badge and the number under it are
+       what the rating has earned; the two buttons below are the only things
+       to answer before playing for it. -->
+  <section class="screen" id="screen-ranked">
+    <header class="site-head">
+      <button class="logo-btn" data-home aria-label="Nox Chess — back to the home page">
+        <img src="assets/nox-logo.png?v=1" alt="Nox Chess" width="976" height="730">
+      </button>
+    </header>
+
+    <div class="ranked">
+      <!-- src, alt and size are all set by drawRank(): the seven badges are
+           different shapes, and only the one being shown is ever fetched. -->
+      <img class="rank-badge" id="rankBadge" alt="">
+      <div class="rank-tier" id="rankTier">Bronze</div>
+      <div class="rank-elo" id="rankElo">100</div>
+      <div class="rank-elo-cap">Elo</div>
+
+      <div class="rank-gauge">
+        <div class="gauge-track"><div class="gauge-fill" id="rankFill"></div></div>
+        <div class="gauge-ends">
+          <span id="rankFloor">100</span>
+          <span id="rankCeil">500</span>
+        </div>
+      </div>
+
+      <button class="rank-pick" id="btnRankPick">Select Games Settings</button>
+      <button class="primary rank-start dim" id="btnRankStart">Start Game</button>
+      <p class="rank-note" id="rankNote"></p>
+    </div>
+  </section>
+
   <!-- ============ SETTINGS ============ -->
   <section class="screen" id="screen-settings">
     <header class="game-head">
@@ -1491,9 +1615,9 @@
             <div class="go">TWO WAYS TO PLAY →</div>
           </div>
           <div class="card-split">
-            <button class="half" data-kind="ranked" disabled>
+            <button class="half" data-kind="ranked">
               <div class="half-title">RANKED MATCH</div>
-              <div class="half-sub">Coming soon.</div>
+              <div class="half-sub">Your rating is on the table. Win and it climbs.</div>
             </button>
             <button class="half" data-kind="friendly">
               <div class="half-title">FRIENDLY MATCH</div>
@@ -1931,6 +2055,31 @@
   </div>
 </div>
 
+<!-- the ranked game's two questions: nothing is a default, and answering
+     both is what closes the box -->
+<div class="overlay" id="rankSetOverlay">
+  <div class="modal rank-modal">
+    <button class="modal-x" id="rankSetX" aria-label="Close" title="Close">×</button>
+    <div class="rank-field">
+      <div class="rank-label">Game:</div>
+      <div class="rank-opts col" id="rankModes">
+        <button data-mode="total">Complete Blindfold</button>
+        <button data-mode="blind">Only Board</button>
+        <button data-mode="fog">Fog of War</button>
+        <button data-mode="sighted">Sighted</button>
+      </div>
+    </div>
+    <div class="rank-field">
+      <div class="rank-label">Time:</div>
+      <div class="rank-opts row" id="rankTimes">
+        <button data-min="3" data-inc="2">3+2</button>
+        <button data-min="10" data-inc="0">10 min</button>
+        <button data-min="30" data-inc="0">30 min</button>
+      </div>
+    </div>
+  </div>
+</div>
+
 <!-- game over -->
 <div class="overlay" id="endOverlay">
   <div class="modal">
@@ -2230,6 +2379,91 @@ function isAttacked(s, sq, by){
   return false;
 }
 
+/* ---- who is hitting what, and what it costs -----------------
+   isAttacked() answers yes or no as fast as it can, and the move generator
+   leans on it move by move. These answer *with whom* and *for how much*, which
+   is what the review needs to say why a move works. They are deliberately new
+   functions rather than a rewrite of isAttacked: castling rights and the bot's
+   legality checks depend on that one's exact behaviour, and this is not the
+   place to find out how. */
+function attackersOf(s, sq, by){
+  const out = [];
+  const r = rowOf(sq), c = colOf(sq);
+  // pawns capture forwards, so one attacking this square stands behind it
+  const pdir = by === W ? 1 : -1;
+  for (const dc of [-1,1]){
+    const nr = r + pdir, nc = c + dc;
+    if (!onBoard(nr,nc)) continue;
+    const p = s.b[nr*8+nc];
+    if (p && p.c === by && p.t === 'P') out.push(nr*8+nc);
+  }
+  for (const [dirs, kind] of [[DIR_N,'N'],[DIR_K,'K']]){
+    for (const [dr,dc] of dirs){
+      const nr = r+dr, nc = c+dc;
+      if (!onBoard(nr,nc)) continue;
+      const p = s.b[nr*8+nc];
+      if (p && p.c === by && p.t === kind) out.push(nr*8+nc);
+    }
+  }
+  for (const [dirs, kind] of [[DIR_R,'R'],[DIR_B,'B']]){
+    for (const [dr,dc] of dirs){
+      let nr = r+dr, nc = c+dc;
+      while (onBoard(nr,nc)){
+        const p = s.b[nr*8+nc];
+        if (p){
+          if (p.c === by && (p.t === kind || p.t === 'Q')) out.push(nr*8+nc);
+          break;
+        }
+        nr += dr; nc += dc;
+      }
+    }
+  }
+  return out;
+}
+
+/* Guarding a square and attacking it are one relation seen from either side of
+   the capture, so this is attackersOf() under the name that reads correctly at
+   the call site — asking who recaptures, not who strikes first. */
+function defendersOf(s, sq, by){ return attackersOf(s, sq, by); }
+
+/* Static exchange evaluation: play out every capture on one square, cheapest
+   attacker first, and hand back what the side that started it comes out with
+   in centipawns. Nothing searches — the sequence is arithmetic over the pieces
+   that can see the square, recomputed from the board after each capture so a
+   rook standing behind a bishop joins the queue on its own.
+
+   The sequence is played to the end and then walked back, each side taking the
+   better of capturing and standing still. The usual alpha-beta cutoff on the
+   way down is left out on purpose: it is sound for asking whether a capture is
+   good, and wrong for asking by how much, and by how much is the whole
+   question here. Nobody notices sixteen iterations on a review screen. */
+function see(s, sq, sideToCapture){
+  const victim = s.b[sq];
+  if (!victim || victim.c === sideToCapture) return 0;   // nothing of theirs to take
+  if (victim.t === 'K') return 0;                        // kings are never actually taken
+  const work = { b: s.b.slice() };                       // attackersOf only reads .b
+  const gain = [ VAL[victim.t] ];
+  let side = sideToCapture, d = 0;
+  for (;;){
+    const atk = attackersOf(work, sq, side);
+    if (!atk.length) break;
+    let from = atk[0];
+    for (const a of atk) if (VAL[work.b[a].t] < VAL[work.b[from].t]) from = a;
+    const p = work.b[from];
+    // a king may not capture into a recapture, so the sequence ends rather than
+    // pretending it can
+    if (p.t === 'K' && attackersOf(work, sq, other(side)).length) break;
+    d++;
+    gain[d] = VAL[p.t] - gain[d-1];
+    work.b[from] = null;
+    work.b[sq]   = p;                  // whoever captured is the next one taken
+    side = other(side);
+  }
+  if (!d) return 0;                    // unattacked: the piece is not going anywhere
+  while (--d > 0) gain[d-1] = -Math.max(-gain[d-1], gain[d]);
+  return gain[0];
+}
+
 function kingSq(s, color){
   for (let i=0;i<64;i++){ const p=s.b[i]; if (p && p.c===color && p.t==='K') return i; }
   return -1;
@@ -2406,6 +2640,7 @@ const G = {
   started: false,         // the board is only a preview until Start Play
   human: W,
   minutes: 10,            // same allowance for both sides
+  inc: 0,                 // seconds added after each move; 0 is a plain clock
   clock: { w: 600000, b: 600000 },
   tickAt: 0,
   flipped: false,
@@ -2992,6 +3227,9 @@ function applyMove(m, fromNet){
   G.st = makeMove(G.st, m);
   G.sans.push(san);
   G.uci.push(uciOf(m));      // the review replays the game from these
+  // The increment is earned by moving, so it lands on the clock of whoever
+  // just moved — including their first move, as it does over a real board.
+  if (G.inc) G.clock[mover] += G.inc * 1000;
   // our own moves go out to the opponent; theirs arrive already applied elsewhere
   if (ONLINE() && !fromNet && mover === G.human){
     netSend({ t:'move', ply:G.sans.length - 1, from:m.from, to:m.to, promo:m.promo || null, san });
@@ -3360,7 +3598,7 @@ function renderRooms(list){
     const yours = r.color === 'w' ? 'Black' : 'White';
     main.innerHTML =
       '<div class="room-vision">' + (MODE_NAME[r.mode] || r.mode) + '</div>' +
-      '<div class="room-meta">' + r.minutes + ' min · ' +
+      '<div class="room-meta">' + timeLabel(r.minutes, r.inc || 0) + ' · ' +
       (mine ? 'your room — waiting for someone'
             : 'host plays ' + (r.color === 'w' ? 'White' : 'Black') + ', you play ' + yours) +
       '</div>';
@@ -3391,7 +3629,7 @@ function hostGame(){
               'for anyone who is looking.', 'Waiting for Opponent');
   netConnect(() => {
     NET.state = 'hosting';
-    netSend({ t:'host', mode:G.mode, minutes:G.minutes, color:G.human });
+    netSend({ t:'host', mode:G.mode, minutes:G.minutes, inc:G.inc, color:G.human });
   });
 }
 
@@ -3414,7 +3652,10 @@ function onNetMessage(msg){
       break;
 
     case 'waiting':
-      showWaiting('Looking for someone who wants the same game…');
+      // Whichever screen joined the queue has already said what it is waiting
+      // for, in its own words. This only has to speak when nothing did.
+      if (!waitOverlay.classList.contains('show'))
+        showWaiting('Looking for someone who wants the same game…');
       break;
 
     case 'rooms':
@@ -3434,6 +3675,7 @@ function onNetMessage(msg){
       G.human = msg.color === 'w' ? W : B;      // colours are the server's call
       G.mode = msg.mode;
       G.minutes = msg.minutes;
+      G.inc = msg.inc || 0;
       // Online there is no Start Play to press: the pairing is what starts the
       // game, so this is where the board stops being a preview.
       G.started = true;
@@ -3495,6 +3737,9 @@ function onNetMessage(msg){
     case 'error':
       // on the rooms page there is no game log to write to — say it there instead
       if (screenName === 'rooms') roomNote(msg.msg);
+      // waiting for a game, the log is behind the box — a refusal that lands
+      // there is a refusal nobody reads
+      else if (waitOverlay.classList.contains('show')) waitingFailed(msg.msg);
       else logLine('⚠  ' + msg.msg, 'err');
       break;
   }
@@ -3735,13 +3980,25 @@ function engineLine(line){
     const idx = mp ? +mp[1] : 1;
     if (idx > sfInfo.want) return;
     const slot = sfInfo.lines[idx - 1] ||
-                 (sfInfo.lines[idx - 1] = { cp:null, mate:null, best:null });
+                 (sfInfo.lines[idx - 1] = { cp:null, mate:null, best:null, pv:null });
     const cp = line.match(/score cp (-?\d+)/);
     const mate = line.match(/score mate (-?\d+)/);
-    const pv = line.match(/ pv ([a-h][1-8][a-h][1-8][qrbn]?)/);
+    // The whole line, not just its first move: the review tells the player what
+    // happens next, and that is what the rest of the pv is. Stockfish puts pv
+    // last, but UCI does not promise it, so the tail is cut at the first token
+    // that is not a move — and again at eight plies, past which nobody is
+    // following along anyway.
+    const pv = line.match(/ pv (.+)$/);
     if (cp) { slot.cp = +cp[1]; slot.mate = null; }
     if (mate){ slot.mate = +mate[1]; slot.cp = null; }
-    if (pv) slot.best = pv[1];
+    if (pv){
+      const moves = [];
+      for (const tok of pv[1].trim().split(/\s+/)){
+        if (moves.length === 8 || !/^[a-h][1-8][a-h][1-8][qrbn]?$/.test(tok)) break;
+        moves.push(tok);
+      }
+      if (moves.length){ slot.pv = moves; slot.best = moves[0]; }
+    }
     return;
   }
   if (line.startsWith('bestmove')){
@@ -3750,13 +4007,15 @@ function engineLine(line){
     SF.pending = null;
     if (p){
       const lines = (sfInfo && sfInfo.lines.filter(Boolean)) || [];
-      const one = lines[0] || { cp:null, mate:null, best:null };
+      const one = lines[0] || { cp:null, mate:null, best:null, pv:null };
       const out = {
         // below Skill 20 the engine's own pick is deliberately not its top line,
         // and that pick is the one the bot should play
         best: (best && best !== '(none)') ? best : one.best,
         cp:   one.cp,
         mate: one.mate,
+        // the top line in full, for the review's "after ..." sentence
+        pv:   one.pv,
         // absent when there was only one legal move — which is itself a fact
         second: lines[1] || null,
         lines: lines
@@ -3926,24 +4185,109 @@ function fmtScore(res, turn){
   return (white > 0 ? '+' : '') + (white / 100).toFixed(2);
 }
 
-/* Four judgements, and every move gets exactly one.
+/* Eight judgements, and every move gets exactly one.
 
-   ??  blunder    — gave away three pawns' worth or more
-   ?   mistake    — gave away a pawn's worth or more
-   !!  brilliant  — the engine's own move, and clearly better than the next
-                    best, so it was genuinely there to be missed
-   !   good       — anything else: it held on to what the position had
+   Centipawns are the wrong ruler for this. Dropping a pawn from a level
+   position is a real error; dropping one while a queen up is not; both read as
+   100. So a move is judged in the only currency the player is actually
+   spending — the chance of winning the game — through the fitted curve that
+   turns an evaluation into that chance:
 
-   That "clearly better than the next best" is what MultiPV buys. Without it, a
-   move that is best only because every move is fine would read as brilliant. */
-function judgeMove(loss, playedWasBest, gap){
-  if (loss !== null && loss >= 300)
-    return { sym:'??', text:'Blunder',   cls:'v-blunder',   mark:'m-blunder' };
-  if (loss !== null && loss >= 100)
-    return { sym:'?',  text:'Mistake',   cls:'v-mistake',   mark:'m-mistake' };
-  if (playedWasBest && gap !== null && gap >= 150)
-    return { sym:'!!', text:'Brilliant', cls:'v-brilliant', mark:'m-brilliant' };
-  return { sym:'!', text:'Good move', cls:'v-good', mark:'m-good' };
+     win% = 50 + 50 * (2 / (1 + e^(-0.00368208 * cp)) - 1)
+
+   and what the move threw away is the drop in win% it caused. The bands below
+   are the familiar ones: a couple of points is nothing, twenty is a game.
+
+   Mate scores never go near the curve. A forced mate is +-10000 by convention,
+   which the curve reads as certainty and cannot tell a mate in twelve from a
+   mate in one, so mates are compared as mates: losing one is judged by what is
+   left instead, and walking into one is a blunder whatever the pawns say. */
+function winPct(cp){
+  return 50 + 50 * (2 / (1 + Math.exp(-0.00368208 * cp)) - 1);
+}
+
+const VERDICT = {
+  brilliant:  { sym:'!!', text:'Brilliant',  cls:'v-brilliant',  mark:'m-brilliant' },
+  great:      { sym:'!',  text:'Great move', cls:'v-great',      mark:'m-great' },
+  best:       { sym:'\u2605', text:'Best move', cls:'v-best',      mark:'m-best' },
+  // excellent and good share the tick and differ by colour, as the marks do
+  excellent:  { sym:'\u2713', text:'Excellent', cls:'v-excellent', mark:'m-excellent' },
+  good:       { sym:'\u2713', text:'Good move', cls:'v-good',      mark:'m-good' },
+  inaccuracy: { sym:'?!', text:'Inaccuracy', cls:'v-inaccuracy', mark:'m-inaccuracy' },
+  mistake:    { sym:'?',  text:'Mistake',    cls:'v-mistake',    mark:'m-mistake' },
+  blunder:    { sym:'??', text:'Blunder',    cls:'v-blunder',    mark:'m-blunder' }
+};
+
+/* What the move gave away, in material, by the board alone: the exchange the
+   opponent can now win on the square the piece landed on, or on anything else
+   the move left behind. A sacrifice is not a capture the engine happens to
+   like — it is material that can be taken and is offered anyway. */
+function sacrificeSize(st, m, after){
+  const them = other(m.p.c);
+  let most = see(after, m.to, them);
+  for (let i=0;i<64;i++){
+    const p = after.b[i];
+    if (!p || p.c !== m.p.c || i === m.to) continue;
+    if (see(st, i, them) > 0) continue;        // already loose before the move
+    const cost = see(after, i, them);
+    if (cost > most) most = cost;
+  }
+  return most;
+}
+
+/* st and played are the position and the move under the microscope; before and
+   after are the engine's two readings either side of it, each from the point
+   of view of whoever is to move in them, so everything the mover is charged
+   with is the second one flipped. gap is how far the engine's first line beat
+   its second. */
+function judgeMove(st, played, before, after, playedWasBest, gap){
+  const num = v => (v === null || v === undefined) ? null : v;
+  const mateBefore = before ? num(before.mate) : null;
+  const mateAfter  = (after && num(after.mate) !== null) ? -after.mate : null;
+  const cpBefore   = before ? num(before.cp) : null;
+  const cpAfter    = (after && num(after.cp) !== null) ? -after.cp : null;
+
+  if (mateBefore !== null && mateBefore > 0){
+    if (mateAfter !== null && mateAfter > 0){
+      // mate before and mate after: the only question left is how long it takes
+      const slower = mateAfter - mateBefore;
+      if (slower <= 0) return VERDICT.best;
+      if (slower <= 2) return VERDICT.good;
+      return VERDICT.mistake;
+    }
+    // the mate is gone, and what is left decides how much that cost
+    return (cpAfter !== null && cpAfter >= 300) ? VERDICT.mistake : VERDICT.blunder;
+  }
+  if (mateAfter !== null && mateAfter < 0){
+    // being mated already is not this move's fault; lasting longer is a defence
+    if (mateBefore !== null && mateBefore < 0)
+      return mateAfter <= mateBefore ? VERDICT.best : VERDICT.good;
+    return VERDICT.blunder;                    // walked into a mate that was not there
+  }
+  // escaping a mate, or an engine that has not answered yet: nothing to weigh
+  if (cpBefore === null || cpAfter === null)
+    return playedWasBest ? VERDICT.best : VERDICT.good;
+
+  if (playedWasBest){
+    const secondCp = before.second ? sfScore(before.second) : null;
+    // brilliant is a sacrifice the engine still calls best, in a position that
+    // was not already won — giving up material while a rook up is only tidying
+    if (secondCp !== null && secondCp < 700 &&
+        sacrificeSize(st, played, makeMove(st, played)) >= 200)
+      return VERDICT.brilliant;
+    // great is the only move that holds, played, and not hung in the process
+    if (gap !== null && gap >= 150 &&
+        see(makeMove(st, played), played.to, other(st.turn)) <= 0)
+      return VERDICT.great;
+    return VERDICT.best;
+  }
+
+  const loss = winPct(cpBefore) - winPct(cpAfter);
+  if (loss < 2)  return VERDICT.excellent;
+  if (loss < 5)  return VERDICT.good;
+  if (loss < 10) return VERDICT.inaccuracy;
+  if (loss < 20) return VERDICT.mistake;
+  return VERDICT.blunder;
 }
 
 /* ---- the two arrows, and the mark on the square the piece landed on ---- */
@@ -4009,45 +4353,288 @@ function drawReviewOverlay(played, best, judgement){
    and it only ever claims what it can see. */
 const PIECE_WORD = { P:'pawn', N:'knight', B:'bishop', R:'rook', Q:'queen', K:'king' };
 
-function describeBest(st, m, res, lossByPlayer){
+/* Every line of fire the mover's sliders have with two enemy pieces on it: the
+   shape a pin and a skewer share, told apart afterwards by which of the two is
+   worth more. */
+function sliderLines(s, by){
+  const out = [];
+  for (let i=0;i<64;i++){
+    const p = s.b[i];
+    if (!p || p.c !== by || (p.t !== 'B' && p.t !== 'R' && p.t !== 'Q')) continue;
+    const dirs = p.t === 'B' ? DIR_B : p.t === 'R' ? DIR_R : DIR_K;
+    for (const [dr,dc] of dirs){
+      let r = rowOf(i)+dr, c = colOf(i)+dc, front = -1;
+      while (onBoard(r,c)){
+        const t = r*8+c, q = s.b[t];
+        if (q){
+          if (q.c === by) break;                // one of ours shuts the line
+          if (front < 0) front = t;             // the first enemy on the ray
+          else { out.push({ from:i, front, frontP:s.b[front], back:t, backP:q }); break; }
+        }
+        r += dr; c += dc;
+      }
+    }
+  }
+  return out;
+}
+
+// is `sq` on the line between two aligned squares, and strictly between them?
+function betweenSq(a, b, sq){
+  const dr = Math.sign(rowOf(b) - rowOf(a)), dc = Math.sign(colOf(b) - colOf(a));
+  let r = rowOf(a) + dr, c = colOf(a) + dc;
+  while (onBoard(r,c) && r*8+c !== b){
+    if (r*8+c === sq) return true;
+    r += dr; c += dc;
+  }
+  return false;
+}
+
+/* ---- the tactic, named ----
+   One pass over the position the move leads to, looking for the handful of
+   patterns a coach says out loud. Everything is read off the board — no search
+   and nothing past the move itself — so a motif is either visibly there or it
+   is not claimed. The list comes back most important first and the narrator
+   takes the top of it; an empty list is an honest answer, and the caller has
+   its own words for a move with no tactic behind it. */
+function findMotifs(before, move, after, attackerColor){
+  const out = [], pins = [], skewers = [];
+  const them = other(attackerColor);
+  const theirMoves = legalMoves(after, them);
+  const mated = !theirMoves.length && inCheck(after, them);
+  const word = t => PIECE_WORD[t];
+  const moved = after.b[move.to];               // a promotion is not what set out
+  const theirKing = kingSq(after, them);
+
+  if (mated) out.push({ tag:'mate', text:'It is checkmate — the king has nowhere to go.' });
+
+  // free material: anything of theirs the exchange on its square simply wins
+  let loose = null;
+  for (let i=0;i<64;i++){
+    const p = after.b[i];
+    if (!p || p.c !== them || p.t === 'K') continue;
+    // what was already loose before the move is not a reason to play it
+    if (see(before, i, attackerColor) > 0) continue;
+    const win = see(after, i, attackerColor);
+    if (win > 0 && (!loose || win > loose.win)) loose = { sq:i, p, win };
+  }
+  if (loose && !mated)
+    out.push({ tag:'hangingPiece',
+               text:'It leaves the ' + word(loose.p.t) + ' on ' + sqName(loose.sq) +
+                    ' hanging — it can simply be taken.' });
+
+  // a fork: one piece, two targets it outranks or that nobody is guarding
+  if (moved){
+    const hit = [];
+    for (let i=0;i<64;i++){
+      const p = after.b[i];
+      if (!p || p.c !== them) continue;
+      if (attackersOf(after, i, attackerColor).indexOf(move.to) < 0) continue;
+      if (VAL[p.t] > VAL[moved.t] || !defendersOf(after, i, them).length)
+        hit.push(word(p.t) + ' on ' + sqName(i));
+    }
+    if (hit.length >= 2)
+      out.push({ tag:'fork',
+                 text:'The ' + word(moved.t) + ' on ' + sqName(move.to) + ' forks the ' +
+                      hit.slice(0,-1).join(', the ') + ' and the ' + hit[hit.length-1] + '.' });
+  }
+
+  // pins and skewers, but only the ones this move created: a pin that was
+  // already on the board is not the reason to play anything
+  const had = sliderLines(before, attackerColor);
+  for (const l of sliderLines(after, attackerColor)){
+    if (had.some(x => x.from === l.from && x.front === l.front && x.back === l.back)) continue;
+    if (VAL[l.backP.t] > VAL[l.frontP.t])
+      pins.push({ tag:'pin',
+                  text:'The ' + word(l.frontP.t) + ' on ' + sqName(l.front) + ' is pinned to the ' +
+                       word(l.backP.t) + ' behind it and cannot step aside.' });
+    else if (VAL[l.frontP.t] > VAL[l.backP.t])
+      skewers.push({ tag:'skewer',
+                     text:'The ' + word(l.frontP.t) + ' on ' + sqName(l.front) +
+                          ' has to move, and the ' + word(l.backP.t) + ' on ' + sqName(l.back) +
+                          ' behind it falls.' });
+  }
+  out.push(...pins, ...skewers);
+
+  // a discovery: something that was standing behind the piece that moved has
+  // been aiming through it all along
+  let disc = null;
+  for (let i=0;i<64;i++){
+    const p = after.b[i];
+    if (!p || p.c !== them) continue;
+    if (disc && VAL[p.t] <= VAL[disc.p.t]) continue;
+    const then = attackersOf(before, i, attackerColor);
+    for (const a of attackersOf(after, i, attackerColor)){
+      if (a === move.to || then.indexOf(a) >= 0) continue;
+      const q = after.b[a];
+      if (q.t !== 'B' && q.t !== 'R' && q.t !== 'Q') continue;
+      if (!betweenSq(a, i, move.from)) continue;   // the mover was the door
+      disc = { sq:i, p, from:a, q };
+      break;
+    }
+  }
+  if (disc){
+    const onKing = disc.p.t === 'K';
+    const alsoChecks = theirKing >= 0 && moved &&
+                       attackersOf(after, theirKing, attackerColor).indexOf(move.to) >= 0;
+    if (onKing && alsoChecks)
+      out.push({ tag:'doubleCheck',
+                 text:'It is double check — the ' + word(moved.t) + ' and the ' + word(disc.q.t) +
+                      ' on ' + sqName(disc.from) + ' both hit the king, so only the king can move.' });
+    else
+      out.push({ tag:'discoveredAttack',
+                 text:'Moving the ' + word(move.p.t) + ' uncovers the ' + word(disc.q.t) + ' on ' +
+                      sqName(disc.from) + ', which now ' +
+                      (onKing ? 'checks the king' : 'attacks the ' + word(disc.p.t) + ' on ' + sqName(disc.sq)) +
+                      '.' });
+  }
+
+  // the back rank: their king walled in by its own pieces, and a heavy piece
+  // that reaches the rank it is standing on
+  const home = them === W ? 7 : 0;
+  if (theirKing >= 0 && rowOf(theirKing) === home){
+    const front = them === W ? 6 : 1;
+    let boxed = true, walls = 0;
+    for (const dc of [-1,0,1]){
+      const c = colOf(theirKing) + dc;
+      if (!onBoard(front, c)) continue;
+      walls++;
+      const p = after.b[front*8+c];
+      if (!p || p.c !== them) boxed = false;
+    }
+    if (boxed && walls){
+      // it is their move in `after`, so the threat is asked for by handing the
+      // move back — what a rook or a queen would do if it were not
+      const turn = cloneState(after);
+      turn.turn = attackerColor; turn.ep = -1;
+      let threat = false;
+      for (const mv of legalMoves(turn, attackerColor)){
+        if ((mv.p.t !== 'R' && mv.p.t !== 'Q') || rowOf(mv.to) !== home) continue;
+        const nx = makeMove(turn, mv);
+        if (inCheck(nx, them) && !legalMoves(nx, them).length){ threat = true; break; }
+      }
+      if (threat)
+        out.push({ tag:'backRank',
+                   text:'The king is shut in on its own back rank by its own pieces, and a rook ' +
+                        'or queen landing there is mate.' });
+    }
+  }
+
+  // trapped: attacked, and every square it can reach loses it just the same
+  let trapped = null;
+  for (let i=0;i<64;i++){
+    const p = after.b[i];
+    if (!p || p.c !== them || p.t === 'K' || p.t === 'P') continue;
+    if (!attackersOf(after, i, attackerColor).length) continue;
+    // only this piece's own moves count: taking the attacker with something
+    // else is an answer, but it is not an escape square for the piece
+    const safe = theirMoves.some(x => x.from === i && see(makeMove(after, x), x.to, attackerColor) <= 0);
+    if (safe) continue;
+    if (!trapped || VAL[p.t] > VAL[trapped.p.t]) trapped = { sq:i, p };
+  }
+  if (trapped && (!loose || trapped.sq !== loose.sq))
+    out.push({ tag:'trappedPiece',
+               text:'The ' + word(trapped.p.t) + ' on ' + sqName(trapped.sq) +
+                    ' is trapped — every square it can reach loses it.' });
+
+  return out;
+}
+
+/* The engine's line in the notation a player reads, and what it comes to. The
+   moves are replayed through the same generator and toSAN() that write the
+   game's own move list, so the review cannot end up with a second opinion
+   about how a move is spelled. */
+function pvLine(st, pv){
+  if (!pv || pv.length < 2) return null;
+  const sans = [];
+  let s = st;
+  for (const u of pv){
+    const all = legalMoves(s, s.turn);
+    const m = all.find(x => uciOf(x) === u);
+    if (!m) break;                     // a line we cannot replay stops where it stops
+    sans.push(toSAN(s, m, all));
+    s = makeMove(s, m);
+  }
+  if (sans.length < 2) return null;
+  const mover = st.turn;
+  let outcome;
+  if (!legalMoves(s, s.turn).length && inCheck(s, s.turn))
+    outcome = s.turn === mover ? 'you are mated' : 'it is mate';
+  else {
+    const gain = materialFor(s, mover) - materialFor(st, mover);
+    outcome = gain >= 90  ? 'you are ' + materialWord(gain) + ' up'
+            : gain <= -90 ? 'you are ' + materialWord(-gain) + ' down'
+            : 'the material is level';
+  }
+  return { sans, outcome };
+}
+// kings are not material: they are on both sides of every position
+function materialFor(s, color){
+  let v = 0;
+  for (const p of s.b) if (p && p.t !== 'K') v += (p.c === color ? VAL[p.t] : -VAL[p.t]);
+  return v;
+}
+function materialWord(cp){
+  if (cp >= 850) return 'a queen';
+  if (cp >= 450) return 'a rook';
+  if (cp >= 280) return 'a piece';
+  if (cp >= 150) return 'the exchange';
+  return 'a pawn';
+}
+
+/* The coach's two or three sentences, in the order a coach would say them: the
+   mate, then the tactic the move is built on, then the plain facts about it,
+   and only if none of that is there, the vague truth that it was simply the
+   soundest move. The line the engine intends to follow, and what the player's
+   own move cost, come last and are never crowded out. */
+function describeBest(st, m, res, lossByPlayer, pvSan){
   if (!m) return '';
-  const bits = [];
+  const head = [], tail = [];
   const after = makeMove(st, m);
   const them = other(st.turn);
   const mated = !legalMoves(after, after.turn).length && inCheck(after, after.turn);
 
-  if (mated) bits.push('It is checkmate.');
-  else if (res && res.mate !== null && res.mate !== undefined && res.mate > 0)
-    bits.push('It forces mate in ' + Math.abs(res.mate) + '.');
-  else if (inCheck(after, after.turn)) bits.push('It puts the king in check.');
+  if (mated) head.push('It is checkmate.');
+  else {
+    if (res && res.mate !== null && res.mate !== undefined && res.mate > 0)
+      head.push('It forces mate in ' + Math.abs(res.mate) + '.');
+    // the tactic the move is built on, and only the first one: a card that
+    // lists every pattern on the board is a card nobody finishes reading
+    const motif = findMotifs(st, m, after, st.turn).find(x => x.tag !== 'mate');
+    if (motif) head.push(motif.text);
+    if (inCheck(after, after.turn)) head.push('It puts the king in check.');
 
-  if (m.cap) bits.push('It wins the ' + PIECE_WORD[m.cap.t] + '.');
-  if (m.promo) bits.push('The pawn becomes a ' + PIECE_WORD[m.promo] + '.');
-  if (m.p.t === 'K' && Math.abs(colOf(m.to) - colOf(m.from)) === 2)
-    bits.push('Castling tucks the king away and brings a rook into play.');
+    if (m.cap) head.push('It wins the ' + PIECE_WORD[m.cap.t] + '.');
+    if (m.promo) head.push('The pawn becomes a ' + PIECE_WORD[m.promo] + '.');
+    if (m.p.t === 'K' && Math.abs(colOf(m.to) - colOf(m.from)) === 2)
+      head.push('Castling tucks the king away and brings a rook into play.');
 
-  // a piece that was being attacked, and is no longer standing there
-  if (!m.cap && m.p.t !== 'K' && m.p.t !== 'P' &&
-      isAttacked(st, m.from, them) && !isAttacked(after, m.to, them))
-    bits.push('It moves the ' + PIECE_WORD[m.p.t] + ' out of attack.');
+    // a piece that was being attacked, and is no longer standing there
+    if (!m.cap && m.p.t !== 'K' && m.p.t !== 'P' &&
+        isAttacked(st, m.from, them) && !isAttacked(after, m.to, them))
+      head.push('It moves the ' + PIECE_WORD[m.p.t] + ' out of attack.');
+  }
 
-  if (!bits.length){
+  if (!head.length){
     const backRank = st.turn === W ? 7 : 0;
     if (m.p.t !== 'P' && m.p.t !== 'K' && rowOf(m.from) === backRank)
-      bits.push('It brings the ' + PIECE_WORD[m.p.t] + ' off the back rank.');
+      head.push('It brings the ' + PIECE_WORD[m.p.t] + ' off the back rank.');
     else if (m.p.t === 'P' && Math.abs(3.5 - colOf(m.to)) <= 1.5)
-      bits.push('It claims space in the centre.');
+      head.push('It claims space in the centre.');
     else
-      bits.push('No single tactic — it is simply the soundest of the options.');
+      head.push('No single tactic — it is simply the soundest of the options.');
   }
+
+  if (pvSan && pvSan.sans.length >= 2)
+    tail.push('After ' + pvSan.sans.join(' ') + ', ' + pvSan.outcome + '.');
 
   // a mate score is ±10000, so pawns stop being a sensible unit long before that
   if (lossByPlayer !== null && lossByPlayer >= 2000)
-    bits.push('What you played loses by force.');
+    tail.push('What you played loses by force.');
   else if (lossByPlayer !== null && lossByPlayer >= 100)
-    bits.push('Your move let ' + (lossByPlayer / 100).toFixed(1) + ' of a pawn slip.');
+    tail.push('Your move let ' + (lossByPlayer / 100).toFixed(1) + ' of a pawn slip.');
 
-  return bits.slice(0, 3).join(' ');
+  // three sentences, and the tail keeps its place in them
+  return head.slice(0, Math.max(1, 3 - tail.length)).concat(tail).slice(0, 3).join(' ');
 }
 
 function reviewRender(){
@@ -4110,7 +4697,7 @@ function reviewRender(){
     gap = sfScore(before) - sfScore(before.second);
   }
 
-  const v = judgeMove(loss, playedWasBest, gap);
+  const v = judgeMove(st, played, before, after, playedWasBest, gap);
   badge.className = 'rev-verdict ' + v.cls;
   badge.textContent = v.sym + '  ' + v.text;
 
@@ -4126,7 +4713,10 @@ function reviewRender(){
     coach.style.display = '';
     document.getElementById('coachMove').innerHTML =
       bestSan + ' <span class="cm-eval">' + fmtScore(before, st.turn) + '</span>';
-    document.getElementById('coachWhy').textContent = describeBest(st, bestMove, before, loss);
+    // the engine's whole line, so the card can say what happens next and not
+    // only what to play
+    document.getElementById('coachWhy').textContent =
+      describeBest(st, bestMove, before, loss, pvLine(st, before.pv));
   } else {
     coach.style.display = 'none';
     document.getElementById('coachMove').textContent = '';
@@ -4224,6 +4814,9 @@ document.getElementById('revDone').onclick = () => exitReview();
    SCREENS — title → vision select → game, with settings off the title
    ============================================================ */
 const MODE_NAME  = { blind:'Board Only', total:'Complete Blindfold', fog:'Fog of War', sighted:'Sighted' };
+// "3+2" when there is an increment, plain minutes when there is not — one
+// spelling, used by the chips, the room list and the ranked screen alike
+const timeLabel = (m, inc) => inc ? m + '+' + inc : m + ' min';
 // what the two halves of the blindfold card call themselves
 const HALF_NAME  = { total:'COMPLETE BLINDFOLD', blind:'SEE THE BOARD' };
 let screenName = 'home';
@@ -4252,6 +4845,7 @@ function showScreen(name){
     chosen.level = chosen.side = chosen.minutes = false;
     flagged = false;
   }
+  if (name === 'ranked') resetRank();
   document.querySelectorAll('.screen').forEach(s => s.classList.toggle('show', s.id === 'screen-' + name));
   syncOptions();
   // Only the home page has room for the account cluster. Sign up, log in and
@@ -4337,7 +4931,7 @@ function syncOptions(){
       ? (G.matchKind === 'ranked' ? 'Ranked' : 'Friendly') +
         ' · ' + (G.human === W ? 'White' : 'Black')
       : G.level + ' Elo · ' + (G.human === W ? 'White' : 'Black'))
-    + ' · ' + G.minutes + ' min';
+    + ' · ' + timeLabel(G.minutes, G.inc);
 
   syncSound();
 }
@@ -4359,6 +4953,10 @@ function goLocal(){
   G.human = W;                             // hot-seat always opens from White's side
   enterGameSetup();
 }
+function goRanked(){
+  beep(700,.09);
+  showScreen('ranked');
+}
 function goFriendly(){
   beep(700,.09);
   G.matchKind = 'friendly';
@@ -4370,9 +4968,10 @@ function goFriendly(){
 document.getElementById('navBot').onclick      = goBot;
 document.getElementById('navLocal').onclick    = goLocal;
 document.getElementById('navFriendly').onclick = goFriendly;
+document.getElementById('navRanked').onclick   = goRanked;
 
 // Deliberately inert for now, each one waiting on a page of its own.
-['navRanked','navSocial','navHowTo','navPractice','navOpening','navMiddle','navEnd']
+['navSocial','navHowTo','navPractice','navOpening','navMiddle','navEnd']
   .forEach(id => { document.getElementById(id).onclick = () => {}; });
 
 document.getElementById('btnSettings').onclick = () => { beep(560,.07); showScreen('settings'); };
@@ -4400,13 +4999,15 @@ document.querySelectorAll('#oppGrid .mode-card:not(.split)').forEach(card => {
 });
 document.querySelectorAll('#oppGrid .half').forEach(half => {
   half.onclick = () => {
-    if (half.disabled) return;             // ranked is not wired up yet
+    // Ranked is arranged on a page of its own — the badge, the rating and the
+    // queue. Friendly play goes through the room list instead.
+    if (half.dataset.kind === 'ranked'){ goRanked(); return; }
     G.matchKind = half.dataset.kind;
     G.opponent = 'online';
     picked.opponent = true;
     G.hosting = false;
     beep(700,.09);
-    enterRooms();                          // friendly play goes through the room list
+    enterRooms();
   };
 });
 
@@ -4449,6 +5050,9 @@ document.getElementById('waitCancel').onclick = () => {
   netSend({ t:'cancel' });
   netClose();
   hideWaiting();
+  // the ranked queue was joined from the ranked screen, so that is where
+  // giving up on it leads — not to a board with nobody on the other side
+  if (ONLINE() && G.matchKind === 'ranked') showScreen('ranked');
 };
 
 // the cards only choose a vision now — nothing begins until Start Play
@@ -4540,8 +5144,137 @@ document.querySelectorAll('[data-side]').forEach(b => {
   b.onclick = () => { G.human = b.dataset.side; chosen.side = true; syncOptions(); };
 });
 document.querySelectorAll('[data-time]').forEach(b => {
-  b.onclick = () => { G.minutes = +b.dataset.time; chosen.minutes = true; syncOptions(); };
+  // every clock on this screen is a flat one, so choosing here drops the
+  // increment a ranked game may have left behind
+  b.onclick = () => { G.minutes = +b.dataset.time; G.inc = 0; chosen.minutes = true; syncOptions(); };
 });
+
+/* ---- the ranked screen ----
+   A rating is the whole point of the page, so it leads with the badge that
+   rating has earned and how far it is from the next one. Underneath, the two
+   questions a ranked game needs — and no more: strength is the other player's
+   business, and colour is the server's call. */
+const RANK_MODE_NAME = {
+  total:'Complete Blindfold', blind:'Only Board', fog:'Fog of War', sighted:'Sighted'
+};
+const RANK = { mode:null, minutes:null, inc:0 };
+const rankReady = () => !!RANK.mode && RANK.minutes !== null;
+const rankSetOverlay = document.getElementById('rankSetOverlay');
+
+/** Arriving at the page again asks both questions again, as the setup does. */
+function resetRank(){
+  RANK.mode = null; RANK.minutes = null; RANK.inc = 0;
+  document.querySelectorAll('#rankModes button, #rankTimes button')
+    .forEach(b => b.classList.remove('active'));
+  rankSetOverlay.classList.remove('show');
+  drawRank();
+  drawRankPick();
+}
+
+/** The badge, the number under it, and how far along its tier that number is. */
+function drawRank(){
+  const elo = account ? account.rating : START_ELO;
+  // TIERS runs highest first, so the first floor the rating clears is its own;
+  // anything under the bottom floor still belongs to the bottom tier.
+  let at = TIERS.findIndex(t => elo >= t[0]);
+  if (at === -1) at = TIERS.length - 1;
+  const [floor, name] = TIERS[at];
+  const ceil = at === 0 ? null : TIERS[at - 1][0];   // the top tier has no ceiling
+  const badge = document.getElementById('rankBadge');
+  badge.src = tierArt(name);
+  badge.alt = name + ' badge';
+  document.getElementById('rankTier').textContent  = name;
+  document.getElementById('rankElo').textContent   = elo;
+  document.getElementById('rankFloor').textContent = floor;
+  document.getElementById('rankCeil').textContent  = ceil === null ? '—' : ceil;
+  // Nothing to climb towards at the top, so the bar is simply full.
+  const part = ceil === null ? 1 : (elo - floor) / (ceil - floor);
+  document.getElementById('rankFill').style.width =
+    Math.round(Math.min(1, Math.max(0, part)) * 100) + '%';
+  // Anyone may look at the ladder, but a rating has to belong to somebody.
+  document.getElementById('rankNote').textContent = account
+    ? '' : 'Playing as a guest. Sign in to carry a rating of your own.';
+}
+
+/* The settings button says what was chosen, so the box never has to be opened
+   again to remember it — and Start Game stays dark until it has something to say. */
+function drawRankPick(){
+  const set = rankReady();
+  const btn = document.getElementById('btnRankPick');
+  btn.textContent = set
+    ? RANK_MODE_NAME[RANK.mode] + ' | ' + timeLabel(RANK.minutes, RANK.inc)
+    : 'Select Games Settings';
+  btn.classList.toggle('set', set);
+  document.getElementById('btnRankStart').classList.toggle('dim', !set);
+}
+
+function rankAnswered(){
+  drawRankPick();
+  // Both answered and the box has nothing left to ask, so it closes itself.
+  // The pause is only long enough to watch the second choice light up.
+  if (rankReady()) setTimeout(() => rankSetOverlay.classList.remove('show'), 260);
+}
+
+document.getElementById('btnRankPick').onclick = () => {
+  beep(620,.08);
+  rankSetOverlay.classList.add('show');
+};
+document.getElementById('rankSetX').onclick = () => rankSetOverlay.classList.remove('show');
+
+document.querySelectorAll('#rankModes button').forEach(b => {
+  b.onclick = () => {
+    RANK.mode = b.dataset.mode;
+    document.querySelectorAll('#rankModes button')
+      .forEach(o => o.classList.toggle('active', o === b));
+    beep(660,.07);
+    rankAnswered();
+  };
+});
+document.querySelectorAll('#rankTimes button').forEach(b => {
+  b.onclick = () => {
+    RANK.minutes = +b.dataset.min;
+    RANK.inc     = +b.dataset.inc;
+    document.querySelectorAll('#rankTimes button')
+      .forEach(o => o.classList.toggle('active', o === b));
+    beep(660,.07);
+    rankAnswered();
+  };
+});
+
+/* Ranked play is a queue rather than a room: everyone asking for the same game
+   waits in the same place and the server pairs the first two, so there is no
+   list to browse and no seat to advertise. */
+function startRanked(){
+  if (NET.state === 'connecting' || NET.state === 'waiting') return;   // already queued
+  G.opponent  = 'online';
+  G.matchKind = 'ranked';
+  G.hosting   = false;
+  G.mode      = RANK.mode;
+  G.minutes   = RANK.minutes;
+  G.inc       = RANK.inc;
+  picked.opponent = picked.mode = true;
+  chosen.minutes  = true;
+  beep(760,.09); setTimeout(()=>beep(1010,.11), 90);
+  showScreen('game');
+  newGame();                                  // a board to look at behind the box
+  showWaiting('Looking for a ranked game — ' + RANK_MODE_NAME[RANK.mode] +
+              ', ' + timeLabel(RANK.minutes, RANK.inc) + '.');
+  netConnect(() => {
+    NET.state = 'waiting';
+    netSend({ t:'find', mode:G.mode, minutes:G.minutes, inc:G.inc, kind:'ranked' });
+  });
+}
+
+document.getElementById('btnRankStart').onclick = () => {
+  // Refused, it opens the box rather than explaining itself: the only thing
+  // standing in the way is the question inside it.
+  if (!rankReady()){
+    beep(190,.16,'sine',.09);
+    rankSetOverlay.classList.add('show');
+    return;
+  }
+  startRanked();
+};
 
 document.addEventListener('keydown', e => {
   if (e.metaKey || e.ctrlKey || e.altKey) return;
@@ -4569,6 +5302,14 @@ document.addEventListener('keydown', e => {
   }
   if (screenName === 'rooms'){
     if (k === 'escape'){ leaveRooms(); showScreen('home'); }
+    return;
+  }
+  if (screenName === 'ranked'){
+    // the settings box first, if it is open — escape closes what is in front
+    if (k === 'escape'){
+      if (rankSetOverlay.classList.contains('show')) rankSetOverlay.classList.remove('show');
+      else showScreen('home');
+    } else if (k === 'enter' && rankReady()){ e.preventDefault(); startRanked(); }
     return;
   }
   if (screenName === 'setup'){
@@ -4677,11 +5418,21 @@ function authToken(){
   return authSession && authSession.access_token ? authSession.access_token : null;
 }
 
+/* The ladder, highest first: each rung is the rating that reaches it and the
+   name it goes by, and the rung above is what the ranked screen's gauge fills
+   towards. Bronze starts at 100 rather than 0 because 100 is where everybody
+   starts — there is no stretch of the bar nobody has ever stood on.
+   Change these and change supabase-setup.sql with them: the tier column there
+   is generated from the same thresholds, and the two disagreeing would mean a
+   badge that argues with the database. */
+const START_ELO = 100;
 const TIERS = [
-  [2000, 'Master'], [1800, 'Expert'], [1600, 'Advanced'],
-  [1400, 'Intermediate'], [1200, 'Casual'], [0, 'Novice']
+  [2500, 'Grandmaster'], [2000, 'Master'], [1600, 'Diamond'],
+  [1200, 'Platinum'], [800, 'Gold'], [500, 'Silver'], [100, 'Bronze']
 ];
 const tierFor = r => (TIERS.find(t => r >= t[0]) || TIERS[TIERS.length-1])[1];
+// one badge per tier, named after it; only the one on screen is ever fetched
+const tierArt = name => 'assets/tier-' + name.toLowerCase() + '.png?v=1';
 
 async function initAuth(){
   updateAccountUI();
@@ -4710,8 +5461,8 @@ async function setAccount(session){
     gameName: nameProblem(chosen) ? '' : chosen,   // '' means: still needs asking
     name: chosen || meta.full_name || meta.name || (u.email || '').split('@')[0] || 'Player',
     avatar: meta.avatar_url || meta.picture || '',
-    rating: 1200,
-    tier: tierFor(1200)
+    rating: START_ELO,
+    tier: tierFor(START_ELO)
   };
   updateAccountUI();
   // the profile row is created by a trigger on signup; read it back for rating/tier
@@ -4748,6 +5499,9 @@ function updateAccountUI(){
   if (foot) foot.style.display = signedIn ? 'flex' : 'none';
 
   G.playerName = signedIn ? account.name : '';   // guests are named by the server
+  // signing in while looking at the ladder swaps the guest's starting badge
+  // for the one the account has actually earned
+  if (screenName === 'ranked') drawRank();
   decideFirstScreen();
 }
 
@@ -4780,9 +5534,18 @@ function decideFirstScreen(){
 
 async function signIn(){
   if (!sb){ document.getElementById('authOverlay').classList.add('show'); return; }
+  // `prompt: select_account` makes Google show its account chooser every time.
+  // Without it Google silently reuses whichever account the browser is already
+  // signed in to, so pressing the button looked like it did nothing — you were
+  // just inside the account, with no way to pick a different one and no sign
+  // that a choice had been made on your behalf. The round trip through Google
+  // is the point: the person should see which account they are entering with.
   const { error } = await sb.auth.signInWithOAuth({
     provider: 'google',
-    options: { redirectTo: location.href.split('#')[0].split('?')[0] }
+    options: {
+      redirectTo: location.href.split('#')[0].split('?')[0],
+      queryParams: { prompt: 'select_account' }
+    }
   });
   if (error) console.warn('Google sign-in failed:', error.message);
 }
@@ -4804,7 +5567,7 @@ document.getElementById('btnLogInGoogle').onclick  = signIn;
 document.getElementById('btnToLogIn').onclick  = () => showScreen('login');
 document.getElementById('btnToSignUp').onclick = () => showScreen('signup');
 document.getElementById('btnLogOut').onclick   = signOut;
-document.querySelectorAll('.auth-logo[data-home]').forEach(b => {
+document.querySelectorAll('[data-home]').forEach(b => {
   b.onclick = () => showScreen('home');
 });
 document.getElementById('authClose').onclick  =

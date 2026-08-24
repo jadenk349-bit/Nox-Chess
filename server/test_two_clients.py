@@ -265,6 +265,33 @@ def main():
     check("players wanting different games are left waiting",
           e.nothing_arrives() and f.nothing_arrives())
 
+    print("\n\033[1mThe increment is part of the game asked for\033[0m")
+    # 3+2 and a flat 3 minutes are different clocks, so they are different
+    # queues — pairing across them would hand somebody a game they did not pick.
+    p1 = TestClient("P1")
+    p2 = TestClient("P2")
+    p1.send(t="find", mode="blind", minutes=3, inc=2)
+    p1.expect("waiting")
+    p2.send(t="find", mode="blind", minutes=3)
+    p2.expect("waiting")
+    check("an increment does not match a flat clock",
+          p1.nothing_arrives() and p2.nothing_arrives())
+
+    p3 = TestClient("P3")
+    p3.send(t="find", mode="blind", minutes=3, inc=2)
+    start_p1 = p1.expect("start")
+    start_p3 = p3.expect("start")
+    check("the same increment matches", start_p1["game"] == start_p3["game"])
+    check("the increment carries into the game",
+          start_p1.get("inc") == 2 and start_p3.get("inc") == 2, "(%s)" % start_p1)
+    check("the flat clock is still waiting", p2.nothing_arrives())
+
+    p4 = TestClient("P4")
+    p4.send(t="find", mode="blind", minutes=3, inc="nonsense")
+    start_p2 = p2.expect("start")
+    check("an increment that is not a number becomes a flat clock",
+          start_p2.get("inc") == 0, "(%s)" % start_p2)
+
     print("\n\033[1mRanked and friendly are separate queues\033[0m")
     g = TestClient("G")
     h = TestClient("H")
@@ -423,7 +450,7 @@ def main():
     check("everyone watching sees the new room", len(seen) == 1, "(%s)" % seen)
     check("the room carries its settings",
           seen and seen[0]["mode"] == "fog" and seen[0]["minutes"] == 15
-          and seen[0]["color"] == "b", "(%s)" % seen)
+          and seen[0]["inc"] == 0 and seen[0]["color"] == "b", "(%s)" % seen)
     room_id = seen[0]["id"]
     host.expect("rooms")        # the host watches the list too, so it sees its own room
 
@@ -470,7 +497,7 @@ def main():
     check("cancelling a room removes it for everyone",
           watcher.expect("rooms")["rooms"] == [])
 
-    for client in (a, b, d, e, f, g, h, i, j, k,
+    for client in (a, b, d, e, f, g, h, i, j, k, p1, p2, p3, p4,
                    host, watcher, joiner, late, host2):
         if client is not None:               # ranked clients may have been skipped
             client.close()

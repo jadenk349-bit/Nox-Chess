@@ -18,9 +18,13 @@ python3 server/server.py [--port 8787]   # serves the page AND the game socket o
 
 python3 server/test_two_clients.py       # integration tests — REQUIRES a running server
 node server/test_ws_url.js               # unit tests for wsURLFrom(); no server needed
+node server/test_review.js               # unit tests for the review's chess reasoning
 
 docker build -t nox-chess . && docker run --rm -p 8787:8787 nox-chess
 ```
+
+Both JS suites read the code under test out of `blind-chess.html` by name, so
+renaming or reformatting what they extract breaks them on purpose.
 
 `test_two_clients.py` has no test-case selection flag; it runs the whole
 sequence (matchmaking, turn order, a full game, resign/draw, rooms) and exits
@@ -57,9 +61,9 @@ the engine, not optional). Allowlisted assets are cached for a week, so every
 reference in the page carries `?v=N`; bump it when a file changes.
 
 **Server state** is module-level dicts guarded by one `RLock`: `lobby` (quick
-match, keyed by `(mode, minutes, kind)` — ranked and friendly are separate
-queues), `rooms` (hosted games anyone may join), `lobby_subs` (clients watching
-the room list), `games`. Payloads are built under the lock and sent outside it.
+match, keyed by `(mode, minutes, inc, kind)` — ranked and friendly are separate
+queues, and 3+2 is a different game from a flat 3 minutes), `rooms` (hosted
+games anyone may join), `lobby_subs` (clients watching the room list), `games`. Payloads are built under the lock and sent outside it.
 One thread per connection.
 
 **Two engines.** `blind-chess.html` contains a small negamax/alpha-beta search
@@ -111,6 +115,14 @@ Global game state is `G` (mode, opponent, colours, clocks, `G.uci` — the move
 list the review and the bot replay from). `G.token` is incremented on every new
 game; async engine callbacks capture it and bail if it changed, which is what
 stops a reply from an abandoned game landing in the next one.
+
+Ranked play is a queue, not a room: the ranked screen (`screen-ranked`) shows
+the badge the rating has earned and sends `{t:"find", kind:"ranked"}`. Friendly
+play still goes through the room list. The rating ladder is written out twice —
+`TIERS` in the page picks the badge, and the generated `tier` column in
+`supabase-setup.sql` names it in the database — so a threshold has to move in
+both or they will disagree. Badge art is `assets/tier-<tier>.png`, one file per
+rung, and only the one on screen is fetched.
 
 Vision modes: `blind` (board, no pieces), `total` (pure notation, typed moves),
 `fog`, `sighted`. Prefer the helpers — `BLINDISH()`, `CAN_PEEK()`, `LOCAL()`,
