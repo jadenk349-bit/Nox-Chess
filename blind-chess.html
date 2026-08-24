@@ -956,7 +956,13 @@
     color:#fff; box-shadow:0 .25cqmin .6cqmin rgba(0,0,0,.45);
   }
   .mark.m-brilliant b{background:#3fa4d8;}
-  .mark.m-good b{background:#5fb96a;}
+  .mark.m-great b{background:#4fbfa8;}
+  .mark.m-best b{background:#5fb96a;}
+  /* excellent and good share a tick and differ only in colour, the way the
+     board marks players already know do */
+  .mark.m-excellent b{background:#4e9c58;}
+  .mark.m-good b{background:#5fb96a; opacity:.72;}
+  .mark.m-inaccuracy b{background:#d8c35a; color:#2a2408;}
   .mark.m-mistake b{background:#e0a341; color:#2a1f08;}
   .mark.m-blunder b{background:#d0453c;}
 
@@ -977,7 +983,11 @@
     padding:3px 9px; border-radius:999px;
   }
   .rev-verdict.v-brilliant{color:#08222e; background:#3fa4d8;}
+  .rev-verdict.v-great{color:#062a25; background:#4fbfa8;}
+  .rev-verdict.v-best{color:#08240f; background:#5fb96a;}
+  .rev-verdict.v-excellent{color:var(--good); border:1px solid rgba(111,191,115,.55);}
   .rev-verdict.v-good{color:var(--good); border:1px solid rgba(111,191,115,.4);}
+  .rev-verdict.v-inaccuracy{color:#d8c35a; border:1px solid rgba(216,195,90,.45);}
   .rev-verdict.v-mistake{color:#e0a341; border:1px solid rgba(224,163,65,.5);}
   .rev-verdict.v-blunder{color:#fff; background:var(--danger);}
   .rev-line{margin-top:6px; font-size:13.5px; color:var(--text); line-height:1.5;}
@@ -2179,6 +2189,91 @@ function isAttacked(s, sq, by){
     }
   }
   return false;
+}
+
+/* ---- who is hitting what, and what it costs -----------------
+   isAttacked() answers yes or no as fast as it can, and the move generator
+   leans on it move by move. These answer *with whom* and *for how much*, which
+   is what the review needs to say why a move works. They are deliberately new
+   functions rather than a rewrite of isAttacked: castling rights and the bot's
+   legality checks depend on that one's exact behaviour, and this is not the
+   place to find out how. */
+function attackersOf(s, sq, by){
+  const out = [];
+  const r = rowOf(sq), c = colOf(sq);
+  // pawns capture forwards, so one attacking this square stands behind it
+  const pdir = by === W ? 1 : -1;
+  for (const dc of [-1,1]){
+    const nr = r + pdir, nc = c + dc;
+    if (!onBoard(nr,nc)) continue;
+    const p = s.b[nr*8+nc];
+    if (p && p.c === by && p.t === 'P') out.push(nr*8+nc);
+  }
+  for (const [dirs, kind] of [[DIR_N,'N'],[DIR_K,'K']]){
+    for (const [dr,dc] of dirs){
+      const nr = r+dr, nc = c+dc;
+      if (!onBoard(nr,nc)) continue;
+      const p = s.b[nr*8+nc];
+      if (p && p.c === by && p.t === kind) out.push(nr*8+nc);
+    }
+  }
+  for (const [dirs, kind] of [[DIR_R,'R'],[DIR_B,'B']]){
+    for (const [dr,dc] of dirs){
+      let nr = r+dr, nc = c+dc;
+      while (onBoard(nr,nc)){
+        const p = s.b[nr*8+nc];
+        if (p){
+          if (p.c === by && (p.t === kind || p.t === 'Q')) out.push(nr*8+nc);
+          break;
+        }
+        nr += dr; nc += dc;
+      }
+    }
+  }
+  return out;
+}
+
+/* Guarding a square and attacking it are one relation seen from either side of
+   the capture, so this is attackersOf() under the name that reads correctly at
+   the call site — asking who recaptures, not who strikes first. */
+function defendersOf(s, sq, by){ return attackersOf(s, sq, by); }
+
+/* Static exchange evaluation: play out every capture on one square, cheapest
+   attacker first, and hand back what the side that started it comes out with
+   in centipawns. Nothing searches — the sequence is arithmetic over the pieces
+   that can see the square, recomputed from the board after each capture so a
+   rook standing behind a bishop joins the queue on its own.
+
+   The sequence is played to the end and then walked back, each side taking the
+   better of capturing and standing still. The usual alpha-beta cutoff on the
+   way down is left out on purpose: it is sound for asking whether a capture is
+   good, and wrong for asking by how much, and by how much is the whole
+   question here. Nobody notices sixteen iterations on a review screen. */
+function see(s, sq, sideToCapture){
+  const victim = s.b[sq];
+  if (!victim || victim.c === sideToCapture) return 0;   // nothing of theirs to take
+  if (victim.t === 'K') return 0;                        // kings are never actually taken
+  const work = { b: s.b.slice() };                       // attackersOf only reads .b
+  const gain = [ VAL[victim.t] ];
+  let side = sideToCapture, d = 0;
+  for (;;){
+    const atk = attackersOf(work, sq, side);
+    if (!atk.length) break;
+    let from = atk[0];
+    for (const a of atk) if (VAL[work.b[a].t] < VAL[work.b[from].t]) from = a;
+    const p = work.b[from];
+    // a king may not capture into a recapture, so the sequence ends rather than
+    // pretending it can
+    if (p.t === 'K' && attackersOf(work, sq, other(side)).length) break;
+    d++;
+    gain[d] = VAL[p.t] - gain[d-1];
+    work.b[from] = null;
+    work.b[sq]   = p;                  // whoever captured is the next one taken
+    side = other(side);
+  }
+  if (!d) return 0;                    // unattacked: the piece is not going anywhere
+  while (--d > 0) gain[d-1] = -Math.max(-gain[d-1], gain[d]);
+  return gain[0];
 }
 
 function kingSq(s, color){
@@ -3608,13 +3703,25 @@ function engineLine(line){
     const idx = mp ? +mp[1] : 1;
     if (idx > sfInfo.want) return;
     const slot = sfInfo.lines[idx - 1] ||
-                 (sfInfo.lines[idx - 1] = { cp:null, mate:null, best:null });
+                 (sfInfo.lines[idx - 1] = { cp:null, mate:null, best:null, pv:null });
     const cp = line.match(/score cp (-?\d+)/);
     const mate = line.match(/score mate (-?\d+)/);
-    const pv = line.match(/ pv ([a-h][1-8][a-h][1-8][qrbn]?)/);
+    // The whole line, not just its first move: the review tells the player what
+    // happens next, and that is what the rest of the pv is. Stockfish puts pv
+    // last, but UCI does not promise it, so the tail is cut at the first token
+    // that is not a move — and again at eight plies, past which nobody is
+    // following along anyway.
+    const pv = line.match(/ pv (.+)$/);
     if (cp) { slot.cp = +cp[1]; slot.mate = null; }
     if (mate){ slot.mate = +mate[1]; slot.cp = null; }
-    if (pv) slot.best = pv[1];
+    if (pv){
+      const moves = [];
+      for (const tok of pv[1].trim().split(/\s+/)){
+        if (moves.length === 8 || !/^[a-h][1-8][a-h][1-8][qrbn]?$/.test(tok)) break;
+        moves.push(tok);
+      }
+      if (moves.length){ slot.pv = moves; slot.best = moves[0]; }
+    }
     return;
   }
   if (line.startsWith('bestmove')){
@@ -3623,13 +3730,15 @@ function engineLine(line){
     SF.pending = null;
     if (p){
       const lines = (sfInfo && sfInfo.lines.filter(Boolean)) || [];
-      const one = lines[0] || { cp:null, mate:null, best:null };
+      const one = lines[0] || { cp:null, mate:null, best:null, pv:null };
       const out = {
         // below Skill 20 the engine's own pick is deliberately not its top line,
         // and that pick is the one the bot should play
         best: (best && best !== '(none)') ? best : one.best,
         cp:   one.cp,
         mate: one.mate,
+        // the top line in full, for the review's "after ..." sentence
+        pv:   one.pv,
         // absent when there was only one legal move — which is itself a fact
         second: lines[1] || null,
         lines: lines
@@ -3799,24 +3908,109 @@ function fmtScore(res, turn){
   return (white > 0 ? '+' : '') + (white / 100).toFixed(2);
 }
 
-/* Four judgements, and every move gets exactly one.
+/* Eight judgements, and every move gets exactly one.
 
-   ??  blunder    — gave away three pawns' worth or more
-   ?   mistake    — gave away a pawn's worth or more
-   !!  brilliant  — the engine's own move, and clearly better than the next
-                    best, so it was genuinely there to be missed
-   !   good       — anything else: it held on to what the position had
+   Centipawns are the wrong ruler for this. Dropping a pawn from a level
+   position is a real error; dropping one while a queen up is not; both read as
+   100. So a move is judged in the only currency the player is actually
+   spending — the chance of winning the game — through the fitted curve that
+   turns an evaluation into that chance:
 
-   That "clearly better than the next best" is what MultiPV buys. Without it, a
-   move that is best only because every move is fine would read as brilliant. */
-function judgeMove(loss, playedWasBest, gap){
-  if (loss !== null && loss >= 300)
-    return { sym:'??', text:'Blunder',   cls:'v-blunder',   mark:'m-blunder' };
-  if (loss !== null && loss >= 100)
-    return { sym:'?',  text:'Mistake',   cls:'v-mistake',   mark:'m-mistake' };
-  if (playedWasBest && gap !== null && gap >= 150)
-    return { sym:'!!', text:'Brilliant', cls:'v-brilliant', mark:'m-brilliant' };
-  return { sym:'!', text:'Good move', cls:'v-good', mark:'m-good' };
+     win% = 50 + 50 * (2 / (1 + e^(-0.00368208 * cp)) - 1)
+
+   and what the move threw away is the drop in win% it caused. The bands below
+   are the familiar ones: a couple of points is nothing, twenty is a game.
+
+   Mate scores never go near the curve. A forced mate is +-10000 by convention,
+   which the curve reads as certainty and cannot tell a mate in twelve from a
+   mate in one, so mates are compared as mates: losing one is judged by what is
+   left instead, and walking into one is a blunder whatever the pawns say. */
+function winPct(cp){
+  return 50 + 50 * (2 / (1 + Math.exp(-0.00368208 * cp)) - 1);
+}
+
+const VERDICT = {
+  brilliant:  { sym:'!!', text:'Brilliant',  cls:'v-brilliant',  mark:'m-brilliant' },
+  great:      { sym:'!',  text:'Great move', cls:'v-great',      mark:'m-great' },
+  best:       { sym:'\u2605', text:'Best move', cls:'v-best',      mark:'m-best' },
+  // excellent and good share the tick and differ by colour, as the marks do
+  excellent:  { sym:'\u2713', text:'Excellent', cls:'v-excellent', mark:'m-excellent' },
+  good:       { sym:'\u2713', text:'Good move', cls:'v-good',      mark:'m-good' },
+  inaccuracy: { sym:'?!', text:'Inaccuracy', cls:'v-inaccuracy', mark:'m-inaccuracy' },
+  mistake:    { sym:'?',  text:'Mistake',    cls:'v-mistake',    mark:'m-mistake' },
+  blunder:    { sym:'??', text:'Blunder',    cls:'v-blunder',    mark:'m-blunder' }
+};
+
+/* What the move gave away, in material, by the board alone: the exchange the
+   opponent can now win on the square the piece landed on, or on anything else
+   the move left behind. A sacrifice is not a capture the engine happens to
+   like — it is material that can be taken and is offered anyway. */
+function sacrificeSize(st, m, after){
+  const them = other(m.p.c);
+  let most = see(after, m.to, them);
+  for (let i=0;i<64;i++){
+    const p = after.b[i];
+    if (!p || p.c !== m.p.c || i === m.to) continue;
+    if (see(st, i, them) > 0) continue;        // already loose before the move
+    const cost = see(after, i, them);
+    if (cost > most) most = cost;
+  }
+  return most;
+}
+
+/* st and played are the position and the move under the microscope; before and
+   after are the engine's two readings either side of it, each from the point
+   of view of whoever is to move in them, so everything the mover is charged
+   with is the second one flipped. gap is how far the engine's first line beat
+   its second. */
+function judgeMove(st, played, before, after, playedWasBest, gap){
+  const num = v => (v === null || v === undefined) ? null : v;
+  const mateBefore = before ? num(before.mate) : null;
+  const mateAfter  = (after && num(after.mate) !== null) ? -after.mate : null;
+  const cpBefore   = before ? num(before.cp) : null;
+  const cpAfter    = (after && num(after.cp) !== null) ? -after.cp : null;
+
+  if (mateBefore !== null && mateBefore > 0){
+    if (mateAfter !== null && mateAfter > 0){
+      // mate before and mate after: the only question left is how long it takes
+      const slower = mateAfter - mateBefore;
+      if (slower <= 0) return VERDICT.best;
+      if (slower <= 2) return VERDICT.good;
+      return VERDICT.mistake;
+    }
+    // the mate is gone, and what is left decides how much that cost
+    return (cpAfter !== null && cpAfter >= 300) ? VERDICT.mistake : VERDICT.blunder;
+  }
+  if (mateAfter !== null && mateAfter < 0){
+    // being mated already is not this move's fault; lasting longer is a defence
+    if (mateBefore !== null && mateBefore < 0)
+      return mateAfter <= mateBefore ? VERDICT.best : VERDICT.good;
+    return VERDICT.blunder;                    // walked into a mate that was not there
+  }
+  // escaping a mate, or an engine that has not answered yet: nothing to weigh
+  if (cpBefore === null || cpAfter === null)
+    return playedWasBest ? VERDICT.best : VERDICT.good;
+
+  if (playedWasBest){
+    const secondCp = before.second ? sfScore(before.second) : null;
+    // brilliant is a sacrifice the engine still calls best, in a position that
+    // was not already won — giving up material while a rook up is only tidying
+    if (secondCp !== null && secondCp < 700 &&
+        sacrificeSize(st, played, makeMove(st, played)) >= 200)
+      return VERDICT.brilliant;
+    // great is the only move that holds, played, and not hung in the process
+    if (gap !== null && gap >= 150 &&
+        see(makeMove(st, played), played.to, other(st.turn)) <= 0)
+      return VERDICT.great;
+    return VERDICT.best;
+  }
+
+  const loss = winPct(cpBefore) - winPct(cpAfter);
+  if (loss < 2)  return VERDICT.excellent;
+  if (loss < 5)  return VERDICT.good;
+  if (loss < 10) return VERDICT.inaccuracy;
+  if (loss < 20) return VERDICT.mistake;
+  return VERDICT.blunder;
 }
 
 /* ---- the two arrows, and the mark on the square the piece landed on ---- */
@@ -3882,45 +4076,288 @@ function drawReviewOverlay(played, best, judgement){
    and it only ever claims what it can see. */
 const PIECE_WORD = { P:'pawn', N:'knight', B:'bishop', R:'rook', Q:'queen', K:'king' };
 
-function describeBest(st, m, res, lossByPlayer){
+/* Every line of fire the mover's sliders have with two enemy pieces on it: the
+   shape a pin and a skewer share, told apart afterwards by which of the two is
+   worth more. */
+function sliderLines(s, by){
+  const out = [];
+  for (let i=0;i<64;i++){
+    const p = s.b[i];
+    if (!p || p.c !== by || (p.t !== 'B' && p.t !== 'R' && p.t !== 'Q')) continue;
+    const dirs = p.t === 'B' ? DIR_B : p.t === 'R' ? DIR_R : DIR_K;
+    for (const [dr,dc] of dirs){
+      let r = rowOf(i)+dr, c = colOf(i)+dc, front = -1;
+      while (onBoard(r,c)){
+        const t = r*8+c, q = s.b[t];
+        if (q){
+          if (q.c === by) break;                // one of ours shuts the line
+          if (front < 0) front = t;             // the first enemy on the ray
+          else { out.push({ from:i, front, frontP:s.b[front], back:t, backP:q }); break; }
+        }
+        r += dr; c += dc;
+      }
+    }
+  }
+  return out;
+}
+
+// is `sq` on the line between two aligned squares, and strictly between them?
+function betweenSq(a, b, sq){
+  const dr = Math.sign(rowOf(b) - rowOf(a)), dc = Math.sign(colOf(b) - colOf(a));
+  let r = rowOf(a) + dr, c = colOf(a) + dc;
+  while (onBoard(r,c) && r*8+c !== b){
+    if (r*8+c === sq) return true;
+    r += dr; c += dc;
+  }
+  return false;
+}
+
+/* ---- the tactic, named ----
+   One pass over the position the move leads to, looking for the handful of
+   patterns a coach says out loud. Everything is read off the board — no search
+   and nothing past the move itself — so a motif is either visibly there or it
+   is not claimed. The list comes back most important first and the narrator
+   takes the top of it; an empty list is an honest answer, and the caller has
+   its own words for a move with no tactic behind it. */
+function findMotifs(before, move, after, attackerColor){
+  const out = [], pins = [], skewers = [];
+  const them = other(attackerColor);
+  const theirMoves = legalMoves(after, them);
+  const mated = !theirMoves.length && inCheck(after, them);
+  const word = t => PIECE_WORD[t];
+  const moved = after.b[move.to];               // a promotion is not what set out
+  const theirKing = kingSq(after, them);
+
+  if (mated) out.push({ tag:'mate', text:'It is checkmate — the king has nowhere to go.' });
+
+  // free material: anything of theirs the exchange on its square simply wins
+  let loose = null;
+  for (let i=0;i<64;i++){
+    const p = after.b[i];
+    if (!p || p.c !== them || p.t === 'K') continue;
+    // what was already loose before the move is not a reason to play it
+    if (see(before, i, attackerColor) > 0) continue;
+    const win = see(after, i, attackerColor);
+    if (win > 0 && (!loose || win > loose.win)) loose = { sq:i, p, win };
+  }
+  if (loose && !mated)
+    out.push({ tag:'hangingPiece',
+               text:'It leaves the ' + word(loose.p.t) + ' on ' + sqName(loose.sq) +
+                    ' hanging — it can simply be taken.' });
+
+  // a fork: one piece, two targets it outranks or that nobody is guarding
+  if (moved){
+    const hit = [];
+    for (let i=0;i<64;i++){
+      const p = after.b[i];
+      if (!p || p.c !== them) continue;
+      if (attackersOf(after, i, attackerColor).indexOf(move.to) < 0) continue;
+      if (VAL[p.t] > VAL[moved.t] || !defendersOf(after, i, them).length)
+        hit.push(word(p.t) + ' on ' + sqName(i));
+    }
+    if (hit.length >= 2)
+      out.push({ tag:'fork',
+                 text:'The ' + word(moved.t) + ' on ' + sqName(move.to) + ' forks the ' +
+                      hit.slice(0,-1).join(', the ') + ' and the ' + hit[hit.length-1] + '.' });
+  }
+
+  // pins and skewers, but only the ones this move created: a pin that was
+  // already on the board is not the reason to play anything
+  const had = sliderLines(before, attackerColor);
+  for (const l of sliderLines(after, attackerColor)){
+    if (had.some(x => x.from === l.from && x.front === l.front && x.back === l.back)) continue;
+    if (VAL[l.backP.t] > VAL[l.frontP.t])
+      pins.push({ tag:'pin',
+                  text:'The ' + word(l.frontP.t) + ' on ' + sqName(l.front) + ' is pinned to the ' +
+                       word(l.backP.t) + ' behind it and cannot step aside.' });
+    else if (VAL[l.frontP.t] > VAL[l.backP.t])
+      skewers.push({ tag:'skewer',
+                     text:'The ' + word(l.frontP.t) + ' on ' + sqName(l.front) +
+                          ' has to move, and the ' + word(l.backP.t) + ' on ' + sqName(l.back) +
+                          ' behind it falls.' });
+  }
+  out.push(...pins, ...skewers);
+
+  // a discovery: something that was standing behind the piece that moved has
+  // been aiming through it all along
+  let disc = null;
+  for (let i=0;i<64;i++){
+    const p = after.b[i];
+    if (!p || p.c !== them) continue;
+    if (disc && VAL[p.t] <= VAL[disc.p.t]) continue;
+    const then = attackersOf(before, i, attackerColor);
+    for (const a of attackersOf(after, i, attackerColor)){
+      if (a === move.to || then.indexOf(a) >= 0) continue;
+      const q = after.b[a];
+      if (q.t !== 'B' && q.t !== 'R' && q.t !== 'Q') continue;
+      if (!betweenSq(a, i, move.from)) continue;   // the mover was the door
+      disc = { sq:i, p, from:a, q };
+      break;
+    }
+  }
+  if (disc){
+    const onKing = disc.p.t === 'K';
+    const alsoChecks = theirKing >= 0 && moved &&
+                       attackersOf(after, theirKing, attackerColor).indexOf(move.to) >= 0;
+    if (onKing && alsoChecks)
+      out.push({ tag:'doubleCheck',
+                 text:'It is double check — the ' + word(moved.t) + ' and the ' + word(disc.q.t) +
+                      ' on ' + sqName(disc.from) + ' both hit the king, so only the king can move.' });
+    else
+      out.push({ tag:'discoveredAttack',
+                 text:'Moving the ' + word(move.p.t) + ' uncovers the ' + word(disc.q.t) + ' on ' +
+                      sqName(disc.from) + ', which now ' +
+                      (onKing ? 'checks the king' : 'attacks the ' + word(disc.p.t) + ' on ' + sqName(disc.sq)) +
+                      '.' });
+  }
+
+  // the back rank: their king walled in by its own pieces, and a heavy piece
+  // that reaches the rank it is standing on
+  const home = them === W ? 7 : 0;
+  if (theirKing >= 0 && rowOf(theirKing) === home){
+    const front = them === W ? 6 : 1;
+    let boxed = true, walls = 0;
+    for (const dc of [-1,0,1]){
+      const c = colOf(theirKing) + dc;
+      if (!onBoard(front, c)) continue;
+      walls++;
+      const p = after.b[front*8+c];
+      if (!p || p.c !== them) boxed = false;
+    }
+    if (boxed && walls){
+      // it is their move in `after`, so the threat is asked for by handing the
+      // move back — what a rook or a queen would do if it were not
+      const turn = cloneState(after);
+      turn.turn = attackerColor; turn.ep = -1;
+      let threat = false;
+      for (const mv of legalMoves(turn, attackerColor)){
+        if ((mv.p.t !== 'R' && mv.p.t !== 'Q') || rowOf(mv.to) !== home) continue;
+        const nx = makeMove(turn, mv);
+        if (inCheck(nx, them) && !legalMoves(nx, them).length){ threat = true; break; }
+      }
+      if (threat)
+        out.push({ tag:'backRank',
+                   text:'The king is shut in on its own back rank by its own pieces, and a rook ' +
+                        'or queen landing there is mate.' });
+    }
+  }
+
+  // trapped: attacked, and every square it can reach loses it just the same
+  let trapped = null;
+  for (let i=0;i<64;i++){
+    const p = after.b[i];
+    if (!p || p.c !== them || p.t === 'K' || p.t === 'P') continue;
+    if (!attackersOf(after, i, attackerColor).length) continue;
+    // only this piece's own moves count: taking the attacker with something
+    // else is an answer, but it is not an escape square for the piece
+    const safe = theirMoves.some(x => x.from === i && see(makeMove(after, x), x.to, attackerColor) <= 0);
+    if (safe) continue;
+    if (!trapped || VAL[p.t] > VAL[trapped.p.t]) trapped = { sq:i, p };
+  }
+  if (trapped && (!loose || trapped.sq !== loose.sq))
+    out.push({ tag:'trappedPiece',
+               text:'The ' + word(trapped.p.t) + ' on ' + sqName(trapped.sq) +
+                    ' is trapped — every square it can reach loses it.' });
+
+  return out;
+}
+
+/* The engine's line in the notation a player reads, and what it comes to. The
+   moves are replayed through the same generator and toSAN() that write the
+   game's own move list, so the review cannot end up with a second opinion
+   about how a move is spelled. */
+function pvLine(st, pv){
+  if (!pv || pv.length < 2) return null;
+  const sans = [];
+  let s = st;
+  for (const u of pv){
+    const all = legalMoves(s, s.turn);
+    const m = all.find(x => uciOf(x) === u);
+    if (!m) break;                     // a line we cannot replay stops where it stops
+    sans.push(toSAN(s, m, all));
+    s = makeMove(s, m);
+  }
+  if (sans.length < 2) return null;
+  const mover = st.turn;
+  let outcome;
+  if (!legalMoves(s, s.turn).length && inCheck(s, s.turn))
+    outcome = s.turn === mover ? 'you are mated' : 'it is mate';
+  else {
+    const gain = materialFor(s, mover) - materialFor(st, mover);
+    outcome = gain >= 90  ? 'you are ' + materialWord(gain) + ' up'
+            : gain <= -90 ? 'you are ' + materialWord(-gain) + ' down'
+            : 'the material is level';
+  }
+  return { sans, outcome };
+}
+// kings are not material: they are on both sides of every position
+function materialFor(s, color){
+  let v = 0;
+  for (const p of s.b) if (p && p.t !== 'K') v += (p.c === color ? VAL[p.t] : -VAL[p.t]);
+  return v;
+}
+function materialWord(cp){
+  if (cp >= 850) return 'a queen';
+  if (cp >= 450) return 'a rook';
+  if (cp >= 280) return 'a piece';
+  if (cp >= 150) return 'the exchange';
+  return 'a pawn';
+}
+
+/* The coach's two or three sentences, in the order a coach would say them: the
+   mate, then the tactic the move is built on, then the plain facts about it,
+   and only if none of that is there, the vague truth that it was simply the
+   soundest move. The line the engine intends to follow, and what the player's
+   own move cost, come last and are never crowded out. */
+function describeBest(st, m, res, lossByPlayer, pvSan){
   if (!m) return '';
-  const bits = [];
+  const head = [], tail = [];
   const after = makeMove(st, m);
   const them = other(st.turn);
   const mated = !legalMoves(after, after.turn).length && inCheck(after, after.turn);
 
-  if (mated) bits.push('It is checkmate.');
-  else if (res && res.mate !== null && res.mate !== undefined && res.mate > 0)
-    bits.push('It forces mate in ' + Math.abs(res.mate) + '.');
-  else if (inCheck(after, after.turn)) bits.push('It puts the king in check.');
+  if (mated) head.push('It is checkmate.');
+  else {
+    if (res && res.mate !== null && res.mate !== undefined && res.mate > 0)
+      head.push('It forces mate in ' + Math.abs(res.mate) + '.');
+    // the tactic the move is built on, and only the first one: a card that
+    // lists every pattern on the board is a card nobody finishes reading
+    const motif = findMotifs(st, m, after, st.turn).find(x => x.tag !== 'mate');
+    if (motif) head.push(motif.text);
+    if (inCheck(after, after.turn)) head.push('It puts the king in check.');
 
-  if (m.cap) bits.push('It wins the ' + PIECE_WORD[m.cap.t] + '.');
-  if (m.promo) bits.push('The pawn becomes a ' + PIECE_WORD[m.promo] + '.');
-  if (m.p.t === 'K' && Math.abs(colOf(m.to) - colOf(m.from)) === 2)
-    bits.push('Castling tucks the king away and brings a rook into play.');
+    if (m.cap) head.push('It wins the ' + PIECE_WORD[m.cap.t] + '.');
+    if (m.promo) head.push('The pawn becomes a ' + PIECE_WORD[m.promo] + '.');
+    if (m.p.t === 'K' && Math.abs(colOf(m.to) - colOf(m.from)) === 2)
+      head.push('Castling tucks the king away and brings a rook into play.');
 
-  // a piece that was being attacked, and is no longer standing there
-  if (!m.cap && m.p.t !== 'K' && m.p.t !== 'P' &&
-      isAttacked(st, m.from, them) && !isAttacked(after, m.to, them))
-    bits.push('It moves the ' + PIECE_WORD[m.p.t] + ' out of attack.');
+    // a piece that was being attacked, and is no longer standing there
+    if (!m.cap && m.p.t !== 'K' && m.p.t !== 'P' &&
+        isAttacked(st, m.from, them) && !isAttacked(after, m.to, them))
+      head.push('It moves the ' + PIECE_WORD[m.p.t] + ' out of attack.');
+  }
 
-  if (!bits.length){
+  if (!head.length){
     const backRank = st.turn === W ? 7 : 0;
     if (m.p.t !== 'P' && m.p.t !== 'K' && rowOf(m.from) === backRank)
-      bits.push('It brings the ' + PIECE_WORD[m.p.t] + ' off the back rank.');
+      head.push('It brings the ' + PIECE_WORD[m.p.t] + ' off the back rank.');
     else if (m.p.t === 'P' && Math.abs(3.5 - colOf(m.to)) <= 1.5)
-      bits.push('It claims space in the centre.');
+      head.push('It claims space in the centre.');
     else
-      bits.push('No single tactic — it is simply the soundest of the options.');
+      head.push('No single tactic — it is simply the soundest of the options.');
   }
+
+  if (pvSan && pvSan.sans.length >= 2)
+    tail.push('After ' + pvSan.sans.join(' ') + ', ' + pvSan.outcome + '.');
 
   // a mate score is ±10000, so pawns stop being a sensible unit long before that
   if (lossByPlayer !== null && lossByPlayer >= 2000)
-    bits.push('What you played loses by force.');
+    tail.push('What you played loses by force.');
   else if (lossByPlayer !== null && lossByPlayer >= 100)
-    bits.push('Your move let ' + (lossByPlayer / 100).toFixed(1) + ' of a pawn slip.');
+    tail.push('Your move let ' + (lossByPlayer / 100).toFixed(1) + ' of a pawn slip.');
 
-  return bits.slice(0, 3).join(' ');
+  // three sentences, and the tail keeps its place in them
+  return head.slice(0, Math.max(1, 3 - tail.length)).concat(tail).slice(0, 3).join(' ');
 }
 
 function reviewRender(){
@@ -3983,7 +4420,7 @@ function reviewRender(){
     gap = sfScore(before) - sfScore(before.second);
   }
 
-  const v = judgeMove(loss, playedWasBest, gap);
+  const v = judgeMove(st, played, before, after, playedWasBest, gap);
   badge.className = 'rev-verdict ' + v.cls;
   badge.textContent = v.sym + '  ' + v.text;
 
@@ -3999,7 +4436,10 @@ function reviewRender(){
     coach.style.display = '';
     document.getElementById('coachMove').innerHTML =
       bestSan + ' <span class="cm-eval">' + fmtScore(before, st.turn) + '</span>';
-    document.getElementById('coachWhy').textContent = describeBest(st, bestMove, before, loss);
+    // the engine's whole line, so the card can say what happens next and not
+    // only what to play
+    document.getElementById('coachWhy').textContent =
+      describeBest(st, bestMove, before, loss, pvLine(st, before.pv));
   } else {
     coach.style.display = 'none';
     document.getElementById('coachMove').textContent = '';

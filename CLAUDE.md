@@ -18,9 +18,13 @@ python3 server/server.py [--port 8787]   # serves the page AND the game socket o
 
 python3 server/test_two_clients.py       # integration tests — REQUIRES a running server
 node server/test_ws_url.js               # unit tests for wsURLFrom(); no server needed
+node server/test_review.js               # unit tests for the review's chess reasoning
 
 docker build -t nox-chess . && docker run --rm -p 8787:8787 nox-chess
 ```
+
+Both JS suites read the code under test out of `blind-chess.html` by name, so
+renaming or reformatting what they extract breaks them on purpose.
 
 `test_two_clients.py` has no test-case selection flag; it runs the whole
 sequence (matchmaking, turn order, a full game, resign/draw, rooms) and exits
