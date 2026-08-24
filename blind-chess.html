@@ -4653,9 +4653,18 @@ function decideFirstScreen(){
 
 async function signIn(){
   if (!sb){ document.getElementById('authOverlay').classList.add('show'); return; }
+  // `prompt: select_account` makes Google show its account chooser every time.
+  // Without it Google silently reuses whichever account the browser is already
+  // signed in to, so pressing the button looked like it did nothing — you were
+  // just inside the account, with no way to pick a different one and no sign
+  // that a choice had been made on your behalf. The round trip through Google
+  // is the point: the person should see which account they are entering with.
   const { error } = await sb.auth.signInWithOAuth({
     provider: 'google',
-    options: { redirectTo: location.href.split('#')[0].split('?')[0] }
+    options: {
+      redirectTo: location.href.split('#')[0].split('?')[0],
+      queryParams: { prompt: 'select_account' }
+    }
   });
   if (error) console.warn('Google sign-in failed:', error.message);
 }
