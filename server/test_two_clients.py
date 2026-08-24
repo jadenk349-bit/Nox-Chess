@@ -433,6 +433,68 @@ def main():
     for c in (r1, r2, d1, d2, s1, s2):
         c.close()
 
+    print("\n\033[1mChallenging a friend\033[0m")
+    # A challenge is addressed to an account, not to a socket, so it needs a
+    # server that can verify one. Without that everybody here is a guest and
+    # there is nobody in particular to challenge.
+    c1 = c2 = c3 = None
+    if not a.verified:
+        print("  \033[33mSKIP\033[0m challenges — they need a verified account on both ends")
+    else:
+        c1 = TestClient("C1")
+        c2 = TestClient("C2")
+        c3 = TestClient("C3")
+        c1.send(t="challenge", to="test-C2", mode="fog", minutes=5, inc=2, color="w")
+        sent = c1.expect("challenge-sent")
+        invite = c2.expect("challenged")
+        check("the challenger is told the invitation went out", "id" in sent)
+        check("it reaches the friend, and only the friend",
+              invite["id"] == sent["id"] and c3.nothing_arrives(), "(%s)" % invite)
+        check("the invitation says who and what",
+              invite.get("fromName") and invite["mode"] == "fog"
+              and invite["minutes"] == 5 and invite["inc"] == 2, "(%s)" % invite)
+        check("the friend is offered the seat the challenger did not keep",
+              invite["color"] == "b", "(%s)" % invite)
+
+        # The check the whole design rests on.
+        c3.send(t="challenge-accept", id=invite["id"])
+        check("a stranger cannot accept somebody else's challenge",
+              c3.expect("error")["msg"] == "that challenge is not yours")
+        check("and the challenger is not dragged into a game",
+              c1.nothing_arrives() and c2.nothing_arrives())
+
+        c2.send(t="challenge-decline", id=invite["id"])
+        declined = c1.expect("challenge-declined")
+        check("declining reaches the challenger", declined["id"] == invite["id"])
+
+        c1.send(t="challenge", to="test-C2", mode="sighted", minutes=3, color="b")
+        sent2 = c1.expect("challenge-sent")
+        invite2 = c2.expect("challenged")
+        c2.send(t="challenge-accept", id=invite2["id"])
+        s1 = c1.expect("start")
+        s2 = c2.expect("start")
+        check("accepting seats both players at one board", s1["game"] == s2["game"])
+        check("the challenger keeps the colour it chose", s1["color"] == "b", "(%s)" % s1)
+        check("the friend takes the other", s2["color"] == "w", "(%s)" % s2)
+        check("the challenge's settings carry into the game",
+              s1["mode"] == "sighted" and s1["minutes"] == 3 and s1["kind"] == "friendly",
+              "(%s)" % s1)
+        check("each is named to the other",
+              s1.get("opponent") and s2.get("opponent"), "(%s / %s)" % (s1, s2))
+
+        c1.timeline = []
+        c2.timeline = []
+        c2.play(52, 36, "e4")                # C2 is White here
+        check("moves flow through a challenged game",
+              c1.receive_move()["san"] == "e4")
+
+        # Nobody left to hand it to.
+        lonely = TestClient("C4")
+        lonely.send(t="challenge", to="nobody-at-all", mode="blind", minutes=5, color="w")
+        check("challenging someone who is not online says so",
+              lonely.expect("challenge-away")["t"] == "challenge-away")
+        lonely.close()
+
     print("\n\033[1mHosted rooms\033[0m")
     host = TestClient("HOST")
     watcher = TestClient("WATCH")
@@ -497,9 +559,9 @@ def main():
     check("cancelling a room removes it for everyone",
           watcher.expect("rooms")["rooms"] == [])
 
-    for client in (a, b, d, e, f, g, h, i, j, k, p1, p2, p3, p4,
+    for client in (a, b, d, e, f, g, h, i, j, k, p1, p2, p3, p4, c1, c2, c3,
                    host, watcher, joiner, late, host2):
-        if client is not None:               # ranked clients may have been skipped
+        if client is not None:               # ranked and challenge clients may have been skipped
             client.close()
 
     print("\n\033[1m%d passed, %d failed\033[0m\n" % (passed, failed))

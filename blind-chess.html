@@ -742,7 +742,10 @@
   .menu-item:hover > .submenu,
   .menu-item:focus-within > .submenu{opacity:1; visibility:visible; transform:none;}
 
-  .head-right{margin-left:auto; display:flex; align-items:center; gap:10px;}
+  /* The cluster is pushed to the far side by its mount, not by itself, so it
+     can be lifted into another screen's header without carrying layout with it. */
+  .head-mount{margin-left:auto; display:flex; align-items:center;}
+  .head-right{display:flex; align-items:center; gap:10px;}
 
   /* Narrow: the nav cannot share a row with the account cluster, so it drops to
      one of its own. The second-level menu flattens inline rather than flying
@@ -1350,6 +1353,183 @@
   }
   .rules-table td:first-child{color:var(--gold-soft);}
   .rules-table td:last-child{color:#cfd3dd; padding-right:0;}
+
+  /* ---------- social ----------
+     One panel doing two jobs: your friends when the search box is empty, and
+     whoever matches it when it is not. They share a row shape on purpose —
+     the difference between "someone you know" and "someone you found" is the
+     button on the right, and nothing else. */
+  .social-title{
+    margin:0; font-family:Georgia,serif; font-weight:400;
+    font-size:clamp(26px,4.4vw,42px); letter-spacing:.12em; color:var(--gold-soft);
+    white-space:nowrap;
+  }
+  .social-page{
+    display:grid; grid-template-columns:minmax(0,1fr) clamp(180px,19vw,240px);
+    gap:clamp(16px,2.4vw,28px); align-items:start;
+    margin-top:clamp(14px,2.4vh,26px);
+  }
+  @media (max-width:760px){ .social-page{grid-template-columns:minmax(0,1fr);} }
+
+  .social-main{
+    padding:20px 22px 22px;
+    display:flex; flex-direction:column; gap:14px;
+    /* tall enough to hold a real list rather than growing a row at a time */
+    min-height:min(70vh,620px);
+  }
+  .social-top{display:flex; align-items:flex-end; gap:14px;}
+  .social-search{flex:1; min-width:0;}
+  .social-label{
+    display:block; margin-bottom:7px;
+    font-size:10.5px; letter-spacing:.22em; text-transform:uppercase; color:var(--muted);
+  }
+  .social-field{
+    display:flex; align-items:center; gap:9px;
+    padding:0 12px; border-radius:10px;
+    background:rgba(0,0,0,.34); border:1px solid var(--line);
+    transition:border-color .2s;
+  }
+  .social-field:focus-within{border-color:var(--gold);}
+  .social-field svg{width:16px; height:16px; flex:none; color:var(--muted);}
+  .social-field input{
+    flex:1; min-width:0; padding:11px 0;
+    background:transparent; border:0; outline:none;
+    color:var(--text); font:inherit; font-size:13.5px;
+  }
+  .search-x{
+    flex:none; width:24px; height:24px; padding:0; border-radius:6px;
+    background:transparent; border:0; color:var(--muted); font-size:17px; line-height:1;
+  }
+  .search-x:hover{color:var(--text); transform:none;}
+
+  .mail-btn{
+    position:relative; flex:none;
+    width:42px; height:42px; padding:0; border-radius:10px;
+    display:flex; align-items:center; justify-content:center;
+    color:#98a0b2; background:rgba(0,0,0,.34); border:1px solid var(--line);
+  }
+  .mail-btn svg{width:20px; height:20px; display:block;}
+  .mail-btn:hover{color:var(--gold-soft); border-color:rgba(217,164,65,.42); transform:none;}
+  /* the count only exists when there is something waiting */
+  .mail-count{
+    position:absolute; top:-6px; right:-6px; min-width:18px; height:18px; padding:0 5px;
+    border-radius:999px; background:var(--danger); color:#fff;
+    font-size:11px; font-weight:700; line-height:18px; text-align:center;
+  }
+
+  .social-caption{
+    font-size:10.5px; letter-spacing:.22em; text-transform:uppercase; color:var(--muted);
+  }
+  .social-rows{
+    flex:1; display:flex; flex-direction:column; gap:9px;
+    overflow-y:auto; overflow-x:hidden; padding-right:2px;
+  }
+  .social-row{
+    position:relative;                       /* the dots menu hangs off this */
+    display:flex; align-items:center; gap:13px;
+    padding:11px 14px; border-radius:12px;
+    background:rgba(0,0,0,.24); border:1px solid var(--line);
+  }
+  .social-row:hover{border-color:#3a4152;}
+  .social-face{
+    flex:none; width:38px; height:38px; border-radius:50%;
+    display:flex; align-items:center; justify-content:center; overflow:hidden;
+    background:linear-gradient(160deg,#2c3140,#1b1e26); border:1px solid var(--line);
+    color:var(--gold-soft); font-size:15px; font-weight:650; letter-spacing:.04em;
+  }
+  .social-face img{width:100%; height:100%; object-fit:cover; display:block;}
+  .social-who{flex:1; min-width:0;}
+  .social-name{
+    font-size:14px; font-weight:600; letter-spacing:.03em; color:var(--text);
+    overflow:hidden; text-overflow:ellipsis; white-space:nowrap;
+  }
+  .social-meta{margin-top:2px; font-size:11.5px; color:var(--muted); letter-spacing:.05em;}
+
+  /* add-a-friend: a person with a plus, and nothing else to read */
+  .add-btn{
+    flex:none; display:flex; align-items:center; gap:7px;
+    padding:8px 12px; border-radius:9px;
+    font-size:11.5px; letter-spacing:.1em; font-weight:650;
+    color:var(--gold-soft); background:rgba(217,164,65,.10);
+    border:1px solid rgba(217,164,65,.34);
+  }
+  .add-btn svg{width:17px; height:17px; flex:none;}
+  .add-btn:hover{background:rgba(217,164,65,.18); border-color:var(--gold); transform:none;}
+  .add-btn:disabled{color:var(--muted); background:transparent; border-color:var(--line);}
+  .row-note{flex:none; font-size:11.5px; letter-spacing:.1em; color:var(--muted);}
+
+  .dots-btn{
+    flex:none; width:34px; height:34px; padding:0; border-radius:8px;
+    background:transparent; border:1px solid transparent; color:var(--muted);
+    font-size:19px; line-height:1;
+  }
+  .dots-btn:hover, .dots-btn.open{color:var(--gold-soft); border-color:var(--line); transform:none;}
+
+  /* Same dark glass as the home nav's menus — it is the same gesture. */
+  .friend-menu{
+    position:absolute; top:calc(100% - 6px); right:12px; z-index:40;
+    min-width:168px; padding:5px; border-radius:11px;
+    background:rgba(9,11,19,.92);
+    -webkit-backdrop-filter:blur(14px) saturate(120%);
+            backdrop-filter:blur(14px) saturate(120%);
+    border:1px solid rgba(217,164,65,.22);
+    box-shadow:0 16px 38px rgba(0,0,0,.72), inset 0 1px 0 rgba(255,255,255,.05);
+  }
+  /* The list scrolls, so a menu on one of the last rows would open into the
+     clipped edge. renderSocial() measures and turns it upwards instead. */
+  .friend-menu.up{top:auto; bottom:calc(100% - 6px);}
+  .friend-menu button{
+    display:block; width:100%; text-align:left; padding:8px 11px; border-radius:7px;
+    background:transparent; border:0; color:#d8dbe4; font-size:12.5px; letter-spacing:.03em;
+  }
+  .friend-menu button:hover{background:rgba(217,164,65,.16); color:var(--gold-soft); transform:none;}
+  .friend-menu button.soon{color:#6b7080;}
+  .friend-menu button.soon:hover{background:rgba(255,255,255,.05); color:#6b7080;}
+  .friend-menu button.danger{color:#e7908a;}
+  .friend-menu button.danger:hover{background:rgba(224,90,77,.16); color:#fff;}
+
+  .social-empty{
+    padding:30px 18px; text-align:center; color:var(--muted);
+    font-size:13px; line-height:1.65;
+    white-space:pre-line;                    /* the empty states are two lines */
+  }
+  .social-empty.bad{color:#e7908a;}
+
+  .social-aside{
+    padding:16px; display:flex; flex-direction:column; gap:10px;
+  }
+  .social-link{
+    width:100%; padding:12px 10px; border-radius:10px;
+    font-size:12px; letter-spacing:.12em; font-weight:650;
+  }
+  /* Quiet, the way the unbuilt items in the home nav are quiet — it should
+     read as a button that is not ready, not as one that is broken. */
+  .social-link.soon{color:#6b7080;}
+  .social-link.soon:hover{border-color:var(--line); color:#6b7080; transform:none;}
+  .social-soon{
+    margin:2px 0 0; text-align:center;
+    font-size:10.5px; letter-spacing:.18em; text-transform:uppercase; color:#5c6070;
+  }
+
+  /* the notifications box: the same rows, in a modal */
+  .note-modal{max-width:480px; text-align:left;}
+  .note-modal h3{text-align:center; margin-bottom:18px;}
+  .note-list{display:flex; flex-direction:column; gap:9px; max-height:52vh; overflow-y:auto;}
+  .note-row{
+    display:flex; align-items:center; gap:12px;
+    padding:10px 12px; border-radius:11px;
+    background:rgba(0,0,0,.26); border:1px solid var(--line);
+  }
+  .note-row .social-who{text-align:left;}
+  /* "wants to be friends" is one line or it is nothing */
+  .note-row .social-meta{white-space:nowrap;}
+  .yn{flex:none; display:flex; gap:6px;}
+  .yn button{padding:7px 11px; font-size:12px; border-radius:8px;}
+  .yn .yes{color:#9fe0a4; border-color:rgba(111,191,115,.4);}
+  .yn .yes:hover{color:#fff; background:rgba(111,191,115,.18); border-color:var(--good);}
+  .yn .no{color:#e7908a; border-color:rgba(224,90,77,.4);}
+  .yn .no:hover{color:#fff; background:rgba(224,90,77,.16); border-color:var(--danger);}
+
   /* ---------- overlays ---------- */
   .overlay{
     position:fixed; inset:0; z-index:50;
@@ -1486,7 +1666,7 @@
         </div>
 
         <div class="nav-item">
-          <button class="nav-btn soon" id="navSocial">SOCIAL</button>
+          <button class="nav-btn" id="navSocial">SOCIAL</button>
         </div>
 
         <div class="nav-item">
@@ -1508,7 +1688,13 @@
       </nav>
 
       <!-- Lives in the header from the first paint, so it is never briefly
-           parked in the corner while the page finds its feet. -->
+           parked in the corner while the page finds its feet.
+           The mount around it is a socket rather than decoration: showScreen()
+           moves the one account cluster into whichever screen's header offers
+           a .head-mount, the same way the clocks move between the two board
+           bars. One cluster, one set of ids, and it is always inside a header
+           row — never floating while a script catches up. -->
+      <div class="head-mount">
       <div class="head-right" id="headRight">
       <!-- account bar: sign-up / signed-in identity -->
       <div class="account" id="accountBar">
@@ -1528,7 +1714,67 @@
         </button>
       </div>
       </div>
+      </div>
     </header>
+  </section>
+
+  <!-- ============ SOCIAL ============
+       Friends, the requests that make them, and the invitation to a game.
+       The header is the home page's, unchanged and in the same place: the
+       wordmark on the left with the page's name beside it, and the account
+       cluster carried over into the mount on the right. -->
+  <section class="screen" id="screen-social">
+    <header class="site-head">
+      <button class="logo-btn" data-home aria-label="Nox Chess — back to the home page">
+        <img src="assets/nox-logo.png?v=1" alt="Nox Chess" width="976" height="730">
+      </button>
+      <h2 class="social-title">Social</h2>
+      <div class="head-mount"></div>
+    </header>
+
+    <div class="social-page">
+      <!-- the friends panel: search at the top, then whoever matches it, or
+           your friends when nothing is being searched for -->
+      <div class="social-main panel">
+        <div class="social-top">
+          <div class="social-search">
+            <label class="social-label" for="socialSearch">Search by username</label>
+            <div class="social-field">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                   stroke-linecap="round" aria-hidden="true">
+                <circle cx="11" cy="11" r="7"/><path d="M20 20l-3.6-3.6"/>
+              </svg>
+              <input id="socialSearch" type="text" maxlength="25" autocomplete="off"
+                     spellcheck="false" placeholder="Find a player…"
+                     aria-label="Search Nox Chess players by username">
+              <button class="search-x" id="searchClear" aria-label="Clear the search"
+                      title="Clear" style="display:none">×</button>
+            </div>
+          </div>
+          <!-- friend requests wait in here rather than on the panel itself,
+               so the list below is only ever people you already know -->
+          <button class="mail-btn" id="btnNotes" aria-label="Friend requests" title="Friend requests">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"
+                 stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+              <rect x="2.5" y="4.5" width="19" height="15" rx="2.5"/>
+              <path d="M3 6.5l9 6.5 9-6.5"/>
+            </svg>
+            <span class="mail-count" id="noteCount" style="display:none">0</span>
+          </button>
+        </div>
+
+        <div class="social-caption" id="socialCaption">Your friends</div>
+        <div class="social-rows" id="socialRows"></div>
+      </div>
+
+      <!-- placeholders, and honest about it: they look like buttons because
+           they will be, and they do nothing because nothing is behind them yet -->
+      <aside class="social-aside panel">
+        <button class="social-link soon" id="btnFriendLink">Friend Link</button>
+        <button class="social-link soon" id="btnChallengeLink">Create Challenge Link</button>
+        <p class="social-soon">Coming soon.</p>
+      </aside>
+    </div>
   </section>
 
   <!-- ============ RANKED ============
@@ -1997,7 +2243,7 @@
     <p>Accounts need a Supabase project and a hosted address — Google will not redirect back to a file on disk. Five steps:</p>
     <ol class="auth-steps">
       <li>Create a free project at <b>supabase.com</b>.</li>
-      <li>Open the SQL editor and run <b>supabase-setup.sql</b> (next to this file).</li>
+      <li>Open the SQL editor and run <b>supabase-setup.sql</b>, then <b>supabase-social.sql</b> (both next to this file).</li>
       <li>Authentication → Providers → enable <b>Google</b>, using a Google Cloud OAuth client.</li>
       <li>Paste your project URL and publishable key into <code>SUPABASE_URL</code> and <code>SUPABASE_ANON_KEY</code> near the top of this file's script.</li>
       <li>Host it (a Render Static Site works) and add that https address to Supabase's redirect allow-list.</li>
@@ -2076,6 +2322,27 @@
         <button data-min="10" data-inc="0">10 min</button>
         <button data-min="30" data-inc="0">30 min</button>
       </div>
+    </div>
+  </div>
+</div>
+
+<!-- friend requests waiting to be answered -->
+<div class="overlay" id="noteOverlay">
+  <div class="modal note-modal">
+    <button class="modal-x" id="noteX" aria-label="Close" title="Close">×</button>
+    <h3>Notifications</h3>
+    <div class="note-list" id="noteList"></div>
+  </div>
+</div>
+
+<!-- a friend wants a game, right now -->
+<div class="overlay" id="chalOverlay">
+  <div class="modal">
+    <h3 id="chalTitle">A friend challenged you</h3>
+    <p id="chalText"></p>
+    <div class="row" style="justify-content:center">
+      <button class="primary" id="chalAccept">✓ Accept</button>
+      <button class="ghost" id="chalDecline">✕ Decline</button>
     </div>
   </div>
 </div>
@@ -2776,6 +3043,22 @@ const BOT_NAME = {
 const LOCAL   = () => G.opponent === 'local';
 const ONLINE  = () => G.opponent === 'online';
 const HOSTING = () => ONLINE() && G.hosting;   // setting up a room, not joining one
+/* A challenge in flight, seen from both ends. It lives up here beside the
+   other opponent helpers because the setup form asks about it before the
+   social page below has had a chance to define anything. */
+const CHAL = {
+  to: null,        // { id, name } — the friend this setup form is aimed at
+  id: null,        // what the server called the invitation we sent
+  pending: false,  // sent, and not yet answered
+  incoming: null,  // the invitation on screen, waiting for our yes or no
+  timer: null      // gives up on an unanswered one, at the server's own deadline
+};
+/* The server drops an invitation nobody answered after three minutes. This
+   side gives up at the same moment rather than leaving somebody watching a
+   box that can no longer come to anything. */
+const CHALLENGE_TTL = 180000;
+// Setting up a game for one particular person rather than for whoever turns up.
+const CHALLENGING = () => ONLINE() && !!CHAL.to;
 const BOT    = () => G.opponent === 'bot';     // the only opponent the engine plays
 const humanTurn = () => LOCAL() || G.st.turn === G.human;
 // whose eyes the board is drawn through
@@ -3471,9 +3754,9 @@ function showWaiting(text, title){
   document.getElementById('waitCancel').textContent = 'Cancel';
   waitOverlay.classList.add('show');
 }
-function waitingFailed(text){
+function waitingFailed(text, title){
   if (NET.state === 'playing') return;
-  document.getElementById('waitTitle').textContent = 'No Game';
+  document.getElementById('waitTitle').textContent = title || 'No Game';
   document.getElementById('waitText').textContent = text;
   document.getElementById('waitCancel').textContent = 'Back';
   waitOverlay.classList.add('show');
@@ -3508,11 +3791,18 @@ function netClose(){
 }
 
 /* One socket serves the whole online session — watching the room list, hosting,
-   joining and then playing all run over it. `ready` fires once it is open. */
-function netConnect(ready){
+   joining, waiting for a friend to answer a challenge and then playing all run
+   over it. `ready` fires once it is open.
+
+   `onFail` exists for the one caller that is not a person waiting for a game:
+   the social page opens this socket in the background so a challenge can reach
+   you, and a server that cannot be reached must not throw a "No Game" box over
+   a page nobody asked to play from. */
+function netConnect(ready, onFail){
+  const fail = onFail || waitingFailed;
   if (!ONLINE_AVAILABLE){
-    waitingFailed('Online play needs this page to be served over http or https. ' +
-                  'Open the address the server prints rather than the file itself.');
+    fail('Online play needs this page to be served over http or https. ' +
+         'Open the address the server prints rather than the file itself.');
     return;
   }
   if (NET.sock && NET.sock.readyState === WebSocket.OPEN){ ready(); return; }
@@ -3521,7 +3811,7 @@ function netConnect(ready){
   NET.state = 'connecting';
   let sock;
   try { sock = new WebSocket(serverURL()); }
-  catch(e){ waitingFailed('Could not reach the server.'); return; }
+  catch(e){ fail('Could not reach the server.'); return; }
   NET.sock = sock;
 
   sock.onopen = () => {
@@ -3536,7 +3826,7 @@ function netConnect(ready){
     try { msg = JSON.parse(ev.data); } catch(e){ return; }
     onNetMessage(msg);
   };
-  sock.onerror = () => waitingFailed('Could not reach the server.');
+  sock.onerror = () => fail('Could not reach the server.');
   sock.onclose = () => {
     if (NET.state === 'playing' && !G.over){
       finish('Disconnected', 'The connection to the server was lost, so the game cannot go on.',
@@ -3666,9 +3956,48 @@ function onNetMessage(msg){
       NET.myRoom = msg.room;
       break;
 
+    /* ---- challenging a friend ----
+       The invitation itself never touches the database: it is only meaningful
+       while both people are connected, so it rides this socket like a room
+       does. What makes it *this friend's* invitation is that the server routes
+       it by account id and refuses an answer from anyone else. */
+    case 'challenged':
+      showChallenge(msg);
+      break;
+
+    case 'challenge-sent':
+      CHAL.id = msg.id;                         // what a cancel will refer to
+      break;
+
+    case 'challenge-gone':
+      // answered on another tab, withdrawn, or the challenger left
+      if (CHAL.incoming && CHAL.incoming.id === msg.id) hideChallenge();
+      break;
+
+    case 'challenge-declined':
+      challengeRefused('Your friend declined the challenge.', 'Challenge Declined');
+      break;
+
+    case 'challenge-away':
+      challengeRefused(friendWord() + ' is not online right now, so there is nobody ' +
+                       'to hand the challenge to.', 'Nobody There');
+      break;
+
+    case 'challenge-busy':
+      challengeRefused(friendWord() + ' is already in a game.', 'Already Playing');
+      break;
+
+    case 'challenge-lapsed':
+      challengeRefused('The challenge went unanswered.', 'No Answer');
+      break;
+
     case 'start':
       NET.state = 'playing';
       NET.myRoom = null;
+      // whatever was in the air is now a game
+      CHAL.to = null; CHAL.id = null; CHAL.pending = false;
+      clearTimeout(CHAL.timer);
+      hideChallenge();
       NET.gameId = msg.game;
       NET.opponent = msg.opponent || '';        // who to name on the board bar and in chat
       NET.oppGone = false;
@@ -4839,6 +5168,16 @@ function resetChoices(){
 function showScreen(name){
   if (name !== 'game') reviewClose(false);
   screenName = name;
+  // Walking away from the challenge form abandons it. The form only lives on
+  // the game screen, so anywhere else is walking away — and an invitation
+  // still out is withdrawn rather than left to start a game on a page nobody
+  // is looking at. (Whoever sent us here may have withdrawn it already; the
+  // flag is cleared with it, so this cannot send twice.)
+  if (name !== 'game' && CHAL.to){
+    if (CHAL.pending && CHAL.id) netSend({ t:'challenge-cancel', id:CHAL.id });
+    CHAL.to = null; CHAL.id = null; CHAL.pending = false;
+    clearTimeout(CHAL.timer);
+  }
   if (name === 'opponent') picked.opponent = false;
   if (name === 'setup'){
     picked.mode = false;
@@ -4847,7 +5186,16 @@ function showScreen(name){
   }
   if (name === 'ranked') resetRank();
   document.querySelectorAll('.screen').forEach(s => s.classList.toggle('show', s.id === 'screen-' + name));
+  // The one account cluster travels to whichever screen has somewhere to put
+  // it — home and social both do, and it sits in the same place on each.
+  const mount = document.querySelector('#screen-' + name + ' .head-mount');
+  const cluster = document.getElementById('headRight');
+  if (mount && cluster.parentElement !== mount) mount.appendChild(cluster);
   syncOptions();
+  // Signed in and standing still: hold the game socket open so a friend's
+  // challenge has somewhere to land. netConnect reuses whatever is already
+  // there, so this is a no-op on the second visit.
+  if (name === 'home' || name === 'social') socialConnect();
   // Only the home page has room for the account cluster. Sign up, log in and
   // the username screen are about the account already; rooms names you in its
   // own chip; and over a game it would sit on the chips describing the game.
@@ -4894,6 +5242,8 @@ function syncOptions(){
   document.getElementById('optSide').style.display     = (BOT() || HOSTING()) ? 'flex' : 'none';
 
   document.getElementById('btnStart').textContent = HOSTING() ? 'Host Game' : 'Start Play';
+  // The same form, sent to one particular person rather than begun on the spot.
+  document.getElementById('btnStartGame').textContent = CHALLENGING() ? 'Challenge' : 'Start Play';
 
   // the vision buttons and the colour squares on the game page
   document.querySelectorAll('.vis[data-mode]').forEach(b =>
@@ -4901,7 +5251,9 @@ function syncOptions(){
 
   // the engine is only asked about when the engine is playing
   document.getElementById('secOpponent').style.display = BOT() ? '' : 'none';
-  document.getElementById('secYouPlay').style.display  = BOT() ? '' : 'none';
+  // Colour is yours to pick against the engine and when you are the one
+  // issuing the invitation — the friend answering it takes the other seat.
+  document.getElementById('secYouPlay').style.display  = (BOT() || CHALLENGING()) ? '' : 'none';
 
   // before the game: options showing, board a preview. After: notation and the
   // buttons you need mid-game.
@@ -4965,13 +5317,14 @@ function goFriendly(){
   G.hosting = false;
   enterRooms();
 }
+document.getElementById('navSocial').onclick   = goSocial;
 document.getElementById('navBot').onclick      = goBot;
 document.getElementById('navLocal').onclick    = goLocal;
 document.getElementById('navFriendly').onclick = goFriendly;
 document.getElementById('navRanked').onclick   = goRanked;
 
 // Deliberately inert for now, each one waiting on a page of its own.
-['navSocial','navHowTo','navPractice','navOpening','navMiddle','navEnd']
+['navHowTo','navPractice','navOpening','navMiddle','navEnd']
   .forEach(id => { document.getElementById(id).onclick = () => {}; });
 
 document.getElementById('btnSettings').onclick = () => { beep(560,.07); showScreen('settings'); };
@@ -5047,6 +5400,16 @@ document.getElementById('leaveConfirm').onclick = () => {
 document.getElementById('waitCancel').onclick = () => {
   // giving up on a room takes it off everyone's list and goes back to it
   if (NET.state === 'hosting'){ stopHosting(); return; }
+  // A challenge — still out, or already answered with a no. Either way this
+  // is the way back to the friend it was aimed at. The socket stays open:
+  // the social page is listening on it for the next one.
+  if (CHAL.to){
+    if (CHAL.pending && CHAL.id) netSend({ t:'challenge-cancel', id:CHAL.id });
+    CHAL.pending = false; CHAL.id = null;
+    hideWaiting();
+    goSocial();
+    return;
+  }
   netSend({ t:'cancel' });
   netClose();
   hideWaiting();
@@ -5080,6 +5443,7 @@ function optionsAnswered(){
   if (!chosen.minutes) return false;
   if (BOT()) return chosen.level && chosen.side;
   if (HOSTING()) return chosen.side;      // the room advertises which seat is left
+  if (CHALLENGING()) return chosen.side;  // the invitation names the seat you kept
   return true;
 }
 
@@ -5091,7 +5455,7 @@ function unanswered(){
   // on the game page each question is its own panel, so point at the one missing
   if (screenName === 'game'){
     if (BOT() && !chosen.level) out.push('secOpponent');
-    if (BOT() && !chosen.side)  out.push('secYouPlay');
+    if ((BOT() || CHALLENGING()) && !chosen.side) out.push('secYouPlay');
     if (!picked.mode)           out.push('secVision');
     if (!chosen.minutes)        out.push('secTime');
     return out;
@@ -5115,6 +5479,9 @@ function startGame(){
     document.getElementById(missing[0]).scrollIntoView({ block:'center', behavior:'smooth' });
     return;
   }
+  // A challenge is not a game yet: it is a question put to one person, and
+  // nothing starts until they say yes.
+  if (CHALLENGING()){ sendChallenge(); return; }
   // online, this screen is the host form — the game opens when someone joins
   if (ONLINE()){ beep(620,.09); hostGame(); return; }
   beep(760,.09); setTimeout(()=>beep(1010,.11), 90);
@@ -5279,6 +5646,12 @@ document.getElementById('btnRankStart').onclick = () => {
 document.addEventListener('keydown', e => {
   if (e.metaKey || e.ctrlKey || e.altKey) return;
   const k = e.key.toLowerCase();
+  // A challenge can arrive on any screen, home included, so it is answered
+  // before whatever that screen would otherwise do with the key.
+  if (chalOverlay.classList.contains('show')){
+    if (k === 'escape'){ e.preventDefault(); document.getElementById('chalDecline').click(); }
+    return;
+  }
   // never let shortcuts fire while a move is being typed — 'n' lives in "Nf3"
   if (e.target && (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA')){
     if (k === 'escape') e.target.blur();
@@ -5304,6 +5677,15 @@ document.addEventListener('keydown', e => {
     if (k === 'escape'){ leaveRooms(); showScreen('home'); }
     return;
   }
+  if (screenName === 'social'){
+    // the boxes in front first — escape closes whatever is nearest
+    if (k === 'escape'){
+      if (noteOverlay.classList.contains('show')) noteOverlay.classList.remove('show');
+      else if (SOC.menuFor) closeFriendMenu();
+      else showScreen('home');
+    }
+    return;
+  }
   if (screenName === 'ranked'){
     // the settings box first, if it is open — escape closes what is in front
     if (k === 'escape'){
@@ -5317,12 +5699,11 @@ document.addEventListener('keydown', e => {
     else if (k === 'enter'){ e.preventDefault(); startGame(); }
     return;
   }
-  // waiting for someone to take the other seat — escape gives the room up
+  // waiting for someone to take the other seat — escape gives the room up.
+  // The button already knows what "give up" means for each thing that can be
+  // waited on, so escape presses it rather than working it out again.
   if (waitOverlay.classList.contains('show')){
-    if (k === 'escape'){
-      if (NET.state === 'hosting') stopHosting();
-      else { netSend({ t:'cancel' }); netClose(); hideWaiting(); }
-    }
+    if (k === 'escape') document.getElementById('waitCancel').click();
     return;
   }
   if (leaveOverlay.classList.contains('show')){
@@ -5502,6 +5883,8 @@ function updateAccountUI(){
   // signing in while looking at the ladder swaps the guest's starting badge
   // for the one the account has actually earned
   if (screenName === 'ranked') drawRank();
+  // and the social page is about one particular account, so it starts over
+  socialAccountChanged();
   decideFirstScreen();
 }
 
@@ -5572,6 +5955,657 @@ document.querySelectorAll('[data-home]').forEach(b => {
 });
 document.getElementById('authClose').onclick  =
   () => document.getElementById('authOverlay').classList.remove('show');
+
+/* ============================================================
+   SOCIAL — friends, the requests that make them, and challenges
+   Two halves, deliberately kept apart:
+
+   · Friendships and friend requests are facts that outlive a session, so
+     they are rows in Supabase, read and written straight from the browser
+     under the policies in supabase-social.sql. The server never sees them.
+
+   · A challenge is not a fact, it is a question being asked right now. It
+     only means anything while both people are connected, so it rides the
+     game socket in server/server.py beside rooms and quick match, and the
+     game it turns into is an ordinary online game — same relay, same rules,
+     same board. There is no second multiplayer system here.
+
+   Both feed the same page, and it refreshes itself from Supabase's realtime
+   stream so a request lands in the other player's notifications without them
+   reloading anything.
+   ============================================================ */
+const SOC = {
+  friends: [],            // [{id,name,avatar,rating}] — sorted by name
+  requests: [],           // incoming and unanswered: [{id, from:{…}}]
+  outgoing: new Set(),    // ids we already have a request out to
+  query: '',
+  results: null,          // null when not searching; [] is a real empty answer
+  loading: false,
+  error: '',
+  menuFor: null,          // the friend id whose ⋯ menu is open, if any
+  searchToken: 0,         // only the newest search may paint
+  chan: null,             // the realtime subscription
+  chanFor: null,          // the account it was opened for — a different one needs its own
+  poll: null,
+  debounce: null
+};
+
+const noteOverlay = document.getElementById('noteOverlay');
+const chalOverlay = document.getElementById('chalOverlay');
+const socialRows  = document.getElementById('socialRows');
+const searchBox   = document.getElementById('socialSearch');
+
+/* Everything on this page needs both an account and a database to hold it in;
+   without either there is nothing to show and nothing to write. */
+function socialReady(){ return !!(sb && account); }
+
+function goSocial(){
+  beep(700,.09);
+  searchBox.value = '';
+  SOC.query = '';
+  SOC.results = null;
+  SOC.error = '';
+  document.getElementById('searchClear').style.display = 'none';
+  closeFriendMenu();
+  showScreen('social');
+  if (socialReady()){ socialSubscribe(); loadSocial(); }
+  else renderSocial();
+  startSocialPoll();
+}
+
+/* ---- reading it ---- */
+
+/** The profiles behind a pile of ids, in one round trip. */
+async function profilesFor(ids){
+  const want = [...new Set(ids)].filter(Boolean);
+  const found = new Map();
+  if (!want.length) return found;
+  const { data, error } = await sb.from('profiles')
+    .select('id, display_name, avatar_url, rating').in('id', want);
+  if (error) throw error;
+  for (const row of data || []) found.set(row.id, asPerson(row));
+  return found;
+}
+
+const asPerson = row => ({
+  id: row.id,
+  name: row.display_name || 'Player',
+  avatar: row.avatar_url || '',
+  rating: typeof row.rating === 'number' ? row.rating : null
+});
+// A friendship whose profile row has gone is still a friendship; show it as
+// somebody rather than dropping the row and losing the way to remove it.
+const unknownPerson = id => ({ id, name: 'Player', avatar: '', rating: null });
+const byName = (a, b) => a.name.toLowerCase() < b.name.toLowerCase() ? -1 : 1;
+
+async function loadSocial(){
+  if (!socialReady()){ renderSocial(); return; }
+  // The friends list is what this loads, and a search is what covers it up.
+  // Saying "loading" over somebody's search results would blank them for a
+  // refresh they did not ask for — but the results still have to be redrawn
+  // afterwards, since it is this that knows who is already a friend.
+  const searching = !!SOC.query;
+  if (!searching){ SOC.loading = true; renderSocial(); }
+  try {
+    const me = account.id;
+    // The policies decide what comes back: friendships you are in, requests
+    // you are one end of. Neither query has to say so, and neither could be
+    // widened by asking differently.
+    const [pairs, incoming, outgoing] = await Promise.all([
+      sb.from('friendships').select('user_low, user_high'),
+      sb.from('friend_requests').select('id, sender, created_at').eq('recipient', me),
+      sb.from('friend_requests').select('recipient').eq('sender', me)
+    ]);
+    for (const r of [pairs, incoming, outgoing]) if (r.error) throw r.error;
+
+    const friendIds = (pairs.data || []).map(r => r.user_low === me ? r.user_high : r.user_low);
+    const senderIds = (incoming.data || []).map(r => r.sender);
+    const people = await profilesFor(friendIds.concat(senderIds));
+
+    SOC.friends  = friendIds.map(id => people.get(id) || unknownPerson(id)).sort(byName);
+    SOC.requests = (incoming.data || [])
+      .map(r => ({ id: r.id, from: people.get(r.sender) || unknownPerson(r.sender) }));
+    SOC.outgoing = new Set((outgoing.data || []).map(r => r.recipient));
+    SOC.error = '';
+  } catch (err){
+    SOC.error = 'Could not load your friends — ' + ((err && err.message) || 'try again in a moment.');
+  } finally {
+    if (!searching) SOC.loading = false;
+    renderSocial();
+    renderNotes();
+    drawNoteCount();
+  }
+}
+
+/* ---- searching ---- */
+
+/* Usernames are [A-Za-z0-9 _-], so neither of LIKE's wildcards can legitimately
+   appear in one. % is dropped because a search for it would match everybody;
+   _ is left alone because it is a legal character, and the worst it can do is
+   match one character too generously. */
+const forSearch = q => q.replace(/[%*]/g, '').trim();
+
+function onSearchInput(){
+  const raw = searchBox.value;
+  document.getElementById('searchClear').style.display = raw ? '' : 'none';
+  SOC.query = raw.trim();
+  clearTimeout(SOC.debounce);
+  if (!SOC.query){
+    SOC.searchToken++;                 // whatever was in flight is moot
+    SOC.results = null;
+    SOC.loading = false;
+    renderSocial();
+    return;
+  }
+  // A search per keystroke would be a query per keystroke; a short pause is
+  // long enough to mean "they have stopped typing" and short enough not to feel it.
+  SOC.debounce = setTimeout(() => runSearch(SOC.query), 220);
+}
+
+async function runSearch(q){
+  const term = forSearch(q);
+  if (!term || !socialReady()){ SOC.results = []; renderSocial(); return; }
+  const token = ++SOC.searchToken;
+  SOC.loading = true;
+  renderSocial();
+  try {
+    const { data, error } = await sb.from('profiles')
+      .select('id, display_name, avatar_url, rating')
+      // part of a name, anywhere in it, in any case: ChessMaster123 answers
+      // to "Chess", to "Master" and to "chessmaster" alike
+      .ilike('display_name', '%' + term + '%')
+      .neq('id', account.id)            // you are never a result of your own search
+      .order('display_name')
+      .limit(25);
+    if (error) throw error;
+    if (token !== SOC.searchToken) return;      // a later keystroke has already answered
+    SOC.results = (data || []).map(asPerson);
+    SOC.error = '';
+  } catch (err){
+    if (token !== SOC.searchToken) return;
+    SOC.results = [];
+    SOC.error = 'Search failed — ' + ((err && err.message) || 'try again in a moment.');
+  } finally {
+    if (token === SOC.searchToken){ SOC.loading = false; renderSocial(); }
+  }
+}
+
+/* ---- writing to it ---- */
+
+async function sendRequest(person, btn){
+  if (!socialReady()) return;
+  btn.disabled = true;
+  const label = btn.querySelector('span');
+  if (label) label.textContent = 'Sending…';
+  const { error } = await sb.from('friend_requests')
+    .insert({ sender: account.id, recipient: person.id });
+  if (error){
+    // The policy and the unique constraint are what actually stop a second
+    // request, a request to a friend and a request to yourself; this only
+    // has to say so in words.
+    // 23505 is the unique constraint — you have already asked them. 42501 is
+    // the policy — you are already friends, or they asked you first. Both are
+    // the database saying no to a duplicate, so both get plain words for it.
+    SOC.error =
+      error.code === '23505' ? 'You have already asked ' + person.name + '.' :
+      error.code === '42501' ? 'You cannot send that request — you may already be friends, ' +
+                               'or ' + person.name + ' may have asked you first.' :
+      'That request could not be sent — ' + (error.message || 'try again.');
+    await loadSocial();               // whatever the real state is, show that
+    return;
+  }
+  SOC.outgoing.add(person.id);
+  SOC.error = '';
+  beep(720,.07);
+  renderSocial();
+}
+
+async function acceptRequest(req){
+  if (!socialReady()) return;
+  // One call, not two: making the friendship and clearing the request are a
+  // single step in the database, and the browser is not trusted to do half of it.
+  const { error } = await sb.rpc('accept_friend_request', { req_id: req.id });
+  if (error){
+    SOC.error = 'Could not accept that — ' + (error.message || 'try again.');
+  } else {
+    beep(760,.08); setTimeout(()=>beep(1010,.1), 90);
+  }
+  await loadSocial();
+}
+
+async function declineRequest(req){
+  if (!socialReady()) return;
+  const { error } = await sb.from('friend_requests').delete().eq('id', req.id);
+  if (error) SOC.error = 'Could not decline that — ' + (error.message || 'try again.');
+  await loadSocial();
+}
+
+async function removeFriend(friend){
+  if (!socialReady()) return;
+  closeFriendMenu();
+  // One row, stored under the sorted pair, so one delete ends it for both of
+  // them. There is no second row to leave behind disagreeing.
+  const low  = account.id < friend.id ? account.id : friend.id;
+  const high = account.id < friend.id ? friend.id  : account.id;
+  // Off the list at once — the round trip is confirmation, not permission.
+  SOC.friends = SOC.friends.filter(f => f.id !== friend.id);
+  renderSocial();
+  const { error } = await sb.from('friendships').delete()
+    .eq('user_low', low).eq('user_high', high);
+  if (error) SOC.error = 'Could not remove that friend — ' + (error.message || 'try again.');
+  await loadSocial();
+}
+
+/* ---- drawing it ----
+   Every name here was typed by somebody else, so it goes in with textContent
+   and never as markup — the same rule the chat panel plays by. */
+
+function faceFor(person){
+  const face = document.createElement('div');
+  face.className = 'social-face';
+  face.textContent = (person.name || '?').trim().charAt(0).toUpperCase() || '?';
+  if (person.avatar){
+    const img = document.createElement('img');
+    img.src = person.avatar;
+    img.alt = '';
+    // a broken avatar leaves the initial behind rather than an empty circle
+    img.onerror = () => img.remove();
+    face.appendChild(img);
+  }
+  return face;
+}
+
+function whoBlock(person, meta){
+  const who = document.createElement('div');
+  who.className = 'social-who';
+  const name = document.createElement('div');
+  name.className = 'social-name';
+  name.textContent = person.name;
+  who.appendChild(name);
+  if (meta){
+    const sub = document.createElement('div');
+    sub.className = 'social-meta';
+    sub.textContent = meta;
+    who.appendChild(sub);
+  }
+  return who;
+}
+
+function emptyNote(text, bad){
+  const box = document.createElement('div');
+  box.className = 'social-empty' + (bad ? ' bad' : '');
+  box.textContent = text;
+  return box;
+}
+
+/** A person-with-a-plus, which is the whole label the button needs. */
+function addFriendButton(person){
+  const btn = document.createElement('button');
+  btn.className = 'add-btn';
+  btn.title = 'Send ' + person.name + ' a friend request';
+  btn.innerHTML =
+    '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" ' +
+    'stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">' +
+    '<circle cx="9" cy="8" r="3.6"/><path d="M2.5 20c0-3.4 2.9-5.6 6.5-5.6 1.4 0 2.7.34 3.8.95"/>' +
+    '<path d="M18 13.5v6M15 16.5h6"/></svg><span>Add Friend</span>';
+  btn.onclick = () => sendRequest(person, btn);
+  return btn;
+}
+
+function searchRow(person){
+  const row = document.createElement('div');
+  row.className = 'social-row';
+  row.appendChild(faceFor(person));
+  row.appendChild(whoBlock(person, person.rating === null ? '' : person.rating + ' Elo'));
+
+  const friend = SOC.friends.some(f => f.id === person.id);
+  const asked  = SOC.outgoing.has(person.id);
+  const asking = SOC.requests.find(r => r.from.id === person.id);
+
+  if (friend){
+    // already friends: there is nothing left to ask, so nothing that looks askable
+    const note = document.createElement('span');
+    note.className = 'row-note';
+    note.textContent = 'Friends';
+    row.appendChild(note);
+  } else if (asking){
+    // they got there first — offer the answer rather than a second request
+    const btn = document.createElement('button');
+    btn.className = 'add-btn';
+    btn.innerHTML = '<span>✓ Accept</span>';
+    btn.onclick = () => acceptRequest(asking);
+    row.appendChild(btn);
+  } else if (asked){
+    const btn = document.createElement('button');
+    btn.className = 'add-btn';
+    btn.disabled = true;
+    btn.innerHTML = '<span>Request Sent</span>';
+    row.appendChild(btn);
+  } else {
+    row.appendChild(addFriendButton(person));
+  }
+  return row;
+}
+
+function friendRow(friend){
+  const row = document.createElement('div');
+  row.className = 'social-row';
+  row.appendChild(faceFor(friend));
+  row.appendChild(whoBlock(friend, friend.rating === null ? '' : friend.rating + ' Elo'));
+
+  const dots = document.createElement('button');
+  dots.className = 'dots-btn';
+  dots.textContent = '⋯';
+  dots.setAttribute('aria-label', 'More for ' + friend.name);
+  dots.setAttribute('aria-haspopup', 'true');
+  dots.onclick = e => {
+    e.stopPropagation();
+    // Only ever one open: pressing another row's dots moves the menu there.
+    if (SOC.menuFor === friend.id) closeFriendMenu();
+    else { SOC.menuFor = friend.id; renderSocial(); }
+  };
+  row.appendChild(dots);
+
+  if (SOC.menuFor === friend.id){
+    dots.classList.add('open');
+    const menu = document.createElement('div');
+    menu.className = 'friend-menu';
+    menu.onclick = e => e.stopPropagation();
+
+    const item = (text, cls, fn) => {
+      const b = document.createElement('button');
+      b.className = cls || '';
+      b.textContent = text;
+      if (fn) b.onclick = fn;
+      return b;
+    };
+    menu.appendChild(item('Challenge', '', () => challengeFriend(friend)));
+    // Visible so the shape of the menu is the shape it will keep, and inert
+    // because there is no messaging behind it yet.
+    menu.appendChild(item('Send Message', 'soon'));
+    menu.appendChild(item('Remove Friend', 'danger', () => removeFriend(friend)));
+    row.appendChild(menu);
+  }
+  return row;
+}
+
+function renderSocial(){
+  socialRows.innerHTML = '';
+  const caption = document.getElementById('socialCaption');
+  const searching = !!SOC.query;
+  caption.textContent = searching ? 'Search results' : 'Your friends';
+
+  if (!accountsAvailable()){
+    caption.textContent = '';
+    socialRows.appendChild(emptyNote('Friends need an account, and accounts need this ' +
+      'page served over http or https.'));
+    return;
+  }
+  if (!account){
+    caption.textContent = '';
+    socialRows.appendChild(emptyNote('Sign in to find players and keep a friends list.'));
+    return;
+  }
+  if (SOC.error) socialRows.appendChild(emptyNote(SOC.error, true));
+  if (SOC.loading){
+    socialRows.appendChild(emptyNote(searching ? 'Searching…' : 'Loading your friends…'));
+    return;
+  }
+  if (searching){
+    if (!SOC.results || !SOC.results.length){
+      if (!SOC.error) socialRows.appendChild(emptyNote('No players found.'));
+      return;
+    }
+    for (const person of SOC.results) socialRows.appendChild(searchRow(person));
+    return;
+  }
+  if (!SOC.friends.length){
+    if (!SOC.error) socialRows.appendChild(emptyNote(
+      'You haven\'t added any friends yet.\nSearch for a username above to send the first request.'));
+    return;
+  }
+  for (const friend of SOC.friends) socialRows.appendChild(friendRow(friend));
+  fitFriendMenu();
+}
+
+/** An open menu opens upwards rather than into the bottom edge of the list. */
+function fitFriendMenu(){
+  const menu = socialRows.querySelector('.friend-menu');
+  if (!menu) return;
+  const list = socialRows.getBoundingClientRect();
+  const box  = menu.getBoundingClientRect();
+  // only if there is actually room above — a menu clipped at the top is no better
+  if (box.bottom > list.bottom && box.top - box.height > list.top) menu.classList.add('up');
+}
+
+function closeFriendMenu(){
+  if (SOC.menuFor === null) return;
+  SOC.menuFor = null;
+  if (screenName === 'social') renderSocial();
+}
+// anywhere else on the page closes it, which is what a menu like this should do
+document.addEventListener('click', () => closeFriendMenu());
+
+/* ---- notifications ---- */
+
+function drawNoteCount(){
+  const badge = document.getElementById('noteCount');
+  badge.textContent = SOC.requests.length;
+  badge.style.display = SOC.requests.length ? '' : 'none';
+}
+
+function renderNotes(){
+  const list = document.getElementById('noteList');
+  list.innerHTML = '';
+  if (!SOC.requests.length){
+    list.appendChild(emptyNote('Nothing waiting for you.'));
+    return;
+  }
+  for (const req of SOC.requests){
+    const row = document.createElement('div');
+    row.className = 'note-row';
+    row.appendChild(faceFor(req.from));
+    row.appendChild(whoBlock(req.from, 'wants to be friends'));
+    const yn = document.createElement('div');
+    yn.className = 'yn';
+    const yes = document.createElement('button');
+    yes.className = 'yes';
+    yes.textContent = '✓ Accept';
+    yes.onclick = () => acceptRequest(req);
+    const no = document.createElement('button');
+    no.className = 'no';
+    no.textContent = '✕ Decline';
+    no.onclick = () => declineRequest(req);
+    yn.appendChild(yes); yn.appendChild(no);
+    row.appendChild(yn);
+    list.appendChild(row);
+  }
+}
+
+document.getElementById('btnNotes').onclick = e => {
+  e.stopPropagation();
+  beep(620,.08);
+  renderNotes();
+  noteOverlay.classList.add('show');
+  if (socialReady()) loadSocial();       // answer with what is true right now
+};
+document.getElementById('noteX').onclick = () => noteOverlay.classList.remove('show');
+document.getElementById('searchClear').onclick = () => {
+  searchBox.value = '';
+  onSearchInput();
+  searchBox.focus();
+};
+searchBox.addEventListener('input', onSearchInput);
+searchBox.addEventListener('click', e => e.stopPropagation());
+// the two placeholders in the side box: they look like buttons because they
+// will be, and they lead nowhere because there is nothing behind them yet
+document.getElementById('btnFriendLink').onclick    = () => {};
+document.getElementById('btnChallengeLink').onclick = () => {};
+
+/* ---- staying up to date ----
+   Supabase streams the two tables straight to the page, so a request appears
+   in the other player's notifications, an acceptance appears in both friends
+   lists, and a removal disappears from both — none of it needing a reload. */
+function socialSubscribe(){
+  if (!sb || !account) return;
+  if (SOC.chan && SOC.chanFor === account.id) return;
+  socialUnsubscribe();                   // a channel opened for somebody else
+  const bump = () => { if (socialReady()) loadSocial(); };
+  SOC.chanFor = account.id;
+  SOC.chan = sb.channel('social:' + account.id)
+    .on('postgres_changes', { event:'*', schema:'public', table:'friend_requests' }, bump)
+    .on('postgres_changes', { event:'*', schema:'public', table:'friendships' }, bump)
+    .subscribe();
+}
+
+function socialUnsubscribe(){
+  if (!SOC.chan) return;
+  try { sb.removeChannel(SOC.chan); } catch(e){}
+  SOC.chan = null;
+  SOC.chanFor = null;
+}
+
+/* The fallback, and only that: realtime needs the two tables added to the
+   publication, and a project where that step was missed would otherwise show
+   a friends list that never changed. Slow on purpose, and only while the page
+   is actually being looked at. */
+function startSocialPoll(){
+  if (SOC.poll) return;
+  SOC.poll = setInterval(() => {
+    if (screenName !== 'social'){ clearInterval(SOC.poll); SOC.poll = null; return; }
+    if (socialReady() && !SOC.query && !SOC.loading) loadSocial();
+  }, 30000);
+}
+
+/** Signing in or out changes who this page is about. */
+function socialAccountChanged(){
+  if (!account || (SOC.chanFor && SOC.chanFor !== account.id)) socialUnsubscribe();
+  if (!account){
+    SOC.friends = []; SOC.requests = []; SOC.outgoing = new Set();
+    drawNoteCount();
+  } else if (screenName === 'social'){
+    socialSubscribe();
+    loadSocial();
+  }
+  if (screenName === 'social') renderSocial();
+  if (screenName === 'home' || screenName === 'social') socialConnect();
+}
+
+/* ---- challenges, over the game socket ---- */
+
+/* Held open in the background while you are signed in and standing still, so
+   a friend's challenge has somewhere to arrive. It is the same socket the
+   room list and the game itself use — opening a second one would mean two
+   answers to the question of whether you are online. */
+function socialConnect(){
+  if (!account || !ONLINE_AVAILABLE) return;
+  if (NET.sock && NET.sock.readyState === WebSocket.OPEN) return;
+  netConnect(
+    () => { if (NET.state === 'connecting') NET.state = 'social'; },
+    msg => console.warn('Challenges unavailable:', msg)
+  );
+}
+
+/** The friend a challenge is about, for a sentence that has to name somebody. */
+function friendWord(){
+  return (CHAL.to && CHAL.to.name) || 'That player';
+}
+
+/* The Play Bot page, aimed at a person. Same board, same vision and time
+   questions, same Start Play button in the same place — with the bot ladder
+   gone, because there is no bot to pick, and the friend's name above the
+   board where the bot's name would be. */
+function challengeFriend(friend){
+  closeFriendMenu();
+  if (!account) return;
+  beep(700,.09);
+  G.opponent  = 'online';
+  G.matchKind = 'friendly';
+  G.hosting   = false;
+  G.started   = false;
+  CHAL.to = { id: friend.id, name: friend.name };
+  CHAL.id = null;
+  CHAL.pending = false;
+  // seatName() reads this for the strip above the board, so the friend is
+  // named there from the moment the form opens rather than once play begins.
+  NET.opponent = friend.name;
+  resetChoices();
+  newGame();
+  showScreen('game');
+  syncOptions();
+}
+
+function sendChallenge(){
+  if (!CHAL.to) return;
+  if (!account){ logLine('⚠  challenging a friend needs a signed-in account.', 'err'); return; }
+  // "Either colour" has to be settled before it is offered: the invitation
+  // tells the other player which seat is theirs.
+  const mine = G.human === 'r' ? (Math.random() < 0.5 ? W : B) : G.human;
+  CHAL.pending = true;
+  CHAL.id = null;
+  clearTimeout(CHAL.timer);
+  CHAL.timer = setTimeout(() => {
+    if (!CHAL.pending) return;
+    if (CHAL.id) netSend({ t:'challenge-cancel', id:CHAL.id });
+    challengeRefused('The challenge went unanswered.', 'No Answer');
+  }, CHALLENGE_TTL);
+  beep(620,.09);
+  showWaiting('Waiting for ' + CHAL.to.name + ' to accept your challenge…', 'Challenge Sent');
+  netConnect(() => {
+    if (NET.state === 'connecting') NET.state = 'social';
+    netSend({ t:'challenge', to:CHAL.to.id, mode:G.mode,
+              minutes:G.minutes, inc:G.inc, color:mine });
+  });
+}
+
+/** No game, and a reason. The box's own button is the way back to the friends list. */
+function challengeRefused(text, title){
+  CHAL.pending = false;
+  CHAL.id = null;
+  clearTimeout(CHAL.timer);
+  waitingFailed(text, title || 'No Game');
+}
+
+function showChallenge(msg){
+  CHAL.incoming = msg;
+  document.getElementById('chalTitle').textContent =
+    (msg.fromName || 'A friend') + ' challenged you';
+  document.getElementById('chalText').textContent =
+    (MODE_NAME[msg.mode] || msg.mode) + ' · ' + timeLabel(msg.minutes, msg.inc || 0) +
+    ' — you play ' + (msg.color === 'w' ? 'White' : 'Black') + '.';
+  chalOverlay.classList.add('show');
+  beep(880,.09); setTimeout(()=>beep(1180,.1), 110);
+}
+
+function hideChallenge(){
+  CHAL.incoming = null;
+  chalOverlay.classList.remove('show');
+}
+
+document.getElementById('chalAccept').onclick = () => {
+  const invite = CHAL.incoming;
+  if (!invite) return;
+  hideChallenge();
+  // The server's `start` sets the colours, the clock and the vision; this only
+  // has to say what kind of game is about to arrive, because `start` does not
+  // carry that and the board would otherwise still be laid out for the last one.
+  G.opponent  = 'online';
+  G.matchKind = 'friendly';
+  G.hosting   = false;
+  CHAL.to = null;
+  picked.opponent = picked.mode = true;
+  chosen.minutes = chosen.side = true;
+  showWaiting('Setting the board…', 'Challenge Accepted');
+  netSend({ t:'challenge-accept', id:invite.id });
+};
+
+document.getElementById('chalDecline').onclick = () => {
+  const invite = CHAL.incoming;
+  if (!invite) return;
+  hideChallenge();
+  beep(400,.09);
+  netSend({ t:'challenge-decline', id:invite.id });
+};
 
 /* ---- boot ---- */
 syncOptions();

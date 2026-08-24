@@ -63,8 +63,18 @@ reference in the page carries `?v=N`; bump it when a file changes.
 **Server state** is module-level dicts guarded by one `RLock`: `lobby` (quick
 match, keyed by `(mode, minutes, inc, kind)` — ranked and friendly are separate
 queues, and 3+2 is a different game from a flat 3 minutes), `rooms` (hosted
-games anyone may join), `lobby_subs` (clients watching the room list), `games`. Payloads are built under the lock and sent outside it.
-One thread per connection.
+games anyone may join), `lobby_subs` (clients watching the room list), `games`,
+`by_user` (signed-in account id → its open connections) and `challenges`.
+Payloads are built under the lock and sent outside it. One thread per
+connection.
+
+**Three ways in, one Game.** Quick match, rooms and friend challenges all end
+in `start_game_between()` and then the same relay — a challenge is not a second
+multiplayer system. A challenge is addressed to an *account id*, not a socket,
+which is what lets it reach every tab that account has open and what lets the
+server refuse an answer from anyone else (`handle_challenge_accept`). It is
+deliberately not a database row: it means nothing once either side disconnects,
+so it lives in memory and dies with the session.
 
 **Two engines.** `blind-chess.html` contains a small negamax/alpha-beta search
 (`bestMove`) *and* drives the vendored Stockfish WASM worker over UCI (`SF`,
@@ -93,6 +103,18 @@ otherwise signing in would be a way to wear someone else's name. `clean_name()`
 to token metadata, because that metadata is writable through Supabase's own
 API. Guest names go through the same rule.
 
+**`supabase-social.sql`** is the second hand-run file, after
+`supabase-setup.sql`. Friendships are **one row per pair**, stored sorted
+(`user_low < user_high`, enforced by a check constraint): the primary key is
+then also the "already friends" guard, reading it from either side is the same
+query, and removing it is one delete both players see. There is no insert
+policy on `friendships` at all — `accept_friend_request()` is a security-definer
+function and the only door in, because accepting is two writes and the browser
+must not be trusted to do only the first. Requests are deleted when answered;
+there is no status column. Both tables need `replica identity full` or realtime
+DELETEs never reach anybody — that is most of the feature, since accepting,
+declining and unfriending are all deletes.
+
 **`supabase-setup.sql`** is run once by hand in the Supabase SQL editor. The
 load-bearing part is at the bottom: RLS alone would let a signed-in user set
 their own `rating`, so column-level grants restrict the browser to writing
@@ -109,7 +131,9 @@ REVIEW, CONTROLS, SCREENS, ACCOUNTS.
 
 Screens are `<section class="screen" id="screen-NAME">` toggled by
 `showScreen(name)`; `screenName` is the current one and several handlers branch
-on it.
+on it. There is only one account cluster (`#headRight`), and `showScreen()`
+moves it into whichever screen's header offers a `.head-mount` — home and
+social both do, so it sits in the same place on each. Don't duplicate it.
 
 Global game state is `G` (mode, opponent, colours, clocks, `G.uci` — the move
 list the review and the bot replay from). `G.token` is incremented on every new
@@ -127,6 +151,15 @@ rung, and only the one on screen is fetched.
 Vision modes: `blind` (board, no pieces), `total` (pure notation, typed moves),
 `fog`, `sighted`. Prefer the helpers — `BLINDISH()`, `CAN_PEEK()`, `LOCAL()`,
 `ONLINE()`, `BOT()` — over comparing `G.mode`/`G.opponent` inline.
+
+**The social page** (`screen-social`, the SOCIAL section of the script) is two
+things that only meet on screen: friends and friend requests are Supabase rows
+the browser reads and writes directly, kept fresh by a realtime subscription
+with a slow poll behind it as a fallback; challenges are messages on the game
+socket. The challenge *form* is the Play Bot page — the same `#gameSetup`
+panel beside the same board, with `CHALLENGING()` hiding the bot ladder,
+renaming Start Play to Challenge, and `NET.opponent` naming the friend on the
+strip above the board. `CHAL` holds the invitation in flight from either end.
 
 There is deliberately no undo, no take-back, and no move history during play.
 Don't reintroduce them.

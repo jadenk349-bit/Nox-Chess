@@ -4,6 +4,12 @@ Stdlib only. One port serves both the page over HTTP and the game socket at
 /ws, so a browser loads http://localhost:8787/ and connects straight back to
 the origin it came from.
 
+It pairs players three ways: a quick-match queue, a list of open rooms, and a
+challenge sent to one named friend. All three end in the same Game, relayed the
+same way — a challenge is not a second kind of multiplayer, only a third way
+into the first one. Friendships themselves are Supabase's business, not this
+server's; see supabase-social.sql.
+
 The rules live in the browser: both clients run the same move generator, so the
 server's job is to pair players and to keep the two of them on one timeline. It
 enforces whose turn it is and that plies arrive in order — a move from the wrong
@@ -38,7 +44,16 @@ lobby = {}        # (mode, minutes, inc, kind) -> Client waiting for a quick mat
 rooms = {}        # room id -> Room, the open rooms anyone may sit down at
 lobby_subs = set()  # clients watching the room list right now
 games = {}        # game id -> Game
+# Signed-in players, by account id -> the connections they have open. A friend
+# is challenged by who they are rather than by which socket they happen to be
+# on, so this is what turns an account id into somewhere to send.
+by_user = {}      # supabase user id -> set of Clients
+challenges = {}   # challenge id -> Challenge, one per invitation in the air
 LOG = True
+
+# A challenge nobody answers should not sit in memory for the life of the
+# process. Long enough for someone to notice the box and think about it.
+CHALLENGE_TTL = 180
 
 
 def log(*a):
@@ -124,6 +139,84 @@ class Room:
         }
 
 
+class Challenge:
+    """One player asking one particular friend for a game.
+
+    Deliberately not a database row. A challenge is only meaningful while both
+    people are connected — the moment either drops there is nothing to accept —
+    so it lives here beside rooms and quick match, and dies with the session.
+    It is addressed to an account id, not to a connection, so it reaches every
+    tab that account has open and only that account can answer it.
+    """
+
+    def __init__(self, host, to_user, mode, minutes, inc, color):
+        self.id = uuid.uuid4().hex[:8]
+        self.host = host          # the challenger's client
+        self.to_user = to_user    # the account id of the person challenged
+        self.mode = mode
+        self.minutes = minutes
+        self.inc = inc
+        self.color = color        # the colour the challenger takes; the friend gets the other
+        self.created = time.time()
+
+    def public(self):
+        return {
+            "id": self.id,
+            "from": self.host.user_id,
+            "fromName": self.host.name,
+            "mode": self.mode,
+            "minutes": self.minutes,
+            "inc": self.inc,
+            # what the person answering will be playing, which is not what the
+            # challenger picked for themselves
+            "color": BLACK if self.color == WHITE else WHITE,
+        }
+
+
+def register_user(client):
+    """Note where a signed-in player can be reached. Caller holds the lock."""
+    if client.user_id:
+        by_user.setdefault(client.user_id, set()).add(client)
+
+
+def unregister_user(user_id, client):
+    """Forget one connection of one account. Caller holds the lock.
+
+    Takes the id rather than reading it off the client, because the one caller
+    that matters is a second hello — where the client has already become
+    somebody else and the entry to remove is filed under who they were.
+    """
+    peers = by_user.get(user_id)
+    if peers is not None:
+        peers.discard(client)
+        if not peers:
+            by_user.pop(user_id, None)
+
+
+def prune_challenges(now=None):
+    """Drop invitations nobody answered. Caller holds the lock.
+
+    Returns the ones that went, so the caller can tell whoever is waiting —
+    a challenger left staring at "waiting for…" forever is worse than one
+    told the invitation lapsed.
+    """
+    now = now or time.time()
+    dead = [c for c in challenges.values()
+            if now - c.created > CHALLENGE_TTL or not c.host.alive]
+    for ch in dead:
+        challenges.pop(ch.id, None)
+    return dead
+
+
+def take_challenges_of(client, user_id=None):
+    """Every invitation this client is either end of. Caller holds the lock."""
+    mine = [c for c in challenges.values()
+            if c.host is client or (user_id and c.to_user == user_id)]
+    for ch in mine:
+        challenges.pop(ch.id, None)
+    return mine
+
+
 def broadcast_rooms():
     """Everyone watching the list sees it the moment it changes.
 
@@ -195,6 +288,7 @@ def handle_hello(client, msg):
     as. Without a token — or with a bad one — they stay a guest and may
     still play friendly games.
     """
+    was = client.user_id
     token = msg.get("token")
     if token:
         try:
@@ -203,6 +297,8 @@ def handle_hello(client, msg):
             client.user_id = None
             client.verified = False
             client.name = clean_guest_name(msg.get("name"))
+            with lock:
+                unregister_user(was, client)   # no longer anybody, if it ever was
             log("%s rejected token: %s" % (client.id, err))
             client.send({
                 "t": "welcome",
@@ -219,6 +315,12 @@ def handle_hello(client, msg):
         client.user_id = None
         client.verified = False
         client.name = clean_guest_name(msg.get("name"))
+
+    # A second hello on the same socket re-identifies it, so the old entry has
+    # to go or a signed-out tab would still be reachable as whoever it was.
+    with lock:
+        unregister_user(was, client)
+        register_user(client)
 
     client.send({
         "t": "welcome",
@@ -350,28 +452,13 @@ def handle_join(client, msg):
         host = room.host
         host.room = None
         # the host plays the colour they asked for; the joiner takes the other
-        white, black = (host, client) if room.color == WHITE else (client, host)
-        game = Game(white, black, room.mode, room.minutes, room.inc)
-        white.color, black.color = WHITE, BLACK
-        white.game = black.game = game
-        games[game.id] = game
-        lobby_subs.discard(host)
-        lobby_subs.discard(client)
-        outgoing = [(player, {
-            "t": "start",
-            "game": game.id,
-            "color": color,
-            "mode": room.mode,
-            "minutes": room.minutes,
-            "inc": room.inc,
-            "kind": "friendly",
-            "opponent": game.opponent_of(player).name,
-            "opponentVerified": game.opponent_of(player).verified,
-        }) for color, player in game.players.items()]
+        game, outgoing = start_game_between(host, client, room.color,
+                                            room.mode, room.minutes, room.inc)
     for player, payload in outgoing:
         player.send(payload)
     log("room %s filled — %s (w) vs %s (b), %s, %s"
-        % (room.id, white.id, black.id, room.mode, time_label(room.minutes, room.inc)))
+        % (room.id, game.players[WHITE].id, game.players[BLACK].id,
+           room.mode, time_label(room.minutes, room.inc)))
     broadcast_rooms()
 
 
@@ -499,6 +586,169 @@ def handle_chat(client, msg):
     other.send({"t": "chat", "game": game_id, "text": text, "from": client.name})
 
 
+# ------------------------------------------------------- challenging a friend
+
+def start_game_between(host, guest, host_color, mode, minutes, inc, kind="friendly"):
+    """Seat two named players at one board. Caller holds the lock.
+
+    The same pairing handle_join does for a room, lifted out so a challenge
+    does not grow a second copy of it. Returns what to send each of them,
+    which the caller sends outside the lock.
+    """
+    white, black = (host, guest) if host_color == WHITE else (guest, host)
+    game = Game(white, black, mode, minutes, inc)
+    white.color, black.color = WHITE, BLACK
+    white.game = black.game = game
+    white.queue_key = black.queue_key = None
+    games[game.id] = game
+    lobby_subs.discard(host)
+    lobby_subs.discard(guest)
+    # neither of them is waiting anywhere else now
+    for player in (host, guest):
+        if player.queue_key and lobby.get(player.queue_key) is player:
+            del lobby[player.queue_key]
+        player.queue_key = None
+    return game, [(player, {
+        "t": "start",
+        "game": game.id,
+        "color": color,
+        "mode": mode,
+        "minutes": minutes,
+        "inc": inc,
+        "kind": kind,
+        "opponent": game.opponent_of(player).name,
+        "opponentVerified": game.opponent_of(player).verified,
+    }) for color, player in game.players.items()]
+
+
+def handle_challenge(client, msg):
+    """Ask one particular friend for a game.
+
+    Addressed by account id, which is why it needs an account on both ends:
+    a guest is nobody in particular, so there is nobody in particular to
+    challenge and nobody in particular who may answer.
+    """
+    if not client.verified:
+        client.send({"t": "error", "msg": "challenging a friend needs a signed-in account"})
+        return
+    target = msg.get("to")
+    if not isinstance(target, str) or not target or target == client.user_id:
+        client.send({"t": "error", "msg": "no such player"})
+        return
+    mode = msg.get("mode", "blind")
+    minutes = msg.get("minutes", 10)
+    inc = clean_inc(msg.get("inc"))
+    color = msg.get("color", WHITE)
+    if color not in (WHITE, BLACK):
+        color = WHITE
+
+    with lock:
+        if client.game:
+            client.send({"t": "error", "msg": "already in a game"})
+            return
+        lapsed = prune_challenges()
+        # one invitation out at a time: a second replaces the first rather
+        # than leaving the friend with two boxes to answer
+        withdrawn = [c for c in challenges.values() if c.host is client]
+        for ch in withdrawn:
+            challenges.pop(ch.id, None)
+        peers = [c for c in by_user.get(target, ()) if c.alive]
+        free = [c for c in peers if not c.game]
+        if not peers:
+            client.send({"t": "challenge-away"})
+            return
+        if not free:
+            client.send({"t": "challenge-busy"})
+            return
+        ch = Challenge(client, target, mode, minutes, inc, color)
+        challenges[ch.id] = ch
+        invite = dict(ch.public(), t="challenged")
+        gone = [(c.id, list(by_user.get(c.to_user, ()))) for c in withdrawn]
+        stale = [(c.host, c.id) for c in lapsed]
+    for cid, peers_of in gone:
+        for c in peers_of:
+            c.send({"t": "challenge-gone", "id": cid})
+    for host, cid in stale:
+        host.send({"t": "challenge-lapsed", "id": cid})
+    client.send({"t": "challenge-sent", "id": ch.id, "to": target})
+    for c in free:
+        c.send(invite)
+    log("%s challenged %s — %s, %s" % (client.id, target[:8], mode, time_label(minutes, inc)))
+
+
+def handle_challenge_accept(client, msg):
+    """Take up a friend's invitation. Both of them end up in one ordinary game."""
+    with lock:
+        prune_challenges()
+        ch = challenges.get(msg.get("id"))
+        if ch is None:
+            client.send({"t": "error", "msg": "that challenge is gone"})
+            return
+        # The one check the whole design rests on: a challenge belongs to the
+        # account it was addressed to, so nobody else can answer it — not
+        # another player, and not a second connection guessing at ids.
+        if not client.verified or client.user_id != ch.to_user:
+            client.send({"t": "error", "msg": "that challenge is not yours"})
+            return
+        del challenges[ch.id]
+        host = ch.host
+        if client.game or host.game or not host.alive:
+            # Too late — one of them started something else in the meantime.
+            # The challenger is still looking at "waiting for…", so they are
+            # told as well; only the one who left needs no telling.
+            client.send({"t": "error", "msg": "that challenge is gone"})
+            if host.alive and not host.game:
+                host.send({"t": "challenge-lapsed", "id": ch.id})
+            return
+        game, outgoing = start_game_between(host, client, ch.color,
+                                            ch.mode, ch.minutes, ch.inc)
+        # Anything else either of them had in the air is moot now.
+        dropped = take_challenges_of(host, host.user_id) + \
+                  take_challenges_of(client, client.user_id)
+        # the accepting player's other tabs still have the box open
+        others = [c for c in by_user.get(client.user_id, ()) if c is not client]
+        notices = [(c, ch.id) for c in others]
+        for d in dropped:
+            notices += [(c, d.id) for c in by_user.get(d.to_user, ())]
+            if d.host is not host and d.host is not client:
+                notices.append((d.host, d.id))
+    for player, payload in outgoing:
+        player.send(payload)
+    for c, cid in notices:
+        c.send({"t": "challenge-gone", "id": cid})
+    log("challenge %s taken up — %s (w) vs %s (b), %s, %s"
+        % (ch.id, game.players[WHITE].id, game.players[BLACK].id,
+           ch.mode, time_label(ch.minutes, ch.inc)))
+
+
+def handle_challenge_decline(client, msg):
+    with lock:
+        ch = challenges.get(msg.get("id"))
+        if ch is None:
+            return
+        if not client.verified or client.user_id != ch.to_user:
+            client.send({"t": "error", "msg": "that challenge is not yours"})
+            return
+        del challenges[ch.id]
+        host = ch.host
+        others = [c for c in by_user.get(client.user_id, ()) if c is not client]
+    host.send({"t": "challenge-declined", "id": ch.id, "by": client.name})
+    for c in others:                       # their own other tabs, still asking
+        c.send({"t": "challenge-gone", "id": ch.id})
+
+
+def handle_challenge_cancel(client, msg):
+    """The challenger thought better of it."""
+    with lock:
+        ch = challenges.get(msg.get("id"))
+        if ch is None or ch.host is not client:
+            return
+        del challenges[ch.id]
+        peers = list(by_user.get(ch.to_user, ()))
+    for c in peers:
+        c.send({"t": "challenge-gone", "id": ch.id})
+
+
 def handle_message(client, raw):
     try:
         msg = json.loads(raw)
@@ -536,6 +786,14 @@ def handle_message(client, raw):
         handle_draw_decline(client)
     elif kind == "chat":
         handle_chat(client, msg)
+    elif kind == "challenge":
+        handle_challenge(client, msg)
+    elif kind == "challenge-accept":
+        handle_challenge_accept(client, msg)
+    elif kind == "challenge-decline":
+        handle_challenge_decline(client, msg)
+    elif kind == "challenge-cancel":
+        handle_challenge_cancel(client, msg)
     elif kind == "ping":
         client.send({"t": "pong"})
     else:
@@ -549,6 +807,23 @@ def drop_client(client):
         if client.queue_key and lobby.get(client.queue_key) is client:
             del lobby[client.queue_key]
         lobby_subs.discard(client)
+        unregister_user(client.user_id, client)
+        # A challenge is only worth anything while both ends are connected.
+        # This client's own invitations go; invitations aimed at this account
+        # go too, but only once its last connection has gone — another tab is
+        # still somewhere the box can be answered.
+        mine = [c for c in challenges.values() if c.host is client]
+        if client.user_id and client.user_id not in by_user:
+            mine += [c for c in challenges.values() if c.to_user == client.user_id]
+        for ch in mine:
+            challenges.pop(ch.id, None)
+        told = []
+        for ch in mine:
+            if ch.host is client:
+                told += [(c, {"t": "challenge-gone", "id": ch.id})
+                         for c in by_user.get(ch.to_user, ())]
+            else:
+                told.append((ch.host, {"t": "challenge-away", "id": ch.id}))
         if client.room:                  # a host who vanishes takes their room with them
             rooms.pop(client.room.id, None)
             client.room = None
@@ -561,6 +836,8 @@ def drop_client(client):
         # the other side keeps its own reference until it disconnects too, but
         # sending to a dead socket is a no-op, so nothing piles up
         client.chat_peer = None
+    for other, payload in told:
+        other.send(payload)
     log("%s disconnected" % client.id)
     if dropped_room:
         broadcast_rooms()
