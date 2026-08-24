@@ -1,0 +1,13 @@
+# Python leaves bytecode behind wherever the server or its tests are run.
+__pycache__/
+*.pyc
+
+# A virtualenv for PyJWT, if you make one in the tree rather than outside it.
+venv/
+.venv/
+
+# The puzzle generator can keep the candidate pool it chose the ladders from
+# (--poolsOut), which is large, regenerable, and not what the game serves.
+puzzles/pool*.json
+
+.DS_Store

@@ -22,6 +22,13 @@ RUN pip install --no-cache-dir -r requirements.txt
 COPY server/ ./server/
 COPY engine/ ./engine/
 COPY assets/ ./assets/
+# The three puzzle ladders. Generated offline by tools/generate_puzzles.js and
+# checked in, so the image needs no engine run and no network: without these
+# the Puzzles menu has nothing to open and the server rates nothing, because it
+# reads its own copy of what each puzzle is worth from exactly these files.
+# tools/ itself is deliberately absent — it is a build-time thing, not a
+# serving one.
+COPY puzzles/ ./puzzles/
 COPY blind-chess.html ./blind-chess.html
 
 # Nothing here needs root, and the process only ever reads these files.

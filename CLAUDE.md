@@ -19,12 +19,19 @@ python3 server/server.py [--port 8787]   # serves the page AND the game socket o
 python3 server/test_two_clients.py       # integration tests — REQUIRES a running server
 node server/test_ws_url.js               # unit tests for wsURLFrom(); no server needed
 node server/test_review.js               # unit tests for the review's chess reasoning
+node server/test_puzzle_flow.js          # plays a shipped puzzle against a stub DOM
+python3 server/test_puzzle_rating.py     # the puzzle Elo handler; no server needed
+node tools/test_generate_puzzles.js      # the generator's own decisions, no engine
+python3 tools/check_supabase_puzzles.py  # RLS and column grants, against the real project
+
+node tools/generate_puzzles.js --poolsOut /tmp/pools.json   # regenerate (slow: ~12 min)
+node tools/generate_puzzles.js --poolsIn /tmp/pools.json    # re-cut the ladders only (instant)
 
 docker build -t nox-chess . && docker run --rm -p 8787:8787 nox-chess
 ```
 
-Both JS suites read the code under test out of `blind-chess.html` by name, so
-renaming or reformatting what they extract breaks them on purpose.
+All three JS suites read the code under test out of `blind-chess.html` by name,
+so renaming or reformatting what they extract breaks them on purpose.
 
 `test_two_clients.py` has no test-case selection flag; it runs the whole
 sequence (matchmaking, turn order, a full game, resign/draw, rooms) and exits
@@ -33,7 +40,11 @@ non-zero on failure. Point it at another host with `WS_TEST_HOST=… PORT=…`.
 Environment: `PORT` (default 8787), `SUPABASE_URL` (enables token
 verification), `SUPABASE_JWT_SECRET` (only for legacy HS256 projects; also what
 `test_two_clients.py` uses to mint test tokens — without it the tests play as
-guests). With neither Supabase variable set, accounts are simply off and
+guests), `SUPABASE_SERVICE_KEY` (lets the server persist `puzzle_rating`;
+without it ratings live in memory for the life of the process). That last one
+takes either a modern `sb_secret_…` key or a legacy `service_role` JWT —
+`supabase_db.py` tells them apart by shape, because only the JWT may go in the
+`Authorization` header, and it refuses a publishable/anon key by name. With neither Supabase variable set, accounts are simply off and
 everything else still works.
 
 ## Architecture
@@ -75,6 +86,49 @@ which is what lets it reach every tab that account has open and what lets the
 server refuse an answer from anyone else (`handle_challenge_accept`). It is
 deliberately not a database row: it means nothing once either side disconnects,
 so it lives in memory and dies with the session.
+
+**The rating only persists with `SUPABASE_SERVICE_KEY`.** The browser is not
+allowed to write `puzzle_rating`, so the server is the only thing that can, and
+it needs the service-role key to do it. Without one it still rates every
+attempt — in memory, for the life of the process — and tells the client
+`saved: false`. `supabase_db.set_puzzle_rating()` reads the row back rather
+than trusting the status code, because PostgREST answers 204 to an UPDATE that
+row-level security filtered to nothing, and a publishable key pasted into that
+variable would otherwise report every rating as saved and store none.
+
+**Two kinds of puzzle state, owned by two different parties.** Which puzzles a
+player has finished is personal state, so the browser writes
+`public.puzzle_progress` itself under RLS and `localStorage` is only a cache —
+rows are keyed by puzzle *id*, not by rung, so regenerating the ladders costs a
+player their place in the numbering and not their progress. What their solving
+is *worth* is `profiles.puzzle_rating`, which the browser may read and never
+write, exactly as `rating` and `tier` already work; `server/supabase_db.py`
+writes it with the service key, and without one the server keeps ratings in
+memory. Guests get neither and keep both locally. Run
+`supabase-migrate-puzzles.sql` once, by hand, like `supabase-setup.sql`.
+
+**Study Board and Puzzles are separate features that share one library.**
+Study Board (`REV`, the review screen) explains *the game the player just
+finished*: it is reached only from the end-of-game overlay, replays `G.uci`,
+and never reads a puzzle file. Puzzles (`PZ`) are three ladders of a hundred
+positions in `puzzles/*.json`, walked in order, one unlocked by the last. What
+they share is the explaining — `findMotifs()`, `see()`, `describeBest()` — which
+is why a puzzle tagged `fork` is explained with the word fork. Keep the
+dependency one-way: `PZ` may call the review's pure helpers, the review must
+never learn what a puzzle is.
+
+**Puzzle Rush borrows the game's clock.** `tickClock()` and `renderClocks()`
+each grow one branch for `RUSH.on`; there is no second timer. A run never
+records ladder progress and never moves the rating — it reads the rating to
+choose where to start and nothing else.
+
+**`tools/` is offline, and reads the page rather than copying it.**
+`tools/page_chess.js` cuts the named declarations out of `blind-chess.html` and
+evaluates them in Node, so the puzzle generator tags positions with the same
+code the browser explains them with. `tools/sf.js` drives the vendored engine
+in a forked process (Node needs `delete global.fetch` and a cwd of `engine/`,
+both explained there). Renaming anything in that file's DECLS/FNS lists breaks
+the tools loudly, which is the trade for having one implementation.
 
 **Two engines.** `blind-chess.html` contains a small negamax/alpha-beta search
 (`bestMove`) *and* drives the vendored Stockfish WASM worker over UCI (`SF`,

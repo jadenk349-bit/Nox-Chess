@@ -1024,6 +1024,57 @@
     .rev-body{order:3; flex-basis:100%;}
   }
 
+  /* ---------- puzzles ----------
+     The puzzle board is the game board: same squares, same pieces, same
+     renderer. Only the furniture around it changes, and it changes by class
+     rather than by a second screen, because two boards would drift apart. */
+  #screen-game.puzzle-mode .console,
+  #screen-game.puzzle-mode .status,
+  #screen-game.puzzle-mode .clock,
+  #screen-game.puzzle-mode .clock-note{display:none !important;}
+  /* a rush is the one puzzle mode with a clock, and it goes where clocks go */
+  #screen-game.puzzle-mode.rush #clockW{display:flex !important;}
+  .pz-strikes{letter-spacing:.22em; color:#d0453c;}
+  .pz-count{color:var(--gold-soft); font-variant-numeric:tabular-nums;}
+  .puzzle-card .pz-ask{font-size:14px; color:var(--text); line-height:1.5;}
+  .puzzle-card .pz-ask b{color:var(--gold-soft);}
+  .pz-say{
+    margin-top:9px; font-size:13.5px; line-height:1.55; color:var(--muted);
+    border-left:2px solid transparent; padding-left:0; transition:padding .15s ease;
+  }
+  .pz-say.right{color:var(--good); border-color:var(--good); padding-left:9px;}
+  .pz-say.wrong{color:#e0864d; border-color:#e0864d; padding-left:9px;}
+  .pz-say.told{color:var(--muted); border-color:var(--line); padding-left:9px;}
+  .pz-themes{display:flex; flex-wrap:wrap; gap:5px; margin-top:10px;}
+  .pz-theme{
+    font-size:9.5px; letter-spacing:.14em; text-transform:uppercase;
+    padding:3px 7px; border-radius:999px;
+    color:var(--muted); border:1px solid var(--line);
+  }
+  .pz-theme.rating{color:var(--gold-soft); border-color:rgba(212,175,110,.35);}
+  .pz-controls{display:flex; gap:8px; margin-top:14px;}
+  .pz-controls button{flex:1; padding:9px 6px; font-size:12px;}
+  .pz-progress{
+    float:right; font-size:10px; letter-spacing:.14em; color:var(--muted);
+    font-variant-numeric:tabular-nums;
+  }
+  .pz-grid{
+    display:grid; grid-template-columns:repeat(auto-fill, minmax(2.2rem, 1fr));
+    gap:5px; max-height:236px; overflow-y:auto; padding:2px;
+  }
+  .pz-lv{
+    padding:7px 0; font-size:11.5px; font-variant-numeric:tabular-nums;
+    border:1px solid var(--line); border-radius:7px;
+    background:rgba(255,255,255,.03); color:var(--muted); cursor:pointer;
+  }
+  .pz-lv:hover:not(:disabled){border-color:rgba(212,175,110,.5); color:var(--text);}
+  .pz-lv.done{color:var(--good); border-color:rgba(111,191,115,.4); background:rgba(111,191,115,.09);}
+  .pz-lv.seen{color:var(--muted); border-color:rgba(212,175,110,.25);}
+  /* the one you are meant to play next, and the one you are looking at */
+  .pz-lv.now{color:var(--gold-soft); border-color:var(--gold-soft); background:rgba(212,175,110,.12);}
+  .pz-lv.cur{outline:2px solid var(--gold-soft); outline-offset:1px;}
+  .pz-lv.locked{opacity:.32; cursor:not-allowed;}
+
   /* ---------- open rooms ---------- */
   #screen-rooms{position:relative;}
   .rooms-top{display:flex; justify-content:center; margin-bottom:26px;}
@@ -1735,9 +1786,10 @@
         <div class="nav-item">
           <button class="nav-btn" aria-haspopup="true">PUZZLE</button>
           <div class="menu">
-            <button class="menu-btn soon" id="navOpening">Opening</button>
-            <button class="menu-btn soon" id="navMiddle">Middle Game</button>
-            <button class="menu-btn soon" id="navEnd">End Game</button>
+            <button class="menu-btn" id="navOpening">Opening</button>
+            <button class="menu-btn" id="navMiddle">Middle Game</button>
+            <button class="menu-btn" id="navEnd">End Game</button>
+            <button class="menu-btn" id="navRush">Puzzle Rush</button>
           </div>
         </div>
       </nav>
@@ -2279,6 +2331,26 @@
           </div>
         </div>
 
+        <!-- puzzles: the ladder, and what the position is asking for -->
+        <div id="gamePuzzle" style="display:none">
+          <div class="card panel puzzle-card">
+            <h2 id="pzTitle">Puzzle</h2>
+            <div class="pz-ask" id="pzAsk"></div>
+            <div class="pz-say" id="pzSay"></div>
+            <div class="pz-themes" id="pzThemes"></div>
+            <div class="pz-controls">
+              <button class="ghost" id="pzShow">Show Solution</button>
+              <button class="ghost" id="pzRetry">Retry</button>
+              <button class="primary" id="pzNext">Next</button>
+            </div>
+          </div>
+
+          <div class="card panel" id="pzLevels">
+            <h2>Levels <span class="pz-progress" id="pzProgress"></span></h2>
+            <div class="pz-grid" id="pzGrid"></div>
+          </div>
+        </div>
+
       </aside>
     </div>
 
@@ -2577,6 +2649,49 @@ function posKey(s){
   let k = '';
   for (let i=0;i<64;i++){ const p=s.b[i]; k += p ? p.c+p.t : '.'; }
   return k + s.turn + s.cr.wK + s.cr.wQ + s.cr.bK + s.cr.bQ + s.ep;
+}
+
+/* ---- FEN ----------------------------------------------------
+   A game never needs this: it starts from the initial position every time and
+   remembers itself in UCI. A puzzle does — it is a position out of nowhere,
+   and FEN is how a position travels. Written and read here so the puzzle
+   generator, which pulls these functions straight out of this file, cannot
+   disagree with the page about what a position is. */
+function fenOf(s){
+  const rows = [];
+  for (let r=0;r<8;r++){
+    let row = '', empty = 0;
+    for (let c=0;c<8;c++){
+      const p = s.b[r*8+c];
+      if (!p){ empty++; continue; }
+      if (empty){ row += empty; empty = 0; }
+      row += p.c === W ? p.t : p.t.toLowerCase();
+    }
+    rows.push(row + (empty || ''));
+  }
+  const cr = (s.cr.wK?'K':'') + (s.cr.wQ?'Q':'') + (s.cr.bK?'k':'') + (s.cr.bQ?'q':'');
+  return rows.join('/') + ' ' + s.turn + ' ' + (cr || '-') + ' ' +
+         (s.ep >= 0 ? sqName(s.ep) : '-') + ' ' + s.half + ' ' + s.full;
+}
+function stateFromFEN(fen){
+  const parts = fen.trim().split(/\s+/);
+  const rights = parts[2] || '-', ep = parts[3] || '-';
+  const b = Array(64).fill(null);
+  let i = 0;
+  for (const ch of parts[0]){
+    if (ch === '/') continue;
+    if (ch >= '1' && ch <= '8'){ i += +ch; continue; }
+    b[i++] = mk(ch === ch.toUpperCase() ? W : B, ch.toUpperCase());
+  }
+  return {
+    b,
+    turn: parts[1] === 'b' ? B : W,
+    cr: { wK: rights.indexOf('K') >= 0 ? 1 : 0, wQ: rights.indexOf('Q') >= 0 ? 1 : 0,
+          bK: rights.indexOf('k') >= 0 ? 1 : 0, bQ: rights.indexOf('q') >= 0 ? 1 : 0 },
+    ep: ep !== '-' ? (8 - +ep[1]) * 8 + FILES.indexOf(ep[0]) : -1,
+    half: +parts[4] || 0,
+    full: +parts[5] || 1
+  };
 }
 
 /* ============================================================
@@ -3119,6 +3234,7 @@ const CHALLENGE_TTL = 180000;
 // Setting up a game for one particular person rather than for whoever turns up.
 const CHALLENGING = () => ONLINE() && !!CHAL.to;
 const BOT    = () => G.opponent === 'bot';     // the only opponent the engine plays
+const PUZZLE = () => G.opponent === 'puzzle';  // a position from a file, not a game
 const humanTurn = () => LOCAL() || G.st.turn === G.human;
 // whose eyes the board is drawn through
 const viewer = () => LOCAL() ? G.st.turn : G.human;
@@ -3346,6 +3462,7 @@ function layoutBoardBars(){
 }
 
 function renderClocks(){
+  if (RUSH.on){ rushClock(); return; }   // a run has one clock, and it is the run's
   const running = G.sans.length > 0;
   layoutBoardBars();
   for (const c of [W,B]){
@@ -3378,6 +3495,13 @@ function tickClock(){
   const now = Date.now();
   const dt = now - G.tickAt;
   G.tickAt = now;
+  if (RUSH.on){
+    if (RUSH.over) return;
+    RUSH.left = Math.max(0, RUSH.left - dt);
+    rushClock();
+    if (RUSH.left === 0) rushEnd('time');
+    return;
+  }
   if (!clockRunning()) return;                  // paused, but keep the baseline current
   const c = G.st.turn;
   G.clock[c] = Math.max(0, G.clock[c] - dt);
@@ -3671,25 +3795,41 @@ const levelFor = elo => LEVELS.find(l => l.elo === elo) || LEVELS[4];
 
 function pickFrom(list){ return list[Math.random() * list.length | 0]; }
 
+/* A rung's move, in two pure halves either side of the engine call — pure so
+   that the offline puzzle generator can play this same ladder without a
+   browser, and so the bots that produce the puzzles are the bots players meet.
+   Chance arrives as `rnd` for the same reason: seeded, the generator repeats. */
+
+// what needs no engine at all: nothing to choose, or a rung wild enough not to think
+function botShortcut(legal, lvl, rnd){
+  rnd = rnd || Math.random;
+  if (legal.length === 1) return legal[0];
+  if (lvl.wild && rnd() < lvl.wild) return legal[rnd() * legal.length | 0];
+  return null;
+}
+// and what the engine's answer comes to once the rung has had its say
+function botChoice(legal, lvl, res, rnd){
+  rnd = rnd || Math.random;
+  if (!res) return null;                    // the caller falls back to its own search
+  const byUci = u => legal.find(x => uciOf(x) === u);
+  let want = res.best;
+  const others = (res.lines || []).map(l => l.best).filter(Boolean).slice(1);
+  if (lvl.slop && others.length && rnd() < lvl.slop) want = others[rnd() * others.length | 0];
+  return byUci(want) || byUci(res.best) || null;
+}
+
 /* Choose the bot's move. Falls back to the built-in search when the browser
    cannot run WebAssembly, so a bot game still works. */
 function botPick(lvl){
   const legal = legalMoves(G.st, G.st.turn);
   if (!legal.length) return Promise.resolve(null);
-  if (legal.length === 1) return Promise.resolve(legal[0]);
-  if (lvl.wild && Math.random() < lvl.wild) return Promise.resolve(pickFrom(legal));
+  const quick = botShortcut(legal, lvl);
+  if (quick) return Promise.resolve(quick);
 
   return engineAsk(G.uci.slice(), {
     skill: lvl.skill, multipv: lvl.pool,
     depth: lvl.depth, movetime: lvl.movetime, nocache: true
-  }).then(res => {
-    const byUci = u => legal.find(x => uciOf(x) === u);
-    if (!res) return bestMove(G.st, lvl.js) || pickFrom(legal);
-    let want = res.best;
-    const others = (res.lines || []).map(l => l.best).filter(Boolean).slice(1);
-    if (lvl.slop && others.length && Math.random() < lvl.slop) want = pickFrom(others);
-    return byUci(want) || byUci(res.best) || bestMove(G.st, lvl.js) || pickFrom(legal);
-  });
+  }).then(res => botChoice(legal, lvl, res) || bestMove(G.st, lvl.js) || pickFrom(legal));
 }
 
 /* `token` is taken when the turn is *scheduled*, not when it runs: a reply
@@ -3739,8 +3879,14 @@ el.squares.addEventListener('click', e => {
     return;
   }
   if (moves.length > 1 && moves[0].promo){ askPromotion(moves); return; }
-  applyMove(moves[0]);
+  commitMove(moves[0]);
 });
+
+/* A puzzle referees its own moves; a game plays them. Everything that lets a
+   player choose a move on the board comes through here. */
+function commitMove(m){
+  if (PZ.on) pzPlay(m); else applyMove(m);
+}
 
 function reject(sqEl){
   sqEl.classList.add('bad');
@@ -3758,7 +3904,7 @@ function askPromotion(moves){
       el.promoOverlay.classList.remove('show');
       const m = G.pendingPromo.find(x => x.promo === q);
       G.pendingPromo = null;
-      applyMove(m);
+      commitMove(m);
     };
     el.promoBtns.appendChild(b);
   }
@@ -4376,6 +4522,36 @@ function engineStart(){
 }
 
 let sfInfo = null;
+/* One `info` line into the ranked list it belongs in, keeping the deepest
+   line seen for each ranked move. Pure, and shared with the offline puzzle
+   generator: a puzzle is picked by the same numbers the review reads, parsed
+   by the same code, or the two would drift apart a regex at a time. */
+function readInfoLine(line, lines, want){
+  const mp = line.match(/ multipv (\d+)/);
+  const idx = mp ? +mp[1] : 1;
+  if (idx > want) return;
+  const slot = lines[idx - 1] ||
+               (lines[idx - 1] = { cp:null, mate:null, best:null, pv:null });
+  const cp = line.match(/score cp (-?\d+)/);
+  const mate = line.match(/score mate (-?\d+)/);
+  // The whole line, not just its first move: the review tells the player what
+  // happens next, and that is what the rest of the pv is. Stockfish puts pv
+  // last, but UCI does not promise it, so the tail is cut at the first token
+  // that is not a move — and again at eight plies, past which nobody is
+  // following along anyway.
+  const pv = line.match(/ pv (.+)$/);
+  if (cp) { slot.cp = +cp[1]; slot.mate = null; }
+  if (mate){ slot.mate = +mate[1]; slot.cp = null; }
+  if (pv){
+    const moves = [];
+    for (const tok of pv[1].trim().split(/\s+/)){
+      if (moves.length === 8 || !/^[a-h][1-8][a-h][1-8][qrbn]?$/.test(tok)) break;
+      moves.push(tok);
+    }
+    if (moves.length){ slot.pv = moves; slot.best = moves[0]; }
+  }
+}
+
 function engineLine(line){
   if (line === 'uciok'){
     // Deliberately no "setoption name Threads": this build is single-threaded,
@@ -4388,30 +4564,7 @@ function engineLine(line){
   if (line === 'readyok'){ SF.ready = true; enginePump(); reviewRender(); return; }
 
   if (line.startsWith('info ') && sfInfo){
-    // keep the deepest line seen for each ranked move
-    const mp = line.match(/ multipv (\d+)/);
-    const idx = mp ? +mp[1] : 1;
-    if (idx > sfInfo.want) return;
-    const slot = sfInfo.lines[idx - 1] ||
-                 (sfInfo.lines[idx - 1] = { cp:null, mate:null, best:null, pv:null });
-    const cp = line.match(/score cp (-?\d+)/);
-    const mate = line.match(/score mate (-?\d+)/);
-    // The whole line, not just its first move: the review tells the player what
-    // happens next, and that is what the rest of the pv is. Stockfish puts pv
-    // last, but UCI does not promise it, so the tail is cut at the first token
-    // that is not a move — and again at eight plies, past which nobody is
-    // following along anyway.
-    const pv = line.match(/ pv (.+)$/);
-    if (cp) { slot.cp = +cp[1]; slot.mate = null; }
-    if (mate){ slot.mate = +mate[1]; slot.cp = null; }
-    if (pv){
-      const moves = [];
-      for (const tok of pv[1].trim().split(/\s+/)){
-        if (moves.length === 8 || !/^[a-h][1-8][a-h][1-8][qrbn]?$/.test(tok)) break;
-        moves.push(tok);
-      }
-      if (moves.length){ slot.pv = moves; slot.best = moves[0]; }
-    }
+    readInfoLine(line, sfInfo.lines, sfInfo.want);
     return;
   }
   if (line.startsWith('bestmove')){
@@ -4827,6 +4980,9 @@ function findMotifs(before, move, after, attackerColor){
     if (!p || p.c !== them || p.t === 'K') continue;
     // what was already loose before the move is not a reason to play it
     if (see(before, i, attackerColor) > 0) continue;
+    // nor is a loose pawn the news, when the move just took a queen: free
+    // material only leads the explanation if it beats what was captured
+    if (move.cap && VAL[p.t] <= VAL[move.cap.t]) continue;
     const win = see(after, i, attackerColor);
     if (win > 0 && (!loose || win > loose.win)) loose = { sq:i, p, win };
   }
@@ -5140,6 +5296,706 @@ function reviewRender(){
 }
 
 /* ============================================================
+   THE PUZZLES — three ladders of a hundred, walked in order
+
+   Nothing here has anything to do with Study Board. Study Board explains the
+   game the player has just finished, from G.uci; a puzzle is a position out of
+   a file, and the two never meet. What they do share is the explaining: the
+   card at the end of a puzzle is written by describeBest(), the same function
+   that writes the coach card in the review, which is why a puzzle tagged
+   "fork" is explained with the word fork.
+
+   The board is the game board. Same squares, same pieces, same renderer, with
+   G pointed at the puzzle position and G.opponent set to 'puzzle' so that
+   BOT(), LOCAL() and ONLINE() are all false and none of the game's machinery
+   thinks it is running.
+   ============================================================ */
+const PZ_TRACK_NAME = { opening:'Opening', middlegame:'Middlegame', endgame:'Endgame' };
+const PZ_START_RATING = 1200;
+const PZ_VERSION = 1;              // ?v= on the three files; bump when they are regenerated
+const PZ_REPLY_MS = 420;           // long enough to read the reply as an answer
+
+const PZ = {
+  on: false,
+  mode: 'ladder',      // 'ladder' walks a track in order; 'rush' is against the clock
+  track: null,
+  list: [],            // the whole ladder, in difficulty order
+  n: 0,                // which rung, 1-based — the number the player sees
+  puzzle: null,
+  ply: 0,              // how far into puzzle.moves the solver has got
+  side: 'w',           // whose puzzle it is: the colour to move in the fen
+  wasDone: false,      // finished before today, so the rating stays where it is
+  delta: null,         // what this attempt moved the rating by
+  wrong: false,        // a wrong move was tried on this attempt
+  shown: false,        // the solution was revealed
+  done: false,         // the line has been played to its end
+  busy: false          // the forced reply is on its way
+};
+const pzLoaded = {};   // track -> the parsed ladder, fetched once
+
+/* ---- what the player has already done ----
+   Kept by puzzle id rather than by number, because regenerating the set
+   renumbers it: a player who has solved forty puzzles should lose their place
+   in the numbering, not the forty. Solved and seen are separate — revealing
+   the solution still unlocks the next rung, but it is not a solve, and the
+   ladder shows the difference.
+
+   For a signed-in player Supabase is the record and this is a cache: finish a
+   puzzle on a laptop and the phone knows, and clearing site data costs
+   nothing. For a guest the cache is all there is, which is the same bargain
+   guests already get from ranked play. The cache is stamped with whose it is,
+   so two accounts sharing a browser cannot read each other's ladder — and a
+   guest's progress, which belongs to nobody yet, is adopted by the first
+   account to sign in on top of it. */
+const PZ_STORE = 'nox.puzzles.';
+const PZ_TRACKS = ['opening', 'middlegame', 'endgame'];
+const pzOwner = () => (account ? account.id : '');
+
+/* Each account gets its own key, and a guest gets the bare one. Two accounts
+   sharing a browser therefore cannot read each other's ladder, and — the case
+   that actually bites — signing out and playing on as a guest cannot write
+   over an account's progress on a project where the migration has not been run
+   yet and Supabase has no copy to restore from. */
+const pzKey = (track, owner) => PZ_STORE + (owner ? owner + '.' : '') + track;
+
+function pzStored(track, owner){
+  try {
+    const raw = JSON.parse(localStorage.getItem(pzKey(track, owner)));
+    if (raw && Array.isArray(raw.solved)) return { solved: raw.solved, seen: raw.seen || [] };
+  } catch (e){ /* private browsing, or somebody edited it: start clean */ }
+  return null;
+}
+function pzProgress(track){
+  return pzStored(track, pzOwner()) || { solved: [], seen: [] };
+}
+function pzWrite(track, prog){
+  try { localStorage.setItem(pzKey(track, pzOwner()), JSON.stringify(prog)); } catch (e){}
+}
+function pzMark(track, id, clean){
+  const prog = pzProgress(track);
+  const list = clean ? prog.solved : prog.seen;
+  if (list.indexOf(id) < 0) list.push(id);
+  pzWrite(track, prog);
+  pzPush(track, id, clean);
+}
+
+/* One finished puzzle, on its way to the account. Fire and forget: the cache
+   has already been written, so a failed write costs the player nothing today
+   and is picked up by the next sync. */
+function pzPush(track, id, clean){
+  if (!sb || !account) return;                    // a guest has nowhere to put it
+  // a revealed replay must never write over a real solve
+  if (!clean && pzProgress(track).solved.indexOf(id) >= 0) return;
+  Promise.resolve(
+    sb.from('puzzle_progress')
+      .upsert({ user_id: account.id, track, puzzle_id: id, solved: !!clean },
+              { onConflict: 'user_id,puzzle_id' })
+  ).catch(err => console.warn('puzzle progress not saved:', err && err.message));
+}
+
+/* Sign-in: read the account's progress, merge the cache into it both ways, and
+   write both back. Merging rather than replacing is what makes the guest case
+   work — ten puzzles solved before signing up are still solved afterwards —
+   and a solve always beats a reveal, whichever side it came from.
+
+   Every step is allowed to fail. Until supabase-migrate-puzzles.sql is run
+   there is no table to read, and the game carries on with the cache exactly as
+   it did before any of this existed. */
+async function pzSync(){
+  if (!sb || !account) return;
+  let rows;
+  try {
+    const { data, error } = await sb.from('puzzle_progress')
+      .select('track, puzzle_id, solved').eq('user_id', account.id);
+    if (error) throw error;
+    rows = data || [];
+  } catch (err){
+    console.warn('puzzle progress unavailable:', err && err.message);
+    return;
+  }
+
+  const remote = {};                              // puzzle_id -> solved
+  for (const r of rows) remote[r.puzzle_id] = !!r.solved;
+
+  const push = [];
+  for (const track of PZ_TRACKS){
+    // this account's own cache, and whatever was solved as a guest before
+    // signing up — those belong to nobody until somebody claims them
+    const mine = { solved: [], seen: [] };
+    for (const raw of [pzStored(track, account.id), pzStored(track, '')]){
+      if (!raw) continue;
+      for (const id of raw.solved) if (mine.solved.indexOf(id) < 0) mine.solved.push(id);
+      for (const id of raw.seen) if (mine.seen.indexOf(id) < 0) mine.seen.push(id);
+    }
+
+    for (const r of rows){
+      if (r.track !== track) continue;
+      const list = r.solved ? mine.solved : mine.seen;
+      if (list.indexOf(r.puzzle_id) < 0) list.push(r.puzzle_id);
+    }
+    // anything the cache knows and the account does not, going the other way
+    for (const id of mine.solved)
+      if (remote[id] !== true) push.push({ user_id: account.id, track, puzzle_id: id, solved: true });
+    for (const id of mine.seen)
+      if (remote[id] === undefined) push.push({ user_id: account.id, track, puzzle_id: id, solved: false });
+
+    // a solve outranks a reveal, so it is not also listed as merely seen
+    mine.seen = mine.seen.filter(id => mine.solved.indexOf(id) < 0);
+    pzWrite(track, mine);
+  }
+
+  if (push.length){
+    try {
+      await sb.from('puzzle_progress').upsert(push, { onConflict: 'user_id,puzzle_id' });
+    } catch (err){
+      console.warn('puzzle progress not uploaded:', err && err.message);
+      if (PZ.on) pzRender();
+      return;                      // keep the cache: the next sync tries again
+    }
+  }
+  /* The unclaimed cache has been claimed, so it stops being unclaimed. Without
+     this it would be adopted again by the next account to sign in on the same
+     browser, which on a shared machine hands one person's puzzles to another —
+     and for the player it belonged to it is no loss, because everything in it
+     is now on their account. Only after the upload succeeded, so a failed
+     network costs nobody their progress. */
+  for (const track of PZ_TRACKS){
+    if (pzStored(track, '')) { try { localStorage.removeItem(pzKey(track, '')); } catch (e){} }
+  }
+  if (PZ.on) pzRender();
+}
+function pzDone(track){
+  const prog = pzProgress(track);
+  return new Set(prog.solved.concat(prog.seen));
+}
+/** The rung to open a track at: the first one not yet finished. */
+function pzNextRung(list, done){
+  for (let i = 0; i < list.length; i++) if (!done.has(list[i].id)) return i + 1;
+  return list.length;                     // all of them: sit on the last
+}
+/** A rung is open when the one before it is finished. The first always is. */
+function pzUnlocked(list, done, n){
+  return n === 1 || (!!list[n-2] && done.has(list[n-2].id));
+}
+
+/* ---- what the solving is worth ----
+   The server prices a signed-in player's attempts and keeps the number: a
+   rating players compare is not the browser's to write, which is why
+   puzzle_rating is outside the column grants in supabase-setup.sql. A guest
+   has nowhere to keep one, so their browser prices its own and remembers it
+   here — the same bargain ranked play already offers an account-less player.
+
+   That is why the Elo below exists twice, once here and once in server.py.
+   Not a shared library going spare: the two run for different people, and the
+   one that matters cannot be reached by the player it is rating. */
+const PZ_K = 20;
+const PZ_RATING_STORE = 'nox.puzzles.rating';
+
+function pzElo(player, puzzle, solved){
+  const expected = 1 / (1 + Math.pow(10, (puzzle - player) / 400));
+  const moved = player + PZ_K * ((solved ? 1 : 0) - expected);
+  return Math.max(400, Math.min(3200, Math.round(moved)));
+}
+function pzGuestRating(){
+  const n = parseInt(localStorage.getItem(PZ_RATING_STORE), 10);
+  return isFinite(n) ? n : PZ_START_RATING;
+}
+function pzRating(){
+  return account ? (account.puzzleRating || PZ_START_RATING) : pzGuestRating();
+}
+
+/* Report a finished puzzle and move the rating. The number shown changes at
+   once either way; for a signed-in player it is a guess until the server says
+   otherwise, and the server's answer replaces it. */
+function pzReport(p, solved){
+  const before = pzRating();
+  const after = pzElo(before, p.seedRating, solved);
+  if (account){
+    account.puzzleRating = after;
+    pzSendResult(p.id, solved, before);
+  } else {
+    try { localStorage.setItem(PZ_RATING_STORE, String(after)); } catch (e){}
+  }
+  return after - before;
+}
+
+/* A socket of its own, opened for one message and closed after the answer.
+   Puzzles are otherwise an offline mode, and borrowing NET's connection would
+   tangle a lobby or a game up in something that has nothing to do with it. */
+function pzSendResult(id, solved, playerRating){
+  if (!ONLINE_AVAILABLE || !authToken()) return;
+  let sock;
+  try { sock = new WebSocket(serverURL()); } catch (e){ return; }
+  let shut = false;
+  const done = () => { if (shut) return; shut = true; try { sock.close(); } catch (e){} };
+  sock.onopen = () => {
+    sock.send(JSON.stringify({ t:'hello', token: authToken(), name: G.playerName }));
+    sock.send(JSON.stringify({
+      t:'puzzleResult', puzzleId:id, solved:!!solved, playerRating
+    }));
+  };
+  sock.onmessage = ev => {
+    let msg;
+    try { msg = JSON.parse(ev.data); } catch (e){ return; }
+    if (msg.t === 'error'){ done(); return; }
+    if (msg.t !== 'puzzleRating') return;          // the welcome comes first
+    if (account && typeof msg.rating === 'number'){
+      account.puzzleRating = msg.rating;
+      if (PZ.on) pzRender();
+    }
+    done();
+  };
+  sock.onerror = done;
+  sock.onclose = () => { shut = true; };
+  setTimeout(done, 8000);                          // never hold a socket open on a lost server
+}
+
+/* ---- the whole of the refereeing ----
+   A puzzle is its own principal variation, so there is no engine here and no
+   judgement to make: the move either is the next move of the line or it is
+   not. Pure, and exported to the tests, because this is the one piece of
+   puzzle logic that can be wrong in a way nobody would see. */
+function puzzleStep(moves, ply, uci){
+  if (uci !== moves[ply]) return { ok:false, ply, reply:null, solved:false };
+  const reply = ply + 1 < moves.length ? moves[ply + 1] : null;
+  const next = ply + (reply ? 2 : 1);
+  return { ok:true, ply:next, reply, solved: next >= moves.length };
+}
+
+/* ---- Puzzle Rush ----
+   Three minutes, three strikes, and puzzles that get harder as you go. The
+   ladder is a syllabus; this is the exam, and it borrows the game's clock
+   rather than growing one of its own — tickClock() already runs whenever the
+   board is on screen.
+
+   A rush never touches ladder progress and never moves the rating. It reads
+   the rating to decide where to start and nothing else: a mode that rewards
+   speed should not be able to price a player's understanding. */
+const RUSH_MS = 180000;                 // three minutes
+const RUSH_LIVES = 3;
+const RUSH_GAP_MS = 550;                // a beat to see the board before the next one
+
+const RUSH = {
+  on: false,
+  queue: [],
+  at: 0,
+  solved: 0,
+  strikes: 0,
+  best: 0,                              // the hardest puzzle actually solved
+  left: RUSH_MS,
+  over: null                            // why it ended, once it has
+};
+
+/* Everything from all three tracks, hardest last, starting at the player's
+   own rating. Running off the top end is not a failure — it wraps to the
+   bottom, because a three-minute run has no business ending because the
+   library did. */
+function rushQueue(sets, rating){
+  const all = [];
+  for (const track of PZ_TRACKS) for (const p of (sets[track] || [])) all.push(p);
+  all.sort((a, b) => a.seedRating - b.seedRating || a.id.localeCompare(b.id));
+  if (!all.length) return all;
+  let from = all.findIndex(p => p.seedRating >= rating - 200);
+  if (from < 0) from = 0;
+  return all.slice(from).concat(all.slice(0, from));
+}
+
+function rushStart(){
+  beep(700,.09);
+  Promise.all(PZ_TRACKS.map(t => pzFetch(t).catch(() => [])))
+    .then(lists => {
+      const sets = {};
+      PZ_TRACKS.forEach((t, i) => { sets[t] = lists[i]; });
+      const queue = rushQueue(sets, pzRating());
+      if (!queue.length){ alert('No puzzles are installed yet.'); return; }
+      RUSH.on = true;
+      RUSH.queue = queue;
+      RUSH.at = RUSH.solved = RUSH.strikes = RUSH.best = 0;
+      RUSH.left = RUSH_MS;
+      RUSH.over = null;
+      document.getElementById('screen-game').classList.add('rush');
+      PZ.mode = 'rush';
+      PZ.track = null;
+      PZ.list = queue;
+      pzOpen(1);
+    });
+}
+
+function rushAdvance(){
+  if (!RUSH.on || RUSH.over) return;
+  if (RUSH.at + 1 >= RUSH.queue.length){ rushEnd('through every puzzle there is'); return; }
+  const token = G.token;
+  setTimeout(() => {
+    if (!RUSH.on || RUSH.over || G.token !== token) return;
+    pzOpen(RUSH.at + 2);                // pzOpen counts from one
+  }, RUSH_GAP_MS);
+}
+
+function rushStrike(){
+  RUSH.strikes++;
+  if (RUSH.strikes >= RUSH_LIVES) rushEnd('three wrong');
+}
+
+function rushEnd(why){
+  RUSH.over = why;
+  PZ.busy = true;                       // the board stops taking moves
+  beep(200,.2,'sawtooth',.07);
+  pzRender();                           // the clock stays up, frozen where it stopped
+}
+
+/* The clock is the game's, with one branch: renderClocks() draws the run's
+   remaining time into the same box a game's clock uses, and tickClock() runs
+   it down. Nothing else about the clock changes. */
+function rushClock(){
+  layoutBoardBars();
+  const box = document.getElementById('clockW');
+  box.querySelector('.time').textContent = fmtClock(RUSH.left);
+  box.querySelector('.who').textContent = 'RUSH';
+  box.classList.add('active');
+  box.classList.toggle('low', RUSH.left <= 30000 && RUSH.left > 0);
+  box.classList.toggle('flagged', RUSH.left <= 0);
+  document.getElementById('clockNote').style.display = 'none';
+}
+
+/* ---- getting in ---- */
+function enterTrack(track){
+  beep(700,.09);
+  pzFetch(track).then(list => {
+    if (!list.length){
+      alert('No ' + PZ_TRACK_NAME[track].toLowerCase() + ' puzzles are installed yet.');
+      return;
+    }
+    PZ.mode = 'ladder';
+    PZ.track = track;
+    PZ.list = list;
+    pzOpen(pzNextRung(list, pzDone(track)));
+  }, () => alert('Could not load the ' + PZ_TRACK_NAME[track].toLowerCase() + ' puzzles.'));
+}
+
+function pzFetch(track){
+  if (pzLoaded[track]) return Promise.resolve(pzLoaded[track]);
+  return fetch('puzzles/' + track + '.json?v=' + PZ_VERSION)
+    .then(r => r.ok ? r.json() : Promise.reject(new Error('http ' + r.status)))
+    .then(list => (pzLoaded[track] = Array.isArray(list) ? list : []));
+}
+
+/** Put a rung on the board. */
+function pzOpen(n){
+  const p = PZ.list[n - 1];
+  if (!p) return;
+  reviewClose(false);                     // the review and a puzzle both want G.st
+  PZ.on = true;
+  PZ.n = n;
+  PZ.puzzle = p;
+  PZ.ply = 0;
+  PZ.wrong = PZ.shown = PZ.done = PZ.busy = false;
+  PZ.side = stateFromFEN(p.fen).turn;
+  PZ.wasDone = PZ.track ? pzDone(PZ.track).has(p.id) : false;   // a replay is not worth a rating
+  if (PZ.mode === 'rush') RUSH.at = n - 1;
+  PZ.delta = null;
+
+  G.opponent = 'puzzle';
+  G.mode = 'sighted';                     // a puzzle you cannot see is a different game
+  G.st = stateFromFEN(p.fen);
+  G.human = G.st.turn;
+  G.flipped = G.st.turn === B;            // always from the solver's side of the board
+  G.started = true;
+  G.over = null;
+  G.sel = -1;
+  G.lastMove = null;
+  G.sans = []; G.uci = [];
+  G.caps = { w:[], b:[] };
+  G.reps = {};
+  G.revealed = true;
+  G.peeking = false;
+  G.thinking = false;
+  G.drawPending = false;
+  G.token++;                              // any timer still in flight belongs to the last one
+
+  document.getElementById('screen-game').classList.add('puzzle-mode');
+  showScreen('game');
+  pzRender();
+}
+
+function pzClose(){
+  if (!PZ.on) return;
+  PZ.on = false;
+  PZ.busy = false;
+  RUSH.on = false;
+  document.getElementById('screen-game').classList.remove('rush');
+  G.token++;                              // strand the pending reply, if there is one
+  document.getElementById('screen-game').classList.remove('puzzle-mode');
+  document.getElementById('gamePuzzle').style.display = 'none';
+}
+
+/* ---- playing one ---- */
+function pzPlay(m){
+  if (PZ.busy || PZ.done) return;
+  const step = puzzleStep(PZ.puzzle.moves, PZ.ply, uciOf(m));
+  if (!step.ok){
+    // wrong: the move is never applied, so the board is already where it should
+    // be. Flash the square it was going to and say so.
+    PZ.wrong = true;
+    G.sel = -1;
+    render();
+    reject(sqEls[visualIndex(m.to)]);
+    if (PZ.mode === 'rush') rushStrike();
+    pzRender();
+    return;
+  }
+  beep(760,.07);
+  G.st = makeMove(G.st, m);
+  G.uci.push(uciOf(m));
+  G.lastMove = m;
+  G.sel = -1;
+  PZ.ply = step.ply;
+  render();
+
+  if (step.solved){ pzFinish(true); return; }
+
+  // the defence is forced, so it plays itself
+  PZ.busy = true;
+  pzRender();
+  const token = G.token;
+  setTimeout(() => {
+    if (!PZ.on || G.token !== token) return;
+    const rm = legalMoves(G.st, G.st.turn).find(x => uciOf(x) === step.reply);
+    if (rm){
+      G.st = makeMove(G.st, rm);
+      G.uci.push(step.reply);
+      G.lastMove = rm;
+      beep(420,.06);
+    }
+    PZ.busy = false;
+    render();
+    pzRender();
+  }, PZ_REPLY_MS);
+}
+
+/* Finished, one way or the other. A revealed solution still opens the next
+   rung — a ladder you cannot get off is a wall — but it is recorded as seen
+   rather than solved, and only a clean first-time solve is worth a rating. */
+function pzFinish(clean){
+  PZ.done = true;
+  PZ.busy = false;
+  const first = clean && !PZ.wrong && !PZ.shown;
+  if (PZ.mode === 'rush'){
+    if (clean){
+      RUSH.solved++;
+      RUSH.best = Math.max(RUSH.best, PZ.puzzle.seedRating);
+      beep(880,.12);
+    }
+    render();
+    pzRender();
+    rushAdvance();
+    return;
+  }
+  pzMark(PZ.track, PZ.puzzle.id, first);
+  // only the first time through counts: a puzzle you have already finished is
+  // practice, and practice does not move a rating
+  if (!PZ.wasDone) PZ.delta = pzReport(PZ.puzzle, first);
+  if (clean) beep(880,.12);
+  render();
+  pzRender();
+}
+
+/** Walk the rest of the line out, move by move, and call it seen. */
+function pzShowSolution(){
+  if (PZ.done) return;
+  PZ.shown = true;
+  PZ.busy = true;
+  pzRender();
+  const token = G.token;
+  const step = () => {
+    if (!PZ.on || G.token !== token) return;
+    if (PZ.ply >= PZ.puzzle.moves.length){ pzFinish(false); return; }
+    const m = legalMoves(G.st, G.st.turn).find(x => uciOf(x) === PZ.puzzle.moves[PZ.ply]);
+    if (!m){ pzFinish(false); return; }
+    G.st = makeMove(G.st, m);
+    G.uci.push(PZ.puzzle.moves[PZ.ply]);
+    G.lastMove = m;
+    PZ.ply++;
+    beep(520,.05);
+    render();
+    setTimeout(step, PZ_REPLY_MS);
+  };
+  setTimeout(step, 200);
+}
+
+function pzRetry(){ pzOpen(PZ.n); }
+function pzNext(){
+  if (PZ.n < PZ.list.length) pzOpen(PZ.n + 1);
+}
+
+/* ---- what the card says ----
+   describeBest() explains one move and, given a line, says where it ends. A
+   puzzle already is that line, so the whole solution goes in as the principal
+   variation and no engine is asked anything: the file was written by an engine
+   that had already thought about it. */
+function pzExplain(p){
+  const st = stateFromFEN(p.fen);
+  const m = legalMoves(st, st.turn).find(x => uciOf(x) === p.moves[0]);
+  if (!m) return '';
+  return describeBest(st, m, null, null, pvLine(st, p.moves));
+}
+
+/** The solution in notation, for when it has been given away. */
+function pzSolutionSan(p){
+  const sans = [];
+  let st = stateFromFEN(p.fen);
+  for (const u of p.moves){
+    const all = legalMoves(st, st.turn);
+    const m = all.find(x => uciOf(x) === u);
+    if (!m) break;
+    sans.push(toSAN(st, m, all));
+    st = makeMove(st, m);
+  }
+  return sans.join(' ');
+}
+
+function pzRender(){
+  if (!PZ.on) return;
+  if (PZ.mode === 'rush') return rushRender();
+  const p = PZ.puzzle;
+  const side = PZ.side === W ? 'White' : 'Black';
+
+  document.getElementById('pzTitle').textContent =
+    PZ_TRACK_NAME[PZ.track] + ' · Puzzle ' + PZ.n;
+
+  const ask = document.getElementById('pzAsk');
+  const say = document.getElementById('pzSay');
+  ask.innerHTML = PZ.done
+    ? '<b>' + side + '</b> played ' + pzSolutionSan(p)
+    : '<b>' + side + '</b> to play — find the move.';
+
+  say.className = 'pz-say';
+  if (PZ.done){
+    say.classList.add(PZ.shown || PZ.wrong ? 'told' : 'right');
+    say.textContent = (PZ.shown ? '' : PZ.wrong ? 'Solved. ' : 'Correct. ') + pzExplain(p);
+  } else if (PZ.busy){
+    say.textContent = '…';
+  } else if (PZ.wrong){
+    say.classList.add('wrong');
+    say.textContent = 'Not that one. The position is back where it was — try again.';
+  } else if (PZ.ply > 0){
+    say.classList.add('right');
+    say.textContent = 'Right. Keep going.';
+  } else {
+    say.textContent = '';
+  }
+
+  const themes = document.getElementById('pzThemes');
+  const move = PZ.delta === null || PZ.delta === 0 ? ''
+             : ' (' + (PZ.delta > 0 ? '+' : '') + PZ.delta + ')';
+  themes.innerHTML =
+    '<span class="pz-theme rating">Puzzle ' + p.seedRating + '</span>' +
+    '<span class="pz-theme rating">You ' + pzRating() + move + '</span>' +
+    // the themes give the answer away, so they wait until it has been given
+    (PZ.done ? p.themes.map(t => '<span class="pz-theme">' + PZ_THEME_NAME(t) + '</span>').join('') : '');
+
+  document.getElementById('pzShow').disabled = PZ.done || PZ.busy;
+  document.getElementById('pzRetry').disabled = PZ.busy || (!PZ.done && PZ.ply === 0 && !PZ.wrong);
+  const next = document.getElementById('pzNext');
+  next.disabled = !PZ.done || PZ.n >= PZ.list.length;
+  next.textContent = PZ.n >= PZ.list.length ? 'Track Complete' : 'Next Puzzle';
+
+  document.getElementById('pzLevels').style.display = '';
+  document.getElementById('pzShow').style.display = '';
+  document.getElementById('pzRetry').style.display = '';
+  pzRenderGrid();
+  syncOptions();
+}
+
+/* The rush card: no ladder, no solution, no retry — just how it is going, and
+   one button to stop. */
+function rushRender(){
+  const p = PZ.puzzle;
+  const side = PZ.side === W ? 'White' : 'Black';
+  const strikes = '\u2715'.repeat(RUSH.strikes) +
+                  '\u25cb'.repeat(Math.max(0, RUSH_LIVES - RUSH.strikes));
+
+  document.getElementById('pzTitle').textContent = 'Puzzle Rush';
+  document.getElementById('pzLevels').style.display = 'none';
+  document.getElementById('pzShow').style.display = 'none';
+  document.getElementById('pzRetry').style.display = 'none';
+
+  const ask = document.getElementById('pzAsk');
+  const say = document.getElementById('pzSay');
+  say.className = 'pz-say';
+
+  if (RUSH.over){
+    ask.innerHTML = '<b>Run over</b> \u2014 ' + RUSH.over + '.';
+    say.classList.add('told');
+    say.textContent = RUSH.solved + (RUSH.solved === 1 ? ' puzzle solved' : ' puzzles solved') +
+      (RUSH.best ? ', hardest rated ' + RUSH.best : '') + '.';
+  } else {
+    ask.innerHTML = '<b>' + side + '</b> to play \u2014 find the move.';
+    say.textContent = PZ.wrong ? 'Wrong \u2014 the position is back where it was.'
+                    : PZ.done  ? 'Solved.' : '';
+    if (PZ.wrong) say.classList.add('wrong');
+    else if (PZ.done) say.classList.add('right');
+  }
+
+  document.getElementById('pzThemes').innerHTML =
+    '<span class="pz-theme rating"><span class="pz-count">' + RUSH.solved + '</span> solved</span>' +
+    '<span class="pz-theme rating">Puzzle ' + p.seedRating + '</span>' +
+    '<span class="pz-theme"><span class="pz-strikes">' + strikes + '</span></span>';
+
+  const next = document.getElementById('pzNext');
+  next.style.display = '';
+  next.disabled = false;
+  next.textContent = RUSH.over ? 'Run Again' : 'Give Up';
+  syncOptions();
+}
+
+// findMotifs speaks in tags; the card speaks to a person
+const PZ_THEME_WORDS = {
+  mate:'Checkmate', hangingPiece:'Hanging Piece', fork:'Fork', pin:'Pin',
+  skewer:'Skewer', discoveredAttack:'Discovered Attack', doubleCheck:'Double Check',
+  backRank:'Back Rank', trappedPiece:'Trapped Piece', longGame:'Multi-Move'
+};
+function PZ_THEME_NAME(tag){ return PZ_THEME_WORDS[tag] || tag; }
+
+function pzRenderGrid(){
+  const done = pzDone(PZ.track);
+  const next = pzNextRung(PZ.list, done);
+  const grid = document.getElementById('pzGrid');
+  const solved = new Set(pzProgress(PZ.track).solved);
+  let html = '';
+  for (let n = 1; n <= PZ.list.length; n++){
+    const id = PZ.list[n-1].id;
+    const open = pzUnlocked(PZ.list, done, n);
+    const cls = ['pz-lv'];
+    if (solved.has(id)) cls.push('done');
+    else if (done.has(id)) cls.push('seen');
+    if (!open) cls.push('locked');
+    else if (n === next) cls.push('now');
+    if (n === PZ.n) cls.push('cur');
+    html += '<button class="' + cls.join(' ') + '" data-n="' + n + '"' +
+            (open ? '' : ' disabled aria-label="Puzzle ' + n + ', locked"') + '>' + n + '</button>';
+  }
+  grid.innerHTML = html;
+  document.getElementById('pzProgress').textContent =
+    solved.size + ' / ' + PZ.list.length;
+  const cur = grid.querySelector('.pz-lv.cur');
+  if (cur) cur.scrollIntoView({ block:'nearest' });
+}
+
+document.getElementById('pzGrid').addEventListener('click', e => {
+  const b = e.target.closest('.pz-lv');
+  if (!b || b.disabled) return;
+  beep(640,.06);
+  pzOpen(+b.dataset.n);
+});
+document.getElementById('pzShow').onclick  = () => pzShowSolution();
+document.getElementById('pzRetry').onclick = () => pzRetry();
+document.getElementById('pzNext').onclick  = () => {
+  if (PZ.mode !== 'rush') return pzNext();
+  if (RUSH.over) return rushStart();
+  rushEnd('stopped');
+};
+
+/* ============================================================
    CONTROLS
    ============================================================ */
 function newGame(){
@@ -5251,6 +6107,7 @@ function resetChoices(){
 
 function showScreen(name){
   if (name !== 'game') reviewClose(false);
+  if (name !== 'game') pzClose();
   screenName = name;
   // Walking away from the challenge form abandons it. The form only lives on
   // the game screen, so anywhere else is walking away — and an invitation
@@ -5344,9 +6201,22 @@ function syncOptions(){
 
   // before the game: options showing, board a preview. After: notation and the
   // buttons you need mid-game.
-  document.getElementById('gameSetup').style.display = G.started ? 'none' : 'flex';
-  document.getElementById('gamePlay').style.display  = G.started ? 'flex' : 'none';
+  // a puzzle is neither being set up nor being played: it has its own panel,
+  // and the chips name the track rather than the opponent
+  document.getElementById('gameSetup').style.display = (!PUZZLE() && !G.started) ? 'flex' : 'none';
+  document.getElementById('gamePlay').style.display  = (!PUZZLE() && G.started) ? 'flex' : 'none';
+  document.getElementById('gamePuzzle').style.display = PUZZLE() ? 'flex' : 'none';
   document.getElementById('gameChips').style.visibility = G.started ? 'visible' : 'hidden';
+  if (PUZZLE()){
+    document.getElementById('visionChip').textContent =
+      PZ.mode === 'rush' ? 'Puzzle Rush' : PZ_TRACK_NAME[PZ.track];
+    document.getElementById('setupChip').textContent =
+      PZ.mode === 'rush'
+        ? RUSH.solved + ' solved'
+        : 'Puzzle ' + PZ.n + ' of ' + PZ.list.length;
+    syncSound();
+    return;
+  }
 
   // dark until every question has an answer, then it lights up
   document.getElementById('btnStartGame').classList.toggle('dim', !allAnswered());
@@ -5411,8 +6281,14 @@ document.getElementById('navFriendly').onclick = goFriendly;
 document.getElementById('navRanked').onclick   = goRanked;
 
 // Deliberately inert for now, each one waiting on a page of its own.
-['navHowTo','navPractice','navOpening','navMiddle','navEnd']
+['navHowTo','navPractice']
   .forEach(id => { document.getElementById(id).onclick = () => {}; });
+
+// the three puzzle tracks, each its own ladder of a hundred
+document.getElementById('navOpening').onclick = () => enterTrack('opening');
+document.getElementById('navMiddle').onclick  = () => enterTrack('middlegame');
+document.getElementById('navEnd').onclick     = () => enterTrack('endgame');
+document.getElementById('navRush').onclick    = () => rushStart();
 
 document.getElementById('btnSettings').onclick = () => { beep(560,.07); showScreen('settings'); };
 document.getElementById('btnSetBack').onclick  = () => showScreen('home');
@@ -5939,7 +6815,8 @@ async function setAccount(session){
     name: chosen || meta.full_name || meta.name || (u.email || '').split('@')[0] || 'Player',
     avatar: meta.avatar_url || meta.picture || '',
     rating: START_ELO,
-    tier: tierFor(START_ELO)
+    tier: tierFor(START_ELO),
+    puzzleRating: PZ_START_RATING
   };
   updateAccountUI();
   // the profile row is created by a trigger on signup; read it back for rating/tier
@@ -5961,6 +6838,22 @@ async function setAccount(session){
       updateAccountUI();
     }
   } catch (err){ /* profile not readable yet — the identity above still stands */ }
+
+  /* Asked for separately, and on purpose. puzzle_rating arrives with
+     supabase-migrate-puzzles.sql; selecting a column that does not exist yet
+     fails the whole request, and folding it into the select above would take
+     the player's rating and tier down with it on any project where the
+     migration has not been run. */
+  try {
+    const { data } = await sb.from('profiles')
+      .select('puzzle_rating').eq('id', u.id).maybeSingle();
+    if (data && typeof data.puzzle_rating === 'number'){
+      account.puzzleRating = data.puzzle_rating;
+      if (PZ.on) pzRender();
+    }
+  } catch (err){ /* the migration has not been run: the local rating stands */ }
+
+  pzSync();                    // and bring this browser's ladder up to date
 }
 
 function updateAccountUI(){
