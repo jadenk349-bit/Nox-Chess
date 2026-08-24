@@ -17,6 +17,14 @@
     --light-sq:#e9dcc3;
     --dark-sq:#7a5c3e;
     --sel:#f2c14e;
+    /* Controls are cut INTO the night, not laid on top of it. The old slab
+       grey (#262a35) was lighter than the panels it sat in and cold against
+       the gold, so every question read as a stack of dead tiles. These are
+       darker than a panel and hair-lined in gold instead of blue-grey. */
+    --ctl-1:#181a23;
+    --ctl-2:#0d0f16;
+    --ctl-line:rgba(217,164,65,.15);
+    --ctl-edge:rgba(217,164,65,.5);
     --danger:#e05a4d;
     --good:#6fbf73;
     --radius:14px;
@@ -280,14 +288,16 @@
   .bot{
     display:flex; flex-direction:column; align-items:center; gap:2px;
     padding:9px 4px; border-radius:9px;
-    background:linear-gradient(180deg,#22262f,#191c23);
-    border:1px solid var(--line); color:var(--text);
+    background:linear-gradient(180deg,var(--ctl-1),var(--ctl-2));
+    border:1px solid var(--ctl-line); color:var(--text);
   }
   .bot .bn{font-size:11.5px; font-weight:600; letter-spacing:.02em;}
   .bot .be{font-size:10px; color:var(--muted); font-variant-numeric:tabular-nums;}
-  .bot:hover{border-color:#4a5062;}
+  .bot:hover{border-color:var(--ctl-edge);}
   .bot.active{
-    border-color:var(--gold); background:linear-gradient(180deg,rgba(217,164,65,.2),rgba(217,164,65,.06));
+    border-color:var(--gold);
+    background:linear-gradient(180deg,rgba(217,164,65,.22),rgba(217,164,65,.05));
+    box-shadow:inset 0 1px 0 rgba(255,255,255,.06);
   }
   .bot.active .bn{color:var(--gold-soft);}
   .bot.active .be{color:var(--gold);}
@@ -301,12 +311,12 @@
   .side-squares{display:flex; gap:10px;}
   .side-sq{
     width:42px; height:42px; padding:0; border-radius:9px;
-    border:1px solid var(--line);
+    border:1px solid var(--ctl-line);
   }
   .side-sq.w{background:#efe6d4;}
   .side-sq.b{background:#22242c;}
   .side-sq.r{background:linear-gradient(135deg,#efe6d4 0 50%,#22242c 50% 100%);}
-  .side-sq:hover{border-color:#4a5062; transform:translateY(-1px);}
+  .side-sq:hover{border-color:var(--ctl-edge); transform:translateY(-1px);}
   .side-sq.active{
     border-color:var(--gold); box-shadow:0 0 0 3px rgba(217,164,65,.22);
   }
@@ -314,26 +324,28 @@
   .vis-grid{display:grid; grid-template-columns:1fr; gap:7px;}
   .vis{
     padding:11px 12px; border-radius:9px; text-align:left;
-    background:linear-gradient(180deg,#22262f,#191c23);
-    border:1px solid var(--line); color:var(--text);
+    background:linear-gradient(180deg,var(--ctl-1),var(--ctl-2));
+    border:1px solid var(--ctl-line); color:var(--text);
     font-size:12.5px; letter-spacing:.05em;
   }
-  .vis:hover{border-color:#4a5062;}
+  .vis:hover{border-color:var(--ctl-edge);}
   .vis.active{
     border-color:var(--gold); color:var(--gold-soft);
-    background:linear-gradient(180deg,rgba(217,164,65,.2),rgba(217,164,65,.06));
+    background:linear-gradient(180deg,rgba(217,164,65,.22),rgba(217,164,65,.05));
+    box-shadow:inset 0 1px 0 rgba(255,255,255,.06);
   }
 
   .time-grid{display:grid; grid-template-columns:repeat(3,1fr); gap:7px;}
   .tm{
     padding:10px 4px; border-radius:9px; font-size:12px; white-space:nowrap;
-    background:linear-gradient(180deg,#22262f,#191c23);
-    border:1px solid var(--line); color:var(--text);
+    background:linear-gradient(180deg,var(--ctl-1),var(--ctl-2));
+    border:1px solid var(--ctl-line); color:var(--text);
   }
-  .tm:hover{border-color:#4a5062;}
+  .tm:hover{border-color:var(--ctl-edge);}
   .tm.active{
     border-color:var(--gold); color:var(--gold-soft);
-    background:linear-gradient(180deg,rgba(217,164,65,.2),rgba(217,164,65,.06));
+    background:linear-gradient(180deg,rgba(217,164,65,.22),rgba(217,164,65,.05));
+    box-shadow:inset 0 1px 0 rgba(255,255,255,.06);
   }
 
   /* dark until every question is answered, then it lights up */
@@ -342,8 +354,8 @@
     transition:background .25s ease, color .25s ease, box-shadow .25s ease, opacity .25s ease;
   }
   #gameSetup .start-btn.dim{
-    background:linear-gradient(180deg,#20242e,#171a21);
-    border-color:var(--line); color:#5f6472; box-shadow:none;
+    background:linear-gradient(180deg,var(--ctl-1),var(--ctl-2));
+    border-color:var(--ctl-line); color:#5f6472; box-shadow:none;
   }
   #gameSetup .start-btn.dim:hover{filter:none; transform:none;}
 
@@ -419,19 +431,26 @@
   .controls{width:min(100%,var(--board-max)); padding:14px; display:flex; flex-wrap:wrap; gap:8px;}
   button{
     font:inherit; font-size:13px; letter-spacing:.03em;
-    color:var(--text); background:linear-gradient(180deg,#262a35,#1b1e26);
-    border:1px solid var(--line); border-radius:10px;
+    color:var(--text); background:linear-gradient(180deg,var(--ctl-1),var(--ctl-2));
+    border:1px solid var(--ctl-line); border-radius:10px;
     padding:9px 14px; cursor:pointer;
     transition:transform .12s ease, border-color .2s, background .2s, color .2s;
   }
-  button:hover{border-color:#4a5062; transform:translateY(-1px);}
+  button:hover{border-color:var(--ctl-edge); transform:translateY(-1px);}
   button:active{transform:translateY(0);}
   button:disabled{opacity:.4; cursor:not-allowed; transform:none;}
+  /* Lit gold rather than flat mustard: a bright crown, the palette's own gold
+     through the middle, a deep amber foot, and enough spill underneath that it
+     looks like the one thing on the page giving off light. */
   button.primary{
-    background:linear-gradient(180deg,#e2b357,#b07f22);
-    border-color:#e2b357; color:#1a1408; font-weight:650;
+    background:linear-gradient(180deg,#f6d391 0%, var(--gold) 48%, #9c6f1e 100%);
+    border-color:rgba(246,211,145,.7); color:#1a1206; font-weight:650;
+    box-shadow:0 8px 22px rgba(217,164,65,.20), inset 0 1px 0 rgba(255,255,255,.42);
   }
-  button.primary:hover{filter:brightness(1.07);}
+  button.primary:hover{
+    filter:brightness(1.06);
+    box-shadow:0 10px 28px rgba(217,164,65,.30), inset 0 1px 0 rgba(255,255,255,.5);
+  }
   button.ghost{background:transparent;}
   button.danger{color:#e7908a; border-color:rgba(224,90,77,.42);}
   button.danger:hover{color:#fff; border-color:var(--danger); background:rgba(224,90,77,.16);}
@@ -1156,8 +1175,8 @@
   /* Dark until both questions have answers, exactly as Start Play is beside
      the board: a button you cannot use should not look like one you can. */
   .rank-start.dim{
-    background:linear-gradient(180deg,#20242e,#171a21);
-    border-color:var(--line); color:#5f6472; box-shadow:none;
+    background:linear-gradient(180deg,var(--ctl-1),var(--ctl-2));
+    border-color:var(--ctl-line); color:#5f6472; box-shadow:none;
   }
   .rank-start.dim:hover{filter:none; transform:none;}
   .rank-note{margin:14px 0 0; font-size:11.5px; color:var(--muted); line-height:1.6;}
@@ -1219,6 +1238,38 @@
   }
   .setup-foot{margin-top:18px; text-align:center; display:flex; gap:10px; justify-content:center;}
 
+  /* Looking for an opponent is not a different place to be, so it does not get
+     a box of its own: the button keeps its position and reports on itself. A
+     band of light runs across it for as long as the room is on the list. */
+  .start-btn.searching{
+    cursor:progress; color:#f6e3ba; font-weight:650;
+    border-color:rgba(217,164,65,.55);
+    background:linear-gradient(100deg,
+      #16120a 0 40%, rgba(217,164,65,.92) 50%, #16120a 60% 100%);
+    background-size:280% 100%;
+    box-shadow:0 8px 22px rgba(217,164,65,.13), inset 0 1px 0 rgba(255,255,255,.05);
+    animation:matchsweep 1.5s linear infinite;
+  }
+  .start-btn.searching:hover{filter:none; transform:none; border-color:rgba(217,164,65,.75);}
+  @keyframes matchsweep{ from{background-position:0 0;} to{background-position:100% 0;} }
+  /* the animation is the whole point, but it must not be the only way to know */
+  @media (prefers-reduced-motion:reduce){
+    .start-btn.searching{animation:none; background:linear-gradient(180deg,#221a0d,#16120a);}
+  }
+  /* The room is already on the list under these answers, so they stop being
+     answerable until the search is called off — otherwise the form and the
+     room would quietly disagree about what game is being offered. */
+  #screen-setup.searching #modeGrid,
+  #screen-setup.searching #setupOpts{
+    pointer-events:none; opacity:.45; filter:saturate(.55);
+    transition:opacity .25s ease, filter .25s ease;
+  }
+  .match-note{
+    display:none; margin:14px auto 0; max-width:420px;
+    font-size:11.5px; line-height:1.6; letter-spacing:.04em; color:var(--muted);
+  }
+  .match-note b{color:var(--gold-soft); font-weight:600;}
+
   /* ---------- game top bar ---------- */
   .topbar{
     display:flex; align-items:center; justify-content:space-between; gap:14px;
@@ -1242,7 +1293,11 @@
   .row{display:flex; gap:8px; flex-wrap:wrap;}
   .seg{display:flex; gap:6px;}
   .seg button{flex:1; padding:8px 10px; font-size:12px; white-space:nowrap;}
-  .seg button.active{border-color:var(--gold); color:var(--gold-soft); background:rgba(217,164,65,.12);}
+  .seg button.active{
+    border-color:var(--gold); color:var(--gold-soft);
+    background:linear-gradient(180deg,rgba(217,164,65,.22),rgba(217,164,65,.05));
+    box-shadow:inset 0 1px 0 rgba(255,255,255,.06);
+  }
 
   .tray{min-height:26px; font-size:20px; line-height:1.1; letter-spacing:1px; color:#cdc6b8;}
   .tray .b{color:#7e8290;}
@@ -1757,6 +1812,10 @@
       <div class="setup-foot">
         <button class="primary start-btn" id="btnStart">Start Play</button>
       </div>
+      <p class="match-note" id="matchNote" role="status">
+        Your room is on the list — the first person to take a seat plays you.
+        Press <b>Finding an Opponent</b> again to call it off.
+      </p>
     </div>
   </section>
 
@@ -3473,6 +3532,7 @@ function showWaiting(text, title){
 }
 function waitingFailed(text){
   if (NET.state === 'playing') return;
+  setSearching(false);
   document.getElementById('waitTitle').textContent = 'No Game';
   document.getElementById('waitText').textContent = text;
   document.getElementById('waitCancel').textContent = 'Back';
@@ -3480,6 +3540,20 @@ function waitingFailed(text){
   NET.state = 'idle';
 }
 function hideWaiting(){ waitOverlay.classList.remove('show'); }
+
+/* Looking for an opponent used to open a box over a board nobody could use
+   yet. It is not a place, it is a state of the button that started it: the
+   setup screen stays put, Start Play becomes a sweep of light saying it is
+   searching, and pressing it again gives the room up. Only an actual failure
+   still earns an overlay, because that is news rather than progress. */
+let searching = false;
+function setSearching(on){
+  searching = on;
+  document.getElementById('btnStart').classList.toggle('searching', on);
+  document.getElementById('screen-setup').classList.toggle('searching', on);
+  document.getElementById('matchNote').style.display = on ? 'block' : 'none';
+  syncOptions();                       // the label is set there, in one place
+}
 
 /* A reverse proxy will close a socket that has said nothing for a while, and a
    blindfold player can easily think for longer than that. A quiet heartbeat keeps
@@ -3623,21 +3697,21 @@ function joinRoom(id){
 function hostGame(){
   G.opponent = 'online';
   NET.myRoom = null;
-  showScreen('game');
-  newGame();                              // a board to look at behind the box
-  showWaiting('Nobody has taken the other seat yet. This room is on the list ' +
-              'for anyone who is looking.', 'Waiting for Opponent');
+  setSearching(true);
   netConnect(() => {
     NET.state = 'hosting';
     netSend({ t:'host', mode:G.mode, minutes:G.minutes, inc:G.inc, color:G.human });
   });
 }
 
+/* Calling the search off takes the room off everyone's list and leaves you on
+   the form you filled in, ready to change an answer and try again. */
 function stopHosting(){
   netSend({ t:'unhost' });
   NET.myRoom = null;
+  netClose();
   hideWaiting();
-  enterRooms();
+  setSearching(false);
 }
 
 function onNetMessage(msg){
@@ -3677,12 +3751,16 @@ function onNetMessage(msg){
       G.minutes = msg.minutes;
       G.inc = msg.inc || 0;
       // Online there is no Start Play to press: the pairing is what starts the
-      // game, so this is where the board stops being a preview.
+      // game, so this is where the board stops being a preview. Without it the
+      // side panel would go on asking its questions over a board that refuses
+      // moves, because everything mid-game is gated on G.started.
       G.started = true;
+      setSearching(false);          // the button can stop sweeping, it found one
       hideWaiting();
       resetChat();                              // nothing carries over from the last opponent
       showScreen('game');
       newGame();
+      syncOptions();
       logLine('Matched — you are ' + (G.human === W ? 'White' : 'Black') + '.', 'sys');
       beep(760,.09); setTimeout(()=>beep(1010,.11), 90);
       break;
@@ -3737,9 +3815,12 @@ function onNetMessage(msg){
     case 'error':
       // on the rooms page there is no game log to write to — say it there instead
       if (screenName === 'rooms') roomNote(msg.msg);
-      // waiting for a game, the log is behind the box — a refusal that lands
-      // there is a refusal nobody reads
-      else if (waitOverlay.classList.contains('show')) waitingFailed(msg.msg);
+      // While a game is still being looked for, the log is not where anyone is
+      // looking: a friendly search left it behind on the setup screen with the
+      // Start button sweeping for something that will never come, and a ranked
+      // search has the box sitting on top of it. Either way the refusal has to
+      // land where the waiting is, and stop it.
+      else if (searching || waitOverlay.classList.contains('show')) waitingFailed(msg.msg);
       else logLine('⚠  ' + msg.msg, 'err');
       break;
   }
@@ -4893,7 +4974,8 @@ function syncOptions(){
   document.getElementById('optOpponent').style.display = BOT() ? 'flex' : 'none';
   document.getElementById('optSide').style.display     = (BOT() || HOSTING()) ? 'flex' : 'none';
 
-  document.getElementById('btnStart').textContent = HOSTING() ? 'Host Game' : 'Start Play';
+  document.getElementById('btnStart').textContent =
+    searching ? 'Finding an Opponent' : HOSTING() ? 'Host Game' : 'Start Play';
 
   // the vision buttons and the colour squares on the game page
   document.querySelectorAll('.vis[data-mode]').forEach(b =>
@@ -4979,8 +5061,10 @@ document.getElementById('btnSetBack').onclick  = () => showScreen('home');
 
 document.getElementById('btnOppBack').onclick  = () => showScreen('home');
 // hosting reached this screen from the room list, so Back returns there
-document.getElementById('btnBackHome').onclick = () =>
+document.getElementById('btnBackHome').onclick = () => {
+  if (searching) stopHosting();          // leaving means the room goes too
   HOSTING() ? enterRooms() : showScreen('home');
+};
 
 // who you're playing — chosen before the vision. The split card has no whole-card
 // click of its own; only its two halves choose anything.
@@ -5045,8 +5129,9 @@ document.getElementById('leaveConfirm').onclick = () => {
 };
 
 document.getElementById('waitCancel').onclick = () => {
-  // giving up on a room takes it off everyone's list and goes back to it
-  if (NET.state === 'hosting'){ stopHosting(); return; }
+  // A room is given up on its own button now, so this only catches a host that
+  // is somehow still up behind a failure box — take the room down with it.
+  if (NET.state === 'hosting'){ stopHosting(); hideWaiting(); return; }
   netSend({ t:'cancel' });
   netClose();
   hideWaiting();
@@ -5102,6 +5187,8 @@ function unanswered(){
 }
 
 function startGame(){
+  // the online start button is the search as well — pressing it again calls it off
+  if (searching){ beep(320,.1); stopHosting(); return; }
   if (NET.state === 'connecting' || NET.state === 'waiting') return;   // already queued
   const missing = unanswered();
   if (missing.length){
@@ -5313,14 +5400,17 @@ document.addEventListener('keydown', e => {
     return;
   }
   if (screenName === 'setup'){
-    if (k === 'escape') HOSTING() ? enterRooms() : showScreen('home');
+    // the first escape calls the search off; the second leaves the screen
+    if (k === 'escape') searching ? stopHosting()
+                      : HOSTING() ? enterRooms() : showScreen('home');
     else if (k === 'enter'){ e.preventDefault(); startGame(); }
     return;
   }
-  // waiting for someone to take the other seat — escape gives the room up
+  // the box is only ever a failure now — escape dismisses it, and takes any
+  // room that outlived the failure down on the way out
   if (waitOverlay.classList.contains('show')){
     if (k === 'escape'){
-      if (NET.state === 'hosting') stopHosting();
+      if (NET.state === 'hosting'){ stopHosting(); hideWaiting(); }
       else { netSend({ t:'cancel' }); netClose(); hideWaiting(); }
     }
     return;
