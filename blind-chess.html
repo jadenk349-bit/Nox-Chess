@@ -63,6 +63,18 @@
 
   .wrap{position:relative; z-index:1; max-width:1120px; margin:0 auto;}
 
+  /* Over a game the page gives its height to the board: the logo shrinks, the
+     header row closes up and the page padding tightens. --board-max on
+     .game-layout is measured against exactly these numbers, so changing one
+     without the other pushes a name strip off the bottom of the window. */
+  body.on-game{padding:8px 20px 12px;}
+  body.on-game .game-head{margin-bottom:6px;}
+  body.on-game .logo-btn{min-height:44px;}
+  body.on-game .logo-btn img{width:clamp(58px,6.4vw,80px);}
+  /* The review opens a whole extra row under the board, so the board hands
+     back the height that row needs — otherwise its ◀ ▶ land below the fold. */
+  body.on-game.reviewing .game-layout{--board-max:min(100%, calc(100vh - 320px));}
+
   /* ---------- header ---------- */
   header{text-align:center; margin-bottom:26px;}
   .eyebrow{
@@ -249,10 +261,16 @@
     align-items:start;
     /* The board takes what the column offers, but never so much that the strip
        under it falls off the screen — a clock you have to scroll to is no clock.
-       The subtraction is the header, both strips, the status line and padding. */
-    --board-max:min(100%, calc(100vh - 352px));
+       The subtraction is the header, both strips, the status line and padding,
+       counted against the slim chrome `body.on-game` puts on this screen — so
+       the two name strips land near the top and bottom edges of the window and
+       everything between them is board. Retune it if any of those rows change
+       height, or the bottom name strip starts scrolling out of sight. */
+    --board-max:min(100%, calc(100vh - 224px));
   }
-  .board-col{align-items:stretch;}
+  /* Centred rather than left-hugging: the board sits in from the page margin,
+     nearer the side panel, instead of jammed against the edge of the wrap. */
+  .board-col{align-items:center; gap:9px;}
   @media (max-width:900px){ .game-layout{grid-template-columns:minmax(0,1fr);} }
 
   /* the slim name-and-clock strips clamped to the board's edges */
@@ -276,8 +294,8 @@
     overflow:hidden; text-overflow:ellipsis; white-space:nowrap;
   }
   .bar-name .sub{color:var(--muted); font-size:11px; letter-spacing:.14em; margin-left:8px;}
-  #barTop{margin-bottom:8px;}
-  #barBottom{margin-top:8px;}
+  #barTop{margin-bottom:6px;}
+  #barBottom{margin-top:6px;}
   .clock-pool{display:none;}          /* the bars take these two in and out */
 
   /* ---------- the questions asked before a game ---------- */
@@ -417,20 +435,6 @@
     grid-column:1 / -1; text-align:center; padding:4px 0 1px;
     font-size:10px; letter-spacing:.18em; text-transform:uppercase; color:#6b7080;
   }
-
-  /* ---------- status bar ---------- */
-  .status{
-    width:min(100%,var(--board-max));
-    display:flex; align-items:center; gap:12px;
-    padding:12px 16px; border-radius:12px;
-  }
-  .dot{width:10px; height:10px; border-radius:50%; background:var(--gold); box-shadow:0 0 12px var(--gold); flex:none;}
-  .dot.think{animation:pulse 1s infinite;}
-  @keyframes pulse{0%,100%{opacity:1;}50%{opacity:.25;}}
-  .status-text{font-size:14px; letter-spacing:.02em;}
-  .status-text b{color:var(--gold-soft); font-weight:600;}
-  .status .spacer{flex:1;}
-  .peeks{font-size:12px; color:var(--muted); letter-spacing:.08em; white-space:nowrap;}
 
   /* ---------- controls ---------- */
   .controls{width:min(100%,var(--board-max)); padding:14px; display:flex; flex-wrap:wrap; gap:8px;}
@@ -2186,13 +2190,6 @@
         </div>
         <div class="clock-note" id="clockNote">Clock starts on the first move</div>
 
-        <div class="status panel">
-          <div class="dot" id="dot"></div>
-          <div class="status-text" id="status">White to move</div>
-          <div class="spacer"></div>
-          <div class="peeks" id="peeks"></div>
-        </div>
-
         <!-- post-game review: appears when Study Board is pressed -->
         <div class="review panel" id="reviewBar" style="display:none">
           <div class="rev-nav">
@@ -3111,9 +3108,6 @@ const el = {
   board: document.getElementById('board'),
   squares: document.getElementById('squares'),
   pieces: document.getElementById('piecesLayer'),
-  status: document.getElementById('status'),
-  dot: document.getElementById('dot'),
-  peeks: document.getElementById('peeks'),
   moves: document.getElementById('moves'),
   trayW: document.getElementById('trayW'),
   trayB: document.getElementById('trayB'),
@@ -3308,31 +3302,12 @@ function render(){
   renderClocks();
 }
 
+/* There is no line of narration under the board any more — whose turn it is is
+   the clock that is lit, the result arrives on the end overlay, and the board
+   itself is what the height freed up went to. What is left here is the state
+   the controls beside the board carry. */
 function renderStatus(){
   const t = G.st.turn;
-  let txt;
-  const side = t === W ? 'White' : 'Black';
-  if (G.over){
-    txt = G.over.text;
-  } else if (G.thinking){
-    txt = 'The engine is thinking…';
-  } else if (ONLINE() && t !== G.human){
-    txt = 'Waiting for your opponent…';
-  } else if (LOCAL()){
-    txt = (inCheck(G.st, t) ? '<b>Check.</b> ' : '') + '<b>' + side + '</b> to move';
-  } else if (t === G.human){
-    txt = inCheck(G.st, t) ? '<b>Check.</b> Your move.' : 'Your move — <b>' + side + '</b>';
-  } else {
-    txt = side + ' to move';
-  }
-  el.status.innerHTML = txt;
-  el.dot.classList.toggle('think', G.thinking);
-  el.dot.style.background = G.over ? '#e05a4d' : (humanTurn() ? '#6fbf73' : '#d9a441');
-  el.dot.style.boxShadow = '0 0 12px ' + el.dot.style.background;
-
-  el.peeks.textContent = CAN_PEEK(G.mode)
-    ? `PEEKS ${'◆'.repeat(G.peeksLeft)}${'◇'.repeat(Math.max(0,3-G.peeksLeft))}`
-    : '';
   // The logo is the way home and stays put; walking out of a game in progress
   // is caught by the confirmation on the way, not by hiding the door.
   document.getElementById('btnMenu').style.display = '';
@@ -3340,6 +3315,12 @@ function renderStatus(){
   const peekBtn = document.getElementById('btnPeek');
   peekBtn.style.display = CAN_PEEK(G.mode) ? '' : 'none';   // nothing to peek at otherwise
   peekBtn.disabled = G.peeksLeft <= 0 || G.peeking || !!G.over;
+  // The strip under the board used to count the peeks left; the button is now
+  // the only place that can, so it wears them rather than dropping the count.
+  if (CAN_PEEK(G.mode)){
+    peekBtn.textContent =
+      `Peek ${'◆'.repeat(G.peeksLeft)}${'◇'.repeat(Math.max(0, 3 - G.peeksLeft))}`;
+  }
   // Resign and Draw are always there, so the panel always is too
   const live = !G.over && !REV.on;
   const resignBtn = document.getElementById('btnResign');
@@ -3479,8 +3460,11 @@ function renderClocks(){
     box.classList.toggle('low', G.clock[c] <= 30000 && G.clock[c] > 0);
     box.classList.toggle('flagged', G.clock[c] <= 0);
   }
-  document.getElementById('clockNote').style.display =
-    (G.started && !running && !G.over) ? 'block' : 'none';
+  // It keeps its row either way. It is the last thing under the player's own
+  // name strip, and --board-max is measured against a column that includes it —
+  // appearing and disappearing would resize the board on the first move.
+  document.getElementById('clockNote').style.visibility =
+    (G.started && !running && !G.over) ? 'visible' : 'hidden';
 }
 
 let clockTimer = null;
@@ -4684,6 +4668,7 @@ function enterReview(){
   G.revealed = true;                  // the board is open once the game is done
   G.peeking = false;
   document.getElementById('reviewBar').style.display = 'flex';
+  document.body.classList.add('reviewing');
   engineStart();
   reviewGoto(0);
 }
@@ -4698,6 +4683,7 @@ function reviewClose(restore){
   if (restore && REV.liveState) G.st = REV.liveState;
   REV.liveState = null;
   document.getElementById('reviewBar').style.display = 'none';
+  document.body.classList.remove('reviewing');
   document.getElementById('coachCard').style.display = 'none';
   document.getElementById('arrows').innerHTML = '';
   document.getElementById('marks').innerHTML = '';
@@ -6132,6 +6118,9 @@ function showScreen(name){
   }
   if (name === 'ranked') resetRank();
   document.querySelectorAll('.screen').forEach(s => s.classList.toggle('show', s.id === 'screen-' + name));
+  // Only the game screen runs the slim header and page padding that let the
+  // board fill the window; the class on <body> is what switches that on.
+  document.body.classList.toggle('on-game', name === 'game');
   // The one account cluster travels to whichever screen has somewhere to put
   // it — home and social both do, and it sits in the same place on each.
   const mount = document.querySelector('#screen-' + name + ' .head-mount');
