@@ -233,6 +233,11 @@
   .site-logo, .logo-btn{
     flex:none; display:flex; align-items:center; min-height:var(--logo-box);
     padding:0; background:transparent; border:0; border-radius:10px; line-height:0;
+    /* Pulled a little outside the content column, so the mark sits closer to
+       the edge of the window than the text below it does. Never more than the
+       20px of body padding, or it would run off a narrow screen. The auth
+       pages centre their own wordmark and are deliberately left alone. */
+    margin-left:clamp(-20px,-1.6vw,-8px);
   }
   .site-logo img, .logo-btn img{width:var(--logo-w); height:auto; display:block;}
   .logo-btn:hover{transform:none; filter:brightness(1.12);}
