@@ -34,6 +34,12 @@
        happens to sit beside it in the header row. */
     --logo-w:clamp(84px,10vw,118px);
     --logo-box:96px;
+    /* The mark hangs in a lane down the left of the page rather than standing in
+       a row above the content. That is what lets the board start at the top of
+       the page with the wordmark still beside its first rank. The lane moves the
+       logo; it never resizes it, and every screen reserves the same one, so the
+       mark does not shift from page to page. */
+    --rail:calc(var(--logo-w) + clamp(14px,2vw,30px));
     --btn-h:clamp(74px,17vw,120px);      /* PLAY height = SOCIAL square side */
     --play-w:clamp(200px,48vw,360px);
     --btn-gap:18px;
@@ -61,7 +67,9 @@
     pointer-events:none;
   }
 
-  .wrap{position:relative; z-index:1; max-width:1120px; margin:0 auto;}
+  /* The lane is added outside the content, not taken out of it: the column the
+     page is laid out in is still 1120px on every screen. */
+  .wrap{position:relative; z-index:1; max-width:calc(1120px + var(--rail)); margin:0 auto;}
 
   /* Over a game the page gives its height to the board: the logo shrinks, the
      header row closes up and the page padding tightens. --board-max on
@@ -71,9 +79,6 @@
   body.on-game .game-head{margin-bottom:6px;}
   body.on-game .logo-btn{min-height:44px;}
   body.on-game .logo-btn img{width:clamp(58px,6.4vw,80px);}
-  /* The review opens a whole extra row under the board, so the board hands
-     back the height that row needs — otherwise its ◀ ▶ land below the fold. */
-  body.on-game.reviewing .game-layout{--board-max:min(100%, calc(100vh - 320px));}
 
   /* ---------- header ---------- */
   header{text-align:center; margin-bottom:26px;}
@@ -238,11 +243,22 @@
   .board.reveal .piece span{opacity:1 !important; filter:none !important;}
 
   /* ---------- the game page ---------- */
+  /* The logo is no longer one of this row's children, so the row has to carry
+     its own height — otherwise settings and rooms would ride up under the mark. */
   .game-head{
     display:flex; align-items:center; justify-content:space-between;
-    gap:16px; margin-bottom:14px;
+    gap:16px; margin-bottom:14px; min-height:var(--logo-box);
   }
+  /* …except on the game screen, where the whole point is that nothing stands
+     between the top of the page and the top of the board. Its chips moved into
+     the side column, so what is left of this row is the logo, and the logo is
+     out of the flow. */
+  #screen-game .game-head{min-height:0; margin-bottom:0;}
+  /* Out of the flow and into the lane. Nothing in the header row can push it,
+     which is the point: an enlarged board cannot crowd the mark, so the mark
+     never has to give up any of its size to make room. */
   .site-logo, .logo-btn{
+    position:absolute; left:0; top:0;
     flex:none; display:flex; align-items:center; min-height:var(--logo-box);
     padding:0; background:transparent; border:0; border-radius:10px; line-height:0;
     /* Pulled a little outside the content column, so the mark sits closer to
@@ -261,17 +277,34 @@
     align-items:start;
     /* The board takes what the column offers, but never so much that the strip
        under it falls off the screen — a clock you have to scroll to is no clock.
-       The subtraction is the header, both strips, the status line and padding,
-       counted against the slim chrome `body.on-game` puts on this screen — so
-       the two name strips land near the top and bottom edges of the window and
-       everything between them is board. Retune it if any of those rows change
-       height, or the bottom name strip starts scrolling out of sight. */
-    --board-max:min(100%, calc(100vh - 224px));
+       The subtraction is both strips, the clock note and the page's own
+       padding, counted against the slim chrome `body.on-game` puts on this
+       screen — and there is no header row above the board left to pay for,
+       because the mark hangs in the lane beside it rather than standing in a
+       row over it. So the two name strips land near the top and bottom edges
+       of the window and everything between them is board. Retune it if any of
+       those rows change height, or the bottom name strip starts scrolling out
+       of sight. */
+    --chrome:174px;
+    --board-max:min(100%, calc(100vh - var(--chrome)));
   }
   /* Centred rather than left-hugging: the board sits in from the page margin,
      nearer the side panel, instead of jammed against the edge of the wrap. */
   .board-col{align-items:center; gap:9px;}
   @media (max-width:900px){ .game-layout{grid-template-columns:minmax(0,1fr);} }
+  /* Too narrow to spend 140px on a lane: the mark goes back into the header row
+     it came from, above the board, and the board pays for that row again. */
+  @media (max-width:1100px){
+    :root{--rail:0px;}
+    .site-logo, .logo-btn{position:static;}
+    #screen-game .game-head{min-height:var(--logo-box); margin-bottom:14px;}
+    .game-layout{--chrome:284px;}
+  }
+  /* Study Board opens a row of its own beneath the board. The board pays for it
+     out of its own height, rather than the page growing a scrollbar under a
+     game that fitted on screen a moment earlier — otherwise its ◀ ▶ land below
+     the fold. Off --chrome, so it still holds under the media query above. */
+  #screen-game.reviewing .game-layout{--board-max:min(100%, calc(100vh - var(--chrome) - 104px));}
 
   /* the slim name-and-clock strips clamped to the board's edges */
   .board-bar{
@@ -583,6 +616,14 @@
 
   /* ---------- screens ---------- */
   .screen{display:none;}
+  /* The lane, reserved on every screen that carries the small mark — and on the
+     two that carry a back button instead, so the content column does not jump
+     sideways on the way through them: the back button is placed against the
+     screen's own left edge, so it lands in the lane where the mark would be.
+     The three that centre the big wordmark (sign up, log in, name) have no lane
+     and stay centred in the page. */
+  #screen-home, #screen-settings, #screen-opponent, #screen-rooms,
+  #screen-setup, #screen-game{position:relative; padding-left:var(--rail);}
   /* A fade, and nothing more. Sliding the screen in moved the header with it,
      so the logo drifted on every change of screen — the one thing on the page
      that should never appear to move. */
@@ -711,6 +752,7 @@
   /* ---------- site header: logo left, nav and account right ---------- */
   .site-head{
     display:flex; align-items:center; gap:clamp(14px,3vw,36px);
+    min-height:var(--logo-box);
   }
   /* Sits directly beside the wordmark; the account cluster is what gets pushed
      to the far side of the row. */
@@ -2132,10 +2174,6 @@
       <button class="logo-btn" id="btnMenu" aria-label="Nox Chess — back to the home page">
         <img src="assets/nox-logo.png?v=1" alt="Nox Chess" width="976" height="730">
       </button>
-      <div class="chips" id="gameChips">
-        <div class="vision-chip" id="visionChip">Blindfold</div>
-        <div class="vision-chip alt" id="setupChip">1300 Elo · White</div>
-      </div>
     </header>
 
     <div class="game-layout">
@@ -2209,6 +2247,12 @@
 
       <!-- SIDE: the questions before the game, the game itself after it -->
       <aside class="game-side">
+        <!-- these used to sit at the right-hand end of the header row; they are
+             a few pixels from where they were, and the header row is gone -->
+        <div class="chips" id="gameChips">
+          <div class="vision-chip" id="visionChip">Blindfold</div>
+          <div class="vision-chip alt" id="setupChip">1300 Elo · White</div>
+        </div>
 
         <div id="gameSetup">
           <div class="panel sec" id="secOpponent">
@@ -4668,7 +4712,7 @@ function enterReview(){
   G.revealed = true;                  // the board is open once the game is done
   G.peeking = false;
   document.getElementById('reviewBar').style.display = 'flex';
-  document.body.classList.add('reviewing');
+  document.getElementById('screen-game').classList.add('reviewing');
   engineStart();
   reviewGoto(0);
 }
@@ -4683,7 +4727,7 @@ function reviewClose(restore){
   if (restore && REV.liveState) G.st = REV.liveState;
   REV.liveState = null;
   document.getElementById('reviewBar').style.display = 'none';
-  document.body.classList.remove('reviewing');
+  document.getElementById('screen-game').classList.remove('reviewing');
   document.getElementById('coachCard').style.display = 'none';
   document.getElementById('arrows').innerHTML = '';
   document.getElementById('marks').innerHTML = '';
@@ -6200,7 +6244,9 @@ function syncOptions(){
   document.getElementById('gameSetup').style.display = (!PUZZLE() && !G.started) ? 'flex' : 'none';
   document.getElementById('gamePlay').style.display  = (!PUZZLE() && G.started) ? 'flex' : 'none';
   document.getElementById('gamePuzzle').style.display = PUZZLE() ? 'flex' : 'none';
-  document.getElementById('gameChips').style.visibility = G.started ? 'visible' : 'hidden';
+  // display, not visibility: the chips head a column now, and space held open
+  // for them before the game starts reads as a hole above the first panel
+  document.getElementById('gameChips').style.display = G.started ? '' : 'none';
   if (PUZZLE()){
     document.getElementById('visionChip').textContent =
       PZ.mode === 'rush' ? 'Puzzle Rush' : PZ_TRACK_NAME[PZ.track];
