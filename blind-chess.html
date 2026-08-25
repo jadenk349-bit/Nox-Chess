@@ -71,14 +71,17 @@
      page is laid out in is still 1120px on every screen. */
   .wrap{position:relative; z-index:1; max-width:calc(1120px + var(--rail)); margin:0 auto;}
 
-  /* Over a game the page gives its height to the board: the logo shrinks, the
-     header row closes up and the page padding tightens. --board-max on
-     .game-layout is measured against exactly these numbers, so changing one
-     without the other pushes a name strip off the bottom of the window. */
-  body.on-game{padding:8px 20px 12px;}
+  /* Over a game the page gives its height to the board: the header row closes
+     up and the foot of the page tightens. The top padding is deliberately NOT
+     touched, and neither is the logo: the mark keeps the size and the place it
+     has on the home page on every screen, which is the whole point of the lane
+     it hangs in. Shrinking it over a game bought twenty-odd pixels of board and
+     made the one fixed thing on the site jump on every entry to a game.
+     --board-max on .game-layout is measured against exactly these numbers, so
+     changing one without the other pushes a name strip off the bottom of the
+     window. */
+  body.on-game{padding:28px 20px 12px;}
   body.on-game .game-head{margin-bottom:6px;}
-  body.on-game .logo-btn{min-height:44px;}
-  body.on-game .logo-btn img{width:clamp(58px,6.4vw,80px);}
 
   /* ---------- header ---------- */
   header{text-align:center; margin-bottom:26px;}
@@ -278,14 +281,14 @@
     /* The board takes what the column offers, but never so much that the strip
        under it falls off the screen — a clock you have to scroll to is no clock.
        The subtraction is both strips, the clock note and the page's own
-       padding, counted against the slim chrome `body.on-game` puts on this
-       screen — and there is no header row above the board left to pay for,
+       padding, counted against the slim chrome `body.on-game` puts on the foot
+       of this screen — and there is no header row above the board left to pay for,
        because the mark hangs in the lane beside it rather than standing in a
        row over it. So the two name strips land near the top and bottom edges
        of the window and everything between them is board. Retune it if any of
        those rows change height, or the bottom name strip starts scrolling out
        of sight. */
-    --chrome:174px;
+    --chrome:194px;
     --board-max:min(100%, calc(100vh - var(--chrome)));
   }
   /* Centred rather than left-hugging: the board sits in from the page margin,
@@ -298,7 +301,7 @@
     :root{--rail:0px;}
     .site-logo, .logo-btn{position:static;}
     #screen-game .game-head{min-height:var(--logo-box); margin-bottom:14px;}
-    .game-layout{--chrome:284px;}
+    .game-layout{--chrome:304px;}
   }
   /* Study Board opens a row of its own beneath the board. The board pays for it
      out of its own height, rather than the page growing a scrollbar under a
