@@ -325,6 +325,9 @@
   }
   .bot.big .bn{font-size:14px; letter-spacing:.16em;}
   .bot.big .be{font-size:12px;}
+  /* the strongest rung is an account's to play; a guest sees it locked */
+  .bot.locked{opacity:.5;}
+  .bot.locked:hover{border-color:var(--line);}
 
   .side-squares{display:flex; gap:10px;}
   .side-sq{
@@ -757,6 +760,18 @@
   }
   .menu-btn.soon{color:#6b7080;}
   .menu-btn.soon:hover{background:rgba(255,255,255,.05); color:#6b7080;}
+  /* Shut to a visitor with no account. Deliberately still buttons rather than
+     hidden or [disabled]: they are how a guest finds out the feature exists,
+     and clicking one is what carries them to sign-up. Dimmed, and nothing
+     more — a padlock on every one of them was more furniture than the header
+     could carry. */
+  .nav-btn.locked, .menu-btn.locked{color:#6b7080;}
+  .nav-btn.locked:hover, .nav-item:focus-within > .nav-btn.locked{
+    background:rgba(255,255,255,.05); border-color:transparent; color:#7d8394;
+  }
+  .menu-btn.locked:hover, .menu-btn.locked:focus-visible{
+    background:rgba(255,255,255,.05); color:#7d8394;
+  }
   .chev{color:var(--gold); font-size:14px; line-height:1;}
 
   /* the second level opens alongside; Play is the leftmost item, so there is
@@ -1737,7 +1752,7 @@
         </div>
 
         <div class="nav-item">
-          <button class="nav-btn" aria-haspopup="true">PUZZLE</button>
+          <button class="nav-btn" id="navPuzzle" aria-haspopup="true">PUZZLE</button>
           <div class="menu">
             <button class="menu-btn soon" id="navOpening">Opening</button>
             <button class="menu-btn soon" id="navMiddle">Middle Game</button>
@@ -2958,7 +2973,8 @@ const G = {
   opponent: 'bot',        // 'bot' | 'local' (two players, one screen) | 'online'
   matchKind: 'friendly',  // online only: 'ranked' | 'friendly' — separate queues
   hosting: false,         // online only: setting up a room rather than joining one
-  playerName: '',         // the account's chosen name; empty for guests
+  playerName: '',         // the account's chosen name, or the minted guest one
+  guestName: '',          // 'Guest-38154', made the first time a guest needs naming
   level: 1300,
   started: false,         // the board is only a preview until Start Play
   human: W,
@@ -3289,11 +3305,11 @@ function fmtClock(ms){
 function seatName(color){
   if (LOCAL()) return color === W ? 'White' : 'Black';
   if (BOT()){
-    if (color === G.human) return (account && account.name) || 'You';
+    if (color === G.human) return myName() || 'You';
     return BOT_NAME[G.level] ? (BOT_NAME[G.level] + ' ' + G.level) : ('Engine ' + G.level);
   }
   if (ONLINE()){
-    if (color === G.human) return (account && account.name) || 'You';
+    if (color === G.human) return myName() || 'You';
     return NET.opponent || 'Opponent';
   }
   return color === W ? 'White' : 'Black';
@@ -3906,9 +3922,12 @@ function netConnect(ready, onFail){
 /* ---- the room list ---- */
 function enterRooms(){
   G.opponent = 'online';
+  // A guest is named here rather than on the way out: hosting and joining both
+  // pass through this list, and the corner should already say what the other
+  // player is about to be told.
+  ensureGuestName();
   // who you will be sitting down as, named in the corner
-  document.getElementById('roomWho').textContent =
-    (account && account.name) ? account.name : 'Playing as a guest';
+  document.getElementById('roomWho').textContent = myName() || 'Playing as a guest';
   showScreen('rooms');
   renderRooms([]);
   netConnect(() => { NET.state = 'lobby'; netSend({ t:'lobby' }); });
@@ -5370,6 +5389,10 @@ function syncOptions(){
    does nothing, rather than leading somewhere half-finished. */
 function goBot(){
   beep(700,.09);
+  // Named before the board is drawn, so the strip under it says who is playing
+  // rather than "You". Nox is locked to a guest, so every rung reachable from
+  // here is one a Guest-##### may take.
+  ensureGuestName();
   G.opponent = 'bot';
   picked.opponent = true;
   enterGameSetup();
@@ -5393,14 +5416,20 @@ function goFriendly(){
   G.hosting = false;
   enterRooms();
 }
-document.getElementById('navSocial').onclick   = goSocial;
+// Ranked and Social belong to an account, so a guest gets the page that makes
+// one instead of the page that needs one.
+document.getElementById('navSocial').onclick   = () => GUEST() ? toSignUp() : goSocial();
+document.getElementById('navRanked').onclick   = () => GUEST() ? toSignUp() : goRanked();
 document.getElementById('navBot').onclick      = goBot;
 document.getElementById('navLocal').onclick    = goLocal;
 document.getElementById('navFriendly').onclick = goFriendly;
-document.getElementById('navRanked').onclick   = goRanked;
 
-// Deliberately inert for now, each one waiting on a page of its own.
-['navHowTo','navPractice','navOpening','navMiddle','navEnd']
+// Deliberately inert for now, each one waiting on a page of its own — except
+// to a guest, for whom the puzzles are locked and the lock leads somewhere.
+// PUZZLE itself is only a menu opener signed in; locked, it is the shortcut.
+['navPuzzle','navOpening','navMiddle','navEnd']
+  .forEach(id => { document.getElementById(id).onclick = () => { if (GUEST()) toSignUp(); }; });
+['navHowTo','navPractice']
   .forEach(id => { document.getElementById(id).onclick = () => {}; });
 
 document.getElementById('btnSettings').onclick = () => { beep(560,.07); showScreen('settings'); };
@@ -5432,7 +5461,10 @@ document.querySelectorAll('#oppGrid .half').forEach(half => {
   half.onclick = () => {
     // Ranked is arranged on a page of its own — the badge, the rating and the
     // queue. Friendly play goes through the room list instead.
-    if (half.dataset.kind === 'ranked'){ goRanked(); return; }
+    if (half.dataset.kind === 'ranked'){
+      if (GUEST()) return toSignUp();          // a rating has to belong to somebody
+      goRanked(); return;
+    }
     G.matchKind = half.dataset.kind;
     G.opponent = 'online';
     picked.opponent = true;
@@ -5586,7 +5618,11 @@ function enterGameSetup(){
 document.getElementById('btnStart').onclick     = startGame;   // room host form
 document.getElementById('btnStartGame').onclick = startGame;   // beside the board
 document.querySelectorAll('[data-level]').forEach(b => {
-  b.onclick = () => { G.level = +b.dataset.level; chosen.level = true; syncOptions(); };
+  b.onclick = () => {
+    // the top rung is the one an account buys; the rest of the ladder is open
+    if (GUEST() && +b.dataset.level === 3200) return toSignUp();
+    G.level = +b.dataset.level; chosen.level = true; syncOptions();
+  };
 });
 document.querySelectorAll('[data-side]').forEach(b => {
   b.onclick = () => { G.human = b.dataset.side; chosen.side = true; syncOptions(); };
@@ -5964,7 +6000,11 @@ function updateAccountUI(){
   const foot = document.getElementById('setFoot');
   if (foot) foot.style.display = signedIn ? 'flex' : 'none';
 
-  G.playerName = signedIn ? account.name : '';   // guests are named by the server
+  // An account's name replaces whatever guest name this visit had minted.
+  if (signedIn) G.guestName = '';
+  G.playerName = signedIn ? account.name : (G.guestName || '');
+  // signing in or out is the only thing that opens or shuts the locked pages
+  syncLocks();
   // signing in while looking at the ladder swaps the guest's starting badge
   // for the one the account has actually earned
   if (screenName === 'ranked') drawRank();
@@ -5976,6 +6016,78 @@ function updateAccountUI(){
 function accountsAvailable(){
   return !!(SUPABASE_URL && SUPABASE_ANON_KEY) &&
          (location.protocol === 'http:' || location.protocol === 'https:');
+}
+
+/* ---- what an account is for ----
+   Signing in is possible here and nobody has: the one state the locks below
+   exist for. With Supabase unconfigured, or the page opened over file://,
+   there is no sign-up page worth sending anyone to — so nothing locks and the
+   whole site stays playable, the same way the server drops its account checks
+   when it is in no position to verify anybody. */
+const GUEST = () => accountsAvailable() && !account;
+
+/* The four things an account is the point of: the ranked ladder, the social
+   page, the puzzles, and Nox — the top of the bot ladder. A guest sees each
+   one dimmed and padlocked, and clicking it opens sign-up rather than doing
+   nothing, so the lock is a door rather than a wall. They stay ordinary
+   buttons for exactly that reason: [disabled] would swallow the click that
+   was the whole invitation. */
+const LOCKED_IDS = ['navRanked', 'navSocial', 'navPuzzle',
+                    'navOpening', 'navMiddle', 'navEnd'];
+
+function lockedControls(){
+  const out = LOCKED_IDS.map(id => document.getElementById(id)).filter(Boolean);
+  // Nox by its rating rather than by an id: 3200 is the same bot on the ladder
+  // beside the board and on the older options strip.
+  document.querySelectorAll('[data-level="3200"]').forEach(b => out.push(b));
+  return out;
+}
+
+/** Dim what a guest cannot have; give it back when they sign in. */
+function syncLocks(){
+  const shut = GUEST();
+  lockedControls().forEach(el => {
+    el.classList.toggle('locked', shut);
+    // No badge drawn into the label: the dimming carries it, and the hover
+    // title says why. aria-disabled, not disabled — it still answers, it just
+    // answers with sign-up.
+    if (shut) el.title = 'Sign up to unlock';
+    else el.removeAttribute('title');
+    el.setAttribute('aria-disabled', shut ? 'true' : 'false');
+  });
+}
+
+/** Where every locked control leads. */
+function toSignUp(){
+  beep(420,.09);
+  showScreen('signup');
+}
+
+/* ---- a guest's name ----
+   A guest is never asked for one, but the moment they sit at a board opposite
+   somebody they need to be called something other than "Guest", which is what
+   every other guest is called too. One name is minted per visit and kept for
+   it, so the name on the room list is still the name on the board bar
+   afterwards, and the server is told the same thing on every connect. Signing
+   in throws it away: an account has a name of its own.
+   Five digits, the shape the site shows off: Guest-38154. */
+function mintGuestName(){
+  let digits = '';
+  for (let i = 0; i < 5; i++) digits += Math.floor(Math.random() * 10);
+  return 'Guest-' + digits;
+}
+
+/** Name this guest, once, before a game that has somebody to show it to. */
+function ensureGuestName(){
+  if (account) return account.name;
+  if (!G.guestName) G.guestName = mintGuestName();
+  G.playerName = G.guestName;        // what {t:"hello"} hands the server
+  return G.guestName;
+}
+
+/** Whoever is sitting in this browser — '' if a guest has not been named yet. */
+function myName(){
+  return account ? account.name : (G.guestName || '');
 }
 
 // Signed in but has not chosen a username yet — the one thing that is asked
