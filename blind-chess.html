@@ -300,6 +300,7 @@
   @media (max-width:1100px){
     :root{--rail:0px;}
     .site-logo, .logo-btn{position:static;}
+    .social-title{margin-left:0;}
     #screen-game .game-head{min-height:var(--logo-box); margin-bottom:14px;}
     .game-layout{--chrome:304px;}
   }
@@ -624,8 +625,10 @@
      sideways on the way through them: the back button is placed against the
      screen's own left edge, so it lands in the lane where the mark would be.
      The three that centre the big wordmark (sign up, log in, name) have no lane
-     and stay centred in the page. */
-  #screen-home, #screen-settings, #screen-opponent, #screen-rooms,
+     and stay centred in the page. Social is in the lane too: it is the one
+     screen that writes its own name beside the mark, so without the lane the
+     word would be printed underneath it. */
+  #screen-home, #screen-social, #screen-settings, #screen-opponent, #screen-rooms,
   #screen-setup, #screen-game{position:relative; padding-left:var(--rail);}
   /* A fade, and nothing more. Sliding the screen in moved the header with it,
      so the logo drifted on every change of screen — the one thing on the page
@@ -1519,8 +1522,12 @@
      whoever matches it when it is not. They share a row shape on purpose —
      the difference between "someone you know" and "someone you found" is the
      button on the right, and nothing else. */
+  /* Stood off a little further than the lane: the page's left edge — the edge
+     of the search panel below — lands between the mark and this word, so the
+     two read as separate things rather than one crowded line. Only the word
+     moves; the mark stays where it is on every other screen. */
   .social-title{
-    margin:0; font-family:Georgia,serif; font-weight:400;
+    margin:0 0 0 clamp(12px,1.6vw,26px); font-family:Georgia,serif; font-weight:400;
     font-size:clamp(26px,4.4vw,42px); letter-spacing:.12em; color:var(--gold-soft);
     white-space:nowrap;
   }
