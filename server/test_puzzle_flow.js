@@ -84,6 +84,15 @@ function reviewClose(){}
 function announce(){}
 var sqEls = [];
 for (var i = 0; i < 64; i++) sqEls.push(fakeEl());
+/* The page walks the follow-up out on a timer so it reads as the game
+   continuing. Here it is a queue the test drains by hand: node's own
+   setTimeout would make the suite wait for real seconds, and jsc has no
+   timers at all. */
+var timers = [];
+function setTimeout(fn){ timers.push(fn); return timers.length; }
+function flushTimers(){
+  for (var guard = 0; timers.length && guard < 200; guard++) timers.shift()();
+}
 var REV = { on:false };
 // signed out, and no Supabase client: the guest path, which is the one that
 // works with nothing configured. The account path is exercised by
@@ -108,7 +117,7 @@ var FNS = ['startBoard','newState','cloneState','posKey','fenOf','stateFromFEN',
            'pzNextRung','pzUnlocked','pzElo','pzGuestRating','pzRating','pzReport',
            'pzSendResult','pzSync','rushQueue','rushStrike','rushEnd','rushAdvance','rushRender',
            'pzOpen','pzClose','pzPlay','pzFinish','pzExplain','pzSolutionSan',
-           'pzRender','pzRenderGrid','visualIndex'];
+           'pzFollowUp','pzFollowSay','pzRetry','pzRender','pzRenderGrid','visualIndex'];
 
 var bundle = [grab(/\nconst W = 'w', B = 'b';/, "const W/B")];
 for (var d = 0; d < DECLS.length; d++) if (DECLS[d] !== 'W') bundle.push(decl(DECLS[d]));
@@ -146,6 +155,7 @@ for (var k = 0; k < TRACKS.length; k++){
   total += list.length;
   if (!list.length){ say('  ..    ' + TRACKS[k] + ' is empty, skipping'); continue; }
   var numbered = true, replayable = true, ordered = true;
+  var follows = true, followed = 0;
   for (var n = 0; n < list.length; n++){
     if (list[n].n !== n + 1) numbered = false;
     // every solution has to be playable from its own fen, or the puzzle is a trap
@@ -158,11 +168,37 @@ for (var k = 0; k < TRACKS.length; k++){
     }
     // and a puzzle always ends on the solver's move
     if (list[n].moves.length % 2 === 0) replayable = false;
+    // the follow-up carries on from where the solution stopped, so it has to
+    // play from that position too — a line that does not is a button that
+    // stops halfway through its own explanation
+    var f = list[n].follow;
+    if (f){
+      followed++;
+      if (!f.moves || f.moves.length > 8) follows = false;
+      for (var fi = 0; fi < (f.moves || []).length; fi++){
+        var fall = legalMoves(st, st.turn), fm = null;
+        for (var fa = 0; fa < fall.length; fa++) if (uciOf(fall[fa]) === f.moves[fi]) fm = fall[fa];
+        if (!fm){ follows = false; break; }
+        st = makeMove(st, fm);
+      }
+      // it says how it ends, one way or the other
+      if (typeof f.cp !== 'number' && typeof f.mate !== 'number') follows = false;
+    }
   }
   check(TRACKS[k] + ': numbered 1..n', numbered, true);
   check(TRACKS[k] + ': every solution replays from its fen', replayable, true);
   check(TRACKS[k] + ': ordered easiest first',
         list[0].seedRating <= list[list.length-1].seedRating, true);
+  if (followed)
+    check(TRACKS[k] + ': every follow-up plays on from the solution', follows, true);
+  else
+    say('  ..    ' + TRACKS[k] + ' has no follow-ups yet, skipping');
+  var ids = {}, unique = true;
+  for (var u = 0; u < list.length; u++){
+    if (ids[list[u].id]) unique = false;
+    ids[list[u].id] = true;
+  }
+  check(TRACKS[k] + ': no two puzzles share an id', unique, true);
 }
 check('the three files hold puzzles at all', total > 0, true);
 
@@ -247,6 +283,77 @@ if (one){
   check('Next is offered', elements.pzNext.disabled, false);
 } else {
   say('  ..    no second one-move puzzle in this set, skipping');
+}
+
+say('\nShow Follow-up\n');
+
+/* The button only exists once the puzzle is over, only where the file has a
+   line to show, and when it is pressed the board has to actually move. */
+var withFollow = null;
+for (var wf = 0; wf < TRACKS.length; wf++)
+  for (var wq = 0; wq < sets[TRACKS[wf]].length && !withFollow; wq++){
+    var cand = sets[TRACKS[wf]][wq];
+    if (cand.moves.length === 1 && cand.follow && cand.follow.moves.length)
+      withFollow = { track: TRACKS[wf], n: wq + 1, p: cand };
+  }
+
+if (withFollow){
+  PZ.track = withFollow.track;
+  PZ.list = sets[withFollow.track];
+  pzOpen(withFollow.n);
+  timers = [];
+  pzRender();
+  check('before it is solved, the button is not offered',
+        elements.pzFollow.style.display, 'none');
+  check('and Show Solution has the slot', elements.pzShow.style.display, '');
+
+  pzPlay(moveFor(withFollow.p.moves[0]));
+  pzRender();
+  check('solving it offers the follow-up', elements.pzFollow.style.display, '');
+  check('and Show Solution gives up the slot', elements.pzShow.style.display, 'none');
+  check('the card explains why the move was good before it is pressed',
+        elements.pzSay.textContent.indexOf('Best play continues') >= 0, false);
+
+  var atSolve = fenOf(G.st);
+  timers = [];
+  pzFollowUp();
+  check('pressing it takes the board over', PZ.busy, true);
+  flushTimers();
+  check('the follow-up is played out',   fenOf(G.st) !== atSolve, true);
+  check('and the board is handed back',  PZ.busy, false);
+  check('it only plays once',            PZ.followed, true);
+  pzRender();
+  check('the button will not fire twice', elements.pzFollow.disabled, true);
+  check('and the card now says what came of it',
+        elements.pzSay.textContent.indexOf('Best play continues') >= 0, true);
+  check('the follow-up reads as notation, not as squares',
+        /[a-h][1-8][a-h][1-8]/.test(pzFollowSay(withFollow.p)), false);
+
+  // retrying puts the position, and the button, back
+  pzRetry();
+  timers = [];
+  pzRender();
+  check('retrying clears the follow-up',   PZ.followed, false);
+  check('and puts the position back',      fenOf(G.st), withFollow.p.fen);
+
+  // a puzzle whose line ends in mate has nothing to follow up
+  var mated = null;
+  for (var mt = 0; mt < TRACKS.length && !mated; mt++)
+    for (var mq = 0; mq < sets[TRACKS[mt]].length && !mated; mq++)
+      if (sets[TRACKS[mt]][mq].follow && !sets[TRACKS[mt]][mq].follow.moves.length)
+        mated = { track: TRACKS[mt], n: mq + 1, p: sets[TRACKS[mt]][mq] };
+  if (mated){
+    PZ.track = mated.track;
+    PZ.list = sets[mated.track];
+    pzOpen(mated.n);
+    PZ.done = true;
+    pzRender();
+    check('a puzzle that ends in mate offers no follow-up',
+          elements.pzFollow.style.display, 'none');
+    check('and says nothing about one', pzFollowSay(mated.p), '');
+  }
+} else {
+  say('  ..    no one-move puzzle with a follow-up in this set, skipping');
 }
 
 say('\nRating, for a player with nowhere to store one\n');

@@ -615,6 +615,16 @@ the same \`--seed\`.
 node tools/generate_puzzles.js --jobs ${cfg.jobs} --seed ${cfg.seed}
 \`\`\`
 
+Then check the new set and write its follow-ups, one track at a time:
+
+\`\`\`bash
+node tools/verify_puzzles.js --track middlegame
+\`\`\`
+
+A freshly generated file has been checked by the search that made it and by
+nothing else, and carries no \`follow\` field, so the Show Follow-up button stays
+hidden until it has been.
+
 Then bump the \`?v=\` on the three JSON files in \`blind-chess.html\`, because
 \`server/server.py\` serves them with a week of cache. Regenerating renumbers
 the ladders; progress is stored per puzzle id, so a player keeps whatever they
@@ -625,7 +635,10 @@ have already solved and loses only their place in the numbering.
 module.exports = {
   mulberry32, lineScore, candidateFrom, bucketFor, puzzleId, themesFor, worthShowing,
   openingWeight, weightedPick, materialSwing, parseArgs, difficulty, ladder,
-  PLAY_RUNGS, ALREADY_WON, CLEAR_WIN, UNSOLVED_SEED, DEFAULTS
+  // tools/verify_puzzles.js re-derives lines and re-seeds ratings for the
+  // puzzles it repairs, and has to do both exactly the way they were made
+  uciFind, buildLine, seedRating,
+  PLAY_RUNGS, ALREADY_WON, CLEAR_WIN, UNSOLVED_SEED, MATE_SCORE, DEFAULTS
 };
 
 if (require.main === module) main().catch(err => { console.error(err); process.exit(1); });
