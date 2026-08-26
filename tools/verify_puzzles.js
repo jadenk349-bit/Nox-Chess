@@ -53,9 +53,23 @@
  *
  * Nothing is written unless it is asked for.
  *
- *   node tools/verify_puzzles.js --track opening                 # report only
- *   node tools/verify_puzzles.js --track middlegame --write      # repair in place
- *   node tools/verify_puzzles.js --track opening --followup 6 --write
+ *   node tools/verify_puzzles.js --track opening                  # report only
+ *   node tools/verify_puzzles.js --track middlegame --write       # repair in place
+ *   node tools/verify_puzzles.js --track endgame --followup 6 --write
+ *   node tools/verify_puzzles.js --track endgame --resort --write # ...and re-rank
+ *   node tools/verify_puzzles.js --track opening --limit 5        # a smoke test
+ *
+ * One tool for all three ladders. The tracks differ only in which file is read:
+ * an opening puzzle, a middlegame puzzle and an endgame puzzle are the same
+ * record — fen, moves, themes, seedRating — and the same claim is being checked
+ * about each of them, so a second verifier per track would only be a second
+ * place for the rules to drift.
+ *
+ * Every search here is a `fresh` one — see sf.js. A pool engine that has
+ * already answered forty questions answers the forty-first differently, and a
+ * verdict that depends on which engine of the pool happened to draw the puzzle
+ * is not a verdict. Depth, never movetime, for the same reason the generator
+ * uses it: the answer must not depend on how fast the machine is.
  */
 
 'use strict';
@@ -100,6 +114,19 @@ const DEFAULTS = {
   // rewrites the line.
   replySlack: 25,
   follow: 6,          // plies of best play past the end of the solution; --followup
+  // A corrected puzzle was priced on the move it no longer plays, so its seed
+  // rating is re-measured. --no-reseed skips the slow ladder replay when a run
+  // is only after the follow-ups.
+  reseed: true,
+  /* A ladder promises that puzzle 1 is easier than puzzle 100, and a corrected
+     puzzle is rarely as hard as the one it replaced. --resort re-ranks the
+     whole track by the generator's own difficulty key and renumbers it; rungs
+     move, nobody's progress does, because progress is stored per puzzle id and
+     every id survives. It is off by default because a run is normally read as
+     "what changed", and a file that comes back reordered hides that in a diff
+     of a hundred moved records. It is refused on a partial run (--limit),
+     which could only sort the part it looked at. */
+  resort: false,
   write: false,       // nothing is written unless it is asked for
   dry: false,         // the same thing said the other way round
   limit: 0,           // 0 = the whole track; a number checks the first n, for a smoke test
@@ -108,10 +135,36 @@ const DEFAULTS = {
 
 // --followup is the same knob as --follow, because both halves of this tool
 // were written under their own name before they were one tool.
-const ALIASES = { followup: 'follow', followUp: 'follow' };
+const ALIASES = { followup: 'follow', followUp: 'follow', out: 'dir' };
 
 const MATE_SCORE = G.MATE_SCORE || 10000;
 const uciFind = G.uciFind;
+
+/* Two lines wide, for the searches that *build* rather than judge.
+ *
+ * A single-line search prunes against the best move it has found so far, and
+ * it is allowed to throw away a move it has decided cannot beat that one: in
+ * one position of the endgame set it answers Nxb7 at +15 and never mentions
+ * that Rxb7 is +63, which MultiPV 2 finds at the same depth in the same time.
+ * A defence or a follow-up move chosen that way writes exactly the fault this
+ * tool exists to correct, so both are asked for two lines wide and read off
+ * the ranking with bestOf().
+ *
+ * Judging is the opposite case and deliberately asks for one line — see
+ * checkReplyPly — because there the question is what the engine *plays*, and
+ * asking for two lines changes the pruning enough that the answer moves.
+ *
+ * clean() is for the generator's own helpers, which ask their own questions
+ * (seedRating() is imitating a weak rung, and its MultiPV is the point) and
+ * only need the table emptied first. */
+const clean = engine => ({
+  ask: o => engine.ask(Object.assign({ fresh: true }, o))
+});
+
+/** The move a search actually names, read off the ranking rather than off
+    bestmove — at Skill 20 they agree, and when they do not the ranking is the
+    one a player would be shown. */
+const bestOf = res => ((res.lines || [])[0] || {}).best || res.best || null;
 
 /* ---------------------------------------------------------------- helpers */
 
@@ -178,6 +231,9 @@ async function rank(engine, fen, prefix, played, depth, cfg){
   if (best === null || got === null) return null;
   return {
     top: top.best, best, got, ranked,
+    // the shallowest depth this search never changed its mind after, which is
+    // what difficulty() ranks a rung on and what the shipped file does not carry
+    settle: res.settleDepth,
     loss: best - got,
     gap: second ? best - scoreOf(second) : null,
     sharp: !!G.candidateFrom(res, cfg.gap),
@@ -310,17 +366,21 @@ async function extendFrom(engine, fen, prefix, cfg, first){
     if (gameOver(st)) break;                                   // mate delivered
     if (G.materialSwing(fen, st) >= G.CLEAR_WIN) break;        // a clear material win
     if (moves.length + 2 > cfg.maxPlies) break;
-    const reply = await engine.ask({ fen, moves, depth: cfg.replyDepth, fresh: true });
-    if (!reply.best) break;
-    const rm = uciFind(st, reply.best);
+    // two lines wide, not one — see bestOf() above: the defence a rebuilt line is
+    // extended with has to be the toughest one there is, and a single-line
+    // search may never mention it
+    const reply = await engine.ask({ fen, moves, multipv: 2, depth: cfg.replyDepth, fresh: true });
+    const defence = bestOf(reply);
+    if (!defence) break;
+    const rm = uciFind(st, defence);
     if (!rm) break;
     const next = P.makeMove(st, rm);
     if (gameOver(next)) break;                                 // the defence walked into mate
-    const look = await pickSolver(engine, fen, moves.concat([reply.best]), cfg);
+    const look = await pickSolver(engine, fen, moves.concat([defence]), cfg);
     if (!look || !look.sharp) break;                           // no longer one strong move
     const pm = uciFind(next, look.best);
     if (!pm) break;
-    moves.push(reply.best, look.best);
+    moves.push(defence, look.best);
     st = P.makeMove(next, pm);
   }
   return { moves, soft };
@@ -343,12 +403,13 @@ async function followUp(engine, fen, moves, cfg){
   for (let i = 0; i < cfg.follow; i++){
     if (gameOver(st)) break;
     const res = await engine.ask({
-      fen, moves: moves.concat(line), depth: cfg.followDepth, fresh: true
+      fen, moves: moves.concat(line), multipv: 2, depth: cfg.followDepth, fresh: true
     });
-    if (!res.best) break;
-    const m = uciFind(st, res.best);
+    const best = bestOf(res);
+    if (!best) break;
+    const m = uciFind(st, best);
     if (!m) break;
-    line.push(res.best);
+    line.push(best);
     st = P.makeMove(st, m);
   }
 
@@ -396,17 +457,21 @@ async function audit(engine, p, cfg){
   const solver = P.stateFromFEN(fen).turn;
   const notes = [];
   let st = P.stateFromFEN(fen);
+  // measured on the puzzle's own position, and only there: it describes how
+  // hard the *first* move is to see, which is what the ladder is ordered by
+  let settle = null;
 
   for (let i = 0; i < p.moves.length; i++){
-    if (!st || gameOver(st)) return { at: i, why: 'line-over', notes };
+    if (!st || gameOver(st)) return { at: i, why: 'line-over', notes, settle };
     const played = p.moves[i];
-    if (!uciFind(st, played)) return { at: i, why: 'illegal', notes };
+    if (!uciFind(st, played)) return { at: i, why: 'illegal', notes, settle };
     const prefix = p.moves.slice(0, i);
     const mine = st.turn === solver;
     const where = (mine ? 'solution' : 'defence') + ' ply ' + i + ': ';
 
     // 1. the sweep, which only nominates: nothing below this line trusts it
     const quick = await rank(engine, fen, prefix, played, cfg.sweep, cfg);
+    if (i === 0 && quick) settle = quick.settle;
     if (mine && quick && quick.top === played && !quick.sharp)
       // still the move, no longer the only move: worth knowing when the set is
       // next regenerated, not worth rewriting a correct solution over
@@ -439,14 +504,14 @@ async function audit(engine, p, cfg){
     if (r.ok && r.tie) notes.push('ply' + i + ':tie');
     if (!r.ok)
       return {
-        at: i, top: r.best, notes,
+        at: i, top: r.best, notes, settle,
         why: where + 'file plays ' + played + ', engine plays ' + (r.best || '?') +
              ' (' + r.why + (r.by === null || r.by === undefined ? ''
                                                                  : ', ' + Math.round(r.by) + 'cp worse') + ')'
       };
     st = P.makeMove(st, uciFind(st, played));
   }
-  return { at: -1, why: '', notes };
+  return { at: -1, why: '', notes, settle };
 }
 
 async function verifyOne(p, engine, cfg){
@@ -456,6 +521,7 @@ async function verifyOne(p, engine, cfg){
 
   const found = await audit(engine, p, cfg);
   note.notes = found.notes;
+  note.settle = found.settle;
 
   let moves = p.moves;
   if (found.at >= 0){
@@ -486,9 +552,12 @@ async function verifyOne(p, engine, cfg){
     // scores against, and it was measured on the old first move. seedRating()
     // is the generator's own cold start, exported rather than copied so that a
     // repaired rung is priced exactly the way the ladder was.
-    if (moves[0] !== p.moves[0]){
-      out.seedRating = await G.seedRating(engine, fen, moves[0]);
+    if (cfg.reseed && moves[0] !== p.moves[0]){
+      out.seedRating = await G.seedRating(clean(engine), fen, moves[0]);
       note.seedRating = out.seedRating;
+      // the first move changed, so how hard it is to see changed with it
+      const re = await engine.ask({ fen, multipv: 2, depth: cfg.depth, fresh: true });
+      note.settle = re.settleDepth;
     }
   }
   if (cfg.follow > 0){
@@ -504,11 +573,56 @@ async function verifyOne(p, engine, cfg){
 
 /* ------------------------------------------------------------------ main */
 
+/** A line in the notation a person reads, for the report. UCI is what the file
+    stores and what puzzleStep() compares against, so both are printed: one to
+    understand the change, one to grep for it. */
+function lineSan(fen, moves){
+  let st = P.stateFromFEN(fen);
+  const out = [];
+  for (const u of moves){
+    const all = P.legalMoves(st, st.turn);
+    const m = all.find(x => P.uciOf(x) === u);
+    if (!m) break;
+    out.push(P.toSAN(st, m, all));
+    st = P.makeMove(st, m);
+  }
+  return out.join(' ');
+}
+
+/* Put the ladder back in difficulty order.
+ *
+ * A track promises that puzzle 1 is easier than puzzle 100, and a corrected
+ * puzzle is rarely as hard as the one it replaced: a seven-move line that only
+ * worked because the defence blundered collapses to one move once the defence
+ * is fixed. The key is the generator's own difficulty(), so a re-ranked track
+ * is ranked the way it was built — with the settle depth measured by the sweep,
+ * which is the one ingredient a shipped file does not carry.
+ *
+ * Rungs move; nobody's progress does. Progress is stored per puzzle id, and an
+ * id only changes when the line it hashes did. Returns how many rungs moved. */
+function resort(puzzles, settleOf){
+  const was = new Map(puzzles.map(p => [p, p.n]));
+  const key = new Map(puzzles.map(p =>
+    [p, G.difficulty(Object.assign({}, p, { settleDepth: settleOf(p) }))]));
+  puzzles.sort((a, b) => key.get(a) - key.get(b) || String(a.id).localeCompare(String(b.id)));
+  let moved = 0;
+  puzzles.forEach((p, i) => { if (was.get(p) !== i + 1) moved++; p.n = i + 1; });
+  return moved;
+}
+
 function parseArgs(argv){
   const cfg = Object.assign({}, DEFAULTS);
   for (let i = 0; i < argv.length; i++){
     const a = argv[i];
     if (!a.startsWith('--')) continue;
+    // --no-reseed / --no-resort turn off the two things that are switched on
+    // by being named, which a bare --flag has no way of saying
+    if (a.startsWith('--no-')){
+      const off = ALIASES[a.slice(5)] || a.slice(5);
+      if (typeof cfg[off] !== 'boolean') throw new Error('unknown option ' + a);
+      cfg[off] = false;
+      continue;
+    }
     const k = ALIASES[a.slice(2)] || a.slice(2);
     if (!(k in cfg)) throw new Error('unknown option --' + k);
     if (typeof cfg[k] === 'boolean') cfg[k] = true;
@@ -559,12 +673,18 @@ async function main(){
     for (const n of r.note.notes || []) console.log('  #' + r.note.n + ' note   ' + n);
   for (const r of repaired)
     console.log('  #' + r.note.n + ' WRONG  ' + r.note.why +
-                '\n         was [' + r.note.was.join(' ') + ']' +
-                '\n         now [' + r.puzzle.moves.join(' ') + ']');
+                '\n         was ' + lineSan(r.puzzle.fen, r.note.was) +
+                '   [' + r.note.was.join(' ') + ']' +
+                '\n         now ' + lineSan(r.puzzle.fen, r.puzzle.moves) +
+                '   [' + r.puzzle.moves.join(' ') + ']');
   for (const r of failed) console.log('  #' + r.note.n + ' FAILED ' + r.note.failed);
 
   if (cfg.report)
     fs.writeFileSync(cfg.report, JSON.stringify(results.map(r => r.note), null, 1) + '\n');
+  // A partial run has only seen part of the ladder, and part of a ladder cannot
+  // be put in order; say so rather than sorting the first n against nothing.
+  if (cfg.resort && cfg.limit)
+    console.log('  --resort ignored: only ' + list.length + ' of ' + all.length + ' were checked');
   if (cfg.write){
     /* Written back in place, rung for rung. A repaired puzzle is a different
        puzzle — new line, new motifs, new id — but it is the same rung of the
@@ -572,6 +692,12 @@ async function main(){
        repair. */
     const out = all.slice();
     results.forEach((r, i) => { out[i] = r.puzzle; });
+    if (cfg.resort && !cfg.limit){
+      const settle = new Map(results.map((r, i) => [out[i], r.note.settle]));
+      const moved = resort(out, p => settle.get(p));
+      console.log(moved + ' of ' + out.length + ' rungs renumbered to keep the ladder' +
+                  ' in difficulty order (ids, and so progress, are untouched)');
+    }
     fs.writeFileSync(file, JSON.stringify(out, null, 1) + '\n');
     console.log('wrote ' + file);
     noteInReadme(cfg, results);
@@ -629,8 +755,8 @@ function noteInReadme(cfg, results){
 }
 
 module.exports = {
-  walk, rank, audit, extendFrom, followUp, scoreAfter, scoreOf,
-  checkSolverPly, checkReplyPly, parseArgs, DEFAULTS
+  walk, rank, audit, extendFrom, followUp, scoreAfter, scoreOf, bestOf, lineSan,
+  checkSolverPly, checkReplyPly, resort, parseArgs, DEFAULTS
 };
 
 if (require.main === module) main().catch(err => { console.error(err); process.exit(1); });

@@ -233,11 +233,17 @@ async function playGame(engine, rungs, rnd, cfg){
 
 /* Extend a candidate into a real solution: the player's move, the engine's
    own best defence, then ask again. It ends on the player's move — always an
-   odd number of plies — and stops when there is nothing left to find. */
+   odd number of plies — and stops when there is nothing left to find.
+
+   `first` is normally the one move the position was chosen for, but it also
+   takes a whole line: tools/verify_puzzles.js re-checks a shipped ladder move
+   by move and, when it has to correct one, hands back the part of the line it
+   has already agreed with so only the tail is rebuilt. Either way the prefix
+   ends on the player's move, which is what the loop below assumes. */
 async function buildLine(engine, startFen, first, cfg){
-  const moves = [first];
+  const moves = Array.isArray(first) ? first.slice() : [first];
   let st = P.stateFromFEN(startFen);
-  st = P.makeMove(st, uciFind(st, first));
+  for (const u of moves) st = P.makeMove(st, uciFind(st, u));
   for (;;){
     if (!P.legalMoves(st, st.turn).length) break;        // mate delivered, or stalemate
     if (materialSwing(startFen, st) >= CLEAR_WIN) break; // a clear material win
@@ -635,8 +641,9 @@ have already solved and loses only their place in the numbering.
 module.exports = {
   mulberry32, lineScore, candidateFrom, bucketFor, puzzleId, themesFor, worthShowing,
   openingWeight, weightedPick, materialSwing, parseArgs, difficulty, ladder,
-  // tools/verify_puzzles.js re-derives lines and re-seeds ratings for the
-  // puzzles it repairs, and has to do both exactly the way they were made
+  // what tools/verify_puzzles.js reuses rather than re-derives: a corrected
+  // line has to be built the way the shipped ones were, and a corrected puzzle
+  // re-rated by the same ladder replay
   uciFind, buildLine, seedRating,
   PLAY_RUNGS, ALREADY_WON, CLEAR_WIN, UNSOLVED_SEED, MATE_SCORE, DEFAULTS
 };

@@ -30,7 +30,8 @@ node tools/generate_puzzles.js --poolsOut /tmp/pools.json   # regenerate (slow: 
 node tools/generate_puzzles.js --poolsIn /tmp/pools.json    # re-cut the ladders only (instant)
 node tools/verify_puzzles.js --track opening               # audit a shipped ladder (slow), touching nothing
 node tools/verify_puzzles.js --track middlegame --write    # ...and repair it in place, follow-ups included
-node tools/verify_puzzles.js --track opening --followup 6 --write   # ...with a longer follow-up
+node tools/verify_puzzles.js --track endgame --followup 6 --write   # ...with a longer follow-up
+node tools/verify_puzzles.js --track endgame --resort --write       # ...and re-rank the ladder with it
 
 docker build -t nox-chess . && docker run --rm -p 8787:8787 nox-chess
 ```
@@ -213,7 +214,22 @@ own best defence in before judging the next one — so every ply of a solution
 was chosen by a search that had only just arrived at it.
 `tools/verify_puzzles.js` asks again from outside, both colours, and where it
 disagrees the file is wrong: the player is being told to play a move the engine
-does not play, and `puzzleStep()` will accept nothing else.
+does not play, and `puzzleStep()` will accept nothing else. One tool for all
+three tracks — an opening, a middlegame and an endgame puzzle are the same
+record and the same claim is being checked about each, so a second verifier per
+track would only be a second place for the rules to drift.
+
+Every search it makes empties the transposition table first: one engine
+answering many unrelated questions answers them differently depending on the
+order they arrive in, which is fine while *choosing* puzzles and useless while
+*judging* them (`fresh` in `tools/sf.js` exists for this and nothing else, and
+waits for `readyok` because `ucinewgame` is only honoured once the engine acts
+on it). The searches that *build* rather than judge — the defence a rebuilt
+line is extended with, and every follow-up move — ask for two lines and read
+the ranking, because a single-line search prunes against the best move it
+already has and can decline to mention a better one. Corrections reuse the
+generator's `buildLine()`, `themesFor()`, `seedRating()` and `difficulty()`
+rather than growing second versions, which is why those four are exported.
 
 Three passes, and the order is the whole design. A cheap **sweep** ranks every
 ply and only ever nominates; a **head-to-head** at the working depth plays both
@@ -233,27 +249,40 @@ reported, not rewritten: sharpness is a generation criterion, not a claim the
 file makes to the player, and rewriting it would only be undone by the next run
 at the next depth. Nothing is written at all without `--write`.
 
+Puzzle *ids* survive a correction, so nobody loses a solve. Rung numbers are
+left alone too, unless `--resort` is asked for: that re-ranks the whole track by
+the generator's own `difficulty()` and renumbers it, which is right after a pass
+that shortened a lot of lines (the endgame one did) and wrong as a default,
+because a file that comes back reordered hides what actually changed in a diff
+of a hundred moved records.
+
 **The follow-up is the payoff, and it is precomputed.** A solution is extended
 only while there is still exactly one strong move to find, which stops it a
 move or two before the rook actually falls off the board — so a player who has
 just found the move is holding a position whose point has not happened yet. The
 follow-up is best play from both sides from there, chosen by
 `verify_puzzles.js`, and `pzShowFollowUp()` plays it out at the same cadence as
-the forced replies. It is precomputed on purpose: `pzExplain()` asks no engine,
-and `test_puzzle_flow.js` asserts that the puzzle screen never loads one.
+the forced replies. Every one of those plies is its own search of its own
+position; a pv would be one search's intention, and cheaper, and would not be
+true of the board it is shown on. It is precomputed on purpose: `pzExplain()`
+asks no engine, and `test_puzzle_flow.js` asserts that the puzzle screen never
+loads one.
 
-**Two shapes of the same thing, because the two ladders were checked by
+**Two shapes of the same thing, because the three ladders were checked by
 different runs.** The middlegame carries `follow` — the line, the score it
 arrives at, the material it wins, and the score the puzzle *started* at — and
-the opening carries `followUp`, the line on its own. `pzFollowOf()` reads
-either, and is the only place in the page that knows there are two; everything
-else asks it. `follow.startCp` is what lets the card tell a move that wins from
+the opening and endgame carry `followUp`, the line on its own. `pzFollowOf()`
+reads either, and is the only place in the page that knows there are two;
+everything else asks it. `follow.startCp` is what lets the card tell a move that wins from
 a move that is merely the best of a lost position — both are right answers, and
 only one of them is "you come out a rook up" — so a line stored without a score
 says what it won and stops there. Re-verifying a track with `--write` writes the
 richer shape and drops the older one, which is why nothing may read `followUp`
-directly. `pzFollowSay()` counts the material from the *puzzle's* first position
-rather than from where the solution stopped: the question is what the move the
+directly. `pzFollowSay()` is what writes the card's sentence — `pvLine()` cannot,
+because it speaks for whoever is to move at the head of a line and a follow-up
+opens on the *opponent's* move, so its "you" would name the wrong player. It
+counts the material from the *puzzle's* first position rather than from where
+the solution stopped: the question is what the move the
 player found was worth, and half of it is usually already won by the time the
 solution runs out. A track from before any of this has neither field, and the
 button is absent rather than present and dead.

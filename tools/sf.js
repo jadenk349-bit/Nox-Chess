@@ -94,9 +94,21 @@ class Engine {
     const multipv = opt.multipv || 1;
     const skill = opt.skill === undefined ? 20 : opt.skill;
     const moves = (opt.moves && opt.moves.length) ? ' moves ' + opt.moves.join(' ') : '';
-    // one worker, one queue: the commands are read in the order they are sent,
-    // so ucinewgame lands before the position it is meant to clear for
-    if (opt.fresh) this.send('ucinewgame');
+    // One engine answers many unrelated questions, and the transposition table
+    // it fills answering one of them changes how it searches the next: the same
+    // position at the same depth can come back with a different move depending
+    // on what this process happened to look at before it. The generator can
+    // live with that — it is choosing among positions it is seeing for the
+    // first time either way — but a verifier cannot, because a verdict that
+    // depends on which engine of the pool drew the puzzle is not a verdict.
+    // `fresh` empties the table first, at the cost of the search starting cold.
+    // The wait for readyok is the point: ucinewgame is only honoured once the
+    // engine acts on it, and a `position` sent before that would be searched
+    // against the table this was meant to throw away.
+    if (opt.fresh){
+      this.send('ucinewgame');
+      await new Promise(resolve => { this._ready = resolve; this.send('isready'); });
+    }
     this.send('setoption name Skill Level value ' + skill);
     this.send('setoption name MultiPV value ' + multipv);
     this.send('position ' + (opt.fen ? 'fen ' + opt.fen : 'startpos') + moves);

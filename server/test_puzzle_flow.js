@@ -155,8 +155,7 @@ for (var k = 0; k < TRACKS.length; k++){
   var list = sets[TRACKS[k]];
   total += list.length;
   if (!list.length){ say('  ..    ' + TRACKS[k] + ' is empty, skipping'); continue; }
-  var numbered = true, replayable = true, ordered = true;
-  var follows = true, followed = 0;
+  var numbered = true, replayable = true, follows = true, followed = 0;
   for (var n = 0; n < list.length; n++){
     if (list[n].n !== n + 1) numbered = false;
     // every solution has to be playable from its own fen, or the puzzle is a trap
@@ -170,14 +169,14 @@ for (var k = 0; k < TRACKS.length; k++){
     // and a puzzle always ends on the solver's move
     if (list[n].moves.length % 2 === 0) replayable = false;
     /* A follow-up is optional — a track checked before they existed has none —
-       but one that is there has to carry on from where the solution stopped,
-       and st is standing on exactly that square. A line that does not play is
-       a button that stops halfway through its own explanation.
+       but one that is there has to carry on from exactly where the solution
+       stopped, and st is standing on that square. A line that does not replay
+       is a button that stops halfway through its own explanation.
 
-       Two shapes, because the two ladders were checked by different runs of
+       Two shapes, because the three ladders were checked by different runs of
        tools/verify_puzzles.js: `follow` is the line together with the score it
-       arrives at, `followUp` is the line on its own. The page reads both, so
-       both are checked here. */
+       arrives at, `followUp` is the line on its own. The page reads both
+       through pzFollowOf(), so both are checked here. */
     var f = list[n].follow ||
             (list[n].followUp && list[n].followUp.length ? { moves: list[n].followUp } : null);
     if (f){
@@ -194,13 +193,16 @@ for (var k = 0; k < TRACKS.length; k++){
     }
   }
   check(TRACKS[k] + ': numbered 1..n', numbered, true);
+  check(TRACKS[k] + ': a full ladder of a hundred', list.length, 100);
   check(TRACKS[k] + ': every solution replays from its fen', replayable, true);
   check(TRACKS[k] + ': ordered easiest first',
         list[0].seedRating <= list[list.length-1].seedRating, true);
-  if (followed)
+  if (followed){
     check(TRACKS[k] + ': every follow-up plays on from the solution', follows, true);
-  else
+    say('  ..    ' + followed + ' of ' + list.length + ' carry a follow-up');
+  } else {
     say('  ..    ' + TRACKS[k] + ' has no follow-ups yet, skipping');
+  }
   var ids = {}, unique = true;
   for (var u = 0; u < list.length; u++){
     if (ids[list[u].id]) unique = false;
@@ -212,242 +214,218 @@ check('the three files hold puzzles at all', total > 0, true);
 
 say('\nSolving one, click by click\n');
 
-// the longest puzzle in the set, so the forced reply is exercised
-var long = null;
-for (var b = 0; b < TRACKS.length; b++)
-  for (var q = 0; q < sets[TRACKS[b]].length; q++)
-    if (!long || sets[TRACKS[b]][q].moves.length > long.p.moves.length)
-      long = { track: TRACKS[b], n: q + 1, p: sets[TRACKS[b]][q] };
+/* Once per track, and on the longest puzzle each of them has, so the forced
+   reply is exercised. Every track is walked rather than one of them, because
+   the three ladders were generated and corrected by separate runs and the
+   thing most likely to be wrong with any of them is wrong in only one. */
+function solveFlow(track){
+  var list = sets[track], long = null;
+  for (var q = 0; q < list.length; q++)
+    if (!long || list[q].moves.length > long.p.moves.length) long = { n: q + 1, p: list[q] };
+  if (!long){ say('  ..    ' + track + ' is empty, skipping'); return; }
+  var at = track + ': ';
 
-PZ.track = long.track;
-PZ.list = sets[long.track];
-pzOpen(long.n);
-check('the board is the puzzle position', fenOf(G.st), long.p.fen);
-check('the solver is on move',            G.human, PZ.side);
-check('the board faces the solver',       G.flipped, PZ.side === 'b');
-check('the screen it opens is the board', screens[screens.length-1], 'game');
-check('and nothing is solved yet',        PZ.done, false);
+  PZ.mode = 'ladder';
+  PZ.track = track;
+  PZ.list = list;
+  pzOpen(long.n);
+  check(at + 'the board is the puzzle position', fenOf(G.st), long.p.fen);
+  check(at + 'the solver is on move',            G.human, PZ.side);
+  check(at + 'the board faces the solver',       G.flipped, PZ.side === 'b');
+  check(at + 'the screen it opens is the board', screens[screens.length-1], 'game');
+  check(at + 'and nothing is solved yet',        PZ.done, false);
 
-// a wrong move must not move anything
-var before = fenOf(G.st);
-var wrong = null, legal = legalMoves(G.st, G.st.turn);
-for (var w = 0; w < legal.length; w++) if (uciOf(legal[w]) !== long.p.moves[0]) { wrong = legal[w]; break; }
-var flashesBefore = flashed;
-pzPlay(wrong);
-check('a wrong move leaves the position alone', fenOf(G.st), before);
-check('and says so on the board',               flashed, flashesBefore + 1);
-check('and does not advance the line',          PZ.ply, 0);
-check('and is remembered against the attempt',  PZ.wrong, true);
+  // a wrong move must not move anything
+  var before = fenOf(G.st);
+  var wrong = null, legal = legalMoves(G.st, G.st.turn);
+  for (var w = 0; w < legal.length; w++)
+    if (uciOf(legal[w]) !== long.p.moves[0]) { wrong = legal[w]; break; }
+  var flashesBefore = flashed;
+  pzPlay(wrong);
+  check(at + 'a wrong move leaves the position alone', fenOf(G.st), before);
+  check(at + 'and says so on the board',               flashed, flashesBefore + 1);
+  check(at + 'and does not advance the line',          PZ.ply, 0);
+  check(at + 'and is remembered against the attempt',  PZ.wrong, true);
 
-// the right one does advance
-pzPlay(moveFor(long.p.moves[0]));
-check('the right move is accepted', PZ.ply >= 1, true);
-check('and the board has moved on', fenOf(G.st) !== before, true);
-if (long.p.moves.length > 1){
-  check('a multi-move puzzle waits for the defence', PZ.busy, true);
-  // the reply is on a timer in the page; play it here the way the timer would
-  var rm = moveFor(long.p.moves[1]);
-  check('and the forced reply is legal', !!rm, true);
-  G.st = makeMove(G.st, rm);
-  PZ.busy = false;
-  for (var s = 2; s < long.p.moves.length; s += 2){
-    pzPlay(moveFor(long.p.moves[s]));
-    if (PZ.busy && long.p.moves[s+1]){
-      G.st = makeMove(G.st, moveFor(long.p.moves[s+1]));
-      PZ.busy = false;
+  // the right one does advance
+  pzPlay(moveFor(long.p.moves[0]));
+  check(at + 'the right move is accepted', PZ.ply >= 1, true);
+  check(at + 'and the board has moved on', fenOf(G.st) !== before, true);
+  if (long.p.moves.length > 1){
+    check(at + 'a multi-move puzzle waits for the defence', PZ.busy, true);
+    // the reply is on a timer in the page; play it here the way the timer would
+    var rm = moveFor(long.p.moves[1]);
+    check(at + 'and the forced reply is legal', !!rm, true);
+    G.st = makeMove(G.st, rm);
+    PZ.busy = false;
+    for (var sp = 2; sp < long.p.moves.length; sp += 2){
+      pzPlay(moveFor(long.p.moves[sp]));
+      if (PZ.busy && long.p.moves[sp+1]){
+        G.st = makeMove(G.st, moveFor(long.p.moves[sp+1]));
+        PZ.busy = false;
+      }
     }
   }
-}
-check('the puzzle finishes', PZ.done, true);
-check('but not as a clean solve, after that wrong move',
-      pzProgress(long.track).solved.indexOf(long.p.id) >= 0, false);
-check('though it is recorded as seen',
-      pzProgress(long.track).seen.indexOf(long.p.id) >= 0, true);
-check('so the next rung is open', pzUnlocked(PZ.list, pzDone(long.track), long.n + 1), true);
+  check(at + 'the puzzle finishes', PZ.done, true);
+  check(at + 'but not as a clean solve, after that wrong move',
+        pzProgress(track).solved.indexOf(long.p.id) >= 0, false);
+  check(at + 'though it is recorded as seen',
+        pzProgress(track).seen.indexOf(long.p.id) >= 0, true);
+  check(at + 'so the next rung is open',
+        pzUnlocked(PZ.list, pzDone(track), long.n + 1), true);
 
-say('\nA clean solve, on a one-move puzzle\n');
+  /* ---- and a clean solve, on a one-move puzzle of the same track ---- */
+  var one = null;
+  for (var c = 0; c < list.length && !one; c++)
+    if (list[c].moves.length === 1 && list[c].id !== long.p.id) one = { n: c + 1, p: list[c] };
+  if (!one){ say('  ..    no second one-move puzzle in ' + track + ', skipping'); return; }
 
-var one = null;
-for (var c = 0; c < sets[long.track].length; c++)
-  if (sets[long.track][c].moves.length === 1 && sets[long.track][c].id !== long.p.id)
-    { one = { n: c + 1, p: sets[long.track][c] }; break; }
-
-if (one){
   pzOpen(one.n);
   pzPlay(moveFor(one.p.moves[0]));
-  check('one right move finishes it', PZ.done, true);
-  check('with no mistakes against it', PZ.wrong, false);
-  check('and it counts as solved',
-        pzProgress(long.track).solved.indexOf(one.p.id) >= 0, true);
-  check('the card explains the move', pzExplain(one.p).length > 10, true);
-  check('and the solution reads as notation', pzSolutionSan(one.p).length > 1, true);
+  check(at + 'one right move finishes it', PZ.done, true);
+  check(at + 'with no mistakes against it', PZ.wrong, false);
+  check(at + 'and it counts as solved',
+        pzProgress(track).solved.indexOf(one.p.id) >= 0, true);
+  check(at + 'the card explains the move', pzExplain(one.p).length > 10, true);
+  check(at + 'and the solution reads as notation', pzSolutionSan(one.p).length > 1, true);
   // pzRender writes the whole card; running it is the point
   pzRender();
-  check('the card names the track and rung',
-        elements.pzTitle.textContent, PZ_TRACK_NAME[long.track] + ' · Puzzle ' + one.n);
-  check('the ladder is drawn', elements.pzGrid.innerHTML.indexOf('pz-lv') >= 0, true);
-  check('and counts what has been solved',
-        elements.pzProgress.textContent, pzProgress(long.track).solved.length + ' / ' + PZ.list.length);
-  check('Next is offered', elements.pzNext.disabled, false);
-} else {
-  say('  ..    no second one-move puzzle in this set, skipping');
+  check(at + 'the card names the track and rung',
+        elements.pzTitle.textContent, PZ_TRACK_NAME[track] + ' · Puzzle ' + one.n);
+  check(at + 'the ladder is drawn', elements.pzGrid.innerHTML.indexOf('pz-lv') >= 0, true);
+  check(at + 'and counts what has been solved',
+        elements.pzProgress.textContent,
+        pzProgress(track).solved.length + ' / ' + PZ.list.length);
+  check(at + 'Next is offered', elements.pzNext.disabled, false);
 }
+for (var stk = 0; stk < TRACKS.length; stk++) solveFlow(TRACKS[stk]);
 
-say('\nShow Follow Up: a line stored with its score\n');
+say('\nShow Follow Up, one track at a time\n');
 
 /* The button is on the card only where the file has a line to show, it is dead
    until the puzzle is over, and when it is pressed the board has to actually
-   move. This half takes a puzzle whose follow-up is stored as `follow` — the
-   line together with the score it arrives at, which is how the middlegame
-   ladder was checked. */
-var withFollow = null;
-for (var wf = 0; wf < TRACKS.length; wf++)
-  for (var wq = 0; wq < sets[TRACKS[wf]].length && !withFollow; wq++){
-    var cand = sets[TRACKS[wf]][wq];
-    if (cand.moves.length === 1 && cand.follow && cand.follow.moves.length)
-      withFollow = { track: TRACKS[wf], n: wq + 1, p: cand };
-  }
+   move. Every track goes through the same walk, because the three ladders were
+   checked by different runs of tools/verify_puzzles.js and store the line in
+   two different shapes: `follow`, which is the line together with the score it
+   arrives at and the one it started from, and `followUp`, which is the line on
+   its own. pzFollowOf() is the only thing in the page that knows there are
+   two, and a per-track pass is what proves it — a track quietly reading back
+   as "no follow-up" would otherwise pass every check in this file.
 
-if (withFollow){
-  PZ.track = withFollow.track;
-  PZ.list = sets[withFollow.track];
-  pzOpen(withFollow.n);
+   The line comes out of the file; no engine is loaded on this screen. What is
+   tested here is the gate on it, the playing of it and the sentence it writes,
+   not the chess, which tools/verify_puzzles.js is responsible for. */
+function followUpFlow(track){
+  var list = sets[track], pick = null;
+  for (var i = 0; i < list.length && !pick; i++)
+    if (list[i].moves.length === 1 && pzHasFollowUp(list[i]))
+      pick = { n: i + 1, p: list[i] };
+  if (!pick){
+    say('  ..    no one-move puzzle with a follow-up in ' + track + ', skipping');
+    return;
+  }
+  var at = track + ': ';
+  var f = pzFollowOf(pick.p);
+
+  PZ.mode = 'ladder';
+  PZ.track = track;
+  PZ.list = list;
+  pzOpen(pick.n);
   timers = [];
   pzRender();
-  check('the card offers a follow-up at all', elements.pzFollow.style.display, '');
-  check('but it cannot be pressed before it is solved',
+  check(at + 'a puzzle with a follow-up says so', pzHasFollowUp(pick.p), true);
+  check(at + 'the card offers it at all',         elements.pzFollow.style.display, '');
+  check(at + 'but it cannot be pressed before the puzzle is solved',
         elements.pzFollow.disabled, true);
-  check('and Show Solution is what there is to press', elements.pzShow.disabled, false);
+  check(at + 'and Show Solution is what there is to press', elements.pzShow.disabled, false);
 
-  pzPlay(moveFor(withFollow.p.moves[0]));
+  // it will not run early either: it gives the whole thing away
+  var fenBefore = fenOf(G.st);
+  pzShowFollowUp();
+  check(at + 'pressing it early does nothing', PZ.followed, false);
+  check(at + 'and the board has not moved',    fenOf(G.st), fenBefore);
+
+  // solve it, walking any forced reply the way the page's timer would
+  pzPlay(moveFor(pick.p.moves[0]));
+  for (var fs = 1; fs < pick.p.moves.length; fs++){
+    if (PZ.busy){ G.st = makeMove(G.st, moveFor(pick.p.moves[fs])); PZ.busy = false; }
+    else pzPlay(moveFor(pick.p.moves[fs]));
+  }
+  check(at + 'the puzzle is solved', PZ.done, true);
+
   pzRender();
-  check('solving it offers the follow-up', elements.pzFollow.disabled, false);
-  check('and Show Solution is spent', elements.pzShow.disabled, true);
-  check('the card explains why the move was good before it is pressed',
-        elements.pzFollowSay.textContent.indexOf('Best play continues') >= 0, false);
+  check(at + 'solving it offers the follow-up',  elements.pzFollow.disabled, false);
+  check(at + 'and it is labelled Show Follow Up', elements.pzFollow.textContent, 'Show Follow Up');
+  check(at + 'Show Solution is spent',            elements.pzShow.disabled, true);
+  check(at + 'and nothing is said before it is pressed',
+        elements.pzFollowSay.textContent, '');
 
-  var atSolve = fenOf(G.st);
+  var atSolve = fenOf(G.st), playedBefore = G.uci.length;
   timers = [];
   pzShowFollowUp();
-  check('pressing it takes the board over', PZ.busy, true);
-  flushTimers();
-  check('the follow-up is played out',   fenOf(G.st) !== atSolve, true);
-  check('and the board is handed back',  PZ.busy, false);
-  check('it only plays once',            PZ.followed, true);
+  check(at + 'pressing it takes the board over', PZ.busy, true);
+  check(at + 'and takes the offer',              PZ.followed, true);
   pzRender();
-  check('the button will not fire twice', elements.pzFollow.disabled, true);
-  check('and the card now says what came of it',
-        elements.pzFollowSay.textContent.indexOf('Best play continues') >= 0, true);
-  check('with the score the file carried behind the sentence',
-        /up\.|down\.|Mate in|already lost|calls/.test(elements.pzFollowSay.textContent), true);
-  check('the follow-up reads as notation, not as squares',
-        /[a-h][1-8][a-h][1-8]/.test(pzFollowSay(withFollow.p)), false);
+  check(at + 'so it cannot be pressed twice', elements.pzFollow.disabled, true);
+  flushTimers();                                  // the page plays it on a timer
+  check(at + 'the follow-up is played out', fenOf(G.st) !== atSolve, true);
+  check(at + 'every move of it landed',     G.uci.length - playedBefore, f.moves.length);
+  check(at + 'and the board is handed back', PZ.busy, false);
+
+  pzRender();
+  var said = pzFollowSay(pick.p);
+  check(at + 'the card explains what it led to', said.length > 20, true);
+  check(at + 'and names the moves it played',    said.indexOf('Best play continues'), 0);
+  check(at + 'the card carries it',              elements.pzFollowSay.textContent, said);
+  check(at + 'it reads as notation, not as squares',
+        /[a-h][1-8][a-h][1-8]/.test(said), false);
+  // where the file carried a score, the sentence says how the line ends
+  if (pick.p.follow)
+    check(at + 'with the score the file carried behind it',
+          /up\.|down\.|Mate in|already lost|calls/.test(said), true);
+  check(at + 'a puzzle with no follow-up says nothing',
+        pzFollowSay({ fen: pick.p.fen, moves: pick.p.moves }), '');
+
+  // and Puzzle Rush is not the place for any of it
+  RUSH.on = true; RUSH.over = null; RUSH.solved = 0; RUSH.strikes = 0;
+  PZ.mode = 'rush';
+  rushRender();
+  check(at + 'a rush hides the follow-up entirely', elements.pzFollow.style.display, 'none');
+  RUSH.on = false; PZ.mode = 'ladder'; PZ.track = track;
 
   // retrying puts the position, and the button, back
   pzRetry();
   timers = [];
   pzRender();
-  check('retrying clears the follow-up',   PZ.followed, false);
-  check('and puts the position back',      fenOf(G.st), withFollow.p.fen);
-
-  // a puzzle whose line ends in mate has nothing to follow up
-  var mated = null;
-  for (var mt = 0; mt < TRACKS.length && !mated; mt++)
-    for (var mq = 0; mq < sets[TRACKS[mt]].length && !mated; mq++)
-      if (sets[TRACKS[mt]][mq].follow && !sets[TRACKS[mt]][mq].follow.moves.length)
-        mated = { track: TRACKS[mt], n: mq + 1, p: sets[TRACKS[mt]][mq] };
-  if (mated){
-    PZ.track = mated.track;
-    PZ.list = sets[mated.track];
-    pzOpen(mated.n);
-    PZ.done = true;
-    pzRender();
-    check('a puzzle that ends in mate offers no follow-up',
-          elements.pzFollow.style.display, 'none');
-    check('and says nothing about one', pzFollowSay(mated.p), '');
-  }
-} else {
-  say('  ..    no one-move puzzle with a follow-up in this set, skipping');
+  check(at + 'retrying clears the follow-up', PZ.followed, false);
+  check(at + 'and puts the position back',    fenOf(G.st), pick.p.fen);
 }
+for (var ftk = 0; ftk < TRACKS.length; ftk++) followUpFlow(TRACKS[ftk]);
+PZ.on = false;
 
-say('\nShow Follow Up: a line stored on its own\n');
+check('a puzzle with no line at all offers nothing', pzHasFollowUp({ moves:['e2e4'] }), false);
 
-/* Which is a different question from what the move was, and is asked after the
-   puzzle is over. The line comes out of the file — no engine is loaded on this
-   screen — so what is tested here is the gate on it and the sentence it
-   writes, not the chess, which tools/verify_puzzles.js is responsible for. */
-var withFollowUp = null;
-for (var fu = 0; fu < TRACKS.length; fu++)
-  for (var fp = 0; fp < sets[TRACKS[fu]].length; fp++)
-    if (!withFollowUp && sets[TRACKS[fu]][fp].followUp && sets[TRACKS[fu]][fp].followUp.length)
-      withFollowUp = { track: TRACKS[fu], n: fp + 1, p: sets[TRACKS[fu]][fp] };
-
-if (withFollowUp){
+/* A solution that ends in mate has nothing to follow, and the button is absent
+   rather than present and dead — which is the one case that cannot be found by
+   looking for a follow-up, since what it looks like is not having one. */
+var mated = null;
+for (var mt = 0; mt < TRACKS.length && !mated; mt++)
+  for (var mq = 0; mq < sets[TRACKS[mt]].length && !mated; mq++)
+    if (!pzHasFollowUp(sets[TRACKS[mt]][mq]))
+      mated = { track: TRACKS[mt], n: mq + 1, p: sets[TRACKS[mt]][mq] };
+if (mated){
   PZ.mode = 'ladder';
-  PZ.track = withFollowUp.track;
-  PZ.list = sets[withFollowUp.track];
-  pzOpen(withFollowUp.n);
-  timers = [];
-
-  check('a puzzle with a follow-up says so', pzHasFollowUp(withFollowUp.p), true);
-  check('and one without does not',          pzHasFollowUp({ moves:['e2e4'] }), false);
-
-  // it is not on offer until the puzzle is over: it gives the whole thing away
-  var fenBefore = fenOf(G.st);
-  pzShowFollowUp();
-  check('it will not run before the puzzle is solved', PZ.followed, false);
-  check('and the board has not moved',                 fenOf(G.st), fenBefore);
-
-  // solve it, walking any forced reply the way the page's timer would
-  pzPlay(moveFor(withFollowUp.p.moves[0]));
-  for (var fs = 1; fs < withFollowUp.p.moves.length; fs++){
-    if (PZ.busy){ G.st = makeMove(G.st, moveFor(withFollowUp.p.moves[fs])); PZ.busy = false; }
-    else pzPlay(moveFor(withFollowUp.p.moves[fs]));
-  }
-  check('the puzzle is solved', PZ.done, true);
-
+  PZ.track = mated.track;
+  PZ.list = sets[mated.track];
+  pzOpen(mated.n);
+  PZ.done = true;
   pzRender();
-  check('the button is offered once it is', elements.pzFollow.disabled, false);
-  check('and it is labelled Show Follow Up', elements.pzFollow.textContent, 'Show Follow Up');
-  check('with nothing said yet',            elements.pzFollowSay.textContent, '');
-
-  timers = [];
-  pzShowFollowUp();
-  check('pressing it takes the offer',   PZ.followed, true);
-  check('and the board is busy playing', PZ.busy, true);
-  pzRender();
-  check('so it cannot be pressed twice', elements.pzFollow.disabled, true);
-  G.token++;                                  // strand the page's timer; we walk it here
-
-  // walk the line by hand, exactly as the timer would
-  for (var fw = 0; fw < withFollowUp.p.followUp.length; fw++){
-    var fm = moveFor(withFollowUp.p.followUp[fw]);
-    check('follow-up move ' + (fw + 1) + ' is legal where it lands', !!fm, true);
-    G.st = makeMove(G.st, fm);
-  }
-  PZ.busy = false;
-  pzRender();
-
-  var said = pzFollowSay(withFollowUp.p);
-  check('the card explains what it led to', said.length > 20, true);
-  check('and names the moves it played',    said.indexOf('Best play continues') === 0, true);
-  check('the card carries it', elements.pzFollowSay.textContent, said);
-  check('a puzzle with no follow-up says nothing',
-        pzFollowSay({ fen: withFollowUp.p.fen, moves: withFollowUp.p.moves }), '');
-
-  // and Puzzle Rush is not the place for it
-  RUSH.on = true; RUSH.over = null; RUSH.solved = 0; RUSH.strikes = 0;
-  PZ.mode = 'rush';
-  rushRender();
-  check('a rush hides the follow-up entirely', elements.pzFollow.style.display, 'none');
-  RUSH.on = false; PZ.mode = 'ladder'; PZ.track = withFollowUp.track;
-
-  // a retry starts the whole thing over, follow-up included
-  pzOpen(withFollowUp.n);
-  check('and re-opening the puzzle takes it back', PZ.followed, false);
+  check('a puzzle with nothing to follow offers no button',
+        elements.pzFollow.style.display, 'none');
+  check('and says nothing about one', pzFollowSay(mated.p), '');
   PZ.on = false;
 } else {
-  say('  ..    no puzzle in this set carries a follow-up, skipping');
+  say('  ..    every shipped puzzle carries a follow-up, nothing to skip');
 }
 
 say('\nRating, for a player with nowhere to store one\n');
@@ -512,8 +490,11 @@ check('a solve in one track is stored there',
       pzProgress('endgame').solved.indexOf('en-test-1') >= 0, true);
 check('and not in another', pzProgress('opening').solved.indexOf('en-test-1') >= 0, false);
 pzMark('endgame', 'en-test-1', true);
-check('marking the same one twice does not double it',
-      pzProgress('endgame').solved.length, 1);
+// counted rather than measured by length: real endgame puzzles have been
+// solved further up this file, and they are in the same list
+var twice = 0, solvedIds = pzProgress('endgame').solved;
+for (var si = 0; si < solvedIds.length; si++) if (solvedIds[si] === 'en-test-1') twice++;
+check('marking the same one twice does not double it', twice, 1);
 
 // and it is kept per account, so signing out does not show somebody else's
 // ladder — and playing on as a guest cannot write over theirs

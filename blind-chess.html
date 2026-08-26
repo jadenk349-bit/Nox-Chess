@@ -1171,6 +1171,10 @@
   .pz-theme.rating{color:var(--gold-soft); border-color:rgba(212,175,110,.35);}
   .pz-controls{display:flex; gap:8px; margin-top:14px;}
   .pz-controls button{flex:1; padding:9px 6px; font-size:12px;}
+  /* the follow-up gets a row of its own: it is the one control on this card
+     that is worth anything only after the puzzle is over, and squeezing a
+     fourth button into the row above would shorten the three that are always
+     there */
   .pz-follow{width:100%; margin-top:8px; padding:9px 6px; font-size:12px;}
   .pz-follow-say{color:var(--gold-soft); border-color:rgba(212,175,110,.45); padding-left:9px;}
   .pz-progress{
@@ -5646,6 +5650,15 @@ function reviewRender(){
    that writes the coach card in the review, which is why a puzzle tagged
    "fork" is explained with the word fork.
 
+   A puzzle from any of the three tracks may also carry a follow-up: a few
+   more plies of best play from where the solution stops, behind the Show
+   Follow Up button. A solution ends when the finding ends, which is often
+   several moves before the point is obvious, and "you won a rook" is a poor
+   answer to "why was that good". The moves are the engine's, one search per
+   move — see tools/verify_puzzles.js — and the page only ever replays them.
+   pzFollowOf() is the only thing here that knows the file writes that line in
+   either of two shapes; everything else asks it.
+
    The board is the game board. Same squares, same pieces, same renderer, with
    G pointed at the puzzle position and G.opponent set to 'puzzle' so that
    BOT(), LOCAL() and ONLINE() are all false and none of the game's machinery
@@ -5653,7 +5666,7 @@ function reviewRender(){
    ============================================================ */
 const PZ_TRACK_NAME = { opening:'Opening', middlegame:'Middlegame', endgame:'Endgame' };
 const PZ_START_RATING = 1200;
-const PZ_VERSION = 3;              // ?v= on the three files; bump when they are regenerated
+const PZ_VERSION = 4;              // ?v= on the three files; bump when they are regenerated
 const PZ_REPLY_MS = 420;           // long enough to read the reply as an answer
 
 const PZ = {
@@ -6263,6 +6276,11 @@ function pzExplain(p){
 
 /* What the follow-up amounts to, said plainly.
 
+   pvLine() answers this shape of question for the review, and cannot answer it
+   here: it speaks for whoever is to move at the head of the line, and a
+   follow-up begins on the *opponent's* move, so its "you" would name the wrong
+   player.
+
    The line comes from the file; the verdict is read off the board the line
    arrives at, because material the player can count is worth more here than a
    centipawn number. The engine's own score is kept for the two cases counting
@@ -6386,6 +6404,9 @@ function pzRender(){
   follow.style.display = has ? '' : 'none';
   follow.disabled = !PZ.done || PZ.busy || PZ.followed;
   follow.textContent = PZ.followed ? 'Follow Up Shown' : 'Show Follow Up';
+  // and what came of it, on its own line and only once it has been watched:
+  // the sentence is the answer to the button, and printing it beside the
+  // button is answering before it is pressed
   const said = (PZ.followed && !PZ.busy) ? pzFollowSay(p) : '';
   followSay.textContent = said;
   followSay.style.display = said ? '' : 'none';
@@ -6413,6 +6434,7 @@ function rushRender(){
   document.getElementById('pzLevels').style.display = 'none';
   document.getElementById('pzShow').style.display = 'none';
   document.getElementById('pzRetry').style.display = 'none';
+  // a run does not stop to explain
   document.getElementById('pzFollow').style.display = 'none';
   document.getElementById('pzFollowSay').style.display = 'none';
 
