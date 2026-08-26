@@ -28,6 +28,8 @@ python3 tools/check_supabase_puzzles.py  # RLS and column grants, against the re
 
 node tools/generate_puzzles.js --poolsOut /tmp/pools.json   # regenerate (slow: ~12 min)
 node tools/generate_puzzles.js --poolsIn /tmp/pools.json    # re-cut the ladders only (instant)
+node tools/verify_puzzles.js --track middlegame            # re-check one ladder, and write its follow-ups
+node tools/verify_puzzles.js --track middlegame --dry      # ...report only, touching nothing
 
 docker build -t nox-chess . && docker run --rm -p 8787:8787 nox-chess
 ```
@@ -213,6 +215,28 @@ they share is the explaining — `findMotifs()`, `see()`, `describeBest()` — w
 is why a puzzle tagged `fork` is explained with the word fork. Keep the
 dependency one-way: `PZ` may call the review's pure helpers, the review must
 never learn what a puzzle is.
+
+**A shipped ladder is checked, not trusted.** `tools/verify_puzzles.js` replays
+every puzzle in a file against the engine at depth 18 — the solver's moves have
+to still be best, the defence's moves have to still be the best defence — and
+rebuilds any line that fails by the generator's own rules, recomputing the id
+(a hash of position and line) and the seed rating with it. Two rules make it
+converge instead of churning: a verdict is a **head-to-head** comparison, both
+moves played and the results scored, never the order of a MultiPV list, whose
+top move is not always the move a MultiPV 1 search plays; and nothing is
+rewritten on one search, only on one that a deeper look agrees with. A correct
+solution that is no longer *sharp* is reported, not rewritten — sharpness is a
+generation criterion, not a claim the file makes to the player.
+
+**The follow-up is in the file, not in the browser.** Each puzzle in a verified
+track carries `follow`: a few more plies of best play past the end of the
+solution, the score the line arrives at, the material it wins, and the score the
+puzzle *started* at. `pzFollowUp()` plays them out on the board and
+`pzFollowSay()` writes the sentence; no engine is asked at the board, exactly as
+`pzExplain()` asks none. `follow.startCp` is what lets the card tell a move that
+wins from a move that is merely the best of a lost position — both are right
+answers, and only one of them is "you come out a rook up". Tracks without the
+field simply show no button.
 
 **Puzzle Rush borrows the game's clock.** `tickClock()` and `renderClocks()`
 each grow one branch for `RUSH.on`; there is no second timer. A run never

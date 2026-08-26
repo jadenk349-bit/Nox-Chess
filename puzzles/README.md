@@ -107,3 +107,22 @@ Then bump the `?v=` on the three JSON files in `blind-chess.html`, because
 `server/server.py` serves them with a week of cache. Regenerating renumbers
 the ladders; progress is stored per puzzle id, so a player keeps whatever they
 have already solved and loses only their place in the numbering.
+
+<!-- verified: begin -->
+
+## Checked against the engine
+
+Written by `tools/verify_puzzles.js`, which replays every move of every
+puzzle in a track and rebuilds any line the engine no longer agrees with.
+The row is the **last run**, not a history: *repaired* counts what that run
+rewrote, and a second run over a file already checked rewrites nothing — see
+the git history for what changed. *Dull* puzzles are still the best move but
+no longer beat the runner-up by 150cp at this depth, which is reported and
+left alone. *Follow-up* counts the puzzles carrying a continuation for the
+Show Follow-up button — a line that ends in mate has none.
+
+| Track | Checked | Depth | Puzzles | Repaired | Dull | Follow-up |
+|---|---|---|---|---|---|---|
+| `middlegame` | 2026-08-26 | 18 | 100 | 0 | 36 | 97 |
+
+<!-- verified: end -->

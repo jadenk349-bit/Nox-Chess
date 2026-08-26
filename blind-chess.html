@@ -2446,6 +2446,10 @@
             <div class="pz-themes" id="pzThemes"></div>
             <div class="pz-controls">
               <button class="ghost" id="pzShow">Show Solution</button>
+              <!-- takes the same slot once the puzzle is over: before, the only
+                   thing to ask for is the answer; after, the only thing left to
+                   ask is what the answer was for -->
+              <button class="ghost" id="pzFollow" style="display:none">Show Follow-up</button>
               <button class="ghost" id="pzRetry">Retry</button>
               <button class="primary" id="pzNext">Next</button>
             </div>
@@ -5647,7 +5651,7 @@ function reviewRender(){
    ============================================================ */
 const PZ_TRACK_NAME = { opening:'Opening', middlegame:'Middlegame', endgame:'Endgame' };
 const PZ_START_RATING = 1200;
-const PZ_VERSION = 1;              // ?v= on the three files; bump when they are regenerated
+const PZ_VERSION = 2;              // ?v= on the three files; bump when they are regenerated
 const PZ_REPLY_MS = 420;           // long enough to read the reply as an answer
 
 const PZ = {
@@ -5664,6 +5668,7 @@ const PZ = {
   wrong: false,        // a wrong move was tried on this attempt
   shown: false,        // the solution was revealed
   done: false,         // the line has been played to its end
+  followed: false,     // the follow-up has been played out past the end of it
   busy: false          // the forced reply is on its way
 };
 const pzLoaded = {};   // track -> the parsed ladder, fetched once
@@ -6022,7 +6027,7 @@ function pzOpen(n){
   PZ.n = n;
   PZ.puzzle = p;
   PZ.ply = 0;
-  PZ.wrong = PZ.shown = PZ.done = PZ.busy = false;
+  PZ.wrong = PZ.shown = PZ.done = PZ.followed = PZ.busy = false;
   PZ.side = stateFromFEN(p.fen).turn;
   PZ.wasDone = PZ.track ? pzDone(PZ.track).has(p.id) : false;   // a replay is not worth a rating
   if (PZ.mode === 'rush') RUSH.at = n - 1;
@@ -6156,6 +6161,43 @@ function pzShowSolution(){
   setTimeout(step, 200);
 }
 
+/* ---- the follow-up ----
+   A puzzle stops the moment the answer stops being in doubt, which is exactly
+   where somebody who has just found it is left asking "and then what?". The
+   follow-up is the rest of that sentence: a few more plies of best play, each
+   one an engine answer at full depth, checked into puzzles/<track>.json beside
+   the solution by tools/verify_puzzles.js. Nothing is asked at the board — the
+   line was verified once, in the tool, rather than once per player.
+
+   It plays out on the same board at the same cadence as the forced replies, so
+   it reads as the game continuing rather than as a diagram. */
+function pzFollowUp(){
+  const p = PZ.puzzle;
+  const f = p && p.follow;
+  if (!PZ.done || PZ.busy || PZ.followed || !f || !f.moves || !f.moves.length) return;
+  PZ.followed = true;
+  PZ.busy = true;
+  beep(620,.07);
+  pzRender();
+  const token = G.token;
+  let i = 0;
+  const step = () => {
+    if (!PZ.on || G.token !== token) return;                  // the board moved on
+    const u = f.moves[i];
+    const m = u && legalMoves(G.st, G.st.turn).find(x => uciOf(x) === u);
+    // the line has run out, or — a file older than the page — would not play
+    if (!m){ PZ.busy = false; render(); pzRender(); return; }
+    G.st = makeMove(G.st, m);
+    G.uci.push(u);
+    G.lastMove = m;
+    i++;
+    beep(500,.05);
+    render();
+    setTimeout(step, PZ_REPLY_MS);
+  };
+  setTimeout(step, 200);
+}
+
 function pzRetry(){ pzOpen(PZ.n); }
 function pzNext(){
   if (PZ.n < PZ.list.length) pzOpen(PZ.n + 1);
@@ -6171,6 +6213,68 @@ function pzExplain(p){
   const m = legalMoves(st, st.turn).find(x => uciOf(x) === p.moves[0]);
   if (!m) return '';
   return describeBest(st, m, null, null, pvLine(st, p.moves));
+}
+
+/* What the follow-up amounts to, said plainly.
+
+   The line comes from the file; the verdict is read off the board the line
+   arrives at, because material the player can count is worth more here than a
+   centipawn number. The engine's own score is kept for the two cases counting
+   pieces gets wrong: a position won by force with nothing captured yet, and
+   one where the material is up but the position is not. */
+function pzFollowSay(p){
+  const f = p.follow;
+  if (!f || !f.moves || !f.moves.length) return '';
+  const start = stateFromFEN(p.fen);
+  const solver = start.turn;
+  let st = start;
+  for (const u of p.moves){
+    const m = legalMoves(st, st.turn).find(x => uciOf(x) === u);
+    if (!m) return '';
+    st = makeMove(st, m);
+  }
+  const sans = [];
+  for (const u of f.moves){
+    const all = legalMoves(st, st.turn);
+    const m = all.find(x => uciOf(x) === u);
+    if (!m) break;
+    sans.push(toSAN(st, m, all));
+    st = makeMove(st, m);
+  }
+  if (!sans.length) return '';
+
+  const out = ['Best play continues ' + sans.join(' ') + '.'];
+  const them = solver === W ? 'Black' : 'White';
+  const gain = materialFor(st, solver) - materialFor(start, solver);
+  const mated = !legalMoves(st, st.turn).length && inCheck(st, st.turn);
+
+  // a mate on the board says who it is for by whose turn it is; a mate still
+  // being forced is a number in the file, positive when it is yours
+  if (mated) out.push(st.turn === solver ? 'Even so, you are mated.' : 'That is checkmate.');
+  else if (typeof f.mate === 'number')
+    out.push(f.mate > 0 ? 'Mate in ' + f.mate + ' follows.'
+                        : them + ' has mate in ' + Math.abs(f.mate) + '.');
+  else if (gain >= 90)  out.push('You come out ' + materialWord(gain) + ' up.');
+  else if (gain <= -90) out.push('You come out ' + materialWord(-gain) + ' down.');
+
+  /* And what to make of it. There are two kinds of right answer in this set —
+     the move that wins something, and the move that is simply the best of a
+     lost position — and a card that only ever counts material tells somebody
+     who has just found the second one that they have blundered. The score the
+     position started at, which is in the file beside the line, is what tells
+     them apart. */
+  const lost = v => typeof v === 'number' && v <= -150;
+  const startLost = (typeof f.startMate === 'number' && f.startMate < 0) || lost(f.startCp);
+  const endLost = (typeof f.mate === 'number' && f.mate < 0) || lost(f.cp);
+  if (mated && st.turn === solver) return out.slice(0, 3).join(' ');
+  if (startLost && endLost)
+    out.push('The position was already lost — this is what holds out longest.');
+  else if (typeof f.mate !== 'number' && typeof f.cp === 'number'){
+    if (f.cp <= -150 && gain > -90) out.push('The engine still calls it better for ' + them + '.');
+    else if (f.cp >= 150 && gain < 90) out.push('The engine calls that winning.');
+    else if (Math.abs(f.cp) < 150 && Math.abs(gain) < 90) out.push('The engine calls it level.');
+  }
+  return out.slice(0, 3).join(' ');
 }
 
 /** The solution in notation, for when it has been given away. */
@@ -6205,7 +6309,8 @@ function pzRender(){
   say.className = 'pz-say';
   if (PZ.done){
     say.classList.add(PZ.shown || PZ.wrong ? 'told' : 'right');
-    say.textContent = (PZ.shown ? '' : PZ.wrong ? 'Solved. ' : 'Correct. ') + pzExplain(p);
+    say.textContent = (PZ.shown ? '' : PZ.wrong ? 'Solved. ' : 'Correct. ') + pzExplain(p) +
+                      (PZ.followed ? ' ' + pzFollowSay(p) : '');
   } else if (PZ.busy){
     say.textContent = '…';
   } else if (PZ.wrong){
@@ -6227,14 +6332,22 @@ function pzRender(){
     // the themes give the answer away, so they wait until it has been given
     (PZ.done ? p.themes.map(t => '<span class="pz-theme">' + PZ_THEME_NAME(t) + '</span>').join('') : '');
 
-  document.getElementById('pzShow').disabled = PZ.done || PZ.busy;
+  // Show Solution and Show Follow-up share one slot: only one of them is ever
+  // the thing left to ask for. A puzzle whose line ends in mate has no
+  // follow-up to show, and keeps the spent Show Solution button.
+  const canFollow = PZ.done && p.follow && p.follow.moves && p.follow.moves.length > 0;
+  const show = document.getElementById('pzShow');
+  const follow = document.getElementById('pzFollow');
+  show.style.display = canFollow ? 'none' : '';
+  show.disabled = PZ.done || PZ.busy;
+  follow.style.display = canFollow ? '' : 'none';
+  follow.disabled = PZ.busy || PZ.followed;
   document.getElementById('pzRetry').disabled = PZ.busy || (!PZ.done && PZ.ply === 0 && !PZ.wrong);
   const next = document.getElementById('pzNext');
   next.disabled = !PZ.done || PZ.n >= PZ.list.length;
   next.textContent = PZ.n >= PZ.list.length ? 'Track Complete' : 'Next Puzzle';
 
   document.getElementById('pzLevels').style.display = '';
-  document.getElementById('pzShow').style.display = '';
   document.getElementById('pzRetry').style.display = '';
   pzRenderGrid();
   syncOptions();
@@ -6251,6 +6364,7 @@ function rushRender(){
   document.getElementById('pzTitle').textContent = 'Puzzle Rush';
   document.getElementById('pzLevels').style.display = 'none';
   document.getElementById('pzShow').style.display = 'none';
+  document.getElementById('pzFollow').style.display = 'none';
   document.getElementById('pzRetry').style.display = 'none';
 
   const ask = document.getElementById('pzAsk');
@@ -6322,6 +6436,7 @@ document.getElementById('pzGrid').addEventListener('click', e => {
   pzOpen(+b.dataset.n);
 });
 document.getElementById('pzShow').onclick  = () => pzShowSolution();
+document.getElementById('pzFollow').onclick = () => pzFollowUp();
 document.getElementById('pzRetry').onclick = () => pzRetry();
 document.getElementById('pzNext').onclick  = () => {
   if (PZ.mode !== 'rush') return pzNext();
@@ -6651,20 +6766,25 @@ document.getElementById('navLocal').onclick    = goLocal;
 document.getElementById('navFriendly').onclick = goFriendly;
 
 // PUZZLE is only a menu opener once signed in, so it has no click of its own;
-// locked, that click is the whole invitation and it is the shortcut to
-// sign-up.
+// locked, that click is the whole invitation and it is the shortcut to the
+// account that unlocks the ladder.
 document.getElementById('navPuzzle').onclick = () => { if (GUEST()) toSignUp(); };
+
 // Deliberately inert for now, each one waiting on a page of its own.
 ['navHowTo','navPractice']
   .forEach(id => { document.getElementById(id).onclick = () => {}; });
 
-// The three puzzle tracks, each its own ladder of a hundred — but a guest's
+// The three puzzle tracks, each its own ladder of a hundred — and a ladder is
+// a record of what you have solved, which has to belong to somebody. A guest's
 // place in one has nowhere to live, so for them the lock leads somewhere
-// rather than nowhere.
-document.getElementById('navOpening').onclick = () => GUEST() ? toSignUp() : enterTrack('opening');
-document.getElementById('navMiddle').onclick  = () => GUEST() ? toSignUp() : enterTrack('middlegame');
-document.getElementById('navEnd').onclick     = () => GUEST() ? toSignUp() : enterTrack('endgame');
-document.getElementById('navRush').onclick    = () => rushStart();
+// rather than nowhere. Puzzle Rush answers to the same rule: it is in
+// LOCKED_IDS with the rest, and a button painted locked must not quietly start
+// a run anyway.
+const goTrack = track => () => GUEST() ? toSignUp() : enterTrack(track);
+document.getElementById('navOpening').onclick = goTrack('opening');
+document.getElementById('navMiddle').onclick  = goTrack('middlegame');
+document.getElementById('navEnd').onclick     = goTrack('endgame');
+document.getElementById('navRush').onclick    = () => GUEST() ? toSignUp() : rushStart();
 
 document.getElementById('btnSettings').onclick = () => { beep(560,.07); showScreen('settings'); };
 document.getElementById('btnSetBack').onclick  = () => showScreen('home');
@@ -7342,7 +7462,7 @@ const GUEST = () => accountsAvailable() && !account;
    buttons for exactly that reason: [disabled] would swallow the click that
    was the whole invitation. */
 const LOCKED_IDS = ['navRanked', 'navSocial', 'navPuzzle',
-                    'navOpening', 'navMiddle', 'navEnd'];
+                    'navOpening', 'navMiddle', 'navEnd', 'navRush'];
 
 function lockedControls(){
   const out = LOCKED_IDS.map(id => document.getElementById(id)).filter(Boolean);

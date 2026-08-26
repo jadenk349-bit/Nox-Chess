@@ -81,13 +81,22 @@ class Engine {
     }
   }
 
-  /** ask({fen, moves, skill, multipv, depth, movetime}) -> engineAsk's shape */
+  /** ask({fen, moves, skill, multipv, depth, movetime, fresh}) -> engineAsk's shape
+   *
+   * `fresh` empties the transposition table first. An engine kept alive across
+   * many questions is faster because it remembers, and that memory is exactly
+   * what a checking tool must not have: the same position asked after two
+   * different games can otherwise come back with two different answers at the
+   * same depth. Generating wants the speed; verifying wants the isolation. */
   async ask(opt){
     await this.ready;
     if (this.pending) throw new Error('sf: one question at a time per engine');
     const multipv = opt.multipv || 1;
     const skill = opt.skill === undefined ? 20 : opt.skill;
     const moves = (opt.moves && opt.moves.length) ? ' moves ' + opt.moves.join(' ') : '';
+    // one worker, one queue: the commands are read in the order they are sent,
+    // so ucinewgame lands before the position it is meant to clear for
+    if (opt.fresh) this.send('ucinewgame');
     this.send('setoption name Skill Level value ' + skill);
     this.send('setoption name MultiPV value ' + multipv);
     this.send('position ' + (opt.fen ? 'fen ' + opt.fen : 'startpos') + moves);
