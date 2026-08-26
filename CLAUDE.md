@@ -28,6 +28,8 @@ python3 tools/check_supabase_puzzles.py  # RLS and column grants, against the re
 
 node tools/generate_puzzles.js --poolsOut /tmp/pools.json   # regenerate (slow: ~12 min)
 node tools/generate_puzzles.js --poolsIn /tmp/pools.json    # re-cut the ladders only (instant)
+node tools/verify_puzzles.js --track opening               # audit a shipped ladder (slow)
+node tools/verify_puzzles.js --track opening --followup 6 --write   # …and repair it in place
 
 docker build -t nox-chess . && docker run --rm -p 8787:8787 nox-chess
 ```
@@ -203,6 +205,35 @@ write, exactly as `rating` and `tier` already work; `server/supabase_db.py`
 writes it with the service key, and without one the server keeps ratings in
 memory. Guests get neither and keep both locally. Run
 `supabase-migrate-puzzles.sql` once, by hand, like `supabase-setup.sql`.
+
+**A shipped ladder is audited by a different tool than the one that grew it.**
+`generate_puzzles.js` judges a position once, at `confirmDepth`, and splices its
+own best defence in before judging the next one — so every ply of a solution
+was chosen by a search that had only just arrived at it.
+`tools/verify_puzzles.js` asks again from outside, both colours, and where it
+disagrees the file is wrong: the player is being told to play a move the engine
+does not play, and `puzzleStep()` will accept nothing else. Two depths, because
+one is either too slow to run over a whole track or too shallow to be believed —
+a cheap sweep only nominates, and a slow verdict is the only thing allowed to
+call a move wrong. That split is not fussiness: a single pass at depth 22 called
+six of the hundred opening puzzles wrong and depth 26 sided with the file on
+five of them. A disagreement is **repaired, not deleted** — the line is cut at
+the offending ply, the engine's move goes in, and it is extended by the
+generator's own rule — because a track is a hundred rungs and has to stay a
+hundred rungs.
+
+**The follow-up is the payoff, and it is precomputed.** A solution is extended
+only while there is still exactly one strong move to find, which stops it a
+move or two before the rook actually falls off the board — so a player who has
+just found the move is holding a position whose point has not happened yet.
+`followUp` in the puzzle file is best play from both sides from there, chosen
+by `verify_puzzles.js`, and Show Follow Up plays it out. It is precomputed on
+purpose: `pzExplain()` asks no engine, and `test_puzzle_flow.js` asserts that
+the puzzle screen never loads one. `pzFollowSay()` counts the material from the
+*puzzle's* first position rather than from where the solution stopped — the
+question is what the move the player found was worth, and half of it is usually
+already won by the time the solution runs out. Puzzles from before follow-ups
+existed have none, and the button is absent rather than present and dead.
 
 **Study Board and Puzzles are separate features that share one library.**
 Study Board (`REV`, the review screen) explains *the game the player just

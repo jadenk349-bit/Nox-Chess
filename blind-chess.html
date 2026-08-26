@@ -1105,6 +1105,8 @@
   .pz-theme.rating{color:var(--gold-soft); border-color:rgba(212,175,110,.35);}
   .pz-controls{display:flex; gap:8px; margin-top:14px;}
   .pz-controls button{flex:1; padding:9px 6px; font-size:12px;}
+  .pz-follow{width:100%; margin-top:8px; padding:9px 6px; font-size:12px;}
+  .pz-follow-say{color:var(--gold-soft); border-color:rgba(212,175,110,.45); padding-left:9px;}
   .pz-progress{
     float:right; font-size:10px; letter-spacing:.14em; color:var(--muted);
     font-variant-numeric:tabular-nums;
@@ -2374,12 +2376,16 @@
             <h2 id="pzTitle">Puzzle</h2>
             <div class="pz-ask" id="pzAsk"></div>
             <div class="pz-say" id="pzSay"></div>
+            <div class="pz-say pz-follow-say" id="pzFollowSay" style="display:none"></div>
             <div class="pz-themes" id="pzThemes"></div>
             <div class="pz-controls">
               <button class="ghost" id="pzShow">Show Solution</button>
               <button class="ghost" id="pzRetry">Retry</button>
               <button class="primary" id="pzNext">Next</button>
             </div>
+            <!-- the payoff, on a row of its own: it is the one control here
+                 that is worth anything only after the puzzle is over -->
+            <button class="ghost pz-follow" id="pzFollow">Show Follow Up</button>
           </div>
 
           <div class="card panel" id="pzLevels">
@@ -5579,7 +5585,7 @@ function reviewRender(){
    ============================================================ */
 const PZ_TRACK_NAME = { opening:'Opening', middlegame:'Middlegame', endgame:'Endgame' };
 const PZ_START_RATING = 1200;
-const PZ_VERSION = 1;              // ?v= on the three files; bump when they are regenerated
+const PZ_VERSION = 2;              // ?v= on the three files; bump when they are regenerated
 const PZ_REPLY_MS = 420;           // long enough to read the reply as an answer
 
 const PZ = {
@@ -5596,6 +5602,7 @@ const PZ = {
   wrong: false,        // a wrong move was tried on this attempt
   shown: false,        // the solution was revealed
   done: false,         // the line has been played to its end
+  followed: false,     // the follow-up has been played out
   busy: false          // the forced reply is on its way
 };
 const pzLoaded = {};   // track -> the parsed ladder, fetched once
@@ -5955,7 +5962,7 @@ function pzOpen(n){
   PZ.n = n;
   PZ.puzzle = p;
   PZ.ply = 0;
-  PZ.wrong = PZ.shown = PZ.done = PZ.busy = false;
+  PZ.wrong = PZ.shown = PZ.done = PZ.followed = PZ.busy = false;
   PZ.side = stateFromFEN(p.fen).turn;
   PZ.wasDone = PZ.track ? pzDone(PZ.track).has(p.id) : false;   // a replay is not worth a rating
   if (PZ.mode === 'rush') RUSH.at = n - 1;
@@ -6089,6 +6096,104 @@ function pzShowSolution(){
   setTimeout(step, 200);
 }
 
+/* ---- the follow-up ----
+   Finding the move and understanding it are two different things, and the
+   solution stops at the first — deliberately, because a line is extended only
+   while there is still exactly one strong move to find, which is usually a
+   move or two before the rook actually falls off the board. A player who has
+   just played the right move is therefore left holding a position whose point
+   has not happened yet.
+
+   The follow-up is that point, played out: both sides at full strength from
+   where the solution stopped, so what it shows is the best the defence has
+   rather than a line that only works if the opponent helps. It is chosen
+   offline, by the same engine that chose the puzzle — see
+   tools/verify_puzzles.js — because a puzzle screen with a Stockfish worker in
+   it is a second engine in a feature that was built around not having one, and
+   because a line the generator has verified beats a line the browser searches
+   for two seconds while the player waits.
+
+   Puzzles written before this existed simply have no followUp, and the button
+   stays off the card rather than appearing with nothing behind it. */
+function pzHasFollowUp(p){
+  return !!(p && p.followUp && p.followUp.length);
+}
+
+/** Where the solution leaves the board — the follow-up's own starting point. */
+function pzAfterSolution(p){
+  let st = stateFromFEN(p.fen);
+  for (const u of p.moves){
+    const m = legalMoves(st, st.turn).find(x => uciOf(x) === u);
+    if (!m) return null;
+    st = makeMove(st, m);
+  }
+  return st;
+}
+
+/* What the follow-up amounts to, in the review's own words and with no engine
+   asked: the file's line is replayed and pvLine's own reckoning of where a
+   line ends is applied to it.
+
+   The material is counted from the *puzzle's* first position, not from where
+   the solution stopped. What the player wants to know is what the move they
+   found was worth, and half of it was often already won by the time the
+   solution ran out — measuring from the end would credit the tactic with only
+   its last instalment. */
+function pzFollowSay(p){
+  const start = stateFromFEN(p.fen);
+  const solver = start.turn;
+  let st = pzAfterSolution(p);
+  if (!st) return '';
+  const sans = [];
+  for (const u of (p.followUp || [])){
+    const all = legalMoves(st, st.turn);
+    const m = all.find(x => uciOf(x) === u);
+    if (!m) break;                       // a line we cannot replay stops where it stops
+    sans.push(toSAN(st, m, all));
+    st = makeMove(st, m);
+  }
+  if (!sans.length) return '';
+
+  let outcome;
+  if (!legalMoves(st, st.turn).length)
+    outcome = !inCheck(st, st.turn) ? 'it is stalemate'
+            : st.turn === solver     ? 'you are mated'
+                                     : 'it is mate';
+  else {
+    const gain = materialFor(st, solver) - materialFor(start, solver);
+    outcome = gain >= 90  ? 'you are ' + materialWord(gain) + ' up on where you started'
+            : gain <= -90 ? 'you are ' + materialWord(-gain) + ' down'
+            : 'the material is level, and what the move won is the position';
+  }
+  return 'Best play from both sides: ' + sans.join(' ') + ' \u2014 ' + outcome + '.';
+}
+
+/** Play the follow-up out on the board, a move at a time. */
+function pzShowFollowUp(){
+  if (!PZ.done || PZ.busy || PZ.followed || !pzHasFollowUp(PZ.puzzle)) return;
+  PZ.followed = true;
+  PZ.busy = true;
+  pzRender();
+  const line = PZ.puzzle.followUp;
+  const token = G.token;
+  let i = 0;
+  const step = () => {
+    if (!PZ.on || G.token !== token) return;
+    const m = i < line.length &&
+              legalMoves(G.st, G.st.turn).find(x => uciOf(x) === line[i]);
+    if (!m){ PZ.busy = false; render(); pzRender(); return; }
+    G.st = makeMove(G.st, m);
+    G.uci.push(line[i]);
+    G.lastMove = m;
+    i++;
+    // the solver's half of the line and the defence's, told apart by ear
+    beep(i % 2 ? 520 : 400, .05);
+    render();
+    setTimeout(step, PZ_REPLY_MS);
+  };
+  setTimeout(step, 200);
+}
+
 function pzRetry(){ pzOpen(PZ.n); }
 function pzNext(){
   if (PZ.n < PZ.list.length) pzOpen(PZ.n + 1);
@@ -6162,6 +6267,19 @@ function pzRender(){
 
   document.getElementById('pzShow').disabled = PZ.done || PZ.busy;
   document.getElementById('pzRetry').disabled = PZ.busy || (!PZ.done && PZ.ply === 0 && !PZ.wrong);
+
+  // a puzzle from before follow-ups were generated has nothing to offer here,
+  // so the button is absent rather than present and dead
+  const follow = document.getElementById('pzFollow');
+  const followSay = document.getElementById('pzFollowSay');
+  const has = pzHasFollowUp(p);
+  follow.style.display = has ? '' : 'none';
+  follow.disabled = !PZ.done || PZ.busy || PZ.followed;
+  follow.textContent = PZ.followed ? 'Follow Up Shown' : 'Show Follow Up';
+  const said = (PZ.followed && !PZ.busy) ? pzFollowSay(p) : '';
+  followSay.textContent = said;
+  followSay.style.display = said ? '' : 'none';
+
   const next = document.getElementById('pzNext');
   next.disabled = !PZ.done || PZ.n >= PZ.list.length;
   next.textContent = PZ.n >= PZ.list.length ? 'Track Complete' : 'Next Puzzle';
@@ -6185,6 +6303,8 @@ function rushRender(){
   document.getElementById('pzLevels').style.display = 'none';
   document.getElementById('pzShow').style.display = 'none';
   document.getElementById('pzRetry').style.display = 'none';
+  document.getElementById('pzFollow').style.display = 'none';
+  document.getElementById('pzFollowSay').style.display = 'none';
 
   const ask = document.getElementById('pzAsk');
   const say = document.getElementById('pzSay');
@@ -6254,8 +6374,9 @@ document.getElementById('pzGrid').addEventListener('click', e => {
   beep(640,.06);
   pzOpen(+b.dataset.n);
 });
-document.getElementById('pzShow').onclick  = () => pzShowSolution();
-document.getElementById('pzRetry').onclick = () => pzRetry();
+document.getElementById('pzShow').onclick   = () => pzShowSolution();
+document.getElementById('pzRetry').onclick  = () => pzRetry();
+document.getElementById('pzFollow').onclick = () => { beep(600,.06); pzShowFollowUp(); };
 document.getElementById('pzNext').onclick  = () => {
   if (PZ.mode !== 'rush') return pzNext();
   if (RUSH.over) return rushStart();
