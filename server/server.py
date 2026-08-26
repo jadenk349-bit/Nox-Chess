@@ -32,6 +32,7 @@ import uuid
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 import wsproto
 import supabase_auth
+import supabase_db
 from wsproto import Framer, WSClosed, WSError
 
 HERE = os.path.dirname(os.path.abspath(__file__))
@@ -251,6 +252,120 @@ def finish_game(game, reason, winner=None, exclude=None):
 
 
 # ---------------------------------------------------------------- messages
+
+# ------------------------------------------------------------------ puzzles
+
+# The server keeps its own copy of what each puzzle is worth. The browser sends
+# which puzzle it finished, not how hard it was: a client that names its own
+# difficulty can name 3000 every time. Unknown ids are refused for the same
+# reason. Loaded once at startup — the files are generated offline and change
+# only when somebody regenerates them.
+PUZZLE_RATINGS = {}
+
+def load_puzzles():
+    for track in ("opening", "middlegame", "endgame"):
+        path = os.path.join(ROOT, "puzzles", "%s.json" % track)
+        try:
+            with open(path, "r") as fh:
+                for puzzle in json.load(fh):
+                    PUZZLE_RATINGS[puzzle["id"]] = int(puzzle["seedRating"])
+        except (OSError, ValueError, KeyError, TypeError):
+            continue          # no puzzles installed: the mode simply has nothing to rate
+    log("%d puzzles known" % len(PUZZLE_RATINGS))
+
+
+# Ratings for players this server cannot store. With SUPABASE_SERVICE_KEY set
+# these are a cache in front of the profiles table; without it they are the
+# only copy there is, and they last as long as the process does.
+puzzle_ratings = {}
+
+# Which puzzles each account has already been rated on, so that finishing one
+# is worth something once and nothing after that.
+#
+# Deliberately keyed by account rather than by connection. The browser opens a
+# socket per result and closes it again — puzzles are otherwise an offline mode
+# and there is no reason to hold a connection open through one — so a guard
+# that lived on the Client object would start empty every single time and stop
+# nothing at all. Guests are not tracked here: there is no identity to track,
+# and nothing of theirs is stored to protect.
+#
+# This lasts as long as the process. A restart lets each puzzle count once
+# more, which is a bounded amount of drift and the honest cost of not putting
+# a row in the database for every attempt.
+rated_puzzles = {}
+
+PUZZLE_START = 1200
+PUZZLE_K = 20              # one puzzle should move a rating, not decide it
+PUZZLE_FLOOR, PUZZLE_CEIL = 400, 3200
+
+
+def elo_after(player, puzzle, solved):
+    """Ordinary Elo, one game against a puzzle that never learns."""
+    expected = 1.0 / (1.0 + 10 ** ((puzzle - player) / 400.0))
+    moved = player + PUZZLE_K * ((1.0 if solved else 0.0) - expected)
+    return max(PUZZLE_FLOOR, min(PUZZLE_CEIL, int(round(moved))))
+
+
+def puzzle_rating_of(client):
+    """What this player is rated now: stored if we can store, else remembered."""
+    if client.user_id in puzzle_ratings:
+        return puzzle_ratings[client.user_id]
+    stored = supabase_db.get_puzzle_rating(client.user_id)
+    rating = stored if isinstance(stored, int) else PUZZLE_START
+    puzzle_ratings[client.user_id] = rating
+    return rating
+
+
+def handle_puzzle_result(client, msg):
+    """A finished puzzle, priced here rather than in the browser.
+
+    Guests are answered but not remembered: their rating lives in their own
+    browser, exactly as ranked play already degrades for an account-less
+    player. A signed-in player's rating is this server's to keep, and the
+    browser's claim about what it currently is never enters into it.
+    """
+    puzzle_id = msg.get("puzzleId")
+    solved = bool(msg.get("solved"))
+    if not isinstance(puzzle_id, str) or puzzle_id not in PUZZLE_RATINGS:
+        client.send({"t": "error", "msg": "unknown puzzle"})
+        return
+    puzzle = PUZZLE_RATINGS[puzzle_id]
+
+    if not client.verified:
+        # nothing to store against, so price the attempt they describe and let
+        # their browser keep the answer
+        try:
+            player = int(msg.get("playerRating", PUZZLE_START))
+        except (TypeError, ValueError):
+            player = PUZZLE_START
+        player = max(PUZZLE_FLOOR, min(PUZZLE_CEIL, player))
+        after = elo_after(player, puzzle, solved)
+        client.send({"t": "puzzleRating", "rating": after,
+                     "delta": after - player, "saved": False})
+        return
+
+    # Once per puzzle per account. Replaying one you have already been rated on
+    # is practice, and practice does not move a rating.
+    done = rated_puzzles.setdefault(client.user_id, set())
+    if puzzle_id in done:
+        client.send({
+            "t": "puzzleRating",
+            "rating": puzzle_rating_of(client),
+            "delta": 0,
+            "saved": supabase_db.enabled(),
+        })
+        return
+    done.add(puzzle_id)
+
+    before = puzzle_rating_of(client)
+    after = elo_after(before, puzzle, solved)
+    puzzle_ratings[client.user_id] = after
+    saved = supabase_db.set_puzzle_rating(client.user_id, after)
+    log("%s %s %s: %d -> %d%s" % (
+        client.id, "solved" if solved else "failed", puzzle_id, before, after,
+        "" if saved else " (not stored)"))
+    client.send({"t": "puzzleRating", "rating": after, "delta": after - before, "saved": saved})
+
 
 def clean_guest_name(raw):
     """Guests are held to the same naming rule as accounts.
@@ -794,6 +909,8 @@ def handle_message(client, raw):
         handle_challenge_decline(client, msg)
     elif kind == "challenge-cancel":
         handle_challenge_cancel(client, msg)
+    elif kind == "puzzleResult":
+        handle_puzzle_result(client, msg)
     elif kind == "ping":
         client.send({"t": "pong"})
     else:
@@ -861,6 +978,12 @@ STATIC_FILES = {
     "/assets/tier-diamond.png":     ("assets/tier-diamond.png",     "image/png"),
     "/assets/tier-master.png":      ("assets/tier-master.png",      "image/png"),
     "/assets/tier-grandmaster.png": ("assets/tier-grandmaster.png", "image/png"),
+    # The three puzzle ladders, generated by tools/generate_puzzles.js out of
+    # this game's own self-play. Regenerating renumbers them, so bump the ?v=
+    # on these three in the page or a week of cache will serve the old ladder.
+    "/puzzles/opening.json":     ("puzzles/opening.json",     "application/json; charset=utf-8"),
+    "/puzzles/middlegame.json":  ("puzzles/middlegame.json",  "application/json; charset=utf-8"),
+    "/puzzles/endgame.json":     ("puzzles/endgame.json",     "application/json; charset=utf-8"),
 }
 
 
@@ -992,6 +1115,7 @@ def handle_connection(sock, addr):
 
 
 def main():
+    load_puzzles()
     # $PORT is what most hosts inject; --port wins when it is given explicitly
     port = int(os.environ.get("PORT") or 8787)
     if "--port" in sys.argv:

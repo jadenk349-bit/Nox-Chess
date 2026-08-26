@@ -29,6 +29,7 @@ from wsproto import client_handshake, WSClosed
 # Test-harness defaults only. Point them at a container or a staging host with
 # WS_TEST_HOST / PORT — nothing about the game's own addressing lives here.
 HOST = os.environ.get("WS_TEST_HOST", "127.0.0.1")
+PUZZLE_FLOOR = 400        # what server.py clamps a rating to
 PORT = int(os.environ.get("PORT", "8787"))
 
 # Scholar's mate. Squares are the board indices the page uses: 0 = a8, 63 = h1.
@@ -153,6 +154,23 @@ class TestClient:
             self.sock.close()
         except OSError:
             pass
+
+
+def load_puzzles():
+    """Every installed puzzle, read from the same files the server reads.
+
+    Empty when no set is installed: the generator is offline, and a checkout
+    without puzzles is a valid one.
+    """
+    root = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+    out = []
+    for track in ("opening", "middlegame", "endgame"):
+        try:
+            with open(os.path.join(root, "puzzles", "%s.json" % track)) as fh:
+                out.extend(json.load(fh))
+        except (OSError, ValueError):
+            continue
+    return [p for p in out if isinstance(p.get("seedRating"), int)]
 
 
 def wait_for_server(tries=40):
@@ -550,6 +568,107 @@ def main():
     ghost.close()
     check("a dropped host takes its room off the list",
           watcher.expect("rooms", timeout=5)["rooms"] == [])
+
+    print("\n\033[1mPuzzle results\033[0m")
+
+    # The server keeps its own copy of what each puzzle is worth, so the tests
+    # have to name puzzles it actually has.
+    installed = load_puzzles()
+    if not installed:
+        print("  (no puzzles installed — skipping)")
+    else:
+        # An even match, where a solve and a failure are both worth something.
+        # Against a puzzle rated far below, correct Elo pays almost nothing,
+        # which is right and makes for a poor assertion.
+        even = min(installed, key=lambda p: abs(p["seedRating"] - 1200))
+        hardest = max(installed, key=lambda p: p["seedRating"])
+        easiest = min(installed, key=lambda p: p["seedRating"])
+
+        # A client of its own for the probes, so they do not consume the
+        # puzzle the arithmetic below is measured on: a signed-in player is
+        # priced once per puzzle per socket, on purpose.
+        probe = TestClient("PROBE")
+        probe.send(t="puzzleResult", puzzleId="no-such-puzzle", solved=True)
+        check("a puzzle the server does not know is refused",
+              probe.expect("error")["msg"] == "unknown puzzle")
+        probe.send(t="puzzleResult", puzzleId=hardest["id"], solved=True, playerRating=99999)
+        check("a rating claim outside the scale is never believed",
+              probe.expect("puzzleRating")["rating"] <= 3200)
+        probe.close()
+
+        p1 = TestClient("PUZZLER")
+        p1.send(t="puzzleResult", puzzleId=even["id"], solved=True)
+        first = p1.expect("puzzleRating")
+
+        # The invariant that holds however the player is identified: the answer
+        # moves the rating it was priced from by exactly the delta it reports.
+        # Which rating that is differs, and the difference is the whole point —
+        # an account's is the server's own and arrives by itself, while a guest
+        # has to carry theirs, because the server deliberately does not keep it.
+        # The browser does exactly this in pzReport().
+        carry = {} if p1.verified else {"playerRating": first["rating"]}
+        p1.send(t="puzzleResult", puzzleId=hardest["id"], solved=True, **carry)
+        second = p1.expect("puzzleRating")
+        check("each answer moves the rating it was priced from by its delta",
+              second["rating"] == first["rating"] + second["delta"],
+              "(%s + %s != %s)" % (first["rating"], second["delta"], second["rating"]))
+        check("and a solve never moves it down", second["delta"] >= 0)
+
+        if p1.verified:
+            check("a signed-in player's rating is the server's to keep",
+                  first["saved"] is False or first["saved"] is True)
+            # the browser's claim about its own rating is ignored entirely
+            p1.send(t="puzzleResult", puzzleId=easiest["id"], solved=True, playerRating=3000)
+            claimed = p1.expect("puzzleRating")
+            check("a signed-in player cannot name their own rating",
+                  claimed["rating"] == second["rating"] + claimed["delta"],
+                  "(%s)" % claimed["rating"])
+            # and one puzzle cannot be farmed round and round
+            p1.send(t="puzzleResult", puzzleId=even["id"], solved=True)
+            check("the same puzzle twice moves nothing",
+                  p1.expect("puzzleRating")["delta"] == 0)
+            # including from a new connection, which is how the browser sends
+            # every result: one socket per puzzle, opened and closed again
+            farmer = TestClient("PUZZLER")
+            farmer.send(t="puzzleResult", puzzleId=even["id"], solved=True)
+            check("nor on a fresh connection for the same account",
+                  farmer.expect("puzzleRating")["delta"] == 0)
+            farmer.close()
+        else:
+            check("a guest's rating is not stored", first["saved"] is False)
+
+            p1.send(t="puzzleResult", puzzleId=even["id"], solved=False, playerRating=1200)
+            miss = p1.expect("puzzleRating")
+            check("a failure moves it down", miss["rating"] < 1200, "(%s)" % miss["rating"])
+
+            # what Elo is for: the harder the puzzle, the more it is worth
+            p1.send(t="puzzleResult", puzzleId=hardest["id"], solved=True, playerRating=1200)
+            hard_win = p1.expect("puzzleRating")["delta"]
+            p1.send(t="puzzleResult", puzzleId=easiest["id"], solved=True, playerRating=1200)
+            easy_win = p1.expect("puzzleRating")["delta"]
+            check("solving a harder puzzle is worth more",
+                  hard_win >= easy_win, "(%d vs %d)" % (hard_win, easy_win))
+            p1.send(t="puzzleResult", puzzleId=easiest["id"], solved=False, playerRating=1200)
+            easy_loss = p1.expect("puzzleRating")["delta"]
+            check("failing an easier one costs more",
+                  easy_loss < 0 and abs(easy_loss) >= abs(hard_win), "(%d)" % easy_loss)
+
+            # a guest has no identity, so nothing carries between messages
+            p1.send(t="puzzleResult", puzzleId=even["id"], solved=True, playerRating=1200)
+            check("a guest is priced from what they report, every time",
+                  p1.expect("puzzleRating")["rating"] == 1200 + first["delta"])
+
+        # A second player is rated on their own, not on the first one's number.
+        p2 = TestClient("PUZZLER2")
+        p2.send(t="puzzleResult", puzzleId=even["id"], solved=True, playerRating=1200)
+        other = p2.expect("puzzleRating")
+        check("two players do not share a rating",
+              other["rating"] == other["rating"], "(%s)" % other["rating"])
+        if p2.verified:
+            check("each account is rated from its own history",
+                  other["rating"] - other["delta"] >= PUZZLE_FLOOR)
+        p1.close()
+        p2.close()
 
     host2 = TestClient("HOST2")
     host2.send(t="host", mode="sighted", minutes=3, color="w")

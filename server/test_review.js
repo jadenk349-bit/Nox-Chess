@@ -37,8 +37,14 @@ function grab(re, what){
 function fn(name){
   return grab(new RegExp('\\nfunction ' + name + '\\s*\\([\\s\\S]*?\\n\\}'), 'function ' + name + '()');
 }
+/* A declaration that opens a brace or a bracket closes at column zero; only a
+   one-liner ends at its first semicolon. Telling them apart matters: some of
+   these declarations have comments inside them, and a comment may contain a
+   semicolon of its own. */
 function decl(name){
-  return grab(new RegExp('\\n(?:const|let) ' + name + '\\b[\\s\\S]*?;'), name);
+  var block = SRC.match(new RegExp('\\n(?:const|let) ' + name + '\\s*=\\s*[\\{\\[][\\s\\S]*?\\n[\\}\\]];'));
+  if (block) return block[0];
+  return grab(new RegExp('\\n(?:const|let) ' + name + '\\b[^\\n]*?;'), name);
 }
 
 var DECLS = ['VAL','FILES','rowOf','colOf','SQNAME','uciOf','sqName','onBoard','other',
@@ -46,7 +52,8 @@ var DECLS = ['VAL','FILES','rowOf','colOf','SQNAME','uciOf','sqName','onBoard','
 var FNS   = ['startBoard','newState','cloneState','slide','step','addPawn','pseudoMoves',
              'isAttacked','kingSq','inCheck','makeMove','legalMoves','toSAN',
              'attackersOf','defendersOf','see','sliderLines','betweenSq','findMotifs',
-             'winPct','sacrificeSize','pvLine','materialFor','materialWord'];
+             'winPct','sacrificeSize','pvLine','materialFor','materialWord',
+             'fenOf','stateFromFEN','describeBest','puzzleStep','pzNextRung','pzUnlocked'];
 
 var BUNDLE = [grab(/\nconst W = 'w', B = 'b';/, "const W/B")];
 DECLS.forEach(function(n){ BUNDLE.push(decl(n)); });
@@ -220,6 +227,67 @@ check('and neither is nothing', pvLine(st, null), null);
 
 check('material is named by size', materialWord(500), 'a rook');
 check('a piece is a piece', materialWord(320), 'a piece');
+
+say('\nFEN, in and out\n');
+
+// the page never needed FEN until puzzles did; a position has to survive the trip
+var START = 'rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1';
+check('the starting position writes itself', fenOf(newState()), START);
+check('and reads back the same', fenOf(stateFromFEN(START)), START);
+var TRICKY = 'r3k2r/pp3ppp/8/4pP2/8/8/PP4PP/R3K2R w KQkq e6 4 12';
+check('castling rights and en passant survive', fenOf(stateFromFEN(TRICKY)), TRICKY);
+check('a position with neither is still itself',
+      fenOf(stateFromFEN('8/8/4k3/8/8/4K3/8/8 b - - 0 40')), '8/8/4k3/8/8/4K3/8/8 b - - 0 40');
+// and the round trip has to survive being played through
+var afterE4 = makeMove(stateFromFEN(START), moveOf(stateFromFEN(START), 'e2e4'));
+check('a double step leaves the en passant square behind',
+      fenOf(afterE4), 'rnbqkbnr/pppppppp/8/8/4P3/8/PPPP1PPP/RNBQKBNR b KQkq e3 0 1');
+
+say('\nPuzzle refereeing\n');
+
+// the whole of it: the move is the next move of the line, or it is not
+var LINE = ['d5c7', 'e8d8', 'c7a8'];
+check('a wrong first move does not advance', puzzleStep(LINE, 0, 'a1a2').ok, false);
+check('and leaves the index alone',          puzzleStep(LINE, 0, 'a1a2').ply, 0);
+check('the right one advances past the reply', puzzleStep(LINE, 0, 'd5c7').ply, 2);
+check('and names the reply to play',           puzzleStep(LINE, 0, 'd5c7').reply, 'e8d8');
+check('which is not the end of it',            puzzleStep(LINE, 0, 'd5c7').solved, false);
+check('the last move has no reply',            puzzleStep(LINE, 2, 'c7a8').reply, null);
+check('and finishes the puzzle',               puzzleStep(LINE, 2, 'c7a8').solved, true);
+// a one-move puzzle is solved by its one move, with nothing to play back
+check('a single move solves a single-move puzzle', puzzleStep(['a1a8'], 0, 'a1a8').solved, true);
+check('and asks for no reply',                     puzzleStep(['a1a8'], 0, 'a1a8').reply, null);
+// promotion is spelled out in the uci, so it referees itself
+check('the wrong promotion piece is a wrong move', puzzleStep(['e7e8q'], 0, 'e7e8n').ok, false);
+check('and the right one is right',                puzzleStep(['e7e8q'], 0, 'e7e8q').ok, true);
+
+say('\nThe ladder\n');
+
+var LADDER = [{id:'a'},{id:'b'},{id:'c'},{id:'d'}];
+var none = new Set();
+var some = new Set(['a','b']);
+check('a fresh track opens at its first rung', pzNextRung(LADDER, none), 1);
+check('and afterwards at the first unfinished one', pzNextRung(LADDER, some), 3);
+check('a finished track sits on its last', pzNextRung(LADDER, new Set(['a','b','c','d'])), 4);
+check('the first rung is always open',   pzUnlocked(LADDER, none, 1), true);
+check('the second is not, at first',     pzUnlocked(LADDER, none, 2), false);
+check('finishing one opens the next',    pzUnlocked(LADDER, some, 3), true);
+check('but not the one after that',      pzUnlocked(LADDER, some, 4), false);
+// solved rungs stay open, so a puzzle can be played again
+check('a rung already done stays open',  pzUnlocked(LADDER, some, 2), true);
+
+say('\nA puzzle explains itself\n');
+
+// the coach card at the end of a puzzle is describeBest(), with the puzzle's
+// own solution standing in for the engine's line
+var forkFen = 'r3k3/8/8/3N4/8/8/8/4K3 w - - 0 1';
+var told = (function(){
+  var st = stateFromFEN(forkFen);
+  var m = moveOf(st, 'd5c7');
+  return describeBest(st, m, null, null, pvLine(st, LINE));
+})();
+check('it names what the move does', /fork|hanging/.test(told), true);
+check('and where the line ends',     /After Nc7\+ Kd8 Nxa8, you are a rook up\./.test(told), true);
 
 say('\n' + passed + ' passed, ' + failed + ' failed\n');
 
