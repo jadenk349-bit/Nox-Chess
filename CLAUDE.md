@@ -17,7 +17,9 @@ python3 server/server.py [--port 8787]   # serves the page AND the game socket o
 # then open http://localhost:8787/
 
 python3 server/test_two_clients.py       # integration tests — REQUIRES a running server
+node server/test_rematch_e2e.js          # two whole pages on real sockets — REQUIRES a running server
 node server/test_ws_url.js               # unit tests for wsURLFrom(); no server needed
+node server/test_rematch_flow.js         # the page's rematch and New Game wiring, against scripted replies
 node server/test_review.js               # unit tests for the review's chess reasoning
 node server/test_puzzle_flow.js          # plays a shipped puzzle against a stub DOM
 python3 server/test_puzzle_rating.py     # the puzzle Elo handler; no server needed
@@ -30,12 +32,21 @@ node tools/generate_puzzles.js --poolsIn /tmp/pools.json    # re-cut the ladders
 docker build -t nox-chess . && docker run --rm -p 8787:8787 nox-chess
 ```
 
-All three JS suites read the code under test out of `blind-chess.html` by name,
-so renaming or reformatting what they extract breaks them on purpose.
+The JS suites read the code under test out of `blind-chess.html` by name, so
+renaming or reformatting what they extract breaks them on purpose.
+`test_rematch_e2e.js` is the exception and the reason the others can stay
+narrow: it boots the *whole* page script twice under a dumb DOM shim, gives
+each copy its own real WebSocket to the server, and presses the real buttons —
+the only thing in the repo that can catch the page and the server disagreeing
+about a message neither one of them is wrong about on its own.
 
 `test_two_clients.py` has no test-case selection flag; it runs the whole
-sequence (matchmaking, turn order, a full game, resign/draw, rooms) and exits
-non-zero on failure. Point it at another host with `WS_TEST_HOST=… PORT=…`.
+sequence (matchmaking, turn order, a full game, resign/draw, rooms, rematch)
+and exits non-zero on failure. Point it at another host with
+`WS_TEST_HOST=… PORT=…`, which `test_rematch_e2e.js` reads as well. Both leave
+players parked in the lobby while they run, so each pairing asks for a clock
+no other test asks for; reusing one is how a test ends up matched with the
+wrong stranger.
 
 Environment: `PORT` (default 8787), `SUPABASE_URL` (enables token
 verification), `SUPABASE_JWT_SECRET` (only for legacy HS256 projects; also what
@@ -86,6 +97,92 @@ which is what lets it reach every tab that account has open and what lets the
 server refuse an answer from anyone else (`handle_challenge_accept`). It is
 deliberately not a database row: it means nothing once either side disconnects,
 so it lives in memory and dies with the session.
+
+**A rematch is a fourth invitation, not a fourth way to start a game.** Rematch
+used to walk away from the finished game and open the room list, which is not a
+rematch at all — it never involved the same opponent. It is now a question put
+to them: `{t:"rematch"}` from the page, `rematch-request` to the other side, and
+`rematch-accept` / `rematch-decline` back. Accepting lands in
+`start_game_between()` like everything else, so there is one Game and one relay,
+with the colours swapped.
+
+What makes a request answerable is the *finished* game it names. `Game` is let
+go of by `finish_game()`, so each client keeps a `last_game` — the terms, the
+seat it had, and who the opponent was — and only the last one. A request naming
+anything else is stale by definition and refused. That single rule is what
+handles the awkward cases: pressing twice sends one invitation, both pressing at
+once is settled into one game by the server (the second press answers the first
+request), sitting down at another board answers whatever was left in the air,
+and a disconnection tells whichever end is still there. `REM` on the page is the
+mirror of that, and one box in three states — asking, waiting, reporting —
+opened *over* the end-of-game box so that neither player ever leaves the
+post-game screen by answering.
+
+**New Game leads back to where that kind of game is arranged.** A ranked game
+goes to the ranked page with the settings it was played on already filled in and
+the queue joined automatically (`rankResume`, consumed by `showScreen`); a
+friendly or challenged one goes to the friendly match page, which is the room
+list; an offline one to the setup form. The old Choose Opponent screen was
+reachable from nothing but the online branch of that one button, so it is gone
+and `picked.opponent` with it.
+
+**Looking for an opponent is a state of the button that started it, on both
+screens.** The setup form has always worked this way — `.start-btn.searching`
+sweeps a band of light across Start Play with `@keyframes matchsweep` while the
+room is on the list — and the ranked page now does the same rather than being
+sent to the board behind a centred "Finding an Opponent" modal.
+
+The two do **not** share a rule, and the reason is worth keeping. Start Play
+says "working" by going dark with one band of light crossing it, which reads
+correctly beside a board. The ranked Start Game is the only lit thing on an
+otherwise black page, and a button that goes out reads as one that has stopped,
+not one that is busy — so `#btnRankStart.searching` keeps its gold and moves the
+gold instead (`@keyframes rankhunt`). Two things about how it is written are
+load-bearing: the selector carries the **id**, because `button.primary` and
+`.rank-start.dim` both paint this same element, and the background is set in
+**longhands**, because the `background` shorthand resets `background-size` and
+`background-position` to `auto` — one shorthand winning the cascade leaves the
+gradient sitting perfectly still, which looks exactly like an animation that is
+not running. `test_rematch_flow.js` reads the stylesheet and asserts both, since
+every other check in the repo asks what the script does and none of them asks
+what actually gets painted. `setSearching()` drives both; `drawRankPick()` owns what the
+ranked button looks like and is told rather than reached into. Pressing the
+button again calls the search off, escape does the same, and walking off the
+ranked page cancels the queue — all of which the modal used to make impossible.
+The modal is still there for *failures* (`waitingFailed`), because a refusal is
+news rather than progress, and for challenges. One catch worth keeping in mind:
+the server answers `find` with `{t:"waiting"}`, and that arm opens the modal
+when nothing else has spoken — a sweeping button counts as having spoken, which
+is why it checks `searching`.
+
+The ranked half of New Game is the fiddly one, because it is the only New Game
+that starts a search rather than showing a list, and it must not be mistaken for
+Rematch. Three things keep it honest. The settings come from `rankedLast`,
+written when the server's `start` arrives, not read off `G` when the button is
+pressed — `G.mode` is live, the vision buttons beside the board write to it, and
+a player poking at those on a finished board would otherwise re-queue for a game
+they never played. `rankedAgain()` then drops everything that named the last
+game — result, board, `NET.gameId`, `NET.opponent`, `NET.state` — keeping only
+the socket, which the queue is about to want. And the ranked page is left up
+long enough to be read (`RANK_AGAIN_PAUSE`) with a line saying what is about to
+happen — the search then runs on that page, so there is nothing to see it
+before, and the pause is only long enough for the restored settings to be up
+when the button starts moving.
+
+**The quick-match queue holds a list, so it can avoid handing you back the
+player you just finished with.** `lobby[key]` was one waiting Client; it is a
+list in arrival order now, and `handle_find()` prefers a waiting player who is
+not `last_game["opponent"]`. They are the fallback rather than a refusal — on a
+quiet server the alternative is two people staring at "finding an opponent" with
+each other in front of them — but one stranger on the same time control is
+enough to be preferred. `leave_lobby()` is the single way out of a queue, since a
+list has more ways to strand an entry than one slot did, and a stale entry is
+somebody the next arrival tries to start a game with.
+
+**Ranked play answers to the same rule at both doors.** `may_play_ranked()` is
+the rule — verified, or a server that cannot verify anyone — and both
+`handle_find()` and the rematch handlers ask it. A rule enforced at one of two
+ways in is not a rule.
 
 **The rating only persists with `SUPABASE_SERVICE_KEY`.** The browser is not
 allowed to write `puzzle_rating`, so the server is the only thing that can, and
