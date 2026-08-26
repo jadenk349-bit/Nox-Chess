@@ -130,6 +130,39 @@ class TestClient:
             raise AssertionError("%s expected %r, got %r" % (self.name, kind, msg))
         raise AssertionError("%s timed out waiting for %r" % (self.name, kind))
 
+    def await_kind(self, kind, timeout=5.0):
+        """Next message of this kind, stepping over anything else on the way.
+
+        expect() is deliberately strict about order, which is what makes it
+        useful. This is for the handful of cases where two messages are
+        genuinely racing and either order is a correct one.
+        """
+        deadline = time.time() + timeout
+        while time.time() < deadline:
+            try:
+                msg = self.inbox.get(timeout=deadline - time.time())
+            except queue.Empty:
+                break
+            if msg.get("t") == kind:
+                return msg
+        raise AssertionError("%s timed out waiting for %r" % (self.name, kind))
+
+    def drain(self, seconds=0.5):
+        """Everything still on the wire after a moment, order not asserted.
+
+        For the races the server deliberately allows: payloads are built under
+        the lock and sent outside it, so two threads finishing at once can put
+        their messages on the wire in either order.
+        """
+        out = []
+        deadline = time.time() + seconds
+        while time.time() < deadline:
+            try:
+                out.append(self.inbox.get(timeout=max(0, deadline - time.time())))
+            except queue.Empty:
+                break
+        return out
+
     def nothing_arrives(self, seconds=0.4):
         """True if the server stayed quiet — used to prove a move was refused."""
         try:
@@ -568,6 +601,214 @@ def main():
     ghost.close()
     check("a dropped host takes its room off the list",
           watcher.expect("rooms", timeout=5)["rooms"] == [])
+
+    print("\n\033[1mRematch — the opponent has to agree\033[0m")
+
+    def paired(n1, n2, mode="blind", minutes=5, inc=0, kind="friendly"):
+        """Two fresh clients, matched and then finished: ready to be asked again."""
+        x, y = TestClient(n1), TestClient(n2)
+        x.send(t="find", mode=mode, minutes=minutes, inc=inc, kind=kind)
+        x.expect("waiting")
+        y.send(t="find", mode=mode, minutes=minutes, inc=inc, kind=kind)
+        sx, sy = x.expect("start"), y.expect("start")
+        x.color, y.color = sx["color"], sy["color"]
+        x.game = y.game = sx["game"]
+        x.send(t="result", status="Checkmate — White wins", winner="w")
+        y.expect("over")
+        return x, y
+
+    # Each pairing here asks for a clock no other test asks for: earlier
+    # sections deliberately leave players parked in the common queues, and
+    # being handed one of them would match the wrong two people.
+    r1, r2 = paired("R1", "R2", minutes=15)
+    finished = r1.game
+    r1.send(t="rematch", game=finished)
+    sent = r1.expect("rematch-sent")
+    ask = r2.expect("rematch-request")
+    check("a rematch reaches the opponent", ask["id"] == sent["id"], "(%s)" % ask)
+    check("and names the game it is about", ask["game"] == finished, "(%s)" % ask)
+    check("the terms of the finished game travel with it",
+          ask["mode"] == "blind" and ask["minutes"] == 15 and ask["kind"] == "friendly",
+          "(%s)" % ask)
+    check("the seat offered is the one the asker is getting up from",
+          ask["color"] == r1.color, "(offered %s, asker had %s)" % (ask["color"], r1.color))
+
+    # pressing the button twice must not put two boxes in front of anybody
+    r1.send(t="rematch", game=finished)
+    again = r1.expect("rematch-sent")
+    check("pressing rematch twice sends one invitation", again["id"] == sent["id"],
+          "(%s then %s)" % (sent["id"], again["id"]))
+    check("and the opponent is not asked a second time", r2.nothing_arrives())
+
+    r2.send(t="rematch-decline", id=ask["id"])
+    refused = r1.expect("rematch-declined")
+    check("a declined rematch is reported to the asker",
+          refused["game"] == finished, "(%s)" % refused)
+    check("and no game starts", r1.nothing_arrives() and r2.nothing_arrives())
+
+    # asked again, and taken up this time
+    r1.send(t="rematch", game=finished)
+    r1.expect("rematch-sent")
+    ask2 = r2.expect("rematch-request")
+    r2.send(t="rematch-accept", id=ask2["id"])
+    new1, new2 = r1.expect("start"), r2.expect("start")
+    check("an accepted rematch seats both players at one game",
+          new1["game"] == new2["game"], "(%s vs %s)" % (new1["game"], new2["game"]))
+    check("and it is a new game, not the finished one", new1["game"] != finished)
+    check("colours swap", new1["color"] != r1.color and new2["color"] != r2.color,
+          "(%s -> %s, %s -> %s)" % (r1.color, new1["color"], r2.color, new2["color"]))
+    check("the settings are the ones the last game was played on",
+          new1["mode"] == "blind" and new1["minutes"] == 15 and
+          new1["inc"] == 0 and new1["kind"] == "friendly", "(%s)" % new1)
+
+    r1.color, r2.color = new1["color"], new2["color"]
+    r1.game = r2.game = new1["game"]
+    w2 = r1 if r1.color == "w" else r2
+    b2 = r2 if r1.color == "w" else r1
+    w2.send(t="move", ply=0, **{"from": 52, "to": 36, "san": "e4"})
+    relayed = b2.expect("move")
+    check("the rematch starts at ply 0 with nothing carried over",
+          relayed["ply"] == 0 and relayed["san"] == "e4", "(%s)" % relayed)
+
+    r1.send(t="rematch")
+    check("a rematch asked for mid-game is refused",
+          r1.expect("error")["msg"] == "already in a game")
+
+    w2.send(t="result", status="Checkmate — White wins", winner="w")
+    b2.expect("over")
+    r1.send(t="rematch", game=finished)
+    stale = r1.expect("rematch-gone")
+    check("a rematch naming an older game is refused",
+          stale["reason"] == "stale", "(%s)" % stale)
+    check("and never reaches the opponent", r2.nothing_arrives())
+    r1.close()
+    r2.close()
+
+    x1, x2 = paired("X1", "X2", minutes=20)
+    x1.send(t="rematch")
+    x2.send(t="rematch")
+    s1 = x1.await_kind("start")
+    s2 = x2.await_kind("start")
+    check("both pressing rematch at once makes one game, not two",
+          s1["game"] == s2["game"], "(%s vs %s)" % (s1["game"], s2["game"]))
+    # The two presses are handled on two threads and each sends outside the
+    # lock, so the invitation one of them raised can still be on the wire when
+    # the game the other one settled it into lands. That is allowed, and the
+    # page refuses a request naming a game it is no longer sitting on. What
+    # must not happen is a second game.
+    leftovers = x1.drain() + x2.drain()
+    check("and no second game comes of the crossing",
+          not [m for m in leftovers if m.get("t") == "start"], "(%s)" % leftovers)
+    x1.close()
+    x2.close()
+
+    d1, d2 = paired("D1", "D2", minutes=25)
+    nosy = TestClient("NOSY")
+    d1.send(t="rematch")
+    d1.expect("rematch-sent")
+    d_ask = d2.expect("rematch-request")
+    nosy.send(t="rematch-accept", id=d_ask["id"])
+    check("only the player asked may accept",
+          nosy.expect("error")["msg"] == "that rematch is not yours")
+    nosy.send(t="rematch-decline", id=d_ask["id"])
+    check("nor may anyone else decline it",
+          nosy.expect("error")["msg"] == "that rematch is not yours")
+    check("and the invitation is still standing", d1.nothing_arrives())
+    nosy.close()
+
+    d2.close()
+    dropped = d1.expect("rematch-gone", timeout=5)
+    check("an opponent who disconnects takes the rematch with them",
+          dropped["reason"] == "left", "(%s)" % dropped)
+    d1.close()
+
+    e1, e2 = paired("E1", "E2", minutes=30)
+    e3 = TestClient("E3")
+    e1.send(t="rematch")
+    e1.expect("rematch-sent")
+    e2.expect("rematch-request")
+    e2.send(t="find", mode="sighted", minutes=30)
+    e2.expect("waiting")
+    e3.send(t="find", mode="sighted", minutes=30)
+    e2.await_kind("start")
+    e3.expect("start")
+    moved_on = e1.expect("rematch-gone")
+    check("sitting down at another board answers the rematch left in the air",
+          moved_on["reason"] == "away", "(%s)" % moved_on)
+    e1.close()
+    e2.close()
+    e3.close()
+
+    print("\n\033[1mNew Game does not hand you the same opponent back\033[0m")
+
+    # Both players pressing New Game after a game re-enter the same queue a
+    # moment apart, which used to pair them straight back together — a rematch
+    # nobody agreed to, wearing New Game's clothes. A stranger waiting on the
+    # same time control is preferred now.
+    n1, n2 = paired("N1", "N2", mode="blind", minutes=35)
+    stranger = TestClient("N3")
+    stranger.send(t="find", mode="blind", minutes=35)
+    stranger.expect("waiting")
+    n1.send(t="find", mode="blind", minutes=35)
+    got = n1.expect("start")
+    with_stranger = stranger.expect("start")
+    check("a stranger already waiting is taken first",
+          got["game"] == with_stranger["game"], "(%s vs %s)" % (got, with_stranger))
+    check("and the player just finished with is left alone", n2.nothing_arrives())
+
+    # …but they are the fallback, not a refusal. On a quiet server two people
+    # who both want another game must still get one.
+    n2.send(t="find", mode="blind", minutes=36)
+    n2.expect("waiting")
+    n4 = TestClient("N4")
+    n4.send(t="find", mode="blind", minutes=36)
+    n2.expect("start")
+    n4.expect("start")
+    check("two players wanting the same game are still paired", True)
+    n2.send(t="result", status="Checkmate — White wins", winner="w")
+    n4.expect("over")
+    n2.send(t="find", mode="blind", minutes=37)
+    n2.expect("waiting")
+    n4.send(t="find", mode="blind", minutes=37)
+    again2 = n2.expect("start")
+    again4 = n4.expect("start")
+    check("with nobody else there, the last opponent is better than nobody",
+          again2["game"] == again4["game"], "(%s vs %s)" % (again2, again4))
+
+    # the queue holds more than one player per time control now
+    q1, q2, q3 = TestClient("Q1"), TestClient("Q2"), TestClient("Q3")
+    for q in (q1, q2):
+        q.send(t="find", mode="sighted", minutes=38)
+        q.expect("start" if q is q2 else "waiting")
+    q3.send(t="find", mode="sighted", minutes=38)
+    q3.expect("waiting")
+    q4 = TestClient("Q4")
+    q4.send(t="find", mode="sighted", minutes=38)
+    check("a third and fourth player queue behind the first pair",
+          q3.expect("start")["game"] == q4.expect("start")["game"])
+    for q in (n1, n2, n4, stranger, q1, q2, q3, q4):
+        q.close()
+
+    print("\n\033[1mA ranked rematch is still ranked\033[0m")
+    rk = TestClient("RK0")
+    if rk.accounts and not rk.verified:
+        print("  \033[33mSKIP\033[0m ranked rematch — the harness cannot sign an ES256 token")
+    else:
+        k1, k2 = paired("RK1", "RK2", mode="fog", minutes=3, inc=2, kind="ranked")
+        k1.send(t="rematch")
+        k1.expect("rematch-sent")
+        k_ask = k2.expect("rematch-request")
+        check("a ranked rematch is offered as ranked",
+              k_ask["kind"] == "ranked", "(%s)" % k_ask)
+        k2.send(t="rematch-accept", id=k_ask["id"])
+        ks1, ks2 = k1.expect("start"), k2.expect("start")
+        check("and the game it starts is a ranked one",
+              ks1["kind"] == "ranked" and ks2["kind"] == "ranked", "(%s)" % ks1)
+        check("on the clock the ranked game was played on",
+              ks1["minutes"] == 3 and ks1["inc"] == 2 and ks1["mode"] == "fog", "(%s)" % ks1)
+        k1.close()
+        k2.close()
+    rk.close()
 
     print("\n\033[1mPuzzle results\033[0m")
 
