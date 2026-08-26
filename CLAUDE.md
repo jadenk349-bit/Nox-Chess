@@ -26,11 +26,13 @@ python3 tools/check_supabase_puzzles.py  # RLS and column grants, against the re
 
 node tools/generate_puzzles.js --poolsOut /tmp/pools.json   # regenerate (slow: ~12 min)
 node tools/generate_puzzles.js --poolsIn /tmp/pools.json    # re-cut the ladders only (instant)
+node tools/verify_puzzles.js --track endgame                # re-check one shipped ladder
+node tools/verify_puzzles.js --track endgame --write        # …and save the corrections
 
 docker build -t nox-chess . && docker run --rm -p 8787:8787 nox-chess
 ```
 
-All three JS suites read the code under test out of `blind-chess.html` by name,
+All four JS suites read the code under test out of `blind-chess.html` by name,
 so renaming or reformatting what they extract breaks them on purpose.
 
 `test_two_clients.py` has no test-case selection flag; it runs the whole
@@ -95,6 +97,28 @@ attempt — in memory, for the life of the process — and tells the client
 than trusting the status code, because PostgREST answers 204 to an UPDATE that
 row-level security filtered to nothing, and a publishable key pasted into that
 variable would otherwise report every rating as saved and store none.
+
+**A shipped ladder can be re-checked, and it is not the generator that does
+it.** `tools/verify_puzzles.js` asks every ply of every solution again, deeper
+than generation did and — crucially — with the transposition table emptied
+first: one engine answering many unrelated questions answers them differently
+depending on the order they arrive in, which is fine while *choosing* puzzles
+and useless while *judging* them (`fresh` in `tools/sf.js` exists for this and
+nothing else). Corrections reuse the generator's `buildLine()`, `themesFor()`,
+`seedRating()` and `difficulty()` rather than growing second versions, which is
+why those four are exported. Puzzle *ids* survive a correction so nobody loses
+a solve; rung numbers do not, exactly as after a regeneration. The same pass
+writes `followUp` — see below.
+
+**The follow-up is engine-verified, not a principal variation.** A solution
+ends where the finding ends, which leaves the player a rook up and no idea what
+for, so each puzzle carries a few more plies behind the Show Follow Up button.
+Every one of those plies is its own search of its own position; a pv would be
+one search's intention, and cheaper, and would not be true of the board it is
+shown on. The page (`pzFollowUp`, `pzFollowLine`) only replays them, and reads
+the outcome from the solver's side — `pvLine()` cannot be used directly there
+because a follow-up opens on the *opponent's* move and its "you" would name the
+wrong player.
 
 **Two kinds of puzzle state, owned by two different parties.** Which puzzles a
 player has finished is personal state, so the browser writes

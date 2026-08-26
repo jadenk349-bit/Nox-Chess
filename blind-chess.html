@@ -1159,6 +1159,7 @@
   .pz-theme.rating{color:var(--gold-soft); border-color:rgba(212,175,110,.35);}
   .pz-controls{display:flex; gap:8px; margin-top:14px;}
   .pz-controls button{flex:1; padding:9px 6px; font-size:12px;}
+  .pz-controls.pz-after{margin-top:8px;}
   .pz-progress{
     float:right; font-size:10px; letter-spacing:.14em; color:var(--muted);
     font-variant-numeric:tabular-nums;
@@ -2445,6 +2446,12 @@
               <button class="ghost" id="pzShow">Show Solution</button>
               <button class="ghost" id="pzRetry">Retry</button>
               <button class="primary" id="pzNext">Next</button>
+            </div>
+            <!-- the follow-up gets a row of its own: it only exists once the
+                 puzzle is over, and squeezing a fourth button into the row
+                 above would shorten the three that are always there -->
+            <div class="pz-controls pz-after" id="pzFollowRow" style="display:none">
+              <button class="ghost" id="pzFollow">Show Follow Up</button>
             </div>
           </div>
 
@@ -5392,6 +5399,13 @@ function reviewRender(){
    that writes the coach card in the review, which is why a puzzle tagged
    "fork" is explained with the word fork.
 
+   A puzzle may also carry a `followUp`: a few more plies of best play from
+   where the solution stops, behind the Show Follow Up button. A solution ends
+   when the finding ends, which is often several moves before the point is
+   obvious, and "you won a rook" is a poor answer to "why was that good". The
+   moves are the engine's, one search per move — see tools/verify_puzzles.js —
+   and the page only ever replays them.
+
    The board is the game board. Same squares, same pieces, same renderer, with
    G pointed at the puzzle position and G.opponent set to 'puzzle' so that
    BOT(), LOCAL() and ONLINE() are all false and none of the game's machinery
@@ -5399,7 +5413,7 @@ function reviewRender(){
    ============================================================ */
 const PZ_TRACK_NAME = { opening:'Opening', middlegame:'Middlegame', endgame:'Endgame' };
 const PZ_START_RATING = 1200;
-const PZ_VERSION = 1;              // ?v= on the three files; bump when they are regenerated
+const PZ_VERSION = 2;              // ?v= on the three files; bump when they are regenerated
 const PZ_REPLY_MS = 420;           // long enough to read the reply as an answer
 
 const PZ = {
@@ -5416,6 +5430,7 @@ const PZ = {
   wrong: false,        // a wrong move was tried on this attempt
   shown: false,        // the solution was revealed
   done: false,         // the line has been played to its end
+  follow: 'idle',      // the engine's continuation: 'idle', 'playing', 'played'
   busy: false          // the forced reply is on its way
 };
 const pzLoaded = {};   // track -> the parsed ladder, fetched once
@@ -5775,6 +5790,7 @@ function pzOpen(n){
   PZ.puzzle = p;
   PZ.ply = 0;
   PZ.wrong = PZ.shown = PZ.done = PZ.busy = false;
+  PZ.follow = 'idle';
   PZ.side = stateFromFEN(p.fen).turn;
   PZ.wasDone = PZ.track ? pzDone(PZ.track).has(p.id) : false;   // a replay is not worth a rating
   if (PZ.mode === 'rush') RUSH.at = n - 1;
@@ -5908,6 +5924,47 @@ function pzShowSolution(){
   setTimeout(step, 200);
 }
 
+/* ---- the follow-up ----
+   A solution stops where the finding stops: once the win is not in doubt there
+   is nothing left to look for, and the line ends with the player a rook up and
+   no idea what the rook was for. So every puzzle carries a few more plies of
+   best play — written by tools/verify_puzzles.js, where each of those moves
+   was separately the engine's answer to the position it was played in, not a
+   tail read off one search's principal variation — and this walks them out on
+   the board. It is shown only after the puzzle is over, because it is the
+   answer to "why was that good", and that is not a question until then. */
+function pzFollowUp(){
+  const follow = (PZ.puzzle && PZ.puzzle.followUp) || [];
+  if (!PZ.done || PZ.busy || PZ.follow !== 'idle' || !follow.length) return;
+  PZ.follow = 'playing';
+  PZ.busy = true;                          // the board is not taking moves during it
+  pzRender();
+  const token = G.token;
+  let i = 0;
+  const step = () => {
+    if (!PZ.on || G.token !== token) return;
+    const m = i < follow.length &&
+              legalMoves(G.st, G.st.turn).find(x => uciOf(x) === follow[i]);
+    if (!m){                               // played out, or a move we cannot replay
+      PZ.follow = 'played';
+      PZ.busy = false;
+      render();
+      pzRender();
+      return;
+    }
+    // the solution ended on the player's move, so the follow-up opens with the
+    // opponent's: odd plies are the player's and get the brighter note
+    beep(i % 2 ? 520 : 420, .05);
+    G.st = makeMove(G.st, m);
+    G.uci.push(follow[i]);
+    G.lastMove = m;
+    i++;
+    render();
+    setTimeout(step, PZ_REPLY_MS);
+  };
+  setTimeout(step, 200);
+}
+
 function pzRetry(){ pzOpen(PZ.n); }
 function pzNext(){
   if (PZ.n < PZ.list.length) pzOpen(PZ.n + 1);
@@ -5939,6 +5996,50 @@ function pzSolutionSan(p){
   return sans.join(' ');
 }
 
+/* Where the follow-up leaves the position, said from the solver's side.
+   pvLine() answers this for the review, but it answers it for whoever is to
+   move at the head of the line — and a follow-up begins on the opponent's
+   move, so its "you" would be the wrong person. */
+function pzFollowLine(p){
+  const follow = p.followUp || [];
+  if (!follow.length) return null;
+  const start = stateFromFEN(p.fen);
+  const solver = start.turn;
+  let st = start;
+  for (const u of p.moves){                       // wind forward to where it stopped
+    const m = legalMoves(st, st.turn).find(x => uciOf(x) === u);
+    if (!m) return null;
+    st = makeMove(st, m);
+  }
+  const sans = [];
+  for (const u of follow){
+    const all = legalMoves(st, st.turn);
+    const m = all.find(x => uciOf(x) === u);
+    if (!m) break;
+    sans.push(toSAN(st, m, all));
+    st = makeMove(st, m);
+  }
+  if (!sans.length) return null;
+  // What the move was worth is measured across the whole puzzle, not just the
+  // follow-up: the difference between the position you were given and the one
+  // you end up in. Where it ends up losing anyway, that is said instead — a
+  // good part of this set is defence, positions the solver was already lost in
+  // where the move to find is the one that gives away least, and telling
+  // somebody they "won a pawn" on the way to being a rook down explains
+  // nothing. Every move in the line is the engine's own, so "nothing held out
+  // better" is a statement about the search and not a consolation.
+  const gain = materialFor(st, solver) - materialFor(start, solver);
+  const bal = materialFor(st, solver);
+  const outcome =
+      !legalMoves(st, st.turn).length && inCheck(st, st.turn)
+        ? (st.turn === solver ? 'you are mated' : 'it is mate')
+    : gain >=   90 ? 'you have won ' + materialWord(gain)
+    : bal  >=  150 ? 'you are ' + materialWord(bal) + ' up'
+    : bal  <= -150 ? 'you are ' + materialWord(-bal) + ' down, and nothing held out better'
+    : 'the position holds';
+  return { sans, outcome };
+}
+
 function pzRender(){
   if (!PZ.on) return;
   if (PZ.mode === 'rush') return rushRender();
@@ -5954,10 +6055,16 @@ function pzRender(){
     ? '<b>' + side + '</b> played ' + pzSolutionSan(p)
     : '<b>' + side + '</b> to play — find the move.';
 
+  const follow = PZ.done ? pzFollowLine(p) : null;
   say.className = 'pz-say';
   if (PZ.done){
     say.classList.add(PZ.shown || PZ.wrong ? 'told' : 'right');
     say.textContent = (PZ.shown ? '' : PZ.wrong ? 'Solved. ' : 'Correct. ') + pzExplain(p);
+    // only once it has been watched: the line is the answer to the button, and
+    // printing it beside the button is answering before it is pressed
+    if (PZ.follow === 'played')
+      say.textContent += ' From there ' + follow.sans.join(' ') +
+                         ' \u2014 ' + follow.outcome + '.';
   } else if (PZ.busy){
     say.textContent = '…';
   } else if (PZ.wrong){
@@ -5981,6 +6088,9 @@ function pzRender(){
 
   document.getElementById('pzShow').disabled = PZ.done || PZ.busy;
   document.getElementById('pzRetry').disabled = PZ.busy || (!PZ.done && PZ.ply === 0 && !PZ.wrong);
+  // a puzzle that ends in mate has nothing to follow, and there is no row
+  document.getElementById('pzFollowRow').style.display = follow ? 'flex' : 'none';
+  document.getElementById('pzFollow').disabled = PZ.follow !== 'idle';
   const next = document.getElementById('pzNext');
   next.disabled = !PZ.done || PZ.n >= PZ.list.length;
   next.textContent = PZ.n >= PZ.list.length ? 'Track Complete' : 'Next Puzzle';
@@ -6004,6 +6114,7 @@ function rushRender(){
   document.getElementById('pzLevels').style.display = 'none';
   document.getElementById('pzShow').style.display = 'none';
   document.getElementById('pzRetry').style.display = 'none';
+  document.getElementById('pzFollowRow').style.display = 'none';   // a run does not stop to explain
 
   const ask = document.getElementById('pzAsk');
   const say = document.getElementById('pzSay');
@@ -6073,8 +6184,9 @@ document.getElementById('pzGrid').addEventListener('click', e => {
   beep(640,.06);
   pzOpen(+b.dataset.n);
 });
-document.getElementById('pzShow').onclick  = () => pzShowSolution();
-document.getElementById('pzRetry').onclick = () => pzRetry();
+document.getElementById('pzShow').onclick   = () => pzShowSolution();
+document.getElementById('pzFollow').onclick = () => pzFollowUp();
+document.getElementById('pzRetry').onclick  = () => pzRetry();
 document.getElementById('pzNext').onclick  = () => {
   if (PZ.mode !== 'rush') return pzNext();
   if (RUSH.over) return rushStart();

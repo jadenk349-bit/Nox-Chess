@@ -108,7 +108,7 @@ var FNS = ['startBoard','newState','cloneState','posKey','fenOf','stateFromFEN',
            'pzNextRung','pzUnlocked','pzElo','pzGuestRating','pzRating','pzReport',
            'pzSendResult','pzSync','rushQueue','rushStrike','rushEnd','rushAdvance','rushRender',
            'pzOpen','pzClose','pzPlay','pzFinish','pzExplain','pzSolutionSan',
-           'pzRender','pzRenderGrid','visualIndex'];
+           'pzFollowUp','pzFollowLine','pzRender','pzRenderGrid','visualIndex'];
 
 var bundle = [grab(/\nconst W = 'w', B = 'b';/, "const W/B")];
 for (var d = 0; d < DECLS.length; d++) if (DECLS[d] !== 'W') bundle.push(decl(DECLS[d]));
@@ -145,7 +145,7 @@ for (var k = 0; k < TRACKS.length; k++){
   var list = sets[TRACKS[k]];
   total += list.length;
   if (!list.length){ say('  ..    ' + TRACKS[k] + ' is empty, skipping'); continue; }
-  var numbered = true, replayable = true, ordered = true;
+  var numbered = true, replayable = true, follows = true, withFollow = 0;
   for (var n = 0; n < list.length; n++){
     if (list[n].n !== n + 1) numbered = false;
     // every solution has to be playable from its own fen, or the puzzle is a trap
@@ -158,9 +158,21 @@ for (var k = 0; k < TRACKS.length; k++){
     }
     // and a puzzle always ends on the solver's move
     if (list[n].moves.length % 2 === 0) replayable = false;
+    // the follow-up carries on from exactly where the solution stopped, so it
+    // replays out of the same walk — a stale one would strand the board
+    var fu = list[n].followUp || [];
+    if (fu.length) withFollow++;
+    for (var fi = 0; fi < fu.length; fi++){
+      var fall = legalMoves(st, st.turn), got = null;
+      for (var g = 0; g < fall.length; g++) if (uciOf(fall[g]) === fu[fi]) got = fall[g];
+      if (!got){ follows = false; break; }
+      st = makeMove(st, got);
+    }
   }
   check(TRACKS[k] + ': numbered 1..n', numbered, true);
   check(TRACKS[k] + ': every solution replays from its fen', replayable, true);
+  check(TRACKS[k] + ': every follow-up replays from its solution', follows, true);
+  say('  ..    ' + withFollow + ' of ' + list.length + ' carry a follow-up');
   check(TRACKS[k] + ': ordered easiest first',
         list[0].seedRating <= list[list.length-1].seedRating, true);
 }
@@ -249,6 +261,59 @@ if (one){
   say('  ..    no second one-move puzzle in this set, skipping');
 }
 
+say('\nThe follow-up\n');
+
+// a puzzle that carries one: the field is written by tools/verify_puzzles.js
+// and a track that has not been through it yet simply has no follow-ups
+var withF = null;
+for (var ft = 0; ft < TRACKS.length && !withF; ft++)
+  for (var fq = 0; fq < sets[TRACKS[ft]].length; fq++)
+    if ((sets[TRACKS[ft]][fq].followUp || []).length){
+      withF = { track: TRACKS[ft], n: fq + 1, p: sets[TRACKS[ft]][fq] };
+      break;
+    }
+
+if (withF){
+  PZ.track = withF.track;
+  PZ.list = sets[withF.track];
+  pzOpen(withF.n);
+  pzRender();
+  check('an unsolved puzzle does not offer it', elements.pzFollowRow.style.display, 'none');
+  pzFollowUp();
+  check('and pressing it early does nothing', PZ.follow, 'idle');
+
+  // solve it, driving the forced replies the way the page's timer would
+  pzPlay(moveFor(withF.p.moves[0]));
+  for (var fs = 1; fs < withF.p.moves.length; fs++){
+    if (PZ.busy){ G.st = makeMove(G.st, moveFor(withF.p.moves[fs])); PZ.busy = false; }
+    else pzPlay(moveFor(withF.p.moves[fs]));
+  }
+  check('the puzzle is solved', PZ.done, true);
+  pzRender();
+  check('now the follow-up is offered', elements.pzFollowRow.style.display, 'flex');
+  check('and the card has not given it away yet',
+        elements.pzSay.textContent.indexOf('From there') >= 0, false);
+
+  var line = pzFollowLine(withF.p);
+  check('it reads back as notation', line.sans.length, withF.p.followUp.length);
+  check('and says where it ends up',  line.outcome.length > 4, true);
+
+  // the walk itself is on the page's timer; what can be checked here is that
+  // pressing the button takes the puzzle out of 'idle' and holds the board
+  pzFollowUp();
+  check('pressing it starts the line', PZ.follow, 'playing');
+  check('and the board stops taking moves while it runs', PZ.busy, true);
+
+  PZ.follow = 'played';
+  PZ.busy = false;
+  pzRender();
+  check('once watched, the card spells the line out',
+        elements.pzSay.textContent.indexOf('From there') >= 0, true);
+  check('and the button will not run twice', elements.pzFollow.disabled, true);
+} else {
+  say('  ..    no puzzle in this set carries a follow-up, skipping');
+}
+
 say('\nRating, for a player with nowhere to store one\n');
 
 // the guest path: the browser prices its own attempts and remembers the answer.
@@ -311,8 +376,11 @@ check('a solve in one track is stored there',
       pzProgress('endgame').solved.indexOf('en-test-1') >= 0, true);
 check('and not in another', pzProgress('opening').solved.indexOf('en-test-1') >= 0, false);
 pzMark('endgame', 'en-test-1', true);
-check('marking the same one twice does not double it',
-      pzProgress('endgame').solved.length, 1);
+// counted rather than measured by length: real endgame puzzles have been
+// solved further up this file, and they are in the same list
+var twice = 0, solvedIds = pzProgress('endgame').solved;
+for (var si = 0; si < solvedIds.length; si++) if (solvedIds[si] === 'en-test-1') twice++;
+check('marking the same one twice does not double it', twice, 1);
 
 // and it is kept per account, so signing out does not show somebody else's
 // ladder — and playing on as a guest cannot write over theirs
