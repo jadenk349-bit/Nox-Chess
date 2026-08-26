@@ -91,8 +91,16 @@
      of the window: widening .wrap itself would re-centre it and drag the lane
      — and the mark in it — leftwards, and the mark does not move. The side
      panel keeps its own clamp and simply sits further right. The 40px is the
-     body's side padding. */
+     body's side padding.
+     It is also pulled LEFT, out of the lane's own margin, so the board stands
+     next to the wordmark instead of a hand's width away from it — the lane is
+     wide enough for the mark plus the air the home page wants around it, and a
+     game does not want that air. The mark itself does not move: it is pinned to
+     the top of the lane, outside this box. The whole layout goes, board and side
+     panel together, so the gap between them is untouched; the width is NOT
+     grown back, so the right-hand end comes left by the same amount. */
   body.on-game .game-layout{
+    margin-left:calc(0px - var(--board-shift));
     width:calc(100% + max(0px, min(440px, (100vw - 40px - 1120px - var(--rail)) / 2)));
   }
 
@@ -293,16 +301,25 @@
     align-items:start;
     /* The board takes what the column offers, but never so much that the strip
        under it falls off the screen — a clock you have to scroll to is no clock.
-       The subtraction is both strips, the clock note and the few pixels of
-       page padding the board column leaves after it has been pulled out over
+       The subtraction is both strips and the few pixels of page padding the
+       board column leaves after it has been pulled out over
        `body.on-game`'s own (see .board-col just below) — and there is no header row above the board left to pay for,
        because the mark hangs in the lane beside it rather than standing in a
        row over it. So the two name strips land near the top and bottom edges
-       of the window and everything between them is board. Retune it if any of
-       those rows change height, or the bottom name strip starts scrolling out
-       of sight. */
-    --chrome:142px;
+       of the window and everything between them is board. Nothing may be added
+       below the bottom strip: the 4px of page padding left under it is the same
+       4px left over the top strip, and the two strips are meant to sit level
+       against their own edges of the window. Retune it if any of those rows
+       change height, or the bottom name strip starts scrolling out of sight.
+       (It was 36px larger while a "clock starts on the first move" caption held
+       a row under the bottom strip; that caption is gone, and the few pixels of
+       slack that used to sit under it went with it — measured, not guessed: the
+       strips land 4px from either edge.) */
+    --chrome:106px;
     --board-max:min(100%, calc(100vh - var(--chrome)));
+    /* How far left of the lane the whole layout stands. Never more than the air
+       the lane holds beside the mark, or the board would run under it. */
+    --board-shift:clamp(12px,2.2vw,32px);
   }
   /* Centred rather than left-hugging: the board sits in from the page margin,
      nearer the side panel, instead of jammed against the edge of the wrap. */
@@ -313,7 +330,19 @@
      pinned to the top of the lane, and the padding it is measured from is
      untouched — only this column reaches into it. The 4px + 4px left over are
      what --chrome above counts as page padding. */
-  .game-layout .board-col{margin-top:-24px; margin-bottom:-8px;}
+  .game-layout .board-col{
+    margin-top:-24px; margin-bottom:-8px;
+    /* The strips are meant to sit the same 4px from the top and the bottom of
+       the window. When the board is height-bound that falls out of --chrome on
+       its own; when the window is tall enough that the board runs out of WIDTH
+       first, the column is shorter than the window and the leftover would all
+       collect under the bottom strip. So the column claims the whole height and
+       centres itself in it. min-height, not height: a column that outgrows the
+       window (the typed-move console opens one above the board) pushes past it
+       and flows downwards as before, rather than centring its overflow and
+       hiding the top strip off the top of the screen. */
+    min-height:calc(100vh - 8px); justify-content:center;
+  }
   @media (max-width:900px){ .game-layout{grid-template-columns:minmax(0,1fr);} }
   /* Too narrow to spend 140px on a lane: the mark goes back into the header row
      it came from, above the board, and the board pays for that row again. */
@@ -323,9 +352,10 @@
     .social-title{margin-left:0;}
     #screen-game .game-head{min-height:var(--logo-box); margin-bottom:14px;}
     /* …and the board column can no longer reach up into the page padding,
-       because the mark is standing in that row. */
-    .game-layout .board-col{margin-top:0; margin-bottom:0;}
-    .game-layout{--chrome:262px;}
+       because the mark is standing in that row — nor centre itself against the
+       window, since that row is above it. It simply starts under the mark. */
+    .game-layout .board-col{margin-top:0; margin-bottom:0; min-height:0; justify-content:flex-start;}
+    .game-layout{--chrome:226px; --board-shift:0px;}
   }
   /* Study Board opens a row of its own beneath the board. The board pays for it
      out of its own height, rather than the page growing a scrollbar under a
@@ -494,10 +524,6 @@
   .clock.low .time{color:var(--danger);}
   .clock.low.active{border-color:var(--danger); background:rgba(224,90,77,.12);}
   .clock.flagged{opacity:.5;}
-  .clock-note{
-    grid-column:1 / -1; text-align:center; padding:4px 0 1px;
-    font-size:10px; letter-spacing:.18em; text-transform:uppercase; color:#6b7080;
-  }
 
   /* ---------- controls ---------- */
   .controls{width:min(100%,var(--board-max)); padding:14px; display:flex; flex-wrap:wrap; gap:8px;}
@@ -1125,8 +1151,7 @@
      rather than by a second screen, because two boards would drift apart. */
   #screen-game.puzzle-mode .console,
   #screen-game.puzzle-mode .status,
-  #screen-game.puzzle-mode .clock,
-  #screen-game.puzzle-mode .clock-note{display:none !important;}
+  #screen-game.puzzle-mode .clock{display:none !important;}
   /* a rush is the one puzzle mode with a clock, and it goes where clocks go */
   #screen-game.puzzle-mode.rush #clockW{display:flex !important;}
   .pz-strikes{letter-spacing:.22em; color:#d0453c;}
@@ -2274,7 +2299,6 @@
           <div class="clock" id="clockW"><span class="who">WHITE</span><span class="time">10:00</span></div>
           <div class="clock" id="clockB"><span class="who">BLACK</span><span class="time">10:00</span></div>
         </div>
-        <div class="clock-note" id="clockNote">Clock starts on the first move</div>
 
         <!-- post-game review: appears when Study Board is pressed -->
         <div class="review panel" id="reviewBar" style="display:none">
@@ -3553,11 +3577,6 @@ function renderClocks(){
     box.classList.toggle('low', G.clock[c] <= 30000 && G.clock[c] > 0);
     box.classList.toggle('flagged', G.clock[c] <= 0);
   }
-  // It keeps its row either way. It is the last thing under the player's own
-  // name strip, and --board-max is measured against a column that includes it —
-  // appearing and disappearing would resize the board on the first move.
-  document.getElementById('clockNote').style.visibility =
-    (G.started && !running && !G.over) ? 'visible' : 'hidden';
 }
 
 let clockTimer = null;
@@ -5741,7 +5760,6 @@ function rushClock(){
   box.classList.add('active');
   box.classList.toggle('low', RUSH.left <= 30000 && RUSH.left > 0);
   box.classList.toggle('flagged', RUSH.left <= 0);
-  document.getElementById('clockNote').style.display = 'none';
 }
 
 /* ---- getting in ---- */
