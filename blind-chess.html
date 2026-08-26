@@ -82,6 +82,19 @@
      window. */
   body.on-game{padding:28px 20px 12px;}
   body.on-game .game-head{margin-bottom:6px;}
+  /* Over a game the layout is allowed to run wider than the 1120px column
+     every other screen keeps to. A board that stands the full height of the
+     window needs the same width, and inside 1120px the side panel and its gap
+     left the board only ~730px of it — so on a tall screen the board stopped
+     growing long before it reached the foot of the page. The extra width is
+     grown to the RIGHT only, out of the room between the column and the edge
+     of the window: widening .wrap itself would re-centre it and drag the lane
+     — and the mark in it — leftwards, and the mark does not move. The side
+     panel keeps its own clamp and simply sits further right. The 40px is the
+     body's side padding. */
+  body.on-game .game-layout{
+    width:calc(100% + max(0px, min(440px, (100vw - 40px - 1120px - var(--rail)) / 2)));
+  }
 
   /* ---------- header ---------- */
   header{text-align:center; margin-bottom:26px;}
@@ -280,20 +293,27 @@
     align-items:start;
     /* The board takes what the column offers, but never so much that the strip
        under it falls off the screen — a clock you have to scroll to is no clock.
-       The subtraction is both strips, the clock note and the page's own
-       padding, counted against the slim chrome `body.on-game` puts on the foot
-       of this screen — and there is no header row above the board left to pay for,
+       The subtraction is both strips, the clock note and the few pixels of
+       page padding the board column leaves after it has been pulled out over
+       `body.on-game`'s own (see .board-col just below) — and there is no header row above the board left to pay for,
        because the mark hangs in the lane beside it rather than standing in a
        row over it. So the two name strips land near the top and bottom edges
        of the window and everything between them is board. Retune it if any of
        those rows change height, or the bottom name strip starts scrolling out
        of sight. */
-    --chrome:194px;
+    --chrome:142px;
     --board-max:min(100%, calc(100vh - var(--chrome)));
   }
   /* Centred rather than left-hugging: the board sits in from the page margin,
      nearer the side panel, instead of jammed against the edge of the wrap. */
   .board-col{align-items:center; gap:9px;}
+  /* The board column is pulled up and down over `body.on-game`'s own padding
+     so the name strips lie against the edges of the window and the board fills
+     everything between them. This cannot move the mark: it is out of the flow,
+     pinned to the top of the lane, and the padding it is measured from is
+     untouched — only this column reaches into it. The 4px + 4px left over are
+     what --chrome above counts as page padding. */
+  .game-layout .board-col{margin-top:-24px; margin-bottom:-8px;}
   @media (max-width:900px){ .game-layout{grid-template-columns:minmax(0,1fr);} }
   /* Too narrow to spend 140px on a lane: the mark goes back into the header row
      it came from, above the board, and the board pays for that row again. */
@@ -302,7 +322,10 @@
     .site-logo, .logo-btn{position:static;}
     .social-title{margin-left:0;}
     #screen-game .game-head{min-height:var(--logo-box); margin-bottom:14px;}
-    .game-layout{--chrome:304px;}
+    /* …and the board column can no longer reach up into the page padding,
+       because the mark is standing in that row. */
+    .game-layout .board-col{margin-top:0; margin-bottom:0;}
+    .game-layout{--chrome:262px;}
   }
   /* Study Board opens a row of its own beneath the board. The board pays for it
      out of its own height, rather than the page growing a scrollbar under a
@@ -314,9 +337,9 @@
   .board-bar{
     width:min(100%,var(--board-max));
     display:flex; align-items:center; justify-content:space-between; gap:12px;
-    padding:6px 14px; border-radius:10px;
+    padding:4px 14px; border-radius:10px;
     border:1px solid var(--line); background:rgba(0,0,0,.3);
-    min-height:44px;
+    min-height:36px;   /* slim: every pixel here is a pixel off the board */
   }
   /* the clock sits inside the strip, so it drops its own frame — and its own
      colour caption, which the name beside it has already given */
@@ -331,8 +354,8 @@
     overflow:hidden; text-overflow:ellipsis; white-space:nowrap;
   }
   .bar-name .sub{color:var(--muted); font-size:11px; letter-spacing:.14em; margin-left:8px;}
-  #barTop{margin-bottom:6px;}
-  #barBottom{margin-top:6px;}
+  #barTop{margin-bottom:4px;}
+  #barBottom{margin-top:4px;}
   .clock-pool{display:none;}          /* the bars take these two in and out */
 
   /* ---------- the questions asked before a game ---------- */
