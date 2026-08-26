@@ -28,8 +28,9 @@ python3 tools/check_supabase_puzzles.py  # RLS and column grants, against the re
 
 node tools/generate_puzzles.js --poolsOut /tmp/pools.json   # regenerate (slow: ~12 min)
 node tools/generate_puzzles.js --poolsIn /tmp/pools.json    # re-cut the ladders only (instant)
-node tools/verify_puzzles.js --track middlegame            # re-check one ladder, and write its follow-ups
-node tools/verify_puzzles.js --track middlegame --dry      # ...report only, touching nothing
+node tools/verify_puzzles.js --track opening               # audit a shipped ladder (slow), touching nothing
+node tools/verify_puzzles.js --track middlegame --write    # ...and repair it in place, follow-ups included
+node tools/verify_puzzles.js --track opening --followup 6 --write   # ...with a longer follow-up
 
 docker build -t nox-chess . && docker run --rm -p 8787:8787 nox-chess
 ```
@@ -206,6 +207,57 @@ writes it with the service key, and without one the server keeps ratings in
 memory. Guests get neither and keep both locally. Run
 `supabase-migrate-puzzles.sql` once, by hand, like `supabase-setup.sql`.
 
+**A shipped ladder is audited by a different tool than the one that grew it.**
+`generate_puzzles.js` judges a position once, at `confirmDepth`, and splices its
+own best defence in before judging the next one — so every ply of a solution
+was chosen by a search that had only just arrived at it.
+`tools/verify_puzzles.js` asks again from outside, both colours, and where it
+disagrees the file is wrong: the player is being told to play a move the engine
+does not play, and `puzzleStep()` will accept nothing else.
+
+Three passes, and the order is the whole design. A cheap **sweep** ranks every
+ply and only ever nominates; a **head-to-head** at the working depth plays both
+moves and scores the positions they lead to, never reading the order of a
+MultiPV list, whose top move is not always the move a MultiPV 1 search plays;
+and the **verdict**, the same comparison deeper, is the only thing allowed to
+call a move wrong. That split is not fussiness: a single pass at depth 22 called
+six of the hundred opening puzzles wrong and depth 26 sided with the file on
+five of them, so a sweep that decides is a sweep that rewrites good puzzles.
+
+A disagreement is **repaired, not deleted** — the line is cut at the offending
+ply, the engine's move goes in, and it is extended by the generator's own rule —
+because a track is a hundred rungs and has to stay a hundred rungs. Repairing
+changes the line, so the id (a hash of position and line) and the seed rating
+are recomputed with it. A correct solution that is no longer *sharp* is
+reported, not rewritten: sharpness is a generation criterion, not a claim the
+file makes to the player, and rewriting it would only be undone by the next run
+at the next depth. Nothing is written at all without `--write`.
+
+**The follow-up is the payoff, and it is precomputed.** A solution is extended
+only while there is still exactly one strong move to find, which stops it a
+move or two before the rook actually falls off the board — so a player who has
+just found the move is holding a position whose point has not happened yet. The
+follow-up is best play from both sides from there, chosen by
+`verify_puzzles.js`, and `pzShowFollowUp()` plays it out at the same cadence as
+the forced replies. It is precomputed on purpose: `pzExplain()` asks no engine,
+and `test_puzzle_flow.js` asserts that the puzzle screen never loads one.
+
+**Two shapes of the same thing, because the two ladders were checked by
+different runs.** The middlegame carries `follow` — the line, the score it
+arrives at, the material it wins, and the score the puzzle *started* at — and
+the opening carries `followUp`, the line on its own. `pzFollowOf()` reads
+either, and is the only place in the page that knows there are two; everything
+else asks it. `follow.startCp` is what lets the card tell a move that wins from
+a move that is merely the best of a lost position — both are right answers, and
+only one of them is "you come out a rook up" — so a line stored without a score
+says what it won and stops there. Re-verifying a track with `--write` writes the
+richer shape and drops the older one, which is why nothing may read `followUp`
+directly. `pzFollowSay()` counts the material from the *puzzle's* first position
+rather than from where the solution stopped: the question is what the move the
+player found was worth, and half of it is usually already won by the time the
+solution runs out. A track from before any of this has neither field, and the
+button is absent rather than present and dead.
+
 **Study Board and Puzzles are separate features that share one library.**
 Study Board (`REV`, the review screen) explains *the game the player just
 finished*: it is reached only from the end-of-game overlay, replays `G.uci`,
@@ -215,28 +267,6 @@ they share is the explaining — `findMotifs()`, `see()`, `describeBest()` — w
 is why a puzzle tagged `fork` is explained with the word fork. Keep the
 dependency one-way: `PZ` may call the review's pure helpers, the review must
 never learn what a puzzle is.
-
-**A shipped ladder is checked, not trusted.** `tools/verify_puzzles.js` replays
-every puzzle in a file against the engine at depth 18 — the solver's moves have
-to still be best, the defence's moves have to still be the best defence — and
-rebuilds any line that fails by the generator's own rules, recomputing the id
-(a hash of position and line) and the seed rating with it. Two rules make it
-converge instead of churning: a verdict is a **head-to-head** comparison, both
-moves played and the results scored, never the order of a MultiPV list, whose
-top move is not always the move a MultiPV 1 search plays; and nothing is
-rewritten on one search, only on one that a deeper look agrees with. A correct
-solution that is no longer *sharp* is reported, not rewritten — sharpness is a
-generation criterion, not a claim the file makes to the player.
-
-**The follow-up is in the file, not in the browser.** Each puzzle in a verified
-track carries `follow`: a few more plies of best play past the end of the
-solution, the score the line arrives at, the material it wins, and the score the
-puzzle *started* at. `pzFollowUp()` plays them out on the board and
-`pzFollowSay()` writes the sentence; no engine is asked at the board, exactly as
-`pzExplain()` asks none. `follow.startCp` is what lets the card tell a move that
-wins from a move that is merely the best of a lost position — both are right
-answers, and only one of them is "you come out a rook up". Tracks without the
-field simply show no button.
 
 **Puzzle Rush borrows the game's clock.** `tickClock()` and `renderClocks()`
 each grow one branch for `RUSH.on`; there is no second timer. A run never

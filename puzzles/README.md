@@ -28,6 +28,12 @@ player just finished and never reads them.
 Each track is an ordered ladder: `n` 1 to 100, puzzle 1 the easiest and
 puzzle 100 the hardest. The player walks it in order, one unlocked by the last.
 
+| Track | Audited | Repaired | `followUp` |
+|---|---|---|---|
+| opening | 2026-08-26, sweep 20 / verdict 28 | 1 of 100 (`n` 19: the defence was 241cp short of best, and the true best defence leaves nothing to find, so the line is one move now) | 6 plies, all 100 |
+| middlegame | — | — | — |
+| endgame | — | — | — |
+
 ### Themes
 
 | Theme | Puzzles |
@@ -96,6 +102,59 @@ not depend on how fast the machine is. Regeneration is still not bit-for-bit
 reproducible: Stockfish seeds its Skill Level randomness from the clock, so the
 self-play games and the seed ratings both wander a little between runs even at
 the same `--seed`.
+
+## Auditing what shipped
+
+The generator judges a position once, at `confirmDepth`, splices its own best
+defence in and judges the next one — so every ply of a solution was chosen by a
+search that had only just arrived at it. `tools/verify_puzzles.js` asks again
+from outside, at a depth the generator cannot afford over a whole corpus, and
+where the two disagree the file is wrong: the player is being told to play a
+move the engine does not play, and the referee in the page accepts nothing
+else. Both colours are audited, because a puzzle whose defence walks into the
+tactic teaches a tactic that is not there.
+
+Two depths, because one alone is either too slow to run over a hundred puzzles
+or too shallow to be trusted with them. The sweep at depth 20 only notices that
+the engine would play something else; the verdict at depth 28 is the only thing
+allowed to call a move wrong. The split is what the tool is for: run as one
+pass at depth 22 it called six of the hundred opening puzzles wrong, and a look
+at depth 26 sided with the file on five of the six.
+
+A disagreement is repaired rather than deleted. The line is cut at the offending
+ply, the engine's own move goes in, and it is extended by the generator's rule —
+best defence, ask again, stop when there is no longer one strong move. A track
+is a hundred rungs and has to stay a hundred rungs, so a puzzle keeps its place
+in the ladder; what it does not keep is its `id`, which is the hash of the fen
+and the moves and therefore changes with them.
+
+```bash
+node tools/verify_puzzles.js --track opening                        # report
+node tools/verify_puzzles.js --track opening --followup 6 --write   # repair
+```
+
+## The follow-up: `follow`, or `followUp`
+
+Optional, and only on tracks that have been through the audit. A solution is
+extended only while there is still exactly one strong move to find, which
+usually stops it a move or two before the material actually changes hands — so
+a player who has just found the move is holding a position whose point has not
+happened yet. The follow-up is best play from *both* sides from there, so what
+it shows is the best the defence has rather than a line that only works if the
+opponent helps. Show Follow Up on the puzzle card plays it out.
+
+Two shapes, because the two ladders were checked by different runs of the tool.
+`follow` is an object — the line, the score it arrives at (`cp` or `mate`), the
+material it wins (`swing`), and the score the puzzle started at (`startCp` /
+`startMate`, which is what lets the card tell a move that wins from a move that
+is merely the best of a lost position). `followUp` is the older shape: the line
+on its own, with nothing said about where it ends. The page reads either,
+through `pzFollowOf()`; a track re-verified with `--write` comes back carrying
+`follow` and loses `followUp`, so nothing should read that field directly.
+
+It lives in the file rather than being searched for in the browser because the
+puzzle screen has no engine in it, deliberately, and `test_puzzle_flow.js`
+asserts that it never grows one.
 
 ## Regenerating
 

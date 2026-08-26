@@ -1,41 +1,61 @@
 #!/usr/bin/env node
 /* Marking the puzzles' own homework — and writing the follow-up.
  *
- * tools/generate_puzzles.js mines a track at depth 12/16 while it is playing
- * hundreds of games; this tool goes back over a finished file one puzzle at a
- * time and asks a deeper search whether every claim in it is still true:
+ * tools/generate_puzzles.js decides what a puzzle is, mining a track at depth
+ * 12/16 while it is playing hundreds of games. This tool goes back over a
+ * finished file, one puzzle at a time and at a deeper setting, and asks whether
+ * every claim in it is still true:
  *
  *   - each of the solver's moves is still the engine's best move there;
  *   - each of the defence's moves is still the engine's best defence, because
  *     a line answered by a blunder proves nothing about the moves after it.
  *
- * Both verdicts are head-to-head: the move on file and the move the engine
- * prefers are each played, and the positions they lead to are scored. The
- * obvious test — is this the first line of a MultiPV 2 search — asks about the
- * search rather than about the move, and asking for two lines changes the
- * pruning enough that the answer is not stable. Nothing is rewritten on one
- * search either: a failing move is asked again four ply deeper first.
+ * Both colours, because a puzzle whose opponent walks into it teaches a tactic
+ * that is not there. And where the deep look disagrees with the file, the file
+ * is wrong: the player is being told to play a move the engine does not play,
+ * and puzzleStep() in the page will accept nothing else.
  *
- * Whatever fails is not deleted, it is rebuilt: the line is re-derived from
- * the last position that did hold up, by the same rules the generator used,
- * so a repaired puzzle is the puzzle the generator would have written if it
- * had looked this deep. Repairing changes the line, so the id (a hash of the
- * position and the line) and the seed rating are recomputed with it.
+ * Three passes, not one, and the order matters:
+ *
+ *   1. a cheap **sweep** ranks every ply. It only ever *nominates* — a single
+ *      pass at depth 22 called six of the hundred opening puzzles wrong and a
+ *      look at depth 26 sided with the file on five of the six, so a sweep that
+ *      decides is a sweep that rewrites good puzzles.
+ *   2. a **head-to-head** at the working depth: the move on file and the move
+ *      the engine prefers are each played, and the positions they lead to are
+ *      scored. The obvious test — is this the first line of a MultiPV 2 search
+ *      — asks about the search rather than about the move, and asking for two
+ *      lines changes the pruning enough that the answer is not stable.
+ *   3. the **verdict**, the same comparison four ply deeper, and the only thing
+ *      allowed to call a move wrong. Nothing is rewritten on one search.
+ *
+ * Whatever fails is not deleted, it is rebuilt: the line is cut at the ply the
+ * engine will not sign, the engine's own move is put there, and it is extended
+ * by the same rules the generator used — best defence, ask again, stop when the
+ * position is no longer sharp. A track is a hundred rungs and has to stay a
+ * hundred rungs. Repairing changes the line, so the id (a hash of the position
+ * and the line) and the seed rating are recomputed with it.
  *
  * What the tool will not do is rewrite a correct solution for being *dull* —
  * still the best move, no longer 150cp clear of the runner-up at this depth.
- * Sharpness is how the generator chose the position; it is not a claim the
- * file makes to the player, and a run that rewrote it would be undone by the
- * next run at the next depth. Dull puzzles are counted and reported instead.
+ * Sharpness is how the generator chose the position; it is not a claim the file
+ * makes to the player, and a run that rewrote it would be undone by the next
+ * run at the next depth. Dull puzzles are counted and reported instead.
  *
  * Then every puzzle — repaired or not — gets a **follow-up**: a few more plies
- * of best play past the end of the solution, each one an engine answer at
- * full depth, with the evaluation that line arrives at. That is what the
- * "Show Follow-up" button plays out on the board: the puzzle proves the move
- * is forced, and the follow-up shows what it was forced *for*.
+ * of best play from both sides past the end of the solution, each one an engine
+ * answer at full depth, with the evaluation that line arrives at and the one it
+ * started from. That is what the "Show Follow Up" button plays out on the
+ * board: the puzzle proves the move is forced, the follow-up shows what it was
+ * forced *for*. It is precomputed here rather than searched in the browser,
+ * because a puzzle screen with a Stockfish worker in it is a second engine in a
+ * feature that was built around not having one.
  *
- *   node tools/verify_puzzles.js --track middlegame --jobs 12
- *   node tools/verify_puzzles.js --track middlegame --dry        # report only
+ * Nothing is written unless it is asked for.
+ *
+ *   node tools/verify_puzzles.js --track opening                 # report only
+ *   node tools/verify_puzzles.js --track middlegame --write      # repair in place
+ *   node tools/verify_puzzles.js --track opening --followup 6 --write
  */
 
 'use strict';
@@ -51,14 +71,24 @@ const DEFAULTS = {
   track: 'middlegame',
   jobs: Math.max(1, Math.min(12, require('os').cpus().length - 2)),
   dir: path.join(__dirname, '..', 'puzzles'),
+  file: '',           // an explicit file, when it is not dir/track.json
   // Deeper than the generator on purpose. Re-asking at the depth that wrote
   // the file would mostly re-read it back; the point is a second opinion.
-  depth: 18,          // the solver's moves, MultiPV 2
+  sweep: 20,          // the cheap pass over every ply, which only nominates
+  multipv: 5,         // how wide the sweep looks
+  depth: 18,          // the head-to-head on anything the sweep nominated
   replyDepth: 18,     // the defence
-  deepDepth: 22,      // the second opinion on anything the first one failed
+  deepDepth: 26,      // the verdict: the only thing allowed to call a move wrong
   followDepth: 16,    // the follow-up, where nothing is being decided any more
   gap: 150,           // centipawns the best move must beat the second best by
   maxPlies: 7,        // solution length cap, always odd: a puzzle ends on your move
+  // How far the puzzle's own move may fall short of the sweep's before the
+  // slow searches are spent on it. Not zero: two roads to the same won ending
+  // are both "the answer" and the file is allowed to have picked either.
+  tol: 50,
+  // The defence is held to a looser standard than the solve. It only has to be
+  // a real try; the solver's move has to be the move.
+  defTol: 100,
   // Two moves within a few centipawns of each other are the same move as far
   // as this tool is concerned: rewriting a solution because the engine now
   // prefers the other way of winning the same piece would churn the file
@@ -67,13 +97,18 @@ const DEFAULTS = {
   // A defence that is not the engine's first choice but loses by the same
   // amount is not a wrong defence — Stockfish is picking between two ways of
   // being lost. Only a defence that is actually better than the one on file
-  // (or actually worse than a real alternative) rewrites the line.
+  // rewrites the line.
   replySlack: 25,
-  follow: 6,          // plies of best play past the end of the solution
-  dry: false,
+  follow: 6,          // plies of best play past the end of the solution; --followup
+  write: false,       // nothing is written unless it is asked for
+  dry: false,         // the same thing said the other way round
   limit: 0,           // 0 = the whole track; a number checks the first n, for a smoke test
   report: ''
 };
+
+// --followup is the same knob as --follow, because both halves of this tool
+// were written under their own name before they were one tool.
+const ALIASES = { followup: 'follow', followUp: 'follow' };
 
 const MATE_SCORE = G.MATE_SCORE || 10000;
 const uciFind = G.uciFind;
@@ -115,6 +150,47 @@ async function scoreAfter(engine, fen, moves, cfg, depth){
   return v === null ? null : -v;
 }
 
+/* One ply, ranked cheaply — the sweep.
+ *
+ * The comparison happens *inside* one search: the file's move is looked for
+ * among the MultiPV lines and its score is read off there, so the two numbers
+ * being subtracted came out of the same tree at the same depth. Only when the
+ * move is not ranked at all does it fall back to a search of its own, and then
+ * with a lot of room for the noise that costs.
+ *
+ * This is also where dullness is noticed, since the same search already has
+ * the runner-up in hand: still the best move, no longer clear of the field. */
+async function rank(engine, fen, prefix, played, depth, cfg){
+  const res = await engine.ask({
+    fen, moves: prefix, multipv: cfg.multipv, depth, fresh: true
+  });
+  const lines = (res.lines || []).filter(Boolean);
+  const top = lines[0], second = lines[1];
+  if (!top || !top.best) return null;
+  const mine = lines.find(l => l.best === played);
+  const best = scoreOf(top);
+  let got = mine ? scoreOf(mine) : null;
+  let ranked = !!mine;
+  if (got === null){
+    got = await scoreAfter(engine, fen, prefix.concat([played]), cfg, depth);
+    ranked = false;
+  }
+  if (best === null || got === null) return null;
+  return {
+    top: top.best, best, got, ranked,
+    loss: best - got,
+    gap: second ? best - scoreOf(second) : null,
+    sharp: !!G.candidateFrom(res, cfg.gap),
+    // a position already won without finding anything is a different complaint
+    // from a narrow gap, and only the second says the answer is ambiguous
+    won: !!second && scoreOf(second) >= G.ALREADY_WON,
+    // A mate that is found and a mate that is missed are not a few centipawns
+    // apart, but the arithmetic says they are when the missed one still wins a
+    // rook. Asked separately: if the engine mates, the file has to.
+    mateMissed: top.mate > 0 && got < MATE_SCORE - 100
+  };
+}
+
 /* Two moves, compared by playing each of them and asking what is left.
  *
  * The obvious test — is the move the first line of a MultiPV 2 search — is not
@@ -147,9 +223,6 @@ async function checkSolverPly(engine, fen, prefix, played, cfg, depth){
   if (!top || !top.best) return { ok: false, why: 'no-answer', best: null };
   const gap = second ? scoreOf(top) - scoreOf(second) : null;
   const sharp = !!G.candidateFrom(res, cfg.gap);
-  // why it is not sharp, when it is not: a narrow gap and a position already
-  // won without finding anything are different complaints about the same
-  // puzzle, and only the first one says the answer is ambiguous
   const won = !!second && scoreOf(second) >= G.ALREADY_WON;
   if (top.best === played) return { ok: true, best: played, gap, sharp, won };
   const by = await betterBy(engine, fen, prefix, played, top.best, cfg, depth);
@@ -199,21 +272,39 @@ async function pickSolver(engine, fen, moves, cfg){
    are the generator's buildLine(): the player's move, the engine's own best
    defence, then ask again — while the position stays a puzzle, stopping at a
    clear material win, at mate, or at the length cap.
+
+   Whose turn it is at the end of the prefix is the parity of its length, since
+   a solution starts and ends on the solver's move. An even prefix is cut at a
+   solver's move that did not hold up, and `first` — the move that overruled it,
+   taken from the verdict search rather than asked for again at some other
+   depth — goes in its place. An odd prefix is cut at a defence that did not
+   hold up, and there is nothing to splice: the loop's first act is to ask for
+   the best defence, which is the same question with the same answer. That line
+   may well stop at once, leaving the puzzle a move shorter and ending, as it
+   must, on the solver's move.
+
    `soft` says the first move is no longer a "one strong move" answer at all:
    the line is then simply best play, which is a correct solution to a position
    that is no longer much of a puzzle. */
-async function extendFrom(engine, fen, prefix, cfg){
+async function extendFrom(engine, fen, prefix, cfg, first){
   const moves = prefix.slice();
   let st = walk(fen, moves);
   if (!st) return null;
+  let soft = false;
 
-  const first = await pickSolver(engine, fen, moves, cfg);
-  if (!first) return null;
-  const soft = !first.sharp;
-  let m = uciFind(st, first.best);
-  if (!m) return null;
-  moves.push(first.best);
-  st = P.makeMove(st, m);
+  if (moves.length % 2 === 0){                                 // the solver is to move
+    let pick = first;
+    if (!pick){
+      const chosen = await pickSolver(engine, fen, moves, cfg);
+      if (!chosen) return null;
+      pick = chosen.best;
+      soft = !chosen.sharp;
+    }
+    const m = uciFind(st, pick);
+    if (!m) return null;
+    moves.push(pick);
+    st = P.makeMove(st, m);
+  }
 
   for (;;){
     if (gameOver(st)) break;                                   // mate delivered
@@ -240,8 +331,9 @@ async function extendFrom(engine, fen, prefix, cfg){
  * A puzzle stops the moment the answer is no longer in doubt, which is exactly
  * where a player is left asking "so what?". Every move here is the engine's
  * own at full depth — asked one at a time, so each is answered in the position
- * it is actually played in — and the evaluation carried back is the one the
- * line arrives at, from the solver's side. */
+ * it is actually played in, and not read off somebody else's principal
+ * variation — and the evaluation carried back is the one the line arrives at,
+ * from the solver's side. */
 async function followUp(engine, fen, moves, cfg){
   const line = [];
   const solver = P.stateFromFEN(fen).turn;
@@ -250,9 +342,6 @@ async function followUp(engine, fen, moves, cfg){
 
   for (let i = 0; i < cfg.follow; i++){
     if (gameOver(st)) break;
-    // asked from the position it is actually played in, one move at a time,
-    // so every move in the follow-up is an engine answer and not a guess
-    // read off somebody else's principal variation
     const res = await engine.ask({
       fen, moves: moves.concat(line), depth: cfg.followDepth, fresh: true
     });
@@ -299,55 +388,90 @@ async function followUp(engine, fen, moves, cfg){
 
 /* ------------------------------------------------------------ one puzzle */
 
+/* Every ply of one solution, swept cheaply and then, where the sweep and the
+   file disagree at all, judged slowly. Returns the first ply the engine will
+   not sign, or -1 when it signs all of them. */
+async function audit(engine, p, cfg){
+  const fen = p.fen;
+  const solver = P.stateFromFEN(fen).turn;
+  const notes = [];
+  let st = P.stateFromFEN(fen);
+
+  for (let i = 0; i < p.moves.length; i++){
+    if (!st || gameOver(st)) return { at: i, why: 'line-over', notes };
+    const played = p.moves[i];
+    if (!uciFind(st, played)) return { at: i, why: 'illegal', notes };
+    const prefix = p.moves.slice(0, i);
+    const mine = st.turn === solver;
+    const where = (mine ? 'solution' : 'defence') + ' ply ' + i + ': ';
+
+    // 1. the sweep, which only nominates: nothing below this line trusts it
+    const quick = await rank(engine, fen, prefix, played, cfg.sweep, cfg);
+    if (mine && quick && quick.top === played && !quick.sharp)
+      // still the move, no longer the only move: worth knowing when the set is
+      // next regenerated, not worth rewriting a correct solution over
+      notes.push('ply' + i + ':dull' +
+                 (quick.won ? '(won)' : '(gap=' + (quick.gap === null ? '?' : Math.round(quick.gap)) + ')'));
+    const close = quick &&
+      quick.loss < (mine ? cfg.tol : cfg.defTol) * (quick.ranked ? 1 : 3) &&
+      !quick.mateMissed;
+    if (!quick || quick.top === played || close){
+      if (quick && quick.top !== played)
+        notes.push(where + played + ' is not ' + quick.top +
+                   ' but only by ' + Math.round(quick.loss) + 'cp');
+      st = P.makeMove(st, uciFind(st, played));
+      continue;
+    }
+
+    // 2. the head-to-head, and 3. the same comparison deeper. Nothing is
+    // rewritten on one search: a move the first pass disliked is asked again
+    // at the verdict depth, and only a verdict that survives that is allowed
+    // to change the file — otherwise the tool would spend its time rewriting
+    // lines that the next run would rewrite back.
+    const ask = mine ? checkSolverPly : checkReplyPly;
+    let r = await ask(engine, fen, prefix, played, cfg);
+    if (!r.ok){
+      const second = await ask(engine, fen, prefix, played, cfg, cfg.deepDepth);
+      if (second.ok) notes.push(where + played + ' is best at depth ' + cfg.deepDepth +
+                                ' and not at depth ' + cfg.depth);
+      r = second;
+    }
+    if (r.ok && r.tie) notes.push('ply' + i + ':tie');
+    if (!r.ok)
+      return {
+        at: i, top: r.best, notes,
+        why: where + 'file plays ' + played + ', engine plays ' + (r.best || '?') +
+             ' (' + r.why + (r.by === null || r.by === undefined ? ''
+                                                                 : ', ' + Math.round(r.by) + 'cp worse') + ')'
+      };
+    st = P.makeMove(st, uciFind(st, played));
+  }
+  return { at: -1, why: '', notes };
+}
+
 async function verifyOne(p, engine, cfg){
   const note = { n: p.n, id: p.id, repaired: false, soft: false, notes: [] };
   const fen = p.fen;
   const st0 = P.stateFromFEN(fen);
-  const solver = st0.turn;
 
-  let bad = -1, why = '', best = null;
-  let st = st0;
-  for (let i = 0; i < p.moves.length; i++){
-    if (!st || gameOver(st)){ bad = i; why = 'line-over'; break; }
-    const played = p.moves[i];
-    if (!uciFind(st, played)){ bad = i; why = 'illegal'; break; }
-    const prefix = p.moves.slice(0, i);
-    const mine = st.turn === solver;
-    const ask = mine ? checkSolverPly : checkReplyPly;
-    let r = await ask(engine, fen, prefix, played, cfg);
-    // Nothing is rewritten on one search. A move the first pass disliked is
-    // asked again four ply deeper, and only a verdict that survives that is
-    // allowed to change the file — otherwise the tool would spend its time
-    // rewriting lines that the next run would rewrite back.
-    if (!r.ok && why !== 'illegal'){
-      const second = await ask(engine, fen, prefix, played, cfg, cfg.deepDepth);
-      if (second.ok){ note.notes.push('ply' + i + ':' + r.why + '-cleared-at-' + cfg.deepDepth); r = second; }
-      else r = second;
-    }
-    if (mine && r.ok && r.sharp === false)
-      // still the move, no longer the only move: worth knowing when the set is
-      // next regenerated, not worth rewriting a correct solution over
-      note.notes.push('ply' + i + ':dull' +
-                      (r.won ? '(won)' : '(gap=' + (r.gap === null ? '?' : r.gap) + ')'));
-    if (mine && r.ok && r.tie) note.notes.push('ply' + i + ':tie');
-    if (!r.ok){ bad = i; why = r.why; best = r.best; break; }
-    st = P.makeMove(st, uciFind(st, played));
-  }
+  const found = await audit(engine, p, cfg);
+  note.notes = found.notes;
 
   let moves = p.moves;
-  if (bad >= 0){
-    // Rebuild from the last position that held up. A defence that failed is
-    // dropped along with everything after it; the engine's own is spliced in
-    // by extendFrom(), which then keeps going for as long as the position is
-    // still a puzzle.
-    const prefix = p.moves.slice(0, bad - (bad % 2));     // end on the solver's turn
-    const rebuilt = await extendFrom(engine, fen, prefix, cfg);
-    if (!rebuilt){ note.failed = why || 'no-line'; return { puzzle: p, note }; }
+  if (found.at >= 0){
+    // Rebuild from the last position that held up. The engine's own move goes
+    // in where the file's was, and extendFrom() keeps going for as long as the
+    // position is still a puzzle.
+    const rebuilt = await extendFrom(engine, fen, p.moves.slice(0, found.at), cfg, found.top);
+    if (!rebuilt || !rebuilt.moves.length || rebuilt.moves.length % 2 === 0){
+      note.failed = found.why || 'no-line';
+      return { puzzle: p, note };
+    }
     moves = rebuilt.moves;
     note.repaired = true;
     note.soft = rebuilt.soft;
-    note.why = why;
-    note.wasBad = { ply: bad, played: p.moves[bad], engine: best };
+    note.why = found.why;
+    note.wasBad = { ply: found.at, played: p.moves[found.at], engine: found.top || null };
     note.was = p.moves.slice();
   }
 
@@ -359,14 +483,22 @@ async function verifyOne(p, engine, cfg){
     out.id = G.puzzleId(G.bucketFor(st0.full), fen, moves);
     out.themes = G.themesFor(fen, moves);
     // The rating is what the ladder is sorted by and what the Elo update
-    // scores against, and it was measured on the old first move.
+    // scores against, and it was measured on the old first move. seedRating()
+    // is the generator's own cold start, exported rather than copied so that a
+    // repaired rung is priced exactly the way the ladder was.
     if (moves[0] !== p.moves[0]){
       out.seedRating = await G.seedRating(engine, fen, moves[0]);
       note.seedRating = out.seedRating;
     }
   }
-  out.follow = await followUp(engine, fen, out.moves, cfg);
-  note.follow = out.follow ? out.follow.moves.length : 0;
+  if (cfg.follow > 0){
+    out.follow = await followUp(engine, fen, out.moves, cfg);
+    // an older run of this tool stored the line on its own, under its own name;
+    // leaving it beside a freshly measured one would be two answers to the same
+    // question, and the page would read the newer one and never say so
+    delete out.followUp;
+    note.follow = out.follow ? out.follow.moves.length : 0;
+  }
   return { puzzle: out, note };
 }
 
@@ -374,24 +506,29 @@ async function verifyOne(p, engine, cfg){
 
 function parseArgs(argv){
   const cfg = Object.assign({}, DEFAULTS);
-  for (let i = 2; i < argv.length; i++){
+  for (let i = 0; i < argv.length; i++){
     const a = argv[i];
-    if (a === '--dry'){ cfg.dry = true; continue; }
-    const k = a.replace(/^--/, '');
-    if (!(k in cfg)) throw new Error('unknown option ' + a);
-    const v = argv[++i];
-    cfg[k] = typeof cfg[k] === 'number' ? +v : v;
+    if (!a.startsWith('--')) continue;
+    const k = ALIASES[a.slice(2)] || a.slice(2);
+    if (!(k in cfg)) throw new Error('unknown option --' + k);
+    if (typeof cfg[k] === 'boolean') cfg[k] = true;
+    else if (typeof cfg[k] === 'number') cfg[k] = +argv[++i];
+    else cfg[k] = argv[++i];
   }
+  // --dry is the older way of saying "report only", which is now the default;
+  // it stays because the docs and the shell history are full of it.
+  if (cfg.dry) cfg.write = false;
   return cfg;
 }
 
 async function main(){
-  const cfg = parseArgs(process.argv);
-  const file = path.join(cfg.dir, cfg.track + '.json');
+  const cfg = parseArgs(process.argv.slice(2));
+  const file = cfg.file || path.join(cfg.dir, cfg.track + '.json');
   const all = JSON.parse(fs.readFileSync(file, 'utf8'));
   const list = cfg.limit ? all.slice(0, cfg.limit) : all;
-  console.log(cfg.track + ': ' + list.length + ' puzzles, depth ' + cfg.depth +
-              ', ' + cfg.jobs + ' engines');
+  console.log(cfg.track + ': ' + list.length + ' puzzles, sweep ' + cfg.sweep +
+              ', verdict ' + cfg.deepDepth + ', ' + cfg.jobs + ' engines' +
+              (cfg.write ? '' : ' (report only; --write to repair in place)'));
 
   const pool = new Pool(cfg.jobs);
   const started = Date.now();
@@ -418,15 +555,21 @@ async function main(){
   const dull = results.filter(r => (r.note.notes || []).some(n => /:dull/.test(n)));
   console.log('  dull    : ' + dull.length + ' (still the best move, no longer 150cp clear)');
   if (dull.length) console.log('    ' + dull.map(r => '#' + r.note.n).join(' '));
+  for (const r of results)
+    for (const n of r.note.notes || []) console.log('  #' + r.note.n + ' note   ' + n);
   for (const r of repaired)
-    console.log('  #' + r.note.n + ' ' + r.note.why + ' at ply ' + r.note.wasBad.ply +
-                ': ' + r.note.wasBad.played + ' -> ' + (r.note.wasBad.engine || '?') +
-                '   [' + r.note.was.join(' ') + '] -> [' + r.puzzle.moves.join(' ') + ']');
+    console.log('  #' + r.note.n + ' WRONG  ' + r.note.why +
+                '\n         was [' + r.note.was.join(' ') + ']' +
+                '\n         now [' + r.puzzle.moves.join(' ') + ']');
   for (const r of failed) console.log('  #' + r.note.n + ' FAILED ' + r.note.failed);
 
   if (cfg.report)
     fs.writeFileSync(cfg.report, JSON.stringify(results.map(r => r.note), null, 1) + '\n');
-  if (!cfg.dry){
+  if (cfg.write){
+    /* Written back in place, rung for rung. A repaired puzzle is a different
+       puzzle — new line, new motifs, new id — but it is the same rung of the
+       same ladder, because a track is a hundred and thinning it is not a
+       repair. */
     const out = all.slice();
     results.forEach((r, i) => { out[i] = r.puzzle; });
     fs.writeFileSync(file, JSON.stringify(out, null, 1) + '\n');
@@ -450,7 +593,7 @@ function noteInReadme(cfg, results){
   const dull = results.filter(r => (r.note.notes || []).some(n => /:dull/.test(n)));
   const withFollow = results.filter(r => r.puzzle.follow && r.puzzle.follow.moves.length);
   const row = '| `' + cfg.track + '` | ' + new Date().toISOString().slice(0, 10) + ' | ' +
-    cfg.depth + ' | ' + results.length + ' | ' + repaired.length + ' | ' +
+    cfg.deepDepth + ' | ' + results.length + ' | ' + repaired.length + ' | ' +
     dull.length + ' | ' + withFollow.length + ' |';
 
   const head = '<!-- verified: begin -->';
@@ -462,10 +605,11 @@ function noteInReadme(cfg, results){
     'puzzle in a track and rebuilds any line the engine no longer agrees with.',
     'The row is the **last run**, not a history: *repaired* counts what that run',
     'rewrote, and a second run over a file already checked rewrites nothing — see',
-    'the git history for what changed. *Dull* puzzles are still the best move but',
-    'no longer beat the runner-up by 150cp at this depth, which is reported and',
+    'the git history for what changed. *Depth* is the verdict depth, the only one',
+    'allowed to call a move wrong. *Dull* puzzles are still the best move but',
+    'no longer beat the runner-up by 150cp at that depth, which is reported and',
     'left alone. *Follow-up* counts the puzzles carrying a continuation for the',
-    'Show Follow-up button — a line that ends in mate has none.', '',
+    'Show Follow Up button — a line that ends in mate has none.', '',
     '| Track | Checked | Depth | Puzzles | Repaired | Dull | Follow-up |',
     '|---|---|---|---|---|---|---|'
   ].join('\n');
@@ -484,6 +628,9 @@ function noteInReadme(cfg, results){
   console.log('noted in ' + readme);
 }
 
-module.exports = { walk, extendFrom, followUp, checkSolverPly, checkReplyPly, parseArgs, DEFAULTS };
+module.exports = {
+  walk, rank, audit, extendFrom, followUp, scoreAfter, scoreOf,
+  checkSolverPly, checkReplyPly, parseArgs, DEFAULTS
+};
 
 if (require.main === module) main().catch(err => { console.error(err); process.exit(1); });

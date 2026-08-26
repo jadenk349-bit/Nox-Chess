@@ -1171,6 +1171,8 @@
   .pz-theme.rating{color:var(--gold-soft); border-color:rgba(212,175,110,.35);}
   .pz-controls{display:flex; gap:8px; margin-top:14px;}
   .pz-controls button{flex:1; padding:9px 6px; font-size:12px;}
+  .pz-follow{width:100%; margin-top:8px; padding:9px 6px; font-size:12px;}
+  .pz-follow-say{color:var(--gold-soft); border-color:rgba(212,175,110,.45); padding-left:9px;}
   .pz-progress{
     float:right; font-size:10px; letter-spacing:.14em; color:var(--muted);
     font-variant-numeric:tabular-nums;
@@ -2443,16 +2445,16 @@
             <h2 id="pzTitle">Puzzle</h2>
             <div class="pz-ask" id="pzAsk"></div>
             <div class="pz-say" id="pzSay"></div>
+            <div class="pz-say pz-follow-say" id="pzFollowSay" style="display:none"></div>
             <div class="pz-themes" id="pzThemes"></div>
             <div class="pz-controls">
               <button class="ghost" id="pzShow">Show Solution</button>
-              <!-- takes the same slot once the puzzle is over: before, the only
-                   thing to ask for is the answer; after, the only thing left to
-                   ask is what the answer was for -->
-              <button class="ghost" id="pzFollow" style="display:none">Show Follow-up</button>
               <button class="ghost" id="pzRetry">Retry</button>
               <button class="primary" id="pzNext">Next</button>
             </div>
+            <!-- the payoff, on a row of its own: it is the one control here
+                 that is worth anything only after the puzzle is over -->
+            <button class="ghost pz-follow" id="pzFollow">Show Follow Up</button>
           </div>
 
           <div class="card panel" id="pzLevels">
@@ -5651,7 +5653,7 @@ function reviewRender(){
    ============================================================ */
 const PZ_TRACK_NAME = { opening:'Opening', middlegame:'Middlegame', endgame:'Endgame' };
 const PZ_START_RATING = 1200;
-const PZ_VERSION = 2;              // ?v= on the three files; bump when they are regenerated
+const PZ_VERSION = 3;              // ?v= on the three files; bump when they are regenerated
 const PZ_REPLY_MS = 420;           // long enough to read the reply as an answer
 
 const PZ = {
@@ -6162,28 +6164,71 @@ function pzShowSolution(){
 }
 
 /* ---- the follow-up ----
-   A puzzle stops the moment the answer stops being in doubt, which is exactly
-   where somebody who has just found it is left asking "and then what?". The
-   follow-up is the rest of that sentence: a few more plies of best play, each
-   one an engine answer at full depth, checked into puzzles/<track>.json beside
-   the solution by tools/verify_puzzles.js. Nothing is asked at the board — the
-   line was verified once, in the tool, rather than once per player.
+   A puzzle stops the moment the answer stops being in doubt — a line is
+   extended only while there is still exactly one strong move to find, which is
+   usually a move or two before the rook actually falls off the board. So
+   somebody who has just found the move is left holding a position whose point
+   has not happened yet, asking "and then what?".
+
+   The follow-up is the rest of that sentence: a few more plies of best play
+   from both sides, each one an engine answer at full depth, checked into
+   puzzles/<track>.json beside the solution by tools/verify_puzzles.js. Both
+   sides at full strength, so what it shows is the best the defence has rather
+   than a line that only works if the opponent helps. Nothing is asked at the
+   board — the line was verified once, in the tool, rather than once per
+   player, because a puzzle screen with a Stockfish worker in it is a second
+   engine in a feature that was built around not having one.
 
    It plays out on the same board at the same cadence as the forced replies, so
-   it reads as the game continuing rather than as a diagram. */
-function pzFollowUp(){
-  const p = PZ.puzzle;
-  const f = p && p.follow;
-  if (!PZ.done || PZ.busy || PZ.followed || !f || !f.moves || !f.moves.length) return;
+   it reads as the game continuing rather than as a diagram. Puzzles written
+   before any of this existed simply have no follow-up, and the button stays
+   off the card rather than appearing with nothing behind it. */
+
+/* The line, however the file writes it. The two ladders were checked by
+   different runs of the verifier and each kept the shape of its own run: the
+   middlegame carries `follow`, an object holding the line together with the
+   score it arrives at and the one it started from, and the opening carries
+   `followUp`, the line on its own. Reading both here is what lets a track be
+   re-verified without the page having to be regenerated with it — and the
+   card simply says less about a line that came with no score. */
+function pzFollowOf(p){
+  if (!p) return null;
+  if (p.follow && p.follow.moves) return p.follow;
+  if (Array.isArray(p.followUp)) return { moves: p.followUp };
+  return null;
+}
+
+/** Whether there is anything to show — a line that ends in mate has nothing. */
+function pzHasFollowUp(p){
+  const f = pzFollowOf(p);
+  return !!(f && f.moves && f.moves.length);
+}
+
+/** Where the solution leaves the board — the follow-up's own starting point. */
+function pzAfterSolution(p){
+  let st = stateFromFEN(p.fen);
+  for (const u of p.moves){
+    const m = legalMoves(st, st.turn).find(x => uciOf(x) === u);
+    if (!m) return null;
+    st = makeMove(st, m);
+  }
+  return st;
+}
+
+/** Play the follow-up out on the board, a move at a time. */
+function pzShowFollowUp(){
+  const f = pzFollowOf(PZ.puzzle);
+  if (!PZ.done || PZ.busy || PZ.followed || !f || !f.moves.length) return;
   PZ.followed = true;
   PZ.busy = true;
   beep(620,.07);
   pzRender();
+  const line = f.moves;
   const token = G.token;
   let i = 0;
   const step = () => {
     if (!PZ.on || G.token !== token) return;                  // the board moved on
-    const u = f.moves[i];
+    const u = line[i];
     const m = u && legalMoves(G.st, G.st.turn).find(x => uciOf(x) === u);
     // the line has run out, or — a file older than the page — would not play
     if (!m){ PZ.busy = false; render(); pzRender(); return; }
@@ -6191,7 +6236,8 @@ function pzFollowUp(){
     G.uci.push(u);
     G.lastMove = m;
     i++;
-    beep(500,.05);
+    // the solver's half of the line and the defence's, told apart by ear
+    beep(i % 2 ? 520 : 400, .05);
     render();
     setTimeout(step, PZ_REPLY_MS);
   };
@@ -6223,16 +6269,13 @@ function pzExplain(p){
    pieces gets wrong: a position won by force with nothing captured yet, and
    one where the material is up but the position is not. */
 function pzFollowSay(p){
-  const f = p.follow;
+  const f = pzFollowOf(p);
   if (!f || !f.moves || !f.moves.length) return '';
   const start = stateFromFEN(p.fen);
   const solver = start.turn;
-  let st = start;
-  for (const u of p.moves){
-    const m = legalMoves(st, st.turn).find(x => uciOf(x) === u);
-    if (!m) return '';
-    st = makeMove(st, m);
-  }
+  const st0 = pzAfterSolution(p);
+  if (!st0) return '';
+  let st = st0;
   const sans = [];
   for (const u of f.moves){
     const all = legalMoves(st, st.turn);
@@ -6309,8 +6352,7 @@ function pzRender(){
   say.className = 'pz-say';
   if (PZ.done){
     say.classList.add(PZ.shown || PZ.wrong ? 'told' : 'right');
-    say.textContent = (PZ.shown ? '' : PZ.wrong ? 'Solved. ' : 'Correct. ') + pzExplain(p) +
-                      (PZ.followed ? ' ' + pzFollowSay(p) : '');
+    say.textContent = (PZ.shown ? '' : PZ.wrong ? 'Solved. ' : 'Correct. ') + pzExplain(p);
   } else if (PZ.busy){
     say.textContent = '…';
   } else if (PZ.wrong){
@@ -6332,22 +6374,28 @@ function pzRender(){
     // the themes give the answer away, so they wait until it has been given
     (PZ.done ? p.themes.map(t => '<span class="pz-theme">' + PZ_THEME_NAME(t) + '</span>').join('') : '');
 
-  // Show Solution and Show Follow-up share one slot: only one of them is ever
-  // the thing left to ask for. A puzzle whose line ends in mate has no
-  // follow-up to show, and keeps the spent Show Solution button.
-  const canFollow = PZ.done && p.follow && p.follow.moves && p.follow.moves.length > 0;
-  const show = document.getElementById('pzShow');
-  const follow = document.getElementById('pzFollow');
-  show.style.display = canFollow ? 'none' : '';
-  show.disabled = PZ.done || PZ.busy;
-  follow.style.display = canFollow ? '' : 'none';
-  follow.disabled = PZ.busy || PZ.followed;
+  document.getElementById('pzShow').disabled = PZ.done || PZ.busy;
   document.getElementById('pzRetry').disabled = PZ.busy || (!PZ.done && PZ.ply === 0 && !PZ.wrong);
+
+  // a puzzle from before follow-ups were generated, or one whose line ends in
+  // mate, has nothing to offer here — so the button is absent rather than
+  // present and dead
+  const follow = document.getElementById('pzFollow');
+  const followSay = document.getElementById('pzFollowSay');
+  const has = pzHasFollowUp(p);
+  follow.style.display = has ? '' : 'none';
+  follow.disabled = !PZ.done || PZ.busy || PZ.followed;
+  follow.textContent = PZ.followed ? 'Follow Up Shown' : 'Show Follow Up';
+  const said = (PZ.followed && !PZ.busy) ? pzFollowSay(p) : '';
+  followSay.textContent = said;
+  followSay.style.display = said ? '' : 'none';
+
   const next = document.getElementById('pzNext');
   next.disabled = !PZ.done || PZ.n >= PZ.list.length;
   next.textContent = PZ.n >= PZ.list.length ? 'Track Complete' : 'Next Puzzle';
 
   document.getElementById('pzLevels').style.display = '';
+  document.getElementById('pzShow').style.display = '';
   document.getElementById('pzRetry').style.display = '';
   pzRenderGrid();
   syncOptions();
@@ -6364,8 +6412,9 @@ function rushRender(){
   document.getElementById('pzTitle').textContent = 'Puzzle Rush';
   document.getElementById('pzLevels').style.display = 'none';
   document.getElementById('pzShow').style.display = 'none';
-  document.getElementById('pzFollow').style.display = 'none';
   document.getElementById('pzRetry').style.display = 'none';
+  document.getElementById('pzFollow').style.display = 'none';
+  document.getElementById('pzFollowSay').style.display = 'none';
 
   const ask = document.getElementById('pzAsk');
   const say = document.getElementById('pzSay');
@@ -6435,9 +6484,9 @@ document.getElementById('pzGrid').addEventListener('click', e => {
   beep(640,.06);
   pzOpen(+b.dataset.n);
 });
-document.getElementById('pzShow').onclick  = () => pzShowSolution();
-document.getElementById('pzFollow').onclick = () => pzFollowUp();
-document.getElementById('pzRetry').onclick = () => pzRetry();
+document.getElementById('pzShow').onclick   = () => pzShowSolution();
+document.getElementById('pzRetry').onclick  = () => pzRetry();
+document.getElementById('pzFollow').onclick = () => pzShowFollowUp();
 document.getElementById('pzNext').onclick  = () => {
   if (PZ.mode !== 'rush') return pzNext();
   if (RUSH.over) return rushStart();
