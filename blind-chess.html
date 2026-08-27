@@ -1175,6 +1175,25 @@
      that is worth anything only after the puzzle is over, and squeezing a
      fourth button into the row above would shorten the three that are always
      there */
+  /* the finished card: a mistake, a numbered line, a point. The line is the
+     part worth reading twice, so it is the part that is indented and marked —
+     the solver's moves in gold, the defence's in the muted colour, which is the
+     same pairing the board's own move list uses. */
+  .pz-say.pz-why{line-height:1.5;}
+  .pz-why p{margin:0 0 7px;}
+  .pz-why p:last-child{margin-bottom:0;}
+  .pz-why-lead{font-weight:600;}
+  .pz-why-tag{
+    display:inline-block; font-size:10px; letter-spacing:.09em; text-transform:uppercase;
+    color:var(--gold-soft); margin-right:5px;
+  }
+  .pz-why-swing{color:var(--muted); font-size:12px;}
+  .pz-why-line{list-style:none; margin:0 0 7px; padding:0;}
+  .pz-why-line li{margin:0 0 4px; padding-left:11px; border-left:2px solid var(--line);}
+  .pz-why-line li.you{border-left-color:var(--gold-soft);}
+  .pz-why-line li b{color:var(--gold-soft); margin-right:4px;}
+  .pz-why-line li.them{color:var(--muted);}
+  .pz-why-line li.them b{color:var(--text);}
   .pz-follow{width:100%; margin-top:8px; padding:9px 6px; font-size:12px;}
   .pz-follow-say{color:var(--gold-soft); border-color:rgba(212,175,110,.45); padding-left:9px;}
   .pz-progress{
@@ -5666,7 +5685,7 @@ function reviewRender(){
    ============================================================ */
 const PZ_TRACK_NAME = { opening:'Opening', middlegame:'Middlegame', endgame:'Endgame' };
 const PZ_START_RATING = 1200;
-const PZ_VERSION = 4;              // ?v= on the three files; bump when they are regenerated
+const PZ_VERSION = 5;              // ?v= on the three files; bump when they are regenerated
 const PZ_REPLY_MS = 420;           // long enough to read the reply as an answer
 
 const PZ = {
@@ -6263,15 +6282,68 @@ function pzNext(){
 }
 
 /* ---- what the card says ----
-   describeBest() explains one move and, given a line, says where it ends. A
-   puzzle already is that line, so the whole solution goes in as the principal
-   variation and no engine is asked anything: the file was written by an engine
-   that had already thought about it. */
-function pzExplain(p){
+
+   A puzzle has a premise the Study Board does not: *somebody just went wrong*.
+   describeBest() cannot say what — it is handed one position and one move, and
+   the mistake happened before either of them — so a card built out of it can
+   explain the solution perfectly and still never tell the player what to look
+   for the next time. That is the half worth having.
+
+   So the explanation is written where the engine is, by tools/puzzle_words.js,
+   and checked into the file as `why`: what the opponent's move gave away, a
+   line for every ply of the solution — including why the runner-up is not the
+   answer and why each defence is the toughest one — and where it all arrives.
+   The page only spells it out. Nothing is searched here, which is the same
+   bargain the follow-up already made and the reason test_puzzle_flow.js can
+   still assert that the puzzle screen never loads an engine.
+
+   A track written before any of this simply has no `why`, and falls back to
+   the old one-paragraph card rather than to nothing. */
+
+/* The card is the one thing in the puzzle screen built as markup rather than
+   as text, so it is the one thing that has to escape what it interpolates.
+   Everything it prints — notation, square names, piece words — is written by
+   tools/puzzle_words.js and contains none of this; escaping anyway is what
+   keeps that true of a file somebody edits by hand later. A function rather
+   than an arrow because server/test_puzzle_flow.js cuts named declarations out
+   of this page and a multi-line const is the one shape its extractor cannot
+   take. */
+function pzEsc(t){
+  return String(t === null || t === undefined ? '' : t)
+    .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+}
+
+/** The old card: one paragraph, for a file that carries no explanation. */
+function pzExplainPlain(p){
   const st = stateFromFEN(p.fen);
   const m = legalMoves(st, st.turn).find(x => uciOf(x) === p.moves[0]);
   if (!m) return '';
   return describeBest(st, m, null, null, pvLine(st, p.moves));
+}
+
+/** The card, as html. Falls back to the paragraph when there is no `why`. */
+function pzExplain(p){
+  const w = p && p.why;
+  if (!w || !w.moves || !w.moves.length)
+    return '<p class="pz-why-plain">' + pzEsc(pzExplainPlain(p)) + '</p>';
+
+  const out = [];
+  // the mistake first, because it is the thing the player did not have to see
+  // in order to solve it and the thing they most need in order to do it again
+  if (w.mistake)
+    out.push('<p class="pz-why-mistake"><span class="pz-why-tag">The mistake</span> ' +
+             pzEsc(w.mistake) + '</p>');
+  if (w.swing) out.push('<p class="pz-why-swing">' + pzEsc(w.swing) + '</p>');
+
+  out.push('<ol class="pz-why-line">' + w.moves.map(m =>
+    '<li class="' + (m.by === 'you' ? 'you' : 'them') + '">' +
+    '<b>' + pzEsc(m.san) + '</b>' + (m.text ? ' ' + pzEsc(m.text) : '') + '</li>'
+  ).join('') + '</ol>');
+
+  if (w.point)
+    out.push('<p class="pz-why-point"><span class="pz-why-tag">The point</span> ' +
+             pzEsc(w.point) + '</p>');
+  return out.join('');
 }
 
 /* What the follow-up amounts to, said plainly.
@@ -6370,7 +6442,11 @@ function pzRender(){
   say.className = 'pz-say';
   if (PZ.done){
     say.classList.add(PZ.shown || PZ.wrong ? 'told' : 'right');
-    say.textContent = (PZ.shown ? '' : PZ.wrong ? 'Solved. ' : 'Correct. ') + pzExplain(p);
+    say.classList.add('pz-why');
+    // the only branch here that is markup rather than a sentence: the finished
+    // card is a mistake, a line and a point, and the others are one line of text
+    const lead = PZ.shown ? '' : PZ.wrong ? 'Solved.' : 'Correct.';
+    say.innerHTML = (lead ? '<p class="pz-why-lead">' + lead + '</p>' : '') + pzExplain(p);
   } else if (PZ.busy){
     say.textContent = '…';
   } else if (PZ.wrong){
@@ -6468,10 +6544,21 @@ function rushRender(){
 }
 
 // findMotifs speaks in tags; the card speaks to a person
+/* The nine findMotifs() names, plus the ones a whole puzzle carries that a
+   single move does not — what kind of answer it was, what it cost, and the two
+   that are about the move before it. tools/puzzle_rules.js decides which apply;
+   this only spells them. A tag with no entry falls through to itself rather
+   than disappearing, so a track generated by a newer tool still shows its
+   labels on an older page. */
 const PZ_THEME_WORDS = {
   mate:'Checkmate', hangingPiece:'Hanging Piece', fork:'Fork', pin:'Pin',
   skewer:'Skewer', discoveredAttack:'Discovered Attack', doubleCheck:'Double Check',
-  backRank:'Back Rank', trappedPiece:'Trapped Piece', longGame:'Multi-Move'
+  backRank:'Back Rank', trappedPiece:'Trapped Piece', longGame:'Multi-Move',
+  sacrifice:'Sacrifice', exchangeSacrifice:'Exchange Sacrifice', promotion:'Promotion',
+  mateThreat:'Mate Threat', kingAttack:'King Attack', defensiveResource:'Defensive Resource',
+  perpetual:'Perpetual Check', stalemateResource:'Stalemate Resource',
+  zwischenzug:'Zwischenzug', removalOfDefender:'Removal of Defender',
+  pawnBreakthrough:'Pawn Breakthrough', positionalTactic:'Positional Tactic'
 };
 function PZ_THEME_NAME(tag){ return PZ_THEME_WORDS[tag] || tag; }
 

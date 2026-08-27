@@ -116,7 +116,7 @@ var FNS = ['startBoard','newState','cloneState','posKey','fenOf','stateFromFEN',
            'puzzleStep','pzStored','pzProgress','pzWrite','pzMark','pzPush','pzDone',
            'pzNextRung','pzUnlocked','pzElo','pzGuestRating','pzRating','pzReport',
            'pzSendResult','pzSync','rushQueue','rushStrike','rushEnd','rushAdvance','rushRender',
-           'pzOpen','pzClose','pzPlay','pzFinish','pzExplain','pzSolutionSan',
+           'pzOpen','pzClose','pzPlay','pzFinish','pzEsc','pzExplainPlain','pzExplain','pzSolutionSan',
            'pzFollowOf','pzHasFollowUp','pzAfterSolution','pzFollowSay','pzShowFollowUp',
            'pzRetry','pzRender','pzRenderGrid','visualIndex'];
 
@@ -193,7 +193,14 @@ for (var k = 0; k < TRACKS.length; k++){
     }
   }
   check(TRACKS[k] + ': numbered 1..n', numbered, true);
-  check(TRACKS[k] + ': a full ladder of a hundred', list.length, 100);
+  /* A ladder is however many positions cleared the standard, not a round
+     number. This used to assert exactly a hundred, which was true of the set
+     the old generator cut to a fixed size and is the opposite of what the
+     current one promises: padding a track to a target means keeping puzzles
+     that did not earn a place. So the assertion is that there *is* a ladder,
+     and the count is reported rather than demanded. */
+  check(TRACKS[k] + ': a ladder with rungs in it', list.length > 0, true);
+  say('  ..    ' + list.length + ' rungs');
   check(TRACKS[k] + ': every solution replays from its fen', replayable, true);
   check(TRACKS[k] + ': ordered easiest first',
         list[0].seedRating <= list[list.length-1].seedRating, true);
@@ -299,6 +306,49 @@ function solveFlow(track){
   check(at + 'Next is offered', elements.pzNext.disabled, false);
 }
 for (var stk = 0; stk < TRACKS.length; stk++) solveFlow(TRACKS[stk]);
+
+/* ---------------------------------------------------------------------
+   The card at the end: the mistake, the line, the point.
+   --------------------------------------------------------------------- */
+say('\nWhat the finished card says\n');
+
+(function explainCard(){
+  // a record shaped the way tools/verify_puzzles.js writes one
+  var rich = {
+    fen: '4k3/8/8/8/8/8/8/R3K2R w KQ - 0 20',
+    moves: ['a1a8'],
+    themes: ['backRank'],
+    seedRating: 1200,
+    why: {
+      mistake: 'Black played Ke8. It walks the king onto the back rank.',
+      swing: 'The position was level before it and is winning after it.',
+      moves: [{ san: 'Ra8+', uci: 'a1a8', by: 'you', text: 'It comes with check.' }],
+      point: 'White comes out a rook up.'
+    }
+  };
+  var html = pzExplain(rich);
+  check('the card leads with the mistake', html.indexOf('walks the king') >= 0, true);
+  check('it names the move in notation',   html.indexOf('<b>Ra8+</b>') >= 0, true);
+  check('it marks whose move each one is', html.indexOf('class="you"') >= 0, true);
+  check('and it ends on the point',        html.indexOf('a rook up') >= 0, true);
+
+  // a defence is marked as theirs, so the card can colour the two apart
+  rich.why.moves.push({ san: 'Kd7', uci: 'e8d7', by: 'them', text: 'Forced.' });
+  check('the defence is marked as theirs',
+        pzExplain(rich).indexOf('class="them"') >= 0, true);
+
+  // whatever the tool wrote, the card is markup and treats it as text
+  rich.why.mistake = 'Black played <script>Ke8</script>.';
+  check('and nothing it is handed becomes markup',
+        pzExplain(rich).indexOf('<script>') >= 0, false);
+
+  // a track from before any of this still gets the old paragraph
+  var plain = { fen: rich.fen, moves: rich.moves, themes: rich.themes, seedRating: 1200 };
+  var old = pzExplain(plain);
+  check('a file with no explanation falls back to one sentence',
+        old.indexOf('pz-why-plain') >= 0, true);
+  check('and the fallback still says something', old.length > 30, true);
+})();
 
 say('\nShow Follow Up, one track at a time\n');
 
@@ -719,11 +769,20 @@ function separationTests(){
   check('it replays the game that was played', /G\.uci/.test(fn('reviewBuild')), true);
   check('and refuses to open without one', /G\.sans\.length/.test(fn('enterReview')), true);
 
-  // the one direction that is allowed: puzzles borrowing the review's words
-  check('the puzzle card uses the review’s own explainer',
-        /describeBest\(/.test(fn('pzExplain')), true);
+  /* The one direction that is allowed: puzzles borrowing the review's words.
+     The finished card is now the explanation checked into the file by
+     tools/puzzle_words.js — which is what lets it say what the *opponent* did
+     wrong, something describeBest() cannot know, since the mistake happened
+     before the position it is handed. describeBest() is what a track written
+     before any of that falls back to, and that fallback is still the review
+     lending the puzzles its words. */
+  check('the puzzle card prefers the explanation checked into the file',
+        /\.why\b/.test(fn('pzExplain')), true);
+  check('and falls back on the review’s own explainer',
+        /describeBest\(/.test(fn('pzExplainPlain')), true);
   check('and asks no engine of its own',
-        /engineAsk|SF\./.test(fn('pzExplain') + fn('pzOpen') + fn('pzPlay')), false);
+        /engineAsk|SF\./.test(fn('pzExplain') + fn('pzExplainPlain') +
+                              fn('pzOpen') + fn('pzPlay')), false);
 
   // entering a puzzle must put any open review away, or both would own G.st
   check('opening a puzzle closes the review', /reviewClose\(/.test(fn('pzOpen')), true);

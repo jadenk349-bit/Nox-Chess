@@ -81,7 +81,7 @@ class Engine {
     }
   }
 
-  /** ask({fen, moves, skill, multipv, depth, movetime, fresh}) -> engineAsk's shape
+  /** ask({fen, moves, skill, multipv, depth, movetime, fresh, objective}) -> engineAsk's shape
    *
    * `fresh` empties the transposition table first. An engine kept alive across
    * many questions is faster because it remembers, and that memory is exactly
@@ -111,6 +111,17 @@ class Engine {
     }
     this.send('setoption name Skill Level value ' + skill);
     this.send('setoption name MultiPV value ' + multipv);
+    // Contempt is a thumb on the scale, and this build applies it from the
+    // point of view of whoever is to move at the root ("Analysis Contempt:
+    // Both", 24 by default). That is right for a bot, which should prefer a
+    // fight to a draw, and ruinous for a tool that compares the score of a
+    // position before a move with the score after it: those two searches have
+    // opposite sides at the root, so the same position is worth ~50cp more
+    // after any move than before it, and every move in every game looks like a
+    // blunder by exactly that much. Anything measuring a position rather than
+    // playing one asks for `objective`.
+    this.send('setoption name Contempt value ' + (opt.objective ? 0 : 24));
+    this.send('setoption name Analysis Contempt value ' + (opt.objective ? 'Off' : 'Both'));
     this.send('position ' + (opt.fen ? 'fen ' + opt.fen : 'startpos') + moves);
     const p = new Promise(resolve => { this.pending = { lines: [], byDepth: [], multipv, resolve }; });
     // depth first: a search bounded by depth answers the same way on any
