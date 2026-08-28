@@ -6,7 +6,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 Nox Chess (directory name still "Blind Chess"): a blindfold-chess web game. The
 entire client — styles, markup, chess rules, UI, bot, online client, review
-screen, practice drills — is one file, `blind-chess.html` (~7.9k lines). The
+screen, practice drills, the lesson course — is one file, `blind-chess.html`. The
 Python server in `server/` is matchmaking and a move relay, nothing more. There is no build step
 and no package manager on either side.
 
@@ -24,6 +24,7 @@ node server/test_review.js               # unit tests for the review's chess rea
 node server/test_puzzle_flow.js          # plays a shipped puzzle against a stub DOM
 node server/test_practice.js             # what the practice drills invent, re-checked
 node server/test_practice_flow.js        # and running one, against a stub DOM + clock
+node server/test_lessons.js              # walks the whole seven-lesson course (~70s)
 python3 server/test_puzzle_rating.py     # the puzzle Elo handler; no server needed
 node tools/test_generate_puzzles.js      # the generator's own decisions, no engine
 python3 tools/check_supabase_puzzles.py  # RLS and column grants, against the real project
@@ -43,6 +44,13 @@ renaming or reformatting what they extract breaks them on purpose.
 `test_practice_flow.js` goes further and lifts the whole PRACTICE section out
 between its banner comments, so it runs the screen's own code rather than a
 copy — moving that banner moves the suite with it.
+`test_lessons.js` boots the whole page too, and drives the course the way a
+player does — presses the buttons, clicks the squares, types into the console.
+It answers every task by brute force rather than by being told the answer, so a
+lesson step that cannot be finished fails there; and it asks the page's own move
+generator whether every fixed position in the course is legal. It takes a little
+over a minute because the lessons play their sequences at reading speed and it
+waits for them, which is the point.
 `test_rematch_e2e.js` is the exception and the reason the others can stay
 narrow: it boots the *whole* page script twice under a dumb DOM shim, gives
 each copy its own real WebSocket to the server, and presses the real buttons —
@@ -327,8 +335,62 @@ without changing what the page writes. Every answer is written as it happens, so
 a refresh keeps what was answered; only the session count waits for the session
 to end. `showScreen()` calls `prLeave()` on the way out, which is what stops a
 study countdown running over another page. `goPractice()` is the only way in, on
-purpose: the How to Play page, when there is one, should finish by calling it
-rather than growing a second entrance.
+purpose — and now that the How to Play page exists, that is exactly what it
+does: the button at the end of the course presses `goPractice()` rather than
+growing a second entrance.
+
+**The lessons are the game with one thing taken away.** `screen-lessons` (the
+LESSONS section of the script, `LSN`, reached from LESSON → How to Play Blind
+Chess) is a seven-lesson course, and it is deliberately made of the game rather
+than about it: the same square and piece classes, the same four visions,
+`legalMoves()` refereeing every answer, and `parseMoveIn()` reading what is
+typed into its console — so anything the console accepts in a lesson it accepts
+in a game. `lsnRender()` is `render()` with `G` swapped for `LSN`, and it exists
+only because `render()` reads `G` and a lesson is not a game. One function took
+a parameter to make that possible — `visibleSet(s, me)` — and it still answers
+the game with no arguments at all.
+
+Three of the lessons are **generated, not written**: the coordinate drills, the
+piece-vision drills and the tracking sequences are made fresh out of
+`legalMoves()` each time, so the course cannot be learnt by heart. Generated
+positions carry both kings, because `legalMoves()` judges by check and a board
+with no king is not a question it can be asked; `lsnPiecePos()` throws a
+position away and makes another unless the piece's legal moves are exactly its
+geometric ones, since a pinned rook teaches the wrong lesson under the heading
+"where can it reach". What is fixed is fixed for a reason — the ten notations
+have to show ten particular forms, the three challenges have to be small — and
+`server/test_lessons.js` asks the page's own move generator whether every one of
+them is legal.
+
+Every transient thing a step owns is cleared by `lsnResetStep()`, which is the
+only door into a step. That is what stops a half-played sequence running on over
+the next lesson, and `showScreen()` calls `lsnLeave()` beside `prLeave()` on the
+way to anywhere else. Nothing on the screen can collect a second listener: the
+board has one delegated click handler installed at load, and every button strip
+is rebuilt from nothing each time it is drawn. One trap worth remembering —
+`.mark` already belongs to the review's move badges and is absolutely
+positioned, so a lesson class has to be `.lsn-`something even when the plain
+name looks free.
+
+**The course and Practice are two pages, and neither one is a door into the
+other.** They cover related ground — a coordinate drill in lesson 2 and the
+Coordinate Trainer both ask you to name a square — and that is the point: the
+course *teaches* the skill once, in order, and Practice is where it is *drilled*
+afterwards, with levels and statistics the course has no business keeping. So
+the course has no practice mode of its own; it hands off, and it hands off
+through `goPractice()`, the same function LESSON → Practice calls. There is one
+Practice screen, one `goPractice()`, and no third set of drills anywhere.
+
+**Lesson progress is local, and kept apart from Practice's.**
+`nox.lessons.<owner>.howto` in `localStorage`, keyed by owner exactly as the
+puzzle ladder and `nox.practice.<owner>` are, so two accounts sharing a browser
+cannot read each other's. The two records are separate on purpose: finishing a
+lesson is something you did once and it stays done, while a practice level is
+something you currently are and can fall. There is no lessons table in Supabase
+and inventing one for seven booleans would be a schema change to regret;
+`lsnPush()` is the seam a cloud copy goes through when there is one, and
+everything above it already speaks of "the owner's finished lessons" rather than
+"this browser's".
 
 **Study Board and Puzzles are separate features that share one library.**
 Study Board (`REV`, the review screen) explains *the game the player just
@@ -404,7 +466,8 @@ grants.
 Navigate by the `/* ==== TITLE ==== */` banners in the script — THE SKY,
 CONSTANTS & HELPERS, MOVE GENERATION, ENGINE, GAME / UI STATE, CLOCK, SOUND,
 COMPLETE BLINDFOLD, PLAYING MOVES, ONLINE PLAY, RESIGNING…, THE ENGINE, THE
-REVIEW, THE PUZZLES, PRACTICE, CONTROLS, SCREENS, ACCOUNTS, SOCIAL.
+REVIEW, THE PUZZLES, THE LESSONS, CONTROLS, PRACTICE, SCREENS, ACCOUNTS,
+SOCIAL.
 
 Screens are `<section class="screen" id="screen-NAME">` toggled by
 `showScreen(name)`; `screenName` is the current one and several handlers branch
