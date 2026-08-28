@@ -681,7 +681,7 @@
      screen that writes its own name beside the mark, so without the lane the
      word would be printed underneath it. */
   #screen-home, #screen-social, #screen-settings, #screen-rooms,
-  #screen-setup, #screen-game{position:relative; padding-left:var(--rail);}
+  #screen-setup, #screen-game, #screen-practice{position:relative; padding-left:var(--rail);}
   /* A fade, and nothing more. Sliding the screen in moved the header with it,
      so the logo drifted on every change of screen — the one thing on the page
      that should never appear to move. */
@@ -1198,6 +1198,230 @@
   .pz-lv.cur{outline:2px solid var(--gold-soft); outline-offset:1px;}
   .pz-lv.locked{opacity:.32; cursor:not-allowed;}
 
+  /* ---------- practice ----------
+     The Lesson section's drills. A puzzle asks what the best move is; these
+     ask whether the board is there at all when nobody is showing it to you, so
+     the furniture is a question and a set of answers rather than a ladder and
+     a solution.
+
+     The board below is the game's board markup built a second time — same .sq,
+     same .piece, same .blind that hides the men. A drill and a game are never
+     on screen at the same moment, but they are never off it at the same moment
+     either, and handing one board back and forth between two screens is how
+     the two would come to disagree about what is on it. The CSS is shared;
+     only the element is not. */
+  .pr-page{margin-top:clamp(10px,2vh,22px); padding-bottom:40px;}
+  .pr-head{max-width:760px;}
+  .pr-head p{margin:10px 0 0; color:var(--muted); font-size:13.5px; line-height:1.7;}
+
+  /* what the practising has come to: the level on the left, the numbers beside it */
+  .pr-summary{
+    margin-top:clamp(16px,2.6vh,26px); padding:20px 22px;
+    display:grid; grid-template-columns:minmax(0,1.05fr) minmax(0,1.55fr);
+    gap:clamp(18px,3vw,34px); align-items:center;
+  }
+  @media (max-width:820px){ .pr-summary{grid-template-columns:minmax(0,1fr);} }
+  .pr-level-name{
+    font-family:Georgia,serif; font-size:clamp(21px,3.2vw,29px);
+    letter-spacing:.16em; color:var(--gold-soft);
+  }
+  .pr-level-cap{
+    margin-top:6px; font-size:9.5px; letter-spacing:.26em;
+    text-transform:uppercase; color:var(--muted);
+  }
+  .pr-level .rank-gauge{margin-top:15px;}
+  .pr-figs{display:grid; grid-template-columns:repeat(4,1fr); gap:9px;}
+  @media (max-width:520px){ .pr-figs{grid-template-columns:repeat(2,1fr);} }
+  .pr-fig{
+    padding:12px 8px; border-radius:11px; text-align:center;
+    background:rgba(0,0,0,.28); border:1px solid var(--line);
+  }
+  .pr-fig b{
+    display:block; font-size:clamp(17px,2.5vw,23px); font-weight:600;
+    font-variant-numeric:tabular-nums; color:var(--text);
+  }
+  .pr-fig small{
+    display:block; margin-top:5px; font-size:9px; letter-spacing:.16em;
+    text-transform:uppercase; color:var(--muted);
+  }
+
+  /* the drills */
+  .pr-cards{
+    margin-top:clamp(16px,2.6vh,26px);
+    display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:14px;
+  }
+  @media (max-width:940px){ .pr-cards{grid-template-columns:repeat(2,minmax(0,1fr));} }
+  @media (max-width:620px){ .pr-cards{grid-template-columns:minmax(0,1fr);} }
+  .pr-card{display:flex; flex-direction:column; padding:18px 18px 16px; text-align:left;}
+  .pr-name{font-size:14.5px; font-weight:650; letter-spacing:.09em; color:var(--gold-soft);}
+  .pr-desc{margin-top:8px; flex:1; color:var(--muted); font-size:12.5px; line-height:1.65;}
+  .pr-foot{margin-top:15px; display:flex; align-items:center; justify-content:space-between; gap:10px;}
+  .pr-dots{display:flex; gap:4px; align-items:center;}
+  .pr-dots i{
+    width:7px; height:7px; border-radius:50%;
+    background:rgba(255,255,255,.10); border:1px solid var(--line);
+  }
+  .pr-dots i.on{background:var(--gold); border-color:var(--gold);}
+  .pr-go{padding:8px 15px; font-size:11px; letter-spacing:.16em; font-weight:650;}
+  .pr-score{
+    margin-top:11px; font-size:10px; letter-spacing:.14em; text-transform:uppercase;
+    color:#5c6070; font-variant-numeric:tabular-nums;
+  }
+  /* locked reads as not-yet-earned, the way the unbuilt nav items read as
+     not-yet-built: quiet, and honest about why */
+  .pr-card.locked{opacity:.6;}
+  .pr-card.locked .pr-go{color:#6b7080; cursor:not-allowed;}
+  .pr-card.locked .pr-go:hover{border-color:var(--ctl-line); transform:none;}
+
+  /* ---- a drill in progress ---- */
+  .practice-run{
+    display:grid; grid-template-columns:minmax(0,1fr) clamp(288px,27vw,352px);
+    gap:clamp(16px,2.4vw,26px); align-items:start;
+    margin-top:clamp(12px,2vh,22px);
+  }
+  @media (max-width:900px){ .practice-run{grid-template-columns:minmax(0,1fr);} }
+  /* the same stack the game's side panel is */
+  .pr-side{display:flex; flex-direction:column; gap:14px;}
+  .pr-boardcol{
+    --board-max:540px;
+    display:flex; flex-direction:column; align-items:center; gap:10px;
+  }
+  .pr-orient{font-size:9.5px; letter-spacing:.22em; text-transform:uppercase; color:var(--muted);}
+  /* square colour at its hardest has no board to look at, and the space it
+     leaves should say so rather than close up */
+  .pr-noboard{
+    width:min(100%,540px); padding:clamp(50px,12vh,96px) 20px; border-radius:18px;
+    text-align:center; line-height:1.9;
+    background:linear-gradient(160deg,rgba(20,22,29,.9),rgba(10,11,16,.9));
+    border:1px dashed rgba(217,164,65,.24); color:var(--muted);
+    font-size:12.5px; letter-spacing:.1em;
+  }
+
+  /* Three states a game has no use for: the square you chose, the square that
+     was right, and the one you did not find. */
+  .sq.pr-pick::before{
+    content:""; position:absolute; inset:0;
+    background:rgba(217,164,65,.30); box-shadow:inset 0 0 0 3px rgba(217,164,65,.72);
+  }
+  .sq.pr-right::before{
+    content:""; position:absolute; inset:0;
+    background:rgba(111,191,115,.34); box-shadow:inset 0 0 0 3px rgba(111,191,115,.85);
+  }
+  .sq.pr-wrong::before{
+    content:""; position:absolute; inset:0;
+    background:rgba(224,90,77,.34); box-shadow:inset 0 0 0 3px rgba(224,90,77,.85);
+  }
+  .sq.pr-from::before{
+    content:""; position:absolute; inset:0;
+    background:rgba(242,193,78,.24); box-shadow:inset 0 0 0 2px rgba(242,193,78,.5);
+  }
+  .sq.pr-miss::after{
+    content:""; position:absolute; left:50%; top:50%;
+    width:40%; height:40%; transform:translate(-50%,-50%);
+    border-radius:50%; border:3px solid rgba(111,191,115,.8);
+  }
+  .sq.pr-target::before{
+    content:""; position:absolute; inset:0;
+    background:rgba(242,193,78,.36); box-shadow:inset 0 0 0 3px rgba(242,193,78,.8);
+    animation:prPulse 1.7s ease-in-out infinite;
+  }
+  @keyframes prPulse{0%,100%{opacity:.72;}50%{opacity:1;}}
+  @media (prefers-reduced-motion:reduce){ .sq.pr-target::before{animation:none;} }
+
+  /* ---- the question, and the answer to it ---- */
+  .pr-quiz .pr-q{font-size:16px; line-height:1.55; color:var(--text);}
+  .pr-quiz .pr-q b{
+    color:var(--gold-soft); letter-spacing:.06em;
+    font-family:ui-monospace,SFMono-Regular,Menlo,monospace;
+  }
+  .pr-sub{margin-top:8px; font-size:12px; color:var(--muted); line-height:1.6;}
+  .pr-sub:empty{display:none;}
+  .pr-seq{
+    margin-top:12px; padding:11px 13px; border-radius:10px;
+    background:rgba(0,0,0,.32); border:1px solid var(--line);
+    font-family:ui-monospace,SFMono-Regular,Menlo,monospace;
+    font-size:13px; line-height:1.85; color:#d3d7e1; letter-spacing:.03em;
+  }
+  .pr-seq:empty{display:none;}
+  .pr-seq b{color:var(--gold-soft); font-weight:600;}
+  .pr-ans{margin-top:14px; display:flex; flex-wrap:wrap; gap:7px;}
+  .pr-ans:empty{display:none;}
+  .pr-ans button{flex:1 1 auto; min-width:62px; padding:10px 8px; font-size:12.5px;}
+  /* the twelve men, in two rows of six, with "empty square" under them */
+  .pr-ans.glyphs{display:grid; grid-template-columns:repeat(6,1fr);}
+  .pr-ans.glyphs button{min-width:0; padding:5px 0; font-size:23px; line-height:1.15;}
+  .pr-ans.glyphs button.wide{grid-column:1/-1; font-size:12px; padding:9px 0;}
+  .pr-ans.glyphs .pc-svg{width:.86em; height:.86em; margin:0 auto;}
+  .pr-ans .g-w{color:#fbf6ea; -webkit-text-stroke:1.2px #2a2118;}
+  .pr-ans .g-b{color:#2c2f3a; -webkit-text-stroke:1.2px #0a0b0e;}
+  .pr-ans .g-w .pc-svg{fill:#fbf6ea; stroke:#2a2118; stroke-width:1.5;}
+  .pr-ans .g-b .pc-svg{fill:#2c2f3a; stroke:#0a0b0e; stroke-width:1.5;}
+  .pr-ans input{
+    flex:1; min-width:0; font:inherit; font-size:15px; letter-spacing:.16em; text-align:center;
+    font-family:ui-monospace,SFMono-Regular,Menlo,monospace;
+    padding:11px 12px; border-radius:9px;
+    background:#12141a; border:1px solid var(--line); color:var(--text);
+  }
+  .pr-ans input::placeholder{color:#565b69; letter-spacing:.06em;}
+  .pr-ans input:focus{outline:none; border-color:var(--gold); box-shadow:0 0 0 3px rgba(217,164,65,.14);}
+  .pr-ans input.bad{border-color:var(--danger); animation:nudge .34s ease;}
+  #prSay{margin-top:13px;}
+  #prSay:empty{display:none;}
+  .pr-controls{display:flex; gap:8px; margin-top:14px;}
+  .pr-controls:empty{display:none;}
+  .pr-controls button{flex:1; padding:10px 6px; font-size:12px;}
+  .pr-stats{display:grid; grid-template-columns:repeat(3,1fr); gap:8px; margin-bottom:13px;}
+  .pr-stats div{text-align:center;}
+  .pr-stats span{
+    display:block; font-size:16px; font-weight:600;
+    font-variant-numeric:tabular-nums; color:var(--gold-soft);
+  }
+  .pr-stats small{
+    display:block; margin-top:4px; font-size:8.5px; letter-spacing:.16em;
+    text-transform:uppercase; color:var(--muted);
+  }
+  .pr-exit{display:flex; gap:8px;}
+  .pr-exit button{flex:1; padding:10px 6px; font-size:12px;}
+
+  /* the mini challenge types its moves, exactly as complete blindfold does */
+  .pr-log{
+    height:min(30vh,232px); overflow-y:auto; margin-top:12px;
+    padding:12px 13px; border-radius:10px;
+    background:rgba(0,0,0,.3); border:1px solid var(--line);
+    font-family:ui-monospace,SFMono-Regular,Menlo,monospace;
+    font-size:12.5px; line-height:1.75;
+  }
+  .pr-log::-webkit-scrollbar{width:8px;}
+  .pr-log::-webkit-scrollbar-thumb{background:#2e3340; border-radius:4px;}
+  .pr-log div{white-space:pre-wrap;}
+  .pr-log .you{color:var(--gold-soft);}
+  .pr-log .them{color:#d3d7e1;}
+  .pr-log .sys{color:var(--muted); font-style:italic;}
+  .pr-log .err{color:var(--danger);}
+
+  /* ---- how it went ---- */
+  .pr-done-modal{max-width:440px;}
+  .pr-result{display:flex; flex-direction:column; gap:8px; margin:0 0 18px;}
+  .pr-result div{
+    display:flex; align-items:baseline; justify-content:space-between; gap:14px;
+    padding:9px 13px; border-radius:10px;
+    background:rgba(0,0,0,.26); border:1px solid var(--line);
+    font-size:10.5px; letter-spacing:.18em; text-transform:uppercase; color:var(--muted);
+  }
+  .pr-result div b{
+    font-size:15px; letter-spacing:.04em; text-transform:none;
+    color:var(--gold-soft); font-variant-numeric:tabular-nums;
+  }
+  .pr-tip{
+    margin:0 0 18px; padding:11px 13px; border-radius:10px; text-align:left;
+    background:rgba(217,164,65,.08); border:1px solid rgba(217,164,65,.24);
+    font-size:12.5px; line-height:1.65; color:#cfd3dd;
+  }
+  .pr-tip b{color:var(--gold-soft); font-weight:600;}
+  .pr-done-btns{flex-direction:column; gap:8px;}
+  .pr-done-btns button{width:100%; padding:12px 0; font-size:12.5px; letter-spacing:.12em;}
+
+
   /* ---------- open rooms ---------- */
   #screen-rooms{position:relative;}
   .rooms-top{display:flex; justify-content:center; margin-bottom:26px;}
@@ -1633,7 +1857,7 @@
      of the search panel below — lands between the mark and this word, so the
      two read as separate things rather than one crowded line. Only the word
      moves; the mark stays where it is on every other screen. */
-  .social-title{
+  .social-title, .pr-title{
     margin:0 0 0 clamp(12px,1.6vw,26px); font-family:Georgia,serif; font-weight:400;
     font-size:clamp(26px,4.4vw,42px); letter-spacing:.12em; color:var(--gold-soft);
     white-space:nowrap;
@@ -1947,7 +2171,7 @@
           <button class="nav-btn" aria-haspopup="true">LESSON</button>
           <div class="menu">
             <button class="menu-btn soon" id="navHowTo">How to Play Blind Chess</button>
-            <button class="menu-btn soon" id="navPractice">Practice</button>
+            <button class="menu-btn" id="navPractice">Practice</button>
           </div>
         </div>
 
@@ -2082,6 +2306,106 @@
       <button class="rank-pick" id="btnRankPick">Select Games Settings</button>
       <button class="primary rank-start dim" id="btnRankStart">Start Game</button>
       <p class="rank-note" id="rankNote"></p>
+    </div>
+  </section>
+
+  <!-- ============ PRACTICE ============
+       The Lesson section's training ground. Puzzles ask for the best move;
+       this asks whether the board is there when nobody is showing it to you.
+       Its header is the social page's: the wordmark on the left — which is the
+       way back to the home page and so to the LESSON menu this page hangs off
+       — the page's name beside it, and the one account cluster in the mount on
+       the right.
+
+       Two states in one screen, the way the game screen holds a setup panel
+       and a game: the dashboard of drills, and the drill being run. -->
+  <section class="screen" id="screen-practice">
+    <header class="site-head">
+      <button class="logo-btn" data-home aria-label="Nox Chess — back to the home page">
+        <img src="assets/nox-logo.png?v=1" alt="Nox Chess" width="976" height="730">
+      </button>
+      <h2 class="pr-title">Practice</h2>
+      <div class="head-mount"></div>
+    </header>
+
+    <div class="pr-page">
+      <!-- the dashboard -->
+      <div id="prDash">
+        <div class="pr-head">
+          <p>
+            Blindfold chess is not a harder kind of calculation — it is the board
+            itself, held in the head. These drills build that board: the names of
+            the squares, their colours, where a piece can reach, and where it ends
+            up after moves you never see. Nothing here touches your rating.
+          </p>
+        </div>
+
+        <div class="pr-summary panel">
+          <div class="pr-level">
+            <div class="pr-level-name" id="prLevel">Beginner</div>
+            <div class="pr-level-cap">Practice level</div>
+            <div class="rank-gauge">
+              <div class="gauge-track"><div class="gauge-fill" id="prLevelFill"></div></div>
+              <div class="gauge-ends">
+                <span id="prLevelNow">Beginner</span>
+                <span id="prLevelNext">Visualizer</span>
+              </div>
+            </div>
+          </div>
+          <div class="pr-figs">
+            <div class="pr-fig"><b id="prFigAcc">—</b><small>Accuracy</small></div>
+            <div class="pr-fig"><b id="prFigStreak">0</b><small>Streak</small></div>
+            <div class="pr-fig"><b id="prFigBest">0</b><small>Best streak</small></div>
+            <div class="pr-fig"><b id="prFigSessions">0</b><small>Sessions</small></div>
+          </div>
+        </div>
+
+        <div class="pr-cards" id="prCards"></div>
+      </div>
+
+      <!-- a drill in progress -->
+      <div class="practice-run" id="prRun" style="display:none">
+        <div class="pr-boardcol">
+          <div class="pr-orient" id="prOrient">White's view</div>
+          <div class="board-frame panel" id="prFrame">
+            <div class="board" id="prBoard">
+              <div class="squares" id="prSquares"></div>
+              <div class="pieces" id="prPieces"></div>
+            </div>
+          </div>
+          <div class="pr-noboard" id="prNoBoard" style="display:none">
+            No board this time.<br>Answer from the name alone.
+          </div>
+        </div>
+
+        <aside class="pr-side">
+          <div class="card panel pr-quiz">
+            <h2 id="prSkill">Coordinates</h2>
+            <div class="pr-q" id="prQ"></div>
+            <div class="pr-sub" id="prSub"></div>
+            <div class="pr-seq" id="prSeq"></div>
+            <div class="pr-log" id="prLog" style="display:none"></div>
+            <form class="pr-ans" id="prAns" autocomplete="off"></form>
+            <div class="pz-say" id="prSay"></div>
+            <div class="pr-controls" id="prCtl"></div>
+          </div>
+
+          <div class="card panel">
+            <h2>This Session</h2>
+            <div class="pr-stats">
+              <div><span id="prStatQ">1 / 10</span><small id="prStatQCap">Question</small></div>
+              <div><span id="prStatA">—</span><small>Accuracy</small></div>
+              <div><span id="prStatS">0</span><small>Streak</small></div>
+            </div>
+            <div class="gauge-track"><div class="gauge-fill" id="prBar"></div></div>
+          </div>
+
+          <div class="pr-exit">
+            <button class="ghost" id="prRestart">Restart</button>
+            <button class="ghost" id="prExit">Exit Practice</button>
+          </div>
+        </aside>
+      </div>
     </div>
   </section>
 
@@ -2590,6 +2914,41 @@
     <div class="row" style="justify-content:center">
       <button class="primary" id="chalAccept">✓ Accept</button>
       <button class="ghost" id="chalDecline">✕ Decline</button>
+    </div>
+  </div>
+</div>
+
+<!-- a drill's two questions, asked the way a ranked game's two are asked -->
+<div class="overlay" id="prSetOverlay">
+  <div class="modal rank-modal">
+    <button class="modal-x" id="prSetX" aria-label="Close" title="Close">×</button>
+    <div class="rank-field">
+      <div class="rank-label" id="prSetName">Coordinate Trainer</div>
+      <div class="rank-opts col" id="prSetDiff"></div>
+    </div>
+    <div class="rank-field" id="prSetLenField">
+      <div class="rank-label">Questions:</div>
+      <div class="rank-opts row" id="prSetLen">
+        <button data-len="5">5</button>
+        <button data-len="10">10</button>
+        <button data-len="20">20</button>
+      </div>
+    </div>
+    <button class="primary rank-start" id="prSetGo">Begin</button>
+  </div>
+</div>
+
+<!-- how the session went, and what to do about it -->
+<div class="overlay" id="prDoneOverlay">
+  <div class="modal pr-done-modal">
+    <h3 id="prDoneTitle">Practice Complete</h3>
+    <div class="pr-result" id="prDoneRows"></div>
+    <p class="pr-tip" id="prDoneTip"></p>
+    <div class="row pr-done-btns">
+      <button class="primary" id="prAgain">Practice Again</button>
+      <button class="ghost" id="prAnother">Choose Another Exercise</button>
+      <button class="ghost" id="prBlindGame" style="display:none">Play a Blindfold Game</button>
+      <button class="ghost" id="prToLessons">Back to Lessons</button>
     </div>
   </div>
 </div>
@@ -3737,16 +4096,19 @@ function announce(san, m){
   logLine(line, mine ? 'you' : 'them');
 }
 
-// turn what the player typed into one of the legal moves
-function parseMove(text){
+/* Turn what the player typed into one of the legal moves — of the position
+   handed in, not necessarily the game's. The practice page reads notation for
+   a position of its own, and there is one reader on this page rather than a
+   second one that could come to disagree with this about what O-O means. */
+function parseMoveIn(st, text){
   const strip = s => s.replace(/[+#!?\s]/g, '').replace(/0/g, 'O');
   let t = strip(text);
   if (!t) return { error:'Type a move first.' };
 
   if (/^[oO](-?[oO]){1,2}$/.test(t)) t = (t.match(/[oO]/g).length >= 3) ? 'O-O-O' : 'O-O';
 
-  const legal = legalMoves(G.st, G.st.turn);
-  const opts  = legal.map(m => ({ m, san: strip(toSAN(G.st, m, legal)) }));
+  const legal = legalMoves(st, st.turn);
+  const opts  = legal.map(m => ({ m, san: strip(toSAN(st, m, legal)) }));
 
   // 1. exact standard notation
   let hit = opts.filter(o => o.san === t);
@@ -3780,6 +4142,8 @@ function parseMove(text){
 
   return { error:`"${text.trim()}" is not a legal move here.` };
 }
+// the game's own reader: the same one, aimed at the game's own position
+function parseMove(text){ return parseMoveIn(G.st, text); }
 
 // one submit path for the bot's single box and the two hot-seat boxes
 function submitEntry(inp, side){
@@ -6613,6 +6977,1509 @@ document.getElementById('revFwd').onclick  = () => reviewGoto(REV.ply + 1);
 document.getElementById('revDone').onclick = () => exitReview();
 
 /* ============================================================
+   PRACTICE — the drills behind LESSON → Practice
+
+   Puzzles and Practice ask two different questions. A puzzle asks "what is
+   the best move here", and the board is in front of you the whole time.
+   Practice asks "is the board there at all" — can you name a square, colour
+   it, see where a knight reaches, follow a piece through moves you never see,
+   and still say what stands on c6 afterwards. That is the skill blindfold
+   chess actually needs, and it is not the skill a tactic trains.
+
+   So there is deliberately no Elo here. What a player's visualisation is
+   worth is not a number other players compare, it is a level they climb:
+   Beginner → Visualizer → Tracker → Blindfold Ready → Advanced, earned by
+   sessions finished and answers got right. Ranked ratings and puzzle ratings
+   are untouched by everything below.
+
+   Every position, every movement and every sequence on this page comes out of
+   the move generator at the top of this file. Nothing here reimplements a
+   rule: legalMoves() says where a piece may go, makeMove() plays it, toSAN()
+   names it and parseMoveIn() reads what the player typed. A generator that
+   cannot produce a valid exercise retries and then falls back — it never puts
+   a broken one on screen.
+   ============================================================ */
+
+/* Each drill, in the order the dashboard lists them. `hard` is the card's
+   difficulty indicator — how demanding the drill is against the others, not
+   which setting is chosen for it. `needs` is the level index that unlocks it;
+   only the mini challenge has one. */
+const PR_MODES = [
+  { key:'coord', name:'Coordinate Trainer', skill:'Coordinates', hard:1,
+    desc:'Find the square you are told, or name the one that lights up. The alphabet of the board.',
+    tiers:['Board labelled, White below', 'Labels off', 'Labels off, either side below'] },
+  { key:'color', name:'Square Colour', skill:'Square colour', hard:1,
+    desc:'Light or dark, from the name alone — the thing every blindfold player checks first.',
+    tiers:['Board shown, labelled', 'Board shown, no labels', 'No board at all'] },
+  { key:'vision', name:'Piece Visualization', skill:'Piece movement', hard:2,
+    desc:'One piece on a board. Select every square it can reach from where it stands.',
+    tiers:['Empty board', 'A blocker or two', 'A crowded board'] },
+  { key:'track', name:'Piece Tracking', skill:'Tracking', hard:2,
+    desc:'Watch a piece, then lose sight of it. Follow the moves in your head and say where it ends.',
+    tiers:['One piece, two moves', 'Longer, with captures', 'Two pieces, five moves'] },
+  { key:'memory', name:'Position Memory', skill:'Position memory', hard:3,
+    desc:'Study a position for a few seconds, then answer for it with the men hidden.',
+    tiers:['4–6 men', '7–12 men', '13–20 men, less time'] },
+  { key:'sequence', name:'Blindfold Sequence', skill:'Blindfold sequence', hard:3,
+    desc:'A position, then moves you only read. Answer for the position they make.',
+    tiers:['2 plies', '4 plies', '6–8 plies, and rebuild it'] },
+  { key:'mini', name:'Mini Blindfold Challenge', skill:'Blindfold play', hard:3, needs:2,
+    desc:'A handful of men each, played out in notation with the board dark. The real thing, small.',
+    tiers:['Two men each side', 'Three each', 'Four each'] }
+];
+const PR_MODE = {};
+for (const m of PR_MODES) PR_MODE[m.key] = m;
+
+/* The ladder. Each rung wants three things at once — sessions finished,
+   accuracy across everything answered, and how many different drills have been
+   tried — so nobody climbs it by grinding one exercise. The numbers are
+   deliberately gentle: three sessions is twenty minutes, not a fortnight. */
+const PR_LEVELS = [
+  { name:'Beginner',        sessions:0,  acc:0,   modes:0 },
+  { name:'Visualizer',      sessions:3,  acc:.55, modes:2 },
+  { name:'Tracker',         sessions:8,  acc:.62, modes:3 },
+  { name:'Blindfold Ready', sessions:15, acc:.70, modes:4 },
+  { name:'Advanced',        sessions:24, acc:.76, modes:5 }
+];
+
+/* ---- what the practising has come to ----
+   Kept in the browser and nowhere else. Practice is not a rating anybody
+   compares, so there is nothing here the server has to be the one to write —
+   and adding a table for it would be a schema change bought with nothing.
+   The shape is a flat record of totals plus one of the same record per drill,
+   which is exactly what a `practice_progress` row would be if this ever does
+   go to Supabase: totals on the profile, a row per drill beside it.
+
+   Stamped with whose it is, the way the puzzle cache is: two accounts sharing
+   a browser must not read each other's practice, and a guest's is their own. */
+const PR_STORE = 'nox.practice.';
+const PR_VERSION = 1;
+const prKey = () => PR_STORE + (account ? account.id : 'guest');
+
+function prBlank(){
+  const modes = {};
+  for (const m of PR_MODES) modes[m.key] = { asked:0, correct:0, sessions:0, best:0, diff:1 };
+  return { v:PR_VERSION, asked:0, correct:0, sessions:0, streak:0, best:0, modes };
+}
+/* Merged into a blank rather than used as it stands: a drill added later must
+   not read as a corrupt save, and a save from an older version is simply
+   dropped. Anything unreadable — private browsing, somebody editing it —
+   starts clean rather than throwing. */
+function prLoad(){
+  const out = prBlank();
+  let raw = null;
+  try { raw = JSON.parse(localStorage.getItem(prKey())); } catch (e){ raw = null; }
+  if (!raw || raw.v !== PR_VERSION || !raw.modes) return out;
+  for (const k of ['asked','correct','sessions','streak','best'])
+    if (typeof raw[k] === 'number' && raw[k] >= 0) out[k] = raw[k];
+  for (const m of PR_MODES){
+    const src = raw.modes[m.key];
+    if (!src) continue;
+    for (const k of ['asked','correct','sessions','best','diff'])
+      if (typeof src[k] === 'number' && src[k] >= 0) out.modes[m.key][k] = src[k];
+  }
+  return out;
+}
+function prSave(st){
+  try { localStorage.setItem(prKey(), JSON.stringify(st)); } catch (e){ /* nowhere to keep it */ }
+}
+
+const prAcc = st => (st.asked ? st.correct / st.asked : 0);
+const prTried = st => PR_MODES.filter(m => st.modes[m.key].sessions > 0).length;
+
+/** The highest rung every requirement of which is met — and every one below it. */
+function prLevelIndex(st){
+  let idx = 0;
+  for (let i = 1; i < PR_LEVELS.length; i++){
+    const L = PR_LEVELS[i];
+    if (st.sessions >= L.sessions && prAcc(st) >= L.acc && prTried(st) >= L.modes) idx = i;
+    else break;
+  }
+  return idx;
+}
+/** How far along to the next rung — the least finished of its three demands. */
+function prLevelProgress(st, idx){
+  const next = PR_LEVELS[idx + 1];
+  if (!next) return 1;
+  const now = PR_LEVELS[idx];
+  const part = (have, from, to) => (to <= from ? 1 : Math.max(0, Math.min(1, (have - from) / (to - from))));
+  return Math.min(
+    part(st.sessions, now.sessions, next.sessions),
+    part(prAcc(st),   now.acc,      next.acc),
+    part(prTried(st), now.modes,    next.modes)
+  );
+}
+
+/* ---- the drill in progress ---- */
+const PR = {
+  on: false,          // the practice screen is up
+  view: 'dash',       // 'dash' | 'run'
+  mode: null,         // the PR_MODES entry being run
+  diff: 1,
+  len: 10,            // questions in this session (moves, for the mini challenge)
+  i: 0,               // answered so far
+  right: 0,
+  streak: 0,
+  best: 0,
+  played: 0,          // mini challenge only: player moves made
+  q: null,            // the question on screen
+  answered: false,
+  flipped: false,
+  click: null,        // what a click on a square means right now — null for nothing
+  onSubmit: null,     // what the answer form's Enter means
+  timers: [],
+  mini: null
+};
+
+/* Every timer a drill starts goes in here, and walking away clears the lot.
+   A session left behind must not keep counting down over whatever page the
+   player went to instead — which is exactly what a stray study countdown or a
+   pending reveal would do. */
+function prTimer(fn, ms){
+  const id = setTimeout(() => {
+    const at = PR.timers.indexOf(id);
+    if (at >= 0) PR.timers.splice(at, 1);
+    fn();
+  }, ms);
+  PR.timers.push(id);
+  return id;
+}
+function prClearTimers(){
+  for (const id of PR.timers) clearTimeout(id);
+  PR.timers.length = 0;
+}
+
+/* ---- the practice board ----
+   The game's board markup, built a second time. Same .sq, same .piece, same
+   .blind that takes the men away — a drill and a game are never on screen
+   together, but they are never both off it either, and passing one board
+   between two screens is how the two would come to disagree about what is on
+   it. The CSS is shared; only the element is not. */
+const prBoardEl   = document.getElementById('prBoard');
+const prSquaresEl = document.getElementById('prSquares');
+const prPiecesEl  = document.getElementById('prPieces');
+const prSqEls = [];
+for (let v = 0; v < 64; v++){
+  const d = document.createElement('div');
+  d.className = 'sq';
+  prSquaresEl.appendChild(d);
+  prSqEls.push(d);
+}
+const prVisual = i => (PR.flipped ? 63 - i : i);
+
+let prLaid = null;
+function prLayout(flipped, labels){
+  PR.flipped = !!flipped;
+  const key = (flipped ? 'f' : 'n') + (labels ? 'l' : 'x');
+  if (prLaid === key) return;
+  prLaid = key;
+  for (let i = 0; i < 64; i++){
+    const v = flipped ? 63 - i : i;
+    const d = prSqEls[v];
+    d.dataset.sq = i;
+    d.dataset.base = (rowOf(i) + colOf(i)) % 2 === 1 ? 'dark' : 'light';
+    let html = '';
+    if (labels && rowOf(v) === 7) html += '<div class="coord file">' + FILES[colOf(i)] + '</div>';
+    if (labels && colOf(v) === 0) html += '<div class="coord rank">' + (8 - rowOf(i)) + '</div>';
+    d.innerHTML = html;
+  }
+  document.getElementById('prOrient').textContent =
+    (flipped ? 'Black' : 'White') + "'s view — " + (flipped ? 'h1' : 'a1') + ' at the far corner';
+}
+
+/* Keyed by piece id exactly as renderPieces() is, so a piece that moves
+   travels rather than blinking out and back — which is the whole of the
+   tracking reveal's animation. */
+const prPieceEls = new Map();
+function prPaint(board){
+  const seen = new Set();
+  for (let i = 0; i < 64; i++){
+    const p = board[i];
+    if (!p) continue;
+    seen.add(p.id);
+    let e = prPieceEls.get(p.id);
+    if (!e){
+      e = document.createElement('div');
+      e.innerHTML = '<span></span>';
+      prPiecesEl.appendChild(e);
+      prPieceEls.set(p.id, e);
+    }
+    e.className = 'piece ' + p.c;
+    if (e.dataset.t !== p.t){ e.dataset.t = p.t; e.firstChild.innerHTML = pieceHTML(p.t); }
+    const v = prVisual(i);
+    e.style.transform = 'translate(' + colOf(v) * 100 + '%, ' + rowOf(v) * 100 + '%)';
+  }
+  for (const [id, e] of prPieceEls){
+    if (!seen.has(id)){ prPieceEls.delete(id); e.remove(); }
+  }
+}
+function prClearPieces(){
+  for (const [, e] of prPieceEls) e.remove();
+  prPieceEls.clear();
+}
+function prMarksClear(){
+  // `|| ''` because this can run before the board has been laid out for the
+  // first drill of the visit, and "sq undefined" is a class nobody styled
+  for (const d of prSqEls) d.className = 'sq ' + (d.dataset.base || '');
+}
+function prMark(sq, cls){
+  if (sq >= 0 && sq < 64) prSqEls[prVisual(sq)].classList.add(cls);
+}
+function prBoardOn(on){
+  document.getElementById('prFrame').style.display = on ? '' : 'none';
+  document.getElementById('prNoBoard').style.display = on ? 'none' : '';
+  document.getElementById('prOrient').style.display = on ? '' : 'none';
+}
+/** The men, shown or hidden — the game's own blindfold class does the fading. */
+function prMen(shown){ prBoardEl.classList.toggle('blind', !shown); }
+
+/* ---- the panel ---- */
+const prQEl   = document.getElementById('prQ');
+const prSubEl = document.getElementById('prSub');
+const prSeqEl = document.getElementById('prSeq');
+const prSayEl = document.getElementById('prSay');
+const prAnsEl = document.getElementById('prAns');
+const prCtlEl = document.getElementById('prCtl');
+const prLogEl = document.getElementById('prLog');
+
+function prQ(html){ prQEl.innerHTML = html; }
+function prSub(html){ prSubEl.innerHTML = html || ''; }
+function prSeq(html){ prSeqEl.innerHTML = html || ''; }
+function prSay(html, cls){
+  prSayEl.innerHTML = html || '';
+  prSayEl.className = 'pz-say' + (cls ? ' ' + cls : '');
+}
+function prAnsClear(){ prAnsEl.innerHTML = ''; prAnsEl.className = 'pr-ans'; PR.onSubmit = null; }
+function prAnsButton(html, fn, cls){
+  const b = document.createElement('button');
+  b.type = 'button';
+  if (cls) b.className = cls;
+  b.innerHTML = html;
+  b.onclick = fn;
+  prAnsEl.appendChild(b);
+  return b;
+}
+function prAnsInput(placeholder, maxlen, onEnter, label){
+  const i = document.createElement('input');
+  i.type = 'text'; i.placeholder = placeholder; i.maxLength = maxlen;
+  i.autocomplete = 'off'; i.spellcheck = false; i.autocapitalize = 'off';
+  prAnsEl.appendChild(i);
+  const go = document.createElement('button');
+  go.type = 'submit'; go.className = 'primary'; go.textContent = label || 'Answer';
+  prAnsEl.appendChild(go);
+  PR.onSubmit = () => onEnter(i);
+  prTimer(() => i.focus(), 40);
+  return i;
+}
+/** The row under the answer: Reveal, Next, whatever this drill offers. */
+function prCtl(list){
+  prCtlEl.innerHTML = '';
+  for (const [label, fn, cls] of list){
+    const b = document.createElement('button');
+    b.type = 'button';
+    if (cls) b.className = cls;
+    b.textContent = label;
+    b.onclick = fn;
+    prCtlEl.appendChild(b);
+  }
+}
+prAnsEl.addEventListener('submit', e => { e.preventDefault(); if (PR.onSubmit) PR.onSubmit(); });
+prSquaresEl.addEventListener('click', e => {
+  const d = e.target.closest('.sq');
+  if (!d || !PR.click) return;
+  PR.click(+d.dataset.sq);
+});
+
+/* ---- dice ---- */
+const prRand = n => Math.floor(Math.random() * n);
+const prPick = a => a[prRand(a.length)];
+function prShuffle(a){
+  for (let i = a.length - 1; i > 0; i--){
+    const j = prRand(i + 1), x = a[i];
+    a[i] = a[j]; a[j] = x;
+  }
+  return a;
+}
+
+/* A heap of pieces is not a position. Three things make it one, and all three
+   are checked here rather than hoped for: two kings that are not touching, no
+   pawn on a rank it could never have reached, and neither king already in
+   check — a side to move with the opponent in check is a position that cannot
+   have arisen, and every drill below asks questions of the side to move.
+
+   Castling rights are cleared, so pseudoMoves() never offers a castle out of a
+   position that has no history to have earned one.
+
+   `counts` is [colour, type] pairs; `at` comes back in the same order, which
+   is how a caller finds the piece it asked for. */
+function prPosition(counts, tries){
+  for (let t = 0; t < (tries || 200); t++){
+    const b = Array(64).fill(null);
+    const free = prShuffle(Array.from({ length: 64 }, (_, i) => i));
+    const at = [];
+    let k = 0;
+    const put = (c, ty) => {
+      while (k < free.length){
+        const sq = free[k++];
+        if (ty === 'P' && (rowOf(sq) === 0 || rowOf(sq) === 7)) continue;
+        b[sq] = mk(c, ty);
+        return sq;
+      }
+      return -1;
+    };
+    const wk = put(W, 'K'), bk = put(B, 'K');
+    if (wk < 0 || bk < 0) continue;
+    if (Math.abs(rowOf(wk) - rowOf(bk)) <= 1 && Math.abs(colOf(wk) - colOf(bk)) <= 1) continue;
+    let ok = true;
+    for (const [c, ty] of counts){
+      const sq = put(c, ty);
+      if (sq < 0){ ok = false; break; }
+      at.push(sq);
+    }
+    if (!ok) continue;
+    const st = { b, turn: W, cr: { wK:0, wQ:0, bK:0, bQ:0 }, ep: -1, half: 0, full: 1 };
+    if (inCheck(st, W) || inCheck(st, B)) continue;
+    return { st, wk, bk, at };
+  }
+  return null;
+}
+
+/** Men for a memory position: roughly even, pawn-heavy, at most one queen a side. */
+function prMaterial(n){
+  const out = [], queens = { w:0, b:0 };
+  for (let i = 0; i < n; i++){
+    const c = i % 2 ? B : W;
+    let ty;
+    do { ty = prPick(['P','P','P','P','N','N','B','B','R','R','Q']); }
+    while (ty === 'Q' && queens[c] >= 1);
+    if (ty === 'Q') queens[c]++;
+    out.push([c, ty]);
+  }
+  return out;
+}
+
+const prSide = c => (c === W ? 'White' : 'Black');
+const prMan  = (c, t) => prSide(c) + "'s " + PIECE_NAME[t];
+/* Why a square is the colour it is, said as the rule rather than as a fact:
+   a1 is dark, and a square is dark exactly when its file number and its rank
+   number are both odd or both even. */
+function prColourWhy(sq){
+  const file = colOf(sq) + 1, rank = 8 - rowOf(sq);
+  const dark = (rowOf(sq) + colOf(sq)) % 2 === 1;
+  return '<b>' + FILES[colOf(sq)] + '</b> is file ' + file + ', and the rank is ' + rank +
+         ' — ' + (file % 2 === rank % 2 ? 'the same parity, so the square is dark'
+                                        : 'opposite parity, so the square is light') +
+         '. (' + sqName(sq) + ' is ' + (dark ? 'dark' : 'light') + '.)';
+}
+
+/* ============================================================
+   THE SIX DRILLS — generation
+   Every one of these returns null rather than something broken, and prMake()
+   below retries and then falls back before anything reaches the screen.
+   ============================================================ */
+
+/* 1 — COORDINATE TRAINER. Two exercises, chosen by a coin: find the square you
+   are named, or name the square that lights up. */
+function prMakeCoord(diff){
+  return {
+    kind: 'coord',
+    findIt: Math.random() < .5,
+    sq: prRand(64),
+    labels: diff <= 1,
+    flipped: diff >= 3 && Math.random() < .45
+  };
+}
+
+/* 2 — SQUARE COLOUR. The answer is arithmetic on the coordinate, never a
+   table: dark exactly when row and column disagree in parity, which is the
+   same rule layoutSquares() paints the board with. */
+function prMakeColor(diff){
+  const sq = prRand(64);
+  return {
+    kind: 'color',
+    sq,
+    dark: (rowOf(sq) + colOf(sq)) % 2 === 1,
+    labels: diff <= 1,
+    board: diff < 3
+  };
+}
+
+/* 3 — PIECE VISUALIZATION. The answer is legalMoves(), not a second movement
+   table — which is the point: a drill that disagreed with the game about where
+   a bishop goes would be teaching the wrong board.
+
+   A pinned piece is thrown back rather than asked about (except for the king,
+   whose legal moves ARE the answer): "where can this knight go" meaning
+   "nowhere, it is pinned" is a fine chess question and a bad geometry one, and
+   geometry is what this drill is for. */
+function prMakeVision(diff){
+  for (let t = 0; t < 80; t++){
+    const colour = Math.random() < .5 ? W : B;
+    const type = diff <= 1 ? prPick(['N','B','R','K'])
+                           : prPick(['N','N','B','B','R','R','Q','K','P']);
+    const blockers = diff <= 1 ? 0 : diff === 2 ? 1 + prRand(2) : 3 + prRand(3);
+    const counts = [];
+    for (let k = 0; k < blockers; k++)
+      counts.push([Math.random() < .5 ? W : B, prPick(['P','P','N','B','R'])]);
+    counts.push([colour, type]);
+    const built = prPosition(counts);
+    if (!built) continue;
+    const from = built.at[built.at.length - 1];
+    const st = built.st;
+    st.turn = colour;                      // both kings are safe, so either may be to move
+    const legal = legalMoves(st, colour).filter(m => m.from === from);
+    if (!legal.length) continue;
+    if (type !== 'K'){
+      const pseudo = pseudoMoves(st, colour).filter(m => m.from === from);
+      if (pseudo.length !== legal.length) continue;      // pinned
+    }
+    // a promotion is four moves to one square; the question is about squares
+    const targets = Array.from(new Set(legal.map(m => m.to)));
+    if (targets.length < 2) continue;
+    return { kind:'vision', st, from, type, colour, targets: new Set(targets), picks: new Set() };
+  }
+  return null;
+}
+
+/* 4 — PIECE TRACKING. One side moves and the other stands still: the exercise
+   is following a piece, not playing a game, and alternating would put half the
+   sequence on men the player was never asked to watch. Every move in the walk
+   still comes out of legalMoves() in the position it is played in, and moves
+   that leave the enemy king attacked are dropped — a frozen side cannot be in
+   check, and that is also what keeps a king out of the capture list. */
+function prMakeTrack(diff){
+  const pieces = diff >= 3 ? 2 : 1;
+  const steps  = diff <= 1 ? 2 : diff === 2 ? 3 + prRand(2) : 5;
+  const shapes = diff <= 1 ? ['N','B','R'] : ['N','B','R','Q'];
+  const enemy  = diff <= 1 ? 0 : diff === 2 ? 2 + prRand(2) : 3 + prRand(2);
+
+  for (let t = 0; t < 60; t++){
+    const bag = shapes.slice(), types = [];
+    for (let k = 0; k < pieces; k++) types.push(bag.splice(prRand(bag.length), 1)[0]);
+    const counts = types.map(ty => [W, ty]);
+    for (let k = 0; k < enemy; k++) counts.push([B, prPick(['P','P','N','B','R'])]);
+
+    const built = prPosition(counts);
+    if (!built) continue;
+    let st = built.st;
+    const ids = types.map((ty, k) => st.b[built.at[k]].id);
+    const frames = [st.b.slice()];
+    const path = [];
+    let ok = true;
+    for (let k = 0; k < steps; k++){
+      st.turn = W;
+      const all = legalMoves(st, W);
+      const mine = all.filter(m => ids.indexOf(m.p.id) >= 0 && !inCheck(makeMove(st, m), B));
+      if (!mine.length){ ok = false; break; }
+      const m = prPick(mine);
+      path.push({ san: toSAN(st, m, all), from: m.from, to: m.to, id: m.p.id });
+      st = makeMove(st, m);
+      st.turn = W;                     // the frozen side never gets its turn
+      frames.push(st.b.slice());
+    }
+    if (!ok) continue;
+
+    const which = prRand(pieces);
+    const askId = ids[which];
+    if (!path.some(s => s.id === askId)) continue;   // a piece that never moved is not a question
+    let end = -1;
+    for (let i = 0; i < 64; i++){ const p = st.b[i]; if (p && p.id === askId) end = i; }
+    if (end < 0) continue;
+    return {
+      kind:'track', frames, path, ids, types, askType: types[which], askId, end,
+      startAt: built.at.slice(0, pieces)
+    };
+  }
+  return null;
+}
+
+/* 5 — POSITION MEMORY. A legal position, a few seconds to look at it, and then
+   one question about it with the men gone. Beginners get four to six men on
+   purpose: a full board memorised badly teaches nothing. */
+function prMakeMemory(diff){
+  const men = diff <= 1 ? 2 + prRand(3) : diff === 2 ? 5 + prRand(6) : 11 + prRand(8);
+  for (let t = 0; t < 40; t++){
+    const built = prPosition(prMaterial(men));
+    if (!built) continue;
+    const ask = prAskAbout(built.st, false);
+    if (!ask) continue;
+    return {
+      kind:'memory', st: built.st, ask,
+      study: diff <= 1 ? 7000 : diff === 2 ? 6000 : 5000
+    };
+  }
+  return null;
+}
+
+/* 6 — BLINDFOLD SEQUENCE. A position, then moves the player only reads, then a
+   question about the position those moves make. The moves are generated by
+   playing them: legalMoves() in the position, one of them chosen, makeMove()
+   applied — never by assembling notation and hoping. */
+function prMakeSequence(diff){
+  const plies = diff <= 1 ? 2 : diff === 2 ? 4 : 6 + 2 * prRand(2);
+  for (let t = 0; t < 30; t++){
+    let fromStart = true;
+    let st = newState();
+    if (diff >= 3 && Math.random() < .5){
+      const built = prPosition(prMaterial(8 + prRand(5)));
+      if (!built) continue;
+      st = built.st;
+      fromStart = false;
+    }
+    const start = st;
+    const sans = [];
+    let ok = true;
+    for (let k = 0; k < plies; k++){
+      const all = legalMoves(st, st.turn);
+      if (!all.length){ ok = false; break; }
+      const m = prPickMove(st, all);
+      sans.push(toSAN(st, m, all));
+      st = makeMove(st, m);
+    }
+    if (!ok) continue;
+    if (!legalMoves(st, st.turn).length) continue;   // never finish on mate or stalemate
+    const ask = prAskAbout(st, diff >= 3);
+    if (!ask) continue;
+    return { kind:'sequence', start, end: st, sans, ask, fromStart, study: diff <= 1 ? 5000 : 6500 };
+  }
+  return null;
+}
+
+/* Legal is the only requirement, but a line of legal nonsense is hard to hold
+   in the head for reasons that have nothing to do with visualisation. Moves
+   that simply hand a piece over are set aside when there is anything else to
+   play — see() is the review's own exchange arithmetic, asked here about the
+   square the piece lands on. */
+function prPickMove(st, all){
+  const safe = all.filter(m => see(makeMove(st, m), m.to, other(m.p.c)) <= 0);
+  return prPick(safe.length ? safe : all);
+}
+
+/* One question about one position, answerable from the position alone. Every
+   type checks that it can actually be asked here before it is asked: "where is
+   the white rook" needs there to be exactly one, and a count nobody could hold
+   is not a memory test. */
+function prAskAbout(st, allowRebuild){
+  const men = [];
+  for (let i = 0; i < 64; i++){ const p = st.b[i]; if (p) men.push({ p, i }); }
+  const only = men.filter(m => men.filter(o => o.p.c === m.p.c && o.p.t === m.p.t).length === 1);
+  const kinds = ['where', 'what', 'count', 'occupied'];
+  if (allowRebuild && only.length >= 3) kinds.push('rebuild', 'rebuild');
+
+  for (let t = 0; t < 30; t++){
+    const kind = prPick(kinds);
+
+    if (kind === 'where'){
+      if (!only.length) continue;
+      const m = prPick(only);
+      return { t:'where', sq:m.i, colour:m.p.c, type:m.p.t,
+               text:'Where is ' + prMan(m.p.c, m.p.t) + '?' };
+    }
+    if (kind === 'what'){
+      const sq = (men.length && Math.random() < .62) ? prPick(men).i : prRand(64);
+      const p = st.b[sq];
+      return { t:'what', sq, colour: p ? p.c : null, type: p ? p.t : null,
+               text:'What stands on <b>' + sqName(sq) + '</b>?' };
+    }
+    if (kind === 'count'){
+      const c = Math.random() < .5 ? W : B;
+      const ty = prPick(['P','N','B','R','Q']);
+      const n = men.filter(m => m.p.c === c && m.p.t === ty).length;
+      if (n > 6) continue;
+      return { t:'count', colour:c, type:ty, n,
+               text:'How many ' + prSide(c) + ' ' + PIECE_NAME[ty] + 's are on the board?' };
+    }
+    if (kind === 'occupied'){
+      const sq = (men.length && Math.random() < .5) ? prPick(men).i : prRand(64);
+      return { t:'occupied', sq, yes: !!st.b[sq],
+               text:'Is <b>' + sqName(sq) + '</b> occupied?' };
+    }
+    if (kind === 'rebuild'){
+      const want = prShuffle(only.slice()).slice(0, 3)
+        .map(m => ({ sq:m.i, colour:m.p.c, type:m.p.t }));
+      return { t:'rebuild', want, at:0, given:[],
+               text:'Rebuild what you can — place each man as it is named.' };
+    }
+  }
+  return null;
+}
+
+/* The mini challenge: reduced material, both kings, and a side to move that
+   has something to move. Not a game with the pieces turned off — a game small
+   enough that the position fits in the head to begin with. */
+function prMakeMini(diff){
+  const each = diff <= 1 ? 2 : diff === 2 ? 3 : 4;
+  for (let t = 0; t < 60; t++){
+    const counts = [];
+    for (let k = 0; k < each; k++){
+      counts.push([W, prPick(['P','P','N','B','R'])]);
+      counts.push([B, prPick(['P','P','N','B','R'])]);
+    }
+    const built = prPosition(counts);
+    if (!built) continue;
+    if (legalMoves(built.st, W).length < 4) continue;
+    return { kind:'mini', start: built.st, target: diff <= 1 ? 4 : diff === 2 ? 6 : 8 };
+  }
+  return null;
+}
+
+const PR_MAKE = {
+  coord: prMakeCoord, color: prMakeColor, vision: prMakeVision,
+  track: prMakeTrack, memory: prMakeMemory, sequence: prMakeSequence, mini: prMakeMini
+};
+
+/* Correctness beats variety: an exercise that will not generate is retried,
+   then asked for at the easiest setting, and only then given up on. Nothing
+   half-built reaches the screen. */
+function prMake(key, diff){
+  for (let t = 0; t < 5; t++){
+    const q = PR_MAKE[key](diff);
+    if (q) return q;
+  }
+  for (let t = 0; t < 5; t++){
+    const q = PR_MAKE[key](1);
+    if (q) return q;
+  }
+  return null;
+}
+
+/* ============================================================
+   RUNNING A DRILL
+   ============================================================ */
+function prStatsRender(){
+  const acc = PR.i ? Math.round(PR.right / PR.i * 100) + '%' : '—';
+  const mini = PR.mode && PR.mode.key === 'mini';
+  // the challenge counts the moves it asked for; the drills count questions
+  document.getElementById('prStatQCap').textContent = mini ? 'Move' : 'Question';
+  document.getElementById('prStatQ').textContent =
+    mini ? PR.played + ' / ' + PR.len
+         : Math.min(PR.i + 1, PR.len) + ' / ' + PR.len;
+  document.getElementById('prStatA').textContent = acc;
+  document.getElementById('prStatS').textContent = PR.streak;
+  const done = PR.mode && PR.mode.key === 'mini' ? PR.played : PR.i;
+  document.getElementById('prBar').style.width = Math.round(Math.min(1, done / PR.len) * 100) + '%';
+}
+
+/* One answer, counted. Written to storage as it happens rather than at the end
+   of the session, so a reload mid-drill keeps what was actually answered — the
+   session count is the only thing that waits for the session to finish. */
+function prRecord(ok){
+  const st = prLoad();
+  st.asked++;
+  st.modes[PR.mode.key].asked++;
+  if (ok){
+    st.correct++;
+    st.modes[PR.mode.key].correct++;
+    st.streak++;
+    if (st.streak > st.best) st.best = st.streak;
+  } else st.streak = 0;
+  prSave(st);
+}
+
+function prScore(ok){
+  PR.i++;
+  if (ok){
+    PR.right++;
+    PR.streak++;
+    if (PR.streak > PR.best) PR.best = PR.streak;
+  } else PR.streak = 0;
+  prRecord(ok);
+  prStatsRender();
+}
+
+/* The drills whose answer is a single fact worth no lingering over: a right
+   answer moves straight on, a wrong one waits so the correction can be read.
+   Memory and sequence never auto-advance — comparing the board you imagined
+   with the one that was there is most of what they teach. */
+const PR_BRISK = { coord:1, color:1, vision:1, track:1 };
+
+function prJudge(ok, say, extraCtl){
+  if (PR.answered) return;
+  PR.answered = true;
+  PR.click = null;
+  PR.onSubmit = null;
+  prAnsClear();
+  prScore(ok);
+  prSay(say, ok ? 'right' : 'wrong');
+  if (ok) beep(760, .09); else beep(190, .16, 'sine', .09);
+
+  const last = PR.i >= PR.len;
+  const ctl = (extraCtl || []).concat([[last ? 'Finish' : 'Next', prAdvance, 'primary']]);
+  prCtl(ctl);
+  if (ok && PR_BRISK[PR.mode.key]) prTimer(prAdvance, 900);
+}
+
+function prAdvance(){
+  prClearTimers();
+  if (PR.i >= PR.len){ prFinish(); return; }
+  prNextQuestion();
+}
+
+function prNextQuestion(){
+  prClearTimers();
+  PR.answered = false;
+  PR.click = null;
+  PR.onSubmit = null;
+  prSay('');
+  prSeq('');
+  prAnsClear();
+  prCtl([]);
+  prMarksClear();
+  PR.q = prMake(PR.mode.key, PR.diff);
+  if (!PR.q){
+    // Nothing valid came out after every retry. Say so and leave rather than
+    // showing an exercise that is not one.
+    prQ('This drill could not build a position just now.');
+    prSub('Nothing broken happened — the generator simply gave up. Try it again, or pick another drill.');
+    prCtl([['Back to Practice', prShowDash, 'primary']]);
+    return;
+  }
+  prStatsRender();
+  prPresent();
+}
+
+/* ---- putting a question on screen ---- */
+function prPresent(){
+  const q = PR.q;
+  document.getElementById('prSkill').textContent = PR.mode.skill;
+  switch (q.kind){
+    case 'coord':    return prShowCoord(q);
+    case 'color':    return prShowColor(q);
+    case 'vision':   return prShowVision(q);
+    case 'track':    return prShowTrack(q);
+    case 'memory':   return prShowMemory(q);
+    case 'sequence': return prShowSequence(q);
+  }
+}
+
+/* ---- 1: coordinates ---- */
+function prShowCoord(q){
+  prBoardOn(true);
+  prLayout(q.flipped, q.labels);
+  prClearPieces();
+  prMarksClear();
+  prMen(true);
+  if (q.findIt){
+    prQ('Find <b>' + sqName(q.sq) + '</b>');
+    prSub('Click it on the board.');
+    PR.click = i => prAnswerCoordFind(i);
+  } else {
+    prMark(q.sq, 'pr-target');
+    prQ('Which square is lit?');
+    prSub('Type its name — the file letter, then the rank number.');
+    prAnsInput('e4', 2, inp => prAnswerCoordName(inp));
+  }
+}
+function prAnswerCoordFind(i){
+  const q = PR.q, ok = i === q.sq;
+  prMarksClear();
+  if (!ok) prMark(i, 'pr-wrong');
+  prMark(q.sq, 'pr-right');
+  prJudge(ok,
+    ok ? 'Yes — that is <b>' + sqName(q.sq) + '</b>.'
+       : 'That was <b>' + sqName(i) + '</b>. <b>' + sqName(q.sq) + '</b> is the square in green.');
+}
+function prAnswerCoordName(inp){
+  const said = (inp.value || '').trim().toLowerCase();
+  if (!/^[a-h][1-8]$/.test(said)){
+    inp.classList.add('bad');
+    prTimer(() => inp.classList.remove('bad'), 380);
+    prSay('A file letter a–h and a rank number 1–8 — <b>e4</b>, say.', 'told');
+    return;
+  }
+  const q = PR.q, ok = said === sqName(q.sq);
+  prMarksClear();
+  prMark(q.sq, ok ? 'pr-right' : 'pr-wrong');
+  prJudge(ok,
+    ok ? 'Yes — <b>' + sqName(q.sq) + '</b>.'
+       : 'That was <b>' + sqName(q.sq) + '</b>, not <b>' + said + '</b>.');
+}
+
+/* ---- 2: square colour ---- */
+function prShowColor(q){
+  prBoardOn(q.board);
+  prLayout(false, q.labels);
+  prClearPieces();
+  prMarksClear();
+  prMen(true);
+  prQ('Is <b>' + sqName(q.sq) + '</b> a light square or a dark one?');
+  prSub(q.board ? 'Answer before you go looking for it.'
+                : 'No board this time — work it out from the name.');
+  prAnsButton('Light', () => prAnswerColor(false));
+  prAnsButton('Dark',  () => prAnswerColor(true));
+}
+function prAnswerColor(saidDark){
+  const q = PR.q, ok = saidDark === q.dark;
+  prBoardOn(true);                       // hidden or not, the answer is shown on the board
+  prLayout(false, true);
+  prMarksClear();
+  prMark(q.sq, ok ? 'pr-right' : 'pr-wrong');
+  prJudge(ok,
+    (ok ? 'Yes. ' : '<b>' + sqName(q.sq) + '</b> is ' + (q.dark ? 'dark' : 'light') + '. ') +
+    prColourWhy(q.sq));
+}
+
+/* ---- 3: piece visualization ---- */
+function prShowVision(q){
+  prBoardOn(true);
+  prLayout(false, true);
+  prMen(true);
+  prPaint(q.st.b);
+  prMarksClear();
+  prMark(q.from, 'pr-from');
+  prQ(prSide(q.colour) + "'s <b>" + PIECE_NAME[q.type] + '</b> on <b>' + sqName(q.from) +
+      '</b>. Select every square it could move to.');
+  prSub('Click each one, then Check. Squares its own men stand on do not count.');
+  q.picks = new Set();
+  PR.click = i => {
+    if (PR.answered || i === q.from) return;
+    if (q.picks.has(i)){ q.picks.delete(i); prSqEls[prVisual(i)].classList.remove('pr-pick'); }
+    else { q.picks.add(i); prMark(i, 'pr-pick'); }
+  };
+  prAnsButton('Check', () => prAnswerVision(), 'primary');
+}
+function prAnswerVision(){
+  const q = PR.q;
+  const missed = [], wrong = [];
+  for (const sq of q.targets) if (!q.picks.has(sq)) missed.push(sq);
+  for (const sq of q.picks) if (!q.targets.has(sq)) wrong.push(sq);
+  const ok = !missed.length && !wrong.length;
+
+  prMarksClear();
+  prMark(q.from, 'pr-from');
+  for (const sq of q.targets) prMark(sq, q.picks.has(sq) ? 'pr-right' : 'pr-miss');
+  for (const sq of wrong) prMark(sq, 'pr-wrong');
+
+  const names = Array.from(q.targets).sort((a, b) => a - b).map(sqName).join(', ');
+  prJudge(ok,
+    ok ? 'All ' + q.targets.size + ' of them: <b>' + names + '</b>.'
+       : (missed.length ? 'Missed <b>' + missed.sort((a,b)=>a-b).map(sqName).join(', ') + '</b>. ' : '') +
+         (wrong.length ? 'Not <b>' + wrong.sort((a,b)=>a-b).map(sqName).join(', ') + '</b>. ' : '') +
+         'The full answer is <b>' + names + '</b>.');
+}
+
+/* ---- 4: piece tracking ---- */
+function prShowTrack(q){
+  prBoardOn(true);
+  prLayout(false, true);
+  prMen(true);
+  prPaint(q.frames[0]);
+  prMarksClear();
+  for (const sq of q.startAt) prMark(sq, 'pr-from');
+  const who = q.types.map((ty, k) => 'a <b>' + PIECE_NAME[ty] + '</b> on <b>' +
+                                     sqName(q.startAt[k]) + '</b>').join(' and ');
+  prQ('White has ' + who + '.');
+  prSub('Look at where they stand. Press Ready and the men go dark; the moves come after.');
+  prCtl([['Ready', () => prTrackAsk(q), 'primary']]);
+}
+function prTrackAsk(q){
+  prClearTimers();
+  prMen(false);
+  prMarksClear();
+  prCtl([]);
+  prSeq(q.path.map((s, k) => '<b>' + (k + 1) + '.</b> ' + s.san).join('&nbsp; &nbsp;'));
+  prQ('Where does the <b>' + PIECE_NAME[q.askType] + '</b> finish?');
+  prSub('Only White moves; the black men stand still. Click the square you land on.');
+  PR.click = i => prAnswerTrack(i);
+}
+function prAnswerTrack(i){
+  const q = PR.q, ok = i === q.end;
+  prMarksClear();
+  if (!ok) prMark(i, 'pr-wrong');
+  prMark(q.end, 'pr-right');
+  prJudge(ok,
+    ok ? 'Yes — the ' + PIECE_NAME[q.askType] + ' ends on <b>' + sqName(q.end) + '</b>.'
+       : 'It ends on <b>' + sqName(q.end) + '</b>, not <b>' + sqName(i) + '</b>.',
+    [['Reveal the path', () => prTrackReveal(q)]]);
+}
+/* The walk, played out square by square. The men are keyed by id, so a piece
+   that moves slides rather than reappearing — which is the whole animation. */
+function prTrackReveal(q){
+  prClearTimers();
+  prMen(true);
+  prPaint(q.frames[0]);
+  prMarksClear();
+  for (const sq of q.startAt) prMark(sq, 'pr-from');
+  let k = 0;
+  const step = () => {
+    if (k >= q.path.length){
+      prMarksClear();
+      prMark(q.end, 'pr-right');
+      prSub('That is the path. The ' + PIECE_NAME[q.askType] + ' finishes on <b>' + sqName(q.end) + '</b>.');
+      return;
+    }
+    prPaint(q.frames[k + 1]);
+    prMarksClear();
+    prMark(q.path[k].from, 'pr-from');
+    prMark(q.path[k].to, 'pr-target');
+    prSub('<b>' + (k + 1) + '.</b> ' + q.path[k].san);
+    k++;
+    prTimer(step, 780);
+  };
+  prTimer(step, 420);
+}
+
+/* ---- 5: position memory ---- */
+function prShowMemory(q){
+  prBoardOn(true);
+  prLayout(false, true);
+  prMen(true);
+  prPaint(q.st.b);
+  prMarksClear();
+  let men = 0;
+  for (let i = 0; i < 64; i++) if (q.st.b[i]) men++;
+  prQ('Study this position — <b>' + men + '</b> men.');
+  prStudyPhase(q.study, () => {
+    prMen(false);
+    prMarksClear();
+    prAskShow(q.ask, q.st, [['Reveal the position', () => prRevealPosition(q.st)]]);
+  });
+}
+/* A countdown that can be cut short, and cannot fire twice. */
+function prStudyPhase(ms, then){
+  let spent = false;
+  const go = () => { if (spent) return; spent = true; prClearTimers(); prCtl([]); then(); };
+  const t0 = Date.now();
+  const tick = () => {
+    const left = Math.max(0, ms - (Date.now() - t0));
+    prSub('The men go dark in <b>' + Math.ceil(left / 1000) + 's</b>.');
+    if (left <= 0){ go(); return; }
+    prTimer(tick, 200);
+  };
+  prCtl([['Ready', go, 'primary']]);
+  tick();
+}
+function prRevealPosition(st){
+  prBoardOn(true);
+  prMen(true);
+  prPaint(st.b);
+  prSub('The position as it actually stood.');
+}
+
+/* ---- 6: blindfold sequence ---- */
+function prShowSequence(q){
+  prBoardOn(true);
+  prLayout(false, true);
+  prMen(true);
+  prPaint(q.start.b);
+  prMarksClear();
+  prQ(q.fromStart ? 'The usual starting position.' : 'Study this position.');
+  prStudyPhase(q.study, () => {
+    prMen(false);
+    prMarksClear();
+    prSeq(prSanList(q.sans));
+    prAskShow(q.ask, q.end, [['Reveal the position', () => prRevealPosition(q.end)]]);
+  });
+}
+/** "1. e4 e5   2. Nf3 Nc6" — White always has the move in a generated position. */
+function prSanList(sans){
+  let out = '';
+  for (let i = 0; i < sans.length; i++){
+    if (i % 2 === 0) out += (i ? '&nbsp; &nbsp;' : '') + '<b>' + (i / 2 + 1) + '.</b> ';
+    out += sans[i] + ' ';
+  }
+  return out;
+}
+
+/* ---- asking one question about a position ---- */
+function prAskShow(ask, st, extraCtl){
+  prQ(ask.text);
+  switch (ask.t){
+    case 'where':
+      prSub('Click the square it stands on.');
+      PR.click = i => prAnswerWhere(i, ask, extraCtl);
+      break;
+    case 'what':
+      prSub('Pick the man — or say the square is empty.');
+      prAnsEl.className = 'pr-ans glyphs';
+      for (const c of [W, B])
+        for (const ty of ['K','Q','R','B','N','P'])
+          prAnsButton('<span class="g-' + c + '">' + pieceHTML(ty) + '</span>',
+                      () => prAnswerWhat(c, ty, ask, extraCtl));
+      prAnsButton('Empty square', () => prAnswerWhat(null, null, ask, extraCtl), 'wide');
+      break;
+    case 'count':
+      prSub('');
+      for (let n = 0; n <= 6; n++) prAnsButton(String(n), () => prAnswerCount(n, ask, extraCtl));
+      break;
+    case 'occupied':
+      prSub('');
+      prAnsButton('Yes', () => prAnswerOccupied(true, ask, extraCtl));
+      prAnsButton('No',  () => prAnswerOccupied(false, ask, extraCtl));
+      break;
+    case 'rebuild':
+      ask.at = 0; ask.given = [];
+      prRebuildStep(ask, extraCtl);
+      break;
+  }
+  if (ask.t !== 'rebuild') prCtl(extraCtl || []);
+}
+function prAnswerWhere(i, ask, extra){
+  const ok = i === ask.sq;
+  prMarksClear();
+  if (!ok) prMark(i, 'pr-wrong');
+  prMark(ask.sq, 'pr-right');
+  prJudge(ok,
+    ok ? 'Yes — <b>' + sqName(ask.sq) + '</b>.'
+       : prMan(ask.colour, ask.type) + ' was on <b>' + sqName(ask.sq) + '</b>.',
+    extra);
+}
+function prAnswerWhat(c, ty, ask, extra){
+  const ok = c === ask.colour && ty === ask.type;
+  prMarksClear();
+  prMark(ask.sq, ok ? 'pr-right' : 'pr-wrong');
+  const truth = ask.type ? prMan(ask.colour, ask.type) : 'nothing at all';
+  prJudge(ok,
+    ok ? 'Yes — ' + truth + '.'
+       : '<b>' + sqName(ask.sq) + '</b> had ' + truth + ' on it.',
+    extra);
+}
+function prAnswerCount(n, ask, extra){
+  const ok = n === ask.n;
+  prJudge(ok,
+    ok ? 'Yes — ' + ask.n + '.'
+       : 'There ' + (ask.n === 1 ? 'was one' : 'were ' + ask.n) + '.',
+    extra);
+}
+function prAnswerOccupied(said, ask, extra){
+  const ok = said === ask.yes;
+  prMarksClear();
+  prMark(ask.sq, ok ? 'pr-right' : 'pr-wrong');
+  prJudge(ok,
+    (ok ? 'Yes. ' : 'No. ') + '<b>' + sqName(ask.sq) + '</b> was ' + (ask.yes ? 'occupied' : 'empty') + '.',
+    extra);
+}
+/* The reconstruction: the men are named one at a time and placed on a blank
+   board, and only when the last one is down is anything judged — a rebuild
+   marked square by square is three easy questions, not one hard one. */
+function prRebuildStep(ask, extra){
+  const want = ask.want[ask.at];
+  prQ('Rebuild the position. Place <b>' + prMan(want.colour, want.type) + '</b>' +
+      ' <span style="color:var(--muted)">(' + (ask.at + 1) + ' of ' + ask.want.length + ')</span>');
+  prSub('Click the square you believe it stands on.');
+  prCtl(extra || []);
+  PR.click = i => {
+    if (PR.answered) return;
+    ask.given.push(i);
+    prMark(i, 'pr-pick');
+    ask.at++;
+    if (ask.at < ask.want.length){ prRebuildStep(ask, extra); return; }
+    let hits = 0;
+    prMarksClear();
+    for (let k = 0; k < ask.want.length; k++){
+      const right = ask.given[k] === ask.want[k].sq;
+      if (right) hits++;
+      else prMark(ask.given[k], 'pr-wrong');
+      prMark(ask.want[k].sq, 'pr-right');
+    }
+    const list = ask.want.map(w => prMan(w.colour, w.type) + ' on <b>' + sqName(w.sq) + '</b>').join(', ');
+    prJudge(hits === ask.want.length,
+      (hits === ask.want.length ? 'All three, exactly. ' : hits + ' of ' + ask.want.length + ' right. ') + list + '.',
+      extra);
+  };
+}
+
+/* ============================================================
+   THE MINI BLINDFOLD CHALLENGE
+   Not a second game: a small legal position, the page's own move generator,
+   the page's own notation reader, and the small JS search already in this
+   file answering for the other side. Nothing here queues, rates or matches.
+   ============================================================ */
+function prMiniLine(text, cls){
+  const d = document.createElement('div');
+  if (cls) d.className = cls;
+  d.textContent = text;
+  prLogEl.appendChild(d);
+  prLogEl.scrollTop = prLogEl.scrollHeight;
+}
+function prShowMini(q){
+  PR.mini = { st: q.start, target: q.target, over: false, busy: false };
+  PR.len = q.target;
+  PR.played = 0;
+  prLogEl.style.display = 'none';
+  prLogEl.innerHTML = '';
+  prBoardOn(true);
+  prLayout(false, true);
+  prMen(true);
+  prPaint(q.start.b);
+  prMarksClear();
+  let men = 0;
+  for (let i = 0; i < 64; i++) if (q.start.b[i]) men++;
+  prQ('A small position — <b>' + men + '</b> men, and you have White.');
+  prSub('Learn it. When you press Ready the board goes dark and you play on in notation.');
+  prCtl([['Ready', () => prMiniPlay(), 'primary']]);
+  prStatsRender();
+}
+function prMiniPlay(){
+  prClearTimers();
+  prMen(false);
+  prMarksClear();
+  // Named apart from the Restart in the side panel on purpose: that one deals
+  // a new position, this one plays the same men again.
+  prCtl([['Reveal Position', () => prMiniReveal()],
+         ['Restart Position', () => prMiniRestart()]]);
+  prQ('Play it out — <b>' + PR.mini.target + '</b> moves, board dark.');
+  prSub('Standard notation: <b>e4</b> · <b>Nf3</b> · <b>exd5</b> · <b>O-O</b> · <b>e8=Q</b> — or plain squares, <b>e2e4</b>.');
+  prLogEl.style.display = '';
+  prMiniLine('The board is dark from here. You are White.', 'sys');
+  prAnsClear();
+  prAnsInput('your move…', 12, inp => prMiniSubmit(inp), 'Play');
+}
+/* This position again, from the top. Deliberately not a new one: half the
+   value of a challenge that went wrong is playing the same men a second time
+   knowing where they were. The Restart in the side panel is the other kind —
+   it starts the whole session over, and that one does deal a new position. */
+function prMiniRestart(){
+  prClearTimers();
+  PR.i = 0; PR.right = 0; PR.streak = 0; PR.best = 0;
+  prSay('');
+  prShowMini(PR.q);
+}
+function prMiniReveal(){
+  prMen(true);
+  prPaint(PR.mini.st.b);
+  prTimer(() => { if (PR.mini && !PR.mini.over) prMen(false); }, 2600);
+}
+function prMiniSubmit(inp){
+  const mini = PR.mini;
+  if (!mini || mini.over || mini.busy) return;
+  const res = parseMoveIn(mini.st, inp.value);
+  if (res.error){
+    // A move that is not there is exactly the failure this drill measures, so
+    // it counts — and costs nothing else.
+    prScore(false);
+    prMiniLine('✗  ' + res.error, 'err');
+    beep(140, .16, 'sawtooth', .08);
+    inp.classList.add('bad');
+    prTimer(() => inp.classList.remove('bad'), 380);
+    inp.select();
+    return;
+  }
+  const all = legalMoves(mini.st, mini.st.turn);
+  const san = toSAN(mini.st, res.move, all);
+  mini.st = makeMove(mini.st, res.move);
+  PR.played++;
+  prScore(true);
+  prMiniLine((PR.played) + '.  ' + san, 'you');
+  if (res.note) prMiniLine('     · ' + res.note, 'sys');
+  inp.value = '';
+
+  const theirs = legalMoves(mini.st, mini.st.turn);
+  if (!theirs.length){
+    prMiniEnd(inCheck(mini.st, mini.st.turn) ? 'Checkmate — you finished it.' : 'Stalemate. The position is a draw.');
+    return;
+  }
+  mini.busy = true;
+  inp.disabled = true;
+  prTimer(() => {
+    const reply = bestMove(mini.st, 2);
+    if (!reply){ mini.busy = false; inp.disabled = false; return; }
+    const replySan = toSAN(mini.st, reply, theirs);
+    mini.st = makeMove(mini.st, reply);
+    prMiniLine('    …  ' + replySan, 'them');
+    mini.busy = false;
+    inp.disabled = false;
+    prStatsRender();
+    if (PR.played >= mini.target){ prMiniEnd('You held the position for all ' + mini.target + ' moves.'); return; }
+    const mine = legalMoves(mini.st, mini.st.turn);
+    if (!mine.length){
+      prMiniEnd(inCheck(mini.st, mini.st.turn) ? 'Checkmate against you — the run ends here.' : 'Stalemate. The position is a draw.');
+      return;
+    }
+    inp.focus();
+  }, 520);
+}
+function prMiniEnd(why){
+  PR.mini.over = true;
+  prClearTimers();
+  prMen(true);
+  prPaint(PR.mini.st.b);
+  prMiniLine(why, 'sys');
+  prAnsClear();
+  prCtl([]);
+  prFinish(why);
+}
+
+/* ============================================================
+   A SESSION, START TO FINISH
+   ============================================================ */
+function prBegin(){
+  prClearTimers();
+  document.getElementById('prDoneOverlay').classList.remove('show');
+  PR.view = 'run';
+  PR.i = 0; PR.right = 0; PR.streak = 0; PR.best = 0; PR.played = 0;
+  PR.answered = false;
+  PR.q = null; PR.click = null; PR.onSubmit = null; PR.mini = null;
+  prLaid = null;                                   // relay the board for this drill's settings
+  prClearPieces();
+  prMarksClear();
+  prSay(''); prSeq(''); prAnsClear(); prCtl([]);
+  prLogEl.style.display = 'none';
+  prLogEl.innerHTML = '';
+  document.getElementById('prDash').style.display = 'none';
+  document.getElementById('prRun').style.display = '';
+  document.getElementById('prSkill').textContent = PR.mode.skill;
+
+  if (PR.mode.key === 'mini'){
+    const q = prMake('mini', PR.diff);
+    if (!q){
+      prQ('The challenge could not build a position just now.');
+      prSub('Try it again, or pick another drill.');
+      prCtl([['Back to Practice', prShowDash, 'primary']]);
+      return;
+    }
+    PR.q = q;
+    prShowMini(q);
+    return;
+  }
+  prStatsRender();
+  prNextQuestion();
+}
+
+/* What the session was worth, and what to do next. `note` is the mini
+   challenge's own ending; the drills have none. */
+function prFinish(note){
+  prClearTimers();
+  PR.click = null;
+  PR.onSubmit = null;
+
+  const st = prLoad();
+  st.sessions++;
+  const m = st.modes[PR.mode.key];
+  m.sessions++;
+  m.diff = PR.diff;
+  if (PR.best > m.best) m.best = PR.best;
+  const before = prLevelIndex(prLoad());
+  prSave(st);
+  const after = prLevelIndex(st);
+
+  const acc = PR.i ? PR.right / PR.i : 0;
+  const rows = document.getElementById('prDoneRows');
+  rows.innerHTML = '';
+  const row = (cap, val) => {
+    const d = document.createElement('div');
+    d.innerHTML = cap + '<b>' + val + '</b>';
+    rows.appendChild(d);
+  };
+  if (PR.mode.key === 'mini') row('Moves played', PR.played + ' / ' + PR.len);
+  row('Accuracy', PR.right + ' / ' + PR.i + (PR.i ? '  ·  ' + Math.round(acc * 100) + '%' : ''));
+  row('Best streak', PR.best);
+  row('Skill practised', PR.mode.skill);
+
+  const tip = document.getElementById('prDoneTip');
+  const rec = prRecommend(acc);
+  let text = '';
+  if (note) text += note + ' ';
+  if (after > before) text += 'You have reached <b>' + PR_LEVELS[after].name + '</b>. ';
+  if (rec) text += rec.why + ' <b>' + PR_MODE[rec.key].name + '</b> next.';
+  tip.innerHTML = text || 'Steady work. Pick whichever drill you fancy next.';
+
+  document.getElementById('prDoneTitle').textContent = 'Practice Complete';
+  // Finishing a blindfold game in miniature is the one result that leads
+  // somewhere else on the site — into the game setup that already exists.
+  document.getElementById('prBlindGame').style.display =
+    PR.mode.key === 'mini' && PR.played >= PR.len ? '' : 'none';
+  document.getElementById('prDoneOverlay').classList.add('show');
+  prRenderDash();
+}
+
+/* Rule-based and deliberately small: repeat what is going badly, try what has
+   never been tried, otherwise shore up the weakest thing. */
+function prRecommend(sessionAcc){
+  const st = prLoad();
+  const level = prLevelIndex(st);
+  const open = m => m.needs === undefined || level >= m.needs;
+  if (sessionAcc < .6)
+    return { key: PR.mode.key, why: 'Under 60% this session, so more of the same is the quickest way to move it:' };
+  for (const m of PR_MODES)
+    if (open(m) && !st.modes[m.key].sessions)
+      return { key: m.key, why: 'You have not tried this one yet:' };
+  let worst = null;
+  for (const m of PR_MODES){
+    const s = st.modes[m.key];
+    if (!open(m) || !s.asked) continue;
+    const a = s.correct / s.asked;
+    if (!worst || a < worst.acc) worst = { key: m.key, acc: a };
+  }
+  if (worst)
+    return { key: worst.key,
+             why: 'Your weakest drill so far is at ' + Math.round(worst.acc * 100) + '% —' };
+  return null;
+}
+
+/* ============================================================
+   THE DASHBOARD
+   ============================================================ */
+function prShowDash(){
+  prClearTimers();
+  PR.view = 'dash';
+  PR.q = null; PR.click = null; PR.onSubmit = null; PR.mini = null;
+  document.getElementById('prDoneOverlay').classList.remove('show');
+  document.getElementById('prRun').style.display = 'none';
+  document.getElementById('prDash').style.display = '';
+  prRenderDash();
+}
+
+function prRenderDash(){
+  const st = prLoad();
+  const idx = prLevelIndex(st);
+  const next = PR_LEVELS[idx + 1];
+  document.getElementById('prLevel').textContent = PR_LEVELS[idx].name;
+  document.getElementById('prLevelNow').textContent = PR_LEVELS[idx].name;
+  document.getElementById('prLevelNext').textContent = next ? next.name : 'Top of the ladder';
+  document.getElementById('prLevelFill').style.width =
+    Math.round(prLevelProgress(st, idx) * 100) + '%';
+  document.getElementById('prFigAcc').textContent = st.asked ? Math.round(prAcc(st) * 100) + '%' : '—';
+  document.getElementById('prFigStreak').textContent = st.streak;
+  document.getElementById('prFigBest').textContent = st.best;
+  document.getElementById('prFigSessions').textContent = st.sessions;
+  prRenderCards(st, idx);
+}
+
+function prRenderCards(st, level){
+  const wrap = document.getElementById('prCards');
+  wrap.innerHTML = '';
+  for (const m of PR_MODES){
+    const s = st.modes[m.key];
+    const locked = m.needs !== undefined && level < m.needs;
+    const card = document.createElement('div');
+    card.className = 'card panel pr-card' + (locked ? ' locked' : '');
+
+    let dots = '';
+    for (let d = 1; d <= 3; d++) dots += '<i class="' + (d <= m.hard ? 'on' : '') + '"></i>';
+
+    const score = locked
+      ? 'Reach ' + PR_LEVELS[m.needs].name + ' to unlock'
+      : s.asked
+        ? s.asked + ' answered · ' + Math.round(s.correct / s.asked * 100) + '% · best streak ' + s.best
+        : 'Not tried yet';
+
+    // Built rather than written out as one string: the Start button has to go
+    // inside the foot, and fishing it back out of markup that was just
+    // stringified is a step that can only fail silently.
+    const part = (cls, html) => {
+      const d = document.createElement('div');
+      d.className = cls;
+      d.innerHTML = html;
+      return d;
+    };
+    const foot = part('pr-foot', '');
+    const dotRow = part('pr-dots', dots);
+    dotRow.title = 'How demanding this drill is';
+    foot.appendChild(dotRow);
+
+    const go = document.createElement('button');
+    go.type = 'button';
+    go.className = 'pr-go' + (locked ? '' : ' primary');
+    go.textContent = locked ? 'Locked' : 'Start';
+    if (!locked) go.onclick = () => prOpenSetup(m);
+    foot.appendChild(go);
+
+    card.appendChild(part('pr-name', m.name));
+    card.appendChild(part('pr-desc', m.desc));
+    card.appendChild(foot);
+    card.appendChild(part('pr-score', score));
+    wrap.appendChild(card);
+  }
+}
+
+/* ---- the two questions a drill asks before it starts ---- */
+const prSetOverlay = document.getElementById('prSetOverlay');
+let prSetMode = null, prSetLevel = 1, prSetCount = 10;
+
+function prOpenSetup(mode){
+  const st = prLoad();
+  prSetMode = mode;
+  prSetLevel = st.modes[mode.key].diff || 1;
+  prSetCount = prSetCount || 10;
+  document.getElementById('prSetName').textContent = mode.name;
+
+  const diffBox = document.getElementById('prSetDiff');
+  diffBox.innerHTML = '';
+  mode.tiers.forEach((label, k) => {
+    const b = document.createElement('button');
+    b.type = 'button';
+    b.textContent = ['Easy', 'Medium', 'Hard'][k] + ' — ' + label;
+    b.onclick = () => { prSetLevel = k + 1; prDrawSetup(); };
+    diffBox.appendChild(b);
+  });
+
+  // The mini challenge sets its own length: how long it runs is what the
+  // position can stand, not a number to pick off a row.
+  document.getElementById('prSetLenField').style.display = mode.key === 'mini' ? 'none' : '';
+  prDrawSetup();
+  prSetOverlay.classList.add('show');
+  beep(700, .09);
+}
+function prDrawSetup(){
+  const diffBox = document.getElementById('prSetDiff');
+  Array.from(diffBox.children).forEach((b, k) => b.classList.toggle('active', k + 1 === prSetLevel));
+  document.querySelectorAll('#prSetLen button').forEach(b =>
+    b.classList.toggle('active', +b.dataset.len === prSetCount));
+}
+document.querySelectorAll('#prSetLen button').forEach(b => {
+  b.onclick = () => { prSetCount = +b.dataset.len; prDrawSetup(); };
+});
+document.getElementById('prSetX').onclick = () => prSetOverlay.classList.remove('show');
+document.getElementById('prSetGo').onclick = () => {
+  if (!prSetMode) return;
+  prSetOverlay.classList.remove('show');
+  PR.mode = prSetMode;
+  PR.diff = prSetLevel;
+  PR.len = prSetMode.key === 'mini' ? 0 : prSetCount;   // the mini sets its own from the position
+  beep(760, .09);
+  prBegin();
+};
+
+/* ---- the results box ---- */
+document.getElementById('prAgain').onclick   = () => prBegin();
+document.getElementById('prAnother').onclick = () => prShowDash();
+document.getElementById('prToLessons').onclick = () => {
+  document.getElementById('prDoneOverlay').classList.remove('show');
+  showScreen('home');
+};
+/* Straight into the game setup that already exists — a blindfold game against
+   the engine, with the vision it earned already chosen. No second setup, no
+   second matchmaker. */
+document.getElementById('prBlindGame').onclick = () => {
+  document.getElementById('prDoneOverlay').classList.remove('show');
+  goBot();
+  selectMode('total');
+};
+
+document.getElementById('prRestart').onclick = () => prBegin();
+document.getElementById('prExit').onclick    = () => prShowDash();
+
+/* ---- coming and going ----
+   goPractice() is the whole of the way in, and it is a function rather than a
+   handler on one button on purpose: the LESSON menu calls it today, and the
+   How to Play page — when there is one — should finish by calling the same
+   thing rather than growing a second entrance.
+
+   Walking off the page ends whatever was running: no timer left counting down
+   over another screen, no square click still wired to a question nobody can
+   see, no engine reply landing in a drill that is over. */
+function goPractice(){
+  beep(700, .09);
+  PR.on = true;
+  prShowDash();
+  showScreen('practice');
+}
+function prLeave(){
+  if (!PR.on) return;
+  PR.on = false;
+  prClearTimers();
+  PR.view = 'dash';
+  PR.q = null; PR.click = null; PR.onSubmit = null; PR.mini = null;
+  PR.answered = false;
+  prSetOverlay.classList.remove('show');
+  document.getElementById('prDoneOverlay').classList.remove('show');
+  document.getElementById('prRun').style.display = 'none';
+  document.getElementById('prDash').style.display = '';
+}
+
+
+/* ============================================================
    SCREENS — title → vision select → game, with settings off the title
    ============================================================ */
 const MODE_NAME  = { blind:'Board Only', total:'Complete Blindfold', fog:'Fog of War', sighted:'Sighted' };
@@ -6645,6 +8512,9 @@ function showScreen(name){
   if (screenName === 'ranked' && name !== 'ranked' && searching) stopRankSearch();
   if (name !== 'game') reviewClose(false);
   if (name !== 'game') pzClose();
+  // A drill left behind stops with the page: its countdown, the click still
+  // wired to a question nobody can see, the reply on its way from the engine.
+  if (name !== 'practice') prLeave();
   screenName = name;
   // Walking away from the challenge form abandons it. The form only lives on
   // the game screen, so anywhere else is walking away — and an invitation
@@ -6841,9 +8711,10 @@ document.getElementById('navFriendly').onclick = goFriendly;
 // account that unlocks the ladder.
 document.getElementById('navPuzzle').onclick = () => { if (GUEST()) toSignUp(); };
 
-// Deliberately inert for now, each one waiting on a page of its own.
-['navHowTo','navPractice']
-  .forEach(id => { document.getElementById(id).onclick = () => {}; });
+// How to Play is still waiting on a page of its own. Practice has one, and
+// this is the only door into it.
+document.getElementById('navHowTo').onclick   = () => {};
+document.getElementById('navPractice').onclick = goPractice;
 
 // The three puzzle tracks, each its own ladder of a hundred — and a ladder is
 // a record of what you have solved, which has to belong to somebody. A guest's
@@ -7510,6 +9381,9 @@ function updateAccountUI(){
   if (screenName === 'ranked') drawRank();
   // and the social page is about one particular account, so it starts over
   socialAccountChanged();
+  // practice is kept per account too, so the dashboard on screen is now
+  // somebody else's and has to be read again
+  if (screenName === 'practice') prRenderDash();
   decideFirstScreen();
 }
 

@@ -6,8 +6,8 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 Nox Chess (directory name still "Blind Chess"): a blindfold-chess web game. The
 entire client — styles, markup, chess rules, UI, bot, online client, review
-screen — is one file, `blind-chess.html` (~4.7k lines). The Python server in
-`server/` is matchmaking and a move relay, nothing more. There is no build step
+screen, practice drills — is one file, `blind-chess.html` (~7.9k lines). The
+Python server in `server/` is matchmaking and a move relay, nothing more. There is no build step
 and no package manager on either side.
 
 ## Commands
@@ -22,6 +22,8 @@ node server/test_ws_url.js               # unit tests for wsURLFrom(); no server
 node server/test_rematch_flow.js         # the page's rematch and New Game wiring, against scripted replies
 node server/test_review.js               # unit tests for the review's chess reasoning
 node server/test_puzzle_flow.js          # plays a shipped puzzle against a stub DOM
+node server/test_practice.js             # what the practice drills invent, re-checked
+node server/test_practice_flow.js        # and running one, against a stub DOM + clock
 python3 server/test_puzzle_rating.py     # the puzzle Elo handler; no server needed
 node tools/test_generate_puzzles.js      # the generator's own decisions, no engine
 python3 tools/check_supabase_puzzles.py  # RLS and column grants, against the real project
@@ -38,6 +40,9 @@ docker build -t nox-chess . && docker run --rm -p 8787:8787 nox-chess
 
 The JS suites read the code under test out of `blind-chess.html` by name, so
 renaming or reformatting what they extract breaks them on purpose.
+`test_practice_flow.js` goes further and lifts the whole PRACTICE section out
+between its banner comments, so it runs the screen's own code rather than a
+copy — moving that banner moves the suite with it.
 `test_rematch_e2e.js` is the exception and the reason the others can stay
 narrow: it boots the *whole* page script twice under a dumb DOM shim, gives
 each copy its own real WebSocket to the server, and presses the real buttons —
@@ -287,6 +292,44 @@ player found was worth, and half of it is usually already won by the time the
 solution runs out. A track from before any of this has neither field, and the
 button is absent rather than present and dead.
 
+**Practice is not a second puzzle ladder.** Puzzles ask what the best move is,
+with the board in front of you the whole time. Practice (`PR`,
+`screen-practice`, reached from LESSON → Practice) asks whether the board is
+there at all: name a square, colour it, see where a knight reaches, follow a
+piece through moves you never see, answer for a position with the men hidden.
+Six drills and a Mini Blindfold Challenge, each with three settings that change
+the exercise rather than a label on it. There is deliberately **no Elo**: what a
+player's visualisation is worth is a level they climb (Beginner → Visualizer →
+Tracker → Blindfold Ready → Advanced), earned by sessions finished, by accuracy
+and by how many different drills have been tried — so nobody climbs it by
+grinding one. Ranked and puzzle ratings are untouched by all of it.
+
+Nothing in it reimplements a rule. Positions come out of `prPosition()` and are
+thrown back unless the rules accept them — two kings, not touching, no pawn on a
+promotion rank, neither side already in check, no castling rights nobody earned.
+Movement answers are `legalMoves()`. Tracking walks and blindfold sequences are
+*played*, with `makeMove()`, and named with `toSAN()` — never assembled out of
+notation strings. The mini challenge reads what the player typed with
+`parseMoveIn()` and answers with the small JS search already in this file.
+`parseMove()` is now a one-line wrapper over `parseMoveIn(G.st, …)`: one
+notation reader, two pages. A generator that cannot produce a valid exercise
+retries, then asks again at the easiest setting, and only then gives up — it
+never puts a broken one on screen.
+
+The practice board is the game's board markup built a second time (`#prBoard`,
+`prSqEls`, `prPaint`) — same `.sq`, same `.piece`, same `.blind` that hides the
+men. The CSS is shared; only the element is not, because handing one board back
+and forth between two screens is how the two would come to disagree about what
+is on it. Progress is `localStorage` only
+(`nox.practice.<account id | guest>`), stamped with whose it is the way the
+puzzle cache is, and shaped so a `practice_progress` table could take it later
+without changing what the page writes. Every answer is written as it happens, so
+a refresh keeps what was answered; only the session count waits for the session
+to end. `showScreen()` calls `prLeave()` on the way out, which is what stops a
+study countdown running over another page. `goPractice()` is the only way in, on
+purpose: the How to Play page, when there is one, should finish by calling it
+rather than growing a second entrance.
+
 **Study Board and Puzzles are separate features that share one library.**
 Study Board (`REV`, the review screen) explains *the game the player just
 finished*: it is reached only from the end-of-game overlay, replays `G.uci`,
@@ -361,7 +404,7 @@ grants.
 Navigate by the `/* ==== TITLE ==== */` banners in the script — THE SKY,
 CONSTANTS & HELPERS, MOVE GENERATION, ENGINE, GAME / UI STATE, CLOCK, SOUND,
 COMPLETE BLINDFOLD, PLAYING MOVES, ONLINE PLAY, RESIGNING…, THE ENGINE, THE
-REVIEW, CONTROLS, SCREENS, ACCOUNTS.
+REVIEW, THE PUZZLES, PRACTICE, CONTROLS, SCREENS, ACCOUNTS, SOCIAL.
 
 Screens are `<section class="screen" id="screen-NAME">` toggled by
 `showScreen(name)`; `screenName` is the current one and several handlers branch
