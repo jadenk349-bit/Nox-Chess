@@ -24,7 +24,7 @@ node server/test_review.js               # unit tests for the review's chess rea
 node server/test_puzzle_flow.js          # plays a shipped puzzle against a stub DOM
 node server/test_practice.js             # what the practice drills invent, re-checked
 node server/test_practice_flow.js        # and running one, against a stub DOM + clock
-node server/test_lessons.js              # walks the whole seven-lesson course (~70s)
+node server/test_lessons.js              # walks the whole five-lesson course (~90s)
 python3 server/test_puzzle_rating.py     # the puzzle Elo handler; no server needed
 node tools/test_generate_puzzles.js      # the generator's own decisions, no engine
 python3 tools/check_supabase_puzzles.py  # RLS and column grants, against the real project
@@ -341,7 +341,7 @@ growing a second entrance.
 
 **The lessons are the game with one thing taken away.** `screen-lessons` (the
 LESSONS section of the script, `LSN`, reached from LESSON → How to Play Blind
-Chess) is a seven-lesson course, and it is deliberately made of the game rather
+Chess) is a five-lesson course, and it is deliberately made of the game rather
 than about it: the same square and piece classes, the same four visions,
 `legalMoves()` refereeing every answer, and `parseMoveIn()` reading what is
 typed into its console — so anything the console accepts in a lesson it accepts
@@ -350,9 +350,21 @@ only because `render()` reads `G` and a lesson is not a game. One function took
 a parameter to make that possible — `visibleSet(s, me)` — and it still answers
 the game with no arguments at all.
 
+The five are Learn the Board, Chess Notation, Visualize Pieces, Track the
+Position and First Blindfold Challenge. Every one of them opens on something to
+do: an introduction that is only an introduction has been taken out of each,
+and two whole lessons that were *about* the game rather than made of it — "What
+Is Blind Chess?" and "Playing in Nox" — went with them. That is why `LESSONS`
+is read through `LSN_V1_TO_V2` on the way out of `localStorage`: a record
+written by the seven-lesson course still names lessons 6 and 7.
+
 Three of the lessons are **generated, not written**: the coordinate drills, the
 piece-vision drills and the tracking sequences are made fresh out of
-`legalMoves()` each time, so the course cannot be learnt by heart. Generated
+`legalMoves()` each time, so the course cannot be learnt by heart. Learn the
+Board's ten questions come out of `lsnCoordSet()`, which lays down all four
+combinations of question-kind and chair before drawing the rest at random and
+shuffling the lot — so both kinds and both orientations are certain to be
+asked, and the White half is not always the first half. Generated
 positions carry both kings, because `legalMoves()` judges by check and a board
 with no king is not a question it can be asked; `lsnPiecePos()` throws a
 position away and makes another unless the piece's legal moves are exactly its
@@ -361,6 +373,24 @@ geometric ones, since a pinned rook teaches the wrong lesson under the heading
 have to show ten particular forms, the three challenges have to be small — and
 `server/test_lessons.js` asks the page's own move generator whether every one of
 them is legal.
+
+**The player decides when the men go out, everywhere they go out.** Visualize
+Pieces waits on a Start Visualization button and the challenges wait on I'm
+Ready; neither hides a position on a timer, because a countdown tests reading
+speed rather than visualisation. The challenge's **Position** card
+(`lsnPositionHTML()`) is the same rule said in words — every man on the board,
+grouped by side and named by square — and it is read off `LSN.st` rather than
+written beside the FEN, so a position that changes cannot end up described as
+the one it used to be. It goes down with the board on I'm Ready, since left up
+it is simply the answer key, and Reveal builds it again from the position as it
+then stands.
+
+**One gauge, and no second list of lessons.** The stage carries a labelled
+progress line with a dot per lesson — done, current, ahead — and the dots are
+also the way back into a finished one, on the same `lsnReach()` rule the ladder
+uses. The old card of lesson links beside the board is gone: two maps of the
+same course is one too many, and the one that was off the bottom of a phone was
+the one nobody could see. The board took the room it freed.
 
 Every transient thing a step owns is cleared by `lsnResetStep()`, which is the
 only door into a step. That is what stops a half-played sequence running on over
@@ -373,7 +403,7 @@ positioned, so a lesson class has to be `.lsn-`something even when the plain
 name looks free.
 
 **The course and Practice are two pages, and neither one is a door into the
-other.** They cover related ground — a coordinate drill in lesson 2 and the
+other.** They cover related ground — a coordinate drill in lesson 1 and the
 Coordinate Trainer both ask you to name a square — and that is the point: the
 course *teaches* the skill once, in order, and Practice is where it is *drilled*
 afterwards, with levels and statistics the course has no business keeping. So
@@ -387,7 +417,7 @@ puzzle ladder and `nox.practice.<owner>` are, so two accounts sharing a browser
 cannot read each other's. The two records are separate on purpose: finishing a
 lesson is something you did once and it stays done, while a practice level is
 something you currently are and can fall. There is no lessons table in Supabase
-and inventing one for seven booleans would be a schema change to regret;
+and inventing one for five booleans would be a schema change to regret;
 `lsnPush()` is the seam a cloud copy goes through when there is one, and
 everything above it already speaks of "the owner's finished lessons" rather than
 "this browser's".

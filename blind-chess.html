@@ -1423,7 +1423,7 @@
 
 
   /* ---------- the lessons ----------
-     One screen with two faces: the ladder of seven, and a single lesson open
+     One screen with two faces: the ladder of five, and a single lesson open
      on the stage. Nothing here invents a look of its own — the board is the
      game's board, the cards are .panel, the answers are the same cut-in
      controls the setup form asks its questions with. A lesson about the game
@@ -1485,30 +1485,62 @@
     display:flex; align-items:center; gap:14px; margin-bottom:14px;
   }
   .lsn-bar .ghost{flex:none; padding:8px 14px; font-size:12px;}
+  /* The gauge, and the label that says what it is a gauge of. The label sits
+     ABOVE the line rather than beside it so the line itself can run the full
+     width of the page: with a dot for every lesson on it, a short line reads
+     as a crowd of dots rather than as a course. */
+  .lsn-prog{flex:1; min-width:120px; display:flex; flex-direction:column; gap:9px;}
+  .lsn-count{
+    font-size:10.5px; letter-spacing:.18em; text-transform:uppercase;
+    color:var(--muted); font-variant-numeric:tabular-nums;
+    overflow:hidden; text-overflow:ellipsis; white-space:nowrap;
+  }
+  .lsn-count b{color:var(--gold-soft); font-weight:650;}
+  /* Not overflow:hidden any more — the dots stand proud of the line, and a
+     clipped dot is a semicircle. The fill keeps its own rounded ends instead. */
   .lsn-track{
-    flex:1; min-width:60px; height:4px; border-radius:99px;
-    background:rgba(255,255,255,.07); overflow:hidden;
+    position:relative; min-width:60px; height:4px; border-radius:99px;
+    background:rgba(255,255,255,.07);
   }
   .lsn-fill{
-    height:100%; width:0;
+    height:100%; width:0; border-radius:99px;
     background:linear-gradient(90deg, var(--gold), var(--gold-soft));
     transition:width .3s ease;
   }
-  .lsn-count{
-    flex:none; font-size:10.5px; letter-spacing:.18em; text-transform:uppercase;
-    color:var(--muted); font-variant-numeric:tabular-nums; white-space:nowrap;
+  .lsn-dots{position:absolute; inset:0;}
+  /* One dot per lesson, sitting on the line at the middle of its stretch of
+     it. Three states and no more: finished, the one you are on, and the ones
+     ahead — told apart by fill and ring, not by colour alone. */
+  .lsn-dot{
+    position:absolute; top:50%; width:11px; height:11px; padding:0; margin:-6px 0 0 -6px;
+    border-radius:50%; border:1px solid var(--line); background:var(--bg-1);
+    color:transparent; font-size:0; line-height:0; transition:none;
   }
+  .lsn-dot:hover:not(:disabled){border-color:var(--gold); transform:none;}
+  .lsn-dot.done{background:var(--gold-soft); border-color:var(--gold-soft);}
+  .lsn-dot.cur{
+    background:var(--gold); border-color:var(--gold);
+    box-shadow:0 0 0 3px rgba(217,164,65,.18);
+  }
+  .lsn-dot:disabled{opacity:.65;}
 
   /* Board on the left, what the lesson is asking on the right — the same two
      columns the game screen is laid out in, and the same breakpoint. */
   .lsn-body{
-    display:grid; grid-template-columns:minmax(0,1fr) clamp(280px,27vw,368px);
+    display:grid; grid-template-columns:minmax(0,1fr) clamp(268px,24vw,340px);
     gap:clamp(16px,2.2vw,26px); align-items:start;
-    --board-max:min(100%, 560px);
+    /* The board is the lesson, so it is given the room the removed course rail
+       used to take. Bound by height as well as by width — --lsn-chrome is what
+       the header, the gauge and the strip under the board cost — so a wide
+       short window does not push the question below the fold. */
+    --lsn-chrome:288px;
+    --board-max:min(100%, calc(100vh - var(--lsn-chrome)), 860px);
   }
-  @media (max-width:900px){ .lsn-body{grid-template-columns:minmax(0,1fr);} }
+  @media (max-width:900px){
+    .lsn-body{grid-template-columns:minmax(0,1fr); --board-max:min(100%, 92vw);}
+  }
   .lsn-boardcol{display:flex; flex-direction:column; align-items:center; gap:11px;}
-  .lsn-boardcol .board-frame{padding:12px;}
+  .lsn-boardcol .board-frame{padding:clamp(8px,1vw,14px);}
   .lsn-side{display:flex; flex-direction:column; gap:14px;}
 
   /* the strip of controls that belongs to the board rather than to the card:
@@ -1579,6 +1611,18 @@
     margin:14px 0 4px; font-size:10px; letter-spacing:.22em; text-transform:uppercase;
     color:var(--muted); font-weight:600;
   }
+  /* the challenge position, said in words: a column of men and a column of
+     squares, so it is read down rather than across */
+  .lsn-pos .lsn-subcap:first-child{margin-top:0;}
+  .lsn-pos-row{
+    display:flex; align-items:baseline; gap:10px; padding:3px 0;
+    font-size:12.5px; line-height:1.5;
+  }
+  .lsn-pos-row .man{flex:none; min-width:62px; color:var(--muted);}
+  .lsn-pos-row .sqs{
+    color:var(--gold-soft); font-weight:600; letter-spacing:.08em;
+    font-variant-numeric:tabular-nums;
+  }
 
   .lsn-acts{display:flex; gap:8px; margin-top:14px;}
   .lsn-acts button{flex:1; padding:10px 6px; font-size:12px;}
@@ -1588,29 +1632,6 @@
     50%{box-shadow:0 10px 30px rgba(217,164,65,.46), inset 0 1px 0 rgba(255,255,255,.5);}
   }
   #lsnNext.ready{animation:lsnready 1.6s ease-in-out infinite;}
-
-  /* the seven, listed beside the stage so the course never loses its shape */
-  .lsn-rail{padding:14px;}
-  .lsn-rail h2{
-    margin:0 0 10px; font-size:10.5px; letter-spacing:.24em; text-transform:uppercase;
-    color:var(--muted); font-weight:600;
-  }
-  .lsn-jump{
-    display:flex; align-items:center; gap:9px; width:100%;
-    padding:8px 10px; border-radius:8px; text-align:left; font-size:12px;
-    background:transparent; border:1px solid transparent; color:var(--muted);
-  }
-  .lsn-jump + .lsn-jump{margin-top:2px;}
-  .lsn-jump .n{
-    flex:none; width:17px; text-align:center;
-    font-variant-numeric:tabular-nums; font-size:11px;
-  }
-  .lsn-jump .t{flex:1; min-width:0; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;}
-  .lsn-jump:hover{border-color:var(--ctl-line); color:var(--text); transform:none;}
-  .lsn-jump.done{color:var(--good);}
-  .lsn-jump.cur{
-    color:var(--gold-soft); border-color:rgba(212,175,110,.4); background:rgba(212,175,110,.1);
-  }
 
   /* the lesson's own console — the game's, at the size this column offers */
   .lsn-boardcol .console{width:min(100%,var(--board-max)); padding:15px;}
@@ -1674,6 +1695,11 @@
     .lsn-acts button{flex:1 1 44%;}
     .lsn-row{padding:12px 13px; gap:11px;}
     .lsn-row .nm{font-size:13px;}
+    /* the gauge takes the whole width here rather than sharing a line with
+       the way out — a label squeezed beside a button is a label nobody reads */
+    .lsn-bar{flex-wrap:wrap; gap:10px;}
+    .lsn-prog{flex:1 1 100%;}
+    .lsn-count{white-space:normal; letter-spacing:.14em;}
   }
 
   /* ---------- open rooms ---------- */
@@ -2664,7 +2690,7 @@
   </section>
 
   <!-- ============ LESSONS ============
-       How to Play Blind Chess: seven lessons on one screen, in three faces —
+       How to Play Blind Chess: five lessons on one screen, in three faces —
        the ladder, one lesson open, and the end of the course. The header is
        the social page's, so the wordmark and the account cluster sit exactly
        where they sit everywhere else. -->
@@ -2677,7 +2703,7 @@
       <div class="head-mount"></div>
     </header>
 
-    <!-- the ladder of seven -->
+    <!-- the ladder of five -->
     <div class="lsn-hub" id="lsnHub">
       <p class="lsn-lede" id="lsnLede"></p>
       <div class="lsn-list" id="lsnList"></div>
@@ -2688,12 +2714,19 @@
     </div>
 
     <!-- one lesson, open: the game's own board on the left, the question on
-         the right, and the seven listed under it so the course keeps its shape -->
+         the right, and the gauge above both. The gauge is the only place the
+         course says where you are — there is no second list of lessons beside
+         the stage, because two of them disagreed the moment one was scrolled. -->
     <div class="lsn-course" id="lsnCourse" style="display:none">
       <div class="lsn-bar">
         <button class="ghost" id="lsnExit">← Lessons</button>
-        <div class="lsn-track"><div class="lsn-fill" id="lsnFill"></div></div>
-        <span class="lsn-count" id="lsnCount"></span>
+        <div class="lsn-prog">
+          <div class="lsn-count" id="lsnCount"></div>
+          <div class="lsn-track">
+            <div class="lsn-fill" id="lsnFill"></div>
+            <div class="lsn-dots" id="lsnDots"></div>
+          </div>
+        </div>
       </div>
 
       <div class="lsn-body">
@@ -2738,11 +2771,6 @@
           <div class="card panel" id="lsnExtra" style="display:none">
             <h2 id="lsnExtraTitle">Notation</h2>
             <div id="lsnExtraBody"></div>
-          </div>
-
-          <div class="card panel lsn-rail" id="lsnRail">
-            <h2>The Course</h2>
-            <div id="lsnJumps"></div>
           </div>
         </aside>
       </div>
@@ -7258,7 +7286,7 @@ document.getElementById('pzNext').onclick  = () => {
 
 /* ---- what the player has already finished ----
    Local, and deliberately so. There is no lessons table in Supabase, and
-   inventing one for seven booleans would be a schema change to regret. The
+   inventing one for five booleans would be a schema change to regret. The
    store is keyed by owner exactly as the puzzle ladder is, so two accounts
    sharing a browser cannot read each other's progress and a guest's is
    adopted by whoever signs in on top of it. lsnPush() is the seam a cloud
@@ -7268,16 +7296,33 @@ const LSN_STORE  = 'nox.lessons.';
 const LSN_COURSE = 'howto';
 const lsnKey = owner => LSN_STORE + (owner ? owner + '.' : '') + LSN_COURSE;
 
+/* The course was seven lessons and is now five: "What Is Blind Chess?" and
+   "Playing in Nox" were both talk about the game rather than the game, and
+   they went. Anybody who had finished lessons under the old numbering still
+   has that record in this browser, so a v1 record is read through this map on
+   the way in — the two removed lessons simply have nowhere to land, and the
+   rest keep their place in the course rather than their old number. Written
+   back as v2, so the translation happens once. */
+const LSN_V1_TO_V2 = { 2:1, 3:2, 4:3, 5:4, 7:5 };
+function lsnNormalise(raw){
+  if (!raw || !Array.isArray(raw.done)) return [];
+  const list = (raw.v >= 2) ? raw.done : raw.done.map(n => LSN_V1_TO_V2[n]);
+  const out = [];
+  list.forEach(n => {
+    if (!(n >= 1 && n <= LESSONS.length)) return;   // removed, or from a course we do not have
+    if (out.indexOf(n) < 0) out.push(n);
+  });
+  return out.sort((a, b) => a - b);
+}
 function lsnStored(owner){
   try {
-    const raw = JSON.parse(localStorage.getItem(lsnKey(owner)));
-    if (raw && Array.isArray(raw.done)) return raw.done.filter(n => n >= 1 && n <= 7);
+    return lsnNormalise(JSON.parse(localStorage.getItem(lsnKey(owner))));
   } catch (e){ /* private browsing, or somebody edited it: start clean */ }
   return [];
 }
 function lsnDone(){ return lsnStored(pzOwner()); }
 function lsnWrite(done){
-  try { localStorage.setItem(lsnKey(pzOwner()), JSON.stringify({ v:1, done })); } catch (e){}
+  try { localStorage.setItem(lsnKey(pzOwner()), JSON.stringify({ v:2, done })); } catch (e){}
 }
 function lsnMark(n){
   const done = lsnDone();
@@ -7322,21 +7367,20 @@ const LSN = {
   timers: []
 };
 
+/* Five lessons, and every one of them a thing you do. The course opens on the
+   board rather than on an essay about the board, and it ends the first time
+   you find a move you could not see. */
 const LESSONS = [
-  { n:1, name:'What Is Blind Chess?',      blurb:'The four visions, and what is left when the men go out.',
-    build:() => lsnLesson1() },
-  { n:2, name:'Learn the Board',           blurb:'Files, ranks, and the same square from either chair.',
-    build:() => lsnLesson2() },
-  { n:3, name:'Chess Notation',            blurb:'Ten moves written down, played out on the board.',
-    build:() => lsnLesson3() },
-  { n:4, name:'Visualize Pieces',          blurb:'Where each man can reach, with the men hidden.',
-    build:() => lsnLesson4() },
-  { n:5, name:'Track the Position',        blurb:'Follow a sequence in your head, then answer for it.',
-    build:() => lsnLesson5() },
-  { n:6, name:'Playing in Nox',            blurb:'The real interface: typing moves, peeks, notation, captures.',
-    build:() => lsnLesson6() },
-  { n:7, name:'First Blindfold Challenge', blurb:'Three small positions, played blind.',
-    build:() => lsnLesson7() }
+  { n:1, name:'Learn the Board',           blurb:'Files, ranks, and the same square from either chair.',
+    build:() => lsnLessonBoard() },
+  { n:2, name:'Chess Notation',            blurb:'Ten moves written down, played out on the board.',
+    build:() => lsnLessonNotation() },
+  { n:3, name:'Visualize Pieces',          blurb:'Where each man can reach, with the men hidden.',
+    build:() => lsnLessonVisualize() },
+  { n:4, name:'Track the Position',        blurb:'Follow a sequence in your head, then answer for it.',
+    build:() => lsnLessonTrack() },
+  { n:5, name:'First Blindfold Challenge', blurb:'Three small positions, played blind.',
+    build:() => lsnLessonChallenge() }
 ];
 
 /* ---- small change ---- */
@@ -7721,29 +7765,42 @@ function lsnPaint(){
     !!LSN.console && !(LSN.mode === 'total' && (LSN.reveal || LSN.peek)));
   document.getElementById('lsnEntryForm').style.display = LSN.entry ? '' : 'none';
 
-  const total = LESSONS.length;
-  const within = (LSN.step + 1) / LSN.steps.length;
-  document.getElementById('lsnFill').style.width =
-    Math.round(((LSN.n - 1) + within) / total * 100) + '%';
-  document.getElementById('lsnCount').textContent =
-    'LESSON ' + LSN.n + ' OF ' + total + ' · ' + (LSN.step + 1) + '/' + LSN.steps.length;
+  lsnGauge();
 }
 
-/** The seven, beside the stage. Finished lessons stay open. */
-function lsnRail(){
-  const box = document.getElementById('lsnJumps');
-  if (!box) return;
+/* ---- the gauge ----
+   The only thing on the stage that says where in the course you are, now that
+   the list beside it is gone. A label naming the lesson, a line filled as far
+   as you have come, and a dot on the line for each lesson: filled for the ones
+   behind you, ringed for the one you are on, hollow for the ones ahead. The
+   dots are also the way back into a finished lesson — the same reach rule the
+   ladder uses, so nothing opens here that would be locked there. */
+function lsnGauge(){
+  const total = LESSONS.length;
+  const within = LSN.steps.length ? (LSN.step + 1) / LSN.steps.length : 0;
+  const fill = document.getElementById('lsnFill');
+  if (fill) fill.style.width = Math.round(((LSN.n - 1) + within) / total * 100) + '%';
+
+  const count = document.getElementById('lsnCount');
+  if (count) count.innerHTML =
+    'Lesson ' + LSN.n + ' of ' + total + ' · <b>' + LESSONS[LSN.n - 1].name + '</b>' +
+    (LSN.steps.length > 1 ? ' · step ' + (LSN.step + 1) + ' of ' + LSN.steps.length : '');
+
+  const dots = document.getElementById('lsnDots');
+  if (!dots) return;
   const done = lsnDone(), reach = lsnReach();
-  box.innerHTML = '';
-  LESSONS.forEach(L => {
+  dots.innerHTML = '';
+  LESSONS.forEach((L, i) => {
     const b = document.createElement('button');
     const fin = done.indexOf(L.n) >= 0;
-    b.className = 'lsn-jump' + (fin ? ' done' : '') + (L.n === LSN.n ? ' cur' : '');
-    b.innerHTML = '<span class="n">' + (fin ? '✓' : L.n) + '</span>' +
-                  '<span class="t">' + L.name + '</span>';
+    b.className = 'lsn-dot' + (fin ? ' done' : '') + (L.n === LSN.n ? ' cur' : '');
+    b.style.left = ((i + 0.5) / total * 100) + '%';
+    b.textContent = String(L.n);
+    b.title = L.name + (fin ? ' — done' : L.n > reach ? ' — locked' : '');
+    b.setAttribute('aria-label', 'Lesson ' + L.n + ': ' + L.name);
     b.disabled = L.n > reach;
     b.onclick = () => lsnOpen(L.n, 0);
-    box.appendChild(b);
+    dots.appendChild(b);
   });
 }
 
@@ -7763,7 +7820,7 @@ function lsnHub(){
   const done = lsnDone(), reach = lsnReach();
   document.getElementById('lsnLede').innerHTML = done.length === LESSONS.length
     ? 'Every lesson finished. They stay open — walk back through any of them, or take the drills.'
-    : 'Seven lessons, from what the board is called to playing a position you cannot see. ' +
+    : 'Five lessons, from naming a square to playing a position you cannot see. ' +
       'You are on <b>lesson ' + reach + '</b>.';
 
   const list = document.getElementById('lsnList');
@@ -7798,7 +7855,6 @@ function lsnShow(){
   const s = LSN.steps[LSN.step];
   if (s && s.setup) s.setup();
   lsnPaint();
-  lsnRail();
   lsnRender();
 }
 
@@ -7989,15 +8045,20 @@ function lsnBookMove(st, ply){
 
 /* ---- the three drills, each usable on its own ---- */
 
+/** The line above a coordinate question: which one it is, and which chair. */
+function lsnQuizWhat(q, turned){
+  return '<p>Question ' + (q ? q.n : 1) + ' of ' + (q ? q.of : 10) +
+         (turned ? ' — <b>Black’s</b> chair.' : ' — <b>White’s</b> chair.') + '</p>';
+}
+
 /** "Click e4." */
-function lsnDrillClick(flip){
+function lsnDrillClick(flip, q){
   const turned = flip === undefined ? !!lsnRand(2) : flip;
   const sq = lsnRand(64);
   return {
     title:'Learn the Board',
-    what:'<p>Every square has one name: the <b>file</b> it stands on, then the <b>rank</b>.</p>',
-    ask:'Click <code>' + sqName(sq) + '</code>.' +
-        (turned ? ' You are in <b>Black’s</b> chair — the board is turned around.' : ''),
+    what:lsnQuizWhat(q, turned),
+    ask:'Click <code>' + sqName(sq) + '</code>.',
     gate:true, auto:900,
     setup(){
       LSN.st = lsnEmpty();
@@ -8026,7 +8087,7 @@ function lsnDrillClick(flip){
 }
 
 /** "Which square is highlighted?" */
-function lsnDrillName(flip){
+function lsnDrillName(flip, q){
   const turned = flip === undefined ? !!lsnRand(2) : flip;
   const sq = lsnRand(64), r = rowOf(sq), c = colOf(sq);
   // the three confusions worth making: right file wrong rank, right rank wrong
@@ -8041,8 +8102,8 @@ function lsnDrillName(flip){
 
   return {
     title:'Learn the Board',
-    what:'<p>The other way round: the square is lit, and you name it.</p>',
-    ask:'Which square is lit?' + (turned ? ' The board is turned around.' : ''),
+    what:lsnQuizWhat(q, turned),
+    ask:'Which square is lit?',
     gate:true, auto:1000,
     setup(){
       LSN.st = lsnEmpty();
@@ -8071,8 +8132,8 @@ function lsnDrillReach(type, hide){
   const name = PIECE_NAME[pos.type];
   const home = sqName(pos.sq);
   return {
-    title:'Visualize Piece Movement',
-    what:'<p>A piece reaches the same squares whether you can see it or not. That is the whole of blindfold play.</p>',
+    title:'Visualize Pieces',
+    what:'<p>A piece reaches the same squares whether you can see it or not.</p>',
     ask:'',
     gate:true,
     setup(){
@@ -8125,18 +8186,19 @@ function lsnDrillReach(type, hide){
         lsnUnder([{ label:'Begin', cls:'primary wide', on:arm }]);
         lsnSay('Look at what is in its way first.', 'tip');
       } else {
-        s.ask = 'Look at the position. The men go out in three seconds.';
-        lsnCap('memorising');
-        let left = 3;
-        const tick = () => {
-          left--;
-          if (left > 0){ lsnCap(left + '…'); lsnAt(tick, 1000); return; }
+        // No countdown. The men go out when the player says they are ready and
+        // not a second before — a timer that hides a position somebody is still
+        // reading is a test of reading speed, which is not the lesson.
+        s.ask = 'The ' + name + ' is on <code>' + home + '</code>. Study it, then start.';
+        lsnCap('study the position');
+        lsnUnder([{ label:'Start Visualization', cls:'primary wide', on(){
           LSN.mode = 'blind';
           lsnCap('');
+          lsnSay('');
           lsnRender();
           arm();
-        };
-        lsnAt(tick, 1000);
+        } }]);
+        lsnSay('Press Start when you have the position — the men go out then.', 'tip');
       }
     }
   };
@@ -8153,7 +8215,7 @@ const LSN_REACH_HINT = {
 function lsnDrillTrack(plies){
   const step = {
     title:'Track the Position',
-    what:'<p>The board goes dark, the moves are read out, and you follow them in your head. Nothing else.</p>',
+    what:'<p>The board goes dark and the moves are read out. Follow them in your head.</p>',
     ask:'', gate:true,
     setup(){ begin(); }
   };
@@ -8164,8 +8226,7 @@ function lsnDrillTrack(plies){
     LSN.mode = 'sighted';
     lsnCardKind = 'moves';
     lsnGameCard();
-    step.ask = 'This is where every game starts. Press <b>Hide the Board</b> when you have it, and ' +
-               plies + ' moves follow.';
+    step.ask = 'The starting position. Press <b>Hide the Board</b> and ' + plies + ' moves follow.';
     lsnUnder([{ label:'Hide the Board', cls:'primary wide', on:run }]);
     lsnPaint();
   }
@@ -8276,7 +8337,7 @@ function lsnConcede(html){
 }
 
 /* ============================================================
-   THE SEVEN
+   THE FIVE
    ============================================================ */
 
 /** "Play this move" — click the man, then the square. The notation drills and
@@ -8315,136 +8376,69 @@ function lsnAskMove(want, onRight, onWrong){
   };
 }
 
-/* ---- 1 · What Is Blind Chess? ---- */
-const LSN_MODE_SAY = {
-  sighted:'<b>Sighted.</b> Ordinary chess, with the legal moves marked for you. The place to warm up.',
-  fog:'<b>Fog of War.</b> Only the squares your own men stand on are lit. Where the other side is, you work out.',
-  blind:'<b>Board Only.</b> Sixty-four empty squares. The men are on them — you can click them, you just cannot see them.',
-  total:'<b>Complete Blindfold.</b> No board at all. Moves go in as notation and come back as notation.'
-};
-function lsnLesson1(){
-  const LINE = ['e4','e5','Nf3','Nc6','Bb5'];
-  const ORDER = ['sighted','fog','blind','total'];
-  const seen = new Set();
+/* ---- 1 · Learn the Board ----
+   The course opens on the board itself. One page to sit down at it, and then
+   ten coordinate questions — half of them from the chair the player is not
+   used to, because a square read from one side and not the other is a square
+   only half learnt. */
 
-  const look = {
-    title:'What Is Blind Chess?',
-    what:'<p>Blindfold chess is ordinary chess with the board taken away by degrees. ' +
-         'The rules do not change. What changes is how much of the position you are shown, ' +
-         'and therefore how much of it you have to <b>hold in your head</b>.</p>' +
-         '<p>Nox offers four visions. Here is one position — the Ruy Lopez after ' +
-         '<code>1.e4 e5 2.Nf3 Nc6 3.Bb5</code> — through all four of them.</p>',
-    ask:'Try each of the four. This is exactly how each one looks in a real game.',
+/** The coordinate board, and the two chairs. Continue is shut until one of
+    them has been taken: the page is here to be sat at, not read. */
+function lsnBoardSeat(){
+  return {
+    title:'Learn the Board',
+    what:'<p>Files run <code>a</code>–<code>h</code> across, ranks <code>1</code>–<code>8</code> up. ' +
+         'A square is its file then its rank: <code>e4</code>.</p>',
+    ask:'Take a chair — the names never move, the board does.',
     gate:true,
     setup(){
-      LSN.st = newState();
-      LINE.forEach(san => { const m = lsnMoveFor(LSN.st, san); if (m) lsnPlayMove(m, true); });
-      LSN.mode = 'sighted'; LSN.eye = W; LSN.last = null;
-      lsnCardKind = 'moves'; lsnGameCard();
-      const draw = () => lsnUnder(ORDER.map(m => ({
-        label: MODE_NAME[m],
-        cls: 'vis' + (LSN.mode === m ? ' active' : ''),
-        on(){
-          LSN.mode = m;
-          LSN.console = (m === 'total');
-          seen.add(m);
-          lsnSay(LSN_MODE_SAY[m], 'tip');
-          draw(); lsnPaint(); lsnRender();
-          if (seen.size === ORDER.length)
-            lsnRight('That is the whole ladder. Every one of them is the same game underneath.');
-        }
-      })));
+      LSN.st = lsnEmpty();
+      LSN.named = true;
+      LSN.marks.set(sqIndex('a1'), 'lsn-ask');
+      const sit = white => {
+        if (LSN.flip === !white && LSN.ok) return;      // already in that chair
+        LSN.flip = !white;
+        draw();
+        lsnRender();
+        const line = white
+          ? 'White’s chair: <code>a1</code> is the near left corner.'
+          : 'Black’s chair: <code>a1</code> is the far right corner — same square, same name.';
+        // The first sitting is what opens the way on; every one after it just
+        // says where a1 went, and leaves Continue where it is.
+        if (LSN.ok) lsnSay(line, 'good');
+        else lsnRight(line);
+      };
+      // The two chairs, as a pair of vision buttons — the same cut-in control
+      // the rest of the course changes what it is showing with.
+      const draw = () => lsnUnder([
+        { label:'Sit in White’s Chair', cls:'vis' + (LSN.flip ? '' : ' active'), on(){ sit(true); } },
+        { label:'Sit in Black’s Chair', cls:'vis' + (LSN.flip ? ' active' : ''), on(){ sit(false); } }
+      ]);
       draw();
-      lsnSay(LSN_MODE_SAY.sighted, 'tip');
-      // Building the position wrote the moves into the console already; the
-      // console wants the opening lines above them, so it is written once more.
-      lsnLogClear();
-      lsnLog('Complete Blindfold — there is no board.', 'sys');
-      lsnLog(' ');
-      LSN.sans.forEach((san, i) => lsnLog(
-        ((Math.floor(i / 2) + 1) + (i % 2 === 0 ? '.' : '…')).padEnd(6, ' ') + san,
-        i % 2 === 0 ? 'you' : 'them'));
     }
   };
-
-  const why = {
-    title:'What Holds It Together',
-    what:'<p>With the men out, two things are left: <b>where you remember them</b>, and ' +
-         '<b>the moves as they are read out</b>. Every move — yours and theirs — arrives as ' +
-         'notation, and you move the position along in your head one move at a time.</p>' +
-         '<p>That is the whole skill, and it is what the next five lessons build.</p>',
-    ask:'In Complete Blindfold, how do you know where your opponent’s pieces are?',
-    gate:true,
-    setup(){
-      LSN.st = newState();
-      LINE.forEach(san => { const m = lsnMoveFor(LSN.st, san); if (m) lsnPlayMove(m, true); });
-      LSN.mode = 'blind'; LSN.last = null;
-      lsnCardKind = 'moves'; lsnGameCard();
-      lsnChoices([
-        { label:'You remember them, and follow every move in notation.', right:true },
-        { label:'The board shows them faintly.', right:false },
-        { label:'The server sends a picture each turn.', right:false },
-        { label:'You cannot — you guess.', right:false }
-      ], (c, b) => {
-        if (c.right){
-          b.classList.add('right');
-          lsnRight('That is it. Nothing is hidden from you that you were ever told — you were told all of it, in notation.');
-        } else {
-          b.classList.add('wrong'); b.disabled = true;
-          lsnWrong('No. Nothing on the screen will tell you.');
-        }
-      }, true);
-    }
-  };
-
-  return [look, why];
 }
 
-/* ---- 2 · Learn the Board ---- */
-function lsnLesson2(){
-  const names = {
-    title:'Files, Ranks, Squares',
-    what:'<p>The eight columns are <b>files</b>, lettered <code>a</code> to <code>h</code> from ' +
-         'White’s left. The eight rows are <b>ranks</b>, numbered <code>1</code> to <code>8</code> ' +
-         'from White’s side.</p>' +
-         '<p>A square is its file then its rank, always in that order: <code>e4</code>, ' +
-         '<code>c7</code>, <code>h1</code>. Every square on the board is wearing its own name here — ' +
-         'this is the only time you will see that.</p>',
-    ask:'Look along the bottom and up the left. That is the whole system.',
-    gate:false,
-    setup(){ LSN.st = lsnEmpty(); LSN.named = true; }
-  };
+/* The ten. Both kinds of question and both chairs are guaranteed to turn up —
+   the four combinations are laid down first and the rest drawn at random — and
+   then the whole list is shuffled, so the White half is not always the first
+   half. Generated on every open, so nobody learns the answers. */
+function lsnCoordSet(total){
+  const n = total || 10;
+  const combos = [];
+  const KINDS = ['click', 'name'], CHAIRS = [false, true];
+  KINDS.forEach(k => CHAIRS.forEach(f => combos.push({ kind:k, flip:f })));
+  const picks = combos.slice(0, Math.min(n, combos.length));
+  while (picks.length < n) picks.push(lsnAny(combos));
+  lsnShuffle(picks);
+  return picks.map((c, i) => {
+    const q = { n:i + 1, of:n };
+    return c.kind === 'click' ? lsnDrillClick(c.flip, q) : lsnDrillName(c.flip, q);
+  });
+}
 
-  const sides = {
-    title:'Two Chairs, One Board',
-    what:'<p>The names never move. The board does.</p>' +
-         '<p>From White’s chair <code>a1</code> is the near left corner. From Black’s it is the ' +
-         'far right one — and Nox turns the board round for you when you play Black, ' +
-         'exactly as it turns here.</p>',
-    ask:'Sit in the other chair, and watch where <code>a1</code> goes.',
-    gate:true,
-    setup(){
-      LSN.st = newState();
-      LSN.marks.set(sqIndex('a1'), 'lsn-ask');
-      const draw = () => lsnUnder([{
-        label: LSN.flip ? 'Sit in White’s chair' : 'Sit in Black’s chair',
-        cls:'primary wide',
-        on(){
-          LSN.flip = !LSN.flip;
-          draw(); lsnRender();
-          lsnRight('Same square, same name, other corner. <code>a1</code> is where it always was.');
-        }
-      }]);
-      draw();
-    }
-  };
-
-  // Fixed orientations first, so the turn is met once it is understood; the
-  // last two take whichever side they are given.
-  return [names, sides,
-          lsnDrillClick(false), lsnDrillName(false),
-          lsnDrillClick(true),  lsnDrillName(true),
-          lsnDrillClick(),      lsnDrillName()];
+function lsnLessonBoard(){
+  return [lsnBoardSeat()].concat(lsnCoordSet(10));
 }
 
 /* ---- 3 · Chess Notation ----
@@ -8475,16 +8469,36 @@ const LSN_NOTATION = [
     why:'Both knights can reach <code>d2</code>, so the move names the file the one that goes came from.' }
 ];
 
+/* The reference the lesson used to spend a whole page introducing. It is not
+   a page now — it stands beside every one of the ten questions, where it is
+   worth something, instead of being read once and scrolled past. */
+const LSN_NOTATION_RULES =
+  '<table class="rules-table"><thead><tr><th>Symbol</th><th>Meaning</th><th>Example</th></tr></thead><tbody>' +
+  '<tr><td>K Q R B N</td><td>King, queen, rook, bishop, knight</td><td>Nf3</td></tr>' +
+  '<tr><td>—</td><td>A pawn has no letter; name the square</td><td>e4</td></tr>' +
+  '<tr><td>a–h 1–8</td><td>File letter, then rank number</td><td>e4</td></tr>' +
+  '<tr><td>x</td><td>Captures</td><td>Bxe5</td></tr>' +
+  '<tr><td>file + x</td><td>A pawn capture names the file it left</td><td>exd5</td></tr>' +
+  '<tr><td>O-O</td><td>Castles kingside (short)</td><td>O-O</td></tr>' +
+  '<tr><td>O-O-O</td><td>Castles queenside (long)</td><td>O-O-O</td></tr>' +
+  '<tr><td>=</td><td>Promotes a pawn on the last rank</td><td>e8=Q</td></tr>' +
+  '<tr><td>+</td><td>Check</td><td>Qh5+</td></tr>' +
+  '<tr><td>#</td><td>Checkmate</td><td>Qf7#</td></tr>' +
+  '<tr><td>extra letter</td><td>Says which man, when two could go there</td><td>Nbd2</td></tr>' +
+  '</tbody></table>';
+
 function lsnNotationStep(item, i){
   return {
     title:'Chess Notation',
+    // No "move 3 of 10" here — the gauge above the board is already counting.
     what:'<p>' + item.why + '</p>',
-    ask:'Play <code>' + item.san + '</code> — click the man, then the square it goes to.',
+    ask:'Play <code>' + item.san + '</code> — click the man, then the square.',
     gate:true,
     setup(){
       LSN.st = stateFromFEN(item.fen);
       LSN.mode = 'sighted';
-      lsnCardKind = 'moves'; lsnGameCard();
+      lsnCardKind = null;
+      lsnExtraShow('Notation', LSN_NOTATION_RULES);
       const want = lsnMoveFor(LSN.st, item.san);
       LSN.hint = () => {
         if (!want) return;
@@ -8499,47 +8513,18 @@ function lsnNotationStep(item, i){
   };
 }
 
-function lsnLesson3(){
-  const intro = {
-    title:'Reading a Move',
-    what:'<p>Nox takes moves in the notation every chess book uses, and in plain squares ' +
-         '(<code>e2e4</code>) as well. In Complete Blindfold, notation is the <b>only</b> thing ' +
-         'you and your opponent say to each other — so it is worth being fluent.</p>' +
-         '<p>Ten moves follow, one for each thing notation has to be able to say. ' +
-         'You play each one on the board.</p>',
-    ask:'The table beside this is the whole of it.',
-    gate:false,
-    setup(){
-      LSN.st = newState();
-      lsnExtraShow('Notation Rules',
-        '<table class="rules-table"><thead><tr><th>Symbol</th><th>Meaning</th><th>Example</th></tr></thead><tbody>' +
-        '<tr><td>K Q R B N</td><td>King, queen, rook, bishop, knight</td><td>Nf3</td></tr>' +
-        '<tr><td>—</td><td>A pawn has no letter; name the square</td><td>e4</td></tr>' +
-        '<tr><td>a–h 1–8</td><td>File letter, then rank number</td><td>e4</td></tr>' +
-        '<tr><td>x</td><td>Captures</td><td>Bxe5</td></tr>' +
-        '<tr><td>file + x</td><td>A pawn capture names the file it left</td><td>exd5</td></tr>' +
-        '<tr><td>O-O</td><td>Castles kingside (short)</td><td>O-O</td></tr>' +
-        '<tr><td>O-O-O</td><td>Castles queenside (long)</td><td>O-O-O</td></tr>' +
-        '<tr><td>=</td><td>Promotes a pawn on the last rank</td><td>e8=Q</td></tr>' +
-        '<tr><td>+</td><td>Check</td><td>Qh5+</td></tr>' +
-        '<tr><td>#</td><td>Checkmate</td><td>Qf7#</td></tr>' +
-        '<tr><td>extra letter</td><td>Says which man, when two could go there</td><td>Nbd2</td></tr>' +
-        '</tbody></table>');
-      lsnCardKind = null;
-    }
-  };
-  return [intro].concat(LSN_NOTATION.map(lsnNotationStep));
+/* Straight into the ten. The page that used to introduce them said what the
+   table beside them says. */
+function lsnLessonNotation(){
+  return LSN_NOTATION.map(lsnNotationStep);
 }
 
-/* ---- 4 · Visualize Piece Movement ---- */
-function lsnLesson4(){
+/* ---- 3 · Visualize Pieces ---- */
+function lsnLessonVisualize(){
   const intro = {
     title:'What a Knight Can Reach',
-    what:'<p>A blindfold player does not picture the board. They picture <b>lines</b>: what each ' +
-         'man attacks, and what stands in the way.</p>' +
-         '<p>Here is a knight on <code>e4</code> with its eight squares marked. Nothing blocks a ' +
-         'knight — it is the one man that jumps.</p>',
-    ask:'Next, the same question with the men taken away.',
+    what:'<p>A blindfold player pictures <b>lines</b>, not a board: what each man attacks, and what stands in the way.</p>',
+    ask:'A knight on <code>e4</code>, with its eight squares marked. Nothing blocks a knight.',
     gate:false,
     setup(){
       const b = Array(64).fill(null);
@@ -8553,224 +8538,20 @@ function lsnLesson4(){
       LSN.marks.set(sqIndex('e4'), 'sel');
     }
   };
-  // Two in plain sight, then the men go out — the progression the lesson is about.
+  // Two in plain sight, then the men go out — when the player says so.
   return [intro,
           lsnDrillReach('R', false), lsnDrillReach('B', false),
           lsnDrillReach('N', true),  lsnDrillReach('Q', true), lsnDrillReach('K', true)];
 }
 
-/* ---- 5 · Track Moves Mentally ---- */
-function lsnLesson5(){
-  const intro = {
-    title:'Moving the Position Along',
-    what:'<p>This is the lesson everything else was for. A move arrives; you change one thing ' +
-         'in the position you are holding, and only that thing.</p>' +
-         '<p>Say it to yourself in full — <i>"knight from g1 to f3"</i> — rather than repeating ' +
-         'the letters. A square you have said out loud is one you can find again.</p>',
-    ask:'Four sequences follow, of two, four, six and eight moves.',
-    gate:false,
-    setup(){ LSN.st = newState(); }
-  };
-  return [intro, lsnDrillTrack(2), lsnDrillTrack(4), lsnDrillTrack(6), lsnDrillTrack(8)];
+/* ---- 4 · Track the Position ----
+   No page in front of it: the first sequence is the first thing on screen,
+   with the one instruction it needs written on the button that starts it. */
+function lsnLessonTrack(){
+  return [lsnDrillTrack(2), lsnDrillTrack(4), lsnDrillTrack(6), lsnDrillTrack(8)];
 }
 
-/* ---- 6 · Playing Blindfold Chess in Nox ----
-   Not a description of the interface: the interface. The board is the game's
-   board, the four buttons are the game's four visions, Peek spends three
-   peeks and lasts as long as the game's does, and the typing step hands what
-   is typed straight to parseMoveIn() — the same function the real console
-   parses through, so anything it accepts here it accepts there. */
-function lsnLesson6(){
-  const board = {
-    title:'The Board You Will Play On',
-    what:'<p>This is a real Nox board with nobody on the other side of it. Move for both ' +
-         'colours, switch vision underneath, and spend a peek.</p>' +
-         '<p><b>Peek</b> shows you everything for a second and a half. You get three in a game, ' +
-         'and no more — they are there to save you, not to play for you. Captured men and the ' +
-         'notation are always on the right, in every vision.</p>',
-    ask:'Play a couple of moves, and change the vision under the board while you do.',
-    gate:true,
-    setup(){
-      LSN.st = newState();
-      LSN.mode = 'sighted'; LSN.eye = W;
-      lsnCardKind = 'game'; lsnGameCard();
-      lsnLog('Complete Blindfold — there is no board. Type your moves.', 'sys');
-      lsnLog(' ');
-      let played = 0;
-
-      const doPeek = () => {
-        if (LSN.peeks <= 0 || LSN.peek) return;
-        LSN.peeks--; LSN.peek = true;
-        beep(700, .08, 'sine', .07);
-        draw(); lsnRender();
-        lsnAt(() => {
-          LSN.peek = false;
-          beep(430, .08, 'sine', .05);
-          draw(); lsnRender();
-          lsnLog('👁  peek used — ' + LSN.peeks + ' left.', 'sys');
-        }, 1600);
-      };
-
-      const draw = () => lsnUnder(
-        ['total','blind','fog','sighted'].map(m => ({
-          label: MODE_NAME[m],
-          cls: 'vis' + (LSN.mode === m ? ' active' : ''),
-          on(){
-            LSN.mode = m;
-            LSN.console = (m === 'total');
-            LSN.entry = (m === 'total');
-            lsnSay(LSN_MODE_SAY[m], 'tip');
-            draw(); lsnPaint(); lsnRender();
-          }
-        })).concat([{
-          label:'Peek ' + '◆'.repeat(LSN.peeks) + '◇'.repeat(Math.max(0, 3 - LSN.peeks)),
-          cls:'ghost wide', disabled: LSN.peeks <= 0 || LSN.peek, on: doPeek
-        }]));
-
-      const move = m => {
-        lsnPlayMove(m);
-        played++;
-        draw();
-        if (played >= 2) lsnRight('That is the whole of it — the same board and the same rules, with less of it shown.');
-      };
-
-      // The game's own click rules, including the one that matters: blind, every
-      // square selects, because refusing one would say what is on it.
-      LSN.onSquare = i => {
-        if (LSN.sel < 0){ LSN.sel = i; LSN.marks.set(i, 'sel'); lsnRender(); return; }
-        if (LSN.sel === i){ LSN.marks.delete(i); LSN.sel = -1; lsnRender(); return; }
-        const moves = legalMoves(LSN.st, LSN.st.turn).filter(m => m.from === LSN.sel && m.to === i);
-        LSN.marks.delete(LSN.sel);
-        if (!moves.length){
-          const p = LSN.st.b[i];
-          if (p && p.c === LSN.st.turn && !BLINDISH(LSN.mode)){
-            LSN.sel = i; LSN.marks.set(i, 'sel'); lsnRender(); return;
-          }
-          LSN.sel = -1; lsnRender(); lsnFlash(i);
-          beep(140, .16, 'sawtooth', .08);
-          return;
-        }
-        LSN.sel = -1;
-        // A promotion here takes a queen without asking: the game's promotion box
-        // is bound to G, and a sandbox is not the place to teach that question.
-        move(moves.find(m => !m.promo) || moves.find(m => m.promo === 'Q') || moves[0]);
-      };
-      LSN.onEntry = raw => {
-        const res = parseMoveIn(LSN.st, raw);
-        const inp = document.getElementById('lsnEntry');
-        if (res.error){ lsnLog('✗  ' + res.error, 'err'); beep(140, .16, 'sawtooth', .08); return; }
-        inp.value = '';
-        move(res.move);
-      };
-      draw();
-      lsnSay(LSN_MODE_SAY.sighted, 'tip');
-    }
-  };
-
-  const typing = {
-    title:'Entering a Move',
-    what:'<p>With no board there is nothing to click, so moves are <b>typed</b>. Nox takes them ' +
-         'two ways: ordinary notation (<code>e4</code>, <code>Nf3</code>, <code>exd5</code>, ' +
-         '<code>O-O</code>, <code>e8=Q</code>) and plain squares (<code>e2e4</code>, ' +
-         '<code>g1f3</code>) — whichever you find faster under a clock.</p>' +
-         '<p>Anything it cannot make a legal move out of is refused, and nothing is played. ' +
-         'A typo costs you no position, only the time it took.</p>',
-    ask:'',
-    gate:true,
-    setup(){
-      LSN.st = newState();
-      LSN.mode = 'total'; LSN.console = true; LSN.entry = true;
-      lsnCardKind = 'moves'; lsnGameCard();
-      lsnLog('Complete Blindfold — there is no board. Type your moves.', 'sys');
-      lsnLog(' ');
-      const s = LSN.steps[LSN.step];
-      const wants = [
-        { san:'e4', show:'e4', coord:false,
-          ask:'Type <code>e4</code> and press Play — the pawn move, written the way chess writes it.' },
-        { san:'Nf3', show:'g1f3', coord:true,
-          ask:'Black has answered. Now the coordinate form: type <code>g1f3</code> — the square it ' +
-              'leaves, then the square it lands on.' }
-      ];
-      let at = 0;
-      s.ask = wants[0].ask;
-      LSN.hint = () => lsnSay('Type it exactly as it is written in the question, then press Play.', 'tip');
-      LSN.onEntry = raw => {
-        if (LSN.ok) return;
-        const typed = (raw || '').trim();
-        const res = parseMoveIn(LSN.st, typed);
-        if (res.error){ lsnLog('✗  ' + res.error, 'err'); lsnWrong(res.error); return; }
-        const legal = legalMoves(LSN.st, LSN.st.turn);
-        const san = toSAN(LSN.st, res.move, legal);
-        if (san !== wants[at].san){
-          lsnLog('✗  that is ' + san + ', not ' + wants[at].show, 'err');
-          lsnWrong('That is <b>' + san + '</b>. The lesson is asking for <b>' + wants[at].show + '</b>.');
-          return;
-        }
-        if (wants[at].coord && !/^[a-h][1-8][-x]?[a-h][1-8]/i.test(typed.replace(/\s+/g, ''))){
-          lsnWrong('Right move — now write it as two squares: <code>' + wants[at].show + '</code>.');
-          return;
-        }
-        document.getElementById('lsnEntry').value = '';
-        lsnPlayMove(res.move);
-        at++;
-        if (at < wants.length){
-          // the other side answers, so that the next move asked for is White's again
-          lsnAt(() => {
-            const reply = lsnMoveFor(LSN.st, 'e5') || lsnBookMove(LSN.st, 1).m;
-            lsnPlayMove(reply);
-            s.ask = wants[at].ask;
-            lsnPaint();
-          }, 650);
-          lsnSay('Accepted. Wait for the answer.', 'good');
-          lsnPaint();
-          return;
-        }
-        lsnRight('Both forms, both accepted. That is everything you need to play a whole game blind.');
-      };
-    }
-  };
-
-  const ending = {
-    title:'Check, Mate, and the Clock',
-    what:'<p>A check is announced beside the move, as <code>+</code>, and a mate as ' +
-         '<code>#</code> — you are never left to notice one for yourself. Captures are named ' +
-         'in full (<i>takes a bishop</i>), and every man taken shows up in the tray on the right.</p>' +
-         '<p>The clock runs the whole time, and there is no take-back, no undo and no move ' +
-         'history to scroll while you think. What you have is the notation and your memory.</p>',
-    ask:'Play out the four moves of a scholar’s mate on a board you cannot see, and watch what the console tells you.',
-    gate:true,
-    setup(){
-      LSN.st = newState();
-      LSN.mode = 'total';
-      LSN.console = true;
-      lsnCardKind = 'game'; lsnGameCard();
-      lsnLog('Complete Blindfold — there is no board. The moves are all there is.', 'sys');
-      lsnLog(' ');
-      const LINE = ['e4','e5','Bc4','Nc6','Qh5','Nf6','Qxf7#'];
-      let n = 0;
-      const one = () => {
-        if (n >= LINE.length){
-          LSN.reveal = true;
-          lsnRender();
-          lsnUnder([]);
-          lsnRight('<b>Qxf7#</b> — announced as a capture and a mate, both, before you had to look.');
-          return;
-        }
-        const m = lsnMoveFor(LSN.st, LINE[n]);
-        if (!m){ lsnRight('—'); return; }
-        lsnPlayMove(m);
-        lsnCap(LINE[n]);
-        n++;
-        lsnAt(one, 950);
-      };
-      lsnUnder([{ label:'Play It Out', cls:'primary wide', on(){ lsnUnder([]); lsnAt(one, 300); } }]);
-    }
-  };
-
-  return [board, typing, ending];
-}
-
-/* ---- 7 · Your First Blindfold Challenge ----
+/* ---- 5 · Your First Blindfold Challenge ----
    Reduced material on purpose: nobody's first blindfold position should have
    thirty-two men on it. Each of the three is a position, a sequence played out
    on a board that has already gone dark, and one move to find at the end of
@@ -8778,42 +8559,78 @@ function lsnLesson6(){
 const LSN_CHALLENGES = [
   { fen:'6k1/5ppp/8/8/8/8/5PPP/3R2K1 w - - 0 1',
     pre:[], answer:'Rd8#',
-    what:'<p>Six men. A white rook on <code>d1</code>, a white king on <code>g1</code>, three ' +
-         'white pawns; Black has a king on <code>g8</code> and the three pawns it is hiding behind.</p>',
+    what:'<p>Six men, and the black king is shut in behind its own pawns.</p>',
     ask:'White to move. <b>Mate in one.</b>',
     hint:'The eighth rank is empty, and the king cannot step off it — its own pawns are in the way.' },
   { fen:'2r3k1/4q1pp/8/8/8/2N5/6PP/6K1 b - - 0 1',
     pre:['Rc7'], answer:'Nd5',
-    what:'<p>A white knight on <code>c3</code>. Black has a queen on <code>e7</code> and a rook ' +
-         'about to arrive on the seventh rank.</p>',
+    what:'<p>A white knight against a black queen and rook. Black moves first.</p>',
     ask:'Black has just played <b>…Rc8–c7</b>. White to move — <b>fork them</b>.',
     hint:'One square attacks c7 and e7 at the same time, and nothing of Black’s covers it.' },
   { fen:'2r3k1/5ppp/8/8/8/8/3R1PPP/3R2K1 w - - 0 1',
     pre:['Rd8+','Rxd8'], answer:'Rxd8#',
-    what:'<p>Two white rooks stacked on the d-file, against one black rook on <code>c8</code> — ' +
-         'and the same king shut in behind its own pawns.</p>',
+    what:'<p>Two white rooks stacked on the d-file against one black rook. Two moves are played first.</p>',
     ask:'The front rook has gone in and been taken. <b>Finish it.</b>',
     hint:'The second rook never moved. It is still on d1, and d8 is where the first one died.' }
 ];
+
+/* ---- the Position list ----
+   The position said in words, read off the board itself rather than written
+   out beside it: a challenge whose FEN changes cannot end up with a list that
+   describes the position it used to be. Squares of the same kind share a line
+   (Pawn — f2, g2, h2) because three lines saying "Pawn" are three lines to
+   read and one fact to learn. It is the position a blindfold player would say
+   to themselves, so it goes away the moment the board does — left up, it is
+   simply the answer key. */
+const LSN_POS_ORDER = ['K','Q','R','B','N','P'];
+function lsnPositionHTML(st){
+  if (!st) return '';
+  const cap = s => s.charAt(0).toUpperCase() + s.slice(1);
+  const side = c => {
+    const rows = [];
+    LSN_POS_ORDER.forEach(t => {
+      const on = [];
+      for (let i = 0; i < 64; i++){
+        const p = st.b[i];
+        if (p && p.c === c && p.t === t) on.push(sqName(i));
+      }
+      if (!on.length) return;
+      on.sort();
+      rows.push('<div class="lsn-pos-row"><span class="man">' + cap(PIECE_NAME[t]) +
+                '</span><span class="sqs">' + on.join(', ') + '</span></div>');
+    });
+    return '<div class="lsn-subcap">' + lsnSide(c) + '</div>' +
+           (rows.length ? rows.join('') : '<div class="lsn-pos-row"><span class="man">—</span></div>');
+  };
+  return '<div class="lsn-pos">' + side(W) + side(B) + '</div>';
+}
 
 function lsnChallengeStep(spec, i){
   const step = {
     title:'Challenge ' + (i + 1) + ' of ' + LSN_CHALLENGES.length,
     what: spec.what,
-    ask:'Study the position — take as long as you like. Press <b>I’m Ready</b> and it goes dark.',
+    ask:'Study the board and the position list. Press <b>I’m Ready</b> and both go dark.',
     gate:true,
     setup(){
       LSN.st = stateFromFEN(spec.fen);
       LSN.mode = 'sighted';
-      lsnCardKind = 'moves'; lsnGameCard();
+      lsnCardKind = null;
+      lsnExtraShow('Position', lsnPositionHTML(LSN.st));
       lsnUnder([{ label:'I’m Ready', cls:'primary wide', on:begin }]);
-      lsnSay('Name the men to yourself, square by square, before you hide it.', 'tip');
+      lsnSay('Say the men to yourself, square by square, before you hide them.', 'tip');
     }
   };
 
+  // Reveal puts back both of the things I'm Ready took away, and the list is
+  // built again rather than remembered: by now a move or two has been played.
   function reveal(){
     lsnUnder([{ label:'Reveal the Position', cls:'ghost wide',
-                on(){ LSN.reveal = true; lsnRender(); lsnCap('the real position'); } }]);
+                on(){
+                  LSN.reveal = true;
+                  lsnRender();
+                  lsnExtraShow('Position', lsnPositionHTML(LSN.st));
+                  lsnCap('the real position');
+                } }]);
   }
 
   function begin(){
@@ -8821,6 +8638,7 @@ function lsnChallengeStep(spec, i){
     LSN.sel = -1; LSN.marks = new Map();
     lsnUnder([]);
     lsnSay('');
+    lsnExtraHide();                 // the list is not an answer key
     lsnRender();
     if (!spec.pre.length){ ask(); return; }
     step.ask = 'Follow the moves.';
@@ -8862,22 +8680,8 @@ function lsnChallengeStep(spec, i){
   return step;
 }
 
-function lsnLesson7(){
-  const intro = {
-    title:'Your First Blindfold Challenge',
-    what:'<p>Three small positions — six or seven men each, not thirty-two. You get as long as ' +
-         'you like to look at each one. Then it goes dark, a move or two is played out on it, ' +
-         'and you play the answer.</p>' +
-         '<p>Say the position to yourself before you hide it. <i>White rook d1, white king g1, ' +
-         'pawns f2 g2 h2…</i> — out loud is better than in your head.</p>',
-    ask:'This is exactly what a blindfold game feels like, at a size you can hold.',
-    gate:false,
-    setup(){
-      LSN.st = stateFromFEN(LSN_CHALLENGES[0].fen);
-      LSN.mode = 'sighted';
-    }
-  };
-  return [intro].concat(LSN_CHALLENGES.map(lsnChallengeStep));
+function lsnLessonChallenge(){
+  return LSN_CHALLENGES.map(lsnChallengeStep);
 }
 
 /* ============================================================

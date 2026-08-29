@@ -169,7 +169,7 @@ function makePage(store){
     .replace(/^<script>\n/, '').replace(/\n<\/script>$/, '');
   const src = '"use strict";' + BODY.replace(/await import\([^)]*\)/g, 'await Promise.reject(new Error("no cdn"))') +
     '\n__expose({ G, LSN, LESSONS, el, showScreen, lsnEnter, lsnHub, lsnOpen, lsnNext, lsnBack,' +
-    ' lsnDone, lsnReach, lsnSqEls, lsnVisual, legalMoves, toSAN, sqName, sqIndex,' +
+    ' lsnDone, lsnReach, lsnSqEls, lsnVisual, lsnPositionHTML, lsnGauge, legalMoves, toSAN, sqName, sqIndex,' +
     ' stateFromFEN, parseMoveIn, MODE_NAME, PR, PR_MODES, goPractice, prLoad,' +
     ' screen:()=>screenName });';
   let out = null;
@@ -306,14 +306,19 @@ async function walk(p, n){
   p.press('navHowTo');
   check('How to Play Blind Chess opens it', p.screen() === 'lessons', p.screen());
   check('and the ladder is what it shows', p.LSN.view === 'hub', p.LSN.view);
-  check('the seven are listed', p.by('lsnList').children.length === 7,
+  check('the five are listed', p.by('lsnList').children.length === 5,
         p.by('lsnList').children.length);
   check('only the first is open',
         !p.by('lsnList').children[0].disabled && p.by('lsnList').children[1].disabled);
-  check('the course names all seven', p.LESSONS.length === 7);
+  check('the course names all five', p.LESSONS.length === 5);
+  check('and Learn the Board is the first of them',
+        p.LESSONS[0].name === 'Learn the Board', p.LESSONS[0].name);
+  check('the removed lessons are not among them',
+        !p.LESSONS.some(L => /What Is Blind Chess|Playing in Nox/.test(L.name)),
+        p.LESSONS.map(L => L.name).join(' / '));
 
   head('The board is drawn the way the game draws it');
-  p.lsnOpen(2, 0);
+  p.lsnOpen(1, 0);
   check('sixty-four squares', p.lsnSqEls.length === 64, p.lsnSqEls.length);
   check('a1 is the bottom left from White’s chair',
         +p.lsnSqEls[56].dataset.sq === 56 && p.sqName(56) === 'a1', p.lsnSqEls[56].dataset.sq);
@@ -325,7 +330,7 @@ async function walk(p, n){
   check('e4 is where e4 is', p.sqName(p.sqIndex('e4')) === 'e4');
 
   head('Every lesson can be walked end to end');
-  for (let n = 1; n <= 7; n++){
+  for (let n = 1; n <= 5; n++){
     const ok = await walk(p, n);
     check('lesson ' + n + ' finishes', ok);
     if (!ok) break;
@@ -333,7 +338,7 @@ async function walk(p, n){
 
   head('Each challenge accepts the move it is asking for');
   for (let i = 0; i < CHALLENGES.length; i++){
-    p.lsnOpen(7, i + 1);
+    p.lsnOpen(5, i);
     const spec = CHALLENGES[i];
     let b = null;
     for (const c of p.by('lsnUnder').children) if (c.textContent.indexOf('I’m Ready') === 0) b = c;
@@ -352,37 +357,38 @@ async function walk(p, n){
     check('challenge ' + (i + 1) + ' accepts ' + spec.answer + ' first time',
           p.LSN.ok && p.LSN.tries === 0, 'tries ' + p.LSN.tries);
   }
-  p.lsnOpen(7, 0);
-  for (let i = 0; i < 4; i++){
+  p.lsnOpen(5, 0);
+  for (let i = 0; i < p.LSN.steps.length + 1; i++){
+    if (p.LSN.view !== 'lesson') break;
     if (p.LSN.steps[p.LSN.step].gate) await solveStep(p);
     p.press('lsnNext');
     await sleep(40);
   }
 
-  head('Finishing the seventh finishes the course');
+  head('Finishing the fifth finishes the course');
   check('the completion state is up', p.LSN.view === 'done', p.LSN.view);
-  check('all seven are recorded', p.lsnDone().length === 7, p.lsnDone().join(','));
+  check('all five are recorded', p.lsnDone().length === 5, p.lsnDone().join(','));
   check('and written to this browser',
         Object.keys(store).some(k => k.indexOf('nox.lessons.') === 0), Object.keys(store).join(','));
 
   head('Progress survives a reload');
   const again = makePage(store);
   again.press('navHowTo');
-  check('the ladder remembers', again.lsnDone().length === 7, again.lsnDone().join(','));
+  check('the ladder remembers', again.lsnDone().length === 5, again.lsnDone().join(','));
   check('every row is ticked',
         Array.from(again.by('lsnList').children).every(b => b.classList.contains('done')));
   check('and none of them is locked',
         Array.from(again.by('lsnList').children).every(b => !b.disabled));
 
   head('Neither button at the end is a dead one');
-  again.lsnOpen(7, 0);
+  again.lsnOpen(5, 0);
   again.press('lsnGoPractice');
   check('Go to Practice opens the Practice page', again.screen() === 'practice', again.screen());
   check('and it is the real one, running', again.PR.on === true);
   check('showing its dashboard', again.PR.view === 'dash', again.PR.view);
   check('the course did not follow it there', again.LSN.view !== 'lesson', again.LSN.view);
   again.showScreen('lessons');
-  again.lsnOpen(7, 0);
+  again.lsnOpen(5, 0);
   again.press('lsnGoPlay');
   check('Play Blindfold lands on the game setup', again.screen() === 'game', again.screen());
   check('with Complete Blindfold already chosen', again.G.mode === 'total', again.G.mode);
@@ -446,6 +452,272 @@ async function walk(p, n){
     again.goPractice();
     again.showScreen('home');
     return again.lsnDone().join(',') === before;
+  })());
+
+  /* ============================================================
+     3 · the revised course: five lessons, and what each one now opens on
+     ============================================================ */
+  const MARKUP = SRC.slice(0, SRC.indexOf('<script>\n'));
+  const g = makePage({});
+  g.press('navHowTo');
+
+  head('The gauge is the only map the stage has');
+  g.lsnOpen(1, 0);
+  const dots = () => Array.from(g.by('lsnDots').children);
+  check('a dot on the line for every lesson', dots().length === 5, dots().length);
+  check('the one you are on is marked current', dots()[0].classList.contains('cur'));
+  check('nothing behind you yet, so no dot is done',
+        !dots().some(d => d.classList.contains('done')));
+  check('and the ones you have not reached are shut', dots()[4].disabled);
+  check('the label above it names the lesson',
+        /Learn the Board/.test(g.by('lsnCount').innerHTML), g.by('lsnCount').innerHTML);
+  check('the bottom-right course panel is gone',
+        SRC.indexOf('lsnJumps') < 0 && SRC.indexOf('lsn-rail') < 0 && SRC.indexOf('lsnRail') < 0);
+  check('and nothing empty was left where it stood',
+        (SRC.match(/id="lsnExtra"/g) || []).length === 1);
+
+  head('Learn the Board opens on the board, and will not let you past it');
+  g.lsnOpen(1, 0);
+  check('a board page and ten questions', g.LSN.steps.length === 11, g.LSN.steps.length);
+  check('every square is wearing its name', g.LSN.named === true);
+  check('Continue is shut when the page opens', g.by('lsnNext').disabled === true);
+  const chair = re => Array.from(g.by('lsnUnder').children).find(b => re.test(b.textContent));
+  check('both chairs are offered here', !!chair(/White/) && !!chair(/Black/),
+        Array.from(g.by('lsnUnder').children).map(b => b.textContent).join(' | '));
+  chair(/Black/).onclick();
+  check('sitting in Black’s chair turns the board round', g.LSN.flip === true);
+  check('and opens Continue', g.by('lsnNext').disabled === false);
+  chair(/White/).onclick();
+  check('sitting back in White’s turns it back', g.LSN.flip === false);
+  check('and Continue stays open', g.by('lsnNext').disabled === false);
+
+  head('The ten coordinate questions are made, not written');
+  const shape = () => g.LSN.steps.slice(1).map(st =>
+    (/^Click/.test(st.ask) ? 'c' : 'n') + (/Black/.test(st.what) ? 'b' : 'w')).join(' ');
+  const shapes = new Set();
+  for (let k = 0; k < 12; k++){ g.lsnOpen(1, 0); shapes.add(shape()); }
+  check('there are exactly ten of them every time', g.LSN.steps.length === 11, g.LSN.steps.length);
+  check('and they are not the same ten twice', shapes.size > 1, shapes.size + ' of 12 runs differed');
+  const covered = Array.from(shapes).every(sh => {
+    const qs = sh.split(' ');
+    return ['cw','cb','nw','nb'].every(want => qs.indexOf(want) >= 0);
+  });
+  check('every run asks both kinds from both chairs', covered, Array.from(shapes)[0]);
+  const halves = Array.from(shapes).some(sh => {
+    const qs = sh.split(' ').map(q => q[1]);
+    return qs.slice(0, 5).join('') !== 'wwwww' || qs.slice(5).join('') !== 'bbbbb';
+  });
+  check('and not White first then Black every time', halves);
+
+  head('Every one of the ten can be answered, and only with the right answer');
+  for (let i = 1; i <= 10; i++){
+    g.lsnOpen(1, i);
+    const ask = g.by('lsnAsk').innerHTML || '';
+    const litFor = () => { let sq = -1; g.LSN.marks.forEach((c, k) => { if (c === 'lsn-ask') sq = k; }); return sq; };
+    if (/^Click/.test(ask)){
+      const want = g.sqIndex((ask.match(/<code>([a-h][1-8])<\/code>/) || [])[1]);
+      check('question ' + i + ' names a square to click', want >= 0 && want < 64, ask);
+      g.LSN.onSquare((want + 9) % 64);
+      check('question ' + i + ' refuses the wrong square', !g.LSN.ok);
+      g.LSN.onSquare(want);
+      check('question ' + i + ' takes ' + g.sqName(want), g.LSN.ok === true);
+    } else {
+      const lit = litFor();
+      check('question ' + i + ' lights a square', lit >= 0);
+      check('question ' + i + ' does not give the answer away',
+            ask.indexOf(g.sqName(lit)) < 0, ask);
+      const btns = Array.from(g.by('lsnChoices').children);
+      check('question ' + i + ' offers four names', btns.length === 4, btns.length);
+      const right = btns.filter(b => b.textContent === g.sqName(lit));
+      check('question ' + i + ': ' + g.sqName(lit) + ' is one of them, once', right.length === 1);
+      const wrong = btns.find(b => b.textContent !== g.sqName(lit));
+      if (wrong){ wrong.onclick(); check('question ' + i + ' refuses the wrong name', !g.LSN.ok); }
+      if (right.length){ right[0].onclick(); check('question ' + i + ' takes the right one', g.LSN.ok === true); }
+    }
+    check('question ' + i + ' opens the way on once answered', g.by('lsnNext').disabled === false);
+  }
+
+  head('Chess Notation starts on a move, not on a page about moves');
+  g.lsnOpen(2, 0);
+  check('ten moves and no introduction', g.LSN.steps.length === 10, g.LSN.steps.length);
+  check('the first step already asks for one',
+        /Play <code>e4<\/code>/.test(g.by('lsnAsk').innerHTML || ''), g.by('lsnAsk').innerHTML);
+  check('with the notation table beside it',
+        /rules-table/.test(g.by('lsnExtraBody').innerHTML || ''));
+  check('and the table names every form the course teaches',
+        ['Nf3','e4','Bxe5','exd5','O-O','O-O-O','e8=Q','Qh5+','Qf7#','Nbd2']
+          .every(f => (g.by('lsnExtraBody').innerHTML || '').indexOf(f) >= 0));
+
+  head('Visualize Pieces hides the men when the player says so');
+  g.lsnOpen(3, 3);
+  check('the men are still on the board', g.LSN.mode === 'sighted', g.LSN.mode);
+  const startBtn = () => Array.from(g.by('lsnUnder').children).find(b => /Start/.test(b.textContent));
+  check('a Start button is offered', !!startBtn(),
+        Array.from(g.by('lsnUnder').children).map(b => b.textContent).join(' | '));
+  await sleep(3600);
+  check('and no timer takes them out while it waits', g.LSN.mode === 'sighted', g.LSN.mode);
+  startBtn().onclick();
+  check('pressing Start is what hides them', g.LSN.mode === 'blind', g.LSN.mode);
+  check('and the question is asked once they are gone',
+        /Select <b>every square<\/b>/.test(g.by('lsnAsk').innerHTML || ''), g.by('lsnAsk').innerHTML);
+  check('with Check waiting under the board',
+        Array.from(g.by('lsnUnder').children).some(b => b.textContent.indexOf('Check') === 0));
+
+  head('Track the Position starts on the sequence');
+  g.lsnOpen(4, 0);
+  check('four sequences and no introduction', g.LSN.steps.length === 4, g.LSN.steps.length);
+  check('the first step offers Hide the Board straight away',
+        Array.from(g.by('lsnUnder').children).some(b => /Hide the Board/.test(b.textContent)),
+        Array.from(g.by('lsnUnder').children).map(b => b.textContent).join(' | '));
+
+  head('The First Blindfold Challenge says the position out loud');
+  for (let i = 0; i < CHALLENGES.length; i++){
+    g.lsnOpen(5, i);
+    check('challenge ' + (i + 1) + ' shows a Position card',
+          g.by('lsnExtraTitle').textContent === 'Position', g.by('lsnExtraTitle').textContent);
+    const body = g.by('lsnExtraBody').innerHTML || '';
+    const st = g.stateFromFEN(CHALLENGES[i].fen);
+    let all = true, men = 0;
+    const NAME = { P:'Pawn', N:'Knight', B:'Bishop', R:'Rook', Q:'Queen', K:'King' };
+    for (let sq = 0; sq < 64; sq++){
+      const pc = st.b[sq];
+      if (!pc) continue;
+      men++;
+      if (body.indexOf(g.sqName(sq)) < 0 || body.indexOf(NAME[pc.t]) < 0) all = false;
+    }
+    check('challenge ' + (i + 1) + ': every man on the board is in the list', all, body);
+    const listed = (body.match(/\b[a-h][1-8]\b/g) || []);
+    check('challenge ' + (i + 1) + ': and nothing that is not on it',
+          listed.length === men, listed.join(',') + ' vs ' + men + ' men');
+    check('challenge ' + (i + 1) + ': both sides are named',
+          body.indexOf('White') >= 0 && body.indexOf('Black') >= 0);
+    check('challenge ' + (i + 1) + ': it is offered before the blindfold, not during',
+          g.by('lsnExtra').style.display !== 'none');
+    Array.from(g.by('lsnUnder').children).find(b => b.textContent.indexOf('I’m Ready') === 0).onclick();
+    check('challenge ' + (i + 1) + ': pressing I’m Ready takes it away',
+          g.by('lsnExtra').style.display === 'none');
+    check('challenge ' + (i + 1) + ': and the board with it', g.LSN.mode === 'blind', g.LSN.mode);
+    const ready = await until(() =>
+      (g.by('lsnAsk').innerHTML || '').indexOf('Play it on the board') >= 0, 8000);
+    check('challenge ' + (i + 1) + ': the sequence plays out', ready);
+    if (!ready) continue;
+    const legal = g.legalMoves(g.LSN.st, g.LSN.st.turn);
+    const want = legal.find(m => g.toSAN(g.LSN.st, m, legal) === CHALLENGES[i].answer);
+    g.LSN.onSquare(want.from); g.LSN.onSquare(want.to);
+    check('challenge ' + (i + 1) + ': ' + CHALLENGES[i].answer + ' is accepted', g.LSN.ok === true);
+    const rev = Array.from(g.by('lsnUnder').children).find(b => /Reveal/.test(b.textContent));
+    check('challenge ' + (i + 1) + ': Reveal is offered afterwards', !!rev);
+    if (!rev) continue;
+    rev.onclick();
+    check('challenge ' + (i + 1) + ': Reveal brings the position list back',
+          g.by('lsnExtra').style.display !== 'none' &&
+          /lsn-pos/.test(g.by('lsnExtraBody').innerHTML || ''));
+    check('challenge ' + (i + 1) + ': and it describes the position as it stands now',
+          g.by('lsnExtraBody').innerHTML === g.lsnPositionHTML(g.LSN.st));
+  }
+
+  head('The position list is read off the board, not written beside it');
+  const made = g.lsnPositionHTML(g.stateFromFEN('8/8/4k3/8/2N5/8/5PPP/6K1 w - - 0 1'));
+  check('a position it has never seen is described too',
+        /Knight/.test(made) && /c4/.test(made) && /King/.test(made) &&
+        /e6/.test(made) && /g1/.test(made) && /f2, g2, h2/.test(made), made);
+  check('and the two sides are kept apart',
+        made.indexOf('White') < made.indexOf('c4') && made.indexOf('Black') < made.indexOf('e6'));
+
+  head('Nothing anywhere still speaks of the two lessons that went');
+  // In the markup and in what the course says — the migration note in the
+  // script names both of them on purpose, because that is what it is for.
+  const said = [];
+  for (let n = 1; n <= 5; n++)
+    again.LESSONS[n - 1].build().forEach(st => said.push(st.title, st.what, st.ask));
+  said.push(MARKUP);
+  again.LESSONS.forEach(L => said.push(L.name, L.blurb));
+  check('no What Is Blind Chess anywhere the player looks',
+        !said.some(t => String(t || '').indexOf('What Is Blind Chess') >= 0));
+  check('no Playing in Nox anywhere the player looks',
+        !said.some(t => String(t || '').indexOf('Playing in Nox') >= 0));
+  check('no vision blurbs left behind them', SRC.indexOf('LSN_MODE_SAY') < 0);
+  check('no builder left without a lesson',
+        SRC.indexOf('lsnLesson1(') < 0 && SRC.indexOf('lsnLesson6(') < 0 &&
+        SRC.indexOf('lsnLesson7(') < 0);
+  check('and the real game still has all four visions',
+        /const MODE_NAME\s*=\s*\{ blind:/.test(SRC));
+  check('no conflict markers', !/^(?:<{7}|={7}|>{7})/m.test(SRC));
+  const ids = (MARKUP.match(/\sid="[^"]+"/g) || []).map(x => x.slice(5, -1));
+  const dupes = ids.filter((x, i) => ids.indexOf(x) !== i);
+  check('every id in the markup is unique', dupes.length === 0, dupes.join(','));
+
+  head('No caption runs past two sentences');
+  const strip = h => String(h || '').replace(/<[^>]*>/g, ' ').replace(/&[a-z]+;/g, ' ')
+                                    .replace(/\s+/g, ' ').trim();
+  const sentences = t => (t.match(/[.!?](?=\s|$)/g) || []).length;
+  let longest = '', worst = 0;
+  for (let n = 1; n <= 5; n++){
+    const steps = again.LESSONS[n - 1].build();
+    steps.forEach((st, i) => {
+      [st.what, st.ask].forEach(t => {
+        const txt = strip(t);
+        const c = sentences(txt);
+        if (c > worst){ worst = c; longest = 'lesson ' + n + ' step ' + (i + 1) + ': ' + txt; }
+      });
+    });
+  }
+  check('the longest caption in the course is two sentences or fewer', worst <= 2, longest);
+
+  head('Old progress from the seven-lesson course still lands somewhere');
+  const migrate = (done, v) => {
+    const st = { 'nox.lessons.howto': JSON.stringify(v ? { v, done } : { done }),
+                 'nox.practice.': JSON.stringify({ v:1, kept:true }) };
+    const q = makePage(st);
+    q.press('navHowTo');
+    return { done:q.lsnDone().join(','), reach:q.lsnReach(), store:st };
+  };
+  check('the two lessons before Learn the Board and Notation become those two',
+        migrate([1, 2, 3], 1).done === '1,2', migrate([1, 2, 3], 1).done);
+  check('a finished old course is a finished new one',
+        migrate([1, 2, 3, 4, 5, 6, 7], 1).done === '1,2,3,4,5', migrate([1,2,3,4,5,6,7], 1).done);
+  check('progress that was only in the removed lessons goes back to the start',
+        migrate([1, 6], 1).done === '' && migrate([1, 6], 1).reach === 1);
+  check('a record with no version is read as an old one',
+        migrate([2, 3], 0).done === '1,2', migrate([2, 3], 0).done);
+  check('a v2 record is taken as it stands',
+        migrate([1, 2, 3, 4, 5], 2).done === '1,2,3,4,5');
+  check('nothing out of range survives either way',
+        migrate([0, 9, 99], 2).done === '' && migrate([99], 1).done === '');
+  check('and a corrupt record starts clean, rather than throwing', (function(){
+    const q = makePage({ 'nox.lessons.howto':'{not json' });
+    q.press('navHowTo');
+    return q.lsnDone().length === 0 && q.LSN.view === 'hub';
+  })());
+  check('migrating leaves Practice’s own record alone', (function(){
+    const st = { 'nox.lessons.howto':JSON.stringify({ v:1, done:[2,3] }),
+                 'nox.practice.':JSON.stringify({ v:1, kept:true }) };
+    const q = makePage(st);
+    q.press('navHowTo');
+    q.lsnOpen(1, 0);
+    return JSON.parse(st['nox.practice.']).kept === true;
+  })());
+  check('a lesson finished now is stored in the new numbering, as v2', (function(){
+    const st = {};
+    const q = makePage(st);
+    q.press('navHowTo');
+    q.lsnOpen(1, 0);
+    q.lsnOpen(1, q.LSN.steps.length - 1);         // …now that the steps are built
+    q.LSN.ok = true;                              // as if the last question had been answered
+    q.lsnNext();
+    const raw = JSON.parse(st['nox.lessons.howto'] || 'null');
+    return !!raw && raw.v === 2 && raw.done.join(',') === '1';
+  })());
+  check('an old record is rewritten as v2 the first time it is added to', (function(){
+    const st = { 'nox.lessons.howto':JSON.stringify({ v:1, done:[2,3] }) };
+    const q = makePage(st);
+    q.press('navHowTo');
+    q.lsnOpen(3, 0);
+    q.lsnOpen(3, q.LSN.steps.length - 1);
+    q.LSN.ok = true;
+    q.lsnNext();
+    const raw = JSON.parse(st['nox.lessons.howto'] || 'null');
+    return !!raw && raw.v === 2 && raw.done.join(',') === '1,2,3';
   })());
 
   console.log('\n' + passed + ' passed, ' + failed + ' failed');
