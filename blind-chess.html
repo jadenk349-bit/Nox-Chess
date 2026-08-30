@@ -1196,6 +1196,13 @@
   .pz-why-line li.them b{color:var(--text);}
   .pz-follow{width:100%; margin-top:8px; padding:9px 6px; font-size:12px;}
   .pz-follow-say{color:var(--gold-soft); border-color:rgba(212,175,110,.45); padding-left:9px;}
+  /* study mode speaks in a different voice from the card: the card is the
+     verdict on the puzzle, this is a conversation about a position the player
+     invented, and the two should not look like the same claim */
+  .pz-study-say{color:var(--text); border-color:rgba(120,160,220,.5); padding-left:9px;}
+  .pz-study-say b{color:#9fc0ea;}
+  .pz-study-say .holds{color:var(--good);}
+  .pz-study-say .fails{color:var(--gold-soft);}
   .pz-progress{
     float:right; font-size:10px; letter-spacing:.14em; color:var(--muted);
     font-variant-numeric:tabular-nums;
@@ -2478,6 +2485,10 @@
             <!-- the payoff, on a row of its own: it is the one control here
                  that is worth anything only after the puzzle is over -->
             <button class="ghost pz-follow" id="pzFollow">Show Follow Up</button>
+            <!-- and the answer to "but couldn't they just play something else?",
+                 which is a question you can only ask once you know the answer -->
+            <button class="ghost pz-follow" id="pzStudy">Study Alternatives</button>
+            <div class="pz-say pz-study-say" id="pzStudySay" style="display:none"></div>
           </div>
 
           <div class="card panel" id="pzLevels">
@@ -4973,7 +4984,8 @@ function enginePump(){
     SF.worker.postMessage('setoption name MultiPV value ' + job.multipv);
     SF.applied.multipv = job.multipv;
   }
-  SF.worker.postMessage('position startpos' + (job.moves ? ' moves ' + job.moves : ''));
+  SF.worker.postMessage('position ' + (job.fen ? 'fen ' + job.fen : 'startpos') +
+                        (job.moves ? ' moves ' + job.moves : ''));
   SF.worker.postMessage(job.limit);
 }
 
@@ -4982,25 +4994,34 @@ function enginePump(){
    different engines and they share one worker. */
 // settings are part of the key: the same position answers differently at
 // different strengths. One function owns the format so nothing can drift.
+/* A question for the engine, and the cache key that identifies it.
+ *
+ * `fen` is optional and is what lets a *puzzle* be asked about. The review
+ * replays a real game, so a move list from the start position says everything;
+ * a puzzle is a position out of a file with no game in front of it, and Study
+ * Alternatives has to ask about branches off that position. The fen is part of
+ * the key because the same move list means two different things from two
+ * different starting positions. */
 function engineKey(moves, opt){
   const skill   = opt.skill === undefined ? 20 : opt.skill;
   const multipv = opt.multipv || 1;
   const limit   = opt.depth ? ('go depth ' + opt.depth)
                             : ('go movetime ' + (opt.movetime || SF_MOVETIME));
-  return { key: moves.join(' ') + '|' + skill + '|' + multipv + '|' + limit,
-           moveStr: moves.join(' '), skill, multipv, limit };
+  const fen = opt.fen || '';
+  return { key: fen + '|' + moves.join(' ') + '|' + skill + '|' + multipv + '|' + limit,
+           moveStr: moves.join(' '), fen, skill, multipv, limit };
 }
 
 function engineAsk(moves, opt){
   opt = opt || {};
-  const { key, moveStr, skill, multipv, limit } = engineKey(moves, opt);
+  const { key, moveStr, fen, skill, multipv, limit } = engineKey(moves, opt);
   // bot moves skip the cache, so a repeated position is not answered identically
   if (!opt.nocache && SF.cache.has(key)) return Promise.resolve(SF.cache.get(key));
   if (SF.unavailable) return Promise.resolve(null);
   engineStart();
   if (SF.unavailable) return Promise.resolve(null);
   return new Promise(resolve => {
-    SF.queue.push({ key, moves: moveStr, skill, multipv, limit,
+    SF.queue.push({ key, moves: moveStr, fen, skill, multipv, limit,
                     nocache: !!opt.nocache, resolve });
     enginePump();
   });
@@ -5685,7 +5706,7 @@ function reviewRender(){
    ============================================================ */
 const PZ_TRACK_NAME = { opening:'Opening', middlegame:'Middlegame', endgame:'Endgame' };
 const PZ_START_RATING = 1200;
-const PZ_VERSION = 5;              // ?v= on the three files; bump when they are regenerated
+const PZ_VERSION = 7;              // ?v= on the three files; bump when they are regenerated
 const PZ_REPLY_MS = 420;           // long enough to read the reply as an answer
 
 const PZ = {
@@ -5703,6 +5724,7 @@ const PZ = {
   shown: false,        // the solution was revealed
   done: false,         // the line has been played to its end
   followed: false,     // the follow-up has been played out past the end of it
+  study: null,         // Study Alternatives, when the player is exploring
   busy: false          // the forced reply is on its way
 };
 const pzLoaded = {};   // track -> the parsed ladder, fetched once
@@ -6062,6 +6084,7 @@ function pzOpen(n){
   PZ.puzzle = p;
   PZ.ply = 0;
   PZ.wrong = PZ.shown = PZ.done = PZ.followed = PZ.busy = false;
+  PZ.study = null;
   PZ.side = stateFromFEN(p.fen).turn;
   PZ.wasDone = PZ.track ? pzDone(PZ.track).has(p.id) : false;   // a replay is not worth a rating
   if (PZ.mode === 'rush') RUSH.at = n - 1;
@@ -6094,6 +6117,7 @@ function pzClose(){
   if (!PZ.on) return;
   PZ.on = false;
   PZ.busy = false;
+  PZ.study = null;
   RUSH.on = false;
   document.getElementById('screen-game').classList.remove('rush');
   G.token++;                              // strand the pending reply, if there is one
@@ -6103,6 +6127,10 @@ function pzClose(){
 
 /* ---- playing one ---- */
 function pzPlay(m){
+  // once the puzzle is over the board belongs to Study Alternatives, which is
+  // the only mode where a move that is not the solution is a legitimate thing
+  // to play — it is the opponent's move, and trying it is the point
+  if (pzStudyOn()) return pzStudyPlay(m);
   if (PZ.busy || PZ.done) return;
   const step = puzzleStep(PZ.puzzle.moves, PZ.ply, uciOf(m));
   if (!step.ok){
@@ -6274,6 +6302,237 @@ function pzShowFollowUp(){
     setTimeout(step, PZ_REPLY_MS);
   };
   setTimeout(step, 200);
+}
+
+
+/* ============================================================
+   STUDY ALTERNATIVES — "but couldn't they just play something else?"
+
+   A puzzle only ever shows one defence: the engine's best. That is the right
+   line to prove the tactic with, and it leaves the most natural question a
+   solver has unanswered — the one about the move *they* were worried about.
+   Reading a list of refutations somebody else chose does not answer it either,
+   because the move you are worried about is yours.
+
+   So this hands the board back. After a puzzle is solved, the position rewinds
+   to the opponent's first defensive turn and the player may make any legal move
+   for them. The engine then answers it, on that exact position, and the board
+   plays out the refutation.
+
+   This is the one thing on the puzzle screen that needs an engine, and it is
+   deliberately the *last* thing: nothing in solving a puzzle loads one, the
+   file carries its own explanation and its own follow-up, and the worker only
+   ever boots when somebody presses this button. A player who never does never
+   pays for it.
+
+   The honest case matters most. If the defence the player tries is genuinely
+   as good as the one on file, this says so rather than inventing a refutation —
+   and that is a finding about the *puzzle*, not about the player, so it says
+   that too. A puzzle whose stored defence is not best is a broken puzzle, and
+   the tool that writes them is what should have caught it.
+   ============================================================ */
+
+const PZ_STUDY_DEPTH = 14;      // deep enough to refute, shallow enough to answer
+const PZ_STUDY_PAUSE = 2400;    // long enough to read the refutation on the board
+// How much worse than the puzzle's own defence a try has to be before it is
+// called a failure. Two ways of being lost are not a refutation of either.
+const PZ_STUDY_SLACK = 80;
+
+function pzStudyOn(){ return !!(PZ.study && PZ.study.on); }
+
+/** The ply the opponent first has to defend on — right after the key move. */
+function pzBranchPly(){ return 1; }
+
+/** Put the board back at the branch point, however far a try has wandered. */
+function pzStudyReset(){
+  const p = PZ.puzzle;
+  let st = stateFromFEN(p.fen);
+  const upto = Math.min(pzBranchPly(), p.moves.length);
+  G.uci = [];
+  for (let i = 0; i < upto; i++){
+    const m = legalMoves(st, st.turn).find(x => uciOf(x) === p.moves[i]);
+    if (!m) break;
+    st = makeMove(st, m);
+    G.uci.push(p.moves[i]);
+    G.lastMove = m;
+  }
+  G.st = st;
+  PZ.study.tried = null;
+  render();
+}
+
+function pzStudyStart(){
+  if (!PZ.done || PZ.busy) return;
+  if (PZ.puzzle.moves.length < 2){
+    pzStudySay('This puzzle is over in a single move, so there is no defence to try.');
+    return;
+  }
+  /* And the case where there is a defence but no *alternative* to it: the key
+     move leaves exactly one legal reply. Nothing to explore, and offering an
+     empty exercise is worse than saying so — it is also the honest answer to
+     "couldn't they play something else?", which here is no. */
+  const branch = walkFrom(PZ.puzzle.fen, PZ.puzzle.moves.slice(0, pzBranchPly()));
+  if (branch && legalMoves(branch, branch.turn).length < 2){
+    pzStudySay('The key move leaves exactly one legal reply, so there is no other ' +
+               'defence to try — that is why it works.');
+    return;
+  }
+  beep(660,.07);
+  PZ.study = { on:true, tried:null, thinking:false };
+  pzStudyReset();
+  pzStudySay(null);
+  pzRender();
+}
+
+function pzStudyStop(){
+  PZ.study = null;
+  // back to the finished puzzle, follow-up and all, exactly as it was left
+  pzReplaySolved();
+  pzRender();
+}
+
+/** Rebuild the solved position: the whole solution, plus the follow-up if it
+    had been watched, so leaving study mode does not quietly undo it. */
+function pzReplaySolved(){
+  const p = PZ.puzzle;
+  let st = stateFromFEN(p.fen);
+  G.uci = [];
+  const line = p.moves.concat(PZ.followed ? ((pzFollowOf(p) || {}).moves || []) : []);
+  for (const u of line){
+    const m = legalMoves(st, st.turn).find(x => uciOf(x) === u);
+    if (!m) break;
+    st = makeMove(st, m);
+    G.uci.push(u);
+    G.lastMove = m;
+  }
+  G.st = st;
+  render();
+}
+
+function pzStudySay(html){
+  const box = document.getElementById('pzStudySay');
+  box.innerHTML = html || '';
+  box.style.display = html ? '' : 'none';
+}
+
+/* One attempted defence, answered.
+ *
+ * Three questions of the engine, and they are three because they are three
+ * different questions: what the position was worth after the *puzzle's* own
+ * defence, what it is worth after this one, and what the answer to this one is.
+ * Comparing the first two is what decides whether the try fails; the third is
+ * what the board then plays. */
+async function pzStudyPlay(m){
+  if (!m || !pzStudyOn() || PZ.study.thinking) return;
+  const p = PZ.puzzle, solver = PZ.side;
+  if (G.st.turn === solver) return;            // only their moves are on offer here
+  const tried = uciOf(m);
+  const branch = p.moves.slice(0, pzBranchPly());
+
+  PZ.study.thinking = true;
+  pzStudySay('Thinking…');
+  G.st = makeMove(G.st, m);
+  G.uci.push(tried);
+  G.lastMove = m;
+  render();
+
+  const token = G.token;
+  const askedFor = tried;
+  const ask = (moves, opt) => engineAsk(moves, Object.assign({ fen:p.fen, depth:PZ_STUDY_DEPTH }, opt));
+
+  // what the puzzle's own defence is worth, and what this one is worth: both
+  // read from the solver's side, both after the defender has moved
+  const mine  = await ask(branch.concat([tried]));
+  const book  = await ask(branch.concat([p.moves[pzBranchPly()]]));
+  if (!pzStudyOn() || G.token !== token) return;
+  if (!mine){
+    PZ.study.thinking = false;
+    pzStudySay('The engine is not available in this browser, so alternatives cannot be checked.');
+    return;
+  }
+
+  const val = r => r && (r.mate !== null && r.mate !== undefined
+    ? (r.mate > 0 ? 10000 - Math.abs(r.mate) : -10000 + Math.abs(r.mate))
+    : (r.cp === null || r.cp === undefined ? null : r.cp));
+  const afterTry  = val(mine);                 // solver to move, so already theirs
+  const afterBook = val(book);
+
+  // and the answer, played out
+  const reply = mine.best;
+  let text = '<b>' + pzSanOf(p.fen, branch, tried) + '</b> — ';
+  const same = tried === p.moves[pzBranchPly()];
+
+  if (same){
+    text += 'that is the defence the puzzle plays. ' + pzStudyWorth(afterTry);
+  } else if (afterBook !== null && afterTry !== null && afterTry < afterBook - PZ_STUDY_SLACK){
+    /* Honest case, and the important one: their try is better than the line on
+       file. That is a fact about the puzzle, not about the player. */
+    text += '<span class="holds">this actually holds better than the defence in the puzzle.</span> ' +
+            'That means the stored line is not best defence, which makes this puzzle faulty — ' +
+            'worth reporting rather than worth explaining away.';
+  } else {
+    const st = walkFrom(p.fen, branch.concat([tried]));
+    const rm = st && legalMoves(st, st.turn).find(x => uciOf(x) === reply);
+    text += '<span class="fails">it does not save the position.</span>';
+    if (rm){
+      const words = describeBest(st, rm, mine, null, pvLine(st, mine.pv || [reply]));
+      text += ' <b>' + toSAN(st, rm, legalMoves(st, st.turn)) + '</b> answers it. ' + words;
+    }
+    text += ' ' + pzStudyWorth(afterTry);
+  }
+
+  if (reply){
+    const st = G.st;
+    const rm = legalMoves(st, st.turn).find(x => uciOf(x) === reply);
+    if (rm){
+      G.st = makeMove(st, rm);
+      G.uci.push(reply);
+      G.lastMove = rm;
+      beep(520,.05);
+      render();
+    }
+  }
+  pzStudySay(text + '<br><span class="pz-why-tag">try another</span> the board goes back in a moment.');
+  PZ.study.thinking = false;
+
+  setTimeout(() => {
+    if (!pzStudyOn() || G.token !== token) return;
+    pzStudyReset();
+    pzStudySay(text + '<br><span class="pz-why-tag">your move</span> play another defence for ' +
+               (solver === W ? 'Black' : 'White') + ', or press Done Studying.');
+  }, PZ_STUDY_PAUSE);
+}
+
+/** What the position is worth to the solver, said without a number. */
+function pzStudyWorth(v){
+  if (v === null || v === undefined) return '';
+  const me = PZ.side === W ? 'White' : 'Black';
+  if (Math.abs(v) > 9800) return v > 0 ? 'It is mate for ' + me + '.' : 'It is mate against ' + me + '.';
+  const w = v >= 900 ? 'completely winning' : v >= 400 ? 'winning'
+          : v >= 150 ? 'clearly better' : v >= 60 ? 'slightly better'
+          : v > -60 ? 'level' : v > -150 ? 'slightly worse'
+          : v > -400 ? 'clearly worse' : 'losing';
+  return 'The engine calls the position ' + w + ' for ' + me + '.';
+}
+
+/** The position a line reaches from a fen, or null. */
+function walkFrom(fen, moves){
+  let st = stateFromFEN(fen);
+  for (const u of moves){
+    const m = legalMoves(st, st.turn).find(x => uciOf(x) === u);
+    if (!m) return null;
+    st = makeMove(st, m);
+  }
+  return st;
+}
+
+/** One move in notation, played from a fen after a prefix. */
+function pzSanOf(fen, prefix, uci){
+  const st = walkFrom(fen, prefix);
+  if (!st) return uci;
+  const all = legalMoves(st, st.turn);
+  const m = all.find(x => uciOf(x) === uci);
+  return m ? toSAN(st, m, all) : uci;
 }
 
 function pzRetry(){ pzOpen(PZ.n); }
@@ -6487,6 +6746,25 @@ function pzRender(){
   followSay.textContent = said;
   followSay.style.display = said ? '' : 'none';
 
+  /* Study Alternatives. Offered only on a finished puzzle that actually has a
+     defence in it, and it takes the board over while it is on — so the other
+     controls step back rather than competing for the same pieces. */
+  const study = document.getElementById('pzStudy');
+  const canStudy = PZ.done && p.moves.length >= 2;
+  study.style.display = canStudy ? '' : 'none';
+  study.disabled = PZ.busy;
+  study.textContent = pzStudyOn() ? 'Done Studying' : 'Study Alternatives';
+  if (pzStudyOn()){
+    follow.disabled = true;
+    ask.innerHTML = '<b>Study</b> — play a defence for ' +
+                    (PZ.side === W ? 'Black' : 'White') + ' and see what answers it.';
+    if (!document.getElementById('pzStudySay').innerHTML)
+      pzStudySay('Move one of their pieces. The engine will answer on that exact ' +
+                 'position and say whether the defence saves anything.');
+  } else {
+    document.getElementById('pzStudySay').style.display = 'none';
+  }
+
   const next = document.getElementById('pzNext');
   next.disabled = !PZ.done || PZ.n >= PZ.list.length;
   next.textContent = PZ.n >= PZ.list.length ? 'Track Complete' : 'Next Puzzle';
@@ -6513,6 +6791,8 @@ function rushRender(){
   // a run does not stop to explain
   document.getElementById('pzFollow').style.display = 'none';
   document.getElementById('pzFollowSay').style.display = 'none';
+  document.getElementById('pzStudy').style.display = 'none';
+  document.getElementById('pzStudySay').style.display = 'none';
 
   const ask = document.getElementById('pzAsk');
   const say = document.getElementById('pzSay');
@@ -6596,6 +6876,7 @@ document.getElementById('pzGrid').addEventListener('click', e => {
 document.getElementById('pzShow').onclick   = () => pzShowSolution();
 document.getElementById('pzRetry').onclick  = () => pzRetry();
 document.getElementById('pzFollow').onclick = () => pzShowFollowUp();
+document.getElementById('pzStudy').onclick  = () => pzStudyOn() ? pzStudyStop() : pzStudyStart();
 document.getElementById('pzNext').onclick  = () => {
   if (PZ.mode !== 'rush') return pzNext();
   if (RUSH.over) return rushStart();

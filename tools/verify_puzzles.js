@@ -122,21 +122,31 @@ const DEFAULTS = {
   jobs: Math.max(1, Math.min(12, require('os').cpus().length - 2)),
   dir: path.join(__dirname, '..', 'puzzles'),
   file: '',           // an explicit file, when it is not dir/track.json
-  // Deeper than the generator on purpose. Re-asking at the depth that wrote
-  // the file would mostly re-read it back; the point is a second opinion.
-  sweep: 20,          // the cheap pass over every ply, which only nominates
+  /* Deeper than the generator on purpose. Re-asking at the depth that wrote
+     the file would mostly read it back; the point is a second opinion — and
+     from a second *engine*: the judge is the native Stockfish 18 on PATH, NNUE
+     and all, while engine/ is the pre-NNUE build the browser runs. These
+     numbers are for the former, which is both much stronger and about twenty
+     times faster at a given depth, so they are deeper than the old set and
+     still cheaper to reach. */
+  sweep: 18,          // the cheap pass over every ply, which only nominates
   multipv: 5,         // how wide the sweep looks
-  depth: 18,          // the head-to-head on anything the sweep nominated
-  replyDepth: 18,     // the defence
-  deepDepth: 26,      // the verdict: the only thing allowed to call a move wrong
+  depth: 22,          // the head-to-head on anything the sweep nominated
+  replyDepth: 22,     // the defence
+  deepDepth: 26,      // the tie-break: the only thing allowed to call a move wrong
+  threads: 1,         // per engine; jobs x threads should fit the machine
+  hash: 512,          // MB per engine
   /* The whole-puzzle verdict — is this still a turning point at all — is a
      different question from "is this ply the engine's move", and it is asked
      of every puzzle rather than of the few plies the sweep disliked. So it
      gets its own depth: deep enough to be a real second opinion on the
      generator's 16, shallow enough to afford three searches on every record. */
-  verdictDepth: 22,
-  followDepth: 16,    // the follow-up, where nothing is being decided any more
-  maxPlies: 7,        // solution length cap, always odd: a puzzle ends on your move
+  verdictDepth: 24,
+  followDepth: 20,    // the follow-up, where nothing is being decided any more
+  /* Lines run to their payoff now rather than to the end of the doubt, so the
+     cap has to leave room for one: a combination that wins a rook on move four
+     needs nine plies to show it. Still odd — a puzzle ends on your move. */
+  maxPlies: 11,
   // How far the puzzle's own move may fall short of the sweep's before the
   // slow searches are spent on it. Not zero: two roads to the same won ending
   // are both "the answer" and the file is allowed to have picked either.
@@ -171,7 +181,25 @@ const DEFAULTS = {
   write: false,       // nothing is written unless it is asked for
   dry: false,         // the same thing said the other way round
   limit: 0,           // 0 = the whole track; a number checks the first n, for a smoke test
-  report: ''
+  report: '',
+  /* Every puzzle's result, written the moment it is finished.
+   *
+   * The verifier used to hold a whole track in memory and write once, at the
+   * end. Five hours into a run that meant five hours of work with nothing on
+   * disk, and one pathological puzzle held 314 finished results hostage until
+   * it returned. A stage that long has no business being all-or-nothing.
+   * Results are appended to <file>.progress.jsonl as they land, and a restart
+   * skips the ids already there. */
+  progress: true,
+  /* The per-puzzle budget, in seconds. A puzzle that exceeds it is *rejected*
+     as pathological — never accepted, never verified at a lower depth. The
+     search is abandoned rather than weakened, so nothing ships that has not
+     met the full standard. 0 turns it off. */
+  budget: 2700,
+  /* Verify several tracks from one queue. One track at a time means the tail
+     of a track leaves every engine idle while the next track waits; sharing a
+     queue lets them carry on. Comma separated, e.g. middlegame,endgame. */
+  tracks: ''
 };
 
 // --followup is the same knob as --follow, because both halves of this tool
@@ -354,7 +382,9 @@ async function pickSolver(engine, fen, moves, cfg){
   const two = await engine.ask({ fen, moves, multipv: 2, depth: cfg.depth, fresh: true, objective: true });
   const lines2 = (two.lines || []).filter(Boolean);
   const top = lines2[0];
-  const cand = R.stillSharp(scoreOf(top), lines2[1] ? scoreOf(lines2[1]) : null);
+  const a = scoreOf(top), b = lines2[1] ? scoreOf(lines2[1]) : null;
+  const cand = R.stillSharp(a, b);
+  const choosing = R.stillChoosing(a, b);
   let pick = top && top.best;
   if (!pick) return null;
   const one = await engine.ask({ fen, moves, multipv: 1, depth: cfg.depth, fresh: true, objective: true });
@@ -363,7 +393,7 @@ async function pickSolver(engine, fen, moves, cfg){
     const by = await betterBy(engine, fen, moves, pick, alt, cfg);
     if (by !== null && by > cfg.tie) pick = alt;
   }
-  return { best: pick, sharp: cand };
+  return { best: pick, sharp: cand, choosing };
 }
 
 /* Re-derive a solution from a prefix that has already been checked. The rules
@@ -404,9 +434,11 @@ async function extendFrom(engine, fen, prefix, cfg, first){
     st = P.makeMove(st, m);
   }
 
+  const solver = P.stateFromFEN(fen).turn;
   for (;;){
     if (gameOver(st)) break;                                   // mate delivered
-    if (G.materialSwing(fen, st) >= G.CLEAR_WIN) break;        // a clear material win
+    // to the payoff, not to the end of the doubt — see paidOff() in the rules
+    if (R.paidOff(fen, st, solver)) break;
     if (moves.length + 2 > cfg.maxPlies) break;
     // two lines wide, not one — see bestOf() above: the defence a rebuilt line is
     // extended with has to be the toughest one there is, and a single-line
@@ -419,7 +451,7 @@ async function extendFrom(engine, fen, prefix, cfg, first){
     const next = P.makeMove(st, rm);
     if (gameOver(next)) break;                                 // the defence walked into mate
     const look = await pickSolver(engine, fen, moves.concat([defence]), cfg);
-    if (!look || !look.sharp) break;                           // no longer one strong move
+    if (!look || !look.choosing) break;                        // nothing left to choose
     const pm = uciFind(next, look.best);
     if (!pm) break;
     moves.push(defence, look.best);
@@ -530,7 +562,7 @@ async function verdict(engine, p, cfg){
 
   // what else there was. Three lines, so that "the second best" is a move and
   // not the first thing a two-line search happened to keep.
-  const wide = await engine.ask({ fen, multipv: 3, depth: d, fresh: true, objective: true });
+  const wide = await engine.ask({ fen, multipv: 3, depth: cfg.depth, fresh: true, objective: true });
   const lines = (wide.lines || []).filter(Boolean);
   const rival = (lines.find(l => l.best && l.best !== moves[0]) || {}).best;
   if (!rival) return { ok: false, why: 'one legal move' };
@@ -614,7 +646,7 @@ async function audit(engine, p, cfg){
   return { at: -1, why: '', notes, settle };
 }
 
-async function verifyOne(p, engine, cfg){
+async function verifyOne(p, engine, cfg, rung){
   const note = { n: p.n, id: p.id, repaired: false, soft: false, notes: [] };
   const fen = p.fen;
   const st0 = P.stateFromFEN(fen);
@@ -647,8 +679,26 @@ async function verifyOne(p, engine, cfg){
     note.was = p.moves.slice();
   }
 
+  /* A line can be right at every ply and still stop before its point. The
+     audit only rebuilds what it disagrees with, so without this a correct
+     one-move puzzle stays a correct one-move puzzle and is then dropped for
+     having nothing to calculate — when what it needed was to be *continued*.
+     Extending is the same machinery a repair uses: best defence, ask again,
+     stop at the payoff. */
+  if (found.at < 0){
+    const end = walk(fen, moves);
+    if (end && !R.paidOff(fen, end, st0.turn) && moves.length + 2 <= cfg.maxPlies){
+      const grown = await extendFrom(engine, fen, moves, cfg);
+      if (grown && grown.moves.length > moves.length && grown.moves.length % 2 === 1){
+        note.grew = { from: moves.length, to: grown.moves.length };
+        moves = grown.moves;
+        delete p.replies;              // the notes describe the shorter line
+      }
+    }
+  }
+
   const out = Object.assign({}, p, { moves });
-  if (note.repaired) delete out.replies;
+  if (note.repaired || note.grew) delete out.replies;
 
   /* And then the question the per-ply audit cannot ask: is any of this worth
      showing? A solution can be correct at every ply and still be the best move
@@ -683,7 +733,7 @@ async function verifyOne(p, engine, cfg){
     // is the generator's own cold start, exported rather than copied so that a
     // repaired rung is priced exactly the way the ladder was.
     if (cfg.reseed && moves[0] !== p.moves[0]){
-      out.seedRating = await G.seedRating(clean(engine), fen, moves[0]);
+      out.seedRating = await G.seedRating(clean(rung || engine), fen, moves[0]);
       note.seedRating = out.seedRating;
       // the first move changed, so how hard it is to see changed with it
       const re = await engine.ask({ fen, multipv: 2, depth: cfg.depth, fresh: true, objective: true });
@@ -718,7 +768,25 @@ async function verifyOne(p, engine, cfg){
      that is re-verified should come back consistent with the tool that did it
      rather than half in the old vocabulary. */
   out.themes = G.themesFor(out);
+
+  /* The human half of the standard, asked last because it needs the final
+     line and the final themes: a solution that was repaired may be a move
+     shorter than the one that came in, and a puzzle that is now over in one
+     move is exactly the shape this rejects. Costs no search — it reads the
+     board — so it is asked of every record on every run. */
+  const easy = R.obvious(out);
+  if (easy){
+    note.dropped = easy;
+    return { puzzle: null, note };
+  }
+
+  /* Words last, and only once the line is locked. Everything the card says is
+     derived from the final moves, the final score and the final follow-up —
+     writing it any earlier is how a card ends up describing the line it was
+     going to have. Then every promise in it is checked against the board the
+     line actually reaches, and anything that cannot be justified is struck. */
   out.why = WORDS.explain(out);
+  note.struck = WORDS.auditClaims(out);
   return { puzzle: out, note };
 }
 
@@ -786,98 +854,216 @@ function parseArgs(argv){
   return cfg;
 }
 
+
+/* ------------------------------------------------- durable per-puzzle results
+ *
+ * One line of JSON per finished puzzle, appended the moment it lands. That is
+ * the whole mechanism, and it is deliberately the dullest possible one: an
+ * append to a text file is atomic enough for whole lines, needs no schema, and
+ * a half-written last line is simply skipped on the way back in.
+ *
+ * It exists because a five-hour stage that keeps everything in memory and
+ * writes once at the end is a stage where a single slow puzzle can cost the
+ * other three hundred. Resuming reads the file, keeps the results it finds and
+ * asks the engine only about what is missing.
+ */
+const progressFile = file => file + '.progress.jsonl';
+
+/** What has already been verified, by puzzle id. */
+function loadProgress(file){
+  const out = new Map();
+  let text = '';
+  try { text = fs.readFileSync(progressFile(file), 'utf8'); } catch (e){ return out; }
+  for (const line of text.split('\n')){
+    if (!line.trim()) continue;
+    let rec = null;
+    // a run killed mid-write leaves one ragged line; it is not an error, it is
+    // simply the puzzle that did not finish
+    try { rec = JSON.parse(line); } catch (e){ continue; }
+    if (rec && rec.id) out.set(rec.id, rec);
+  }
+  return out;
+}
+
+/** Record one finished puzzle. Synchronous on purpose: the point is that it is
+    on disk before the next search begins. */
+function saveProgress(file, id, r){
+  fs.appendFileSync(progressFile(file),
+    JSON.stringify({ id, puzzle: r.puzzle, note: r.note }) + '\n');
+}
+
+/** Which of these still need the engine. */
+const pending = (list, done) => list.filter(p => !done.has(p.id));
+
+/* A puzzle may not run away with the machine.
+ *
+ * The budget is a *rejection* rule and nothing else: a puzzle that exceeds it
+ * is dropped as pathological. It is never accepted on a partial check, and the
+ * search is never shortened or shallowed to fit — the engine is abandoned
+ * mid-search and the puzzle leaves the track. Anything that ships has met the
+ * full standard at the full depth. */
+async function withBudget(fn, seconds, engine){
+  if (!seconds) return fn();
+  let timer = null;
+  const bell = new Promise(resolve => {
+    timer = setTimeout(() => { engine.abandon(); resolve('timeout'); }, seconds * 1000);
+  });
+  try {
+    const r = await Promise.race([fn().catch(e => ({ __err: e })), bell]);
+    if (r === 'timeout' || (r && r.__err)) return null;
+    return r;
+  } finally {
+    clearTimeout(timer);
+    engine.release();
+  }
+}
+
 async function main(){
   const cfg = parseArgs(process.argv.slice(2));
-  const file = cfg.file || path.join(cfg.dir, cfg.track + '.json');
-  const all = JSON.parse(fs.readFileSync(file, 'utf8'));
-  const list = cfg.limit ? all.slice(0, cfg.limit) : all;
-  console.log(cfg.track + ': ' + list.length + ' puzzles, sweep ' + cfg.sweep +
-              ', verdict ' + cfg.deepDepth + ', ' + cfg.jobs + ' engines' +
-              (cfg.write ? '' : ' (report only; --write to repair in place)'));
+  /* One queue, however many tracks. Verifying a track at a time means the tail
+     of one leaves every engine idle while the next waits its turn; sharing the
+     queue lets them carry on. Each track still keeps its own file, its own
+     progress log and its own report. */
+  const names = (cfg.tracks ? cfg.tracks.split(',') : [cfg.track]).map(s => s.trim());
+  const books = names.map(name => {
+    const f = (cfg.file && names.length === 1) ? cfg.file : path.join(cfg.dir, name + '.json');
+    const all = JSON.parse(fs.readFileSync(f, 'utf8'));
+    return { name, file: f, all: cfg.limit ? all.slice(0, cfg.limit) : all };
+  });
+  for (const b of books){
+    b.done = cfg.progress ? loadProgress(b.file) : new Map();
+    b.todo = pending(b.all, b.done);
+    console.log(b.name + ': ' + b.all.length + ' puzzles' +
+                (b.done.size ? '  (' + b.done.size + ' already verified, resuming)' : '') +
+                (cfg.write ? '' : '  (report only; --write to repair in place)'));
+  }
+  const queue = [];
+  for (const b of books) for (const p of b.todo) queue.push({ b, p });
 
-  const pool = new Pool(cfg.jobs);
+  /* Two pools. The native one judges; the WASM one is only ever asked to
+     imitate a rung of the bot ladder for seedRating(), because a difficulty
+     rating measured against an engine the player never meets is a rating of
+     nobody. They are paired by engine slot so a worker always uses its own. */
+  const pool = new Pool(cfg.jobs, {
+    native: true, threads: cfg.threads, hash: cfg.hash, wdl: true
+  });
+  const rungs = new Pool(cfg.jobs);
+  await pool.engines[0].ready;
+  console.log('  judge: ' + (pool.engines[0].id || 'unknown') +
+              '  ·  ' + cfg.jobs + ' engines x ' + cfg.threads + ' threads x ' + cfg.hash + 'MB' +
+              '  ·  sweep ' + cfg.sweep + ', work ' + cfg.depth +
+              ', verdict ' + cfg.verdictDepth + ', tie-break ' + cfg.deepDepth +
+              ', follow-up ' + cfg.followDepth);
+  if (cfg.budget)
+    console.log('  budget: ' + Math.round(cfg.budget / 60) + ' min per puzzle — over that it is ' +
+                'rejected as pathological, never accepted');
   const started = Date.now();
   let done = 0;
-  const results = await pool.map(list, async (p, engine) => {
-    const r = await verifyOne(p, engine, cfg);
+  await pool.map(queue, async (item, engine) => {
+    const r = await withBudget(
+      () => verifyOne(item.p, engine, cfg, rungs.engines[engine.slot]),
+      cfg.budget, engine);
+    /* A puzzle that ran out of budget, or whose verification threw, is dropped.
+       It is never accepted: nothing reaches the file without having been
+       checked all the way through at the full depth. */
+    const out = r || { puzzle: null, note: { n: item.p.n, id: item.p.id,
+                                             dropped: 'verification timeout', notes: [] } };
     done++;
-    const mark = r.note.dropped ? 'd' : r.note.failed ? 'x'
-               : r.note.repaired ? (r.note.soft ? 's' : 'r') : '.';
+    if (cfg.progress) saveProgress(item.b.file, item.p.id, out);
+    item.b.done.set(item.p.id, out);
+    const mark = out.note.dropped ? 'd' : out.note.failed ? 'x'
+               : out.note.repaired ? (out.note.soft ? 's' : 'r') : '.';
     process.stdout.write(mark + (done % 50 ? '' : ' ' + done + '\n'));
-    return r;
   });
   pool.quit();
+  rungs.quit();
   process.stdout.write('\n');
 
-  const kept = results.filter(r => r.puzzle);
-  const dropped = results.filter(r => r.note.dropped);
-  const repaired = kept.filter(r => r.note.repaired);
-  const failed = results.filter(r => r.note.failed);
-  const soft = repaired.filter(r => r.note.soft);
-  console.log('checked ' + results.length + ' in ' +
-              Math.round((Date.now() - started) / 1000) + 's');
-  console.log('  held up : ' + (kept.length - repaired.length));
-  console.log('  repaired: ' + repaired.length + ' (' + soft.length + ' no longer sharp)');
-  console.log('  dropped : ' + dropped.length + ' (not a turning point at depth ' +
-              cfg.verdictDepth + ')');
-  console.log('  failed  : ' + failed.length);
-  if (dropped.length){
-    const why = {};
-    for (const r of dropped) why[r.note.dropped] = (why[r.note.dropped] || 0) + 1;
-    for (const [w, n] of Object.entries(why).sort((a, b) => b[1] - a[1]))
-      console.log('    ' + w.padEnd(16) + String(n).padStart(4) + '   ' +
-                  dropped.filter(r => r.note.dropped === w).map(r => '#' + r.note.n).join(' '));
-  }
-  const punish = kept.filter(r => r.note.kind === 'punish').length;
-  console.log('  kinds   : ' + punish + ' punish, ' + (kept.length - punish) + ' save');
-  // reported, never rewritten: see the header
-  const dull = kept.filter(r => (r.note.notes || []).some(n => /:dull/.test(n)));
-  console.log('  dull    : ' + dull.length + ' (still the best move, no longer ' +
-              R.GAP_MIN + 'cp clear at the sweep depth)');
-  if (dull.length) console.log('    ' + dull.map(r => '#' + r.note.n).join(' '));
-  for (const r of results)
-    for (const n of r.note.notes || []) console.log('  #' + r.note.n + ' note   ' + n);
-  for (const r of repaired)
-    console.log('  #' + r.note.n + ' WRONG  ' + r.note.why +
-                '\n         was ' + lineSan(r.puzzle.fen, r.note.was) +
-                '   [' + r.note.was.join(' ') + ']' +
-                '\n         now ' + lineSan(r.puzzle.fen, r.puzzle.moves) +
-                '   [' + r.puzzle.moves.join(' ') + ']');
-  for (const r of failed) console.log('  #' + r.note.n + ' FAILED ' + r.note.failed);
+  /* Report and write, one track at a time. The queue was shared; the files
+     are not, and neither are the ladders — each track is ordered and numbered
+     on its own. Results come from the progress map, so a resumed run reports
+     on everything it has, not only on what this process happened to do. */
+  console.log('checked ' + done + ' in ' + Math.round((Date.now() - started) / 1000) + 's' +
+              (done < queue.length ? '  (' + (queue.length - done) + ' not reached)' : ''));
 
-  if (cfg.report)
-    fs.writeFileSync(cfg.report, JSON.stringify(results.map(r => r.note), null, 1) + '\n');
-  // A partial run has only seen part of the ladder, and part of a ladder cannot
-  // be put in order; say so rather than sorting the first n against nothing.
-  if (cfg.resort && cfg.limit)
-    console.log('  --resort ignored: only ' + list.length + ' of ' + all.length + ' were checked');
-  if (cfg.write){
-    /* Written back in place. A repaired puzzle is a different puzzle — new
-       line, new motifs, new id — but it is the same rung of the same ladder.
-       A *dropped* one leaves a hole, and the ladder closes over it: the track
-       is however many puzzles cleared the standard, not a fixed hundred with
-       the failures papered over. That is the trade rule 14 asks for, and it is
-       why the rungs are renumbered here whether or not --resort was asked for.
-       Ids are untouched either way, so nobody loses a solve — only their place
-       in the numbering, exactly as after a regeneration. */
-    const out = all.slice();
-    results.forEach((r, i) => { out[i] = r.puzzle; });
-    const before = out.length;
-    let kept2 = out.filter(Boolean);
-    if (kept2.length !== before)
-      console.log((before - kept2.length) + ' rungs removed; the track is now ' +
-                  kept2.length + ' long');
-    if (cfg.resort && !cfg.limit){
-      const settle = new Map(results.filter(r => r.puzzle).map(r => [r.puzzle, r.note.settle]));
-      const moved = resort(kept2, p => settle.get(p));
-      console.log(moved + ' of ' + kept2.length + ' rungs renumbered to keep the ladder' +
-                  ' in difficulty order (ids, and so progress, are untouched)');
-    } else {
-      kept2.forEach((p, i) => { p.n = i + 1; });
+  for (const b of books){
+    const results = b.all.map(p => b.done.get(p.id)).filter(Boolean);
+    const kept = results.filter(r => r.puzzle);
+    const dropped = results.filter(r => r.note.dropped);
+    const repaired = kept.filter(r => r.note.repaired);
+    const failed = results.filter(r => r.note.failed);
+    const soft = repaired.filter(r => r.note.soft);
+    console.log('');
+    console.log('=== ' + b.name + ': ' + results.length + ' of ' + b.all.length + ' ===');
+    console.log('  held up : ' + (kept.length - repaired.length));
+    console.log('  repaired: ' + repaired.length + ' (' + soft.length + ' no longer sharp)');
+    console.log('  dropped : ' + dropped.length);
+    console.log('  failed  : ' + failed.length);
+    if (dropped.length){
+      const why = {};
+      for (const r of dropped) why[r.note.dropped] = (why[r.note.dropped] || 0) + 1;
+      for (const [w, n] of Object.entries(why).sort((a, b) => b[1] - a[1]))
+        console.log('    ' + w.padEnd(22) + String(n).padStart(4) + '   ' +
+                    dropped.filter(r => r.note.dropped === w).map(r => '#' + r.note.n).join(' '));
     }
-    fs.writeFileSync(file, JSON.stringify(kept2, null, 1) + '\n');
-    console.log('wrote ' + file);
-    noteInReadme(cfg, results);
+    const grew = kept.filter(r => r.note.grew);
+    if (grew.length){
+      const plies = grew.reduce((n, r) => n + (r.note.grew.to - r.note.grew.from), 0);
+      console.log('  extended: ' + grew.length + ' lines carried on to their payoff (+' +
+                  plies + ' plies in all)');
+    }
+    const struck = kept.reduce((n, r) => n + ((r.note.struck || []).length), 0);
+    if (struck){
+      console.log('  claims struck from explanations: ' + struck);
+      const why = {};
+      for (const r of kept) for (const c of r.note.struck || []) why[c.why] = (why[c.why] || 0) + 1;
+      for (const [k, n] of Object.entries(why).sort((a, b) => b[1] - a[1]))
+        console.log('    ' + String(n).padStart(4) + '  ' + k);
+    }
+    const punish = kept.filter(r => r.note.kind === 'punish').length;
+    console.log('  kinds   : ' + punish + ' punish, ' + (kept.length - punish) + ' save');
+    const dull = kept.filter(r => (r.note.notes || []).some(n => /:dull/.test(n)));
+    console.log('  dull    : ' + dull.length + ' (still the best move, no longer ' +
+                R.GAP_MIN + 'cp clear at the sweep depth)');
+    for (const r of repaired)
+      console.log('  #' + r.note.n + ' WRONG  ' + r.note.why +
+                  '\n         was ' + lineSan(r.puzzle.fen, r.note.was) +
+                  '\n         now ' + lineSan(r.puzzle.fen, r.puzzle.moves));
+    for (const r of failed) console.log('  #' + r.note.n + ' FAILED ' + r.note.failed);
+
+    if (cfg.report)
+      fs.writeFileSync(cfg.report.replace('{track}', b.name),
+                       JSON.stringify(results.map(r => r.note), null, 1) + '\n');
+
+    if (cfg.write){
+      /* A repaired puzzle is a different puzzle — new line, new motifs, new id
+         — but the same rung of the same ladder. A *dropped* one leaves a hole
+         and the ladder closes over it: a track is however many puzzles cleared
+         the standard. Ids are untouched, so nobody loses a solve; only their
+         place in the numbering moves. Written only when every puzzle in the
+         track has an answer, so an interrupted run leaves the file alone and
+         its progress log carries what it did. */
+      if (results.length < b.all.length){
+        console.log('  not written: ' + (b.all.length - results.length) +
+                    ' puzzles still unverified (progress is on disk; re-run to resume)');
+        continue;
+      }
+      let out = results.map(r => r.puzzle).filter(Boolean);
+      if (out.length !== b.all.length)
+        console.log('  ' + (b.all.length - out.length) + ' rungs removed; the track is now ' +
+                    out.length + ' long');
+      if (cfg.resort && !cfg.limit){
+        const settle = new Map(results.filter(r => r.puzzle).map(r => [r.puzzle, r.note.settle]));
+        const moved = resort(out, p => settle.get(p));
+        console.log('  ' + moved + ' of ' + out.length + ' rungs renumbered to keep the ladder' +
+                    ' in difficulty order (ids, and so progress, are untouched)');
+      } else {
+        out.forEach((p, i) => { p.n = i + 1; });
+      }
+      fs.writeFileSync(b.file, JSON.stringify(out, null, 1) + '\n');
+      console.log('  wrote ' + b.file);
+      noteInReadme(Object.assign({}, cfg, { track: b.name, file: b.file }), results);
+    }
   }
 }
 
@@ -942,6 +1128,7 @@ function noteInReadme(cfg, results){
 
 module.exports = {
   walk, rank, audit, extendFrom, followUp, scoreAfter, scoreOf, bestOf, lineSan,
+  loadProgress, saveProgress, pending, progressFile, withBudget,
   checkSolverPly, checkReplyPly, resort, parseArgs, DEFAULTS
 };
 

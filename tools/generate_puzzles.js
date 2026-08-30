@@ -40,6 +40,7 @@ const crypto = require('crypto');
 
 const P = require('./page_chess.js');
 const R = require('./puzzle_rules.js');
+const BOOK = require('./opening_book.js');
 const WORDS = require('./puzzle_words.js');
 const { Pool } = require('./sf.js');
 
@@ -60,17 +61,24 @@ const DEFAULTS = {
   out: path.join(__dirname, '..', 'puzzles'),
   // depth, never movetime: a search bounded by depth answers the same on a
   // laptop and on a server, which is the only way a generated set is reproducible
-  scanDepth: 12,        // cheap sweep over every position
-  confirmDepth: 16,     // and a real look at the few that survive it
-  replyDepth: 16,       // the defence spliced in between the player's moves
+  /* Depths for the *judge*, which is the native Stockfish 18 on PATH. The
+     games themselves are still played by the vendored WASM build, because the
+     bots that produce the mistakes have to be the bots players meet. */
+  scanDepth: 14,        // cheap sweep over every position
+  confirmDepth: 20,     // and a real look at the few that survive it
+  replyDepth: 20,       // the defence spliced in between the player's moves
+  threads: 1,           // per judging engine
+  hash: 256,            // MB per judging engine
   // The bar itself lives in tools/puzzle_rules.js, because the verifier holds
   // the shipped set to the same one and two copies of a threshold is two
   // standards. This is only how optimistic the *cheap* sweep is allowed to be:
   // it nominates, it never decides, so it may be wrong in the generous
   // direction and must not be wrong in the other.
   nominate: 0.6,
-  maxPlies: 7,          // solution length cap, always odd: a puzzle ends on your move
-  beforeDepth: 16,      // the position the opponent moved from, to price the mistake
+  // room for a combination to actually pay off; still odd, so a puzzle ends
+  // on the solver's move
+  maxPlies: 11,
+  beforeDepth: 20,      // the position the opponent moved from, to price the mistake
   perGame: 4,           // one game should not fill the set with its own middlegame
   gameLength: 120,
   // Curation is cheap and generation is not, so the pool the ladders were
@@ -84,6 +92,30 @@ const DEFAULTS = {
      sweep, so a run looking for endgames does not pay to look at anything
      else, and --gameLength can be raised to give the games time to reach one. */
   only: '',
+  /* Where the game numbering starts. Games are seeded from the run's seed and
+     their own index, so a run stopped after N games can be continued by asking
+     for indices N onward: same seed, same games it would have played, and no
+     index ever played twice. Nothing is resumed *inside* a game — the pool it
+     had already checkpointed is merged in afterwards. */
+  from: 0,
+  /* Which rungs play the games, as a comma-separated list of Elo.
+   *
+   * The default is the whole ladder, and that was right when a puzzle only had
+   * to be a turning point: any blunder would do, and the weak rungs produce
+   * blunders constantly. Under the stricter standard it is close to useless.
+   * An 800 hangs a rook, which is precisely the puzzle obvious() throws away,
+   * and a game where one side is 800 is decided long before anybody has to
+   * find a quiet move. What the standard actually asks for — a plausible
+   * mistake with a hidden multi-move refutation — is what *good* players make,
+   * so the games have to be played by the good rungs. */
+  rungs: '',
+  /* Start games from a real opening instead of from weighted-random plies.
+     The random opening is fine for a corpus that only has to avoid being four
+     openings deep; it is wrong for an *Opening* puzzle, where the standard
+     asks that the mistake be one a person might plausibly make and a player
+     learns it by recognising the structure it happened in. --book 1 plays a
+     mainline first and lets the bots go wrong on their own from there. */
+  book: 0,
   /* How far apart the two rungs of a self-play game may be drawn. The rungs
      used to be picked independently, which means a third of the games were
      800 against 2400 — decided in the opening, and over as a contest long
@@ -253,13 +285,19 @@ const uciFind = (st, u) => P.legalMoves(st, st.turn).find(x => P.uciOf(x) === u)
 async function playGame(engine, rungs, rnd, cfg){
   let st = P.newState();
   const states = [st], moves = [], uci = [], reps = {};
-  const openPlies = 4 + Math.floor(rnd() * 3);          // 4-6, per the brief
+  // either a real opening, cut somewhere sensible, or the old weighted-random
+  // few plies; the rest of the game is the bots' either way
+  const opening = cfg.book ? BOOK.bookLine(rnd) : null;
+  const openPlies = opening ? opening.moves.length : 4 + Math.floor(rnd() * 3);
   for (let ply = 0; ply < cfg.gameLength; ply++){
     const legal = P.legalMoves(st, st.turn);
     if (!legal.length) break;                            // mate or stalemate
     if (st.half >= 100) break;                           // the fifty-move rule
     let m;
-    if (ply < openPlies){
+    if (opening && ply < openPlies){
+      m = legal.find(x => P.uciOf(x) === opening.moves[ply]);
+      if (!m) break;                                     // cannot happen; not worth trusting
+    } else if (ply < openPlies){
       m = weightedPick(legal, x => openingWeight(st, x), rnd);
     } else {
       const lvl = rungs[st.turn === P.W ? 0 : 1];
@@ -280,7 +318,7 @@ async function playGame(engine, rungs, rnd, cfg){
     reps[key] = (reps[key] || 0) + 1;
     if (reps[key] >= 3) break;                           // threefold; nothing more to learn
   }
-  return { states, moves, uci, openPlies };
+  return { states, moves, uci, openPlies, opening: opening ? opening.name : null };
 }
 
 /* Extend a candidate into a real solution: the player's move, the engine's
@@ -304,10 +342,14 @@ async function buildLine(engine, startFen, first, cfg){
   const replies = {};
   let st = P.stateFromFEN(startFen);
   for (const u of moves) st = P.makeMove(st, uciFind(st, u));
+  const solver = P.stateFromFEN(startFen).turn;
   for (;;){
     const legal = P.legalMoves(st, st.turn);
     if (!legal.length) break;                          // mate delivered, or stalemate
-    if (materialSwing(startFen, st) >= CLEAR_WIN) break; // a clear material win
+    // Run to the payoff, not to the end of the doubt. A line that stops as
+    // soon as the answer is obvious stops before anything has been won, and
+    // the card is then reduced to promising a rook the player never takes.
+    if (R.paidOff(startFen, st, solver)) break;
     if (moves.length + 2 > cfg.maxPlies) break;
     // two lines wide, always. A single-line search prunes against the best move
     // it already has and can decline to mention a better one — which is the
@@ -331,10 +373,15 @@ async function buildLine(engine, startFen, first, cfg){
     });
     const ll = (look.lines || []);
     const a = R.lineScore(ll[0]), b = R.lineScore(ll[1]);
-    // still exactly one move to find? The turning point was established at the
-    // head of the line and is not re-argued here — rule 6 is only "keep going
-    // while there is something to find", and rule 8 is the cap above.
-    if (!R.stillSharp(a, b)) break;
+    /* Still one move to find? Past the head of the line the bar is lower than
+       the one that let the puzzle in: what is being asked here is not "is this
+       a turning point" — that was settled at ply 0 — but "does the player still
+       have to choose". A second move that is merely clearly best is still a
+       move they have to see, and holding the entry bar all the way down would
+       stop every line before its payoff, which is the fault being fixed. It is
+       not zero either: a move with a real alternative would be marked wrong by
+       puzzleStep() for no reason. */
+    if (!R.stillChoosing(a, b)) break;
     const pm = uciFind(next, ll[0].best);
     if (!pm) break;
     // from the defender's side, how much worse the second-best defence was —
@@ -407,7 +454,7 @@ async function seedRating(engine, fen, first){
  * play, and a puzzle whose premise is "your opponent blundered" should not be
  * built on a move nobody chose.
  */
-async function minePuzzles(engine, game, cfg, seen, wanted, tally){
+async function minePuzzles(engine, game, cfg, seen, wanted, tally, rung){
   const note = why => { if (tally) tally[why] = (tally[why] || 0) + 1; };
   const hits = [];
   /* The mistake has to be a move a bot chose. The first four to six plies are
@@ -454,6 +501,7 @@ async function minePuzzles(engine, game, cfg, seen, wanted, tally){
 
     const v = R.judge({ before, best, alt });
     if (!v.ok){ note(v.why); continue; }
+    note('~turning point');
     hits.push({
       i, st, fen, v,
       first: lines[0].best,
@@ -477,6 +525,7 @@ async function minePuzzles(engine, game, cfg, seen, wanted, tally){
     if (seen.has(h.fen)) continue;
     const first = uciFind(h.st, h.first);
     if (!first) continue;
+    note('~examined');
     const built = await buildLine(engine, h.fen, h.first, cfg);
     const rec = {
       fen: h.fen,
@@ -490,14 +539,23 @@ async function minePuzzles(engine, game, cfg, seen, wanted, tally){
     rec.themes = themesFor(rec);
     const dull = R.trivial(h.st, first, game.moves[h.i - 1], rec.themes, rec.moves.length);
     if (dull){ note(dull); continue; }
+    /* And the question the numbers cannot ask: would a person have to work for
+       it? A position can be a turning point with one clearly best move and
+       still be "they hung a rook, take the rook" — every engine gate passes it
+       and nobody learns anything. See obvious() in tools/puzzle_rules.js. */
+    const easy = R.obvious(rec);
+    if (easy){ note(easy); continue; }
     seen.add(h.fen);
     lastPly = h.i;
     rec.bucket = bucketFor(h.st);
+    if (game.opening) rec.opening = game.opening;
     rec.id = puzzleId(rec.bucket, rec.fen, rec.moves);
     rec.mistake = h.v.mistake;
     rec.gap = h.v.gap;
     rec.settleDepth = h.settleDepth;
-    rec.seedRating = await seedRating(engine, rec.fen, rec.moves[0]);
+    // priced against the ladder the player actually meets, which is the WASM
+    // build in the browser and not the judge
+    rec.seedRating = await seedRating(rung || engine, rec.fen, rec.moves[0]);
     note('kept');
     note('kept:' + rec.bucket);
     found.push(rec);
@@ -590,14 +648,35 @@ async function main(){
     console.log('re-cutting ladders from %s, no engine needed', cfg.poolsIn);
     return finish(cfg, pools, started, (carried && carried.__played) || 0, carried);
   }
-  const pool = new Pool(cfg.jobs);
+  /* Two pools, and the split is the point. `pool` is the native Stockfish 18
+     that decides whether a position is a puzzle; `rungs` is the vendored WASM
+     build, which plays the games and prices the difficulty, because both of
+     those have to be the engine the player meets in the browser. Paired by
+     engine slot so a worker always uses its own of each. */
+  const pool = new Pool(cfg.jobs, {
+    native: true, threads: cfg.threads, hash: cfg.hash, wdl: true
+  });
+  const rungs = new Pool(cfg.jobs);
+  await pool.engines[0].ready;
+  console.log('  judge: ' + (pool.engines[0].id || 'unknown') + '  ·  bots: vendored WASM build' +
+              '  ·  sweep ' + cfg.scanDepth + ', confirm ' + cfg.confirmDepth);
   /* A forked child outlives the parent that forked it on Unix, so a run stopped
      with Ctrl-C or a kill leaves a dozen Stockfish processes behind chewing
      through the machine — and the next person to go looking for them reaches
      for a pattern kill, which is how somebody else's run dies too. Stopping
      this one has to stop its own engines and nothing else's. */
+  /* And print the tally on the way out. It is the only record of *why*
+     candidates were refused — the pool file holds what was kept and nothing
+     about what was not — and it lives in this process's memory. Two comparison
+     runs have already been stopped early and lost their rejection rates
+     because this printed only on the normal path. */
   for (const sig of ['SIGINT', 'SIGTERM'])
-    process.on(sig, () => { pool.quit(); process.exit(130); });
+    process.on(sig, () => {
+      pool.quit(); rungs.quit();
+      console.log('\n  stopped early after ' + played + ' games');
+      reportTally(tally);
+      process.exit(130);
+    });
   const seen = new Set();
   // Why candidates were refused, counted. A run that looks at a hundred
   // thousand positions and keeps two hundred is only legible as a tally, and
@@ -611,40 +690,63 @@ async function main(){
   // with a flat --games count there is no quota to fill, so nothing is ever full
   const full = () => need > 0 &&
     Object.keys(pools).filter(hunting).every(b => pools[b].length >= need);
-  let played = 0;
+  let played = cfg.from;
 
+  /* One queue for the whole run, not a barrier every `jobs` games.
+   *
+   * This used to hand out a batch the size of the engine pool and wait for all
+   * of it before handing out the next. Game length varies enormously — a sharp
+   * position at 2000 can take an hour to mine while its batch-mates take two
+   * minutes — so the pool ran at the speed of its slowest member and everything
+   * else idled. It was not a small effect: one production run spent nine hours
+   * with one engine of seven working and the machine 80% idle.
+   *
+   * pool.map() already hands each engine the next item as soon as it is free,
+   * so the fix is simply to give it every game at once and let it schedule.
+   * The checkpoint moves inside, and `played` becomes a count of games that
+   * have actually finished rather than of batches dispatched — which is what
+   * it always claimed to be. */
   const cap = cfg.games || cfg.maxGames;
-  while (played < cap && !full()){
-    const batch = [];
-    for (let k = 0; k < cfg.jobs && played + k < cap; k++) batch.push(played + k);
-    await pool.map(batch, async (n, engine) => {
-      const rnd = mulberry32(cfg.seed * 1000003 + n);
-      const a = rnd() * PLAY_RUNGS.length | 0;
-      const b = Math.max(0, Math.min(PLAY_RUNGS.length - 1,
-        a + (rnd() * (2 * cfg.spread + 1) | 0) - cfg.spread));
-      const rungs = [P.levelFor(PLAY_RUNGS[a]), P.levelFor(PLAY_RUNGS[b])];
-      const game = await playGame(engine, rungs, rnd, cfg);
-      for (const p of await minePuzzles(engine, game, cfg, seen, wanted, tally)) pools[p.bucket].push(p);
-    });
-    played += batch.length;
-    /* Checkpoint after every batch, not at the end. A full run is over an hour
-       and a scarce track can be several; a tool that only writes when it is
-       finished is a tool nobody can stop, and "let it run, we cannot afford to
-       lose it" is how a run nobody wanted keeps going. With the pool on disk,
-       killing the run costs one batch and --poolsIn cuts the ladders from what
-       it did find. */
+  const queue = [];
+  for (let n = cfg.from; n < cap; n++) queue.push(n);
+  const save = () => {
     if (cfg.poolsOut) fs.writeFileSync(cfg.poolsOut, JSON.stringify(pools));
     process.stdout.write('\r  ' + played + ' games  ·  ' +
       Object.entries(pools).map(([b, l]) => b.slice(0, 3) + ' ' + l.length).join('  ·  ') + '   ');
-  }
+  };
+  await pool.map(queue, async (n, engine) => {
+    if (full()) return;                       // the quota filled while this waited
+    const rnd = mulberry32(cfg.seed * 1000003 + n);
+    const ladder = cfg.rungs ? cfg.rungs.split(',').map(Number) : PLAY_RUNGS;
+    const a = rnd() * ladder.length | 0;
+    const b = Math.max(0, Math.min(ladder.length - 1,
+      a + (rnd() * (2 * cfg.spread + 1) | 0) - cfg.spread));
+    const levels = [P.levelFor(ladder[a]), P.levelFor(ladder[b])];
+    const bot = rungs.engines[engine.slot];
+    const game = await playGame(bot, levels, rnd, cfg);
+    for (const p of await minePuzzles(engine, game, cfg, seen, wanted, tally, bot))
+      pools[p.bucket].push(p);
+    /* Checkpoint on every finished game now rather than every batch. A pool is
+       a few hundred records, so the write costs nothing next to the search that
+       produced it, and it means a run can be stopped at any moment and lose at
+       most the games still in flight. */
+    played++;
+    save();
+  });
   pool.quit();
+  rungs.quit();
   console.log('');
+  reportTally(tally);
+  return finish(cfg, pools, started, played, tally);
+}
+
+/** Why candidates were refused, counted — printed however the run ends. */
+function reportTally(tally){
   const total = Object.values(tally).reduce((a, b) => a + b, 0);
   console.log('  candidates judged: ' + total);
   for (const [why, n] of Object.entries(tally).sort((a, b) => b[1] - a[1]))
     console.log('    ' + why.padEnd(18) + String(n).padStart(6) + '   ' +
                 (100 * n / (total || 1)).toFixed(1) + '%');
-  return finish(cfg, pools, started, played, tally);
 }
 
 function finish(cfg, pools, started, played, tally){
@@ -704,7 +806,8 @@ function writeReadme(cfg, tracks, pools, started, played, tally){
   // why candidates were refused, which is the honest picture of the standard:
   // a threshold is only arguable next to the count of what it turned away
   const judged = Object.entries(tally || {})
-    .filter(([k]) => k !== 'kept' && k.indexOf('kept:') !== 0 && k.indexOf('__') !== 0)
+    .filter(([k]) => k !== 'kept' && k.indexOf('kept:') !== 0 && k.indexOf('__') !== 0 &&
+                     k.indexOf('~') !== 0)
     .sort((a, b) => b[1] - a[1]);
   const total = judged.reduce((a, b) => a + b[1], 0) + ((tally && tally.kept) || 0);
   const refusals = judged

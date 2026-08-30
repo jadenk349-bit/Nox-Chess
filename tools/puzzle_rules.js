@@ -211,6 +211,18 @@ function mayPass(best, alt){
   return null;
 }
 
+/* Past the first move, the bar for "a move the player still has to find".
+   Lower than GAP_MIN, because the turning point is not re-argued at every ply
+   and holding the entry bar all the way down ends every line before its
+   payoff. Higher than nothing, because the board accepts one move and a
+   position with two equally good continuations would mark a good one wrong. */
+const GAP_CONTINUE = 100;
+function stillChoosing(a1, a2){
+  if (a1 === null || a2 === null) return false;
+  if (isMate(a1) && a1 > 0 && isMate(a2) && a2 > 0) return false;
+  return a1 - a2 >= GAP_CONTINUE;
+}
+
 /* Whether a line is still worth continuing past this ply — the same "one
    clearly superior move" test, without the turning-point half of it, because
    the turning point was established at the head of the line and is not
@@ -426,9 +438,188 @@ function passed(st, sq, color){
   return true;
 }
 
+/* ------------------------------------------------------------- the payoff
+ *
+ * Where a solution is allowed to stop.
+ *
+ * The old rule was "while there is still exactly one strong move", which ends
+ * a line at the moment the answer stops being in doubt — reliably a move or
+ * two before anything happens. The player finds the combination and the puzzle
+ * congratulates them on a position where nothing has been won yet, and the
+ * card has to say "this eventually wins the rook" about a rook still standing
+ * on the board. That is the complaint, and it is a fair one: the payoff is the
+ * thing being taught, and it belongs inside the puzzle.
+ *
+ * So a line now runs until one of these is true on the board:
+ *
+ *   - the material is actually in hand, and safely (a piece hanging back is
+ *     not material won, which is what caught out the old card);
+ *   - it is mate;
+ *   - there is nothing further to find and no payoff is coming, in which case
+ *     the puzzle is judged on what it did achieve, not on a promise.
+ *
+ * PAYOFF is a minor piece rather than a pawn on purpose: "wins a pawn" is
+ * rarely the point of a combination, and stopping at one would bring back the
+ * same complaint one rung down.
+ */
+const PAYOFF = 280;
+
+/** Material the solver has actually banked, net of anything still loose. */
+function banked(startFen, st, solver){
+  const start = P.stateFromFEN(startFen);
+  const gain = P.materialFor(st, solver) - P.materialFor(start, solver);
+  // whatever of ours the opponent can take back is not in hand yet
+  const them = P.other(solver);
+  let loose = 0;
+  for (let i = 0; i < 64; i++){
+    const p = st.b[i];
+    if (!p || p.c !== solver || p.t === 'K') continue;
+    const cost = P.see(st, i, them);
+    if (cost > loose) loose = cost;
+  }
+  return gain - (st.turn === them ? loose : 0);
+}
+
+/** Has the point of the combination happened yet? */
+function paidOff(startFen, st, solver){
+  if (!P.legalMoves(st, st.turn).length) return true;          // mate or stalemate
+  return banked(startFen, st, solver) >= PAYOFF;
+}
+
+/* --------------------------------------------- would a human have to think?
+ *
+ * Everything above asks whether the *engine* has a clear answer. None of it
+ * asks whether a person would have to find it, and the two are not the same
+ * question — which is the fault this section exists to fix. A corpus built on
+ * the numbers alone fills up with the same puzzle over and over: the opponent
+ * puts a rook where it can be taken, the eval swings six hundred centipawns,
+ * exactly one move is best, and the answer is "take the rook". Every gate
+ * above passes it. No player learns anything from it.
+ *
+ * So there is a second standard, and it is about the *shape* of the position
+ * rather than its evaluation:
+ *
+ *   1. the answer must not be announced by the move before it. A capture of
+ *      the piece that just moved, or of a piece the last move left loose, is
+ *      something a player sees rather than finds.
+ *   2. there must be something left to calculate. One move and the puzzle is
+ *      over is a puzzle whose whole content is noticing loose material —
+ *      unless the one move is quiet, in which case noticing it *is* the work.
+ *   3. the material must not all arrive on the first move, or the rest of the
+ *      line is bookkeeping.
+ *
+ * Each of the three is waived by a real idea. A capture that is also a
+ * sacrifice, a zwischenzug, a discovery, a deflection — those are moves you
+ * have to see *through*, and refusing them because they happen to take
+ * something would throw away the best puzzles in the set. This is the whole
+ * balance the rule has to strike: reject obvious captures, not forcing moves.
+ */
+
+/* The motifs that make a move worth finding whatever else it does. Read as:
+   if the answer carries one of these, the fact that it also takes a piece is
+   not what makes it findable, so the tests below stand down.
+ *
+ * Every entry has to be a property of *the move* — something you must see
+ * through in order to play it. That rules out three that look like they
+ * belong and do not, and getting this wrong is what made the first version of
+ * this list waive 703 of 888 puzzles:
+ *
+ *   defensiveResource  is the puzzle's *kind*, tagged on all 509 rescues. It
+ *                      says the position was bad, not that the move was hard.
+ *   trappedPiece       fires on any enemy piece with no square after the move,
+ *                      which is very often incidental to why the move is good.
+ *   mateThreat         is read off the final evaluation. Mate following a
+ *                      capture does not make the capture hard to spot.
+ *
+ * Four of the names below — interference, clearance, deflection, overload —
+ * are not emitted by themesOf() at all yet, deliberately, because no cheap
+ * test for them is trustworthy. They are listed so that the waiver already
+ * says what it means if one ever is. */
+const REAL_IDEA = [
+  'sacrifice', 'exchangeSacrifice', 'zwischenzug', 'discoveredAttack', 'doubleCheck',
+  'interference', 'clearance', 'deflection', 'removalOfDefender', 'overload',
+  'backRank', 'promotion', 'pawnBreakthrough', 'perpetual', 'stalemateResource'
+];
+
+// How much of the puzzle's whole material gain may already be on the board
+// after the first move before the rest of the line stops being a calculation.
+const AT_ONCE = 0.85;
+
+/**
+ * obvious(rec) -> a short reason the puzzle is too easy to be worth showing,
+ * or null when a human would actually have to work for it.
+ *
+ * Pure board reading, like trivial(): no engine, so the generator and the
+ * verifier can both afford to ask it of everything.
+ */
+function obvious(rec){
+  const st0 = P.stateFromFEN(rec.fen);
+  const solver = st0.turn, them = P.other(solver);
+  const first = uciFind(st0, rec.moves[0]);
+  if (!first) return 'unplayable';
+
+  const after = P.makeMove(st0, first);
+  const themes = rec.themes || [];
+  const mated = !P.legalMoves(after, after.turn).length && P.inCheck(after, after.turn);
+  const checks = P.inCheck(after, them);
+  const quiet = !first.cap && !checks;
+  // net of what it took: a bishop handed over for a queen is not a sacrifice
+  const sac = P.sacrificeSize(st0, first, after) - (first.cap ? P.VAL[first.cap.t] : 0) >= 200;
+  const motif = themes.some(t => t !== 'longGame');
+  const idea = sac || themes.some(t => REAL_IDEA.indexOf(t) >= 0);
+
+  /* The order of the three is about the *reason* rather than the verdict: a
+     one-move puzzle whose move takes the piece that just moved fails both
+     tests, and "takes the piece that just moved" is the useful thing to say
+     about it. Length is asked last so it never masks a sharper diagnosis. */
+
+  /* 1. The move before must not give the answer away. Both shapes of that: the
+        piece stepped onto a square the solver attacks, or it walked away and
+        left something of its own loose. Either way the player is reading the
+        board, not calculating. */
+  if (first.cap && rec.prev && rec.prev.fen && rec.prev.move && !idea){
+    const bst = P.stateFromFEN(rec.prev.fen);
+    const pm = uciFind(bst, rec.prev.move);
+    if (pm && P.see(st0, first.to, solver) > 0){
+      if (pm.to === first.to) return 'takes the piece that just moved';
+      if (P.see(bst, first.to, solver) <= 0) return 'takes what the last move hung';
+    }
+  }
+
+  /* Free material standing on its own — undefended, worth a piece or more,
+     and nothing else to the move. */
+  if (first.cap && !idea && P.VAL[first.cap.t] >= P.VAL.N &&
+      !P.defendersOf(st0, first.to, them).length &&
+      P.see(st0, first.to, solver) > 0) return 'free piece';
+
+  /* 3. The material must not all be in hand after one move. */
+  if (first.cap && !idea){
+    const immediate = P.see(st0, first.to, solver);
+    let st = st0;
+    for (const u of rec.moves){
+      const m = uciFind(st, u);
+      if (!m) break;
+      st = P.makeMove(st, m);
+    }
+    const total = P.materialFor(st, solver) - P.materialFor(st0, solver);
+    if (immediate > 0 && total <= immediate / AT_ONCE * 1.0 && total <= immediate + 60)
+      return 'won at once';
+  }
+
+  /* 4. Something left to calculate. A solution that ends on its first move is
+        the shape of "notice the loose piece" — except when the move is quiet,
+        where seeing it at all is the whole exercise, and that is a kind of
+        puzzle worth keeping. */
+  if (mated && rec.moves.length === 1) return 'mate in one';
+  if (rec.moves.length < 3 && !(quiet && motif)) return 'one move';
+
+  return null;
+}
+
 module.exports = {
   MATE_SCORE, MISTAKE_MIN, GAP_MIN, BEFORE_MAX, BEFORE_SAVE,
   PUNISH_MIN, PUNISH_ALT_MAX, SAVE_MIN, SAVE_ALT_MAX,
-  lineScore, isMate, asSolver, judge, mayPass, stillSharp, trivial, uciFind,
-  themesOf, passed
+  lineScore, isMate, asSolver, judge, mayPass, stillSharp, stillChoosing,
+  GAP_CONTINUE, trivial, uciFind,
+  themesOf, passed, obvious, REAL_IDEA, PAYOFF, banked, paidOff
 };

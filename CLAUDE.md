@@ -209,6 +209,39 @@ writes it with the service key, and without one the server keeps ratings in
 memory. Guests get neither and keep both locally. Run
 `supabase-migrate-puzzles.sql` once, by hand, like `supabase-setup.sql`.
 
+**"One objectively best move" is only half the standard.** The other half is
+`obvious()`, and it exists because a corpus built on the numbers alone fills up
+with one puzzle: the opponent puts a rook where it can be taken, the evaluation
+swings six hundred centipawns, exactly one move is best, and the answer is
+"take the rook". Every engine gate passes it and nobody learns anything. So a
+puzzle is also refused when the move before it *announces* the answer (a
+capture of the piece that just moved, or of one it just left loose), when all
+the material is in hand after one move, or when there is nothing left to
+calculate. Each is waived by a real idea — but only ideas that are properties
+of *the move*: a first version of that waiver let 703 of 888 puzzles through
+because it counted `defensiveResource`, which is the *kind* label stamped on
+every rescue, as a tactic. Captures and checks are welcome; obvious ones are
+not.
+
+**A solution runs to its payoff, not to the end of the doubt.** `buildLine()`
+used to stop the moment there was no longer exactly one strong move, which is
+reliably a move or two before anything happens — so the player found the
+combination and the card had to promise a rook still standing on the board.
+`paidOff()` is the new stopping rule: the material actually in hand (net of
+anything of ours still hanging), or mate. Past the first move the bar for
+"a move they still have to find" drops from `GAP_MIN` to `GAP_CONTINUE`,
+because the turning point is settled at ply 0 and re-arguing it every ply is
+what stopped every line early.
+
+**The card may not promise what the line does not deliver.** A card once said
+"it leaves the rook on b7 hanging — it can simply be taken" while the verified
+follow-up never took it; both halves were produced honestly and the reader drew
+a false conclusion from their being next to each other. `auditClaims()` in
+`tools/puzzle_words.js` re-reads every sentence against the board the line
+actually reaches and strikes anything it cannot justify — a hedged false
+sentence is still a false sentence. Explanations are therefore written *last*,
+after the moves, the score and the follow-up are locked.
+
 **What makes a position a puzzle lives in one file, `tools/puzzle_rules.js`.**
 The first version of this generator had one criterion — "one strong move", the
 best beating the second best by 150cp — and the corpus it produced is the
@@ -354,6 +387,23 @@ double attack at all — every cheap test for them fires where they are not true
 and a wrong label is worse than a missing one, because the label is the thing
 the player is learning to see.
 
+**Study Alternatives is the one thing on the puzzle screen that needs an
+engine, and it is deliberately the last.** Solving asks nothing: the file
+carries its own explanation and its own follow-up, and `test_puzzle_flow.js`
+still asserts that solving, finishing and the follow-up never reach for one.
+The worker boots only when somebody presses the button — because what it
+analyses is a position *the player invented*, and no amount of precomputation
+can have that in the file. The board rewinds to the opponent's first defensive
+turn, any legal move for them is accepted, and the engine answers on that exact
+position. `engineAsk()` grew a `fen` option for it, since a puzzle has no game
+in front of it to describe as a move list from the start.
+
+The case that matters most is the honest one: if the defence the player tries
+is genuinely better than the one on file, it says so, and says that this makes
+the *puzzle* faulty. A stored defence that is not best defence is a broken
+puzzle, and inventing a refutation for it would hide exactly the bug the
+verifier is supposed to catch.
+
 **Study Board and Puzzles are separate features that share one library.**
 Study Board (`REV`, the review screen) explains *the game the player just
 finished*: it is reached only from the end-of-game overlay, replays `G.uci`,
@@ -377,7 +427,19 @@ in a forked process (Node needs `delete global.fetch` and a cwd of `engine/`,
 both explained there). Renaming anything in that file's DECLS/FNS lists breaks
 the tools loudly, which is the trade for having one implementation.
 
-**Two engines.** `blind-chess.html` contains a small negamax/alpha-beta search
+**Three engines, and which one answers matters.** `engine/` is the vendored
+pre-NNUE WASM Stockfish: one thread, 16MB of hash, and it is what the *browser*
+runs. The bot ladder in `LEVELS` was tuned against it, so anything imitating a
+rung — `seedRating()`, and the self-play games the generator mines — must keep
+asking it, because a difficulty measured against an engine the player never
+meets is a difficulty for nobody. The **judge** is the native `stockfish` on
+PATH (Stockfish 18, NNUE, as many threads and as much hash as it is given):
+nothing about whether a puzzle is *correct* should be decided by a build chosen
+for fitting in a web page. `tools/sf.js` has both behind one `ask()`, and
+`Pool(n, {native:true})` picks. Callers that need the browser's engine ask for
+it by name — see the two pools in `main()` in both tools.
+
+**Two engines in the page.** `blind-chess.html` contains a small negamax/alpha-beta search
 (`bestMove`) *and* drives the vendored Stockfish WASM worker over UCI (`SF`,
 `engineAsk`). The bot ladder (`LEVELS`) is Stockfish plus deliberate
 degradation — `pool`/`slop`/`wild` make weak rungs, since this build has Skill

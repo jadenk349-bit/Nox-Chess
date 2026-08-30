@@ -357,5 +357,142 @@ function explain(rec){
   return out;
 }
 
-module.exports = { explain, cpWord, whatWentWrong, keySentence, defenceSentence,
+/* ------------------------------------------------- does the card tell the truth?
+ *
+ * A card said "it leaves the rook on b7 hanging — it can simply be taken", and
+ * the verified follow-up never took it. Both halves were produced honestly:
+ * findMotifs() reported a fact about the position after the move, and the
+ * follow-up reported best play, and best play had better things to do. The
+ * card put them next to each other and the reader drew the obvious conclusion,
+ * which was false.
+ *
+ * That is the whole class of bug this guards. A sentence about a *threat* is
+ * fine; a sentence a reader will take as a *promise* has to be kept, and the
+ * only thing entitled to make promises is the position the line actually
+ * reaches. So every claim the card makes about winning material is checked
+ * against the board at the end of the solution and, where there is one, the
+ * end of the follow-up — and a claim that does not survive is removed rather
+ * than softened, because a hedged false sentence is still a false sentence.
+ *
+ * Returns the list of claims it had to strike, so a run can report them.
+ */
+
+const PIECE_OF = { pawn:'P', knight:'N', bishop:'B', rook:'R', queen:'Q' };
+
+/** Where the line — solution, and the follow-up if there is one — arrives. */
+function finalPosition(rec){
+  let st = P.stateFromFEN(rec.fen);
+  const walk = list => {
+    for (const u of list || []){
+      const t = step(st, u);
+      if (!t) return false;
+      st = t.next;
+    }
+    return true;
+  };
+  if (!walk(rec.moves)) return null;
+  const solutionEnd = st;
+  walk((rec.follow || {}).moves);
+  return { solutionEnd, end: st };
+}
+
+/**
+ * auditClaims(rec) -> [{ where, claim, why }]
+ *
+ * `rec.why` is edited in place: anything that cannot be justified is cut.
+ */
+function auditClaims(rec){
+  const struck = [];
+  const w = rec.why;
+  if (!w) return struck;
+  const pos = finalPosition(rec);
+  if (!pos) return struck;
+  const start = P.stateFromFEN(rec.fen);
+  const solver = start.turn;
+  const them = P.other(solver);
+
+  // what the whole line actually won, counted where it ends and net of
+  // anything of ours still hanging there
+  const won = R.banked(rec.fen, pos.end, solver);
+  const mated = !P.legalMoves(pos.end, pos.end.turn).length &&
+                P.inCheck(pos.end, pos.end.turn) && pos.end.turn === them;
+  // and which of their pieces are actually gone by the end
+  const before = {}, after = {};
+  for (const b of P.stateFromFEN(rec.fen).b) if (b && b.c === them) before[b.t] = (before[b.t] || 0) + 1;
+  for (const b of pos.end.b) if (b && b.c === them) after[b.t] = (after[b.t] || 0) + 1;
+  const captured = t => (before[t] || 0) > (after[t] || 0);
+
+  const cut = (bucket, i, text, why) => {
+    struck.push({ where: bucket + (i === undefined ? '' : '[' + i + ']'), claim: text, why });
+  };
+
+  /* Sentence by sentence. Each test is "would a reader take this as a promise,
+     and was it kept" — never "does the wording look risky". */
+  const check = (text, bucket, i) => {
+    if (!text) return text;
+    const keep = [];
+    for (const sentence of text.split(/(?<=\.)\s+/)){
+      const low = sentence.toLowerCase();
+      let bad = null;
+
+      // "it leaves the rook on b7 hanging — it can simply be taken"
+      const hang = low.match(/leaves the (pawn|knight|bishop|rook|queen) on ([a-h][1-8]) hanging/);
+      if (hang && !captured(PIECE_OF[hang[1]]) && !mated)
+        bad = 'the ' + hang[1] + ' on ' + hang[2] + ' is never taken in the line';
+
+      // "it wins the rook"
+      const wins = low.match(/wins the (pawn|knight|bishop|rook|queen)/);
+      if (!bad && wins && !captured(PIECE_OF[wins[1]]) && !mated)
+        bad = 'no ' + wins[1] + ' is captured in the line';
+
+      // "you come out a rook up"
+      const up = low.match(/comes out (a queen|a rook|a piece|the exchange|a pawn) up/);
+      if (!bad && up){
+        const need = { 'a queen':850, 'a rook':450, 'a piece':280, 'the exchange':150, 'a pawn':90 }[up[1]];
+        if (won < need) bad = 'only ' + Math.round(won) + 'cp is actually banked';
+      }
+
+      // "mate is forced from here" / "that is checkmate"
+      if (!bad && /checkmate|mate is forced|forces mate/.test(low) && !mated &&
+          !(typeof (rec.follow || {}).mate === 'number' && rec.follow.mate > 0))
+        bad = 'no mate is reached or forced in the verified line';
+
+      // "the <piece> on x is trapped — every square it can reach loses it"
+      const trap = low.match(/the (pawn|knight|bishop|rook|queen) on ([a-h][1-8]) is trapped/);
+      if (!bad && trap && !captured(PIECE_OF[trap[1]]) && !mated)
+        bad = 'the trapped ' + trap[1] + ' survives the line';
+
+      if (bad) cut(bucket, i, sentence, bad);
+      else keep.push(sentence);
+    }
+    return keep.join(' ');
+  };
+
+  w.mistake = check(w.mistake, 'mistake');
+  w.point   = check(w.point, 'point');
+  if (Array.isArray(w.moves))
+    w.moves.forEach((m, i) => { m.text = check(m.text, 'moves', i); });
+
+  /* A move left with nothing to say is worse than one with a modest sentence,
+     so anything stripped bare falls back to the plainly true thing. */
+  if (Array.isArray(w.moves)){
+    let st = P.stateFromFEN(rec.fen);
+    for (let i = 0; i < w.moves.length; i++){
+      const t = step(st, w.moves[i].uci);
+      if (!t) break;
+      if (!w.moves[i].text){
+        const ours = st.turn === solver;
+        w.moves[i].text = P.inCheck(t.next, P.other(st.turn)) ? 'It gives check.'
+          : ours ? 'It is the move the engine plays here.'
+                 : 'The engine’s own defence.';
+      }
+      st = t.next;
+    }
+  }
+  if (!w.point) w.point = pointSentence(P.stateFromFEN(rec.fen), pos.solutionEnd, solver,
+                                        (rec.eval || {}).end, rec.follow) || '';
+  return struck;
+}
+
+module.exports = { explain, auditClaims, finalPosition, cpWord, whatWentWrong, keySentence, defenceSentence,
                    pointSentence, sansOf, step };

@@ -116,6 +116,37 @@ for (var a1 = -1200; a1 <= 1200; a1 += 60)
 check('the short cut never drops a puzzle judge() would keep', wrong, 0);
 check('and it does stop most of them', stops > lets, true);
 
+console.log('\nWould a human have to think about it?\n');
+
+/* The gate the evaluation numbers cannot supply. Built on a real position: a
+   white rook on d1, a black rook on d5 that Black has just moved there. */
+const hangFen2 = '4k3/8/8/3r4/8/8/8/3RK3 w - - 0 1';
+const prevFen2 = '4k3/8/8/8/3r4/8/8/3RK3 b - - 0 1';   // ...Rd4-d5??
+const rec = (over) => Object.assign({
+  fen: hangFen2, prev: { fen: prevFen2, move: 'd4d5' },
+  moves: ['d1d5'], themes: ['hangingPiece']
+}, over || {});
+
+check('taking the piece they just moved there is not a puzzle',
+      R.obvious(rec()), 'takes the piece that just moved');
+check('nor is it when the line runs on and the material is already in hand',
+      R.obvious(rec({ moves: ['d1d5','e8e7','d5d7'] })), 'takes the piece that just moved');
+check('but a sacrifice is worth finding whatever it takes',
+      R.obvious(rec({ moves: ['d1d5','e8e7','d5d7'], themes: ['sacrifice'] })), null);
+check('and so is a discovery',
+      R.obvious(rec({ moves: ['d1d5','e8e7','d5d7'], themes: ['discoveredAttack'] })), null);
+check('a rescue is not "an idea" — every save carries that tag',
+      R.obvious(rec({ themes: ['hangingPiece','defensiveResource'] })),
+      'takes the piece that just moved');
+
+// length: one move is not a calculation unless the move is a quiet one
+const quietRec = {
+  fen: '4k3/8/8/8/8/8/8/R3K1N1 w - - 0 1', moves: ['g1f3'], themes: ['fork']
+};
+check('a one-move quiet answer is still worth finding', R.obvious(quietRec), null);
+check('a one-move capture is not',
+      R.obvious({ fen: hangFen2, moves: ['d1d5'], themes: ['fork'] }), 'free piece');
+
 console.log('\nIs there still something to find further down the line?\n');
 
 check('a clear best move keeps the line going', R.stillSharp(400, 100), true);
