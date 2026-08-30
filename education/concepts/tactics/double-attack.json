@@ -1,0 +1,75 @@
+{
+  "category": "tactical-motifs",
+  "subcategory": "material-winning motif",
+  "epistemic_type": "D",
+  "sources": [
+    "informant-encyclopedia-combinations",
+    "wikipedia-chess-tactic",
+    "chesstempo-tactical-motifs",
+    "chesscom-tactics-38"
+  ],
+  "source_confidence": "high",
+  "status": {
+    "stage": "researched",
+    "last_updated": "2026-08-31",
+    "open_questions": []
+  },
+  "origin": {
+    "attributed_to": [],
+    "first_source": "informant-encyclopedia-combinations",
+    "year": null,
+    "certainty": "unknown",
+    "notes": "Tactical motifs are descriptive pattern names of long and mostly anonymous usage. The Chess Informant classification is cited as a standard enumeration, not as the origin of the term.",
+    "competing_claims": []
+  },
+  "id": "double-attack",
+  "canonical_name": "Double attack",
+  "difficulty": "beginner",
+  "alternate_names": [
+    "dual threat"
+  ],
+  "broader_concepts": [],
+  "related_concepts": [
+    "fork",
+    "discovered-attack"
+  ],
+  "definition_short": "Any move that creates two threats at once, whether by one piece or two.",
+  "definition_long": "The general case of which the fork is the special case. A fork is a double attack by a single piece; a discovered attack is a double attack by two pieces, one moving and one revealed. Chess Informant treats 'Double Attack' as a top-level theme.\n\nSources disagree on whether 'fork' and 'double attack' are synonyms. Chess.com treats them as one theme; Wikipedia and Chess Tempo keep the distinction that a fork is by one unit. This record follows the narrower usage and records the conflation as an alternate usage rather than an error.",
+  "epistemic_note": "Motif (D). The fork/double-attack boundary is a terminological disagreement between sources, recorded rather than resolved.",
+  "recognition": {
+    "preconditions": [
+      "After the move, two distinct threats exist that cannot both be met"
+    ],
+    "indicators_for": [
+      "The two threats require different defensive resources",
+      "One threat is a check, forcing the reply"
+    ],
+    "indicators_against": [
+      "A single defensive move parries both",
+      "One 'threat' is not real because the target is adequately defended"
+    ],
+    "detector": "threatsAfterMove",
+    "detectability": "heuristic"
+  },
+  "exceptions": [
+    "A single move can sometimes answer both threats — an interposition that also defends, or a counter-check."
+  ],
+  "limitations": [
+    "'Threat' is broader than 'attacks a piece' and includes mate threats and positional threats, which makes fully mechanical detection unreliable."
+  ],
+  "explanation_templates": {
+    "beginner": "This move makes two threats at once, and only one can be answered.",
+    "intermediate": "A double attack: two threats, needing two different answers.",
+    "advanced": "Double attack (Informant theme j). Distinguish from a fork proper, which is a double attack by a single unit.",
+    "hedge": ""
+  },
+  "terminology": {
+    "beginner_words": [
+      "two threats at once"
+    ],
+    "advanced_words": [
+      "double attack"
+    ],
+    "avoid": []
+  }
+}

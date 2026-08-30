@@ -1,0 +1,142 @@
+# Education System — Progress Log
+
+Newest entry first. `state/research-state.json` is the machine-readable version;
+this file is the narrative, and records reasoning that does not fit in JSON.
+
+---
+
+## Session 1 — scaffolding, methodology, pilot concept
+
+### Codebase inspection (done before any design)
+
+- The client is one file, `blind-chess.html` (~4.8k lines), navigated by
+  `/* ==== TITLE ==== */` banners. 17 script sections.
+- **Study Board** is not a separate feature: it is the post-game review
+  (`REV`, `reviewGoto`, `reviewRender`), reached by the `endClose` button.
+- **LESSON** and **PUZZLE** exist in the header nav but every entry carries the
+  `soon` class. They are stubs — nothing to preserve, nothing to break.
+- **Existing explanation system**, the thing this project extends:
+  - `judgeMove(loss, playedWasBest, gap)` -> `??` / `?` / `!!` / `!`, purely from
+    centipawn loss plus the MultiPV gap.
+  - `describeBest(st, m, res, lossByPlayer)` -> up to three observable facts
+    (mate, check, capture, promotion, castling, escaping an attack, leaving the
+    back rank, taking central space), else the fallback *"No single tactic — it
+    is simply the soundest of the options."*
+  - Its own comment: *"This is not chess understanding, and it only ever claims
+    what it can see."* That is an accurate self-assessment and names the gap.
+- **Engine integration**: `SF` object, one lazily-started worker running the
+  vendored single-threaded `engine/stockfish.wasm` (Stockfish 10), spoken to in
+  UCI via `engineAsk(moves, opt)`. Results are cached on a key that includes
+  strength settings. Review asks at `{skill:20, multipv:2}`, 500 ms per position.
+  Notably it must never `setoption name Threads` — the comment records that doing
+  so wedges the build.
+- **No FEN anywhere in the codebase.** State is `{b, turn, cr, ep, half, full}`
+  with `b` a 64-array of `{c,t,id}`, index 0 = a8. The client only ever sends
+  `position startpos moves ...`.
+
+  This is a real prerequisite. Every stored example position, every puzzle, every
+  textbook position is a FEN. A FEN reader/writer that round-trips against the
+  existing state shape has to exist before the runtime half of this system can
+  work. It is purely additive and changes no existing behaviour. **Not yet
+  written** — deliberately deferred until the knowledge base justifies it.
+
+### Decisions taken
+
+- **Storage: one JSON file per concept**, under `concepts/<category>/`.
+  Chosen over a single large file so git diffs stay readable and two sessions
+  can work without merge conflicts. A committed `education-bundle.json` will be
+  compiled from them, so the app still has no build step.
+- **Tools are standard-library only.** `requirements.txt` has exactly one
+  dependency (PyJWT) and the Dockerfile is proud of it. `sf_analyse.py` speaks
+  raw UCI over a pipe; `validate_kb.py` hand-rolls the schema checks rather than
+  pulling in `jsonschema`. `python-chess` is optional, for SAN in tool output.
+- **Research uses a native Stockfish 18, not `engine/stockfish.wasm`.** The
+  vendored build is GPL, checksum-verified, single-threaded Stockfish 10, and
+  exists to be served to browsers. Research must not touch it, and a 2018 engine
+  is the wrong instrument for adjudicating theory anyway.
+- **20 domains / 85 areas**, mapped one-to-one against the 85 numbered items in
+  the project brief so scope coverage stays auditable (`brief_items` in
+  `taxonomy.json`). All 85 are accounted for; item 85 is the escape hatch for
+  categories discovered later.
+
+### Tooling built and verified
+
+- `tools/sf_analyse.py` — probed `Stockfish 18`, 12 cores available.
+  One real bug found and fixed during verification: piping every UCI command at
+  once and closing stdin makes Stockfish read `quit` mid-search and exit before
+  printing a single `info` line, so it silently returned a bestmove with no
+  evaluation. It now streams and waits for `bestmove`. Worth remembering — the
+  broken version *looked* like it worked.
+- `tools/validate_kb.py` — schema, enums, id uniqueness, referential integrity
+  across concepts/sources/coverage. Currently clean.
+
+### Pilot concept: principle of two weaknesses
+
+Researched and engine-validated ahead of the scaffolding, and used to prove the
+schema end to end. Findings that shaped the methodology:
+
+1. **The received attribution is half wrong, and only the primary text showed
+   it.** Every secondary source says Nimzowitsch formulated the principle in
+   *My System* (1925). The full text shows the idea is there — Ch. 5/VI
+   "Manoeuvring", §2(b) is literally headed *"Two pawn weaknesses, in this case
+   c3 and h3"* — but he calls it *manoeuvring* or *tacking*, never "the principle
+   of two weaknesses". That name comes from the Soviet line
+   (Belavenets -> Dvoretsky -> Shereshevsky). Both halves of the received claim
+   are half-right. This is why `origin.certainty` exists as a field.
+
+2. **Controlled pairs are the strongest validation available.** Two positions
+   differing only in the presence of a distant second target: mate in 23 versus
+   a dead draw. Reproducible from the FENs by anyone.
+
+3. **Respected sources overstate.** Shereshevsky: a position "would be drawn"
+   with the kings placed differently — engine says +0.75, not 0.00. Mechanism
+   confirmed and large; absolute claim not supported.
+
+4. **Annotators' punctuation is not an evaluation.** Dvoretsky and British Chess
+   News mark 42...h5 as necessary and 42...Kf6 as an inaccuracy in
+   Kotov-Pachman. At depth 32 the gap is **0.05 pawns**. The second weakness
+   created *practical* difficulty, not objective loss — Pachman held for another
+   thirteen moves and lost to a later error. A concept can be practically
+   decisive and objectively near-irrelevant at the same time, and the record has
+   to be able to say so.
+
+5. **Disagreements get adjudicated, not flattened.** Capablanca called 43...Nb4
+   a trap; Myers said Black wins anyway. Engine: Capablanca's concrete line is
+   0.00 so the trap is real, Myers is right that Black can deviate and win, and
+   *neither* noticed 43...Nb4 is 1.2 pawns better than the move actually played.
+   All three recorded.
+
+Side benefit: a FEN hand-decoded from Dvoretsky's diagram font was verified by
+replaying the entire published continuation through move 55 — it is legal
+throughout, which independently confirms the transcription.
+
+### Phase 5 results — tactics controlled pairs
+
+Three pairs built, each differing in exactly one variable.
+
+| Concept | Positive | Negative (one variable changed) | Swing |
+|---|---|---|---|
+| Fork | Nc7+ **+7.39**, best, +2.21 clear | bishop guards c7: same move **+0.57**, ranked last | **6.82** |
+| Back-rank mate | Re8 **mate in 1** | h7-h6 luft: same move **mate in 30**, not best | #1 -> #30 |
+| Pin | d4-d5 **+7.26**, +1.57 clear | king castled, no pin: d4-d5 **+5.40**, still best, +0.28 clear | 1.86 |
+
+The pin result is the important one and is now written into METHODOLOGY.md as a governing rule:
+the same move was the engine's first choice with and without the pin, so best-move agreement
+cannot be used to decide that a concept applies. The usable signal is the margin over the
+runner-up, plus the paired delta.
+
+The fork pair is the cleanest false-match demonstration in the base so far: identical geometry,
+6.82 pawns apart, decided solely by whether one defender covers the landing square. Any fork
+detector that stops at geometry will produce exactly this error.
+
+Housekeeping: a depth-34 analysis of the Kotov-Pachman move-55 rook ending failed to converge in
+16 minutes and was starving a parallel run of CPU; it was killed and recorded as an open question
+on the two-weaknesses concept rather than dropped. Lesson: cap simplified endings at depth 28-30,
+or install Syzygy tablebases.
+
+### Next
+
+Complete the pilot concept record, then work the taxonomy in dependency order:
+`rules-terminology` and `board-geometry` first (they are prerequisites for the
+recognition criteria of everything else), then `tactics`, then the positional
+domains.

@@ -1,0 +1,79 @@
+{
+  "category": "official-rules",
+  "subcategory": "basic rules of play",
+  "epistemic_type": "A",
+  "sources": [
+    "fide-laws-2023",
+    "fide-laws-2023-pdf"
+  ],
+  "source_confidence": "high",
+  "status": {
+    "stage": "researched",
+    "last_updated": "2026-08-31",
+    "open_questions": []
+  },
+  "id": "dead-position",
+  "canonical_name": "Dead position",
+  "difficulty": "intermediate",
+  "alternate_names": [
+    "dead drawn (rules sense)"
+  ],
+  "definition_short": "A position from which neither player can checkmate by ANY series of legal moves. The game is drawn immediately.",
+  "definition_long": "FIDE Art. 5.2.2: 'The game is drawn when a position has arisen in which neither player can checkmate the opponent's king with any series of legal moves. The game is said to end in a dead position. This immediately ends the game...'\n\nThis is broader and stricter than the 'insufficient material' test most software implements. 'Insufficient material' asks whether the material present could ever mate; a dead position asks whether mate is reachable from THIS position by any legal continuation, which includes blocked positions with plenty of material. Conversely, K+B vs K+B on the same colour is insufficient in the FIDE sense, whereas K+N vs K+N is NOT automatically dead, because a helpmate exists.\n\nNox Chess should not conflate the two terms when explaining a draw.",
+  "epistemic_note": "Official rule (A). The commonly used 'insufficient material' shortcut is an implementation convention, not the FIDE rule, and is classified separately.",
+  "origin": {
+    "attributed_to": [],
+    "first_source": "fide-laws-2023",
+    "year": null,
+    "certainty": "unknown",
+    "notes": "",
+    "competing_claims": []
+  },
+  "recognition": {
+    "preconditions": [
+      "No sequence of legal moves from this position ends in checkmate"
+    ],
+    "indicators_for": [
+      "K vs K",
+      "K+B vs K",
+      "K+N vs K",
+      "K+B vs K+B with bishops on the same colour"
+    ],
+    "indicators_against": [
+      "Any pawn remains on the board",
+      "A rook or queen remains on the board",
+      "K+N+N vs K — mate is not forcible but is not impossible, so the position is not dead"
+    ],
+    "detector": null,
+    "detectability": "heuristic"
+  },
+  "exceptions": [
+    "K+N+N vs K is a draw in practice but is NOT a dead position: mate is legally reachable with cooperation, so the game does not end automatically.",
+    "A completely blocked position with full material can be a dead position even though material is ample."
+  ],
+  "limitations": [
+    "Deciding the general case is hard; engines and servers approximate it with a material test. The approximation is correct in the common cases and wrong at the edges."
+  ],
+  "related_concepts": [
+    "insufficient-material",
+    "stalemate"
+  ],
+  "explanation_templates": {
+    "beginner": "Neither side has enough left to deliver checkmate, so the game is a draw.",
+    "intermediate": "Dead position: no legal sequence of moves from here could ever produce checkmate, so the game ends drawn at once.",
+    "advanced": "Art. 5.2.2. Note this is broader than the 'insufficient material' test implemented by most software.",
+    "hedge": ""
+  },
+  "terminology": {
+    "beginner_words": [
+      "not enough pieces to checkmate"
+    ],
+    "advanced_words": [
+      "dead position",
+      "Art. 5.2.2"
+    ],
+    "avoid": [
+      "insufficient material (when the FIDE rule is meant)"
+    ]
+  }
+}

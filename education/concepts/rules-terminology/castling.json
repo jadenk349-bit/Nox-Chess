@@ -1,0 +1,86 @@
+{
+  "category": "official-rules",
+  "subcategory": "basic rules of play",
+  "epistemic_type": "A",
+  "sources": [
+    "fide-laws-2023",
+    "fide-laws-2023-pdf"
+  ],
+  "source_confidence": "high",
+  "status": {
+    "stage": "researched",
+    "last_updated": "2026-08-31",
+    "open_questions": []
+  },
+  "id": "castling",
+  "canonical_name": "Castling",
+  "alternate_names": [
+    "castling kingside",
+    "castling queenside",
+    "short castling",
+    "long castling",
+    "O-O",
+    "O-O-O"
+  ],
+  "difficulty": "beginner",
+  "definition_short": "A single move of king and rook: the king moves two squares towards the rook, and that rook jumps to the square the king crossed.",
+  "definition_long": "FIDE Art. 3.8.2: 'a move of the king and either rook of the same colour along the player's first rank, counting as a single move of the king and executed as follows: the king is transferred from its original square two squares towards the rook on its original square, then that rook is transferred to the square the king has just crossed.'\n\nArt. 3.8.2.1 — the right is LOST permanently if the king has already moved, or with a rook that has already moved. Art. 3.8.2.2 — castling is prevented TEMPORARILY if the king's square, the square it crosses, or the square it lands on is attacked, or if any piece stands between king and rook.\n\nThe lost/prevented distinction is the part implementations most often get wrong. Moving the king and returning it does not restore the right; a check that passes does restore the possibility.",
+  "epistemic_note": "Official rule. The permanent-vs-temporary distinction is explicit in the Laws.",
+  "origin": {
+    "attributed_to": [],
+    "first_source": "fide-laws-2023",
+    "year": null,
+    "certainty": "unknown",
+    "notes": "Historical development of castling not yet researched for this record.",
+    "competing_claims": []
+  },
+  "recognition": {
+    "preconditions": [
+      "King and the chosen rook are both on their original squares and neither has moved",
+      "No piece stands between them",
+      "The king is not in check, does not cross an attacked square, and does not land on one"
+    ],
+    "indicators_for": [
+      "Castling rights flag still set for that side and that rook"
+    ],
+    "indicators_against": [
+      "King or that rook has moved at any earlier point",
+      "King is currently in check",
+      "The crossed or destination square is attacked"
+    ],
+    "detector": "castlingRights",
+    "detectability": "mechanical"
+  },
+  "exceptions": [
+    "The ROOK may be attacked, and in queenside castling the b1/b8 square the rook crosses may be attacked — only the king's three squares matter.",
+    "Rights once lost never return, even if the piece goes back to its original square."
+  ],
+  "limitations": [
+    "Affects position identity for repetition: Art. 9.2.3.2 — positions are not the same if a king had castling rights with a rook that has not moved but forfeited them after moving."
+  ],
+  "related_concepts": [
+    "threefold-repetition"
+  ],
+  "explanation_templates": {
+    "beginner": "Castling moves your king two squares towards a rook and hops that rook over to the other side — it tucks the king away and brings the rook into play in one move.",
+    "intermediate": "Castling is legal only if neither piece has moved, the squares between are empty, and the king is not in, through, or into check. Note the rook may be attacked.",
+    "advanced": "Art. 3.8.2. Distinguish rights lost permanently (3.8.2.1) from castling prevented temporarily (3.8.2.2); the latter can be restored.",
+    "hedge": ""
+  },
+  "terminology": {
+    "beginner_words": [
+      "castle",
+      "tuck the king away"
+    ],
+    "advanced_words": [
+      "castling rights",
+      "kingside",
+      "queenside",
+      "O-O",
+      "O-O-O"
+    ],
+    "avoid": [
+      "you must castle early"
+    ]
+  }
+}

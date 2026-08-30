@@ -1,0 +1,78 @@
+{
+  "category": "tactical-motifs",
+  "subcategory": "material-winning motif",
+  "epistemic_type": "D",
+  "sources": [
+    "informant-encyclopedia-combinations",
+    "wikipedia-chess-tactic",
+    "chesstempo-tactical-motifs",
+    "chesscom-tactics-38"
+  ],
+  "source_confidence": "high",
+  "status": {
+    "stage": "researched",
+    "last_updated": "2026-08-31",
+    "open_questions": []
+  },
+  "origin": {
+    "attributed_to": [],
+    "first_source": "informant-encyclopedia-combinations",
+    "year": null,
+    "certainty": "unknown",
+    "notes": "Tactical motifs are descriptive pattern names of long and mostly anonymous usage. The Chess Informant classification is cited as a standard enumeration, not as the origin of the term.",
+    "competing_claims": []
+  },
+  "id": "x-ray",
+  "canonical_name": "X-ray",
+  "difficulty": "advanced",
+  "alternate_names": [
+    "x-ray attack",
+    "x-ray defence",
+    "through-attack"
+  ],
+  "related_concepts": [
+    "pin",
+    "skewer",
+    "battery"
+  ],
+  "definition_short": "A line piece acts through another piece — attacking or defending beyond it.",
+  "definition_long": "A bishop, rook or queen exerts influence through an intervening unit. Two distinct uses share the name, and Chess Tempo maintains them as separate tags:\n\nX-RAY ATTACK — the line piece attacks a target through an intervening piece, so the attack becomes real the moment the blocker leaves.\nX-RAY DEFENCE — the line piece defends a friendly unit through an intervening piece, so a capture on that square is answered by a recapture that was not visible.\n\nSources also disagree about whether x-ray is distinct from pin and skewer at all; some treat all three as one family of line effects. This record keeps x-ray for the case where the effect operates THROUGH a piece without compelling it to move, which is what distinguishes it from a pin or skewer.",
+  "epistemic_note": "Motif (D). Terminology genuinely contested: some sources fold x-ray into pin/skewer. The boundary chosen here is stated explicitly rather than presented as settled.",
+  "recognition": {
+    "preconditions": [
+      "A line piece, an intervening unit, and a further square of interest are collinear"
+    ],
+    "indicators_for": [
+      "The defence or attack becomes live as soon as the blocker moves",
+      "A capture on the far square is met by a recapture along the x-ray line"
+    ],
+    "indicators_against": [
+      "A second blocker sits further along the line",
+      "The far target is irrelevant"
+    ],
+    "detector": "lineAlignment",
+    "detectability": "mechanical"
+  },
+  "exceptions": [
+    "An x-ray defence is illusory if the defending piece is itself pinned."
+  ],
+  "limitations": [
+    "The pin/skewer/x-ray boundary is not agreed between sources; an explanation should prefer the more specific term when the position warrants it."
+  ],
+  "explanation_templates": {
+    "beginner": "This piece is working right through another piece — the moment the piece in the middle moves, the attack is real.",
+    "intermediate": "An x-ray: the {piece} defends {square} through {blocker}, so the recapture is available.",
+    "advanced": "X-ray. Prefer 'pin' or 'skewer' where the front piece is compelled; reserve x-ray for through-effects that compel nothing.",
+    "hedge": "Sources differ on where x-ray ends and pin or skewer begins."
+  },
+  "terminology": {
+    "beginner_words": [
+      "works through another piece"
+    ],
+    "advanced_words": [
+      "x-ray attack",
+      "x-ray defence"
+    ],
+    "avoid": []
+  }
+}

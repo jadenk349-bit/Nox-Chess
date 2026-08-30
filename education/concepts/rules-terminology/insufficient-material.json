@@ -1,0 +1,76 @@
+{
+  "category": "official-rules",
+  "subcategory": "implementation convention",
+  "epistemic_type": "I",
+  "sources": [
+    "fide-laws-2023",
+    "fide-laws-2023-pdf"
+  ],
+  "source_confidence": "medium",
+  "status": {
+    "stage": "researched",
+    "last_updated": "2026-08-31",
+    "open_questions": []
+  },
+  "id": "insufficient-material",
+  "canonical_name": "Insufficient material",
+  "difficulty": "beginner",
+  "alternate_names": [
+    "insufficient mating material",
+    "no mating material"
+  ],
+  "definition_short": "The common software test for an automatic draw: the material on the board could not force mate. It approximates, but is not identical to, FIDE's 'dead position'.",
+  "definition_long": "'Insufficient material' is not a term in the FIDE Laws. It is the convention chess servers and engines use to implement Art. 5.2.2 automatically, normally covering K vs K, K+B vs K, K+N vs K, and (in most implementations) K+B vs K+B with bishops on the same colour.\n\nIt differs from the rule in both directions. It misses dead positions that have ample material but are completely blocked. And implementations disagree at the edges — notably K+N+N vs K, which is drawn in practice but is not a dead position under Art. 5.2.2 because a helpmate exists.\n\nRecorded as terminology (type I) rather than as an official rule, precisely so the Education System does not present a convention as a Law.",
+  "epistemic_note": "Type I, not A. This is the single clearest case in the rules area where a widely used term is a convention rather than the codified rule, and it is the reason the epistemic typing exists.",
+  "origin": {
+    "attributed_to": [],
+    "first_source": null,
+    "year": null,
+    "certainty": "unknown",
+    "notes": "A software convention with no single origin; not codified by FIDE.",
+    "competing_claims": []
+  },
+  "recognition": {
+    "preconditions": [
+      "Only kings, or a king and a single minor piece, remain for the side in question"
+    ],
+    "indicators_for": [
+      "K vs K",
+      "K+B vs K",
+      "K+N vs K",
+      "K+B vs K+B same colour squares"
+    ],
+    "indicators_against": [
+      "Any pawn, rook or queen on the board"
+    ],
+    "detector": null,
+    "detectability": "mechanical"
+  },
+  "exceptions": [
+    "Implementations differ on K+N+N vs K and on K+B vs K+N; do not state a universal rule.",
+    "Blocked positions with full material are dead under the Laws but are not caught by this test."
+  ],
+  "limitations": [
+    "Because implementations vary, an explanation should say what THIS program does, not what 'the rules' say."
+  ],
+  "related_concepts": [
+    "dead-position"
+  ],
+  "explanation_templates": {
+    "beginner": "There is not enough material left on the board to checkmate, so the game is drawn.",
+    "intermediate": "Insufficient material: neither side can force mate with what remains, so the game ends in a draw.",
+    "advanced": "The implementation convention for Art. 5.2.2. Note it is narrower than 'dead position' and varies between programs.",
+    "hedge": "This is how most software implements the rule, not a phrase from the FIDE Laws themselves."
+  },
+  "terminology": {
+    "beginner_words": [
+      "not enough pieces left"
+    ],
+    "advanced_words": [
+      "insufficient material"
+    ],
+    "avoid": [
+      "the rules say insufficient material"
+    ]
+  }
+}

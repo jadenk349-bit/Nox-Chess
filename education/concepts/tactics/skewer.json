@@ -1,0 +1,78 @@
+{
+  "category": "tactical-motifs",
+  "subcategory": "material-winning motif",
+  "epistemic_type": "D",
+  "sources": [
+    "informant-encyclopedia-combinations",
+    "wikipedia-chess-tactic",
+    "chesstempo-tactical-motifs",
+    "chesscom-tactics-38"
+  ],
+  "source_confidence": "high",
+  "status": {
+    "stage": "researched",
+    "last_updated": "2026-08-31",
+    "open_questions": []
+  },
+  "origin": {
+    "attributed_to": [],
+    "first_source": "informant-encyclopedia-combinations",
+    "year": null,
+    "certainty": "unknown",
+    "notes": "Tactical motifs are descriptive pattern names of long and mostly anonymous usage. The Chess Informant classification is cited as a standard enumeration, not as the origin of the term.",
+    "competing_claims": []
+  },
+  "id": "skewer",
+  "canonical_name": "Skewer",
+  "difficulty": "beginner",
+  "alternate_names": [
+    "thrust",
+    "reverse pin"
+  ],
+  "opposing_concepts": [
+    "pin"
+  ],
+  "definition_short": "A line attack where the MORE valuable piece is in front; when it moves, the lesser piece behind it is captured.",
+  "definition_long": "The pin's mirror image. A bishop, rook or queen attacks a valuable enemy unit that has a lesser unit directly behind it on the same line. The front piece must move — by force if it is the king — and the piece behind falls.\n\nSkewers are ABSOLUTE when the front piece is the king (the move is compelled) and RELATIVE otherwise (the defender may prefer to lose the exchange, counter-attack, or defend the rear piece).\n\nSkewers are most common in endgames, where kings are exposed on open lines and there are few pieces to interpose.",
+  "epistemic_note": "Motif (D), mechanically detectable, defined purely by the value ordering along a line.",
+  "recognition": {
+    "preconditions": [
+      "A friendly line piece attacks an enemy unit with a second enemy unit directly behind it on the same line",
+      "The front unit is worth more than the one behind, or is the king"
+    ],
+    "indicators_for": [
+      "The front unit is the king, so the move is forced",
+      "The rear unit is undefended once exposed"
+    ],
+    "indicators_against": [
+      "The front unit can capture the skewering piece",
+      "A third unit can interpose",
+      "The front unit can move so that it still defends the rear unit",
+      "The rear unit is defended and the exchange is not favourable"
+    ],
+    "detector": "lineAlignment",
+    "detectability": "mechanical"
+  },
+  "exceptions": [
+    "If the front piece moves along the same line it may keep defending the piece behind."
+  ],
+  "limitations": [
+    "Same as the pin: geometry is mechanical, profitability is not."
+  ],
+  "explanation_templates": {
+    "beginner": "The valuable piece in front has to move, and then you take the piece behind it.",
+    "intermediate": "A skewer — the pin turned around, with the bigger piece in front.",
+    "advanced": "Skewer, absolute if the front unit is the king. Check whether the front piece can move along the line and keep defending.",
+    "hedge": ""
+  },
+  "terminology": {
+    "beginner_words": [
+      "the big piece has to move"
+    ],
+    "advanced_words": [
+      "skewer",
+      "absolute skewer"
+    ],
+    "avoid": []
+  }
+}

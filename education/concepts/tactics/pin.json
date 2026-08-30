@@ -1,0 +1,152 @@
+{
+  "category": "tactical-motifs",
+  "subcategory": "material-winning motif",
+  "epistemic_type": "D",
+  "sources": [
+    "informant-encyclopedia-combinations",
+    "wikipedia-chess-tactic",
+    "chesstempo-tactical-motifs",
+    "chesscom-tactics-38"
+  ],
+  "source_confidence": "high",
+  "status": {
+    "stage": "validated",
+    "last_updated": "2026-08-31",
+    "open_questions": []
+  },
+  "origin": {
+    "attributed_to": [],
+    "first_source": "informant-encyclopedia-combinations",
+    "year": null,
+    "certainty": "unknown",
+    "notes": "Tactical motifs are descriptive pattern names of long and mostly anonymous usage. The Chess Informant classification is cited as a standard enumeration, not as the origin of the term.",
+    "competing_claims": []
+  },
+  "id": "pin",
+  "canonical_name": "Pin",
+  "difficulty": "beginner",
+  "alternate_names": [
+    "pinning"
+  ],
+  "narrower_concepts": [],
+  "opposing_concepts": [
+    "skewer"
+  ],
+  "related_concepts": [
+    "x-ray"
+  ],
+  "definition_short": "A line piece attacks through a less valuable enemy unit to a more valuable one behind it, so moving the front unit is illegal or costly.",
+  "definition_long": "Only bishops, rooks and queens can pin, because a pin needs a line. The pinned unit stands between the pinning piece and a target behind it.\n\nAn ABSOLUTE pin is against the king: moving the pinned piece is illegal. A RELATIVE pin is against any other piece: moving is legal but loses material.\n\nTwo consequences follow. First, a pinned piece is a poor defender — it may be attacked again and cannot run. Second, and routinely misunderstood: a pinned piece STILL GIVES CHECK and still controls the squares it attacks. FIDE Art. 3.9.1 is explicit that a king is in check 'even if such pieces are constrained from moving to the square occupied by the king because they would then leave or place their own king in check.' A pinned knight defending a square does not defend it against the king, but it does defend it against everything else.",
+  "epistemic_note": "Motif (D), mechanically detectable. The interaction with FIDE Art. 3.9.1 makes it a rules matter as well.",
+  "prerequisites": [
+    "check"
+  ],
+  "recognition": {
+    "preconditions": [
+      "A friendly line piece, an enemy unit, and a more valuable enemy unit are collinear, in that order, with no other piece between"
+    ],
+    "indicators_for": [
+      "The target behind is the king (absolute pin)",
+      "The pinned unit is currently defending something",
+      "The pinned unit can be attacked again to win it"
+    ],
+    "indicators_against": [
+      "The pinned piece can capture the pinner",
+      "The defender can interpose a third unit on the line",
+      "The target behind can simply step off the line",
+      "The 'pinned' piece is worth more than the piece behind it — that is a skewer, not a pin"
+    ],
+    "detector": "lineAlignment",
+    "detectability": "mechanical"
+  },
+  "exceptions": [
+    "A pinned piece still delivers check and still guards squares against non-king units.",
+    "A relative pin can be broken profitably when moving the front piece creates a bigger threat.",
+    "Pinning is not automatically good: a pin can be dissolved and the pinning piece can end up misplaced."
+  ],
+  "limitations": [
+    "Detecting alignment is mechanical; deciding whether the pin is exploitable is not.",
+    "Engine agreement does not establish that a pin explains a move. In a controlled test the same move (d4-d5) was best both with and without the pin; only the margin over alternatives distinguished the two (1.57 vs 0.28)."
+  ],
+  "typical_plans": [
+    "Attack the pinned piece again with a pawn or a minor piece",
+    "Prevent the pin from being broken before adding attackers"
+  ],
+  "explanation_templates": {
+    "beginner": "That piece cannot move, because moving it would expose the more valuable piece behind it.",
+    "intermediate": "A pin. The pinned piece is stuck and makes a poor defender, so you can pile up on it.",
+    "advanced": "Absolute pin against the king (illegal to move) or relative pin (legal but costly). Remember a pinned piece still gives check.",
+    "hedge": ""
+  },
+  "terminology": {
+    "beginner_words": [
+      "stuck",
+      "cannot move away"
+    ],
+    "advanced_words": [
+      "pin",
+      "absolute pin",
+      "relative pin",
+      "pinned piece"
+    ],
+    "avoid": [
+      "a pinned piece cannot do anything"
+    ]
+  },
+  "examples": [
+    {
+      "fen": "r3k2r/ppp2ppp/2n5/1B6/3P4/2N5/PPP2PPP/R3K2R w KQkq - 0 1",
+      "note": "Constructed controlled pair, positive half. Bb5 pins Nc6 absolutely against Ke8, so d4-d5 attacks a knight that cannot move.",
+      "side_to_move_benefits": "white",
+      "engine": {
+        "engine_id": "Stockfish 18",
+        "depth": 26,
+        "best_move": "d4d5",
+        "eval_cp": 726,
+        "mate_in": null,
+        "alternatives": [
+          {
+            "move": "a2a3",
+            "eval_cp": 569,
+            "mate_in": null
+          },
+          {
+            "move": "e1g1",
+            "eval_cp": 531,
+            "mate_in": null
+          }
+        ],
+        "verdict": "supports",
+        "verdict_note": "d5 is best at +7.26, 1.57 clear of the next move (a3, +5.12... ranked 2nd at +5.69). The pinned knight cannot step away."
+      }
+    }
+  ],
+  "counterexamples": [
+    {
+      "fen": "r4rk1/ppp2ppp/2n5/1B6/3P4/2N5/PPP2PPP/R3K2R w KQ - 0 1",
+      "note": "Constructed controlled pair, negative half. IDENTICAL except the black king has castled to g8, so Nc6 is not pinned (verified with python-chess is_pinned: True in the positive position, False here).",
+      "side_to_move_benefits": "white",
+      "engine": {
+        "engine_id": "Stockfish 18",
+        "depth": 26,
+        "best_move": "d4d5",
+        "eval_cp": 540,
+        "mate_in": null,
+        "alternatives": [
+          {
+            "move": "a2a3",
+            "eval_cp": 512,
+            "mate_in": null
+          },
+          {
+            "move": "e1g1",
+            "eval_cp": 483,
+            "mate_in": null
+          }
+        ],
+        "verdict": "ambiguous",
+        "verdict_note": "IMPORTANT NEGATIVE RESULT. d5 is STILL the best move here (+5.40) — the pin is not what makes it best. What changes is (a) the value of the move, +7.26 vs +5.40, and (b) how clearly best it is: a 1.57 margin over the runner-up with the pin, only 0.28 without it. So 'the engine picked this move' is NOT evidence that the pin concept applies; using best-move agreement as the test would produce a false positive here. Reliable signals are the margin over alternatives and the paired eval delta."
+      }
+    }
+  ]
+}

@@ -1,0 +1,148 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "nox-chess/education/concept.schema.json",
+  "title": "Education System concept record",
+  "type": "object",
+  "required": ["id", "canonical_name", "category", "epistemic_type",
+               "definition_short", "definition_long", "sources", "source_confidence",
+               "status"],
+  "additionalProperties": false,
+  "properties": {
+    "id":              { "type": "string", "pattern": "^[a-z0-9]+(-[a-z0-9]+)*$",
+                         "description": "Globally unique kebab-case slug. Stable forever once published." },
+    "canonical_name":  { "type": "string" },
+    "alternate_names": { "type": "array", "items": { "type": "string" },
+                         "description": "Synonyms actually attested in sources, not invented." },
+    "historical_names":{ "type": "array", "items": { "type": "string" } },
+    "category":        { "type": "string" },
+    "subcategory":     { "type": "string" },
+    "difficulty":      { "enum": ["beginner", "intermediate", "advanced", "master"] },
+
+    "epistemic_type":  { "enum": ["A","B","C","D","E","F","G","H","I","J"],
+                         "description": "A=official rule B=proven result C=named theoretical position D=tactical motif E=strategic principle F=rule of thumb G=historical teaching principle H=practical guideline I=terminology/pattern J=other" },
+    "epistemic_note":  { "type": "string",
+                         "description": "Why this type and not a neighbouring one. Required when the choice is arguable." },
+
+    "definition_short":{ "type": "string", "maxLength": 300 },
+    "definition_long": { "type": "string" },
+
+    "origin": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "attributed_to":  { "type": "array", "items": { "type": "string" } },
+        "first_source":   { "type": "string" },
+        "year":           { "type": ["integer", "null"] },
+        "certainty":      { "enum": ["established", "probable", "disputed", "unknown"] },
+        "notes":          { "type": "string" },
+        "competing_claims": { "type": "array", "items": { "type": "string" } }
+      }
+    },
+
+    "sources":           { "type": "array", "items": { "type": "string" },
+                           "description": "Source IDs into sources/sources.json." },
+    "source_confidence": { "enum": ["high", "medium", "low"],
+                           "description": "high = multiple independent authoritative sources agree." },
+
+    "recognition": {
+      "type": "object",
+      "description": "How the concept is detected from a position. Machine-checkable where possible.",
+      "additionalProperties": false,
+      "properties": {
+        "preconditions":      { "type": "array", "items": { "type": "string" } },
+        "indicators_for":     { "type": "array", "items": { "type": "string" } },
+        "indicators_against": { "type": "array", "items": { "type": "string" } },
+        "detector":           { "type": ["string", "null"],
+                                "description": "Name of the feature-detector function, or null if not yet mechanised." },
+        "detectability":      { "enum": ["mechanical", "heuristic", "human-only"] }
+      }
+    },
+
+    "exceptions":    { "type": "array", "items": { "type": "string" } },
+    "limitations":   { "type": "array", "items": { "type": "string" } },
+    "prerequisites": { "type": "array", "items": { "type": "string" } },
+
+    "related_concepts":  { "type": "array", "items": { "type": "string" } },
+    "broader_concepts":  { "type": "array", "items": { "type": "string" } },
+    "narrower_concepts": { "type": "array", "items": { "type": "string" } },
+    "opposing_concepts": { "type": "array", "items": { "type": "string" },
+                           "description": "Concepts that recommend the opposite in the same situation." },
+
+    "typical_plans":            { "type": "array", "items": { "type": "string" } },
+    "typical_moves":            { "type": "array", "items": { "type": "string" } },
+    "tactical_consequences":    { "type": "array", "items": { "type": "string" } },
+    "strategic_consequences":   { "type": "array", "items": { "type": "string" } },
+
+    "examples":        { "type": "array", "items": { "$ref": "#/$defs/position_ref" } },
+    "counterexamples": { "type": "array", "items": { "$ref": "#/$defs/position_ref" } },
+
+    "explanation_templates": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "beginner":     { "type": "string" },
+        "intermediate": { "type": "string" },
+        "advanced":     { "type": "string" },
+        "hedge":        { "type": "string",
+                          "description": "Wording used when epistemic_type is F/G/H, so a habit is never stated as a law." }
+      }
+    },
+
+    "terminology": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "beginner_words": { "type": "array", "items": { "type": "string" } },
+        "advanced_words": { "type": "array", "items": { "type": "string" } },
+        "avoid":          { "type": "array", "items": { "type": "string" } }
+      }
+    },
+
+    "status": {
+      "type": "object",
+      "required": ["stage"],
+      "additionalProperties": false,
+      "properties": {
+        "stage":        { "enum": ["stub", "researched", "validated", "needs-review"] },
+        "last_updated": { "type": "string" },
+        "open_questions": { "type": "array", "items": { "type": "string" } }
+      }
+    }
+  },
+
+  "$defs": {
+    "position_ref": {
+      "type": "object",
+      "required": ["fen", "note"],
+      "additionalProperties": false,
+      "properties": {
+        "fen":   { "type": "string" },
+        "note":  { "type": "string" },
+        "game":  { "type": "string", "description": "Player-vs-player, event, year, if from a real game." },
+        "side_to_move_benefits": { "enum": ["white", "black", "neither"] },
+        "engine": {
+          "type": "object",
+          "description": "Filled in by tools/sf_analyse.py. Absent means not yet engine-tested.",
+          "additionalProperties": false,
+          "properties": {
+            "engine_id":    { "type": "string" },
+            "depth":        { "type": "integer" },
+            "best_move":    { "type": "string" },
+            "eval_cp":      { "type": ["integer", "null"] },
+            "mate_in":      { "type": ["integer", "null"] },
+            "alternatives": { "type": "array", "items": {
+                                "type": "object",
+                                "additionalProperties": false,
+                                "properties": {
+                                  "move":  { "type": "string" },
+                                  "eval_cp": { "type": ["integer", "null"] },
+                                  "mate_in": { "type": ["integer", "null"] }
+                                } } },
+            "verdict":      { "enum": ["supports", "contradicts", "ambiguous", "untested"] },
+            "verdict_note": { "type": "string" }
+          }
+        }
+      }
+    }
+  }
+}

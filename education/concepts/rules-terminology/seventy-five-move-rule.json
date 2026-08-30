@@ -1,0 +1,61 @@
+{
+  "category": "official-rules",
+  "subcategory": "basic rules of play",
+  "epistemic_type": "A",
+  "sources": [
+    "fide-laws-2023",
+    "fide-laws-2023-pdf"
+  ],
+  "source_confidence": "high",
+  "status": {
+    "stage": "researched",
+    "last_updated": "2026-08-31",
+    "open_questions": []
+  },
+  "id": "seventy-five-move-rule",
+  "canonical_name": "The seventy-five-move rule",
+  "difficulty": "intermediate",
+  "definition_short": "After 75 moves by each player with no capture and no pawn move, the game is drawn automatically.",
+  "definition_long": "FIDE Art. 9.6.2: the game is drawn if 'any series of at least 75 moves have been made by each player without the movement of any pawn and without any capture. If the last move resulted in checkmate, that shall take precedence.'\n\nThe automatic counterpart to the claimable fifty-move rule. The checkmate proviso is the interesting part: a move that simultaneously completes the 75 and delivers mate is a win, not a draw.",
+  "epistemic_note": "Official rule.",
+  "origin": {
+    "attributed_to": [],
+    "first_source": "fide-laws-2023",
+    "year": null,
+    "certainty": "unknown",
+    "notes": "",
+    "competing_claims": []
+  },
+  "recognition": {
+    "preconditions": [
+      "150 ply have elapsed with no capture and no pawn move"
+    ],
+    "indicators_for": [],
+    "indicators_against": [
+      "The final move delivers checkmate — mate takes precedence"
+    ],
+    "detector": "halfmoveClock",
+    "detectability": "mechanical"
+  },
+  "exceptions": [
+    "Checkmate on the 75th move takes precedence over the draw."
+  ],
+  "limitations": [],
+  "related_concepts": [
+    "fifty-move-rule",
+    "checkmate"
+  ],
+  "explanation_templates": {
+    "beginner": "Seventy-five moves have passed for each side with no capture and no pawn move, so the game is automatically drawn.",
+    "intermediate": "The seventy-five-move rule ends the game without a claim — unless the last move was checkmate.",
+    "advanced": "Art. 9.6.2, including the checkmate precedence clause.",
+    "hedge": ""
+  },
+  "terminology": {
+    "beginner_words": [],
+    "advanced_words": [
+      "seventy-five-move rule"
+    ],
+    "avoid": []
+  }
+}
