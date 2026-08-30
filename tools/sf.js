@@ -11,7 +11,8 @@
 'use strict';
 
 const path = require('path');
-const { fork } = require('child_process');
+const fs = require('fs');
+const { fork, spawn, execSync } = require('child_process');
 const P = require('./page_chess.js');
 
 const ENGINE_DIR = path.join(__dirname, '..', 'engine');
@@ -29,6 +30,158 @@ function settleDepth(byDepth, best){
     settled = byDepth[i][0];
   }
   return settled === null ? byDepth[byDepth.length - 1][0] : settled;
+}
+
+/* ------------------------------------------------------- two engines
+ *
+ * There are two Stockfishes in this repo now and the difference between them
+ * is not a detail.
+ *
+ *   engine/stockfish.wasm  is what the *browser* runs. It is a pre-NNUE build
+ *     with one thread and sixteen megabytes of hash, and it is what the bot
+ *     ladder in LEVELS was tuned against. Anything imitating a rung — chiefly
+ *     seedRating(), which asks "what can an 1800 see?" — has to keep using it,
+ *     because a rating measured against a different engine is a rating of a
+ *     player who does not exist in this game.
+ *
+ *   the native `stockfish` on PATH is what *judges*. Stockfish 18 with NNUE,
+ *     as many threads and as much hash as the machine will give it. Nothing
+ *     about a puzzle's correctness should be decided by a build chosen for
+ *     fitting in a web page, and this one is several hundred Elo stronger and
+ *     an order of magnitude faster at the same depth.
+ *
+ * Same ask() on both, so the callers do not care which they were handed —
+ * except that the callers who *do* care ask for the one they need by name.
+ */
+
+/** Where a native Stockfish is, or null. */
+function nativeBin(){
+  if (process.env.NOX_SF && fs.existsSync(process.env.NOX_SF)) return process.env.NOX_SF;
+  try {
+    const found = execSync('command -v stockfish', { encoding:'utf8' }).trim();
+    return found || null;
+  } catch (e){ return null; }
+}
+
+/* A real Stockfish process, spoken to over stdin and stdout.
+ *
+ * Options are set once the engine has told us which it has, rather than fired
+ * blind: this has to work against a build with Contempt (the old one) and one
+ * without (every modern one), and an unknown setoption is silently ignored by
+ * some builds and complained about by others. Asking first is cheap and means
+ * the same code drives both. */
+class NativeEngine {
+  constructor(opt){
+    opt = opt || {};
+    this.bin = opt.bin || nativeBin();
+    this.threads = opt.threads || 1;
+    this.hash = opt.hash || 256;
+    this.wdl = !!opt.wdl;
+    this.names = new Set();
+    this.id = '';
+    this.proc = spawn(this.bin, [], { stdio: ['pipe', 'pipe', 'ignore'] });
+    this.buf = '';
+    this.pending = null;
+    this.ready = new Promise(resolve => { this._ready = resolve; });
+    this.proc.stdout.on('data', d => {
+      this.buf += d;
+      let i;
+      while ((i = this.buf.indexOf('\n')) >= 0){
+        const line = this.buf.slice(0, i).replace(/\r$/, '');
+        this.buf = this.buf.slice(i + 1);
+        this._line(line);
+      }
+    });
+    this.send('uci');
+  }
+
+  send(cmd){ try { this.proc.stdin.write(cmd + '\n'); } catch (e){ /* gone */ } }
+
+  set(name, value){ if (this.names.has(name)) this.send('setoption name ' + name + ' value ' + value); }
+
+  _line(line){
+    if (line.startsWith('id name ')) { this.id = line.slice(8); return; }
+    if (line.startsWith('option name ')){
+      this.names.add(line.slice(12).split(' type ')[0]);
+      return;
+    }
+    if (line === 'uciok'){
+      this.set('Threads', this.threads);
+      this.set('Hash', this.hash);
+      if (this.wdl) this.set('UCI_ShowWDL', 'true');
+      this.send('isready');
+      return;
+    }
+    if (line === 'readyok'){ this._ready(); return; }
+    const job = this.pending;
+    if (!job) return;
+    if (line.startsWith('info ')){
+      P.readInfoLine(line, job.lines, job.multipv);
+      // win/draw/loss, in permille, for the side to move — the thing the old
+      // build could not report and the reason evaluation bands had to stand in
+      // for it. Parsed here rather than in the page's readInfoLine(), which is
+      // shared with the browser and has no use for it.
+      const w = line.match(/ wdl (\d+) (\d+) (\d+)/);
+      if (w){
+        const mp = line.match(/ multipv (\d+)/);
+        const slot = job.lines[(mp ? +mp[1] : 1) - 1];
+        if (slot) slot.wdl = { win:+w[1], draw:+w[2], loss:+w[3] };
+      }
+      const mp2 = line.match(/ multipv (\d+)/);
+      if (!mp2 || mp2[1] === '1'){
+        const d = line.match(/ depth (\d+)/);
+        const pv = line.match(/ pv ([a-h][1-8][a-h][1-8][qrbn]?)/);
+        if (d && pv) job.byDepth.push([+d[1], pv[1]]);
+      }
+      return;
+    }
+    if (line.startsWith('bestmove')){
+      const best = line.split(/\s+/)[1];
+      const lines = job.lines.filter(Boolean);
+      const one = lines[0] || { cp:null, mate:null, best:null, pv:null };
+      this.pending = null;
+      job.resolve({
+        settleDepth: settleDepth(job.byDepth, (best && best !== '(none)') ? best : one.best),
+        best: (best && best !== '(none)') ? best : one.best,
+        cp: one.cp, mate: one.mate, pv: one.pv, wdl: one.wdl,
+        second: lines[1] || null,
+        lines
+      });
+    }
+  }
+
+  /* Abandon whatever this engine is doing and refuse further questions until
+     it is released. `stop` makes Stockfish answer the search in flight
+     immediately, which resolves the pending promise and leaves the process
+     healthy and reusable — killing it would cost a fresh boot and the hash
+     table. Used by the verifier's per-puzzle budget: a puzzle that runs away
+     is abandoned, never accepted. */
+  abandon(){ this.aborted = true; this.send('stop'); }
+  release(){ this.aborted = false; }
+
+  async ask(o){
+    await this.ready;
+    if (this.aborted) throw new Error('sf: abandoned');
+    if (this.pending) throw new Error('sf: one question at a time per engine');
+    const multipv = o.multipv || 1;
+    const moves = (o.moves && o.moves.length) ? ' moves ' + o.moves.join(' ') : '';
+    if (o.fresh){
+      this.send('ucinewgame');
+      await new Promise(resolve => { this._ready = resolve; this.send('isready'); });
+    }
+    this.set('Skill Level', o.skill === undefined ? 20 : o.skill);
+    this.set('MultiPV', multipv);
+    // only the old build has it; on a modern one this is a no-op by design
+    this.set('Contempt', o.objective ? 0 : 24);
+    this.send('position ' + (o.fen ? 'fen ' + o.fen : 'startpos') + moves);
+    const p = new Promise(resolve => { this.pending = { lines: [], byDepth: [], multipv, resolve }; });
+    this.send(o.depth ? 'go depth ' + o.depth
+            : o.nodes ? 'go nodes ' + o.nodes
+            : 'go movetime ' + (o.movetime || 200));
+    return p;
+  }
+
+  quit(){ this.send('quit'); try { this.proc.kill(); } catch (e){ /* already gone */ } }
 }
 
 class Engine {
@@ -81,7 +234,7 @@ class Engine {
     }
   }
 
-  /** ask({fen, moves, skill, multipv, depth, movetime, fresh}) -> engineAsk's shape
+  /** ask({fen, moves, skill, multipv, depth, movetime, fresh, objective}) -> engineAsk's shape
    *
    * `fresh` empties the transposition table first. An engine kept alive across
    * many questions is faster because it remembers, and that memory is exactly
@@ -111,6 +264,17 @@ class Engine {
     }
     this.send('setoption name Skill Level value ' + skill);
     this.send('setoption name MultiPV value ' + multipv);
+    // Contempt is a thumb on the scale, and this build applies it from the
+    // point of view of whoever is to move at the root ("Analysis Contempt:
+    // Both", 24 by default). That is right for a bot, which should prefer a
+    // fight to a draw, and ruinous for a tool that compares the score of a
+    // position before a move with the score after it: those two searches have
+    // opposite sides at the root, so the same position is worth ~50cp more
+    // after any move than before it, and every move in every game looks like a
+    // blunder by exactly that much. Anything measuring a position rather than
+    // playing one asks for `objective`.
+    this.send('setoption name Contempt value ' + (opt.objective ? 0 : 24));
+    this.send('setoption name Analysis Contempt value ' + (opt.objective ? 'Off' : 'Both'));
     this.send('position ' + (opt.fen ? 'fen ' + opt.fen : 'startpos') + moves);
     const p = new Promise(resolve => { this.pending = { lines: [], byDepth: [], multipv, resolve }; });
     // depth first: a search bounded by depth answers the same way on any
@@ -124,8 +288,18 @@ class Engine {
 
 /** A pool of engines, handed out one job at a time. */
 class Pool {
-  constructor(n){
-    this.engines = Array.from({ length: n }, () => new Engine());
+  /** Pool(n) is the browser's engine, n of them. Pool(n, {native:true, …})
+      is the judge. Callers that imitate a rung of the bot ladder must not
+      pass native: see the note above the two classes. */
+  constructor(n, opt){
+    opt = opt || {};
+    this.native = !!opt.native;
+    this.engines = Array.from({ length: n },
+      () => this.native ? new NativeEngine(opt) : new Engine());
+    // each engine knows its own slot, so a caller can pair it with a second
+    // pool — the judge is Stockfish 18, but anything imitating a rung of the
+    // bot ladder has to keep asking the build the browser actually runs
+    this.engines.forEach((e, i) => { e.slot = i; });
   }
   /** Run fn(engine) for every item, `n` at a time, preserving input order. */
   async map(items, fn){
@@ -143,4 +317,4 @@ class Pool {
   quit(){ this.engines.forEach(e => e.quit()); }
 }
 
-module.exports = { Engine, Pool, settleDepth };
+module.exports = { Engine, NativeEngine, Pool, settleDepth, nativeBin };

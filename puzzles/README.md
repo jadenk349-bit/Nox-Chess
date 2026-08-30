@@ -15,76 +15,170 @@ player just finished and never reads them.
 
 | | |
 |---|---|
-| Generated | 2026-08-24 |
-| Self-play games | 432 |
-| Random seed | `21` |
+| Generated | 2026-08-27 |
+| Self-play games | 6245 |
+| Positions judged | 65624 |
+| Random seed | `1` |
 
-| Track | Puzzles | Chosen from | Easiest | Median | Hardest |
-|---|---|---|---|---|---|
-| opening | 100 | 301 | 100 | 1600 | 2800 |
-| middlegame | 100 | 313 | 100 | 1600 | 3000 |
-| endgame | 100 | 300 | 100 | 2000 | 3200 |
+| Track | Mined | Chosen from | Punish | Save | Easiest | Median | Hardest |
+|---|---|---|---|---|---|---|---|
+| opening | 255 | 255 | 187 | 68 | 100 | 500 | 3200 |
+| middlegame | 600 | 694 | 229 | 371 | 100 | 500 | 3200 |
+| endgame | 228 | 228 | 76 | 152 | 100 | 100 | 3000 |
 
-Those are the numbers generation produced, kept as the record of it. All three
-tracks have since been through `tools/verify_puzzles.js` and their numbers have
-moved with them; see **Auditing what shipped**.
+**Mined**, not shipped. This table is the record of the run that found these
+positions, judged at depth 16; `tools/verify_puzzles.js` then takes the same
+verdict again at depth 22 from outside, and drops what no longer clears it.
+What actually shipped, and how much the second opinion removed, is the
+*Checked against the engine* table at the bottom of this file.
 
-Each track is an ordered ladder: `n` 1 to 100, puzzle 1 the easiest and
-puzzle 100 the hardest. The player walks it in order, one unlocked by the last.
+A track is however many positions cleared the standard, not a fixed hundred.
+That is deliberate and it is the whole difference between this set and the one
+before it: padding a ladder to a round number means keeping puzzles that did
+not earn their place, and one bad puzzle costs more than ten missing ones,
+because it teaches a player to look for something that is not there.
 
-| Track | Audited | Repaired | Follow-up |
-|---|---|---|---|
-| opening | 2026-08-26, sweep 20 / verdict 28 | 1 of 100 (`n` 19: the defence was 241cp short of best, and the true best defence leaves nothing to find, so the line is one move now) | 6 plies, all 100 |
-| middlegame | 2026-08-26, depth 18 | 0 of 100 | 6 plies, 97 of 100 — the other 3 end in mate |
-| endgame | 2026-08-26, depth 22 | 27 of 100 | 6 plies, 96 of 100 — the other 4 end in mate |
+Each track is still an ordered ladder — `n` 1 to however many, puzzle 1 the
+easiest and the last one the hardest, walked in order, one unlocked by the last.
 
-The three runs were separate, at different depths, and they wrote the follow-up
-in two different shapes — see **The follow-up** below. The page reads both.
+## What makes a position a puzzle
+
+Bot against bot, rungs drawn from `LEVELS` in the page (800, 1000, 1300, 1600, 2000, 2400
+Elo), because games between equal and perfect engines contain no mistakes and
+therefore no puzzles. The first 4–6 plies of each game are random, weighted
+towards moves that look like chess, so the set is not four openings deep — and
+nothing from inside that stretch is ever a puzzle, since a position is only
+offered when the move that created it was one a bot chose.
+
+The rule itself is `judge()` in `tools/puzzle_rules.js`, and it is the only
+copy of it: the generator asks it while mining and the verifier asks it again,
+deeper, over what shipped. Three numbers, all from the **solver's** point of
+view — the side to move in the puzzle's position:
+
+| | |
+|---|---|
+| `B` | what the position was worth **before the opponent's last move** |
+| `A1` | what it is worth now, if the solver finds the move |
+| `A2` | what it is worth now, if the solver plays the second-best move |
+
+and three questions:
+
+- **`A1 − B` — the mistake.** At least 200cp. The opponent has to have
+  thrown something away, or the position is merely sharp and always was, and
+  the card would be saying "they blundered" about a move that did not.
+- **`A1 − A2` — the point.** At least 200cp, measured by playing both moves
+  and scoring what they lead to rather than by reading two numbers off one
+  MultiPV list. Below it, the player who finds the other move is told they are
+  wrong about a move that was just as good.
+- **`B`, `A1`, `A2` — the stakes.** Which decides what kind of puzzle it is:
+
+**Punish** — `B` no better than +150 (level, or only slightly for the
+solver), `A1` at least +400, and `A2` no better than +250. Something
+was there to be won, finding it is what wins it, and it was not already won.
+
+**Save** — `B` at or below -250 (the solver was worse, often lost), `A2`
+at or below -250 (there is something to be saved from), and `A1` at least
+-80: the move has to hold the balance or better. "The best move in a lost
+position" is not a save, and refusing it is the single criterion that removes
+most of what the previous set called a middlegame puzzle.
+
+Two moves that both force mate are refused as well, however different the move
+counts: the board accepts one of them, and a player who finds the other is
+told they are wrong.
+
+That is a strict rule and this is what it turned away.
+
+| Refused because | Positions | |
+|---|---|---|
+| `ambiguous` | 25246 | 38.5% |
+| `wins anyway` | 16737 | 25.5% |
+| `no advantage won` | 12914 | 19.7% |
+| `two mates` | 3598 | 5.5% |
+| `no mistake` | 2857 | 4.4% |
+| `neither` | 2178 | 3.3% |
+| `already better` | 515 | 0.8% |
+| `nothing to save` | 230 | 0.4% |
+| `recapture` | 121 | 0.2% |
+| `still lost` | 84 | 0.1% |
+| `free piece` | 63 | 0.1% |
+| `nothing to say` | 10 | 0.0% |
+
+Something can pass all of that and still not be worth showing. A recapture on
+the square just captured on is forced rather than found; a piece lifted off the
+board in one move with no pattern behind it teaches looking for undefended
+pieces, which players do anyway; a move with only one legal square is not a
+decision. Those are `trivial()`, beside the rule.
+
+## Opening, middlegame, endgame
+
+By what is on the board, not by the move number. Endgame is asked first,
+because it is the one of the three with a real definition — few enough pieces
+that the king is a fighting piece — and it is answered on material, with a
+queen still on counting for more than what is left beside it. Opening is a
+position with opening work still in it: most of the pawns there, pieces still
+standing where they started. Everything else is a middlegame. A queen trade on
+move nine leaves an endgame however early it is, and a game that shuffles to
+move forty with all sixteen pieces on has not reached one.
+
+## What the card says at the end
+
+Every puzzle carries a `why`, written by `tools/puzzle_words.js` beside the
+moves: what the opponent's move gave away, a sentence for each ply — including
+why the runner-up move is not the answer and how forced each defence was — and
+where the whole thing arrives. It is in the file because the puzzle screen has
+no engine in it, deliberately, and `server/test_puzzle_flow.js` asserts that it
+never grows one.
+
+None of it is guessed. Every sentence is read off a position or off a number a
+search already produced, and where nothing can be justified the card is shorter
+instead — the discipline being that a confident sentence about a deflection
+that is not on the board is worse than no sentence at all.
+
+A freshly generated file has no `why` and no `follow`; both are written by
+`tools/verify_puzzles.js`, which is also the only thing that measures them at
+the verdict depth.
 
 ### Themes
 
 | Theme | Puzzles |
 |---|---|
-| `hangingPiece` | 165 |
-| `longGame` | 145 |
-| `pin` | 85 |
-| `discoveredAttack` | 62 |
-| `fork` | 57 |
-| `trappedPiece` | 55 |
-| `skewer` | 44 |
-| `mate` | 7 |
+| `defensiveResource` | 591 |
+| `hangingPiece` | 450 |
+| `longGame` | 345 |
+| `pin` | 225 |
+| `discoveredAttack` | 201 |
+| `fork` | 190 |
+| `trappedPiece` | 180 |
+| `skewer` | 148 |
+| `removalOfDefender` | 127 |
+| `sacrifice` | 87 |
+| `kingAttack` | 75 |
+| `pawnBreakthrough` | 64 |
+| `zwischenzug` | 36 |
+| `positionalTactic` | 26 |
+| `mate` | 13 |
+| `promotion` | 12 |
+| `exchangeSacrifice` | 3 |
+| `backRank` | 1 |
 
-## How they were made
+The first nine of those names are `findMotifs()`'s, the same function behind the
+Study Board coach card, so a puzzle tagged `fork` is explained with the word
+fork. The rest are what a whole puzzle carries and a single move does not: what
+kind of answer it was, what it cost, and the two that are about the move before
+it. Deflection, decoy, overloading, interference and double attack are
+deliberately **not** claimed — each is an assertion about *why* a piece cannot
+do its job, every cheap test for them fires where it is not true, and a puzzle
+labelled with a tactic that is not there is worse than one labelled with a tag
+fewer.
 
-Bot against bot, rungs drawn from `LEVELS` in the page (800, 1000, 1300, 1600, 2000, 2400
-Elo), because games between equal and perfect engines contain no mistakes and
-therefore no puzzles. The first 4–6 plies of each game are random, weighted
-towards moves that look like chess, so the set is not four openings deep. Games
-are played until every track has a pool of 300 candidates to choose from,
-rather than to a fixed count: endgames are several times rarer than
-middlegames, and a fixed count starves one to overshoot the other.
+## The order of a ladder
 
-After every move the position is swept at depth 12 and, if it looks
-sharp, examined at depth 16 with two lines. A position is a puzzle when
-the best move beats the second best by 150cp or more, or forces a mate the
-runner-up does not — "only one strong move", the same MultiPV gap the review
-screen uses to tell a Great move from a merely best one. The solution is then
-extended by splicing in the engine's own best defence and asking again, until
-the position is no longer that sharp, a clear material win is reached, or mate.
-
-A candidate still has to be worth showing. A recapture on the square just
-captured on is forced rather than found, and a move that `findMotifs()` has
-nothing to say about, which gives no check and wins no material, would reach
-the player with an explanation that explains nothing. Both are dropped.
-
-## How the hundred are chosen
-
-The survivors are ranked, and the ladder is a hundred rungs **evenly spaced in
-difficulty** between the easiest thing found and the hardest — not the hardest
-hundred, not the first hundred, and not every third puzzle in the pool. That
-last one is the obvious method and the wrong one: self-play turns up far more
-easy tactics than hard ones, so spacing by position spends the first quarter of
-a track on puzzles that are all exactly as easy as each other. The rank key is
+The survivors are ranked, and the ladder is spaced **evenly in difficulty**
+between the easiest thing found and the hardest — not the hardest of them, not
+the first of them, and not every third puzzle in the pool. That last one is the
+obvious method and the wrong one: self-play turns up far more easy tactics than
+hard ones, so spacing by position spends the first quarter of a track on
+puzzles that are all exactly as easy as each other. The rank key is
 
 ```
 seedRating + 40·settleDepth + 60·(plies−1) + 120·(quiet move) + 150·(sacrifice)
@@ -94,7 +188,7 @@ seedRating + 40·settleDepth + 60·(plies−1) + 120·(quiet move) + 150·(sacri
 the puzzle's first move is replayed against every rung of the ladder — chance
 switched off, best of three, because Skill Level scrambles the engine's own
 choice on purpose — and the lowest rung that finds it twice names the rating
-(2800 when none does). It has ten possible values and a hundred puzzles to
+(2800 when none does). It has ten possible values and many more puzzles to
 order, so the rest of the key breaks its ties with what actually makes a move
 hard to see: the depth the search had to reach before it stopped changing its
 mind, the number of moves in the line, whether the move captures or checks
@@ -105,144 +199,29 @@ what corrects it is real attempts, through the Elo update in
 `server/server.py`.
 
 Analysis is bounded by depth rather than by time, so the puzzle *criteria* do
-not depend on how fast the machine is. Regeneration is still not bit-for-bit
-reproducible: Stockfish seeds its Skill Level randomness from the clock, so the
-self-play games and the seed ratings both wander a little between runs even at
-the same `--seed`.
+not depend on how fast the machine is — and every search that measures a
+position rather than playing one is made with contempt switched off. That last
+one is not a detail: this build applies contempt from the point of view of
+whoever is to move at the root, so `B` and `A1` are read from opposite sides
+and the same position comes out ~50cp better after any move than before it.
+Left on, every move in every game looks like a blunder by exactly that much,
+and the mistake this whole standard is built on is an artefact.
 
-## Auditing what shipped
-
-The generator judges a position once, at `confirmDepth`, splices its own best
-defence in and judges the next one — so every ply of a solution was chosen by a
-search that had only just arrived at it, on an engine that had just been
-answering questions about unrelated positions. That is enough to *find* a
-puzzle and not always enough to be sure of it. `tools/verify_puzzles.js` asks
-again from outside, at a depth the generator cannot afford over a whole corpus,
-and where the two disagree the file is wrong: the player is being told to play
-a move the engine does not play, and the referee in the page accepts nothing
-else. Both colours are audited, because a puzzle whose defence walks into the
-tactic teaches a tactic that is not there — and in the endgame pass the defence
-was most of what was wrong.
-
-One tool, three tracks. An opening puzzle, a middlegame puzzle and an endgame
-puzzle are the same record and the same claim is being checked about each:
-
-```bash
-node tools/verify_puzzles.js --track opening                        # report
-node tools/verify_puzzles.js --track middlegame --write             # repair
-node tools/verify_puzzles.js --track endgame --followup 6 --write
-```
-
-Every search in the pass is made on a table emptied first (`fresh` in
-`tools/sf.js`). Without that, the same position at the same depth answers
-differently depending on what the engine looked at before it, and a verdict
-that depends on which engine of the pool drew the puzzle is not a verdict.
-Depth, never movetime, for the same reason the generator uses it.
-
-Three passes, because one alone is either too slow to run over a hundred
-puzzles or too shallow to be trusted with them. A cheap **sweep** ranks every
-ply and only ever nominates. A **head-to-head** at the working depth plays the
-stored move and the engine's move and scores the positions they lead to, rather
-than reading two numbers off one MultiPV ranking — a shipped puzzle should only
-be overruled by two numbers arrived at the same way, and the top line of a
-MultiPV list is not always the move a MultiPV 1 search plays. The **verdict**,
-the same comparison deeper, is the only thing allowed to call a move wrong. The
-split is what the tool is for: run as one pass at depth 22 it called six of the
-hundred opening puzzles wrong, and a look at depth 26 sided with the file on
-five of the six.
-
-The searches that *build* rather than judge ask for two lines, not one. A
-single-line search prunes against the best move it already has, and in one
-position of the endgame set it answers Nxb7 at +15 and never mentions that Rxb7
-is +63 — which MultiPV 2 finds at the same depth. That is the fault this tool
-exists to correct, so it must not be the way the tool searches: the defence a
-rebuilt line is extended with, and every follow-up move, are asked for two
-lines wide.
-
-A disagreement is repaired rather than deleted. The line is cut at the offending
-ply, the engine's own move goes in, and it is extended by the generator's rule —
-best defence, ask again, stop when there is no longer one strong move. A track
-is a hundred rungs and has to stay a hundred rungs. Themes are re-derived by
-`findMotifs()` and the seed rating re-measured against the bot ladder, because
-both of them described the old line; the `id`, being the hash of the fen and the
-moves, changes with them, so a repaired puzzle is honestly a different puzzle.
-
-What the tool will not do is rewrite a correct solution for being *dull* — still
-the best move, no longer 150cp clear of the runner-up at this depth. Sharpness
-is how the generator chose the position, not a claim the file makes to the
-player, and a run that rewrote it would be undone by the next run at the next
-depth. Dull puzzles are counted and reported instead.
-
-`--resort` re-ranks the whole track by the generator's own `difficulty()` and
-renumbers it, for the case the endgame pass ran into: a seven-move line that
-only worked while the defence blundered is not as hard as it was once the
-defence is fixed. It is off by default, because a run is normally read as "what
-changed" and a file that comes back reordered hides that in a diff of a hundred
-moved records. **Ids are left alone either way**, so nobody loses a solve; only
-the rung numbering moves, exactly as it does after a regeneration.
-
-## The follow-up: `follow`, or `followUp`
-
-A solution is extended only while there is still exactly one strong move to
-find, which usually stops it a move or two before the material actually changes
-hands — so a player who has just found the move is holding a position whose
-point has not happened yet. The follow-up is best play from *both* sides from
-there: up to six more plies, so what it shows is the best the defence has
-rather than a line that only works if the opponent helps. **Show Follow Up** on
-the puzzle card plays it out, at the same cadence as the forced replies.
-
-Each of those plies is its own search of its own position, never a tail read
-off one search's principal variation — a pv is one search's intention, and what
-the player is shown after solving should be a sequence of moves that were each,
-separately, the best move on the board. A puzzle whose line ends in mate has no
-follow-up, and no button.
-
-Two shapes, because the three ladders were checked by different runs of the
-tool. `follow` is an object — the line, the score it arrives at (`cp` or
-`mate`), the material it wins (`swing`), and the score the puzzle started at
-(`startCp` / `startMate`, which is what lets the card tell a move that wins
-from a move that is merely the best of a lost position). `followUp` is the
-older shape: the line on its own, with nothing said about where it ends, so the
-card says what it won and stops there. The page reads either, through
-`pzFollowOf()`; a track re-verified with `--write` comes back carrying `follow`
-and loses `followUp`, so nothing else should read that field directly.
-
-It lives in the file rather than being searched for in the browser because the
-puzzle screen has no engine in it, deliberately, and `test_puzzle_flow.js`
-asserts that it never grows one.
-
-### The endgame pass
-
-| | |
-|---|---|
-| Verified | 2026-08-26 |
-| Track | `endgame` |
-| Depth | 22, follow-up 20 (six plies) |
-| Solutions agreed with | 73 of 100 |
-| Solutions corrected | 27 |
-| Follow-ups written | 96; the other 4 end in mate |
-
-Of the 27, most were the *defence* rather than the player: the reply the
-generator spliced in was not the toughest one, and once it is, there is
-nothing left to find. That is why the track is shorter than it was — 57
-one-move puzzles against 50, and 7 seven-move ones against 13 — and why its
-median seed rating fell from 2000 to 1600. A seven-move line that only ran
-because the defence kept blundering was never a seven-move puzzle.
-
-Two things that pass reports and does not act on. Thirty-three positions no
-longer clear the generator's 150cp "one strong move" margin at depth 22, three
-of them by nothing at all: the stored move is still the engine's, but a second
-move now ties it, and a player who finds that one is told they are wrong. The
-board matches on the stored move exactly, so closing that would mean teaching
-`puzzleStep()` about alternatives, which is a change to the feature and not to
-the file. And the ladder is not monotonic in `seedRating` — it never was:
-`difficulty()` ranks on four things and the seed rating is only the first.
-
+Regeneration is still not bit-for-bit reproducible: Stockfish seeds its Skill
+Level randomness from the clock, so the self-play games and the seed ratings
+both wander a little between runs even at the same `--seed`.
 
 ## Regenerating
 
 ```bash
-node tools/generate_puzzles.js --jobs 12 --seed 21
+node tools/generate_puzzles.js --games 1600 --jobs 12 --seed 1
+```
+
+Then check each track, which is where the verdict is taken at depth, the
+explanations are written and the follow-ups are searched:
+
+```bash
+node tools/verify_puzzles.js --track middlegame --write --resort
 ```
 
 Then bump the `?v=` on the three JSON files in `blind-chess.html`, because
@@ -255,19 +234,23 @@ have already solved and loses only their place in the numbering.
 ## Checked against the engine
 
 Written by `tools/verify_puzzles.js`, which replays every move of every
-puzzle in a track and rebuilds any line the engine no longer agrees with.
-The row is the **last run**, not a history: *repaired* counts what that run
-rewrote, and a second run over a file already checked rewrites nothing — see
-the git history for what changed. *Dull* puzzles are still the best move but
-no longer beat the runner-up by 150cp at this depth, which is reported and
-left alone. *Follow-up* counts the puzzles carrying a continuation for the
-Show Follow-up button — a line that ends in mate has none. A `—` is a run made
-before the tool counted that column.
+puzzle in a track, rebuilds any line the engine no longer agrees with, and
+then asks of the whole thing the question a per-ply check cannot: is this
+still a turning point? The row is the **last run**, not a history — see the
+git history for what changed. *Depth* is the verdict depth. *Repaired*
+counts lines rewritten because a move was not the engine's. *Dropped*
+counts puzzles removed because the position was not one worth showing —
+nobody had blundered, the solver was already winning, the solver was lost
+either way, or two moves were equally good. *Dull* puzzles are still the
+best move but no longer clear of the runner-up at the sweep depth, which is
+reported and left alone. *Follow-up* counts the puzzles carrying a
+continuation for the Show Follow Up button — a line that ends in mate has
+none.
 
-| Track | Checked | Depth | Puzzles | Repaired | Dull | Follow-up |
-|---|---|---|---|---|---|---|
-| `endgame` | 2026-08-26 | 22 | 100 | 27 | 33 | 96 |
-| `middlegame` | 2026-08-26 | 18 | 100 | 0 | 36 | 97 |
-| `opening` | 2026-08-26 | 28 | 100 | 1 | — | 100 |
+| Track | Checked | Depth | Puzzles | Repaired | Dropped | Dull | Follow-up |
+|---|---|---|---|---|---|---|---|
+| `endgame` | 2026-08-27 | 24 | 104 | 0 | 28 | 9 | 103 |
+| `middlegame` | 2026-08-27 | 24 | 191 | 1 | 162 | 31 | 187 |
+| `opening` | 2026-08-27 | 24 | 41 | 1 | 93 | 7 | 41 |
 
 <!-- verified: end -->

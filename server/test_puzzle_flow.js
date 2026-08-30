@@ -94,6 +94,18 @@ function flushTimers(){
   for (var guard = 0; timers.length && guard < 200; guard++) timers.shift()();
 }
 var REV = { on:false };
+/* Study Alternatives is the only puzzle path that reaches for an engine, so the
+   suite carries a stand-in for it: canned answers, and a record of what it was
+   asked, which is how the test checks that the question was put about the
+   player's own position rather than about the book line. */
+var engineAsked = [];
+var engineReply = {};          // fen|moves -> canned result
+function engineAsk(moves, opt){
+  opt = opt || {};
+  var key = (opt.fen || '') + '|' + moves.join(' ');
+  engineAsked.push({ key: key, fen: opt.fen, moves: moves.slice(), depth: opt.depth });
+  return Promise.resolve(engineReply[key] || engineReply['*'] || null);
+}
 // signed out, and no Supabase client: the guest path, which is the one that
 // works with nothing configured. The account path is exercised by
 // test_two_clients.py, where there is a server to answer.
@@ -103,7 +115,8 @@ var ONLINE_AVAILABLE = false;
 
 /* ---- the real half ---- */
 
-var DECLS = ['VAL','FILES','rowOf','colOf','SQNAME','uciOf','sqName','onBoard','other',
+var DECLS = ['PZ_STUDY_DEPTH','PZ_STUDY_PAUSE','PZ_STUDY_SLACK',
+             'VAL','FILES','rowOf','colOf','SQNAME','uciOf','sqName','onBoard','other',
              'idCounter','mk','DIR_N','DIR_B','DIR_R','DIR_K','PIECE_WORD',
              'G','PZ','PZ_TRACK_NAME','PZ_TRACKS','PZ_STORE','PZ_VERSION','PZ_REPLY_MS',
              'PZ_START_RATING','PZ_K','PZ_RATING_STORE','pzOwner','pzKey',
@@ -116,8 +129,10 @@ var FNS = ['startBoard','newState','cloneState','posKey','fenOf','stateFromFEN',
            'puzzleStep','pzStored','pzProgress','pzWrite','pzMark','pzPush','pzDone',
            'pzNextRung','pzUnlocked','pzElo','pzGuestRating','pzRating','pzReport',
            'pzSendResult','pzSync','rushQueue','rushStrike','rushEnd','rushAdvance','rushRender',
-           'pzOpen','pzClose','pzPlay','pzFinish','pzExplain','pzSolutionSan',
+           'pzOpen','pzClose','pzPlay','pzFinish','pzEsc','pzExplainPlain','pzExplain','pzSolutionSan',
            'pzFollowOf','pzHasFollowUp','pzAfterSolution','pzFollowSay','pzShowFollowUp',
+           'pzStudyOn','pzBranchPly','pzStudyReset','pzStudyStart','pzStudyStop',
+           'pzReplaySolved','pzStudySay','pzStudyPlay','pzStudyWorth','walkFrom','pzSanOf',
            'pzRetry','pzRender','pzRenderGrid','visualIndex'];
 
 var bundle = [grab(/\nconst W = 'w', B = 'b';/, "const W/B")];
@@ -193,7 +208,14 @@ for (var k = 0; k < TRACKS.length; k++){
     }
   }
   check(TRACKS[k] + ': numbered 1..n', numbered, true);
-  check(TRACKS[k] + ': a full ladder of a hundred', list.length, 100);
+  /* A ladder is however many positions cleared the standard, not a round
+     number. This used to assert exactly a hundred, which was true of the set
+     the old generator cut to a fixed size and is the opposite of what the
+     current one promises: padding a track to a target means keeping puzzles
+     that did not earn a place. So the assertion is that there *is* a ladder,
+     and the count is reported rather than demanded. */
+  check(TRACKS[k] + ': a ladder with rungs in it', list.length > 0, true);
+  say('  ..    ' + list.length + ' rungs');
   check(TRACKS[k] + ': every solution replays from its fen', replayable, true);
   check(TRACKS[k] + ': ordered easiest first',
         list[0].seedRating <= list[list.length-1].seedRating, true);
@@ -299,6 +321,49 @@ function solveFlow(track){
   check(at + 'Next is offered', elements.pzNext.disabled, false);
 }
 for (var stk = 0; stk < TRACKS.length; stk++) solveFlow(TRACKS[stk]);
+
+/* ---------------------------------------------------------------------
+   The card at the end: the mistake, the line, the point.
+   --------------------------------------------------------------------- */
+say('\nWhat the finished card says\n');
+
+(function explainCard(){
+  // a record shaped the way tools/verify_puzzles.js writes one
+  var rich = {
+    fen: '4k3/8/8/8/8/8/8/R3K2R w KQ - 0 20',
+    moves: ['a1a8'],
+    themes: ['backRank'],
+    seedRating: 1200,
+    why: {
+      mistake: 'Black played Ke8. It walks the king onto the back rank.',
+      swing: 'The position was level before it and is winning after it.',
+      moves: [{ san: 'Ra8+', uci: 'a1a8', by: 'you', text: 'It comes with check.' }],
+      point: 'White comes out a rook up.'
+    }
+  };
+  var html = pzExplain(rich);
+  check('the card leads with the mistake', html.indexOf('walks the king') >= 0, true);
+  check('it names the move in notation',   html.indexOf('<b>Ra8+</b>') >= 0, true);
+  check('it marks whose move each one is', html.indexOf('class="you"') >= 0, true);
+  check('and it ends on the point',        html.indexOf('a rook up') >= 0, true);
+
+  // a defence is marked as theirs, so the card can colour the two apart
+  rich.why.moves.push({ san: 'Kd7', uci: 'e8d7', by: 'them', text: 'Forced.' });
+  check('the defence is marked as theirs',
+        pzExplain(rich).indexOf('class="them"') >= 0, true);
+
+  // whatever the tool wrote, the card is markup and treats it as text
+  rich.why.mistake = 'Black played <script>Ke8</script>.';
+  check('and nothing it is handed becomes markup',
+        pzExplain(rich).indexOf('<script>') >= 0, false);
+
+  // a track from before any of this still gets the old paragraph
+  var plain = { fen: rich.fen, moves: rich.moves, themes: rich.themes, seedRating: 1200 };
+  var old = pzExplain(plain);
+  check('a file with no explanation falls back to one sentence',
+        old.indexOf('pz-why-plain') >= 0, true);
+  check('and the fallback still says something', old.length > 30, true);
+})();
 
 say('\nShow Follow Up, one track at a time\n');
 
@@ -719,11 +784,30 @@ function separationTests(){
   check('it replays the game that was played', /G\.uci/.test(fn('reviewBuild')), true);
   check('and refuses to open without one', /G\.sans\.length/.test(fn('enterReview')), true);
 
-  // the one direction that is allowed: puzzles borrowing the review's words
-  check('the puzzle card uses the review’s own explainer',
-        /describeBest\(/.test(fn('pzExplain')), true);
-  check('and asks no engine of its own',
-        /engineAsk|SF\./.test(fn('pzExplain') + fn('pzOpen') + fn('pzPlay')), false);
+  /* The one direction that is allowed: puzzles borrowing the review's words.
+     The finished card is now the explanation checked into the file by
+     tools/puzzle_words.js — which is what lets it say what the *opponent* did
+     wrong, something describeBest() cannot know, since the mistake happened
+     before the position it is handed. describeBest() is what a track written
+     before any of that falls back to, and that fallback is still the review
+     lending the puzzles its words. */
+  check('the puzzle card prefers the explanation checked into the file',
+        /\.why\b/.test(fn('pzExplain')), true);
+  check('and falls back on the review’s own explainer',
+        /describeBest\(/.test(fn('pzExplainPlain')), true);
+  /* Solving a puzzle still asks no engine — the file carries the explanation
+     and the follow-up, and that is what keeps the puzzle screen able to run
+     with the worker never booted. Study Alternatives is the deliberate
+     exception and the only one: it cannot be precomputed, because the position
+     it analyses is one the player invents. So the assertion is about solving,
+     and the exception is asserted too rather than left as a gap. */
+  check('solving asks no engine of its own',
+        /engineAsk|SF\./.test(fn('pzExplain') + fn('pzExplainPlain') +
+                              fn('pzOpen') + fn('pzFinish') + fn('pzShowFollowUp')), false);
+  check('and pzPlay only reaches one by handing over to study mode',
+        /engineAsk|SF\./.test(fn('pzPlay')), false);
+  check('while Study Alternatives does ask, on the position the player made',
+        /engineAsk\(/.test(fn('pzStudyPlay')), true);
 
   // entering a puzzle must put any open review away, or both would own G.st
   check('opening a puzzle closes the review', /reviewClose\(/.test(fn('pzOpen')), true);
@@ -731,7 +815,138 @@ function separationTests(){
 
 separationTests();
 
-accountTests().then(function(){
+/* ---------------------------------------------------------------------
+   Study Alternatives: the board goes back, and the engine answers.
+   --------------------------------------------------------------------- */
+say('\nStudy Alternatives\n');
+
+async function studyTests(){
+  // a three-ply puzzle from the shipped opening track, so the line is real
+  /* A puzzle to study needs more than a multi-move line: it needs the opponent
+     to have had a *choice* at the branch point. A key move that leaves one
+     legal reply has nothing to explore, which the feature now says out loud —
+     so the fixture has to be one where there is something to try. */
+  var list = null, pick = null, track = null, single = null;
+  for (var t = 0; t < TRACKS.length; t++){
+    var cand = sets[TRACKS[t]];
+    for (var i = 0; i < cand.length; i++){
+      if (cand[i].moves.length < 3) continue;
+      var st0 = stateFromFEN(cand[i].fen);
+      var key = legalMoves(st0, st0.turn).find(function(x){ return uciOf(x) === cand[i].moves[0]; });
+      if (!key) continue;
+      var after = makeMove(st0, key);
+      var replies = legalMoves(after, after.turn).length;
+      if (replies < 2){ if (!single) single = cand[i]; continue; }
+      if (!pick){ pick = { n: i + 1, p: cand[i] }; list = cand; track = TRACKS[t]; }
+    }
+  }
+  if (!pick){ say('  ..    no multi-move puzzle to study, skipping'); return; }
+
+  PZ.mode = 'ladder'; PZ.track = track; PZ.list = list;
+  pzOpen(pick.n);
+  // solve it the short way: the state a finished puzzle leaves the board in is
+  // the whole solution played out, which is what study mode has to restore
+  PZ.done = true; PZ.busy = false;
+  var solvedSt = stateFromFEN(pick.p.fen);
+  for (var q = 0; q < pick.p.moves.length; q++){
+    var qm = legalMoves(solvedSt, solvedSt.turn).find(function(x){ return uciOf(x) === pick.p.moves[q]; });
+    solvedSt = makeMove(solvedSt, qm);
+  }
+  var solved = fenOf(solvedSt);
+
+  check('the button is offered on a finished multi-move puzzle', pick.p.moves.length >= 2, true);
+  pzStudyStart();
+  check('study mode is on', pzStudyOn(), true);
+
+  // a key move with only one legal reply has nothing to study, and says so
+  if (single){
+    pzStudyStop();
+    PZ.list = sets[single.id.slice(0,2) === 'op' ? 'opening'
+             : single.id.slice(0,2) === 'mi' ? 'middlegame' : 'endgame'];
+    var idx = PZ.list.indexOf(single) + 1;
+    pzOpen(idx); PZ.done = true; PZ.busy = false;
+    pzStudyStart();
+    check('a forced-reply puzzle refuses to open study mode', pzStudyOn(), false);
+    check('and explains why', /one legal reply/.test(elements.pzStudySay.innerHTML), true);
+    // back to the real fixture
+    PZ.mode = 'ladder'; PZ.track = track; PZ.list = list;
+    pzOpen(pick.n); PZ.done = true; PZ.busy = false;
+    pzStudyStart();
+  }
+
+  // the board is back at the opponent's first defensive turn
+  var st = stateFromFEN(pick.p.fen);
+  var m0 = legalMoves(st, st.turn).find(function(x){ return uciOf(x) === pick.p.moves[0]; });
+  var wantFen = fenOf(makeMove(st, m0));
+  check('the board rewinds to just after the key move', fenOf(G.st), wantFen);
+  check('and it is the opponent to move', G.st.turn !== PZ.side, true);
+
+  // try a defence that is not the one on file
+  var theirs = legalMoves(G.st, G.st.turn);
+  var alt = null;
+  for (var k = 0; k < theirs.length; k++)
+    if (uciOf(theirs[k]) !== pick.p.moves[1]) { alt = theirs[k]; break; }
+  check('there is another legal defence to try', !!alt, true);
+
+  engineAsked = [];
+  engineReply['*'] = { cp: 900, mate: null, best: null, pv: [] };
+  await pzStudyPlay(alt);
+  check('the engine was asked about the player’s own position',
+        engineAsked.length > 0 && engineAsked[0].fen === pick.p.fen, true);
+  check('and the question included the move they just tried',
+        engineAsked[0].moves[engineAsked[0].moves.length - 1], uciOf(alt));
+
+  /* The three things it can conclude, and the third is the one that matters:
+     a defence that is genuinely better than the one on file is a fault in the
+     *puzzle*, and saying so is the whole reason this is not a canned list of
+     refutations. */
+  var said = function(){ return elements.pzStudySay.innerHTML || ''; };
+
+  // 1. the try is refuted
+  pzStudyReset();
+  engineReply = { '*': { cp: 900, mate: null, best: null, pv: [] } };
+  await pzStudyPlay(alt);
+  check('a losing try is called a failure', /does not save the position/.test(said()), true);
+  check('and it is not called a success',   /holds better/.test(said()), false);
+
+  // 2. the try is the book defence
+  pzStudyReset();
+  var bookMove = legalMoves(G.st, G.st.turn).find(function(x){ return uciOf(x) === pick.p.moves[1]; });
+  engineReply = { '*': { cp: 500, mate: null, best: null, pv: [] } };
+  await pzStudyPlay(bookMove);
+  check('playing the puzzle’s own defence is recognised',
+        /that is the defence the puzzle plays/.test(said()), true);
+
+  // 3. the try is better than the book line — the puzzle is at fault
+  pzStudyReset();
+  var keyTry  = pick.p.fen + '|' + pick.p.moves[0] + ' ' + uciOf(alt);
+  var keyBook = pick.p.fen + '|' + pick.p.moves[0] + ' ' + pick.p.moves[1];
+  engineReply = {};
+  engineReply[keyTry]  = { cp: -200, mate: null, best: null, pv: [] };
+  engineReply[keyBook] = { cp: 600, mate: null, best: null, pv: [] };
+  await pzStudyPlay(alt);
+  check('a defence that really holds is not called a failure',
+        /does not save the position/.test(said()), false);
+  check('and it is reported as a fault in the puzzle',
+        /faulty/.test(said()), true);
+
+  engineReply = { '*': { cp: 900, mate: null, best: null, pv: [] } };
+
+  // leaving study mode restores the solved position
+  pzStudyStop();
+  check('study mode is off again', pzStudyOn(), false);
+  check('and the board is back where the puzzle ended', fenOf(G.st), solved);
+
+  // solving is untouched by any of it
+  pzOpen(pick.n);
+  check('opening a puzzle clears study mode', PZ.study, null);
+}
+
+
+/* Study Alternatives is the one suite here that has to wait for a promise —
+   it is the one feature that asks an engine — so it runs at the end, where its
+   pending answers cannot interleave with the synchronous suites that share PZ. */
+studyTests().then(accountTests).then(function(){
   say('\n' + passed + ' passed, ' + failed + ' failed\n');
   if (typeof process !== 'undefined' && process.exit) process.exit(failed ? 1 : 0);
 }, function(err){

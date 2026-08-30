@@ -29,10 +29,11 @@ python3 server/test_puzzle_rating.py     # the puzzle Elo handler; no server nee
 node tools/test_generate_puzzles.js      # the generator's own decisions, no engine
 python3 tools/check_supabase_puzzles.py  # RLS and column grants, against the real project
 
-node tools/generate_puzzles.js --poolsOut /tmp/pools.json   # regenerate (slow: ~12 min)
+node tools/generate_puzzles.js --games 1600 --poolsOut /tmp/pools.json   # mine (slow: ~75 min)
 node tools/generate_puzzles.js --poolsIn /tmp/pools.json    # re-cut the ladders only (instant)
+node tools/generate_puzzles.js --only endgame --games 3000 --gameLength 200   # hunt one scarce track
 node tools/verify_puzzles.js --track opening               # audit a shipped ladder (slow), touching nothing
-node tools/verify_puzzles.js --track middlegame --write    # ...and repair it in place, follow-ups included
+node tools/verify_puzzles.js --track middlegame --write    # ...and repair, drop, explain and extend it in place
 node tools/verify_puzzles.js --track endgame --followup 6 --write   # ...with a longer follow-up
 node tools/verify_puzzles.js --track endgame --resort --write       # ...and re-rank the ladder with it
 
@@ -221,6 +222,74 @@ writes it with the service key, and without one the server keeps ratings in
 memory. Guests get neither and keep both locally. Run
 `supabase-migrate-puzzles.sql` once, by hand, like `supabase-setup.sql`.
 
+**"One objectively best move" is only half the standard.** The other half is
+`obvious()`, and it exists because a corpus built on the numbers alone fills up
+with one puzzle: the opponent puts a rook where it can be taken, the evaluation
+swings six hundred centipawns, exactly one move is best, and the answer is
+"take the rook". Every engine gate passes it and nobody learns anything. So a
+puzzle is also refused when the move before it *announces* the answer (a
+capture of the piece that just moved, or of one it just left loose), when all
+the material is in hand after one move, or when there is nothing left to
+calculate. Each is waived by a real idea — but only ideas that are properties
+of *the move*: a first version of that waiver let 703 of 888 puzzles through
+because it counted `defensiveResource`, which is the *kind* label stamped on
+every rescue, as a tactic. Captures and checks are welcome; obvious ones are
+not.
+
+**A solution runs to its payoff, not to the end of the doubt.** `buildLine()`
+used to stop the moment there was no longer exactly one strong move, which is
+reliably a move or two before anything happens — so the player found the
+combination and the card had to promise a rook still standing on the board.
+`paidOff()` is the new stopping rule: the material actually in hand (net of
+anything of ours still hanging), or mate. Past the first move the bar for
+"a move they still have to find" drops from `GAP_MIN` to `GAP_CONTINUE`,
+because the turning point is settled at ply 0 and re-arguing it every ply is
+what stopped every line early.
+
+**The card may not promise what the line does not deliver.** A card once said
+"it leaves the rook on b7 hanging — it can simply be taken" while the verified
+follow-up never took it; both halves were produced honestly and the reader drew
+a false conclusion from their being next to each other. `auditClaims()` in
+`tools/puzzle_words.js` re-reads every sentence against the board the line
+actually reaches and strikes anything it cannot justify — a hedged false
+sentence is still a false sentence. Explanations are therefore written *last*,
+after the moves, the score and the follow-up are locked.
+
+**What makes a position a puzzle lives in one file, `tools/puzzle_rules.js`.**
+The first version of this generator had one criterion — "one strong move", the
+best beating the second best by 150cp — and the corpus it produced is the
+argument against it: 57 of the hundred middlegame puzzles had the solver at
+worse than −700 before they began and still worse than −700 after the
+"solution", and another 18 had them already winning by more than +700. Every
+one of those is a position with exactly one best move in it and nothing at
+stake in finding it. A puzzle is not "the engine's choice here is clear". A
+puzzle is a **turning point**, and `judge()` measures three numbers, all from
+the solver's side: what the position was worth *before the opponent's last
+move* (`B`), what it is worth if the solver finds the move (`A1`), and what it
+is worth if they play the second best (`A2`). `A1 − B` is the mistake, `A1 − A2`
+is whether finding it matters, and the three together say whether this is a
+punishment (level beforehand, winning after) or a rescue (worse beforehand,
+level after) or neither. The generator asks it while mining and the verifier
+asks it again deeper over what shipped — one rule, two callers, because a
+corpus checked against a second standard is a corpus with no standard.
+
+`B` is the number the old generator never had, and getting it needs the
+position *before* the opponent moved, which is why every record now carries
+`prev`. It is also why every measuring search sets **`objective: true`** in
+`tools/sf.js`. This build applies `Contempt 24` from the point of view of
+whoever is to move at the root, so `B` and `A1` are read with opposite sides at
+the root: left on, `1.e4` from the starting position measures as a 64cp
+blunder, and the mistake the whole standard rests on is an artefact of the
+setting. Playing searches — the bot ladder, `seedRating()`'s imitation of a
+rung — deliberately keep the default, because there the engine is a player and
+contempt is what a player should have.
+
+**Opening, middlegame and endgame are decided by the position, not the move
+number.** `bucketFor()` used to be `fullmove <= 12` and `<= 30`, which files a
+queenless rook ending reached on move nine under "opening" and a fully manned
+Sicilian on move 32 under "endgame". It now reads material for the endgame test
+and pawn count plus undeveloped pieces for the opening one.
+
 **A shipped ladder is audited by a different tool than the one that grew it.**
 `generate_puzzles.js` judges a position once, at `confirmDepth`, and splices its
 own best defence in before judging the next one — so every ply of a solution
@@ -253,11 +322,22 @@ call a move wrong. That split is not fussiness: a single pass at depth 22 called
 six of the hundred opening puzzles wrong and depth 26 sided with the file on
 five of them, so a sweep that decides is a sweep that rewrites good puzzles.
 
-A disagreement is **repaired, not deleted** — the line is cut at the offending
-ply, the engine's move goes in, and it is extended by the generator's own rule —
-because a track is a hundred rungs and has to stay a hundred rungs. Repairing
-changes the line, so the id (a hash of position and line) and the seed rating
-are recomputed with it. A correct solution that is no longer *sharp* is
+A wrong *move* is **repaired**: the line is cut at the offending ply, the
+engine's move goes in, and it is extended by the generator's own rule.
+Repairing changes the line, so the id (a hash of position and line) and the
+seed rating are recomputed with it.
+
+A position that is no longer a **turning point** is **dropped**, which is the
+other half and the new one. There is a right move to put in place of a wrong
+one; there is nothing that would make a position worth showing that is not.
+`verdict()` re-measures `B`, `A1` and `A2` at depth 22 — deep enough to be a
+real second opinion on the generator's 16, cheap enough to spend three searches
+on every record — and a record that fails, or that cannot be checked because it
+carries no `prev`, leaves the track. The ladder then closes over the hole and
+renumbers, so a track is however many puzzles cleared the standard rather than
+a fixed hundred with the failures papered over. Ids are untouched, so nobody
+loses a solve — only their place in the numbering, exactly as after a
+regeneration. A correct solution that is no longer *sharp* is
 reported, not rewritten: sharpness is a generation criterion, not a claim the
 file makes to the player, and rewriting it would only be undone by the next run
 at the next depth. Nothing is written at all without `--write`.
@@ -299,6 +379,43 @@ the solution stopped: the question is what the move the
 player found was worth, and half of it is usually already won by the time the
 solution runs out. A track from before any of this has neither field, and the
 button is absent rather than present and dead.
+
+**The card at the end of a puzzle is written by the tool, not by the page.**
+`describeBest()` cannot say what the *opponent* did wrong — the mistake happened
+before the position and the move it is handed — so a card built out of it can
+explain the solution perfectly and never tell the player what to look for next
+time. `tools/puzzle_words.js` writes the explanation where the engine is, and
+`verify_puzzles.js` checks it into the file as `why`: the mistake, a sentence
+for every ply (including why the runner-up is not the answer, and how forced
+each defence was), and where it all arrives. `pzExplain()` only spells it out.
+Nothing is searched at the board, which is the same bargain the follow-up made.
+
+The discipline in that file is worth keeping: every sentence is read off a
+position or off a number a search already produced, and where nothing can be
+justified the card says less instead. It is very easy to write a confident
+sentence about a deflection that is not on the board, and a set that does it
+once is a set nobody can trust the rest of. The same reasoning is why
+`themesOf()` refuses to claim deflection, decoy, overloading, interference or
+double attack at all — every cheap test for them fires where they are not true,
+and a wrong label is worse than a missing one, because the label is the thing
+the player is learning to see.
+
+**Study Alternatives is the one thing on the puzzle screen that needs an
+engine, and it is deliberately the last.** Solving asks nothing: the file
+carries its own explanation and its own follow-up, and `test_puzzle_flow.js`
+still asserts that solving, finishing and the follow-up never reach for one.
+The worker boots only when somebody presses the button — because what it
+analyses is a position *the player invented*, and no amount of precomputation
+can have that in the file. The board rewinds to the opponent's first defensive
+turn, any legal move for them is accepted, and the engine answers on that exact
+position. `engineAsk()` grew a `fen` option for it, since a puzzle has no game
+in front of it to describe as a move list from the start.
+
+The case that matters most is the honest one: if the defence the player tries
+is genuinely better than the one on file, it says so, and says that this makes
+the *puzzle* faulty. A stored defence that is not best defence is a broken
+puzzle, and inventing a refutation for it would hide exactly the bug the
+verifier is supposed to catch.
 
 **Practice is not a second puzzle ladder.** Puzzles ask what the best move is,
 with the board in front of you the whole time. Practice (`PR`,
@@ -425,12 +542,12 @@ everything above it already speaks of "the owner's finished lessons" rather than
 **Study Board and Puzzles are separate features that share one library.**
 Study Board (`REV`, the review screen) explains *the game the player just
 finished*: it is reached only from the end-of-game overlay, replays `G.uci`,
-and never reads a puzzle file. Puzzles (`PZ`) are three ladders of a hundred
-positions in `puzzles/*.json`, walked in order, one unlocked by the last. What
-they share is the explaining — `findMotifs()`, `see()`, `describeBest()` — which
-is why a puzzle tagged `fork` is explained with the word fork. Keep the
-dependency one-way: `PZ` may call the review's pure helpers, the review must
-never learn what a puzzle is.
+and never reads a puzzle file. Puzzles (`PZ`) are three ladders in
+`puzzles/*.json`, walked in order, one unlocked by the last. What they share is
+the explaining — `findMotifs()`, `see()`, and `describeBest()` as the fallback
+card for a track written before `why` existed — which is why a puzzle tagged
+`fork` is explained with the word fork. Keep the dependency one-way: `PZ` may
+call the review's pure helpers, the review must never learn what a puzzle is.
 
 **Puzzle Rush borrows the game's clock.** `tickClock()` and `renderClocks()`
 each grow one branch for `RUSH.on`; there is no second timer. A run never
@@ -445,7 +562,19 @@ in a forked process (Node needs `delete global.fetch` and a cwd of `engine/`,
 both explained there). Renaming anything in that file's DECLS/FNS lists breaks
 the tools loudly, which is the trade for having one implementation.
 
-**Two engines.** `blind-chess.html` contains a small negamax/alpha-beta search
+**Three engines, and which one answers matters.** `engine/` is the vendored
+pre-NNUE WASM Stockfish: one thread, 16MB of hash, and it is what the *browser*
+runs. The bot ladder in `LEVELS` was tuned against it, so anything imitating a
+rung — `seedRating()`, and the self-play games the generator mines — must keep
+asking it, because a difficulty measured against an engine the player never
+meets is a difficulty for nobody. The **judge** is the native `stockfish` on
+PATH (Stockfish 18, NNUE, as many threads and as much hash as it is given):
+nothing about whether a puzzle is *correct* should be decided by a build chosen
+for fitting in a web page. `tools/sf.js` has both behind one `ask()`, and
+`Pool(n, {native:true})` picks. Callers that need the browser's engine ask for
+it by name — see the two pools in `main()` in both tools.
+
+**Two engines in the page.** `blind-chess.html` contains a small negamax/alpha-beta search
 (`bestMove`) *and* drives the vendored Stockfish WASM worker over UCI (`SF`,
 `engineAsk`). The bot ladder (`LEVELS`) is Stockfish plus deliberate
 degradation — `pool`/`slop`/`wild` make weak rungs, since this build has Skill
@@ -496,8 +625,8 @@ grants.
 Navigate by the `/* ==== TITLE ==== */` banners in the script — THE SKY,
 CONSTANTS & HELPERS, MOVE GENERATION, ENGINE, GAME / UI STATE, CLOCK, SOUND,
 COMPLETE BLINDFOLD, PLAYING MOVES, ONLINE PLAY, RESIGNING…, THE ENGINE, THE
-REVIEW, THE PUZZLES, THE LESSONS, CONTROLS, PRACTICE, SCREENS, ACCOUNTS,
-SOCIAL.
+REVIEW, THE PUZZLES, STUDY ALTERNATIVES, THE LESSONS, CONTROLS, PRACTICE,
+SCREENS, ACCOUNTS, SOCIAL.
 
 Screens are `<section class="screen" id="screen-NAME">` toggled by
 `showScreen(name)`; `screenName` is the current one and several handlers branch
