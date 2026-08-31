@@ -1,7 +1,31 @@
 {
+  "schema_version": 2,
+  "id": "battery",
+  "canonical_name": "Battery",
+  "alternate_names": [
+    "doubled pieces on a line"
+  ],
+  "historical_names": [],
   "category": "tactical-motifs",
   "subcategory": "piece configuration",
-  "epistemic_type": "D",
+  "tags": [],
+  "knowledge_type": "tactical-motif",
+  "knowledge_type_note": "Type D by association, but it is really a configuration that enables motifs rather than a motif that wins material. Flagged so an explanation does not claim a battery is itself the reason a move is good.",
+  "name_status": "established-name",
+  "difficulty": "intermediate",
+  "definition_short": "Two or more line pieces stacked on the same file, rank or diagonal, so their force is combined.",
+  "definition_long": "Two rooks on a file, a queen behind a rook, a queen behind a bishop on a diagonal. The front piece can capture on a defended square because the rear piece recaptures, and the pair controls the line far more strongly than either alone.\n\nA battery is also the precondition for a discovered attack: put a piece of your own in front of the rear piece and moving it discovers. The queen-plus-bishop diagonal battery aimed at h7 is the standard attacking configuration; three heavy pieces on one file is sometimes called Alekhine's gun.\n\nRecorded as a piece configuration rather than a tactic: a battery does not by itself do anything, it enables things.",
+  "history": {
+    "attributions": [],
+    "first_documented_source": "informant-encyclopedia-combinations",
+    "year": null,
+    "confidence": "unknown",
+    "notes": "Descriptive pattern name of long, largely anonymous usage.",
+    "competing_claims": [],
+    "development": []
+  },
+  "engine_era_status": "unassessed",
+  "engine_era_note": "",
   "sources": [
     "informant-encyclopedia-combinations",
     "wikipedia-chess-tactic",
@@ -9,33 +33,6 @@
     "chesscom-tactics-38"
   ],
   "source_confidence": "high",
-  "status": {
-    "stage": "researched",
-    "last_updated": "2026-08-31",
-    "open_questions": []
-  },
-  "origin": {
-    "attributed_to": [],
-    "first_source": "informant-encyclopedia-combinations",
-    "year": null,
-    "certainty": "unknown",
-    "notes": "Descriptive pattern name of long, largely anonymous usage.",
-    "competing_claims": []
-  },
-  "id": "battery",
-  "canonical_name": "Battery",
-  "difficulty": "intermediate",
-  "alternate_names": [
-    "doubled pieces on a line"
-  ],
-  "related_concepts": [
-    "x-ray",
-    "discovered-attack",
-    "open-file"
-  ],
-  "definition_short": "Two or more line pieces stacked on the same file, rank or diagonal, so their force is combined.",
-  "definition_long": "Two rooks on a file, a queen behind a rook, a queen behind a bishop on a diagonal. The front piece can capture on a defended square because the rear piece recaptures, and the pair controls the line far more strongly than either alone.\n\nA battery is also the precondition for a discovered attack: put a piece of your own in front of the rear piece and moving it discovers. The queen-plus-bishop diagonal battery aimed at h7 is the standard attacking configuration; three heavy pieces on one file is sometimes called Alekhine's gun.\n\nRecorded as a piece configuration rather than a tactic: a battery does not by itself do anything, it enables things.",
-  "epistemic_note": "Type D by association, but it is really a configuration that enables motifs rather than a motif that wins material. Flagged so an explanation does not claim a battery is itself the reason a move is good.",
   "recognition": {
     "preconditions": [
       "Two or more friendly line pieces share a file, rank or diagonal with nothing between them"
@@ -48,8 +45,19 @@
       "The line is blocked further along and cannot be opened",
       "The rear piece is more valuable and becomes a target itself"
     ],
+    "prerequisites": [],
     "detector": "lineAlignment",
-    "detectability": "mechanical"
+    "detectability": "mechanical",
+    "typical_confidence": "medium",
+    "false_positive_traps": []
+  },
+  "application": {
+    "typical_plans": [],
+    "typical_moves": [],
+    "typical_pawn_structures": [],
+    "typical_piece_arrangements": [],
+    "tactical_consequences": [],
+    "strategic_consequences": []
   },
   "exceptions": [
     "Ordering matters: queen in front of rook is usually worse than rook in front of queen, because the more valuable piece meets the defenders first."
@@ -57,11 +65,31 @@
   "limitations": [
     "A battery is potential, not achievement. Do not report it as the reason for a move unless the position shows what it actually enables."
   ],
-  "explanation_templates": {
-    "beginner": "Two pieces are lined up on the same line, so they work together — the one in front can take, and the one behind takes back.",
-    "intermediate": "A battery on the {line}. It doubles the pressure and sets up a discovery if the front piece moves.",
-    "advanced": "Battery. Check the ordering — the cheaper piece generally belongs in front.",
-    "hedge": "A battery enables tactics rather than being one; say what it actually threatens here."
+  "misconceptions": [],
+  "relationships": {
+    "broader": [],
+    "narrower": [],
+    "related": [
+      "x-ray",
+      "discovered-attack",
+      "open-file"
+    ],
+    "contrasting": [],
+    "co_occurring": [],
+    "conflicts": []
+  },
+  "examples": [],
+  "counterexamples": [],
+  "ambiguous_examples": [],
+  "explanations": {
+    "by_level": {
+      "beginner": "Two pieces are lined up on the same line, so they work together — the one in front can take, and the one behind takes back.",
+      "intermediate": "A battery on the {line}. It doubles the pressure and sets up a discovery if the front piece moves.",
+      "advanced": "Battery. Check the ordering — the cheaper piece generally belongs in front."
+    },
+    "by_depth": {},
+    "hedge": "A battery enables tactics rather than being one; say what it actually threatens here.",
+    "lesson": ""
   },
   "terminology": {
     "beginner_words": [
@@ -73,5 +101,11 @@
       "Alekhine's gun"
     ],
     "avoid": []
+  },
+  "status": {
+    "stage": "researched",
+    "last_updated": "2026-08-31",
+    "open_questions": [],
+    "audit_notes": []
   }
 }

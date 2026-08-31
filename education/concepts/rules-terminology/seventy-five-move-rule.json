@@ -1,31 +1,34 @@
 {
+  "schema_version": 2,
+  "id": "seventy-five-move-rule",
+  "canonical_name": "The seventy-five-move rule",
+  "alternate_names": [],
+  "historical_names": [],
   "category": "official-rules",
   "subcategory": "basic rules of play",
-  "epistemic_type": "A",
+  "tags": [],
+  "knowledge_type": "official-rule",
+  "knowledge_type_note": "Official rule.",
+  "name_status": "established-name",
+  "difficulty": "intermediate",
+  "definition_short": "After 75 moves by each player with no capture and no pawn move, the game is drawn automatically.",
+  "definition_long": "FIDE Art. 9.6.2: the game is drawn if 'any series of at least 75 moves have been made by each player without the movement of any pawn and without any capture. If the last move resulted in checkmate, that shall take precedence.'\n\nThe automatic counterpart to the claimable fifty-move rule. The checkmate proviso is the interesting part: a move that simultaneously completes the 75 and delivers mate is a win, not a draw.",
+  "history": {
+    "attributions": [],
+    "first_documented_source": "fide-laws-2023",
+    "year": null,
+    "confidence": "unknown",
+    "notes": "",
+    "competing_claims": [],
+    "development": []
+  },
+  "engine_era_status": "not-applicable",
+  "engine_era_note": "",
   "sources": [
     "fide-laws-2023",
     "fide-laws-2023-pdf"
   ],
   "source_confidence": "high",
-  "status": {
-    "stage": "researched",
-    "last_updated": "2026-08-31",
-    "open_questions": []
-  },
-  "id": "seventy-five-move-rule",
-  "canonical_name": "The seventy-five-move rule",
-  "difficulty": "intermediate",
-  "definition_short": "After 75 moves by each player with no capture and no pawn move, the game is drawn automatically.",
-  "definition_long": "FIDE Art. 9.6.2: the game is drawn if 'any series of at least 75 moves have been made by each player without the movement of any pawn and without any capture. If the last move resulted in checkmate, that shall take precedence.'\n\nThe automatic counterpart to the claimable fifty-move rule. The checkmate proviso is the interesting part: a move that simultaneously completes the 75 and delivers mate is a win, not a draw.",
-  "epistemic_note": "Official rule.",
-  "origin": {
-    "attributed_to": [],
-    "first_source": "fide-laws-2023",
-    "year": null,
-    "certainty": "unknown",
-    "notes": "",
-    "competing_claims": []
-  },
   "recognition": {
     "preconditions": [
       "150 ply have elapsed with no capture and no pawn move"
@@ -34,22 +37,48 @@
     "indicators_against": [
       "The final move delivers checkmate — mate takes precedence"
     ],
+    "prerequisites": [],
     "detector": "halfmoveClock",
-    "detectability": "mechanical"
+    "detectability": "mechanical",
+    "typical_confidence": "medium",
+    "false_positive_traps": []
+  },
+  "application": {
+    "typical_plans": [],
+    "typical_moves": [],
+    "typical_pawn_structures": [],
+    "typical_piece_arrangements": [],
+    "tactical_consequences": [],
+    "strategic_consequences": []
   },
   "exceptions": [
     "Checkmate on the 75th move takes precedence over the draw."
   ],
   "limitations": [],
-  "related_concepts": [
-    "fifty-move-rule",
-    "checkmate"
-  ],
-  "explanation_templates": {
-    "beginner": "Seventy-five moves have passed for each side with no capture and no pawn move, so the game is automatically drawn.",
-    "intermediate": "The seventy-five-move rule ends the game without a claim — unless the last move was checkmate.",
-    "advanced": "Art. 9.6.2, including the checkmate precedence clause.",
-    "hedge": ""
+  "misconceptions": [],
+  "relationships": {
+    "broader": [],
+    "narrower": [],
+    "related": [
+      "fifty-move-rule",
+      "checkmate"
+    ],
+    "contrasting": [],
+    "co_occurring": [],
+    "conflicts": []
+  },
+  "examples": [],
+  "counterexamples": [],
+  "ambiguous_examples": [],
+  "explanations": {
+    "by_level": {
+      "beginner": "Seventy-five moves have passed for each side with no capture and no pawn move, so the game is automatically drawn.",
+      "intermediate": "The seventy-five-move rule ends the game without a claim — unless the last move was checkmate.",
+      "advanced": "Art. 9.6.2, including the checkmate precedence clause."
+    },
+    "by_depth": {},
+    "hedge": "",
+    "lesson": ""
   },
   "terminology": {
     "beginner_words": [],
@@ -57,5 +86,11 @@
       "seventy-five-move rule"
     ],
     "avoid": []
+  },
+  "status": {
+    "stage": "researched",
+    "last_updated": "2026-08-31",
+    "open_questions": [],
+    "audit_notes": []
   }
 }

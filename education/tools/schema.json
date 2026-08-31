@@ -1,96 +1,161 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "$id": "nox-chess/education/concept.schema.json",
-  "title": "Education System concept record",
+  "$id": "nox-chess/education/concept.schema.v2.json",
+  "title": "Education System concept record (v2)",
+  "schema_version": 2,
   "type": "object",
-  "required": ["id", "canonical_name", "category", "epistemic_type",
-               "definition_short", "definition_long", "sources", "source_confidence",
-               "status"],
+  "required": ["id", "canonical_name", "category", "knowledge_type",
+               "definition_short", "definition_long", "sources",
+               "source_confidence", "status"],
   "additionalProperties": false,
   "properties": {
-    "id":              { "type": "string", "pattern": "^[a-z0-9]+(-[a-z0-9]+)*$",
-                         "description": "Globally unique kebab-case slug. Stable forever once published." },
-    "canonical_name":  { "type": "string" },
-    "alternate_names": { "type": "array", "items": { "type": "string" },
-                         "description": "Synonyms actually attested in sources, not invented." },
-    "historical_names":{ "type": "array", "items": { "type": "string" } },
-    "category":        { "type": "string" },
-    "subcategory":     { "type": "string" },
-    "difficulty":      { "enum": ["beginner", "intermediate", "advanced", "master"] },
 
-    "epistemic_type":  { "enum": ["A","B","C","D","E","F","G","H","I","J"],
-                         "description": "A=official rule B=proven result C=named theoretical position D=tactical motif E=strategic principle F=rule of thumb G=historical teaching principle H=practical guideline I=terminology/pattern J=other" },
-    "epistemic_note":  { "type": "string",
-                         "description": "Why this type and not a neighbouring one. Required when the choice is arguable." },
+    "schema_version": { "const": 2 },
 
-    "definition_short":{ "type": "string", "maxLength": 300 },
-    "definition_long": { "type": "string" },
+    "id":               { "type": "string", "pattern": "^[a-z0-9]+(-[a-z0-9]+)*$" },
+    "canonical_name":   { "type": "string" },
+    "alternate_names":  { "type": "array", "items": { "type": "string" } },
+    "historical_names": { "type": "array", "items": { "type": "string" } },
+    "translated_names": { "type": "array", "items": {
+                            "type": "object", "additionalProperties": false,
+                            "properties": { "lang": {"type":"string"},
+                                            "name": {"type":"string"},
+                                            "note": {"type":"string"} } } },
+    "category":         { "type": "string", "description": "An area id from taxonomy.json." },
+    "subcategory":      { "type": "string" },
+    "tags":             { "type": "array", "items": { "type": "string" } },
 
-    "origin": {
-      "type": "object",
-      "additionalProperties": false,
+    "knowledge_type": {
+      "enum": ["official-rule", "proven-result", "tablebase-fact",
+               "named-theoretical-position", "tactical-motif", "mating-pattern",
+               "strategic-principle", "positional-concept", "rule-of-thumb",
+               "historical-teaching-principle", "practical-guideline",
+               "terminology", "other"],
+      "description": "What KIND of knowledge this is. A rule of thumb must never be presented as a proven result." },
+    "knowledge_type_note": { "type": "string",
+      "description": "Required when the classification is arguable: why this type and not a neighbouring one." },
+
+    "name_status": {
+      "enum": ["established-name", "common-usage", "descriptive-phrase", "contested"],
+      "description": "Whether sources support this as a recognised NAME (e.g. 'Lucena Position') or whether it is a descriptive phrase that must not be presented as established terminology." },
+
+    "difficulty": { "enum": ["beginner", "novice", "intermediate", "advanced",
+                             "expert", "master", "highly-theoretical"] },
+
+    "definition_short": { "type": "string", "maxLength": 400 },
+    "definition_long":  { "type": "string" },
+
+    "history": {
+      "type": "object", "additionalProperties": false,
       "properties": {
-        "attributed_to":  { "type": "array", "items": { "type": "string" } },
-        "first_source":   { "type": "string" },
-        "year":           { "type": ["integer", "null"] },
-        "certainty":      { "enum": ["established", "probable", "disputed", "unknown"] },
-        "notes":          { "type": "string" },
-        "competing_claims": { "type": "array", "items": { "type": "string" } }
+        "attributions": {
+          "type": "array",
+          "description": "Attribution is not one relation. Record the specific kind claimed by each source.",
+          "items": { "type": "object", "additionalProperties": false,
+            "required": ["person", "relation"],
+            "properties": {
+              "person":   { "type": "string" },
+              "relation": { "enum": ["originated-by", "first-documented-by", "popularized-by",
+                                     "systematized-by", "named-by", "later-associated-with"] },
+              "source":   { "type": "string" },
+              "year":     { "type": ["integer", "null"] },
+              "note":     { "type": "string" } } } },
+        "first_documented_source": { "type": ["string", "null"] },
+        "year":       { "type": ["integer", "null"] },
+        "confidence": { "enum": ["high", "medium", "low", "disputed", "unknown"],
+                        "description": "high = primary-source evidence; medium = multiple reliable secondary sources; low = repeated attribution with no primary evidence; disputed = reliable sources disagree; unknown = cannot establish." },
+        "notes":      { "type": "string" },
+        "competing_claims": { "type": "array", "items": { "type": "string" } },
+        "development": {
+          "type": "array",
+          "description": "How understanding of the concept changed over time.",
+          "items": { "type": "object", "additionalProperties": false,
+            "properties": { "era": {"type":"string"}, "change": {"type":"string"},
+                            "source": {"type":"string"} } } }
       }
     },
 
-    "sources":           { "type": "array", "items": { "type": "string" },
-                           "description": "Source IDs into sources/sources.json." },
-    "source_confidence": { "enum": ["high", "medium", "low"],
-                           "description": "high = multiple independent authoritative sources agree." },
+    "engine_era_status": {
+      "enum": ["reliable", "useful-with-common-exceptions", "historically-overstated",
+               "substantially-revised-by-engines", "not-applicable", "unassessed"],
+      "description": "How modern engine analysis has affected the concept's standing." },
+    "engine_era_note": { "type": "string" },
+
+    "sources":           { "type": "array", "items": { "type": "string" } },
+    "source_confidence": { "enum": ["high", "medium", "low"] },
 
     "recognition": {
-      "type": "object",
-      "description": "How the concept is detected from a position. Machine-checkable where possible.",
-      "additionalProperties": false,
+      "type": "object", "additionalProperties": false,
       "properties": {
         "preconditions":      { "type": "array", "items": { "type": "string" } },
         "indicators_for":     { "type": "array", "items": { "type": "string" } },
         "indicators_against": { "type": "array", "items": { "type": "string" } },
-        "detector":           { "type": ["string", "null"],
-                                "description": "Name of the feature-detector function, or null if not yet mechanised." },
-        "detectability":      { "enum": ["mechanical", "heuristic", "human-only"] }
+        "prerequisites":      { "type": "array", "items": { "type": "string" } },
+        "detector":           { "type": ["string", "null"] },
+        "detectability":      { "enum": ["mechanical", "heuristic", "human-only"] },
+        "typical_confidence": { "enum": ["high", "medium", "low"],
+                                "description": "How confidently this concept can normally be asserted once its preconditions hold." },
+        "false_positive_traps": { "type": "array", "items": { "type": "string" },
+                                  "description": "Situations that satisfy the surface pattern but where the concept does NOT apply." }
       }
     },
 
-    "exceptions":    { "type": "array", "items": { "type": "string" } },
-    "limitations":   { "type": "array", "items": { "type": "string" } },
-    "prerequisites": { "type": "array", "items": { "type": "string" } },
+    "application": {
+      "type": "object", "additionalProperties": false,
+      "properties": {
+        "typical_plans":             { "type": "array", "items": { "type": "string" } },
+        "typical_moves":             { "type": "array", "items": { "type": "string" } },
+        "typical_pawn_structures":   { "type": "array", "items": { "type": "string" } },
+        "typical_piece_arrangements":{ "type": "array", "items": { "type": "string" } },
+        "tactical_consequences":     { "type": "array", "items": { "type": "string" } },
+        "strategic_consequences":    { "type": "array", "items": { "type": "string" } }
+      }
+    },
 
-    "related_concepts":  { "type": "array", "items": { "type": "string" } },
-    "broader_concepts":  { "type": "array", "items": { "type": "string" } },
-    "narrower_concepts": { "type": "array", "items": { "type": "string" } },
-    "opposing_concepts": { "type": "array", "items": { "type": "string" },
-                           "description": "Concepts that recommend the opposite in the same situation." },
+    "exceptions":      { "type": "array", "items": { "type": "string" } },
+    "limitations":     { "type": "array", "items": { "type": "string" } },
+    "misconceptions":  { "type": "array", "items": { "type": "string" } },
 
-    "typical_plans":            { "type": "array", "items": { "type": "string" } },
-    "typical_moves":            { "type": "array", "items": { "type": "string" } },
-    "tactical_consequences":    { "type": "array", "items": { "type": "string" } },
-    "strategic_consequences":   { "type": "array", "items": { "type": "string" } },
+    "relationships": {
+      "type": "object", "additionalProperties": false,
+      "properties": {
+        "broader":      { "type": "array", "items": { "type": "string" } },
+        "narrower":     { "type": "array", "items": { "type": "string" } },
+        "related":      { "type": "array", "items": { "type": "string" } },
+        "contrasting":  { "type": "array", "items": { "type": "string" } },
+        "co_occurring": { "type": "array", "items": { "type": "string" } },
+        "conflicts": {
+          "type": "array",
+          "description": "Concepts that recommend the opposite in the same situation, with guidance on which wins.",
+          "items": { "type": "object", "additionalProperties": false,
+            "required": ["concept", "resolution"],
+            "properties": { "concept": {"type":"string"}, "resolution": {"type":"string"} } } }
+      }
+    },
 
-    "examples":        { "type": "array", "items": { "$ref": "#/$defs/position_ref" } },
-    "counterexamples": { "type": "array", "items": { "$ref": "#/$defs/position_ref" } },
+    "examples":        { "type": "array", "items": { "$ref": "#/$defs/position" } },
+    "counterexamples": { "type": "array", "items": { "$ref": "#/$defs/position" } },
+    "ambiguous_examples": { "type": "array", "items": { "$ref": "#/$defs/position" } },
 
-    "explanation_templates": {
+    "explanations": {
       "type": "object",
+      "description": "Two independent axes: LEVEL (who is reading) and DEPTH (how much). Keep them separate.",
       "additionalProperties": false,
       "properties": {
-        "beginner":     { "type": "string" },
-        "intermediate": { "type": "string" },
-        "advanced":     { "type": "string" },
-        "hedge":        { "type": "string",
-                          "description": "Wording used when epistemic_type is F/G/H, so a habit is never stated as a law." }
+        "by_level": { "type": "object", "additionalProperties": false,
+          "properties": { "beginner": {"type":"string"}, "intermediate": {"type":"string"},
+                          "advanced": {"type":"string"}, "master": {"type":"string"} } },
+        "by_depth": { "type": "object", "additionalProperties": false,
+          "properties": { "short": {"type":"string"}, "normal": {"type":"string"},
+                          "deep": {"type":"string"} } },
+        "hedge": { "type": "string",
+                   "description": "Mandatory for rule-of-thumb / historical-teaching-principle / practical-guideline: wording that stops a habit being stated as a law." },
+        "lesson": { "type": "string", "description": "The transferable takeaway." }
       }
     },
 
     "terminology": {
-      "type": "object",
-      "additionalProperties": false,
+      "type": "object", "additionalProperties": false,
       "properties": {
         "beginner_words": { "type": "array", "items": { "type": "string" } },
         "advanced_words": { "type": "array", "items": { "type": "string" } },
@@ -99,47 +164,69 @@
     },
 
     "status": {
-      "type": "object",
-      "required": ["stage"],
-      "additionalProperties": false,
+      "type": "object", "required": ["stage"], "additionalProperties": false,
       "properties": {
-        "stage":        { "enum": ["stub", "researched", "validated", "needs-review"] },
-        "last_updated": { "type": "string" },
-        "open_questions": { "type": "array", "items": { "type": "string" } }
+        "stage": { "enum": ["discovered", "researched", "sourced", "structured",
+                            "tested", "validated", "ready", "needs-review"],
+                   "description": "Lifecycle. Only 'ready' may be treated as production-ready." },
+        "last_updated":   { "type": "string" },
+        "open_questions": { "type": "array", "items": { "type": "string" } },
+        "audit_notes":    { "type": "array", "items": { "type": "string" } }
       }
     }
   },
 
   "$defs": {
-    "position_ref": {
-      "type": "object",
-      "required": ["fen", "note"],
+    "position": {
+      "type": "object", "required": ["fen", "note", "origin_kind"],
       "additionalProperties": false,
       "properties": {
-        "fen":   { "type": "string" },
-        "note":  { "type": "string" },
-        "game":  { "type": "string", "description": "Player-vs-player, event, year, if from a real game." },
+        "fen":  { "type": "string" },
+        "note": { "type": "string" },
+        "origin_kind": { "enum": ["historical-game", "constructed-test", "study-composition",
+                                  "puzzle", "tablebase-position"],
+                         "description": "Constructed positions must be labelled as such and never presented as historical." },
+        "game": { "type": "string" },
+        "pgn":  { "type": "string" },
         "side_to_move_benefits": { "enum": ["white", "black", "neither"] },
+        "concept_role": { "enum": ["positive", "negative", "ambiguous"] },
+        "controlled_pair_with": { "type": ["string", "null"],
+                                  "description": "FEN of the paired position this is a controlled comparison against." },
         "engine": {
-          "type": "object",
-          "description": "Filled in by tools/sf_analyse.py. Absent means not yet engine-tested.",
-          "additionalProperties": false,
+          "type": "object", "additionalProperties": false,
           "properties": {
-            "engine_id":    { "type": "string" },
-            "depth":        { "type": "integer" },
-            "best_move":    { "type": "string" },
-            "eval_cp":      { "type": ["integer", "null"] },
-            "mate_in":      { "type": ["integer", "null"] },
-            "alternatives": { "type": "array", "items": {
-                                "type": "object",
-                                "additionalProperties": false,
-                                "properties": {
-                                  "move":  { "type": "string" },
-                                  "eval_cp": { "type": ["integer", "null"] },
-                                  "mate_in": { "type": ["integer", "null"] }
-                                } } },
-            "verdict":      { "enum": ["supports", "contradicts", "ambiguous", "untested"] },
-            "verdict_note": { "type": "string" }
+            "engine_id":     { "type": "string" },
+            "test_level":    { "enum": [1, 2, 3, 4],
+                               "description": "1 smoke, 2 normal, 3 deep, 4 critical/disputed." },
+            "depth":         { "type": "integer" },
+            "threads":       { "type": ["integer", "null"] },
+            "hash_mb":       { "type": ["integer", "null"] },
+            "multipv":       { "type": ["integer", "null"] },
+            "best_move":     { "type": ["string", "null"] },
+            "eval_cp":       { "type": ["integer", "null"] },
+            "mate_in":       { "type": ["integer", "null"] },
+            "pv":            { "type": "array", "items": { "type": "string" } },
+            "alternatives":  { "type": "array", "items": {
+                                 "type": "object", "additionalProperties": false,
+                                 "properties": { "move": {"type":"string"},
+                                                 "eval_cp": {"type":["integer","null"]},
+                                                 "mate_in": {"type":["integer","null"]} } } },
+            "margin_cp":     { "type": ["integer", "null"],
+                               "description": "Best minus runner-up. The usable signal that a concept is driving the move — best-move agreement alone is not." },
+            "verdict":       { "enum": ["supports", "contradicts", "ambiguous", "untested"] },
+            "verdict_note":  { "type": "string" }
+          }
+        },
+        "tablebase": {
+          "type": "object", "additionalProperties": false,
+          "properties": {
+            "source":   { "type": "string" },
+            "pieces":   { "type": ["integer", "null"] },
+            "wdl":      { "enum": ["win", "cursed-win", "draw", "blessed-loss", "loss", "unknown"] },
+            "dtz":      { "type": ["integer", "null"] },
+            "dtm":      { "type": ["integer", "null"] },
+            "category": { "type": "string" },
+            "note":     { "type": "string" }
           }
         }
       }

@@ -1,7 +1,33 @@
 {
+  "schema_version": 2,
+  "id": "back-rank-mate",
+  "canonical_name": "Back-rank mate",
+  "alternate_names": [
+    "back rank mate",
+    "corridor mate",
+    "back-rank weakness"
+  ],
+  "historical_names": [],
   "category": "named-mating-patterns",
   "subcategory": "mating pattern",
-  "epistemic_type": "D",
+  "tags": [],
+  "knowledge_type": "mating-pattern",
+  "knowledge_type_note": "A named mating pattern (D). The derived 'back-rank weakness' is a standing positional feature rather than a one-move tactic, and the two should not be conflated in an explanation.",
+  "name_status": "established-name",
+  "difficulty": "beginner",
+  "definition_short": "A rook or queen mates on the back rank because the king's own pawns block every escape square.",
+  "definition_long": "The castled king sits behind three unmoved pawns. A heavy piece arriving on the back rank gives check, and the king has nowhere to go because its own pawns occupy the only flight squares. The standard prophylactic is to make LUFT — advancing a pawn (usually h2-h3 or h7-h6) to open an escape square.\n\nThe back rank is more often a weakness to be exploited indirectly than a mate to be played immediately: it makes defenders of the back rank overloaded, so deflecting or removing them wins material even when mate never actually occurs.",
+  "history": {
+    "attributions": [],
+    "first_documented_source": "informant-encyclopedia-combinations",
+    "year": null,
+    "confidence": "unknown",
+    "notes": "Descriptive pattern name of long, largely anonymous usage.",
+    "competing_claims": [],
+    "development": []
+  },
+  "engine_era_status": "unassessed",
+  "engine_era_note": "",
   "sources": [
     "informant-encyclopedia-combinations",
     "wikipedia-chess-tactic",
@@ -9,36 +35,6 @@
     "chesscom-tactics-38"
   ],
   "source_confidence": "high",
-  "status": {
-    "stage": "validated",
-    "last_updated": "2026-08-31",
-    "open_questions": []
-  },
-  "origin": {
-    "attributed_to": [],
-    "first_source": "informant-encyclopedia-combinations",
-    "year": null,
-    "certainty": "unknown",
-    "notes": "Descriptive pattern name of long, largely anonymous usage.",
-    "competing_claims": []
-  },
-  "id": "back-rank-mate",
-  "canonical_name": "Back-rank mate",
-  "difficulty": "beginner",
-  "alternate_names": [
-    "back rank mate",
-    "corridor mate",
-    "back-rank weakness"
-  ],
-  "related_concepts": [
-    "deflection",
-    "overloading",
-    "battery",
-    "luft"
-  ],
-  "definition_short": "A rook or queen mates on the back rank because the king's own pawns block every escape square.",
-  "definition_long": "The castled king sits behind three unmoved pawns. A heavy piece arriving on the back rank gives check, and the king has nowhere to go because its own pawns occupy the only flight squares. The standard prophylactic is to make LUFT — advancing a pawn (usually h2-h3 or h7-h6) to open an escape square.\n\nThe back rank is more often a weakness to be exploited indirectly than a mate to be played immediately: it makes defenders of the back rank overloaded, so deflecting or removing them wins material even when mate never actually occurs.",
-  "epistemic_note": "A named mating pattern (D). The derived 'back-rank weakness' is a standing positional feature rather than a one-move tactic, and the two should not be conflated in an explanation.",
   "recognition": {
     "preconditions": [
       "The enemy king is on its back rank",
@@ -55,8 +51,19 @@
       "The checking square is defended",
       "The king can capture the checking piece"
     ],
+    "prerequisites": [],
     "detector": "backRankEscape",
-    "detectability": "mechanical"
+    "detectability": "mechanical",
+    "typical_confidence": "medium",
+    "false_positive_traps": []
+  },
+  "application": {
+    "typical_plans": [],
+    "typical_moves": [],
+    "typical_pawn_structures": [],
+    "typical_piece_arrangements": [],
+    "tactical_consequences": [],
+    "strategic_consequences": []
   },
   "exceptions": [
     "Luft defeats it outright: one pawn move can turn mate into nothing.",
@@ -65,11 +72,102 @@
   "limitations": [
     "The pattern is easy to detect but easy to over-report — most back ranks that look weak are adequately defended."
   ],
-  "explanation_templates": {
-    "beginner": "The king is trapped on the back row by its own pawns, so a rook or queen arriving there is checkmate.",
-    "intermediate": "Back-rank mate. The king's pawns block every escape square and the back rank is not adequately defended.",
-    "advanced": "Back-rank pattern. Often the real value is the standing weakness: it overloads whatever defends the rank.",
-    "hedge": ""
+  "misconceptions": [],
+  "relationships": {
+    "broader": [],
+    "narrower": [],
+    "related": [
+      "deflection",
+      "overloading",
+      "battery",
+      "luft"
+    ],
+    "contrasting": [],
+    "co_occurring": [],
+    "conflicts": []
+  },
+  "examples": [
+    {
+      "fen": "6k1/5ppp/8/8/8/8/5PPP/4R1K1 w - - 0 1",
+      "note": "Constructed controlled pair, positive half. Black's f7/g7/h7 pawns are all unmoved, so the king has no flight square.",
+      "origin_kind": "constructed-test",
+      "concept_role": "positive",
+      "side_to_move_benefits": "white",
+      "engine": {
+        "engine_id": "Stockfish 18",
+        "test_level": 2,
+        "depth": 26,
+        "threads": 10,
+        "hash_mb": 4096,
+        "multipv": 3,
+        "best_move": "e1e8",
+        "eval_cp": null,
+        "mate_in": 1,
+        "pv": [],
+        "alternatives": [
+          {
+            "move": "h2h3",
+            "eval_cp": null,
+            "mate_in": 31
+          },
+          {
+            "move": "g1f1",
+            "eval_cp": null,
+            "mate_in": 32
+          }
+        ],
+        "margin_cp": null,
+        "verdict": "supports",
+        "verdict_note": "Re8 is mate in 1. The next-best move is mate in 31. As clean a demonstration of the pattern as exists."
+      }
+    }
+  ],
+  "counterexamples": [
+    {
+      "fen": "6k1/5pp1/7p/8/8/8/5PPP/4R1K1 w - - 0 1",
+      "note": "Constructed controlled pair, negative half. IDENTICAL except Black's h-pawn stands on h6 instead of h7 — one pawn move of luft.",
+      "origin_kind": "constructed-test",
+      "concept_role": "negative",
+      "side_to_move_benefits": "white",
+      "engine": {
+        "engine_id": "Stockfish 18",
+        "test_level": 2,
+        "depth": 26,
+        "threads": 10,
+        "hash_mb": 4096,
+        "multipv": 3,
+        "best_move": "h2h3",
+        "eval_cp": null,
+        "mate_in": 28,
+        "pv": [],
+        "alternatives": [
+          {
+            "move": "e1e8",
+            "eval_cp": null,
+            "mate_in": 30
+          },
+          {
+            "move": "g1f1",
+            "eval_cp": null,
+            "mate_in": 30
+          }
+        ],
+        "margin_cp": null,
+        "verdict": "supports",
+        "verdict_note": "Re8+ is no longer mate in 1 but mate in 30, and is no longer even the best move (h3 is mate in 28). A single tempo of luft converts a mate in 1 into a mate in 30. Exact quantification of the standard antidote, and a hard demonstration that the pattern must be re-checked against escape squares before it is reported."
+      }
+    }
+  ],
+  "ambiguous_examples": [],
+  "explanations": {
+    "by_level": {
+      "beginner": "The king is trapped on the back row by its own pawns, so a rook or queen arriving there is checkmate.",
+      "intermediate": "Back-rank mate. The king's pawns block every escape square and the back rank is not adequately defended.",
+      "advanced": "Back-rank pattern. Often the real value is the standing weakness: it overloads whatever defends the rank."
+    },
+    "by_depth": {},
+    "hedge": "",
+    "lesson": ""
   },
   "terminology": {
     "beginner_words": [
@@ -83,60 +181,10 @@
     ],
     "avoid": []
   },
-  "examples": [
-    {
-      "fen": "6k1/5ppp/8/8/8/8/5PPP/4R1K1 w - - 0 1",
-      "note": "Constructed controlled pair, positive half. Black's f7/g7/h7 pawns are all unmoved, so the king has no flight square.",
-      "side_to_move_benefits": "white",
-      "engine": {
-        "engine_id": "Stockfish 18",
-        "depth": 26,
-        "best_move": "e1e8",
-        "eval_cp": null,
-        "mate_in": 1,
-        "alternatives": [
-          {
-            "move": "h2h3",
-            "eval_cp": null,
-            "mate_in": 31
-          },
-          {
-            "move": "g1f1",
-            "eval_cp": null,
-            "mate_in": 32
-          }
-        ],
-        "verdict": "supports",
-        "verdict_note": "Re8 is mate in 1. The next-best move is mate in 31. As clean a demonstration of the pattern as exists."
-      }
-    }
-  ],
-  "counterexamples": [
-    {
-      "fen": "6k1/5pp1/7p/8/8/8/5PPP/4R1K1 w - - 0 1",
-      "note": "Constructed controlled pair, negative half. IDENTICAL except Black's h-pawn stands on h6 instead of h7 — one pawn move of luft.",
-      "side_to_move_benefits": "white",
-      "engine": {
-        "engine_id": "Stockfish 18",
-        "depth": 26,
-        "best_move": "h2h3",
-        "eval_cp": null,
-        "mate_in": 28,
-        "alternatives": [
-          {
-            "move": "e1e8",
-            "eval_cp": null,
-            "mate_in": 30
-          },
-          {
-            "move": "g1f1",
-            "eval_cp": null,
-            "mate_in": 30
-          }
-        ],
-        "verdict": "supports",
-        "verdict_note": "Re8+ is no longer mate in 1 but mate in 30, and is no longer even the best move (h3 is mate in 28). A single tempo of luft converts a mate in 1 into a mate in 30. Exact quantification of the standard antidote, and a hard demonstration that the pattern must be re-checked against escape squares before it is reported."
-      }
-    }
-  ]
+  "status": {
+    "stage": "validated",
+    "last_updated": "2026-08-31",
+    "open_questions": [],
+    "audit_notes": []
+  }
 }

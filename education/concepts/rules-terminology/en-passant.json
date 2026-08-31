@@ -1,35 +1,37 @@
 {
-  "category": "official-rules",
-  "subcategory": "basic rules of play",
-  "epistemic_type": "A",
-  "sources": [
-    "fide-laws-2023",
-    "fide-laws-2023-pdf"
-  ],
-  "source_confidence": "high",
-  "status": {
-    "stage": "researched",
-    "last_updated": "2026-08-31",
-    "open_questions": []
-  },
+  "schema_version": 2,
   "id": "en-passant",
   "canonical_name": "En passant capture",
   "alternate_names": [
     "en passant",
     "e.p."
   ],
+  "historical_names": [],
+  "category": "official-rules",
+  "subcategory": "basic rules of play",
+  "tags": [],
+  "knowledge_type": "official-rule",
+  "knowledge_type_note": "Official rule, quoted verbatim from the authentic English text.",
+  "name_status": "established-name",
   "difficulty": "beginner",
   "definition_short": "A pawn that has just advanced two squares may be captured, on the very next move only, by an enemy pawn beside it, as though it had advanced one square.",
   "definition_long": "FIDE Art. 3.7.3.1: 'A pawn occupying a square on the same rank as and on an adjacent file to an opponent's pawn which has just advanced two squares in one move from its original square may capture this opponent's pawn as though the latter had been moved only one square.' Art. 3.7.3.2: 'This capture is only legal on the move following this advance and is called an en passant capture.'\n\nThe right expires immediately. It exists so that the two-square first move cannot be used to run a pawn past an enemy pawn that would have been able to capture it had it advanced one square at a time.",
-  "epistemic_note": "Official rule, quoted verbatim from the authentic English text.",
-  "origin": {
-    "attributed_to": [],
-    "first_source": "fide-laws-2023",
+  "history": {
+    "attributions": [],
+    "first_documented_source": "fide-laws-2023",
     "year": null,
-    "certainty": "unknown",
+    "confidence": "unknown",
     "notes": "The modern rule dates from the introduction of the two-square pawn advance in late-medieval Europe, but no origin research has been done for this record yet. Only the current codification is cited.",
-    "competing_claims": []
+    "competing_claims": [],
+    "development": []
   },
+  "engine_era_status": "not-applicable",
+  "engine_era_note": "",
+  "sources": [
+    "fide-laws-2023",
+    "fide-laws-2023-pdf"
+  ],
+  "source_confidence": "high",
   "recognition": {
     "preconditions": [
       "The immediately preceding move was an enemy pawn advancing two squares",
@@ -41,8 +43,19 @@
     "indicators_against": [
       "Any other move has intervened since the two-square advance"
     ],
+    "prerequisites": [],
     "detector": "epTarget",
-    "detectability": "mechanical"
+    "detectability": "mechanical",
+    "typical_confidence": "medium",
+    "false_positive_traps": []
+  },
+  "application": {
+    "typical_plans": [],
+    "typical_moves": [],
+    "typical_pawn_structures": [],
+    "typical_piece_arrangements": [],
+    "tactical_consequences": [],
+    "strategic_consequences": []
   },
   "exceptions": [
     "Cannot be deferred: the right is lost if not exercised immediately.",
@@ -51,14 +64,29 @@
   "limitations": [
     "Affects repetition claims: see Art. 9.2.3.1 — two positions are not the same if, at the start of the sequence, a pawn could have been captured en passant."
   ],
-  "related_concepts": [
-    "threefold-repetition"
-  ],
-  "explanation_templates": {
-    "beginner": "That pawn just jumped two squares past yours, so you may take it as if it had only moved one — but only right now.",
-    "intermediate": "En passant: the two-square advance does not let a pawn slip past an adjacent enemy pawn. The capture is available on this move only.",
-    "advanced": "En passant capture (Art. 3.7.3). Note it also affects position identity for repetition claims under Art. 9.2.3.1.",
-    "hedge": ""
+  "misconceptions": [],
+  "relationships": {
+    "broader": [],
+    "narrower": [],
+    "related": [
+      "threefold-repetition"
+    ],
+    "contrasting": [],
+    "co_occurring": [],
+    "conflicts": []
+  },
+  "examples": [],
+  "counterexamples": [],
+  "ambiguous_examples": [],
+  "explanations": {
+    "by_level": {
+      "beginner": "That pawn just jumped two squares past yours, so you may take it as if it had only moved one — but only right now.",
+      "intermediate": "En passant: the two-square advance does not let a pawn slip past an adjacent enemy pawn. The capture is available on this move only.",
+      "advanced": "En passant capture (Art. 3.7.3). Note it also affects position identity for repetition claims under Art. 9.2.3.1."
+    },
+    "by_depth": {},
+    "hedge": "",
+    "lesson": ""
   },
   "terminology": {
     "beginner_words": [
@@ -70,5 +98,11 @@
       "ep target square"
     ],
     "avoid": []
+  },
+  "status": {
+    "stage": "researched",
+    "last_updated": "2026-08-31",
+    "open_questions": [],
+    "audit_notes": []
   }
 }

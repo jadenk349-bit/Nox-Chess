@@ -1,0 +1,211 @@
+{
+  "schema_version": 2,
+  "id": "hole",
+  "canonical_name": "Hole",
+  "alternate_names": [
+    "weak point"
+  ],
+  "historical_names": [],
+  "category": "weak-squares",
+  "subcategory": "pawn-structure weakness",
+  "tags": [
+    "squares",
+    "pawn-structure",
+    "steinitz",
+    "classical-school"
+  ],
+  "knowledge_type": "positional-concept",
+  "knowledge_type_note": "A positional concept, not a rule and not a tactical motif. It names a durable structural feature rather than prescribing a move. Classified separately from `weak-square`, which is the broader modern term — see the note on their overlap below.",
+  "name_status": "established-name",
+  "difficulty": "intermediate",
+  "definition_short": "A square in front of a pawn that can no longer be guarded by a pawn, because the pawns on both adjoining files have advanced past it or been exchanged.",
+  "definition_long": "Steinitz's own wording, The Modern Chess Instructor (1889), p. xxxix: \"The 'hole' means a square on the third or forth [sic] row in front of a pawn after the two adjoining pawns have been moved or captured.\" His illustration: after 1.e4 e5 2.c4 White already has holes at d3 and d4, and they are worse while Black's e5 pawn stands, because it restrains the two white pawns that would otherwise repair the damage.\n\nSteinitz also anticipated Nimzowitsch's later emphasis on files: \"A hole or weak square are still more troublesome when the opponent is enabled to open the file on which they are situated for his Queens and Rooks.\" And he located them by phase: most dangerous in the centre or on the kingside before queens come off, but on the queenside in the endgame.\n\nDEFINITIONAL DRIFT. Hooper and Whyld's Oxford Companion (1992) gives 'a square on a player's third rank or beyond that cannot be guarded by a pawn' — which drops Steinitz's requirement that the square be in front of a pawn, and removes his fourth-rank ceiling. Both definitions are in current use and they are not equivalent. This record follows Steinitz for the term's meaning and notes the broader usage.\n\nA hole matters only if the opponent can use it. Romanovsky's refinement is the operative test: a square becomes a real weakness when an enemy piece that cannot be driven away or exchanged threatens to occupy it. An unusable hole is a curiosity.",
+  "history": {
+    "attributions": [
+      {
+        "person": "Wilhelm Steinitz",
+        "relation": "named-by",
+        "source": "steinitz-modern-chess-instructor",
+        "year": 1886,
+        "note": "Steinitz states in The Modern Chess Instructor (1889) that he first used the term in The International Chess Magazine, November 1886, and that he was also the first to point out the disadvantage it describes."
+      },
+      {
+        "person": "Wilhelm Steinitz",
+        "relation": "originated-by",
+        "source": "britannica-chess-theory",
+        "year": 1886,
+        "note": "Britannica: 'He originated the term hole'. Lasker's Manual (p.203) also attributes the idea to Steinitz."
+      },
+      {
+        "person": "Aron Nimzowitsch",
+        "relation": "systematized-by",
+        "source": "nimzowitsch-my-system",
+        "year": 1925,
+        "note": "Developed the exploitation side as the outpost, tying occupation of such squares to play on open files."
+      }
+    ],
+    "first_documented_source": "steinitz-modern-chess-instructor",
+    "year": 1886,
+    "confidence": "high",
+    "notes": "Unusually well founded for a chess term: a self-claim in a primary text, an independent attribution by Lasker in his Manual, and Britannica agreeing. Recorded as 'high' rather than certain because the strongest single piece of evidence is Steinitz claiming credit for himself. Edward Winter, reviewing exactly this, notes the attribution is significant but cautions 'This one item is certainly not enough to settle the matter.' The November 1886 International Chess Magazine issue has not been examined directly.",
+    "competing_claims": [],
+    "development": [
+      {
+        "era": "1886-1889, Steinitz",
+        "change": "Term coined; defined as a square on the 3rd or 4th rank in front of a pawn whose adjoining pawns have gone.",
+        "source": "steinitz-modern-chess-instructor"
+      },
+      {
+        "era": "1925, Nimzowitsch",
+        "change": "The offensive use of such squares is systematised as the outpost, with the open file as the enabling condition.",
+        "source": "nimzowitsch-my-system"
+      },
+      {
+        "era": "mid-20th c., Romanovsky",
+        "change": "Refined: a hole is a real weakness only if a piece that cannot be dislodged or exchanged can occupy it.",
+        "source": "romanovsky-middlegame-planning"
+      },
+      {
+        "era": "1992, Hooper & Whyld",
+        "change": "Broadened to any square on the third rank or beyond that no pawn can guard, dropping Steinitz's 'in front of a pawn' condition.",
+        "source": "oxford-companion-chess"
+      }
+    ]
+  },
+  "engine_era_status": "reliable",
+  "engine_era_note": "Engines do not use the word, but the underlying feature is standard in evaluation functions as pawn-attackable-square and outpost terms. Nothing in engine practice contradicts the concept; what engines do contradict is the assumption that every hole is exploitable, which is Romanovsky's point restated.",
+  "sources": [
+    "steinitz-modern-chess-instructor",
+    "mark-weeks-steinitz",
+    "winter-chess-notes-steinitz",
+    "oxford-companion-chess",
+    "britannica-chess-theory",
+    "romanovsky-middlegame-planning",
+    "chessskill-outpost",
+    "nimzowitsch-my-system"
+  ],
+  "source_confidence": "high",
+  "recognition": {
+    "preconditions": [
+      "A square on the third rank or beyond (from its owner's side) that no friendly pawn can ever attack",
+      "In Steinitz's stricter sense, the square also lies in front of a pawn, with both adjoining pawns advanced past it or gone"
+    ],
+    "indicators_for": [
+      "Both adjoining pawns have advanced beyond the square's rank or have been captured",
+      "The square is central, or adjacent to the king's shelter",
+      "An enemy piece can reach it and be supported there",
+      "A file leading to the square is open or half-open for the opponent"
+    ],
+    "indicators_against": [
+      "A friendly pawn can still advance to attack the square",
+      "No enemy piece can reach the square, or reaching it costs more than it gains",
+      "An enemy piece that occupies it can be exchanged on favourable terms",
+      "The square is on the edge or deep in the opponent's own half, where occupying it achieves nothing"
+    ],
+    "prerequisites": [],
+    "detector": "pawnAttackableSquares",
+    "detectability": "mechanical",
+    "typical_confidence": "high",
+    "false_positive_traps": [
+      "Every pawn move creates squares no pawn can guard. Most of them are irrelevant. Reporting a hole requires that the opponent can actually use it.",
+      "A hole that only a queen can occupy is usually not a weakness, because the queen can be driven off by cheaper pieces.",
+      "Fianchetto structures leave permanent holes on the long-diagonal colour complex that are nonetheless well covered by the bishop; the hole is real, the weakness is not."
+    ]
+  },
+  "application": {
+    "typical_plans": [
+      "Manoeuvre a knight towards the square by a route the defender cannot contest",
+      "Open the file leading to the square, following Steinitz's own observation about files",
+      "Exchange the defender that covers the square, especially a fianchettoed bishop",
+      "Provoke a further pawn advance to create a second hole on the same colour complex"
+    ],
+    "typical_moves": [],
+    "typical_pawn_structures": [
+      "After 1.e4 e5 2.c4 — Steinitz's own example, holes at d3 and d4",
+      "After a kingside fianchetto is played and the bishop later exchanged, holes on the dark squares around the king",
+      "In front of a backward pawn on a half-open file"
+    ],
+    "typical_piece_arrangements": [
+      "A knight permanently posted on the square, supported by a pawn"
+    ],
+    "tactical_consequences": [
+      "An unchallengeable piece near the king generates mating threats"
+    ],
+    "strategic_consequences": [
+      "Holes are permanent: pawns cannot move backwards, so the defect cannot be repaired",
+      "Their value increases as the pieces that could cover them are exchanged"
+    ]
+  },
+  "exceptions": [
+    "A hole is only a weakness if it can be occupied usefully. Romanovsky: the square becomes a real weakness when a piece that cannot be driven away or exchanged threatens to take it up.",
+    "Creating a hole is often the correct price for something else — space, the bishop pair, or a tempo. Steinitz's own example (1.e4 e5 2.c4) is a playable opening, not a mistake.",
+    "A hole covered by a well-placed piece is not exploitable while that piece remains; the plan is to exchange the defender first."
+  ],
+  "limitations": [
+    "The term's boundaries are not agreed. Steinitz's definition and Hooper & Whyld's are both current and are not equivalent.",
+    "Detecting squares no pawn can attack is mechanical; deciding which of them matter is not."
+  ],
+  "misconceptions": [
+    "That every square a pawn cannot guard is a hole worth naming. Most are not.",
+    "That holes are always bad. They are a structural cost that is frequently worth paying.",
+    "That a hole is created by moving a pawn. It is created by moving BOTH adjoining pawns, or by their exchange."
+  ],
+  "relationships": {
+    "broader": [
+      "weak-square"
+    ],
+    "narrower": [],
+    "related": [
+      "outpost",
+      "backward-pawn"
+    ],
+    "contrasting": [],
+    "co_occurring": [
+      "outpost"
+    ],
+    "conflicts": []
+  },
+  "examples": [],
+  "counterexamples": [],
+  "ambiguous_examples": [],
+  "explanations": {
+    "by_level": {
+      "beginner": "Your pawns can never go backwards, so a square they have moved past is one they can never guard again. If your opponent can park a piece there, it will sit there for the rest of the game.",
+      "intermediate": "A hole on {square}: neither adjoining pawn can ever attack it. It matters here because {piece} can reach it and cannot be driven off.",
+      "advanced": "Hole in Steinitz's sense — in front of a pawn, both adjoining pawns gone. Exploitable only on Romanovsky's condition that the occupying piece cannot be dislodged or exchanged.",
+      "master": "Structural, permanent, and worth evaluating against what was received for it. The operative questions are which piece can occupy it, whether the defender covering it can be traded, and whether a file can be opened towards it."
+    },
+    "by_depth": {
+      "short": "Neither pawn can ever guard {square} again — a permanent hole.",
+      "normal": "The pawns that used to control {square} have gone past it, and pawns cannot move backwards, so the square is weak for good. That matters when a piece can occupy it and cannot be chased away.",
+      "deep": "Steinitz coined 'hole' in 1886 for exactly this: a square in front of a pawn whose adjoining pawns have advanced or been exchanged. He noted they are worst when the opponent can also open the file leading to them, and that they hurt in the centre and near the king in the middlegame but on the queenside in the endgame. Romanovsky added the condition that decides whether it matters at all — a hole is a real weakness only when a piece that cannot be driven away or exchanged can occupy it."
+    },
+    "hedge": "",
+    "lesson": "Before pushing a pawn, look at the square it will never be able to guard again, and ask whether your opponent has a piece that could live there."
+  },
+  "terminology": {
+    "beginner_words": [
+      "a square your pawns can never defend again",
+      "weak square"
+    ],
+    "advanced_words": [
+      "hole",
+      "weak square",
+      "colour complex",
+      "outpost square"
+    ],
+    "avoid": [
+      "every hole is a weakness"
+    ]
+  },
+  "status": {
+    "stage": "researched",
+    "last_updated": "2026-08-31",
+    "open_questions": [
+      "Examine The International Chess Magazine, November 1886 directly to confirm Steinitz's self-claim.",
+      "Construct and engine-test a controlled pair: an exploitable hole versus a structurally identical but unusable one, to validate Romanovsky's condition.",
+      "Confirm the Hooper & Whyld wording against the book rather than via secondary quotation."
+    ],
+    "audit_notes": []
+  }
+}

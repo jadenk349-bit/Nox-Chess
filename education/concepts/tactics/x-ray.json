@@ -1,7 +1,33 @@
 {
+  "schema_version": 2,
+  "id": "x-ray",
+  "canonical_name": "X-ray",
+  "alternate_names": [
+    "x-ray attack",
+    "x-ray defence",
+    "through-attack"
+  ],
+  "historical_names": [],
   "category": "tactical-motifs",
   "subcategory": "material-winning motif",
-  "epistemic_type": "D",
+  "tags": [],
+  "knowledge_type": "tactical-motif",
+  "knowledge_type_note": "Motif (D). Terminology genuinely contested: some sources fold x-ray into pin/skewer. The boundary chosen here is stated explicitly rather than presented as settled.",
+  "name_status": "established-name",
+  "difficulty": "advanced",
+  "definition_short": "A line piece acts through another piece — attacking or defending beyond it.",
+  "definition_long": "A bishop, rook or queen exerts influence through an intervening unit. Two distinct uses share the name, and Chess Tempo maintains them as separate tags:\n\nX-RAY ATTACK — the line piece attacks a target through an intervening piece, so the attack becomes real the moment the blocker leaves.\nX-RAY DEFENCE — the line piece defends a friendly unit through an intervening piece, so a capture on that square is answered by a recapture that was not visible.\n\nSources also disagree about whether x-ray is distinct from pin and skewer at all; some treat all three as one family of line effects. This record keeps x-ray for the case where the effect operates THROUGH a piece without compelling it to move, which is what distinguishes it from a pin or skewer.",
+  "history": {
+    "attributions": [],
+    "first_documented_source": "informant-encyclopedia-combinations",
+    "year": null,
+    "confidence": "unknown",
+    "notes": "Tactical motifs are descriptive pattern names of long and mostly anonymous usage. The Chess Informant classification is cited as a standard enumeration, not as the origin of the term.",
+    "competing_claims": [],
+    "development": []
+  },
+  "engine_era_status": "unassessed",
+  "engine_era_note": "",
   "sources": [
     "informant-encyclopedia-combinations",
     "wikipedia-chess-tactic",
@@ -9,35 +35,6 @@
     "chesscom-tactics-38"
   ],
   "source_confidence": "high",
-  "status": {
-    "stage": "researched",
-    "last_updated": "2026-08-31",
-    "open_questions": []
-  },
-  "origin": {
-    "attributed_to": [],
-    "first_source": "informant-encyclopedia-combinations",
-    "year": null,
-    "certainty": "unknown",
-    "notes": "Tactical motifs are descriptive pattern names of long and mostly anonymous usage. The Chess Informant classification is cited as a standard enumeration, not as the origin of the term.",
-    "competing_claims": []
-  },
-  "id": "x-ray",
-  "canonical_name": "X-ray",
-  "difficulty": "advanced",
-  "alternate_names": [
-    "x-ray attack",
-    "x-ray defence",
-    "through-attack"
-  ],
-  "related_concepts": [
-    "pin",
-    "skewer",
-    "battery"
-  ],
-  "definition_short": "A line piece acts through another piece — attacking or defending beyond it.",
-  "definition_long": "A bishop, rook or queen exerts influence through an intervening unit. Two distinct uses share the name, and Chess Tempo maintains them as separate tags:\n\nX-RAY ATTACK — the line piece attacks a target through an intervening piece, so the attack becomes real the moment the blocker leaves.\nX-RAY DEFENCE — the line piece defends a friendly unit through an intervening piece, so a capture on that square is answered by a recapture that was not visible.\n\nSources also disagree about whether x-ray is distinct from pin and skewer at all; some treat all three as one family of line effects. This record keeps x-ray for the case where the effect operates THROUGH a piece without compelling it to move, which is what distinguishes it from a pin or skewer.",
-  "epistemic_note": "Motif (D). Terminology genuinely contested: some sources fold x-ray into pin/skewer. The boundary chosen here is stated explicitly rather than presented as settled.",
   "recognition": {
     "preconditions": [
       "A line piece, an intervening unit, and a further square of interest are collinear"
@@ -50,8 +47,19 @@
       "A second blocker sits further along the line",
       "The far target is irrelevant"
     ],
+    "prerequisites": [],
     "detector": "lineAlignment",
-    "detectability": "mechanical"
+    "detectability": "mechanical",
+    "typical_confidence": "medium",
+    "false_positive_traps": []
+  },
+  "application": {
+    "typical_plans": [],
+    "typical_moves": [],
+    "typical_pawn_structures": [],
+    "typical_piece_arrangements": [],
+    "tactical_consequences": [],
+    "strategic_consequences": []
   },
   "exceptions": [
     "An x-ray defence is illusory if the defending piece is itself pinned."
@@ -59,11 +67,31 @@
   "limitations": [
     "The pin/skewer/x-ray boundary is not agreed between sources; an explanation should prefer the more specific term when the position warrants it."
   ],
-  "explanation_templates": {
-    "beginner": "This piece is working right through another piece — the moment the piece in the middle moves, the attack is real.",
-    "intermediate": "An x-ray: the {piece} defends {square} through {blocker}, so the recapture is available.",
-    "advanced": "X-ray. Prefer 'pin' or 'skewer' where the front piece is compelled; reserve x-ray for through-effects that compel nothing.",
-    "hedge": "Sources differ on where x-ray ends and pin or skewer begins."
+  "misconceptions": [],
+  "relationships": {
+    "broader": [],
+    "narrower": [],
+    "related": [
+      "pin",
+      "skewer",
+      "battery"
+    ],
+    "contrasting": [],
+    "co_occurring": [],
+    "conflicts": []
+  },
+  "examples": [],
+  "counterexamples": [],
+  "ambiguous_examples": [],
+  "explanations": {
+    "by_level": {
+      "beginner": "This piece is working right through another piece — the moment the piece in the middle moves, the attack is real.",
+      "intermediate": "An x-ray: the {piece} defends {square} through {blocker}, so the recapture is available.",
+      "advanced": "X-ray. Prefer 'pin' or 'skewer' where the front piece is compelled; reserve x-ray for through-effects that compel nothing."
+    },
+    "by_depth": {},
+    "hedge": "Sources differ on where x-ray ends and pin or skewer begins.",
+    "lesson": ""
   },
   "terminology": {
     "beginner_words": [
@@ -74,5 +102,11 @@
       "x-ray defence"
     ],
     "avoid": []
+  },
+  "status": {
+    "stage": "researched",
+    "last_updated": "2026-08-31",
+    "open_questions": [],
+    "audit_notes": []
   }
 }

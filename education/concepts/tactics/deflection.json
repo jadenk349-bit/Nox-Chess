@@ -1,7 +1,32 @@
 {
+  "schema_version": 2,
+  "id": "deflection",
+  "canonical_name": "Deflection",
+  "alternate_names": [
+    "distraction",
+    "diversion"
+  ],
+  "historical_names": [],
   "category": "tactical-motifs",
   "subcategory": "material-winning motif",
-  "epistemic_type": "D",
+  "tags": [],
+  "knowledge_type": "tactical-motif",
+  "knowledge_type_note": "Motif (D), but recognition is heuristic: it depends on identifying a DUTY, which is a functional judgement rather than a geometric one.",
+  "name_status": "established-name",
+  "difficulty": "intermediate",
+  "definition_short": "Forcing a defending piece away from the square, line, or duty it must hold.",
+  "definition_long": "The defender's piece is doing a job. Deflection forces it to stop — usually with a capture or a check it cannot decline — and the real target then falls.\n\nDeflection and DECOY are constantly conflated; the useful distinction is one of direction. Deflection pushes a piece AWAY from a duty. A decoy lures a piece TOWARDS a bad square. Chess.com merges them into one theme; Chess Tempo and Chess Informant keep them separate (themes d and h). This record keeps them separate and cross-links them.",
+  "history": {
+    "attributions": [],
+    "first_documented_source": "informant-encyclopedia-combinations",
+    "year": null,
+    "confidence": "unknown",
+    "notes": "Tactical motifs are descriptive pattern names of long and mostly anonymous usage. The Chess Informant classification is cited as a standard enumeration, not as the origin of the term.",
+    "competing_claims": [],
+    "development": []
+  },
+  "engine_era_status": "unassessed",
+  "engine_era_note": "",
   "sources": [
     "informant-encyclopedia-combinations",
     "wikipedia-chess-tactic",
@@ -9,34 +34,6 @@
     "chesscom-tactics-38"
   ],
   "source_confidence": "high",
-  "status": {
-    "stage": "researched",
-    "last_updated": "2026-08-31",
-    "open_questions": []
-  },
-  "origin": {
-    "attributed_to": [],
-    "first_source": "informant-encyclopedia-combinations",
-    "year": null,
-    "certainty": "unknown",
-    "notes": "Tactical motifs are descriptive pattern names of long and mostly anonymous usage. The Chess Informant classification is cited as a standard enumeration, not as the origin of the term.",
-    "competing_claims": []
-  },
-  "id": "deflection",
-  "canonical_name": "Deflection",
-  "difficulty": "intermediate",
-  "alternate_names": [
-    "distraction",
-    "diversion"
-  ],
-  "related_concepts": [
-    "decoy",
-    "overloading",
-    "removing-the-defender"
-  ],
-  "definition_short": "Forcing a defending piece away from the square, line, or duty it must hold.",
-  "definition_long": "The defender's piece is doing a job. Deflection forces it to stop — usually with a capture or a check it cannot decline — and the real target then falls.\n\nDeflection and DECOY are constantly conflated; the useful distinction is one of direction. Deflection pushes a piece AWAY from a duty. A decoy lures a piece TOWARDS a bad square. Chess.com merges them into one theme; Chess Tempo and Chess Informant keep them separate (themes d and h). This record keeps them separate and cross-links them.",
-  "epistemic_note": "Motif (D), but recognition is heuristic: it depends on identifying a DUTY, which is a functional judgement rather than a geometric one.",
   "recognition": {
     "preconditions": [
       "An enemy piece is performing a defensive duty (guarding a square, a piece, or a line)",
@@ -51,8 +48,19 @@
       "The defender can decline the offer and keep its post",
       "Accepting costs the attacker more than the target is worth"
     ],
+    "prerequisites": [],
     "detector": null,
-    "detectability": "heuristic"
+    "detectability": "heuristic",
+    "typical_confidence": "medium",
+    "false_positive_traps": []
+  },
+  "application": {
+    "typical_plans": [],
+    "typical_moves": [],
+    "typical_pawn_structures": [],
+    "typical_piece_arrangements": [],
+    "tactical_consequences": [],
+    "strategic_consequences": []
   },
   "exceptions": [
     "If the deflected piece can return with tempo, or a second defender exists, the tactic fails."
@@ -60,11 +68,31 @@
   "limitations": [
     "Requires modelling 'what this piece is defending', which is not a purely geometric property."
   ],
-  "explanation_templates": {
-    "beginner": "This forces the defending piece to leave, and then the thing it was guarding is yours.",
-    "intermediate": "Deflection: the defender is dragged off its job by a threat it cannot ignore.",
-    "advanced": "Deflection (Informant theme d). Distinguish from decoy, which lures a piece onto a square rather than off a duty.",
-    "hedge": ""
+  "misconceptions": [],
+  "relationships": {
+    "broader": [],
+    "narrower": [],
+    "related": [
+      "decoy",
+      "overloading",
+      "removing-the-defender"
+    ],
+    "contrasting": [],
+    "co_occurring": [],
+    "conflicts": []
+  },
+  "examples": [],
+  "counterexamples": [],
+  "ambiguous_examples": [],
+  "explanations": {
+    "by_level": {
+      "beginner": "This forces the defending piece to leave, and then the thing it was guarding is yours.",
+      "intermediate": "Deflection: the defender is dragged off its job by a threat it cannot ignore.",
+      "advanced": "Deflection (Informant theme d). Distinguish from decoy, which lures a piece onto a square rather than off a duty."
+    },
+    "by_depth": {},
+    "hedge": "",
+    "lesson": ""
   },
   "terminology": {
     "beginner_words": [
@@ -76,5 +104,11 @@
       "overload"
     ],
     "avoid": []
+  },
+  "status": {
+    "stage": "researched",
+    "last_updated": "2026-08-31",
+    "open_questions": [],
+    "audit_notes": []
   }
 }

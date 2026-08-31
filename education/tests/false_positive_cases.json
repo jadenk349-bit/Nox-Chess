@@ -1,0 +1,109 @@
+{
+  "version": 1,
+  "note": [
+    "Phase 30 of the brief: a bad educational system sees concepts everywhere.",
+    "These cases are written BEFORE the concepts they constrain. Each names a surface pattern",
+    "that naive recognition would latch onto, and the condition under which the concept does NOT",
+    "apply. A concept listed here may not reach stage 'ready' until it carries an engine-tested",
+    "counterexample covering its case — tools/run_tests.py enforces that.",
+    "fen: null means the position has not been constructed yet; that is itself a tracked gap."
+  ],
+  "cases": [
+    {
+      "id": "knight-on-d5-not-outpost",
+      "concept": "outpost",
+      "surface_pattern": "A knight sits on a central advanced square such as d5.",
+      "why_not": "An outpost requires that no enemy pawn can challenge the square. If ...c6 or ...e6 is available, the knight is merely visiting.",
+      "fen": null,
+      "status": "pending"
+    },
+    {
+      "id": "seventh-rank-rook-not-decisive",
+      "concept": "rook-on-the-seventh",
+      "surface_pattern": "A rook reaches the opponent's seventh rank.",
+      "why_not": "The rank matters when it attacks pawns, confines the king, or supports an invasion. A rook on an empty seventh with the enemy king already safe achieves nothing and can be driven away with tempo.",
+      "fen": null,
+      "status": "pending"
+    },
+    {
+      "id": "doubled-pawns-not-weak",
+      "concept": "doubled-pawns",
+      "surface_pattern": "Two friendly pawns share a file.",
+      "why_not": "Doubling can open a file for a rook, add central control, and shield a king. Weakness depends on whether they can be attacked and whether they are immobile.",
+      "fen": null,
+      "status": "pending"
+    },
+    {
+      "id": "bishop-behind-pawns-not-bad",
+      "concept": "bad-bishop",
+      "surface_pattern": "A bishop sits behind its own pawn chain.",
+      "why_not": "A bishop hemmed in by pawns on its own colour may still be the key defender of a colour complex, or may become excellent after one pawn break. Mobility, role and prospects matter, not geometry alone.",
+      "fen": null,
+      "status": "pending"
+    },
+    {
+      "id": "exposed-king-not-losing",
+      "concept": "king-safety",
+      "surface_pattern": "A king has lost its pawn cover or sits in the centre.",
+      "why_not": "With the attacking pieces traded off, an exposed king is often simply an active king. Exposure matters in proportion to the attacking force that remains.",
+      "fen": null,
+      "status": "pending"
+    },
+    {
+      "id": "early-queen-not-bad",
+      "concept": "premature-queen-development",
+      "surface_pattern": "The queen leaves its starting square in the first few moves.",
+      "why_not": "The guideline exists because the queen can be harassed with tempo. Where no such harassment exists — the Scandinavian after ...Qa5, or 2.Qh5 lines that have concrete point — the objection does not apply.",
+      "fen": null,
+      "status": "pending"
+    },
+    {
+      "id": "moving-piece-twice-not-wrong",
+      "concept": "opening-development",
+      "surface_pattern": "The same piece moves twice inside the first ten moves.",
+      "why_not": "Concrete gain overrides the guideline: capturing, escaping a threat, or reaching a decisively better square all justify it. This is the brief's own example of principle yielding to tactics.",
+      "fen": null,
+      "status": "pending"
+    },
+    {
+      "id": "isolated-pawn-not-weak",
+      "concept": "isolated-queen-pawn",
+      "surface_pattern": "A pawn has no friendly pawn on either adjacent file.",
+      "why_not": "An IQP grants central space, two open files and outposts on the squares beside it. It is a dynamic asset in the middlegame and a static liability in the endgame; which dominates depends on how much material remains.",
+      "fen": null,
+      "status": "pending"
+    },
+    {
+      "id": "passed-pawn-not-advantage",
+      "concept": "passed-pawn",
+      "surface_pattern": "A pawn has no enemy pawn ahead of it on its own or adjacent files.",
+      "why_not": "A passed pawn that is permanently blockaded by a minor piece is a target rather than an asset, and it can cost tempi to defend.",
+      "fen": null,
+      "status": "pending"
+    },
+    {
+      "id": "open-file-not-useful",
+      "concept": "open-file",
+      "surface_pattern": "A file has no pawns of either colour.",
+      "why_not": "A file is worth occupying only if it offers entry squares. A file whose seventh and eighth ranks are covered gives a rook nothing but a stare.",
+      "fen": null,
+      "status": "pending"
+    },
+    {
+      "id": "material-count-not-evaluation",
+      "concept": "material-imbalance",
+      "surface_pattern": "One side is ahead on the standard 1/3/3/5/9 count.",
+      "why_not": "Piece values are a heuristic for counting, not an evaluation. Compensation in activity, king safety or structure regularly outweighs a pawn or the exchange.",
+      "fen": null,
+      "status": "pending"
+    },
+    {
+      "id": "check-not-good",
+      "concept": "check",
+      "surface_pattern": "A move gives check.",
+      "why_not": "Checks are forcing, not good. A check that drives the king somewhere better, or loses a tempo the attacker needed, is a mistake. This is the commonest beginner misconception in the base.",
+      "fen": null,
+      "status": "pending"
+    }
+  ]
+}

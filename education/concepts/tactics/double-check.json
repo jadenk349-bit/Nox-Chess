@@ -1,7 +1,29 @@
 {
+  "schema_version": 2,
+  "id": "double-check",
+  "canonical_name": "Double check",
+  "alternate_names": [],
+  "historical_names": [],
   "category": "tactical-motifs",
   "subcategory": "material-winning motif",
-  "epistemic_type": "D",
+  "tags": [],
+  "knowledge_type": "tactical-motif",
+  "knowledge_type_note": "Motif (D) with a hard consequence that follows from the rules — the forced king move is a proven consequence, not a heuristic.",
+  "name_status": "established-name",
+  "difficulty": "intermediate",
+  "definition_short": "A discovered check where both the moving piece and the revealed piece give check. The king MUST move.",
+  "definition_long": "Two pieces check the king at once. Neither can be captured (capturing one leaves the other checking), and no interposition covers two lines. FIDE leaves only one legal reply: a king move. Wikipedia notes the rare third case where a third piece delivers the second check, possible via an en passant capture.\n\nThis is why double check underlies smothered mate and many king hunts: it strips the defender of every resource except moving the king, so the attacker can sacrifice freely.",
+  "history": {
+    "attributions": [],
+    "first_documented_source": "informant-encyclopedia-combinations",
+    "year": null,
+    "confidence": "unknown",
+    "notes": "Tactical motifs are descriptive pattern names of long and mostly anonymous usage. The Chess Informant classification is cited as a standard enumeration, not as the origin of the term.",
+    "competing_claims": [],
+    "development": []
+  },
+  "engine_era_status": "unassessed",
+  "engine_era_note": "",
   "sources": [
     "informant-encyclopedia-combinations",
     "wikipedia-chess-tactic",
@@ -9,36 +31,6 @@
     "chesscom-tactics-38"
   ],
   "source_confidence": "high",
-  "status": {
-    "stage": "researched",
-    "last_updated": "2026-08-31",
-    "open_questions": []
-  },
-  "origin": {
-    "attributed_to": [],
-    "first_source": "informant-encyclopedia-combinations",
-    "year": null,
-    "certainty": "unknown",
-    "notes": "Tactical motifs are descriptive pattern names of long and mostly anonymous usage. The Chess Informant classification is cited as a standard enumeration, not as the origin of the term.",
-    "competing_claims": []
-  },
-  "id": "double-check",
-  "canonical_name": "Double check",
-  "difficulty": "intermediate",
-  "broader_concepts": [
-    "discovered-attack"
-  ],
-  "related_concepts": [
-    "check",
-    "discovered-check"
-  ],
-  "definition_short": "A discovered check where both the moving piece and the revealed piece give check. The king MUST move.",
-  "definition_long": "Two pieces check the king at once. Neither can be captured (capturing one leaves the other checking), and no interposition covers two lines. FIDE leaves only one legal reply: a king move. Wikipedia notes the rare third case where a third piece delivers the second check, possible via an en passant capture.\n\nThis is why double check underlies smothered mate and many king hunts: it strips the defender of every resource except moving the king, so the attacker can sacrifice freely.",
-  "epistemic_note": "Motif (D) with a hard consequence that follows from the rules — the forced king move is a proven consequence, not a heuristic.",
-  "prerequisites": [
-    "check",
-    "discovered-attack"
-  ],
   "recognition": {
     "preconditions": [
       "After the move, two enemy pieces attack the king simultaneously"
@@ -49,21 +41,55 @@
     "indicators_against": [
       "The king has a safe square, in which case the double check may achieve nothing"
     ],
+    "prerequisites": [
+      "check",
+      "discovered-attack"
+    ],
     "detector": "checkersAfterMove",
-    "detectability": "mechanical"
+    "detectability": "mechanical",
+    "typical_confidence": "medium",
+    "false_positive_traps": []
+  },
+  "application": {
+    "typical_plans": [],
+    "typical_moves": [],
+    "typical_pawn_structures": [],
+    "typical_piece_arrangements": [],
+    "tactical_consequences": [
+      "Only a king move is legal, so material on any other square is irrelevant for one move"
+    ],
+    "strategic_consequences": []
   },
   "exceptions": [
     "A double check is not automatically strong: if the king simply steps aside safely, the attacker may have given away material for nothing."
   ],
   "limitations": [],
-  "tactical_consequences": [
-    "Only a king move is legal, so material on any other square is irrelevant for one move"
-  ],
-  "explanation_templates": {
-    "beginner": "Two pieces are checking the king at the same time. The king has to move — nothing can block or capture both.",
-    "intermediate": "Double check. The only legal reply is a king move, so you can ignore everything else for a move.",
-    "advanced": "Double check: no interposition or capture can answer two lines, which is what makes smothered mate work.",
-    "hedge": ""
+  "misconceptions": [],
+  "relationships": {
+    "broader": [
+      "discovered-attack"
+    ],
+    "narrower": [],
+    "related": [
+      "check",
+      "discovered-check"
+    ],
+    "contrasting": [],
+    "co_occurring": [],
+    "conflicts": []
+  },
+  "examples": [],
+  "counterexamples": [],
+  "ambiguous_examples": [],
+  "explanations": {
+    "by_level": {
+      "beginner": "Two pieces are checking the king at the same time. The king has to move — nothing can block or capture both.",
+      "intermediate": "Double check. The only legal reply is a king move, so you can ignore everything else for a move.",
+      "advanced": "Double check: no interposition or capture can answer two lines, which is what makes smothered mate work."
+    },
+    "by_depth": {},
+    "hedge": "",
+    "lesson": ""
   },
   "terminology": {
     "beginner_words": [
@@ -73,5 +99,11 @@
       "double check"
     ],
     "avoid": []
+  },
+  "status": {
+    "stage": "researched",
+    "last_updated": "2026-08-31",
+    "open_questions": [],
+    "audit_notes": []
   }
 }

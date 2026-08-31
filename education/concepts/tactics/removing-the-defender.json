@@ -1,7 +1,33 @@
 {
+  "schema_version": 2,
+  "id": "removing-the-defender",
+  "canonical_name": "Removing the defender",
+  "alternate_names": [
+    "removing the guard",
+    "annihilation of defence",
+    "undermining"
+  ],
+  "historical_names": [],
   "category": "tactical-motifs",
   "subcategory": "material-winning motif",
-  "epistemic_type": "D",
+  "tags": [],
+  "knowledge_type": "tactical-motif",
+  "knowledge_type_note": "Motif (D). The three defender-removal ideas (removal, deflection, overloading) shade into each other and sources draw the lines differently.",
+  "name_status": "established-name",
+  "difficulty": "beginner",
+  "definition_short": "Capturing or driving off the piece that defends a target, so the target can then be taken.",
+  "definition_long": "The most direct of the defender-removal ideas: instead of attacking the target, attack what holds it. Informant theme a, 'Annihilation of Defence'. UNDERMINING is the same idea applied to a pawn that supports a piece or a key square.\n\nIt differs from deflection in that the defender is destroyed or driven off rather than lured into abandoning its post, and from overloading in that the defender may have only one job — it is simply removed.",
+  "history": {
+    "attributions": [],
+    "first_documented_source": "informant-encyclopedia-combinations",
+    "year": null,
+    "confidence": "unknown",
+    "notes": "Tactical motifs are descriptive pattern names of long and mostly anonymous usage. The Chess Informant classification is cited as a standard enumeration, not as the origin of the term.",
+    "competing_claims": [],
+    "development": []
+  },
+  "engine_era_status": "unassessed",
+  "engine_era_note": "",
   "sources": [
     "informant-encyclopedia-combinations",
     "wikipedia-chess-tactic",
@@ -9,34 +35,6 @@
     "chesscom-tactics-38"
   ],
   "source_confidence": "high",
-  "status": {
-    "stage": "researched",
-    "last_updated": "2026-08-31",
-    "open_questions": []
-  },
-  "origin": {
-    "attributed_to": [],
-    "first_source": "informant-encyclopedia-combinations",
-    "year": null,
-    "certainty": "unknown",
-    "notes": "Tactical motifs are descriptive pattern names of long and mostly anonymous usage. The Chess Informant classification is cited as a standard enumeration, not as the origin of the term.",
-    "competing_claims": []
-  },
-  "id": "removing-the-defender",
-  "canonical_name": "Removing the defender",
-  "difficulty": "beginner",
-  "alternate_names": [
-    "removing the guard",
-    "annihilation of defence",
-    "undermining"
-  ],
-  "related_concepts": [
-    "deflection",
-    "overloading"
-  ],
-  "definition_short": "Capturing or driving off the piece that defends a target, so the target can then be taken.",
-  "definition_long": "The most direct of the defender-removal ideas: instead of attacking the target, attack what holds it. Informant theme a, 'Annihilation of Defence'. UNDERMINING is the same idea applied to a pawn that supports a piece or a key square.\n\nIt differs from deflection in that the defender is destroyed or driven off rather than lured into abandoning its post, and from overloading in that the defender may have only one job — it is simply removed.",
-  "epistemic_note": "Motif (D). The three defender-removal ideas (removal, deflection, overloading) shade into each other and sources draw the lines differently.",
   "recognition": {
     "preconditions": [
       "A target is defended",
@@ -50,18 +48,48 @@
       "A second defender exists",
       "Removing the defender costs more than the target"
     ],
+    "prerequisites": [],
     "detector": "defenderCount",
-    "detectability": "mechanical"
+    "detectability": "mechanical",
+    "typical_confidence": "medium",
+    "false_positive_traps": []
+  },
+  "application": {
+    "typical_plans": [],
+    "typical_moves": [],
+    "typical_pawn_structures": [],
+    "typical_piece_arrangements": [],
+    "tactical_consequences": [],
+    "strategic_consequences": []
   },
   "exceptions": [
     "Fails against a second defender, or when the removal costs more than it wins."
   ],
   "limitations": [],
-  "explanation_templates": {
-    "beginner": "Take the piece that was guarding it, and then the guarded piece falls too.",
-    "intermediate": "Removing the defender. Count defenders first — this only works if it is the last one.",
-    "advanced": "Annihilation of defence (Informant theme a). Undermining is the pawn-support version.",
-    "hedge": ""
+  "misconceptions": [],
+  "relationships": {
+    "broader": [],
+    "narrower": [],
+    "related": [
+      "deflection",
+      "overloading"
+    ],
+    "contrasting": [],
+    "co_occurring": [],
+    "conflicts": []
+  },
+  "examples": [],
+  "counterexamples": [],
+  "ambiguous_examples": [],
+  "explanations": {
+    "by_level": {
+      "beginner": "Take the piece that was guarding it, and then the guarded piece falls too.",
+      "intermediate": "Removing the defender. Count defenders first — this only works if it is the last one.",
+      "advanced": "Annihilation of defence (Informant theme a). Undermining is the pawn-support version."
+    },
+    "by_depth": {},
+    "hedge": "",
+    "lesson": ""
   },
   "terminology": {
     "beginner_words": [
@@ -73,5 +101,11 @@
       "annihilation of defence"
     ],
     "avoid": []
+  },
+  "status": {
+    "stage": "researched",
+    "last_updated": "2026-08-31",
+    "open_questions": [],
+    "audit_notes": []
   }
 }

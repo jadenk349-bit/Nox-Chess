@@ -55,11 +55,20 @@ education-bundle.json           compiled KB for the client (a committed artifact
 ## Tools
 
 ```bash
-python3 education/tools/validate_kb.py            # check the whole base
-python3 education/tools/validate_kb.py --strict   # also fail on warnings
+python3 education/tools/validate_kb.py            # schema + referential integrity
+python3 education/tools/run_tests.py              # educational-soundness tests
+python3 education/tools/sync_state.py             # recompute coverage and counters
 python3 education/tools/sf_analyse.py --probe
 python3 education/tools/sf_analyse.py --fen "<FEN>" --depth 30 --multipv 3
+python3 education/tools/tablebase.py --fen "<FEN>"   # <=7 pieces: proof, not evaluation
 ```
+
+Run `validate_kb.py` and `run_tests.py` before and after any change to the base.
+`validate_kb.py` enforces the schema; `run_tests.py` enforces the things that make
+the knowledge educationally sound — that a guideline carries hedging wording, that a
+constructed position is never dressed up as a game, that nothing reaches `ready`
+without engine or tablebase evidence, and that every registered false-positive case
+is answered before the concept it constrains is promoted.
 
 `sf_analyse.py` is standard-library only, in keeping with the rest of the
 project's Python, and finds Stockfish via `$STOCKFISH` or `PATH`. It does **not**
@@ -83,7 +92,17 @@ the knowledge base depends on it.
   origin, the record says `disputed` and keeps the competing claims.
 - **Do not force a name onto every move.** Sometimes the true explanation is
   calculation. The system must be able to say so.
+- **Tablebase beats engine beats author.** Under eight pieces the tablebase is
+  proof and ends the question. An author's assertion is strong evidence about what
+  an idea IS and weak evidence about whether a move works.
+- **Positional concepts are held to a different standard than tactical ones.**
+  Controlled pairs isolate a fork cleanly and cannot isolate an outpost at all; see
+  METHODOLOGY.md. Positional concepts therefore stay at `researched` on evidence
+  that would promote a tactical motif, and that is deliberate, not an oversight.
 
 ## Status
 
-Scaffolding complete; deep research beginning. See `state/progress.md`.
+See `state/research-state.json` for the machine-readable checkpoint and
+`state/progress.md` for the narrative log. That checkpoint also records what did
+NOT work: `failed_research_attempts` and `tool_limitations` exist so a later
+session does not repeat a dead end. Read them before designing a new test.

@@ -1,7 +1,29 @@
 {
+  "schema_version": 2,
+  "id": "desperado",
+  "canonical_name": "Desperado",
+  "alternate_names": [],
+  "historical_names": [],
   "category": "tactical-motifs",
   "subcategory": "material-winning motif",
-  "epistemic_type": "D",
+  "tags": [],
+  "knowledge_type": "tactical-motif",
+  "knowledge_type_note": "Motif (D). A named special case of zwischenzug rather than an independent geometric pattern.",
+  "name_status": "established-name",
+  "difficulty": "advanced",
+  "definition_short": "A piece already doomed sells itself as dearly as possible before it is lost.",
+  "definition_long": "When a piece is going to be lost regardless, it takes something on the way out, or forces a concession, instead of being captured for nothing. Common in capture races where both sides have hanging pieces, and in stalemate defences.\n\nFormally a special case of the zwischenzug: the doomed piece acts before the expected recapture. Chess.com classifies it that way explicitly.",
+  "history": {
+    "attributions": [],
+    "first_documented_source": "informant-encyclopedia-combinations",
+    "year": null,
+    "confidence": "unknown",
+    "notes": "Tactical motifs are descriptive pattern names of long and mostly anonymous usage. The Chess Informant classification is cited as a standard enumeration, not as the origin of the term.",
+    "competing_claims": [],
+    "development": []
+  },
+  "engine_era_status": "unassessed",
+  "engine_era_note": "",
   "sources": [
     "informant-encyclopedia-combinations",
     "wikipedia-chess-tactic",
@@ -9,28 +31,6 @@
     "chesscom-tactics-38"
   ],
   "source_confidence": "high",
-  "status": {
-    "stage": "researched",
-    "last_updated": "2026-08-31",
-    "open_questions": []
-  },
-  "origin": {
-    "attributed_to": [],
-    "first_source": "informant-encyclopedia-combinations",
-    "year": null,
-    "certainty": "unknown",
-    "notes": "Tactical motifs are descriptive pattern names of long and mostly anonymous usage. The Chess Informant classification is cited as a standard enumeration, not as the origin of the term.",
-    "competing_claims": []
-  },
-  "id": "desperado",
-  "canonical_name": "Desperado",
-  "difficulty": "advanced",
-  "broader_concepts": [
-    "zwischenzug"
-  ],
-  "definition_short": "A piece already doomed sells itself as dearly as possible before it is lost.",
-  "definition_long": "When a piece is going to be lost regardless, it takes something on the way out, or forces a concession, instead of being captured for nothing. Common in capture races where both sides have hanging pieces, and in stalemate defences.\n\nFormally a special case of the zwischenzug: the doomed piece acts before the expected recapture. Chess.com classifies it that way explicitly.",
-  "epistemic_note": "Motif (D). A named special case of zwischenzug rather than an independent geometric pattern.",
   "recognition": {
     "preconditions": [
       "A friendly piece cannot be saved",
@@ -43,18 +43,47 @@
     "indicators_against": [
       "The piece can actually be saved, in which case desperado logic is simply a blunder"
     ],
+    "prerequisites": [],
     "detector": null,
-    "detectability": "heuristic"
+    "detectability": "heuristic",
+    "typical_confidence": "medium",
+    "false_positive_traps": []
+  },
+  "application": {
+    "typical_plans": [],
+    "typical_moves": [],
+    "typical_pawn_structures": [],
+    "typical_piece_arrangements": [],
+    "tactical_consequences": [],
+    "strategic_consequences": []
   },
   "exceptions": [
     "The whole idea rests on the piece being genuinely unsaveable. Verify that first."
   ],
   "limitations": [],
-  "explanation_templates": {
-    "beginner": "This piece is lost anyway, so it grabs something before it goes.",
-    "intermediate": "A desperado: since the piece cannot be saved, it takes material on its way off the board.",
-    "advanced": "Desperado, a special case of zwischenzug. Confirm the piece really is unsaveable before applying the logic.",
-    "hedge": ""
+  "misconceptions": [],
+  "relationships": {
+    "broader": [
+      "zwischenzug"
+    ],
+    "narrower": [],
+    "related": [],
+    "contrasting": [],
+    "co_occurring": [],
+    "conflicts": []
+  },
+  "examples": [],
+  "counterexamples": [],
+  "ambiguous_examples": [],
+  "explanations": {
+    "by_level": {
+      "beginner": "This piece is lost anyway, so it grabs something before it goes.",
+      "intermediate": "A desperado: since the piece cannot be saved, it takes material on its way off the board.",
+      "advanced": "Desperado, a special case of zwischenzug. Confirm the piece really is unsaveable before applying the logic."
+    },
+    "by_depth": {},
+    "hedge": "",
+    "lesson": ""
   },
   "terminology": {
     "beginner_words": [
@@ -64,5 +93,11 @@
       "desperado"
     ],
     "avoid": []
+  },
+  "status": {
+    "stage": "researched",
+    "last_updated": "2026-08-31",
+    "open_questions": [],
+    "audit_notes": []
   }
 }

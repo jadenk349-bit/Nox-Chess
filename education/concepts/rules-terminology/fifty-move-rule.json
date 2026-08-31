@@ -1,31 +1,34 @@
 {
+  "schema_version": 2,
+  "id": "fifty-move-rule",
+  "canonical_name": "The fifty-move rule",
+  "alternate_names": [],
+  "historical_names": [],
   "category": "official-rules",
   "subcategory": "basic rules of play",
-  "epistemic_type": "A",
+  "tags": [],
+  "knowledge_type": "official-rule",
+  "knowledge_type_note": "Official rule. The tablebase point is a genuine conflict between rule (A) and proven result (B) and is recorded as such.",
+  "name_status": "established-name",
+  "difficulty": "intermediate",
+  "definition_short": "A player to move may CLAIM a draw when the last 50 moves by each player have been made with no pawn move and no capture.",
+  "definition_long": "FIDE Art. 9.3: the game is drawn on a correct claim if the player indicates a move that 'will result in the last 50 moves by each player having been made without the movement of any pawn and without any capture' (9.3.1), or if 'the last 50 moves by each player have been completed without the movement of any pawn and without any capture' (9.3.2).\n\n'50 moves by each player' means 100 ply. Any capture or any pawn move resets the count. Like threefold repetition it is a claim, not automatic — Art. 9.6.2 supplies the automatic version at 75.\n\nHistorically FIDE granted exceptions for specific endgames later shown by tablebases to need more than 50 moves; those exceptions were removed, so some theoretically won endings are drawn under the current Laws.",
+  "history": {
+    "attributions": [],
+    "first_documented_source": "fide-laws-2023",
+    "year": null,
+    "confidence": "unknown",
+    "notes": "History of the exception list not yet researched for this record.",
+    "competing_claims": [],
+    "development": []
+  },
+  "engine_era_status": "not-applicable",
+  "engine_era_note": "",
   "sources": [
     "fide-laws-2023",
     "fide-laws-2023-pdf"
   ],
   "source_confidence": "high",
-  "status": {
-    "stage": "researched",
-    "last_updated": "2026-08-31",
-    "open_questions": []
-  },
-  "id": "fifty-move-rule",
-  "canonical_name": "The fifty-move rule",
-  "difficulty": "intermediate",
-  "definition_short": "A player to move may CLAIM a draw when the last 50 moves by each player have been made with no pawn move and no capture.",
-  "definition_long": "FIDE Art. 9.3: the game is drawn on a correct claim if the player indicates a move that 'will result in the last 50 moves by each player having been made without the movement of any pawn and without any capture' (9.3.1), or if 'the last 50 moves by each player have been completed without the movement of any pawn and without any capture' (9.3.2).\n\n'50 moves by each player' means 100 ply. Any capture or any pawn move resets the count. Like threefold repetition it is a claim, not automatic — Art. 9.6.2 supplies the automatic version at 75.\n\nHistorically FIDE granted exceptions for specific endgames later shown by tablebases to need more than 50 moves; those exceptions were removed, so some theoretically won endings are drawn under the current Laws.",
-  "epistemic_note": "Official rule. The tablebase point is a genuine conflict between rule (A) and proven result (B) and is recorded as such.",
-  "origin": {
-    "attributed_to": [],
-    "first_source": "fide-laws-2023",
-    "year": null,
-    "certainty": "unknown",
-    "notes": "History of the exception list not yet researched for this record.",
-    "competing_claims": []
-  },
   "recognition": {
     "preconditions": [
       "100 ply have elapsed with no capture and no pawn move"
@@ -34,22 +37,48 @@
     "indicators_against": [
       "Any capture or pawn move in that span resets the counter"
     ],
+    "prerequisites": [],
     "detector": "halfmoveClock",
-    "detectability": "mechanical"
+    "detectability": "mechanical",
+    "typical_confidence": "medium",
+    "false_positive_traps": []
+  },
+  "application": {
+    "typical_plans": [],
+    "typical_moves": [],
+    "typical_pawn_structures": [],
+    "typical_piece_arrangements": [],
+    "tactical_consequences": [],
+    "strategic_consequences": []
   },
   "exceptions": [
     "Not automatic — it must be claimed.",
     "Some endgames proven winnable by tablebase require more than 50 moves and are therefore drawn under the Laws. The rule and the theoretical truth genuinely diverge here."
   ],
   "limitations": [],
-  "related_concepts": [
-    "seventy-five-move-rule"
-  ],
-  "explanation_templates": {
-    "beginner": "Fifty moves have gone by for each side with no capture and no pawn move, so a draw can be claimed.",
-    "intermediate": "The fifty-move rule. Any capture or pawn move resets the counter, and the draw must be claimed.",
-    "advanced": "Art. 9.3. Note the divergence from tablebase truth in long theoretical endings.",
-    "hedge": ""
+  "misconceptions": [],
+  "relationships": {
+    "broader": [],
+    "narrower": [],
+    "related": [
+      "seventy-five-move-rule"
+    ],
+    "contrasting": [],
+    "co_occurring": [],
+    "conflicts": []
+  },
+  "examples": [],
+  "counterexamples": [],
+  "ambiguous_examples": [],
+  "explanations": {
+    "by_level": {
+      "beginner": "Fifty moves have gone by for each side with no capture and no pawn move, so a draw can be claimed.",
+      "intermediate": "The fifty-move rule. Any capture or pawn move resets the counter, and the draw must be claimed.",
+      "advanced": "Art. 9.3. Note the divergence from tablebase truth in long theoretical endings."
+    },
+    "by_depth": {},
+    "hedge": "",
+    "lesson": ""
   },
   "terminology": {
     "beginner_words": [
@@ -60,5 +89,11 @@
       "halfmove clock"
     ],
     "avoid": []
+  },
+  "status": {
+    "stage": "researched",
+    "last_updated": "2026-08-31",
+    "open_questions": [],
+    "audit_notes": []
   }
 }

@@ -1,7 +1,29 @@
 {
+  "schema_version": 2,
+  "id": "discovered-check",
+  "canonical_name": "Discovered check",
+  "alternate_names": [],
+  "historical_names": [],
   "category": "tactical-motifs",
   "subcategory": "material-winning motif",
-  "epistemic_type": "D",
+  "tags": [],
+  "knowledge_type": "tactical-motif",
+  "knowledge_type_note": "Motif (D). Strictly a sub-case of discovered attack, distinguished because the forced reply changes what the moving piece may do.",
+  "name_status": "established-name",
+  "difficulty": "intermediate",
+  "definition_short": "A discovered attack where the revealed line gives check, so the moving piece is free to do anything.",
+  "definition_long": "A friendly unit steps off a line and the piece behind it checks the king. Because the opponent must answer the check immediately, the MOVING piece is effectively unconstrained for one move: it may capture, it may threaten a second target, and it may stand on a square where it is attacked, because there is no time to take it.\n\nThat last point is the one that makes discovered checks so hard to see. Ordinary safety reasoning — 'I cannot go there, it is defended' — does not apply to the discovering piece.",
+  "history": {
+    "attributions": [],
+    "first_documented_source": "informant-encyclopedia-combinations",
+    "year": null,
+    "confidence": "unknown",
+    "notes": "Descriptive pattern name of long, largely anonymous usage.",
+    "competing_claims": [],
+    "development": []
+  },
+  "engine_era_status": "unassessed",
+  "engine_era_note": "",
   "sources": [
     "informant-encyclopedia-combinations",
     "wikipedia-chess-tactic",
@@ -9,39 +31,6 @@
     "chesscom-tactics-38"
   ],
   "source_confidence": "high",
-  "status": {
-    "stage": "researched",
-    "last_updated": "2026-08-31",
-    "open_questions": []
-  },
-  "origin": {
-    "attributed_to": [],
-    "first_source": "informant-encyclopedia-combinations",
-    "year": null,
-    "certainty": "unknown",
-    "notes": "Descriptive pattern name of long, largely anonymous usage.",
-    "competing_claims": []
-  },
-  "id": "discovered-check",
-  "canonical_name": "Discovered check",
-  "difficulty": "intermediate",
-  "broader_concepts": [
-    "discovered-attack"
-  ],
-  "narrower_concepts": [
-    "double-check"
-  ],
-  "related_concepts": [
-    "check",
-    "battery"
-  ],
-  "definition_short": "A discovered attack where the revealed line gives check, so the moving piece is free to do anything.",
-  "definition_long": "A friendly unit steps off a line and the piece behind it checks the king. Because the opponent must answer the check immediately, the MOVING piece is effectively unconstrained for one move: it may capture, it may threaten a second target, and it may stand on a square where it is attacked, because there is no time to take it.\n\nThat last point is the one that makes discovered checks so hard to see. Ordinary safety reasoning — 'I cannot go there, it is defended' — does not apply to the discovering piece.",
-  "epistemic_note": "Motif (D). Strictly a sub-case of discovered attack, distinguished because the forced reply changes what the moving piece may do.",
-  "prerequisites": [
-    "discovered-attack",
-    "check"
-  ],
   "recognition": {
     "preconditions": [
       "A friendly line piece is aimed at the enemy king through exactly one friendly blocker",
@@ -55,18 +44,55 @@
       "The check is easily blocked or the checking piece captured",
       "The moving piece has no useful destination"
     ],
+    "prerequisites": [
+      "discovered-attack",
+      "check"
+    ],
     "detector": "lineAlignment",
-    "detectability": "mechanical"
+    "detectability": "mechanical",
+    "typical_confidence": "medium",
+    "false_positive_traps": []
+  },
+  "application": {
+    "typical_plans": [],
+    "typical_moves": [],
+    "typical_pawn_structures": [],
+    "typical_piece_arrangements": [],
+    "tactical_consequences": [],
+    "strategic_consequences": []
   },
   "exceptions": [
     "If the discovered check can be met by a capture of the checking piece, the free move is not free."
   ],
   "limitations": [],
-  "explanation_templates": {
-    "beginner": "Moving this piece gives check from the piece behind it. Your opponent must answer the check, so this piece can go anywhere — even somewhere it could be taken.",
-    "intermediate": "Discovered check. The opponent must deal with the check, so the moving piece gets a free move.",
-    "advanced": "Discovered check. Suspend normal safety reasoning for the discovering piece; the check buys the tempo.",
-    "hedge": ""
+  "misconceptions": [],
+  "relationships": {
+    "broader": [
+      "discovered-attack"
+    ],
+    "narrower": [
+      "double-check"
+    ],
+    "related": [
+      "check",
+      "battery"
+    ],
+    "contrasting": [],
+    "co_occurring": [],
+    "conflicts": []
+  },
+  "examples": [],
+  "counterexamples": [],
+  "ambiguous_examples": [],
+  "explanations": {
+    "by_level": {
+      "beginner": "Moving this piece gives check from the piece behind it. Your opponent must answer the check, so this piece can go anywhere — even somewhere it could be taken.",
+      "intermediate": "Discovered check. The opponent must deal with the check, so the moving piece gets a free move.",
+      "advanced": "Discovered check. Suspend normal safety reasoning for the discovering piece; the check buys the tempo."
+    },
+    "by_depth": {},
+    "hedge": "",
+    "lesson": ""
   },
   "terminology": {
     "beginner_words": [
@@ -77,5 +103,11 @@
       "discoverer"
     ],
     "avoid": []
+  },
+  "status": {
+    "stage": "researched",
+    "last_updated": "2026-08-31",
+    "open_questions": [],
+    "audit_notes": []
   }
 }

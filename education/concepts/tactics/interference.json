@@ -1,7 +1,33 @@
 {
+  "schema_version": 2,
+  "id": "interference",
+  "canonical_name": "Interference",
+  "alternate_names": [
+    "interception",
+    "line blocking",
+    "obstruction"
+  ],
+  "historical_names": [],
   "category": "tactical-motifs",
   "subcategory": "material-winning motif",
-  "epistemic_type": "D",
+  "tags": [],
+  "knowledge_type": "tactical-motif",
+  "knowledge_type_note": "Motif (D), mechanically detectable in principle, but rarely spotted because the candidate move looks unnatural.",
+  "name_status": "established-name",
+  "difficulty": "advanced",
+  "definition_short": "Placing a piece — often as a sacrifice — on the line between an enemy piece and what it defends.",
+  "definition_long": "A unit is inserted onto the line a defending bishop, rook or queen needs, cutting the defence. Because the interfering unit is usually en prise, interference is typically a sacrifice; the point is the line, not the material.\n\nIt is the rarest of the common motifs, and the hardest to see, because the interfering move goes to a square that looks absurd. Informant theme i; the ECM lists it as 'Interception'.",
+  "history": {
+    "attributions": [],
+    "first_documented_source": "informant-encyclopedia-combinations",
+    "year": null,
+    "confidence": "unknown",
+    "notes": "Tactical motifs are descriptive pattern names of long and mostly anonymous usage. The Chess Informant classification is cited as a standard enumeration, not as the origin of the term.",
+    "competing_claims": [],
+    "development": []
+  },
+  "engine_era_status": "unassessed",
+  "engine_era_note": "",
   "sources": [
     "informant-encyclopedia-combinations",
     "wikipedia-chess-tactic",
@@ -9,34 +35,6 @@
     "chesscom-tactics-38"
   ],
   "source_confidence": "high",
-  "status": {
-    "stage": "researched",
-    "last_updated": "2026-08-31",
-    "open_questions": []
-  },
-  "origin": {
-    "attributed_to": [],
-    "first_source": "informant-encyclopedia-combinations",
-    "year": null,
-    "certainty": "unknown",
-    "notes": "Tactical motifs are descriptive pattern names of long and mostly anonymous usage. The Chess Informant classification is cited as a standard enumeration, not as the origin of the term.",
-    "competing_claims": []
-  },
-  "id": "interference",
-  "canonical_name": "Interference",
-  "difficulty": "advanced",
-  "alternate_names": [
-    "interception",
-    "line blocking",
-    "obstruction"
-  ],
-  "related_concepts": [
-    "clearance",
-    "deflection"
-  ],
-  "definition_short": "Placing a piece — often as a sacrifice — on the line between an enemy piece and what it defends.",
-  "definition_long": "A unit is inserted onto the line a defending bishop, rook or queen needs, cutting the defence. Because the interfering unit is usually en prise, interference is typically a sacrifice; the point is the line, not the material.\n\nIt is the rarest of the common motifs, and the hardest to see, because the interfering move goes to a square that looks absurd. Informant theme i; the ECM lists it as 'Interception'.",
-  "epistemic_note": "Motif (D), mechanically detectable in principle, but rarely spotted because the candidate move looks unnatural.",
   "recognition": {
     "preconditions": [
       "An enemy line piece defends a target along a line",
@@ -50,18 +48,48 @@
       "Capturing the interfering unit restores the defence at no cost",
       "The defender has an alternative route to the target"
     ],
+    "prerequisites": [],
     "detector": "lineAlignment",
-    "detectability": "mechanical"
+    "detectability": "mechanical",
+    "typical_confidence": "medium",
+    "false_positive_traps": []
+  },
+  "application": {
+    "typical_plans": [],
+    "typical_moves": [],
+    "typical_pawn_structures": [],
+    "typical_piece_arrangements": [],
+    "tactical_consequences": [],
+    "strategic_consequences": []
   },
   "exceptions": [
     "Fails if the interposed unit can be captured by a piece that does not itself have a duty."
   ],
   "limitations": [],
-  "explanation_templates": {
-    "beginner": "This move stands right in the way of the piece that was defending, cutting it off.",
-    "intermediate": "Interference: the {piece} is placed on the defender's line, so the defence is cut even though the piece can be taken.",
-    "advanced": "Interference / interception (Informant theme i). Look for a square where two enemy defensive lines cross.",
-    "hedge": ""
+  "misconceptions": [],
+  "relationships": {
+    "broader": [],
+    "narrower": [],
+    "related": [
+      "clearance",
+      "deflection"
+    ],
+    "contrasting": [],
+    "co_occurring": [],
+    "conflicts": []
+  },
+  "examples": [],
+  "counterexamples": [],
+  "ambiguous_examples": [],
+  "explanations": {
+    "by_level": {
+      "beginner": "This move stands right in the way of the piece that was defending, cutting it off.",
+      "intermediate": "Interference: the {piece} is placed on the defender's line, so the defence is cut even though the piece can be taken.",
+      "advanced": "Interference / interception (Informant theme i). Look for a square where two enemy defensive lines cross."
+    },
+    "by_depth": {},
+    "hedge": "",
+    "lesson": ""
   },
   "terminology": {
     "beginner_words": [
@@ -73,5 +101,11 @@
       "line blocking"
     ],
     "avoid": []
+  },
+  "status": {
+    "stage": "researched",
+    "last_updated": "2026-08-31",
+    "open_questions": [],
+    "audit_notes": []
   }
 }

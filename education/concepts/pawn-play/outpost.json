@@ -1,0 +1,295 @@
+{
+  "schema_version": 2,
+  "id": "outpost",
+  "canonical_name": "Outpost",
+  "alternate_names": [
+    "outpost square",
+    "strong square (loosely)",
+    "eternal knight (Romanovsky, for the occupant)"
+  ],
+  "historical_names": [
+    "Vorposten"
+  ],
+  "category": "outposts",
+  "subcategory": "square control",
+  "tags": [
+    "squares",
+    "knights",
+    "nimzowitsch",
+    "hypermodern",
+    "disputed-definition"
+  ],
+  "knowledge_type": "positional-concept",
+  "knowledge_type_note": "A positional concept. NOT a rule and not a proven result: whether occupying an outpost is good depends on the whole position. Recorded as positional-concept rather than strategic-principle because it names a board FEATURE, not a method of play.",
+  "name_status": "contested",
+  "difficulty": "intermediate",
+  "definition_short": "An advanced square, usually protected by a pawn, that no enemy pawn can attack — so a piece placed there cannot be driven away. Sources disagree on whether an open or half-open file behind it is part of the definition.",
+  "definition_long": "THE DEFINITION IS GENUINELY DISPUTED. This is not vagueness in the sources; it is a real divergence that a system using the word must handle explicitly.\n\nNIMZOWITSCH (My System, 1925), who coined the term, requires the file. His words: 'by an outpost we mean one of our own pieces, (usually a knight), which is placed, being protected (by a pawn of course) and on an open file within enemy territory.' He is emphatic that the file is load-bearing: 'The outpost must be accompanied by the file behind and the pawn protecting it from one side', and 'The outpost does not draw its strength from its own resources, but much more from its open file and the protecting pawn.' For him the outpost has two purposes: (a) it is a base for new attacks, and (b) it PROVOKES a weakening — the opponent drives the knight away with a pawn, and that pawn move damages the file. He also held that a flank outpost belongs to a rook rather than a knight.\n\nHOOPER & WHYLD (Oxford Companion, 1992) make the file optional: a square 'guarded by a pawn but cannot be attacked by an enemy pawn, especially such a square on an open file'.\n\nMODERN COMMON USAGE drops the file entirely: an advanced square (4th-7th rank), defended by one's own pawn, unattackable by enemy pawns. Chess.com adds a third condition frequently omitted elsewhere and important in practice — no piece of equal value can easily challenge the occupant. The Chess Programming Wiki states the drift plainly: in the broad sense 'the half-open file and provocation aspect of the outpost is lost, though the evaluation term is still useful.'\n\nIM Xavier Bedouin proposed a full nomenclature precisely because of this, distinguishing strong square, protected strong square, foothold (open file) and outpost (semi-open file), each absolute or relative. It is a coherent proposal, not established usage, and is recorded as such.\n\nROMANOVSKY supplies the condition that decides whether any of it matters: a square is a real weakness only when an enemy piece 'which it will not be possible to drive away or eliminate by an exchange' threatens to occupy it.\n\nPRACTICAL POSITION FOR THIS SYSTEM: use the modern conditions for RECOGNITION, because they are what most readers will mean, but never assert an outpost without checking the exchangeability condition, and prefer the more specific wording ('a knight that cannot be driven away') over the contested label where the two would differ.",
+  "history": {
+    "attributions": [
+      {
+        "person": "Wilhelm Steinitz",
+        "relation": "originated-by",
+        "source": "steinitz-modern-chess-instructor",
+        "year": 1886,
+        "note": "The underlying idea, via the 'hole': 'not alone the weakness on one single pawn but also that of one single square into which any hostile man can be planted with commanding effect'. Steinitz did not use the word outpost."
+      },
+      {
+        "person": "Aron Nimzowitsch",
+        "relation": "named-by",
+        "source": "nimzowitsch-my-system",
+        "year": 1925,
+        "note": "Coined 'outpost' (Vorposten) and gave the file-dependent definition quoted above."
+      },
+      {
+        "person": "David Hooper and Kenneth Whyld",
+        "relation": "later-associated-with",
+        "source": "oxford-companion-chess",
+        "year": 1992,
+        "note": "Reference-work definition that relaxes the file requirement; the origin of much modern usage."
+      },
+      {
+        "person": "Peter Romanovsky",
+        "relation": "systematized-by",
+        "source": "romanovsky-middlegame-planning",
+        "year": null,
+        "note": "The 'eternal knight' condition: exploitability requires the occupant be neither dislodgeable nor exchangeable."
+      }
+    ],
+    "first_documented_source": "nimzowitsch-my-system",
+    "year": 1925,
+    "confidence": "high",
+    "notes": "Origin of the TERM is secure (Nimzowitsch, 1925). Origin of the IDEA is Steinitz's hole, 1886. What is disputed is not who coined it but what it means: the file condition was part of the original definition and has been dropped by most later usage. Bedouin notes the root cause — 'the problem goes back to Nimzowitsch himself. In My System he suggests various examples, but he doesn't give clear definitions.'",
+    "competing_claims": [
+      "Nimzowitsch 1925: requires an open or half-open file behind the square.",
+      "Hooper & Whyld 1992: file is 'especially' relevant but not required.",
+      "Modern usage / engine evaluation terms: file dropped entirely.",
+      "Dorfman (The Method in Chess): a square on a half-open file in front of an enemy pawn, on the 6th rank.",
+      "Bedouin: 'outpost' should be reserved for semi-open files, with other cases renamed."
+    ],
+    "development": [
+      {
+        "era": "1886, Steinitz",
+        "change": "The idea, as the 'hole' — a square into which a hostile man can be planted with commanding effect.",
+        "source": "steinitz-modern-chess-instructor"
+      },
+      {
+        "era": "1925, Nimzowitsch",
+        "change": "Named, and tied to open-file play and provocation of a weakening pawn move.",
+        "source": "nimzowitsch-my-system"
+      },
+      {
+        "era": "1992, Hooper & Whyld",
+        "change": "File requirement relaxed in the standard reference work.",
+        "source": "oxford-companion-chess"
+      },
+      {
+        "era": "engine era",
+        "change": "Reduced to a static evaluation term: pawn-protected, pawn-unattackable advanced square. Provocation aspect lost.",
+        "source": "chessprogramming-outposts"
+      }
+    ]
+  },
+  "engine_era_status": "useful-with-common-exceptions",
+  "engine_era_note": "Engines carry an outpost term in their evaluation, so the feature is real and worth points. What engine testing does NOT support is treating it as decisive. In the Chess Programming Wiki's own illustrative position for 'the mighty outpost Nd5', Stockfish 18 at depth 28 prefers Nb5 (+0.52) over Nd5 (+0.30). The outpost move is sound and second-best, not the point of the position. Any explanation that presents occupying an outpost as automatically the strongest move is overstating it.",
+  "sources": [
+    "nimzowitsch-my-system",
+    "oxford-companion-chess",
+    "wikipedia-outpost",
+    "chesscom-outpost",
+    "chessprogramming-outposts",
+    "chessbase-india-bedouin-outpost",
+    "romanovsky-middlegame-planning",
+    "chessskill-outpost",
+    "steinitz-modern-chess-instructor"
+  ],
+  "source_confidence": "high",
+  "recognition": {
+    "preconditions": [
+      "A square on the 4th rank or beyond, counted from the occupying side",
+      "No enemy pawn can ever attack the square — the pawns on both adjoining files have advanced past it, been exchanged, or do not exist",
+      "The square is defended by a friendly pawn (usual, and required by Nimzowitsch and Hooper & Whyld, but relaxed in some modern usage)"
+    ],
+    "indicators_for": [
+      "The occupant cannot be exchanged for a piece of equal value — Romanovsky's condition, and the one that most often decides whether the outpost matters",
+      "The defender's remaining bishop is of the wrong colour to challenge the square",
+      "The square is central (c/d/e/f files) and the occupant is a knight, whose short range benefits most",
+      "An open or half-open file leads to the square — required by Nimzowitsch, and the mechanism by which driving the knight away costs the defender a pawn weakness",
+      "The square sits in front of a backward or isolated enemy pawn",
+      "From the square the piece attacks something concrete or denies the enemy king and rooks key squares"
+    ],
+    "indicators_against": [
+      "An enemy pawn can still advance to challenge the square, and doing so costs the defender nothing",
+      "The occupant can be traded off by a knight or a same-coloured bishop with no compensation",
+      "The square is on the a/b/g/h files and the intended occupant is a knight — Nimzowitsch assigns flank outposts to rooks",
+      "The piece on the square attacks nothing and restricts nothing; it is safe but idle",
+      "Occupying costs a tempo the position cannot spare, or walks into a concrete tactic"
+    ],
+    "prerequisites": [
+      "hole"
+    ],
+    "detector": null,
+    "detectability": "heuristic",
+    "typical_confidence": "medium",
+    "false_positive_traps": [
+      "A knight on d5 is not an outpost merely because it is on d5. If ...c6 or ...e6 is available, the knight is visiting.",
+      "A pawn-protected advanced square whose occupant can simply be exchanged is not an outpost in any useful sense — Romanovsky's condition fails.",
+      "A safe square that the piece does nothing from. Safety is a precondition, not the benefit.",
+      "In the engine test above, the archetypal 'outpost' move was second-best. Being a genuine outpost does not make occupying it the best move."
+    ]
+  },
+  "application": {
+    "typical_plans": [
+      "Route a knight to the square by a path the defender cannot contest",
+      "Exchange the defender that could challenge the square, especially a same-coloured bishop",
+      "Occupy with a knight, then use the square as a base for a further attack — Nimzowitsch's point (a)",
+      "Invite the pawn advance that drives the knight away, because that advance is itself a concession — Nimzowitsch's point (b)",
+      "On a flank file, occupy with a rook rather than a knight"
+    ],
+    "typical_moves": [
+      "Nd5 / Nc5 / Ne5 and their mirrors, supported by a pawn"
+    ],
+    "typical_pawn_structures": [
+      "In front of a backward d-pawn on a half-open d-file",
+      "Isolated queen's pawn structures, where the squares beside the isolani are the natural outposts",
+      "After a fianchettoed bishop has been exchanged, on the resulting colour complex"
+    ],
+    "typical_piece_arrangements": [
+      "Knight on the square, pawn supporting it, rook behind on the same file"
+    ],
+    "tactical_consequences": [
+      "An unchallengeable knight near the king supports mating ideas and forks from a permanent base"
+    ],
+    "strategic_consequences": [
+      "Silman's estimate, reported by Chess.com: an established knight on the sixth rank is worth about a rook",
+      "The square denies the defender's own pieces access, shrinking their available squares",
+      "The advantage is durable because pawns cannot move backwards to repair it"
+    ]
+  },
+  "exceptions": [
+    "An outpost that can be neutralised by an equal exchange confers little. Check what can capture the occupant before naming it.",
+    "Occupying is not obligatory. The THREAT of occupying can bind the defender while the piece does something else.",
+    "Nimzowitsch's own counter-illustration: with the file behind it closed, the point largely goes. He asks the reader to imagine an extra white pawn on d3 — 'the capital would have run out'.",
+    "A flank outpost suits a rook, not a knight, because the rook exerts pressure along the whole rank.",
+    "A bishop on an outpost defends its own supporting pawn, so it cannot be undermined the way a knight can — a genuine asymmetry between the pieces."
+  ],
+  "limitations": [
+    "The definition is contested; there is no authoritative wording to appeal to.",
+    "Not reliably engine-testable. Three separate controlled-pair designs failed to isolate the variable, because no pawn can be moved without altering several structural facts at once. See METHODOLOGY.md.",
+    "Recognition is heuristic. Detecting 'no enemy pawn can attack this square' is mechanical; deciding that the square MATTERS is not."
+  ],
+  "misconceptions": [
+    "That any advanced knight protected by a pawn is on an outpost.",
+    "That an outpost is automatically the best move available — the engine test above shows otherwise.",
+    "That outposts are only for knights. Bishops and rooks use them too, and Nimzowitsch specifically assigns flank outposts to rooks.",
+    "That the pawn protection is what makes it strong. Nimzowitsch says the strength comes from the file AND the pawn together; the modern reading keeps the pawn and forgets the file."
+  ],
+  "relationships": {
+    "broader": [
+      "weak-square"
+    ],
+    "narrower": [],
+    "related": [
+      "hole",
+      "backward-pawn",
+      "open-file",
+      "knight-vs-bishop"
+    ],
+    "contrasting": [],
+    "co_occurring": [
+      "hole",
+      "backward-pawn"
+    ],
+    "conflicts": []
+  },
+  "examples": [
+    {
+      "fen": "r4rk1/ppp2ppp/3p2n1/8/4P3/2N5/PPP2PPP/2KRR3 w - - 0 1",
+      "note": "The Chess Programming Wiki's illustrative position for 'the mighty outpost Nd5'. White's d-file is half-open, d5 is protected by e4, and ...c6 can challenge but only at the cost of leaving d6 backward — Nimzowitsch's provocation mechanism exactly. NOT a Nimzowitsch diagram; it is the wiki's own construction.",
+      "origin_kind": "constructed-test",
+      "concept_role": "ambiguous",
+      "side_to_move_benefits": "white",
+      "engine": {
+        "engine_id": "Stockfish 18",
+        "test_level": 3,
+        "depth": 28,
+        "threads": 10,
+        "hash_mb": 2048,
+        "multipv": 4,
+        "best_move": "c3b5",
+        "eval_cp": 52,
+        "mate_in": null,
+        "pv": [],
+        "alternatives": [
+          {
+            "move": "c3d5",
+            "eval_cp": 30,
+            "mate_in": null
+          },
+          {
+            "move": "d1d2",
+            "eval_cp": 19,
+            "mate_in": null
+          },
+          {
+            "move": "e1e2",
+            "eval_cp": 15,
+            "mate_in": null
+          }
+        ],
+        "margin_cp": 22,
+        "verdict": "ambiguous",
+        "verdict_note": "Nd5 is sound but SECOND-BEST: +0.30 against +0.52 for Nb5. The textbook outpost move is not the best move in the textbook outpost position. Recorded as ambiguous because it confirms the feature is real and playable while contradicting any claim that occupying an outpost is automatically strongest. This is the position behind the concept's principal false-positive trap."
+      }
+    }
+  ],
+  "counterexamples": [],
+  "ambiguous_examples": [],
+  "explanations": {
+    "by_level": {
+      "beginner": "No pawn can ever attack this square, so a piece put there cannot be chased away. A knight is usually the best piece for the job.",
+      "intermediate": "An outpost on {square}: protected by {pawn}, and no enemy pawn can reach it. Worth having here because {reason} — but check first whether the knight can simply be traded off.",
+      "advanced": "Outpost in the modern sense. Nimzowitsch additionally required the half-open file behind it, both as support and because driving the knight off costs the defender a pawn weakness. Romanovsky's condition applies: it counts only if the occupant can be neither dislodged nor exchanged.",
+      "master": "Note which sense is meant. If the file is closed this is a protected strong square rather than an outpost in Nimzowitsch's sense, and the provocation mechanism is absent. Evaluate exchangeability, what the piece actually does from the square, and whether the tempo spent getting there is affordable."
+    },
+    "by_depth": {
+      "short": "No enemy pawn can ever attack {square}, so the knight there is permanent.",
+      "normal": "{square} is an outpost: your pawn defends it and no enemy pawn can attack it, so a knight there cannot be driven away. It matters here because it cannot be exchanged either, and from there it {does what}.",
+      "deep": "Nimzowitsch coined 'outpost' in 1925 for a protected piece, usually a knight, on an OPEN FILE in enemy territory — the file being as load-bearing as the pawn, since driving the knight off with a pawn damages the file the attacker is working on. Later usage, following Hooper and Whyld, dropped the file requirement, and engine evaluation terms use the broad static sense. Whichever definition is used, Romanovsky's test decides whether it matters: the square is a real weakness only if a piece that cannot be driven away or exchanged can occupy it. Engine testing supports the feature but not its primacy — in the standard illustrative position, the outpost move is only second-best."
+    },
+    "hedge": "",
+    "lesson": "Before calling a square an outpost, ask two questions: can a pawn ever attack it, and can the piece standing there be exchanged? If the answer to either is yes, it is just a square."
+  },
+  "terminology": {
+    "beginner_words": [
+      "a square they can never attack with a pawn",
+      "a permanent home for your knight"
+    ],
+    "advanced_words": [
+      "outpost",
+      "outpost square",
+      "strong square",
+      "protected strong square",
+      "hole"
+    ],
+    "avoid": [
+      "outposts win games",
+      "always put a knight on an outpost",
+      "the knight is centralised, therefore an outpost"
+    ]
+  },
+  "status": {
+    "stage": "researched",
+    "last_updated": "2026-08-31",
+    "open_questions": [
+      "NOT engine-validated and cannot be by controlled pair. Three designs failed (see METHODOLOGY.md and research-state failed_research_attempts). A different standard is needed for positional concepts.",
+      "Collect 10-20 annotated master positions where a titled author names an outpost, and record whether Stockfish rates the annotated move among its top candidates. That measures whether the concept tracks strong play without claiming causation.",
+      "Construct the FEN for the registered false-positive case 'knight-on-d5-not-outpost' in tests/false_positive_cases.json.",
+      "Read the Hooper & Whyld and Dorfman definitions from the books rather than via secondary quotation.",
+      "Nimzowitsch's diagram 60 and 61 positions should be reconstructed from My System and tested directly."
+    ],
+    "audit_notes": [
+      "Deliberately NOT promoted past 'researched' despite having a large source base and an engine-tested position, because the engine evidence is ambiguous and the concept could not be isolated by controlled pair. Promoting it would misrepresent the strength of the evidence."
+    ]
+  }
+}

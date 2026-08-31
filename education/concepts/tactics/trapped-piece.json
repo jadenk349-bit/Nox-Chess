@@ -1,7 +1,32 @@
 {
+  "schema_version": 2,
+  "id": "trapped-piece",
+  "canonical_name": "Trapped piece",
+  "alternate_names": [
+    "trapping a piece",
+    "piece hunt"
+  ],
+  "historical_names": [],
   "category": "tactical-motifs",
   "subcategory": "material-winning motif",
-  "epistemic_type": "D",
+  "tags": [],
+  "knowledge_type": "tactical-motif",
+  "knowledge_type_note": "Motif (D). Detection needs mobility counting rather than line geometry, so it is a different kind of detector from the pin/skewer family.",
+  "name_status": "established-name",
+  "difficulty": "intermediate",
+  "definition_short": "A piece with no safe square is attacked and lost, even though it is not currently pinned or forked.",
+  "definition_long": "Material is won not by a geometric double attack but by taking away every retreat first. Common victims: a queen that has grabbed a pawn deep in enemy territory, a bishop that has run out of diagonal after ...h6 and ...g5, and a knight on the rim.\n\nECM lists 'Trapping a piece' as a category. It is worth distinguishing from a fork because the winning move often attacks only ONE piece — the tactic is in the absence of squares, not in the presence of a second target.",
+  "history": {
+    "attributions": [],
+    "first_documented_source": "informant-encyclopedia-combinations",
+    "year": null,
+    "confidence": "unknown",
+    "notes": "Tactical motifs are descriptive pattern names of long and mostly anonymous usage. The Chess Informant classification is cited as a standard enumeration, not as the origin of the term.",
+    "competing_claims": [],
+    "development": []
+  },
+  "engine_era_status": "unassessed",
+  "engine_era_note": "",
   "sources": [
     "informant-encyclopedia-combinations",
     "wikipedia-chess-tactic",
@@ -9,29 +34,6 @@
     "chesscom-tactics-38"
   ],
   "source_confidence": "high",
-  "status": {
-    "stage": "researched",
-    "last_updated": "2026-08-31",
-    "open_questions": []
-  },
-  "origin": {
-    "attributed_to": [],
-    "first_source": "informant-encyclopedia-combinations",
-    "year": null,
-    "certainty": "unknown",
-    "notes": "Tactical motifs are descriptive pattern names of long and mostly anonymous usage. The Chess Informant classification is cited as a standard enumeration, not as the origin of the term.",
-    "competing_claims": []
-  },
-  "id": "trapped-piece",
-  "canonical_name": "Trapped piece",
-  "difficulty": "intermediate",
-  "alternate_names": [
-    "trapping a piece",
-    "piece hunt"
-  ],
-  "definition_short": "A piece with no safe square is attacked and lost, even though it is not currently pinned or forked.",
-  "definition_long": "Material is won not by a geometric double attack but by taking away every retreat first. Common victims: a queen that has grabbed a pawn deep in enemy territory, a bishop that has run out of diagonal after ...h6 and ...g5, and a knight on the rim.\n\nECM lists 'Trapping a piece' as a category. It is worth distinguishing from a fork because the winning move often attacks only ONE piece — the tactic is in the absence of squares, not in the presence of a second target.",
-  "epistemic_note": "Motif (D). Detection needs mobility counting rather than line geometry, so it is a different kind of detector from the pin/skewer family.",
   "recognition": {
     "preconditions": [
       "An enemy piece has no safe square available",
@@ -47,18 +49,45 @@
       "It has a desperado capture that recovers the material",
       "Trapping it costs more material than it is worth"
     ],
+    "prerequisites": [],
     "detector": "safeSquareCount",
-    "detectability": "mechanical"
+    "detectability": "mechanical",
+    "typical_confidence": "medium",
+    "false_positive_traps": []
+  },
+  "application": {
+    "typical_plans": [],
+    "typical_moves": [],
+    "typical_pawn_structures": [],
+    "typical_piece_arrangements": [],
+    "tactical_consequences": [],
+    "strategic_consequences": []
   },
   "exceptions": [
     "A trapped piece may escape by a desperado capture, or by a counter-threat that gains the tempo it needs."
   ],
   "limitations": [],
-  "explanation_templates": {
-    "beginner": "That piece has nowhere safe to go, so attacking it wins it.",
-    "intermediate": "The {piece} is trapped — every retreat square is covered.",
-    "advanced": "Trapped piece. Check for desperado resources and counter-threats before committing material to the hunt.",
-    "hedge": ""
+  "misconceptions": [],
+  "relationships": {
+    "broader": [],
+    "narrower": [],
+    "related": [],
+    "contrasting": [],
+    "co_occurring": [],
+    "conflicts": []
+  },
+  "examples": [],
+  "counterexamples": [],
+  "ambiguous_examples": [],
+  "explanations": {
+    "by_level": {
+      "beginner": "That piece has nowhere safe to go, so attacking it wins it.",
+      "intermediate": "The {piece} is trapped — every retreat square is covered.",
+      "advanced": "Trapped piece. Check for desperado resources and counter-threats before committing material to the hunt."
+    },
+    "by_depth": {},
+    "hedge": "",
+    "lesson": ""
   },
   "terminology": {
     "beginner_words": [
@@ -69,5 +98,11 @@
       "no retreat squares"
     ],
     "avoid": []
+  },
+  "status": {
+    "stage": "researched",
+    "last_updated": "2026-08-31",
+    "open_questions": [],
+    "audit_notes": []
   }
 }

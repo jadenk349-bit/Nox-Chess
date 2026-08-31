@@ -1,34 +1,36 @@
 {
+  "schema_version": 2,
+  "id": "checkmate",
+  "canonical_name": "Checkmate",
+  "alternate_names": [
+    "mate"
+  ],
+  "historical_names": [],
   "category": "official-rules",
   "subcategory": "basic rules of play",
-  "epistemic_type": "A",
+  "tags": [],
+  "knowledge_type": "official-rule",
+  "knowledge_type_note": "Official rule, and the game's objective.",
+  "name_status": "established-name",
+  "difficulty": "beginner",
+  "definition_short": "The king is in check and no legal move removes the check. The game ends immediately.",
+  "definition_long": "FIDE Art. 5.1.1: 'The game is won by the player who has checkmated his/her opponent's king. This immediately ends the game, provided that the move producing the checkmate position was in accordance with Article 3 and Articles 4.2 – 4.7.'\n\nCheckmate takes precedence over the automatic-draw provisions: Art. 9.6.2 ends with 'If the last move resulted in checkmate, that shall take precedence' — so a move that both completes 75 moves without capture or pawn move AND delivers mate is a win, not a draw.",
+  "history": {
+    "attributions": [],
+    "first_documented_source": "fide-laws-2023",
+    "year": null,
+    "confidence": "unknown",
+    "notes": "",
+    "competing_claims": [],
+    "development": []
+  },
+  "engine_era_status": "not-applicable",
+  "engine_era_note": "",
   "sources": [
     "fide-laws-2023",
     "fide-laws-2023-pdf"
   ],
   "source_confidence": "high",
-  "status": {
-    "stage": "researched",
-    "last_updated": "2026-08-31",
-    "open_questions": []
-  },
-  "id": "checkmate",
-  "canonical_name": "Checkmate",
-  "difficulty": "beginner",
-  "alternate_names": [
-    "mate"
-  ],
-  "definition_short": "The king is in check and no legal move removes the check. The game ends immediately.",
-  "definition_long": "FIDE Art. 5.1.1: 'The game is won by the player who has checkmated his/her opponent's king. This immediately ends the game, provided that the move producing the checkmate position was in accordance with Article 3 and Articles 4.2 – 4.7.'\n\nCheckmate takes precedence over the automatic-draw provisions: Art. 9.6.2 ends with 'If the last move resulted in checkmate, that shall take precedence' — so a move that both completes 75 moves without capture or pawn move AND delivers mate is a win, not a draw.",
-  "epistemic_note": "Official rule, and the game's objective.",
-  "origin": {
-    "attributed_to": [],
-    "first_source": "fide-laws-2023",
-    "year": null,
-    "certainty": "unknown",
-    "notes": "",
-    "competing_claims": []
-  },
   "recognition": {
     "preconditions": [
       "The side to move is in check",
@@ -36,21 +38,47 @@
     ],
     "indicators_for": [],
     "indicators_against": [],
+    "prerequisites": [],
     "detector": "isCheckmate",
-    "detectability": "mechanical"
+    "detectability": "mechanical",
+    "typical_confidence": "medium",
+    "false_positive_traps": []
+  },
+  "application": {
+    "typical_plans": [],
+    "typical_moves": [],
+    "typical_pawn_structures": [],
+    "typical_piece_arrangements": [],
+    "tactical_consequences": [],
+    "strategic_consequences": []
   },
   "exceptions": [],
   "limitations": [],
-  "related_concepts": [
-    "check",
-    "stalemate",
-    "seventy-five-move-rule"
-  ],
-  "explanation_templates": {
-    "beginner": "The king is attacked and there is no way out. The game is over.",
-    "intermediate": "Checkmate ends the game immediately.",
-    "advanced": "Art. 5.1.1. Mate takes precedence over the automatic draw in Art. 9.6.2.",
-    "hedge": ""
+  "misconceptions": [],
+  "relationships": {
+    "broader": [],
+    "narrower": [],
+    "related": [
+      "check",
+      "stalemate",
+      "seventy-five-move-rule"
+    ],
+    "contrasting": [],
+    "co_occurring": [],
+    "conflicts": []
+  },
+  "examples": [],
+  "counterexamples": [],
+  "ambiguous_examples": [],
+  "explanations": {
+    "by_level": {
+      "beginner": "The king is attacked and there is no way out. The game is over.",
+      "intermediate": "Checkmate ends the game immediately.",
+      "advanced": "Art. 5.1.1. Mate takes precedence over the automatic draw in Art. 9.6.2."
+    },
+    "by_depth": {},
+    "hedge": "",
+    "lesson": ""
   },
   "terminology": {
     "beginner_words": [
@@ -61,5 +89,11 @@
       "mate in N"
     ],
     "avoid": []
+  },
+  "status": {
+    "stage": "researched",
+    "last_updated": "2026-08-31",
+    "open_questions": [],
+    "audit_notes": []
   }
 }

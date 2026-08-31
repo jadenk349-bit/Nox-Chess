@@ -1,7 +1,31 @@
 {
+  "schema_version": 2,
+  "id": "fork",
+  "canonical_name": "Fork",
+  "alternate_names": [
+    "double attack (by a single piece)"
+  ],
+  "historical_names": [],
   "category": "tactical-motifs",
   "subcategory": "material-winning motif",
-  "epistemic_type": "D",
+  "tags": [],
+  "knowledge_type": "tactical-motif",
+  "knowledge_type_note": "A tactical motif (D): a geometric pattern, mechanically detectable, not a guideline.",
+  "name_status": "established-name",
+  "difficulty": "beginner",
+  "definition_short": "One piece attacks two or more enemy units at once, so only one can be saved.",
+  "definition_long": "A single piece attacks two or more targets simultaneously. The defender can normally answer only one threat, so material falls. Knights fork most often because no other piece attacks a knight back from a forked square, and because the knight's move is the hardest to see. Pawns fork cheaply: the forked pieces being defended does not help, since the pawn is worth less than either.\n\nForks are ABSOLUTE when one target is the king — the defender is forced to answer the check and cannot save the other piece or insert a zwischenzug (except a cross-check). Otherwise they are RELATIVE, and the defender may have resources: defending both, counter-attacking, or an in-between move.\n\nTargets need not be pieces. A square, a mate threat, or a follow-up fork can be one prong.",
+  "history": {
+    "attributions": [],
+    "first_documented_source": "informant-encyclopedia-combinations",
+    "year": null,
+    "confidence": "unknown",
+    "notes": "Tactical motifs are descriptive pattern names of long and mostly anonymous usage. The Chess Informant classification is cited as a standard enumeration, not as the origin of the term.",
+    "competing_claims": [],
+    "development": []
+  },
+  "engine_era_status": "unassessed",
+  "engine_era_note": "",
   "sources": [
     "informant-encyclopedia-combinations",
     "wikipedia-chess-tactic",
@@ -9,32 +33,6 @@
     "chesscom-tactics-38"
   ],
   "source_confidence": "high",
-  "status": {
-    "stage": "validated",
-    "last_updated": "2026-08-31",
-    "open_questions": []
-  },
-  "origin": {
-    "attributed_to": [],
-    "first_source": "informant-encyclopedia-combinations",
-    "year": null,
-    "certainty": "unknown",
-    "notes": "Tactical motifs are descriptive pattern names of long and mostly anonymous usage. The Chess Informant classification is cited as a standard enumeration, not as the origin of the term.",
-    "competing_claims": []
-  },
-  "id": "fork",
-  "canonical_name": "Fork",
-  "difficulty": "beginner",
-  "alternate_names": [
-    "double attack (by a single piece)"
-  ],
-  "narrower_concepts": [],
-  "related_concepts": [
-    "double-attack"
-  ],
-  "definition_short": "One piece attacks two or more enemy units at once, so only one can be saved.",
-  "definition_long": "A single piece attacks two or more targets simultaneously. The defender can normally answer only one threat, so material falls. Knights fork most often because no other piece attacks a knight back from a forked square, and because the knight's move is the hardest to see. Pawns fork cheaply: the forked pieces being defended does not help, since the pawn is worth less than either.\n\nForks are ABSOLUTE when one target is the king — the defender is forced to answer the check and cannot save the other piece or insert a zwischenzug (except a cross-check). Otherwise they are RELATIVE, and the defender may have resources: defending both, counter-attacking, or an in-between move.\n\nTargets need not be pieces. A square, a mate threat, or a follow-up fork can be one prong.",
-  "epistemic_note": "A tactical motif (D): a geometric pattern, mechanically detectable, not a guideline.",
   "recognition": {
     "preconditions": [
       "One piece attacks two or more enemy units after the move"
@@ -49,8 +47,27 @@
       "Both targets are defended and each is worth less than the forker",
       "The defender has a check or a stronger counter-threat available first"
     ],
+    "prerequisites": [],
     "detector": "attacksAfterMove",
-    "detectability": "mechanical"
+    "detectability": "mechanical",
+    "typical_confidence": "medium",
+    "false_positive_traps": []
+  },
+  "application": {
+    "typical_plans": [],
+    "typical_moves": [
+      "A knight to a square attacking king and rook (the classic Nc7+ / Nf7 pattern)",
+      "A pawn advance attacking two pieces on adjacent diagonals",
+      "A queen check that also picks up a loose piece"
+    ],
+    "typical_pawn_structures": [],
+    "typical_piece_arrangements": [],
+    "tactical_consequences": [
+      "Wins material when at least one target cannot be saved"
+    ],
+    "strategic_consequences": [
+      "Loose pieces invite forks; keeping pieces defended is prophylaxis against them"
+    ]
   },
   "exceptions": [
     "A fork wins nothing if the forking piece can be taken, or if every target is adequately defended and cheaper than the forker.",
@@ -59,22 +76,99 @@
   "limitations": [
     "Detecting the geometry is mechanical; deciding whether it WINS material requires resolving the whole capture sequence, so recognition alone is not enough."
   ],
-  "typical_moves": [
-    "A knight to a square attacking king and rook (the classic Nc7+ / Nf7 pattern)",
-    "A pawn advance attacking two pieces on adjacent diagonals",
-    "A queen check that also picks up a loose piece"
+  "misconceptions": [],
+  "relationships": {
+    "broader": [],
+    "narrower": [],
+    "related": [
+      "double-attack"
+    ],
+    "contrasting": [],
+    "co_occurring": [],
+    "conflicts": []
+  },
+  "examples": [
+    {
+      "fen": "r3k3/4bppp/8/3N4/8/8/PPP5/R3KB2 w Qq - 0 1",
+      "note": "Constructed controlled pair, positive half. Nc7+ forks Ke8 and Ra8; c7 is unguarded because the black bishop stands on e7.",
+      "origin_kind": "constructed-test",
+      "concept_role": "positive",
+      "side_to_move_benefits": "white",
+      "engine": {
+        "engine_id": "Stockfish 18",
+        "test_level": 2,
+        "depth": 26,
+        "threads": 10,
+        "hash_mb": 4096,
+        "multipv": 3,
+        "best_move": "d5c7",
+        "eval_cp": 739,
+        "mate_in": null,
+        "pv": [],
+        "alternatives": [
+          {
+            "move": "f1d3",
+            "eval_cp": 518,
+            "mate_in": null
+          },
+          {
+            "move": "d5f4",
+            "eval_cp": 435,
+            "mate_in": null
+          }
+        ],
+        "margin_cp": 221,
+        "verdict": "supports",
+        "verdict_note": "Nc7+ is best at +7.39, a full 2.21 ahead of the next move (Bd3, +5.18). The engine line is 1.Nc7+ Kd7 2.Nxa8 — the rook simply falls. Confirms the motif when the forking square is safe."
+      }
+    }
   ],
-  "tactical_consequences": [
-    "Wins material when at least one target cannot be saved"
+  "counterexamples": [
+    {
+      "fen": "r2bk3/5ppp/8/3N4/8/8/PPP5/R3KB2 w Qq - 0 1",
+      "note": "Constructed controlled pair, negative half. IDENTICAL to the positive example except the black bishop is on d8 instead of e7, so it guards c7. The fork geometry is unchanged.",
+      "origin_kind": "constructed-test",
+      "concept_role": "negative",
+      "side_to_move_benefits": "white",
+      "engine": {
+        "engine_id": "Stockfish 18",
+        "test_level": 2,
+        "depth": 26,
+        "threads": 10,
+        "hash_mb": 4096,
+        "multipv": 3,
+        "best_move": "f1d3",
+        "eval_cp": 473,
+        "mate_in": null,
+        "pv": [],
+        "alternatives": [
+          {
+            "move": "d5f4",
+            "eval_cp": 425,
+            "mate_in": null
+          },
+          {
+            "move": "d5c7",
+            "eval_cp": 57,
+            "mate_in": null
+          }
+        ],
+        "margin_cp": 48,
+        "verdict": "supports",
+        "verdict_note": "Nc7+ collapses to +0.57 and is ranked LAST of the three moves tested, 4.16 behind the best (Bd3, +4.73). The line is 1.Nc7+ Bxc7 — the knight is simply lost. The same geometric pattern swings 6.82 pawns between the two positions purely on whether the forking square is defended. This is the canonical false-match case: geometric detection alone is NOT sufficient to report a fork."
+      }
+    }
   ],
-  "strategic_consequences": [
-    "Loose pieces invite forks; keeping pieces defended is prophylaxis against them"
-  ],
-  "explanation_templates": {
-    "beginner": "This one piece attacks two things at the same time. Your opponent can only save one of them.",
-    "intermediate": "A fork. Because it hits {targets} at once and {reason}, the defender cannot cover both.",
-    "advanced": "Fork. Note whether it is absolute (a target is the king, so no zwischenzug is available) or relative (the defender may have an in-between resource).",
-    "hedge": ""
+  "ambiguous_examples": [],
+  "explanations": {
+    "by_level": {
+      "beginner": "This one piece attacks two things at the same time. Your opponent can only save one of them.",
+      "intermediate": "A fork. Because it hits {targets} at once and {reason}, the defender cannot cover both.",
+      "advanced": "Fork. Note whether it is absolute (a target is the king, so no zwischenzug is available) or relative (the defender may have an in-between resource)."
+    },
+    "by_depth": {},
+    "hedge": "",
+    "lesson": ""
   },
   "terminology": {
     "beginner_words": [
@@ -91,60 +185,10 @@
       "forks always win material"
     ]
   },
-  "examples": [
-    {
-      "fen": "r3k3/4bppp/8/3N4/8/8/PPP5/R3KB2 w Qq - 0 1",
-      "note": "Constructed controlled pair, positive half. Nc7+ forks Ke8 and Ra8; c7 is unguarded because the black bishop stands on e7.",
-      "side_to_move_benefits": "white",
-      "engine": {
-        "engine_id": "Stockfish 18",
-        "depth": 26,
-        "best_move": "d5c7",
-        "eval_cp": 739,
-        "mate_in": null,
-        "alternatives": [
-          {
-            "move": "f1d3",
-            "eval_cp": 518,
-            "mate_in": null
-          },
-          {
-            "move": "d5f4",
-            "eval_cp": 435,
-            "mate_in": null
-          }
-        ],
-        "verdict": "supports",
-        "verdict_note": "Nc7+ is best at +7.39, a full 2.21 ahead of the next move (Bd3, +5.18). The engine line is 1.Nc7+ Kd7 2.Nxa8 — the rook simply falls. Confirms the motif when the forking square is safe."
-      }
-    }
-  ],
-  "counterexamples": [
-    {
-      "fen": "r2bk3/5ppp/8/3N4/8/8/PPP5/R3KB2 w Qq - 0 1",
-      "note": "Constructed controlled pair, negative half. IDENTICAL to the positive example except the black bishop is on d8 instead of e7, so it guards c7. The fork geometry is unchanged.",
-      "side_to_move_benefits": "white",
-      "engine": {
-        "engine_id": "Stockfish 18",
-        "depth": 26,
-        "best_move": "f1d3",
-        "eval_cp": 473,
-        "mate_in": null,
-        "alternatives": [
-          {
-            "move": "d5f4",
-            "eval_cp": 425,
-            "mate_in": null
-          },
-          {
-            "move": "d5c7",
-            "eval_cp": 57,
-            "mate_in": null
-          }
-        ],
-        "verdict": "supports",
-        "verdict_note": "Nc7+ collapses to +0.57 and is ranked LAST of the three moves tested, 4.16 behind the best (Bd3, +4.73). The line is 1.Nc7+ Bxc7 — the knight is simply lost. The same geometric pattern swings 6.82 pawns between the two positions purely on whether the forking square is defended. This is the canonical false-match case: geometric detection alone is NOT sufficient to report a fork."
-      }
-    }
-  ]
+  "status": {
+    "stage": "validated",
+    "last_updated": "2026-08-31",
+    "open_questions": [],
+    "audit_notes": []
+  }
 }

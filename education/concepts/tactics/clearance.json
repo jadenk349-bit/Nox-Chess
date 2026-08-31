@@ -1,7 +1,33 @@
 {
+  "schema_version": 2,
+  "id": "clearance",
+  "canonical_name": "Clearance",
+  "alternate_names": [
+    "clearance sacrifice",
+    "space clearance",
+    "vacating sacrifice"
+  ],
+  "historical_names": [],
   "category": "tactical-motifs",
   "subcategory": "material-winning motif",
-  "epistemic_type": "D",
+  "tags": [],
+  "knowledge_type": "tactical-motif",
+  "knowledge_type_note": "Motif (D). Detection requires reasoning about what the VACATED square enables, so it is heuristic in practice.",
+  "name_status": "established-name",
+  "difficulty": "advanced",
+  "definition_short": "Vacating a square or line — often by sacrificing the piece occupying it — so a friendly piece can use it.",
+  "definition_long": "The opposite of interference: instead of blocking an enemy line you clear your own. A piece moves, or is given away, purely to empty a square, file, rank or diagonal that another friendly piece needs. Informant theme c; ECM 'Space Clearance'.\n\nClearance is usually recognised by the moving piece going somewhere pointless or losing itself — the value is entirely in the vacated square, and normal material reasoning about the moving piece is misleading.",
+  "history": {
+    "attributions": [],
+    "first_documented_source": "informant-encyclopedia-combinations",
+    "year": null,
+    "confidence": "unknown",
+    "notes": "Tactical motifs are descriptive pattern names of long and mostly anonymous usage. The Chess Informant classification is cited as a standard enumeration, not as the origin of the term.",
+    "competing_claims": [],
+    "development": []
+  },
+  "engine_era_status": "unassessed",
+  "engine_era_note": "",
   "sources": [
     "informant-encyclopedia-combinations",
     "wikipedia-chess-tactic",
@@ -9,34 +35,6 @@
     "chesscom-tactics-38"
   ],
   "source_confidence": "high",
-  "status": {
-    "stage": "researched",
-    "last_updated": "2026-08-31",
-    "open_questions": []
-  },
-  "origin": {
-    "attributed_to": [],
-    "first_source": "informant-encyclopedia-combinations",
-    "year": null,
-    "certainty": "unknown",
-    "notes": "Tactical motifs are descriptive pattern names of long and mostly anonymous usage. The Chess Informant classification is cited as a standard enumeration, not as the origin of the term.",
-    "competing_claims": []
-  },
-  "id": "clearance",
-  "canonical_name": "Clearance",
-  "difficulty": "advanced",
-  "alternate_names": [
-    "clearance sacrifice",
-    "space clearance",
-    "vacating sacrifice"
-  ],
-  "related_concepts": [
-    "interference",
-    "discovered-attack"
-  ],
-  "definition_short": "Vacating a square or line — often by sacrificing the piece occupying it — so a friendly piece can use it.",
-  "definition_long": "The opposite of interference: instead of blocking an enemy line you clear your own. A piece moves, or is given away, purely to empty a square, file, rank or diagonal that another friendly piece needs. Informant theme c; ECM 'Space Clearance'.\n\nClearance is usually recognised by the moving piece going somewhere pointless or losing itself — the value is entirely in the vacated square, and normal material reasoning about the moving piece is misleading.",
-  "epistemic_note": "Motif (D). Detection requires reasoning about what the VACATED square enables, so it is heuristic in practice.",
   "recognition": {
     "preconditions": [
       "A friendly unit occupies a square or line another friendly unit needs",
@@ -50,18 +48,48 @@
       "The vacated square is covered by the defender",
       "The clearance is too slow and the defender consolidates"
     ],
+    "prerequisites": [],
     "detector": null,
-    "detectability": "heuristic"
+    "detectability": "heuristic",
+    "typical_confidence": "medium",
+    "false_positive_traps": []
+  },
+  "application": {
+    "typical_plans": [],
+    "typical_moves": [],
+    "typical_pawn_structures": [],
+    "typical_piece_arrangements": [],
+    "tactical_consequences": [],
+    "strategic_consequences": []
   },
   "exceptions": [
     "A clearance sacrifice fails if the follow-up is a tempo too slow — the whole idea depends on forcing continuations."
   ],
   "limitations": [],
-  "explanation_templates": {
-    "beginner": "This gets a piece out of the way so another one can use the square.",
-    "intermediate": "Clearance: the point is the square that is emptied, not the piece that moves.",
-    "advanced": "Clearance / space clearance (Informant theme c). Judge the moving piece by the square it vacates, not by where it lands.",
-    "hedge": ""
+  "misconceptions": [],
+  "relationships": {
+    "broader": [],
+    "narrower": [],
+    "related": [
+      "interference",
+      "discovered-attack"
+    ],
+    "contrasting": [],
+    "co_occurring": [],
+    "conflicts": []
+  },
+  "examples": [],
+  "counterexamples": [],
+  "ambiguous_examples": [],
+  "explanations": {
+    "by_level": {
+      "beginner": "This gets a piece out of the way so another one can use the square.",
+      "intermediate": "Clearance: the point is the square that is emptied, not the piece that moves.",
+      "advanced": "Clearance / space clearance (Informant theme c). Judge the moving piece by the square it vacates, not by where it lands."
+    },
+    "by_depth": {},
+    "hedge": "",
+    "lesson": ""
   },
   "terminology": {
     "beginner_words": [
@@ -73,5 +101,11 @@
       "vacating"
     ],
     "avoid": []
+  },
+  "status": {
+    "stage": "researched",
+    "last_updated": "2026-08-31",
+    "open_questions": [],
+    "audit_notes": []
   }
 }

@@ -1,7 +1,31 @@
 {
+  "schema_version": 2,
+  "id": "discovered-attack",
+  "canonical_name": "Discovered attack",
+  "alternate_names": [
+    "discovery"
+  ],
+  "historical_names": [],
   "category": "tactical-motifs",
   "subcategory": "material-winning motif",
-  "epistemic_type": "D",
+  "tags": [],
+  "knowledge_type": "tactical-motif",
+  "knowledge_type_note": "Motif (D). Informant theme e.",
+  "name_status": "established-name",
+  "difficulty": "intermediate",
+  "definition_short": "One piece moves out of the way, unmasking an attack by a piece behind it.",
+  "definition_long": "A friendly unit steps off a line, revealing an attack by a friendly bishop, rook or queen behind it. Its power is that the MOVING piece is free to make a second threat of its own, so one move produces two attacks — and the moving piece can go somewhere it would otherwise never be allowed to stand, including en prise, because the revealed threat outweighs it.\n\nIf the revealed attack hits the king it is a DISCOVERED CHECK, which is far stronger because the defender must answer the check and has no time for the moving piece. If both the moving and the revealed piece attack the king it is a DOUBLE CHECK, and only a king move is legal.",
+  "history": {
+    "attributions": [],
+    "first_documented_source": "informant-encyclopedia-combinations",
+    "year": null,
+    "confidence": "unknown",
+    "notes": "Tactical motifs are descriptive pattern names of long and mostly anonymous usage. The Chess Informant classification is cited as a standard enumeration, not as the origin of the term.",
+    "competing_claims": [],
+    "development": []
+  },
+  "engine_era_status": "unassessed",
+  "engine_era_note": "",
   "sources": [
     "informant-encyclopedia-combinations",
     "wikipedia-chess-tactic",
@@ -9,32 +33,6 @@
     "chesscom-tactics-38"
   ],
   "source_confidence": "high",
-  "status": {
-    "stage": "researched",
-    "last_updated": "2026-08-31",
-    "open_questions": []
-  },
-  "origin": {
-    "attributed_to": [],
-    "first_source": "informant-encyclopedia-combinations",
-    "year": null,
-    "certainty": "unknown",
-    "notes": "Tactical motifs are descriptive pattern names of long and mostly anonymous usage. The Chess Informant classification is cited as a standard enumeration, not as the origin of the term.",
-    "competing_claims": []
-  },
-  "id": "discovered-attack",
-  "canonical_name": "Discovered attack",
-  "difficulty": "intermediate",
-  "alternate_names": [
-    "discovery"
-  ],
-  "narrower_concepts": [
-    "discovered-check",
-    "double-check"
-  ],
-  "definition_short": "One piece moves out of the way, unmasking an attack by a piece behind it.",
-  "definition_long": "A friendly unit steps off a line, revealing an attack by a friendly bishop, rook or queen behind it. Its power is that the MOVING piece is free to make a second threat of its own, so one move produces two attacks — and the moving piece can go somewhere it would otherwise never be allowed to stand, including en prise, because the revealed threat outweighs it.\n\nIf the revealed attack hits the king it is a DISCOVERED CHECK, which is far stronger because the defender must answer the check and has no time for the moving piece. If both the moving and the revealed piece attack the king it is a DOUBLE CHECK, and only a king move is legal.",
-  "epistemic_note": "Motif (D). Informant theme e.",
   "recognition": {
     "preconditions": [
       "A friendly line piece is behind a friendly unit, aimed at an enemy target",
@@ -50,8 +48,19 @@
       "The revealed 'attack' hits something defended and not worth taking",
       "The defender can answer both threats with one move"
     ],
+    "prerequisites": [],
     "detector": "lineAlignment",
-    "detectability": "mechanical"
+    "detectability": "mechanical",
+    "typical_confidence": "medium",
+    "false_positive_traps": []
+  },
+  "application": {
+    "typical_plans": [],
+    "typical_moves": [],
+    "typical_pawn_structures": [],
+    "typical_piece_arrangements": [],
+    "tactical_consequences": [],
+    "strategic_consequences": []
   },
   "exceptions": [
     "A discovery is worthless if the unmasked line hits nothing of value.",
@@ -60,11 +69,30 @@
   "limitations": [
     "Detecting that a line opens is mechanical; judging whether the two threats together are decisive is not."
   ],
-  "explanation_templates": {
-    "beginner": "Moving this piece uncovers an attack from the piece behind it, so you get two attacks in one move.",
-    "intermediate": "A discovered attack. The moving piece is free to threaten something else, because the revealed attack does the work.",
-    "advanced": "Discovery. If the unmasked line hits the king it is a discovered check, and the moving piece may go anywhere, including en prise.",
-    "hedge": ""
+  "misconceptions": [],
+  "relationships": {
+    "broader": [],
+    "narrower": [
+      "discovered-check",
+      "double-check"
+    ],
+    "related": [],
+    "contrasting": [],
+    "co_occurring": [],
+    "conflicts": []
+  },
+  "examples": [],
+  "counterexamples": [],
+  "ambiguous_examples": [],
+  "explanations": {
+    "by_level": {
+      "beginner": "Moving this piece uncovers an attack from the piece behind it, so you get two attacks in one move.",
+      "intermediate": "A discovered attack. The moving piece is free to threaten something else, because the revealed attack does the work.",
+      "advanced": "Discovery. If the unmasked line hits the king it is a discovered check, and the moving piece may go anywhere, including en prise."
+    },
+    "by_depth": {},
+    "hedge": "",
+    "lesson": ""
   },
   "terminology": {
     "beginner_words": [
@@ -76,5 +104,11 @@
       "battery"
     ],
     "avoid": []
+  },
+  "status": {
+    "stage": "researched",
+    "last_updated": "2026-08-31",
+    "open_questions": [],
+    "audit_notes": []
   }
 }

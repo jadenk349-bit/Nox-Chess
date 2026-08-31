@@ -6,16 +6,25 @@
     "note": "Filled in by tools/sf_analyse.py --probe"
   },
   "counters": {
-    "concepts_total": 33,
+    "concepts_total": 35,
     "concepts_stub": 0,
     "concepts_researched": 29,
     "concepts_validated": 4,
     "concepts_needs_review": 0,
-    "sources_reviewed": 21,
-    "positions_tested": 11,
+    "sources_reviewed": 32,
+    "positions_tested": 12,
     "matches_validated": 8,
     "false_matches": 0,
-    "ambiguous_matches": 3
+    "ambiguous_matches": 4,
+    "by_stage": {
+      "ready": 1,
+      "researched": 31,
+      "validated": 3
+    },
+    "tablebase_positions": 2,
+    "concepts_fully_covered": 0,
+    "areas_touched": 6,
+    "areas_total": 85
   },
   "areas": {
     "official-rules": {
@@ -321,10 +330,12 @@
     },
     "weak-squares": {
       "domain": "pawn-play",
-      "status": "not-started",
-      "concepts": [],
+      "status": "in-progress",
+      "concepts": [
+        "hole"
+      ],
       "open_questions": [],
-      "last_touched": null
+      "last_touched": "2026-08-31"
     },
     "strong-squares": {
       "domain": "pawn-play",
@@ -335,10 +346,12 @@
     },
     "outposts": {
       "domain": "pawn-play",
-      "status": "not-started",
-      "concepts": [],
+      "status": "in-progress",
+      "concepts": [
+        "outpost"
+      ],
       "open_questions": [],
-      "last_touched": null
+      "last_touched": "2026-08-31"
     },
     "open-files": {
       "domain": "lines",
@@ -651,13 +664,15 @@
       "last_touched": null
     }
   },
-  "current_area": "tactical-motifs",
+  "current_area": "outposts",
   "next_areas": [
-    "named-mating-patterns",
-    "checks-captures-threats",
-    "forcing-moves",
-    "board-geometry",
-    "piece-properties"
+    "piece-properties",
+    "ranks-files-diagonals",
+    "outposts",
+    "open-files",
+    "weak-squares",
+    "king-safety",
+    "pawn-structures"
   ],
   "discovered_concepts_unresearched": [
     {
@@ -734,7 +749,185 @@
       "id": "demolition-of-pawn-structure",
       "seen_in": "Informant theme g",
       "note": "sacrificial destruction of the king's pawn cover"
+    },
+    {
+      "id": "weak-square",
+      "seen_in": "hole, outpost",
+      "note": "broader modern term; overlaps 'hole', boundary not agreed between sources"
+    },
+    {
+      "id": "backward-pawn",
+      "seen_in": "outpost, hole",
+      "note": "pawn-structures area"
+    },
+    {
+      "id": "knight-vs-bishop",
+      "seen_in": "outpost",
+      "note": "piece-play area"
     }
   ],
-  "blocked": []
+  "blocked": [],
+  "schema_version": 2,
+  "checkpoint": {
+    "last_successful": "2026-08-31",
+    "session": "session-2",
+    "how_to_resume": [
+      "1. Read education/README.md, then ARCHITECTURE.md and METHODOLOGY.md.",
+      "2. Run: python3 education/tools/validate_kb.py && python3 education/tools/run_tests.py",
+      "3. Read this file's `current_area` and `next_areas`, then continue from there.",
+      "4. Anything in `discovered_concepts_unresearched` is fair game and already has provenance.",
+      "5. Anything in `unresolved_historical_claims` needs a primary source before it can be stated.",
+      "6. Respect `tool_limitations` — those are known dead ends, not untried ideas."
+    ]
+  },
+  "unresolved_historical_claims": [
+    {
+      "claim": "Sergey Belavenets published an article formulating the endgame principles that Shereshevsky's Endgame Strategy credits.",
+      "status": "unverified",
+      "confidence": "low",
+      "needed": "Title, journal and year of the Belavenets article itself. Currently attested only through Shereshevsky's and Dvoretsky's descriptions of it.",
+      "concepts": [
+        "two-weaknesses"
+      ]
+    },
+    {
+      "claim": "The rule that stalemate is a draw was not universal historically; it has been scored as a win and as a loss in various times and places.",
+      "status": "unverified",
+      "confidence": "low",
+      "needed": "Primary or scholarly sources on regional stalemate conventions before standardisation.",
+      "concepts": [
+        "stalemate"
+      ]
+    },
+    {
+      "claim": "FIDE formerly granted exceptions to the fifty-move rule for specific endgames later shown by tablebase to require more than 50 moves, and removed them.",
+      "status": "unverified",
+      "confidence": "medium",
+      "needed": "The specific FIDE handbook editions that added and removed the exception list.",
+      "concepts": [
+        "fifty-move-rule"
+      ]
+    },
+    {
+      "claim": "The Encyclopaedia of Chess Combinations theme list (a-j) as recorded.",
+      "status": "partially-verified",
+      "confidence": "medium",
+      "needed": "The list was read from a publisher product description and corroborated against Wikipedia's citation of the companion volume, but the book itself has not been seen. Any WORDING attributed to the book remains unverified.",
+      "concepts": [
+        "fork",
+        "pin",
+        "deflection",
+        "decoy",
+        "interference",
+        "clearance"
+      ]
+    }
+  ],
+  "failed_research_attempts": [
+    {
+      "what": "tvly extract on https://britishchessnews.com/tag/training/",
+      "result": "returned empty",
+      "reason": "JS-heavy tag-archive page; content came from Exa search highlights instead",
+      "date": "2026-08-31"
+    },
+    {
+      "what": "Stockfish depth-34 multipv-3 analysis of the Kotov-Pachman move-55 rook ending",
+      "result": "no convergence in 16 minutes; killed to free CPU",
+      "reason": "simplified rook endings explode at high depth; cap at 28-30 or use tablebase",
+      "date": "2026-08-31"
+    },
+    {
+      "what": "Controlled pair for Nimzowitsch's open-file condition on outposts",
+      "result": "inconclusive — test design was invalid",
+      "reason": "The 'closed file' half was built by adding a white pawn on d3, which also added a pawn of material (+0.52 -> +2.22 baseline). The halves were not comparable. Retest by relocating the c2 pawn to d3 so material is identical.",
+      "date": "2026-08-31"
+    },
+    {
+      "what": "Controlled pair for the outpost's 'cannot be challenged by a pawn' condition",
+      "result": "inconclusive — variable could not be isolated",
+      "reason": "Moving Black's c-pawn c7->c5 made d5 unchallengeable as intended, but also made d6 backward and opened b5. Nb5 became +2.47 while Nd5 fell to last at +0.93. Side effects swamped the tested variable.",
+      "date": "2026-08-31"
+    },
+    {
+      "what": "Corrected relocation pair (c2->d3) for Nimzowitsch's open-file condition",
+      "result": "inconclusive — position lacked discriminating power",
+      "reason": "Material was correctly held constant, but all four candidate moves fell within 0.08 of each other. The result ran mildly opposite to Nimzowitsch's prediction, which is noise rather than evidence. A discriminating position is needed, not a quieter one.",
+      "date": "2026-08-31"
+    }
+  ],
+  "tool_limitations": [
+    {
+      "tool": "Stockfish (native 18)",
+      "limits": [
+        "Piping all UCI commands at once and closing stdin makes it read `quit` mid-search and exit before printing any info line — it returns a bestmove with no evaluation and LOOKS like it worked. tools/sf_analyse.py streams and waits for `bestmove`.",
+        "Simplified endgames can fail to converge at depth 34+. Prefer tablebase below 8 pieces.",
+        "Two concurrent instances halve each other's throughput on this 12-core machine."
+      ]
+    },
+    {
+      "tool": "Lichess tablebase API",
+      "limits": [
+        "7 pieces maximum. Above that, engine analysis is the only option.",
+        "Network dependent; tools/tablebase.py retries three times then records wdl 'unknown'."
+      ]
+    },
+    {
+      "tool": "Tavily",
+      "limits": [
+        "tvly extract returns site chrome and JSON-wrapped raw_content that needs stripping.",
+        "Search can rank a SUPERSEDED FIDE Laws PDF above the current one — verify edition dates.",
+        "tvly research takes 3-5 minutes and pads its source count with index pages."
+      ]
+    },
+    {
+      "tool": "Exa",
+      "limits": [
+        "Highlights are excerpts and can stitch together non-adjacent text; fetch the page before quoting anything as continuous prose."
+      ]
+    },
+    {
+      "tool": "python-chess",
+      "limits": [
+        "Installed only in a scratchpad venv, not a project dependency. Repo tools must not require it; it is used optionally for SAN rendering and legality checks."
+      ]
+    },
+    {
+      "tool": "controlled-pair methodology",
+      "limits": [
+        "Works on tactical motifs, which depend on one geometric relation.",
+        "Does NOT work on positional concepts: no pawn can be moved without changing several structural facts simultaneously. Three separate designs failed on the outpost. Use annotated real positions plus recognition criteria instead, and do not mark positional concepts 'validated' on controlled-pair evidence."
+      ]
+    }
+  ],
+  "awaiting_validation": [
+    "castling",
+    "en-passant",
+    "checkmate",
+    "threefold-repetition",
+    "stalemate",
+    "insufficient-material",
+    "dead-position",
+    "seventy-five-move-rule",
+    "check",
+    "fivefold-repetition",
+    "fifty-move-rule",
+    "promotion",
+    "skewer",
+    "zwischenzug",
+    "removing-the-defender",
+    "trapped-piece",
+    "double-attack",
+    "overloading",
+    "discovered-attack",
+    "desperado",
+    "interference",
+    "double-check",
+    "clearance",
+    "x-ray",
+    "deflection",
+    "decoy",
+    "discovered-check",
+    "battery",
+    "smothered-mate"
+  ]
 }

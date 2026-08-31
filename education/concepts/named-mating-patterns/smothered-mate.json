@@ -1,7 +1,31 @@
 {
+  "schema_version": 2,
+  "id": "smothered-mate",
+  "canonical_name": "Smothered mate",
+  "alternate_names": [
+    "Philidor's legacy"
+  ],
+  "historical_names": [],
   "category": "named-mating-patterns",
   "subcategory": "mating pattern",
-  "epistemic_type": "D",
+  "tags": [],
+  "knowledge_type": "mating-pattern",
+  "knowledge_type_note": "Named mating pattern (D). Philidor's Legacy names the specific queen-sacrifice delivery, not every smothered mate; sources sometimes use the terms interchangeably.",
+  "name_status": "established-name",
+  "difficulty": "intermediate",
+  "definition_short": "A knight mates a king that is completely surrounded by its own pieces.",
+  "definition_long": "The king is hemmed in on every side by its own men, so only a knight — which jumps — can reach it. The classic delivery, known as Philidor's Legacy, runs Qg8+ (a queen sacrifice on g8 or b8 forcing the rook to capture) followed by Nf7#, with the rook now blocking the last flight square.\n\nThe mechanism depends on DOUBLE CHECK earlier in the sequence: the knight checks from f7 or h6 with the queen also checking, so the defender cannot capture or interpose and must move the king into the corner.",
+  "history": {
+    "attributions": [],
+    "first_documented_source": "informant-encyclopedia-combinations",
+    "year": null,
+    "confidence": "unknown",
+    "notes": "Descriptive pattern name of long, largely anonymous usage.",
+    "competing_claims": [],
+    "development": []
+  },
+  "engine_era_status": "unassessed",
+  "engine_era_note": "",
   "sources": [
     "informant-encyclopedia-combinations",
     "wikipedia-chess-tactic",
@@ -9,36 +33,6 @@
     "chesscom-tactics-38"
   ],
   "source_confidence": "high",
-  "status": {
-    "stage": "researched",
-    "last_updated": "2026-08-31",
-    "open_questions": []
-  },
-  "origin": {
-    "attributed_to": [],
-    "first_source": "informant-encyclopedia-combinations",
-    "year": null,
-    "certainty": "unknown",
-    "notes": "Descriptive pattern name of long, largely anonymous usage.",
-    "competing_claims": []
-  },
-  "id": "smothered-mate",
-  "canonical_name": "Smothered mate",
-  "difficulty": "intermediate",
-  "alternate_names": [
-    "Philidor's legacy"
-  ],
-  "related_concepts": [
-    "double-check",
-    "decoy",
-    "knight-fork"
-  ],
-  "definition_short": "A knight mates a king that is completely surrounded by its own pieces.",
-  "definition_long": "The king is hemmed in on every side by its own men, so only a knight — which jumps — can reach it. The classic delivery, known as Philidor's Legacy, runs Qg8+ (a queen sacrifice on g8 or b8 forcing the rook to capture) followed by Nf7#, with the rook now blocking the last flight square.\n\nThe mechanism depends on DOUBLE CHECK earlier in the sequence: the knight checks from f7 or h6 with the queen also checking, so the defender cannot capture or interpose and must move the king into the corner.",
-  "epistemic_note": "Named mating pattern (D). Philidor's Legacy names the specific queen-sacrifice delivery, not every smothered mate; sources sometimes use the terms interchangeably.",
-  "prerequisites": [
-    "double-check"
-  ],
   "recognition": {
     "preconditions": [
       "The enemy king's flight squares are all occupied by its own pieces",
@@ -52,18 +46,51 @@
       "A flight square is empty or can be vacated",
       "The knight's square is defended"
     ],
+    "prerequisites": [
+      "double-check"
+    ],
     "detector": "kingFlightSquares",
-    "detectability": "mechanical"
+    "detectability": "mechanical",
+    "typical_confidence": "medium",
+    "false_positive_traps": []
+  },
+  "application": {
+    "typical_plans": [],
+    "typical_moves": [],
+    "typical_pawn_structures": [],
+    "typical_piece_arrangements": [],
+    "tactical_consequences": [],
+    "strategic_consequences": []
   },
   "exceptions": [
     "If any surrounding piece can move away with tempo, the mate evaporates."
   ],
   "limitations": [],
-  "explanation_templates": {
-    "beginner": "The king is boxed in by its own pieces, so the knight — the only piece that can jump — delivers mate.",
-    "intermediate": "Smothered mate: every escape square is occupied by the king's own men.",
-    "advanced": "Smothered mate. The Philidor's Legacy delivery uses a double check and a queen sacrifice to fill the last flight square.",
-    "hedge": ""
+  "misconceptions": [],
+  "relationships": {
+    "broader": [],
+    "narrower": [],
+    "related": [
+      "double-check",
+      "decoy",
+      "knight-fork"
+    ],
+    "contrasting": [],
+    "co_occurring": [],
+    "conflicts": []
+  },
+  "examples": [],
+  "counterexamples": [],
+  "ambiguous_examples": [],
+  "explanations": {
+    "by_level": {
+      "beginner": "The king is boxed in by its own pieces, so the knight — the only piece that can jump — delivers mate.",
+      "intermediate": "Smothered mate: every escape square is occupied by the king's own men.",
+      "advanced": "Smothered mate. The Philidor's Legacy delivery uses a double check and a queen sacrifice to fill the last flight square."
+    },
+    "by_depth": {},
+    "hedge": "",
+    "lesson": ""
   },
   "terminology": {
     "beginner_words": [
@@ -74,5 +101,11 @@
       "Philidor's Legacy"
     ],
     "avoid": []
+  },
+  "status": {
+    "stage": "researched",
+    "last_updated": "2026-08-31",
+    "open_questions": [],
+    "audit_notes": []
   }
 }

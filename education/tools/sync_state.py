@@ -1,36 +1,64 @@
 #!/usr/bin/env python3
-"""Recompute state/research-state.json counters and seed state/coverage.json rows.
+"""Recompute the coverage matrix, category rollups and progress counters.
 
-Derives everything it can from the concept files themselves, so the trackers
-cannot drift from the knowledge base. Coverage boxes it cannot infer are left
-alone if already set, and seeded false if the row is new.
+Everything derivable from the concept files is derived, so the trackers cannot
+drift from the knowledge base. Boxes that require a human/agent judgement
+(canonical_name_verified, historical_attribution_researched) are preserved once
+set and default to false.
+
+A box may be set to the string "n/a" where validation is genuinely impossible
+for that concept — a rule of chess has no meaningful counterexample position.
+"n/a" counts as satisfied for completion, but is reported separately so the
+distinction stays visible.
 
     python3 tools/sync_state.py
 """
 import datetime, json, os
 
 HERE = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-BOXES = ["researched_definition", "verified_terminology", "multiple_sources",
-         "examples", "counterexamples", "recognition_criteria",
-         "engine_validation", "tested_positive", "tested_negative",
-         "tested_ambiguous", "explanation_template"]
+
+BOXES = [
+    "canonical_name_verified",        # judgement
+    "alternate_names_researched",     # judgement
+    "definition_researched",          # derived
+    "historical_attribution_researched",  # derived
+    "multiple_sources",               # derived
+    "recognition_criteria",           # derived
+    "examples",                       # derived
+    "counterexamples",                # derived
+    "exceptions",                     # derived
+    "stockfish_validation",           # derived
+    "positive_test",                  # derived
+    "negative_test",                  # derived
+    "ambiguous_test",                 # derived
+    "explanation_template",           # derived
+    "beginner_explanation",           # derived
+    "advanced_explanation",           # derived
+]
+JUDGEMENT = {"canonical_name_verified", "alternate_names_researched"}
+DERIVED = [b for b in BOXES if b not in JUDGEMENT]
+READY_STAGES = {"validated", "ready"}
 
 
-def load(p):
-    with open(os.path.join(HERE, p)) as f:
+def load(rel):
+    with open(os.path.join(HERE, rel)) as f:
         return json.load(f)
 
 
-def save(p, d):
-    with open(os.path.join(HERE, p), "w") as f:
+def save(rel, d):
+    with open(os.path.join(HERE, rel), "w") as f:
         json.dump(d, f, indent=2, ensure_ascii=False)
+
+
+def satisfied(v):
+    return v is True or v == "n/a"
 
 
 def main():
     today = datetime.date.today().isoformat()
     concepts = {}
     for dirpath, _, files in os.walk(os.path.join(HERE, "concepts")):
-        for fn in files:
+        for fn in sorted(files):
             if fn.endswith(".json"):
                 with open(os.path.join(dirpath, fn)) as f:
                     c = json.load(f)
@@ -38,40 +66,65 @@ def main():
 
     cov = load("state/coverage.json")
     state = load("state/research-state.json")
+    taxonomy = load("taxonomy.json")
+    area_of = {a["id"]: d["id"] for d in taxonomy["domains"] for a in d["areas"]}
 
-    positions = matches = false_matches = ambiguous = 0
+    positions = supports = contradicts = ambiguous = tb_positions = 0
 
     for cid, c in concepts.items():
-        ex, cex = c.get("examples", []), c.get("counterexamples", [])
-        engines = [p.get("engine") for p in ex + cex if p.get("engine")]
+        ex = c.get("examples", [])
+        cex = c.get("counterexamples", [])
+        amb = c.get("ambiguous_examples", [])
+        allpos = ex + cex + amb
+        engines = [p["engine"] for p in allpos if p.get("engine")]
         positions += len(engines)
+        tb_positions += sum(1 for p in allpos if p.get("tablebase"))
         for e in engines:
             v = e.get("verdict")
-            matches += v == "supports"
-            false_matches += v == "contradicts"
+            supports += v == "supports"
+            contradicts += v == "contradicts"
             ambiguous += v == "ambiguous"
 
+        row = cov["concepts"].get(cid) or {}
+        boxes = row.get("boxes") or {}
+        for b in BOXES:
+            boxes.setdefault(b, False)
+
+        h = c.get("history") or {}
         rec = c.get("recognition") or {}
-        row = cov["concepts"].get(cid, {"boxes": {b: False for b in BOXES},
-                                        "engine_testable": True,
-                                        "engine_testable_note": ""})
-        row.setdefault("boxes", {b: False for b in BOXES})
-        b = row["boxes"]
-        # inferable from the record itself
-        b["researched_definition"] = bool(c.get("definition_long"))
-        b["multiple_sources"] = len(c.get("sources", [])) >= 2
-        b["examples"] = len(ex) > 0
-        b["counterexamples"] = len(cex) > 0
-        b["recognition_criteria"] = bool(rec.get("indicators_for")) and bool(rec.get("indicators_against"))
-        b["explanation_template"] = bool((c.get("explanation_templates") or {}).get("intermediate"))
-        b["engine_validation"] = len(engines) > 0
-        b["tested_positive"] = any(e.get("verdict") == "supports" for e in engines)
-        b["tested_negative"] = any(
+        expl = c.get("explanations") or {}
+        lvl = expl.get("by_level") or {}
+
+        boxes["definition_researched"] = bool(c.get("definition_long"))
+        boxes["historical_attribution_researched"] = (
+            bool(h.get("notes")) or bool(h.get("attributions")) or h.get("confidence") == "unknown")
+        boxes["multiple_sources"] = len(c.get("sources", [])) >= 2
+        boxes["recognition_criteria"] = bool(rec.get("indicators_for")) and bool(rec.get("indicators_against"))
+        boxes["examples"] = "n/a" if boxes.get("examples") == "n/a" else bool(ex)
+        boxes["counterexamples"] = "n/a" if boxes.get("counterexamples") == "n/a" else bool(cex)
+        boxes["exceptions"] = bool(c.get("exceptions"))
+        boxes["stockfish_validation"] = "n/a" if boxes.get("stockfish_validation") == "n/a" else bool(engines)
+        boxes["positive_test"] = "n/a" if boxes.get("positive_test") == "n/a" else any(
+            (p.get("engine") or {}).get("verdict") == "supports" for p in ex)
+        boxes["negative_test"] = "n/a" if boxes.get("negative_test") == "n/a" else any(
             (p.get("engine") or {}).get("verdict") in ("supports", "contradicts") for p in cex)
-        b["tested_ambiguous"] = any(e.get("verdict") == "ambiguous" for e in engines)
-        b.setdefault("verified_terminology", False)
-        row["stage"] = (c.get("status") or {}).get("stage")
-        row["category"] = c.get("category")
+        boxes["ambiguous_test"] = "n/a" if boxes.get("ambiguous_test") == "n/a" else bool(
+            [p for p in amb if p.get("engine")])
+        boxes["explanation_template"] = bool(lvl) or bool(expl.get("by_depth"))
+        boxes["beginner_explanation"] = bool(lvl.get("beginner"))
+        boxes["advanced_explanation"] = bool(lvl.get("advanced"))
+
+        row.update({
+            "boxes": boxes,
+            "stage": (c.get("status") or {}).get("stage"),
+            "category": c.get("category"),
+            "domain": area_of.get(c.get("category")),
+            "knowledge_type": c.get("knowledge_type"),
+            "engine_testable": row.get("engine_testable", True),
+            "engine_testable_note": row.get("engine_testable_note", ""),
+            "complete": all(satisfied(boxes[b]) for b in BOXES),
+            "derived_complete": all(satisfied(boxes[b]) for b in DERIVED),
+        })
         cov["concepts"][cid] = row
 
         area = state["areas"].get(c.get("category"))
@@ -79,31 +132,53 @@ def main():
             area["concepts"].append(cid)
             area["last_touched"] = today
 
+    # ---- category-level rollup (brief Phase 12) ----
+    rollup = {}
+    for aid, dom in area_of.items():
+        ids = [cid for cid, r in cov["concepts"].items() if r.get("category") == aid]
+        stages = [cov["concepts"][i]["stage"] for i in ids]
+        rollup[aid] = {
+            "domain": dom,
+            "status": state["areas"][aid]["status"],
+            "discovered": len(ids),
+            "researched": sum(1 for s in stages if s in
+                              ("researched", "sourced", "structured", "tested", "validated", "ready")),
+            "validated": sum(1 for s in stages if s in READY_STAGES),
+            "needs_review": sum(1 for s in stages if s == "needs-review"),
+            "fully_covered": sum(1 for i in ids if cov["concepts"][i]["complete"]),
+        }
+    cov["by_area"] = rollup
+    cov["by_domain"] = {}
+    for aid, r in rollup.items():
+        d = cov["by_domain"].setdefault(r["domain"], {k: 0 for k in
+                                                     ("discovered", "researched", "validated", "fully_covered")})
+        for k in d:
+            d[k] += r[k]
+
     stages = [(c.get("status") or {}).get("stage") for c in concepts.values()]
     state["counters"].update({
         "concepts_total": len(concepts),
-        "concepts_stub": stages.count("stub"),
-        "concepts_researched": stages.count("researched"),
-        "concepts_validated": stages.count("validated"),
-        "concepts_needs_review": stages.count("needs-review"),
+        "by_stage": {s: stages.count(s) for s in sorted(set(stages)) if s},
         "sources_reviewed": len(load("sources/sources.json")["sources"]),
         "positions_tested": positions,
-        "matches_validated": matches,
-        "false_matches": false_matches,
+        "tablebase_positions": tb_positions,
+        "matches_validated": supports,
+        "false_matches": contradicts,
         "ambiguous_matches": ambiguous,
+        "concepts_fully_covered": sum(1 for r in cov["concepts"].values() if r["complete"]),
+        "areas_touched": sum(1 for r in rollup.values() if r["discovered"] > 0),
+        "areas_total": len(rollup),
     })
     state["last_session"] = today
-    state["engine"]["id"] = state["engine"]["id"] or "Stockfish 18"
 
     save("state/coverage.json", cov)
     save("state/research-state.json", state)
 
-    done = sum(1 for r in cov["concepts"].values()
-               if all(r["boxes"][k] for k in BOXES if r.get("engine_testable", True)
-                      or not k.startswith("tested") and k != "engine_validation"))
-    print(f"concepts {len(concepts)}  positions {positions}  "
-          f"supports {matches}  contradicts {false_matches}  ambiguous {ambiguous}")
-    print(f"coverage rows: {len(cov['concepts'])}  fully-boxed: {done}")
+    print(f"concepts {len(concepts)} | positions {positions} (+{tb_positions} tablebase) | "
+          f"supports {supports} contradicts {contradicts} ambiguous {ambiguous}")
+    print(f"areas touched {state['counters']['areas_touched']}/{len(rollup)} | "
+          f"fully covered {state['counters']['concepts_fully_covered']}")
+    print("by stage:", state["counters"]["by_stage"])
 
 
 if __name__ == "__main__":

@@ -1,7 +1,33 @@
 {
+  "schema_version": 2,
+  "id": "zwischenzug",
+  "canonical_name": "Zwischenzug",
+  "alternate_names": [
+    "intermezzo",
+    "in-between move",
+    "intermediate move"
+  ],
+  "historical_names": [],
   "category": "tactical-motifs",
   "subcategory": "material-winning motif",
-  "epistemic_type": "D",
+  "tags": [],
+  "knowledge_type": "tactical-motif",
+  "knowledge_type_note": "Motif (D), but categorically different from the geometric motifs: it is about sequencing, so it cannot be detected from a static position at all.",
+  "name_status": "established-name",
+  "difficulty": "intermediate",
+  "definition_short": "An in-between move that inserts a bigger threat before making the reply the opponent expected.",
+  "definition_long": "In a forcing sequence — typically a capture that 'obviously' must be recaptured — a player inserts a different, stronger move first, usually a check or a larger threat. The opponent must deal with it; only then does the original recapture happen, now under changed circumstances.\n\nIt is a move-order idea rather than a geometric pattern, which is what makes it hard to see: the losing move is often not a bad move but a correct move played one turn too early. ECM lists it as 'Intermediate Move'.",
+  "history": {
+    "attributions": [],
+    "first_documented_source": "informant-encyclopedia-combinations",
+    "year": null,
+    "confidence": "unknown",
+    "notes": "Tactical motifs are descriptive pattern names of long and mostly anonymous usage. The Chess Informant classification is cited as a standard enumeration, not as the origin of the term.",
+    "competing_claims": [],
+    "development": []
+  },
+  "engine_era_status": "unassessed",
+  "engine_era_note": "",
   "sources": [
     "informant-encyclopedia-combinations",
     "wikipedia-chess-tactic",
@@ -9,34 +35,6 @@
     "chesscom-tactics-38"
   ],
   "source_confidence": "high",
-  "status": {
-    "stage": "researched",
-    "last_updated": "2026-08-31",
-    "open_questions": []
-  },
-  "origin": {
-    "attributed_to": [],
-    "first_source": "informant-encyclopedia-combinations",
-    "year": null,
-    "certainty": "unknown",
-    "notes": "Tactical motifs are descriptive pattern names of long and mostly anonymous usage. The Chess Informant classification is cited as a standard enumeration, not as the origin of the term.",
-    "competing_claims": []
-  },
-  "id": "zwischenzug",
-  "canonical_name": "Zwischenzug",
-  "difficulty": "intermediate",
-  "alternate_names": [
-    "intermezzo",
-    "in-between move",
-    "intermediate move"
-  ],
-  "related_concepts": [
-    "desperado",
-    "double-attack"
-  ],
-  "definition_short": "An in-between move that inserts a bigger threat before making the reply the opponent expected.",
-  "definition_long": "In a forcing sequence — typically a capture that 'obviously' must be recaptured — a player inserts a different, stronger move first, usually a check or a larger threat. The opponent must deal with it; only then does the original recapture happen, now under changed circumstances.\n\nIt is a move-order idea rather than a geometric pattern, which is what makes it hard to see: the losing move is often not a bad move but a correct move played one turn too early. ECM lists it as 'Intermediate Move'.",
-  "epistemic_note": "Motif (D), but categorically different from the geometric motifs: it is about sequencing, so it cannot be detected from a static position at all.",
   "recognition": {
     "preconditions": [
       "A forcing exchange is under way and one side is expected to recapture",
@@ -50,8 +48,19 @@
       "The delay allows the opponent to save the material",
       "The in-between threat can be met while also defending"
     ],
+    "prerequisites": [],
     "detector": null,
-    "detectability": "human-only"
+    "detectability": "human-only",
+    "typical_confidence": "medium",
+    "false_positive_traps": []
+  },
+  "application": {
+    "typical_plans": [],
+    "typical_moves": [],
+    "typical_pawn_structures": [],
+    "typical_piece_arrangements": [],
+    "tactical_consequences": [],
+    "strategic_consequences": []
   },
   "exceptions": [
     "Only works if the postponed capture is still there afterwards."
@@ -59,11 +68,30 @@
   "limitations": [
     "Cannot be detected from a single position — it is a property of a sequence. Any detector must operate on the move list, not the board."
   ],
-  "explanation_templates": {
-    "beginner": "Instead of recapturing straight away, this makes a bigger threat first. The recapture is still there afterwards.",
-    "intermediate": "A zwischenzug. Check that the delayed capture will still be available.",
-    "advanced": "In-between move. The commonest source of error is treating a forced-looking recapture as actually forced.",
-    "hedge": ""
+  "misconceptions": [],
+  "relationships": {
+    "broader": [],
+    "narrower": [],
+    "related": [
+      "desperado",
+      "double-attack"
+    ],
+    "contrasting": [],
+    "co_occurring": [],
+    "conflicts": []
+  },
+  "examples": [],
+  "counterexamples": [],
+  "ambiguous_examples": [],
+  "explanations": {
+    "by_level": {
+      "beginner": "Instead of recapturing straight away, this makes a bigger threat first. The recapture is still there afterwards.",
+      "intermediate": "A zwischenzug. Check that the delayed capture will still be available.",
+      "advanced": "In-between move. The commonest source of error is treating a forced-looking recapture as actually forced."
+    },
+    "by_depth": {},
+    "hedge": "",
+    "lesson": ""
   },
   "terminology": {
     "beginner_words": [
@@ -75,5 +103,11 @@
       "in-between move"
     ],
     "avoid": []
+  },
+  "status": {
+    "stage": "researched",
+    "last_updated": "2026-08-31",
+    "open_questions": [],
+    "audit_notes": []
   }
 }

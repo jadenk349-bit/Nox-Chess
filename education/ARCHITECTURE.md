@@ -52,6 +52,88 @@ board features that define it are present **and** the engine agrees about the
 move — matching on one alone is a false match, and false matches are recorded as
 such (see `state/coverage.json`).
 
+
+## The five layers
+
+The brief specifies five layers that must not be mixed. They are kept separate in
+both the data and the tooling.
+
+| Layer | What it owns | Where it lives | Must never |
+|---|---|---|---|
+| 1. Research knowledge | What humans call ideas, what they mean, where they came from | `concepts/`, `sources/` | assert that a move works |
+| 2. Engine validation | Whether a move actually works | `tools/sf_analyse.py`, `tools/tablebase.py`, the `engine`/`tablebase` blocks on positions | name a concept |
+| 3. Position understanding | Observable board features — structure, files, squares, material, activity | detectors, named in `recognition.detector`; **not yet built** | interpret |
+| 4. Concept matching | Which concepts the detected features actually license | **not yet built** | match on engine agreement |
+| 5. Explanation generation | Wording, level, depth, hedging | `explanations` on each concept | claim anything not true in this position |
+
+Layer 3 and 4 do not exist yet, deliberately. They are the part that must be built
+*on* researched criteria, and the criteria are what the research phase produces.
+Building them first would mean inventing recognition rules and then looking for
+sources to justify them, which is the failure mode this whole design exists to
+avoid.
+
+## Knowledge types
+
+Every concept declares what KIND of knowledge it is. The brief's Phase 5 letters
+map onto the stored values as follows; the stored values are words rather than
+letters because a JSON diff should be readable without a key.
+
+| Brief | Stored `knowledge_type` |
+|---|---|
+| A official chess rule | `official-rule` |
+| B proven theoretical fact | `proven-result` |
+| C tablebase fact | `tablebase-fact` |
+| D named theoretical position | `named-theoretical-position` |
+| E tactical motif | `tactical-motif` |
+| — (Phase 4 list) | `mating-pattern` |
+| F strategic principle | `strategic-principle` |
+| G positional concept | `positional-concept` |
+| H rule of thumb | `rule-of-thumb` |
+| I historical teaching principle | `historical-teaching-principle` |
+| J practical guideline | `practical-guideline` |
+| K terminology | `terminology` |
+| — | `other` |
+
+`rule-of-thumb`, `historical-teaching-principle` and `practical-guideline` carry a
+**mandatory** `explanations.hedge`. `tools/validate_kb.py` fails the build without
+it, so a guideline cannot be phrased as a law by accident.
+
+## Concept lifecycle
+
+```
+discovered -> researched -> sourced -> structured -> tested -> validated -> ready
+```
+
+Only `ready` may be treated as production-ready. `validated` and `ready` both
+require engine or tablebase evidence unless the coverage row marks the concept
+`engine_testable: false` with a reason — `tools/validate_kb.py` enforces this.
+
+## Evidence hierarchy
+
+When two kinds of evidence disagree, the order is fixed:
+
+1. **Tablebase** — for positions of seven pieces or fewer this is proof, not
+   opinion, and it ends the question. Recorded as `knowledge_type: tablebase-fact`.
+2. **Engine at adequate depth** — strong evidence about a specific position.
+3. **A titled author's assertion** — evidence about what the idea IS, and only
+   weak evidence about whether a given move works.
+
+The pilot concept shows all three interacting: Shereshevsky asserts a position
+"would be drawn"; the engine says +0.75; and the constructed pair beneath it is
+settled outright by tablebase. Each is recorded at its own strength.
+
+## Engine test levels
+
+| Level | Use |
+|---|---|
+| 1 | smoke test — position is legal, move is legal, nothing is obviously wrong |
+| 2 | normal validation — depth ~26-28, the default |
+| 3 | deep validation — depth 30+, or MultiPV comparison of close alternatives |
+| 4 | critical — disputed claims, historical adjudication, foundational concepts |
+
+Levels are stored per position so results are reproducible, alongside threads,
+hash and MultiPV.
+
 ## Storage model
 
 Plain files in the repository. No database, no build step, no package manager —
@@ -113,27 +195,6 @@ Two rules govern the output:
    right register and should survive.
 2. **Rank, do not enumerate.** Several concepts often apply. Report the ones
    that explain the move, in order, not everything that technically matched.
-
-## Epistemic typing
-
-Every concept carries an `epistemic_type`, because the system must not present a
-heuristic as a law:
-
-| Code | Meaning |
-|---|---|
-| A | Official rule of chess |
-| B | Proven/theoretical result (tablebase or proof) |
-| C | Named theoretical position |
-| D | Tactical motif |
-| E | Strategic principle |
-| F | Rule of thumb |
-| G | Historical teaching principle |
-| H | Practical guideline |
-| I | Terminology / pattern name |
-| J | Other |
-
-A `D` may be stated flatly. An `F` must be hedged and must carry its exceptions.
-The distinction is enforced in the explanation templates, not left to prose.
 
 ## Non-goals
 
