@@ -6,7 +6,7 @@
     "note": "Filled in by tools/sf_analyse.py --probe"
   },
   "counters": {
-    "concepts_total": 72,
+    "concepts_total": 75,
     "concepts_stub": 0,
     "concepts_researched": 29,
     "concepts_validated": 4,
@@ -18,12 +18,12 @@
     "ambiguous_matches": 4,
     "by_stage": {
       "ready": 2,
-      "researched": 64,
+      "researched": 67,
       "validated": 6
     },
     "tablebase_positions": 14,
     "concepts_fully_covered": 11,
-    "areas_touched": 34,
+    "areas_touched": 37,
     "areas_total": 85
   },
   "areas": {
@@ -207,23 +207,29 @@
     "prophylaxis": {
       "domain": "defense",
       "status": "not-started",
-      "concepts": [],
+      "concepts": [
+        "prophylaxis"
+      ],
       "open_questions": [],
-      "last_touched": null
+      "last_touched": "2026-09-01"
     },
     "restriction": {
       "domain": "defense",
       "status": "not-started",
-      "concepts": [],
+      "concepts": [
+        "blockade"
+      ],
       "open_questions": [],
-      "last_touched": null
+      "last_touched": "2026-09-01"
     },
     "overprotection": {
       "domain": "defense",
       "status": "not-started",
-      "concepts": [],
+      "concepts": [
+        "overprotection"
+      ],
       "open_questions": [],
-      "last_touched": null
+      "last_touched": "2026-09-01"
     },
     "king-safety": {
       "domain": "king-safety",
@@ -1065,6 +1071,32 @@
         "Two short records (checkmate, fivefold-repetition) — accepted, they are simple rules quoted from the Laws and padding them would add words, not knowledge."
       ],
       "note": "First periodic audit. The high findings were all real and all invisible to validate_kb.py and run_tests.py, which is the point of having a third tool that looks for what is wrong but legal."
+    }
+  ],
+  "measurements": [
+    {
+      "date": "2026-09-01",
+      "tool": "tools/explanation_gap.py",
+      "what": "How many of the 788 shipped puzzle `why` cards name a motif in chess vocabulary",
+      "result": {
+        "total": 788,
+        "name_a_motif": 517,
+        "pct": 65,
+        "fallback_to_numbers": 271,
+        "fallback_pct": 34,
+        "by_theme_high": {
+          "pin": 98,
+          "kingAttack": 100,
+          "perpetual": 100,
+          "zwischenzug": 100
+        },
+        "by_theme_low": {
+          "positionalTactic": 4,
+          "pawnBreakthrough": 38,
+          "defensiveResource": 60
+        }
+      },
+      "conclusion": "Quantifies the Education System's surface. The tactical single-move case is covered at 88-100% by findMotifs() and puzzle_words.js and cannot be improved on by this project. The quiet/structural case is at 4-38%, and overall a third of all cards contain no chess vocabulary at all. Research priority is therefore positional, not tactical."
     }
   ]
 }

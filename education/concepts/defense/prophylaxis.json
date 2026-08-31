@@ -1,0 +1,194 @@
+{
+  "schema_version": 2,
+  "alternate_names": [
+    "prophylactic thinking",
+    "anticipation"
+  ],
+  "historical_names": [],
+  "tags": [
+    "nimzowitsch",
+    "positional",
+    "primary-sourced",
+    "defence"
+  ],
+  "subcategory": "positional method",
+  "difficulty": "advanced",
+  "knowledge_type_note": "A strategic principle and a method of THINKING rather than a board feature. It prescribes a question to ask, not a pattern to detect, which is why its detectability is human-only.",
+  "name_status": "established-name",
+  "history": {
+    "attributions": [
+      {
+        "person": "Aron Nimzowitsch",
+        "relation": "originated-by",
+        "source": "nimzowitsch-my-system",
+        "year": 1925,
+        "note": "Verified against the primary text: he presents it as his own conception of positional play, explicitly ranking it above the accumulation of advantages."
+      },
+      {
+        "person": "Tigran Petrosian",
+        "relation": "popularized-by",
+        "source": "britannica-chess-theory-3",
+        "year": null,
+        "note": "Conventionally regarded as the great practitioner of prophylactic play. ATTRIBUTION NOT VERIFIED against a primary source."
+      }
+    ],
+    "first_documented_source": "nimzowitsch-my-system",
+    "year": 1925,
+    "confidence": "high",
+    "notes": "Unusually well founded: Nimzowitsch's own words were read in the full text of My System, and he claims the conception explicitly rather than being credited with it by others.",
+    "competing_claims": [],
+    "development": [
+      {
+        "era": "1925, Nimzowitsch",
+        "change": "Introduced as the central idea of positional play, above accumulation.",
+        "source": "nimzowitsch-my-system"
+      },
+      {
+        "era": "mid-20th c.",
+        "change": "Becomes standard technique, associated above all with Petrosian.",
+        "source": "britannica-chess-theory-3"
+      },
+      {
+        "era": "engine era",
+        "change": "Vindicated in an unexpected way: engines routinely play quiet preventive moves that improve nothing directly, which is exactly what prophylaxis describes.",
+        "source": null
+      }
+    ]
+  },
+  "engine_era_status": "reliable",
+  "engine_era_note": "Strongly vindicated. Engines constantly prefer quiet moves that deny an opponent's resource over moves that improve their own position, and human commentators reach for the word 'prophylactic' to explain them. If anything the concept is more useful now than when it was coined, because engines demonstrate how often it is correct.",
+  "recognition": {
+    "preconditions": [
+      "A move that prevents an opponent's idea rather than advancing one's own"
+    ],
+    "indicators_for": [
+      "The opponent has a specific concrete resource, and the move removes it",
+      "The move improves nothing of the mover's own position",
+      "The opponent's plan was the only source of counterplay",
+      "A pawn move that denies a square before an enemy piece can reach it"
+    ],
+    "indicators_against": [
+      "The threat being prevented is not real",
+      "The prevention costs more than the threat was worth",
+      "The move is simply slow, and the opponent had nothing"
+    ],
+    "prerequisites": [],
+    "detector": null,
+    "detectability": "human-only",
+    "typical_confidence": "low",
+    "false_positive_traps": [
+      "Any quiet move can be called prophylactic after the fact. The claim requires naming the specific idea prevented — if you cannot name it, the move was just quiet.",
+      "Preventing a threat that does not exist is not prophylaxis, it is a wasted move.",
+      "This is not detectable from a static position. It is a property of what the move DENIES, which requires knowing what the opponent intended."
+    ]
+  },
+  "application": {
+    "typical_plans": [
+      "Before choosing a move, ask what the opponent would play if it were their turn",
+      "Deny the square, file or break the opponent's plan depends on",
+      "Internal prophylaxis: forestall the weaknesses your own plan would create"
+    ],
+    "typical_moves": [
+      "A quiet pawn move denying a square to an enemy knight",
+      "Kh1 or ...Kh8 stepping off a diagonal before it matters",
+      "An exchange that removes the opponent's best piece before it becomes active"
+    ],
+    "typical_pawn_structures": [],
+    "typical_piece_arrangements": [],
+    "tactical_consequences": [
+      "Removes the tactical resource the opponent's position was resting on"
+    ],
+    "strategic_consequences": [
+      "Leaves the opponent without a plan, which is often decisive by itself"
+    ]
+  },
+  "exceptions": [
+    "Prevention has a cost. If the opponent's idea was not dangerous, the tempo is simply lost.",
+    "In sharp positions, speed can outweigh prevention — a prophylactic move in a race loses the race.",
+    "Nimzowitsch's ranking of prophylaxis above accumulation is a claim about emphasis and was polemical; the two are complementary."
+  ],
+  "limitations": [
+    "Not detectable from a position, and this is intrinsic: prophylaxis is defined by what a move prevents, so recognising it requires modelling the opponent's intention.",
+    "The easiest concept in the base to assert falsely, because any quiet move can be described this way afterwards."
+  ],
+  "misconceptions": [
+    "That prophylaxis means passive or defensive play. Nimzowitsch explicitly says it is neither attack nor defence.",
+    "That it only concerns the opponent. He distinguishes external from internal prophylaxis, the latter aimed at one's own position.",
+    "That it is a modern refinement. It is his stated central conception of positional play, from 1925."
+  ],
+  "relationships": {
+    "broader": [],
+    "narrower": [
+      "overprotection"
+    ],
+    "related": [
+      "restraint",
+      "blockade",
+      "overprotection",
+      "hypermodern-school",
+      "initiative"
+    ],
+    "contrasting": [],
+    "co_occurring": [
+      "restraint"
+    ],
+    "conflicts": [
+      {
+        "concept": "initiative",
+        "resolution": "Genuine tension. The initiative must be used before it expires, and a prophylactic move spends a tempo on prevention rather than pressure. Which applies depends on whether the opponent actually has a resource worth denying: with the initiative and a concrete continuation, press; without one, prevention is usually the better use of the move."
+      }
+    ]
+  },
+  "examples": [],
+  "counterexamples": [],
+  "ambiguous_examples": [],
+  "explanations": {
+    "by_level": {
+      "beginner": "Instead of asking what you want to do, ask what they want to do — and stop it.",
+      "intermediate": "A prophylactic move. It does not improve your position; it removes the resource their position depended on.",
+      "advanced": "Prophylaxis in Nimzowitsch's sense, and note he distinguishes external — aimed at the opponent's moves — from internal, aimed at weaknesses your own plan would create.",
+      "master": "He ranked it above the accumulation of advantages, which was a deliberate shot at the classical school. Engines have largely vindicated the emphasis."
+    },
+    "by_depth": {
+      "short": "This stops their idea before it happens.",
+      "normal": "Prophylaxis: preventing the opponent's plan rather than pursuing your own. The move often improves nothing of yours, which is why it is hard to find — the value is entirely in what it denies.",
+      "deep": "Nimzowitsch's central conception of positional play, and he put it above Steinitz's accumulation of small advantages: 'neither attack nor defence are what is essential... what is needed is a far more energetic and targeted prophylaxis.' He divides it into external prophylaxis, directed at the opponent's moves, and internal, directed at the weaknesses one's own plans would create — a distinction most modern summaries drop. The method is a question rather than a pattern: before moving, ask what the opponent would play if it were their turn. Engines have vindicated the emphasis, since they constantly prefer quiet preventive moves over moves that improve anything."
+    },
+    "hedge": "",
+    "lesson": "Before you choose a move, spend one moment on their position: if it were their turn, what would they play? Quite often stopping that is worth more than anything you had planned."
+  },
+  "terminology": {
+    "beginner_words": [
+      "stop their idea",
+      "what do they want to do?"
+    ],
+    "advanced_words": [
+      "prophylaxis",
+      "prophylactic",
+      "restraint",
+      "overprotection"
+    ],
+    "avoid": [
+      "prophylaxis means playing passively",
+      "any quiet move is prophylactic"
+    ]
+  },
+  "status": {
+    "stage": "researched",
+    "last_updated": "2026-09-01",
+    "open_questions": [],
+    "audit_notes": []
+  },
+  "id": "prophylaxis",
+  "canonical_name": "Prophylaxis",
+  "category": "prophylaxis",
+  "knowledge_type": "strategic-principle",
+  "definition_short": "Preventing the opponent's ideas before they materialise — asking what they want to do, and stopping it, rather than only pursuing your own plan.",
+  "definition_long": "Nimzowitsch's own statement of it, from My System, is stronger than the way it is usually reported: 'The well-known accumulation of tiny advantages is only the second (or perhaps third) most important thing; what is far more significant is prophylaxis (anticipation of problems)... neither attack nor defence are what is essential, in my opinion, in positional play; what is needed is a far more energetic and targeted prophylaxis. What is important above all is to head off certain positionally undesirable possibilities before they materialise.'\n\nThat is a direct challenge to the classical school. Steinitz's doctrine was the accumulation of small advantages; Nimzowitsch demotes it to second or third place and puts prevention first.\n\nHE SPLITS IT IN TWO, and modern summaries usually lose the distinction. EXTERNAL prophylaxis is directed at the opponent's moves — seeing what they intend and denying it. INTERNAL prophylaxis is directed at one's OWN position — anticipating the weaknesses one's own plans would create and forestalling them. The second is the less obvious and the more characteristic.\n\nIn practice the method is a question rather than a pattern: before choosing a move, ask what the opponent would play if it were their turn, and whether preventing it is worth more than your own plan. A prophylactic move often improves nothing of yours — which is exactly why it is hard to find and easy to under-value.",
+  "sources": [
+    "nimzowitsch-my-system",
+    "britannica-chess-theory-3",
+    "wikipedia-hypermodernism"
+  ],
+  "source_confidence": "high"
+}

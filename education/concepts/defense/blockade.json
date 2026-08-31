@@ -1,0 +1,180 @@
+{
+  "schema_version": 2,
+  "alternate_names": [],
+  "historical_names": [],
+  "tags": [
+    "nimzowitsch",
+    "positional",
+    "primary-sourced",
+    "passed-pawns"
+  ],
+  "subcategory": "positional method",
+  "difficulty": "advanced",
+  "knowledge_type_note": "A strategic method with a concrete, checkable object: a piece placed in front of a pawn to stop it.",
+  "name_status": "established-name",
+  "history": {
+    "attributions": [
+      {
+        "person": "Aron Nimzowitsch",
+        "relation": "systematized-by",
+        "source": "nimzowitsch-my-system",
+        "year": 1925,
+        "note": "Verified in the primary text. He is explicit that masters already blockaded by custom and that his contribution was the theoretical rationale: 'It is customary, at least in master practice, to block the enemy pawn. But to my knowledge no attempt has so far been made to provide a theoretical rationale.'"
+      }
+    ],
+    "first_documented_source": "nimzowitsch-my-system",
+    "year": 1925,
+    "confidence": "high",
+    "notes": "Well founded, and notable for what he does NOT claim: he says explicitly that the practice predates him and only the justification is his. That is a more careful self-attribution than he is usually given credit for.",
+    "competing_claims": [],
+    "development": [
+      {
+        "era": "pre-1925",
+        "change": "Blockading is customary in master practice without a stated rationale.",
+        "source": "nimzowitsch-my-system"
+      },
+      {
+        "era": "1925",
+        "change": "The rationale is supplied, along with the requirements on the blockading piece.",
+        "source": "nimzowitsch-my-system"
+      }
+    ]
+  },
+  "engine_era_status": "reliable",
+  "engine_era_note": "Uncontroversial and confirmed. The specific claim that a knight is the best blockader and a queen the worst is borne out by any engine evaluation of the same position with the blockading piece swapped.",
+  "recognition": {
+    "preconditions": [
+      "An enemy passed or advancing pawn",
+      "A friendly piece on the square directly in front of it"
+    ],
+    "indicators_for": [
+      "The blockader is a knight",
+      "The blockading square cannot be attacked by an enemy pawn",
+      "The blockader still makes threats from the square",
+      "The blockade is supported from behind"
+    ],
+    "indicators_against": [
+      "The blockader is a queen or rook, which is expensive and evictable",
+      "The blockading piece is needed elsewhere",
+      "The pawn can be supported and the blockade broken by an advance of its neighbours"
+    ],
+    "prerequisites": [
+      "passed-pawn",
+      "hole"
+    ],
+    "detector": "pieceInFrontOfPawn (not yet written)",
+    "detectability": "mechanical",
+    "typical_confidence": "high",
+    "false_positive_traps": [
+      "A piece standing in front of a pawn is not necessarily blockading it usefully. The test is whether the piece keeps its powers there — a queen on a blockading square is doing a knight's chore.",
+      "A blockade becomes a weakness when it ties down a piece needed elsewhere, which is the standard cost and is easy to omit."
+    ]
+  },
+  "application": {
+    "typical_plans": [
+      "Blockade with a knight, support it, and then attack the pawn",
+      "Restrain, blockade, destroy — in that order",
+      "Against a blockade: advance the neighbouring pawns to challenge the square"
+    ],
+    "typical_moves": [
+      "Nd4 or Nd5 in front of an isolated queen's pawn"
+    ],
+    "typical_pawn_structures": [
+      "Isolated queen's pawn — the square in front is the standard blockade square",
+      "Passed pawns of any kind"
+    ],
+    "typical_piece_arrangements": [
+      "Knight in front of the pawn, supported from behind"
+    ],
+    "tactical_consequences": [
+      "A blockaded pawn cannot generate promotion threats, so the tactics that depend on it disappear"
+    ],
+    "strategic_consequences": [
+      "Converts a passed pawn from an asset into a fixed target",
+      "The blockading square is by construction a square no pawn can attack, so it is also an outpost"
+    ]
+  },
+  "exceptions": [
+    "A blockade that ties down a piece needed elsewhere is a liability.",
+    "Blockading with a heavy piece is expensive and usually temporary.",
+    "The pawn must not be allowed too far forward before the blockade is established — Nimzowitsch's own caveat."
+  ],
+  "limitations": [
+    "Detecting a piece in front of a pawn is mechanical; judging whether the blockade is worth its cost is not."
+  ],
+  "misconceptions": [
+    "That any piece will do. The choice of blockader is most of the concept.",
+    "That blockading is free. It commits a piece, and Nimzowitsch says so."
+  ],
+  "relationships": {
+    "broader": [
+      "restraint"
+    ],
+    "narrower": [],
+    "related": [
+      "passed-pawn",
+      "outpost",
+      "hole",
+      "overprotection",
+      "isolated-queen-pawn"
+    ],
+    "contrasting": [],
+    "co_occurring": [
+      "outpost",
+      "passed-pawn"
+    ],
+    "conflicts": []
+  },
+  "examples": [],
+  "counterexamples": [],
+  "ambiguous_examples": [],
+  "explanations": {
+    "by_level": {
+      "beginner": "Put a piece right in front of their pawn so it cannot move. A knight is best at this — it still does its job from there.",
+      "intermediate": "Blockade the pawn. Choose the blockader carefully: a knight loses nothing standing there, a queen loses almost everything.",
+      "advanced": "Nimzowitsch's three requirements: effectiveness as a blocker, threats from the square, and elasticity. The blockading square is also a hole by construction, so it doubles as an outpost.",
+      "master": "Restrain, blockade, destroy, in that order — and weigh the tying-down cost, which he states explicitly."
+    },
+    "by_depth": {
+      "short": "A piece in front of the pawn stops it dead.",
+      "normal": "Blockade: park a piece directly in front of an enemy pawn so it cannot advance. A knight is the ideal blockader because it keeps all its power from the square; a queen is the worst, because any minor piece evicts her.",
+      "deep": "Nimzowitsch supplied the rationale for something masters already did by custom, and said so — his claim was the theory, not the practice. He sets three requirements on a blockading piece: effectiveness as a blocker, the threats it makes from the square, and elasticity to leave when needed. The third decides which piece should do it. He also notes that the blockading square tends to become a good square, because the pawn it blocks can never attack it — which makes blockade and outpost the same geometry from two sides. All of it sits inside the formula his primary text states verbatim: first restrain, then blockade, and finally destroy."
+    },
+    "hedge": "",
+    "lesson": "Stop a passed pawn with a knight if you can. And remember the blockade costs you a piece's freedom — make sure the pawn was worth it."
+  },
+  "terminology": {
+    "beginner_words": [
+      "stand in front of the pawn",
+      "it cannot move"
+    ],
+    "advanced_words": [
+      "blockade",
+      "blockader",
+      "elasticity",
+      "restraint",
+      "outpost"
+    ],
+    "avoid": [
+      "blockade with anything"
+    ]
+  },
+  "status": {
+    "stage": "researched",
+    "last_updated": "2026-09-01",
+    "open_questions": [],
+    "audit_notes": []
+  },
+  "id": "blockade",
+  "canonical_name": "Blockade",
+  "category": "restriction",
+  "knowledge_type": "strategic-principle",
+  "definition_short": "Stopping an enemy pawn by placing a piece directly in front of it — ideally a knight, which loses nothing by standing there.",
+  "definition_long": "A piece parked immediately in front of an enemy pawn stops it dead. Nimzowitsch devoted a chapter to justifying what masters had done by instinct, and his framing survives intact.\n\nHe sets out what a blockading piece must offer: basic effectiveness as a blocker, the threats it can make FROM the blockading square, and elasticity — the ability to leave when needed. That third requirement is what decides which piece should do the job. A knight blockades ideally because it loses none of its power standing in front of a pawn and still radiates over squares beyond it. A queen is the worst blockader, because any minor piece attacking her forces the post to be abandoned.\n\nHe also notes the blockading square tends to BECOME a good square: because the pawn in front of it can never attack it, the blockade square is by construction a hole. That is why the blockade and the outpost are the same geometry seen from two sides.\n\nThe blockade sits inside his larger formula, which is in the primary text verbatim: 'First restrain, then blockade and finally destroy!' — restrain the pawn from advancing, blockade it so it cannot, then win it.",
+  "sources": [
+    "nimzowitsch-my-system",
+    "wikipedia-passed-pawn",
+    "scribd-hypermodern-revolt"
+  ],
+  "source_confidence": "high"
+}
