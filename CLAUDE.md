@@ -390,6 +390,21 @@ for every ply (including why the runner-up is not the answer, and how forced
 each defence was), and where it all arrives. `pzExplain()` only spells it out.
 Nothing is searched at the board, which is the same bargain the follow-up made.
 
+**The swing is drawn as well as said.** The card's own sentence ("the
+position was losing before it and is level after it") cannot be compared to
+the last puzzle's, so `pzSwingHTML()` prints the same two readings as a chance
+of winning: `eval.before` — what the position was worth *before the opponent
+went wrong* — and `eval.best`, what it is worth once the move has been found,
+both already in the file, both from the solver's side, and both through
+`winPct()`, the same curve the review judges every move with. The pair is the
+point: the evaluation of the position the player is looking at *is* the
+evaluation after the best move, so a strip drawn either side of the solution
+alone would show one number twice. Mates are shown as certainty and nothing
+else is allowed to reach 0% or 100%, because a position that is merely winning
+is not a game already over. It appears only once the puzzle is finished, for
+the same reason the themes do — "you are on 8% and heading for 58%" says the
+move is a rescue, which is most of the answer.
+
 The discipline in that file is worth keeping: every sentence is read off a
 position or off a number a search already produced, and where nothing can be
 justified the card says less instead. It is very easy to write a confident

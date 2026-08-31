@@ -119,7 +119,7 @@ var DECLS = ['PZ_STUDY_DEPTH','PZ_STUDY_PAUSE','PZ_STUDY_SLACK',
              'VAL','FILES','rowOf','colOf','SQNAME','uciOf','sqName','onBoard','other',
              'idCounter','mk','DIR_N','DIR_B','DIR_R','DIR_K','PIECE_WORD',
              'G','PZ','PZ_TRACK_NAME','PZ_TRACKS','PZ_STORE','PZ_VERSION','PZ_REPLY_MS',
-             'PZ_START_RATING','PZ_K','PZ_RATING_STORE','pzOwner','pzKey',
+             'PZ_START_RATING','PZ_K','PZ_RATING_STORE','PZ_MATE_CP','pzOwner','pzKey',
              'RUSH','RUSH_MS','RUSH_LIVES','RUSH_GAP_MS','W'];
 var FNS = ['startBoard','newState','cloneState','posKey','fenOf','stateFromFEN',
            'slide','step','addPawn','pseudoMoves','isAttacked','kingSq','inCheck',
@@ -130,6 +130,7 @@ var FNS = ['startBoard','newState','cloneState','posKey','fenOf','stateFromFEN',
            'pzNextRung','pzUnlocked','pzElo','pzGuestRating','pzRating','pzReport',
            'pzSendResult','pzSync','rushQueue','rushStrike','rushEnd','rushAdvance','rushRender',
            'pzOpen','pzClose','pzPlay','pzFinish','pzEsc','pzExplainPlain','pzExplain','pzSolutionSan',
+           'pzWinPct','pzSwing','pzSwingHTML',
            'pzFollowOf','pzHasFollowUp','pzAfterSolution','pzFollowSay','pzShowFollowUp',
            'pzStudyOn','pzBranchPly','pzStudyReset','pzStudyStart','pzStudyStop',
            'pzReplaySolved','pzStudySay','pzStudyPlay','pzStudyWorth','walkFrom','pzSanOf',
@@ -363,6 +364,103 @@ say('\nWhat the finished card says\n');
   check('a file with no explanation falls back to one sentence',
         old.indexOf('pz-why-plain') >= 0, true);
   check('and the fallback still says something', old.length > 30, true);
+})();
+
+/* ---------------------------------------------------------------------
+   The swing: what the mistake cost and the move won, as a chance of winning.
+   --------------------------------------------------------------------- */
+say('\nThe winning-chance strip\n');
+
+(function swingStrip(){
+  check('a level position is an even chance', pzWinPct(0), 50);
+  check('a forced mate is certainty',         pzWinPct(9999), 100);
+  check('and being mated is the other end',   pzWinPct(-9999), 0);
+  /* Winning is not the same as won: the curve reads +20 pawns as 100% and a
+     card that prints it has told the player the game was already over. */
+  check('a merely winning position stops short of certainty', pzWinPct(2000) < 100, true);
+  check('and a merely lost one stops short of zero',          pzWinPct(-2000) > 0, true);
+  check('the two ends mirror each other', pzWinPct(300) + pzWinPct(-300), 100);
+  check('a file with no score reads as nothing', pzWinPct(undefined), null);
+
+  // the two readings are the ones the generator measured, in the order the
+  // card puts them: before the opponent's move, and after the solver's
+  var rec = {
+    fen: '4k3/8/8/8/8/8/8/R3K2R w KQ - 0 20',
+    prev: { fen: '4k2r/8/8/8/8/8/8/R3K2R b KQk - 0 19', move: 'h8h7' },
+    moves: ['a1a8'],
+    eval: { before: 0, best: 500, alt: -100, end: 500 }
+  };
+  var sw = pzSwing(rec);
+  check('the swing is read off the file', sw.before, pzWinPct(0));
+  check('and so is what it became',       sw.after,  pzWinPct(500));
+  check('the difference is the two of them', sw.delta, sw.after - sw.before);
+
+  var html = pzSwingHTML(rec);
+  check('the strip says whose chance it is', html.indexOf('for White') >= 0, true);
+  check('it names the move that went wrong', html.indexOf('Before Rh7') >= 0, true);
+  check('and the move that answered it',     html.indexOf('After Ra8+') >= 0, true);
+  check('it prints the chance before',       html.indexOf('>' + sw.before + '%<') >= 0, true);
+  check('and the chance after',              html.indexOf('>' + sw.after + '%<') >= 0, true);
+  check('and the gain between them',         html.indexOf('+' + sw.delta + '</b>') >= 0, true);
+
+  // a track from before the scores were written has nothing to draw
+  var bare = { fen: rec.fen, prev: rec.prev, moves: rec.moves };
+  check('a file with no scores draws no strip', pzSwingHTML(bare), '');
+
+  /* And every puzzle that ships has one, with a real difference in it — a
+     turning point whose two readings round to the same percentage is a
+     puzzle whose premise the card cannot show. */
+  var missing = 0, flat = 0, least = 100;
+  for (var t = 0; t < TRACKS.length; t++){
+    var list = sets[TRACKS[t]];
+    for (var i = 0; i < list.length; i++){
+      var s2 = pzSwing(list[i]);
+      if (!s2){ missing++; continue; }
+      if (s2.delta < 5) flat++;
+      if (s2.delta < least) least = s2.delta;
+    }
+  }
+  check('every shipped puzzle carries the two readings', missing, 0);
+  check('and every one of them is a visible swing',      flat, 0);
+  say('  ..    the smallest swing in the set is +' + least + ' points');
+})();
+
+/* It is a hint until it is over, exactly as the themes are: a player told at
+   the start that they are on 8% and heading for 58% has been told the move is
+   a rescue. */
+(function swingWaits(){
+  var track = null, pick = null;
+  for (var t = 0; t < TRACKS.length && !pick; t++){
+    var list = sets[TRACKS[t]];
+    for (var i = 0; i < list.length && !pick; i++)
+      if (list[i].moves.length === 1 && list[i].eval) pick = { n: i + 1, p: list[i] };
+    if (pick) track = TRACKS[t];
+  }
+  if (!pick){ say('  ..    no one-move puzzle with scores, skipping'); return; }
+
+  PZ.mode = 'ladder';
+  PZ.track = track;
+  PZ.list = sets[track];
+  pzOpen(pick.n);
+  pzRender();
+  check('the strip is hidden while the puzzle is open', elements.pzEval.style.display, 'none');
+  check('and says nothing at all',                      elements.pzEval.innerHTML, '');
+
+  pzPlay(moveFor(pick.p.moves[0]));
+  pzRender();
+  check('solving it shows the strip',      elements.pzEval.style.display, '');
+  check('with a percentage on it',         elements.pzEval.innerHTML.indexOf('%') >= 0, true);
+  check('drawn as two bars, not one',
+        elements.pzEval.innerHTML.indexOf('pz-eval-row after') >= 0, true);
+
+  // and a run has no room for it
+  RUSH.on = true;
+  PZ.mode = 'rush';
+  PZ.puzzle = pick.p;
+  rushRender();
+  check('a rush does not stop to draw it', elements.pzEval.style.display, 'none');
+  RUSH.on = false;
+  PZ.mode = 'ladder';
 })();
 
 say('\nShow Follow Up, one track at a time\n');
