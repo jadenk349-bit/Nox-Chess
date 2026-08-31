@@ -1,0 +1,192 @@
+{
+  "schema_version": 2,
+  "alternate_names": [
+    "the modern school (contemporary name)",
+    "positional school"
+  ],
+  "historical_names": [
+    "the Modern school"
+  ],
+  "tags": [
+    "history",
+    "steinitz",
+    "tarrasch",
+    "positional"
+  ],
+  "subcategory": "school of thought",
+  "difficulty": "advanced",
+  "knowledge_type_note": "A historical school. Its claims were teaching principles of their era; several were later shown to be overstated, and the record hedges accordingly.",
+  "name_status": "established-name",
+  "knowledge_type": "historical-teaching-principle",
+  "history": {
+    "attributions": [
+      {
+        "person": "Wilhelm Steinitz",
+        "relation": "originated-by",
+        "source": "britannica-chess-theory",
+        "year": 1889,
+        "note": "The first systematic positional theory, set out in The Modern Chess Instructor. Well attested; the primary text has been consulted for the 'hole' passage."
+      },
+      {
+        "person": "Siegbert Tarrasch",
+        "relation": "popularized-by",
+        "source": "wikipedia-hypermodernism",
+        "year": null,
+        "note": "Codified Steinitz's ideas into rules; described as 'the father of Classical dogma'. Second-hand."
+      },
+      {
+        "person": "Emanuel Lasker",
+        "relation": "systematized-by",
+        "source": "winter-chess-notes-steinitz",
+        "year": 1901,
+        "note": "Summarised Steinitz's theory in three principles in a newspaper article; quoted by Winter."
+      }
+    ],
+    "first_documented_source": "steinitz-modern-chess-instructor",
+    "year": 1889,
+    "confidence": "high",
+    "notes": "Better founded than most historical entries here, because Steinitz's own text was consulted directly for this project's `hole` record and Winter's Chess Notes were used for the Lasker summary. The Tarrasch half is second-hand.",
+    "competing_claims": [],
+    "development": [
+      {
+        "era": "pre-1870, Romantic",
+        "change": "Games decided by sacrificial attack; positional features not systematically evaluated.",
+        "source": "wikipedia-hypermodernism"
+      },
+      {
+        "era": "1886-1889, Steinitz",
+        "change": "Positional theory established: weak points, accumulation, attack only with an advantage.",
+        "source": "steinitz-modern-chess-instructor"
+      },
+      {
+        "era": "1890s, Tarrasch",
+        "change": "Codified into rules — the form the hypermoderns attacked.",
+        "source": "wikipedia-hypermodernism"
+      },
+      {
+        "era": "1920s onward",
+        "change": "The dogmatic form is corrected; the evaluation framework survives and remains the basis of positional chess.",
+        "source": "wikipedia-hypermodernism"
+      }
+    ]
+  },
+  "engine_era_status": "useful-with-common-exceptions",
+  "engine_era_note": "Steinitz's evaluative framework is essentially what engine evaluation functions encode — pawn structure, square control, king safety, piece quality. Tarrasch's dogmatic form does not survive: engines accept doubled pawns, cede the centre, and trade good bishops for knights whenever concrete play justifies it.",
+  "recognition": {
+    "preconditions": [
+      "A plan built on accumulating durable positional features rather than on immediate tactics"
+    ],
+    "indicators_for": [
+      "Play directed at fixed weaknesses",
+      "Central pawn occupation with pieces developed behind it",
+      "Refusal to attack before an advantage exists"
+    ],
+    "indicators_against": [
+      "The plan depends on a concrete tactical justification rather than a static feature"
+    ],
+    "prerequisites": [],
+    "detector": null,
+    "false_positive_traps": [
+      "Do not conflate Steinitz with Tarrasch. Steinitz's evaluation framework survived; Tarrasch's dogmatic rules did not, and the hypermodern attack was aimed at the second.",
+      "The school was called 'Modern' in its own time, which makes contemporary quotations easy to misread."
+    ]
+  },
+  "application": {
+    "typical_plans": [
+      "Identify the opponent's durable weaknesses and play against them",
+      "Accumulate small advantages rather than seeking a knockout",
+      "Occupy the centre and develop behind it"
+    ],
+    "typical_moves": [
+      "1.e4 and 1.d4 with quick development"
+    ],
+    "typical_pawn_structures": [
+      "Broad supported pawn centre"
+    ],
+    "typical_piece_arrangements": [],
+    "tactical_consequences": [],
+    "strategic_consequences": [
+      "Provides the evaluative vocabulary nearly all later theory is written in"
+    ]
+  },
+  "exceptions": [
+    "Tarrasch's dogmatic form is widely and correctly broken; the underlying evaluation framework is not.",
+    "'Do not attack without an advantage' remains sound, but 'advantage' turned out to include dynamic factors the classical school undervalued."
+  ],
+  "limitations": [
+    "A historical school, so it is context for other concepts rather than a technique to apply."
+  ],
+  "misconceptions": [
+    "That the classical school was refuted. Its evaluation framework is the basis of modern positional chess and of engine evaluation.",
+    "That Steinitz and Tarrasch held the same views with the same rigidity.",
+    "That 'classical' was what they called themselves — they were the Modern school."
+  ],
+  "relationships": {
+    "broader": [],
+    "narrower": [],
+    "related": [
+      "hypermodern-school",
+      "soviet-school",
+      "center-control",
+      "hole",
+      "weak-square",
+      "bad-bishop"
+    ],
+    "contrasting": [
+      "hypermodern-school"
+    ],
+    "co_occurring": [],
+    "conflicts": []
+  },
+  "examples": [],
+  "counterexamples": [],
+  "ambiguous_examples": [],
+  "explanations": {
+    "by_level": {
+      "beginner": "The idea that chess is won by building up small lasting advantages rather than by attacking straight away.",
+      "intermediate": "The classical school: evaluate the position's durable features, accumulate them, and attack only once you have an advantage.",
+      "advanced": "Steinitz's framework plus Tarrasch's codification. The first survived, the second was corrected by the hypermoderns.",
+      "master": "The vocabulary nearly all later theory is written in. Note the distinction between Steinitz's evaluative claims and Tarrasch's prescriptive ones when reading period sources."
+    },
+    "by_depth": {
+      "short": "Build small advantages; attack only when you have earned it.",
+      "normal": "The classical school, from Steinitz and codified by Tarrasch: positions have durable features that can be identified and accumulated, and an attack must be justified by an advantage you already hold.",
+      "deep": "Steinitz was the first player to demonstrate systematic positional understanding, replacing the Romantic style with an evaluative one. Two halves: positions have durable features — weak squares, pawn weaknesses, good and bad bishops — that can be accumulated; and one must not attack without a tangible advantage, but should when one exists. Lasker compressed it to three principles: the initial position is balanced, do not attack without an advantage, attack the weak points. Tarrasch turned this into teachable rules, and it was that dogmatic form the hypermoderns attacked rather than Steinitz himself. The evaluation framework survived intact and is the basis of most positional vocabulary — and, recognisably, of engine evaluation functions."
+    },
+    "hedge": "A historical school. Its evaluative framework survives essentially unchanged, but its prescriptive form — particularly Tarrasch's — has well-known exceptions and should not be quoted as law.",
+    "lesson": "Steinitz's question is still the right one to start with: what are the durable features of this position, and which of them can I play against?"
+  },
+  "terminology": {
+    "beginner_words": [
+      "small advantages",
+      "weak points"
+    ],
+    "advanced_words": [
+      "classical school",
+      "accumulation",
+      "static advantage",
+      "positional play"
+    ],
+    "avoid": [
+      "the classical school was refuted"
+    ]
+  },
+  "status": {
+    "stage": "researched",
+    "last_updated": "2026-09-01",
+    "open_questions": [],
+    "audit_notes": []
+  },
+  "id": "classical-school",
+  "canonical_name": "The classical school",
+  "category": "classical-school",
+  "definition_short": "Steinitz's positional doctrine, codified by Tarrasch: accumulate small static advantages, occupy the centre with pawns, and attack only when you have earned the right.",
+  "definition_long": "The school that replaced the Romantic style of Anderssen and Blackburne, whose games were decided by sacrificial attack. Steinitz was the first player to demonstrate systematic positional understanding, and his doctrine has two halves that are still the base of the game.\n\nFirst, EVALUATION: positions have durable features — pawn weaknesses, weak squares, good and bad bishops, holes — which can be identified and accumulated. Second, TIMING: you may not attack without a tangible advantage in position, and if you have one you are more or less obliged to. Lasker summarised the theory in three principles: the initial position is balanced; do not attack without an advantage; attack the weak points.\n\nSteinitz also held the striking view that with best play a draw is the legitimate result — a claim that reads as unremarkable now and was radical then.\n\nTarrasch codified all this into teachable rules, and that codification is what the hypermoderns attacked. The distinction matters: Steinitz's evaluation framework survived essentially intact and is the basis of most of the concepts in this knowledge base. What was overturned was Tarrasch's DOGMATIC form of it — that the centre must be occupied by pawns, that certain structures are simply bad, that the rules admit few exceptions.\n\nConfusingly, this school was called 'the Modern school' at the time. It is now the classical one.",
+  "sources": [
+    "steinitz-modern-chess-instructor",
+    "britannica-chess-theory",
+    "wikipedia-hypermodernism",
+    "winter-chess-notes-steinitz"
+  ],
+  "source_confidence": "high"
+}

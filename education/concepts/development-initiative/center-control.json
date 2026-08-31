@@ -1,0 +1,225 @@
+{
+  "schema_version": 2,
+  "alternate_names": [
+    "centre control",
+    "center control"
+  ],
+  "historical_names": [],
+  "tags": [
+    "centre",
+    "foundational",
+    "classical-vs-hypermodern"
+  ],
+  "subcategory": "strategic foundation",
+  "difficulty": "beginner",
+  "knowledge_type_note": "A strategic principle rather than a rule, and one whose CONTENT was the subject of the most famous disagreement in chess theory. What is agreed is that the centre matters; what was disputed is what to do about it.",
+  "name_status": "established-name",
+  "history": {
+    "attributions": [
+      {
+        "person": "François-André Danican Philidor",
+        "relation": "originated-by",
+        "source": "britannica-chess-theory-3",
+        "year": null,
+        "note": "The centre as a goal dates back to Philidor per Britannica. ATTRIBUTION NOT VERIFIED against a primary text."
+      },
+      {
+        "person": "Wilhelm Steinitz",
+        "relation": "systematized-by",
+        "source": "wikibooks-chess-centre",
+        "year": null,
+        "note": "First master to teach the centre's importance systematically. Second-hand."
+      },
+      {
+        "person": "Siegbert Tarrasch",
+        "relation": "popularized-by",
+        "source": "wikipedia-hypermodernism",
+        "year": null,
+        "note": "Hardened Steinitz's ideas into the dogmatic form the hypermoderns attacked; called 'the father of Classical dogma'."
+      },
+      {
+        "person": "Aron Nimzowitsch and Richard Réti",
+        "relation": "later-associated-with",
+        "source": "wikipedia-hypermodernism",
+        "year": 1920,
+        "note": "Reframed the question as control versus occupation."
+      }
+    ],
+    "first_documented_source": "wikipedia-hypermodernism",
+    "year": null,
+    "confidence": "medium",
+    "notes": "The history is well attested in outline across three sources; no primary texts consulted, and the Philidor attribution in particular is a summary claim.",
+    "competing_claims": [
+      "Classical: the centre should be occupied by pawns.",
+      "Hypermodern: the centre should be controlled by pieces, and occupation invites a target.",
+      "Modern synthesis: both are conditional on support and timing; the schools are complementary."
+    ],
+    "development": [
+      {
+        "era": "classical, Steinitz to Tarrasch",
+        "change": "Central pawn occupation becomes doctrine.",
+        "source": "wikibooks-chess-centre"
+      },
+      {
+        "era": "1920s, hypermodern",
+        "change": "Control distinguished from occupation; the pawn centre reframed as a potential target.",
+        "source": "wikipedia-hypermodernism"
+      },
+      {
+        "era": "Soviet era",
+        "change": "Both subordinated to the initiative; structures earlier called bad are accepted for dynamic play.",
+        "source": "britannica-chess-theory-3"
+      },
+      {
+        "era": "modern",
+        "change": "Treated as complementary; textbooks present hypermodernism as an extension of classical theory.",
+        "source": "wikipedia-hypermodernism"
+      }
+    ]
+  },
+  "engine_era_status": "useful-with-common-exceptions",
+  "engine_era_note": "Engines vindicate neither school and both. They are entirely comfortable ceding the centre for concrete compensation and entirely comfortable building a pawn centre when it can be supported — which is the synthesis stated computationally. What they do not support is either position held as a rule.",
+  "recognition": {
+    "preconditions": [
+      "The four central squares are contested"
+    ],
+    "indicators_for": [
+      "Pawns occupying central squares WITH pieces supporting them",
+      "Pieces attacking central squares from a distance, especially fianchettoed bishops",
+      "The opponent cannot advance in the centre without loosening something",
+      "You can switch wings faster than the opponent"
+    ],
+    "indicators_against": [
+      "A pawn centre that cannot advance and cannot be defended — a target, not an asset",
+      "Central occupation achieved at the cost of development",
+      "Central squares occupied by pieces that can be evicted with a pawn move"
+    ],
+    "prerequisites": [],
+    "detector": "centralSquareControl — not yet written",
+    "detectability": "mechanical",
+    "typical_confidence": "medium",
+    "false_positive_traps": [
+      "Counting pawns on central squares measures occupation, not control. A fianchettoed bishop controls e4 without standing anywhere near it.",
+      "A big pawn centre is not automatically an advantage. Whether it is an asset or a target is a question of timing and support, and that cannot be read off the structure.",
+      "Central pieces are only strong while they cannot be kicked; a piece on a central square a pawn can attack is visiting."
+    ]
+  },
+  "application": {
+    "typical_plans": [
+      "Occupy with pawns and support them before expanding",
+      "Or influence from the flanks, invite the advance, and undermine it with a break",
+      "Control the centre before starting a wing attack",
+      "Meet a wing attack with a central counter-blow"
+    ],
+    "typical_moves": [
+      "e4 and d4 (classical)",
+      "Nf3, g3 and Bg2 (hypermodern)",
+      "...c5 and ...e5 undermining breaks"
+    ],
+    "typical_pawn_structures": [
+      "Broad pawn centre",
+      "Fianchetto structures conceding it",
+      "Closed and fixed centres"
+    ],
+    "typical_piece_arrangements": [
+      "Fianchettoed bishop on the long diagonal",
+      "Knights on f3/c3 supporting central squares"
+    ],
+    "tactical_consequences": [
+      "A central break is the standard refutation of a premature wing attack"
+    ],
+    "strategic_consequences": [
+      "Determines whose wing attack is viable",
+      "A centre that is fixed makes flank play safe; a fluid one makes it dangerous"
+    ]
+  },
+  "exceptions": [
+    "Occupying the centre is not always right — an unsupported pawn centre is a target, which is the hypermodern case.",
+    "Ceding the centre is not always right either — against proper support it just loses space.",
+    "In the endgame the logic inverts: the centre matters for king activity rather than for restriction."
+  ],
+  "limitations": [
+    "The single most contested concept in the base: two respected schools gave opposite prescriptions and the resolution is 'it depends on support and timing', which is true and not very operational."
+  ],
+  "misconceptions": [
+    "That controlling the centre means putting pawns there.",
+    "That the hypermoderns thought the centre was unimportant — they thought it was too important to commit to early.",
+    "That one school won. Textbooks treat hypermodernism as an extension of classical theory, not a replacement."
+  ],
+  "relationships": {
+    "broader": [],
+    "narrower": [],
+    "related": [
+      "classical-school",
+      "hypermodern-school",
+      "opening-development",
+      "space",
+      "king-attack"
+    ],
+    "contrasting": [],
+    "co_occurring": [
+      "opening-development"
+    ],
+    "conflicts": [
+      {
+        "concept": "king-attack",
+        "resolution": "Not opposed but ordered: a wing attack is viable in proportion to central control. With a fixed or controlled centre the flank attack is safe; with a fluid centre the defender's central break refutes it. Establish the centre first."
+      }
+    ]
+  },
+  "examples": [],
+  "counterexamples": [],
+  "ambiguous_examples": [],
+  "explanations": {
+    "by_level": {
+      "beginner": "Pieces in the middle of the board reach more squares. Fight for the centre — either by putting pawns there or by aiming pieces at it.",
+      "intermediate": "Centre control. Note that controlling is not the same as occupying: a bishop on the long diagonal controls e4 without going near it, and a pawn there can be attacked.",
+      "advanced": "Two schools gave opposite prescriptions and both were conditionally right. A pawn centre is an asset when supported and expanded on time, and a target when static.",
+      "master": "Identify which kind of centre is on the board before choosing a plan, and remember the corollary: a wing attack is only as sound as your control of the middle."
+    },
+    "by_depth": {
+      "short": "Whoever controls the middle can do more.",
+      "normal": "Control of the centre: influence over the four central squares, whether by occupying them with pawns or attacking them from a distance with pieces. Occupation gives space; control without commitment avoids giving a target.",
+      "deep": "The most contested idea in chess theory. The classical school, from Steinitz and codified by Tarrasch, held that the centre should be occupied by pawns. The hypermoderns of the 1920s replied that occupation and control are different — a fianchettoed bishop influences central squares without committing to them, and a pawn centre you have committed to can be shot at. The modern position treats these as complementary rather than rival: a big pawn centre is simultaneously an asset and a liability, and which it becomes is a question of support and timing. Ceding the centre on principle against an opponent who supports theirs properly simply loses. One corollary survives both schools intact — a wing attack succeeds in proportion to your control of the centre."
+    },
+    "hedge": "",
+    "lesson": "Ask what kind of centre is on the board before you choose a plan, and never start a flank attack while your opponent can hit back in the middle."
+  },
+  "terminology": {
+    "beginner_words": [
+      "the middle of the board",
+      "pieces reach further from the centre"
+    ],
+    "advanced_words": [
+      "centre control",
+      "occupation",
+      "fianchetto",
+      "undermining",
+      "central break"
+    ],
+    "avoid": [
+      "always occupy the centre with pawns",
+      "the centre does not matter"
+    ]
+  },
+  "status": {
+    "stage": "researched",
+    "last_updated": "2026-09-01",
+    "open_questions": [],
+    "audit_notes": []
+  },
+  "id": "center-control",
+  "canonical_name": "Control of the centre",
+  "category": "center-control",
+  "knowledge_type": "strategic-principle",
+  "definition_short": "Influence over the four central squares — which can be achieved by occupying them with pawns or by attacking them from a distance with pieces.",
+  "definition_long": "Pieces in the centre reach more squares, and a side that controls it can switch wings faster than an opponent who does not. Both are uncontroversial. What was fought over for a generation is whether control requires OCCUPATION.\n\nTHE CLASSICAL POSITION, from Steinitz and hardened into rules by Tarrasch: occupy the centre with pawns, ideally e4 and d4, and develop behind them. A pawn centre grants space, restricts the opponent and supports an attack.\n\nTHE HYPERMODERN REPLY, from the 1920s: occupation and control are different things. A fianchettoed bishop influences central squares from the flank WITHOUT committing to them, and a pawn centre you have committed to is a pawn centre your opponent can shoot at. So invite the occupation, then undermine it.\n\nTHE SYNTHESIS is not a compromise but a recognition that both are conditional. A large pawn centre is an asset and a liability at once, and which it turns out to be is a question of TIMING: supported properly and expanded at the right moment it crushes, and left static it becomes a fixed target. Equally, ceding the centre on principle against an opponent who supports it properly simply loses to the space advantage you invited. The honest summary found in the sources is that hypermodern play is 'correct as a correction and false as a dogma' — and modern textbooks accordingly present hypermodernism as an EXTENSION of classical theory rather than a replacement for it.\n\nA standing corollary that survives both schools: a wing attack succeeds in proportion to your control of the centre. An attack on the flank launched while the opponent can strike back in the middle tends to rebound.",
+  "sources": [
+    "wikipedia-hypermodernism",
+    "britannica-chess-theory-3",
+    "nimzowitsch-my-system",
+    "wikibooks-chess-centre",
+    "scribd-hypermodern-revolt"
+  ],
+  "source_confidence": "high"
+}

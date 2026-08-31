@@ -111,16 +111,23 @@ def main():
                 finding("LOW", cid, "possible-duplicate",
                         f"alias '{alias}' matches concept id '{slug}'")
 
-    # ---- 6. proportion: records far shorter or longer than their neighbours ----
-    sizes = {cid: len(json.dumps(c)) for cid, c in C.items()}
-    if sizes:
+    # ---- 6. proportion: records far shorter than their PEERS ----
+    # Compared within knowledge_type, because an official rule quoted from the Laws is
+    # legitimately shorter than a strategic principle with a contested history. Comparing
+    # everything to one global median just flags every rule, which is noise.
+    bytype = defaultdict(dict)
+    for cid, c in C.items():
+        bytype[c.get("knowledge_type", "other")][cid] = len(json.dumps(c))
+    for kt, sizes in bytype.items():
+        if len(sizes) < 3:
+            continue
         vals = sorted(sizes.values())
         med = vals[len(vals) // 2]
         for cid, n in sizes.items():
             stage = C[cid].get("status", {}).get("stage")
             if n < med * 0.45 and stage not in ("discovered", "stub"):
                 finding("LOW", cid, "proportion",
-                        f"record is {n} bytes against a median of {med} — likely under-researched")
+                        f"{n} bytes against a median of {med} for {kt!r} records — likely under-researched")
 
     # ---- 7. detector claims that no code backs ----
     for cid, c in C.items():
