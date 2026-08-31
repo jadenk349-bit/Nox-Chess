@@ -222,6 +222,88 @@ writes it with the service key, and without one the server keeps ratings in
 memory. Guests get neither and keep both locally. Run
 `supabase-migrate-puzzles.sql` once, by hand, like `supabase-setup.sql`.
 
+**A puzzle is a category and a vision, and it needs both.** The home page's four
+puzzle entries — Opening, Middle Game, End Game and Puzzle Rush — no longer open
+a puzzle. Each opens `screen-pzvision` with its own category remembered in
+`pzPick`, and the three cards there answer the other half: `pzChooseVision()`
+writes `PZ.vision` and only then calls `enterTrack()` or `rushStart()`. The
+category is held rather than passed through because the two answers have to
+arrive at `pzOpen()` together, and because a vision chosen for one track must
+not still be the answer for the next thing pressed on the home page. The guest
+lock stays on the home page rather than moving to the cards: a guest is sent to
+the account page instead of being asked a question they cannot act on.
+
+**The three visions are the game's own, not a second visibility system.**
+`PZ_VISION_NAME`'s keys are `G.mode`'s — `total` (Complete Blindfold, no board,
+moves typed), `blind` (See the Board, sixty-four empty squares, clicked) and
+`fog` (Fog of War, your men drawn and theirs not) — so the whole of "board
+hidden / pieces hidden / their pieces hidden" is `G.mode = PZ.vision` and
+nothing else. `render()` already knew how to draw each of those, in one place.
+A puzzle used to open as `sighted` with the board revealed, which is a fourth
+vision and the one nobody asked for.
+
+Hiding is *rendering*, and never anything else: `G.st` is a complete position in
+every vision, which is what lets the written lists, the legality of a move, the
+forced reply, castling, promotion and en passant be identical in all three.
+There is no second board with the opponent taken out of it.
+
+Two things a puzzle does **not** inherit from the game with that mode. It does
+not inherit fog of the *squares* — in a game, fog darkens every square you have
+nobody standing on, which is a rule about what you can see of the board, and
+here the board is granted and it is the opponent who is hidden; a darkened board
+would also be the second vision over again. And it does not inherit peeking:
+three peeks are a concession to a game you cannot restart, and a puzzle has
+Retry, so `pzOpen()` sets `G.peeksLeft = 0`.
+
+`pzFinish()` is the one place the vision is lifted (`G.revealed = true`), on the
+same terms as the card, the swing and the themes: it waits until there is
+nothing left to give away, and it is also what hands Study Alternatives a board
+it can be played on. A run is the exception and does not stop to open anything —
+`rushEnd()` does, because by then the run is over.
+
+**Nothing may leak through a highlight, and two of them had to be narrowed.**
+The last-move highlight already required `sighted`, a peek or a reveal, so it is
+absent from all three visions on its own. The check ring did not: it lights
+whichever king is in check, which during the forced reply is *theirs*, and a
+ring around the opponent's king is the most valuable square on a hidden board.
+`render()` therefore lights it only for the solver's own king while a puzzle is
+unrevealed. Check is still *said* — `CHECK` beside the side-to-move line — with
+no attacker, no arrow and no path, in words or on the board.
+
+**The written position is generated, never stored.** `pzPieceList()` reads
+`G.st` on every render, both sides, in all three visions: in Complete Blindfold
+it is the position, and in the other two it is the half the board is refusing to
+draw. A list checked into `puzzles/*.json` would be a second copy that has to be
+kept in step with the first, and would be wrong the moment anything moved — as
+it is, a capture, a promotion and an en passant are right without any of the
+three being mentioned. Kings first and pawns last, and a pawn is named by its
+square alone, because "Pa2" is not how anybody says it and the letters are what
+the eye is scanning for. Captured men are simply not on the board, so there is
+no separate record of them: the list says what is there, not what happened.
+
+**The notations panel is walked from what was played, never from the file.**
+`pzSanLine()` replays `G.uci` from the puzzle's own fen. Reading `puzzle.moves`
+would print the answer before it had been found, and would also be wrong about
+every other way this board moves — a revealed solution, a follow-up and a
+defence tried in Study Alternatives all land in `G.uci` and only one of the
+three is in `puzzle.moves`. `G.sans` is deliberately left alone: filling it in
+would start the game's clock (`clockRunning()` waits on exactly that) and make
+`gameInProgress()` true of a puzzle. The numbering is the game's, off the fen's
+fullmove, so a black-to-move puzzle opens on an ellipsis.
+
+**Complete Blindfold is the only vision with a move console, and it shares
+`parseMove()` with the game's.** SAN, plain coordinates, castling, promotion,
+the forgiven casing and the ambiguity message are one implementation; a puzzle
+that accepted a different dialect of notation from the game would be teaching
+the wrong one. Nothing compares strings to the solution — `parseMove()` hands
+back one of the legal moves or an error, and `puzzleStep()` is what then decides
+whether it was the move. That split is why the page can tell "not legal here"
+from "legal, and not the answer", which it must: one of the two means the
+player's picture of the board is wrong, and only the rules can say which. An
+illegal attempt is reported in words on the board visions too, where the flash
+on an empty square says nothing, and it is not counted against the attempt —
+`PZ.wrong` is for a move that existed and was not the answer.
+
 **"One objectively best move" is only half the standard.** The other half is
 `obvious()`, and it exists because a corpus built on the numbers alone fills up
 with one puzzle: the opponent puts a rook where it can be taken, the evaluation
@@ -565,9 +647,14 @@ card for a track written before `why` existed — which is why a puzzle tagged
 call the review's pure helpers, the review must never learn what a puzzle is.
 
 **Puzzle Rush borrows the game's clock.** `tickClock()` and `renderClocks()`
-each grow one branch for `RUSH.on`; there is no second timer. A run never
+each grow one branch for `RUSH.on`; there is no second timer. `rushClock()` puts
+that clock in the *top* strip itself rather than letting `layoutBoardBars()`
+file it by seat — a puzzle has no seats, and a clock that changes ends whenever a
+black-to-move puzzle comes up looks like a clock that has been reset. A run never
 records ladder progress and never moves the rating — it reads the rating to
-choose where to start and nothing else.
+choose where to start and nothing else. It is chosen from the same vision screen
+as the three ladders and plays in whichever vision was picked, which is what
+lets Run Again keep it.
 
 **`tools/` is offline, and reads the page rather than copying it.**
 `tools/page_chess.js` cuts the named declarations out of `blind-chess.html` and
@@ -645,7 +732,8 @@ SCREENS, ACCOUNTS, SOCIAL.
 
 Screens are `<section class="screen" id="screen-NAME">` toggled by
 `showScreen(name)`; `screenName` is the current one and several handlers branch
-on it. There is only one account cluster (`#headRight`), and `showScreen()`
+on it. `screen-pzvision` is the one every puzzle goes through — see "A puzzle is
+a category and a vision" above. There is only one account cluster (`#headRight`), and `showScreen()`
 moves it into whichever screen's header offers a `.head-mount` — home and
 social both do, so it sits in the same place on each. Don't duplicate it.
 
@@ -664,7 +752,10 @@ rung, and only the one on screen is fetched.
 
 Vision modes: `blind` (board, no pieces), `total` (pure notation, typed moves),
 `fog`, `sighted`. Prefer the helpers — `BLINDISH()`, `CAN_PEEK()`, `LOCAL()`,
-`ONLINE()`, `BOT()` — over comparing `G.mode`/`G.opponent` inline.
+`ONLINE()`, `BOT()` — over comparing `G.mode`/`G.opponent` inline. The first
+three are also the three puzzle visions, under different names on the cards;
+`PZ.vision` is written straight into `G.mode` by `pzOpen()`, so anything added
+to `render()` for one of them is added to a puzzle with it.
 
 **The social page** (`screen-social`, the SOCIAL section of the script) is two
 things that only meet on screen: friends and friend requests are Supabase rows

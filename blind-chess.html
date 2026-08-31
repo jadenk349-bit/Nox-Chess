@@ -471,7 +471,7 @@
 
   /* ---------- the questions asked before a game ---------- */
   .game-side{display:flex; flex-direction:column; gap:14px;}
-  #gameSetup, #gamePlay{display:flex; flex-direction:column; gap:14px;}
+  #gameSetup, #gamePlay, #gamePuzzle{display:flex; flex-direction:column; gap:14px;}
   /* Same inner margin as a .card: the setup column and the playing column are
      the same column, and used to be 14px and 16px apart from each other for no
      reason anybody could name. Its heading is the shared one — see .card h2. */
@@ -844,7 +844,7 @@
      screen that writes its own name beside the mark, so without the lane the
      word would be printed underneath it. */
   #screen-home, #screen-social, #screen-settings, #screen-rooms, #screen-lessons,
-  #screen-setup, #screen-game, #screen-practice{position:relative; padding-left:var(--rail);}
+  #screen-setup, #screen-pzvision, #screen-game, #screen-practice{position:relative; padding-left:var(--rail);}
   /* A fade, and nothing more. Sliding the screen in moved the header with it,
      so the logo drifted on every change of screen — the one thing on the page
      that should never appear to move. */
@@ -1417,6 +1417,154 @@
   .pz-lv.now{color:var(--gold-soft); border-color:var(--gold-soft); background:rgba(212,175,110,.12);}
   .pz-lv.cur{outline:2px solid var(--gold-soft); outline-offset:1px;}
   .pz-lv.locked{opacity:.32; cursor:not-allowed;}
+
+  /* ---------- choose puzzle vision ----------
+     The three cards borrow .mode-card wholesale — they are the same kind of
+     choice the setup screen asks, made about a puzzle instead of a game, and
+     two card designs for one decision would drift apart the first time either
+     was touched. What is added here is only what a vision card has and a game
+     card does not: a preview of what the board will look like, and the three
+     facts underneath that say it in words for anyone the preview does not
+     reach. */
+  .pzv-cat{
+    display:inline-block; margin-top:2px;
+    font-size:12px; letter-spacing:.3em; text-transform:uppercase;
+    color:var(--gold-soft); font-weight:700;
+  }
+  #screen-pzvision .setup-head p{margin:8px 0 0;}
+  .pzv-card{cursor:pointer;}
+  .pzv-card:hover .pzv-mini{border-color:rgba(212,175,110,.55);}
+  .pzv-art{
+    width:100%; max-width:132px; aspect-ratio:1/1; margin:2px auto 0;
+    display:flex; align-items:center; justify-content:center;
+  }
+  /* Complete Blindfold's preview is the absence of one — a dark panel with a
+     question mark in it, because a board drawn on this card would be promising
+     a board the mode does not give. */
+  .pzv-art-dark{
+    border-radius:12px; border:1px solid var(--line);
+    background:radial-gradient(circle at 50% 40%, rgba(255,255,255,.05), rgba(6,7,10,.96) 70%);
+  }
+  .pzv-art-word{
+    font-family:Georgia,"Times New Roman",serif; font-size:44px; line-height:1;
+    color:rgba(212,175,110,.5); filter:blur(1.5px); transition:filter .45s ease;
+  }
+  .pzv-card:hover .pzv-art-word{filter:none;}
+  /* the other two are a real 8×8, painted by one gradient rather than by
+     sixty-four elements: it is a picture of a board, not a board */
+  .pzv-mini{
+    width:100%; height:100%; border-radius:8px; overflow:hidden;
+    border:1px solid var(--line); position:relative;
+    /* one conic gradient tiled sixteen times is a crisp 8x8; the two crossed
+       45-degree linear gradients that usually draw this are antialiased along
+       every diagonal and read as diamonds at this size */
+    background-image:conic-gradient(#efdcbc 25%, #a97d55 0 50%, #efdcbc 0 75%, #a97d55 0);
+    background-size:25% 25%;
+    transition:border-color .22s ease;
+  }
+  /* Fog of War's board carries one side's men and nothing of the other's,
+     which is exactly the claim the card is making. Two rows of glyphs, laid
+     over the bottom two ranks. */
+  .pzv-mini .pzv-men{
+    position:absolute; left:0; right:0; bottom:0; height:25%;
+    display:grid; grid-template-columns:repeat(8,1fr); grid-template-rows:1fr 1fr;
+    font-size:10px; line-height:1; color:#fbf6ea; text-align:center;
+    text-shadow:0 1px 0 #2a2118, 0 0 2px rgba(0,0,0,.6);
+  }
+  .pzv-mini .pzv-men span{display:flex; align-items:center; justify-content:center;}
+  .pzv-facts{
+    display:flex; flex-direction:column; gap:3px; margin-top:12px; width:100%;
+    font-size:11px; color:var(--muted);
+  }
+  .pzv-facts span{display:flex; justify-content:space-between; gap:10px;}
+  .pzv-facts b{font-weight:600; letter-spacing:.04em;}
+  .pzv-facts b.yes{color:var(--good);}
+  .pzv-facts b.no{color:#8b8477;}
+  .pzv-note{
+    text-align:center; margin:26px 0 0; font-size:12px; color:var(--muted);
+  }
+  /* the heading is two words longer than the setup screen's and wraps into the
+     Back button's corner on a phone; the button is out of the flow, so the
+     heading is what gives way */
+  @media (max-width:760px){ #screen-pzvision .setup-head{padding-top:46px;} }
+
+  /* ---------- the puzzle page ----------
+     Two panels the game board never has: the written position above it, and —
+     in Complete Blindfold only — a typed move console under it. The bars that
+     carry a game's names and clocks go, because a puzzle has neither; a rush
+     is the exception, and it is the exception because it has a clock. */
+  #screen-game.puzzle-mode .board-bar{display:none;}
+  /* …except the run's clock, which goes where clocks go. The seat names beside
+     it are a game's — there is nobody on the other side of a puzzle — so the
+     strip carries the clock alone. */
+  #screen-game.puzzle-mode.rush #barTop{display:flex; justify-content:flex-end;}
+  #screen-game.puzzle-mode .board-bar .bar-name{display:none;}
+  .pz-pieces{
+    width:min(100%,var(--board-max)); padding:11px 14px;
+    display:flex; flex-direction:column; gap:6px;
+  }
+  .pz-pc-row{display:flex; align-items:baseline; gap:12px; line-height:1.5;}
+  .pz-pc-tag{
+    flex:0 0 96px; font-size:9.5px; letter-spacing:.16em; text-transform:uppercase;
+    color:var(--muted); white-space:nowrap;
+  }
+  .pz-pc-list{
+    flex:1 1 auto; min-width:0;
+    font-size:13.5px; letter-spacing:.03em; color:var(--text);
+    font-variant-numeric:tabular-nums; word-spacing:.12em;
+  }
+  .pz-pc-row + .pz-pc-row{border-top:1px solid var(--line); padding-top:6px;}
+  .pz-pc-row + .pz-pc-row .pz-pc-list{color:#cfc7b6;}
+
+  /* the empty middle of Complete Blindfold. It is sized off the board so that
+     switching visions does not move the panels above and below it. */
+  .pz-stage{
+    width:min(100%,var(--board-max)); aspect-ratio:1/1;
+    max-height:calc(100vh - var(--chrome) - 200px);
+    display:flex; align-items:center; justify-content:center;
+    border-radius:14px; border:1px solid var(--line);
+    background:radial-gradient(circle at 50% 42%, rgba(255,255,255,.035), rgba(6,7,10,.9) 72%);
+  }
+  .pz-stage-in{text-align:center; padding:20px;}
+  .pz-stage-lead{
+    margin:0; font-family:Georgia,"Times New Roman",serif;
+    font-size:clamp(17px,2.4vw,24px); letter-spacing:.12em;
+    color:rgba(212,175,110,.62);
+  }
+  .pz-stage-sub{
+    margin:10px 0 0; font-size:12px; letter-spacing:.22em;
+    text-transform:uppercase; color:var(--muted);
+  }
+
+  .pz-console{width:min(100%,var(--board-max)); padding:12px 14px;}
+  .pz-entry{display:flex; gap:8px; margin-top:0;}
+  .pz-entry input{flex:1 1 auto; min-width:0;}
+  .pz-console .entry-hint{margin:8px 0 0;}
+  .pz-console-say{
+    margin-top:8px; font-size:12.5px; line-height:1.5; color:var(--muted);
+    display:none;
+  }
+  .pz-console-say.show{display:block;}
+  .pz-console-say.bad{color:#e0864d;}
+  .pz-console-say.good{color:var(--good);}
+
+  /* the info card: one line the size of a headline, and everything else small */
+  .pz-info .pz-turn{
+    font-size:15px; letter-spacing:.24em; font-weight:700;
+    color:var(--gold-soft); text-transform:uppercase;
+  }
+  .pz-info .pz-turn.check::after{
+    content:"CHECK"; margin-left:10px; font-size:9.5px; letter-spacing:.18em;
+    color:#e0864d; vertical-align:2px;
+  }
+  .pz-meta{
+    display:flex; flex-wrap:wrap; gap:4px 14px; margin-top:9px;
+    font-size:11.5px; color:var(--muted);
+  }
+  .pz-meta b{color:var(--text); font-weight:600;}
+  .pz-info .pz-ask{margin-top:11px;}
+  .pz-notes{max-height:210px;}
+  .pz-notes-card h2{margin-bottom:9px;}
 
   /* ---------- practice ----------
      The Lesson section's drills. A puzzle asks what the best move is; these
@@ -2018,7 +2166,7 @@
   #setupOpts.needs{border-color:var(--danger); animation:nudge .34s ease;}
   .box-please{margin:12px 0 0; text-align:center;}
   #setupOpts.needs + .box-please{display:block;}
-  #screen-setup, #screen-home, #screen-settings{position:relative;}
+  #screen-setup, #screen-pzvision, #screen-home, #screen-settings{position:relative;}
 
   /* ---------- ranked ---------- */
   /* One column down the middle: the badge, what it is called, the rating it
@@ -3345,6 +3493,80 @@
     </div>
   </section>
 
+  <!-- ============ CHOOSE PUZZLE VISION ============
+       Every puzzle category goes through here first. The category is chosen on
+       the home page and the vision is chosen here, and the puzzle needs both:
+       a Fog of War endgame and a Complete Blindfold endgame are the same
+       hundred positions asked for in two different ways. Which is why this is
+       a screen of its own rather than a row of buttons on the puzzle page —
+       the vision is a decision about how hard the training is, taken before
+       the first position is seen, not a setting to be flipped mid-puzzle. -->
+  <section class="screen" id="screen-pzvision">
+    <button class="ghost setup-back" id="btnPzVisionBack">← Back</button>
+    <div class="setup">
+      <div class="setup-head">
+        <h2>Choose Puzzle Vision</h2>
+        <p><b class="pzv-cat" id="pzvCategory">Opening</b></p>
+        <p id="pzvLead">Choose how you want to visualize the puzzle.</p>
+      </div>
+
+      <div class="mode-grid pzv-grid" id="pzvGrid">
+        <button class="mode-card pzv-card" data-vision="total">
+          <div class="pzv-art pzv-art-dark" aria-hidden="true">
+            <span class="pzv-art-word">?</span>
+          </div>
+          <strong>COMPLETE BLINDFOLD</strong>
+          <small>Visualize the entire position without seeing the board. You are given
+                 the piece locations in writing and nothing else — type your move.</small>
+          <div class="pzv-facts">
+            <span>Board <b class="no">Hidden</b></span>
+            <span>Your pieces <b class="no">Hidden</b></span>
+            <span>Their pieces <b class="no">Hidden</b></span>
+          </div>
+          <div class="go">SELECT</div>
+        </button>
+
+        <button class="mode-card pzv-card" data-vision="blind">
+          <div class="pzv-art" aria-hidden="true">
+            <div class="pzv-mini" id="pzvMiniBlind"></div>
+          </div>
+          <strong>SEE THE BOARD</strong>
+          <small>See the board, but visualize every piece yourself. Sixty-four empty
+                 squares to click — the men are all still there.</small>
+          <div class="pzv-facts">
+            <span>Board <b class="yes">Visible</b></span>
+            <span>Your pieces <b class="no">Hidden</b></span>
+            <span>Their pieces <b class="no">Hidden</b></span>
+          </div>
+          <div class="go">SELECT</div>
+        </button>
+
+        <button class="mode-card pzv-card" data-vision="fog">
+          <div class="pzv-art" aria-hidden="true">
+            <div class="pzv-mini" id="pzvMiniFog">
+              <!-- one side's men and nothing of the other's, which is the claim -->
+              <div class="pzv-men">
+                <span>&#9820;</span><span>&#9822;</span><span>&#9821;</span><span>&#9819;</span><span>&#9818;</span><span>&#9821;</span><span>&#9822;</span><span>&#9820;</span>
+                <span>&#9823;</span><span>&#9823;</span><span>&#9823;</span><span>&#9823;</span><span>&#9823;</span><span>&#9823;</span><span>&#9823;</span><span>&#9823;</span>
+              </div>
+            </div>
+          </div>
+          <strong>FOG OF WAR</strong>
+          <small>See the board and your own pieces, but visualize your opponent.
+                 Everything of theirs stays dark, however close it comes.</small>
+          <div class="pzv-facts">
+            <span>Board <b class="yes">Visible</b></span>
+            <span>Your pieces <b class="yes">Visible</b></span>
+            <span>Their pieces <b class="no">Hidden</b></span>
+          </div>
+          <div class="go">SELECT</div>
+        </button>
+      </div>
+
+      <p class="pzv-note">The vision is fixed for the whole session — leave and come back to change it.</p>
+    </div>
+  </section>
+
   <!-- ============ GAME ============ -->
   <section class="screen" id="screen-game">
     <header class="game-head">
@@ -3358,6 +3580,28 @@
       <!-- BOARD -->
       <div class="board-col">
         <div class="board-bar" id="barTop"></div>
+
+        <!-- puzzles only: where every man on the board actually is, in writing.
+             Never stored in the puzzle file and never cached — it is read off
+             G.st on every render, so it is right after a capture, a promotion
+             or an en passant without any of those having to be special-cased.
+             It is shown in all three visions on purpose: in Complete Blindfold
+             it is the whole position, and in the other two it is the half of
+             the position the board is refusing to draw. -->
+        <div class="panel pz-pieces" id="pzPieces" style="display:none">
+          <div class="pz-pc-row"><span class="pz-pc-tag">White Pieces</span><span class="pz-pc-list" id="pzPcW"></span></div>
+          <div class="pz-pc-row"><span class="pz-pc-tag">Black Pieces</span><span class="pz-pc-list" id="pzPcB"></span></div>
+        </div>
+
+        <!-- Complete Blindfold: no board, no squares, no coordinates. What
+             stands in its place is deliberately almost nothing — anything drawn
+             here would be something to look at instead of the position. -->
+        <div class="pz-stage" id="pzStage" style="display:none">
+          <div class="pz-stage-in">
+            <p class="pz-stage-lead">Visualize the position.</p>
+            <p class="pz-stage-sub">Calculate the best move.</p>
+          </div>
+        </div>
 
         <div class="console panel" id="console">
           <h2 class="console-title">Blindfold Console</h2>
@@ -3396,6 +3640,22 @@
         </div>
 
         <div class="board-bar" id="barBottom"></div>
+
+        <!-- Complete Blindfold's move console. Deliberately the only vision
+             that gets one: the other two have sixty-four squares to click, and
+             a text box under a board is a second way to do the same thing that
+             the player then has to choose between. -->
+        <div class="panel pz-console" id="pzConsole" style="display:none">
+          <form class="entry pz-entry" id="pzEntryForm" autocomplete="off">
+            <input id="pzMoveInput" type="text" placeholder="Your move..." autocomplete="off"
+                   autocapitalize="off" spellcheck="false" aria-label="Your move, in notation">
+            <button class="primary" type="submit">Play</button>
+          </form>
+          <div class="pz-console-say" id="pzConsoleSay"></div>
+          <p class="entry-hint">
+            Standard notation: <b>Nf3</b> · <b>Bxf7+</b> · <b>O-O</b> · <b>e8=Q</b> · <b>Nbd2</b> — or plain squares, <b>c4f7</b>.
+          </p>
+        </div>
 
         <!-- the two clocks live in the bars above and below; kept here so the
              markup they need exists even before a bar has claimed them -->
@@ -3555,10 +3815,28 @@
 
         <!-- puzzles: the ladder, and what the position is asking for -->
         <div id="gamePuzzle" style="display:none">
-          <div class="card panel puzzle-card">
-            <h2 id="pzTitle">Puzzle</h2>
+          <!-- What the position is asking for, before anything about how it is
+               going. Side to move is the one thing on this card a solver in
+               Complete Blindfold cannot work out for themselves, so it is the
+               line that is set in type twice the size of the rest. -->
+          <div class="card panel pz-info" id="pzInfo">
+            <div class="pz-turn" id="pzTurn">WHITE TO MOVE</div>
+            <div class="pz-meta" id="pzMeta"></div>
             <div class="pz-ask" id="pzAsk"></div>
             <div class="pz-say" id="pzSay"></div>
+          </div>
+
+          <!-- Only what has already been played. The line in the file is not
+               read here at all: this is walked from the puzzle's own fen
+               through G.uci, which is the moves that actually happened,
+               whether they were solved, revealed, followed up or studied. -->
+          <div class="card panel pz-notes-card">
+            <h2>Notations</h2>
+            <div class="moves pz-notes" id="pzMoves"><div class="empty">No moves yet.</div></div>
+          </div>
+
+          <div class="card panel puzzle-card">
+            <h2 id="pzTitle">Puzzle</h2>
             <!-- what the mistake cost and the answer won, as a chance of
                  winning: the card's swing sentence with the numbers in it -->
             <div class="pz-eval" id="pzEval" style="display:none"></div>
@@ -4554,7 +4832,10 @@ function render(){
   // complete blindfold shows no board at all — until you peek, or the game ends.
   // A peek swaps the console out for the board so the reveal lands where you're looking.
   const totalPeek = view === 'total' && G.peeking;
-  const boardShown = view !== 'total' || !!G.over || G.peeking;
+  // …and a finished puzzle, which reveals for the same reason a finished game
+  // does. In a game G.revealed only ever goes up with G.over, so this adds a
+  // case rather than changing one.
+  const boardShown = view !== 'total' || !!G.over || G.peeking || G.revealed;
   el.boardFrame.style.display = boardShown ? '' : 'none';
   el.console.classList.toggle('show', view === 'total' && !totalPeek);
 
@@ -4571,7 +4852,15 @@ function render(){
   if (G.sel >= 0) sqEls[visualIndex(G.sel)].classList.add('sel');
 
 
-  if (inCheck(G.st, G.st.turn) && (!BLINDISH(view) || G.peeking || G.revealed)){
+  /* Check, on the board. In a puzzle this may only ever light the *solver's*
+     own king: their king is one they are allowed to see in Fog of War, and the
+     opponent's is not — a check given during the forced reply would otherwise
+     draw a ring around the square their king is standing on, which is the one
+     piece of the hidden half worth most. The card says "Check" in words either
+     way, and neither the card nor the board says what is giving it. */
+  const showCheck = PZ.on && !G.revealed ? G.st.turn === PZ.side
+                                         : (!BLINDISH(view) || G.peeking || G.revealed);
+  if (inCheck(G.st, G.st.turn) && showCheck){
     const k = kingSq(G.st, G.st.turn);
     if (k >= 0) sqEls[visualIndex(k)].classList.add('check');
   }
@@ -4589,7 +4878,14 @@ function render(){
   // fog
   if (view === 'fog' && !G.revealed && !G.peeking){
     const vis = visibleSet();
-    for (let i=0;i<64;i++) if (!vis.has(i)) sqEls[visualIndex(i)].classList.add('hidden');
+    /* A game's fog hides the board as well as the men: you see the squares your
+       own men are standing on and nothing else. A puzzle's does not, and the
+       difference is the whole of what the two mean. Fog of War here is "I can
+       see my own pieces and none of theirs" — the sixty-four squares are
+       granted, because the exercise is visualizing an opponent rather than
+       finding your way around in the dark, and a darkened board would also be
+       the second mode over again. */
+    if (!PZ.on) for (let i=0;i<64;i++) if (!vis.has(i)) sqEls[visualIndex(i)].classList.add('hidden');
     for (let i=0;i<64;i++){
       const p = G.st.b[i];
       if (!p) continue;
@@ -4602,6 +4898,13 @@ function render(){
   renderMoves();
   renderCaptures();
   renderClocks();
+  /* The puzzle page's written half. Hung here rather than on pzRender() because
+     every path that moves a puzzle board ends in render() and only some of them
+     end in pzRender(): the forced reply, a revealed solution, the follow-up and
+     a defence tried in Study Alternatives all move the men, and a piece list
+     that is right after some of those and stale after the others is worse than
+     none. It is a no-op unless a puzzle is open. */
+  pzRenderLive();
 }
 
 /* There is no line of narration under the board any more — whose turn it is is
@@ -5191,7 +5494,11 @@ el.squares.addEventListener('click', e => {
   // will take a move. Not even a selection — half a move is still a move begun.
   if (G.peeking){ peekBlocked(); return; }
   const i = +sqEl.dataset.sq;
-  if (!humanTurn()) return;
+  /* Study Alternatives is the one time the board is offered for the side the
+     player is not: the whole exercise is playing a defence for the opponent and
+     seeing it answered. pzPlay() sends those to pzStudyPlay(), which refuses
+     anything that is not the defender's move. */
+  if (!humanTurn() && !pzStudyOn()) return;
 
   if (G.sel < 0){
     G.sel = i;                                  // always select — revealing nothing in blind mode
@@ -5208,6 +5515,16 @@ el.squares.addEventListener('click', e => {
     G.sel = -1;
     render();          // render first — it rewrites square classes
     reject(sqEl);      // then flash, so the shake survives
+    /* On a puzzle board the flash is not enough on its own: in See the Board
+       and Fog of War the player is guessing at men they cannot see, and "there
+       is no piece of yours that can do that" is a different piece of news from
+       "that is not the move" — one of the two says their picture of the board
+       is wrong. It is not counted against the attempt, because no move was
+       made; PZ.wrong is for a move that existed and was not the answer. */
+    if (PZ.on && !PZ.done && !pzStudyOn()){
+      PZ.typed = { text:'That move is not legal in this position.', cls:'bad', illegal:true };
+      pzRender();
+    }
     return;
   }
   if (moves.length > 1 && moves[0].promo){ askPromotion(moves); return; }
@@ -6873,6 +7190,41 @@ function reviewRender(){
    thinks it is running.
    ============================================================ */
 const PZ_TRACK_NAME = { opening:'Opening', middlegame:'Middlegame', endgame:'Endgame' };
+/* The same three tracks as the home page spells them. The vision screen echoes
+   back the thing that was just pressed, so it has to use that page's wording:
+   somebody who clicked "Middle Game" and is shown "Middlegame" has been given a
+   small reason to wonder whether they landed where they meant to. Everywhere
+   else — the chips, the card title, the alerts — PZ_TRACK_NAME is right, because
+   there it is naming the track rather than quoting a button. */
+const PZ_MENU_NAME = {
+  opening:'Opening', middlegame:'Middle Game', endgame:'End Game'
+};
+
+/* ---- the three puzzle visions ----
+   The keys are G.mode's own names, deliberately: a puzzle's vision is not a
+   second visibility system, it is the game's one pointed at a position out of
+   a file. render() already knows how to draw a board with no men on it and a
+   board with only one side's men on it, and it knows it in one place — so the
+   whole of "board hidden / pieces hidden / their pieces hidden" is
+   G.mode = PZ.vision and nothing else.
+
+     total  Complete Blindfold — no board at all, moves typed in notation
+     blind  See the Board      — sixty-four empty squares, clicked
+     fog    Fog of War         — your own men drawn, theirs not
+
+   What a puzzle does NOT inherit is the game's fog of the squares themselves.
+   In a game, fog darkens every square you have nobody standing on, which is a
+   rule about what you can see of the *board*; here the board is granted and it
+   is the opponent who is hidden, so render() draws the squares and hides only
+   the men. Peeking is not inherited either — three peeks are a concession to a
+   game you cannot restart, and a puzzle has Retry. */
+const PZ_VISIONS = [
+  'total', 'blind', 'fog'
+];
+const PZ_VISION_NAME = {
+  total:'Complete Blindfold', blind:'See the Board', fog:'Fog of War'
+};
+
 const PZ_START_RATING = 1200;
 const PZ_VERSION = 7;              // ?v= on the three files; bump when they are regenerated
 const PZ_REPLY_MS = 420;           // long enough to read the reply as an answer
@@ -6880,6 +7232,7 @@ const PZ_REPLY_MS = 420;           // long enough to read the reply as an answer
 const PZ = {
   on: false,
   mode: 'ladder',      // 'ladder' walks a track in order; 'rush' is against the clock
+  vision: 'fog',       // 'total' | 'blind' | 'fog' — chosen before the first position
   track: null,
   list: [],            // the whole ladder, in difficulty order
   n: 0,                // which rung, 1-based — the number the player sees
@@ -6893,6 +7246,7 @@ const PZ = {
   done: false,         // the line has been played to its end
   followed: false,     // the follow-up has been played out past the end of it
   study: null,         // Study Alternatives, when the player is exploring
+  typed: null,         // what the blindfold move console last said, and how
   busy: false          // the forced reply is on its way
 };
 const pzLoaded = {};   // track -> the parsed ladder, fetched once
@@ -7203,7 +7557,11 @@ function rushStrike(){
 function rushEnd(why){
   RUSH.over = why;
   PZ.busy = true;                       // the board stops taking moves
+  // the run is over, so the last position is nobody's secret any more — and in
+  // Complete Blindfold it is the only chance to see the one that was on screen
+  G.revealed = true;
   beep(200,.2,'sawtooth',.07);
+  render();
   pzRender();                           // the clock stays up, frozen where it stopped
 }
 
@@ -7213,6 +7571,13 @@ function rushEnd(why){
 function rushClock(){
   layoutBoardBars();
   const box = document.getElementById('clockW');
+  /* A run's clock belongs to the run, not to White. layoutBoardBars() files the
+     two clocks by seat and a puzzle has no seats, so this one is put in the top
+     strip whichever way the board is facing — otherwise it changes ends every
+     time a black-to-move puzzle comes up, which is a clock that looks like it
+     has been reset. */
+  const bar = document.getElementById('barTop');
+  if (box.parentElement !== bar) bar.appendChild(box);
   box.querySelector('.time').textContent = fmtClock(RUSH.left);
   box.querySelector('.who').textContent = 'RUSH';
   box.classList.add('active');
@@ -7220,7 +7585,51 @@ function rushClock(){
   box.classList.toggle('flagged', RUSH.left <= 0);
 }
 
-/* ---- getting in ---- */
+/* ---- getting in ----
+   Two questions, and the puzzle needs both answers: which positions, and how
+   much of them is drawn. The home page asks the first and this screen asks the
+   second, which is why the category is remembered here rather than passed
+   through — Opening and Fog of War have to arrive at pzOpen() together, and a
+   vision chosen for one track must not quietly still be the answer for the
+   next thing pressed on the home page.
+
+   Puzzle Rush comes through the same door: a run is a category like any other
+   as far as this screen is concerned, and it inherits PZ.vision exactly as a
+   ladder does, which is what makes Run Again keep the vision the run was
+   played in. */
+const pzPick = {
+  track: null,   // the ladder chosen on the home page, or null for a run
+  rush: false
+};
+
+function goPuzzleVision(track){
+  beep(700,.09);
+  pzPick.rush = track === 'rush';
+  pzPick.track = pzPick.rush ? null : track;
+  document.getElementById('pzvCategory').textContent =
+    pzPick.rush ? 'Puzzle Rush' : PZ_MENU_NAME[track];
+  document.getElementById('pzvLead').textContent = pzPick.rush
+    ? 'Choose your puzzle vision.'
+    : 'Choose how you want to visualize the puzzle.';
+  showScreen('pzvision');
+}
+
+/** A card was pressed: that vision, on the category already chosen. */
+function pzChooseVision(vision){
+  if (PZ_VISIONS.indexOf(vision) < 0) return;
+  PZ.vision = vision;
+  if (pzPick.rush) rushStart();
+  else if (pzPick.track) enterTrack(pzPick.track);
+}
+
+document.querySelectorAll('#pzvGrid .pzv-card').forEach(card => {
+  card.onclick = () => pzChooseVision(card.dataset.vision);
+});
+document.getElementById('btnPzVisionBack').onclick = () => {
+  beep(560,.07);
+  showScreen('home');
+};
+
 function enterTrack(track){
   beep(700,.09);
   pzFetch(track).then(list => {
@@ -7253,13 +7662,18 @@ function pzOpen(n){
   PZ.ply = 0;
   PZ.wrong = PZ.shown = PZ.done = PZ.followed = PZ.busy = false;
   PZ.study = null;
+  PZ.typed = null;
   PZ.side = stateFromFEN(p.fen).turn;
   PZ.wasDone = PZ.track ? pzDone(PZ.track).has(p.id) : false;   // a replay is not worth a rating
   if (PZ.mode === 'rush') RUSH.at = n - 1;
   PZ.delta = null;
 
   G.opponent = 'puzzle';
-  G.mode = 'sighted';                     // a puzzle you cannot see is a different game
+  /* The vision, and the whole of it: render() draws a puzzle exactly as it
+     draws a game in the same mode. It used to be 'sighted' with the board
+     revealed, which is the fourth vision and the one the player did not ask
+     for — every puzzle is now solved through the one they chose. */
+  G.mode = PZ.vision;
   G.st = stateFromFEN(p.fen);
   G.human = G.st.turn;
   G.flipped = G.st.turn === B;            // always from the solver's side of the board
@@ -7270,8 +7684,13 @@ function pzOpen(n){
   G.sans = []; G.uci = [];
   G.caps = { w:[], b:[] };
   G.reps = {};
-  G.revealed = true;
+  /* Not revealed: the board answers to the chosen vision until the puzzle is
+     finished, and finishing it is what opens it (pzFinish). A peek would be a
+     way around the vision, and a puzzle has Retry instead — so there are none
+     to spend here however many the last game left. */
+  G.revealed = false;
   G.peeking = false;
+  G.peeksLeft = 0;
   G.thinking = false;
   G.drawPending = false;
   G.token++;                              // any timer still in flight belongs to the last one
@@ -7291,6 +7710,8 @@ function pzClose(){
   G.token++;                              // strand the pending reply, if there is one
   document.getElementById('screen-game').classList.remove('puzzle-mode');
   document.getElementById('gamePuzzle').style.display = 'none';
+  for (const id of ['pzPieces', 'pzStage', 'pzConsole'])
+    document.getElementById(id).style.display = 'none';
 }
 
 /* ---- playing one ---- */
@@ -7305,6 +7726,11 @@ function pzPlay(m){
     // wrong: the move is never applied, so the board is already where it should
     // be. Flash the square it was going to and say so.
     PZ.wrong = true;
+    /* Legal, and not the move. The console says the second half out loud
+       because in Complete Blindfold there is no square to flash — and it says
+       something different from "not legal", which the player has to be able to
+       tell apart: one of the two means their picture of the board is wrong. */
+    PZ.typed = { text:'Not the best move. Try again.', cls:'bad' };
     G.sel = -1;
     render();
     reject(sqEls[visualIndex(m.to)]);
@@ -7313,6 +7739,7 @@ function pzPlay(m){
     return;
   }
   beep(760,.07);
+  PZ.typed = null;
   G.st = makeMove(G.st, m);
   G.uci.push(uciOf(m));
   G.lastMove = m;
@@ -7347,6 +7774,18 @@ function pzPlay(m){
 function pzFinish(clean){
   PZ.done = true;
   PZ.busy = false;
+  PZ.typed = null;
+  /* The one place the vision is lifted. Rule of the three modes is that they
+     hold "until puzzle completion" — the card, the swing and the themes all
+     wait for the same moment, and the position they are all talking about is
+     worth seeing once there is nothing left to give away. It is also what
+     hands Study Alternatives a board it can be played on.
+
+     A run is the exception, and for the reason a run has no card and no themes:
+     it does not stop. The next position is already on its way, so opening this
+     one would be half a second of a board nobody has time to read — and in
+     Complete Blindfold it would be half a second of the page changing shape. */
+  if (PZ.mode !== 'rush') G.revealed = true;
   const first = clean && !PZ.wrong && !PZ.shown;
   if (PZ.mode === 'rush'){
     if (clean){
@@ -7916,8 +8355,206 @@ function pzSolutionSan(p){
   return sans.join(' ');
 }
 
+/* ---- the written position ----
+
+   Every man still on the board, in both lists, under every vision. In Complete
+   Blindfold it is the position; in the other two it is the half of the position
+   the board is refusing to draw.
+
+   It is generated, never stored. A list checked into puzzles/*.json would be a
+   second copy of the position that has to be kept in step with the first, and
+   it would be wrong the moment anything moved — so this is read straight off
+   G.st, and a capture, a promotion or an en passant is right without any of the
+   three being mentioned here. Captured men are simply not on the board, so they
+   are not in the list; there is no separate record of them, because the list
+   says what is there rather than what happened.
+
+   Kings first and pawns last, and a pawn is named by its square alone — "Pa2"
+   is not how anybody says it, and the letters are what the eye is scanning for. */
+const PZ_PIECE_RANK = {
+  K:0, Q:1, R:2, B:3, N:4, P:5
+};
+
+function pzPieceList(st, color){
+  const men = [];
+  for (let i = 0; i < 64; i++){
+    const p = st.b[i];
+    if (p && p.c === color) men.push({ t:p.t, name:sqName(i) });
+  }
+  men.sort((a, b) =>
+    (PZ_PIECE_RANK[a.t] - PZ_PIECE_RANK[b.t]) || (a.name < b.name ? -1 : a.name > b.name ? 1 : 0));
+  return men.map(m => (m.t === 'P' ? '' : m.t) + m.name).join(', ');
+}
+
+function pzRenderPieces(){
+  document.getElementById('pzPcW').textContent = pzPieceList(G.st, W) || '—';
+  document.getElementById('pzPcB').textContent = pzPieceList(G.st, B) || '—';
+}
+
+/* ---- the notation panel ----
+
+   Walked from the puzzle's own fen through G.uci — the moves that actually
+   happened — and never out of puzzle.moves, which is the *solution*. Reading
+   the file here would print the answer before it had been found; it would also
+   be wrong about every other way this board moves, since a revealed solution, a
+   follow-up and a defence tried in Study Alternatives all land in G.uci and only
+   one of the three is in puzzle.moves.
+
+   G.sans is deliberately left out of it. That array is the game's, and filling
+   it in would start the game's clock (clockRunning() waits on exactly that) and
+   make gameInProgress() true of a puzzle, which is what the leave-the-page
+   confirmation reads. */
+function pzSanLine(){
+  if (!PZ.puzzle) return [];
+  let st = stateFromFEN(PZ.puzzle.fen);
+  const out = [];
+  for (const u of G.uci){
+    const all = legalMoves(st, st.turn);
+    const m = all.find(x => uciOf(x) === u);
+    if (!m) break;
+    out.push(toSAN(st, m, all));
+    st = makeMove(st, m);
+  }
+  return out;
+}
+
+function pzRenderNotes(){
+  const box = document.getElementById('pzMoves');
+  const sans = pzSanLine();
+  if (!sans.length){ box.innerHTML = '<div class="empty">No moves yet.</div>'; return; }
+  // a puzzle starts where its game had got to, so the numbering starts there
+  // too — and one that opens on Black's move opens on an ellipsis rather than
+  // pretending White has not moved
+  const st0 = stateFromFEN(PZ.puzzle.fen);
+  let num = st0.full, i = 0, html = '';
+  if (st0.turn === B){
+    html += '<div class="n">' + num + '.</div><div class="m">…</div>' +
+            '<div class="m">' + pzEsc(sans[0]) + '</div>';
+    i = 1;
+    num++;
+  }
+  for (; i < sans.length; i += 2){
+    html += '<div class="n">' + num + '.</div>';
+    html += '<div class="m">' + pzEsc(sans[i]) + '</div>';
+    html += sans[i+1] ? '<div class="m">' + pzEsc(sans[i+1]) + '</div>' : '<div></div>';
+    num++;
+  }
+  box.innerHTML = html;
+  box.scrollTop = box.scrollHeight;
+}
+
+/* ---- the info card ----
+   Side to move in type twice the size of everything else, because it is the one
+   thing on this screen a solver in Complete Blindfold cannot work out for
+   themselves. Everything under it is a fact about the exercise rather than about
+   the position, so none of it can give anything away. */
+function pzRenderInfo(){
+  const p = PZ.puzzle;
+  if (!p) return;
+  // whose turn it actually is, which during the forced reply is theirs — and
+  // saying so is honest: the board is moving and the player is not to move
+  const head = document.getElementById('pzTurn');
+  // …and once it is over there is nobody to move: the line saying so would be
+  // the only stale thing on a finished card
+  head.textContent = PZ.done
+    ? (PZ.shown ? 'Solution shown' : PZ.wrong ? 'Solved' : 'Solved \u2713')
+    : (G.st.turn === W ? 'White' : 'Black') + ' to move';
+  /* Check is the one thing about the hidden half the player is told outright.
+     Knowing they are in check is not knowing what is giving it — there is no
+     arrow, no attacker lit and no path drawn, here or on the board. */
+  head.classList.toggle('check', !PZ.done && !PZ.busy && inCheck(G.st, G.st.turn));
+
+  const mine = Math.ceil(p.moves.length / 2);          // the solver's own moves
+  const at = Math.min(mine, Math.floor(PZ.ply / 2) + 1);
+  const bits = [
+    'Move <b>' + (PZ.done ? mine : at) + '</b> of <b>' + mine + '</b>',
+    PZ.mode === 'rush' ? '<b>Puzzle Rush</b>' : '<b>' + PZ_TRACK_NAME[PZ.track] + '</b>',
+    'Difficulty <b>' + p.seedRating + '</b>',
+    'Vision <b>' + PZ_VISION_NAME[PZ.vision] + '</b>'
+  ];
+  document.getElementById('pzMeta').innerHTML =
+    bits.map(t => '<span>' + t + '</span>').join('');
+}
+
+/* ---- what the vision puts on the board column ----
+   The board itself is render()'s business and is drawn from G.mode exactly as a
+   game's is. What is decided here is only the furniture the game screen has no
+   use for: the written position, the empty stage that stands where Complete
+   Blindfold's board would be, and the console that is the only way to move
+   without one. */
+function pzRenderLive(){
+  if (!PZ.on || !PZ.puzzle) return;
+  pzRenderPieces();
+  pzRenderNotes();
+  pzRenderInfo();
+  pzRenderStage();
+}
+
+function pzRenderStage(){
+  const blindfold = PZ.vision === 'total' && !G.revealed;
+  document.getElementById('pzPieces').style.display = '';
+  document.getElementById('pzStage').style.display = blindfold ? 'flex' : 'none';
+
+  /* The console goes with the missing board: solving a ladder rung opens the
+     position, so the board is back by then and Study Alternatives wants it
+     clicked rather than typed at. Between two puzzles of a run — where nothing
+     is opened — it stays where it is and goes dead instead, because a box that
+     comes and goes every few seconds moves everything under it. */
+  const typing = blindfold && !pzStudyOn();
+  document.getElementById('pzConsole').style.display = typing ? '' : 'none';
+  const inp = document.getElementById('pzMoveInput');
+  inp.disabled = !typing || PZ.busy || PZ.done;
+
+  const said = PZ.typed;
+  const box = document.getElementById('pzConsoleSay');
+  box.textContent = said ? said.text : '';
+  box.className = 'pz-console-say' + (said ? ' show ' + (said.cls || '') : '');
+}
+
+/* ---- the typed move console ----
+   Complete Blindfold's only way in, and it shares parseMove() with the game's
+   own console on purpose: SAN, plain coordinates, castling, promotion, the
+   forgiven casing and the ambiguity message are one implementation, and a
+   puzzle that accepted a different dialect of notation from the game would be
+   teaching the wrong one. Nothing here compares strings to the solution —
+   parseMove() hands back one of the legal moves or an error, and puzzleStep()
+   is what then decides whether it is the move. */
+function pzSubmitTyped(){
+  if (!PZ.on || PZ.vision !== 'total' || PZ.done || PZ.busy || pzStudyOn()) return;
+  const inp = document.getElementById('pzMoveInput');
+  const res = parseMove(inp.value || '');
+  if (res.error){
+    // "not legal here" and "legal, but not the move" are different answers and
+    // the player is owed the difference: one of the two means their picture of
+    // the board is wrong, and only the engine's own rules can tell them which
+    PZ.typed = { text: res.error, cls:'bad', illegal:true };
+    beep(140,.16,'sawtooth',.08);
+    inp.classList.add('bad');
+    setTimeout(() => inp.classList.remove('bad'), 360);
+    pzRender();
+    return;
+  }
+  inp.value = '';
+  pzPlay(res.move);
+  // a promotion typed without a piece named is worth mentioning, but only if
+  // the move was the right one — otherwise the note outlives the position
+  if (res.note && PZ.typed === null) PZ.typed = { text: res.note, cls:'' };
+  pzRender();
+  if (!PZ.done) inp.focus();
+}
+
+document.getElementById('pzEntryForm').addEventListener('submit', e => {
+  e.preventDefault();
+  pzSubmitTyped();
+});
+
 function pzRender(){
   if (!PZ.on) return;
+  /* The four things the puzzle page has and the game page does not, drawn for
+     every puzzle in every vision before anything else is decided: a run needs
+     its written position and its notation exactly as a ladder rung does, and
+     both need them updated after every ply rather than at the end. */
+  pzRenderLive();
   if (PZ.mode === 'rush') return rushRender();
   const p = PZ.puzzle;
   const side = PZ.side === W ? 'White' : 'Black';
@@ -7929,7 +8566,7 @@ function pzRender(){
   const say = document.getElementById('pzSay');
   ask.innerHTML = PZ.done
     ? '<b>' + side + '</b> played ' + pzSolutionSan(p)
-    : '<b>' + side + '</b> to play — find the move.';
+    : 'Find the best move for <b>' + side + '</b>.';
 
   say.className = 'pz-say';
   if (PZ.done){
@@ -7941,6 +8578,12 @@ function pzRender(){
     say.innerHTML = (lead ? '<p class="pz-why-lead">' + lead + '</p>' : '') + pzExplain(p);
   } else if (PZ.busy){
     say.textContent = '…';
+  } else if (PZ.typed && PZ.typed.illegal){
+    // an attempted move that is not a move at all, said in words: the flash on
+    // the square is invisible in Complete Blindfold and ambiguous in the other
+    // two, where there is nothing on the square to look at
+    say.classList.add('wrong');
+    say.textContent = PZ.typed.text;
   } else if (PZ.wrong){
     say.classList.add('wrong');
     say.textContent = 'Not that one. The position is back where it was — try again.';
@@ -8045,7 +8688,7 @@ function rushRender(){
     say.textContent = RUSH.solved + (RUSH.solved === 1 ? ' puzzle solved' : ' puzzles solved') +
       (RUSH.best ? ', hardest rated ' + RUSH.best : '') + '.';
   } else {
-    ask.innerHTML = '<b>' + side + '</b> to play \u2014 find the move.';
+    ask.innerHTML = 'Find the best move for <b>' + side + '</b>.';
     say.textContent = PZ.wrong ? 'Wrong \u2014 the position is back where it was.'
                     : PZ.done  ? 'Solved.' : '';
     if (PZ.wrong) say.classList.add('wrong');
@@ -11322,15 +11965,19 @@ function syncOptions(){
   // for them before the game starts reads as a hole above the first panel
   document.getElementById('gameChips').style.display = G.started ? '' : 'none';
   if (PUZZLE()){
-    document.getElementById('visionChip').textContent =
-      PZ.mode === 'rush' ? 'Puzzle Rush' : PZ_TRACK_NAME[PZ.track];
+    document.getElementById('visionChip').textContent = PZ_VISION_NAME[PZ.vision];
     document.getElementById('setupChip').textContent =
       PZ.mode === 'rush'
-        ? RUSH.solved + ' solved'
-        : 'Puzzle ' + PZ.n + ' of ' + PZ.list.length;
+        ? 'Puzzle Rush · ' + RUSH.solved + ' solved'
+        : PZ_TRACK_NAME[PZ.track] + ' · Puzzle ' + PZ.n + ' of ' + PZ.list.length;
     syncSound();
     return;
   }
+  // a game has no written position, no blindfold stage and no move console of
+  // its own — pzRenderStage() is the only thing that puts these up, and this is
+  // what takes them down again on the way back to a board that is not a puzzle
+  for (const id of ['pzPieces', 'pzStage', 'pzConsole'])
+    document.getElementById(id).style.display = 'none';
 
   // dark until every question has an answer, then it lights up
   document.getElementById('btnStartGame').classList.toggle('dim', !allAnswered());
@@ -11414,11 +12061,15 @@ document.getElementById('navPractice').onclick = goPractice;
 // rather than nowhere. Puzzle Rush answers to the same rule: it is in
 // LOCKED_IDS with the rest, and a button painted locked must not quietly start
 // a run anyway.
-const goTrack = track => () => GUEST() ? toSignUp() : enterTrack(track);
+/* None of the four opens a puzzle any more: each of them opens the vision
+   screen with its own category remembered, and the puzzle starts from there.
+   The lock is still checked here rather than there, so a guest is sent to the
+   account page instead of being asked a question they cannot act on. */
+const goTrack = track => () => GUEST() ? toSignUp() : goPuzzleVision(track);
 document.getElementById('navOpening').onclick = goTrack('opening');
 document.getElementById('navMiddle').onclick  = goTrack('middlegame');
 document.getElementById('navEnd').onclick     = goTrack('endgame');
-document.getElementById('navRush').onclick    = () => GUEST() ? toSignUp() : rushStart();
+document.getElementById('navRush').onclick    = goTrack('rush');
 
 document.getElementById('btnSettings').onclick = () => { beep(560,.07); showScreen('settings'); };
 document.getElementById('btnSetBack').onclick  = () => showScreen('home');
