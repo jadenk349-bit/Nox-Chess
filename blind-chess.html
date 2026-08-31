@@ -611,6 +611,10 @@
 
   /* ---------- controls ---------- */
   .controls{width:min(100%,var(--board-max)); padding:var(--pad-card); display:flex; flex-wrap:wrap; gap:8px;}
+  /* An open peek is closed by hand and by nothing else, so reaching for the
+     board while one is open shakes the button that is in the way rather than
+     reddening a square that was never the problem. */
+  #btnPeek.blocking{animation:nudge .34s ease;}
 
   /* ---------- the buttons ----------
      There are three ranks on this site and a button is always one of them:
@@ -4583,12 +4587,17 @@ function renderStatus(){
 
   const peekBtn = document.getElementById('btnPeek');
   peekBtn.style.display = CAN_PEEK(G.mode) ? '' : 'none';   // nothing to peek at otherwise
-  peekBtn.disabled = G.peeksLeft <= 0 || G.peeking || !!G.over;
+  // An open peek must always be closable, whatever the count says — it is the
+  // only thing standing between the player and their next move.
+  peekBtn.disabled = !!G.over || (!G.peeking && G.peeksLeft <= 0);
+  // While one is open, closing it is the single thing this panel is asking for,
+  // and there is no other .primary in the box for it to compete with.
+  peekBtn.classList.toggle('primary', G.peeking && !G.over);
   // The strip under the board used to count the peeks left; the button is now
   // the only place that can, so it wears them rather than dropping the count.
   if (CAN_PEEK(G.mode)){
-    peekBtn.textContent =
-      `Peek ${'◆'.repeat(G.peeksLeft)}${'◇'.repeat(Math.max(0, 3 - G.peeksLeft))}`;
+    const dots = `${'◆'.repeat(G.peeksLeft)}${'◇'.repeat(Math.max(0, 3 - G.peeksLeft))}`;
+    peekBtn.textContent = G.peeking ? `Close Peek ${dots}` : `Peek ${dots}`;
   }
   // Resign and Draw are always there, so the panel always is too
   const live = !G.over && !REV.on;
@@ -4624,9 +4633,13 @@ function renderStatus(){
   chatCard.style.display = ONLINE() ? 'block' : 'none';
   chatInput.disabled = !ONLINE() || NET.state !== 'playing' || NET.oppGone;
 
-  // only the move-entry hint remains; Peek is a button, not a key
+  // only the move-entry hint remains; Peek is a button, not a key. An open peek
+  // takes the line over, because in complete blindfold it has taken the console
+  // that would otherwise be saying it, and in the others there is no console at
+  // all — this strip is the one place left to say why the board will not move.
   document.getElementById('footHint').innerHTML =
-    G.mode === 'total' ? 'TYPE A MOVE AND PRESS <kbd>ENTER</kbd>' : '';
+    G.peeking ? 'CLOSE THE PEEK TO MOVE'
+    : G.mode === 'total' ? 'TYPE A MOVE AND PRESS <kbd>ENTER</kbd>' : '';
 }
 
 function renderMoves(){
@@ -4912,6 +4925,7 @@ function parseMove(text){ return parseMoveIn(G.st, text); }
 function submitEntry(inp, side){
   if (!G.started) return;                             // the board is still a preview
   if (G.mode !== 'total' || G.over || G.thinking) return;
+  if (G.peeking){ peekBlocked(); return; }             // close the board before you move
   if (side && G.st.turn !== side) return;              // not this player's turn
   if (!humanTurn()) return;
   const res = parseMove(inp.value);
@@ -5009,6 +5023,7 @@ function resultTitle(winner){
 function finish(title, text, status){
   G.over = { text: status };
   G.revealed = true;
+  G.peeking = false;      // the board is open to everyone now; nothing is being spent on it
   stopClock();
   logLine(' ');
   logLine('— ' + status + ' —', 'sys');
@@ -5119,6 +5134,9 @@ el.squares.addEventListener('click', e => {
   const sqEl = e.target.closest('.sq');
   if (!G.started) return;                       // nothing moves until Start Play
   if (!sqEl || G.over || G.thinking || G.pendingPromo) return;
+  // A peek is looking, not playing: the board has to be closed again before it
+  // will take a move. Not even a selection — half a move is still a move begun.
+  if (G.peeking){ peekBlocked(); return; }
   const i = +sqEl.dataset.sq;
   if (!humanTurn()) return;
 
@@ -9424,18 +9442,42 @@ function newGame(){
   if (G.started && BOT() && G.st.turn !== G.human) scheduleEngine(420);
 }
 
+/* A peek used to be a 1.6-second window that took itself away again whether or
+   not you had finished looking, which measured how fast you can read a board
+   rather than how well you hold one. So a peek now lasts as long as you want it
+   to — and the price is paid on the other side: while one is open the board is
+   somewhere you look, not somewhere you play from. No move can be entered until
+   you close it, so closing it is the deliberate act that losing the reveal used
+   to be. Sighted play never had a peek to change; CAN_PEEK is what leaves it
+   out, here as everywhere else. */
 function peek(){
-  if (!CAN_PEEK(G.mode) || G.peeksLeft <= 0 || G.peeking || G.over) return;
+  if (!CAN_PEEK(G.mode) || G.over) return;
+  if (G.peeking) return unpeek();
+  if (G.peeksLeft <= 0) return;
   G.peeksLeft--;
   G.peeking = true;
+  G.sel = -1;              // a square chosen before the peek is not a move chosen during it
   beep(700,.08,'sine',.07);
   render();
-  setTimeout(() => {
-    G.peeking = false;
-    beep(430,.08,'sine',.05);
-    render();                                   // console is back before we write to it
-    logLine(`👁  peek used — ${G.peeksLeft} left.`, 'sys');
-  }, 1600);
+}
+
+function unpeek(){
+  if (!G.peeking) return;
+  G.peeking = false;
+  beep(430,.08,'sine',.05);
+  render();                                   // console is back before we write to it
+  logLine(`👁  peek closed — ${G.peeksLeft} left.`, 'sys');
+}
+
+/* Pressing the board while a peek is open is not an illegal move, it is a move
+   made in the wrong state. Point at the way out rather than at the square. */
+function peekBlocked(){
+  const b = document.getElementById('btnPeek');
+  b.classList.remove('blocking');
+  void b.offsetWidth;                          // restart the animation on a second try
+  b.classList.add('blocking');
+  setTimeout(() => b.classList.remove('blocking'), 400);
+  beep(200,.1,'sine',.05);
 }
 
 document.getElementById('btnPeek').onclick  = peek;
