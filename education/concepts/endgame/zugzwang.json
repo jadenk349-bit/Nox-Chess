@@ -1,0 +1,216 @@
+{
+  "schema_version": 2,
+  "alternate_names": [
+    "compulsion to move"
+  ],
+  "historical_names": [
+    "squeeze (some writers, for the one-sided case)"
+  ],
+  "tags": [
+    "endgame",
+    "tempo",
+    "german-term",
+    "well-dated"
+  ],
+  "subcategory": "tempo",
+  "difficulty": "intermediate",
+  "knowledge_type_note": "A proven result rather than a heuristic: whether a given position is zugzwang is decidable, and in the endgame it is decidable by tablebase. The concept names a fact about a position, not a recommendation.",
+  "name_status": "established-name",
+  "history": {
+    "attributions": [
+      {
+        "person": "Max Lange",
+        "relation": "named-by",
+        "source": "winter-zugzwang",
+        "year": null,
+        "note": "ALLEGED only. Edward Winter's Chess Notes records the claim and states plainly that 'The first use of the word Zugzwang, allegedly originated by Max Lange, needs to be determined.' Recorded because the claim circulates, NOT as established."
+      },
+      {
+        "person": "Emanuel Lasker",
+        "relation": "popularized-by",
+        "source": "wikipedia-zugzwang",
+        "year": 1905,
+        "note": "First known use of the term in ENGLISH. He also cited a Philidor position as an example in Lasker's Manual of Chess."
+      },
+      {
+        "person": "Alessandro Salvio",
+        "relation": "first-documented-by",
+        "source": "wikipedia-zugzwang",
+        "year": 1604,
+        "note": "An endgame study exhibiting the CONCEPT, more than two centuries before the term."
+      }
+    ],
+    "first_documented_source": "wikipedia-zugzwang",
+    "year": 1858,
+    "confidence": "disputed",
+    "notes": "Unusually well dated for a chess term, and unusually clearly unsettled at the same time. The word appears in German chess literature in 1858 or earlier and in English from Lasker in 1905. Who coined it is NOT established: Max Lange is alleged, and Winter — the standard authority on exactly this kind of question — says the first use needs to be determined. The CONCEPT is far older than the word, appearing in Salvio's 1604 study and in shatranj studies from the early 9th century, over a thousand years before the term. Confidence 'disputed' refers to the coinage; the dating of first appearances is solid.",
+    "competing_claims": [
+      "Coined by Max Lange — alleged, and explicitly unverified by Winter.",
+      "Terminology split: most writers call the one-sided case zugzwang and the two-sided case reciprocal zugzwang; some call the one-sided case a 'squeeze' and the two-sided case zugzwang."
+    ],
+    "development": [
+      {
+        "era": "9th century, shatranj",
+        "change": "The concept appears in studies over a millennium before it is named.",
+        "source": "wikipedia-zugzwang"
+      },
+      {
+        "era": "1604, Salvio",
+        "change": "An endgame study exhibiting zugzwang.",
+        "source": "wikipedia-zugzwang"
+      },
+      {
+        "era": "1858 or earlier",
+        "change": "The term is in use in German chess literature.",
+        "source": "wikipedia-zugzwang"
+      },
+      {
+        "era": "1905, Lasker",
+        "change": "First known use in English.",
+        "source": "wikipedia-zugzwang"
+      },
+      {
+        "era": "tablebase era",
+        "change": "Reciprocal zugzwang becomes decidable rather than analysed; Nunn notes how often it turns out to matter.",
+        "source": "wikipedia-zugzwang"
+      }
+    ]
+  },
+  "engine_era_status": "reliable",
+  "engine_era_note": "Not merely reliable but DECIDABLE. Within tablebase range, whether a position is zugzwang is settled by comparing the result with each side to move — the two lookups differ by one bit. The opposition record in this base contains exactly that pair.",
+  "recognition": {
+    "preconditions": [
+      "Every legal move available to the side to move worsens their position",
+      "The same position with the other side to move would be better for them"
+    ],
+    "indicators_for": [
+      "Few pieces and few legal moves — typically a king-and-pawn endgame",
+      "The king is tied to defending something and has no waiting move",
+      "All pawn moves are exhausted or would create a fatal weakness",
+      "The tablebase result flips when the side to move is flipped"
+    ],
+    "indicators_against": [
+      "A waiting move exists that changes nothing",
+      "A spare pawn tempo is available",
+      "Many pieces remain, so a neutral move is almost always available"
+    ],
+    "prerequisites": [],
+    "detector": "tablebase comparison with side-to-move flipped",
+    "detectability": "mechanical",
+    "typical_confidence": "high",
+    "false_positive_traps": [
+      "A position where the side to move is simply losing is not zugzwang. The test is whether having to MOVE is the cause — flip the side to move and see whether the result changes.",
+      "Being short of good moves is not zugzwang; every move must worsen the position.",
+      "In middlegames, apparent zugzwang is usually just a bad position."
+    ]
+  },
+  "application": {
+    "typical_plans": [
+      "Exhaust the opponent's waiting moves, then hand them the move",
+      "Triangulate to lose a tempo and return the same position with the other side to play",
+      "Keep a spare pawn tempo in reserve rather than spending it"
+    ],
+    "typical_moves": [
+      "A king triangulation",
+      "A waiting move with a rook along a rank"
+    ],
+    "typical_pawn_structures": [
+      "Blocked pawn chains where no pawn can move safely"
+    ],
+    "typical_piece_arrangements": [
+      "Kings in opposition"
+    ],
+    "tactical_consequences": [
+      "Wins material or forces a decisive concession without any threat being made"
+    ],
+    "strategic_consequences": [
+      "Required for some elementary wins; king and rook against king cannot be forced without it",
+      "The reason reserve tempi are worth hoarding in pawn endings"
+    ]
+  },
+  "exceptions": [
+    "A side with a spare tempo is not in zugzwang, however constrained it looks.",
+    "In the middlegame, with many pieces on, genuine zugzwang is rare — usually a bad position is just a bad position."
+  ],
+  "limitations": [
+    "Decidable within tablebase range; a judgement outside it.",
+    "The terminology is not agreed: 'squeeze' versus 'zugzwang' for the one-sided case."
+  ],
+  "misconceptions": [
+    "That zugzwang means having no good moves. It means every move is bad AND that being obliged to move is what causes it.",
+    "That Lasker or Nimzowitsch coined it. Lasker introduced it to English in 1905; the coinage is unestablished.",
+    "That it is a modern idea. The concept predates the word by over a thousand years."
+  ],
+  "relationships": {
+    "broader": [],
+    "narrower": [
+      "opposition",
+      "triangulation"
+    ],
+    "related": [
+      "opposition",
+      "triangulation",
+      "corresponding-squares",
+      "stalemate"
+    ],
+    "contrasting": [],
+    "co_occurring": [
+      "opposition",
+      "triangulation"
+    ],
+    "conflicts": []
+  },
+  "examples": [],
+  "counterexamples": [],
+  "ambiguous_examples": [],
+  "explanations": {
+    "by_level": {
+      "beginner": "It is their turn, and every move they can make makes things worse. If they could pass, they would be fine — but you cannot pass in chess.",
+      "intermediate": "Zugzwang. The position is fine for them; having to move is what loses it. Check whether they have a spare tempo before relying on it.",
+      "advanced": "Zugzwang, and note whether it is one-sided or reciprocal — the second means you must not step into it yourself.",
+      "master": "Within tablebase range this is decidable: flip the side to move and compare results. Reciprocal zugzwang is the case worth identifying precisely, since both sides must avoid moving first."
+    },
+    "by_depth": {
+      "short": "Every move they have makes things worse.",
+      "normal": "Zugzwang: the position would be fine if they could pass, but chess has no pass, and every legal move worsens things. The way to impose it is to run their waiting moves out.",
+      "deep": "From German, compulsion to move. Positions divide three ways: neither side minds moving, one side does, or both do — the last being reciprocal zugzwang, whose extreme form is the trébuchet, where whoever moves loses. Terminology is not fully agreed; a minority of writers call the one-sided case a squeeze. It is required for some elementary wins — king and rook against king cannot be forced without it — and the standard tool for imposing it is triangulation. The word appears in German chess literature by 1858 and in English from Lasker in 1905, but the concept is over a thousand years older, appearing in shatranj studies from the 9th century."
+    },
+    "hedge": "",
+    "lesson": "In simple endings, count the waiting moves. Whoever runs out first usually loses, and hoarding one spare pawn tempo can be worth more than a pawn."
+  },
+  "terminology": {
+    "beginner_words": [
+      "every move makes it worse",
+      "they wish they could pass"
+    ],
+    "advanced_words": [
+      "zugzwang",
+      "reciprocal zugzwang",
+      "mutual zugzwang",
+      "trebuchet",
+      "reserve tempo"
+    ],
+    "avoid": [
+      "zugzwang means no good moves"
+    ]
+  },
+  "status": {
+    "stage": "researched",
+    "last_updated": "2026-08-31",
+    "open_questions": [],
+    "audit_notes": []
+  },
+  "id": "zugzwang",
+  "canonical_name": "Zugzwang",
+  "category": "zugzwang",
+  "knowledge_type": "proven-result",
+  "definition_short": "A position in which having to move is itself the disadvantage — every legal move worsens the position.",
+  "definition_long": "From German, 'compulsion to move'. Chess has no pass, so a player who would be fine if allowed to do nothing can be lost purely because they must move.\n\nTHREE KINDS OF POSITION, and this classification is what makes the term usable. Either neither side would be disadvantaged by having to move (the great majority), or one side would, or both would. Most writers call the second case zugzwang and the third RECIPROCAL or MUTUAL zugzwang. A minority reverse it, calling the second a 'squeeze' and reserving 'zugzwang' for the third. Both usages are attested and the disagreement is recorded rather than resolved.\n\nThe extreme form of reciprocal zugzwang is the TRÉBUCHET, where whoever must move loses outright — a full-point mutual zugzwang.\n\nIt matters most in the endgame, where few moves are available and each is critical, and it is REQUIRED for some elementary results: king and rook against king cannot be won without it. John Nunn's assessment is that reciprocal zugzwang positions are surprisingly important in endgame analysis generally.\n\nThe standard way to impose it is TRIANGULATION — losing a move so as to hand the same position back with the opponent to play.",
+  "sources": [
+    "wikipedia-zugzwang",
+    "winter-zugzwang",
+    "lichess-tablebase",
+    "wikipedia-triangulation"
+  ],
+  "source_confidence": "high"
+}

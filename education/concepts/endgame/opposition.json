@@ -1,0 +1,208 @@
+{
+  "schema_version": 2,
+  "alternate_names": [
+    "direct opposition"
+  ],
+  "historical_names": [],
+  "tags": [
+    "endgame",
+    "kings",
+    "tablebase-proven",
+    "zugzwang"
+  ],
+  "subcategory": "king technique",
+  "difficulty": "beginner",
+  "knowledge_type_note": "Typed tablebase-fact rather than positional-concept because the core claim is provable and has been proved here: the same position is a draw or a win purely according to who must move. That is not a heuristic.",
+  "name_status": "established-name",
+  "history": {
+    "attributions": [
+      {
+        "person": "Yuri Averbakh",
+        "relation": "later-associated-with",
+        "source": "wikipedia-opposition",
+        "year": null,
+        "note": "Credited with the formulation that the opposition is a means to an end, the end being penetration to a key square."
+      }
+    ],
+    "first_documented_source": "wikipedia-opposition",
+    "year": null,
+    "confidence": "unknown",
+    "notes": "No coinage researched. The technique is ancient and anonymous; Averbakh's corrective is the attributable part and is second-hand here.",
+    "competing_claims": [],
+    "development": []
+  },
+  "engine_era_status": "reliable",
+  "engine_era_note": "Fully settled by tablebase, and the proof is a one-bit comparison. Nothing about the concept has been revised; what tablebases add is that the exceptions — positions where taking the opposition is the wrong move — can now be demonstrated rather than argued.",
+  "recognition": {
+    "preconditions": [
+      "Both kings on the same rank or file with exactly one square between them"
+    ],
+    "indicators_for": [
+      "A king-and-pawn endgame where king penetration decides the result",
+      "The defending king is trying to hold key squares in front of a pawn",
+      "Neither side has a spare pawn tempo"
+    ],
+    "indicators_against": [
+      "A spare pawn tempo exists, so the opposition can be handed back",
+      "The position is decided by a race rather than by penetration",
+      "Taking the opposition does not lead to any key square — Averbakh's point",
+      "Enough material remains that king movement is not the deciding factor"
+    ],
+    "prerequisites": [
+      "zugzwang"
+    ],
+    "detector": "kingDistance",
+    "detectability": "mechanical",
+    "typical_confidence": "high",
+    "false_positive_traps": [
+      "Kings facing each other is trivially detectable and means nothing outside endgames where king penetration decides.",
+      "Taking the opposition is not always correct. In some positions the king should ignore it and head for a key square directly — this is Averbakh's corrective and it is the standard error.",
+      "A spare pawn tempo makes the opposition irrelevant, since it can simply be handed back."
+    ]
+  },
+  "application": {
+    "typical_plans": [
+      "Take the opposition to force the defending king aside, then occupy a key square",
+      "Convert distant or diagonal opposition into direct opposition as an intermediate step",
+      "As the defender, seize the opposition whenever the attacking king advances"
+    ],
+    "typical_moves": [
+      "A king step that leaves exactly one square between the kings",
+      "A waiting king move on the same file"
+    ],
+    "typical_pawn_structures": [
+      "King and pawn against king",
+      "Blocked pawns where penetration decides"
+    ],
+    "typical_piece_arrangements": [
+      "Kings two squares apart on a file, pawn behind the attacking king"
+    ],
+    "tactical_consequences": [],
+    "strategic_consequences": [
+      "Decides king-and-pawn endgames outright",
+      "The reason a single tempo is worth so much in simplified positions"
+    ]
+  },
+  "exceptions": [
+    "Taking the opposition is not always best. Averbakh: it is a means to an end, and if it does not lead to a key square, marching the king there directly may be correct.",
+    "A spare pawn tempo neutralises it entirely.",
+    "In positions decided by a pawn race, king geometry may be irrelevant."
+  ],
+  "limitations": [
+    "Mechanically detectable and mechanically decidable in the endgame; meaningless elsewhere."
+  ],
+  "misconceptions": [
+    "That having the opposition means it is your move. It means the opposite — the side NOT to move has it.",
+    "That taking the opposition is always right.",
+    "That it is a rule of thumb. In king-and-pawn endings it is provably exact."
+  ],
+  "relationships": {
+    "broader": [
+      "zugzwang"
+    ],
+    "narrower": [],
+    "related": [
+      "zugzwang",
+      "triangulation",
+      "key-square",
+      "corresponding-squares"
+    ],
+    "contrasting": [],
+    "co_occurring": [
+      "zugzwang",
+      "key-square"
+    ],
+    "conflicts": []
+  },
+  "examples": [
+    {
+      "fen": "8/4k3/8/4K3/4P3/8/8/8 b - - 0 1",
+      "note": "Constructed controlled pair, positive half. White Ke5, pawn e4, Black Ke7 — direct opposition. BLACK to move, so White has the opposition.",
+      "origin_kind": "constructed-test",
+      "concept_role": "positive",
+      "side_to_move_benefits": "white",
+      "controlled_pair_with": "8/4k3/8/4K3/4P3/8/8/8 w - - 0 1",
+      "tablebase": {
+        "source": "Lichess tablebase (Syzygy, 7-piece)",
+        "pieces": 3,
+        "wdl": "loss",
+        "dtz": -4,
+        "dtm": -28,
+        "category": "loss",
+        "note": "PROVEN win for White, mate in 28. Result is from the side to move (Black). Paired with the identical position with White to move, which is a proven draw. The two FENs differ in exactly one character — the side-to-move field — which makes this the most tightly isolated controlled pair possible in chess."
+      }
+    }
+  ],
+  "counterexamples": [
+    {
+      "fen": "8/4k3/8/4K3/4P3/8/8/8 w - - 0 1",
+      "note": "Constructed controlled pair, negative half. IDENTICAL position; WHITE to move, so Black has the opposition and holds.",
+      "origin_kind": "constructed-test",
+      "concept_role": "negative",
+      "side_to_move_benefits": "neither",
+      "controlled_pair_with": "8/4k3/8/4K3/4P3/8/8/8 b - - 0 1",
+      "tablebase": {
+        "source": "Lichess tablebase (Syzygy, 7-piece)",
+        "pieces": 3,
+        "wdl": "draw",
+        "dtz": 0,
+        "dtm": 0,
+        "category": "draw",
+        "note": "PROVEN draw. Establishes the necessity half: the extra pawn wins only when the opposition is held. Together with the paired position this proves the concept outright rather than evidencing it — a full point of result swings on which side must move."
+      }
+    }
+  ],
+  "ambiguous_examples": [],
+  "explanations": {
+    "by_level": {
+      "beginner": "The two kings are facing each other with one square between. Whoever has to move must step aside, so you want it to be their turn, not yours.",
+      "intermediate": "Direct opposition. The side NOT to move has it. Use it to force their king off the squares in front of your pawn.",
+      "advanced": "Opposition, a special case of zugzwang. Remember Averbakh: it is a means to an end, and the end is a key square — sometimes marching there directly beats taking it.",
+      "master": "Decidable. In king-and-pawn endings the opposition is exact, and the corresponding-squares framework generalises it for cluttered positions where simple opposition misleads."
+    },
+    "by_depth": {
+      "short": "Kings face each other; whoever must move gives way.",
+      "normal": "The opposition: kings on the same line with one square between them. Because kings cannot touch, whoever is to move has to step aside — so the side NOT to move has the opposition and can force the other king off key squares.",
+      "deep": "A special case of zugzwang, and one of the few chess ideas that is exactly provable. In the basic king-and-pawn-versus-king position the same arrangement is a draw with one side to move and a win in 28 with the other — a full point turning on a single bit. Diagonal and distant opposition are variants, usually used as routes to the direct form. The corrective that matters is Averbakh's: the opposition is a means to an end and the end is penetration to a key square. Taking it is not automatically correct, and in some positions the king should simply march for the key squares instead."
+    },
+    "hedge": "",
+    "lesson": "In king-and-pawn endings, work out who has the opposition before you move — and then check that taking it actually gets your king somewhere it wants to be."
+  },
+  "terminology": {
+    "beginner_words": [
+      "kings facing each other",
+      "whoever moves has to give way"
+    ],
+    "advanced_words": [
+      "opposition",
+      "distant opposition",
+      "diagonal opposition",
+      "key square",
+      "zugzwang"
+    ],
+    "avoid": [
+      "I have the opposition because it is my move",
+      "always take the opposition"
+    ]
+  },
+  "status": {
+    "stage": "ready",
+    "last_updated": "2026-08-31",
+    "open_questions": [],
+    "audit_notes": [
+      "Promoted to 'ready': the core claim is PROVEN by tablebase in both directions on a pair of positions differing in one bit, Averbakh's corrective is recorded as the standing exception, and every coverage box is satisfied. This is the strongest evidential position of any concept in the base."
+    ]
+  },
+  "id": "opposition",
+  "canonical_name": "Opposition",
+  "category": "opposition",
+  "knowledge_type": "tablebase-fact",
+  "definition_short": "Kings facing each other with one square between them on a rank or file. The side NOT to move has the opposition.",
+  "definition_long": "Two kings a knight's-jump-less apart — one empty square between them on a rank or file. Since kings may not stand adjacent, each blocks the other, and whoever must move has to give way. The player NOT on move is said to have the opposition.\n\nIt is a special case of zugzwang, and its effect is exact rather than approximate. In the basic king-and-pawn-versus-king position with White Ke5, pawn e4, Black Ke7, the tablebase gives a DRAW with White to move and a WIN for White (mate in 28) with Black to move. Same pieces, same squares; one bit of difference.\n\nVariants: DIAGONAL opposition, kings on a diagonal with one square between; DISTANT opposition, kings on the same line with an odd number of squares between, where again the player not to move holds it. Both are usually routes to direct opposition.\n\nAVERBAKH'S CORRECTIVE is the part most often missed: the opposition is a MEANS TO AN END, and the end is penetration to a KEY SQUARE. Taking the opposition is not automatically right. Wikipedia's own example makes the point — in one position 1.Ke2 taking the distant opposition wins, while in another taking the opposition with 1.Ke4 only draws and the king should simply march for the key squares instead.",
+  "sources": [
+    "wikipedia-opposition",
+    "lichess-tablebase",
+    "wikipedia-zugzwang"
+  ],
+  "source_confidence": "high"
+}

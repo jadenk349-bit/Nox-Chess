@@ -159,7 +159,7 @@ def main():
                 warnings.append(f"{rel}: descriptive-phrase promoted to {stage!r} — "
                                 f"confirm sources support it as a recognised name")
 
-            engine_seen = False
+            evidence_seen = False
             for bucket in ("examples", "counterexamples", "ambiguous_examples"):
                 for i, ex in enumerate(c.get(bucket, [])):
                     w = f"{rel}: {bucket}[{i}]"
@@ -174,21 +174,26 @@ def main():
                         warnings.append(f"{w}: historical-game with no game citation")
                     eng = ex.get("engine")
                     if eng:
-                        engine_seen = True
+                        evidence_seen = True
                         if VERDICT and eng.get("verdict") not in VERDICT:
                             errors.append(f"{w}: bad engine.verdict")
                         if eng.get("test_level") not in (1, 2, 3, 4):
                             errors.append(f"{w}: engine.test_level must be 1-4")
                     tb = ex.get("tablebase")
-                    if tb and WDL and tb.get("wdl") not in WDL:
-                        errors.append(f"{w}: bad tablebase.wdl")
+                    if tb:
+                        # a tablebase result is proof and outranks a search, so it satisfies
+                        # the evidence requirement for 'validated'/'ready' on its own
+                        if tb.get("wdl") not in (None, "unknown"):
+                            evidence_seen = True
+                        if WDL and tb.get("wdl") not in WDL:
+                            errors.append(f"{w}: bad tablebase.wdl")
 
-            if stage in NEEDS_ENGINE and not engine_seen:
+            if stage in NEEDS_ENGINE and not evidence_seen:
                 rowid = cid
                 cov = load("state/coverage.json")["concepts"].get(rowid, {})
                 if cov.get("engine_testable", True):
-                    errors.append(f"{rel}: stage {stage!r} but no engine-tested position "
-                                  f"(mark engine_testable:false in coverage if not applicable)")
+                    errors.append(f"{rel}: stage {stage!r} but no engine- or tablebase-settled "
+                                  f"position (mark engine_testable:false in coverage if not applicable)")
 
     for cid, c in concepts.items():
         rel = c.get("relationships") or {}

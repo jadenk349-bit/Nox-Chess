@@ -77,6 +77,8 @@ def main():
         amb = c.get("ambiguous_examples", [])
         allpos = ex + cex + amb
         engines = [p["engine"] for p in allpos if p.get("engine")]
+        # a tablebase result is proof, so it satisfies validation at least as well as a search
+        proven = [p for p in allpos if p.get("engine") or p.get("tablebase")]
         positions += len(engines)
         tb_positions += sum(1 for p in allpos if p.get("tablebase"))
         for e in engines:
@@ -103,16 +105,29 @@ def main():
         boxes["examples"] = "n/a" if boxes.get("examples") == "n/a" else bool(ex)
         boxes["counterexamples"] = "n/a" if boxes.get("counterexamples") == "n/a" else bool(cex)
         boxes["exceptions"] = bool(c.get("exceptions"))
-        boxes["stockfish_validation"] = "n/a" if boxes.get("stockfish_validation") == "n/a" else bool(engines)
-        boxes["positive_test"] = "n/a" if boxes.get("positive_test") == "n/a" else any(
-            (p.get("engine") or {}).get("verdict") == "supports" for p in ex)
-        boxes["negative_test"] = "n/a" if boxes.get("negative_test") == "n/a" else any(
-            (p.get("engine") or {}).get("verdict") in ("supports", "contradicts") for p in cex)
+        def verified(p):
+            """A position counts as tested if a search OR a tablebase settled it."""
+            if p.get("tablebase") and p["tablebase"].get("wdl") not in (None, "unknown"):
+                return True
+            return (p.get("engine") or {}).get("verdict") in ("supports", "contradicts")
+        boxes["stockfish_validation"] = "n/a" if boxes.get("stockfish_validation") == "n/a" else bool(proven)
+        boxes["positive_test"] = "n/a" if boxes.get("positive_test") == "n/a" else any(verified(p) for p in ex)
+        boxes["negative_test"] = "n/a" if boxes.get("negative_test") == "n/a" else any(verified(p) for p in cex)
         boxes["ambiguous_test"] = "n/a" if boxes.get("ambiguous_test") == "n/a" else bool(
-            [p for p in amb if p.get("engine")])
+            [p for p in amb if p.get("engine") or p.get("tablebase")])
         boxes["explanation_template"] = bool(lvl) or bool(expl.get("by_depth"))
         boxes["beginner_explanation"] = bool(lvl.get("beginner"))
         boxes["advanced_explanation"] = bool(lvl.get("advanced"))
+        # name work: a canonical name is "verified" when it was checked against two or more
+        # sources and an explicit name_status judgement was recorded.
+        multi = len(c.get("sources", [])) >= 2
+        boxes["canonical_name_verified"] = bool(c.get("name_status")) and multi
+        boxes["alternate_names_researched"] = (
+            bool(c.get("alternate_names")) or bool(c.get("historical_names"))
+            or boxes["canonical_name_verified"])
+        # drop stale keys left over from the v1 schema
+        for stale in [k for k in boxes if k not in BOXES]:
+            boxes.pop(stale)
 
         row.update({
             "boxes": boxes,

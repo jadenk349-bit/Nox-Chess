@@ -148,8 +148,96 @@
     ],
     "conflicts": []
   },
-  "examples": [],
-  "counterexamples": [],
+  "examples": [
+    {
+      "fen": "r1b2rk1/p1pn1ppp/1q2p3/3pP3/3P4/2PB1N2/PP3PPP/R1BQ1RK1 w - - 0 1",
+      "note": "Constructed controlled pair, positive half. Vukovic's conditions are met: White has queen, light-squared bishop and knight; the bishop reaches h7; g5 is undefended; the queen has the d1-h5 route. Black's bishop sits on c8, blocked behind the d7 knight.",
+      "origin_kind": "constructed-test",
+      "concept_role": "positive",
+      "side_to_move_benefits": "white",
+      "controlled_pair_with": "r4rk1/p1pnbppp/1q2p3/3pP3/3P4/2PB1N2/PP3PPP/R1BQ1RK1 w - - 0 1",
+      "engine": {
+        "engine_id": "Stockfish 18",
+        "test_level": 3,
+        "depth": 20,
+        "threads": 10,
+        "hash_mb": 2048,
+        "multipv": 3,
+        "best_move": "d3h7",
+        "eval_cp": 671,
+        "mate_in": null,
+        "pv": [
+          "d3h7",
+          "g8h8",
+          "h7c2",
+          "f7f5",
+          "f1e1",
+          "f8e8",
+          "f3g5"
+        ],
+        "alternatives": [
+          {
+            "move": "d1c2",
+            "eval_cp": 530,
+            "mate_in": null
+          },
+          {
+            "move": "c1e3",
+            "eval_cp": 516,
+            "mate_in": null
+          }
+        ],
+        "margin_cp": 141,
+        "verdict": "supports",
+        "verdict_note": "Bxh7+ is best at +6.71, 1.41 clear of the runner-up, and settled from depth 11. Paired with the negative half below, which differs only in the black bishop's square."
+      }
+    }
+  ],
+  "counterexamples": [
+    {
+      "fen": "r4rk1/p1pnbppp/1q2p3/3pP3/3P4/2PB1N2/PP3PPP/R1BQ1RK1 w - - 0 1",
+      "note": "Constructed controlled pair, negative half. IDENTICAL material — the same black bishop, relocated from c8 to e7, where it covers g5. Verified with python-chess `attackers`: g5 has no black defender in the positive position and is defended from e7 here. Every other piece and pawn is on the same square.",
+      "origin_kind": "constructed-test",
+      "concept_role": "negative",
+      "side_to_move_benefits": "white",
+      "controlled_pair_with": "r1b2rk1/p1pn1ppp/1q2p3/3pP3/3P4/2PB1N2/PP3PPP/R1BQ1RK1 w - - 0 1",
+      "engine": {
+        "engine_id": "Stockfish 18",
+        "test_level": 3,
+        "depth": 20,
+        "threads": 10,
+        "hash_mb": 2048,
+        "multipv": 3,
+        "best_move": "d1c2",
+        "eval_cp": 536,
+        "mate_in": null,
+        "pv": [
+          "d1c2",
+          "g7g6",
+          "c2b3",
+          "c7c5",
+          "b3b6",
+          "d7b6",
+          "d4c5"
+        ],
+        "alternatives": [
+          {
+            "move": "c1e3",
+            "eval_cp": 480,
+            "mate_in": null
+          },
+          {
+            "move": "d3h7",
+            "eval_cp": 377,
+            "mate_in": null
+          }
+        ],
+        "margin_cp": 56,
+        "verdict": "supports",
+        "verdict_note": "Bxh7+ collapses from BEST at +6.71 to LAST at +3.77 — a swing of 2.94 pawns, and from 1.41 ahead of the field to 1.59 behind it, on one defender of g5. The concept's central precondition is confirmed. HONEST QUALIFICATION: +3.77 still means White is much better, because White is much better in this constructed position for unrelated reasons — the sacrifice throws away most of an advantage rather than losing outright. Note also that the engine's line after Bxh7+ Kxh7 is Bc1-g5, not Ng5+, so White does recover some compensation; the textbook refutation ...Bxg5 is not what Stockfish plays. Contrast this clean tactical isolation with the three failed attempts to isolate the outpost."
+      }
+    }
+  ],
   "ambiguous_examples": [],
   "explanations": {
     "by_level": {
@@ -181,13 +269,15 @@
     ]
   },
   "status": {
-    "stage": "researched",
+    "stage": "validated",
     "last_updated": "2026-08-31",
     "open_questions": [
       "Establish the origin of the NAME. Two incompatible derivations circulate (Greco; the Trojan horse) and neither is verified. Check Winter's Chess Notes, which is the right place for exactly this kind of question.",
       "Read Vukovic's conditions from the book rather than via the Chessable summary.",
       "Construct and test the Kg6 defence as a second controlled pair."
     ],
-    "audit_notes": []
+    "audit_notes": [
+      "Promoted to validated on a controlled pair that isolates Vukovic's g5 condition with identical material. Not promoted to 'ready': the name's origin is unverified, Vukovic's conditions were read via a secondary source, and the Kg6 defence has not been tested separately."
+    ]
   }
 }
