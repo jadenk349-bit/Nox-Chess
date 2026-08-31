@@ -4211,6 +4211,11 @@ function renderStatus(){
       : live ? 'your move…'
       : (inp.dataset.side === W ? "white's move…" : "black's move…");
   });
+  // A box that has just been handed back is a box the player is about to type
+  // in: disabling an input blurs it, and every reply — the bot's, the
+  // opponent's, the other seat's — disables the one that was focused, so
+  // re-enabling is the only moment that can give the keyboard back.
+  focusEntry();
 
   // the rules crib only belongs where you have to type the notation yourself
   rulesCard.style.display = G.mode === 'total' ? 'block' : 'none';
@@ -4435,6 +4440,25 @@ function resetLog(){
 // hand the keyboard to whichever side is now to move
 function focusLocalInput(){
   const inp = document.querySelector(`.local-input[data-side="${G.st.turn}"]`);
+  if (inp && !inp.disabled) inp.focus();
+}
+
+/* The console is the only way to move in complete blindfold, so the caret
+   belongs in it — the player should never have to click the box again after
+   the first move. It is only ever taken from nothing: if something else holds
+   the focus (the chat box, a menu, a button being tabbed to) that is where the
+   player put it, and stealing it back mid-sentence is worse than a lost caret.
+   Focusing a box on a hidden screen is a no-op in the browser, which is what
+   makes it safe to call this from every render. */
+function focusEntry(){
+  if (G.mode !== 'total' || G.over) return;
+  const a = document.activeElement;
+  const idle = !a || a === document.body || a === el.moveInput ||
+               a.classList.contains('local-input');
+  if (!idle) return;
+  const inp = LOCAL()
+    ? document.querySelector(`.local-input[data-side="${G.st.turn}"]`)
+    : el.moveInput;
   if (inp && !inp.disabled) inp.focus();
 }
 
