@@ -1,0 +1,4120 @@
+[
+ {
+  "n": 1,
+  "id": "op-09bab91e03",
+  "fen": "r1b2bnr/ppNnpk1p/2p3p1/3p4/3P1B2/2P5/P3QPPP/qN2KB1R w K - 2 12",
+  "moves": [
+   "e2e6",
+   "f7g7",
+   "c7e8"
+  ],
+  "themes": [
+   "pin",
+   "skewer",
+   "trappedPiece",
+   "mate",
+   "kingAttack"
+  ],
+  "seedRating": 100,
+  "settleDepth": 1,
+  "kind": "punish",
+  "prev": {
+   "fen": "r1b1kbnr/ppNnp2p/2p3p1/3p4/3P1B2/2P5/P3QPPP/qN2KB1R b Kkq - 1 11",
+   "move": "e8f7"
+  },
+  "alt": {
+   "uci": "e2c2",
+   "score": -297
+  },
+  "eval": {
+   "before": 0,
+   "best": 9999,
+   "alt": -297,
+   "end": 10000
+  },
+  "replies": {
+   "1": {
+    "legal": 1,
+    "clear": null
+   }
+  },
+  "follow": {
+   "moves": [],
+   "mate": 0,
+   "swing": 0,
+   "startMate": 1
+  },
+  "why": {
+   "moves": [
+    {
+     "san": "Qe6+",
+     "uci": "e2e6",
+     "by": "you",
+     "text": "The knight on d7 is pinned to the bishop behind it and cannot step aside. It comes with check, so the reply is not a free move. The next best move, Qc2, only leaves White clearly worse."
+    },
+    {
+     "san": "Kg7",
+     "uci": "f7g7",
+     "by": "them",
+     "text": "Forced — it is the only legal move."
+    },
+    {
+     "san": "Ne8#",
+     "uci": "c7e8",
+     "by": "you",
+     "text": "It is checkmate."
+    }
+   ],
+   "mistake": "Black played Kf7. The position was level for White before it and is forced mate after it, with best play.",
+   "swing": null,
+   "point": "That is checkmate."
+  }
+ },
+ {
+  "n": 2,
+  "id": "op-0e9fd0cb60",
+  "fen": "r3kb1r/p3qppp/2p1bn2/1Q6/B2NpP2/4P3/PP1P1KPP/n1B3NR w kq - 0 14",
+  "moves": [
+   "b5c6",
+   "e6d7",
+   "c6a8"
+  ],
+  "themes": [
+   "hangingPiece",
+   "fork",
+   "skewer",
+   "pin",
+   "discoveredAttack",
+   "trappedPiece",
+   "defensiveResource",
+   "kingAttack",
+   "longGame"
+  ],
+  "seedRating": 100,
+  "settleDepth": 1,
+  "kind": "save",
+  "prev": {
+   "fen": "r3kb1r/p1p1qppp/4bn2/1Q6/B2NpP2/4P3/PP1P1KPP/n1B3NR b kq - 0 13",
+   "move": "c7c6"
+  },
+  "alt": {
+   "uci": "b5a6",
+   "score": -256
+  },
+  "eval": {
+   "before": -319,
+   "best": 488,
+   "alt": -256,
+   "end": 473
+  },
+  "replies": {
+   "1": {
+    "legal": 4,
+    "clear": 198
+   }
+  },
+  "follow": {
+   "moves": [
+    "e7d8",
+    "a4d7",
+    "f6d7",
+    "a8e4",
+    "f8e7",
+    "g1f3"
+   ],
+   "cp": 460,
+   "swing": 700,
+   "startCp": 488
+  },
+  "why": {
+   "moves": [
+    {
+     "san": "Qxc6+",
+     "uci": "b5c6",
+     "by": "you",
+     "text": "It leaves the rook on a8 hanging — it can simply be taken. It comes with check, so the reply is not a free move. It wins the pawn."
+    },
+    {
+     "san": "Bd7",
+     "uci": "e6d7",
+     "by": "them",
+     "text": "The king is in check and has to answer it. It is the toughest try — nothing else does better."
+    },
+    {
+     "san": "Qxa8+",
+     "uci": "c6a8",
+     "by": "you",
+     "text": "The queen on a8 forks the king on e8 and the pawn on a7. It comes with check, so the reply is not a free move. It wins the rook."
+    }
+   ],
+   "mistake": "Black played c6. It puts the pawn on c6 where it can simply be taken.",
+   "swing": "The position was clearly worse for White before it and is winning after it, with best play.",
+   "point": "White comes out the exchange up, and the engine calls the position winning."
+  }
+ },
+ {
+  "n": 3,
+  "id": "op-1a5945bb6c",
+  "fen": "r2qkb1r/1pp2ppp/p1n1p3/3P4/4Q1n1/2N2P2/PPPP1P1P/R1B1KB1R b KQkq - 3 9",
+  "moves": [
+   "g4f6"
+  ],
+  "themes": [
+   "hangingPiece",
+   "defensiveResource"
+  ],
+  "seedRating": 100,
+  "settleDepth": 1,
+  "kind": "save",
+  "prev": {
+   "fen": "r2qkb1r/1pp2ppp/p1n1p3/3P4/6n1/2NQ1P2/PPPP1P1P/R1B1KB1R w KQkq - 2 9",
+   "move": "d3e4"
+  },
+  "alt": {
+   "uci": "g4f2",
+   "score": -322
+  },
+  "eval": {
+   "before": -481,
+   "best": 76,
+   "alt": -322,
+   "end": 92
+  },
+  "replies": {},
+  "follow": {
+   "moves": [
+    "e4h4",
+    "f6d5",
+    "h4d8",
+    "a8d8",
+    "c3d5",
+    "d8d5"
+   ],
+   "cp": 84,
+   "swing": 100,
+   "startCp": 76
+  },
+  "why": {
+   "moves": [
+    {
+     "san": "Nf6",
+     "uci": "g4f6",
+     "by": "you",
+     "text": "It leaves the queen on e4 hanging — it can simply be taken. The next best move, Nxf2, only leaves Black clearly worse."
+    }
+   ],
+   "mistake": "White played Qe4. It moves the queen to e4, which does not turn out to be a safe square.",
+   "swing": "The position was losing for Black before it and is slightly better after it, with best play.",
+   "point": "Black is a piece down on material, though the engine calls the position only slightly better."
+  }
+ },
+ {
+  "n": 4,
+  "id": "op-6cd7a5e7f3",
+  "fen": "r1bqkBr1/ppp2ppp/n4n2/3pp3/8/1P1PP3/P1PN1PPP/R2QKBNR w KQq - 1 7",
+  "moves": [
+   "f8a3"
+  ],
+  "themes": [
+   "positionalTactic"
+  ],
+  "seedRating": 100,
+  "settleDepth": 1,
+  "kind": "punish",
+  "prev": {
+   "fen": "r1bqkB1r/ppp2ppp/n4n2/3pp3/8/1P1PP3/P1PN1PPP/R2QKBNR b KQkq - 0 6",
+   "move": "h8g8"
+  },
+  "alt": {
+   "uci": "d3d4",
+   "score": 224
+  },
+  "eval": {
+   "before": -10,
+   "best": 432,
+   "alt": 224,
+   "end": 430
+  },
+  "replies": {},
+  "follow": {
+   "moves": [
+    "d5d4",
+    "g1f3",
+    "g7g5",
+    "f3e5",
+    "g5g4",
+    "d1e2"
+   ],
+   "cp": 467,
+   "swing": 100,
+   "startCp": 432
+  },
+  "why": {
+   "moves": [
+    {
+     "san": "Ba3",
+     "uci": "f8a3",
+     "by": "you",
+     "text": "The next best move, d4, only leaves White clearly better."
+    }
+   ],
+   "mistake": "Black played Rg8. The position was level for White before it and is winning after it, with best play.",
+   "swing": null,
+   "point": "The engine calls the position winning for White."
+  }
+ },
+ {
+  "n": 5,
+  "id": "op-6f7e608af1",
+  "fen": "rnb1kbnr/1pp2ppp/8/p2N1p2/1q1P4/P3P3/1PPB1PPP/R2QKB1R b KQkq - 0 9",
+  "moves": [
+   "b4d6"
+  ],
+  "themes": [
+   "hangingPiece",
+   "skewer",
+   "defensiveResource"
+  ],
+  "seedRating": 100,
+  "settleDepth": 1,
+  "kind": "save",
+  "prev": {
+   "fen": "rnb1kbnr/1pp2ppp/8/p2p1p2/1q1P4/P1N1P3/1PPB1PPP/R2QKB1R w KQkq - 1 9",
+   "move": "c3d5"
+  },
+  "alt": {
+   "uci": "b4d2",
+   "score": -432
+  },
+  "eval": {
+   "before": -616,
+   "best": 235,
+   "alt": -432,
+   "end": 214
+  },
+  "replies": {},
+  "follow": {
+   "moves": [
+    "e3e4",
+    "f5e4",
+    "f1c4",
+    "b8a6",
+    "f2f3",
+    "g8e7"
+   ],
+   "cp": 248,
+   "swing": 100,
+   "startCp": 235
+  },
+  "why": {
+   "moves": [
+    {
+     "san": "Qd6",
+     "uci": "b4d6",
+     "by": "you",
+     "text": "The next best move, Qxd2+, only leaves Black losing."
+    }
+   ],
+   "mistake": "White played Nxd5. It moves the knight to d5, which does not turn out to be a safe square.",
+   "swing": "The position was losing for Black before it and is clearly better after it, with best play.",
+   "point": "The engine calls the position clearly better for Black."
+  }
+ },
+ {
+  "n": 6,
+  "id": "op-9e1d386669",
+  "fen": "r3k1nr/p4pbp/1p2p1p1/Q1pp4/P3PP1q/N2b1P2/1PP4P/R1BK1BNR w kq - 0 14",
+  "moves": [
+   "a5e1"
+  ],
+  "themes": [
+   "hangingPiece",
+   "trappedPiece",
+   "defensiveResource"
+  ],
+  "seedRating": 100,
+  "settleDepth": 1,
+  "kind": "save",
+  "prev": {
+   "fen": "r3k1nr/p4pbp/bp2p1p1/Q1pp4/P3PP1q/N2P1P2/1PP4P/R1BK1BNR b kq - 1 13",
+   "move": "a6d3"
+  },
+  "alt": {
+   "uci": "a5d2",
+   "score": -372
+  },
+  "eval": {
+   "before": -538,
+   "best": 291,
+   "alt": -372,
+   "end": 281
+  },
+  "replies": {},
+  "follow": {
+   "moves": [
+    "h4e1",
+    "d1e1",
+    "d3f1",
+    "e1f1",
+    "g8f6",
+    "a3b5"
+   ],
+   "cp": 275,
+   "swing": 0,
+   "startCp": 291
+  },
+  "why": {
+   "moves": [
+    {
+     "san": "Qe1",
+     "uci": "a5e1",
+     "by": "you",
+     "text": "It leaves the queen on h4 hanging — it can simply be taken. The next best move, Qd2, only leaves White clearly worse."
+    }
+   ],
+   "mistake": "Black played Bxd3. It takes on d3 and leaves the bishop there to be recaptured.",
+   "swing": "The position was losing for White before it and is clearly better after it, with best play.",
+   "point": "The engine calls the position clearly better for White."
+  }
+ },
+ {
+  "n": 7,
+  "id": "op-a992967c8a",
+  "fen": "r1q1kb1r/pp1npp2/3pbnpp/P7/2pPP3/2N2N1P/1PP1QPP1/R1B1KB1R w KQkq - 0 12",
+  "moves": [
+   "d4d5"
+  ],
+  "themes": [
+   "hangingPiece"
+  ],
+  "seedRating": 100,
+  "settleDepth": 1,
+  "kind": "punish",
+  "prev": {
+   "fen": "r1q1kb1r/pp1npp2/3pbnpp/P1p5/3PP3/2N2N1P/1PP1QPP1/R1B1KB1R b KQkq - 0 11",
+   "move": "c5c4"
+  },
+  "alt": {
+   "uci": "c1d2",
+   "score": 232
+  },
+  "eval": {
+   "before": 104,
+   "best": 445,
+   "alt": 232,
+   "end": 455
+  },
+  "replies": {},
+  "follow": {
+   "moves": [
+    "e6d5",
+    "e4d5",
+    "f8g7",
+    "f3d4",
+    "b7b5",
+    "c3b5"
+   ],
+   "cp": 440,
+   "swing": 330,
+   "startCp": 445
+  },
+  "why": {
+   "moves": [
+    {
+     "san": "d5",
+     "uci": "d4d5",
+     "by": "you",
+     "text": "It leaves the bishop on e6 hanging — it can simply be taken. The next best move, Bd2, only leaves White clearly better."
+    }
+   ],
+   "mistake": "Black played c4. The position was slightly better for White before it and is winning after it, with best play.",
+   "swing": null,
+   "point": "The engine calls the position winning for White."
+  }
+ },
+ {
+  "n": 8,
+  "id": "op-abb5466ba0",
+  "fen": "r3kbnr/1pBbppp1/2p5/p6p/1q1PN3/5P2/PPPQ2PP/R3KB1R w KQkq a6 0 11",
+  "moves": [
+   "c2c3"
+  ],
+  "themes": [
+   "hangingPiece"
+  ],
+  "seedRating": 100,
+  "settleDepth": 1,
+  "kind": "punish",
+  "prev": {
+   "fen": "r3kbnr/ppBbppp1/2p5/7p/1q1PN3/5P2/PPPQ2PP/R3KB1R b KQkq - 0 10",
+   "move": "a7a5"
+  },
+  "alt": {
+   "uci": "e4c3",
+   "score": 192
+  },
+  "eval": {
+   "before": -68,
+   "best": 625,
+   "alt": 192,
+   "end": 612
+  },
+  "replies": {},
+  "follow": {
+   "moves": [
+    "f7f5",
+    "c3b4",
+    "f5e4",
+    "b4a5",
+    "g8f6",
+    "f3e4"
+   ],
+   "cp": 596,
+   "swing": 780,
+   "startCp": 625
+  },
+  "why": {
+   "moves": [
+    {
+     "san": "c3",
+     "uci": "c2c3",
+     "by": "you",
+     "text": "It leaves the queen on b4 hanging — it can simply be taken. The next best move, Nc3, only leaves White clearly better."
+    }
+   ],
+   "mistake": "Black played a5. The position was slightly worse for White before it and is winning after it, with best play.",
+   "swing": null,
+   "point": "The engine calls the position winning for White."
+  }
+ },
+ {
+  "n": 9,
+  "id": "op-d8ffb9003b",
+  "fen": "1rbqk2r/pppp1ppp/2n1pB2/8/1b1PP3/5N2/PPP2PPP/RN1QKB1R w KQk - 1 7",
+  "moves": [
+   "c2c3"
+  ],
+  "themes": [
+   "hangingPiece"
+  ],
+  "seedRating": 100,
+  "settleDepth": 1,
+  "kind": "punish",
+  "prev": {
+   "fen": "1rbqk2r/ppppbppp/2n1pB2/8/3PP3/5N2/PPP2PPP/RN1QKB1R b KQk - 0 6",
+   "move": "e7b4"
+  },
+  "alt": {
+   "uci": "b1d2",
+   "score": 93
+  },
+  "eval": {
+   "before": 39,
+   "best": 446,
+   "alt": 93,
+   "end": 459
+  },
+  "replies": {},
+  "follow": {
+   "moves": [
+    "d8f6",
+    "c3b4",
+    "g7g5",
+    "h2h3",
+    "h7h5",
+    "d1d2"
+   ],
+   "cp": 445,
+   "swing": 0,
+   "startCp": 446
+  },
+  "why": {
+   "moves": [
+    {
+     "san": "c3",
+     "uci": "c2c3",
+     "by": "you",
+     "text": "It leaves the bishop on b4 hanging — it can simply be taken. The next best move, Nbd2, only leaves White slightly better."
+    }
+   ],
+   "mistake": "Black played Bb4+. It moves the bishop to b4, which does not turn out to be a safe square.",
+   "swing": "The position was level for White before it and is winning after it, with best play.",
+   "point": "White is a piece down on material, though the engine calls the position only winning."
+  }
+ },
+ {
+  "n": 10,
+  "id": "op-dcef14b811",
+  "fen": "rnq2bnr/pp2pk2/2p3p1/3pPpPp/3P1B1P/2PQ3N/PP1N1P2/2KR3R b - - 1 14",
+  "moves": [
+   "e7e6"
+  ],
+  "themes": [
+   "defensiveResource"
+  ],
+  "seedRating": 100,
+  "settleDepth": 1,
+  "kind": "save",
+  "prev": {
+   "fen": "rnq2bnr/pp2pk2/2p3p1/3pPpPp/3P1B1P/2PQ3N/PP1N1P2/R3K2R w KQ - 0 14",
+   "move": "e1c1"
+  },
+  "alt": {
+   "uci": "b8d7",
+   "score": -367
+  },
+  "eval": {
+   "before": -350,
+   "best": -49,
+   "alt": -367,
+   "end": -61
+  },
+  "replies": {},
+  "follow": {
+   "moves": [
+    "c1b1",
+    "a7a5",
+    "d3e2",
+    "g8e7",
+    "f4e3",
+    "b8d7"
+   ],
+   "cp": -61,
+   "swing": 0,
+   "startCp": -49
+  },
+  "why": {
+   "moves": [
+    {
+     "san": "e6",
+     "uci": "e7e6",
+     "by": "you",
+     "text": "The next best move, Nd7, only leaves Black clearly worse."
+    }
+   ],
+   "mistake": "White played O-O-O. The position was clearly worse for Black before it and is level after it, with best play.",
+   "swing": null,
+   "point": "The engine calls the position slightly worse for Black."
+  }
+ },
+ {
+  "n": 11,
+  "id": "op-424949398a",
+  "fen": "r1b1kb1r/pp2ppp1/3p4/q1n2P1p/3NnB1P/P1N4R/1PP1P1P1/R2QKB2 w Qkq - 0 12",
+  "moves": [
+   "b2b4",
+   "a5d8",
+   "b4c5"
+  ],
+  "themes": [
+   "hangingPiece",
+   "fork",
+   "longGame"
+  ],
+  "seedRating": 100,
+  "settleDepth": 1,
+  "kind": "punish",
+  "prev": {
+   "fen": "r1b1kb1r/pp2ppp1/3p3p/q1n2P2/3NnB1P/P1N4R/1PP1P1P1/R2QKB2 b Qkq - 1 11",
+   "move": "h6h5"
+  },
+  "alt": {
+   "uci": "f4d2",
+   "score": 33
+  },
+  "eval": {
+   "before": -41,
+   "best": 435,
+   "alt": 33,
+   "end": 358
+  },
+  "follow": {
+   "moves": [
+    "e4c5",
+    "h3e3",
+    "c8d7",
+    "d1d2",
+    "d8a5",
+    "f4d6"
+   ],
+   "cp": 421,
+   "swing": 320,
+   "startCp": 435
+  },
+  "why": {
+   "moves": [
+    {
+     "san": "b4",
+     "uci": "b2b4",
+     "by": "you",
+     "text": "The next best move, Bd2, only leaves White level."
+    },
+    {
+     "san": "Qd8",
+     "uci": "a5d8",
+     "by": "them",
+     "text": "It is the toughest try — nothing else does better."
+    },
+    {
+     "san": "bxc5",
+     "uci": "b4c5",
+     "by": "you",
+     "text": "It wins the knight."
+    }
+   ],
+   "mistake": "Black played h5. The position was level for White before it and is winning after it, with best play.",
+   "swing": null,
+   "point": "White comes out the exchange up, though the engine calls the position only clearly better."
+  }
+ },
+ {
+  "n": 12,
+  "id": "op-7befe64db5",
+  "fen": "rnbqkbr1/pp3ppp/2pp4/4P2Q/4n3/3B3P/PPPP2P1/RNB1K1NR b KQq - 1 7",
+  "moves": [
+   "e4g3",
+   "h5f3",
+   "g3h1"
+  ],
+  "themes": [
+   "hangingPiece",
+   "fork",
+   "longGame"
+  ],
+  "seedRating": 100,
+  "settleDepth": 1,
+  "kind": "punish",
+  "prev": {
+   "fen": "rnbqkbr1/pp3ppp/2pp4/4P3/4n3/3B3P/PPPP2P1/RNBQK1NR w KQq - 0 7",
+   "move": "d1h5"
+  },
+  "alt": {
+   "uci": "g7g6",
+   "score": 158
+  },
+  "eval": {
+   "before": 70,
+   "best": 407,
+   "alt": 158,
+   "end": 408
+  },
+  "follow": {
+   "moves": [
+    "g2g3",
+    "h1g3",
+    "f3g3",
+    "b8d7",
+    "e5d6",
+    "d7f6"
+   ],
+   "cp": 419,
+   "swing": 180,
+   "startCp": 407
+  },
+  "why": {
+   "moves": [
+    {
+     "san": "Ng3",
+     "uci": "e4g3",
+     "by": "you",
+     "text": "The next best move, g6, only leaves Black clearly better."
+    },
+    {
+     "san": "Qf3",
+     "uci": "h5f3",
+     "by": "them",
+     "text": "It is the toughest try — nothing else does better."
+    },
+    {
+     "san": "Nxh1",
+     "uci": "g3h1",
+     "by": "you",
+     "text": "It wins the rook."
+    }
+   ],
+   "mistake": "White played Qh5. It moves the queen to h5, which does not turn out to be a safe square.",
+   "swing": "The position was slightly better for Black before it and is winning after it, with best play.",
+   "point": "Black comes out a piece up, and the engine calls the position winning."
+  }
+ },
+ {
+  "n": 13,
+  "id": "op-8af48d7b8d",
+  "fen": "rnbq1rk1/ppp1b1p1/5n2/5pNQ/7P/2P5/PP1P1PP1/R1B1KB1R w KQ - 4 12",
+  "moves": [
+   "f1c4",
+   "d8d5",
+   "c4d5",
+   "c8e6",
+   "d5e6"
+  ],
+  "themes": [
+   "pin",
+   "hangingPiece",
+   "fork",
+   "mateThreat",
+   "kingAttack",
+   "longGame"
+  ],
+  "seedRating": 100,
+  "settleDepth": 1,
+  "kind": "punish",
+  "prev": {
+   "fen": "rnbq1rk1/ppp1b1p1/8/3n1pNQ/7P/2P5/PP1P1PP1/R1B1KB1R b KQ - 3 11",
+   "move": "d5f6"
+  },
+  "alt": {
+   "uci": "h5g6",
+   "score": 135
+  },
+  "eval": {
+   "before": -246,
+   "best": 9996,
+   "alt": 135,
+   "end": 9998
+  },
+  "replies": {
+   "1": {
+    "legal": 4,
+    "clear": 1
+   },
+   "3": {
+    "legal": 3,
+    "clear": 0
+   }
+  },
+  "follow": {
+   "moves": [
+    "f8f7",
+    "e6f7",
+    "g8f8",
+    "g5e6"
+   ],
+   "mate": 0,
+   "swing": 1730,
+   "startMate": 4
+  },
+  "why": {
+   "moves": [
+    {
+     "san": "Bc4+",
+     "uci": "f1c4",
+     "by": "you",
+     "text": "It comes with check, so the reply is not a free move. The next best move, Qg6, only leaves White slightly better."
+    },
+    {
+     "san": "Qd5",
+     "uci": "d8d5",
+     "by": "them",
+     "text": "The king is in check and has to answer it. It is the toughest try — nothing else does better."
+    },
+    {
+     "san": "Bxd5+",
+     "uci": "c4d5",
+     "by": "you",
+     "text": "The pawn on b7 is pinned to the rook behind it and cannot step aside. It comes with check, so the reply is not a free move. It wins the queen."
+    },
+    {
+     "san": "Be6",
+     "uci": "c8e6",
+     "by": "them",
+     "text": "The king is in check and has to answer it. It is the toughest try — nothing else does better."
+    },
+    {
+     "san": "Bxe6+",
+     "uci": "d5e6",
+     "by": "you",
+     "text": "The bishop on e6 forks the king on g8 and the pawn on f5. It comes with check, so the reply is not a free move. It wins the bishop."
+    }
+   ],
+   "mistake": "Black played Nf6. The position was clearly worse for White before it and is forced mate after it, with best play.",
+   "swing": null,
+   "point": "Mate is forced from here."
+  }
+ },
+ {
+  "n": 14,
+  "id": "op-90a6096224",
+  "fen": "r3k1nr/1Qpn1pp1/4pq1p/p1B2b2/2P1p3/3P1PP1/PP1N3P/2KR1BNR b kq - 0 14",
+  "moves": [
+   "a8b8",
+   "b7b8",
+   "d7b8"
+  ],
+  "themes": [
+   "hangingPiece",
+   "skewer",
+   "defensiveResource",
+   "longGame"
+  ],
+  "seedRating": 100,
+  "settleDepth": 1,
+  "kind": "save",
+  "prev": {
+   "fen": "r3k1nr/1ppn1pp1/4pq1p/pQB2b2/2P1p3/3P1PP1/PP1N3P/2KR1BNR w kq - 0 14",
+   "move": "b5b7"
+  },
+  "alt": {
+   "uci": "a8d8",
+   "score": -388
+  },
+  "eval": {
+   "before": -428,
+   "best": 94,
+   "alt": -388,
+   "end": 89
+  },
+  "replies": {
+   "1": {
+    "legal": 45,
+    "clear": 519
+   }
+  },
+  "follow": {
+   "moves": [
+    "d3e4",
+    "f5h7",
+    "g1e2",
+    "g8e7",
+    "e2c3",
+    "e7c6"
+   ],
+   "cp": 91,
+   "swing": 300,
+   "startCp": 94
+  },
+  "why": {
+   "moves": [
+    {
+     "san": "Rb8",
+     "uci": "a8b8",
+     "by": "you",
+     "text": "It leaves the queen on b7 hanging — it can simply be taken. The next best move, Rd8, only leaves Black clearly worse."
+    },
+    {
+     "san": "Qxb8+",
+     "uci": "b7b8",
+     "by": "them",
+     "text": "It takes the rook back. Everything else is clearly worse for them."
+    },
+    {
+     "san": "Nxb8",
+     "uci": "d7b8",
+     "by": "you",
+     "text": "It wins the queen."
+    }
+   ],
+   "mistake": "White played Qxb7. It moves the queen to b7, which does not turn out to be a safe square.",
+   "swing": "The position was losing for Black before it and is slightly better after it, with best play.",
+   "point": "Black comes out a piece up, though the engine calls the position only slightly better."
+  }
+ },
+ {
+  "n": 15,
+  "id": "op-caf9b35c95",
+  "fen": "r1b1kb1r/ppp2ppp/2q1pn2/3pn2Q/1P1PP3/P1N2P2/2P3PP/R1B1KBNR w KQkq - 1 8",
+  "moves": [
+   "f1b5",
+   "f6h5",
+   "d4e5"
+  ],
+  "themes": [
+   "hangingPiece",
+   "pin",
+   "trappedPiece",
+   "defensiveResource",
+   "longGame"
+  ],
+  "seedRating": 100,
+  "settleDepth": 1,
+  "kind": "save",
+  "prev": {
+   "fen": "r1b1kbnr/ppp2ppp/2q1p3/3pn2Q/1P1PP3/P1N2P2/2P3PP/R1B1KBNR b KQkq - 0 7",
+   "move": "g8f6"
+  },
+  "alt": {
+   "uci": "c1d2",
+   "score": -453
+  },
+  "eval": {
+   "before": -727,
+   "best": 90,
+   "alt": -453,
+   "end": 64
+  },
+  "replies": {
+   "1": {
+    "legal": 30,
+    "clear": 3
+   }
+  },
+  "follow": {
+   "moves": [
+    "a7a5",
+    "g2g4",
+    "a5b4",
+    "b5c6",
+    "b7c6",
+    "c3b1"
+   ],
+   "cp": 96,
+   "swing": -110,
+   "startCp": 90
+  },
+  "why": {
+   "moves": [
+    {
+     "san": "Bb5",
+     "uci": "f1b5",
+     "by": "you",
+     "text": "It leaves the queen on c6 hanging — it can simply be taken. The next best move, Bd2, only leaves White losing."
+    },
+    {
+     "san": "Nxh5",
+     "uci": "f6h5",
+     "by": "them",
+     "text": "It takes the queen back. It is the toughest try — nothing else does better."
+    },
+    {
+     "san": "dxe5",
+     "uci": "d4e5",
+     "by": "you",
+     "text": "The queen on c6 is trapped — every square it can reach loses it. It wins the knight."
+    }
+   ],
+   "mistake": "Black played Nf6. The position was losing for White before it and is slightly better after it, with best play.",
+   "swing": null,
+   "point": "White is a queen down on material, though the engine calls the position only slightly better."
+  }
+ },
+ {
+  "n": 16,
+  "id": "op-d2c1a5d911",
+  "fen": "rq2k1nr/1ppbbNpp/3p4/3Q4/1pN5/2P5/P3PPPP/R1B1KB1R b KQkq - 2 12",
+  "moves": [
+   "g8f6",
+   "d5d3",
+   "e8f7"
+  ],
+  "themes": [
+   "hangingPiece",
+   "defensiveResource",
+   "longGame"
+  ],
+  "seedRating": 100,
+  "settleDepth": 1,
+  "kind": "save",
+  "prev": {
+   "fen": "rq2k1nr/1ppbbNpp/3p4/8/1pN5/2P5/P3PPPP/R1BQKB1R w KQkq - 1 12",
+   "move": "d1d5"
+  },
+  "alt": {
+   "uci": "d7c6",
+   "score": -309
+  },
+  "eval": {
+   "before": -456,
+   "best": 66,
+   "alt": -309,
+   "end": 29
+  },
+  "follow": {
+   "moves": [
+    "c3b4",
+    "b7b5",
+    "c4d2",
+    "c7c5",
+    "c1b2",
+    "c5c4"
+   ],
+   "cp": 24,
+   "swing": 220,
+   "startCp": 66
+  },
+  "why": {
+   "moves": [
+    {
+     "san": "Nf6",
+     "uci": "g8f6",
+     "by": "you",
+     "text": "The next best move, Bc6, only leaves Black clearly worse."
+    },
+    {
+     "san": "Qd3",
+     "uci": "d5d3",
+     "by": "them",
+     "text": "It is the toughest try — nothing else does better."
+    },
+    {
+     "san": "Kxf7",
+     "uci": "e8f7",
+     "by": "you",
+     "text": "It wins the knight."
+    }
+   ],
+   "mistake": "White played Qd5. It moves the queen to d5, which does not turn out to be a safe square.",
+   "swing": "The position was losing for Black before it and is slightly better after it, with best play.",
+   "point": "Black comes out the exchange up, though the engine calls the position only level."
+  }
+ },
+ {
+  "n": 17,
+  "id": "op-e493e72a1a",
+  "fen": "rn2kb1r/1p3ppp/8/pqppP1Nb/3PP1n1/2P3PB/PP4KP/RNBQR3 b kq - 2 12",
+  "moves": [
+   "g4e3",
+   "c1e3",
+   "h5d1"
+  ],
+  "themes": [
+   "hangingPiece",
+   "fork",
+   "discoveredAttack",
+   "sacrifice",
+   "defensiveResource",
+   "longGame"
+  ],
+  "seedRating": 100,
+  "settleDepth": 1,
+  "kind": "save",
+  "prev": {
+   "fen": "rn2kb1r/1p3ppp/8/pqppP2b/3PP1n1/2P2NPB/PP4KP/RNBQR3 w kq - 1 12",
+   "move": "f3g5"
+  },
+  "alt": {
+   "uci": "f8e7",
+   "score": -517
+  },
+  "eval": {
+   "before": -476,
+   "best": 262,
+   "alt": -517,
+   "end": 258
+  },
+  "replies": {
+   "1": {
+    "legal": 5,
+    "clear": 111
+   }
+  },
+  "follow": {
+   "moves": [
+    "b1d2",
+    "c5d4",
+    "c3d4",
+    "d1h5",
+    "a2a4",
+    "b5a6"
+   ],
+   "cp": 239,
+   "swing": 580,
+   "startCp": 262
+  },
+  "why": {
+   "moves": [
+    {
+     "san": "Ne3+",
+     "uci": "g4e3",
+     "by": "you",
+     "text": "It leaves the queen on d1 hanging — it can simply be taken. It comes with check, so the reply is not a free move. It gives up a piece first, which is why it is easy to reject."
+    },
+    {
+     "san": "Bxe3",
+     "uci": "c1e3",
+     "by": "them",
+     "text": "The king is in check and has to answer it. It takes the knight back."
+    },
+    {
+     "san": "Bxd1",
+     "uci": "h5d1",
+     "by": "you",
+     "text": "It wins the queen."
+    }
+   ],
+   "mistake": "White played Ng5. The position was losing for Black before it and is clearly better after it, with best play.",
+   "swing": null,
+   "point": "Black comes out the exchange up, though the engine calls the position only clearly better."
+  }
+ },
+ {
+  "n": 18,
+  "id": "op-01d3be9536",
+  "fen": "3qkb1r/rp2np1n/1p1P2p1/p3P2p/P3P1bP/R1P5/1P2N2R/2BQKB2 b k - 0 18",
+  "moves": [
+   "e7c6"
+  ],
+  "themes": [
+   "hangingPiece",
+   "pin",
+   "discoveredAttack"
+  ],
+  "seedRating": 500,
+  "settleDepth": 1,
+  "kind": "punish",
+  "prev": {
+   "fen": "3qkb1r/rp2np1n/1p1P2p1/p3P2p/P3P1bP/R7/1PP1N2R/2BQKB2 w k - 0 18",
+   "move": "c2c3"
+  },
+  "alt": {
+   "uci": "a7a8",
+   "score": 177
+  },
+  "eval": {
+   "before": -11,
+   "best": 408,
+   "alt": 177,
+   "end": 388
+  },
+  "replies": {},
+  "follow": {
+   "moves": [
+    "c1f4",
+    "f8g7",
+    "e5e6",
+    "g4e6",
+    "d1d2",
+    "h7f6"
+   ],
+   "cp": 409,
+   "swing": 100,
+   "startCp": 408
+  },
+  "why": {
+   "moves": [
+    {
+     "san": "Nc6",
+     "uci": "e7c6",
+     "by": "you",
+     "text": "It leaves the pawn on e5 hanging — it can simply be taken. The next best move, Ra8, only leaves Black clearly better."
+    }
+   ],
+   "mistake": "White played c3. The position was level for Black before it and is winning after it, with best play.",
+   "swing": null,
+   "point": "The engine calls the position clearly better for Black."
+  }
+ },
+ {
+  "n": 19,
+  "id": "op-8f214e0102",
+  "fen": "r2qkbnr/p4pp1/b1pPp2p/2p5/Q2P4/5N2/PP1N1PPP/R1B1K2R b KQkq - 1 11",
+  "moves": [
+   "a6b5"
+  ],
+  "themes": [
+   "hangingPiece",
+   "defensiveResource"
+  ],
+  "seedRating": 500,
+  "settleDepth": 1,
+  "kind": "save",
+  "prev": {
+   "fen": "r2qkbnr/p4pp1/b1pPp2p/2p5/3P4/1Q3N2/PP1N1PPP/R1B1K2R w KQkq - 0 11",
+   "move": "b3a4"
+  },
+  "alt": {
+   "uci": "d8c8",
+   "score": -333
+  },
+  "eval": {
+   "before": -321,
+   "best": 61,
+   "alt": -333,
+   "end": 70
+  },
+  "replies": {},
+  "follow": {
+   "moves": [
+    "a4c2",
+    "f8d6",
+    "d4c5",
+    "d6e7",
+    "d2b3",
+    "b5d3"
+   ],
+   "cp": 64,
+   "swing": 0,
+   "startCp": 61
+  },
+  "why": {
+   "moves": [
+    {
+     "san": "Bb5",
+     "uci": "a6b5",
+     "by": "you",
+     "text": "The next best move, Qc8, only leaves Black clearly worse."
+    }
+   ],
+   "mistake": "White played Qa4. It moves the queen to a4, which does not turn out to be a safe square.",
+   "swing": "The position was clearly worse for Black before it and is slightly better after it, with best play.",
+   "point": "Black is a pawn down on material, though the engine calls the position only slightly better."
+  }
+ },
+ {
+  "n": 20,
+  "id": "op-940c6c973d",
+  "fen": "r1bqk1nr/pppp2pp/2n1pp2/8/1b4Q1/4P2N/PPPP1PPP/RNB1KB1R w KQkq - 2 5",
+  "moves": [
+   "g4g7",
+   "d8e7",
+   "g7h8"
+  ],
+  "themes": [
+   "hangingPiece",
+   "pin",
+   "trappedPiece",
+   "longGame"
+  ],
+  "seedRating": 500,
+  "settleDepth": 1,
+  "kind": "punish",
+  "prev": {
+   "fen": "rnbqk1nr/pppp2pp/4pp2/8/1b4Q1/4P2N/PPPP1PPP/RNB1KB1R b KQkq - 1 4",
+   "move": "b8c6"
+  },
+  "alt": {
+   "uci": "c2c4",
+   "score": 42
+  },
+  "eval": {
+   "before": 50,
+   "best": 523,
+   "alt": 42,
+   "end": 533
+  },
+  "replies": {
+   "1": {
+    "legal": 27,
+    "clear": 72
+   }
+  },
+  "follow": {
+   "moves": [
+    "e7f7",
+    "f1d3",
+    "f6f5",
+    "h3g5",
+    "f7g6",
+    "h2h4"
+   ],
+   "cp": 519,
+   "swing": 600,
+   "startCp": 523
+  },
+  "why": {
+   "moves": [
+    {
+     "san": "Qxg7",
+     "uci": "g4g7",
+     "by": "you",
+     "text": "It leaves the rook on h8 hanging — it can simply be taken. It wins the pawn. The next best move, c4, only leaves White level."
+    },
+    {
+     "san": "Qe7",
+     "uci": "d8e7",
+     "by": "them",
+     "text": "It is the toughest try — nothing else does better."
+    },
+    {
+     "san": "Qxh8",
+     "uci": "g7h8",
+     "by": "you",
+     "text": "The knight on g8 is pinned to the king behind it and cannot step aside. It wins the rook."
+    }
+   ],
+   "mistake": "Black played Nc6. The position was level for White before it and is winning after it, with best play.",
+   "swing": null,
+   "point": "White comes out a rook up, and the engine calls the position winning."
+  }
+ },
+ {
+  "n": 21,
+  "id": "op-b0db58fd38",
+  "fen": "rnb1k2r/qp1pnpb1/p3p3/1Pp4p/N1B2Pp1/1N2P1P1/P1PP3P/R1BQK2R w KQkq - 4 12",
+  "moves": [
+   "b5b6"
+  ],
+  "themes": [
+   "hangingPiece",
+   "discoveredAttack"
+  ],
+  "seedRating": 500,
+  "settleDepth": 1,
+  "kind": "punish",
+  "prev": {
+   "fen": "rnb1k2r/1p1pnpb1/pq2p3/1Pp4p/N1B2Pp1/1N2P1P1/P1PP3P/R1BQK2R b KQkq - 3 11",
+   "move": "b6a7"
+  },
+  "alt": {
+   "uci": "c1b2",
+   "score": 7
+  },
+  "eval": {
+   "before": -167,
+   "best": 502,
+   "alt": 7,
+   "end": 498
+  },
+  "replies": {},
+  "follow": {
+   "moves": [
+    "g7a1",
+    "b3a1",
+    "d7d5",
+    "c4f1",
+    "b8d7",
+    "b6a7"
+   ],
+   "cp": 510,
+   "swing": 730,
+   "startCp": 502
+  },
+  "why": {
+   "moves": [
+    {
+     "san": "b6",
+     "uci": "b5b6",
+     "by": "you",
+     "text": "It leaves the queen on a7 hanging — it can simply be taken. The next best move, Bb2, only leaves White level."
+    }
+   ],
+   "mistake": "Black played Qa7. It moves the queen to a7, which does not turn out to be a safe square.",
+   "swing": "The position was clearly worse for White before it and is winning after it, with best play.",
+   "point": "White is the exchange down on material, though the engine calls the position only winning."
+  }
+ },
+ {
+  "n": 22,
+  "id": "op-c325d549b8",
+  "fen": "rn2kb1r/pp2nbpp/8/1q1p1pN1/4p3/B1P1P3/P1B2PPP/RN1QK2R w KQkq - 0 13",
+  "moves": [
+   "c2a4"
+  ],
+  "themes": [
+   "hangingPiece",
+   "pin"
+  ],
+  "seedRating": 500,
+  "settleDepth": 1,
+  "kind": "punish",
+  "prev": {
+   "fen": "rn2kb1r/pp2nbpp/1q6/1P1p1pN1/4p3/B1P1P3/P1B2PPP/RN1QK2R b KQkq - 2 12",
+   "move": "b6b5"
+  },
+  "alt": {
+   "uci": "g5e4",
+   "score": 112
+  },
+  "eval": {
+   "before": -30,
+   "best": 537,
+   "alt": 112,
+   "end": 524
+  },
+  "replies": {},
+  "follow": {
+   "moves": [
+    "b5c6",
+    "a4c6",
+    "b8c6",
+    "g5f7",
+    "e8f7",
+    "e1g1"
+   ],
+   "cp": 527,
+   "swing": 580,
+   "startCp": 537
+  },
+  "why": {
+   "moves": [
+    {
+     "san": "Ba4",
+     "uci": "c2a4",
+     "by": "you",
+     "text": "It leaves the queen on b5 hanging — it can simply be taken. The next best move, Nxe4, only leaves White slightly better."
+    }
+   ],
+   "mistake": "Black played Qxb5. It moves the queen to b5, which does not turn out to be a safe square.",
+   "swing": "The position was level for White before it and is winning after it, with best play.",
+   "point": "The engine calls the position winning for White."
+  }
+ },
+ {
+  "n": 23,
+  "id": "op-c5db1dd930",
+  "fen": "rnbqkbnr/p2p3p/2p1ppp1/1p1B4/1P2P3/8/P1PPQPPP/RNB1K1NR w KQkq - 0 6",
+  "moves": [
+   "d5b3"
+  ],
+  "themes": [
+   "pin",
+   "defensiveResource"
+  ],
+  "seedRating": 500,
+  "settleDepth": 1,
+  "kind": "save",
+  "prev": {
+   "fen": "rnbqkbnr/p2pp2p/2p2pp1/1p1B4/1P2P3/8/P1PPQPPP/RNB1K1NR b KQkq - 1 5",
+   "move": "e7e6"
+  },
+  "alt": {
+   "uci": "a2a4",
+   "score": -287
+  },
+  "eval": {
+   "before": -329,
+   "best": 19,
+   "alt": -287,
+   "end": 20
+  },
+  "replies": {},
+  "follow": {
+   "moves": [
+    "f8b4",
+    "a2a4",
+    "a7a5",
+    "c2c3",
+    "b4d6",
+    "a4b5"
+   ],
+   "cp": 15,
+   "swing": 0,
+   "startCp": 19
+  },
+  "why": {
+   "moves": [
+    {
+     "san": "Bb3",
+     "uci": "d5b3",
+     "by": "you",
+     "text": "The pawn on e6 is pinned to the knight behind it and cannot step aside. The next best move, a4, only leaves White clearly worse."
+    }
+   ],
+   "mistake": "Black played e6. The position was clearly worse for White before it and is level after it, with best play.",
+   "swing": null,
+   "point": "White is a pawn down on material, though the engine calls the position only level."
+  }
+ },
+ {
+  "n": 24,
+  "id": "op-13c2bead8f",
+  "fen": "r1b1kbnr/ppp2ppp/3qp3/3pn2Q/1P2P3/P1N5/2PP1PPP/R1B1KBNR w KQkq - 3 6",
+  "moves": [
+   "c3b5",
+   "d6d7",
+   "h5e5"
+  ],
+  "themes": [
+   "hangingPiece",
+   "pin",
+   "longGame"
+  ],
+  "seedRating": 500,
+  "settleDepth": 1,
+  "kind": "punish",
+  "prev": {
+   "fen": "r1bqkbnr/ppp2ppp/4p3/3pn2Q/1P2P3/P1N5/2PP1PPP/R1B1KBNR b KQkq - 2 5",
+   "move": "d8d6"
+  },
+  "alt": {
+   "uci": "d2d4",
+   "score": 141
+  },
+  "eval": {
+   "before": -96,
+   "best": 401,
+   "alt": 141,
+   "end": 398
+  },
+  "replies": {
+   "1": {
+    "legal": 34,
+    "clear": 34
+   }
+  },
+  "follow": {
+   "moves": [
+    "e8d8",
+    "e4d5",
+    "e6d5",
+    "e5b2",
+    "g8e7",
+    "g1f3"
+   ],
+   "cp": 383,
+   "swing": 320,
+   "startCp": 401
+  },
+  "why": {
+   "moves": [
+    {
+     "san": "Nb5",
+     "uci": "c3b5",
+     "by": "you",
+     "text": "The next best move, d4, only leaves White slightly better."
+    },
+    {
+     "san": "Qd7",
+     "uci": "d6d7",
+     "by": "them",
+     "text": "It is the toughest try — nothing else does better."
+    },
+    {
+     "san": "Qxe5",
+     "uci": "h5e5",
+     "by": "you",
+     "text": "The pawn on g7 is pinned to the rook behind it and cannot step aside. It wins the knight."
+    }
+   ],
+   "mistake": "Black played Qd6. It moves the queen to d6, which does not turn out to be a safe square.",
+   "swing": "The position was slightly worse for White before it and is winning after it, with best play.",
+   "point": "White comes out a piece up, though the engine calls the position only clearly better."
+  }
+ },
+ {
+  "n": 25,
+  "id": "op-547d9474b5",
+  "fen": "r1bqkbnr/pppnppp1/7p/8/4pN2/2N5/PPPP1PPP/R1BQKB1R w KQkq - 0 5",
+  "moves": [
+   "f4e6"
+  ],
+  "themes": [
+   "hangingPiece",
+   "fork",
+   "sacrifice"
+  ],
+  "seedRating": 500,
+  "settleDepth": 1,
+  "kind": "punish",
+  "prev": {
+   "fen": "r1bqkbnr/pppnppp1/7p/3p4/4PN2/2N5/PPPP1PPP/R1BQKB1R b KQkq - 3 4",
+   "move": "d5e4"
+  },
+  "alt": {
+   "uci": "d2d4",
+   "score": -53
+  },
+  "eval": {
+   "before": 124,
+   "best": 577,
+   "alt": -53,
+   "end": 581
+  },
+  "replies": {},
+  "follow": {
+   "moves": [
+    "g8f6",
+    "e6d8",
+    "e8d8",
+    "d2d3",
+    "e7e6",
+    "d3e4"
+   ],
+   "cp": 605,
+   "swing": 680,
+   "startCp": 577
+  },
+  "why": {
+   "moves": [
+    {
+     "san": "Ne6",
+     "uci": "f4e6",
+     "by": "you",
+     "text": "It leaves the queen on d8 hanging — it can simply be taken. It gives up a piece first, which is why it is easy to reject. The next best move, d4, only leaves White level."
+    }
+   ],
+   "mistake": "Black played dxe4. It takes on e4 and leaves the pawn there to be recaptured.",
+   "swing": "The position was slightly better for White before it and is winning after it, with best play.",
+   "point": "White is a piece down on material, though the engine calls the position only winning."
+  }
+ },
+ {
+  "n": 26,
+  "id": "op-982c449d3a",
+  "fen": "rnb1kb1r/ppqpnppp/4p3/4P3/3Q4/N1P1B3/PP3PPP/R3KBNR w KQ - 1 8",
+  "moves": [
+   "a3b5",
+   "c7c6",
+   "b5d6",
+   "c6d6",
+   "e5d6"
+  ],
+  "themes": [
+   "hangingPiece",
+   "fork",
+   "pin",
+   "discoveredAttack",
+   "longGame"
+  ],
+  "seedRating": 500,
+  "settleDepth": 1,
+  "kind": "punish",
+  "prev": {
+   "fen": "rnb1kbnr/ppqp1ppp/4p3/4P3/3Q4/N1P1B3/PP3PPP/R3KBNR b KQ - 0 7",
+   "move": "g8e7"
+  },
+  "alt": {
+   "uci": "g1f3",
+   "score": 160
+  },
+  "eval": {
+   "before": -98,
+   "best": 529,
+   "alt": 160,
+   "end": 532
+  },
+  "replies": {
+   "1": {
+    "legal": 29,
+    "clear": 96
+   },
+   "3": {
+    "legal": 2,
+    "clear": 79
+   }
+  },
+  "follow": {
+   "moves": [
+    "e7f5",
+    "d4d2",
+    "b7b6",
+    "e3f4",
+    "g7g5",
+    "f4g5"
+   ],
+   "cp": 556,
+   "swing": 680,
+   "startCp": 529
+  },
+  "why": {
+   "moves": [
+    {
+     "san": "Nb5",
+     "uci": "a3b5",
+     "by": "you",
+     "text": "It leaves the queen on c7 hanging — it can simply be taken. The next best move, Nf3, only leaves White clearly better."
+    },
+    {
+     "san": "Qc6",
+     "uci": "c7c6",
+     "by": "them",
+     "text": "It is the toughest try — nothing else does better."
+    },
+    {
+     "san": "Nd6+",
+     "uci": "b5d6",
+     "by": "you",
+     "text": "It comes with check, so the reply is not a free move."
+    },
+    {
+     "san": "Qxd6",
+     "uci": "c6d6",
+     "by": "them",
+     "text": "The king is in check and has to answer it. It takes the knight back."
+    },
+    {
+     "san": "exd6",
+     "uci": "e5d6",
+     "by": "you",
+     "text": "The pawn on g7 is pinned to the rook behind it and cannot step aside. It wins the queen."
+    }
+   ],
+   "mistake": "Black played Ne7. The position was slightly worse for White before it and is winning after it, with best play.",
+   "swing": null,
+   "point": "White comes out a rook up, and the engine calls the position winning."
+  }
+ },
+ {
+  "n": 27,
+  "id": "op-20152fdcf1",
+  "fen": "r1b1kbnr/pp1ppppp/1qN5/2p5/8/8/PPPPPPPP/RNBQKB1R w KQkq - 1 4",
+  "moves": [
+   "c6e5"
+  ],
+  "themes": [
+   "positionalTactic"
+  ],
+  "seedRating": 800,
+  "settleDepth": 1,
+  "kind": "punish",
+  "prev": {
+   "fen": "r1bqkbnr/pp1ppppp/2N5/2p5/8/8/PPPPPPPP/RNBQKB1R b KQkq - 0 3",
+   "move": "d8b6"
+  },
+  "alt": {
+   "uci": "c6a7",
+   "score": 145
+  },
+  "eval": {
+   "before": 18,
+   "best": 408,
+   "alt": 145,
+   "end": 416
+  },
+  "replies": {},
+  "follow": {
+   "moves": [
+    "g8f6",
+    "b1c3",
+    "b6c7",
+    "e5f3",
+    "g7g5",
+    "e2e4"
+   ],
+   "cp": 414,
+   "swing": 0,
+   "startCp": 408
+  },
+  "why": {
+   "moves": [
+    {
+     "san": "Ne5",
+     "uci": "c6e5",
+     "by": "you",
+     "text": "The next best move, Nxa7, only leaves White slightly better."
+    }
+   ],
+   "mistake": "Black played Qb6. The position was level for White before it and is winning after it, with best play.",
+   "swing": null,
+   "point": "The engine calls the position winning for White."
+  }
+ },
+ {
+  "n": 28,
+  "id": "op-a667d55c83",
+  "fen": "r1b1k2r/p2p2pp/2npp3/1p3p2/3P1P1q/2P1K2P/PP2P1P1/RNBQ1BR1 b kq - 0 12",
+  "moves": [
+   "h4g3",
+   "e3d2",
+   "g3h2"
+  ],
+  "themes": [
+   "pin",
+   "skewer",
+   "hangingPiece",
+   "fork",
+   "defensiveResource",
+   "longGame"
+  ],
+  "seedRating": 800,
+  "settleDepth": 1,
+  "kind": "save",
+  "prev": {
+   "fen": "r1b1k2r/p2p2pp/2npp3/1p3p2/3P1P1q/4K2P/PPP1P1P1/RNBQ1BR1 w kq - 0 12",
+   "move": "c2c3"
+  },
+  "alt": {
+   "uci": "g7g5",
+   "score": -267
+  },
+  "eval": {
+   "before": -398,
+   "best": 171,
+   "alt": -267,
+   "end": 158
+  },
+  "replies": {
+   "1": {
+    "legal": 1,
+    "clear": null
+   }
+  },
+  "follow": {
+   "moves": [
+    "d2e1",
+    "h2g1",
+    "d4d5",
+    "c6e7",
+    "d5e6",
+    "d7e6"
+   ],
+   "cp": 178,
+   "swing": 500,
+   "startCp": 171
+  },
+  "why": {
+   "moves": [
+    {
+     "san": "Qg3+",
+     "uci": "h4g3",
+     "by": "you",
+     "text": "The pawn on g2 is pinned to the rook behind it and cannot step aside. It comes with check, so the reply is not a free move. The next best move, g5, only leaves Black clearly worse."
+    },
+    {
+     "san": "Kd2",
+     "uci": "e3d2",
+     "by": "them",
+     "text": "Forced — it is the only legal move."
+    },
+    {
+     "san": "Qh2",
+     "uci": "g3h2",
+     "by": "you",
+     "text": "It leaves the rook on g1 hanging — it can simply be taken."
+    }
+   ],
+   "mistake": "White played c3. The position was clearly worse for Black before it and is clearly better after it, with best play.",
+   "swing": null,
+   "point": "The engine calls the position clearly better for Black."
+  }
+ },
+ {
+  "n": 29,
+  "id": "op-c7bc2cbf8a",
+  "fen": "r1bqkb1r/pp2pppp/5n2/n2p4/QP6/N1P2N2/P2P1PPP/R1B1KB1R b KQkq - 2 7",
+  "moves": [
+   "a5c6"
+  ],
+  "themes": [
+   "defensiveResource"
+  ],
+  "seedRating": 800,
+  "settleDepth": 1,
+  "kind": "save",
+  "prev": {
+   "fen": "r1bqkb1r/pp2pppp/5n2/n2p4/1P6/N1P2N2/P2P1PPP/R1BQKB1R w KQkq - 1 7",
+   "move": "d1a4"
+  },
+  "alt": {
+   "uci": "c8d7",
+   "score": -378
+  },
+  "eval": {
+   "before": -385,
+   "best": 17,
+   "alt": -378,
+   "end": 15
+  },
+  "replies": {},
+  "follow": {
+   "moves": [
+    "b4b5",
+    "c6a5",
+    "f1e2",
+    "e7e6",
+    "e1g1",
+    "f8e7"
+   ],
+   "cp": 19,
+   "swing": 0,
+   "startCp": 17
+  },
+  "why": {
+   "moves": [
+    {
+     "san": "Nc6",
+     "uci": "a5c6",
+     "by": "you",
+     "text": "The next best move, Bd7, only leaves Black clearly worse."
+    }
+   ],
+   "mistake": "White played Qa4+. The position was clearly worse for Black before it and is level after it, with best play.",
+   "swing": null,
+   "point": "The engine calls the position level for Black."
+  }
+ },
+ {
+  "n": 30,
+  "id": "op-e139c9b1fe",
+  "fen": "rnb1kb1r/p1ppqpp1/1p6/6Pp/2Q4P/5N1B/PPP1PP2/R1B1K2R b KQkq - 2 12",
+  "moves": [
+   "c8a6"
+  ],
+  "themes": [
+   "hangingPiece",
+   "skewer"
+  ],
+  "seedRating": 800,
+  "settleDepth": 1,
+  "kind": "punish",
+  "prev": {
+   "fen": "rnb1kb1r/p1ppqpp1/1p6/6Pp/3Q3P/5N1B/PPP1PP2/R1B1K2R w KQkq - 1 12",
+   "move": "d4c4"
+  },
+  "alt": {
+   "uci": "e7b4",
+   "score": -61
+  },
+  "eval": {
+   "before": -170,
+   "best": 403,
+   "alt": -61,
+   "end": 375
+  },
+  "replies": {},
+  "follow": {
+   "moves": [
+    "h3d7",
+    "e8d7",
+    "c4d5",
+    "d7c8",
+    "f3d4",
+    "e7d7"
+   ],
+   "cp": 398,
+   "swing": 230,
+   "startCp": 403
+  },
+  "why": {
+   "moves": [
+    {
+     "san": "Ba6",
+     "uci": "c8a6",
+     "by": "you",
+     "text": "The next best move, Qb4+, only leaves Black slightly worse."
+    }
+   ],
+   "mistake": "White played Qc4. It moves the queen to c4, which does not turn out to be a safe square.",
+   "swing": "The position was clearly worse for Black before it and is winning after it, with best play.",
+   "point": "Black is a pawn down on material, though the engine calls the position only clearly better."
+  }
+ },
+ {
+  "n": 31,
+  "id": "op-31be3122c8",
+  "fen": "r2qkb1r/pppnpnpp/4bp2/8/Q1pPP3/2N2N1P/PP3PP1/R1B1KB1R w KQkq - 2 8",
+  "moves": [
+   "d4d5",
+   "e6d5",
+   "e4d5"
+  ],
+  "themes": [
+   "hangingPiece",
+   "trappedPiece",
+   "longGame"
+  ],
+  "seedRating": 800,
+  "settleDepth": 1,
+  "kind": "punish",
+  "prev": {
+   "fen": "rn1qkb1r/ppp1pnpp/4bp2/8/Q1pPP3/2N2N1P/PP3PP1/R1B1KB1R b KQkq - 1 7",
+   "move": "b8d7"
+  },
+  "alt": {
+   "uci": "b2b3",
+   "score": 148
+  },
+  "eval": {
+   "before": 137,
+   "best": 477,
+   "alt": 148,
+   "end": 490
+  },
+  "replies": {
+   "1": {
+    "legal": 24,
+    "clear": 68
+   }
+  },
+  "follow": {
+   "moves": [
+    "c7c6",
+    "d5c6",
+    "d7b6",
+    "c6c7",
+    "d8d7",
+    "a4d7"
+   ],
+   "cp": 463,
+   "swing": 1230,
+   "startCp": 477
+  },
+  "why": {
+   "moves": [
+    {
+     "san": "d5",
+     "uci": "d4d5",
+     "by": "you",
+     "text": "It leaves the bishop on e6 hanging — it can simply be taken. The next best move, b3, only leaves White slightly better."
+    },
+    {
+     "san": "Bxd5",
+     "uci": "e6d5",
+     "by": "them",
+     "text": "It takes the pawn back. It is the toughest try — nothing else does better."
+    },
+    {
+     "san": "exd5",
+     "uci": "e4d5",
+     "by": "you",
+     "text": "It wins the bishop."
+    }
+   ],
+   "mistake": "Black played Nd7. The position was slightly better for White before it and is winning after it, with best play.",
+   "swing": null,
+   "point": "White comes out the exchange up, and the engine calls the position winning."
+  }
+ },
+ {
+  "n": 32,
+  "id": "op-6c6f558c9c",
+  "fen": "r1b1kb1r/pp2qpp1/2pp2n1/5P1p/P2Pn3/2PB4/1PK1N1PB/RN3Q1R b kq - 1 16",
+  "moves": [
+   "g6h4",
+   "e2g3",
+   "d6d5"
+  ],
+  "themes": [
+   "hangingPiece",
+   "defensiveResource",
+   "longGame"
+  ],
+  "seedRating": 800,
+  "settleDepth": 1,
+  "kind": "save",
+  "prev": {
+   "fen": "r1b1kb1r/pp2qpp1/2pp2n1/5P1p/P2Pn3/2PB4/1PK1N1PB/RN1Q3R w kq - 0 16",
+   "move": "d1f1"
+  },
+  "alt": {
+   "uci": "e7f6",
+   "score": -321
+  },
+  "eval": {
+   "before": -272,
+   "best": -15,
+   "alt": -321,
+   "end": -18
+  },
+  "replies": {
+   "1": {
+    "legal": 36,
+    "clear": 109
+   }
+  },
+  "follow": {
+   "moves": [
+    "b1a3",
+    "e7f6",
+    "g3e4",
+    "d5e4",
+    "a1e1",
+    "f8a3"
+   ],
+   "cp": -30,
+   "swing": 320,
+   "startCp": -15
+  },
+  "why": {
+   "moves": [
+    {
+     "san": "Nh4",
+     "uci": "g6h4",
+     "by": "you",
+     "text": "The next best move, Qf6, only leaves Black clearly worse."
+    },
+    {
+     "san": "Ng3",
+     "uci": "e2g3",
+     "by": "them",
+     "text": "It is the toughest try — nothing else does better."
+    },
+    {
+     "san": "d5",
+     "uci": "d6d5",
+     "by": "you",
+     "text": "It is the move the engine plays here."
+    }
+   ],
+   "mistake": "White played Qf1. The position was clearly worse for Black before it and is level after it, with best play.",
+   "swing": null,
+   "point": "The engine calls the position level for Black."
+  }
+ },
+ {
+  "n": 33,
+  "id": "op-bc736e1fb2",
+  "fen": "r1bq3r/ppp2k2/8/3npp1p/2p3p1/B4P2/PP2P1PP/RN1QKBNR b KQ - 1 14",
+  "moves": [
+   "d5e3",
+   "d1d2",
+   "f5f4"
+  ],
+  "themes": [
+   "hangingPiece",
+   "fork",
+   "discoveredAttack",
+   "trappedPiece",
+   "defensiveResource",
+   "longGame"
+  ],
+  "seedRating": 800,
+  "settleDepth": 1,
+  "kind": "save",
+  "prev": {
+   "fen": "r1bq1B1r/ppp2k2/8/3npp1p/2p3p1/5P2/PP2P1PP/RN1QKBNR w KQ - 0 14",
+   "move": "f8a3"
+  },
+  "alt": {
+   "uci": "f5f4",
+   "score": -319
+  },
+  "eval": {
+   "before": -400,
+   "best": -40,
+   "alt": -319,
+   "end": -40
+  },
+  "follow": {
+   "moves": [
+    "g2g3",
+    "c8f5",
+    "a3c5",
+    "e3c2",
+    "e1f2",
+    "h5h4"
+   ],
+   "cp": 0,
+   "swing": 0,
+   "startCp": -40
+  },
+  "why": {
+   "moves": [
+    {
+     "san": "Ne3",
+     "uci": "d5e3",
+     "by": "you",
+     "text": "The next best move, f4, only leaves Black clearly worse."
+    },
+    {
+     "san": "Qd2",
+     "uci": "d1d2",
+     "by": "them",
+     "text": "It is the toughest try — nothing else does better."
+    },
+    {
+     "san": "f4",
+     "uci": "f5f4",
+     "by": "you",
+     "text": "It is the move the engine plays here."
+    }
+   ],
+   "mistake": "White played Ba3. The position was losing for Black before it and is level after it, with best play.",
+   "swing": null,
+   "point": "The engine calls the position level for Black."
+  }
+ },
+ {
+  "n": 34,
+  "id": "op-28cbbd452a",
+  "fen": "r1b1k1nr/1pppb1Q1/4pp2/p1q5/3NP2P/PP3B1P/1B1P1P2/2n2KNR b kq - 3 18",
+  "moves": [
+   "h8h6"
+  ],
+  "themes": [
+   "sacrifice",
+   "defensiveResource"
+  ],
+  "seedRating": 800,
+  "settleDepth": 1,
+  "kind": "save",
+  "prev": {
+   "fen": "r1b1k1nr/1pppb1Q1/4pp2/pNq5/4P2P/PP3B1P/1B1P1P2/2n2KNR w kq - 2 18",
+   "move": "b5d4"
+  },
+  "alt": {
+   "uci": "h8h4",
+   "score": -357
+  },
+  "eval": {
+   "before": -471,
+   "best": 6,
+   "alt": -357,
+   "end": 33
+  },
+  "replies": {},
+  "follow": {
+   "moves": [
+    "g7g8",
+    "e7f8",
+    "b3b4",
+    "a5b4",
+    "a3b4",
+    "c5c4"
+   ],
+   "cp": 20,
+   "swing": -320,
+   "startCp": 6
+  },
+  "why": {
+   "moves": [
+    {
+     "san": "Rh6",
+     "uci": "h8h6",
+     "by": "you",
+     "text": "It gives up a piece first, which is why it is easy to reject. The next best move, Rxh4, only leaves Black clearly worse."
+    }
+   ],
+   "mistake": "White played Nd4. The position was losing for Black before it and is level after it, with best play.",
+   "swing": null,
+   "point": "Black is a piece down on material, though the engine calls the position only level."
+  }
+ },
+ {
+  "n": 35,
+  "id": "op-cb0a5945e3",
+  "fen": "r1b1k2r/pp1n2p1/1qp2p1B/7p/1b1PP2P/P1NP4/5QP1/2R1KBNR b Kkq - 1 15",
+  "moves": [
+   "b4c3",
+   "c1c3",
+   "h8h6"
+  ],
+  "themes": [
+   "hangingPiece",
+   "defensiveResource",
+   "longGame"
+  ],
+  "seedRating": 800,
+  "settleDepth": 1,
+  "kind": "save",
+  "prev": {
+   "fen": "r1b1k2r/pp1n2p1/1qp2p1B/7p/1b1PP2P/P1NP4/5QP1/R3KBNR w KQkq - 0 15",
+   "move": "a1c1"
+  },
+  "alt": {
+   "uci": "b4a3",
+   "score": -353
+  },
+  "eval": {
+   "before": -452,
+   "best": 9,
+   "alt": -353,
+   "end": 2
+  },
+  "follow": {
+   "moves": [
+    "g1e2",
+    "b6a5",
+    "f2e3",
+    "d7b6",
+    "e3d2",
+    "c8g4"
+   ],
+   "cp": 4,
+   "swing": 320,
+   "startCp": 9
+  },
+  "why": {
+   "moves": [
+    {
+     "san": "Bxc3+",
+     "uci": "b4c3",
+     "by": "you",
+     "text": "It comes with check, so the reply is not a free move. It wins the knight. The next best move, Bxa3, only leaves Black clearly worse."
+    },
+    {
+     "san": "Rxc3",
+     "uci": "c1c3",
+     "by": "them",
+     "text": "The king is in check and has to answer it. It takes the bishop back."
+    },
+    {
+     "san": "Rxh6",
+     "uci": "h8h6",
+     "by": "you",
+     "text": "It wins the bishop."
+    }
+   ],
+   "mistake": "White played Rc1. It leaves the pawn on a3 undefended.",
+   "swing": "The position was losing for Black before it and is level after it, with best play.",
+   "point": "Black comes out a piece up, though the engine calls the position only level."
+  }
+ },
+ {
+  "n": 36,
+  "id": "op-2688cdd238",
+  "fen": "r1q1kb1r/pppb2p1/n2p2np/3PPp2/2P5/P3PN2/1P4PP/RNBQKB1R w KQkq - 1 10",
+  "moves": [
+   "e5e6"
+  ],
+  "themes": [
+   "hangingPiece",
+   "pawnBreakthrough"
+  ],
+  "seedRating": 1000,
+  "settleDepth": 1,
+  "kind": "punish",
+  "prev": {
+   "fen": "r2qkb1r/pppb2p1/n2p2np/3PPp2/2P5/P3PN2/1P4PP/RNBQKB1R b KQkq - 0 9",
+   "move": "d8c8"
+  },
+  "alt": {
+   "uci": "b2b4",
+   "score": 211
+  },
+  "eval": {
+   "before": 30,
+   "best": 421,
+   "alt": 211,
+   "end": 443
+  },
+  "replies": {},
+  "follow": {
+   "moves": [
+    "a6c5",
+    "e6d7",
+    "c8d7",
+    "b2b4",
+    "c5e4",
+    "c1b2"
+   ],
+   "cp": 411,
+   "swing": 230,
+   "startCp": 421
+  },
+  "why": {
+   "moves": [
+    {
+     "san": "e6",
+     "uci": "e5e6",
+     "by": "you",
+     "text": "It leaves the bishop on d7 hanging — it can simply be taken. The next best move, b4, only leaves White clearly better."
+    }
+   ],
+   "mistake": "Black played Qc8. The position was level for White before it and is winning after it, with best play.",
+   "swing": null,
+   "point": "The engine calls the position winning for White."
+  }
+ },
+ {
+  "n": 37,
+  "id": "op-7cc259f603",
+  "fen": "r1b1kbnr/pppq1pp1/2np4/1B2p2p/3PP3/5N1P/PPP2PP1/RNBQK2R w KQkq - 4 6",
+  "moves": [
+   "d4d5"
+  ],
+  "themes": [
+   "hangingPiece"
+  ],
+  "seedRating": 1000,
+  "settleDepth": 1,
+  "kind": "punish",
+  "prev": {
+   "fen": "r1bqkbnr/ppp2pp1/2np4/1B2p2p/3PP3/5N1P/PPP2PP1/RNBQK2R b KQkq - 3 5",
+   "move": "d8d7"
+  },
+  "alt": {
+   "uci": "b5a4",
+   "score": 157
+  },
+  "eval": {
+   "before": 113,
+   "best": 407,
+   "alt": 157,
+   "end": 420
+  },
+  "replies": {},
+  "follow": {
+   "moves": [
+    "a7a6",
+    "d5c6",
+    "b7c6",
+    "b5a4",
+    "c8b7",
+    "c2c4"
+   ],
+   "cp": 422,
+   "swing": 220,
+   "startCp": 407
+  },
+  "why": {
+   "moves": [
+    {
+     "san": "d5",
+     "uci": "d4d5",
+     "by": "you",
+     "text": "It leaves the knight on c6 hanging — it can simply be taken. The next best move, Ba4, only leaves White clearly better."
+    }
+   ],
+   "mistake": "Black played Qd7. The position was slightly better for White before it and is winning after it, with best play.",
+   "swing": null,
+   "point": "The engine calls the position winning for White."
+  }
+ },
+ {
+  "n": 38,
+  "id": "op-1f51c3f07a",
+  "fen": "rnbqk1nr/ppp1bppp/3p4/1B2p3/6Q1/4P1P1/PPPP1P1P/RNB1K1NR b KQkq - 1 4",
+  "moves": [
+   "c7c6",
+   "g4g7",
+   "e7f6",
+   "g7h8",
+   "f6h8"
+  ],
+  "themes": [
+   "hangingPiece",
+   "longGame"
+  ],
+  "seedRating": 800,
+  "settleDepth": 1,
+  "kind": "punish",
+  "prev": {
+   "fen": "rnbqk1nr/ppp1bppp/3p4/4p3/6Q1/4P1P1/PPPP1P1P/RNB1KBNR w KQkq - 0 4",
+   "move": "f1b5"
+  },
+  "alt": {
+   "uci": "b8c6",
+   "score": 125
+  },
+  "eval": {
+   "before": 67,
+   "best": 417,
+   "alt": 125,
+   "end": 429
+  },
+  "follow": {
+   "moves": [
+    "b5e2",
+    "b8a6",
+    "b1c3",
+    "a6b4",
+    "e2d1",
+    "c8e6"
+   ],
+   "cp": 419,
+   "swing": 300,
+   "startCp": 417
+  },
+  "why": {
+   "moves": [
+    {
+     "san": "c6",
+     "uci": "c7c6",
+     "by": "you",
+     "text": "The next best move, Nc6, only leaves Black slightly better."
+    },
+    {
+     "san": "Qxg7",
+     "uci": "g4g7",
+     "by": "them",
+     "text": "It takes the pawn back. It is the toughest try — nothing else does better."
+    },
+    {
+     "san": "Bf6",
+     "uci": "e7f6",
+     "by": "you",
+     "text": "It leaves the queen on g7 hanging — it can simply be taken."
+    },
+    {
+     "san": "Qxh8",
+     "uci": "g7h8",
+     "by": "them",
+     "text": "It takes the rook back. It is the toughest try — nothing else does better."
+    },
+    {
+     "san": "Bxh8",
+     "uci": "f6h8",
+     "by": "you",
+     "text": "It wins the queen."
+    }
+   ],
+   "mistake": "White played Bb5+. It moves the bishop to b5, which does not turn out to be a safe square.",
+   "swing": "The position was slightly better for Black before it and is winning after it, with best play.",
+   "point": "Black comes out a piece up, and the engine calls the position winning."
+  }
+ },
+ {
+  "n": 39,
+  "id": "op-27ad55a2e0",
+  "fen": "rnbqk1r1/pppp2bp/4p1p1/8/2Bn3P/2N5/PPP2PP1/R1BQ1KNR w q - 0 9",
+  "moves": [
+   "c1g5",
+   "g7f6",
+   "c3e4",
+   "f6g5",
+   "h4g5"
+  ],
+  "themes": [
+   "hangingPiece",
+   "discoveredAttack",
+   "longGame"
+  ],
+  "seedRating": 800,
+  "settleDepth": 1,
+  "kind": "punish",
+  "prev": {
+   "fen": "rnbqk1r1/pppp2bp/4p1p1/5n2/2BP3P/2N5/PPP2PP1/R1BQ1KNR b q d3 0 8",
+   "move": "f5d4"
+  },
+  "alt": {
+   "uci": "g1e2",
+   "score": 128
+  },
+  "eval": {
+   "before": 96,
+   "best": 456,
+   "alt": 128,
+   "end": 443
+  },
+  "replies": {
+   "1": {
+    "legal": 32,
+    "clear": 243
+   },
+   "3": {
+    "legal": 32,
+    "clear": 153
+   }
+  },
+  "follow": {
+   "moves": [
+    "c7c5",
+    "h1h7",
+    "d7d5",
+    "e4f6",
+    "e8f8",
+    "d1g4"
+   ],
+   "cp": 438,
+   "swing": 100,
+   "startCp": 456
+  },
+  "why": {
+   "moves": [
+    {
+     "san": "Bg5",
+     "uci": "c1g5",
+     "by": "you",
+     "text": "The next best move, Nge2, only leaves White slightly better."
+    },
+    {
+     "san": "Bf6",
+     "uci": "g7f6",
+     "by": "them",
+     "text": "Everything else is clearly worse for them."
+    },
+    {
+     "san": "Ne4",
+     "uci": "c3e4",
+     "by": "you",
+     "text": "It leaves the bishop on f6 hanging — it can simply be taken."
+    },
+    {
+     "san": "Bxg5",
+     "uci": "f6g5",
+     "by": "them",
+     "text": "It takes the bishop back. It is the toughest try — nothing else does better."
+    },
+    {
+     "san": "hxg5",
+     "uci": "h4g5",
+     "by": "you",
+     "text": "Moving the pawn uncovers the rook on h1, which now attacks the pawn on h7. It wins the bishop."
+    }
+   ],
+   "mistake": "Black played Nxd4. The position was slightly better for White before it and is winning after it, with best play.",
+   "swing": null,
+   "point": "The engine calls the position winning for White."
+  }
+ },
+ {
+  "n": 40,
+  "id": "op-26c632f1a5",
+  "fen": "r1b1kb1r/1ppqnpp1/2n5/p3P2p/3pQ2P/2B3N1/PPP1PPP1/R3KBNR b KQkq - 1 11",
+  "moves": [
+   "d4c3",
+   "b2c3",
+   "e7d5",
+   "e5e6",
+   "d7e6"
+  ],
+  "themes": [
+   "hangingPiece",
+   "skewer",
+   "removalOfDefender",
+   "longGame"
+  ],
+  "seedRating": 1000,
+  "settleDepth": 1,
+  "kind": "punish",
+  "prev": {
+   "fen": "r1b1kb1r/1ppqnpp1/2n5/p3P2p/3pQ2P/6N1/PPPBPPP1/R3KBNR w KQkq a6 0 11",
+   "move": "d2c3"
+  },
+  "alt": {
+   "uci": "f7f5",
+   "score": 201
+  },
+  "eval": {
+   "before": -86,
+   "best": 489,
+   "alt": 201,
+   "end": 536
+  },
+  "replies": {
+   "1": {
+    "legal": 32,
+    "clear": 35
+   },
+   "3": {
+    "legal": 32,
+    "clear": 14
+   }
+  },
+  "follow": {
+   "moves": [
+    "e4e6",
+    "c8e6",
+    "g3e4",
+    "f8a3",
+    "e2e3",
+    "e6f5"
+   ],
+   "cp": 557,
+   "swing": 330,
+   "startCp": 489
+  },
+  "why": {
+   "moves": [
+    {
+     "san": "dxc3",
+     "uci": "d4c3",
+     "by": "you",
+     "text": "It wins the bishop. The next best move, f5, only leaves Black clearly better."
+    },
+    {
+     "san": "bxc3",
+     "uci": "b2c3",
+     "by": "them",
+     "text": "It takes the pawn back. It is the toughest try — nothing else does better."
+    },
+    {
+     "san": "Nd5",
+     "uci": "e7d5",
+     "by": "you",
+     "text": "It leaves the pawn on c3 hanging — it can simply be taken."
+    },
+    {
+     "san": "e6",
+     "uci": "e5e6",
+     "by": "them",
+     "text": "It is the toughest try — nothing else does better."
+    },
+    {
+     "san": "Qxe6",
+     "uci": "d7e6",
+     "by": "you",
+     "text": "The queen on e4 has to move, and the pawn on e2 behind it falls. It wins the pawn."
+    }
+   ],
+   "mistake": "White played Bc3. It puts the bishop on c3 where it can simply be taken.",
+   "swing": "The position was slightly worse for Black before it and is winning after it, with best play.",
+   "point": "Black comes out a piece up, and the engine calls the position winning."
+  }
+ },
+ {
+  "n": 41,
+  "id": "op-62e863874a",
+  "fen": "rnbqkbnr/ppp3pp/3pp3/8/Q1P2Pp1/7N/PP1PP2P/RNB1KB1R b KQkq - 1 5",
+  "moves": [
+   "c8d7",
+   "a4b3",
+   "g4h3"
+  ],
+  "themes": [
+   "hangingPiece",
+   "longGame"
+  ],
+  "seedRating": 1000,
+  "settleDepth": 1,
+  "kind": "punish",
+  "prev": {
+   "fen": "rnbqkbnr/ppp3pp/3pp3/8/2P2Pp1/7N/PP1PP2P/RNBQKB1R w KQkq - 0 5",
+   "move": "d1a4"
+  },
+  "alt": {
+   "uci": "b8c6",
+   "score": 216
+  },
+  "eval": {
+   "before": 120,
+   "best": 429,
+   "alt": 216,
+   "end": 423
+  },
+  "replies": {
+   "1": {
+    "legal": 29,
+    "clear": 2
+   }
+  },
+  "follow": {
+   "moves": [
+    "b3h3",
+    "f8e7",
+    "h1g1",
+    "e7h4",
+    "e1d1",
+    "h4f6"
+   ],
+   "cp": 426,
+   "swing": 220,
+   "startCp": 429
+  },
+  "why": {
+   "moves": [
+    {
+     "san": "Bd7",
+     "uci": "c8d7",
+     "by": "you",
+     "text": "The next best move, Nc6, only leaves Black clearly better."
+    },
+    {
+     "san": "Qb3",
+     "uci": "a4b3",
+     "by": "them",
+     "text": "It is the toughest try — nothing else does better."
+    },
+    {
+     "san": "gxh3",
+     "uci": "g4h3",
+     "by": "you",
+     "text": "It wins the knight."
+    }
+   ],
+   "mistake": "White played Qa4+. It moves the queen to a4, which does not turn out to be a safe square.",
+   "swing": "The position was slightly better for Black before it and is winning after it, with best play.",
+   "point": "Black comes out the exchange up, and the engine calls the position winning."
+  }
+ },
+ {
+  "n": 42,
+  "id": "op-8054c2fe94",
+  "fen": "rnbk2nr/1pp1qppp/3b4/p2p4/2PP4/8/PP2BPPP/RNBQK1NR w KQ - 3 8",
+  "moves": [
+   "c4c5",
+   "d6c5",
+   "d4c5"
+  ],
+  "themes": [
+   "hangingPiece",
+   "pin",
+   "discoveredAttack",
+   "longGame"
+  ],
+  "seedRating": 1000,
+  "settleDepth": 1,
+  "kind": "punish",
+  "prev": {
+   "fen": "rnb1k1nr/1pp1qppp/3b4/p2p4/2PP4/8/PP2BPPP/RNBQK1NR b KQkq - 2 7",
+   "move": "e8d8"
+  },
+  "alt": {
+   "uci": "g1f3",
+   "score": 200
+  },
+  "eval": {
+   "before": 34,
+   "best": 428,
+   "alt": 200,
+   "end": 460
+  },
+  "replies": {
+   "1": {
+    "legal": 40,
+    "clear": 25
+   }
+  },
+  "follow": {
+   "moves": [
+    "g8f6",
+    "b1c3",
+    "e7c5",
+    "c1e3",
+    "c5d6",
+    "g1f3"
+   ],
+   "cp": 462,
+   "swing": 130,
+   "startCp": 428
+  },
+  "why": {
+   "moves": [
+    {
+     "san": "c5",
+     "uci": "c4c5",
+     "by": "you",
+     "text": "It leaves the bishop on d6 hanging — it can simply be taken. The next best move, Nf3, only leaves White clearly better."
+    },
+    {
+     "san": "Bxc5",
+     "uci": "d6c5",
+     "by": "them",
+     "text": "It takes the pawn back. It is the toughest try — nothing else does better."
+    },
+    {
+     "san": "dxc5",
+     "uci": "d4c5",
+     "by": "you",
+     "text": "The pawn on d5 is pinned to the king behind it and cannot step aside. It wins the bishop."
+    }
+   ],
+   "mistake": "Black played Kd8. The position was level for White before it and is winning after it, with best play.",
+   "swing": null,
+   "point": "White comes out a pawn up, and the engine calls the position winning."
+  }
+ },
+ {
+  "n": 43,
+  "id": "op-8ea0c738a2",
+  "fen": "r1b1kbn1/pp1q1pp1/2p4r/1Pn1p3/2P1P2p/2NPBQ2/P3B1PP/R3K1NR b q - 13 15",
+  "moves": [
+   "h6f6",
+   "b5c6",
+   "b7c6"
+  ],
+  "themes": [
+   "hangingPiece",
+   "longGame"
+  ],
+  "seedRating": 1000,
+  "settleDepth": 1,
+  "kind": "punish",
+  "prev": {
+   "fen": "r1b1kbn1/pp1q1pp1/2p4r/1Pn1p3/2P1P2p/2NPBQ2/P3BKPP/R5NR w q - 12 15",
+   "move": "f2e1"
+  },
+  "alt": {
+   "uci": "d7d8",
+   "score": 209
+  },
+  "eval": {
+   "before": 146,
+   "best": 409,
+   "alt": 209,
+   "end": 431
+  },
+  "replies": {
+   "1": {
+    "legal": 39,
+    "clear": 3
+   }
+  },
+  "follow": {
+   "moves": [
+    "e1d2",
+    "f6f3",
+    "g1f3",
+    "d7c7",
+    "h1b1",
+    "g8f6"
+   ],
+   "cp": 451,
+   "swing": 400,
+   "startCp": 409
+  },
+  "why": {
+   "moves": [
+    {
+     "san": "Rf6",
+     "uci": "h6f6",
+     "by": "you",
+     "text": "It leaves the queen on f3 hanging — it can simply be taken. The next best move, Qd8, only leaves Black clearly better."
+    },
+    {
+     "san": "bxc6",
+     "uci": "b5c6",
+     "by": "them",
+     "text": "It takes the pawn back. It is the toughest try — nothing else does better."
+    },
+    {
+     "san": "bxc6",
+     "uci": "b7c6",
+     "by": "you",
+     "text": "It wins the pawn."
+    }
+   ],
+   "mistake": "White played Ke1. The position was slightly better for Black before it and is winning after it, with best play.",
+   "swing": null,
+   "point": "The engine calls the position winning for Black."
+  }
+ },
+ {
+  "n": 44,
+  "id": "op-760d1d3b16",
+  "fen": "rnb1k1nr/pp1p3p/1qp3p1/4p1b1/3P1N2/8/PPP1PP2/RNBQKB1R w KQkq - 0 9",
+  "moves": [
+   "f4g6",
+   "g5c1",
+   "d1c1"
+  ],
+  "themes": [
+   "hangingPiece",
+   "fork",
+   "discoveredAttack",
+   "sacrifice",
+   "trappedPiece",
+   "longGame"
+  ],
+  "seedRating": 1000,
+  "settleDepth": 1,
+  "kind": "punish",
+  "prev": {
+   "fen": "rnb1k1nr/pp1p3p/1qp3pb/4p1P1/3P1N2/8/PPP1PP2/RNBQKB1R b KQkq - 0 8",
+   "move": "h6g5"
+  },
+  "alt": {
+   "uci": "d4e5",
+   "score": 205
+  },
+  "eval": {
+   "before": 109,
+   "best": 441,
+   "alt": 205,
+   "end": 376
+  },
+  "follow": {
+   "moves": [
+    "d7d6",
+    "d4e5",
+    "b8d7",
+    "e5d6",
+    "d7e5",
+    "g6e5"
+   ],
+   "cp": 440,
+   "swing": 620,
+   "startCp": 441
+  },
+  "why": {
+   "moves": [
+    {
+     "san": "Nxg6",
+     "uci": "f4g6",
+     "by": "you",
+     "text": "It gives up the exchange first, which is why it is easy to reject. The next best move, dxe5, only leaves White clearly better."
+    },
+    {
+     "san": "Bxc1",
+     "uci": "g5c1",
+     "by": "them",
+     "text": "It takes the bishop back. It is the toughest try — nothing else does better."
+    },
+    {
+     "san": "Qxc1",
+     "uci": "d1c1",
+     "by": "you",
+     "text": "It wins the bishop."
+    }
+   ],
+   "mistake": "Black played Bxg5. The position was slightly better for White before it and is winning after it, with best play.",
+   "swing": null,
+   "point": "White is the exchange down on material, though the engine calls the position only clearly better."
+  }
+ },
+ {
+  "n": 45,
+  "id": "op-73c4070342",
+  "fen": "rn2k1nr/pp3ppp/6q1/4Pb2/2pP4/P1P4N/2P1Q1PP/R1B1K2R w KQkq - 3 13",
+  "moves": [
+   "h3f4"
+  ],
+  "themes": [
+   "hangingPiece",
+   "defensiveResource"
+  ],
+  "seedRating": 1300,
+  "settleDepth": 1,
+  "kind": "save",
+  "prev": {
+   "fen": "rn2k1nr/pp3ppp/4b1q1/4P3/2pP4/P1P4N/2P1Q1PP/R1B1K2R b KQkq - 2 12",
+   "move": "e6f5"
+  },
+  "alt": {
+   "uci": "c1e3",
+   "score": -285
+  },
+  "eval": {
+   "before": -354,
+   "best": 0,
+   "alt": -285,
+   "end": -29
+  },
+  "replies": {},
+  "follow": {
+   "moves": [
+    "g6a6",
+    "f4h5",
+    "a6g6",
+    "h5f4",
+    "g6b6",
+    "f4h5"
+   ],
+   "cp": 0,
+   "swing": 0,
+   "startCp": 0
+  },
+  "why": {
+   "moves": [
+    {
+     "san": "Nf4",
+     "uci": "h3f4",
+     "by": "you",
+     "text": "The next best move, Be3, only leaves White clearly worse."
+    }
+   ],
+   "mistake": "Black played Bf5. It leaves the pawn on c4 undefended.",
+   "swing": "The position was clearly worse for White before it and is level after it, with best play.",
+   "point": "White is a pawn down on material, though the engine calls the position only level."
+  }
+ },
+ {
+  "n": 46,
+  "id": "op-218c77cc6e",
+  "fen": "r1bqkbnr/1n1p4/2p1pp2/1p2P1p1/N1NP3p/P1p2P2/2Q3PP/R1B1KB1R w KQkq - 0 17",
+  "moves": [
+   "c2g6",
+   "e8e7",
+   "e5f6",
+   "g8f6",
+   "c1g5",
+   "d7d6",
+   "a4b6",
+   "f8h6",
+   "g6f6"
+  ],
+  "themes": [
+   "trappedPiece",
+   "hangingPiece",
+   "pin",
+   "fork",
+   "skewer",
+   "kingAttack",
+   "zwischenzug",
+   "longGame"
+  ],
+  "seedRating": 1000,
+  "settleDepth": 1,
+  "kind": "punish",
+  "prev": {
+   "fen": "r1bqkbnr/1n1p4/2p1pp2/1p2P1p1/NpNP3p/P1P2P2/2Q3PP/R1B1KB1R b KQkq - 0 16",
+   "move": "b4c3"
+  },
+  "alt": {
+   "uci": "c4b6",
+   "score": 0
+  },
+  "eval": {
+   "before": -167,
+   "best": 1177,
+   "alt": 0,
+   "end": 949
+  },
+  "follow": {
+   "moves": [
+    "e7e8",
+    "c4d6",
+    "d8d6",
+    "f1d3",
+    "h8g8",
+    "d3g6"
+   ],
+   "mate": 6,
+   "swing": 200,
+   "startCp": 1177
+  },
+  "why": {
+   "moves": [
+    {
+     "san": "Qg6+",
+     "uci": "c2g6",
+     "by": "you",
+     "text": "The knight on g8 is trapped — every square it can reach loses it. It comes with check, so the reply is not a free move. The next best move, Ncb6, only leaves White level."
+    },
+    {
+     "san": "Ke7",
+     "uci": "e8e7",
+     "by": "them",
+     "text": "Forced — it is the only legal move."
+    },
+    {
+     "san": "exf6+",
+     "uci": "e5f6",
+     "by": "you",
+     "text": "It comes with check, so the reply is not a free move. It wins the pawn."
+    },
+    {
+     "san": "Nxf6",
+     "uci": "g8f6",
+     "by": "them",
+     "text": "Forced — it is the only legal move."
+    },
+    {
+     "san": "Bxg5",
+     "uci": "c1g5",
+     "by": "you",
+     "text": "It leaves the knight on f6 hanging — it can simply be taken. It wins the pawn."
+    },
+    {
+     "san": "d6",
+     "uci": "d7d6",
+     "by": "them",
+     "text": "It is the toughest try — nothing else does better."
+    },
+    {
+     "san": "Nab6",
+     "uci": "a4b6",
+     "by": "you",
+     "text": "It is the move the engine plays here."
+    },
+    {
+     "san": "Bh6",
+     "uci": "f8h6",
+     "by": "them",
+     "text": "It is the toughest try — nothing else does better."
+    },
+    {
+     "san": "Qxf6+",
+     "uci": "g6f6",
+     "by": "you",
+     "text": "The king on e7 has to move, and the queen on d8 behind it falls. It comes with check, so the reply is not a free move. It wins the knight."
+    }
+   ],
+   "mistake": "Black played bxc3. It takes on c3 and leaves the pawn there to be recaptured.",
+   "swing": "The position was clearly worse for White before it and is completely winning after it, with best play.",
+   "point": "White comes out the exchange up, and the engine calls the position completely winning."
+  }
+ },
+ {
+  "n": 47,
+  "id": "op-5a9bfc79a0",
+  "fen": "r1bqkN1r/ppp2ppp/2npp3/8/2P1n3/5P2/PP1PP1PP/RNBQKB1R b KQkq - 0 6",
+  "moves": [
+   "d8h4",
+   "g2g3",
+   "e4g3",
+   "d1a4",
+   "g3h1"
+  ],
+  "themes": [
+   "pin",
+   "trappedPiece",
+   "hangingPiece",
+   "fork",
+   "discoveredAttack",
+   "kingAttack",
+   "longGame"
+  ],
+  "seedRating": 1300,
+  "settleDepth": 1,
+  "kind": "punish",
+  "prev": {
+   "fen": "r1bqkN1r/ppp2ppp/2npp3/8/2P1n3/8/PP1PPPPP/RNBQKB1R w KQkq - 0 6",
+   "move": "f2f3"
+  },
+  "alt": {
+   "uci": "e4c5",
+   "score": -109
+  },
+  "eval": {
+   "before": -160,
+   "best": 715,
+   "alt": -109,
+   "end": 602
+  },
+  "replies": {
+   "1": {
+    "legal": 1,
+    "clear": null
+   },
+   "3": {
+    "legal": 25,
+    "clear": 136
+   }
+  },
+  "follow": {
+   "moves": [
+    "e1d1",
+    "h4f2",
+    "d2d3",
+    "f2f1",
+    "d1d2",
+    "e8f8"
+   ],
+   "cp": 633,
+   "swing": 1250,
+   "startCp": 715
+  },
+  "why": {
+   "moves": [
+    {
+     "san": "Qh4+",
+     "uci": "d8h4",
+     "by": "you",
+     "text": "The pawn on h2 is pinned to the rook behind it and cannot step aside. It comes with check, so the reply is not a free move. The next best move, Nc5, only leaves Black slightly worse."
+    },
+    {
+     "san": "g3",
+     "uci": "g2g3",
+     "by": "them",
+     "text": "Forced — it is the only legal move."
+    },
+    {
+     "san": "Nxg3",
+     "uci": "e4g3",
+     "by": "you",
+     "text": "It leaves the rook on h1 hanging — it can simply be taken. It wins the pawn."
+    },
+    {
+     "san": "Qa4",
+     "uci": "d1a4",
+     "by": "them",
+     "text": "It is the toughest try — nothing else does better."
+    },
+    {
+     "san": "Nxh1+",
+     "uci": "g3h1",
+     "by": "you",
+     "text": "Moving the knight uncovers the queen on h4, which now checks the king. It comes with check, so the reply is not a free move. It wins the rook."
+    }
+   ],
+   "mistake": "White played f3. The position was clearly worse for Black before it and is winning after it, with best play.",
+   "swing": null,
+   "point": "Black comes out a rook up, and the engine calls the position winning."
+  }
+ },
+ {
+  "n": 48,
+  "id": "op-74e0de50ce",
+  "fen": "r1bqkb1r/ppp2p2/4p3/3p3p/Pn3PPn/2N1P2R/1PPPN3/R1BQKB2 w Qq h6 0 12",
+  "moves": [
+   "g4g5",
+   "h4g6",
+   "d2d4"
+  ],
+  "themes": [
+   "hangingPiece",
+   "defensiveResource",
+   "longGame"
+  ],
+  "seedRating": 1300,
+  "settleDepth": 1,
+  "kind": "save",
+  "prev": {
+   "fen": "r1bqkb1r/ppp2p1p/4p3/3p4/Pn3PPn/2N1P2R/1PPPN3/R1BQKB2 b Qq - 4 11",
+   "move": "h7h5"
+  },
+  "alt": {
+   "uci": "e2g3",
+   "score": -345
+  },
+  "eval": {
+   "before": -293,
+   "best": -43,
+   "alt": -345,
+   "end": -49
+  },
+  "replies": {
+   "1": {
+    "legal": 36,
+    "clear": 45
+   }
+  },
+  "follow": {
+   "moves": [
+    "f7f6",
+    "e3e4",
+    "f6g5",
+    "f4g5",
+    "e6e5",
+    "c3d5"
+   ],
+   "cp": -26,
+   "swing": 100,
+   "startCp": -43
+  },
+  "why": {
+   "moves": [
+    {
+     "san": "g5",
+     "uci": "g4g5",
+     "by": "you",
+     "text": "The next best move, Ng3, only leaves White clearly worse."
+    },
+    {
+     "san": "Ng6",
+     "uci": "h4g6",
+     "by": "them",
+     "text": "It is the toughest try — nothing else does better."
+    },
+    {
+     "san": "d4",
+     "uci": "d2d4",
+     "by": "you",
+     "text": "It is the move the engine plays here."
+    }
+   ],
+   "mistake": "Black played h5. The position was clearly worse for White before it and is level after it, with best play.",
+   "swing": null,
+   "point": "The engine calls the position level for White."
+  }
+ },
+ {
+  "n": 49,
+  "id": "op-dae090fb1c",
+  "fen": "r1b2rk1/ppppq1pp/8/4n3/4Qn1P/P2P1P2/1PPB2P1/R3KBNR b KQ - 2 14",
+  "moves": [
+   "d7d5",
+   "e4e3",
+   "d5d4",
+   "e3e4",
+   "c8f5"
+  ],
+  "themes": [
+   "hangingPiece",
+   "skewer",
+   "longGame"
+  ],
+  "seedRating": 1300,
+  "settleDepth": 1,
+  "kind": "punish",
+  "prev": {
+   "fen": "r1b2rk1/ppppq1pp/8/4n3/5n1P/P2P1P2/1PPBQ1P1/R3KBNR w KQ - 1 14",
+   "move": "e2e4"
+  },
+  "alt": {
+   "uci": "d7d6",
+   "score": -194
+  },
+  "eval": {
+   "before": -208,
+   "best": 482,
+   "alt": -194,
+   "end": 468
+  },
+  "replies": {
+   "1": {
+    "legal": 39,
+    "clear": 29
+   },
+   "3": {
+    "legal": 30,
+    "clear": 15
+   }
+  },
+  "follow": {
+   "moves": [
+    "e1c1",
+    "f5e4",
+    "d3e4",
+    "d4d3",
+    "d2f4",
+    "f8f4"
+   ],
+   "cp": 475,
+   "swing": 580,
+   "startCp": 482
+  },
+  "why": {
+   "moves": [
+    {
+     "san": "d5",
+     "uci": "d7d5",
+     "by": "you",
+     "text": "It leaves the queen on e4 hanging — it can simply be taken. The next best move, d6, only leaves Black clearly worse."
+    },
+    {
+     "san": "Qe3",
+     "uci": "e4e3",
+     "by": "them",
+     "text": "It is the toughest try — nothing else does better."
+    },
+    {
+     "san": "d4",
+     "uci": "d5d4",
+     "by": "you",
+     "text": "It leaves the queen on e3 hanging — it can simply be taken."
+    },
+    {
+     "san": "Qe4",
+     "uci": "e3e4",
+     "by": "them",
+     "text": "It is the toughest try — nothing else does better."
+    },
+    {
+     "san": "Bf5",
+     "uci": "c8f5",
+     "by": "you",
+     "text": "It leaves the queen on e4 hanging — it can simply be taken."
+    }
+   ],
+   "mistake": "White played Qe4. It moves the queen to e4, which does not turn out to be a safe square.",
+   "swing": "The position was clearly worse for Black before it and is winning after it, with best play.",
+   "point": "Black is a piece down on material, though the engine calls the position only winning."
+  }
+ },
+ {
+  "n": 50,
+  "id": "op-5adfb22085",
+  "fen": "r1bqkbnr/pppppppp/6n1/8/3P3P/4P3/PPP2PP1/RNBQKBNR w KQkq - 1 4",
+  "moves": [
+   "h4h5"
+  ],
+  "themes": [
+   "hangingPiece"
+  ],
+  "seedRating": 1600,
+  "settleDepth": 1,
+  "kind": "punish",
+  "prev": {
+   "fen": "r1bqkbnr/pppppppp/8/4n3/3P3P/4P3/PPP2PP1/RNBQKBNR b KQkq h3 0 3",
+   "move": "e5g6"
+  },
+  "alt": {
+   "uci": "g1f3",
+   "score": 143
+  },
+  "eval": {
+   "before": 113,
+   "best": 435,
+   "alt": 143,
+   "end": 438
+  },
+  "replies": {},
+  "follow": {
+   "moves": [
+    "g8h6",
+    "g1f3",
+    "e7e6",
+    "h5g6",
+    "h7g6",
+    "e3e4"
+   ],
+   "cp": 442,
+   "swing": 220,
+   "startCp": 435
+  },
+  "why": {
+   "moves": [
+    {
+     "san": "h5",
+     "uci": "h4h5",
+     "by": "you",
+     "text": "It leaves the knight on g6 hanging — it can simply be taken. The next best move, Nf3, only leaves White slightly better."
+    }
+   ],
+   "mistake": "Black played Ng6. It moves the knight to g6, which does not turn out to be a safe square.",
+   "swing": "The position was slightly better for White before it and is winning after it, with best play.",
+   "point": "The engine calls the position winning for White."
+  }
+ },
+ {
+  "n": 51,
+  "id": "op-f11498ecb2",
+  "fen": "r1b1kbnr/1q2ppp1/p4n2/1p1pN2p/N4P2/2Q1P3/PPP3PP/R1B1KB1R w KQkq - 2 13",
+  "moves": [
+   "a4c5"
+  ],
+  "themes": [
+   "hangingPiece",
+   "defensiveResource"
+  ],
+  "seedRating": 1600,
+  "settleDepth": 1,
+  "kind": "save",
+  "prev": {
+   "fen": "r1b1kbnr/q3ppp1/p4n2/1p1pN2p/N4P2/2Q1P3/PPP3PP/R1B1KB1R b KQkq - 1 12",
+   "move": "a7b7"
+  },
+  "alt": {
+   "uci": "c3b3",
+   "score": -336
+  },
+  "eval": {
+   "before": -377,
+   "best": 80,
+   "alt": -336,
+   "end": 72
+  },
+  "replies": {},
+  "follow": {
+   "moves": [
+    "b7c7",
+    "f1d3",
+    "g8h6",
+    "b2b4",
+    "e7e6",
+    "e1g1"
+   ],
+   "cp": 91,
+   "swing": 0,
+   "startCp": 80
+  },
+  "why": {
+   "moves": [
+    {
+     "san": "Nc5",
+     "uci": "a4c5",
+     "by": "you",
+     "text": "The next best move, Qb3, only leaves White clearly worse."
+    }
+   ],
+   "mistake": "Black played Qb7. Moving the queen from a7 took the last guard off c5.",
+   "swing": "The position was clearly worse for White before it and is slightly better after it, with best play.",
+   "point": "The engine calls the position slightly better for White."
+  }
+ },
+ {
+  "n": 52,
+  "id": "op-f44cd26656",
+  "fen": "rnbqkbnr/ppp1ppp1/7p/1B6/4pP2/5N2/PPPP2PP/RNBQK2R b KQkq - 1 4",
+  "moves": [
+   "c7c6",
+   "b5e2",
+   "e4f3"
+  ],
+  "themes": [
+   "hangingPiece",
+   "fork",
+   "longGame"
+  ],
+  "seedRating": 1600,
+  "settleDepth": 1,
+  "kind": "punish",
+  "prev": {
+   "fen": "rnbqkbnr/ppp1ppp1/7p/8/4pP2/5N2/PPPP2PP/RNBQKB1R w KQkq - 0 4",
+   "move": "f1b5"
+  },
+  "alt": {
+   "uci": "c8d7",
+   "score": 204
+  },
+  "eval": {
+   "before": 67,
+   "best": 420,
+   "alt": 204,
+   "end": 413
+  },
+  "replies": {
+   "1": {
+    "legal": 34,
+    "clear": 46
+   }
+  },
+  "follow": {
+   "moves": [
+    "e2f3",
+    "g8f6",
+    "d1e2",
+    "c8e6",
+    "d2d4",
+    "d8d4"
+   ],
+   "cp": 423,
+   "swing": 320,
+   "startCp": 420
+  },
+  "why": {
+   "moves": [
+    {
+     "san": "c6",
+     "uci": "c7c6",
+     "by": "you",
+     "text": "The next best move, Bd7, only leaves Black clearly better."
+    },
+    {
+     "san": "Be2",
+     "uci": "b5e2",
+     "by": "them",
+     "text": "It is the toughest try — nothing else does better."
+    },
+    {
+     "san": "exf3",
+     "uci": "e4f3",
+     "by": "you",
+     "text": "It wins the knight."
+    }
+   ],
+   "mistake": "White played Bb5+. It moves the bishop to b5, which does not turn out to be a safe square.",
+   "swing": "The position was slightly better for Black before it and is winning after it, with best play.",
+   "point": "Black comes out the exchange up, and the engine calls the position winning."
+  }
+ },
+ {
+  "n": 53,
+  "id": "op-fba3cc0170",
+  "fen": "r1b1kb1r/ppp1pppp/3q1n2/1P1p4/1n2P3/P1N5/2PP1PPP/1RBQKBNR b Kkq - 2 6",
+  "moves": [
+   "d5d4",
+   "a3b4",
+   "d4c3"
+  ],
+  "themes": [
+   "hangingPiece",
+   "pin",
+   "discoveredAttack",
+   "defensiveResource",
+   "longGame"
+  ],
+  "seedRating": 1600,
+  "settleDepth": 1,
+  "kind": "save",
+  "prev": {
+   "fen": "r1b1kb1r/ppp1pppp/3q1n2/1P1p4/1n2P3/P1N5/2PP1PPP/R1BQKBNR w KQkq - 1 6",
+   "move": "a1b1"
+  },
+  "alt": {
+   "uci": "a7a5",
+   "score": -280
+  },
+  "eval": {
+   "before": -353,
+   "best": -73,
+   "alt": -280,
+   "end": -69
+  },
+  "follow": {
+   "moves": [
+    "f1d3",
+    "c3d2",
+    "c1d2",
+    "e7e5",
+    "g1f3",
+    "f8e7"
+   ],
+   "cp": -87,
+   "swing": 0,
+   "startCp": -73
+  },
+  "why": {
+   "moves": [
+    {
+     "san": "d4",
+     "uci": "d5d4",
+     "by": "you",
+     "text": "It leaves the knight on c3 hanging — it can simply be taken. The next best move, a5, only leaves Black clearly worse."
+    },
+    {
+     "san": "axb4",
+     "uci": "a3b4",
+     "by": "them",
+     "text": "It takes the knight back. It is the toughest try — nothing else does better."
+    },
+    {
+     "san": "dxc3",
+     "uci": "d4c3",
+     "by": "you",
+     "text": "The pawn on d2 is pinned to the queen behind it and cannot step aside. It wins the knight."
+    }
+   ],
+   "mistake": "White played Rb1. The position was clearly worse for Black before it and is slightly worse after it, with best play.",
+   "swing": null,
+   "point": "Black is a pawn down on material, though the engine calls the position only slightly worse."
+  }
+ },
+ {
+  "n": 54,
+  "id": "op-17064f66ab",
+  "fen": "r1bqkbnr/pp1npp1p/8/3p2p1/3BP3/2N5/PPP2PPP/R2QKBNR b KQkq - 0 6",
+  "moves": [
+   "e7e5",
+   "f1b5",
+   "e5d4",
+   "d1d4",
+   "d8f6"
+  ],
+  "themes": [
+   "hangingPiece",
+   "skewer",
+   "defensiveResource",
+   "longGame"
+  ],
+  "seedRating": 1600,
+  "settleDepth": 1,
+  "kind": "save",
+  "prev": {
+   "fen": "r1bqkbnr/pp1npp1p/8/3p2p1/3pP3/2N1B3/PPP2PPP/R2QKBNR w KQkq - 0 6",
+   "move": "e3d4"
+  },
+  "alt": {
+   "uci": "g8f6",
+   "score": -397
+  },
+  "eval": {
+   "before": -263,
+   "best": 131,
+   "alt": -397,
+   "end": 131
+  },
+  "replies": {
+   "1": {
+    "legal": 41,
+    "clear": 54
+   },
+   "3": {
+    "legal": 41,
+    "clear": 161
+   }
+  },
+  "follow": {
+   "moves": [
+    "e4e5",
+    "f6b6",
+    "d4b6",
+    "a7b6",
+    "c3d5",
+    "e8d8"
+   ],
+   "cp": 112,
+   "swing": 130,
+   "startCp": 131
+  },
+  "why": {
+   "moves": [
+    {
+     "san": "e5",
+     "uci": "e7e5",
+     "by": "you",
+     "text": "It leaves the bishop on d4 hanging — it can simply be taken. The next best move, Ngf6, only leaves Black clearly worse."
+    },
+    {
+     "san": "Bb5",
+     "uci": "f1b5",
+     "by": "them",
+     "text": "It is the toughest try — nothing else does better."
+    },
+    {
+     "san": "exd4",
+     "uci": "e5d4",
+     "by": "you",
+     "text": "It wins the bishop."
+    },
+    {
+     "san": "Qxd4",
+     "uci": "d1d4",
+     "by": "them",
+     "text": "It takes the pawn back. It is the toughest try — nothing else does better."
+    },
+    {
+     "san": "Qf6",
+     "uci": "d8f6",
+     "by": "you",
+     "text": "It leaves the queen on d4 hanging — it can simply be taken."
+    }
+   ],
+   "mistake": "White played Bxd4. It moves the bishop to d4, which does not turn out to be a safe square.",
+   "swing": "The position was clearly worse for Black before it and is slightly better after it, with best play.",
+   "point": "Black comes out a pawn up, though the engine calls the position only slightly better."
+  }
+ },
+ {
+  "n": 55,
+  "id": "op-0ab2845542",
+  "fen": "rnb1kbnr/pp1p1pp1/4p3/2p4p/1q2P2P/N1N5/PPPP1PP1/R1BQKB1R w KQkq - 3 6",
+  "moves": [
+   "a3c4"
+  ],
+  "themes": [
+   "positionalTactic"
+  ],
+  "seedRating": 2000,
+  "settleDepth": 1,
+  "kind": "punish",
+  "prev": {
+   "fen": "rnb1kbnr/pp1p1pp1/1q2p3/2p4p/4P2P/N1N5/PPPP1PP1/R1BQKB1R b KQkq - 2 5",
+   "move": "b6b4"
+  },
+  "alt": {
+   "uci": "d1f3",
+   "score": 217
+  },
+  "eval": {
+   "before": -8,
+   "best": 437,
+   "alt": 217,
+   "end": 425
+  },
+  "replies": {},
+  "follow": {
+   "moves": [
+    "b7b5",
+    "a2a3",
+    "b4c3",
+    "b2c3",
+    "b5c4",
+    "f1c4"
+   ],
+   "cp": 428,
+   "swing": 360,
+   "startCp": 437
+  },
+  "why": {
+   "moves": [
+    {
+     "san": "Nc4",
+     "uci": "a3c4",
+     "by": "you",
+     "text": "The next best move, Qf3, only leaves White clearly better."
+    }
+   ],
+   "mistake": "Black played Qb4. The position was level for White before it and is winning after it, with best play.",
+   "swing": null,
+   "point": "The engine calls the position winning for White."
+  }
+ },
+ {
+  "n": 56,
+  "id": "op-3596cdeee3",
+  "fen": "rnbqk2r/pp3p1p/2pb1p2/8/4P3/P1N4P/1PP1B1P1/R2QK1NR b KQkq - 0 12",
+  "moves": [
+   "d6g3",
+   "e1f1",
+   "d8b6"
+  ],
+  "themes": [
+   "discoveredAttack",
+   "trappedPiece",
+   "hangingPiece",
+   "longGame"
+  ],
+  "seedRating": 2000,
+  "settleDepth": 1,
+  "kind": "punish",
+  "prev": {
+   "fen": "rnbqk2r/pp3p1p/2pb1p2/8/4p3/P1N2P1P/1PP1B1P1/R2QK1NR w KQkq - 0 12",
+   "move": "f3e4"
+  },
+  "alt": {
+   "uci": "d8c7",
+   "score": 127
+  },
+  "eval": {
+   "before": 22,
+   "best": 650,
+   "alt": 127,
+   "end": 638
+  },
+  "replies": {
+   "1": {
+    "legal": 1,
+    "clear": null
+   }
+  },
+  "follow": {
+   "moves": [
+    "d1e1",
+    "g3e1",
+    "a1e1",
+    "b6b2",
+    "c3d1",
+    "b2a3"
+   ],
+   "cp": 659,
+   "swing": 770,
+   "startCp": 650
+  },
+  "why": {
+   "moves": [
+    {
+     "san": "Bg3+",
+     "uci": "d6g3",
+     "by": "you",
+     "text": "Moving the bishop uncovers the queen on d8, which now attacks the queen on d1. It comes with check, so the reply is not a free move. The next best move, Qc7, only leaves Black slightly better."
+    },
+    {
+     "san": "Kf1",
+     "uci": "e1f1",
+     "by": "them",
+     "text": "Forced — it is the only legal move."
+    },
+    {
+     "san": "Qb6",
+     "uci": "d8b6",
+     "by": "you",
+     "text": "It leaves the pawn on b2 hanging — it can simply be taken."
+    }
+   ],
+   "mistake": "White played fxe4. The position was level for Black before it and is winning after it, with best play.",
+   "swing": null,
+   "point": "The engine calls the position winning for Black."
+  }
+ },
+ {
+  "n": 57,
+  "id": "op-79fbfe1a2c",
+  "fen": "rnb1kb2/pp3pp1/1q2r3/3ppn1p/1P1P3P/2P2P2/P1Q1NKP1/RNB2B1R b q - 2 11",
+  "moves": [
+   "e5d4",
+   "c3d4",
+   "b8c6"
+  ],
+  "themes": [
+   "discoveredAttack",
+   "hangingPiece",
+   "longGame"
+  ],
+  "seedRating": 2000,
+  "settleDepth": 1,
+  "kind": "punish",
+  "prev": {
+   "fen": "rnb1kb2/pp3pp1/1q2r3/3ppn1p/1P1P3P/2P2P2/P3NKP1/RNBQ1B1R w q - 1 11",
+   "move": "d1c2"
+  },
+  "alt": {
+   "uci": "e6g6",
+   "score": 181
+  },
+  "eval": {
+   "before": 101,
+   "best": 464,
+   "alt": 181,
+   "end": 439
+  },
+  "replies": {
+   "1": {
+    "legal": 34,
+    "clear": 61
+   }
+  },
+  "follow": {
+   "moves": [
+    "g2g3",
+    "c6d4",
+    "e2d4",
+    "f5d4",
+    "c2b2",
+    "d4c2"
+   ],
+   "cp": 985,
+   "swing": 100,
+   "startCp": 464
+  },
+  "why": {
+   "moves": [
+    {
+     "san": "exd4",
+     "uci": "e5d4",
+     "by": "you",
+     "text": "Moving the pawn uncovers the rook on e6, which now attacks the knight on e2. It wins the pawn. The next best move, Rg6, only leaves Black clearly better."
+    },
+    {
+     "san": "cxd4",
+     "uci": "c3d4",
+     "by": "them",
+     "text": "It takes the pawn back. It is the toughest try — nothing else does better."
+    },
+    {
+     "san": "Nc6",
+     "uci": "b8c6",
+     "by": "you",
+     "text": "It is the move the engine plays here."
+    }
+   ],
+   "mistake": "White played Qc2. The queen on d1 was covering d4, and c2 is not.",
+   "swing": "The position was slightly better for Black before it and is winning after it, with best play.",
+   "point": "Black is a piece down on material, though the engine calls the position only winning."
+  }
+ },
+ {
+  "n": 58,
+  "id": "op-ae5721118f",
+  "fen": "r1b1kbnr/p1p2ppp/1pnq4/3pN3/4PP2/N2P4/PPP3PP/R1BQKB1R w KQkq - 1 7",
+  "moves": [
+   "a3b5",
+   "d6b4",
+   "c2c3",
+   "b4b5",
+   "d3d4",
+   "b5f1",
+   "h1f1"
+  ],
+  "themes": [
+   "hangingPiece",
+   "discoveredAttack",
+   "longGame"
+  ],
+  "seedRating": 2000,
+  "settleDepth": 1,
+  "kind": "punish",
+  "prev": {
+   "fen": "r1b1kbnr/p1pq1ppp/1pn5/3pN3/4PP2/N2P4/PPP3PP/R1BQKB1R b KQkq - 0 6",
+   "move": "d7d6"
+  },
+  "alt": {
+   "uci": "d3d4",
+   "score": 208
+  },
+  "eval": {
+   "before": -1,
+   "best": 478,
+   "alt": 208,
+   "end": 464
+  },
+  "replies": {
+   "1": {
+    "legal": 42,
+    "clear": 5
+   },
+   "3": {
+    "legal": 45,
+    "clear": 11
+   },
+   "5": {
+    "legal": 45,
+    "clear": 11
+   }
+  },
+  "follow": {
+   "moves": [
+    "c8b7",
+    "e4d5",
+    "c6e5",
+    "f4e5",
+    "e8c8",
+    "d5d6"
+   ],
+   "cp": 484,
+   "swing": 350,
+   "startCp": 478
+  },
+  "why": {
+   "moves": [
+    {
+     "san": "Nb5",
+     "uci": "a3b5",
+     "by": "you",
+     "text": "It leaves the queen on d6 hanging — it can simply be taken. The next best move, d4, only leaves White clearly better."
+    },
+    {
+     "san": "Qb4+",
+     "uci": "d6b4",
+     "by": "them",
+     "text": "It is the toughest try — nothing else does better."
+    },
+    {
+     "san": "c3",
+     "uci": "c2c3",
+     "by": "you",
+     "text": "It leaves the queen on b4 hanging — it can simply be taken."
+    },
+    {
+     "san": "Qxb5",
+     "uci": "b4b5",
+     "by": "them",
+     "text": "It takes the knight back. It is the toughest try — nothing else does better."
+    },
+    {
+     "san": "d4",
+     "uci": "d3d4",
+     "by": "you",
+     "text": "It leaves the queen on b5 hanging — it can simply be taken."
+    },
+    {
+     "san": "Qxf1+",
+     "uci": "b5f1",
+     "by": "them",
+     "text": "It takes the bishop back. It is the toughest try — nothing else does better."
+    },
+    {
+     "san": "Rxf1",
+     "uci": "h1f1",
+     "by": "you",
+     "text": "It wins the queen."
+    }
+   ],
+   "mistake": "Black played Qd6. It moves the queen to d6, which does not turn out to be a safe square.",
+   "swing": "The position was level for White before it and is winning after it, with best play.",
+   "point": "White comes out the exchange up, and the engine calls the position winning."
+  }
+ }
+]

@@ -20,17 +20,21 @@ create table if not exists public.profiles (
 
   -- Rating is server-owned. The browser can read it; only server-side
   -- code (an edge function, after refereeing a game) may change it.
-  rating            integer not null default 1200,
+  -- Everybody starts at the foot of the ladder and climbs.
+  rating            integer not null default 100,
 
   -- Tier follows from rating automatically, so the two can never disagree.
+  -- These thresholds are also written out in blind-chess.html, as TIERS, which
+  -- is what picks the badge on the ranked screen. Move one and move the other.
   tier              text generated always as (
                       case
+                        when rating >= 2500 then 'Grandmaster'
                         when rating >= 2000 then 'Master'
-                        when rating >= 1800 then 'Expert'
-                        when rating >= 1600 then 'Advanced'
-                        when rating >= 1400 then 'Intermediate'
-                        when rating >= 1200 then 'Casual'
-                        else 'Novice'
+                        when rating >= 1600 then 'Diamond'
+                        when rating >= 1200 then 'Platinum'
+                        when rating >= 800  then 'Gold'
+                        when rating >= 500  then 'Silver'
+                        else 'Bronze'
                       end
                     ) stored,
 
