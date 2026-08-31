@@ -118,11 +118,15 @@
     "wikipedia-fortress": {
       "title": "Fortress (chess)",
       "author": "Wikipedia contributors",
+      "publisher": "Wikipedia",
       "year": null,
       "kind": "encyclopedia",
       "confidence": "medium",
       "url": "https://en.wikipedia.org/wiki/Fortress_(chess)",
-      "note": ""
+      "note": "Distinguishes the elementary fortress (a book draw held by passive defence) from the general drawing technique, and relates both to the positional draw.",
+      "relevant_concepts": [
+        "fortress"
+      ]
     },
     "wikipedia-ocb-endgame": {
       "title": "Opposite-coloured bishops endgame",
@@ -1046,6 +1050,88 @@
       "note": "AI-authored. Recorded for one formulation that the tablebase then confirmed exactly: 'behind the pawn, the rook attacks a square the pawn will leave; beside the pawn, it attacks the square the pawn lives on'. Also gives Vancura's dates (1898-1921) and the 1924 posthumous publication, which match ChessBase.",
       "relevant_concepts": [
         "vancura-position"
+      ]
+    },
+    "wikipedia-wrong-rook-pawn": {
+      "title": "Wrong rook pawn",
+      "author": "Wikipedia contributors",
+      "publisher": "Wikipedia",
+      "year": null,
+      "kind": "encyclopedia",
+      "confidence": "medium",
+      "url": "https://en.wikipedia.org/wiki/Wrong_rook_pawn",
+      "note": "Dates the knowledge to at least 1623 via a Gioachino Greco study. Cites Müller & Lamprecht, Mednis, Fine & Benko and de la Villa for the specific cases. Also records the Kasparov-Ķeņģis game where the ten-year-old Kasparov thought he was winning two pawns up and it was drawn.",
+      "relevant_concepts": [
+        "wrong-rook-pawn",
+        "opposite-coloured-bishops"
+      ]
+    },
+    "wikipedia-wrong-bishop": {
+      "title": "Wrong bishop",
+      "author": "Wikipedia contributors",
+      "publisher": "Wikipedia",
+      "year": null,
+      "kind": "encyclopedia",
+      "confidence": "medium",
+      "url": "https://en.wikipedia.org/wiki/Wrong_bishop",
+      "note": "Covers the mirror cases: rook versus bishop, rook and rook pawn versus bishop, and the 'safe corner' idea. Notes del Rio studied the bishop-pawn case around 1750.",
+      "relevant_concepts": [
+        "wrong-rook-pawn"
+      ]
+    },
+    "chessprogramming-wrong-bishop": {
+      "title": "Wrong Color Bishop and Rook Pawn",
+      "author": "Chess Programming Wiki contributors",
+      "publisher": "chessprogramming.org",
+      "year": null,
+      "kind": "technical-reference",
+      "confidence": "high",
+      "url": "https://www.chessprogramming.org/Wrong_Color_Bishop_and_Rook_Pawn",
+      "note": "States the engine-era fact plainly: this is a drawn fortress that 'needs to be encoded in the evaluation function, as search would not evaluate them properly'. Cites TCEC Season 5 Superfinal, where Komodo had the knowledge and Stockfish apparently did not.",
+      "relevant_concepts": [
+        "wrong-rook-pawn",
+        "fortress"
+      ]
+    },
+    "wikipedia-ocb": {
+      "title": "Opposite-colored bishops endgame",
+      "author": "Wikipedia contributors",
+      "publisher": "Wikipedia",
+      "year": null,
+      "kind": "encyclopedia",
+      "confidence": "medium",
+      "url": "https://en.wikipedia.org/wiki/Opposite-colored_bishops_endgame",
+      "note": "Gives the concrete statistics: about half of bishop-and-four-pawns versus opposite-coloured-bishop endings are drawn, against over 90% wins when the bishops are on the same colour. Also the separated-pawns rule and the deliberate bad-bishop defensive idea.",
+      "relevant_concepts": [
+        "opposite-coloured-bishops",
+        "fortress",
+        "bad-bishop"
+      ]
+    },
+    "lichess-dvoretsky-fortress": {
+      "title": "Fortresses in Pawn Endgames (study)",
+      "author": null,
+      "publisher": "lichess.org",
+      "year": null,
+      "kind": "study",
+      "confidence": "low",
+      "url": "https://lichess.org/study/AXFEM2vt/ArGCYu1H",
+      "note": "Carries Dvoretsky's definition — a situation in which a king, with or without the assistance of pieces or pawns, successfully defends a small territory. ACCESS CAVEAT: quoted via a community study, not from Dvoretsky's text.",
+      "relevant_concepts": [
+        "fortress"
+      ]
+    },
+    "chessify-engine-eval": {
+      "title": "Behind the Numbers: Understanding Chess Engine Evaluations",
+      "author": null,
+      "publisher": "chessify.me",
+      "year": null,
+      "kind": "article",
+      "confidence": "low",
+      "url": "https://chessify.me/blog/chess-engine-evaluation",
+      "note": "Used only for the uncontroversial statement that engines misevaluate fortresses and that tablebase integration is the standard remedy; corroborated by the Chess Programming Wiki.",
+      "relevant_concepts": [
+        "fortress"
       ]
     }
   },

@@ -1,0 +1,192 @@
+{
+  "schema_version": 2,
+  "alternate_names": [
+    "opposite-color bishops",
+    "bishops of opposite colour"
+  ],
+  "historical_names": [],
+  "tags": [
+    "bishop-endgame",
+    "drawish",
+    "fortress",
+    "statistics"
+  ],
+  "subcategory": "material imbalance",
+  "difficulty": "advanced",
+  "knowledge_type_note": "A positional concept with unusually hard statistical backing, but still a concept rather than a proven result: whether a given position draws depends on the position.",
+  "name_status": "established-name",
+  "history": {
+    "attributions": [],
+    "first_documented_source": "wikipedia-ocb",
+    "year": null,
+    "confidence": "unknown",
+    "notes": "No coinage researched; the term is descriptive and standard. The earliest example in the ChessBase database is Paulsen-Anderssen 1862, which is a fact about the database rather than about the concept.",
+    "competing_claims": [],
+    "development": []
+  },
+  "engine_era_status": "useful-with-common-exceptions",
+  "engine_era_note": "Engines evaluate opposite-coloured-bishop endings poorly for the same reason they misjudge fortresses — the draw is a positional wall rather than a line — and this is a standard reason to consult tablebases. Their middlegame sharpness, by contrast, engines assess well.",
+  "recognition": {
+    "preconditions": [
+      "Each side has exactly one bishop",
+      "The bishops travel on opposite colours"
+    ],
+    "indicators_for": [
+      "An endgame with few or no other pieces — the drawish case",
+      "The defender can blockade the passed pawns on their own bishop's colour",
+      "The defender's pawns are on their own bishop's colour, so the bishop defends them",
+      "One of the pawns is a wrong rook pawn"
+    ],
+    "indicators_against": [
+      "Queens or rooks remain — winning chances rise sharply, and in the middlegame the bishops are an ATTACKING asset",
+      "The extra pawns are separated by three files or more",
+      "The defender cannot establish a blockade on their bishop's colour",
+      "The attacker's king can penetrate on the colour the defending bishop cannot cover"
+    ],
+    "prerequisites": [
+      "bad-bishop",
+      "fortress"
+    ],
+    "detector": "materialPattern opposite-colour bishops",
+    "detectability": "mechanical",
+    "typical_confidence": "medium",
+    "false_positive_traps": [
+      "The drawish reputation is an ENDGAME fact. In the middlegame with heavy pieces on, opposite-coloured bishops favour the attacker, because the bishop operates where the defender's cannot answer. Announcing 'opposite bishops, drawn' with queens on the board is the standard error.",
+      "Detecting the material is trivial; whether a blockade is achievable is not.",
+      "Two extra pawns are often not enough — but three files of separation often are. The count of pawns is the wrong variable; their separation and the blockade are the right ones."
+    ]
+  },
+  "application": {
+    "typical_plans": [
+      "As the defender: blockade on your own bishop's colour, put your pawns there too, and accept a 'bad' bishop deliberately",
+      "As the attacker: put your pawns on the colour OPPOSITE your bishop, separate the passed pawns by at least three files, and keep heavy pieces on",
+      "As the attacker: aim for the colour complex the defending bishop cannot cover"
+    ],
+    "typical_moves": [
+      "A bishop sacrifice to gain the tempo needed for the king to reach a blockade square"
+    ],
+    "typical_pawn_structures": [
+      "Separated passed pawns — the attacker's best try",
+      "Blockaded connected pawns on the defender's bishop colour — the drawing setup"
+    ],
+    "typical_piece_arrangements": [
+      "Defending king and bishop sharing the blockade duties"
+    ],
+    "tactical_consequences": [
+      "Bishop sacrifices for a single tempo are a standard defensive resource"
+    ],
+    "strategic_consequences": [
+      "Material largely stops being the operative variable; position takes over",
+      "A standard way for a worse side to save a game is to steer into them"
+    ]
+  },
+  "exceptions": [
+    "The drawish rule is an endgame rule. With queens and rooks on, opposite bishops favour the attacker.",
+    "Three files of separation between passed pawns usually wins despite the bishops.",
+    "A wrong rook pawn draws regardless of how far apart or how advanced the pawns are.",
+    "The defender's best practice is the opposite of normal: make your bishop bad on purpose."
+  ],
+  "limitations": [
+    "The material pattern is trivially detectable; whether the position draws is not.",
+    "The published statistics apply to specific material counts and should not be generalised."
+  ],
+  "misconceptions": [
+    "That opposite-coloured bishops mean a draw. That is an endgame tendency, and the reverse is true in the middlegame.",
+    "That an extra pawn or two settles it. Two extra pawns frequently fail to win.",
+    "That a bad bishop is bad here. For the defender it is the correct setup."
+  ],
+  "relationships": {
+    "broader": [],
+    "narrower": [],
+    "related": [
+      "bad-bishop",
+      "fortress",
+      "wrong-rook-pawn",
+      "passed-pawn",
+      "two-weaknesses"
+    ],
+    "contrasting": [],
+    "co_occurring": [
+      "fortress",
+      "wrong-rook-pawn"
+    ],
+    "conflicts": [
+      {
+        "concept": "two-weaknesses",
+        "resolution": "`two-weaknesses` lists opposite-coloured bishops as a case where the principle fails, and that is right: the defending bishop holds one colour complex however many targets exist, so stretching the defence does not work. Where the two meet, the bishop colour wins — unless the second weakness creates a breakthrough square on the defender's OWN colour, which is the one way through."
+      },
+      {
+        "concept": "bad-bishop",
+        "resolution": "Direct inversion. `bad-bishop` treats pawns on the bishop's colour as a defect; here the DEFENDER should deliberately create that defect, because a bishop that defends its own pawns on its own colour is what builds the fortress. The general concept is right and this configuration is the standard exception to it."
+      }
+    ]
+  },
+  "examples": [
+    {
+      "fen": "8/4k3/4P3/3P4/2B1K3/b7/8/8 w - - 0 1",
+      "note": "Opposite-coloured bishops with TWO extra connected pawns on the fifth and sixth. The black bishop on a3 holds the a3-f8 diagonal and the d6 square, so the pawns cannot advance and the king cannot help them through.",
+      "origin_kind": "constructed-test",
+      "concept_role": "positive",
+      "side_to_move_benefits": "neither",
+      "tablebase": {
+        "source": "Lichess tablebase (Syzygy, 7-piece)",
+        "pieces": 6,
+        "wdl": "draw",
+        "dtz": 0,
+        "dtm": 0,
+        "category": "draw",
+        "note": "PROVEN draw two pawns down. This is the concept's central claim demonstrated rather than asserted: two extra connected pawns, well advanced, and the blockade on the defending bishop's colour holds it. Note the tablebase's own best move is d6+, which also draws — there is simply nothing to be done."
+      }
+    }
+  ],
+  "counterexamples": [],
+  "ambiguous_examples": [],
+  "explanations": {
+    "by_level": {
+      "beginner": "The bishops move on different colours, so they can never meet or defend against each other. In endgames this makes it very hard to win, even a pawn or two ahead.",
+      "intermediate": "Opposite-coloured bishops. In the endgame they are the most drawish material in chess — blockade the pawns on your own bishop's colour and even two extra pawns often fail.",
+      "advanced": "Endgame: drawish, and the defender should deliberately make their bishop bad to build the fortress. Middlegame: sharp, because your bishop operates where theirs cannot answer.",
+      "master": "The operative variables are blockade feasibility and pawn separation, not the pawn count. Three files apart usually wins; a wrong rook pawn draws regardless."
+    },
+    "by_depth": {
+      "short": "Bishops on different colours — very hard to win in the endgame.",
+      "normal": "Opposite-coloured bishops: the bishops can never contest the same squares, so the defender can blockade on their own colour and the attacker's bishop can never challenge it. One extra pawn usually draws and two often do.",
+      "deep": "The most drawish material configuration in the endgame — roughly half of bishop-and-four-pawns endings against an opposite bishop are drawn, against over 90% wins with same-coloured bishops. The defensive method inverts an ordinary principle: put your pawns on your own bishop's colour so the bishop defends them, deliberately creating a 'bad' bishop that is exactly what the fortress needs. Two other reversals: separated pawns beat connected ones, and zugzwang is much less available than usual. The drawish reputation belongs to the ENDGAME, though. With heavy pieces still on, opposite bishops favour the attacker, because a bishop attacking on a colour the defender cannot answer is an extra attacker."
+    },
+    "hedge": "",
+    "lesson": "Opposite bishops are drawish in endgames and dangerous in middlegames. Before announcing a draw, count what else is on the board."
+  },
+  "terminology": {
+    "beginner_words": [
+      "bishops on different colours",
+      "they can never meet"
+    ],
+    "advanced_words": [
+      "opposite-coloured bishops",
+      "blockade",
+      "colour complex",
+      "fortress"
+    ],
+    "avoid": [
+      "opposite bishops means a draw"
+    ]
+  },
+  "status": {
+    "stage": "researched",
+    "last_updated": "2026-09-01",
+    "open_questions": [],
+    "audit_notes": []
+  },
+  "id": "opposite-coloured-bishops",
+  "canonical_name": "Opposite-coloured bishops",
+  "category": "bishop-endgames",
+  "knowledge_type": "positional-concept",
+  "definition_short": "Each side has one bishop and they run on opposite colours. Strongly drawish in the endgame — two extra pawns often fail to win — and sharply attacking in the middlegame.",
+  "definition_long": "Because the bishops can never meet or contest the same squares, each side is effectively playing with a piece the other cannot answer on its own colour. That has two opposite consequences depending on phase.\n\nIN THE ENDGAME they are the most drawish material configuration in chess. The numbers are stark: about HALF of endings with bishop and four pawns against a bishop on the opposite colour are drawn, against over 90% wins when the bishops are on the same colour. One extra pawn usually draws, and two extra pawns frequently do too, because the defender can blockade on the colour of their own bishop and the attacker's bishop can never challenge the blockade. Zugzwang, the usual tool for breaking such positions, is much less available than with same-coloured bishops.\n\nThe defensive method inverts an ordinary principle: the weaker side should DELIBERATELY make their bishop bad, putting their pawns on the bishop's own colour so it defends them, and building a fortress on that colour complex. The attacker should do the reverse.\n\nSeparated pawns beat connected ones here, which is also the reverse of the usual rule — with one file between the pawns it is normally a draw, with three files the attacker normally wins, because the defender must block one pawn with the king and the other with the bishop and then the attacking king wins the blockaded piece.\n\nIN THE MIDDLEGAME the same feature makes them SHARP, not drawish, because a bishop attacking on a colour the opponent cannot defend is a genuine extra attacker. The drawish reputation belongs to the endgame and is routinely over-applied earlier.",
+  "sources": [
+    "wikipedia-ocb",
+    "wikipedia-wrong-rook-pawn",
+    "lichess-tablebase"
+  ],
+  "source_confidence": "medium"
+}
