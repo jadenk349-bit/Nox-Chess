@@ -1194,6 +1194,32 @@
   .pz-why-line li b{color:var(--gold-soft); margin-right:4px;}
   .pz-why-line li.them{color:var(--muted);}
   .pz-why-line li.them b{color:var(--text);}
+  /* The swing, drawn. Two bars rather than one with a marker on it: the
+     question is what the position was worth twice, and a single bar that
+     moves is a picture of one number changing rather than of two readings
+     side by side. The "before" bar is muted and the "after" bar is gold —
+     the same pairing the line above it uses for their moves and yours. */
+  .pz-eval{margin-top:10px;}
+  .pz-eval-head{font-size:12px; color:var(--muted); margin-bottom:6px;}
+  .pz-eval-row{display:flex; align-items:center; gap:8px; margin-bottom:5px;}
+  .pz-eval-when{
+    flex:0 0 88px; font-size:10px; letter-spacing:.09em; text-transform:uppercase;
+    color:var(--muted); white-space:nowrap; overflow:hidden; text-overflow:ellipsis;
+  }
+  .pz-eval-track{
+    flex:1 1 auto; height:6px; border-radius:999px;
+    background:rgba(255,255,255,.06); overflow:hidden;
+  }
+  .pz-eval-track i{display:block; height:100%; border-radius:999px; background:var(--muted);}
+  .pz-eval-row.after .pz-eval-track i{background:var(--gold-soft);}
+  .pz-eval-pct{
+    flex:0 0 32px; text-align:right; font-size:12px;
+    font-variant-numeric:tabular-nums; color:var(--muted);
+  }
+  .pz-eval-row.after .pz-eval-pct{color:var(--gold-soft);}
+  .pz-eval-note{margin:6px 0 0; font-size:12px; color:var(--muted);}
+  .pz-eval-note b{color:var(--good); font-weight:600;}
+  .pz-eval-note b.down{color:#e0864d;}
   .pz-follow{width:100%; margin-top:8px; padding:9px 6px; font-size:12px;}
   .pz-follow-say{color:var(--gold-soft); border-color:rgba(212,175,110,.45); padding-left:9px;}
   /* study mode speaks in a different voice from the card: the card is the
@@ -2475,6 +2501,9 @@
             <h2 id="pzTitle">Puzzle</h2>
             <div class="pz-ask" id="pzAsk"></div>
             <div class="pz-say" id="pzSay"></div>
+            <!-- what the mistake cost and the answer won, as a chance of
+                 winning: the card's swing sentence with the numbers in it -->
+            <div class="pz-eval" id="pzEval" style="display:none"></div>
             <div class="pz-say pz-follow-say" id="pzFollowSay" style="display:none"></div>
             <div class="pz-themes" id="pzThemes"></div>
             <div class="pz-controls">
@@ -6605,6 +6634,71 @@ function pzExplain(p){
   return out.join('');
 }
 
+/* The turning point as a number, and the only number on this card the player
+   is actually spending.
+
+   The card already says it in words — "the position was losing before it and
+   is slightly better after it" — and words cannot be compared to the last
+   puzzle's. These are the same two readings through winPct(), the fitted
+   curve the review judges every move with: `eval.before` is what the position
+   was worth before the opponent went wrong, `eval.best` what it is worth once
+   the move has been found, both from the solver's side and both already in the
+   file. The gap between them is the whole puzzle.
+
+   It waits until the puzzle is over, exactly as the themes do. Told at the
+   start that they are going from 8% to 58% a player has been told the move is
+   a rescue, and 45% to 97% tells them to look for something decisive — which
+   is most of the answer to a position whose whole question is what kind of
+   move is called for. */
+
+/* A forced mate is ±10000 by convention (tools/puzzle_rules.js) and the curve
+   reads anything that large as certainty, so mates are shown as certainty and
+   nothing else is allowed to reach 0 or 100 — a position that is merely
+   winning is not a game already over. */
+const PZ_MATE_CP = 9800;
+
+function pzWinPct(cp){
+  if (typeof cp !== 'number') return null;
+  if (cp >= PZ_MATE_CP) return 100;
+  if (cp <= -PZ_MATE_CP) return 0;
+  return Math.min(99, Math.max(1, Math.round(winPct(cp))));
+}
+
+/** The two readings either side of the mistake, whole percentages, or null. */
+function pzSwing(p){
+  const e = p && p.eval;
+  if (!e) return null;
+  const before = pzWinPct(e.before), after = pzWinPct(e.best);
+  if (before === null || after === null) return null;
+  return { before: before, after: after, delta: after - before };
+}
+
+/** ...and the strip that draws it. Empty for a file that carries no scores. */
+function pzSwingHTML(p){
+  const s = pzSwing(p);
+  if (!s) return '';
+  const side = stateFromFEN(p.fen).turn === W ? 'White' : 'Black';
+  // both moves named, because "before" and "after" are two different moves
+  // and a bar labelled only "before" invites the reading that the first
+  // number is what the position was worth on the screen the player just saw
+  const theirs = (p.prev && p.prev.fen && p.prev.move)
+               ? pzSanOf(p.prev.fen, [], p.prev.move) : '';
+  const yours  = pzSanOf(p.fen, [], p.moves[0]);
+  const row = (cls, when, pct) =>
+    '<div class="pz-eval-row ' + cls + '">' +
+      '<span class="pz-eval-when">' + pzEsc(when) + '</span>' +
+      '<span class="pz-eval-track"><i style="width:' + pct + '%"></i></span>' +
+      '<span class="pz-eval-pct">' + pct + '%</span>' +
+    '</div>';
+  return '<div class="pz-eval-head">' +
+           '<span class="pz-why-tag">Winning chance</span> for ' + side +
+         '</div>' +
+    row('before', theirs ? 'Before ' + theirs : 'Before', s.before) +
+    row('after', 'After ' + yours, s.after) +
+    '<p class="pz-eval-note"><b' + (s.delta < 0 ? ' class="down"' : '') + '>' +
+    (s.delta > 0 ? '+' : '') + s.delta + '</b> points, from their mistake to your move.</p>';
+}
+
 /* What the follow-up amounts to, said plainly.
 
    pvLine() answers this shape of question for the review, and cannot answer it
@@ -6718,6 +6812,13 @@ function pzRender(){
     say.textContent = '';
   }
 
+  /* The swing, between the card and the chips, and on the same terms as the
+     themes: it is a hint until the puzzle is over. */
+  const ev = document.getElementById('pzEval');
+  const swing = PZ.done ? pzSwingHTML(p) : '';
+  ev.innerHTML = swing;
+  ev.style.display = swing ? '' : 'none';
+
   const themes = document.getElementById('pzThemes');
   const move = PZ.delta === null || PZ.delta === 0 ? ''
              : ' (' + (PZ.delta > 0 ? '+' : '') + PZ.delta + ')';
@@ -6789,6 +6890,7 @@ function rushRender(){
   document.getElementById('pzShow').style.display = 'none';
   document.getElementById('pzRetry').style.display = 'none';
   // a run does not stop to explain
+  document.getElementById('pzEval').style.display = 'none';
   document.getElementById('pzFollow').style.display = 'none';
   document.getElementById('pzFollowSay').style.display = 'none';
   document.getElementById('pzStudy').style.display = 'none';
