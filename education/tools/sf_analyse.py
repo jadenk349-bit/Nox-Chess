@@ -158,6 +158,8 @@ def main():
     ap.add_argument("--fen")
     ap.add_argument("--depth", type=int, default=DEFAULT_DEPTH)
     ap.add_argument("--multipv", type=int, default=1)
+    ap.add_argument("--threads", type=int, default=None,
+                    help="engine threads; default cpu_count-2. Lower it when running jobs in parallel.")
     ap.add_argument("--moves", nargs="*", help="restrict the search to these UCI moves")
     ap.add_argument("--json", action="store_true")
     a = ap.parse_args()
@@ -172,7 +174,7 @@ def main():
     if not a.fen:
         ap.error("--fen is required unless --probe is given")
 
-    res = analyse(engine, a.fen, a.depth, a.multipv, a.moves)
+    res = analyse(engine, a.fen, a.depth, a.multipv, a.moves, threads=a.threads)
     res["engine_id"] = probe(engine)
     if a.json:
         print(json.dumps(res, indent=2))

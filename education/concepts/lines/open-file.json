@@ -1,0 +1,177 @@
+{
+  "schema_version": 2,
+  "alternate_names": [
+    "open line"
+  ],
+  "historical_names": [],
+  "tags": [
+    "rooks",
+    "lines",
+    "nimzowitsch"
+  ],
+  "subcategory": "line control",
+  "difficulty": "beginner",
+  "knowledge_type_note": "Names a board feature. That rooks belong on open files is a related rule of thumb, not part of the definition.",
+  "name_status": "established-name",
+  "history": {
+    "attributions": [
+      {
+        "person": "Aron Nimzowitsch",
+        "relation": "systematized-by",
+        "source": "nimzowitsch-my-system",
+        "year": 1925,
+        "note": "My System devotes early chapters to the open file — its genesis, its purpose, obstacles to a file operation, and the outpost as its natural consequence."
+      }
+    ],
+    "first_documented_source": "nimzowitsch-my-system",
+    "year": 1925,
+    "confidence": "medium",
+    "notes": "Rooks on open files were understood long before Nimzowitsch; what he supplied was systematic treatment and the link to the outpost. Not a claim of invention.",
+    "competing_claims": [],
+    "development": [
+      {
+        "era": "1925, Nimzowitsch",
+        "change": "Systematic treatment; the file is tied to the outpost and to provoking pawn weaknesses.",
+        "source": "nimzowitsch-my-system"
+      },
+      {
+        "era": "engine era",
+        "change": "Quantified: open-file bonuses of roughly 8-20 centipawns, with extra for doubling and for bearing on the enemy king.",
+        "source": "chessprogramming-rook-open-file"
+      }
+    ]
+  },
+  "engine_era_status": "reliable",
+  "engine_era_note": "Uncontroversial and directly quantified in engine evaluation. The engine-era refinement is that the bonus is conditional — larger when the file bears on the enemy king, and worth little without an entry square.",
+  "recognition": {
+    "preconditions": [
+      "A file contains no pawns of either colour (open), or pawns of one colour only (half-open for the other side)"
+    ],
+    "indicators_for": [
+      "A safe entry square exists on the seventh or eighth rank, or on any rank the defender cannot cover",
+      "The file leads towards the enemy king",
+      "Rooks can be doubled on it, or a queen placed behind them",
+      "The opponent cannot contest the file, or contesting it costs them something"
+    ],
+    "indicators_against": [
+      "Every entry square on the file is defended — the rook stares and does nothing",
+      "The opponent can contest the file and trade all the rooks off",
+      "The file can be closed by a pawn advance",
+      "Occupying it costs a tempo the position cannot spare"
+    ],
+    "prerequisites": [],
+    "detector": "fileOccupancy (not yet written)",
+    "detectability": "mechanical",
+    "typical_confidence": "high",
+    "false_positive_traps": [
+      "REGISTERED FALSE POSITIVE: a file with no pawns is not automatically useful. Without an entry square, a rook on it accomplishes nothing.",
+      "Detecting 'no pawns on this file' is trivial and fires constantly. The reportable fact is the file PLUS a usable entry square.",
+      "Contested files where all rooks come off leave neither side with anything."
+    ]
+  },
+  "application": {
+    "typical_plans": [
+      "Double rooks on the file, then invade on the seventh",
+      "Half-open file: pile onto the enemy pawn standing on it",
+      "Create the entry square first by exchanging its defender",
+      "Open a file deliberately with a pawn break aimed at the enemy king"
+    ],
+    "typical_moves": [
+      "Rook to the file, then doubling; a rook lift to the third rank and across"
+    ],
+    "typical_pawn_structures": [
+      "Half-open c-file in Sicilian structures",
+      "Half-open d-file in front of a backward d-pawn"
+    ],
+    "typical_piece_arrangements": [
+      "Doubled rooks, or queen behind rook, on one file"
+    ],
+    "tactical_consequences": [
+      "Invasion on the seventh rank; back-rank threats"
+    ],
+    "strategic_consequences": [
+      "Files are how heavy pieces enter a position at all"
+    ]
+  },
+  "exceptions": [
+    "A file with no entry squares is worth nothing.",
+    "A half-open file can be more valuable than a fully open one, because the enemy pawn on it is a fixed target and the file cannot be neutralised by a simple rook trade.",
+    "Nimzowitsch's usage of the term differs from the modern one."
+  ],
+  "limitations": [
+    "The feature is trivially detectable and therefore trivially over-reportable. Usability is the whole question."
+  ],
+  "misconceptions": [
+    "That rooks belong on open files unconditionally. They belong on files they can invade down.",
+    "That an open file is better than a half-open one."
+  ],
+  "relationships": {
+    "broader": [],
+    "narrower": [],
+    "related": [
+      "battery",
+      "backward-pawn",
+      "outpost",
+      "rook-on-the-seventh"
+    ],
+    "contrasting": [],
+    "co_occurring": [
+      "battery",
+      "backward-pawn"
+    ],
+    "conflicts": []
+  },
+  "examples": [],
+  "counterexamples": [],
+  "ambiguous_examples": [],
+  "explanations": {
+    "by_level": {
+      "beginner": "There are no pawns on that file, so a rook there can see all the way down the board.",
+      "intermediate": "The {file}-file is open. Before committing the rook, find the square you intend to invade on — a file with no entry point does nothing.",
+      "advanced": "Open file with an entry square on {square}. Double, or place the queen behind, and check whether the opponent can contest and trade off.",
+      "master": "File plus entry point, always. A half-open file with a fixed enemy pawn on it is frequently worth more than a fully open one, because it cannot be neutralised by an exchange of rooks."
+    },
+    "by_depth": {
+      "short": "No pawns on the {file}-file.",
+      "normal": "The {file}-file is open. That matters because there is an entry square on {square} — a file a rook cannot invade down is not worth occupying.",
+      "deep": "A file with no pawns of either colour; half-open means pawns of one colour only, and is the natural file to attack down since the enemy pawn is a fixed target. Nimzowitsch treated the open file systematically and tied it to the outpost — the file supports a piece planted in enemy territory, and driving that piece off with a pawn is what damages the file in turn. The qualification that matters in practice is the entry square: engine evaluation gives a rook on an open file only about 8 to 20 centipawns, which is the right order of magnitude for the feature by itself. What makes a file decisive is somewhere to go."
+    },
+    "hedge": "",
+    "lesson": "An open file is a road. Before you drive down it, check there is somewhere to arrive."
+  },
+  "terminology": {
+    "beginner_words": [
+      "no pawns on that file",
+      "the rook can see down the board"
+    ],
+    "advanced_words": [
+      "open file",
+      "half-open file",
+      "semi-open file",
+      "entry square",
+      "doubling"
+    ],
+    "avoid": [
+      "rooks belong on open files (unqualified)"
+    ]
+  },
+  "status": {
+    "stage": "researched",
+    "last_updated": "2026-08-31",
+    "open_questions": [],
+    "audit_notes": []
+  },
+  "id": "open-file",
+  "canonical_name": "Open file",
+  "category": "open-files",
+  "knowledge_type": "positional-concept",
+  "definition_short": "A file with no pawns of either colour, which rooks and queens can use to exert pressure and invade.",
+  "definition_long": "A file with no pawns on it at all. A HALF-OPEN (or SEMI-OPEN) file has pawns of one colour only — half-open for the side without a pawn there, and the natural file to attack down, because the enemy pawn on it is a target.\n\nThe critical qualification, and the one most often left out: a file is worth having only if it offers an ENTRY SQUARE. A rook on an open file whose seventh and eighth ranks are all covered controls squares and achieves nothing. The plan is always file plus entry point, not file alone.\n\nNimzowitsch treated the open file as a subject in its own right and tied it to the outpost: the file is what supports a piece planted in enemy territory, and driving that piece away with a pawn is what damages the file. Note a terminology difference — he used '(semi) open file' even for rooks standing in front of their own pawn chain, which modern usage would not.\n\nEngine evaluation gives a rook on an open file a bonus of roughly 8 to 20 centipawns, which is a useful calibration: real, worth having, and far smaller than a pawn.",
+  "sources": [
+    "nimzowitsch-my-system",
+    "chessprogramming-rook-open-file",
+    "thechessworld-rooks-open-files",
+    "chessworld-weaknesses-outposts"
+  ],
+  "source_confidence": "high"
+}

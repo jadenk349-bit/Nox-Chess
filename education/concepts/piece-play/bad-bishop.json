@@ -1,0 +1,198 @@
+{
+  "schema_version": 2,
+  "alternate_names": [
+    "poor bishop"
+  ],
+  "historical_names": [],
+  "tags": [
+    "bishops",
+    "steinitz",
+    "structure",
+    "misunderstood"
+  ],
+  "subcategory": "piece quality",
+  "difficulty": "intermediate",
+  "knowledge_type_note": "Names a STRUCTURAL relationship between a bishop and its own pawns. Whether the bishop is ineffective is a different, functional question — see the Suba exception.",
+  "name_status": "established-name",
+  "history": {
+    "attributions": [
+      {
+        "person": "Wilhelm Steinitz",
+        "relation": "originated-by",
+        "source": "kingsights-good-bad-bishop",
+        "year": null,
+        "note": "Credited with formalising the good/bad bishop distinction in the 1880s; not verified against The Modern Chess Instructor in this research."
+      },
+      {
+        "person": "Siegbert Tarrasch",
+        "relation": "popularized-by",
+        "source": "kingsights-good-bad-bishop",
+        "year": null,
+        "note": "Made it one of the cornerstones of his positional rules."
+      },
+      {
+        "person": "Mihail Suba",
+        "relation": "named-by",
+        "source": "kingsights-good-bad-bishop",
+        "year": null,
+        "note": "Named the 'active bad bishop' — the structurally bad bishop that is nonetheless effective outside the pawn chain."
+      }
+    ],
+    "first_documented_source": null,
+    "year": null,
+    "confidence": "low",
+    "notes": "All three attributions come from a single anonymous source and none has been checked against a primary text. The Steinitz and Tarrasch attributions are conventional and plausible; Suba's coinage is the one most worth verifying, since the distinction it names is load-bearing for this record. Recorded low.",
+    "competing_claims": [],
+    "development": [
+      {
+        "era": "1880s, Steinitz",
+        "change": "The relationship between a bishop and its own pawn colour becomes an explicit evaluation factor.",
+        "source": "kingsights-good-bad-bishop"
+      },
+      {
+        "era": "Tarrasch",
+        "change": "Hardened into a positional rule.",
+        "source": "kingsights-good-bad-bishop"
+      },
+      {
+        "era": "Suba, late 20th c.",
+        "change": "Corrective: structural badness does not entail functional passivity — the 'active bad bishop'.",
+        "source": "kingsights-good-bad-bishop"
+      }
+    ]
+  },
+  "engine_era_status": "useful-with-common-exceptions",
+  "engine_era_note": "Engines weigh bishop mobility directly rather than counting pawns on its colour, which is exactly Suba's point mechanised. A bishop that is 'bad' by the classical count but has an open diagonal outside the chain gets no penalty from an engine.",
+  "recognition": {
+    "preconditions": [
+      "A bishop's own pawns predominantly occupy the colour it moves on"
+    ],
+    "indicators_for": [
+      "Its own central pawns are fixed on its colour and cannot advance",
+      "It is inside its own pawn chain with no route out",
+      "The opponent's pawns are on the opposite colour, so there are no targets either",
+      "The position is closed, so the pawn structure will not change"
+    ],
+    "indicators_against": [
+      "THE SUBA CASE: the bishop is outside the pawn chain and active, however bad it looks structurally",
+      "A pawn break is available that shifts the blocking pawns off its colour",
+      "It is the only defender of a colour complex — a bad bishop with a job is not a bad piece",
+      "The structure is fluid and about to change",
+      "It can be traded for the opponent's good bishop"
+    ],
+    "prerequisites": [],
+    "detector": "pawnsOnBishopColour (not yet written)",
+    "detectability": "mechanical",
+    "typical_confidence": "low",
+    "false_positive_traps": [
+      "REGISTERED FALSE POSITIVE: a bishop behind its own pawns is not automatically bad in the sense that matters. Suba's active bad bishop is the counterexample, and it is common, not exotic.",
+      "Counting pawns on the bishop's colour is mechanical and will fire on pieces that are performing well. Mobility and role must be checked too.",
+      "A bad bishop that is the sole guardian of a weak colour complex is a load-bearing defender, not a liability."
+    ]
+  },
+  "application": {
+    "typical_plans": [
+      "Break with a pawn move that relocates pawns off the bishop's colour",
+      "Trade the bad bishop, ideally for the opponent's good one",
+      "Reroute it outside the pawn chain and give it a job there",
+      "Against one: fix the opponent's pawns on the bishop's colour so the defect is permanent"
+    ],
+    "typical_moves": [
+      "...Bd7-e8-h5 in the French, to trade it",
+      "...Bd7-a4, the active bad bishop",
+      "...b6 and ...Bb7 in the QGD Tartakower"
+    ],
+    "typical_pawn_structures": [
+      "French: black pawns on d5, e6, f7 with the light-squared bishop",
+      "Closed centres where the pawns are fixed"
+    ],
+    "typical_piece_arrangements": [
+      "Bishop shut inside its own chain with no exit square"
+    ],
+    "tactical_consequences": [],
+    "strategic_consequences": [
+      "One of the largest static imbalances available, and durable into the endgame",
+      "Drives the classic technique of simplifying into an endgame with the better bishop"
+    ]
+  },
+  "exceptions": [
+    "Suba's active bad bishop: outside the pawn chain, a structurally bad bishop is often equal or better than a knight.",
+    "A bad bishop defending a colour complex is doing essential work and should not be traded off casually.",
+    "If the structure can change, the badness is temporary."
+  ],
+  "limitations": [
+    "Recognition confidence is LOW. The structural test is mechanical and the conclusion it invites is frequently wrong.",
+    "Sources for the historical attributions are weak; see history.notes."
+  ],
+  "misconceptions": [
+    "That a bishop behind its own pawns is a bad piece. It is structurally bad, which is not the same thing.",
+    "That a bad bishop should always be traded.",
+    "That the bishop's square makes it bad. Its own pawn structure does, and moving the bishop takes the problem with it."
+  ],
+  "relationships": {
+    "broader": [],
+    "narrower": [],
+    "related": [
+      "weak-square",
+      "hole",
+      "outpost"
+    ],
+    "contrasting": [],
+    "co_occurring": [
+      "weak-square"
+    ],
+    "conflicts": []
+  },
+  "examples": [],
+  "counterexamples": [],
+  "ambiguous_examples": [],
+  "explanations": {
+    "by_level": {
+      "beginner": "Your own pawns are sitting on the same colour squares as your bishop, so they are in its way.",
+      "intermediate": "A bad bishop: its own pawns are fixed on its colour. Before writing it off, check whether it can get outside the chain — a bad bishop with an open diagonal is a real piece.",
+      "advanced": "Structurally bad. Suba's distinction applies: badness is about the pawns, passivity is about the work it does, and an active bad bishop outside the chain is often fine.",
+      "master": "Fix the opponent's pawns on their bishop's colour to make it permanent. And check whether the bad bishop is the sole guardian of a complex before proposing a trade."
+    },
+    "by_depth": {
+      "short": "Its own pawns are on the bishop's colour, blocking it.",
+      "normal": "A bad bishop — its own pawns sit on the squares it travels on, so its diagonals are blocked from the inside and the squares they leave uncovered are ones the bishop cannot use either. The cures are a pawn break, a trade, or getting the bishop outside the chain.",
+      "deep": "A bishop's scope is decided by its own pawn structure, since its colour is fixed forever. Pawns on the bishop's colour block it and leave the other colour unguarded; pawns on the opposite colour give the pair full coverage. Formalised by Steinitz and hardened into a rule by Tarrasch. The essential corrective is Suba's 'active bad bishop': a structurally bad bishop that has got outside its own chain can be an excellent piece, because bad is structural and passive is functional. The French ...Bd7-a4 is the standard case — still bad by definition, and cutting the queenside in half."
+    },
+    "hedge": "",
+    "lesson": "Count the pawns on your bishop's colour to see if it is bad. Then look at what it is actually doing, because those are different questions."
+  },
+  "terminology": {
+    "beginner_words": [
+      "your pawns are in the bishop's way"
+    ],
+    "advanced_words": [
+      "bad bishop",
+      "good bishop",
+      "active bad bishop",
+      "colour complex",
+      "pawn chain"
+    ],
+    "avoid": [
+      "bad bishop means bad piece",
+      "always trade your bad bishop"
+    ]
+  },
+  "status": {
+    "stage": "researched",
+    "last_updated": "2026-08-31",
+    "open_questions": [],
+    "audit_notes": []
+  },
+  "id": "bad-bishop",
+  "canonical_name": "Bad bishop",
+  "category": "good-bad-bishops",
+  "knowledge_type": "positional-concept",
+  "definition_short": "A bishop whose own pawns sit on the colour it travels on, so its diagonals are blocked from the inside.",
+  "definition_long": "A bishop moves on one colour forever, so its scope is decided by where its OWN pawns sit. Pawns on the bishop's colour block it from the inside and, worse, leave the other colour uncovered — so the weak squares stay weak and the bishop cannot use them. Pawns on the opposite colour give full-board coverage: pawns hold one colour, bishop holds the other.\n\nThe archetype is the French Defence light-squared bishop, buried behind d5, e6 and f7.\n\nTHE CRITICAL QUALIFICATION, and the reason this concept is so often misapplied: badness is STRUCTURAL, not positional. Mihail Suba's 'active bad bishop' names the case — a structurally bad bishop that has got OUTSIDE its own pawn chain and is doing real work. The French ...Bd7-a4 is the standard illustration: the bishop is still bad by Steinitz's definition, since its own pawns still block its diagonals, and it is nevertheless an excellent piece. As the distinction is usually put: 'bad' is structural, 'passive' is functional, and they are not the same thing.\n\nThe three standard cures are a pawn break that moves the offending pawns off the bishop's colour, trading the bad bishop for the opponent's good one, and rerouting it outside the chain.",
+  "sources": [
+    "kingsights-good-bad-bishop",
+    "steinitz-modern-chess-instructor",
+    "nimzowitsch-my-system"
+  ],
+  "source_confidence": "medium"
+}

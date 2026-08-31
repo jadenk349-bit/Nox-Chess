@@ -1,0 +1,221 @@
+{
+  "schema_version": 2,
+  "alternate_names": [
+    "kingside attack",
+    "mating attack",
+    "attack on the castled king"
+  ],
+  "historical_names": [],
+  "tags": [
+    "vukovic",
+    "attack",
+    "king-safety"
+  ],
+  "subcategory": "attacking method",
+  "difficulty": "advanced",
+  "knowledge_type_note": "A strategic principle with an unusually firm PRECONDITION attached, which is what stops it being merely a rule of thumb. Vukovic's tradition holds that an attack is not a choice of style but a consequence of an existing advantage.",
+  "name_status": "established-name",
+  "history": {
+    "attributions": [
+      {
+        "person": "Wilhelm Steinitz",
+        "relation": "originated-by",
+        "source": "steinitz-modern-chess-instructor",
+        "year": 1889,
+        "note": "The doctrine that one must not attack without an advantage is his; Lasker summarised his theory as 'Do not attack when you have no tangible advantage in position.'"
+      },
+      {
+        "person": "Vladimir Vukovic",
+        "relation": "systematized-by",
+        "source": "vukovic-art-of-attack",
+        "year": 1965,
+        "note": "The Art of Attack in Chess is the standard systematic treatment; focal points and the conditions for the classic bishop sacrifice are his."
+      }
+    ],
+    "first_documented_source": "vukovic-art-of-attack",
+    "year": 1965,
+    "confidence": "medium",
+    "notes": "Attacking the king is as old as chess; what is attributable is the doctrine that it requires justification (Steinitz) and its systematic treatment (Vukovic). Neither is a claim of invention. Vukovic's text has not been read directly — see the source's access caveat.",
+    "competing_claims": [],
+    "development": [
+      {
+        "era": "romantic era",
+        "change": "Attack treated as the normal way to play; soundness a secondary question.",
+        "source": null
+      },
+      {
+        "era": "1889, Steinitz",
+        "change": "Attack becomes conditional on an existing advantage rather than a matter of style.",
+        "source": "steinitz-modern-chess-instructor"
+      },
+      {
+        "era": "1965, Vukovic",
+        "change": "Systematised: preconditions, timing, focal points, pawn-shelter types, named sacrifices.",
+        "source": "vukovic-art-of-attack"
+      },
+      {
+        "era": "modern",
+        "change": "Defensive resources better understood; the third opposite-castling scenario — attacking while also slowing the opponent — becomes the common treatment.",
+        "source": "gambit-art-of-attacking-chess"
+      }
+    ]
+  },
+  "engine_era_status": "useful-with-common-exceptions",
+  "engine_era_note": "Engines have raised the bar for what counts as a justified attack, refuting many attacking sacrifices that were played on general grounds, and have made defence look far more resilient than classical writing assumed. The PRECONDITION doctrine survives this well; what does not survive is the romantic assumption that a king with a damaged shelter is losing.",
+  "recognition": {
+    "preconditions": [
+      "More attacking units bear on the king's sector than defending units, or the king's cover is durably weakened",
+      "The attacker's own king is safe, or safe enough for the time the operation needs",
+      "The centre is closed or under control, so a counter-blow there is not available"
+    ],
+    "indicators_for": [
+      "A clear focal point — a weak square next to the king that pieces can occupy or sacrifice on",
+      "The defender's key defensive piece (often a knight on f6 or a fianchettoed bishop) can be exchanged or driven off",
+      "A file or diagonal can be opened towards the king by a pawn break",
+      "Opposite-side castling, so pawns can advance without cost",
+      "A hook — an advanced enemy pawn that gives the attacker something to attack in order to open a line"
+    ],
+    "indicators_against": [
+      "The centre is open or can be opened by the defender",
+      "Development is unfinished; a missing rook is often the exact tempo the attack lacks",
+      "The defender can trade queens, which usually ends the attack",
+      "The attacker has no way to bring a third piece to the sector",
+      "The king's shelter is intact and there is no sacrifice that breaks it"
+    ],
+    "prerequisites": [
+      "king-safety"
+    ],
+    "detector": "puzzle_rules.js: checks >= 2 or mated (a crude proxy)",
+    "detectability": "heuristic",
+    "typical_confidence": "low",
+    "false_positive_traps": [
+      "Two checks is not an attack. The repository's `kingAttack` tag fires on checks >= 2 or mate, which is a proxy for puzzle classification and NOT a definition of the concept.",
+      "An exposed king is not automatically under attack — with the attacking pieces traded off, an exposed king is often just an active one. This is a registered false-positive case.",
+      "Advancing pawns at a king is not an attack unless pieces can follow into the lines that open."
+    ]
+  },
+  "application": {
+    "typical_plans": [
+      "Exchange the defender — the f6 knight, the g7 bishop — before striking",
+      "Open a file or diagonal with a pawn break, then double heavy pieces on it",
+      "Sacrifice on a focal point to strip the shelter, with a follow-up piece already in range",
+      "In opposite-side castling, count tempi to contact and start the storm first",
+      "Combine the attack with prophylaxis against the opponent's counter-attack"
+    ],
+    "typical_moves": [
+      "h4-h5 and g4-g5 pawn storms",
+      "Bxh7+ and Bxh6 sacrifices on the shelter",
+      "Rook lifts to the third rank and across"
+    ],
+    "typical_pawn_structures": [
+      "f7-g7-h7 intact — most resistant, usually needs a sacrifice",
+      "f7-g6-h7 — holes on f6 and h6, but sound while a bishop sits on g7",
+      "f7-g7-h6 — h6 is both a target and a hook for g4-g5"
+    ],
+    "typical_piece_arrangements": [
+      "Queen and bishop battery on b1-h7",
+      "Rook on the g- or h-file behind an advancing pawn",
+      "Knight reaching g5 or f5"
+    ],
+    "tactical_consequences": [
+      "Mating nets, sacrifices on focal points, forced king walks"
+    ],
+    "strategic_consequences": [
+      "An attack that fails usually leaves the attacker structurally worse, especially after a pawn storm"
+    ]
+  },
+  "exceptions": [
+    "An attack without a positional advantage generally fails; this is the doctrine's core and it is a genuine constraint, not encouragement.",
+    "A wing attack can be refuted by a central counter-blow — the standard antidote.",
+    "Trading queens usually ends an attack, so the defender's simplest defence is often to seek that trade.",
+    "Damaged pawn cover is not decisive by itself. It matters in proportion to the attacking force that remains."
+  ],
+  "limitations": [
+    "Recognition confidence is LOW. 'Local superiority near the king' is a judgement about which pieces count, and no mechanical detector in this repository attempts it.",
+    "The repo's kingAttack tag is a puzzle-classification proxy and should not be read as the concept."
+  ],
+  "misconceptions": [
+    "That attacking is a matter of temperament. The classical position is that it is a consequence of an advantage you already hold.",
+    "That an exposed king is losing.",
+    "That pushing pawns at the king is an attack. Without pieces to follow, it is a structural concession."
+  ],
+  "relationships": {
+    "broader": [],
+    "narrower": [
+      "greek-gift"
+    ],
+    "related": [
+      "king-safety",
+      "weak-square",
+      "sacrifice",
+      "initiative",
+      "pawn-storm"
+    ],
+    "contrasting": [],
+    "co_occurring": [
+      "sacrifice",
+      "weak-square"
+    ],
+    "conflicts": [
+      {
+        "concept": "king-safety",
+        "resolution": "Directly opposed for the same pawn moves: advancing the g- and h-pawns attacks and simultaneously exposes your own king. Opposite-side castling resolves the conflict (the pawns are not in front of your king); same-side castling does not, and there the burden of proof is on the attacker."
+      }
+    ]
+  },
+  "examples": [],
+  "counterexamples": [],
+  "ambiguous_examples": [],
+  "explanations": {
+    "by_level": {
+      "beginner": "White is bringing more pieces near the black king than Black has defending it, and trying to open a line to get at it.",
+      "intermediate": "An attack on the king. It works here because {more attackers than defenders / the shelter is weakened} — and note the centre is {closed / controlled}, so there is no counter-blow.",
+      "advanced": "The attack is justified by {local superiority / a focal point on {square}}. The critical question is the defender's key defensive piece and whether it can be removed.",
+      "master": "Count attackers against defenders in the sector, identify the focal point, and check the centre and the queen trade before committing. The doctrine since Steinitz is that an attack must be earned, not chosen."
+    },
+    "by_depth": {
+      "short": "More force is bearing on the king than is defending it.",
+      "normal": "An attack on the king, justified by {reason}. Attacks require a pre-existing advantage — usually more pieces near the king than the defender has, or holes in the pawn cover — and they fail when the centre is open or the defender can trade queens.",
+      "deep": "Vukovic's treatment is the standard one. An attack is a consequence of an advantage rather than a choice of style, a doctrine going back to Steinitz. It is usually best understood as an operation against a specific weak square next to the king — a focal point — rather than against the king in general. The pawn shelter's type matters: f7-g7-h7 intact is the most resistant and normally needs a sacrifice; f7-g6-h7 has holes on f6 and h6 but is sound while a bishop stands on g7, which is why trading that bishop is so often the whole plan. Opposite-side castling turns the game into a race where a tempo decides, and the modern treatment combines attacking with slowing the opponent down rather than pure racing."
+    },
+    "hedge": "",
+    "lesson": "Before attacking, count: how many of your pieces can reach the king's sector, and how many of theirs defend it? If the answer is not in your favour, improve the position instead — and check the centre first."
+  },
+  "terminology": {
+    "beginner_words": [
+      "more pieces near their king",
+      "opening a line to the king"
+    ],
+    "advanced_words": [
+      "local superiority",
+      "focal point",
+      "pawn shelter",
+      "hook",
+      "pawn storm",
+      "prophylaxis"
+    ],
+    "avoid": [
+      "attack because the king looks exposed",
+      "always attack"
+    ]
+  },
+  "status": {
+    "stage": "researched",
+    "last_updated": "2026-08-31",
+    "open_questions": [],
+    "audit_notes": []
+  },
+  "id": "king-attack",
+  "canonical_name": "Attack on the king",
+  "category": "attack-principles",
+  "knowledge_type": "strategic-principle",
+  "definition_short": "A concerted operation against the enemy king, justified only by an existing advantage — usually local superiority in force near the king, or weaknesses in its cover.",
+  "definition_long": "Not a mood but a consequence. The classical position, following Vukovic, is that an attack must be EARNED: you cannot attack the king without a positional advantage, and attacking without one fails against any competent defence. The advantage usually takes the form of LOCAL SUPERIORITY — more pieces bearing on the king's sector than the defender has defending it, or a pawn majority there — or of durable weaknesses in the king's pawn cover.\n\nFOCAL POINTS. Vukovic's central contribution: 'every focal-point is a weak square in the defender's territory and a potentially strong one for the attacker', especially when adjacent to the king. g7 and h7 (g2 and h2 mirrored) are the classic ones. An attack is usually best understood as an operation against a specific square rather than against the king in general.\n\nPAWN COVER. The three common shelters differ sharply in resilience. f7-g7-h7 unmoved is the most resistant and usually has to be broken by sacrifice. f7-g6-h7 leaves f6 and h6 as holes and invites h4-h5 or f4-f5 to open a file — but is not weak while a bishop sits on g7, which is why exchanging that bishop is so often the whole plan. f7-g7-h6 gives the h6 pawn as a target and a hook for g4-g5.\n\nOPPOSITE-SIDE CASTLING changes the character completely: pawns can be thrown forward without exposing one's own king, and the game becomes a race where a single tempo decides. Franco distinguishes three scenarios — a mutual race, an attack against pure defence, and the modern treatment that combines attacking with prophylaxis on one's own wing.\n\nThe standing counter-principle is that a wing attack is answered in the centre. An attack launched while the centre is open, or while one's own development is unfinished, tends to rebound.",
+  "sources": [
+    "vukovic-art-of-attack",
+    "gambit-art-of-attacking-chess",
+    "chessable-art-of-attack",
+    "steinitz-modern-chess-instructor"
+  ],
+  "source_confidence": "high"
+}

@@ -195,6 +195,59 @@ Cook", popularised by Nunn. The hedge is theirs and is kept, confidence is
 `medium`, and `misconceptions` records that writing "Nunn coined LPDO" would be
 wrong.
 
+## Session 4 — corpus-driven research
+
+Worked the priority order the corpus produced rather than by taste. Ten concepts
+added: sacrifice, positional-sacrifice, exchange-sacrifice, perpetual-check,
+king-attack, backward-pawn, open-file, greek-gift, passed-pawn,
+pawn-breakthrough, rook-on-the-seventh, bad-bishop, doubled-pawns,
+isolated-queen-pawn.
+
+### Findings worth keeping
+
+**The first `contradicts` verdict.** Puzzle mi-bb512d9713 is tagged
+`exchangeSacrifice` by the repository's own pipeline. Stockfish says Re1+ is mate
+in two. So the material pattern fires correctly — rook for bishop — but this is a
+MATING sacrifice, sham in Spielmann's sense, not a positional exchange sacrifice.
+Recorded as `contradicts` on the exchange-sacrifice record, because it proves the
+corpus tags cannot be used as ground truth for the positional concept.
+
+**Perpetual check is not a rule**, and this is the clearest rules misconception
+found so far. FIDE's Laws do not mention it; a perpetual forces a repetition and
+the repetition is what draws. Shogi and xiangqi forbid it outright, which shows
+its status is a choice rather than a necessity. Engine-verified on a real corpus
+position: Qa8+ evaluates 0.00 with the repeating cycle in the PV, while every
+alternative is mate against — Ne6+ is mate in 13, Qg3 mate in 3.
+
+**Two unverified famous quotations recorded as unverified.** Nimzowitsch's
+"a passed pawn is a criminal which should be kept under lock and key" is
+attributed but was NOT located in the primary text during this research. A
+Capablanca line about taking doubled pawns for the seventh rank is prefaced
+"Legend has it" by its own source. Both are flagged rather than repeated, and
+`passed-pawn` carries history confidence `low` because of it.
+
+**The Greek gift's NAME has two incompatible origins** in circulation — Greco the
+player, and the Trojan horse — and neither was verified. Recorded as an open
+question. Vukovic's four CONDITIONS, by contrast, are secure and precise enough
+to be near-mechanical recognition criteria.
+
+### Epistemic typing doing real work
+
+Four concepts on one subject, typed three different ways: `hanging-piece` and
+`loose-piece` are terminology, `lpdo` is a rule-of-thumb with mandatory hedging,
+`weak-square` is a positional concept. Similarly `perpetual-check` is terminology
+rather than an official rule, and `pawn-breakthrough` is a tactical motif rather
+than a strategic principle because its correctness is settled by calculation.
+
+### Engine budget — a lesson learned twice
+
+A Greek Gift pair at depth 28 MultiPV 4 and a breakthrough pair at depth 34, run
+concurrently, failed to converge in twelve minutes. Two compounding errors:
+MultiPV suppresses pruning so it costs far more than single-PV at the same depth,
+and `sf_analyse.py` defaults to `cpu_count-2` threads so two concurrent jobs
+requested 20 threads on 12 cores. Both recorded in `tool_limitations`, and
+`sf_analyse.py` now takes `--threads`. Run engine jobs sequentially.
+
 ### Next
 
 Complete the pilot concept record, then work the taxonomy in dependency order:

@@ -1,0 +1,164 @@
+{
+  "schema_version": 2,
+  "alternate_names": [
+    "breakthrough",
+    "pawn break-through sacrifice"
+  ],
+  "historical_names": [],
+  "tags": [
+    "endgame",
+    "pawn-structure",
+    "sacrifice",
+    "concrete"
+  ],
+  "subcategory": "forcing pawn method",
+  "difficulty": "intermediate",
+  "knowledge_type_note": "A tactical motif rather than a strategic principle: it is a concrete forcing sequence whose correctness is settled by calculation, not judgement. It happens to occur in pawn structures, which is why it is often taught as strategy.",
+  "name_status": "established-name",
+  "history": {
+    "attributions": [],
+    "first_documented_source": "chessprogramming-pawns-breakthrough",
+    "year": null,
+    "confidence": "unknown",
+    "notes": "The pattern is old and anonymous; it appears in endgame manuals long before any of the sources consulted here. No coiner is claimed and none was found.",
+    "competing_claims": [],
+    "development": []
+  },
+  "engine_era_status": "reliable",
+  "engine_era_note": "Wholly concrete, so engines settle it exactly. Nothing about the concept has been revised; what engines add is that the boundary conditions — how advanced the pawns must be, how far the king may stand — can now be checked in seconds rather than analysed.",
+  "recognition": {
+    "preconditions": [
+      "Opposing pawn groups face each other with no passer for either side",
+      "The attacker has at least as many pawns in the group and they are advanced",
+      "A pawn advance creates two levers simultaneously"
+    ],
+    "indicators_for": [
+      "A trio against a trio, the attacker's one rank further on",
+      "The defending king is outside the square of the prospective passer",
+      "The attacker has a space advantage in that pawn group",
+      "Whichever way the defender captures, a different pawn gets through"
+    ],
+    "indicators_against": [
+      "The defending king is close enough to catch the runner — check the rule of the square first",
+      "The attacking pawns are too far back; the same structure one rank earlier usually fails outright",
+      "The defender can decline the capture and hold",
+      "The attacker's own king is needed elsewhere and cannot support"
+    ],
+    "prerequisites": [
+      "passed-pawn"
+    ],
+    "detector": "puzzle_rules.js: pawn advance creating a decisive passer",
+    "detectability": "mechanical",
+    "typical_confidence": "high",
+    "false_positive_traps": [
+      "A pawn sacrifice that creates a passer is not a breakthrough unless the passer actually cannot be stopped. The rule of the square decides this and is cheap to check.",
+      "The pattern is highly recognisable and therefore easy to play on autopilot in a position that is one rank short of it working."
+    ]
+  },
+  "application": {
+    "typical_plans": [
+      "Push the middle pawn to create two levers, then sacrifice again to deflect, then run",
+      "Combine with an outside passer to stretch the defending king",
+      "Prophylactically: prevent the lever structure from arising at all"
+    ],
+    "typical_moves": [
+      "b6! in the a5-b5-c5 against a7-b7-c7 structure",
+      "g6! and h6! and f6! in the kingside mirror (f5-g5-h5 against f7-g7-h7)"
+    ],
+    "typical_pawn_structures": [
+      "Trio against trio, one rank apart",
+      "Blocked majorities in king-and-pawn endings"
+    ],
+    "typical_piece_arrangements": [
+      "Typically none — this is usually a pure pawn ending"
+    ],
+    "tactical_consequences": [
+      "Produces an unstoppable passer by force"
+    ],
+    "strategic_consequences": [
+      "Makes a space advantage in a pawn group concrete",
+      "Turns apparently blocked and drawn endings into wins"
+    ]
+  },
+  "exceptions": [
+    "Fails outright without enough space. Moving the whole structure one rank back is the standard demonstration.",
+    "Fails if the defending king is inside the square of the resulting passer.",
+    "The defender can sometimes decline the first capture and hold."
+  ],
+  "limitations": [
+    "Entirely concrete. It should be verified by calculation every time, not recognised and trusted."
+  ],
+  "misconceptions": [
+    "That the breakthrough always works in a trio-against-trio structure. Space and king distance decide it.",
+    "That it is a strategic idea. It is a forcing tactical sequence that happens to be made of pawns."
+  ],
+  "relationships": {
+    "broader": [
+      "passed-pawn"
+    ],
+    "narrower": [],
+    "related": [
+      "passed-pawn",
+      "sacrifice",
+      "two-weaknesses"
+    ],
+    "contrasting": [],
+    "co_occurring": [
+      "passed-pawn",
+      "sacrifice"
+    ],
+    "conflicts": []
+  },
+  "examples": [],
+  "counterexamples": [],
+  "ambiguous_examples": [],
+  "explanations": {
+    "by_level": {
+      "beginner": "White gives away two pawns so the third one can run all the way to the end, and the king is too far away to catch it.",
+      "intermediate": "A breakthrough. The middle pawn goes first because it attacks two ways at once, so whichever way Black captures, a different pawn gets through.",
+      "advanced": "Classic trio breakthrough. Two conditions to check: enough space, and the defending king outside the square of the runner. Both are calculable, so calculate them.",
+      "master": "Concrete throughout. Verify both captures, the declined capture, and the full race before playing it — the same pattern one rank back is simply a lost pawn."
+    },
+    "by_depth": {
+      "short": "Two pawns are given so the third cannot be stopped.",
+      "normal": "A pawn breakthrough: the middle pawn advances to create two levers at once, a second pawn is sacrificed to deflect the defender, and the third promotes. It works here because the pawns are far enough advanced and the king is outside the square.",
+      "deep": "The canonical form is a5-b5-c5 against a7-b7-c7: 1.b6! and either 1...axb6 2.c6! bxc6 3.a6 or 1...cxb6 2.a6! bxa6 3.c6. The middle pawn leads because it creates two levers, so the defender's choice does not matter. Two conditions decide whether it works and both are concrete — enough space, and the defending king outside the square of the resulting passer. Move the same structure one rank back and it fails entirely, which is why this is a calculation rather than a pattern to trust."
+    },
+    "hedge": "",
+    "lesson": "When pawns face each other and nothing seems to be happening, check for the breakthrough — and then check the square rule before you play it."
+  },
+  "terminology": {
+    "beginner_words": [
+      "giving up pawns so one can run"
+    ],
+    "advanced_words": [
+      "breakthrough",
+      "lever",
+      "rule of the square",
+      "passer",
+      "candidate"
+    ],
+    "avoid": [
+      "breakthroughs always work in this structure"
+    ]
+  },
+  "status": {
+    "stage": "researched",
+    "last_updated": "2026-08-31",
+    "open_questions": [],
+    "audit_notes": []
+  },
+  "id": "pawn-breakthrough",
+  "canonical_name": "Pawn breakthrough",
+  "category": "pawn-breaks",
+  "knowledge_type": "tactical-motif",
+  "definition_short": "Sacrificing one or two pawns to force through a passer the enemy king cannot catch.",
+  "definition_long": "A forcing pawn sacrifice that manufactures a passed pawn out of a blocked structure. The canonical pattern is three pawns against three, one rank apart — white a5, b5, c5 against black a7, b7, c7:\n\n  1.b6! and now\n     1...axb6 2.c6! bxc6 3.a6 and the a-pawn queens; or\n     1...cxb6 2.a6! bxa6 3.c6 and the c-pawn queens.\n\nThe middle pawn moves first because it creates two levers at once, so whichever way the defender captures, another pawn breaks through. The second sacrifice deflects the pawn that would have stopped the runner. Two pawns are given to promote the third.\n\nIT IS CONCRETE, NOT GENERAL. Two conditions decide it and both are calculable. First, SPACE: the attacking pawns must be advanced enough. Move the whole structure one rank back and the breakthrough simply fails — a claim testable directly, and tested in this record. Second, KING DISTANCE: the defending king must be outside the square of the resulting passer, which the rule of the square settles at a glance.\n\nBecause both conditions are checkable, a breakthrough should never be played on general grounds. Verify both captures, the refusal to capture, and the full promotion race.",
+  "sources": [
+    "chessprogramming-pawns-breakthrough",
+    "pawnbreak-endgame-breaks",
+    "chessworld-pawn-breakthrough",
+    "wikipedia-passed-pawn"
+  ],
+  "source_confidence": "high"
+}

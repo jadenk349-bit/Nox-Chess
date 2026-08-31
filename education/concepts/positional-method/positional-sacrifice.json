@@ -1,0 +1,190 @@
+{
+  "schema_version": 2,
+  "alternate_names": [],
+  "historical_names": [],
+  "tags": [
+    "petrosian",
+    "strategy",
+    "compensation"
+  ],
+  "subcategory": "long-term investment",
+  "difficulty": "advanced",
+  "knowledge_type_note": "A strategic method rather than terminology, because it prescribes a way of playing — convert material into a static asset — rather than merely naming a move type. NOTE a genuine terminological collision: Spielmann uses 'positional sacrifice' for a SHAM sacrifice that regains material with an improved position, while modern usage means a REAL sacrifice for long-term static compensation. These are near-opposite meanings.",
+  "name_status": "established-name",
+  "history": {
+    "attributions": [
+      {
+        "person": "Rudolf Spielmann",
+        "relation": "named-by",
+        "source": "spielmann-art-of-sacrifice",
+        "year": 1935,
+        "note": "Used the phrase, but for a sham sacrifice with forced material recovery — not the modern meaning."
+      },
+      {
+        "person": "Tigran Petrosian",
+        "relation": "popularized-by",
+        "source": "thechessworld-positional-sacrifice",
+        "year": null,
+        "note": "Made the positional exchange sacrifice a standing strategic method; devoted a chapter of one of his books to it."
+      }
+    ],
+    "first_documented_source": "spielmann-art-of-sacrifice",
+    "year": 1935,
+    "confidence": "disputed",
+    "notes": "Disputed not about who used the phrase but about what it means. Spielmann's sense (sham, material returns) and the modern sense (real, material does not return) are close to opposites, and both are current. Do not attribute the modern concept to Spielmann.",
+    "competing_claims": [
+      "Spielmann 1935: a sham sacrifice in which recovering the material is an essential characteristic.",
+      "Modern usage: a real sacrifice for static compensation, with no forced recovery."
+    ],
+    "development": [
+      {
+        "era": "1935, Spielmann",
+        "change": "Phrase used for temporary material investment with forced return.",
+        "source": "spielmann-art-of-sacrifice"
+      },
+      {
+        "era": "mid-20th c., Petrosian",
+        "change": "Reframed as permanent investment for static assets; the exchange sacrifice becomes a positional instrument.",
+        "source": "thechessworld-positional-sacrifice"
+      }
+    ]
+  },
+  "engine_era_status": "substantially-revised-by-engines",
+  "engine_era_note": "The class most changed by modern engines and by neural-network evaluation, which values long-term compensation far more highly than earlier material-weighted search did. Sacrifices that classical engines called simply bad are now often endorsed. That is a genuine revision in understanding rather than a change in the concept.",
+  "recognition": {
+    "preconditions": [
+      "Material is given up",
+      "No forced sequence recovers it",
+      "No mating attack follows"
+    ],
+    "indicators_for": [
+      "The compensation is static: structure, a permanent square, a colour complex, the bishop pair",
+      "The opponent's extra material has no active role — a rook with no open file, a bishop biting on granite",
+      "The resulting position would still be pleasant after further exchanges",
+      "The sacrifice removes the piece that was defending a complex"
+    ],
+    "indicators_against": [
+      "The compensation is described but not visible on the board",
+      "The opponent can return the material to liquidate into a good endgame",
+      "The asset gained is temporary and the material deficit is not"
+    ],
+    "prerequisites": [
+      "sacrifice"
+    ],
+    "detector": null,
+    "detectability": "heuristic",
+    "typical_confidence": "low",
+    "false_positive_traps": [
+      "Calling any unclear sacrifice positional. If the point is an attack, it is not a positional sacrifice.",
+      "Asserting compensation that cannot be named. 'Positional compensation' with no named asset is the vaguest claim in chess writing and must not be produced by this system.",
+      "Spielmann's sense and the modern sense are opposite; using the phrase without saying which is meant is itself a false positive."
+    ]
+  },
+  "application": {
+    "typical_plans": [
+      "Exchange for the defender of a colour complex, then occupy it",
+      "Accept a material deficit to obtain a permanent outpost for a knight",
+      "Wreck the enemy structure permanently and play against the fixed weaknesses",
+      "Defensively: give material to remove the key attacking piece or reach a fortress"
+    ],
+    "typical_moves": [
+      "...Rxc3 in Sicilian structures, wrecking the queenside and taking the dark squares",
+      "...Rxe4 giving the exchange for a pawn, the bishop pair and a better structure"
+    ],
+    "typical_pawn_structures": [
+      "Sicilian structures where ...Rxc3 doubles the c-pawns",
+      "Structures where one side's bishop is the sole guardian of a colour complex"
+    ],
+    "typical_piece_arrangements": [
+      "A knight established where no pawn can challenge it, bought with the exchange"
+    ],
+    "tactical_consequences": [],
+    "strategic_consequences": [
+      "The material deficit never expresses itself because the extra piece has no role",
+      "Assets survive into the endgame, unlike an attack"
+    ]
+  },
+  "exceptions": [
+    "The compensation must survive simplification. An asset that evaporates when queens come off is not positional compensation.",
+    "The opponent can often return the material at a good moment to reach a favourable endgame; a positional sacrifice must account for that resource.",
+    "Defensive positional sacrifices are a real and under-taught category."
+  ],
+  "limitations": [
+    "Recognition confidence is LOW. Nothing forces the payoff, so the judgement cannot be checked by a short line.",
+    "The word is used in two near-opposite senses."
+  ],
+  "misconceptions": [
+    "That a positional sacrifice is a slower attacking sacrifice. It is not an attack at all.",
+    "That Petrosian invented the term. He is associated with the modern practice; the phrase is older and meant something different."
+  ],
+  "relationships": {
+    "broader": [
+      "sacrifice"
+    ],
+    "narrower": [
+      "exchange-sacrifice"
+    ],
+    "related": [
+      "outpost",
+      "weak-square",
+      "two-weaknesses"
+    ],
+    "contrasting": [],
+    "co_occurring": [
+      "exchange-sacrifice",
+      "outpost"
+    ],
+    "conflicts": []
+  },
+  "examples": [],
+  "counterexamples": [],
+  "ambiguous_examples": [],
+  "explanations": {
+    "by_level": {
+      "beginner": "This gives up material not to attack, but to get something that lasts — a better pawn structure, or a square their pieces can never take back.",
+      "intermediate": "A positional sacrifice: material for a lasting asset rather than an attack. The test is whether the compensation would still be worth something after more pieces come off.",
+      "advanced": "Static compensation, no forced return. Name the asset — structure, colour complex, an eternal outpost — and check it survives simplification, because nothing forces the payoff.",
+      "master": "Petrosian's instrument. The question is whether the opponent's extra material has a role: an exchange given for a knight that cannot be challenged and a structure that cannot be repaired is not a deficit in any operative sense."
+    },
+    "by_depth": {
+      "short": "Material given up for a lasting positional asset, not an attack.",
+      "normal": "A positional sacrifice — material for static compensation such as {asset}, with no attack and no forced way to win the material back. It has to be judged rather than calculated, and the compensation must be durable enough to survive into an endgame.",
+      "deep": "Material converted into assets that do not expire: structure, squares, a colour complex, an unassailable outpost. Associated above all with Petrosian and the exchange sacrifice, whose point was never a mating attack but a permanent asset that made the opponent's extra material irrelevant. Note a terminological trap: Spielmann used 'positional sacrifice' for a SHAM sacrifice in which recovering the material was essential, which is close to the opposite of the modern meaning. Modern engines, especially neural-network evaluation, value this kind of compensation far more highly than older search did, and have rehabilitated a number of sacrifices previously called unsound."
+    },
+    "hedge": "",
+    "lesson": "If you cannot name the asset you are buying, and say why it will still matter after further exchanges, you are not making a positional sacrifice."
+  },
+  "terminology": {
+    "beginner_words": [
+      "giving up material for something that lasts"
+    ],
+    "advanced_words": [
+      "positional sacrifice",
+      "static compensation",
+      "colour complex",
+      "exchange sacrifice"
+    ],
+    "avoid": [
+      "positional compensation (with no named asset)",
+      "unclear but probably good"
+    ]
+  },
+  "status": {
+    "stage": "researched",
+    "last_updated": "2026-08-31",
+    "open_questions": [],
+    "audit_notes": []
+  },
+  "id": "positional-sacrifice",
+  "canonical_name": "Positional sacrifice",
+  "category": "positional-sacrifices",
+  "knowledge_type": "strategic-principle",
+  "definition_short": "Giving up material for long-term static compensation — structure, squares, a permanent outpost, the bishop pair — with no attack and no forced return.",
+  "definition_long": "Material converted into assets that do not expire. Not an attack: the payoff is a better structure, an unassailable square, a colour complex, a crippled enemy majority, or the bishop pair. Because nothing forces the payoff, the compensation has to be strong enough to survive into any endgame, which is what makes these the hardest sacrifices to play.\n\nTERMINOLOGY WARNING. Spielmann uses the phrase for something else — a SHAM sacrifice whose 'recapture of the material given up is an essential characteristic', i.e. material is lent and returned with a better position. Modern usage means the opposite: a REAL sacrifice where the material does not come back. Both usages are attested; a record or explanation must not silently pick one.\n\nTigran Petrosian is the player most associated with the modern sense, above all through the exchange sacrifice. The point of his sacrifices was not a mating attack but assets — an untouchable knight, a dark-square grip — and the material deficit simply never expressed itself.\n\nIt also works defensively, which most treatments omit: giving material to defuse an attack, remove a key attacking piece, or reach a fortress.",
+  "sources": [
+    "spielmann-art-of-sacrifice",
+    "thechessworld-positional-sacrifice",
+    "wikipedia-sacrifice"
+  ],
+  "source_confidence": "high"
+}

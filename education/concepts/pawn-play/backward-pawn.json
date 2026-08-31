@@ -1,0 +1,163 @@
+{
+  "schema_version": 2,
+  "alternate_names": [],
+  "historical_names": [],
+  "tags": [
+    "pawn-structure",
+    "weakness",
+    "semi-open-file"
+  ],
+  "subcategory": "pawn weakness",
+  "difficulty": "intermediate",
+  "knowledge_type_note": "Names a structural feature. Whether it is a WEAKNESS is a separate judgement and is not part of the definition.",
+  "name_status": "established-name",
+  "history": {
+    "attributions": [
+      {
+        "person": "Wilhelm Steinitz",
+        "relation": "originated-by",
+        "source": "britannica-chess-theory",
+        "year": null,
+        "note": "Part of the pawn-weakness doctrine Steinitz introduced; Britannica lists backward pawns among the structural weaknesses his theory named."
+      }
+    ],
+    "first_documented_source": "britannica-chess-theory",
+    "year": null,
+    "confidence": "low",
+    "notes": "Attribution is weak. Britannica associates the classification of pawn weaknesses with Steinitz, but no source consulted gives a first use of 'backward pawn' specifically. Recorded low rather than guessed at.",
+    "competing_claims": [],
+    "development": []
+  },
+  "engine_era_status": "useful-with-common-exceptions",
+  "engine_era_note": "Engines carry backward-pawn penalties, but modern practice is markedly more relaxed about accepting one in return for activity or space than classical teaching was. The square in front is generally valued more highly than the pawn.",
+  "recognition": {
+    "preconditions": [
+      "A pawn is on a lower rank than all friendly pawns on adjacent files",
+      "It cannot advance safely — the square ahead is controlled by an enemy pawn or piece"
+    ],
+    "indicators_for": [
+      "It stands on a file that is half-open for the opponent",
+      "The square in front of it is controlled by an enemy pawn and can be occupied by a piece",
+      "It cannot be defended by a pawn and needs pieces to hold it",
+      "The position is simplifying, so fewer pieces are available to defend it"
+    ],
+    "indicators_against": [
+      "It can advance at a moment of its choosing, so the defect is temporary",
+      "No enemy rook can reach the file",
+      "It is compensated by space or by the activity its structure enables",
+      "The square in front is covered by a piece the opponent cannot dislodge"
+    ],
+    "prerequisites": [
+      "hole",
+      "weak-square"
+    ],
+    "detector": "pawnStructure (not yet written)",
+    "detectability": "mechanical",
+    "typical_confidence": "medium",
+    "false_positive_traps": [
+      "A pawn that is merely behind its neighbours but CAN advance safely is not backward in the operative sense.",
+      "A backward pawn on a closed file that nothing can attack is a description, not a weakness.",
+      "Reporting the pawn and not the square in front of it usually misses the more important half."
+    ]
+  },
+  "application": {
+    "typical_plans": [
+      "Fix it by preventing the freeing advance, then attack it with rooks on the half-open file",
+      "Occupy the square in front of it with a knight",
+      "As the defender: prepare and execute the freeing pawn break, or exchange into a position where it cannot be attacked"
+    ],
+    "typical_moves": [],
+    "typical_pawn_structures": [
+      "Sicilian structures with a backward d-pawn on a half-open d-file",
+      "The result of a minority attack, which aims to leave a backward pawn behind"
+    ],
+    "typical_piece_arrangements": [
+      "Enemy rooks doubled on the half-open file, knight on the square in front"
+    ],
+    "tactical_consequences": [],
+    "strategic_consequences": [
+      "Fixes the defender's pieces to passive defence",
+      "The square in front becomes a permanent outpost"
+    ]
+  },
+  "exceptions": [
+    "Not a weakness if it cannot be attacked, or if the freeing break is always available.",
+    "Accepting one for space or activity is routine modern practice.",
+    "The square in front is often the real asset; winning the pawn can be the lesser goal."
+  ],
+  "limitations": [
+    "The geometric test is mechanical; 'cannot advance safely' requires evaluating the square ahead, which is position-dependent."
+  ],
+  "misconceptions": [
+    "That every backward pawn is a weakness.",
+    "That the pawn is the target. The square in front of it is usually worth more."
+  ],
+  "relationships": {
+    "broader": [
+      "weak-square"
+    ],
+    "narrower": [],
+    "related": [
+      "hole",
+      "outpost",
+      "open-file",
+      "two-weaknesses"
+    ],
+    "contrasting": [],
+    "co_occurring": [
+      "outpost",
+      "hole"
+    ],
+    "conflicts": []
+  },
+  "examples": [],
+  "counterexamples": [],
+  "ambiguous_examples": [],
+  "explanations": {
+    "by_level": {
+      "beginner": "That pawn has fallen behind the pawns next to it and cannot move up safely, so it has to be defended by pieces.",
+      "intermediate": "A backward pawn on {square}. It cannot advance, it sits on a file their rooks can use, and the square in front of it is a hole for your knight.",
+      "advanced": "Backward on a half-open file. Fix the freeing break first, then decide whether the target is the pawn or the square in front of it — usually the square.",
+      "master": "Two assets, not one: a fixed target on a half-open file, and a permanent outpost on the square ahead. Weigh both against whatever space or activity was received for it."
+    },
+    "by_depth": {
+      "short": "{square} cannot advance and cannot be defended by a pawn.",
+      "normal": "A backward pawn: it has fallen behind its neighbours and cannot safely advance, so it must be defended by pieces. It usually stands on a file that is half-open for the opponent, and the square in front of it is a hole.",
+      "deep": "Defined as a pawn behind all friendly pawns on the adjacent files that cannot be safely advanced. The inability to advance is the operative half, because it means the defect is permanent. It produces two assets for the opponent: the pawn as a fixed target on a half-open file, and the square in front as an outpost no pawn can contest. The second is usually worth more, and it is exactly the mechanism behind Nimzowitsch's outpost — provoke the pawn move that leaves a backward pawn, and the square appears with it. Modern practice accepts backward pawns far more readily than classical teaching did, when space or activity is received in return."
+    },
+    "hedge": "",
+    "lesson": "When you see a backward pawn, look at the square in front of it before you look at the pawn."
+  },
+  "terminology": {
+    "beginner_words": [
+      "a pawn that has been left behind"
+    ],
+    "advanced_words": [
+      "backward pawn",
+      "half-open file",
+      "freeing break",
+      "outpost"
+    ],
+    "avoid": [
+      "backward pawns are always weak"
+    ]
+  },
+  "status": {
+    "stage": "researched",
+    "last_updated": "2026-08-31",
+    "open_questions": [],
+    "audit_notes": []
+  },
+  "id": "backward-pawn",
+  "canonical_name": "Backward pawn",
+  "category": "pawn-structures",
+  "knowledge_type": "positional-concept",
+  "definition_short": "A pawn behind all friendly pawns on the adjacent files, which cannot safely advance — usually standing on a half-open file where enemy rooks can attack it.",
+  "definition_long": "Wikipedia's definition is the standard one: 'a pawn that is behind all pawns of the same colour on the adjacent files and cannot be safely advanced.' Both halves matter. Being behind its neighbours is the geometry; being unable to advance safely is what makes it a problem, because it means the defect cannot be repaired.\n\nTwo consequences follow and they are what make the concept useful:\n\n  1. The pawn itself is a fixed target, and it usually sits on a HALF-OPEN FILE for the opponent, so rooks and queens can pile onto it from a distance.\n  2. The square DIRECTLY IN FRONT of it is a hole. That square is often worth more than the pawn, because a piece placed there cannot be challenged by a pawn — which is exactly the outpost condition.\n\nThis is why backward pawns and outposts are usually discussed together: creating a backward pawn in the opponent's camp creates the square in front of it at the same time. Nimzowitsch's outpost mechanism is precisely this — provoking the pawn advance that leaves a backward pawn behind it.\n\nIt is not automatically a weakness. A backward pawn that cannot be attacked, or that is compensated by space or activity, is a feature of the structure rather than a defect.",
+  "sources": [
+    "wikipedia-backward-pawn",
+    "britannica-chess-theory",
+    "nimzowitsch-my-system"
+  ],
+  "source_confidence": "medium"
+}

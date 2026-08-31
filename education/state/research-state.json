@@ -6,24 +6,24 @@
     "note": "Filled in by tools/sf_analyse.py --probe"
   },
   "counters": {
-    "concepts_total": 39,
+    "concepts_total": 53,
     "concepts_stub": 0,
     "concepts_researched": 29,
     "concepts_validated": 4,
     "concepts_needs_review": 0,
-    "sources_reviewed": 39,
-    "positions_tested": 13,
-    "matches_validated": 9,
-    "false_matches": 0,
+    "sources_reviewed": 64,
+    "positions_tested": 15,
+    "matches_validated": 10,
+    "false_matches": 1,
     "ambiguous_matches": 4,
     "by_stage": {
       "ready": 1,
-      "researched": 35,
+      "researched": 49,
       "validated": 3
     },
     "tablebase_positions": 2,
     "concepts_fully_covered": 0,
-    "areas_touched": 8,
+    "areas_touched": 18,
     "areas_total": 85
   },
   "areas": {
@@ -135,9 +135,11 @@
     "named-tactical-patterns": {
       "domain": "tactics",
       "status": "not-started",
-      "concepts": [],
+      "concepts": [
+        "greek-gift"
+      ],
       "open_questions": [],
-      "last_touched": null
+      "last_touched": "2026-08-31"
     },
     "named-mating-patterns": {
       "domain": "tactics",
@@ -180,9 +182,11 @@
     "attack-principles": {
       "domain": "attack",
       "status": "not-started",
-      "concepts": [],
+      "concepts": [
+        "king-attack"
+      ],
       "open_questions": [],
-      "last_touched": null
+      "last_touched": "2026-08-31"
     },
     "initiative": {
       "domain": "attack",
@@ -243,9 +247,11 @@
     "good-bad-bishops": {
       "domain": "piece-play",
       "status": "not-started",
-      "concepts": [],
+      "concepts": [
+        "bad-bishop"
+      ],
       "open_questions": [],
-      "last_touched": null
+      "last_touched": "2026-08-31"
     },
     "bishop-pair": {
       "domain": "piece-play",
@@ -264,9 +270,11 @@
     "rooks": {
       "domain": "piece-play",
       "status": "not-started",
-      "concepts": [],
+      "concepts": [
+        "rook-on-the-seventh"
+      ],
       "open_questions": [],
-      "last_touched": null
+      "last_touched": "2026-08-31"
     },
     "queen": {
       "domain": "piece-play",
@@ -320,16 +328,23 @@
     "pawn-structures": {
       "domain": "pawn-play",
       "status": "not-started",
-      "concepts": [],
+      "concepts": [
+        "backward-pawn",
+        "passed-pawn",
+        "doubled-pawns",
+        "isolated-queen-pawn"
+      ],
       "open_questions": [],
-      "last_touched": null
+      "last_touched": "2026-08-31"
     },
     "pawn-breaks": {
       "domain": "pawn-play",
       "status": "not-started",
-      "concepts": [],
+      "concepts": [
+        "pawn-breakthrough"
+      ],
       "open_questions": [],
-      "last_touched": null
+      "last_touched": "2026-08-31"
     },
     "weak-squares": {
       "domain": "pawn-play",
@@ -360,9 +375,11 @@
     "open-files": {
       "domain": "lines",
       "status": "not-started",
-      "concepts": [],
+      "concepts": [
+        "open-file"
+      ],
       "open_questions": [],
-      "last_touched": null
+      "last_touched": "2026-08-31"
     },
     "semi-open-files": {
       "domain": "lines",
@@ -374,16 +391,21 @@
     "positional-sacrifices": {
       "domain": "positional-method",
       "status": "not-started",
-      "concepts": [],
+      "concepts": [
+        "positional-sacrifice",
+        "sacrifice"
+      ],
       "open_questions": [],
-      "last_touched": null
+      "last_touched": "2026-08-31"
     },
     "exchange-sacrifices": {
       "domain": "positional-method",
       "status": "not-started",
-      "concepts": [],
+      "concepts": [
+        "exchange-sacrifice"
+      ],
       "open_questions": [],
-      "last_touched": null
+      "last_touched": "2026-08-31"
     },
     "material-imbalances": {
       "domain": "positional-method",
@@ -537,9 +559,11 @@
     "drawing-mechanisms": {
       "domain": "endgame",
       "status": "not-started",
-      "concepts": [],
+      "concepts": [
+        "perpetual-check"
+      ],
       "open_questions": [],
-      "last_touched": null
+      "last_touched": "2026-08-31"
     },
     "conversion-techniques": {
       "domain": "endgame",
@@ -859,6 +883,12 @@
       "result": "inconclusive — position lacked discriminating power",
       "reason": "Material was correctly held constant, but all four candidate moves fell within 0.08 of each other. The result ran mildly opposite to Nimzowitsch's prediction, which is noise rather than evidence. A discriminating position is needed, not a quieter one.",
       "date": "2026-08-31"
+    },
+    {
+      "what": "Greek Gift controlled pair at depth 28 with MultiPV 4, and the breakthrough pair at depth 34, run concurrently",
+      "result": "neither converged in ~12 minutes; both killed and rerun at depth 20/26",
+      "reason": "Two compounding mistakes. (1) MultiPV disables most pruning, so a MultiPV search on a 28-piece middlegame costs far more than a single-PV search to the same depth — depth 20-22 is ample for a question whose answer is a forced sequence. (2) sf_analyse.py defaults threads to cpu_count-2 = 10, so two concurrent runs requested 20 threads on 12 cores and thrashed. Run engine jobs SEQUENTIALLY, or pass --threads.",
+      "date": "2026-08-31"
     }
   ],
   "tool_limitations": [
@@ -867,7 +897,9 @@
       "limits": [
         "Piping all UCI commands at once and closing stdin makes it read `quit` mid-search and exit before printing any info line — it returns a bestmove with no evaluation and LOOKS like it worked. tools/sf_analyse.py streams and waits for `bestmove`.",
         "Simplified endgames can fail to converge at depth 34+. Prefer tablebase below 8 pieces.",
-        "Two concurrent instances halve each other's throughput on this 12-core machine."
+        "Two concurrent instances halve each other's throughput on this 12-core machine.",
+        "MultiPV is expensive: it suppresses pruning, so multipv 3-4 at depth 28 on a full board can take an order of magnitude longer than depth 28 single-PV. For forced-sequence questions depth 20-22 with MultiPV is plenty.",
+        "education/tools/sf_analyse.py defaults to cpu_count-2 threads. Two concurrent invocations oversubscribe the machine. Run jobs sequentially in one script."
       ]
     },
     {

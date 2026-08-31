@@ -1,0 +1,200 @@
+{
+  "schema_version": 2,
+  "alternate_names": [
+    "passer"
+  ],
+  "historical_names": [],
+  "tags": [
+    "pawn-structure",
+    "endgame",
+    "nimzowitsch",
+    "conversion"
+  ],
+  "subcategory": "pawn asset",
+  "difficulty": "beginner",
+  "knowledge_type_note": "A board feature, defined mechanically. That it is an ADVANTAGE is a separate judgement, and one that is wrong often enough to be worth separating.",
+  "name_status": "established-name",
+  "history": {
+    "attributions": [
+      {
+        "person": "Aron Nimzowitsch",
+        "relation": "popularized-by",
+        "source": "nimzowitsch-my-system",
+        "year": 1925,
+        "note": "The blockade doctrine and the much-quoted 'A passed pawn is a criminal which should be kept under lock and key. Mild measures, such as police surveillance, are not sufficient.' Widely attributed and cited by Wikipedia; the passage has NOT been located in the primary text during this research, so the quotation is recorded as attributed rather than verified."
+      },
+      {
+        "person": "Siegbert Tarrasch",
+        "relation": "named-by",
+        "source": "wikipedia-passed-pawn",
+        "year": null,
+        "note": "The rule that rooks belong behind passed pawns is conventionally Tarrasch's; not verified against a primary text here."
+      }
+    ],
+    "first_documented_source": "wikipedia-passed-pawn",
+    "year": null,
+    "confidence": "low",
+    "notes": "Passed pawns are as old as chess and nobody coined the term. Both attached rules of thumb are attributed to Nimzowitsch and Tarrasch respectively by convention. Neither attribution has been checked against a primary text in this research, and the 'criminal' quotation in particular is exactly the kind of famous line the brief warns about. Confidence low, deliberately.",
+    "competing_claims": [],
+    "development": [
+      {
+        "era": "1925, Nimzowitsch",
+        "change": "The blockade is systematised: a passer must be stopped by a piece, and which piece matters.",
+        "source": "nimzowitsch-my-system"
+      },
+      {
+        "era": "engine era",
+        "change": "Engines weigh passers by rank and by whether they are blockaded, and are markedly less impressed by a passer that ties down its own side.",
+        "source": "wikipedia-passed-pawn"
+      }
+    ]
+  },
+  "engine_era_status": "useful-with-common-exceptions",
+  "engine_era_note": "Engines value passers strongly and by rank, but they are also the clearest demonstration of the exception: a securely blockaded passer often evaluates as no advantage at all. The engine does not share the human bias towards being impressed by one.",
+  "recognition": {
+    "preconditions": [
+      "No enemy pawn ahead on the pawn's own file",
+      "No enemy pawn ahead on either adjacent file"
+    ],
+    "indicators_for": [
+      "It is advanced — the further, the more it is worth",
+      "It is protected by a friendly pawn, or escorted by the king",
+      "It is outside, far from the other pawns, so it deflects the enemy king",
+      "It has a connected partner and the two can advance in tandem",
+      "The blockading square cannot be safely occupied by an enemy piece"
+    ],
+    "indicators_against": [
+      "It is securely blockaded by a piece that cannot be dislodged, especially a knight",
+      "Defending it ties down more of the owner's pieces than of the opponent's",
+      "It stands on a square where it is easily attacked",
+      "It was created by a pawn trade that also fixed it as a target",
+      "The position has no second front, so the blockader is never distracted"
+    ],
+    "prerequisites": [],
+    "detector": "pawnStructure (not yet written)",
+    "detectability": "mechanical",
+    "typical_confidence": "high",
+    "false_positive_traps": [
+      "REGISTERED FALSE POSITIVE: a passed pawn is not automatically an advantage. A permanently blockaded passer that must be defended is a liability, and the blockading square is an excellent one for the defender.",
+      "Detecting a passer is trivial and fires constantly in endgames. Reporting one is only informative alongside whether it can actually advance.",
+      "A passer created from doubled pawns is often born weak."
+    ]
+  },
+  "application": {
+    "typical_plans": [
+      "Mobilise a healthy majority; the candidate pawn — the one with no direct opponent — leads",
+      "Escort it with the king in simplified positions",
+      "Put the rook behind it",
+      "Use it to deflect the enemy king while operating on the other wing",
+      "As the defender: blockade with a knight, and if possible make the blockade permanent"
+    ],
+    "typical_moves": [
+      "The breakthrough b6! in the classic trio structure"
+    ],
+    "typical_pawn_structures": [
+      "A healthy 3-vs-2 majority, which produces a passer almost by force",
+      "Outside passer against a symmetric kingside — the two-weaknesses mechanism"
+    ],
+    "typical_piece_arrangements": [
+      "Knight blockading on the square in front",
+      "Rook behind the pawn"
+    ],
+    "tactical_consequences": [
+      "The threat of promotion forces pieces into passive defence and creates deflection tactics"
+    ],
+    "strategic_consequences": [
+      "Often the single most important asset in an endgame",
+      "An outside passer wins by deflection rather than by promoting"
+    ]
+  },
+  "exceptions": [
+    "A blockaded passer that ties down its owner's pieces is a liability, not an asset. Nimzowitsch's blockade rule is right about half the time, which is the honest figure.",
+    "A passer pushed too early becomes a fixed target.",
+    "A passer created from doubled pawns is frequently weak from birth.",
+    "Even a blockaded passer retains value if there is a second front the blockader can be pulled towards — which is the principle of two weaknesses doing the work."
+  ],
+  "limitations": [
+    "The definition is mechanical and reliable; the evaluation is not.",
+    "Both attached rules of thumb (blockade, rook behind) are heuristics with well-known exceptions."
+  ],
+  "misconceptions": [
+    "That a passed pawn is always an advantage.",
+    "That the aim is to promote it. Often the aim is to make the opponent spend pieces stopping it.",
+    "That any piece will do as a blockader. A knight loses nothing standing there; a queen loses almost everything."
+  ],
+  "relationships": {
+    "broader": [],
+    "narrower": [
+      "pawn-breakthrough"
+    ],
+    "related": [
+      "two-weaknesses",
+      "pawn-breakthrough",
+      "backward-pawn",
+      "outpost"
+    ],
+    "contrasting": [],
+    "co_occurring": [
+      "two-weaknesses"
+    ],
+    "conflicts": [
+      {
+        "concept": "two-weaknesses",
+        "resolution": "Not opposed but complementary, and the interaction is the interesting part: a blockaded passer is worthless alone but decisive when a second front exists, because the blockader cannot be in two places. The tablebase-proven pair in the two-weaknesses record is exactly an outside passer plus a second target."
+      }
+    ]
+  },
+  "examples": [],
+  "counterexamples": [],
+  "ambiguous_examples": [],
+  "explanations": {
+    "by_level": {
+      "beginner": "No enemy pawn can stop that pawn — only their pieces can. If it gets far enough, they have to give up a piece for it.",
+      "intermediate": "A passed pawn on {square}. What matters is whether it can advance: a passer that is permanently blockaded ties down your pieces rather than theirs.",
+      "advanced": "Passer on {square}, {protected / outside / connected}. Blockade with a knight if defending; if attacking, ask whether the blockader can be distracted by a second front.",
+      "master": "Value scales with rank and with whether the blockade is permanent. The decisive question is which side's pieces are tied down by it."
+    },
+    "by_depth": {
+      "short": "Nothing can stop {square} except a piece.",
+      "normal": "A passed pawn: no enemy pawn ahead of it on its file or either neighbour, so only pieces can stop it. Its worth depends almost entirely on whether it can advance — a permanently blockaded passer is a liability rather than an asset.",
+      "deep": "Defined by three conditions: no enemy pawn ahead on its own file or either adjacent file. Adjacent files count because pawns capture diagonally. Value rises steeply with rank, and the named variants matter — protected, connected, outside. Nimzowitsch's blockade doctrine attaches: stop it with a piece, and prefer a knight, which loses none of its powers standing guard, over a queen, which loses almost all of hers. Tarrasch's rule attaches too: rooks belong behind passed pawns. Both are heuristics with real exceptions. The most important is that a securely blockaded passer achieves nothing while its owner defends it — unless a second front exists to pull the blockader away, which is where this concept and the principle of two weaknesses meet."
+    },
+    "hedge": "",
+    "lesson": "A passed pawn is only as good as its ability to move. Before counting it as an advantage, ask who is tied down by it."
+  },
+  "terminology": {
+    "beginner_words": [
+      "a pawn no pawn can stop"
+    ],
+    "advanced_words": [
+      "passed pawn",
+      "passer",
+      "protected passer",
+      "outside passer",
+      "blockade",
+      "candidate"
+    ],
+    "avoid": [
+      "a passed pawn is always good",
+      "every passed pawn must be blockaded (as a law)"
+    ]
+  },
+  "status": {
+    "stage": "researched",
+    "last_updated": "2026-08-31",
+    "open_questions": [],
+    "audit_notes": []
+  },
+  "id": "passed-pawn",
+  "canonical_name": "Passed pawn",
+  "category": "pawn-structures",
+  "knowledge_type": "positional-concept",
+  "definition_short": "A pawn with no enemy pawn ahead of it on its own file or on either adjacent file, so only pieces can stop it.",
+  "definition_long": "Three conditions, all necessary: no enemy pawn ahead on its own file, and none ahead on either adjacent file. Enemy pawns BEHIND it are irrelevant. The adjacent files matter because pawns capture diagonally — a pawn on an adjacent file ahead of the passer can always trade itself for it eventually.\n\nValue scales sharply with advancement: a passer on the third rank is a long-term asset, one on the seventh is a crisis the opponent must solve now. Variants worth naming: a PROTECTED passed pawn is defended by a friendly pawn; CONNECTED passed pawns on adjacent files are very strong, and are best advanced in tandem on the same rank so they cannot be blockaded singly; an OUTSIDE passed pawn is separated by several files from the rest and wins by deflecting the enemy king — which is the mechanism behind the two-weaknesses controlled pair in this base.\n\nTwo standing rules of thumb attach to it. Nimzowitsch: every passed pawn must be blockaded, and the blockader should be a piece that keeps its powers while standing guard — the knight is the best, the queen the worst. Tarrasch: the rook belongs behind the passed pawn, yours to push it and the enemy's to attack it.\n\nTHE IMPORTANT EXCEPTION. A passed pawn is not automatically good. A firmly blockaded passer that requires constant defence is a liability: you are guarding a pawn that generates no threats, while the blockading piece stands on an excellent square. The operative test is whether it ties down THEIR pieces or YOURS.",
+  "sources": [
+    "wikipedia-passed-pawn",
+    "nimzowitsch-my-system",
+    "chesscom-passed-or-weak"
+  ],
+  "source_confidence": "medium"
+}

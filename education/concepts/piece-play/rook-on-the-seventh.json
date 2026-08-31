@@ -1,0 +1,192 @@
+{
+  "schema_version": 2,
+  "alternate_names": [
+    "seventh rank",
+    "rook on the seventh",
+    "pigs on the seventh (two rooks)"
+  ],
+  "historical_names": [],
+  "tags": [
+    "rooks",
+    "nimzowitsch",
+    "endgame",
+    "misunderstood"
+  ],
+  "subcategory": "rook activity",
+  "difficulty": "intermediate",
+  "knowledge_type_note": "A piece-placement concept. That it is decisive is a common overstatement and is handled in the exceptions.",
+  "name_status": "established-name",
+  "history": {
+    "attributions": [
+      {
+        "person": "Aron Nimzowitsch",
+        "relation": "systematized-by",
+        "source": "nimzowitsch-my-system",
+        "year": 1925,
+        "note": "Devoted a chapter of My System to the seventh rank and drew the absolute/relative distinction."
+      },
+      {
+        "person": "Yasser Seirawan",
+        "relation": "named-by",
+        "source": "naroditsky-rooks-seventh",
+        "year": null,
+        "note": "Credited by Naroditsky with introducing 'pigs on the seventh' in the Winning Chess series. Attribution is second-hand and not verified against Seirawan's books."
+      }
+    ],
+    "first_documented_source": "nimzowitsch-my-system",
+    "year": 1925,
+    "confidence": "medium",
+    "notes": "The power of the seventh rank was known long before Nimzowitsch; the absolute/relative distinction is his contribution. The 'pigs' nickname attribution rests on a single secondary source and is recorded as medium.",
+    "competing_claims": [],
+    "development": [
+      {
+        "era": "1925, Nimzowitsch",
+        "change": "Systematised; absolute versus relative seventh introduced.",
+        "source": "nimzowitsch-my-system"
+      },
+      {
+        "era": "modern",
+        "change": "Corrective: two rooks on the seventh rarely mate against a defended eighth rank; the advantage is usually transitional and must be converted.",
+        "source": "naroditsky-rooks-seventh"
+      }
+    ]
+  },
+  "engine_era_status": "useful-with-common-exceptions",
+  "engine_era_note": "Engines are markedly less impressed by a rook on the seventh than club instruction is. They value it when it attacks something and restricts the king, and price it near zero when the pawns on the rank have moved and the king is free.",
+  "recognition": {
+    "preconditions": [
+      "A rook occupies the opponent's seventh rank (second for Black)"
+    ],
+    "indicators_for": [
+      "The enemy king is confined to the eighth rank — the ABSOLUTE seventh",
+      "Two or more enemy pawns still stand on the seventh and can be attacked sideways",
+      "A second rook can be brought to the rank, or a passed pawn supports it",
+      "The rook cannot be evicted with tempo"
+    ],
+    "indicators_against": [
+      "The enemy king has escaped to the sixth rank or beyond",
+      "The pawns on the seventh have already advanced, so there is nothing to attack",
+      "The rook can be challenged and traded off, or driven away with gain",
+      "The eighth rank is defended, so the mating dimension of a second rook is absent",
+      "Reaching the seventh costs a tempo the position cannot spare"
+    ],
+    "prerequisites": [
+      "open-file"
+    ],
+    "detector": "rankOccupancy (not yet written)",
+    "detectability": "mechanical",
+    "typical_confidence": "medium",
+    "false_positive_traps": [
+      "REGISTERED FALSE POSITIVE: a rook arriving on the seventh is not automatically important. With the pawns advanced and the king free, it attacks nothing and confines nobody.",
+      "Two rooks on the seventh do NOT generally mate a king whose eighth rank is defended. Explaining them as a mating attack is usually wrong.",
+      "Detecting 'rook on rank 7' is trivial and fires often; the reportable facts are what it attacks and whether the king is trapped."
+    ]
+  },
+  "application": {
+    "typical_plans": [
+      "Establish the rook, then bring a second one to the rank",
+      "Support the rook with a pawn advancing to the sixth, which the defender often cannot allow",
+      "Convert the transitional advantage into material or a favourable trade rather than hunting a mate",
+      "Combine an absolute seventh with a passed pawn"
+    ],
+    "typical_moves": [
+      "Rd7 / Re7 after winning a file",
+      "A rook lift to the third rank and across"
+    ],
+    "typical_pawn_structures": [
+      "Enemy pawns still on their starting squares on the seventh"
+    ],
+    "typical_piece_arrangements": [
+      "Doubled rooks on the seventh; rook on the seventh plus a passed pawn"
+    ],
+    "tactical_consequences": [
+      "Back-rank threats when the king is confined",
+      "Sideways attacks the pawns cannot answer"
+    ],
+    "strategic_consequences": [
+      "Restricts the enemy king and pieces even when it wins nothing directly",
+      "Frequently a transitional advantage to be transformed, not a final one"
+    ]
+  },
+  "exceptions": [
+    "The king escaping forward removes most of the value at a stroke.",
+    "Two rooks on the seventh rarely mate against a defended eighth rank.",
+    "A rook on the seventh with nothing to attack is just a rook on a rank.",
+    "It can be a liability if it can be trapped there."
+  ],
+  "limitations": [
+    "Trivially detectable and therefore easy to over-report. Usefulness depends entirely on targets and on the king."
+  ],
+  "misconceptions": [
+    "That a rook on the seventh is automatically winning.",
+    "That two rooks on the seventh mean mate. Usually they mean material.",
+    "That the aim is the rank. The aim is the pawns on it and the king behind it."
+  ],
+  "relationships": {
+    "broader": [],
+    "narrower": [],
+    "related": [
+      "open-file",
+      "back-rank-mate",
+      "passed-pawn"
+    ],
+    "contrasting": [],
+    "co_occurring": [
+      "open-file",
+      "passed-pawn"
+    ],
+    "conflicts": []
+  },
+  "examples": [],
+  "counterexamples": [],
+  "ambiguous_examples": [],
+  "explanations": {
+    "by_level": {
+      "beginner": "The rook has got behind their pawns, where they cannot defend themselves, and the king cannot come out past it.",
+      "intermediate": "A rook on the seventh. It matters here because {the king is stuck on the back rank / it attacks {n} pawns} — check both before valuing it.",
+      "advanced": "Absolute seventh, with the king confined. That is the version worth investing in; a relative seventh, with the king out, is a good rook rather than a winning one.",
+      "master": "Treat it as transitional. Two rooks on the seventh will not mate a defended eighth rank, so plan the conversion — material, or a favourable trade — rather than a mating attack."
+    },
+    "by_depth": {
+      "short": "The rook is behind their pawns and cutting off the king.",
+      "normal": "A rook on the seventh rank: it attacks pawns from a side they cannot defend and confines the king. It is decisive mainly when the king is trapped on the eighth behind it — if the king is out, the rook is good rather than winning.",
+      "deep": "Nimzowitsch's distinction is the operative one. The seventh is held absolutely when the enemy king is confined behind it, at which point every threat carries mating undertones and he rated an absolute seventh plus a passed pawn as usually decisive. It is held only relatively when the king has escaped forward, and then the rook eats pawns but nothing more. The famous 'pigs on the seventh' need a corrective: with the eighth rank defended, two rooks on the seventh can almost never mate by themselves, and their real power is restriction and mobility. Treat the configuration as a transitional advantage to convert, not as a mating attack."
+    },
+    "hedge": "",
+    "lesson": "Before you spend anything getting to the seventh rank, look at their king. If it is trapped behind you, pay whatever it costs. If it is not, pay less."
+  },
+  "terminology": {
+    "beginner_words": [
+      "behind their pawns",
+      "the king is stuck on the back row"
+    ],
+    "advanced_words": [
+      "absolute seventh",
+      "relative seventh",
+      "pigs on the seventh",
+      "restriction"
+    ],
+    "avoid": [
+      "a rook on the seventh wins",
+      "two rooks on the seventh is mate"
+    ]
+  },
+  "status": {
+    "stage": "researched",
+    "last_updated": "2026-08-31",
+    "open_questions": [],
+    "audit_notes": []
+  },
+  "id": "rook-on-the-seventh",
+  "canonical_name": "Rook on the seventh rank",
+  "category": "rooks",
+  "knowledge_type": "positional-concept",
+  "definition_short": "A rook on the opponent's second rank, attacking unmoved pawns from the side and confining the king — decisive mainly when the king is trapped behind it.",
+  "definition_long": "A rook reaching the seventh attacks the pawns that have not moved, from a direction they cannot defend against, and simultaneously cuts the king off from the rest of the board.\n\nNIMZOWITSCH'S DISTINCTION is the one that makes the concept usable. The seventh is held ABSOLUTELY when the enemy king is confined to the eighth rank behind the rook: every threat then carries mating undertones, and a second attacker arriving creates immediate mate threats. He rated the absolute seventh plus a passed pawn as usually decisive on its own. The rank is held only RELATIVELY when the king has escaped forward — the rook still eats pawns sideways, but the mating dimension is gone and the defender can often afford to shed a pawn to get active.\n\nThe practical use: before spending moves or material to reach the seventh, look at the enemy king. If the rook will trap it on the back rank, the investment almost always pays. If the king slips out, you are buying a good rook, not a winning one, and should pay less.\n\nTWO ROOKS ON THE SEVENTH ('pigs on the seventh', a nickname Naroditsky attributes to Seirawan) are famous, and famously misunderstood. Naroditsky's corrective is worth quoting in substance: with the eighth rank defended by a rook or queen, two rooks on the seventh can ALMOST NEVER checkmate by themselves. Their power is mobility and restriction, not mate, and they are often best treated as a transitional advantage to be converted into something more tangible — a favourable rook trade, or material.",
+  "sources": [
+    "nimzowitsch-my-system",
+    "naroditsky-rooks-seventh",
+    "oldschoolchess-rook-seventh"
+  ],
+  "source_confidence": "high"
+}
