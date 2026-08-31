@@ -51,6 +51,7 @@ var localStorage = {
 function fakeEl(){
   return {
     textContent: '', innerHTML: '', className: '', disabled: false, style: {},
+    value: '', scrollTop: 0, scrollHeight: 0, focus: function(){},
     dataset: {}, classList: {
       add: function(){}, remove: function(){}, toggle: function(){}, contains: function(){ return false; }
     },
@@ -120,7 +121,9 @@ var DECLS = ['PZ_STUDY_DEPTH','PZ_STUDY_PAUSE','PZ_STUDY_SLACK',
              'idCounter','mk','DIR_N','DIR_B','DIR_R','DIR_K','PIECE_WORD',
              'G','PZ','PZ_TRACK_NAME','PZ_TRACKS','PZ_STORE','PZ_VERSION','PZ_REPLY_MS',
              'PZ_START_RATING','PZ_K','PZ_RATING_STORE','PZ_MATE_CP','pzOwner','pzKey',
-             'RUSH','RUSH_MS','RUSH_LIVES','RUSH_GAP_MS','W'];
+             'RUSH','RUSH_MS','RUSH_LIVES','RUSH_GAP_MS','W',
+             'PZ_VISIONS','PZ_VISION_NAME','PZ_MENU_NAME','PZ_PIECE_RANK','sqIndex',
+             'pzPick'];
 var FNS = ['startBoard','newState','cloneState','posKey','fenOf','stateFromFEN',
            'slide','step','addPawn','pseudoMoves','isAttacked','kingSq','inCheck',
            'makeMove','legalMoves','toSAN','attackersOf','defendersOf','see',
@@ -134,7 +137,13 @@ var FNS = ['startBoard','newState','cloneState','posKey','fenOf','stateFromFEN',
            'pzFollowOf','pzHasFollowUp','pzAfterSolution','pzFollowSay','pzShowFollowUp',
            'pzStudyOn','pzBranchPly','pzStudyReset','pzStudyStart','pzStudyStop',
            'pzReplaySolved','pzStudySay','pzStudyPlay','pzStudyWorth','walkFrom','pzSanOf',
-           'pzRetry','pzRender','pzRenderGrid','visualIndex'];
+           'pzRetry','pzRender','pzRenderGrid','visualIndex',
+           /* the three visions, and the page they put on the screen: the written
+              position, the notation walked from what was actually played, the
+              info card and the typed console Complete Blindfold moves through */
+           'pzPieceList','pzRenderPieces','pzSanLine','pzRenderNotes','pzRenderInfo',
+           'pzRenderStage','pzRenderLive','parseMove','pzSubmitTyped',
+           'goPuzzleVision','pzChooseVision','pzShowSolution'];
 
 var bundle = [grab(/\nconst W = 'w', B = 'b';/, "const W/B")];
 for (var d = 0; d < DECLS.length; d++) if (DECLS[d] !== 'W') bundle.push(decl(DECLS[d]));
@@ -590,6 +599,288 @@ if (mated){
 } else {
   say('  ..    every shipped puzzle carries a follow-up, nothing to skip');
 }
+
+/* ---------------------------------------------------------------------
+   Choosing a category and choosing a vision are two decisions, and the
+   puzzle needs both. The home page makes the first and the vision screen
+   makes the second, so what is checked here is that neither of them loses
+   the other's answer.
+   --------------------------------------------------------------------- */
+say('\nCategory first, then vision\n');
+
+(function picking(){
+  goPuzzleVision('middlegame');
+  check('a category opens the vision screen', screens[screens.length-1], 'pzvision');
+  /* the wording of the home page's own menu, not the track's name: this line
+     is quoting the button that was pressed back to the person who pressed it */
+  check('which names the category chosen', elements.pzvCategory.textContent, 'Middle Game');
+  check('and remembers it', pzPick.track, 'middlegame');
+  check('as a ladder, not a run', pzPick.rush, false);
+
+  goPuzzleVision('rush');
+  check('Puzzle Rush comes through the same door', screens[screens.length-1], 'pzvision');
+  check('and is named as itself', elements.pzvCategory.textContent, 'Puzzle Rush');
+  check('with no ladder behind it', pzPick.track, null);
+  check('but marked as a run', pzPick.rush, true);
+
+  // a card press with nothing behind it still records the vision, which is the
+  // half of the answer this screen owns
+  pzPick.rush = false;
+  pzPick.track = null;
+  pzChooseVision('blind');
+  check('the card pressed is the vision kept', PZ.vision, 'blind');
+  pzChooseVision('nonsense');
+  check('and one that is not a vision is refused', PZ.vision, 'blind');
+})();
+
+/* ---------------------------------------------------------------------
+   The three visions. The rule they all answer to is that only the *drawing*
+   changes: the position behind them is always whole, which is what lets the
+   written lists, the legality of a move and the forced reply be the same in
+   all three.
+   --------------------------------------------------------------------- */
+say('\nThe three visions\n');
+
+(function visions(){
+  check('there are three', PZ_VISIONS.length, 3);
+  check('and each is one of the page’s own vision modes, so render() needs no map',
+        PZ_VISIONS.join(','), 'total,blind,fog');
+  check('Complete Blindfold is the one with no board', PZ_VISION_NAME.total, 'Complete Blindfold');
+  check('See the Board is the empty one',             PZ_VISION_NAME.blind, 'See the Board');
+  check('and Fog of War is the one that draws you',   PZ_VISION_NAME.fog,   'Fog of War');
+
+  var track = null, one = null;
+  for (var t = 0; t < TRACKS.length && !one; t++){
+    var list = sets[TRACKS[t]];
+    for (var i = 0; i < list.length && !one; i++)
+      if (list[i].moves.length === 1) one = { n: i + 1, p: list[i] };
+    if (one) track = TRACKS[t];
+  }
+  if (!one){ say('  ..    no one-move puzzle anywhere, skipping'); return; }
+
+  PZ.mode = 'ladder';
+  PZ.track = track;
+  PZ.list = sets[track];
+
+  for (var v = 0; v < PZ_VISIONS.length; v++){
+    var vis = PZ_VISIONS[v], at = PZ_VISION_NAME[vis] + ': ';
+    PZ.vision = vis;
+    pzOpen(one.n);
+    check(at + 'the board is drawn in the vision that was chosen', G.mode, vis);
+    check(at + 'and nothing is given away while it is unsolved', G.revealed, false);
+    check(at + 'there are no peeks to spend on it',               G.peeksLeft, 0);
+    /* The rule the whole feature rests on: hiding is rendering, so the position
+       is complete in every vision. Both sides are on the board and both sides
+       have legal moves, whatever the player can see of them. */
+    check(at + 'the position behind it is whole',
+          pzPieceList(G.st, W).length > 0 && pzPieceList(G.st, B).length > 0, true);
+    check(at + 'and the rules still run on all of it',
+          legalMoves(G.st, G.st.turn).length > 0, true);
+
+    pzRender();
+    check(at + 'the written position is on the page', elements.pzPieces.style.display, '');
+    check(at + 'the blindfold stage stands where the board would be',
+          elements.pzStage.style.display, vis === 'total' ? 'flex' : 'none');
+    check(at + 'and the typed console is the only way in without one',
+          elements.pzConsole.style.display, vis === 'total' ? '' : 'none');
+
+    // and solving it opens the position, in every vision
+    pzPlay(moveFor(one.p.moves[0]));
+    check(at + 'the puzzle is solved',              PZ.done, true);
+    check(at + 'and finishing it opens the board',  G.revealed, true);
+    pzRender();
+    check(at + 'so the stage comes down',   elements.pzStage.style.display, 'none');
+    check(at + 'and the console with it',   elements.pzConsole.style.display, 'none');
+  }
+  PZ.vision = 'fog';
+})();
+
+/* ---------------------------------------------------------------------
+   The written position: the one thing on the puzzle page that is in all three
+   visions, because in the first it IS the position and in the other two it is
+   the half the board is refusing to draw.
+   --------------------------------------------------------------------- */
+say('\nThe written position\n');
+
+(function written(){
+  var st = stateFromFEN('r1bqk2r/pppp1ppp/2n2n2/2b1p3/2B1P3/5N2/PPPP1PPP/RNBQK2R w KQkq - 6 5');
+  check('kings first, then queens, rooks, bishops, knights, pawns last',
+        pzPieceList(st, W),
+        'Ke1, Qd1, Ra1, Rh1, Bc1, Bc4, Nb1, Nf3, a2, b2, c2, d2, e4, f2, g2, h2');
+  check('and the same, read for the other side',
+        pzPieceList(st, B),
+        'Ke8, Qd8, Ra8, Rh8, Bc5, Bc8, Nc6, Nf6, a7, b7, c7, d7, e5, f7, g7, h7');
+  check('a pawn is named by its square and nothing else',
+        /Pa2|Pe4/.test(pzPieceList(st, W)), false);
+  check('two of a kind are simply both listed',
+        pzPieceList(st, W).indexOf('Ra1, Rh1') >= 0, true);
+
+  /* It is read off the board rather than stored, which is the whole of why a
+     capture, a promotion and an en passant need no mention here. */
+  var all = legalMoves(st, st.turn), take = null;
+  for (var i = 0; i < all.length; i++) if (uciOf(all[i]) === 'c4f7') take = all[i];
+  var after = makeMove(st, take);
+  check('a captured man leaves the list',
+        pzPieceList(after, B).indexOf('f7') >= 0, false);
+  check('the piece that took it is listed on the square it took',
+        pzPieceList(after, W).indexOf('Bf7') >= 0, true);
+  check('and it is listed under its own colour only',
+        pzPieceList(after, B).indexOf('Bf7') >= 0, false);
+
+  var promo = stateFromFEN('8/P6k/8/8/8/8/8/K7 w - - 0 40');
+  var pall = legalMoves(promo, promo.turn), q = null;
+  for (var j = 0; j < pall.length; j++) if (uciOf(pall[j]) === 'a7a8q') q = pall[j];
+  check('a promoted pawn is listed as what it became',
+        pzPieceList(makeMove(promo, q), W), 'Ka1, Qa8');
+
+  // and an emptied side says so rather than printing nothing
+  PZ.vision = 'blind';
+  PZ.mode = 'ladder';
+  PZ.track = TRACKS[0];
+  PZ.list = sets[TRACKS[0]];
+  if (PZ.list.length){
+    pzOpen(1);
+    pzRenderPieces();
+    check('the page carries both lists',
+          elements.pzPcW.textContent.length > 2 && elements.pzPcB.textContent.length > 2, true);
+    check('and they are the position on the board',
+          elements.pzPcW.textContent, pzPieceList(stateFromFEN(PZ.list[0].fen), W));
+  }
+})();
+
+/* ---------------------------------------------------------------------
+   Notations: what has happened, and only that.
+   --------------------------------------------------------------------- */
+say('\nThe notations panel\n');
+
+(function notations(){
+  var track = null, many = null;
+  for (var t = 0; t < TRACKS.length && !many; t++){
+    var list = sets[TRACKS[t]];
+    for (var i = 0; i < list.length && !many; i++)
+      if (list[i].moves.length >= 3) many = { n: i + 1, p: list[i] };
+    if (many) track = TRACKS[t];
+  }
+  if (!many){ say('  ..    no multi-move puzzle, skipping'); return; }
+
+  PZ.mode = 'ladder';
+  PZ.track = track;
+  PZ.list = sets[track];
+  PZ.vision = 'fog';
+  pzOpen(many.n);
+  pzRender();
+  check('an unstarted puzzle has nothing to list',
+        elements.pzMoves.innerHTML.indexOf('No moves yet') >= 0, true);
+
+  var cells = function(){ return (elements.pzMoves.innerHTML.match(/class="m"/g) || []).length; };
+
+  pzPlay(moveFor(many.p.moves[0]));
+  pzRender();
+  check('the move that was played is listed', cells(), 1);
+  check('and it is listed in notation, not in squares',
+        /[a-h][1-8][a-h][1-8]/.test(elements.pzMoves.innerHTML), false);
+  check('the solution ahead of it is not', cells() < many.p.moves.length, true);
+
+  // the forced reply, played the way the page's timer plays it
+  G.st = makeMove(G.st, moveFor(many.p.moves[1]));
+  G.uci.push(many.p.moves[1]);
+  PZ.busy = false;
+  pzRender();
+  check('the defence joins it once it has happened', cells(), 2);
+
+  /* The numbering is the game's, not the puzzle's: a middlegame position is
+     move twenty-something, and a puzzle that opens on Black's move opens on an
+     ellipsis rather than pretending White has not moved. */
+  var st0 = stateFromFEN(many.p.fen);
+  check('it is numbered from where the game had got to',
+        elements.pzMoves.innerHTML.indexOf('>' + st0.full + '.<') >= 0, true);
+  if (st0.turn === 'b')
+    check('and a black-to-move puzzle opens on an ellipsis',
+          elements.pzMoves.innerHTML.indexOf('…') >= 0, true);
+
+  // it is walked from what was played, so it survives a retry
+  pzRetry();
+  pzRender();
+  check('retrying empties it', elements.pzMoves.innerHTML.indexOf('No moves yet') >= 0, true);
+  check('and the written position goes back with it',
+        elements.pzPcW.textContent, pzPieceList(stateFromFEN(many.p.fen), W));
+
+  // and a revealed solution fills it in, because those moves happened too
+  timers = [];
+  pzShowSolution();
+  flushTimers();
+  pzRender();
+  check('a revealed solution is listed as well', cells(), many.p.moves.length);
+})();
+
+/* ---------------------------------------------------------------------
+   The blindfold move console. Nothing here compares strings to the solution:
+   parseMove() hands back one of the legal moves or an error, and puzzleStep()
+   is what then decides whether it was the move.
+   --------------------------------------------------------------------- */
+say('\nThe blindfold move console\n');
+
+(function typing(){
+  var track = null, one = null;
+  for (var t = 0; t < TRACKS.length && !one; t++){
+    var list = sets[TRACKS[t]];
+    for (var i = 0; i < list.length && !one; i++)
+      if (list[i].moves.length === 1) one = { n: i + 1, p: list[i] };
+    if (one) track = TRACKS[t];
+  }
+  if (!one){ say('  ..    no one-move puzzle, skipping'); return; }
+
+  PZ.mode = 'ladder';
+  PZ.track = track;
+  PZ.list = sets[track];
+  PZ.vision = 'total';
+  pzOpen(one.n);
+
+  var start = fenOf(G.st);
+  var all = legalMoves(G.st, G.st.turn), right = moveFor(one.p.moves[0]);
+  var rightSan = toSAN(G.st, right, all), wrong = null;
+  for (var w = 0; w < all.length; w++) if (uciOf(all[w]) !== one.p.moves[0]) wrong = all[w];
+  var wrongSan = wrong ? toSAN(G.st, wrong, all) : null;
+
+  elements.pzMoveInput.value = 'Qz9';
+  pzSubmitTyped();
+  check('notation that is not a move moves nothing', fenOf(G.st), start);
+  check('and the console says why',   /not a legal move/.test(PZ.typed.text), true);
+  check('and the line does not advance', PZ.ply, 0);
+  check('nor is it counted as a wrong answer', PZ.wrong, false);
+
+  if (wrongSan){
+    elements.pzMoveInput.value = wrongSan;
+    pzSubmitTyped();
+    check('a legal move that is not the answer moves nothing either', fenOf(G.st), start);
+    /* And it is told apart from the one above: one of the two means the
+       player's picture of the board is wrong, which is the thing this mode is
+       for, and only the engine's own rules can say which. */
+    check('but it is a different answer', PZ.typed.text, 'Not the best move. Try again.');
+    check('and it does count against the attempt', PZ.wrong, true);
+  }
+
+  elements.pzMoveInput.value = rightSan;
+  pzSubmitTyped();
+  check('the move itself, typed in notation, is accepted', PZ.done, true);
+  check('the board moved on', fenOf(G.st) !== start, true);
+  check('and the console has nothing left to say', PZ.typed, null);
+  check('the notation panel has it', elements.pzMoves.innerHTML.indexOf(rightSan) >= 0, true);
+
+  // the same move as plain squares, which is the other dialect parseMove takes
+  pzOpen(one.n);
+  elements.pzMoveInput.value = one.p.moves[0];
+  pzSubmitTyped();
+  check('plain coordinates are accepted too', PZ.done, true);
+
+  // and the console is not a way round the other two visions
+  pzOpen(one.n);
+  PZ.vision = 'blind';
+  elements.pzMoveInput.value = rightSan;
+  pzSubmitTyped();
+  check('a board vision does not take typed moves', PZ.ply, 0);
+  PZ.vision = 'fog';
+})();
 
 say('\nRating, for a player with nowhere to store one\n');
 
