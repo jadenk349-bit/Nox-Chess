@@ -1,0 +1,195 @@
+{
+  "schema_version": 2,
+  "alternate_names": [
+    "opening principles",
+    "developing the pieces"
+  ],
+  "historical_names": [],
+  "tags": [
+    "opening",
+    "foundational",
+    "rule-of-thumb",
+    "misapplied"
+  ],
+  "subcategory": "opening method",
+  "difficulty": "beginner",
+  "knowledge_type_note": "Deliberately typed rule-of-thumb, not principle. The conventional five rules are teaching devices with well-known exceptions, and every one of them is broken routinely at master level. They carry mandatory hedging wording.",
+  "name_status": "established-name",
+  "history": {
+    "attributions": [
+      {
+        "person": "Wilhelm Steinitz",
+        "relation": "systematized-by",
+        "source": "britannica-chess-theory",
+        "year": 1889,
+        "note": "The modern school's treatment of development as an accountable resource rather than a matter of taste."
+      },
+      {
+        "person": "Siegbert Tarrasch",
+        "relation": "popularized-by",
+        "source": null,
+        "year": null,
+        "note": "Conventionally credited with hardening the guidance into teachable rules; not verified here."
+      }
+    ],
+    "first_documented_source": null,
+    "year": null,
+    "confidence": "low",
+    "notes": "The five-rule list has no single author and is a pedagogical convention. Both attributions are conventional and neither was verified against a primary text.",
+    "competing_claims": [],
+    "development": [
+      {
+        "era": "classical",
+        "change": "Development codified as rules; the centre is to be occupied by pawns.",
+        "source": "britannica-chess-theory"
+      },
+      {
+        "era": "hypermodern",
+        "change": "Central occupation challenged — the centre may be controlled from a distance and invited to overextend.",
+        "source": "nimzowitsch-my-system"
+      },
+      {
+        "era": "engine era",
+        "change": "Opening theory becomes concrete; many rule-breaking systems are vindicated, and the rules survive as scaffolding for players who cannot yet calculate the exception.",
+        "source": "chesswoodie-opening-principles"
+      }
+    ]
+  },
+  "engine_era_status": "historically-overstated",
+  "engine_era_note": "Engines break all five rules routinely when a concrete reason exists, and modern opening theory contains many respectable lines that violate them. What survives is the underlying accounting — tempo is real and finite. What does not survive is treating the rules as constraints rather than defaults.",
+  "recognition": {
+    "preconditions": [
+      "The game is in the opening — pieces are still undeveloped"
+    ],
+    "indicators_for": [
+      "Pieces remain on their starting squares while the opponent develops",
+      "A piece has moved twice with no capture, no escape and no clear gain",
+      "The king is uncastled past move ten with the centre open",
+      "The queen is out early and can be harassed with tempo"
+    ],
+    "indicators_against": [
+      "The repeated move captures something, escapes a threat, or reaches a decisively better square",
+      "The centre is closed, so the timetable is slower and the king is not in danger",
+      "The opening is a known system where the deviation is theory",
+      "A concrete tactic justifies the move"
+    ],
+    "prerequisites": [
+      "tempo"
+    ],
+    "detector": null,
+    "detectability": "heuristic",
+    "typical_confidence": "low",
+    "false_positive_traps": [
+      "REGISTERED FALSE POSITIVE: moving the same piece twice is not automatically wrong. Capturing, escaping and reaching a much better square all justify it, and this is the brief's own illustration of tactics overriding a principle.",
+      "REGISTERED FALSE POSITIVE: early queen development is not automatically wrong — the objection is that the queen can be harassed WITH TEMPO, so where no such harassment exists the objection does not apply.",
+      "Detecting a rule violation is easy and says almost nothing. Only the absence of a concrete justification makes it a criticism.",
+      "'The opening' has no fixed end. Applying opening rules at move 15 of a closed position is a category error."
+    ]
+  },
+  "application": {
+    "typical_plans": [
+      "Develop minor pieces towards the centre, castle, then connect the rooks",
+      "Develop with threats where possible, so each move gains a tempo",
+      "Decide which side to castle by where the opponent cannot attack"
+    ],
+    "typical_moves": [
+      "Knights before bishops, as a default rather than a law"
+    ],
+    "typical_pawn_structures": [],
+    "typical_piece_arrangements": [],
+    "tactical_consequences": [
+      "A lead in development converts into an initiative in open positions"
+    ],
+    "strategic_consequences": [
+      "Time spent in the opening cannot be recovered",
+      "The choice of castling side sets the character of the middlegame"
+    ]
+  },
+  "exceptions": [
+    "Moving a piece twice to capture, to escape, or to reach a decisively better square.",
+    "Early queen sorties that cannot be harassed — the Scandinavian's ...Qa5 is theory, not an error.",
+    "Delaying castling deliberately when the centre is closed, or when castling would walk into a prepared attack.",
+    "Hypermodern openings that decline to occupy the centre at all and invite overextension instead."
+  ],
+  "limitations": [
+    "These are teaching heuristics. Every one has standard exceptions, and a violation is only a criticism when no concrete justification exists.",
+    "Not detectable in any useful sense: the rule violation is trivially detectable, the justification is not."
+  ],
+  "misconceptions": [
+    "That the rules are rules. They are defaults for players who cannot yet judge the exception.",
+    "That moving a piece twice is a mistake.",
+    "That the queen must stay home until move 10.",
+    "That 'the opening' ends at a fixed move number. It ends when the pieces are developed."
+  ],
+  "relationships": {
+    "broader": [],
+    "narrower": [],
+    "related": [
+      "tempo",
+      "initiative",
+      "king-safety",
+      "castling",
+      "center-control"
+    ],
+    "contrasting": [],
+    "co_occurring": [
+      "tempo",
+      "king-safety"
+    ],
+    "conflicts": []
+  },
+  "examples": [],
+  "counterexamples": [],
+  "ambiguous_examples": [],
+  "explanations": {
+    "by_level": {
+      "beginner": "Get your pieces out towards the middle, castle your king to safety, and try not to move the same piece twice — every move counts in the opening.",
+      "intermediate": "Opening principles. Before criticising a move for breaking one, check whether it captures, escapes, or reaches a square worth two tempi.",
+      "advanced": "Heuristics for spending tempi when calculation is unavailable. In a closed centre the timetable slackens and most of them relax with it.",
+      "master": "Defaults, not constraints. The interesting question is always what concrete justification the deviation has."
+    },
+    "by_depth": {
+      "short": "Get the pieces out and the king castled.",
+      "normal": "The conventional opening guidance: control the centre, develop, castle, avoid moving one piece twice, and keep the queen home early. They are about spending tempo well, and each has standard exceptions.",
+      "deep": "Five heuristics whose common currency is tempo: an opening move cannot be recovered, and moving one piece twice pays two moves for one working piece. Each has explicit exceptions. Moving a piece twice is justified by a capture, an escape, or a decisively better square. Early queen development is objectionable only where the queen can be harassed with tempo. Castling early is really a decision about the kind of game wanted — castling opposite converts it into a race where speed beats material and your own shield pawns become weapons. The hypermodern school rejected the central-occupation rule outright, and engines break all five routinely when a concrete reason exists."
+    },
+    "hedge": "These are teaching guidelines, not rules. Strong players break every one of them routinely when a concrete reason exists, and a move that violates one is only a mistake if it has no such justification.",
+    "lesson": "Opening rules are for when you cannot see the exception yet. When you can see one, the exception wins."
+  },
+  "terminology": {
+    "beginner_words": [
+      "get your pieces out",
+      "castle early",
+      "don't waste moves"
+    ],
+    "advanced_words": [
+      "development",
+      "tempo",
+      "lead in development",
+      "hypermodern"
+    ],
+    "avoid": [
+      "never move the same piece twice",
+      "never bring the queen out early"
+    ]
+  },
+  "status": {
+    "stage": "researched",
+    "last_updated": "2026-09-01",
+    "open_questions": [],
+    "audit_notes": []
+  },
+  "id": "opening-development",
+  "canonical_name": "Development (opening principles)",
+  "category": "development",
+  "knowledge_type": "rule-of-thumb",
+  "definition_short": "Bring pieces off the back rank quickly, towards the centre, and get the king castled — the conventional opening guidance, with exceptions that matter.",
+  "definition_long": "The standard five: control the centre, develop your pieces, castle early, do not move the same piece twice, and do not bring the queen out too early. They are excellent guidance for a player who does not yet know when to break them, and every one of them is broken constantly by strong players for concrete reasons.\n\nThe underlying quantity is TEMPO. Each opening move is a unit of time you cannot get back, and moving one piece twice means paying two moves for one working piece. The rules are heuristics for spending time well when you cannot yet calculate whether a specific deviation pays.\n\n'DO NOT MOVE THE SAME PIECE TWICE' has explicit, standard exceptions, and this is the brief's own example of principle yielding to tactics. Capturing something is worth the move. Saving an attacked piece is not optional. Reaching a decisively better square can be worth two tempi. And the rule's scope is bounded — 'the opening' ends when the pieces are developed, not at a fixed move number.\n\n'CASTLE EARLY' is really a decision about what kind of game you want, not only about safety. Castling opposite your opponent converts the game into a race in which speed beats material and the pawns in front of your own king become attacking units rather than shelter.",
+  "sources": [
+    "chesswoodie-opening-principles",
+    "chessstrategyonline-opening",
+    "britannica-chess-theory",
+    "nimzowitsch-my-system"
+  ],
+  "source_confidence": "medium"
+}

@@ -168,7 +168,11 @@
       "intermediate": "A pin. The pinned piece is stuck and makes a poor defender, so you can pile up on it.",
       "advanced": "Absolute pin against the king (illegal to move) or relative pin (legal but costly). Remember a pinned piece still gives check."
     },
-    "by_depth": {},
+    "by_depth": {
+      "short": "That piece cannot move without exposing something more valuable.",
+      "normal": "A pin: the {piece} on {square} is stuck, because moving it would expose the {target} behind it. A pinned piece is a poor defender, so it can often be attacked again.",
+      "deep": "A line piece attacks through a less valuable enemy unit to a more valuable one behind it. Absolute against the king, where moving is illegal; relative against anything else, where moving is legal but costly. Two consequences follow, and the second is routinely misunderstood: a pinned piece makes a poor defender and can be piled on, but it STILL GIVES CHECK and still controls its squares against everything except the king — FIDE Art. 3.9.1 is explicit about this. Note also that engine testing showed a pin does not necessarily change which move is best, only how clearly best it is."
+    },
     "hedge": "",
     "lesson": ""
   },
@@ -191,6 +195,8 @@
     "stage": "validated",
     "last_updated": "2026-08-31",
     "open_questions": [],
-    "audit_notes": []
+    "audit_notes": [
+      "2026-09-01 audit: flagged for being promoted while relying on a source carrying an access caveat. REVIEWED AND ACCEPTED — the promotion rests on ENGINE evidence, not on the unread text; the unread source supplies the concept's name and classification only. The caveat stands and is the reason this is not promoted further to 'ready'."
+    ]
   }
 }

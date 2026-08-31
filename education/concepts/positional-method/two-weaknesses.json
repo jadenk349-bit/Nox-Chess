@@ -103,7 +103,12 @@
     "detector": null,
     "detectability": "heuristic",
     "typical_confidence": "medium",
-    "false_positive_traps": []
+    "false_positive_traps": [
+      "Two weaknesses that the defending king stands between are not two weaknesses in the operative sense. Measured on the Lasker-Capablanca ending, moving the kings to d3/d6 costs the attacker over half the advantage.",
+      "Any position has several imperfections. Calling any two of them 'two weaknesses' is the commonest misuse — they must require DIFFERENT defensive resources and be far enough apart that the defence cannot cover both.",
+      "The principle describes a method of conversion, not an evaluation. A position with two weaknesses is not thereby winning, and Kotov-Pachman shows the gap: the moves annotators mark necessary and inaccurate differ by 0.05 pawns.",
+      "Against opposite-coloured bishops or a reachable fortress, the count of weaknesses is simply not the operative variable."
+    ]
   },
   "application": {
     "typical_plans": [
@@ -373,7 +378,8 @@
       "Kotov-Pachman move 55 (FEN 3R4/r6p/2p1kpp1/2Pp4/6PP/4PK2/5P2/8 b - - 4 55): British Chess News claims 55...Ra4! holds and 55...Ke7? loses. Attempted at depth 34; the rook ending did not converge in 16 minutes and the run was stopped to free CPU. Retry at depth 28-30, or with Syzygy tablebases installed."
     ],
     "audit_notes": [
-      "Promoted to 'ready': primary-text history, 12 sources, engine-tested positive/negative/ambiguous positions, and a tablebase-proven controlled pair. The remaining open questions are extensions, not gaps in the core claim."
+      "Promoted to 'ready': primary-text history, 12 sources, engine-tested positive/negative/ambiguous positions, and a tablebase-proven controlled pair. The remaining open questions are extensions, not gaps in the core claim.",
+      "2026-09-01 audit: false_positive_traps was empty on a strategic principle that is easy to over-apply. Populated from the exceptions and engine findings already in the record."
     ]
   }
 }

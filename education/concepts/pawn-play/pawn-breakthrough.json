@@ -112,7 +112,7 @@
   "examples": [
     {
       "fen": "6k1/ppp5/8/PPP5/8/8/8/6K1 w - - 0 1",
-      "note": "Constructed test of the canonical trio-versus-trio breakthrough: White a5-b5-c5 against Black a7-b7-c7, kings far away. 1.b6! and whichever way Black captures, a different pawn queens. NOTE: this is currently the positive half of an INCOMPLETE pair — the control (same structure one rank back) had not finished computing when this was recorded, so the space-advantage condition is stated on the sources' authority and is not yet tested.",
+      "note": "Constructed test of the canonical trio-versus-trio breakthrough: White a5-b5-c5 against Black a7-b7-c7, kings far away. 1.b6! and whichever way Black captures, a different pawn queens.",
       "origin_kind": "constructed-test",
       "concept_role": "positive",
       "side_to_move_benefits": "white",
@@ -152,10 +152,55 @@
         "margin_cp": 7510,
         "verdict": "supports",
         "verdict_note": "A far stronger result than expected. 1.b6! is +64.85 and queens by force. Both alternative first moves LOSE — 1.a6? is -10.25 and 1.c6? is -81.15 — because they let Black break through instead. So the middle pawn is not merely best practice, it is the only move, and the margin over the runner-up is 75 pawns. Settled from depth 3. This is the strongest confirmation in the base that the breakthrough is CONCRETE: order decides everything, and the pattern must be calculated rather than recognised."
+      },
+      "controlled_pair_with": "6k1/ppp5/8/8/PPP5/8/8/6K1 w - - 0 1"
+    }
+  ],
+  "counterexamples": [
+    {
+      "fen": "6k1/ppp5/8/8/PPP5/8/8/6K1 w - - 0 1",
+      "note": "Constructed controlled pair, negative half. IDENTICAL material and identical structure — three pawns against three, kings on the same squares — with White's trio moved one rank back to a4-b4-c4. This isolates the space-advantage condition and nothing else, and it tests pawnbreak.com's testable claim that 'move all pawns one row and the breakthrough does not work at all anymore'.",
+      "origin_kind": "constructed-test",
+      "concept_role": "negative",
+      "side_to_move_benefits": "neither",
+      "controlled_pair_with": "6k1/ppp5/8/PPP5/8/8/8/6K1 w - - 0 1",
+      "engine": {
+        "engine_id": "Stockfish 18",
+        "test_level": 3,
+        "depth": 22,
+        "threads": 10,
+        "hash_mb": 2048,
+        "multipv": 3,
+        "best_move": "a4a5",
+        "eval_cp": -46,
+        "mate_in": null,
+        "pv": [
+          "a4a5",
+          "g8g7",
+          "g1g2",
+          "g7f6",
+          "g2f3",
+          "f6f5",
+          "f3e3"
+        ],
+        "alternatives": [
+          {
+            "move": "b4b5",
+            "eval_cp": -586,
+            "mate_in": null
+          },
+          {
+            "move": "c4c5",
+            "eval_cp": -586,
+            "mate_in": null
+          }
+        ],
+        "margin_cp": 540,
+        "verdict": "supports",
+        "verdict_note": "The claim is confirmed exactly and the margin is enormous. The analogous breakthrough 1.b5 evaluates -5.86 and is NOT best; the quiet 1.a5 at -0.46 is. So the same pattern, with the pawns one rank further back, swings from +64.85 (winning by force) to -5.86 (losing) — a difference of over 70 pawns produced by one rank of space, with material and structure held identical. This is the cleanest confirmation in the base that a positional-sounding precondition can be exactly decisive, and it is why the concept is typed tactical-motif: it must be calculated, never recognised."
       }
     }
   ],
-  "counterexamples": [],
   "ambiguous_examples": [],
   "explanations": {
     "by_level": {
@@ -188,12 +233,13 @@
     ]
   },
   "status": {
-    "stage": "researched",
+    "stage": "validated",
     "last_updated": "2026-08-31",
-    "open_questions": [
-      "Second half of the controlled pair (identical structure one rank back, testing the space-advantage condition) was still computing at the end of this session. Rerun 6k1/ppp5/8/8/PPP5/8/8/6K1 w at depth 24 and record whether the breakthrough fails as pawnbreak.com claims."
-    ],
-    "audit_notes": []
+    "open_questions": [],
+    "audit_notes": [
+      "Promoted to validated: both halves of a properly isolated controlled pair are engine-settled, and the space-advantage condition the sources state is confirmed with a 70-pawn swing.",
+      "2026-09-01 audit: source_confidence was 'high' with no source rated high — the sources are a programming wiki, two instructional sites and an encyclopedia. Downgraded to medium. The ENGINE evidence is strong and unaffected; it is the textual sourcing that is medium."
+    ]
   },
   "id": "pawn-breakthrough",
   "canonical_name": "Pawn breakthrough",
@@ -207,5 +253,5 @@
     "chessworld-pawn-breakthrough",
     "wikipedia-passed-pawn"
   ],
-  "source_confidence": "high"
+  "source_confidence": "medium"
 }

@@ -62,11 +62,17 @@ def lookup(fen, retries=3, pause=1.5):
         "checkmate": d.get("checkmate"), "stalemate": d.get("stalemate"),
         "note": "",
     }
-    best = (d.get("moves") or [None])[0]
+    moves = d.get("moves") or []
+    best = moves[0] if moves else None
     if best:
         out["best_move"] = best.get("uci")
         out["best_move_san"] = best.get("san")
         out["best_move_category"] = best.get("category")
+    # every legal move with its exact verdict — this is what makes a tablebase far more
+    # informative than an evaluation: each move is labelled win/draw/loss, not scored.
+    out["moves"] = [{"uci": m.get("uci"), "san": m.get("san"),
+                     "category": m.get("category"), "dtz": m.get("dtz"), "dtm": m.get("dtm")}
+                    for m in moves]
     return out
 
 
@@ -74,6 +80,8 @@ def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("--fen", required=True)
     ap.add_argument("--json", action="store_true")
+    ap.add_argument("--all-moves", action="store_true",
+                    help="list every legal move with its exact tablebase verdict")
     a = ap.parse_args()
     r = lookup(a.fen)
     if a.json:
@@ -84,6 +92,10 @@ def main():
     print(f"dtz     {r.get('dtz')}    dtm {r.get('dtm')}")
     if r.get("best_move_san"):
         print(f"best    {r['best_move_san']}  ({r.get('best_move_category')})")
+    if a.all_moves and r.get("moves"):
+        print("  every legal move, exactly:")
+        for m in r["moves"]:
+            print(f"    {m['san']:8} {m['category']:12} dtz {str(m['dtz']):>5}  dtm {str(m['dtm']):>5}")
     if r.get("note"):
         print(f"note    {r['note']}")
 

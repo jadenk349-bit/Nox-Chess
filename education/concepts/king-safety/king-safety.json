@@ -1,0 +1,199 @@
+{
+  "schema_version": 2,
+  "alternate_names": [],
+  "historical_names": [],
+  "tags": [
+    "king",
+    "evaluation",
+    "foundational",
+    "engine-quantified"
+  ],
+  "subcategory": "evaluation factor",
+  "difficulty": "beginner",
+  "knowledge_type_note": "A positional concept, and the one that overrides the others — not because it is more important in the abstract but because checkmate ends the game, so every other advantage is conditional on it.",
+  "name_status": "established-name",
+  "history": {
+    "attributions": [
+      {
+        "person": "Wilhelm Steinitz",
+        "relation": "systematized-by",
+        "source": "steinitz-modern-chess-instructor",
+        "year": 1889,
+        "note": "King exposure enters positional theory as a durable feature to be evaluated rather than a matter of tactical alertness."
+      }
+    ],
+    "first_documented_source": null,
+    "year": null,
+    "confidence": "low",
+    "notes": "No coinage claimed; the term is ordinary. The attribution to Steinitz is for the doctrine of evaluating it, and is weakly sourced here.",
+    "competing_claims": [],
+    "development": [
+      {
+        "era": "classical",
+        "change": "King exposure becomes an evaluable positional factor rather than a purely tactical one.",
+        "source": "steinitz-modern-chess-instructor"
+      },
+      {
+        "era": "engine era",
+        "change": "Quantified explicitly: attack units by piece type, a defined king zone, and a non-linear scoring table.",
+        "source": "chessprogramming-king-safety"
+      }
+    ]
+  },
+  "engine_era_status": "reliable",
+  "engine_era_note": "Not merely reliable but quantified, and the quantification is public. The engine-era refinement worth carrying into explanations is the NON-LINEARITY: danger rises slowly with one or two attackers and then steeply, which is why 'they have a piece near my king' is not a warning and 'they have three' is.",
+  "recognition": {
+    "preconditions": [
+      "A king's exposure is being assessed"
+    ],
+    "indicators_for": [
+      "Pawn shield intact and unmoved",
+      "Few enemy pieces able to reach the king zone",
+      "No open file or diagonal pointing at the king",
+      "Defenders present, especially a knight on f3/f6",
+      "Escape squares available",
+      "Queens off the board"
+    ],
+    "indicators_against": [
+      "Three or more attackers can reach the king zone",
+      "Shield pawns advanced or missing, especially with an open file beside the king",
+      "A hook the opponent can attack to open a line",
+      "King uncastled with the centre open or opening",
+      "Key defender exchangeable — the fianchettoed bishop, or the f6 knight",
+      "No escape square, so back-rank tactics are live"
+    ],
+    "prerequisites": [],
+    "detector": "kingZoneAttackers (not yet written; Stockfish's scheme is a usable specification)",
+    "detectability": "heuristic",
+    "typical_confidence": "medium",
+    "false_positive_traps": [
+      "REGISTERED FALSE POSITIVE: an exposed king is not automatically losing. With the attacking pieces traded off, an exposed king is often simply an active one — and in the endgame that is the goal.",
+      "Castling does not establish safety and failing to castle does not establish danger. A closed centre changes both.",
+      "Counting attacking pieces linearly overstates one or two and understates four. The relationship is S-shaped, and it is not worth reporting an attack below three attackers.",
+      "A pawn move near the king is not automatically a weakening — h3 in a quiet position is useful luft; the same move against a queenside-castled opponent is a hook."
+    ]
+  },
+  "application": {
+    "typical_plans": [
+      "Castle by default in open positions; delay only for a stated concrete reason",
+      "Leave the shield pawns alone unless there is a specific need",
+      "When under attack: trade the strongest attacker, ideally queens; add a defender; close the line; return material; or run the king before the files open",
+      "When attacking: count attackers against defenders before calculating"
+    ],
+    "typical_moves": [
+      "Qe2 or Re1 or Nf1 as quiet defensive additions",
+      "h3 as luft — in the right circumstances only"
+    ],
+    "typical_pawn_structures": [
+      "f2-g2-h2 unmoved — the hardest structure to break",
+      "Fianchetto: g3 and Bg2, sound while the bishop lives",
+      "h3 or h6 played against an opponent who can storm — a hook"
+    ],
+    "typical_piece_arrangements": [
+      "Knight on f3/f6 as the best defensive minor piece",
+      "Rook on e1/e8 covering entry squares"
+    ],
+    "tactical_consequences": [
+      "Back-rank mates when there is no escape square",
+      "Sacrifices on the shield become sound once attackers outnumber defenders"
+    ],
+    "strategic_consequences": [
+      "Overrides other advantages, because mate ends the game",
+      "Inverts in the endgame, where the king becomes a strong piece"
+    ]
+  },
+  "exceptions": [
+    "An exposed king with no attackers left is an ACTIVE king, and in the endgame that is what you want.",
+    "An uncastled king in a closed position can be safer than a castled one.",
+    "Castling into an oncoming pawn storm gives the attacker a fixed address; sometimes delaying or castling the other way is correct.",
+    "h3 or ...h6 is useful luft in a quiet position and a hook against an opponent who can storm. The same move, opposite meanings."
+  ],
+  "limitations": [
+    "Judgement, not measurement, at the human level — though Stockfish's scheme is a usable specification for a detector.",
+    "The attacker/defender count is an alarm, not a verdict; it tells you when calculation is worth starting."
+  ],
+  "misconceptions": [
+    "That castling makes the king safe.",
+    "That an exposed king is losing.",
+    "That pushing a pawn to chase an enemy piece away from your king is a defensive move. It usually creates a hook and the piece just steps aside.",
+    "That material compensates for king danger. It does not — checkmate ends the game regardless."
+  ],
+  "relationships": {
+    "broader": [],
+    "narrower": [],
+    "related": [
+      "castling",
+      "king-attack",
+      "weak-square",
+      "back-rank-mate",
+      "greek-gift"
+    ],
+    "contrasting": [],
+    "co_occurring": [
+      "king-attack",
+      "weak-square"
+    ],
+    "conflicts": [
+      {
+        "concept": "king-attack",
+        "resolution": "The same pawn moves attack and expose. With opposite-side castling there is no conflict — your storming pawns are not your own shelter. With same-side castling there is, and the burden of proof sits on the attacker: a wing attack that opens your own king is refuted by a counter-blow in the centre."
+      }
+    ]
+  },
+  "examples": [],
+  "counterexamples": [],
+  "ambiguous_examples": [],
+  "explanations": {
+    "by_level": {
+      "beginner": "Your king is safest castled, behind pawns you have not moved, with a piece or two nearby. Moving those pawns makes holes you can never fill again.",
+      "intermediate": "King safety: count the attackers that can reach the king's area against the defenders already there. One or two is normal; three against a damaged shield is when sacrifices start to work.",
+      "advanced": "Shield, lines, attacker count, escape squares. Note that danger is non-linear in the attacker count, and that trading queens is the strongest single defensive resource.",
+      "master": "Assess by what the opponent can concretely open and how fast. Castling is a means; an uncastled king behind a closed centre may be the safest king on the board, and in the endgame exposure becomes activity."
+    },
+    "by_depth": {
+      "short": "The king is {safe / exposed} — {reason}.",
+      "normal": "King safety: the shield is {intact/damaged}, {n} enemy pieces can reach the king's zone against {m} defenders, and {an open file / no open line} points at it. That is what decides whether an attack is possible, not whether the king has castled.",
+      "deep": "Five factors: castled or not, shield integrity, attackers against defenders, open lines, escape squares. The shield is strongest unmoved because it offers no target, and every advance both weakens squares permanently and creates a hook for the opponent to bite on. Engine practice makes the counting explicit — Stockfish weights a minor piece attacking the king zone as 2 units, a rook 3, a queen 5, and looks the sum up in an S-shaped table, with the practical consequence that an attack with fewer than three attackers is not worth evaluating. The concept overrides the others because checkmate ends the game, and it inverts entirely in the endgame, where the exposed king becomes a fighting piece."
+    },
+    "hedge": "",
+    "lesson": "Count attackers against defenders before you decide whether to worry. And do not push the pawns in front of your own king to chase a piece — the piece steps aside and the hole stays forever."
+  },
+  "terminology": {
+    "beginner_words": [
+      "how safe your king is",
+      "pawns in front of the king",
+      "somewhere to run"
+    ],
+    "advanced_words": [
+      "pawn shield",
+      "hook",
+      "king zone",
+      "attacker count",
+      "luft",
+      "escape square"
+    ],
+    "avoid": [
+      "castling makes you safe",
+      "an exposed king is losing"
+    ]
+  },
+  "status": {
+    "stage": "researched",
+    "last_updated": "2026-09-01",
+    "open_questions": [],
+    "audit_notes": []
+  },
+  "id": "king-safety",
+  "canonical_name": "King safety",
+  "category": "king-safety",
+  "knowledge_type": "positional-concept",
+  "definition_short": "How exposed the king is to attack, judged by pawn cover, open lines pointing at it, the count of attackers against defenders, and escape squares.",
+  "definition_long": "Five things decide it, and they are worth checking in order: is the king castled; is the pawn shield intact; how many enemy pieces can reach the king's zone against how many defenders; do open files or diagonals point at it; does it have escape squares.\n\nTHE PAWN SHIELD is the part players damage themselves. Pawns in front of a castled king are strongest unmoved, because an unmoved shield presents no target. Every advance does two things: it permanently weakens the squares the pawn has left, and it creates a HOOK — a fixed pawn the opponent can attack in order to force a file open. Playing g3 weakens f3 and h3 for good and gives ...h5-h4 something to bite on.\n\nCASTLING IS NOT SAFETY. A castled king with a damaged shield and an open file beside it is a target with a known address; an uncastled king in a closed position can be perfectly safe. Castling usually helps, and should be the default in open positions, but it is a means.\n\nENGINE PRACTICE IS UNUSUALLY EXPLICIT HERE and worth borrowing. Stockfish defines a king zone as the squares the enemy king can reach plus three forward squares, counts a minor piece attacking it as 2 attack units, a rook as 3 and a queen as 5, adds 6 for a safe queen contact check, and looks the total up in an S-shaped table that rises slowly then steeply. The Chess Programming Wiki's practical note is the useful one: it is not worth evaluating a king attack at all with fewer than three attackers. That matches the coaching heuristic that three or more attackers against a damaged shield is when sacrifices start to work.\n\nThe strongest single defensive idea is trading queens. In the endgame the whole concept inverts and the king becomes a fighting piece.",
+  "sources": [
+    "chessprogramming-king-safety",
+    "chessworld-king-safety",
+    "vukovic-art-of-attack",
+    "steinitz-modern-chess-instructor"
+  ],
+  "source_confidence": "high"
+}

@@ -1,29 +1,29 @@
 {
   "version": 1,
-  "last_session": "2026-08-31",
+  "last_session": "2026-09-01",
   "engine": {
     "id": "Stockfish 18",
     "note": "Filled in by tools/sf_analyse.py --probe"
   },
   "counters": {
-    "concepts_total": 57,
+    "concepts_total": 62,
     "concepts_stub": 0,
     "concepts_researched": 29,
     "concepts_validated": 4,
     "concepts_needs_review": 0,
-    "sources_reviewed": 73,
-    "positions_tested": 18,
-    "matches_validated": 13,
+    "sources_reviewed": 77,
+    "positions_tested": 19,
+    "matches_validated": 14,
     "false_matches": 1,
     "ambiguous_matches": 4,
     "by_stage": {
       "ready": 2,
-      "researched": 51,
-      "validated": 4
+      "researched": 55,
+      "validated": 5
     },
-    "tablebase_positions": 4,
+    "tablebase_positions": 5,
     "concepts_fully_covered": 11,
-    "areas_touched": 22,
+    "areas_touched": 27,
     "areas_total": 85
   },
   "areas": {
@@ -228,9 +228,11 @@
     "king-safety": {
       "domain": "king-safety",
       "status": "not-started",
-      "concepts": [],
+      "concepts": [
+        "king-safety"
+      ],
       "open_questions": [],
-      "last_touched": null
+      "last_touched": "2026-09-01"
     },
     "piece-activity": {
       "domain": "piece-play",
@@ -302,9 +304,11 @@
     "development": {
       "domain": "development-initiative",
       "status": "not-started",
-      "concepts": [],
+      "concepts": [
+        "opening-development"
+      ],
       "open_questions": [],
-      "last_touched": null
+      "last_touched": "2026-09-01"
     },
     "tempo": {
       "domain": "development-initiative",
@@ -495,9 +499,11 @@
     "corresponding-squares": {
       "domain": "endgame",
       "status": "not-started",
-      "concepts": [],
+      "concepts": [
+        "corresponding-squares"
+      ],
       "open_questions": [],
-      "last_touched": null
+      "last_touched": "2026-09-01"
     },
     "zugzwang": {
       "domain": "endgame",
@@ -511,16 +517,20 @@
     "triangulation": {
       "domain": "endgame",
       "status": "not-started",
-      "concepts": [],
+      "concepts": [
+        "triangulation"
+      ],
       "open_questions": [],
-      "last_touched": null
+      "last_touched": "2026-09-01"
     },
     "pawn-endgames": {
       "domain": "endgame",
       "status": "not-started",
-      "concepts": [],
+      "concepts": [
+        "key-square"
+      ],
       "open_questions": [],
-      "last_touched": null
+      "last_touched": "2026-09-01"
     },
     "rook-endgames": {
       "domain": "endgame",
@@ -1003,5 +1013,26 @@
       }
     ],
     "convergence_note": "The puzzle generator deliberately refuses to claim deflection, decoy, overloading, interference and double attack because 'every cheap test for them fires where it is not true'. This knowledge base had independently classified the same five detectability:heuristic from the sources. Two independent routes to the same line."
-  }
+  },
+  "audits": [
+    {
+      "date": "2026-09-01",
+      "tool": "tools/audit.py",
+      "concepts_audited": 59,
+      "findings": {
+        "high": 6,
+        "low": 10
+      },
+      "high_findings_fixed": [
+        "Four attributions (backward-pawn, bad-bishop, doubled-pawns, isolated-queen-pawn) asserted originated-by/named-by at history confidence 'low' with no hedge in the attribution note itself. Hedge added so the caveat travels with the claim.",
+        "fork listed 'double attack (by a single piece)' as an alias, which is the canonical name of the separate `double-attack` record — the record's own metadata contradicted the distinction its prose draws. Alias removed, `broader: double-attack` added instead.",
+        "pawn-breakthrough claimed source_confidence 'high' with no source rated high. Downgraded to medium; the engine evidence is unaffected."
+      ],
+      "low_findings_accepted": [
+        "Four concepts promoted while relying on a source with an access caveat — accepted, because the promotions rest on engine evidence and the caveat is why none is promoted to 'ready'.",
+        "Two short records (checkmate, fivefold-repetition) — accepted, they are simple rules quoted from the Laws and padding them would add words, not knowledge."
+      ],
+      "note": "First periodic audit. The high findings were all real and all invisible to validate_kb.py and run_tests.py, which is the point of having a third tool that looks for what is wrong but legal."
+    }
+  ]
 }

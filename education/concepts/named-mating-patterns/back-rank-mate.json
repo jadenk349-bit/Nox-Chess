@@ -165,7 +165,11 @@
       "intermediate": "Back-rank mate. The king's pawns block every escape square and the back rank is not adequately defended.",
       "advanced": "Back-rank pattern. Often the real value is the standing weakness: it overloads whatever defends the rank."
     },
-    "by_depth": {},
+    "by_depth": {
+      "short": "The king is boxed in by its own pawns on the back rank.",
+      "normal": "A back-rank mate: the king's own f, g and h pawns block every escape square, so a rook or queen arriving on the back rank is mate — provided the rank is not adequately defended.",
+      "deep": "The castled king sits behind three unmoved pawns, and a heavy piece arriving on the back rank gives a check it cannot escape. The standard antidote is luft, and the cost of omitting it is exact: in a controlled test, moving one pawn from h7 to h6 turned a mate in one into a mate in thirty. More often than the mate itself, the value is the standing WEAKNESS — a back rank that must be guarded overloads whatever guards it, so deflecting that defender wins material even when mate never occurs."
+    },
     "hedge": "",
     "lesson": ""
   },
@@ -185,6 +189,8 @@
     "stage": "validated",
     "last_updated": "2026-08-31",
     "open_questions": [],
-    "audit_notes": []
+    "audit_notes": [
+      "2026-09-01 audit: flagged for being promoted while relying on a source carrying an access caveat. REVIEWED AND ACCEPTED — the promotion rests on ENGINE evidence, not on the unread text; the unread source supplies the concept's name and classification only. The caveat stands and is the reason this is not promoted further to 'ready'."
+    ]
   }
 }

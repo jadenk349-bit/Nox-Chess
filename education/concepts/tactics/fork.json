@@ -3,14 +3,14 @@
   "id": "fork",
   "canonical_name": "Fork",
   "alternate_names": [
-    "double attack (by a single piece)"
+    "fork (single-piece double attack)"
   ],
   "historical_names": [],
   "category": "tactical-motifs",
   "subcategory": "material-winning motif",
   "tags": [],
   "knowledge_type": "tactical-motif",
-  "knowledge_type_note": "A tactical motif (D): a geometric pattern, mechanically detectable, not a guideline.",
+  "knowledge_type_note": "A tactical motif: a geometric pattern, mechanically detectable, not a guideline. NOTE ON NAMING: 'double attack' was previously listed here as an alias, which the audit flagged as a possible duplicate of the `double-attack` record. They are NOT the same concept in the usage this base follows — a fork is a double attack by ONE piece, while `double-attack` is the general case including discovered attacks. Chess.com merges them; Wikipedia and Chess Tempo do not. The alias has been removed so the distinction is not undermined by the record's own metadata.",
   "name_status": "established-name",
   "difficulty": "beginner",
   "definition_short": "One piece attacks two or more enemy units at once, so only one can be saved.",
@@ -78,7 +78,9 @@
   ],
   "misconceptions": [],
   "relationships": {
-    "broader": [],
+    "broader": [
+      "double-attack"
+    ],
     "narrower": [],
     "related": [
       "double-attack"
@@ -193,7 +195,11 @@
       "intermediate": "A fork. Because it hits {targets} at once and {reason}, the defender cannot cover both.",
       "advanced": "Fork. Note whether it is absolute (a target is the king, so no zwischenzug is available) or relative (the defender may have an in-between resource)."
     },
-    "by_depth": {},
+    "by_depth": {
+      "short": "One piece attacks two things at once.",
+      "normal": "A fork: this piece hits {targets} simultaneously, and only one can be saved. It works because {target} is {undefended / worth more than the forking piece} and the forking square is safe.",
+      "deep": "A single piece attacking two or more targets. It wins material only when at least one target is undefended or outranks the forking piece, and when the forking square itself is safe — those conditions are what separate a fork from a move that merely looks like one. An absolute fork hits the king, so the defender is forced to answer the check and cannot insert a zwischenzug; a relative fork leaves them resources. Targets need not be pieces: a mate threat or a follow-up fork can serve as a prong."
+    },
     "hedge": "",
     "lesson": ""
   },
@@ -216,6 +222,9 @@
     "stage": "validated",
     "last_updated": "2026-08-31",
     "open_questions": [],
-    "audit_notes": []
+    "audit_notes": [
+      "2026-09-01 audit: removed the alias 'double attack (by a single piece)', which collided with the canonical name of the `double-attack` record and read as a claim that the two are one concept. Added broader: double-attack instead, which is the actual relationship. Added by_depth.",
+      "2026-09-01 audit: flagged for being promoted while relying on a source carrying an access caveat. REVIEWED AND ACCEPTED — the promotion rests on ENGINE evidence, not on the unread text; the unread source supplies the concept's name and classification only. The caveat stands and is the reason this is not promoted further to 'ready'."
+    ]
   }
 }

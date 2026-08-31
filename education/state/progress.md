@@ -248,6 +248,80 @@ and `sf_analyse.py` defaults to `cpu_count-2` threads so two concurrent jobs
 requested 20 threads on 12 cores. Both recorded in `tool_limitations`, and
 `sf_analyse.py` now takes `--threads`. Run engine jobs sequentially.
 
+## Session 5 — first quality audit, and a corrected textbook
+
+### The audit (brief Phase 39)
+
+`tools/audit.py` is new and looks for what is wrong but LEGAL — the class of
+problem `validate_kb.py` and `run_tests.py` cannot see. First run over 59
+concepts found **16 issues, 6 of them high**, and all six were real:
+
+- Four attributions (`backward-pawn`, `bad-bishop`, `doubled-pawns`,
+  `isolated-queen-pawn`) asserted `originated-by` or `named-by` at history
+  confidence `low` with no hedge in the attribution note itself. The caveat sat
+  in a field a reader might not reach. Hedge now travels with the claim.
+- `fork` listed "double attack (by a single piece)" as an alias — which is the
+  canonical name of the separate `double-attack` record. The record's own
+  metadata contradicted the distinction its prose draws. Alias removed,
+  `broader: double-attack` added instead.
+- `pawn-breakthrough` claimed `source_confidence: high` with no source rated
+  high. Downgraded.
+
+The six low findings were reviewed and **accepted rather than fixed**, with
+reasons recorded: four concepts promoted while relying on a source with an
+access caveat (the promotions rest on engine evidence, and the caveat is exactly
+why none is promoted to `ready`), and two short records that are simple rules
+quoted from the Laws, where padding would add words rather than knowledge.
+
+### Tablebase corrects a teaching source
+
+`tools/tablebase.py` now reports EVERY legal move with its exact verdict, which
+turns out to be far more informative than a single evaluation.
+
+Run over the standard textbook triangulation position — White Kd5 with pawns b5
+and c5, Black Kd7 with a pawn on b7 — it says:
+
+```
+b6    win in 22      Kc4/Kd4/Ke4  win in 48
+Ke5   win in 46      c6+          DRAW
+```
+
+The instructional line gives 1.Ke5! as the winning move. It wins, but it is the
+slowest of five winning moves, and the direct 1.b6 is more than twice as fast.
+Only 1.c6+ throws the win away. So the position genuinely teaches "do not push
+the pawn" and does NOT establish that triangulation was necessary. Recorded as
+an `ambiguous` example on the concept, because it supports the technique's
+existence while contradicting the necessity the source implies.
+
+### Pawn breakthrough completed
+
+Both halves of the controlled pair are now settled, and the swing is the largest
+in the base. Identical material and structure, White's trio one rank apart:
+
+```
+pawns on the 5th:  1.b6!  +64.85  (both alternatives LOSE: -10.25, -81.15)
+pawns on the 4th:  1.b5   -5.86   and not best; the quiet 1.a5 at -0.46 is
+```
+
+Over 70 pawns of difference produced by one rank of space. The sources' claim
+that "move all pawns one row and the breakthrough does not work at all anymore"
+is confirmed exactly.
+
+### Concepts added
+
+`king-safety`, `opening-development`, `triangulation`, `corresponding-squares`,
+`key-square`. The first two close three registered false-positive cases, and
+`opening-development` is deliberately typed `rule-of-thumb` with mandatory
+hedging — the five conventional opening rules are teaching scaffolding, and the
+brief's own example (moving a piece twice) is recorded as a trap rather than a
+criticism.
+
+King safety is worth noting as the one concept where engine practice is public
+enough to borrow as a specification: Stockfish's king zone, its attack-unit
+weights (minor 2, rook 3, queen 5), and the S-shaped scoring table are all
+documented, and the practical consequence — an attack is not worth evaluating
+below three attackers — is better guidance than anything in the prose sources.
+
 ### Next
 
 Complete the pilot concept record, then work the taxonomy in dependency order:
