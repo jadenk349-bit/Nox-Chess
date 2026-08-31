@@ -1,0 +1,209 @@
+{
+  "schema_version": 2,
+  "alternate_names": [],
+  "historical_names": [],
+  "tags": [
+    "rook-endgame",
+    "theoretical-position",
+    "tablebase-proven",
+    "misattributed"
+  ],
+  "subcategory": "rook and pawn versus rook",
+  "difficulty": "advanced",
+  "knowledge_type_note": "A specific, named position with a proven result. Not a principle — it either is the position or it is not.",
+  "name_status": "established-name",
+  "history": {
+    "attributions": [
+      {
+        "person": "Luis Ramírez de Lucena",
+        "relation": "named-by",
+        "source": "wikipedia-lucena",
+        "year": 1497,
+        "note": "MISATTRIBUTION. The position does not appear in his book. The name is universal and should be retained as terminology, but it is not evidence of authorship."
+      },
+      {
+        "person": "Scipione Genovino",
+        "relation": "originated-by",
+        "source": "wikipedia-lucena",
+        "year": null,
+        "note": "Credited by Salvio, who gives the earliest preserved discussion. Second-hand; Salvio's text not consulted directly."
+      },
+      {
+        "person": "Alessandro Salvio",
+        "relation": "first-documented-by",
+        "source": "wikipedia-lucena",
+        "year": 1634,
+        "note": "Il Puttino contains the earliest surviving treatment."
+      },
+      {
+        "person": "Constantin Schwede",
+        "relation": "later-associated-with",
+        "source": "wikipedia-lucena",
+        "year": 1880,
+        "note": "Editor of the sixth Handbuch des Schachspiels, where the erroneous attribution to Lucena appears to have originated."
+      },
+      {
+        "person": "Aron Nimzowitsch",
+        "relation": "named-by",
+        "source": "wikipedia-lucena",
+        "year": null,
+        "note": "Named the winning technique 'building a bridge'. Second-hand attribution."
+      }
+    ],
+    "first_documented_source": "wikipedia-lucena",
+    "year": 1634,
+    "confidence": "medium",
+    "notes": "An unusually well-documented case of a chess name being wrong: the misattribution, its probable source and its probable cause are all recorded. Confidence is medium rather than high because the whole chain comes from one encyclopedia entry and none of the primary works (Lucena 1497, Salvio 1634, Handbuch 1880, van der Linde 1874) was consulted here. Worth checking against Winter's Chess Notes.",
+    "competing_claims": [
+      "Named for Lucena (1497) — universal, and demonstrably not where the position appears.",
+      "Attributed by Salvio (1634) to Scipione Genovino.",
+      "Misattribution traced to the Handbuch des Schachspiels, 6th ed. (1880)."
+    ],
+    "development": []
+  },
+  "engine_era_status": "reliable",
+  "engine_era_note": "Proven by tablebase. The human method survives because it is the clearest route a person can follow, not because the result was ever in doubt.",
+  "recognition": {
+    "preconditions": [
+      "Rook and pawn against rook",
+      "Pawn on the seventh rank and not a rook pawn",
+      "Attacking king on the queening square",
+      "Defending king cut off by at least one file"
+    ],
+    "indicators_for": [
+      "The defending rook has checking distance on the far side of the pawn",
+      "The attacking rook can reach the fourth rank to build the bridge"
+    ],
+    "indicators_against": [
+      "The pawn is a rook pawn — a different and usually drawn ending",
+      "The defending king is NOT cut off, so it can reach the queening square",
+      "The defending rook prevents the rook reaching the bridge rank",
+      "The defender has the short-side defence available: at least three files of checking distance with the king on the side with fewer files"
+    ],
+    "prerequisites": [
+      "passed-pawn",
+      "rook-on-the-seventh"
+    ],
+    "detector": "materialPattern KRP-KR",
+    "detectability": "mechanical",
+    "typical_confidence": "high",
+    "false_positive_traps": [
+      "A rook pawn is NOT a Lucena. The mechanism needs room on both sides of the pawn, and rook-pawn endings are frequently drawn — see the Vancura position.",
+      "'King in front of the pawn on the seventh' is not sufficient: the defending king must also be cut off, and the short-side defence must not be available.",
+      "The name does not tell you who discovered it, and a record that repeats the attribution as fact is wrong."
+    ]
+  },
+  "application": {
+    "typical_plans": [
+      "Drive the defending king back with a rook check, drop the rook to the fourth rank, walk the king out under the shield"
+    ],
+    "typical_moves": [
+      "Rd1+ then Rd4! — the bridge"
+    ],
+    "typical_pawn_structures": [],
+    "typical_piece_arrangements": [],
+    "tactical_consequences": [],
+    "strategic_consequences": [
+      "The target of conversion in most rook endings a pawn up"
+    ]
+  },
+  "exceptions": [
+    "Does not apply to rook pawns.",
+    "Fails if the defending rook can stop the attacking rook reaching the bridge rank — though other wins usually exist.",
+    "The short-side defence draws if the defending king is on the side with fewer files and the rook has at least three files of checking distance."
+  ],
+  "limitations": [],
+  "misconceptions": [
+    "That Lucena discovered it. He did not, and the position is absent from his book.",
+    "That any rook-and-pawn-on-the-seventh position is a Lucena.",
+    "That it works with a rook pawn."
+  ],
+  "relationships": {
+    "broader": [],
+    "narrower": [
+      "building-a-bridge"
+    ],
+    "related": [
+      "philidor-position",
+      "vancura-position",
+      "passed-pawn",
+      "building-a-bridge"
+    ],
+    "contrasting": [
+      "philidor-position"
+    ],
+    "co_occurring": [
+      "building-a-bridge"
+    ],
+    "conflicts": []
+  },
+  "examples": [
+    {
+      "fen": "1K6/1P1k4/8/8/8/8/r7/5R2 w - - 0 1",
+      "note": "Lucena setup: White Kb8 and pawn b7 with the rook free to check, Black Kd7 cut off and the rook on a2 with checking distance. The textbook win is 1.Rd1+ Ke7 2.Rd4! and the bridge.",
+      "origin_kind": "study-composition",
+      "concept_role": "positive",
+      "side_to_move_benefits": "white",
+      "tablebase": {
+        "source": "Lichess tablebase (Syzygy, 7-piece)",
+        "pieces": 5,
+        "wdl": "win",
+        "dtz": 15,
+        "dtm": 41,
+        "category": "win",
+        "note": "PROVEN win, mate in 41. The tablebase's own best move is Rd1+ — exactly the first move of the textbook bridge-building method, which is a pleasing confirmation that the human technique is also the objectively correct one."
+      }
+    }
+  ],
+  "counterexamples": [],
+  "ambiguous_examples": [],
+  "explanations": {
+    "by_level": {
+      "beginner": "The pawn is one square from queening but the king is in its way. The trick is to use the rook as a shield so the king can step out.",
+      "intermediate": "The Lucena position — a forced win. Check the king back, put the rook on the fourth rank, then walk out: the rook blocks the checks.",
+      "advanced": "Lucena. Confirm it is not a rook pawn and that the defending king is genuinely cut off before relying on it.",
+      "master": "The conversion target of most rook endings a pawn up. Note the short-side defence is the standard way it fails to be a Lucena at all."
+    },
+    "by_depth": {
+      "short": "Pawn on the seventh, king in front, rook builds a bridge — a win.",
+      "normal": "The Lucena position: rook and pawn against rook with the pawn on the seventh, your king in front of it and theirs cut off. It wins by building a bridge — check the king away, drop the rook to the fourth rank, then walk your king out behind the shield.",
+      "deep": "The canonical winning position in rook and pawn versus rook, and the one the stronger side aims for while the defender aims for the Philidor. The conditions are exact: not a rook pawn, pawn on the seventh, attacking king on the queening square, defending king cut off by at least a file. The win is Nimzowitsch's 'building a bridge'. A footnote worth knowing: the name is wrong. The position does not appear in Lucena's 1497 book; the earliest surviving discussion is Salvio's of 1634, who credits Scipione Genovino, and the misattribution seems to have entered through an 1880 edition of the Handbuch des Schachspiels."
+    },
+    "hedge": "",
+    "lesson": "In a rook ending a pawn up, this is what you are steering towards. Check first that your pawn is not a rook pawn — that changes everything."
+  },
+  "terminology": {
+    "beginner_words": [
+      "the winning rook ending",
+      "using the rook as a shield"
+    ],
+    "advanced_words": [
+      "Lucena position",
+      "building a bridge",
+      "cut off",
+      "short-side defence"
+    ],
+    "avoid": [
+      "Lucena discovered this",
+      "any pawn on the seventh is a Lucena"
+    ]
+  },
+  "status": {
+    "stage": "researched",
+    "last_updated": "2026-09-01",
+    "open_questions": [],
+    "audit_notes": []
+  },
+  "id": "lucena-position",
+  "canonical_name": "Lucena position",
+  "category": "named-theoretical-positions",
+  "knowledge_type": "named-theoretical-position",
+  "definition_short": "Rook and pawn against rook, pawn on the seventh with the attacking king in front of it and the defending king cut off. A forced win by building a bridge.",
+  "definition_long": "The canonical winning position of the rook-and-pawn-versus-rook ending, and the one the stronger side steers for. Its characteristics are exact:\n\n  - the pawn is any pawn EXCEPT a rook pawn;\n  - the pawn stands on the seventh rank;\n  - the attacking king is on the queening square, in its own pawn's way;\n  - the attacking rook cuts the defending king off by at least one file;\n  - the defending rook is on the file on the far side of the pawn.\n\nThe win is by BUILDING A BRIDGE: a rook check drives the king back, the rook drops to the fourth rank, and when the defender checks from the side the rook interposes, shielding the king so it can walk out and the pawn can promote.\n\nKarsten Müller has called it possibly the most important position in endgame theory, and de la Villa pairs it with the Philidor as the two that matter most. Rook endings occur in roughly 8-10% of all games and reduce to one or the other more often than to anything else.\n\nTHE NAME IS WRONG, AND THE ERROR IS TRACEABLE. The position does not appear in Luis Ramírez de Lucena's Repetición de Amores e Arte de Axedrez (1497). The earliest preserved discussion is in Alessandro Salvio's Il Puttino (1634), and Salvio attributes it to Scipione Genovino. The misattribution most likely entered via the sixth edition of the Handbuch des Schachspiels (1880), where the editor Constantin Schwede credited it to 'Lucena 96', apparently through confusion over references in van der Linde's 1874 work. The name is now standard and should keep being used — but it should not be presented as telling you who found it.",
+  "sources": [
+    "wikipedia-lucena",
+    "naroditsky-two-rook-endings",
+    "lichess-tablebase"
+  ],
+  "source_confidence": "high"
+}

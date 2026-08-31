@@ -322,6 +322,63 @@ weights (minor 2, rook 3, queen 5), and the S-shaped scoring table are all
 documented, and the practical consequence — an attack is not worth evaluating
 below three attackers — is better guidance than anything in the prose sources.
 
+## Session 6 — orphaned waiters, and a rule of thumb proven wrong
+
+### The two background shells could never finish
+
+Both were `until grep -q DONE_...` waiters polling `gg.out` and `bt.out`. Those
+files end in a **BrokenPipeError traceback**: when the over-deep runs were killed
+last session, `sf_analyse.py` raised on writing `quit` to a dead engine, which
+escaped and killed the wrapping script BEFORE it echoed its sentinel. Nothing
+could ever write what the waiters were watching for.
+
+Nothing was pending. The results had been obtained by reruns and incorporated;
+every number in `greek-gift` and `pawn-breakthrough` was re-checked against the
+raw output of `both.out` and `bt2.out` and matches exactly. No corrections were
+needed to the research.
+
+Two fixes recorded:
+- `sf_analyse.py` now tolerates a dead pipe and raises a clear RuntimeError
+  naming the problem, instead of a stray BrokenPipeError that kills its caller.
+- Recorded in `tool_limitations`: a background script must write its sentinel
+  UNCONDITIONALLY — `trap 'echo DONE_X' EXIT`, not a bare echo at the bottom.
+
+### The most valuable result in the base so far
+
+The Vancura position gives a **proven refutation of a famous rule of thumb**.
+Tarrasch's rule — the rook belongs behind the passed pawn — is recorded in
+`passed-pawn` as a reliable heuristic. In the Vancura configuration it loses by
+force. Two positions, identical material and identical kings, differing only in
+which square the defending rook stands on:
+
+```
+R7/6k1/P4r2/8/3K4/8/8/8 w   rook BESIDE the pawn (f6)   PROVEN DRAW
+R7/6k1/P7/8/3K4/8/8/r7  w   rook BEHIND the pawn (a1)   PROVEN LOSS in 63
+```
+
+That is not an argument about the rule, it is a counterexample to it. The
+exception is now linked from `passed-pawn`, which previously stated Tarrasch's
+rule without qualification, and both concepts carry the cross-reference.
+
+### A documented misattribution
+
+The Lucena position is not Lucena's. It does not appear in his 1497 book; the
+earliest preserved discussion is Salvio's *Il Puttino* (1634), who credits
+Scipione Genovino; and the error is traced to Constantin Schwede's sixth edition
+of the *Handbuch des Schachspiels* (1880). The name is universal and should keep
+being used — but it is terminology, not evidence of authorship, and the record
+says so.
+
+Philidor's attribution, by contrast, is sound (1777) — with the nuance that his
+own claim that the third-rank defence was the ONLY drawing method was disproved
+by Karstedt in 1897.
+
+### Concepts added
+
+`lucena-position`, `philidor-position`, `vancura-position` — three named
+theoretical positions, all tablebase-proven. The Lucena's tablebase best move is
+Rd1+, exactly the textbook first move of the bridge.
+
 ### Next
 
 Complete the pilot concept record, then work the taxonomy in dependency order:

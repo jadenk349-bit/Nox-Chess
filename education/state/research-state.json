@@ -6,24 +6,24 @@
     "note": "Filled in by tools/sf_analyse.py --probe"
   },
   "counters": {
-    "concepts_total": 62,
+    "concepts_total": 65,
     "concepts_stub": 0,
     "concepts_researched": 29,
     "concepts_validated": 4,
     "concepts_needs_review": 0,
-    "sources_reviewed": 77,
+    "sources_reviewed": 83,
     "positions_tested": 19,
     "matches_validated": 14,
     "false_matches": 1,
     "ambiguous_matches": 4,
     "by_stage": {
       "ready": 2,
-      "researched": 55,
-      "validated": 5
+      "researched": 57,
+      "validated": 6
     },
-    "tablebase_positions": 5,
+    "tablebase_positions": 9,
     "concepts_fully_covered": 11,
-    "areas_touched": 27,
+    "areas_touched": 28,
     "areas_total": 85
   },
   "areas": {
@@ -593,9 +593,13 @@
     "named-theoretical-positions": {
       "domain": "named-patterns",
       "status": "not-started",
-      "concepts": [],
+      "concepts": [
+        "lucena-position",
+        "philidor-position",
+        "vancura-position"
+      ],
       "open_questions": [],
-      "last_touched": null
+      "last_touched": "2026-09-01"
     },
     "named-strategic-concepts": {
       "domain": "named-patterns",
@@ -907,6 +911,12 @@
       "result": "neither converged in ~12 minutes; both killed and rerun at depth 20/26",
       "reason": "Two compounding mistakes. (1) MultiPV disables most pruning, so a MultiPV search on a 28-piece middlegame costs far more than a single-PV search to the same depth — depth 20-22 is ample for a question whose answer is a forced sequence. (2) sf_analyse.py defaults threads to cpu_count-2 = 10, so two concurrent runs requested 20 threads on 12 cores and thrashed. Run engine jobs SEQUENTIALLY, or pass --threads.",
       "date": "2026-08-31"
+    },
+    {
+      "what": "Two background waiter shells left polling for sentinels that could never appear",
+      "result": "orphaned; they would have spun forever",
+      "reason": "When the over-deep Stockfish runs were killed, sf_analyse.py raised BrokenPipeError writing `quit` to the dead engine. That escaped and killed the wrapping shell script BEFORE it echoed its DONE sentinel, so the `until grep -q DONE...` waiters had nothing to wait for. The results themselves were fine — obtained by reruns and already incorporated — but the waiters were unrecoverable.",
+      "date": "2026-09-01"
     }
   ],
   "tool_limitations": [
@@ -917,7 +927,8 @@
         "Simplified endgames can fail to converge at depth 34+. Prefer tablebase below 8 pieces.",
         "Two concurrent instances halve each other's throughput on this 12-core machine.",
         "MultiPV is expensive: it suppresses pruning, so multipv 3-4 at depth 28 on a full board can take an order of magnitude longer than depth 28 single-PV. For forced-sequence questions depth 20-22 with MultiPV is plenty.",
-        "education/tools/sf_analyse.py defaults to cpu_count-2 threads. Two concurrent invocations oversubscribe the machine. Run jobs sequentially in one script."
+        "education/tools/sf_analyse.py defaults to cpu_count-2 threads. Two concurrent invocations oversubscribe the machine. Run jobs sequentially in one script.",
+        "FIXED: sf_analyse.py used to raise BrokenPipeError if the engine died mid-search, killing the calling script. It now tolerates a dead pipe and raises a clear RuntimeError naming the problem instead."
       ]
     },
     {
@@ -952,6 +963,14 @@
       "limits": [
         "Works on tactical motifs, which depend on one geometric relation.",
         "Does NOT work on positional concepts: no pawn can be moved without changing several structural facts simultaneously. Three separate designs failed on the outpost. Use annotated real positions plus recognition criteria instead, and do not mark positional concepts 'validated' on controlled-pair evidence."
+      ]
+    },
+    {
+      "tool": "background shell scripts (Bash run_in_background + until-loop waiters)",
+      "limits": [
+        "A waiter polling for a sentinel is only safe if the producing script writes that sentinel UNCONDITIONALLY. If a step raises, the script dies before the echo and the waiter spins forever. Use `trap 'echo DONE_X' EXIT` at the top of the script, not a bare echo at the bottom.",
+        "Renaming or rerunning an analysis under a different output filename orphans any waiter still watching the old one. Kill the waiter or reuse the filename.",
+        "Orphaned waiters are harmless — idle sleep loops — but they are invisible in ps output unless you grep for the loop body rather than for the analysis tool."
       ]
     }
   ],

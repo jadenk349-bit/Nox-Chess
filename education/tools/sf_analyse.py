@@ -37,20 +37,43 @@ def run_uci(engine, commands, timeout, until=None):
     p = subprocess.Popen([engine], stdin=subprocess.PIPE, stdout=subprocess.PIPE,
                          stderr=subprocess.DEVNULL, text=True, bufsize=1)
     lines = []
+    saw_sentinel = False
+
+    def send(cmd):
+        """Write to the engine, tolerating a process that has already died.
+
+        Learned the hard way: if the engine is killed mid-search, the stdout loop
+        below ends without seeing `bestmove` and the subsequent `quit` raises
+        BrokenPipeError. That used to escape and kill the whole calling script,
+        which is how two background waiters ended up orphaned — the script died
+        before writing the sentinel they were polling for.
+        """
+        try:
+            p.stdin.write(cmd + "\n")
+            p.stdin.flush()
+            return True
+        except (BrokenPipeError, ValueError, OSError):
+            return False
+
     try:
         for c in commands:
-            p.stdin.write(c + "\n")
-        p.stdin.flush()
+            if not send(c):
+                break
         if until is None:
-            p.stdin.write("quit\n"); p.stdin.flush()
+            send("quit")
             out, _ = p.communicate(timeout=timeout)
             return out.splitlines()
         for line in p.stdout:
             line = line.rstrip("\n")
             lines.append(line)
             if line.startswith(until):
+                saw_sentinel = True
                 break
-        p.stdin.write("quit\n"); p.stdin.flush()
+        send("quit")
+        if not saw_sentinel:
+            raise RuntimeError(
+                f"engine exited before producing {until!r} after {len(lines)} lines — "
+                "it was probably killed, or crashed. Nothing usable was produced.")
     finally:
         try:
             p.stdin.close()

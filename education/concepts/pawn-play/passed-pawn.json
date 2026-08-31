@@ -111,7 +111,8 @@
     "A blockaded passer that ties down its owner's pieces is a liability, not an asset. Nimzowitsch's blockade rule is right about half the time, which is the honest figure.",
     "A passer pushed too early becomes a fixed target.",
     "A passer created from doubled pawns is frequently weak from birth.",
-    "Even a blockaded passer retains value if there is a second front the blockader can be pulled towards — which is the principle of two weaknesses doing the work."
+    "Even a blockaded passer retains value if there is a second front the blockader can be pulled towards — which is the principle of two weaknesses doing the work.",
+    "PROVEN EXCEPTION to Tarrasch's 'rook behind the passed pawn': in the Vancura configuration — a rook pawn on the sixth with the attacking rook in front of it — putting the rook behind the pawn LOSES. Tablebase-verified on a pair differing only in the defending rook's square: beside the pawn is a draw, behind it is a loss in 63. See `vancura-position`."
   ],
   "limitations": [
     "The definition is mechanical and reliable; the evaluation is not.",
@@ -120,7 +121,8 @@
   "misconceptions": [
     "That a passed pawn is always an advantage.",
     "That the aim is to promote it. Often the aim is to make the opponent spend pieces stopping it.",
-    "That any piece will do as a blockader. A knight loses nothing standing there; a queen loses almost everything."
+    "That any piece will do as a blockader. A knight loses nothing standing there; a queen loses almost everything.",
+    "That 'rook behind the passed pawn' is always right. It is a heuristic with a proven counterexample — see vancura-position."
   ],
   "relationships": {
     "broader": [],
@@ -131,7 +133,8 @@
       "two-weaknesses",
       "pawn-breakthrough",
       "backward-pawn",
-      "outpost"
+      "outpost",
+      "vancura-position"
     ],
     "contrasting": [],
     "co_occurring": [
@@ -141,6 +144,10 @@
       {
         "concept": "two-weaknesses",
         "resolution": "Not opposed but complementary, and the interaction is the interesting part: a blockaded passer is worthless alone but decisive when a second front exists, because the blockader cannot be in two places. The tablebase-proven pair in the two-weaknesses record is exactly an outside passer plus a second target."
+      },
+      {
+        "concept": "vancura-position",
+        "resolution": "Tarrasch's rule is a good default and a proven mistake in one specific configuration. Where the pawn is a rook pawn on the sixth with the attacking rook already in front, the Vancura side-attack draws and the rule loses. Prefer the specific proven result over the general heuristic whenever the configuration matches."
       }
     ]
   },
@@ -183,7 +190,9 @@
     "stage": "researched",
     "last_updated": "2026-08-31",
     "open_questions": [],
-    "audit_notes": []
+    "audit_notes": [
+      "2026-09-01: added the tablebase-proven Vancura exception to Tarrasch's rule, which this record previously stated without qualification."
+    ]
   },
   "id": "passed-pawn",
   "canonical_name": "Passed pawn",

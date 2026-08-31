@@ -1,0 +1,189 @@
+{
+  "schema_version": 2,
+  "alternate_names": [
+    "third-rank defence",
+    "third rank defense"
+  ],
+  "historical_names": [],
+  "tags": [
+    "rook-endgame",
+    "theoretical-position",
+    "tablebase-proven",
+    "defence"
+  ],
+  "subcategory": "rook and pawn versus rook",
+  "difficulty": "advanced",
+  "knowledge_type_note": "A specific named position with a proven result; the defender's counterpart to the Lucena.",
+  "name_status": "established-name",
+  "history": {
+    "attributions": [
+      {
+        "person": "François-André Danican Philidor",
+        "relation": "first-documented-by",
+        "source": "wikipedia-philidor-position",
+        "year": 1777,
+        "note": "Analysed the position in 1777. The attribution here is secure, unlike the Lucena's."
+      },
+      {
+        "person": "Max A.K.S. Karstedt",
+        "relation": "later-associated-with",
+        "source": "wikipedia-philidor-position",
+        "year": 1897,
+        "note": "Showed that Philidor's claim of uniqueness was not strictly correct; Johann Berger expanded on it."
+      }
+    ],
+    "first_documented_source": "wikipedia-philidor-position",
+    "year": 1777,
+    "confidence": "medium",
+    "notes": "Better founded than the Lucena's naming. Recorded medium rather than high only because Philidor's own text was not consulted here.",
+    "competing_claims": [],
+    "development": [
+      {
+        "era": "1777, Philidor",
+        "change": "The third-rank defence is analysed and presented as the drawing method.",
+        "source": "wikipedia-philidor-position"
+      },
+      {
+        "era": "1897, Karstedt / Berger",
+        "change": "Philidor's claim that it was the only drawing method is shown to be too strong.",
+        "source": "wikipedia-philidor-position"
+      }
+    ]
+  },
+  "engine_era_status": "reliable",
+  "engine_era_note": "Tablebase-confirmed. Engines also make clear how narrow the alternatives are, which is why the third-rank defence remains the practical method.",
+  "recognition": {
+    "preconditions": [
+      "Rook and pawn against rook, defending side to hold",
+      "Defending king in front of the pawn",
+      "Pawn not yet on the defender's third rank",
+      "Defending rook on the defender's third rank"
+    ],
+    "indicators_for": [
+      "The attacking king cannot reach its sixth rank because the rook denies it",
+      "The defender's rook has the seventh and eighth ranks available for rear checks"
+    ],
+    "indicators_against": [
+      "The defending king is cut off from the pawn's file — likely a Lucena instead",
+      "The pawn has already reached the third rank while the rook is still on it",
+      "The defending rook has no safe far rank to drop to"
+    ],
+    "prerequisites": [
+      "passed-pawn"
+    ],
+    "detector": "materialPattern KRP-KR",
+    "detectability": "mechanical",
+    "typical_confidence": "high",
+    "false_positive_traps": [
+      "The rook must leave the third rank at exactly the right moment — too early and the king comes in, too late and the pawn is past. Recognising the setup is not the same as executing it.",
+      "If the defending king is not in front of the pawn, this is not a Philidor and the position may be lost."
+    ]
+  },
+  "application": {
+    "typical_plans": [
+      "Hold the third rank; when the pawn advances to it, go to the far rank and check from behind",
+      "Accept a rook trade if offered on the third rank — the pawn ending is drawn"
+    ],
+    "typical_moves": [
+      "A waiting rook move along the third rank",
+      "Rook to the eighth rank once the pawn advances"
+    ],
+    "typical_pawn_structures": [],
+    "typical_piece_arrangements": [],
+    "tactical_consequences": [],
+    "strategic_consequences": [
+      "The defensive target in most rook endings a pawn down"
+    ]
+  },
+  "exceptions": [
+    "Philidor's own claim of uniqueness is too strong: other defences draw, though they are harder.",
+    "With the pawn less advanced, the defending rook uses its FOURTH rank instead of the third and the king needs only to reach its second."
+  ],
+  "limitations": [],
+  "misconceptions": [
+    "That it is the only way to draw — Karstedt showed otherwise in 1897.",
+    "That passive defence works. It does not; the rook must switch to rear checks at the right moment."
+  ],
+  "relationships": {
+    "broader": [],
+    "narrower": [],
+    "related": [
+      "lucena-position",
+      "vancura-position",
+      "passed-pawn"
+    ],
+    "contrasting": [
+      "lucena-position"
+    ],
+    "co_occurring": [],
+    "conflicts": []
+  },
+  "examples": [
+    {
+      "fen": "8/8/8/4k3/4p3/R7/1r6/4K3 w - - 0 1",
+      "note": "Philidor setup with colours reversed from the usual diagram: White is the DEFENDER, king on e1 in front of the pawn, rook on a3 holding the third rank. Black has king e5, pawn e4, rook b2.",
+      "origin_kind": "study-composition",
+      "concept_role": "positive",
+      "side_to_move_benefits": "neither",
+      "tablebase": {
+        "source": "Lichess tablebase (Syzygy, 7-piece)",
+        "pieces": 5,
+        "wdl": "draw",
+        "dtz": 0,
+        "dtm": 0,
+        "category": "draw",
+        "note": "PROVEN draw. The tablebase's best move is a waiting rook move along the rank, which is exactly the third-rank defence's first phase — hold the rank and do nothing until the pawn commits."
+      }
+    }
+  ],
+  "counterexamples": [],
+  "ambiguous_examples": [],
+  "explanations": {
+    "by_level": {
+      "beginner": "Keep your king in front of their pawn and your rook across the third row so their king cannot come forward. When the pawn finally advances, drop your rook far back and check them from behind.",
+      "intermediate": "The Philidor position — a draw. Two phases: hold the third rank, then check from behind once the pawn arrives on it. Getting the switch wrong is how the draw is lost.",
+      "advanced": "Third-rank defence. Both attacking tries fail: pushing the pawn removes the king's screen, and interposing on the third rank allows a rook trade into a drawn pawn ending.",
+      "master": "The defensive target in rook endings a pawn down. Note Philidor's uniqueness claim was disproved by Karstedt in 1897, though the alternatives are harder."
+    },
+    "by_depth": {
+      "short": "King in front, rook on the third rank, then check from behind.",
+      "normal": "The Philidor position: the drawing method in rook and pawn against rook. Hold your rook on the third rank so their king cannot advance; when the pawn is pushed to that rank, swing the rook to the far end and check from behind.",
+      "deep": "The defender's counterpart to the Lucena, analysed by Philidor in 1777. Conditions: defending king in front of the pawn, pawn not yet on the defender's third rank, attacking king beyond it, defending rook on it. The method has two phases and the timing is everything — hold the rank until the pawn commits, then check from behind, where the attacking king has lost the screen its own pawn provided. Both attacking tries fail cleanly: pushing removes the cover, interposing allows a rook trade into a drawn pawn ending. Philidor believed it was the only drawing method; Karstedt showed in 1897 that it is not, though the alternatives are more complicated."
+    },
+    "hedge": "",
+    "lesson": "A pawn down in a rook ending, get your king in front of the pawn and your rook on the third rank. Then wait — and only switch to checking from behind when the pawn actually advances."
+  },
+  "terminology": {
+    "beginner_words": [
+      "king in front of the pawn",
+      "checking from behind"
+    ],
+    "advanced_words": [
+      "Philidor position",
+      "third-rank defence",
+      "rear checks",
+      "passive defence"
+    ],
+    "avoid": [
+      "the only way to draw"
+    ]
+  },
+  "status": {
+    "stage": "researched",
+    "last_updated": "2026-09-01",
+    "open_questions": [],
+    "audit_notes": []
+  },
+  "id": "philidor-position",
+  "canonical_name": "Philidor position",
+  "category": "named-theoretical-positions",
+  "knowledge_type": "named-theoretical-position",
+  "definition_short": "The drawing setup in rook and pawn against rook: defending king in front of the pawn, defending rook on the third rank, then checking from behind once the pawn advances.",
+  "definition_long": "The defender's target, as the Lucena is the attacker's. Its conditions, from the defender's side:\n\n  - the defending king is on the pawn's queening square or adjacent to it;\n  - the pawn has not yet reached the defender's third rank;\n  - the attacking king is beyond the defender's third rank;\n  - the defending rook sits on the third rank, denying that rank to the attacking king.\n\nThe method has TWO PHASES and the timing is the whole point. Hold the rook on the third rank, which stops the attacking king coming to the sixth. When the pawn is finally pushed to the third rank, the rook drops to the far end of the board — seventh or eighth — and checks from behind, where the attacking king has no shelter because its own pawn no longer screens it.\n\nBoth attacking tries fail cleanly. Pushing the pawn removes the king's cover and invites the rear checks. Interposing the rook on the third rank allows the exchange, and the resulting king-and-pawn ending is drawn.\n\nA NUANCE Philidor himself got wrong: he believed the third-rank defence was the ONLY way to draw. Karstedt showed in 1897, and Berger elaborated, that this is not strictly true — other defences exist, though they are more complicated. The method is the best practical one, not the unique one.",
+  "sources": [
+    "wikipedia-philidor-position",
+    "naroditsky-two-rook-endings",
+    "lichess-tablebase"
+  ],
+  "source_confidence": "high"
+}
