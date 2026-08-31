@@ -1,0 +1,183 @@
+{
+  "schema_version": 2,
+  "alternate_names": [
+    "weak point",
+    "support point",
+    "strong square (from the other side)"
+  ],
+  "historical_names": [],
+  "tags": [
+    "squares",
+    "pawn-structure",
+    "positional"
+  ],
+  "subcategory": "square control",
+  "difficulty": "intermediate",
+  "knowledge_type_note": "A positional concept naming a board feature. Broader than `hole`, which is the specific structural case, and than `outpost`, which is the square once usefully occupied.",
+  "name_status": "established-name",
+  "history": {
+    "attributions": [
+      {
+        "person": "Wilhelm Steinitz",
+        "relation": "originated-by",
+        "source": "steinitz-modern-chess-instructor",
+        "year": 1886,
+        "note": "Through the 'hole' and the general doctrine of weak points; Lasker summarised his theory as including 'attack the weak points'."
+      }
+    ],
+    "first_documented_source": "steinitz-modern-chess-instructor",
+    "year": 1886,
+    "confidence": "medium",
+    "notes": "The specific term 'hole' is securely Steinitz's. 'Weak square' as a general phrase has no identifiable coiner and grew out of the same body of ideas; recorded medium rather than high for that reason.",
+    "competing_claims": [],
+    "development": [
+      {
+        "era": "1886-1889, Steinitz",
+        "change": "Weak points enter chess theory as a named, teachable defect.",
+        "source": "steinitz-modern-chess-instructor"
+      },
+      {
+        "era": "1925, Nimzowitsch",
+        "change": "The exploiting side is systematised as the outpost, and colour complexes get explicit treatment.",
+        "source": "nimzowitsch-my-system"
+      }
+    ]
+  },
+  "engine_era_status": "reliable",
+  "engine_era_note": "Standard in engine evaluation as king-safety and square-control terms. Uncontroversial; what engines dispute is only how much any individual weak square is worth.",
+  "recognition": {
+    "preconditions": [
+      "No friendly pawn can ever attack the square"
+    ],
+    "indicators_for": [
+      "The square is central, or adjacent to the king's shelter",
+      "Several weak squares of the same colour form a connected complex",
+      "The bishop covering that colour has been exchanged or is shut in",
+      "An enemy piece can reach the square and be supported there"
+    ],
+    "indicators_against": [
+      "A friendly pawn can still advance to cover it",
+      "A piece covers it durably and cannot be exchanged",
+      "The square is unreachable, or reaching it achieves nothing",
+      "It is on the edge or deep in the opponent's own half"
+    ],
+    "prerequisites": [],
+    "detector": "pawnAttackableSquares",
+    "detectability": "mechanical",
+    "typical_confidence": "medium",
+    "false_positive_traps": [
+      "Every pawn move creates squares no pawn can guard, so the raw feature fires everywhere. Usability is what makes it reportable.",
+      "A fianchetto leaves permanent weak squares on the long diagonal that the bishop covers perfectly well. The square is weak; the position is not.",
+      "A weak square only a queen can occupy is usually not a weakness, since cheaper pieces evict her."
+    ]
+  },
+  "application": {
+    "typical_plans": [
+      "Exchange the piece that covers the complex, then invade it",
+      "Fix enemy pawns on the colour opposite the complex so they cannot repair it",
+      "Route a knight to the square by a path the defender cannot contest"
+    ],
+    "typical_moves": [],
+    "typical_pawn_structures": [
+      "Fianchetto structures after the bishop is traded — weak dark squares around the king",
+      "Pawns fixed on one colour, weakening the other complex",
+      "In front of a backward pawn"
+    ],
+    "typical_piece_arrangements": [
+      "A knight established on the square with pawn support"
+    ],
+    "tactical_consequences": [
+      "Weak squares near the king convert into mating nets"
+    ],
+    "strategic_consequences": [
+      "Permanent, since pawns cannot move backwards",
+      "A weak colour complex often names the whole winning plan"
+    ]
+  },
+  "exceptions": [
+    "A weak square covered by a piece is not exploitable while that piece stays; the plan is to trade it off first.",
+    "Conceding weak squares is routinely the right price for space, the bishop pair, or a tempo.",
+    "Romanovsky's condition: it is only a real weakness if a piece that cannot be driven away or exchanged can occupy it."
+  ],
+  "limitations": [
+    "Detecting squares no pawn can attack is mechanical; deciding which matter is not.",
+    "Terminology overlaps with `hole` and sources use the two interchangeably."
+  ],
+  "misconceptions": [
+    "That weak squares should always be avoided.",
+    "That a weak square is a weakness regardless of whether the opponent can use it.",
+    "That 'weak square' and 'hole' are always synonyms — hole is the narrower, structural case."
+  ],
+  "relationships": {
+    "broader": [],
+    "narrower": [
+      "hole",
+      "outpost"
+    ],
+    "related": [
+      "hole",
+      "outpost",
+      "backward-pawn"
+    ],
+    "contrasting": [],
+    "co_occurring": [
+      "hole",
+      "outpost"
+    ],
+    "conflicts": []
+  },
+  "examples": [],
+  "counterexamples": [],
+  "ambiguous_examples": [],
+  "explanations": {
+    "by_level": {
+      "beginner": "None of your pawns can ever attack that square again, so their pieces can sit there safely.",
+      "intermediate": "{square} is weak: no pawn can cover it. It matters here because {piece} can reach it and stay.",
+      "advanced": "A weak square on the {colour} complex. Note whether it is isolated or part of a connected complex — the second is systemic and usually names the plan.",
+      "master": "Weak-square complex. The operative questions are which piece defends the complex, whether it can be traded, and whether the pawns can be fixed on the opposite colour to make the damage permanent."
+    },
+    "by_depth": {
+      "short": "No pawn can ever cover {square} again.",
+      "normal": "{square} is a weak square — no friendly pawn can attack it, and pawns cannot move backwards, so it stays weak. That matters when an enemy piece can occupy it and cannot be driven off.",
+      "deep": "The general term for a square its owner can no longer contest with a pawn; the same square is 'strong' from the other side. A hole is the narrower structural case Steinitz named, and an outpost is such a square once a piece occupies and uses it. The idea that matters most is the weak colour complex: several weak squares of one colour, usually left when the bishop of that colour goes or the pawns fix on the opposite colour. One weak square is local; a complex is systemic and generally names the winning plan — trade the defender of the complex, then occupy it."
+    },
+    "hedge": "",
+    "lesson": "Weak squares are permanent, so trade them for something permanent. And a weak square only counts if your opponent has a piece that can actually live there."
+  },
+  "terminology": {
+    "beginner_words": [
+      "a square your pawns can't guard"
+    ],
+    "advanced_words": [
+      "weak square",
+      "strong square",
+      "colour complex",
+      "support point",
+      "hole",
+      "outpost"
+    ],
+    "avoid": [
+      "all weak squares are weaknesses"
+    ]
+  },
+  "status": {
+    "stage": "researched",
+    "last_updated": "2026-08-31",
+    "open_questions": [],
+    "audit_notes": []
+  },
+  "id": "weak-square",
+  "canonical_name": "Weak square",
+  "category": "weak-squares",
+  "knowledge_type": "positional-concept",
+  "definition_short": "A square in one's own camp that can no longer be controlled by a pawn, and that the opponent can use.",
+  "definition_long": "The general term for a square whose owner can no longer contest it with a pawn. The same square is a WEAK square to its owner and a STRONG square to the opponent; the two names describe one fact from two sides.\n\nThe vocabulary in this area nests, and sources use it loosely, so the hierarchy is worth stating: a weak square is any square no friendly pawn can attack; a HOLE is the specific structural case Steinitz named, in front of a pawn with both adjoining pawns gone; an OUTPOST is such a square once a piece occupies it securely and uses it. 'Support point' is a further synonym in some American writing.\n\nThe larger idea is the WEAK COLOUR COMPLEX: a connected group of weak squares all of one colour, which usually arises when pawns are fixed on the opposite colour or when the bishop covering that colour has been exchanged. A single weak square is a local problem; a weak colour complex is systemic, and it often names the winning plan by itself — trade the defender of the complex, then occupy it.\n\nEvery pawn move creates weak squares. That is not an argument against pawn moves; it is the reason to make them deliberately.",
+  "sources": [
+    "steinitz-modern-chess-instructor",
+    "chessworld-weaknesses-outposts",
+    "chesscom-mastering-squares",
+    "nimzowitsch-my-system",
+    "chessmind-en-prise"
+  ],
+  "source_confidence": "high"
+}

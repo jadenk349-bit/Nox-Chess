@@ -134,6 +134,67 @@ Housekeeping: a depth-34 analysis of the Kotov-Pachman move-55 rook ending faile
 on the two-weaknesses concept rather than dropped. Lesson: cap simplified endings at depth 28-30,
 or install Syzygy tablebases.
 
+## Session 3 — Phase 0 redone against the merged tree
+
+`agent-4` was 44 commits behind `main` when Phase 0 was first performed. It has been
+brought up to date and the inspection redone. Full record in `INTEGRATION.md`.
+
+### Corrections
+
+| First pass said | Actually |
+|---|---|
+| No FEN in the codebase; a reader/writer is a prerequisite | `fenOf()` / `stateFromFEN()` at `blind-chess.html:3913`/`:3929`, round-trip tested. **Do not write a second one.** |
+| LESSON and PUZZLE are `soon` stubs | Both shipped, with their own suites, plus Practice and 788 verified puzzles |
+| `judgeMove` = centipawn loss -> 4 verdicts | Win-percentage based, six verdicts, SEE-based sacrifice detection |
+| Layers 3 and 5 are greenfield | `findMotifs()` covers the tactical half of 3; `tools/puzzle_words.js` covers 5 for puzzles |
+
+### The convergence worth recording
+
+`findMotifs()` already applies the guards this project derived independently from
+engine testing — a fork is reported only when the target is outranked or
+undefended, material already loose before the move is not counted, and a pin that
+already existed is skipped. And the generator's README refuses to claim
+deflection, decoy, overloading, interference and double attack because "every
+cheap test for them fires where it is not true" — exactly the five this knowledge
+base had classified `detectability: heuristic` from the sources. Two independent
+routes to the same line.
+
+That reframes the project. The tactical single-move case is already solved here to
+a high standard. What is missing is the knowledge behind the tags, everything
+positional (the codebase has no vocabulary for it at all), extra registers, and
+retrieval.
+
+### Corpus testing
+
+`tools/corpus.py` mines the 788 shipped puzzles as a labelled dataset. It measures
+which themes have concept records, weighted by how often they occur, which turns
+research prioritisation from a guess into a measurement: **78% of chess-concept
+theme instances are covered**.
+
+It also caught a mistake before it was made. `longGame` (591 puzzles) and
+`defensiveResource` (490) look like the two biggest gaps, but reading
+`puzzle_rules.js` shows `longGame` means "the line is at least three moves" and
+`defensiveResource` means "this puzzle is a rescue rather than a punish". They are
+properties of the PUZZLE, not chess ideas, and giving them concept records would
+have been inventing terminology to fit a pipeline tag. They are now classified
+`metadata` and excluded from the coverage denominator. `positionalTactic` is
+similar — the generator's label for "a quiet move with no motif tag" — and is
+marked NEEDS RESEARCH BEFORE NAMING rather than given a concept called
+"positional tactic", which is not a recognised term.
+
+### Concepts added
+
+`hanging-piece`, `loose-piece`, `lpdo`, `weak-square` — chosen because
+`hangingPiece` is the single most common theme in the corpus (598 of 788) and had
+no record. The four are deliberately typed differently to show the classification
+doing real work on one subject: hanging and loose are `terminology`, LPDO is a
+`rule-of-thumb` carrying mandatory hedging, weak-square is a `positional-concept`.
+
+LPDO is also a clean attribution case: two sources say "probably coined by Mike
+Cook", popularised by Nunn. The hedge is theirs and is kept, confidence is
+`medium`, and `misconceptions` records that writing "Nunn coined LPDO" would be
+wrong.
+
 ### Next
 
 Complete the pilot concept record, then work the taxonomy in dependency order:

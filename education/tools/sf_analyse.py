@@ -69,9 +69,26 @@ def probe(engine):
     return name
 
 
+def settle_depth(by_depth, best):
+    """Shallowest depth from which the search never changed its mind again.
+
+    Borrowed from tools/sf.js, which uses it to rate puzzle difficulty. It is a
+    better confidence signal than raw depth: an answer held from depth 3 is firm,
+    one that flipped until depth 25 is not, even though both were searched to 30.
+    """
+    if not best or not by_depth:
+        return None
+    settled = None
+    for d, mv in reversed(by_depth):
+        if mv != best:
+            break
+        settled = d
+    return settled if settled is not None else (by_depth[-1][0] if by_depth else None)
+
+
 def analyse(engine, fen, depth=DEFAULT_DEPTH, multipv=1, searchmoves=None,
             threads=None, hash_mb=2048, timeout=3600):
-    """Return {'best': uci, 'lines': [{multipv, depth, cp, mate, pv}]}."""
+    """Return {'best': uci, 'lines': [...], 'settle_depth': int|None}."""
     if threads is None:
         threads = max(1, (os.cpu_count() or 2) - 2)
     go = "go depth %d" % depth
@@ -84,7 +101,7 @@ def analyse(engine, fen, depth=DEFAULT_DEPTH, multipv=1, searchmoves=None,
             "isready", "position fen " + fen, go]
     out = run_uci(engine, cmds, timeout, until="bestmove")
 
-    best, deepest = None, {}
+    best, deepest, by_depth = None, {}, []
     info_re = re.compile(
         r"^info\b(?=.*\bdepth (\d+))(?=.*\bscore (cp|mate) (-?\d+))"
         r"(?:(?=.*\bmultipv (\d+)))?.*?\bpv (.+)$")
@@ -100,6 +117,8 @@ def analyse(engine, fen, depth=DEFAULT_DEPTH, multipv=1, searchmoves=None,
         kind, val = m.group(2), int(m.group(3))
         idx = int(m.group(4) or 1)
         pv = m.group(5).split()
+        if idx == 1:
+            by_depth.append((d, pv[0] if pv else None))
         prev = deepest.get(idx)
         if prev is None or d >= prev["depth"]:
             deepest[idx] = {"multipv": idx, "depth": d,
@@ -107,7 +126,9 @@ def analyse(engine, fen, depth=DEFAULT_DEPTH, multipv=1, searchmoves=None,
                             "mate": val if kind == "mate" else None,
                             "pv": pv}
     return {"fen": fen, "best": best,
-            "lines": [deepest[k] for k in sorted(deepest)]}
+            "lines": [deepest[k] for k in sorted(deepest)],
+            "settle_depth": settle_depth(by_depth, best),
+            "threads": threads, "hash_mb": hash_mb, "multipv": multipv}
 
 
 def to_san(fen, uci_moves):
@@ -162,7 +183,7 @@ def main():
         score = f"#{ln['mate']}" if ln["mate"] is not None else f"{ln['cp']/100:+.2f}"
         san = to_san(a.fen, ln["pv"][:10])
         print(f"  [{ln['multipv']}] d{ln['depth']:<3} {score:>8}  {san or ' '.join(ln['pv'][:10])}")
-    print(f"  bestmove: {res['best']}")
+    print(f"  bestmove: {res['best']}   settled from depth {res['settle_depth']}")
 
 
 if __name__ == "__main__":

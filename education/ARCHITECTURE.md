@@ -62,15 +62,21 @@ both the data and the tooling.
 |---|---|---|---|
 | 1. Research knowledge | What humans call ideas, what they mean, where they came from | `concepts/`, `sources/` | assert that a move works |
 | 2. Engine validation | Whether a move actually works | `tools/sf_analyse.py`, `tools/tablebase.py`, the `engine`/`tablebase` blocks on positions | name a concept |
-| 3. Position understanding | Observable board features — structure, files, squares, material, activity | detectors, named in `recognition.detector`; **not yet built** | interpret |
-| 4. Concept matching | Which concepts the detected features actually license | **not yet built** | match on engine agreement |
-| 5. Explanation generation | Wording, level, depth, hedging | `explanations` on each concept | claim anything not true in this position |
+| 3. Position understanding | Observable board features — structure, files, squares, material, activity | **tactical half already exists**: `findMotifs()` in `blind-chess.html`, plus `attackersOf`/`see`/`sliderLines` reusable via `tools/page_chess.js`. Positional half not built. | interpret |
+| 4. Concept matching | Which concepts the detected features actually license | not yet built | match on engine agreement |
+| 5. Explanation generation | Wording, level, depth, hedging | **already exists for puzzles**: `tools/puzzle_words.js`, with an `auditClaims()` pass. This system adds registers and the positional vocabulary. | claim anything not true in this position |
 
-Layer 3 and 4 do not exist yet, deliberately. They are the part that must be built
-*on* researched criteria, and the criteria are what the research phase produces.
-Building them first would mean inventing recognition rules and then looking for
-sources to justify them, which is the failure mode this whole design exists to
-avoid.
+Layers 3 and 5 are **not greenfield** — see `INTEGRATION.md`. The tactical,
+single-move case is already solved in this codebase to a high standard, and
+`findMotifs()` independently applies the same guards this project derived from
+engine testing. The Education System's real surface is the knowledge behind those
+tags, everything positional (for which the codebase has no vocabulary at all), and
+retrieval.
+
+Layer 4 does not exist yet, deliberately. It must be built *on* researched
+criteria, and the criteria are what the research phase produces. Building it first
+would mean inventing recognition rules and then looking for sources to justify
+them, which is the failure mode this whole design exists to avoid.
 
 ## Knowledge types
 

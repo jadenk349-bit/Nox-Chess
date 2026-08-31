@@ -1,0 +1,170 @@
+{
+  "schema_version": 2,
+  "alternate_names": [
+    "LPDO"
+  ],
+  "historical_names": [],
+  "tags": [
+    "heuristic",
+    "nunn",
+    "practical",
+    "mnemonic"
+  ],
+  "subcategory": "practical tactics",
+  "difficulty": "beginner",
+  "knowledge_type_note": "A rule of thumb and explicitly described as one by its sources — 'as usual, this is a rule of thumb which happily may be ignored by a strong player'. It carries mandatory hedging wording. It is NOT a law: strong players leave pieces loose deliberately and correctly.",
+  "name_status": "established-name",
+  "history": {
+    "attributions": [
+      {
+        "person": "Mike Cook",
+        "relation": "originated-by",
+        "source": "chessbase-lpdo",
+        "year": null,
+        "note": "Two independent sources say 'PROBABLY coined by the English player Mike Cook'. The hedge is theirs and is kept. Cook is the 2300-rated player who lost the 100-game match to Nunn and used the phrase to explain his losses."
+      },
+      {
+        "person": "John Nunn",
+        "relation": "popularized-by",
+        "source": "nunn-secrets-practical-chess",
+        "year": 1998,
+        "note": "Recounted the match in Secrets of Practical Chess, which is how the phrase reached general usage."
+      }
+    ],
+    "first_documented_source": "nunn-secrets-practical-chess",
+    "year": 1998,
+    "confidence": "medium",
+    "notes": "Popularisation by Nunn is well attested. Coinage by Cook is reported by two sources, both hedged with 'probably', and no primary evidence has been seen. Recorded as medium: this is exactly the 'repeated attribution, no primary evidence' case the confidence scale exists for. Do not write 'Nunn coined LPDO' — he popularised it.",
+    "competing_claims": [
+      "Some sources credit Nunn with the term itself; the better-sourced account credits Cook with the phrase and Nunn with its currency."
+    ],
+    "development": []
+  },
+  "engine_era_status": "useful-with-common-exceptions",
+  "engine_era_note": "Nothing in engine analysis undermines the statistical observation, and engines punish loose material ruthlessly. What engine play does contradict is any strict reading: top engines leave pieces undefended constantly, because they can calculate that no forcing move reaches them. The heuristic is a substitute for calculation, and loses its force exactly to the extent that calculation is available.",
+  "recognition": {
+    "preconditions": [
+      "One or more pieces are undefended",
+      "Forcing moves are available in the position"
+    ],
+    "indicators_for": [
+      "Two or more loose pieces on the same side",
+      "An undefended piece on a line the enemy queen or a knight can reach with check",
+      "Open position, queens on, several forcing moves available"
+    ],
+    "indicators_against": [
+      "Closed position where no forcing move reaches the loose piece",
+      "The loose piece can be defended or moved with tempo at any time",
+      "Defending would cost a tempo the position cannot spare"
+    ],
+    "prerequisites": [
+      "loose-piece"
+    ],
+    "detector": null,
+    "detectability": "heuristic",
+    "typical_confidence": "medium",
+    "false_positive_traps": [
+      "A piece being undefended is not a mistake, and calling it one teaches a habit of pointless defending.",
+      "Not every loss of a loose piece is an LPDO instance. A ChessBase reader demonstrated that the article's own headline example was not: the piece did not fall because it was loose but because a square had become a forking square. If the tactic would work against a defended piece too, LPDO is not the explanation."
+    ]
+  },
+  "application": {
+    "typical_plans": [
+      "Scan both sides for undefended units before calculating",
+      "Given two loose enemy pieces, look for the move that attacks both"
+    ],
+    "typical_moves": [
+      "A queen check that also hits an undefended piece"
+    ],
+    "typical_pawn_structures": [],
+    "typical_piece_arrangements": [],
+    "tactical_consequences": [
+      "Directs the search towards double attacks that actually pay"
+    ],
+    "strategic_consequences": [
+      "Prophylactically, coordination reduces exposure to tactics"
+    ]
+  },
+  "exceptions": [
+    "Strong players leave pieces loose deliberately, having calculated that nothing reaches them.",
+    "Defending everything is a real error in the other direction: it wastes tempi and produces passive pieces.",
+    "The heuristic describes a tendency across many games, not a property of any one position."
+  ],
+  "limitations": [
+    "A search heuristic, not an evaluation. It suggests where to look; it does not say a move is bad.",
+    "Its force decreases as calculation increases."
+  ],
+  "misconceptions": [
+    "That LPDO means you should defend every piece.",
+    "That Nunn coined it — the better-sourced account is that Mike Cook did and Nunn popularised it.",
+    "That any lost undefended piece illustrates LPDO. It illustrates it only when being undefended is why the tactic worked."
+  ],
+  "relationships": {
+    "broader": [],
+    "narrower": [],
+    "related": [
+      "loose-piece",
+      "hanging-piece",
+      "fork",
+      "double-attack"
+    ],
+    "contrasting": [],
+    "co_occurring": [
+      "fork",
+      "discovered-attack"
+    ],
+    "conflicts": []
+  },
+  "examples": [],
+  "counterexamples": [],
+  "ambiguous_examples": [],
+  "explanations": {
+    "by_level": {
+      "beginner": "Pieces that nothing is defending tend to get picked off. Before you move, look at which of your pieces are undefended.",
+      "intermediate": "LPDO — loose pieces drop off. With {n} undefended pieces here, look for a forcing move that hits two things at once.",
+      "advanced": "Nunn's heuristic. Useful as a search filter rather than as an evaluation: undefended units are the natural second target of any double attack.",
+      "master": "A statistical regularity about practical play. Weigh it against the tempo cost of defending, and note that it says nothing once the relevant lines are calculated."
+    },
+    "by_depth": {
+      "short": "Undefended pieces tend to get lost to tactics.",
+      "normal": "Loose pieces drop off: nearly every double attack needs a target that is undefended, so a camp with several undefended pieces is likely to lose one sooner or later. Use it as a scan, not as a rule to defend everything.",
+      "deep": "Popularised by John Nunn in Secrets of Practical Chess, and probably coined by Mike Cook, the opponent whose losses it explained. The mechanism is that forks, discoveries and skewers all need a second target that is either outranked by the attacker or undefended, and an undefended piece qualifies automatically. Its practical use is as a search heuristic. Its limit is that it is a substitute for calculation, so it loses force wherever calculation is actually done — which is why strong players leave pieces loose without concern."
+    },
+    "hedge": "This is a rule of thumb, not a law. Strong players leave pieces undefended deliberately and correctly whenever no forcing move can reach them, and defending everything costs tempi and produces passive pieces.",
+    "lesson": "Undefended pieces are what combinations are made of. Scan for them on both sides before you calculate — but do not spend moves defending what nothing can attack."
+  },
+  "terminology": {
+    "beginner_words": [
+      "undefended pieces get taken"
+    ],
+    "advanced_words": [
+      "LPDO",
+      "loose",
+      "double attack"
+    ],
+    "avoid": [
+      "always defend your pieces",
+      "LPDO is a rule",
+      "Nunn coined LPDO"
+    ]
+  },
+  "status": {
+    "stage": "researched",
+    "last_updated": "2026-08-31",
+    "open_questions": [],
+    "audit_notes": []
+  },
+  "id": "lpdo",
+  "canonical_name": "Loose Pieces Drop Off (LPDO)",
+  "category": "rules-of-thumb",
+  "knowledge_type": "rule-of-thumb",
+  "definition_short": "Undefended pieces tend to be lost to tactics sooner or later, because almost every double-threat device needs an undefended target.",
+  "definition_long": "A mnemonic for a statistical fact about practical play rather than a rule about correct play. Forks, discovered attacks, skewers and double attacks all work by creating two problems at once, and an undefended piece is the ideal second problem — it needs no other justification to be worth taking. So a position with several loose pieces is disproportionately likely to lose material to a tactic, whether or not any tactic exists right now.\n\nIts practical value is as a SEARCH HEURISTIC. It converts an open-ended hunt for tactics into a fast scan: list the undefended units on both sides, then look for a forcing move that reaches two of them, or one of them and the king.\n\nIt is not advice to defend everything. Defending costs tempi, and a piece that no forcing move can reach is not at risk.",
+  "sources": [
+    "nunn-secrets-practical-chess",
+    "chessbase-lpdo",
+    "chessworld-lpdo",
+    "chessmind-en-prise"
+  ],
+  "source_confidence": "high"
+}

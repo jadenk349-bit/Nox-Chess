@@ -121,6 +121,33 @@
         "verdict": "supports",
         "verdict_note": "Nc7+ is best at +7.39, a full 2.21 ahead of the next move (Bd3, +5.18). The engine line is 1.Nc7+ Kd7 2.Nxa8 — the rook simply falls. Confirms the motif when the forking square is safe."
       }
+    },
+    {
+      "fen": "5k2/6p1/8/3Q3p/6PP/8/P2pr1P1/6K1 b - - 0 43",
+      "note": "Real position from the shipped endgame ladder (puzzle en-154023780e). Black plays Re1+, and the point is that the check means the reply is not free — the rook then promotes on d1. Tagged fork by findMotifs() alongside hangingPiece, promotion and zwischenzug, which is a good illustration that several motifs usually co-occur and that ranking them by explanatory importance is the real problem, not detecting them.",
+      "origin_kind": "puzzle",
+      "concept_role": "positive",
+      "side_to_move_benefits": "black",
+      "engine": {
+        "engine_id": "Stockfish 18 (via tools/verify_puzzles.js, repo pipeline)",
+        "test_level": 2,
+        "depth": null,
+        "threads": null,
+        "hash_mb": null,
+        "multipv": null,
+        "best_move": "e2e1",
+        "eval_cp": null,
+        "mate_in": null,
+        "pv": [
+          "e2e1",
+          "g1f2",
+          "d2d1q"
+        ],
+        "alternatives": [],
+        "margin_cp": null,
+        "verdict": "supports",
+        "verdict_note": "Numbers come from the repository's own puzzle verification pipeline at its verdict depth, NOT from education/tools/sf_analyse.py. Recorded that way deliberately so provenance stays honest. The puzzle's stored `why` says the runner-up (Re4) leaves Black losing, so the move is uniquely correct here."
+      }
     }
   ],
   "counterexamples": [

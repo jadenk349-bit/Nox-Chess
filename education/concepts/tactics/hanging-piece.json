@@ -1,0 +1,148 @@
+{
+  "schema_version": 2,
+  "alternate_names": [
+    "en prise",
+    "hanging",
+    "free piece"
+  ],
+  "historical_names": [],
+  "tags": [
+    "material",
+    "tactics",
+    "beginner-critical",
+    "detector-backed"
+  ],
+  "subcategory": "material state",
+  "difficulty": "beginner",
+  "knowledge_type_note": "Terminology, not a motif. It names a STATE of the board, not a move or a method. The tactics that exploit it (fork, discovered attack) are the motifs; this is the condition that makes them pay.",
+  "name_status": "established-name",
+  "history": {
+    "attributions": [],
+    "first_documented_source": null,
+    "year": null,
+    "confidence": "unknown",
+    "notes": "'En prise' is a French borrowing in English chess writing since at least the nineteenth century; no origin research has been done and no single coiner is claimed. 'Hanging' has no established first use in the sources consulted.",
+    "competing_claims": [],
+    "development": []
+  },
+  "engine_era_status": "reliable",
+  "engine_era_note": "Entirely mechanical and unaffected by engine-era revision. Static exchange evaluation is the standard test and is what this codebase uses.",
+  "recognition": {
+    "preconditions": [
+      "An enemy piece is attacked",
+      "The exchange sequence on its square wins material for the attacker"
+    ],
+    "indicators_for": [
+      "The piece has no defender at all",
+      "It is attacked more times than it is defended",
+      "Its only defender is pinned, overloaded, or would be deflected by the capture"
+    ],
+    "indicators_against": [
+      "Recapture regains equal or greater material — an even trade is not a hanging piece",
+      "Taking it walks into a stronger counter-tactic",
+      "It is bait: the capture opens a line or removes a defender the opponent wants gone",
+      "The piece was ALREADY winnable before this move, so the move is not what hung it"
+    ],
+    "prerequisites": [],
+    "detector": "findMotifs -> hangingPiece",
+    "detectability": "mechanical",
+    "typical_confidence": "high",
+    "false_positive_traps": [
+      "A defended piece attacked once is not hanging; count both sides of the exchange.",
+      "A nominal defender that is pinned does not defend. SEE catches this; a naive defender count does not.",
+      "Material already loose before the move is not this move's doing — reporting it makes the move look worse than it was."
+    ]
+  },
+  "application": {
+    "typical_plans": [
+      "Take it, after checking the recapture sequence and any counter-tactic"
+    ],
+    "typical_moves": [],
+    "typical_pawn_structures": [],
+    "typical_piece_arrangements": [],
+    "tactical_consequences": [
+      "Direct material gain",
+      "Supplies the second target that makes a fork or discovered attack pay"
+    ],
+    "strategic_consequences": []
+  },
+  "exceptions": [
+    "A hanging piece may be a sacrifice offered on purpose. SEE says the material is winnable; it does not say taking is right.",
+    "In a lost position, giving material to reach a fortress or a perpetual can be correct."
+  ],
+  "limitations": [
+    "Purely material. It says nothing about whether taking is best."
+  ],
+  "misconceptions": [
+    "That a piece with a defender cannot be hanging. It can — if the defender is pinned or overloaded, or if it is attacked twice and defended once.",
+    "That every hanging piece should be taken."
+  ],
+  "relationships": {
+    "broader": [],
+    "narrower": [],
+    "related": [
+      "loose-piece",
+      "lpdo",
+      "fork",
+      "discovered-attack"
+    ],
+    "contrasting": [],
+    "co_occurring": [
+      "fork",
+      "discovered-attack",
+      "double-attack"
+    ],
+    "conflicts": []
+  },
+  "examples": [],
+  "counterexamples": [],
+  "ambiguous_examples": [],
+  "explanations": {
+    "by_level": {
+      "beginner": "That piece can just be taken for free — nothing is defending it.",
+      "intermediate": "The {piece} on {square} hangs: it is attacked {n} times and defended {m}, so the exchange wins material.",
+      "advanced": "Hanging by static exchange evaluation. Check whether the capture is a genuine win or an offer — SEE measures material, not correctness.",
+      "master": "En prise. Confirm the defender is real (not pinned or overloaded) and that the capture does not concede a line or a tempo worth more than the material."
+    },
+    "by_depth": {
+      "short": "The {piece} on {square} can be taken for free.",
+      "normal": "The {piece} on {square} is hanging — attacked and not adequately defended, so the exchange there wins material.",
+      "deep": "Hanging, or en prise in the older French term. The test is the exchange sequence on the square, not a count of attackers: a defender that is pinned or overloaded does not defend. Distinguish from loose, which means undefended but not yet attacked — that is a future problem rather than a present loss."
+    },
+    "hedge": "",
+    "lesson": "Before every move, check both sides for pieces that can simply be taken. Below master level this decides more games than every strategic idea combined."
+  },
+  "terminology": {
+    "beginner_words": [
+      "can be taken for free",
+      "undefended"
+    ],
+    "advanced_words": [
+      "hanging",
+      "en prise",
+      "SEE",
+      "static exchange evaluation"
+    ],
+    "avoid": [
+      "hanging always means undefended"
+    ]
+  },
+  "status": {
+    "stage": "researched",
+    "last_updated": "2026-08-31",
+    "open_questions": [],
+    "audit_notes": []
+  },
+  "id": "hanging-piece",
+  "canonical_name": "Hanging piece",
+  "category": "checks-captures-threats",
+  "knowledge_type": "terminology",
+  "definition_short": "A piece that is attacked and can be captured for free — undefended, or defended fewer times than it is attacked.",
+  "definition_long": "A piece stands where the opponent can take it and come out ahead. In everyday English it 'hangs'; the traditional French term is EN PRISE, literally 'in a position to be taken'.\n\nThree words are used in this area and the distinction between them is worth keeping:\n\n  EN PRISE — attacked and capturable. Strictly this says nothing about defence, though in living usage it means capturing wins material.\n  HANGING — the English equivalent, and in practice the stronger claim: attacked AND undefended, or defended too few times.\n  LOOSE — undefended but not necessarily attacked YET. Not a loss today; the raw material of tomorrow's tactic. Recorded separately as `loose-piece`.\n\nThe hanging/loose line is the one that carries weight, because it separates a mistake that has already happened from a condition that invites one.\n\nIN THIS CODEBASE: `findMotifs()` emits `hangingPiece` using static exchange evaluation — it reports a piece only where `see(after, square, attacker) > 0`, i.e. the exchange on that square actually wins material, and it explicitly skips anything that was already winnable before the move. That is the strict, correct reading, and it is by far the most common theme in the shipped puzzle set (598 of 788 puzzles).",
+  "sources": [
+    "chessbio-hanging",
+    "chessworld-lpdo",
+    "chessmind-en-prise"
+  ],
+  "source_confidence": "medium"
+}

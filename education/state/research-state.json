@@ -6,24 +6,24 @@
     "note": "Filled in by tools/sf_analyse.py --probe"
   },
   "counters": {
-    "concepts_total": 35,
+    "concepts_total": 39,
     "concepts_stub": 0,
     "concepts_researched": 29,
     "concepts_validated": 4,
     "concepts_needs_review": 0,
-    "sources_reviewed": 32,
-    "positions_tested": 12,
-    "matches_validated": 8,
+    "sources_reviewed": 39,
+    "positions_tested": 13,
+    "matches_validated": 9,
     "false_matches": 0,
     "ambiguous_matches": 4,
     "by_stage": {
       "ready": 1,
-      "researched": 31,
+      "researched": 35,
       "validated": 3
     },
     "tablebase_positions": 2,
     "concepts_fully_covered": 0,
-    "areas_touched": 6,
+    "areas_touched": 8,
     "areas_total": 85
   },
   "areas": {
@@ -118,9 +118,12 @@
     "checks-captures-threats": {
       "domain": "tactics",
       "status": "not-started",
-      "concepts": [],
+      "concepts": [
+        "hanging-piece",
+        "loose-piece"
+      ],
       "open_questions": [],
-      "last_touched": null
+      "last_touched": "2026-08-31"
     },
     "forcing-moves": {
       "domain": "tactics",
@@ -332,7 +335,8 @@
       "domain": "pawn-play",
       "status": "in-progress",
       "concepts": [
-        "hole"
+        "hole",
+        "weak-square"
       ],
       "open_questions": [],
       "last_touched": "2026-08-31"
@@ -596,9 +600,11 @@
     "rules-of-thumb": {
       "domain": "heuristics",
       "status": "not-started",
-      "concepts": [],
+      "concepts": [
+        "lpdo"
+      ],
       "open_questions": [],
-      "last_touched": null
+      "last_touched": "2026-08-31"
     },
     "exceptions-to-rules": {
       "domain": "heuristics",
@@ -664,15 +670,15 @@
       "last_touched": null
     }
   },
-  "current_area": "outposts",
+  "current_area": "weak-squares",
   "next_areas": [
     "piece-properties",
-    "ranks-files-diagonals",
-    "outposts",
+    "board-geometry",
     "open-files",
-    "weak-squares",
+    "pawn-structures",
     "king-safety",
-    "pawn-structures"
+    "passed-pawn",
+    "material-imbalances"
   ],
   "discovered_concepts_unresearched": [
     {
@@ -929,5 +935,33 @@
     "discovered-check",
     "battery",
     "smothered-mate"
-  ]
+  ],
+  "phase0": {
+    "last_redone": "2026-08-31",
+    "against_commit": "9ae184e (agent-4 after merging main)",
+    "record": "INTEGRATION.md",
+    "corrections": [
+      {
+        "was": "There is no FEN anywhere in the codebase; a FEN reader/writer is a prerequisite the Education System must add.",
+        "now": "fenOf() and stateFromFEN() exist at blind-chess.html:3913/:3929 and are round-trip tested. Do NOT write a second implementation.",
+        "cause": "inspected agent-4 while it was 44 commits behind main"
+      },
+      {
+        "was": "LESSON and PUZZLE are 'soon' stubs with nothing to preserve.",
+        "now": "Both are shipped features with their own test suites, plus a Practice system and 788 Stockfish-verified puzzles.",
+        "cause": "same"
+      },
+      {
+        "was": "The existing explanation system is judgeMove (centipawn loss -> 4 verdicts) and describeBest (3 board facts).",
+        "now": "judgeMove works in win percentage, takes both engine readings, distinguishes six verdicts and detects sacrifices by SEE. tools/puzzle_words.js is a separate, more capable explanation writer with an auditClaims() pass.",
+        "cause": "same"
+      },
+      {
+        "was": "Education System layers 3 and 5 are greenfield.",
+        "now": "The tactical half of layer 3 exists as findMotifs() (nine SEE-checked tags) and layer 5 exists for puzzles as tools/puzzle_words.js. The Education System supplies knowledge, the positional layer, extra registers and retrieval instead.",
+        "cause": "same"
+      }
+    ],
+    "convergence_note": "The puzzle generator deliberately refuses to claim deflection, decoy, overloading, interference and double attack because 'every cheap test for them fires where it is not true'. This knowledge base had independently classified the same five detectability:heuristic from the sources. Two independent routes to the same line."
+  }
 }

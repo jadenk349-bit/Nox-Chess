@@ -1,0 +1,148 @@
+{
+  "schema_version": 2,
+  "alternate_names": [
+    "undefended piece",
+    "unprotected piece"
+  ],
+  "historical_names": [],
+  "tags": [
+    "material",
+    "tactics",
+    "prophylaxis"
+  ],
+  "subcategory": "material state",
+  "difficulty": "beginner",
+  "knowledge_type_note": "Terminology for a board state. The associated guidance is recorded separately as `lpdo`, which is a rule of thumb.",
+  "name_status": "established-name",
+  "history": {
+    "attributions": [],
+    "first_documented_source": null,
+    "year": null,
+    "confidence": "unknown",
+    "notes": "Ordinary descriptive English; no coiner claimed. The associated mnemonic LPDO does have an attribution — see that record.",
+    "competing_claims": [],
+    "development": []
+  },
+  "engine_era_status": "reliable",
+  "engine_era_note": "Mechanically detectable and uncontroversial. Engines do not use the word but every evaluation weighs hanging and undefended material.",
+  "recognition": {
+    "preconditions": [
+      "A piece has no friendly defender",
+      "It is not currently attacked"
+    ],
+    "indicators_for": [
+      "Two or more loose pieces on the same side — a double attack probably exists",
+      "A loose piece and the king share a line, rank, file or diagonal a queen or knight could hit at once",
+      "The position is open, with forcing moves available"
+    ],
+    "indicators_against": [
+      "The piece is on a square nothing can reach",
+      "It can be defended or moved in one tempo the opponent cannot deny",
+      "Defending it would cost more than the risk — a loose piece is a risk, not an error"
+    ],
+    "prerequisites": [],
+    "detector": null,
+    "detectability": "mechanical",
+    "typical_confidence": "high",
+    "false_positive_traps": [
+      "Being loose is not being bad. Reporting every undefended piece would flag most positions and teach nothing.",
+      "It only matters when a forcing move can reach it. A loose rook in a locked position is not a weakness."
+    ]
+  },
+  "application": {
+    "typical_plans": [
+      "Scan for enemy loose pieces, then hunt for a check or threat hitting two things at once",
+      "Prophylactically, keep your own pieces defended in open positions with queens on"
+    ],
+    "typical_moves": [
+      "A queen check that also attacks an undefended piece on the far wing"
+    ],
+    "typical_pawn_structures": [],
+    "typical_piece_arrangements": [],
+    "tactical_consequences": [
+      "Supplies the second target for a fork, discovered attack or skewer"
+    ],
+    "strategic_consequences": [
+      "A camp full of loose pieces is a combination waiting for its trigger"
+    ]
+  },
+  "exceptions": [
+    "Strong players leave pieces loose constantly and correctly, when no forcing move can exploit it.",
+    "Spending tempi to defend a piece nothing attacks is a real cost and often the worse choice."
+  ],
+  "limitations": [
+    "Says nothing on its own. Its whole value is conditional on forcing moves existing."
+  ],
+  "misconceptions": [
+    "That every piece should be defended.",
+    "That a loose piece is a blunder. It is a standing risk."
+  ],
+  "relationships": {
+    "broader": [],
+    "narrower": [],
+    "related": [
+      "hanging-piece",
+      "lpdo",
+      "fork",
+      "skewer",
+      "discovered-attack"
+    ],
+    "contrasting": [
+      "hanging-piece"
+    ],
+    "co_occurring": [
+      "fork"
+    ],
+    "conflicts": []
+  },
+  "examples": [],
+  "counterexamples": [],
+  "ambiguous_examples": [],
+  "explanations": {
+    "by_level": {
+      "beginner": "Nothing is defending that piece. It is safe right now, but it is the kind of thing that gets picked off by a check.",
+      "intermediate": "The {piece} is loose — undefended, though not attacked yet. Look for a forcing move that hits it and something else at once.",
+      "advanced": "Loose, not hanging. It is tactical fuel: any double attack needs a target that is outranked or undefended.",
+      "master": "Undefended. Weigh the tempo cost of covering it against the concrete forcing resources available to the opponent."
+    },
+    "by_depth": {
+      "short": "The {piece} is undefended.",
+      "normal": "The {piece} is loose — nothing defends it, and nothing attacks it yet. That matters because forks, skewers and discoveries all need an undefended target to pay off.",
+      "deep": "Loose means undefended but not attacked, and it is worth distinguishing from hanging because it describes a risk rather than a loss. Nearly every double-threat device needs a target that is either outranked by the attacker or undefended, so undefended pieces are what combinations are built out of. The commonest concrete pattern is check plus loose piece: a queen reaching a square that gives check and attacks the undefended piece at the same time."
+    },
+    "hedge": "",
+    "lesson": "Run two scans, not one: what can be taken right now, and what is merely undefended that a check could reach."
+  },
+  "terminology": {
+    "beginner_words": [
+      "nothing is defending it"
+    ],
+    "advanced_words": [
+      "loose",
+      "undefended",
+      "LPDO"
+    ],
+    "avoid": [
+      "loose means hanging"
+    ]
+  },
+  "status": {
+    "stage": "researched",
+    "last_updated": "2026-08-31",
+    "open_questions": [],
+    "audit_notes": []
+  },
+  "id": "loose-piece",
+  "canonical_name": "Loose piece",
+  "category": "checks-captures-threats",
+  "knowledge_type": "terminology",
+  "definition_short": "A piece that is undefended but not currently attacked. Not a loss yet — the raw material of a future tactic.",
+  "definition_long": "Undefended, and nobody is attacking it. Nothing is wrong this move. The point of having a word for it is that almost every double-threat device needs an undefended target to pay off: a fork wins material only if a target is outranked or undefended; a discovered attack needs somewhere for the unmasked line to land; a skewer only cashes if the piece behind is loose.\n\nSo loose pieces are the precondition for tactics rather than the tactic. The progression is the thing to see: a piece becomes loose innocently, then some forcing move attacks it as a by-product, and now it is hanging with no time to save it. The blunder was usually the earlier quiet decision, not the move that lost the piece.\n\nThe most quoted concrete pattern is check plus loose piece: an undefended piece and an enemy queen able to reach a square that checks the king and hits the piece at once.",
+  "sources": [
+    "chessworld-lpdo",
+    "chessbio-hanging",
+    "chessmind-en-prise",
+    "nunn-secrets-practical-chess"
+  ],
+  "source_confidence": "medium"
+}
