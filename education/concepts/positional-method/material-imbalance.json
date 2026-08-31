@@ -1,0 +1,201 @@
+{
+  "schema_version": 2,
+  "alternate_names": [
+    "imbalance",
+    "unbalanced material"
+  ],
+  "historical_names": [],
+  "tags": [
+    "material",
+    "statistics",
+    "engine-revised",
+    "kaufman",
+    "silman"
+  ],
+  "subcategory": "evaluation",
+  "difficulty": "advanced",
+  "knowledge_type_note": "A positional concept resting on unusually hard statistical evidence, but still a concept: the values are averages over large samples and any individual position may depart from them arbitrarily far.",
+  "name_status": "established-name",
+  "history": {
+    "attributions": [
+      {
+        "person": "Jeremy Silman",
+        "relation": "popularized-by",
+        "source": "silman-reassess",
+        "year": 2010,
+        "note": "How to Reassess Your Chess built a whole method on identifying imbalances and letting them dictate the plan. Full text consulted."
+      },
+      {
+        "person": "Larry Kaufman",
+        "relation": "systematized-by",
+        "source": "kaufman-material-imbalances",
+        "year": 1999,
+        "note": "Put piece values on a statistical footing; his figures are the basis of modern engine material tables."
+      }
+    ],
+    "first_documented_source": "kaufman-material-imbalances",
+    "year": 1999,
+    "confidence": "medium",
+    "notes": "Piece values are as old as chess writing; what is attributable is the statistical derivation (Kaufman) and the planning framework (Silman). Neither is a claim of originating the concept.",
+    "competing_claims": [
+      "The exchange is worth 2 pawns (conventional).",
+      "1.5 pawns (Tarrasch, Mednis, Evans).",
+      "1.75 pawns (Kaufman, statistical).",
+      "1 pawn (Petrosian) — probably reflecting positions where the bishop pair is also involved."
+    ],
+    "development": [
+      {
+        "era": "classical",
+        "change": "Fixed piece values taught as a scale.",
+        "source": null
+      },
+      {
+        "era": "Soviet era",
+        "change": "'A new appreciation of differences in material' — imbalances taken seriously as strategic content.",
+        "source": "britannica-chess-theory-3"
+      },
+      {
+        "era": "1999, Kaufman",
+        "change": "Values derived statistically; the bishop pair quantified at about half a pawn.",
+        "source": "kaufman-material-imbalances"
+      },
+      {
+        "era": "database era",
+        "change": "Outcome studies contradict some received wisdom outright, notably queen versus two rooks.",
+        "source": "chessdigits-imbalances"
+      }
+    ]
+  },
+  "engine_era_status": "substantially-revised-by-engines",
+  "engine_era_note": "Substantially revised, and in a measurable way. Kaufman's values are what modern engines use, and they differ from the taught scale in every entry — the bishop pair is worth half a pawn on its own, the exchange is 1.75 rather than 2, and values shift with how much material remains. Database outcomes also refute at least one standard claim, since the queen outperforms two rooks in practice.",
+  "recognition": {
+    "preconditions": [
+      "The two sides hold different kinds of material, not merely different amounts"
+    ],
+    "indicators_for": [
+      "One side has the bishop pair and the other does not",
+      "Queen against two rooks, or rook against two minor pieces",
+      "The position's character suits one kind of material — open files for rooks, closed structure for knights"
+    ],
+    "indicators_against": [
+      "Material is symmetrical in kind, in which case simple counting applies",
+      "The imbalance is temporary and about to be liquidated"
+    ],
+    "prerequisites": [],
+    "detector": "materialSignature (not yet written)",
+    "detectability": "mechanical",
+    "typical_confidence": "high",
+    "false_positive_traps": [
+      "REGISTERED FALSE POSITIVE: the 1/3/3/5/9 count is not an evaluation. Being 'ahead on material' by that scale says very little once the material is of different kinds.",
+      "Detecting the imbalance is mechanical and trivial; saying who it favours is not, and depends on open files, king safety and how much else remains.",
+      "Statistical values are averages. They tell you what to expect across many games, not what is true in this one."
+    ]
+  },
+  "application": {
+    "typical_plans": [
+      "Identify the imbalances, then let them choose the plan — Silman's method",
+      "With two minor pieces against a rook, keep major pieces on",
+      "With a rook against two minor pieces, trade major pieces even if nominally behind",
+      "With the bishop pair, open the position; against it, keep it closed or trade a bishop"
+    ],
+    "typical_moves": [],
+    "typical_pawn_structures": [],
+    "typical_piece_arrangements": [
+      "Queen against two rooks — coordination of the rooks is the deciding factor"
+    ],
+    "tactical_consequences": [
+      "Disconnected rooks against a queen are vulnerable to double attacks"
+    ],
+    "strategic_consequences": [
+      "The imbalance usually determines the plan more directly than any other feature"
+    ]
+  },
+  "exceptions": [
+    "Values shift with the amount of material: minor pieces are worth more pawns with a full board, rooks more with an empty one.",
+    "The redundancy of major pieces reverses the usual exchanging rule for the side with a lone rook against two minors.",
+    "Queen against two rooks favours the queen in practice, against the standard teaching.",
+    "An exposed king shifts everything towards the queen."
+  ],
+  "limitations": [
+    "Statistical values are averages over many games and can be arbitrarily wrong in a single position.",
+    "The concept names a condition, not a verdict."
+  ],
+  "misconceptions": [
+    "That the piece-value scale evaluates positions. It counts material, which is a different thing.",
+    "That two rooks beat a queen. The database says the opposite.",
+    "That the bishop pair is worth nothing measurable — it is about half a pawn, and that is quantified.",
+    "That the side ahead in material should always trade. With a rook against two minors the reverse is true."
+  ],
+  "relationships": {
+    "broader": [],
+    "narrower": [
+      "bishop-pair",
+      "exchange-sacrifice"
+    ],
+    "related": [
+      "exchange-sacrifice",
+      "sacrifice",
+      "bishop-pair",
+      "static-vs-dynamic"
+    ],
+    "contrasting": [],
+    "co_occurring": [
+      "exchange-sacrifice"
+    ],
+    "conflicts": []
+  },
+  "examples": [],
+  "counterexamples": [],
+  "ambiguous_examples": [],
+  "explanations": {
+    "by_level": {
+      "beginner": "The two sides have different kinds of pieces rather than different amounts. Counting points does not tell you who is better here.",
+      "intermediate": "A material imbalance. Ask what the position suits: open files favour rooks, a closed structure favours knights, an exposed king favours the queen.",
+      "advanced": "Use Kaufman's values rather than the taught scale — the bishop pair alone is worth about half a pawn, and the exchange 1.75 rather than 2. Note that values shift as material comes off.",
+      "master": "The redundancy of major pieces is the least-known useful rule here: with a rook against two minors, seek major-piece trades even when nominally behind."
+    },
+    "by_depth": {
+      "short": "Different kinds of material, so counting points does not settle it.",
+      "normal": "A material imbalance: the sides hold different kinds of material rather than different amounts. The 1/3/3/5/9 scale stops applying, and the question becomes which pieces the position suits.",
+      "deep": "Once material is unbalanced, counting stops being an evaluation. Kaufman's statistical values are the best starting point and are what modern engines use: knight and unpaired bishop 3.5, rook 5.25, queen 10, and the bishop PAIR 7.5 — half a pawn more than two bishops separately. More useful than the numbers are two findings. Values move with the board: fewer pieces means a minor piece is worth fewer pawns, and every pawn trade helps a rook. And major pieces are redundant — a second one adds less than the first, which is why the side with a lone rook against two minors should trade majors even when nominally behind. Database outcomes also contradict the standard teaching that two rooks beat a queen: in practice the queen wins 49% and the rooks 31%."
+    },
+    "hedge": "",
+    "lesson": "When the material is unbalanced, stop counting and ask what the position wants. Open files want rooks, closed positions want knights, and an exposed king wants a queen."
+  },
+  "terminology": {
+    "beginner_words": [
+      "different kinds of pieces",
+      "counting points does not work here"
+    ],
+    "advanced_words": [
+      "imbalance",
+      "the exchange",
+      "bishop pair",
+      "redundancy of major pieces"
+    ],
+    "avoid": [
+      "a rook is worth five points",
+      "two rooks beat a queen"
+    ]
+  },
+  "status": {
+    "stage": "researched",
+    "last_updated": "2026-09-01",
+    "open_questions": [],
+    "audit_notes": []
+  },
+  "id": "material-imbalance",
+  "canonical_name": "Material imbalance",
+  "category": "material-imbalances",
+  "knowledge_type": "positional-concept",
+  "definition_short": "A position where the two sides hold different KINDS of material — queen against two rooks, rook against two minor pieces, bishop pair against bishop and knight.",
+  "definition_long": "The 1/3/3/5/9 scale is a counting aid for beginners, not an evaluation. Once the two sides hold different kinds of material the scale stops applying and the position has to be judged on what the pieces can actually do.\n\nKAUFMAN'S STATISTICAL VALUES, from a large-sample study and the basis of modern engine values, are the best available starting point: knight 3.5, unpaired bishop 3.5, rook 5.25, queen 10, and — the important one — the bishop PAIR 7.5, which is half a pawn more than two separate bishops. He puts the exchange at 1.75 pawns, against the conventional 2, Tarrasch and Mednis and Evans at 1.5, and Petrosian's claim of just 1.\n\nTwo of his findings are more useful than the numbers. First, values move with the board: the fewer pieces remain, the fewer pawns a minor piece is worth, and each pawn trade helps a rook because rooks need open files. Second, the REDUNDANCY OF MAJOR PIECES — a second major piece adds less than the first, since there may only be time to use one on an open line. That is why the side with a rook against two minor pieces should seek major-piece trades even when nominally behind, which reverses the usual rule that the materially superior side trades.\n\nEMPIRICAL OUTCOMES CONTRADICT RECEIVED WISDOM in at least one well-known case. 'Two rooks beat a queen' is standard teaching; over a large database the queen WINS 49% against two rooks and loses 31%. Two minor pieces against a rook is confirmed emphatically in the other direction — a rook facing two bishops loses two games in three. The bishop pair is confirmed.\n\nSilman's framing is the practical one: an imbalance is any significant difference between the two positions, and the imbalances present are what tell you what the plan should be.",
+  "sources": [
+    "kaufman-material-imbalances",
+    "chessdigits-imbalances",
+    "silman-reassess",
+    "heisman-kaufman-values",
+    "britannica-chess-theory-3"
+  ],
+  "source_confidence": "high"
+}

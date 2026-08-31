@@ -1,0 +1,166 @@
+{
+  "schema_version": 2,
+  "alternate_names": [
+    "space"
+  ],
+  "historical_names": [],
+  "tags": [
+    "positional",
+    "silman"
+  ],
+  "subcategory": "positional asset",
+  "difficulty": "intermediate",
+  "knowledge_type_note": "A board feature, mechanically countable, whose VALUE is conditional on being able to use it.",
+  "name_status": "established-name",
+  "history": {
+    "attributions": [
+      {
+        "person": "Jeremy Silman",
+        "relation": "popularized-by",
+        "source": "silman-reassess",
+        "year": 2010,
+        "note": "Treats space as one of the primary imbalances and stresses the entry-point requirement. Full text consulted."
+      }
+    ],
+    "first_documented_source": "silman-reassess",
+    "year": null,
+    "confidence": "low",
+    "notes": "Space is standard vocabulary with no identifiable coiner; only its treatment as a named imbalance is attributable, and weakly.",
+    "competing_claims": [],
+    "development": []
+  },
+  "engine_era_status": "useful-with-common-exceptions",
+  "engine_era_note": "Engines carry space and mobility terms and value them, but considerably less than club instruction implies. They will concede space readily for concrete play, which is closer to the hypermodern position than the classical one.",
+  "recognition": {
+    "preconditions": [
+      "One side controls more squares behind its pawn front"
+    ],
+    "indicators_for": [
+      "The opponent's pieces have few squares and obstruct one another",
+      "An entry square exists or can be created",
+      "The extra space spans both wings, so the opponent cannot defend both",
+      "The opponent cannot trade pieces off"
+    ],
+    "indicators_against": [
+      "No entry point exists, so the territory buys nothing",
+      "The advanced pawns are fixed targets rather than a front",
+      "The cramped side can liquidate with exchanges",
+      "The space was gained by overextension the opponent can undermine"
+    ],
+    "prerequisites": [],
+    "detector": "squareControlCount (not yet written)",
+    "detectability": "mechanical",
+    "typical_confidence": "medium",
+    "false_positive_traps": [
+      "Counting controlled squares is mechanical and over-reports. Space with no entry point wins nothing.",
+      "Advanced pawns are not automatically a space advantage — they may simply be weak and fixed.",
+      "The cramped side's standard remedy is exchanging, so a space advantage that cannot prevent trades is temporary."
+    ]
+  },
+  "application": {
+    "typical_plans": [
+      "Avoid exchanges, improve pieces behind the front, then open a second front",
+      "Create an entry square before advancing further",
+      "As the cramped side: exchange pieces, and look for a freeing pawn break"
+    ],
+    "typical_moves": [
+      "A space-gaining pawn advance supported by pieces",
+      "A freeing break such as ...c5 or ...f6 by the cramped side"
+    ],
+    "typical_pawn_structures": [
+      "Advanced pawn chains",
+      "Maroczy Bind and similar space-clamping structures"
+    ],
+    "typical_piece_arrangements": [],
+    "tactical_consequences": [],
+    "strategic_consequences": [
+      "Enables switching wings faster than the defender",
+      "Combines directly with the principle of two weaknesses, which needs exactly that ability"
+    ]
+  },
+  "exceptions": [
+    "Space with no way in is worth little.",
+    "Space bought by overextension is a liability — the hypermodern critique.",
+    "The cramped side exchanging pieces is the standard and effective antidote."
+  ],
+  "limitations": [
+    "Countable but conditional: the count says nothing about usability."
+  ],
+  "misconceptions": [
+    "That more space is simply better. It is better if you can enter.",
+    "That advancing pawns gains space safely. It also fixes them and leaves holes behind them."
+  ],
+  "relationships": {
+    "broader": [],
+    "narrower": [],
+    "related": [
+      "center-control",
+      "two-weaknesses",
+      "hole",
+      "piece-exchanges",
+      "hypermodern-school"
+    ],
+    "contrasting": [],
+    "co_occurring": [
+      "center-control",
+      "two-weaknesses"
+    ],
+    "conflicts": [
+      {
+        "concept": "hypermodern-school",
+        "resolution": "The hypermodern position is precisely that space gained by pawn advance can be a liability, since the pawns become targets. Both are right conditionally: supported and expanded on time, space wins; static and overextended, it is a target. The deciding variable is whether the pawn front can be supported, not the amount of territory."
+      }
+    ]
+  },
+  "examples": [],
+  "counterexamples": [],
+  "ambiguous_examples": [],
+  "explanations": {
+    "by_level": {
+      "beginner": "You control more squares, so your pieces have room and theirs are bumping into each other.",
+      "intermediate": "A space advantage. Avoid trades, improve your pieces, and find the square you intend to invade on — space with no way in achieves nothing.",
+      "advanced": "The value is the mobility difference and the ability to switch wings faster than the defender. Watch the cost: advanced pawns are fixed and leave holes.",
+      "master": "Space combines directly with the two-weaknesses method, because that method needs exactly the ability to operate on both wings faster than the defence can follow."
+    },
+    "by_depth": {
+      "short": "More room for your pieces, less for theirs.",
+      "normal": "A space advantage: you control more squares behind your pawn front. The value is mobility — their pieces get in each other's way. Avoid exchanges, and find an entry square, because space without a way in wins nothing.",
+      "deep": "Territory behind the pawn front, whose worth is the mobility difference rather than the squares themselves. Two corollaries matter more than the count: the cramped side should exchange pieces, since fewer pieces need fewer squares, and space must be usable — a big advantage almost certainly wins if a way can be found into enemy territory, which puts the emphasis on the entry point. The cost is real: advancing pawns fixes them and permanently uncovers the squares behind them, and space gained by overextension is a liability. That is exactly the hypermodern critique of the classical pawn centre."
+    },
+    "hedge": "",
+    "lesson": "Space is only worth what you can enter with. Before pushing another pawn, ask which square you intend to invade on."
+  },
+  "terminology": {
+    "beginner_words": [
+      "more room",
+      "their pieces are cramped"
+    ],
+    "advanced_words": [
+      "space",
+      "entry square",
+      "overextension",
+      "freeing break"
+    ],
+    "avoid": [
+      "more space is always better"
+    ]
+  },
+  "status": {
+    "stage": "researched",
+    "last_updated": "2026-09-01",
+    "open_questions": [],
+    "audit_notes": []
+  },
+  "id": "space",
+  "canonical_name": "Space advantage",
+  "category": "space",
+  "knowledge_type": "positional-concept",
+  "definition_short": "More squares controlled behind your own pawns, which gives your pieces room to manoeuvre and denies the opponent room to do the same.",
+  "definition_long": "Space is territory: the squares behind your pawn front, which your pieces can use and the opponent's cannot. Its value is not the territory itself but the MOBILITY difference — a cramped side's pieces get in each other's way and cannot be regrouped quickly, and the side with space can switch wings faster than the defender can follow.\n\nTwo standing corollaries follow, and both are more useful than the raw count. First, the cramped side should EXCHANGE PIECES: fewer pieces need fewer squares, and every trade relieves the cramp. Correspondingly, the side with space should avoid trades. Second, space must be USABLE — Silman's framing is that a big space advantage almost certainly wins if a way can be found to break into enemy territory, which puts the emphasis on the entry point rather than on the territory.\n\nThe cost side is real and easy to forget. Advancing pawns to gain space also fixes them, leaves squares behind them permanently uncovered, and can leave the advanced pawns as targets in an endgame. Space gained by overextension is a liability, which is precisely the hypermodern critique of the classical pawn centre.",
+  "sources": [
+    "silman-reassess",
+    "nimzowitsch-my-system",
+    "wikibooks-chess-centre"
+  ],
+  "source_confidence": "medium"
+}

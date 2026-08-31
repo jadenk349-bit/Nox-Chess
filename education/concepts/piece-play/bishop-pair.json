@@ -1,0 +1,193 @@
+{
+  "schema_version": 2,
+  "alternate_names": [
+    "two bishops"
+  ],
+  "historical_names": [],
+  "tags": [
+    "bishops",
+    "kaufman",
+    "quantified"
+  ],
+  "subcategory": "material imbalance",
+  "difficulty": "intermediate",
+  "knowledge_type_note": "A concept with an unusually precise measured value, but still conditional on the position being or becoming open.",
+  "name_status": "established-name",
+  "history": {
+    "attributions": [
+      {
+        "person": "Wilhelm Steinitz",
+        "relation": "originated-by",
+        "source": "steinitz-modern-chess-instructor",
+        "year": 1889,
+        "note": "Steinitz taught the superiority of the two bishops at a time when the bishop-versus-knight question was still disputed. Reported by a publisher's summary of The Modern Chess Instructor; ATTRIBUTION NOT VERIFIED against the passage itself."
+      },
+      {
+        "person": "Larry Kaufman",
+        "relation": "systematized-by",
+        "source": "kaufman-material-imbalances",
+        "year": 1999,
+        "note": "Quantified it statistically at about half a pawn, which is the figure engines use."
+      }
+    ],
+    "first_documented_source": "steinitz-modern-chess-instructor",
+    "year": 1889,
+    "confidence": "medium",
+    "notes": "The concept is old and the modern contribution is measurement rather than discovery.",
+    "competing_claims": [],
+    "development": [
+      {
+        "era": "1889, Steinitz",
+        "change": "The two bishops taught as clearly superior, against the prevailing uncertainty.",
+        "source": "steinitz-modern-chess-instructor"
+      },
+      {
+        "era": "1920s, hypermodern",
+        "change": "Tarrasch's high valuation of the unobstructed bishop attacked; bishop-for-knight trades rehabilitated.",
+        "source": "britannica-chess-theory-3"
+      },
+      {
+        "era": "1999 onward",
+        "change": "Quantified at about half a pawn and built into engine material tables.",
+        "source": "kaufman-material-imbalances"
+      }
+    ]
+  },
+  "engine_era_status": "reliable",
+  "engine_era_note": "Confirmed and quantified rather than revised. Engines carry an explicit bishop-pair bonus of roughly half a pawn, which is one of the few positional concepts with a number attached that both statistics and engines agree on.",
+  "recognition": {
+    "preconditions": [
+      "One side has both bishops and the other does not"
+    ],
+    "indicators_for": [
+      "The position is open or can be opened",
+      "The opponent's knights have no stable advanced squares",
+      "Play on both wings, where the bishops' range tells",
+      "An endgame, where the pair is at its strongest"
+    ],
+    "indicators_against": [
+      "A locked pawn structure with no way to open it",
+      "The opponent has a knight on a secure outpost",
+      "One of the bishops is shut in by its own pawns",
+      "The opponent can force the trade of one bishop"
+    ],
+    "prerequisites": [
+      "bad-bishop"
+    ],
+    "detector": "materialSignature (not yet written)",
+    "detectability": "mechanical",
+    "typical_confidence": "high",
+    "false_positive_traps": [
+      "Detecting two bishops is trivial and says nothing about whether they are worth anything. In a locked position the pair can be worth less than a well-placed knight.",
+      "Half a pawn is an AVERAGE over many games and can be arbitrarily wrong in one position.",
+      "A bishop pair where one bishop is shut in by its own pawns is not really a pair."
+    ]
+  },
+  "application": {
+    "typical_plans": [
+      "Open the position; avoid trading either bishop",
+      "Play on both wings so the range advantage tells",
+      "Against the pair: keep the position closed, or spend a tempo to trade one bishop off"
+    ],
+    "typical_moves": [
+      "A pawn break to open lines for the bishops",
+      "...Bxc3 or Bxf6 to break up the opponent's pair"
+    ],
+    "typical_pawn_structures": [
+      "Open or semi-open centres",
+      "Positions with pawns on both wings"
+    ],
+    "typical_piece_arrangements": [
+      "Bishops on adjacent long diagonals raking the board"
+    ],
+    "tactical_consequences": [
+      "Two bishops generate mating patterns against a castled king that a bishop and knight cannot"
+    ],
+    "strategic_consequences": [
+      "Grows in value as the position simplifies and opens",
+      "Compensates measurably in other imbalances — about 0.6 pawns' worth in exchange-down positions"
+    ]
+  },
+  "exceptions": [
+    "In a locked position the pair may be worth nothing and a knight may be better.",
+    "A bishop shut in by its own pawns does not contribute to the pair.",
+    "Modern practice trades bishop for knight far more readily than Tarrasch would have, sometimes for minimal compensation."
+  ],
+  "limitations": [
+    "The half-pawn figure is a statistical average, not a property of any position."
+  ],
+  "misconceptions": [
+    "That two bishops are always better than bishop and knight. It depends on whether the position is open.",
+    "That the pair's value is just two bishops' values added. The synergy is the point, and it is measurable.",
+    "That giving up a bishop for a knight is an error. Modern practice does it routinely."
+  ],
+  "relationships": {
+    "broader": [
+      "material-imbalance"
+    ],
+    "narrower": [],
+    "related": [
+      "bad-bishop",
+      "material-imbalance",
+      "doubled-pawns",
+      "opposite-coloured-bishops"
+    ],
+    "contrasting": [],
+    "co_occurring": [
+      "doubled-pawns",
+      "material-imbalance"
+    ],
+    "conflicts": []
+  },
+  "examples": [],
+  "counterexamples": [],
+  "ambiguous_examples": [],
+  "explanations": {
+    "by_level": {
+      "beginner": "Each bishop can only use half the squares. Having both means you cover everything, so the pair is worth more than two separate bishops.",
+      "intermediate": "The bishop pair, worth about half a pawn. Open the position to use it, and avoid trading either one — losing one destroys the pair entirely.",
+      "advanced": "Kaufman's figure: unpaired bishop 3.5, pair 7.5. It is conditional on open lines, and worth little in a locked structure.",
+      "master": "Weigh it against the structure. It is also the quantity that makes an exchange sacrifice affordable — with the pair, 1.15 pawns levels an exchange rather than 1.75."
+    },
+    "by_depth": {
+      "short": "Both bishops cover both colours — worth about half a pawn extra.",
+      "normal": "The bishop pair: a single bishop is blind to half the board, and two together cover everything. Statistically worth about half a pawn beyond the two bishops separately, and strongest in open positions.",
+      "deep": "Its value is synergy, and unusually for a positional concept the size is measured rather than argued: Kaufman puts an unpaired bishop at 3.5 and the pair at 7.5, and database outcomes confirm the effect. It is conditional — bishops need diagonals, so the pair can be worth nothing in a locked structure where a knight hopping over the pawns is the better piece. Hence the plans on both sides: open the position and keep both, or close it and trade one off, since trading ONE destroys the pair entirely. It also shows up in other imbalances: down the exchange but holding the pair, about 1.15 pawns levels the position against 1.75 without it."
+    },
+    "hedge": "",
+    "lesson": "The bishop pair is worth about half a pawn — but only if you can open the position. In a locked structure, a knight with a secure square may be the better piece."
+  },
+  "terminology": {
+    "beginner_words": [
+      "both bishops",
+      "they cover both colours together"
+    ],
+    "advanced_words": [
+      "bishop pair",
+      "colour complex",
+      "open position"
+    ],
+    "avoid": [
+      "two bishops are always better"
+    ]
+  },
+  "status": {
+    "stage": "researched",
+    "last_updated": "2026-09-01",
+    "open_questions": [],
+    "audit_notes": []
+  },
+  "id": "bishop-pair",
+  "canonical_name": "The bishop pair",
+  "category": "bishop-pair",
+  "knowledge_type": "positional-concept",
+  "definition_short": "Having both bishops when the opponent does not. Worth roughly half a pawn on average, because together they cover both colour complexes.",
+  "definition_long": "A single bishop is permanently blind to half the board. Two bishops between them cover everything, which is why the pair is worth measurably more than the sum of its parts.\n\nThe size is known rather than guessed. Kaufman's statistical values put an unpaired bishop at 3.5 and the PAIR at 7.5 — half a pawn of pure synergy — and database outcome studies confirm the effect, with the side holding the pair winning 41-46% against 30-32%.\n\nIt is conditional on the position. Bishops need open diagonals, so the pair is strongest in open positions and can be worth nothing in a locked one, where a knight that can hop over the structure may be the better piece. Hence the standard plans on both sides: the holder opens the position and avoids trading either bishop, and the opponent keeps it closed or trades one bishop off — trading one is what destroys the pair, and it is worth a tempo or a small concession to do it.\n\nIts practical weight also shows up in other imbalances: a side down the exchange but holding the bishop pair needs only about 1.15 pawns of further compensation to be level, against 1.75 without it.",
+  "sources": [
+    "kaufman-material-imbalances",
+    "chessdigits-imbalances",
+    "steinitz-modern-chess-instructor",
+    "britannica-chess-theory-3"
+  ],
+  "source_confidence": "high"
+}
