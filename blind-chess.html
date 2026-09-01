@@ -2351,17 +2351,18 @@
     border-color:var(--tint-lit); color:var(--tint-lit);
     background:linear-gradient(180deg, var(--tint-glow), rgba(0,0,0,.22));
   }
-  /* The transition list is Host Game's, deliberately: the base button fades
-     transform and filter as well, which on a gold plate turns a press into a
-     200ms wash of brightness going down and another coming back up — the
-     colour arrives after the click and leaves after the finger. Naming only
-     the properties that should ease (background, colour, the spill) leaves the
-     lift and the dip instant, so the plate reads as pressed rather than as
-     recolouring itself. */
+  /* Geometry only, and deliberately no transition of its own. Start Play beside
+     the board (.start-btn) names none either, so both plates ease on the base
+     button's list — transform, border, background, shadow, colour and filter
+     together. An earlier version overrode it here with a shorter list that left
+     transform and filter out, which is precisely the lift on hover and the dip
+     on press: naming fewer properties did not calm the press down, it made this
+     one button snap where every other button on the site eases. Host Game's
+     feel is the base list, so the way to match Host Game is to not override
+     it. */
   .rank-start{
     width:100%; margin-top:12px; padding:17px 0; border-radius:var(--r-lg);
     font-size:13px; letter-spacing:.2em;
-    transition:background .25s ease, color .25s ease, box-shadow .25s ease, opacity .25s ease;
   }
   /* Dark until both questions have answers, exactly as Start Play is beside
      the board: a button you cannot use should not look like one you can. */
@@ -2461,40 +2462,54 @@
   }
 
   /* The ranked page's Start Game reports on itself the same way, but it cannot
-     borrow the rule above. That one says "working" by going dark, which is
-     right beside a board and wrong here: this is the single lit thing on an
-     otherwise black page, and a button that goes out does not read as a button
-     that is busy. So it keeps its gold, and the gold is what moves — bands of
-     the palette's own three golds travelling across it for as long as the queue
-     is being waited on.
+     borrow the rule above, because that one is written against `.start-btn` and
+     this button is not one. It is the same effect all the same, and that is the
+     point: Start Play hosting a room and Start Game in the queue are the same
+     act, so they say it the same way — a dark plate with the palette's gold
+     running across it.
 
-     Two deliberate choices about how this is written, both of them about not
-     being quietly overridden. The selector carries the id, so it outranks
-     `button.primary` and `.rank-start.dim`, which both set a gradient of their
-     own and both match this element. And the background is set in longhands
-     rather than through the `background` shorthand, because that shorthand
-     resets background-size and background-position to auto — one stray
-     shorthand winning the cascade leaves the gradient sitting perfectly still,
-     which looks exactly like an animation that is not running. */
+     An earlier version tried to keep the plate gold and move gold bands over
+     it, on the theory that the one lit thing on a black page must not go out.
+     It reads as nothing at all. Gold light on a gold ground has no contrast to
+     carry the movement, so a button mid-search looked like the same gold button
+     sitting still, and the state the whole design rests on was invisible. The
+     dark ground is what makes the light legible; the travelling light, the text
+     and the dimmed settings button are together what say the page is working.
+
+     One deliberate difference from Start Play: the band repeats rather than
+     crossing once. Start Play's single band leaves the plate flat dark for the
+     back half of every cycle, which beside a board is fine and here is the
+     stopped-button worry all over again. Two bands in flight mean there is
+     always one crossing.
+
+     Two things about how this is written are load-bearing. The selector carries
+     the id, so it outranks `button.primary` and `.rank-start.dim`, which both
+     set a gradient of their own and both match this element. And the background
+     is set in longhands rather than through the `background` shorthand, because
+     that shorthand resets background-size and background-position to auto — one
+     stray shorthand winning the cascade leaves the gradient sitting perfectly
+     still, which looks exactly like an animation that is not running. */
   #btnRankStart.searching{
-    cursor:progress; color:#241903; font-weight:700;
-    border-color:rgba(246,211,145,.9);
-    background-color:#9c6f1e;
+    cursor:progress; color:#f6e3ba; font-weight:650;
+    border-color:rgba(217,164,65,.55);
+    background-color:#16120a;
     background-image:repeating-linear-gradient(100deg,
-      #8a6119 0 10%, var(--gold) 10% 20%, #ffe6ad 20% 30%, var(--gold) 30% 40%, #8a6119 40% 50%);
+      #16120a 0 16%, rgba(217,164,65,.92) 25%, #ffe6ad 28%,
+      rgba(217,164,65,.92) 31%, #16120a 40% 50%);
     background-size:200% 100%;
     background-repeat:repeat;
-    box-shadow:0 10px 30px rgba(217,164,65,.38), inset 0 1px 0 rgba(255,255,255,.5);
-    transition:none;                 /* nothing to ease into — it is already moving */
-    animation:rankhunt 1.1s linear infinite;
+    box-shadow:0 8px 22px rgba(217,164,65,.13), inset 0 1px 0 rgba(255,255,255,.05);
+    animation:rankhunt 1.5s linear infinite;
   }
-  #btnRankStart.searching:hover{filter:none; transform:none;}
+  #btnRankStart.searching:hover{filter:none; transform:none; border-color:rgba(217,164,65,.75);}
   /* one whole tile per turn, so the loop has no seam in it */
   @keyframes rankhunt{ from{background-position:0 0;} to{background-position:-200% 0;} }
   @media (prefers-reduced-motion:reduce){
-    /* the motion goes, the state does not: still gold, still striped, still
+    /* the motion goes, the state does not: still the dark searching plate, still
        saying "Finding an Opponent", just not travelling */
-    #btnRankStart.searching{animation:none;}
+    #btnRankStart.searching{
+      animation:none; background-image:linear-gradient(180deg,#221a0d,#16120a);
+    }
   }
   /* The room is already on the list under these answers, so they stop being
      answerable until the search is called off — otherwise the form and the
