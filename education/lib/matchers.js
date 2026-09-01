@@ -135,8 +135,8 @@ const PRIORITY = [
   'rook-on-the-seventh', 'passed-pawn', 'isolated-queen-pawn', 'backward-pawn',
   'hanging-pawns', 'opposite-coloured-bishops', 'bishop-pair', 'luft',
   'pawn-break', 'restraint', 'worst-placed-piece', 'bad-bishop', 'sacrifice',
-  'king-safety', 'bishop-pair', 'battery', 'center-control', 'blockade',
-  'opposition', 'king-activation', 'loose-piece', 'doubled-pawns', 'two-weaknesses',
+  'king-safety', 'battery', 'center-control', 'blockade',
+  'opposition', 'king-activation', 'loose-piece', 'doubled-pawns',
 
   // ...and the band that is true of most positions, last, because being true
   // here is not news.
@@ -148,12 +148,14 @@ const PRIORITY = [
   // 33.9% once it counts active moves rather than legal ones, and weak-square
   // 68.9% -> 40.5% once the piece has to be able to STAY on the square and the
   // square has to be in the other camp. Each moved up to where the measurement
-  // now puts it, and `space` is now the only one left above half — it is next.
+  // now puts it, and `space` 53.3% -> 34.6% once an entry square is required.
+  // Nothing is left above half except `passed-pawn`, which is kept where it is
+  // for the reason given above.
   //
   // Re-measure with `node tools/firing_rates.js`, which exists because this
   // measurement kept being made by hand.
-  'space', 'weak-square', 'semi-open-file', 'open-file', 'piece-activity',
-  'material-imbalance',
+  'material-imbalance', 'weak-square', 'semi-open-file', 'two-weaknesses',
+  'open-file', 'space', 'piece-activity',
 ];
 const priorityOf = id => {
   const i = PRIORITY.indexOf(id);
@@ -641,14 +643,39 @@ const STRUCTURAL = [
   },
   {
     concept: 'space',
-    implements: "recognition: one side's pawns control more squares in the opponent's half",
+    implements: ("recognition.preconditions AND the record's first false-positive trap, which the " +
+                 "earlier version ignored: 'counting controlled squares is mechanical and over-reports. " +
+                 "Space with no entry point wins nothing.' An entry square is required."),
     run(f) {
       const w = f.activity.pawnSpace.w, b = f.activity.pawnSpace.b;
       if (totalPawns(f) < 6 || Math.abs(w - b) < 2) return null;
       const c = w > b ? 'w' : 'b';
+      // Space with no entry point wins nothing - the record says so in those
+      // words, and this matcher counted squares and stopped. Layer 3's
+      // entrySquares() answers the other half.
+      const entry = (f.activity.entry || {})[c] || [];
+      if (!entry.length) return null;
+      // Trap 2: "advanced pawns are not automatically a space advantage - they
+      // may simply be weak and fixed." The pawns that CREATE the space are the
+      // ones whose attacks land in the other half, which is rank 4 and beyond
+      // for White; if every one of them is a pawn no pawn can defend and it
+      // cannot advance, the territory is a set of targets. Measured: this
+      // refuses 1 of 274 positions on the shipped corpus, because a side with a
+      // real space advantage rarely has EVERY space-creating pawn weak. It is
+      // built anyway - a condition the record states and the matcher ignores is
+      // how the other four went wrong - and the rate is recorded rather than
+      // talked up.
+      const weak = new Set(f.pawns[c].undefendable || []);
+      const advanced = (f.pawns[c].squares || []).filter(sq =>
+        c === 'w' ? +sq[1] >= 4 : +sq[1] <= 5);
+      if (advanced.length && advanced.every(sq => weak.has(sq) && f.pawns[c].blocked.includes(sq))) {
+        return null;
+      }
       return {
         confidence: 'medium',
-        because: [`${side(f, c)}'s pawns control ${Math.max(w, b)} squares in the opponent's half against ${Math.min(w, b)}`],
+        because: [`${side(f, c)}'s pawns control ${Math.max(w, b)} squares in the opponent's half against ` +
+                  `${Math.min(w, b)}, and a piece can enter on ${brief(entry)}`],
+        slots: { square: entry[0] },
         subjects: [c],
       };
     },

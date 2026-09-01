@@ -184,9 +184,23 @@ function pawnStructure(st, colour) {
     if (k === 0 || occupied[k] !== occupied[k - 1] + 1) islands++;
   }
 
+  // Where the pawns actually stand, and which of them cannot move. The space
+  // record's second trap - "advanced pawns are not automatically a space
+  // advantage, they may simply be weak and fixed" - needs both halves of the
+  // word "fixed", and neither was observable from this function before.
+  const squares = [], blocked = [];
+  for (let f = 0; f < 8; f++) {
+    for (const i of me[f]) {
+      squares.push(nameOf(i));
+      const ahead = idx(rowOf(i) + forward, f);
+      if (onBoard(rowOf(i) + forward, f) && st.b[ahead]) blocked.push(nameOf(i));
+    }
+  }
+
   return {
     count: occupied.reduce((n, f) => n + me[f].length, 0),
     doubled, isolated, passed, backward, blockadedPassers, undefendable, islands,
+    squares, blocked,
     files: occupied.map(f => FILES[f]),
   };
 }
@@ -622,6 +636,54 @@ function pawnSpace(st, colour) {
   return set.size;
 }
 
+/* Entry squares: where a space advantage is actually spent.
+ *
+ * The space record's first false-positive trap is "counting controlled squares
+ * is mechanical and over-reports. Space with no entry point wins nothing", and
+ * its indicators_for says "an entry square exists or can be created". This is
+ * that test. A square counts when it is in the opponent's half, no pawn of
+ * theirs can ever attack it, one of our pieces can move there next move, and
+ * the piece is not lost for going.
+ *
+ * It is deliberately wider than reachableHoles(): that answers a question about
+ * OUTPOSTS - a minor piece on one of three ranks - and the classic way to cash
+ * in a space advantage is a rook arriving on the seventh down a file nobody can
+ * contest, which is an entry square and is not an outpost.
+ */
+function entrySquares(st, colour) {
+  const enemy = colour === 'w' ? 'b' : 'w';
+  const them = pawnFiles(st, enemy);
+  const probe = P.cloneState(st);
+  probe.turn = colour;
+  probe.ep = null;
+  let moves;
+  try { moves = P.legalMoves(probe); } catch (e) { return []; }
+  const out = new Set();
+  for (const m of moves) {
+    const pc = probe.b[m.from];
+    if (!pc || pc.t === 'P' || pc.t === 'K') continue;
+    const r = rowOf(m.to), c = colOf(m.to);
+    const inTheirHalf = colour === 'w' ? r <= 3 : r >= 4;
+    if (!inTheirHalf) continue;
+    if (out.has(nameOf(m.to))) continue;
+    let attackable = false;
+    for (const dc of [-1, 1]) {
+      const g = c + dc;
+      if (g < 0 || g > 7) continue;
+      for (const j of them[g]) {
+        const need = colour === 'w' ? r - 1 : r + 1;
+        if (colour === 'w' ? rowOf(j) <= need : rowOf(j) >= need) { attackable = true; break; }
+      }
+      if (attackable) break;
+    }
+    if (attackable) continue;
+    const nx = P.makeMove(probe, m);
+    if (P.attackersOf(nx, m.to, enemy).length && P.see(nx, m.to, enemy) >= 0) continue;
+    out.add(nameOf(m.to));
+  }
+  return [...out];
+}
+
 /* Phase, by material rather than move number — the same reasoning as
  * bucketFor() in tools/puzzle_rules.js, which was changed away from move counts
  * because a queenless rook ending reached on move nine is not an opening. */
@@ -998,6 +1060,7 @@ function features(fen) {
       mobility: { w: mobility(st, 'w'), b: mobility(st, 'b') },
       active: { w: activeMoves(st, 'w'), b: activeMoves(st, 'b') },
       pawnSpace: { w: pawnSpace(st, 'w'), b: pawnSpace(st, 'b') },
+      entry: { w: entrySquares(st, 'w'), b: entrySquares(st, 'b') },
     },
   };
 }
@@ -1070,6 +1133,7 @@ module.exports = {
   features, motifsOfMove, motifsOfLine, phaseOf, material, pawnStructure, fileState,
   holesFor, reachableHoles, outposts, pieceFeatures, kingFeatures, mobility, pawnSpace,
   bishopPawnColours, quietness, pieceScopes, weakPawnSpread, safeSquaresFor, activeMoves,
+  entrySquares,
   centralSquareControl, kingZoneAttackers, pawnBreakthrough, winsTheRace,
   nameOf, isLight, page: P,
 };

@@ -865,6 +865,51 @@ const { concepts } = API.knowledge();
      /40\.5%/.test(fs.readFileSync(path.join(ROOT, 'lib', 'matchers.js'), 'utf8')));
 }
 
+{
+  // space, the last matcher that was true of more than half of all positions.
+  // It counted controlled squares, which is the one thing its record warns
+  // about in the same breath: "counting controlled squares is mechanical and
+  // over-reports. Space with no entry point wins nothing."
+  const sp = fen => (API.analyzeWithEducation({ fen }).concepts_all
+    .find(c => c.id === 'space') || { subjects: [] }).subjects;
+
+  // A wall of pawns with nothing behind it and nowhere to go: territory, no
+  // entry point, and by the record's own words it wins nothing.
+  ok('space: silent when there is no entry square',
+     !sp('4k3/pppppppp/8/8/2PPPP2/1P4P1/P6P/4K3 w - - 0 1').length,
+     JSON.stringify(FEAT.features('4k3/pppppppp/8/8/2PPPP2/1P4P1/P6P/4K3 w - - 0 1').activity.entry));
+
+  // Layer 3's entry test is deliberately wider than reachableHoles(): a rook
+  // arriving on the seventh down an uncontestable file is an entry square and
+  // is not an outpost, and the space concept is cashed in exactly there.
+  const e = FEAT.entrySquares(FEAT.page.stateFromFEN(
+    'r5k1/5ppp/8/8/8/8/5PPP/3R2K1 w - - 0 1'), 'w');
+  ok('space: an entry square may be a rook square, not only an outpost',
+     e.includes('d8') || e.includes('d7'), e.join(','));
+
+  // Trap 2: the territory must not consist entirely of weak, fixed pawns. This
+  // refuses 1 of 274 positions on the shipped corpus - built because a stated
+  // condition a matcher ignores is how the other four went wrong, and the rate
+  // is written down rather than talked up.
+  ok('space: refuses a territory made only of weak, blocked pawns',
+     !sp('2k5/1p1r4/p1b1p3/2P4r/1q6/R2nQ1BP/5PP1/R5K1 w - - 2 35').includes('w'));
+  const rec = JSON.parse(fs.readFileSync(
+    path.join(ROOT, 'concepts', 'development-initiative', 'space.json'), 'utf8'));
+  ok('space: the third trap is recorded as unimplementable, not quietly dropped',
+     (rec.limitations || []).some(l => /TRAP 3 IS NOT IMPLEMENTED/.test(l)));
+  ok('space: the record no longer claims its detector is unwritten',
+     !/not yet written/.test(rec.recognition.detector));
+
+  // Layer 3 grew the two observations trap 2 needs, and both are plain facts
+  // about the board rather than judgements.
+  const f2 = FEAT.features('rnbqkbnr/pp3ppp/8/2ppp3/2PPP3/8/PP3PPP/RNBQKBNR w KQkq - 0 1');
+  ok('pawns: squares and blocked are observable at Layer 3',
+     f2.pawns.w.squares.includes('d4') && f2.pawns.w.blocked.includes('d4'),
+     f2.pawns.w.blocked.join(','));
+  ok('space: the measured rate is recorded in the source',
+     /34\.6%/.test(fs.readFileSync(path.join(ROOT, 'lib', 'matchers.js'), 'utf8')));
+}
+
 /* ---------- report ---------- */
 console.log(`\nAPI  PASS ${pass}   FAIL ${fails.length}`);
 for (const [n, d] of fails) console.log(`  FAIL  ${n}\n        ${d}`);

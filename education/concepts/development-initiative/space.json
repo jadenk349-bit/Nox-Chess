@@ -48,7 +48,7 @@
       "The space was gained by overextension the opponent can undermine"
     ],
     "prerequisites": [],
-    "detector": "squareControlCount (not yet written)",
+    "detector": "pawnSpace + entrySquares in lib/features.js; the `space` matcher in lib/matchers.js",
     "detectability": "mechanical",
     "typical_confidence": "medium",
     "false_positive_traps": [
@@ -84,7 +84,8 @@
     "The cramped side exchanging pieces is the standard and effective antidote."
   ],
   "limitations": [
-    "Countable but conditional: the count says nothing about usability."
+    "Countable but conditional: the count says nothing about usability.",
+    "TRAP 3 IS NOT IMPLEMENTED AND CANNOT BE, MECHANICALLY. 'The cramped side's standard remedy is exchanging, so a space advantage that cannot prevent trades is temporary' is a claim about what the position will BECOME, and no static feature answers it. The other two traps are built: an entry square is required (53.3% -> 34.6% of the 788 shipped positions), and a territory made entirely of weak, blocked pawns is refused (a further 1 position — it almost never binds, because a side with a real space advantage rarely has EVERY space-creating pawn weak, and the rate is recorded rather than talked up)."
   ],
   "misconceptions": [
     "That more space is simply better. It is better if you can enter.",

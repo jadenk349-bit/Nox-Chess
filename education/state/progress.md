@@ -425,7 +425,18 @@ recapture, which keeps the square where a piece recapture leaves it to nobody �
 and pawn support is what the record's own `indicators_for` names. Both cases are
 pinned by tests.
 
-Five matchers, one shape: the record's bare *precondition* was implemented and
+`space` counted controlled squares and stopped — the one thing its record warns
+about in the same breath: *"counting controlled squares is mechanical and
+over-reports. Space with no entry point wins nothing."* An entry square is now
+required: 53.3% → **34.6%**. Layer 3's new `entrySquares()` is deliberately
+wider than `reachableHoles()`, because the classic way to cash a space advantage
+is a rook arriving on the seventh down a file nobody can contest — an entry
+square, and not an outpost.
+
+With that, **no matcher fires on more than half** of the 788 shipped positions
+except `passed-pawn`, which is kept high on purpose.
+
+Six matchers, one shape: the record's bare *precondition* was implemented and
 the *traps* written underneath it were not, and in every case the traps were the
 part that carried the chess. The next audit should read every matcher against
 its record's traps rather than its preconditions — that is where the conditions
