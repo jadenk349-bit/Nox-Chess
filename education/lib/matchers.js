@@ -181,6 +181,19 @@ const priorityOf = id => {
   return i === -1 ? PRIORITY.length : i;
 };
 
+/* "Shut in by its own pawns", in ONE place.
+ *
+ * `bad-bishop` decides this and `bishop-pair` needs the same answer - its
+ * record's third false-positive trap is "a bishop pair where one bishop is shut
+ * in by its own pawns is not really a pair", which is the bad-bishop condition
+ * word for word. Two thresholds for one idea would drift, and the calibration
+ * behind these numbers is not free: the scope test exists because of Suba's
+ * active bad bishop and was measured against Nimzowitsch-Salwe 1911.
+ */
+function shutInByItsOwnPawns(b) {
+  return b.ownPawnsOnItsColour >= 4 && b.share >= 0.60 && b.scope <= 3;
+}
+
 const STRUCTURAL = [
   {
     concept: 'doubled-pawns',
@@ -425,10 +438,45 @@ const STRUCTURAL = [
   },
   {
     concept: 'bishop-pair',
-    implements: "recognition.preconditions: two bishops of opposite square colours, opponent has fewer",
+    implements: ("recognition.preconditions: two bishops of opposite square colours, opponent has " +
+                 "fewer - AND the record's third false-positive trap, which the earlier version " +
+                 "ignored: 'a bishop pair where one bishop is shut in by its own pawns is not really " +
+                 "a pair'. Decided by the same test `bad-bishop` uses, so there is one definition."),
     run(f) {
       for (const c of ['w', 'b']) {
         if (f.pieces[c].bishopPair && !f.pieces[other(c)].bishopPair) {
+          // Two bishops are trivial to count and the count says nothing about
+          // whether they are worth anything - the record's first trap. The one
+          // condition it states mechanically is the third, and it is this.
+          // What the API says about a pair is advice premised on it being an
+          // asset ("open the position to use it, and avoid trading either one"),
+          // and that advice is actively wrong for a pair with a buried bishop.
+          //
+          // It DOWNGRADES rather than suppresses, and the direction matters. A
+          // first version refused the pair outright when one bishop was buried,
+          // and that produced a false negative on this corpus's own annotated
+          // bishop-pair position - Havasi-Capablanca 1929, where White's c1
+          // bishop shares its colour with five of its six pawns and sees one
+          // square, and the annotation is precisely that Capablanca showed the
+          // pair to be overrated. The pair is a FACT and the fact is high
+          // confidence; whether it is worth anything is the conditional part.
+          // Letting bad-bishop veto it would also be letting a test whose own
+          // record says "the conclusion it invites is frequently wrong", and
+          // which reports at LOW confidence for that reason, overrule a
+          // certainty. So the pair is still reported, at low confidence, and the
+          // sentence says which bishop is buried instead of advising the reader
+          // to keep them both.
+          const buried = (f.pieces[c].bishops || []).filter(shutInByItsOwnPawns);
+          if (buried.length) {
+            return {
+              confidence: 'low',
+              because: [`${side(f, c)} has both bishops, but the one on ${buried[0].square} shares its ` +
+                        `colour with ${buried[0].ownPawnsOnItsColour} of its own ${buried[0].ownPawnsTotal} ` +
+                        `pawns and sees ${buried[0].scope === 1 ? 'one square' : buried[0].scope + ' squares'} ` +
+                        `— a pair with a bishop shut in by its own pawns is not really a pair`],
+              subjects: [c],
+            };
+          }
           return {
             confidence: 'high',
             because: [`${side(f, c)} has both bishops and ${side(f, other(c))} does not`],
@@ -544,11 +592,10 @@ const STRUCTURAL = [
       for (const c of ['w', 'b']) {
         for (const b of (f.pieces[c].bishops || [])) {
           if (f.phase === 'opening' && HOME[c].includes(b.square)) continue;
-          if (b.ownPawnsOnItsColour < 4 || b.share < 0.60) continue;
           // Suba's active bad bishop is the registered false positive on this
           // record: structurally bad, outside the chain, and a fine piece. Scope
           // is what tells them apart, so a bishop that can see is not reported.
-          if (b.scope > 3) continue;
+          if (!shutInByItsOwnPawns(b)) continue;
           return {
             // The record states its own recognition confidence as LOW, saying
             // that "the structural test is mechanical and the conclusion it

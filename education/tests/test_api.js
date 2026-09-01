@@ -1038,6 +1038,46 @@ const { concepts } = API.knowledge();
      /42\.1% -> 35\.5%/.test(fs.readFileSync(path.join(ROOT, 'lib', 'matchers.js'), 'utf8')));
 }
 
+{
+  // bishop-pair implemented its precondition and none of its three traps. The
+  // one that is mechanical is the third: "a bishop pair where one bishop is shut
+  // in by its own pawns is not really a pair." It is now decided by the SAME
+  // test `bad-bishop` uses, in one function, because two thresholds for one idea
+  // drift and the calibration behind these numbers was not free.
+  const HAV = '2r2rk1/pb1q1ppp/1pn1pn2/8/3P4/P3PB2/3N1PPP/RQB2RK1 b - - 7 15';
+  const r = API.analyzeWithEducation({ fen: HAV });
+  const bp = r.concepts_all.find(c => c.id === 'bishop-pair');
+
+  // It DOWNGRADES rather than suppresses, and the direction is the point. A
+  // first version refused the pair outright and produced a false negative on
+  // this corpus's own annotated bishop-pair position - Havasi-Capablanca 1929,
+  // where the annotation is precisely that Capablanca showed the pair to be
+  // overrated. The pair is a fact; whether it is worth anything is not.
+  ok('bishop-pair: still reported when one bishop is buried', !!bp);
+  ok('...but at low confidence', bp && bp.confidence === 'low', bp && bp.confidence);
+  const line = ((r.concepts.find(c => c.id === 'bishop-pair') || {}).because || [])[0] || '';
+  ok('...and the sentence names the buried bishop rather than advising you to keep both',
+     /shut in by its own pawns is not really a pair/.test(line), line);
+
+  // Letting bad-bishop VETO the pair would also be letting a test whose own
+  // record says "the conclusion it invites is frequently wrong", and which
+  // reports at low confidence for that reason, overrule a certainty.
+  const badRec = JSON.parse(fs.readFileSync(
+    path.join(ROOT, 'concepts', 'piece-play', 'bad-bishop.json'), 'utf8'));
+  ok('bad-bishop still states its own low recognition confidence',
+     JSON.stringify(badRec).includes('frequently wrong'));
+
+  // An ordinary pair with both bishops free is untouched and stays high.
+  const free = API.analyzeWithEducation({
+    fen: 'r2qk2r/pp3ppp/2n1pn2/8/3P4/2N1PN2/PP3PPP/R2QKB1R w KQkq - 0 1' })
+    .concepts_all.find(c => c.id === 'bishop-pair');
+  ok('bishop-pair: a free pair is still high confidence',
+     !free || free.confidence === 'high', free && free.confidence);
+  ok('bishop-pair: one definition of "shut in", shared with bad-bishop',
+     /function shutInByItsOwnPawns/.test(
+       fs.readFileSync(path.join(ROOT, 'lib', 'matchers.js'), 'utf8')));
+}
+
 /* ---------- report ---------- */
 console.log(`\nAPI  PASS ${pass}   FAIL ${fails.length}`);
 for (const [n, d] of fails) console.log(`  FAIL  ${n}\n        ${d}`);

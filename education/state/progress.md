@@ -1143,3 +1143,29 @@ A scan for a second `luft`-style base-rate discrepancy found none: luft is +43.8
 points higher on the annotated corpus than on the 788, the next gap is +13.2,
 and the whole negative tail is the puzzle corpus's known skew towards endgames.
 On 37 positions a ten-point gap is noise; a forty-point one is not.
+
+
+## The seventh matcher, and the first where the answer was to qualify
+
+`bishop-pair` implemented "one side has both bishops" and none of its three
+traps. The mechanical one is the third — *"a bishop pair where one bishop is
+shut in by its own pawns is not really a pair"* — which is the `bad-bishop`
+condition word for word, so it is now one shared function rather than two
+thresholds for one idea.
+
+**Suppressing the pair outright was tried first and failed**, on this base's own
+annotated bishop-pair position: Havasi–Capablanca 1929, where White's c1 bishop
+shares its colour with five of its six pawns and sees one square — and where the
+annotation is precisely that Capablanca proved the pair overrated. The concept
+has to be *reported* there to be argued with.
+
+The direction matters for a second reason. `bad-bishop`'s own record says the
+conclusion its structural test invites "is frequently wrong", and it reports at
+low confidence for that reason. Letting it **veto** something certain would be
+the wrong way round.
+
+So the pair is still reported, at low confidence, with a sentence naming the
+buried bishop instead of the record's usual advice to keep both. 23 of the 178
+positions where a pair exists change from a confident recommendation to a
+qualified observation. The firing rate does not move, and saying it moved would
+be the wrong claim to make about this change.

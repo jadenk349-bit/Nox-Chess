@@ -114,7 +114,8 @@
     "Modern practice trades bishop for knight far more readily than Tarrasch would have, sometimes for minimal compensation."
   ],
   "limitations": [
-    "The half-pawn figure is a statistical average, not a property of any position."
+    "The half-pawn figure is a statistical average, not a property of any position.",
+    "MEASURED 2026-09-02: the third false-positive trap - 'a bishop pair where one bishop is shut in by its own pawns is not really a pair' - was written down and not built, and it is the only one of the three that CAN be built. It is now decided by the same test `bad-bishop` uses, in one shared function, and it DOWNGRADES rather than suppresses: 23 of the 178 positions on the shipped corpus where a pair exists are reported at low confidence, with a sentence naming the buried bishop instead of the record's usual advice to avoid trading either one. Suppressing outright was tried first and produced a false negative on this base's own annotated bishop-pair position, Havasi-Capablanca 1929 - where the annotation is precisely that Capablanca showed the pair to be overrated, so the concept has to be REPORTED to be argued with. The direction matters for a second reason: bad-bishop's record says its conclusion 'is frequently wrong' and it reports at low confidence for that reason, so letting it veto a certainty would be the wrong way round. The other two traps are about magnitude ('half a pawn is an AVERAGE') and are not mechanical."
   ],
   "misconceptions": [
     "That two bishops are always better than bishop and knight. It depends on whether the position is open.",

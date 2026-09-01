@@ -25,7 +25,7 @@ evidence in general, it is NEGATIVE and AMBIGUOUS evidence in particular.
 
 137 concepts · 188 sources · **111 engine-validated positions + 22 tablebase** ·
 **37 human-annotated corpus positions from 24 master games** · 32 replay-verified
-master games · 661 tests + 365 API + 374 audit + 3574 explanation assertions.
+master games · 661 tests + 371 API + 374 audit + 3574 explanation assertions.
 
 ## What moved this session
 
