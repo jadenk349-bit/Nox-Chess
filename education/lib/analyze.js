@@ -262,7 +262,14 @@ function analyzeWithEducation(opts) {
     fen,
     // Every concept the position licensed, in rank order, whether or not it fit
     // the display limit. Callers wanting completeness should read this.
+    // `subjects` belongs here too. Without it a caller reading concepts_all is
+    // told "bad bishop" and not whose, which is not actionable — and it made a
+    // whole class of corpus entry impossible to express, because the sharpest
+    // negative examples are per-side: Nimzowitsch's blockading bishop on d4
+    // must not be called bad in a position where BLACK's bishop on d7 correctly
+    // is, and a side-agnostic list cannot state that.
     concepts_all: matchedAll.map(m => ({ id: m.concept, confidence: m.confidence,
+                                         subjects: m.subjects || [],
                                          detected_by: m.source })),
     side_to_move: features.sideToMove,
     phase: features.phase,

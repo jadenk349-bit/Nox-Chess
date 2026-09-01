@@ -405,7 +405,8 @@ const STRUCTURAL = [
             // 1911, this fired on White's d4 bishop, which is the blockading
             // piece the whole game is built around.
             confidence: 'low',
-            because: [`${side(f, c)}'s bishop on ${b.square} shares its colour with ${b.ownPawnsOnItsColour} of its own ${b.ownPawnsTotal} pawns, and sees only ${b.scope} squares`],
+            because: [`${side(f, c)}'s bishop on ${b.square} shares its colour with ${b.ownPawnsOnItsColour} of its own ${b.ownPawnsTotal} pawns, and sees ` +
+                    (b.scope === 1 ? 'only one square' : `only ${b.scope} squares`)],
             slots: { square: b.square, piece: 'bishop' },
             subjects: [c],
           };

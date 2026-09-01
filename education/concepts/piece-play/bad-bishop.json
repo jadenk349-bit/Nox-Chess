@@ -224,6 +224,24 @@
         "verdict": "contradicts",
         "verdict_note": "Quiet and close to balanced at 1.02, which is the combination this base most needs and least often finds: nothing forcing is available and the evaluation is not swamping the feature, so the position is usable as an instance of the concept. What is NOT claimed is that the concept explains the engine's choice of move."
       }
+    },
+    {
+      "fen": "2r2rk1/ppqb2pp/3bpn2/3pN3/1P1B4/2PB4/P3QPPP/R4RK1 b - - 10 17",
+      "note": "Nimzowitsch-Salwe, Karlsbad 1911, Be8. Human ground truth: the concept is named for this position by Aron Nimzowitsch, annotating his own game. Corpus entry `nimzowitsch-salwe-1911-17Ne5-bad-bishop-negative`. The hardest negative in this corpus, because the structural test PASSES and only a guard stops the error. White's dark-squared bishop on d4 shares its colour with four of its own six pawns - a share of 0.67, over the 0.60 the matcher requires - and it is the piece the entire game is built around, the blockader Nimzowitsch calls a stout fellow and repositions twice on purpose. What saves this base ",
+      "origin_kind": "historical-game",
+      "game": "Nimzowitsch-Salwe, Karlsbad 1911",
+      "concept_role": "negative",
+      "attributed_by": "Aron Nimzowitsch, annotating his own game — corpus entry nimzowitsch-salwe-1911-17Ne5-bad-bishop-negative",
+      "engine": {
+        "engine_id": "Stockfish 18",
+        "test_level": 3,
+        "depth": 22,
+        "multipv": 3,
+        "best_move": "Be8",
+        "eval_cp": -112,
+        "verdict": "contradicts",
+        "verdict_note": "on both counts. The game's 17...Be8 is the engine's first choice, and Black stands at -1.12 - White is more than a pawn better with the 'structurally bad' bishop on d4 doing the work. What is being tested is not the move but whether a piece is called bad. The engine cannot answer that and was not asked to; it is here to say that the side owning the allegedly bad bishop is winning."
+      }
     }
   ],
   "ambiguous_examples": [

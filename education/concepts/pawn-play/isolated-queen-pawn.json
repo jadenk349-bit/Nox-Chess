@@ -260,6 +260,24 @@
         "verdict": "ambiguous",
         "verdict_note": "Level-2 validation: the position was scored, not designed. It confirms the feature is present in real play and, where the score is near level, that the feature is not drowned out. It is not a controlled pair and proves nothing about the concept on its own."
       }
+    },
+    {
+      "fen": "r2q1rk1/pp1bbppp/1n2pn2/6B1/3P4/1BNQ1N2/PP3PPP/R4RK1 b - - 4 12",
+      "note": "Botvinnik-Vidmar, Nottingham 1936, Nbd5. Human ground truth: the concept is named for this position by Mark Buckley in Practical Chess Analysis, quoted on this game; corroborated by IM Jeremy Silman on the structure. Corpus entry `botvinnik-vidmar-1936-12Qd3-isolated-queen-pawn-ambiguous`. The other half of the isolani, and the reason this base's own record registers 'an isolated pawn is not automatically a weakness' as a false positive. The d4 pawn is what gives White the e5 square, the two open files and the two attacking diagonals, and Botvinnik uses all of them: 13.Ne5, 17.f4, 18.f5, and the famous 20.Nxf7. It is an AMBIGUOUS entry rather than a positive one because the concept ",
+      "origin_kind": "historical-game",
+      "game": "Botvinnik-Vidmar, Nottingham 1936",
+      "concept_role": "ambiguous",
+      "attributed_by": "Mark Buckley in Practical Chess Analysis, quoted on this game; corroborated by IM Jeremy Silman on the structure — corpus entry botvinnik-vidmar-1936-12Qd3-isolated-queen-pawn-ambiguous",
+      "engine": {
+        "engine_id": "Stockfish 18",
+        "test_level": 3,
+        "depth": 22,
+        "multipv": 3,
+        "best_move": "Nfd5",
+        "eval_cp": -23,
+        "verdict": "ambiguous",
+        "verdict_note": "on the assessment, which is the claim being tested: at depth 22 the side WITH the isolated queen's pawn is better, by 0.23, in a structure the same base's detector reports as a weakness in the pawn structure. The game's 12...Nbd5 is not in the engine's top three; it prefers the other knight, which is a question about Vidmar's move and not about the structure. Deliberately scored as a structure rather than a move, on the same footing as this corpus's hanging-pawns entry. Running a search to rank 12...Nbd5 would answer a question nobody asked."
+      }
     }
   ],
   "explanations": {

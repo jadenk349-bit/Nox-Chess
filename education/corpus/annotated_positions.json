@@ -28,7 +28,9 @@
     "",
     "move_after_uci exists for the same reason fen_concept_realised does, one step further on: some concepts are realised by a FORCED REPLY that is a move rather than a position. Capablanca-Mattison 1929 is the case - 15.Ng5 does not change the count of pieces bearing on the black king by one, and 15...f5 permanently removes a shield pawn.",
     "",
-    "rejected_as_wrong is the sharpest test in this file and it is the easiest field to get wrong. It must list only concepts whose application here would be FALSE - never ones that are merely secondary, and never ones a naive reader might over-weight. Three entries in this corpus were drafted with a true concept in that list (space, trapped-piece, pawn-break), and each one manufactured a false positive out of correct output. When the checker reports a rejected alternate, the first question is whether the alternate is actually wrong."
+    "rejected_as_wrong is the sharpest test in this file and it is the easiest field to get wrong. It must list only concepts whose application here would be FALSE - never ones that are merely secondary, and never ones a naive reader might over-weight. Three entries in this corpus were drafted with a true concept in that list (space, trapped-piece, pawn-break), and each one manufactured a false positive out of correct output. When the checker reports a rejected alternate, the first question is whether the alternate is actually wrong.",
+    "",
+    "`side` names the colour a NEGATIVE entry is about, and it exists because the sharpest negatives are per-side. Nimzowitsch's blockading bishop on d4 must not be called bad in a position where Black's bishop on d7 correctly is, and a side-agnostic list cannot state that. It required carrying `subjects` through to the API's concepts_all, which had never been exposed there."
   ],
   "concept_roles": {
     "positive": "the concept clearly applies, on the annotator's authority",
@@ -1246,6 +1248,96 @@
       "rejected_as_wrong": [
         "outpost",
         "pawn-breakthrough"
+      ]
+    },
+    {
+      "game": "Nimzowitsch-Salwe, Karlsbad 1911",
+      "source": "nimzowitsch-salwe-1911-own-notes",
+      "players": "Aron Nimzowitsch - Georg Salwe",
+      "event": "Karlsbad 1911",
+      "year": 1911,
+      "annotator": "Aron Nimzowitsch, annotating his own game",
+      "fen_verified": "replay: all 77 plies replayed legally through blind-chess.html's move generator; the transcription of Nimzowitsch's notes carries the same move list as the database score",
+      "added": "2026-09-01",
+      "id": "nimzowitsch-salwe-1911-17Ne5-bad-bishop-negative",
+      "concept": "bad-bishop",
+      "concept_role": "negative",
+      "side": "w",
+      "fen": "2r2rk1/ppqb2pp/3bpn2/3pN3/1P1B4/2PB4/P3QPPP/R4RK1 b - - 10 17",
+      "move": "Be8",
+      "move_uci": "d7e8",
+      "fen_after": "2r1brk1/ppq3pp/3bpn2/3pN3/1P1B4/2PB4/P3QPPP/R4RK1 w - - 11 18",
+      "human_annotation": "Nimzowitsch on the same bishop three moves earlier, when it stood on e5: 'the new blockader, the bishop at e5, proves to be a stout fellow.' At this position, 17.Ne5: 'The immobility of the e-pawn is now greater than ever. White has utilized his resources very economically.' And at 20.Bd4: 'In order to force Black's queen bishop, who also has his eye on h5, to come to a decision.'",
+      "explanation": "The hardest negative in this corpus, because the structural test PASSES and only a guard stops the error. White's dark-squared bishop on d4 shares its colour with four of its own six pawns - a share of 0.67, over the 0.60 the matcher requires - and it is the piece the entire game is built around, the blockader Nimzowitsch calls a stout fellow and repositions twice on purpose. What saves this base is the scope check the record added for Suba's active bad bishop: the d4 bishop sees four squares, one more than the threshold. Remove that guard and the system calls the hero of the founding game of blockade theory a bad piece, which is what it did before the guard existed. Note what must still be reported: BLACK's bishop, which Nimzowitsch himself sends to a decision on move 20, is bad here in every sense, and this base says so five moves later. The negative is about the side, not about the concept.",
+      "engine": {
+        "engine_id": "Stockfish 18",
+        "depth": 22,
+        "multipv": 3,
+        "best_move": "Be8",
+        "best_eval_cp": -112,
+        "annotated_move_eval_cp": -112,
+        "annotated_move_rank": 1,
+        "agrees": "on both counts. The game's 17...Be8 is the engine's first choice, and Black stands at -1.12 - White is more than a pawn better with the 'structurally bad' bishop on d4 doing the work.",
+        "note": "What is being tested is not the move but whether a piece is called bad. The engine cannot answer that and was not asked to; it is here to say that the side owning the allegedly bad bishop is winning."
+      },
+      "confidence": "high",
+      "why_not_alternates": "blockade and restraint are what the position IS about and are recorded on their own records from this same game. weak-square is correctly reported. What must not be said is that White's bishop is bad.",
+      "also_true_but_secondary": [
+        "blockade",
+        "restraint",
+        "weak-square",
+        "semi-open-file",
+        "two-weaknesses"
+      ],
+      "rejected_as_wrong": [
+        "bad-bishop"
+      ],
+      "limitation": "The claim is per-side and could not be written down before this session: the API's concepts_all carried no `subjects`, so a caller - and this checker - was told 'bad bishop' and not whose."
+    },
+    {
+      "game": "Botvinnik-Vidmar, Nottingham 1936",
+      "source": "buckley-practical-chess-analysis-iqp",
+      "players": "Mikhail Botvinnik - Milan Vidmar",
+      "event": "Nottingham 1936",
+      "year": 1936,
+      "annotator": "Mark Buckley in Practical Chess Analysis, quoted on this game; corroborated by IM Jeremy Silman on the structure",
+      "fen_verified": "replay: all 47 plies replayed legally through blind-chess.html's move generator",
+      "added": "2026-09-01",
+      "id": "botvinnik-vidmar-1936-12Qd3-isolated-queen-pawn-ambiguous",
+      "concept": "isolated-queen-pawn",
+      "concept_role": "ambiguous",
+      "side": "w",
+      "fen": "r2q1rk1/pp1bbppp/1n2pn2/6B1/3P4/1BNQ1N2/PP3PPP/R4RK1 b - - 4 12",
+      "move": "Nbd5",
+      "move_uci": "b6d5",
+      "fen_after": "r2q1rk1/pp1bbppp/4pn2/3n2B1/3P4/1BNQ1N2/PP3PPP/R4RK1 w - - 5 13",
+      "fen_concept_realised": "r2q1rk1/pp1bbppp/4pn2/3nN1B1/3P4/1BNQ4/PP3PPP/R4RK1 b - - 6 13",
+      "fen_concept_realised_note": "After 13.Ne5. This is the isolani's whole case made visible in one position: the pawn on d4 is the reason the knight can stand on e5 at all, and the reason the bishops on b3 and g5 have the diagonals they have.",
+      "human_annotation": "'As we know, the IQP offers its owner two files (c and e) and two outposts (c5 and e5)... The problem with Rc1 is ...Rc8; exchanges tend to favour Black. Fewer pieces mean that White's dynamic plus is minimized while the d5 hole remains.' Silman on the same structure: 'though this pawn is a potential static weakness, it's also a dynamic tower of strength.'",
+      "explanation": "The other half of the isolani, and the reason this base's own record registers 'an isolated pawn is not automatically a weakness' as a false positive. The d4 pawn is what gives White the e5 square, the two open files and the two attacking diagonals, and Botvinnik uses all of them: 13.Ne5, 17.f4, 18.f5, and the famous 20.Nxf7. It is an AMBIGUOUS entry rather than a positive one because the concept genuinely does not decide - the same pawn that wins this game in twenty-four moves is the thing Black would win the endgame against, and the annotation says which way it goes and why: fewer pieces, and the d5 hole outlives the attack.",
+      "engine": {
+        "engine_id": "Stockfish 18",
+        "depth": 22,
+        "multipv": 3,
+        "best_move": "Nfd5",
+        "best_eval_cp": -23,
+        "annotated_move_eval_cp": null,
+        "annotated_move_rank": null,
+        "agrees": "on the assessment, which is the claim being tested: at depth 22 the side WITH the isolated queen's pawn is better, by 0.23, in a structure the same base's detector reports as a weakness in the pawn structure. The game's 12...Nbd5 is not in the engine's top three; it prefers the other knight, which is a question about Vidmar's move and not about the structure.",
+        "note": "Deliberately scored as a structure rather than a move, on the same footing as this corpus's hanging-pawns entry. Running a search to rank 12...Nbd5 would answer a question nobody asked."
+      },
+      "confidence": "high",
+      "why_not_alternates": "backward-pawn is the label a loose reading reaches for and is wrong: d4 has no friendly pawn on either adjacent file at all, which makes it isolated, not backward. hanging-pawns is wrong for the same reason - there is one pawn, not two abreast.",
+      "also_true_but_secondary": [
+        "outpost",
+        "center-control",
+        "space",
+        "piece-activity",
+        "static-vs-dynamic"
+      ],
+      "rejected_as_wrong": [
+        "backward-pawn",
+        "hanging-pawns"
       ]
     }
   ]

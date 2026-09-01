@@ -249,6 +249,38 @@ Two things came with it:
 Measured after: the wording varies by level on **99.3%** of the 788 shipped
 positions, and beginner no longer gets a sentence about Nimzowitsch.
 
+### Ranking and confidence, measured for the first time
+
+Reporting a concept and burying it were scored the same. The corpus now
+measures **rank** — for a positive entry the annotated concept is what a human
+said the position is ABOUT — and the answer was **mean 4.9**, with six of twelve
+sitting outside the six entries the API returns by default. Reported, and
+invisible.
+
+Two causes. The PRIORITY list called itself informativeness and had never been
+checked against one: two-weaknesses fires on 72.5% of the 788 shipped positions,
+weak-square 68.9%, open-file 55.7%, space 53.3% — and all four ranked ahead of
+king-attack at 1.5%, backward-pawn at 1.9% and luft at 4.8%. And the comparator
+took a rule its own comment states about the *headline* — a low-confidence claim
+must never lead — and applied it to the whole list, so every hedged claim sank
+below every confident one. Mean rank 4.9 → **2.6**, top-3 5 → 8, nothing outside
+the six, and endgames keep their point.
+
+### The hardest negative so far, and it needed an API change to write down
+
+Nimzowitsch–Salwe, Karlsbad 1911, annotated by Nimzowitsch himself. His
+dark-squared bishop on d4 **passes** this base's structural test for a bad
+bishop — four of its own six pawns on its colour, a share of 0.67 against the
+0.60 required — and it is the piece the whole game is built around, the
+blockader he calls "a stout fellow". Only the scope guard stops the error, and
+this base called that bishop bad before the guard existed.
+
+Writing the claim down was impossible until now, because it is *per side*:
+Black's bishop on d7 in the same game is bad in every sense and is correctly
+reported five moves later. The API's `concepts_all` carried no `subjects`, so a
+caller was told "bad bishop" and not whose. Fixed in the API, in the checker and
+in the corpus schema, and a whole class of negative example became writable.
+
 That is the third metric this project has caught telling it what it wanted to
 hear — after the mass test's "99.7% positional coverage" and the corpus
 checker's scoring of negative examples — and all three were found the same way:

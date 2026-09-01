@@ -26,7 +26,14 @@ STRESS TEST every entry is run through analyzeWithEducation and scored AGAINST
                             contributing factor is overstating.
              FALSE NEGATIVE absent entirely
 
-  negative   correct        the concept is ABSENT. That is the whole point of a
+  negative   correct        the concept is ABSENT for the SIDE the entry names
+                            (`side`: "w" or "b"), or absent entirely when it
+                            names none. The side matters and the sharpest cases
+                            need it: Nimzowitsch's blockading bishop on d4 must
+                            not be called bad in a position where BLACK's bishop
+                            on d7 correctly is, and until `subjects` was carried
+                            through to the API's concepts_all that claim could
+                            not be written down at all. That is the whole point of a
                             negative example: the board superficially resembles
                             the concept and the system must not say so.
              FALSE POSITIVE it is reported. Leading with it is worse and is
@@ -69,7 +76,7 @@ def api(fen, move=None):
     js = ("const A=require('%s/lib/analyze.js');"
           "const o={fen:process.argv[1]};if(process.argv[2])o.move=process.argv[2];"
           "const r=A.analyzeWithEducation(o);"
-          "console.log(JSON.stringify({c:(r.concepts_all||r.concepts).map(x=>({id:x.id,conf:x.confidence})),"
+          "console.log(JSON.stringify({c:(r.concepts_all||r.concepts).map(x=>({id:x.id,conf:x.confidence,side:x.subjects||[]})),"
           "t:r.explanation.text,v:r.phrasing_violations,n:r.notes}));") % HERE
     out = subprocess.run(["node", "-e", js, fen, move or ""], capture_output=True, text=True, cwd=HERE)
     if out.returncode != 0:
@@ -171,9 +178,19 @@ def main():
             tally["api_error"] += 1
             rows.append((p["id"], "API ERROR", "", "", None, None, None, False))
             continue
-        ids = [c["id"] for c in r["c"]]
-        idsAfter = [c["id"] for c in (rAfter or {}).get("c", [])]
-        idsReal = [c["id"] for c in (rReal or {}).get("c", [])]
+        # When an entry names a side, a concept reported about the OTHER side is
+        # not the concept this entry is talking about.
+        want_side = p.get("side")
+
+        def keep(cs):
+            if not want_side:
+                return [c["id"] for c in cs]
+            return [c["id"] for c in cs
+                    if c["id"] != p["concept"] or want_side in (c.get("side") or [])]
+
+        ids = keep(r["c"])
+        idsAfter = keep((rAfter or {}).get("c", []))
+        idsReal = keep((rReal or {}).get("c", []))
         idsAfter = idsAfter + [i for i in idsReal if i not in idsAfter]
         want = p["concept"]
         seen = ids + [i for i in idsAfter if i not in ids]

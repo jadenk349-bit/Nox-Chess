@@ -587,6 +587,48 @@ const { concepts } = API.knowledge();
   }
 }
 
+{
+  // Nimzowitsch-Salwe, Karlsbad 1911, after 17.Ne5 - the founding game of
+  // blockade theory, annotated by Nimzowitsch himself. His dark-squared bishop
+  // on d4 PASSES the structural test for a bad bishop: four of its own six
+  // pawns share its colour, a share of 0.67 against the 0.60 the matcher
+  // requires. Only the scope guard stops the error, and this base called that
+  // bishop bad before the guard existed. The hardest negative in the corpus.
+  const NS = '2r2rk1/ppqb2pp/3bpn2/3pN3/1P1B4/2PB4/P3QPPP/R4RK1 b - - 10 17';
+  const f = FEAT.features(NS);
+  const d4 = (f.pieces.w.bishops || []).find(b => b.square === 'd4');
+  ok('the structural test really does fire on Nimzowitsch’s bishop',
+     d4 && d4.ownPawnsOnItsColour >= 4 && d4.share >= 0.6, JSON.stringify(d4));
+  ok('...and only the scope guard saves it', d4 && d4.scope > 3, d4 && String(d4.scope));
+  const bb = API.analyzeWithEducation({ fen: NS, move: 'd7e8' })
+    .concepts_all.filter(c => c.id === 'bad-bishop');
+  ok('false positive: White’s blockading bishop is not called bad',
+     !bb.some(c => (c.subjects || []).includes('w')), JSON.stringify(bb));
+
+  // ...and the concept is not simply switched off: five moves later Black's
+  // bishop on d7, which Nimzowitsch drives to a decision on move 20, is bad in
+  // every sense and must still be reported.
+  const later = API.analyzeWithEducation({ fen: '2r3k1/pp1b1rpp/2q1pn2/3p4/1P1B4/2PBR3/P1Q2PPP/5RK1 b - - 6 22' });
+  const lb = later.concepts_all.filter(c => c.id === 'bad-bishop');
+  ok('...and Black’s bishop in the same game still is',
+     lb.some(c => (c.subjects || []).includes('b')), JSON.stringify(lb));
+}
+{
+  // `subjects` must reach concepts_all. Without it a caller is told "bad
+  // bishop" and not whose, and the per-side negative above cannot be written.
+  const r = API.analyzeWithEducation({ fen: '2r3k1/pp1b1rpp/2q1pn2/3p4/1P1B4/2PBR3/P1Q2PPP/5RK1 b - - 6 22' });
+  ok('concepts_all carries the side', r.concepts_all.every(c => Array.isArray(c.subjects)),
+     JSON.stringify(r.concepts_all[0]));
+}
+{
+  // Botvinnik-Vidmar, Nottingham 1936: the isolani as the source of the attack
+  // rather than a weakness. The side WITH the isolated pawn is +0.23.
+  const BV = 'r2q1rk1/pp1bbppp/1n2pn2/6B1/3P4/1BNQ1N2/PP3PPP/R4RK1 b - - 4 12';
+  const ids = API.analyzeWithEducation({ fen: BV, move: 'b6d5' }).concepts_all.map(c => c.id);
+  has('the isolani is reported where it is a strength', ids, 'isolated-queen-pawn');
+  ok('...and is not called backward', !ids.includes('backward-pawn'), ids.join(','));
+}
+
 /* ---------- report ---------- */
 console.log(`\nAPI  PASS ${pass}   FAIL ${fails.length}`);
 for (const [n, d] of fails) console.log(`  FAIL  ${n}\n        ${d}`);

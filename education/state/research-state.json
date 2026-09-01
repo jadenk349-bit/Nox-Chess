@@ -11,11 +11,11 @@
     "concepts_researched": 29,
     "concepts_validated": 4,
     "concepts_needs_review": 0,
-    "sources_reviewed": 193,
-    "positions_tested": 105,
+    "sources_reviewed": 196,
+    "positions_tested": 107,
     "matches_validated": 53,
-    "false_matches": 25,
-    "ambiguous_matches": 27,
+    "false_matches": 26,
+    "ambiguous_matches": 28,
     "by_stage": {
       "ready": 2,
       "researched": 126,
@@ -1711,13 +1711,16 @@
         "confidence_overclaimed": "0 of 29, before and after",
         "worst_ranks_before": "restraint 10, king-safety 10, worst-placed-piece 8, king-safety 7, center-control 7",
         "mass_test_leads": "unchanged: 83.5% tactical, and the positional leads are the same set",
-        "tests": "655 pass, 274 API, 377 audit, 3274 explanation"
+        "tests": "655 pass, 274 API, 377 audit, 3274 explanation",
+        "corpus_positions_after": 31,
+        "corpus_roles_after": "18 positive, 9 ambiguous, 4 negative"
       },
       "findings": [
         "HALF THE HUMAN-ATTRIBUTED CONCEPTS WERE INVISIBLE. The API returns six concepts by default. On six of twelve positive corpus entries the concept a named annotator attributed to the position sat at rank 7, 8 or 10 - present in concepts_all, absent from anything a caller reads. Nothing measured this until the corpus did.",
         "TWO CAUSES, AND THE FIRST WAS THE PRIORITY LIST CALLING ITSELF INFORMATIVENESS. Measured firing rates: two-weaknesses 72.5%, weak-square 68.9%, passed-pawn 60.4%, open-file 55.7%, space 53.3% - and all five ranked ahead of king-attack (1.5%), backward-pawn (1.9%), luft (4.8%), pawn-break (4.9%) and hanging-pawns (7.2%). A concept true of three quarters of all positions cannot be the most informative thing about any of them. Reordered by the measurement, with the measurement written into the source and two exceptions stated: passed-pawn, which names a concrete asset and whose 60% is an artefact of a corpus one third endgames, and pawn-breakthrough, whose 0% is scope rather than rarity.",
         "AND THE SECOND WAS A RULE APPLIED TO THE WHOLE LIST INSTEAD OF TO ONE ENTRY. The comparator demoted every low-confidence claim below every medium one. Its comment says the rule is that a low-confidence claim must never be the HEADLINE - one position, not all of them - and every badly-ranked corpus concept was a low-confidence one. Now the lead is chosen that way and everything below it is ordered by informativeness. Mean rank 4.9 -> 2.6, and nothing is outside the six any more.",
-        "A METRIC MEASURING ITS OWN MAINTENANCE. mass_test.js decided what counts as 'positional' from a hand-written list that had gone stale: center-control, king-safety, king-attack and pawn-breakthrough were all missing, so when one of them took a slot in the visible six it displaced a counted concept and the headline fell from 96.4% to 94.9%. Now derived from each record's knowledge_type - and the number goes back to 99.4%, which this project has already recorded as a figure worth nothing, so the line now says so out loud and points at the LEAD figures instead."
+        "A METRIC MEASURING ITS OWN MAINTENANCE. mass_test.js decided what counts as 'positional' from a hand-written list that had gone stale: center-control, king-safety, king-attack and pawn-breakthrough were all missing, so when one of them took a slot in the visible six it displaced a counted concept and the headline fell from 96.4% to 94.9%. Now derived from each record's knowledge_type - and the number goes back to 99.4%, which this project has already recorded as a figure worth nothing, so the line now says so out loud and points at the LEAD figures instead.",
+        "THE HARDEST NEGATIVE SO FAR, AND IT NEEDED AN API CHANGE TO WRITE DOWN. Nimzowitsch-Salwe, Karlsbad 1911 - the founding game of blockade theory, annotated by Nimzowitsch himself - has his dark-squared bishop on d4 PASSING this base's structural test for a bad bishop: four of its own six pawns on its colour, a share of 0.67 against the 0.60 required. Only the scope guard stops the error, and this base called that bishop bad before the guard existed. Recording the claim needed a `side` field, because BLACK's bishop in the same game is bad in every sense and is correctly reported five moves later - and the API's concepts_all carried no `subjects`, so a caller was told 'bad bishop' and not whose. Fixed in the API, in the checker and in the corpus schema; a whole class of per-side negative was unwritable before."
       ]
     }
   ],
