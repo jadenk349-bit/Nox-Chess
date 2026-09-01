@@ -215,6 +215,26 @@ function outposts(st, colour) {
   return out;
 }
 
+/* Holes a minor piece could occupy next move. A hole nobody can use is a fact
+ * about the pawns; a hole a knight reaches in one is a plan. */
+function reachableHoles(st, colour) {
+  const holes = new Set(holesFor(st, colour));
+  if (!holes.size) return [];
+  const probe = P.cloneState(st);
+  probe.turn = colour;
+  probe.ep = null;
+  let moves;
+  try { moves = P.legalMoves(probe); } catch (e) { return []; }
+  const out = new Set();
+  for (const m of moves) {
+    const piece = probe.b[m.from];
+    if (!piece || (piece.t !== 'N' && piece.t !== 'B')) continue;
+    const sq = nameOf(m.to);
+    if (holes.has(sq)) out.add(sq);
+  }
+  return [...out];
+}
+
 /* -- pieces --------------------------------------------------------------- */
 
 function pieceFeatures(st) {
@@ -355,6 +375,7 @@ function features(fen) {
     pawns: { w: pawnStructure(st, 'w'), b: pawnStructure(st, 'b') },
     files: fileState(st),
     holes: { w: holesFor(st, 'w'), b: holesFor(st, 'b') },
+    reachableHoles: { w: reachableHoles(st, 'w'), b: reachableHoles(st, 'b') },
     outposts: { w: outposts(st, 'w'), b: outposts(st, 'b') },
     pieces: pieceFeatures(st),
     king: { w: kingFeatures(st, 'w'), b: kingFeatures(st, 'b') },
@@ -389,6 +410,6 @@ function motifsOfMove(fen, uci) {
 
 module.exports = {
   features, motifsOfMove, phaseOf, material, pawnStructure, fileState,
-  holesFor, outposts, pieceFeatures, kingFeatures, mobility, pawnSpace,
+  holesFor, reachableHoles, outposts, pieceFeatures, kingFeatures, mobility, pawnSpace,
   nameOf, isLight, page: P,
 };

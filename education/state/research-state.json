@@ -1218,6 +1218,11 @@
       "item": "detector claims were unverified until now",
       "date": "2026-09-01",
       "note": "For most of this project a concept could claim a mechanical detector that did not exist, because the audit compared against a list rather than the code. Fixed; the check now reads lib/*.js, blind-chess.html and tools/*.js."
+    },
+    {
+      "item": "no quiet-position corpus",
+      "date": "2026-09-01",
+      "note": "Mass testing runs on 788 tactical puzzles because that is the corpus this repository has. The positional half of the system would be better judged on quiet middlegame positions, and no such labelled corpus exists here."
     }
   ],
   "awaiting_validation": [
@@ -1452,6 +1457,40 @@
       ],
       "concepts": [
         "board-geometry"
+      ]
+    },
+    {
+      "id": "mass-position-test-788",
+      "date": "2026-09-01",
+      "method": "tools/mass_test.js runs analyzeWithEducation over all 788 shipped puzzle positions with their known solution move, no engine supplied.",
+      "results": {
+        "crashes": 0,
+        "unfilled_templates": 0,
+        "banned_phrasings": 0,
+        "licensed_a_concept": "787 of 788 (99.9%)",
+        "said_nothing": "1 (0.1%)",
+        "lead_is_a_tactical_motif": "500 (63.5%)",
+        "lead_is_a_positional_concept": "287 (36.4%)",
+        "agreement_with_generator_tags": "500 of 703 comparable (71.1%)",
+        "by_track_motif_lead": {
+          "opening": "84.5%",
+          "middlegame": "72.3%",
+          "endgame": "43.4%"
+        }
+      },
+      "findings": [
+        "Robustness is clean at scale: no crashes, no unfilled templates, no banned phrasings across 788 positions.",
+        "The first version of this test reported 99.7% 'positional coverage' and that number was worthless - it counted any positional concept anywhere in a list of six, and the matchers were firing on nearly everything. semi-open-file fired on 83% of positions, open-file on 61%, weak-square on 57%.",
+        "Three matchers were tightened against their own concept records as a result: open-file and semi-open-file now require a rook actually on the file, and weak-square reports a hole a minor piece can MOVE TO rather than any hole at all.",
+        "The measurement was then changed to the lead concept, which is what the explanation actually says. Lead is a motif 63.5% of the time and positional 36.4%.",
+        "That 63.5% is expected and not an achievement: the tactical half delegates to findMotifs, the same detector the shipped layer uses, which explanation_gap.py measured at 65%. The addition is the 36.4%, which is close to the 34% of puzzles where the shipped card layer fell back to comparing numbers.",
+        "Agreement with the puzzle generator's independent tagging is 71% on comparable positions. The largest disagreement is hangingPiece, which the generator assigns across a whole solution line while findMotifs judges a single move - an explainable difference in scope rather than a contradiction.",
+        "CAVEAT ON THE WHOLE TEST: these are tactical puzzle positions selected for having one best move. They are not a representative sample of quiet positions, which is where a positional explanation layer would most need to be judged, and this base has no such corpus."
+      ],
+      "concepts": [
+        "open-file",
+        "semi-open-file",
+        "weak-square"
       ]
     }
   ],

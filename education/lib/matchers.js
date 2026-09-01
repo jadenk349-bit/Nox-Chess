@@ -167,14 +167,17 @@ const STRUCTURAL = [
     concept: 'open-file',
     implements: "recognition.preconditions: a file with no pawns of either colour",
     run(f) {
-      // A file is only "open" in the instructive sense if a rook or queen exists
-      // to operate on it. On a bare board every file is empty and none is open.
+      // The concept's own record says a file with no entry point does nothing,
+      // and mass testing over 788 positions showed this firing on 61% of them -
+      // a label that common carries almost no information. Require a rook or
+      // queen actually standing on the file, which is what makes it this side's
+      // file rather than a fact about the pawns.
       if (!f.files.open.length || totalHeavy(f) === 0) return null;
       const occupied = [];
       for (const c of ['w', 'b']) for (const r of f.pieces[c].rooksOnOpenFiles) occupied.push(`${side(f, c)}'s rook on ${r}`);
-      const because = [`the ${f.files.open.join('- and ')}-file${f.files.open.length > 1 ? 's are' : ' is'} open`];
-      if (occupied.length) because.push(`${occupied.join(' and ')} already stand${occupied.length > 1 ? '' : 's'} on it`);
-      return { confidence: occupied.length ? 'high' : 'medium', because,
+      if (!occupied.length) return null;
+      const because = [`the ${f.files.open.join('- and ')}-file${f.files.open.length > 1 ? 's are' : ' is'} open, and ${occupied.join(' and ')} stand${occupied.length > 1 ? '' : 's'} on it`];
+      return { confidence: 'high', because,
                slots: { file: f.files.open[0] }, subjects: ['w', 'b'] };
     },
   },
@@ -191,13 +194,17 @@ const STRUCTURAL = [
         hits.push({ c, files, rooks });
       }
       if (!hits.length) return null;
-      const lead = hits.find(h => h.rooks.length) || hits[0];
+      // Firing on 83% of tested positions before this guard. Nearly every
+      // position has a semi-open file somewhere; what is worth reporting is one
+      // a rook is actually using.
+      const withRook = hits.filter(h => h.rooks.length);
+      if (!withRook.length) return null;
+      const lead = withRook[0];
       return {
-        confidence: lead.rooks.length ? 'high' : 'medium',
-        because: hits.map(h => `${side(f, h.c)} has a semi-open ${brief(h.files, 3)}-file` +
-                               (h.rooks.length ? `, with a rook on ${h.rooks.join(' and ')}` : '')),
+        confidence: 'high',
+        because: withRook.map(h => `${side(f, h.c)} has a rook on ${h.rooks.join(' and ')}, on a semi-open file`),
         slots: { file: lead.files[0] },
-        subjects: hits.map(h => h.c),
+        subjects: withRook.map(h => h.c),
       };
     },
   },
@@ -222,16 +229,23 @@ const STRUCTURAL = [
     implements: "recognition: a square in one camp that no pawn of that colour can ever attack",
     run(f) {
       const hits = [];
-      // A hole is a hole in something. With almost no pawns left, "no enemy pawn
-      // can attack this square" is true of most of the board and means nothing.
+      // A hole is a hole in something, and a hole nothing can use is not worth
+      // mentioning - the strong-square record says a strong square is worth
+      // nothing if nothing valuable can reach it. Before this guard the matcher
+      // fired on 57% of 788 tested positions, which is a label carrying almost
+      // no information. Report a hole a minor piece can actually move to: that
+      // is a plan rather than a fact about the pawn structure. Squares already
+      // occupied are left to the outpost matcher, which says more about them.
       for (const c of ['w', 'b']) {
         if (pawnCount(f, other(c)) < 3) continue;
-        if (f.holes[c].length) hits.push({ c, sq: f.holes[c] });
+        const taken = new Set((f.outposts[c] || []).map(o => o.square));
+        const usable = (f.reachableHoles[c] || []).filter(sq => !taken.has(sq));
+        if (usable.length) hits.push({ c, sq: usable });
       }
       if (!hits.length) return null;
       return {
         confidence: 'medium',
-        because: hits.map(h => `${side(f, other(h.c))} can no longer attack ${brief(h.sq)} with a pawn`),
+        because: hits.map(h => `${side(f, h.c)} can put a minor piece on ${brief(h.sq)}, where no enemy pawn can attack it`),
         slots: { square: hits[0].sq[0] },
         subjects: hits.map(h => h.c),
       };
