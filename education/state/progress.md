@@ -1313,3 +1313,27 @@ Everything downstream was measured and corrected:
 
 This is the ninth defect the trap reading list has produced, and the first one
 that was not in the layer being audited.
+
+
+## Three more built, one measured as unbuildable
+
+`two-weaknesses` now refuses the concept outright when there are
+opposite-coloured bishops on the board — *"against opposite-coloured bishops or a
+reachable fortress, the count of weaknesses is simply not the operative
+variable"* — because the defender holds a whole colour complex whatever the
+count says. 38.6% → **33.8%**.
+
+`backward-pawn` now requires the file to be half-open for the opponent — *"a
+backward pawn on a closed file that nothing can attack is a description, not a
+weakness"*. 10 of the 15 backward pawns on the shipped corpus qualify; the other
+five were descriptions. 1.9% → **1.3%**.
+
+`luft`'s second trap is the more useful of the four. *"Luft is unnecessary when
+the back rank is adequately defended or when no heavy pieces remain."* The second
+half is enforced; the first is not mechanical at any threshold this base could
+defend, and the number says why — **36 of the 39** side-instances where luft
+fires have a friendly rook or queen *on* their own back rank. Refusing those
+would delete the concept, because a rook on the back rank is exactly what most
+back-rank mates happen in spite of. Recorded rather than attempted.
+
+**83 of 108 traps cited, 25 unread.**

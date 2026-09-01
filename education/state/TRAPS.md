@@ -13,7 +13,7 @@ implemented; that is a reading, and doing it is the work. What it can do is
 stop the list being rediscovered from scratch each time — and every one of
 the defects listed in the tool's header was unread before it was looked at.
 
-**76 of 108 cited. 32 unread.**
+**83 of 108 cited. 25 unread.**
 
 ## doubled-pawns
 
@@ -33,8 +33,8 @@ the defects listed in the tool's header was unread before it was looked at.
 - [cited] A passer created from doubled pawns is often born weak.
 ## backward-pawn
 
-- [**unread**] A pawn that is merely behind its neighbours but CAN advance safely is not backward in the operative sense.
-- [**unread**] A backward pawn on a closed file that nothing can attack is a description, not a weakness.
+- [cited] A pawn that is merely behind its neighbours but CAN advance safely is not backward in the operative sense.
+- [cited] A backward pawn on a closed file that nothing can attack is a description, not a weakness.
 - [layer 3] Reporting the pawn and not the square in front of it usually misses the more important half.
 - [layer 3] A pawn with no friendly pawn on either adjacent file is ISOLATED, not backward, and reporting both names for one pawn promises the reader a hole in front of it that the isolated case does not create.
 - [cited] A pawn whose advance square is occupied by an enemy pawn is RAMMED. It cannot advance, but not for the reason the concept is about, and the square in front of it is not a hole - an enemy pawn is standing on it.
@@ -75,13 +75,13 @@ the defects listed in the tool's header was unread before it was looked at.
 - [cited] Two weaknesses that the defending king stands between are not two weaknesses in the operative sense. Measured on the Lasker-Capablanca ending, moving the kings to d3/d6 costs the attacker over half the advantage.
 - [cited] Any position has several imperfections. Calling any two of them 'two weaknesses' is the commonest misuse — they must require DIFFERENT defensive resources and be far enough apart that the defence cannot cover both.
 - [noted] The principle describes a method of conversion, not an evaluation. A position with two weaknesses is not thereby winning, and Kotov-Pachman shows the gap: the moves annotators mark necessary and inaccurate differ by 0.05 pawns.
-- [**unread**] Against opposite-coloured bishops or a reachable fortress, the count of weaknesses is simply not the operative variable.
+- [cited] Against opposite-coloured bishops or a reachable fortress, the count of weaknesses is simply not the operative variable.
 - [**unread**] A pawn that is structurally weak can be the position's KEY DEFENSIVE ASSET, and no pawn-skeleton test tells the two apart. Shirov-Kramnik, Linares 2000, move 20: this base lists Black's f4 among the weaknesses White should play against, and Jan Markos calls the same pawn, together with b4, the cage that 'guards all the roads to d5'. Both readings follow from the skeleton and only one is true of the position.
 ## bad-bishop
 
 - [cited] REGISTERED FALSE POSITIVE: a bishop behind its own pawns is not automatically bad in the sense that matters. Suba's active bad bishop is the counterexample, and it is common, not exotic.
-- [**unread**] Counting pawns on the bishop's colour is mechanical and will fire on pieces that are performing well. Mobility and role must be checked too.
-- [**unread**] A bad bishop that is the sole guardian of a weak colour complex is a load-bearing defender, not a liability.
+- [cited] Counting pawns on the bishop's colour is mechanical and will fire on pieces that are performing well. Mobility and role must be checked too.
+- [cited] A bad bishop that is the sole guardian of a weak colour complex is a load-bearing defender, not a liability.
 ## opposite-coloured-bishops
 
 - [cited] The drawish reputation is an ENDGAME fact. In the middlegame with heavy pieces on, opposite-coloured bishops favour the attacker, because the bishop operates where the defender's cannot answer. Announcing 'opposite bishops, drawn' with queens on the board is the standard error.
@@ -95,8 +95,8 @@ the defects listed in the tool's header was unread before it was looked at.
 - [cited] A rook reaching the seventh is not decisive by itself. With an empty seventh rank and an enemy king that has luft, a tested position evaluates level at -0.04.
 ## luft
 
-- [**unread**] Making luft is not automatically prudent. The same move is a hook against an opponent who can storm, and this is the standard error.
-- [**unread**] Luft is unnecessary when the back rank is adequately defended or when no heavy pieces remain.
+- [noted] Making luft is not automatically prudent. The same move is a hook against an opponent who can storm, and this is the standard error.
+- [cited] Luft is unnecessary when the back rank is adequately defended or when no heavy pieces remain.
 ## material-imbalance
 
 - [cited] REGISTERED FALSE POSITIVE: the 1/3/3/5/9 count is not an evaluation. Being 'ahead on material' by that scale says very little once the material is of different kinds.

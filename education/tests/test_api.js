@@ -1276,6 +1276,43 @@ const { concepts } = API.knowledge();
   ok('...and the ones that did are corrected in place, not deleted', corrected >= 20, String(corrected));
 }
 
+{
+  // Three more traps built, and one measured as unbuildable.
+  const has = (fen, id) => API.analyzeWithEducation({ fen }).concepts_all.some(c => c.id === id);
+
+  // two-weaknesses, fourth trap: "against opposite-coloured bishops or a
+  // reachable fortress, the count of weaknesses is simply not the operative
+  // variable." The defender holds a whole colour complex whatever the count
+  // says. 38.6% -> 33.8%.
+  const OCB = 'r5k1/5ppp/1p6/p2b4/P7/1P6/2B2PPP/R5K1 w - - 0 1';
+  ok('two-weaknesses: not the operative variable with opposite bishops on',
+     !has(OCB, 'two-weaknesses'),
+     JSON.stringify(API.analyzeWithEducation({ fen: OCB }).concepts_all.map(c => c.id)));
+
+  // backward-pawn, second trap: "a backward pawn on a closed file that nothing
+  // can attack is a description, not a weakness." 1.9% -> 1.3%: 10 of the 15
+  // backward pawns on the shipped corpus stand on a file half-open for the
+  // opponent, and the other five were descriptions.
+  ok('backward-pawn: the file must be half-open for the opponent',
+     /half-open for the opponent/.test(
+       fs.readFileSync(path.join(ROOT, 'lib', 'matchers.js'), 'utf8')));
+
+  // luft, second trap: half built, half measured as unbuildable, and the
+  // measurement is the point. 36 of the 39 side-instances where luft fires have
+  // a friendly rook or queen ON their own back rank - refusing those would
+  // delete the concept, because a rook on the back rank is exactly what most
+  // back-rank mates happen in spite of.
+  const luftRec = JSON.parse(fs.readFileSync(
+    path.join(ROOT, 'concepts', 'king-safety', 'luft.json'), 'utf8'));
+  ok('luft: "adequately defended" is recorded as unbuildable, with the number',
+     (luftRec.limitations || []).some(l => /36 of the 39/.test(l)));
+
+  // ...and the trap reading list has gone down, not up.
+  const traps = fs.readFileSync(path.join(ROOT, 'state', 'TRAPS.md'), 'utf8');
+  const m = traps.match(/\*\*(\d+) of (\d+) cited\. (\d+) unread\.\*\*/);
+  ok('trap list: fewer than 30 unread', m && Number(m[3]) < 30, m && m[0]);
+}
+
 /* ---------- report ---------- */
 console.log(`\nAPI  PASS ${pass}   FAIL ${fails.length}`);
 for (const [n, d] of fails) console.log(`  FAIL  ${n}\n        ${d}`);

@@ -351,10 +351,26 @@ const STRUCTURAL = [
   },
   {
     concept: 'backward-pawn',
-    implements: "recognition: lagging behind its neighbours with its advance square controlled by an enemy pawn",
+    implements: ("recognition: lagging behind its neighbours with its advance square controlled by " +
+                 "an enemy pawn - and the record's second trap, which had never been built: \"a " +
+                 "backward pawn on a closed file that nothing can attack is a description, not a " +
+                 "weakness.\" The file must be half-open for the opponent."),
     run(f) {
       const hits = [];
-      for (const c of ['w', 'b']) if (f.pawns[c].backward.length) hits.push({ c, sq: f.pawns[c].backward });
+      for (const c of ['w', 'b']) {
+        // The first trap - "a pawn that is merely behind its neighbours but CAN
+        // advance safely is not backward in the operative sense" - is Layer 3's,
+        // and is built there: the advance square has to be controlled by an
+        // enemy pawn, which is what makes advancing unsafe by definition.
+        //
+        // The second is this. A backward pawn nobody can get at is a shape, not
+        // a target: the opponent needs the file to bring a rook down. 10 of the
+        // 15 backward pawns on the 788 shipped positions stand on a file that is
+        // half-open for the opponent; the other five are descriptions.
+        const semi = new Set(f.files.semiOpenFor[other(c)] || []);
+        const real = f.pawns[c].backward.filter(sq => semi.has(sq[0]));
+        if (real.length) hits.push({ c, sq: real });
+      }
       if (!hits.length) return null;
       return {
         confidence: 'medium',
@@ -663,6 +679,13 @@ const STRUCTURAL = [
         // on move nine. A count cannot tell those apart. So the test is only
         // that the attacker is not MORE weak than the defender, and the rest of
         // the precondition is recorded as a limitation rather than pretended.
+        // "Against opposite-coloured bishops or a reachable fortress, the count
+        // of weaknesses is simply not the operative variable" - the record's
+        // fourth trap. This base can answer the first half: with one bishop each
+        // on opposite colours the defender holds a whole colour complex whatever
+        // the count says, and the concept's own definition_long makes the same
+        // point about the defending king covering both targets.
+        if (f.pieces.oppositeColouredBishops) continue;
         const mine = f.weakSpread[c] || { weak: [] };
         if (mine.weak.length > s.weak.length) continue;
         if (f.material[c].counts.R + f.material[c].counts.Q === 0) continue;
@@ -702,9 +725,15 @@ const STRUCTURAL = [
       for (const c of ['w', 'b']) {
         for (const b of (f.pieces[c].bishops || [])) {
           if (f.phase === 'opening' && HOME[c].includes(b.square)) continue;
-          // Suba's active bad bishop is the registered false positive on this
-          // record: structurally bad, outside the chain, and a fine piece. Scope
-          // is what tells them apart, so a bishop that can see is not reported.
+          // "Counting pawns on the bishop's colour is mechanical and will fire
+          // on pieces that are performing well. Mobility and role must be
+          // checked too" - the record's first trap, and Suba's active bad bishop
+          // is its registered case: structurally bad, outside the chain, and a
+          // fine piece. Mobility is the half a scan can check, so a bishop that
+          // can see is not reported. Role is not checkable and the record's
+          // second trap says why - "a bad bishop that is the sole guardian of a
+          // weak colour complex is a load-bearing defender, not a liability" -
+          // which is why this reports at LOW confidence and never at high.
           if (!shutInByItsOwnPawns(b)) continue;
           return {
             // The record states its own recognition confidence as LOW, saying
@@ -808,6 +837,11 @@ const STRUCTURAL = [
         // are about — with no open or semi-open file for Black to use. The
         // concept's record already says the pattern is only dangerous when a
         // rook or queen can reach the rank.
+        // This is also the buildable half of the record's second trap, "luft is
+        // unnecessary when the back rank is adequately defended or when no heavy
+        // pieces remain": no heavy pieces on a usable file, nothing to fear. The
+        // other half is not mechanical and says so on the record.
+        //
         // Not merely that a route exists, but that a heavy piece is ON one. An
         // earlier version counted open and semi-open files and still fired on
         // Nimzowitsch-Salwe, where Black had two semi-open files and no rook on

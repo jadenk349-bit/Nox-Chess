@@ -89,7 +89,8 @@
   ],
   "limitations": [
     "The geometric test is mechanical; 'cannot advance safely' requires evaluating the square ahead, which is position-dependent.",
-    "FIXED 2026-09-01, found by Wade-Korchnoi 1960: the detector reported a pawn with NO friendly pawn on either adjacent file as backward, because the 'is it behind its neighbours' test returns false both when the neighbours are all advanced and when there are none. A pawn with no neighbours is isolated. It also reported a pawn whose advance square is OCCUPIED by an enemy pawn, which is rammed rather than backward and creates no hole in front of it."
+    "FIXED 2026-09-01, found by Wade-Korchnoi 1960: the detector reported a pawn with NO friendly pawn on either adjacent file as backward, because the 'is it behind its neighbours' test returns false both when the neighbours are all advanced and when there are none. A pawn with no neighbours is isolated. It also reported a pawn whose advance square is OCCUPIED by an enemy pawn, which is rammed rather than backward and creates no hole in front of it.",
+    "MEASURED 2026-09-02: the second trap - 'a backward pawn on a closed file that nothing can attack is a description, not a weakness' - had never been built. The file must now be half-open for the opponent, so a rook can actually come down it. 1.9% -> 1.3%: 10 of the 15 backward pawns on the 788 shipped positions stand on such a file and the other five were descriptions. The first trap is Layer 3's and was already built there - the advance square has to be controlled by an enemy pawn, which is what makes advancing unsafe by definition."
   ],
   "misconceptions": [
     "That every backward pawn is a weakness.",
