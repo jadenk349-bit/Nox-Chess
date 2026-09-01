@@ -13,7 +13,7 @@ implemented; that is a reading, and doing it is the work. What it can do is
 stop the list being rediscovered from scratch each time — and every one of
 the defects listed in the tool's header was unread before it was looked at.
 
-**Of 246 stated conditions (traps and indicators-against): 74 enforced in the matcher, 20 in Layer 3, 29 argued on the record to be unbuildable or already honoured elsewhere, 123 unread.**
+**Of 246 stated conditions (traps and indicators-against): 79 enforced in the matcher, 20 in Layer 3, 29 argued on the record to be unbuildable or already honoured elsewhere, 118 unread.**
 
 "Noted on the record" is an argument, not a guard. A single "all cited"
 headline would read as "all traps implemented", which would be the same
@@ -69,17 +69,17 @@ shared file was added to the search. The test is quotation for that reason.
 - [cited] Detecting 'no pawns on this file' is trivial and fires constantly. The reportable fact is the file PLUS a usable entry square.
 - [cited] Contested files where all rooks come off leave neither side with anything.
 - [noted] An open file is not an advantage on its own. In a proven test position with a rook of each colour on the open d-file, the evaluation is +0.02 - the file belongs to nobody.
-- [**unread**] *(indicator against)* Every entry square on the file is defended — the rook stares and does nothing
-- [**unread**] *(indicator against)* The opponent can contest the file and trade all the rooks off
-- [**unread**] *(indicator against)* The file can be closed by a pawn advance
+- [cited] *(indicator against)* Every entry square on the file is defended — the rook stares and does nothing
+- [cited] *(indicator against)* The opponent can contest the file and trade all the rooks off
+- [cited] *(indicator against)* The file can be closed by a pawn advance
 - [**unread**] *(indicator against)* Occupying it costs a tempo the position cannot spare
 ## semi-open-file
 
 - [cited] A semi-open file is a fact about pawns; whether it produces pressure depends on whether the target is fixed and whether you can attack it more times than it can be defended.
 - [cited] Both sides can have semi-open files, usually on opposite wings, and each will be attacking on their own. Reporting only one side's is half the position.
-- [**unread**] *(indicator against)* The pawn can simply advance
+- [cited] *(indicator against)* The pawn can simply advance
 - [layer 3] *(indicator against)* Another enemy pawn can defend it
-- [**unread**] *(indicator against)* The file has no entry square beyond the pawn
+- [cited] *(indicator against)* The file has no entry square beyond the pawn
 ## outpost
 
 - [layer 3] A knight on d5 is not an outpost merely because it is on d5. If ...c6 or ...e6 is available, the knight is visiting.

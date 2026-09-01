@@ -1502,3 +1502,28 @@ anyway. Karpov's eviction takes four preparatory king moves.
 Fitting a rule to one position would have cost the textbook one, so the failure
 is recorded. The corpus now reports **1 false positive of 40**, where it reported
 0 of 39.
+
+
+## A matcher that quoted its test and built neither half of it
+
+`semi-open-file` fired on **39.5%** of the 788 shipped positions and had zero
+human grounding. Its record states the whole test — *"whether it produces
+pressure depends on whether the **target is fixed** and whether you can **attack
+it more times than it can be defended**"* — and the matcher quoted that sentence
+in a comment and then said "a rook on the file is the half a static scan can
+answer". That was a claim nobody had checked, and it is false: both halves are
+answerable. The enemy pawn must have no safe advance, and it must be attacked at
+least as often as it is defended. 39.5% → **16.4%**, and the sentence now names
+the pawn it bears down on.
+
+This is worth separating from the eight earlier cases. Those were matchers that
+*ignored* a stated condition. This one **quoted** the condition, asserted that
+half of it was unanswerable, and was wrong about that — which is how a trap gets
+marked "cited" by the audit and still is not built. The artifact already says
+"noted is an argument, not a guard"; this says the same about a citation.
+
+`open-file`'s last answerable indicator_against — "the file can be closed by a
+pawn advance" — is built too, and is **near-inert**: 35.5% → 35.4%, because a
+file is open precisely when both pawns have left it and a pawn arriving from an
+adjacent file to shut it is rare. Built, measured, and reported as near-inert
+rather than dressed up.

@@ -1503,6 +1503,45 @@ const { concepts } = API.knowledge();
      /traps and indicators-against/.test(traps));
 }
 
+{
+  // semi-open-file QUOTED its record's whole test and built none of it. The
+  // record: "whether it produces pressure depends on whether the target is FIXED
+  // and whether you can attack it MORE TIMES THAN IT CAN BE DEFENDED." A comment
+  // in the matcher used to say a rook on the file was "the half a static scan
+  // can answer" — a claim nobody had checked. Both halves are answerable.
+  // 39.5% -> 16.4%.
+  const sof = fen => {
+    const c = API.analyzeWithEducation({ fen }).concepts.find(x => x.id === 'semi-open-file');
+    return c ? (c.because || [''])[0] : null;
+  };
+  // A rook on a half-open file whose target pawn can simply step forward is a
+  // rook looking at a pawn that is about to leave.
+  ok('semi-open-file: silent when the target pawn can step out of the way',
+     !sof('4k3/3p4/2p5/8/8/8/8/3RK3 w - - 0 1'),
+     String(sof('4k3/3p4/2p5/8/8/8/8/3RK3 w - - 0 1')));
+  // ...and silent when the rook is outnumbered on it — "the rook stares and
+  // does nothing", which is the record's own phrase.
+  ok('semi-open-file: silent when the target is defended more times than attacked',
+     !sof('4k3/3pr3/8/8/8/8/8/3RK3 w - - 0 1'),
+     String(sof('4k3/3pr3/8/8/8/8/8/3RK3 w - - 0 1')));
+  // ...and reported when the pawn is genuinely stuck, with the target named.
+  const fixed = sof('4k3/3p4/8/8/8/8/8/3RK3 w - - 0 1');
+  ok('semi-open-file: reported when the target is fixed', !!fixed, String(fixed));
+  ok('...and the sentence names the pawn it bears down on',
+     /bearing down the semi-open d-file on d7, which cannot step out of the way/.test(String(fixed)),
+     String(fixed));
+  ok('semi-open-file: the measured rate is recorded in the source',
+     /39\.5% -> 16\.4%|83% of tested positions before any guard/.test(
+       fs.readFileSync(path.join(ROOT, 'lib', 'matchers.js'), 'utf8')));
+
+  // open-file's last answerable indicator_against, built and near-inert, which
+  // is reported rather than dressed up: "the file can be closed by a pawn
+  // advance" costs 0.1 points of the firing rate.
+  ok('open-file: the closable-file guard is built and its near-inertness recorded',
+     /Built and near-inert, and saying so is the honest report/.test(
+       fs.readFileSync(path.join(ROOT, 'lib', 'matchers.js'), 'utf8')));
+}
+
 /* ---------- report ---------- */
 console.log(`\nAPI  PASS ${pass}   FAIL ${fails.length}`);
 for (const [n, d] of fails) console.log(`  FAIL  ${n}\n        ${d}`);

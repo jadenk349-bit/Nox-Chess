@@ -414,7 +414,12 @@ const STRUCTURAL = [
   },
   {
     concept: 'open-file',
-    implements: "recognition.preconditions: a file with no pawns of either colour",
+    implements: ("recognition.preconditions: a file with no pawns of either colour, plus the " +
+                 "record's registered false positive and three of its indicators_against - a usable " +
+                 "entry square (\"every entry square on the file is defended, the rook stares and " +
+                 "does nothing\"), no enemy heavy piece contesting it (\"the opponent can contest " +
+                 "the file and trade all the rooks off\"), and the file not shuttable (\"the file " +
+                 "can be closed by a pawn advance\")."),
     run(f) {
       // The concept's own record says a file with no entry point does nothing,
       // and mass testing over 788 positions showed this firing on 61% of them -
@@ -464,6 +469,27 @@ const STRUCTURAL = [
             const q = base.b[rr * 8 + (m.to & 7)];
             if (q && q.c === other(c) && (q.t === 'R' || q.t === 'Q')) return false;
           }
+          // ...and the last of the record's indicators_against that a static
+          // scan can answer: "the file can be closed by a pawn advance." A file
+          // the defender shuts with one safe pawn move is not a file, it is a
+          // file until they get a move. Measured: this costs 0.1 points of the
+          // firing rate, 35.5% -> 35.4%, because a file is open precisely when
+          // both pawns have left it and a pawn arriving from an adjacent file is
+          // rare. Built and near-inert, and saying so is the honest report.
+          const col = m.to & 7;
+          const them = other(c);
+          const shut = P.cloneState(base);
+          shut.turn = them; shut.ep = null;
+          let theirs;
+          try { theirs = P.legalMoves(shut); } catch (e) { theirs = []; }
+          const closable = theirs.some(x => {
+            const q = shut.b[x.from];
+            if (!q || q.t !== 'P' || q.c !== them) return false;
+            if ((x.to & 7) !== col) return false;
+            let nx2; try { nx2 = P.makeMove(shut, x); } catch (e) { return false; }
+            return P.see(nx2, x.to, c) <= 0;
+          });
+          if (closable) return false;
           return true;
         });
         if (hit) entries.push({ c, from: FEAT.nameOf(hit.from), to: FEAT.nameOf(hit.to) });
@@ -481,7 +507,11 @@ const STRUCTURAL = [
   },
   {
     concept: 'semi-open-file',
-    implements: "recognition.preconditions: a file carrying an enemy pawn and none of your own",
+    implements: ("recognition.preconditions: a file carrying an enemy pawn and none of your own - " +
+                 "AND the whole of the record's first trap, which this used to quote and not build: " +
+                 "\"whether it produces pressure depends on whether the target is FIXED and whether " +
+                 "you can attack it MORE TIMES THAN IT CAN BE DEFENDED.\" Both halves are answerable " +
+                 "and neither was asked."),
     run(f) {
       if (totalHeavy(f) === 0) return null;      // same reason as open-file
       const hits = [];
@@ -492,23 +522,78 @@ const STRUCTURAL = [
         hits.push({ c, files, rooks });
       }
       if (!hits.length) return null;
-      // Firing on 83% of tested positions before this guard. Nearly every
+      // Firing on 83% of tested positions before any guard. Nearly every
       // position has a semi-open file somewhere; what is worth reporting is one
-      // a rook is actually using. The record says it in these words: "a
-      // semi-open file is a fact about pawns; whether it produces pressure
-      // depends on whether the target is fixed and whether you can attack it
-      // more times than it can be defended." A rook on the file is the first
-      // half of that and is the half a static scan can answer.
+      // a rook is actually using, and then only when it is doing something.
+      //
+      // The record states the whole test and this matcher used to quote it and
+      // build none of it: "a semi-open file is a fact about pawns; whether it
+      // produces pressure depends on whether the TARGET IS FIXED and whether you
+      // can ATTACK IT MORE TIMES THAN IT CAN BE DEFENDED." A comment here used to
+      // say a rook on the file was "the half a static scan can answer", which was
+      // a claim nobody had checked: both halves are answerable, and neither was
+      // asked. Its indicators_against say the same thing twice more - "the pawn
+      // can simply advance" and "the file has no entry square beyond the pawn".
+      //
+      // FIXED: the enemy pawn on the file has no safe advance. A pawn that can
+      // step out of the way is not a target, it is a pawn that is about to leave.
+      // OUTNUMBERED: we attack it at least as many times as they defend it.
+      // Attacking it fewer times than it is defended is a rook staring at a wall,
+      // which is the record's "the rook stares and does nothing".
+      //
       // ...and BOTH sides, which is the record's second trap: "both sides can
       // have semi-open files, usually on opposite wings, and each will be
       // attacking on their own. Reporting only one side's is half the position."
-      const withRook = hits.filter(h => h.rooks.length);
+      const P = FEAT.page;
+      const st = P.stateFromFEN(f.fen);
+      const targetOf = (c, file) => {
+        const col = file.charCodeAt(0) - 97;
+        for (let r = 0; r < 8; r++) {
+          const i = r * 8 + col, q = st.b[i];
+          if (q && q.t === 'P' && q.c === other(c)) return i;
+        }
+        return -1;
+      };
+      const canStepAway = (c, i) => {
+        const them = other(c);
+        const probe = P.cloneState(st); probe.turn = them; probe.ep = null;
+        let ms; try { ms = P.legalMoves(probe); } catch (e) { return true; }
+        return ms.some(m => {
+          if (m.from !== i) return false;
+          const pc = probe.b[m.from];
+          if (!pc || pc.t !== 'P') return false;
+          let nx; try { nx = P.makeMove(probe, m); } catch (e) { return false; }
+          return P.see(nx, m.to, c) <= 0;               // and it survives leaving
+        });
+      };
+      const withRook = [];
+      for (const h of hits) {
+        if (!h.rooks.length) continue;
+        const useful = h.files.filter(fl => {
+          const i = targetOf(h.c, fl);
+          if (i < 0) return false;
+          if (!h.rooks.some(sq => sq[0] === fl)) return false;   // a rook on THIS file
+          if (canStepAway(h.c, i)) return false;                 // not a fixed target
+          let atk = 0, def = 0;
+          try {
+            atk = P.attackersOf(st, i, h.c).length;
+            def = P.attackersOf(st, i, other(h.c)).length;
+          } catch (e) { return false; }
+          return atk >= def && atk > 0;
+        });
+        if (useful.length) withRook.push({ ...h, useful });
+      }
       if (!withRook.length) return null;
       const lead = withRook[0];
       return {
         confidence: 'high',
-        because: withRook.map(h => `${side(f, h.c)} has a rook on ${h.rooks.join(' and ')}, on a semi-open file`),
-        slots: { file: lead.files[0] },
+        because: withRook.map(h => {
+          const fl = h.useful[0];
+          const i = targetOf(h.c, fl);
+          return `${side(f, h.c)} has a rook on ${h.rooks.filter(sq => h.useful.includes(sq[0])).join(' and ')}, ` +
+                 `bearing down the semi-open ${fl}-file on ${FEAT.nameOf(i)}, which cannot step out of the way`;
+        }),
+        slots: { file: lead.useful[0] },
         subjects: withRook.map(h => h.c),
       };
     },
