@@ -1547,3 +1547,23 @@ rather than a front", and `doubled-pawns`' three compensations. The audit's
 quotation test under-credits when a record says the same thing twice in different
 words — which is the price of a test that cannot be gamed. The fix is to quote
 the second wording too, not to loosen the test.
+
+
+## Nimzowitsch assigns flank outposts to rooks; this base gave them to knights
+
+`outpost`'s second `indicator_against` says *"the square is on the a/b/g/h files
+and the intended occupant is a knight — Nimzowitsch assigns flank outposts to
+rooks."* The matcher filtered only **a** and **h**, and only because
+Capablanca–Tartakower 1924 had forced it in an earlier session. Widening to b and
+g for knights: 15.4% → **11.9%**, leads 43 → **30**. More than it looks — a
+pawn-defended knight on b5 or g5 in the enemy half is not rare in a corpus of
+tactical puzzles, and every one was being called an outpost by a base whose own
+record assigns the square to a rook.
+
+`blockade` went the other way, and a position decided it. Its first
+`indicator_against` — "the blockader is a queen or rook, which is expensive and
+evictable" — was built as a refusal and measured: 27.3% → 20.3%, and it **deletes
+Lisitsin–Capablanca 1935**, a queen ending where Chernev praises exactly the
+queen blockade the record warns about, and which is this corpus's annotated
+instance of the concept. The sentence carries the caveat instead. Fifth "say
+more" in two sessions.

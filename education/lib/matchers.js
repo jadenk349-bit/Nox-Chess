@@ -640,7 +640,19 @@ const STRUCTURAL = [
         // record's second trap, and it had never been built: the piece has to
         // bear on an enemy man or on squares inside the enemy camp, or the
         // report is about a square rather than about a plan.
+        //
+        // The record's second indicator_against widens the rim test to the b-
+        // and g-files as well, and only for knights: "the square is on the
+        // a/b/g/h files and the intended occupant is a knight - Nimzowitsch
+        // assigns flank outposts to rooks." A knight on the rim is proverbially
+        // dim; a rook on a flank outpost is a file being used. 15.4% -> 11.9%
+        // of the 788 shipped positions, which is more than it looks: a
+        // pawn-defended knight on b5 or g5 in the enemy half is not rare in a
+        // corpus of tactical puzzles, and every one of those was being called an
+        // outpost by a base whose own record assigns the square to a rook.
+        const RIM = 'abgh';
         const o = f.outposts[c].filter(x => x.square[0] !== 'a' && x.square[0] !== 'h')
+                               .filter(x => !(x.piece === 'N' && RIM.includes(x.square[0])))
                                .filter(x => bearsOnSomething(st, c, x.square));
         if (o.length) hits.push({ c, o });
       }
@@ -1372,10 +1384,21 @@ const STRUCTURAL = [
       if (!hits.length) return null;
       const h = hits[0];
       const word = { N: 'knight', B: 'bishop', R: 'rook', Q: 'queen', K: 'king' }[h.by];
+      // "The blockader is a queen or rook, which is expensive and evictable" -
+      // the record's first indicator_against, and the only one of its three a
+      // static scan can answer. It is SAID rather than used to suppress, and
+      // that was decided by a position: Lisitsin-Capablanca 1935 is a queen
+      // ending where Chernev praises exactly the queen blockade this warns
+      // about, and it is this corpus's annotated instance of the concept.
+      // Refusing heavy blockaders takes the rate 27.3% -> 20.3% and deletes it.
+      // Fifth time in two sessions that saying more beat firing less.
+      const heavy = h.by === 'R' || h.by === 'Q';
       return {
         confidence: 'high',
         because: [`${side(f, h.c)}'s ${word} on ${h.on} stands directly in front of ${side(f, other(h.c))}'s ` +
-                  `pawn on ${h.sq}, which has nothing of its own to advance behind and cannot pass it`],
+                  `pawn on ${h.sq}, which has nothing of its own to advance behind and cannot pass it` +
+                  (heavy ? ` — though a ${word} is an expensive blockader and can usually be chased ` +
+                           `off by something cheaper` : '')],
         slots: { square: h.on, piece: word },
         subjects: [...new Set(hits.map(x => x.c))],
       };

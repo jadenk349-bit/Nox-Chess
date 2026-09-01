@@ -1566,6 +1566,42 @@ const { concepts } = API.knowledge();
      /60\.4%/.test(fs.readFileSync(path.join(ROOT, 'lib', 'matchers.js'), 'utf8')));
 }
 
+{
+  // blockade's first indicator_against — "the blockader is a queen or rook,
+  // which is expensive and evictable" — is the only one of its three a static
+  // scan can answer, and it is SAID rather than used to suppress. Refusing heavy
+  // blockaders was tried: 27.3% -> 20.3%, and it deletes Lisitsin–Capablanca
+  // 1935, a queen ending where Chernev praises exactly the queen blockade the
+  // record warns about, and which is this corpus's annotated instance.
+  const bl = fen => {
+    const c = API.analyzeWithEducation({ fen }).concepts.find(x => x.id === 'blockade');
+    return c ? (c.because || [''])[0] : null;
+  };
+  const q = bl('8/5p2/1p2pkp1/1P1q2p1/3P4/5P1P/1Q3KP1/8 w - - 18 53');
+  ok('blockade: a queen blockader is reported', !!q, String(q));
+  ok('...with the caveat the record asks for',
+     /expensive blockader and can usually be chased off by something cheaper/.test(String(q)),
+     String(q));
+  ok('blockade: a knight blockader gets no caveat',
+     !/expensive blockader/.test(String(bl('4k3/3p4/3N4/8/8/8/4P3/4K3 w - - 0 1')) || 'none'));
+  ok('blockade: the rate is unchanged, and the attempt is recorded',
+     /27\.3% -> 20\.3% and deletes it/.test(
+       fs.readFileSync(path.join(ROOT, 'lib', 'matchers.js'), 'utf8')));
+
+  // outpost's second indicator_against — "the square is on the a/b/g/h files and
+  // the intended occupant is a knight; Nimzowitsch assigns flank outposts to
+  // rooks" — widens the existing a/h filter to b and g, for knights only.
+  // 15.4% -> 11.9% on the shipped corpus, and it leads 30 times instead of 43.
+  const src = fs.readFileSync(path.join(ROOT, 'lib', 'matchers.js'), 'utf8');
+  ok('outpost: a knight on a flank outpost is Nimzowitsch\'s rook job',
+     src.includes('flank outposts to rooks') && src.includes("const RIM = 'abgh'") &&
+     src.includes('15.4% -> 11.9%'));
+  // ...and a knight on b5 in the enemy half, pawn-defended, is no longer one.
+  const flank = API.analyzeWithEducation({
+    fen: '4k3/8/8/1N6/P7/8/8/4K3 w - - 0 1' }).concepts_all.some(c => c.id === 'outpost');
+  ok('outpost: a pawn-defended knight on the b-file is not reported', !flank);
+}
+
 /* ---------- report ---------- */
 console.log(`\nAPI  PASS ${pass}   FAIL ${fails.length}`);
 for (const [n, d] of fails) console.log(`  FAIL  ${n}\n        ${d}`);

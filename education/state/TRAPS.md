@@ -13,7 +13,7 @@ implemented; that is a reading, and doing it is the work. What it can do is
 stop the list being rediscovered from scratch each time — and every one of
 the defects listed in the tool's header was unread before it was looked at.
 
-**Of 246 stated conditions (traps and indicators-against): 85 enforced in the matcher, 20 in Layer 3, 29 argued on the record to be unbuildable or already honoured elsewhere, 112 unread.**
+**Of 246 stated conditions (traps and indicators-against): 87 enforced in the matcher, 20 in Layer 3, 33 argued on the record to be unbuildable or already honoured elsewhere, 106 unread.**
 
 "Noted on the record" is an argument, not a guard. A single "all cited"
 headline would read as "all traps implemented", which would be the same
@@ -47,11 +47,11 @@ shared file was added to the search. The test is quotation for that reason.
 - [cited] REGISTERED FALSE POSITIVE: a passed pawn is not automatically an advantage. A permanently blockaded passer that must be defended is a liability, and the blockading square is an excellent one for the defender.
 - [cited] Detecting a passer is trivial and fires constantly in endgames. Reporting one is only informative alongside whether it can actually advance.
 - [cited] A passer created from doubled pawns is often born weak.
-- [**unread**] *(indicator against)* It is securely blockaded by a piece that cannot be dislodged, especially a knight
-- [**unread**] *(indicator against)* Defending it ties down more of the owner's pieces than of the opponent's
+- [noted] *(indicator against)* It is securely blockaded by a piece that cannot be dislodged, especially a knight
+- [noted] *(indicator against)* Defending it ties down more of the owner's pieces than of the opponent's
 - [cited] *(indicator against)* It stands on a square where it is easily attacked
-- [**unread**] *(indicator against)* It was created by a pawn trade that also fixed it as a target
-- [**unread**] *(indicator against)* The position has no second front, so the blockader is never distracted
+- [noted] *(indicator against)* It was created by a pawn trade that also fixed it as a target
+- [noted] *(indicator against)* The position has no second front, so the blockader is never distracted
 ## backward-pawn
 
 - [cited] A pawn that is merely behind its neighbours but CAN advance safely is not backward in the operative sense.
@@ -89,7 +89,7 @@ shared file was added to the search. The test is quotation for that reason.
 - [layer 3] A centralised advanced knight is not an outpost. If an enemy pawn can still challenge the square, the piece is visiting. The detector in lib/features.js checks this and correctly refuses in the recorded counterexample.
 - [layer 3] *(indicator against)* An enemy pawn can still advance to challenge the square, and doing so costs the defender nothing
 - [**unread**] *(indicator against)* The occupant can be traded off by a knight or a same-coloured bishop with no compensation
-- [**unread**] *(indicator against)* The square is on the a/b/g/h files and the intended occupant is a knight — Nimzowitsch assigns flank outposts to rooks
+- [cited] *(indicator against)* The square is on the a/b/g/h files and the intended occupant is a knight — Nimzowitsch assigns flank outposts to rooks
 - [**unread**] *(indicator against)* The piece on the square attacks nothing and restricts nothing; it is safe but idle
 - [**unread**] *(indicator against)* Occupying costs a tempo the position cannot spare, or walks into a concrete tactic
 ## weak-square
@@ -237,7 +237,7 @@ shared file was added to the search. The test is quotation for that reason.
 - [layer 3] A piece standing in front of a pawn is not necessarily blockading it usefully. The test is whether the piece keeps its powers there — a queen on a blockading square is doing a knight's chore.
 - [noted] A blockade becomes a weakness when it ties down a piece needed elsewhere, which is the standard cost and is easy to omit.
 - [cited] A pawn stopped by an enemy PAWN is a ram, not a blockade, and no piece is being spent.
-- [**unread**] *(indicator against)* The blockader is a queen or rook, which is expensive and evictable
+- [cited] *(indicator against)* The blockader is a queen or rook, which is expensive and evictable
 - [**unread**] *(indicator against)* The blockading piece is needed elsewhere
 - [**unread**] *(indicator against)* The pawn can be supported and the blockade broken by an advance of its neighbours
 ## battery
