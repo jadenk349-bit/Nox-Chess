@@ -80,6 +80,7 @@ def main():
     DEPTHS = ["short", "normal", "deep"]
 
     rows = {}
+    mined = {}
     for cid, c in concepts.items():
         pos = c.get("examples", []) + c.get("counterexamples", []) + c.get("ambiguous_examples", [])
         ex = c.get("explanations") or {}
@@ -91,13 +92,27 @@ def main():
         # tested `'{' in json.dumps(ex)`, which is true of every dict ever
         # serialised and scored the whole rung at zero.
         texts = list((by_level or {}).values()) + list((by_depth or {}).values())
-        # A human-grounded example: the annotated corpus, or a position carrying a
-        # named game AND a historical origin. A mined self-play position is not one.
-        human = cid in corpus_ids or any(
+        # A human-grounded example is one a PERSON attributed to this concept.
+        #
+        # This used to accept any position carrying a named game and a historical
+        # origin, which is a different thing and a much easier one: 22 of the 36
+        # concepts it was counting were grounded only on positions this system
+        # found by running its own Layer 4 over master games. Those positions are
+        # real, their records say plainly that they "cannot by itself validate
+        # the matcher that found it", and the rung's own definition above says
+        # "an annotated master position, NOT a mined one". The implementation was
+        # contradicting the definition, in the direction that flattered it.
+        #
+        # `attributed_by` is now the test, and it is set only where a named human
+        # said so. The looser count is still computed, because the drop is worth
+        # seeing rather than hiding.
+        human = cid in corpus_ids or any(p.get("attributed_by") for p in pos)
+        mined_only = (not human) and any(
             p.get("game") and p.get("origin_kind") == "historical-game" for p in pos)
         rows[cid] = {
             "researched": bool(c.get("definition_long")) and bool(c.get("sources")),
             "human_grounded": human,
+            "_master_game_position_only": mined_only,
             "engine_verified": any(p.get("engine") or p.get("tablebase") for p in pos),
             "negative_tested": bool(c.get("counterexamples")),
             "ambiguity_tested": bool(c.get("ambiguous_examples")),
@@ -132,6 +147,12 @@ def main():
             m = len(can_detect) or 1
             line += f"\n  {'':<24} {got:>3}/{m} of the concepts whose own record allows a detector"
         print(line)
+
+    for c, r in rows.items():
+        mined[c] = r.pop("_master_game_position_only", False)
+    extra = sum(1 for c in mined if mined[c])
+    print(f"\n  ...and {extra} more concepts have a master-game position this system found "
+          f"itself,\n  which is evidence the concept OCCURS and not evidence a human named it here.")
 
     full = [c for c, r in rows.items() if all(r.values())]
     print(f"\n  all seven rungs: {len(full)}/{n}" + (f" — {', '.join(sorted(full))}" if full else ""))

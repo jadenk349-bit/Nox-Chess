@@ -136,8 +136,29 @@ would be wrong.
 master games, 648 tests plus 250 API, 376 audit and 3276 explanation assertions,
 all green, twelve audits clean. Against the corpus: 0 false negatives on concepts
 that can be detected, 0 false positives, 3 of 3 negatives correct — two of them
-non-vacuously. Eleven concepts now clear every rung their own record allows,
-up from eight.
+non-vacuously. On the corrected human-grounding
+measure — see below — four concepts clear every rung their own record allows.
+
+### And then the ladder turned out to be flattering itself
+
+The HUMAN-GROUNDED rung read 39 of 137, and its own definition in the same file
+said "an annotated master position, NOT a mined one". The implementation
+accepted any position carrying a named game and a historical origin, so 22 of
+those 39 were grounded only on positions this system had found by running its
+own Layer 4 over master games — positions whose own notes already said, in as
+many words, that one of them "cannot by itself validate the matcher that found
+it". The record was honest and the metric reading it was not.
+
+Fixed by adding an `attributed_by` field to the position schema, set only where
+a named human attributed the concept to that position, and the rung fell from 39
+to 17. All 17 come from the annotated corpus; the same measure would have read 5
+before this session. The looser count is still printed underneath the ladder,
+because a drop that large should be legible rather than silent.
+
+That is the third metric this project has caught telling it what it wanted to
+hear — after the mass test's "99.7% positional coverage" and the corpus
+checker's scoring of negative examples — and all three were found the same way:
+by asking what the number would have to mean.
 
 `state/COMPLETION.md` still says **not substantially complete**, and the blocker
 has changed shape rather than shrunk: it is negative and ambiguous evidence, 77%

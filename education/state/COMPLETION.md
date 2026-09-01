@@ -34,10 +34,21 @@ master games · 648 tests + 250 API + 376 audit + 3276 explanation assertions.
 | human-grounded corpus positions | 6 | 22 |
 | corpus games | 2 | 11 |
 | corpus roles | 5 positive, 1 ambiguous, 0 negative | 13 positive, 6 ambiguous, 3 negative |
-| concepts with human grounding | 31 | 39 |
+| concepts with human grounding (corrected measure) | 5 | 17 |
 | concepts with a Layer 4 matcher | 32 | 36 |
 | validated positions | 82 | 98 |
 | API false negatives on the corpus | 3 of 6 detectable | 0 of 22 |
+
+## A number that got worse on purpose
+
+The ladder's HUMAN-GROUNDED rung said 39 of 137 and its own definition said "an
+annotated master position, not a mined one". The implementation accepted any
+position carrying a named game, so 22 of those 39 were grounded only on
+positions this system found by running its own Layer 4 over master games — real
+positions whose own records already said they "cannot by itself validate the
+matcher that found it". The rung now requires an `attributed_by` naming the
+person who said so, and reads **17**. Every one of the 17 comes from the
+annotated corpus; before this session the same measure would have read 5.
 
 ## What is still missing, precisely
 
