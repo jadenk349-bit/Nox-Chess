@@ -6,13 +6,13 @@
   "counts": {
     "avoid_phrasing": 162,
     "exception": 289,
-    "false_positive_trap": 285,
-    "misconception": 258
+    "false_positive_trap": 287,
+    "misconception": 259
   },
   "evidence_tiers": {
-    "demonstrated": 27,
-    "on-a-tested-record": 279,
-    "sourced": 688
+    "demonstrated": 30,
+    "on-a-tested-record": 288,
+    "sourced": 679
   },
   "evidence_tier_meaning": {
     "demonstrated": "the sentence cites a measurement AND its concept holds engine or tablebase evidence",
@@ -20,7 +20,7 @@
     "sourced": "rests on cited sources; no engine or tablebase evidence on the record",
     "unsourced": "neither - should not exist and is a bug if it does"
   },
-  "total": 994,
+  "total": 997,
   "soft_concepts_without_exceptions": [],
   "entries": [
     {
@@ -3032,6 +3032,18 @@
       "path": "concepts/endgame/king-activation.json",
       "kind": "false_positive_trap",
       "text": "Centralisation with queens still on is a different matter entirely and this concept does not apply.",
+      "self_evidenced": false,
+      "evidence_tier": "on-a-tested-record"
+    },
+    {
+      "concept": "king-activation",
+      "category": "king-activation",
+      "knowledge_type": "strategic-principle",
+      "difficulty": "intermediate",
+      "concept_evidence": "tablebase",
+      "path": "concepts/endgame/king-activation.json",
+      "kind": "false_positive_trap",
+      "text": "Never recommend centralising a king while the opponent has a queen, whatever the piece count says. The phase test in lib/features.js is material-based and can call a queens-on position an endgame.",
       "self_evidenced": false,
       "evidence_tier": "on-a-tested-record"
     },
@@ -9292,108 +9304,132 @@
       "category": "piece-exchanges",
       "knowledge_type": "rule-of-thumb",
       "difficulty": "beginner",
-      "concept_evidence": "sources-only",
+      "concept_evidence": "tablebase",
       "path": "concepts/positional-method/piece-exchanges.json",
       "kind": "misconception",
       "text": "That trading is good when ahead. It is good when it reduces counterplay and bad when it approaches a drawn ending.",
       "self_evidenced": false,
-      "evidence_tier": "sourced"
+      "evidence_tier": "on-a-tested-record"
     },
     {
       "concept": "piece-exchanges",
       "category": "piece-exchanges",
       "knowledge_type": "rule-of-thumb",
       "difficulty": "beginner",
-      "concept_evidence": "sources-only",
+      "concept_evidence": "tablebase",
       "path": "concepts/positional-method/piece-exchanges.json",
       "kind": "misconception",
       "text": "That an even trade is positionally neutral. It changes the character of the position, which is usually the bigger consequence.",
       "self_evidenced": false,
-      "evidence_tier": "sourced"
+      "evidence_tier": "on-a-tested-record"
     },
     {
       "concept": "piece-exchanges",
       "category": "piece-exchanges",
       "knowledge_type": "rule-of-thumb",
       "difficulty": "beginner",
-      "concept_evidence": "sources-only",
+      "concept_evidence": "tablebase",
+      "path": "concepts/positional-method/piece-exchanges.json",
+      "kind": "misconception",
+      "text": "That capturing or trading is safe when you are winning. A proven position in this base has one available capture, which is also a check, and it converts mate in one into a draw.",
+      "self_evidenced": true,
+      "evidence_tier": "demonstrated"
+    },
+    {
+      "concept": "piece-exchanges",
+      "category": "piece-exchanges",
+      "knowledge_type": "rule-of-thumb",
+      "difficulty": "beginner",
+      "concept_evidence": "tablebase",
       "path": "concepts/positional-method/piece-exchanges.json",
       "kind": "exception",
       "text": "Simplifying when ahead fails if the ending is drawn — wrong rook pawn, opposite bishops, insufficient material.",
       "self_evidenced": false,
-      "evidence_tier": "sourced"
+      "evidence_tier": "on-a-tested-record"
     },
     {
       "concept": "piece-exchanges",
       "category": "piece-exchanges",
       "knowledge_type": "rule-of-thumb",
       "difficulty": "beginner",
-      "concept_evidence": "sources-only",
+      "concept_evidence": "tablebase",
       "path": "concepts/positional-method/piece-exchanges.json",
       "kind": "exception",
       "text": "The side ahead in material should keep pawns, not trade them.",
       "self_evidenced": false,
-      "evidence_tier": "sourced"
+      "evidence_tier": "on-a-tested-record"
     },
     {
       "concept": "piece-exchanges",
       "category": "piece-exchanges",
       "knowledge_type": "rule-of-thumb",
       "difficulty": "beginner",
-      "concept_evidence": "sources-only",
+      "concept_evidence": "tablebase",
       "path": "concepts/positional-method/piece-exchanges.json",
       "kind": "exception",
       "text": "With a rook against two minor pieces, trade major pieces even when nominally behind, because major pieces are redundant.",
       "self_evidenced": false,
-      "evidence_tier": "sourced"
+      "evidence_tier": "on-a-tested-record"
     },
     {
       "concept": "piece-exchanges",
       "category": "piece-exchanges",
       "knowledge_type": "rule-of-thumb",
       "difficulty": "beginner",
-      "concept_evidence": "sources-only",
+      "concept_evidence": "tablebase",
       "path": "concepts/positional-method/piece-exchanges.json",
       "kind": "false_positive_trap",
       "text": "'Simplify when ahead' is the most over-applied rule in chess. Trading into a proven drawn ending is how won games are drawn, and this base holds tablebase-proven examples of exactly that.",
       "self_evidenced": true,
-      "evidence_tier": "sourced"
+      "evidence_tier": "demonstrated"
     },
     {
       "concept": "piece-exchanges",
       "category": "piece-exchanges",
       "knowledge_type": "rule-of-thumb",
       "difficulty": "beginner",
-      "concept_evidence": "sources-only",
+      "concept_evidence": "tablebase",
       "path": "concepts/positional-method/piece-exchanges.json",
       "kind": "false_positive_trap",
       "text": "The rule is about removing counterplay, not about removing pieces. If the opponent has no counterplay, there is no reason to trade at all.",
       "self_evidenced": false,
-      "evidence_tier": "sourced"
+      "evidence_tier": "on-a-tested-record"
     },
     {
       "concept": "piece-exchanges",
       "category": "piece-exchanges",
       "knowledge_type": "rule-of-thumb",
       "difficulty": "beginner",
-      "concept_evidence": "sources-only",
+      "concept_evidence": "tablebase",
       "path": "concepts/positional-method/piece-exchanges.json",
       "kind": "false_positive_trap",
       "text": "Trading one bishop destroys a bishop pair worth half a pawn — a cost that a simple material count does not see.",
       "self_evidenced": false,
-      "evidence_tier": "sourced"
+      "evidence_tier": "on-a-tested-record"
     },
     {
       "concept": "piece-exchanges",
       "category": "piece-exchanges",
       "knowledge_type": "rule-of-thumb",
       "difficulty": "beginner",
-      "concept_evidence": "sources-only",
+      "concept_evidence": "tablebase",
+      "path": "concepts/positional-method/piece-exchanges.json",
+      "kind": "false_positive_trap",
+      "text": "A trade being available is not a reason to make it, and being ahead is not a reason either. Proven case: Rxh7+ draws where Rb8 mates in one.",
+      "self_evidenced": true,
+      "evidence_tier": "demonstrated"
+    },
+    {
+      "concept": "piece-exchanges",
+      "category": "piece-exchanges",
+      "knowledge_type": "rule-of-thumb",
+      "difficulty": "beginner",
+      "concept_evidence": "tablebase",
       "path": "concepts/positional-method/piece-exchanges.json",
       "kind": "avoid_phrasing",
       "text": "always simplify when ahead",
       "self_evidenced": false,
-      "evidence_tier": "sourced"
+      "evidence_tier": "on-a-tested-record"
     },
     {
       "concept": "positional-evaluation",

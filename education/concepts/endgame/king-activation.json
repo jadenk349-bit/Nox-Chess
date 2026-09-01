@@ -67,7 +67,8 @@
     "false_positive_traps": [
       "The single most important trap is rook endings, on the testimony of the principle's own advocate: Shereshevsky found centralisation there to be not merely untimely but sometimes simply wrong, and warns against automatic centralising moves.",
       "A king moving towards the centre is not automatically doing the right thing; the move still has to survive checks. His example has 1...Ke5? losing to 2.Rd5+ while the retreat 1...Kc5! draws.",
-      "Centralisation with queens still on is a different matter entirely and this concept does not apply."
+      "Centralisation with queens still on is a different matter entirely and this concept does not apply.",
+      "Never recommend centralising a king while the opponent has a queen, whatever the piece count says. The phase test in lib/features.js is material-based and can call a queens-on position an endgame."
     ]
   },
   "application": {
@@ -167,6 +168,17 @@
         "category": "win",
         "note": "PROVEN win in 15, against 35 with the king in front. The 20-move difference is attributable to the king's square alone."
       }
+    },
+    {
+      "fen": "8/3b2k1/pp1p2pp/n1p1br2/P1P4q/1P1Q1BPP/7K/1R2BR2 b - - 1 31",
+      "note": "A position this base's phase test calls simplified enough to matter, in which BOTH queens are still on the board. Centralising a king here is not a plan but an invitation. Mined from the corpus rather than constructed, as an instance of the pattern the concept's exceptions warn about. Provenance: taken from this repository's puzzle corpus (puzzles/*.json), which tools/generate_puzzles.js mined from ENGINE SELF-PLAY. It is a real, legally reached position from a real game between two engines - not a master game, and this base does not claim it as one.",
+      "origin_kind": "puzzle",
+      "concept_role": "contradicts",
+      "side_to_move_benefits": "neither",
+      "detector": {
+        "source": "lib/features.js",
+        "note": "Queens present for both sides. The king-activation matcher requires phase=endgame AND pawns on the board, and does not check for queens - so this position is recorded as the case that guard does not cover, and the concept's recognition block carries the warning explicitly."
+      }
     }
   ],
   "ambiguous_examples": [],
@@ -206,7 +218,8 @@
     "last_updated": "2026-09-01",
     "open_questions": [],
     "audit_notes": [
-      "2026-09-01: two attempts to build a controlled pair in which king placement alone flips a rook ending between win and draw both FAILED - one pair came out win/win (dtm 35 vs 15, recorded) and a Philidor-setup pair came out draw/draw. Recorded rather than discarded. This mirrors the three failed outpost pairs and is consistent with Shereshevsky's own remark that rook endings are too concrete for the principle to isolate."
+      "2026-09-01: two attempts to build a controlled pair in which king placement alone flips a rook ending between win and draw both FAILED - one pair came out win/win (dtm 35 vs 15, recorded) and a Philidor-setup pair came out draw/draw. Recorded rather than discarded. This mirrors the three failed outpost pairs and is consistent with Shereshevsky's own remark that rook endings are too concrete for the principle to isolate.",
+      "2026-09-01: a mined position was labelled origin_kind 'historical-game'. The corpus it came from is engine self-play, so that claimed a provenance this base does not have. Relabelled 'puzzle' with the provenance stated."
     ]
   },
   "id": "king-activation",

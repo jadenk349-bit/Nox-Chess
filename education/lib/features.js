@@ -215,6 +215,49 @@ function outposts(st, colour) {
   return out;
 }
 
+/* Own pawns standing on the same colour as each bishop. This is the observable
+ * half of the good/bad bishop distinction and nothing more: a bishop hemmed in
+ * by its own pawns is the SHAPE of a bad bishop, and whether it is actually bad
+ * depends on whether those pawns can move and on what the bishop is doing
+ * instead — which is Layer 4's problem and, mostly, a human's. */
+function bishopPawnColours(st, colour) {
+  const own = pieces(st, colour, 'P');
+  const lights = own.filter(isLight).length;
+  const darks = own.length - lights;
+  // How far the bishop can actually see. The concept's own record insists that
+  // "bad" is structural and "passive" is functional and that the two are not the
+  // same thing - Suba's active bad bishop is a structurally bad bishop outside
+  // its own chain doing real work. Scope is what separates them, so it is
+  // measured rather than assumed from the pawn count.
+  const scopeOf = i => {
+    let n = 0;
+    for (const [dr, dc] of [[-1, -1], [-1, 1], [1, -1], [1, 1]]) {
+      let r = rowOf(i) + dr, c = colOf(i) + dc;
+      while (onBoard(r, c)) {
+        const q = st.b[idx(r, c)];
+        if (q) { if (q.c !== colour) n++; break; }
+        n++; r += dr; c += dc;
+      }
+    }
+    return n;
+  };
+  return pieces(st, colour, 'B').map(i => {
+    const light = isLight(i);
+    const sameColour = light ? lights : darks;
+    // Blocked: a pawn of ours directly in front of the bishop's own diagonal
+    // exits is the sharper test, but "how many of our pawns share its colour"
+    // is what the literature actually uses.
+    return {
+      square: nameOf(i),
+      colour: light ? 'light' : 'dark',
+      ownPawnsOnItsColour: sameColour,
+      ownPawnsTotal: own.length,
+      share: own.length ? sameColour / own.length : 0,
+      scope: scopeOf(i),
+    };
+  });
+}
+
 /* Holes a minor piece could occupy next move. A hole nobody can use is a fact
  * about the pawns; a hole a knight reaches in one is a plan. */
 function reachableHoles(st, colour) {
@@ -248,6 +291,7 @@ function pieceFeatures(st) {
     return {
       bishopPair: bishops.length >= 2 && bishops.some(isLight) && bishops.some(i => !isLight(i)),
       bishopSquares: bishops.map(i => ({ square: nameOf(i), colour: isLight(i) ? 'light' : 'dark' })),
+      bishops: bishopPawnColours(st, colour),
       rooksOnOpenFiles: rooks.filter(i => openSet.has(FILES[colOf(i)])).map(nameOf),
       rooksOnSemiOpenFiles: rooks.filter(i => semi.has(FILES[colOf(i)])).map(nameOf),
       rooksOnSeventh: rooks.filter(i => rowOf(i) === seventh).map(nameOf),
@@ -411,5 +455,6 @@ function motifsOfMove(fen, uci) {
 module.exports = {
   features, motifsOfMove, phaseOf, material, pawnStructure, fileState,
   holesFor, reachableHoles, outposts, pieceFeatures, kingFeatures, mobility, pawnSpace,
+  bishopPawnColours,
   nameOf, isLight, page: P,
 };

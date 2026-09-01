@@ -47,9 +47,11 @@
       "concept": "bad-bishop",
       "surface_pattern": "A bishop sits behind its own pawn chain.",
       "why_not": "A bishop hemmed in by pawns on its own colour may still be the key defender of a colour complex, or may become excellent after one pawn break. Mobility, role and prospects matter, not geometry alone.",
-      "fen": null,
-      "status": "pending",
-      "blocked_note": "Attempted and not resolved. A convincing case needs a bishop whose own pawns sit on its colour - the surface pattern - which is nonetheless fine, and the honest versions of that are positions where the pawns can still move or where the bishop is doing essential defensive work. Both depend on a judgement this base cannot yet isolate in a controlled position, exactly as the outpost and king-activity pairs could not be isolated. Left pending rather than resolved with a position that does not really demonstrate it."
+      "fen": "8/3b2k1/pp1p2pp/n1p1br2/P1P4q/1P1Q1BPP/7K/1R2BR2 b - - 1 31",
+      "status": "resolved",
+      "evidence": "feature-detector",
+      "resolution": "Resolved by building the detector the concept needed. lib/features.js now measures both halves of the distinction the record insists on: how many of a side's own pawns share the bishop's colour (structural) and how many squares the bishop actually sees (functional). The matcher requires BOTH before reporting a bad bishop, so Suba's active bad bishop - structurally bad, sees eleven squares - is not reported. The position was found by searching 1576 real positions for the shape rather than constructed to fit. A first version also reported undeveloped bishops on their home squares, which was caught by the existing false-positive regression suite.",
+      "resolved_date": "2026-09-01"
     },
     {
       "id": "exposed-king-not-losing",
@@ -137,6 +139,28 @@
       "status": "resolved",
       "evidence": "tablebase",
       "resolution": "PROVEN by the Syzygy tablebase, and controlled in the strongest possible way: this one position contains TWO checks with opposite results. Ra7+ holds the draw; Rg8+ LOSES. The surface pattern 'a check is available' therefore carries no information at all about whether checking is right - in this position it is simultaneously the drawing move and the losing move, depending only on which check. Rh8 and Rf8 also lose, so three of the seventeen legal moves throw away a proven draw.",
+      "resolved_date": "2026-09-01"
+    },
+    {
+      "id": "trading-while-ahead-not-automatic",
+      "concept": "piece-exchanges",
+      "surface_pattern": "A capture or trade is available and the player is materially or positionally ahead.",
+      "why_not": "Simplification is a method for reducing counterplay, not a rule. Which position you simplify INTO is the whole question, and a trade can convert a won position into a proven draw.",
+      "fen": "7k/1R5p/5K2/8/8/8/8/8 w - - 0 1",
+      "status": "resolved",
+      "evidence": "tablebase",
+      "resolution": "PROVEN by tablebase, every legal move checked. Rb8 is mate in one. The only capture, Rxh7+, is also a check and is a proven draw, since after Kxh7 only the two kings remain. The one move that simplifies is the one move that throws the game away.",
+      "resolved_date": "2026-09-01"
+    },
+    {
+      "id": "king-centralisation-with-danger",
+      "concept": "king-activation",
+      "surface_pattern": "Few pieces remain and a king has left its back rank, so a material-based phase test calls it an endgame.",
+      "why_not": "King activation is a claim about a phase in which mating attacks have become unlikely. A material-based phase test can call a position with both queens on an endgame, and centralising into that is an invitation rather than a plan. Shereshevsky separately documents rook endings where centralisation is not merely untimely but wrong.",
+      "fen": "8/3b2k1/pp1p2pp/n1p1br2/P1P4q/1P1Q1BPP/7K/1R2BR2 b - - 1 31",
+      "status": "partially-resolved",
+      "evidence": "feature-detector",
+      "resolution": "Partially resolved and recorded as such. The concept now carries an explicit trap forbidding the recommendation while the opponent has a queen, and the matcher's guard (phase must be endgame AND pawns must be on) is documented as NOT covering this case. A full resolution would mean the matcher itself checking for enemy queens, which is a change to Layer 4 rather than to the record, and is listed as open.",
       "resolved_date": "2026-09-01"
     }
   ],

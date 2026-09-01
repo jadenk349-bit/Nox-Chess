@@ -58,7 +58,8 @@
     "false_positive_traps": [
       "'Simplify when ahead' is the most over-applied rule in chess. Trading into a proven drawn ending is how won games are drawn, and this base holds tablebase-proven examples of exactly that.",
       "The rule is about removing counterplay, not about removing pieces. If the opponent has no counterplay, there is no reason to trade at all.",
-      "Trading one bishop destroys a bishop pair worth half a pawn — a cost that a simple material count does not see."
+      "Trading one bishop destroys a bishop pair worth half a pawn — a cost that a simple material count does not see.",
+      "A trade being available is not a reason to make it, and being ahead is not a reason either. Proven case: Rxh7+ draws where Rb8 mates in one."
     ]
   },
   "application": {
@@ -88,7 +89,8 @@
   ],
   "misconceptions": [
     "That trading is good when ahead. It is good when it reduces counterplay and bad when it approaches a drawn ending.",
-    "That an even trade is positionally neutral. It changes the character of the position, which is usually the bigger consequence."
+    "That an even trade is positionally neutral. It changes the character of the position, which is usually the bigger consequence.",
+    "That capturing or trading is safe when you are winning. A proven position in this base has one available capture, which is also a check, and it converts mate in one into a draw."
   ],
   "relationships": {
     "broader": [],
@@ -114,7 +116,24 @@
     ]
   },
   "examples": [],
-  "counterexamples": [],
+  "counterexamples": [
+    {
+      "fen": "7k/1R5p/5K2/8/8/8/8/8 w - - 0 1",
+      "note": "The sharpest available form of 'a trade is not automatically good'. White is winning by force and one capture is available.",
+      "origin_kind": "tablebase-position",
+      "concept_role": "contradicts",
+      "side_to_move_benefits": "white",
+      "tablebase": {
+        "source": "Lichess tablebase (Syzygy, 7-piece)",
+        "pieces": 4,
+        "wdl": "win",
+        "dtz": 1,
+        "dtm": 1,
+        "category": "win",
+        "note": "PROVEN, every legal move checked. Rb8 is MATE IN ONE. Rxh7+ - the only capture, and a check as well - is a PROVEN DRAW, because after Kxh7 nothing is left but the two kings. Every other rook move on the b-file also wins. So the single move that simplifies is the single move that throws the game away, while being both a capture and a check. This is the resolution position for the trading-while-ahead false-positive case."
+      }
+    }
+  ],
   "ambiguous_examples": [],
   "explanations": {
     "by_level": {

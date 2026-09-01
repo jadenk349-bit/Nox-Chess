@@ -144,7 +144,23 @@
     "conflicts": []
   },
   "examples": [],
-  "counterexamples": [],
+  "counterexamples": [
+    {
+      "fen": "8/3b2k1/pp1p2pp/n1p1br2/P1P4q/1P1Q1BPP/7K/1R2BR2 b - - 1 31",
+      "note": "Suba's active bad bishop, found by searching 1576 real positions for the shape rather than constructed to fit it. White's bishop on f3 shares its colour with four of White's five pawns - structurally bad by Steinitz's definition - and sees eleven squares. The concept's own distinction between 'bad' (structural) and 'passive' (functional) is exactly what separates this from a genuine liability. Provenance: taken from this repository's puzzle corpus (puzzles/*.json), which tools/generate_puzzles.js mined from ENGINE SELF-PLAY. It is a real, legally reached position from a real game between two engines - not a master game, and this base does not claim it as one.",
+      "origin_kind": "puzzle",
+      "concept_role": "contradicts",
+      "side_to_move_benefits": "neither",
+      "detector": {
+        "source": "lib/features.js bishopPawnColours",
+        "own_pawns_on_its_colour": 4,
+        "own_pawns_total": 5,
+        "share": 0.8,
+        "scope": 11,
+        "note": "This base's own Layer 3 measurement. The matcher requires scope below 7 before it will report a bad bishop at all, so the system does NOT make this false positive - the structural test fires and the functional one vetoes it."
+      }
+    }
+  ],
   "ambiguous_examples": [],
   "explanations": {
     "by_level": {
@@ -179,10 +195,12 @@
   },
   "status": {
     "stage": "researched",
-    "last_updated": "2026-08-31",
+    "last_updated": "2026-09-01",
     "open_questions": [],
     "audit_notes": [
-      "2026-09-01 audit: attribution to Mihail Suba carried low confidence without a hedge in the note itself. Hedge added so the caveat travels with the claim rather than sitting only in history.confidence."
+      "2026-09-01 audit: attribution to Mihail Suba carried low confidence without a hedge in the note itself. Hedge added so the caveat travels with the claim rather than sitting only in history.confidence.",
+      "2026-09-01: a detector was written for this concept (bishopPawnColours in lib/features.js) together with a scope measurement, precisely so that the structural test cannot on its own produce the registered false positive. An early version also reported undeveloped bishops on their home squares as bad; a bishop that has not moved has not been condemned by anything.",
+      "2026-09-01: a mined position was labelled origin_kind 'historical-game'. The corpus it came from is engine self-play, so that claimed a provenance this base does not have. Relabelled 'puzzle' with the provenance stated."
     ]
   },
   "id": "bad-bishop",

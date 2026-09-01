@@ -86,7 +86,7 @@ const PRIORITY = [
   // then structural features, most informative first
   'outpost', 'rook-on-the-seventh', 'passed-pawn', 'isolated-queen-pawn',
   'backward-pawn', 'doubled-pawns', 'opposite-coloured-bishops', 'bishop-pair',
-  'luft', 'semi-open-file', 'open-file', 'weak-square', 'material-imbalance',
+  'bad-bishop', 'luft', 'semi-open-file', 'open-file', 'weak-square', 'material-imbalance',
   'king-activation',
   'space', 'piece-activity',
 ];
@@ -260,6 +260,38 @@ const STRUCTURAL = [
           return {
             confidence: 'high',
             because: [`${side(f, c)} has both bishops and ${side(f, other(c))} does not`],
+            subjects: [c],
+          };
+        }
+      }
+      return null;
+    },
+  },
+  {
+    concept: 'bad-bishop',
+    implements: "definition: a bishop's scope is decided by where its OWN pawns sit; " +
+                "the record insists badness is STRUCTURAL and passivity FUNCTIONAL, so this " +
+                "reports the structure and requires low scope before saying anything stronger",
+    run(f) {
+      if (totalPawns(f) < 8) return null;          // structure has to exist to be bad
+      // A bishop still on its starting square is UNDEVELOPED, not bad. It was
+      // reported as bad on the Ruy Lopez false-positive position, where Black's
+      // c8 bishop simply has not moved yet and its own d7 pawn is in the way.
+      // Badness is a claim about the pawn structure having condemned a piece,
+      // which cannot be said of a piece that has not tried to go anywhere.
+      const HOME = { w: ['c1', 'f1'], b: ['c8', 'f8'] };
+      for (const c of ['w', 'b']) {
+        for (const b of (f.pieces[c].bishops || [])) {
+          if (HOME[c].includes(b.square)) continue;
+          if (b.ownPawnsOnItsColour < 4 || b.share < 0.55) continue;
+          // Suba's active bad bishop is the registered false positive on this
+          // record: structurally bad, outside the chain, and a fine piece. Scope
+          // is what tells them apart, so a bishop that can see is not reported.
+          if (b.scope >= 7) continue;
+          return {
+            confidence: 'medium',
+            because: [`${side(f, c)}'s bishop on ${b.square} shares its colour with ${b.ownPawnsOnItsColour} of its own ${b.ownPawnsTotal} pawns, and sees only ${b.scope} squares`],
+            slots: { square: b.square, piece: 'bishop' },
             subjects: [c],
           };
         }
