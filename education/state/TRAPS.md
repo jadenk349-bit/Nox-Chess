@@ -13,7 +13,7 @@ implemented; that is a reading, and doing it is the work. What it can do is
 stop the list being rediscovered from scratch each time — and every one of
 the defects listed in the tool's header was unread before it was looked at.
 
-**83 of 108 cited. 25 unread.**
+**89 of 108 cited. 19 unread.**
 
 ## doubled-pawns
 
@@ -100,7 +100,7 @@ the defects listed in the tool's header was unread before it was looked at.
 ## material-imbalance
 
 - [cited] REGISTERED FALSE POSITIVE: the 1/3/3/5/9 count is not an evaluation. Being 'ahead on material' by that scale says very little once the material is of different kinds.
-- [**unread**] Detecting the imbalance is mechanical and trivial; saying who it favours is not, and depends on open files, king safety and how much else remains.
+- [cited] Detecting the imbalance is mechanical and trivial; saying who it favours is not, and depends on open files, king safety and how much else remains.
 - [noted] Statistical values are averages. They tell you what to expect across many games, not what is true in this one.
 - [cited] MEASURED 2026-09-02: a knight against a bishop is not an imbalance by this record's own preferred numbers - Kaufman puts a knight and an UNPAIRED bishop at the same 3.5 - and the matcher fired on every such swap, 42.1% of the 788 shipped positions. It is a third name for a fact `bishop-pair` and `bad-bishop` already report. The exception is the pair itself, which Kaufman does separate (7.5 against 7.0), so two bishops against two knights is still reported. 42.1% -> 35.5%.
 ## space
@@ -127,7 +127,7 @@ the defects listed in the tool's header was unread before it was looked at.
 ## king-attack
 
 - [cited] Two checks is not an attack. The repository's `kingAttack` tag fires on checks >= 2 or mate, which is a proxy for puzzle classification and NOT a definition of the concept.
-- [**unread**] An exposed king is not automatically under attack — with the attacking pieces traded off, an exposed king is often just an active one. This is a registered false-positive case.
+- [cited] An exposed king is not automatically under attack — with the attacking pieces traded off, an exposed king is often just an active one. This is a registered false-positive case.
 - [cited] Advancing pawns at a king is not an attack unless pieces can follow into the lines that open.
 ## center-control
 
@@ -145,7 +145,7 @@ the defects listed in the tool's header was unread before it was looked at.
 - [cited] Two line pieces on one line are only a battery if the line ARRIVES somewhere. Stacked behind their own pawns they combine nothing, and the bare geometry fires on nearly half of all positions.
 ## check
 
-- [**unread**] A check being available is not a reason to play it. Proven case: Ra7+ draws and Rg8+ loses in the same position.
+- [cited] A check being available is not a reason to play it. Proven case: Ra7+ draws and Rg8+ loses in the same position.
 ## wrong-rook-pawn
 
 - [cited] Being in front of the pawn is NOT enough, unlike king-and-pawn endings. The defending king must reach the corner or the square beside it — Mednis gives a position where the same setup wins with White to move and draws with Black to move.
@@ -155,7 +155,7 @@ the defects listed in the tool's header was unread before it was looked at.
 
 - [cited] Kings facing each other is trivially detectable and means nothing outside endgames where king penetration decides.
 - [**unread**] Taking the opposition is not always correct. In some positions the king should ignore it and head for a key square directly — this is Averbakh's corrective and it is the standard error.
-- [**unread**] A spare pawn tempo makes the opposition irrelevant, since it can simply be handed back.
+- [cited] A spare pawn tempo makes the opposition irrelevant, since it can simply be handed back.
 ## loose-piece
 
 - [cited] Being loose is not being bad. Reporting every undefended piece would flag most positions and teach nothing.
@@ -169,8 +169,8 @@ the defects listed in the tool's header was unread before it was looked at.
 ## pawn-break
 
 - [layer 3] Any pawn advance into contact is mechanically a break; whether it is a good one depends on who is placed to use the lines it opens, which the detector cannot see.
-- [**unread**] A break is not a pawn-breakthrough. This base keeps them separate: the breakthrough sacrifices to force a passer, the break challenges a structure.
-- [**unread**] The break's value is often as an unplayed THREAT, and a position where it is available but not played may be the concept working correctly.
+- [cited] A break is not a pawn-breakthrough. This base keeps them separate: the breakthrough sacrifices to force a passer, the break challenges a structure.
+- [cited] The break's value is often as an unplayed THREAT, and a position where it is available but not played may be the concept working correctly.
 ## restraint
 
 - [cited] Restraint is not the same as passivity. It reduces the opponent's options; a passive move merely fails to increase yours.

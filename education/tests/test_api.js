@@ -1313,6 +1313,38 @@ const { concepts } = API.knowledge();
   ok('trap list: fewer than 30 unread', m && Number(m[3]) < 30, m && m[0]);
 }
 
+{
+  // material-imbalance named the side ahead on the 1/3/3/5/9 count as the
+  // concept's SUBJECT — which is saying who the imbalance favours, by the very
+  // scale the record's first trap says stops applying. Its second trap:
+  // "detecting the imbalance is mechanical and trivial; saying who it FAVOURS is
+  // not, and depends on open files, king safety and how much else remains."
+  const mi = API.analyzeWithEducation({ fen: '4k3/pp3ppp/2nb4/8/8/8/PP3PPP/2R1K3 w - - 0 1' })
+    .concepts_all.find(c => c.id === 'material-imbalance');
+  ok('material-imbalance: names both sides, never a beneficiary',
+     mi && mi.subjects.length === 2, JSON.stringify(mi));
+  const line = (API.analyzeWithEducation({ fen: '4k3/pp3ppp/2nb4/8/8/8/PP3PPP/2R1K3 w - - 0 1' })
+    .concepts.find(c => c.id === 'material-imbalance') || {}).because[0];
+  ok('...and says the point count is a scale that stops applying here',
+     /scale that stops applying here/.test(line), line);
+
+  // opposition claimed in its `implements` string that the wording named the
+  // spare-tempo escape, and the wording did not. "A spare pawn tempo makes the
+  // opposition irrelevant, since it can simply be handed back."
+  const opp = fen => {
+    const c = API.analyzeWithEducation({ fen }).concepts.find(x => x.id === 'opposition');
+    return c ? c.confidence + ': ' + (c.because || [''])[0] : null;
+  };
+  const bare = opp('8/8/4k3/8/4K3/8/8/8 w - - 0 1');
+  ok('opposition: with no pawns at all it is the plain high-confidence fact',
+     /^high:/.test(String(bare)) && !/spare pawn tempo/.test(String(bare)), String(bare));
+  const tempo = opp('8/8/4k3/8/4K3/8/6P1/8 w - - 0 1');
+  ok('opposition: a spare pawn tempo hands it straight back',
+     /spare pawn tempo and can hand it straight back/.test(String(tempo)), String(tempo));
+  ok('...and the claim drops to low confidence when it does',
+     /^low:/.test(String(tempo)), String(tempo));
+}
+
 /* ---------- report ---------- */
 console.log(`\nAPI  PASS ${pass}   FAIL ${fails.length}`);
 for (const [n, d] of fails) console.log(`  FAIL  ${n}\n        ${d}`);

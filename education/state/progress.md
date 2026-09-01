@@ -1337,3 +1337,23 @@ would delete the concept, because a rook on the back rank is exactly what most
 back-rank mates happen in spite of. Recorded rather than attempted.
 
 **83 of 108 traps cited, 25 unread.**
+
+
+## An overclaim hiding in a field nobody reads as a claim
+
+`material-imbalance` set `subjects` to the side ahead on the 1/3/3/5/9 count —
+which is saying who the imbalance *favours*, by the very scale the record's first
+trap says stops applying once the material is of different kinds, and which its
+second trap forbids in so many words. `subjects` is not decoration: it is what
+the corpus checker filters per-side claims on, and what a caller reads to know
+whose concept this is. Both sides are now named, always, and the sentence calls
+the point count "a scale that stops applying here".
+
+And an `implements` string that was not true: `opposition` said the wording named
+the spare-tempo escape, and the wording did not. It does now, and the claim drops
+to **low** confidence when the side to move has a pawn push that loses nothing —
+the commonest reason a king that "has the opposition" has nothing.
+
+**89 of 108 traps cited, 19 unread**, and what remains is mostly traps about
+judgement that no static feature answers — which is the useful thing to have
+established about them.

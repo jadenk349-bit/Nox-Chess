@@ -910,11 +910,18 @@ const STRUCTURAL = [
         const m = c === 'w' ? w : b;
         return `${m.Q ? m.Q + 'Q ' : ''}${m.R ? m.R + 'R ' : ''}${m.B ? m.B + 'B ' : ''}${m.N ? m.N + 'N ' : ''}${m.P}P`.trim();
       };
+      // BOTH sides, always. `subjects` names who a concept is about, and an
+      // imbalance is about the position rather than about a side: the record's
+      // second trap says "detecting the imbalance is mechanical and trivial;
+      // saying who it FAVOURS is not, and depends on open files, king safety and
+      // how much else remains." Naming the side ahead on the 1/3/3/5/9 count was
+      // saying who it favours by the very scale the record's first trap says
+      // stops applying once the material is of different kinds.
       return {
         confidence: 'high',
         because: [`the material is unbalanced — White has ${describe('w')} against Black's ${describe('b')}` +
-                  (d === 0 ? ', level on points' : `, ${Math.abs(d)} point${Math.abs(d) === 1 ? '' : 's'} to ${d > 0 ? 'White' : 'Black'}`)],
-        subjects: d > 0 ? ['w'] : d < 0 ? ['b'] : ['w', 'b'],
+                  (d === 0 ? ', level on points' : `, ${Math.abs(d)} point${Math.abs(d) === 1 ? '' : 's'} to ${d > 0 ? 'White' : 'Black'} on a scale that stops applying here`)],
+        subjects: ['w', 'b'],
       };
     },
   },
@@ -1082,6 +1089,10 @@ const STRUCTURAL = [
         //    trap here is "advancing pawns at a king is not an attack unless
         //    pieces can follow into the lines that open".
         if (zd.attackers < 3 || zd.attackers <= zd.defenders) continue;
+        //    This is also the registered false positive: "an exposed king is not
+        //    automatically under attack - with the attacking pieces traded off,
+        //    an exposed king is often just an active one." Three attackers
+        //    outnumbering the defenders is what separates the two.
         // 2. "The attacker's own king is safe, or safe enough for the time the
         //    operation needs." Adams-Kasparov 2005 is the registered case where
         //    every other sign of an attack is present and this one is not.
@@ -1278,7 +1289,12 @@ const STRUCTURAL = [
    * -------------------------------------------------------------------- */
   {
     concept: 'check',
-    implements: "recognition.preconditions: a king stands on a square attacked by an enemy piece. Detector: inCheck.",
+    implements: ("recognition.preconditions: a king stands on a square attacked by an enemy piece. " +
+                 "Detector: inCheck. The record's trap is about a different claim from the one made " +
+                 "here: \"a check being AVAILABLE is not a reason to play it. Proven case: Ra7+ " +
+                 "draws and Rg8+ loses in the same position.\" This reports a king that IS in check, " +
+                 "which is a fact about the position and not a recommendation, and nothing in this " +
+                 "base ever suggests giving one."),
     run(f) {
       for (const c of ['w', 'b']) {
         if (f.king[c] && f.king[c].inCheck) {
@@ -1431,10 +1447,28 @@ const STRUCTURAL = [
       if (!sameFile && !sameRank) return null;
       // The side NOT to move has it.
       const holder = other(st.turn);
+      // "A spare pawn tempo makes the opposition irrelevant, since it can simply
+      // be handed back" - the record's third trap, which the wording claimed to
+      // name and did not. A pawn push that keeps the position and loses nothing
+      // is exactly such a tempo, and having one is the commonest reason a king
+      // that "has the opposition" has nothing.
+      const spare = c => {
+        const probe = P.cloneState(st); probe.turn = c; probe.ep = null;
+        let ms; try { ms = P.legalMoves(probe); } catch (e) { return false; }
+        return ms.some(m => {
+          const pc = probe.b[m.from];
+          if (!pc || pc.t !== 'P' || m.cap) return false;
+          const nx = P.makeMove(probe, m);
+          return P.see(nx, m.to, other(c)) <= 0;
+        });
+      };
+      const tempo = spare(st.turn);
       return {
-        confidence: 'high',
+        confidence: tempo ? 'low' : 'high',
         because: [`The kings stand on ${wk} and ${bk} with one square between them, so ${side(f, holder)} ` +
-                  `has the opposition — ${side(f, st.turn)} has to give way first`],
+                  `has the opposition — ${side(f, st.turn)} has to give way first` +
+                  (tempo ? `, except that ${side(f, st.turn)} has a spare pawn tempo and can hand it straight back`
+                         : '')],
         slots: { square: holder === 'w' ? wk : bk },
         subjects: [holder],
       };
@@ -1595,7 +1629,14 @@ function matchMotifs(motifs, moveInfo) {
 const MOVE_BASED = [
   {
     concept: 'pawn-break',
-    implements: "recognition.preconditions: a pawn advances into contact with an enemy pawn",
+    implements: ("recognition.preconditions: a pawn advances into contact with an enemy pawn. " +
+                 "The record's second trap is a statement about this base rather than about a " +
+                 "position - \"a break is not a pawn-breakthrough. This base keeps them separate: " +
+                 "the breakthrough sacrifices to force a passer, the break challenges a structure\" " +
+                 "- and it is kept: they are two concept records with two matchers, and " +
+                 "pawn-breakthrough runs the rule of the square while this one only asks for " +
+                 "contact. The third trap, that a break's value is often as an unplayed THREAT, " +
+                 "is why this arm is MOVE-based and reports nothing about a break merely available."),
     run(before, after, moveInfo) {
       const san = moveInfo.san || '';
       if (!/^[a-h]/.test(san)) return null;              // a pawn move
