@@ -1,0 +1,155 @@
+{
+  "schema_version": 2,
+  "alternate_names": [
+    "unbalanced material endings"
+  ],
+  "historical_names": [],
+  "tags": [
+    "endgame",
+    "material-imbalance"
+  ],
+  "subcategory": "endgame type",
+  "difficulty": "advanced",
+  "knowledge_type_note": "A record about a class whose defining property is that class-level principles do not apply to it.",
+  "name_status": "established-name",
+  "history": {
+    "attributions": [],
+    "first_documented_source": "wikipedia-chess-endgame",
+    "year": null,
+    "confidence": "low",
+    "notes": "Not a tradition with an origin; a residual category in the endgame literature.",
+    "competing_claims": [],
+    "development": []
+  },
+  "engine_era_status": "substantially-revised-by-engines",
+  "engine_era_note": "The class most transformed by tablebases, because the hardest mixed endings are small enough to solve and were previously matters of opinion. Several long-held evaluations of specific material balances have been overturned outright.",
+  "recognition": {
+    "preconditions": [
+      "Few pieces remain",
+      "The two sides hold different kinds of material"
+    ],
+    "indicators_for": [
+      "A passed pawn one side's material is suited to stopping",
+      "Pieces that defend one another against a piece that must work alone"
+    ],
+    "indicators_against": [],
+    "prerequisites": [
+      "endgame-principles",
+      "material-imbalance"
+    ],
+    "detector": "material in lib/features.js reports the counts; the imbalance is visible from them",
+    "detectability": "mechanical",
+    "typical_confidence": "low",
+    "false_positive_traps": [
+      "The point count is least reliable exactly here, and this is where people rely on it most. This base holds a proven draw a bishop and a pawn up.",
+      "The 60% figure for bishops over knights in endings is a population statistic and says nothing about a particular position.",
+      "This class is under-researched in this base, and confidence should stay low regardless of how clean the material description looks."
+    ]
+  },
+  "application": {
+    "typical_plans": [
+      "Ask which side's material suits the pawn structure",
+      "Keep two minor pieces defending each other rather than operating separately",
+      "Use a knight to blockade a passer and a rook to chase one",
+      "Look for a fortress when material down"
+    ],
+    "typical_moves": [],
+    "typical_pawn_structures": [
+      "Pawns on both wings, which favours the bishop",
+      "A symmetrical structure on one wing, which favours the knight"
+    ],
+    "typical_piece_arrangements": [],
+    "tactical_consequences": [],
+    "strategic_consequences": [
+      "Conversion is unusually hard, and fortresses are unusually common"
+    ]
+  },
+  "exceptions": [
+    "Fortresses defeat material reasoning entirely and are common in this class.",
+    "The bishop's statistical edge reverses when the pawns are all on one wing."
+  ],
+  "limitations": [
+    "This base has not researched mixed-material endings in depth; the record is orientation and says so.",
+    "No tablebase-verified position of this class is held here beyond the wrong-rook-pawn and opposite-bishop cases already recorded."
+  ],
+  "misconceptions": [
+    "That the point count settles unbalanced endings. It is least reliable precisely here.",
+    "That two minor pieces automatically beat a rook. They do when coordinated and lose when they are not."
+  ],
+  "relationships": {
+    "broader": [
+      "endgame-principles"
+    ],
+    "narrower": [],
+    "related": [
+      "endgame-principles",
+      "material-imbalance",
+      "knight-vs-bishop",
+      "fortress",
+      "piece-properties",
+      "opposite-coloured-bishops",
+      "wrong-rook-pawn",
+      "king-activation",
+      "passed-pawn"
+    ],
+    "contrasting": [
+      "rook-endgame-principles"
+    ],
+    "co_occurring": [
+      "fortress"
+    ],
+    "conflicts": []
+  },
+  "examples": [],
+  "counterexamples": [],
+  "ambiguous_examples": [],
+  "explanations": {
+    "by_level": {
+      "beginner": "Endings where each side has different pieces — a rook against two minor pieces, say. Counting points helps least here.",
+      "intermediate": "What decides them is whether the pieces work together and whose material suits the pawn structure.",
+      "advanced": "Bishops beat knights in about 60% of endings, and the more symmetrical the structure the better for the knight — a statistic, not a rule.",
+      "master": "The class most rewritten by tablebases, and the one where principles help least."
+    },
+    "by_depth": {
+      "short": "Endings with different material on each side.",
+      "normal": "Endings where the two sides hold different kinds of material. They are defined by not being one of the studied types, and the point count - already a rule of thumb - is least reliable exactly here.",
+      "deep": "The endings that are not a type. What decides them is coordination rather than count, since two minor pieces beat a rook when they work together and lose to it when they do not; which side's material suits the pawn structure, since a knight blockades superbly and chases badly while a rook does the reverse; and the presence of fortresses, which live in unbalanced material because a fortress is precisely a position where extra material cannot be converted. The commonest case has a real result behind it - bishops outperform knights in about 60% of endings, and symmetry favours the knight - but that is a statistic about a population and not a claim about any position."
+    },
+    "hedge": "Under-researched in this base and orientation rather than theory; where a position is small enough for a tablebase, the tablebase is the authority.",
+    "lesson": "Ask whose pieces suit the pawns, not whose pieces add up to more."
+  },
+  "terminology": {
+    "beginner_words": [
+      "different pieces on each side"
+    ],
+    "advanced_words": [
+      "material imbalance",
+      "coordination",
+      "blockade",
+      "fortress"
+    ],
+    "avoid": [
+      "two minors beat a rook",
+      "count the material"
+    ]
+  },
+  "status": {
+    "stage": "researched",
+    "last_updated": "2026-09-01",
+    "open_questions": [],
+    "audit_notes": []
+  },
+  "id": "mixed-piece-endgames",
+  "canonical_name": "Mixed-piece endgames",
+  "category": "mixed-piece-endgames",
+  "knowledge_type": "strategic-principle",
+  "definition_short": "Endings where the two sides hold different KINDS of material — rook against two minors, queen against rook and pieces, bishop against knight.",
+  "definition_long": "The endings that are not a type. Rook-and-pawn endings have a body of theory and named positions; so do knight endings and queen endings. Mixed-material endings are defined by what they are not, and the practical consequence is that the point count — already a rule of thumb — becomes the least reliable guide exactly where people lean on it most.\n\nWHAT ACTUALLY DECIDES THEM:\n- COORDINATION over count. Two minor pieces beat a rook when they work together and lose to it when they do not, which is why these endings turn on whether the pieces defend each other and have squares.\n- PASSED PAWNS, and specifically who can BLOCKADE. A knight blockades superbly and chases badly; a rook does the opposite. Mixed endings are usually decided by which side's material suits the pawn structure it is facing.\n- KING ACTIVITY, as everywhere in the endgame.\n- FORTRESSES. Unbalanced material is where fortresses live, because a fortress is precisely a position in which extra material cannot be converted. This base holds proven examples.\n\nTHE BISHOP-VERSUS-KNIGHT ENDING is the commonest mixed case and the one with a real result behind it: bishops are better than knights in the endgame roughly 60% of the time, and the more SYMMETRICAL the pawn structure the better for the knight. That is a statistic about a population, not a rule about a position, and this base records it as such.\n\nTHE HONEST POSITION on this class is that principles help less here than anywhere else in the endgame, and where a position is small enough for a tablebase the tablebase is the authority. This base has not researched the class in depth and says so.",
+  "sources": [
+    "wikipedia-chess-endgame",
+    "dvoretsky-endgame-manual",
+    "kaufman-material-imbalances",
+    "studer-bishop-vs-knight"
+  ],
+  "source_confidence": "medium"
+}

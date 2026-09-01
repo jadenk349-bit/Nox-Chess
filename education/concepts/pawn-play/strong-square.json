@@ -1,0 +1,162 @@
+{
+  "schema_version": 2,
+  "alternate_names": [
+    "support point",
+    "strong point"
+  ],
+  "historical_names": [],
+  "tags": [
+    "squares",
+    "structure"
+  ],
+  "subcategory": "squares",
+  "difficulty": "intermediate",
+  "knowledge_type_note": "The mirror of a weak square, seen from the side that gets to use it.",
+  "name_status": "established-name",
+  "history": {
+    "attributions": [
+      {
+        "relation": "systematized-by",
+        "person": "Aron Nimzowitsch",
+        "year": 1925,
+        "note": "My System treats strong points and their overprotection as a central strategic device.",
+        "confidence": "high"
+      }
+    ],
+    "first_documented_source": "nimzowitsch-my-system",
+    "year": 1925,
+    "confidence": "medium",
+    "notes": "The vocabulary of weak and strong squares is older and anonymous; Nimzowitsch's contribution is the systematic treatment and the overprotection idea.",
+    "competing_claims": [],
+    "development": []
+  },
+  "engine_era_status": "reliable",
+  "engine_era_note": "Engines value control of such squares implicitly and are markedly less impressed than classical teaching by occupying one when a concrete alternative exists.",
+  "recognition": {
+    "preconditions": [
+      "A square no enemy pawn can attack",
+      "A friendly pawn able to defend it"
+    ],
+    "indicators_for": [
+      "The square is in or adjacent to the enemy camp",
+      "A knight can reach it in a move or two",
+      "It sits on a file your rooks can use"
+    ],
+    "indicators_against": [
+      "The square can only be held by pieces, not pawns",
+      "Nothing useful can reach it",
+      "Occupying it achieves nothing concrete"
+    ],
+    "prerequisites": [
+      "weak-square"
+    ],
+    "detector": "holesFor in lib/features.js, from the occupying side",
+    "detectability": "mechanical",
+    "typical_confidence": "high",
+    "false_positive_traps": [
+      "A square being safe is not a reason to put a piece on it. This base's outpost testing found the textbook outpost move to be only second best in the textbook outpost position.",
+      "A strong square held by pieces rather than by a pawn is expensive, and the cost can exceed what the square is worth."
+    ]
+  },
+  "application": {
+    "typical_plans": [
+      "Manoeuvre a knight towards it",
+      "Overprotect it so the defenders gain scope from doing so",
+      "Trade off the enemy piece that could contest it, usually a knight or a same-coloured bishop"
+    ],
+    "typical_moves": [],
+    "typical_pawn_structures": [
+      "Structures where an enemy pawn has advanced past the square"
+    ],
+    "typical_piece_arrangements": [
+      "A knight on the square, defended by a pawn"
+    ],
+    "tactical_consequences": [],
+    "strategic_consequences": [
+      "A strong square is permanent in a way a piece placement is not, because it is a property of the pawns"
+    ]
+  },
+  "exceptions": [
+    "A strong square is worth nothing if nothing valuable can reach it.",
+    "Occupying is not the only use: controlling the square may matter more than standing on it."
+  ],
+  "limitations": [
+    "The geometry is mechanical; the value is not, and this base has failed three times to isolate outpost value in a controlled test."
+  ],
+  "misconceptions": [
+    "That a strong square must be occupied. Controlling it can be worth more, and occupying it can be second best.",
+    "That the centre has the strong squares. They are wherever the enemy pawns have gone past."
+  ],
+  "relationships": {
+    "broader": [],
+    "narrower": [
+      "outpost"
+    ],
+    "related": [
+      "weak-square",
+      "outpost",
+      "overprotection",
+      "hole",
+      "knight-vs-bishop",
+      "prophylaxis"
+    ],
+    "contrasting": [
+      "weak-square"
+    ],
+    "co_occurring": [
+      "outpost"
+    ],
+    "conflicts": []
+  },
+  "examples": [],
+  "counterexamples": [],
+  "ambiguous_examples": [],
+  "explanations": {
+    "by_level": {
+      "beginner": "A square in their half that their pawns can never attack and one of yours can defend.",
+      "intermediate": "A strong square. Get a knight there — but check that being there actually does something.",
+      "advanced": "Two conditions: no enemy pawn can attack it, and one of your pawns can defend it. The second is what makes it cheap.",
+      "master": "Nimzowitsch's move is to overprotect it, on the grounds that the defenders gain scope from bearing on a square that matters."
+    },
+    "by_depth": {
+      "short": "A square their pawns cannot attack and yours can defend.",
+      "normal": "A strong square: the mirror of a weak one, seen from the side that gets to use it. It needs both conditions - no enemy pawn able to attack it, and a friendly pawn able to defend it - because the first makes a piece there permanent and the second makes it cheap.",
+      "deep": "The same geometry as a weak square, from the other side. What makes it strong rather than merely reachable is the pair of conditions: no enemy pawn can attack it, so a piece there cannot be driven away, and one of your own pawns can defend it, so holding it does not tie down other pieces. Nimzowitsch's contribution was overprotection - defending such a point beyond necessity, on the reasoning that the defenders gain their own scope from bearing on a square that matters. The outpost is the special case where a minor piece actually occupies it, and this base's own engine testing is the standing warning that occupying is not automatically best."
+    },
+    "hedge": "",
+    "lesson": "Ask whether a pawn can defend it. That is what separates a strong square from a square you can reach."
+  },
+  "terminology": {
+    "beginner_words": [
+      "a safe square in their half"
+    ],
+    "advanced_words": [
+      "strong point",
+      "support point",
+      "outpost",
+      "overprotection"
+    ],
+    "avoid": [
+      "put a knight on it",
+      "the centre squares are strong"
+    ]
+  },
+  "status": {
+    "stage": "researched",
+    "last_updated": "2026-09-01",
+    "open_questions": [],
+    "audit_notes": []
+  },
+  "id": "strong-square",
+  "canonical_name": "Strong square",
+  "category": "strong-squares",
+  "knowledge_type": "positional-concept",
+  "definition_short": "A square in or near the enemy position that your pawns can defend and theirs cannot attack.",
+  "definition_long": "The same geometry as a weak square, described from the other side of the board. A square is weak FOR the player who can no longer cover it with a pawn, and strong FOR the opponent who can.\n\nTWO CONDITIONS make it strong rather than merely reachable: no enemy pawn can attack it, and one of your own pawns can defend it. The first makes a piece there permanent; the second makes it cheap, because the piece is not tying down other pieces to hold it. A piece on a strong square that has to be defended by two pieces is a liability wearing a good square's clothes.\n\nNIMZOWITSCH'S CONTRIBUTION was to treat such a point as something to be OVERPROTECTED — defended beyond necessity — on the reasoning that the defenders gain their own scope from bearing on a square that matters, so the overprotection costs less than it appears to. That is the constructive form of the idea, and it is recorded on its own concept.\n\nTHE OUTPOST IS THE SPECIAL CASE: a strong square actually occupied by a minor piece, usually a knight. The strong square is the real estate; the outpost is what gets built on it. And this base's engine testing on outposts is the standing warning that occupying one is not automatically the best move.",
+  "sources": [
+    "nimzowitsch-my-system",
+    "wikipedia-outpost",
+    "chessprogramming-outposts"
+  ],
+  "source_confidence": "high"
+}

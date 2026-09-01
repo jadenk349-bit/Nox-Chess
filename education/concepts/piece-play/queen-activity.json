@@ -1,0 +1,152 @@
+{
+  "schema_version": 2,
+  "alternate_names": [],
+  "historical_names": [],
+  "tags": [
+    "pieces",
+    "queen"
+  ],
+  "subcategory": "pieces",
+  "difficulty": "intermediate",
+  "knowledge_type_note": "Observations about how the most valuable piece behaves, which is mostly a story about what it cannot afford to do.",
+  "name_status": "established-name",
+  "history": {
+    "attributions": [],
+    "first_documented_source": "wikipedia-chess-piece-values",
+    "year": null,
+    "confidence": "unknown",
+    "notes": "No coinage; ordinary observations about the piece.",
+    "competing_claims": [],
+    "development": []
+  },
+  "engine_era_status": "reliable",
+  "engine_era_note": "Engines are far more willing than classical teaching to bring the queen out early when concrete lines support it, which has softened the rule without removing its basis - the tempo cost is real and measurable.",
+  "recognition": {
+    "preconditions": [
+      "A queen is on the board"
+    ],
+    "indicators_for": [
+      "Weaknesses on both square colours",
+      "An exposed enemy king",
+      "A passed pawn the queen can escort"
+    ],
+    "indicators_against": [
+      "The queen can be attacked by cheaper pieces with tempo",
+      "The queen is tied to defending a single point"
+    ],
+    "prerequisites": [
+      "piece-activity"
+    ],
+    "detector": null,
+    "detectability": "heuristic",
+    "typical_confidence": "low",
+    "false_positive_traps": [
+      "An advanced queen is not an active queen. It is often a queen about to be chased, and the chasing moves develop the opponent.",
+      "This base measured the early-queen cost at about 0.68 in the standard case - real, and much smaller than the usual teaching tone."
+    ]
+  },
+  "application": {
+    "typical_plans": [
+      "Bring the queen in after the minor pieces, not before",
+      "Use it against positions weak on both colours",
+      "Escort a passed pawn with it in the endgame",
+      "Decide deliberately whether to allow the queen trade"
+    ],
+    "typical_moves": [],
+    "typical_pawn_structures": [],
+    "typical_piece_arrangements": [
+      "Queen behind a rook or bishop in a battery, rather than in front",
+      "Queen and knight together"
+    ],
+    "tactical_consequences": [
+      "The queen is the piece most vulnerable to forks and skewers, precisely because of its value"
+    ],
+    "strategic_consequences": [
+      "Trading queens changes the phase and with it what the king is for"
+    ]
+  },
+  "exceptions": [
+    "In endgames the queen leads perfectly well, since there is nothing cheap left to chase it.",
+    "Some openings bring the queen out early by design and pay a measured, affordable price."
+  ],
+  "limitations": [
+    "The queen-and-knight claim is recorded from the literature and has not been tested here.",
+    "Most of this record is about what the queen should not do, which reflects the sources rather than a bias."
+  ],
+  "misconceptions": [
+    "That the strongest piece should attack first. Its value is exactly why it should not.",
+    "That an advanced queen is doing something. It is usually about to be attacked."
+  ],
+  "relationships": {
+    "broader": [
+      "piece-activity"
+    ],
+    "narrower": [],
+    "related": [
+      "piece-activity",
+      "early-queen-development",
+      "queen-endgames",
+      "piece-exchanges",
+      "battery",
+      "fork",
+      "skewer",
+      "perpetual-check",
+      "king-attack"
+    ],
+    "contrasting": [],
+    "co_occurring": [],
+    "conflicts": []
+  },
+  "examples": [],
+  "counterexamples": [],
+  "ambiguous_examples": [],
+  "explanations": {
+    "by_level": {
+      "beginner": "The queen is the strongest piece, which is why it should not go first — everything can chase it.",
+      "intermediate": "Bring the queen in behind the other pieces. In front, it gets attacked and driven back with tempo.",
+      "advanced": "It is strongest where its rook and bishop movements combine rather than duplicate — weaknesses on both colours, or an exposed king.",
+      "master": "Whether to allow the queen trade is often the whole strategic question, because it changes what the king is for."
+    },
+    "by_depth": {
+      "short": "The strongest piece, and the wrong one to attack with first.",
+      "normal": "The queen moves as rook and bishop together, and is worth more than anything that can attack it - so it must retreat from every threat. That is why it should not lead an attack or come out early, and why tying it to defending one point wastes it.",
+      "deep": "Almost everything true about queen play follows from its value: it must retreat from any threat, so a queen that arrives first is driven back with tempo by cheaper pieces, and a queen tied to one defensive job is a nine-point piece doing a one-point task. It is strongest where its two movements combine rather than duplicate - against weaknesses on both colours, against an exposed king, and escorting a passed pawn it can shepherd alone. Queen and knight complement each other where queen and rook duplicate lines, which is a real asymmetry though an untested one here. And the queen trade is often the most consequential exchange available, because it changes what the king is for."
+    },
+    "hedge": "",
+    "lesson": "The queen goes in last, and the decision to trade it is usually bigger than it looks."
+  },
+  "terminology": {
+    "beginner_words": [
+      "the strongest piece",
+      "she gets chased"
+    ],
+    "advanced_words": [
+      "queen activity",
+      "battery",
+      "the queen trade",
+      "escorting"
+    ],
+    "avoid": [
+      "attack with the queen",
+      "an advanced queen is active"
+    ]
+  },
+  "status": {
+    "stage": "researched",
+    "last_updated": "2026-09-01",
+    "open_questions": [],
+    "audit_notes": []
+  },
+  "id": "queen-activity",
+  "canonical_name": "Queen activity",
+  "category": "queen",
+  "knowledge_type": "positional-concept",
+  "definition_short": "The queen combines rook and bishop movement, which makes it the strongest piece and the worst attacker to lead with.",
+  "definition_long": "THE QUEEN'S PROBLEM IS ITS VALUE. It moves like a rook and a bishop together and is therefore worth more than any piece that can attack it, so it must retreat from every threat. That single fact generates most of what is true about queen play:\n\n- IT SHOULD NOT LEAD AN ATTACK. A queen arriving first is attacked by cheaper pieces and driven off with tempo. It belongs behind the attack, arriving when the defenders are already committed.\n- IT SHOULD NOT COME OUT EARLY, for the same reason, which this base has measured at about two thirds of a pawn in the standard case.\n- IT IS A POOR BLOCKADER and a poor defender of a single point, because tying a nine-point piece to one job wastes most of it.\n\nWHERE IT IS STRONGEST is where its two movements combine rather than duplicate: against a position with weaknesses on both colours, against an exposed king where checks come from everywhere, and in endgames with a passed pawn it can escort alone.\n\nTHE QUEEN AND KNIGHT PAIRING is a genuine observation worth keeping: the two complement each other because the knight covers the squares the queen cannot reach in one move, while queen and rook duplicate lines. It is a real asymmetry rather than a saying, though this base has not tested it and records it as sourced rather than demonstrated.\n\nTHE EXCHANGE OF QUEENS is often the most consequential trade on the board, because it converts the position into one where the king is a piece rather than a liability. Deciding whether to allow it is frequently the whole strategic question.",
+  "sources": [
+    "wikipedia-chess-piece-values",
+    "chessstrategyonline-opening-principles",
+    "dvoretsky-endgame-manual"
+  ],
+  "source_confidence": "medium"
+}

@@ -1,0 +1,117 @@
+{
+  "schema_version": 2,
+  "alternate_names": [],
+  "historical_names": [],
+  "tags": [
+    "meta",
+    "levels",
+    "index-backed"
+  ],
+  "subcategory": "meta",
+  "difficulty": "intermediate",
+  "knowledge_type_note": "A meta-record describing what this base means by an intermediate concept, and indexing which concepts are so classified.",
+  "name_status": "descriptive-phrase",
+  "history": {
+    "attributions": [],
+    "first_documented_source": null,
+    "year": null,
+    "confidence": "unknown",
+    "notes": "A meta-record generated from this base's own content; no external history.",
+    "competing_claims": [],
+    "development": []
+  },
+  "engine_era_status": "not-applicable",
+  "engine_era_note": "",
+  "recognition": {
+    "preconditions": [
+      "A concept is being pitched to a reader"
+    ],
+    "indicators_for": [],
+    "indicators_against": [],
+    "prerequisites": [],
+    "detector": "the difficulty field, enforced by tools/schema.json",
+    "detectability": "mechanical",
+    "typical_confidence": "high",
+    "false_positive_traps": [
+      "Difficulty describes the concept, not the reader. An intermediate concept still needs beginner wording when a beginner meets it, which is what explanations.by_level is for.",
+      "The tier is an editorial judgement made when the record was written, not a measured property."
+    ]
+  },
+  "application": {
+    "typical_plans": [],
+    "typical_moves": [],
+    "typical_pawn_structures": [],
+    "typical_piece_arrangements": [],
+    "tactical_consequences": [],
+    "strategic_consequences": []
+  },
+  "exceptions": [],
+  "limitations": [
+    "The classification is a judgement rather than a measurement, and was made concept by concept as each was written.",
+    "The tiers are unevenly populated, which reflects what has been researched rather than the shape of chess knowledge."
+  ],
+  "misconceptions": [
+    "That difficulty means how hard the idea is to play. It means how much context is needed to state it without lying."
+  ],
+  "relationships": {
+    "broader": [],
+    "narrower": [],
+    "related": [
+      "beginner-misconceptions",
+      "exceptions-to-rules",
+      "advanced-concepts",
+      "chess-terminology"
+    ],
+    "contrasting": [],
+    "co_occurring": [],
+    "conflicts": []
+  },
+  "examples": [],
+  "counterexamples": [],
+  "ambiguous_examples": [],
+  "explanations": {
+    "by_level": {
+      "beginner": "Ideas that come with an 'unless' attached.",
+      "intermediate": "Concepts that need a condition stated with them — doubled pawns are weak UNLESS the capture bought something.",
+      "advanced": "The largest tier and the one misconceptions come from, because the condition is what gets dropped in retelling.",
+      "master": "Difficulty here measures how much context a truthful statement needs, not how hard the idea is to use."
+    },
+    "by_depth": {
+      "short": "Concepts that need a condition attached.",
+      "normal": "The tier where an idea can no longer be stated in one sentence without losing its condition — 54 concepts here, the largest group and the one most misconceptions come from.",
+      "deep": "A beginner concept is self-contained: a fork attacks two pieces and that is the whole idea. An intermediate concept needs a condition, and the condition is what gets lost in retelling - doubled pawns are weak unless the capture bought something, an outpost is strong if a pawn defends it, improve your worst piece when nothing more urgent is happening. That is why this is both the largest tier and the most dangerous: nearly every entry in this base's misconception index is an intermediate concept with its condition stripped off."
+    },
+    "hedge": "",
+    "lesson": "If you can state it without an 'unless', it is probably a beginner concept. If you cannot, do not drop the 'unless'."
+  },
+  "terminology": {
+    "beginner_words": [
+      "ideas with an 'unless'"
+    ],
+    "advanced_words": [
+      "condition",
+      "precondition",
+      "tier"
+    ],
+    "avoid": [
+      "intermediate players should"
+    ]
+  },
+  "status": {
+    "stage": "researched",
+    "last_updated": "2026-09-01",
+    "open_questions": [],
+    "audit_notes": []
+  },
+  "id": "intermediate-concepts",
+  "canonical_name": "Intermediate concepts",
+  "category": "intermediate-concepts",
+  "knowledge_type": "terminology",
+  "definition_short": "Concepts that need one layer of context to state truthfully — 54 of them here, the largest tier.",
+  "definition_long": "The tier where a concept can no longer be stated in one sentence without losing its condition.\n\nA BEGINNER CONCEPT IS SELF-CONTAINED: a fork attacks two pieces, and that is the whole idea. An INTERMEDIATE CONCEPT NEEDS A CONDITION, and the condition is the part that gets lost in retelling. Doubled pawns are a weakness — unless the capture bought a file, the bishop pair or the centre. An outpost is strong — if a pawn defends it and no enemy pawn can attack it. Improve your worst piece — when nothing more urgent is happening.\n\nTHAT IS WHY THIS IS THE LARGEST TIER AND THE MOST DANGEROUS ONE. Nearly every entry in this base's misconception index is an intermediate concept with its condition removed, which is exactly the shape a chess misconception takes.\n\nDIFFICULTY IN THIS BASE IS ABOUT THE CONCEPT, NOT THE PLAYER. It records how much other machinery a concept needs before it can be stated truthfully, which is why some famous ideas sit high and some obscure ones sit low. A fork is a beginner concept because it can be stated completely in one sentence; the Vancura position is an expert one not because it is hard to play but because stating it correctly requires the rook-ending context in which Tarrasch's rule fails.\n\nIT IS ALSO WHAT DRIVES LEVEL ADAPTATION. Every concept carries explanations.by_level with wording for beginner, intermediate, advanced and master, and the API selects among them. The difficulty field says where a concept BELONGS; the by_level wording says how to say it to whoever is asking. The two are deliberately separate, because an advanced concept still has to be explicable to a beginner who has just met it on the board.\n\nCURRENT DISTRIBUTION: beginner 36, intermediate 54, advanced 35, expert 2.",
+  "sources": [
+    "chessstrategyonline-opening-principles",
+    "wikipedia-chess-opening"
+  ],
+  "source_confidence": "medium"
+}

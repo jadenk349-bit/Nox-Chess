@@ -1,0 +1,154 @@
+{
+  "schema_version": 2,
+  "alternate_names": [
+    "half-open file"
+  ],
+  "historical_names": [],
+  "tags": [
+    "lines",
+    "rooks",
+    "structure"
+  ],
+  "subcategory": "lines",
+  "difficulty": "intermediate",
+  "knowledge_type_note": "An observable feature of the pawn structure, with the usual gap between the feature being present and its being worth anything.",
+  "name_status": "established-name",
+  "history": {
+    "attributions": [],
+    "first_documented_source": "nimzowitsch-my-system",
+    "year": 1925,
+    "confidence": "low",
+    "notes": "Standard vocabulary; Nimzowitsch's treatment of files is the classical source but the term is not his coinage.",
+    "competing_claims": [],
+    "development": []
+  },
+  "engine_era_status": "reliable",
+  "engine_era_note": "Unremarkable to engines, which evaluate the resulting pressure directly. The concept survives as the explanation for why the pressure exists.",
+  "recognition": {
+    "preconditions": [
+      "A file carrying an enemy pawn and none of your own"
+    ],
+    "indicators_for": [
+      "The enemy pawn on it is backward or otherwise fixed",
+      "You can bring more pieces to bear than can defend it",
+      "A rook already stands on the file"
+    ],
+    "indicators_against": [
+      "The pawn can simply advance",
+      "Another enemy pawn can defend it",
+      "The file has no entry square beyond the pawn"
+    ],
+    "prerequisites": [
+      "ranks-files-diagonals"
+    ],
+    "detector": "fileState in lib/features.js reports semiOpenFor per colour",
+    "detectability": "mechanical",
+    "typical_confidence": "high",
+    "false_positive_traps": [
+      "A semi-open file is a fact about pawns; whether it produces pressure depends on whether the target is fixed and whether you can attack it more times than it can be defended.",
+      "Both sides can have semi-open files, usually on opposite wings, and each will be attacking on their own. Reporting only one side's is half the position."
+    ]
+  },
+  "application": {
+    "typical_plans": [
+      "Double rooks against the pawn on the file",
+      "Fix the target first so it cannot advance out of the pressure",
+      "Trade off its defenders rather than adding attackers"
+    ],
+    "typical_moves": [],
+    "typical_pawn_structures": [
+      "A backward pawn on a semi-open file",
+      "Sicilian and French structures, which are largely arguments about which files each side gets"
+    ],
+    "typical_piece_arrangements": [
+      "Doubled rooks on the file"
+    ],
+    "tactical_consequences": [],
+    "strategic_consequences": [
+      "The file usually outlives the pieces currently on it, so it is a durable asset"
+    ]
+  },
+  "exceptions": [
+    "A semi-open file with no entry square and a defensible pawn achieves nothing.",
+    "Where the enemy pawn can advance freely, the file is a route rather than a lever."
+  ],
+  "limitations": [
+    "Detecting the file is mechanical; judging whether the target is fixed is not."
+  ],
+  "misconceptions": [
+    "That an open file is better than a semi-open one. The open file is symmetric and often belongs to nobody; the semi-open file comes with a target.",
+    "That the file is the asset. The fixed pawn on it is the asset."
+  ],
+  "relationships": {
+    "broader": [
+      "open-file"
+    ],
+    "narrower": [],
+    "related": [
+      "open-file",
+      "backward-pawn",
+      "ranks-files-diagonals",
+      "rook-on-the-seventh",
+      "isolated-queen-pawn",
+      "doubled-pawns",
+      "two-weaknesses"
+    ],
+    "contrasting": [
+      "open-file"
+    ],
+    "co_occurring": [
+      "backward-pawn"
+    ],
+    "conflicts": []
+  },
+  "examples": [],
+  "counterexamples": [],
+  "ambiguous_examples": [],
+  "explanations": {
+    "by_level": {
+      "beginner": "A file where you have no pawn and they do — so your rook is already pointing at something.",
+      "intermediate": "A semi-open file. Better than an open one for attacking, because it comes with a target that cannot step aside.",
+      "advanced": "Fix the pawn first. A target that can advance out of the pressure is not a target.",
+      "master": "Most opening choices are really arguments about which semi-open files each side ends up with."
+    },
+    "by_depth": {
+      "short": "A file with their pawn on it and none of yours.",
+      "normal": "A semi-open file: no pawn of your own, one of the opponent's. It is often more useful than a fully open file, because it is asymmetric - the enemy pawn is a target that cannot move sideways, and you can usually attack it more times than it can be defended.",
+      "deep": "The asymmetric half of the open-file idea. An open file is a road both sides can use, and this base holds a tested position where one with a rook of each colour on it is worth exactly nothing; a semi-open file comes with a target built in. It is created by the pawn structure rather than chosen, which is why so many openings are arguments about which files each side gets. And the target is worth having only when it is fixed: a backward pawn on a semi-open file is the classic pairing, because it can neither advance out of the pressure nor be defended by its neighbours."
+    },
+    "hedge": "",
+    "lesson": "The file is not the asset. The pawn stuck on it is."
+  },
+  "terminology": {
+    "beginner_words": [
+      "your rook points at their pawn"
+    ],
+    "advanced_words": [
+      "semi-open file",
+      "half-open file",
+      "fixed target",
+      "doubling rooks"
+    ],
+    "avoid": [
+      "an open file is better"
+    ]
+  },
+  "status": {
+    "stage": "researched",
+    "last_updated": "2026-09-01",
+    "open_questions": [],
+    "audit_notes": []
+  },
+  "id": "semi-open-file",
+  "canonical_name": "Semi-open file",
+  "category": "semi-open-files",
+  "knowledge_type": "positional-concept",
+  "definition_short": "A file with none of your own pawns on it but one of the opponent's — so your rook looks straight at a pawn that cannot run away sideways.",
+  "definition_long": "The more useful half of the open-file idea, and the one that supplies targets rather than merely space.\n\nWHY IT IS OFTEN BETTER THAN AN OPEN FILE: an open file is a road both sides can use, and this base holds a tested position where an open file with a rook of each colour on it is worth exactly nothing. A semi-open file is asymmetric by construction. The enemy pawn on it is a TARGET that cannot step sideways out of the way, and pressure against it can be built with more pieces than can defend it.\n\nIT IS CREATED BY THE STRUCTURE, not chosen. Every pawn capture that leaves one side with a pawn on a file and the other without makes one, which is why so many openings are really arguments about which files each side gets. The Sicilian's whole character comes from Black's semi-open c-file, the French's from the same on the other wing.\n\nTHE TARGET IS BEST WHEN IT IS FIXED. A backward pawn on a semi-open file is the classic combination, because the pawn cannot advance to escape and its own neighbours cannot defend it. Where the pawn can simply advance or be defended by another pawn, the file is a route rather than a lever.",
+  "sources": [
+    "nimzowitsch-my-system",
+    "chessprogramming-rook-open-file",
+    "wikipedia-backward-pawn"
+  ],
+  "source_confidence": "medium"
+}

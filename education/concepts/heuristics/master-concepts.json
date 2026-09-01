@@ -1,0 +1,117 @@
+{
+  "schema_version": 2,
+  "alternate_names": [],
+  "historical_names": [],
+  "tags": [
+    "meta",
+    "levels",
+    "index-backed"
+  ],
+  "subcategory": "meta",
+  "difficulty": "expert",
+  "knowledge_type_note": "A meta-record for the top tier, which is thinly populated here and says so.",
+  "name_status": "descriptive-phrase",
+  "history": {
+    "attributions": [],
+    "first_documented_source": null,
+    "year": null,
+    "confidence": "unknown",
+    "notes": "A meta-record generated from this base's own content; no external history.",
+    "competing_claims": [],
+    "development": []
+  },
+  "engine_era_status": "not-applicable",
+  "engine_era_note": "",
+  "recognition": {
+    "preconditions": [
+      "A concept is being pitched to a reader"
+    ],
+    "indicators_for": [],
+    "indicators_against": [],
+    "prerequisites": [],
+    "detector": "the difficulty field, enforced by tools/schema.json",
+    "detectability": "mechanical",
+    "typical_confidence": "high",
+    "false_positive_traps": [
+      "The tier is for concepts that need specific theory to state truthfully, not for concepts that are impressive. Marking something master-level to signal importance destroys what the field is for.",
+      "Most master-level chess knowledge is concrete rather than conceptual and does not belong in a concept record at all."
+    ]
+  },
+  "application": {
+    "typical_plans": [],
+    "typical_moves": [],
+    "typical_pawn_structures": [],
+    "typical_piece_arrangements": [],
+    "tactical_consequences": [],
+    "strategic_consequences": []
+  },
+  "exceptions": [],
+  "limitations": [
+    "Only two records sit at this tier, so it is a category with almost nothing in it, which the record states rather than conceals.",
+    "Three of the schema's seven difficulty values are currently unused."
+  ],
+  "misconceptions": [
+    "That the top tier holds the most important concepts. It holds the ones that break if stated approximately."
+  ],
+  "relationships": {
+    "broader": [],
+    "narrower": [],
+    "related": [
+      "advanced-concepts",
+      "vancura-position",
+      "corresponding-squares",
+      "exceptions-to-rules"
+    ],
+    "contrasting": [],
+    "co_occurring": [],
+    "conflicts": []
+  },
+  "examples": [],
+  "counterexamples": [],
+  "ambiguous_examples": [],
+  "explanations": {
+    "by_level": {
+      "beginner": "A few ideas that go wrong if you simplify them at all.",
+      "intermediate": "Concepts where an approximate account is not vague but false.",
+      "advanced": "Both records at this tier are rook endings, and both are here because a summary that drops the exception misleads.",
+      "master": "The tier is thin on purpose; most master-level knowledge is concrete rather than conceptual."
+    },
+    "by_depth": {
+      "short": "Concepts that break if you simplify them.",
+      "normal": "The top tier: concepts whose truthful statement needs a specific body of theory, where getting it slightly wrong makes it false rather than vague. Currently 2 records, and the tier is deliberately thin.",
+      "deep": "Both records here are rook endings and both for the same reason. The Vancura position is expert-level not because the moves are hard but because stating it correctly means stating where Tarrasch's rule fails, and this base holds the proof that one rook move turns a draw into a loss in 63; a summary omitting that is worse than none. Corresponding squares is expert-level because the concept is a mapping between square pairs and an approximate account of it is simply wrong. The tier stays thin on purpose: most of what is called master-level knowledge is concrete rather than conceptual - specific positions and lines that belong in a tablebase or an opening file."
+    },
+    "hedge": "",
+    "lesson": "Some things cannot be summarised. For those, say the whole thing or say nothing."
+  },
+  "terminology": {
+    "beginner_words": [
+      "ideas you cannot shorten"
+    ],
+    "advanced_words": [
+      "theoretical position",
+      "corresponding squares",
+      "exact knowledge"
+    ],
+    "avoid": [
+      "master-level (as praise)"
+    ]
+  },
+  "status": {
+    "stage": "researched",
+    "last_updated": "2026-09-01",
+    "open_questions": [],
+    "audit_notes": []
+  },
+  "id": "master-concepts",
+  "canonical_name": "Master-level and theoretical concepts",
+  "category": "master-concepts",
+  "knowledge_type": "terminology",
+  "definition_short": "Concepts whose truthful statement requires knowing a specific body of theory — currently 2 records, and the tier is thin.",
+  "definition_long": "The tier where a concept cannot be stated correctly without a particular piece of theory in hand, and where getting it slightly wrong makes it false rather than vague.\n\nTHE TWO RECORDS AT THIS TIER are both rook endings and both are here for the same reason. The VANCURA POSITION is expert-level not because the moves are hard but because stating it correctly means stating where Tarrasch's rule fails — this base holds the proof that one rook move turns a draw into a loss in 63, and a summary that omits that is worse than no summary. CORRESPONDING SQUARES is expert-level because the concept is a mapping between square pairs, and an approximate account of it is simply wrong.\n\nTHE TIER IS DELIBERATELY THIN, and this record says so rather than padding it. Very few concepts genuinely require this much before they can be stated, and marking things master-level to signal importance would defeat the field's purpose. Most of what people call master-level knowledge is concrete rather than conceptual — specific positions, specific lines — and belongs in a tablebase or an opening file rather than in a concept record.\n\nA NOTE ON THE FIELD'S RANGE. The schema allows beginner, novice, intermediate, advanced, expert, master and highly-theoretical. Only four are currently in use; the unused values are kept because a range with gaps is more honest than one retro-fitted to what happens to exist.\n\nDIFFICULTY IN THIS BASE IS ABOUT THE CONCEPT, NOT THE PLAYER. It records how much other machinery a concept needs before it can be stated truthfully, which is why some famous ideas sit high and some obscure ones sit low. A fork is a beginner concept because it can be stated completely in one sentence; the Vancura position is an expert one not because it is hard to play but because stating it correctly requires the rook-ending context in which Tarrasch's rule fails.\n\nIT IS ALSO WHAT DRIVES LEVEL ADAPTATION. Every concept carries explanations.by_level with wording for beginner, intermediate, advanced and master, and the API selects among them. The difficulty field says where a concept BELONGS; the by_level wording says how to say it to whoever is asking. The two are deliberately separate, because an advanced concept still has to be explicable to a beginner who has just met it on the board.\n\nCURRENT DISTRIBUTION: beginner 36, intermediate 54, advanced 35, expert 2.",
+  "sources": [
+    "wikipedia-corresponding-squares",
+    "dvoretsky-endgame-manual"
+  ],
+  "source_confidence": "medium"
+}

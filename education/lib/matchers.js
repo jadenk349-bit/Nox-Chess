@@ -86,7 +86,8 @@ const PRIORITY = [
   // then structural features, most informative first
   'outpost', 'rook-on-the-seventh', 'passed-pawn', 'isolated-queen-pawn',
   'backward-pawn', 'doubled-pawns', 'opposite-coloured-bishops', 'bishop-pair',
-  'luft', 'open-file', 'weak-square', 'material-imbalance', 'king-activation',
+  'luft', 'semi-open-file', 'open-file', 'weak-square', 'material-imbalance',
+  'king-activation',
   'space', 'piece-activity',
 ];
 const priorityOf = id => {
@@ -175,6 +176,29 @@ const STRUCTURAL = [
       if (occupied.length) because.push(`${occupied.join(' and ')} already stand${occupied.length > 1 ? '' : 's'} on it`);
       return { confidence: occupied.length ? 'high' : 'medium', because,
                slots: { file: f.files.open[0] }, subjects: ['w', 'b'] };
+    },
+  },
+  {
+    concept: 'semi-open-file',
+    implements: "recognition.preconditions: a file carrying an enemy pawn and none of your own",
+    run(f) {
+      if (totalHeavy(f) === 0) return null;      // same reason as open-file
+      const hits = [];
+      for (const c of ['w', 'b']) {
+        const files = f.files.semiOpenFor[c];
+        if (!files.length) continue;
+        const rooks = f.pieces[c].rooksOnSemiOpenFiles;
+        hits.push({ c, files, rooks });
+      }
+      if (!hits.length) return null;
+      const lead = hits.find(h => h.rooks.length) || hits[0];
+      return {
+        confidence: lead.rooks.length ? 'high' : 'medium',
+        because: hits.map(h => `${side(f, h.c)} has a semi-open ${brief(h.files, 3)}-file` +
+                               (h.rooks.length ? `, with a rook on ${h.rooks.join(' and ')}` : '')),
+        slots: { file: lead.files[0] },
+        subjects: hits.map(h => h.c),
+      };
     },
   },
   {

@@ -1,0 +1,169 @@
+{
+  "schema_version": 2,
+  "alternate_names": [],
+  "historical_names": [],
+  "tags": [
+    "history",
+    "schools",
+    "epistemics"
+  ],
+  "subcategory": "history",
+  "difficulty": "intermediate",
+  "knowledge_type_note": "Principles preserved as history: what was taught, when, and what has happened to it since.",
+  "name_status": "established-name",
+  "history": {
+    "attributions": [
+      {
+        "relation": "systematized-by",
+        "person": "Wilhelm Steinitz",
+        "year": 1873,
+        "note": "The first body of chess principle presented as a theory rather than as advice.",
+        "confidence": "medium"
+      },
+      {
+        "relation": "systematized-by",
+        "person": "Aron Nimzowitsch",
+        "year": 1925,
+        "note": "My System, the most influential single statement of positional principle, and the source of several rules this base has had to qualify.",
+        "confidence": "high"
+      }
+    ],
+    "first_documented_source": "nimzowitsch-my-system",
+    "year": null,
+    "confidence": "medium",
+    "notes": "A meta-record over this base's historical findings; the individual claims are documented on their own concepts.",
+    "competing_claims": [],
+    "development": [
+      {
+        "period": "1873-1900",
+        "note": "Steinitz turns advice into theory."
+      },
+      {
+        "period": "1925-1930",
+        "note": "Nimzowitsch and the hypermoderns state the positional principles that are still taught."
+      },
+      {
+        "period": "mid-20th century",
+        "note": "The Soviet school shifts the deciding method from principle to concrete analysis."
+      },
+      {
+        "period": "engine era",
+        "note": "Principles become checkable; some are quantified, a few are disproved, most are qualified."
+      }
+    ]
+  },
+  "engine_era_status": "historically-overstated",
+  "engine_era_note": "The characteristic engine-era finding is not that an old principle is wrong but that it is smaller than it sounds. Most of this base's measurements confirm a rule's direction and shrink its magnitude.",
+  "recognition": {
+    "preconditions": [
+      "A traditional principle is being applied or quoted"
+    ],
+    "indicators_for": [],
+    "indicators_against": [],
+    "prerequisites": [],
+    "detector": "the engine_era_status field, enforced by tools/schema.json",
+    "detectability": "mechanical",
+    "typical_confidence": "medium",
+    "false_positive_traps": [
+      "An old principle being qualified does not make it worthless; most are right in direction and overstated in strength, which is why they are kept rather than deleted.",
+      "Quoting a principle in its popular form usually drops the condition its author attached. Prefer the author's own wording where this base holds it.",
+      "That a principle is old is not evidence against it, and that it is modern is not evidence for it."
+    ]
+  },
+  "application": {
+    "typical_plans": [
+      "Quote a principle with the condition its author gave it",
+      "State the measured magnitude where this base has one",
+      "Record what happened to a principle rather than silently updating it"
+    ],
+    "typical_moves": [],
+    "typical_pawn_structures": [],
+    "typical_piece_arrangements": [],
+    "tactical_consequences": [],
+    "strategic_consequences": []
+  },
+  "exceptions": [
+    "Some principles have survived checking unqualified, particularly the geometric facts and the rules of the game itself."
+  ],
+  "limitations": [
+    "This base has measured a small number of principles and qualified those; silence about a principle is not endorsement.",
+    "The historical research is English-language and mostly second-hand."
+  ],
+  "misconceptions": [
+    "That engines have refuted classical chess strategy. They have mostly measured it and found it directionally right and overstated.",
+    "That a principle stated by a world champion has been checked. Several in this base had not been until now."
+  ],
+  "relationships": {
+    "broader": [],
+    "narrower": [],
+    "related": [
+      "classical-school",
+      "hypermodern-school",
+      "soviet-school",
+      "modern-dynamic",
+      "exceptions-to-rules",
+      "beginner-misconceptions",
+      "named-strategic-concepts",
+      "lpdo"
+    ],
+    "contrasting": [
+      "modern-dynamic"
+    ],
+    "co_occurring": [
+      "exceptions-to-rules"
+    ],
+    "conflicts": []
+  },
+  "examples": [],
+  "counterexamples": [],
+  "ambiguous_examples": [],
+  "explanations": {
+    "by_level": {
+      "beginner": "Old chess rules are mostly still useful, but they were stated more strongly than they should have been.",
+      "intermediate": "Three things happen to an old principle: it loses its condition, it gets disproved, or it gets measured. The first is much the commonest.",
+      "advanced": "The engine era's real contribution has been measurement rather than demolition — the early-queen rule is true and worth about two thirds of a pawn.",
+      "master": "A base that deleted every principle an engine has qualified would delete most of chess strategy and would be wrong to."
+    },
+    "by_depth": {
+      "short": "Old principles, and what has happened to them since.",
+      "normal": "Principles once taught as law, kept here with their history: most have lost the condition their author attached, a few have been disproved outright, and several have been measured and turn out to be true but smaller than they sound.",
+      "deep": "Chess teaching accumulates rather than corrects, so a rule stated confidently in 1925 is still circulating without the qualification its author gave it. Three things happen to an old principle. It loses its condition, which is much the commonest and is the shape of nearly every misconception in this base. It is disproved, which is rarer - Tarrasch's rook rule is false as stated and this base holds the proof. Or it survives and gets quantified, which is the engine era's real contribution: the early-queen rule costs about 0.68, gambit compensation can be exactly one pawn, and the side to move is worth exactly one file in the rule of the square. The pattern is that the old teaching was usually onto something and stated it too strongly."
+    },
+    "hedge": "Preserved as history and as teaching; where this base has measured a principle the measurement is on the concept itself, and silence about one is not endorsement.",
+    "lesson": "Old principles are usually right about the direction and wrong about the strength."
+  },
+  "terminology": {
+    "beginner_words": [
+      "the old rules"
+    ],
+    "advanced_words": [
+      "historical principle",
+      "qualification",
+      "engine-era revision"
+    ],
+    "avoid": [
+      "engines disproved classical chess",
+      "the old masters were wrong"
+    ]
+  },
+  "status": {
+    "stage": "researched",
+    "last_updated": "2026-09-01",
+    "open_questions": [],
+    "audit_notes": []
+  },
+  "id": "historical-principles",
+  "canonical_name": "Historical chess principles",
+  "category": "historical-principles",
+  "knowledge_type": "historical-teaching-principle",
+  "definition_short": "Principles that were once taught as law and have since been qualified, reattributed, or shown to be false.",
+  "definition_long": "Chess teaching accumulates rather than corrects. A rule stated confidently in 1925 is still in circulation in 2026, usually without the qualification its author attached and sometimes after being disproved. This record is where that history is kept, because the qualification is generally the useful part.\n\nTHE THREE THINGS THAT HAPPEN TO AN OLD PRINCIPLE:\n\n1. IT LOSES ITS CONDITION. The commonest fate, and the shape of nearly every misconception in this base. Anderssen and Makogonov both stated the worst-piece rule conditionally and the popular form drops the condition. Shereshevsky documented rook endings where his own first principle fails.\n\n2. IT IS DISPROVED. Rarer and more interesting. Tarrasch's rule about the rook behind the passed pawn is false as a general rule, and this base holds the proof: same material, one rook moved, a draw becomes a loss in 63. Kotov's one-pass analysis tree is rejected by every later authority consulted here. Fine's 1941 verdict on the four-against-three knight ending has been downgraded.\n\n3. IT SURVIVES AND GETS QUANTIFIED. The engine era's real contribution to old principles is not demolition but measurement. 'Do not bring the queen out early' is true and costs about 0.68 in the standard case. Gambit compensation is real and the Evans is worth exactly one pawn. The rule of the square is exact, and the side to move is worth exactly one file.\n\nTHE PATTERN ACROSS ALL THREE is that the old teaching was usually onto something and stated it too strongly, which is what makes it worth preserving rather than discarding. A base that deleted every principle an engine has qualified would delete most of chess strategy and would be wrong to.\n\nAND THE ENGINE-ERA CAUTION runs the other way too: an engine can say that a move is better than another and cannot say what a principle MEANS, which is why research names concepts and the engine validates moves, and neither does the other's job.",
+  "sources": [
+    "nimzowitsch-my-system",
+    "shereshevsky-endgame-strategy",
+    "winter-chess-gambits",
+    "kotov-think-like-gm",
+    "dvoretsky-endgame-manual"
+  ],
+  "source_confidence": "high"
+}

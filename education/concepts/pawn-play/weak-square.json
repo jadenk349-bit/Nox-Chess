@@ -2,8 +2,7 @@
   "schema_version": 2,
   "alternate_names": [
     "weak point",
-    "support point",
-    "strong square (from the other side)"
+    "support point"
   ],
   "historical_names": [],
   "tags": [
@@ -119,7 +118,9 @@
       "outpost",
       "backward-pawn"
     ],
-    "contrasting": [],
+    "contrasting": [
+      "strong-square"
+    ],
     "co_occurring": [
       "hole",
       "outpost"
@@ -165,7 +166,8 @@
     "last_updated": "2026-09-01",
     "open_questions": [],
     "audit_notes": [
-      "2026-09-01: detector field named 'pawnAttackableSquares', which does not exist anywhere in the codebase. The audit's hardcoded whitelist had been accepting it. Repointed at real code, or marked as proposed where nothing implements it."
+      "2026-09-01: detector field named 'pawnAttackableSquares', which does not exist anywhere in the codebase. The audit's hardcoded whitelist had been accepting it. Repointed at real code, or marked as proposed where nothing implements it.",
+      "2026-09-01: carried ['weak point', 'support point', 'strong square (from the other side)'] as an alternate name, colliding with the canonical name of strong-square. They are one square described from two sides, which is a contrast relation and not an alias. Moved to relationships.contrasting."
     ]
   },
   "id": "weak-square",

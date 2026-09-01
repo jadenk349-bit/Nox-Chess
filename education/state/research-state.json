@@ -6,24 +6,24 @@
     "note": "Filled in by tools/sf_analyse.py --probe"
   },
   "counters": {
-    "concepts_total": 120,
+    "concepts_total": 134,
     "concepts_stub": 0,
     "concepts_researched": 29,
     "concepts_validated": 4,
     "concepts_needs_review": 0,
-    "sources_reviewed": 159,
+    "sources_reviewed": 166,
     "positions_tested": 32,
     "matches_validated": 18,
     "false_matches": 8,
     "ambiguous_matches": 6,
     "by_stage": {
       "ready": 2,
-      "researched": 109,
+      "researched": 123,
       "validated": 9
     },
     "tablebase_positions": 21,
     "concepts_fully_covered": 12,
-    "areas_touched": 71,
+    "areas_touched": 85,
     "areas_total": 85
   },
   "areas": {
@@ -352,10 +352,14 @@
     },
     "queen": {
       "domain": "piece-play",
-      "status": "not-started",
-      "concepts": [],
+      "status": "covered",
+      "concepts": [
+        "queen-activity"
+      ],
       "open_questions": [],
-      "last_touched": null
+      "last_touched": "2026-09-01",
+      "last_updated": "2026-09-01",
+      "note": "queen-activity."
     },
     "piece-exchanges": {
       "domain": "piece-play",
@@ -446,10 +450,14 @@
     },
     "strong-squares": {
       "domain": "pawn-play",
-      "status": "not-started",
-      "concepts": [],
+      "status": "covered",
+      "concepts": [
+        "strong-square"
+      ],
       "open_questions": [],
-      "last_touched": null
+      "last_touched": "2026-09-01",
+      "last_updated": "2026-09-01",
+      "note": "strong-square."
     },
     "outposts": {
       "domain": "pawn-play",
@@ -471,10 +479,14 @@
     },
     "semi-open-files": {
       "domain": "lines",
-      "status": "not-started",
-      "concepts": [],
+      "status": "covered",
+      "concepts": [
+        "semi-open-file"
+      ],
       "open_questions": [],
-      "last_touched": null
+      "last_touched": "2026-09-01",
+      "last_updated": "2026-09-01",
+      "note": "semi-open-file, with a Layer 4 matcher."
     },
     "positional-sacrifices": {
       "domain": "positional-method",
@@ -574,10 +586,14 @@
     },
     "middlegame-principles": {
       "domain": "middlegame",
-      "status": "not-started",
-      "concepts": [],
+      "status": "covered",
+      "concepts": [
+        "middlegame-principles"
+      ],
       "open_questions": [],
-      "last_touched": null
+      "last_touched": "2026-09-01",
+      "last_updated": "2026-09-01",
+      "note": "Umbrella; records that the phase has a procedure rather than a rule set."
     },
     "endgame-principles": {
       "domain": "endgame",
@@ -691,10 +707,14 @@
     },
     "mixed-piece-endgames": {
       "domain": "endgame",
-      "status": "not-started",
-      "concepts": [],
+      "status": "covered",
+      "concepts": [
+        "mixed-piece-endgames"
+      ],
       "open_questions": [],
-      "last_touched": null
+      "last_touched": "2026-09-01",
+      "last_updated": "2026-09-01",
+      "note": "Orientation only, and says the class is under-researched here."
     },
     "fortresses": {
       "domain": "endgame",
@@ -736,17 +756,25 @@
     },
     "named-strategic-concepts": {
       "domain": "named-patterns",
-      "status": "not-started",
-      "concepts": [],
+      "status": "covered",
+      "concepts": [
+        "named-strategic-concepts"
+      ],
       "open_questions": [],
-      "last_touched": null
+      "last_touched": "2026-09-01",
+      "last_updated": "2026-09-01",
+      "note": "Meta-record of this base's attribution findings."
     },
     "historical-principles": {
       "domain": "history-schools",
-      "status": "not-started",
-      "concepts": [],
+      "status": "covered",
+      "concepts": [
+        "historical-principles"
+      ],
       "open_questions": [],
-      "last_touched": null
+      "last_touched": "2026-09-01",
+      "last_updated": "2026-09-01",
+      "note": "What happens to old principles: condition lost, disproved, or quantified."
     },
     "classical-school": {
       "domain": "history-schools",
@@ -777,10 +805,14 @@
     },
     "modern-dynamic": {
       "domain": "history-schools",
-      "status": "not-started",
-      "concepts": [],
+      "status": "covered",
+      "concepts": [
+        "modern-dynamic"
+      ],
       "open_questions": [],
-      "last_touched": null
+      "last_touched": "2026-09-01",
+      "last_updated": "2026-09-01",
+      "note": "Watson's thesis, corroborated independently by the cognitive-psychology literature."
     },
     "rules-of-thumb": {
       "domain": "heuristics",
@@ -815,45 +847,69 @@
     },
     "intermediate-concepts": {
       "domain": "heuristics",
-      "status": "not-started",
-      "concepts": [],
+      "status": "covered",
+      "concepts": [
+        "intermediate-concepts"
+      ],
       "open_questions": [],
-      "last_touched": null
+      "last_touched": "2026-09-01",
+      "last_updated": "2026-09-01",
+      "note": "Meta; difficulty is about the concept, not the player."
     },
     "advanced-concepts": {
       "domain": "heuristics",
-      "status": "not-started",
-      "concepts": [],
+      "status": "covered",
+      "concepts": [
+        "advanced-concepts"
+      ],
       "open_questions": [],
-      "last_touched": null
+      "last_touched": "2026-09-01",
+      "last_updated": "2026-09-01",
+      "note": "Meta; dependency rather than difficulty, and the tier this system detects worst."
     },
     "master-concepts": {
       "domain": "heuristics",
-      "status": "not-started",
-      "concepts": [],
+      "status": "covered",
+      "concepts": [
+        "master-concepts"
+      ],
       "open_questions": [],
-      "last_touched": null
+      "last_touched": "2026-09-01",
+      "last_updated": "2026-09-01",
+      "note": "Meta; deliberately thin and says so."
     },
     "practical-principles": {
       "domain": "practical",
-      "status": "not-started",
-      "concepts": [],
+      "status": "covered",
+      "concepts": [
+        "practical-principles"
+      ],
       "open_questions": [],
-      "last_touched": null
+      "last_touched": "2026-09-01",
+      "last_updated": "2026-09-01",
+      "note": "The objective/practical distinction, kept small deliberately."
     },
     "time-management": {
       "domain": "practical",
-      "status": "not-started",
-      "concepts": [],
+      "status": "covered",
+      "concepts": [
+        "time-management"
+      ],
       "open_questions": [],
-      "last_touched": null
+      "last_touched": "2026-09-01",
+      "last_updated": "2026-09-01",
+      "note": "Built from large-sample studies rather than folklore."
     },
     "practical-psychology": {
       "domain": "practical",
-      "status": "not-started",
-      "concepts": [],
+      "status": "covered",
+      "concepts": [
+        "practical-psychology"
+      ],
       "open_questions": [],
-      "last_touched": null
+      "last_touched": "2026-09-01",
+      "last_updated": "2026-09-01",
+      "note": "Restricted to measured effects, and names what it omits."
     },
     "blindfold-visualisation": {
       "domain": "blindfold",
@@ -1399,5 +1455,12 @@
       ]
     }
   ],
-  "last_updated": "2026-09-01"
+  "last_updated": "2026-09-01",
+  "milestones": [
+    {
+      "date": "2026-09-01",
+      "milestone": "all 85 taxonomy areas have at least one researched concept",
+      "note": "Coverage is breadth, not depth: 12 of 85 areas are 'fully covered' by the coverage model, and several records (mixed-piece-endgames, queen-endgames) are explicitly orientation rather than theory and say so."
+    }
+  ]
 }
