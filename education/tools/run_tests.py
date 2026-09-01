@@ -100,6 +100,16 @@ def main():
     if verbose and eline:
         print("   " + eline[0])
 
+    # 3e. API behaviour across position types the puzzle corpus does not contain,
+    # including terminology invariance under an engine result.
+    aud = subprocess.run(["node", os.path.join(HERE, "tools", "api_audit.js")],
+                         capture_output=True, text=True)
+    aline = [l for l in (aud.stdout or "").splitlines() if l.startswith("API AUDIT  PASS")]
+    check("api_behaviour_audit", aud.returncode == 0,
+          (aline[0] if aline else (aud.stderr or "api_audit.js failed").strip().splitlines()[-1]))
+    if verbose and aline:
+        print("   " + aline[0])
+
     # 4. constructed positions must be labelled, never dressed as history
     for cid, c in C.items():
         for b in ("examples", "counterexamples", "ambiguous_examples"):

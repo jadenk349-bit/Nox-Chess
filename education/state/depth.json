@@ -194,7 +194,7 @@
     },
     "restriction": {
       "rating": "substantial",
-      "mean_completeness": 0.6,
+      "mean_completeness": 0.667,
       "concepts": [
         "blockade",
         "restraint"
@@ -211,7 +211,7 @@
     },
     "king-safety": {
       "rating": "substantial",
-      "mean_completeness": 0.661,
+      "mean_completeness": 0.768,
       "concepts": [
         "king-safety",
         "luft"
@@ -236,7 +236,7 @@
     },
     "good-bad-bishops": {
       "rating": "partial",
-      "mean_completeness": 0.667,
+      "mean_completeness": 0.733,
       "concepts": [
         "bad-bishop"
       ],
@@ -244,7 +244,7 @@
     },
     "bishop-pair": {
       "rating": "partial",
-      "mean_completeness": 0.6,
+      "mean_completeness": 0.8,
       "concepts": [
         "bishop-pair"
       ],
@@ -252,7 +252,7 @@
     },
     "knights": {
       "rating": "partial",
-      "mean_completeness": 0.6,
+      "mean_completeness": 0.733,
       "concepts": [
         "knight-vs-bishop"
       ],
@@ -260,7 +260,7 @@
     },
     "rooks": {
       "rating": "partial",
-      "mean_completeness": 0.75,
+      "mean_completeness": 0.875,
       "concepts": [
         "rook-on-the-seventh"
       ],
@@ -276,7 +276,7 @@
     },
     "piece-exchanges": {
       "rating": "partial",
-      "mean_completeness": 0.6,
+      "mean_completeness": 0.875,
       "concepts": [
         "piece-exchanges"
       ],
@@ -308,7 +308,7 @@
     },
     "space": {
       "rating": "partial",
-      "mean_completeness": 0.6,
+      "mean_completeness": 0.8,
       "concepts": [
         "space"
       ],
@@ -323,8 +323,8 @@
       "domain": "development-initiative"
     },
     "pawn-structures": {
-      "rating": "substantial",
-      "mean_completeness": 0.706,
+      "rating": "full",
+      "mean_completeness": 0.836,
       "concepts": [
         "backward-pawn",
         "doubled-pawns",
@@ -343,7 +343,7 @@
     },
     "weak-squares": {
       "rating": "substantial",
-      "mean_completeness": 0.6,
+      "mean_completeness": 0.667,
       "concepts": [
         "hole",
         "weak-square"
@@ -360,7 +360,7 @@
     },
     "outposts": {
       "rating": "partial",
-      "mean_completeness": 0.867,
+      "mean_completeness": 0.933,
       "concepts": [
         "outpost"
       ],
@@ -477,7 +477,7 @@
     },
     "king-activation": {
       "rating": "partial",
-      "mean_completeness": 0.75,
+      "mean_completeness": 0.938,
       "concepts": [
         "king-activation"
       ],
@@ -533,7 +533,7 @@
     },
     "bishop-endgames": {
       "rating": "substantial",
-      "mean_completeness": 0.7,
+      "mean_completeness": 0.8,
       "concepts": [
         "opposite-coloured-bishops",
         "wrong-rook-pawn"
@@ -732,8 +732,8 @@
   },
   "tally": {
     "partial": 75,
-    "substantial": 9,
-    "full": 1
+    "substantial": 8,
+    "full": 2
   },
   "concepts": {
     "king-attack": {
@@ -989,7 +989,7 @@
       }
     },
     "blockade": {
-      "score": 0.6,
+      "score": 0.733,
       "check": {
         "definition": true,
         "terminology": true,
@@ -997,12 +997,12 @@
         "attribution": true,
         "recognition": true,
         "exceptions": true,
-        "positive_example": false,
+        "positive_example": true,
         "negative_example": false,
         "ambiguous_example": false,
         "engine_validation": false,
         "tablebase_validation": null,
-        "master_game": false,
+        "master_game": true,
         "false_positive_test": false,
         "beginner_explanation": true,
         "advanced_explanation": true,
@@ -1157,7 +1157,7 @@
       }
     },
     "space": {
-      "score": 0.6,
+      "score": 0.8,
       "check": {
         "definition": true,
         "terminology": true,
@@ -1165,10 +1165,10 @@
         "attribution": true,
         "recognition": true,
         "exceptions": true,
-        "positive_example": false,
+        "positive_example": true,
         "negative_example": false,
-        "ambiguous_example": false,
-        "engine_validation": false,
+        "ambiguous_example": true,
+        "engine_validation": true,
         "tablebase_validation": null,
         "master_game": false,
         "false_positive_test": false,
@@ -1283,7 +1283,7 @@
       }
     },
     "king-activation": {
-      "score": 0.75,
+      "score": 0.938,
       "check": {
         "definition": true,
         "terminology": true,
@@ -1294,10 +1294,10 @@
         "positive_example": true,
         "negative_example": true,
         "ambiguous_example": false,
-        "engine_validation": false,
+        "engine_validation": true,
         "tablebase_validation": true,
-        "master_game": false,
-        "false_positive_test": false,
+        "master_game": true,
+        "false_positive_test": true,
         "beginner_explanation": true,
         "advanced_explanation": true,
         "explanation_template": true
@@ -1346,7 +1346,7 @@
       }
     },
     "opposite-coloured-bishops": {
-      "score": 0.667,
+      "score": 0.867,
       "check": {
         "definition": true,
         "terminology": true,
@@ -1355,9 +1355,9 @@
         "recognition": true,
         "exceptions": true,
         "positive_example": true,
-        "negative_example": false,
-        "ambiguous_example": false,
-        "engine_validation": false,
+        "negative_example": true,
+        "ambiguous_example": true,
+        "engine_validation": true,
         "tablebase_validation": true,
         "master_game": false,
         "false_positive_test": false,
@@ -1787,7 +1787,7 @@
       }
     },
     "luft": {
-      "score": 0.571,
+      "score": 0.786,
       "check": {
         "definition": true,
         "terminology": true,
@@ -1796,9 +1796,9 @@
         "recognition": true,
         "exceptions": true,
         "positive_example": false,
-        "negative_example": false,
-        "ambiguous_example": false,
-        "engine_validation": false,
+        "negative_example": true,
+        "ambiguous_example": true,
+        "engine_validation": true,
         "tablebase_validation": null,
         "master_game": false,
         "false_positive_test": false,
@@ -2144,7 +2144,7 @@
       }
     },
     "backward-pawn": {
-      "score": 0.6,
+      "score": 0.8,
       "check": {
         "definition": true,
         "terminology": true,
@@ -2152,10 +2152,10 @@
         "attribution": true,
         "recognition": true,
         "exceptions": true,
-        "positive_example": false,
+        "positive_example": true,
         "negative_example": false,
-        "ambiguous_example": false,
-        "engine_validation": false,
+        "ambiguous_example": true,
+        "engine_validation": true,
         "tablebase_validation": null,
         "master_game": false,
         "false_positive_test": false,
@@ -2165,7 +2165,7 @@
       }
     },
     "doubled-pawns": {
-      "score": 0.8,
+      "score": 0.867,
       "check": {
         "definition": true,
         "terminology": true,
@@ -2173,7 +2173,7 @@
         "attribution": true,
         "recognition": true,
         "exceptions": true,
-        "positive_example": false,
+        "positive_example": true,
         "negative_example": true,
         "ambiguous_example": false,
         "engine_validation": true,
@@ -2207,7 +2207,7 @@
       }
     },
     "isolated-queen-pawn": {
-      "score": 0.8,
+      "score": 0.867,
       "check": {
         "definition": true,
         "terminology": true,
@@ -2217,7 +2217,7 @@
         "exceptions": true,
         "positive_example": true,
         "negative_example": false,
-        "ambiguous_example": false,
+        "ambiguous_example": true,
         "engine_validation": true,
         "tablebase_validation": null,
         "master_game": false,
@@ -2228,7 +2228,7 @@
       }
     },
     "outpost": {
-      "score": 0.867,
+      "score": 0.933,
       "check": {
         "definition": true,
         "terminology": true,
@@ -2238,7 +2238,7 @@
         "exceptions": true,
         "positive_example": true,
         "negative_example": true,
-        "ambiguous_example": false,
+        "ambiguous_example": true,
         "engine_validation": true,
         "tablebase_validation": null,
         "master_game": false,
@@ -2249,7 +2249,7 @@
       }
     },
     "passed-pawn": {
-      "score": 0.625,
+      "score": 0.812,
       "check": {
         "definition": true,
         "terminology": true,
@@ -2258,9 +2258,9 @@
         "recognition": true,
         "exceptions": true,
         "positive_example": false,
-        "negative_example": false,
-        "ambiguous_example": false,
-        "engine_validation": false,
+        "negative_example": true,
+        "ambiguous_example": true,
+        "engine_validation": true,
         "tablebase_validation": false,
         "master_game": false,
         "false_positive_test": true,
@@ -2312,7 +2312,7 @@
       }
     },
     "weak-square": {
-      "score": 0.6,
+      "score": 0.733,
       "check": {
         "definition": true,
         "terminology": true,
@@ -2320,12 +2320,12 @@
         "attribution": true,
         "recognition": true,
         "exceptions": true,
-        "positive_example": false,
+        "positive_example": true,
         "negative_example": false,
         "ambiguous_example": false,
         "engine_validation": false,
         "tablebase_validation": null,
-        "master_game": false,
+        "master_game": true,
         "false_positive_test": false,
         "beginner_explanation": true,
         "advanced_explanation": true,
@@ -2333,7 +2333,7 @@
       }
     },
     "bad-bishop": {
-      "score": 0.667,
+      "score": 0.733,
       "check": {
         "definition": true,
         "terminology": true,
@@ -2342,7 +2342,7 @@
         "recognition": true,
         "exceptions": true,
         "positive_example": false,
-        "negative_example": false,
+        "negative_example": true,
         "ambiguous_example": false,
         "engine_validation": false,
         "tablebase_validation": null,
@@ -2354,7 +2354,7 @@
       }
     },
     "bishop-pair": {
-      "score": 0.6,
+      "score": 0.8,
       "check": {
         "definition": true,
         "terminology": true,
@@ -2362,10 +2362,10 @@
         "attribution": true,
         "recognition": true,
         "exceptions": true,
-        "positive_example": false,
-        "negative_example": false,
+        "positive_example": true,
+        "negative_example": true,
         "ambiguous_example": false,
-        "engine_validation": false,
+        "engine_validation": true,
         "tablebase_validation": null,
         "master_game": false,
         "false_positive_test": false,
@@ -2375,7 +2375,7 @@
       }
     },
     "knight-vs-bishop": {
-      "score": 0.6,
+      "score": 0.733,
       "check": {
         "definition": true,
         "terminology": true,
@@ -2383,12 +2383,12 @@
         "attribution": true,
         "recognition": true,
         "exceptions": true,
-        "positive_example": false,
+        "positive_example": true,
         "negative_example": false,
         "ambiguous_example": false,
         "engine_validation": false,
         "tablebase_validation": null,
-        "master_game": false,
+        "master_game": true,
         "false_positive_test": false,
         "beginner_explanation": true,
         "advanced_explanation": true,
@@ -2459,7 +2459,7 @@
       }
     },
     "rook-on-the-seventh": {
-      "score": 0.75,
+      "score": 0.875,
       "check": {
         "definition": true,
         "terminology": true,
@@ -2467,12 +2467,12 @@
         "attribution": true,
         "recognition": true,
         "exceptions": true,
-        "positive_example": false,
+        "positive_example": true,
         "negative_example": true,
         "ambiguous_example": false,
         "engine_validation": true,
         "tablebase_validation": false,
-        "master_game": false,
+        "master_game": true,
         "false_positive_test": true,
         "beginner_explanation": true,
         "advanced_explanation": true,
@@ -2522,7 +2522,7 @@
       }
     },
     "piece-exchanges": {
-      "score": 0.6,
+      "score": 0.875,
       "check": {
         "definition": true,
         "terminology": true,
@@ -2530,13 +2530,13 @@
         "attribution": true,
         "recognition": true,
         "exceptions": true,
-        "positive_example": false,
-        "negative_example": false,
+        "positive_example": true,
+        "negative_example": true,
         "ambiguous_example": false,
         "engine_validation": false,
-        "tablebase_validation": null,
-        "master_game": false,
-        "false_positive_test": false,
+        "tablebase_validation": true,
+        "master_game": true,
+        "false_positive_test": true,
         "beginner_explanation": true,
         "advanced_explanation": true,
         "explanation_template": true
@@ -3558,13 +3558,13 @@
     "attribution": 0,
     "recognition": 0,
     "exceptions": 3,
-    "positive_example": 109,
-    "negative_example": 110,
-    "ambiguous_example": 124,
-    "engine_validation": 113,
+    "positive_example": 100,
+    "negative_example": 104,
+    "ambiguous_example": 117,
+    "engine_validation": 106,
     "tablebase_validation": 13,
-    "master_game": 128,
-    "false_positive_test": 117,
+    "master_game": 122,
+    "false_positive_test": 115,
     "beginner_explanation": 0,
     "advanced_explanation": 0,
     "explanation_template": 29
