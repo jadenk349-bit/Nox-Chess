@@ -1,0 +1,241 @@
+{
+  "schema_version": 2,
+  "alternate_names": [],
+  "historical_names": [],
+  "tags": [
+    "evaluation",
+    "sacrifice",
+    "initiative",
+    "engine-measured"
+  ],
+  "subcategory": "evaluation",
+  "difficulty": "intermediate",
+  "knowledge_type_note": "A claim about a position's balance that is directly measurable, since an evaluation already nets material against everything else.",
+  "name_status": "established-name",
+  "history": {
+    "attributions": [],
+    "first_documented_source": "wikipedia-gambit",
+    "year": null,
+    "confidence": "unknown",
+    "notes": "General evaluative vocabulary with no single coinage traced. The three-tempi-per-pawn yardstick is described by its own sources as something that 'used to be said', with Wikipedia adding that it is unclear how useful the maxim is - so it is recorded as folklore of uncertain provenance rather than as a result.",
+    "competing_claims": [],
+    "development": []
+  },
+  "engine_era_status": "reliable",
+  "engine_era_note": "The concept became directly measurable. Where compensation was once a matter of judgement expressed in symbols, an evaluation now states the net balance, which is what allowed the measurements recorded here. What engines do not supply is the DURABILITY of the compensation, which still has to be reasoned about.",
+  "recognition": {
+    "preconditions": [
+      "One side is materially behind",
+      "That side holds identifiable non-material assets"
+    ],
+    "indicators_for": [
+      "A development lead measured in moves still needed, not moves already made",
+      "Open files or diagonals aimed at the enemy king",
+      "The enemy king unable to castle",
+      "Lasting structural damage in the opponent's camp",
+      "The opponent's pieces tied to defending the extra material"
+    ],
+    "indicators_against": [
+      "The only asset is tempi, and the opponent is close to finishing development",
+      "The opponent can return the material to defuse the position",
+      "Queens are off and the position has simplified"
+    ],
+    "prerequisites": [
+      "material-imbalance",
+      "initiative"
+    ],
+    "detector": null,
+    "detectability": "heuristic",
+    "typical_confidence": "medium",
+    "false_positive_traps": [
+      "Being down material with active pieces is not the same as having compensation. The Halloween Gambit position has active pieces and measures 1.75 pawns worse.",
+      "Counting developed pieces overstates a development lead. Count the moves each side still needs.",
+      "An evaluation near zero while a pawn down means full compensation NOW; it says nothing about whether it survives the next ten moves."
+    ]
+  },
+  "application": {
+    "typical_plans": [
+      "Convert an expiring lead into a permanent asset before it runs out",
+      "Force the opponent to spend moves untangling rather than developing",
+      "As the defender, return the material at the moment it completes development or forces a trade"
+    ],
+    "typical_moves": [],
+    "typical_pawn_structures": [
+      "Structures damaged by the capture, such as doubled or isolated pawns"
+    ],
+    "typical_piece_arrangements": [
+      "Rooks on lines opened by the sacrifice",
+      "An enemy king still in the centre"
+    ],
+    "tactical_consequences": [
+      "Threats force defensive replies, which buys further time and compounds the lead"
+    ],
+    "strategic_consequences": [
+      "If the compensation expires unused, the material deficit is simply a lost endgame"
+    ]
+  },
+  "exceptions": [
+    "Compensation of the structural kind - the Benko Gambit is the standard case - does not expire and can persist into the endgame, so the deadline reasoning does not apply to it.",
+    "Where the material given is more than a pawn, tempo compensation alone is rarely enough."
+  ],
+  "limitations": [
+    "An engine evaluation states whether compensation is currently adequate; it does not say how durable it is, which is the question a human most needs answered.",
+    "The three-tempi yardstick is folklore hedged by its own sources and should not be used as a calculation.",
+    "The written sources for this concept are encyclopedia and club-level instruction rather than primary texts, so the source confidence is medium. The quantitative claims here do not rest on them - they rest on this base's own controlled engine measurements."
+  ],
+  "misconceptions": [
+    "That compensation means attacking chances. Structural damage and the bishop pair are compensation too, and they last longer.",
+    "That the defender should hold the extra material. The standard technique is to return it at the right moment.",
+    "That a gambit's name tells you whether compensation exists. It has to be measured."
+  ],
+  "relationships": {
+    "broader": [],
+    "narrower": [],
+    "related": [
+      "gambit",
+      "sacrifice",
+      "initiative",
+      "positional-sacrifice",
+      "material-imbalance",
+      "static-vs-dynamic",
+      "tempo",
+      "bishop-pair",
+      "open-file"
+    ],
+    "contrasting": [
+      "material-imbalance"
+    ],
+    "co_occurring": [
+      "gambit",
+      "initiative"
+    ],
+    "conflicts": [
+      {
+        "concept": "material-imbalance",
+        "resolution": "These are the two halves of one evaluation and do not really conflict: material counts the deficit, compensation counts what was bought with it, and the engine number is the net. The practical error is treating either half as the answer on its own."
+      }
+    ]
+  },
+  "examples": [
+    {
+      "fen": "r1bqk1nr/pppp1ppp/2n5/2b1p3/2B1P3/5N2/PPPP1PPP/RNBQK2R w KQkq - 4 4",
+      "note": "The Evans Gambit, used here to show that compensation is a measurable quantity rather than a manner of speaking. Same controlled searchmoves comparison as in the gambit record. (Recorded as constructed-test: the FEN was built from the standard move sequence specifically for this comparison, not taken from a game.)",
+      "origin_kind": "constructed-test",
+      "concept_role": "supports",
+      "side_to_move_benefits": "neither",
+      "engine": {
+        "engine_id": "Stockfish 18",
+        "test_level": 3,
+        "depth": 26,
+        "threads": 10,
+        "hash_mb": 2048,
+        "multipv": 3,
+        "best_move": "c2c3",
+        "eval_cp": 28,
+        "mate_in": null,
+        "pv": [],
+        "alternatives": [
+          {
+            "move": "d2d3",
+            "eval_cp": 24,
+            "mate_in": null
+          },
+          {
+            "move": "b2b4",
+            "eval_cp": 0,
+            "mate_in": null
+          }
+        ],
+        "margin_cp": 28,
+        "verdict": "supports",
+        "verdict_note": "Full compensation, demonstrated numerically. After 4.b4 White is a pawn down and the position evaluates to exactly 0.00, against +0.28 for the quiet 4.c3. Since an evaluation already nets material against everything else, a pawn deficit scoring level means the non-material assets are worth a full pawn. What White gives up is the opening edge, not the pawn."
+      }
+    }
+  ],
+  "counterexamples": [
+    {
+      "fen": "r1bqkb1r/pppp1ppp/2n2n2/4p3/4P3/2N2N2/PPPP1PPP/R1BQKB1R w KQkq - 4 4",
+      "note": "The Halloween Gambit, where activity exists but does not amount to compensation. (Recorded as constructed-test: the FEN was built from the standard move sequence specifically for this comparison, not taken from a game.)",
+      "origin_kind": "constructed-test",
+      "concept_role": "contradicts",
+      "side_to_move_benefits": "black",
+      "engine": {
+        "engine_id": "Stockfish 18",
+        "test_level": 3,
+        "depth": 26,
+        "threads": 10,
+        "hash_mb": 2048,
+        "multipv": 3,
+        "best_move": "d2d4",
+        "eval_cp": 8,
+        "mate_in": null,
+        "pv": [],
+        "alternatives": [
+          {
+            "move": "f1b5",
+            "eval_cp": 3,
+            "mate_in": null
+          },
+          {
+            "move": "f3e5",
+            "eval_cp": -167,
+            "mate_in": null
+          }
+        ],
+        "margin_cp": 175,
+        "verdict": "contradicts",
+        "verdict_note": "Activity without compensation. 4.Nxe5 gives a knight for a pawn and produces a genuinely mobile centre and gain of time against the black knights, yet evaluates at -1.67 against +0.08 for the best move. Direct evidence that visible activity is not the same thing as adequate compensation, which is the trap this concept most needs guarding against."
+      }
+    }
+  ],
+  "ambiguous_examples": [],
+  "explanations": {
+    "by_level": {
+      "beginner": "What you get in return for the material you gave away.",
+      "intermediate": "Compensation. Being a pawn down is fine if what you got back is worth a pawn - usually time, open lines, or damage to their position.",
+      "advanced": "Ask how long it lasts. Tempi expire, open lines last while the position stays open, and a ruined structure lasts into the endgame.",
+      "master": "The evaluation already nets it out; what it will not tell you is the durability, and that is the part worth thinking about."
+    },
+    "by_depth": {
+      "short": "What you get back for the material you gave up.",
+      "normal": "Compensation: the non-material assets held in exchange for a material deficit - time, open lines, central control, an exposed enemy king, or damage to the opponent's structure. It is what makes being a pawn down consistent with not being worse.",
+      "deep": "What is received in exchange for material, and its forms differ above all in how long they last. Tempi expire once the opponent completes development, so a lead of that kind must be converted while it exists; open lines persist while the position stays open; structural damage and the bishop pair persist into the endgame, which makes them the most reliable compensation of all. The classical yardstick of three tempi per pawn is hedged by its own sources and understates good compensation, since the free moves are rarely the whole of what is gained; the better count is of moves each side still needs, not moves already made. The quantity is directly measurable, because an evaluation nets material against everything else: a pawn down at 0.00 is fully compensated, as the Evans Gambit measures here, while a piece down at -1.67 is not, however active the pieces look."
+    },
+    "hedge": "",
+    "lesson": "Ask two questions: is it worth the material now, and how long will it last?"
+  },
+  "terminology": {
+    "beginner_words": [
+      "what you got in return"
+    ],
+    "advanced_words": [
+      "compensation",
+      "adequate compensation",
+      "initiative",
+      "development lead",
+      "durability"
+    ],
+    "avoid": [
+      "compensation means an attack"
+    ]
+  },
+  "status": {
+    "stage": "validated",
+    "last_updated": "2026-09-01",
+    "open_questions": [],
+    "audit_notes": []
+  },
+  "id": "compensation",
+  "canonical_name": "Compensation",
+  "category": "gambit-principles",
+  "knowledge_type": "positional-concept",
+  "definition_short": "What a player receives in return for material given up.",
+  "definition_long": "The non-material assets held in exchange for a material deficit. Compensation is what makes it coherent to be a pawn down and not worse.\n\nTHE FORMS DIFFER IN DURABILITY, and this is the distinction that matters most in practice. TEMPI expire: a development lead is spent once the opponent finishes developing, so it must be converted while it exists. OPEN LINES and DIAGONALS persist as long as the position stays open. STRUCTURAL DAMAGE to the opponent — doubled or isolated pawns, holes — persists into the endgame, which is why compensation of that kind is the most reliable. The BISHOP PAIR is similar. An enemy king permanently stuck in the centre sits between the two.\n\nTHE CLASSICAL YARDSTICK is that a pawn is worth about three tempi in open positions. Its sources hedge it heavily and so does this base: the free moves are almost never the whole of what the gambiteer gains, so the count understates good compensation and flatters bad. The useful refinement is to count not the developing moves already made but the moves each side still needs to complete development, because a gambiteer with an initiative may force the opponent to spend moves untangling before they can develop at all.\n\nCOMPENSATION IS MEASURABLE, and this base has measured it. An engine evaluation nets material against everything else, so a position a pawn down that evaluates to 0.00 has, by definition, full compensation. The Evans Gambit does exactly that. The corollary is the important one: a position a piece down evaluating at -1.67 has partial compensation and no more, whatever the opening is called.\n\nTHE DEADLINE. Compensation of the expiring kind has a shelf life, and the standard defensive technique is built on that fact: accept the material, decline to cling to it, and return it at the moment doing so completes development or forces a favourable trade. Strong defenders return gambit material readily. The practical trigger is when holding the extra pawn costs a second tempo or forces a piece to a passive square.",
+  "sources": [
+    "wikipedia-gambit",
+    "exeter-gambits",
+    "chessmind-gambit",
+    "wikipedia-chess-opening"
+  ],
+  "source_confidence": "medium"
+}

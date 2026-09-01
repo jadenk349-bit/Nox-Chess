@@ -6,24 +6,24 @@
     "note": "Filled in by tools/sf_analyse.py --probe"
   },
   "counters": {
-    "concepts_total": 86,
+    "concepts_total": 93,
     "concepts_stub": 0,
     "concepts_researched": 29,
     "concepts_validated": 4,
     "concepts_needs_review": 0,
-    "sources_reviewed": 101,
-    "positions_tested": 19,
-    "matches_validated": 14,
-    "false_matches": 1,
-    "ambiguous_matches": 4,
+    "sources_reviewed": 114,
+    "positions_tested": 25,
+    "matches_validated": 17,
+    "false_matches": 3,
+    "ambiguous_matches": 5,
     "by_stage": {
       "ready": 2,
-      "researched": 78,
-      "validated": 6
+      "researched": 82,
+      "validated": 9
     },
     "tablebase_positions": 14,
-    "concepts_fully_covered": 11,
-    "areas_touched": 44,
+    "concepts_fully_covered": 12,
+    "areas_touched": 47,
     "areas_total": 85
   },
   "areas": {
@@ -471,24 +471,42 @@
     },
     "opening-principles": {
       "domain": "opening",
-      "status": "not-started",
-      "concepts": [],
+      "status": "covered",
+      "concepts": [
+        "compensation",
+        "early-queen-development",
+        "gambit"
+      ],
       "open_questions": [],
-      "last_touched": null
+      "last_touched": "2026-09-01",
+      "last_updated": "2026-09-01",
+      "note": "early-queen-development written with a controlled engine measurement; opening-development, center-control, castling and tempo already existed."
     },
     "opening-theory-concepts": {
       "domain": "opening",
-      "status": "not-started",
-      "concepts": [],
+      "status": "covered",
+      "concepts": [
+        "opening-repertoire",
+        "tabiya",
+        "theoretical-novelty",
+        "transposition"
+      ],
       "open_questions": [],
-      "last_touched": null
+      "last_touched": "2026-09-01",
+      "last_updated": "2026-09-01",
+      "note": "transposition, theoretical-novelty, tabiya, opening-repertoire. Three of the four are not detectable without an opening database, which is recorded on each."
     },
     "gambit-principles": {
       "domain": "opening",
-      "status": "not-started",
-      "concepts": [],
+      "status": "covered",
+      "concepts": [
+        "compensation",
+        "gambit"
+      ],
       "open_questions": [],
-      "last_touched": null
+      "last_touched": "2026-09-01",
+      "last_updated": "2026-09-01",
+      "note": "gambit and compensation, both validated against the controlled searchmoves spectrum."
     },
     "middlegame-principles": {
       "domain": "middlegame",
@@ -1115,6 +1133,42 @@
         }
       },
       "conclusion": "Quantifies the Education System's surface. The tactical single-move case is covered at 88-100% by findMotifs() and puzzle_words.js and cannot be improved on by this project. The quiet/structural case is at 4-38%, and overall a third of all cards contain no chess vocabulary at all. Research priority is therefore positional, not tactical."
+    },
+    {
+      "id": "opening-compensation-spectrum",
+      "date": "2026-09-01",
+      "method": "Controlled searchmoves comparison: Stockfish 18, depth 26, 10 threads, 2048MB. For each position every candidate was evaluated inside ONE search of that position, so the only variable is the move. This avoids the separate-search artefacts that make cross-position gambit comparisons unreliable.",
+      "results": {
+        "after 1.e4 e5": {
+          "2.Nf3": 30,
+          "2.Nc3": 15,
+          "2.Qh5": -38,
+          "2.f4 (King's Gambit)": -61
+        },
+        "after 1.e4 e5 2.Nf3 Nc6 3.Bc4 Bc5": {
+          "4.c3": 28,
+          "4.d3": 24,
+          "4.b4 (Evans Gambit)": 0
+        },
+        "after 1.e4 e5 2.Nf3 Nc6 3.Nc3 Nf6": {
+          "4.d4": 8,
+          "4.Bb5": 3,
+          "4.Nxe5 (Halloween Gambit)": -167
+        }
+      },
+      "findings": [
+        "Gambit compensation is a measurable quantity, and it can be complete: the Evans Gambit is a pawn down and evaluates to exactly 0.00, so what is surrendered is White's opening edge (0.28) rather than the pawn.",
+        "Compensation must be established per gambit, never inferred from the word: the Halloween Gambit gives a knight for a pawn and measures 1.75 worse than the best move, with visible activity and no adequate compensation.",
+        "The 'don't bring the queen out early' rule is confirmed in direction and is smaller than its usual phrasing implies: 2.Qh5 costs 0.68 against 2.Nf3.",
+        "The claim that the King's Gambit is simply unsound is only partly supported. 2.f4 concedes 0.91 relative to 2.Nf3, which is an inferior line rather than a refuted one - and it evaluates BELOW 2.Qh5, the move beginners are told never to play.",
+        "Methodological: openings are one of the few positional areas where controlled comparison is easy, because the alternatives are all legal moves in a single position. This is the same searchmoves technique that failed to isolate outposts, and it works here for exactly that reason."
+      ],
+      "concepts": [
+        "gambit",
+        "compensation",
+        "early-queen-development"
+      ]
     }
-  ]
+  ],
+  "last_updated": "2026-09-01"
 }

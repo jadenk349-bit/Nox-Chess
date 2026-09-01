@@ -1,0 +1,134 @@
+{
+  "schema_version": 2,
+  "alternate_names": [],
+  "historical_names": [],
+  "tags": [
+    "opening",
+    "move-order",
+    "terminology"
+  ],
+  "subcategory": "move order",
+  "difficulty": "intermediate",
+  "knowledge_type_note": "A fact about how chess positions are identified, not a piece of advice. It follows from the rules, so it is not disputable.",
+  "name_status": "established-name",
+  "history": {
+    "attributions": [],
+    "first_documented_source": "wikipedia-chess-opening",
+    "year": null,
+    "confidence": "unknown",
+    "notes": "Standard technical vocabulary of opening theory; no coinage researched. The claim that a position remembers only castling rights, en passant availability and repetition count is verified against the FIDE Laws (Article 9.2.2 defines position identity for repetition, including castling and en passant rights), not taken from the instructional sources.",
+    "competing_claims": [],
+    "development": []
+  },
+  "engine_era_status": "reliable",
+  "engine_era_note": "Unaffected as a fact, but far more heavily exploited in practice. Engine and database preparation is organised around positions rather than move sequences, which is why searching by position rather than by opening name is the professional habit.",
+  "recognition": {
+    "preconditions": [
+      "Two different move sequences reaching one position"
+    ],
+    "indicators_for": [
+      "The piece placement matches a known position exactly",
+      "Castling rights and en passant rights also match"
+    ],
+    "indicators_against": [
+      "A piece stands on a different square, however similar the position looks",
+      "Castling rights differ, which makes it a different position in law as well as in fact"
+    ],
+    "prerequisites": [],
+    "detector": null,
+    "detectability": "mechanical",
+    "typical_confidence": "high",
+    "false_positive_traps": [
+      "Nearly the same is not the same. One pawn move inserted for both sides makes a different position, and treating it as the canonical one is the commonest opening disaster at club level.",
+      "Castling rights are invisible on the board but are part of the position. Two arrangements that look identical are not transpositions if one side has lost the right to castle."
+    ]
+  },
+  "application": {
+    "typical_plans": [
+      "Choose a move order that denies the opponent a line you do not want to face",
+      "Use a flexible first move to keep several destinations available",
+      "Reach a familiar structure from an unfamiliar opening"
+    ],
+    "typical_moves": [
+      "Flexible first moves such as 1.Nf3 and 1.c4 that can enter several systems"
+    ],
+    "typical_pawn_structures": [],
+    "typical_piece_arrangements": [],
+    "tactical_consequences": [],
+    "strategic_consequences": [
+      "Repertoire size can be reduced by funnelling many openings into one structure"
+    ]
+  },
+  "exceptions": [
+    "Castling rights, en passant availability and repetition count are remembered, so positions matching in piece placement alone may still differ."
+  ],
+  "limitations": [
+    "Whether a given move order is safe is a concrete question about the extra options it concedes, not something the concept itself answers."
+  ],
+  "misconceptions": [
+    "That a transposition is a kind of repetition. Repetition is one game revisiting a position; transposition is different routes reaching a position once.",
+    "That reaching the same opening name means reaching the same position. Names index move sequences, positions do not."
+  ],
+  "relationships": {
+    "broader": [],
+    "narrower": [],
+    "related": [
+      "opening-repertoire",
+      "tabiya",
+      "opening-development"
+    ],
+    "contrasting": [],
+    "co_occurring": [],
+    "conflicts": []
+  },
+  "examples": [],
+  "counterexamples": [],
+  "ambiguous_examples": [],
+  "explanations": {
+    "by_level": {
+      "beginner": "The same position reached by playing the moves in a different order.",
+      "intermediate": "A transposition. Once the pieces stand on the same squares, everything known about that position applies however you got there.",
+      "advanced": "Positions remember only castling rights, en passant, and repetitions. Everything else about the route is forgotten, which is what makes move order a tool.",
+      "master": "Move orders are asymmetric: pick the route whose junctions deny the opponent what you least want to face."
+    },
+    "by_depth": {
+      "short": "The same position by a different move order.",
+      "normal": "A transposition: two different sequences of moves reaching one and the same position. Because a position is defined by where the pieces stand, all the theory about it applies no matter which route produced it.",
+      "deep": "A position has no memory of the moves that made it, with exactly three exceptions - castling rights, en passant availability, and the repetition count - which is why theory attaches to positions rather than to move orders. What makes this a weapon rather than a curiosity is that routes are asymmetric: two orders reaching the same destination pass different junctions, so choosing an order decides which positions the opponent may steer into. The matching hazard is the transposition trap, where an apparently equivalent order concedes one extra option or spends a commitment the canonical version keeps in reserve."
+    },
+    "hedge": "",
+    "lesson": "Compare the position you are entering with the standard version piece by piece, and treat any difference as a new position until you have checked it is harmless."
+  },
+  "terminology": {
+    "beginner_words": [
+      "the same position, different order"
+    ],
+    "advanced_words": [
+      "transposition",
+      "move order",
+      "transposition trap",
+      "move-order finesse"
+    ],
+    "avoid": [
+      "transposition is a repetition"
+    ]
+  },
+  "status": {
+    "stage": "researched",
+    "last_updated": "2026-09-01",
+    "open_questions": [],
+    "audit_notes": []
+  },
+  "id": "transposition",
+  "canonical_name": "Transposition",
+  "category": "opening-theory-concepts",
+  "knowledge_type": "terminology",
+  "definition_short": "Reaching the same position by a different order of moves.",
+  "definition_long": "A position is defined by where the pieces stand, not by the path taken to get there. Two games that open completely differently can arrive at an identical position, and at that moment every piece of theory about that position applies to both, regardless of route.\n\nTHE EXCEPTIONS ARE EXACTLY THREE, and they are the only things a chess position remembers about its own history: castling rights, en passant availability, and the count of previous repetitions. Everything else is forgotten. This is not a convention — it is visible in the FEN record, which stores precisely those items and nothing else about the past.\n\nTransposition matters because move orders are ASYMMETRIC. Two routes to the same destination pass different junctions along the way, so choosing a move order decides which positions the opponent is allowed to steer into. This is what makes it a weapon rather than a curiosity: the destination can be identical while one route deletes an option the opponent wanted.\n\nThe corresponding hazard is the TRANSPOSITION TRAP — a move order that looks equivalent to the main road but concedes one extra option, or quietly spends a commitment that the canonical version keeps in reserve. A piece already developed to a square is a piece that can no longer go anywhere else.",
+  "sources": [
+    "fide-laws-2023",
+    "wikipedia-chess-opening",
+    "chessmind-transposition"
+  ],
+  "source_confidence": "high"
+}
