@@ -12,16 +12,16 @@
     "concepts_validated": 4,
     "concepts_needs_review": 0,
     "sources_reviewed": 148,
-    "positions_tested": 29,
+    "positions_tested": 32,
     "matches_validated": 18,
-    "false_matches": 5,
+    "false_matches": 8,
     "ambiguous_matches": 6,
     "by_stage": {
       "ready": 2,
       "researched": 101,
       "validated": 9
     },
-    "tablebase_positions": 17,
+    "tablebase_positions": 18,
     "concepts_fully_covered": 12,
     "areas_touched": 63,
     "areas_total": 85
@@ -1303,6 +1303,38 @@
         "opening-development",
         "isolated-queen-pawn",
         "doubled-pawns"
+      ]
+    },
+    {
+      "id": "false-positive-resolutions-structural",
+      "date": "2026-09-01",
+      "method": "Constructed positions verified with lib/features.js, then judged by Stockfish 18 at depth 24-26, or by the Syzygy tablebase where the position was small enough.",
+      "results": {
+        "knight on d5 Black can challenge": {
+          "detector": "d5 not a hole; outposts empty",
+          "engine": "Black +0.74"
+        },
+        "symmetric open d-file, rook each": {
+          "engine": "+0.02"
+        },
+        "rook on the seventh, empty rank, king has luft": {
+          "engine": "-0.04"
+        },
+        "both kings exposed in a pawn ending": {
+          "tablebase": "proven draw, pawnShield 0 each"
+        }
+      },
+      "findings": [
+        "A centralised advanced knight is not an outpost, and this base's own detector refuses it - the question is definitional, so the feature detector rather than the engine is the instrument that settles it.",
+        "An open file confers nothing by itself: symmetric, with a rook of each colour on it, the position is dead level.",
+        "A rook on the seventh is not decisive when the rank is empty and the enemy king has luft - the two conditions the concept names are exactly what was removed.",
+        "An exposed king is not a losing king; king safety is phase-dependent, and the proven-drawn position has both kings in the open with no shelter at all."
+      ],
+      "concepts": [
+        "outpost",
+        "open-file",
+        "rook-on-the-seventh",
+        "king-safety"
       ]
     }
   ],

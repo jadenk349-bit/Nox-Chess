@@ -79,7 +79,8 @@
     "false_positive_traps": [
       "REGISTERED FALSE POSITIVE: a rook arriving on the seventh is not automatically important. With the pawns advanced and the king free, it attacks nothing and confines nobody.",
       "Two rooks on the seventh do NOT generally mate a king whose eighth rank is defended. Explaining them as a mating attack is usually wrong.",
-      "Detecting 'rook on rank 7' is trivial and fires often; the reportable facts are what it attacks and whether the king is trapped."
+      "Detecting 'rook on rank 7' is trivial and fires often; the reportable facts are what it attacks and whether the king is trapped.",
+      "A rook reaching the seventh is not decisive by itself. With an empty seventh rank and an enemy king that has luft, a tested position evaluates level at -0.04."
     ]
   },
   "application": {
@@ -138,7 +139,42 @@
     "conflicts": []
   },
   "examples": [],
-  "counterexamples": [],
+  "counterexamples": [
+    {
+      "fen": "4r1k1/6pp/8/8/8/6PP/r7/4R1K1 w - - 0 1",
+      "note": "A black rook on a2 - the seventh rank from Black's side - with nothing on that rank to attack, since White's pawns have advanced to g3 and h3, and with White's king already provided with an escape square. Constructed to remove exactly the two things that make a seventh-rank rook strong while leaving the rook where it is.",
+      "origin_kind": "constructed-test",
+      "concept_role": "contradicts",
+      "side_to_move_benefits": "neither",
+      "engine": {
+        "engine_id": "Stockfish 18",
+        "test_level": 3,
+        "depth": 26,
+        "threads": 10,
+        "hash_mb": 2048,
+        "multipv": 3,
+        "best_move": "e1e8",
+        "eval_cp": -4,
+        "mate_in": null,
+        "pv": [],
+        "alternatives": [
+          {
+            "move": "e1f1",
+            "eval_cp": null,
+            "mate_in": null
+          },
+          {
+            "move": "e1b1",
+            "eval_cp": null,
+            "mate_in": null
+          }
+        ],
+        "margin_cp": 0,
+        "verdict": "contradicts",
+        "verdict_note": "Level at -0.04 with best play. The rook occupies the seventh and achieves nothing, because the rank is empty and the enemy king is not confined - the two conditions the concept record names. Worth noting what the same search says about the alternatives: 2.Rf1 and 2.Rb1 are mate in 28 and 26 AGAINST White. So the position is level and sharp, which is a different thing from the rook being strong, and is exactly the distinction this case exists to protect."
+      }
+    }
+  ],
   "ambiguous_examples": [],
   "explanations": {
     "by_level": {
@@ -173,7 +209,7 @@
   },
   "status": {
     "stage": "researched",
-    "last_updated": "2026-08-31",
+    "last_updated": "2026-09-01",
     "open_questions": [],
     "audit_notes": []
   },

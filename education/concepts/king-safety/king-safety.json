@@ -70,7 +70,8 @@
       "REGISTERED FALSE POSITIVE: an exposed king is not automatically losing. With the attacking pieces traded off, an exposed king is often simply an active one — and in the endgame that is the goal.",
       "Castling does not establish safety and failing to castle does not establish danger. A closed centre changes both.",
       "Counting attacking pieces linearly overstates one or two and understates four. The relationship is S-shaped, and it is not worth reporting an attack below three attackers.",
-      "A pawn move near the king is not automatically a weakening — h3 in a quiet position is useful luft; the same move against a queenside-castled opponent is a hook."
+      "A pawn move near the king is not automatically a weakening — h3 in a quiet position is useful luft; the same move against a queenside-castled opponent is a hook.",
+      "An exposed king is not a losing king. In a proven drawn ending both kings stand in the open with no pawn shelter, and centralising them is correct - see the recorded counterexample."
     ]
   },
   "application": {
@@ -141,7 +142,24 @@
     ]
   },
   "examples": [],
-  "counterexamples": [],
+  "counterexamples": [
+    {
+      "fen": "8/8/3k1pp1/8/3K4/5PP1/8/8 b - - 0 1",
+      "note": "Both kings in the centre of the board with no pawn shelter at all - this base's feature detector reports pawnShield 0 for each - and the position is a proven draw. Already held in this base as the two-weaknesses counterexample; reused here because it settles a second question.",
+      "origin_kind": "tablebase-position",
+      "concept_role": "contradicts",
+      "side_to_move_benefits": "neither",
+      "tablebase": {
+        "source": "Lichess tablebase (Syzygy, 7-piece)",
+        "pieces": 6,
+        "wdl": "draw",
+        "dtz": 0,
+        "dtm": 0,
+        "category": "draw",
+        "note": "PROVEN draw with both kings fully exposed. King safety is a phase-dependent concept, not a property of a king's surroundings: once the pieces that could punish exposure are gone, an exposed king is not merely safe but actively wanted there. This is the resolution position for the exposed-king-not-losing false-positive case, and it is proof rather than argument."
+      }
+    }
+  ],
   "ambiguous_examples": [],
   "explanations": {
     "by_level": {

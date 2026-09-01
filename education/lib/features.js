@@ -279,7 +279,9 @@ function kingFeatures(st, colour) {
   return {
     square: nameOf(k),
     onHomeRank: r === homeRow,
-    castledSide: r === homeRow && (c >= 6 ? 'king' : c <= 2 ? 'queen' : null),
+    // null in every case where it does not apply, rather than false on one
+    // branch and null on another, which read as two different answers.
+    castledSide: r === homeRow ? (c >= 6 ? 'king' : c <= 2 ? 'queen' : null) : null,
     pawnShield: shield, pawnShieldSquares: shieldSquares,
     luft,
     // Observable precondition only. Whether a back-rank mate EXISTS is

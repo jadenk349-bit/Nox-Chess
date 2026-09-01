@@ -14,16 +14,22 @@
       "concept": "outpost",
       "surface_pattern": "A knight sits on a central advanced square such as d5.",
       "why_not": "An outpost requires that no enemy pawn can challenge the square. If ...c6 or ...e6 is available, the knight is merely visiting.",
-      "fen": null,
-      "status": "pending"
+      "fen": "r1bqkb1r/pp2pppp/2np1n2/3N4/4P3/8/1PPP1PPP/RNBQKB1R b KQkq - 0 1",
+      "status": "resolved",
+      "evidence": "feature-detector + engine",
+      "resolution": "Resolved by two independent checks. This base's own Layer 3 detector reports that d5 is NOT a hole for White and returns an empty outpost list, because Black still has the e7 pawn and can play ...e6 - so the system does not make the false positive in the first place. The engine agrees there is nothing to claim: Black stands at +0.74. Note that the question is definitional rather than evaluative, so the detector, not the engine, is the instrument that settles it.",
+      "resolved_date": "2026-09-01"
     },
     {
       "id": "seventh-rank-rook-not-decisive",
       "concept": "rook-on-the-seventh",
       "surface_pattern": "A rook reaches the opponent's seventh rank.",
       "why_not": "The rank matters when it attacks pawns, confines the king, or supports an invasion. A rook on an empty seventh with the enemy king already safe achieves nothing and can be driven away with tempo.",
-      "fen": null,
-      "status": "pending"
+      "fen": "4r1k1/6pp/8/8/8/6PP/r7/4R1K1 w - - 0 1",
+      "status": "resolved",
+      "evidence": "engine",
+      "resolution": "Resolved. A black rook sits on the seventh with an empty rank to work on and an enemy king that already has luft, and the position is level at -0.04. The two conditions the concept record names as what makes a seventh-rank rook strong are both absent, and the rook is correspondingly worth nothing.",
+      "resolved_date": "2026-09-01"
     },
     {
       "id": "doubled-pawns-not-weak",
@@ -42,15 +48,19 @@
       "surface_pattern": "A bishop sits behind its own pawn chain.",
       "why_not": "A bishop hemmed in by pawns on its own colour may still be the key defender of a colour complex, or may become excellent after one pawn break. Mobility, role and prospects matter, not geometry alone.",
       "fen": null,
-      "status": "pending"
+      "status": "pending",
+      "blocked_note": "Attempted and not resolved. A convincing case needs a bishop whose own pawns sit on its colour - the surface pattern - which is nonetheless fine, and the honest versions of that are positions where the pawns can still move or where the bishop is doing essential defensive work. Both depend on a judgement this base cannot yet isolate in a controlled position, exactly as the outpost and king-activity pairs could not be isolated. Left pending rather than resolved with a position that does not really demonstrate it."
     },
     {
       "id": "exposed-king-not-losing",
       "concept": "king-safety",
       "surface_pattern": "A king has lost its pawn cover or sits in the centre.",
       "why_not": "With the attacking pieces traded off, an exposed king is often simply an active king. Exposure matters in proportion to the attacking force that remains.",
-      "fen": null,
-      "status": "pending"
+      "fen": "8/8/3k1pp1/8/3K4/5PP1/8/8 b - - 0 1",
+      "status": "resolved",
+      "evidence": "tablebase",
+      "resolution": "Resolved by proof. Both kings stand in the open with no pawn shelter whatever - the feature detector reports pawnShield 0 for each - and the tablebase says the position is a draw. King safety is phase-dependent: once the pieces that could punish exposure are gone, the exposed king is not merely safe but is where it should be.",
+      "resolved_date": "2026-09-01"
     },
     {
       "id": "early-queen-not-bad",
@@ -101,8 +111,11 @@
       "concept": "open-file",
       "surface_pattern": "A file has no pawns of either colour.",
       "why_not": "A file is worth occupying only if it offers entry squares. A file whose seventh and eighth ranks are covered gives a rook nothing but a stare.",
-      "fen": null,
-      "status": "pending"
+      "fen": "3rk3/ppp1ppp1/8/8/8/8/PPP1PPP1/3RK3 w - - 0 1",
+      "status": "resolved",
+      "evidence": "engine",
+      "resolution": "Resolved. A symmetric position with the d-file open and a rook of each colour on it evaluates at +0.02 - dead level, with the best line simply trading the rooks. An open file is not an advantage in itself; it is an advantage only when one side can use it and the other cannot.",
+      "resolved_date": "2026-09-01"
     },
     {
       "id": "material-count-not-evaluation",

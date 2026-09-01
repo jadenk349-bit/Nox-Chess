@@ -66,7 +66,8 @@
     "false_positive_traps": [
       "REGISTERED FALSE POSITIVE: a file with no pawns is not automatically useful. Without an entry square, a rook on it accomplishes nothing.",
       "Detecting 'no pawns on this file' is trivial and fires constantly. The reportable fact is the file PLUS a usable entry square.",
-      "Contested files where all rooks come off leave neither side with anything."
+      "Contested files where all rooks come off leave neither side with anything.",
+      "An open file is not an advantage on its own. In a proven test position with a rook of each colour on the open d-file, the evaluation is +0.02 - the file belongs to nobody."
     ]
   },
   "application": {
@@ -122,7 +123,42 @@
     "conflicts": []
   },
   "examples": [],
-  "counterexamples": [],
+  "counterexamples": [
+    {
+      "fen": "3rk3/ppp1ppp1/8/8/8/8/PPP1PPP1/3RK3 w - - 0 1",
+      "note": "A symmetric position with the d-file open and a rook of each colour already on it. Constructed to isolate the file itself: if an open file were an advantage, occupying one could not leave the position dead level.",
+      "origin_kind": "constructed-test",
+      "concept_role": "contradicts",
+      "side_to_move_benefits": "neither",
+      "engine": {
+        "engine_id": "Stockfish 18",
+        "test_level": 3,
+        "depth": 26,
+        "threads": 10,
+        "hash_mb": 2048,
+        "multipv": 3,
+        "best_move": "d1d8",
+        "eval_cp": 2,
+        "mate_in": null,
+        "pv": [],
+        "alternatives": [
+          {
+            "move": "d1d2",
+            "eval_cp": 0,
+            "mate_in": null
+          },
+          {
+            "move": "e2e4",
+            "eval_cp": 0,
+            "mate_in": null
+          }
+        ],
+        "margin_cp": 0,
+        "verdict": "contradicts",
+        "verdict_note": "Dead level at +0.02, with the best line trading the rooks off immediately. An open file is not an advantage in itself - it is an advantage only when one side can use it and the other cannot, and here both can equally. This is the position behind the open-file-not-useful false-positive case, and it is why this system reports a file as open rather than as good."
+      }
+    }
+  ],
   "ambiguous_examples": [],
   "explanations": {
     "by_level": {
@@ -157,7 +193,7 @@
   },
   "status": {
     "stage": "researched",
-    "last_updated": "2026-08-31",
+    "last_updated": "2026-09-01",
     "open_questions": [],
     "audit_notes": []
   },

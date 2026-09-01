@@ -135,7 +135,8 @@
       "A knight on d5 is not an outpost merely because it is on d5. If ...c6 or ...e6 is available, the knight is visiting.",
       "A pawn-protected advanced square whose occupant can simply be exchanged is not an outpost in any useful sense — Romanovsky's condition fails.",
       "A safe square that the piece does nothing from. Safety is a precondition, not the benefit.",
-      "In the engine test above, the archetypal 'outpost' move was second-best. Being a genuine outpost does not make occupying it the best move."
+      "In the engine test above, the archetypal 'outpost' move was second-best. Being a genuine outpost does not make occupying it the best move.",
+      "A centralised advanced knight is not an outpost. If an enemy pawn can still challenge the square, the piece is visiting. The detector in lib/features.js checks this and correctly refuses in the recorded counterexample."
     ]
   },
   "application": {
@@ -243,7 +244,42 @@
       }
     }
   ],
-  "counterexamples": [],
+  "counterexamples": [
+    {
+      "fen": "r1bqkb1r/pp2pppp/2np1n2/3N4/4P3/8/1PPP1PPP/RNBQKB1R b KQkq - 0 1",
+      "note": "A white knight on d5 with Black's c- and e-pawns still able to challenge it. Constructed specifically to be the near-miss: the piece is centralised and advanced, which is the surface pattern, and the defining condition is absent.",
+      "origin_kind": "constructed-test",
+      "concept_role": "contradicts",
+      "side_to_move_benefits": "black",
+      "engine": {
+        "engine_id": "Stockfish 18",
+        "test_level": 3,
+        "depth": 24,
+        "threads": 10,
+        "hash_mb": 2048,
+        "multipv": 3,
+        "best_move": "f6e4",
+        "eval_cp": 74,
+        "mate_in": null,
+        "pv": [],
+        "alternatives": [
+          {
+            "move": "e7e6",
+            "eval_cp": -21,
+            "mate_in": null
+          },
+          {
+            "move": "g7g6",
+            "eval_cp": -61,
+            "mate_in": null
+          }
+        ],
+        "margin_cp": 0,
+        "verdict": "contradicts",
+        "verdict_note": "Two independent checks agree the knight is not on an outpost. This base's own feature detector (lib/features.js) reports d5 is NOT a hole for White and returns an empty outpost list, because Black retains the e7 pawn and can play ...e6. And the engine puts BLACK at +0.74 with the move, so the advanced central knight is conferring no advantage whatever. Centralisation is the surface pattern; the absence of a pawn that can challenge the square is the concept."
+      }
+    }
+  ],
   "ambiguous_examples": [],
   "explanations": {
     "by_level": {
@@ -280,7 +316,7 @@
   },
   "status": {
     "stage": "researched",
-    "last_updated": "2026-08-31",
+    "last_updated": "2026-09-01",
     "open_questions": [
       "NOT engine-validated and cannot be by controlled pair. Three designs failed (see METHODOLOGY.md and research-state failed_research_attempts). A different standard is needed for positional concepts.",
       "Collect 10-20 annotated master positions where a titled author names an outpost, and record whether Stockfish rates the annotated move among its top candidates. That measures whether the concept tracks strong play without claiming causation.",
