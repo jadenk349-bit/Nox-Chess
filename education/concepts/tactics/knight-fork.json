@@ -103,7 +103,15 @@
     ],
     "conflicts": []
   },
-  "examples": [],
+  "examples": [
+    {
+      "fen": "2k3r1/2N2R2/1p4P1/pp3ppr/1b2p3/3pP1P1/P3NP2/1R4K1 w - - 4 38",
+      "note": "the solution Nd4 is a knight fork — the detector reports fork and the moving piece is a knight. The feature was established mechanically from the position by the page's own move generator and lib/features.js. What is NOT claimed is that this feature decides the position. The move is Nd4. Provenance: the puzzle corpus is engine self-play — a real position from a real game between engines, not a master game.",
+      "origin_kind": "puzzle",
+      "concept_role": "supports",
+      "side_to_move_benefits": "neither"
+    }
+  ],
   "counterexamples": [],
   "ambiguous_examples": [],
   "explanations": {
