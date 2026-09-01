@@ -225,34 +225,122 @@ function analyzeWithEducation(opts) {
   };
 }
 
-/* Layer 5, minimal and deliberately plain. It states what was observed, names
- * the concepts that observation licenses, and stops. It does not narrate. */
+/* ---------------------------------------------------------------------------
+ * LAYER 5 — WORDING
+ *
+ * The rule this file follows is that an explanation is about THIS POSITION.
+ * Everything else is subordinate to that, and three habits were removed to
+ * enforce it.
+ *
+ * NO DICTIONARY DEFINITIONS. An earlier version printed the concept's full
+ * definition after the position-specific observation, so a reader who had just
+ * been told "White's knight on b6 cannot be driven off by a pawn" was then told
+ * what an outpost is in general. The teaching sentence now has to add something
+ * the observation did not, and the concept's `lesson` - which is short and
+ * actionable - is preferred over its definition.
+ *
+ * NO META-REMARKS. Concept records carry sentences about the literature and
+ * about this base's own testing, because a knowledge base should. They must not
+ * reach a player. "Sources disagree on whether an open file behind it is part
+ * of the definition" is true, useful to a maintainer, and noise in a comment on
+ * a chess position.
+ *
+ * SECONDARY OBSERVATIONS EARN THEIR PLACE. Listing everything detected is how a
+ * six-item feature dump gets mistaken for an explanation.
+ * ------------------------------------------------------------------------ */
+
+// Sentences that talk about the knowledge rather than the position.
+const META = /(sources? (disagree|differ|are split)|this base|recorded here|measured here|tools\/|\bthis system\b|not verified|unverified|attribut|coinage|is disputed|no controlled evidence|this record)/i;
+
+function sentences(text) {
+  if (!text) return [];
+  return String(text).split(/(?<=[.!?])\s+/).map(s => s.trim()).filter(Boolean);
+}
+
+/* The first sentence that says something about chess rather than about the
+ * literature. Returns null if the whole passage is meta. */
+function teachingSentence(text) {
+  for (const s of sentences(text)) {
+    if (META.test(s)) continue;
+    if (s.length < 12) continue;
+    return s;
+  }
+  return null;
+}
+
+/* Does this sentence merely restate the observation? Cheap overlap test on the
+ * content words, which is enough to catch "The d-file is open" following "the
+ * d-file is open, and White's rook stands on it". */
+function restates(a, b) {
+  if (!a || !b) return false;
+  const words = t => new Set(String(t).toLowerCase().match(/[a-z]{4,}/g) || []);
+  const A = words(a), B = words(b);
+  if (!B.size) return false;
+  let shared = 0;
+  for (const w of B) if (A.has(w)) shared++;
+  return shared / B.size > 0.6;
+}
+
 function compose(features, moveInfo, concepts, assessment, level, depth) {
   const bits = [];
+
   if (moveInfo && moveInfo.legal) {
-    bits.push(assessment
-      ? (assessment.is_best === true
-          ? `${moveInfo.san} is the engine's first choice here.`
-          : `${moveInfo.san} evaluates at ${(assessment.eval_cp / 100).toFixed(2)}.`)
-      : `${moveInfo.san} was played.`);
+    if (assessment) {
+      bits.push(assessment.is_best === true
+        ? `${moveInfo.san} is the engine's first choice.`
+        : `${moveInfo.san} evaluates at ${(assessment.eval_cp / 100).toFixed(2)}` +
+          (assessment.best_move ? `, against the engine's ${assessment.best_move}.` : '.'));
+    } else {
+      bits.push(`${moveInfo.san}.`);
+    }
   }
+
   if (!concepts.length) {
     bits.push('Nothing in this position matches a researched concept in this knowledge base.');
     return bits.join(' ');
   }
+
   const lead = concepts[0];
-  // Avoid "The d- and e-files are open. The d-file is open." — if the wording
-  // was filled with this position's specifics, it has already said it.
-  if (!(lead.wording_specific && lead.wording)) bits.push(`${cap1(lead.because[0])}.`);
-  // If the lead observation already described this position concretely (a motif
-  // sentence, or a filled template), the record's general definition adds length
-  // and no information. Keep it only when the lead was generic.
-  if (lead.wording && !(lead.detected_by || '').startsWith('findMotifs')) bits.push(lead.wording);
-  if (lead.hedge) bits.push(lead.hedge);
-  const rest = concepts.slice(1, 3).filter(c => c.confidence !== 'low');
-  if (rest.length) {
-    bits.push('Also on the board: ' + rest.map(c => lower1(c.because[0])).join('; ') + '.');
+  const observation = lead.wording_specific && lead.wording ? lead.wording : cap1(lead.because[0]) + '.';
+  bits.push(observation.endsWith('.') ? observation : observation + '.');
+
+  // The teaching half, only where it adds to the observation.
+  if (depth !== 'short') {
+    let teach = null;
+    if (lead.lesson && !restates(observation, lead.lesson)) teach = lead.lesson;
+    if (!teach && lead.wording && !lead.wording_specific) {
+      const t = teachingSentence(lead.wording);
+      if (t && !restates(observation, t)) teach = t;
+    }
+    if (teach) bits.push(teach.endsWith('.') ? teach : teach + '.');
   }
+
+  // Secondary observations. One at normal depth, two at deep, and only where
+  // they are confident and are not saying the same thing again.
+  const room = depth === 'deep' ? 2 : depth === 'normal' ? 1 : 0;
+  if (room) {
+    const said = [observation];
+    const extra = [];
+    for (const c of concepts.slice(1)) {
+      if (extra.length >= room) break;
+      if (c.confidence === 'low') continue;
+      const line = c.because[0];
+      if (said.some(x => restates(x, line))) continue;
+      said.push(line); extra.push(lower1(line));
+    }
+    if (extra.length === 1) bits.push(`Also here: ${extra[0]}.`);
+    else if (extra.length > 1) bits.push(`Also here: ${extra.join('; ')}.`);
+  }
+
+  // A hedge on soft knowledge, and at depth a caution — but never the meta ones.
+  if (depth === 'deep') {
+    if (lead.hedge && !META.test(lead.hedge)) bits.push(lead.hedge);
+    const caution = (lead.cautions || []).find(c => !META.test(c.text));
+    if (caution) bits.push(`Worth checking: ${lower1(caution.text)}`);
+  } else if (lead.hedge && !META.test(lead.hedge) && depth === 'normal' && SOFT.has(lead.knowledge_type)) {
+    bits.push(lead.hedge);
+  }
+
   return bits.join(' ');
 }
 const cap1 = s => (s ? s[0].toUpperCase() + s.slice(1) : s);

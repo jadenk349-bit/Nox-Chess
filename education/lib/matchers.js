@@ -310,15 +310,35 @@ const STRUCTURAL = [
   },
   {
     concept: 'material-imbalance',
-    implements: "recognition.preconditions: the sides hold different material",
+    implements: "definition: the sides hold different KINDS of material, not different amounts",
     run(f) {
+      // The record defines an imbalance as the sides holding different kinds of
+      // material - "the 1/3/3/5/9 scale stops applying". An earlier version of
+      // this matcher fired on any one-point difference, so an ordinary extra
+      // pawn was explained with a lecture about qualitative imbalance. A pawn up
+      // is a material ADVANTAGE; a rook against two minors is an imbalance.
+      const w = f.material.w.counts, b = f.material.b.counts;
+      const diffs = [];
+      for (const t of ['N', 'B', 'R', 'Q']) if (w[t] !== b[t]) diffs.push(t);
+      if (!diffs.length) return null;
+      // A single missing minor with everything else equal is being a piece up,
+      // not an imbalance. Require either two differing piece types, or a
+      // rook/queen traded against minors.
+      const minorsW = w.N + w.B, minorsB = b.N + b.B;
+      const heavyW = w.R + w.Q, heavyB = b.R + b.Q;
+      const qualitative = diffs.length >= 2 ||
+                          (heavyW !== heavyB && minorsW !== minorsB);
+      if (!qualitative) return null;
       const d = f.material.balance;
-      if (Math.abs(d) < 1) return null;
-      const lead = d > 0 ? 'White' : 'Black';
+      const describe = c => {
+        const m = c === 'w' ? w : b;
+        return `${m.Q ? m.Q + 'Q ' : ''}${m.R ? m.R + 'R ' : ''}${m.B ? m.B + 'B ' : ''}${m.N ? m.N + 'N ' : ''}${m.P}P`.trim();
+      };
       return {
         confidence: 'high',
-        because: [`${lead} is ahead by ${Math.abs(d)} point${Math.abs(d) === 1 ? '' : 's'} of material`],
-        subjects: [d > 0 ? 'w' : 'b'],
+        because: [`the material is unbalanced — White has ${describe('w')} against Black's ${describe('b')}` +
+                  (d === 0 ? ', level on points' : `, ${Math.abs(d)} point${Math.abs(d) === 1 ? '' : 's'} to ${d > 0 ? 'White' : 'Black'}`)],
+        subjects: d > 0 ? ['w'] : d < 0 ? ['b'] : ['w', 'b'],
       };
     },
   },
@@ -364,7 +384,7 @@ const STRUCTURAL = [
       if (!hits.length) return null;
       return {
         confidence: 'medium',
-        because: hits.map(c => `it is an endgame and ${side(f, c)}'s king has left its back rank (${f.king[c].square})`),
+        because: hits.map(c => `${side(f, c)}'s king has come off its back rank to ${f.king[c].square}, which is where it belongs in an endgame`),
         subjects: hits,
       };
     },

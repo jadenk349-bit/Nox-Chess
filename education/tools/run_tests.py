@@ -89,6 +89,17 @@ def main():
     if verbose and line:
         print("   " + line[0])
 
+    # 3d. Explanation quality: not whether the system says something false, but
+    # whether it says something useless, which is the other way an explanation
+    # layer fails.
+    exp = subprocess.run(["node", os.path.join(HERE, "tests", "test_explanations.js")],
+                         capture_output=True, text=True)
+    eline = [l for l in (exp.stdout or "").splitlines() if l.startswith("EXPLANATION  PASS")]
+    check("explanation_quality", exp.returncode == 0,
+          (eline[0] if eline else (exp.stderr or "test_explanations.js failed").strip().splitlines()[-1]))
+    if verbose and eline:
+        print("   " + eline[0])
+
     # 4. constructed positions must be labelled, never dressed as history
     for cid, c in C.items():
         for b in ("examples", "counterexamples", "ambiguous_examples"):
