@@ -1,0 +1,189 @@
+{
+  "schema_version": 2,
+  "alternate_names": [
+    "relative piece value",
+    "the point count"
+  ],
+  "historical_names": [],
+  "tags": [
+    "material",
+    "fundamentals",
+    "disputed"
+  ],
+  "subcategory": "fundamentals",
+  "difficulty": "beginner",
+  "knowledge_type_note": "The point count is explicitly a rule of thumb: its own authorities disagree about the numbers, and the disagreement is not small.",
+  "name_status": "established-name",
+  "history": {
+    "attributions": [
+      {
+        "relation": "later-associated-with",
+        "person": "Larry Kaufman",
+        "year": 1999,
+        "note": "Derived values statistically from a large game sample, giving bishop and knight 3.5 each and the pair an explicit bonus.",
+        "confidence": "high"
+      },
+      {
+        "relation": "later-associated-with",
+        "person": "Bobby Fischer",
+        "year": null,
+        "note": "Quoted for bishop 3.25 against knight 3.",
+        "confidence": "medium"
+      }
+    ],
+    "first_documented_source": "wikipedia-chess-piece-values",
+    "year": null,
+    "confidence": "disputed",
+    "notes": "Many value systems exist and they disagree in the second decimal and occasionally in the first. This base treats the count as a rule of thumb and records the sharpest disagreement on knight-vs-bishop.",
+    "competing_claims": [
+      {
+        "claim": "bishop 3.25 vs knight 3",
+        "source": "studer-bishop-vs-knight",
+        "note": "attributed to Fischer"
+      },
+      {
+        "claim": "bishop 3.5 = knight 3.5, bonus on the pair",
+        "source": "kaufman-material-imbalances",
+        "note": "statistical"
+      },
+      {
+        "claim": "individual bishop superiority is unevidenced",
+        "source": "studer-bishop-vs-knight",
+        "note": "GM Studer"
+      }
+    ],
+    "development": []
+  },
+  "engine_era_status": "useful-with-common-exceptions",
+  "engine_era_note": "Engines do not use a fixed point count at all; modern evaluation is positional and learned, and the numbers survive as a human shorthand. Engine self-play is also what produced the statistical value sets that disagree with the classical ones.",
+  "recognition": {
+    "preconditions": [
+      "Material is being compared"
+    ],
+    "indicators_for": [],
+    "indicators_against": [],
+    "prerequisites": [],
+    "detector": "material() in lib/features.js",
+    "detectability": "mechanical",
+    "typical_confidence": "high",
+    "false_positive_traps": [
+      "Counting material is not evaluating a position. This base holds a PROVEN DRAW a bishop and a pawn up.",
+      "The values are disputed among their own authorities, and the bishop-versus-knight disagreement is a full half-pawn wide.",
+      "The pair bonus attaches to having two bishops, not to each bishop. Reporting a lone bishop as worth more than a knight asserts the disputed claim."
+    ]
+  },
+  "application": {
+    "typical_plans": [
+      "Use the count to decide ordinary exchanges",
+      "Stop using it when the position has a concrete feature the count cannot see"
+    ],
+    "typical_moves": [],
+    "typical_pawn_structures": [],
+    "typical_piece_arrangements": [],
+    "tactical_consequences": [],
+    "strategic_consequences": []
+  },
+  "exceptions": [
+    "Fortresses and wrong-coloured-bishop draws are proven counterexamples to the count.",
+    "With all pawns on one wing the knight is generally stronger than the bishop, reversing the usual ordering.",
+    "The exchange (rook for minor) is given up often enough that treating it as a fixed +2 is a mistake."
+  ],
+  "limitations": [
+    "No value system is authoritative; this base records several and adopts none.",
+    "The count is a static measure and says nothing about activity, structure or king safety."
+  ],
+  "misconceptions": [
+    "That the point values are facts. They are averages, and their authors disagree.",
+    "That being ahead on material means being better. A proven draw in this base is a bishop and pawn up.",
+    "That a bishop is worth more than a knight. That is one position in a live dispute, not a settled value."
+  ],
+  "relationships": {
+    "broader": [],
+    "narrower": [],
+    "related": [
+      "material-imbalance",
+      "knight-vs-bishop",
+      "bishop-pair",
+      "exchange-sacrifice",
+      "compensation",
+      "wrong-rook-pawn",
+      "fortress",
+      "board-geometry",
+      "piece-exchanges"
+    ],
+    "contrasting": [
+      "compensation"
+    ],
+    "co_occurring": [],
+    "conflicts": []
+  },
+  "examples": [],
+  "counterexamples": [
+    {
+      "fen": "7k/8/5K2/3B3P/8/8/8/8 w - - 0 1",
+      "note": "A bishop and a pawn ahead, which the point count scores at roughly +4.",
+      "origin_kind": "tablebase-position",
+      "concept_role": "contradicts",
+      "side_to_move_benefits": "neither",
+      "tablebase": {
+        "source": "Lichess tablebase (Syzygy, 7-piece)",
+        "pieces": 4,
+        "wdl": "draw",
+        "dtz": 0,
+        "dtm": 0,
+        "category": "draw",
+        "note": "PROVEN draw. The count says about +4 and the position is dead. Recorded here as well as on wrong-rook-pawn because it is the cleanest available demonstration that a point count is an approximation with no standing against a concrete feature of the position."
+      }
+    }
+  ],
+  "ambiguous_examples": [],
+  "explanations": {
+    "by_level": {
+      "beginner": "Pawn 1, knight and bishop 3, rook 5, queen 9. Good enough for most trades.",
+      "intermediate": "They are averages, not facts. A bishop is better in open positions and a knight in closed ones or on an outpost.",
+      "advanced": "The half-pawn bonus belongs to the bishop PAIR, not to a bishop — the pair works because the two cover different colours.",
+      "master": "Their own authorities disagree by half a pawn on bishop versus knight, and a proven draw in this base is a bishop and pawn up."
+    },
+    "by_depth": {
+      "short": "Pawn 1, minor pieces 3, rook 5, queen 9 — approximately.",
+      "normal": "The conventional point values, which are a serviceable rule of thumb for ordinary exchanges and nothing more. They compress away colour-boundedness, the difference between open and closed positions, and the bishop pair, all of which decide positions the numbers cannot see.",
+      "deep": "The first thing anyone learns and the thing most often mistaken for a fact. The values are disputed among their own authorities: Fischer at bishop 3.25 to knight 3, Kaufman's statistics at 3.5 each with the bonus attaching to the pair, and GM Studer holding that individual bishop superiority is unevidenced. What the numbers compress away is what usually decides: a bishop is a half-board piece and a knight reaches everywhere; the bishop wants open lines and the knight closed ones and outposts; and with all the pawns on one wing the ordering reverses. And a count says nothing about a position — this base holds a proven draw in which one side is a bishop and a pawn ahead."
+    },
+    "hedge": "The point values are a rule of thumb whose own authorities disagree by up to half a pawn; they decide ordinary exchanges and nothing concrete.",
+    "lesson": "Use the count to decide trades, and stop using it the moment the position has a feature the count cannot see."
+  },
+  "terminology": {
+    "beginner_words": [
+      "how much the pieces are worth"
+    ],
+    "advanced_words": [
+      "relative value",
+      "the exchange",
+      "the pair bonus",
+      "material imbalance"
+    ],
+    "avoid": [
+      "a bishop is worth more than a knight",
+      "the piece values are"
+    ]
+  },
+  "status": {
+    "stage": "researched",
+    "last_updated": "2026-09-01",
+    "open_questions": [],
+    "audit_notes": []
+  },
+  "id": "piece-properties",
+  "canonical_name": "Piece values and properties",
+  "category": "piece-properties",
+  "knowledge_type": "rule-of-thumb",
+  "definition_short": "The conventional numeric values of the pieces, and the properties those numbers compress away.",
+  "definition_long": "The first thing anyone learns and the thing most often mistaken for a fact.\n\nTHE CONVENTIONAL COUNT is pawn 1, knight 3, bishop 3, rook 5, queen 9, king priceless. It is a good enough approximation to decide most exchanges and is not more than that.\n\nTHE NUMBERS ARE DISPUTED, and the clearest case is the bishop against the knight, recorded in full on its own concept: Fischer put the bishop at 3.25 against a knight's 3; Kaufman's statistics put both at 3.5 — EQUAL — with the half-pawn attaching to the PAIR rather than to the bishop; and GM Studer says the claim of individual bishop superiority 'is not funded with evidence'. Three authorities, three positions, and this base records the dispute rather than picking a winner.\n\nWHAT THE NUMBERS COMPRESS AWAY is what actually decides positions:\n- COLOUR-BOUNDEDNESS. A bishop is a half-board piece; a knight reaches every square.\n- RANGE VERSUS REACH. A bishop's value rises with open lines; a knight's with closed ones and with outposts. With all the pawns on one wing the knight is stronger, which is the reversal people find most surprising.\n- THE PAIR. Two bishops complement each other because they cover different colours; two knights are redundant because they want the same squares. The bonus attaches to the asymmetry.\n- THE EXCHANGE. Rook for minor piece is nominally +2 and is routinely given up for lasting compensation, which is a whole named concept here.\n\nAND THE COUNT SAYS NOTHING ABOUT POSITIONS. This base holds a tablebase-proven draw in which one side is a bishop AND a pawn ahead. A point count reads that as roughly +4; the truth is a dead draw, because the pawn is a rook pawn whose promotion square the bishop cannot control.",
+  "sources": [
+    "wikipedia-chess-piece-values",
+    "kaufman-material-imbalances",
+    "studer-bishop-vs-knight",
+    "heisman-kaufman-values"
+  ],
+  "source_confidence": "high"
+}

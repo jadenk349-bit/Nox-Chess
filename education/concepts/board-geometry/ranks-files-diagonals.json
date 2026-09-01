@@ -1,0 +1,136 @@
+{
+  "schema_version": 2,
+  "alternate_names": [],
+  "historical_names": [],
+  "tags": [
+    "geometry",
+    "fundamentals",
+    "nox-relevant"
+  ],
+  "subcategory": "fundamentals",
+  "difficulty": "beginner",
+  "knowledge_type_note": "Vocabulary for the board's lines, and the observation that the lines are what long-range pieces actually fight over.",
+  "name_status": "established-name",
+  "history": {
+    "attributions": [],
+    "first_documented_source": "fide-laws-2023",
+    "year": null,
+    "confidence": "unknown",
+    "notes": "Elementary vocabulary defined in the Laws of Chess.",
+    "competing_claims": [],
+    "development": []
+  },
+  "engine_era_status": "not-applicable",
+  "engine_era_note": "Not applicable.",
+  "recognition": {
+    "preconditions": [
+      "A board"
+    ],
+    "indicators_for": [],
+    "indicators_against": [],
+    "prerequisites": [],
+    "detector": "fileState / sliderLines in lib/features.js and blind-chess.html",
+    "detectability": "mechanical",
+    "typical_confidence": "high",
+    "false_positive_traps": [
+      "A line being open is a fact; its being useful is not. This base holds a tested position where an open file with a rook of each colour on it is worth exactly nothing."
+    ]
+  },
+  "application": {
+    "typical_plans": [
+      "Open a file for the rooks with a pawn break",
+      "Fianchetto to take a long diagonal",
+      "Keep the pawns off the colour your bishop travels on"
+    ],
+    "typical_moves": [],
+    "typical_pawn_structures": [],
+    "typical_piece_arrangements": [],
+    "tactical_consequences": [
+      "Pins, skewers, x-rays and batteries all require a line"
+    ],
+    "strategic_consequences": [
+      "Pawn moves are the only way to open or close a file, which is why structure governs activity"
+    ]
+  },
+  "exceptions": [
+    "Knights ignore lines entirely, which is what makes them the right piece for closed positions."
+  ],
+  "limitations": [
+    "Vocabulary. It names what the pieces fight over; it does not say who wins the fight."
+  ],
+  "misconceptions": [
+    "That a rook belongs on any open file. It belongs on one with a square to invade.",
+    "That diagonals are secondary to files. The long diagonals are the longest lines on the board."
+  ],
+  "relationships": {
+    "broader": [],
+    "narrower": [],
+    "related": [
+      "open-file",
+      "board-geometry",
+      "rook-on-the-seventh",
+      "battery",
+      "pin",
+      "skewer",
+      "x-ray",
+      "bishop-pair",
+      "notation"
+    ],
+    "contrasting": [],
+    "co_occurring": [],
+    "conflicts": []
+  },
+  "examples": [],
+  "counterexamples": [],
+  "ambiguous_examples": [],
+  "explanations": {
+    "by_level": {
+      "beginner": "Rows are ranks, columns are files, slants are diagonals.",
+      "intermediate": "Long-range pieces fight over lines rather than squares — a rook is worth what its file is worth.",
+      "advanced": "Only pawns can open or close a file, which is the mechanical link between structure and activity.",
+      "master": "The long diagonals are the longest lines on the board and run through the centre, which is the whole case for the fianchetto."
+    },
+    "by_depth": {
+      "short": "Ranks are rows, files are columns, diagonals are slants.",
+      "normal": "The board's three kinds of line. They matter because long-range pieces fight over lines rather than squares: a rook's strength is a property of its file, a bishop's of its diagonal.",
+      "deep": "Ranks run across, files up and down, diagonals at a slant, and the vocabulary earns its place because the long-range pieces contest lines rather than squares. Pins, skewers, x-rays and batteries exist only along one. Pawns decide which lines exist, since they are the only pieces that cannot move sideways — a file is opened by a pawn move and by nothing else — which is the mechanical reason pawn structure governs piece activity and is treated as the more permanent of the two."
+    },
+    "hedge": "",
+    "lesson": "Ask what line a piece is on before asking what square it is on."
+  },
+  "terminology": {
+    "beginner_words": [
+      "row",
+      "column",
+      "slant"
+    ],
+    "advanced_words": [
+      "rank",
+      "file",
+      "diagonal",
+      "long diagonal",
+      "open file",
+      "half-open file"
+    ],
+    "avoid": [
+      "diagonals are less important than files"
+    ]
+  },
+  "status": {
+    "stage": "researched",
+    "last_updated": "2026-09-01",
+    "open_questions": [],
+    "audit_notes": []
+  },
+  "id": "ranks-files-diagonals",
+  "canonical_name": "Ranks, files and diagonals",
+  "category": "ranks-files-diagonals",
+  "knowledge_type": "terminology",
+  "definition_short": "The three kinds of straight line on the board: rows, columns and slants.",
+  "definition_long": "RANKS are the rows, numbered 1 to 8 from White's side. FILES are the columns, lettered a to h from White's left. DIAGONALS are the slants, named by their end squares (the a1-h8 diagonal).\n\nWHY THE VOCABULARY MATTERS is that the long-range pieces do not fight over squares so much as over LINES. A rook's power is a function of the file it stands on; a bishop's is a function of the diagonal. This is why so many positional concepts in this base are stated as facts about lines — open and semi-open files, the seventh rank, the long diagonal, batteries, pins and skewers, which exist only along a line.\n\nPAWNS DECIDE THE LINES. Pawns are the only pieces that cannot move sideways, so a file is opened or closed by pawn moves and by nothing else, and a diagonal is blocked by whichever pawns sit on its colour. That is the mechanical link between pawn structure and piece activity, and it is why structure is treated as the more permanent of the two.\n\nTHE LONG DIAGONALS (a1-h8 and h1-a8) are singled out because they are the longest lines on the board and pass through the centre, which is what makes a fianchettoed bishop a strategic asset rather than a developed piece.",
+  "sources": [
+    "fide-laws-2023",
+    "wikipedia-chess-notation"
+  ],
+  "source_confidence": "high"
+}

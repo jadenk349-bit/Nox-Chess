@@ -1,0 +1,171 @@
+{
+  "schema_version": 2,
+  "alternate_names": [],
+  "historical_names": [],
+  "tags": [
+    "geometry",
+    "fundamentals",
+    "tablebase-tested",
+    "nox-relevant"
+  ],
+  "subcategory": "fundamentals",
+  "difficulty": "beginner",
+  "knowledge_type_note": "Geometric facts about the board and the pieces' movement. They are true by construction, not by evidence, though this base has verified the one that people most often get wrong.",
+  "name_status": "established-name",
+  "history": {
+    "attributions": [],
+    "first_documented_source": "wikipedia-rule-of-the-square",
+    "year": null,
+    "confidence": "unknown",
+    "notes": "Anonymous elementary knowledge; the rule of the square has no traced coinage.",
+    "competing_claims": [],
+    "development": []
+  },
+  "engine_era_status": "not-applicable",
+  "engine_era_note": "Unaffected. These are consequences of the rules and cannot be revised by analysis.",
+  "recognition": {
+    "preconditions": [
+      "A board"
+    ],
+    "indicators_for": [],
+    "indicators_against": [],
+    "prerequisites": [],
+    "detector": "isLight / legalMoves in lib/features.js and blind-chess.html",
+    "detectability": "mechanical",
+    "typical_confidence": "high",
+    "false_positive_traps": [
+      "The rule of the square must be applied with the side to move in hand. This base holds a tablebase-proven pair where the identical position is a draw or a mate in 23 depending only on whose turn it is.",
+      "The rule of the square assumes a clear path: another pawn, or a king in the way, breaks it.",
+      "Colour-boundedness is a fact about bishops, not a claim that a bishop is limited — it is also why the pair is worth more than two of anything else."
+    ]
+  },
+  "application": {
+    "typical_plans": [
+      "Count whether a king is inside the square before racing",
+      "Use the free diagonal to approach two targets at once",
+      "Check the promotion square's colour against your bishop"
+    ],
+    "typical_moves": [],
+    "typical_pawn_structures": [],
+    "typical_piece_arrangements": [],
+    "tactical_consequences": [
+      "A knight can never attack a piece that defends it"
+    ],
+    "strategic_consequences": [
+      "Colour complexes are permanent; a colour weakness cannot be repaired by a bishop that does not travel on it"
+    ]
+  },
+  "exceptions": [
+    "The rule of the square fails if the pawn's path is blocked, if it can be supported by its own king, or if the defending king's route is obstructed."
+  ],
+  "limitations": [
+    "These are geometric facts and settle nothing evaluative on their own."
+  ],
+  "misconceptions": [
+    "That the rule of the square is about distance. It is about the square, and about whose move it is.",
+    "That a knight can lose a tempo. It cannot: every knight move changes square colour, so returning takes an even number of moves."
+  ],
+  "relationships": {
+    "broader": [],
+    "narrower": [],
+    "related": [
+      "ranks-files-diagonals",
+      "opposition",
+      "passed-pawn",
+      "wrong-rook-pawn",
+      "opposite-coloured-bishops",
+      "bishop-pair",
+      "knight-fork",
+      "blindfold-representation",
+      "board-vision"
+    ],
+    "contrasting": [],
+    "co_occurring": [],
+    "conflicts": []
+  },
+  "examples": [
+    {
+      "fen": "8/8/8/3k3P/8/8/8/K7 b - - 0 1",
+      "note": "The rule of the square, first half: Black to move, king on d5, white pawn on h5. Counting files alone puts the king outside the square; the move puts it inside.",
+      "origin_kind": "tablebase-position",
+      "concept_role": "supports",
+      "side_to_move_benefits": "black",
+      "tablebase": {
+        "source": "Lichess tablebase (Syzygy, 7-piece)",
+        "pieces": 3,
+        "wdl": "draw",
+        "dtz": 0,
+        "dtm": 0,
+        "category": "draw",
+        "note": "PROVEN draw. The king catches the pawn. Paired with the identical position with White to move, which is a proven win in 23."
+      }
+    }
+  ],
+  "counterexamples": [
+    {
+      "fen": "8/8/8/3k3P/8/8/8/K7 w - - 0 1",
+      "note": "The same position in every respect except that it is White's move.",
+      "origin_kind": "tablebase-position",
+      "concept_role": "contradicts",
+      "side_to_move_benefits": "white",
+      "tablebase": {
+        "source": "Lichess tablebase (Syzygy, 7-piece)",
+        "pieces": 3,
+        "wdl": "win",
+        "dtz": 1,
+        "dtm": 23,
+        "category": "win",
+        "note": "PROVEN win in 23, against a proven draw with Black to move. Nothing on the board differs. This is the cleanest demonstration in the base that the rule of the square is a statement about the position AND the side to move, and it is why the concept's principal false-positive trap is counting files without checking the turn."
+      }
+    }
+  ],
+  "ambiguous_examples": [],
+  "explanations": {
+    "by_level": {
+      "beginner": "A bishop never changes colour. A knight changes colour every move. And a king reaches a1 to h8 in seven moves, the same as a1 to a8.",
+      "intermediate": "To see if a king catches a passed pawn, draw the square from the pawn to its promotion square — but check whose move it is first.",
+      "advanced": "A knight needs an even number of moves to return to its square, so it can never gain a single tempo on a fixed target.",
+      "master": "Colour complexes are permanent, and almost every proven draw a piece down in this base is a consequence of colour-boundedness."
+    },
+    "by_depth": {
+      "short": "Bishops keep their colour, knights change it every move, and the king's diagonal is free.",
+      "normal": "The geometric facts: a bishop never leaves its starting colour, a knight changes square colour with every move (so it needs an even number of moves to come back), and a king crosses diagonally at no extra cost. The rule of the square follows from that last one — a king catches a passed pawn if it can step into the square between the pawn and its promotion square.",
+      "deep": "Consequences of how the pieces move, which a blindfold player must hold rather than look at. Colour-boundedness makes a single bishop a half-board piece and is behind every wrong-rook-pawn and opposite-coloured-bishop draw in this base. The knight's colour change means it can never gain a single tempo on a fixed target, and can never attack a piece that defends it. And the king's diagonal costing no more than its straight line gives the rule of the square — which carries a trap worth proving rather than asserting: with a white pawn on h5 and a black king on d5, the position is a draw with Black to move and a win in 23 with White to move. Same board, opposite results."
+    },
+    "hedge": "",
+    "lesson": "Count the square, then check whose move it is. The turn is worth a file."
+  },
+  "terminology": {
+    "beginner_words": [
+      "light squares and dark squares",
+      "the knight always changes colour"
+    ],
+    "advanced_words": [
+      "colour-bound",
+      "the square of the pawn",
+      "colour complex",
+      "tempo"
+    ],
+    "avoid": [
+      "the king is slow",
+      "count the distance to the pawn"
+    ]
+  },
+  "status": {
+    "stage": "researched",
+    "last_updated": "2026-09-01",
+    "open_questions": [],
+    "audit_notes": []
+  },
+  "id": "board-geometry",
+  "canonical_name": "Board geometry",
+  "category": "board-geometry",
+  "knowledge_type": "proven-result",
+  "definition_short": "The fixed geometric facts of the board — colour-boundedness, the knight's colour change, and the fact that a king's diagonal path costs no more than a straight one.",
+  "definition_long": "Facts that follow from how the pieces move, and that a blindfold player has to hold rather than look at.\n\nCOLOUR-BOUNDEDNESS. A bishop never leaves the colour it starts on, which is why the bishop pair covers the whole board and a single bishop covers half of it. Every fortress, every wrong-rook-pawn draw and every opposite-coloured-bishop draw in this base is a consequence of this one fact.\n\nTHE KNIGHT ALWAYS CHANGES COLOUR. Every knight move goes from a light square to a dark one or back, so a knight needs an EVEN number of moves to return to its square and can never gain a single tempo on a fixed target. It also means a knight cannot attack a piece that is defending it, and — the practical corollary — that only another knight can attack a knight back without moving away.\n\nTHE KING'S DIAGONAL IS FREE. Because the king moves one square in any direction, going from a1 to h8 costs seven moves, exactly as going from a1 to a8 does. A king can therefore approach a target and do something else on the way at no cost, which is the mechanism behind many king-and-pawn endings that look like they must be lost.\n\nTHE RULE OF THE SQUARE follows from that: a king catches a passed pawn if it can step into the square whose corners are the pawn and its promotion square. It is the most useful geometric shortcut in chess and it carries a trap this base has proven. The rule depends on WHOSE MOVE IT IS. With a white pawn on h5 and a black king on d5, the position is a DRAW with Black to move and a WIN FOR WHITE IN 23 with White to move — the same position, the same square, opposite results, because the side to move effectively widens the square by a file.",
+  "sources": [
+    "wikipedia-rule-of-the-square",
+    "fide-laws-2023"
+  ],
+  "source_confidence": "high"
+}

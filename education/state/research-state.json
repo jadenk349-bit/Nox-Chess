@@ -6,24 +6,24 @@
     "note": "Filled in by tools/sf_analyse.py --probe"
   },
   "counters": {
-    "concepts_total": 112,
+    "concepts_total": 117,
     "concepts_stub": 0,
     "concepts_researched": 29,
     "concepts_validated": 4,
     "concepts_needs_review": 0,
-    "sources_reviewed": 148,
+    "sources_reviewed": 152,
     "positions_tested": 32,
     "matches_validated": 18,
     "false_matches": 8,
     "ambiguous_matches": 6,
     "by_stage": {
       "ready": 2,
-      "researched": 101,
+      "researched": 106,
       "validated": 9
     },
-    "tablebase_positions": 18,
+    "tablebase_positions": 21,
     "concepts_fully_covered": 12,
-    "areas_touched": 63,
+    "areas_touched": 68,
     "areas_total": 85
   },
   "areas": {
@@ -49,38 +49,58 @@
     },
     "chess-terminology": {
       "domain": "rules-terminology",
-      "status": "not-started",
-      "concepts": [],
+      "status": "covered",
+      "concepts": [
+        "chess-terminology"
+      ],
       "open_questions": [],
-      "last_touched": null
+      "last_touched": "2026-09-01",
+      "last_updated": "2026-09-01",
+      "note": "Meta-record of the naming discipline: name_status, the refusal to coin terms for detector tags, and the five deliberately unclaimed motifs."
     },
     "notation": {
       "domain": "rules-terminology",
-      "status": "not-started",
-      "concepts": [],
+      "status": "covered",
+      "concepts": [
+        "notation"
+      ],
       "open_questions": [],
-      "last_touched": null
+      "last_touched": "2026-09-01",
+      "last_updated": "2026-09-01",
+      "note": "Four systems and why they differ; all four are in use in this codebase."
     },
     "board-geometry": {
       "domain": "board-geometry",
-      "status": "not-started",
-      "concepts": [],
+      "status": "covered",
+      "concepts": [
+        "board-geometry"
+      ],
       "open_questions": [],
-      "last_touched": null
+      "last_touched": "2026-09-01",
+      "last_updated": "2026-09-01",
+      "note": "Colour-boundedness, the knight's colour change, and the rule of the square with a tablebase-proven side-to-move pair."
     },
     "piece-properties": {
       "domain": "board-geometry",
-      "status": "not-started",
-      "concepts": [],
+      "status": "covered",
+      "concepts": [
+        "piece-properties"
+      ],
       "open_questions": [],
-      "last_touched": null
+      "last_touched": "2026-09-01",
+      "last_updated": "2026-09-01",
+      "note": "The point count typed as a rule of thumb, with the bishop/knight dispute and a proven-draw counterexample a bishop and pawn up."
     },
     "ranks-files-diagonals": {
       "domain": "board-geometry",
-      "status": "not-started",
-      "concepts": [],
+      "status": "covered",
+      "concepts": [
+        "ranks-files-diagonals"
+      ],
       "open_questions": [],
-      "last_touched": null
+      "last_touched": "2026-09-01",
+      "last_updated": "2026-09-01",
+      "note": "Lines as what long-range pieces actually contest, and pawns as the only thing that opens or closes a file."
     },
     "tactical-motifs": {
       "domain": "tactics",
@@ -1335,6 +1355,24 @@
         "open-file",
         "rook-on-the-seventh",
         "king-safety"
+      ]
+    },
+    {
+      "id": "rule-of-the-square-side-to-move",
+      "date": "2026-09-01",
+      "method": "Syzygy tablebase, 3-piece positions differing only in the side to move.",
+      "results": {
+        "Kd5 vs Ph5, Black to move": "proven draw",
+        "Kd5 vs Ph5, White to move": "proven win in 23",
+        "Ke5 vs Ph5, Black to move": "proven draw",
+        "Kc5 vs Ph5, Black to move": "proven loss for Black in 24"
+      },
+      "findings": [
+        "The rule of the square is a statement about the position AND the side to move: the identical board is a draw or a mate in 23 depending only on whose turn it is.",
+        "The turn is worth exactly one file, which is why counting files without checking the move is the rule's standard failure."
+      ],
+      "concepts": [
+        "board-geometry"
       ]
     }
   ],
