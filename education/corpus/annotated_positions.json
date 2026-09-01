@@ -950,6 +950,173 @@
         "king-attack"
       ],
       "added": "2026-09-01"
+    },
+    {
+      "game": "Capablanca-Tartakower, New York 1924",
+      "source": "lifemasteraj-capablanca-tartakower-1924",
+      "players": "Jose Raul Capablanca - Saviely Tartakower",
+      "event": "New York 1924",
+      "year": 1924,
+      "annotator": "Irving Chernev, quoted move by move",
+      "fen_verified": "replay: all 103 plies replayed legally through blind-chess.html's move generator",
+      "id": "capablanca-tartakower-1924-35Kg3-king-activation",
+      "concept": "king-activation",
+      "concept_role": "positive",
+      "fen": "5k2/p1p4R/1pr5/3p1pP1/P2P1P2/2P2K2/8/8 w - - 0 35",
+      "move": "Kg3",
+      "move_uci": "f3g3",
+      "fen_after": "5k2/p1p4R/1pr5/3p1pP1/P2P1P2/2P3K1/8/8 b - - 1 35",
+      "human_annotation": "Chernev: 'Le roi s'amuse! The King is headed for B6 (f6), a square from which he can assist the White Rook in threats of mate, and also help the passed pawn take those last three steps.' And on its cost: 'In a simplified ending, where Pawns are worth their weight in gold, he gives away TWO Pawns! Moreover, he lets Black capture them WITH CHECK!!'",
+      "explanation": "The most famous illustration of the concept there is, and it is a positive example of an unusually pure kind: the move does nothing except walk the king forward, and it costs two pawns with check to do it. The concept record's own claim is that in an endgame the king is a piece and belongs in the middle of the board; here that claim is priced. Nine moves later the king stands on f6 and Chernev's summary is that White is playing with an extra piece.",
+      "engine": {
+        "engine_id": "Stockfish 18",
+        "depth": 20,
+        "multipv": 3,
+        "best_move": "Kg3",
+        "best_eval_cp": 295,
+        "annotated_move_eval_cp": 295,
+        "annotated_move_rank": 1,
+        "agrees": "completely, and by the largest margin in this corpus. 35.Kg3 is the engine's first choice at +2.95; the second-best move is +0.46. The move that gives away two pawns with check is worth two and a half pawns more than any move that keeps them.",
+        "note": "Depth 20 rather than 24: this is a simplified rook ending, the case this project has already recorded as failing to converge deeper. The 2.49 gap is not a number that needs more depth."
+      },
+      "confidence": "high",
+      "why_not_alternates": "material-imbalance is what a counting reading would report and it is exactly backwards - the move creates the imbalance on purpose and against itself. rook-on-the-seventh is present and is the standing feature, not what the move does.",
+      "also_true_but_secondary": [
+        "rook-on-the-seventh",
+        "passed-pawn",
+        "open-file",
+        "space"
+      ],
+      "rejected_as_wrong": [
+        "material-imbalance",
+        "two-weaknesses"
+      ],
+      "added": "2026-09-01"
+    },
+    {
+      "game": "Capablanca-Tartakower, New York 1924",
+      "source": "lifemasteraj-capablanca-tartakower-1924",
+      "players": "Jose Raul Capablanca - Saviely Tartakower",
+      "event": "New York 1924",
+      "year": 1924,
+      "annotator": "Irving Chernev, quoted move by move",
+      "fen_verified": "replay: all 103 plies replayed legally through blind-chess.html's move generator",
+      "id": "capablanca-tartakower-1924-35Kg3-passed-pawn",
+      "concept": "passed-pawn",
+      "concept_role": "positive",
+      "fen": "5k2/p1p4R/1pr5/3p1pP1/P2P1P2/2P2K2/8/8 w - - 0 35",
+      "move": "Kg3",
+      "move_uci": "f3g3",
+      "fen_after": "5k2/p1p4R/1pr5/3p1pP1/P2P1P2/2P3K1/8/8 b - - 1 35",
+      "human_annotation": "Chernev, on the same move: the king goes to f6 'from which he can assist the White Rook in threats of mate, and also help the passed pawn take those last three steps.'",
+      "explanation": "The same position and a different concept, recorded separately because the annotation names both and they are not the same claim. The g5 pawn is passed - no black pawn stands on the f-, g- or h-file ahead of it - and Chernev counts its remaining journey exactly: three steps. What makes this human ground truth rather than a feature report is the second half of the sentence, that the passer needs the KING to escort it, which is why two pawns are given away to fetch him. The concept record's own condition is that a passed pawn is worth what it can be escorted to, not what it is.",
+      "engine": {
+        "engine_id": "Stockfish 18",
+        "depth": 20,
+        "multipv": 3,
+        "best_move": "Kg3",
+        "best_eval_cp": 295,
+        "annotated_move_eval_cp": 295,
+        "annotated_move_rank": 1,
+        "agrees": "yes, and its principal variation escorts the pawn exactly as described: 35.Kg3 Rxc3+ 36.Kh4 c5 37.g6 - the pawn moves the instant the king is close enough to help it.",
+        "note": "Same search as the king-activation entry on this position; recorded on both because the annotation makes two claims and they are separable."
+      },
+      "confidence": "high",
+      "why_not_alternates": "pawn-breakthrough is the concept this could be mistaken for and does not apply: nothing is sacrificed to CREATE the passer, which already exists; what is sacrificed is to escort it. king-activation is the other half of the same sentence and is recorded separately.",
+      "also_true_but_secondary": [
+        "king-activation",
+        "rook-on-the-seventh",
+        "open-file"
+      ],
+      "rejected_as_wrong": [
+        "pawn-breakthrough",
+        "two-weaknesses"
+      ],
+      "added": "2026-09-01"
+    },
+    {
+      "game": "Capablanca-Rubinstein, Berlin 1928",
+      "source": "amazingatlas-capablanca-rubinstein-1928",
+      "players": "Jose Raul Capablanca - Akiba Rubinstein",
+      "event": "Berliner Tageblatt tournament, Berlin 1928",
+      "year": 1928,
+      "annotator": "Nicholas Van Der Nat (FM)",
+      "fen_verified": "replay: all 87 plies replayed legally through blind-chess.html's move generator",
+      "id": "capablanca-rubinstein-1928-23Re7-rook-on-the-seventh",
+      "concept": "rook-on-the-seventh",
+      "concept_role": "positive",
+      "fen": "3r1nk1/p4ppp/1bp5/B7/3p4/1N4PP/PPP2P2/4R1K1 w - - 0 23",
+      "move": "Re7",
+      "move_uci": "e1e7",
+      "fen_after": "3r1nk1/p3Rppp/1bp5/B7/3p4/1N4PP/PPP2P2/6K1 b - - 1 23",
+      "human_annotation": "'In return for giving up the target, he plays 23.Re7 and seizes the seventh rank. A rook planted on the seventh, behind the enemy pawns, attacks everything on that rank and hunts any pawn that dares advance. Capablanca judged, correctly, that an active rook on the seventh was worth far more than a static pawn to nibble at.'",
+      "explanation": "A named annotator putting the concept on a specific ply and saying what it is worth relative to a named alternative, which is more than most annotations do. The record's own condition - that the seventh rank matters because the enemy pawns start there and cannot leave without being taken - is exactly the reason given: the rook 'hunts any pawn that dares advance'. It is worth noting what the position is NOT: the black king is not trapped on the back rank, so this is the rank's other use, the one the record lists second.",
+      "engine": {
+        "engine_id": "Stockfish 18",
+        "depth": 24,
+        "multipv": 3,
+        "best_move": "Re7",
+        "best_eval_cp": 20,
+        "annotated_move_eval_cp": 20,
+        "annotated_move_rank": 1,
+        "agrees": "yes, though narrowly - 23.Re7 is the engine's first choice at depth 24 at +0.20, with the second at +0.17. The margin is small because the position is close to level; the point of the entry is the attribution, not the size of the edge.",
+        "note": "The engine's principal variation is 23.Re7 d3 24.cxd3 Rxd3 25.Bb4, which is the rook using the seventh to force a favourable trade rather than to win material outright."
+      },
+      "confidence": "high",
+      "why_not_alternates": "transformation-of-advantages is what the move IS in the annotator's larger argument and is recorded separately on the move before it. trapped-piece is TRUE here and this entry listed it as wrong in a first draft, which manufactured a false positive out of a correct report - the bishop on b6 really has no safe square once the rook reaches the seventh. What would be wrong is back-rank-mate: the black king has luft on f8 and h7 and there is no mating net, and the seventh rank is being used here for the OTHER reason the record lists, hunting pawns that cannot move.",
+      "also_true_but_secondary": [
+        "transformation-of-advantages",
+        "open-file",
+        "piece-activity",
+        "trapped-piece"
+      ],
+      "rejected_as_wrong": [
+        "back-rank-mate",
+        "pawn-breakthrough"
+      ],
+      "added": "2026-09-01"
+    },
+    {
+      "game": "Rubinstein-Salwe, Lodz 1908",
+      "source": "amazingatlas-rubinstein-salwe",
+      "players": "Akiba Rubinstein - Georg Salwe",
+      "event": "Lodz 1908",
+      "year": 1908,
+      "annotator": "Nicholas Van Der Nat (Chess.com), following the classical literature",
+      "fen_verified": "replay: all 77 plies replayed legally through blind-chess.html's move generator",
+      "id": "rubinstein-salwe-1908-20-bad-bishop",
+      "concept": "bad-bishop",
+      "concept_role": "positive",
+      "fen": "r1r3k1/p2n1ppp/2p1b3/1q1p4/N2Q4/5PP1/PP2PR1P/2R2BK1 w - - 4 20",
+      "move": "e3",
+      "move_uci": "e2e3",
+      "fen_after": "r1r3k1/p2n1ppp/2p1b3/1q1p4/N2Q4/4PPP1/PP3R1P/2R2BK1 b - - 0 20",
+      "human_annotation": "'Black: The bishop on e6 is bad, blocked by its own pawns. The knight was already traded off. The rooks have no open files. The queen is being chased. Black is completely passive.'",
+      "explanation": "The archetype: a light-squared bishop on e6 with four of its own six pawns standing on light squares, in a structure Rubinstein has spent the game fixing so it cannot change. This base's detector agrees here, and the entry exists as much for what the tracing found as for the agreement - see the concept's limitations. The record's distinction between STRUCTURAL badness and FUNCTIONAL passivity is what the annotation is making: the bishop is bad because of the pawns, and passive because of everything else in the sentence.",
+      "engine": {
+        "engine_id": "Stockfish 18",
+        "depth": 22,
+        "multipv": 3,
+        "best_move": "e3",
+        "best_eval_cp": 31,
+        "annotated_move_eval_cp": 31,
+        "annotated_move_rank": 1,
+        "agrees": "on the move, yes - 20.e3 is the engine's first choice. On the bishop it says nothing, because an evaluation is not an opinion about a piece, and this base does not ask it for one.",
+        "note": "Same position and same search as the corpus's worst-placed-piece entry for this game; two entries, two claims."
+      },
+      "confidence": "high",
+      "why_not_alternates": "worst-placed-piece is a claim about the move and is recorded separately for this exact position; bad-bishop is a claim about the structure and would still be true if White played something else. opposite-coloured-bishops is wrong: White's remaining bishop is on f1, also light.",
+      "also_true_but_secondary": [
+        "worst-placed-piece",
+        "two-weaknesses",
+        "weak-square"
+      ],
+      "rejected_as_wrong": [
+        "opposite-coloured-bishops",
+        "outpost"
+      ],
+      "limitation": "Traced ply by ply through this game, the detector reports the e6 bishop for exactly ten plies and then stops, while the annotator treats it as bad throughout. The measurement and why it is recorded rather than fixed are on the concept record.",
+      "added": "2026-09-01"
     }
   ]
 }

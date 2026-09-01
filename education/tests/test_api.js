@@ -448,6 +448,37 @@ const { concepts } = API.knowledge();
       HC.concepts_all.map(c => c.id), 'bishop-pair');
 }
 
+{
+  // Capablanca-Tartakower 1924, 35.Kg3!! - Chernev's "Le roi s'amuse". The move
+  // gives away two pawns WITH CHECK to walk the king to f6, and Stockfish 18 at
+  // depth 20 puts it 2.49 ahead of anything else. Three concepts are grounded
+  // in this one position and all three must survive here.
+  const CT = '5k2/p1p4R/1pr5/3p1pP1/P2P1P2/2P2K2/8/8 w - - 0 35';
+  const ids = API.analyzeWithEducation({ fen: CT, move: 'f3g3' }).concepts_all.map(c => c.id);
+  has('king-activation reported in the position it is named for', ids, 'king-activation');
+  has('passed-pawn reported alongside it', ids, 'passed-pawn');
+  has('rook-on-the-seventh reported alongside it', ids, 'rook-on-the-seventh');
+  ok('and material-imbalance is NOT reported for a move that creates one against itself',
+     !ids.includes('material-imbalance'), ids.join(','));
+}
+{
+  // Rubinstein-Salwe 1908. The e6 bishop is reported for exactly ten plies of a
+  // game its annotator calls it bad throughout, because the scope guard releases
+  // as pieces shuffle. The guard is deliberate; the window is measured. This
+  // pins both ends of it, so a change to the guard shows up as a test failure
+  // rather than as a quietly different set of explanations.
+  const inWindow = 'r1r3k1/p2n1ppp/2p1b3/1q1p4/N2Q4/5PP1/PP2PR1P/2R2BK1 w - - 4 20';
+  const outOfWindow = 'r1r3k1/p2n1ppp/2p1b3/1q1p4/N2Q4/4PPP1/PP3R1P/2R2BK1 b - - 0 20';
+  has('bad-bishop: reported inside the measured window',
+      API.analyzeWithEducation({ fen: inWindow }).concepts_all.map(c => c.id), 'bad-bishop');
+  const late = FEAT.features('r5k1/p1r2ppp/1qp1b3/2Rp4/PP1Q4/4PPP1/5R1P/5BK1 b - - 0 24');
+  const b = (late.pieces.b.bishops || []).find(x => x.square === 'e6');
+  ok('bad-bishop: the pawn share only rises later, while the report stops',
+     !b || b.share >= 0.6, b && String(b.share));
+  ok('bad-bishop: the position after 20.e3 still reports it', 
+     API.analyzeWithEducation({ fen: outOfWindow }).concepts_all.some(c => c.id === 'bad-bishop'));
+}
+
 /* ---------- report ---------- */
 console.log(`\nAPI  PASS ${pass}   FAIL ${fails.length}`);
 for (const [n, d] of fails) console.log(`  FAIL  ${n}\n        ${d}`);

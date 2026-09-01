@@ -170,6 +170,24 @@
       "origin_kind": "historical-game",
       "concept_role": "supports",
       "side_to_move_benefits": "neither"
+    },
+    {
+      "fen": "5k2/p1p4R/1pr5/3p1pP1/P2P1P2/2P2K2/8/8 w - - 0 35",
+      "note": "Capablanca-Tartakower, New York 1924, Kg3. Human ground truth: the concept is named for this position by Irving Chernev, quoted move by move. Corpus entry `capablanca-tartakower-1924-35Kg3-passed-pawn`. The same position and a different concept, recorded separately because the annotation names both and they are not the same claim. The g5 pawn is passed - no black pawn stands on the f-, g- or h-file ahead of it - and Chernev counts its remaining journey exactly: three steps. What makes this human ground truth rather than a feature report is the second half of the sentence, that",
+      "origin_kind": "historical-game",
+      "game": "Capablanca-Tartakower, New York 1924",
+      "concept_role": "positive",
+      "attributed_by": "Irving Chernev, quoted move by move — corpus entry capablanca-tartakower-1924-35Kg3-passed-pawn",
+      "engine": {
+        "engine_id": "Stockfish 18",
+        "test_level": 3,
+        "depth": 20,
+        "multipv": 3,
+        "best_move": "Kg3",
+        "eval_cp": 295,
+        "verdict": "supports",
+        "verdict_note": "yes, and its principal variation escorts the pawn exactly as described: 35.Kg3 Rxc3+ 36.Kh4 c5 37.g6 - the pawn moves the instant the king is close enough to help it. Same search as the king-activation entry on this position; recorded on both because the annotation makes two claims and they are separable."
+      }
     }
   ],
   "counterexamples": [

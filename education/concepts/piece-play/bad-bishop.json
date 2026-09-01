@@ -122,7 +122,8 @@
   ],
   "limitations": [
     "Recognition confidence is LOW. The structural test is mechanical and the conclusion it invites is frequently wrong.",
-    "Sources for the historical attributions are weak; see history.notes."
+    "Sources for the historical attributions are weak; see history.notes.",
+    "MEASURED 2026-09-01, on Rubinstein-Salwe 1908, the game whose annotator says flatly that 'the bishop on e6 is bad, blocked by its own pawns'. Traced ply by ply, this base reports it for exactly ten plies - from 16...Nd7 to 21.Nc5 - and stops, because the `scope > 3` guard releases as pieces shuffle around it, while the pawn share RISES from 0.67 to 0.83 over the same stretch. A human calls the bishop bad for the whole game; the detector calls it bad intermittently. The guard is not a mistake - it is what keeps Suba's active bad bishop off the list, and it is what stopped this base calling Nimzowitsch's blockading bishop bad - but it makes badness a momentary property of a piece the concept says is condemned by the STRUCTURE. Recorded rather than loosened: raising the scope threshold would restore the two false positives this record exists to prevent."
   ],
   "misconceptions": [
     "That a bishop behind its own pawns is a bad piece. It is structurally bad, which is not the same thing.",
@@ -159,6 +160,24 @@
       "origin_kind": "historical-game",
       "concept_role": "supports",
       "side_to_move_benefits": "neither"
+    },
+    {
+      "fen": "r1r3k1/p2n1ppp/2p1b3/1q1p4/N2Q4/5PP1/PP2PR1P/2R2BK1 w - - 4 20",
+      "note": "Rubinstein-Salwe, Lodz 1908, e3. Human ground truth: the concept is named for this position by Nicholas Van Der Nat (Chess.com), following the classical literature. Corpus entry `rubinstein-salwe-1908-20-bad-bishop`. The archetype: a light-squared bishop on e6 with four of its own six pawns standing on light squares, in a structure Rubinstein has spent the game fixing so it cannot change. This base's detector agrees here, and the entry exists as much for what the tracing found as for the agreement - see the concept's limitations. The record's distinction between STRUCTURAL badness and FUNCT",
+      "origin_kind": "historical-game",
+      "game": "Rubinstein-Salwe, Lodz 1908",
+      "concept_role": "positive",
+      "attributed_by": "Nicholas Van Der Nat (Chess.com), following the classical literature — corpus entry rubinstein-salwe-1908-20-bad-bishop",
+      "engine": {
+        "engine_id": "Stockfish 18",
+        "test_level": 3,
+        "depth": 22,
+        "multipv": 3,
+        "best_move": "e3",
+        "eval_cp": 31,
+        "verdict": "supports",
+        "verdict_note": "on the move, yes - 20.e3 is the engine's first choice. On the bishop it says nothing, because an evaluation is not an opinion about a piece, and this base does not ask it for one. Same position and same search as the corpus's worst-placed-piece entry for this game; two entries, two claims."
+      }
     }
   ],
   "counterexamples": [

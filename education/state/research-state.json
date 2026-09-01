@@ -11,9 +11,9 @@
     "concepts_researched": 29,
     "concepts_validated": 4,
     "concepts_needs_review": 0,
-    "sources_reviewed": 190,
-    "positions_tested": 98,
-    "matches_validated": 48,
+    "sources_reviewed": 191,
+    "positions_tested": 102,
+    "matches_validated": 52,
     "false_matches": 25,
     "ambiguous_matches": 25,
     "by_stage": {
@@ -22,7 +22,7 @@
       "validated": 9
     },
     "tablebase_positions": 22,
-    "concepts_fully_covered": 20,
+    "concepts_fully_covered": 22,
     "areas_touched": 85,
     "areas_total": 85
   },
@@ -1653,22 +1653,22 @@
       "method": "Targeted the seven concepts the previous checkpoint named as lacking human grounding - initiative, king safety, centre control, static-vs-dynamic, piece coordination, transformation of advantages and the pawn breakthrough. Annotations were found first and positions second, never the other way round. Game scores were taken from a database (pgnmentor player files) rather than from the annotating page, because six of seven move orders printed by one otherwise useful blog failed to replay; every score used here was replayed end to end through blind-chess.html's own move generator, and every claim was then re-measured with Stockfish 18 at depth 20-22 with MultiPV 3.",
       "results": {
         "corpus_positions_before": 6,
-        "corpus_positions_after": 22,
+        "corpus_positions_after": 26,
         "corpus_master_games_before": 2,
-        "corpus_master_games_after": 11,
-        "corpus_roles_after": "13 positive, 6 ambiguous, 3 negative",
-        "api_false_negatives_on_detectable_concepts": "0 of 22",
-        "api_false_positives": "0 of 22",
-        "ladder_human_grounded": "31 -> 39 on the OLD measure, which was wrong; 5 -> 17 on the corrected one. See the finding below: the rung was counting positions this system found itself as human grounding.",
+        "corpus_master_games_after": 13,
+        "corpus_roles_after": "17 positive, 6 ambiguous, 3 negative",
+        "api_false_negatives_on_detectable_concepts": "0 of 26",
+        "api_false_positives": "0 of 26",
+        "ladder_human_grounded": "5 -> 21 on the corrected measure (39 was the old, wrong one - see the findings)",
         "ladder_api_validated": "32 -> 36 (36 of the 83 concepts whose own record allows a detector)",
         "ladder_negative_tested": "29 -> 31",
         "ladder_ambiguity_tested": "17 -> 22",
-        "validated_positions": "82 -> 98",
+        "validated_positions": "82 -> 102",
         "depth_mean": "0.70 -> 0.71",
         "new_detectors": "centralSquareControl, kingZoneAttackers, pawnBreakthrough (Layer 3); center-control, king-safety, king-attack, pawn-breakthrough (Layer 4)",
         "firing_rates_over_788_positions": "center-control 20.3%, king-attack 1.5%, king-safety-by-count 1.1% of king-sides, king-safety-by-bare-shield 12.4% of king-sides, move-based centre 7.1%, move-based shield damage 2.6%, pawn-breakthrough 0.0%",
-        "tests": "632 -> 648 pass, 0 fail",
-        "ladder_every_rung_its_record_allows": "on the corrected measure, 4 (was 2 by the same measure)"
+        "tests": "632 -> 652 pass, 0 fail",
+        "ladder_every_rung_its_record_allows": "2 -> 8 on the corrected measure"
       },
       "findings": [
         "SIX of seven blog-printed 'full move orders' failed to replay. Only Capablanca-Mattison 1929 survived; Janowsky-Alapin, Rubinstein-Maroczy, Pillsbury-Marco, Havasi-Capablanca and Chekhover-Rudakovsky all reached an illegal move. Prose from such a page can still be cited; its move list cannot. Every score in this corpus now comes from a database and is replay-verified.",
@@ -1681,7 +1681,8 @@
         "FIVE OF THE SEVEN TARGET CONCEPTS CANNOT HAVE A DETECTOR, by their own records, and pretending otherwise would have been the easy way to move the numbers. initiative is 'invisible to a static feature scan'; piece-coordination and transformation-of-advantages are human-only; static-vs-dynamic is not a property of a feature. They now have human ground truth instead, and both the ladder and the corpus checker report the distinction from the records rather than from a list.",
         "A NEGATIVE EXAMPLE ONLY COUNTS IF A DETECTOR COULD HAVE FAILED IT, and the corpus now holds one that could: Smyslov-Botvinnik 1954 after 21.Nc5, where a centralised advanced knight in front of an enemy pawn chain is the outpost pattern as any scan sees it and Botvinnik says twice in his own notes that the piece is badly placed. This base's outpost detector agrees and reports nothing, because ...b6 challenges c5 and no white pawn defends it. Two of the corpus's three negatives are now live tests rather than vacuous ones.",
         "TWO FEATURES THAT ARE CORRECT AND WORTH NOTHING, which is what an ambiguous example is for. Nimzowitsch-Capablanca 1914: Black has doubled c-pawns and is +1.07 with the best move on the board being the one that presses the file they opened. Havasi-Capablanca 1929: White has the bishop pair and the engine's first choice for Black, at +0.40, is the move that trades it off. Both features are reported, both correctly, and this base's wording already refuses to go further - 'doubled pawns are a price, not a verdict'.",
-        "THE HUMAN-GROUNDED RUNG WAS MEASURING THE WRONG THING, and it was flattering itself. Its own definition says 'an annotated master position, NOT a mined one', and its implementation accepted any position carrying a named game and a historical origin - so 22 of the 36 concepts it counted were grounded only on positions this system found by running its own Layer 4 over master games. Those positions' own notes already said they 'cannot by itself validate the matcher that found it'. Fixed by adding an `attributed_by` field that names the person who said so, and the number fell from 39 to 17. The looser count is still printed underneath, because a drop that large should be legible rather than silent."
+        "THE HUMAN-GROUNDED RUNG WAS MEASURING THE WRONG THING, and it was flattering itself. Its own definition says 'an annotated master position, NOT a mined one', and its implementation accepted any position carrying a named game and a historical origin - so 22 of the 36 concepts it counted were grounded only on positions this system found by running its own Layer 4 over master games. Those positions' own notes already said they 'cannot by itself validate the matcher that found it'. Fixed by adding an `attributed_by` field that names the person who said so, and the number fell from 39 to 17. The looser count is still printed underneath, because a drop that large should be legible rather than silent.",
+        "A DETECTOR THAT FLICKERS ON AND OFF ACROSS A GAME A HUMAN CALLS SETTLED. Traced ply by ply through Rubinstein-Salwe 1908 - the game whose annotator says flatly that the e6 bishop is bad - this base reports bad-bishop for exactly ten plies, from 16...Nd7 to 21.Nc5, and then stops, while the bishop's pawn share RISES from 0.67 to 0.83 over the same stretch. The cause is the `scope > 3` guard, which is there to keep Suba's active bad bishop off the list and is what stopped this base calling Nimzowitsch's blockading bishop bad. So the guard is right and the concept is momentary in a way its own record says it should not be. Recorded on the record and pinned at both ends by a test, rather than loosened: raising the threshold would restore two false positives to remove one false negative."
       ]
     }
   ],

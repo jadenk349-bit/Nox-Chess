@@ -204,6 +204,24 @@
         "verdict": "supports",
         "verdict_note": "Quiet and close to balanced at 0.04, which is the combination this base most needs and least often finds: nothing forcing is available and the evaluation is not swamping the feature, so the position is usable as an instance of the concept. What is NOT claimed is that the concept explains the engine's choice of move."
       }
+    },
+    {
+      "fen": "3r1nk1/p4ppp/1bp5/B7/3p4/1N4PP/PPP2P2/4R1K1 w - - 0 23",
+      "note": "Capablanca-Rubinstein, Berlin 1928, Re7. Human ground truth: the concept is named for this position by Nicholas Van Der Nat (FM). Corpus entry `capablanca-rubinstein-1928-23Re7-rook-on-the-seventh`. A named annotator putting the concept on a specific ply and saying what it is worth relative to a named alternative, which is more than most annotations do. The record's own condition - that the seventh rank matters because the enemy pawns start there and cannot leave without being taken - is exactly the reason given: the rook 'hunts any pawn that dares advance'. It is worth no",
+      "origin_kind": "historical-game",
+      "game": "Capablanca-Rubinstein, Berlin 1928",
+      "concept_role": "positive",
+      "attributed_by": "Nicholas Van Der Nat (FM) — corpus entry capablanca-rubinstein-1928-23Re7-rook-on-the-seventh",
+      "engine": {
+        "engine_id": "Stockfish 18",
+        "test_level": 3,
+        "depth": 24,
+        "multipv": 3,
+        "best_move": "Re7",
+        "eval_cp": 20,
+        "verdict": "supports",
+        "verdict_note": "yes, though narrowly - 23.Re7 is the engine's first choice at depth 24 at +0.20, with the second at +0.17. The margin is small because the position is close to level; the point of the entry is the attribution, not the size of the edge. The engine's principal variation is 23.Re7 d3 24.cxd3 Rxd3 25.Bb4, which is the rook using the seventh to force a favourable trade rather than to win material outright."
+      }
     }
   ],
   "counterexamples": [

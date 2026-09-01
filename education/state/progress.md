@@ -155,6 +155,32 @@ to 17. All 17 come from the annotated corpus; the same measure would have read 5
 before this session. The looser count is still printed underneath the ladder,
 because a drop that large should be legible rather than silent.
 
+### Four more concepts through every rung their record allows
+
+With the measure fixed, the cheapest real progress is a single annotated
+position for a concept that already has everything else. Four of them:
+
+- **king-activation** and **passed-pawn**, both from Capablanca–Tartakower 1924
+  and both from one sentence of Chernev's: 35.Kg3, "Le roi s'amuse! The King is
+  headed for f6, a square from which he can assist the White Rook in threats of
+  mate, and also help the passed pawn take those last three steps." The move
+  gives away two pawns with check, and Stockfish puts it **2.49 ahead** of
+  anything else — the largest margin in this corpus.
+- **rook-on-the-seventh**, Capablanca–Rubinstein 1928, 23.Re7, with the
+  annotator saying what it is worth against a named alternative.
+- **bad-bishop**, Rubinstein–Salwe 1908, the archetype: four of six pawns on the
+  bishop's own colour in a structure the winner spent the game fixing.
+
+The last of those produced a finding worth more than the rung. Traced ply by
+ply, this base reports the e6 bishop as bad for exactly **ten plies** of a game
+its annotator calls it bad throughout — and stops while the bishop's pawn share
+is still *rising*, from 0.67 to 0.83. The cause is the `scope > 3` guard, which
+exists to keep Suba's active bad bishop off the list and is what stopped this
+base calling Nimzowitsch's blockading bishop bad. The guard is right and the
+concept is momentary in a way its own record says it should not be. Recorded and
+pinned at both ends by a test rather than loosened: raising the threshold would
+restore two false positives to remove one false negative.
+
 That is the third metric this project has caught telling it what it wanted to
 hear — after the mass test's "99.7% positional coverage" and the corpus
 checker's scoring of negative examples — and all three were found the same way:
