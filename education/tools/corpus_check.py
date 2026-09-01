@@ -36,6 +36,18 @@ STRESS TEST every entry is run through analyzeWithEducation and scored AGAINST
   AND REJECTED is a FALSE POSITIVE - a much sharper test than "reported
   something extra", because the human named those alternatives and said no.
 
+RANKING    reporting a concept and burying it are different outcomes and were
+           scored the same. For a POSITIVE entry the annotated concept is what a
+           human said the position is about, so its RANK in the reported list is
+           a measurement: rank 1 is the lead, rank 5 is a footnote under four
+           other things. The mean rank is printed, and every entry's rank is
+           printed beside it, so a change that quietly buries a concept shows up.
+
+CONFIDENCE the annotator's own confidence is recorded per entry. The system may
+           say less than the human and may not say more: reporting HIGH where a
+           careful annotator wrote `medium` is a confidence error, and it is
+           counted separately from being wrong about the concept.
+
     python3 tools/corpus_check.py [-v]
 """
 import json, os, subprocess, sys
@@ -134,9 +146,10 @@ def main():
         print("  provenance complete on every entry")
 
     tally = {"primary": 0, "secondary": 0, "false_negative": 0, "false_positive": 0,
-             "phrasing": 0, "api_error": 0, "undetectable": 0,
+             "phrasing": 0, "api_error": 0, "undetectable": 0, "overconfident": 0,
              "neg_correct": 0, "neg_leaked": 0, "neg_vacuous": 0, "amb_present": 0, "amb_led": 0}
     rows = []
+    ranks = []
     for p in pos:
         # Look at the position the move REACHES as well as the one it was played
         # from. A move-based concept - two weaknesses, improving the worst piece -
@@ -156,7 +169,7 @@ def main():
         rReal = api(p["fen_concept_realised"]) if p.get("fen_concept_realised") else None
         if r is None:
             tally["api_error"] += 1
-            rows.append((p["id"], "API ERROR", "", ""))
+            rows.append((p["id"], "API ERROR", "", "", None, None, None, False))
             continue
         ids = [c["id"] for c in r["c"]]
         idsAfter = [c["id"] for c in (rAfter or {}).get("c", [])]
@@ -212,8 +225,29 @@ def main():
             tally["false_positive"] += 1
         if r["v"]:
             tally["phrasing"] += 1
+        # RANK of the annotated concept, wherever it was actually reported. 1 is
+        # the lead. `None` when it was not reported at all.
+        rank = None
+        for lst in (ids, idsAfter, idsReal):
+            if want in lst:
+                r_ = lst.index(want) + 1
+                rank = r_ if rank is None else min(rank, r_)
+        if rank is not None and role == "positive":
+            ranks.append(rank)
+
+        # CONFIDENCE: the system may say less than the human, never more.
+        ORDER = {"low": 0, "medium": 1, "high": 2}
+        said = next((c["conf"] for c in r["c"] if c["id"] == want), None)
+        if said is None:
+            said = next((c["conf"] for c in (rAfter or {}).get("c", []) if c["id"] == want), None)
+        human = p.get("confidence")
+        overclaim = (said is not None and human in ORDER and said in ORDER
+                     and ORDER[said] > ORDER[human])
+        if overclaim:
+            tally["overconfident"] += 1
+
         rows.append((p["id"], verdict, ",".join(ids[:3]) + " | after: " + ",".join(idsAfter[:3]),
-                     ",".join(rejected)))
+                     ",".join(rejected), rank, said, human, overclaim))
 
     n = len(pos) or 1
     roles = {r: sum(1 for x in pos if x.get("concept_role") == r)
@@ -233,6 +267,12 @@ def main():
           f"   (of which led: {tally['amb_led']})")
     print(f"  FALSE POSITIVE (rejected alternate)  {tally['false_positive']}/{n}")
     print(f"  phrasing violations                  {tally['phrasing']}/{n}")
+    if ranks:
+        best = sum(1 for x in ranks if x == 1)
+        top3 = sum(1 for x in ranks if x <= 3)
+        print(f"  RANK of the annotated concept        mean {sum(ranks)/len(ranks):.1f} over "
+              f"{len(ranks)} positives; lead {best}, top-3 {top3}")
+    print(f"  CONFIDENCE overclaimed vs the human  {tally['overconfident']}/{n}")
     if tally["api_error"]:
         print(f"  API errors                           {tally['api_error']}/{n}")
     print()
@@ -240,11 +280,14 @@ def main():
     BYDESIGN = ("absent - the concept's own record says it cannot have a detector",
                 "vacuous - nothing could have reported it")
     SOFT = ("secondary",)
-    for pid, verdict, got, rej in rows:
+    for pid, verdict, got, rej, rank, said, human, overclaim in rows:
         mark = ("ok  " if verdict in GOOD else "n/a " if verdict in BYDESIGN
                 else "~   " if verdict in SOFT else "MISS")
-        print(f"  {mark} {pid}")
+        where = f" [rank {rank}]" if rank else ""
+        print(f"  {mark} {pid}{where}")
         print(f"       {verdict}; API said: {got or '(nothing)'}")
+        if overclaim:
+            print(f"       CONFIDENCE: says {said} where the annotator wrote {human}")
         if rej:
             print(f"       reported rejected alternate(s): {rej}")
     print()

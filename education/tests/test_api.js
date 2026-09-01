@@ -541,6 +541,52 @@ const { concepts } = API.knowledge();
      texts.every(t => t.length > 120), texts.map(t => t.length).join(','));
 }
 
+{
+  // Ranking. The corpus measured this and nothing else did: the concept a human
+  // annotator said the position was ABOUT sat at mean rank 4.9, and in six of
+  // twelve cases outside the six entries the API returns by default - reported,
+  // and invisible. Two causes, both fixed: PRIORITY put four concepts that fire
+  // on more than half of all positions ahead of everything specific, and the
+  // comparator demoted every low-confidence claim below every medium one rather
+  // than barring it from the lead alone.
+  const P = MATCH.PRIORITY;
+  const at = id => P.indexOf(id);
+  ok('ranking: the near-universal band is last',
+     ['two-weaknesses', 'weak-square', 'open-file', 'space'].every(x => at(x) > at('outpost')),
+     ['two-weaknesses', 'weak-square', 'open-file', 'space'].map(x => `${x}@${at(x)}`).join(' '));
+  ok('ranking: the rare and specific come first',
+     at('pawn-breakthrough') < at('king-safety') && at('king-attack') < at('doubled-pawns'),
+     `pawn-breakthrough@${at('pawn-breakthrough')} king-attack@${at('king-attack')}`);
+  ok('ranking: passed-pawn is deliberately kept high despite firing on 60%',
+     at('passed-pawn') < at('doubled-pawns'), `passed-pawn@${at('passed-pawn')}`);
+
+  // Wade-Korchnoi: the breakthrough is a proof and decides the game, and it used
+  // to rank third behind doubled pawns on b6/b7.
+  const wk = API.analyzeWithEducation({
+    fen: '8/1pp5/1p4p1/1P1Pp2k/P3P2p/5K2/5P1P/8 w - - 1 38', move: 'a4a5' });
+  eq('ranking: the proven breakthrough leads its own position', wk.concepts[0].id, 'pawn-breakthrough');
+
+  // ...and a low-confidence claim still may not be the headline. This is the
+  // Nimzowitsch-Salwe case the old rule was written for.
+  for (const fen of ['r1r3k1/p2n1ppp/2p1b3/1q1p4/N2Q4/5PP1/PP2PR1P/2R2BK1 w - - 4 20',
+                     'rnbqnrk1/ppppppbp/6p1/4P3/2PP1P2/2N5/PP4PP/R1BQKBNR b KQ f3 0 6']) {
+    const r = API.analyzeWithEducation({ fen });
+    if (r.concepts.length > 1) {
+      ok('ranking: a low-confidence claim never leads',
+         r.concepts[0].confidence !== 'low', r.concepts.map(c => `${c.id}:${c.confidence}`).join(','));
+    }
+  }
+}
+{
+  // Endgames must not lose their point to the reorder: a passed pawn is a
+  // concrete asset on a concrete square and its record makes it decisive there.
+  for (const [label, fen] of [['K+P', '8/8/4k3/8/3P4/4K3/8/8 w - - 0 1'],
+                              ['R+P', '8/8/1p4k1/8/3P4/6K1/8/R7 w - - 0 1']]) {
+    eq(`ranking: passed-pawn still leads a ${label} ending`,
+       API.analyzeWithEducation({ fen }).concepts[0].id, 'passed-pawn');
+  }
+}
+
 /* ---------- report ---------- */
 console.log(`\nAPI  PASS ${pass}   FAIL ${fails.length}`);
 for (const [n, d] of fails) console.log(`  FAIL  ${n}\n        ${d}`);

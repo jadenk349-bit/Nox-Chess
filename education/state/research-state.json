@@ -1696,6 +1696,29 @@
         "THE `level` PARAMETER HAD NEVER DONE ANYTHING. The API accepts beginner/intermediate/advanced/master, the README documents it, every concept record carries four texts written for those four readers, and asking for master and for beginner returned the SAME SENTENCE on every position. Cause: wordFor() tried `by_depth[depth]` before `by_level[level]`, and every record carries all three by_depth texts, so the by_level branch was unreachable. 137 records times four texts, written and unread. Found by asking, on the Letelier-Fischer position, why four levels printed one string. tests/test_explanations.js had a comment saying 'level must be able to' change the wording with no assertion under it; there is one now, and the wording varies by level on 99.3% of the 788 shipped positions. Two consequences came with the fix: level feeds the TEACHING half rather than the observation, because the observation must name the square and the level texts are general; and teachingSentence() now prefers a sentence long enough to teach something, because the advanced text for `outpost` opens 'Outpost in the modern sense.' and that label was the whole of what an advanced reader used to get.",
         "A FALSE-POSITIVE TEST THAT BANNED A WORD RATHER THAN A CLAIM. The regression suite failed the new intermediate wording 'ask what the exchange bought before calling them a weakness' because it contains the word 'weakness' - which is the opposite of the fault it guards against. The check now splits the explanation into sentences and only fails a sentence that asserts a verdict without a hedging cue."
       ]
+    },
+    {
+      "id": "ranking-and-confidence-measured-for-the-first-time",
+      "date": "2026-09-01",
+      "method": "Added RANK and CONFIDENCE measurement to tools/corpus_check.py. Reporting a concept and burying it were scored the same before this; for a positive entry the annotated concept is what a human said the position is ABOUT, so its rank in the reported list is a measurement. Then measured the firing rate of every concept over the 788 shipped positions, with the solution move supplied, and compared it with the order the PRIORITY list actually used.",
+      "results": {
+        "mean_rank_before": 4.9,
+        "mean_rank_after": 2.6,
+        "in_the_six_the_API_returns_before": "6 of 12",
+        "in_the_six_after": "12 of 12",
+        "top_3_before": 5,
+        "top_3_after": 8,
+        "confidence_overclaimed": "0 of 29, before and after",
+        "worst_ranks_before": "restraint 10, king-safety 10, worst-placed-piece 8, king-safety 7, center-control 7",
+        "mass_test_leads": "unchanged: 83.5% tactical, and the positional leads are the same set",
+        "tests": "655 pass, 274 API, 377 audit, 3274 explanation"
+      },
+      "findings": [
+        "HALF THE HUMAN-ATTRIBUTED CONCEPTS WERE INVISIBLE. The API returns six concepts by default. On six of twelve positive corpus entries the concept a named annotator attributed to the position sat at rank 7, 8 or 10 - present in concepts_all, absent from anything a caller reads. Nothing measured this until the corpus did.",
+        "TWO CAUSES, AND THE FIRST WAS THE PRIORITY LIST CALLING ITSELF INFORMATIVENESS. Measured firing rates: two-weaknesses 72.5%, weak-square 68.9%, passed-pawn 60.4%, open-file 55.7%, space 53.3% - and all five ranked ahead of king-attack (1.5%), backward-pawn (1.9%), luft (4.8%), pawn-break (4.9%) and hanging-pawns (7.2%). A concept true of three quarters of all positions cannot be the most informative thing about any of them. Reordered by the measurement, with the measurement written into the source and two exceptions stated: passed-pawn, which names a concrete asset and whose 60% is an artefact of a corpus one third endgames, and pawn-breakthrough, whose 0% is scope rather than rarity.",
+        "AND THE SECOND WAS A RULE APPLIED TO THE WHOLE LIST INSTEAD OF TO ONE ENTRY. The comparator demoted every low-confidence claim below every medium one. Its comment says the rule is that a low-confidence claim must never be the HEADLINE - one position, not all of them - and every badly-ranked corpus concept was a low-confidence one. Now the lead is chosen that way and everything below it is ordered by informativeness. Mean rank 4.9 -> 2.6, and nothing is outside the six any more.",
+        "A METRIC MEASURING ITS OWN MAINTENANCE. mass_test.js decided what counts as 'positional' from a hand-written list that had gone stale: center-control, king-safety, king-attack and pawn-breakthrough were all missing, so when one of them took a slot in the visible six it displaced a counted concept and the headline fell from 96.4% to 94.9%. Now derived from each record's knowledge_type - and the number goes back to 99.4%, which this project has already recorded as a figure worth nothing, so the line now says so out loud and points at the LEAD figures instead."
+      ]
     }
   ],
   "last_updated": "2026-09-01",

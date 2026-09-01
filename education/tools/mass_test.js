@@ -49,12 +49,28 @@ const THEME_TO_CONCEPT = {
   pawnBreakthrough: 'pawn-breakthrough', kingAttack: 'king-attack',
   removalOfDefender: 'removing-the-defender',
 };
-const POSITIONAL = new Set([
-  'outpost', 'weak-square', 'strong-square', 'doubled-pawns', 'isolated-queen-pawn',
-  'backward-pawn', 'passed-pawn', 'open-file', 'semi-open-file', 'bishop-pair',
-  'opposite-coloured-bishops', 'rook-on-the-seventh', 'space', 'piece-activity',
-  'king-activation', 'luft', 'material-imbalance',
-]);
+// Which concepts count as positional, DERIVED from the records rather than
+// listed here. The hand-written list this replaces went stale the moment new
+// matchers were added: `center-control`, `king-safety`, `king-attack` and
+// `pawn-breakthrough` are all positional and none was in it, so when one of
+// them took a slot in the six the API returns it displaced a counted concept
+// and the headline number fell — a metric measuring its own maintenance.
+const POSITIONAL = (() => {
+  const TACTICAL = new Set(['tactical-motif', 'mating-pattern', 'official-rule',
+                            'named-theoretical-position', 'tablebase-fact']);
+  const out = new Set();
+  const root = path.join(ROOT, 'concepts');
+  for (const dir of fs.readdirSync(root)) {
+    const d = path.join(root, dir);
+    if (!fs.statSync(d).isDirectory()) continue;
+    for (const fn of fs.readdirSync(d)) {
+      if (!fn.endsWith('.json')) continue;
+      const c = JSON.parse(fs.readFileSync(path.join(d, fn), 'utf8'));
+      if (!TACTICAL.has(c.knowledge_type)) out.add(c.id);
+    }
+  }
+  return out;
+})();
 
 const R = {
   positions: 0, crashed: 0, templateLeaks: 0, phrasingViolations: 0,
@@ -143,7 +159,8 @@ console.log('\nCOVERAGE');
 console.log(`  licensed a concept      ${R.withConcept} (${pct(R.withConcept, R.positions)})`);
 console.log(`  said nothing            ${R.silent} (${pct(R.silent, R.positions)})`);
 console.log(`  named a tactical motif  ${R.withMotif} (${pct(R.withMotif, R.positions)})`);
-console.log(`  named a positional one  ${R.withPositional} (${pct(R.withPositional, R.positions)})`);
+console.log(`  named a positional one  ${R.withPositional} (${pct(R.withPositional, R.positions)})` +
+            `   <- worth little; see the LEAD figures below`);
 console.log('\nBY TRACK');
 for (const [k, v] of Object.entries(R.byTrack)) {
   console.log(`  ${k.padEnd(11)} n=${String(v.positions).padStart(3)}  motif ${pct(v.motif, v.positions).padStart(6)}  positional ${pct(v.positional, v.positions).padStart(6)}  silent ${pct(v.silent, v.positions).padStart(6)}`);

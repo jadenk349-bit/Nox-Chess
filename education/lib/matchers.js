@@ -83,13 +83,47 @@ const PRIORITY = [
   // the hanging piece first describes the incidental and buries the point.
   'checkmate', 'double-check', 'fork', 'knight-fork', 'pin', 'skewer',
   'discovered-attack', 'back-rank-mate', 'trapped-piece', 'hanging-piece',
-  // then structural features, most informative first
-  'outpost', 'rook-on-the-seventh', 'passed-pawn', 'isolated-queen-pawn',
-  'backward-pawn', 'doubled-pawns', 'opposite-coloured-bishops', 'bishop-pair',
-  'hanging-pawns', 'two-weaknesses', 'pawn-breakthrough', 'pawn-break', 'restraint', 'worst-placed-piece', 'bad-bishop', 'luft', 'semi-open-file', 'open-file',
-  'weak-square', 'king-attack', 'king-safety', 'center-control', 'material-imbalance',
-  'king-activation',
-  'space', 'piece-activity',
+
+  // Then structural features, most informative first — and MEASURED, because
+  // "most informative" was a judgement nobody had checked. Firing rates over
+  // the 788 shipped positions with the solution move supplied, 2026-09-01:
+  //
+  //   two-weaknesses 72.5%   weak-square 68.9%   passed-pawn 60.4%
+  //   open-file 55.7%        space 53.3%         piece-activity 44.4%
+  //   material-imbalance 42.1%  semi-open-file 39.5%  doubled-pawns 34.6%
+  //   center-control 26.0%   king-safety 23.5%   bishop-pair 22.6%
+  //   isolated-queen-pawn 17.6%  outpost 15.5%   king-activation 15.5%
+  //   rook-on-the-seventh 12.8%  restraint 12.7%  bad-bishop 12.4%
+  //   opposite-coloured-bishops 10.2%  worst-placed-piece 8.4%
+  //   hanging-pawns 7.2%     pawn-break 4.9%     luft 4.8%
+  //   backward-pawn 1.9%     king-attack 1.5%    pawn-breakthrough 0.0%
+  //
+  // A concept true of three quarters of all positions cannot be the most
+  // informative thing about any of them, and four of the five that led this
+  // list were in that band. The corpus measured the cost: the concept a human
+  // annotator said the position was ABOUT sat at mean rank 4.9, and in six of
+  // twelve cases outside the six the API returns by default — reported, and
+  // invisible.
+  //
+  // Rarity is the check on the ordering, not the definition of it. Two are
+  // deliberately kept ahead of where their rate alone would put them:
+  //   passed-pawn, because it names a concrete asset on a concrete square and
+  //     its record makes it decisive in the endgame — 60% here is an artefact
+  //     of a corpus that is one third endgames, not of the concept saying
+  //     little; and
+  //   pawn-breakthrough, whose 0.0% is not rarity but scope: it only runs in
+  //     pure pawn endings, of which the 788 contain none, and where it does
+  //     fire it is a PROOF by the rule of the square.
+  'pawn-breakthrough', 'king-attack', 'outpost', 'rook-on-the-seventh',
+  'passed-pawn', 'isolated-queen-pawn', 'backward-pawn', 'hanging-pawns',
+  'opposite-coloured-bishops', 'bishop-pair', 'luft', 'pawn-break', 'restraint',
+  'worst-placed-piece', 'bad-bishop', 'king-safety', 'center-control',
+  'king-activation', 'doubled-pawns',
+
+  // ...and the band that is true of most positions, last, because being true
+  // here is not news.
+  'semi-open-file', 'material-imbalance', 'piece-activity', 'space',
+  'open-file', 'weak-square', 'two-weaknesses',
 ];
 const priorityOf = id => {
   const i = PRIORITY.indexOf(id);
@@ -663,8 +697,8 @@ const STRUCTURAL = [
       if (!c) return null;
       const o = other(c);
       const because = [
-        `${side(f, c)} attacks ${tot[c]} of the four central squares' defences against ${tot[o]}, ` +
-        `and out-attacks ${side(f, o)} on ${led[c]} of the four`,
+        `${side(f, c)} has ${tot[c]} attacks on the four central squares against ${tot[o]}, ` +
+        `and out-attacks ${side(f, o)} on ${led[c]} of them`,
       ];
       // The record's other two traps, said out loud when they apply.
       if (ct.occupied[o].length && !ct.occupied[c].length) {
@@ -1026,11 +1060,25 @@ function matchAll(features, moveInfo, concepts, featuresAfter) {
   // low confidence because the record says the structural test is unreliable.
   // Informativeness decides between claims we are equally sure of; it does not
   // promote one we are not sure of at all.
-  const weak = x => (x.confidence === 'low' ? 1 : 0);
   found.sort((a, b) => isMotif(a) - isMotif(b) ||
-                       weak(a) - weak(b) ||
                        priorityOf(a.concept) - priorityOf(b.concept) ||
                        rank[a.confidence] - rank[b.confidence]);
+
+  // A low-confidence claim must never be the HEADLINE, and until now it was
+  // also barred from everything else: the comparator demoted every low-
+  // confidence entry below every medium one, so a concept firing on 1.5% of
+  // positions sat behind six that fire on more than half. That is what put the
+  // human-attributed concept at rank 7, 8 and 10 on six of twelve corpus
+  // positions - reported, and outside the six the API returns by default.
+  //
+  // The rule the comment was reaching for applies to ONE position in the list,
+  // so it is applied to one: if the head is low-confidence and anything else is
+  // not, that one leads instead. Everything below the lead is ordered by
+  // informativeness, which is where a hedged claim about a rare feature belongs.
+  if (found.length > 1 && found[0].confidence === 'low') {
+    const i = found.findIndex(x => x.confidence !== 'low');
+    if (i > 0) found.unshift(found.splice(i, 1)[0]);
+  }
   return found;
 }
 
