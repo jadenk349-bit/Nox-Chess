@@ -29,7 +29,7 @@ ranking. Nothing here should be read as saying the system is nearly finished.
 
 137 concepts · 202 sources · **111 engine-validated positions + 22 tablebase** ·
 **39 human-annotated corpus positions from 26 master games** · 32 replay-verified
-master games · 661 tests + 422 API + 374 audit + 3574 explanation assertions.
+master games · 661 tests + 429 API + 374 audit + 3574 explanation assertions.
 
 Ladder: researched 137, human-grounded 30, engine-verified 54, negative-tested
 32, ambiguity-tested 24, api-validated 53 of the 83 whose record allows it,
@@ -109,9 +109,15 @@ first entry in this corpus scored on weighting rather than on detection.
    written and thrown away: `strong-square`, exactly to its record's two stated
    preconditions, fires on 80.1% of the 788 shipped positions and is a third
    name for a fact already reported twice.
-4. **The 788 shipped positions cannot validate everything.** Zero of them is a
-   pawn ending, so `pawnBreakthrough()` fires on none and the corpus offers no
-   evidence at all about its false-positive rate. A pawn-ending corpus is needed.
+4. **CLOSED, and it cost the concept its strongest claim.** Zero of the 788 is a
+   pawn ending, so `pawnBreakthrough()` had never been run against anything.
+   `tools/pawn_endings.js` now generates them and `tools/verify_breakthrough.py`
+   checks each claim against Syzygy, where a seven-man pawn ending is *decided*.
+   Two real bugs fell out — a breakthrough claimed for the side not to move, and
+   a rule of the square applied to three enemy passers and one king — and one
+   thing that is not a bug: the rule of the square is **not a proof** in a
+   multi-pawn ending. 22 of 24 tablebase-decidable claims are right, the detector
+   reports at medium instead of high, and nothing calls it a proof any more.
 5. **Layer 5 is plain.** It states what is true, avoids the failure modes it used
    to have, and does not read like a good teacher.
 6. **`king-centralisation-with-danger` remains partially resolved.** The phase

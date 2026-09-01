@@ -1409,6 +1409,64 @@ const { concepts } = API.knowledge();
      r.concepts_all.some(c => c.id === 'piece-activity' && c.subjects.includes('b')));
 }
 
+{
+  // PAWN ENDINGS, which this base had never been run on. state/COMPLETION.md
+  // carried the gap for several sessions: none of the 788 shipped positions is a
+  // pawn ending, so pawnBreakthrough() fired on none of them and its 0.0% rate
+  // said nothing at all about its accuracy. tools/pawn_endings.js generates
+  // them; tools/verify_breakthrough.py checks the claims against Syzygy, where a
+  // pawn ending of seven men or fewer is DECIDED rather than estimated.
+  //
+  // BUG 1: a breakthrough is a move, and you cannot play it out of turn.
+  // pawnBreakthrough() asked P.legalMoves(st) and never checked whose moves they
+  // were, so when features() asked it for the side NOT to move — which it does
+  // for both sides, every time — it read the opponent's pawn moves as the offer.
+  const WRONGTURN = '3K4/p7/2p5/4P3/1P2k3/8/P7/8 b - - 0 1';
+  const bt = FEAT.features(WRONGTURN).breakthrough;
+  if (bt.w) {
+    const first = bt.w.first;
+    const from = FEAT.page.stateFromFEN(WRONGTURN).b[
+      (8 - Number(first[1])) * 8 + (first.charCodeAt(0) - 97)];
+    ok('breakthrough: a claim for White starts with a WHITE pawn',
+       from && from.c === 'w' && from.t === 'P', JSON.stringify({ first, from }));
+  } else {
+    ok('breakthrough: no claim for White here', true);
+  }
+
+  // BUG 2: one king cannot be in two places. This dismissed White's a5, a2 AND
+  // e5 as individually catchable by one black king on e4; Syzygy says the
+  // offering side is lost.
+  ok('breakthrough: two calls on one king is an unclear race',
+     /one king cannot be charged twice/i.test(
+       fs.readFileSync(path.join(ROOT, 'lib', 'features.js'), 'utf8')));
+
+  // ...and the ORDER of the two questions, which is what deleted the textbook
+  // pattern when it was wrong: speed first, king second.
+  const P3 = FEAT.features('8/ppp5/8/PPP4k/8/8/8/6K1 w - - 0 1');
+  ok('breakthrough: the classic three-against-three survives both guards',
+     P3.breakthrough.w && P3.breakthrough.w.first === 'b5b6',
+     JSON.stringify(P3.breakthrough.w));
+
+  // The claim is no longer called a PROOF anywhere, because it is not one.
+  const src = fs.readFileSync(path.join(ROOT, 'lib', 'matchers.js'), 'utf8');
+  ok('breakthrough: reports at medium, not high',
+     /confidence: 'medium',\n\s*because: \[\n\s*`\$\{side\(f, c\)\} can play a pawn/.test(src) ||
+     /22 right, 2 wrong/.test(src));
+  ok('breakthrough: the wording says indication rather than proof',
+     /an indication rather \` \+\n\s*\`than a proof/.test(src) || /nine times in ten/.test(src));
+  ok('breakthrough: the measurement table is in the source',
+     /margin 2   fires on  6\.1%/.test(
+       fs.readFileSync(path.join(ROOT, 'lib', 'features.js'), 'utf8')));
+
+  // And the corpus's own annotated instance is untouched: Wade–Korchnoi 1960.
+  const corpus = JSON.parse(fs.readFileSync(
+    path.join(ROOT, 'corpus', 'annotated_positions.json'), 'utf8')).positions;
+  const wk = corpus.find(p => p.id === 'wade-korchnoi-1960-38a5-pawn-breakthrough');
+  ok('breakthrough: Wade–Korchnoi is still found, and still with 38.a5',
+     FEAT.features(wk.fen).breakthrough.w &&
+     FEAT.features(wk.fen).breakthrough.w.first === 'a4a5');
+}
+
 /* ---------- report ---------- */
 console.log(`\nAPI  PASS ${pass}   FAIL ${fails.length}`);
 for (const [n, d] of fails) console.log(`  FAIL  ${n}\n        ${d}`);

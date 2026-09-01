@@ -1414,3 +1414,61 @@ implemented.
 
 Corpus: **39 positions, 26 games, 18 positive / 13 ambiguous / 8 negative**,
 seven of the eight negatives live rather than vacuous.
+
+
+## A whole position type the system had never seen, and two bugs in it
+
+`state/COMPLETION.md` had carried this for several sessions: *"zero of the 788
+shipped positions is a pawn ending, so `pawnBreakthrough()` fires on none and the
+corpus offers no evidence at all about its false-positive rate."* A detector
+nothing has ever been run against is not a validated detector, and a 0.0% firing
+rate is not evidence of anything.
+
+`tools/pawn_endings.js` now generates them through the page's own move
+generator — 20,000 of them: **0 crashes, 0 unfilled templates, 3 licensing no
+concept**. `tools/verify_breakthrough.py` checks each breakthrough claim against
+Syzygy, where a pawn ending of seven men or fewer is *decided* rather than
+estimated. The claim checked is the narrow one the matcher makes — accepting the
+offer loses — so the position tested is the one after the offer and after a pawn
+capture of it.
+
+**Two real bugs.**
+
+1. *A breakthrough is a move, and you cannot play it out of turn.*
+   `pawnBreakthrough()` asked for the legal moves and never checked whose they
+   were, so when `features()` asked it for the side **not** to move — which it
+   does for both sides, every time — it read the opponent's pawn moves as the
+   offer. On `3K4/p7/2p5/4P3/1P2k3/8/P7/8 b` it returned a breakthrough for
+   White whose first move was a7a5, a black pawn.
+2. *One king cannot be in two places.* The rule of the square was applied to
+   each enemy passer in turn, which quietly assumes one king catches all of
+   them. It dismissed White's a5, a2 **and** e5 as individually catchable by one
+   black king; Syzygy says the offering side is lost.
+
+**And one thing that is not a bug.** The rule of the square is not a proof in a
+multi-pawn ending, and the record and the matcher both said it was. Promoting one
+move before the defender is not winning: Syzygy calls
+`8/8/2K4P/1p6/4p3/8/k4P2/8 w` a **draw** after 1.f3 exf3 2.h7 f2 3.h8=Q f1=Q.
+
+| enemy passer must be slower by | fires on | right |
+|---|---|---|
+| 0 | 15.7% | 22 of 30 |
+| 1 | 10.3% | 19 of 24 |
+| **2** | **6.1%** | **22 of 24** |
+| 3 | 4.1% | 22 of 24 |
+| no enemy passer at all | 0.7% | 20 of 23 — *and it deletes the canonical pattern* |
+
+Two tempi is the chess, not a fitted number: it is the free move that lets the
+new queen stop the other pawn. Refusing every enemy passer is wrong on principle
+— in a real breakthrough **both** sides get a passer and the point is that ours
+is faster.
+
+The *order* of the two questions matters as well, and getting it wrong deleted
+the textbook three-against-three: speed must be asked before the king, or two
+hopeless enemy pawns five steps from promotion count as two calls on a king that
+never needed to move.
+
+`pawn-breakthrough` now reports at **medium**, and its sentence says "an
+indication rather than a proof — checked against tablebases, right about nine
+times in ten". It used to say high, and the PRIORITY comment used to call it
+"a PROOF by the rule of the square".

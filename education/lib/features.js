@@ -932,12 +932,29 @@ function pawnBreakthrough(st, colour) {
   const startCount = mine();
   const countP = s => pieces(s, colour, 'P').length;
 
+  // A BREAKTHROUGH IS A MOVE, AND YOU CANNOT PLAY IT OUT OF TURN. This asked
+  // P.legalMoves(st) for the moves and never checked whose they were, so when
+  // features() called it for the side NOT to move - which it does for both
+  // sides, every time - it read the OPPONENT'S pawn moves as the offer and
+  // claimed the resulting line for the wrong colour. On
+  // `3K4/p7/2p5/4P3/1P2k3/8/P7/8 b` it returned a breakthrough for White whose
+  // first move was a7a5, a black pawn. Found by generating pawn endings, which
+  // this base had never been run on: the 788 shipped positions contain none.
+  //
+  // The fix is the one the rest of Layer 3 already uses - probe with the turn
+  // set - and it refuses positions where that would leave the other king in
+  // check, since those are boards rather than positions.
+  const probe = P.cloneState(st);
+  probe.turn = colour;
+  probe.ep = null;
+  try { if (P.inCheck(probe, colour === 'w' ? 'b' : 'w')) return null; } catch (e) { return null; }
+
   let moves;
-  try { moves = P.legalMoves(st); } catch (e) { return null; }
+  try { moves = P.legalMoves(probe); } catch (e) { return null; }
   for (const m of moves) {
-    const pc = st.b[m.from];
-    if (!pc || pc.t !== 'P' || m.cap) continue;         // an ADVANCE, not a capture
-    const after = P.makeMove(st, m);
+    const pc = probe.b[m.from];
+    if (!pc || pc.c !== colour || pc.t !== 'P' || m.cap) continue;   // OUR advance, not a capture
+    const after = P.makeMove(probe, m);
     // The offer has to be an offer: an enemy pawn must be able to take it.
     const takers = capturesOf(after, m.to);
     if (!takers.length) continue;
@@ -1038,13 +1055,67 @@ function winsTheRace(st, colour) {
   if (ours === Infinity) return false;
 
   const theirPromoRow = enemy === 'w' ? 0 : 7;
+  // ONE KING CANNOT BE IN TWO PLACES. The rule of the square is a statement
+  // about one pawn and one king, and applying it to each enemy passer in turn
+  // quietly assumes our king can catch all of them. It cannot, and the
+  // tablebase proved it: on `3K4/p7/2p5/4P3/1P2k3/8/P7/8 b`, this function
+  // dismissed White's a5, a2 AND e5 as individually catchable by the black king
+  // on e4 and returned true, and Syzygy says Black is LOST after the offer is
+  // accepted. Same shape on `8/4p2p/5p2/Pk6/4P3/8/5K2/8 b`, where the true
+  // verdict is a draw.
+  //
+  // So a passer dismissed only because our king catches it is COUNTED, and two
+  // of them is an unclear race. The function's own comment says it is
+  // "conservative on purpose: an unclear race is not a breakthrough", and this
+  // is what that has to mean.
+  // How much slower an enemy passer has to be before the race is still ours.
+  //
+  // This whole block used to be one line - "if (steps <= ours) return false" -
+  // and the number in it was never measured, because none of the 788 shipped
+  // positions is a pawn ending and this detector had therefore never been run
+  // against anything. tools/pawn_endings.js generates them and
+  // tools/verify_breakthrough.py checks the claims against Syzygy, where a pawn
+  // ending of seven men or fewer is decided rather than estimated. On 20,000
+  // random pawn endings, scored over the first 24 tablebase-decidable claims:
+  //
+  //   margin 0   fires on 15.7%   22 of 30 right
+  //   margin 1   fires on 10.3%   19 of 24 right
+  //   margin 2   fires on  6.1%   22 of 24 right   <- this
+  //   margin 3   fires on  4.1%   22 of 24 right
+  //   no enemy passer allowed at all: 0.7%, 20 of 23 - and it DELETES the
+  //     canonical pattern, because in a real breakthrough BOTH sides get a
+  //     passer and the whole point is that ours is faster.
+  //
+  // Two is not a fitted number, it is the chess. Promoting one move before the
+  // defender is not winning: Syzygy calls `8/8/2K4P/1p6/4p3/8/k4P2/8 w` a DRAW
+  // after 1.f3 exf3 2.h7 f2 3.h8=Q f1=Q. Two tempi is the difference between a
+  // queen and a queen ENDING - the free move that lets the new queen stop the
+  // other pawn.
+  //
+  // ORDER MATTERS, and getting it wrong deleted the textbook pattern. Speed is
+  // asked FIRST: a passer comfortably slower than ours is irrelevant and costs
+  // the king nothing. Only a passer fast enough to matter is charged to the
+  // king, and one king cannot be charged twice - on
+  // `3K4/p7/2p5/4P3/1P2k3/8/P7/8 b` this dismissed White's a5, a2 AND e5 as
+  // individually catchable by one black king on e4 and returned true, where
+  // Syzygy says the offering side is LOST. Asking the king question first
+  // instead counted the two hopeless black pawns in the classic
+  // three-against-three - five steps against our two - as two calls on the king
+  // and refused 1.b6, the position the concept is named for.
+  const MARGIN = 2;
+  let kingMustCatch = 0;
   for (const name of theirs.passed) {
     const i = sqIndex(name);
     const steps = Math.abs(rowOf(i) - theirPromoRow);
     const queenSq = idx(theirPromoRow, colOf(i));
     const ourTempo = st.turn === colour ? 0 : 1;
-    if (dist(ok, queenSq) - ourTempo <= steps) continue;      // we catch it
-    if (steps <= ours) return false;                          // they are not slower
+    if (steps > ours + MARGIN) continue;                      // comfortably slower
+    if (dist(ok, queenSq) - ourTempo <= steps) {              // fast, but we catch it
+      kingMustCatch++;
+      if (kingMustCatch > 1) return false;
+      continue;
+    }
+    return false;                                             // fast and uncatchable
   }
   return true;
 }

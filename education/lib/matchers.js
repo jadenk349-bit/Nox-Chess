@@ -127,8 +127,11 @@ const PRIORITY = [
   //     of a corpus that is one third endgames, not of the concept saying
   //     little; and
   //   pawn-breakthrough, whose 0.0% is not rarity but scope: it only runs in
-  //     pure pawn endings, of which the 788 contain none, and where it does
-  //     fire it is a PROOF by the rule of the square.
+  //     pure pawn endings, of which the 788 contain none. That claim has since
+  //     been tested by generating pawn endings and checking the claims against
+  //     Syzygy — it fires on 6.1% of random ones and is right 22 times in 24,
+  //     which is why it is no longer described here or anywhere else as a
+  //     PROOF, and why it now reports at medium rather than high.
   //   ...and, measured the same way when they were added: exchange-sacrifice
   //   1.3%, sacrifice 14.5%, battery 24.4%, blockade 27.3%.
   'pawn-breakthrough', 'exchange-sacrifice', 'king-attack', 'outpost',
@@ -989,7 +992,10 @@ const STRUCTURAL = [
     concept: 'pawn-breakthrough',
     implements: ("recognition.preconditions + the record's own false-positive trap: a pawn sacrifice " +
                  "that creates a passer is not a breakthrough unless the passer cannot be stopped, and " +
-                 "the rule of the square decides that. Layer 3's pawnBreakthrough() runs the race."),
+                 "the rule of the square is what this base has to decide it with. Layer 3's " +
+                 "pawnBreakthrough() runs the race. MEASURED against Syzygy on 24 tablebase-decidable " +
+                 "pawn endings: 22 right, 2 wrong. It is an indication, not a proof, and the " +
+                 "confidence and the wording say so."),
     run(f) {
       const hits = [];
       for (const c of ['w', 'b']) if (f.breakthrough && f.breakthrough[c]) hits.push(c);
@@ -998,14 +1004,20 @@ const STRUCTURAL = [
       const bt = f.breakthrough[c];
       const sq = bt.first.slice(2, 4);
       return {
-        // High rather than medium, and the reason is epistemic rather than
-        // enthusiastic: in the pure pawn ending this detector restricts itself
-        // to, the rule of the square is a PROOF. The confidence ceiling for the
-        // record's knowledge type still applies on top of this.
-        confidence: 'high',
+        // MEDIUM, and it used to be high on the grounds that "in the pure pawn
+        // ending this detector restricts itself to, the rule of the square is a
+        // PROOF". It is not. Generating pawn endings - which the 788 shipped
+        // positions contain none of - and checking the claims against Syzygy
+        // gives 22 right of 24 at the margin finally chosen, and the two
+        // failures are the method's limit rather than bugs: a pawn that is not
+        // PASSED can still queen after an exchange, and the arithmetic of a
+        // multi-pawn race is not decidable by the rule of the square. Two real
+        // bugs were found on the way and both are fixed.
+        confidence: 'medium',
         because: [
-          `${side(f, c)} can play a pawn to ${sq}, which cannot be declined without letting it through ` +
-          `and which loses the race for the defender however it is captured: ${bt.line.join(' ')}`,
+          `${side(f, c)} can play a pawn to ${sq}, and by the rule of the square every pawn capture of ` +
+          `it loses the race: ${bt.line.join(' ')}. In a multi-pawn ending that is an indication rather ` +
+          `than a proof — checked against tablebases, this reading is right about nine times in ten`,
           bt.offers > 1
             ? `The advance creates ${bt.offers} pawn captures at once, which is the lever geometry the pattern needs`
             : `The advance offers itself to a pawn capture, and every capture loses`,
