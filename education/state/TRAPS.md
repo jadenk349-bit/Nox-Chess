@@ -13,24 +13,24 @@ implemented; that is a reading, and doing it is the work. What it can do is
 stop the list being rediscovered from scratch each time — and every one of
 the defects listed in the tool's header was unread before it was looked at.
 
-**67 of 108 cited. 41 unread.**
+**72 of 108 cited. 36 unread.**
 
 ## doubled-pawns
 
-- [layer 3] REGISTERED FALSE POSITIVE: doubled pawns are not automatically weak. Detecting them is trivial; concluding weakness from the detection is wrong often enough to be a real hazard.
-- [**unread**] The compensation is usually invisible to a structure check — the bishop pair and the opened file are elsewhere on the board.
-- [**unread**] Doubled CENTRAL pawns are frequently an asset, controlling four squares between them.
+- [cited] REGISTERED FALSE POSITIVE: doubled pawns are not automatically weak. Detecting them is trivial; concluding weakness from the detection is wrong often enough to be a real hazard.
+- [cited] The compensation is usually invisible to a structure check — the bishop pair and the opened file are elsewhere on the board.
+- [cited] Doubled CENTRAL pawns are frequently an asset, controlling four squares between them.
 ## isolated-queen-pawn
 
-- [**unread**] REGISTERED FALSE POSITIVE: an isolated pawn is not automatically a weakness. In the middlegame it is frequently the source of the better side's whole game.
+- [cited] REGISTERED FALSE POSITIVE: an isolated pawn is not automatically a weakness. In the middlegame it is frequently the source of the better side's whole game.
 - [**unread**] The structure is trivially detectable and says almost nothing on its own — the material left on the board decides the evaluation more than the structure does.
 - [**unread**] Reporting it as a weakness while its owner has the initiative inverts the position.
 - [cited] An isolated queen's pawn is not a weakness on sight. In the standard position measured here the side with the isolani is slightly better (+0.14).
 ## passed-pawn
 
 - [cited] REGISTERED FALSE POSITIVE: a passed pawn is not automatically an advantage. A permanently blockaded passer that must be defended is a liability, and the blockading square is an excellent one for the defender.
-- [**unread**] Detecting a passer is trivial and fires constantly in endgames. Reporting one is only informative alongside whether it can actually advance.
-- [**unread**] A passer created from doubled pawns is often born weak.
+- [cited] Detecting a passer is trivial and fires constantly in endgames. Reporting one is only informative alongside whether it can actually advance.
+- [cited] A passer created from doubled pawns is often born weak.
 ## backward-pawn
 
 - [**unread**] A pawn that is merely behind its neighbours but CAN advance safely is not backward in the operative sense.

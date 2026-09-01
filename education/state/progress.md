@@ -1231,3 +1231,30 @@ centralise a king while the opponent has a queen", which the phase test enforces
 because `phaseOf()` requires no queens. One is genuinely open and now says so on
 its record: `restraint` cannot "name the advance being prevented" and reports a
 count instead.
+
+
+## A third kind of answer to a trap: say more, rather than fire less
+
+Working down the reading list, two of the highest-firing concepts turned out to
+have traps that ask for **information** rather than for silence — and both had
+been read as if they asked for a guard.
+
+`passed-pawn` fires on 60.4% and leads 128 times. Its record: *"detecting a
+passer is trivial and fires constantly in endgames. Reporting one is only
+informative alongside whether it can actually advance."* A passer that cannot
+move today is still a passer, so the rate is unchanged and the **sentence** now
+carries the other half — the push is tried and whether it survives is said out
+loud — plus the second trap, *"a passer created from doubled pawns is often born
+weak"*, readable straight off the structure.
+
+`doubled-pawns` reported the structure and stopped, which invites exactly the
+conclusion its first trap forbids. Both compensations the record names are
+visible from the board and both are now said: a central pair "controls four
+squares between them", and a side holding the bishop pair has its compensation
+off the pawn structure. Nothing there says "weak", and `test_explanations.js`
+enforces that.
+
+Saying the rate did not move is the honest report on both. With a firing-rate
+metric in front of you the temptation is to answer every trap with a guard.
+
+**72 of 108 traps cited, 36 unread.**

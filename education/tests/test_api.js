@@ -1144,6 +1144,56 @@ const { concepts } = API.knowledge();
      !!r7(cr.fen_after || cr.fen) || !!r7(cr.fen));
 }
 
+{
+  // passed-pawn is the most-reported concept in the base at 60.4%, and its
+  // record's first trap says why that is not enough: "detecting a passer is
+  // trivial and fires constantly in endgames. Reporting one is only informative
+  // alongside whether it can actually advance." Note what the trap asks for -
+  // information, not silence. A passer that cannot move today is still a passer.
+  const pp = fen => {
+    const a = API.analyzeWithEducation({ fen });
+    const c = a.concepts.find(x => x.id === 'passed-pawn');
+    return c ? (c.because || [''])[0] : null;
+  };
+  ok('passed-pawn: says when the passer cannot advance',
+     /cannot advance without being taken/.test(String(pp('6k1/8/8/1n1P4/8/8/8/4K3 w - - 0 1'))),
+     String(pp('6k1/8/8/1n1P4/8/8/8/4K3 w - - 0 1')));
+  ok('passed-pawn: a free passer is still reported plainly',
+     pp('8/8/8/3P4/8/8/8/4K1k1 w - - 0 1') === 'White has a passed pawn on d5',
+     String(pp('8/8/8/3P4/8/8/8/4K1k1 w - - 0 1')));
+  // "A passer created from doubled pawns is often born weak" - the second trap,
+  // and a fact readable straight off the structure.
+  ok('passed-pawn: names a passer born of a doubled pair',
+     /doubled, which is how a passer is born weak/.test(
+       String(pp('8/8/8/3P4/3P4/8/8/4K1k1 w - - 0 1'))),
+     String(pp('8/8/8/3P4/3P4/8/8/4K1k1 w - - 0 1')));
+  // The concept is not suppressed by any of this: the rate is unchanged and
+  // saying it moved would be the wrong claim about a wording change.
+  ok('passed-pawn: the rate is unchanged and the source says so',
+     /60\.4%/.test(fs.readFileSync(path.join(ROOT, 'lib', 'matchers.js'), 'utf8')));
+}
+
+{
+  // doubled-pawns reported the structure and stopped, which invites exactly the
+  // conclusion its record's first trap forbids: "doubled pawns are not
+  // automatically weak. Detecting them is trivial; concluding weakness from the
+  // detection is wrong often." Both compensations the record names are visible
+  // from the board, so both are now said.
+  const dp = fen => {
+    const c = API.analyzeWithEducation({ fen }).concepts.find(x => x.id === 'doubled-pawns');
+    return c ? (c.because || [''])[0] : null;
+  };
+  const central = dp('rnbqkbnr/pp3ppp/4p3/8/8/3PP3/PP1P1PPP/RNBQKBNR w KQkq - 0 1');
+  ok('doubled-pawns: names a central pair as controlling four squares',
+     /central, and a central pair controls four squares between them/.test(String(central)),
+     String(central));
+  const withPair = dp('4k3/pp3ppp/8/8/8/3PP3/PP1P1PPP/2B1KB2 w - - 0 1');
+  ok('doubled-pawns: names the bishop pair as the compensation off the structure',
+     /the compensation is off the pawn structure/.test(String(withPair)), String(withPair));
+  ok('doubled-pawns: still says nothing about weakness',
+     !/weak/.test(String(central) + String(withPair)));
+}
+
 /* ---------- report ---------- */
 console.log(`\nAPI  PASS ${pass}   FAIL ${fails.length}`);
 for (const [n, d] of fails) console.log(`  FAIL  ${n}\n        ${d}`);

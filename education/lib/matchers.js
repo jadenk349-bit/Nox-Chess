@@ -197,14 +197,33 @@ function shutInByItsOwnPawns(b) {
 const STRUCTURAL = [
   {
     concept: 'doubled-pawns',
-    implements: "recognition.preconditions: two or more pawns of one colour on a file",
+    implements: ("recognition.preconditions: two or more pawns of one colour on a file - and the " +
+                 "record's three traps, which are all about not drawing the obvious conclusion: " +
+                 "\"doubled pawns are not automatically weak\", \"the compensation is usually " +
+                 "invisible to a structure check - the bishop pair and the opened file are elsewhere " +
+                 "on the board\", and \"doubled CENTRAL pawns are frequently an asset, controlling " +
+                 "four squares between them\"."),
     run(f) {
       const hits = [];
       for (const c of ['w', 'b']) if (f.pawns[c].doubled.length) hits.push({ c, sq: f.pawns[c].doubled });
       if (!hits.length) return null;
       return {
         confidence: 'high',
-        because: hits.map(h => `${side(f, h.c)} has doubled pawns on ${h.sq.join(', ')}`),
+        because: hits.map(h => {
+          let line = `${side(f, h.c)} has doubled pawns on ${h.sq.join(', ')}`;
+          // Both of the compensations the record names are visible from here,
+          // and the reason to say them is that a bare structure report invites
+          // exactly the conclusion the record's first trap forbids.
+          const central = h.sq.filter(sq => sq[0] === 'd' || sq[0] === 'e');
+          if (central.length >= 2) line += ' — central, and a central pair controls four squares between them';
+          if (f.pieces[h.c].bishopPair && !f.pieces[other(h.c)].bishopPair) {
+            line += '; the compensation is off the pawn structure — they hold the bishop pair';
+          }
+          const semi = f.files.semiOpenFor[h.c] || [];
+          const near = semi.filter(fl => h.sq.some(sq => Math.abs(fl.charCodeAt(0) - sq.charCodeAt(0)) === 1));
+          if (near.length) line += `; and the ${brief(near)} file beside them is half-open for them`;
+          return line;
+        }),
         slots: { file: hits[0].sq[0][0], square: hits[0].sq.join(', ') },
         subjects: hits.map(h => h.c),
       };
@@ -229,6 +248,14 @@ const STRUCTURAL = [
         if (d.length) hits.push({ c, sq: d });
       }
       if (!hits.length) return null;
+      // The sentence deliberately reports the STRUCTURE and not a verdict, and
+      // the wording layer supplies the record's two-sided reading. That is this
+      // record's registered false positive: "an isolated pawn is not
+      // automatically a weakness. In the middlegame it is frequently the source
+      // of the better side's whole game", and again, measured: "an isolated
+      // queen's pawn is not a weakness on sight. In the standard position
+      // measured here the side with the isolani is slightly better (+0.14)."
+      // Nothing here may say "weak"; test_explanations.js enforces that.
       return {
         confidence: 'high',
         because: hits.map(h => `${side(f, h.c)} has an isolated pawn on ${h.sq.join(', ')} with no friendly pawn on the c- or e-file`),
@@ -239,7 +266,9 @@ const STRUCTURAL = [
   },
   {
     concept: 'passed-pawn',
-    implements: "recognition.preconditions: no enemy pawn ahead on its file or either adjacent file",
+    implements: ("recognition.preconditions: no enemy pawn ahead on its file or either adjacent file " +
+                 "- plus the record's first two traps, which ask for information rather than for " +
+                 "silence: whether it can actually advance, and whether it was born of a doubled pair."),
     run(f) {
       const hits = [];
       for (const c of ['w', 'b']) {
@@ -253,9 +282,42 @@ const STRUCTURAL = [
         if (live.length) hits.push({ c, sq: live });
       }
       if (!hits.length) return null;
+      // "Detecting a passer is trivial and fires constantly in endgames.
+      // Reporting one is only informative alongside whether it can actually
+      // advance." That is the record's first trap, and note what it asks for:
+      // not that the concept be suppressed - a passer that cannot move today is
+      // still a passer, and this is the most-reported concept in the base at
+      // 60.4% for a reason - but that the sentence carry the other half. So the
+      // push is tried, and whether it survives is said out loud.
+      const P = FEAT.page;
+      const st = P.stateFromFEN(f.fen);
+      const canAdvance = (c, sq) => {
+        const probe = P.cloneState(st); probe.turn = c; probe.ep = null;
+        let ms; try { ms = P.legalMoves(probe); } catch (e) { return null; }
+        const from = (8 - Number(sq[1])) * 8 + (sq.charCodeAt(0) - 97);
+        const push = ms.find(m => m.from === from && (m.to & 7) === (from & 7));
+        if (!push) return false;
+        const nx = P.makeMove(probe, push);
+        return P.see(nx, push.to, other(c)) <= 0;
+      };
+      // "A passer created from doubled pawns is often born weak" - the second
+      // trap, and a fact this base can read straight off the structure.
+      const doubled = c => new Set(f.pawns[c].doubled || []);
       return {
         confidence: 'high',
-        because: hits.map(h => `${side(f, h.c)} has a passed pawn on ${brief(h.sq)}`),
+        because: hits.map(h => {
+          const moving = h.sq.filter(sq => canAdvance(h.c, sq));
+          const born = h.sq.filter(sq => doubled(h.c).has(sq));
+          let line = `${side(f, h.c)} has a passed pawn on ${brief(h.sq)}`;
+          if (!moving.length) line += ', which cannot advance without being taken';
+          else if (moving.length < h.sq.length) line += `, of which ${brief(moving)} can safely advance`;
+          if (born.length) {
+            line += born.length === 1
+              ? `; the one on ${born[0]} is half of a doubled pair, which is how a passer is born weak`
+              : `; ${brief(born)} are doubled, which is how a passer is born weak`;
+          }
+          return line;
+        }),
         slots: { square: hits[0].sq[0] },
         subjects: hits.map(h => h.c),
       };
