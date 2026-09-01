@@ -37,6 +37,13 @@ const only = args.includes('--concept') ? args[args.indexOf('--concept') + 1] : 
 const openOnly = args.includes('--unread') || args.includes('--open');
 const mdOut = args.includes('--markdown') ? args[args.indexOf('--markdown') + 1] : null;
 
+// Half the guards live in Layer 3, not in the matcher: the fianchetto trap for
+// `weak-square` is enforced in reachableHoles() and quoted in a comment there.
+// Searching only lib/matchers.js therefore reports work that has been done as
+// unread, which is the one way this list can mislead in the direction that
+// wastes time. features.js is a shared file, so it counts at a higher bar.
+const LAYER3_RAW = fs.readFileSync(path.join(__dirname, '..', 'lib', 'features.js'), 'utf8');
+
 const recs = {};
 for (const dir of fs.readdirSync(path.join(ROOT, 'concepts'))) {
   const d = path.join(ROOT, 'concepts', dir);
@@ -48,14 +55,28 @@ for (const dir of fs.readdirSync(path.join(ROOT, 'concepts'))) {
   }
 }
 
-// Words distinctive enough that finding one in the matcher is evidence the trap
-// was read, and common enough to appear in a comment written about it. Stop
-// words are stripped so "the" does not match everything.
-const STOP = new Set(('a an and are as at be by can do does for from has have in is it its no not of on ' +
-  'one only or that the their them there they this to two was what when which will with you your ' +
-  'if but so than then more most less least any all every each other than very much such').split(' '));
-const keywords = t => [...new Set(String(t).toLowerCase().match(/[a-z][a-z-]{3,}/g) || [])]
-  .filter(w => !STOP.has(w));
+// What counts as evidence that a trap has been read.
+//
+// The first version scored keyword OVERLAP, and it was wrong in both directions
+// at once: it missed guards that live in Layer 3 rather than in the matcher, and
+// when Layer 3 was added at a keyword threshold it credited 40 traps at a
+// stroke, which is the shape of a metric flattering itself. A shared 1000-line
+// file will contain half of any sentence's words by accident.
+//
+// So the test is QUOTATION. This project's habit, everywhere, is to quote the
+// condition it is implementing in the comment beside it — the seven fixes found
+// by this method all read that way. A four-word run from the trap appearing in
+// the code is something someone did on purpose; a bag of words is not.
+const norm = t => String(t).toLowerCase().replace(/[^a-z0-9]+/g, ' ').replace(/\s+/g, ' ').trim();
+const shingles = (t, n = 4) => {
+  const w = norm(t).split(' ');
+  const out = [];
+  for (let i = 0; i + n <= w.length; i++) out.push(w.slice(i, i + n).join(' '));
+  return out;
+};
+const quoted = (trap, hay) => shingles(trap).some(sh => hay.includes(sh));
+
+const L3 = norm(LAYER3_RAW);
 
 // A concept may have more than one matcher (king-safety has three arms), so the
 // evidence for a trap is all of them together, and each trap is listed once.
@@ -75,22 +96,19 @@ for (const m of MATCH.STRUCTURAL.concat(MATCH.MOVE_BASED)) {
   if (!traps.length) continue;
   if (done.has(m.concept)) continue;
   done.add(m.concept);
-  const text = bodies[m.concept].toLowerCase();
-  const limits = JSON.stringify(rec.limitations || []).toLowerCase();
+  const text = norm(bodies[m.concept]);
+  const limits = norm(JSON.stringify(rec.limitations || []));
   for (const trap of traps) {
-    const ks = keywords(trap);
-    // A trap is addressed when a good share of its distinctive words appear in
-    // the matcher, or when the record says in its limitations that it cannot be
-    // built. Both are deliberate acts; neither happens by accident.
-    const hitM = ks.filter(w => text.includes(w)).length / (ks.length || 1);
-    const hitL = ks.filter(w => limits.includes(w)).length / (ks.length || 1);
+
+    const hitM = quoted(trap, text), hitL = quoted(trap, limits), hit3 = quoted(trap, L3);
     // This is a reading list, not a verdict. "cited" means the trap has been
     // written about somewhere it would be enforced or excused; "unread" means
     // nobody has written down whether it is implemented, which is true whether
     // or not it happens to be. Every one of the seven defects listed above was
     // in the second group before it was looked at.
-    const verdict = hitM >= 0.4 ? 'in the matcher'
-                  : hitL >= 0.4 ? 'recorded as unbuildable'
+    const verdict = hitM ? 'in the matcher'
+                  : hit3 ? 'in Layer 3'
+                  : hitL ? 'recorded as unbuildable'
                   : 'unread';
     rows.push({ concept: m.concept, trap, verdict, hitM, hitL });
   }
@@ -102,7 +120,9 @@ let last = null;
 console.log(`\nTRAP AUDIT — ${rows.length} stated traps across ${new Set(rows.map(r => r.concept)).size} matchers\n`);
 for (const r of show) {
   if (r.concept !== last) { console.log(`  ${r.concept}`); last = r.concept; }
-  const tag = r.verdict === 'unread' ? 'UNREAD' : r.verdict === 'in the matcher' ? 'cited ' : 'noted ';
+  const tag = r.verdict === 'unread' ? 'UNREAD'
+            : r.verdict === 'in the matcher' ? 'cited '
+            : r.verdict === 'in Layer 3' ? 'layer3' : 'noted ';
   console.log(`    [${tag}] ${r.trap.replace(/\s+/g, ' ').slice(0, 150)}${r.trap.length > 150 ? '…' : ''}`);
 }
 console.log(`\n  cited ${rows.length - open.length}/${rows.length}   UNREAD ${open.length}` +
@@ -125,7 +145,9 @@ if (mdOut) {
   let cur = null;
   for (const r of rows) {
     if (r.concept !== cur) { lines.push(`## ${r.concept}`, ''); cur = r.concept; }
-    const tag = r.verdict === 'unread' ? '**unread**' : r.verdict === 'in the matcher' ? 'cited' : 'noted';
+    const tag = r.verdict === 'unread' ? '**unread**'
+              : r.verdict === 'in the matcher' ? 'cited'
+              : r.verdict === 'in Layer 3' ? 'layer 3' : 'noted';
     lines.push(`- [${tag}] ${r.trap.replace(/\s+/g, ' ')}`);
   }
   lines.push('');

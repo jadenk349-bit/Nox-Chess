@@ -1202,3 +1202,32 @@ the eight defects found by this method was in the second group before someone
 read it. The tool is deliberately a reading list and not a verdict — deciding
 whether a trap is correctly implemented is the work, and the tool's job is only
 to stop the list being rediscovered from scratch each session.
+
+
+## The reading list paid for itself, then caught itself flattering
+
+`tools/trap_audit.js` first scored keyword **overlap** and reported 75 of 122
+traps unread. Adding `lib/features.js` as a second place to look — correctly,
+since half the guards live in Layer 3 — took it to **10 unread at a stroke**,
+which is the shape of a metric flattering itself: a shared thousand-line file
+contains half of any sentence's words by accident.
+
+The test is now **quotation** — a four-word run from the trap appearing in the
+code — because quoting the condition beside the guard is what this project
+actually does, and a bag of words is not something anyone did on purpose. **67
+of 108 cited, 41 unread.**
+
+Working the first few items found one real defect. `rook-on-the-seventh`
+reported the geometry and nothing else, which is its own third trap word for
+word: *"detecting 'rook on rank 7' is trivial and fires often; the reportable
+facts are what it ATTACKS and whether the KING is trapped."* It now requires one
+of the two and the sentence says which — 12.8% → **10.7%**, leading 26 times
+instead of 36, with the corpus's annotated instance (Capablanca–Rubinstein 1928,
+23.Re7) still leading.
+
+Three more turned out to be implemented and merely unquoted: `open-file`'s entry
+square, `semi-open-file`'s both-sides rule, and `king-activation`'s "never
+centralise a king while the opponent has a queen", which the phase test enforces
+because `phaseOf()` requires no queens. One is genuinely open and now says so on
+its record: `restraint` cannot "name the advance being prevented" and reports a
+count instead.

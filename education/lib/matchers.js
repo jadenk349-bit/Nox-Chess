@@ -288,7 +288,10 @@ const STRUCTURAL = [
       if (!f.files.open.length || totalHeavy(f) === 0) return null;
       // ...and the record's REGISTERED false positive, which had never been
       // implemented: "a file with no pawns is not automatically useful. Without
-      // an entry square, a rook on it accomplishes nothing." Requiring a rook on
+      // an entry square, a rook on it accomplishes nothing." The same record
+      // says it again as a trap: "detecting 'no pawns on this file' is trivial
+      // and fires constantly. The reportable fact is the file PLUS a usable
+      // entry square." Requiring a rook on
       // the file took this from 61% to 55.7%; requiring the rook to be able to
       // ENTER - a legal move down the file into the opponent's half after which
       // static exchange evaluation does not win it - takes it to 35.5%, and it
@@ -355,7 +358,14 @@ const STRUCTURAL = [
       if (!hits.length) return null;
       // Firing on 83% of tested positions before this guard. Nearly every
       // position has a semi-open file somewhere; what is worth reporting is one
-      // a rook is actually using.
+      // a rook is actually using. The record says it in these words: "a
+      // semi-open file is a fact about pawns; whether it produces pressure
+      // depends on whether the target is fixed and whether you can attack it
+      // more times than it can be defended." A rook on the file is the first
+      // half of that and is the half a static scan can answer.
+      // ...and BOTH sides, which is the record's second trap: "both sides can
+      // have semi-open files, usually on opposite wings, and each will be
+      // attacking on their own. Reporting only one side's is half the position."
       const withRook = hits.filter(h => h.rooks.length);
       if (!withRook.length) return null;
       const lead = withRook[0];
@@ -628,14 +638,44 @@ const STRUCTURAL = [
   },
   {
     concept: 'rook-on-the-seventh',
-    implements: "recognition.preconditions: a rook on the opponent's second rank",
+    implements: ("recognition.preconditions: a rook on the opponent's second rank - AND the record's " +
+                 "third trap, which the earlier version ignored: \"detecting 'rook on rank 7' is " +
+                 "trivial and fires often; the reportable facts are what it attacks and whether the " +
+                 "king is trapped.\" One of those two must be true."),
     run(f) {
+      const P = FEAT.page;
+      const st = P.stateFromFEN(f.fen);
       const hits = [];
-      for (const c of ['w', 'b']) if (f.pieces[c].rooksOnSeventh.length) hits.push({ c, r: f.pieces[c].rooksOnSeventh });
+      for (const c of ['w', 'b']) {
+        const rooks = f.pieces[c].rooksOnSeventh;
+        if (!rooks.length) continue;
+        // "A rook reaching the seventh is not decisive by itself. With an empty
+        // seventh rank and an enemy king that has luft, a tested position
+        // evaluates level" - the record's fourth trap, measured on its own
+        // registered position. So the rook has to be doing one of the two things
+        // the record names: attacking something on that rank, or holding the
+        // enemy king on its back rank.
+        const rank = c === 'w' ? 1 : 6;                 // row index of the seventh
+        const targets = [];
+        for (let col = 0; col < 8; col++) {
+          const i = rank * 8 + col;
+          const q = st.b[i];
+          if (q && q.c === other(c) && q.t !== 'K') targets.push(FEAT.nameOf(i));
+        }
+        const k = f.king[other(c)];
+        const confined = !!k && k.onHomeRank;
+        if (!targets.length && !confined) continue;
+        hits.push({ c, r: rooks, targets, confined });
+      }
       if (!hits.length) return null;
       return {
         confidence: 'high',
-        because: hits.map(h => `${side(f, h.c)} has a rook on ${h.r.join(' and ')}, on the rank the enemy pawns start on`),
+        because: hits.map(h => {
+          const what = h.targets.length
+            ? `attacking ${brief(h.targets, 3)}` + (h.confined ? ', with the king held on its back rank' : '')
+            : 'holding the enemy king on its back rank';
+          return `${side(f, h.c)} has a rook on ${h.r.join(' and ')}, ${what}`;
+        }),
         slots: { square: hits[0].r[0] },
         subjects: hits.map(h => h.c),
       };
@@ -1339,6 +1379,12 @@ const STRUCTURAL = [
     run(f) {
       // With no pawns there is nothing for an active king to attack or escort,
       // and the concept's whole content is about what the king does once there.
+      //
+      // The phase test also carries the record's strongest instruction, which is
+      // worth stating so it is not lost in a refactor: "never recommend
+      // centralising a king while the opponent has a queen, whatever the piece
+      // count says." phaseOf() returns 'endgame' only with NO queens on the
+      // board, so requiring the endgame is what enforces it here.
       if (f.phase !== 'endgame' || totalPawns(f) === 0) return null;
       const hits = [];
       for (const c of ['w', 'b']) if (f.king[c] && !f.king[c].onHomeRank) hits.push(c);

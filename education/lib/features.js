@@ -455,6 +455,10 @@ function reachableHoles(st, colour) {
   try { moves = P.legalMoves(probe); } catch (e) { return []; }
   const out = new Set();
   for (const m of moves) {
+    // Minor pieces only, and that is the record's third trap rather than a
+    // convenience: "a weak square only a queen can occupy is usually not a
+    // weakness, since cheaper pieces evict her." A rook on a hole is evicted by
+    // a minor piece for the same reason.
     const piece = probe.b[m.from];
     if (!piece || (piece.t !== 'N' && piece.t !== 'B')) continue;
     const sq = nameOf(m.to);

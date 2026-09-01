@@ -1112,6 +1112,38 @@ const { concepts } = API.knowledge();
      /READING LIST, not a verdict/.test(traps));
 }
 
+{
+  // rook-on-the-seventh reported the geometry and nothing else, which is the
+  // record's third trap word for word: "detecting 'rook on rank 7' is trivial
+  // and fires often; the reportable facts are what it ATTACKS and whether the
+  // KING is trapped." One of those two is now required. 12.8% -> 10.7%.
+  const r7 = fen => {
+    const a = API.analyzeWithEducation({ fen });
+    const c = a.concepts_all.find(x => x.id === 'rook-on-the-seventh');
+    return c ? ((a.concepts.find(x => x.id === 'rook-on-the-seventh') || {}).because || [''])[0] : null;
+  };
+  // Nothing on the seventh, and a king with luft: the record's own registered
+  // position for this, which it says "evaluates level".
+  ok('rook-on-the-seventh: silent on an empty seventh with a king off its back rank',
+     !r7('8/1R6/6k1/6pp/8/7P/6P1/6K1 w - - 0 1'), String(r7('8/1R6/6k1/6pp/8/7P/6P1/6K1 w - - 0 1')));
+  // Pawns on the seventh rank to attack.
+  const atk = r7('6k1/pR4pp/8/8/8/7P/6P1/6K1 w - - 0 1');
+  ok('rook-on-the-seventh: reported when it attacks something there', !!atk, String(atk));
+  ok('...and the sentence says what it attacks', /attacking a7/.test(String(atk)), String(atk));
+  // A king held on its back rank, nothing to attack.
+  const conf = r7('6k1/1R6/6pp/8/8/7P/6P1/6K1 w - - 0 1');
+  ok('rook-on-the-seventh: reported when the king is held on the back rank', !!conf, String(conf));
+  ok('...and the sentence says so', /holding the enemy king on its back rank/.test(String(conf)), String(conf));
+
+  // The corpus's own annotated instance must survive: Capablanca-Rubinstein
+  // 1928, 23.Re7, where the concept is the annotated one and leads.
+  const corpus = JSON.parse(fs.readFileSync(
+    path.join(ROOT, 'corpus', 'annotated_positions.json'), 'utf8')).positions;
+  const cr = corpus.find(p => p.id === 'capablanca-rubinstein-1928-23Re7-rook-on-the-seventh');
+  ok('rook-on-the-seventh: the annotated master instance still fires',
+     !!r7(cr.fen_after || cr.fen) || !!r7(cr.fen));
+}
+
 /* ---------- report ---------- */
 console.log(`\nAPI  PASS ${pass}   FAIL ${fails.length}`);
 for (const [n, d] of fails) console.log(`  FAIL  ${n}\n        ${d}`);
