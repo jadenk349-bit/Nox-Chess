@@ -122,7 +122,16 @@
     ],
     "conflicts": []
   },
-  "examples": [],
+  "examples": [
+    {
+      "fen": "4r1k1/1b3pb1/pq4pp/3pr3/3p4/1P1B2P1/P2N1P1P/2RQR1K1 w - - 0 31",
+      "game": "Kotov-Petrosian, Candidates, Zurich 1953",
+      "note": "A QUIET position from a master game — after Rxe5, ply 60 — in which the c- and e-files are open, and White's rook on c1 and White's rook on e1 and Black's rook on e8 and Black's rook on e5 stand on it. Quiet here has a mechanical meaning: the side to move has no check and no capture that wins material, so the next move has to be chosen on positional grounds. That matters because this base's other corpus is 788 tactical puzzles, in which a positional feature cannot be isolated.\n\nWHAT IS VERIFIED: the game replays legally end to end through the page's own move generator, so the FEN is derived rather than transcribed; and the feature is present by mechanical measurement in lib/features.js.\n\nWHAT IS NOT CLAIMED: that the concept decides this position, or that the players were thinking about it. Note also a limitation of method — the position was FOUND by this system's own Layer 4, so it demonstrates the concept and cannot by itself validate the matcher that found it. Other concepts licensed here: passed-pawn, isolated-queen-pawn, doubled-pawns, bishop-pair.",
+      "origin_kind": "historical-game",
+      "concept_role": "supports",
+      "side_to_move_benefits": "neither"
+    }
+  ],
   "counterexamples": [
     {
       "fen": "3rk3/ppp1ppp1/8/8/8/8/PPP1PPP1/3RK3 w - - 0 1",
@@ -207,7 +216,8 @@
     "nimzowitsch-my-system",
     "chessprogramming-rook-open-file",
     "thechessworld-rooks-open-files",
-    "chessworld-weaknesses-outposts"
+    "chessworld-weaknesses-outposts",
+    "zurich-1953-games"
   ],
   "source_confidence": "high"
 }

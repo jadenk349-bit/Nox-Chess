@@ -137,6 +137,14 @@
         "category": "draw",
         "note": "PROVEN draw two pawns down. This is the concept's central claim demonstrated rather than asserted: two extra connected pawns, well advanced, and the blockade on the defending bishop's colour holds it. Note the tablebase's own best move is d6+, which also draws — there is simply nothing to be done."
       }
+    },
+    {
+      "fen": "3k4/1p3bB1/2p1p2p/2P4P/5PP1/6K1/8/8 b - - 1 59",
+      "game": "Petrosian-Euwe, Candidates, Zurich 1953",
+      "note": "A QUIET position from a master game — after Bg7, ply 117 — in which each side has one bishop and they travel on opposite square colours, so neither can attack or defend the other’s squares. Quiet here has a mechanical meaning: the side to move has no check and no capture that wins material, so the next move has to be chosen on positional grounds. That matters because this base's other corpus is 788 tactical puzzles, in which a positional feature cannot be isolated.\n\nWHAT IS VERIFIED: the game replays legally end to end through the page's own move generator, so the FEN is derived rather than transcribed; and the feature is present by mechanical measurement in lib/features.js.\n\nWHAT IS NOT CLAIMED: that the concept decides this position, or that the players were thinking about it. Note also a limitation of method — the position was FOUND by this system's own Layer 4, so it demonstrates the concept and cannot by itself validate the matcher that found it. Other concepts licensed here: weak-square, king-activation, space.",
+      "origin_kind": "historical-game",
+      "concept_role": "supports",
+      "side_to_move_benefits": "neither"
     }
   ],
   "counterexamples": [
@@ -246,7 +254,8 @@
   "sources": [
     "wikipedia-ocb",
     "wikipedia-wrong-rook-pawn",
-    "lichess-tablebase"
+    "lichess-tablebase",
+    "zurich-1953-games"
   ],
   "source_confidence": "medium"
 }

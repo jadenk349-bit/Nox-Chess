@@ -101,7 +101,16 @@
     ],
     "conflicts": []
   },
-  "examples": [],
+  "examples": [
+    {
+      "fen": "r3r3/2p2q1k/1p1p2pb/3Ppp1p/p1P4P/P4PP1/1PQ1R1NK/4R3 w - - 7 31",
+      "game": "Stahlberg-Petrosian, Candidates, Zurich 1953",
+      "note": "A QUIET position from a master game — after Qf7, ply 60 — in which White has a rook on e2 and e1, on a semi-open file. Quiet here has a mechanical meaning: the side to move has no check and no capture that wins material, so the next move has to be chosen on positional grounds. That matters because this base's other corpus is 788 tactical puzzles, in which a positional feature cannot be isolated.\n\nWHAT IS VERIFIED: the game replays legally end to end through the page's own move generator, so the FEN is derived rather than transcribed; and the feature is present by mechanical measurement in lib/features.js.\n\nWHAT IS NOT CLAIMED: that the concept decides this position, or that the players were thinking about it. Note also a limitation of method — the position was FOUND by this system's own Layer 4, so it demonstrates the concept and cannot by itself validate the matcher that found it. Other concepts licensed here: weak-square, material-imbalance.",
+      "origin_kind": "historical-game",
+      "concept_role": "supports",
+      "side_to_move_benefits": "neither"
+    }
+  ],
   "counterexamples": [],
   "ambiguous_examples": [],
   "explanations": {
@@ -148,7 +157,8 @@
   "sources": [
     "nimzowitsch-my-system",
     "chessprogramming-rook-open-file",
-    "wikipedia-backward-pawn"
+    "wikipedia-backward-pawn",
+    "zurich-1953-games"
   ],
   "source_confidence": "medium"
 }

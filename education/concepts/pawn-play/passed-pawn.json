@@ -154,7 +154,16 @@
       }
     ]
   },
-  "examples": [],
+  "examples": [
+    {
+      "fen": "8/p2PB1pk/1p5p/4q3/6K1/2Pp1P2/6PP/8 w - - 0 48",
+      "game": "Smyslov-Petrosian, Candidates, Zurich 1953",
+      "note": "A QUIET position from a master game — after cxd3, ply 94 — in which White has a passed pawn on d7. Quiet here has a mechanical meaning: the side to move has no check and no capture that wins material, so the next move has to be chosen on positional grounds. That matters because this base's other corpus is 788 tactical puzzles, in which a positional feature cannot be isolated.\n\nWHAT IS VERIFIED: the game replays legally end to end through the page's own move generator, so the FEN is derived rather than transcribed; and the feature is present by mechanical measurement in lib/features.js.\n\nWHAT IS NOT CLAIMED: that the concept decides this position, or that the players were thinking about it. Note also a limitation of method — the position was FOUND by this system's own Layer 4, so it demonstrates the concept and cannot by itself validate the matcher that found it. Other concepts licensed here: isolated-queen-pawn, backward-pawn, weak-square, material-imbalance.",
+      "origin_kind": "historical-game",
+      "concept_role": "supports",
+      "side_to_move_benefits": "neither"
+    }
+  ],
   "counterexamples": [
     {
       "fen": "r7/1p1k2p1/1Ppb2q1/3p3n/pP2P3/5BP1/3NQ2K/7R w - - 3 35",
@@ -267,7 +276,8 @@
   "sources": [
     "wikipedia-passed-pawn",
     "nimzowitsch-my-system",
-    "chesscom-passed-or-weak"
+    "chesscom-passed-or-weak",
+    "zurich-1953-games"
   ],
   "source_confidence": "medium"
 }

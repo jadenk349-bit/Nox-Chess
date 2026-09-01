@@ -100,7 +100,8 @@
     "chessbase-india-bedouin-outpost",
     "romanovsky-middlegame-planning",
     "chessskill-outpost",
-    "steinitz-modern-chess-instructor"
+    "steinitz-modern-chess-instructor",
+    "zurich-1953-games"
   ],
   "source_confidence": "high",
   "recognition": {
@@ -271,6 +272,14 @@
         "verdict": "supports",
         "verdict_note": "Level-2 validation: the position was scored, not designed. It confirms the feature is present in real play and, where the score is near level, that the feature is not drowned out. It is not a controlled pair and proves nothing about the concept on its own."
       }
+    },
+    {
+      "fen": "4q1k1/p5p1/1p5p/5b2/P1pP1Q2/BnP2P2/5KPP/8 w - - 0 29",
+      "game": "Smyslov-Petrosian, Candidates, Zurich 1953",
+      "note": "A QUIET position from a master game — after Bxf5, ply 56 — in which Black's knight on b3 cannot be driven off by a pawn and is defended by one. Quiet here has a mechanical meaning: the side to move has no check and no capture that wins material, so the next move has to be chosen on positional grounds. That matters because this base's other corpus is 788 tactical puzzles, in which a positional feature cannot be isolated.\n\nWHAT IS VERIFIED: the game replays legally end to end through the page's own move generator, so the FEN is derived rather than transcribed; and the feature is present by mechanical measurement in lib/features.js.\n\nWHAT IS NOT CLAIMED: that the concept decides this position, or that the players were thinking about it. Note also a limitation of method — the position was FOUND by this system's own Layer 4, so it demonstrates the concept and cannot by itself validate the matcher that found it. Other concepts licensed here: passed-pawn, opposite-coloured-bishops, weak-square, piece-activity.",
+      "origin_kind": "historical-game",
+      "concept_role": "supports",
+      "side_to_move_benefits": "neither"
     }
   ],
   "counterexamples": [

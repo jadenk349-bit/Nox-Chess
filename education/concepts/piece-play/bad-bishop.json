@@ -143,7 +143,16 @@
     ],
     "conflicts": []
   },
-  "examples": [],
+  "examples": [
+    {
+      "fen": "3q4/1p2kb2/2p1pp1p/2PB4/1P3PPP/2Q1K3/1B6/8 b - - 0 38",
+      "game": "Petrosian-Euwe, Candidates, Zurich 1953",
+      "note": "A QUIET position from a master game — after Bxd5, ply 75 — in which White's bishop on b2 shares its colour with 4 of its own 5 pawns, and sees only 3 squares. Quiet here has a mechanical meaning: the side to move has no check and no capture that wins material, so the next move has to be chosen on positional grounds. That matters because this base's other corpus is 788 tactical puzzles, in which a positional feature cannot be isolated.\n\nWHAT IS VERIFIED: the game replays legally end to end through the page's own move generator, so the FEN is derived rather than transcribed; and the feature is present by mechanical measurement in lib/features.js.\n\nWHAT IS NOT CLAIMED: that the concept decides this position, or that the players were thinking about it. Note also a limitation of method — the position was FOUND by this system's own Layer 4, so it demonstrates the concept and cannot by itself validate the matcher that found it. Other concepts licensed here: bishop-pair, space.",
+      "origin_kind": "historical-game",
+      "concept_role": "supports",
+      "side_to_move_benefits": "neither"
+    }
+  ],
   "counterexamples": [
     {
       "fen": "8/3b2k1/pp1p2pp/n1p1br2/P1P4q/1P1Q1BPP/7K/1R2BR2 b - - 1 31",
@@ -212,7 +221,8 @@
   "sources": [
     "kingsights-good-bad-bishop",
     "steinitz-modern-chess-instructor",
-    "nimzowitsch-my-system"
+    "nimzowitsch-my-system",
+    "zurich-1953-games"
   ],
   "source_confidence": "medium"
 }

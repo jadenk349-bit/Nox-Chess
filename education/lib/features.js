@@ -215,6 +215,40 @@ function outposts(st, colour) {
   return out;
 }
 
+/* Is this a QUIET position? The corpus this base has is 788 tactical puzzles,
+ * chosen for having one forcing answer, and a positional concept cannot be
+ * isolated in a position that a tactic decides. Quietness is therefore the
+ * filter that turns a tactical corpus into a partly usable positional one.
+ *
+ * The test is deliberately strict: the side to move has no check available and
+ * no capture that wins material by static exchange evaluation. A position where
+ * every capture loses material and no check exists is one where the next move
+ * has to be chosen on positional grounds, which is exactly the case this system
+ * most needs to be tested on and least often sees. */
+function quietness(st) {
+    const moves = P.legalMoves(st);
+    let checks = 0, goodCaptures = 0, captures = 0;
+    for (const m of moves) {
+      const target = st.b[m.to];
+      if (target) {
+        captures++;
+        let v = 0;
+        try { v = P.see(st, m); } catch (e) { v = target ? 1 : 0; }
+        if (v > 0) goodCaptures++;
+      }
+      let after;
+      try { after = P.makeMove(st, m); } catch (e) { continue; }
+      if (P.inCheck(after, after.turn)) checks++;
+    }
+    return {
+      legalMoves: moves.length, checksAvailable: checks,
+      capturesAvailable: captures, winningCapturesAvailable: goodCaptures,
+      inCheck: P.inCheck(st, st.turn),
+      // Quiet: nothing forcing is on offer for the side to move.
+      quiet: !P.inCheck(st, st.turn) && checks === 0 && goodCaptures === 0,
+    };
+}
+
 /* Own pawns standing on the same colour as each bishop. This is the observable
  * half of the good/bad bishop distinction and nothing more: a bishop hemmed in
  * by its own pawns is the SHAPE of a bad bishop, and whether it is actually bad
@@ -423,6 +457,7 @@ function features(fen) {
     outposts: { w: outposts(st, 'w'), b: outposts(st, 'b') },
     pieces: pieceFeatures(st),
     king: { w: kingFeatures(st, 'w'), b: kingFeatures(st, 'b') },
+    quietness: quietness(st),
     activity: {
       mobility: { w: mobility(st, 'w'), b: mobility(st, 'b') },
       pawnSpace: { w: pawnSpace(st, 'w'), b: pawnSpace(st, 'b') },
@@ -455,6 +490,6 @@ function motifsOfMove(fen, uci) {
 module.exports = {
   features, motifsOfMove, phaseOf, material, pawnStructure, fileState,
   holesFor, reachableHoles, outposts, pieceFeatures, kingFeatures, mobility, pawnSpace,
-  bishopPawnColours,
+  bishopPawnColours, quietness,
   nameOf, isLight, page: P,
 };
