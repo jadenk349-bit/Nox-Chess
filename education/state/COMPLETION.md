@@ -12,9 +12,9 @@ evidence in general, it is NEGATIVE and AMBIGUOUS evidence in particular.
 |---|---|---|---|
 | 1 | All major areas have meaningful depth | **NOT MET** | 2 areas `full`, 13 `substantial`, 70 `partial`. Mean concept completeness 0.71 (was 0.70). |
 | 2 | Important concepts have strong recognition criteria | **PARTIAL** | 36 concepts have an implemented Layer 4 matcher naming the record it implements — 36 of the 83 whose own record permits one. The other 54 permitted ones have written criteria and no detector. |
-| 3 | Positional concepts tested outside the tactical corpus | **MET** | 18 human-annotated positions from 9 master games, 1908–2005, spanning a century and seven countries; plus 13 replay-verified games and a 350-position quiet sub-corpus. No longer one tournament. |
-| 4 | Major concepts have positive and negative testing | **NOT MET** | 55% of applicable concepts lack a positive example, 77% a negative one, 83% an ambiguous one. This is the blocker, and it is the one that does not yield to mining. |
-| 5 | False positives aggressively tested | **MET** | 27 resolved cases replayed as regression assertions, plus two annotated negative examples. One of those is a real test — the API declines to report a king attack in a position with every mechanical sign of one — and the other is recorded as **vacuous**, because nothing could have reported it. |
+| 3 | Positional concepts tested outside the tactical corpus | **MET** | 22 human-annotated positions from 11 master games, 1908–2005, spanning a century and seven countries; plus 13 replay-verified games and a 350-position quiet sub-corpus. No longer one tournament. |
+| 4 | Major concepts have positive and negative testing | **NOT MET** | 55% of applicable concepts lack a positive example, 77% a negative one, 81% an ambiguous one. This is the blocker, and it is the one that does not yield to mining. |
+| 5 | False positives aggressively tested | **MET** | 27 resolved cases replayed as regression assertions, plus three annotated negative examples. Two of those are real tests — the API declines to report a king attack in a position with every mechanical sign of one — — the API declines to report an outpost on a square a world champion twice calls unsafe, and declines to report a king attack in a position with every mechanical sign of one — and the third is recorded as **vacuous**, because nothing could have reported it. |
 | 6 | API works across tactical and positional positions | **MET** | 788-position mass test: 0 crashes, 0 template leaks, 0 banned phrasings, 100% licensed a concept. 376-assertion behaviour audit over 22 position types. |
 | 7 | Explanation quality is high | **PARTIAL** | 3272 assertions pass; no dictionary definitions, meta-remarks, feature dumps, inert features or duplicated concepts. Correct and plain rather than good. |
 | 8 | Evidence levels correctly represented | **MET** | Four-tier grading; confidence ceilings by knowledge type, enforced and audited; and the ladder and the corpus checker now both distinguish "not achieved" from "cannot be achieved", derived from the records. |
@@ -23,21 +23,21 @@ evidence in general, it is NEGATIVE and AMBIGUOUS evidence in particular.
 
 ## Current state
 
-137 concepts · 188 sources · **94 engine-validated positions + 22 tablebase** ·
-**18 human-annotated corpus positions from 9 master games** · 20 replay-verified
-master games · 644 tests + 246 API + 376 audit + 3276 explanation assertions.
+137 concepts · 188 sources · **98 engine-validated positions + 22 tablebase** ·
+**22 human-annotated corpus positions from 11 master games** · 22 replay-verified
+master games · 648 tests + 250 API + 376 audit + 3276 explanation assertions.
 
 ## What moved this session
 
 | | before | after |
 |---|---|---|
-| human-grounded corpus positions | 6 | 18 |
-| corpus games | 2 | 9 |
-| corpus roles | 5 positive, 1 ambiguous, 0 negative | 13 positive, 3 ambiguous, 2 negative |
+| human-grounded corpus positions | 6 | 22 |
+| corpus games | 2 | 11 |
+| corpus roles | 5 positive, 1 ambiguous, 0 negative | 13 positive, 6 ambiguous, 3 negative |
 | concepts with human grounding | 31 | 39 |
 | concepts with a Layer 4 matcher | 32 | 36 |
-| validated positions | 82 | 94 |
-| API false negatives on the corpus | 3 of 6 detectable | 0 of 18 |
+| validated positions | 82 | 98 |
+| API false negatives on the corpus | 3 of 6 detectable | 0 of 22 |
 
 ## What is still missing, precisely
 
@@ -49,7 +49,7 @@ master games · 644 tests + 246 API + 376 audit + 3276 explanation assertions.
    and is not*. Two were found this session and both were worth the search: one
    of them is now the sharpest false-positive test in the repository.
 2. **A negative example is worth nothing without a detector that could fail it.**
-   Both new negatives initially passed vacuously. Writing the `king-attack`
+   The first two new negatives passed vacuously. Writing the `king-attack`
    matcher turned one into a real test. The `initiative` negative remains vacuous
    and always will, because the concept cannot have a detector — which is itself
    worth knowing and is now printed rather than counted as a pass.

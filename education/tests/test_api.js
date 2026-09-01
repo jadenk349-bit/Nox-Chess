@@ -420,6 +420,34 @@ const { concepts } = API.knowledge();
      'the measured firing rate for center-control is no longer stated in the code');
 }
 
+{
+  // Smyslov-Botvinnik 1954 after 21.Nc5. A centralised advanced knight in front
+  // of an enemy pawn chain is the outpost pattern as a scan sees it, and
+  // Botvinnik says twice in his own notes that the piece is badly placed:
+  // ...b6 challenges it and no white pawn defends it. This is the only
+  // human-grounded negative example in the corpus for a concept the API can
+  // actually recognise, so it is the only one that could ever fail.
+  const SB = '2r1k2r/1pqbnpp1/4p2p/p1NpP3/PP3P2/2PB4/6PP/R3QR1K b k - 3 21';
+  const f = FEAT.features(SB);
+  eq('false positive: c5 is not an outpost for White', f.outposts.w, []);
+  const ids = API.analyzeWithEducation({ fen: SB, move: 'd7c6' }).concepts_all.map(c => c.id);
+  ok('false positive: and the API does not report one', !ids.includes('outpost'), ids.join(','));
+}
+{
+  // Nimzowitsch-Capablanca 1914 and Havasi-Capablanca 1929: two features that
+  // are correctly REPORTED and decide nothing. The system must say the feature
+  // is there and must not have said more than that, which test_explanations.js
+  // enforces on the wording.
+  const NC = API.analyzeWithEducation({
+    fen: 'r3r1k1/2p2pbp/2pp2p1/8/P1q1P3/2N2P2/1PPQ2PP/1R1R2K1 b - - 2 22', move: 'e8b8' });
+  has('ambiguous: doubled pawns reported where they are a strength',
+      NC.concepts_all.map(c => c.id), 'doubled-pawns');
+  const HC = API.analyzeWithEducation({
+    fen: '2r2rk1/pb1q1ppp/1pn1pn2/8/3P4/P3PB2/3N1PPP/RQB2RK1 b - - 7 15', move: 'c6a5' });
+  has('ambiguous: the bishop pair reported where its owner is worse',
+      HC.concepts_all.map(c => c.id), 'bishop-pair');
+}
+
 /* ---------- report ---------- */
 console.log(`\nAPI  PASS ${pass}   FAIL ${fails.length}`);
 for (const [n, d] of fails) console.log(`  FAIL  ${n}\n        ${d}`);

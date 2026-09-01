@@ -177,7 +177,25 @@
     }
   ],
   "counterexamples": [],
-  "ambiguous_examples": [],
+  "ambiguous_examples": [
+    {
+      "fen": "4rnk1/r2n1p2/1p1R2pp/pP5q/3N4/P3N1P1/1Q3PKP/3R4 b - - 0 27",
+      "note": "Reti-Capablanca, New York 1924 (round 5), Qe5. Human ground truth: the concept is named for this position by Raymond Keene (GM), The Spectator Australia. Corpus entry `reti-capablanca-1924-27Qe5-piece-activity-ambiguous`. The same position as this corpus's initiative counterexample, and a different and gentler claim about it, which is why both exist. Piece activity genuinely applies: Black's queen is the most active piece on the board and Keene says so in as many words. It does not decide anything, because activity concentrated in one piece against a coordinated group is not activity in the sens",
+      "origin_kind": "historical-game",
+      "game": "Reti-Capablanca, New York 1924 (round 5)",
+      "concept_role": "ambiguous",
+      "engine": {
+        "engine_id": "Stockfish 18",
+        "test_level": 3,
+        "depth": 22,
+        "multipv": 3,
+        "best_move": "Rxe3",
+        "eval_cp": -212,
+        "verdict": "ambiguous",
+        "verdict_note": "yes, and it prices the activity. Black is more than two pawns worse with the most active piece on the board, and the engine's preferred move is an exchange sacrifice that gives that activity away in order to break White's coordination. Same search as the initiative counterexample on this position; recorded on both because the two entries make different claims about it."
+      }
+    }
+  ],
   "explanations": {
     "by_level": {
       "beginner": "A piece is active if it is doing something - attacking, defending something important, or controlling squares the opponent wants.",

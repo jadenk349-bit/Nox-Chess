@@ -16,7 +16,7 @@ Mean completeness **0.71** across 137 concepts.
 
 | rating | mean | area | concepts |
 |---|---|---|---|
-| full | 0.86 | `pawn-structures` | 5 |
+| full | 0.88 | `pawn-structures` | 5 |
 | full | 0.81 | `opening-theory-concepts` | 4 |
 | substantial | 1.00 | `king-safety` | 2 |
 | substantial | 0.96 | `gambit-principles` | 2 |
@@ -33,12 +33,12 @@ Mean completeness **0.71** across 137 concepts.
 | substantial | 0.63 | `official-rules` | 12 |
 | partial | 1.00 | `tactical-combinations` | 1 |
 | partial | 1.00 | `good-bad-bishops` | 1 |
+| partial | 1.00 | `bishop-pair` | 1 |
 | partial | 1.00 | `tempo` | 1 |
 | partial | 1.00 | `outposts` | 1 |
 | partial | 1.00 | `two-weaknesses` | 1 |
 | partial | 1.00 | `king-activation` | 1 |
 | partial | 0.94 | `rooks` | 1 |
-| partial | 0.93 | `bishop-pair` | 1 |
 | partial | 0.93 | `open-files` | 1 |
 | partial | 0.93 | `semi-open-files` | 1 |
 | partial | 0.93 | `material-imbalances` | 1 |
@@ -52,12 +52,12 @@ Mean completeness **0.71** across 137 concepts.
 | partial | 0.87 | `exchange-sacrifices` | 1 |
 | partial | 0.86 | `opening-principles` | 1 |
 | partial | 0.83 | `drawing-mechanisms` | 1 |
+| partial | 0.81 | `piece-activity` | 1 |
 | partial | 0.80 | `piece-coordination` | 1 |
 | partial | 0.80 | `development` | 1 |
 | partial | 0.80 | `static-vs-dynamic` | 1 |
 | partial | 0.80 | `transformation-of-advantages` | 1 |
 | partial | 0.75 | `piece-properties` | 1 |
-| partial | 0.75 | `piece-activity` | 1 |
 | partial | 0.73 | `prophylaxis` | 1 |
 | partial | 0.73 | `overprotection` | 1 |
 | partial | 0.73 | `knights` | 1 |
@@ -114,8 +114,10 @@ Mean completeness **0.71** across 137 concepts.
 | `gambit` | 1.00 | x | x | x | x | x | x | . | . | . | . | . | . | x | x | x | x |
 | `tabiya` | 1.00 | x | x | x | x | x | x | . | . | . | . | . | . | x | x | x | x |
 | `theoretical-novelty` | 1.00 | x | x | x | . | x | x | . | . | . | . | . | . | x | x | x | x |
+| `doubled-pawns` | 1.00 | x | x | x | x | x | x | x | x | x | x | . | x | x | x | x | x |
 | `outpost` | 1.00 | x | x | x | x | x | x | x | x | x | x | . | x | x | x | x | x |
 | `bad-bishop` | 1.00 | x | x | x | x | x | x | x | x | x | x | . | x | x | x | x | x |
+| `bishop-pair` | 1.00 | x | x | x | x | x | x | x | x | x | x | . | x | x | x | x | x |
 | `two-weaknesses` | 1.00 | x | x | x | x | x | x | x | x | x | x | x | x | x | x | x | x |
 | `tactical-combinations` | 1.00 | x | x | x | x | x | x | . | . | . | . | . | . | x | x | x | x |
 | `passed-pawn` | 0.94 | x | x | x | x | x | x | x | x | x | x | - | x | x | x | x | x |
@@ -123,10 +125,8 @@ Mean completeness **0.71** across 137 concepts.
 | `open-file` | 0.93 | x | x | x | x | x | x | x | x | - | x | . | x | x | x | x | x |
 | `semi-open-file` | 0.93 | x | x | x | x | x | x | x | x | - | x | . | x | x | x | x | x |
 | `backward-pawn` | 0.93 | x | x | x | x | x | x | x | x | x | x | . | x | - | x | x | x |
-| `doubled-pawns` | 0.93 | x | x | x | x | x | x | x | x | - | x | . | x | x | x | x | x |
 | `isolated-queen-pawn` | 0.93 | x | x | x | x | x | x | x | - | x | x | . | x | x | x | x | x |
 | `weak-square` | 0.93 | x | x | x | x | x | x | x | x | - | x | . | x | x | x | x | x |
-| `bishop-pair` | 0.93 | x | x | x | x | x | x | x | x | - | x | . | x | x | x | x | x |
 | `material-imbalance` | 0.93 | x | x | x | x | x | x | x | - | x | x | . | x | x | x | x | x |
 | `compensation` | 0.93 | x | x | x | . | x | x | x | x | - | x | . | x | x | x | x | x |
 | `opposition` | 0.92 | x | x | x | x | x | . | x | x | . | - | x | . | x | x | x | x |
@@ -144,6 +144,7 @@ Mean completeness **0.71** across 137 concepts.
 | `hanging-piece` | 0.83 | x | x | x | . | x | x | x | - | . | x | . | . | - | x | x | x |
 | `check` | 0.82 | x | x | x | . | x | . | - | x | . | . | x | . | x | x | x | - |
 | `vancura-position` | 0.81 | x | x | x | x | x | x | x | x | - | - | x | - | x | x | x | x |
+| `piece-activity` | 0.81 | x | x | x | x | x | x | x | - | x | x | - | x | - | x | x | x |
 | `king-attack` | 0.80 | x | x | x | x | x | x | - | x | - | x | . | x | - | x | x | x |
 | `opening-development` | 0.80 | x | x | x | x | x | x | - | x | - | x | . | - | x | x | x | x |
 | `piece-coordination` | 0.80 | x | x | x | x | x | x | x | - | - | x | . | x | - | x | x | x |
@@ -153,7 +154,6 @@ Mean completeness **0.71** across 137 concepts.
 | `fork` | 0.79 | x | x | x | . | x | x | x | x | - | x | . | - | - | x | x | x |
 | `pin` | 0.79 | x | x | x | . | x | x | x | - | x | x | . | - | - | x | x | x |
 | `piece-properties` | 0.75 | x | x | x | x | x | x | - | x | - | - | x | - | x | x | x | x |
-| `piece-activity` | 0.75 | x | x | x | x | x | x | x | - | - | x | - | x | - | x | x | x |
 | `loose-piece` | 0.75 | x | x | x | . | x | x | x | - | . | - | . | . | - | x | x | x |
 | `blockade` | 0.73 | x | x | x | x | x | x | x | - | - | - | . | x | - | x | x | x |
 | `overprotection` | 0.73 | x | x | x | x | x | x | x | - | - | - | . | x | - | x | x | x |

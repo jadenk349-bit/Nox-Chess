@@ -278,7 +278,25 @@
       }
     }
   ],
-  "ambiguous_examples": [],
+  "ambiguous_examples": [
+    {
+      "fen": "r3r1k1/2p2pbp/2pp2p1/8/P1q1P3/2N2P2/1PPQ2PP/1R1R2K1 b - - 2 22",
+      "note": "Nimzowitsch-Capablanca, St Petersburg preliminary 1914, Reb8. Human ground truth: the concept is named for this position by Chess.com's reference page on doubled pawns, corroborated independently by WGM Sgircea and IM Castellanos. Corpus entry `nimzowitsch-capablanca-1914-22Reb8-doubled-pawns`. This is the standard textbook illustration that the feature and the verdict are two different things, and it is an AMBIGUOUS example rather than a negative one for exactly that reason. Capablanca's c6 and c7 pawns are doubled - the detector is right to say so, and this base's own wording already refuses to go further ('Doubled pawns are a price, not a verdict. Ask what was boug",
+      "origin_kind": "historical-game",
+      "game": "Nimzowitsch-Capablanca, St Petersburg preliminary 1914",
+      "concept_role": "ambiguous",
+      "engine": {
+        "engine_id": "Stockfish 18",
+        "test_level": 3,
+        "depth": 22,
+        "multipv": 3,
+        "best_move": "Reb8",
+        "eval_cp": 107,
+        "verdict": "ambiguous",
+        "verdict_note": "fully. 22...Reb8 is the engine's first choice at depth 22 and it puts Black at +1.07 - the side with the structural defect is more than a pawn better, and the move that presses the file is the best move on the board by 0.64."
+      }
+    }
+  ],
   "explanations": {
     "by_level": {
       "beginner": "Two of your pawns are on the same file. They cannot protect each other, but the trade that put them there often gave you something in return.",

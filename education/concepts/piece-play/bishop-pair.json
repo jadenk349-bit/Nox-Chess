@@ -246,7 +246,25 @@
       }
     }
   ],
-  "ambiguous_examples": [],
+  "ambiguous_examples": [
+    {
+      "fen": "2r2rk1/pb1q1ppp/1pn1pn2/8/3P4/P3PB2/3N1PPP/RQB2RK1 b - - 7 15",
+      "note": "Havasi-Capablanca, Budapest 1929, Na5. Human ground truth: the concept is named for this position by Nicholas Van Der Nat (FM), following Irving Chernev's Logical Chess: Move by Move. Corpus entry `havasi-capablanca-1929-15Na5-bishop-pair`. White holds the bishop pair here - Black gave up the dark-squared bishop on move 7 - and the concept correctly applies and is correctly reported. What it does not do is decide anything, which is what makes this ambiguous rather than positive or negative. The concept record's own condition is that the pair is worth about half a pawn 'only if you can open the position', and Capab",
+      "origin_kind": "historical-game",
+      "game": "Havasi-Capablanca, Budapest 1929",
+      "concept_role": "ambiguous",
+      "engine": {
+        "engine_id": "Stockfish 18",
+        "test_level": 3,
+        "depth": 22,
+        "multipv": 3,
+        "best_move": "Na5",
+        "eval_cp": 40,
+        "verdict": "ambiguous",
+        "verdict_note": "fully, and against the feature. 15...Na5 is the engine's first choice at depth 22 at +0.40 for Black, 0.18 clear of the second - so the side WITHOUT the bishop pair is better, and the best move in the position is the one that gets rid of the pair. The engine's own principal variation is 15...Na5 16.a4 Rc7 17.Bxb7 Nxb7, which is the same trade by a different move order."
+      }
+    }
+  ],
   "explanations": {
     "by_level": {
       "beginner": "Each bishop can only use half the squares. Having both means you cover everything, so the pair is worth more than two separate bishops.",

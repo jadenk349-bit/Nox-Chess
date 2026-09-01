@@ -353,6 +353,23 @@
         "verdict": "contradicts",
         "verdict_note": "Quiet and close to balanced at -0.66, which is the combination this base most needs and least often finds: nothing forcing is available and the evaluation is not swamping the feature, so the position is usable as an instance of the concept. What is NOT claimed is that the concept explains the engine's choice of move."
       }
+    },
+    {
+      "fen": "2r1k2r/1pqbnpp1/4p2p/p1NpP3/PP3P2/2PB4/6PP/R3QR1K b k - 3 21",
+      "note": "Smyslov-Botvinnik, World Championship match (game 1), Moscow 1954, Bc6. Human ground truth: the concept is named for this position by Mikhail Botvinnik, annotating his own game (tr. Douglas Griffin). Corpus entry `smyslov-botvinnik-1954-g1-21Nc5-outpost-negative`. A centralised, advanced knight on the fifth rank in front of an enemy pawn chain is the outpost pattern as a scan sees it, and a world champion says twice in his own notes that the piece is badly placed. The condition the concept turns on is absent: c5 can be challenged by a pawn, because ...b6 is available, and it is not defended by a white pawn - the b4 pawn is on the wrong s",
+      "origin_kind": "historical-game",
+      "game": "Smyslov-Botvinnik, World Championship match (game 1), Moscow 1954",
+      "concept_role": "negative",
+      "engine": {
+        "engine_id": "Stockfish 18",
+        "test_level": 3,
+        "depth": 22,
+        "multipv": 3,
+        "best_move": "O-O",
+        "eval_cp": -8,
+        "verdict": "contradicts",
+        "verdict_note": "on the assessment, which is the claim. The position is level (-0.08 from Black's side) with the knight sitting on c5, so the advanced knight is conferring nothing. On the move it prefers 21...O-O to Botvinnik's 21...Bc6 by half a pawn, which the annotation itself half-concedes by calling the move 'cautiously played'. The move recorded is the game move, not a recommendation. What is being tested is whether a knight on c5 in this structure is an outpost."
+      }
     }
   ],
   "ambiguous_examples": [

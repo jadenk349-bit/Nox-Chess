@@ -782,6 +782,174 @@
         "outpost"
       ],
       "limitation": "This entry is also the position that exposed a Layer 3 bug: before this session, Black's e5 pawn - which has no d- or f-pawn at all and a white pawn standing on e4 - was reported as a BACKWARD pawn, and led the explanation of the most famous breakthrough in the corpus. Fixed at the detector, with a regression test."
+    },
+    {
+      "game": "Nimzowitsch-Capablanca, St Petersburg preliminary 1914",
+      "source": "chesscom-doubled-pawns-terms",
+      "players": "Aaron Nimzowitsch - Jose Raul Capablanca",
+      "event": "St Petersburg 1914, preliminary",
+      "year": 1914,
+      "annotator": "Chess.com's reference page on doubled pawns, corroborated independently by WGM Sgircea and IM Castellanos",
+      "fen_verified": "replay: all 83 plies replayed legally through blind-chess.html's move generator",
+      "id": "nimzowitsch-capablanca-1914-22Reb8-doubled-pawns",
+      "concept": "doubled-pawns",
+      "concept_role": "ambiguous",
+      "fen": "r3r1k1/2p2pbp/2pp2p1/8/P1q1P3/2N2P2/1PPQ2PP/1R1R2K1 b - - 2 22",
+      "move": "Reb8",
+      "move_uci": "e8b8",
+      "fen_after": "rr4k1/2p2pbp/2pp2p1/8/P1q1P3/2N2P2/1PPQ2PP/1R1R2K1 w - - 3 23",
+      "human_annotation": "'Black has doubled c-pawns, but his extremely active pieces and play on the open b-file more than compensate for the structural weakness.' Sgircea and Castellanos on the same game: 'a clear example of how the doubled pawns are strong in the center and how the open files created as a consequence of the structure can be a source of counter play.'",
+      "explanation": "This is the standard textbook illustration that the feature and the verdict are two different things, and it is an AMBIGUOUS example rather than a negative one for exactly that reason. Capablanca's c6 and c7 pawns are doubled - the detector is right to say so, and this base's own wording already refuses to go further ('Doubled pawns are a price, not a verdict. Ask what was bought with them'). What was bought is the b-file, which 22...Reb8 now occupies with both rooks, and six moves later the pawn on b2 falls. The concept applies, it is correctly reported, and it does not decide anything.",
+      "engine": {
+        "engine_id": "Stockfish 18",
+        "depth": 22,
+        "multipv": 3,
+        "best_move": "Reb8",
+        "best_eval_cp": 107,
+        "annotated_move_eval_cp": 107,
+        "annotated_move_rank": 1,
+        "agrees": "fully. 22...Reb8 is the engine's first choice at depth 22 and it puts Black at +1.07 - the side with the structural defect is more than a pawn better, and the move that presses the file is the best move on the board by 0.64.",
+        "note": null
+      },
+      "confidence": "high",
+      "why_not_alternates": "isolated-queen-pawn would be flatly wrong: c6 and c7 are doubled and defended by nothing, but they are not on the d-file and are not a single pawn. backward-pawn is the other name a detector could reach for and is equally wrong - c7 is behind c6 on the same file, which is doubling, not backwardness.",
+      "also_true_but_secondary": [
+        "semi-open-file",
+        "piece-activity",
+        "pin",
+        "space"
+      ],
+      "rejected_as_wrong": [
+        "isolated-queen-pawn",
+        "backward-pawn"
+      ],
+      "added": "2026-09-01"
+    },
+    {
+      "game": "Havasi-Capablanca, Budapest 1929",
+      "source": "amazingatlas-havasi-capablanca-1929",
+      "players": "Kornel Havasi - Jose Raul Capablanca",
+      "event": "Budapest 1929",
+      "year": 1929,
+      "annotator": "Nicholas Van Der Nat (FM), following Irving Chernev's Logical Chess: Move by Move",
+      "fen_verified": "replay: all 66 plies replayed legally through blind-chess.html's move generator, from a database score. The annotating page's move numbering is off by one and was not used.",
+      "id": "havasi-capablanca-1929-15Na5-bishop-pair",
+      "concept": "bishop-pair",
+      "concept_role": "ambiguous",
+      "fen": "2r2rk1/pb1q1ppp/1pn1pn2/8/3P4/P3PB2/3N1PPP/RQB2RK1 b - - 7 15",
+      "move": "Na5",
+      "move_uci": "c6a5",
+      "fen_after": "2r2rk1/pb1q1ppp/1p2pn2/n7/3P4/P3PB2/3N1PPP/RQB2RK1 w - - 8 16",
+      "fen_concept_realised": "2r2rk1/p4ppp/qp2pn2/n7/3P4/P3P3/1B1N1PPP/RQ3RK1 w - - 2 18",
+      "fen_concept_realised_note": "After 16.Bxb7 Qxb7 17.Bb2 Qa6. The bishop pair is gone, traded off on Black's terms, and Black's queen has left the long diagonal to press the light squares the bishops used to hold.",
+      "human_annotation": "'15...Na5! is a fine strategic move. The knight offers to exchange Black's bishop for White's remaining bishop, eliminating the bishop pair advantage.' And, as the lesson of the game: 'The bishop pair is overrated when you target specific weaknesses: an active knight on the rim outplayed two bishops.'",
+      "explanation": "White holds the bishop pair here - Black gave up the dark-squared bishop on move 7 - and the concept correctly applies and is correctly reported. What it does not do is decide anything, which is what makes this ambiguous rather than positive or negative. The concept record's own condition is that the pair is worth about half a pawn 'only if you can open the position', and Capablanca's answer is to refuse: he offers the trade of the light bishops immediately, and after 16.Bxb7 Qxb7 the advantage is simply gone. A knight going to the rim to liquidate the opponent's best asset is the move, and no reading of the bishop-pair feature alone would find it.",
+      "engine": {
+        "engine_id": "Stockfish 18",
+        "depth": 22,
+        "multipv": 3,
+        "best_move": "Na5",
+        "best_eval_cp": 40,
+        "annotated_move_eval_cp": 40,
+        "annotated_move_rank": 1,
+        "agrees": "fully, and against the feature. 15...Na5 is the engine's first choice at depth 22 at +0.40 for Black, 0.18 clear of the second - so the side WITHOUT the bishop pair is better, and the best move in the position is the one that gets rid of the pair.",
+        "note": "The engine's own principal variation is 15...Na5 16.a4 Rc7 17.Bxb7 Nxb7, which is the same trade by a different move order."
+      },
+      "confidence": "high",
+      "why_not_alternates": "worst-placed-piece is the reading a mechanical scan would reach for - a knight going from c6 to a5 loses scope - and it is exactly backwards: the knight is going somewhere worse in order to make the position better. outpost is wrong; a5 is not protected by a black pawn and Black has no intention of staying there.",
+      "also_true_but_secondary": [
+        "piece-exchanges",
+        "skewer",
+        "discovered-attack",
+        "space"
+      ],
+      "rejected_as_wrong": [
+        "outpost",
+        "worst-placed-piece"
+      ],
+      "added": "2026-09-01"
+    },
+    {
+      "game": "Smyslov-Botvinnik, World Championship match (game 1), Moscow 1954",
+      "source": "dgriffin-botvinnik-smyslov-1954-g1",
+      "players": "Vassily Smyslov - Mikhail Botvinnik",
+      "event": "World Championship match, Moscow 1954",
+      "year": 1954,
+      "annotator": "Mikhail Botvinnik, annotating his own game (tr. Douglas Griffin)",
+      "fen_verified": "replay: all 116 plies replayed legally through blind-chess.html's move generator",
+      "id": "smyslov-botvinnik-1954-g1-21Nc5-outpost-negative",
+      "concept": "outpost",
+      "concept_role": "negative",
+      "fen": "2r1k2r/1pqbnpp1/4p2p/p1NpP3/PP3P2/2PB4/6PP/R3QR1K b k - 3 21",
+      "move": "Bc6",
+      "move_uci": "d7c6",
+      "fen_after": "2r1k2r/1pq1npp1/2b1p2p/p1NpP3/PP3P2/2PB4/6PP/R3QR1K w k - 4 22",
+      "human_annotation": "'...the knight has to be placed on c5, where it does not stand safely.' And fifteen moves later, on the exchange that removes it: '26.Nxd7 This too is logical. As the reader is already aware, the knight was insecurely placed on c5.'",
+      "explanation": "A centralised, advanced knight on the fifth rank in front of an enemy pawn chain is the outpost pattern as a scan sees it, and a world champion says twice in his own notes that the piece is badly placed. The condition the concept turns on is absent: c5 can be challenged by a pawn, because ...b6 is available, and it is not defended by a white pawn - the b4 pawn is on the wrong side and the d-pawn is long gone. This base's own detector agrees and reports no outpost for either side here, which is why the entry is worth keeping: it is a live test rather than a vacuous one, and it is the only human-grounded negative example in this corpus for a concept the API can actually recognise.",
+      "engine": {
+        "engine_id": "Stockfish 18",
+        "depth": 22,
+        "multipv": 3,
+        "best_move": "O-O",
+        "best_eval_cp": -8,
+        "annotated_move_eval_cp": -60,
+        "annotated_move_rank": 2,
+        "agrees": "on the assessment, which is the claim. The position is level (-0.08 from Black's side) with the knight sitting on c5, so the advanced knight is conferring nothing. On the move it prefers 21...O-O to Botvinnik's 21...Bc6 by half a pawn, which the annotation itself half-concedes by calling the move 'cautiously played'.",
+        "note": "The move recorded is the game move, not a recommendation. What is being tested is whether a knight on c5 in this structure is an outpost."
+      },
+      "confidence": "high",
+      "why_not_alternates": "piece-activity is true of the knight in the narrow sense that it stands on an advanced square, and it is the honest thing to say about it. weak-square would be wrong in the other direction: c5 is not a hole in Black's camp, because ...b6 covers it.",
+      "also_true_but_secondary": [
+        "piece-activity",
+        "space",
+        "passed-pawn"
+      ],
+      "rejected_as_wrong": [
+        "outpost",
+        "strong-square"
+      ],
+      "added": "2026-09-01"
+    },
+    {
+      "game": "Reti-Capablanca, New York 1924 (round 5)",
+      "source": "keene-reti-capablanca-1924",
+      "players": "Richard Reti - Jose Raul Capablanca",
+      "event": "New York 1924",
+      "year": 1924,
+      "annotator": "Raymond Keene (GM), The Spectator Australia",
+      "fen_verified": "replay: all 61 plies replayed legally through blind-chess.html's move generator",
+      "id": "reti-capablanca-1924-27Qe5-piece-activity-ambiguous",
+      "concept": "piece-activity",
+      "concept_role": "ambiguous",
+      "fen": "4rnk1/r2n1p2/1p1R2pp/pP5q/3N4/P3N1P1/1Q3PKP/3R4 b - - 0 27",
+      "move": "Qe5",
+      "move_uci": "h5e5",
+      "fen_after": "4rnk1/r2n1p2/1p1R2pp/pP2q3/3N4/P3N1P1/1Q3PKP/3R4 w - - 1 28",
+      "human_annotation": "'Capablanca is really doing his upmost on the fourth rank with his strongest piece, but the queen is no match for White's heavily centralised knights and rooks.'",
+      "explanation": "The same position as this corpus's initiative counterexample, and a different and gentler claim about it, which is why both exist. Piece activity genuinely applies: Black's queen is the most active piece on the board and Keene says so in as many words. It does not decide anything, because activity concentrated in one piece against a coordinated group is not activity in the sense that wins games - the concept record's own warning is that 'having more active pieces is not the same as having the initiative'. This is the position that separates the two, and it is what an ambiguous example is for: the concept is present, correctly reported, and worth nothing here.",
+      "engine": {
+        "engine_id": "Stockfish 18",
+        "depth": 22,
+        "multipv": 3,
+        "best_move": "Rxe3",
+        "best_eval_cp": -212,
+        "annotated_move_eval_cp": -248,
+        "annotated_move_rank": 2,
+        "agrees": "yes, and it prices the activity. Black is more than two pawns worse with the most active piece on the board, and the engine's preferred move is an exchange sacrifice that gives that activity away in order to break White's coordination.",
+        "note": "Same search as the initiative counterexample on this position; recorded on both because the two entries make different claims about it."
+      },
+      "confidence": "high",
+      "why_not_alternates": "initiative is the concept that would be WRONG here and is recorded separately as a counterexample. queen-activity is a narrower true label and this base has no matcher for it.",
+      "also_true_but_secondary": [
+        "queen-activity",
+        "exchange-sacrifice",
+        "open-file"
+      ],
+      "rejected_as_wrong": [
+        "initiative",
+        "king-attack"
+      ],
+      "added": "2026-09-01"
     }
   ]
 }

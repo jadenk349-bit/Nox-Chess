@@ -102,12 +102,42 @@ should move. The corollary is uncomfortable and worth keeping: **the 788 shipped
 positions cannot validate a pawn-ending detector at all**, and will silently
 report no false positives forever.
 
+### A second pass, on concepts whose detectors had never met a human "no"
+
+The list that matters is not "concepts without a counterexample" but "concepts
+with a DETECTOR and without a counterexample" — everywhere else a negative
+example passes because nothing could have reported it. Four more entries, from
+games this session had already verified or could verify cheaply:
+
+- **outpost, negative.** Smyslov–Botvinnik 1954 after 21.Nc5. A centralised
+  advanced knight in front of an enemy pawn chain, and Botvinnik says twice in
+  his own notes that it is badly placed: ...b6 challenges c5 and no white pawn
+  defends it. The detector agrees and reports nothing. This is the corpus's
+  first human-grounded negative for a concept the API can actually recognise.
+- **doubled-pawns, ambiguous.** Nimzowitsch–Capablanca, St Petersburg 1914 —
+  the game the literature uses to teach that doubled pawns need not be a
+  weakness. Black has them and is +1.07, and the engine's best move is the one
+  that presses the file they opened.
+- **bishop-pair, ambiguous.** Havasi–Capablanca 1929: White holds the pair and
+  the engine's first choice for Black, at +0.40, is 15...Na5 — the move that
+  trades it off.
+- **piece-activity, ambiguous.** Réti–Capablanca after 27...Qe5, the same
+  position as the initiative counterexample and a gentler claim about it. The
+  most active piece on the board belongs to the side that is two pawns worse.
+
+Both new ambiguous cases are features the system reports and should report. The
+wording already refuses to go further — "doubled pawns are a price, not a
+verdict" — and that refusal is now tested against positions where going further
+would be wrong.
+
 ### Where it stands
 
-137 concepts, 188 sources, 94 validated positions, 18 corpus positions, 644 tests
-plus 246 API, 376 audit and 3276 explanation assertions, all green, twelve audits
-clean. Against the corpus: 0 false negatives on concepts that can be detected, 0
-false positives, 2 of 2 negatives correct (1 of them non-vacuously).
+137 concepts, 190 sources, 98 validated positions, 22 corpus positions from 11
+master games, 648 tests plus 250 API, 376 audit and 3276 explanation assertions,
+all green, twelve audits clean. Against the corpus: 0 false negatives on concepts
+that can be detected, 0 false positives, 3 of 3 negatives correct — two of them
+non-vacuously. Eleven concepts now clear every rung their own record allows,
+up from eight.
 
 `state/COMPLETION.md` still says **not substantially complete**, and the blocker
 has changed shape rather than shrunk: it is negative and ambiguous evidence, 77%
