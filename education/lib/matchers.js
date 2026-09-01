@@ -136,12 +136,12 @@ const PRIORITY = [
   'hanging-pawns', 'opposite-coloured-bishops', 'bishop-pair', 'luft',
   'pawn-break', 'restraint', 'worst-placed-piece', 'bad-bishop', 'sacrifice',
   'king-safety', 'bishop-pair', 'battery', 'center-control', 'blockade',
-  'opposition', 'king-activation', 'loose-piece', 'doubled-pawns',
+  'opposition', 'king-activation', 'loose-piece', 'doubled-pawns', 'two-weaknesses',
 
   // ...and the band that is true of most positions, last, because being true
   // here is not news.
   'semi-open-file', 'material-imbalance', 'piece-activity', 'space',
-  'open-file', 'weak-square', 'two-weaknesses',
+  'open-file', 'weak-square',
 ];
 const priorityOf = id => {
   const i = PRIORITY.indexOf(id);
@@ -375,13 +375,50 @@ const STRUCTURAL = [
                  "board stretches a finite defence past breaking. The file distance between the " +
                  "weaknesses is therefore the concept, not their number"),
     run(f) {
+      // Three of this record's four preconditions were written down and never
+      // implemented, and the matcher fired on 72.5% of the 788 shipped
+      // positions - which is the record's OWN second trap, "any position has
+      // several imperfections; calling any two of them 'two weaknesses' is the
+      // commonest misuse". Found by the corpus: the one entry whose annotated
+      // concept is two-weaknesses had been pushed to rank 8, outside the six the
+      // API returns, because the concept had to be ranked last to stop it
+      // leading everywhere. The fix belongs in the recognition, not the order.
+      //
+      //   the attacker "has no weakness of comparable value"  -> 42.8%
+      //   "a piece that can change wings faster than the defender can follow
+      //    (rook or queen)"                                   -> 68.1%
+      //   and the first trap, that weaknesses "the defending king stands
+      //    between" are not two weaknesses in the operative sense -> 41.5%
+      //
+      // Together, in the form below: 38.6%, and it still fires on
+      // Rubinstein-Salwe 1908, which is the textbook game and this base's own
+      // corpus entry. A stricter reading of the first condition reaches 21.3%
+      // and loses that game, which is how the loosening below was chosen.
       for (const c of ['w', 'b']) {
         const s = f.weakSpread[other(c)];
         if (!s || !s.separated || s.weak.length < 2) continue;
+        // "The attacker has no weakness of comparable value" is a precondition
+        // this base can only approximate, and the approximation had to be
+        // loosened once it was tested. Requiring the attacker to have STRICTLY
+        // fewer weak pawns removed Rubinstein-Salwe 1908 - the textbook game and
+        // this corpus's own entry - because after 9.Nxc6 bxc6 White's b2 and e2
+        // count the same as Black's a7 and c6, and they are not comparable in
+        // any sense a human would recognise: one pair is a fixed target complex
+        // on half-open files, the other is two pawns on their original squares
+        // on move nine. A count cannot tell those apart. So the test is only
+        // that the attacker is not MORE weak than the defender, and the rest of
+        // the precondition is recorded as a limitation rather than pretended.
+        const mine = f.weakSpread[c] || { weak: [] };
+        if (mine.weak.length > s.weak.length) continue;
+        if (f.material[c].counts.R + f.material[c].counts.Q === 0) continue;
+        const files = s.weak.map(x => x.charCodeAt(0) - 97);
+        const kf = ((f.king[other(c)] || {}).square || 'e1').charCodeAt(0) - 97;
+        if (kf > Math.min(...files) && kf < Math.max(...files)) continue;
         return {
           confidence: 'medium',
           because: [`${side(f, other(c))} has weaknesses on ${brief(s.weak, 4)} — ${s.spread} files ` +
-                    `apart, so no single defensive set-up covers both`],
+                    `apart, with the king on neither side of both, and ${side(f, c)} has a heavy piece ` +
+                    `that can switch wings faster than the defence can follow`],
           slots: { square: s.weak[0] },
           subjects: [c],
         };
@@ -1059,6 +1096,16 @@ const STRUCTURAL = [
           if (!nx.b[i]) return false;
           const forcing = !!m.cap || P.inCheck(nx, them);
           if (!forcing) return false;
+          // ...and the forcing move must survive being forcing. Found on
+          // Lisitsin-Capablanca 1935, move 52, a pure QUEEN ending: this
+          // reported White's queen on b2 as a loose piece because 52...Qd2+ is
+          // a check that also attacks it and static exchange evaluation on b2
+          // then says Black wins a queen - while White simply answers the check
+          // with Qxd2 and Black has won nothing. Every queen in a queen ending
+          // is undefended and attackable by the other one, which is the record's
+          // first trap exactly: "reporting every undefended piece would flag
+          // most positions and teach nothing".
+          if (P.see(nx, m.to, them) > 0) return false;
           if (!P.attackersOf(nx, i, mover).length) return false;
           return P.see(nx, i, mover) > 0;
         });

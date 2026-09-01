@@ -354,6 +354,49 @@ arrived at by ignoring the second. Requiring the move to be a check or a capture
 brings it to 34.9% and 34.4%, and the agreement between two unrelated corpora is
 the sign that it is now measuring the position rather than the corpus.
 
+### Negatives aimed at the broadest detectors
+
+The three newest detectors — `blockade`, `sacrifice`, `loose-piece` — had no
+human grounding and no negative example at all, while firing on a quarter to a
+third of positions. Hunting annotations that would break them found two bugs and
+a missing piece of research.
+
+**A false positive in a pure queen ending.** Lisitsin–Capablanca 1935 at move
+52, and this base called White's queen a **loose piece**. The guard asked for a
+forcing move after which static exchange evaluation says the piece is won, and
+52...Qd2+ is a check that also attacks b2 — so SEE reported a queen won, while
+White simply answers the check with Qxd2 and Black has won nothing. *The forcing
+move has to survive being forcing.* Every queen in a queen ending is undefended
+and attackable by the other one, which is the record's own first trap. 34.9% →
+9.1%, and 34.4% → **0%** on the annotated corpus.
+
+**Three of four preconditions written and never built.** `two-weaknesses` fired
+on **72.5%** of positions with one of its four stated conditions implemented.
+The corpus exposed it sideways: the concept had been ranked *last* to stop it
+leading everywhere, and that pushed the one corpus entry whose annotated concept
+IS two-weaknesses to rank 8, outside the six the API returns. The fix belonged
+in the recognition, not the order — the heavy piece that can switch wings, the
+defending king not standing between the targets, and a comparison of the two
+sides' weakness counts. **38.6%**, and the textbook entry back at rank 1.
+
+And one precondition that **cannot be counted**: "the attacker has no weakness of
+comparable value" looks measurable and is not. Requiring strictly fewer weak
+pawns removed Rubinstein–Salwe 1908 from its own concept, because after 9.Nxc6
+bxc6 White's b2 and e2 count the same as Black's a7 and c6 — one pair a fixed
+target complex on half-open files, the other two pawns on their original squares
+on move nine. Loosened, and the remainder written down as unmeasurable rather
+than approximated.
+
+**And a piece of standard research that was simply missing.** Spielmann's
+sham/real classification — "sham sacrifices involve losses of material only for
+a definable amount of time … Properly speaking, there is no sacrifice, only an
+advantageous business deal" — was nowhere in the base. It is now on the
+`sacrifice` record, sourced to the book, with the consequence stated: an SEE test
+detects that material was *offered* and cannot tell sham from real, because that
+turns on whether the consequences could be calculated. Capablanca's 24.Qg8+
+against Mattison is mate in two, and therefore sham by Spielmann and a queen
+sacrifice by Chernev. Recorded as ambiguous; this base adjudicates neither.
+
 That is the third metric this project has caught telling it what it wanted to
 hear — after the mass test's "99.7% positional coverage" and the corpus
 checker's scoring of negative examples — and all three were found the same way:

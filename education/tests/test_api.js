@@ -716,6 +716,55 @@ const { concepts } = API.knowledge();
      !t('rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1').includes('loose-piece'));
 }
 
+{
+  // two-weaknesses had THREE of its four written preconditions unimplemented and
+  // fired on 72.5% of the 788 shipped positions - which is the record's own
+  // second trap, "calling any two imperfections 'two weaknesses' is the
+  // commonest misuse". The corpus found it: the concept had been ranked last to
+  // stop it leading everywhere, which pushed the one entry whose annotated
+  // concept IS two-weaknesses to rank 8, outside the six the API returns.
+  const RS = '1r4k1/2r2ppp/2p5/pPR5/3Q4/P3PPP1/6BP/2R3K1 w - - 0 24';
+  has('two-weaknesses still fires on the textbook game',
+      API.analyzeWithEducation({ fen: RS }).concepts_all.map(c => c.id), 'two-weaknesses');
+  // ...and not where the attacker is the weaker side, or has no piece that can
+  // switch wings, or the defending king stands between the targets.
+  const noHeavy = API.analyzeWithEducation({ fen: '4k3/p6p/8/8/8/8/P6P/4K1B1 w - - 0 1' });
+  ok('two-weaknesses: not without a heavy piece to switch wings',
+     !noHeavy.concepts_all.some(c => c.id === 'two-weaknesses'),
+     noHeavy.concepts_all.map(c => c.id).join(','));
+  ok('two-weaknesses: measured rate is recorded in the source',
+     /38\.6%/.test(fs.readFileSync(path.join(ROOT, 'lib', 'matchers.js'), 'utf8')));
+}
+{
+  // Lisitsin-Capablanca 1935, a PURE QUEEN ENDING. Every queen in a queen ending
+  // is undefended and attackable by the other one, and this reported White's as
+  // a loose piece: 52...Qd2+ is a check that also attacks b2, so SEE on b2 said
+  // a queen was won - while White answers the check with Qxd2 and Black has won
+  // nothing. The forcing move has to survive being forcing.
+  const QE = '8/5p2/1p2pkp1/1P4qp/3P4/5P1P/1Q3KP1/8 b - - 17 52';
+  const r = API.analyzeWithEducation({ fen: QE });
+  ok('false positive: a queen in a queen ending is not a loose piece',
+     !r.concepts_all.some(c => c.id === 'loose-piece'), r.concepts_all.map(c => c.id).join(','));
+  // ...and what 52...Qd5 CREATES is the blockade Chernev named. The structural
+  // matcher runs on the position, so the blockade appears after the move, which
+  // is why the corpus checker looks at fen_after as well as fen.
+  has('blockade: a queen blockading, which the record warns about and Chernev praises',
+      API.analyzeWithEducation({ fen: '8/5p2/1p2pkp1/1P1q3p/3P4/5P1P/1Q3KP1/8 w - - 18 53' })
+        .concepts_all.map(c => c.id), 'blockade');
+}
+{
+  // Capablanca-Mattison 1929, 24.Qg8+: mate in two, so a MATING sacrifice, which
+  // Spielmann classes as sham - "properly speaking, there is no sacrifice". This
+  // base reports the material fact and carries his taxonomy on the record.
+  const CM = 'r1b2r1k/p5pp/npq4N/2P1pp2/5B2/PQ2P3/5PPP/1R1R2K1 w - - 5 24';
+  has('sacrifice: reported where seven points are offered',
+      API.analyzeWithEducation({ fen: CM, move: 'b3g8' }).concepts_all.map(c => c.id), 'sacrifice');
+  const rec = JSON.parse(fs.readFileSync(
+    path.join(ROOT, 'concepts', 'positional-method', 'sacrifice.json'), 'utf8'));
+  ok('sacrifice: the record carries Spielmann’s sham/real classification',
+     /sham/i.test(rec.definition_long) && (rec.sources || []).includes('spielmann-art-of-sacrifice'));
+}
+
 /* ---------- report ---------- */
 console.log(`\nAPI  PASS ${pass}   FAIL ${fails.length}`);
 for (const [n, d] of fails) console.log(`  FAIL  ${n}\n        ${d}`);

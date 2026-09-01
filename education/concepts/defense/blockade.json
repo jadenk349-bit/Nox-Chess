@@ -147,7 +147,26 @@
     }
   ],
   "counterexamples": [],
-  "ambiguous_examples": [],
+  "ambiguous_examples": [
+    {
+      "fen": "8/5p2/1p2pkp1/1P4qp/3P4/5P1P/1Q3KP1/8 b - - 17 52",
+      "note": "Lisitsin-Capablanca, Moscow 1935, Qd5. Human ground truth: the concept is named for this position by Irving Chernev, quoted; Max Euwe on the ending. Corpus entry `lisitsin-capablanca-1935-52Qd5-blockade-ambiguous`. A queen blockading, praised by name, in a position that is objectively drawn - which makes it ambiguous twice over. This base's blockade record carries a false-positive trap that reads almost as a warning against this exact move: 'a piece standing in front of a pawn is not necessarily blockading it usefully. The test is whether the piece keeps its powers there - a queen on a blockading square is d",
+      "origin_kind": "historical-game",
+      "game": "Lisitsin-Capablanca, Moscow 1935",
+      "concept_role": "ambiguous",
+      "attributed_by": "Irving Chernev, quoted; Max Euwe on the ending — corpus entry lisitsin-capablanca-1935-52Qd5-blockade-ambiguous",
+      "engine": {
+        "engine_id": "Stockfish 18",
+        "test_level": 3,
+        "depth": 24,
+        "multipv": 3,
+        "best_move": "Ke7",
+        "eval_cp": 0,
+        "verdict": "ambiguous",
+        "verdict_note": "with the annotation's own caveat rather than with its enthusiasm, which is the useful outcome. At depth 24 the position is 0.00 and so is 52...Qd5, the engine's second choice among three moves it scores identically. Capablanca won it anyway, and the page says in as many words that the ending is a theoretical draw. An annotation that names its own limits is worth more than one that does not, and this entry is here partly to record that."
+      }
+    }
+  ],
   "explanations": {
     "by_level": {
       "beginner": "Put a piece right in front of their pawn so it cannot move. A knight is best at this — it still does its job from there.",

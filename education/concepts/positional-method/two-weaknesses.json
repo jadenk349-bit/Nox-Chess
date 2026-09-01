@@ -100,7 +100,7 @@
       "The defending king already stands between the two targets"
     ],
     "prerequisites": [],
-    "detector": null,
+    "detector": "lib/matchers.js: two-weaknesses, implementing three preconditions that had been written and not built",
     "detectability": "heuristic",
     "typical_confidence": "medium",
     "false_positive_traps": [
@@ -148,7 +148,9 @@
     "It describes a method of conversion, not an evaluation. A position with two weaknesses is not thereby winning.",
     "Its effect is often practical rather than objective. In Kotov-Pachman 1950 the moves annotators mark as necessary and inaccurate differ by 0.05 pawns at depth 32; the second weakness made the defence hard to find over the board, and the game was decided by a later error.",
     "It presupposes the attacker has time. Against active counterplay the slow improving phase is unavailable.",
-    "Recognition is heuristic, not mechanical: 'a target' and 'far enough apart' are judgements, and the detector for this concept is not yet written."
+    "Recognition is heuristic, not mechanical: 'a target' and 'far enough apart' are judgements, and the detector for this concept is not yet written.",
+    "MEASURED 2026-09-01 and fixed: three of this record's four preconditions were written down and never implemented, and the matcher fired on 72.5% of the 788 shipped positions - which is this record's own second trap, 'any position has several imperfections; calling any two of them two weaknesses is the commonest misuse'. Adding the heavy piece that can switch wings, the first trap's requirement that the defending king not stand between the targets, and a comparison of the two sides' weakness counts brings it to 38.6%.",
+    "'The attacker has no weakness of comparable value' cannot be measured by counting, and the attempt to do so produced a false negative on the textbook game. After 9.Nxc6 bxc6 in Rubinstein-Salwe 1908, White's b2 and e2 count the same as Black's a7 and c6 - one pair a fixed target complex on half-open files, the other two pawns on their original squares on move nine. The test is therefore only that the attacker is not MORE weak than the defender, and the rest of the precondition is recorded here rather than pretended."
   ],
   "misconceptions": [
     "That two weaknesses make a position winning. They make it convertible, not won; the tablebase pair shows the mechanism can be decisive, and the Kotov-Pachman example shows it often is not.",

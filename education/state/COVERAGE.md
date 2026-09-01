@@ -21,12 +21,12 @@ Mean completeness **0.71** across 137 concepts.
 | substantial | 1.00 | `king-safety` | 2 |
 | substantial | 0.96 | `gambit-principles` | 2 |
 | substantial | 0.96 | `bishop-endgames` | 2 |
-| substantial | 0.79 | `checks-captures-threats` | 2 |
+| substantial | 0.88 | `checks-captures-threats` | 2 |
+| substantial | 0.80 | `restriction` | 2 |
 | substantial | 0.77 | `weak-squares` | 2 |
-| substantial | 0.73 | `restriction` | 2 |
+| substantial | 0.75 | `positional-sacrifices` | 2 |
 | substantial | 0.73 | `named-theoretical-positions` | 3 |
 | substantial | 0.72 | `pawn-breaks` | 3 |
-| substantial | 0.71 | `positional-sacrifices` | 2 |
 | substantial | 0.69 | `attack-principles` | 2 |
 | substantial | 0.65 | `blindfold-visualisation` | 4 |
 | substantial | 0.64 | `named-mating-patterns` | 2 |
@@ -132,7 +132,9 @@ Mean completeness **0.71** across 137 concepts.
 | `opposition` | 0.92 | x | x | x | x | x | . | x | x | . | - | x | . | x | x | x | x |
 | `wrong-rook-pawn` | 0.92 | x | x | x | x | x | . | x | x | . | - | x | . | x | x | x | x |
 | `board-geometry` | 0.92 | x | x | x | . | x | . | x | x | . | - | x | . | x | x | x | x |
+| `loose-piece` | 0.92 | x | x | x | . | x | x | x | x | . | x | . | . | - | x | x | x |
 | `piece-exchanges` | 0.88 | x | x | x | x | x | x | x | x | - | - | x | x | x | x | x | x |
+| `blockade` | 0.87 | x | x | x | x | x | x | x | - | x | x | . | x | - | x | x | x |
 | `center-control` | 0.87 | x | x | x | x | x | x | x | - | x | x | . | x | - | x | x | x |
 | `initiative` | 0.87 | x | x | x | x | x | x | x | x | - | x | . | x | - | x | x | x |
 | `space` | 0.87 | x | x | x | x | x | x | x | - | x | x | . | x | - | x | x | x |
@@ -153,9 +155,8 @@ Mean completeness **0.71** across 137 concepts.
 | `back-rank-mate` | 0.79 | x | x | x | . | x | x | x | x | - | x | . | - | - | x | x | x |
 | `fork` | 0.79 | x | x | x | . | x | x | x | x | - | x | . | - | - | x | x | x |
 | `pin` | 0.79 | x | x | x | . | x | x | x | - | x | x | . | - | - | x | x | x |
+| `sacrifice` | 0.77 | x | x | x | x | x | x | - | - | . | x | . | . | - | x | x | x |
 | `piece-properties` | 0.75 | x | x | x | x | x | x | - | x | - | - | x | - | x | x | x | x |
-| `loose-piece` | 0.75 | x | x | x | . | x | x | x | - | . | - | . | . | - | x | x | x |
-| `blockade` | 0.73 | x | x | x | x | x | x | x | - | - | - | . | x | - | x | x | x |
 | `overprotection` | 0.73 | x | x | x | x | x | x | x | - | - | - | . | x | - | x | x | x |
 | `prophylaxis` | 0.73 | x | x | x | x | x | x | x | - | - | - | . | x | - | x | x | x |
 | `restraint` | 0.73 | x | x | x | x | x | x | x | - | - | - | . | x | - | x | x | x |
@@ -167,7 +168,6 @@ Mean completeness **0.71** across 137 concepts.
 | `en-passant` | 0.70 | x | x | x | . | x | . | x | - | . | . | . | . | - | x | x | - |
 | `promotion` | 0.70 | x | x | x | . | x | . | x | - | . | . | . | . | - | x | x | - |
 | `triangulation` | 0.69 | x | x | x | x | x | . | - | - | . | - | x | . | - | x | x | x |
-| `sacrifice` | 0.69 | x | x | x | x | x | x | - | - | . | - | . | . | - | x | x | x |
 | `fortress` | 0.69 | x | x | x | x | x | x | x | - | - | - | x | - | - | x | x | x |
 | `lucena-position` | 0.69 | x | x | x | x | x | x | x | - | - | - | x | - | - | x | x | x |
 | `philidor-position` | 0.69 | x | x | x | x | x | x | x | - | - | - | x | - | - | x | x | x |

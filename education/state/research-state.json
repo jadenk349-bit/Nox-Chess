@@ -11,11 +11,11 @@
     "concepts_researched": 29,
     "concepts_validated": 4,
     "concepts_needs_review": 0,
-    "sources_reviewed": 197,
-    "positions_tested": 108,
+    "sources_reviewed": 198,
+    "positions_tested": 111,
     "matches_validated": 53,
-    "false_matches": 26,
-    "ambiguous_matches": 29,
+    "false_matches": 27,
+    "ambiguous_matches": 31,
     "by_stage": {
       "ready": 2,
       "researched": 126,
@@ -1742,6 +1742,28 @@
         "THREE SUITES ASSERTED A MISSING DETECTOR AS A VIRTUE. tests/test_api.js, tools/api_audit.js and tests/test_explanations.js all demonstrated the 'no forced label' refusal on BARE KINGS, requiring that the position license nothing. But bare kings is where the most certain statement in chess is available - neither side can force mate - and saying nothing there is a gap, not a refusal. Adding `insufficient-material` broke all three, which is the correct outcome and not a regression. The refusal is a real principle and is now demonstrated where it really applies: two kings and two blocked e-pawns, a legal position in which no researched concept fits. Found by building a detector, not by reading a test.",
         "THE RULES LAYER, WHICH THIS SYSTEM COULD NEVER SPEAK. Seven concepts whose records name detectors that already existed - check, stalemate, insufficient-material, fifty-move-rule, en-passant, promotion, castling - had no matcher, so a system built to explain chess could not say 'this is stalemate' or 'the fifty-move count is at 92'. They are the one class of claim it can make with certainty. Two guards were needed to keep them from being noise: `castling` is reported for the MOVE rather than for the rights, which almost every opening position has, and `en-passant` only when the capture is actually available, because a FEN carries the target square whether or not any pawn can use it.",
         "A RECORD WITH TWO TRAPS, WHERE THE FIRST IS ONLY AVOIDED BY HONOURING THE SECOND. `loose-piece` warns that 'reporting every undefended piece would flag most positions and teach nothing' and, separately, that 'it only matters when a FORCING move can reach it'. A detector written to the preconditions plus the obvious guard - is there a move after which this can be won - fired on 66.8% of the 788 tactical positions and 40.6% of the annotated master corpus, because 'undefended and attackable' describes most pieces. Requiring the move to be a check or a capture brings it to 34.9% and 34.4%, and the agreement between two unrelated corpora is the sign that it is measuring the position rather than the corpus. The first trap was the symptom; the second was the cure, and they are two sentences apart in the same record."
+      ]
+    },
+    {
+      "id": "negatives-and-ambiguity-against-the-broadest-detectors",
+      "date": "2026-09-01",
+      "method": "Took the mandate's target directly: the concepts with the broadest, most easily triggered recognition rules, and hunted human annotations that would break them. Three of the four newest detectors - blockade, sacrifice, loose-piece - had no human grounding and no negatives at all while firing on a quarter to a third of positions.",
+      "results": {
+        "corpus_positions": "32 -> 35",
+        "corpus_roles": "18 positive, 12 ambiguous, 5 negative; 4 of the 5 negatives are live tests",
+        "mean_rank": "2.6 -> 2.4; leads 3 -> 4",
+        "two_weaknesses_firing_rate": "72.5% -> 38.6%",
+        "loose_piece_firing_rate": "34.9% -> 9.1% on the 788, 34.4% -> 0% on the annotated corpus",
+        "false_negatives": "0 of 35",
+        "false_positives": "0 of 35",
+        "confidence_overclaims": "0 of 35",
+        "tests": "661 pass, 330 API, 401 audit, 3558 explanation"
+      },
+      "findings": [
+        "A FALSE POSITIVE IN A PURE QUEEN ENDING, AND THE GUARD THAT WAS MISSING. Lisitsin-Capablanca 1935 at move 52 is a queen ending, and this base reported White's queen as a LOOSE PIECE. The cause: the guard asked for a forcing move after which static exchange evaluation says the piece is won, and 52...Qd2+ is a check that also attacks b2, so SEE reported a queen won - while White simply answers the check with Qxd2 and Black has won nothing. The forcing move must also survive being forcing. Every queen in a queen ending is undefended and attackable by the other one, which is the record's own first trap. 34.9% -> 9.1%, and 34.4% -> 0% on the annotated corpus.",
+        "THREE OF FOUR PRECONDITIONS WRITTEN AND NEVER BUILT. `two-weaknesses` fired on 72.5% of the 788 positions because its matcher implemented one of the four conditions its own record states. The corpus is what exposed it, and it did so indirectly: the concept had been ranked LAST in PRIORITY to stop it leading everywhere, and that pushed the one corpus entry whose annotated concept IS two-weaknesses to rank 8, outside the six the API returns. The fix belonged in the recognition, not in the order. Adding the heavy piece that can switch wings, the requirement that the defending king not stand between the targets, and a comparison of the two sides' weakness counts: 38.6%, the concept back in its measured place in the order, and the textbook entry back at rank 1.",
+        "AND ONE PRECONDITION THAT CANNOT BE COUNTED. 'The attacker has no weakness of comparable value' looks measurable and is not. Requiring the attacker to have strictly fewer weak pawns removed Rubinstein-Salwe 1908 from its own concept, because after 9.Nxc6 bxc6 White's b2 and e2 count the same as Black's a7 and c6 - one pair a fixed target complex on half-open files, the other two pawns on their original squares on move nine. The test was loosened to 'not MORE weak', and the remainder recorded as a limitation rather than pretended. This is the second time a corpus position has forced a precondition to be written down as unmeasurable instead of approximated.",
+        "SPIELMANN'S SHAM/REAL CLASSIFICATION WAS MISSING FROM THE SACRIFICE RECORD. The standard taxonomy of sacrifices - 'sham sacrifices involve losses of material only for a definable amount of time ... Properly speaking, there is no sacrifice, only an advantageous business deal' - was not in the base at all. Found while looking for a negative example for a detector that fires on 28.9% of positions. It is now on the record, sourced to the book, with the consequence stated: the SEE test detects that material was OFFERED and cannot tell sham from real, because that turns on whether the consequences could be calculated. Capablanca's 24.Qg8+ against Mattison is mate in two and is therefore sham - 'properly speaking, no sacrifice' - while Chernev and the literature call it a queen sacrifice. Recorded as an ambiguous example: two named authorities, both right about different questions, and this base adjudicating neither."
       ]
     }
   ],

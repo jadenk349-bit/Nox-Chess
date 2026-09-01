@@ -78,7 +78,8 @@
     "false_positive_traps": [
       "A capture the engine happens to like is not a sacrifice. The repo's own definition is the right one: material that CAN be taken and is offered anyway, measured by SEE.",
       "An even trade is not a sacrifice.",
-      "Calling a blunder a sacrifice. The difference is whether the compensation is real and nameable — annotators decide between '!' and '?' on exactly that."
+      "Calling a blunder a sacrifice. The difference is whether the compensation is real and nameable — annotators decide between '!' and '?' on exactly that.",
+      "Spielmann's distinction is invisible to a material test. A forced mating sacrifice and a speculative one give up the same material and are different things; 'risk is the hallmark of the real sacrifice', and risk is not a property of the position, it is a property of what could be calculated from it."
     ]
   },
   "application": {
@@ -110,7 +111,8 @@
   "limitations": [
     "'Sacrifice' names what a move DOES, not whether it is good. Soundness is a separate question answered by calculation or judgement, depending on the type.",
     "Spielmann's real-sacrifice subdivisions are explicitly subjective by his own statement.",
-    "Fires on 28.9% of the 788 shipped positions with the solution move supplied, which is what a corpus of tactical puzzles should look like. It measures that material was OFFERED, which is exact; it cannot measure whether the compensation is real, which is the difference between '!' and '?' and is why the confidence is medium rather than the record's high."
+    "Fires on 28.9% of the 788 shipped positions with the solution move supplied, which is what a corpus of tactical puzzles should look like. It measures that material was OFFERED, which is exact; it cannot measure whether the compensation is real, which is the difference between '!' and '?' and is why the confidence is medium rather than the record's high.",
+    "Detects that material was offered and nothing about which KIND. Spielmann's sham/real split - added to this record in 2026-09 after it was found missing - is the standard taxonomy and cannot be read off a board: a mating sacrifice and a speculative one are the same measurement and opposite ideas."
   ],
   "misconceptions": [
     "That every material give-up is a sacrifice — a blunder gives up material for nothing.",
@@ -140,7 +142,25 @@
   },
   "examples": [],
   "counterexamples": [],
-  "ambiguous_examples": [],
+  "ambiguous_examples": [
+    {
+      "fen": "r1b2r1k/p5pp/npq4N/2P1pp2/5B2/PQ2P3/5PPP/1R1R2K1 w - - 5 24",
+      "note": "Capablanca-Mattison, Karlsbad 1929, Qg8+. Human ground truth: the concept is named for this position by Rudolf Spielmann on what a sacrifice IS; Irving Chernev on this move. Corpus entry `capablanca-mattison-1929-24Qg8-sacrifice-ambiguous`. Two named authorities disagree about whether this is a sacrifice, and both are right about different questions - which is exactly what an ambiguous entry is for. By this base's definition, taken from the repository's own SEE test, material that can be taken is offered and the concept applies: seven points of it. By Spielmann's classification the move is a mating sacrifice, sham, and 'properly spea",
+      "origin_kind": "historical-game",
+      "game": "Capablanca-Mattison, Karlsbad 1929",
+      "concept_role": "ambiguous",
+      "attributed_by": "Rudolf Spielmann on what a sacrifice IS; Irving Chernev on this move — corpus entry capablanca-mattison-1929-24Qg8-sacrifice-ambiguous",
+      "engine": {
+        "engine_id": "Stockfish 18",
+        "test_level": 3,
+        "depth": 20,
+        "multipv": 3,
+        "best_move": "Qg8+",
+        "verdict": "ambiguous",
+        "verdict_note": "completely, and it decides the half of the question that can be decided: 24.Qg8+ is the engine's first choice at depth 20 and it is MATE IN TWO. A forced mate is precisely Spielmann's condition for a sham sacrifice - the consequences were foreseen from the first. Recorded with mate rather than a centipawn score, because a centipawn score here would be a worse answer than the one available."
+      }
+    }
+  ],
   "explanations": {
     "by_level": {
       "beginner": "This gives away material on purpose, to get something else — usually an attack on the king or a piece that cannot be stopped.",
@@ -185,7 +205,7 @@
   "category": "positional-sacrifices",
   "knowledge_type": "terminology",
   "definition_short": "Deliberately giving up material for compensation in another currency — time, king exposure, structure, squares, or mate.",
-  "definition_long": "The voluntary surrender of material for something not measured in material. What makes the word worth having is Spielmann's division, which is still the standard frame ninety years on.\n\nSHAM (pseudo, temporary) — the material comes back by force, with interest, or the line ends in mate. Spielmann is blunt: 'Properly speaking, there is no sacrifice, only an advantageous business deal.' He subdivides these into positional sacrifices, sacrifices for gain, and mating sacrifices. There is no risk, because the consequences were foreseen from the first.\n\nREAL — the player 'gives up material, but is unable to calculate the consequences with accuracy; he has to rely on his judgment.' Compensation is dynamic and must be realised gradually. Spielmann's own summary: 'the risk is the hallmark of the real sacrifice.'\n\nThe division matters because THE TWO ARE CHECKED BY DIFFERENT FACULTIES. A sham sacrifice is settled by calculation and nothing else; a real one by judgement. Confusing them goes wrong in both directions — trying to calculate a real sacrifice to exhaustion, or 'judging' a sham one on intuition when a variation would have settled it.\n\nSpielmann's second axis is ACTIVE versus PASSIVE: an active sacrifice must be accepted, a passive one may be declined without the declining side being worse. He notes the active form is 'by far the more powerful'. Wikipedia renders the same distinction as forced/non-forced, and adds that failing to notice when an offer can simply be declined is a common error.\n\nCompensation, concretely, is some mix of: time (the initiative), king exposure, structure, squares and domination, and the destruction of the opponent's coordination.",
+  "definition_long": "The voluntary surrender of material for something not measured in material. What makes the word worth having is Spielmann's division, which is still the standard frame ninety years on.\n\nSHAM (pseudo, temporary) — the material comes back by force, with interest, or the line ends in mate. Spielmann is blunt: 'Properly speaking, there is no sacrifice, only an advantageous business deal.' He subdivides these into positional sacrifices, sacrifices for gain, and mating sacrifices. There is no risk, because the consequences were foreseen from the first.\n\nREAL — the player 'gives up material, but is unable to calculate the consequences with accuracy; he has to rely on his judgment.' Compensation is dynamic and must be realised gradually. Spielmann's own summary: 'the risk is the hallmark of the real sacrifice.'\n\nThe division matters because THE TWO ARE CHECKED BY DIFFERENT FACULTIES. A sham sacrifice is settled by calculation and nothing else; a real one by judgement. Confusing them goes wrong in both directions — trying to calculate a real sacrifice to exhaustion, or 'judging' a sham one on intuition when a variation would have settled it.\n\nSpielmann's second axis is ACTIVE versus PASSIVE: an active sacrifice must be accepted, a passive one may be declined without the declining side being worse. He notes the active form is 'by far the more powerful'. Wikipedia renders the same distinction as forced/non-forced, and adds that failing to notice when an offer can simply be declined is a common error.\n\nCompensation, concretely, is some mix of: time (the initiative), king exposure, structure, squares and domination, and the destruction of the opponent's coordination.\n\nSHAM AND REAL, which is Spielmann's classification and the standard one. He splits sacrifices by whether the consequences were calculable at the moment of offering: 'sham sacrifices involve losses of material only for a definable amount of time; in the case of real sacrifices, the amount of time required for recovering the material is not clear.' A sham sacrifice 'involves no risk. After a series of forced moves, the player either recovers the invested material with advantage, or else even mates his opponent. The consequences of the sacrifice were foreseen from the first. Properly speaking, there is no sacrifice, only an advantageous business deal.' Sham divides into positional sacrifices, sacrifices for gain and mating sacrifices; real ones are the rest, and 'risk is the hallmark of the real sacrifice'.\n\nThis matters here for a specific reason: the SEE test this base uses detects that material was OFFERED, which is the definition it was written to, and it cannot tell sham from real, because that turns on whether the consequences could be calculated. Capablanca's 24.Qg8+ against Mattison is mate in two and is therefore a mating sacrifice - sham, and 'properly speaking, no sacrifice' - while Chernev and the whole literature call it a queen sacrifice. Both are right about different questions, and this base reports the material fact and does not adjudicate between them.",
   "sources": [
     "spielmann-art-of-sacrifice",
     "wikipedia-sacrifice",

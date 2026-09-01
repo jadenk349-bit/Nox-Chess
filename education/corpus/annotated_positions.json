@@ -1385,6 +1385,135 @@
         "trapped-piece",
         "hanging-piece"
       ]
+    },
+    {
+      "game": "Lisitsin-Capablanca, Moscow 1935",
+      "source": "amazingatlas-lisitsin-capablanca-1935",
+      "players": "Georgy Lisitsin - Jose Raul Capablanca",
+      "event": "Moscow 1935",
+      "year": 1935,
+      "annotator": "Irving Chernev, quoted; Max Euwe on the ending",
+      "fen_verified": "replay: all 132 plies replayed legally through blind-chess.html's move generator",
+      "id": "lisitsin-capablanca-1935-52Qd5-blockade-ambiguous",
+      "concept": "blockade",
+      "concept_role": "ambiguous",
+      "side": "b",
+      "fen": "8/5p2/1p2pkp1/1P4qp/3P4/5P1P/1Q3KP1/8 b - - 17 52",
+      "move": "Qd5",
+      "move_uci": "g5d5",
+      "fen_after": "8/5p2/1p2pkp1/1P1q3p/3P4/5P1P/1Q3KP1/8 w - - 18 53",
+      "human_annotation": "'Here is the move that gives the game its name, 52...Qd5, and Chernev marks it with an exclamation and one word: Blockade. She sits directly in front of White's d-pawn, stopping it dead, and at the same time she eyes weak pawns on both wings. That is the three directions at once: one square, three jobs.' The same page is candid about the position: it 'is objectively a draw with accurate play', and the great annotators disagreed about the cleanest winning path.",
+      "explanation": "A queen blockading, praised by name, in a position that is objectively drawn - which makes it ambiguous twice over. This base's blockade record carries a false-positive trap that reads almost as a warning against this exact move: 'a piece standing in front of a pawn is not necessarily blockading it usefully. The test is whether the piece keeps its powers there - a queen on a blockading square is doing a knight's chore.' Chernev's point is that here she does keep them: from d5 she stops the d-pawn AND attacks pawns on both wings, which is precisely why the chore is not a chore. The concept applies, the detector reports it, and neither settles whether the position is won.",
+      "engine": {
+        "engine_id": "Stockfish 18",
+        "depth": 24,
+        "multipv": 3,
+        "best_move": "Ke7",
+        "best_eval_cp": 0,
+        "annotated_move_eval_cp": 0,
+        "annotated_move_rank": 2,
+        "agrees": "with the annotation's own caveat rather than with its enthusiasm, which is the useful outcome. At depth 24 the position is 0.00 and so is 52...Qd5, the engine's second choice among three moves it scores identically. Capablanca won it anyway, and the page says in as many words that the ending is a theoretical draw.",
+        "note": "An annotation that names its own limits is worth more than one that does not, and this entry is here partly to record that."
+      },
+      "confidence": "medium",
+      "why_not_alternates": "king-activation is true of both kings and says nothing about the move. passed-pawn would be wrong: White's d-pawn is not passed - Black's e6 pawn stands on an adjacent file ahead of it - which is why this is a blockade of an ADVANCING pawn, the half of the record's precondition that a first version of the detector ignored.",
+      "also_true_but_secondary": [
+        "isolated-queen-pawn",
+        "space",
+        "two-weaknesses",
+        "king-activation"
+      ],
+      "rejected_as_wrong": [
+        "passed-pawn",
+        "outpost"
+      ],
+      "added": "2026-09-01"
+    },
+    {
+      "game": "Lisitsin-Capablanca, Moscow 1935",
+      "source": "amazingatlas-lisitsin-capablanca-1935",
+      "players": "Georgy Lisitsin - Jose Raul Capablanca",
+      "event": "Moscow 1935",
+      "year": 1935,
+      "annotator": "Irving Chernev, quoted; Max Euwe on the ending",
+      "fen_verified": "replay: all 132 plies replayed legally through blind-chess.html's move generator",
+      "id": "lisitsin-capablanca-1935-52-loose-piece-negative",
+      "concept": "loose-piece",
+      "concept_role": "negative",
+      "side": "w",
+      "fen": "8/5p2/1p2pkp1/1P4qp/3P4/5P1P/1Q3KP1/8 b - - 17 52",
+      "move": "Qd5",
+      "move_uci": "g5d5",
+      "fen_after": "8/5p2/1p2pkp1/1P1q3p/3P4/5P1P/1Q3KP1/8 w - - 18 53",
+      "human_annotation": "Chernev and the commentary describe White's queen as the opposite of loose: it is 'tied to the passive defence of three separate pawns and can do nothing active', 'glued to the defence of three weaklings', 'reduced to a babysitter'. Nobody annotating this ending treats it as a piece hanging about to be won.",
+      "explanation": "A pure queen ending, where every queen is undefended and the enemy queen can attack it - which is the `loose-piece` record's first trap made flesh: 'reporting every undefended piece would flag most positions and teach nothing.' This base reported White's queen on b2 as loose, and the cause was worth finding: the guard asked for a FORCING move after which static exchange evaluation says the piece is won, and 52...Qd2+ is a check that also attacks b2, so SEE duly reported a queen won - while White simply answers the check with Qxd2 and Black has won nothing. The forcing move has to survive being forcing. Fixed at the matcher; this entry is the regression.",
+      "engine": {
+        "engine_id": "Stockfish 18",
+        "depth": 24,
+        "multipv": 3,
+        "best_move": "Ke7",
+        "best_eval_cp": 0,
+        "agrees": "the position is dead level at depth 24, which is the point: nothing is being won here, least of all a queen.",
+        "note": "The engine is not being asked whether a piece is loose. It is here to say that no material is available."
+      },
+      "confidence": "high",
+      "why_not_alternates": "blockade is what this position IS about and is recorded separately from the same move. What must not be said is that a queen in a queen ending is loose material.",
+      "also_true_but_secondary": [
+        "blockade",
+        "isolated-queen-pawn",
+        "two-weaknesses",
+        "space"
+      ],
+      "rejected_as_wrong": [
+        "loose-piece",
+        "hanging-piece"
+      ],
+      "limitation": "Found by running the corpus, not by reading the matcher. Before the fix, `loose-piece` fired on 34.9% of the 788 shipped positions and 34.4% of this corpus; after it, 9.1% and 0%.",
+      "added": "2026-09-01"
+    },
+    {
+      "game": "Capablanca-Mattison, Karlsbad 1929",
+      "source": "spielmann-art-of-sacrifice",
+      "players": "Jose Raul Capablanca - Hermanis Mattison",
+      "event": "Karlsbad 1929",
+      "year": 1929,
+      "annotator": "Rudolf Spielmann on what a sacrifice IS; Irving Chernev on this move",
+      "fen_verified": "replay: all 49 plies replayed legally through blind-chess.html's move generator",
+      "id": "capablanca-mattison-1929-24Qg8-sacrifice-ambiguous",
+      "concept": "sacrifice",
+      "concept_role": "ambiguous",
+      "side": "w",
+      "fen": "r1b2r1k/p5pp/npq4N/2P1pp2/5B2/PQ2P3/5PPP/1R1R2K1 w - - 5 24",
+      "move": "Qg8+",
+      "move_uci": "b3g8",
+      "fen_after": "r1b2rQk/p5pp/npq4N/2P1pp2/5B2/P3P3/5PPP/1R1R2K1 b - - 6 24",
+      "human_annotation": "Chernev calls the finish 'a queen sacrifice followed by a smothered mate'. Spielmann, classifying sacrifices: 'A sham (temporary) sacrifice involves no risk. After a series of forced moves, the player either recovers the invested material with advantage, or else even mates his opponent. The consequences of the sacrifice were foreseen from the first. Properly speaking, there is no sacrifice, only an advantageous business deal.' A mating sacrifice is one of his three sham types.",
+      "explanation": "Two named authorities disagree about whether this is a sacrifice, and both are right about different questions - which is exactly what an ambiguous entry is for. By this base's definition, taken from the repository's own SEE test, material that can be taken is offered and the concept applies: seven points of it. By Spielmann's classification the move is a mating sacrifice, sham, and 'properly speaking, there is no sacrifice'. The distinction turns on whether the consequences were calculable, and Stockfish settles that half: mate in two. This base reports the material fact, carries Spielmann's taxonomy on the record since this position exposed that it did not, and does not adjudicate.",
+      "engine": {
+        "engine_id": "Stockfish 18",
+        "depth": 20,
+        "multipv": 3,
+        "best_move": "Qg8+",
+        "best_eval_cp": null,
+        "annotated_move_eval_cp": null,
+        "annotated_move_rank": 1,
+        "agrees": "completely, and it decides the half of the question that can be decided: 24.Qg8+ is the engine's first choice at depth 20 and it is MATE IN TWO. A forced mate is precisely Spielmann's condition for a sham sacrifice - the consequences were foreseen from the first.",
+        "note": "Recorded with mate rather than a centipawn score, because a centipawn score here would be a worse answer than the one available."
+      },
+      "confidence": "high",
+      "why_not_alternates": "checkmate is not yet true - 24.Qg8+ is not mate, 25.Nf7 is - and reporting it here would be a move early. smothered-mate is correctly reported one ply later and is recorded on its own record.",
+      "also_true_but_secondary": [
+        "smothered-mate",
+        "check",
+        "fork",
+        "back-rank-mate",
+        "battery"
+      ],
+      "rejected_as_wrong": [
+        "checkmate",
+        "stalemate"
+      ],
+      "added": "2026-09-01"
     }
   ]
 }
