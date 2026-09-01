@@ -1,0 +1,153 @@
+{
+  "schema_version": 2,
+  "alternate_names": [
+    "making luft",
+    "an escape square",
+    "air"
+  ],
+  "historical_names": [],
+  "tags": [
+    "king-safety",
+    "back-rank",
+    "german-term"
+  ],
+  "subcategory": "prophylactic pawn move",
+  "difficulty": "beginner",
+  "knowledge_type_note": "Terminology for a specific prophylactic move and the square it creates.",
+  "name_status": "established-name",
+  "history": {
+    "attributions": [],
+    "first_documented_source": null,
+    "year": null,
+    "confidence": "unknown",
+    "notes": "A German loanword in English chess writing; no coinage researched.",
+    "competing_claims": [],
+    "development": []
+  },
+  "engine_era_status": "reliable",
+  "engine_era_note": "Engines make luft when it is needed and not otherwise, and are unimpressed by it as a routine move. That matches the conditional reading rather than the habitual one.",
+  "recognition": {
+    "preconditions": [
+      "A castled king with its shield pawns unmoved",
+      "A pawn move that creates a flight square"
+    ],
+    "indicators_for": [
+      "Heavy pieces remain, so back-rank mates are live",
+      "The opponent cannot storm the king's wing",
+      "The back rank is already defended by only one piece"
+    ],
+    "indicators_against": [
+      "The opponent has castled on the other wing and can throw pawns forward",
+      "The advanced pawn becomes a hook for a specific break",
+      "The tempo is needed elsewhere in a sharp position"
+    ],
+    "prerequisites": [
+      "king-safety",
+      "back-rank-mate"
+    ],
+    "detector": "backRankEscape",
+    "detectability": "mechanical",
+    "typical_confidence": "high",
+    "false_positive_traps": [
+      "Making luft is not automatically prudent. The same move is a hook against an opponent who can storm, and this is the standard error.",
+      "Luft is unnecessary when the back rank is adequately defended or when no heavy pieces remain."
+    ]
+  },
+  "application": {
+    "typical_plans": [
+      "Make luft in a quiet moment, before it is forced",
+      "Prefer the pawn move that creates the fewest weaknesses"
+    ],
+    "typical_moves": [
+      "h3 / ...h6",
+      "g3 / ...g6 — more committal, since it weakens two squares"
+    ],
+    "typical_pawn_structures": [
+      "f2-g2-h2 intact, with h3 the usual choice"
+    ],
+    "typical_piece_arrangements": [],
+    "tactical_consequences": [
+      "Removes back-rank mate outright"
+    ],
+    "strategic_consequences": [
+      "Permanently uncovers the squares the pawn left"
+    ]
+  },
+  "exceptions": [
+    "Against a queenside-castled opponent, luft is a hook and usually a concession.",
+    "With no heavy pieces left, back-rank mate is not a threat and luft is a wasted move."
+  ],
+  "limitations": [
+    "Trivially detectable; whether it is wise is entirely conditional on the opponent's attacking prospects."
+  ],
+  "misconceptions": [
+    "That making luft is always sensible prophylaxis. It is conditional, and the condition is whether the opponent can attack that wing."
+  ],
+  "relationships": {
+    "broader": [
+      "king-safety"
+    ],
+    "narrower": [],
+    "related": [
+      "back-rank-mate",
+      "king-safety",
+      "king-attack",
+      "hole"
+    ],
+    "contrasting": [],
+    "co_occurring": [
+      "back-rank-mate"
+    ],
+    "conflicts": []
+  },
+  "examples": [],
+  "counterexamples": [],
+  "ambiguous_examples": [],
+  "explanations": {
+    "by_level": {
+      "beginner": "Move one pawn in front of your castled king so the king has somewhere to go if it gets checked on the back row.",
+      "intermediate": "Luft. Worth playing when heavy pieces are on and back-rank mates are live — but it also weakens squares permanently, so check they cannot storm that wing.",
+      "advanced": "A conditional move. The same h3 is useful prophylaxis in a quiet position and a hook against a queenside-castled opponent.",
+      "master": "Measured: in a controlled test one tempo of luft turned a mate in one into a mate in thirty. The cost is the hook, and which dominates is the whole question."
+    },
+    "by_depth": {
+      "short": "A pawn move giving the king an escape square.",
+      "normal": "Luft — German for air. Advancing a pawn in front of the castled king gives it a flight square and removes back-rank mates, at the cost of permanently weakening the squares the pawn left.",
+      "deep": "A castled king behind three unmoved pawns has no escape square, which is what makes back-rank mates work. One pawn move fixes it — and in a controlled test in this base, moving a pawn from h7 to h6 turned a mate in one into a mate in thirty. The cost is that the vacated squares are uncovered for good and the advanced pawn becomes a hook the opponent can attack to open a file. So the same move is good or bad on one question: can they realistically storm this wing? In a quiet position it is free; against an opponent castled the other way it is a concession."
+    },
+    "hedge": "",
+    "lesson": "Make luft when heavy pieces are on and nobody can storm you. Against an opponent castled the other way, that same pawn move is a target."
+  },
+  "terminology": {
+    "beginner_words": [
+      "give the king some air",
+      "an escape square"
+    ],
+    "advanced_words": [
+      "luft",
+      "back rank",
+      "hook",
+      "flight square"
+    ],
+    "avoid": [
+      "always make luft"
+    ]
+  },
+  "status": {
+    "stage": "researched",
+    "last_updated": "2026-09-01",
+    "open_questions": [],
+    "audit_notes": []
+  },
+  "id": "luft",
+  "canonical_name": "Luft",
+  "category": "king-safety",
+  "knowledge_type": "terminology",
+  "definition_short": "German for 'air': a pawn move in front of the castled king that gives it an escape square and removes back-rank mates.",
+  "definition_long": "A castled king behind three unmoved pawns has no escape square, which is what makes back-rank mates possible. Advancing one of them — usually the h-pawn to h3 or h6 — creates a flight square and eliminates the whole family of back-rank tactics at a stroke.\n\nThe cost is exactly the cost of any shield-pawn move: the squares the pawn has left are permanently uncovered, and the advanced pawn itself becomes a HOOK the opponent can attack to force a file open.\n\nSo the same move is good or bad depending on one question: can the opponent realistically storm your king? In a quiet position, or with queens off, h3 is a free and useful move. Against an opponent castled on the other wing with mobile pawns, the identical move hands them something to bite on with ...g5-g4.\n\nIts value is measurable and large. In a controlled test in this knowledge base, moving one pawn from h7 to h6 turned a mate in one into a mate in thirty.",
+  "sources": [
+    "chessprogramming-king-safety",
+    "chessworld-king-safety"
+  ],
+  "source_confidence": "medium"
+}

@@ -1,0 +1,154 @@
+{
+  "schema_version": 2,
+  "alternate_names": [
+    "the umbrella technique"
+  ],
+  "historical_names": [],
+  "tags": [
+    "rook-endgame",
+    "technique",
+    "nimzowitsch",
+    "lucena"
+  ],
+  "subcategory": "rook endgame technique",
+  "difficulty": "advanced",
+  "knowledge_type_note": "A specific winning procedure with a proven result in the position it applies to; not a heuristic.",
+  "name_status": "established-name",
+  "history": {
+    "attributions": [
+      {
+        "person": "Aron Nimzowitsch",
+        "relation": "named-by",
+        "source": "wikipedia-lucena",
+        "year": null,
+        "note": "Credited with describing the manoeuvre as 'building a bridge'. Second-hand attribution; not located in the My System text consulted for this project."
+      }
+    ],
+    "first_documented_source": "wikipedia-lucena",
+    "year": null,
+    "confidence": "medium",
+    "notes": "The technique is much older than the name; only the name is attributed, and that at second hand.",
+    "competing_claims": [],
+    "development": []
+  },
+  "engine_era_status": "reliable",
+  "engine_era_note": "Tablebase-confirmed. Notably, the tablebase's own best move in the Lucena position is the bridge's first move, so the human procedure is also the objectively fastest.",
+  "recognition": {
+    "preconditions": [
+      "A Lucena position: rook and non-rook pawn on the seventh, attacking king in front, defending king cut off"
+    ],
+    "indicators_for": [
+      "The rook can reach the fourth rank",
+      "The defender's only resource is side checks"
+    ],
+    "indicators_against": [
+      "The pawn is a rook pawn",
+      "The defending rook prevents access to the bridge rank",
+      "The enemy king has not yet been driven back — interposing early allows perpetual check or stalemate"
+    ],
+    "prerequisites": [
+      "lucena-position"
+    ],
+    "detector": null,
+    "detectability": "heuristic",
+    "typical_confidence": "high",
+    "false_positive_traps": [
+      "Interposing before the enemy king is driven back is the standard error and can allow perpetual check or a stalemate trick.",
+      "The fifth rank is the wrong bridge rank in general, and there is a known line where building there loses the rook to a capture and draws."
+    ]
+  },
+  "application": {
+    "typical_plans": [
+      "Rear check to drive the king back, rook to the fourth, king out under the shield"
+    ],
+    "typical_moves": [
+      "Rd1+ then Rd4!",
+      "Rb4 interposing against the checks"
+    ],
+    "typical_pawn_structures": [],
+    "typical_piece_arrangements": [
+      "Rook on the fourth rank as a shield"
+    ],
+    "tactical_consequences": [
+      "Ends the defender's checking resource"
+    ],
+    "strategic_consequences": [
+      "The standard conversion of a rook ending a pawn up"
+    ]
+  },
+  "exceptions": [
+    "Does not work with a rook pawn in general.",
+    "Fails if the defending rook denies the bridge rank, though other wins usually exist."
+  ],
+  "limitations": [
+    "Applies to one specific position type; it is a procedure, not a principle."
+  ],
+  "misconceptions": [
+    "That any rook move on the fourth rank builds a bridge. The order matters — drive the king back first."
+  ],
+  "relationships": {
+    "broader": [
+      "lucena-position"
+    ],
+    "narrower": [],
+    "related": [
+      "lucena-position",
+      "philidor-position",
+      "passed-pawn"
+    ],
+    "contrasting": [],
+    "co_occurring": [
+      "lucena-position"
+    ],
+    "conflicts": []
+  },
+  "examples": [],
+  "counterexamples": [],
+  "ambiguous_examples": [],
+  "explanations": {
+    "by_level": {
+      "beginner": "Their rook keeps checking your king. Put your rook in the way so the checks stop, then walk your king out and promote.",
+      "intermediate": "Building a bridge. Check their king back first, then put your rook on the fourth rank — it will block the side checks when they come.",
+      "advanced": "The Lucena win. The fourth rank is chosen so the rook is far enough to shield and close enough for the king to step under.",
+      "master": "Order matters: rear check, rook to the fourth, then walk. Interposing early invites perpetual check or a stalemate resource."
+    },
+    "by_depth": {
+      "short": "Use the rook as a shield so the king can walk out.",
+      "normal": "Building a bridge: the defender's only resource is checking your king from the side, so you place your rook on the fourth rank where it can interpose, and the king walks out behind it while the pawn promotes.",
+      "deep": "Nimzowitsch's name for the Lucena winning method, also called the umbrella technique. The procedure is a rear check to drive the defending king back, the rook to the fourth rank, then the king advancing while the defender checks, and the rook interposing at the right moment. The fourth rank is chosen deliberately — far enough to shield, close enough for the king to step under it. A bridge on the fifth is possible but inferior, and there is a known trap where building it prematurely loses the rook. Two conditions: drive the king back first, and it does not work with a rook pawn."
+    },
+    "hedge": "",
+    "lesson": "When their rook can check yours forever, stop trying to run from the checks and put your rook in the way instead."
+  },
+  "terminology": {
+    "beginner_words": [
+      "block the checks with your rook"
+    ],
+    "advanced_words": [
+      "building a bridge",
+      "umbrella technique",
+      "interpose",
+      "side checks"
+    ],
+    "avoid": []
+  },
+  "status": {
+    "stage": "researched",
+    "last_updated": "2026-09-01",
+    "open_questions": [],
+    "audit_notes": []
+  },
+  "id": "building-a-bridge",
+  "canonical_name": "Building a bridge",
+  "category": "conversion-techniques",
+  "knowledge_type": "proven-result",
+  "definition_short": "The winning method in the Lucena position: interpose your rook on the fourth rank so it shields your king from side checks while the pawn promotes.",
+  "definition_long": "The defender's resource in a rook-and-pawn ending is checking the attacking king from the side indefinitely. Building a bridge removes it. The rook is placed on the fourth rank, and when the checks come the rook interposes on the checking line, blocking permanently — the king walks out under the shield and the pawn queens. Nimzowitsch named the manoeuvre; it is also called the umbrella technique, for obvious reasons.\n\nThe procedure: drive the defending king back with a rook check from the rear; drop the rook to the fourth rank; advance the king while the defender checks from the side; interpose the rook at the right moment.\n\nThe fourth rank is not arbitrary — far enough to shield the checks, close enough for the king to step under it. A bridge can also be built on the fifth, but it is worse, and there is a known trap where building on the fifth prematurely allows the defender to capture the rook and draw. Two other conditions: the enemy king must be pushed back FIRST, since interposing too early allows perpetual checks or stalemate tricks, and the method does not work with a rook pawn.",
+  "sources": [
+    "wikipedia-lucena",
+    "chessbio-building-a-bridge",
+    "naroditsky-two-rook-endings",
+    "lichess-tablebase"
+  ],
+  "source_confidence": "high"
+}

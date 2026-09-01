@@ -1,0 +1,169 @@
+{
+  "schema_version": 2,
+  "alternate_names": [
+    "pawn roller",
+    "pawn avalanche"
+  ],
+  "historical_names": [],
+  "tags": [
+    "attack",
+    "pawns",
+    "opposite-castling"
+  ],
+  "subcategory": "attacking method",
+  "difficulty": "intermediate",
+  "knowledge_type_note": "A method with a clear precondition — the pawns being advanced must not be your own king's shelter.",
+  "name_status": "established-name",
+  "history": {
+    "attributions": [],
+    "first_documented_source": "gambit-art-of-attacking-chess",
+    "year": null,
+    "confidence": "unknown",
+    "notes": "Standard vocabulary; no coinage researched. The systematic treatment of opposite-side-castling races is attributable to the modern attacking literature rather than to any individual.",
+    "competing_claims": [],
+    "development": []
+  },
+  "engine_era_status": "reliable",
+  "engine_era_note": "Engines storm readily with opposite-side castling and are notably reluctant to do so with same-side castling, which matches the precondition exactly. They also find the central counter-blow far faster than humans do, which has made premature storms harder to get away with.",
+  "recognition": {
+    "preconditions": [
+      "A group of pawns advancing towards the enemy king",
+      "Pieces available to use the lines that open"
+    ],
+    "indicators_for": [
+      "Opposite-side castling, so the storming pawns are not your own shelter",
+      "A hook — an advanced enemy shield pawn to attack",
+      "The centre is closed or under control",
+      "Rooks already placed on the files that will open"
+    ],
+    "indicators_against": [
+      "Same-side castling, so the storm exposes your own king",
+      "The centre is open or can be opened by the defender",
+      "No pieces can follow into the opened lines",
+      "The defender is faster in the race"
+    ],
+    "prerequisites": [
+      "king-attack",
+      "king-safety"
+    ],
+    "detector": null,
+    "detectability": "heuristic",
+    "typical_confidence": "medium",
+    "false_positive_traps": [
+      "Advancing pawns at a king is not an attack unless pieces can follow. Without that, it is a structural concession.",
+      "With same-side castling the same moves that attack also expose, and this is the commonest way a storm rebounds.",
+      "Counting the storm's speed without counting the defender's central break is how these positions are misjudged."
+    ]
+  },
+  "application": {
+    "typical_plans": [
+      "Count tempi to contact and start first",
+      "Attack a hook to force a file open",
+      "Combine the storm with prophylaxis against the counter-attack"
+    ],
+    "typical_moves": [
+      "h4-h5 and g4-g5",
+      "g6 as a breakthrough sacrifice"
+    ],
+    "typical_pawn_structures": [
+      "Opposite-side castling with pawn masses facing each other",
+      "A defender's h6 or g6 as a hook"
+    ],
+    "typical_piece_arrangements": [
+      "Rooks behind the advancing pawns"
+    ],
+    "tactical_consequences": [
+      "Sacrifices to open the last file are routine and often correct"
+    ],
+    "strategic_consequences": [
+      "A failed storm usually leaves the attacker structurally worse for the endgame"
+    ]
+  },
+  "exceptions": [
+    "With same-side castling the storm is a concession first and an attack second.",
+    "A central counter-blow refutes a premature storm — the standard antidote.",
+    "Against an intact shield with no hook, the storm may never force a file open at all."
+  ],
+  "limitations": [
+    "Whether the storm arrives first is a concrete calculation, not a judgement."
+  ],
+  "misconceptions": [
+    "That pushing pawns at the king is an attack. It is a way of making a road; without pieces it is a weakness.",
+    "That storms are always double-edged. With opposite-side castling they cost the attacker nothing."
+  ],
+  "relationships": {
+    "broader": [
+      "king-attack"
+    ],
+    "narrower": [],
+    "related": [
+      "king-attack",
+      "king-safety",
+      "luft",
+      "center-control",
+      "space"
+    ],
+    "contrasting": [],
+    "co_occurring": [
+      "king-attack"
+    ],
+    "conflicts": [
+      {
+        "concept": "king-safety",
+        "resolution": "The same pawn moves attack and expose, and the resolution is which king they shelter. Opposite-side castling removes the conflict entirely; same-side castling makes it acute, and there king safety wins unless a concrete line says otherwise."
+      }
+    ]
+  },
+  "examples": [],
+  "counterexamples": [],
+  "ambiguous_examples": [],
+  "explanations": {
+    "by_level": {
+      "beginner": "Push your pawns at their king to open a line your rooks and queen can use.",
+      "intermediate": "A pawn storm. It is nearly free when you have castled on the opposite side, and expensive when you have castled on the same side.",
+      "advanced": "The pawns make the road; the pieces do the work. Look for a hook to attack, and check the centre before committing.",
+      "master": "In opposite-castling races count tempi to contact, and combine the storm with prophylaxis rather than racing blind."
+    },
+    "by_depth": {
+      "short": "Push pawns at their king to open a file.",
+      "normal": "A pawn storm: advancing pawns at the enemy king to trade off its shelter and open a line for your pieces. It costs nothing when you have castled on the other wing, and dismantles your own cover when you have not.",
+      "deep": "The pawns are the tool, not the attack — their job is to force a file open for the pieces behind them. The precondition is whose shelter they are: with opposite-side castling they are not yours, so the game becomes a race where one tempo decides; with same-side castling the same advance exposes you. A hook makes it work, since an advanced enemy shield pawn gives you something to attack; against an intact shield the file usually has to be forced with a sacrifice. The standard refutation is a central counter-blow, since a wing attack is only as sound as your control of the centre."
+    },
+    "hedge": "",
+    "lesson": "Before storming, ask two questions: are these pawns sheltering my own king, and can my pieces follow into the lines that open?"
+  },
+  "terminology": {
+    "beginner_words": [
+      "push the pawns at their king"
+    ],
+    "advanced_words": [
+      "pawn storm",
+      "hook",
+      "opposite-side castling",
+      "race",
+      "central counter-blow"
+    ],
+    "avoid": [
+      "pushing pawns is an attack"
+    ]
+  },
+  "status": {
+    "stage": "researched",
+    "last_updated": "2026-09-01",
+    "open_questions": [],
+    "audit_notes": []
+  },
+  "id": "pawn-storm",
+  "canonical_name": "Pawn storm",
+  "category": "attack-principles",
+  "knowledge_type": "strategic-principle",
+  "definition_short": "Advancing a group of pawns at the enemy king to open a file for the pieces behind them.",
+  "definition_long": "Pawns are a barrier, and the king is safe behind them; a storm's purpose is to trade that barrier away and open a line the heavy pieces can use. The pawns are not the attack — they are the tool that creates the road.\n\nTHE PRECONDITION is which pawns you are pushing. With OPPOSITE-SIDE CASTLING the g- and h-pawns are not your own king's shelter, so they can be thrown forward at no cost to your own safety, and the game becomes a race in which a single tempo decides. With SAME-SIDE CASTLING the same advance dismantles your own cover, and the burden of proof shifts entirely onto the attacker.\n\nA HOOK makes it work. If the defender has advanced a shield pawn — ...h6, say — the attacker has something to attack with g4-g5, which forces the file open. Against an intact f7-g7-h7 there is nothing to bite on, and the storm has to force the exchange itself, usually with a sacrifice.\n\nThe standard refutation is a central counter-blow: a wing attack is only as sound as your control of the centre, and the classic punishment for a premature storm is ...d5 opening lines at the storming side's own king.",
+  "sources": [
+    "gambit-art-of-attacking-chess",
+    "vukovic-art-of-attack",
+    "uscfsales-pawn-storm",
+    "chessworld-king-safety"
+  ],
+  "source_confidence": "high"
+}

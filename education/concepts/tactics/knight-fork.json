@@ -1,0 +1,156 @@
+{
+  "schema_version": 2,
+  "alternate_names": [
+    "family fork (when it hits king, queen and rook)",
+    "royal fork (king and queen)"
+  ],
+  "historical_names": [],
+  "tags": [
+    "tactics",
+    "knights",
+    "detector-backed"
+  ],
+  "subcategory": "fork variant",
+  "difficulty": "beginner",
+  "knowledge_type_note": "A named variant of the fork, kept separate because the knight's geometry makes it behave differently from every other forking piece.",
+  "name_status": "established-name",
+  "history": {
+    "attributions": [],
+    "first_documented_source": "informant-encyclopedia-combinations",
+    "year": null,
+    "confidence": "unknown",
+    "notes": "A descriptive name of long, anonymous usage.",
+    "competing_claims": [],
+    "development": []
+  },
+  "engine_era_status": "reliable",
+  "engine_era_note": "Wholly mechanical and unaffected by engine-era revision. findMotifs() in this repository detects it as part of its general fork test.",
+  "recognition": {
+    "preconditions": [
+      "A knight attacks two or more enemy units after the move"
+    ],
+    "indicators_for": [
+      "One target is the king, making the fork absolute",
+      "A target is undefended or outranks the knight",
+      "The landing square cannot be attacked by an enemy pawn",
+      "The classic c7/f7 geometry against a king and a corner rook"
+    ],
+    "indicators_against": [
+      "The landing square is defended and the knight is simply lost",
+      "Both targets are defended and cheaper than the knight",
+      "The defender has a check or stronger counter-threat first"
+    ],
+    "prerequisites": [
+      "fork"
+    ],
+    "detector": "findMotifs -> fork",
+    "detectability": "mechanical",
+    "typical_confidence": "high",
+    "false_positive_traps": [
+      "The landing square must be safe. This base's fork controlled pair shows the same knight move at +7.39 and at +0.57 depending only on whether one bishop guards the square.",
+      "A knight attacking two defended pawns is not a fork worth reporting."
+    ]
+  },
+  "application": {
+    "typical_plans": [
+      "Manoeuvre the knight towards a square from which it forks",
+      "Force the enemy pieces onto squares of one colour, which is the geometry a knight fork needs",
+      "Decoy a piece onto a forking square with a sacrifice"
+    ],
+    "typical_moves": [
+      "Nc7+ and Nf7 forking king and rook",
+      "Nd6+ and Ne7+ family forks"
+    ],
+    "typical_pawn_structures": [
+      "Structures where the knight has an outpost within forking range"
+    ],
+    "typical_piece_arrangements": [
+      "King and rook on squares of the same colour, a knight's move apart"
+    ],
+    "tactical_consequences": [
+      "Wins material outright when absolute"
+    ],
+    "strategic_consequences": [
+      "An outpost within forking distance of the king is worth more than one that is not"
+    ]
+  },
+  "exceptions": [
+    "A knight fork on a guarded square wins nothing.",
+    "Only another knight can attack a knight back without moving, which is why knight-versus-knight forks behave differently."
+  ],
+  "limitations": [
+    "Detecting the geometry is mechanical; deciding it wins material requires resolving the exchange."
+  ],
+  "misconceptions": [
+    "That a knight fork always wins material. The landing square's safety decides it.",
+    "That the family and royal fork are distinct motifs. They are the same motif with more expensive targets."
+  ],
+  "relationships": {
+    "broader": [
+      "fork"
+    ],
+    "narrower": [],
+    "related": [
+      "fork",
+      "outpost",
+      "double-attack",
+      "smothered-mate",
+      "loose-piece"
+    ],
+    "contrasting": [],
+    "co_occurring": [
+      "loose-piece"
+    ],
+    "conflicts": []
+  },
+  "examples": [],
+  "counterexamples": [],
+  "ambiguous_examples": [],
+  "explanations": {
+    "by_level": {
+      "beginner": "The knight attacks two pieces at once. They cannot both move, and nothing can block a knight.",
+      "intermediate": "A knight fork. Check the square the knight lands on is safe first — that is what decides whether it wins anything.",
+      "advanced": "The knight attacks the opposite colour to the square it stands on, so a forked piece can never defend itself by attacking back. Nothing interposes either.",
+      "master": "Geometry first: get the enemy pieces onto one colour and the knight within range. The forking square's safety is the whole condition."
+    },
+    "by_depth": {
+      "short": "The knight hits two things at once.",
+      "normal": "A knight fork: one knight attacks two or more pieces, and neither interposition nor counter-attack defends, because a knight cannot be blocked and attacks the opposite colour to the one it occupies.",
+      "deep": "The most dangerous form of fork, for three reasons rooted in the knight's move. It attacks squares of the opposite colour to the one it stands on, so a forked piece cannot defend itself by attacking back — only another knight can. Its move is the hardest to visualise, so these are the tactics most often missed. And it cannot be blocked, so interposition is never a defence. The classic squares are c7 and f7 against a king and a corner rook. The conditions for it to win material are the fork's general ones and they bite hard: in a controlled test the same Nc7+ is worth +7.39 with the landing square free and +0.57 with one bishop guarding it."
+    },
+    "hedge": "",
+    "lesson": "When you see a knight fork, check the square it lands on before you check anything else."
+  },
+  "terminology": {
+    "beginner_words": [
+      "the knight attacks two things"
+    ],
+    "advanced_words": [
+      "knight fork",
+      "family fork",
+      "royal fork",
+      "absolute fork"
+    ],
+    "avoid": [
+      "a knight fork always wins material"
+    ]
+  },
+  "status": {
+    "stage": "researched",
+    "last_updated": "2026-09-01",
+    "open_questions": [],
+    "audit_notes": []
+  },
+  "id": "knight-fork",
+  "canonical_name": "Knight fork",
+  "category": "tactical-motifs",
+  "knowledge_type": "tactical-motif",
+  "definition_short": "A fork delivered by a knight — the most dangerous kind, because no other piece can be defended against it by standing next to it.",
+  "definition_long": "The fork's most common and most dangerous form. Three properties of the knight's move are responsible.\n\nFirst, the knight attacks squares of the OPPOSITE colour to the one it stands on, so a forked piece can never simply defend itself by attacking the knight back — except another knight. Second, its move is the hardest to visualise, so knight forks are the tactics most often missed. Third, the knight cannot be blocked, so interposition is never a defence.\n\nThe archetypal squares are c7 and f7 (c2 and f2 mirrored), where a knight forks the king and a rook in the corner. When king, queen and rook are hit at once, the result is often called a FAMILY FORK; when it is king and queen, a ROYAL FORK. Both names are attested and neither is essential.\n\nThe conditions for it to WIN are the fork's general ones, and they matter as much here: the landing square must be safe, and at least one target must be undefended or worth more than the knight. A knight fork on a defended square wins nothing, and this base contains an engine-tested controlled pair demonstrating exactly that — the same Nc7+ swings 6.82 pawns depending on whether one bishop covers the landing square.",
+  "sources": [
+    "informant-encyclopedia-combinations",
+    "wikipedia-chess-tactic",
+    "chesstempo-tactical-motifs"
+  ],
+  "source_confidence": "high"
+}
