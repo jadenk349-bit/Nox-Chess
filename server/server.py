@@ -970,6 +970,13 @@ STATIC_FILES = {
     "/engine/stockfish.wasm.js": ("engine/stockfish.wasm.js", "text/javascript; charset=utf-8"),
     "/engine/stockfish.wasm":    ("engine/stockfish.wasm",    "application/wasm"),
     "/assets/nox-logo.png":      ("assets/nox-logo.png",      "image/png"),
+    # The board is a photograph, not a drawing: the squares, the frame around
+    # them and the twelve men are all cut out of one shot of one board by
+    # tools/make_board_art.py. image/webp is required, not optional — served as
+    # anything else the men lose their transparency and stand on grey tiles.
+    "/assets/board-squares.webp": ("assets/board-squares.webp", "image/webp"),
+    "/assets/board-frame.webp":   ("assets/board-frame.webp",   "image/webp"),
+    "/assets/pieces.webp":        ("assets/pieces.webp",        "image/webp"),
     # the seven rank badges the ranked screen shows, one per tier
     "/assets/tier-bronze.png":      ("assets/tier-bronze.png",      "image/png"),
     "/assets/tier-silver.png":      ("assets/tier-silver.png",      "image/png"),
