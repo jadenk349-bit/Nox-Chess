@@ -18,16 +18,16 @@ Mean completeness **0.70** across 135 concepts.
 |---|---|---|---|
 | full | 0.92 | `pawn-structures` | 4 |
 | full | 0.81 | `opening-theory-concepts` | 4 |
+| substantial | 0.96 | `gambit-principles` | 2 |
 | substantial | 0.96 | `bishop-endgames` | 2 |
-| substantial | 0.93 | `gambit-principles` | 2 |
 | substantial | 0.88 | `king-safety` | 2 |
 | substantial | 0.79 | `checks-captures-threats` | 2 |
 | substantial | 0.77 | `pawn-breaks` | 2 |
 | substantial | 0.77 | `weak-squares` | 2 |
 | substantial | 0.73 | `restriction` | 2 |
 | substantial | 0.73 | `named-theoretical-positions` | 3 |
+| substantial | 0.71 | `positional-sacrifices` | 2 |
 | substantial | 0.65 | `blindfold-visualisation` | 4 |
-| substantial | 0.65 | `positional-sacrifices` | 2 |
 | substantial | 0.64 | `named-mating-patterns` | 2 |
 | substantial | 0.63 | `official-rules` | 12 |
 | partial | 1.00 | `tactical-combinations` | 1 |
@@ -46,14 +46,15 @@ Mean completeness **0.70** across 135 concepts.
 | partial | 0.88 | `piece-exchanges` | 1 |
 | partial | 0.87 | `named-tactical-patterns` | 1 |
 | partial | 0.87 | `space` | 1 |
+| partial | 0.87 | `exchange-sacrifices` | 1 |
 | partial | 0.86 | `opening-principles` | 1 |
 | partial | 0.83 | `drawing-mechanisms` | 1 |
 | partial | 0.80 | `development` | 1 |
 | partial | 0.75 | `piece-properties` | 1 |
 | partial | 0.75 | `piece-activity` | 1 |
+| partial | 0.73 | `prophylaxis` | 1 |
 | partial | 0.73 | `overprotection` | 1 |
 | partial | 0.73 | `knights` | 1 |
-| partial | 0.73 | `exchange-sacrifices` | 1 |
 | partial | 0.73 | `notation` | 1 |
 | partial | 0.69 | `triangulation` | 1 |
 | partial | 0.69 | `fortresses` | 1 |
@@ -74,7 +75,6 @@ Mean completeness **0.70** across 135 concepts.
 | partial | 0.60 | `positional-evaluation` | 1 |
 | partial | 0.60 | `initiative` | 1 |
 | partial | 0.60 | `defensive-principles` | 1 |
-| partial | 0.60 | `prophylaxis` | 1 |
 | partial | 0.60 | `piece-coordination` | 1 |
 | partial | 0.60 | `worst-placed-piece` | 1 |
 | partial | 0.60 | `strong-squares` | 1 |
@@ -126,14 +126,15 @@ Mean completeness **0.70** across 135 concepts.
 | `weak-square` | 0.93 | x | x | x | x | x | x | x | x | - | x | . | x | x | x | x | x |
 | `bishop-pair` | 0.93 | x | x | x | x | x | x | x | x | - | x | . | x | x | x | x | x |
 | `material-imbalance` | 0.93 | x | x | x | x | x | x | x | - | x | x | . | x | x | x | x | x |
+| `compensation` | 0.93 | x | x | x | . | x | x | x | x | - | x | . | x | x | x | x | x |
 | `opposition` | 0.92 | x | x | x | x | x | . | x | x | . | - | x | . | x | x | x | x |
 | `wrong-rook-pawn` | 0.92 | x | x | x | x | x | . | x | x | . | - | x | . | x | x | x | x |
 | `board-geometry` | 0.92 | x | x | x | . | x | . | x | x | . | - | x | . | x | x | x | x |
 | `piece-exchanges` | 0.88 | x | x | x | x | x | x | x | x | - | - | x | x | x | x | x | x |
 | `space` | 0.87 | x | x | x | x | x | x | x | - | x | x | . | x | - | x | x | x |
 | `backward-pawn` | 0.87 | x | x | x | x | x | x | x | - | x | x | . | x | - | x | x | x |
+| `exchange-sacrifice` | 0.87 | x | x | x | x | x | x | x | - | x | x | . | x | - | x | x | x |
 | `greek-gift` | 0.87 | x | x | x | x | x | x | x | x | - | x | . | - | x | x | x | x |
-| `compensation` | 0.86 | x | x | x | . | x | x | x | x | - | x | . | - | x | x | x | x |
 | `early-queen-development` | 0.86 | x | x | x | . | x | x | x | - | x | x | . | - | x | x | x | x |
 | `perpetual-check` | 0.83 | x | x | x | . | x | x | x | - | . | x | . | . | - | x | x | x |
 | `hanging-piece` | 0.83 | x | x | x | . | x | x | x | - | . | x | . | . | - | x | x | x |
@@ -150,10 +151,11 @@ Mean completeness **0.70** across 135 concepts.
 | `loose-piece` | 0.75 | x | x | x | . | x | x | x | - | . | - | . | . | - | x | x | x |
 | `blockade` | 0.73 | x | x | x | x | x | x | x | - | - | - | . | x | - | x | x | x |
 | `overprotection` | 0.73 | x | x | x | x | x | x | x | - | - | - | . | x | - | x | x | x |
+| `prophylaxis` | 0.73 | x | x | x | x | x | x | x | - | - | - | . | x | - | x | x | x |
 | `restraint` | 0.73 | x | x | x | x | x | x | x | - | - | - | . | x | - | x | x | x |
 | `minority-attack` | 0.73 | x | x | x | x | x | x | x | - | - | - | . | x | - | x | x | x |
 | `knight-vs-bishop` | 0.73 | x | x | x | x | x | x | x | - | - | - | . | x | - | x | x | x |
-| `exchange-sacrifice` | 0.73 | x | x | x | x | x | x | - | - | x | x | . | - | - | x | x | x |
+| `positional-sacrifice` | 0.73 | x | x | x | x | x | x | x | - | - | - | . | x | - | x | x | x |
 | `notation` | 0.73 | x | x | x | x | x | . | - | - | . | . | . | . | - | x | x | x |
 | `castling` | 0.70 | x | x | x | . | x | . | x | - | . | . | . | . | - | x | x | - |
 | `en-passant` | 0.70 | x | x | x | . | x | . | x | - | . | . | . | . | - | x | x | - |
@@ -188,7 +190,6 @@ Mean completeness **0.70** across 135 concepts.
 | `candidate-moves` | 0.60 | x | x | x | x | x | x | - | - | - | - | . | - | - | x | x | x |
 | `planning` | 0.60 | x | x | x | x | x | x | - | - | - | - | . | - | - | x | x | x |
 | `defensive-principles` | 0.60 | x | x | x | x | x | x | - | - | - | - | . | - | - | x | x | x |
-| `prophylaxis` | 0.60 | x | x | x | x | x | x | - | - | - | - | . | - | - | x | x | x |
 | `initiative` | 0.60 | x | x | x | x | x | x | - | - | - | - | . | - | - | x | x | x |
 | `classical-school` | 0.60 | x | x | x | x | x | x | - | - | - | - | . | - | - | x | x | x |
 | `historical-principles` | 0.60 | x | x | x | x | x | x | - | - | - | - | . | - | - | x | x | x |
@@ -200,7 +201,6 @@ Mean completeness **0.70** across 135 concepts.
 | `strong-square` | 0.60 | x | x | x | x | x | x | - | - | - | - | . | - | - | x | x | x |
 | `piece-coordination` | 0.60 | x | x | x | x | x | x | - | - | - | - | . | - | - | x | x | x |
 | `positional-evaluation` | 0.60 | x | x | x | x | x | x | - | - | - | - | . | - | - | x | x | x |
-| `positional-sacrifice` | 0.60 | x | x | x | x | x | x | - | - | - | - | . | - | - | x | x | x |
 | `static-vs-dynamic` | 0.60 | x | x | x | x | x | x | - | - | - | - | . | - | - | x | x | x |
 | `transformation-of-advantages` | 0.60 | x | x | x | x | x | x | - | - | - | - | . | - | - | x | x | x |
 | `worst-placed-piece` | 0.60 | x | x | x | x | x | x | - | - | - | - | . | - | - | x | x | x |
