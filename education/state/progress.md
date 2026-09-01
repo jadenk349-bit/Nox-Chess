@@ -397,6 +397,21 @@ turns on whether the consequences could be calculated. Capablanca's 24.Qg8+
 against Mattison is mate in two, and therefore sham by Spielmann and a queen
 sacrifice by Chernev. Recorded as ambiguous; this base adjudicates neither.
 
+### The same defect three times, and it is a class
+
+`two-weaknesses` fired on 72.5% with one of its four preconditions built.
+`loose-piece` fired on 34.9% because the *second* of its two traps was ignored.
+`open-file` fires on 55.7% with its **registered** false positive — "without an
+entry square, a rook on it accomplishes nothing" — never implemented at all, and
+its third trap, that a contested file leaves neither side anything, likewise.
+Building both takes it to **35.5%**.
+
+Three matchers, one shape: the record's bare *precondition* was implemented and
+the *traps* written underneath it were not, and in every case the traps were the
+part that carried the chess. The next audit should read every matcher against
+its record's traps rather than its preconditions — that is where the conditions
+actually live in this knowledge base.
+
 That is the third metric this project has caught telling it what it wanted to
 hear — after the mass test's "99.7% positional coverage" and the corpus
 checker's scoring of negative examples — and all three were found the same way:

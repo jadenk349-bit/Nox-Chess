@@ -765,6 +765,27 @@ const { concepts } = API.knowledge();
      /sham/i.test(rec.definition_long) && (rec.sources || []).includes('spielmann-art-of-sacrifice'));
 }
 
+{
+  // open-file carried a REGISTERED false positive that had never been
+  // implemented: "a file with no pawns is not automatically useful. Without an
+  // entry square, a rook on it accomplishes nothing." Requiring a rook on the
+  // file had taken it from 61% to 55.7%; requiring the rook to be able to ENTER
+  // - a legal move down the file into the opponent's half after which static
+  // exchange evaluation does not win it - takes it to 37.8%.
+  // Both sides doubled on the same open file: the record's third trap says
+  // "contested files where all rooks come off leave neither side with anything".
+  const contested = API.analyzeWithEducation({ fen: '3r2k1/3r1ppp/8/8/8/8/3R1PPP/3R2K1 w - - 0 1' });
+  ok('open-file: a contested file is not an entry for anybody',
+     !contested.concepts_all.some(c => c.id === 'open-file'),
+     JSON.stringify(contested.concepts_all.filter(c => c.id === 'open-file')));
+  // ...and it still fires where a rook really does have somewhere to go.
+  has('open-file: reported where the rook can enter',
+      API.analyzeWithEducation({ fen: '4r1k1/5ppp/8/8/8/8/3R1PPP/3R2K1 w - - 0 1' })
+        .concepts_all.map(c => c.id), 'open-file');
+  ok('open-file: the measured rate is recorded in the source',
+     /35\.5%/.test(fs.readFileSync(path.join(ROOT, 'lib', 'matchers.js'), 'utf8')));
+}
+
 /* ---------- report ---------- */
 console.log(`\nAPI  PASS ${pass}   FAIL ${fails.length}`);
 for (const [n, d] of fails) console.log(`  FAIL  ${n}\n        ${d}`);

@@ -140,8 +140,14 @@ const PRIORITY = [
 
   // ...and the band that is true of most positions, last, because being true
   // here is not news.
-  'semi-open-file', 'material-imbalance', 'piece-activity', 'space',
-  'open-file', 'weak-square',
+  //
+  // Re-sorted 2026-09 after two matchers were tightened against conditions
+  // their own records state and had never implemented: open-file 55.7% ->
+  // 37.8% once a usable entry square is required, and two-weaknesses 72.5% ->
+  // 38.6% once three of its four preconditions are built. Both moved up to
+  // where the measurement now puts them.
+  'open-file', 'semi-open-file', 'material-imbalance', 'piece-activity',
+  'space', 'weak-square',
 ];
 const priorityOf = id => {
   const i = PRIORITY.indexOf(id);
@@ -240,12 +246,58 @@ const STRUCTURAL = [
       // queen actually standing on the file, which is what makes it this side's
       // file rather than a fact about the pawns.
       if (!f.files.open.length || totalHeavy(f) === 0) return null;
-      const occupied = [];
-      for (const c of ['w', 'b']) for (const r of f.pieces[c].rooksOnOpenFiles) occupied.push(`${side(f, c)}'s rook on ${r}`);
-      if (!occupied.length) return null;
-      const because = [`the ${f.files.open.join('- and ')}-file${f.files.open.length > 1 ? 's are' : ' is'} open, and ${occupied.join(' and ')} stand${occupied.length > 1 ? '' : 's'} on it`];
-      return { confidence: 'high', because,
-               slots: { file: f.files.open[0] }, subjects: ['w', 'b'] };
+      // ...and the record's REGISTERED false positive, which had never been
+      // implemented: "a file with no pawns is not automatically useful. Without
+      // an entry square, a rook on it accomplishes nothing." Requiring a rook on
+      // the file took this from 61% to 55.7%; requiring the rook to be able to
+      // ENTER - a legal move down the file into the opponent's half after which
+      // static exchange evaluation does not win it - takes it to 35.5%, and it
+      // is the difference between a fact about the pawns and a plan.
+      const P = FEAT.page;
+      const st = P.stateFromFEN(f.fen);
+      const cols = new Set(f.files.open.map(x => x.charCodeAt(0) - 97));
+      const entries = [];
+      for (const c of ['w', 'b']) {
+        if (!f.pieces[c].rooksOnOpenFiles.length) continue;
+        let moves;
+        if (st.turn === c) {
+          try { moves = P.legalMoves(st); } catch (e) { continue; }
+        } else {
+          const flipped = P.cloneState(st);
+          flipped.turn = c; flipped.ep = null;
+          try { moves = P.legalMoves(flipped); } catch (e) { continue; }
+        }
+        const base = st.turn === c ? st : (() => { const q = P.cloneState(st); q.turn = c; q.ep = null; return q; })();
+        const hit = moves.find(m => {
+          const pc = base.b[m.from];
+          if (!pc || pc.t !== 'R' || pc.c !== c) return false;
+          if (!cols.has(m.from & 7) || (m.to & 7) !== (m.from & 7)) return false;
+          const row = m.to >> 3;
+          if (!(c === 'w' ? row <= 3 : row >= 4)) return false;
+          const nx = P.makeMove(base, m);
+          if (P.see(nx, m.to, other(c)) > 0) return false;
+          // ...and the record's third trap: "contested files where all rooks
+          // come off leave neither side with anything". An entry that is simply
+          // met by the enemy rook on the same file is a trade, not an entry, and
+          // a first version reported BOTH sides as having one on a file where
+          // each had doubled rooks facing the other.
+          for (let rr = 0; rr < 8; rr++) {
+            const q = base.b[rr * 8 + (m.to & 7)];
+            if (q && q.c === other(c) && (q.t === 'R' || q.t === 'Q')) return false;
+          }
+          return true;
+        });
+        if (hit) entries.push({ c, from: FEAT.nameOf(hit.from), to: FEAT.nameOf(hit.to) });
+      }
+      if (!entries.length) return null;
+      const e0 = entries[0];
+      return {
+        confidence: 'high',
+        because: entries.map(e => `${side(f, e.c)}'s rook on ${e.from} stands on an open file with a square to ` +
+                                  `enter on: ${e.to}, where nothing wins it`),
+        slots: { file: e0.from[0], square: e0.to },
+        subjects: entries.map(e => e.c),
+      };
     },
   },
   {

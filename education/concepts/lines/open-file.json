@@ -60,7 +60,7 @@
       "Occupying it costs a tempo the position cannot spare"
     ],
     "prerequisites": [],
-    "detector": "fileOccupancy (not yet written)",
+    "detector": "lib/matchers.js: open-file, implementing the record's entry-square and contested-file traps",
     "detectability": "mechanical",
     "typical_confidence": "high",
     "false_positive_traps": [
@@ -100,7 +100,8 @@
     "Nimzowitsch's usage of the term differs from the modern one."
   ],
   "limitations": [
-    "The feature is trivially detectable and therefore trivially over-reportable. Usability is the whole question."
+    "The feature is trivially detectable and therefore trivially over-reportable. Usability is the whole question.",
+    "MEASURED 2026-09-01 and fixed: this record's REGISTERED false positive - 'a file with no pawns is not automatically useful; without an entry square, a rook on it accomplishes nothing' - had never been implemented. The matcher required a rook on the file, which took it from 61% to 55.7% of the 788 shipped positions and left it the second-broadest label in the base. Requiring the rook to be able to ENTER - a legal move down the file into the opponent's half after which static exchange evaluation does not win it - and then the third trap, that a file the enemy also has a rook or queen on is contested rather than entered, brings it to 35.5%. Both conditions were in the record and neither was in the code."
   ],
   "misconceptions": [
     "That rooks belong on open files unconditionally. They belong on files they can invade down.",
