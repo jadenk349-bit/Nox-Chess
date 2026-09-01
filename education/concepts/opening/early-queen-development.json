@@ -72,7 +72,7 @@
     ]
   },
   "exceptions": [
-    "Openings where theory brings the queen out early, such as the Scandinavian after 1.e4 d5 2.exd5 Qxd5.",
+    "Openings where theory brings the queen out early, such as the Scandinavian after 1.e4 d5 2.exd5 Qxd5. Measured, these do not escape the tempo cost - the Scandinavian concedes about 0.46 more than 1...e5 - they simply accept it as affordable.",
     "Queen moves that create a threat the opponent must answer, which reverses who is gaining tempi.",
     "Positions where no minor piece can attack the queen usefully."
   ],
@@ -83,7 +83,8 @@
   "misconceptions": [
     "That an early queen move loses material or the game. In the measured case it costs about two thirds of a pawn.",
     "That the danger is to the queen herself. The queen is rarely trapped; the cost is time.",
-    "That the rule is absolute. Several sound openings violate it by design."
+    "That the rule is absolute. Several sound openings violate it by design.",
+    "That openings which break the rule escape its cost. The Scandinavian pays about 0.46 for its early queen move and is a good opening anyway."
   ],
   "relationships": {
     "broader": [
@@ -148,7 +149,42 @@
     }
   ],
   "counterexamples": [],
-  "ambiguous_examples": [],
+  "ambiguous_examples": [
+    {
+      "fen": "rnb1kbnr/ppp1pppp/8/3q4/8/8/PPPP1PPP/RNBQKBNR w KQkq - 0 3",
+      "note": "The Scandinavian after 1.e4 d5 2.exd5 Qxd5, the standard counterexample to the early-queen rule. Tested because this base had asserted it as a clean exception; the measurement says otherwise. (Constructed-test: the FEN was built from the move sequence.)",
+      "origin_kind": "constructed-test",
+      "concept_role": "ambiguous",
+      "side_to_move_benefits": "white",
+      "engine": {
+        "engine_id": "Stockfish 18",
+        "test_level": 3,
+        "depth": 26,
+        "threads": 10,
+        "hash_mb": 2048,
+        "multipv": 3,
+        "best_move": "b1c3",
+        "eval_cp": 76,
+        "mate_in": null,
+        "pv": [],
+        "alternatives": [
+          {
+            "move": "g1f3",
+            "eval_cp": 28,
+            "mate_in": null
+          },
+          {
+            "move": "d2d4",
+            "eval_cp": 26,
+            "mate_in": null
+          }
+        ],
+        "margin_cp": 48,
+        "verdict": "ambiguous",
+        "verdict_note": "Corrects an assertion this base made before testing it. The Scandinavian was written up as showing that the early-queen rule 'simply does not bite'. It does bite: White stands at +0.76 here against +0.30 after 1...e5, so Black concedes roughly 0.46 by exactly the mechanism the rule names, and White's best move 3.Nc3 gains the tempo the rule warns about. Filed as ambiguous because the opening is nonetheless entirely sound and played at every level - which makes it evidence that the rule measures a real price rather than evidence that early queen moves are refuted."
+      }
+    }
+  ],
   "explanations": {
     "by_level": {
       "beginner": "Bring your knights and bishops out first. If the queen comes out early, your opponent attacks her and develops at the same time.",
@@ -183,14 +219,16 @@
     "stage": "validated",
     "last_updated": "2026-09-01",
     "open_questions": [],
-    "audit_notes": []
+    "audit_notes": [
+      "2026-09-01: the Scandinavian claim was asserted before it was tested, then corrected when the measurement contradicted it. Recorded rather than quietly edited."
+    ]
   },
   "id": "early-queen-development",
   "canonical_name": "Bringing the queen out early",
   "category": "opening-principles",
   "knowledge_type": "rule-of-thumb",
   "definition_short": "Developing the queen before the minor pieces usually loses time, because the opponent gains tempi by attacking her with moves they wanted to play anyway.",
-  "definition_long": "The most-repeated rule in beginner instruction, and one of the few whose cost this base has measured directly.\n\nTHE MECHANISM is tempo, not danger. The queen is worth more than every piece that can attack her, so she must retreat from any attack. If the attacking move is one the opponent wanted to play in any case — a knight or bishop coming to a natural square — then the attack is free for them and the retreat is not free for you. The opponent develops; you shuffle. Nothing is hanging and nothing is lost, which is why the penalty is a matter of a fraction of a pawn rather than of material.\n\nTHE MEASURED COST: in the position after 1.e4 e5, Stockfish 18 at depth 26 evaluates 2.Nf3 at +0.30 and 2.Qh5 at -0.38 — a swing of 0.68 pawns. That is a genuine and consistent penalty, and it is also a good deal smaller than the rule's tone in most primers suggests. An early queen move costs about two thirds of a pawn, not the game.\n\nTHE CONDITION is whether the queen can be attacked with tempo. Where the opponent's natural developing moves do not hit her, the rule simply does not bite, which is why perfectly respectable openings move the queen early: the Scandinavian's main line has Black's queen out on move two, and the Danish, the Scotch and many queenside openings involve early queen moves that no one objects to.",
+  "definition_long": "The most-repeated rule in beginner instruction, and one of the few whose cost this base has measured directly.\n\nTHE MECHANISM is tempo, not danger. The queen is worth more than every piece that can attack her, so she must retreat from any attack. If the attacking move is one the opponent wanted to play in any case — a knight or bishop coming to a natural square — then the attack is free for them and the retreat is not free for you. The opponent develops; you shuffle. Nothing is hanging and nothing is lost, which is why the penalty is a matter of a fraction of a pawn rather than of material.\n\nTHE MEASURED COST: in the position after 1.e4 e5, Stockfish 18 at depth 26 evaluates 2.Nf3 at +0.30 and 2.Qh5 at -0.38 — a swing of 0.68 pawns. That is a genuine and consistent penalty, and it is also a good deal smaller than the rule's tone in most primers suggests. An early queen move costs about two thirds of a pawn, not the game.\n\nTHE CONDITION is whether the queen can be attacked with tempo, and the standard counterexample turns out to be more interesting than it is usually presented. The Scandinavian brings Black's queen out on move two and is a thoroughly respectable defence - but measured, it PAYS the cost the rule predicts. After 1.e4 d5 2.exd5 Qxd5, White stands at +0.76, against +0.30 for the mainstream 1...e5. Black concedes about 0.46 by the same mechanism the rule describes, and 3.Nc3 hitting the queen is exactly how. The honest conclusion is not that the rule fails here but that the cost is AFFORDABLE: +0.76 is a playable position, and a sound opening may pay a tempo for something it wants. The rule identifies a real price; it does not decide whether the price is worth paying.",
   "sources": [
     "chessstrategyonline-opening-principles",
     "chessworld-king-safety",

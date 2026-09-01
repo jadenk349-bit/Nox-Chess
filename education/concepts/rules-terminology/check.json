@@ -41,7 +41,9 @@
     "detector": "inCheck",
     "detectability": "mechanical",
     "typical_confidence": "medium",
-    "false_positive_traps": []
+    "false_positive_traps": [
+      "A check being available is not a reason to play it. Proven case: Ra7+ draws and Rg8+ loses in the same position."
+    ]
   },
   "application": {
     "typical_plans": [],
@@ -57,7 +59,9 @@
   "limitations": [
     "Check is not a threat to be evaluated; it is a state. Being in check is not itself bad, and giving check is not itself good."
   ],
-  "misconceptions": [],
+  "misconceptions": [
+    "That a check is a good move because it forces a reply. In the Vancura position one check draws and another loses."
+  ],
   "relationships": {
     "broader": [],
     "narrower": [],
@@ -70,7 +74,24 @@
     "conflicts": []
   },
   "examples": [],
-  "counterexamples": [],
+  "counterexamples": [
+    {
+      "fen": "R7/6k1/P4r2/8/3K4/8/8/8 w - - 0 1",
+      "note": "The Vancura drawing position, used here for a different purpose: it contains two checks with opposite results, which makes it an unusually clean demonstration that 'a check is available' says nothing about whether checking is right.",
+      "origin_kind": "tablebase-position",
+      "concept_role": "contradicts",
+      "side_to_move_benefits": "neither",
+      "tablebase": {
+        "source": "Lichess tablebase (Syzygy, 7-piece)",
+        "pieces": 5,
+        "wdl": "draw",
+        "dtz": 0,
+        "dtm": 0,
+        "category": "draw",
+        "note": "PROVEN, every legal move checked. Ra7+ is a check and HOLDS THE DRAW. Rg8+ is also a check and LOSES. Rh8 and Rf8 lose as well, so three of seventeen legal moves throw away a proven draw. Two checks, one position, opposite results - the surface feature carries no information on its own. This is the resolution position for the check-not-good false-positive case."
+      }
+    }
+  ],
   "ambiguous_examples": [],
   "explanations": {
     "by_level": {
@@ -97,7 +118,7 @@
   },
   "status": {
     "stage": "researched",
-    "last_updated": "2026-08-31",
+    "last_updated": "2026-09-01",
     "open_questions": [],
     "audit_notes": []
   }
