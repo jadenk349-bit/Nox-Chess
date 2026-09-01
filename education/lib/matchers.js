@@ -86,7 +86,8 @@ const PRIORITY = [
   // then structural features, most informative first
   'outpost', 'rook-on-the-seventh', 'passed-pawn', 'isolated-queen-pawn',
   'backward-pawn', 'doubled-pawns', 'opposite-coloured-bishops', 'bishop-pair',
-  'bad-bishop', 'luft', 'semi-open-file', 'open-file', 'weak-square', 'material-imbalance',
+  'two-weaknesses', 'worst-placed-piece', 'bad-bishop', 'luft', 'semi-open-file', 'open-file',
+  'weak-square', 'material-imbalance',
   'king-activation',
   'space', 'piece-activity',
 ];
@@ -285,6 +286,26 @@ const STRUCTURAL = [
             subjects: [c],
           };
         }
+      }
+      return null;
+    },
+  },
+  {
+    concept: 'two-weaknesses',
+    implements: ("definition: one weakness can usually be held; a second on the FAR SIDE of the " +
+                 "board stretches a finite defence past breaking. The file distance between the " +
+                 "weaknesses is therefore the concept, not their number"),
+    run(f) {
+      for (const c of ['w', 'b']) {
+        const s = f.weakSpread[other(c)];
+        if (!s || !s.separated || s.weak.length < 2) continue;
+        return {
+          confidence: 'medium',
+          because: [`${side(f, other(c))} has weaknesses on ${brief(s.weak, 4)} — ${s.spread} files ` +
+                    `apart, so no single defensive set-up covers both`],
+          slots: { square: s.weak[0] },
+          subjects: [c],
+        };
       }
       return null;
     },
@@ -516,7 +537,49 @@ function matchMotifs(motifs, moveInfo) {
   return out;
 }
 
-function matchAll(features, moveInfo, concepts) {
+/* Concepts that are properties of a MOVE rather than of a position. The
+ * human-grounded corpus exposed the need for these: worst-placed-piece is a
+ * claim about what a move achieves, and asking only about the board it was
+ * played from missed an annotated instance entirely. */
+const MOVE_BASED = [
+  {
+    concept: 'worst-placed-piece',
+    implements: ("the record's condition — when nothing urgent is happening, the right move is the " +
+                 "one that improves the piece doing least. Measured as an increase in the MINIMUM " +
+                 "piece scope across the side's own pieces"),
+    run(before, after, moveInfo) {
+      // The record's precondition is that nothing more urgent is happening, and
+      // that is a property of the MOVE rather than of the whole position. An
+      // earlier version demanded a quiet position and so missed Rubinstein's
+      // 20.e3 — which improves the worst pieces AND gains a tempo, exactly as
+      // its annotator says. A move that captures or checks is doing something
+      // else; a quiet move in a position with no check against you is not.
+      if (before.quietness.inCheck) return null;
+      const san = moveInfo.san || '';
+      if (/[x+#]/.test(san)) return null;
+      const mover = before.sideToMove;
+      const b = before.scopes[mover], a = after.scopes[mover];
+      if (!b || !b.length || !a || !a.length) return null;
+      const worstBefore = b[0], worstAfter = a[0];
+      if (worstAfter.moves <= worstBefore.moves) return null;
+      // and the total must not have fallen: a move that frees one piece by
+      // burying two has not improved anything.
+      const sum = xs => xs.reduce((n, x) => n + x.moves, 0);
+      if (sum(a) < sum(b)) return null;
+      return {
+        confidence: 'low',
+        because: [`${moveInfo.san || 'the move'} raises the scope of ${side(before, mover)}'s least ` +
+                  `active piece from ${worstBefore.moves} squares (the ${worstBefore.type === 'N' ? 'knight' :
+                    worstBefore.type === 'B' ? 'bishop' : worstBefore.type === 'R' ? 'rook' : 'queen'} on ` +
+                  `${worstBefore.square}) to ${worstAfter.moves}, in a position where nothing is forcing`],
+        slots: {},
+        subjects: [mover],
+      };
+    },
+  },
+];
+
+function matchAll(features, moveInfo, concepts, featuresAfter) {
   const found = [];
   for (const m of STRUCTURAL) {
     let r = null;
@@ -530,6 +593,19 @@ function matchAll(features, moveInfo, concepts) {
       raw_confidence: r.confidence,
       because: r.because, subjects: r.subjects || [], slots: r.slots || {},
     });
+  }
+  if (moveInfo && moveInfo.legal && featuresAfter) {
+    for (const m of MOVE_BASED) {
+      let r = null;
+      try { r = m.run(features, featuresAfter, moveInfo); } catch (e) { r = null; }
+      if (!r) continue;
+      const rec = concepts[m.concept];
+      if (!rec) continue;
+      found.push({ concept: m.concept, source: 'move', implements: m.implements,
+                   confidence: cap(r.confidence, rec.knowledge_type),
+                   raw_confidence: r.confidence, because: r.because,
+                   subjects: r.subjects || [], slots: r.slots || {} });
+    }
   }
   if (moveInfo && moveInfo.legal) {
     for (const m of matchMotifs(moveInfo.motifs, moveInfo)) {
@@ -571,4 +647,4 @@ function matchAll(features, moveInfo, concepts) {
   return found;
 }
 
-module.exports = { matchAll, matchMotifs, STRUCTURAL, MOTIF_TO_CONCEPT, CEILING, cap, PRIORITY };
+module.exports = { matchAll, matchMotifs, STRUCTURAL, MOVE_BASED, MOTIF_TO_CONCEPT, CEILING, cap, PRIORITY };

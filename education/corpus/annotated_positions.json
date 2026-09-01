@@ -1,0 +1,156 @@
+{
+  "version": 1,
+  "note": [
+    "HUMAN-GROUNDED positional corpus. Every entry exists because a reputable human source",
+    "explicitly named the concept for this position — never because an engine liked a move.",
+    "",
+    "The division of labour is the point, and it is recorded per entry:",
+    "  the CONCEPT and its explanation come from the human annotation;",
+    "  Stockfish verifies only whether the annotated move is sound, what it prefers,",
+    "  and whether the positional claim survives concrete calculation.",
+    "",
+    "engine.agrees is therefore a FINDING, not a filter. An annotated move the engine",
+    "does not choose is kept, because the concept can be sound while the move is not,",
+    "and that distinction is exactly what a learner needs and what an engine-labelled",
+    "corpus destroys.",
+    "",
+    "fen_verified records how the position was obtained. 'replay' means the whole game",
+    "was played through the page's own move generator, so the FEN is derived rather than",
+    "transcribed. Two game scores from reputable sources have already failed that check.",
+    "",
+    "alternate_concepts_considered was originally one list, and the stress test showed why that was wrong: it lumped concepts that are ALSO TRUE but secondary together with concepts that would be WRONG here. Reporting the first is correct behaviour and reporting the second is a false positive, so they are now separate fields and only rejected_as_wrong counts against the system.",
+    "",
+    "fen_concept_realised exists for entries where the concept only appears after a FORCED reply. 9.Nxc6 creates a doubled isolated pawn, and it does so after Black recaptures; asking about the position between the two halves of the exchange is asking before the concept exists."
+  ],
+  "concept_roles": {
+    "positive": "the concept clearly applies, on the annotator's authority",
+    "negative": "the board superficially resembles the concept and it should NOT be labelled that way",
+    "ambiguous": "the concept contributes but is not clearly the primary explanation"
+  },
+  "positions": [
+    {
+      "game": "Rubinstein-Salwe, Lodz 1908",
+      "source": "amazingatlas-rubinstein-salwe",
+      "players": "Akiba Rubinstein - Georg Salwe",
+      "event": "Lodz 1908",
+      "year": 1908,
+      "annotator": "Nicholas Van Der Nat (Chess.com), following the classical literature",
+      "fen_verified": "replay: all 77 plies replayed legally through blind-chess.html's move generator",
+      "added": "2026-09-01",
+      "id": "rubinstein-salwe-1908-9Nxc6-two-weaknesses",
+      "concept": "two-weaknesses",
+      "concept_role": "positive",
+      "fen": "r1b1kb1r/pp3ppp/1qn2n2/3p4/3N4/2N3P1/PP2PPBP/R1BQK2R w KQkq - 1 9",
+      "move": "Nxc6",
+      "move_uci": "d4c6",
+      "human_annotation": "'The critical moment comes at move 9 when Rubinstein plays 9.Nxc6!, trading the knight to give Black a doubled, isolated c-pawn. Black now has two problems: a weak d-pawn AND a weak c-pawn.'",
+      "explanation": "The concept applies because the capture MANUFACTURES the second weakness rather than exploiting an existing one. Before it Black has one target, the isolated d5 pawn; after it Black has two, on c6 and d5, and they cannot both be defended by pawns. This base's own detector confirms the structural claim: after 9...bxc6 Black's pawns stand on a, c, c, d, f, g, h with three islands.",
+      "engine": {
+        "engine_id": "Stockfish 18",
+        "depth": 22,
+        "multipv": 3,
+        "best_move": "Nb5",
+        "best_eval_cp": 54,
+        "annotated_move_eval_cp": 49,
+        "annotated_move_rank": 2,
+        "agrees": "substantially — the annotated move is the engine's second choice, 0.05 behind its first",
+        "note": "The engine marginally prefers 9.Nb5. A five-hundredth of a pawn is not a disagreement about the plan, and the structural consequence the annotator describes is not in doubt."
+      },
+      "confidence": "high",
+      "why_not_alternates": "doubled-pawns and the isolated pawn are the RESULT and are recorded separately; what makes this two-weaknesses is that a second, separated target is created on purpose. piece-exchanges describes the mechanism, not the aim.",
+      "also_true_but_secondary": [
+        "doubled-pawns",
+        "isolated-queen-pawn",
+        "piece-exchanges"
+      ],
+      "rejected_as_wrong": [
+        "transformation-of-advantages"
+      ],
+      "fen_after": "r1b1kb1r/pp3ppp/1qN2n2/3p4/8/2N3P1/PP2PPBP/R1BQK2R b KQkq - 0 9",
+      "fen_after_note": "The position the annotated move reaches. A move-based concept describes what the move ACHIEVES, so the checker looks here as well as at the position before it.",
+      "fen_concept_realised": "r1b1kb1r/p4ppp/1qp2n2/3p4/8/2N3P1/PP2PPBP/R1BQK2R w KQkq - 0 10",
+      "fen_concept_realised_note": "After 9.Nxc6 bxc6, the forced recapture. The doubled isolated c-pawn the annotation is about exists only here."
+    },
+    {
+      "game": "Rubinstein-Salwe, Lodz 1908",
+      "source": "amazingatlas-rubinstein-salwe",
+      "players": "Akiba Rubinstein - Georg Salwe",
+      "event": "Lodz 1908",
+      "year": 1908,
+      "annotator": "Nicholas Van Der Nat (Chess.com), following the classical literature",
+      "fen_verified": "replay: all 77 plies replayed legally through blind-chess.html's move generator",
+      "added": "2026-09-01",
+      "id": "rubinstein-salwe-1908-20e3-improving",
+      "concept": "worst-placed-piece",
+      "concept_role": "positive",
+      "fen": "r1r3k1/p2n1ppp/2p1b3/1q1p4/N2Q4/5PP1/PP2PR1P/2R2BK1 w - - 4 20",
+      "move": "e3",
+      "move_uci": "e2e3",
+      "human_annotation": "'After patient maneuvering, Rubinstein plays the instructive 20.e3! This seemingly small move accomplishes a great deal: it gains a tempo by attacking Black's queen, opens a diagonal for the bishop, and clears the second rank so the rook can swing from f2 to c2, doubling on the c-file.'",
+      "explanation": "A quiet move whose entire purpose is to improve the pieces that are doing least — the f1 bishop, shut in, and the f2 rook, off the file that matters. The concept's condition is satisfied exactly: nothing urgent is happening, so the right move is the one that improves the worst-placed piece.",
+      "engine": {
+        "engine_id": "Stockfish 18",
+        "depth": 22,
+        "multipv": 3,
+        "best_move": "e3",
+        "best_eval_cp": 31,
+        "annotated_move_eval_cp": 31,
+        "annotated_move_rank": 1,
+        "agrees": "yes — the annotated move is the engine's first choice",
+        "note": "A rare clean agreement between a century-old annotation and a modern engine on a quiet move."
+      },
+      "confidence": "high",
+      "why_not_alternates": "semi-open-file names where the rook is going and not why this move is right. prophylaxis was rejected: nothing of Black's is being prevented, White's own pieces are being improved, which is the distinction the two records exist to keep apart.",
+      "also_true_but_secondary": [
+        "semi-open-file",
+        "piece-activity"
+      ],
+      "rejected_as_wrong": [
+        "prophylaxis",
+        "planning"
+      ],
+      "fen_after": "r1r3k1/p2n1ppp/2p1b3/1q1p4/N2Q4/4PPP1/PP3R1P/2R2BK1 b - - 0 20",
+      "fen_after_note": "The position the annotated move reaches. A move-based concept describes what the move ACHIEVES, so the checker looks here as well as at the position before it."
+    },
+    {
+      "game": "Rubinstein-Salwe, Lodz 1908",
+      "source": "amazingatlas-rubinstein-salwe",
+      "players": "Akiba Rubinstein - Georg Salwe",
+      "event": "Lodz 1908",
+      "year": 1908,
+      "annotator": "Nicholas Van Der Nat (Chess.com), following the classical literature",
+      "fen_verified": "replay: all 77 plies replayed legally through blind-chess.html's move generator",
+      "added": "2026-09-01",
+      "id": "rubinstein-salwe-1908-24b4-second-weakness",
+      "concept": "two-weaknesses",
+      "concept_role": "ambiguous",
+      "fen": "r5k1/p1r2ppp/1qp1b3/2Rp4/3Q4/4PPP1/PPR4P/5BK1 w - - 3 24",
+      "move": "b4",
+      "move_uci": "b2b4",
+      "human_annotation": "'Now Rubinstein plays 24.b4!, the decisive pawn break. The immediate threat is 25.b5, attacking the immobilized c-pawn a third time. Black is forced to play 24...a6, creating yet another weakness: the a6-pawn.'",
+      "explanation": "The human claim is that the pawn break forces a THIRD target into existence on a6, stretching a defence already tied to c6 and d5. The concept is well attested here; the MOVE is not the engine's.",
+      "engine": {
+        "engine_id": "Stockfish 18",
+        "depth": 22,
+        "multipv": 3,
+        "best_move": "Rb2",
+        "best_eval_cp": 424,
+        "annotated_move_eval_cp": null,
+        "annotated_move_rank": ">3",
+        "agrees": "NO — the engine plays 22.Rb2 at +4.24 and does not rank the annotated move in its top three, all of which are at most +1.52",
+        "note": "Recorded as a disagreement rather than resolved. The strategic idea the annotation describes is real and the game bears it out, and the engine sees a much stronger continuation that the annotator does not mention. Both are true. This is why concept_role here is AMBIGUOUS: the concept contributes and is not the whole explanation of why the position is winning."
+      },
+      "confidence": "medium",
+      "why_not_alternates": "minority-attack was considered and rejected — this is not a Carlsbad structure and White is not advancing a minority into a majority. pawn-breaks describes the move; two-weaknesses describes its purpose.",
+      "also_true_but_secondary": [
+        "pawn-breaks",
+        "restraint"
+      ],
+      "rejected_as_wrong": [
+        "minority-attack"
+      ],
+      "fen_after": "r5k1/p1r2ppp/1qp1b3/2Rp4/1P1Q4/4PPP1/P1R4P/5BK1 b - b3 0 24",
+      "fen_after_note": "The position the annotated move reaches. A move-based concept describes what the move ACHIEVES, so the checker looks here as well as at the position before it."
+    }
+  ]
+}

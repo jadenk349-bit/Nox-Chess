@@ -71,6 +71,11 @@ function pawnStructure(st, colour) {
   const forward = colour === 'w' ? -1 : 1;   // direction of travel in rows
 
   const doubled = [], isolated = [], passed = [], backward = [], blockadedPassers = [];
+  // A pawn no friendly pawn can EVER defend: nothing on an adjacent file at or
+  // behind its rank. This is the general definition of a weak pawn and it catches
+  // what isolated/backward miss — c6 in Rubinstein-Salwe 1908, which is defended
+  // by no pawn and never can be, while d5 beside it is defended by c6 itself.
+  const undefendable = [];
 
   for (let f = 0; f < 8; f++) {
     if (me[f].length > 1) for (const i of me[f]) doubled.push(nameOf(i));
@@ -90,6 +95,20 @@ function pawnStructure(st, colour) {
           const ahead = forward === -1 ? rowOf(j) < r : rowOf(j) > r;
           if (ahead) { blocked = true; break; }
         }
+      }
+      // can any friendly pawn ever defend this one?
+      {
+        let canBeDefended = false;
+        for (const dc of [-1, 1]) {
+          const g = f + dc;
+          if (g < 0 || g > 7) continue;
+          for (const j of me[g]) {
+            const rj = rowOf(j);
+            // "behind" means further from the promotion square
+            if (forward === -1 ? rj >= r : rj <= r) canBeDefended = true;
+          }
+        }
+        if (!canBeDefended) undefendable.push(nameOf(i));
       }
       if (!blocked) {
         // Is it blockaded? An enemy PIECE standing directly in front of a passer
@@ -131,7 +150,7 @@ function pawnStructure(st, colour) {
 
   return {
     count: occupied.reduce((n, f) => n + me[f].length, 0),
-    doubled, isolated, passed, backward, blockadedPassers, islands,
+    doubled, isolated, passed, backward, blockadedPassers, undefendable, islands,
     files: occupied.map(f => FILES[f]),
   };
 }
@@ -222,6 +241,49 @@ function outposts(st, colour) {
     if (pawnDefended) out.push({ square: nameOf(i), piece: p.t });
   }
   return out;
+}
+
+/* How much each non-pawn piece can actually do, so a caller can ask which piece
+ * is doing least. The worst-placed-piece concept is about exactly that
+ * comparison and had no detector, which the human-grounded corpus exposed on
+ * Rubinstein-Salwe 1908 move 20 - an annotated instance the system could not
+ * see at all. */
+function pieceScopes(st, colour) {
+  const probe = P.cloneState(st);
+  probe.turn = colour;
+  probe.ep = null;
+  let moves = [];
+  try { moves = P.legalMoves(probe); } catch (e) { return []; }
+  const byFrom = new Map();
+  for (const m of moves) byFrom.set(m.from, (byFrom.get(m.from) || 0) + 1);
+  const out = [];
+  for (let i = 0; i < 64; i++) {
+    const pc = st.b[i];
+    if (!pc || pc.c !== colour || pc.t === 'P' || pc.t === 'K') continue;
+    out.push({ square: nameOf(i), type: pc.t, moves: byFrom.get(i) || 0 });
+  }
+  out.sort((a, b) => a.moves - b.moves);
+  return out;
+}
+
+/* Weak pawns, and whether they are SEPARATED. The two-weaknesses record says a
+ * single weakness can usually be held and a second one on the far side of the
+ * board cannot, so the file distance between them is the concept, not the count. */
+function weakPawnSpread(structure) {
+  const weak = [...new Set(structure.isolated.concat(structure.backward, structure.doubled,
+                                                     structure.undefendable))];
+  if (weak.length < 2) return { weak, spread: 0, separated: false };
+  const files = weak.map(sq => sq.charCodeAt(0) - 97);
+  const spread = Math.max(...files) - Math.min(...files);
+  // Threshold calibrated against the canonical example rather than guessed. The
+  // first version demanded 3 files apart, on the record's wording "a second on
+  // the far side of the board" — and Rubinstein-Salwe 1908, which IS the textbook
+  // two-weaknesses game, has its targets on a and c, two files apart and both on
+  // the queenside. Rubinstein did not attack on opposite wings; he attacked c6,
+  // then made a second target on a6. The real condition is two targets that one
+  // defensive unit cannot cover, and adjacent files fail that only because one
+  // pawn can guard both.
+  return { weak, spread, separated: spread >= 2 };
 }
 
 /* Is this a QUIET position? The corpus this base has is 788 tactical puzzles,
@@ -467,6 +529,9 @@ function features(fen) {
     pieces: pieceFeatures(st),
     king: { w: kingFeatures(st, 'w'), b: kingFeatures(st, 'b') },
     quietness: quietness(st),
+    scopes: { w: pieceScopes(st, 'w'), b: pieceScopes(st, 'b') },
+    weakSpread: { w: weakPawnSpread(pawnStructure(st, 'w')),
+                  b: weakPawnSpread(pawnStructure(st, 'b')) },
     activity: {
       mobility: { w: mobility(st, 'w'), b: mobility(st, 'b') },
       pawnSpace: { w: pawnSpace(st, 'w'), b: pawnSpace(st, 'b') },
@@ -533,6 +598,6 @@ function motifsOfLine(fen, uciMoves) {
 module.exports = {
   features, motifsOfMove, motifsOfLine, phaseOf, material, pawnStructure, fileState,
   holesFor, reachableHoles, outposts, pieceFeatures, kingFeatures, mobility, pawnSpace,
-  bishopPawnColours, quietness,
+  bishopPawnColours, quietness, pieceScopes, weakPawnSpread,
   nameOf, isLight, page: P,
 };

@@ -161,7 +161,19 @@ function analyzeWithEducation(opts) {
     if (!moveInfo.legal) notes.push(`the move ${move} is not legal in this position; it was ignored`);
   }
 
-  const matched = MATCH.matchAll(features, moveInfo, concepts).slice(0, maxConcepts);
+  // Features of the position the move REACHES, so move-based concepts can ask
+  // what the move achieved rather than only what was there before it.
+  let featuresAfter = null;
+  if (moveInfo && moveInfo.legal && moveInfo.fenAfter) {
+    try { featuresAfter = FEAT.features(moveInfo.fenAfter); } catch (e) { featuresAfter = null; }
+  }
+  // Everything licensed, and separately the subset worth showing. The corpus
+  // stress test found worst-placed-piece being MATCHED and then sliced off by
+  // the display limit, because low-confidence entries sort last — so the system
+  // knew the annotated concept applied and the caller could not tell. A display
+  // cap must not double as a claim that nothing else was found.
+  const matchedAll = MATCH.matchAll(features, moveInfo, concepts, featuresAfter);
+  const matched = matchedAll.slice(0, maxConcepts);
 
   const out = matched.map(m => {
     const rec = concepts[m.concept];
@@ -222,6 +234,10 @@ function analyzeWithEducation(opts) {
 
   return {
     fen,
+    // Every concept the position licensed, in rank order, whether or not it fit
+    // the display limit. Callers wanting completeness should read this.
+    concepts_all: matchedAll.map(m => ({ id: m.concept, confidence: m.confidence,
+                                         detected_by: m.source })),
     side_to_move: features.sideToMove,
     phase: features.phase,
     move: moveInfo && moveInfo.legal

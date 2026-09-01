@@ -110,6 +110,16 @@ def main():
     if verbose and aline:
         print("   " + aline[0])
 
+    # 3f. The human-grounded corpus: provenance complete, and the API agreeing
+    # with what a human expert actually said about the position.
+    cc = subprocess.run([sys.executable, os.path.join(HERE, "tools", "corpus_check.py")],
+                        capture_output=True, text=True)
+    cl = [l for l in (cc.stdout or "").splitlines() if "FALSE NEGATIVE" in l or "provenance" in l]
+    check("annotated_corpus", cc.returncode == 0,
+          "; ".join(x.strip() for x in cl) or "corpus_check.py failed")
+    if verbose and cl:
+        print("   " + "; ".join(x.strip() for x in cl))
+
     # 4. constructed positions must be labelled, never dressed as history
     for cid, c in C.items():
         for b in ("examples", "counterexamples", "ambiguous_examples"):
