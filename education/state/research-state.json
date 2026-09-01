@@ -1037,23 +1037,24 @@
   "schema_version": 2,
   "checkpoint": {
     "last_successful": "2026-09-02",
-    "session": "session-9",
+    "session": "session-10",
     "how_to_resume": [
       "1. Read education/README.md, then ARCHITECTURE.md and METHODOLOGY.md.",
       "2. Run: python3 education/tools/validate_kb.py && python3 education/tools/run_tests.py && node education/tests/test_api.js && python3 education/tools/corpus_check.py",
-      "3. state/COMPLETION.md is the assessment against the ten criteria; state/ladder.json is per-concept and machine-readable; state/TRAPS.md and state/firing_rates.json are the two artifacts added this session.",
-      "4. The corpus in corpus/annotated_positions.json is the primary ground truth for positional concepts. Every entry is a human annotation first and an engine result second, and the engine's DISAGREEMENTS are kept on purpose. `attributed_by` names the person the claim rests on and is what the validation ladder counts - `annotator` is prose and must not be counted.",
-      "5. THE TRAP READING LIST IS AT ZERO UNREAD, which is not the same as done: 28 of the 108 traps are arguments on a record rather than guards in the code, and `node tools/trap_audit.js` prints the split for that reason. Thirteen defects came out of reading the first 89.",
-      "6. The next work is named in COMPLETION.md under 'What is still missing, precisely'. In one line: negative and ambiguous examples, which do not yield to mining and have to be hunted one concept at a time in annotations - and, newly, the observation that the sharpest remaining failures are not about detection at all but about WEIGHT and RANK, where everything reported is true.",
-      "7. Two corpus entries are RECORDED FAILURES kept failing on purpose (Reti-Capablanca 1924 piece-activity, Ftacnik-Roiz 2009 bishop-pair). Do not 'fix' them with a guard fitted to one position; if they are ever to pass it must be because a concept that fits was built - `queen-activity` in the first case.",
-      "8. Respect `tool_limitations` and `failed_research_attempts` - those are measured dead ends, not untried ideas.",
-      "9. Measure firing rates on all three denominators (`node tools/firing_rates.js`, plain / --quiet / --corpus). They disagree, and `luft` is the standing proof that reading one of them alone puts the wrong concept at the head of an explanation."
+      "3. Artifacts: state/COMPLETION.md (the ten criteria), state/ladder.json (per concept), state/TRAPS.md (the reading list), state/firing_rates.json, state/pawn_endings.json and state/breakthrough_proof.json (this session's).",
+      "4. THE READING LIST IS THE ENGINE OF THIS PROJECT. `node tools/trap_audit.js --unread` lists every condition a concept record states - false_positive_traps AND indicators_against - that nobody has written about. It stood at 0 unread until it turned out to be reading half the fields; it now reads 106 of 246 unread. Seventeen defects have come out of it, including two in Layer 3 that had been true of every measurement in the project.",
+      "5. THREE ANSWERS TO A CONDITION, and the third is the one that keeps being right: build it, argue on the record that it cannot be built, or SAY IT IN THE SENTENCE. Five times in two sessions a guard was written, measured, found to delete a canonical position, and replaced by a caveat in the wording - passed-pawn, doubled-pawns, king-activation, bishop-pair, blockade. With a firing-rate metric in front of you the temptation is to answer every condition with a guard.",
+      "6. WHEN A GUARD DELETES A CANONICAL POSITION, THE GUARD IS WRONG. Rubinstein-Salwe for two-weaknesses, Capablanca-Tartakower for king-activation, Capablanca-Rubinstein for rook-on-the-seventh, Havasi-Capablanca for bishop-pair, Lisitsin-Capablanca for blockade, the three-against-three for pawn-breakthrough. Check the corpus before and after every change: `python3 tools/corpus_check.py`.",
+      "7. Three corpus entries are RECORDED FAILURES kept failing on purpose - Reti-Capablanca 1924 (piece-activity), Ftacnik-Roiz 2009 (bishop-pair, a confidence overclaim), Karpov-Polgar 2001 (rook-on-the-seventh, a false positive that LEADS). Do not fix them with a rule fitted to one position.",
+      "8. Measure firing rates on all three denominators (`node tools/firing_rates.js`, plain / --quiet / --corpus), and pawn endings with `node tools/pawn_endings.js` + `python3 tools/verify_breakthrough.py`, which is the only place in this project where a claim can be PROVED.",
+      "9. The next work is in COMPLETION.md under 'What is still missing, precisely'. In one line: negative and ambiguous human-grounded examples, hunted one concept at a time in articles by named authors ABOUT the failure mode - 'when a hole is not a weakness', 'hypnotised by the bishops', 'how not to play when you have space advantage', 'rooks in paradise'. Six corpus entries have come from four such articles and every one is a position built to catch exactly the reading a mechanical detector performs.",
+      "10. Respect `tool_limitations` and `failed_research_attempts` - measured dead ends, not untried ideas."
     ],
     "what_worked_this_session": [
-      "Reading each concept record's false_positive_traps against the matcher meant to implement them. Thirteen defects, including one in Layer 3 that had been true of every measurement in the project.",
-      "Asking what a metric was actually counting. Three metrics were flattering themselves and all three went down when asked twice: the human-grounded rung, the trap audit's own first version, and the firing-rate denominator.",
-      "Hunting negatives in named authors' articles ABOUT the failure mode - 'when a hole is not a weakness', 'hypnotised by the bishops', 'how not to play when you have space advantage'. Four of the five new corpus entries came from three such articles, and every one of them is a position built to catch exactly the reading a mechanical detector performs.",
-      "Answering a trap by SAYING MORE rather than by firing less, three times: passed-pawn, doubled-pawns, king-activation. With a firing-rate metric in front of you the temptation is to answer every trap with a guard."
+      "Generating a position type the system had never seen. Pawn endings: 20,000 of them, two real bugs in pawnBreakthrough(), and the first PROOF-based validation in the project - Syzygy decides a seven-man pawn ending outright.",
+      "Asking what a metric was actually counting, for the fourth and fifth time. The trap audit read half the fields; `quiet` had never tested for winning captures. Both numbers were wrong in the flattering direction and both are fixed.",
+      "Reading each record's indicators_against, not only its false_positive_traps. That is where the Karpov-Polgar failure was hiding, and it is half the conditions in the knowledge base.",
+      "Answering a condition by saying more rather than firing less, when the guard would delete a canonical position."
     ]
   },
   "unresolved_historical_claims": [
