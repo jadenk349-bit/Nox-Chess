@@ -631,16 +631,21 @@ const STRUCTURAL = [
   },
   {
     concept: 'piece-activity',
-    implements: "recognition.indicators_for: a difference in what the pieces can do",
+    implements: ("recognition.indicators_for, and the record's own first false-positive trap, which the " +
+                 "earlier version contradicted: 'counting available squares is not measuring activity. A " +
+                 "piece with many moves that bear on nothing is not active.' Counted over ACTIVE moves - " +
+                 "captures, moves into the opponent's half, and moves that attack an enemy man from where " +
+                 "they land - rather than legal ones."),
     run(f) {
-      const w = f.activity.mobility.w, b = f.activity.mobility.b;
+      const w = f.activity.active.w, b = f.activity.active.b;
       if (w == null || b == null) return null;
       const gap = Math.abs(w - b);
       if (gap < 8) return null;                 // small gaps are noise, not activity
       const c = w > b ? 'w' : 'b';
       return {
         confidence: 'low',
-        because: [`${side(f, c)} has ${Math.max(w, b)} legal moves against ${Math.min(w, b)}`],
+        because: [`${side(f, c)} has ${Math.max(w, b)} moves that do something — a capture, a step into the ` +
+                  `opponent's half, or an attack from where the piece lands — against ${Math.min(w, b)}`],
         subjects: [c],
       };
     },

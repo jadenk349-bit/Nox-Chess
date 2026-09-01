@@ -406,11 +406,30 @@ entry square, a rook on it accomplishes nothing" — never implemented at all, a
 its third trap, that a contested file leaves neither side anything, likewise.
 Building both takes it to **35.5%**.
 
-Three matchers, one shape: the record's bare *precondition* was implemented and
+`piece-activity` counted **legal moves**, which is word for word what its
+record's first trap forbids — "counting available squares is not measuring
+activity. A piece with many moves that bear on nothing is not active." It now
+counts active moves, threshold unchanged: 44.4% → **33.9%**.
+
+Four matchers, one shape: the record's bare *precondition* was implemented and
 the *traps* written underneath it were not, and in every case the traps were the
 part that carried the chess. The next audit should read every matcher against
 its record's traps rather than its preconditions — that is where the conditions
 actually live in this knowledge base.
+
+### And one failure kept failing on purpose
+
+Fixing `piece-activity` broke a corpus entry, and the break was the useful part.
+Keene's note on Réti–Capablanca 1924 is that Capablanca "is doing his utmost
+with his strongest piece" — and the entry had been *passing* because
+piece-activity was reported for **White**, whose army really is the more active,
+while the annotation is about **Black's queen**. Naming the side made that
+visible, and the entry now fails.
+
+It is left failing. An army-level measure cannot state a single-piece claim; the
+concept that fits is `queen-activity`, which has no matcher; and the limitation
+is written on both records. Loosening the measure, or dropping the side, would
+have made the number better and the record worse.
 
 That is the third metric this project has caught telling it what it wanted to
 hear — after the mass test's "99.7% positional coverage" and the corpus

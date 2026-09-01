@@ -536,6 +536,41 @@ function mobility(st, colour) {
   try { return P.legalMoves(flipped).length; } catch (e) { return null; }
 }
 
+/* ACTIVE moves, as opposed to legal ones.
+ *
+ * The piece-activity record's first false-positive trap says it in one line:
+ * "Counting available squares is not measuring activity. A piece with many
+ * moves that bear on nothing is not active." The matcher counted legal moves,
+ * which is the thing the trap forbids, and fired on 44.4% of the 788 shipped
+ * positions. A move counts here only if it does something: it captures, it
+ * crosses into the opponent's half, or it attacks an enemy man from where it
+ * lands. King moves are excluded - a king shuffling is not activity.
+ *
+ * Measured on the same 788 positions, an eight-move gap in ACTIVE moves fires
+ * on 33.9%. The threshold is unchanged; what changed is what is counted. */
+function activeMoves(st, colour) {
+  const probe = P.cloneState(st);
+  probe.turn = colour;
+  probe.ep = null;
+  let ms;
+  try { ms = P.legalMoves(probe); } catch (e) { return null; }
+  let n = 0;
+  for (const m of ms) {
+    const pc = probe.b[m.from];
+    if (!pc || pc.t === 'K') continue;
+    if (m.cap) { n++; continue; }
+    const row = m.to >> 3;
+    if (colour === 'w' ? row <= 3 : row >= 4) { n++; continue; }
+    const nx = P.makeMove(probe, m);
+    for (let i = 0; i < 64; i++) {
+      const q = nx.b[i];
+      if (!q || q.c === colour) continue;
+      if (P.attackersOf(nx, i, colour).indexOf(m.to) >= 0) { n++; break; }
+    }
+  }
+  return n;
+}
+
 /* Space: squares in the opponent's half attacked by our pawns. Deliberately the
  * narrow pawn-only definition, because it is the one that is observable without
  * judgement; piece "space" is a different and vaguer claim. */
@@ -926,6 +961,7 @@ function features(fen) {
     breakthrough: { w: pawnBreakthrough(st, 'w'), b: pawnBreakthrough(st, 'b') },
     activity: {
       mobility: { w: mobility(st, 'w'), b: mobility(st, 'b') },
+      active: { w: activeMoves(st, 'w'), b: activeMoves(st, 'b') },
       pawnSpace: { w: pawnSpace(st, 'w'), b: pawnSpace(st, 'b') },
     },
   };
@@ -998,7 +1034,7 @@ function motifsOfLine(fen, uciMoves) {
 module.exports = {
   features, motifsOfMove, motifsOfLine, phaseOf, material, pawnStructure, fileState,
   holesFor, reachableHoles, outposts, pieceFeatures, kingFeatures, mobility, pawnSpace,
-  bishopPawnColours, quietness, pieceScopes, weakPawnSpread, safeSquaresFor,
+  bishopPawnColours, quietness, pieceScopes, weakPawnSpread, safeSquaresFor, activeMoves,
   centralSquareControl, kingZoneAttackers, pawnBreakthrough, winsTheRace,
   nameOf, isLight, page: P,
 };

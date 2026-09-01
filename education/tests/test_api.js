@@ -786,6 +786,39 @@ const { concepts } = API.knowledge();
      /35\.5%/.test(fs.readFileSync(path.join(ROOT, 'lib', 'matchers.js'), 'utf8')));
 }
 
+{
+  // piece-activity counted LEGAL moves, which is exactly what its record's first
+  // trap forbids: "counting available squares is not measuring activity. A piece
+  // with many moves that bear on nothing is not active." It now counts ACTIVE
+  // moves - captures, moves into the opponent's half, and moves that attack an
+  // enemy man from where they land. Threshold unchanged; what is counted changed.
+  const f = FEAT.features('4rnk1/r2n1p2/1p1R2pp/pP5q/3N4/P3N1P1/1Q3PKP/3R4 b - - 0 27');
+  ok('activity: legal-move counts and active-move counts differ',
+     f.activity.mobility.w !== f.activity.active.w,
+     `${f.activity.mobility.w} vs ${f.activity.active.w}`);
+  ok('activity: the measured rate is recorded in the source',
+     /33\.9%/.test(fs.readFileSync(path.join(ROOT, 'lib', 'features.js'), 'utf8')));
+  // The starting position is perfectly symmetrical and must not be called active
+  // for either side, on either measure.
+  ok('activity: not reported in the symmetrical starting position',
+     !API.analyzeWithEducation({ fen: START }).concepts_all.some(c => c.id === 'piece-activity'));
+}
+{
+  // A recorded FAILURE, kept failing on purpose. Keene's claim about
+  // Reti-Capablanca 1924 is that ONE PIECE is carrying a side, and this base's
+  // piece-activity is an army-level measure. The corpus entry names the side, so
+  // it fails, and the limitation is written on two concept records rather than
+  // engineered around.
+  const corpus = JSON.parse(fs.readFileSync(
+    path.join(ROOT, 'corpus', 'annotated_positions.json'), 'utf8')).positions;
+  const e = corpus.find(x => x.id === 'reti-capablanca-1924-27Qe5-piece-activity-ambiguous');
+  ok('the single-piece-activity failure is still recorded as a failure',
+     e && e.side === 'b' && /RECORDED FAILURE/.test(e.explanation));
+  const pa = JSON.parse(fs.readFileSync(
+    path.join(ROOT, 'concepts', 'piece-play', 'piece-activity.json'), 'utf8'));
+  ok('...and named on the concept record', (pa.limitations || []).some(l => /ARMY-LEVEL ONLY/.test(l)));
+}
+
 /* ---------- report ---------- */
 console.log(`\nAPI  PASS ${pass}   FAIL ${fails.length}`);
 for (const [n, d] of fails) console.log(`  FAIL  ${n}\n        ${d}`);

@@ -49,7 +49,7 @@
       "A piece with moves available that accomplish nothing"
     ],
     "prerequisites": [],
-    "detector": null,
+    "detector": "lib/matchers.js: piece-activity, over lib/features.js activeMoves()",
     "detectability": "heuristic",
     "typical_confidence": "medium",
     "false_positive_traps": [
@@ -90,7 +90,9 @@
   ],
   "limitations": [
     "No reliable measure of activity exists in this system; the judgement is heuristic.",
-    "The concept is broad enough that it risks being applied to any move, which is exactly why the false-positive traps are stated."
+    "The concept is broad enough that it risks being applied to any move, which is exactly why the false-positive traps are stated.",
+    "MEASURED 2026-09-02 and fixed: the matcher counted LEGAL moves, which is exactly what this record's first false-positive trap forbids - 'counting available squares is not measuring activity. A piece with many moves that bear on nothing is not active.' It now counts ACTIVE moves: captures, moves into the opponent's half, and moves that attack an enemy man from where they land. The threshold is unchanged at a gap of eight; what changed is what is counted, and the firing rate went from 44.4% of the 788 shipped positions to 33.9%.",
+    "ARMY-LEVEL ONLY, and this base has a corpus entry failing on it. Keene on Reti-Capablanca 1924 writes that Capablanca 'is doing his utmost with his strongest piece' - a claim about ONE PIECE carrying a side, which this measure cannot express: Black's queen has a scope of 13 against its own next-best piece's 9, while White's army has 24 active moves to Black's 20. The concept that fits is queen-activity, which has no matcher. The entry is left failing rather than resolved by loosening the measure."
   ],
   "misconceptions": [
     "That activity means having many legal moves. It means bearing on things that matter.",

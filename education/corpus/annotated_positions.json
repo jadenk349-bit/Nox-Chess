@@ -930,7 +930,7 @@
       "move_uci": "h5e5",
       "fen_after": "4rnk1/r2n1p2/1p1R2pp/pP2q3/3N4/P3N1P1/1Q3PKP/3R4 w - - 1 28",
       "human_annotation": "'Capablanca is really doing his upmost on the fourth rank with his strongest piece, but the queen is no match for White's heavily centralised knights and rooks.'",
-      "explanation": "The same position as this corpus's initiative counterexample, and a different and gentler claim about it, which is why both exist. Piece activity genuinely applies: Black's queen is the most active piece on the board and Keene says so in as many words. It does not decide anything, because activity concentrated in one piece against a coordinated group is not activity in the sense that wins games - the concept record's own warning is that 'having more active pieces is not the same as having the initiative'. This is the position that separates the two, and it is what an ambiguous example is for: the concept is present, correctly reported, and worth nothing here.",
+      "explanation": "The same position as this corpus's initiative counterexample, and a different and gentler claim about it, which is why both exist. Piece activity genuinely applies: Black's queen is the most active piece on the board and Keene says so in as many words. It does not decide anything, because activity concentrated in one piece against a coordinated group is not activity in the sense that wins games - the concept record's own warning is that 'having more active pieces is not the same as having the initiative'. This is the position that separates the two, and it is what an ambiguous example is for: the concept is present, correctly reported, and worth nothing here. RECORDED FAILURE, 2026-09-02: this entry passed until `piece-activity` was rebuilt to count ACTIVE moves rather than legal ones, and it passed for the wrong reason - the concept was being reported for WHITE, whose army really is more active, while the annotation is about BLACK's queen. Naming the side makes that visible, and the entry now fails. It is kept failing on purpose: Keene's claim is about ONE PIECE carrying a side, and this base's piece-activity matcher is an army-level measure that cannot express it. The concept that would fit is queen-activity, which has no matcher. Measured here: Black's queen has a scope of 13 against its own next-best piece's 9, and White's army has 24 active moves to Black's 20 - both true, and neither is the sentence Keene wrote.",
       "engine": {
         "engine_id": "Stockfish 18",
         "depth": 22,
@@ -953,7 +953,9 @@
         "initiative",
         "king-attack"
       ],
-      "added": "2026-09-01"
+      "added": "2026-09-01",
+      "side": "b",
+      "limitation": "An army-level detector cannot state a single-piece claim. Left as a false negative rather than resolved by loosening the measure or by dropping the side, either of which would have made the number better and the record worse."
     },
     {
       "game": "Capablanca-Tartakower, New York 1924",
