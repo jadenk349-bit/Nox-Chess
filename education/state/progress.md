@@ -5,6 +5,70 @@ this file is the narrative, and records reasoning that does not fit in JSON.
 
 ---
 
+## Session 6 — the depth phase, and what running it found (2026-09-01)
+
+The brief for this session was that 85 covered areas is not a finished system.
+It was right, and `tools/depth_report.py` was built to say how far off: scoring
+every concept against fifteen things a finished record should carry gave ONE area
+full, nine substantial, seventy-five partial, and a mean of 0.61.
+
+The gaps were entirely evidence rather than research — master games missing on
+99% of board-level concepts, examples on 84%, engine validation on 88%, against
+definitions missing on 2%. Strong on text, thin on positions.
+
+### What was built
+
+- `tools/depth_report.py` — the checklist audit, and `state/COVERAGE.md` from it.
+- `tools/mine_positions.js` — finds real positions exhibiting a concept, and the
+  harder thing: NEAR-MISSES where the surface pattern is present and the
+  condition is absent, which is what false-positive testing needs.
+- `tools/replay_game.js` — derives verified FENs by replaying a game through the
+  page's own move generator.
+- `tools/api_audit.js` — API behaviour across 22 position types.
+- `tests/test_explanations.js` — 3384 assertions on whether explanations are
+  USELESS, which the API suite does not test.
+
+### Everything that broke, broke under test
+
+Not one fault this session was found by reading the code.
+
+**The mass test's headline metric was worthless.** It reported 99.7% positional
+coverage and I nearly recorded it as success. Underneath, `semi-open-file` fired
+on 83% of positions and `open-file` on 61%. Three matchers tightened against
+their own concept records, and the metric changed to the LEAD concept, which is
+what a reader actually sees: 63.5% motif, 36.4% positional.
+
+**The API printed `{targets}` at a reader.** 25 records write templated
+explanations; nothing was filling them.
+
+**Master games broke three matchers in one sitting.** Nimzowitsch–Salwe called
+his blockading bishop bad. Capablanca–Tartakower called a rim knight on a5 an
+outpost and a rook-ending pawn an isolated queen's pawn. All three fixed at the
+matcher, each grounded in the concept's own record.
+
+**Ordering let a low-confidence claim lead.** The system's headline on
+Nimzowitsch's most famous positional game was that his best piece was bad.
+
+**24 detectors did not exist.** Rewriting the audit's check against real source
+files instead of a whitelist exposed `isCheckmate`, `lineAlignment`,
+`backRankEscape` and twenty-one others naming nothing.
+
+**A reputable game score failed to replay** at Black's 24th move. Only the
+verified prefix was used, and the failure is logged.
+
+### Where it stands
+
+135 concepts, 172 sources, 53 validated positions, 1008 indexed warnings, 576
+tests plus 365 API-audit and 3384 explanation assertions. All eleven audits clean.
+
+`state/COMPLETION.md` assesses this against the brief's ten criteria: five met,
+three partial, two not. **Not substantially complete**, and the blocker is one
+thing — 129 board-level concepts against 53 validated positions.
+
+The corollary for whoever continues is in that file: add positions, not prose.
+
+---
+
 ## Session 5 — the system becomes usable (2026-09-01)
 
 The knowledge base became a system this session: Layers 3 and 4 exist, the API
