@@ -1,0 +1,172 @@
+{
+  "schema_version": 2,
+  "alternate_names": [
+    "the hanging pair"
+  ],
+  "historical_names": [],
+  "tags": [
+    "structure",
+    "pawns",
+    "master-game"
+  ],
+  "subcategory": "pawn structure",
+  "difficulty": "advanced",
+  "knowledge_type_note": "A structure with a genuinely two-sided assessment, which is why its record is written as a pair of plans rather than as a verdict.",
+  "name_status": "established-name",
+  "history": {
+    "attributions": [],
+    "first_documented_source": "thechessworld-hanging-pawns",
+    "year": null,
+    "confidence": "unknown",
+    "notes": "Standard structural vocabulary with no traced coinage; the treatment is classical and anonymous.",
+    "competing_claims": [],
+    "development": []
+  },
+  "engine_era_status": "reliable",
+  "engine_era_note": "Engines assess the structure by the piece configuration rather than by the pawns, which is what the classical treatment already said. What they changed is the confidence: the structure is now known to be closer to balanced than the older 'weak by nature' framing implied.",
+  "recognition": {
+    "preconditions": [
+      "Two friendly pawns abreast on adjacent files",
+      "No friendly pawn on either flanking file",
+      "Both files half-open for the opponent"
+    ],
+    "indicators_for": [
+      "The pair is on c and d, or on d and e",
+      "The opponent has rooks on the two half-open files",
+      "The pair can advance together with pieces behind it"
+    ],
+    "indicators_against": [
+      "A friendly pawn still stands on a flanking file — then it is a chain, not a hanging pair",
+      "One of the two has already advanced, which usually ends the structure"
+    ],
+    "prerequisites": [
+      "isolated-queen-pawn",
+      "weak-square"
+    ],
+    "detector": "pawnStructure().undefendable in lib/features.js — two abreast on files the opponent has no pawn on",
+    "detectability": "mechanical",
+    "typical_confidence": "medium",
+    "false_positive_traps": [
+      "Hanging pawns are not automatically weak. The structure is dynamic, and the same pair that loses one game wins the next depending on where the pieces are.",
+      "Do not assess them as an isolated pawn. They defend the squares in front of one another and the pair advancing is a genuine threat.",
+      "The detector finds the STRUCTURE. Whether it is an asset needs the piece placement, which the detector does not read."
+    ]
+  },
+  "application": {
+    "typical_plans": [
+      "Against them: pressure both until one must advance, then blockade the square it left",
+      "With them: activate the pieces first and advance only when the advance gains something",
+      "Against them: trade pieces, since fewer defenders makes two pawns harder to hold",
+      "With them: avoid trades for the same reason"
+    ],
+    "typical_moves": [
+      "The pair advancing together",
+      "A rook doubling on one of the half-open files"
+    ],
+    "typical_pawn_structures": [
+      "c5 and d5 against a queenside fianchetto or a rook on c1",
+      "Arising from the Queen's Gambit Tartakower, the Alapin Sicilian and the Petrov"
+    ],
+    "typical_piece_arrangements": [
+      "Rooks on the two half-open files",
+      "A blockading knight in front of the advanced pawn"
+    ],
+    "tactical_consequences": [
+      "The advance of one pawn is often a tactical as well as a positional decision"
+    ],
+    "strategic_consequences": [
+      "Two targets that only pieces can defend, and two files the opponent's rooks can use"
+    ]
+  },
+  "exceptions": [
+    "Where the pair can advance profitably, they are a space-gaining asset rather than a weakness.",
+    "With enough piece activity the structure is fully sound; the 'weak by nature' framing is a starting assessment, not a verdict."
+  ],
+  "limitations": [
+    "The detector finds the structure and cannot judge whether it is an asset, which is the whole question.",
+    "This base has one master-game example and no counterexample where the pair proved strong; the record is therefore one-sided in its evidence and says so."
+  ],
+  "misconceptions": [
+    "That hanging pawns are simply weak. They are dynamic, and the assessment turns on the pieces.",
+    "That they are two isolated pawns. They defend the squares in front of each other, which an isolani has nobody to do.",
+    "That the way to play against them is to attack them. The way is to make one of them move."
+  ],
+  "relationships": {
+    "broader": [],
+    "narrower": [],
+    "related": [
+      "isolated-queen-pawn",
+      "weak-square",
+      "blockade",
+      "semi-open-file",
+      "backward-pawn",
+      "space",
+      "piece-activity",
+      "static-vs-dynamic",
+      "minority-attack"
+    ],
+    "contrasting": [
+      "isolated-queen-pawn"
+    ],
+    "co_occurring": [
+      "semi-open-file"
+    ],
+    "conflicts": [
+      {
+        "concept": "static-vs-dynamic",
+        "resolution": "This structure is the clearest case of the distinction rather than a conflict with it: statically two permanent targets, dynamically two pawns that can advance and take the centre. Which reading applies is decided by the pieces, not by the pawns."
+      }
+    ]
+  },
+  "examples": [],
+  "counterexamples": [],
+  "ambiguous_examples": [],
+  "explanations": {
+    "by_level": {
+      "beginner": "Two pawns side by side with no pawns next to them — no pawn can defend either one.",
+      "intermediate": "Hanging pawns. They are strong if you can advance them and weak if you cannot, so activate your pieces before pushing.",
+      "advanced": "Against them, do not attack the pawns — force one to advance, then blockade the square it left behind.",
+      "master": "A dynamic structure: the same pair is an asset or a liability depending entirely on the piece configuration."
+    },
+    "by_depth": {
+      "short": "Two pawns abreast that no pawn can defend.",
+      "normal": "Hanging pawns: two connected pawns on half-open files with no friendly pawns on either side, so only pieces can defend them. They are dynamic — a weapon when they can advance and two targets when they cannot.",
+      "deep": "Two abreast, usually c and d, with the b- and e-pawns gone, so no pawn can ever defend either. That single fact gives the structure its character: pieces must hold them, and whether the pieces are doing that or something better decides everything. The method against them is not to attack the pawns but to make one MOVE — pressure both, and when one advances the pair is broken and the square it left is a permanent hole. Fischer against Spassky in 1972 is the model, pressing c5 and d5 until 20...d4 fixed the structure and handed him c4 and a new target on e6."
+    },
+    "hedge": "",
+    "lesson": "Do not attack hanging pawns. Make one of them move, then occupy the square it leaves."
+  },
+  "terminology": {
+    "beginner_words": [
+      "two pawns side by side with no neighbours"
+    ],
+    "advanced_words": [
+      "hanging pawns",
+      "half-open file",
+      "blockade",
+      "the pair advancing"
+    ],
+    "avoid": [
+      "hanging pawns are weak"
+    ]
+  },
+  "status": {
+    "stage": "researched",
+    "last_updated": "2026-09-01",
+    "open_questions": [],
+    "audit_notes": []
+  },
+  "id": "hanging-pawns",
+  "canonical_name": "Hanging pawns",
+  "category": "pawn-structures",
+  "knowledge_type": "positional-concept",
+  "definition_short": "Two connected pawns side by side on half-open files, with no friendly pawns left on either neighbouring file to defend them.",
+  "definition_long": "Two abreast, usually on c and d, with the b- and e-pawns gone. No pawn can ever defend either of them, so pieces must — and that is the whole of the structure's character.\n\nTHEY ARE A WEAKNESS AND A WEAPON, and which one depends on the pieces. Advanced together at the right moment they take squares and open lines; left to be attacked they are two targets that only pieces can hold. The standard formulation is that the structure is DYNAMIC — piece play is the major factor — and it is why the same pawns are an asset in one game and a liability in the next.\n\nTHE METHOD AGAINST THEM is not to attack the pawns but to make one of them MOVE. Pressure both, and the defender must advance one; the advance breaks the pair, and the square the moving pawn leaves becomes a permanent hole for a blockading piece. Fischer's handling of Spassky in 1972 is the model: he pressured c5 and d5 until 20...d4 came, after which d4 was fixed, c4 was free for his bishop, and e6 was a new weakness.\n\nTHE METHOD WITH THEM is the mirror: place the pieces actively FIRST, and advance only when the advance gains something. The annotation of that same game puts the failure precisely — the structure was reached with Black's pieces passively placed, and from there the pawns were only targets.\n\nTHEY ARE NOT AN ISOLATED PAWN and should not be assessed as one. An isolated pawn has one neighbour-less file; hanging pawns defend the squares in front of each other and control four squares between them, which is why the pair advancing is a real threat and a lone isolani advancing usually is not.",
+  "sources": [
+    "thechessworld-hanging-pawns",
+    "lichess-fischer-spassky-g6",
+    "chesscom-fischer-spassky-g6",
+    "nimzowitsch-my-system"
+  ],
+  "source_confidence": "medium"
+}

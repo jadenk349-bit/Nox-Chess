@@ -1,0 +1,172 @@
+{
+  "schema_version": 2,
+  "alternate_names": [
+    "the break",
+    "freeing move"
+  ],
+  "historical_names": [],
+  "tags": [
+    "structure",
+    "pawns",
+    "master-game"
+  ],
+  "subcategory": "pawn play",
+  "difficulty": "intermediate",
+  "knowledge_type_note": "A method rather than a tactic; it is kept separate from pawn-breakthrough, which is the sacrificial motif for forcing a passer.",
+  "name_status": "established-name",
+  "history": {
+    "attributions": [],
+    "first_documented_source": "nimzowitsch-my-system",
+    "year": null,
+    "confidence": "unknown",
+    "notes": "Standard vocabulary; no coinage traced.",
+    "competing_claims": [],
+    "development": []
+  },
+  "engine_era_status": "reliable",
+  "engine_era_note": "Engines time breaks far better than humans and are notably readier to delay one; the timing question the concept is about is exactly where they are strongest.",
+  "recognition": {
+    "preconditions": [
+      "A pawn advances into contact with an enemy pawn"
+    ],
+    "indicators_for": [
+      "Pieces already placed on the lines the break will open",
+      "The opponent must answer, committing their structure",
+      "A file or diagonal opens towards a target"
+    ],
+    "indicators_against": [
+      "The opponent is better developed and will use the opened lines first",
+      "The break opens a line towards your own king",
+      "Nothing of yours is placed to use what opens"
+    ],
+    "prerequisites": [
+      "pawn-structures"
+    ],
+    "detector": "a pawn move that attacks an enemy pawn, from lib/features.js and the move generator",
+    "detectability": "mechanical",
+    "typical_confidence": "medium",
+    "false_positive_traps": [
+      "Any pawn advance into contact is mechanically a break; whether it is a good one depends on who is placed to use the lines it opens, which the detector cannot see.",
+      "A break is not a pawn-breakthrough. This base keeps them separate: the breakthrough sacrifices to force a passer, the break challenges a structure.",
+      "The break's value is often as an unplayed THREAT, and a position where it is available but not played may be the concept working correctly."
+    ]
+  },
+  "application": {
+    "typical_plans": [
+      "Place the pieces on the lines the break will open, then break",
+      "Break to force the opponent's structure to commit",
+      "Hold the break in reserve as a standing threat"
+    ],
+    "typical_moves": [
+      "c4-c5 and d4-d5 in queen's pawn structures",
+      "f4-f5 and e4-e5 against a king's position",
+      "...c5 and ...f5 as the standard freeing breaks for Black"
+    ],
+    "typical_pawn_structures": [
+      "Any fixed structure — the break is how a fixed structure stops being fixed"
+    ],
+    "typical_piece_arrangements": [
+      "Rooks behind the pawn that is about to advance"
+    ],
+    "tactical_consequences": [
+      "The moment of the break is usually the sharpest moment of the game"
+    ],
+    "strategic_consequences": [
+      "Whoever chooses the moment of the break usually chooses the resulting structure"
+    ]
+  },
+  "exceptions": [
+    "A break that opens lines for a better-developed opponent helps them.",
+    "Some positions are won by NOT breaking — keeping the tension is itself a plan, and the threat can be worth more than the move."
+  ],
+  "limitations": [
+    "Detecting a pawn advancing into contact is mechanical; judging whether it is right is not, and this record does not claim the detector does.",
+    "This base holds one master-game example and no counterexample of a break played too early."
+  ],
+  "misconceptions": [
+    "That a break wins material. It changes the structure and opens lines; material is a separate question.",
+    "That you should break as soon as it is available. The threat is often worth more than the execution.",
+    "That a break and a breakthrough are the same thing."
+  ],
+  "relationships": {
+    "broader": [],
+    "narrower": [
+      "pawn-breakthrough",
+      "minority-attack"
+    ],
+    "related": [
+      "pawn-breakthrough",
+      "minority-attack",
+      "hanging-pawns",
+      "open-file",
+      "semi-open-file",
+      "planning",
+      "space",
+      "restraint"
+    ],
+    "contrasting": [
+      "restraint"
+    ],
+    "co_occurring": [
+      "open-file"
+    ],
+    "conflicts": [
+      {
+        "concept": "restraint",
+        "resolution": "Opposite methods against a structure and both correct at different moments: restraint keeps the opponent's pawns where they are, a break forces them to move. The question is which side benefits from the structure changing, and the answer is usually whoever is better placed for the lines that open."
+      }
+    ]
+  },
+  "examples": [],
+  "counterexamples": [],
+  "ambiguous_examples": [],
+  "explanations": {
+    "by_level": {
+      "beginner": "A pawn move that runs into an enemy pawn, so the structure has to change and lines open up.",
+      "intermediate": "A pawn break. Get your pieces onto the lines it will open BEFORE you play it.",
+      "advanced": "It is often played to make the OPPONENT commit rather than to gain anything directly.",
+      "master": "The break's value is frequently as an unplayed threat; timing it is the whole skill."
+    },
+    "by_depth": {
+      "short": "A pawn advance that forces the structure to change.",
+      "normal": "A pawn break: an advance into contact with an enemy pawn, played to open a file or a diagonal for the pieces behind it, or to force the opponent's structure to commit. It is not played to win a pawn.",
+      "deep": "Pawn structures are stable because pawns cannot retreat, so a structure changes only when a pawn advances into contact — and whoever chooses when that happens usually chooses the terms. The break opens lines for both sides, so it favours whoever is better placed to use them, which is why breaking against a better-developed opponent is the standard misapplication. Its other and less obvious use is to force the opponent to commit: Fischer's 20.e4 against Spassky in 1972 was played not to gain material but to make one of two hanging pawns advance, so that the square it left could be occupied."
+    },
+    "hedge": "",
+    "lesson": "Put the pieces where the lines will open before you open them."
+  },
+  "terminology": {
+    "beginner_words": [
+      "a pawn move that opens things up"
+    ],
+    "advanced_words": [
+      "pawn break",
+      "freeing move",
+      "the tension",
+      "timing the break"
+    ],
+    "avoid": [
+      "break as soon as you can",
+      "a break wins a pawn"
+    ]
+  },
+  "status": {
+    "stage": "researched",
+    "last_updated": "2026-09-01",
+    "open_questions": [],
+    "audit_notes": []
+  },
+  "id": "pawn-break",
+  "canonical_name": "Pawn break",
+  "category": "pawn-breaks",
+  "knowledge_type": "strategic-principle",
+  "definition_short": "A pawn advance that challenges an enemy pawn, forcing the structure to change and opening lines the pieces behind it want.",
+  "definition_long": "The move that turns a static position into a decided one. Pawn structures are stable because pawns cannot retreat, so a structure only changes when a pawn advances into contact — and whoever chooses WHEN that happens usually chooses the terms.\n\nIT IS NOT PLAYED TO WIN A PAWN. A break is played to open a file for the rooks, a diagonal for a bishop, or a square for a knight; or, in its other and less obvious use, to force the OPPONENT to commit — Fischer's 20.e4 against Spassky in 1972 is the model, played not to gain material but to make one of two hanging pawns advance so that the square it left could be occupied.\n\nTHE PIECES COME FIRST. A break opens lines for both sides, so it favours whoever is better placed to use them. Breaking while the opponent is better developed opens the position for them, which is the standard way the idea is misapplied.\n\nTIMING IS THE WHOLE SKILL. The break exists as a threat before it is played, and the threat is often worth more than the execution — the opponent must keep guarding against it, which is a restraint on their own plans.\n\nDISTINGUISH IT FROM A BREAKTHROUGH. A pawn BREAK challenges a structure and usually costs nothing; a pawn BREAKTHROUGH sacrifices material to force a passer past the defenders. This base keeps them as separate records because the second is a tactic with a calculation attached and the first is a strategic decision.",
+  "sources": [
+    "nimzowitsch-my-system",
+    "lichess-fischer-spassky-g6",
+    "thechessworld-hanging-pawns",
+    "thechessworld-planning"
+  ],
+  "source_confidence": "medium"
+}

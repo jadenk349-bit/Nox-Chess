@@ -86,7 +86,7 @@ const PRIORITY = [
   // then structural features, most informative first
   'outpost', 'rook-on-the-seventh', 'passed-pawn', 'isolated-queen-pawn',
   'backward-pawn', 'doubled-pawns', 'opposite-coloured-bishops', 'bishop-pair',
-  'two-weaknesses', 'worst-placed-piece', 'bad-bishop', 'luft', 'semi-open-file', 'open-file',
+  'hanging-pawns', 'two-weaknesses', 'pawn-break', 'restraint', 'worst-placed-piece', 'bad-bishop', 'luft', 'semi-open-file', 'open-file',
   'weak-square', 'material-imbalance',
   'king-activation',
   'space', 'piece-activity',
@@ -285,6 +285,33 @@ const STRUCTURAL = [
             because: [`${side(f, c)} has both bishops and ${side(f, other(c))} does not`],
             subjects: [c],
           };
+        }
+      }
+      return null;
+    },
+  },
+  {
+    concept: 'hanging-pawns',
+    implements: ("recognition.preconditions: two friendly pawns abreast on adjacent files, no " +
+                 "friendly pawn on either flanking file, both files half-open for the opponent"),
+    run(f) {
+      for (const c of ['w', 'b']) {
+        const weak = f.pawns[c].undefendable || [];
+        for (const a of weak) {
+          for (const b of weak) {
+            if (a >= b) continue;
+            const sameRank = a[1] === b[1];
+            const adjacent = Math.abs(a.charCodeAt(0) - b.charCodeAt(0)) === 1;
+            if (sameRank && adjacent) {
+              return {
+                confidence: 'medium',
+                because: [`${side(f, c)} has hanging pawns on ${a} and ${b} — abreast, on half-open ` +
+                          `files, and no pawn can defend either`],
+                slots: { square: a },
+                subjects: [c],
+              };
+            }
+          }
         }
       }
       return null;
@@ -542,6 +569,74 @@ function matchMotifs(motifs, moveInfo) {
  * claim about what a move achieves, and asking only about the board it was
  * played from missed an annotated instance entirely. */
 const MOVE_BASED = [
+  {
+    concept: 'pawn-break',
+    implements: "recognition.preconditions: a pawn advances into contact with an enemy pawn",
+    run(before, after, moveInfo) {
+      const san = moveInfo.san || '';
+      if (!/^[a-h]/.test(san)) return null;              // a pawn move
+      const dest = (san.match(/([a-h][1-8])/g) || []).pop();
+      if (!dest) return null;
+      // CONTACT is the definition: after the move, the advanced pawn either
+      // attacks an enemy pawn or can be taken by one. An earlier version
+      // compared "captures available" before and after, which compares two
+      // DIFFERENT sides to move and is meaningless.
+      const file = dest.charCodeAt(0) - 97, rank = Number(dest[1]);
+      const mover = before.sideToMove;
+      const fwd = mover === 'w' ? 1 : -1;
+      // Read the board straight from the FEN of the position after the move.
+      const rows = (after.fen || '').split(' ')[0].split('/');
+      const at = (f, r) => {
+        if (f < 0 || f > 7 || r < 1 || r > 8) return null;
+        const row = rows[8 - r];
+        if (!row) return null;
+        let i = 0;
+        for (const ch of row) {
+          if (/\d/.test(ch)) i += Number(ch);
+          else { if (i === f) return ch; i++; }
+        }
+        return null;
+      };
+      const enemyPawnChar = mover === 'w' ? 'p' : 'P';
+      let contact = false;
+      for (const df of [-1, 1]) {
+        if (at(file + df, rank + fwd) === enemyPawnChar) contact = true;   // we attack it
+        if (at(file + df, rank - fwd) === enemyPawnChar) contact = true;   // it attacks us
+      }
+      if (!contact) return null;
+      return {
+        confidence: 'low',
+        because: [`${san} advances a pawn into contact with an enemy pawn, so the structure must ` +
+                  `change — the opponent has to take, be taken, or leave the tension standing`],
+        slots: {},
+        subjects: [mover],
+      };
+    },
+  },
+  {
+    concept: 'restraint',
+    implements: ("the record's distinction from prophylaxis — restraint reduces the opponent's " +
+                 "GENERAL mobility rather than preventing a specific plan. Measured as a quiet move " +
+                 "that lowers the opponent's total piece scope"),
+    run(before, after, moveInfo) {
+      const san = moveInfo.san || '';
+      if (/[x+#]/.test(san)) return null;              // not a capture, not a check
+      const enemy = other(before.sideToMove);
+      // SAFE destinations, not legal moves. A restraining pawn move usually does
+      // not remove a square from the enemy's move list; it makes the square
+      // unusable. Fischer's 30.h4 is the case that settled this.
+      const b = before.safeSquares[enemy], a = after.safeSquares[enemy];
+      if (b == null || a == null || b - a < 1) return null;
+      return {
+        confidence: 'low',
+        because: [`${san} takes ${b - a} safe square${b - a === 1 ? '' : 's'} away from ` +
+                  `${side(before, enemy)}'s pieces without attacking anything — they can still go ` +
+                  `there, and a pawn now meets them if they do`],
+        slots: {},
+        subjects: [before.sideToMove],
+      };
+    },
+  },
   {
     concept: 'worst-placed-piece',
     implements: ("the record's condition — when nothing urgent is happening, the right move is the " +

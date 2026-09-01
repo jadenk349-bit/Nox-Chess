@@ -324,10 +324,11 @@
     },
     "pawn-structures": {
       "rating": "full",
-      "mean_completeness": 0.934,
+      "mean_completeness": 0.862,
       "concepts": [
         "backward-pawn",
         "doubled-pawns",
+        "hanging-pawns",
         "isolated-queen-pawn",
         "passed-pawn"
       ],
@@ -335,9 +336,10 @@
     },
     "pawn-breaks": {
       "rating": "substantial",
-      "mean_completeness": 0.767,
+      "mean_completeness": 0.702,
       "concepts": [
         "minority-attack",
+        "pawn-break",
         "pawn-breakthrough"
       ],
       "domain": "pawn-play"
@@ -2186,6 +2188,27 @@
         "explanation_template": true
       }
     },
+    "hanging-pawns": {
+      "score": 0.571,
+      "check": {
+        "definition": true,
+        "terminology": true,
+        "provenance": true,
+        "attribution": null,
+        "recognition": true,
+        "exceptions": true,
+        "positive_example": false,
+        "negative_example": false,
+        "ambiguous_example": false,
+        "engine_validation": false,
+        "tablebase_validation": null,
+        "master_game": false,
+        "false_positive_test": false,
+        "beginner_explanation": true,
+        "advanced_explanation": true,
+        "explanation_template": true
+      }
+    },
     "hole": {
       "score": 0.6,
       "check": {
@@ -2286,6 +2309,27 @@
         "tablebase_validation": false,
         "master_game": true,
         "false_positive_test": true,
+        "beginner_explanation": true,
+        "advanced_explanation": true,
+        "explanation_template": true
+      }
+    },
+    "pawn-break": {
+      "score": 0.571,
+      "check": {
+        "definition": true,
+        "terminology": true,
+        "provenance": true,
+        "attribution": null,
+        "recognition": true,
+        "exceptions": true,
+        "positive_example": false,
+        "negative_example": false,
+        "ambiguous_example": false,
+        "engine_validation": false,
+        "tablebase_validation": null,
+        "master_game": false,
+        "false_positive_test": false,
         "beginner_explanation": true,
         "advanced_explanation": true,
         "explanation_template": true
@@ -3580,13 +3624,13 @@
     "attribution": 0,
     "recognition": 0,
     "exceptions": 3,
-    "positive_example": 76,
-    "negative_example": 102,
-    "ambiguous_example": 78,
-    "engine_validation": 86,
+    "positive_example": 78,
+    "negative_example": 104,
+    "ambiguous_example": 80,
+    "engine_validation": 88,
     "tablebase_validation": 13,
-    "master_game": 65,
-    "false_positive_test": 102,
+    "master_game": 67,
+    "false_positive_test": 104,
     "beginner_explanation": 0,
     "advanced_explanation": 0,
     "explanation_template": 29

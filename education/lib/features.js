@@ -68,6 +68,11 @@ function pawnFiles(st, colour) {
 function pawnStructure(st, colour) {
   const me = pawnFiles(st, colour);
   const them = pawnFiles(st, colour === 'w' ? 'b' : 'w');
+  // A pawn is WEAK when no friendly pawn can defend it AND the opponent can
+  // actually attack it — which needs the file to be open on their side. Without
+  // that second half the test called every pawn on its home rank undefendable,
+  // which is literally true (no friendly pawn can stand on rank 1) and says
+  // nothing: the starting position is not eight weaknesses.
   const forward = colour === 'w' ? -1 : 1;   // direction of travel in rows
 
   const doubled = [], isolated = [], passed = [], backward = [], blockadedPassers = [];
@@ -104,11 +109,19 @@ function pawnStructure(st, colour) {
           if (g < 0 || g > 7) continue;
           for (const j of me[g]) {
             const rj = rowOf(j);
-            // "behind" means further from the promotion square
-            if (forward === -1 ? rj >= r : rj <= r) canBeDefended = true;
+            // STRICTLY behind. A pawn on an adjacent file at the SAME rank cannot
+            // defend its neighbour — pawns capture diagonally forward — and an
+            // earlier version counted it, which made c5 and d5 look mutually
+            // defended. Those two pawns are the definition of HANGING pawns, and
+            // the bug hid them: tested against Fischer-Spassky 1972 game 6, where
+            // the annotation says outright "we've reached a position with hanging
+            // pawns" and this base's detector reported nothing weak at all.
+            if (forward === -1 ? rj > r : rj < r) canBeDefended = true;
           }
         }
-        if (!canBeDefended) undefendable.push(nameOf(i));
+        // ...and the opponent must have no pawn on the file, or a rook can never
+        // get at it.
+        if (!canBeDefended && them[f].length === 0) undefendable.push(nameOf(i));
       }
       if (!blocked) {
         // Is it blockaded? An enemy PIECE standing directly in front of a passer
@@ -264,6 +277,36 @@ function pieceScopes(st, colour) {
   }
   out.sort((a, b) => a.moves - b.moves);
   return out;
+}
+
+/* Squares the enemy's pieces can move to WITHOUT being met by a pawn. This is
+ * the right measure for restriction, and the wrong one was tried first: after
+ * Fischer's 30.h4 in the 1972 game 6, annotated "restricting the knight on h7
+ * even further", the black knight's legal-move count is UNCHANGED. h4 does not
+ * take g5 away, it makes g5 unsafe. Counting legal moves misses that entirely;
+ * counting safe destinations catches it. */
+function safeSquaresFor(st, colour) {
+  const enemy = colour === 'w' ? 'b' : 'w';
+  const forwardE = enemy === 'w' ? -1 : 1;
+  const pawnAttacked = new Set();
+  for (const i of pieces(st, enemy, 'P')) {
+    for (const dc of [-1, 1]) {
+      const r = rowOf(i) + forwardE, c = colOf(i) + dc;
+      if (onBoard(r, c)) pawnAttacked.add(idx(r, c));
+    }
+  }
+  const probe = P.cloneState(st);
+  probe.turn = colour;
+  probe.ep = null;
+  let moves = [];
+  try { moves = P.legalMoves(probe); } catch (e) { return 0; }
+  let n = 0;
+  for (const m of moves) {
+    const pc = st.b[m.from];
+    if (!pc || pc.t === 'P' || pc.t === 'K') continue;
+    if (!pawnAttacked.has(m.to)) n++;
+  }
+  return n;
 }
 
 /* Weak pawns, and whether they are SEPARATED. The two-weaknesses record says a
@@ -530,6 +573,7 @@ function features(fen) {
     king: { w: kingFeatures(st, 'w'), b: kingFeatures(st, 'b') },
     quietness: quietness(st),
     scopes: { w: pieceScopes(st, 'w'), b: pieceScopes(st, 'b') },
+    safeSquares: { w: safeSquaresFor(st, 'w'), b: safeSquaresFor(st, 'b') },
     weakSpread: { w: weakPawnSpread(pawnStructure(st, 'w')),
                   b: weakPawnSpread(pawnStructure(st, 'b')) },
     activity: {
@@ -598,6 +642,6 @@ function motifsOfLine(fen, uciMoves) {
 module.exports = {
   features, motifsOfMove, motifsOfLine, phaseOf, material, pawnStructure, fileState,
   holesFor, reachableHoles, outposts, pieceFeatures, kingFeatures, mobility, pawnSpace,
-  bishopPawnColours, quietness, pieceScopes, weakPawnSpread,
+  bishopPawnColours, quietness, pieceScopes, weakPawnSpread, safeSquaresFor,
   nameOf, isLight, page: P,
 };

@@ -151,6 +151,124 @@
       ],
       "fen_after": "r5k1/p1r2ppp/1qp1b3/2Rp4/1P1Q4/4PPP1/P1R4P/5BK1 b - b3 0 24",
       "fen_after_note": "The position the annotated move reaches. A move-based concept describes what the move ACHIEVES, so the checker looks here as well as at the position before it."
+    },
+    {
+      "game": "Fischer-Spassky, World Championship, Reykjavik 1972 (game 6)",
+      "source": "lichess-fischer-spassky-g6",
+      "players": "Robert James Fischer - Boris Spassky",
+      "event": "World Championship, Reykjavik 1972",
+      "year": 1972,
+      "annotator": "lichess study following the standard literature; corroborated by a Chess.com retrospective",
+      "fen_verified": "replay: all 81 plies replayed legally through blind-chess.html's move generator",
+      "added": "2026-09-01",
+      "id": "fischer-spassky-1972-g6-hanging-pawns",
+      "concept": "hanging-pawns",
+      "concept_role": "positive",
+      "fen": "rnr3k1/4qpp1/p3b2p/1Bpp4/8/Q3PN2/PP3PPP/2R2RK1 b - - 1 16",
+      "move": "Ra7",
+      "move_uci": "a8a7",
+      "fen_after": "1nr3k1/r3qpp1/p3b2p/1Bpp4/8/Q3PN2/PP3PPP/2R2RK1 w - - 2 17",
+      "human_annotation": "'We've reached a position with hanging pawns. Usually, the side with hanging pawns should place his pieces actively and try to advance the pawns at an appropriate moment. Here, however, Spassky's pieces are passively placed.'",
+      "explanation": "The structure is present by definition — c5 and d5 abreast with no b- or e-pawn — and the annotation is careful to say the structure alone is not the problem. The concept applies here in its NEGATIVE aspect because the precondition for the good version, active pieces, is absent. This base's detector independently reports c5 and d5 as pawns no pawn can defend on files the opponent has none.",
+      "engine": {
+        "engine_id": "Stockfish 18",
+        "depth": null,
+        "multipv": null,
+        "best_move": "(not searched: the annotated claim is about the STRUCTURE, not this move)",
+        "agrees": "not applicable — the annotation names a structure, not a best move",
+        "note": "Deliberately not engine-scored. The human claim here is 'this is a hanging-pawns position and Black's pieces are passive', which is a description rather than a move recommendation, and running a search would answer a question nobody asked."
+      },
+      "confidence": "high",
+      "also_true_but_secondary": [
+        "semi-open-file",
+        "weak-square",
+        "bishop-pair"
+      ],
+      "rejected_as_wrong": [
+        "isolated-queen-pawn"
+      ],
+      "why_not_alternates": "isolated-queen-pawn is explicitly WRONG here and is the reason this entry exists: two hanging pawns defend the squares in front of one another and an isolani has nobody to do that, so assessing them as an isolated pawn misreads the structure."
+    },
+    {
+      "game": "Fischer-Spassky, World Championship, Reykjavik 1972 (game 6)",
+      "source": "lichess-fischer-spassky-g6",
+      "players": "Robert James Fischer - Boris Spassky",
+      "event": "World Championship, Reykjavik 1972",
+      "year": 1972,
+      "annotator": "lichess study following the standard literature; corroborated by a Chess.com retrospective",
+      "fen_verified": "replay: all 81 plies replayed legally through blind-chess.html's move generator",
+      "added": "2026-09-01",
+      "id": "fischer-spassky-1972-g6-20e4-break",
+      "concept": "pawn-break",
+      "concept_role": "positive",
+      "fen": "2r2qk1/r2n2p1/p3p2p/2pp4/8/Q3P3/PP2BPPP/2R2RK1 w - - 0 20",
+      "move": "e4",
+      "move_uci": "e3e4",
+      "fen_after": "2r2qk1/r2n2p1/p3p2p/2pp4/4P3/Q7/PP2BPPP/2R2RK1 b - - 0 20",
+      "human_annotation": "'Fischer proceeds to bust open the position... 20.e4! d4 21.f4 Qe7 22.e5! - fixing the pawns on dark squares to emphasize the power of the light-squared bishop in a more open position.' The Chess.com retrospective adds that 20...d4? 'opened the c4-square for the light-squared bishop, left a weak pawn on e6'.",
+      "explanation": "The break's purpose is not material but to FORCE one of the hanging pawns to commit, which is the standard method against that structure. Re-pointed from pawn-breakthrough to pawn-break after the stress test: this base had no concept for a structural break at all, only the sacrificial motif for forcing a passer, and the annotated position exposed the gap.",
+      "engine": {
+        "engine_id": "Stockfish 18",
+        "depth": 22,
+        "multipv": 3,
+        "best_move": "e4",
+        "best_eval_cp": 40,
+        "annotated_move_eval_cp": 40,
+        "annotated_move_rank": 1,
+        "agrees": "yes — the annotated move is the engine's first choice at +0.40",
+        "note": "Fischer's break is confirmed as objectively best, fifty years later."
+      },
+      "confidence": "medium",
+      "also_true_but_secondary": [
+        "hanging-pawns",
+        "space",
+        "bishop-pair"
+      ],
+      "rejected_as_wrong": [
+        "minority-attack",
+        "pawn-breakthrough"
+      ],
+      "why_not_alternates": "pawn-breakthrough is explicitly wrong: nothing is sacrificed and no passer is forced through. minority-attack requires a Carlsbad structure and a pawn minority advancing; neither is present."
+    },
+    {
+      "game": "Fischer-Spassky, World Championship, Reykjavik 1972 (game 6)",
+      "source": "lichess-fischer-spassky-g6",
+      "players": "Robert James Fischer - Boris Spassky",
+      "event": "World Championship, Reykjavik 1972",
+      "year": 1972,
+      "annotator": "lichess study following the standard literature; corroborated by a Chess.com retrospective",
+      "fen_verified": "replay: all 81 plies replayed legally through blind-chess.html's move generator",
+      "added": "2026-09-01",
+      "id": "fischer-spassky-1972-g6-30h4-restriction",
+      "concept": "restraint",
+      "concept_role": "positive",
+      "fen": "1r1q3k/4r1pn/7p/p1p1PR2/2Bp4/1P4Q1/P5PP/5RK1 w - - 5 30",
+      "move": "h4",
+      "move_uci": "h2h4",
+      "fen_after": "1r1q3k/4r1pn/7p/p1p1PR2/2Bp3P/1P4Q1/P5P1/5RK1 b - h3 0 30",
+      "human_annotation": "'30.h4! Restricting the knight on h7 even further.'",
+      "explanation": "A pawn move whose only purpose is to take squares from an enemy piece — g5 and f6 for the knight on h7 — rather than to attack anything. That is restraint as this base distinguishes it from prophylaxis: no specific plan is being prevented, the opponent's general mobility is being reduced.",
+      "engine": {
+        "engine_id": "Stockfish 18",
+        "depth": 22,
+        "multipv": 3,
+        "best_move": "e6",
+        "best_eval_cp": 415,
+        "annotated_move_eval_cp": 375,
+        "annotated_move_rank": 3,
+        "agrees": "partially — the annotated move is the engine's THIRD choice at +3.75, against +4.15 for 30.e6",
+        "note": "The engine prefers pushing the passed pawn at once. Fischer's move is 0.40 behind and wins as played. Recorded as partial agreement: the restraining idea is real and there was a faster route, which is a normal thing for a fifty-year-old annotation to have missed and not a reason to drop the concept."
+      },
+      "confidence": "high",
+      "also_true_but_secondary": [
+        "space",
+        "king-attack",
+        "passed-pawn"
+      ],
+      "rejected_as_wrong": [
+        "prophylaxis"
+      ],
+      "why_not_alternates": "prophylaxis was considered and rejected on this base's own distinction: prophylaxis prevents a specific enemy idea, restraint reduces general mobility. Black has no concrete plan here to prevent."
     }
   ]
 }

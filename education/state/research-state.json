@@ -6,19 +6,19 @@
     "note": "Filled in by tools/sf_analyse.py --probe"
   },
   "counters": {
-    "concepts_total": 135,
+    "concepts_total": 137,
     "concepts_stub": 0,
     "concepts_researched": 29,
     "concepts_validated": 4,
     "concepts_needs_review": 0,
-    "sources_reviewed": 175,
+    "sources_reviewed": 179,
     "positions_tested": 82,
     "matches_validated": 40,
     "false_matches": 22,
     "ambiguous_matches": 20,
     "by_stage": {
       "ready": 2,
-      "researched": 124,
+      "researched": 126,
       "validated": 9
     },
     "tablebase_positions": 22,
@@ -424,17 +424,19 @@
         "backward-pawn",
         "passed-pawn",
         "doubled-pawns",
-        "isolated-queen-pawn"
+        "isolated-queen-pawn",
+        "hanging-pawns"
       ],
       "open_questions": [],
-      "last_touched": "2026-08-31"
+      "last_touched": "2026-09-01"
     },
     "pawn-breaks": {
       "domain": "pawn-play",
       "status": "covered",
       "concepts": [
         "pawn-breakthrough",
-        "minority-attack"
+        "minority-attack",
+        "pawn-break"
       ],
       "open_questions": [],
       "last_touched": "2026-09-01",
@@ -1591,6 +1593,37 @@
         "positional-sacrifice",
         "prophylaxis",
         "compensation"
+      ]
+    },
+    {
+      "id": "human-grounded-corpus-v1",
+      "date": "2026-09-01",
+      "method": "Built corpus/annotated_positions.json: positions where a reputable human source names the concept, FENs derived by replaying the whole game through the page's own move generator, and Stockfish used only to verify the annotated move. tools/corpus_check.py validates provenance and runs the real API against every entry.",
+      "results": {
+        "positions": 6,
+        "games": 2,
+        "primary": 3,
+        "secondary": 3,
+        "false_negative": 0,
+        "false_positive": 0,
+        "at_start": "0 primary, 0 secondary, 3 false negatives on the first three entries"
+      },
+      "findings": [
+        "The first run scored 3 of 3 FALSE NEGATIVES. Human-grounded ground truth found in one sitting what 1576 mined positions and 13 master games had not.",
+        "A real Layer 3 BUG: the weak-pawn test counted a pawn on the SAME RANK on an adjacent file as a defender. Pawns capture diagonally forward, so c5 and d5 cannot defend each other - they are the definition of hanging pawns, and the bug hid them. Fischer-Spassky 1972 game 6, where the annotation says outright 'we've reached a position with hanging pawns', reported nothing weak at all.",
+        "Fixing that overcorrected: every home-rank pawn became 'undefendable', which is literally true and useless. Qualified by requiring the file to be open on the opponent's side, which is the classical weak-pawn definition.",
+        "Restraint is NOT measurable as a drop in legal moves. After Fischer's 30.h4, annotated 'restricting the knight on h7 even further', the knight's move count is UNCHANGED - h4 does not remove g5, it makes g5 unsafe. The matcher now counts destinations not attacked by a pawn.",
+        "Two concepts were missing entirely and the corpus exposed both: hanging-pawns, and pawn-break as distinct from pawn-breakthrough (a structural break versus a sacrifice to force a passer).",
+        "The two-weaknesses file-distance threshold was my guess. I demanded 3 files on the record's wording 'the far side of the board'; the textbook game has them on a and c, two files apart, both on the queenside. Calibrated to the canonical example.",
+        "The API was MATCHING concepts and then slicing them off the returned list because low confidence sorts last and the display cap is six. Added concepts_all: a display cap must not double as a claim that nothing else was found.",
+        "Engine verification came back MIXED and is recorded as a finding rather than a filter: 20.e3 and 20.e4 are the engine's first choice, 9.Nxc6 its second by 0.05, 30.h4 its third by 0.40, and 24.b4 - annotated 'the decisive pawn break' - is not in its top three."
+      ],
+      "concepts": [
+        "two-weaknesses",
+        "worst-placed-piece",
+        "hanging-pawns",
+        "pawn-break",
+        "restraint"
       ]
     }
   ],
