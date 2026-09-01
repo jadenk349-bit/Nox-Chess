@@ -78,6 +78,17 @@ def main():
     check("warnings_index_current", r.returncode == 0,
           (r.stdout or "").strip().splitlines()[-1] if r.stdout else "build_index.py --check failed")
 
+    # 3c. Layers 3 and 4 and the reusable API have their own suite, in JS because
+    # they run on the page's own move generator. Fold its result in here so one
+    # command still tells you whether the whole system is sound.
+    api = subprocess.run(["node", os.path.join(HERE, "tests", "test_api.js")],
+                         capture_output=True, text=True)
+    line = [l for l in (api.stdout or "").splitlines() if l.startswith("API  PASS")]
+    check("api_suite", api.returncode == 0,
+          (line[0] if line else (api.stderr or "node/test_api.js failed").strip().splitlines()[-1]))
+    if verbose and line:
+        print("   " + line[0])
+
     # 4. constructed positions must be labelled, never dressed as history
     for cid, c in C.items():
         for b in ("examples", "counterexamples", "ambiguous_examples"):

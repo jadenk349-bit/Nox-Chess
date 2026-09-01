@@ -19,28 +19,78 @@ The output is generated, never hand-edited: rebuild it rather than patch it.
     python3 tools/build_index.py            # write state/warnings_index.json
     python3 tools/build_index.py --check    # non-zero if the file is stale
 """
-import json, glob, os, sys, datetime, hashlib
+import json, glob, os, re, sys, datetime
 
 OUT = "state/warnings_index.json"
 
 
+# A warning that rests on a grandmaster's opinion and a warning that rests on a
+# tablebase are both true, but a caller must be able to tell them apart before
+# deciding how firmly to say them. Two independent signals are recorded.
+#
+# CONCEPT_EVIDENCE is a property of the CONCEPT: does it carry a tablebase
+# result, an engine measurement, or neither? It bounds how well-evidenced any
+# claim on that record can be. It is emphatically NOT proof of the individual
+# sentence - a concept can hold a tablebase position and also a sentence nobody
+# tested. Treat it as a ceiling, not a warrant.
+#
+# SELF_EVIDENCED is a property of the SENTENCE: does the text itself point at a
+# measurement or a proof? This is a textual test and therefore fallible in both
+# directions, which is why it is reported beside the concept signal rather than
+# collapsed into one grade.
+PROOF_WORDS = re.compile(
+    r"\b(proven|proof|tablebase|measured|measurement|dtm|dtz)\b"
+    r"|[+-]?\d+\.\d\d\b"          # an evaluation such as +0.42 or -1.67
+    r"|\b\d+\s*cp\b",
+    re.I)
+
+
+def evidence_of(concept):
+    """The strongest evidence the concept as a whole carries."""
+    pos = (concept.get("examples", []) + concept.get("counterexamples", [])
+           + concept.get("ambiguous_examples", []))
+    if any(p.get("tablebase") for p in pos):
+        return "tablebase"
+    if any(p.get("engine") for p in pos):
+        return "engine"
+    if concept.get("sources"):
+        return "sources-only"
+    return "unsourced"
+
+
 def build():
-    entries, by_kind = [], {}
+    entries, by_kind, by_tier = [], {}, {}
     concepts = 0
     for f in sorted(glob.glob("concepts/*/*.json")):
         c = json.load(open(f))
         concepts += 1
+        ev = evidence_of(c)
         base = {"concept": c["id"], "category": c.get("category"),
                 "knowledge_type": c.get("knowledge_type"),
-                "difficulty": c.get("difficulty"), "path": f}
+                "difficulty": c.get("difficulty"),
+                "concept_evidence": ev, "path": f}
         for kind, items in (
                 ("misconception", c.get("misconceptions", [])),
                 ("exception", c.get("exceptions", [])),
                 ("false_positive_trap", c.get("recognition", {}).get("false_positive_traps", [])),
                 ("avoid_phrasing", c.get("terminology", {}).get("avoid", []))):
             for text in items:
-                entries.append(dict(base, kind=kind, text=text))
+                self_ev = bool(PROOF_WORDS.search(text))
+                # The tier is deliberately conservative: a sentence only counts
+                # as demonstrated when it cites a measurement AND sits on a
+                # record that actually holds one.
+                if self_ev and ev in ("tablebase", "engine"):
+                    tier = "demonstrated"
+                elif ev in ("tablebase", "engine"):
+                    tier = "on-a-tested-record"
+                elif ev == "sources-only":
+                    tier = "sourced"
+                else:
+                    tier = "unsourced"
+                entries.append(dict(base, kind=kind, text=text,
+                                    self_evidenced=self_ev, evidence_tier=tier))
                 by_kind[kind] = by_kind.get(kind, 0) + 1
+                by_tier[tier] = by_tier.get(tier, 0) + 1
 
     # Concepts whose type demands a hedge are worth surfacing separately: a
     # rule-of-thumb with no recorded exception is a claim overstating itself.
@@ -61,6 +111,13 @@ def build():
         "generated": datetime.date.today().isoformat(),
         "concepts_indexed": concepts,
         "counts": dict(sorted(by_kind.items())),
+        "evidence_tiers": dict(sorted(by_tier.items())),
+        "evidence_tier_meaning": {
+            "demonstrated": "the sentence cites a measurement AND its concept holds engine or tablebase evidence",
+            "on-a-tested-record": "the concept holds engine or tablebase evidence, but this sentence does not itself cite it",
+            "sourced": "rests on cited sources; no engine or tablebase evidence on the record",
+            "unsourced": "neither - should not exist and is a bug if it does",
+        },
         "total": len(entries),
         "soft_concepts_without_exceptions": unhedged,
         "entries": entries,
@@ -84,6 +141,7 @@ def main():
     json.dump(fresh, open(OUT, "w"), indent=2, ensure_ascii=False)
     print(f"wrote {OUT}: {fresh['total']} warnings from {fresh['concepts_indexed']} concepts")
     print("  " + " ".join(f"{k}={v}" for k, v in fresh["counts"].items()))
+    print("  tiers: " + " ".join(f"{k}={v}" for k, v in fresh["evidence_tiers"].items()))
     if fresh["soft_concepts_without_exceptions"]:
         print(f"  soft-typed concepts with NO exception recorded: "
               f"{len(fresh['soft_concepts_without_exceptions'])} -> "

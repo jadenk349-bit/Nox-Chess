@@ -62,9 +62,9 @@ both the data and the tooling.
 |---|---|---|---|
 | 1. Research knowledge | What humans call ideas, what they mean, where they came from | `concepts/`, `sources/` | assert that a move works |
 | 2. Engine validation | Whether a move actually works | `tools/sf_analyse.py`, `tools/tablebase.py`, the `engine`/`tablebase` blocks on positions | name a concept |
-| 3. Position understanding | Observable board features — structure, files, squares, material, activity | **tactical half already exists**: `findMotifs()` in `blind-chess.html`, plus `attackersOf`/`see`/`sliderLines` reusable via `tools/page_chess.js`. Positional half not built. | interpret |
-| 4. Concept matching | Which concepts the detected features actually license | not yet built | match on engine agreement |
-| 5. Explanation generation | Wording, level, depth, hedging | **already exists for puzzles**: `tools/puzzle_words.js`, with an `auditClaims()` pass. This system adds registers and the positional vocabulary. | claim anything not true in this position |
+| 3. Position understanding | Observable board features — structure, files, squares, material, activity | `lib/features.js`, built on `tools/page_chess.js`; the tactical half stays `findMotifs()` in `blind-chess.html` | interpret |
+| 4. Concept matching | Which concepts the detected features actually license | `lib/matchers.js` | match on engine agreement |
+| 5. Explanation generation | Wording, level, depth, hedging | `lib/analyze.js` (`compose`), beside the existing `tools/puzzle_words.js` for puzzles | claim anything not true in this position |
 
 Layers 3 and 5 are **not greenfield** — see `INTEGRATION.md`. The tactical,
 single-move case is already solved in this codebase to a high standard, and
@@ -73,10 +73,44 @@ engine testing. The Education System's real surface is the knowledge behind thos
 tags, everything positional (for which the codebase has no vocabulary at all), and
 retrieval.
 
-Layer 4 does not exist yet, deliberately. It must be built *on* researched
-criteria, and the criteria are what the research phase produces. Building it first
-would mean inventing recognition rules and then looking for sources to justify
-them, which is the failure mode this whole design exists to avoid.
+Layer 4 was deliberately not built until the research existed, because writing
+recognition rules first and then hunting for sources to justify them is the
+failure mode this whole design exists to avoid. It was built once 112 concepts
+carried researched `recognition` blocks, and every matcher in `lib/matchers.js`
+names the record it implements in an `implements` field, so the rule and its
+justification can be read side by side.
+
+## The reusable API
+
+`analyzeWithEducation({fen, move, engine, level, depth})` in `lib/analyze.js` is
+the single entry point other features call. It assembles the layers and enforces
+four refusals, which are the point of it rather than a caveat on it:
+
+1. **No forced label.** If nothing matches, it says nothing matched. There is no
+   nearest-concept fallback, because a fallback is wrong exactly when the
+   position is unusual — which is when the reader most needs the truth.
+2. **No quality claim without an engine.** Without an engine result the API
+   describes the board and records explicitly that the move was not assessed.
+   Naming ideas is this system's job; deciding whether a move works is not.
+3. **No banned phrasing.** Generated text is checked against the
+   `terminology.avoid` list of every concept it used, and a hit is returned as a
+   violation rather than hidden.
+4. **No unfilled template.** 25 concept records write their explanations with
+   `{slots}`. Slots are filled from what Layer 3 observed; any wording still
+   holding a slot is discarded in favour of something plainer, and the API
+   reports a bug if a brace ever reaches the output.
+
+Confidence is capped by knowledge type (`CEILING` in `lib/matchers.js`): a rule
+of thumb cannot produce a high-confidence claim however cleanly its features
+match, because the features were never the uncertain part.
+
+Ordering is by informativeness, not confidence, and the comment in `matchAll`
+explains why — sorting on confidence put "the king has no escape square" ahead of
+"there is an unassailable knight on d5" in a position that is about the knight.
+
+`tests/test_api.js` covers all of it, and replays every resolved false-positive
+case through the real API: those positions were chosen because a naive detector
+gets them wrong, which makes them the right regression suite.
 
 ## Knowledge types
 

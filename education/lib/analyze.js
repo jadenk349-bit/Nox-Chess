@@ -1,0 +1,302 @@
+'use strict';
+/* ============================================================================
+ * THE REUSABLE API — analyzeWithEducation()
+ *
+ * The single entry point other features are meant to call. Everything below is
+ * assembly: Layer 3 (lib/features.js) observes, Layer 4 (lib/matchers.js)
+ * decides what is licensed, and this file words it and refuses to say things it
+ * cannot support.
+ *
+ * Four refusals are built in, and they are the point of the file:
+ *
+ *   1. NO FORCED LABEL. If nothing matches, the result says nothing matched.
+ *      There is no nearest-concept fallback, because the fallback would be
+ *      wrong exactly when the position is unusual — which is when a reader
+ *      most needs the truth.
+ *   2. NO QUALITY CLAIM WITHOUT AN ENGINE. This system names ideas; Stockfish
+ *      decides whether a move works. Without an engine result the API reports
+ *      what is on the board and explicitly records that the move was not
+ *      assessed.
+ *   3. NO BANNED PHRASING. Every concept carries terminology.avoid, and the
+ *      generated text is checked against the avoid lists of the concepts it
+ *      used. A hit is a bug, and is returned rather than hidden.
+ *   4. NO UNHEDGED RULE OF THUMB. Soft knowledge types carry their hedge into
+ *      the output, because the whole failure mode this project exists to
+ *      prevent is a heuristic read as a law.
+ * ========================================================================== */
+
+const fs = require('fs');
+const path = require('path');
+const FEAT = require('./features.js');
+const MATCH = require('./matchers.js');
+
+const ROOT = path.join(__dirname, '..');
+
+let _cache = null;
+function knowledge() {
+  if (_cache) return _cache;
+  const concepts = {};
+  const cdir = path.join(ROOT, 'concepts');
+  for (const d of fs.readdirSync(cdir)) {
+    const sub = path.join(cdir, d);
+    if (!fs.statSync(sub).isDirectory()) continue;
+    for (const fn of fs.readdirSync(sub)) {
+      if (!fn.endsWith('.json')) continue;
+      const c = JSON.parse(fs.readFileSync(path.join(sub, fn), 'utf8'));
+      concepts[c.id] = c;
+    }
+  }
+  let warnings = { entries: [] };
+  const wp = path.join(ROOT, 'state', 'warnings_index.json');
+  if (fs.existsSync(wp)) warnings = JSON.parse(fs.readFileSync(wp, 'utf8'));
+  _cache = { concepts, warnings };
+  return _cache;
+}
+
+const LEVELS = ['beginner', 'intermediate', 'advanced', 'master'];
+const DEPTHS = ['short', 'normal', 'deep'];
+
+/* Several concept records deliberately write their explanation as a TEMPLATE —
+ * "A fork. Because it hits {targets} at once..." — so that a caller can fill in
+ * what is true of the position rather than speaking in generalities. That is a
+ * good design and a trap: an unfilled slot must never reach a reader. So slots
+ * are filled from what Layer 3 actually observed, and any wording still holding
+ * a slot afterwards is discarded in favour of something plainer. The API would
+ * rather say less than print braces at somebody. */
+const SLOT = /\{[^}]*\}/;
+
+function fill(text, slots) {
+  if (!text) return null;
+  let out = text.replace(/\{([a-zA-Z_][a-zA-Z0-9_]*)\}/g,
+    (m, k) => (slots && slots[k] != null ? String(slots[k]) : m));
+  return out;
+}
+
+// Whether the emitted wording is specific to this position is not something to
+// infer after the fact. Two earlier attempts got it wrong: asking whether the
+// record's PREFERRED wording had slots was wrong because wordFor may fall back
+// to a plain sentence, and substring-matching the slot values was wrong because
+// a file slot is a single letter that occurs in almost any sentence. So wordFor
+// reports what it did.
+
+function wordFor(rec, level, depth, slots) {
+  const ex = rec.explanations || {};
+  const candidates = [
+    depth && (ex.by_depth || {})[depth],
+    level && (ex.by_level || {})[level],
+    (ex.by_depth || {}).normal,
+    (ex.by_level || {}).intermediate,
+    rec.definition_short,
+  ];
+  for (const raw of candidates) {
+    if (!raw) continue;
+    const filled = fill(raw, slots);
+    if (SLOT.test(filled)) continue;          // a slot we could not fill
+    return { text: filled, specific: SLOT.test(raw) };
+  }
+  return { text: null, specific: false };     // nothing this record offers is usable
+}
+
+/* Warnings that belong with a concept, strongest evidence first — so a caller
+ * showing only one caveat shows the one that is actually demonstrated. */
+function cautionsFor(id, warnings) {
+  const rank = { demonstrated: 0, 'on-a-tested-record': 1, sourced: 2, unsourced: 3 };
+  return (warnings.entries || [])
+    .filter(e => e.concept === id && (e.kind === 'false_positive_trap' || e.kind === 'exception'))
+    .sort((a, b) => rank[a.evidence_tier] - rank[b.evidence_tier])
+    .map(e => ({ kind: e.kind, text: e.text, evidence: e.evidence_tier }));
+}
+
+const SOFT = new Set(['rule-of-thumb', 'practical-guideline', 'strategic-principle',
+                      'historical-teaching-principle', 'positional-concept']);
+
+/* Refusal 3, enforced rather than intended. */
+function auditPhrasing(text, used, concepts) {
+  const hits = [];
+  const low = text.toLowerCase();
+  for (const id of used) {
+    for (const bad of ((concepts[id] || {}).terminology || {}).avoid || []) {
+      // Only flag bare phrases; a banned phrase is banned as an assertion, and
+      // multi-clause entries are guidance to the writer rather than substrings.
+      const b = bad.toLowerCase().trim();
+      if (b.length >= 6 && b.split(' ').length <= 6 && low.includes(b)) {
+        hits.push({ concept: id, phrase: bad });
+      }
+    }
+  }
+  return hits;
+}
+
+function analyzeWithEducation(opts) {
+  const { fen, move = null, engine = null, level = 'intermediate',
+          depth = 'normal', maxConcepts = 6 } = opts || {};
+  if (!fen) throw new Error('analyzeWithEducation: a fen is required');
+  if (level && !LEVELS.includes(level)) throw new Error('unknown level: ' + level);
+  if (depth && !DEPTHS.includes(depth)) throw new Error('unknown depth: ' + depth);
+
+  const { concepts, warnings } = knowledge();
+  const notes = [];
+
+  const features = FEAT.features(fen);
+  let moveInfo = null;
+  if (move) {
+    moveInfo = FEAT.motifsOfMove(fen, move);
+    if (!moveInfo.legal) notes.push(`the move ${move} is not legal in this position; it was ignored`);
+  }
+
+  const matched = MATCH.matchAll(features, moveInfo, concepts).slice(0, maxConcepts);
+
+  const out = matched.map(m => {
+    const rec = concepts[m.concept];
+    const cautions = cautionsFor(m.concept, warnings);
+    const w = wordFor(rec, level, depth, m.slots);
+    return {
+      id: m.concept,
+      name: rec.canonical_name,
+      knowledge_type: rec.knowledge_type,
+      confidence: m.confidence,
+      confidence_capped_from: m.raw_confidence !== m.confidence ? m.raw_confidence : null,
+      detected_by: m.source,
+      detector_text: m.detector_text || null,
+      implements: m.implements,
+      because: m.because,
+      subjects: m.subjects,
+      hedge: SOFT.has(rec.knowledge_type) ? (rec.explanations || {}).hedge || null : null,
+      lesson: (rec.explanations || {}).lesson || null,
+      cautions: cautions.slice(0, 3),
+      wording: w.text,
+      wording_specific: w.specific,
+      wording_is_templated: SLOT.test(
+        ((rec.explanations || {}).by_depth || {})[depth] ||
+        ((rec.explanations || {}).by_level || {})[level] || ''),
+    };
+  });
+
+  if (!out.length) {
+    notes.push('no researched concept is licensed by the features of this position — ' +
+               'this system says nothing rather than reaching for the nearest label');
+  }
+
+  // Refusal 2. The engine is the only thing entitled to say a move is good.
+  let assessment = null;
+  if (move && engine && typeof engine.eval_cp === 'number') {
+    assessment = {
+      eval_cp: engine.eval_cp,
+      best_move: engine.best_move || null,
+      is_best: engine.best_move ? engine.best_move === move : null,
+      depth: engine.depth || null,
+      engine_id: engine.engine_id || null,
+    };
+  } else if (move) {
+    notes.push('no engine result was supplied, so this analysis makes NO claim about ' +
+               'whether the move is good — only about what is on the board');
+  }
+
+  const text = compose(features, moveInfo, out, assessment, level, depth);
+  if (SLOT.test(text)) {
+    notes.push('TEMPLATE BUG: generated text still contains an unfilled slot; ' +
+               'this is a bug in the concept wording or in slot filling');
+  }
+  const phrasing = auditPhrasing(text, out.map(c => c.id), concepts);
+  if (phrasing.length) {
+    notes.push('PHRASING BUG: generated text matched a banned phrase — ' +
+               phrasing.map(h => `${h.concept}: "${h.phrase}"`).join('; '));
+  }
+
+  return {
+    fen,
+    side_to_move: features.sideToMove,
+    phase: features.phase,
+    move: moveInfo && moveInfo.legal
+      ? { uci: move, san: moveInfo.san, motifs: moveInfo.motifs, fen_after: moveInfo.fenAfter }
+      : null,
+    features,
+    concepts: out,
+    assessment,
+    explanation: { text, level, depth },
+    phrasing_violations: phrasing,
+    notes,
+    provenance: {
+      concepts_available: Object.keys(concepts).length,
+      warnings_indexed: (warnings.entries || []).length,
+      chess_rules: 'blind-chess.html via tools/page_chess.js',
+      motif_detector: 'findMotifs() in blind-chess.html',
+    },
+  };
+}
+
+/* Layer 5, minimal and deliberately plain. It states what was observed, names
+ * the concepts that observation licenses, and stops. It does not narrate. */
+function compose(features, moveInfo, concepts, assessment, level, depth) {
+  const bits = [];
+  if (moveInfo && moveInfo.legal) {
+    bits.push(assessment
+      ? (assessment.is_best === true
+          ? `${moveInfo.san} is the engine's first choice here.`
+          : `${moveInfo.san} evaluates at ${(assessment.eval_cp / 100).toFixed(2)}.`)
+      : `${moveInfo.san} was played.`);
+  }
+  if (!concepts.length) {
+    bits.push('Nothing in this position matches a researched concept in this knowledge base.');
+    return bits.join(' ');
+  }
+  const lead = concepts[0];
+  // Avoid "The d- and e-files are open. The d-file is open." — if the wording
+  // was filled with this position's specifics, it has already said it.
+  if (!(lead.wording_specific && lead.wording)) bits.push(`${cap1(lead.because[0])}.`);
+  // If the lead observation already described this position concretely (a motif
+  // sentence, or a filled template), the record's general definition adds length
+  // and no information. Keep it only when the lead was generic.
+  if (lead.wording && !(lead.detected_by || '').startsWith('findMotifs')) bits.push(lead.wording);
+  if (lead.hedge) bits.push(lead.hedge);
+  const rest = concepts.slice(1, 3).filter(c => c.confidence !== 'low');
+  if (rest.length) {
+    bits.push('Also on the board: ' + rest.map(c => lower1(c.because[0])).join('; ') + '.');
+  }
+  return bits.join(' ');
+}
+const cap1 = s => (s ? s[0].toUpperCase() + s.slice(1) : s);
+// These clauses are spliced mid-sentence after a semicolon, so a leading capital
+// reads as a typo — except where the capital belongs to the word, which for
+// chess prose means a colour or a piece in algebraic notation.
+const lower1 = s => (!s ? s
+  : /^(White|Black|[KQRBN][a-h1-8x]|O-O)/.test(s) ? s
+  : s[0].toLowerCase() + s.slice(1));
+
+module.exports = { analyzeWithEducation, knowledge, cautionsFor, auditPhrasing, LEVELS, DEPTHS };
+
+/* CLI: node lib/analyze.js "<fen>" [uci] [--level L] [--depth D] [--json] */
+if (require.main === module) {
+  const args = process.argv.slice(2);
+  const flags = {};
+  const pos = [];
+  for (let i = 0; i < args.length; i++) {
+    if (args[i].startsWith('--')) {
+      const k = args[i].slice(2);
+      if (k === 'json') flags.json = true;
+      else { flags[k] = args[i + 1]; i++; }
+    } else pos.push(args[i]);
+  }
+  if (!pos.length) {
+    console.error('usage: node lib/analyze.js "<fen>" [uci-move] [--level beginner|intermediate|advanced|master] [--depth short|normal|deep] [--json]');
+    process.exit(2);
+  }
+  const r = analyzeWithEducation({
+    fen: pos[0], move: pos[1] || null,
+    level: flags.level || 'intermediate', depth: flags.depth || 'normal',
+  });
+  if (flags.json) { console.log(JSON.stringify(r, null, 2)); process.exit(0); }
+  console.log(`\n${r.fen}`);
+  console.log(`${r.side_to_move === 'w' ? 'White' : 'Black'} to move · ${r.phase}`);
+  if (r.move) console.log(`move: ${r.move.san}${r.move.motifs.length ? '  motifs: ' + r.move.motifs.join(', ') : ''}`);
+  console.log(`\n${r.explanation.text}\n`);
+  if (r.concepts.length) {
+    console.log('concepts licensed by the position:');
+    for (const c of r.concepts) {
+      console.log(`  ${c.id} [${c.confidence}${c.confidence_capped_from ? ', capped from ' + c.confidence_capped_from : ''}] (${c.knowledge_type})`);
+      for (const b of c.because) console.log(`      because ${b}`);
+      if (c.cautions.length) console.log(`      caution (${c.cautions[0].evidence}): ${c.cautions[0].text}`);
+    }
+  }
+  if (r.notes.length) { console.log('\nnotes:'); for (const n of r.notes) console.log('  · ' + n); }
+}
