@@ -1,0 +1,224 @@
+{
+  "schema_version": 2,
+  "alternate_names": [
+    "king activity",
+    "the active king",
+    "the king as a fighting piece"
+  ],
+  "historical_names": [],
+  "tags": [
+    "endgame",
+    "king",
+    "tablebase-tested"
+  ],
+  "subcategory": "endgame method",
+  "difficulty": "intermediate",
+  "knowledge_type_note": "Typed a principle rather than a rule because its own principal advocate documents a class of positions where it fails, and this base follows him.",
+  "name_status": "established-name",
+  "history": {
+    "attributions": [
+      {
+        "relation": "systematized-by",
+        "person": "Mikhail Shereshevsky",
+        "year": 1985,
+        "note": "Lists centralisation of the king first among the four basic endgame principles in Endgame Strategy, and documents its failure mode in rook endings.",
+        "confidence": "high"
+      },
+      {
+        "relation": "later-associated-with",
+        "person": "Jose Raul Capablanca",
+        "year": null,
+        "note": "The standard exemplar of the marching endgame king. Znosko-Borovsky is quoted as contrasting Alekhine's queen with the king as the principal instrument of Capablanca's victories - a quotation this base has not verified at source.",
+        "confidence": "low"
+      }
+    ],
+    "first_documented_source": "shereshevsky-endgame-strategy",
+    "year": 1985,
+    "confidence": "medium",
+    "notes": "The idea long predates Shereshevsky and is not his invention; he is credited with systematising it and, more valuably, with documenting where it breaks. The Znosko-Borovsky quotation reaches this base through an instructional blog and is recorded at low confidence.",
+    "competing_claims": [],
+    "development": []
+  },
+  "engine_era_status": "reliable",
+  "engine_era_note": "Strongly confirmed. Engines value an active king in simplified positions highly and will spend material to activate one, which was the part of Capablanca's method that looked most like intuition and turns out to be calculable.",
+  "recognition": {
+    "preconditions": [
+      "Queens are off or a transition to an endgame is imminent",
+      "No mating threats against the king"
+    ],
+    "indicators_for": [
+      "Weak enemy pawns the king could attack",
+      "A passed pawn needing escort or blockade",
+      "The enemy king is further from the action",
+      "Few enough pieces that mating nets are unlikely"
+    ],
+    "indicators_against": [
+      "Queens or many pieces remain and the king can be attacked",
+      "A rook ending with concrete defensive resources, where the king may be needed at home",
+      "The centralising move loses time in a race",
+      "The king would step into a check that gains the opponent a tempo"
+    ],
+    "prerequisites": [
+      "king-safety"
+    ],
+    "detector": null,
+    "detectability": "heuristic",
+    "typical_confidence": "medium",
+    "false_positive_traps": [
+      "The single most important trap is rook endings, on the testimony of the principle's own advocate: Shereshevsky found centralisation there to be not merely untimely but sometimes simply wrong, and warns against automatic centralising moves.",
+      "A king moving towards the centre is not automatically doing the right thing; the move still has to survive checks. His example has 1...Ke5? losing to 2.Rd5+ while the retreat 1...Kc5! draws.",
+      "Centralisation with queens still on is a different matter entirely and this concept does not apply."
+    ]
+  },
+  "application": {
+    "typical_plans": [
+      "Bring the king to the centre as the queens come off, before it is needed",
+      "Use the king to attack fixed pawn weaknesses",
+      "Escort a passed pawn with the king",
+      "Blockade an enemy passed pawn with the king, freeing pieces for active work"
+    ],
+    "typical_moves": [
+      "Kf2-e3-d4 style marches once queens are exchanged"
+    ],
+    "typical_pawn_structures": [
+      "Fixed pawn weaknesses within a king's reach"
+    ],
+    "typical_piece_arrangements": [
+      "Simplified positions with few or no minor pieces"
+    ],
+    "tactical_consequences": [
+      "An exchange sacrifice to install the king on a strong central square can be sound"
+    ],
+    "strategic_consequences": [
+      "The side whose king arrives first usually wins otherwise level endings"
+    ]
+  },
+  "exceptions": [
+    "Rook endings, where the author of the principle records finding outright incorrect centralisation and attributes it to their concreteness and to the king's larger defensive role.",
+    "Positions where the king is still exposed to checks that gain the opponent tempi.",
+    "Races, where a centralising move may simply be too slow."
+  ],
+  "limitations": [
+    "Whether a particular king move is right remains a concrete question; the principle says where the king belongs, not whether this move gets it there safely.",
+    "This base's attempts to build a controlled pair isolating king activity in rook endings FAILED twice - see the concept's audit notes - which is itself consistent with Shereshevsky's finding."
+  ],
+  "misconceptions": [
+    "That the king should be kept safe in the endgame as it is earlier. The change in the king's role is what defines the phase.",
+    "That centralisation is always correct. Its own advocate documents rook endings where it is not."
+  ],
+  "relationships": {
+    "broader": [
+      "endgame-principles"
+    ],
+    "narrower": [],
+    "related": [
+      "endgame-principles",
+      "opposition",
+      "two-weaknesses",
+      "passed-pawn",
+      "king-safety",
+      "rook-endgame-principles",
+      "triangulation"
+    ],
+    "contrasting": [
+      "king-safety"
+    ],
+    "co_occurring": [
+      "two-weaknesses"
+    ],
+    "conflicts": [
+      {
+        "concept": "king-safety",
+        "resolution": "The same piece, opposite advice, and the phase decides. King safety governs while a mating attack is possible; king activity governs once it is not. The dangerous ground is the transition, and the honest test is whether any enemy force can still generate threats against the king rather than whether the queens happen to be off."
+      }
+    ]
+  },
+  "examples": [
+    {
+      "fen": "r7/4k3/4P3/4K3/8/8/8/7R w - - 0 1",
+      "note": "Controlled pair, first half: the defending king stands in front of the pawn. Paired with the identical position with that king on a7 - same material, same white setup, only the defending king's square differs.",
+      "origin_kind": "tablebase-position",
+      "concept_role": "supports",
+      "side_to_move_benefits": "white",
+      "tablebase": {
+        "source": "Lichess tablebase (Syzygy, 7-piece)",
+        "pieces": 5,
+        "wdl": "win",
+        "dtz": 7,
+        "dtm": 35,
+        "category": "win",
+        "note": "PROVEN win in 35. The paired position, identical except that the defending king sits on a7 instead of e7, is a proven win in 15. Both are lost, so king placement does not change the RESULT here - but it more than doubles the resistance, 35 against 15, with nothing else on the board different. Recorded as measuring the king's defensive value rather than as proving the principle, which would be a stronger claim than the evidence supports."
+      }
+    }
+  ],
+  "counterexamples": [
+    {
+      "fen": "r7/k7/4P3/4K3/8/8/8/7R w - - 0 1",
+      "note": "Controlled pair, second half: identical to the position above except the defending king is on a7 rather than e7.",
+      "origin_kind": "tablebase-position",
+      "concept_role": "supports",
+      "side_to_move_benefits": "white",
+      "tablebase": {
+        "source": "Lichess tablebase (Syzygy, 7-piece)",
+        "pieces": 5,
+        "wdl": "win",
+        "dtz": 1,
+        "dtm": 15,
+        "category": "win",
+        "note": "PROVEN win in 15, against 35 with the king in front. The 20-move difference is attributable to the king's square alone."
+      }
+    }
+  ],
+  "ambiguous_examples": [],
+  "explanations": {
+    "by_level": {
+      "beginner": "Once the queens come off, bring your king towards the middle. It is a fighting piece now.",
+      "intermediate": "Centralise the king in the endgame. The side whose king gets to the action first usually wins otherwise level endings.",
+      "advanced": "Bring it in anticipation of the ending rather than after it arrives - but be careful in rook endings, which are concrete enough to punish automatic centralising.",
+      "master": "Shereshevsky himself reports finding outright incorrect centralisation in rook endings, and attributes it to the king's larger defensive role there."
+    },
+    "by_depth": {
+      "short": "In the endgame the king is a fighting piece - bring it to the centre.",
+      "normal": "Centralisation of the king: once queens are off and mating attacks are unlikely, the king becomes an active piece and often the strongest one. It attacks weak pawns, escorts passed pawns and blockades enemy ones, and the side whose king arrives first usually wins endings that look level.",
+      "deep": "The change that defines the endgame, and the first of Shereshevsky's four basic principles - stated by him at close to full strength, since centralisation is 'almost never wrong' and 'can only be untimely'. The mechanism is that a short-range piece is finally allowed to move, doing work that would otherwise cost a piece elsewhere. The exception is worth as much as the rule and comes from the same source: Shereshevsky reports being surprised to find centralisation in rook endings that was not merely untimely but wrong, explaining that rook endings are very concrete, full of defensive set-ups and fortresses, and that the king's defensive role there is much larger. His illustration has the natural centralising move losing while a retreat away from the passed pawn draws."
+    },
+    "hedge": "",
+    "lesson": "Bring the king in as the queens come off - but in a rook ending, check the move rather than trusting the plan."
+  },
+  "terminology": {
+    "beginner_words": [
+      "bring your king out",
+      "the king can fight now"
+    ],
+    "advanced_words": [
+      "centralisation",
+      "king activity",
+      "the active king",
+      "opposition"
+    ],
+    "avoid": [
+      "always centralise the king",
+      "keep the king safe in the endgame"
+    ]
+  },
+  "status": {
+    "stage": "researched",
+    "last_updated": "2026-09-01",
+    "open_questions": [],
+    "audit_notes": [
+      "2026-09-01: two attempts to build a controlled pair in which king placement alone flips a rook ending between win and draw both FAILED - one pair came out win/win (dtm 35 vs 15, recorded) and a Philidor-setup pair came out draw/draw. Recorded rather than discarded. This mirrors the three failed outpost pairs and is consistent with Shereshevsky's own remark that rook endings are too concrete for the principle to isolate."
+    ]
+  },
+  "id": "king-activation",
+  "canonical_name": "Centralisation of the king",
+  "category": "king-activation",
+  "knowledge_type": "strategic-principle",
+  "definition_short": "Once queens are off, the king becomes a fighting piece and belongs in the centre rather than in shelter.",
+  "definition_long": "The change that defines the endgame. In the opening and middlegame the king hides; once the chance of a mating attack recedes, it becomes an active piece and often the strongest one on the board. Shereshevsky lists it first among the four basic principles of endgame play and states the rule at close to full strength: centralisation of the king in the endgame is 'almost never wrong. It can only be untimely.'\n\nTHE MECHANISM is that the king is a short-range piece that is finally allowed to move. It attacks weak pawns, escorts passed pawns, blockades enemy ones, and does all of it without costing a piece elsewhere. The side whose king reaches the action first usually wins endings that look level, which is why experienced players bring the king towards the centre in ANTICIPATION of an ending rather than after one has arrived.\n\nTHE AUTHOR'S OWN EXCEPTION is the reason this record exists in the form it does, and it is unusually honest testimony. Shereshevsky reports being SURPRISED that in rook endings he could find examples of centralisation that were not merely untimely but outright INCORRECT, and offers a candid explanation: rook endings are very concrete, full of specific defensive set-ups and fortresses, and the king's defensive role there is much more significant than in other endings. His own illustration has the natural 1...Ke5? losing while the illogical 1...Kc5!, stepping the king FURTHER from the enemy passed pawn, draws.\n\nMEASURED HERE: with identical material and only the defending king's square changed, the defence lasted more than twice as long with the king in front of the pawn — mate in 35 against mate in 15. That quantifies the king's defensive value directly, in a position where nothing else differs.",
+  "sources": [
+    "shereshevsky-endgame-strategy",
+    "chessentials-endgame-strategy-review",
+    "oldschoolchess-capablanca-endgame"
+  ],
+  "source_confidence": "high"
+}

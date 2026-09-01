@@ -1,0 +1,171 @@
+{
+  "schema_version": 2,
+  "alternate_names": [
+    "rook and pawn endings"
+  ],
+  "historical_names": [],
+  "tags": [
+    "endgame",
+    "rooks",
+    "tablebase-tested"
+  ],
+  "subcategory": "endgame type",
+  "difficulty": "advanced",
+  "knowledge_type_note": "Typed a principle rather than a rule, and hedged hard, because this is the endgame type in which general rules most often fail - a claim this base can support with proofs rather than assert.",
+  "name_status": "established-name",
+  "history": {
+    "attributions": [
+      {
+        "relation": "originated-by",
+        "person": "Siegbert Tarrasch",
+        "year": null,
+        "note": "The rule of placing the rook behind the passed pawn is conventionally attributed to him; this base records the attribution as DISPUTED, with Tartakower a competing claimant, on the passed-pawn concept.",
+        "confidence": "disputed"
+      }
+    ],
+    "first_documented_source": "shereshevsky-endgame-strategy",
+    "year": null,
+    "confidence": "low",
+    "notes": "No single origin. The named drawing positions carry their own histories, including the Lucena position's well-documented misattribution, recorded on its own concept.",
+    "competing_claims": [],
+    "development": []
+  },
+  "engine_era_status": "useful-with-common-exceptions",
+  "engine_era_note": "Tablebases have been harder on rook-endgame folklore than on any other area, because rook endings are small enough to solve and numerous enough in practice for the difference to matter. Several rules of thumb are now known to be wrong as stated rather than merely approximate.",
+  "recognition": {
+    "preconditions": [
+      "Rooks and pawns only, or nearly so"
+    ],
+    "indicators_for": [
+      "An activity difference between the rooks",
+      "A passed pawn on either side",
+      "A known drawing set-up available to the defender"
+    ],
+    "indicators_against": [],
+    "prerequisites": [
+      "endgame-principles"
+    ],
+    "detector": null,
+    "detectability": "heuristic",
+    "typical_confidence": "low",
+    "false_positive_traps": [
+      "This is the endgame type where general rules are least trustworthy, and this base holds proofs against three of them: Tarrasch's rule, king centralisation, and the value of a check.",
+      "A pawn advantage is much weaker evidence here than elsewhere, because the defensive constructions are so numerous.",
+      "Recognising the material as a rook ending says almost nothing. The concrete configuration decides."
+    ]
+  },
+  "application": {
+    "typical_plans": [
+      "Activate the rook, giving a pawn for it if necessary",
+      "Cut the enemy king off from the pawn along a rank or file",
+      "Tie the enemy rook to defence and then open a second front",
+      "As the defender, aim for a known drawing set-up rather than counting material"
+    ],
+    "typical_moves": [],
+    "typical_pawn_structures": [
+      "A single passed pawn against a lone rook"
+    ],
+    "typical_piece_arrangements": [
+      "A rook cut off from the action",
+      "A rook chained to a pawn's defence"
+    ],
+    "tactical_consequences": [
+      "Giving a pawn to activate the rook is frequently correct"
+    ],
+    "strategic_consequences": [
+      "An extra pawn is often insufficient, so conversion technique matters more than acquisition"
+    ]
+  },
+  "exceptions": [
+    "Tarrasch's rule fails in the Vancura configuration, proven in this base.",
+    "King centralisation fails in some rook endings, on the testimony of the principle's own advocate.",
+    "Passive defence is sometimes correct, in defiance of the activity principle, when a known drawing set-up requires it."
+  ],
+  "limitations": [
+    "This record is deliberately an umbrella of caveats; the load-bearing knowledge lives in the named positions - Lucena, Philidor, Vancura - each of which is validated here against tablebase.",
+    "This base has not systematically covered rook-endgame technique; only the positions it has proven."
+  ],
+  "misconceptions": [
+    "That an extra pawn wins a rook ending. A great many such positions are drawn, because of how many defensive constructions exist.",
+    "That the rook belongs behind the passed pawn. It often does, and this base holds a proof that as a general rule it is false.",
+    "That rook endings can be played on principle. They are the type most resistant to that."
+  ],
+  "relationships": {
+    "broader": [
+      "endgame-principles"
+    ],
+    "narrower": [],
+    "related": [
+      "endgame-principles",
+      "lucena-position",
+      "philidor-position",
+      "vancura-position",
+      "king-activation",
+      "passed-pawn",
+      "rook-on-the-seventh",
+      "open-file",
+      "fortress"
+    ],
+    "contrasting": [],
+    "co_occurring": [],
+    "conflicts": [
+      {
+        "concept": "king-activation",
+        "resolution": "Rook endings are the recorded exception to king centralisation. Where the two collide, the concrete line decides and the general principle yields - which is Shereshevsky's own position, not a hedge invented here."
+      }
+    ]
+  },
+  "examples": [],
+  "counterexamples": [],
+  "ambiguous_examples": [],
+  "explanations": {
+    "by_level": {
+      "beginner": "Keep your rook active. A rook stuck defending a pawn is worth much less than one that can attack.",
+      "intermediate": "Activity beats material in rook endings - giving a pawn to free your rook is often right. And many rook endings a pawn down are drawn.",
+      "advanced": "Learn the drawing positions. The defence has more resources here than in any other ending, and the general rules are least reliable.",
+      "master": "Three standard rules have proven counterexamples in this base alone: the rook behind the passed pawn, king centralisation, and the value of a check."
+    },
+    "by_depth": {
+      "short": "Activity beats material; learn the drawing positions.",
+      "normal": "Rook endings are the commonest in practice and the least governed by rules. An active rook is worth more than a pawn, so giving a pawn to activate one is routinely right, and the defence has so many known drawing set-ups that an extra pawn frequently wins nothing.",
+      "deep": "The commonest endings and the ones where general principles are least reliable. Activity over material is the idea that survives everywhere - a passive rook chained to a pawn loses material the moment it moves, and that asymmetry decides more rook endings than a pawn does. What makes the type distinctive is the depth of the defensive resources: named drawing constructions hold positions that material counting calls lost, which is why so many rook endings a pawn down are drawn. And the general rules fail here demonstrably rather than arguably - Tarrasch's rule about the rook behind the passed pawn is disproved by a proven pair in this base, king centralisation is documented as sometimes wrong by its own advocate, and one check can draw while another loses in the same position."
+    },
+    "hedge": "Rook endings are the endgame type in which general rules are least trustworthy; prefer a known position to a principle wherever one applies.",
+    "lesson": "Reach for a known position before reaching for a rule."
+  },
+  "terminology": {
+    "beginner_words": [
+      "keep the rook active",
+      "a rook stuck defending is nearly useless"
+    ],
+    "advanced_words": [
+      "active rook",
+      "passive rook",
+      "cutting off the king",
+      "Philidor",
+      "Vancura"
+    ],
+    "avoid": [
+      "the rook belongs behind the passed pawn",
+      "an extra pawn wins"
+    ]
+  },
+  "status": {
+    "stage": "researched",
+    "last_updated": "2026-09-01",
+    "open_questions": [],
+    "audit_notes": []
+  },
+  "id": "rook-endgame-principles",
+  "canonical_name": "Rook endgame principles",
+  "category": "rook-endgames",
+  "knowledge_type": "strategic-principle",
+  "definition_short": "The most common and least rule-governed endings: activity outweighs material, and almost every general rule has proven exceptions.",
+  "definition_long": "The commonest endings in practice, and the ones where general principles are least reliable.\n\nACTIVITY OVER MATERIAL is the one idea that survives everywhere. An active rook makes threats and goes where it likes; a passive rook is chained to a pawn and loses material the moment it moves. That asymmetry decides rook endings more often than a pawn does, which is why giving a pawn to activate a rook is routinely correct — a trade that would be absurd in most other endings.\n\nTHE DEFENDER'S RESOURCES ARE UNUSUALLY DEEP, and this is what makes the type distinctive. Rook endings are full of specific drawing set-ups — Philidor, Vancura — which hold positions that material counting says are lost. The practical consequence is the old observation that a great many rook endings a pawn down are drawn, and it is not a joke about laziness: it is a statement about how many defensive constructions exist.\n\nWHY GENERAL RULES FAIL HERE, with evidence rather than assertion:\n- TARRASCH'S RULE, to put the rook behind the passed pawn, is DISPROVED as a general rule by this base's Vancura pair: same material, one rook moved, and the result changes from a proven draw to a proven loss in 63.\n- CENTRALISING THE KING, elsewhere almost never wrong, is documented by Shereshevsky himself as sometimes outright incorrect in rook endings, which he attributes to their concreteness and to the king's larger defensive role.\n- A CHECK is not even weak evidence: this base holds a rook ending where one check draws and another loses.\n\nThe honest summary is that rook endings are learned as concrete positions and techniques rather than derived from principles, and that a system explaining them should reach for a known position before reaching for a rule.",
+  "sources": [
+    "shereshevsky-endgame-strategy",
+    "oldschoolchess-capablanca-endgame",
+    "chessentials-endgame-strategy-review"
+  ],
+  "source_confidence": "medium"
+}
