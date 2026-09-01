@@ -1283,3 +1283,33 @@ the commonest thing anyone says about this material, and it is the error the
 record names.
 
 **74 of 108 traps cited, 34 unread.**
+
+
+## A guard that never fired, and the Layer 3 bug under it
+
+`worst-placed-piece` grew a guard implementing its record's second trap —
+*"improving pieces while the opponent builds an initiative produces individually
+reasonable moves and a collectively lost position"* — and the guard refused **0
+of 788** positions. A guard that never fires is either unnecessary or broken.
+
+It was broken, and not in the guard. `quietness()` called `P.see(st, m)` with a
+**move object** where `see(state, square, side)` expects a square index.
+`s.b[move]` is undefined, so `see()` returned 0 for every capture and
+`winningCapturesAvailable` was **always zero**. `quiet` has only ever meant "not
+in check and no check available", for as long as it has existed.
+
+Everything downstream was measured and corrected:
+
+- Quiet positions among the 788 are **98, not 172** — the `--quiet` denominator
+  added earlier today was wrong the day it was written.
+- `worst-placed-piece` falls 8.4% → **4.1%** now that its new guard can fire.
+- **21 of the 53** record notes saying a position is "QUIET by mechanical test:
+  no check available and no capture that wins material" were claiming something
+  that had never been tested, and are false. All 21 are corrected **in place**,
+  naming the bug, and the positions are kept — dropping the evidence would be
+  tidying away the consequence of a bug.
+- The `two-weaknesses` limitation that cited the quiet experiment is re-measured:
+  28.6% rather than 32.6%, conclusion unchanged.
+
+This is the ninth defect the trap reading list has produced, and the first one
+that was not in the layer being audited.

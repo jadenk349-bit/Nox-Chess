@@ -1872,7 +1872,14 @@ const MOVE_BASED = [
     concept: 'worst-placed-piece',
     implements: ("the record's condition — when nothing urgent is happening, the right move is the " +
                  "one that improves the piece doing least. Measured as an increase in the MINIMUM " +
-                 "piece scope across the side's own pieces"),
+                 "piece scope across the side's own pieces, plus the record's second trap: " +
+                 "\"improving pieces while the opponent builds an initiative produces individually " +
+                 "reasonable moves and a collectively lost position.\" " +
+                 "Note what is NOT claimed. The record says 'identifying the worst piece is a " +
+                 "judgement, not a measurement. This system has no reliable detector for it and " +
+                 "must not claim one', and this does not claim one: it says that THIS MOVE raised " +
+                 "the scope of the least active piece, which is a measurement about a move, and it " +
+                 "says it at low confidence. It never says which piece is worst."),
     run(before, after, moveInfo) {
       // The record's precondition is that nothing more urgent is happening, and
       // that is a property of the MOVE rather than of the whole position. An
@@ -1892,6 +1899,22 @@ const MOVE_BASED = [
       // burying two has not improved anything.
       const sum = xs => xs.reduce((n, x) => n + x.moves, 0);
       if (sum(a) < sum(b)) return null;
+      // ...and the opponent must not be handed anything by it. "Improving pieces
+      // while the opponent builds an initiative produces individually reasonable
+      // moves and a collectively lost position. This is the commonest way the
+      // rule is misapplied" - the record's second trap, and the half of it a
+      // static test can answer is whether the position AFTER the move hands the
+      // opponent MATERIAL. A quiet move that does is not an instance of the
+      // rule; it is the mistake the rule is famous for.
+      //
+      // Only winning captures, and the bound was set by a position rather than
+      // guessed. Including "a check is available" as well took this from 8.4% to
+      // 1.6% and lost Rubinstein-Salwe 1908 move 20 - the corpus's own annotated
+      // instance of the concept, and the position the comment above already
+      // says an earlier over-strict version missed. A check being available is
+      // not an initiative; a hanging piece is.
+      const q = after.quietness;
+      if (q && q.winningCapturesAvailable > 0) return null;
       return {
         confidence: 'low',
         because: [`${moveInfo.san || 'the move'} raises the scope of ${side(before, mover)}'s least ` +

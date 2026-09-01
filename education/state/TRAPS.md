@@ -13,7 +13,7 @@ implemented; that is a reading, and doing it is the work. What it can do is
 stop the list being rediscovered from scratch each time — and every one of
 the defects listed in the tool's header was unread before it was looked at.
 
-**74 of 108 cited. 34 unread.**
+**76 of 108 cited. 32 unread.**
 
 ## doubled-pawns
 
@@ -189,5 +189,5 @@ the defects listed in the tool's header was unread before it was looked at.
 ## worst-placed-piece
 
 - [**unread**] The rule's precondition is the load-bearing part and is usually dropped in quotation. Anderssen says 'unless you can derive immediate advantage by an attack' and Makogonov says 'in positions where no other important matters need to be considered'. Without those, it is not the rule they stated.
-- [**unread**] Improving pieces while the opponent builds an initiative produces individually reasonable moves and a collectively lost position. This is the commonest way the rule is misapplied.
-- [**unread**] Identifying the worst piece is a judgement, not a measurement. This system has no reliable detector for it and must not claim one.
+- [cited] Improving pieces while the opponent builds an initiative produces individually reasonable moves and a collectively lost position. This is the commonest way the rule is misapplied.
+- [cited] Identifying the worst piece is a judgement, not a measurement. This system has no reliable detector for it and must not claim one.

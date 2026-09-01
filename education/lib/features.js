@@ -383,8 +383,20 @@ function quietness(st) {
       const target = st.b[m.to];
       if (target) {
         captures++;
+        // see(state, SQUARE, side) - not see(state, move). Passing the move
+        // object put an object where an index belongs, so s.b[sq] was undefined,
+        // see() returned 0 for every capture, and winningCapturesAvailable was
+        // ALWAYS ZERO. `quiet` therefore meant only "not in check and no check
+        // available" for as long as it has existed, and every record and corpus
+        // note claiming a position is quiet because it has "no capture that wins
+        // material" was claiming something that had never been tested.
+        //
+        // Found by the trap audit, of all things: `worst-placed-piece` grew a
+        // guard against handing the opponent material, the guard never fired on
+        // any of 788 positions, and a guard that never fires is either
+        // unnecessary or broken.
         let v = 0;
-        try { v = P.see(st, m); } catch (e) { v = target ? 1 : 0; }
+        try { v = P.see(st, m.to, st.turn); } catch (e) { v = 1; }
         if (v > 0) goodCaptures++;
       }
       let after;

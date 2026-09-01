@@ -1230,6 +1230,52 @@ const { concepts } = API.knowledge();
      !outp('2r1k2r/1pqbnpp1/4p2p/p1NpP3/PP3P2/2PB4/6PP/R3QR1K b k - 3 21'));
 }
 
+{
+  // quietness() passed a MOVE object where see() expects a SQUARE INDEX, so
+  // see() read s.b[move] === undefined and returned 0 for every capture. That
+  // means winningCapturesAvailable was ALWAYS ZERO, and `quiet` has only ever
+  // meant "not in check and no check available" — while 53 records and several
+  // notes said a position was quiet because "the side to move has no check
+  // available AND no capture that wins material".
+  //
+  // Found by the trap audit: worst-placed-piece grew a guard against handing the
+  // opponent material, the guard never fired on any of 788 positions, and a
+  // guard that never fires is either unnecessary or broken.
+  const q = FEAT.features('4k3/8/8/3r4/8/8/8/3QK3 w - - 0 1').quietness;
+  ok('quietness: a free rook is a winning capture', q.winningCapturesAvailable === 1,
+     JSON.stringify(q));
+  ok('...and the position is therefore not quiet', q.quiet === false);
+  const still = FEAT.features('4k3/4p3/8/8/8/8/4P3/4K3 w - - 0 1').quietness;
+  ok('quietness: a position with nothing on offer is still quiet', still.quiet === true,
+     JSON.stringify(still));
+  ok('quietness: the bug is explained where it was', /see\(state, SQUARE, side\)/.test(
+     fs.readFileSync(path.join(ROOT, 'lib', 'features.js'), 'utf8')));
+
+  // Every record note written from the broken test has been re-checked against
+  // the fixed one, and the 21 that turned out to be false were corrected in
+  // place rather than deleted.
+  let overstated = 0, corrected = 0;
+  for (const dir of fs.readdirSync(path.join(ROOT, 'concepts'))) {
+    const d = path.join(ROOT, 'concepts', dir);
+    if (!fs.statSync(d).isDirectory()) continue;
+    for (const fn of fs.readdirSync(d)) {
+      if (!fn.endsWith('.json')) continue;
+      const c = JSON.parse(fs.readFileSync(path.join(d, fn), 'utf8'));
+      for (const k of ['examples', 'counterexamples', 'ambiguous_examples']) {
+        for (const e of (c[k] || [])) {
+          const n = String(e.note || '');
+          if (!/no capture that wins material/i.test(n)) continue;
+          if (/CORRECTED 2026-09-02/.test(n)) { corrected++; continue; }
+          let f; try { f = FEAT.features(e.fen); } catch (err) { continue; }
+          if (!f.quietness.quiet) overstated++;
+        }
+      }
+    }
+  }
+  ok('no record still claims a quiet position that is not one', overstated === 0, String(overstated));
+  ok('...and the ones that did are corrected in place, not deleted', corrected >= 20, String(corrected));
+}
+
 /* ---------- report ---------- */
 console.log(`\nAPI  PASS ${pass}   FAIL ${fails.length}`);
 for (const [n, d] of fails) console.log(`  FAIL  ${n}\n        ${d}`);
