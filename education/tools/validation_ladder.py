@@ -69,11 +69,20 @@ def main():
         c = json.load(open(f, encoding="utf-8"))
         concepts[c["id"]] = c
 
+    # Corpus membership counts only when the entry names the PERSON whose claim
+    # it is. `annotator` is prose and can read "unattributed training page" while
+    # still looking, to a counter, exactly like grounding; `attributed_by` is the
+    # field. This is the second time a rung here was found counting something
+    # looser than its own definition — the first cost it 39 -> 17 — and both
+    # times the honest number was lower. Two entries in the file name no person
+    # and now ground nothing.
     corpus_ids = set()
+    corpus_unattributed = set()
     cp = os.path.join(HERE, "corpus", "annotated_positions.json")
     if os.path.exists(cp):
         for x in json.load(open(cp, encoding="utf-8"))["positions"]:
-            corpus_ids.add(x["concept"])
+            (corpus_ids if x.get("attributed_by") else corpus_unattributed).add(x["concept"])
+    corpus_unattributed -= corpus_ids
 
     recognised = matcher_concepts()
     LEVELS = ["beginner", "intermediate", "advanced", "master"]
@@ -153,6 +162,9 @@ def main():
     extra = sum(1 for c in mined if mined[c])
     print(f"\n  ...and {extra} more concepts have a master-game position this system found "
           f"itself,\n  which is evidence the concept OCCURS and not evidence a human named it here.")
+    if corpus_unattributed:
+        print(f"  ...and {len(corpus_unattributed)} more have a corpus position whose annotation names "
+              f"no person:\n  {', '.join(sorted(corpus_unattributed))}.")
 
     full = [c for c, r in rows.items() if all(r.values())]
     print(f"\n  all seven rungs: {len(full)}/{n}" + (f" — {', '.join(sorted(full))}" if full else ""))

@@ -910,6 +910,74 @@ const { concepts } = API.knowledge();
      /34\.6%/.test(fs.readFileSync(path.join(ROOT, 'lib', 'matchers.js'), 'utf8')));
 }
 
+{
+  // The first human grounding weak-square has, and it is NEGATIVE both times,
+  // which is the right way round for a concept whose own record says every pawn
+  // move creates squares no pawn can guard. Both positions are from one article
+  // by a named grandmaster, built as traps for exactly the reading a mechanical
+  // detector performs: "a keyhole is useless when you don't have a key that fits
+  // into it." Games verified by replaying the scores, not by transcribing
+  // diagrams.
+  const ws = fen => (API.analyzeWithEducation({ fen }).concepts_all
+    .find(c => c.id === 'weak-square') || { subjects: [] }).subjects;
+
+  // Unzicker-Fischer, Varna 1962, after 20.c3. Markos: "Many club players
+  // answer automatically: White is obviously better, look at the hole on d5!
+  // In fact, the opposite is true: Black is better." Stockfish, from the side
+  // to move: +0.39 for Black.
+  const UF = '5rk1/4bppp/1q1p4/1p1QpP2/r3P3/1NP5/1P4PP/R4R1K b - - 0 20';
+  ok('weak-square: the d5 hole is not reported as White\'s asset (Unzicker-Fischer 1962)',
+     !ws(UF).includes('w'), ws(UF).join(','));
+  ok('...and the test is LIVE - Layer 3 does see the hole',
+     FEAT.features(UF).holes.w.includes('d5'), FEAT.features(UF).holes.w.join(','));
+
+  // Shirov-Kramnik, Linares 2000, after 20.Qh5. Markos: "d5 is a 'no man's
+  // land'. Neither side can make any use of it." Hence no side is named.
+  const SK = '1rb1r2k/4qpbp/p2p4/4p2Q/1pP1Pp2/1P6/P1N1BPPP/R3R1K1 b - - 2 20';
+  ok('weak-square: d5 is no man\'s land, for neither side (Shirov-Kramnik 2000)',
+     ws(SK).length === 0, ws(SK).join(','));
+  ok('...and this one too is live: ten holes for White, d5 among them',
+     FEAT.features(SK).holes.w.includes('d5'), FEAT.features(SK).holes.w.join(','));
+
+  // The same position is where two-weaknesses and a grandmaster disagree about
+  // one pawn: this base lists f4 among Black's weaknesses, Markos calls b4 and
+  // f4 the cage that "guards all the roads to d5". Both follow from the pawn
+  // skeleton. That is recorded as a trap on the record, not engineered away -
+  // removing f4 would not change the claim, which also names f7 and d6.
+  const tw = JSON.parse(fs.readFileSync(
+    path.join(ROOT, 'concepts', 'positional-method', 'two-weaknesses.json'), 'utf8'));
+  ok('two-weaknesses: the structural-weakness-as-defensive-asset trap is recorded',
+     tw.recognition.false_positive_traps.some(t => /KEY DEFENSIVE ASSET/.test(t)));
+  ok('two-weaknesses: the unimplementable half of precondition 1 is recorded, with why',
+     tw.limitations.some(l => /no forcing tactic available/.test(l) && /Rubinstein-Salwe/.test(l)));
+}
+
+{
+  // A rung must not count something looser than its own definition. HUMAN-GROUNDED
+  // says "an annotated master position, not a mined one"; it was found once
+  // counting this system's own mining (39 -> 17), and again counting a corpus
+  // entry whose annotation names no person. `attributed_by` is now the field,
+  // in the corpus as well as on the records, and both times the honest number
+  // was lower.
+  const corpus = JSON.parse(fs.readFileSync(
+    path.join(ROOT, 'corpus', 'annotated_positions.json'), 'utf8'));
+  const anon = corpus.positions.filter(p => !p.attributed_by);
+  ok('corpus: entries with no named person are kept, not deleted', anon.length >= 1);
+  ok('corpus: ...and every one of them still names its annotator prose',
+     anon.every(p => p.annotator), anon.map(p => p.id).join(','));
+  const ladderSrc = fs.readFileSync(path.join(ROOT, 'tools', 'validation_ladder.py'), 'utf8');
+  ok('ladder: corpus grounding is read from attributed_by, not from membership',
+     /attributed_by.*else corpus_unattributed|corpus_ids if x\.get\("attributed_by"\)/.test(ladderSrc));
+  const ladder = JSON.parse(fs.readFileSync(path.join(ROOT, 'state', 'ladder.json'), 'utf8'));
+  const anonConcepts = new Set(anon.map(p => p.concept));
+  const grounded = new Set(corpus.positions.filter(p => p.attributed_by).map(p => p.concept));
+  for (const c of anonConcepts) {
+    if (grounded.has(c)) continue;   // grounded by a different, attributed entry
+    ok('ladder: an unattributed corpus entry grounds nothing: ' + c,
+       ladder.concepts[c] && ladder.concepts[c].human_grounded === false);
+  }
+}
+
 /* ---------- report ---------- */
 console.log(`\nAPI  PASS ${pass}   FAIL ${fails.length}`);
 for (const [n, d] of fails) console.log(`  FAIL  ${n}\n        ${d}`);

@@ -30,7 +30,9 @@
     "",
     "rejected_as_wrong is the sharpest test in this file and it is the easiest field to get wrong. It must list only concepts whose application here would be FALSE - never ones that are merely secondary, and never ones a naive reader might over-weight. Three entries in this corpus were drafted with a true concept in that list (space, trapped-piece, pawn-break), and each one manufactured a false positive out of correct output. When the checker reports a rejected alternate, the first question is whether the alternate is actually wrong.",
     "",
-    "`side` names the colour a NEGATIVE entry is about, and it exists because the sharpest negatives are per-side. Nimzowitsch's blockading bishop on d4 must not be called bad in a position where Black's bishop on d7 correctly is, and a side-agnostic list cannot state that. It required carrying `subjects` through to the API's concepts_all, which had never been exposed there."
+    "`side` names the colour a NEGATIVE entry is about, and it exists because the sharpest negatives are per-side. Nimzowitsch's blockading bishop on d4 must not be called bad in a position where Black's bishop on d7 correctly is, and a side-agnostic list cannot state that. It required carrying `subjects` through to the API's concepts_all, which had never been exposed there.",
+    "Two entries added 2026-09-02 give weak-square its first human grounding, and both are NEGATIVE, which is the right way round for a concept whose own record says every pawn move creates squares no pawn can guard. Both come from one article by a named grandmaster who built the positions as traps for exactly the reading a mechanical detector performs; the second names no side, because the claim is that NEITHER side can use the square.",
+    "`attributed_by` names the PERSON whose claim the entry rests on, and it is the field the validation ladder reads - not `annotator`, which is prose and can say things like 'unattributed training page' while still looking like grounding. Backfilled across the file on 2026-09-02, at which point exactly one entry turned out to have no person behind it (karpov-kasparov-1985-g16), and it now correctly grants its concept no human-grounded rung. This is the second time a rung in this project was found counting something looser than its own definition, and both times the number went down."
   ],
   "concept_roles": {
     "positive": "the concept clearly applies, on the annotator's authority",
@@ -79,7 +81,8 @@
       "fen_after": "r1b1kb1r/pp3ppp/1qN2n2/3p4/8/2N3P1/PP2PPBP/R1BQK2R b KQkq - 0 9",
       "fen_after_note": "The position the annotated move reaches. A move-based concept describes what the move ACHIEVES, so the checker looks here as well as at the position before it.",
       "fen_concept_realised": "r1b1kb1r/p4ppp/1qp2n2/3p4/8/2N3P1/PP2PPBP/R1BQK2R w KQkq - 0 10",
-      "fen_concept_realised_note": "After 9.Nxc6 bxc6, the forced recapture. The doubled isolated c-pawn the annotation is about exists only here."
+      "fen_concept_realised_note": "After 9.Nxc6 bxc6, the forced recapture. The doubled isolated c-pawn the annotation is about exists only here.",
+      "attributed_by": "Nicholas Van Der Nat (FM)"
     },
     {
       "game": "Rubinstein-Salwe, Lodz 1908",
@@ -120,7 +123,8 @@
         "planning"
       ],
       "fen_after": "r1r3k1/p2n1ppp/2p1b3/1q1p4/N2Q4/4PPP1/PP3R1P/2R2BK1 b - - 0 20",
-      "fen_after_note": "The position the annotated move reaches. A move-based concept describes what the move ACHIEVES, so the checker looks here as well as at the position before it."
+      "fen_after_note": "The position the annotated move reaches. A move-based concept describes what the move ACHIEVES, so the checker looks here as well as at the position before it.",
+      "attributed_by": "Nicholas Van Der Nat (FM)"
     },
     {
       "game": "Rubinstein-Salwe, Lodz 1908",
@@ -160,7 +164,8 @@
         "minority-attack"
       ],
       "fen_after": "r5k1/p1r2ppp/1qp1b3/2Rp4/1P1Q4/4PPP1/P1R4P/5BK1 b - b3 0 24",
-      "fen_after_note": "The position the annotated move reaches. A move-based concept describes what the move ACHIEVES, so the checker looks here as well as at the position before it."
+      "fen_after_note": "The position the annotated move reaches. A move-based concept describes what the move ACHIEVES, so the checker looks here as well as at the position before it.",
+      "attributed_by": "Nicholas Van Der Nat (FM)"
     },
     {
       "game": "Fischer-Spassky, World Championship, Reykjavik 1972 (game 6)",
@@ -319,7 +324,8 @@
       "rejected_as_wrong": [
         "two-weaknesses"
       ],
-      "added": "2026-09-01"
+      "added": "2026-09-01",
+      "attributed_by": "Mikhail Botvinnik"
     },
     {
       "game": "Reti-Capablanca, New York 1924 (round 5)",
@@ -359,7 +365,8 @@
       "rejected_as_wrong": [
         "initiative"
       ],
-      "added": "2026-09-01"
+      "added": "2026-09-01",
+      "attributed_by": "Raymond Keene (GM)"
     },
     {
       "game": "Adams-Kasparov, Linares 2005 (round 12)",
@@ -399,7 +406,8 @@
         "king-attack",
         "greek-gift"
       ],
-      "added": "2026-09-01"
+      "added": "2026-09-01",
+      "attributed_by": "Jon Speelman (GM)"
     },
     {
       "game": "Adams-Kasparov, Linares 2005 (round 12)",
@@ -441,7 +449,8 @@
         "king-attack",
         "back-rank-mate"
       ],
-      "added": "2026-09-01"
+      "added": "2026-09-01",
+      "attributed_by": "Jon Speelman (GM)"
     },
     {
       "game": "Capablanca-Mattison, Karlsbad 1929",
@@ -486,7 +495,8 @@
       ],
       "added": "2026-09-01",
       "move_after_uci": "f7f5",
-      "move_after_note": "Black's forced reply. The concept is realised by this move, not by 15.Ng5: the knight arriving on g5 blocks the bishop that was already looking at h6, so the count of pieces bearing on the black king's zone is 2 before the move and 2 after it. What changes the king's safety is the pawn leaving f7."
+      "move_after_note": "Black's forced reply. The concept is realised by this move, not by 15.Ng5: the knight arriving on g5 blocks the bishop that was already looking at h6, so the count of pieces bearing on the black king's zone is 2 before the move and 2 after it. What changes the king's safety is the pawn leaving f7.",
+      "attributed_by": "Nicholas Van Der Nat (FM)"
     },
     {
       "game": "Reti-Capablanca, New York 1924 (round 5)",
@@ -530,7 +540,8 @@
         "passed-pawn"
       ],
       "added": "2026-09-01",
-      "limitation": "This base's centralSquareControl() reports center-control for BOTH 18...Ne6 and the game's 18...N6d7, so it does not do the discriminating work the annotation does. Measured: on pawns and minor pieces, Ne6 is +1 and N6d7 is also +1, because moving the f6 knight unblocks the g7 bishop onto d4 and e5. The count cannot tell 'contesting the squares White wants' from 'attacking two other central squares'. Recorded rather than fixed, because tuning the measure until it separates these two particular moves is how a detector stops meaning anything."
+      "limitation": "This base's centralSquareControl() reports center-control for BOTH 18...Ne6 and the game's 18...N6d7, so it does not do the discriminating work the annotation does. Measured: on pawns and minor pieces, Ne6 is +1 and N6d7 is also +1, because moving the f6 knight unblocks the g7 bishop onto d4 and e5. The count cannot tell 'contesting the squares White wants' from 'attacking two other central squares'. Recorded rather than fixed, because tuning the measure until it separates these two particular moves is how a detector stops meaning anything.",
+      "attributed_by": "Raymond Keene (GM)"
     },
     {
       "game": "Reti-Capablanca, New York 1924 (round 5)",
@@ -572,7 +583,8 @@
         "outpost",
         "passed-pawn"
       ],
-      "added": "2026-09-01"
+      "added": "2026-09-01",
+      "attributed_by": "Raymond Keene (GM)"
     },
     {
       "game": "Capablanca-Rubinstein, Berlin 1928",
@@ -614,7 +626,8 @@
         "backward-pawn",
         "passed-pawn"
       ],
-      "added": "2026-09-01"
+      "added": "2026-09-01",
+      "attributed_by": "Nicholas Van Der Nat (FM)"
     },
     {
       "game": "Capablanca-Rubinstein, Berlin 1928",
@@ -657,7 +670,8 @@
         "two-weaknesses",
         "positional-sacrifice"
       ],
-      "added": "2026-09-01"
+      "added": "2026-09-01",
+      "attributed_by": "Nicholas Van Der Nat (FM)"
     },
     {
       "game": "Capablanca-Mattison, Karlsbad 1929",
@@ -698,7 +712,8 @@
         "outpost",
         "worst-placed-piece"
       ],
-      "added": "2026-09-01"
+      "added": "2026-09-01",
+      "attributed_by": "Nicholas Van Der Nat (FM)"
     },
     {
       "game": "Karpov-Kasparov, World Championship match (game 16), Moscow 1985",
@@ -785,7 +800,8 @@
         "backward-pawn",
         "outpost"
       ],
-      "limitation": "This entry is also the position that exposed a Layer 3 bug: before this session, Black's e5 pawn - which has no d- or f-pawn at all and a white pawn standing on e4 - was reported as a BACKWARD pawn, and led the explanation of the most famous breakthrough in the corpus. Fixed at the detector, with a regression test."
+      "limitation": "This entry is also the position that exposed a Layer 3 bug: before this session, Black's e5 pawn - which has no d- or f-pawn at all and a white pawn standing on e4 - was reported as a BACKWARD pawn, and led the explanation of the most famous breakthrough in the corpus. Fixed at the detector, with a regression test.",
+      "attributed_by": "Tryfon Gavriel (FM)"
     },
     {
       "game": "Nimzowitsch-Capablanca, St Petersburg preliminary 1914",
@@ -827,7 +843,8 @@
         "isolated-queen-pawn",
         "backward-pawn"
       ],
-      "added": "2026-09-01"
+      "added": "2026-09-01",
+      "attributed_by": "Raluca Sgircea (WGM) and Renier Castellanos (IM), corroborating"
     },
     {
       "game": "Havasi-Capablanca, Budapest 1929",
@@ -871,7 +888,8 @@
         "outpost",
         "worst-placed-piece"
       ],
-      "added": "2026-09-01"
+      "added": "2026-09-01",
+      "attributed_by": "Nicholas Van Der Nat (FM)"
     },
     {
       "game": "Smyslov-Botvinnik, World Championship match (game 1), Moscow 1954",
@@ -912,7 +930,8 @@
         "outpost",
         "strong-square"
       ],
-      "added": "2026-09-01"
+      "added": "2026-09-01",
+      "attributed_by": "Mikhail Botvinnik"
     },
     {
       "game": "Reti-Capablanca, New York 1924 (round 5)",
@@ -955,7 +974,8 @@
       ],
       "added": "2026-09-01",
       "side": "b",
-      "limitation": "An army-level detector cannot state a single-piece claim. Left as a false negative rather than resolved by loosening the measure or by dropping the side, either of which would have made the number better and the record worse."
+      "limitation": "An army-level detector cannot state a single-piece claim. Left as a false negative rather than resolved by loosening the measure or by dropping the side, either of which would have made the number better and the record worse.",
+      "attributed_by": "Raymond Keene (GM)"
     },
     {
       "game": "Capablanca-Tartakower, New York 1924",
@@ -997,7 +1017,8 @@
         "material-imbalance",
         "two-weaknesses"
       ],
-      "added": "2026-09-01"
+      "added": "2026-09-01",
+      "attributed_by": "Irving Chernev"
     },
     {
       "game": "Capablanca-Tartakower, New York 1924",
@@ -1038,7 +1059,8 @@
         "pawn-breakthrough",
         "two-weaknesses"
       ],
-      "added": "2026-09-01"
+      "added": "2026-09-01",
+      "attributed_by": "Irving Chernev"
     },
     {
       "game": "Capablanca-Rubinstein, Berlin 1928",
@@ -1080,7 +1102,8 @@
         "back-rank-mate",
         "pawn-breakthrough"
       ],
-      "added": "2026-09-01"
+      "added": "2026-09-01",
+      "attributed_by": "Nicholas Van Der Nat (FM)"
     },
     {
       "game": "Rubinstein-Salwe, Lodz 1908",
@@ -1122,7 +1145,8 @@
         "outpost"
       ],
       "limitation": "Traced ply by ply through this game, the detector reports the e6 bishop for exactly ten plies and then stops, while the annotator treats it as bad throughout. The measurement and why it is recorded rather than fixed are on the concept record.",
-      "added": "2026-09-01"
+      "added": "2026-09-01",
+      "attributed_by": "Nicholas Van Der Nat (FM)"
     },
     {
       "game": "Capablanca-Thomas, Hastings 1929",
@@ -1165,7 +1189,8 @@
         "bad-bishop",
         "fortress"
       ],
-      "added": "2026-09-01"
+      "added": "2026-09-01",
+      "attributed_by": "Nicholas Van Der Nat (FM)"
     },
     {
       "game": "Smyslov-Botvinnik, World Championship match (game 1), Moscow 1954",
@@ -1208,7 +1233,8 @@
         "pawn-breakthrough",
         "passed-pawn"
       ],
-      "added": "2026-09-01"
+      "added": "2026-09-01",
+      "attributed_by": "Mikhail Botvinnik"
     },
     {
       "game": "Letelier-Fischer, Leipzig Olympiad 1960 (preliminaries)",
@@ -1250,7 +1276,8 @@
       "rejected_as_wrong": [
         "outpost",
         "pawn-breakthrough"
-      ]
+      ],
+      "attributed_by": "Raluca Sgircea (WGM) and Renier Castellanos (IM)"
     },
     {
       "game": "Nimzowitsch-Salwe, Karlsbad 1911",
@@ -1294,7 +1321,8 @@
       "rejected_as_wrong": [
         "bad-bishop"
       ],
-      "limitation": "The claim is per-side and could not be written down before this session: the API's concepts_all carried no `subjects`, so a caller - and this checker - was told 'bad bishop' and not whose."
+      "limitation": "The claim is per-side and could not be written down before this session: the API's concepts_all carried no `subjects`, so a caller - and this checker - was told 'bad bishop' and not whose.",
+      "attributed_by": "Aron Nimzowitsch"
     },
     {
       "game": "Botvinnik-Vidmar, Nottingham 1936",
@@ -1340,7 +1368,8 @@
       "rejected_as_wrong": [
         "backward-pawn",
         "hanging-pawns"
-      ]
+      ],
+      "attributed_by": "Mark Buckley"
     },
     {
       "game": "Reshevsky-Petrosian, Candidates Tournament, Zurich 1953",
@@ -1386,7 +1415,8 @@
       "rejected_as_wrong": [
         "trapped-piece",
         "hanging-piece"
-      ]
+      ],
+      "attributed_by": "Garry Kasparov, and John Watson reporting Petrosian's own account"
     },
     {
       "game": "Lisitsin-Capablanca, Moscow 1935",
@@ -1429,7 +1459,8 @@
         "passed-pawn",
         "outpost"
       ],
-      "added": "2026-09-01"
+      "added": "2026-09-01",
+      "attributed_by": "Irving Chernev"
     },
     {
       "game": "Lisitsin-Capablanca, Moscow 1935",
@@ -1471,7 +1502,8 @@
         "hanging-piece"
       ],
       "limitation": "Found by running the corpus, not by reading the matcher. Before the fix, `loose-piece` fired on 34.9% of the 788 shipped positions and 34.4% of this corpus; after it, 9.1% and 0%.",
-      "added": "2026-09-01"
+      "added": "2026-09-01",
+      "attributed_by": "Irving Chernev"
     },
     {
       "game": "Capablanca-Mattison, Karlsbad 1929",
@@ -1515,7 +1547,115 @@
         "checkmate",
         "stalemate"
       ],
-      "added": "2026-09-01"
+      "added": "2026-09-01",
+      "attributed_by": "Rudolf Spielmann (on what a sacrifice is) and Irving Chernev (on this move)"
+    },
+    {
+      "game": "Unzicker-Fischer, 15th Chess Olympiad, Varna 1962",
+      "source": "markos-chessbase-winning-academy-32-the-hole-2024",
+      "players": "Wolfgang Unzicker - Robert James Fischer",
+      "event": "Varna Olympiad 1962",
+      "year": 1962,
+      "annotator": "Jan Markos (GM), 'The Winning Academy 32: The Hole', ChessBase, 22 April 2024",
+      "attributed_by": "Jan Markos",
+      "fen_verified": "replay: all 52 plies replayed legally through blind-chess.html's move generator, from the pgnmentor score. The diagram Markos gives is 'Black to move', and the move he quotes as played from it (20...Qa6) is the 40th ply of that replay, which is what fixes the position.",
+      "added": "2026-09-02",
+      "id": "unzicker-fischer-1962-20-weak-square-negative",
+      "concept": "weak-square",
+      "concept_role": "negative",
+      "side": "w",
+      "fen": "5rk1/4bppp/1q1p4/1p1QpP2/r3P3/1NP5/1P4PP/R4R1K b - - 0 20",
+      "move": "Qa6",
+      "move_uci": "b6a6",
+      "fen_after": "5rk1/4bppp/q2p4/1p1QpP2/r3P3/1NP5/1P4PP/R4R1K w - - 1 21",
+      "human_annotation": "\"This is one of my favourite positions to test new pupils. Is Black worse, equal, or better? Many club players answer automatically: White is obviously better, look at the hole on d5! In addition, Black has got the 'bad' bishop. In fact, the opposite is true: Black is better. Why? Firstly, and most importantly, the b3-knight is very far from the d5-square. Two squares diagonally are the well-known 'long-short distance' for a knight. It takes four moves for him to travel it, even on an empty board... In the game, Fischer played 20...Qa6 and with energic play proved that Black truly is better.\"",
+      "explanation": "The first human-grounded evidence in this corpus for weak-square, and it is a negative, which is the right way round: the concept's own record says every pawn move creates squares no pawn can guard, so the whole question is which of them matter. d5 IS a hole in Black's camp by every structural test - Black's c-pawn is gone and the e-pawn is on e5, so no black pawn can ever attack it - and Layer 3 reports it as such: holesFor(w) contains d5. What must not be said is that this is White's asset. Markos designed the position as a trap for exactly the reading a mechanical detector performs.\n\nThis base is silent, and it is worth being precise about WHICH guard does the work, because it is not the one this session added. The matcher requires a hole a minor piece can reach in ONE move, and White's only minor piece is the knight on b3, four moves away. Markos's reason is finer than the machine's - he counts the knight's long-short distance and notes that White's f-pawn is already on f5, so it is the e4 pawn and the white king that are weak - and the machine's reason happens to agree with it here. That is a pass, not a proof, and the entry records the difference rather than claiming the system reasons as Markos does.\n\nThe position is also a live instance of this record's THIRD false-positive trap, 'a weak square only a queen can occupy is usually not a weakness, since cheaper pieces evict her': White's queen is standing on d5 as the diagram is drawn, and is driven off it within six moves.",
+      "confidence": "high",
+      "why_not_alternates": "material-imbalance is correctly reported and is exactly what Markos discusses - White's knight against Black's 'bad' bishop, level on points. blockade is correctly reported: White's queen does stand in front of the d6 pawn. What must not be said is that White has a weak square to use.",
+      "also_true_but_secondary": [
+        "material-imbalance",
+        "blockade",
+        "luft"
+      ],
+      "rejected_as_wrong": [
+        "weak-square",
+        "outpost"
+      ],
+      "engine": {
+        "engine_id": "Stockfish 18",
+        "depth": 30,
+        "multipv": 3,
+        "best_move": "Rc8",
+        "best_eval_cp": 39,
+        "annotated_move": "Qa6",
+        "annotated_move_eval_cp": 0,
+        "annotated_move_rank": null,
+        "alternatives": [
+          {
+            "move": "h5",
+            "eval_cp": 36
+          },
+          {
+            "move": "h6",
+            "eval_cp": 26
+          }
+        ],
+        "agrees": "on the evaluation, not on the move. Scores are from the side to move, and Black is to move: +0.39 says Black is the better side, which is Markos's whole claim and the opposite of what the hole on d5 suggests. The move Markos quotes as played, 20...Qa6, measures 0.00 and is not in the top three - Fischer's 21...Rc8 next move IS the engine's first choice here.",
+        "note": "What is being tested is not the move. It is whether a hole in Black's camp may be reported as White's asset, and the engine is here only to say that the side with the hole is the better side. The gap between +0.39 and 0.00 is a fact about 20...Qa6 and is recorded rather than smoothed over; Markos's claim about the SQUARE stands either way."
+      }
+    },
+    {
+      "game": "Shirov-Kramnik, Linares 2000",
+      "source": "markos-chessbase-winning-academy-32-the-hole-2024",
+      "players": "Alexei Shirov - Vladimir Kramnik",
+      "event": "Linares 2000 (SuperGM)",
+      "year": 2000,
+      "annotator": "Jan Markos (GM), 'The Winning Academy 32: The Hole', ChessBase, 22 April 2024",
+      "attributed_by": "Jan Markos",
+      "fen_verified": "replay: all 65 plies replayed legally through blind-chess.html's move generator, from the pgnmentor score. The diagram is 'Black to move' and the continuation Markos quotes - 20...d5! 21.cxd5 Rb6! - is plies 40-43 of that replay, which is what fixes the position.",
+      "added": "2026-09-02",
+      "id": "shirov-kramnik-2000-20d5-weak-square-negative",
+      "concept": "weak-square",
+      "concept_role": "negative",
+      "fen": "1rb1r2k/4qpbp/p2p4/4p2Q/1pP1Pp2/1P6/P1N1BPPP/R3R1K1 b - - 2 20",
+      "move": "d5",
+      "move_uci": "d6d5",
+      "fen_after": "1rb1r2k/4qpbp/p7/3pp2Q/1pP1Pp2/1P6/P1N1BPPP/R3R1K1 w - - 0 21",
+      "human_annotation": "\"Again, the d5-hole truly resembles a keyhole with no fitting key. White's knight seems to be better placed than in the previous examples, on an empty board its travel to d5 would only take two moves. However, Black succeeded in constructing an interesting cage: his b4 and f4 pawns guard all the roads to d5. Perhaps White would like to put a bishop to d5. But this is impossible as well. Therefore, d5 is a 'no man's land'. Neither side can make any use of it.\"",
+      "explanation": "The sharper of the two, and it names NO side, because Markos's claim is that neither side can use the square. A per-side negative would be the weaker statement.\n\nEverything superficial points the other way. This is the Sveshnikov, the opening whose entire reputation is the d5 hole; Black's structure has the hole permanently (no c-pawn, pawn committed to e5); Layer 3 reports ten holes for White including d5; and a knight sits on c2, two moves from the square. A detector built on 'no friendly pawn can ever attack it' says d5 and says it loudly.\n\nWhat makes it a no man's land is that the roads in are closed by two black pawns that a structural scan reads as WEAKNESSES: b4 and f4 are both undefendable by any black pawn, and this base's own two-weaknesses matcher lists f4 among the things Black should be worried about. Markos calls the same two pawns a cage. Both readings are mechanically defensible from the pawn skeleton alone and only one of them is true of this position, which is the clearest statement in this corpus of what a structural feature cannot decide.\n\nThe entry is kept as a weak-square negative rather than a two-weaknesses negative because Markos does not discuss the principle of two weaknesses, and putting a concept in rejected_as_wrong on an annotator's behalf is how three earlier entries in this file manufactured false positives. What the f4 disagreement is, is a limitation recorded on the two-weaknesses record.\n\nAfter 20...d5 the square ceases to exist, which is Kramnik's point in playing it - so fen_after tests the same claim in its easiest form, and the position before the move is the one that carries the entry.",
+      "confidence": "high",
+      "why_not_alternates": "bishop-pair and doubled-pawns are correctly reported for Black and are both true. The doubled f-pawns are the Sveshnikov's own bargain and Markos's 'cage' is made of one of them. What must not be said is that d5 is a square either side can use.",
+      "also_true_but_secondary": [
+        "bishop-pair",
+        "doubled-pawns",
+        "material-imbalance"
+      ],
+      "rejected_as_wrong": [
+        "weak-square",
+        "outpost"
+      ],
+      "engine": {
+        "engine_id": "Stockfish 18",
+        "depth": 30,
+        "multipv": 3,
+        "best_move": "d5",
+        "best_eval_cp": 0,
+        "annotated_move": "d5",
+        "annotated_move_eval_cp": 0,
+        "annotated_move_rank": 1,
+        "alternatives": [
+          {
+            "move": "Rg8",
+            "eval_cp": -35
+          },
+          {
+            "move": "Qe6",
+            "eval_cp": -42
+          }
+        ],
+        "agrees": "on both counts, and unusually cleanly. Scores are from the side to move: 0.00 for Black, which is Markos's 'Black is equal', and the move he quotes - 20...d5! - is the engine's first choice, settled from depth 8, with the second best a third of a pawn worse.",
+        "note": "The engine says nothing about whether d5 is a weak square and was not asked to. It says the position is level and that abolishing the square is best play, which is what makes 'no man's land' a claim about the board rather than about taste."
+      }
     }
   ]
 }

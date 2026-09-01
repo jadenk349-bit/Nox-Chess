@@ -30,6 +30,12 @@ const args = process.argv.slice(2);
 const limit = args.includes('--limit') ? Number(args[args.indexOf('--limit') + 1]) : Infinity;
 const only = args.includes('--concept') ? args[args.indexOf('--concept') + 1] : null;
 const jsonOut = args.includes('--json') ? args[args.indexOf('--json') + 1] : null;
+// The 788 are TACTICAL puzzles: every one of them has a forcing solution by
+// construction. So a matcher that requires a quiet position scores near zero
+// here for a reason that says nothing about the matcher, and --quiet restricts
+// the measurement to the positions where a positional claim can be isolated at
+// all. Any rate quoted for a quietness-gated matcher must say which set it is on.
+const quietOnly = args.includes('--quiet');
 
 const fens = [];
 for (const track of ['opening', 'middlegame', 'endgame']) {
@@ -43,11 +49,13 @@ const use = fens.slice(0, limit);
 
 const count = new Map();
 const lead = new Map();
-let bad = 0;
+let bad = 0, skipped = 0, kept = 0;
 for (const { fen, uci } of use) {
   let r;
   try { r = API.analyzeWithEducation(uci ? { fen, move: uci } : { fen }); }
   catch (e) { bad++; continue; }
+  if (quietOnly && !(r.features.quietness || {}).quiet) { skipped++; continue; }
+  kept++;
   const seen = new Set();
   r.concepts_all.forEach((h, i) => {
     if (seen.has(h.id)) return;
@@ -57,10 +65,10 @@ for (const { fen, uci } of use) {
   });
 }
 
-const n = use.length || 1;
+const n = (quietOnly ? kept : use.length) || 1;
 const rows = [...count.entries()].sort((a, b) => b[1] - a[1])
   .filter(([c]) => !only || c === only);
-console.log(`\nFIRING RATES — ${use.length} positions` + (bad ? `  (${bad} unreadable)` : '') + '\n');
+console.log(`\nFIRING RATES — ${quietOnly ? kept + ' QUIET positions of ' + use.length : use.length + ' positions'}` + (bad ? `  (${bad} unreadable)` : '') + '\n');
 console.log('  concept                        fires    rate    leads');
 for (const [c, k] of rows) {
   const flag = k / n > 0.5 ? '  <- true of most positions' : '';

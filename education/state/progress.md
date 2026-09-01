@@ -1063,3 +1063,40 @@ Complete the pilot concept record, then work the taxonomy in dependency order:
 `rules-terminology` and `board-geometry` first (they are prerequisites for the
 recognition criteria of everything else), then `tactics`, then the positional
 domains.
+
+
+## `weak-square` gets its first human grounding, and it is a refusal
+
+Both new corpus positions come from one article by Jan Markos (GM), who built
+them as traps for exactly the reading a mechanical detector performs: *"a
+keyhole is useless when you don't have a key that fits into it."*
+
+**Unzicker–Fischer, Varna 1962**, after 20.c3. d5 is a permanent hole in Black's
+camp, Layer 3 sees it, and Markos's pupils are meant to say White is better for
+it. Stockfish, from the side to move, says **+0.39 for Black**. The system is
+silent — and the entry records *which* guard does the work (the one-move
+reachability rule, not this session's new ones), because a pass for a cruder
+reason than the human's is a pass and not a proof.
+
+**Shirov–Kramnik, Linares 2000**, after 20.Qh5, names no side at all: *"d5 is a
+no man's land. Neither side can make any use of it."* Stockfish scores it 0.00
+and plays Kramnik's 20...d5 as its own first choice.
+
+The second position also produced a disagreement worth keeping. Markos calls
+Black's b4 and f4 the cage that "guards all the roads to d5"; this base's
+`two-weaknesses` matcher lists **f4** among the weaknesses White should play
+against. Both readings follow from the pawn skeleton and only one is true of the
+position. It is written on the record as a trap rather than engineered away —
+dropping f4 would not change the claim, which also names f7 and d6, and putting
+a concept into `rejected_as_wrong` on an annotator's behalf is how three earlier
+entries in this file manufactured false positives.
+
+### And the same check, made twice, lowering the same number twice
+
+`human_grounded` was fixed once when it turned out to be counting this system's
+own mining (39 → 17). It was still counting corpus **membership** — and the
+corpus's `annotator` field is prose, so one entry reading "unattributed training
+page" counted exactly like Nimzowitsch annotating his own game. `attributed_by`
+is now the field, backfilled across all 37 entries; four name no person. 29 →
+**26**, and `hanging-pawns`, `pawn-break` and `restraint` lose the rung until a
+named annotator is found for Fischer–Spassky 1972 game 6.
