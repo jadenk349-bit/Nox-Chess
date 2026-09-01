@@ -6,7 +6,7 @@
     "note": "Filled in by tools/sf_analyse.py --probe"
   },
   "counters": {
-    "concepts_total": 110,
+    "concepts_total": 112,
     "concepts_stub": 0,
     "concepts_researched": 29,
     "concepts_validated": 4,
@@ -18,12 +18,12 @@
     "ambiguous_matches": 6,
     "by_stage": {
       "ready": 2,
-      "researched": 99,
+      "researched": 101,
       "validated": 9
     },
     "tablebase_positions": 17,
     "concepts_fully_covered": 12,
-    "areas_touched": 61,
+    "areas_touched": 63,
     "areas_total": 85
   },
   "areas": {
@@ -761,17 +761,25 @@
     },
     "exceptions-to-rules": {
       "domain": "heuristics",
-      "status": "not-started",
-      "concepts": [],
+      "status": "covered",
+      "concepts": [
+        "exceptions-to-rules"
+      ],
       "open_questions": [],
-      "last_touched": null
+      "last_touched": "2026-09-01",
+      "last_updated": "2026-09-01",
+      "note": "Meta-record of this base's structural commitment that every soft-typed concept records where it fails; enforced by the test suite."
     },
     "beginner-misconceptions": {
       "domain": "heuristics",
-      "status": "not-started",
-      "concepts": [],
+      "status": "covered",
+      "concepts": [
+        "beginner-misconceptions"
+      ],
       "open_questions": [],
-      "last_touched": null
+      "last_touched": "2026-09-01",
+      "last_updated": "2026-09-01",
+      "note": "Meta-record indexing what this base has established that people wrongly believe; backed by the generated warnings index."
     },
     "intermediate-concepts": {
       "domain": "heuristics",
@@ -1112,6 +1120,11 @@
       "item": "no opening database",
       "note": "theoretical-novelty, tabiya and gambit identification all require a game database the Education System does not have. Recorded on each concept as a limitation rather than left for a caller to discover.",
       "date": "2026-09-01"
+    },
+    {
+      "item": "warnings index does not grade its own evidence",
+      "date": "2026-09-01",
+      "note": "state/warnings_index.json compiles 826 warnings but does not distinguish those proven by tablebase or controlled measurement from those resting on source authority. A caller cannot currently tell a proof from an opinion. Recorded as a known gap on both meta-concepts."
     }
   ],
   "awaiting_validation": [

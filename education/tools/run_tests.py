@@ -71,6 +71,13 @@ def main():
                       any(p.get("engine") or p.get("tablebase") for p in pos),
                       "promoted with no engine or tablebase evidence")
 
+    # 3b. the warnings index must be current, or an explanation layer reading it
+    # would be working from a stale picture of what it must not say
+    r = subprocess.run([sys.executable, os.path.join(HERE, "tools", "build_index.py"), "--check"],
+                       capture_output=True, text=True)
+    check("warnings_index_current", r.returncode == 0,
+          (r.stdout or "").strip().splitlines()[-1] if r.stdout else "build_index.py --check failed")
+
     # 4. constructed positions must be labelled, never dressed as history
     for cid, c in C.items():
         for b in ("examples", "counterexamples", "ambiguous_examples"):

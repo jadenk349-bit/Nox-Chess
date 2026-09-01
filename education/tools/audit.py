@@ -133,6 +133,15 @@ def main():
     for cid, c in C.items():
         det = (c.get("recognition") or {}).get("detector")
         if det and "not yet written" not in det and c["recognition"].get("detectability") == "mechanical":
+            # A detector may legitimately be a generated data file rather than a
+            # function - the meta-records are backed by state/warnings_index.json.
+            # Verify the file actually exists rather than accepting the claim.
+            path = det.split()[0]
+            if path.endswith(".json"):
+                if not os.path.exists(os.path.join(HERE, path)):
+                    finding("LOW", cid, "detector",
+                            f"detector names the file {path!r}, which does not exist")
+                continue
             if not any(k in det for k in ("findMotifs", "puzzle_rules", "tablebase", "posKey",
                                           "halfmoveClock", "inCheck", "isCheckmate", "isStalemate",
                                           "epTarget", "castlingRights", "promotionAvailable",
