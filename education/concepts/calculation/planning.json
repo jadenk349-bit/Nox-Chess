@@ -1,0 +1,166 @@
+{
+  "schema_version": 2,
+  "alternate_names": [],
+  "historical_names": [],
+  "tags": [
+    "positional",
+    "method"
+  ],
+  "subcategory": "method",
+  "difficulty": "intermediate",
+  "knowledge_type_note": "Advice on how to decide what to aim at. Frameworks for it are numerous and none is authoritative.",
+  "name_status": "established-name",
+  "history": {
+    "attributions": [
+      {
+        "relation": "later-associated-with",
+        "person": "Wilhelm Steinitz",
+        "year": 1873,
+        "note": "Planning in the modern sense is usually traced to his doctrine that play should follow the position's features rather than a search for attacks. This is an association rather than a coinage: no source consulted here credits him with originating planning as such, and the connection is this base's inference from his theory, not a claim found in the literature.",
+        "confidence": "low"
+      }
+    ],
+    "first_documented_source": "thechessworld-planning",
+    "year": null,
+    "confidence": "low",
+    "notes": "No coinage and no clear origin. The Steinitz link is recorded as an association at low confidence, not an attribution - the named historical contributions are to positional evaluation, from which planning follows. The modern frameworks are recent instructional material with no scholarly standing.",
+    "competing_claims": [],
+    "development": []
+  },
+  "engine_era_status": "reliable",
+  "engine_era_note": "An area where engines are least helpful to humans. An engine supplies the move and the number but not the objective, and its plans are frequently not expressible as a human plan at all. Explaining what an engine is aiming at is a translation problem, and it is precisely what this Education System exists to do.",
+  "recognition": {
+    "preconditions": [
+      "No forced sequence demands attention",
+      "The position has identifiable features"
+    ],
+    "indicators_for": [
+      "A fixed enemy weakness that cannot run away",
+      "A pawn majority capable of producing a passer",
+      "A recognisable pawn structure with known plans",
+      "An enemy piece with no good squares"
+    ],
+    "indicators_against": [
+      "A concrete threat must be met first",
+      "The position is too forcing for planning to be relevant"
+    ],
+    "prerequisites": [
+      "positional-evaluation"
+    ],
+    "detector": null,
+    "detectability": "human-only",
+    "typical_confidence": "low",
+    "false_positive_traps": [
+      "A plan that names nothing cannot be verified, followed or abandoned, and is not a plan.",
+      "A plan that ignores the opponent's counterplay is the standard way good-looking moves lose games.",
+      "This system cannot know a player's plan and must not attribute one to a move without evidence."
+    ]
+  },
+  "application": {
+    "typical_plans": [
+      "Attack a fixed weakness that cannot be defended by moving it",
+      "Mobilise a pawn majority into a passed pawn",
+      "Create a second weakness once the first is tied down",
+      "Prevent the opponent's plan rather than pursue your own",
+      "Improve the worst-placed piece when nothing else is asking to be done"
+    ],
+    "typical_moves": [],
+    "typical_pawn_structures": [
+      "Structures with known associated plans, such as the isolated queen's pawn or a queenside majority"
+    ],
+    "typical_piece_arrangements": [],
+    "tactical_consequences": [
+      "Tactics generally appear in service of a plan rather than instead of one"
+    ],
+    "strategic_consequences": []
+  },
+  "exceptions": [
+    "Forcing positions need calculation, not planning.",
+    "Shereshevsky's 'thinking in schemes' inverts the usual order in endgames: decide the target arrangement first, then find the route to it."
+  ],
+  "limitations": [
+    "No planning framework has scholarly standing; they are instructional scaffolding and this base treats them as such.",
+    "This system observes moves, not intentions, and cannot verify that a player had a plan."
+  ],
+  "misconceptions": [
+    "That a plan is a sequence of moves. The opponent gets to move too; a plan is an objective and an arrangement.",
+    "That having any plan beats having none. A bad plan pursued rigidly is worse than responding to the position.",
+    "That abandoning a plan is weakness. Recognising that circumstances changed is a skill in itself."
+  ],
+  "relationships": {
+    "broader": [],
+    "narrower": [],
+    "related": [
+      "positional-evaluation",
+      "worst-placed-piece",
+      "two-weaknesses",
+      "prophylaxis",
+      "calculation",
+      "candidate-moves",
+      "endgame-principles",
+      "static-vs-dynamic"
+    ],
+    "contrasting": [
+      "calculation"
+    ],
+    "co_occurring": [
+      "positional-evaluation"
+    ],
+    "conflicts": []
+  },
+  "examples": [],
+  "counterexamples": [],
+  "ambiguous_examples": [],
+  "explanations": {
+    "by_level": {
+      "beginner": "Pick something to aim at - a weak pawn, a square, a file - and bring your pieces towards it.",
+      "intermediate": "A plan is an objective, not a move sequence. It should follow from the position's features and name something specific.",
+      "advanced": "Read the plan off the pawn structure, check the opponent's counterplay, and be willing to abandon it when the position changes.",
+      "master": "In endgames invert it: choose the arrangement you want to reach, then work out the route."
+    },
+    "by_depth": {
+      "short": "Pick a concrete objective the position points at.",
+      "normal": "Planning: choosing an objective that follows from the position's features and arranging your pieces to achieve it. A plan is not a sequence of moves, since the opponent moves too - it is a target and a set-up.",
+      "deep": "What to do when nothing is forced. The plan is read off the position rather than invented: a fixed enemy weakness makes the plan about that weakness, a pawn majority makes it about mobilising the majority. It has to name something, because 'improve my position' cannot be verified, followed or abandoned. The pawn structure governs what is available, which is why recognising a structure and recalling its plans beats deriving one from scratch. Three failures recur - a plan too vague to direct anything, a plan that ignores the opponent's counterplay, and a plan held after the position that justified it has changed."
+    },
+    "hedge": "Planning frameworks are instructional scaffolding rather than established method; they agree broadly on what to look at and none is authoritative.",
+    "lesson": "If your plan does not name a square, a pawn, a file or a piece, it is not yet a plan."
+  },
+  "terminology": {
+    "beginner_words": [
+      "something to aim at",
+      "bring your pieces towards it"
+    ],
+    "advanced_words": [
+      "plan",
+      "objective",
+      "scheme",
+      "regrouping",
+      "counterplay"
+    ],
+    "avoid": [
+      "improve my position",
+      "create pressure",
+      "a plan is a series of moves"
+    ]
+  },
+  "status": {
+    "stage": "researched",
+    "last_updated": "2026-09-01",
+    "open_questions": [],
+    "audit_notes": []
+  },
+  "id": "planning",
+  "canonical_name": "Planning",
+  "category": "planning",
+  "knowledge_type": "practical-guideline",
+  "definition_short": "Choosing a concrete objective that follows from the position's features, and arranging your pieces to achieve it.",
+  "definition_long": "What to do when no move is forced. A plan is not a sequence of moves — the opponent has a vote — but an OBJECTIVE together with the arrangement of pieces that serves it.\n\nIT FOLLOWS FROM THE ASSESSMENT, and this is the part most often skipped. The plan is not invented; it is read off the position's features. If the opponent has a weak pawn, the plan concerns that pawn. If you have a majority on one wing, the plan is to mobilise it. The standard sequence is assess, choose the objective the assessment points at, verify it with concrete calculation, and revise when the position changes.\n\nIT MUST NAME SOMETHING. 'Improve my position' and 'create pressure' are not plans, because they give no direction and cannot be verified or abandoned. A plan should point at a specific square, pawn, file or piece.\n\nWHAT THE POSITION ALLOWS depends on the pawn structure above all, because the pawns decide which squares the pieces can use and which breaks exist. Recognising a structure and recalling the plans that belong to it is much more efficient than deriving a plan from scratch, and it is why studying structures generalises where studying variations does not.\n\nTHE THREE COMMON FAILURES are worth naming: a plan too vague to direct anything; a plan that ignores the opponent's counterplay; and a plan held rigidly after the position that justified it has changed. Knowing when to abandon a plan is a real skill and is not the same as lacking one.\n\nFRAMEWORKS EXIST IN QUANTITY — question lists, staged procedures, mnemonics — and this base records them as scaffolding rather than method. They agree on substance: look at both sides' weaknesses, where you are strong, which piece is worst placed, what to trade, and what the opponent intends.",
+  "sources": [
+    "thechessworld-planning",
+    "chessmood-7q-planning",
+    "exeter-steinitz-accumulation",
+    "shereshevsky-endgame-strategy"
+  ],
+  "source_confidence": "medium"
+}

@@ -6,24 +6,24 @@
     "note": "Filled in by tools/sf_analyse.py --probe"
   },
   "counters": {
-    "concepts_total": 102,
+    "concepts_total": 106,
     "concepts_stub": 0,
     "concepts_researched": 29,
     "concepts_validated": 4,
     "concepts_needs_review": 0,
-    "sources_reviewed": 131,
+    "sources_reviewed": 138,
     "positions_tested": 26,
     "matches_validated": 17,
     "false_matches": 3,
     "ambiguous_matches": 6,
     "by_stage": {
       "ready": 2,
-      "researched": 91,
+      "researched": 95,
       "validated": 9
     },
     "tablebase_positions": 17,
     "concepts_fully_covered": 12,
-    "areas_touched": 53,
+    "areas_touched": 57,
     "areas_total": 85
   },
   "areas": {
@@ -176,17 +176,25 @@
     },
     "planning": {
       "domain": "calculation",
-      "status": "not-started",
-      "concepts": [],
+      "status": "covered",
+      "concepts": [
+        "planning"
+      ],
       "open_questions": [],
-      "last_touched": null
+      "last_touched": "2026-09-01",
+      "last_updated": "2026-09-01",
+      "note": "Written as guidance with the three standard failure modes named; the Steinitz link recorded as association, not attribution."
     },
     "positional-evaluation": {
       "domain": "calculation",
-      "status": "not-started",
-      "concepts": [],
+      "status": "covered",
+      "concepts": [
+        "positional-evaluation"
+      ],
       "open_questions": [],
-      "last_touched": null
+      "last_touched": "2026-09-01",
+      "last_updated": "2026-09-01",
+      "note": "Steinitz's accumulation theory plus the permanent/temporary element lists, flagged as a later refinement rather than his own words."
     },
     "attack-principles": {
       "domain": "attack",
@@ -254,10 +262,14 @@
     },
     "piece-activity": {
       "domain": "piece-play",
-      "status": "not-started",
-      "concepts": [],
+      "status": "covered",
+      "concepts": [
+        "piece-activity"
+      ],
       "open_questions": [],
-      "last_touched": null
+      "last_touched": "2026-09-01",
+      "last_updated": "2026-09-01",
+      "note": "Written as the general case most other positional concepts specialise, with the activity/material exchange rate taken from this base's own gambit measurements."
     },
     "piece-coordination": {
       "domain": "piece-play",
@@ -320,10 +332,14 @@
     },
     "worst-placed-piece": {
       "domain": "piece-play",
-      "status": "not-started",
-      "concepts": [],
+      "status": "covered",
+      "concepts": [
+        "worst-placed-piece"
+      ],
       "open_questions": [],
-      "last_touched": null
+      "last_touched": "2026-09-01",
+      "last_updated": "2026-09-01",
+      "note": "Written with the four-way attribution dispute intact (Anderssen / Makogonov / Fischer / Dvoretsky) and with the precondition both original formulations carry."
     },
     "development": {
       "domain": "development-initiative",
@@ -1155,6 +1171,12 @@
         "Two short records (checkmate, fivefold-repetition) — accepted, they are simple rules quoted from the Laws and padding them would add words, not knowledge."
       ],
       "note": "First periodic audit. The high findings were all real and all invisible to validate_kb.py and run_tests.py, which is the point of having a third tool that looks for what is wrong but legal."
+    },
+    {
+      "date": "2026-09-01",
+      "findings_high": 1,
+      "findings_low": 5,
+      "note": "Audit caught an originated-by attribution of planning to Steinitz at low confidence with no hedge - an overclaim this base had introduced. Downgraded to later-associated-with with the inference stated explicitly. Also downgraded endgame-principles source_confidence to medium, resting as it does substantially on one source."
     }
   ],
   "measurements": [

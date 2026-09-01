@@ -1,0 +1,185 @@
+{
+  "schema_version": 2,
+  "alternate_names": [
+    "activity",
+    "active pieces"
+  ],
+  "historical_names": [],
+  "tags": [
+    "positional",
+    "pieces",
+    "tablebase-tested"
+  ],
+  "subcategory": "positional",
+  "difficulty": "beginner",
+  "knowledge_type_note": "A property of a position that can be described concretely - what squares a piece reaches and what it bears on - even though measuring it is a judgement.",
+  "name_status": "established-name",
+  "history": {
+    "attributions": [
+      {
+        "relation": "systematized-by",
+        "person": "Wilhelm Steinitz",
+        "year": 1873,
+        "note": "Piece placement and centralisation appear among the temporary advantages in the element lists descended from his theory.",
+        "confidence": "medium"
+      }
+    ],
+    "first_documented_source": "exeter-steinitz-accumulation",
+    "year": null,
+    "confidence": "low",
+    "notes": "Ordinary vocabulary with no coinage; the classification as a temporary advantage is the traceable part.",
+    "competing_claims": [],
+    "development": []
+  },
+  "engine_era_status": "reliable",
+  "engine_era_note": "Engines weigh activity heavily and are markedly more willing than classical human teaching to give material for it, which has shifted practice - the modern preference for the active defence over the passive one owes a good deal to engine analysis.",
+  "recognition": {
+    "preconditions": [
+      "Pieces are on the board with differing scope"
+    ],
+    "indicators_for": [
+      "A piece bearing on enemy weaknesses",
+      "A rook on an open file or the seventh rank",
+      "A knight on a protected advanced square",
+      "Pieces with several useful squares available"
+    ],
+    "indicators_against": [
+      "A piece tied to defending something",
+      "A bishop shut in by its own pawns",
+      "A piece with moves available that accomplish nothing"
+    ],
+    "prerequisites": [],
+    "detector": null,
+    "detectability": "heuristic",
+    "typical_confidence": "medium",
+    "false_positive_traps": [
+      "Counting available squares is not measuring activity. A piece with many moves that bear on nothing is not active.",
+      "Active pieces do not guarantee compensation. The Halloween Gambit position in this base has genuinely active pieces and evaluates 1.75 worse.",
+      "Activity is generally a temporary advantage and must be converted; reporting it as though it were permanent overstates it."
+    ]
+  },
+  "application": {
+    "typical_plans": [
+      "Improve the least active piece",
+      "Trade passive pieces for the opponent's active ones",
+      "Open lines for pieces that would benefit",
+      "Tie enemy pieces to defence and keep your own free"
+    ],
+    "typical_moves": [
+      "Rook lifts to open files",
+      "Giving a pawn to activate a rook in an endgame"
+    ],
+    "typical_pawn_structures": [
+      "Open positions favouring long-range pieces",
+      "Closed structures favouring knights"
+    ],
+    "typical_piece_arrangements": [
+      "A rook chained to a pawn's defence",
+      "A knight on a supported outpost"
+    ],
+    "tactical_consequences": [
+      "Active pieces generate threats, and threats gain tempi"
+    ],
+    "strategic_consequences": [
+      "Activity is usually temporary and must be converted into something durable"
+    ]
+  },
+  "exceptions": [
+    "Passive defence is sometimes objectively correct, particularly where a known drawing set-up requires it.",
+    "Activity purchased with too much material is not compensation, as this base's gambit measurements show."
+  ],
+  "limitations": [
+    "No reliable measure of activity exists in this system; the judgement is heuristic.",
+    "The concept is broad enough that it risks being applied to any move, which is exactly why the false-positive traps are stated."
+  ],
+  "misconceptions": [
+    "That activity means having many legal moves. It means bearing on things that matter.",
+    "That active pieces always justify a material deficit. The amount matters and is measurable.",
+    "That the most advanced piece is the most active. An advanced piece with no support is often the worst-placed one."
+  ],
+  "relationships": {
+    "broader": [],
+    "narrower": [
+      "worst-placed-piece"
+    ],
+    "related": [
+      "worst-placed-piece",
+      "outpost",
+      "bad-bishop",
+      "open-file",
+      "rook-on-the-seventh",
+      "initiative",
+      "compensation",
+      "positional-evaluation",
+      "static-vs-dynamic",
+      "space",
+      "rook-endgame-principles",
+      "king-activation"
+    ],
+    "contrasting": [
+      "material-imbalance"
+    ],
+    "co_occurring": [
+      "initiative"
+    ],
+    "conflicts": [
+      {
+        "concept": "material-imbalance",
+        "resolution": "The trade-off is real and has a measurable rate. This base's controlled gambit comparison found activity worth exactly one pawn in the Evans Gambit and not worth a knight in the Halloween Gambit, so the resolution is arithmetic rather than stylistic."
+      }
+    ]
+  },
+  "examples": [],
+  "counterexamples": [],
+  "ambiguous_examples": [],
+  "explanations": {
+    "by_level": {
+      "beginner": "A piece is active if it is doing something - attacking, defending something important, or controlling squares the opponent wants.",
+      "intermediate": "Piece activity. A rook chained to defending a pawn is worth far less than one free to make threats, whatever the material says.",
+      "advanced": "Activity competes with material at a real exchange rate, and it is usually temporary - convert it before it expires.",
+      "master": "Most positional concepts are special cases of this one: an outpost, a bad bishop and an open file are all statements about activity."
+    },
+    "by_depth": {
+      "short": "How much a piece is actually doing.",
+      "normal": "Piece activity: the squares a piece controls and the targets it bears on. An active piece makes threats and chooses where to go; a passive one is tied to defence and loses material the moment it leaves.",
+      "deep": "The most general positional idea, and the one most others are special cases of - an outpost is a square that makes a knight active, a bad bishop is an inactive one, an open file is a rook's route to activity. It is not mobility alone: a piece with many available squares bearing on nothing is not active. It trades against material at a rate that can be measured, and this base has measured it - the Evans Gambit is a pawn down and evaluates exactly level, so that activity is worth precisely one pawn, while the Halloween Gambit produces real activity and a mobile centre and still evaluates 1.75 worse, because a knight is too much to pay. And it is usually temporary, so it has to be converted into something durable before it expires."
+    },
+    "hedge": "",
+    "lesson": "Ask what each piece is actually doing, not how many squares it can reach."
+  },
+  "terminology": {
+    "beginner_words": [
+      "what is this piece doing",
+      "a piece stuck defending"
+    ],
+    "advanced_words": [
+      "activity",
+      "passive piece",
+      "scope",
+      "mobility",
+      "conversion"
+    ],
+    "avoid": [
+      "active means many moves"
+    ]
+  },
+  "status": {
+    "stage": "researched",
+    "last_updated": "2026-09-01",
+    "open_questions": [],
+    "audit_notes": []
+  },
+  "id": "piece-activity",
+  "canonical_name": "Piece activity",
+  "category": "piece-activity",
+  "knowledge_type": "positional-concept",
+  "definition_short": "How much a piece actually does: the squares it controls, the targets it bears on, and whether it is free to move at all.",
+  "definition_long": "The most general positional idea there is, and the one most other positional concepts are special cases of. An outpost is a square that makes a knight active; a bad bishop is an inactive one; an open file is a route to activity for a rook.\n\nACTIVITY IS NOT MOBILITY ALONE. A piece with many available squares that bear on nothing is not active in any useful sense. What counts is whether the squares it controls MATTER — whether it attacks something, defends something that needs defending, or controls squares the opponent wants.\n\nTHE SHARPEST FORM OF THE IDEA is the active-versus-passive contrast, clearest with rooks. An active rook makes threats and goes where it likes; a passive rook is chained to defending a pawn and loses material the moment it leaves. That asymmetry costs the passive side nothing in material and decides games, which is why giving a pawn to activate a rook is routinely correct in rook endings.\n\nIT COMPETES WITH MATERIAL, and the exchange rate is the interesting part. A pawn for lasting activity is often a good trade; this base measured the Evans Gambit at exactly equal a pawn down, which is activity worth precisely one pawn. The same measurement showed the reverse: the Halloween Gambit produces genuinely active pieces and a mobile centre and still evaluates 1.75 worse, because a knight is too much to pay. Activity is real, measurable, and finite.\n\nIT IS USUALLY TEMPORARY. In Steinitz's division, piece placement and centralisation are TEMPORARY advantages, which means activity must be converted into something durable — material, a weakness, a passed pawn — before it expires.",
+  "sources": [
+    "exeter-steinitz-accumulation",
+    "oldschoolchess-capablanca-endgame",
+    "serper-positional-secret",
+    "chesswise-strategic-elements"
+  ],
+  "source_confidence": "medium"
+}
