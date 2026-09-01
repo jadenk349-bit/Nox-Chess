@@ -5,6 +5,68 @@ this file is the narrative, and records reasoning that does not fit in JSON.
 
 ---
 
+## Session 5 — the system becomes usable (2026-09-01)
+
+The knowledge base became a system this session: Layers 3 and 4 exist, the API
+exists and is tested, and all 85 taxonomy areas have coverage.
+
+### What was built
+
+- **Layer 3** (`lib/features.js`) — observable board features, on the page's own
+  move generator via `tools/page_chess.js`, so there is still one implementation
+  of the rules. Tactical detection stays `findMotifs()`.
+- **Layer 4** (`lib/matchers.js`) — every matcher names in an `implements` field
+  the concept record whose recognition block it implements.
+- **The API** (`lib/analyze.js`) with four enforced refusals, 149 tests.
+- **Retrieval** (`tools/find.py`) and **mass testing** (`tools/mass_test.js`).
+- **Evidence grading** in the warnings index: demonstrated / on-a-tested-record /
+  sourced / unsourced.
+
+### Three things the work caught in itself
+
+**24 fictitious detectors.** Rewriting `audit.py` to verify detector names
+against the actual source files instead of a hardcoded whitelist immediately
+exposed 24 concepts naming functions that do not exist anywhere in the
+repository. The whitelist had been rubber-stamping them for the whole project.
+All repointed at real code or marked "not yet written".
+
+**A metric worth nothing.** The first mass-test run reported 99.7% positional
+coverage and I nearly recorded it as success. It counted any positional concept
+anywhere in a list of six, while underneath it `semi-open-file` fired on 83% of
+positions and `open-file` on 61%. Three matchers were tightened against their own
+concept records, and the metric was changed to the lead concept — what the reader
+actually sees. The honest figure is 63.5% motif lead (the same detector the
+shipped layer uses) and 36.4% positional lead, which is the part this project
+adds.
+
+**Template placeholders reaching a reader.** 25 concept records write their
+explanations with `{slots}`. The first working API output shipped the literal
+text "this piece hits {targets} simultaneously". Slot filling plus a hard guard
+now make that impossible, and it was found by running the thing rather than by
+reasoning about it.
+
+### Coverage
+
+85 of 85 areas, 134 concepts, 166 sources. Coverage here is breadth: 12 areas are
+"fully covered" by the coverage model, and two records (mixed-piece-endgames,
+queen-endgames) say outright that they are orientation rather than theory.
+
+False-positive suite: 10 of 12 resolved, 1 partial, 1 pending with a written
+reason. Every resolved case is replayed through the real API as a regression
+test.
+
+### Still open
+
+- No quiet-position corpus. Mass testing runs on tactical puzzles because that is
+  what this repository has, and the positional half most needs judging on quiet
+  middlegames.
+- Layer 5 wording is deliberately plain and could be much better.
+- The two remaining false-positive cases.
+- `positions/` is still an empty directory; validated positions live inline on
+  the concepts.
+
+---
+
 ## Session 4 — openings, blindfold, endgame core, and the warnings index (2026-09-01)
 
 Grew the base from 86 concepts / 44 areas to 112 concepts / 63 of 85 areas, with

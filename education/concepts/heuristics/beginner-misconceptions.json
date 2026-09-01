@@ -55,7 +55,8 @@
   ],
   "limitations": [
     "The index reflects only what this base has researched. Absence from it is not evidence that a belief is correct.",
-    "Not every entry is backed by a measurement; many rest on source authority alone, and the entries do not currently distinguish the two."
+    "Not every entry is backed by a measurement; many rest on source authority alone, and the entries do not currently distinguish the two.",
+    "Counts in this record are stated as floors ('over N') rather than exact figures, because the base grows and an exact count written into prose silently becomes false. The live figures are in state/warnings_index.json and state/coverage.json."
   ],
   "misconceptions": [
     "That a list of misconceptions means the underlying rules are worthless. Most are useful with their conditions restored.",
@@ -123,7 +124,7 @@
   "canonical_name": "Beginner misconceptions",
   "category": "beginner-misconceptions",
   "knowledge_type": "terminology",
-  "definition_short": "The false beliefs this knowledge base has recorded and, where possible, disproved - 210 of them across 110 concepts.",
+  "definition_short": "The false beliefs this knowledge base has recorded and, where possible, disproved - over 250 of them.",
   "definition_long": "Most chess teaching is transmitted as short rules, and short rules lose their conditions in transmission. The result is a stock of confident false beliefs that a system explaining moves must actively avoid reproducing, because they are exactly the phrasings that sound most like chess teaching.\n\nTHIS BASE CARRIES 210 recorded misconceptions, 254 exceptions, 222 false-positive traps and 125 banned phrasings, compiled by tools/build_index.py into state/warnings_index.json. That file is the retrieval surface: it answers 'what must I not say about this?' without the caller needing to know which concept holds the warning.\n\nTHE RECURRING SHAPE, visible once they are collected in one place, is that the misconception is almost always a TRUE STATEMENT WITH ITS CONDITION REMOVED:\n- 'Doubled pawns are weak' — measured here, inflicting them cost the inflicting side 0.34 while the side accepting them was exactly equal.\n- 'Do not move the same piece twice in the opening' — the best move in the Ruy Lopez does exactly that, by a margin of 0.34.\n- 'Put the rook behind the passed pawn' — proven here to turn a drawn position into a loss in 63.\n- 'Improve your worst piece' — both original formulations are conditional and the condition is what decides.\n- 'A check forces a reply, so checks are strong' — one proven position holds a check that draws and a check that loses.\n\nTHE PRACTICAL RULE that follows, and the reason this record exists: an explanation must never assert a rule in a position that is one of its exceptions. Naming a pattern is not the same as diagnosing a fault, and the surface features people are taught to distrust — doubled pawns, isolated pawns, an exposed king, a piece moved twice — are the ones most likely to be innocent in any given position.",
   "sources": [
     "chessstrategyonline-opening-principles",

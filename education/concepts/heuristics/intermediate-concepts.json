@@ -48,7 +48,8 @@
   "exceptions": [],
   "limitations": [
     "The classification is a judgement rather than a measurement, and was made concept by concept as each was written.",
-    "The tiers are unevenly populated, which reflects what has been researched rather than the shape of chess knowledge."
+    "The tiers are unevenly populated, which reflects what has been researched rather than the shape of chess knowledge.",
+    "Counts in this record are stated as floors ('over N') rather than exact figures, because the base grows and an exact count written into prose silently becomes false. The live figures are in state/warnings_index.json and state/coverage.json."
   ],
   "misconceptions": [
     "That difficulty means how hard the idea is to play. It means how much context is needed to state it without lying."
@@ -78,7 +79,7 @@
     },
     "by_depth": {
       "short": "Concepts that need a condition attached.",
-      "normal": "The tier where an idea can no longer be stated in one sentence without losing its condition — 54 concepts here, the largest group and the one most misconceptions come from.",
+      "normal": "The tier where an idea can no longer be stated in one sentence without losing its condition — over 50 concepts, the largest group and the one most misconceptions come from.",
       "deep": "A beginner concept is self-contained: a fork attacks two pieces and that is the whole idea. An intermediate concept needs a condition, and the condition is what gets lost in retelling - doubled pawns are weak unless the capture bought something, an outpost is strong if a pawn defends it, improve your worst piece when nothing more urgent is happening. That is why this is both the largest tier and the most dangerous: nearly every entry in this base's misconception index is an intermediate concept with its condition stripped off."
     },
     "hedge": "",
@@ -107,8 +108,8 @@
   "canonical_name": "Intermediate concepts",
   "category": "intermediate-concepts",
   "knowledge_type": "terminology",
-  "definition_short": "Concepts that need one layer of context to state truthfully — 54 of them here, the largest tier.",
-  "definition_long": "The tier where a concept can no longer be stated in one sentence without losing its condition.\n\nA BEGINNER CONCEPT IS SELF-CONTAINED: a fork attacks two pieces, and that is the whole idea. An INTERMEDIATE CONCEPT NEEDS A CONDITION, and the condition is the part that gets lost in retelling. Doubled pawns are a weakness — unless the capture bought a file, the bishop pair or the centre. An outpost is strong — if a pawn defends it and no enemy pawn can attack it. Improve your worst piece — when nothing more urgent is happening.\n\nTHAT IS WHY THIS IS THE LARGEST TIER AND THE MOST DANGEROUS ONE. Nearly every entry in this base's misconception index is an intermediate concept with its condition removed, which is exactly the shape a chess misconception takes.\n\nDIFFICULTY IN THIS BASE IS ABOUT THE CONCEPT, NOT THE PLAYER. It records how much other machinery a concept needs before it can be stated truthfully, which is why some famous ideas sit high and some obscure ones sit low. A fork is a beginner concept because it can be stated completely in one sentence; the Vancura position is an expert one not because it is hard to play but because stating it correctly requires the rook-ending context in which Tarrasch's rule fails.\n\nIT IS ALSO WHAT DRIVES LEVEL ADAPTATION. Every concept carries explanations.by_level with wording for beginner, intermediate, advanced and master, and the API selects among them. The difficulty field says where a concept BELONGS; the by_level wording says how to say it to whoever is asking. The two are deliberately separate, because an advanced concept still has to be explicable to a beginner who has just met it on the board.\n\nCURRENT DISTRIBUTION: beginner 36, intermediate 54, advanced 35, expert 2.",
+  "definition_short": "Concepts that need one layer of context to state truthfully — over 50 of them, the largest tier.",
+  "definition_long": "The tier where a concept can no longer be stated in one sentence without losing its condition.\n\nA BEGINNER CONCEPT IS SELF-CONTAINED: a fork attacks two pieces, and that is the whole idea. An INTERMEDIATE CONCEPT NEEDS A CONDITION, and the condition is the part that gets lost in retelling. Doubled pawns are a weakness — unless the capture bought a file, the bishop pair or the centre. An outpost is strong — if a pawn defends it and no enemy pawn can attack it. Improve your worst piece — when nothing more urgent is happening.\n\nTHAT IS WHY THIS IS THE LARGEST TIER AND THE MOST DANGEROUS ONE. Nearly every entry in this base's misconception index is an intermediate concept with its condition removed, which is exactly the shape a chess misconception takes.\n\nDIFFICULTY IN THIS BASE IS ABOUT THE CONCEPT, NOT THE PLAYER. It records how much other machinery a concept needs before it can be stated truthfully, which is why some famous ideas sit high and some obscure ones sit low. A fork is a beginner concept because it can be stated completely in one sentence; the Vancura position is an expert one not because it is hard to play but because stating it correctly requires the rook-ending context in which Tarrasch's rule fails.\n\nIT IS ALSO WHAT DRIVES LEVEL ADAPTATION. Every concept carries explanations.by_level with wording for beginner, intermediate, advanced and master, and the API selects among them. The difficulty field says where a concept BELONGS; the by_level wording says how to say it to whoever is asking. The two are deliberately separate, because an advanced concept still has to be explicable to a beginner who has just met it on the board.\n\n",
   "sources": [
     "chessstrategyonline-opening-principles",
     "wikipedia-chess-opening"
