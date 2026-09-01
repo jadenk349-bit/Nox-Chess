@@ -1,0 +1,192 @@
+{
+  "schema_version": 2,
+  "alternate_names": [],
+  "historical_names": [],
+  "tags": [
+    "endgame",
+    "knights"
+  ],
+  "subcategory": "endgame type",
+  "difficulty": "advanced",
+  "knowledge_type_note": "A principle with a named formula behind it, and an explicit admission from the standard reference that a large part of the territory has no operative principles at all.",
+  "name_status": "established-name",
+  "history": {
+    "attributions": [
+      {
+        "relation": "named-by",
+        "person": "Mikhail Botvinnik",
+        "year": null,
+        "note": "'A knight ending is really a pawn ending', quoted as Botvinnik's Formula in Dvoretsky's Endgame Manual.",
+        "confidence": "high"
+      },
+      {
+        "relation": "systematized-by",
+        "person": "Mark Dvoretsky",
+        "year": 2020,
+        "note": "Endgame Manual, whose knight chapter is the standard modern treatment; the 5th edition's revisions are Karsten Mueller's.",
+        "confidence": "high"
+      },
+      {
+        "relation": "first-documented-by",
+        "person": "Reuben Fine",
+        "year": 1941,
+        "note": "The four-against-three analysis, whose winning verdict modern theory has downgraded.",
+        "confidence": "medium"
+      }
+    ],
+    "first_documented_source": "dvoretsky-endgame-manual",
+    "year": null,
+    "confidence": "medium",
+    "notes": "Botvinnik's remark is quoted consistently by two independent sources here, in slightly different wordings, which is normal for a remark rather than a written formulation.",
+    "competing_claims": [],
+    "development": [
+      {
+        "period": "1941",
+        "note": "Fine analyses four-against-three as a win."
+      },
+      {
+        "period": "tablebase era",
+        "note": "The verdict is revised to 'good winning chances'; Mueller's 2019 analysis corrects several long-accepted lines."
+      }
+    ]
+  },
+  "engine_era_status": "useful-with-common-exceptions",
+  "engine_era_note": "Knight endings have been substantially rewritten by engines and tablebases. A verdict standing since 1941 has been downgraded, and the standard reference now carries corrections dated 2019 to lines that had been accepted for decades.",
+  "recognition": {
+    "preconditions": [
+      "Knights and pawns only, or nearly so"
+    ],
+    "indicators_for": [
+      "An outside passed pawn",
+      "A king that can be activated",
+      "A zugzwang available"
+    ],
+    "indicators_against": [],
+    "prerequisites": [
+      "endgame-principles"
+    ],
+    "detector": null,
+    "detectability": "heuristic",
+    "typical_confidence": "low",
+    "false_positive_traps": [
+      "Botvinnik's formula is a guide to which techniques transfer, not a claim that the ending IS a pawn ending. The knight's ability to fork and check reintroduces tempo, and knight against knight and pawn has no operative principles at all on the standard reference's own account.",
+      "A knight cannot lose a tempo, so triangulation and other tempo-losing methods that work with other pieces are unavailable to it."
+    ]
+  },
+  "application": {
+    "typical_plans": [
+      "Activate the king, exactly as in a pawn ending",
+      "Create and advance an outside passed pawn",
+      "Play for zugzwang",
+      "Sacrifice the knight to reach a won pawn ending or clear a promotion path",
+      "Blockade an enemy passer with the knight rather than chase it"
+    ],
+    "typical_moves": [
+      "The deflecting knight sacrifice"
+    ],
+    "typical_pawn_structures": [
+      "An outside passed pawn",
+      "All pawns on one wing, where the knight is at its best"
+    ],
+    "typical_piece_arrangements": [
+      "A knight in front of an enemy passed pawn"
+    ],
+    "tactical_consequences": [
+      "Knight forks and checks are the way tempo is won in an otherwise tempo-less ending"
+    ],
+    "strategic_consequences": [
+      "Pawn-ending judgement transfers, so a knight ending can often be assessed by asking what the pawn ending would be"
+    ]
+  },
+  "exceptions": [
+    "Knight against knight and pawn is explicitly outside the principles: the standard reference says there are none operative for many such positions.",
+    "The knight is poor at catching a passed pawn, so the pawn-ending intuition about races does not transfer.",
+    "Rook pawns suit the knight badly."
+  ],
+  "limitations": [
+    "This base holds no tablebase-verified knight-ending positions yet; the record rests on textual authority.",
+    "Fine's downgraded verdict is recorded from the secondary literature and has not been re-derived here."
+  ],
+  "misconceptions": [
+    "That a knight ending is a pawn ending. It is one for the purposes of several techniques and is not one when the knights start forking.",
+    "That knights are good blockaders and good chasers. They are excellent at the first and poor at the second."
+  ],
+  "relationships": {
+    "broader": [
+      "endgame-principles"
+    ],
+    "narrower": [],
+    "related": [
+      "endgame-principles",
+      "king-activation",
+      "zugzwang",
+      "triangulation",
+      "passed-pawn",
+      "pawn-breakthrough",
+      "knight-vs-bishop",
+      "board-geometry",
+      "opposition"
+    ],
+    "contrasting": [
+      "rook-endgame-principles"
+    ],
+    "co_occurring": [],
+    "conflicts": [
+      {
+        "concept": "triangulation",
+        "resolution": "Triangulation is unavailable to a knight, which cannot lose a single tempo because every move changes square colour. The king must do the tempo-losing in a knight ending, which is one of the concrete ways Botvinnik's formula holds."
+      }
+    ]
+  },
+  "examples": [],
+  "counterexamples": [],
+  "ambiguous_examples": [],
+  "explanations": {
+    "by_level": {
+      "beginner": "Endings with knights and pawns. Use your king, make a passed pawn — much as in a pawn ending.",
+      "intermediate": "Botvinnik: a knight ending is really a pawn ending. The active king and the outside passed pawn matter just as much.",
+      "advanced": "The reason is that a knight cannot lose a tempo, so the tempo-based techniques transfer intact. Blockade passed pawns with the knight; do not chase them with it.",
+      "master": "Knight against knight and pawn has no operative principles on Dvoretsky's own account, and Fine's four-against-three win is now only good winning chances."
+    },
+    "by_depth": {
+      "short": "Knight endings behave like pawn endings.",
+      "normal": "Endings of knights and pawns, governed by Botvinnik's formula that a knight ending is really a pawn ending: the active king, the outside passed pawn, the breakthrough and zugzwang all work as they do with pawns alone, because a knight cannot lose a tempo.",
+      "deep": "Botvinnik's formula is mechanical rather than poetic. A knight changes square colour every move, so it cannot lose a single tempo and cannot triangulate, and the techniques that turn on tempo therefore transfer intact from pawn endings. The knight's own properties modify that: it blockades a passed pawn superbly and chases one badly, it dislikes rook pawns, and it can fork or check to win the tempo the ending otherwise lacks. The characteristic technique is the deflecting sacrifice - giving the knight to reach a won pawn ending. And the principles run out in a place the standard reference names: knight against knight and pawn is called chaotic, with no principles operative for many positions."
+    },
+    "hedge": "",
+    "lesson": "Ask what the pawn ending would be. Then ask what the knights change about it."
+  },
+  "terminology": {
+    "beginner_words": [
+      "knight and pawn endings"
+    ],
+    "advanced_words": [
+      "Botvinnik's formula",
+      "deflecting knight sacrifice",
+      "blockade",
+      "zugzwang",
+      "shouldering"
+    ],
+    "avoid": [
+      "a knight ending is a pawn ending (unqualified)"
+    ]
+  },
+  "status": {
+    "stage": "researched",
+    "last_updated": "2026-09-01",
+    "open_questions": [],
+    "audit_notes": []
+  },
+  "id": "knight-endgames",
+  "canonical_name": "Knight endgames",
+  "category": "knight-endgames",
+  "knowledge_type": "strategic-principle",
+  "definition_short": "Endings with knights and pawns, which behave like pawn endings because a knight cannot lose a tempo.",
+  "definition_long": "BOTVINNIK'S FORMULA is the organising idea: 'a knight ending is really a pawn ending'. The mechanism is precise rather than poetic. A knight changes square colour with every move, so it cannot lose a single tempo and cannot triangulate — and the techniques that depend on tempo therefore transfer intact from pawn endings. The active king, the outside passed pawn, the breakthrough, shouldering and every method of playing for zugzwang all work in knight endings much as they do with pawns alone.\n\nTHE KNIGHT'S OWN PROPERTIES modify that. It is poor at chasing a passed pawn and ideal at blockading one, since it controls the squares in front rather than needing to catch up. It has a well-known distaste for rook pawns. And it can fork or check to win a tempo, which is the one way tempo re-enters an ending that otherwise runs on pawn-ending logic.\n\nTHE DEFLECTING KNIGHT SACRIFICE is the characteristic technique — giving the knight to reach a pawn ending that is winning, or to remove the piece guarding a promotion path. Dvoretsky calls it 'almost universally employed' in these endings.\n\nWHERE THE PRINCIPLES RUN OUT, and the standard reference says so plainly: knight against knight and pawn is 'quite complex, and rather chaotic', with 'no principles which are operative for many positions' — the evaluation depends entirely on concrete details. That is an unusually direct admission and this record keeps it rather than papering over it.\n\nAND A CLASSIC VERDICT HAS BEEN DOWNGRADED. Fine's 1941 analysis held the four-against-three knight ending to be a win; modern theory revises that to 'good winning chances', because so many of the resulting positions are drawn. Knight endings are also where a player's practical chances of converting an extra pawn with all pawns on one wing are highest, pawn endings excepted.",
+  "sources": [
+    "dvoretsky-endgame-manual",
+    "wikipedia-chess-endgame",
+    "shereshevsky-endgame-strategy"
+  ],
+  "source_confidence": "high"
+}

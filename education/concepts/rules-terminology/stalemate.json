@@ -37,7 +37,7 @@
     "indicators_for": [],
     "indicators_against": [],
     "prerequisites": [],
-    "detector": "isStalemate",
+    "detector": "legalMoves and inCheck in blind-chess.html",
     "detectability": "mechanical",
     "typical_confidence": "medium",
     "false_positive_traps": []
@@ -91,8 +91,10 @@
   },
   "status": {
     "stage": "researched",
-    "last_updated": "2026-08-31",
+    "last_updated": "2026-09-01",
     "open_questions": [],
-    "audit_notes": []
+    "audit_notes": [
+      "2026-09-01: detector field named 'isStalemate', which does not exist anywhere in the codebase. The audit's hardcoded whitelist had been accepting it. Repointed at real code, or marked as proposed where nothing implements it."
+    ]
   }
 }

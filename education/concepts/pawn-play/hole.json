@@ -103,7 +103,7 @@
       "The square is on the edge or deep in the opponent's own half, where occupying it achieves nothing"
     ],
     "prerequisites": [],
-    "detector": "pawnAttackableSquares",
+    "detector": "holesFor in lib/features.js",
     "detectability": "mechanical",
     "typical_confidence": "high",
     "false_positive_traps": [
@@ -200,12 +200,14 @@
   },
   "status": {
     "stage": "researched",
-    "last_updated": "2026-08-31",
+    "last_updated": "2026-09-01",
     "open_questions": [
       "Examine The International Chess Magazine, November 1886 directly to confirm Steinitz's self-claim.",
       "Construct and engine-test a controlled pair: an exploitable hole versus a structurally identical but unusable one, to validate Romanovsky's condition.",
       "Confirm the Hooper & Whyld wording against the book rather than via secondary quotation."
     ],
-    "audit_notes": []
+    "audit_notes": [
+      "2026-09-01: detector field named 'pawnAttackableSquares', which does not exist anywhere in the codebase. The audit's hardcoded whitelist had been accepting it. Repointed at real code, or marked as proposed where nothing implements it."
+    ]
   }
 }

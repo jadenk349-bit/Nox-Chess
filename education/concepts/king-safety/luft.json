@@ -45,7 +45,7 @@
       "king-safety",
       "back-rank-mate"
     ],
-    "detector": "backRankEscape",
+    "detector": "kingFeatures in lib/features.js",
     "detectability": "mechanical",
     "typical_confidence": "high",
     "false_positive_traps": [
@@ -137,7 +137,9 @@
     "stage": "researched",
     "last_updated": "2026-09-01",
     "open_questions": [],
-    "audit_notes": []
+    "audit_notes": [
+      "2026-09-01: detector field named 'backRankEscape', which does not exist anywhere in the codebase. The audit's hardcoded whitelist had been accepting it. Repointed at real code, or marked as proposed where nothing implements it."
+    ]
   },
   "id": "luft",
   "canonical_name": "Luft",

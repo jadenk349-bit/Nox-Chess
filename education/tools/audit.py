@@ -16,6 +16,29 @@ import argparse, json, os, re
 from collections import defaultdict
 
 HERE = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+
+def _code_corpus():
+    """Everything a detector could legitimately name, read from disk.
+
+    A detector claim is only worth anything if the thing it names exists, so
+    this reads the actual sources instead of comparing against a list somebody
+    has to remember to extend."""
+    out = []
+    for rel in ("lib/features.js", "lib/matchers.js", "lib/analyze.js",
+                "tools/schema.json", "tools/motif_map.json"):
+        p = os.path.join(HERE, rel)
+        if os.path.exists(p):
+            out.append(open(p, encoding="utf-8").read())
+    page = os.path.join(HERE, "..", "blind-chess.html")
+    if os.path.exists(page):
+        out.append(open(page, encoding="utf-8", errors="ignore").read())
+    for rel in ("tools/puzzle_rules.js", "tools/puzzle_words.js"):
+        p = os.path.join(HERE, "..", rel)
+        if os.path.exists(p):
+            out.append(open(p, encoding="utf-8", errors="ignore").read())
+    return "\n".join(out)
+
+CODE = _code_corpus()
 FINDINGS = []
 
 
@@ -59,7 +82,14 @@ def main():
         if srcs and len(weak) == len(srcs):
             finding("HIGH", cid, "source-strength",
                     f"every source is low-confidence ({len(weak)}); claims here rest on nothing solid")
-        if c.get("source_confidence") == "high" and len(strong) == 1 and len(srcs) < 3:
+        # Evidence this base produced itself counts. A concept with a tablebase
+        # proof attached is not "resting on a single source" in any sense that
+        # matters, and flagging it taught nothing.
+        pos = (c.get("examples", []) + c.get("counterexamples", [])
+               + c.get("ambiguous_examples", []))
+        own_evidence = any(p.get("engine") or p.get("tablebase") for p in pos)
+        if (c.get("source_confidence") == "high" and len(strong) == 1
+                and len(srcs) < 3 and not own_evidence):
             finding("LOW", cid, "source-strength",
                     "high confidence resting on a single strong source")
 
@@ -142,16 +172,15 @@ def main():
                     finding("LOW", cid, "detector",
                             f"detector names the file {path!r}, which does not exist")
                 continue
-            if not any(k in det for k in ("findMotifs", "puzzle_rules", "tablebase", "posKey",
-                                          "halfmoveClock", "inCheck", "isCheckmate", "isStalemate",
-                                          "epTarget", "castlingRights", "promotionAvailable",
-                                          "sacrificeSize", "lineAlignment", "attacksAfterMove",
-                                          "checkersAfterMove", "defenderCount", "safeSquareCount",
-                                          "threatsAfterMove", "kingFlightSquares", "backRankEscape",
-                                          "rankOccupancy", "kingDistance", "fileOccupancy",
-                                          "pawnAttackableSquares", "pawnStructure", "pawnsOnBishopColour",
-                                          "kingZoneAttackers")):
-                finding("LOW", cid, "detector", f"detector '{det}' names nothing recognisable")
+            # Otherwise the detector names code. Check the identifiers against
+            # the actual sources rather than a hand-kept whitelist: the list had
+            # to be edited every time Layer 3 grew a function, which meant the
+            # check was really testing whether somebody remembered to update it.
+            names = set(re.findall(r"[A-Za-z_][A-Za-z0-9_]{3,}", det))
+            names -= {"findMotifs_placeholder"}
+            if names and not any(n in CODE for n in names):
+                finding("LOW", cid, "detector",
+                        f"detector '{det}' names no identifier found in the codebase")
 
     # ---- 8. an explanation that promises a level the record does not carry ----
     for cid, c in C.items():

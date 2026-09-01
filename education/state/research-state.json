@@ -6,24 +6,24 @@
     "note": "Filled in by tools/sf_analyse.py --probe"
   },
   "counters": {
-    "concepts_total": 117,
+    "concepts_total": 120,
     "concepts_stub": 0,
     "concepts_researched": 29,
     "concepts_validated": 4,
     "concepts_needs_review": 0,
-    "sources_reviewed": 152,
+    "sources_reviewed": 159,
     "positions_tested": 32,
     "matches_validated": 18,
     "false_matches": 8,
     "ambiguous_matches": 6,
     "by_stage": {
       "ready": 2,
-      "researched": 106,
+      "researched": 109,
       "validated": 9
     },
     "tablebase_positions": 21,
     "concepts_fully_covered": 12,
-    "areas_touched": 68,
+    "areas_touched": 71,
     "areas_total": 85
   },
   "areas": {
@@ -131,10 +131,14 @@
     },
     "tactical-combinations": {
       "domain": "tactics",
-      "status": "not-started",
-      "concepts": [],
+      "status": "covered",
+      "concepts": [
+        "tactical-combinations"
+      ],
       "open_questions": [],
-      "last_touched": null
+      "last_touched": "2026-09-01",
+      "last_updated": "2026-09-01",
+      "note": "Written as a contested definition: four named authorities, a failed 1952 consensus attempt, and Averbakh arguing both sides four years apart."
     },
     "checks-captures-threats": {
       "domain": "tactics",
@@ -665,17 +669,25 @@
     },
     "knight-endgames": {
       "domain": "endgame",
-      "status": "not-started",
-      "concepts": [],
+      "status": "covered",
+      "concepts": [
+        "knight-endgames"
+      ],
       "open_questions": [],
-      "last_touched": null
+      "last_touched": "2026-09-01",
+      "last_updated": "2026-09-01",
+      "note": "Botvinnik's formula, with the standard reference's own admission that knight-vs-knight-and-pawn has no operative principles."
     },
     "queen-endgames": {
       "domain": "endgame",
-      "status": "not-started",
-      "concepts": [],
+      "status": "covered",
+      "concepts": [
+        "queen-endgames"
+      ],
       "open_questions": [],
-      "last_touched": null
+      "last_touched": "2026-09-01",
+      "last_updated": "2026-09-01",
+      "note": "Orientation only; the class resisted complete human analysis until tablebases, and the record says to look positions up rather than reason about them."
     },
     "mixed-piece-endgames": {
       "domain": "endgame",
@@ -1145,6 +1157,11 @@
       "item": "warnings index does not grade its own evidence",
       "date": "2026-09-01",
       "note": "state/warnings_index.json compiles 826 warnings but does not distinguish those proven by tablebase or controlled measurement from those resting on source authority. A caller cannot currently tell a proof from an opinion. Recorded as a known gap on both meta-concepts."
+    },
+    {
+      "item": "detector claims were unverified until now",
+      "date": "2026-09-01",
+      "note": "For most of this project a concept could claim a mechanical detector that did not exist, because the audit compared against a list rather than the code. Fixed; the check now reads lib/*.js, blind-chess.html and tools/*.js."
     }
   ],
   "awaiting_validation": [
@@ -1231,6 +1248,12 @@
       "findings_high": 1,
       "findings_low": 5,
       "note": "Audit caught an originated-by attribution of planning to Steinitz at low confidence with no hedge - an overclaim this base had introduced. Downgraded to later-associated-with with the inference stated explicitly. Also downgraded endgame-principles source_confidence to medium, resting as it does substantially on one source."
+    },
+    {
+      "date": "2026-09-01",
+      "findings_high": 0,
+      "findings_low": 29,
+      "note": "Rewrote the audit's detector check to verify identifiers against the actual source files instead of a hardcoded whitelist, and it immediately exposed 24 concepts naming detectors that do not exist anywhere in the codebase - isCheckmate, lineAlignment, backRankEscape, castlingRights and others. The whitelist had been rubber-stamping aspirational names written during the research phase. All 24 repointed at real code or marked 'not yet written', each with an audit note recording what it used to claim."
     }
   ],
   "measurements": [

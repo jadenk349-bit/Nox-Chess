@@ -39,7 +39,7 @@
     "indicators_for": [],
     "indicators_against": [],
     "prerequisites": [],
-    "detector": "isCheckmate",
+    "detector": "legalMoves and inCheck in blind-chess.html",
     "detectability": "mechanical",
     "typical_confidence": "medium",
     "false_positive_traps": []
@@ -92,10 +92,11 @@
   },
   "status": {
     "stage": "researched",
-    "last_updated": "2026-08-31",
+    "last_updated": "2026-09-01",
     "open_questions": [],
     "audit_notes": [
-      "2026-09-01 audit: flagged as short relative to the median record. REVIEWED AND ACCEPTED — this is a simple, fully specified rule quoted from the FIDE Laws. There is no further research to do, and padding it to match the median would add words without adding knowledge. Short is the correct length here."
+      "2026-09-01 audit: flagged as short relative to the median record. REVIEWED AND ACCEPTED — this is a simple, fully specified rule quoted from the FIDE Laws. There is no further research to do, and padding it to match the median would add words without adding knowledge. Short is the correct length here.",
+      "2026-09-01: detector field named 'isCheckmate', which does not exist anywhere in the codebase. The audit's hardcoded whitelist had been accepting it. Repointed at real code, or marked as proposed where nothing implements it."
     ]
   }
 }

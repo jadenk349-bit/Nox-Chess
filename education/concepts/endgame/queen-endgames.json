@@ -1,0 +1,161 @@
+{
+  "schema_version": 2,
+  "alternate_names": [],
+  "historical_names": [],
+  "tags": [
+    "endgame",
+    "queens"
+  ],
+  "subcategory": "endgame type",
+  "difficulty": "advanced",
+  "knowledge_type_note": "A principle-level record; the concrete theory of these endings largely resisted human analysis and is now tablebase territory.",
+  "name_status": "established-name",
+  "history": {
+    "attributions": [],
+    "first_documented_source": "wikipedia-chess-endgame",
+    "year": null,
+    "confidence": "low",
+    "notes": "No individual attribution traced. The historically notable fact is negative: the theory of queen and pawn versus queen was not completed by human analysis, and tablebases settled it.",
+    "competing_claims": [],
+    "development": [
+      {
+        "period": "pre-tablebase",
+        "note": "Queen and pawn versus queen resisted complete human analysis."
+      },
+      {
+        "period": "tablebase era",
+        "note": "Solved exhaustively; the class is now looked up rather than derived."
+      }
+    ]
+  },
+  "engine_era_status": "substantially-revised-by-engines",
+  "engine_era_note": "The clearest case in the endgame domain of a class that humans could not finish and machines simply solved. Queen endings are also where engine defence most often finds perpetual checks that human analysis had missed.",
+  "recognition": {
+    "preconditions": [
+      "Queens and pawns only, or nearly so"
+    ],
+    "indicators_for": [
+      "A far-advanced passed pawn",
+      "An exposed king on either side",
+      "A king that can be sheltered from checks"
+    ],
+    "indicators_against": [],
+    "prerequisites": [
+      "endgame-principles"
+    ],
+    "detector": null,
+    "detectability": "heuristic",
+    "typical_confidence": "low",
+    "false_positive_traps": [
+      "Counting pawns is a poor guide here: an advanced passed pawn outweighs a numerical deficit, because a queen can escort it alone.",
+      "An extra pawn is much less often decisive than in a rook ending, and this class wins less frequently than the rook equivalent.",
+      "Reasoning from principle is weak in queen endings. Where the position is small enough for a tablebase, look it up."
+    ]
+  },
+  "application": {
+    "typical_plans": [
+      "Advance a passed pawn with the queen behind or beside it",
+      "Find shelter for your own king so the checks run out",
+      "As the defender, start checking before the enemy king finds shelter",
+      "Meet a check with a check"
+    ],
+    "typical_moves": [
+      "Centralising queen moves that shield the king and support the pawn"
+    ],
+    "typical_pawn_structures": [
+      "A far-advanced passed pawn"
+    ],
+    "typical_piece_arrangements": [
+      "The queen placed to block checks on the file or diagonal the enemy queen wants"
+    ],
+    "tactical_consequences": [
+      "Perpetual check is the defence and must be calculated, not estimated"
+    ],
+    "strategic_consequences": [
+      "Material counting is unusually unreliable in this class"
+    ]
+  },
+  "exceptions": [
+    "Where the defending king is exposed, the usual perpetual-check defence may fail and ordinary material logic returns.",
+    "Fortresses exist in queen endings and defeat material reasoning entirely."
+  ],
+  "limitations": [
+    "This base holds no tablebase-verified queen-ending positions yet; the record is orientation rather than theory.",
+    "The class is large and mostly concrete; principles help less here than anywhere else in the endgame."
+  ],
+  "misconceptions": [
+    "That an extra pawn should win. Queen endings convert less often than rook endings, which are themselves notoriously drawish.",
+    "That perpetual check is a lucky escape. It is the defender's standard plan and should be expected."
+  ],
+  "relationships": {
+    "broader": [
+      "endgame-principles"
+    ],
+    "narrower": [],
+    "related": [
+      "endgame-principles",
+      "perpetual-check",
+      "passed-pawn",
+      "fortress",
+      "king-safety",
+      "rook-endgame-principles",
+      "promotion"
+    ],
+    "contrasting": [],
+    "co_occurring": [
+      "perpetual-check"
+    ],
+    "conflicts": []
+  },
+  "examples": [],
+  "counterexamples": [],
+  "ambiguous_examples": [],
+  "explanations": {
+    "by_level": {
+      "beginner": "Queens and pawns. Watch for endless checks — they save a lot of these positions.",
+      "intermediate": "An advanced passed pawn matters more than an extra pawn, because the queen can escort it alone. The defence is perpetual check.",
+      "advanced": "Shelter your king so the checks run out, and remember you can answer a check with a check.",
+      "master": "Human analysis never finished queen and pawn versus queen; it was tablebases that did. Treat the class as reference material."
+    },
+    "by_depth": {
+      "short": "Advanced passed pawns decide; perpetual check saves.",
+      "normal": "Endings of queens and pawns. Because a queen can escort a passed pawn to promotion unaided, how far advanced a passer is outweighs how many pawns each side has - and the defender's constant resource is perpetual check, which makes converting an extra pawn hard.",
+      "deep": "The sharpest and longest of the common endings, and where material arithmetic breaks down most completely. A queen escorts a passed pawn alone, so advancement outweighs number, and the defence is always perpetual check in principle - so the attacker's real task is finding shelter for their own king, sometimes behind their own pawns and sometimes behind the enemy king, with the characteristic winning trick being to answer a check with a check. The class is very long and very concrete: queen and pawn against queen is the second most common piece-and-pawn ending, it wins less often than the rook equivalent, and human analysts never completed its analysis before tablebases did."
+    },
+    "hedge": "",
+    "lesson": "Count how far the pawn has come, not how many pawns there are - and expect to be checked."
+  },
+  "terminology": {
+    "beginner_words": [
+      "queen endings",
+      "endless checks"
+    ],
+    "advanced_words": [
+      "perpetual check",
+      "shelter",
+      "escorting the passer",
+      "fortress"
+    ],
+    "avoid": [
+      "an extra pawn wins"
+    ]
+  },
+  "status": {
+    "stage": "researched",
+    "last_updated": "2026-09-01",
+    "open_questions": [],
+    "audit_notes": []
+  },
+  "id": "queen-endgames",
+  "canonical_name": "Queen endgames",
+  "category": "queen-endgames",
+  "knowledge_type": "strategic-principle",
+  "definition_short": "Endings with queens and pawns, where an advanced passed pawn outweighs extra material and the defender's standing resource is perpetual check.",
+  "definition_long": "The sharpest and longest of the common endings, and the one where the usual arithmetic of material breaks down most completely.\n\nTHE PASSED PAWN OUTWEIGHS THE COUNT. A queen can escort a passed pawn to promotion ALONE, without help from the king, so how far advanced a passer is matters more than how many pawns each side has. Kasparov versus the World is the standard illustration: Kasparov won with fewer pawns because his was further advanced.\n\nPERPETUAL CHECK IS THE DEFENCE, and it is always available in principle, which is why converting an extra pawn is so hard. The defender is not trying to hold a position but to reach an endless sequence of checks before the attacker's pawn arrives.\n\nTHE TECHNIQUE FOLLOWS FROM THAT. The attacker's task is to find shelter for their own king — often using their own pawns, sometimes using the enemy king — so that checks run out; and the characteristic winning trick is to answer a check WITH a check, which no other ending offers so readily. Centralising the queen and placing it to shield the king while supporting the pawn is the standard winning arrangement.\n\nTHESE ENDINGS ARE VERY LONG, and that is a fact about the theory, not the players: queen and pawn against queen is the second most common piece-and-pawn ending after rook and pawn against rook, and human analysts could not complete its analysis at all before endgame tablebases. It also wins less often than the corresponding rook ending.\n\nTHIS BASE THEREFORE TREATS QUEEN ENDINGS AS A PLACE TO LOOK THINGS UP rather than to reason about. Where a position is small enough for a tablebase, the tablebase is the authority, and the principles above are for orientation.",
+  "sources": [
+    "wikipedia-chess-endgame",
+    "dvoretsky-endgame-manual",
+    "chessphd-queen-endgame"
+  ],
+  "source_confidence": "medium"
+}

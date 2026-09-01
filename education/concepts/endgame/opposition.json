@@ -51,7 +51,7 @@
     "prerequisites": [
       "zugzwang"
     ],
-    "detector": "kingDistance",
+    "detector": "proposed: king distance and parity (not yet written)",
     "detectability": "mechanical",
     "typical_confidence": "high",
     "false_positive_traps": [
@@ -187,10 +187,11 @@
   },
   "status": {
     "stage": "ready",
-    "last_updated": "2026-08-31",
+    "last_updated": "2026-09-01",
     "open_questions": [],
     "audit_notes": [
-      "Promoted to 'ready': the core claim is PROVEN by tablebase in both directions on a pair of positions differing in one bit, Averbakh's corrective is recorded as the standing exception, and every coverage box is satisfied. This is the strongest evidential position of any concept in the base."
+      "Promoted to 'ready': the core claim is PROVEN by tablebase in both directions on a pair of positions differing in one bit, Averbakh's corrective is recorded as the standing exception, and every coverage box is satisfied. This is the strongest evidential position of any concept in the base.",
+      "2026-09-01: detector field named 'kingDistance', which does not exist anywhere in the codebase. The audit's hardcoded whitelist had been accepting it. Repointed at real code, or marked as proposed where nothing implements it."
     ]
   },
   "id": "opposition",

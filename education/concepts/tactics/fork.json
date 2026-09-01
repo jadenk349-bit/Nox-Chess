@@ -48,7 +48,7 @@
       "The defender has a check or a stronger counter-threat available first"
     ],
     "prerequisites": [],
-    "detector": "attacksAfterMove",
+    "detector": "findMotifs -> fork",
     "detectability": "mechanical",
     "typical_confidence": "medium",
     "false_positive_traps": []
@@ -220,11 +220,12 @@
   },
   "status": {
     "stage": "validated",
-    "last_updated": "2026-08-31",
+    "last_updated": "2026-09-01",
     "open_questions": [],
     "audit_notes": [
       "2026-09-01 audit: removed the alias 'double attack (by a single piece)', which collided with the canonical name of the `double-attack` record and read as a claim that the two are one concept. Added broader: double-attack instead, which is the actual relationship. Added by_depth.",
-      "2026-09-01 audit: flagged for being promoted while relying on a source carrying an access caveat. REVIEWED AND ACCEPTED — the promotion rests on ENGINE evidence, not on the unread text; the unread source supplies the concept's name and classification only. The caveat stands and is the reason this is not promoted further to 'ready'."
+      "2026-09-01 audit: flagged for being promoted while relying on a source carrying an access caveat. REVIEWED AND ACCEPTED — the promotion rests on ENGINE evidence, not on the unread text; the unread source supplies the concept's name and classification only. The caveat stands and is the reason this is not promoted further to 'ready'.",
+      "2026-09-01: detector field named 'attacksAfterMove', which does not exist anywhere in the codebase. The audit's hardcoded whitelist had been accepting it. Repointed at real code, or marked as proposed where nothing implements it."
     ]
   }
 }

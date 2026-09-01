@@ -1,0 +1,229 @@
+{
+  "schema_version": 2,
+  "alternate_names": [
+    "combinative play"
+  ],
+  "historical_names": [],
+  "tags": [
+    "tactics",
+    "disputed",
+    "history"
+  ],
+  "subcategory": "tactics",
+  "difficulty": "intermediate",
+  "knowledge_type_note": "Marked contested because the definition itself is the disputed thing. Forty years of argument among named authorities produced no consensus, and one of them publicly changed his mind twice.",
+  "name_status": "contested",
+  "history": {
+    "attributions": [
+      {
+        "relation": "originated-by",
+        "person": "Emanuel Lasker",
+        "year": null,
+        "note": "The earliest of the formulations consulted here, treating a combination as a net of forcing variations with no sacrifice requirement.",
+        "confidence": "medium"
+      },
+      {
+        "relation": "systematized-by",
+        "person": "Peter Romanovsky",
+        "year": 1929,
+        "note": "Mittelshpiel; the definition the 1964 Chess Dictionary followed.",
+        "confidence": "medium"
+      },
+      {
+        "relation": "named-by",
+        "person": "Mikhail Botvinnik",
+        "year": 1939,
+        "note": "The sacrifice requirement, and the explicit contrast with a forced manoeuvre.",
+        "confidence": "high"
+      },
+      {
+        "relation": "later-associated-with",
+        "person": "Yuri Averbakh",
+        "year": 1980,
+        "note": "Argued FOR the sacrifice requirement in 1976 and AGAINST it in 1980, proposing a definition based on transformed relationships between pieces.",
+        "confidence": "medium"
+      }
+    ],
+    "first_documented_source": "botvinnik-what-is-a-combination",
+    "year": 1939,
+    "confidence": "disputed",
+    "notes": "A genuinely unsettled definition, and unusually well documented as such. A formal discussion in Chess in the USSR in 1952 produced no consensus and its results were never summarised. Both primary texts here are known through secondary accounts; two independent sources were consulted and their quotations agree.",
+    "competing_claims": [
+      {
+        "claim": "a forced variation WITH a sacrifice",
+        "source": "botvinnik-what-is-a-combination",
+        "note": "Botvinnik 1939; the majority view from the mid-1960s"
+      },
+      {
+        "claim": "a forced variation ending in an objective advantage, sacrifice not required",
+        "source": "romanovsky-mittelshpiel",
+        "note": "Romanovsky 1929; basis of the 1964 Chess Dictionary entry"
+      },
+      {
+        "claim": "a net of forcing variations, structure rather than sacrifice",
+        "source": "weeks-combinations",
+        "note": "Lasker's Manual of Chess"
+      },
+      {
+        "claim": "sacrifice likely but not definitional; surprise is essential",
+        "source": "hooper-whyld-oxford-companion",
+        "note": "Oxford Companion, which reports the disagreement rather than resolving it"
+      }
+    ],
+    "development": [
+      {
+        "period": "1929",
+        "note": "Romanovsky defines it without a sacrifice requirement."
+      },
+      {
+        "period": "1939",
+        "note": "Botvinnik introduces the sacrifice requirement and the contrast with a manoeuvre."
+      },
+      {
+        "period": "1952",
+        "note": "Chess in the USSR runs a discussion that reaches no consensus."
+      },
+      {
+        "period": "1964-1976",
+        "note": "The dictionary follows Romanovsky; opinion then swings to Botvinnik after Bondarevsky (1965)."
+      },
+      {
+        "period": "1980",
+        "note": "Averbakh reverses his own earlier position and argues the sacrifice requirement is too narrow."
+      }
+    ]
+  },
+  "engine_era_status": "useful-with-common-exceptions",
+  "engine_era_note": "Engines find forcing sequences without needing the category at all, which is part of why the definitional argument has gone quiet rather than been settled. What the engine era did change is the standing of individual famous combinations, many of which turn out to have been unsound and to have worked because the defence was hard rather than impossible.",
+  "recognition": {
+    "preconditions": [
+      "A forcing sequence exists",
+      "It has an identifiable goal"
+    ],
+    "indicators_for": [
+      "The opponent's replies are compelled at every step",
+      "Material is offered as part of the sequence",
+      "The resulting position is materially or positionally decided"
+    ],
+    "indicators_against": [
+      "The opponent has real choices at some point, which makes it a plan rather than a combination"
+    ],
+    "prerequisites": [
+      "forcing-moves",
+      "sacrifice"
+    ],
+    "detector": null,
+    "detectability": "heuristic",
+    "typical_confidence": "low",
+    "false_positive_traps": [
+      "Whether a sacrifice is REQUIRED is contested by named authorities, so this system must not assert either version as the definition.",
+      "A forcing sequence without a sacrifice is a manoeuvre on Botvinnik's account and a combination on Romanovsky's. Reporting it either way takes a side in an open argument.",
+      "Length and forcing-ness do not make a combination; there has to be a goal it reaches."
+    ]
+  },
+  "application": {
+    "typical_plans": [
+      "Look for combinations only when a concrete advantage already exists",
+      "Search forcing moves first, since a combination is by definition made of them"
+    ],
+    "typical_moves": [],
+    "typical_pawn_structures": [],
+    "typical_piece_arrangements": [],
+    "tactical_consequences": [
+      "The point of the sequence is realised by force rather than by agreement"
+    ],
+    "strategic_consequences": [
+      "Lasker's dictum ties combinations to a pre-existing advantage: no combination without a considerable plus"
+    ]
+  },
+  "exceptions": [
+    "On Botvinnik's definition a forcing line with no sacrifice is a manoeuvre and not a combination at all."
+  ],
+  "limitations": [
+    "This base does not detect combinations. It detects motifs, which are their components.",
+    "Both primary definitions were consulted through secondary accounts rather than in the original."
+  ],
+  "misconceptions": [
+    "That 'combination' has an agreed definition. It has at least four, from named authorities, and a formal 1952 discussion failed to reconcile them.",
+    "That a combination must sacrifice. That is Botvinnik's position, and Romanovsky's, Lasker's and Averbakh's later view all disagree."
+  ],
+  "relationships": {
+    "broader": [],
+    "narrower": [
+      "fork",
+      "pin",
+      "skewer",
+      "discovered-attack",
+      "deflection",
+      "decoy"
+    ],
+    "related": [
+      "forcing-moves",
+      "sacrifice",
+      "calculation",
+      "positional-evaluation",
+      "zwischenzug"
+    ],
+    "contrasting": [
+      "positional-sacrifice"
+    ],
+    "co_occurring": [
+      "forcing-moves"
+    ],
+    "conflicts": []
+  },
+  "examples": [],
+  "counterexamples": [],
+  "ambiguous_examples": [],
+  "explanations": {
+    "by_level": {
+      "beginner": "A forced sequence of moves that achieves something concrete — often starting with a sacrifice.",
+      "intermediate": "A combination. Note that whether it must involve a sacrifice is genuinely disputed among strong authorities.",
+      "advanced": "Botvinnik: a forced variation with a sacrifice, and a forced variation without one is a manoeuvre. Romanovsky and Lasker did not require the sacrifice.",
+      "master": "A 1952 discussion in Chess in the USSR failed to settle it, and Averbakh argued both sides four years apart."
+    },
+    "by_depth": {
+      "short": "A forced sequence of moves with a concrete goal.",
+      "normal": "A combination: a forcing sequence with a specific goal, grounded in tactics. Whether it must contain a sacrifice is contested — Botvinnik said always, Romanovsky and Lasker did not require one, and the Oxford Companion reports the disagreement rather than settling it.",
+      "deep": "One of the few places where the definition is itself the open question. Botvinnik's 1939 formulation - a forced variation with a sacrifice, as against a forced manoeuvre without one - became the majority view from the mid-1960s, but Romanovsky had defined it in 1929 without any sacrifice requirement, Lasker treated it as a net of forcing variations, and the Oxford Companion adds surprise as the essential property while explicitly declining to settle the sacrifice question. A formal discussion in Chess in the USSR in 1952 reached no consensus and was never summarised, and Averbakh argued for the sacrifice requirement in 1976 and against it in 1980. What every version agrees on is that the sequence is forcing and has a goal."
+    },
+    "hedge": "The definition is contested among named authorities and this base adopts none of them; only 'forcing' and 'has a goal' are common to every version.",
+    "lesson": "Everyone agrees a combination is forcing and gets somewhere. Whether it must give something up has been argued for eighty years."
+  },
+  "terminology": {
+    "beginner_words": [
+      "a forced sequence that wins something"
+    ],
+    "advanced_words": [
+      "combination",
+      "forced variation",
+      "manoeuvre",
+      "surprise"
+    ],
+    "avoid": [
+      "a combination always involves a sacrifice",
+      "by definition a combination"
+    ]
+  },
+  "status": {
+    "stage": "researched",
+    "last_updated": "2026-09-01",
+    "open_questions": [],
+    "audit_notes": []
+  },
+  "id": "tactical-combinations",
+  "canonical_name": "Combination",
+  "category": "tactical-combinations",
+  "knowledge_type": "terminology",
+  "definition_short": "A forced sequence of moves with a specific goal — and, according to some authorities but not others, necessarily involving a sacrifice.",
+  "definition_long": "One of the few concepts in this base where the DEFINITION is the open question, and the argument is documented well enough to record properly.\n\nBOTVINNIK (1939), in Chess in the USSR and later as an appendix to One Hundred Selected Games: 'A combination is a forced variation with sacrifice.' He drew the line explicitly — 'a forced manoeuvre is a forced variation WITHOUT sacrifice' — and illustrated it with two of his own endgame examples, calling the one with a two-pawn sacrifice a combination and the one without a manoeuvre.\n\nROMANOVSKY (Mittelshpiel, 1929), earlier and without the sacrifice requirement: 'a variation (or group of variations) during which both sides make forced moves and which ends with an objective advantage for the active side.'\n\nLASKER, earlier still, treats it as a net of variations: where a player can find a forcing line to a desirable outcome, 'the totality of these variations and their logical connections, their structure, are named a combination'.\n\nHOOPER AND WHYLD, in the Oxford Companion, decline to settle it and say so: 'a sequence of forcing moves with a specific goal, and grounded in tactics. A sacrifice is LIKELY to be present and Botvinnik, among others, says is ALWAYS present.' They add the property the others leave out — SURPRISE, the line differing in form from what would normally be expected.\n\nTHE ARGUMENT HAS A HISTORY AND NO ENDING. Chess in the USSR ran a formal discussion in 1952 that reached no consensus and whose results were never summarised. The 1964 Chess Dictionary followed Romanovsky. Opinion swung to Botvinnik after Bondarevsky's Combinations in the Middlegame (1965) — Kotov switched sides by 1975, and Averbakh and Beilin wrote in 1976 that sacrifices made for an advantage simply ARE combinations. Then in 1980 Averbakh reversed himself, arguing the sacrifice requirement was too narrow and proposing a definition based on the transformation of relationships between pieces instead.\n\nTHIS BASE ADOPTS NONE OF THEM. What all versions agree on is FORCING and a GOAL, so those are what the record treats as the concept; the sacrifice requirement is recorded as contested.",
+  "sources": [
+    "botvinnik-what-is-a-combination",
+    "romanovsky-mittelshpiel",
+    "hooper-whyld-oxford-companion",
+    "chesswatch-what-is-a-combination",
+    "weeks-combinations",
+    "informant-encyclopedia-combinations"
+  ],
+  "source_confidence": "high"
+}
