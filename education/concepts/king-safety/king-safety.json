@@ -113,7 +113,8 @@
     "Judgement, not measurement, at the human level — though Stockfish's scheme is a usable specification for a detector.",
     "The attacker/defender count is an alarm, not a verdict; it tells you when calculation is worth starting.",
     "The static arm reports EXPOSURE, never danger, and the difference is the whole of the concept's registered false positive. Adams-Kasparov 2005 after 21...Kxh7 is the measured case: Black's king has no pawn in front of it at all and exactly ONE enemy piece bearing on its zone, and Black is winning by two pawns of evaluation. Anything that turns the first fact into a verdict is wrong.",
-    "It cannot see the thing that decides such positions, which is who mates first. That is a property of the concrete lines and this base does not calculate."
+    "It cannot see the thing that decides such positions, which is who mates first. That is a property of the concrete lines and this base does not calculate.",
+    "MEASURED 2026-09-02: the trap 'castling does not establish safety and failing to castle does not establish danger. A closed centre changes both' is honoured by never testing castling at all. The three arms count attackers and defenders of the king zone and read the shield pawns; the word 'castled' appears nowhere in the matcher, and an uncastled king in a closed position produces no report."
   ],
   "misconceptions": [
     "That castling makes the king safe.",

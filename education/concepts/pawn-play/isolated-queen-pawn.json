@@ -121,7 +121,8 @@
     "In some structures the isolated pawn is an asset even in the endgame, if it cramps the opponent and cannot be won."
   ],
   "limitations": [
-    "Detecting the structure is mechanical; nothing about the evaluation follows from it without counting the remaining pieces."
+    "Detecting the structure is mechanical; nothing about the evaluation follows from it without counting the remaining pieces.",
+    "MEASURED 2026-09-02, on the two traps about interpretation rather than detection: 'the structure is trivially detectable and says almost nothing on its own - the material left on the board decides the evaluation more than the structure does', and 'reporting it as a weakness while its owner has the initiative inverts the position'. Neither is answerable by a static feature, and neither has to be: this base never calls an isolated queen's pawn a weakness. The sentence reports the structure and the wording layer supplies the record's two-sided reading - space and two half-open files in the middlegame, a target in the endgame - and test_explanations.js forbids the word."
   ],
   "misconceptions": [
     "That an IQP is a weakness. It is a weakness in the endgame and often an asset in the middlegame.",

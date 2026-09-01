@@ -1307,10 +1307,17 @@ const { concepts } = API.knowledge();
   ok('luft: "adequately defended" is recorded as unbuildable, with the number',
      (luftRec.limitations || []).some(l => /36 of the 39/.test(l)));
 
-  // ...and the trap reading list has gone down, not up.
+  // ...and the trap reading list reports THREE numbers, not one. "Noted on the
+  // record" means somebody argued a trap cannot be built or is honoured
+  // elsewhere; that is honest work and is not a guard in the code. A single
+  // "all cited" headline would read as "all traps implemented", which is the
+  // self-flattery this tool caught in its own first version.
   const traps = fs.readFileSync(path.join(ROOT, 'state', 'TRAPS.md'), 'utf8');
-  const m = traps.match(/\*\*(\d+) of (\d+) cited\. (\d+) unread\.\*\*/);
-  ok('trap list: fewer than 30 unread', m && Number(m[3]) < 30, m && m[0]);
+  ok('trap list: reports enforced, Layer 3, noted and unread separately',
+     /enforced in the matcher/.test(traps) && /in Layer 3/.test(traps) &&
+     /argued on the\s+record to be unbuildable/.test(traps) && /unread/.test(traps));
+  ok('trap list: says plainly that "noted" is not a guard',
+     /is an argument, not a guard/.test(traps));
 }
 
 {
@@ -1343,6 +1350,37 @@ const { concepts } = API.knowledge();
      /spare pawn tempo and can hand it straight back/.test(String(tempo)), String(tempo));
   ok('...and the claim drops to low confidence when it does',
      /^low:/.test(String(tempo)), String(tempo));
+}
+
+{
+  // king-activation's most important trap, on the testimony of the principle's
+  // own advocate: "the single most important trap is ROOK ENDINGS. Shereshevsky
+  // found centralisation there to be not merely untimely but sometimes simply
+  // wrong, and warns against automatic centralising moves."
+  const ka = fen => {
+    const c = API.analyzeWithEducation({ fen }).concepts.find(x => x.id === 'king-activation');
+    return c ? { conf: c.confidence, line: (c.because || [''])[0] } : null;
+  };
+  const rook = ka('8/5p2/4k3/8/4K3/8/5R2/6r1 w - - 0 1');
+  ok('king-activation: a rook ending carries the warning',
+     /this is a ROOK ending/.test(String(rook && rook.line)), String(rook && rook.line));
+  ok('...and the confidence stays, because that is not the doubt being expressed',
+     rook && rook.conf === 'medium', String(rook && rook.conf));
+  const minor = ka('8/5p2/4k3/8/4K3/8/5N2/8 w - - 0 1');
+  ok('king-activation: a minor-piece ending says the plain thing',
+     minor && !/ROOK ending/.test(minor.line), String(minor && minor.line));
+
+  // Both stronger answers were tried and both are wrong. Refusing the concept
+  // deletes the corpus's own annotated instance — Capablanca–Tartakower 1924,
+  // the most famous king march in a rook ending in the literature.
+  const corpus = JSON.parse(fs.readFileSync(
+    path.join(ROOT, 'corpus', 'annotated_positions.json'), 'utf8')).positions;
+  const ct = corpus.find(p => p.id === 'capablanca-tartakower-1924-35Kg3-king-activation');
+  const said = ka(ct.fen);
+  ok('king-activation: Capablanca–Tartakower is still reported, and not downgraded',
+     said && said.conf === 'medium', JSON.stringify(said));
+  ok('...and the human said high, so the system is not overclaiming either',
+     ct.confidence === 'high');
 }
 
 /* ---------- report ---------- */

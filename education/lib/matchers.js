@@ -1571,9 +1571,36 @@ const STRUCTURAL = [
       const hits = [];
       for (const c of ['w', 'b']) if (f.king[c] && !f.king[c].onHomeRank) hits.push(c);
       if (!hits.length) return null;
+      // "The single most important trap is ROOK ENDINGS, on the testimony of the
+      // principle's own advocate: Shereshevsky found centralisation there to be
+      // not merely untimely but sometimes simply wrong, and warns against
+      // automatic centralising moves." His own example is 1...Ke5? losing to
+      // 2.Rd5+ while the retreat 1...Kc5! draws - which is the second trap, that
+      // the move still has to survive checks, and no static scan can run that.
+      //
+      // A rook ending therefore gets the WARNING, not a lower confidence. Both
+      // stronger answers were tried and both are wrong. Refusing the concept
+      // deletes Capablanca-Tartakower 1924, which is the single most famous king
+      // march in a rook ending in the literature and this corpus's own annotated
+      // instance; and downgrading to low confidence says "we are not sure the
+      // king is off its back rank", which is not the doubt Shereshevsky is
+      // expressing. He warns against centralising AUTOMATICALLY, so the sentence
+      // carries the warning and the confidence stays. Third time today that
+      // saying more has been the right answer to a trap where firing less was
+      // the tempting one. 33 of the 122 positions this fires on are rook
+      // endings.
+      const rooks = f.material.w.counts.R + f.material.b.counts.R;
+      const minors = f.material.w.counts.N + f.material.w.counts.B +
+                     f.material.b.counts.N + f.material.b.counts.B;
+      const rookEnding = rooks > 0 && minors === 0;
       return {
         confidence: 'medium',
-        because: hits.map(c => `${side(f, c)}'s king has come off its back rank to ${f.king[c].square}, which is where it belongs in an endgame`),
+        because: hits.map(c => `${side(f, c)}'s king has come off its back rank to ${f.king[c].square}, ` +
+                 (rookEnding
+                   ? 'which is where it belongs in most endgames — but this is a ROOK ending, where ' +
+                     'the advocate of the principle warns against centralising automatically, and ' +
+                     'where the move has to survive checks first'
+                   : 'which is where it belongs in an endgame')),
         subjects: hits,
       };
     },

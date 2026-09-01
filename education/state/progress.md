@@ -1357,3 +1357,30 @@ the commonest reason a king that "has the opposition" has nothing.
 **89 of 108 traps cited, 19 unread**, and what remains is mostly traps about
 judgement that no static feature answers — which is the useful thing to have
 established about them.
+
+
+## The reading list reaches zero, and the headline had to be split
+
+Every one of the **108** false-positive traps stated across 34 concept records
+has now been read against the matcher meant to implement it. The split matters
+more than the total: **66 enforced in the matcher, 14 in Layer 3, 28 argued on
+the record** to be unbuildable or already honoured elsewhere.
+
+A single "108/108 cited" headline would read as "all traps implemented", which is
+the same self-flattery this tool caught in its own first version — so it prints
+three numbers, and the artifact says in as many words that *noted is an argument,
+not a guard*.
+
+The last of them is the best. `king-activation`'s most important trap comes from
+the principle's own advocate: *"the single most important trap is rook endings.
+Shereshevsky found centralisation there to be not merely untimely but sometimes
+simply wrong."* Both stronger answers were tried and both are wrong — refusing
+the concept in rook endings deletes Capablanca–Tartakower 1924, this corpus's own
+annotated instance and the most famous king march in a rook ending in the
+literature; and downgrading to low confidence says "we are not sure the king is
+off its back rank", which is not the doubt being expressed. He warns against
+centralising *automatically*, so the sentence carries the warning and the
+confidence stays.
+
+Third time today that saying more was the right answer where firing less was the
+tempting one.

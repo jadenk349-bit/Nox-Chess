@@ -101,7 +101,9 @@
   ],
   "limitations": [
     "Whether a particular king move is right remains a concrete question; the principle says where the king belongs, not whether this move gets it there safely.",
-    "This base's attempts to build a controlled pair isolating king activity in rook endings FAILED twice - see the concept's audit notes - which is itself consistent with Shereshevsky's finding."
+    "This base's attempts to build a controlled pair isolating king activity in rook endings FAILED twice - see the concept's audit notes - which is itself consistent with Shereshevsky's finding.",
+    "MEASURED 2026-09-02: the first trap - 'the single most important trap is ROOK ENDINGS... Shereshevsky found centralisation there to be not merely untimely but sometimes simply wrong, and warns against automatic centralising moves' - is now carried in the sentence, which names the rook ending and the warning. Both stronger answers were tried and both are wrong: refusing the concept in rook endings deletes Capablanca-Tartakower 1924, this corpus's own annotated instance and the most famous king march in a rook ending in the literature; and downgrading to low confidence says 'we are not sure the king is off its back rank', which is not the doubt Shereshevsky is expressing. He warns against centralising AUTOMATICALLY. 33 of the 122 positions this fires on are rook endings.",
+    "MEASURED 2026-09-02: the third trap - 'centralisation with queens still on is a different matter entirely and this concept does not apply' - is enforced by the phase gate rather than by a separate test, and it is the same mechanism as the fourth: phaseOf() returns 'endgame' only when there are NO queens on the board, so a queens-on position never reaches this matcher at all."
   ],
   "misconceptions": [
     "That the king should be kept safe in the endgame as it is earlier. The change in the king's role is what defines the phase.",

@@ -13,7 +13,13 @@ implemented; that is a reading, and doing it is the work. What it can do is
 stop the list being rediscovered from scratch each time — and every one of
 the defects listed in the tool's header was unread before it was looked at.
 
-**89 of 108 cited. 19 unread.**
+**Of 108 stated traps: 66 enforced in the matcher, 14 in Layer 3, 28 argued on the record to be unbuildable or already honoured elsewhere, 0 unread.**
+
+"Noted on the record" is an argument, not a guard. A single "all cited"
+headline would read as "all traps implemented", which would be the same
+self-flattery this tool caught in its own first version — it scored keyword
+overlap, reported 75 unread, and then credited 40 traps at a stroke when a
+shared file was added to the search. The test is quotation for that reason.
 
 ## doubled-pawns
 
@@ -23,8 +29,8 @@ the defects listed in the tool's header was unread before it was looked at.
 ## isolated-queen-pawn
 
 - [cited] REGISTERED FALSE POSITIVE: an isolated pawn is not automatically a weakness. In the middlegame it is frequently the source of the better side's whole game.
-- [**unread**] The structure is trivially detectable and says almost nothing on its own — the material left on the board decides the evaluation more than the structure does.
-- [**unread**] Reporting it as a weakness while its owner has the initiative inverts the position.
+- [noted] The structure is trivially detectable and says almost nothing on its own — the material left on the board decides the evaluation more than the structure does.
+- [noted] Reporting it as a weakness while its owner has the initiative inverts the position.
 - [cited] An isolated queen's pawn is not a weakness on sight. In the standard position measured here the side with the isolani is slightly better (+0.14).
 ## passed-pawn
 
@@ -43,7 +49,7 @@ the defects listed in the tool's header was unread before it was looked at.
 - [cited] REGISTERED FALSE POSITIVE: a file with no pawns is not automatically useful. Without an entry square, a rook on it accomplishes nothing.
 - [cited] Detecting 'no pawns on this file' is trivial and fires constantly. The reportable fact is the file PLUS a usable entry square.
 - [cited] Contested files where all rooks come off leave neither side with anything.
-- [**unread**] An open file is not an advantage on its own. In a proven test position with a rook of each colour on the open d-file, the evaluation is +0.02 - the file belongs to nobody.
+- [noted] An open file is not an advantage on its own. In a proven test position with a rook of each colour on the open d-file, the evaluation is +0.02 - the file belongs to nobody.
 ## semi-open-file
 
 - [cited] A semi-open file is a fact about pawns; whether it produces pressure depends on whether the target is fixed and whether you can attack it more times than it can be defended.
@@ -53,7 +59,7 @@ the defects listed in the tool's header was unread before it was looked at.
 - [layer 3] A knight on d5 is not an outpost merely because it is on d5. If ...c6 or ...e6 is available, the knight is visiting.
 - [layer 3] A pawn-protected advanced square whose occupant can simply be exchanged is not an outpost in any useful sense — Romanovsky's condition fails.
 - [cited] A safe square that the piece does nothing from. Safety is a precondition, not the benefit.
-- [**unread**] In the engine test above, the archetypal 'outpost' move was second-best. Being a genuine outpost does not make occupying it the best move.
+- [noted] In the engine test above, the archetypal 'outpost' move was second-best. Being a genuine outpost does not make occupying it the best move.
 - [layer 3] A centralised advanced knight is not an outpost. If an enemy pawn can still challenge the square, the piece is visiting. The detector in lib/features.js checks this and correctly refuses in the recorded counterexample.
 ## weak-square
 
@@ -68,7 +74,7 @@ the defects listed in the tool's header was unread before it was looked at.
 ## hanging-pawns
 
 - [layer 3] Hanging pawns are not automatically weak. The structure is dynamic, and the same pair that loses one game wins the next depending on where the pieces are.
-- [**unread**] Do not assess them as an isolated pawn. They defend the squares in front of one another and the pair advancing is a genuine threat.
+- [noted] Do not assess them as an isolated pawn. They defend the squares in front of one another and the pair advancing is a genuine threat.
 - [noted] The detector finds the STRUCTURE. Whether it is an asset needs the piece placement, which the detector does not read.
 ## two-weaknesses
 
@@ -76,7 +82,7 @@ the defects listed in the tool's header was unread before it was looked at.
 - [cited] Any position has several imperfections. Calling any two of them 'two weaknesses' is the commonest misuse — they must require DIFFERENT defensive resources and be far enough apart that the defence cannot cover both.
 - [noted] The principle describes a method of conversion, not an evaluation. A position with two weaknesses is not thereby winning, and Kotov-Pachman shows the gap: the moves annotators mark necessary and inaccurate differ by 0.05 pawns.
 - [cited] Against opposite-coloured bishops or a reachable fortress, the count of weaknesses is simply not the operative variable.
-- [**unread**] A pawn that is structurally weak can be the position's KEY DEFENSIVE ASSET, and no pawn-skeleton test tells the two apart. Shirov-Kramnik, Linares 2000, move 20: this base lists Black's f4 among the weaknesses White should play against, and Jan Markos calls the same pawn, together with b4, the cage that 'guards all the roads to d5'. Both readings follow from the skeleton and only one is true of the position.
+- [noted] A pawn that is structurally weak can be the position's KEY DEFENSIVE ASSET, and no pawn-skeleton test tells the two apart. Shirov-Kramnik, Linares 2000, move 20: this base lists Black's f4 among the weaknesses White should play against, and Jan Markos calls the same pawn, together with b4, the cage that 'guards all the roads to d5'. Both readings follow from the skeleton and only one is true of the position.
 ## bad-bishop
 
 - [cited] REGISTERED FALSE POSITIVE: a bishop behind its own pawns is not automatically bad in the sense that matters. Suba's active bad bishop is the counterexample, and it is common, not exotic.
@@ -85,8 +91,8 @@ the defects listed in the tool's header was unread before it was looked at.
 ## opposite-coloured-bishops
 
 - [cited] The drawish reputation is an ENDGAME fact. In the middlegame with heavy pieces on, opposite-coloured bishops favour the attacker, because the bishop operates where the defender's cannot answer. Announcing 'opposite bishops, drawn' with queens on the board is the standard error.
-- [**unread**] Detecting the material is trivial; whether a blockade is achievable is not.
-- [**unread**] Two extra pawns are often not enough — but three files of separation often are. The count of pawns is the wrong variable; their separation and the blockade are the right ones.
+- [noted] Detecting the material is trivial; whether a blockade is achievable is not.
+- [noted] Two extra pawns are often not enough — but three files of separation often are. The count of pawns is the wrong variable; their separation and the blockade are the right ones.
 ## rook-on-the-seventh
 
 - [cited] REGISTERED FALSE POSITIVE: a rook arriving on the seventh is not automatically important. With the pawns advanced and the king free, it attacks nothing and confines nobody.
@@ -111,8 +117,8 @@ the defects listed in the tool's header was unread before it was looked at.
 ## piece-activity
 
 - [cited] Counting available squares is not measuring activity. A piece with many moves that bear on nothing is not active.
-- [**unread**] Active pieces do not guarantee compensation. The Halloween Gambit position in this base has genuinely active pieces and evaluates 1.75 worse.
-- [**unread**] Activity is generally a temporary advantage and must be converted; reporting it as though it were permanent overstates it.
+- [noted] Active pieces do not guarantee compensation. The Halloween Gambit position in this base has genuinely active pieces and evaluates 1.75 worse.
+- [noted] Activity is generally a temporary advantage and must be converted; reporting it as though it were permanent overstates it.
 ## pawn-breakthrough
 
 - [cited] A pawn sacrifice that creates a passer is not a breakthrough unless the passer actually cannot be stopped. The rule of the square decides this and is cheap to check.
@@ -120,7 +126,7 @@ the defects listed in the tool's header was unread before it was looked at.
 ## king-safety
 
 - [cited] REGISTERED FALSE POSITIVE: an exposed king is not automatically losing. With the attacking pieces traded off, an exposed king is often simply an active one — and in the endgame that is the goal.
-- [**unread**] Castling does not establish safety and failing to castle does not establish danger. A closed centre changes both.
+- [noted] Castling does not establish safety and failing to castle does not establish danger. A closed centre changes both.
 - [cited] Counting attacking pieces linearly overstates one or two and understates four. The relationship is S-shaped, and it is not worth reporting an attack below three attackers.
 - [cited] A pawn move near the king is not automatically a weakening — h3 in a quiet position is useful luft; the same move against a queenside-castled opponent is a hook.
 - [cited] An exposed king is not a losing king. In a proven drawn ending both kings stand in the open with no pawn shelter, and centralising them is correct - see the recorded counterexample.
@@ -132,7 +138,7 @@ the defects listed in the tool's header was unread before it was looked at.
 ## center-control
 
 - [cited] Counting pawns on central squares measures occupation, not control. A fianchettoed bishop controls e4 without standing anywhere near it.
-- [**unread**] A big pawn centre is not automatically an advantage. Whether it is an asset or a target is a question of timing and support, and that cannot be read off the structure.
+- [noted] A big pawn centre is not automatically an advantage. Whether it is an asset or a target is a question of timing and support, and that cannot be read off the structure.
 - [layer 3] Central pieces are only strong while they cannot be kicked; a piece on a central square a pawn can attack is visiting.
 - [layer 3] A rook or queen whose line to a central square runs through one of its own men counts as an attacker and should not be read as a piece fighting for the square. The move-based arm measures pawns and minors for this reason.
 ## blockade
@@ -149,12 +155,12 @@ the defects listed in the tool's header was unread before it was looked at.
 ## wrong-rook-pawn
 
 - [cited] Being in front of the pawn is NOT enough, unlike king-and-pawn endings. The defending king must reach the corner or the square beside it — Mednis gives a position where the same setup wins with White to move and draws with Black to move.
-- [**unread**] A second pawn on a different file usually changes the verdict entirely.
+- [noted] A second pawn on a different file usually changes the verdict entirely.
 - [cited] The bishop's colour relative to the CORNER is what matters, not its current square.
 ## opposition
 
 - [cited] Kings facing each other is trivially detectable and means nothing outside endgames where king penetration decides.
-- [**unread**] Taking the opposition is not always correct. In some positions the king should ignore it and head for a key square directly — this is Averbakh's corrective and it is the standard error.
+- [noted] Taking the opposition is not always correct. In some positions the king should ignore it and head for a key square directly — this is Averbakh's corrective and it is the standard error.
 - [cited] A spare pawn tempo makes the opposition irrelevant, since it can simply be handed back.
 ## loose-piece
 
@@ -162,9 +168,9 @@ the defects listed in the tool's header was unread before it was looked at.
 - [cited] It only matters when a forcing move can reach it. A loose rook in a locked position is not a weakness.
 ## king-activation
 
-- [**unread**] The single most important trap is rook endings, on the testimony of the principle's own advocate: Shereshevsky found centralisation there to be not merely untimely but sometimes simply wrong, and warns against automatic centralising moves.
-- [**unread**] A king moving towards the centre is not automatically doing the right thing; the move still has to survive checks. His example has 1...Ke5? losing to 2.Rd5+ while the retreat 1...Kc5! draws.
-- [**unread**] Centralisation with queens still on is a different matter entirely and this concept does not apply.
+- [cited] The single most important trap is rook endings, on the testimony of the principle's own advocate: Shereshevsky found centralisation there to be not merely untimely but sometimes simply wrong, and warns against automatic centralising moves.
+- [cited] A king moving towards the centre is not automatically doing the right thing; the move still has to survive checks. His example has 1...Ke5? losing to 2.Rd5+ while the retreat 1...Kc5! draws.
+- [noted] Centralisation with queens still on is a different matter entirely and this concept does not apply.
 - [cited] Never recommend centralising a king while the opponent has a queen, whatever the piece count says. The phase test in lib/features.js is material-based and can call a queens-on position an endgame.
 ## pawn-break
 
@@ -185,9 +191,9 @@ the defects listed in the tool's header was unread before it was looked at.
 
 - [cited] THE MAIN ONE: a rook given up inside a forced mating line is a mating sacrifice, not a positional exchange sacrifice, even though the material given is identical. The engine test on puzzle mi-bb512d9713 in this record is exactly that case — tagged exchangeSacrifice, actually mate in 2.
 - [noted] Detecting 'rook for minor piece' is mechanical; deciding it was POSITIONAL requires that no forced return exists, which the material test cannot see.
-- [**unread**] In an open position with files for the rooks, the same trade can simply be bad.
+- [noted] In an open position with files for the rooks, the same trade can simply be bad.
 ## worst-placed-piece
 
-- [**unread**] The rule's precondition is the load-bearing part and is usually dropped in quotation. Anderssen says 'unless you can derive immediate advantage by an attack' and Makogonov says 'in positions where no other important matters need to be considered'. Without those, it is not the rule they stated.
+- [noted] The rule's precondition is the load-bearing part and is usually dropped in quotation. Anderssen says 'unless you can derive immediate advantage by an attack' and Makogonov says 'in positions where no other important matters need to be considered'. Without those, it is not the rule they stated.
 - [cited] Improving pieces while the opponent builds an initiative produces individually reasonable moves and a collectively lost position. This is the commonest way the rule is misapplied.
 - [cited] Identifying the worst piece is a judgement, not a measurement. This system has no reliable detector for it and must not claim one.

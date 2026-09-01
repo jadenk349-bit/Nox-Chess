@@ -125,8 +125,17 @@ for (const r of show) {
             : r.verdict === 'in Layer 3' ? 'layer3' : 'noted ';
   console.log(`    [${tag}] ${r.trap.replace(/\s+/g, ' ').slice(0, 150)}${r.trap.length > 150 ? '…' : ''}`);
 }
-console.log(`\n  cited ${rows.length - open.length}/${rows.length}   UNREAD ${open.length}` +
-            `   (${new Set(open.map(r => r.concept)).size} matchers)\n`);
+// THREE numbers, not one, and the reason is the reason for everything else in
+// this project. "Noted" means somebody argued on the record that a trap cannot
+// be built or is already honoured elsewhere - which is honest work and is not
+// the same as a guard in the code. A single "108/108 cited" headline would read
+// as "all traps implemented", and that would be the same self-flattery this tool
+// caught in its own first version.
+const byVerdict = v => rows.filter(r => r.verdict === v).length;
+console.log(`\n  in the matcher ${byVerdict('in the matcher')}   in Layer 3 ${byVerdict('in Layer 3')}` +
+            `   noted on the record ${byVerdict('recorded as unbuildable')}   UNREAD ${open.length}` +
+            (open.length ? `   (${new Set(open.map(r => r.concept)).size} matchers)` : '') + '\n' +
+            `  ...of ${rows.length} stated traps. "Noted" is an argument, not a guard.\n`);
 
 if (mdOut) {
   const lines = ['# Trap audit', '',
@@ -141,7 +150,14 @@ if (mdOut) {
     'implemented; that is a reading, and doing it is the work. What it can do is',
     'stop the list being rediscovered from scratch each time — and every one of',
     'the defects listed in the tool\'s header was unread before it was looked at.', '',
-    `**${rows.length - open.length} of ${rows.length} cited. ${open.length} unread.**`, ''];
+    `**Of ${rows.length} stated traps: ${byVerdict('in the matcher')} enforced in the matcher, ` +
+    `${byVerdict('in Layer 3')} in Layer 3, ${byVerdict('recorded as unbuildable')} argued on the ` +
+    `record to be unbuildable or already honoured elsewhere, ${open.length} unread.**`, '',
+    '"Noted on the record" is an argument, not a guard. A single "all cited"',
+    'headline would read as "all traps implemented", which would be the same',
+    'self-flattery this tool caught in its own first version — it scored keyword',
+    'overlap, reported 75 unread, and then credited 40 traps at a stroke when a',
+    'shared file was added to the search. The test is quotation for that reason.', ''];
   let cur = null;
   for (const r of rows) {
     if (r.concept !== cur) { lines.push(`## ${r.concept}`, ''); cur = r.concept; }
