@@ -81,6 +81,11 @@ function fill(text, slots) {
 
 function wordFor(rec, level, depth, slots) {
   const ex = rec.explanations || {};
+  // The OBSERVATION wants the slot-filled, depth-appropriate text: it is the
+  // sentence that names the actual square. `level` is answered separately by
+  // levelWording() below, because the two axes are different questions - depth
+  // is how much to say, level is who is being told - and collapsing them into
+  // one lookup is what left `level` dead for the whole life of this API.
   const candidates = [
     depth && (ex.by_depth || {})[depth],
     level && (ex.by_level || {})[level],
@@ -95,6 +100,25 @@ function wordFor(rec, level, depth, slots) {
     return { text: filled, specific: SLOT.test(raw) };
   }
   return { text: null, specific: false };     // nothing this record offers is usable
+}
+
+/* The wording written FOR THIS READER, which is a different question from how
+ * much to say. Every record carries four of these and until this existed not
+ * one of them could reach anybody: `wordFor` tried by_depth first, every record
+ * has all three by_depth texts, so by_level was never reached. The API accepts
+ * `level`, the README documents it, tests/test_explanations.js says in a comment
+ * that "level must be able to" change the wording - and asking for master and
+ * for beginner returned the same sentence, on every position, for as long as
+ * the API has existed.
+ *
+ * It feeds the TEACHING half of the explanation rather than the observation,
+ * because the observation must name the square and these texts are general. */
+function levelWording(rec, level, slots) {
+  const byLevel = ((rec.explanations || {}).by_level) || {};
+  const raw = level && byLevel[level];
+  if (!raw) return null;
+  const filled = fill(raw, slots);
+  return SLOT.test(filled) ? null : filled;
 }
 
 /* Warnings that belong with a concept, strongest evidence first — so a caller
@@ -179,6 +203,7 @@ function analyzeWithEducation(opts) {
     const rec = concepts[m.concept];
     const cautions = cautionsFor(m.concept, warnings);
     const w = wordFor(rec, level, depth, m.slots);
+    const wLevel = levelWording(rec, level, m.slots);
     return {
       id: m.concept,
       name: rec.canonical_name,
@@ -195,6 +220,7 @@ function analyzeWithEducation(opts) {
       cautions: cautions.slice(0, 3),
       wording: w.text,
       wording_specific: w.specific,
+      wording_level: wLevel,
       wording_is_templated: SLOT.test(
         ((rec.explanations || {}).by_depth || {})[depth] ||
         ((rec.explanations || {}).by_level || {})[level] || ''),
@@ -296,11 +322,16 @@ function sentences(text) {
 /* The first sentence that says something about chess rather than about the
  * literature. Returns null if the whole passage is meta. */
 function teachingSentence(text) {
-  for (const s of sentences(text)) {
-    if (META.test(s)) continue;
-    if (s.length < 12) continue;
-    return s;
-  }
+  // Two passes, and the first one exists because the level-specific texts
+  // front-load a LABEL. The advanced wording for `outpost` opens with "Outpost
+  // in the modern sense." and the master wording with "Note which sense is
+  // meant." — both over the old twelve-character bar, both useless to a reader,
+  // and both were what a caller asking for advanced or master got as the whole
+  // teaching half. So prefer a sentence long enough to be teaching something,
+  // and fall back to the old rule only when the text has nothing longer.
+  const list = sentences(text).filter(x => !META.test(x));
+  for (const s of list) if (s.length >= 45) return s;
+  for (const s of list) if (s.length >= 12) return s;
   return null;
 }
 
@@ -342,8 +373,14 @@ function compose(features, moveInfo, concepts, assessment, level, depth) {
 
   // The teaching half, only where it adds to the observation.
   if (depth !== 'short') {
+    // Level first: this is the sentence written for THIS reader, and it is the
+    // only place the `level` parameter has ever been able to reach a reader.
     let teach = null;
-    if (lead.lesson && !restates(observation, lead.lesson)) teach = lead.lesson;
+    if (lead.wording_level && !restates(observation, lead.wording_level)) {
+      const t = teachingSentence(lead.wording_level) || lead.wording_level;
+      if (t && !restates(observation, t)) teach = t;
+    }
+    if (!teach && lead.lesson && !restates(observation, lead.lesson)) teach = lead.lesson;
     if (!teach && lead.wording && !lead.wording_specific) {
       const t = teachingSentence(lead.wording);
       if (t && !restates(observation, t)) teach = t;

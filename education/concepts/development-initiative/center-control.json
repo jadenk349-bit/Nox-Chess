@@ -216,6 +216,24 @@
         "verdict_note": "on the assessment, which is the claim being tested. Depth 22 gives -0.23 for Black across all three of its top moves, so neither the distant control nor the coming occupation is worth anything measurable yet. The move recorded here is the game's 9...e5, played a move later; it is recorded for what it shows about occupation, not as a recommendation. The move field is the plan Black carries out, not a move the engine was asked to rank in this position."
       },
       "attributed_by": "Raymond Keene (GM), The Spectator Australia — corpus entry reti-capablanca-1924-8d3-center-control-ambiguous"
+    },
+    {
+      "fen": "rnbqnrk1/ppp1ppbp/3p2p1/4P3/2PP1P2/2N1B3/PP4PP/R2QKBNR b KQ - 1 7",
+      "note": "Letelier-Fischer, Leipzig Olympiad 1960 (preliminaries), c5. Human ground truth: the concept is named for this position by WGM Raluca Sgircea and IM Renier Castellanos. Corpus entry `letelier-fischer-1960-7c5-center-control-ambiguous`. The position the literature uses to teach that the centre can be a target, and this base measures White's central control at seven attacks to two, leading on three of the four squares. Both readings are correct and that is the point of an ambiguous entry: the measurement is right, and the verdict everybody attaches to it is wrong. The engine calls the position level. Sixteen mo",
+      "origin_kind": "historical-game",
+      "game": "Letelier-Fischer, Leipzig Olympiad 1960 (preliminaries)",
+      "concept_role": "ambiguous",
+      "attributed_by": "WGM Raluca Sgircea and IM Renier Castellanos — corpus entry letelier-fischer-1960-7c5-center-control-ambiguous",
+      "engine": {
+        "engine_id": "Stockfish 18",
+        "test_level": 3,
+        "depth": 22,
+        "multipv": 3,
+        "best_move": "dxe5",
+        "eval_cp": -9,
+        "verdict": "ambiguous",
+        "verdict_note": "on the assessment, which is the whole claim: at depth 22 the position is level, -0.09 from Black's side, with White holding pawns on d4, e5, c4 and f4 and Black holding no central square at all. The game's 7...c5 is the engine's second choice, 0.17 behind 7...dxe5. An imposing centre worth nothing, measured. Any system that turns a central attacker count into an evaluation gets this position exactly backwards."
+      }
     }
   ],
   "explanations": {

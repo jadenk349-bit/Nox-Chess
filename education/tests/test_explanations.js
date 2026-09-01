@@ -93,10 +93,31 @@ for (const [label, fen] of CORPUS) {
   }
 }
 
-/* Depth must actually change the wording, and level must be able to. */
+/* Depth must actually change the wording, and level must too.
+ *
+ * The second half of that sentence was a comment with no assertion under it for
+ * the whole life of this file, and the behaviour it describes did not exist:
+ * `wordFor` tried by_depth before by_level, every record carries all three
+ * by_depth texts, so by_level was never reached and asking for `master` and for
+ * `beginner` returned the same sentence on every position. Four texts on each of
+ * 137 records, unreadable. Now asserted. */
 for (const [label, fen] of CORPUS.slice(0, 6)) {
   const byDepth = new Set(API.DEPTHS.map(d => API.analyzeWithEducation({ fen, depth: d }).explanation.text));
   ok(`${label}: depth changes the wording`, byDepth.size >= 2, `${byDepth.size} distinct`);
+}
+{
+  let varied = 0, checked = 0;
+  for (const [label, fen] of CORPUS) {
+    const r = API.analyzeWithEducation({ fen });
+    if (!r.concepts.length) continue;
+    const texts = new Set(API.LEVELS.map(l =>
+      API.analyzeWithEducation({ fen, level: l }).explanation.text));
+    checked++;
+    if (texts.size > 1) varied++;
+  }
+  ok('level changes the wording on most positions', checked === 0 || varied / checked > 0.5,
+     `${varied} of ${checked} positions vary by level`);
+  ok('level was checked at all', checked >= 6, `${checked}`);
 }
 
 /* Short must be a subset of the story, not a different story: the lead

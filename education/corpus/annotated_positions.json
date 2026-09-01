@@ -1205,6 +1205,48 @@
         "passed-pawn"
       ],
       "added": "2026-09-01"
+    },
+    {
+      "game": "Letelier-Fischer, Leipzig Olympiad 1960 (preliminaries)",
+      "source": "thechessworld-fighting-the-pawn-centre",
+      "players": "Rene Letelier Martner - Robert James Fischer",
+      "event": "Leipzig Olympiad 1960",
+      "year": 1960,
+      "annotator": "WGM Raluca Sgircea and IM Renier Castellanos",
+      "fen_verified": "replay: all 46 plies replayed legally through blind-chess.html's move generator",
+      "added": "2026-09-01",
+      "id": "letelier-fischer-1960-7c5-center-control-ambiguous",
+      "concept": "center-control",
+      "concept_role": "ambiguous",
+      "fen": "rnbqnrk1/ppp1ppbp/3p2p1/4P3/2PP1P2/2N1B3/PP4PP/R2QKBNR b KQ - 1 7",
+      "move": "c5",
+      "move_uci": "c7c5",
+      "fen_after": "rnbqnrk1/pp2ppbp/3p2p1/2p1P3/2PP1P2/2N1B3/PP4PP/R2QKBNR w KQ c6 0 8",
+      "human_annotation": "'His opponent decided to launch an early pawn storm against Black's King's Indian and delay his development. When central pawns are not supported by pieces, they can become an easy target for the opposite side. This is exactly what happened in the game; Fischer didn't wait for his opponent to develop his pieces and immediately started attacking the center.' And the general statement: 'Occupying the center only with the pawns, without developing the pieces or without having coordinated them is known as over-extension and can become a target for our opponent instead of an advantage.'",
+      "explanation": "The position the literature uses to teach that the centre can be a target, and this base measures White's central control at seven attacks to two, leading on three of the four squares. Both readings are correct and that is the point of an ambiguous entry: the measurement is right, and the verdict everybody attaches to it is wrong. The engine calls the position level. Sixteen moves later Fischer is playing 23...Qxf4+ and White has resigned. The concept record already registers this as its second false-positive trap - 'a big pawn centre is not automatically an advantage; whether it is an asset or a target is a question of timing and support, and that cannot be read off the structure' - and this entry is that sentence given a board. It is also why the matcher's wording states the counts as counts and ends 'ask what kind of centre is on the board before you choose a plan' rather than announcing an advantage.",
+      "engine": {
+        "engine_id": "Stockfish 18",
+        "depth": 22,
+        "multipv": 3,
+        "best_move": "dxe5",
+        "best_eval_cp": -9,
+        "annotated_move_eval_cp": -26,
+        "annotated_move_rank": 2,
+        "agrees": "on the assessment, which is the whole claim: at depth 22 the position is level, -0.09 from Black's side, with White holding pawns on d4, e5, c4 and f4 and Black holding no central square at all. The game's 7...c5 is the engine's second choice, 0.17 behind 7...dxe5.",
+        "note": "An imposing centre worth nothing, measured. Any system that turns a central attacker count into an evaluation gets this position exactly backwards."
+      },
+      "confidence": "high",
+      "why_not_alternates": "space is TRUE and is reported, correctly - White does have more space. pawn-storm would be wrong as a claim about a plan: f4 and e5 are not aimed at a king here and the annotation's whole point is that they are unsupported. outpost is wrong; nothing is anchored.",
+      "also_true_but_secondary": [
+        "space",
+        "pawn-break",
+        "piece-activity",
+        "bad-bishop"
+      ],
+      "rejected_as_wrong": [
+        "outpost",
+        "pawn-breakthrough"
+      ]
     }
   ]
 }

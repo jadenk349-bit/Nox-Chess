@@ -11,11 +11,11 @@
     "concepts_researched": 29,
     "concepts_validated": 4,
     "concepts_needs_review": 0,
-    "sources_reviewed": 192,
-    "positions_tested": 104,
+    "sources_reviewed": 193,
+    "positions_tested": 105,
     "matches_validated": 53,
     "false_matches": 25,
-    "ambiguous_matches": 26,
+    "ambiguous_matches": 27,
     "by_stage": {
       "ready": 2,
       "researched": 126,
@@ -1660,22 +1660,23 @@
       "method": "Targeted the seven concepts the previous checkpoint named as lacking human grounding - initiative, king safety, centre control, static-vs-dynamic, piece coordination, transformation of advantages and the pawn breakthrough. Annotations were found first and positions second, never the other way round. Game scores were taken from a database (pgnmentor player files) rather than from the annotating page, because six of seven move orders printed by one otherwise useful blog failed to replay; every score used here was replayed end to end through blind-chess.html's own move generator, and every claim was then re-measured with Stockfish 18 at depth 20-22 with MultiPV 3.",
       "results": {
         "corpus_positions_before": 6,
-        "corpus_positions_after": 28,
+        "corpus_positions_after": 29,
         "corpus_master_games_before": 2,
-        "corpus_master_games_after": 15,
-        "corpus_roles_after": "18 positive, 7 ambiguous, 3 negative",
-        "api_false_negatives_on_detectable_concepts": "0 of 28",
-        "api_false_positives": "0 of 28",
+        "corpus_master_games_after": 16,
+        "corpus_roles_after": "18 positive, 8 ambiguous, 3 negative",
+        "api_false_negatives_on_detectable_concepts": "0 of 29",
+        "api_false_positives": "0 of 29",
         "ladder_human_grounded": "5 -> 23 on the corrected measure",
         "ladder_api_validated": "32 -> 36 (36 of the 83 concepts whose own record allows a detector)",
         "ladder_negative_tested": "29 -> 31",
         "ladder_ambiguity_tested": "17 -> 22",
-        "validated_positions": "82 -> 104",
+        "validated_positions": "82 -> 105",
         "depth_mean": "0.70 -> 0.71",
         "new_detectors": "centralSquareControl, kingZoneAttackers, pawnBreakthrough (Layer 3); center-control, king-safety, king-attack, pawn-breakthrough (Layer 4)",
         "firing_rates_over_788_positions": "center-control 20.3%, king-attack 1.5%, king-safety-by-count 1.1% of king-sides, king-safety-by-bare-shield 12.4% of king-sides, move-based centre 7.1%, move-based shield damage 2.6%, pawn-breakthrough 0.0%",
-        "tests": "632 -> 654 pass, 0 fail",
-        "ladder_every_rung_its_record_allows": "2 -> 11 on the corrected measure"
+        "tests": "632 -> 655 pass, 0 fail (plus 266 API, 376 audit, 3282 explanation)",
+        "ladder_every_rung_its_record_allows": "2 -> 11 on the corrected measure",
+        "level_parameter": "dead for the whole life of the API; now varies the wording on 99.3% of the 788 shipped positions"
       },
       "findings": [
         "SIX of seven blog-printed 'full move orders' failed to replay. Only Capablanca-Mattison 1929 survived; Janowsky-Alapin, Rubinstein-Maroczy, Pillsbury-Marco, Havasi-Capablanca and Chekhover-Rudakovsky all reached an illegal move. Prose from such a page can still be cited; its move list cannot. Every score in this corpus now comes from a database and is replay-verified.",
@@ -1691,7 +1692,9 @@
         "THE HUMAN-GROUNDED RUNG WAS MEASURING THE WRONG THING, and it was flattering itself. Its own definition says 'an annotated master position, NOT a mined one', and its implementation accepted any position carrying a named game and a historical origin - so 22 of the 36 concepts it counted were grounded only on positions this system found by running its own Layer 4 over master games. Those positions' own notes already said they 'cannot by itself validate the matcher that found it'. Fixed by adding an `attributed_by` field that names the person who said so, and the number fell from 39 to 17. The looser count is still printed underneath, because a drop that large should be legible rather than silent.",
         "A DETECTOR THAT FLICKERS ON AND OFF ACROSS A GAME A HUMAN CALLS SETTLED. Traced ply by ply through Rubinstein-Salwe 1908 - the game whose annotator says flatly that the e6 bishop is bad - this base reports bad-bishop for exactly ten plies, from 16...Nd7 to 21.Nc5, and then stops, while the bishop's pawn share RISES from 0.67 to 0.83 over the same stretch. The cause is the `scope > 3` guard, which is there to keep Suba's active bad bishop off the list and is what stopped this base calling Nimzowitsch's blockading bishop bad. So the guard is right and the concept is momentary in a way its own record says it should not be. Recorded on the record and pinned at both ends by a test, rather than loosened: raising the threshold would restore two false positives to remove one false negative.",
         "AN EXCEPTION THAT LIVED IN THE RECORD AND IN NONE OF THE WORDING. Capablanca-Thomas, Hastings 1929 is an opposite-coloured-bishop ending that Stockfish scores at -5.06 with White a single pawn up, and this base told a reader 'Opposite bishops are drawish in endgames'. The record's own second exception - 'three files of separation between passed pawns usually wins' - was present in the `exceptions` list and in the master-level wording, and absent from the beginner, intermediate, advanced, short and normal wordings and from the lesson line, which is what a reader actually sees. All six now carry the condition. The test written for it does not forbid the word 'draw', which would be the wrong lesson: it requires the condition to travel with the claim.",
-        "REJECTED A GROUNDING RATHER THAN TAKE IT. A FIDE Master's lesson titled 'The Backward Pawn on the Semi-Open File' calls White's c3 pawn backward in Marshall-Tarrasch 1905 and explains it as 'the b2 and d4 pawns sit on adjacent files blocking its advance' - after a capture in which the b2 pawn became the c3 pawn, with c4 empty and controlled by nothing. This base's detector reports no backward pawn at any ply of the sequence and is right by the definition the record takes from Wikipedia. Logged in failed_research_attempts and NOT added: the corpus is ground truth, and grounding a concept on a loose application of its own definition would poison the thing it exists to protect. backward-pawn still has no human grounding."
+        "REJECTED A GROUNDING RATHER THAN TAKE IT. A FIDE Master's lesson titled 'The Backward Pawn on the Semi-Open File' calls White's c3 pawn backward in Marshall-Tarrasch 1905 and explains it as 'the b2 and d4 pawns sit on adjacent files blocking its advance' - after a capture in which the b2 pawn became the c3 pawn, with c4 empty and controlled by nothing. This base's detector reports no backward pawn at any ply of the sequence and is right by the definition the record takes from Wikipedia. Logged in failed_research_attempts and NOT added: the corpus is ground truth, and grounding a concept on a loose application of its own definition would poison the thing it exists to protect. backward-pawn still has no human grounding.",
+        "THE `level` PARAMETER HAD NEVER DONE ANYTHING. The API accepts beginner/intermediate/advanced/master, the README documents it, every concept record carries four texts written for those four readers, and asking for master and for beginner returned the SAME SENTENCE on every position. Cause: wordFor() tried `by_depth[depth]` before `by_level[level]`, and every record carries all three by_depth texts, so the by_level branch was unreachable. 137 records times four texts, written and unread. Found by asking, on the Letelier-Fischer position, why four levels printed one string. tests/test_explanations.js had a comment saying 'level must be able to' change the wording with no assertion under it; there is one now, and the wording varies by level on 99.3% of the 788 shipped positions. Two consequences came with the fix: level feeds the TEACHING half rather than the observation, because the observation must name the square and the level texts are general; and teachingSentence() now prefers a sentence long enough to teach something, because the advanced text for `outpost` opens 'Outpost in the modern sense.' and that label was the whole of what an advanced reader used to get.",
+        "A FALSE-POSITIVE TEST THAT BANNED A WORD RATHER THAN A CLAIM. The regression suite failed the new intermediate wording 'ask what the exchange bought before calling them a weakness' because it contains the word 'weakness' - which is the opposite of the fault it guards against. The check now splits the explanation into sentences and only fails a sentence that asserts a verdict without a hedging cue."
       ]
     }
   ],

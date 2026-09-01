@@ -211,6 +211,44 @@ from Wikipedia. Logged in `failed_research_attempts` and not added:
 `backward-pawn` still has no human grounding, and it is better without one than
 with a wrong one.
 
+### The `level` parameter had never done anything
+
+This one came out of a corpus position and is the largest user-facing fix of the
+session. Letelier–Fischer, Leipzig 1960 is the game the literature uses to teach
+that a pawn centre can be a target; this base measures White's central control
+at seven attacks to two and Stockfish calls the position level. Checking how the
+system worded that, at four reading levels, produced **one string four times**.
+
+`analyzeWithEducation` accepts `level: beginner | intermediate | advanced |
+master`. The README documents it. Every concept record carries four texts
+written for those four readers — that is most of what the ladder's
+EXPLANATION-VALIDATED rung measures. And `wordFor()` tried `by_depth[depth]`
+first; every record carries all three by_depth texts; so the `by_level` branch
+was **unreachable**. 137 records × 4 texts, written and never read by anybody,
+for the whole life of the API.
+
+`tests/test_explanations.js` had a comment saying *"Depth must actually change
+the wording, and level must be able to"* — with an assertion under the first
+half and nothing under the second.
+
+Fixed by separating the two axes, which are different questions: depth is how
+much to say and `compose()` already implements it structurally; level is who is
+being told, and it now feeds the teaching half rather than the observation,
+because the observation has to name the square and the level texts are general.
+Two things came with it:
+
+- `teachingSentence()` now prefers a sentence long enough to teach something.
+  The advanced wording for `outpost` opens "Outpost in the modern sense." and
+  the master wording with "Note which sense is meant." — both cleared the old
+  twelve-character bar, and both were the whole of what an advanced reader got.
+- A false-positive test banned the WORD "weakness" rather than the claim, and
+  failed the new wording *"ask what the exchange bought before calling them a
+  weakness"* — which is the opposite of the fault it guards. It now fails a
+  sentence only when it asserts a verdict with no hedging cue.
+
+Measured after: the wording varies by level on **99.3%** of the 788 shipped
+positions, and beginner no longer gets a sentence about Nimzowitsch.
+
 That is the third metric this project has caught telling it what it wanted to
 hear — after the mass test's "99.7% positional coverage" and the corpus
 checker's scoring of negative examples — and all three were found the same way:
