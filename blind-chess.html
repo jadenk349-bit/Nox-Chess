@@ -2351,9 +2351,17 @@
     border-color:var(--tint-lit); color:var(--tint-lit);
     background:linear-gradient(180deg, var(--tint-glow), rgba(0,0,0,.22));
   }
+  /* The transition list is Host Game's, deliberately: the base button fades
+     transform and filter as well, which on a gold plate turns a press into a
+     200ms wash of brightness going down and another coming back up — the
+     colour arrives after the click and leaves after the finger. Naming only
+     the properties that should ease (background, colour, the spill) leaves the
+     lift and the dip instant, so the plate reads as pressed rather than as
+     recolouring itself. */
   .rank-start{
     width:100%; margin-top:12px; padding:17px 0; border-radius:var(--r-lg);
     font-size:13px; letter-spacing:.2em;
+    transition:background .25s ease, color .25s ease, box-shadow .25s ease, opacity .25s ease;
   }
   /* Dark until both questions have answers, exactly as Start Play is beside
      the board: a button you cannot use should not look like one you can. */
@@ -2430,7 +2438,12 @@
 
   /* Looking for an opponent is not a different place to be, so it does not get
      a box of its own: the button keeps its position and reports on itself. A
-     band of light runs across it for as long as the room is on the list. */
+     band of light runs across it for as long as the room is on the list.
+
+     Only Start Play wears it. The ranked Start Game reports the same state a
+     different way, for the reason set out under #btnRankStart.searching
+     below — it must not go dark — so it deliberately does not share this
+     rule. */
   .start-btn.searching{
     cursor:progress; color:#f6e3ba; font-weight:650;
     border-color:rgba(217,164,65,.55);
@@ -5611,8 +5624,9 @@ function showWaiting(text, title){
 function waitingFailed(text, title){
   if (NET.state === 'playing') return;
   // A failure ends the searching sweep on the Start button as well as opening
-  // the box — and a challenge that came to nothing names itself, since "No Game"
-  // says nothing about which friend said no.
+  // the box — either button, since either search can be refused and one flag
+  // drives both — and a challenge that came to nothing names itself, since
+  // "No Game" says nothing about which friend said no.
   setSearching(false);
   document.getElementById('waitTitle').textContent = title || 'No Game';
   document.getElementById('waitText').textContent = text;
@@ -5637,6 +5651,13 @@ function setSearching(on){
   // The ranked page's Start Game is the same idea on a different screen, and
   // drawRankPick() is where that button's appearance is decided — so it is
   // told rather than reached into from here.
+  //
+  // A queue is not a room and not a board: sending the player to the game
+  // screen to watch a box say "Finding an Opponent" put them in front of a
+  // position nobody was playing, so the ranked screen stays where it is and
+  // the Start Game plate becomes the sweep. The game screen opens when the
+  // server pairs two people and not one moment earlier — that is the 'start'
+  // case below, and it is the only door.
   document.getElementById('screen-ranked').classList.toggle('searching', on);
   drawRankPick();
 }
@@ -5724,6 +5745,10 @@ function netConnect(ready, onFail){
              'Disconnected');
     } else if (NET.state === 'hosting'){
       waitingFailed('The connection closed, so the room is gone.');
+    } else if (NET.state === 'waiting'){
+      // queued for a ranked game: nothing is coming now, and a plate left
+      // sweeping would go on promising that something was
+      waitingFailed('The connection closed, so the search is over.');
     } else if (NET.state === 'lobby'){
       renderRooms(null);                  // say so rather than show a stale list
     }
@@ -5837,9 +5862,10 @@ function onNetMessage(msg){
 
     case 'waiting':
       // Whichever screen joined the queue has already said what it is waiting
-      // for, in its own words — a sweeping button counts, and is the whole
-      // point of one: it says so without taking the page away. This only has
-      // to speak when nothing did.
+      // for, in its own words — the ranked page says it on the button that
+      // started it, and a sweeping button counts, which is the whole point of
+      // one: it says so without taking the page away. This only has to speak
+      // when nothing did.
       if (!searching && !waitOverlay.classList.contains('show'))
         showWaiting('Looking for someone who wants the same game…');
       break;
@@ -5922,7 +5948,7 @@ function onNetMessage(msg){
       // side panel would go on asking its questions over a board that refuses
       // moves, because everything mid-game is gated on G.started.
       G.started = true;
-      setSearching(false);          // the button can stop sweeping, it found one
+      setSearching(false);          // either button can stop sweeping, it found one
       hideWaiting();
       resetChat();                              // nothing carries over from the last opponent
       showScreen('game');
@@ -6029,11 +6055,12 @@ function onNetMessage(msg){
       // on the rooms page there is no game log to write to — say it there instead
       if (screenName === 'rooms') roomNote(msg.msg);
       // While a game is still being looked for, the log is not where anyone is
-      // looking: a friendly search left it behind on the setup screen with the
-      // Start button sweeping for something that will never come, and a ranked
-      // search has the box sitting on top of it. Either way the refusal has to
-      // land where the waiting is, and stop it.
-      else if (searching || waitOverlay.classList.contains('show')) waitingFailed(msg.msg);
+      // looking: both searches left it behind — one on the setup screen, one on
+      // the ranked screen — with a Start button sweeping for something that
+      // will never come. Either way the refusal has to land where the waiting
+      // is, and stop it.
+      else if (searching || waitOverlay.classList.contains('show'))
+        waitingFailed(msg.msg);
       else logLine('⚠  ' + msg.msg, 'err');
       break;
   }
@@ -12308,6 +12335,12 @@ function drawRank(){
     ? '' : 'Playing as a guest. Sign in to carry a rating of your own.';
 }
 
+/* Whether the line under the buttons is currently the search's rather than
+   drawRank's. Only a search that actually ends may hand that line back:
+   rankedAgain() writes its own sentence there after arriving on the page, and
+   an ordinary repaint must not wipe it. */
+let rankNoteSearching = false;
+
 /* The settings button says what was chosen, so the box never has to be opened
    again to remember it — and Start Game stays dark until it has something to say. */
 function drawRankPick(){
@@ -12326,6 +12359,18 @@ function drawRankPick(){
   start.textContent = hunting ? 'Finding an Opponent' : 'Start Game';
   start.classList.toggle('searching', hunting);
   start.classList.toggle('dim', !hunting && !set);
+  /* The button says that it is searching; the line under it says what for, and
+     that pressing it again is how to stop — "Finding an Opponent" on its own
+     names neither the game being waited for nor the way out of it. The line is
+     drawRank's the rest of the time, so it is handed back when the search ends
+     rather than blanked on every repaint. */
+  const note = document.getElementById('rankNote');
+  if (hunting)
+    note.textContent =
+      'Looking for a ranked game — ' + RANK_MODE_NAME[RANK.mode] + ', ' +
+      timeLabel(RANK.minutes, RANK.inc) + '. Press Start Game again to call it off.';
+  else if (rankNoteSearching) drawRank();
+  rankNoteSearching = hunting;
 }
 
 /** Fill the form in from settings already chosen, and light up what they are. */
@@ -12427,7 +12472,9 @@ function startRanked(){
   G.inc       = RANK.inc;
   picked.mode    = true;
   chosen.minutes = true;
-  beep(760,.09); setTimeout(()=>beep(1010,.11), 90);
+  // A press, not a fanfare: the two rising notes belong to being paired, and
+  // the 'start' case plays them when that actually happens.
+  beep(620,.09);
   // Waiting for the queue is not a place to be sent to. The player stays on
   // the page they pressed Start Game on and that button reports on itself,
   // exactly as hosting a room does on the setup form. The board is laid out
@@ -12440,7 +12487,9 @@ function startRanked(){
 }
 
 document.getElementById('btnRankStart').onclick = () => {
-  // the button is the search as well — pressing it again calls it off
+  // The button is the search as well: the one that started it is the one that
+  // stops it, as on the setup screen — there is no other control while it is
+  // sweeping, so pressing it again calls it off.
   if (searching){ beep(320,.1); stopRankSearch(); return; }
   // Refused, it opens the box rather than explaining itself: the only thing
   // standing in the way is the question inside it.
