@@ -1012,6 +1012,32 @@ const { concepts } = API.knowledge();
   }
 }
 
+{
+  // material-imbalance fired on any knight-for-bishop swap. Its own record
+  // leads with Kaufman's values and they are explicit - "knight 3.5, unpaired
+  // bishop 3.5", the same number - so that is a swap of equals, not the
+  // imbalance the concept is about, and the case that DOES differ has its own
+  // concept. 42.1% -> 35.5%.
+  const mi = fen => (API.analyzeWithEducation({ fen }).concepts_all
+    .some(c => c.id === 'material-imbalance'));
+  ok('material-imbalance: a lone knight against a lone bishop is not an imbalance',
+     !mi('r4rk1/pp3ppp/2n5/8/8/5B2/PP3PPP/2R2RK1 w - - 0 1'));
+  // ...but the exception had to be put back. Two bishops against two knights is
+  // the most discussed minor-piece imbalance there is, and Kaufman's own numbers
+  // separate it: the pair at 7.5 against two knights at 7.0.
+  ok('material-imbalance: two bishops against two knights still is one',
+     mi('r2k3r/pp3ppp/2n2n2/8/8/8/PP2BPPP/R1B1K2R w KQ - 0 1'),
+     JSON.stringify(API.analyzeWithEducation({
+       fen: 'r2k3r/pp3ppp/2n2n2/8/8/8/PP2BPPP/R1B1K2R w KQ - 0 1' }).concepts_all.map(c => c.id)));
+  // ...and an exchange sacrifice - rook for knight - is untouched, which is the
+  // corpus's own annotated instance of this concept.
+  ok('material-imbalance: a rook against a minor piece is still reported',
+     mi('4r1k1/pp3ppp/2n5/8/8/8/PP3PPP/2R2RK1 w - - 0 1') ||
+     mi('4r1k1/pp3ppp/2n5/8/8/5N2/PP3PPP/2R3K1 w - - 0 1'));
+  ok('material-imbalance: the measured rate is recorded in the source',
+     /42\.1% -> 35\.5%/.test(fs.readFileSync(path.join(ROOT, 'lib', 'matchers.js'), 'utf8')));
+}
+
 /* ---------- report ---------- */
 console.log(`\nAPI  PASS ${pass}   FAIL ${fails.length}`);
 for (const [n, d] of fails) console.log(`  FAIL  ${n}\n        ${d}`);

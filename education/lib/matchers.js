@@ -652,6 +652,24 @@ const STRUCTURAL = [
       const qualitative = diffs.length >= 2 ||
                           (heavyW !== heavyB && minorsW !== minorsB);
       if (!qualitative) return null;
+      // ...and a KNIGHT against a BISHOP, with the same number of minors on
+      // each side, is not the imbalance this record is about. The record leads
+      // with Kaufman's values and they are explicit: "knight 3.5, unpaired
+      // bishop 3.5" - the same number. The case where the two genuinely differ
+      // is the bishop PAIR at 7.5 against two separate bishops at 7.0, which is
+      // `bishop-pair`, has its own matcher, and says more. Reporting an
+      // imbalance here is a third name for a fact already reported once, which
+      // is the objection that got `strong-square` thrown away.
+      //
+      // The exception is the pair itself, and it had to be put back: a first
+      // version of this guard refused two bishops against two knights, which is
+      // the most discussed minor-piece imbalance there is and one Kaufman's own
+      // numbers separate (7.5 against 7.0). So the swap is only dismissed when
+      // NEITHER side gains the pair by it. 42.1% -> 35.5%.
+      const pairW = !!f.pieces.w.bishopPair, pairB = !!f.pieces.b.bishopPair;
+      const onlyMinorSwap = diffs.every(t => t === 'N' || t === 'B')
+                            && minorsW === minorsB && pairW === pairB;
+      if (onlyMinorSwap) return null;
       const d = f.material.balance;
       const describe = c => {
         const m = c === 'w' ? w : b;

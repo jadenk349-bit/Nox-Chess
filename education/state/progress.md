@@ -1124,3 +1124,22 @@ informative thing to say. Demoted to last: mean rank of the annotated concept
 
 `tools/firing_rates.js` now measures all three denominators, because the
 disagreement between them is a finding rather than noise.
+
+
+## A concept contradicted by the numbers its own record leads with
+
+`material-imbalance` fired on every knight-for-bishop swap. The record's
+headline is Kaufman's statistical values, and they are explicit — *knight 3.5,
+unpaired bishop 3.5*, the same number. So that swap is not an imbalance at all
+by the record's own standard, and saying it is a third name for a fact
+`bishop-pair` and `bad-bishop` already report. 42.1% → **35.5%**.
+
+The first version of the guard went too far and refused two bishops against two
+knights — the most discussed minor-piece imbalance there is, and one Kaufman
+*does* separate (the pair at 7.5 against two knights at 7.0). The exception is
+written in and tested.
+
+A scan for a second `luft`-style base-rate discrepancy found none: luft is +43.8
+points higher on the annotated corpus than on the 788, the next gap is +13.2,
+and the whole negative tail is the puzzle corpus's known skew towards endgames.
+On 37 positions a ten-point gap is noise; a forty-point one is not.

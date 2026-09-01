@@ -6,11 +6,11 @@
   "counts": {
     "avoid_phrasing": 167,
     "exception": 296,
-    "false_positive_trap": 303,
+    "false_positive_trap": 304,
     "misconception": 268
   },
   "evidence_tiers": {
-    "demonstrated": 34,
+    "demonstrated": 35,
     "on-a-tested-record": 487,
     "sourced": 513
   },
@@ -20,7 +20,7 @@
     "sourced": "rests on cited sources; no engine or tablebase evidence on the record",
     "unsourced": "neither - should not exist and is a bug if it does"
   },
-  "total": 1034,
+  "total": 1035,
   "soft_concepts_without_exceptions": [],
   "entries": [
     {
@@ -9682,6 +9682,18 @@
       "text": "Statistical values are averages. They tell you what to expect across many games, not what is true in this one.",
       "self_evidenced": false,
       "evidence_tier": "on-a-tested-record"
+    },
+    {
+      "concept": "material-imbalance",
+      "category": "material-imbalances",
+      "knowledge_type": "positional-concept",
+      "difficulty": "advanced",
+      "concept_evidence": "engine",
+      "path": "concepts/positional-method/material-imbalance.json",
+      "kind": "false_positive_trap",
+      "text": "MEASURED 2026-09-02: a knight against a bishop is not an imbalance by this record's own preferred numbers - Kaufman puts a knight and an UNPAIRED bishop at the same 3.5 - and the matcher fired on every such swap, 42.1% of the 788 shipped positions. It is a third name for a fact `bishop-pair` and `bad-bishop` already report. The exception is the pair itself, which Kaufman does separate (7.5 against 7.0), so two bishops against two knights is still reported. 42.1% -> 35.5%.",
+      "self_evidenced": true,
+      "evidence_tier": "demonstrated"
     },
     {
       "concept": "material-imbalance",
