@@ -11,7 +11,7 @@ evidence in general, it is NEGATIVE and AMBIGUOUS evidence in particular.
 | # | Criterion | Status | Evidence |
 |---|---|---|---|
 | 1 | All major areas have meaningful depth | **NOT MET** | 2 areas `full`, 13 `substantial`, 70 `partial`. Mean concept completeness 0.71 (was 0.70). |
-| 2 | Important concepts have strong recognition criteria | **PARTIAL** | 36 concepts have an implemented Layer 4 matcher naming the record it implements — 36 of the 83 whose own record permits one. The other 54 permitted ones have written criteria and no detector. |
+| 2 | Important concepts have strong recognition criteria | **PARTIAL** | 40 concepts have an implemented Layer 4 matcher naming the record it implements — 40 of the 83 whose own record permits one. The other 43 permitted ones have written criteria and no detector, and one of them, `strong-square`, was written, measured at 80.1% and refused. |
 | 3 | Positional concepts tested outside the tactical corpus | **MET** | 32 human-annotated positions from 21 master games, 1908–2005, spanning a century and seven countries; plus 13 replay-verified games and a 350-position quiet sub-corpus. No longer one tournament. |
 | 4 | Major concepts have positive and negative testing | **NOT MET** | 55% of applicable concepts lack a positive example, 77% a negative one, 81% an ambiguous one. This is the blocker, and it is the one that does not yield to mining. |
 | 5 | False positives aggressively tested | **MET** | 27 resolved cases replayed as regression assertions, plus four annotated negative examples. Three of those are real tests — the API declines to report a king attack in a position with every mechanical sign of one — — the API declines to report an outpost on a square a world champion twice calls unsafe, and declines to report a king attack in a position with every mechanical sign of one — and the third is recorded as **vacuous**, because nothing could have reported it. |
@@ -25,7 +25,7 @@ evidence in general, it is NEGATIVE and AMBIGUOUS evidence in particular.
 
 137 concepts · 188 sources · **108 engine-validated positions + 22 tablebase** ·
 **32 human-annotated corpus positions from 21 master games** · 30 replay-verified
-master games · 658 tests + 283 API + 377 audit + 3274 explanation assertions.
+master games · 658 tests + 294 API + 386 audit + 3278 explanation assertions.
 
 ## What moved this session
 
@@ -77,8 +77,11 @@ never more. 0 of 32 overclaim.
    matcher turned one into a real test. The `initiative` negative remains vacuous
    and always will, because the concept cannot have a detector — which is itself
    worth knowing and is now printed rather than counted as a pass.
-3. **54 concepts whose records permit a detector still have none.** They can be
-   explained when a caller names them and cannot be recognised.
+3. **43 concepts whose records permit a detector still have none.** They can be
+   explained when a caller names them and cannot be recognised. One more was
+   written and thrown away: `strong-square`, exactly to its record's two stated
+   preconditions, fires on 80.1% of the 788 shipped positions and is a third
+   name for a fact already reported twice.
 4. **The 788 shipped positions cannot validate everything.** Zero of them is a
    pawn ending, so `pawnBreakthrough()` fires on none and the corpus offers no
    evidence at all about its false-positive rate. A pawn-ending corpus is needed.

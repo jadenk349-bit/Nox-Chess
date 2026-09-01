@@ -1724,6 +1724,22 @@
         "THE HARDEST NEGATIVE SO FAR, AND IT NEEDED AN API CHANGE TO WRITE DOWN. Nimzowitsch-Salwe, Karlsbad 1911 - the founding game of blockade theory, annotated by Nimzowitsch himself - has his dark-squared bishop on d4 PASSING this base's structural test for a bad bishop: four of its own six pawns on its colour, a share of 0.67 against the 0.60 required. Only the scope guard stops the error, and this base called that bishop bad before the guard existed. Recording the claim needed a `side` field, because BLACK's bishop in the same game is bad in every sense and is correctly reported five moves later - and the API's concepts_all carried no `subjects`, so a caller was told 'bad bishop' and not whose. Fixed in the API, in the checker and in the corpus schema; a whole class of per-side negative was unwritable before.",
         "A 1953 SACRIFICE FOR 'QUALITY OF POSITION' IS A 2026 ENGINE'S FIRST CHOICE BY THREE QUARTERS OF A PAWN. Reshevsky-Petrosian, Zurich 1953: 25...Re6 is Stockfish 18's top move at depth 24, 0.76 clear, and its principal variation plays out the annotation's own plan - 26.Rg3 Ne7 27.Bxe6 fxe6 28.Rf1 Nd5, the knight reaching d5 by the exact route described. Black is still a pawn worse, which is the honest half: the sacrifice rescues a difficult position rather than winning one. Recorded as an AMBIGUOUS example for material-imbalance and named against WHITE: the side up the exchange is the side the reader must conclude nothing about."
       ]
+    },
+    {
+      "id": "four-more-detectors-and-one-refused",
+      "date": "2026-09-01",
+      "method": "Listed the 47 concepts whose own records name a mechanical detector and have no matcher, and built the five best-grounded of them. Each was measured over the 788 shipped positions before it was accepted, and each was tested against the game its concept is usually taught from.",
+      "results": {
+        "api_validated": "36 -> 40 of the 83 concepts whose records permit a detector",
+        "firing_rates": "blockade 27.3%, sacrifice 28.9% (with a move), battery 24.4%, exchange-sacrifice 1.0%",
+        "refused": "strong-square, measured at 80.1%",
+        "tests": "658 pass, 294 API, 386 audit, 3278 explanation"
+      },
+      "findings": [
+        "A DETECTOR THAT IMPLEMENTED HALF ITS OWN PRECONDITION. The blockade record says 'an enemy passed OR ADVANCING pawn'. The first version used Layer 3's existing `blockadedPassers`, which is the passed half, and it did not fire on Nimzowitsch-Salwe 1911 - the game the concept is named after, where the pawn being blockaded is a backward e-pawn and Nimzowitsch's own note is that its 'immobility is now greater than ever'. Testing a new detector against the game its concept is taught from caught it immediately. The matcher now requires an enemy pawn with no pawn of its own ahead of it on the file, stopped by one of our PIECES, because a pawn stopped by a pawn is a ram and no piece is being spent.",
+        "A GEOMETRY THAT FIRED ON 43% BECAUSE IT ARRIVED NOWHERE. `battery` written to its record's bare precondition - two aligned line pieces with a square beyond them - fired on 43% of positions, because two rooks stacked behind their own pawns satisfy it and combine nothing. Requiring the line to reach an enemy man or the enemy half brings it to 24.4%.",
+        "AND ONE DETECTOR WRITTEN, MEASURED AND REFUSED. `strong-square` implemented exactly to its record's two preconditions fires on 80.1% of the 788 positions - the `semi-open-file` failure this project has already made once - and it is a third name for a fact already reported twice, since `weak-square` is the same square from the defender's side and `outpost` is the same square with a piece on it. The record's own note says an outpost and a strong point are really the same thing. Removed rather than shipped, with the measurement on the record and a test that keeps it unimplemented."
+      ]
     }
   ],
   "last_updated": "2026-09-01",

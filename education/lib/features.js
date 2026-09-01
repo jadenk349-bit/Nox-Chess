@@ -950,6 +950,9 @@ function motifsOfMove(fen, uci) {
     // re-derive it from a string that spells a pawn move by leaving the letter out.
     movedType: (before.b[mv.from] || {}).t || null,
     movedFrom: nameOf(mv.from), movedTo: nameOf(mv.to),
+    // the move itself, so a matcher that needs to replay it does not have to
+    // reconstruct it from the SAN it was just given
+    uci,
     // Kept in the page's own {tag, text} shape; matchers read .tag. Normalising
     // to bare strings here would throw away the detector's own sentence, which
     // is worth having for comparison even though this system words its own.

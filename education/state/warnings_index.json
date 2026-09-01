@@ -6,13 +6,13 @@
   "counts": {
     "avoid_phrasing": 167,
     "exception": 296,
-    "false_positive_trap": 299,
+    "false_positive_trap": 301,
     "misconception": 268
   },
   "evidence_tiers": {
     "demonstrated": 33,
     "on-a-tested-record": 459,
-    "sourced": 538
+    "sourced": 540
   },
   "evidence_tier_meaning": {
     "demonstrated": "the sentence cites a measurement AND its concept holds engine or tablebase evidence",
@@ -20,7 +20,7 @@
     "sourced": "rests on cited sources; no engine or tablebase evidence on the record",
     "unsourced": "neither - should not exist and is a bug if it does"
   },
-  "total": 1030,
+  "total": 1032,
   "soft_concepts_without_exceptions": [],
   "entries": [
     {
@@ -1376,6 +1376,18 @@
       "path": "concepts/defense/blockade.json",
       "kind": "false_positive_trap",
       "text": "A blockade becomes a weakness when it ties down a piece needed elsewhere, which is the standard cost and is easy to omit.",
+      "self_evidenced": false,
+      "evidence_tier": "sourced"
+    },
+    {
+      "concept": "blockade",
+      "category": "restriction",
+      "knowledge_type": "strategic-principle",
+      "difficulty": "advanced",
+      "concept_evidence": "sources-only",
+      "path": "concepts/defense/blockade.json",
+      "kind": "false_positive_trap",
+      "text": "A pawn stopped by an enemy PAWN is a ram, not a blockade, and no piece is being spent.",
       "self_evidenced": false,
       "evidence_tier": "sourced"
     },
@@ -11504,6 +11516,18 @@
       "path": "concepts/tactics/battery.json",
       "kind": "exception",
       "text": "Ordering matters: queen in front of rook is usually worse than rook in front of queen, because the more valuable piece meets the defenders first.",
+      "self_evidenced": false,
+      "evidence_tier": "sourced"
+    },
+    {
+      "concept": "battery",
+      "category": "tactical-motifs",
+      "knowledge_type": "tactical-motif",
+      "difficulty": "intermediate",
+      "concept_evidence": "sources-only",
+      "path": "concepts/tactics/battery.json",
+      "kind": "false_positive_trap",
+      "text": "Two line pieces on one line are only a battery if the line ARRIVES somewhere. Stacked behind their own pawns they combine nothing, and the bare geometry fires on nearly half of all positions.",
       "self_evidenced": false,
       "evidence_tier": "sourced"
     },

@@ -644,6 +644,43 @@ const { concepts } = API.knowledge();
      !/\b(is better|winning|decisive|advantage for)\b/i.test(t), t.slice(0, 220));
 }
 
+{
+  // Four new matchers, each pinned at the position that shaped it.
+  //
+  // blockade: Nimzowitsch-Salwe 1911, the game the concept is named after. A
+  // first version used Layer 3's `blockadedPassers` - only the PASSED half of
+  // the record's own precondition - and did not fire here at all, because the
+  // pawn being blockaded is a backward e-pawn.
+  const NS = '2r2rk1/ppqb2pp/3bpn2/3pN3/1P1B4/2PB4/P3QPPP/R4RK1 b - - 10 17';
+  const nsr = API.analyzeWithEducation({ fen: NS });
+  has('blockade: fires on the game it is named after', nsr.concepts_all.map(c => c.id), 'blockade');
+  ok('blockade: and names the piece and both squares',
+     /knight on e5[\s\S]*pawn on e6/.test(nsr.concepts.find(c => c.id === 'blockade').because[0]),
+     nsr.concepts.find(c => c.id === 'blockade').because[0]);
+  // a pawn stopped by a PAWN is a ram, not a blockade
+  const ram = FEAT.features('4k3/8/8/3p4/3P4/8/8/4K3 w - - 0 1');
+  ok('blockade: a pawn ram is not a blockade',
+     !API.analyzeWithEducation({ fen: '4k3/8/8/3p4/3P4/8/8/4K3 w - - 0 1' })
+        .concepts_all.some(c => c.id === 'blockade'));
+
+  // exchange-sacrifice: Petrosian's 25...Re6, the game it is taught from.
+  const RP = '3rq1k1/4rppp/2n3b1/pp2P3/2pP1QB1/P1P1R3/1B4PP/4R1K1 b - - 3 25';
+  has('exchange-sacrifice: fires on Petrosian’s Re6',
+      API.analyzeWithEducation({ fen: RP, move: 'e7e6' }).concepts_all.map(c => c.id), 'exchange-sacrifice');
+
+  // sacrifice: measured by the page's own SEE-based sacrificeSize, and an even
+  // trade is not one.
+  const trade = API.analyzeWithEducation({
+    fen: 'rnbqkbnr/ppp1pppp/8/3p4/3P4/8/PPP1PPPP/RNBQKBNR w KQkq - 0 2', move: 'd1d3' });
+  ok('sacrifice: a quiet developing move is not one',
+     !trade.concepts_all.some(c => c.id === 'sacrifice'), trade.concepts_all.map(c => c.id).join(','));
+
+  // strong-square was written, measured at 80.1%, and REMOVED rather than
+  // shipped. It must stay unimplemented until something better exists.
+  ok('strong-square: still has no matcher, on purpose',
+     !MATCH.STRUCTURAL.some(m => m.concept === 'strong-square'));
+}
+
 /* ---------- report ---------- */
 console.log(`\nAPI  PASS ${pass}   FAIL ${fails.length}`);
 for (const [n, d] of fails) console.log(`  FAIL  ${n}\n        ${d}`);

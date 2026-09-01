@@ -46,10 +46,12 @@
       "The rear piece is more valuable and becomes a target itself"
     ],
     "prerequisites": [],
-    "detector": "proposed: slider alignment through a friendly piece (not yet written)",
+    "detector": "lib/matchers.js: battery",
     "detectability": "mechanical",
     "typical_confidence": "medium",
-    "false_positive_traps": []
+    "false_positive_traps": [
+      "Two line pieces on one line are only a battery if the line ARRIVES somewhere. Stacked behind their own pawns they combine nothing, and the bare geometry fires on nearly half of all positions."
+    ]
   },
   "application": {
     "typical_plans": [],
@@ -63,7 +65,8 @@
     "Ordering matters: queen in front of rook is usually worse than rook in front of queen, because the more valuable piece meets the defenders first."
   ],
   "limitations": [
-    "A battery is potential, not achievement. Do not report it as the reason for a move unless the position shows what it actually enables."
+    "A battery is potential, not achievement. Do not report it as the reason for a move unless the position shows what it actually enables.",
+    "Fires on 24.4% of the 788 shipped positions. A first version asked only for two aligned line pieces with one empty square beyond them and fired on 43%, because two rooks stacked behind their own pawns satisfy the geometry and combine nothing. The line must now arrive somewhere: at an enemy man, or into the enemy half."
   ],
   "misconceptions": [],
   "relationships": {

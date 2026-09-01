@@ -62,12 +62,13 @@
       "passed-pawn",
       "hole"
     ],
-    "detector": "pieceInFrontOfPawn (not yet written)",
+    "detector": "lib/matchers.js: blockade",
     "detectability": "mechanical",
     "typical_confidence": "high",
     "false_positive_traps": [
       "A piece standing in front of a pawn is not necessarily blockading it usefully. The test is whether the piece keeps its powers there — a queen on a blockading square is doing a knight's chore.",
-      "A blockade becomes a weakness when it ties down a piece needed elsewhere, which is the standard cost and is easy to omit."
+      "A blockade becomes a weakness when it ties down a piece needed elsewhere, which is the standard cost and is easy to omit.",
+      "A pawn stopped by an enemy PAWN is a ram, not a blockade, and no piece is being spent."
     ]
   },
   "application": {
@@ -100,7 +101,9 @@
     "The pawn must not be allowed too far forward before the blockade is established — Nimzowitsch's own caveat."
   ],
   "limitations": [
-    "Detecting a piece in front of a pawn is mechanical; judging whether the blockade is worth its cost is not."
+    "Detecting a piece in front of a pawn is mechanical; judging whether the blockade is worth its cost is not.",
+    "Fires on 27.3% of the 788 shipped positions. A first version used Layer 3's `blockadedPassers`, which is only the PASSED half of this record's own precondition, and it did not fire on Nimzowitsch-Salwe 1911 - the game the concept is named after, where the pawn being blockaded is a backward e-pawn and Nimzowitsch's own note is that its 'immobility is now greater than ever'. The matcher now implements both halves: an enemy pawn with no pawn of its own ahead of it on the file, stopped by one of our PIECES. A pawn stopped by a pawn is a ram, and the whole point of the record is that a piece is spending itself to do this.",
+    "It reports the geometry and cannot judge the cost. The record's second trap - that a blockade becomes a weakness when it ties down a piece needed elsewhere - is not decidable from one position."
   ],
   "misconceptions": [
     "That any piece will do. The choice of blockader is most of the concept.",

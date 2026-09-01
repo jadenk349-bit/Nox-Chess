@@ -281,6 +281,41 @@ reported five moves later. The API's `concepts_all` carried no `subjects`, so a
 caller was told "bad bishop" and not whose. Fixed in the API, in the checker and
 in the corpus schema, and a whole class of negative example became writable.
 
+### Four more detectors, and one written, measured and thrown away
+
+Forty-seven concepts have records naming a mechanical detector and no matcher.
+Five of the best-grounded were built, each measured over the 788 shipped
+positions before being accepted and each tested against the game its concept is
+usually taught from — which is what caught the first one.
+
+**`blockade` implemented half its own precondition.** The record says "an enemy
+passed OR ADVANCING pawn"; the first version used Layer 3's existing
+`blockadedPassers`, which is the passed half, and it did not fire on
+Nimzowitsch–Salwe 1911 — the game the concept is named after, where the pawn
+being blockaded is a backward e-pawn and Nimzowitsch's own note is that its
+"immobility is now greater than ever". It now asks for an enemy pawn with no
+pawn of its own ahead of it on the file, stopped by one of our **pieces**,
+because a pawn stopped by a pawn is a ram and nothing is being spent. 27.3%.
+
+**`battery` fired on 43% because it arrived nowhere.** Two rooks stacked behind
+their own pawns satisfy the bare geometry and combine nothing. Requiring the
+line to reach an enemy man or the enemy half: 24.4%.
+
+**`sacrifice`** uses the page's own SEE-based `sacrificeSize()`, which is the
+detector its record names — 28.9% with a move supplied, which is what a corpus
+of tactical puzzles should look like. **`exchange-sacrifice`** requires the rook
+to be winnable where it lands *by a minor piece*, and fires on 1.0% — including
+Petrosian's 25...Re6, the game it is taught from.
+
+And **`strong-square` was refused.** Written exactly to its record's two stated
+preconditions it fires on **80.1%** of the 788 positions — the `semi-open-file`
+failure this project has already made once — and it is a third name for a fact
+already reported twice, since `weak-square` is the same square from the
+defender's side and `outpost` is the same square with a piece on it. The
+record's own note says an outpost and a strong point are really the same thing.
+Removed rather than shipped, with the measurement on the record and a test that
+keeps it unimplemented.
+
 That is the third metric this project has caught telling it what it wanted to
 hear — after the mass test's "99.7% positional coverage" and the corpus
 checker's scoring of negative examples — and all three were found the same way:

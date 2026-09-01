@@ -45,6 +45,14 @@ const cap = (want, kt) => {
   return ORDER[want] < ORDER[c] ? want : c;
 };
 
+const FEAT = require('./features.js');
+const DIRS = {
+  R: [[1, 0], [-1, 0], [0, 1], [0, -1]],
+  B: [[1, 1], [1, -1], [-1, 1], [-1, -1]],
+  Q: [[1, 0], [-1, 0], [0, 1], [0, -1], [1, 1], [1, -1], [-1, 1], [-1, -1]],
+};
+const sqIdx = name => (8 - Number(name[1])) * 8 + (name.charCodeAt(0) - 97);
+
 const other = c => (c === 'w' ? 'b' : 'w');
 const side = (f, c) => (c === 'w' ? 'White' : 'Black');
 
@@ -114,10 +122,13 @@ const PRIORITY = [
   //   pawn-breakthrough, whose 0.0% is not rarity but scope: it only runs in
   //     pure pawn endings, of which the 788 contain none, and where it does
   //     fire it is a PROOF by the rule of the square.
-  'pawn-breakthrough', 'king-attack', 'outpost', 'rook-on-the-seventh',
-  'passed-pawn', 'isolated-queen-pawn', 'backward-pawn', 'hanging-pawns',
-  'opposite-coloured-bishops', 'bishop-pair', 'luft', 'pawn-break', 'restraint',
-  'worst-placed-piece', 'bad-bishop', 'king-safety', 'center-control',
+  //   ...and, measured the same way when they were added: exchange-sacrifice
+  //   1.3%, sacrifice 14.5%, battery 24.4%, blockade 27.3%.
+  'pawn-breakthrough', 'exchange-sacrifice', 'king-attack', 'outpost',
+  'rook-on-the-seventh', 'passed-pawn', 'isolated-queen-pawn', 'backward-pawn',
+  'hanging-pawns', 'opposite-coloured-bishops', 'bishop-pair', 'luft',
+  'pawn-break', 'restraint', 'worst-placed-piece', 'bad-bishop', 'sacrifice',
+  'king-safety', 'bishop-pair', 'battery', 'center-control', 'blockade',
   'king-activation', 'doubled-pawns',
 
   // ...and the band that is true of most positions, last, because being true
@@ -718,6 +729,115 @@ const STRUCTURAL = [
     },
   },
   {
+    concept: 'blockade',
+    implements: ("recognition.preconditions verbatim: an enemy passed OR ADVANCING pawn, and a friendly " +
+                 "piece on the square directly in front of it."),
+    run(f) {
+      // A first version used Layer 3's `blockadedPassers`, which is only the
+      // PASSED half, and it did not fire on Nimzowitsch-Salwe 1911 - the game
+      // the concept is named after, where the pawn being blockaded is a
+      // backward e-pawn rather than a passer, and Nimzowitsch's own note is
+      // that its "immobility is now greater than ever".
+      //
+      // So: an enemy pawn on a file no pawn of ours occupies ahead of it - it
+      // is stopped by a PIECE or not at all - with one of our pieces standing
+      // on the square in front. A pawn stopped by a pawn is a ram, not a
+      // blockade, and the record's whole point is that a piece is spending
+      // itself to do this.
+      const P = FEAT.page;
+      const st = P.stateFromFEN(f.fen);
+      const hits = [];
+      for (const c of ['w', 'b']) {
+        const enemy = other(c);
+        const forward = enemy === 'w' ? -1 : 1;
+        for (let i = 0; i < 64; i++) {
+          const p = st.b[i];
+          if (!p || p.c !== enemy || p.t !== 'P') continue;
+          const r = i >> 3, col = i & 7;
+          const fr = r + forward;
+          if (fr < 0 || fr > 7) continue;
+          const front = st.b[fr * 8 + col];
+          if (!front || front.c !== c || front.t === 'P') continue;   // a pawn in front is a ram
+          // ...and nothing of OURS further up the file, or the pawn was never going anywhere
+          let clearAhead = true;
+          for (let rr = fr + forward; rr >= 0 && rr < 8; rr += forward) {
+            const q = st.b[rr * 8 + col];
+            if (q && q.t === 'P') { clearAhead = false; break; }
+          }
+          if (!clearAhead) continue;
+          hits.push({ c, sq: FEAT.nameOf(i), by: front.t, on: FEAT.nameOf(fr * 8 + col) });
+        }
+      }
+      if (!hits.length) return null;
+      const h = hits[0];
+      const word = { N: 'knight', B: 'bishop', R: 'rook', Q: 'queen', K: 'king' }[h.by];
+      return {
+        confidence: 'high',
+        because: [`${side(f, h.c)}'s ${word} on ${h.on} stands directly in front of ${side(f, other(h.c))}'s ` +
+                  `pawn on ${h.sq}, which has nothing of its own to advance behind and cannot pass it`],
+        slots: { square: h.on, piece: word },
+        subjects: [...new Set(hits.map(x => x.c))],
+      };
+    },
+  },
+  {
+    concept: 'battery',
+    implements: ("recognition.preconditions: two or more friendly line pieces sharing a file, rank or " +
+                 "diagonal with nothing between them. Restricted to batteries that POINT somewhere - the " +
+                 "record's definition is about combining force, and two rooks stacked behind their own " +
+                 "pawns combine nothing."),
+    run(f) {
+      const P = FEAT.page;
+      const st = P.stateFromFEN(f.fen);
+      const hits = [];
+      for (const c of ['w', 'b']) {
+        for (let i = 0; i < 64; i++) {
+          const a = st.b[i];
+          if (!a || a.c !== c || (a.t !== 'R' && a.t !== 'Q' && a.t !== 'B')) continue;
+          for (const [dr, dc] of DIRS[a.t]) {
+            let r = (i >> 3) + dr, cc = (i & 7) + dc, steps = 0;
+            while (r >= 0 && r < 8 && cc >= 0 && cc < 8) {
+              const j = r * 8 + cc, q = st.b[j];
+              if (q) {
+                const compatible = a.t === 'B' || q.t === 'B'
+                  ? (dr !== 0 && dc !== 0) : (dr === 0 || dc === 0);
+                if (q.c === c && (q.t === 'R' || q.t === 'Q' || q.t === 'B') && compatible) {
+                  // ...and the line must continue past the pair into empty space,
+                  // or there is nothing for the combined force to reach.
+                  // ...and the line must ARRIVE somewhere. Two rooks stacked
+                  // behind their own pawns combine nothing, and a first version
+                  // that asked only for one empty square beyond the pair fired
+                  // on 43% of the 788 shipped positions. The line has to reach
+                  // an enemy man, or run into the enemy half.
+                  let rr = r + dr, ccc = cc + dc, room = 0, target = null;
+                  while (rr >= 0 && rr < 8 && ccc >= 0 && ccc < 8) {
+                    const q2 = st.b[rr * 8 + ccc];
+                    if (q2) { target = q2.c === other(c) ? FEAT.nameOf(rr * 8 + ccc) : null; break; }
+                    room++;
+                    if ((c === 'w' && rr <= 3) || (c === 'b' && rr >= 4)) target = target || 'the enemy half';
+                    rr += dr; ccc += dc;
+                  }
+                  if (target) hits.push({ c, a: FEAT.nameOf(i), b: FEAT.nameOf(j), target });
+                }
+                break;
+              }
+              steps++; r += dr; cc += dc;
+            }
+          }
+        }
+      }
+      if (!hits.length) return null;
+      const h = hits[0];
+      return {
+        confidence: 'medium',
+        because: [`${side(f, h.c)} has two long-range pieces stacked on one line, on ${h.a} and ${h.b}, ` +
+                  `and the line runs on to ${h.target}`],
+        slots: { square: h.a },
+        subjects: [...new Set(hits.map(x => x.c))],
+      };
+    },
+  },
+  {
     concept: 'king-activation',
     implements: "recognition.preconditions: an endgame, with a king off its back rank",
     run(f) {
@@ -941,6 +1061,65 @@ const MOVE_BASED = [
                   `and ${kb.pawnShield} of three shield pawns`],
         slots: { square: kb.square, count: String(za.attackers) },
         subjects: [them],
+      };
+    },
+  },
+  {
+    concept: 'sacrifice',
+    implements: ("recognition.preconditions verbatim, and using the detector the record names: the page's " +
+                 "own sacrificeSize(), which is SEE-based. 'A capture the engine happens to like is not a " +
+                 "sacrifice. The repo's own definition is the right one: material that CAN be taken and is " +
+                 "offered anyway.'"),
+    run(before, after, moveInfo) {
+      const P = FEAT.page;
+      const st = P.stateFromFEN(before.fen);
+      const all = P.legalMoves(st);
+      const mv = all.find(m => P.uciOf(m) === moveInfo.uci);
+      if (!mv) return null;
+      const size = P.sacrificeSize(st, mv, P.makeMove(st, mv));
+      if (size < 100) return null;                  // an even trade is not a sacrifice
+      return {
+        // The record's own typical confidence is high and the measurement is
+        // exact, but what is NOT established is that the compensation is real -
+        // which is the difference between '!' and '?' and is why the caution
+        // travels with it.
+        confidence: 'medium',
+        because: [`${moveInfo.san || 'the move'} leaves ${(size / 100).toFixed(0)} point` +
+                  `${size >= 200 ? 's' : ''} of material there to be taken, and offers it anyway`],
+        slots: { count: String(Math.round(size / 100)) },
+        subjects: [before.sideToMove],
+      };
+    },
+  },
+  {
+    concept: 'exchange-sacrifice',
+    implements: ("recognition.preconditions: a rook is given for a knight or bishop. The record's MAIN " +
+                 "false-positive trap is that a rook given inside a forced mating line is a mating " +
+                 "sacrifice with identical material, and no material test can see the difference - so the " +
+                 "caution travels with the claim and the confidence stays at the record's medium."),
+    run(before, after, moveInfo) {
+      if (moveInfo.movedType !== 'R') return null;
+      const P = FEAT.page;
+      const st = P.stateFromFEN(before.fen);
+      const all = P.legalMoves(st);
+      const mv = all.find(m => P.uciOf(m) === moveInfo.uci);
+      if (!mv) return null;
+      const nx = P.makeMove(st, mv);
+      const them = other(before.sideToMove);
+      // The rook must actually be winnable where it stands, and by a MINOR
+      // piece or a pawn - a rook taken by a rook is a trade, not this.
+      const gain = P.see(nx, mv.to, them);
+      if (gain <= 0) return null;
+      const cheapest = P.attackersOf(nx, mv.to, them)
+        .map(a => nx.b[a] && nx.b[a].t).filter(Boolean)
+        .sort((a, b) => ({ P: 1, N: 3, B: 3, R: 5, Q: 9, K: 99 }[a] - { P: 1, N: 3, B: 3, R: 5, Q: 9, K: 99 }[b]))[0];
+      if (cheapest !== 'N' && cheapest !== 'B') return null;
+      return {
+        confidence: 'medium',
+        because: [`${moveInfo.san || 'the move'} puts a rook where a ${cheapest === 'N' ? 'knight' : 'bishop'} ` +
+                  `wins it, giving up about a pawn and a half of material for whatever the square is worth`],
+        slots: { square: moveInfo.movedTo || '' },
+        subjects: [before.sideToMove],
       };
     },
   },

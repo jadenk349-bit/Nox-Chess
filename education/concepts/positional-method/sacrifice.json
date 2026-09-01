@@ -72,7 +72,7 @@
     "prerequisites": [
       "hanging-piece"
     ],
-    "detector": "sacrificeSize (blind-chess.html, SEE-based)",
+    "detector": "lib/matchers.js: sacrifice, over the page's own SEE-based sacrificeSize()",
     "detectability": "mechanical",
     "typical_confidence": "high",
     "false_positive_traps": [
@@ -109,7 +109,8 @@
   ],
   "limitations": [
     "'Sacrifice' names what a move DOES, not whether it is good. Soundness is a separate question answered by calculation or judgement, depending on the type.",
-    "Spielmann's real-sacrifice subdivisions are explicitly subjective by his own statement."
+    "Spielmann's real-sacrifice subdivisions are explicitly subjective by his own statement.",
+    "Fires on 28.9% of the 788 shipped positions with the solution move supplied, which is what a corpus of tactical puzzles should look like. It measures that material was OFFERED, which is exact; it cannot measure whether the compensation is real, which is the difference between '!' and '?' and is why the confidence is medium rather than the record's high."
   ],
   "misconceptions": [
     "That every material give-up is a sacrifice — a blunder gives up material for nothing.",

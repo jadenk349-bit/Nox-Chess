@@ -76,7 +76,7 @@
     "prerequisites": [
       "sacrifice"
     ],
-    "detector": "puzzle_rules.js: rook given for a minor piece",
+    "detector": "lib/matchers.js: exchange-sacrifice",
     "detectability": "mechanical",
     "typical_confidence": "medium",
     "false_positive_traps": [
@@ -119,7 +119,8 @@
   ],
   "limitations": [
     "The material pattern is mechanically detectable; its CLASSIFICATION as positional is not.",
-    "Confidence is medium: 'rook for minor piece' fires reliably, 'and it was positional' does not."
+    "Confidence is medium: 'rook for minor piece' fires reliably, 'and it was positional' does not.",
+    "Fires on 1.0% of the 788 shipped positions with the solution move supplied, and on Reshevsky-Petrosian 1953 at 25...Re6, which is the game this concept is usually taught from. It requires the rook to be winnable where it lands and the cheapest attacker to be a MINOR piece - a rook taken by a rook is a trade. The record's main trap stands and is not detectable: a rook given inside a forced mating line is a mating sacrifice with identical material."
   ],
   "misconceptions": [
     "That an exchange sacrifice is always positional. It is frequently just a mating combination.",
