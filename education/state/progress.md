@@ -337,6 +337,23 @@ broke all three, which is the correct outcome. The refusal is a real principle
 and is now demonstrated where it really applies: two kings and two blocked
 e-pawns, a legal position in which no researched concept fits.
 
+### Six more, and a record whose two traps had to be read together
+
+`wrong-rook-pawn`, `opposition`, `loose-piece`, `discovered-check`,
+`smothered-mate`, `seventy-five-move-rule`. Detectors 32 → 53 across the
+session, of the 83 concepts whose records permit one.
+
+The interesting one was `loose-piece`, whose record carries two warnings two
+sentences apart: that "reporting every undefended piece would flag most
+positions and teach nothing", and that "it only matters when a **forcing** move
+can reach it". Written to the preconditions plus the obvious guard — is there a
+move after which this piece can be won — it fired on **66.8%** of the 788
+tactical positions and **40.6%** of the annotated master corpus, because
+"undefended and attackable" describes most pieces. That is the first trap,
+arrived at by ignoring the second. Requiring the move to be a check or a capture
+brings it to 34.9% and 34.4%, and the agreement between two unrelated corpora is
+the sign that it is now measuring the position rather than the corpus.
+
 That is the third metric this project has caught telling it what it wanted to
 hear — after the mass test's "99.7% positional coverage" and the corpus
 checker's scoring of negative examples — and all three were found the same way:

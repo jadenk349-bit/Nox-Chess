@@ -48,7 +48,7 @@
       "discovered-attack",
       "check"
     ],
-    "detector": "proposed: findMotifs reports discoveredAttack and doubleCheck but does not distinguish a discovered CHECK (not yet written)",
+    "detector": "lib/matchers.js: discovered-check, over findMotifs",
     "detectability": "mechanical",
     "typical_confidence": "medium",
     "false_positive_traps": []
@@ -64,7 +64,9 @@
   "exceptions": [
     "If the discovered check can be met by a capture of the checking piece, the free move is not free."
   ],
-  "limitations": [],
+  "limitations": [
+    "Fires on 1.5% of the 788 shipped positions. Defers to double-check, whose record says more about the same move."
+  ],
   "misconceptions": [],
   "relationships": {
     "broader": [

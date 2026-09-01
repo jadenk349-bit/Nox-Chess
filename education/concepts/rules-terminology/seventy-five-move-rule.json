@@ -38,7 +38,7 @@
       "The final move delivers checkmate — mate takes precedence"
     ],
     "prerequisites": [],
-    "detector": "stateFromFEN, the halfmove-clock field",
+    "detector": "lib/matchers.js: seventy-five-move-rule, over the halfmove clock",
     "detectability": "mechanical",
     "typical_confidence": "medium",
     "false_positive_traps": []
@@ -54,7 +54,9 @@
   "exceptions": [
     "Checkmate on the 75th move takes precedence over the draw."
   ],
-  "limitations": [],
+  "limitations": [
+    "Reported from 130 ply. Unlike the fifty-move rule this needs no claim, which is the difference the wording carries."
+  ],
   "misconceptions": [],
   "relationships": {
     "broader": [],

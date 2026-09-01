@@ -92,8 +92,9 @@ const PRIORITY = [
   // The rules first, when they apply at all: stalemate and insufficient material
   // END the game, and check restricts every legal move. These are facts, not
   // judgements, and nothing informative can outrank them.
-  'stalemate', 'insufficient-material', 'checkmate', 'check', 'promotion',
-  'en-passant', 'fifty-move-rule',
+  'stalemate', 'insufficient-material', 'checkmate', 'smothered-mate', 'check',
+  'discovered-check', 'promotion', 'en-passant', 'fifty-move-rule',
+  'seventy-five-move-rule', 'wrong-rook-pawn',
   'double-check', 'fork', 'knight-fork', 'pin', 'skewer',
   'discovered-attack', 'back-rank-mate', 'trapped-piece', 'hanging-piece',
   'castling',
@@ -135,7 +136,7 @@ const PRIORITY = [
   'hanging-pawns', 'opposite-coloured-bishops', 'bishop-pair', 'luft',
   'pawn-break', 'restraint', 'worst-placed-piece', 'bad-bishop', 'sacrifice',
   'king-safety', 'bishop-pair', 'battery', 'center-control', 'blockade',
-  'king-activation', 'doubled-pawns',
+  'opposition', 'king-activation', 'loose-piece', 'doubled-pawns',
 
   // ...and the band that is true of most positions, last, because being true
   // here is not news.
@@ -952,6 +953,143 @@ const STRUCTURAL = [
     },
   },
   {
+    concept: 'wrong-rook-pawn',
+    implements: ("recognition.preconditions verbatim: the attacker has a bishop and a rook pawn, and the " +
+                 "pawn's promotion square is NOT of the bishop's colour. The record's own first trap - that " +
+                 "the defending king must REACH the corner, and that being in front of the pawn is not " +
+                 "enough - is a fact about the defence, not about the material, so it travels as a caution."),
+    run(f) {
+      for (const c of ['w', 'b']) {
+        const me = f.material[c].counts, them = f.material[other(c)].counts;
+        if (me.B !== 1 || me.N || me.R || me.Q) continue;
+        if (me.P !== 1) continue;
+        if (them.P || them.N || them.B || them.R || them.Q) continue;   // a bare king, or the verdict changes
+        const pawn = (f.pawns[c].passed.concat(f.pawns[c].isolated))[0]
+          || Object.keys(f.pawns[c]).length && null;
+        // find the pawn square directly
+        const P = FEAT.page;
+        const st = P.stateFromFEN(f.fen);
+        let sq = null;
+        for (let i = 0; i < 64; i++) { const q = st.b[i]; if (q && q.c === c && q.t === 'P') sq = i; }
+        if (sq === null) continue;
+        const file = 'abcdefgh'[sq & 7];
+        if (file !== 'a' && file !== 'h') continue;
+        const promo = (c === 'w' ? 0 : 7) * 8 + (sq & 7);
+        let bishop = null;
+        for (let i = 0; i < 64; i++) { const q = st.b[i]; if (q && q.c === c && q.t === 'B') bishop = i; }
+        if (bishop === null) continue;
+        if (FEAT.isLight(promo) === FEAT.isLight(bishop)) continue;      // the RIGHT rook pawn; nothing to say
+        return {
+          confidence: 'high',
+          because: [`${side(f, c)} has a bishop and a rook pawn on the ${file}-file, and the promotion square ` +
+                    `${FEAT.nameOf(promo)} is the colour the bishop can never reach — the extra material is ` +
+                    `worth nothing if the defending king reaches the corner`],
+          slots: { square: FEAT.nameOf(promo), file },
+          subjects: [c],
+        };
+      }
+      return null;
+    },
+  },
+  {
+    concept: 'opposition',
+    implements: ("recognition.preconditions: both kings on the same rank or file with exactly one square " +
+                 "between them. The record's first trap is why this is confined to endgames - 'kings facing " +
+                 "each other is trivially detectable and means nothing outside endgames where king " +
+                 "penetration decides' - and its third is why the wording names the spare-tempo escape."),
+    run(f) {
+      if (f.phase !== 'endgame') return null;
+      const P = FEAT.page;
+      const st = P.stateFromFEN(f.fen);
+      const wk = f.king.w && f.king.w.square, bk = f.king.b && f.king.b.square;
+      if (!wk || !bk) return null;
+      const fw = wk.charCodeAt(0), rw = Number(wk[1]), fb = bk.charCodeAt(0), rb = Number(bk[1]);
+      const sameFile = fw === fb && Math.abs(rw - rb) === 2;
+      const sameRank = rw === rb && Math.abs(fw - fb) === 2;
+      if (!sameFile && !sameRank) return null;
+      // The side NOT to move has it.
+      const holder = other(st.turn);
+      return {
+        confidence: 'high',
+        because: [`The kings stand on ${wk} and ${bk} with one square between them, so ${side(f, holder)} ` +
+                  `has the opposition — ${side(f, st.turn)} has to give way first`],
+        slots: { square: holder === 'w' ? wk : bk },
+        subjects: [holder],
+      };
+    },
+  },
+  {
+    concept: 'loose-piece',
+    implements: ("recognition.preconditions: a piece has no friendly defender and is not currently attacked. " +
+                 "The record's own second trap is the reason for the guard: 'it only matters when a forcing " +
+                 "move can reach it. A loose rook in a locked position is not a weakness.' So a loose piece " +
+                 "is reported only when an enemy move can attack it."),
+    run(f) {
+      const P = FEAT.page;
+      const st = P.stateFromFEN(f.fen);
+      const mover = st.turn;
+      let moves;
+      try { moves = P.legalMoves(st); } catch (e) { return null; }
+      const hits = [];
+      const them = other(mover);
+      for (let i = 0; i < 64; i++) {
+        const q = st.b[i];
+        if (!q || q.c !== them || q.t === 'P' || q.t === 'K') continue;
+        if (P.defendersOf(st, i, them).length) continue;           // defended
+        if (P.attackersOf(st, i, mover).length) continue;          // already attacked; a different concept
+        // ...and a FORCING move can reach it. The record's second trap is the
+        // whole guard: "it only matters when a forcing move can reach it. A
+        // loose rook in a locked position is not a weakness." A first version
+        // asked only whether SOME move attacked the piece and fired on 66.8% of
+        // the 788 shipped positions - which is the record's FIRST trap,
+        // "reporting every undefended piece would flag most positions and teach
+        // nothing", arrived at by ignoring the second. So: a move after which
+        // the piece can actually be WON, by static exchange evaluation.
+        // FORCING is the operative word, and it has to be tested as such. A
+        // version that asked only "is there a move after which this can be won"
+        // fired on 66.8% of the 788 tactical positions and 40.6% of the quiet
+        // master positions in this base's own corpus, because "undefended and
+        // attackable" is a description of most pieces. The move must be one the
+        // opponent has to answer - a check or a capture - and it must leave the
+        // loose piece winnable. That is a fork or a discovery in the making,
+        // which is what the concept is a warning about.
+        const winnable = moves.some(m => {
+          if (m.to === i) return false;                 // taking it is not "loose", it is hanging
+          const nx = P.makeMove(st, m);
+          if (!nx.b[i]) return false;
+          const forcing = !!m.cap || P.inCheck(nx, them);
+          if (!forcing) return false;
+          if (!P.attackersOf(nx, i, mover).length) return false;
+          return P.see(nx, i, mover) > 0;
+        });
+        if (winnable) hits.push(FEAT.nameOf(i));
+      }
+      if (!hits.length) return null;
+      return {
+        confidence: 'medium',
+        because: [`${side(f, them)} has an undefended piece on ${brief(hits)} that is not attacked yet, and ` +
+                  `${side(f, mover)} has a move that attacks it`],
+        slots: { square: hits[0] },
+        subjects: [them],
+      };
+    },
+  },
+  {
+    concept: 'seventy-five-move-rule',
+    implements: "recognition.preconditions: 150 ply with no capture and no pawn move.",
+    run(f) {
+      const half = Number(String(f.fen).split(' ')[4] || 0);
+      if (!(half >= 130)) return null;
+      return {
+        confidence: 'high',
+        because: [`${half} ply have passed with no capture and no pawn move; at 150 the game is drawn ` +
+                  `automatically, with no claim needed`],
+        slots: { count: String(half) },
+        subjects: ['w', 'b'],
+      };
+    },
+  },
+  {
     concept: 'king-activation',
     implements: "recognition.preconditions: an endgame, with a king off its back rank",
     run(f) {
@@ -1208,6 +1346,61 @@ const MOVE_BASED = [
         because: [`${moveInfo.san || 'the move'} castles ${side_}, moving the king to safety and bringing ` +
                   `the rook towards the centre in one move`],
         slots: { square: moveInfo.movedTo },
+        subjects: [before.sideToMove],
+      };
+    },
+  },
+  {
+    concept: 'discovered-check',
+    implements: ("recognition.preconditions: a friendly line piece aimed at the enemy king through exactly " +
+                 "one friendly blocker, and the blocker moves off the line. Detected as findMotifs' own " +
+                 "discoveredAttack where the revealed attack is on the KING, which is what makes the moving " +
+                 "piece free to do anything."),
+    run(before, after, moveInfo) {
+      const tags = (moveInfo.motifs || []).map(m => m.tag);
+      if (tags.includes('doubleCheck')) return null;      // that record says more
+      if (!tags.includes('discoveredAttack')) return null;
+      const text = (moveInfo.motifs.find(m => m.tag === 'discoveredAttack') || {}).text || '';
+      if (!/checks the king/.test(text)) return null;
+      return {
+        confidence: 'high',
+        because: [`${moveInfo.san || 'the move'} uncovers a check, so the piece that moved is free to go ` +
+                  `anywhere it likes — the reply has to answer the check`],
+        slots: { square: moveInfo.movedTo || '' },
+        subjects: [before.sideToMove],
+      };
+    },
+  },
+  {
+    concept: 'smothered-mate',
+    implements: ("recognition.preconditions: the enemy king's flight squares are all occupied by its own " +
+                 "pieces, and a knight gives the check. Reported only on an actual mate, because the " +
+                 "pattern without the mate is a king that happens to be surrounded."),
+    run(before, after, moveInfo) {
+      if (moveInfo.movedType !== 'N') return null;
+      const tags = (moveInfo.motifs || []).map(m => m.tag);
+      if (!tags.includes('mate')) return null;
+      const P = FEAT.page;
+      const st = P.stateFromFEN(moveInfo.fenAfter);
+      const them = st.turn;
+      const k = P.kingSq(st, them);
+      if (k < 0) return null;
+      const r = k >> 3, c = k & 7;
+      let flight = 0, blocked = 0;
+      for (let dr = -1; dr <= 1; dr++) for (let dc = -1; dc <= 1; dc++) {
+        if (!dr && !dc) continue;
+        const rr = r + dr, cc = c + dc;
+        if (rr < 0 || rr > 7 || cc < 0 || cc > 7) continue;
+        flight++;
+        const q = st.b[rr * 8 + cc];
+        if (q && q.c === them) blocked++;
+      }
+      if (!flight || blocked !== flight) return null;
+      return {
+        confidence: 'high',
+        because: [`${moveInfo.san || 'the move'} is mate by a knight against a king whose every flight ` +
+                  `square is occupied by its own men`],
+        slots: { square: moveInfo.movedTo || '' },
         subjects: [before.sideToMove],
       };
     },

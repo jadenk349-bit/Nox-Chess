@@ -51,7 +51,7 @@
     "prerequisites": [
       "zugzwang"
     ],
-    "detector": "proposed: king distance and parity (not yet written)",
+    "detector": "lib/matchers.js: opposition",
     "detectability": "mechanical",
     "typical_confidence": "high",
     "false_positive_traps": [
@@ -89,7 +89,8 @@
     "In positions decided by a pawn race, king geometry may be irrelevant."
   ],
   "limitations": [
-    "Mechanically detectable and mechanically decidable in the endgame; meaningless elsewhere."
+    "Mechanically detectable and mechanically decidable in the endgame; meaningless elsewhere.",
+    "Confined to endgames, per the record's own first trap that kings facing each other \"is trivially detectable and means nothing outside endgames where king penetration decides\". 0.6% of the 788 shipped positions. It reports who HAS the opposition and cannot say whether taking it is right - the record's second trap, Averbakh's corrective, is a judgement about the plan."
   ],
   "misconceptions": [
     "That having the opposition means it is your move. It means the opposite — the side NOT to move has it.",

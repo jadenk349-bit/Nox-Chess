@@ -691,6 +691,31 @@ const { concepts } = API.knowledge();
      !MATCH.STRUCTURAL.some(m => m.concept === 'strong-square'));
 }
 
+{
+  // Six more detectors, each pinned where it matters.
+  const t = (fen, mv) => {
+    const o = { fen }; if (mv) o.move = mv;
+    return API.analyzeWithEducation(o).concepts_all.map(c => c.id);
+  };
+  // wrong-rook-pawn turns on the BISHOP'S COLOUR against the promotion square,
+  // which is the whole content of the concept.
+  has('wrong rook pawn: light bishop, dark h8', t('7k/8/5K2/7P/8/5B2/8/8 w - - 0 1'), 'wrong-rook-pawn');
+  ok('...and not reported when the bishop is the right colour',
+     !t('7k/8/5K2/7P/3B4/8/8/8 w - - 0 1').includes('wrong-rook-pawn'));
+  // opposition is an endgame concept by its own record's first trap.
+  has('opposition: reported in a king ending', t('8/8/4k3/8/4K3/8/8/8 w - - 0 1'), 'opposition');
+  ok('opposition: not reported in a middlegame',
+     !t('r1bqkb1r/pppp1ppp/2n2n2/4p3/2B1P3/5N2/PPPP1PPP/RNBQK2R w KQkq - 4 4').includes('opposition'));
+  has('smothered mate', t('r5rk/6pp/8/6N1/8/8/8/6K1 w - - 0 1', 'g5f7'), 'smothered-mate');
+  has('discovered check', t('4k3/8/8/8/8/4N3/8/4R1K1 w - - 0 1', 'e3d5'), 'discovered-check');
+  // loose-piece must not fire on a normal opening position, which is the
+  // record's first trap.
+  ok('loose-piece: not in a quiet opening',
+     !t('r1bqkb1r/pppp1ppp/2n2n2/4p3/2B1P3/5N2/PPPP1PPP/RNBQK2R w KQkq - 4 4').includes('loose-piece'));
+  ok('loose-piece: not in the starting position',
+     !t('rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1').includes('loose-piece'));
+}
+
 /* ---------- report ---------- */
 console.log(`\nAPI  PASS ${pass}   FAIL ${fails.length}`);
 for (const [n, d] of fails) console.log(`  FAIL  ${n}\n        ${d}`);

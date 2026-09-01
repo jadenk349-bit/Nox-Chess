@@ -72,7 +72,7 @@
       "bad-bishop",
       "fortress"
     ],
-    "detector": "materialPattern KBP-K with a/h pawn — not yet written",
+    "detector": "lib/matchers.js: wrong-rook-pawn",
     "detectability": "mechanical",
     "typical_confidence": "high",
     "false_positive_traps": [
@@ -108,7 +108,9 @@
     "If the defending king cannot reach the corner in time, the attacker wins normally.",
     "In the mirrored rook-versus-bishop cases the logic inverts: there the DEFENDER has the wrong bishop when it is the colour of the corner its king is confined to."
   ],
-  "limitations": [],
+  "limitations": [
+    "Fires on none of the 788 shipped positions - the material is B+RP against a bare king and none of them is that - and on a constructed case with a light-squared bishop and an h-pawn. The record's first trap is not detectable and travels as a caution: the defending king must REACH the corner, and being in front of the pawn is not enough."
+  ],
   "misconceptions": [
     "That an extra bishop and pawn must win. Against the wrong rook pawn it is a dead draw.",
     "That getting the king in front of the pawn draws, as it does with king and pawn alone. It does not.",

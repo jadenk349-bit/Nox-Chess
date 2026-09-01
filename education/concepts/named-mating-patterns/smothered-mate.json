@@ -49,7 +49,7 @@
     "prerequisites": [
       "double-check"
     ],
-    "detector": "proposed: king flight squares all occupied by its own men (not yet written)",
+    "detector": "lib/matchers.js: smothered-mate",
     "detectability": "mechanical",
     "typical_confidence": "medium",
     "false_positive_traps": []
@@ -65,7 +65,9 @@
   "exceptions": [
     "If any surrounding piece can move away with tempo, the mate evaporates."
   ],
-  "limitations": [],
+  "limitations": [
+    "Reported only on an actual mate. The pattern without the mate is a king that happens to be surrounded, which is a description rather than a mating pattern. Fires on none of the 788 shipped positions and on the constructed Philidor pattern."
+  ],
   "misconceptions": [],
   "relationships": {
     "broader": [],

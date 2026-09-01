@@ -41,7 +41,7 @@
       "Defending it would cost more than the risk — a loose piece is a risk, not an error"
     ],
     "prerequisites": [],
-    "detector": null,
+    "detector": "lib/matchers.js: loose-piece",
     "detectability": "mechanical",
     "typical_confidence": "high",
     "false_positive_traps": [
@@ -71,7 +71,8 @@
     "Spending tempi to defend a piece nothing attacks is a real cost and often the worse choice."
   ],
   "limitations": [
-    "Says nothing on its own. Its whole value is conditional on forcing moves existing."
+    "Says nothing on its own. Its whole value is conditional on forcing moves existing.",
+    "The record has two traps and the first is only avoided by honouring the second. A version asking \"is there a move after which this undefended piece can be won\" fired on 66.8% of the 788 tactical positions and 40.6% of the annotated master corpus, because \"undefended and attackable\" describes most pieces - which is the first trap, \"reporting every undefended piece would flag most positions and teach nothing\", reached by ignoring the second, \"it only matters when a FORCING move can reach it\". Requiring the move to be a check or a capture brings it to 34.9% and 34.4%, and the agreement between two unrelated corpora is the sign that it is now measuring the position rather than the corpus."
   ],
   "misconceptions": [
     "That every piece should be defended.",
