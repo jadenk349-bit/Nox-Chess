@@ -2869,6 +2869,87 @@
   .yn .no{color:#e7908a; border-color:rgba(224,90,77,.4);}
   .yn .no:hover{color:#fff; background:rgba(224,90,77,.16); border-color:var(--danger);}
 
+  /* ---------- the leaderboard ----------
+     The home page is a header and a sky, and this is the one thing standing in
+     it, so it is furniture rather than a box laid over the page: parked
+     against the right edge of the row and centred in whatever is left of the
+     window under the header.
+
+     The panel itself has no ground of its own — no plate, no border, no blur.
+     The sky is the background, and the ten rows are the only things drawn on
+     it, each with just enough shading of its own to keep a name readable over
+     a passing star.
+
+     The badge art is here rather than the player's avatar, which costs
+     something worth knowing about: the ranked screen fetches exactly one of
+     these files because only one is ever on it, and this list can put up to
+     seven of them on screen at a couple of hundred kilobytes each. They are
+     fetched once per tier, not once per row, and the server serves the assets
+     with a week of cache — but if this page ever needs to be light on a cold
+     load, small copies of the badges are the first thing to make. */
+  .home-body{
+    display:flex; align-items:center; justify-content:flex-end;
+    min-height:calc(100vh - var(--logo-box) - 150px);
+    padding:clamp(10px,3vh,34px) 0 clamp(20px,5vh,54px);
+  }
+  .lb-panel{
+    width:min(500px,100%);
+    padding:clamp(8px,1.6vw,16px) 0;
+    background:transparent; border:0; box-shadow:none;
+  }
+  /* Ranged left, with the rows: the heading lines up with the place numbers
+     under it rather than floating over the middle of them. */
+  .lb-head{
+    margin:0 0 4px; text-align:left;
+    font-family:Georgia,serif; font-weight:400;
+    font-size:clamp(26px,3.2vw,34px); letter-spacing:.1em; color:var(--gold-soft);
+  }
+  .lb-cap{
+    margin:0 0 clamp(16px,2.2vh,22px); text-align:left;
+    font-size:11px; letter-spacing:.22em; text-transform:uppercase; color:var(--muted);
+  }
+  /* Ten rows is the whole list and it is meant to be read at a glance, so the
+     panel grows to hold them; the cap is only there for a short window. */
+  .lb-list{display:flex; flex-direction:column; gap:9px; max-height:62vh; overflow-y:auto;}
+  .lb-row{
+    display:flex; align-items:center; gap:14px;
+    padding:11px 14px; border-radius:13px;
+    background:rgba(0,0,0,.28); border:1px solid var(--line);
+  }
+  /* your own row, wherever it lands: the list is worth twice as much when you
+     can find yourself in it without reading it */
+  .lb-row.me{background:rgba(217,164,65,.09); border-color:rgba(217,164,65,.42);}
+  .lb-place{
+    flex:none; width:28px; text-align:center;
+    font-size:16px; font-weight:700; color:var(--muted);
+    font-variant-numeric:tabular-nums;
+  }
+  .lb-row.top .lb-place{color:var(--gold);}
+  /* The badge is art with a shape of its own, so it gets no circle to sit in
+     and no crop — it is set into the row the way it is set into the ranked
+     screen, on nothing. */
+  .lb-badge{
+    flex:none; width:46px; height:46px;
+    display:flex; align-items:center; justify-content:center;
+  }
+  .lb-badge img{width:100%; height:100%; object-fit:contain; display:block;}
+  /* the same name the social page draws people with, one size up */
+  .lb-row .social-name{font-size:15.5px;}
+  .lb-row .social-meta{
+    font-size:10.5px; letter-spacing:.16em; text-transform:uppercase;
+  }
+  .lb-elo{flex:none; text-align:right;}
+  .lb-num{
+    font-size:19px; font-weight:650; letter-spacing:.03em; color:var(--gold-soft);
+    font-variant-numeric:tabular-nums;
+  }
+  .lb-cap-elo{font-size:10px; letter-spacing:.2em; color:#5c6070;}
+  /* Narrow, there is no right half to sit in: it takes the width and the row
+     it is on, and stops reserving a screenful of height it cannot centre in. */
+  @media (max-width:760px){
+    .home-body{min-height:0; justify-content:center; padding-top:18px;}
+  }
+
   /* ---------- overlays ---------- */
   .overlay{
     position:fixed; inset:0; z-index:50;
@@ -3059,6 +3140,19 @@
       </div>
       </div>
     </header>
+
+    <!-- The ladder stands on the page rather than behind a button. It is the
+         only thing in the home page's body, so it is given room: pinned to the
+         right of the row and centred in what is left of the window under the
+         header. Nothing here is a link — this is the ladder being shown, and
+         everything that can be done about it is up in the nav. -->
+    <div class="home-body">
+      <aside class="lb-panel" aria-labelledby="lbTitle">
+        <h2 class="lb-head" id="lbTitle">Leaderboard</h2>
+        <p class="lb-cap">Top 10</p>
+        <div class="lb-list" id="lbList"></div>
+      </aside>
+    </div>
   </section>
 
   <!-- ============ SOCIAL ============
@@ -11921,6 +12015,9 @@ function showScreen(name){
   // challenge has somewhere to land. netConnect reuses whatever is already
   // there, so this is a no-op on the second visit.
   if (name === 'home' || name === 'social') socialConnect();
+  // The ladder is on the home page itself, so coming back to it is the only
+  // gesture there is for "show me where things stand now".
+  if (name === 'home' && authSettled) loadBoard();
   // Only the home page has room for the account cluster. Sign up, log in and
   // the username screen are about the account already; rooms names you in its
   // own chip; and over a game it would sit on the chips describing the game.
@@ -12693,19 +12790,34 @@ const tierFor = r => (TIERS.find(t => r >= t[0]) || TIERS[TIERS.length-1])[1];
 // one badge per tier, named after it; only the one on screen is ever fetched
 const tierArt = name => 'assets/tier-' + name.toLowerCase() + '.png?v=1';
 
+/* True once initAuth has finished, whichever way it went. The leaderboard is
+   the only thing that asks: it is on screen from the first paint, and "the
+   client is still being imported" and "there will never be a client" are two
+   different things to put in an empty panel. */
+let authSettled = false;
+
 async function initAuth(){
   updateAccountUI();
-  if (!SUPABASE_URL || !SUPABASE_ANON_KEY) return;      // not configured yet
+  if (!SUPABASE_URL || !SUPABASE_ANON_KEY){             // not configured yet
+    authSettled = true; loadBoard(); return;
+  }
   try {
     const { createClient } = await import('https://esm.sh/@supabase/supabase-js@2');
     sb = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+    authSettled = true;
+    // The ladder needs no account, only the client: profiles are readable by
+    // anon, so a guest may see it and it is asked for the moment there is
+    // something to ask.
+    loadBoard();
     const { data } = await sb.auth.getSession();
     await setAccount(data.session);
     sb.auth.onAuthStateChange((_evt, session) => setAccount(session));
   } catch (err){
     sb = null;                                          // offline, or blocked
+    authSettled = true;
     console.warn('Sign-in unavailable:', err && err.message);
     updateAccountUI();
+    loadBoard();
   }
 }
 
@@ -12782,6 +12894,8 @@ function updateAccountUI(){
   // signing in while looking at the ladder swaps the guest's starting badge
   // for the one the account has actually earned
   if (screenName === 'ranked') drawRank();
+  // and the leaderboard marks one row as yours, which is now somebody else's
+  if (LB.rows) renderBoard();
   // and the social page is about one particular account, so it starts over
   socialAccountChanged();
   // practice is kept per account too, so the dashboard on screen is now
@@ -12929,6 +13043,121 @@ document.querySelectorAll('[data-home]').forEach(b => {
 });
 document.getElementById('authClose').onclick  =
   () => document.getElementById('authOverlay').classList.remove('show');
+
+/* ---- the leaderboard ----
+   The top of the ranked ladder, read straight out of profiles. It needs no
+   account of its own: supabase-setup.sql makes that table readable by anon as
+   well as authenticated, and rating is one of the columns the browser may
+   read and never write — so a guest sees exactly the ten names a signed-in
+   player sees, and neither of them can touch the numbers.
+
+   It is re-read on every open rather than kept for the session. It is one
+   small query, and a ladder that is quietly out of date is worse company than
+   one that takes a moment to arrive. */
+const LB = { rows: null, loading: false, error: '', token: 0 };
+const lbList = document.getElementById('lbList');
+
+async function loadBoard(){
+  if (!sb){
+    /* Two different silences, and the panel must not confuse them. Before
+       initAuth has finished importing the client there is simply nothing to
+       ask yet, and the panel says so by saying nothing; once it has settled —
+       no keys, or a CDN that never answered — there is no ladder to show and
+       that is worth a sentence. Neither one may read as "nobody is ranked". */
+    LB.rows = null;
+    LB.error = authSettled
+      ? 'The leaderboard needs the account server, and it is not reachable right now.'
+      : '';
+    renderBoard();
+    return;
+  }
+  const token = ++LB.token;
+  LB.loading = true;
+  LB.error = '';
+  renderBoard();
+  try {
+    const { data, error } = await sb.from('profiles')
+      // no avatar_url: this list wears the tier badge, not the player's face
+      .select('id, display_name, rating')
+      .order('rating', { ascending: false })
+      // Ties are broken by name here rather than left to whatever order the
+      // database felt like: everybody starts on the same rating, so without
+      // this the tenth and eleventh place could swap between two opens.
+      .order('display_name')
+      .limit(10);
+    if (error) throw error;
+    if (token !== LB.token) return;          // a later read has already answered
+    LB.rows = (data || []).map(asPerson);
+  } catch (err){
+    if (token !== LB.token) return;
+    LB.rows = null;
+    LB.error = 'Could not load the leaderboard — ' + ((err && err.message) || 'try again in a moment.');
+  } finally {
+    if (token === LB.token){ LB.loading = false; renderBoard(); }
+  }
+}
+
+function renderBoard(){
+  lbList.innerHTML = '';
+  if (LB.error){ lbList.appendChild(emptyNote(LB.error, true)); return; }
+  // Anything short of rows in hand is "loading", including the wait before the
+  // account client exists. A refresh over rows that are already up says
+  // nothing at all rather than blanking the list to announce itself.
+  if (!LB.rows){ lbList.appendChild(emptyNote('Loading the ladder…')); return; }
+  if (!LB.rows.length){ lbList.appendChild(emptyNote('Nobody has a ranked rating yet.')); return; }
+  LB.rows.forEach((person, i) => lbList.appendChild(boardRow(person, i + 1)));
+}
+
+/* The tier's badge, the same file and the same naming the ranked screen uses.
+   A row with no rating to read gets no badge rather than a guessed one — the
+   only way that happens is a profile row from before the column existed, and
+   Bronze would be a claim about somebody nobody has measured. */
+function badgeFor(person){
+  const box = document.createElement('div');
+  box.className = 'lb-badge';
+  if (person.rating === null) return box;
+  const tier = tierFor(person.rating);
+  const img = document.createElement('img');
+  img.src = tierArt(tier);
+  img.alt = tier;
+  img.width = 46; img.height = 46;
+  // a badge that will not load leaves the row's spacing alone; the tier is
+  // written under the name anyway
+  img.onerror = () => img.remove();
+  box.appendChild(img);
+  return box;
+}
+
+/* One row: the place, the badge the rating has earned, the name, the tier it
+   is called by, and the rating itself. */
+function boardRow(person, place){
+  const row = document.createElement('div');
+  row.className = 'lb-row'
+    + (place <= 3 ? ' top' : '')
+    + (account && person.id === account.id ? ' me' : '');
+
+  const at = document.createElement('div');
+  at.className = 'lb-place';
+  at.textContent = place;
+  row.appendChild(at);
+
+  row.appendChild(badgeFor(person));
+  row.appendChild(whoBlock(person, person.rating === null ? '' : tierFor(person.rating)));
+
+  const elo = document.createElement('div');
+  elo.className = 'lb-elo';
+  const num = document.createElement('div');
+  num.className = 'lb-num';
+  num.textContent = person.rating === null ? '—' : person.rating;
+  const cap = document.createElement('div');
+  cap.className = 'lb-cap-elo';
+  cap.textContent = 'ELO';
+  elo.appendChild(num);
+  elo.appendChild(cap);
+  row.appendChild(elo);
+  return row;
+}
+
 
 /* ============================================================
    SOCIAL — friends, the requests that make them, and challenges
