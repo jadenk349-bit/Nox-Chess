@@ -11,18 +11,18 @@
     "concepts_researched": 29,
     "concepts_validated": 4,
     "concepts_needs_review": 0,
-    "sources_reviewed": 166,
-    "positions_tested": 32,
-    "matches_validated": 18,
-    "false_matches": 8,
-    "ambiguous_matches": 6,
+    "sources_reviewed": 168,
+    "positions_tested": 53,
+    "matches_validated": 26,
+    "false_matches": 14,
+    "ambiguous_matches": 13,
     "by_stage": {
       "ready": 2,
       "researched": 123,
       "validated": 9
     },
-    "tablebase_positions": 21,
-    "concepts_fully_covered": 12,
+    "tablebase_positions": 22,
+    "concepts_fully_covered": 14,
     "areas_touched": 85,
     "areas_total": 85
   },
@@ -1491,6 +1491,40 @@
         "open-file",
         "semi-open-file",
         "weak-square"
+      ]
+    },
+    {
+      "id": "positional-corpus-and-master-games",
+      "date": "2026-09-01",
+      "method": "Mined 1576 real positions from the puzzle corpus for concept features with lib/features.js, validated 42 of them with Stockfish 18 at depth 20, and separately replayed two master games through the page's own move generator to derive verified FENs.",
+      "results": {
+        "positions_before": 32,
+        "positions_after": 53,
+        "master_game_positions": 7,
+        "engine_validated_added": 21,
+        "validation_errors": 0,
+        "depth_mean_before": 0.61,
+        "depth_mean_after": 0.63,
+        "areas_full_before": 1,
+        "areas_full_after": 2
+      },
+      "findings": [
+        "Two master games were verified end to end rather than transcribed: Capablanca-Tartakower 1924 (103 plies) and Nimzowitsch-Salwe 1911 (77 plies) both replayed legally through the page's own move generator, so every derived FEN is checked rather than remembered.",
+        "Testing against those games immediately exposed three false positives that the tactical corpus had not: bad-bishop fired on Nimzowitsch's BLOCKADING bishop, outpost fired on Capablanca's opponent's rim knight on a5, and isolated-queen-pawn fired on a lone d-pawn in a pure rook ending. All three are fixed.",
+        "A fourth and more structural problem surfaced with them: ordering by informativeness let a LOW-confidence claim lead. A low-confidence claim must never be the headline, and the sort now demotes them regardless of how interesting the concept would be if true.",
+        "Most mined positions are too sharp to isolate a positional concept - the corpus is tactical puzzles - so 13 of them are recorded as AMBIGUOUS examples whose notes say the feature is present and the position is decided by tactics. That is an honest use of them rather than a wasted one.",
+        "The depth needle moved very little (0.61 to 0.63) for 21 added positions, which is the real scale of the remaining gap: 129 board-level concepts would need several hundred positions to reach high completeness."
+      ],
+      "concepts": [
+        "king-activation",
+        "rook-on-the-seventh",
+        "blockade",
+        "weak-square",
+        "knight-vs-bishop",
+        "piece-exchanges",
+        "bad-bishop",
+        "outpost",
+        "isolated-queen-pawn"
       ]
     }
   ],

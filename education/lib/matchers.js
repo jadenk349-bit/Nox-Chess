@@ -116,8 +116,13 @@ const STRUCTURAL = [
     implements: "recognition: an isolated pawn specifically on the d-file",
     run(f) {
       // The isolated queen's pawn is a structure with pieces around it. A lone
-      // d-pawn in a pawn ending is not an IQP, it is a passed pawn.
-      if (totalPieces(f) === 0) return null;
+      // d-pawn in a pawn ending is not an IQP, it is a passed pawn - and a lone
+      // d-pawn in a ROOK ending is not one either, which is what this reported
+      // in Capablanca-Tartakower 1924. The named structure needs a minor piece
+      // or a queen on the board; with only rooks it is just an isolated pawn.
+      const minorsOrQueens = ['w', 'b'].reduce((n, c) =>
+        n + f.material[c].counts.N + f.material[c].counts.B + f.material[c].counts.Q, 0);
+      if (minorsOrQueens === 0) return null;
       const hits = [];
       for (const c of ['w', 'b']) {
         if (pawnCount(f, c) < 2) continue;
@@ -213,7 +218,15 @@ const STRUCTURAL = [
     implements: "recognition: a minor piece on a square no enemy pawn can attack, defended by a friendly pawn",
     run(f) {
       const hits = [];
-      for (const c of ['w', 'b']) if (f.outposts[c].length) hits.push({ c, o: f.outposts[c] });
+      for (const c of ['w', 'b']) {
+        // An outpost is about influence over the opponent's position, so a
+        // knight on the a- or h-file does not qualify however unassailable it
+        // is. Tested against Capablanca-Tartakower 1924, this reported Black's
+        // a5 knight - the worst piece on the board and the one Capablanca was
+        // happy to see there - as an outpost.
+        const o = f.outposts[c].filter(x => x.square[0] !== 'a' && x.square[0] !== 'h');
+        if (o.length) hits.push({ c, o });
+      }
       if (!hits.length) return null;
       return {
         confidence: 'high',
@@ -279,17 +292,28 @@ const STRUCTURAL = [
       // c8 bishop simply has not moved yet and its own d7 pawn is in the way.
       // Badness is a claim about the pawn structure having condemned a piece,
       // which cannot be said of a piece that has not tried to go anywhere.
+      // ...but only in the opening. The ARCHETYPE of a bad bishop is the French
+      // light-squared bishop buried on c8 behind d5, e6 and f7, which is a home
+      // square, so excluding home squares outright would refuse the one position
+      // the concept is named after. Phase separates the two: on move four the
+      // bishop has not moved yet, and on move twenty-four it has been buried.
       const HOME = { w: ['c1', 'f1'], b: ['c8', 'f8'] };
       for (const c of ['w', 'b']) {
         for (const b of (f.pieces[c].bishops || [])) {
-          if (HOME[c].includes(b.square)) continue;
-          if (b.ownPawnsOnItsColour < 4 || b.share < 0.55) continue;
+          if (f.phase === 'opening' && HOME[c].includes(b.square)) continue;
+          if (b.ownPawnsOnItsColour < 4 || b.share < 0.60) continue;
           // Suba's active bad bishop is the registered false positive on this
           // record: structurally bad, outside the chain, and a fine piece. Scope
           // is what tells them apart, so a bishop that can see is not reported.
-          if (b.scope >= 7) continue;
+          if (b.scope > 3) continue;
           return {
-            confidence: 'medium',
+            // The record states its own recognition confidence as LOW, saying
+            // that "the structural test is mechanical and the conclusion it
+            // invites is frequently wrong". Honour that rather than the
+            // cleanliness of the feature match: tested against Nimzowitsch-Salwe
+            // 1911, this fired on White's d4 bishop, which is the blockading
+            // piece the whole game is built around.
+            confidence: 'low',
             because: [`${side(f, c)}'s bishop on ${b.square} shares its colour with ${b.ownPawnsOnItsColour} of its own ${b.ownPawnsTotal} pawns, and sees only ${b.scope} squares`],
             slots: { square: b.square, piece: 'bishop' },
             subjects: [c],
@@ -505,7 +529,16 @@ function matchAll(features, moveInfo, concepts) {
   // on every entry and still caps what may be claimed.
   const rank = { high: 0, medium: 1, low: 2 };
   const isMotif = x => (x.source || '').startsWith('findMotifs') ? 0 : 1;
+  // A low-confidence claim must never be the headline, however informative the
+  // concept would be if it were true. Tested against Nimzowitsch-Salwe 1911,
+  // ordering by informativeness alone led with "White's bishop on d4 is bad" -
+  // about the blockading piece the entire game is built around, and reported at
+  // low confidence because the record says the structural test is unreliable.
+  // Informativeness decides between claims we are equally sure of; it does not
+  // promote one we are not sure of at all.
+  const weak = x => (x.confidence === 'low' ? 1 : 0);
   found.sort((a, b) => isMotif(a) - isMotif(b) ||
+                       weak(a) - weak(b) ||
                        priorityOf(a.concept) - priorityOf(b.concept) ||
                        rank[a.confidence] - rank[b.confidence]);
   return found;

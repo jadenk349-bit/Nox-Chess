@@ -110,9 +110,69 @@
     ],
     "conflicts": []
   },
-  "examples": [],
+  "examples": [
+    {
+      "fen": "r2qkbnr/p4pp1/b1pPp2p/2p5/Q2P4/5N2/PP1N1PPP/R1B1K2R b KQkq - 1 11",
+      "note": "The feature is present and was verified mechanically by lib/features.js: White has a backward pawn on d6, on a file the opponent's rooks can use. The engine puts the position at 0.57, close enough to level that the feature is not being swamped by tactics — so this is usable as an instance of the concept. What is NOT claimed is that the concept explains the engine's move. Provenance: mined from this repository's puzzle corpus, which is engine self-play — a real position from a real game between engines, not a master game.",
+      "origin_kind": "puzzle",
+      "concept_role": "supports",
+      "side_to_move_benefits": "neither",
+      "engine": {
+        "engine_id": "Stockfish 18",
+        "test_level": 2,
+        "depth": 20,
+        "threads": 8,
+        "hash_mb": 2048,
+        "multipv": 2,
+        "best_move": "a6b5",
+        "eval_cp": 57,
+        "mate_in": null,
+        "pv": [],
+        "alternatives": [
+          {
+            "move": "d8c8",
+            "eval_cp": -322,
+            "mate_in": null
+          }
+        ],
+        "margin_cp": 0,
+        "verdict": "supports",
+        "verdict_note": "Level-2 validation: the position was scored, not designed. It confirms the feature is present in real play and, where the score is near level, that the feature is not drowned out. It is not a controlled pair and proves nothing about the concept on its own."
+      }
+    }
+  ],
   "counterexamples": [],
-  "ambiguous_examples": [],
+  "ambiguous_examples": [
+    {
+      "fen": "rr6/1bq3p1/3p3k/pBpPppbp/P4n1P/1PR5/3B1PP1/3QR1K1 w - - 2 40",
+      "note": "The feature is present and was verified mechanically by lib/features.js: a backward pawn on a CLOSED file, where it cannot be attacked by rooks. The engine assessment is 5.05, which is far enough from level that the position is decided by concrete play rather than by this feature. Recorded as an ambiguous example on purpose: it demonstrates the feature and does NOT show the concept deciding anything, and conflating those is the error this base is built to avoid. Provenance: mined from this repository's puzzle corpus, which is engine self-play — a real position from a real game between engines, not a master game.",
+      "origin_kind": "puzzle",
+      "concept_role": "ambiguous",
+      "side_to_move_benefits": "neither",
+      "engine": {
+        "engine_id": "Stockfish 18",
+        "test_level": 2,
+        "depth": 20,
+        "threads": 8,
+        "hash_mb": 2048,
+        "multipv": 2,
+        "best_move": "h4g5",
+        "eval_cp": 505,
+        "mate_in": null,
+        "pv": [],
+        "alternatives": [
+          {
+            "move": "c3f3",
+            "eval_cp": -82,
+            "mate_in": null
+          }
+        ],
+        "margin_cp": 0,
+        "verdict": "ambiguous",
+        "verdict_note": "Level-2 validation: the position was scored, not designed. It confirms the feature is present in real play and, where the score is near level, that the feature is not drowned out. It is not a controlled pair and proves nothing about the concept on its own."
+      }
+    }
+  ],
   "explanations": {
     "by_level": {
       "beginner": "That pawn has fallen behind the pawns next to it and cannot move up safely, so it has to be defended by pieces.",
@@ -144,7 +204,7 @@
   },
   "status": {
     "stage": "researched",
-    "last_updated": "2026-08-31",
+    "last_updated": "2026-09-01",
     "open_questions": [],
     "audit_notes": [
       "2026-09-01 audit: attribution to Wilhelm Steinitz carried low confidence without a hedge in the note itself. Hedge added so the caveat travels with the claim rather than sitting only in history.confidence."

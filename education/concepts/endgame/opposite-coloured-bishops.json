@@ -139,8 +139,68 @@
       }
     }
   ],
-  "counterexamples": [],
-  "ambiguous_examples": [],
+  "counterexamples": [
+    {
+      "fen": "rn2k1nr/pp3ppp/6q1/4Pb2/2pP4/P1P4N/2P1Q1PP/R1B1K2R w KQkq - 3 13",
+      "note": "The feature is present and was verified mechanically by lib/features.js: opposite-coloured bishops WITH queens on — the attacking case, not the drawish one. The engine puts the position at 0.0, close enough to level that the feature is not being swamped by tactics — so this is usable as an instance of the concept. What is NOT claimed is that the concept explains the engine's move. Provenance: mined from this repository's puzzle corpus, which is engine self-play — a real position from a real game between engines, not a master game.",
+      "origin_kind": "puzzle",
+      "concept_role": "contradicts",
+      "side_to_move_benefits": "neither",
+      "engine": {
+        "engine_id": "Stockfish 18",
+        "test_level": 2,
+        "depth": 20,
+        "threads": 8,
+        "hash_mb": 2048,
+        "multipv": 2,
+        "best_move": "h3f4",
+        "eval_cp": 0,
+        "mate_in": null,
+        "pv": [],
+        "alternatives": [
+          {
+            "move": "c1e3",
+            "eval_cp": -265,
+            "mate_in": null
+          }
+        ],
+        "margin_cp": 0,
+        "verdict": "contradicts",
+        "verdict_note": "Level-2 validation: the position was scored, not designed. It confirms the feature is present in real play and, where the score is near level, that the feature is not drowned out. It is not a controlled pair and proves nothing about the concept on its own."
+      }
+    }
+  ],
+  "ambiguous_examples": [
+    {
+      "fen": "8/2nB4/2P2k2/p4P2/7b/P7/1P4pP/3KR3 w - - 3 52",
+      "note": "Opposite-coloured bishops with a rook and a knight still on. Mined as a 'drawish endgame' instance and the engine says otherwise, which is the concept's own exception appearing in the wild. Provenance: mined from this repository's puzzle corpus, which is engine self-play — a real position from a real game between engines, not a master game.",
+      "origin_kind": "puzzle",
+      "concept_role": "ambiguous",
+      "side_to_move_benefits": "white",
+      "engine": {
+        "engine_id": "Stockfish 18",
+        "test_level": 3,
+        "depth": 20,
+        "threads": 8,
+        "hash_mb": 2048,
+        "multipv": 2,
+        "best_move": "e1g1",
+        "eval_cp": 584,
+        "mate_in": null,
+        "pv": [],
+        "alternatives": [
+          {
+            "move": "e1e6",
+            "eval_cp": -656,
+            "mate_in": null
+          }
+        ],
+        "margin_cp": 0,
+        "verdict": "ambiguous",
+        "verdict_note": "+5.84 for White. Opposite-coloured bishops are drawish ONLY when they are nearly the last pieces on the board; with other pieces present the same feature favours the attacker, because each bishop defends a colour complex the other cannot contest. Filed as ambiguous rather than contradicting: it does not refute the drawish claim, it locates its boundary, and it is why this concept's record separates the endgame reading from the middlegame one."
+      }
+    }
+  ],
   "explanations": {
     "by_level": {
       "beginner": "The bishops move on different colours, so they can never meet or defend against each other. In endgames this makes it very hard to win, even a pawn or two ahead.",

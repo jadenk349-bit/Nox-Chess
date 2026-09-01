@@ -137,7 +137,37 @@
     ],
     "conflicts": []
   },
-  "examples": [],
+  "examples": [
+    {
+      "fen": "r1b2rk1/ppp1q1pp/2n1p3/5PN1/2Bp2Q1/P7/P1PP1P1P/R1B2RK1 b - - 2 12",
+      "note": "The feature is present and was verified mechanically by lib/features.js: White has doubled pawns and 4 pawn islands. The engine puts the position at -0.23, close enough to level that the feature is not being swamped by tactics — so this is usable as an instance of the concept. What is NOT claimed is that the concept explains the engine's move. Provenance: mined from this repository's puzzle corpus, which is engine self-play — a real position from a real game between engines, not a master game.",
+      "origin_kind": "puzzle",
+      "concept_role": "supports",
+      "side_to_move_benefits": "neither",
+      "engine": {
+        "engine_id": "Stockfish 18",
+        "test_level": 2,
+        "depth": 20,
+        "threads": 8,
+        "hash_mb": 2048,
+        "multipv": 2,
+        "best_move": "c6e5",
+        "eval_cp": -23,
+        "mate_in": null,
+        "pv": [],
+        "alternatives": [
+          {
+            "move": "h7h6",
+            "eval_cp": -379,
+            "mate_in": null
+          }
+        ],
+        "margin_cp": 0,
+        "verdict": "supports",
+        "verdict_note": "Level-2 validation: the position was scored, not designed. It confirms the feature is present in real play and, where the score is near level, that the feature is not drowned out. It is not a controlled pair and proves nothing about the concept on its own."
+      }
+    }
+  ],
   "counterexamples": [
     {
       "fen": "r1bqkbnr/1pp2ppp/p1p5/4p3/4P3/5N2/PPPP1PPP/RNBQK2R w KQkq - 0 5",
@@ -171,6 +201,35 @@
         "margin_cp": 0,
         "verdict": "contradicts",
         "verdict_note": "Doubled pawns without a disadvantage. Black has just accepted doubled c-pawns and the position is dead level at 0.00. Stronger still, the SAME engine run that produced this shows what inflicting them cost: in the position one move earlier, 4.Bxc6 evaluates +0.08 against +0.42 for the simple retreat 4.Ba4 - so giving the opponent doubled pawns was worth MINUS 0.34 to White. The doubling is paid for by the bishop pair and the half-open d-file, and this base will not report doubled pawns as a weakness without evidence in the specific position."
+      }
+    },
+    {
+      "fen": "r2qkb1r/1pp2ppp/p1n1p3/3P4/4Q1n1/2N2P2/PPPP1P1P/R1B1KB1R b KQkq - 3 9",
+      "note": "The feature is present and was verified mechanically by lib/features.js: White has doubled pawns AND the bishop pair — the compensation the concept names. The engine puts the position at 0.87, close enough to level that the feature is not being swamped by tactics — so this is usable as an instance of the concept. What is NOT claimed is that the concept explains the engine's move. Provenance: mined from this repository's puzzle corpus, which is engine self-play — a real position from a real game between engines, not a master game.",
+      "origin_kind": "puzzle",
+      "concept_role": "contradicts",
+      "side_to_move_benefits": "neither",
+      "engine": {
+        "engine_id": "Stockfish 18",
+        "test_level": 2,
+        "depth": 20,
+        "threads": 8,
+        "hash_mb": 2048,
+        "multipv": 2,
+        "best_move": "g4f6",
+        "eval_cp": 87,
+        "mate_in": null,
+        "pv": [],
+        "alternatives": [
+          {
+            "move": "g4f2",
+            "eval_cp": -324,
+            "mate_in": null
+          }
+        ],
+        "margin_cp": 0,
+        "verdict": "contradicts",
+        "verdict_note": "Level-2 validation: the position was scored, not designed. It confirms the feature is present in real play and, where the score is near level, that the feature is not drowned out. It is not a controlled pair and proves nothing about the concept on its own."
       }
     }
   ],

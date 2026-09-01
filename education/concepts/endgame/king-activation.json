@@ -150,6 +150,51 @@
         "category": "win",
         "note": "PROVEN win in 35. The paired position, identical except that the defending king sits on a7 instead of e7, is a proven win in 15. Both are lost, so king placement does not change the RESULT here - but it more than doubles the resistance, 35 against 15, with nothing else on the board different. Recorded as measuring the king's defensive value rather than as proving the principle, which would be a stronger claim than the evidence supports."
       }
+    },
+    {
+      "fen": "3r4/1P6/5k1p/2PP2pP/r4p2/p2K1P2/8/4R3 w - - 4 52",
+      "note": "The feature is present and was verified mechanically by lib/features.js: White king centralised on d3 in an endgame. The engine puts the position at -0.34, close enough to level that the feature is not being swamped by tactics — so this is usable as an instance of the concept. What is NOT claimed is that the concept explains the engine's move. Provenance: mined from this repository's puzzle corpus, which is engine self-play — a real position from a real game between engines, not a master game.",
+      "origin_kind": "puzzle",
+      "concept_role": "supports",
+      "side_to_move_benefits": "neither",
+      "engine": {
+        "engine_id": "Stockfish 18",
+        "test_level": 2,
+        "depth": 20,
+        "threads": 8,
+        "hash_mb": 2048,
+        "multipv": 2,
+        "best_move": "c5c6",
+        "eval_cp": -34,
+        "mate_in": null,
+        "pv": [],
+        "alternatives": [
+          {
+            "move": "e1c1",
+            "eval_cp": -532,
+            "mate_in": null
+          }
+        ],
+        "margin_cp": 0,
+        "verdict": "supports",
+        "verdict_note": "Level-2 validation: the position was scored, not designed. It confirms the feature is present in real play and, where the score is near level, that the feature is not drowned out. It is not a controlled pair and proves nothing about the concept on its own."
+      }
+    },
+    {
+      "fen": "5k2/p1p4R/1pr5/3p1pP1/P2P1P2/2P2K2/8/8 w - - 0 35",
+      "game": "Capablanca-Tartakower, New York 1924",
+      "note": "The position after 34...gxf5, where Capablanca began the king march that made this game the standard illustration of the active king: Kg3-h4-g5-f6-e5-d6. Chernev's comment on the plan is that in a simplified ending Capablanca gave away two pawns and let them be captured WITH CHECK, because the king's route mattered more. FEN derived by replaying all 103 plies through the page's own move generator.",
+      "origin_kind": "historical-game",
+      "concept_role": "supports",
+      "side_to_move_benefits": "white"
+    },
+    {
+      "fen": "5k2/p1p4R/1p3KP1/3p1p2/P2Pr3/8/8/8 b - - 3 39",
+      "game": "Capablanca-Tartakower, New York 1924",
+      "note": "Five moves later, the king has reached f6. Chernev's summary of the resulting position is that White is effectively playing with an extra piece, given the activity of one king and the passivity of the other.",
+      "origin_kind": "historical-game",
+      "concept_role": "supports",
+      "side_to_move_benefits": "white"
     }
   ],
   "counterexamples": [
