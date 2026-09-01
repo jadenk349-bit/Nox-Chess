@@ -143,7 +143,16 @@ const STRUCTURAL = [
     implements: "recognition.preconditions: no enemy pawn ahead on its file or either adjacent file",
     run(f) {
       const hits = [];
-      for (const c of ['w', 'b']) if (f.pawns[c].passed.length) hits.push({ c, sq: f.pawns[c].passed });
+      for (const c of ['w', 'b']) {
+        // Blockaded passers are excluded, on the concept's own authority: its
+        // record says a permanently blockaded passer is a liability rather than
+        // an asset. Tested against Reshevsky-Petrosian 1953, this matcher led
+        // with "White has a passed pawn on d4" in the position of Petrosian's
+        // famous exchange sacrifice — true, blockaded, and beside the point.
+        const blocked = new Set(f.pawns[c].blockadedPassers || []);
+        const live = f.pawns[c].passed.filter(sq => !blocked.has(sq));
+        if (live.length) hits.push({ c, sq: live });
+      }
       if (!hits.length) return null;
       return {
         confidence: 'high',
@@ -355,7 +364,25 @@ const STRUCTURAL = [
     implements: "recognition: king on its home rank with no empty escape square, and enemy heavy pieces present",
     run(f) {
       const hits = [];
-      for (const c of ['w', 'b']) if (f.king[c] && f.king[c].backRankExposure) hits.push(c);
+      for (const c of ['w', 'b']) {
+        if (!f.king[c] || !f.king[c].backRankExposure) continue;
+        // A king with no escape square is only in danger if a heavy piece can
+        // actually GET to the back rank. Tested against Nimzowitsch-Salwe 1911,
+        // this led with White's back-rank exposure in the position his own notes
+        // are about — with no open or semi-open file for Black to use. The
+        // concept's record already says the pattern is only dangerous when a
+        // rook or queen can reach the rank.
+        // Not merely that a route exists, but that a heavy piece is ON one. An
+        // earlier version counted open and semi-open files and still fired on
+        // Nimzowitsch-Salwe, where Black had two semi-open files and no rook on
+        // either. The threat has to be reachable by something, not conceivable.
+        const enemy = other(c);
+        const usable = new Set(f.files.open.concat(f.files.semiOpenFor[enemy] || []));
+        const onFile = f.pieces[enemy].rooksOnOpenFiles.concat(
+                       f.pieces[enemy].rooksOnSemiOpenFiles).length;
+        if (!usable.size || !onFile) continue;
+        hits.push(c);
+      }
       if (!hits.length) return null;
       return {
         confidence: 'high',

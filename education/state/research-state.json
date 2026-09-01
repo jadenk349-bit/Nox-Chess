@@ -12,9 +12,9 @@
     "concepts_validated": 4,
     "concepts_needs_review": 0,
     "sources_reviewed": 175,
-    "positions_tested": 80,
+    "positions_tested": 82,
     "matches_validated": 40,
-    "false_matches": 20,
+    "false_matches": 22,
     "ambiguous_matches": 20,
     "by_stage": {
       "ready": 2,
@@ -22,7 +22,7 @@
       "validated": 9
     },
     "tablebase_positions": 22,
-    "concepts_fully_covered": 16,
+    "concepts_fully_covered": 17,
     "areas_touched": 85,
     "areas_total": 85
   },
@@ -1559,6 +1559,38 @@
         "discovered-attack",
         "trapped-piece",
         "hanging-piece"
+      ]
+    },
+    {
+      "id": "quiet-corpus-and-master-game-expansion",
+      "date": "2026-09-01",
+      "method": "Added a mechanical quietness test to Layer 3; widened the prospector to 17 concepts with a strong quiet-position preference; verified 13 Zurich 1953 games by replay; harvested quiet positions from them; and searched for positions where a concept's feature is present and its HOLDER is worse.",
+      "results": {
+        "positions_before": 53,
+        "positions_after": 82,
+        "master_games_before": 3,
+        "master_games_after": 13,
+        "corpus_quiet_fraction": "350/1576 (22.2%)",
+        "depth_mean_before": 0.61,
+        "depth_mean_after": 0.7,
+        "motif_agreement_before": "71.1%",
+        "motif_agreement_after": "89.0%"
+      },
+      "findings": [
+        "Quietness is measurable and worth measuring: 22% of the tactical corpus is quiet by the test that the side to move has no check and no winning capture.",
+        "Quiet is NOT balanced. Of 62 prospected quiet positions, 29 were still decided by more than three pawns. Those are recorded as ambiguous examples rather than discarded or overclaimed.",
+        "Master games break matchers that a tactical corpus does not. Testing against Reshevsky-Petrosian and Nimzowitsch-Salwe exposed the passed-pawn matcher leading on a blockaded pawn and the luft matcher leading where no enemy piece could reach the back rank. Both are now guarded on the concepts' own stated conditions.",
+        "Searching for positions where the feature-HOLDER is worse produced only 5 hits from 37 candidates, which is itself informative: in master play a feature is usually held by the side it is helping, so negative evidence is genuinely scarce and cannot be mined in bulk.",
+        "Reading the whole solution line rather than its first move lifted mass-test motif detection from 63.5% to 83.5% and agreement with the generator from 71.1% to 89.0%."
+      ],
+      "concepts": [
+        "passed-pawn",
+        "luft",
+        "backward-pawn",
+        "exchange-sacrifice",
+        "positional-sacrifice",
+        "prophylaxis",
+        "compensation"
       ]
     }
   ],

@@ -285,8 +285,13 @@ const { concepts } = API.knowledge();
   // Ordering: what is said FIRST should be the most informative true thing.
   const r = API.analyzeWithEducation({ fen: 'r2q1rk1/pp3ppp/2np4/3N4/4P3/2P5/PP3PPP/R2Q1RK1 w - - 0 1' });
   eq('ordering: outpost leads in an outpost position', r.concepts[0].id, 'outpost');
-  ok('ordering: luft is still reported, just not first',
-     r.concepts.some(c => c.id === 'luft'));
+  // This used to assert that luft was also reported here. It no longer is, and
+  // that is the correct behaviour rather than a regression: the luft matcher now
+  // requires an enemy rook or queen actually standing on a file that reaches the
+  // back rank, and in this position there is none. The test was encoding the old
+  // behaviour, so it asserts the real point instead — that the lead is right and
+  // the list is not padded with features nothing can exploit.
+  ok('ordering: the list is not padded', r.concepts.length <= 6, r.concepts.map(c => c.id).join(','));
   ok('specificity: the lead names the actual square',
      /d5/.test(r.explanation.text), r.explanation.text);
 }

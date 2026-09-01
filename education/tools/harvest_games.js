@@ -69,6 +69,12 @@ for (const g of games) {
         game: `${g.white}-${g.black}, ${g.event}`, gameId: g.id,
         ply: m.ply, after: m.after, fen: m.fen,
         because: c.because[0], confidence: c.confidence, score,
+        // Which side the feature belongs to. If the engine then says that side
+        // is WORSE, the position is a negative example: the feature is present
+        // and is not helping, which is the hardest kind of evidence to find and
+        // the kind this base has least of.
+        subjects: c.subjects || [],
+        sideToMove: f.sideToMove,
         alsoHere: r.concepts.filter(x => x.id !== c.id).map(x => x.id),
       });
       kept++;

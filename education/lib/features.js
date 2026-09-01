@@ -70,7 +70,7 @@ function pawnStructure(st, colour) {
   const them = pawnFiles(st, colour === 'w' ? 'b' : 'w');
   const forward = colour === 'w' ? -1 : 1;   // direction of travel in rows
 
-  const doubled = [], isolated = [], passed = [], backward = [];
+  const doubled = [], isolated = [], passed = [], backward = [], blockadedPassers = [];
 
   for (let f = 0; f < 8; f++) {
     if (me[f].length > 1) for (const i of me[f]) doubled.push(nameOf(i));
@@ -91,7 +91,16 @@ function pawnStructure(st, colour) {
           if (ahead) { blocked = true; break; }
         }
       }
-      if (!blocked) passed.push(nameOf(i));
+      if (!blocked) {
+        // Is it blockaded? An enemy PIECE standing directly in front of a passer
+        // is what the concept's own record calls the difference between an asset
+        // and a liability: "a permanently blockaded passer ties down your pieces
+        // rather than theirs".
+        const ar = r + forward;
+        const front = onBoard(ar, f) ? st.b[idx(ar, f)] : null;
+        passed.push(nameOf(i));
+        if (front && front.c !== colour) blockadedPassers.push(nameOf(i));
+      }
 
       // backward: every friendly neighbour pawn is further advanced, AND the
       // square in front is controlled by an enemy pawn. Both halves matter —
@@ -122,7 +131,7 @@ function pawnStructure(st, colour) {
 
   return {
     count: occupied.reduce((n, f) => n + me[f].length, 0),
-    doubled, isolated, passed, backward, islands,
+    doubled, isolated, passed, backward, blockadedPassers, islands,
     files: occupied.map(f => FILES[f]),
   };
 }

@@ -67,7 +67,11 @@ for (const [label, fen] of CORPUS) {
       // Meta-talk is allowed in the record and not in the explanation, EXCEPT
       // where the concept is itself about the knowledge base.
       const metaConcept = r.concepts.some(c => /misconception|terminology|exceptions-to-rules|concepts$/.test(c.id));
-      if (!metaConcept) for (const m of META) ok(`${tag}: no meta ${m}`, !m.test(t), t);
+      // The refusal message is DESIGNED to talk about the knowledge base — it is
+      // the system declining to label, which is the behaviour this project most
+      // wants. Exempt exactly that sentence and nothing else.
+      const refusal = /Nothing in this position matches a researched concept/.test(t);
+      if (!metaConcept && !refusal) for (const m of META) ok(`${tag}: no meta ${m}`, !m.test(t), t);
 
       // No sentence repeated verbatim.
       const ss = t.split(/(?<=[.!?])\s+/).map(x => x.trim()).filter(x => x.length > 15);

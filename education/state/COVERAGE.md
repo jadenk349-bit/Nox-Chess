@@ -16,7 +16,7 @@ Mean completeness **0.70** across 135 concepts.
 
 | rating | mean | area | concepts |
 |---|---|---|---|
-| full | 0.92 | `pawn-structures` | 4 |
+| full | 0.93 | `pawn-structures` | 4 |
 | full | 0.81 | `opening-theory-concepts` | 4 |
 | substantial | 0.96 | `gambit-principles` | 2 |
 | substantial | 0.96 | `bishop-endgames` | 2 |
@@ -121,6 +121,7 @@ Mean completeness **0.70** across 135 concepts.
 | `rook-on-the-seventh` | 0.94 | x | x | x | x | x | x | x | x | x | x | - | x | x | x | x | x |
 | `open-file` | 0.93 | x | x | x | x | x | x | x | x | - | x | . | x | x | x | x | x |
 | `semi-open-file` | 0.93 | x | x | x | x | x | x | x | x | - | x | . | x | x | x | x | x |
+| `backward-pawn` | 0.93 | x | x | x | x | x | x | x | x | x | x | . | x | - | x | x | x |
 | `doubled-pawns` | 0.93 | x | x | x | x | x | x | x | x | - | x | . | x | x | x | x | x |
 | `isolated-queen-pawn` | 0.93 | x | x | x | x | x | x | x | - | x | x | . | x | x | x | x | x |
 | `weak-square` | 0.93 | x | x | x | x | x | x | x | x | - | x | . | x | x | x | x | x |
@@ -132,7 +133,6 @@ Mean completeness **0.70** across 135 concepts.
 | `board-geometry` | 0.92 | x | x | x | . | x | . | x | x | . | - | x | . | x | x | x | x |
 | `piece-exchanges` | 0.88 | x | x | x | x | x | x | x | x | - | - | x | x | x | x | x | x |
 | `space` | 0.87 | x | x | x | x | x | x | x | - | x | x | . | x | - | x | x | x |
-| `backward-pawn` | 0.87 | x | x | x | x | x | x | x | - | x | x | . | x | - | x | x | x |
 | `exchange-sacrifice` | 0.87 | x | x | x | x | x | x | x | - | x | x | . | x | - | x | x | x |
 | `greek-gift` | 0.87 | x | x | x | x | x | x | x | x | - | x | . | - | x | x | x | x |
 | `early-queen-development` | 0.86 | x | x | x | . | x | x | x | - | x | x | . | - | x | x | x | x |

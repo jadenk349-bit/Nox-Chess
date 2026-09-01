@@ -147,6 +147,30 @@
         "verdict": "contradicts",
         "verdict_note": "Level at -0.24. A king with no luft is only in danger from a piece that can reach the back rank, and with the heavy pieces gone the missing escape square costs nothing. Recorded because the back-rank pattern is one of the easiest features to detect and one of the easiest to over-report."
       }
+    },
+    {
+      "fen": "1r3r1k/5pnp/3Rp3/p1p5/N1P1BR2/1P2P1PP/n4P1K/8 w - - 0 33",
+      "game": "Najdorf-Petrosian, Candidates, Zurich 1953",
+      "note": "A quiet master-game position — after Nxa2, ply 64 — in which Black's king is on its back rank with no escape square, and White still has a rook or queen, and the side holding that feature is WORSE. The engine puts Black at -4.11. Found by a deliberate search for exactly this: positions where a concept's feature is present and is not helping. Those are the hardest evidence to find and the kind this base has least of, because a feature that helps is easy to illustrate and a feature that does not is the thing a learner actually needs to see.",
+      "origin_kind": "historical-game",
+      "concept_role": "contradicts",
+      "side_to_move_benefits": "neither",
+      "engine": {
+        "engine_id": "Stockfish 18",
+        "test_level": 2,
+        "depth": 20,
+        "threads": 8,
+        "hash_mb": 2048,
+        "multipv": 1,
+        "best_move": "a4c5",
+        "eval_cp": 411,
+        "mate_in": null,
+        "pv": [],
+        "alternatives": [],
+        "margin_cp": 0,
+        "verdict": "contradicts",
+        "verdict_note": "The feature belongs to Black, and Black stands at -4.11. This does not show the feature CAUSING the disadvantage — nothing here isolates it — and it does show that possessing the feature is consistent with being worse, which is exactly what a concept stated as a bare advantage would deny."
+      }
     }
   ],
   "ambiguous_examples": [
