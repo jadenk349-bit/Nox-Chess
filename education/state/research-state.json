@@ -6,24 +6,24 @@
     "note": "Filled in by tools/sf_analyse.py --probe"
   },
   "counters": {
-    "concepts_total": 106,
+    "concepts_total": 108,
     "concepts_stub": 0,
     "concepts_researched": 29,
     "concepts_validated": 4,
     "concepts_needs_review": 0,
-    "sources_reviewed": 138,
+    "sources_reviewed": 143,
     "positions_tested": 26,
     "matches_validated": 17,
     "false_matches": 3,
     "ambiguous_matches": 6,
     "by_stage": {
       "ready": 2,
-      "researched": 95,
+      "researched": 97,
       "validated": 9
     },
     "tablebase_positions": 17,
     "concepts_fully_covered": 12,
-    "areas_touched": 57,
+    "areas_touched": 59,
     "areas_total": 85
   },
   "areas": {
@@ -128,10 +128,14 @@
     },
     "forcing-moves": {
       "domain": "tactics",
-      "status": "not-started",
-      "concepts": [],
+      "status": "covered",
+      "concepts": [
+        "forcing-moves"
+      ],
       "open_questions": [],
-      "last_touched": null
+      "last_touched": "2026-09-01",
+      "last_updated": "2026-09-01",
+      "note": "Written as a search-ordering rule with an explicit refusal to treat forcing as evidence of quality."
     },
     "named-tactical-patterns": {
       "domain": "tactics",
@@ -217,10 +221,14 @@
     },
     "defensive-principles": {
       "domain": "defense",
-      "status": "not-started",
-      "concepts": [],
+      "status": "covered",
+      "concepts": [
+        "defensive-principles"
+      ],
       "open_questions": [],
-      "last_touched": null
+      "last_touched": "2026-09-01",
+      "last_updated": "2026-09-01",
+      "note": "Written with the simplify-vs-complicate conflict recorded rather than resolved, plus the Paulsen attribution finding."
     },
     "prophylaxis": {
       "domain": "defense",
@@ -981,6 +989,11 @@
       "claim": "Knight's tour traced to al-Adli ar-Rumi c.840 AD by Murray",
       "note": "Claimed by an instructional blog citing Murray. NOT verified against Murray's text. Same for the Najdorf 45-board (Sao Paulo 1947) and Koltanowski 56-consecutive-game (San Francisco 1960) blindfold records.",
       "date": "2026-09-01"
+    },
+    {
+      "claim": "Louis Paulsen as progenitor of Steinitz's theory",
+      "date": "2026-09-01",
+      "note": "The Exeter Chess Club states that proposition 4 of Steinitz's theory - that an attack from an equal position can be refuted by correct defence - was FIRST indicated by Paulsen, who declared unfashionably that all gambits can be defended. If correct this materially changes an attribution normally given wholly to Steinitz. Only one source consulted says it; recorded at low confidence on both defensive-principles and positional-evaluation, and not adopted."
     }
   ],
   "failed_research_attempts": [
