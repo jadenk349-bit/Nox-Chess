@@ -33,7 +33,8 @@
     "`side` names the colour a NEGATIVE entry is about, and it exists because the sharpest negatives are per-side. Nimzowitsch's blockading bishop on d4 must not be called bad in a position where Black's bishop on d7 correctly is, and a side-agnostic list cannot state that. It required carrying `subjects` through to the API's concepts_all, which had never been exposed there.",
     "Two entries added 2026-09-02 give weak-square its first human grounding, and both are NEGATIVE, which is the right way round for a concept whose own record says every pawn move creates squares no pawn can guard. Both come from one article by a named grandmaster who built the positions as traps for exactly the reading a mechanical detector performs; the second names no side, because the claim is that NEITHER side can use the square.",
     "`attributed_by` names the PERSON whose claim the entry rests on, and it is the field the validation ladder reads - not `annotator`, which is prose and can say things like 'unattributed training page' while still looking like grounding. Backfilled across the file on 2026-09-02, at which point exactly one entry turned out to have no person behind it (karpov-kasparov-1985-g16), and it now correctly grants its concept no human-grounded rung. This is the second time a rung in this project was found counting something looser than its own definition, and both times the number went down.",
-    "One entry, added 2026-09-02, is scored on CONFIDENCE rather than on presence, and is the first of its kind here: Ftacnik-Roiz 2009, where White really does have the two bishops and a grandmaster's note reads 'please note how idle White's bishops are' in a position Stockfish scores at -2.66 for him. Nothing the system says is false, so `bishop-pair` does not belong in rejected_as_wrong; what is wrong is the weight. The entry's `confidence` is the annotator's, the checker compares it with the system's, and the gap is a recorded failure rather than a guard fitted to one position."
+    "One entry, added 2026-09-02, is scored on CONFIDENCE rather than on presence, and is the first of its kind here: Ftacnik-Roiz 2009, where White really does have the two bishops and a grandmaster's note reads 'please note how idle White's bishops are' in a position Stockfish scores at -2.66 for him. Nothing the system says is false, so `bishop-pair` does not belong in rejected_as_wrong; what is wrong is the weight. The entry's `confidence` is the annotator's, the checker compares it with the system's, and the gap is a recorded failure rather than a guard fitted to one position.",
+    "Torre-Karpov 1977 is the first human-grounded negative for `space`, and it is worth reading beside the two weak-square negatives: all three are positions a named author BUILT to catch the reading a mechanical detector performs, and in all three the raw Layer 3 feature is present and loud. That is what makes them live tests rather than vacuous ones - nine controlled squares to zero, ten holes including d5, a permanent hole on d5 in the Sveshnikov - and in each case what stops the report is a condition the concept's own record already stated."
   ],
   "concept_roles": {
     "positive": "the concept clearly applies, on the annotator's authority",
@@ -1713,6 +1714,59 @@
         ],
         "agrees": "emphatically, on the evaluation. Scores are from the side to move, and White is to move: -2.66 with the bishop pair in hand and every alternative worse. The game's 19.e4 is also the engine's first choice, so White is not being punished for the move but for the position the bishops were bought with.",
         "note": "The engine cannot say whether a bishop pair is worth anything and was not asked to. It is here to establish that the side holding the clear-cut, well-defined asset is losing by more than two and a half pawns, which is what makes this a test of WEIGHTING rather than of detection."
+      }
+    },
+    {
+      "game": "Torre-Karpov, Bad Lauterberg 1977",
+      "source": "thechessworld-space-advantage",
+      "players": "Eugenio Torre - Anatoly Karpov",
+      "event": "4th FRG-ch int, Bad Lauterberg 1977",
+      "year": 1977,
+      "annotator": "Raluca Sgircea (WGM) and Renier Castellanos (IM), 'Positional Chess Understanding: The Space Advantage', TheChessWorld, 2015",
+      "attributed_by": "Raluca Sgircea (WGM) and Renier Castellanos (IM)",
+      "fen_verified": "replay: all 68 plies replayed legally through blind-chess.html's move generator, from the pgnmentor Karpov collection. The position is the one the annotators' note attaches to - 'Qg2 was the only move and continue the waiting game, not weakening any more' is written at White's 26th.",
+      "added": "2026-09-02",
+      "id": "torre-karpov-1977-26e5-space-negative",
+      "concept": "space",
+      "concept_role": "negative",
+      "side": "w",
+      "fen": "bqr1r1k1/3n1ppn/pp1ppb1p/7P/1PP1PPP1/P1NBB3/2RN1Q2/2R3K1 w - - 1 26",
+      "move": "e5",
+      "move_uci": "e4e5",
+      "fen_after": "bqr1r1k1/3n1ppn/pp1ppb1p/4P2P/1PP2PP1/P1NBB3/2RN1Q2/2R3K1 b - - 0 26",
+      "human_annotation": "The game is introduced as \"a great example of how not to play when you have space advantage. Instead of controlling black's counterplay, white deliberately went on to grab more space and all of a sudden found himself under a very strong counterattack.\" At this exact position the note reads: \"26.Qg2 was the only move and continue the waiting game, not weakening any more.\" And the article's general warning, which is this base's `space` record's first trap said in other words: \"just the fact that one side has more space doesn't necessarily mean that is also better. Sometimes the spatial advantage is confused with over-extension... in the quest for space, one side tends to advance too many pawns, leaving weakness behind or not being able to support this advances with pieces. As a result, the opponent will find counterplay.\"",
+      "explanation": "The first human-grounded negative for `space`, and it is a live test of a guard added the same day rather than a vacuous one.\n\nWhite's pawns control NINE squares in Black's half against zero: b4, c4, e4, f4, g4 and h5 make as unambiguous a territorial advantage as this corpus contains, and the matcher's own threshold is a gap of two. Until this session it would have reported it, with confidence, in a position Stockfish scores at -3.01 after the move actually played. What stops it now is the record's own first trap - \"counting controlled squares is mechanical and over-reports. Space with no entry point wins nothing\" - and Layer 3 finds no entry square for White at all: every route in is either covered by a black pawn or loses the piece that takes it.\n\nWhat this base DOES report is the other side of the annotation. `piece-activity` names BLACK, 24 active moves to 12, which is the counterattack the authors say arrives out of nowhere; and `semi-open-file` names Black's rook on the c-file, which is where the game ends - 34...Nxc4, and White resigned.\n\nThe engine agrees with the annotators about the move and not merely about the position: 26.Qg2, the move they call the only one, is Stockfish's first choice at +0.05, and 26.e5, the grab for more space, measures -3.01. A three-pawn swing on one move is what \"suddenly found himself under a very strong counterattack\" looks like in numbers.\n\nWhy `space` is in rejected_as_wrong rather than treated as secondary: this base does not define the concept as territory. Its record defines it as territory that gives the pieces room and denies the opponent room, and states in its first trap that territory with no entry point wins nothing. Reporting it here would not be reporting something true but secondary; it would be reporting the concept as the record defines it, in a position where the record's own exclusion applies.",
+      "confidence": "high",
+      "why_not_alternates": "piece-activity for BLACK and semi-open-file for Black are both correctly reported and are both the annotation's own subject - the counterplay White allowed. battery for White is true and harmless. What must not be said is that White's territory is an asset.",
+      "also_true_but_secondary": [
+        "piece-activity",
+        "semi-open-file",
+        "battery"
+      ],
+      "rejected_as_wrong": [
+        "space"
+      ],
+      "engine": {
+        "engine_id": "Stockfish 18",
+        "depth": 28,
+        "multipv": 3,
+        "best_move": "Qg2",
+        "best_eval_cp": 5,
+        "annotated_move": "e5",
+        "annotated_move_eval_cp": -301,
+        "annotated_move_rank": null,
+        "alternatives": [
+          {
+            "move": "Kf1",
+            "eval_cp": 0
+          },
+          {
+            "move": "Qg3",
+            "eval_cp": -15
+          }
+        ],
+        "agrees": "on the move and on the evaluation. Scores are from the side to move, and White is to move: 26.Qg2 - the move the annotators call the only one - is Stockfish's first choice at +0.05, settled from depth 15, and the game's 26.e5 measures -3.01 and is not in the top three. A three-pawn swing on one move.",
+        "note": "The engine says nothing about whether nine controlled squares are a space advantage and was not asked to. It establishes that the waiting move holds the balance and the grab for more space loses by three pawns, which is what makes 'how not to play when you have space advantage' a claim about the board."
       }
     }
   ]

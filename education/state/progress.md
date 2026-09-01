@@ -1384,3 +1384,33 @@ confidence stays.
 
 Third time today that saying more was the right answer where firing less was the
 tempting one.
+
+
+## The entry-square guard met a game chosen to catch it, and held
+
+**Torre–Karpov, Bad Lauterberg 1977** is introduced by its annotators as *"a
+great example of how not to play when you have space advantage. Instead of
+controlling black's counterplay, white deliberately went on to grab more space
+and all of a sudden found himself under a very strong counterattack."*
+
+At move 26 White's pawns control **nine** squares in Black's half against zero —
+six times the matcher's own threshold — and Layer 3 finds **no entry square at
+all**. Before this session the concept would have been reported here, with
+confidence.
+
+The engine agrees with the annotators about the *move*, not just the position:
+26.Qg2, which they call the only move, is Stockfish's first choice at +0.05; the
+game's 26.e5 measures **−3.01** and is not in the top three. A three-pawn swing
+on one move is what "suddenly found himself under a very strong counterattack"
+looks like in numbers. And the other half of the annotation *is* reported, for
+the other side: `piece-activity` names Black, 24 active moves to 12.
+
+This is the first human-grounded negative `space` has ever had, and it belongs
+beside the two `weak-square` negatives. All three are positions a named author
+built to catch the reading a mechanical detector performs; in all three the raw
+Layer 3 feature is present and loud; and in all three what stops the report is a
+condition the concept's own record already stated and the matcher had not
+implemented.
+
+Corpus: **39 positions, 26 games, 18 positive / 13 ambiguous / 8 negative**,
+seven of the eight negatives live rather than vacuous.

@@ -1383,6 +1383,32 @@ const { concepts } = API.knowledge();
      ct.confidence === 'high');
 }
 
+{
+  // The first human-grounded negative for `space`, and a live test of the guard
+  // added the same day. Torre–Karpov, Bad Lauterberg 1977, introduced by its
+  // annotators as "a great example of how not to play when you have space
+  // advantage. Instead of controlling black's counterplay, white deliberately
+  // went on to grab more space and all of a sudden found himself under a very
+  // strong counterattack."
+  const TK = 'bqr1r1k1/3n1ppn/pp1ppb1p/7P/1PP1PPP1/P1NBB3/2RN1Q2/2R3K1 w - - 1 26';
+  const r = API.analyzeWithEducation({ fen: TK });
+  const f = FEAT.features(TK);
+  // The raw feature is present and loud — nine controlled squares to zero, and
+  // the matcher's own threshold is a gap of two. This is what makes the negative
+  // live rather than vacuous.
+  ok('space: the territory is real — nine squares to nothing',
+     f.activity.pawnSpace.w === 9 && f.activity.pawnSpace.b === 0,
+     `${f.activity.pawnSpace.w}/${f.activity.pawnSpace.b}`);
+  ok('space: ...and there is no entry square at all',
+     (f.activity.entry.w || []).length === 0, JSON.stringify(f.activity.entry.w));
+  ok('space: so it is not reported for White',
+     !r.concepts_all.some(c => c.id === 'space' && c.subjects.includes('w')),
+     r.concepts_all.map(c => c.id + ':' + c.subjects.join('')).join(' '));
+  // ...and the other half of the annotation IS reported, for the other side.
+  ok('piece-activity names Black, which is the counterattack the note is about',
+     r.concepts_all.some(c => c.id === 'piece-activity' && c.subjects.includes('b')));
+}
+
 /* ---------- report ---------- */
 console.log(`\nAPI  PASS ${pass}   FAIL ${fails.length}`);
 for (const [n, d] of fails) console.log(`  FAIL  ${n}\n        ${d}`);
