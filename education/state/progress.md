@@ -5,6 +5,85 @@ this file is the narrative, and records reasoning that does not fit in JSON.
 
 ---
 
+## Session 4 — openings, blindfold, endgame core, and the warnings index (2026-09-01)
+
+Grew the base from 86 concepts / 44 areas to 112 concepts / 63 of 85 areas, with
+500 tests passing and the validator and audit clean throughout. Ten commits.
+
+### What was covered
+
+- **The opening domain**, which had zero coverage: opening principles, opening
+  theory concepts (transposition, novelty, tabiya, repertoire), gambit principles.
+- **The blindfold domain** — the one area unique to this product — from the
+  peer-reviewed cognitive-science literature rather than chess instruction.
+- **Calculation and candidate moves**, with the Kotov/Nunn/Dvoretsky dispute kept.
+- **The endgame core**: endgame principles, king activation, rook endgames.
+- **The positional core**: evaluation, planning, piece activity, worst-placed
+  piece, transformation of advantages, piece coordination.
+- **Defence and forcing moves.**
+- **Two meta-records** over the base's own accumulated content.
+
+### The methodological finding of this session
+
+Openings are one of the few areas where a controlled comparison is EASY, and the
+reason is structural: the candidate moves are all legal moves in ONE position, so
+`searchmoves` evaluates them inside a single search with only the move varying.
+This is the same technique that failed three times on outposts and twice more on
+king activity in this session — and it works here for precisely the reason it
+fails there. Positional concepts that live in *configurations* do not isolate;
+concepts that live in *move choice* do.
+
+That gave a measured compensation spectrum:
+
+| position | quiet best | the gambit | cost |
+|---|---|---|---|
+| after 3...Bc5 | 4.c3 +0.28 | 4.b4 (Evans) 0.00 | 0.28 |
+| after 1.e4 e5 | 2.Nf3 +0.30 | 2.f4 (King's) −0.61 | 0.91 |
+| after 3...Nf6 | 4.d4 +0.08 | 4.Nxe5 (Halloween) −1.67 | 1.75 |
+
+Compensation is real, measurable, and can be complete — the Evans is a pawn down
+and evaluates level, so what it surrenders is the opening edge, not the pawn.
+
+### Where the work contradicted itself, and was corrected
+
+The early-queen concept asserted that the Scandinavian shows the rule "simply
+does not bite". Tested, it bites: White is +0.76 there against +0.30 after
+1...e5, so Black concedes ~0.46 by exactly the mechanism the rule names. The
+concept was corrected, the position filed as an ambiguous example whose verdict
+note says what was claimed and what was found, and an audit note records that the
+claim was asserted before it was tested.
+
+The audit separately caught this session overclaiming an `originated-by`
+attribution of planning to Steinitz — an inference of ours, not a claim in any
+source. Downgraded to `later-associated-with` with the inference stated.
+
+### False-positive suite: 0 → 6 resolved, 1 partial, 5 still pending
+
+Three by tablebase (a check that draws and a check that loses in ONE position;
+the wrong-rook-pawn draw a bishop and pawn up), three by controlled engine
+comparison (a piece moved twice being the best move by 0.34; the isolani side
+being better; doubled pawns costing the *inflicting* side 0.34).
+
+### The generalisation worth keeping
+
+Collecting 826 warnings into `state/warnings_index.json` made the shape visible:
+**a chess misconception is almost always a true statement with its condition
+removed.** Every case this session fits it — doubled pawns, the piece moved
+twice, the rook behind the passed pawn, improve your worst piece, checks are
+forcing so checks are strong.
+
+### Known gaps, stated rather than papered over
+
+- The warnings index does not distinguish proofs from opinions.
+- 22 taxonomy areas still have zero concepts; 5 false-positive cases pending.
+- Layers 3 and 4 (positional feature detection, concept matching) are not built,
+  and neither is the reusable `analyze_with_education()` API.
+- Two controlled-pair designs for king activity failed and are recorded as
+  failures; king activation rests on a resistance measurement (dtm 35 vs 15),
+  not on a win/draw split.
+
+---
+
 ## Session 1 — scaffolding, methodology, pilot concept
 
 ### Codebase inspection (done before any design)
