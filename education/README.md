@@ -63,12 +63,57 @@ python3 tools/find.py --source winter        # what a source is used for
 ## Checking it still holds together
 
 ```bash
-python3 tools/run_tests.py     # everything, including the JS API suite
-python3 tools/validate_kb.py   # schema and referential integrity
-python3 tools/audit.py         # quality findings
-python3 tools/build_index.py   # rebuild the warnings index (tests fail if stale)
-node    tools/mass_test.js     # run the API over all 788 shipped puzzle positions
+python3 tools/run_tests.py         # everything, including the JS API suite
+python3 tools/validate_kb.py       # schema and referential integrity
+python3 tools/audit.py             # quality findings
+python3 tools/build_index.py       # rebuild the warnings index (tests fail if stale)
+python3 tools/corpus_check.py      # the API against human-annotated master positions
+python3 tools/validation_ladder.py # how much has been CHECKED, per concept
+node    tools/mass_test.js         # run the API over all 788 shipped puzzle positions
 ```
+
+## The human-grounded corpus
+
+`corpus/annotated_positions.json` is the primary ground truth for positional
+concepts, and it is the thing that has found most of this system's real bugs.
+Every entry exists because a **named human source explicitly attributed the
+concept to that position** — never because an engine liked a move. Game scores
+come from a database and are replayed through `blind-chess.html`'s own move
+generator before any FEN is derived, because printed move orders fail: seven of
+them have failed in this project so far, six from one otherwise useful blog.
+
+Stockfish then verifies, and **its disagreements are kept**. Botvinnik writes
+that the initiative passes to Black at 20...Qc7 and the engine still gives White
+half a pawn; that gap is the whole distinction between holding the initiative
+and standing better, and an engine-filtered corpus would have deleted it.
+
+Three roles, scored by three different standards, because a corpus of positive
+examples only ever measures false negatives:
+
+| role | the claim | how it is scored |
+|---|---|---|
+| `positive` | the concept clearly applies | present, ideally as the lead |
+| `ambiguous` | it contributes and does not decide | present; leading is counted, not punished |
+| `negative` | the board resembles it and it must NOT be reported | **absent** — and if the concept has no detector, the pass is printed as **vacuous**, because nothing could have reported it |
+
+`rejected_as_wrong` is the sharpest field in the file and the easiest to get
+wrong: it must list only concepts whose application here would be FALSE, never
+ones that are merely secondary. Three entries were drafted with a true concept
+in that list and each manufactured a false positive out of correct output.
+
+## The validation ladder
+
+`tools/validation_ladder.py` answers a different question from the concept
+count: not how much has been *written* but how much has been *checked*. Seven
+rungs, and two of them are deliberately unflattering. HUMAN-GROUNDED requires an
+`attributed_by` naming the person who said so — a position this system found by
+running its own Layer 4 over master games is evidence the concept OCCURS and not
+evidence a human named it there, and counting the second as the first once put
+the number at 39 where the honest one was 17. API-VALIDATED is reported both
+raw and against the concepts whose own records permit a detector at all:
+`initiative` records that it "is invisible to a static feature scan", and
+`piece-coordination` and `transformation-of-advantages` are marked human-only,
+so counting them as failures is as misleading as counting them as passes.
 
 ## Reading order for a new session
 
@@ -89,6 +134,7 @@ anything.
 
 ```
 concepts/<category>/<id>.json   one concept per file; git-diffable, merge-friendly
+corpus/annotated_positions.json human-annotated master positions: the ground truth
 lib/features.js                 Layer 3: observable board features (no interpretation)
 lib/matchers.js                 Layer 4: which concepts the features license
 lib/analyze.js                  the API, and Layer 5 wording
@@ -97,6 +143,8 @@ state/research-state.json       resume checkpoint and counters
 state/warnings_index.json       GENERATED: every recorded warning, evidence-graded
 tests/test_api.js               the API suite, incl. false-positive regressions
 state/coverage.json             per-concept coverage matrix
+state/ladder.json               GENERATED: how much has been CHECKED, per concept
+state/COMPLETION.md             the assessment against the ten completion criteria
 state/progress.md               human-readable running log
 research/                       raw research notes, per session
 tools/schema.json               the concept record schema
