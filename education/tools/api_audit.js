@@ -114,10 +114,20 @@ for (const [kind, label, fen] of SET) {
 }
 
 /* Concepts must not be reported where their own preconditions are impossible.
- * Bare kings is the strongest case: nothing at all should be licensed. */
+ *
+ * This used to assert that BARE KINGS licenses nothing, which was the wrong
+ * position for the claim: on bare kings the most certain statement in chess is
+ * available, and saying nothing there was a missing detector being tested as a
+ * virtue. Two kings and two blocked e-pawns is the honest case - a legal
+ * position in which no researched concept applies. */
 {
-  const r = API.analyzeWithEducation({ fen: '8/8/4k3/8/8/4K3/8/8 w - - 0 1' });
-  ok('bare kings: nothing licensed', r.concepts.length === 0, r.concepts.map(c => c.id).join(','));
+  const r = API.analyzeWithEducation({ fen: '4k3/4p3/8/8/8/8/4P3/4K3 w - - 0 1' });
+  ok('nothing applies: nothing licensed', r.concepts.length === 0, r.concepts.map(c => c.id).join(','));
+
+  const bare = API.analyzeWithEducation({ fen: '8/8/4k3/8/8/4K3/8/8 w - - 0 1' });
+  ok('bare kings: exactly one concept, and it is the true one',
+     bare.concepts.length === 1 && bare.concepts[0].id === 'insufficient-material',
+     bare.concepts.map(c => c.id).join(','));
 }
 
 console.log(`\nAPI AUDIT  PASS ${pass}   FAIL ${fails.length}`);

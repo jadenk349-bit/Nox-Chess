@@ -316,6 +316,27 @@ record's own note says an outpost and a strong point are really the same thing.
 Removed rather than shipped, with the measurement on the record and a test that
 keeps it unimplemented.
 
+### The rules layer, which this system could never speak
+
+Seven concepts — check, stalemate, insufficient material, the fifty-move rule,
+en passant, promotion, castling — have records naming detectors that already
+existed, and no matcher. A system built to explain chess could not say "this is
+stalemate" or "the fifty-move count is at 92", which is the one class of claim
+it can make with certainty. Two guards keep them from being noise: `castling` is
+reported for the **move** rather than for the rights, which almost every opening
+position has, and `en-passant` only when the capture is actually available,
+because a FEN carries the target square whether or not any pawn can use it.
+
+**And three test suites turned out to be asserting a missing detector as a
+virtue.** `test_api.js`, `api_audit.js` and `test_explanations.js` all
+demonstrated the "no forced label" refusal on **bare kings**, requiring that the
+position license nothing at all. But bare kings is exactly where the most
+certain statement in chess is available — neither side can force mate — and
+saying nothing there is a gap, not a refusal. Adding `insufficient-material`
+broke all three, which is the correct outcome. The refusal is a real principle
+and is now demonstrated where it really applies: two kings and two blocked
+e-pawns, a legal position in which no researched concept fits.
+
 That is the third metric this project has caught telling it what it wanted to
 hear — after the mass test's "99.7% positional coverage" and the corpus
 checker's scoring of negative examples — and all three were found the same way:

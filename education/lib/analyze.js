@@ -375,7 +375,13 @@ function compose(features, moveInfo, concepts, assessment, level, depth) {
   }
 
   const lead = concepts[0];
-  const observation = lead.wording_specific && lead.wording ? lead.wording : cap1(lead.because[0]) + '.';
+  let observation = lead.wording_specific && lead.wording ? lead.wording : cap1(lead.because[0]) + '.';
+  // The move has already been named. A move-based matcher whose reason opens
+  // with the same SAN produced "e8=Q+. e8=Q+ promotes the pawn on e8."
+  if (moveInfo && moveInfo.legal && moveInfo.san) {
+    const dup = new RegExp('^' + moveInfo.san.replace(/[.*+?^${}()|[\]\\]/g, '\\$&') + '\\s+');
+    if (dup.test(observation)) observation = cap1(observation.replace(dup, ''));
+  }
   bits.push(observation.endsWith('.') ? observation : observation + '.');
 
   // The teaching half, only where it adds to the observation.
@@ -423,7 +429,11 @@ function compose(features, moveInfo, concepts, assessment, level, depth) {
 
   return bits.join(' ');
 }
-const cap1 = s => (s ? s[0].toUpperCase() + s.slice(1) : s);
+// ...but a leading lowercase letter is not always a sentence needing a capital.
+// A pawn move's SAN starts with its file, and `e8=Q+` capitalised reads `E8=Q+`,
+// which is not a square. Leave a leading algebraic token alone.
+const SAN_START = /^(?:[a-h][1-8x=]|[a-h]x[a-h]|O-O)/;
+const cap1 = s => (!s ? s : SAN_START.test(s) ? s : s[0].toUpperCase() + s.slice(1));
 // These clauses are spliced mid-sentence after a semicolon, so a leading capital
 // reads as a typo — except where the capital belongs to the word, which for
 // chess prose means a colour or a piece in algebraic notation.

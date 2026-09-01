@@ -51,7 +51,7 @@
       "The crossed or destination square is attacked"
     ],
     "prerequisites": [],
-    "detector": "stateFromFEN, the castling-rights field",
+    "detector": "lib/matchers.js: castling (move-based)",
     "detectability": "mechanical",
     "typical_confidence": "medium",
     "false_positive_traps": []
@@ -69,7 +69,8 @@
     "Rights once lost never return, even if the piece goes back to its original square."
   ],
   "limitations": [
-    "Affects position identity for repetition: Art. 9.2.3.2 — positions are not the same if a king had castling rights with a rook that has not moved but forfeited them after moving."
+    "Affects position identity for repetition: Art. 9.2.3.2 — positions are not the same if a king had castling rights with a rook that has not moved but forfeited them after moving.",
+    "Reported for the MOVE, not for the rights. Almost every opening position has castling rights, and a concept true of almost every position is not news; a king moving two squares is."
   ],
   "misconceptions": [],
   "relationships": {

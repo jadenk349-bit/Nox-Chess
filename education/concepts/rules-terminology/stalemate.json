@@ -37,7 +37,7 @@
     "indicators_for": [],
     "indicators_against": [],
     "prerequisites": [],
-    "detector": "legalMoves and inCheck in blind-chess.html",
+    "detector": "lib/matchers.js: stalemate, over legalMoves and inCheck",
     "detectability": "mechanical",
     "typical_confidence": "medium",
     "false_positive_traps": []
@@ -52,7 +52,8 @@
   },
   "exceptions": [],
   "limitations": [
-    "Being drawn regardless of material makes it a deliberate defensive device; an explanation should treat a stalemate trick as a resource, not a blunder by the winner."
+    "Being drawn regardless of material makes it a deliberate defensive device; an explanation should treat a stalemate trick as a resource, not a blunder by the winner.",
+    "Fires on none of the 788 shipped positions, which is correct - a puzzle whose answer is stalemate is a stalemate RESOURCE, and the position offered is not itself stalemate."
   ],
   "misconceptions": [],
   "relationships": {

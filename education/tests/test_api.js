@@ -159,10 +159,20 @@ const { concepts } = API.knowledge();
 }
 {
   // Refusal 1: no forced label.
-  const r = API.analyzeWithEducation({ fen: '8/8/4k3/8/8/4K3/8/8 w - - 0 1' });
-  eq('API: bare kings license no concept', r.concepts.length, 0);
+  //
+  // The position used to be bare kings, and that was wrong. On bare kings the
+  // most certain statement in chess is available - neither side can force mate
+  // - and saying nothing there was a MISSING DETECTOR being asserted as a
+  // virtue. `insufficient-material` now says it. The refusal is a real
+  // principle and is tested where it really applies: two kings and two blocked
+  // e-pawns, a legal position in which nothing researched fits.
+  const r = API.analyzeWithEducation({ fen: '4k3/4p3/8/8/8/8/4P3/4K3 w - - 0 1' });
+  eq('API: a position nothing fits licenses no concept', r.concepts.length, 0);
   ok('API: says so explicitly',
      r.notes.some(n => /says nothing rather than reaching/.test(n)), JSON.stringify(r.notes));
+  const bare = API.analyzeWithEducation({ fen: '8/8/4k3/8/8/4K3/8/8 w - - 0 1' });
+  eq('API: bare kings now licenses the one thing that is certain', bare.concepts.length, 1);
+  eq('API: ...and it is insufficient material', bare.concepts[0].id, 'insufficient-material');
 }
 {
   // Illegal moves are reported, not silently dropped.

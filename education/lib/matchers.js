@@ -89,8 +89,14 @@ const PRIORITY = [
   // Tactics first, in order of how decisively they explain what just happened.
   // A move that forks and also leaves something hanging is a fork; reporting
   // the hanging piece first describes the incidental and buries the point.
-  'checkmate', 'double-check', 'fork', 'knight-fork', 'pin', 'skewer',
+  // The rules first, when they apply at all: stalemate and insufficient material
+  // END the game, and check restricts every legal move. These are facts, not
+  // judgements, and nothing informative can outrank them.
+  'stalemate', 'insufficient-material', 'checkmate', 'check', 'promotion',
+  'en-passant', 'fifty-move-rule',
+  'double-check', 'fork', 'knight-fork', 'pin', 'skewer',
   'discovered-attack', 'back-rank-mate', 'trapped-piece', 'hanging-piece',
+  'castling',
 
   // Then structural features, most informative first — and MEASURED, because
   // "most informative" was a judgement nobody had checked. Firing rates over
@@ -837,6 +843,114 @@ const STRUCTURAL = [
       };
     },
   },
+  /* ---- the rules layer -------------------------------------------------
+   * Seven concepts whose records name a mechanical detector that already
+   * exists. They are here because a system that explains chess and cannot say
+   * "this is stalemate" or "the fifty-move count is at 88" is missing the one
+   * class of claim it could make with certainty. Each is an OFFICIAL RULE, so
+   * the confidence ceiling is high and the claim is a fact rather than a
+   * judgement - and each is guarded against the thing that would make it noise:
+   * `castling` is reported for the MOVE, not for the rights, which almost every
+   * opening position has.
+   * -------------------------------------------------------------------- */
+  {
+    concept: 'check',
+    implements: "recognition.preconditions: a king stands on a square attacked by an enemy piece. Detector: inCheck.",
+    run(f) {
+      for (const c of ['w', 'b']) {
+        if (f.king[c] && f.king[c].inCheck) {
+          return {
+            confidence: 'high',
+            because: [`${side(f, c)}'s king on ${f.king[c].square} is in check, so the only legal moves are ` +
+                      `the ones that answer it`],
+            slots: { square: f.king[c].square },
+            subjects: [c],
+          };
+        }
+      }
+      return null;
+    },
+  },
+  {
+    concept: 'stalemate',
+    implements: "recognition.preconditions verbatim: the side to move has zero legal moves and is not in check.",
+    run(f) {
+      const P = FEAT.page;
+      const st = P.stateFromFEN(f.fen);
+      let moves;
+      try { moves = P.legalMoves(st); } catch (e) { return null; }
+      if (moves.length) return null;
+      if (P.inCheck(st, st.turn)) return null;               // that is checkmate
+      return {
+        confidence: 'high',
+        because: [`${side(f, st.turn)} is to move, is not in check, and has no legal move: the game is drawn`],
+        slots: {},
+        subjects: [st.turn],
+      };
+    },
+  },
+  {
+    concept: 'insufficient-material',
+    implements: ("recognition.preconditions: only kings, or a king and a single minor piece, remain for the " +
+                 "side in question. Reported only when NEITHER side can mate, which is the position that is " +
+                 "drawn rather than merely hard to win."),
+    run(f) {
+      const bare = c => {
+        const m = f.material[c].counts;
+        if (m.P || m.R || m.Q) return false;
+        return m.N + m.B <= 1;
+      };
+      if (!bare('w') || !bare('b')) return null;
+      return {
+        confidence: 'high',
+        because: ['Neither side has enough material left to force mate, so the game is drawn however it is played'],
+        slots: {},
+        subjects: ['w', 'b'],
+      };
+    },
+  },
+  {
+    concept: 'fifty-move-rule',
+    implements: ("recognition.preconditions: 100 ply with no capture and no pawn move. Reported from the " +
+                 "halfmove clock once it is close enough to matter, because a count of 4 is not news."),
+    run(f) {
+      const P = FEAT.page;
+      const st = P.stateFromFEN(f.fen);
+      const half = Number(String(f.fen).split(' ')[4] || 0);
+      if (!(half >= 80)) return null;
+      return {
+        confidence: 'high',
+        because: [`${half} ply have passed with no capture and no pawn move; at 100 either side may claim a draw`],
+        slots: { count: String(half) },
+        subjects: ['w', 'b'],
+      };
+    },
+  },
+  {
+    concept: 'en-passant',
+    implements: ("recognition.preconditions: the previous move was an enemy pawn advancing two squares and a " +
+                 "friendly pawn stands beside it. Reported only when the capture is actually AVAILABLE - a " +
+                 "FEN carries an en-passant target square whether or not anything can use it."),
+    run(f) {
+      const P = FEAT.page;
+      const st = P.stateFromFEN(f.fen);
+      const ep = String(f.fen).split(' ')[3];
+      if (!ep || ep === '-') return null;
+      let moves;
+      try { moves = P.legalMoves(st); } catch (e) { return null; }
+      const has = moves.some(m => {
+        const p = st.b[m.from];
+        return p && p.t === 'P' && FEAT.nameOf(m.to) === ep && !st.b[m.to];
+      });
+      if (!has) return null;
+      return {
+        confidence: 'high',
+        because: [`${side(f, st.turn)} can capture en passant on ${ep}, and only on this move`],
+        slots: { square: ep },
+        subjects: [st.turn],
+      };
+    },
+  },
   {
     concept: 'king-activation',
     implements: "recognition.preconditions: an endgame, with a king off its back rank",
@@ -1061,6 +1175,40 @@ const MOVE_BASED = [
                   `and ${kb.pawnShield} of three shield pawns`],
         slots: { square: kb.square, count: String(za.attackers) },
         subjects: [them],
+      };
+    },
+  },
+  {
+    concept: 'promotion',
+    implements: "recognition.preconditions: a pawn moving to the eighth rank for White or the first for Black.",
+    run(before, after, moveInfo) {
+      if (moveInfo.movedType !== 'P') return null;
+      const r = Number(String(moveInfo.movedTo || '')[1]);
+      if (r !== 8 && r !== 1) return null;
+      return {
+        confidence: 'high',
+        because: [`${moveInfo.san || 'the move'} promotes the pawn on ${moveInfo.movedTo}`],
+        slots: { square: moveInfo.movedTo },
+        subjects: [before.sideToMove],
+      };
+    },
+  },
+  {
+    concept: 'castling',
+    implements: ("recognition.preconditions. Reported for the MOVE and not for the rights: almost every " +
+                 "opening position has castling rights, and a concept true of almost every position is not " +
+                 "news. A king moving two squares is."),
+    run(before, after, moveInfo) {
+      if (moveInfo.movedType !== 'K') return null;
+      const fileOf = sq => (sq || '').charCodeAt(0);
+      if (Math.abs(fileOf(moveInfo.movedTo) - fileOf(moveInfo.movedFrom)) !== 2) return null;
+      const side_ = fileOf(moveInfo.movedTo) > fileOf(moveInfo.movedFrom) ? 'kingside' : 'queenside';
+      return {
+        confidence: 'high',
+        because: [`${moveInfo.san || 'the move'} castles ${side_}, moving the king to safety and bringing ` +
+                  `the rook towards the centre in one move`],
+        slots: { square: moveInfo.movedTo },
+        subjects: [before.sideToMove],
       };
     },
   },

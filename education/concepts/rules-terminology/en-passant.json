@@ -44,7 +44,7 @@
       "Any other move has intervened since the two-square advance"
     ],
     "prerequisites": [],
-    "detector": "stateFromFEN, the en-passant target field",
+    "detector": "lib/matchers.js: en-passant",
     "detectability": "mechanical",
     "typical_confidence": "medium",
     "false_positive_traps": []
@@ -62,7 +62,8 @@
     "Like any move, it is illegal if it leaves or places one's own king in check."
   ],
   "limitations": [
-    "Affects repetition claims: see Art. 9.2.3.1 — two positions are not the same if, at the start of the sequence, a pawn could have been captured en passant."
+    "Affects repetition claims: see Art. 9.2.3.1 — two positions are not the same if, at the start of the sequence, a pawn could have been captured en passant.",
+    "Reported only when the capture is AVAILABLE. A FEN carries an en-passant target square whether or not any pawn can use it, and most that do are the second kind."
   ],
   "misconceptions": [],
   "relationships": {

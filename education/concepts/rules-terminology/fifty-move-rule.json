@@ -38,7 +38,7 @@
       "Any capture or pawn move in that span resets the counter"
     ],
     "prerequisites": [],
-    "detector": "stateFromFEN, the halfmove-clock field",
+    "detector": "lib/matchers.js: fifty-move-rule, over the halfmove clock",
     "detectability": "mechanical",
     "typical_confidence": "medium",
     "false_positive_traps": []
@@ -55,7 +55,9 @@
     "Not automatic — it must be claimed.",
     "Some endgames proven winnable by tablebase require more than 50 moves and are therefore drawn under the Laws. The rule and the theoretical truth genuinely diverge here."
   ],
-  "limitations": [],
+  "limitations": [
+    "Reported from 80 ply, because a count of 4 is not news and a count of 92 is."
+  ],
   "misconceptions": [],
   "relationships": {
     "broader": [],

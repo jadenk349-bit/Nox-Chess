@@ -27,6 +27,7 @@ const CORPUS = [
   ['opposite bishops',   '8/4k3/4P3/3P4/2B1K3/b7/8/8 w - - 0 1'],
   ['back rank',          '6k1/5ppp/8/8/8/8/5PPP/4R1K1 w - - 0 1'],
   ['bare kings',         '8/8/4k3/8/8/4K3/8/8 w - - 0 1'],
+  ['blocked e-pawns',    '4k3/4p3/8/8/8/8/4P3/4K3 w - - 0 1'],
   ['start',              'rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1'],
   ['material imbalance', '4r1k1/5ppp/8/8/8/8/5PPP/2B1NRK1 w - - 0 1'],
   ['tactical, fork',     'r3k3/4bppp/8/3N4/8/8/PPP5/R3KB2 w Qq - 0 1'],
@@ -57,8 +58,13 @@ for (const [label, fen] of CORPUS) {
       ok(`${tag}: no phrasing violation`, r.phrasing_violations.length === 0,
          JSON.stringify(r.phrasing_violations));
 
-      // The bare-kings position is allowed - and required - to say nothing.
-      if (label === 'bare kings') {
+      // A position where nothing applies is allowed - and required - to say so.
+      // This used to be the bare-kings position, which was the wrong choice: on
+      // bare kings the single most certain statement in chess is available, and
+      // saying nothing there was a MISSING DETECTOR being tested as a virtue.
+      // `insufficient-material` now says it, and the refusal is demonstrated on
+      // two kings and two blocked e-pawns, where nothing researched applies.
+      if (label === 'blocked e-pawns') {
         ok(`${tag}: refuses to label`, /Nothing in this position matches/.test(t), t);
         continue;
       }

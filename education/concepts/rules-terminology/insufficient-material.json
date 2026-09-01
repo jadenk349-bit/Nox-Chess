@@ -46,7 +46,7 @@
       "Any pawn, rook or queen on the board"
     ],
     "prerequisites": [],
-    "detector": null,
+    "detector": "lib/matchers.js: insufficient-material, over the material counts",
     "detectability": "mechanical",
     "typical_confidence": "medium",
     "false_positive_traps": []
@@ -64,7 +64,8 @@
     "Blocked positions with full material are dead under the Laws but are not caught by this test."
   ],
   "limitations": [
-    "Because implementations vary, an explanation should say what THIS program does, not what 'the rules' say."
+    "Because implementations vary, an explanation should say what THIS program does, not what 'the rules' say.",
+    "Reported only when NEITHER side can force mate, which is the position that is drawn rather than merely hard to win. Adding it corrected a test that had asserted the OPPOSITE: three suites required bare kings to license nothing at all, which was a missing detector being asserted as a virtue. The refusal principle they were demonstrating is real and is now demonstrated on two kings and two blocked e-pawns, where nothing researched applies."
   ],
   "misconceptions": [],
   "relationships": {
