@@ -133,7 +133,7 @@ const PRIORITY = [
   //   1.3%, sacrifice 14.5%, battery 24.4%, blockade 27.3%.
   'pawn-breakthrough', 'exchange-sacrifice', 'king-attack', 'outpost',
   'rook-on-the-seventh', 'passed-pawn', 'isolated-queen-pawn', 'backward-pawn',
-  'hanging-pawns', 'opposite-coloured-bishops', 'bishop-pair', 'luft',
+  'hanging-pawns', 'opposite-coloured-bishops', 'bishop-pair',
   'pawn-break', 'restraint', 'worst-placed-piece', 'bad-bishop', 'sacrifice',
   'king-safety', 'battery', 'center-control', 'blockade',
   'opposition', 'king-activation', 'loose-piece', 'doubled-pawns',
@@ -156,6 +156,25 @@ const PRIORITY = [
   // measurement kept being made by hand.
   'material-imbalance', 'weak-square', 'semi-open-file', 'two-weaknesses',
   'open-file', 'space', 'piece-activity',
+
+  // ...and `luft` last of all, which is the third denominator's doing.
+  //
+  // It measures 4.8% on the 788 and was ranked with the rare, specific concepts
+  // for it. Measured on the 37 ANNOTATED MASTER positions - the only set here
+  // where a human has said what each position is about - it fires on 48.6% and
+  // is the most frequent LEAD in the file. The two numbers are both correct and
+  // the puzzle one is the misleading one: puzzles are late-game positions whose
+  // kings have often already moved, and master middlegames are full of castled
+  // kings behind three unmoved pawns. A rarity ranking read off the wrong
+  // denominator put a piece of TERMINOLOGY - which is its knowledge_type - at
+  // the head of the explanation of positions Réti and Capablanca were playing.
+  //
+  // Its recognition is not the problem and is not touched: the matcher already
+  // requires an enemy rook standing on a file that reaches the rank, which is
+  // more than the record asks. Being true is not the same as being the most
+  // informative thing to say. Measure all three with tools/firing_rates.js,
+  // plain, --quiet and --corpus.
+  'luft',
 ];
 const priorityOf = id => {
   const i = PRIORITY.indexOf(id);
@@ -602,7 +621,12 @@ const STRUCTURAL = [
       if (!hits.length) return null;
       return {
         confidence: 'high',
-        because: hits.map(c => `${side(f, c)}'s king is on its back rank with no escape square, and ${side(f, other(c))} still has a rook or queen`),
+        // Say the condition that was actually tested. "still has a rook or
+        // queen" is weaker than the guard above, which requires a rook standing
+        // on a file that reaches the rank - and a sentence looser than its own
+        // test teaches the looser rule.
+        because: hits.map(c => `${side(f, c)}'s king is on its back rank with no escape square, and ` +
+                               `${side(f, other(c))} has a rook on a file that reaches it`),
         subjects: hits,
       };
     },

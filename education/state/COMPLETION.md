@@ -25,7 +25,7 @@ evidence in general, it is NEGATIVE and AMBIGUOUS evidence in particular.
 
 137 concepts · 188 sources · **111 engine-validated positions + 22 tablebase** ·
 **37 human-annotated corpus positions from 24 master games** · 32 replay-verified
-master games · 661 tests + 360 API + 374 audit + 3574 explanation assertions.
+master games · 661 tests + 361 API + 374 audit + 3574 explanation assertions.
 
 ## What moved this session
 
@@ -34,7 +34,7 @@ master games · 661 tests + 360 API + 374 audit + 3574 explanation assertions.
 | human-grounded corpus positions | 6 | 37 |
 | corpus games | 2 | 24 |
 | corpus roles | 5 positive, 1 ambiguous, 0 negative | 18 positive, 12 ambiguous, 7 negative |
-| concepts with human grounding (twice-corrected measure) | 5 | 26 |
+| concepts with human grounding (twice-corrected measure) | 5 | 29 |
 | concepts with a Layer 4 matcher | 32 | 36 |
 | validated positions | 82 | 111 |
 | API false negatives on the corpus | 3 of 6 detectable | 1 of 35, recorded on purpose |
@@ -59,7 +59,7 @@ number. It was **4.9**, and on six of twelve positive entries the concept sat
 outside the six the API returns by default — reported, and invisible. After
 reordering PRIORITY by measured firing rate, confining the low-confidence rule
 to the lead alone, and then fixing the *recognition* of the one concept the
-ordering could not accommodate, it is **2.4**.
+ordering could not accommodate, it is **2.2**, and the concept is in the top three on 11 of 12.
 
 **Confidence** is measured too: the system may say less than the annotator and
 never more. 0 of 35 overclaim.

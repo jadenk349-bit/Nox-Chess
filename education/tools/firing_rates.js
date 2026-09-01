@@ -36,9 +36,24 @@ const jsonOut = args.includes('--json') ? args[args.indexOf('--json') + 1] : nul
 // the measurement to the positions where a positional claim can be isolated at
 // all. Any rate quoted for a quietness-gated matcher must say which set it is on.
 const quietOnly = args.includes('--quiet');
+// ...and the corpus of ANNOTATED MASTER POSITIONS, which is small (37) and is
+// the only set here where a human has said what the position is about. The
+// three denominators disagree, and where they disagree the puzzle corpus is
+// usually the misleading one: `luft` measures 4.8% on the 788 and fires on
+// half the annotated positions, because puzzles are late-game positions whose
+// kings have often already moved and master middlegames are full of castled
+// kings behind three unmoved pawns. A rarity ranking read off the wrong
+// denominator puts a piece of terminology at the head of the explanation.
+const corpusOnly = args.includes('--corpus');
 
 const fens = [];
-for (const track of ['opening', 'middlegame', 'endgame']) {
+if (corpusOnly) {
+  const cp = path.join(ROOT, 'corpus', 'annotated_positions.json');
+  for (const p of JSON.parse(fs.readFileSync(cp, 'utf8')).positions) {
+    if (p.fen) fens.push({ fen: p.fen, uci: p.move_uci || null });
+  }
+}
+for (const track of corpusOnly ? [] : ['opening', 'middlegame', 'endgame']) {
   const file = path.join(ROOT, '..', 'puzzles', `${track}.json`);
   if (!fs.existsSync(file)) continue;
   for (const p of JSON.parse(fs.readFileSync(file, 'utf8'))) {
@@ -68,7 +83,7 @@ for (const { fen, uci } of use) {
 const n = (quietOnly ? kept : use.length) || 1;
 const rows = [...count.entries()].sort((a, b) => b[1] - a[1])
   .filter(([c]) => !only || c === only);
-console.log(`\nFIRING RATES — ${quietOnly ? kept + ' QUIET positions of ' + use.length : use.length + ' positions'}` + (bad ? `  (${bad} unreadable)` : '') + '\n');
+console.log(`\nFIRING RATES — ${quietOnly ? kept + ' QUIET positions of ' + use.length : use.length + (corpusOnly ? ' ANNOTATED MASTER positions' : ' positions')}` + (bad ? `  (${bad} unreadable)` : '') + '\n');
 console.log('  concept                        fires    rate    leads');
 for (const [c, k] of rows) {
   const flag = k / n > 0.5 ? '  <- true of most positions' : '';

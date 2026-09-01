@@ -1100,3 +1100,27 @@ page" counted exactly like Nimzowitsch annotating his own game. `attributed_by`
 is now the field, backfilled across all 37 entries; four name no person. 29 →
 **26**, and `hanging-pawns`, `pawn-break` and `restraint` lose the rung until a
 named annotator is found for Fischer–Spassky 1972 game 6.
+
+
+## Three denominators, and the one in use was the wrong one
+
+`luft` measures **4.8%** on the 788 shipped puzzles, and was ranked with the
+rare, specific concepts for it. Measured on the **37 annotated master
+positions** — the only set here where a human has said what each position is
+about — it fires on **48.6%** and was the most frequent *lead* in the whole
+file, ahead of every tactic.
+
+Both numbers are right. The puzzle one misleads: puzzles are late-game
+positions whose kings have often already moved, and master middlegames are full
+of castled kings behind three unmoved pawns. A rarity ranking read off the wrong
+denominator put a piece of **terminology** — which is this concept's own
+`knowledge_type` — at the head of the explanation of positions Réti and
+Capablanca were playing.
+
+Its *recognition* is not the problem and was not touched; the matcher already
+requires more than the record asks. Being true is not the same as being the most
+informative thing to say. Demoted to last: mean rank of the annotated concept
+2.4 → **2.2**, top-three 8 → **11 of 12**, luft's own leads on the corpus 5 → 1.
+
+`tools/firing_rates.js` now measures all three denominators, because the
+disagreement between them is a finding rather than noise.

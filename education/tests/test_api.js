@@ -978,6 +978,40 @@ const { concepts } = API.knowledge();
   }
 }
 
+{
+  // THREE DENOMINATORS, AND THE ONE THIS PROJECT HAD BEEN USING IS THE WRONG ONE
+  // FOR SOME CONCEPTS. `luft` measures 4.8% on the 788 shipped puzzles and was
+  // ranked with the rare, specific concepts for it. On the 37 ANNOTATED MASTER
+  // positions - the only set where a human has said what each position is about
+  // - it fires on 48.6% and was the most frequent LEAD in the file. Both numbers
+  // are right; the puzzle one misleads, because puzzles are late-game positions
+  // whose kings have often already moved and master middlegames are full of
+  // castled kings behind three unmoved pawns.
+  const P = MATCH.PRIORITY;
+  ok('luft is ranked last, not with the rare concepts',
+     P.indexOf('luft') === P.length - 1, String(P.indexOf('luft')));
+  ok('...and the reason is recorded where the ordering is',
+     /48\.6%/.test(fs.readFileSync(path.join(ROOT, 'lib', 'matchers.js'), 'utf8')));
+  ok('firing_rates.js can measure all three denominators',
+     ['--quiet', '--corpus'].every(f => fs.readFileSync(
+        path.join(ROOT, 'tools', 'firing_rates.js'), 'utf8').includes(f)));
+
+  // Its RECOGNITION is not the problem and was not touched - being true is not
+  // the same as being the most informative thing to say. But the sentence was
+  // looser than the guard: it said "still has a rook or queen" where the test
+  // requires a rook standing on a file that reaches the rank, and a sentence
+  // looser than its own test teaches the looser rule.
+  const r = API.analyzeWithEducation({ fen: 'r4rk1/pp3ppp/2n5/8/8/2N5/PP3PPP/2R2RK1 w - - 0 1' });
+  const l = r.concepts_all.find(c => c.id === 'luft');
+  if (l) {
+    const because = (r.concepts.find(c => c.id === 'luft') || {}).because || [];
+    ok('luft: the sentence names the condition that was tested',
+       because.some(b => /rook on a file that reaches it/.test(b)), because.join(' | '));
+  } else {
+    ok('luft: silent where no rook stands on a usable file', true);
+  }
+}
+
 /* ---------- report ---------- */
 console.log(`\nAPI  PASS ${pass}   FAIL ${fails.length}`);
 for (const [n, d] of fails) console.log(`  FAIL  ${n}\n        ${d}`);
