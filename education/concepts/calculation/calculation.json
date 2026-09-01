@@ -1,0 +1,160 @@
+{
+  "schema_version": 2,
+  "alternate_names": [
+    "concrete analysis",
+    "working out variations"
+  ],
+  "historical_names": [],
+  "tags": [
+    "calculation",
+    "thinking-method"
+  ],
+  "subcategory": "thinking technique",
+  "difficulty": "intermediate",
+  "knowledge_type_note": "A description of a skill and the advice attached to it, not a claim about positions.",
+  "name_status": "established-name",
+  "history": {
+    "attributions": [
+      {
+        "relation": "systematized-by",
+        "person": "Alexander Kotov",
+        "year": 1971,
+        "note": "The first systematic published attempt to describe how strong players calculate, whatever the standing of his particular prescription.",
+        "confidence": "high"
+      },
+      {
+        "relation": "first-documented-by",
+        "person": "Adriaan de Groot",
+        "year": 1946,
+        "note": "Established empirically that masters do not search more widely but generate better candidates.",
+        "confidence": "high"
+      }
+    ],
+    "first_documented_source": "kotov-think-like-gm",
+    "year": 1946,
+    "confidence": "medium",
+    "notes": "No coinage; the term is ordinary. The named contributions are to method rather than to vocabulary.",
+    "competing_claims": [],
+    "development": []
+  },
+  "engine_era_status": "reliable",
+  "engine_era_note": "Engines calculate in the way Kotov described and humans cannot, which sharpened rather than replaced the human advice: since exhaustive search is not available, everything depends on pruning well. Engine checking has also made it possible to audit published human analysis, generally unkindly.",
+  "recognition": {
+    "preconditions": [
+      "A position where concrete lines decide the choice of move"
+    ],
+    "indicators_for": [
+      "Forcing moves are available",
+      "Material or the king is at stake in the short term"
+    ],
+    "indicators_against": [
+      "A quiet position where no forcing line changes anything"
+    ],
+    "prerequisites": [],
+    "detector": null,
+    "detectability": "human-only",
+    "typical_confidence": "low",
+    "false_positive_traps": [
+      "A description of how a player thinks, not a feature of the position. It cannot be offered as the reason a move is good.",
+      "That a move requires calculation is not evidence that it is correct."
+    ]
+  },
+  "application": {
+    "typical_plans": [
+      "Examine checks, captures and threats before quiet moves",
+      "Scan shallowly to prune, then go deep on the line the position turns on",
+      "Evaluate the position at the end of each line rather than only counting material",
+      "Blunder-check the chosen move before playing it"
+    ],
+    "typical_moves": [],
+    "typical_pawn_structures": [],
+    "typical_piece_arrangements": [],
+    "tactical_consequences": [],
+    "strategic_consequences": []
+  },
+  "exceptions": [
+    "Many positions are decided by judgement and require almost no calculation.",
+    "In defence the emphasis shifts: pare the candidates down harder and examine the most critical first, since there is little point exploring suspect lines."
+  ],
+  "limitations": [
+    "Exhaustive search is not available to a human at any level, so all human method is pruning.",
+    "This system cannot observe a player's calculation and so cannot assess it."
+  ],
+  "misconceptions": [
+    "That stronger players calculate more deeply and widely. De Groot found they do not search more, and may search less.",
+    "That calculation can replace judgement. A variation is worth only what the position at its end is worth.",
+    "That calculating further is always better. Ideas at the start of a line matter more than refinements at the end."
+  ],
+  "relationships": {
+    "broader": [],
+    "narrower": [
+      "candidate-moves"
+    ],
+    "related": [
+      "candidate-moves",
+      "chunking",
+      "blindfold-representation",
+      "blindfold-interference"
+    ],
+    "contrasting": [],
+    "co_occurring": [
+      "candidate-moves"
+    ],
+    "conflicts": []
+  },
+  "examples": [],
+  "counterexamples": [],
+  "ambiguous_examples": [],
+  "explanations": {
+    "by_level": {
+      "beginner": "Working out what happens: if I go there, they go there, then what? Start with checks and captures.",
+      "intermediate": "Calculation. Look at forcing moves first, scan widely before going deep, and check the position at the end of the line.",
+      "advanced": "All human calculation is pruning - the tree is far too big otherwise. The skill is which moves get looked at, not how many.",
+      "master": "New ideas at the start of a variation are worth more than refinements at the end of it."
+    },
+    "by_depth": {
+      "short": "Working out concrete lines and judging where they end.",
+      "normal": "Calculation: working out sequences of moves and evaluating the positions they lead to. Forcing moves - checks, captures and threats - come first, because they restrict the replies and so cost least to calculate.",
+      "deep": "The concrete half of chess thinking, and one governed everywhere by a limit worth stating plainly: with five plausible replies at each turn a tree has over fifteen thousand leaves after three moves each, which is nothing to a machine and impossible for a person. Every human method is therefore about pruning, and de Groot's finding is the evidence - masters do not search more widely than weaker players and may search less, differing in which moves they look at rather than how many. The advice the sources agree on follows from that: forcing moves first, breadth before depth, stop when further depth stops paying since ideas at the start of a line matter more than refinements at the end, evaluate at the leaves, and look again before committing."
+    },
+    "hedge": "Guidance about how to think, drawn from grandmaster testimony rather than controlled experiment. The ordering advice - forcing moves first, breadth before depth - is consistent across authors who disagree about much else, but how any individual should calculate depends on the position and on the player.",
+    "lesson": "You cannot search the tree. You can only choose well what to look at."
+  },
+  "terminology": {
+    "beginner_words": [
+      "working it out",
+      "if I go here, they go there"
+    ],
+    "advanced_words": [
+      "calculation",
+      "forcing moves",
+      "pruning",
+      "the critical line",
+      "blunder-check"
+    ],
+    "avoid": [
+      "strong players calculate deeper"
+    ]
+  },
+  "status": {
+    "stage": "researched",
+    "last_updated": "2026-09-01",
+    "open_questions": [],
+    "audit_notes": []
+  },
+  "id": "calculation",
+  "canonical_name": "Calculation",
+  "category": "calculation-principles",
+  "knowledge_type": "practical-guideline",
+  "definition_short": "Working out concrete sequences of moves and judging the positions they reach.",
+  "definition_long": "The concrete half of chess thinking, as against the judgement that decides what is worth calculating. The two are not rivals; calculation without judgement has nothing to aim at, and judgement without calculation is unverified.\n\nTHE ADVICE THE SOURCES AGREE ON, across authors who disagree about much else:\n- FORCING MOVES FIRST. Checks, captures and threats restrict the opponent's replies, so they are cheapest to calculate and most likely to be decisive. Dvoretsky puts examining the most forcing line first; Tisdall recommends starting with the most direct.\n- BREADTH BEFORE DEPTH. A shallow scan eliminates the clearly deficient far more cheaply than a full analysis of each. Nunn's objection to the alternative is that twenty minutes can be spent reaching a verdict a quick look would have reached immediately.\n- DON'T CALCULATE FURTHER THAN YOU NEED. Dvoretsky's formulation is that new ideas at the START of a variation matter a good deal more than refinements at the end of it.\n- KEEP ASSESSING. A variation is only worth what the position at its end is worth, so calculation without evaluation at the leaves produces nothing.\n- LOOK AGAIN WITH FRESH EYES, and blunder-check before playing.\n\nTHE HUMAN LIMIT is the thing worth being honest about. A tree with five plausible replies at each turn has over fifteen thousand leaves after three moves each. That is nothing to a machine and impossible for a person, which is why every human method is fundamentally about PRUNING, and why de Groot's finding matters so much: masters do not search more widely than weaker players, and may search less. The difference is in which moves get looked at, not how many.\n\nFOR A BLINDFOLD PLAYER the cost structure changes. Calculation and holding the position compete for the same limited resource, so the depth reachable without sight of the board is markedly shorter, and the research on interference suggests the vulnerable moment is while new information is being taken in.",
+  "sources": [
+    "dvoretsky-attack-and-defence",
+    "nunn-secrets-practical-chess",
+    "tisdall-improve-your-chess-now",
+    "kotov-think-like-gm",
+    "chessable-candidate-moves-research",
+    "gobet-memory-chunks-schemata"
+  ],
+  "source_confidence": "high"
+}
