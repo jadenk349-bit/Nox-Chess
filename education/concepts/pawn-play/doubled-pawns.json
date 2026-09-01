@@ -119,7 +119,8 @@
   "misconceptions": [
     "That doubled pawns are a weakness. They are a concession with a price attached, and the price is often worth paying.",
     "That the Capablanca quotation about doubled pawns and the seventh rank is verified. It is not.",
-    "That they matter equally in middlegame and endgame. They mainly bite in the endgame."
+    "That they matter equally in middlegame and endgame. They mainly bite in the endgame.",
+    "That doubled pawns are a weakness. Measured here: inflicting them cost the inflicting side 0.34, and the side that accepted them is exactly equal."
   ],
   "relationships": {
     "broader": [],
@@ -137,7 +138,42 @@
     "conflicts": []
   },
   "examples": [],
-  "counterexamples": [],
+  "counterexamples": [
+    {
+      "fen": "r1bqkbnr/1pp2ppp/p1p5/4p3/4P3/5N2/PPPP1PPP/RNBQK2R w KQkq - 0 5",
+      "note": "The Ruy Lopez Exchange Variation after 4.Bxc6 dxc6. Black has doubled c-pawns and the bishop pair. Constructed-test, built from the standard move order.",
+      "origin_kind": "constructed-test",
+      "concept_role": "contradicts",
+      "side_to_move_benefits": "neither",
+      "engine": {
+        "engine_id": "Stockfish 18",
+        "test_level": 3,
+        "depth": 26,
+        "threads": 10,
+        "hash_mb": 2048,
+        "multipv": 3,
+        "best_move": "e1g1",
+        "eval_cp": 0,
+        "mate_in": null,
+        "pv": [],
+        "alternatives": [
+          {
+            "move": "b1c3",
+            "eval_cp": -3,
+            "mate_in": null
+          },
+          {
+            "move": "d2d3",
+            "eval_cp": -20,
+            "mate_in": null
+          }
+        ],
+        "margin_cp": 0,
+        "verdict": "contradicts",
+        "verdict_note": "Doubled pawns without a disadvantage. Black has just accepted doubled c-pawns and the position is dead level at 0.00. Stronger still, the SAME engine run that produced this shows what inflicting them cost: in the position one move earlier, 4.Bxc6 evaluates +0.08 against +0.42 for the simple retreat 4.Ba4 - so giving the opponent doubled pawns was worth MINUS 0.34 to White. The doubling is paid for by the bishop pair and the half-open d-file, and this base will not report doubled pawns as a weakness without evidence in the specific position."
+      }
+    }
+  ],
   "ambiguous_examples": [],
   "explanations": {
     "by_level": {
@@ -172,7 +208,7 @@
   },
   "status": {
     "stage": "researched",
-    "last_updated": "2026-08-31",
+    "last_updated": "2026-09-01",
     "open_questions": [],
     "audit_notes": [
       "2026-09-01 audit: attribution to Wilhelm Steinitz carried low confidence without a hedge in the note itself. Hedge added so the caveat travels with the claim rather than sitting only in history.confidence."

@@ -1,0 +1,176 @@
+{
+  "schema_version": 2,
+  "alternate_names": [
+    "harmony",
+    "coordination"
+  ],
+  "historical_names": [],
+  "tags": [
+    "positional",
+    "pieces"
+  ],
+  "subcategory": "positional",
+  "difficulty": "advanced",
+  "knowledge_type_note": "A property of a whole position rather than of any single piece, which is why it is the hardest positional concept to detect or attribute to a move.",
+  "name_status": "established-name",
+  "history": {
+    "attributions": [
+      {
+        "relation": "later-associated-with",
+        "person": "Anatoly Karpov",
+        "year": null,
+        "note": "The standard exemplar; sources consistently identify coordination and manoeuvring as the defining and least imitable feature of his play.",
+        "confidence": "medium"
+      },
+      {
+        "relation": "systematized-by",
+        "person": "Mark Dvoretsky",
+        "year": 2016,
+        "note": "Devoted a book, Maneuvering: the Art of Piece Play, to finding the best squares for pieces when no forcing line or obvious plan exists. Known here from its description only, not read.",
+        "confidence": "low"
+      }
+    ],
+    "first_documented_source": "chessbase-karpov-coordination",
+    "year": null,
+    "confidence": "low",
+    "notes": "Ordinary positional vocabulary with no coinage traced. The named associations are to exemplars and treatments rather than to an origin.",
+    "competing_claims": [],
+    "development": []
+  },
+  "engine_era_status": "reliable",
+  "engine_era_note": "Engines coordinate pieces superbly and explain nothing about it, which makes this the concept where the gap between a correct move and an intelligible reason for it is widest. Translating an engine's quiet regrouping move into a human reason is close to the core problem this Education System exists to solve.",
+  "recognition": {
+    "preconditions": [
+      "Several pieces on the board with a shared or conflicting purpose"
+    ],
+    "indicators_for": [
+      "Pieces defending one another",
+      "Several pieces bearing on the same target or break",
+      "A move that vacates a square another piece wants",
+      "A regrouping that prepares a break requiring several pieces at once"
+    ],
+    "indicators_against": [
+      "Pieces obstructing each other",
+      "Pieces on opposite wings with unrelated purposes",
+      "A piece that must stay put to hold something together"
+    ],
+    "prerequisites": [
+      "piece-activity"
+    ],
+    "detector": null,
+    "detectability": "human-only",
+    "typical_confidence": "low",
+    "false_positive_traps": [
+      "This is the concept most easily misused as a label for any quiet move whose point is not understood. It must never be the default explanation when nothing else fits - saying nothing is better.",
+      "Individually well-placed pieces are not the same as coordinated pieces, and this is exactly the distinction the concept exists to make.",
+      "Coordination is a property of a position, so attributing it to a single move requires knowing what the move prepares - which usually requires the continuation, not the move alone."
+    ]
+  },
+  "application": {
+    "typical_plans": [
+      "Regroup so every piece supports the intended break",
+      "Move a piece off a square another piece needs more",
+      "Arrange the pieces harmoniously before committing to an operation"
+    ],
+    "typical_moves": [
+      "Knight retreats from an outpost that is no longer needed",
+      "Modest queen moves that free a file or diagonal",
+      "Rook transfers that connect two plans"
+    ],
+    "typical_pawn_structures": [],
+    "typical_piece_arrangements": [
+      "Pieces converging on one break or one target"
+    ],
+    "tactical_consequences": [
+      "Well-coordinated pieces generate tactics; uncoordinated ones are vulnerable to them"
+    ],
+    "strategic_consequences": [
+      "Coordination is what allows a plan to be executed at all"
+    ]
+  },
+  "exceptions": [
+    "In forcing positions coordination is subordinate to calculation.",
+    "A piece may correctly be left badly placed if moving it costs more than the disharmony does."
+  ],
+  "limitations": [
+    "The least detectable concept in this base: no mechanical signature, and a claim about the whole position rather than a move.",
+    "One of its sources is known only from a publisher description and has not been read.",
+    "No engine or tablebase validation exists for this concept, and none is currently designed."
+  ],
+  "misconceptions": [
+    "That coordination means every piece is on a good square. It means they work together, which is a different claim.",
+    "That a retreating or modest-looking move is passive. The characteristic coordinating move looks wrong in isolation."
+  ],
+  "relationships": {
+    "broader": [],
+    "narrower": [],
+    "related": [
+      "piece-activity",
+      "worst-placed-piece",
+      "prophylaxis",
+      "planning",
+      "overprotection",
+      "positional-evaluation",
+      "initiative"
+    ],
+    "contrasting": [],
+    "co_occurring": [
+      "piece-activity",
+      "prophylaxis"
+    ],
+    "conflicts": []
+  },
+  "examples": [],
+  "counterexamples": [],
+  "ambiguous_examples": [],
+  "explanations": {
+    "by_level": {
+      "beginner": "Your pieces should work together - defending each other and aiming at the same thing.",
+      "intermediate": "Coordination. Every piece can be on a decent square and the position still be badly coordinated, because they are not helping each other.",
+      "advanced": "The skill of quiet positions, where nobody has an active plan and whoever regroups better gets the advantage.",
+      "master": "The characteristic coordinating move looks strange in isolation, because its point is what it frees or prepares for other pieces."
+    },
+    "by_depth": {
+      "short": "Whether your pieces work together.",
+      "normal": "Piece coordination: how well the pieces support one another and one plan. It is a property of the whole army rather than of any piece, and a position can have every piece on a reasonable square and still be badly coordinated.",
+      "deep": "What distinguishes a good position from a collection of good squares. It is the skill of quiet positions - many middlegames reach an equilibrium where neither side has an active plan and the game turns on who regroups better - and it explains the class of move that looks wrong in isolation: a knight retreating from an outpost it no longer needs, a queen stepping to a modest square, correct because of what it frees or what it prepares. It is also the hardest concept here to detect, having no mechanical signature and being a claim about a whole position rather than about a move, which is why this record forbids using it as a default label for quiet moves whose point is not understood."
+    },
+    "hedge": "The least detectable concept in this base; it has no mechanical signature and must not be offered as a fallback explanation.",
+    "lesson": "Ask what the move does for the other pieces, not what it does for itself."
+  },
+  "terminology": {
+    "beginner_words": [
+      "your pieces working together",
+      "helping each other"
+    ],
+    "advanced_words": [
+      "coordination",
+      "harmony",
+      "regrouping",
+      "manoeuvring"
+    ],
+    "avoid": [
+      "good coordination (as a bare label)",
+      "the pieces are harmonious (with no reason given)"
+    ]
+  },
+  "status": {
+    "stage": "researched",
+    "last_updated": "2026-09-01",
+    "open_questions": [],
+    "audit_notes": []
+  },
+  "id": "piece-coordination",
+  "canonical_name": "Piece coordination",
+  "category": "piece-coordination",
+  "knowledge_type": "positional-concept",
+  "definition_short": "How well the pieces work together - whether they support one plan and one another, rather than each being individually well placed.",
+  "definition_long": "The property that distinguishes a good position from a collection of good squares. Coordination is about the army, not the piece: it asks whether the pieces defend each other, aim at the same targets, and leave each other room, and it is entirely possible for every piece to stand on a reasonable square while the position is badly coordinated.\n\nIT IS THE SKILL OF QUIET POSITIONS. Many middlegames reach an equilibrium in which neither side has an active plan available; what remains is manoeuvring, and the player who regroups more skilfully gets the advantage. Karpov is the standard exemplar precisely because of this, and the quality repeatedly identified in his play is the ability to see each piece IN THE CONTEXT OF THE WHOLE ARMY rather than on its own merits.\n\nIT EXPLAINS MOVES THAT LOOK WRONG. The characteristic coordinating move is one that appears strange or even retrograde in isolation — a knight retreating from an outpost it no longer needs, a queen stepping to a modest square — and is correct because it frees a square another piece wants, or prepares a break that needs three pieces at once. This is the class of move a single-move explanation handles worst, and naming coordination is often the only honest account of it.\n\nIT IS CLOSELY TIED TO PROPHYLAXIS. Arranging one's pieces harmoniously before a decisive operation, and doing so in a way that also anticipates the opponent's plan, is the same activity seen from two sides.\n\nTHE HONEST LIMIT is that coordination is the least detectable concept in this base. It has no mechanical signature, it is a claim about a whole position, and it is easy to invoke as a post-hoc label for any quiet move that turned out well. This record therefore states plainly that it must not be used as a default explanation for moves the system cannot otherwise account for.",
+  "sources": [
+    "chessbase-karpov-coordination",
+    "collins-karpov-move-by-move",
+    "dvoretsky-maneuvering",
+    "serper-positional-secret"
+  ],
+  "source_confidence": "medium"
+}

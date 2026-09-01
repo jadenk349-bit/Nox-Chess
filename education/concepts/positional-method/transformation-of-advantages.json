@@ -1,0 +1,180 @@
+{
+  "schema_version": 2,
+  "alternate_names": [
+    "converting one advantage into another",
+    "technique"
+  ],
+  "historical_names": [],
+  "tags": [
+    "positional",
+    "conversion",
+    "technique"
+  ],
+  "subcategory": "conversion",
+  "difficulty": "advanced",
+  "knowledge_type_note": "A method for converting advantages, and one whose own authors record an internal tension with the principles it sits beside.",
+  "name_status": "established-name",
+  "history": {
+    "attributions": [
+      {
+        "relation": "systematized-by",
+        "person": "Mark Dvoretsky and Artur Yusupov",
+        "year": null,
+        "note": "Technique in Chess sets out the four golden principles with the transformation of an advantage as a named section.",
+        "confidence": "high"
+      },
+      {
+        "relation": "later-associated-with",
+        "person": "Anatoly Karpov",
+        "year": null,
+        "note": "The standard exemplar, on the strength of his games rather than any formulation of his own.",
+        "confidence": "medium"
+      }
+    ],
+    "first_documented_source": "dvoretsky-yusupov-technique",
+    "year": null,
+    "confidence": "medium",
+    "notes": "The idea is older than the formulation and no coinage is traced. Two definitions of 'technique' are recorded alongside it from the same discussion: Zaitsev's 'technique is an art from the past', and Gligoric's plainer 'technique is the skilful application of the laws of strategy and tactics'.",
+    "competing_claims": [],
+    "development": []
+  },
+  "engine_era_status": "reliable",
+  "engine_era_note": "Engines transform advantages constantly and without sentiment, releasing binds and returning material whenever a more convertible advantage results. Watching an engine do this is one of the clearest ways the concept can now be studied, and it exposes how reluctant human players are to give up an advantage they can see for one they must first believe in.",
+  "recognition": {
+    "preconditions": [
+      "One side holds an advantage of some kind",
+      "A conversion of that advantage into another form is available"
+    ],
+    "indicators_for": [
+      "The current advantage has stopped growing",
+      "A concrete line converts the edge into material or a won ending",
+      "The opponent's only counterplay can be removed by a transformation"
+    ],
+    "indicators_against": [
+      "The advantage is still increasing by simple improvement",
+      "The transformation surrenders more than it obtains"
+    ],
+    "prerequisites": [
+      "positional-evaluation",
+      "static-vs-dynamic"
+    ],
+    "detector": null,
+    "detectability": "human-only",
+    "typical_confidence": "low",
+    "false_positive_traps": [
+      "A transforming move often looks like a concession and can be reported as an error by anything judging moves on what they give up rather than what they get.",
+      "Not every exchange of one advantage for another is a transformation; it must be for a MORE convertible advantage, and this base cannot judge that without concrete evidence.",
+      "The concept describes a player's intention. This system observes moves, not intentions, and must not attribute a transformation to a move without evidence."
+    ]
+  },
+  "application": {
+    "typical_plans": [
+      "Convert a positional bind into won material",
+      "Convert a material edge into a technically winning endgame",
+      "Trade an expiring dynamic advantage for a permanent structural one",
+      "Remove all counterplay first, then look for the concrete path"
+    ],
+    "typical_moves": [
+      "Returning sacrificed material at the moment it buys a won ending",
+      "Exchanging into an endgame that is winning rather than merely better"
+    ],
+    "typical_pawn_structures": [],
+    "typical_piece_arrangements": [],
+    "tactical_consequences": [
+      "The concrete phase generally requires exact calculation rather than judgement"
+    ],
+    "strategic_consequences": [
+      "An advantage that is never transformed usually dissipates"
+    ]
+  },
+  "exceptions": [
+    "Where an advantage can be converted directly, no transformation is needed.",
+    "The authors themselves note that concrete play runs contrary to the patient principles, so the method contains a real internal tension rather than a smooth procedure."
+  ],
+  "limitations": [
+    "Recognising the turning point is the whole difficulty and no source offers a test for it.",
+    "This base has not validated any transformation example against an engine, so the concept currently rests on textual authority alone."
+  ],
+  "misconceptions": [
+    "That an advantage should be held onto. Advantages are usually converted through several intermediate forms, and holding one unchanged is how it dissipates.",
+    "That giving something up means conceding. A transformation is judged by what is obtained.",
+    "That technique means playing safely. Its authors describe the decisive phase as precise calculation, not patient manoeuvring."
+  ],
+  "relationships": {
+    "broader": [],
+    "narrower": [],
+    "related": [
+      "static-vs-dynamic",
+      "positional-evaluation",
+      "two-weaknesses",
+      "piece-exchanges",
+      "compensation",
+      "endgame-principles",
+      "planning",
+      "material-imbalance"
+    ],
+    "contrasting": [],
+    "co_occurring": [
+      "two-weaknesses"
+    ],
+    "conflicts": [
+      {
+        "concept": "calculation",
+        "resolution": "A tension the source itself names: patient improvement and forcing calculation pull against each other, and the skill is knowing when the first has run out. This base records the authors' framing and the published objection to it, and does not choose."
+      }
+    ]
+  },
+  "examples": [],
+  "counterexamples": [],
+  "ambiguous_examples": [],
+  "explanations": {
+    "by_level": {
+      "beginner": "Trade the advantage you have for one that is easier to win with - a better position for extra material, extra material for a won ending.",
+      "intermediate": "Transformation of an advantage. Judge the move by what you get, not by what you give up.",
+      "advanced": "Remove counterplay, improve everything, and then find the concrete path - the difficulty is recognising when patient play has run out.",
+      "master": "Miss the turning point and the advantage survives but may become unconvertible."
+    },
+    "by_depth": {
+      "short": "Trade one advantage for a more convertible one.",
+      "normal": "Transformation of an advantage: converting the edge you have into a different kind that is easier to cash - a bind into material, material into a winning endgame, activity into a lasting weakness. Advantages are rarely converted directly; they are usually transformed several times first.",
+      "deep": "The step most often missing between having an advantage and winning with it. It sits inside a larger method - do not allow counterplay, do not hurry, two weaknesses, correct exchanging - and is the operation those principles create the conditions for. The hard part is the turning point: once everything extractable by patient improvement has been extracted, the player must switch from manoeuvring to exact calculation, and missing that moment leaves the advantage intact but much harder to convert, or unconvertible. Transforming moves are difficult to see because they look like concessions - releasing a bind, giving up the bishop pair, returning material - and are judged by what is obtained rather than what is surrendered."
+    },
+    "hedge": "",
+    "lesson": "Judge the move by what it obtains, not by what it gives up - and notice when patient improvement has stopped paying."
+  },
+  "terminology": {
+    "beginner_words": [
+      "swap one advantage for another",
+      "make it easier to win"
+    ],
+    "advanced_words": [
+      "transformation",
+      "technique",
+      "realising an advantage",
+      "conversion"
+    ],
+    "avoid": [
+      "hold on to your advantage",
+      "never give anything back"
+    ]
+  },
+  "status": {
+    "stage": "researched",
+    "last_updated": "2026-09-01",
+    "open_questions": [],
+    "audit_notes": []
+  },
+  "id": "transformation-of-advantages",
+  "canonical_name": "Transformation of an advantage",
+  "category": "transformation-of-advantages",
+  "knowledge_type": "strategic-principle",
+  "definition_short": "Exchanging one kind of advantage for another that is easier to convert - a space edge for a material one, activity for a structural weakness, a better position for a won ending.",
+  "definition_long": "The step most often missing between having an advantage and winning with it. An advantage is not usually cashed directly; it is TRANSFORMED, often several times, into a form that can finally be converted — a positional bind into won material, material into a winning endgame, activity into a permanent weakness in the opponent's camp.\n\nIT SITS INSIDE A LARGER METHOD. Dvoretsky and Yusupov give four golden principles of technique: DO NOT ALLOW COUNTERPLAY, DO NOT HURRY, THE PRINCIPLE OF TWO WEAKNESSES, and CORRECT EXCHANGING. Transformation is the operation those principles create the conditions for.\n\nTHE HARD PART IS THE TURNING POINT, and the authors are unusually direct about it. At some stage everything extractable by patient improvement has been extracted, and the player must switch from manoeuvring to precise calculation and find the concrete path. Miss that moment and the advantage does not vanish, but converting it becomes 'considerably more complicated, delayed, or even impossible'. The difficulty is not knowing the principles; it is recognising when they have run out.\n\nTHE AUTHORS' OWN TENSION, recorded here because it is real: they describe concrete play as 'to some extent contrary' to their golden principles, since patient improvement and forcing calculation pull in different directions. At least one reviewer disputes that framing, arguing concrete play is simply accuracy and is required whether one wins by attack or by technique. This base records the disagreement rather than resolving it.\n\nWHY IT IS HARD TO SEE is that a transforming move often LOOKS like a concession — releasing a bind, giving up the bishop pair, allowing a structural change, returning material. It is assessed by what is obtained, not by what is surrendered.",
+  "sources": [
+    "dvoretsky-yusupov-technique",
+    "kane-technique-review",
+    "shereshevsky-endgame-strategy",
+    "collins-karpov-move-by-move"
+  ],
+  "source_confidence": "high"
+}

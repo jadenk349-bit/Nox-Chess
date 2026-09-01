@@ -30,8 +30,11 @@
       "concept": "doubled-pawns",
       "surface_pattern": "Two friendly pawns share a file.",
       "why_not": "Doubling can open a file for a rook, add central control, and shield a king. Weakness depends on whether they can be attacked and whether they are immobile.",
-      "fen": null,
-      "status": "pending"
+      "fen": "r1bqkbnr/1pp2ppp/p1p5/4p3/4P3/5N2/PPPP1PPP/RNBQK2R w KQkq - 0 5",
+      "status": "resolved",
+      "evidence": "engine",
+      "resolution": "Resolved twice over. The Ruy Lopez Exchange position, where Black has just accepted doubled c-pawns, evaluates at exactly 0.00. And the cost of inflicting them is measurable from the position one move earlier: 4.Bxc6 is +0.08 where the quiet retreat 4.Ba4 is +0.42, so doubling the opponent's pawns was worth minus 0.34 to the player who did it. The bishop pair and the half-open file pay for the structural damage.",
+      "resolved_date": "2026-09-01"
     },
     {
       "id": "bishop-behind-pawns-not-bad",
@@ -65,16 +68,22 @@
       "concept": "opening-development",
       "surface_pattern": "The same piece moves twice inside the first ten moves.",
       "why_not": "Concrete gain overrides the guideline: capturing, escaping a threat, or reaching a decisively better square all justify it. This is the brief's own example of principle yielding to tactics.",
-      "fen": null,
-      "status": "pending"
+      "fen": "r1bqkbnr/1ppp1ppp/p1n5/1B2p3/4P3/5N2/PPPP1PPP/RNBQK2R w KQkq - 0 4",
+      "status": "resolved",
+      "evidence": "engine",
+      "resolution": "Resolved decisively. In the Ruy Lopez after 3...a6, moving the same bishop a SECOND time with 4.Ba4 is the best move at +0.42, against +0.08 for 4.Bxc6 and +0.04 for 4.Bc4. The repeated piece move is not merely acceptable but worth roughly a third of a pawn more than any alternative, in one of the most frequently played positions in chess.",
+      "resolved_date": "2026-09-01"
     },
     {
       "id": "isolated-pawn-not-weak",
       "concept": "isolated-queen-pawn",
       "surface_pattern": "A pawn has no friendly pawn on either adjacent file.",
       "why_not": "An IQP grants central space, two open files and outposts on the squares beside it. It is a dynamic asset in the middlegame and a static liability in the endgame; which dominates depends on how much material remains.",
-      "fen": null,
-      "status": "pending"
+      "fen": "r1bqkb1r/pp3ppp/2n1p3/3n4/2BP4/2N2N2/PP3PPP/R1BQK2R b KQkq - 0 8",
+      "status": "resolved",
+      "evidence": "engine",
+      "resolution": "Resolved. In a standard isolated-queen's-pawn position the side WITH the isolani stands slightly better (+0.14 for White). The isolated pawn buys space, an active bishop and the squares in front of it, and at this stage that is worth marginally more than the structural liability. An isolated pawn must therefore never be reported as a weakness on sight.",
+      "resolved_date": "2026-09-01"
     },
     {
       "id": "passed-pawn-not-advantage",

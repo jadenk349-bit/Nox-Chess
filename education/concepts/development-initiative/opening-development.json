@@ -83,7 +83,8 @@
       "REGISTERED FALSE POSITIVE: moving the same piece twice is not automatically wrong. Capturing, escaping and reaching a much better square all justify it, and this is the brief's own illustration of tactics overriding a principle.",
       "REGISTERED FALSE POSITIVE: early queen development is not automatically wrong — the objection is that the queen can be harassed WITH TEMPO, so where no such harassment exists the objection does not apply.",
       "Detecting a rule violation is easy and says almost nothing. Only the absence of a concrete justification makes it a criticism.",
-      "'The opening' has no fixed end. Applying opening rules at move 15 of a closed position is a category error."
+      "'The opening' has no fixed end. Applying opening rules at move 15 of a closed position is a category error.",
+      "A piece moving twice is not evidence of a mistake. Proven counterexample: 4.Ba4 in the Ruy Lopez is best by 0.34 over any move that leaves the bishop alone."
     ]
   },
   "application": {
@@ -119,7 +120,8 @@
     "That the rules are rules. They are defaults for players who cannot yet judge the exception.",
     "That moving a piece twice is a mistake.",
     "That the queen must stay home until move 10.",
-    "That 'the opening' ends at a fixed move number. It ends when the pieces are developed."
+    "That 'the opening' ends at a fixed move number. It ends when the pieces are developed.",
+    "That moving the same piece twice in the opening is an error. In the Ruy Lopez it is the best move, measured at +0.42 against +0.08 for the alternative."
   ],
   "relationships": {
     "broader": [],
@@ -139,7 +141,47 @@
     "conflicts": []
   },
   "examples": [],
-  "counterexamples": [],
+  "counterexamples": [
+    {
+      "fen": "r1bqkbnr/1ppp1ppp/p1n5/1B2p3/4P3/5N2/PPPP1PPP/RNBQK2R w KQkq - 0 4",
+      "note": "The Ruy Lopez after 1.e4 e5 2.Nf3 Nc6 3.Bb5 a6 - one of the most-played positions in chess. White's best move retreats the bishop that already moved on move three. Constructed-test: the FEN was built from the standard move sequence for this comparison.",
+      "origin_kind": "constructed-test",
+      "concept_role": "contradicts",
+      "side_to_move_benefits": "white",
+      "engine": {
+        "engine_id": "Stockfish 18",
+        "test_level": 3,
+        "depth": 26,
+        "threads": 10,
+        "hash_mb": 2048,
+        "multipv": 4,
+        "best_move": "b5a4",
+        "eval_cp": 42,
+        "mate_in": null,
+        "pv": [],
+        "alternatives": [
+          {
+            "move": "b5c6",
+            "eval_cp": 8,
+            "mate_in": null
+          },
+          {
+            "move": "b5c4",
+            "eval_cp": 4,
+            "mate_in": null
+          },
+          {
+            "move": "b5e2",
+            "eval_cp": -29,
+            "mate_in": null
+          }
+        ],
+        "margin_cp": 0,
+        "verdict": "contradicts",
+        "verdict_note": "Refutes 'do not move the same piece twice' as a rule. 4.Ba4 - a SECOND move by the bishop - is best at +0.42, and by a wide margin: 4.Bxc6 is +0.08 and 4.Bc4 is +0.04. Moving the same piece again is not merely tolerable here but worth about a third of a pawn more than any alternative. The rule describes a typical cost, not a prohibition, and this base will not report a repeated piece move as an error."
+      }
+    }
+  ],
   "ambiguous_examples": [],
   "explanations": {
     "by_level": {

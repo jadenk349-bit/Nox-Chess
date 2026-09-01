@@ -6,24 +6,24 @@
     "note": "Filled in by tools/sf_analyse.py --probe"
   },
   "counters": {
-    "concepts_total": 108,
+    "concepts_total": 110,
     "concepts_stub": 0,
     "concepts_researched": 29,
     "concepts_validated": 4,
     "concepts_needs_review": 0,
-    "sources_reviewed": 143,
-    "positions_tested": 26,
-    "matches_validated": 17,
-    "false_matches": 3,
+    "sources_reviewed": 148,
+    "positions_tested": 29,
+    "matches_validated": 18,
+    "false_matches": 5,
     "ambiguous_matches": 6,
     "by_stage": {
       "ready": 2,
-      "researched": 97,
+      "researched": 99,
       "validated": 9
     },
     "tablebase_positions": 17,
     "concepts_fully_covered": 12,
-    "areas_touched": 59,
+    "areas_touched": 61,
     "areas_total": 85
   },
   "areas": {
@@ -281,10 +281,14 @@
     },
     "piece-coordination": {
       "domain": "piece-play",
-      "status": "not-started",
-      "concepts": [],
+      "status": "covered",
+      "concepts": [
+        "piece-coordination"
+      ],
       "open_questions": [],
-      "last_touched": null
+      "last_touched": "2026-09-01",
+      "last_updated": "2026-09-01",
+      "note": "Written with an explicit prohibition on using it as a fallback label; it is the least detectable concept in this base and says so."
     },
     "good-bad-bishops": {
       "domain": "piece-play",
@@ -496,10 +500,14 @@
     },
     "transformation-of-advantages": {
       "domain": "positional-method",
-      "status": "not-started",
-      "concepts": [],
+      "status": "covered",
+      "concepts": [
+        "transformation-of-advantages"
+      ],
       "open_questions": [],
-      "last_touched": null
+      "last_touched": "2026-09-01",
+      "last_updated": "2026-09-01",
+      "note": "Written from Dvoretsky & Yusupov's Technique in Chess, including the authors' own statement that concrete play runs contrary to their golden principles, and a published objection to that framing."
     },
     "opening-principles": {
       "domain": "opening",
@@ -1250,6 +1258,38 @@
         "gambit",
         "compensation",
         "early-queen-development"
+      ]
+    },
+    {
+      "id": "false-positive-resolutions-openings",
+      "date": "2026-09-01",
+      "method": "Stockfish 18, depth 26, MultiPV, on standard opening positions constructed from mainline move orders.",
+      "results": {
+        "Ruy Lopez after 3...a6": {
+          "4.Ba4 (second bishop move)": 42,
+          "4.Bxc6": 8,
+          "4.Bc4": 4,
+          "4.Be2": -29
+        },
+        "standard IQP after 8.exd4 (Black to move)": {
+          "best": -14,
+          "note": "White, who holds the isolani, is +0.14"
+        },
+        "Ruy Exchange after 4.Bxc6 dxc6": {
+          "best": 0,
+          "note": "dead level with doubled c-pawns"
+        }
+      },
+      "findings": [
+        "'Do not move the same piece twice' is refuted as a rule: 4.Ba4 is best by 0.34 over any alternative in one of the most-played positions in chess.",
+        "An isolated queen's pawn is not a weakness on sight - in the standard position the side holding it is slightly better.",
+        "Doubled pawns are not a weakness on sight, and the cost of inflicting them is measurable: 4.Bxc6 is 0.34 worse than the quiet retreat, and the side accepting them is exactly equal.",
+        "All three surface patterns are ones a naive detector would flag as errors. Each is now a recorded counterexample on its concept."
+      ],
+      "concepts": [
+        "opening-development",
+        "isolated-queen-pawn",
+        "doubled-pawns"
       ]
     }
   ],

@@ -87,7 +87,8 @@
     "false_positive_traps": [
       "REGISTERED FALSE POSITIVE: an isolated pawn is not automatically a weakness. In the middlegame it is frequently the source of the better side's whole game.",
       "The structure is trivially detectable and says almost nothing on its own — the material left on the board decides the evaluation more than the structure does.",
-      "Reporting it as a weakness while its owner has the initiative inverts the position."
+      "Reporting it as a weakness while its owner has the initiative inverts the position.",
+      "An isolated queen's pawn is not a weakness on sight. In the standard position measured here the side with the isolani is slightly better (+0.14)."
     ]
   },
   "application": {
@@ -148,7 +149,42 @@
       }
     ]
   },
-  "examples": [],
+  "examples": [
+    {
+      "fen": "r1bqkb1r/pp3ppp/2n1p3/3n4/2BP4/2N2N2/PP3PPP/R1BQK2R b KQkq - 0 8",
+      "note": "A standard isolated-queen's-pawn position: White has the isolani on d4 with the usual compensation - space, the c4 bishop, and the e5 and c5 squares. Constructed-test, built from a mainline move order.",
+      "origin_kind": "constructed-test",
+      "concept_role": "supports",
+      "side_to_move_benefits": "white",
+      "engine": {
+        "engine_id": "Stockfish 18",
+        "test_level": 3,
+        "depth": 26,
+        "threads": 10,
+        "hash_mb": 2048,
+        "multipv": 3,
+        "best_move": "f8b4",
+        "eval_cp": -14,
+        "mate_in": null,
+        "pv": [],
+        "alternatives": [
+          {
+            "move": "f8e7",
+            "eval_cp": -14,
+            "mate_in": null
+          },
+          {
+            "move": "f8d6",
+            "eval_cp": -18,
+            "mate_in": null
+          }
+        ],
+        "margin_cp": 0,
+        "verdict": "supports",
+        "verdict_note": "The side WITH the isolated pawn stands slightly better: the evaluation is -0.14 from Black's perspective, so White is +0.14. An isolated queen's pawn is therefore not a weakness in itself - it is a trade of a long-term structural liability for short-term activity and space, and at this stage the activity is worth marginally more. Recorded to stop this base reporting an isolated pawn as a defect on sight."
+      }
+    }
+  ],
   "counterexamples": [],
   "ambiguous_examples": [],
   "explanations": {
@@ -185,7 +221,7 @@
   },
   "status": {
     "stage": "researched",
-    "last_updated": "2026-08-31",
+    "last_updated": "2026-09-01",
     "open_questions": [],
     "audit_notes": [
       "2026-09-01 audit: attribution to Wilhelm Steinitz carried low confidence without a hedge in the note itself. Hedge added so the caveat travels with the claim rather than sitting only in history.confidence."
