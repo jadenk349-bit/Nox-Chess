@@ -13,7 +13,7 @@ implemented; that is a reading, and doing it is the work. What it can do is
 stop the list being rediscovered from scratch each time — and every one of
 the defects listed in the tool's header was unread before it was looked at.
 
-**Of 246 stated conditions (traps and indicators-against): 79 enforced in the matcher, 20 in Layer 3, 29 argued on the record to be unbuildable or already honoured elsewhere, 118 unread.**
+**Of 246 stated conditions (traps and indicators-against): 85 enforced in the matcher, 20 in Layer 3, 29 argued on the record to be unbuildable or already honoured elsewhere, 112 unread.**
 
 "Noted on the record" is an argument, not a guard. A single "all cited"
 headline would read as "all traps implemented", which would be the same
@@ -26,9 +26,9 @@ shared file was added to the search. The test is quotation for that reason.
 - [cited] REGISTERED FALSE POSITIVE: doubled pawns are not automatically weak. Detecting them is trivial; concluding weakness from the detection is wrong often enough to be a real hazard.
 - [cited] The compensation is usually invisible to a structure check — the bishop pair and the opened file are elsewhere on the board.
 - [cited] Doubled CENTRAL pawns are frequently an asset, controlling four squares between them.
-- [**unread**] *(indicator against)* The doubling opened a file that is actually being used
-- [**unread**] *(indicator against)* The bishop pair was obtained in the exchange
-- [**unread**] *(indicator against)* They increase control of central squares
+- [cited] *(indicator against)* The doubling opened a file that is actually being used
+- [cited] *(indicator against)* The bishop pair was obtained in the exchange
+- [cited] *(indicator against)* They increase control of central squares
 - [**unread**] *(indicator against)* They create an outpost the opponent cannot contest
 - [**unread**] *(indicator against)* They shield the king rather than exposing it
 ## isolated-queen-pawn
@@ -49,7 +49,7 @@ shared file was added to the search. The test is quotation for that reason.
 - [cited] A passer created from doubled pawns is often born weak.
 - [**unread**] *(indicator against)* It is securely blockaded by a piece that cannot be dislodged, especially a knight
 - [**unread**] *(indicator against)* Defending it ties down more of the owner's pieces than of the opponent's
-- [**unread**] *(indicator against)* It stands on a square where it is easily attacked
+- [cited] *(indicator against)* It stands on a square where it is easily attacked
 - [**unread**] *(indicator against)* It was created by a pawn trade that also fixed it as a target
 - [**unread**] *(indicator against)* The position has no second front, so the blockader is never distracted
 ## backward-pawn
@@ -180,8 +180,8 @@ shared file was added to the search. The test is quotation for that reason.
 - [cited] Counting controlled squares is mechanical and over-reports. Space with no entry point wins nothing.
 - [cited] Advanced pawns are not automatically a space advantage — they may simply be weak and fixed.
 - [noted] The cramped side's standard remedy is exchanging, so a space advantage that cannot prevent trades is temporary.
-- [**unread**] *(indicator against)* No entry point exists, so the territory buys nothing
-- [**unread**] *(indicator against)* The advanced pawns are fixed targets rather than a front
+- [cited] *(indicator against)* No entry point exists, so the territory buys nothing
+- [cited] *(indicator against)* The advanced pawns are fixed targets rather than a front
 - [**unread**] *(indicator against)* The cramped side can liquidate with exchanges
 - [**unread**] *(indicator against)* The space was gained by overextension the opponent can undermine
 ## piece-activity

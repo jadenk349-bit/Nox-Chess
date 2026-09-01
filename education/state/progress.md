@@ -1527,3 +1527,23 @@ pawn advance" — is built too, and is **near-inert**: 35.5% → 35.4%, because 
 file is open precisely when both pawns have left it and a pawn arriving from an
 adjacent file to shut it is rare. Built, measured, and reported as near-inert
 rather than dressed up.
+
+
+## Six more off the second list
+
+`passed-pawn` is the most-reported concept in the base — 60.4%, 128 leads. Three
+of its five `indicators_against` are judgements no static scan reaches and are
+recorded as such. The other two are built: "securely blockaded by a piece that
+cannot be dislodged" has been enforced since the Reshevsky–Petrosian correction,
+and **"it stands on a square where it is easily attacked"** is now carried in the
+*sentence* — a passer attacked more times than it is defended is named as a
+target rather than an asset. The rate does not move, and saying it did would be
+the wrong claim. Fourth time in two sessions that saying more was the right
+answer where firing less was the tempting one.
+
+The other five were already built and merely unquoted: `space`'s "no entry point
+exists, so the territory buys nothing" and "the advanced pawns are fixed targets
+rather than a front", and `doubled-pawns`' three compensations. The audit's
+quotation test under-credits when a record says the same thing twice in different
+words — which is the price of a test that cannot be gamed. The fix is to quote
+the second wording too, not to loosen the test.

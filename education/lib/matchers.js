@@ -271,7 +271,11 @@ const STRUCTURAL = [
           let line = `${side(f, h.c)} has doubled pawns on ${h.sq.join(', ')}`;
           // Both of the compensations the record names are visible from here,
           // and the reason to say them is that a bare structure report invites
-          // exactly the conclusion the record's first trap forbids.
+          // exactly the conclusion the record's first trap forbids. The
+          // indicators_against name the same three things: "they increase
+          // control of central squares", "the bishop pair was obtained in the
+          // exchange", and "the doubling opened a file that is actually being
+          // used".
           const central = h.sq.filter(sq => sq[0] === 'd' || sq[0] === 'e');
           if (central.length >= 2) line += ' — central, and a central pair controls four squares between them';
           if (f.pieces[h.c].bishopPair && !f.pieces[other(h.c)].bishopPair) {
@@ -361,6 +365,17 @@ const STRUCTURAL = [
       // "A passer created from doubled pawns is often born weak" - the second
       // trap, and a fact this base can read straight off the structure.
       const doubled = c => new Set(f.pawns[c].doubled || []);
+      // "It stands on a square where it is easily attacked" - the record's third
+      // indicator_against, and the third thing this sentence can carry rather
+      // than suppress. A passer under more fire than it has defence is a target
+      // being called an asset, which is the shape of every complaint in this
+      // record.
+      const underFire = (c, sq) => {
+        const i = (8 - Number(sq[1])) * 8 + (sq.charCodeAt(0) - 97);
+        try {
+          return P.attackersOf(st, i, other(c)).length > P.attackersOf(st, i, c).length;
+        } catch (e) { return false; }
+      };
       return {
         confidence: 'high',
         because: hits.map(h => {
@@ -369,6 +384,11 @@ const STRUCTURAL = [
           let line = `${side(f, h.c)} has a passed pawn on ${brief(h.sq)}`;
           if (!moving.length) line += ', which cannot advance without being taken';
           else if (moving.length < h.sq.length) line += `, of which ${brief(moving)} can safely advance`;
+          const hot = h.sq.filter(sq => underFire(h.c, sq));
+          if (hot.length) {
+            line += `; ${brief(hot)} ${hot.length === 1 ? 'is' : 'are'} attacked more times than defended, ` +
+                    `which is a target rather than an asset`;
+          }
           if (born.length) {
             line += born.length === 1
               ? `; the one on ${born[0]} is half of a doubled pair, which is how a passer is born weak`
@@ -1064,11 +1084,14 @@ const STRUCTURAL = [
       if (totalPawns(f) < 6 || Math.abs(w - b) < 2) return null;
       const c = w > b ? 'w' : 'b';
       // Space with no entry point wins nothing - the record says so in those
-      // words, and this matcher counted squares and stopped. Layer 3's
-      // entrySquares() answers the other half.
+      // words, and again in its indicators_against as "no entry point exists,
+      // so the territory buys nothing". This matcher counted squares and
+      // stopped. Layer 3's entrySquares() answers the other half.
       const entry = (f.activity.entry || {})[c] || [];
       if (!entry.length) return null;
-      // Trap 2: "advanced pawns are not automatically a space advantage - they
+      // Trap 2, which the indicators_against say again as "the advanced pawns
+      // are fixed targets rather than a front": "advanced pawns are not
+      // automatically a space advantage - they
       // may simply be weak and fixed." The pawns that CREATE the space are the
       // ones whose attacks land in the other half, which is rank 4 and beyond
       // for White; if every one of them is a pawn no pawn can defend and it

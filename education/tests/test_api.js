@@ -1542,6 +1542,30 @@ const { concepts } = API.knowledge();
        fs.readFileSync(path.join(ROOT, 'lib', 'matchers.js'), 'utf8')));
 }
 
+{
+  // passed-pawn's third indicator_against — "it stands on a square where it is
+  // easily attacked" — is now the fourth thing the sentence carries rather than
+  // the fourth reason to suppress. A passer under more fire than it has defence
+  // is a target being called an asset, which is the complaint the whole record
+  // is made of.
+  const pp = fen => {
+    const c = API.analyzeWithEducation({ fen }).concepts.find(x => x.id === 'passed-pawn');
+    return c ? (c.because || [''])[0] : null;
+  };
+  ok('passed-pawn: says when the passer is itself under fire',
+     /attacked more times than defended, which is a target rather than an asset/
+       .test(String(pp('4k3/8/8/r2P4/8/8/8/4K3 w - - 0 1'))),
+     String(pp('4k3/8/8/r2P4/8/8/8/4K3 w - - 0 1')));
+  ok('passed-pawn: and says nothing extra when it is adequately defended',
+     pp('4k3/8/8/r2P4/3R4/8/8/4K3 w - - 0 1') === 'White has a passed pawn on d5',
+     String(pp('4k3/8/8/r2P4/3R4/8/8/4K3 w - - 0 1')));
+  // The rate does not move: this is information, not a guard, and it is the
+  // fourth time in two sessions that "say more" has been the right answer where
+  // "fire less" was the tempting one.
+  ok('passed-pawn: still the most-reported concept, unchanged',
+     /60\.4%/.test(fs.readFileSync(path.join(ROOT, 'lib', 'matchers.js'), 'utf8')));
+}
+
 /* ---------- report ---------- */
 console.log(`\nAPI  PASS ${pass}   FAIL ${fails.length}`);
 for (const [n, d] of fails) console.log(`  FAIL  ${n}\n        ${d}`);
