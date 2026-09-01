@@ -1467,6 +1467,42 @@ const { concepts } = API.knowledge();
      FEAT.features(wk.fen).breakthrough.w.first === 'a4a5');
 }
 
+{
+  // The corpus's first FALSE POSITIVE, and it LEADS. Karpov–Polgar, Linares
+  // 2001: Black's rook is on a2, attacks g2 and h2, and the white king is on its
+  // back rank — the ABSOLUTE seventh this record calls decisive. Stockfish has
+  // White at +0.83 and plays Karpov's 24.Kc1 as its own first choice, with the
+  // Nb5-c3 eviction in the principal variation. Markos: "Polgar's rook is a
+  // beast... Yet Karpov nicely shows that the rook lacks sufficient support."
+  const KP = '6k1/3nnpp1/1p2p1bp/1N6/1P2P3/P4P1N/r5PP/3K1B1R w - - 3 24';
+  const r = API.analyzeWithEducation({ fen: KP });
+  ok('the Karpov–Polgar failure is still failing, and still leading',
+     r.concepts_all[0] && r.concepts_all[0].id === 'rook-on-the-seventh' &&
+     r.concepts_all[0].subjects.includes('b'),
+     r.concepts_all.map(c => c.id).join(','));
+  const corpus = JSON.parse(fs.readFileSync(
+    path.join(ROOT, 'corpus', 'annotated_positions.json'), 'utf8')).positions;
+  const kp = corpus.find(p => p.id === 'karpov-polgar-2001-24Kc1-rook-on-the-seventh-negative');
+  ok('...and it is recorded as a failure rather than engineered around',
+     kp && /RECORDED FAILURE/.test(kp.explanation) && kp.limitation);
+  ok('...with the reason: a one-ply eviction test breaks the positive instance',
+     /one-ply/.test(kp.explanation) && /Capablanca-Rubinstein/.test(kp.explanation));
+  // The attempt is kept in the matcher as a comment, because the next reader
+  // will otherwise write it again.
+  ok('the attempt is recorded where someone would try it again',
+     /NOT EVICTABILITY, and the attempt is recorded/.test(
+       fs.readFileSync(path.join(ROOT, 'lib', 'matchers.js'), 'utf8')));
+
+  // The trap audit was reading HALF the conditions. `indicators_against` is
+  // where the missing one lived, and the tool had never looked at that field.
+  const audit = fs.readFileSync(path.join(ROOT, 'tools', 'trap_audit.js'), 'utf8');
+  ok('trap audit: reads indicators_against as well as false_positive_traps',
+     /indicators_against/.test(audit) && /BOTH LISTS/.test(audit));
+  const traps = fs.readFileSync(path.join(ROOT, 'state', 'TRAPS.md'), 'utf8');
+  ok('...and the artifact says so in its own headline',
+     /traps and indicators-against/.test(traps));
+}
+
 /* ---------- report ---------- */
 console.log(`\nAPI  PASS ${pass}   FAIL ${fails.length}`);
 for (const [n, d] of fails) console.log(`  FAIL  ${n}\n        ${d}`);

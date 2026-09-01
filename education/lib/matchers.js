@@ -184,6 +184,35 @@ const priorityOf = id => {
   return i === -1 ? PRIORITY.length : i;
 };
 
+/* Can the defender drive this piece away with tempo?
+ *
+ * `rook-on-the-seventh` states it in its indicators_against - "the rook can be
+ * challenged and traded off, or driven away with gain" - and in its
+ * indicators_for as "the rook cannot be evicted with tempo". A move counts when
+ * it attacks the piece and the attacker survives being there; a king walking up
+ * to it does not, and neither does simply capturing it, which is a different
+ * fact about the position.
+ */
+function drivenAwayWithTempo(st, colour, square) {
+  const P = FEAT.page;
+  const them = other(colour);
+  const i = (8 - Number(square[1])) * 8 + (square.charCodeAt(0) - 97);
+  const probe = P.cloneState(st);
+  probe.turn = them;
+  probe.ep = null;
+  let ms;
+  try { ms = P.legalMoves(probe); } catch (e) { return false; }
+  return ms.some(m => {
+    const pc = probe.b[m.from];
+    if (!pc || pc.t === 'K') return false;
+    if (m.to === i) return false;                       // a capture, not an eviction
+    let nx;
+    try { nx = P.makeMove(probe, m); } catch (e) { return false; }
+    if (P.attackersOf(nx, i, them).indexOf(m.to) < 0) return false;
+    return P.see(nx, m.to, colour) <= 0;                // ...and the attacker survives
+  });
+}
+
 /* "Shut in by its own pawns", in ONE place.
  *
  * `bad-bishop` decides this and `bishop-pair` needs the same answer - its
@@ -811,6 +840,18 @@ const STRUCTURAL = [
         const k = f.king[other(c)];
         const confined = !!k && k.onHomeRank;
         if (!targets.length && !confined) continue;
+        // NOT EVICTABILITY, and the attempt is recorded because it is the
+        // interesting part. The record's indicators_against say "the rook can be
+        // challenged and traded off, or DRIVEN AWAY WITH GAIN", and its
+        // indicators_for say "the rook cannot be evicted with tempo". Neither is
+        // built, and a one-ply test for them was written, measured and thrown
+        // away: it fixed Karpov-Polgar 2001 and broke Capablanca-Rubinstein
+        // 1928, which is this corpus's own annotated instance of the concept.
+        // In Capablanca's position ...Rd7 challenges the rook and ...Ng6 attacks
+        // it with a lesser piece, and the concept is right there anyway; in
+        // Karpov's, the eviction takes four preparatory king moves and no
+        // one-ply test can see it. The failure is a corpus entry rather than a
+        // guard fitted to one position.
         hits.push({ c, r: rooks, targets, confined });
       }
       if (!hits.length) return null;

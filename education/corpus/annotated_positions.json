@@ -34,7 +34,8 @@
     "Two entries added 2026-09-02 give weak-square its first human grounding, and both are NEGATIVE, which is the right way round for a concept whose own record says every pawn move creates squares no pawn can guard. Both come from one article by a named grandmaster who built the positions as traps for exactly the reading a mechanical detector performs; the second names no side, because the claim is that NEITHER side can use the square.",
     "`attributed_by` names the PERSON whose claim the entry rests on, and it is the field the validation ladder reads - not `annotator`, which is prose and can say things like 'unattributed training page' while still looking like grounding. Backfilled across the file on 2026-09-02, at which point exactly one entry turned out to have no person behind it (karpov-kasparov-1985-g16), and it now correctly grants its concept no human-grounded rung. This is the second time a rung in this project was found counting something looser than its own definition, and both times the number went down.",
     "One entry, added 2026-09-02, is scored on CONFIDENCE rather than on presence, and is the first of its kind here: Ftacnik-Roiz 2009, where White really does have the two bishops and a grandmaster's note reads 'please note how idle White's bishops are' in a position Stockfish scores at -2.66 for him. Nothing the system says is false, so `bishop-pair` does not belong in rejected_as_wrong; what is wrong is the weight. The entry's `confidence` is the annotator's, the checker compares it with the system's, and the gap is a recorded failure rather than a guard fitted to one position.",
-    "Torre-Karpov 1977 is the first human-grounded negative for `space`, and it is worth reading beside the two weak-square negatives: all three are positions a named author BUILT to catch the reading a mechanical detector performs, and in all three the raw Layer 3 feature is present and loud. That is what makes them live tests rather than vacuous ones - nine controlled squares to zero, ten holes including d5, a permanent hole on d5 in the Sveshnikov - and in each case what stops the report is a condition the concept's own record already stated."
+    "Torre-Karpov 1977 is the first human-grounded negative for `space`, and it is worth reading beside the two weak-square negatives: all three are positions a named author BUILT to catch the reading a mechanical detector performs, and in all three the raw Layer 3 feature is present and loud. That is what makes them live tests rather than vacuous ones - nine controlled squares to zero, ten holes including d5, a permanent hole on d5 in the Sveshnikov - and in each case what stops the report is a condition the concept's own record already stated.",
+    "karpov-polgar-2001 is this file's first entry whose concept is not merely reported but LEADS the explanation, and it is kept failing. The condition that would refuse it - 'the rook can be challenged and traded off, or driven away with gain' - is stated on the record and was never built, and a one-ply test for it fixes this position while breaking Capablanca-Rubinstein 1928, the corpus's own positive instance of the same concept. When the choice is between fitting a rule to one position and recording a failure, this file records the failure."
   ],
   "concept_roles": {
     "positive": "the concept clearly applies, on the annotator's authority",
@@ -1767,6 +1768,61 @@
         ],
         "agrees": "on the move and on the evaluation. Scores are from the side to move, and White is to move: 26.Qg2 - the move the annotators call the only one - is Stockfish's first choice at +0.05, settled from depth 15, and the game's 26.e5 measures -3.01 and is not in the top three. A three-pawn swing on one move.",
         "note": "The engine says nothing about whether nine controlled squares are a space advantage and was not asked to. It establishes that the waiting move holds the balance and the grab for more space loses by three pawns, which is what makes 'how not to play when you have space advantage' a claim about the board."
+      }
+    },
+    {
+      "game": "Karpov-Polgar, Linares (SuperGM) 2001, round 4 March",
+      "source": "markos-chessbase-winning-academy-37-rooks-in-paradise-2024",
+      "players": "Anatoly Karpov - Judit Polgar",
+      "event": "XVIII SuperGM, Linares 2001",
+      "year": 2001,
+      "annotator": "Jan Markos (GM), 'The Winning Academy 37: Rooks in Paradise', ChessBase, 8 October 2024",
+      "attributed_by": "Jan Markos",
+      "fen_verified": "replay: all 60 plies replayed legally through blind-chess.html's move generator, from the pgnmentor Karpov collection. The diagram is 'White to move' at move 24 and the continuation Markos quotes - 24.Kc1! Ne5 25.Kb1 Rd2 26.Kc1 Ra2 ... 28.Nc3 f5 - is plies 47-56 of that replay, which is what identifies the game rather than the header.",
+      "added": "2026-09-02",
+      "id": "karpov-polgar-2001-24Kc1-rook-on-the-seventh-negative",
+      "concept": "rook-on-the-seventh",
+      "concept_role": "negative",
+      "side": "b",
+      "fen": "6k1/3nnpp1/1p2p1bp/1N6/1P2P3/P4P1N/r5PP/3K1B1R w - - 3 24",
+      "move": "Kc1",
+      "move_uci": "d1c1",
+      "fen_after": "6k1/3nnpp1/1p2p1bp/1N6/1P2P3/P4P1N/r5PP/2K2B1R b - - 4 24",
+      "human_annotation": "\"White is a pawn up. Also, Black's minor pieces, especially the g6-bishop, are not very active. However, Polgar's rook is a beast. Controlling the almost entire 7th (or 2nd, if you wish) rank, it seems to be the boss on the board. Yet Karpov nicely shows that the rook lacks sufficient support. The game continued: 24.Kc1! His majesty comes to the queenside to rob the rook off the squares a2 and b2... 28.Nc3 f5 29.Kb1 Rd8. Mission accomplished. White is winning.\" And the rule Markos states before the examples: \"a rook on the 7th is usually in the middle of the opponent's army. Therefore, it usually needs some support. If it has no support, it might be suffering more than expected.\"",
+      "explanation": "A RECORDED FAILURE, and the sharpest one in this file, because the system does not merely report the concept here - it LEADS with it and then gives advice.\n\nEvery mechanical condition is satisfied and this base checks all of them: Black's rook is on a2, it attacks g2 and h2, and the white king is on its back rank, which is the ABSOLUTE seventh the record calls decisive. So the explanation opens 'Black has a rook on a2, attacking g2, h2, with the king held on its back rank' and continues 'Before you spend anything getting to the seventh rank, look at their king. If it is trapped behind you, pay whatever it costs.' Stockfish has White at +0.83 and plays Karpov's 24.Kc1 as its own first choice, with Nb5-c3 in the principal variation - the eviction Markos describes.\n\nThe missing condition is not missing from the RECORD. It is stated twice: indicators_against says 'the rook can be challenged and traded off, or driven away with gain', and indicators_for says 'the rook cannot be evicted with tempo'. Neither had ever been built - and neither had ever been READ, because the trap audit was only looking at `false_positive_traps` and half the conditions in this knowledge base live in `indicators_against`. This position is what found that.\n\nA one-ply eviction test was written, measured and thrown away. It fixes this position and breaks Capablanca-Rubinstein 1928, which is this corpus's own annotated instance of the concept: there, ...Rd7 challenges the rook and ...Ng6 attacks it with a lesser piece, and the concept is right anyway. Karpov's eviction takes four preparatory king moves and no one-ply test can see it. Fitting a rule to this position would have cost the textbook one, so the failure is written down instead.\n\nWhat this base gets right here is worth saying too: it reports `space` for White with an entry on a7, c7 and d6, `weak-square` for White on d6, and `piece-activity` for Black - 18 active moves to 9, which is the rook. The pieces of Markos's account are all present. What is wrong is which one leads.",
+      "confidence": "high",
+      "why_not_alternates": "space, weak-square and piece-activity are correctly reported and are all part of the account - White's queenside entry squares, the d6 hole, and the fact that Black's activity IS the rook. semi-open-file for Black is true. What must not be said is that Black's rook on the seventh is a beast worth paying for.",
+      "also_true_but_secondary": [
+        "space",
+        "weak-square",
+        "piece-activity",
+        "semi-open-file"
+      ],
+      "rejected_as_wrong": [
+        "rook-on-the-seventh"
+      ],
+      "limitation": "This entry FAILS: the concept is reported for Black and leads the explanation. The condition that would refuse it is stated on the record and is not decidable at one ply, and the attempt to build it cost the corpus's own positive instance. Recorded rather than engineered around.",
+      "engine": {
+        "engine_id": "Stockfish 18",
+        "depth": 26,
+        "multipv": 3,
+        "best_move": "Kc1",
+        "best_eval_cp": 83,
+        "annotated_move": "Kc1",
+        "annotated_move_eval_cp": 83,
+        "annotated_move_rank": 1,
+        "alternatives": [
+          {
+            "move": "Rg1",
+            "eval_cp": 79
+          },
+          {
+            "move": "Nf4",
+            "eval_cp": 53
+          }
+        ],
+        "agrees": "on the move and on the assessment. Scores are from the side to move, and White is to move: +0.83 for the side whose second rank is occupied, and 24.Kc1 - the move Markos marks with an exclamation - is the engine's first choice, settled from depth 25. Its principal variation contains b5c3, the knight eviction Markos describes four moves later.",
+        "note": "The engine cannot say whether a rook on the seventh is a beast and was not asked to. It establishes that the side with the rook on the seventh, the absolute seventh at that, is nearly a pawn worse and that the defender's plan is the one the annotator gives."
       }
     }
   ]

@@ -16,9 +16,9 @@ ranking. Nothing here should be read as saying the system is nearly finished.
 |---|---|---|---|
 | 1 | All major areas have meaningful depth | **NOT MET** | 2 areas `full`, 13 `substantial`, 70 `partial`. Mean concept completeness 0.71 (was 0.70). |
 | 2 | Important concepts have strong recognition criteria | **PARTIAL** | 53 of the 83 concepts whose own record permits a detector have one, up from 32. But *having* a matcher is not the standard: `state/TRAPS.md` measures every matcher against the false-positive traps its record states, and **every one of the 108 has now been read**, and the split is the honest number: 66 enforced in the matcher, 14 in Layer 3, 28 argued on the record to be unbuildable or honoured elsewhere. Ten defects have been found by reading that list; the rest of it is the honest size of what is unchecked. |
-| 3 | Positional concepts tested outside the tactical corpus | **MET** | 39 human-annotated positions from 26 master games, 1908–2005, spanning a century and seven countries; plus 13 replay-verified games and a quiet sub-corpus that is 98 positions rather than the 350 once claimed — `quietness()` had never tested the half of its own definition about winning captures. No longer one tournament. |
+| 3 | Positional concepts tested outside the tactical corpus | **MET** | 40 human-annotated positions from 27 master games, 1908–2005, spanning a century and seven countries; plus 13 replay-verified games and a quiet sub-corpus that is 98 positions rather than the 350 once claimed — `quietness()` had never tested the half of its own definition about winning captures. No longer one tournament. |
 | 4 | Major concepts have positive and negative testing | **NOT MET** | 55% of applicable concepts lack a positive example, 77% a negative one, 81% an ambiguous one. This is the blocker, and it is the one that does not yield to mining. |
-| 5 | False positives aggressively tested | **MET** | Eight annotated negative examples, seven of them live rather than vacuous, plus 27 resolved cases replayed as assertions. The system declines to report an outpost on a square a world champion twice calls unsafe; declines a king attack in a position with every mechanical sign of one; and declines the hole on d5 in Unzicker–Fischer 1962 and Shirov–Kramnik 2000, which Markos built as traps for exactly the reading a mechanical detector performs — "a keyhole with no fitting key", "a no man's land: neither side can make any use of it". One negative is recorded as **vacuous** because nothing could ever have reported it, which is printed rather than counted as a pass. Eight matchers have been tightened against conditions their own records state and had never implemented. |
+| 5 | False positives aggressively tested | **MET** | Nine annotated negative examples, seven of them live rather than vacuous and **one of them failing on purpose**, plus 27 resolved cases replayed as assertions. The system declines to report an outpost on a square a world champion twice calls unsafe; declines a king attack in a position with every mechanical sign of one; and declines the hole on d5 in Unzicker–Fischer 1962 and Shirov–Kramnik 2000, which Markos built as traps for exactly the reading a mechanical detector performs — "a keyhole with no fitting key", "a no man's land: neither side can make any use of it". One negative is recorded as **vacuous** because nothing could ever have reported it, which is printed rather than counted as a pass. Eight matchers have been tightened against conditions their own records state and had never implemented. |
 | 6 | API works across tactical and positional positions | **MET** | 788-position mass test: 0 crashes, 0 template leaks, 0 banned phrasings, 100% licensed a concept. 374-assertion behaviour audit over 22 position types. Firing rates are now measured on **three** denominators (`tools/firing_rates.js`, plain / `--quiet` / `--corpus`), because they disagree and the disagreement is a finding. |
 | 7 | Explanation quality is high | **PARTIAL** | 3574 assertions pass; no dictionary definitions, meta-remarks, feature dumps, inert features or duplicated concepts. The `level` parameter now reaches a reader — it never had — and the wording varies by level on 99.3% of the 788 shipped positions. Several sentences now carry the *other half* of what their record says rather than the bare feature: a passer says whether it can advance, a doubled pair says what compensates it, opposite bishops stop being "drawish" while the queens are on. Still correct and plain rather than good. |
 | 8 | Evidence levels correctly represented | **MET** | Four-tier grading; confidence ceilings by knowledge type, enforced and audited; and the ladder and the corpus checker now both distinguish "not achieved" from "cannot be achieved", derived from the records. |
@@ -28,8 +28,8 @@ ranking. Nothing here should be read as saying the system is nearly finished.
 ## Current state
 
 137 concepts · 202 sources · **111 engine-validated positions + 22 tablebase** ·
-**39 human-annotated corpus positions from 26 master games** · 32 replay-verified
-master games · 661 tests + 429 API + 374 audit + 3574 explanation assertions.
+**40 human-annotated corpus positions from 27 master games** · 32 replay-verified
+master games · 661 tests + 435 API + 374 audit + 3574 explanation assertions.
 
 Ladder: researched 137, human-grounded 30, engine-verified 54, negative-tested
 32, ambiguity-tested 24, api-validated 53 of the 83 whose record allows it,
@@ -39,9 +39,9 @@ explanation-validated 105. Every rung its record allows: **11 of 137.**
 
 | | before | after |
 |---|---|---|
-| human-grounded corpus positions | 6 | 39 |
-| corpus games | 2 | 26 |
-| corpus roles | 5 positive, 1 ambiguous, 0 negative | 18 positive, 13 ambiguous, 8 negative |
+| human-grounded corpus positions | 6 | 40 |
+| corpus games | 2 | 27 |
+| corpus roles | 5 positive, 1 ambiguous, 0 negative | 18 positive, 13 ambiguous, 9 negative |
 | concepts with human grounding (twice-corrected measure) | 5 | 29 |
 | concepts with a Layer 4 matcher | 32 | 36 |
 | validated positions | 82 | 111 |
@@ -83,6 +83,13 @@ reordering PRIORITY by measured firing rate, confining the low-confidence rule
 to the lead alone, and then fixing the *recognition* of the one concept the
 ordering could not accommodate, it is **2.2**, and the concept is in the top three on 11 of 12.
 
+**False positives are measured against the corpus, and there is one.**
+Karpov–Polgar 2001 is the first entry whose concept is not merely reported but
+*leads*: Black's rook on the absolute seventh, in a position Stockfish scores at
++0.83 for the defender, whose king it is supposedly trapping. The condition that
+would refuse it is on the record and is not decidable at one ply, and building it
+costs the corpus's own positive instance of the same concept. Kept failing.
+
 **Confidence** is measured too: the system may say less than the annotator and
 never more. 1 of 38 overclaims, and it is left standing: Ftacnik–Roiz 2009,
 where White really does hold the two bishops, Markos writes "please note how
@@ -122,12 +129,13 @@ first entry in this corpus scored on weighting rather than on detection.
    to have, and does not read like a good teacher.
 6. **`king-centralisation-with-danger` remains partially resolved.** The phase
    test is material-based and can call a queens-on position an endgame.
-7. **28 of 108 traps are argued to be unbuildable rather than built.**
-   `state/TRAPS.md` now reads 0 unread, and the split is what matters: 66
-   enforced in the matcher, 14 in Layer 3, 28 arguments on a record. Thirteen
-   defects came out of the reading — including one in Layer 3 that had been true
-   of every measurement in the project. What is left is a class rather than a
-   backlog: traps about *judgement*, which is the thing this base does not do.
+7. **123 of 246 stated conditions have never been read against their matcher.**
+   `state/TRAPS.md` reached "0 unread" and then turned out to be reading half
+   the list: it looked only at `false_positive_traps`, and half the conditions
+   in this knowledge base live in `indicators_against`. Counting both, 74 are
+   enforced in the matcher, 20 in Layer 3, 29 argued on a record, **123
+   unread**. Fourteen defects have come out of the reading so far, including one
+   in Layer 3 that had been true of every measurement in the project.
 8. **The sharpest failures are no longer about detection.** Two corpus entries
    are recorded failures in which every reported concept is *true*: Réti–
    Capablanca 1924, where the annotation is about one piece and the measure is

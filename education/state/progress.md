@@ -1472,3 +1472,33 @@ never needed to move.
 indication rather than a proof — checked against tablebases, right about nine
 times in ten". It used to say high, and the PRIORITY comment used to call it
 "a PROOF by the rule of the square".
+
+
+## The reading list was half the list
+
+`tools/trap_audit.js` reached "0 unread" yesterday by reading every record's
+`false_positive_traps` — and **half the conditions in this knowledge base live in
+`indicators_against`**, which it had never looked at. Counting both, there are
+**246 stated conditions and 123 are unread**. That is the fourth metric this
+project has caught flattering itself, and the first where the honest number went
+*up*.
+
+What found it was a position. **Karpov–Polgar, Linares 2001** is now in the
+corpus as the first entry whose concept is not merely reported but **leads**:
+Black's rook on a2 attacks g2 and h2 with the white king on its back rank — the
+*absolute* seventh the record calls decisive — so the explanation opens with it
+and then says "if it is trapped behind you, pay whatever it costs". Stockfish has
+White at **+0.83** and plays Karpov's 24.Kc1 as its own first choice, with the
+Nb5-c3 eviction in the principal variation. Markos: *"Polgar's rook is a beast…
+Yet Karpov nicely shows that the rook lacks sufficient support."*
+
+The missing condition is on the record, in `indicators_against`: *"the rook can
+be challenged and traded off, or driven away with gain."* A one-ply test for it
+was written, measured and thrown away — it fixes this position and **breaks
+Capablanca–Rubinstein 1928**, the corpus's own annotated instance, where the rook
+is both challenged and attacked by a lesser piece and the concept is right
+anyway. Karpov's eviction takes four preparatory king moves.
+
+Fitting a rule to one position would have cost the textbook one, so the failure
+is recorded. The corpus now reports **1 false positive of 40**, where it reported
+0 of 39.

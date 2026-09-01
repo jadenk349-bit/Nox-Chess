@@ -92,13 +92,22 @@ for (const m of MATCH.STRUCTURAL.concat(MATCH.MOVE_BASED)) {
   if (only && m.concept !== only) continue;
   const rec = recs[m.concept];
   if (!rec) continue;
-  const traps = ((rec.recognition || {}).false_positive_traps) || [];
+  // BOTH LISTS. The first version of this tool read only
+  // `false_positive_traps`, and half the conditions in this knowledge base live
+  // in `indicators_against` instead. Karpov-Polgar 2001 is what showed it:
+  // `rook-on-the-seventh` states "the rook can be challenged and traded off, or
+  // driven away with gain" as an indicator_against, and the audit had never
+  // asked whether it was built - because it was not looking at that field.
+  const traps = (((rec.recognition || {}).false_positive_traps) || [])
+    .map(t => ({ text: t, kind: 'trap' }))
+    .concat((((rec.recognition || {}).indicators_against) || [])
+      .map(t => ({ text: t, kind: 'against' })));
   if (!traps.length) continue;
   if (done.has(m.concept)) continue;
   done.add(m.concept);
   const text = norm(bodies[m.concept]);
   const limits = norm(JSON.stringify(rec.limitations || []));
-  for (const trap of traps) {
+  for (const { text: trap, kind } of traps) {
 
     const hitM = quoted(trap, text), hitL = quoted(trap, limits), hit3 = quoted(trap, L3);
     // This is a reading list, not a verdict. "cited" means the trap has been
@@ -110,20 +119,22 @@ for (const m of MATCH.STRUCTURAL.concat(MATCH.MOVE_BASED)) {
                   : hit3 ? 'in Layer 3'
                   : hitL ? 'recorded as unbuildable'
                   : 'unread';
-    rows.push({ concept: m.concept, trap, verdict, hitM, hitL });
+    rows.push({ concept: m.concept, trap, kind, verdict });
   }
 }
 
 const open = rows.filter(r => r.verdict === 'unread');
 const show = openOnly ? open : rows;
 let last = null;
-console.log(`\nTRAP AUDIT — ${rows.length} stated traps across ${new Set(rows.map(r => r.concept)).size} matchers\n`);
+console.log(`\nTRAP AUDIT — ${rows.length} stated conditions (traps + indicators-against) ` +
+            `across ${new Set(rows.map(r => r.concept)).size} matchers\n`);
 for (const r of show) {
   if (r.concept !== last) { console.log(`  ${r.concept}`); last = r.concept; }
   const tag = r.verdict === 'unread' ? 'UNREAD'
             : r.verdict === 'in the matcher' ? 'cited '
             : r.verdict === 'in Layer 3' ? 'layer3' : 'noted ';
-  console.log(`    [${tag}] ${r.trap.replace(/\s+/g, ' ').slice(0, 150)}${r.trap.length > 150 ? '…' : ''}`);
+  console.log(`    [${tag}] ${r.kind === 'against' ? '(against) ' : ''}` +
+              `${r.trap.replace(/\s+/g, ' ').slice(0, 140)}${r.trap.length > 140 ? '…' : ''}`);
 }
 // THREE numbers, not one, and the reason is the reason for everything else in
 // this project. "Noted" means somebody argued on the record that a trap cannot
@@ -135,12 +146,12 @@ const byVerdict = v => rows.filter(r => r.verdict === v).length;
 console.log(`\n  in the matcher ${byVerdict('in the matcher')}   in Layer 3 ${byVerdict('in Layer 3')}` +
             `   noted on the record ${byVerdict('recorded as unbuildable')}   UNREAD ${open.length}` +
             (open.length ? `   (${new Set(open.map(r => r.concept)).size} matchers)` : '') + '\n' +
-            `  ...of ${rows.length} stated traps. "Noted" is an argument, not a guard.\n`);
+            `  ...of ${rows.length} stated conditions. "Noted" is an argument, not a guard.\n`);
 
 if (mdOut) {
   const lines = ['# Trap audit', '',
-    'Every false-positive trap a concept record states, against the matcher that',
-    'is supposed to implement it. Regenerate with `node tools/trap_audit.js',
+    'Every false-positive trap AND every indicator-against a concept record states,',
+    'read against the matcher that is supposed to implement it. Regenerate with `node tools/trap_audit.js',
     '--markdown state/TRAPS.md`.', '',
     'This is a READING LIST, not a verdict. "cited" means the trap has been',
     'written about somewhere it would be enforced or excused — in the matcher, or',
@@ -150,7 +161,7 @@ if (mdOut) {
     'implemented; that is a reading, and doing it is the work. What it can do is',
     'stop the list being rediscovered from scratch each time — and every one of',
     'the defects listed in the tool\'s header was unread before it was looked at.', '',
-    `**Of ${rows.length} stated traps: ${byVerdict('in the matcher')} enforced in the matcher, ` +
+    `**Of ${rows.length} stated conditions (traps and indicators-against): ${byVerdict('in the matcher')} enforced in the matcher, ` +
     `${byVerdict('in Layer 3')} in Layer 3, ${byVerdict('recorded as unbuildable')} argued on the ` +
     `record to be unbuildable or already honoured elsewhere, ${open.length} unread.**`, '',
     '"Noted on the record" is an argument, not a guard. A single "all cited"',
@@ -164,7 +175,7 @@ if (mdOut) {
     const tag = r.verdict === 'unread' ? '**unread**'
               : r.verdict === 'in the matcher' ? 'cited'
               : r.verdict === 'in Layer 3' ? 'layer 3' : 'noted';
-    lines.push(`- [${tag}] ${r.trap.replace(/\s+/g, ' ')}`);
+    lines.push(`- [${tag}] ${r.kind === 'against' ? '*(indicator against)* ' : ''}${r.trap.replace(/\s+/g, ' ')}`);
   }
   lines.push('');
   fs.writeFileSync(path.join(ROOT, mdOut), lines.join('\n'));
