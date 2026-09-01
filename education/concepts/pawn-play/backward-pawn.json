@@ -179,6 +179,35 @@
         "verdict": "ambiguous",
         "verdict_note": "Level-2 validation: the position was scored, not designed. It confirms the feature is present in real play and, where the score is near level, that the feature is not drowned out. It is not a controlled pair and proves nothing about the concept on its own."
       }
+    },
+    {
+      "fen": "5r2/p1nnq1p1/7k/2p2P1B/PpPpP1Qp/3P3P/P4RP1/R1b3K1 b - - 1 35",
+      "note": "a backward pawn on a CLOSED file, where no rook can attack it. The position is QUIET by mechanical test: the side to move has no check available and no capture that wins material, so the next move must be chosen on positional grounds. That is the property this base's tactical corpus almost never has. Found by tools/prospect.js, which searches 1576 real positions for a concept's feature and scores quiet positions far higher. Provenance: the puzzle corpus is engine self-play — a real position from a real game between engines, not a master game.",
+      "origin_kind": "puzzle",
+      "concept_role": "ambiguous",
+      "side_to_move_benefits": "neither",
+      "engine": {
+        "engine_id": "Stockfish 18",
+        "test_level": 2,
+        "depth": 20,
+        "threads": 8,
+        "hash_mb": 2048,
+        "multipv": 2,
+        "best_move": "e7g5",
+        "eval_cp": 439,
+        "mate_in": null,
+        "pv": [],
+        "alternatives": [
+          {
+            "move": "d7e5",
+            "eval_cp": 386,
+            "mate_in": null
+          }
+        ],
+        "margin_cp": 0,
+        "verdict": "ambiguous",
+        "verdict_note": "Quiet AND decided, which is worth recording as a pair. The feature is present and the evaluation is 4.39, so nothing forcing is on offer and the position is nonetheless settled. It demonstrates the feature and cannot show the concept deciding anything - and it is a useful reminder that quietness is not balance."
+      }
     }
   ],
   "explanations": {

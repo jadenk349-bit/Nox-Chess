@@ -195,6 +195,138 @@
       "evidence": "engine",
       "resolution": "Registered from a near-miss position found by searching 1576 real positions for the surface pattern WITHOUT the concept's condition, then scored by the engine. Level-2 validation: the position was scored, not designed. It confirms the feature is present in real play and, where the score is near level, that the feature is not drowned out. It is not a controlled pair and proves nothing about the concept on its own.",
       "resolved_date": "2026-09-01"
+    },
+    {
+      "id": "board-geometry-pattern-without-condition",
+      "concept": "board-geometry",
+      "surface_pattern": "The fixed geometric facts of the board — colour-boundedness, the knight's colour change, and the fact that a king's diagonal path costs no more than a straight one.",
+      "why_not": "The rule of the square must be applied with the side to move in hand. This base holds a tablebase-proven pair where the identical position is a draw or a mate in 23 depending only on whose turn it is.",
+      "fen": "8/8/8/3k3P/8/8/8/K7 w - - 0 1",
+      "status": "resolved",
+      "evidence": "tablebase",
+      "resolution": "Registered from a recorded counterexample: a position where the concept's surface feature is present and its condition is not, verified mechanically by lib/features.js and then scored. ",
+      "resolved_date": "2026-09-01"
+    },
+    {
+      "id": "piece-properties-pattern-without-condition",
+      "concept": "piece-properties",
+      "surface_pattern": "The conventional numeric values of the pieces, and the properties those numbers compress away.",
+      "why_not": "Counting material is not evaluating a position. This base holds a PROVEN DRAW a bishop and a pawn up.",
+      "fen": "7k/8/5K2/3B3P/8/8/8/8 w - - 0 1",
+      "status": "resolved",
+      "evidence": "tablebase",
+      "resolution": "Registered from a recorded counterexample: a position where the concept's surface feature is present and its condition is not, verified mechanically by lib/features.js and then scored. ",
+      "resolved_date": "2026-09-01"
+    },
+    {
+      "id": "opposition-pattern-without-condition",
+      "concept": "opposition",
+      "surface_pattern": "Kings facing each other with one square between them on a rank or file. The side NOT to move has the opposition.",
+      "why_not": "Kings facing each other is trivially detectable and means nothing outside endgames where king penetration decides.",
+      "fen": "8/4k3/8/4K3/4P3/8/8/8 w - - 0 1",
+      "status": "resolved",
+      "evidence": "tablebase",
+      "resolution": "Registered from a recorded counterexample: a position where the concept's surface feature is present and its condition is not, verified mechanically by lib/features.js and then scored. ",
+      "resolved_date": "2026-09-01"
+    },
+    {
+      "id": "wrong-rook-pawn-pattern-without-condition",
+      "concept": "wrong-rook-pawn",
+      "surface_pattern": "A rook pawn whose promotion square is the opposite colour to the bishop's. Bishop and wrong rook pawn cannot win against a king that reaches the corner — the extra material is worth nothing.",
+      "why_not": "Being in front of the pawn is NOT enough, unlike king-and-pawn endings. The defending king must reach the corner or the square beside it — Mednis gives a position where the same setup wins with White to move and draws with Black to move.",
+      "fen": "7k/8/5K2/7P/3B4/8/8/8 w - - 0 1",
+      "status": "resolved",
+      "evidence": "tablebase",
+      "resolution": "Registered from a recorded counterexample: a position where the concept's surface feature is present and its condition is not, verified mechanically by lib/features.js and then scored. ",
+      "resolved_date": "2026-09-01"
+    },
+    {
+      "id": "semi-open-file-pattern-without-condition",
+      "concept": "semi-open-file",
+      "surface_pattern": "A file with none of your own pawns on it but one of the opponent's — so your rook looks straight at a pawn that cannot run away sideways.",
+      "why_not": "A semi-open file is a fact about pawns; whether it produces pressure depends on whether the target is fixed and whether you can attack it more times than it can be defended.",
+      "fen": "r2qkb1r/1pp2ppp/p1n1p3/3P4/4Q1n1/2N2P2/PPPP1P1P/R1B1KB1R b KQkq - 3 9",
+      "status": "resolved",
+      "evidence": "engine",
+      "resolution": "Registered from a recorded counterexample: a position where the concept's surface feature is present and its condition is not, verified mechanically by lib/features.js and then scored. Quiet and close to balanced at 0.91, which is the combination this base most needs and least often finds: nothing forcing is available and the evaluation is not swamping the feature, so the position is usable as an instance of the concept. What is NOT claimed is that the concept explains the engine's choice of move.",
+      "resolved_date": "2026-09-01"
+    },
+    {
+      "id": "vancura-position-pattern-without-condition",
+      "concept": "vancura-position",
+      "surface_pattern": "The drawing method against a rook pawn on the sixth: the defending rook attacks the pawn from the SIDE along the rank, never from behind, with the defending king tucked on g7 or h7.",
+      "why_not": "It is specialist theory for the ROOK PAWN on the sixth. Applying the side-attack idea to a central pawn does not work.",
+      "fen": "R7/6k1/P7/8/3K4/8/8/r7 w - - 0 1",
+      "status": "resolved",
+      "evidence": "tablebase",
+      "resolution": "Registered from a recorded counterexample: a position where the concept's surface feature is present and its condition is not, verified mechanically by lib/features.js and then scored. ",
+      "resolved_date": "2026-09-01"
+    },
+    {
+      "id": "compensation-pattern-without-condition",
+      "concept": "compensation",
+      "surface_pattern": "What a player receives in return for material given up.",
+      "why_not": "Being down material with active pieces is not the same as having compensation. The Halloween Gambit position has active pieces and measures 1.75 pawns worse.",
+      "fen": "r1bqkb1r/pppp1ppp/2n2n2/4p3/4P3/2N2N2/PPPP1PPP/R1BQKB1R w KQkq - 4 4",
+      "status": "resolved",
+      "evidence": "engine",
+      "resolution": "Registered from a recorded counterexample: a position where the concept's surface feature is present and its condition is not, verified mechanically by lib/features.js and then scored. Activity without compensation. 4.Nxe5 gives a knight for a pawn and produces a genuinely mobile centre and gain of time against the black knights, yet evaluates at -1.67 against +0.08 for the best move. Direct evidence that visible activity is not the same thing as adequate compensation, which is the trap this concept most needs guarding against.",
+      "resolved_date": "2026-09-01"
+    },
+    {
+      "id": "gambit-pattern-without-condition",
+      "concept": "gambit",
+      "surface_pattern": "An opening in which material, usually a pawn, is deliberately offered for non-material compensation.",
+      "why_not": "A pawn offered in the opening is not automatically a gambit with compensation. The Halloween Gambit is measured here at 1.75 pawns worse than the best move.",
+      "fen": "r1bqkb1r/pppp1ppp/2n2n2/4p3/4P3/2N2N2/PPPP1PPP/R1BQKB1R w KQkq - 4 4",
+      "status": "resolved",
+      "evidence": "engine",
+      "resolution": "Registered from a recorded counterexample: a position where the concept's surface feature is present and its condition is not, verified mechanically by lib/features.js and then scored. A gambit with no adequate compensation, measured. 4.d4 +0.08, 4.Bb5 +0.03, 4.Nxe5 -1.67 - a loss of 1.75 against the best move. The investment of a knight for one pawn is not repaid by the resulting centre. Recorded as a counterexample deliberately: it is what stops this base from treating 'a gambit was played' as evidence that compensation exists.",
+      "resolved_date": "2026-09-01"
+    },
+    {
+      "id": "pawn-breakthrough-pattern-without-condition",
+      "concept": "pawn-breakthrough",
+      "surface_pattern": "Sacrificing one or two pawns to force through a passer the enemy king cannot catch.",
+      "why_not": "A pawn sacrifice that creates a passer is not a breakthrough unless the passer actually cannot be stopped. The rule of the square decides this and is cheap to check.",
+      "fen": "6k1/ppp5/8/8/PPP5/8/8/6K1 w - - 0 1",
+      "status": "resolved",
+      "evidence": "engine",
+      "resolution": "Registered from a recorded counterexample: a position where the concept's surface feature is present and its condition is not, verified mechanically by lib/features.js and then scored. The claim is confirmed exactly and the margin is enormous. The analogous breakthrough 1.b5 evaluates -5.86 and is NOT best; the quiet 1.a5 at -0.46 is. So the same pattern, with the pawns one rank further back, swings from +64.85 (winning by force) to -5.86 (losing) — a difference of over 70 pawns produced by one rank of space, with material and structure held identical. This is the cleanest confirmation in the base ",
+      "resolved_date": "2026-09-01"
+    },
+    {
+      "id": "weak-square-pattern-without-condition",
+      "concept": "weak-square",
+      "surface_pattern": "A square in one's own camp that can no longer be controlled by a pawn, and that the opponent can use.",
+      "why_not": "Every pawn move creates squares no pawn can guard, so the raw feature fires everywhere. Usability is what makes it reportable.",
+      "fen": "r2qkb1r/1pp2ppp/p1n1p3/3P4/4Q1n1/2N2P2/PPPP1P1P/R1B1KB1R b KQkq - 3 9",
+      "status": "resolved",
+      "evidence": "engine",
+      "resolution": "Registered from a recorded counterexample: a position where the concept's surface feature is present and its condition is not, verified mechanically by lib/features.js and then scored. Quiet and close to balanced at 0.79, which is the combination this base most needs and least often finds: nothing forcing is available and the evaluation is not swamping the feature, so the position is usable as an instance of the concept. What is NOT claimed is that the concept explains the engine's choice of move.",
+      "resolved_date": "2026-09-01"
+    },
+    {
+      "id": "two-weaknesses-pattern-without-condition",
+      "concept": "two-weaknesses",
+      "surface_pattern": "A single weakness can usually be defended, because the defender can concentrate every piece on it. Creating a second target far from the first stretches the defence past what it can cover, and somethi",
+      "why_not": "Two weaknesses that the defending king stands between are not two weaknesses in the operative sense. Measured on the Lasker-Capablanca ending, moving the kings to d3/d6 costs the attacker over half the advantage.",
+      "fen": "8/8/3k1pp1/8/3K4/5PP1/8/8 b - - 0 1",
+      "status": "resolved",
+      "evidence": "tablebase",
+      "resolution": "Registered from a recorded counterexample: a position where the concept's surface feature is present and its condition is not, verified mechanically by lib/features.js and then scored. ",
+      "resolved_date": "2026-09-01"
+    },
+    {
+      "id": "greek-gift-pattern-without-condition",
+      "concept": "greek-gift",
+      "surface_pattern": "Bxh7+ against a castled king, followed by Ng5+ and Qh5 — a bishop given to strip the h-pawn and drag the king out.",
+      "why_not": "The pattern is extremely recognisable, which is exactly why it is played in positions where it does not work. Vukovic's conditions are necessary, NOT sufficient.",
+      "fen": "r4rk1/p1pnbppp/1q2p3/3pP3/3P4/2PB1N2/PP3PPP/R1BQ1RK1 w - - 0 1",
+      "status": "resolved",
+      "evidence": "engine",
+      "resolution": "Registered from a recorded counterexample: a position where the concept's surface feature is present and its condition is not, verified mechanically by lib/features.js and then scored. Bxh7+ collapses from BEST at +6.71 to LAST at +3.77 — a swing of 2.94 pawns, and from 1.41 ahead of the field to 1.59 behind it, on one defender of g5. The concept's central precondition is confirmed. HONEST QUALIFICATION: +3.77 still means White is much better, because White is much better in this constructed position for unrelated reasons — the sacrifice throws away most of an advantage rather than losing outright.",
+      "resolved_date": "2026-09-01"
     }
   ],
   "last_updated": "2026-09-01"

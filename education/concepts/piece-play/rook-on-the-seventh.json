@@ -175,6 +175,35 @@
       "origin_kind": "historical-game",
       "concept_role": "supports",
       "side_to_move_benefits": "white"
+    },
+    {
+      "fen": "1q4k1/5pp1/4p2p/1P5P/2P2RPb/5Q2/r2rBP2/1R4K1 w - - 7 38",
+      "note": "Black has doubled rooks on the seventh (a2, d2). The position is QUIET by mechanical test: the side to move has no check available and no capture that wins material, so the next move must be chosen on positional grounds. That is the property this base's tactical corpus almost never has. Found by tools/prospect.js, which searches 1576 real positions for a concept's feature and scores quiet positions far higher. Provenance: the puzzle corpus is engine self-play — a real position from a real game between engines, not a master game.",
+      "origin_kind": "puzzle",
+      "concept_role": "supports",
+      "side_to_move_benefits": "neither",
+      "engine": {
+        "engine_id": "Stockfish 18",
+        "test_level": 2,
+        "depth": 20,
+        "threads": 8,
+        "hash_mb": 2048,
+        "multipv": 2,
+        "best_move": "f4e4",
+        "eval_cp": 4,
+        "mate_in": null,
+        "pv": [],
+        "alternatives": [
+          {
+            "move": "b1e1",
+            "eval_cp": -313,
+            "mate_in": null
+          }
+        ],
+        "margin_cp": 0,
+        "verdict": "supports",
+        "verdict_note": "Quiet and close to balanced at 0.04, which is the combination this base most needs and least often finds: nothing forcing is available and the evaluation is not swamping the feature, so the position is usable as an instance of the concept. What is NOT claimed is that the concept explains the engine's choice of move."
+      }
     }
   ],
   "counterexamples": [
@@ -242,7 +271,37 @@
       }
     }
   ],
-  "ambiguous_examples": [],
+  "ambiguous_examples": [
+    {
+      "fen": "8/p7/4k3/1pPpr2p/3K3R/2R1B3/2P1r3/8 w - - 4 41",
+      "note": "a rook on the seventh with almost nothing on it and an enemy king that already has luft. The position is QUIET by mechanical test: the side to move has no check available and no capture that wins material, so the next move must be chosen on positional grounds. That is the property this base's tactical corpus almost never has. Found by tools/prospect.js, which searches 1576 real positions for a concept's feature and scores quiet positions far higher. Provenance: the puzzle corpus is engine self-play — a real position from a real game between engines, not a master game.",
+      "origin_kind": "puzzle",
+      "concept_role": "ambiguous",
+      "side_to_move_benefits": "neither",
+      "engine": {
+        "engine_id": "Stockfish 18",
+        "test_level": 2,
+        "depth": 20,
+        "threads": 8,
+        "hash_mb": 2048,
+        "multipv": 2,
+        "best_move": "c5c6",
+        "eval_cp": 647,
+        "mate_in": null,
+        "pv": [],
+        "alternatives": [
+          {
+            "move": "c3a3",
+            "eval_cp": 139,
+            "mate_in": null
+          }
+        ],
+        "margin_cp": 0,
+        "verdict": "ambiguous",
+        "verdict_note": "Quiet AND decided, which is worth recording as a pair. The feature is present and the evaluation is 6.47, so nothing forcing is on offer and the position is nonetheless settled. It demonstrates the feature and cannot show the concept deciding anything - and it is a useful reminder that quietness is not balance."
+      }
+    }
+  ],
   "explanations": {
     "by_level": {
       "beginner": "The rook has got behind their pawns, where they cannot defend themselves, and the king cannot come out past it.",

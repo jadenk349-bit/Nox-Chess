@@ -316,6 +316,35 @@
         "verdict": "contradicts",
         "verdict_note": "Two independent checks agree the knight is not on an outpost. This base's own feature detector (lib/features.js) reports d5 is NOT a hole for White and returns an empty outpost list, because Black retains the e7 pawn and can play ...e6. And the engine puts BLACK at +0.74 with the move, so the advanced central knight is conferring no advantage whatever. Centralisation is the surface pattern; the absence of a pawn that can challenge the square is the concept."
       }
+    },
+    {
+      "fen": "rnbqkbr1/pp3ppp/2pp4/4P3/4n3/3B3P/PPPP2P1/RNBQK1NR w KQq - 0 7",
+      "note": "Black's knight on e4 is advanced and central and is NOT on a hole — a pawn can still challenge it. The position is QUIET by mechanical test: the side to move has no check available and no capture that wins material, so the next move must be chosen on positional grounds. That is the property this base's tactical corpus almost never has. Found by tools/prospect.js, which searches 1576 real positions for a concept's feature and scores quiet positions far higher. Provenance: the puzzle corpus is engine self-play — a real position from a real game between engines, not a master game.",
+      "origin_kind": "puzzle",
+      "concept_role": "contradicts",
+      "side_to_move_benefits": "neither",
+      "engine": {
+        "engine_id": "Stockfish 18",
+        "test_level": 2,
+        "depth": 20,
+        "threads": 8,
+        "hash_mb": 2048,
+        "multipv": 2,
+        "best_move": "d3e4",
+        "eval_cp": -66,
+        "mate_in": null,
+        "pv": [],
+        "alternatives": [
+          {
+            "move": "g1f3",
+            "eval_cp": -243,
+            "mate_in": null
+          }
+        ],
+        "margin_cp": 0,
+        "verdict": "contradicts",
+        "verdict_note": "Quiet and close to balanced at -0.66, which is the combination this base most needs and least often finds: nothing forcing is available and the evaluation is not swamping the feature, so the position is usable as an instance of the concept. What is NOT claimed is that the concept explains the engine's choice of move."
+      }
     }
   ],
   "ambiguous_examples": [
@@ -346,6 +375,35 @@
         "margin_cp": 0,
         "verdict": "ambiguous",
         "verdict_note": "Level-2 validation: the position was scored, not designed. It confirms the feature is present in real play and, where the score is near level, that the feature is not drowned out. It is not a controlled pair and proves nothing about the concept on its own."
+      }
+    },
+    {
+      "fen": "3r4/1pr2nk1/1Np1bp2/2P1p1p1/2P1P1p1/QN1B1P2/2K2NRP/q7 w - - 0 32",
+      "note": "White's knight on b6 sits on a hole, defended by a pawn. The position is QUIET by mechanical test: the side to move has no check available and no capture that wins material, so the next move must be chosen on positional grounds. That is the property this base's tactical corpus almost never has. Found by tools/prospect.js, which searches 1576 real positions for a concept's feature and scores quiet positions far higher. Provenance: the puzzle corpus is engine self-play — a real position from a real game between engines, not a master game.",
+      "origin_kind": "puzzle",
+      "concept_role": "ambiguous",
+      "side_to_move_benefits": "neither",
+      "engine": {
+        "engine_id": "Stockfish 18",
+        "test_level": 2,
+        "depth": 20,
+        "threads": 8,
+        "hash_mb": 2048,
+        "multipv": 2,
+        "best_move": "a3a1",
+        "eval_cp": 649,
+        "mate_in": null,
+        "pv": [],
+        "alternatives": [
+          {
+            "move": "b3a1",
+            "eval_cp": 601,
+            "mate_in": null
+          }
+        ],
+        "margin_cp": 0,
+        "verdict": "ambiguous",
+        "verdict_note": "Quiet AND decided, which is worth recording as a pair. The feature is present and the evaluation is 6.49, so nothing forcing is on offer and the position is nonetheless settled. It demonstrates the feature and cannot show the concept deciding anything - and it is a useful reminder that quietness is not balance."
       }
     }
   ],

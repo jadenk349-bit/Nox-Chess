@@ -168,9 +168,68 @@
         "scope": 11,
         "note": "This base's own Layer 3 measurement. The matcher requires scope below 7 before it will report a bad bishop at all, so the system does NOT make this false positive - the structural test fires and the functional one vetoes it."
       }
+    },
+    {
+      "fen": "r4rk1/2pp1ppp/6q1/1pP1n3/4bP1P/PR5B/2P2Q2/1N2K2R w K - 2 28",
+      "note": "Black's bishop on e4 is structurally bad (4/6 pawns on its colour) and sees 9 squares — Suba's active bad bishop. The position is QUIET by mechanical test: the side to move has no check available and no capture that wins material, so the next move must be chosen on positional grounds. That is the property this base's tactical corpus almost never has. Found by tools/prospect.js, which searches 1576 real positions for a concept's feature and scores quiet positions far higher. Provenance: the puzzle corpus is engine self-play — a real position from a real game between engines, not a master game.",
+      "origin_kind": "puzzle",
+      "concept_role": "contradicts",
+      "side_to_move_benefits": "neither",
+      "engine": {
+        "engine_id": "Stockfish 18",
+        "test_level": 2,
+        "depth": 20,
+        "threads": 8,
+        "hash_mb": 2048,
+        "multipv": 2,
+        "best_move": "h1g1",
+        "eval_cp": 102,
+        "mate_in": null,
+        "pv": [],
+        "alternatives": [
+          {
+            "move": "b3g3",
+            "eval_cp": -306,
+            "mate_in": null
+          }
+        ],
+        "margin_cp": 0,
+        "verdict": "contradicts",
+        "verdict_note": "Quiet and close to balanced at 1.02, which is the combination this base most needs and least often finds: nothing forcing is available and the evaluation is not swamping the feature, so the position is usable as an instance of the concept. What is NOT claimed is that the concept explains the engine's choice of move."
+      }
     }
   ],
-  "ambiguous_examples": [],
+  "ambiguous_examples": [
+    {
+      "fen": "r1bqkBr1/ppp2ppp/n4n2/3pp3/8/1P1PP3/P1PN1PPP/R2QKBNR w KQq - 1 7",
+      "note": "White's bishop on f1 has 5 of its own 8 pawns on its colour and sees 1 squares. The position is QUIET by mechanical test: the side to move has no check available and no capture that wins material, so the next move must be chosen on positional grounds. That is the property this base's tactical corpus almost never has. Found by tools/prospect.js, which searches 1576 real positions for a concept's feature and scores quiet positions far higher. Provenance: the puzzle corpus is engine self-play — a real position from a real game between engines, not a master game.",
+      "origin_kind": "puzzle",
+      "concept_role": "ambiguous",
+      "side_to_move_benefits": "neither",
+      "engine": {
+        "engine_id": "Stockfish 18",
+        "test_level": 2,
+        "depth": 20,
+        "threads": 8,
+        "hash_mb": 2048,
+        "multipv": 2,
+        "best_move": "f8a3",
+        "eval_cp": 423,
+        "mate_in": null,
+        "pv": [],
+        "alternatives": [
+          {
+            "move": "d3d4",
+            "eval_cp": 214,
+            "mate_in": null
+          }
+        ],
+        "margin_cp": 0,
+        "verdict": "ambiguous",
+        "verdict_note": "Quiet AND decided, which is worth recording as a pair. The feature is present and the evaluation is 4.23, so nothing forcing is on offer and the position is nonetheless settled. It demonstrates the feature and cannot show the concept deciding anything - and it is a useful reminder that quietness is not balance."
+      }
+    }
+  ],
   "explanations": {
     "by_level": {
       "beginner": "Your own pawns are sitting on the same colour squares as your bishop, so they are in its way.",
