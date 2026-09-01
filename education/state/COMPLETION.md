@@ -12,7 +12,7 @@ evidence in general, it is NEGATIVE and AMBIGUOUS evidence in particular.
 |---|---|---|---|
 | 1 | All major areas have meaningful depth | **NOT MET** | 2 areas `full`, 13 `substantial`, 70 `partial`. Mean concept completeness 0.71 (was 0.70). |
 | 2 | Important concepts have strong recognition criteria | **PARTIAL** | 36 concepts have an implemented Layer 4 matcher naming the record it implements — 36 of the 83 whose own record permits one. The other 54 permitted ones have written criteria and no detector. |
-| 3 | Positional concepts tested outside the tactical corpus | **MET** | 31 human-annotated positions from 18 master games, 1908–2005, spanning a century and seven countries; plus 13 replay-verified games and a 350-position quiet sub-corpus. No longer one tournament. |
+| 3 | Positional concepts tested outside the tactical corpus | **MET** | 32 human-annotated positions from 21 master games, 1908–2005, spanning a century and seven countries; plus 13 replay-verified games and a 350-position quiet sub-corpus. No longer one tournament. |
 | 4 | Major concepts have positive and negative testing | **NOT MET** | 55% of applicable concepts lack a positive example, 77% a negative one, 81% an ambiguous one. This is the blocker, and it is the one that does not yield to mining. |
 | 5 | False positives aggressively tested | **MET** | 27 resolved cases replayed as regression assertions, plus four annotated negative examples. Three of those are real tests — the API declines to report a king attack in a position with every mechanical sign of one — — the API declines to report an outpost on a square a world champion twice calls unsafe, and declines to report a king attack in a position with every mechanical sign of one — and the third is recorded as **vacuous**, because nothing could have reported it. |
 | 6 | API works across tactical and positional positions | **MET** | 788-position mass test: 0 crashes, 0 template leaks, 0 banned phrasings, 100% licensed a concept. 376-assertion behaviour audit over 22 position types. |
@@ -23,21 +23,21 @@ evidence in general, it is NEGATIVE and AMBIGUOUS evidence in particular.
 
 ## Current state
 
-137 concepts · 188 sources · **107 engine-validated positions + 22 tablebase** ·
-**31 human-annotated corpus positions from 18 master games** · 27 replay-verified
-master games · 657 tests + 281 API + 377 audit + 3274 explanation assertions.
+137 concepts · 188 sources · **108 engine-validated positions + 22 tablebase** ·
+**32 human-annotated corpus positions from 21 master games** · 30 replay-verified
+master games · 658 tests + 283 API + 377 audit + 3274 explanation assertions.
 
 ## What moved this session
 
 | | before | after |
 |---|---|---|
-| human-grounded corpus positions | 6 | 31 |
-| corpus games | 2 | 18 |
-| corpus roles | 5 positive, 1 ambiguous, 0 negative | 18 positive, 9 ambiguous, 4 negative |
+| human-grounded corpus positions | 6 | 32 |
+| corpus games | 2 | 21 |
+| corpus roles | 5 positive, 1 ambiguous, 0 negative | 18 positive, 10 ambiguous, 4 negative |
 | concepts with human grounding (corrected measure) | 5 | 23 |
 | concepts with a Layer 4 matcher | 32 | 36 |
-| validated positions | 82 | 107 |
-| API false negatives on the corpus | 3 of 6 detectable | 0 of 31 |
+| validated positions | 82 | 108 |
+| API false negatives on the corpus | 3 of 6 detectable | 0 of 32 |
 
 ## A number that got worse on purpose
 
@@ -61,7 +61,7 @@ reordering PRIORITY by measured firing rate and confining the low-confidence
 rule to the lead alone, it is **2.6** and nothing is outside the six.
 
 **Confidence** is measured too: the system may say less than the annotator and
-never more. 0 of 31 overclaim.
+never more. 0 of 32 overclaim.
 
 ## What is still missing, precisely
 

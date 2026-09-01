@@ -629,6 +629,21 @@ const { concepts } = API.knowledge();
   ok('...and is not called backward', !ids.includes('backward-pawn'), ids.join(','));
 }
 
+{
+  // Reshevsky-Petrosian, Zurich 1953, before 25...Re6 - the most famous
+  // positional exchange sacrifice ever played, and Stockfish 18's first choice
+  // at depth 24 by three quarters of a pawn. The material imbalance that
+  // follows is real, is reported, and decides nothing: what decides is the d5
+  // square. The system must report the imbalance and must not conclude from it.
+  const RP = '3rq1k1/4rppp/2n3b1/pp2P3/2pP1QB1/P1P1R3/1B4PP/4R1K1 b - - 3 25';
+  const r = API.analyzeWithEducation({ fen: RP, move: 'e7e6' });
+  has('material imbalance reported where it means nothing',
+      r.concepts_all.map(c => c.id), 'material-imbalance');
+  const t = r.explanation.text;
+  ok('...and no side is declared better on a material count',
+     !/\b(is better|winning|decisive|advantage for)\b/i.test(t), t.slice(0, 220));
+}
+
 /* ---------- report ---------- */
 console.log(`\nAPI  PASS ${pass}   FAIL ${fails.length}`);
 for (const [n, d] of fails) console.log(`  FAIL  ${n}\n        ${d}`);

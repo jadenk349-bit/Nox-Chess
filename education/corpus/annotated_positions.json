@@ -1339,6 +1339,52 @@
         "backward-pawn",
         "hanging-pawns"
       ]
+    },
+    {
+      "game": "Reshevsky-Petrosian, Candidates Tournament, Zurich 1953",
+      "source": "kasparov-on-petrosians-exchange-sacrifice",
+      "players": "Samuel Reshevsky - Tigran Petrosian",
+      "event": "Candidates Tournament, Zurich 1953",
+      "year": 1953,
+      "annotator": "Garry Kasparov on what the sacrifice is; John Watson reporting Petrosian's own account of choosing it",
+      "fen_verified": "replay: all 81 plies replayed legally through blind-chess.html's move generator",
+      "added": "2026-09-01",
+      "id": "reshevsky-petrosian-1953-25Re6-material-imbalance",
+      "concept": "material-imbalance",
+      "concept_role": "ambiguous",
+      "side": "w",
+      "fen": "3rq1k1/4rppp/2n3b1/pp2P3/2pP1QB1/P1P1R3/1B4PP/4R1K1 b - - 3 25",
+      "move": "Re6",
+      "move_uci": "e7e6",
+      "fen_after": "3rq1k1/5ppp/2n1r1b1/pp2P3/2pP1QB1/P1P1R3/1B4PP/4R1K1 w - - 4 26",
+      "fen_concept_realised": "3rq1k1/6pp/4p1b1/pp1nP3/P1pP4/2P1R3/1B4PP/4RQK1 w - - 2 29",
+      "fen_concept_realised_note": "After 27.Bxe6 fxe6 28.Qf1 Nd5. This is the imbalance the entry is about: White is the exchange up and it is worth nothing, because the knight on d5 cannot be challenged and the bishop that could have contested it has been traded.",
+      "human_annotation": "Kasparov: 'Petrosian introduced the exchange sacrifice for the sake of quality of position, where the time factor, which is so important in the play of Alekhine and Tal, plays hardly any role. By sacrificing the exchange just like that, for certain long term advantages, in positions with disrupted material balance, he discovered latent resources that few were capable of seeing and properly evaluating.' On this position: 'Black must stop White's pawns, so Petrosian gives up the exchange at a spot of his own choosing, freeing e7 for the transfer of his knight to d5. Of course, Black gets good compensation for the exchange: his knight is much stronger on d5, as is his bishop, which no longer has an opponent.' Petrosian, quoted by Watson, on why he chose it: a move 'so simple, there was no doubt of its correctness'.",
+      "explanation": "The most famous positional exchange sacrifice ever played, and an AMBIGUOUS example rather than a positive one for a precise reason: after the dust settles White really is the exchange up, this base really does report a material imbalance, and it decides nothing. What decides is the d5 square, which no white pawn can attack and no white bishop can contest once the light-squared bishop has been traded for the rook. The concept applies, it is reported, and a reader who stops there has the position exactly backwards - which is why the entry names WHITE as the side holding the imbalance and asks that nothing be concluded from it.",
+      "engine": {
+        "engine_id": "Stockfish 18",
+        "depth": 24,
+        "multipv": 3,
+        "best_move": "Re6",
+        "best_eval_cp": -101,
+        "annotated_move_eval_cp": -101,
+        "annotated_move_rank": 1,
+        "agrees": "completely, and it plays out the plan. 25...Re6 is the engine's first choice at depth 24, 0.76 clear of the second, and its principal variation is 26.Rg3 Ne7 27.Bxe6 fxe6 28.Rf1 Nd5 - the knight reaching d5 by the exact route the annotation describes. Black is still a pawn worse at -1.01, which is the honest part: the sacrifice rescues a difficult position rather than winning one.",
+        "note": "A 1953 exchange sacrifice for 'quality of position', chosen by a player who said it was too simple to doubt, is a 2026 engine's first choice by three quarters of a pawn."
+      },
+      "confidence": "high",
+      "why_not_alternates": "exchange-sacrifice and positional-sacrifice are what the MOVE is and are recorded on their own records from this position. outpost is what the sacrifice buys and does not exist yet - d5 is not occupied for three more moves. What must not be concluded is that the side up the exchange is better.",
+      "also_true_but_secondary": [
+        "exchange-sacrifice",
+        "positional-sacrifice",
+        "prophylaxis",
+        "passed-pawn",
+        "bishop-pair"
+      ],
+      "rejected_as_wrong": [
+        "trapped-piece",
+        "hanging-piece"
+      ]
     }
   ]
 }
