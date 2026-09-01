@@ -13,7 +13,7 @@ implemented; that is a reading, and doing it is the work. What it can do is
 stop the list being rediscovered from scratch each time — and every one of
 the defects listed in the tool's header was unread before it was looked at.
 
-**72 of 108 cited. 36 unread.**
+**74 of 108 cited. 34 unread.**
 
 ## doubled-pawns
 
@@ -52,7 +52,7 @@ the defects listed in the tool's header was unread before it was looked at.
 
 - [layer 3] A knight on d5 is not an outpost merely because it is on d5. If ...c6 or ...e6 is available, the knight is visiting.
 - [layer 3] A pawn-protected advanced square whose occupant can simply be exchanged is not an outpost in any useful sense — Romanovsky's condition fails.
-- [**unread**] A safe square that the piece does nothing from. Safety is a precondition, not the benefit.
+- [cited] A safe square that the piece does nothing from. Safety is a precondition, not the benefit.
 - [**unread**] In the engine test above, the archetypal 'outpost' move was second-best. Being a genuine outpost does not make occupying it the best move.
 - [layer 3] A centralised advanced knight is not an outpost. If an enemy pawn can still challenge the square, the piece is visiting. The detector in lib/features.js checks this and correctly refuses in the recorded counterexample.
 ## weak-square
@@ -84,7 +84,7 @@ the defects listed in the tool's header was unread before it was looked at.
 - [**unread**] A bad bishop that is the sole guardian of a weak colour complex is a load-bearing defender, not a liability.
 ## opposite-coloured-bishops
 
-- [**unread**] The drawish reputation is an ENDGAME fact. In the middlegame with heavy pieces on, opposite-coloured bishops favour the attacker, because the bishop operates where the defender's cannot answer. Announcing 'opposite bishops, drawn' with queens on the board is the standard error.
+- [cited] The drawish reputation is an ENDGAME fact. In the middlegame with heavy pieces on, opposite-coloured bishops favour the attacker, because the bishop operates where the defender's cannot answer. Announcing 'opposite bishops, drawn' with queens on the board is the standard error.
 - [**unread**] Detecting the material is trivial; whether a blockade is achievable is not.
 - [**unread**] Two extra pawns are often not enough — but three files of separation often are. The count of pawns is the wrong variable; their separation and the blockade are the right ones.
 ## rook-on-the-seventh

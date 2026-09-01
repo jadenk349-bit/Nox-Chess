@@ -1258,3 +1258,28 @@ Saying the rate did not move is the honest report on both. With a firing-rate
 metric in front of you the temptation is to answer every trap with a guard.
 
 **72 of 108 traps cited, 36 unread.**
+
+
+## Two more off the list, and one guard that almost never binds
+
+`outpost` had never built its second trap — *"a safe square that the piece does
+nothing from. Safety is a precondition, not the benefit."* Built, it refuses **1
+of 122** positions. That is not a failure of the guard but a fact about the
+geometry: the outpost zone *is* the enemy's half, so a knight standing in it
+bears on something almost by construction, and the shape the guard catches is a
+bishop walled in by its own pawns. 15.5% → 15.4%, and saying it moved would
+overstate it.
+
+Writing it did expose a real bug in the first version, which counted the piece's
+attacks on **its own pawns** as bearing on something — so the walled-in bishop
+passed the test written to catch it.
+
+`opposite-coloured-bishops` said one thing in every position. Its first trap:
+*"the drawish reputation is an ENDGAME fact. In the middlegame with heavy pieces
+on, opposite-coloured bishops favour the attacker, because the bishop on the
+attacking colour has no counterpart."* The phase and the heavy-piece count now
+decide which half is said. Saying "drawish" with queens and rooks on the board is
+the commonest thing anyone says about this material, and it is the error the
+record names.
+
+**74 of 108 traps cited, 34 unread.**

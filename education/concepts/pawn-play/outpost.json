@@ -177,7 +177,8 @@
   "limitations": [
     "The definition is contested; there is no authoritative wording to appeal to.",
     "Not reliably engine-testable. Three separate controlled-pair designs failed to isolate the variable, because no pawn can be moved without altering several structural facts at once. See METHODOLOGY.md.",
-    "Recognition is heuristic. Detecting 'no enemy pawn can attack this square' is mechanical; deciding that the square MATTERS is not."
+    "Recognition is heuristic. Detecting 'no enemy pawn can attack this square' is mechanical; deciding that the square MATTERS is not.",
+    "MEASURED 2026-09-02: the second trap - 'a safe square that the piece does nothing from. Safety is a precondition, not the benefit' - is now built, and it almost never binds: it refuses 1 of the 122 positions on the shipped corpus where the rest of the definition is satisfied. That is not a failure of the guard but a fact about the geometry - the outpost zone is the enemy's half, and a knight standing in it bears on something almost by construction. The shape it does catch is a bishop walled in by its own pawns. Rate 15.5% -> 15.4%, and saying it moved would overstate it."
   ],
   "misconceptions": [
     "That any advanced knight protected by a pawn is on an outpost.",

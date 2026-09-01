@@ -190,6 +190,32 @@ const priorityOf = id => {
  * behind these numbers is not free: the scope test exists because of Suba's
  * active bad bishop and was measured against Nimzowitsch-Salwe 1911.
  */
+/* Does the man on this square DO anything from it?
+ *
+ * `outpost`'s record: "a safe square that the piece does nothing from. Safety is
+ * a precondition, not the benefit." The mechanical half of that is what the
+ * piece bears on - an enemy man, or squares inside the enemy's own half. It
+ * cannot answer whether the piece is on the right side of the board, and does
+ * not pretend to.
+ */
+function bearsOnSomething(st, colour, square) {
+  const P = FEAT.page;
+  const from = (8 - Number(square[1])) * 8 + (square.charCodeAt(0) - 97);
+  let hits = 0, deep = 0;
+  for (let i = 0; i < 64; i++) {
+    if (i === from) continue;
+    let atk;
+    try { atk = P.attackersOf(st, i, colour); } catch (e) { continue; }
+    if (atk.indexOf(from) < 0) continue;
+    const q = st.b[i];
+    if (q && q.c === colour) continue;      // bearing on your own pawn is not bearing on anything
+    if (q) hits++;
+    const row = i >> 3;
+    if (colour === 'w' ? row <= 2 : row >= 5) deep++;
+  }
+  return hits > 0 || deep >= 2;
+}
+
 function shutInByItsOwnPawns(b) {
   return b.ownPawnsOnItsColour >= 4 && b.share >= 0.60 && b.scope <= 3;
 }
@@ -441,8 +467,13 @@ const STRUCTURAL = [
   },
   {
     concept: 'outpost',
-    implements: "recognition: a minor piece on a square no enemy pawn can attack, defended by a friendly pawn",
+    implements: ("recognition: a minor piece on a square no enemy pawn can attack, defended by a " +
+                 "friendly pawn - and doing something from there, which is the record's second " +
+                 "trap: \"a safe square that the piece does nothing from. Safety is a precondition, " +
+                 "not the benefit.\""),
     run(f) {
+      const P = FEAT.page;
+      const st = P.stateFromFEN(f.fen);
       const hits = [];
       for (const c of ['w', 'b']) {
         // An outpost is about influence over the opponent's position, so a
@@ -450,13 +481,20 @@ const STRUCTURAL = [
         // is. Tested against Capablanca-Tartakower 1924, this reported Black's
         // a5 knight - the worst piece on the board and the one Capablanca was
         // happy to see there - as an outpost.
-        const o = f.outposts[c].filter(x => x.square[0] !== 'a' && x.square[0] !== 'h');
+        //
+        // ...and it must be DOING something there. "A safe square that the piece
+        // does nothing from. Safety is a precondition, not the benefit" is the
+        // record's second trap, and it had never been built: the piece has to
+        // bear on an enemy man or on squares inside the enemy camp, or the
+        // report is about a square rather than about a plan.
+        const o = f.outposts[c].filter(x => x.square[0] !== 'a' && x.square[0] !== 'h')
+                               .filter(x => bearsOnSomething(st, c, x.square));
         if (o.length) hits.push({ c, o });
       }
       if (!hits.length) return null;
       return {
         confidence: 'high',
-        because: hits.map(h => `${side(f, h.c)}'s ${h.o.map(x => `${x.piece === 'N' ? 'knight' : 'bishop'} on ${x.square}`).join(' and ')} cannot be driven off by a pawn and is defended by one`),
+        because: hits.map(h => `${side(f, h.c)}'s ${h.o.map(x => `${x.piece === 'N' ? 'knight' : 'bishop'} on ${x.square}`).join(' and ')} cannot be driven off by a pawn, is defended by one, and bears on the position behind it`),
         slots: { square: hits[0].o[0].square,
                  piece: hits[0].o[0].piece === 'N' ? 'knight' : 'bishop' },
         subjects: hits.map(h => h.c),
@@ -688,12 +726,26 @@ const STRUCTURAL = [
   },
   {
     concept: 'opposite-coloured-bishops',
-    implements: "recognition.preconditions: exactly one bishop each, on opposite colours",
+    implements: ("recognition.preconditions: exactly one bishop each, on opposite colours - and the " +
+                 "record's first trap, which the earlier version ignored: \"the drawish reputation " +
+                 "is an ENDGAME fact. In the middlegame with heavy pieces on, opposite-coloured " +
+                 "bishops favour the attacker, because the bishop on the attacking colour has no " +
+                 "counterpart.\" The phase decides which half is said."),
     run(f) {
       if (!f.pieces.oppositeColouredBishops) return null;
+      const heavy = ['w', 'b'].reduce((n, c) => n + f.material[c].counts.R + f.material[c].counts.Q, 0);
+      const line = 'each side has one bishop and they travel on opposite square colours, so neither ' +
+                   'can attack or defend the other’s squares';
+      // Saying "drawish" here with queens and rooks on the board is the error
+      // the record names, and it is the commonest thing anyone says about this
+      // material. The endgame reputation is not transferable to a middlegame.
+      const tail = f.phase !== 'endgame' && heavy > 0
+        ? ' — and with heavy pieces still on this is not the drawish ending it is famous for: the ' +
+          'bishop on the attacking colour has no counterpart, which favours whoever is attacking'
+        : '';
       return {
         confidence: 'high',
-        because: ['each side has one bishop and they travel on opposite square colours, so neither can attack or defend the other’s squares'],
+        because: [line + tail],
         subjects: ['w', 'b'],
       };
     },

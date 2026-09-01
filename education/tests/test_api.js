@@ -1194,6 +1194,42 @@ const { concepts } = API.knowledge();
      !/weak/.test(String(central) + String(withPair)));
 }
 
+{
+  // opposite-coloured-bishops said one thing in every position. Its record's
+  // first trap: "the drawish reputation is an ENDGAME fact. In the middlegame
+  // with heavy pieces on, opposite-coloured bishops favour the attacker, because
+  // the bishop on the attacking colour has no counterpart." Saying "drawish"
+  // with queens and rooks on is the commonest thing anyone says about this
+  // material and it is the error the record names.
+  const ocb = fen => {
+    const c = API.analyzeWithEducation({ fen }).concepts.find(x => x.id === 'opposite-coloured-bishops');
+    return c ? (c.because || [''])[0] : null;
+  };
+  const mid = ocb('r2q1rk1/pp3ppp/4pn2/3b4/8/2B2N2/PP3PPP/R2QK2R w KQ - 0 1');
+  ok('opposite-coloured-bishops: with heavy pieces on, it is not the drawish ending',
+     /not the drawish ending it is famous for/.test(String(mid)), String(mid));
+  const end = ocb('4k3/pp3ppp/8/3b4/8/2B5/PP3PPP/4K3 w - - 0 1');
+  ok('...and in the bare ending it says only the plain fact',
+     end && !/drawish ending it is famous for/.test(String(end)), String(end));
+
+  // outpost: "a safe square that the piece does nothing from. Safety is a
+  // precondition, not the benefit." Built, and honest about how rarely it binds
+  // — the outpost zone's geometry nearly guarantees a knight bears on something,
+  // so this refuses 1 of 122 on the shipped corpus. A bishop walled in by its
+  // own pawns is the shape it catches.
+  const outp = fen => API.analyzeWithEducation({ fen }).concepts_all.some(c => c.id === 'outpost');
+  ok('outpost: refuses a piece that bears on nothing from its safe square',
+     !outp('4k3/8/1PPP4/2B5/1P1P4/8/8/4K3 w - - 0 1'));
+  ok('outpost: reports the same square once the diagonal is open',
+     outp('4k3/8/8/2B5/1P1P4/8/8/4K3 w - - 0 1'));
+  ok('outpost: bearing on your OWN pawn is not bearing on anything',
+     /bearing on your own pawn is not bearing on anything/.test(
+       fs.readFileSync(path.join(ROOT, 'lib', 'matchers.js'), 'utf8')));
+  // The corpus's outpost negative must stay negative.
+  ok('outpost: Botvinnik\'s "insecurely placed" knight is still not an outpost',
+     !outp('2r1k2r/1pqbnpp1/4p2p/p1NpP3/PP3P2/2PB4/6PP/R3QR1K b k - 3 21'));
+}
+
 /* ---------- report ---------- */
 console.log(`\nAPI  PASS ${pass}   FAIL ${fails.length}`);
 for (const [n, d] of fails) console.log(`  FAIL  ${n}\n        ${d}`);
