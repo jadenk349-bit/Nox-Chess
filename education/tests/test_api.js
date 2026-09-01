@@ -199,6 +199,25 @@ const { concepts } = API.knowledge();
   }
 }
 
+/* ---------- lines, not just moves ---------- */
+{
+  const fen = 'r3k3/4bppp/8/3N4/8/8/PPP5/R3KB2 w Qq - 0 1';
+  const r = API.analyzeWithEducation({ fen, line: ['d5c7', 'e8d7', 'c7a8'] });
+  ok('line: reports the SAN line', Array.isArray(r.move.line) && r.move.line[0] === 'Nc7+', JSON.stringify(r.move && r.move.line));
+  ok('line: reports motifs per ply', Array.isArray(r.move.plies) && r.move.plies.length === 3);
+  ok('line: finds the fork', r.concepts.some(c => c.id === 'fork'));
+  // Reading a whole line must never find FEWER motifs than reading its first move.
+  const single = API.analyzeWithEducation({ fen, move: 'd5c7' });
+  const a = new Set(single.concepts.map(c => c.id)), b = new Set(r.concepts.map(c => c.id));
+  ok('line: finds at least what the first move alone finds',
+     [...a].every(x => b.has(x)), `${[...a]} vs ${[...b]}`);
+
+  const bad = API.analyzeWithEducation({ fen, line: ['d5c7', 'a1a8'] });
+  ok('line: an illegal continuation is reported, not silently dropped',
+     bad.notes.some(n => /becomes illegal/.test(n)), JSON.stringify(bad.notes));
+  ok('line: the legal prefix is still used', bad.move && bad.move.line.length === 1);
+}
+
 /* ---------- False-positive regression: the resolved cases ---------- */
 {
   const cases = JSON.parse(fs.readFileSync(path.join(ROOT, 'tests', 'false_positive_cases.json'), 'utf8')).cases;

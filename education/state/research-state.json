@@ -1535,6 +1535,31 @@
         "outpost",
         "isolated-queen-pawn"
       ]
+    },
+    {
+      "id": "false-negative-scope-mismatch",
+      "date": "2026-09-01",
+      "method": "Compared this system's motif detection against the puzzle generator's independent theme tagging on 649 comparable positions, first reading only the solution's first move and then reading the whole solution line.",
+      "results": {
+        "first_move_only": "500/649 (77.0%)",
+        "whole_line": "626/649 (96.5%)",
+        "mass_test_agreement_before": "71.1%",
+        "mass_test_agreement_after": "89.0%"
+      },
+      "findings": [
+        "The apparent false negatives were almost entirely a SCOPE mismatch, not a detection failure. The generator tags themes across a whole solution; the API was reading one move. A combination's fork frequently lands on move three.",
+        "Reading the line lifts direct agreement from 77.0% to 96.5%, with only hanging-piece (23) still diverging.",
+        "This was a real capability gap in the API rather than a measurement artefact: a caller explaining a combination could not get its motifs. analyzeWithEducation now accepts a `line`, reports motifs per ply, and says which move produced each one.",
+        "The residue in the mass test - king-attack 134, sacrifice 119, pawn-breakthrough 86, removing-the-defender 67, perpetual-check 52 - are generator themes computed from the line's EVALUATION rather than by motif detection, so they have no findMotifs equivalent. That is expected and is already documented in tools/motif_map.json."
+      ],
+      "concepts": [
+        "fork",
+        "pin",
+        "skewer",
+        "discovered-attack",
+        "trapped-piece",
+        "hanging-piece"
+      ]
     }
   ],
   "last_updated": "2026-09-01",
