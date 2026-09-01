@@ -26,6 +26,14 @@ HERE = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 # Types where an exception is not a meaningful demand: a rule of chess has no
 # exceptions and a proven result has none either.
 NO_EXCEPTIONS_NEEDED = {"official-rule", "proven-result", "tablebase-fact"}
+# A rule of chess is not illustrated by a master game, is not ambiguous, and does
+# not need an engine to confirm it. Demanding those of en-passant and the
+# fifty-move rule measured nothing except how many rules the base contains.
+# Terminology records are the same: "notation" has no instructive game.
+# NOTE: this exclusion was added AFTER the first depth run, which reported
+# master_game missing on 128 of 129 concepts. The honest comparison is that the
+# earlier figure counted 30-odd records that could never have had one.
+NOT_ILLUSTRATED_BY_GAMES = {"official-rule", "proven-result", "tablebase-fact", "terminology"}
 # Types that describe vocabulary or meta-practice rather than board situations,
 # so board-level tests do not apply to them.
 NON_BOARD = {"terminology"}
@@ -65,6 +73,7 @@ def board_level(c):
 
 def checklist(c, fp_concepts):
     """Each entry is True (has it), False (missing), or None (N/A)."""
+    kt = c.get("knowledge_type")
     ex = c.get("explanations") or {}
     rec = c.get("recognition") or {}
     hist = c.get("history") or {}
@@ -83,12 +92,14 @@ def checklist(c, fp_concepts):
                        else bool(c.get("exceptions"))),
         "positive_example": (bool(c.get("examples")) if board else None),
         "negative_example": (bool(c.get("counterexamples")) if board else None),
-        "ambiguous_example": (bool(c.get("ambiguous_examples")) if board else None),
-        "engine_validation": (any(p.get("engine") for p in pos) if board else None),
+        "ambiguous_example": (bool(c.get("ambiguous_examples"))
+                              if board and kt not in NOT_ILLUSTRATED_BY_GAMES else None),
+        "engine_validation": (any(p.get("engine") for p in pos)
+                              if board and kt != "official-rule" else None),
         "tablebase_validation": (any(p.get("tablebase") for p in pos)
                                  if board and is_endgame_concept(c) else None),
         "master_game": (any(p.get("origin_kind") == "historical-game" for p in pos)
-                        if board else None),
+                        if board and kt not in NOT_ILLUSTRATED_BY_GAMES else None),
         "false_positive_test": bool(rec.get("false_positive_traps")) and c["id"] in fp_concepts
                                if board else bool(rec.get("false_positive_traps")),
         "beginner_explanation": bool((ex.get("by_level") or {}).get("beginner")),

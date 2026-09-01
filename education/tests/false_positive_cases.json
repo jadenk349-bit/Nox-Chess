@@ -162,6 +162,39 @@
       "evidence": "feature-detector",
       "resolution": "Partially resolved and recorded as such. The concept now carries an explicit trap forbidding the recommendation while the opponent has a queen, and the matcher's guard (phase must be endgame AND pawns must be on) is documented as NOT covering this case. A full resolution would mean the matcher itself checking for enemy queens, which is a change to Layer 4 rather than to the record, and is listed as open.",
       "resolved_date": "2026-09-01"
+    },
+    {
+      "id": "opposite-coloured-bishops-surface-pattern-is-not-the-concept",
+      "concept": "opposite-coloured-bishops",
+      "surface_pattern": "Each side has exactly one bishop and they run on opposite colours.",
+      "why_not": "Drawish only when they are nearly the last pieces on the board. With other pieces present the same feature favours the ATTACKER, because each bishop guards a complex the other cannot contest.",
+      "fen": "rn2k1nr/pp3ppp/6q1/4Pb2/2pP4/P1P4N/2P1Q1PP/R1B1K2R w KQkq - 3 13",
+      "status": "resolved",
+      "evidence": "engine",
+      "resolution": "Registered from a near-miss position found by searching 1576 real positions for the surface pattern WITHOUT the concept's condition, then scored by the engine. Level-2 validation: the position was scored, not designed. It confirms the feature is present in real play and, where the score is near level, that the feature is not drowned out. It is not a controlled pair and proves nothing about the concept on its own.",
+      "resolved_date": "2026-09-01"
+    },
+    {
+      "id": "luft-surface-pattern-is-not-the-concept",
+      "concept": "luft",
+      "surface_pattern": "A king sits on its back rank with no empty escape square.",
+      "why_not": "The pattern is only dangerous if a rook or queen can reach the back rank. With the heavy pieces gone it costs nothing.",
+      "fen": "4k3/3nppb1/3p4/PB1P4/4N1p1/6P1/5P2/6K1 b - - 2 35",
+      "status": "resolved",
+      "evidence": "engine",
+      "resolution": "Registered from a near-miss position found by searching 1576 real positions for the surface pattern WITHOUT the concept's condition, then scored by the engine. Level at -0.24. A king with no luft is only in danger from a piece that can reach the back rank, and with the heavy pieces gone the missing escape square costs nothing. Recorded because the back-rank pattern is one of the easiest features to detect and one of the easiest to over-report.",
+      "resolved_date": "2026-09-01"
+    },
+    {
+      "id": "bishop-pair-surface-pattern-is-not-the-concept",
+      "concept": "bishop-pair",
+      "surface_pattern": "One side has both bishops and the other does not.",
+      "why_not": "The pair's value comes from covering both colours in an OPEN position. In a closed one with no open file, it is worth little and a knight may be the better piece.",
+      "fen": "r2qkb1r/1pp2ppp/p1n1p3/3P4/4Q1n1/2N2P2/PPPP1P1P/R1B1KB1R b KQkq - 3 9",
+      "status": "resolved",
+      "evidence": "engine",
+      "resolution": "Registered from a near-miss position found by searching 1576 real positions for the surface pattern WITHOUT the concept's condition, then scored by the engine. Level-2 validation: the position was scored, not designed. It confirms the feature is present in real play and, where the score is near level, that the feature is not drowned out. It is not a controlled pair and proves nothing about the concept on its own.",
+      "resolved_date": "2026-09-01"
     }
   ],
   "last_updated": "2026-09-01"

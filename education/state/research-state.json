@@ -6,19 +6,19 @@
     "note": "Filled in by tools/sf_analyse.py --probe"
   },
   "counters": {
-    "concepts_total": 134,
+    "concepts_total": 135,
     "concepts_stub": 0,
     "concepts_researched": 29,
     "concepts_validated": 4,
     "concepts_needs_review": 0,
-    "sources_reviewed": 168,
+    "sources_reviewed": 172,
     "positions_tested": 53,
     "matches_validated": 26,
     "false_matches": 14,
     "ambiguous_matches": 13,
     "by_stage": {
       "ready": 2,
-      "researched": 123,
+      "researched": 124,
       "validated": 9
     },
     "tablebase_positions": 22,
@@ -431,12 +431,15 @@
     },
     "pawn-breaks": {
       "domain": "pawn-play",
-      "status": "not-started",
+      "status": "covered",
       "concepts": [
-        "pawn-breakthrough"
+        "pawn-breakthrough",
+        "minority-attack"
       ],
       "open_questions": [],
-      "last_touched": "2026-08-31"
+      "last_touched": "2026-09-01",
+      "last_updated": "2026-09-01",
+      "note": "pawn-breakthrough and minority-attack. The latter was a gap the final-phase brief named and the base did not have."
     },
     "weak-squares": {
       "domain": "pawn-play",
@@ -1148,6 +1151,12 @@
       "item": "controlled pair isolating king activity in a rook ending",
       "detail": "Two designs tried, both failed to split. Pair 1 (defending king e7 vs a7 in R+P vs R) came out win/win, though with dtm 35 vs 15, which was kept as a measurement of defensive value. Pair 2 (Philidor setup, defending king e7 vs g7) came out draw/draw - the rook on the sixth holds regardless of the king's square. Consistent with the three failed outpost pairs and with Shereshevsky's own remark that rook endings are too concrete for the principle to isolate.",
       "conclusion": "Recorded on the king-activation concept as a limitation; the concept claims only what the win/win pair measured."
+    },
+    {
+      "date": "2026-09-01",
+      "item": "Petrosian-Krogius 1959 full game score",
+      "detail": "The score printed in the UMBC lecture notes does not replay: Black's 24th move (Ra3) is not legal in the position reached. The first 46 plies verify. Rather than guess a correction, only the verified prefix is used and the source note says so.",
+      "conclusion": "Verified prefix used; the remainder is neither used nor cited."
     }
   ],
   "tool_limitations": [
