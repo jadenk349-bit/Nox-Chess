@@ -95,7 +95,8 @@
   "limitations": [
     "The least detectable concept in this base: no mechanical signature, and a claim about the whole position rather than a move.",
     "One of its sources is known only from a publisher description and has not been read.",
-    "No engine or tablebase validation exists for this concept, and none is currently designed."
+    "No engine or tablebase validation exists for this concept, and none is currently designed.",
+    "No detector, per the record's human-only classification, and the corpus entries for it are scored as 'absent by design'. Two annotated master positions are recorded as human ground truth so that a later session which builds one has something to test it against."
   ],
   "misconceptions": [
     "That coordination means every piece is on a good square. It means they work together, which is a different claim.",
@@ -120,7 +121,42 @@
     ],
     "conflicts": []
   },
-  "examples": [],
+  "examples": [
+    {
+      "fen": "r1b2rk1/p5pp/1pn1p3/3n1pN1/5B2/q1P1P3/P1Q1BPPP/1R1R2K1 w - f6 0 16",
+      "note": "Capablanca-Mattison, Karlsbad 1929, Bf3. Human ground truth: the concept is named for this position by Nicholas Van Der Nat (FM), following Irving Chernev's Logical Chess: Move by Move. Corpus entry `capablanca-mattison-1929-16Bf3-piece-coordination`, which carries the full annotation, the alternates the annotator rejected, and the engine's verdict. The concept record's hardest requirement is met here, which is why this position was chosen: 'attributing coordination to a single move requires knowing what the move prepares - which usually requires the continuation, not the move alone.' The continuation exists and is forced. The bishop steps from e2 to f3 so that it and the bishop on f4 rake two parallel diagonals into Black's position, and nin",
+      "origin_kind": "historical-game",
+      "game": "Capablanca-Mattison, Karlsbad 1929",
+      "concept_role": "positive",
+      "engine": {
+        "engine_id": "Stockfish 18",
+        "test_level": 3,
+        "depth": 22,
+        "multipv": 3,
+        "best_move": "Bf3",
+        "eval_cp": 248,
+        "verdict": "supports",
+        "verdict_note": "fully and by a wide margin. 16.Bf3 is the engine's first choice at depth 22 at +2.48, with the second-best move at +1.64 - a gap of 0.84 in a position with no capture and no check on the board. Coordination is classified human-only in its own record and has no detector in this base. The engine can confirm that the move is right; it cannot supply the word, and it was not asked to."
+      }
+    },
+    {
+      "fen": "r2qr1k1/5ppp/p4n2/1pbP1bB1/1n6/N1N2B2/PP1Q1PPP/3R1RK1 b - - 1 16",
+      "note": "Karpov-Kasparov, World Championship match (game 16), Moscow 1985, Nd3. Human ground truth: the concept is named for this position by unattributed training page; used only for the coordination wording, and the position is independently corroborated. Corpus entry `karpov-kasparov-1985-g16-16Nd3-piece-coordination`, which carries the full annotation, the alternates the annotator rejected, and the engine's verdict. This is coordination read from the other side - what it looks like when an army loses it. One black knight on d3 is not attacking anything decisive; what it does is make every White piece's best square unavailable at once, and the proof is on the board at move 17, where a knight that had reached a3 goes home to b1. The concept record insists the concept is 'about the army, not the piece', and that",
+      "origin_kind": "historical-game",
+      "game": "Karpov-Kasparov, World Championship match (game 16), Moscow 1985",
+      "concept_role": "positive",
+      "engine": {
+        "engine_id": "Stockfish 18",
+        "test_level": 3,
+        "depth": 22,
+        "multipv": 3,
+        "best_move": "Qd6",
+        "eval_cp": 43,
+        "verdict": "supports",
+        "verdict_note": "on the position, not on the move, and both halves matter. 16...Nd3 is only the engine's third choice at depth 22 (+0.29 against +0.43 for 16...Qd6) - a spread of 0.14, which is not a disagreement about the plan. On White's reply the engine is blunter: after 16...Nd3 it wants 17.d6 and does not list the game's 17.Nab1 in its top three at all, which is exactly the human claim that White had no way to reorganise. Two searches: one from Black's move 16, one from White's move 17. The second is the one that tests the annotation's actual claim."
+      }
+    }
+  ],
   "counterexamples": [],
   "ambiguous_examples": [],
   "explanations": {

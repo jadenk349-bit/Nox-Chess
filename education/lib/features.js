@@ -137,10 +137,33 @@ function pawnStructure(st, colour) {
       // backward: every friendly neighbour pawn is further advanced, AND the
       // square in front is controlled by an enemy pawn. Both halves matter —
       // a pawn merely lagging behind is not backward if it can advance freely.
-      let lagging = hasNeighbourBehindOrLevel(me, f, r, forward) === false;
+      //
+      // Two guards, and both were put here by a position rather than by reading
+      // the code. Wade-Korchnoi 1960 (the corpus's pawn-breakthrough entry) has
+      // a black pawn on e5 with no d- or f-pawn at all and a white pawn on e4 in
+      // front of it, and this reported it as backward:
+      //
+      //   * A pawn with NO friendly pawn on either adjacent file is ISOLATED,
+      //     not backward. `hasNeighbourBehindOrLevel` returns false in that case
+      //     as well as in the real one, and the record's definition — "behind all
+      //     pawns of the same colour on the adjacent files" — presupposes that
+      //     such pawns exist. Reporting both names for one pawn told the reader
+      //     about a hole in front of it that the isolated case does not create.
+      //   * A pawn whose advance square is OCCUPIED by an enemy pawn is rammed.
+      //     It cannot advance, but not for the reason the concept is about, and
+      //     the square in front of it is not a hole — an enemy pawn is standing
+      //     on it. The record's second consequence ("the square DIRECTLY IN FRONT
+      //     of it is a hole ... that is exactly the outpost condition") is simply
+      //     false of a rammed pawn.
+      let hasNeighbour = false;
+      for (const df of [-1, 1]) {
+        const g = f + df;
+        if (g >= 0 && g <= 7 && me[g].length) hasNeighbour = true;
+      }
+      let lagging = hasNeighbour && hasNeighbourBehindOrLevel(me, f, r, forward) === false;
       if (lagging) {
         const ar = r + forward, ac = f;
-        if (onBoard(ar, ac)) {
+        if (onBoard(ar, ac) && !st.b[idx(ar, ac)]) {
           let contested = false;
           for (const dc of [-1, 1]) {
             const sr = ar - forward, sc = ac + dc;      // where an enemy pawn would stand
@@ -556,6 +579,328 @@ function phaseOf(st) {
 
 /* -- the whole picture ---------------------------------------------------- */
 
+/* -- the centre, the king's zone, and the breakthrough ---------------------
+ *
+ * Three detectors written against three concept records that each named a
+ * detector that did not exist. They are here rather than in Layer 4 because
+ * they are observations: how many attackers bear on a square, how many pieces
+ * bear on a king's zone, whether a pawn sacrifice forces through a passer the
+ * enemy king cannot catch. What any of that is WORTH is the matcher's problem
+ * and, mostly, nobody's.
+ * ---------------------------------------------------------------------- */
+
+const CENTRE = ['d4', 'e4', 'd5', 'e5'];
+const BIG_CENTRE = ['c3', 'd3', 'e3', 'f3', 'c4', 'd4', 'e4', 'f4',
+                    'c5', 'd5', 'e5', 'f5', 'c6', 'd6', 'e6', 'f6'];
+const sqIndex = name => (8 - Number(name[1])) * 8 + (name.charCodeAt(0) - 97);
+
+/* Central control, counted as ATTACKERS and not as pawns standing on squares.
+ *
+ * The concept record's first false-positive trap is the entire reason this is
+ * written this way: "Counting pawns on central squares measures occupation, not
+ * control. A fianchettoed bishop controls e4 without standing anywhere near
+ * it." So control is attackersOf() — the page's own function, so there is one
+ * implementation of what attacks what — and occupation is reported as a
+ * separate number that a caller may not confuse with it.
+ *
+ * The record's third trap ("central pieces are only strong while they cannot be
+ * kicked; a piece on a central square a pawn can attack is visiting") is why
+ * each occupier is marked with whether an enemy PAWN can attack its square in
+ * one move. */
+function centralSquareControl(st) {
+  const out = { squares: {}, control: { w: 0, b: 0 }, minorControl: { w: 0, b: 0 },
+                occupied: { w: [], b: [] },
+                visiting: { w: [], b: [] }, pawnsOn: { w: 0, b: 0 } };
+  const minorOnly = (list) => list.filter(a => {
+    const q = st.b[a];
+    return q && (q.t === 'P' || q.t === 'N' || q.t === 'B');
+  }).length;
+  for (const name of CENTRE) {
+    const i = sqIndex(name);
+    const wa = P.attackersOf(st, i, 'w'), ba = P.attackersOf(st, i, 'b');
+    const w = wa.length, b = ba.length;
+    out.squares[name] = { w, b, wMinor: minorOnly(wa), bMinor: minorOnly(ba) };
+    out.control.w += w;
+    out.control.b += b;
+    // Control by PAWNS AND MINOR PIECES, kept separately, and it is not a
+    // refinement for its own sake. Reti-Capablanca 1924 is the position that
+    // forced it: after 18...Ne6 - the move Keene names as the one 'fighting
+    // more directly for control of the centre', and the move Stockfish puts
+    // 0.39 clear of anything else - Black's RAW attacker count on the four
+    // central squares FALLS from 7 to 6, because the knight arriving on e6
+    // blocks a rook that was x-raying through its own bishop on e4. Counting a
+    // rook's line through its own man as control makes the best move in the
+    // game look like a retreat. Counted by pawns and minors, the same move
+    // reads +1, and 18...N6d7 - the move actually played, which no source and
+    // no engine likes - reads -1.
+    out.minorControl.w += minorOnly(wa);
+    out.minorControl.b += minorOnly(ba);
+    const p = st.b[i];
+    if (p) {
+      out.occupied[p.c].push(name);
+      if (p.t === 'P') out.pawnsOn[p.c]++;
+      // can an enemy pawn attack this square within one pawn move?
+      const enemy = p.c === 'w' ? 'b' : 'w';
+      if (pawnCanHit(st, i, enemy)) out.visiting[p.c].push(name);
+    }
+  }
+  // How many of the four each side attacks MORE than the other. This is the
+  // number the matcher uses, because a side that out-attacks the opponent on
+  // three of the four central squares has said something; a side that piles six
+  // attackers onto one square has not.
+  out.squaresLed = { w: 0, b: 0 };
+  for (const name of CENTRE) {
+    const s = out.squares[name];
+    if (s.w > s.b) out.squaresLed.w++;
+    else if (s.b > s.w) out.squaresLed.b++;
+  }
+  return out;
+}
+
+/* Can a pawn of `colour` attack square `i` after one legal pawn move? Used only
+ * to mark a central occupier as "visiting". Deliberately geometric — it asks
+ * where a pawn would have to stand and whether one can get there in one move —
+ * because the alternative is generating every legal move for a question about
+ * two squares. */
+function pawnCanHit(st, i, colour) {
+  const r = rowOf(i), c = colOf(i);
+  const forward = colour === 'w' ? -1 : 1;
+  for (const dc of [-1, 1]) {
+    const sr = r - forward, sc = c + dc;          // where the pawn must stand
+    if (!onBoard(sr, sc)) continue;
+    const here = st.b[idx(sr, sc)];
+    if (here && here.t === 'P' && here.c === colour) return true;   // already there
+    if (here) continue;                            // square blocked, no pawn can arrive
+    for (const step of [1, 2]) {
+      const fr = sr - forward * step;
+      if (!onBoard(fr, sc)) break;
+      const q = st.b[idx(fr, sc)];
+      if (!q) continue;
+      if (q.t === 'P' && q.c === colour) {
+        if (step === 1) return true;
+        // a double step is only legal from the pawn's own second rank, and only
+        // if the square it jumps over is empty
+        const home = colour === 'w' ? 6 : 1;
+        if (fr === home && !st.b[idx(sr - forward, sc)]) return true;
+      }
+      break;                                       // first piece on the file settles it
+    }
+  }
+  return false;
+}
+
+/* The king's zone, and how many pieces bear on it.
+ *
+ * The concept record names this detector and points at Stockfish's scheme as a
+ * usable specification, so the zone is the king's square and its neighbours,
+ * plus the three squares two ranks ahead when the king is on its own back rank
+ * — which is what makes a castled king's zone cover the squares an attack
+ * actually arrives through.
+ *
+ * The record also says, in as many words, that this number must not be read
+ * linearly and that "it is not worth reporting an attack below three
+ * attackers". That threshold is applied in Layer 4, not here: this function
+ * reports what is on the board. */
+function kingZoneAttackers(st, colour) {
+  const k = pieces(st, colour, 'K')[0];
+  if (k === undefined) return null;
+  const enemy = colour === 'w' ? 'b' : 'w';
+  const r = rowOf(k), c = colOf(k);
+  const forward = colour === 'w' ? -1 : 1;
+  const homeRow = colour === 'w' ? 7 : 0;
+  const zone = [];
+  for (let dr = -1; dr <= 1; dr++) {
+    for (let dc = -1; dc <= 1; dc++) {
+      const rr = r + dr, cc = c + dc;
+      if (onBoard(rr, cc)) zone.push(idx(rr, cc));
+    }
+  }
+  if (r === homeRow) {
+    for (let dc = -1; dc <= 1; dc++) {
+      const rr = r + forward * 2, cc = c + dc;
+      if (onBoard(rr, cc)) zone.push(idx(rr, cc));
+    }
+  }
+  // DISTINCT pieces, not attacks. A rook that sees four zone squares is one
+  // attacker; counting squares turns one rook into an assault.
+  const att = new Set(), def = new Set();
+  for (const sq of zone) {
+    for (const a of P.attackersOf(st, sq, enemy)) {
+      const p = st.b[a];
+      if (p && p.t !== 'P' && p.t !== 'K') att.add(a);
+    }
+    for (const a of P.attackersOf(st, sq, colour)) {
+      const p = st.b[a];
+      if (p && p.t !== 'K') def.add(a);
+    }
+  }
+  // Files and diagonals arriving at the king matter more than a raw count, and
+  // an open file in front of a castled king is the classic one.
+  const kf = fileState(st);
+  const fileName = 'abcdefgh'[c];
+  const enemyPawnsOnFile = pieces(st, enemy, 'P')
+    .filter(i => colOf(i) === c).length;
+  const ownPawnsOnFile = pieces(st, colour, 'P')
+    .filter(i => colOf(i) === c).length;
+  return {
+    square: nameOf(k),
+    zone: zone.map(nameOf),
+    attackers: att.size,
+    attackerSquares: [...att].map(nameOf),
+    defenders: def.size,
+    enemyHasQueen: pieces(st, enemy, 'Q').length > 0,
+    fileOpenOnKing: ownPawnsOnFile === 0 && enemyPawnsOnFile === 0,
+    fileSemiOpenOnKing: ownPawnsOnFile === 0 && enemyPawnsOnFile > 0,
+    kingFile: fileName,
+    openFiles: kf.open,
+  };
+}
+
+/* The pawn breakthrough, and the one place it can be PROVED.
+ *
+ * The concept record's canonical pattern is three pawns against three, and its
+ * false-positive trap is the honest one: "a pawn sacrifice that creates a passer
+ * is not a breakthrough unless the passer actually cannot be stopped. The rule
+ * of the square decides this and is cheap to check."
+ *
+ * The rule of the square is a proof only when nothing but kings and pawns is
+ * left, so that is the scope, stated rather than hidden: this returns null the
+ * moment a piece is on the board. In a middlegame the same pattern may be a
+ * breakthrough and this base cannot show that it is, so it says nothing, which
+ * is the same bargain every other detector here makes.
+ *
+ * Inside that scope it is a small forced search: our pawn moves only, every
+ * legal reply for the defender, at most five plies, and success is a passed pawn
+ * whose promotion square the defending king cannot reach in time and which
+ * arrives before any enemy passer. At least one pawn must be given up, or it is
+ * not a breakthrough — just a pawn being pushed. */
+function pawnBreakthrough(st, colour) {
+  for (let i = 0; i < 64; i++) {
+    const p = st.b[i];
+    if (p && p.t !== 'K' && p.t !== 'P') return null;
+  }
+  const mine = () => pieces(st, colour, 'P').length;
+  if (mine() < 2) return null;
+  const startCount = mine();
+  const countP = s => pieces(s, colour, 'P').length;
+
+  let moves;
+  try { moves = P.legalMoves(st); } catch (e) { return null; }
+  for (const m of moves) {
+    const pc = st.b[m.from];
+    if (!pc || pc.t !== 'P' || m.cap) continue;         // an ADVANCE, not a capture
+    const after = P.makeMove(st, m);
+    // The offer has to be an offer: an enemy pawn must be able to take it.
+    const takers = capturesOf(after, m.to);
+    if (!takers.length) continue;
+    const line = accepted(after, 4, [P.uciOf(m)]);
+    if (line) {
+      return {
+        first: P.uciOf(m), line, plies: line.length,
+        offers: takers.length,
+        note: 'every pawn capture of the offer loses the race; a declined offer is a different question and is not claimed here',
+      };
+    }
+  }
+  return null;
+
+  /* Enemy pawn captures of the pawn now standing on `sq`. Two of them is the
+   * lever geometry the concept record calls for - "a pawn advance creates two
+   * levers simultaneously" - but one is enough for the sacrifice to be an
+   * offer, and the record's canonical pattern is proved by the race, not by the
+   * count. */
+  function capturesOf(s, sq) {
+    let ms;
+    try { ms = P.legalMoves(s); } catch (e) { return []; }
+    return ms.filter(x => x.to === sq && s.b[x.from] && s.b[x.from].t === 'P');
+  }
+
+  /* The defender has taken, or is about to. Only CAPTURES of our pawns are
+   * searched on their side, and that limit is the honest boundary of the claim:
+   * this proves that accepting loses, not that declining does. A defender who
+   * declines is answering a different question and the matcher says so. */
+  function accepted(s, plies, line) {
+    if (plies <= 0) return null;
+    if (s.turn === colour) {
+      // our turn: any pawn move, and success is an uncatchable passer once a
+      // pawn has actually been given up
+      let ms;
+      try { ms = P.legalMoves(s); } catch (e) { return null; }
+      for (const x of ms) {
+        const pc2 = s.b[x.from];
+        if (!pc2 || pc2.t !== 'P') continue;
+        const nx = P.makeMove(s, x);
+        const l = line.concat(P.uciOf(x));
+        if (countP(nx) < startCount && winsTheRace(nx, colour)) return l;
+        const deeper = accepted(nx, plies - 1, l);
+        if (deeper) return deeper;
+      }
+      return null;
+    }
+    // their turn: every capture of one of our pawns must lose
+    let ms;
+    try { ms = P.legalMoves(s); } catch (e) { return null; }
+    const caps = ms.filter(x => {
+      const from = s.b[x.from], to = s.b[x.to];
+      return from && from.t === 'P' && to && to.c === colour;
+    });
+    if (!caps.length) return null;                 // nothing was accepted here
+    let best = null;
+    for (const x of caps) {
+      const nx = P.makeMove(s, x);
+      if (countP(nx) < startCount && winsTheRace(nx, colour)) { best = best || line; continue; }
+      const deeper = accepted(nx, plies - 1, line.concat(P.uciOf(x)));
+      if (!deeper) return null;                    // one accepted capture holds
+      best = deeper;
+    }
+    return best;
+  }
+}
+
+/* Rule of the square, applied to both sides. Returns true only when `colour`
+ * has a passer the defending king provably cannot catch AND no enemy pawn
+ * promotes at least as fast. Conservative on purpose: an unclear race is not a
+ * breakthrough as far as this base is concerned. */
+function winsTheRace(st, colour) {
+  const enemy = colour === 'w' ? 'b' : 'w';
+  const mine = pawnStructure(st, colour), theirs = pawnStructure(st, enemy);
+  if (!mine.passed.length) return false;
+  const ek = pieces(st, enemy, 'K')[0], ok = pieces(st, colour, 'K')[0];
+  if (ek === undefined || ok === undefined) return false;
+  const dist = (a, b) => Math.max(Math.abs(rowOf(a) - rowOf(b)), Math.abs(colOf(a) - colOf(b)));
+
+  const promoRow = colour === 'w' ? 0 : 7;
+  let ours = Infinity;
+  for (const name of mine.passed) {
+    const i = sqIndex(name);
+    let steps = Math.abs(rowOf(i) - promoRow);
+    // the pawn's path must be clear of every man, ours included
+    let clear = true;
+    const step = colour === 'w' ? -1 : 1;
+    for (let rr = rowOf(i) + step; rr !== promoRow + step; rr += step) {
+      if (st.b[idx(rr, colOf(i))]) { clear = false; break; }
+    }
+    if (!clear) continue;
+    const queenSq = idx(promoRow, colOf(i));
+    // the defender is a tempo down if it is our move
+    const theirTempo = st.turn === enemy ? 0 : 1;
+    if (dist(ek, queenSq) - theirTempo <= steps) continue;    // catchable
+    ours = Math.min(ours, steps);
+  }
+  if (ours === Infinity) return false;
+
+  const theirPromoRow = enemy === 'w' ? 0 : 7;
+  for (const name of theirs.passed) {
+    const i = sqIndex(name);
+    const steps = Math.abs(rowOf(i) - theirPromoRow);
+    const queenSq = idx(theirPromoRow, colOf(i));
+    const ourTempo = st.turn === colour ? 0 : 1;
+    if (dist(ok, queenSq) - ourTempo <= steps) continue;      // we catch it
+    if (steps <= ours) return false;                          // they are not slower
+  }
+  return true;
+}
+
 function features(fen) {
   const st = P.stateFromFEN(fen);
   const other = st.turn === 'w' ? 'b' : 'w';
@@ -576,6 +921,9 @@ function features(fen) {
     safeSquares: { w: safeSquaresFor(st, 'w'), b: safeSquaresFor(st, 'b') },
     weakSpread: { w: weakPawnSpread(pawnStructure(st, 'w')),
                   b: weakPawnSpread(pawnStructure(st, 'b')) },
+    centre: centralSquareControl(st),
+    kingZone: { w: kingZoneAttackers(st, 'w'), b: kingZoneAttackers(st, 'b') },
+    breakthrough: { w: pawnBreakthrough(st, 'w'), b: pawnBreakthrough(st, 'b') },
     activity: {
       mobility: { w: mobility(st, 'w'), b: mobility(st, 'b') },
       pawnSpace: { w: pawnSpace(st, 'w'), b: pawnSpace(st, 'b') },
@@ -597,6 +945,11 @@ function motifsOfMove(fen, uci) {
     legal: true,
     // toSAN needs the full legal-move list to disambiguate (Nbd2 vs Nfd2).
     san: P.toSAN(before, mv, all),
+    // What actually moved, read off the board rather than parsed back out of
+    // the SAN. A matcher that wants "was this a pawn move" should not have to
+    // re-derive it from a string that spells a pawn move by leaving the letter out.
+    movedType: (before.b[mv.from] || {}).t || null,
+    movedFrom: nameOf(mv.from), movedTo: nameOf(mv.to),
     // Kept in the page's own {tag, text} shape; matchers read .tag. Normalising
     // to bare strings here would throw away the detector's own sentence, which
     // is worth having for comparison even though this system words its own.
@@ -643,5 +996,6 @@ module.exports = {
   features, motifsOfMove, motifsOfLine, phaseOf, material, pawnStructure, fileState,
   holesFor, reachableHoles, outposts, pieceFeatures, kingFeatures, mobility, pawnSpace,
   bishopPawnColours, quietness, pieceScopes, weakPawnSpread, safeSquaresFor,
+  centralSquareControl, kingZoneAttackers, pawnBreakthrough, winsTheRace,
   nameOf, isLight, page: P,
 };

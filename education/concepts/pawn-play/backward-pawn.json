@@ -57,7 +57,9 @@
     "false_positive_traps": [
       "A pawn that is merely behind its neighbours but CAN advance safely is not backward in the operative sense.",
       "A backward pawn on a closed file that nothing can attack is a description, not a weakness.",
-      "Reporting the pawn and not the square in front of it usually misses the more important half."
+      "Reporting the pawn and not the square in front of it usually misses the more important half.",
+      "A pawn with no friendly pawn on either adjacent file is ISOLATED, not backward, and reporting both names for one pawn promises the reader a hole in front of it that the isolated case does not create.",
+      "A pawn whose advance square is occupied by an enemy pawn is RAMMED. It cannot advance, but not for the reason the concept is about, and the square in front of it is not a hole - an enemy pawn is standing on it."
     ]
   },
   "application": {
@@ -86,7 +88,8 @@
     "The square in front is often the real asset; winning the pawn can be the lesser goal."
   ],
   "limitations": [
-    "The geometric test is mechanical; 'cannot advance safely' requires evaluating the square ahead, which is position-dependent."
+    "The geometric test is mechanical; 'cannot advance safely' requires evaluating the square ahead, which is position-dependent.",
+    "FIXED 2026-09-01, found by Wade-Korchnoi 1960: the detector reported a pawn with NO friendly pawn on either adjacent file as backward, because the 'is it behind its neighbours' test returns false both when the neighbours are all advanced and when there are none. A pawn with no neighbours is isolated. It also reported a pawn whose advance square is OCCUPIED by an enemy pawn, which is rammed rather than backward and creates no hole in front of it."
   ],
   "misconceptions": [
     "That every backward pawn is a weakness.",

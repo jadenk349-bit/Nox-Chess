@@ -20,7 +20,13 @@
     "",
     "alternate_concepts_considered was originally one list, and the stress test showed why that was wrong: it lumped concepts that are ALSO TRUE but secondary together with concepts that would be WRONG here. Reporting the first is correct behaviour and reporting the second is a false positive, so they are now separate fields and only rejected_as_wrong counts against the system.",
     "",
-    "fen_concept_realised exists for entries where the concept only appears after a FORCED reply. 9.Nxc6 creates a doubled isolated pawn, and it does so after Black recaptures; asking about the position between the two halves of the exchange is asking before the concept exists."
+    "fen_concept_realised exists for entries where the concept only appears after a FORCED reply. 9.Nxc6 creates a doubled isolated pawn, and it does so after Black recaptures; asking about the position between the two halves of the exchange is asking before the concept exists.",
+    "",
+    "concept_role is scored, not decorative. tools/corpus_check.py measures a positive example by whether the concept is reported, a NEGATIVE one by whether it is NOT, and an ambiguous one by whether it is present without being required to lead. An earlier version of that checker had one rule for all three, which scores a negative example as a success exactly when the system has failed it.",
+    "",
+    "Two positions carry more than one entry, deliberately. Adams-Kasparov after 21...Kxh7 is a NEGATIVE example for king-attack and an AMBIGUOUS one for king-safety, because the two claims about that position have opposite answers: the black king really is exposed, and there really is no attack. Splitting them is the only way to test both.",
+    "",
+    "move_after_uci exists for the same reason fen_concept_realised does, one step further on: some concepts are realised by a FORCED REPLY that is a move rather than a position. Capablanca-Mattison 1929 is the case - 15.Ng5 does not change the count of pieces bearing on the black king by one, and 15...f5 permanently removes a shield pawn."
   ],
   "concept_roles": {
     "positive": "the concept clearly applies, on the annotator's authority",
@@ -269,6 +275,513 @@
         "prophylaxis"
       ],
       "why_not_alternates": "prophylaxis was considered and rejected on this base's own distinction: prophylaxis prevents a specific enemy idea, restraint reduces general mobility. Black has no concrete plan here to prevent."
+    },
+    {
+      "game": "Smyslov-Botvinnik, World Championship match (game 1), Moscow 1954",
+      "source": "dgriffin-botvinnik-smyslov-1954-g1",
+      "players": "Vassily Smyslov - Mikhail Botvinnik",
+      "event": "World Championship match, Moscow 1954",
+      "year": 1954,
+      "annotator": "Mikhail Botvinnik, annotating his own game (tr. Douglas Griffin)",
+      "fen_verified": "replay: all 116 plies replayed legally through blind-chess.html's move generator, from a database score that matches every move the annotation names",
+      "id": "smyslov-botvinnik-1954-g1-20Qc7-initiative",
+      "concept": "initiative",
+      "concept_role": "positive",
+      "fen": "2r1k2r/1p1bnpp1/1q2p2p/p2pP3/PP3P2/1NPB4/6PP/R3QR1K b k - 1 20",
+      "move": "Qc7",
+      "move_uci": "b6c7",
+      "fen_after": "2r1k2r/1pqbnpp1/4p2p/p2pP3/PP3P2/1NPB4/6PP/R3QR1K w k - 2 21",
+      "fen_after_note": "The position 20...Qc7 reaches. White's knight has no square: 21.Nxa5 b6 traps it, so it has to go to c5 where it does not stand safely, and that is the constraint the annotation is about.",
+      "human_annotation": "'20...Qc7! The turning point of the game - the initiative now passes to Black. Since 21.Nxa5 b6 22.Nb3 Qxc3 is by no means in White's favour, the knight has to be placed on c5, where it does not stand safely.'",
+      "explanation": "This is the concept in its defining form and it is why the entry exists. Botvinnik does not claim Black is better; he claims the roles have swapped - from here White answers and Black asks. The move itself does nothing visible: it steps off the b-file, eyes c3, and leaves White's knight on b3 with no good square, so every White move for the next several is a reply. The concept record's own test is met exactly: 'one side is making threats the other must answer' and 'the answering side has no time for a plan of their own'. The record's warning is met too - the initiative is not detectable from this position as a static feature, which is why this base has no detector for it and this entry is human ground truth rather than a matcher test.",
+      "engine": {
+        "engine_id": "Stockfish 18",
+        "depth": 22,
+        "multipv": 3,
+        "best_move": "Qc7",
+        "best_eval_cp": -57,
+        "annotated_move_eval_cp": -57,
+        "annotated_move_rank": 1,
+        "agrees": "on the move, completely - 20...Qc7 is the engine's first choice at depth 22, ahead of 20...O-O by 0.15. On the assessment, not at all: the engine still gives White about half a pawn from Black's side of the board.",
+        "note": "That split is the finding, and it is worth more than agreement would have been. Holding the initiative is not the same as standing better, which is exactly what the concept record says and exactly what an engine-labelled corpus would have destroyed by throwing this position away."
+      },
+      "confidence": "high",
+      "why_not_alternates": "tempo is the unit the initiative is spent in, not the concept here; the annotation is about who is answering whom. two-weaknesses is the slow method the concept record records as being in direct tension with the initiative, and reading this move that way would give the reader the opposite instruction about how fast to play.",
+      "also_true_but_secondary": [
+        "tempo",
+        "piece-activity",
+        "trapped-piece"
+      ],
+      "rejected_as_wrong": [
+        "two-weaknesses"
+      ],
+      "added": "2026-09-01"
+    },
+    {
+      "game": "Reti-Capablanca, New York 1924 (round 5)",
+      "source": "keene-reti-capablanca-1924",
+      "players": "Richard Reti - Jose Raul Capablanca",
+      "event": "New York 1924",
+      "year": 1924,
+      "annotator": "Raymond Keene (GM), The Spectator Australia",
+      "fen_verified": "replay: all 61 plies replayed legally through blind-chess.html's move generator",
+      "id": "reti-capablanca-1924-27Qe5-initiative-negative",
+      "concept": "initiative",
+      "concept_role": "negative",
+      "fen": "4rnk1/r2n1p2/1p1R2pp/pP5q/3N4/P3N1P1/1Q3PKP/3R4 b - - 0 27",
+      "move": "Qe5",
+      "move_uci": "h5e5",
+      "fen_after": "4rnk1/r2n1p2/1p1R2pp/pP2q3/3N4/P3N1P1/1Q3PKP/3R4 w - - 1 28",
+      "human_annotation": "'27...Qe5. Capablanca is really doing his upmost on the fourth rank with his strongest piece, but the queen is no match for White's heavily centralised knights and rooks. Black had to try an exchange sacrifice and play 27...Rxe3!'",
+      "explanation": "The surface of an initiative is all here and none of the substance, which is what makes it a negative example. From move 20 Capablanca's queen has been to c4, c5, h5 and now e5, hitting something every time, and White has answered every time - Rxd6, Rad1, Ne3, Nd4, Nc4. Count only 'one side keeps making threats and the other keeps answering' and Black has the initiative. The concept record's actual test fails: every one of White's forced replies also CENTRALISES a piece, so the answering side is improving while it answers. The record states this directly as a false-positive trap: 'a series of checks is not an initiative. If the opponent's forced replies improve their position, you are helping them.' This is that trap in a world-championship-class game.",
+      "engine": {
+        "engine_id": "Stockfish 18",
+        "depth": 22,
+        "multipv": 3,
+        "best_move": "Rxe3",
+        "best_eval_cp": -212,
+        "annotated_move_eval_cp": -248,
+        "annotated_move_rank": 2,
+        "agrees": "on both halves, and independently. The engine's first choice at depth 22 is 27...Rxe3, which is the move Keene says Black had to try, and the game move 27...Qe5 is second and 0.36 worse. Black is lost either way, which is the point: the side with the 'threats' is two pawns down in evaluation.",
+        "note": "A rare case of a 2017 GM annotation and a 2026 engine naming the same move for the same reason."
+      },
+      "confidence": "high",
+      "why_not_alternates": "piece-activity is TRUE here and is the right label - an active queen is exactly what Black has. Calling it an initiative upgrades activity into a claim about who controls the game, which is the specific error the concept record warns against.",
+      "also_true_but_secondary": [
+        "piece-activity",
+        "queen-activity",
+        "exchange-sacrifice"
+      ],
+      "rejected_as_wrong": [
+        "initiative"
+      ],
+      "added": "2026-09-01"
+    },
+    {
+      "game": "Adams-Kasparov, Linares 2005 (round 12)",
+      "source": "chessbase-speelman-adams-kasparov-2005",
+      "players": "Michael Adams - Garry Kasparov",
+      "event": "XXII SuperGM, Linares 2005",
+      "year": 2005,
+      "annotator": "Jon Speelman (GM), reproduced by ChessBase; the king-safety sentence is quoted from a community annotation and is corroborated, not relied on",
+      "fen_verified": "replay: all 52 plies replayed legally through blind-chess.html's move generator",
+      "id": "adams-kasparov-2005-21Kxh7-king-attack-negative",
+      "concept": "king-attack",
+      "concept_role": "negative",
+      "fen": "br3rk1/2q2ppP/p2pp3/2n1b1BP/1n1NP3/2N2P2/1PPQB3/1K4RR b - - 0 21",
+      "move": "Kxh7",
+      "move_uci": "g8h7",
+      "fen_after": "br3r2/2q2ppk/p2pp3/2n1b1BP/1n1NP3/2N2P2/1PPQB3/1K4RR w - - 0 22",
+      "fen_after_note": "The position the recapture reaches, and the one both annotators are judging: Black's king stands on h7 with no pawn cover at all, White's rooks are doubled on the g- and h-files, the h-pawn is on h5 and the bishop is on g5.",
+      "human_annotation": "'Black sees no threats following either gxf7 or gxh7. His king may look exposed, but in actuality, there is no immediate danger to his king, and Garry knows that his attack is much stronger at the moment. ... If 22.h6, ...g6, and Black's defenses hold. The king cannot be driven from h7, even with a rook sacrifice on g6.' Speelman, on the same position: 22.Be3 was the best response for White, and Adams instead, 'seeing no good way to continue his attack, panicked and blundered'.",
+      "explanation": "Every mechanical sign of a winning king attack is present - opposite-side castling, a pawn storm that has arrived, the shield gone, two rooks on the files pointing at the king, a bishop on g5 and a queen able to reach h6 - and the attack does not exist. This is the sharpest kind of negative example because nothing about the pattern is missing; what is missing is a threat, and a threat is a property of the position's concrete lines rather than of its shape. Black mates first on the other wing (22...Nxc2 and 26...Qa3, with ...Rxb2+ behind it). Any detector that reports a king attack from attacker counts and a broken shield will report one here.",
+      "engine": {
+        "engine_id": "Stockfish 18",
+        "depth": 22,
+        "multipv": 3,
+        "best_move": "Be3",
+        "best_eval_cp": -213,
+        "agrees": "fully, and it agrees with the named human move. Searching the position AFTER 21...Kxh7, Stockfish 18 at depth 22 returns Be3 - the move Speelman names as White's best - and scores it at -2.13 from White's side. The side with the 'attack' is two pawns worse.",
+        "note": "Searched from White's move rather than Black's, because the claim being tested is about the position the recapture reaches, not about whether the recapture was forced."
+      },
+      "confidence": "high",
+      "why_not_alternates": "pawn-storm is TRUE and should be reported: White really did play g4-g5-h4-h5-g6. What must not be inferred from it is an attack. greek-gift would be flatly wrong - nothing was sacrificed on h7, a pawn arrived there with check and was taken.",
+      "also_true_but_secondary": [
+        "pawn-storm",
+        "space",
+        "passed-pawn"
+      ],
+      "rejected_as_wrong": [
+        "king-attack",
+        "greek-gift"
+      ],
+      "added": "2026-09-01"
+    },
+    {
+      "game": "Adams-Kasparov, Linares 2005 (round 12)",
+      "source": "chessbase-speelman-adams-kasparov-2005",
+      "players": "Michael Adams - Garry Kasparov",
+      "event": "XXII SuperGM, Linares 2005",
+      "year": 2005,
+      "annotator": "Jon Speelman (GM), reproduced by ChessBase; the king-safety sentence is quoted from a community annotation and is corroborated, not relied on",
+      "fen_verified": "replay: all 52 plies replayed legally through blind-chess.html's move generator",
+      "id": "adams-kasparov-2005-21Kxh7-king-safety-ambiguous",
+      "concept": "king-safety",
+      "concept_role": "ambiguous",
+      "fen": "br3r2/2q2ppk/p2pp3/2n1b1BP/1n1NP3/2N2P2/1PPQB3/1K4RR w - - 0 22",
+      "move": "Be3",
+      "move_uci": "g5e3",
+      "fen_after": "br3r2/2q2ppk/p2pp3/2n1b1BP/1n1NP3/2N1BP2/1PPQ4/1K4RR b - - 1 22",
+      "fen_after_note": "Speelman's recommendation, which the engine also returns. Note what it is: White defends b2 and abandons the attack. Even the best move here treats the exposure of BLACK's king as irrelevant.",
+      "human_annotation": "Speelman: 22.Be3 was the best response for White; Adams, 'seeing no good way to continue his attack, panicked and blundered' with 22.Nb3. The community annotation states the judgement plainly: 'His king may look exposed, but in actuality, there is no immediate danger to his king.'",
+      "explanation": "This is the same position as the negative entry above and a DIFFERENT claim about it, which is why both exist. King safety genuinely applies: Black's king has no pawn shield, stands on an open h-file with two enemy rooks on it, and that is a real and correctly-observed feature. What it is not is the thing that decides the game - the concept contributes and does not decide, which is the definition of an ambiguous example in this corpus. The concept record already registers the distinction as a false-positive trap: 'an exposed king is not automatically losing.' A system that reports Black's king as exposed here is right; one that concludes Black is in trouble is wrong, and the gap between those two sentences is what this entry measures.",
+      "engine": {
+        "engine_id": "Stockfish 18",
+        "depth": 22,
+        "multipv": 3,
+        "best_move": "Be3",
+        "best_eval_cp": -213,
+        "annotated_move_eval_cp": -213,
+        "annotated_move_rank": 1,
+        "agrees": "yes - Speelman's 22.Be3 is the engine's first choice, 0.58 ahead of 22.Bf4. The evaluation of -2.13 is the measure of how little the exposed king is worth to the side attacking it.",
+        "note": "Same search as the negative entry; recorded on both because the two entries make different claims about one position."
+      },
+      "confidence": "high",
+      "why_not_alternates": "king-attack is the concept that would be WRONG here and is recorded separately as a negative example. luft is a different idea about a different rank and does not describe a king already outside its shelter.",
+      "also_true_but_secondary": [
+        "pawn-storm",
+        "open-file",
+        "space"
+      ],
+      "rejected_as_wrong": [
+        "king-attack",
+        "back-rank-mate"
+      ],
+      "added": "2026-09-01"
+    },
+    {
+      "game": "Capablanca-Mattison, Karlsbad 1929",
+      "source": "amazingatlas-capablanca-mattison-1929",
+      "players": "Jose Raul Capablanca - Hermanis Mattison",
+      "event": "Karlsbad 1929",
+      "year": 1929,
+      "annotator": "Nicholas Van Der Nat (FM), following Irving Chernev's Logical Chess: Move by Move",
+      "fen_verified": "replay: all 49 plies replayed legally through blind-chess.html's move generator",
+      "id": "capablanca-mattison-1929-15Ng5-king-safety",
+      "concept": "king-safety",
+      "concept_role": "positive",
+      "fen": "r1b2rk1/p4ppp/1pn1p3/3n4/5B2/q1P1PN2/P1Q1BPPP/1R1R2K1 w - - 0 15",
+      "move": "Ng5",
+      "move_uci": "f3g5",
+      "fen_after": "r1b2rk1/p4ppp/1pn1p3/3n2N1/5B2/q1P1P3/P1Q1BPPP/1R1R2K1 b - - 1 15",
+      "fen_concept_realised": "r1b2rk1/p5pp/1pn1p3/3n1pN1/5B2/q1P1P3/P1Q1BPPP/1R1R2K1 w - f6 0 16",
+      "fen_concept_realised_note": "After the forced 15...f5. The permanent weakening the annotation is about exists only here - before Black replies, the shield is still intact.",
+      "human_annotation": "Chernev calls 15.Ng5 'a master stroke'. The annotation gives its real purposes: 'The surface threat is 16.Qxh7 mate, but the real purposes run deeper: first, it forces Black to play ...f5, permanently weakening the kingside pawn cover; second, it vacates f3 for the dark-squared bishop.'",
+      "explanation": "The concept applies in its constructive form: the move is played FOR the damage to the shield, not for the mate threat that forces it. The concept record puts the pawn shield first among the five things that decide king safety and says the shield is 'strongest unmoved, because an unmoved shield presents no target'. After 15...f5 Black's f-pawn has left f7 for good, e6 and the a2-g8 diagonal are permanently softer, and no later move can undo it. The tactical threat is the mechanism; the king-safety damage is the point, and a reading that reports only 'mate threat on h7' describes the smaller half.",
+      "engine": {
+        "engine_id": "Stockfish 18",
+        "depth": 22,
+        "multipv": 3,
+        "best_move": "Ng5",
+        "best_eval_cp": 126,
+        "annotated_move_eval_cp": 126,
+        "annotated_move_rank": 1,
+        "agrees": "fully - 15.Ng5 is the engine's first choice at depth 22 and 0.66 ahead of the second, and its principal variation begins 15...g6, a different shield concession from the one played, which supports rather than weakens the claim that the move's purpose is the shield.",
+        "note": null
+      },
+      "confidence": "high",
+      "why_not_alternates": "hanging-piece is what this base's tactical layer currently reports for this move, because Qxh7 is winnable material; it is true and it is the least interesting true thing about the move. king-attack is premature: White has not yet committed anything to an attack and the game is won on the queenside diagonal.",
+      "also_true_but_secondary": [
+        "weak-square",
+        "hanging-piece",
+        "piece-coordination"
+      ],
+      "rejected_as_wrong": [
+        "greek-gift",
+        "back-rank-mate"
+      ],
+      "added": "2026-09-01",
+      "move_after_uci": "f7f5",
+      "move_after_note": "Black's forced reply. The concept is realised by this move, not by 15.Ng5: the knight arriving on g5 blocks the bishop that was already looking at h6, so the count of pieces bearing on the black king's zone is 2 before the move and 2 after it. What changes the king's safety is the pawn leaving f7."
+    },
+    {
+      "game": "Reti-Capablanca, New York 1924 (round 5)",
+      "source": "keene-reti-capablanca-1924",
+      "players": "Richard Reti - Jose Raul Capablanca",
+      "event": "New York 1924",
+      "year": 1924,
+      "annotator": "Raymond Keene (GM), The Spectator Australia",
+      "fen_verified": "replay: all 61 plies replayed legally through blind-chess.html's move generator",
+      "id": "reti-capablanca-1924-18Ne6-center-control",
+      "concept": "center-control",
+      "concept_role": "positive",
+      "fen": "r3rnk1/2q2pb1/1p1p1npp/pPp5/2PPb3/P1Q2NP1/1B3PBP/R2R1NK1 b - - 0 18",
+      "move": "Ne6",
+      "move_uci": "f8e6",
+      "fen_after": "r3rnk1/2q2pb1/1p1pnnpp/pPp5/2PPb3/P1Q2NP1/1B3PBP/R2R1NK1 w - - 1 19",
+      "fen_after_note": "The move Keene says Capablanca should have played. The game went 18...N6d7 instead, and the difference between the two is the whole content of this entry.",
+      "human_annotation": "'18...N6d7. It is a mystery why Capablanca did not play the obvious 18...Ne6, fighting more directly for control of the centre.'",
+      "explanation": "A human annotator naming central control as the criterion that decides between two knight moves, in the game that is the canonical demonstration of the hypermodern claim about the centre. Both candidate moves develop a knight and neither occupies a central square; what separates them is how much they contest d4 and c5 - the concept record's first false-positive trap is exactly this distinction, that 'counting pawns on central squares measures occupation, not control'. The knight on e6 bears on d4 and c5 and holds the tension; the knight on d7 does not, and White's centre rolls forward with 19.Qd2 and 20.Bxd4.",
+      "engine": {
+        "engine_id": "Stockfish 18",
+        "depth": 22,
+        "multipv": 3,
+        "best_move": "Ne6",
+        "best_eval_cp": 80,
+        "annotated_move_eval_cp": 80,
+        "annotated_move_rank": 1,
+        "agrees": "fully, and it is the strongest confirmation in this corpus. The engine's first choice at depth 22 is 18...Ne6 at +0.80 for Black; the second and third are +0.41 and +0.31; and the move Capablanca actually played, 18...N6d7, is not in the top three at all. A GM's one-line positional judgement about the centre, written in 2017, picks the move a 2026 engine puts nearly half a pawn clear.",
+        "note": "Searched from Black's side. The 0.39 gap between the recommendation and the runner-up is large for a quiet middlegame move."
+      },
+      "confidence": "high",
+      "why_not_alternates": "space is TRUE for White here - the pawns on b5, c4 and d4 are advanced - and an earlier version of this entry listed it as an alternate the annotator rejected, which manufactured a false positive out of a correct report. What would be wrong is outpost: e6 is not protected by a black pawn and is not unassailable, and the whole content of the annotation is that the knight is going there to contest squares rather than to sit on one.",
+      "also_true_but_secondary": [
+        "piece-activity",
+        "restraint",
+        "worst-placed-piece",
+        "space"
+      ],
+      "rejected_as_wrong": [
+        "outpost",
+        "passed-pawn"
+      ],
+      "added": "2026-09-01",
+      "limitation": "This base's centralSquareControl() reports center-control for BOTH 18...Ne6 and the game's 18...N6d7, so it does not do the discriminating work the annotation does. Measured: on pawns and minor pieces, Ne6 is +1 and N6d7 is also +1, because moving the f6 knight unblocks the g7 bishop onto d4 and e5. The count cannot tell 'contesting the squares White wants' from 'attacking two other central squares'. Recorded rather than fixed, because tuning the measure until it separates these two particular moves is how a detector stops meaning anything."
+    },
+    {
+      "game": "Reti-Capablanca, New York 1924 (round 5)",
+      "source": "keene-reti-capablanca-1924",
+      "players": "Richard Reti - Jose Raul Capablanca",
+      "event": "New York 1924",
+      "year": 1924,
+      "annotator": "Raymond Keene (GM), The Spectator Australia",
+      "fen_verified": "replay: all 61 plies replayed legally through blind-chess.html's move generator",
+      "id": "reti-capablanca-1924-8d3-center-control-ambiguous",
+      "concept": "center-control",
+      "concept_role": "ambiguous",
+      "fen": "rn1q1rk1/pbp1ppbp/1p1p1np1/8/1PP5/3P1NP1/PB2PPBP/RN1Q1RK1 b - - 0 8",
+      "move": "e5",
+      "move_uci": "e7e5",
+      "fen_after": "rn1q1rk1/pbp2pbp/1p1p1np1/4p3/1PP5/3P1NP1/PB2PPBP/RN1Q1RK1 w - e6 0 9",
+      "fen_after_note": "Capablanca occupies the centre with a pawn. Reti never does, and wins.",
+      "human_annotation": "Reti, in Masters of the Chessboard, on the system he is playing here: 'The move directs pressure against the centre, prevents 1...e5, and keeps open almost all the possibilities for the first player.' A reader of the game on chessgames.com states the same point about its finish: 'All of Reti's pieces which once controlled the center from a distance now directly occupy the center.'",
+      "explanation": "This is the position the hypermodern argument is about, and it is an ambiguous example on purpose. After 8.d3 White has not one pawn on a central square; his influence over d4, e4 and e5 comes from a fianchettoed bishop on the long diagonal, a knight on f3 and pawns on c4 and d3. Black is about to occupy the centre with ...e5. Both sides have a coherent claim to be fighting for the centre, and the engine says the position is level - so central control is genuinely present, genuinely the subject of the position, and does not by itself decide anything. Any system that measures central control by counting central pawns would report Black ahead here and the game's own author disagreeing.",
+      "engine": {
+        "engine_id": "Stockfish 18",
+        "depth": 22,
+        "multipv": 3,
+        "best_move": "c5",
+        "best_eval_cp": -23,
+        "annotated_move_eval_cp": null,
+        "annotated_move_rank": null,
+        "agrees": "on the assessment, which is the claim being tested. Depth 22 gives -0.23 for Black across all three of its top moves, so neither the distant control nor the coming occupation is worth anything measurable yet. The move recorded here is the game's 9...e5, played a move later; it is recorded for what it shows about occupation, not as a recommendation.",
+        "note": "The move field is the plan Black carries out, not a move the engine was asked to rank in this position."
+      },
+      "confidence": "medium",
+      "why_not_alternates": "space is the concept that would be wrong to lead with: White's pawns on c4 and b4 do gain queenside space, and reporting that as the story of this position gets the game exactly backwards. hypermodern-school is the historical label, not a property of the board.",
+      "also_true_but_secondary": [
+        "space",
+        "opening-development",
+        "hypermodern-school"
+      ],
+      "rejected_as_wrong": [
+        "outpost",
+        "passed-pawn"
+      ],
+      "added": "2026-09-01"
+    },
+    {
+      "game": "Capablanca-Rubinstein, Berlin 1928",
+      "source": "amazingatlas-capablanca-rubinstein-1928",
+      "players": "Jose Raul Capablanca - Akiba Rubinstein",
+      "event": "Berliner Tageblatt tournament, Berlin 1928",
+      "year": 1928,
+      "annotator": "Nicholas Van Der Nat (FM)",
+      "fen_verified": "replay: all 87 plies replayed legally through blind-chess.html's move generator, from a database score; the blog's own printed move orders are not trusted in this project and were not used",
+      "id": "capablanca-rubinstein-1928-15d4-static-vs-dynamic",
+      "concept": "static-vs-dynamic",
+      "concept_role": "positive",
+      "fen": "r2q1rk1/pp3ppp/1b4n1/3p4/8/1N1Q3P/PPP2PP1/R1B1R1K1 b - - 0 15",
+      "move": "d4",
+      "move_uci": "d5d4",
+      "fen_after": "r2q1rk1/pp3ppp/1b4n1/8/3p4/1N1Q3P/PPP2PP1/R1B1R1K1 w - - 0 16",
+      "fen_after_note": "The pawn is now on d4: further advanced, more space, and permanently unsupportable by another pawn. The bargain is struck here.",
+      "human_annotation": "'Rubinstein, one of the greatest players never to be world champion, voluntarily accepts an isolated queen pawn, confident that its central control is worth the long-term weakness.' Gelfand states the same division in general terms: 'you have to use your advantage before it disappears. Obviously, this is all about dynamic advantages. With static advantages, the urgency is often much less.'",
+      "explanation": "The isolated queen's pawn is the textbook case of the classification and this is a game in which the classification decides the result. What Black holds is dynamic - space, an advanced pawn, open lines for the pieces - and it expires as pieces come off. What White holds is static: a fixed target that cannot be repaired, which grows more valuable with every exchange. The concept record's instruction follows directly and the game obeys it: Capablanca trades queens at move 22 and rooks after, and the pawn is still sitting on d4, untouched, when Rubinstein resigns. The record's own false-positive trap applies here too - the classification is not a property of the feature alone, and the same pawn is dynamic on move 15 and static on move 30.",
+      "engine": {
+        "engine_id": "Stockfish 18",
+        "depth": 22,
+        "multipv": 3,
+        "best_move": "Qf6",
+        "best_eval_cp": 9,
+        "annotated_move_eval_cp": null,
+        "annotated_move_rank": null,
+        "agrees": "partly, and the disagreement is informative. The engine's first choice at depth 22 is 15...Qf6 (+0.09 for Black) and the game move 15...d4 is not in its top three. The position is level either way, so the engine is not calling the advance a mistake - it is declining to spend the tension. The annotation's claim is about which KIND of advantage Black is buying, not about whether this was the best move to buy it with, and this base does not let an engine overrule the first because it disagreed about the second.",
+        "note": "This is the second entry in this corpus where a sound concept sits on a move the engine does not choose, and both are kept for the same reason."
+      },
+      "confidence": "medium",
+      "why_not_alternates": "isolated-queen-pawn is the FEATURE and is correctly reported here by this base's own detector; it is not the concept the annotation names. Reporting only the isolani tells the reader there is a weakness and not that the weakness was bought on purpose with a clock attached to it.",
+      "also_true_but_secondary": [
+        "isolated-queen-pawn",
+        "space",
+        "compensation"
+      ],
+      "rejected_as_wrong": [
+        "backward-pawn",
+        "passed-pawn"
+      ],
+      "added": "2026-09-01"
+    },
+    {
+      "game": "Capablanca-Rubinstein, Berlin 1928",
+      "source": "amazingatlas-capablanca-rubinstein-1928",
+      "players": "Jose Raul Capablanca - Akiba Rubinstein",
+      "event": "Berliner Tageblatt tournament, Berlin 1928",
+      "year": 1928,
+      "annotator": "Nicholas Van Der Nat (FM)",
+      "fen_verified": "replay: all 87 plies replayed legally through blind-chess.html's move generator, from a database score; the blog's own printed move orders are not trusted in this project and were not used",
+      "id": "capablanca-rubinstein-1928-22Qxc6-transformation",
+      "concept": "transformation-of-advantages",
+      "concept_role": "positive",
+      "fen": "3r1nk1/pp3ppp/1bq5/B7/3pQ3/1N4PP/PPP2P2/4R1K1 w - - 1 22",
+      "move": "Qxc6",
+      "move_uci": "e4c6",
+      "fen_after": "3r1nk1/pp3ppp/1bQ5/B7/3p4/1N4PP/PPP2P2/4R1K1 b - - 0 22",
+      "fen_concept_realised": "3r1nk1/p3Rppp/1bp5/B7/3p4/1N4PP/PPP2P2/6K1 b - - 1 23",
+      "fen_concept_realised_note": "After 22...bxc6 23.Re7. This is where the transformation has actually happened: the target is gone, Black's pawns are united, and White has the seventh rank instead. Asking about the position between the two halves is asking before the trade is complete.",
+      "human_annotation": "'Here it is: 22.Qxc6, trading the queens. At first glance this looks like a mistake, because after 22...bxc6 Black's pawns are united and his once-isolated pawn is no longer isolated at all. Capablanca has apparently thrown away the very weakness he spent the game building an attack against. But this is not a mistake, it is a transformation. In return for giving up the target, he plays 23.Re7 and seizes the seventh rank.'",
+      "explanation": "A transforming move gives something up, and that is precisely what makes it hard to recognise and easy to mislabel. Twenty moves of pressure on d4 are abandoned in one move; the reader who is following the plan sees a concession. The concept record names this as its first false-positive trap in reverse - 'a transforming move often looks like a concession and can be reported as an error by anything judging moves on what they give up rather than what they get.' What is bought is the seventh rank, and the record's requirement that the new advantage be MORE convertible is met concretely rather than by assertion: the rook on e7 wins a pawn on b6, then another, then produces a passed b-pawn, and the d4 pawn the whole game was about is never captured at all.",
+      "engine": {
+        "engine_id": "Stockfish 18",
+        "depth": 22,
+        "multipv": 3,
+        "best_move": "Qxc6",
+        "best_eval_cp": 34,
+        "annotated_move_eval_cp": 34,
+        "annotated_move_rank": 1,
+        "agrees": "fully. 22.Qxc6 is the engine's first choice at depth 22 (+0.34), ahead of 22.Bb4 (+0.09) and 22.Re2 (+0.05), and its principal variation continues 22...bxc6 23.Kf1 - it likes the resulting ending for the same structural reason the annotation gives.",
+        "note": "A quarter-pawn gap is small in absolute terms and decisive in kind: the two runners-up are moves that keep the attack on d4, and the engine puts the move that abandons it first."
+      },
+      "confidence": "high",
+      "why_not_alternates": "piece-exchanges describes the mechanism and says nothing about why. rook-on-the-seventh is the RESULT and is correctly reported one move later; naming it here would describe an advantage White does not yet have.",
+      "also_true_but_secondary": [
+        "piece-exchanges",
+        "rook-on-the-seventh",
+        "isolated-queen-pawn"
+      ],
+      "rejected_as_wrong": [
+        "two-weaknesses",
+        "positional-sacrifice"
+      ],
+      "added": "2026-09-01"
+    },
+    {
+      "game": "Capablanca-Mattison, Karlsbad 1929",
+      "source": "amazingatlas-capablanca-mattison-1929",
+      "players": "Jose Raul Capablanca - Hermanis Mattison",
+      "event": "Karlsbad 1929",
+      "year": 1929,
+      "annotator": "Nicholas Van Der Nat (FM), following Irving Chernev's Logical Chess: Move by Move",
+      "fen_verified": "replay: all 49 plies replayed legally through blind-chess.html's move generator",
+      "id": "capablanca-mattison-1929-16Bf3-piece-coordination",
+      "concept": "piece-coordination",
+      "concept_role": "positive",
+      "fen": "r1b2rk1/p5pp/1pn1p3/3n1pN1/5B2/q1P1P3/P1Q1BPPP/1R1R2K1 w - f6 0 16",
+      "move": "Bf3",
+      "move_uci": "e2f3",
+      "fen_after": "r1b2rk1/p5pp/1pn1p3/3n1pN1/5B2/q1P1PB2/P1Q2PPP/1R1R2K1 b - - 1 16",
+      "human_annotation": "'16.Bf3! gives both bishops raking power along parallel diagonals: coordinate before calculating.' And of the position it arises in: 'the knight on g5 threatens mate and targets f7, the bishop on f4 rakes the long diagonal, the bishop on e2 covers the kingside, both rooks are on open files, and the queen supports the entire operation. That is five pieces working together toward a single goal.'",
+      "explanation": "The concept record's hardest requirement is met here, which is why this position was chosen: 'attributing coordination to a single move requires knowing what the move prepares - which usually requires the continuation, not the move alone.' The continuation exists and is forced. The bishop steps from e2 to f3 so that it and the bishop on f4 rake two parallel diagonals into Black's position, and nine moves later that is what wins - 20.Bxc6 removes the defender of the long diagonal and the smothered mate follows. The move is also the record's other requirement, that individually good squares are not the same as coordination: e2 was a perfectly reasonable square for the bishop and f3 is only better because of what the OTHER bishop is doing.",
+      "engine": {
+        "engine_id": "Stockfish 18",
+        "depth": 22,
+        "multipv": 3,
+        "best_move": "Bf3",
+        "best_eval_cp": 248,
+        "annotated_move_eval_cp": 248,
+        "annotated_move_rank": 1,
+        "agrees": "fully and by a wide margin. 16.Bf3 is the engine's first choice at depth 22 at +2.48, with the second-best move at +1.64 - a gap of 0.84 in a position with no capture and no check on the board.",
+        "note": "Coordination is classified human-only in its own record and has no detector in this base. The engine can confirm that the move is right; it cannot supply the word, and it was not asked to."
+      },
+      "confidence": "high",
+      "why_not_alternates": "bishop-pair is present and is a different claim - it is about owning two bishops, not about what they are doing. worst-placed-piece is the concept most easily confused with this one and does not fit: the bishop on e2 was not the worst-placed piece and the move is not about improving it in isolation.",
+      "also_true_but_secondary": [
+        "bishop-pair",
+        "king-safety",
+        "piece-activity"
+      ],
+      "rejected_as_wrong": [
+        "outpost",
+        "worst-placed-piece"
+      ],
+      "added": "2026-09-01"
+    },
+    {
+      "game": "Karpov-Kasparov, World Championship match (game 16), Moscow 1985",
+      "source": "chesstrapguide-kk1985-g16",
+      "players": "Anatoly Karpov - Garry Kasparov",
+      "event": "World Championship match, Moscow 1985",
+      "year": 1985,
+      "annotator": "unattributed training page; used only for the coordination wording, and the position is independently corroborated",
+      "fen_verified": "replay: all 80 plies replayed legally through blind-chess.html's move generator. The FEN after 16...Nd3 derived this way matches character for character the FEN printed by the cited page, which was produced independently.",
+      "id": "karpov-kasparov-1985-g16-16Nd3-piece-coordination",
+      "concept": "piece-coordination",
+      "concept_role": "positive",
+      "fen": "r2qr1k1/5ppp/p4n2/1pbP1bB1/1n6/N1N2B2/PP1Q1PPP/3R1RK1 b - - 1 16",
+      "move": "Nd3",
+      "move_uci": "b4d3",
+      "fen_after": "r2qr1k1/5ppp/p4n2/1pbP1bB1/8/N1Nn1B2/PP1Q1PPP/3R1RK1 w - - 2 17",
+      "fen_concept_realised": "r2qr1k1/5ppp/p4n2/1pbP1bB1/8/2Nn1B2/PP1Q1PPP/1N1R1RK1 b - - 3 17",
+      "fen_concept_realised_note": "After 17.Nab1. This is the claim made visible: with Black's knight on d3 White has had to send a knight back to its starting square, and both white knights now stand on the first rank in a middlegame.",
+      "human_annotation": "'After 16...Nd3, the knight cannot be chased away without damaging White's coordination. White cannot take it, cannot ignore it, and cannot coordinate around it. ... 17.Nab1: White's knights retreat to the back rank, completely uncoordinated.'",
+      "explanation": "This is coordination read from the other side - what it looks like when an army loses it. One black knight on d3 is not attacking anything decisive; what it does is make every White piece's best square unavailable at once, and the proof is on the board at move 17, where a knight that had reached a3 goes home to b1. The concept record insists the concept is 'about the army, not the piece', and that 'it is entirely possible for every piece to stand on a reasonable square while the position is badly coordinated'. White's pieces after 17.Nab1 are each defensible individually and useless together.",
+      "engine": {
+        "engine_id": "Stockfish 18",
+        "depth": 22,
+        "multipv": 3,
+        "best_move": "Qd6",
+        "best_eval_cp": 43,
+        "annotated_move_eval_cp": 29,
+        "annotated_move_rank": 3,
+        "agrees": "on the position, not on the move, and both halves matter. 16...Nd3 is only the engine's third choice at depth 22 (+0.29 against +0.43 for 16...Qd6) - a spread of 0.14, which is not a disagreement about the plan. On White's reply the engine is blunter: after 16...Nd3 it wants 17.d6 and does not list the game's 17.Nab1 in its top three at all, which is exactly the human claim that White had no way to reorganise.",
+        "note": "Two searches: one from Black's move 16, one from White's move 17. The second is the one that tests the annotation's actual claim."
+      },
+      "confidence": "medium",
+      "why_not_alternates": "outpost is the label this position usually gets and is arguably true of d3, but the annotation and the game are about what the knight does to the OTHER army, which an outpost claim does not say. passed-pawn is what this base currently reports here, about White's d5 pawn; it is true and it is not what the position is about.",
+      "also_true_but_secondary": [
+        "outpost",
+        "restraint",
+        "passed-pawn"
+      ],
+      "rejected_as_wrong": [
+        "hanging-piece",
+        "trapped-piece"
+      ],
+      "added": "2026-09-01"
+    },
+    {
+      "game": "Wade-Korchnoi, Buenos Aires 1960 (round 10)",
+      "source": "chessworld-pawn-breakthrough",
+      "players": "Robert Graham Wade - Viktor Korchnoi",
+      "event": "Buenos Aires 1960",
+      "year": 1960,
+      "annotator": "Tryfon Gavriel (FM), naming the ply; corroborated by Luke McShane (GM) in The Spectator",
+      "fen_verified": "replay: all 75 plies replayed legally through blind-chess.html's move generator, and the game's own last move is the one being tested",
+      "added": "2026-09-01",
+      "id": "wade-korchnoi-1960-38a5-pawn-breakthrough",
+      "concept": "pawn-breakthrough",
+      "concept_role": "positive",
+      "fen": "8/1pp5/1p4p1/1P1Pp2k/P3P2p/5K2/5P1P/8 w - - 1 38",
+      "move": "a5",
+      "move_uci": "a4a5",
+      "fen_after": "8/1pp5/1p4p1/PP1Pp2k/4P2p/5K2/5P1P/8 b - - 0 38",
+      "fen_after_note": "The last move of the game. Korchnoi resigned here rather than play into 38...bxa5 39.b6 cxb6 40.d6.",
+      "human_annotation": "'Pawn breakthrough = sacrifice pawns to create the passer. In the classic a-b-c structure, White often starts with b6!; in Wade vs Korchnoi, White breaks with 38.a5!' McShane, setting the same game as a puzzle: 'Bob Wade's next move prepared a surprising and decisive breakthrough.'",
+      "explanation": "The concept's canonical pattern, in a game, at the moment it decides one. White's a4 and b5 face b6, b7 and c7, and 38.a5 offers a pawn to create two levers at once: 38...bxa5 39.b6! cxb6 40.d6 and the d-pawn runs, because after two captures no black pawn stands on the c-, d- or e-file in front of it and the black king on h5 is four moves from d8 with two moves' work to do. The record's own false-positive trap is what makes this checkable rather than a matter of taste: 'a pawn sacrifice that creates a passer is not a breakthrough unless the passer actually cannot be stopped. The rule of the square decides this and is cheap to check.'",
+      "engine": {
+        "engine_id": "Stockfish 18",
+        "depth": 20,
+        "multipv": 3,
+        "best_move": "a5",
+        "best_eval_cp": 917,
+        "annotated_move_eval_cp": 917,
+        "annotated_move_rank": 1,
+        "agrees": "completely, and its variation is the same one. 38.a5 is the engine's first choice at +9.17 against +7.95 for the second, and its principal variation reads a5 bxa5 b6 cxb6 d6 ... d8=Q - the line this base's own detector produced independently.",
+        "note": "Depth 20 rather than the usual 22+: this is a simplified pawn ending, which the project has already recorded as the case where deep searches stop converging. The verdict is +9 and a forced queen; more depth would buy nothing."
+      },
+      "confidence": "high",
+      "why_not_alternates": "passed-pawn is the RESULT and does not yet exist on the board - naming it here would describe an asset White does not have until three moves later. king-activation is true of both kings in this ending and says nothing about why the game ends now.",
+      "also_true_but_secondary": [
+        "passed-pawn",
+        "king-activation",
+        "doubled-pawns",
+        "space"
+      ],
+      "rejected_as_wrong": [
+        "backward-pawn",
+        "outpost"
+      ],
+      "limitation": "This entry is also the position that exposed a Layer 3 bug: before this session, Black's e5 pawn - which has no d- or f-pawn at all and a white pawn standing on e4 - was reported as a BACKWARD pawn, and led the explanation of the most famous breakthrough in the corpus. Fixed at the detector, with a regression test."
     }
   ]
 }

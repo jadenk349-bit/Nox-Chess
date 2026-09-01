@@ -302,6 +302,124 @@ const { concepts } = API.knowledge();
   ok('ordering: knight-fork also reported', r.concepts.some(c => c.id === 'knight-fork'));
 }
 
+/* ---------- regressions from the human-grounded corpus ----------
+ *
+ * Every assertion here was written because a position from an annotated master
+ * game disagreed with this code, and the code was wrong. They are separated from
+ * the rest so a later session can see at a glance which behaviour was PAID for.
+ * ---------------------------------------------------------------- */
+{
+  // Wade-Korchnoi, Buenos Aires 1960, after 37...Kh5. Black's e5 pawn has no
+  // d- or f-pawn at all and a white pawn standing on e4 in front of it. It was
+  // reported as BACKWARD, and led the explanation of the game's decisive
+  // breakthrough. Two guards now: a pawn with no neighbours is isolated, and a
+  // pawn whose advance square is occupied is rammed.
+  const WK = '8/1pp5/1p4p1/1P1Pp2k/P3P2p/5K2/5P1P/8 w - - 1 38';
+  const f = FEAT.features(WK);
+  ok('regression: a pawn with no neighbours is isolated, not backward',
+     !f.pawns.b.backward.includes('e5') && f.pawns.b.isolated.includes('e5'),
+     JSON.stringify({ backward: f.pawns.b.backward, isolated: f.pawns.b.isolated }));
+
+  // and the breakthrough itself, which nothing detected before this session
+  const bt = f.breakthrough.w;
+  ok('regression: the breakthrough is found', !!bt, 'no breakthrough reported');
+  eq('regression: and it is the move Wade played', bt && bt.first, 'a4a5');
+  ok('regression: and the line is the engine’s own',
+     bt && bt.line.join(' ') === 'a4a5 b6a5 b5b6 c7b6 d5d6', bt && bt.line.join(' '));
+
+  const r = API.analyzeWithEducation({ fen: WK, move: 'a4a5' });
+  has('regression: the API reports pawn-breakthrough', r.concepts_all.map(c => c.id), 'pawn-breakthrough');
+  ok('regression: and no longer reports a backward pawn',
+     !r.concepts_all.some(c => c.id === 'backward-pawn'), r.concepts_all.map(c => c.id).join(','));
+}
+{
+  // The classic three-against-three, and two positions that must NOT be one.
+  const P3 = FEAT.features('8/ppp5/8/PPP4k/8/8/8/6K1 w - - 0 1');
+  eq('breakthrough: the classic pattern starts with b6', P3.breakthrough.w && P3.breakthrough.w.first, 'b5b6');
+  const start = FEAT.features(START);
+  ok('breakthrough: not from the starting position', !start.breakthrough.w && !start.breakthrough.b);
+  const kp = FEAT.features('8/8/8/4k3/8/4K3/4P3/8 w - - 0 1');
+  ok('breakthrough: one pawn is not a breakthrough', !kp.breakthrough.w);
+}
+{
+  // Adams-Kasparov, Linares 2005, after 21...Kxh7. Every mechanical sign of a
+  // winning king attack is present and there is no attack: Speelman gives White
+  // 22.Be3 and Stockfish scores the position at -2.13 for White. This is the
+  // corpus's sharpest false-positive case and it is NOT a vacuous pass, because
+  // king-attack now has a matcher that could report it.
+  const AK = 'br3r2/2q2ppk/p2pp3/2n1b1BP/1n1NP3/2N2P2/1PPQB3/1K4RR w - - 0 22';
+  const r = API.analyzeWithEducation({ fen: AK });
+  const ids = r.concepts_all.map(c => c.id);
+  ok('false positive: no king attack where a GM and an engine agree there is none',
+     !ids.includes('king-attack'), ids.join(','));
+  has('false positive: but the exposed king IS reported, which is correct', ids, 'king-safety');
+  ok('false positive: and it is not the lead', r.concepts[0].id !== 'king-safety', r.concepts[0].id);
+}
+{
+  // king-attack must not be dead either: it has to be capable of firing.
+  // These are shipped puzzle positions, not invented ones: over the 788 in
+  // puzzles/*.json the matcher fires on 12, which is 1.5%. Two of those are
+  // pinned here so that a change which quietly kills the matcher is a failure
+  // rather than an improvement in the false-positive count.
+  let fired = 0;
+  for (const fen of ['r1r2b1k/7p/pp4p1/2q2p2/2B1pPN1/2Q3P1/P1P2R1P/2R4K b - - 2 28',
+                     '3qr1k1/1bp2p2/6nQ/6R1/rpP4p/4Bpp1/P7/1B2K3 w - - 0 39']) {
+    const rr = API.analyzeWithEducation({ fen });
+    if (rr.concepts_all.some(c => c.id === 'king-attack')) fired++;
+  }
+  eq('king-attack: the matcher still fires on the positions it was measured on', fired, 2);
+}
+{
+  // Reti-Capablanca 1924: Keene's 18...Ne6 raises Black's pawn-and-minor control
+  // of the centre. The RAW attacker count falls, because the knight blocks a
+  // rook x-raying its own bishop, and an earlier version of the move-based
+  // matcher was measured on that count.
+  const RC = 'r3rnk1/2q2pb1/1p1p1npp/pPp5/2PPb3/P1Q2NP1/1B3PBP/R2R1NK1 b - - 0 18';
+  const before = FEAT.features(RC);
+  const P = FEAT.page;
+  const st = P.stateFromFEN(RC);
+  const ms = P.legalMoves(st);
+  const mv = ms.find(m => P.uciOf(m) === 'f8e6');
+  const after = FEAT.features(P.fenOf(P.makeMove(st, mv)));
+  ok('centre: the RAW count falls on the best move (which is why it is not used)',
+     after.centre.control.b < before.centre.control.b,
+     `${before.centre.control.b} -> ${after.centre.control.b}`);
+  ok('centre: pawn-and-minor control rises on it (which is what is used)',
+     after.centre.minorControl.b > before.centre.minorControl.b,
+     `${before.centre.minorControl.b} -> ${after.centre.minorControl.b}`);
+  has('centre: and the API reports center-control',
+      API.analyzeWithEducation({ fen: RC, move: 'f8e6' }).concepts_all.map(c => c.id), 'center-control');
+}
+{
+  // Capablanca-Mattison 1929: the king-safety event is Black's FORCED REPLY,
+  // not 15.Ng5. The knight landing on g5 blocks the bishop that was already
+  // looking at h6, so the attacker count on the black king's zone is 2 before
+  // the move and 2 after it.
+  const before = FEAT.features('r1b2rk1/p4ppp/1pn1p3/3n4/5B2/q1P1PN2/P1Q1BPPP/1R1R2K1 w - - 0 15');
+  const after = FEAT.features('r1b2rk1/p4ppp/1pn1p3/3n2N1/5B2/q1P1P3/P1Q1BPPP/1R1R2K1 b - - 1 15');
+  eq('king zone: 15.Ng5 does not change the count', 
+     [before.kingZone.b.attackers, after.kingZone.b.attackers], [2, 2]);
+  const r = API.analyzeWithEducation({
+    fen: 'r1b2rk1/p4ppp/1pn1p3/3n2N1/5B2/q1P1P3/P1Q1BPPP/1R1R2K1 b - - 1 15', move: 'f7f5' });
+  has('king safety: the forced reply is where it is reported',
+      r.concepts_all.map(c => c.id), 'king-safety');
+}
+{
+  // One concept, one entry. Two arms of the same matcher used to print the
+  // concept twice at a reader.
+  const r = API.analyzeWithEducation({
+    fen: 'r1b2rk1/p4ppp/1pn1p3/3n2N1/5B2/q1P1P3/P1Q1BPPP/1R1R2K1 b - - 1 15', move: 'f7f5' });
+  const ids = r.concepts_all.map(c => c.id);
+  eq('no duplicates: every concept appears once', ids.length, new Set(ids).size);
+}
+{
+  // Thresholds are measured, not chosen. These record what they were measured
+  // AT, so a later change that quietly loosens one is visible.
+  const M = require('../lib/matchers.js');
+  ok('thresholds: recorded in the source', /20\.3%/.test(fs.readFileSync(path.join(ROOT, 'lib', 'matchers.js'), 'utf8')),
+     'the measured firing rate for center-control is no longer stated in the code');
+}
+
 /* ---------- report ---------- */
 console.log(`\nAPI  PASS ${pass}   FAIL ${fails.length}`);
 for (const [n, d] of fails) console.log(`  FAIL  ${n}\n        ${d}`);

@@ -11,18 +11,18 @@
     "concepts_researched": 29,
     "concepts_validated": 4,
     "concepts_needs_review": 0,
-    "sources_reviewed": 179,
-    "positions_tested": 82,
-    "matches_validated": 40,
-    "false_matches": 22,
-    "ambiguous_matches": 20,
+    "sources_reviewed": 188,
+    "positions_tested": 94,
+    "matches_validated": 48,
+    "false_matches": 24,
+    "ambiguous_matches": 22,
     "by_stage": {
       "ready": 2,
       "researched": 126,
       "validated": 9
     },
     "tablebase_positions": 22,
-    "concepts_fully_covered": 17,
+    "concepts_fully_covered": 18,
     "areas_touched": 85,
     "areas_total": 85
   },
@@ -1036,15 +1036,15 @@
   "blocked": [],
   "schema_version": 2,
   "checkpoint": {
-    "last_successful": "2026-08-31",
-    "session": "session-2",
+    "last_successful": "2026-09-01",
+    "session": "session-8",
     "how_to_resume": [
       "1. Read education/README.md, then ARCHITECTURE.md and METHODOLOGY.md.",
-      "2. Run: python3 education/tools/validate_kb.py && python3 education/tools/run_tests.py",
-      "3. Read this file's `current_area` and `next_areas`, then continue from there.",
-      "4. Anything in `discovered_concepts_unresearched` is fair game and already has provenance.",
-      "5. Anything in `unresolved_historical_claims` needs a primary source before it can be stated.",
-      "6. Respect `tool_limitations` — those are known dead ends, not untried ideas."
+      "2. Run: python3 education/tools/validate_kb.py && python3 education/tools/run_tests.py && python3 education/tools/corpus_check.py",
+      "3. state/COMPLETION.md is the assessment against the ten criteria; state/ladder.json is per-concept and machine-readable.",
+      "4. The corpus in corpus/annotated_positions.json is the primary ground truth for positional concepts. Every entry is a human annotation first and an engine result second, and the engine's DISAGREEMENTS are kept on purpose.",
+      "5. The next work is named in COMPLETION.md under 'What is still missing, precisely'. In one line: negative and ambiguous examples, which do not yield to mining and have to be hunted one concept at a time.",
+      "6. Respect `tool_limitations` and `failed_research_attempts` - those are measured dead ends, not untried ideas. Two of them were added this session and both cost real time to learn."
     ]
   },
   "unresolved_historical_claims": [
@@ -1234,6 +1234,21 @@
       "item": "no quiet-position corpus",
       "date": "2026-09-01",
       "note": "Mass testing runs on 788 tactical puzzles because that is the corpus this repository has. The positional half of the system would be better judged on quiet middlegame positions, and no such labelled corpus exists here."
+    },
+    {
+      "item": "annotated-blog move orders",
+      "date": "2026-09-01",
+      "note": "Six of seven 'full move order' listings printed by an otherwise useful annotation blog failed to replay through the page's own move generator, reaching an illegal move between move 24 and move 36. The prose is citable; the move list is not. Game scores now come from pgnmentor player collections and are replay-verified before any FEN is derived. This is the second time in this project a printed score has failed - the first was a UMBC lecture page - and it should be assumed rather than discovered next time."
+    },
+    {
+      "item": "the shipped puzzle corpus cannot validate a pawn-ending detector",
+      "date": "2026-09-01",
+      "note": "Zero of the 788 shipped puzzle positions is a pure pawn ending, so pawnBreakthrough() fires on none of them and the corpus provides no evidence whatever about its false-positive rate. Any future work on pawn-ending concepts needs a corpus of pawn endings; the 788 will silently return 'no false positives' forever."
+    },
+    {
+      "item": "attacker counts as a measure of central control",
+      "date": "2026-09-01",
+      "note": "Counting attackers of d4/e4/d5/e5 counts a rook whose line runs through its own man as a piece fighting for the square, which makes the best move in Reti-Capablanca 1924 read as a loss of control. The move-based arm therefore counts pawns and minor pieces only. Even so it cannot separate the two candidate knight moves a GM separates, and that is recorded on the concept rather than tuned around."
     }
   ],
   "awaiting_validation": [
@@ -1326,6 +1341,12 @@
       "findings_high": 0,
       "findings_low": 29,
       "note": "Rewrote the audit's detector check to verify identifiers against the actual source files instead of a hardcoded whitelist, and it immediately exposed 24 concepts naming detectors that do not exist anywhere in the codebase - isCheckmate, lineAlignment, backRankEscape, castlingRights and others. The whitelist had been rubber-stamping aspirational names written during the research phase. All 24 repointed at real code or marked 'not yet written', each with an audit note recording what it used to claim."
+    },
+    {
+      "date": "2026-09-01",
+      "findings_high": 0,
+      "findings_low": 4,
+      "note": "Twelfth audit, after adding four Layer 4 matchers and three Layer 3 detectors. Still 0 high; the same 4 low findings, each an honest access-caveat flag on a source used for a validated tactical motif."
     }
   ],
   "measurements": [
@@ -1625,6 +1646,39 @@
         "pawn-break",
         "restraint"
       ]
+    },
+    {
+      "id": "human-grounded-corpus-phase-2-and-four-new-detectors",
+      "date": "2026-09-01",
+      "method": "Targeted the seven concepts the previous checkpoint named as lacking human grounding - initiative, king safety, centre control, static-vs-dynamic, piece coordination, transformation of advantages and the pawn breakthrough. Annotations were found first and positions second, never the other way round. Game scores were taken from a database (pgnmentor player files) rather than from the annotating page, because six of seven move orders printed by one otherwise useful blog failed to replay; every score used here was replayed end to end through blind-chess.html's own move generator, and every claim was then re-measured with Stockfish 18 at depth 20-22 with MultiPV 3.",
+      "results": {
+        "corpus_positions_before": 6,
+        "corpus_positions_after": 18,
+        "corpus_master_games_before": 2,
+        "corpus_master_games_after": 8,
+        "corpus_roles_after": "13 positive, 3 ambiguous, 2 negative",
+        "api_false_negatives_on_detectable_concepts": "0 of 18",
+        "api_false_positives": "0 of 18",
+        "ladder_human_grounded": "31 -> 39",
+        "ladder_api_validated": "32 -> 36 (36 of the 83 concepts whose own record allows a detector)",
+        "ladder_negative_tested": "29 -> 31",
+        "ladder_ambiguity_tested": "17 -> 19",
+        "validated_positions": "82 -> 94",
+        "depth_mean": "0.70 -> 0.71",
+        "new_detectors": "centralSquareControl, kingZoneAttackers, pawnBreakthrough (Layer 3); center-control, king-safety, king-attack, pawn-breakthrough (Layer 4)",
+        "firing_rates_over_788_positions": "center-control 20.3%, king-attack 1.5%, king-safety-by-count 1.1% of king-sides, king-safety-by-bare-shield 12.4% of king-sides, move-based centre 7.1%, move-based shield damage 2.6%, pawn-breakthrough 0.0%",
+        "tests": "632 -> 644 pass, 0 fail"
+      },
+      "findings": [
+        "SIX of seven blog-printed 'full move orders' failed to replay. Only Capablanca-Mattison 1929 survived; Janowsky-Alapin, Rubinstein-Maroczy, Pillsbury-Marco, Havasi-Capablanca and Chekhover-Rudakovsky all reached an illegal move. Prose from such a page can still be cited; its move list cannot. Every score in this corpus now comes from a database and is replay-verified.",
+        "A REAL LAYER 3 BUG, found by a corpus position and nothing else. Wade-Korchnoi 1960 has a black pawn on e5 with no d- or f-pawn at all and a white pawn on e4 in front of it, and the detector called it BACKWARD - so the explanation of the most famous pawn breakthrough in the corpus led with 'Black's pawn on e5 cannot advance'. Two causes: the 'is it behind its neighbours' test returns false both when the neighbours are all advanced and when there are none, and the advance square was never checked for occupancy. A pawn with no neighbours is isolated; a pawn blocked by an enemy pawn is rammed. Fixed with a regression test.",
+        "THE CHECKER SCORED NEGATIVE EXAMPLES BACKWARDS. corpus_check.py had one rule - is the annotated concept the lead - which scores a negative example as a success exactly when the system has failed it. The bug was invisible while the corpus was all positive, and became live the moment negative entries existed. Now three roles, three standards.",
+        "AND THEN THE NEGATIVE EXAMPLES PASSED VACUOUSLY. Both new negatives passed because neither concept had a matcher: nothing could have reported them. A negative example for an undetectable concept is not evidence, and the checker now says so in those words. Writing a king-attack matcher turned one of them into a real test, which it passes.",
+        "RAW ATTACKER COUNTS MISREAD THE CENTRE. On Reti-Capablanca 1924, 18...Ne6 - Keene's recommendation and Stockfish's first choice by 0.39 - makes Black's raw attacker count on the four central squares FALL, from 7 to 6, because the arriving knight blocks a rook x-raying its own bishop. Control is now measured on pawns and minor pieces for the move-based arm. It still cannot tell Ne6 from the game's N6d7, and that is recorded on the record rather than tuned away.",
+        "THE ENGINE AND THE ANNOTATOR AGREED FOUR TIMES AND DISAGREED THREE TIMES, and both are kept. Agreements: Botvinnik's 20...Qc7, Keene's 18...Ne6 (+0.39 clear, with the game move outside the top three), Keene's 27...Rxe3, Speelman's 22.Be3, Capablanca's 22.Qxc6, 15.Ng5 and 16.Bf3, and Wade's 38.a5 at +9.17 with the engine's variation identical to this base's own detector's line. Disagreements: 20...Qc7 holds the initiative and is still half a pawn worse; 15...d4 and 16...Nd3 are sound ideas the engine does not rank first. An engine-filtered corpus would have thrown all three away and destroyed the distinction the learner needs.",
+        "THE PUZZLE GENERATOR AND THE EDUCATION LAYER MEAN DIFFERENT THINGS BY THE SAME WORDS, measured: the generator tags 86 positions `pawnBreakthrough` and ZERO of them is a pawn ending; it tags 134 `kingAttack` and this base reports 12. Both gaps are the concepts' own registered false-positive traps made numeric, and neither number should move.",
+        "FIVE OF THE SEVEN TARGET CONCEPTS CANNOT HAVE A DETECTOR, by their own records, and pretending otherwise would have been the easy way to move the numbers. initiative is 'invisible to a static feature scan'; piece-coordination and transformation-of-advantages are human-only; static-vs-dynamic is not a property of a feature. They now have human ground truth instead, and both the ladder and the corpus checker report the distinction from the records rather than from a list."
+      ]
     }
   ],
   "last_updated": "2026-09-01",
@@ -1633,6 +1687,11 @@
       "date": "2026-09-01",
       "milestone": "all 85 taxonomy areas have at least one researched concept",
       "note": "Coverage is breadth, not depth: 12 of 85 areas are 'fully covered' by the coverage model, and several records (mixed-piece-endgames, queen-endgames) are explicitly orientation rather than theory and say so."
+    },
+    {
+      "date": "2026-09-01",
+      "milestone": "every concept the previous checkpoint named as ungrounded now has a human-annotated master position",
+      "note": "initiative, king safety, centre control, static-vs-dynamic, piece coordination, transformation of advantages and the pawn breakthrough. Grounding is not detection: five of the seven cannot have a detector by their own records, and the corpus records what a human said about them so that a later attempt has something to fail against."
     }
   ]
 }

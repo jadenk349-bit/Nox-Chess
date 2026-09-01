@@ -63,7 +63,7 @@
       "No escape square, so back-rank tactics are live"
     ],
     "prerequisites": [],
-    "detector": "kingZoneAttackers (not yet written; Stockfish's scheme is a usable specification)",
+    "detector": "lib/features.js: kingZoneAttackers(); lib/matchers.js: king-safety (a static arm at three or more attackers or a bare shield, and a move-based arm for a pawn leaving your own shield)",
     "detectability": "heuristic",
     "typical_confidence": "medium",
     "false_positive_traps": [
@@ -111,7 +111,9 @@
   ],
   "limitations": [
     "Judgement, not measurement, at the human level — though Stockfish's scheme is a usable specification for a detector.",
-    "The attacker/defender count is an alarm, not a verdict; it tells you when calculation is worth starting."
+    "The attacker/defender count is an alarm, not a verdict; it tells you when calculation is worth starting.",
+    "The static arm reports EXPOSURE, never danger, and the difference is the whole of the concept's registered false positive. Adams-Kasparov 2005 after 21...Kxh7 is the measured case: Black's king has no pawn in front of it at all and exactly ONE enemy piece bearing on its zone, and Black is winning by two pawns of evaluation. Anything that turns the first fact into a verdict is wrong.",
+    "It cannot see the thing that decides such positions, which is who mates first. That is a property of the concrete lines and this base does not calculate."
   ],
   "misconceptions": [
     "That castling makes the king safe.",
@@ -141,7 +143,25 @@
       }
     ]
   },
-  "examples": [],
+  "examples": [
+    {
+      "fen": "r1b2rk1/p4ppp/1pn1p3/3n4/5B2/q1P1PN2/P1Q1BPPP/1R1R2K1 w - - 0 15",
+      "note": "Capablanca-Mattison, Karlsbad 1929, Ng5. Human ground truth: the concept is named for this position by Nicholas Van Der Nat (FM), following Irving Chernev's Logical Chess: Move by Move. Corpus entry `capablanca-mattison-1929-15Ng5-king-safety`, which carries the full annotation, the alternates the annotator rejected, and the engine's verdict. The concept applies in its constructive form: the move is played FOR the damage to the shield, not for the mate threat that forces it. The concept record puts the pawn shield first among the five things that decide king safety and says the shield is 'strongest unmoved, because an unmoved shield presents no target'. After 15...f5 Black's f-pawn has left f7 for good, e6 and the a2-g8 diagonal are pe",
+      "origin_kind": "historical-game",
+      "game": "Capablanca-Mattison, Karlsbad 1929",
+      "concept_role": "positive",
+      "engine": {
+        "engine_id": "Stockfish 18",
+        "test_level": 3,
+        "depth": 22,
+        "multipv": 3,
+        "best_move": "Ng5",
+        "eval_cp": 126,
+        "verdict": "supports",
+        "verdict_note": "fully - 15.Ng5 is the engine's first choice at depth 22 and 0.66 ahead of the second, and its principal variation begins 15...g6, a different shield concession from the one played, which supports rather than weakens the claim that the move's purpose is the shield."
+      }
+    }
+  ],
   "counterexamples": [
     {
       "fen": "8/8/3k1pp1/8/3K4/5PP1/8/8 b - - 0 1",
@@ -160,7 +180,25 @@
       }
     }
   ],
-  "ambiguous_examples": [],
+  "ambiguous_examples": [
+    {
+      "fen": "br3r2/2q2ppk/p2pp3/2n1b1BP/1n1NP3/2N2P2/1PPQB3/1K4RR w - - 0 22",
+      "note": "Adams-Kasparov, Linares 2005 (round 12), Be3. Human ground truth: the concept is named for this position by Jon Speelman (GM), reproduced by ChessBase; the king-safety sentence is quoted from a community annotation and is corroborated, not relied on. Corpus entry `adams-kasparov-2005-21Kxh7-king-safety-ambiguous`, which carries the full annotation, the alternates the annotator rejected, and the engine's verdict. This is the same position as the negative entry above and a DIFFERENT claim about it, which is why both exist. King safety genuinely applies: Black's king has no pawn shield, stands on an open h-file with two enemy rooks on it, and that is a real and correctly-observed feature. What it is not is the thing that decides the game - the concept contributes and does not decide, which is the definition ",
+      "origin_kind": "historical-game",
+      "game": "Adams-Kasparov, Linares 2005 (round 12)",
+      "concept_role": "ambiguous",
+      "engine": {
+        "engine_id": "Stockfish 18",
+        "test_level": 3,
+        "depth": 22,
+        "multipv": 3,
+        "best_move": "Be3",
+        "eval_cp": -213,
+        "verdict": "ambiguous",
+        "verdict_note": "yes - Speelman's 22.Be3 is the engine's first choice, 0.58 ahead of 22.Bf4. The evaluation of -2.13 is the measure of how little the exposed king is worth to the side attacking it. Same search as the negative entry; recorded on both because the two entries make different claims about one position."
+      }
+    }
+  ],
   "explanations": {
     "by_level": {
       "beginner": "Your king is safest castled, behind pawns you have not moved, with a piece or two nearby. Moving those pawns makes holes you can never fill again.",

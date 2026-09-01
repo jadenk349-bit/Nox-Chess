@@ -160,8 +160,8 @@
       "domain": "calculation"
     },
     "attack-principles": {
-      "rating": "partial",
-      "mean_completeness": 0.586,
+      "rating": "substantial",
+      "mean_completeness": 0.686,
       "concepts": [
         "king-attack",
         "pawn-storm"
@@ -170,7 +170,7 @@
     },
     "initiative": {
       "rating": "partial",
-      "mean_completeness": 0.6,
+      "mean_completeness": 0.867,
       "concepts": [
         "initiative"
       ],
@@ -211,7 +211,7 @@
     },
     "king-safety": {
       "rating": "substantial",
-      "mean_completeness": 0.875,
+      "mean_completeness": 1.0,
       "concepts": [
         "king-safety",
         "luft"
@@ -228,7 +228,7 @@
     },
     "piece-coordination": {
       "rating": "partial",
-      "mean_completeness": 0.6,
+      "mean_completeness": 0.8,
       "concepts": [
         "piece-coordination"
       ],
@@ -316,7 +316,7 @@
     },
     "center-control": {
       "rating": "partial",
-      "mean_completeness": 0.667,
+      "mean_completeness": 0.867,
       "concepts": [
         "center-control"
       ],
@@ -336,7 +336,7 @@
     },
     "pawn-breaks": {
       "rating": "substantial",
-      "mean_completeness": 0.702,
+      "mean_completeness": 0.724,
       "concepts": [
         "minority-attack",
         "pawn-break",
@@ -412,7 +412,7 @@
     },
     "static-vs-dynamic": {
       "rating": "partial",
-      "mean_completeness": 0.6,
+      "mean_completeness": 0.8,
       "concepts": [
         "static-vs-dynamic"
       ],
@@ -428,7 +428,7 @@
     },
     "transformation-of-advantages": {
       "rating": "partial",
-      "mean_completeness": 0.6,
+      "mean_completeness": 0.8,
       "concepts": [
         "transformation-of-advantages"
       ],
@@ -734,13 +734,13 @@
     }
   },
   "tally": {
-    "substantial": 12,
-    "partial": 71,
+    "substantial": 13,
+    "partial": 70,
     "full": 2
   },
   "concepts": {
     "king-attack": {
-      "score": 0.6,
+      "score": 0.8,
       "check": {
         "definition": true,
         "terminology": true,
@@ -749,11 +749,11 @@
         "recognition": true,
         "exceptions": true,
         "positive_example": false,
-        "negative_example": false,
+        "negative_example": true,
         "ambiguous_example": false,
-        "engine_validation": false,
+        "engine_validation": true,
         "tablebase_validation": null,
-        "master_game": false,
+        "master_game": true,
         "false_positive_test": false,
         "beginner_explanation": true,
         "advanced_explanation": true,
@@ -1097,7 +1097,7 @@
       }
     },
     "center-control": {
-      "score": 0.667,
+      "score": 0.867,
       "check": {
         "definition": true,
         "terminology": true,
@@ -1107,10 +1107,10 @@
         "exceptions": true,
         "positive_example": true,
         "negative_example": false,
-        "ambiguous_example": false,
-        "engine_validation": false,
+        "ambiguous_example": true,
+        "engine_validation": true,
         "tablebase_validation": null,
-        "master_game": false,
+        "master_game": true,
         "false_positive_test": false,
         "beginner_explanation": true,
         "advanced_explanation": true,
@@ -1118,7 +1118,7 @@
       }
     },
     "initiative": {
-      "score": 0.6,
+      "score": 0.867,
       "check": {
         "definition": true,
         "terminology": true,
@@ -1126,12 +1126,12 @@
         "attribution": true,
         "recognition": true,
         "exceptions": true,
-        "positive_example": false,
-        "negative_example": false,
+        "positive_example": true,
+        "negative_example": true,
         "ambiguous_example": false,
-        "engine_validation": false,
+        "engine_validation": true,
         "tablebase_validation": null,
-        "master_game": false,
+        "master_game": true,
         "false_positive_test": false,
         "beginner_explanation": true,
         "advanced_explanation": true,
@@ -1769,7 +1769,7 @@
       }
     },
     "king-safety": {
-      "score": 0.75,
+      "score": 1.0,
       "check": {
         "definition": true,
         "terminology": true,
@@ -1777,12 +1777,12 @@
         "attribution": true,
         "recognition": true,
         "exceptions": true,
-        "positive_example": false,
+        "positive_example": true,
         "negative_example": true,
-        "ambiguous_example": false,
-        "engine_validation": false,
+        "ambiguous_example": true,
+        "engine_validation": true,
         "tablebase_validation": true,
-        "master_game": false,
+        "master_game": true,
         "false_positive_test": true,
         "beginner_explanation": true,
         "advanced_explanation": true,
@@ -2336,7 +2336,7 @@
       }
     },
     "pawn-breakthrough": {
-      "score": 0.8,
+      "score": 0.867,
       "check": {
         "definition": true,
         "terminology": true,
@@ -2349,7 +2349,7 @@
         "ambiguous_example": false,
         "engine_validation": true,
         "tablebase_validation": false,
-        "master_game": false,
+        "master_game": true,
         "false_positive_test": true,
         "beginner_explanation": true,
         "advanced_explanation": true,
@@ -2483,7 +2483,7 @@
       }
     },
     "piece-coordination": {
-      "score": 0.6,
+      "score": 0.8,
       "check": {
         "definition": true,
         "terminology": true,
@@ -2491,12 +2491,12 @@
         "attribution": true,
         "recognition": true,
         "exceptions": true,
-        "positive_example": false,
+        "positive_example": true,
         "negative_example": false,
         "ambiguous_example": false,
-        "engine_validation": false,
+        "engine_validation": true,
         "tablebase_validation": null,
-        "master_game": false,
+        "master_game": true,
         "false_positive_test": false,
         "beginner_explanation": true,
         "advanced_explanation": true,
@@ -2672,7 +2672,7 @@
       }
     },
     "static-vs-dynamic": {
-      "score": 0.6,
+      "score": 0.8,
       "check": {
         "definition": true,
         "terminology": true,
@@ -2680,12 +2680,12 @@
         "attribution": true,
         "recognition": true,
         "exceptions": true,
-        "positive_example": false,
+        "positive_example": true,
         "negative_example": false,
         "ambiguous_example": false,
-        "engine_validation": false,
+        "engine_validation": true,
         "tablebase_validation": null,
-        "master_game": false,
+        "master_game": true,
         "false_positive_test": false,
         "beginner_explanation": true,
         "advanced_explanation": true,
@@ -2693,7 +2693,7 @@
       }
     },
     "transformation-of-advantages": {
-      "score": 0.6,
+      "score": 0.8,
       "check": {
         "definition": true,
         "terminology": true,
@@ -2701,12 +2701,12 @@
         "attribution": true,
         "recognition": true,
         "exceptions": true,
-        "positive_example": false,
+        "positive_example": true,
         "negative_example": false,
         "ambiguous_example": false,
-        "engine_validation": false,
+        "engine_validation": true,
         "tablebase_validation": null,
-        "master_game": false,
+        "master_game": true,
         "false_positive_test": false,
         "beginner_explanation": true,
         "advanced_explanation": true,
@@ -3624,12 +3624,12 @@
     "attribution": 0,
     "recognition": 0,
     "exceptions": 3,
-    "positive_example": 78,
-    "negative_example": 104,
-    "ambiguous_example": 80,
-    "engine_validation": 88,
+    "positive_example": 73,
+    "negative_example": 102,
+    "ambiguous_example": 78,
+    "engine_validation": 81,
     "tablebase_validation": 13,
-    "master_game": 67,
+    "master_game": 59,
     "false_positive_test": 104,
     "beginner_explanation": 0,
     "advanced_explanation": 0,

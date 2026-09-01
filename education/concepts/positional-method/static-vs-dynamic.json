@@ -98,7 +98,8 @@
     "Modern practice weights dynamics more heavily than the classical framework implied."
   ],
   "limitations": [
-    "A classification framework rather than a technique; its value is entirely in the timing decision it drives."
+    "A classification framework rather than a technique; its value is entirely in the timing decision it drives.",
+    "No detector, and the record's own first false-positive trap says why: the classification is not a property of the feature alone. The same isolated pawn is dynamic on move 15 of Capablanca-Rubinstein 1928 and static on move 30, and no reading of one position can tell them apart."
   ],
   "misconceptions": [
     "That static means good and dynamic means risky. They are different clocks, not different qualities.",
@@ -127,7 +128,25 @@
       }
     ]
   },
-  "examples": [],
+  "examples": [
+    {
+      "fen": "r2q1rk1/pp3ppp/1b4n1/3p4/8/1N1Q3P/PPP2PP1/R1B1R1K1 b - - 0 15",
+      "note": "Capablanca-Rubinstein, Berlin 1928, d4. Human ground truth: the concept is named for this position by Nicholas Van Der Nat (FM). Corpus entry `capablanca-rubinstein-1928-15d4-static-vs-dynamic`, which carries the full annotation, the alternates the annotator rejected, and the engine's verdict. The isolated queen's pawn is the textbook case of the classification and this is a game in which the classification decides the result. What Black holds is dynamic - space, an advanced pawn, open lines for the pieces - and it expires as pieces come off. What White holds is static: a fixed target that cannot be repaired, which grows more valuable with every exchange. The concept record's instructio",
+      "origin_kind": "historical-game",
+      "game": "Capablanca-Rubinstein, Berlin 1928",
+      "concept_role": "positive",
+      "engine": {
+        "engine_id": "Stockfish 18",
+        "test_level": 3,
+        "depth": 22,
+        "multipv": 3,
+        "best_move": "Qf6",
+        "eval_cp": 9,
+        "verdict": "supports",
+        "verdict_note": "partly, and the disagreement is informative. The engine's first choice at depth 22 is 15...Qf6 (+0.09 for Black) and the game move 15...d4 is not in its top three. The position is level either way, so the engine is not calling the advance a mistake - it is declining to spend the tension. The annotation's claim is about which KIND of advantage Black is buying, not about whether this was the best move to buy it with, and this base does not let an engine overrule the first because it disagreed about the second. This is the second entry in this corpus where a sound concept sits on a move the engine does not choose, and both are kept for the same reason."
+      }
+    }
+  ],
   "counterexamples": [],
   "ambiguous_examples": [],
   "explanations": {

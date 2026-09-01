@@ -86,8 +86,8 @@ const PRIORITY = [
   // then structural features, most informative first
   'outpost', 'rook-on-the-seventh', 'passed-pawn', 'isolated-queen-pawn',
   'backward-pawn', 'doubled-pawns', 'opposite-coloured-bishops', 'bishop-pair',
-  'hanging-pawns', 'two-weaknesses', 'pawn-break', 'restraint', 'worst-placed-piece', 'bad-bishop', 'luft', 'semi-open-file', 'open-file',
-  'weak-square', 'material-imbalance',
+  'hanging-pawns', 'two-weaknesses', 'pawn-breakthrough', 'pawn-break', 'restraint', 'worst-placed-piece', 'bad-bishop', 'luft', 'semi-open-file', 'open-file',
+  'weak-square', 'king-attack', 'king-safety', 'center-control', 'material-imbalance',
   'king-activation',
   'space', 'piece-activity',
 ];
@@ -504,6 +504,185 @@ const STRUCTURAL = [
     },
   },
   {
+    concept: 'pawn-breakthrough',
+    implements: ("recognition.preconditions + the record's own false-positive trap: a pawn sacrifice " +
+                 "that creates a passer is not a breakthrough unless the passer cannot be stopped, and " +
+                 "the rule of the square decides that. Layer 3's pawnBreakthrough() runs the race."),
+    run(f) {
+      const hits = [];
+      for (const c of ['w', 'b']) if (f.breakthrough && f.breakthrough[c]) hits.push(c);
+      if (!hits.length) return null;
+      const c = hits[0];
+      const bt = f.breakthrough[c];
+      const sq = bt.first.slice(2, 4);
+      return {
+        // High rather than medium, and the reason is epistemic rather than
+        // enthusiastic: in the pure pawn ending this detector restricts itself
+        // to, the rule of the square is a PROOF. The confidence ceiling for the
+        // record's knowledge type still applies on top of this.
+        confidence: 'high',
+        because: [
+          `${side(f, c)} can play a pawn to ${sq}, which cannot be declined without letting it through ` +
+          `and which loses the race for the defender however it is captured: ${bt.line.join(' ')}`,
+          bt.offers > 1
+            ? `The advance creates ${bt.offers} pawn captures at once, which is the lever geometry the pattern needs`
+            : `The advance offers itself to a pawn capture, and every capture loses`,
+        ],
+        slots: { square: sq, line: bt.line.join(' ') },
+        subjects: [c],
+      };
+    },
+  },
+  {
+    concept: 'king-safety',
+    implements: ("recognition: pawn shield, open lines at the king, and the count of attackers against " +
+                 "defenders - reported ONLY at three or more attackers, because the record states that " +
+                 "'counting attacking pieces linearly overstates one or two' and that it 'is not worth " +
+                 "reporting an attack below three attackers'."),
+    run(f) {
+      const hits = [];
+      for (const c of ['w', 'b']) {
+        const z = f.kingZone && f.kingZone[c];
+        const k = f.king[c];
+        if (!z || !k) continue;
+        // The record's threshold, its queen condition, and its registered false
+        // positive, in that order. The last is the important one: "an exposed
+        // king is not automatically losing. With the attacking pieces traded
+        // off, an exposed king is often simply an active one - and in the
+        // endgame that is the goal." So this says nothing in an endgame.
+        if (f.phase === 'endgame') continue;
+        if (!z.enemyHasQueen) continue;
+        // Two ways in, and the record puts them in this order: "is the king
+        // castled; is the pawn shield intact; how many enemy pieces can reach
+        // the king's zone against how many defenders; do open files or
+        // diagonals point at it".
+        const byCount = z.attackers >= 3 && z.attackers > z.defenders;
+        // A king with NO shield pawn at all, still on its own half, with the
+        // enemy queen on and a line pointing at it. Adams-Kasparov 2005 after
+        // 21...Kxh7 is the position that put this arm here: the black king has
+        // nothing in front of it and the attacker count is ONE, so a rule built
+        // only on attacker counts says nothing about the most striking fact on
+        // the board.
+        const ownHalf = c === 'w' ? Number(k.square[1]) <= 3 : Number(k.square[1]) >= 6;
+        const byShield = k.pawnShield === 0 && ownHalf &&
+                         (z.fileOpenOnKing || z.fileSemiOpenOnKing || z.attackers >= 2);
+        if (!byCount && !byShield) continue;
+        hits.push({ c, z, k, why: byCount ? 'count' : 'shield' });
+      }
+      if (!hits.length) return null;
+      return {
+        // Low, and capped again by the record's knowledge type. This is the
+        // concept whose own record calls the count S-shaped and unreliable; a
+        // clean feature match is not a reason to sound sure.
+        confidence: 'low',
+        because: hits.map(h =>
+          (h.why === 'shield'
+            ? `${side(f, h.c)}'s king on ${h.k.square} has no pawn in front of it at all`
+            : `${side(f, h.c)}'s king on ${h.k.square} has ${h.z.attackers} enemy pieces bearing on its zone ` +
+              `against ${h.z.defenders} defenders, with ${h.k.pawnShield} of the three shield pawns still in place`) +
+          (h.z.fileOpenOnKing ? `, and the ${h.z.kingFile}-file is open on it`
+            : h.z.fileSemiOpenOnKing ? `, on a file with no pawn of its own` : '')),
+        slots: { square: hits[0].k.square, count: String(hits[0].z.attackers) },
+        subjects: hits.map(h => h.c),
+      };
+    },
+  },
+  {
+    concept: 'king-attack',
+    implements: ("recognition.preconditions, all three, plus the record's own three false-positive " +
+                 "traps. Vukovic's rule is that an attack must be EARNED: local superiority in the " +
+                 "king's sector, the attacker's own king safe enough, and the centre not available " +
+                 "to the defender for a counter-blow."),
+    run(f) {
+      if (f.phase === 'endgame') return null;
+      for (const a of ['w', 'b']) {
+        const d = other(a);
+        const zd = f.kingZone && f.kingZone[d], za = f.kingZone && f.kingZone[a];
+        const kd = f.king[d];
+        if (!zd || !za || !kd) continue;
+        if (f.material[a].counts.Q === 0) continue;
+        // 1. Local superiority. Three, for the reason the king-safety record
+        //    gives and this one repeats: "two checks is not an attack", and a
+        //    linear count "overstates one or two". Pieces, not pawns - the third
+        //    trap here is "advancing pawns at a king is not an attack unless
+        //    pieces can follow into the lines that open".
+        if (zd.attackers < 3 || zd.attackers <= zd.defenders) continue;
+        // 2. "The attacker's own king is safe, or safe enough for the time the
+        //    operation needs." Adams-Kasparov 2005 is the registered case where
+        //    every other sign of an attack is present and this one is not.
+        if (za.attackers >= 3 && za.attackers > za.defenders) continue;
+        // 3. "The centre is closed or under control, so a counter-blow there is
+        //    not available." Not a mood: the attacker must not be behind on the
+        //    central squares.
+        if (f.centre && f.centre.control[a] < f.centre.control[d]) continue;
+        const because = [
+          `${side(f, a)} has ${zd.attackers} pieces bearing on ${side(f, d)}'s king zone against ` +
+          `${zd.defenders} defenders, with ${kd.pawnShield} of three shield pawns in front of the king on ${kd.square}`,
+          `and ${side(f, a)}'s own king has ${za.attackers} pieces on its zone against ${za.defenders}, ` +
+          `so the operation is not a race being lost`,
+        ];
+        if (zd.fileOpenOnKing) because.push(`the ${zd.kingFile}-file is open on the defending king`);
+        return {
+          // The record's own typical_confidence, and it is right: everything
+          // above is a precondition for an attack, not a demonstration of one.
+          confidence: 'low',
+          because,
+          slots: { square: kd.square, count: String(zd.attackers) },
+          subjects: [a],
+        };
+      }
+      return null;
+    },
+  },
+  {
+    concept: 'center-control',
+    implements: ("recognition + the record's first false-positive trap. Control is measured as ATTACKERS " +
+                 "of d4/e4/d5/e5 via the page's own attackersOf(), never as pawns standing on them: " +
+                 "'counting pawns on central squares measures occupation, not control'."),
+    run(f) {
+      const ct = f.centre;
+      if (!ct) return null;
+      // Two guards against the thing that ruined semi-open-file: a feature that
+      // is true of most positions says nothing by being true here. A side must
+      // out-attack the other on at least three of the four squares AND by a
+      // clear total, or this stays quiet.
+      // Two arms, and the thresholds were measured rather than chosen: over the
+      // 788 shipped positions the pair fires on 20.3%, which is what a real
+      // feature of a fifth of positions should look like. `semi-open-file` once
+      // fired on 83% and was reported as coverage.
+      const led = ct.squaresLed, tot = ct.control;
+      let c = null;
+      for (const side_ of ['w', 'b']) {
+        const o_ = other(side_);
+        const clearLead = led[side_] >= 3 && led[side_] > led[o_] && tot[side_] - tot[o_] >= 3;
+        // ...or the opponent leads on nothing at all, which is a different and
+        // equally real shape: one side attacks every central square more.
+        const shutOut = led[side_] >= 2 && led[o_] === 0 && tot[side_] - tot[o_] >= 4;
+        if (clearLead || shutOut) { c = side_; break; }
+      }
+      if (!c) return null;
+      const o = other(c);
+      const because = [
+        `${side(f, c)} attacks ${tot[c]} of the four central squares' defences against ${tot[o]}, ` +
+        `and out-attacks ${side(f, o)} on ${led[c]} of the four`,
+      ];
+      // The record's other two traps, said out loud when they apply.
+      if (ct.occupied[o].length && !ct.occupied[c].length) {
+        because.push(`${side(f, o)} occupies ${brief(ct.occupied[o])} and ${side(f, c)} occupies nothing there ` +
+                     `- occupation and control are different things and this position separates them`);
+      }
+      if (ct.visiting[c].length) {
+        because.push(`${side(f, c)}'s man on ${brief(ct.visiting[c])} can be attacked by a pawn, so it is visiting rather than posted`);
+      }
+      return {
+        confidence: 'medium',
+        because,
+        slots: { square: Object.keys(ct.squares).filter(k => ct.squares[k][c] > ct.squares[k][o]).join(', ') },
+        subjects: [c],
+      };
+    },
+  },
+  {
     concept: 'king-activation',
     implements: "recognition.preconditions: an endgame, with a king off its back rank",
     run(f) {
@@ -638,6 +817,99 @@ const MOVE_BASED = [
     },
   },
   {
+    concept: 'king-safety',
+    implements: ("recognition: 'THE PAWN SHIELD is the part players damage themselves. Pawns in front of " +
+                 "a castled king are strongest unmoved.' A move that advances one of your own shield pawns " +
+                 "while the enemy queen is on is that damage, done and not undoable."),
+    run(before, after, moveInfo) {
+      // Capablanca-Mattison 1929 is why this arm exists and why it is on the
+      // REPLY rather than on 15.Ng5. The annotation's claim is that Ng5 'forces
+      // Black to play ...f5, permanently weakening the kingside pawn cover' -
+      // and 15.Ng5 itself changes the attacker count on Black's king zone not
+      // at all, because the knight landing on g5 blocks the bishop that was
+      // already looking at h6. The king-safety event is the forced reply.
+      const mover = before.sideToMove;
+      const pc = moveInfo.movedType;
+      if (pc && pc !== 'P') return null;
+      const kb = before.king[mover], ka = after.king[mover];
+      const zb = before.kingZone && before.kingZone[mover];
+      if (!kb || !ka || !zb) return null;
+      if (before.phase === 'endgame') return null;
+      if (!kb.castledSide) return null;
+      if (!zb.enemyHasQueen) return null;
+      if (ka.pawnShield >= kb.pawnShield) return null;
+      return {
+        confidence: 'low',
+        because: [`${moveInfo.san || 'the move'} takes a pawn out of ${side(before, mover)}'s own king shield, ` +
+                  `leaving ${ka.pawnShield} of three in front of the king on ${kb.square} with the enemy queen still on. ` +
+                  `A pawn cannot go back.`],
+        slots: { square: kb.square, count: String(ka.pawnShield) },
+        subjects: [mover],
+      };
+    },
+  },
+  {
+    concept: 'center-control',
+    implements: ("the record's distinction between occupation and control, applied to a MOVE: a quiet " +
+                 "move that raises the mover's attack count on d4/e4/d5/e5 is fighting for the centre " +
+                 "whether or not it stands anywhere near it."),
+    run(before, after, moveInfo) {
+      // Keene on Reti-Capablanca, New York 1924: 18...Ne6 was the move
+      // 'fighting more directly for control of the centre', and 18...N6d7 was
+      // not. Nothing static separates those two - the centre is 6-7 either way.
+      // What separates them is what the move does to the count, which is why
+      // this arm exists at all.
+      const san = moveInfo.san || '';
+      if (/[x+#]/.test(san)) return null;              // a capture or check is doing something else
+      const mover = before.sideToMove;
+      const b = before.centre, a = after.centre;
+      if (!b || !a) return null;
+      // Measured on PAWNS AND MINOR PIECES, for the reason recorded at
+      // centralSquareControl() in Layer 3: the raw count makes a knight arriving
+      // to hit d4 look like a loss when it happens to block a rook's x-ray
+      // through its own bishop.
+      const gain = a.minorControl[mover] - b.minorControl[mover];
+      if (gain < 1) return null;
+      if (a.squaresLed[mover] < b.squaresLed[mover]) return null;
+      const key = mover === 'w' ? 'wMinor' : 'bMinor';
+      const grew = Object.keys(b.squares).filter(k => a.squares[k][key] > b.squares[k][key]);
+      if (!grew.length) return null;
+      return {
+        confidence: 'low',
+        because: [`${san || 'the move'} adds ${gain} to what ${side(before, mover)}'s pawns and minor pieces ` +
+                  `attack in the centre, on ${brief(grew)}, without occupying anything there`],
+        slots: { square: grew.join(', ') },
+        subjects: [mover],
+      };
+    },
+  },
+  {
+    concept: 'king-safety',
+    implements: ("recognition: the count of enemy pieces that can reach the king's zone, and the pawn " +
+                 "shield. Reported for a MOVE when the move itself raises that count - which is the " +
+                 "observable half of what an attacking move does."),
+    run(before, after, moveInfo) {
+      const mover = before.sideToMove;
+      const them = other(mover);
+      const zb = before.kingZone && before.kingZone[them];
+      const za = after.kingZone && after.kingZone[them];
+      const kb = before.king[them];
+      if (!zb || !za || !kb) return null;
+      if (before.phase === 'endgame') return null;      // the record's registered false positive
+      if (!kb.castledSide) return null;
+      if (!za.enemyHasQueen) return null;
+      if (za.attackers < 2 || za.attackers <= zb.attackers) return null;
+      return {
+        confidence: 'low',
+        because: [`${moveInfo.san || 'the move'} brings a ${za.attackers}${zb.attackers ? 'th' : 'nd'} piece to bear on ` +
+                  `${side(before, them)}'s king zone, up from ${zb.attackers}, against ${za.defenders} defenders ` +
+                  `and ${kb.pawnShield} of three shield pawns`],
+        slots: { square: kb.square, count: String(za.attackers) },
+        subjects: [them],
+      };
+    },
+  },
+  {
     concept: 'worst-placed-piece',
     implements: ("the record's condition — when nothing urgent is happening, the right move is the " +
                  "one that improves the piece doing least. Measured as an increase in the MINIMUM " +
@@ -675,7 +947,7 @@ const MOVE_BASED = [
 ];
 
 function matchAll(features, moveInfo, concepts, featuresAfter) {
-  const found = [];
+  let found = [];
   for (const m of STRUCTURAL) {
     let r = null;
     try { r = m.run(features); } catch (e) { r = null; }
@@ -711,6 +983,26 @@ function matchAll(features, moveInfo, concepts, featuresAfter) {
                    raw_confidence: m.confidence });
     }
   }
+  // One concept, one entry. Two arms of the same matcher - a structural one and
+  // a move-based one - can both fire, and until this was here the API printed
+  // `center-control` twice in a row at a reader. Merge rather than drop: the two
+  // arms are saying different true things about the same concept, and the
+  // reasons are what the explanation is built from.
+  const byConcept = new Map();
+  for (const item of found) {
+    const prev = byConcept.get(item.concept);
+    if (!prev) { byConcept.set(item.concept, item); continue; }
+    const rank0 = { high: 0, medium: 1, low: 2 };
+    const keep = rank0[item.confidence] < rank0[prev.confidence] ? item : prev;
+    const drop = keep === item ? prev : item;
+    keep.because = keep.because.concat(drop.because.filter(x => !keep.because.includes(x)));
+    keep.slots = Object.assign({}, drop.slots, keep.slots);
+    keep.subjects = [...new Set(keep.subjects.concat(drop.subjects))];
+    keep.source = keep.source === drop.source ? keep.source : 'features+move';
+    byConcept.set(item.concept, keep);
+  }
+  found = [...byConcept.values()];
+
   // Most specific first, then by confidence, so a caller taking the head of the
   // list gets the sharpest true statement rather than the broadest one.
   // Tactics the move actually created come first — they are what just happened.

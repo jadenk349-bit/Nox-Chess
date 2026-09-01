@@ -95,13 +95,14 @@
       "Central squares occupied by pieces that can be evicted with a pawn move"
     ],
     "prerequisites": [],
-    "detector": "centralSquareControl — not yet written",
+    "detector": "lib/features.js: centralSquareControl(); lib/matchers.js: center-control (a structural arm and a move-based one)",
     "detectability": "mechanical",
     "typical_confidence": "medium",
     "false_positive_traps": [
       "Counting pawns on central squares measures occupation, not control. A fianchettoed bishop controls e4 without standing anywhere near it.",
       "A big pawn centre is not automatically an advantage. Whether it is an asset or a target is a question of timing and support, and that cannot be read off the structure.",
-      "Central pieces are only strong while they cannot be kicked; a piece on a central square a pawn can attack is visiting."
+      "Central pieces are only strong while they cannot be kicked; a piece on a central square a pawn can attack is visiting.",
+      "A rook or queen whose line to a central square runs through one of its own men counts as an attacker and should not be read as a piece fighting for the square. The move-based arm measures pawns and minors for this reason."
     ]
   },
   "application": {
@@ -139,7 +140,9 @@
     "In the endgame the logic inverts: the centre matters for king activity rather than for restriction."
   ],
   "limitations": [
-    "The single most contested concept in the base: two respected schools gave opposite prescriptions and the resolution is 'it depends on support and timing', which is true and not very operational."
+    "The single most contested concept in the base: two respected schools gave opposite prescriptions and the resolution is 'it depends on support and timing', which is true and not very operational.",
+    "The detector measures control as ATTACKERS of d4/e4/d5/e5 and cannot tell WHICH central squares matter in a given structure. Measured against Reti-Capablanca 1924: it reports center-control for both 18...Ne6 - the move Keene names as fighting for the centre and the move Stockfish puts 0.39 clear - and 18...N6d7, the move actually played, which neither likes. Both raise Black's pawn-and-minor control by one, because moving the f6 knight unblocks the g7 bishop onto d4 and e5. The count is real and it is not doing the discriminating work the annotation does.",
+    "The RAW attacker count is worse than useless for a move: on 18...Ne6 it FALLS, from 7 to 6, because the arriving knight blocks a rook that was x-raying its own bishop. The move-based arm therefore measures pawns and minor pieces only, and this is recorded because it is the kind of thing that gets 'simplified' back."
   ],
   "misconceptions": [
     "That controlling the centre means putting pawns there.",
@@ -174,10 +177,45 @@
       "origin_kind": "puzzle",
       "concept_role": "supports",
       "side_to_move_benefits": "neither"
+    },
+    {
+      "fen": "r3rnk1/2q2pb1/1p1p1npp/pPp5/2PPb3/P1Q2NP1/1B3PBP/R2R1NK1 b - - 0 18",
+      "note": "Reti-Capablanca, New York 1924 (round 5), Ne6. Human ground truth: the concept is named for this position by Raymond Keene (GM), The Spectator Australia. Corpus entry `reti-capablanca-1924-18Ne6-center-control`, which carries the full annotation, the alternates the annotator rejected, and the engine's verdict. A human annotator naming central control as the criterion that decides between two knight moves, in the game that is the canonical demonstration of the hypermodern claim about the centre. Both candidate moves develop a knight and neither occupies a central square; what separates them is how much they contest d4 and c5 - the concept record's first false-positive trap is exactly this distinction, th",
+      "origin_kind": "historical-game",
+      "game": "Reti-Capablanca, New York 1924 (round 5)",
+      "concept_role": "positive",
+      "engine": {
+        "engine_id": "Stockfish 18",
+        "test_level": 3,
+        "depth": 22,
+        "multipv": 3,
+        "best_move": "Ne6",
+        "eval_cp": 80,
+        "verdict": "supports",
+        "verdict_note": "fully, and it is the strongest confirmation in this corpus. The engine's first choice at depth 22 is 18...Ne6 at +0.80 for Black; the second and third are +0.41 and +0.31; and the move Capablanca actually played, 18...N6d7, is not in the top three at all. A GM's one-line positional judgement about the centre, written in 2017, picks the move a 2026 engine puts nearly half a pawn clear. Searched from Black's side. The 0.39 gap between the recommendation and the runner-up is large for a quiet middlegame move."
+      }
     }
   ],
   "counterexamples": [],
-  "ambiguous_examples": [],
+  "ambiguous_examples": [
+    {
+      "fen": "rn1q1rk1/pbp1ppbp/1p1p1np1/8/1PP5/3P1NP1/PB2PPBP/RN1Q1RK1 b - - 0 8",
+      "note": "Reti-Capablanca, New York 1924 (round 5), e5. Human ground truth: the concept is named for this position by Raymond Keene (GM), The Spectator Australia. Corpus entry `reti-capablanca-1924-8d3-center-control-ambiguous`, which carries the full annotation, the alternates the annotator rejected, and the engine's verdict. This is the position the hypermodern argument is about, and it is an ambiguous example on purpose. After 8.d3 White has not one pawn on a central square; his influence over d4, e4 and e5 comes from a fianchettoed bishop on the long diagonal, a knight on f3 and pawns on c4 and d3. Black is about to occupy the centre with ...e5. Both sides have a coherent claim to be fighting for the centre, and the",
+      "origin_kind": "historical-game",
+      "game": "Reti-Capablanca, New York 1924 (round 5)",
+      "concept_role": "ambiguous",
+      "engine": {
+        "engine_id": "Stockfish 18",
+        "test_level": 3,
+        "depth": 22,
+        "multipv": 3,
+        "best_move": "c5",
+        "eval_cp": -23,
+        "verdict": "ambiguous",
+        "verdict_note": "on the assessment, which is the claim being tested. Depth 22 gives -0.23 for Black across all three of its top moves, so neither the distant control nor the coming occupation is worth anything measurable yet. The move recorded here is the game's 9...e5, played a move later; it is recorded for what it shows about occupation, not as a recommendation. The move field is the plan Black carries out, not a move the engine was asked to rank in this position."
+      }
+    }
+  ],
   "explanations": {
     "by_level": {
       "beginner": "Pieces in the middle of the board reach more squares. Fight for the centre — either by putting pawns there or by aiming pieces at it.",

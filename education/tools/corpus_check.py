@@ -9,15 +9,32 @@ VALIDATION  every entry must carry its provenance - source, game, FEN, move,
             confidence, and the alternates that were considered and rejected.
             A missing field is a finding, not a default.
 
-STRESS TEST every entry is run through analyzeWithEducation and scored:
+STRESS TEST every entry is run through analyzeWithEducation and scored AGAINST
+            ITS ROLE, because a corpus of positive examples only ever measures
+            false negatives. The three roles are scored by three different
+            standards and conflating them is how a negative example gets
+            recorded as a success:
 
-  PRIMARY HIT     the annotated concept is the API's lead
-  SECONDARY HIT   it is present but not the lead
-  FALSE NEGATIVE  the annotated concept is absent entirely
-  FALSE POSITIVE  a concept the annotator explicitly considered AND REJECTED is
-                  reported - which is a much sharper test than "reported
-                  something extra", because the human named those alternatives
-                  and said no
+  positive   PRIMARY        the annotated concept is the API's lead
+             secondary      it is present but not the lead
+             FALSE NEGATIVE it is absent entirely
+
+  ambiguous  present        the concept is reported at all. The annotator said
+                            it contributes without deciding, so leading with it
+                            is not counted as an error - but it IS counted, and
+                            printed, because a system that always leads with a
+                            contributing factor is overstating.
+             FALSE NEGATIVE absent entirely
+
+  negative   correct        the concept is ABSENT. That is the whole point of a
+                            negative example: the board superficially resembles
+                            the concept and the system must not say so.
+             FALSE POSITIVE it is reported. Leading with it is worse and is
+                            reported separately.
+
+  and for every role, reporting a concept the annotator explicitly considered
+  AND REJECTED is a FALSE POSITIVE - a much sharper test than "reported
+  something extra", because the human named those alternatives and said no.
 
     python3 tools/corpus_check.py [-v]
 """
@@ -60,6 +77,39 @@ def main():
                 c = json.load(open(os.path.join(root, fn), encoding="utf-8"))
                 concepts[c["id"]] = c
 
+    import re as _re
+    _src = ""
+    for rel in ("lib/matchers.js",):
+        fp = os.path.join(HERE, rel)
+        if os.path.exists(fp):
+            _src += open(fp, encoding="utf-8").read()
+    recognised = set(_re.findall(r"concept:\s*'([a-z0-9-]+)'", _src))
+    mm = os.path.join(HERE, "tools", "motif_map.json")
+    if os.path.exists(mm):
+        for _v in json.load(open(mm, encoding="utf-8")).get("map", {}).values():
+            if _v.get("concept"):
+                recognised.add(_v["concept"])
+
+    # A concept whose own record says it cannot be detected from a board is not
+    # a bug when it is not detected. `initiative` says so in as many words - "the
+    # initiative is invisible to a static feature scan, so it cannot be detected
+    # from the board alone" - and `piece-coordination` and
+    # `transformation-of-advantages` are both marked human-only. Counting those
+    # as failures is as misleading as counting them as passes, so they are
+    # counted separately, and the split is DERIVED from the concept records
+    # rather than listed here, so it cannot be widened to flatter a number.
+    def detectable(cid):
+        c = concepts.get(cid) or {}
+        det = ((c.get("recognition") or {}).get("detectability") or "")
+        return cid in recognised or det == "mechanical"
+
+    def fn_key(cid):
+        return "false_negative" if detectable(cid) else "undetectable"
+
+    def fn_verdict(cid):
+        return ("FALSE NEGATIVE" if detectable(cid)
+                else "absent - the concept's own record says it cannot have a detector")
+
     problems = []
     for p in pos:
         for k in REQUIRED:
@@ -84,7 +134,8 @@ def main():
         print("  provenance complete on every entry")
 
     tally = {"primary": 0, "secondary": 0, "false_negative": 0, "false_positive": 0,
-             "phrasing": 0, "api_error": 0}
+             "phrasing": 0, "api_error": 0, "undetectable": 0,
+             "neg_correct": 0, "neg_leaked": 0, "neg_vacuous": 0, "amb_present": 0, "amb_led": 0}
     rows = []
     for p in pos:
         # Look at the position the move REACHES as well as the one it was played
@@ -92,7 +143,14 @@ def main():
         # describes what the move achieves, and asking only about the position
         # before it scored 3/3 false negatives on annotated ground truth.
         r = api(p["fen"], p.get("move_uci"))
-        rAfter = api(p["fen_after"]) if p.get("fen_after") else None
+        # The forced reply is often where the concept actually happens, and it is
+        # a MOVE, not a position. Capablanca-Mattison 1929 is the case: the
+        # annotation says 15.Ng5 forces ...f5 and permanently weakens the shield,
+        # and 15.Ng5 itself changes nothing measurable about the black king's
+        # zone - the knight landing on g5 blocks the bishop that was already
+        # looking at h6. Asking about the position after the reply, with no move,
+        # asks about the wreckage and not about the moment it was done.
+        rAfter = api(p["fen_after"], p.get("move_after_uci")) if p.get("fen_after") else None
         # Some concepts exist only after a forced reply; asking earlier asks
         # before the concept exists.
         rReal = api(p["fen_concept_realised"]) if p.get("fen_concept_realised") else None
@@ -107,18 +165,50 @@ def main():
         want = p["concept"]
         seen = ids + [i for i in idsAfter if i not in ids]
         leadAfter = (idsReal[0] if idsReal else None) or (idsAfter[0] if idsAfter else None)
-        if (ids and ids[0] == want) or leadAfter == want:
-            verdict = "PRIMARY"; tally["primary"] += 1
-        elif want in seen:
-            verdict = "secondary"; tally["secondary"] += 1
+        leads = (ids and ids[0] == want) or leadAfter == want
+        role = p.get("concept_role")
+        # Three roles, three standards. An earlier version had one - "is the
+        # annotated concept the lead" - which scores a NEGATIVE example as a
+        # success precisely when the system has failed it.
+        if role == "negative":
+            if want in seen:
+                verdict = "FALSE POSITIVE (led)" if leads else "FALSE POSITIVE"
+                tally["false_positive"] += 1
+                tally["neg_leaked"] += 1
+            elif not detectable(want):
+                # Not a win. A negative example for a concept nothing can detect
+                # passes because nothing could ever have reported it, and
+                # counting that as evidence that false positives are controlled
+                # would be counting the absence of a detector as a virtue.
+                verdict = "vacuous - nothing could have reported it"
+                tally["neg_vacuous"] += 1
+            else:
+                verdict = "correct (absent)"; tally["neg_correct"] += 1
+        elif role == "ambiguous":
+            if want in seen:
+                verdict = "present" + (" (led)" if leads else "")
+                tally["amb_present"] += 1
+                if leads:
+                    tally["amb_led"] += 1
+            else:
+                verdict = fn_verdict(want); tally[fn_key(want)] += 1
         else:
-            verdict = "FALSE NEGATIVE"; tally["false_negative"] += 1
+            if leads:
+                verdict = "PRIMARY"; tally["primary"] += 1
+            elif want in seen:
+                verdict = "secondary"; tally["secondary"] += 1
+            else:
+                verdict = fn_verdict(want); tally[fn_key(want)] += 1
         # Only a concept the annotator considered and REJECTED AS WRONG counts
         # against the system. Concepts that are also true but secondary are
         # supposed to be reported, and an earlier version of this check scored
         # them as false positives — which would have penalised correct output.
+        # For a negative entry the concept itself belongs in rejected_as_wrong -
+        # that is what "should not be labelled this way" means - so it must not
+        # be counted twice.
+        already = {want} if role == "negative" else set()
         rejected = [a for a in (p.get("rejected_as_wrong") or []) if a in seen]
-        if rejected:
+        if [a for a in rejected if a not in already]:
             tally["false_positive"] += 1
         if r["v"]:
             tally["phrasing"] += 1
@@ -126,17 +216,33 @@ def main():
                      ",".join(rejected)))
 
     n = len(pos) or 1
-    print(f"\nAPI AGAINST THE CORPUS")
-    print(f"  annotated concept is the LEAD        {tally['primary']}/{n}")
-    print(f"  present but not the lead             {tally['secondary']}/{n}")
-    print(f"  FALSE NEGATIVE (absent entirely)     {tally['false_negative']}/{n}")
-    print(f"  reported a REJECTED alternate        {tally['false_positive']}/{n}")
+    roles = {r: sum(1 for x in pos if x.get("concept_role") == r)
+             for r in ("positive", "ambiguous", "negative")}
+    npos = roles["positive"] or 1
+    print(f"\nAPI AGAINST THE CORPUS   "
+          f"({roles['positive']} positive, {roles['ambiguous']} ambiguous, "
+          f"{roles['negative']} negative)")
+    print(f"  positive: concept is the LEAD        {tally['primary']}/{npos}")
+    print(f"  positive: present but not the lead   {tally['secondary']}/{npos}")
+    print(f"  FALSE NEGATIVE (absent, and detectable)  {tally['false_negative']}/{n}")
+    print(f"  absent by design (no detector allowed)   {tally['undetectable']}/{n}")
+    print(f"  negative: correctly NOT reported     {tally['neg_correct']}/{roles['negative'] or 1}")
+    print(f"  negative: vacuous (no detector exists) {tally['neg_vacuous']}/{roles['negative'] or 1}")
+    print(f"  negative: reported anyway            {tally['neg_leaked']}/{roles['negative'] or 1}")
+    print(f"  ambiguous: reported                  {tally['amb_present']}/{roles['ambiguous'] or 1}"
+          f"   (of which led: {tally['amb_led']})")
+    print(f"  FALSE POSITIVE (rejected alternate)  {tally['false_positive']}/{n}")
     print(f"  phrasing violations                  {tally['phrasing']}/{n}")
     if tally["api_error"]:
         print(f"  API errors                           {tally['api_error']}/{n}")
     print()
+    GOOD = ("PRIMARY", "correct (absent)", "present", "present (led)")
+    BYDESIGN = ("absent - the concept's own record says it cannot have a detector",
+                "vacuous - nothing could have reported it")
+    SOFT = ("secondary",)
     for pid, verdict, got, rej in rows:
-        mark = "ok  " if verdict == "PRIMARY" else ("~   " if verdict == "secondary" else "MISS")
+        mark = ("ok  " if verdict in GOOD else "n/a " if verdict in BYDESIGN
+                else "~   " if verdict in SOFT else "MISS")
         print(f"  {mark} {pid}")
         print(f"       {verdict}; API said: {got or '(nothing)'}")
         if rej:

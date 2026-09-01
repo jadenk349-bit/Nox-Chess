@@ -5,6 +5,127 @@ this file is the narrative, and records reasoning that does not fit in JSON.
 
 ---
 
+## Session 8 — grounding seven concepts, and four bugs that came with them (2026-09-01)
+
+The brief was narrow and right: the blocker is validation DEPTH, not research,
+and seven named concepts had no human grounding at all — initiative, king safety,
+centre control, static-vs-dynamic, piece coordination, transformation of
+advantages, and the pawn breakthrough.
+
+All seven now have it. The corpus went from 6 positions and 2 games to 18
+positions and 9 games, 1908 to 2005, with roles that mean something: 13 positive,
+3 ambiguous, 2 negative.
+
+### The method mattered more than the count
+
+Annotations first, positions second. For each concept the work was: find a
+reputable human source that NAMES the concept for a specific move; take the game
+score from a database rather than from the annotating page; replay it end to end
+through `blind-chess.html`'s own move generator; and only then ask Stockfish.
+
+That order is not fussiness. **Six of seven "full move order" listings printed by
+one otherwise useful annotation blog failed to replay**, reaching an illegal move
+somewhere between move 24 and move 36. Its prose is citable and its move lists
+are not, and that is now in `tool_limitations` because it is the second time a
+printed score has failed in this project.
+
+The engine was asked to verify, never to name. It agreed on the move seven times
+— including Keene's 18...Ne6 in Réti–Capablanca, which it puts 0.39 clear while
+the move Capablanca actually played is outside its top three, and Wade's 38.a5 at
++9.17 with a principal variation identical to the line this base's own new
+detector produces — and it disagreed three times. **All three disagreements were
+kept.** Botvinnik says the initiative passes to Black at 20...Qc7 and the engine
+still gives White half a pawn; that gap is the whole distinction between holding
+the initiative and standing better, and an engine-filtered corpus would have
+deleted it.
+
+### Everything that broke, broke under the new positions
+
+**A pawn with no neighbours was called backward.** Wade–Korchnoi 1960 has a black
+pawn on e5 with no d- or f-pawn at all and a white pawn on e4 in front of it, and
+Layer 3 reported it as a backward pawn — so the system's explanation of the most
+famous breakthrough in the corpus led with "Black's pawn on e5 cannot advance".
+Two causes: the "is it behind its neighbours" test returns false both when the
+neighbours are all advanced and when there are none, and the advance square was
+never checked for occupancy. A pawn with no neighbours is isolated; a pawn
+blocked by an enemy pawn is rammed. Fixed at the detector, with a regression test
+and two new false-positive traps on the record.
+
+**The corpus checker scored negative examples backwards.** It had one rule — is
+the annotated concept the API's lead — which scores a NEGATIVE example as a
+success exactly when the system has failed it. The bug was invisible while every
+entry was positive and went live the moment one was not. Three roles, three
+standards now.
+
+**And then both negative examples passed for the wrong reason.** They passed
+because neither concept had a matcher: nothing could have reported them. A
+negative example for an undetectable concept is not evidence of anything, and the
+checker now prints "vacuous — nothing could have reported it" instead of a tick.
+Writing a `king-attack` matcher turned one of them into a real test, which it
+passes: in Adams–Kasparov 2005 after 21...Kxh7 every mechanical sign of a winning
+attack is present — opposite-side castling, the pawn storm arrived, the shield
+gone, two rooks on the files at the king — and the API declines, because exactly
+one piece bears on that king's zone and White is the one being mated.
+
+**Raw attacker counts misread the centre.** On Réti–Capablanca, 18...Ne6 makes
+Black's raw attacker count on the four central squares FALL from 7 to 6, because
+the arriving knight blocks a rook x-raying through its own bishop. Control is now
+measured on pawns and minor pieces for the move-based arm. It still cannot tell
+Ne6 from the game's N6d7, and that is written on the concept record rather than
+tuned away — bending a measure until it separates two particular moves is how a
+detector stops meaning anything.
+
+### What was built
+
+- Layer 3: `centralSquareControl()`, `kingZoneAttackers()`, `pawnBreakthrough()`.
+  The last runs the rule of the square as a proof, and therefore restricts itself
+  to pure pawn endings and says so.
+- Layer 4: `center-control`, `king-safety`, `king-attack`, `pawn-breakthrough`,
+  each implementing its record's stated conditions, including the thresholds the
+  records give in words ("it is not worth reporting an attack below three
+  attackers").
+- Every threshold was MEASURED over the 788 shipped positions before it was
+  chosen, and the measurement is in the source: centre 20.3%, king-attack 1.5%,
+  king-safety by attacker count 1.1% of king-sides, by bare shield 12.4%,
+  move-based centre 7.1%, shield damage 2.6%, breakthrough 0.0%.
+- Concept deduplication in `matchAll()`, after two arms of one matcher printed
+  `center-control` twice in a row at a reader.
+
+### Two disagreements with the shipped puzzle generator, measured
+
+The generator tags 86 positions `pawnBreakthrough` and **zero of them is a pawn
+ending**; it tags 134 `kingAttack` and this base reports 12. Both gaps are the
+concepts' own registered false-positive traps made numeric — the generator's
+tests are `checks >= 2 or mated` and "a pawn push that creates a passer or hangs
+itself", which are puzzle classifications and not definitions. Neither number
+should move. The corollary is uncomfortable and worth keeping: **the 788 shipped
+positions cannot validate a pawn-ending detector at all**, and will silently
+report no false positives forever.
+
+### Where it stands
+
+137 concepts, 188 sources, 94 validated positions, 18 corpus positions, 644 tests
+plus 246 API, 376 audit and 3276 explanation assertions, all green, twelve audits
+clean. Against the corpus: 0 false negatives on concepts that can be detected, 0
+false positives, 2 of 2 negatives correct (1 of them non-vacuously).
+
+`state/COMPLETION.md` still says **not substantially complete**, and the blocker
+has changed shape rather than shrunk: it is negative and ambiguous evidence, 77%
+and 83% missing, and it does not yield to mining. It has to be hunted one concept
+at a time, in annotations, where an author says *this looks like X and is not*.
+Two were found this session and one of them is now the sharpest false-positive
+test in the repository, so the search is worth its cost.
+
+Five of this session's seven target concepts will never reach the API-validated
+rung, by their own records — the initiative is invisible to a static scan, and
+coordination and transformation are human-only. Both the ladder and the corpus
+checker now derive that distinction from the records and print it, so that
+"cannot be achieved" is never quietly counted as "not achieved" and never quietly
+counted as a pass.
+
+---
+
+
 ## Session 6 — the depth phase, and what running it found (2026-09-01)
 
 The brief for this session was that 85 covered areas is not a finished system.

@@ -47,7 +47,7 @@
     "prerequisites": [
       "passed-pawn"
     ],
-    "detector": "puzzle_rules.js: pawn advance creating a decisive passer",
+    "detector": "lib/features.js: pawnBreakthrough(); lib/matchers.js: pawn-breakthrough",
     "detectability": "mechanical",
     "typical_confidence": "high",
     "false_positive_traps": [
@@ -86,7 +86,10 @@
     "The defender can sometimes decline the first capture and hold."
   ],
   "limitations": [
-    "Entirely concrete. It should be verified by calculation every time, not recognised and trusted."
+    "Entirely concrete. It should be verified by calculation every time, not recognised and trusted.",
+    "SCOPE, stated rather than hidden: the detector runs only when nothing but kings and pawns is left, because the rule of the square - which the record's own false-positive trap names as the thing that decides - is a proof there and a guess anywhere else. In a middlegame the same pattern may be a breakthrough and this base cannot show that it is, so it says nothing.",
+    "It proves that ACCEPTING the offer loses. A defender who declines is answering a different question, and the matcher's wording says so. Over the 788 shipped puzzle positions it fires zero times, which is correct - none of them is a pawn ending - and means the 788 provide no evidence about its false-positive rate.",
+    "MEASURED 2026-09-01, and the number is the point. The shipped puzzle generator tags 86 of the 788 positions `pawnBreakthrough`; ZERO of those 86 is a pawn ending, and this base confirms a forced breakthrough in none of them. The two are not measuring the same thing and neither is wrong. The generator's test (tools/puzzle_rules.js) is: the first move is a non-capturing pawn move and after it the destination is winnable by static exchange evaluation OR the pawn is passed - a puzzle classification, which does not ask whether the passer can be stopped. That question is this concept's own registered false-positive trap. The consequence for a later session is that the 788 positions provide no evidence at all about this detector's false-positive rate, and a corpus of pawn endings would have to be built to get any."
   ],
   "misconceptions": [
     "That the breakthrough always works in a trio-against-trio structure. Space and king distance decide it.",
@@ -154,6 +157,23 @@
         "verdict_note": "A far stronger result than expected. 1.b6! is +64.85 and queens by force. Both alternative first moves LOSE — 1.a6? is -10.25 and 1.c6? is -81.15 — because they let Black break through instead. So the middle pawn is not merely best practice, it is the only move, and the margin over the runner-up is 75 pawns. Settled from depth 3. This is the strongest confirmation in the base that the breakthrough is CONCRETE: order decides everything, and the pattern must be calculated rather than recognised."
       },
       "controlled_pair_with": "6k1/ppp5/8/8/PPP5/8/8/6K1 w - - 0 1"
+    },
+    {
+      "fen": "8/1pp5/1p4p1/1P1Pp2k/P3P2p/5K2/5P1P/8 w - - 1 38",
+      "note": "Wade-Korchnoi, Buenos Aires 1960 (round 10), a5. Human ground truth: the concept is named for this position by Tryfon Gavriel (FM), naming the ply; corroborated by Luke McShane (GM) in The Spectator. Corpus entry `wade-korchnoi-1960-38a5-pawn-breakthrough`, which carries the full annotation, the alternates the annotator rejected, and the engine's verdict. The concept's canonical pattern, in a game, at the moment it decides one. White's a4 and b5 face b6, b7 and c7, and 38.a5 offers a pawn to create two levers at once: 38...bxa5 39.b6! cxb6 40.d6 and the d-pawn runs, because after two captures no black pawn stands on the c-, d- or e-file in front of it and the black king on h5 is four moves from d8 with two moves' work to do. The record's own false-",
+      "origin_kind": "historical-game",
+      "game": "Wade-Korchnoi, Buenos Aires 1960 (round 10)",
+      "concept_role": "positive",
+      "engine": {
+        "engine_id": "Stockfish 18",
+        "test_level": 3,
+        "depth": 20,
+        "multipv": 3,
+        "best_move": "a5",
+        "eval_cp": 917,
+        "verdict": "supports",
+        "verdict_note": "completely, and its variation is the same one. 38.a5 is the engine's first choice at +9.17 against +7.95 for the second, and its principal variation reads a5 bxa5 b6 cxb6 d6 ... d8=Q - the line this base's own detector produced independently. Depth 20 rather than the usual 22+: this is a simplified pawn ending, which the project has already recorded as the case where deep searches stop converging. The verdict is +9 and a forced queen; more depth would buy nothing."
+      }
     }
   ],
   "counterexamples": [

@@ -93,7 +93,8 @@
   ],
   "limitations": [
     "Recognising the turning point is the whole difficulty and no source offers a test for it.",
-    "This base has not validated any transformation example against an engine, so the concept currently rests on textual authority alone."
+    "This base has not validated any transformation example against an engine, so the concept currently rests on textual authority alone.",
+    "No detector, per the record's human-only classification. The concept describes an intention and this base observes moves; the corpus entry records the one position where a named annotator, the game's continuation and the engine all agree what the intention was."
   ],
   "misconceptions": [
     "That an advantage should be held onto. Advantages are usually converted through several intermediate forms, and holding one unchanged is how it dissipates.",
@@ -124,7 +125,25 @@
       }
     ]
   },
-  "examples": [],
+  "examples": [
+    {
+      "fen": "3r1nk1/pp3ppp/1bq5/B7/3pQ3/1N4PP/PPP2P2/4R1K1 w - - 1 22",
+      "note": "Capablanca-Rubinstein, Berlin 1928, Qxc6. Human ground truth: the concept is named for this position by Nicholas Van Der Nat (FM). Corpus entry `capablanca-rubinstein-1928-22Qxc6-transformation`, which carries the full annotation, the alternates the annotator rejected, and the engine's verdict. A transforming move gives something up, and that is precisely what makes it hard to recognise and easy to mislabel. Twenty moves of pressure on d4 are abandoned in one move; the reader who is following the plan sees a concession. The concept record names this as its first false-positive trap in reverse - 'a transforming move often looks like a concession and can be reported as an error by anything",
+      "origin_kind": "historical-game",
+      "game": "Capablanca-Rubinstein, Berlin 1928",
+      "concept_role": "positive",
+      "engine": {
+        "engine_id": "Stockfish 18",
+        "test_level": 3,
+        "depth": 22,
+        "multipv": 3,
+        "best_move": "Qxc6",
+        "eval_cp": 34,
+        "verdict": "supports",
+        "verdict_note": "fully. 22.Qxc6 is the engine's first choice at depth 22 (+0.34), ahead of 22.Bb4 (+0.09) and 22.Re2 (+0.05), and its principal variation continues 22...bxc6 23.Kf1 - it likes the resulting ending for the same structural reason the annotation gives. A quarter-pawn gap is small in absolute terms and decisive in kind: the two runners-up are moves that keep the attack on d4, and the engine puts the move that abandons it first."
+      }
+    }
+  ],
   "counterexamples": [],
   "ambiguous_examples": [],
   "explanations": {

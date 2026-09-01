@@ -85,7 +85,7 @@
     "prerequisites": [
       "king-safety"
     ],
-    "detector": "puzzle_rules.js: checks >= 2 or mated (a crude proxy)",
+    "detector": "lib/matchers.js: king-attack, implementing all three of the record's preconditions. The repository's `kingAttack` puzzle tag (checks >= 2 or mate) remains a proxy for puzzle classification and is NOT this.",
     "detectability": "heuristic",
     "typical_confidence": "low",
     "false_positive_traps": [
@@ -132,7 +132,10 @@
   ],
   "limitations": [
     "Recognition confidence is LOW. 'Local superiority near the king' is a judgement about which pieces count, and no mechanical detector in this repository attempts it.",
-    "The repo's kingAttack tag is a puzzle-classification proxy and should not be read as the concept."
+    "The repo's kingAttack tag is a puzzle-classification proxy and should not be read as the concept.",
+    "Fires on 12 of the 788 shipped positions (1.5%). It is a claim that the PRECONDITIONS for an attack are met, never that an attack exists, and the difference is why the confidence is capped at low.",
+    "Adams-Kasparov 2005 after 21...Kxh7 is the registered case it must refuse: opposite-side castling, a pawn storm arrived, the shield gone, two rooks on the files at the king - and no attack, because only one piece bears on the king's zone and White's own king is the one being mated. It refuses.",
+    "MEASURED 2026-09-01: the shipped puzzle generator tags 134 of the 788 positions `kingAttack` and this base reports the concept on 12. The gap is the record's own first false-positive trap made numeric - the generator's test is `checks >= 2 or mated`, which is a proxy for sorting puzzles and not a definition, and a two-check sequence is not an attack. Recorded rather than reconciled: moving either number toward the other would mean one of the two systems telling a lie it does not currently tell."
   ],
   "misconceptions": [
     "That attacking is a matter of temperament. The classical position is that it is a consequence of an advantage you already hold.",
@@ -164,7 +167,25 @@
     ]
   },
   "examples": [],
-  "counterexamples": [],
+  "counterexamples": [
+    {
+      "fen": "br3rk1/2q2ppP/p2pp3/2n1b1BP/1n1NP3/2N2P2/1PPQB3/1K4RR b - - 0 21",
+      "note": "Adams-Kasparov, Linares 2005 (round 12), Kxh7. Human ground truth: the concept is named for this position by Jon Speelman (GM), reproduced by ChessBase; the king-safety sentence is quoted from a community annotation and is corroborated, not relied on. Corpus entry `adams-kasparov-2005-21Kxh7-king-attack-negative`, which carries the full annotation, the alternates the annotator rejected, and the engine's verdict. Every mechanical sign of a winning king attack is present - opposite-side castling, a pawn storm that has arrived, the shield gone, two rooks on the files pointing at the king, a bishop on g5 and a queen able to reach h6 - and the attack does not exist. This is the sharpest kind of negative example because nothing about the pattern is missing; what is missing is a threat, and a threat is a propert",
+      "origin_kind": "historical-game",
+      "game": "Adams-Kasparov, Linares 2005 (round 12)",
+      "concept_role": "negative",
+      "engine": {
+        "engine_id": "Stockfish 18",
+        "test_level": 3,
+        "depth": 22,
+        "multipv": 3,
+        "best_move": "Be3",
+        "eval_cp": -213,
+        "verdict": "contradicts",
+        "verdict_note": "fully, and it agrees with the named human move. Searching the position AFTER 21...Kxh7, Stockfish 18 at depth 22 returns Be3 - the move Speelman names as White's best - and scores it at -2.13 from White's side. The side with the 'attack' is two pawns worse. Searched from White's move rather than Black's, because the claim being tested is about the position the recapture reaches, not about whether the recapture was forced."
+      }
+    }
+  ],
   "ambiguous_examples": [],
   "explanations": {
     "by_level": {

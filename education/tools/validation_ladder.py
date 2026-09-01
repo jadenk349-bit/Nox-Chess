@@ -13,7 +13,15 @@ CHECKED, and it is deliberately built so the two cannot be confused.
     AMBIGUITY-TESTED     at least one ambiguous example: the concept contributes
                          and does not decide
     API-VALIDATED        a Layer 4 matcher exists, so the API can actually
-                         recognise it rather than only explain it when told
+                         recognise it rather than only explain it when told.
+                         Some concepts CANNOT reach this rung and saying so is
+                         not an excuse: `initiative` records that it "is
+                         invisible to a static feature scan", and
+                         `piece-coordination` and `transformation-of-advantages`
+                         are marked human-only. Those are counted separately,
+                         and the split is read off each record's own
+                         `recognition.detectability`, so it cannot be widened
+                         to flatter the number.
     EXPLANATION-VALIDATED wording at every level and depth, with no unfilled
                          template and no banned phrasing
 
@@ -108,12 +116,22 @@ def main():
             print(f"  {'yes' if r[k] else 'NO ':<4} {k}")
         return 0
 
+    # Which concepts could ever be recognised from a board at all. Read off the
+    # records, never listed here.
+    can_detect = {cid for cid, c in concepts.items()
+                  if cid in recognised
+                  or ((c.get("recognition") or {}).get("detectability") or "") == "mechanical"}
+
     n = len(rows) or 1
     print(f"\nVALIDATION LADDER — {n} concepts\n")
     for k in RUNGS:
         got = sum(1 for r in rows.values() if r[k])
         bar = "#" * round(30 * got / n)
-        print(f"  {k:<24} {got:>3}/{n}  {100*got/n:5.1f}%  {bar}")
+        line = f"  {k:<24} {got:>3}/{n}  {100*got/n:5.1f}%  {bar}"
+        if k == "api_validated":
+            m = len(can_detect) or 1
+            line += f"\n  {'':<24} {got:>3}/{m} of the concepts whose own record allows a detector"
+        print(line)
 
     full = [c for c, r in rows.items() if all(r.values())]
     print(f"\n  all seven rungs: {len(full)}/{n}" + (f" — {', '.join(sorted(full))}" if full else ""))
@@ -121,9 +139,18 @@ def main():
     only = [c for c, r in rows.items() if r["researched"] and sum(r.values()) == 1]
     print(f"  researched and nothing else: {len(only)}/{n}")
 
+    # "All seven rungs" is unreachable for a human-only concept, so the honest
+    # headline is two numbers rather than one flattering choice between them.
+    reachable = [c for c, r in rows.items()
+                 if all(r[k] for k in RUNGS if k != "api_validated")
+                 and (r["api_validated"] or c not in can_detect)]
+    print(f"  every rung its record allows: {len(reachable)}/{n}")
+
     if a.json:
         json.dump({"rungs": RUNGS, "concepts": rows,
                    "totals": {k: sum(1 for r in rows.values() if r[k]) for k in RUNGS},
+                   "api_detectable": sorted(can_detect),
+                   "every_rung_its_record_allows": sorted(reachable),
                    "all_seven": sorted(full), "researched_only": sorted(only)},
                   open(os.path.join(HERE, a.json), "w"), indent=2)
         print(f"\n  wrote {a.json}")

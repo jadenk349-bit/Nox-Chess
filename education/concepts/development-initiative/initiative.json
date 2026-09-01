@@ -83,7 +83,8 @@
     "Black can hold it. It is not White's by right of the first move."
   ],
   "limitations": [
-    "Recognition confidence LOW, and it is not detectable from a static position at all — it is a property of the sequence of moves, like the zwischenzug."
+    "Recognition confidence LOW, and it is not detectable from a static position at all — it is a property of the sequence of moves, like the zwischenzug.",
+    "This base has NO detector for the initiative and will not gain one: the record already states it is invisible to a static feature scan. tools/corpus_check.py therefore scores its corpus entries as 'absent by design' rather than as false negatives, and scores a NEGATIVE example for it as vacuous - nothing could have reported it, so its passing is not evidence about false positives."
   ],
   "misconceptions": [
     "That the initiative is the same as being better. A worse position can hold the initiative, and often that is the only reason it survives.",
@@ -111,8 +112,44 @@
       }
     ]
   },
-  "examples": [],
-  "counterexamples": [],
+  "examples": [
+    {
+      "fen": "2r1k2r/1p1bnpp1/1q2p2p/p2pP3/PP3P2/1NPB4/6PP/R3QR1K b k - 1 20",
+      "note": "Smyslov-Botvinnik, World Championship match (game 1), Moscow 1954, Qc7. Human ground truth: the concept is named for this position by Mikhail Botvinnik, annotating his own game (tr. Douglas Griffin). Corpus entry `smyslov-botvinnik-1954-g1-20Qc7-initiative`, which carries the full annotation, the alternates the annotator rejected, and the engine's verdict. This is the concept in its defining form and it is why the entry exists. Botvinnik does not claim Black is better; he claims the roles have swapped - from here White answers and Black asks. The move itself does nothing visible: it steps off the b-file, eyes c3, and leaves White's knight on b3 with no good square, so every White move for the next several is a reply. The concept record's own test is",
+      "origin_kind": "historical-game",
+      "game": "Smyslov-Botvinnik, World Championship match (game 1), Moscow 1954",
+      "concept_role": "positive",
+      "engine": {
+        "engine_id": "Stockfish 18",
+        "test_level": 3,
+        "depth": 22,
+        "multipv": 3,
+        "best_move": "Qc7",
+        "eval_cp": -57,
+        "verdict": "supports",
+        "verdict_note": "on the move, completely - 20...Qc7 is the engine's first choice at depth 22, ahead of 20...O-O by 0.15. On the assessment, not at all: the engine still gives White about half a pawn from Black's side of the board. That split is the finding, and it is worth more than agreement would have been. Holding the initiative is not the same as standing better, which is exactly what the concept record says and exactly what an engine-labelled corpus would have destroyed by throwing this position away."
+      }
+    }
+  ],
+  "counterexamples": [
+    {
+      "fen": "4rnk1/r2n1p2/1p1R2pp/pP5q/3N4/P3N1P1/1Q3PKP/3R4 b - - 0 27",
+      "note": "Reti-Capablanca, New York 1924 (round 5), Qe5. Human ground truth: the concept is named for this position by Raymond Keene (GM), The Spectator Australia. Corpus entry `reti-capablanca-1924-27Qe5-initiative-negative`, which carries the full annotation, the alternates the annotator rejected, and the engine's verdict. The surface of an initiative is all here and none of the substance, which is what makes it a negative example. From move 20 Capablanca's queen has been to c4, c5, h5 and now e5, hitting something every time, and White has answered every time - Rxd6, Rad1, Ne3, Nd4, Nc4. Count only 'one side keeps making threats and the other keeps answering' and Black has the initiative. The concept record's actua",
+      "origin_kind": "historical-game",
+      "game": "Reti-Capablanca, New York 1924 (round 5)",
+      "concept_role": "negative",
+      "engine": {
+        "engine_id": "Stockfish 18",
+        "test_level": 3,
+        "depth": 22,
+        "multipv": 3,
+        "best_move": "Rxe3",
+        "eval_cp": -212,
+        "verdict": "contradicts",
+        "verdict_note": "on both halves, and independently. The engine's first choice at depth 22 is 27...Rxe3, which is the move Keene says Black had to try, and the game move 27...Qe5 is second and 0.36 worse. Black is lost either way, which is the point: the side with the 'threats' is two pawns down in evaluation. A rare case of a 2017 GM annotation and a 2026 engine naming the same move for the same reason."
+      }
+    }
+  ],
   "ambiguous_examples": [],
   "explanations": {
     "by_level": {
