@@ -244,22 +244,40 @@
         "verdict": "ambiguous",
         "verdict_note": "Quiet AND decided, which is worth recording as a pair. The feature is present and the evaluation is 15.6, so nothing forcing is on offer and the position is nonetheless settled. It demonstrates the feature and cannot show the concept deciding anything - and it is a useful reminder that quietness is not balance."
       }
+    },
+    {
+      "fen": "1kb5/2p1B3/3p2p1/pP3p1p/2PP4/P1K2P2/6PP/8 b - - 0 31",
+      "note": "Capablanca-Thomas, Hastings 1929, Kb7. Human ground truth: the concept is named for this position by Nicholas Van Der Nat (FM), citing Euwe and Prins. Corpus entry `capablanca-thomas-1929-31bxc4-opposite-coloured-bishops`. The feature is present and correctly reported, and the conclusion everybody attaches to it is false here - which is what makes this ambiguous rather than positive. Opposite-coloured bishops are the most drawish ending in chess and this one is winning by five pawns' worth of evaluation with White a single pawn up, because Capablanca can manufacture passers on the a/b-file and th",
+      "origin_kind": "historical-game",
+      "game": "Capablanca-Thomas, Hastings 1929",
+      "concept_role": "ambiguous",
+      "attributed_by": "Nicholas Van Der Nat (FM), citing Euwe and Prins — corpus entry capablanca-thomas-1929-31bxc4-opposite-coloured-bishops",
+      "engine": {
+        "engine_id": "Stockfish 18",
+        "test_level": 3,
+        "depth": 20,
+        "multipv": 3,
+        "best_move": "f4",
+        "eval_cp": -506,
+        "verdict": "ambiguous",
+        "verdict_note": "on the assessment, emphatically. Black is at -5.06 in a 'drawn' ending while a single pawn down. The move recorded is the game's 31...Kb7; the engine prefers 31...f4 by 0.13, which is not a disagreement about anything and does not change the verdict. Depth 20: a bishop ending with fourteen men, in the range this project has recorded as where deeper searches stop paying."
+      }
     }
   ],
   "explanations": {
     "by_level": {
-      "beginner": "The bishops move on different colours, so they can never meet or defend against each other. In endgames this makes it very hard to win, even a pawn or two ahead.",
-      "intermediate": "Opposite-coloured bishops. In the endgame they are the most drawish material in chess — blockade the pawns on your own bishop's colour and even two extra pawns often fail.",
-      "advanced": "Endgame: drawish, and the defender should deliberately make their bishop bad to build the fortress. Middlegame: sharp, because your bishop operates where theirs cannot answer.",
+      "beginner": "The bishops move on different colours, so they can never meet or defend against each other. In endgames that usually makes it hard to win, even a pawn or two ahead — unless there are passed pawns on BOTH wings, because one bishop cannot guard two places at once.",
+      "intermediate": "Opposite-coloured bishops. In the endgame they are the most drawish material in chess when the fight is on one wing: blockade the pawns on your own bishop's colour and even two extra pawns often fail. The exception is the one that decides games — passed pawns three or more files apart, which a single bishop cannot blockade at both ends.",
+      "advanced": "Endgame: drawish while the play is confined to one wing, and the defender should deliberately make their bishop bad to build the fortress. Separation is what breaks it — roughly three files between passers, with a king marching to escort one of them. Middlegame: sharp, because your bishop operates where theirs cannot answer.",
       "master": "The operative variables are blockade feasibility and pawn separation, not the pawn count. Three files apart usually wins; a wrong rook pawn draws regardless."
     },
     "by_depth": {
-      "short": "Bishops on different colours — very hard to win in the endgame.",
-      "normal": "Opposite-coloured bishops: the bishops can never contest the same squares, so the defender can blockade on their own colour and the attacker's bishop can never challenge it. One extra pawn usually draws and two often do.",
+      "short": "Bishops on different colours — usually hard to win, unless there are passers on both wings.",
+      "normal": "Opposite-coloured bishops: the bishops can never contest the same squares, so the defender can blockade on their own colour and the attacker's bishop can never challenge it. One extra pawn usually draws and two often do — on one wing. Passed pawns far enough apart beat a lone bishop, because it has to choose.",
       "deep": "The most drawish material configuration in the endgame — roughly half of bishop-and-four-pawns endings against an opposite bishop are drawn, against over 90% wins with same-coloured bishops. The defensive method inverts an ordinary principle: put your pawns on your own bishop's colour so the bishop defends them, deliberately creating a 'bad' bishop that is exactly what the fortress needs. Two other reversals: separated pawns beat connected ones, and zugzwang is much less available than usual. The drawish reputation belongs to the ENDGAME, though. With heavy pieces still on, opposite bishops favour the attacker, because a bishop attacking on a colour the defender cannot answer is an extra attacker."
     },
     "hedge": "",
-    "lesson": "Opposite bishops are drawish in endgames and dangerous in middlegames. Before announcing a draw, count what else is on the board."
+    "lesson": "Opposite bishops are drawish when the fight is on ONE wing, and dangerous in middlegames. Before announcing a draw, count what else is on the board and how far apart the passers can be made — three files usually wins."
   },
   "terminology": {
     "beginner_words": [

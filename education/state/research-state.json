@@ -11,11 +11,11 @@
     "concepts_researched": 29,
     "concepts_validated": 4,
     "concepts_needs_review": 0,
-    "sources_reviewed": 191,
-    "positions_tested": 102,
-    "matches_validated": 52,
+    "sources_reviewed": 192,
+    "positions_tested": 104,
+    "matches_validated": 53,
     "false_matches": 25,
-    "ambiguous_matches": 25,
+    "ambiguous_matches": 26,
     "by_stage": {
       "ready": 2,
       "researched": 126,
@@ -1159,6 +1159,13 @@
       "item": "Petrosian-Krogius 1959 full game score",
       "detail": "The score printed in the UMBC lecture notes does not replay: Black's 24th move (Ra3) is not legal in the position reached. The first 46 plies verify. Rather than guess a correction, only the verified prefix is used and the source note says so.",
       "conclusion": "Verified prefix used; the remainder is neither used nor cited."
+    },
+    {
+      "date": "2026-09-01",
+      "what": "Grounding `backward-pawn` on Marshall-Tarrasch, Nuremberg 1905, which a FIDE Master's annotation presents as 'the backward pawn on the semi-open file' and makes the title of its lesson",
+      "result": "REJECTED - the pawn is not backward by the definition this base uses, and the annotation's own stated reason describes a pawn that is not on the board",
+      "reason": "The annotation says White 'is left with a backward pawn on a semi-open file' after the exchange on c3, and explains it as 'the b2 and d4 pawns sit on adjacent files blocking its advance'. After 11.bxc3 there IS no b2 pawn - it is the pawn that captured on c3 - and c4 is empty and controlled by no black pawn, so c3 can advance freely. The record's definition, taken from Wikipedia and stated in its preconditions, requires BOTH halves: behind its neighbours AND unable to advance safely. This base's detector reports no backward pawn at any ply of the relevant sequence, and it is right. The pawn is a weak pawn on a half-open file, which is a different and weaker claim than the one the lesson is named after. Recorded rather than added: the corpus is ground truth, and grounding a concept on a loose application of its own definition would poison exactly the thing it exists to protect.",
+      "conclusion": "backward-pawn still needs human grounding. Look for an annotation that names the square in FRONT of the pawn as the point, which is the half of the concept that makes it matter and the half a loose usage always omits."
     }
   ],
   "tool_limitations": [
@@ -1653,22 +1660,22 @@
       "method": "Targeted the seven concepts the previous checkpoint named as lacking human grounding - initiative, king safety, centre control, static-vs-dynamic, piece coordination, transformation of advantages and the pawn breakthrough. Annotations were found first and positions second, never the other way round. Game scores were taken from a database (pgnmentor player files) rather than from the annotating page, because six of seven move orders printed by one otherwise useful blog failed to replay; every score used here was replayed end to end through blind-chess.html's own move generator, and every claim was then re-measured with Stockfish 18 at depth 20-22 with MultiPV 3.",
       "results": {
         "corpus_positions_before": 6,
-        "corpus_positions_after": 26,
+        "corpus_positions_after": 28,
         "corpus_master_games_before": 2,
-        "corpus_master_games_after": 13,
-        "corpus_roles_after": "17 positive, 6 ambiguous, 3 negative",
-        "api_false_negatives_on_detectable_concepts": "0 of 26",
-        "api_false_positives": "0 of 26",
-        "ladder_human_grounded": "5 -> 21 on the corrected measure (39 was the old, wrong one - see the findings)",
+        "corpus_master_games_after": 15,
+        "corpus_roles_after": "18 positive, 7 ambiguous, 3 negative",
+        "api_false_negatives_on_detectable_concepts": "0 of 28",
+        "api_false_positives": "0 of 28",
+        "ladder_human_grounded": "5 -> 23 on the corrected measure",
         "ladder_api_validated": "32 -> 36 (36 of the 83 concepts whose own record allows a detector)",
         "ladder_negative_tested": "29 -> 31",
         "ladder_ambiguity_tested": "17 -> 22",
-        "validated_positions": "82 -> 102",
+        "validated_positions": "82 -> 104",
         "depth_mean": "0.70 -> 0.71",
         "new_detectors": "centralSquareControl, kingZoneAttackers, pawnBreakthrough (Layer 3); center-control, king-safety, king-attack, pawn-breakthrough (Layer 4)",
         "firing_rates_over_788_positions": "center-control 20.3%, king-attack 1.5%, king-safety-by-count 1.1% of king-sides, king-safety-by-bare-shield 12.4% of king-sides, move-based centre 7.1%, move-based shield damage 2.6%, pawn-breakthrough 0.0%",
-        "tests": "632 -> 652 pass, 0 fail",
-        "ladder_every_rung_its_record_allows": "2 -> 8 on the corrected measure"
+        "tests": "632 -> 654 pass, 0 fail",
+        "ladder_every_rung_its_record_allows": "2 -> 11 on the corrected measure"
       },
       "findings": [
         "SIX of seven blog-printed 'full move orders' failed to replay. Only Capablanca-Mattison 1929 survived; Janowsky-Alapin, Rubinstein-Maroczy, Pillsbury-Marco, Havasi-Capablanca and Chekhover-Rudakovsky all reached an illegal move. Prose from such a page can still be cited; its move list cannot. Every score in this corpus now comes from a database and is replay-verified.",
@@ -1682,7 +1689,9 @@
         "A NEGATIVE EXAMPLE ONLY COUNTS IF A DETECTOR COULD HAVE FAILED IT, and the corpus now holds one that could: Smyslov-Botvinnik 1954 after 21.Nc5, where a centralised advanced knight in front of an enemy pawn chain is the outpost pattern as any scan sees it and Botvinnik says twice in his own notes that the piece is badly placed. This base's outpost detector agrees and reports nothing, because ...b6 challenges c5 and no white pawn defends it. Two of the corpus's three negatives are now live tests rather than vacuous ones.",
         "TWO FEATURES THAT ARE CORRECT AND WORTH NOTHING, which is what an ambiguous example is for. Nimzowitsch-Capablanca 1914: Black has doubled c-pawns and is +1.07 with the best move on the board being the one that presses the file they opened. Havasi-Capablanca 1929: White has the bishop pair and the engine's first choice for Black, at +0.40, is the move that trades it off. Both features are reported, both correctly, and this base's wording already refuses to go further - 'doubled pawns are a price, not a verdict'.",
         "THE HUMAN-GROUNDED RUNG WAS MEASURING THE WRONG THING, and it was flattering itself. Its own definition says 'an annotated master position, NOT a mined one', and its implementation accepted any position carrying a named game and a historical origin - so 22 of the 36 concepts it counted were grounded only on positions this system found by running its own Layer 4 over master games. Those positions' own notes already said they 'cannot by itself validate the matcher that found it'. Fixed by adding an `attributed_by` field that names the person who said so, and the number fell from 39 to 17. The looser count is still printed underneath, because a drop that large should be legible rather than silent.",
-        "A DETECTOR THAT FLICKERS ON AND OFF ACROSS A GAME A HUMAN CALLS SETTLED. Traced ply by ply through Rubinstein-Salwe 1908 - the game whose annotator says flatly that the e6 bishop is bad - this base reports bad-bishop for exactly ten plies, from 16...Nd7 to 21.Nc5, and then stops, while the bishop's pawn share RISES from 0.67 to 0.83 over the same stretch. The cause is the `scope > 3` guard, which is there to keep Suba's active bad bishop off the list and is what stopped this base calling Nimzowitsch's blockading bishop bad. So the guard is right and the concept is momentary in a way its own record says it should not be. Recorded on the record and pinned at both ends by a test, rather than loosened: raising the threshold would restore two false positives to remove one false negative."
+        "A DETECTOR THAT FLICKERS ON AND OFF ACROSS A GAME A HUMAN CALLS SETTLED. Traced ply by ply through Rubinstein-Salwe 1908 - the game whose annotator says flatly that the e6 bishop is bad - this base reports bad-bishop for exactly ten plies, from 16...Nd7 to 21.Nc5, and then stops, while the bishop's pawn share RISES from 0.67 to 0.83 over the same stretch. The cause is the `scope > 3` guard, which is there to keep Suba's active bad bishop off the list and is what stopped this base calling Nimzowitsch's blockading bishop bad. So the guard is right and the concept is momentary in a way its own record says it should not be. Recorded on the record and pinned at both ends by a test, rather than loosened: raising the threshold would restore two false positives to remove one false negative.",
+        "AN EXCEPTION THAT LIVED IN THE RECORD AND IN NONE OF THE WORDING. Capablanca-Thomas, Hastings 1929 is an opposite-coloured-bishop ending that Stockfish scores at -5.06 with White a single pawn up, and this base told a reader 'Opposite bishops are drawish in endgames'. The record's own second exception - 'three files of separation between passed pawns usually wins' - was present in the `exceptions` list and in the master-level wording, and absent from the beginner, intermediate, advanced, short and normal wordings and from the lesson line, which is what a reader actually sees. All six now carry the condition. The test written for it does not forbid the word 'draw', which would be the wrong lesson: it requires the condition to travel with the claim.",
+        "REJECTED A GROUNDING RATHER THAN TAKE IT. A FIDE Master's lesson titled 'The Backward Pawn on the Semi-Open File' calls White's c3 pawn backward in Marshall-Tarrasch 1905 and explains it as 'the b2 and d4 pawns sit on adjacent files blocking its advance' - after a capture in which the b2 pawn became the c3 pawn, with c4 empty and controlled by nothing. This base's detector reports no backward pawn at any ply of the sequence and is right by the definition the record takes from Wikipedia. Logged in failed_research_attempts and NOT added: the corpus is ground truth, and grounding a concept on a loose application of its own definition would poison the thing it exists to protect. backward-pawn still has no human grounding."
       ]
     }
   ],

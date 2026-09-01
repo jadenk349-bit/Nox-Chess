@@ -12,32 +12,32 @@ evidence in general, it is NEGATIVE and AMBIGUOUS evidence in particular.
 |---|---|---|---|
 | 1 | All major areas have meaningful depth | **NOT MET** | 2 areas `full`, 13 `substantial`, 70 `partial`. Mean concept completeness 0.71 (was 0.70). |
 | 2 | Important concepts have strong recognition criteria | **PARTIAL** | 36 concepts have an implemented Layer 4 matcher naming the record it implements — 36 of the 83 whose own record permits one. The other 54 permitted ones have written criteria and no detector. |
-| 3 | Positional concepts tested outside the tactical corpus | **MET** | 26 human-annotated positions from 13 master games, 1908–2005, spanning a century and seven countries; plus 13 replay-verified games and a 350-position quiet sub-corpus. No longer one tournament. |
+| 3 | Positional concepts tested outside the tactical corpus | **MET** | 28 human-annotated positions from 15 master games, 1908–2005, spanning a century and seven countries; plus 13 replay-verified games and a 350-position quiet sub-corpus. No longer one tournament. |
 | 4 | Major concepts have positive and negative testing | **NOT MET** | 55% of applicable concepts lack a positive example, 77% a negative one, 81% an ambiguous one. This is the blocker, and it is the one that does not yield to mining. |
 | 5 | False positives aggressively tested | **MET** | 27 resolved cases replayed as regression assertions, plus three annotated negative examples. Two of those are real tests — the API declines to report a king attack in a position with every mechanical sign of one — — the API declines to report an outpost on a square a world champion twice calls unsafe, and declines to report a king attack in a position with every mechanical sign of one — and the third is recorded as **vacuous**, because nothing could have reported it. |
 | 6 | API works across tactical and positional positions | **MET** | 788-position mass test: 0 crashes, 0 template leaks, 0 banned phrasings, 100% licensed a concept. 376-assertion behaviour audit over 22 position types. |
-| 7 | Explanation quality is high | **PARTIAL** | 3272 assertions pass; no dictionary definitions, meta-remarks, feature dumps, inert features or duplicated concepts. Correct and plain rather than good. |
+| 7 | Explanation quality is high | **PARTIAL** | 3276 assertions pass; no dictionary definitions, meta-remarks, feature dumps, inert features or duplicated concepts. Correct and plain rather than good. |
 | 8 | Evidence levels correctly represented | **MET** | Four-tier grading; confidence ceilings by knowledge type, enforced and audited; and the ladder and the corpus checker now both distinguish "not achieved" from "cannot be achieved", derived from the records. |
 | 9 | No unresolved high-severity audit findings | **MET** | 0 high across twelve audits. 4 low, each an honest access-caveat flag. |
 | 10 | Remaining limitations documented, not hidden | **MET** | This file, `tool_limitations` (14 entries), `failed_research_attempts` (9), per-concept `limitations`, and a measured note on every disagreement with the puzzle generator. |
 
 ## Current state
 
-137 concepts · 188 sources · **102 engine-validated positions + 22 tablebase** ·
-**26 human-annotated corpus positions from 13 master games** · 22 replay-verified
-master games · 652 tests + 257 API + 376 audit + 3276 explanation assertions.
+137 concepts · 188 sources · **104 engine-validated positions + 22 tablebase** ·
+**28 human-annotated corpus positions from 15 master games** · 24 replay-verified
+master games · 654 tests + 260 API + 376 audit + 3276 explanation assertions.
 
 ## What moved this session
 
 | | before | after |
 |---|---|---|
-| human-grounded corpus positions | 6 | 26 |
-| corpus games | 2 | 13 |
-| corpus roles | 5 positive, 1 ambiguous, 0 negative | 17 positive, 6 ambiguous, 3 negative |
-| concepts with human grounding (corrected measure) | 5 | 21 |
+| human-grounded corpus positions | 6 | 28 |
+| corpus games | 2 | 15 |
+| corpus roles | 5 positive, 1 ambiguous, 0 negative | 18 positive, 7 ambiguous, 3 negative |
+| concepts with human grounding (corrected measure) | 5 | 23 |
 | concepts with a Layer 4 matcher | 32 | 36 |
-| validated positions | 82 | 102 |
-| API false negatives on the corpus | 3 of 6 detectable | 0 of 26 |
+| validated positions | 82 | 104 |
+| API false negatives on the corpus | 3 of 6 detectable | 0 of 28 |
 
 ## A number that got worse on purpose
 
@@ -47,7 +47,7 @@ position carrying a named game, so 22 of those 39 were grounded only on
 positions this system found by running its own Layer 4 over master games — real
 positions whose own records already said they "cannot by itself validate the
 matcher that found it". The rung now requires an `attributed_by` naming the
-person who said so, and reads **21**. Every one of the 21 comes from the
+person who said so, and reads **23**. Every one of the 23 comes from the
 annotated corpus; before this session the same measure would have read 5.
 
 ## What is still missing, precisely
@@ -87,6 +87,14 @@ it had not been built on, and this session added four:
 - And when that was fixed, both negatives **passed for the wrong reason**.
 - Raw attacker counts made the best move in Réti–Capablanca read as a **loss** of
   central control.
+- The ladder's **human-grounded rung counted this system's own mining** as human
+  grounding, and read 39 where the honest number was 17.
+- A concept's own recorded **exception lived in the record and in none of the
+  wording a reader sees**: this base said "opposite bishops are drawish in
+  endgames" about an ending Stockfish scores at −5.06.
+- Three corpus entries listed a **true** concept as one the annotator rejected,
+  manufacturing false positives out of correct output. The fix is always to the
+  entry.
 
 Not one was found by reading the code. **Add positions, not prose** — and then
 check what the checker is actually measuring.

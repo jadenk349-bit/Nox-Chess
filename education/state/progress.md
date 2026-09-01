@@ -181,6 +181,36 @@ concept is momentary in a way its own record says it should not be. Recorded and
 pinned at both ends by a test rather than loosened: raising the threshold would
 restore two false positives to remove one false negative.
 
+### Two more, and one grounding refused
+
+**opposite-coloured-bishops** and **gambit** now have human grounding, and the
+first of them cost more than it gave. Capablanca–Thomas, Hastings 1929 is an
+opposite-coloured-bishop ending that Stockfish scores at **−5.06** with White a
+single pawn up, because there are passers coming on two wings and one bishop
+cannot blockade both. Asked about it, this base said *"Opposite bishops are
+drawish in endgames"*. The record's own second exception — "three files of
+separation between passed pawns usually wins" — was in its `exceptions` list and
+in its master-level wording, and in none of the beginner, intermediate,
+advanced, short or normal wordings, nor in the lesson line, which is what a
+reader actually sees. All six now carry the condition, and the test written for
+it does not forbid the word "draw", which would be the wrong lesson: it requires
+the condition to travel with the claim.
+
+**gambit** came from Botvinnik naming one in a world championship game, with its
+author, its publication and its first practical test: "6.b4 A well-known pawn
+sacrifice, recommended by Alekhine in the book of the New York international
+tournament of 1924."
+
+And one grounding was refused. A FIDE Master's lesson titled *The Backward Pawn
+on the Semi-Open File* calls White's c3 pawn backward in Marshall–Tarrasch 1905
+and explains it as "the b2 and d4 pawns sit on adjacent files blocking its
+advance" — after a capture in which the b2 pawn *became* the c3 pawn, with c4
+empty and attacked by nothing. This base's detector reports no backward pawn at
+any ply of that sequence and is right by the definition its own record takes
+from Wikipedia. Logged in `failed_research_attempts` and not added:
+`backward-pawn` still has no human grounding, and it is better without one than
+with a wrong one.
+
 That is the third metric this project has caught telling it what it wanted to
 hear — after the mass test's "99.7% positional coverage" and the corpus
 checker's scoring of negative examples — and all three were found the same way:

@@ -26,7 +26,9 @@
     "",
     "Two positions carry more than one entry, deliberately. Adams-Kasparov after 21...Kxh7 is a NEGATIVE example for king-attack and an AMBIGUOUS one for king-safety, because the two claims about that position have opposite answers: the black king really is exposed, and there really is no attack. Splitting them is the only way to test both.",
     "",
-    "move_after_uci exists for the same reason fen_concept_realised does, one step further on: some concepts are realised by a FORCED REPLY that is a move rather than a position. Capablanca-Mattison 1929 is the case - 15.Ng5 does not change the count of pieces bearing on the black king by one, and 15...f5 permanently removes a shield pawn."
+    "move_after_uci exists for the same reason fen_concept_realised does, one step further on: some concepts are realised by a FORCED REPLY that is a move rather than a position. Capablanca-Mattison 1929 is the case - 15.Ng5 does not change the count of pieces bearing on the black king by one, and 15...f5 permanently removes a shield pawn.",
+    "",
+    "rejected_as_wrong is the sharpest test in this file and it is the easiest field to get wrong. It must list only concepts whose application here would be FALSE - never ones that are merely secondary, and never ones a naive reader might over-weight. Three entries in this corpus were drafted with a true concept in that list (space, trapped-piece, pawn-break), and each one manufactured a false positive out of correct output. When the checker reports a rejected alternate, the first question is whether the alternate is actually wrong."
   ],
   "concept_roles": {
     "positive": "the concept clearly applies, on the annotator's authority",
@@ -1116,6 +1118,92 @@
         "outpost"
       ],
       "limitation": "Traced ply by ply through this game, the detector reports the e6 bishop for exactly ten plies and then stops, while the annotator treats it as bad throughout. The measurement and why it is recorded rather than fixed are on the concept record.",
+      "added": "2026-09-01"
+    },
+    {
+      "game": "Capablanca-Thomas, Hastings 1929",
+      "source": "amazingatlas-capablanca-thomas-1929",
+      "players": "Jose Raul Capablanca - Sir George Thomas",
+      "event": "Hastings 1929",
+      "year": 1929,
+      "annotator": "Nicholas Van Der Nat (FM), citing Euwe and Prins",
+      "fen_verified": "replay: all 101 plies replayed legally through blind-chess.html's move generator",
+      "id": "capablanca-thomas-1929-31bxc4-opposite-coloured-bishops",
+      "concept": "opposite-coloured-bishops",
+      "concept_role": "ambiguous",
+      "fen": "1kb5/2p1B3/3p2p1/pP3p1p/2PP4/P1K2P2/6PP/8 b - - 0 31",
+      "move": "Kb7",
+      "move_uci": "b8b7",
+      "fen_after": "2b5/1kp1B3/3p2p1/pP3p1p/2PP4/P1K2P2/6PP/8 w - - 1 32",
+      "human_annotation": "'Shortly after, the bishops come off with 30...Nxc4 31.bxc4, and now we have a true opposite-coloured-bishop ending, White's dark-squared bishop against Black's light-squared one. This is the ending Black was counting on to draw. Capablanca is about to show why it does not.' The method named: 'passed pawns on two widely separated wings, backed by a marching king ... One bishop cannot be in two places at once.'",
+      "explanation": "The feature is present and correctly reported, and the conclusion everybody attaches to it is false here - which is what makes this ambiguous rather than positive. Opposite-coloured bishops are the most drawish ending in chess and this one is winning by five pawns' worth of evaluation with White a single pawn up, because Capablanca can manufacture passers on the a/b-file and the f/g-file at once and a lone bishop cannot blockade both. The concept record's own note is that the drawing tendency is a property of endings with ONE front; this entry is the position where that qualification does the work. Twenty moves later the white king walks to d6 and Thomas resigns.",
+      "engine": {
+        "engine_id": "Stockfish 18",
+        "depth": 20,
+        "multipv": 3,
+        "best_move": "f4",
+        "best_eval_cp": -506,
+        "annotated_move_eval_cp": null,
+        "annotated_move_rank": null,
+        "agrees": "on the assessment, emphatically. Black is at -5.06 in a 'drawn' ending while a single pawn down. The move recorded is the game's 31...Kb7; the engine prefers 31...f4 by 0.13, which is not a disagreement about anything and does not change the verdict.",
+        "note": "Depth 20: a bishop ending with fourteen men, in the range this project has recorded as where deeper searches stop paying."
+      },
+      "confidence": "high",
+      "why_not_alternates": "bad-bishop is the reading that would be wrong here - neither bishop is bad, and Black's problem is not the quality of his bishop but that there is only one of it. fortress is what Black is hoping for and does not have, and this base must not report a fortress it cannot demonstrate.",
+      "also_true_but_secondary": [
+        "king-activation",
+        "passed-pawn",
+        "two-weaknesses",
+        "weak-square",
+        "space"
+      ],
+      "rejected_as_wrong": [
+        "bad-bishop",
+        "fortress"
+      ],
+      "added": "2026-09-01"
+    },
+    {
+      "game": "Smyslov-Botvinnik, World Championship match (game 1), Moscow 1954",
+      "source": "dgriffin-botvinnik-smyslov-1954-g1",
+      "players": "Vassily Smyslov - Mikhail Botvinnik",
+      "event": "World Championship match, Moscow 1954",
+      "year": 1954,
+      "annotator": "Mikhail Botvinnik, annotating his own game (tr. Douglas Griffin)",
+      "fen_verified": "replay: all 116 plies replayed legally through blind-chess.html's move generator",
+      "id": "smyslov-botvinnik-1954-g1-6b4-gambit",
+      "concept": "gambit",
+      "concept_role": "positive",
+      "fen": "rnbqk1nr/pp3ppp/4p3/b1ppP3/3P4/P1N5/1PP2PPP/R1BQKBNR w KQkq - 1 6",
+      "move": "b4",
+      "move_uci": "b2b4",
+      "fen_after": "rnbqk1nr/pp3ppp/4p3/b1ppP3/1P1P4/P1N5/2P2PPP/R1BQKBNR b KQkq b3 0 6",
+      "human_annotation": "'6.b4 A well-known pawn sacrifice, [recommended] by Alekhine in [the] book of the New York international tournament of 1924. (Incidentally, Alekhine's recommendation was soon tested in an analogous position in the game Botvinnik-Ragozin, Leningrad 1926.) At that time Alekhine examined only the reply 6...cxb4, after which White can gain strong pressure on Black's position with 7.Nb5 bxa3+ 8.c3.'",
+      "explanation": "A world champion naming a move a gambit, giving its author, its publication and its first practical test, in a world championship game - which is as much provenance as this concept can get. The record's own conditions are all visible: material is offered voluntarily in the opening, it can be declined (Botvinnik declines it with 6...cxd4), and the compensation is named as pressure rather than as a forced line. It is worth noting that the pawn was NOT taken, because the concept is about the offer, and an offer refused is still a gambit.",
+      "engine": {
+        "engine_id": "Stockfish 18",
+        "depth": 22,
+        "multipv": 3,
+        "best_move": "Qg4",
+        "best_eval_cp": 55,
+        "annotated_move_eval_cp": 53,
+        "annotated_move_rank": 2,
+        "agrees": "substantially - 6.b4 is the engine's second choice at depth 22, two hundredths of a pawn behind 6.Qg4 and one ahead of 6.Bd2. Three moves inside 0.03 of each other is a position with several good moves in it, not a refutation of a gambit that has been in the books since 1924.",
+        "note": null
+      },
+      "confidence": "high",
+      "why_not_alternates": "pawn-break is TRUE - b4 is a lever against c5 and this base reports it, correctly. An earlier draft of this entry listed it as wrong, which manufactured a false positive out of a correct report; that was the third time in this session and the lesson is recorded in the note above. pawn-breakthrough would be wrong: nothing is being forced through to promotion, and the record's own test - a passer the king cannot catch - is not remotely in view on move six.",
+      "also_true_but_secondary": [
+        "compensation",
+        "space",
+        "initiative",
+        "tempo",
+        "pawn-break"
+      ],
+      "rejected_as_wrong": [
+        "pawn-breakthrough",
+        "passed-pawn"
+      ],
       "added": "2026-09-01"
     }
   ]

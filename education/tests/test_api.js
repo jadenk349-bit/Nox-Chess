@@ -479,6 +479,28 @@ const { concepts } = API.knowledge();
      API.analyzeWithEducation({ fen: outOfWindow }).concepts_all.some(c => c.id === 'bad-bishop'));
 }
 
+{
+  // Capablanca-Thomas, Hastings 1929, after 31.bxc4. The most drawish ending in
+  // chess, and Stockfish gives it -5.06 with White a single pawn up, because
+  // there are passers coming on two wings and one bishop cannot blockade both.
+  // The feature must be REPORTED here - it is true - and the drawn verdict that
+  // usually rides on it must not appear anywhere in the wording.
+  const OCB = '1kb5/2p1B3/3p2p1/pP3p1p/2PP4/P1K2P2/6PP/8 b - - 0 31';
+  const r = API.analyzeWithEducation({ fen: OCB, move: 'b8b7' });
+  has('opposite-coloured bishops reported in the ending that refutes the rule',
+      r.concepts_all.map(c => c.id), 'opposite-coloured-bishops');
+  ok('and no fortress is claimed', !r.concepts_all.some(c => c.id === 'fortress'));
+  // Not "must not say draw" - the drawing tendency is real and worth saying. The
+  // requirement is that the CONDITION travels with it. Before this position was
+  // in the corpus, the record's own second exception - "three files of
+  // separation between passed pawns usually wins" - was in the record and in
+  // none of the wording below master level, so this base told a reader
+  // "drawish in endgames" about an ending Stockfish scores at -5.06.
+  const t = r.explanation.text;
+  ok('a drawing tendency is never stated without the condition that breaks it',
+     !/draw/i.test(t) || /(one wing|apart|separat|count what else)/i.test(t), t.slice(0, 240));
+}
+
 /* ---------- report ---------- */
 console.log(`\nAPI  PASS ${pass}   FAIL ${fails.length}`);
 for (const [n, d] of fails) console.log(`  FAIL  ${n}\n        ${d}`);
