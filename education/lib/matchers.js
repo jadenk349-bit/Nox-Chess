@@ -141,13 +141,19 @@ const PRIORITY = [
   // ...and the band that is true of most positions, last, because being true
   // here is not news.
   //
-  // Re-sorted 2026-09 after two matchers were tightened against conditions
+  // Re-sorted 2026-09 after four matchers were tightened against conditions
   // their own records state and had never implemented: open-file 55.7% ->
-  // 37.8% once a usable entry square is required, and two-weaknesses 72.5% ->
-  // 38.6% once three of its four preconditions are built. Both moved up to
-  // where the measurement now puts them.
-  'open-file', 'semi-open-file', 'material-imbalance', 'piece-activity',
-  'space', 'weak-square',
+  // 35.5% once a usable entry square is required, two-weaknesses 72.5% -> 38.6%
+  // once three of its four preconditions are built, piece-activity 44.4% ->
+  // 33.9% once it counts active moves rather than legal ones, and weak-square
+  // 68.9% -> 40.5% once the piece has to be able to STAY on the square and the
+  // square has to be in the other camp. Each moved up to where the measurement
+  // now puts it, and `space` is now the only one left above half — it is next.
+  //
+  // Re-measure with `node tools/firing_rates.js`, which exists because this
+  // measurement kept being made by hand.
+  'space', 'weak-square', 'semi-open-file', 'open-file', 'piece-activity',
+  'material-imbalance',
 ];
 const priorityOf = id => {
   const i = PRIORITY.indexOf(id);
@@ -353,7 +359,9 @@ const STRUCTURAL = [
   },
   {
     concept: 'weak-square',
-    implements: "recognition: a square in one camp that no pawn of that colour can ever attack",
+    implements: ("recognition: a square in the opponent's camp that no pawn of theirs can ever " +
+                 "attack, that a minor piece can reach and survive on, and that is neither on " +
+                 "the edge nor in our own half — false_positive_traps 1 and 2, indicators_against 3 and 4"),
     run(f) {
       const hits = [];
       // A hole is a hole in something, and a hole nothing can use is not worth
@@ -363,10 +371,26 @@ const STRUCTURAL = [
       // no information. Report a hole a minor piece can actually move to: that
       // is a plan rather than a fact about the pawn structure. Squares already
       // occupied are left to the outpost matcher, which says more about them.
+      //
+      // Together with the survival test in reachableHoles(): 68.9% -> 40.5%.
+      //
+      // The record's `indicators_against` names two more, and this used to
+      // implement neither: "it is on the edge, or deep in the opponent's own
+      // half". A hole on a3 is a square, not a weakness, and a square in one's
+      // OWN half is not what the definition is about at all - "a square in one's
+      // own camp that can no longer be controlled by a pawn". holesFor() spans
+      // three ranks because `outpost` legitimately wants the middle one; the
+      // weak-square CLAIM does not, so the narrowing is here rather than in
+      // Layer 3, where it would silently change what an outpost is.
       for (const c of ['w', 'b']) {
         if (pawnCount(f, other(c)) < 3) continue;
         const taken = new Set((f.outposts[c] || []).map(o => o.square));
-        const usable = (f.reachableHoles[c] || []).filter(sq => !taken.has(sq));
+        const usable = (f.reachableHoles[c] || []).filter(sq => {
+          if (taken.has(sq)) return false;
+          if (sq[0] === 'a' || sq[0] === 'h') return false;
+          const rank = +sq[1];
+          return c === 'w' ? rank >= 5 : rank <= 4;
+        });
         if (usable.length) hits.push({ c, sq: usable });
       }
       if (!hits.length) return null;

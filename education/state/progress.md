@@ -411,7 +411,21 @@ record's first trap forbids — "counting available squares is not measuring
 activity. A piece with many moves that bear on nothing is not active." It now
 counts active moves, threshold unchanged: 44.4% → **33.9%**.
 
-Four matchers, one shape: the record's bare *precondition* was implemented and
+`weak-square` fired on **68.9%** and implemented exactly one line of its
+record — the precondition. Three conditions written underneath it were not
+built: the fianchetto trap ("a fianchetto leaves permanent weak squares on the
+long diagonal that the bishop covers perfectly well"), `indicators_against`'s
+"it is on the edge, or deep in the opponent's own half", and the definition's
+own words, "a square in **one's own camp**". 68.9% → **40.5%**.
+
+The fianchetto guard is the interesting one, because the naive form of it
+deletes the classic outpost too: Nd5 met by ...Nxd5 exd5 is an even trade on the
+square, exactly like Bh6 met by Bxh6 Qxh6. The difference is the **pawn**
+recapture, which keeps the square where a piece recapture leaves it to nobody —
+and pawn support is what the record's own `indicators_for` names. Both cases are
+pinned by tests.
+
+Five matchers, one shape: the record's bare *precondition* was implemented and
 the *traps* written underneath it were not, and in every case the traps were the
 part that carried the chess. The next audit should read every matcher against
 its record's traps rather than its preconditions — that is where the conditions

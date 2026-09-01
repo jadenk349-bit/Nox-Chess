@@ -819,6 +819,52 @@ const { concepts } = API.knowledge();
   ok('...and named on the concept record', (pa.limitations || []).some(l => /ARMY-LEVEL ONLY/.test(l)));
 }
 
+{
+  // weak-square's THREE unimplemented conditions, one test each. The matcher
+  // implemented the record's precondition ("no friendly pawn can ever attack
+  // the square") and none of the three things written underneath it, and fired
+  // on 68.9% of the 788 shipped positions for it.
+  const has = (fen, side) => (API.analyzeWithEducation({ fen }).concepts_all
+    .find(c => c.id === 'weak-square') || { subjects: [] }).subjects.includes(side);
+
+  // 1. THE FIANCHETTO TRAP, in the record's own words: "a fianchetto leaves
+  //    permanent weak squares on the long diagonal that the bishop covers
+  //    perfectly well. The square is weak; the position is not." h6 in a Dragon
+  //    is a hole by every structural test; a white piece put there is taken.
+  ok('weak-square: silent on a fianchetto hole the bishop covers',
+     !has('r1bq1rk1/pp2ppbp/2np1np1/8/3NP3/2N1BP2/PPPQ2PP/R3KB1R w KQ - 0 1', 'w'));
+  ok('weak-square: silent where the piece would simply be lost',
+     !has('r1bq1rk1/ppp1ppbp/2np1np1/8/2PPP3/2N2N2/PP2BPPP/R1BQ1RK1 w - - 0 1', 'w'));
+
+  // 2. ...but the classic outpost must survive that guard, and it is the exact
+  //    same shape: an even trade on the square. The difference is the PAWN
+  //    recapture, which keeps the square instead of leaving it to nobody -
+  //    Nd5, met by ...Nxd5 exd5, is the point of a whole family of openings.
+  ok('weak-square: still reports a pawn-supported central hole',
+     has('r1bq1rk1/pp3ppp/2np1n2/4p3/2B1P3/2NP1N2/PPP2PPP/R1BQ1RK1 w - - 0 1', 'w'));
+
+  // 3. `indicators_against`: "it is on the edge, or deep in the opponent's own
+  //    half" - and a square in our OWN half is not what the definition is about
+  //    at all ("a square in one's own camp").
+  const RIM = '5k1r/5pp1/8/pPPq3p/R2b4/1P1Pn1PN/7K/1Q3R2 w - - 5 35';
+  const feat = FEAT.features(RIM);
+  ok('weak-square: Layer 3 still offers holes on the rim and in our own half',
+     feat.holes.w.some(sq => +sq[1] === 4) && feat.holes.w.some(sq => sq[0] === 'a'),
+     feat.holes.w.join(','));
+  const said = (API.analyzeWithEducation({
+    fen: 'r1bq1rk1/pp3ppp/2np1n2/4p3/2B1P3/2NP1N2/PPP2PPP/R1BQ1RK1 w - - 0 1' })
+    .concepts.find(c => c.id === 'weak-square') || {});
+  ok('...and Layer 4 names none of them in our own half or on the rim',
+     !/\b[ah][1-8]\b|\b[a-h][1-4]\b/.test((said.because || []).join(' ')),
+     (said.because || []).join(' '));
+
+  // The narrowing is in Layer 4, not Layer 3, on purpose: `outpost` legitimately
+  // wants the middle rank, and moving the rank test into holesFor() would have
+  // silently changed what an outpost is.
+  ok('weak-square: the measured rate is recorded in the source',
+     /40\.5%/.test(fs.readFileSync(path.join(ROOT, 'lib', 'matchers.js'), 'utf8')));
+}
+
 /* ---------- report ---------- */
 console.log(`\nAPI  PASS ${pass}   FAIL ${fails.length}`);
 for (const [n, d] of fails) console.log(`  FAIL  ${n}\n        ${d}`);

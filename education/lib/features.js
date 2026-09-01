@@ -444,7 +444,42 @@ function reachableHoles(st, colour) {
     const piece = probe.b[m.from];
     if (!piece || (piece.t !== 'N' && piece.t !== 'B')) continue;
     const sq = nameOf(m.to);
-    if (holes.has(sq)) out.add(sq);
+    if (!holes.has(sq)) continue;
+    // ...and can STAY there. The weak-square record's second false-positive
+    // trap is a fianchetto: "a fianchetto leaves permanent weak squares on the
+    // long diagonal that the bishop covers perfectly well. The square is weak;
+    // the position is not." h6 and f6 in a Dragon are holes by every structural
+    // test - no black pawn can ever attack either - and a white piece put on
+    // one is taken by the bishop on g7.
+    //
+    // So the piece must survive arriving. Losing material there disqualifies
+    // the square outright. An EVEN trade disqualifies it too, but only when no
+    // pawn of ours attacks it - and that exception is the whole difference
+    // between the trap and the classic case. A knight to d5 met by ...Nxd5 exd5
+    // is an even trade and is the point of the whole opening: the pawn recapture
+    // keeps the square. Bxh6 met by Qxh6 is an even trade that leaves the square
+    // to nobody. Pawn support is also what this record's own `indicators_for`
+    // names - "an enemy piece can reach the square and be SUPPORTED there".
+    //
+    // The attacker count is tested separately because see() answers 0 both for
+    // an even trade and for a square nothing attacks at all, and reading those
+    // two as the same thing would throw away exactly the safe squares this is
+    // looking for.
+    const enemy = colour === 'w' ? 'b' : 'w';
+    const nx = P.makeMove(probe, m);
+    const fwd = colour === 'w' ? -1 : 1;          // a pawn of ours standing behind it
+    const heldByPawn = [-1, 1].some(dc => {
+      const r = rowOf(m.to) - fwd, c = colOf(m.to) + dc;
+      if (!onBoard(r, c)) return false;
+      const q = nx.b[idx(r, c)];
+      return !!q && q.t === 'P' && q.c === colour;
+    });
+    if (P.attackersOf(nx, m.to, enemy).length) {
+      const s = P.see(nx, m.to, enemy);
+      if (s > 0) continue;
+      if (s === 0 && !heldByPawn) continue;
+    }
+    out.add(sq);
   }
   return [...out];
 }
