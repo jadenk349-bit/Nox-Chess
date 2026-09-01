@@ -1078,6 +1078,40 @@ const { concepts } = API.knowledge();
        fs.readFileSync(path.join(ROOT, 'lib', 'matchers.js'), 'utf8')));
 }
 
+{
+  // The corpus's first entry scored on CONFIDENCE rather than on presence.
+  // Ftacnik-Roiz 2009: White really does have the two bishops, Markos writes
+  // "please note how idle White's bishops are", and Stockfish scores the
+  // position at -2.66 for the side holding them. Nothing the system says is
+  // false, so the concept does NOT belong in rejected_as_wrong - three entries
+  // in this file once manufactured false positives that way. What is wrong is
+  // the weight, and that is what `confidence` measures.
+  const corpus = JSON.parse(fs.readFileSync(
+    path.join(ROOT, 'corpus', 'annotated_positions.json'), 'utf8')).positions;
+  const fr = corpus.find(p => p.id === 'ftacnik-roiz-2009-18d4-bishop-pair-overrated');
+  ok('the confidence-scored entry exists and rejects nothing', fr &&
+     Array.isArray(fr.rejected_as_wrong) && fr.rejected_as_wrong.length === 0);
+  ok('...and is recorded as a failure rather than engineered around',
+     fr && /RECORDED FAILURE/.test(fr.explanation) && fr.limitation);
+  const r = API.analyzeWithEducation({ fen: fr.fen });
+  const bp = r.concepts_all.find(c => c.id === 'bishop-pair');
+  ok('bishop-pair is still reported there — the pair is a fact', !!bp);
+  ok('...and the guard for a buried bishop correctly does NOT fire',
+     bp && bp.confidence !== 'low',
+     'if this ever flips, check it is for a real reason and not a fitted one');
+
+  // An empty rejected_as_wrong must be readable as a statement, not an omission.
+  const checker = fs.readFileSync(path.join(ROOT, 'tools', 'corpus_check.py'), 'utf8');
+  ok('corpus_check treats an empty rejected_as_wrong as deliberate',
+     /An EMPTY rejected_as_wrong is a statement/.test(checker));
+
+  // The trap audit is a reading list with a number on it.
+  const traps = fs.readFileSync(path.join(ROOT, 'state', 'TRAPS.md'), 'utf8');
+  ok('the trap reading list is checked in', /unread/.test(traps) && traps.length > 2000);
+  ok('...and says plainly that it is a reading list, not a verdict',
+     /READING LIST, not a verdict/.test(traps));
+}
+
 /* ---------- report ---------- */
 console.log(`\nAPI  PASS ${pass}   FAIL ${fails.length}`);
 for (const [n, d] of fails) console.log(`  FAIL  ${n}\n        ${d}`);

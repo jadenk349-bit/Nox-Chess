@@ -12,7 +12,7 @@ evidence in general, it is NEGATIVE and AMBIGUOUS evidence in particular.
 |---|---|---|---|
 | 1 | All major areas have meaningful depth | **NOT MET** | 2 areas `full`, 13 `substantial`, 70 `partial`. Mean concept completeness 0.71 (was 0.70). |
 | 2 | Important concepts have strong recognition criteria | **PARTIAL** | 53 concepts have an implemented Layer 4 matcher naming the record it implements — 53 of the 83 whose own record permits one, up from 32 at the start of the session. Of the 30 remaining, roughly half are vocabulary rather than position features and should never be reported about a board; one more, `strong-square`, was written, measured at 80.1% and refused. |
-| 3 | Positional concepts tested outside the tactical corpus | **MET** | 37 human-annotated positions from 24 master games, 1908–2005, spanning a century and seven countries; plus 13 replay-verified games and a 350-position quiet sub-corpus. No longer one tournament. |
+| 3 | Positional concepts tested outside the tactical corpus | **MET** | 38 human-annotated positions from 25 master games, 1908–2005, spanning a century and seven countries; plus 13 replay-verified games and a 350-position quiet sub-corpus. No longer one tournament. |
 | 4 | Major concepts have positive and negative testing | **NOT MET** | 55% of applicable concepts lack a positive example, 77% a negative one, 81% an ambiguous one. This is the blocker, and it is the one that does not yield to mining. |
 | 5 | False positives aggressively tested | **MET** | 27 resolved cases replayed as regression assertions, plus seven annotated negative examples — two of them built by a named grandmaster as traps for exactly the reading a mechanical detector performs. Four of those are real tests — the API declines to report a king attack in a position with every mechanical sign of one — — the API declines to report an outpost on a square a world champion twice calls unsafe, and declines to report a king attack in a position with every mechanical sign of one — one is recorded as **vacuous**, because nothing could have reported it, and the two newest are the first human grounding `weak-square` has ever had: the hole on d5 in Unzicker–Fischer 1962 and in Shirov–Kramnik 2000, which Markos calls "a keyhole with no fitting key" and "a no man's land — neither side can make any use of it". |
 | 6 | API works across tactical and positional positions | **MET** | 788-position mass test: 0 crashes, 0 template leaks, 0 banned phrasings, 100% licensed a concept. 376-assertion behaviour audit over 22 position types. |
@@ -24,16 +24,16 @@ evidence in general, it is NEGATIVE and AMBIGUOUS evidence in particular.
 ## Current state
 
 137 concepts · 188 sources · **111 engine-validated positions + 22 tablebase** ·
-**37 human-annotated corpus positions from 24 master games** · 32 replay-verified
-master games · 661 tests + 371 API + 374 audit + 3574 explanation assertions.
+**38 human-annotated corpus positions from 25 master games** · 32 replay-verified
+master games · 661 tests + 378 API + 374 audit + 3574 explanation assertions.
 
 ## What moved this session
 
 | | before | after |
 |---|---|---|
-| human-grounded corpus positions | 6 | 37 |
-| corpus games | 2 | 24 |
-| corpus roles | 5 positive, 1 ambiguous, 0 negative | 18 positive, 12 ambiguous, 7 negative |
+| human-grounded corpus positions | 6 | 38 |
+| corpus games | 2 | 25 |
+| corpus roles | 5 positive, 1 ambiguous, 0 negative | 18 positive, 13 ambiguous, 7 negative |
 | concepts with human grounding (twice-corrected measure) | 5 | 29 |
 | concepts with a Layer 4 matcher | 32 | 36 |
 | validated positions | 82 | 111 |
@@ -62,7 +62,11 @@ to the lead alone, and then fixing the *recognition* of the one concept the
 ordering could not accommodate, it is **2.2**, and the concept is in the top three on 11 of 12.
 
 **Confidence** is measured too: the system may say less than the annotator and
-never more. 0 of 35 overclaim.
+never more. 1 of 38 overclaims, and it is left standing: Ftacnik–Roiz 2009,
+where White really does hold the two bishops, Markos writes "please note how
+idle White's bishops are", and Stockfish scores the position at −2.66 for him.
+Nothing the system says there is false; only the weight is wrong. That is the
+first entry in this corpus scored on weighting rather than on detection.
 
 ## What is still missing, precisely
 

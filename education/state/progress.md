@@ -1169,3 +1169,36 @@ buried bishop instead of the record's usual advice to keep both. 23 of the 178
 positions where a pair exists change from a confident recommendation to a
 qualified observation. The firing rate does not move, and saying it moved would
 be the wrong claim to make about this change.
+
+
+## The first test of weighting rather than detection — and it fails
+
+Jan Markos's *Hypnotised by the bishops* gives three master games in which the
+bishop pair is worth nothing. **Ftacnik–Roiz, Bundesliga 2008/09** is now in the
+corpus: after 18...d4 White really does hold the two bishops, Markos writes
+*"please note how idle White's bishops are"*, and Stockfish scores the position
+at **−2.66** for the side holding them, with every alternative worse.
+
+Nothing this base says about that position is false. It reports the pair, the
+doubled f-pawns, Black's isolated pawn, Black's grip on the centre. What it
+cannot do is weight them — which is Markos's whole thesis: *"we tend to
+overestimate what is well-defined and clear-cut, and underestimate what is vague
+and hazy."*
+
+So `bishop-pair` is **not** put in `rejected_as_wrong`. It is not wrong to say
+White has two bishops, and three entries in this corpus once manufactured false
+positives exactly that way. The entry records the *annotator's* confidence as
+low and lets the existing confidence measure catch the gap: **1 overclaim of 38,
+standing.** The buried-bishop guard added the same day does not fire here and
+should not — White's bishops are not buried by pawns, they are pointing at
+nothing while the king they left behind is mated.
+
+### A reading list, with a number on it
+
+`tools/trap_audit.js` and `state/TRAPS.md` list every false-positive trap a
+record states, against the matcher meant to implement it. **108 traps across 24
+matchers: 58 cited somewhere, 50 never written about either way.** Every one of
+the eight defects found by this method was in the second group before someone
+read it. The tool is deliberately a reading list and not a verdict — deciding
+whether a trap is correctly implemented is the work, and the tool's job is only
+to stop the list being rediscovered from scratch each session.

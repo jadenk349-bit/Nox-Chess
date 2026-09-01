@@ -32,7 +32,8 @@
     "",
     "`side` names the colour a NEGATIVE entry is about, and it exists because the sharpest negatives are per-side. Nimzowitsch's blockading bishop on d4 must not be called bad in a position where Black's bishop on d7 correctly is, and a side-agnostic list cannot state that. It required carrying `subjects` through to the API's concepts_all, which had never been exposed there.",
     "Two entries added 2026-09-02 give weak-square its first human grounding, and both are NEGATIVE, which is the right way round for a concept whose own record says every pawn move creates squares no pawn can guard. Both come from one article by a named grandmaster who built the positions as traps for exactly the reading a mechanical detector performs; the second names no side, because the claim is that NEITHER side can use the square.",
-    "`attributed_by` names the PERSON whose claim the entry rests on, and it is the field the validation ladder reads - not `annotator`, which is prose and can say things like 'unattributed training page' while still looking like grounding. Backfilled across the file on 2026-09-02, at which point exactly one entry turned out to have no person behind it (karpov-kasparov-1985-g16), and it now correctly grants its concept no human-grounded rung. This is the second time a rung in this project was found counting something looser than its own definition, and both times the number went down."
+    "`attributed_by` names the PERSON whose claim the entry rests on, and it is the field the validation ladder reads - not `annotator`, which is prose and can say things like 'unattributed training page' while still looking like grounding. Backfilled across the file on 2026-09-02, at which point exactly one entry turned out to have no person behind it (karpov-kasparov-1985-g16), and it now correctly grants its concept no human-grounded rung. This is the second time a rung in this project was found counting something looser than its own definition, and both times the number went down.",
+    "One entry, added 2026-09-02, is scored on CONFIDENCE rather than on presence, and is the first of its kind here: Ftacnik-Roiz 2009, where White really does have the two bishops and a grandmaster's note reads 'please note how idle White's bishops are' in a position Stockfish scores at -2.66 for him. Nothing the system says is false, so `bishop-pair` does not belong in rejected_as_wrong; what is wrong is the weight. The entry's `confidence` is the annotator's, the checker compares it with the system's, and the gap is a recorded failure rather than a guard fitted to one position."
   ],
   "concept_roles": {
     "positive": "the concept clearly applies, on the annotator's authority",
@@ -1658,6 +1659,60 @@
         ],
         "agrees": "on both counts, and unusually cleanly. Scores are from the side to move: 0.00 for Black, which is Markos's 'Black is equal', and the move he quotes - 20...d5! - is the engine's first choice, settled from depth 8, with the second best a third of a pawn worse.",
         "note": "The engine says nothing about whether d5 is a weak square and was not asked to. It says the position is level and that abolishing the square is best play, which is what makes 'no man's land' a claim about the board rather than about taste."
+      }
+    },
+    {
+      "game": "Ftacnik-Roiz, German Bundesliga 2008/09, round 14, 28 March 2009",
+      "source": "markos-chessbase-winning-academy-6-hypnotised-by-the-bishops-2022",
+      "players": "Lubomir Ftacnik - Michael Roiz",
+      "event": "Bundesliga 2008/09",
+      "year": 2009,
+      "annotator": "Jan Markos (GM), 'The Winning Academy 6: Hypnotised by the bishops', ChessBase, 2 March 2022",
+      "attributed_by": "Jan Markos",
+      "fen_verified": "replay: all 56 plies replayed legally through blind-chess.html's move generator. The score was taken from a contemporary Polish-notation report of the round and matches Markos's quoted continuation move for move - 14.gxf3 0-0 15.Rd1 Qe7 16.Na4 Ba7 17.Bh3 Rad8 18.Nb2 d4 - which is what identifies the game rather than the header.",
+      "added": "2026-09-02",
+      "id": "ftacnik-roiz-2009-18d4-bishop-pair-overrated",
+      "concept": "bishop-pair",
+      "concept_role": "ambiguous",
+      "side": "w",
+      "fen": "3r1rk1/bp2qppp/p1n2n2/8/3p4/1P2PP1B/PN1B1P1P/RQ1R2K1 w - - 0 19",
+      "move": "e4",
+      "move_uci": "e3e4",
+      "fen_after": "3r1rk1/bp2qppp/p1n2n2/8/3pP3/1P3P1B/PN1B1P1P/RQ1R2K1 b - - 0 19",
+      "human_annotation": "On the decision that produced this position: \"With his last move 12...Bg4, Roiz created the threat of Bxf3, blowing up the shelter of White's king. However, Ftacnik was not impressed. Instead of carefully parrying the threat with e.g. 13.Be2, he decided for the active 13.Bf5??, assuming that he is in a win-win situation. Either Black exchanges the bishops, and then White is closer to an endgame with a clear plan against the isolated d5-pawn, or he takes on f3 and then White will enjoy the bishop-pair. However, White's thinking was too one-dimensional. In fact, the f3-knight is an important piece that protects crucial central squares. Also, after the exchange on f3 the white king will be extremely weak, and his army stuck in the centre will not be able to come to help him.\" And on this position: \"The final attack against the weakened White's kingside has just begun. Please note how idle White's bishops are, and how nicely the black cavalry controls the centre.\" The article's thesis: \"we tend to overestimate what is well-defined and clear-cut, and underestimate what is vague and hazy... we tend to overestimate it compared to hazier assets as 'initiative' or 'cooperation of pieces'.\"",
+      "explanation": "RECORDED FAILURE, and the first entry in this corpus scored on CONFIDENCE rather than on presence.\n\nWhite does have the two bishops and Black does not. Nothing this base says about the position is false: it reports the pair, the doubled f-pawns, Black's isolated d-pawn, Black's control of the centre. What it cannot do is what Markos's whole article is about - weight them. It reports the pair at MEDIUM confidence, as the second thing in the list, in a position Stockfish scores at -2.66 for the side holding it, and where a grandmaster's note reads 'please note how idle White's bishops are'.\n\nThe entry therefore sets the annotator's confidence to LOW and lets tools/corpus_check.py's confidence measure catch the gap, rather than putting `bishop-pair` in rejected_as_wrong. It is not wrong to say White has two bishops. Three earlier entries in this file manufactured false positives out of correct output by listing a true concept as rejected, and the note at the top of this file says so.\n\nWhat was tried and did not work: the guard added on the same day for this record's third trap - 'a pair where one bishop is shut in by its own pawns is not really a pair' - does not fire here, and should not. White's bishops share their colour with three of six pawns each and see seven and five squares. They are not buried by pawns; they are simply pointing at nothing while the king they left behind is being mated. No static feature in this base separates those two states, and the record says as much in its own second trap: 'half a pawn is an AVERAGE over many games and can be arbitrarily wrong in one position.'\n\nThe honest reading is that this is the same class of limit as the recorded piece-activity failure on Reti-Capablanca 1924: the concept is army-level or position-level, the annotation is about what the pieces are DOING, and inventing a guard to make one position score would be fitting a rule to a case.",
+      "confidence": "low",
+      "why_not_alternates": "doubled-pawns, isolated-queen-pawn and center-control are all correctly reported and are all part of Markos's account - the shattered kingside, the d-pawn White was playing against, and the black knights that 'nicely control the centre'. None of them is wrong. What is wrong is only the WEIGHT given to the bishop pair beside them.",
+      "also_true_but_secondary": [
+        "doubled-pawns",
+        "isolated-queen-pawn",
+        "center-control",
+        "semi-open-file",
+        "space"
+      ],
+      "rejected_as_wrong": [],
+      "limitation": "The system reports bishop-pair at medium confidence where the annotator's is low. That is a measured confidence overclaim and it is left standing, because the only ways to remove it are to invent a guard that fits this one position or to change the expected answer.",
+      "engine": {
+        "engine_id": "Stockfish 18",
+        "depth": 28,
+        "multipv": 3,
+        "best_move": "e4",
+        "best_eval_cp": -266,
+        "annotated_move": "e4",
+        "annotated_move_eval_cp": -266,
+        "annotated_move_rank": 1,
+        "alternatives": [
+          {
+            "move": "Kh1",
+            "eval_cp": -332
+          },
+          {
+            "move": "Bg2",
+            "eval_cp": -348
+          }
+        ],
+        "agrees": "emphatically, on the evaluation. Scores are from the side to move, and White is to move: -2.66 with the bishop pair in hand and every alternative worse. The game's 19.e4 is also the engine's first choice, so White is not being punished for the move but for the position the bishops were bought with.",
+        "note": "The engine cannot say whether a bishop pair is worth anything and was not asked to. It is here to establish that the side holding the clear-cut, well-defined asset is losing by more than two and a half pawns, which is what makes this a test of WEIGHTING rather than of detection."
       }
     }
   ]

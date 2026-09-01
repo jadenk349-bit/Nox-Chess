@@ -132,6 +132,18 @@ def main():
     problems = []
     for p in pos:
         for k in REQUIRED:
+            # An EMPTY rejected_as_wrong is a statement, not an omission: it says
+            # the annotator considered the alternates and none of them would be
+            # wrong here. That is the right answer for an entry scored on
+            # CONFIDENCE rather than on presence, where everything the system
+            # says is true and only the weight is wrong - and treating it as a
+            # missing field would push the author towards inventing a rejection,
+            # which is exactly how three entries in this file once manufactured
+            # false positives out of correct output.
+            if k == "rejected_as_wrong":
+                if k not in p:
+                    problems.append(f"{p.get('id','?')}: missing {k}")
+                continue
             if not p.get(k):
                 problems.append(f"{p.get('id','?')}: missing {k}")
         if p.get("concept") and p["concept"] not in concepts:
