@@ -117,6 +117,14 @@
       "origin_kind": "puzzle",
       "concept_role": "negative",
       "false_positive_case": "a-discovery-onto-a-defended-pawn"
+    },
+    {
+      "fen": "2r5/2p2kr1/pp3p1p/3n4/2RN1p2/P6P/1P3K2/2R5 w - - 10 35",
+      "move_uci": "d4f5",
+      "note": "Shipped puzzle, and a registered false-positive case `a-discovery-onto-a-defended-pawn`, kept on the record as well as in tests/false_positive_cases.json so that the concept carries its own negative evidence. THE SURFACE PATTERN IS PRESENT: Nf5 steps out of the c4 rook's line and the detector reports 'Moving the knight uncovers the rook on c4, which now attacks the pawn on f4.' The line really is uncovered and the pawn really is attacked. WHY IT IS NOT THE CONCEPT: This record's second indicator_against: \"The revealed 'attack' hits something defended and not worth taking.\" The f4 pawn is defended by the knight on d5, so Rxf4 is answered by Nxf4 and the discovery has won a pawn for a rook. WHAT THE SYSTEM DOES: Shipped puzzle en-f21d044b23, and SEE puts a number on it: taking on f4 scores -400. The move is genuinely strong and the API still says why — Nf5 forks the rook on g7 and the h6 pawn, and that report is untouched. What was wrong was the second label sitting beside the first, telling the reader that a rook had been unleashed onto something. 33 of the 788 shipped puzzles carried a discovered-attack report whose revealed target SEE said was not worth taking; all 33 were at HIGH confidence. A revealed CHECK is never guarded — the detector writes 'now checks the king' for those and the guard does not match that sentence — because a check is worth something whatever SEE says.",
+      "origin_kind": "puzzle",
+      "concept_role": "negative",
+      "false_positive_case": "a-discovery-onto-a-defended-pawn"
     }
   ],
   "ambiguous_examples": [],

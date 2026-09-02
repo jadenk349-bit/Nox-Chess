@@ -132,6 +132,14 @@
       "origin_kind": "puzzle",
       "concept_role": "negative",
       "false_positive_case": "a-trapped-rook-with-a-desperado"
+    },
+    {
+      "fen": "2r4k/3qP2p/7Q/p2p4/5P1P/p3P1P1/6K1/8 w - - 0 48",
+      "move_uci": "h6f8",
+      "note": "Shipped puzzle, and a registered false-positive case `a-trapped-rook-with-a-desperado`, kept on the record as well as in tests/false_positive_cases.json so that the concept carries its own negative evidence. THE SURFACE PATTERN IS PRESENT: After Qxf8+, the detector reports 'The rook on c8 is trapped — every square it can reach loses it.' Every square it can reach does lose it. WHY IT IS NOT THE CONCEPT: This record's second indicator_against: \"It has a desperado capture that recovers the material.\" One of the squares it can reach is f8, where the white queen is standing. WHAT THE SYSTEM DOES: This is not a constructed position. It is shipped puzzle mi-9f06a55404, and the puzzle's OWN SOLUTION LINE is the refutation of the label: h6f8, c8f8, e7f8q — the second move of the answer is the trapped rook taking the queen. A rook that is lost is trapped; a rook that is lost after eating a queen is a trade. The scan that found it read all 788 shipped puzzles and asked, of every trapped-piece report, whether any capture available to the piece breaks even after recapture: 8 of them do, and all 8 were being reported. The guard implements the condition and trapped-piece fell to 12.9%.",
+      "origin_kind": "puzzle",
+      "concept_role": "negative",
+      "false_positive_case": "a-trapped-rook-with-a-desperado"
     }
   ],
   "ambiguous_examples": [],

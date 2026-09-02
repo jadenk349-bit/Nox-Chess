@@ -20,7 +20,7 @@ Mean completeness **0.81** across 137 concepts.
 | full | 0.84 | `pawn-breaks` | 3 |
 | full | 0.81 | `named-theoretical-positions` | 3 |
 | full | 0.81 | `opening-theory-concepts` | 4 |
-| full | 0.77 | `official-rules` | 12 |
+| full | 0.79 | `official-rules` | 12 |
 | substantial | 1.00 | `checks-captures-threats` | 2 |
 | substantial | 1.00 | `king-safety` | 2 |
 | substantial | 1.00 | `bishop-endgames` | 2 |
@@ -147,6 +147,7 @@ Mean completeness **0.81** across 137 concepts.
 | `sacrifice` | 0.92 | x | x | x | x | x | x | - | x | . | x | . | . | x | x | x | x |
 | `key-square` | 0.92 | x | x | x | . | x | . | x | x | . | x | x | . | - | x | x | x |
 | `check` | 0.91 | x | x | x | . | x | . | x | x | . | . | x | . | x | x | x | - |
+| `dead-position` | 0.91 | x | x | x | . | x | . | x | x | . | . | x | . | x | x | x | - |
 | `notation` | 0.91 | x | x | x | x | x | . | x | x | . | . | . | . | - | x | x | x |
 | `vancura-position` | 0.88 | x | x | x | x | x | x | x | x | - | x | x | - | x | x | x | x |
 | `initiative` | 0.87 | x | x | x | x | x | x | x | x | - | x | . | x | - | x | x | x |
@@ -159,6 +160,7 @@ Mean completeness **0.81** across 137 concepts.
 | `queen-activity` | 0.86 | x | x | x | . | x | x | - | x | x | x | . | x | - | x | x | x |
 | `battery` | 0.86 | x | x | x | . | x | x | x | x | x | x | . | - | x | x | x | - |
 | `building-a-bridge` | 0.85 | x | x | x | x | x | . | x | - | . | x | x | . | - | x | x | x |
+| `insufficient-material` | 0.85 | x | x | x | . | x | x | x | x | . | - | x | . | x | x | x | - |
 | `perpetual-check` | 0.83 | x | x | x | . | x | x | x | - | . | x | . | . | - | x | x | x |
 | `checkmate` | 0.82 | x | x | x | . | x | . | x | x | . | . | x | . | - | x | x | - |
 | `en-passant` | 0.82 | x | x | x | . | x | . | x | x | . | . | x | . | - | x | x | - |
@@ -194,7 +196,6 @@ Mean completeness **0.81** across 137 concepts.
 | `discovered-attack` | 0.79 | x | x | x | . | x | x | x | x | - | x | . | - | x | x | x | - |
 | `trapped-piece` | 0.79 | x | x | x | . | x | x | x | x | - | x | . | - | x | x | x | - |
 | `triangulation` | 0.77 | x | x | x | x | x | . | - | - | . | x | x | . | - | x | x | x |
-| `insufficient-material` | 0.77 | x | x | x | . | x | x | x | x | . | - | x | . | - | x | x | - |
 | `endgame-principles` | 0.75 | x | x | x | x | x | x | x | - | - | x | - | x | - | x | x | x |
 | `fortress` | 0.75 | x | x | x | x | x | x | x | - | - | x | x | - | - | x | x | x |
 | `knight-endgames` | 0.75 | x | x | x | x | x | x | x | - | - | x | x | - | - | x | x | x |
@@ -207,7 +208,6 @@ Mean completeness **0.81** across 137 concepts.
 | `hole` | 0.73 | x | x | x | x | x | x | x | - | - | x | . | - | - | x | x | x |
 | `double-check` | 0.73 | x | x | x | . | x | x | x | x | - | x | x | - | - | x | x | - |
 | `forcing-moves` | 0.73 | x | x | x | x | x | x | x | - | - | x | . | - | - | x | x | x |
-| `dead-position` | 0.73 | x | x | x | . | x | . | x | - | . | . | x | . | - | x | x | - |
 | `discovered-check` | 0.71 | x | x | x | . | x | x | x | x | - | x | . | - | - | x | x | - |
 | `promotion` | 0.70 | x | x | x | . | x | . | x | - | . | . | . | . | - | x | x | - |
 | `seventy-five-move-rule` | 0.70 | x | x | x | . | x | . | x | - | . | . | . | . | - | x | x | - |

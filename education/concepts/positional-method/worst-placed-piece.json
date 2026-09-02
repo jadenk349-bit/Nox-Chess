@@ -195,6 +195,14 @@
         "verdict_note": "#1. The move generator enumerates Black's only mate as e8e1 and the engine agrees. This is the sharpest form of 'the opponent has a concrete threat that must be met' and it leaves no material on the floor for a material test to find."
       },
       "false_positive_case": "improving-a-piece-into-mate"
+    },
+    {
+      "fen": "4r1k1/5ppp/8/8/8/8/5PPP/N5K1 w - - 0 1",
+      "move_uci": "a1b3",
+      "note": "Registered false-positive case `improving-a-piece-into-mate`, kept on the record as well as in tests/false_positive_cases.json so that the concept carries its own negative evidence. THE SURFACE PATTERN IS PRESENT: The knight on a1 is beyond argument the worst-placed piece on the board: it has two moves and bears on nothing. Nb3 improves it, the move is quiet, nothing is hanging, and no check is available. Every condition this matcher tests is satisfied. WHY IT IS NOT THE CONCEPT: This record's second trap: \"Improving pieces while the opponent builds an initiative produces individually reasonable moves and a collectively lost position. This is the commonest way the rule is misapplied.\" And its first indicator_against: \"The opponent has a concrete threat that must be met.\" Black plays Re1 mate. WHAT THE SYSTEM DOES: Reported as an instance of the rule until a guard was written, and it is the textbook illustration of misapplying it. The matcher already tested the material half of the trap — it refuses when the move leaves a winning capture available — and the sharpest concrete threat there is leaves no material on the floor to detect: the move generator says Black's only mate is e8e1, and Stockfish 18 agrees at depth 20 with #1. The guard is mate in ONE and no further, because whether a threat two moves out 'must be met' is a judgement and this record's third trap is that identifying the worst piece is a judgement this system must not claim to make. A mate the move generator can enumerate is not a judgement. worst-placed-piece fell from 8.4% to 4.1%, and Rubinstein–Salwe 1908 move 20 — the corpus's own annotated instance — still validates.",
+      "origin_kind": "constructed-test",
+      "concept_role": "negative",
+      "false_positive_case": "improving-a-piece-into-mate"
     }
   ],
   "ambiguous_examples": [],

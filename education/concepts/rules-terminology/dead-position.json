@@ -97,7 +97,15 @@
       }
     }
   ],
-  "counterexamples": [],
+  "counterexamples": [
+    {
+      "fen": "4kb2/8/8/8/8/8/8/4KB2 w - - 0 1",
+      "note": "Registered false-positive case `opposite-bishops-and-a-dead-position`, kept on the record as well as in tests/false_positive_cases.json so that the concept carries its own negative evidence. THE SURFACE PATTERN IS PRESENT: King and bishop against king and bishop with nothing else on the board. Neither side can force mate, which is what a dead position sounds like. WHY IT IS NOT THE CONCEPT: FIDE 5.2.2 asks whether checkmate can be reached by ANY possible series of legal moves, not whether it can be forced. With bishops on opposite colours a helpmate exists, so the position is not dead — the players may agree a draw, and the arbiter does not end the game. WHAT THE SYSTEM DOES: The API does not report dead-position here, and the record's own example shows the contrast: K+B vs K, where no series of legal moves reaches mate at all and Syzygy proves the draw over every continuation. The two records are neighbours and the difference between them is exactly this — `insufficient-material` is a software convention and `dead-position` is the Law it approximates, which is why this base keeps them apart and files the first as terminology.",
+      "origin_kind": "constructed-test",
+      "concept_role": "negative",
+      "false_positive_case": "opposite-bishops-and-a-dead-position"
+    }
+  ],
   "ambiguous_examples": [],
   "explanations": {
     "by_level": {

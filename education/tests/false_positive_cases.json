@@ -536,6 +536,36 @@
       "status": "resolved",
       "evidence": "feature-detector",
       "resolution": "THE ANSWER HERE IS THE SENTENCE, NOT A GUARD, and this case exists to pin that down. The concept IS present and suppressing it would be a false negative; what would mislead is reporting it bare. The API says: 'White's queen on d2 stands directly in front of Black's pawn on d3, which has nothing of its own to advance behind and cannot pass it — though a queen is an expensive blockader and can usually be chased off by something cheaper', and attaches two of the record's exceptions as cautions. This is the third of the three answers a stated condition can get — build it, argue on the record that it cannot be built, or say it in the sentence — and it was the right one nine times before this."
+    },
+    {
+      "id": "two-knights-facing-each-other",
+      "concept": "insufficient-material",
+      "surface_pattern": "Two kings and one knight each. Neither side has a pawn, a rook or a queen, and neither has more than one minor piece — this record's precondition, word for word.",
+      "why_not": "The precondition is not the convention. This record's own definition_long names what the convention covers: \"K vs K, K+B vs K, K+N vs K, and (in most implementations) K+B vs K+B with bishops on the same colour.\" Knight against knight is not on that list, and the reason is the one the record gives in the next paragraph about K+N+N vs K: a helpmate exists, so the position is not dead under Art. 5.2.2 and no arbiter declares the game drawn.",
+      "fen": "4k3/8/8/3n4/4N3/8/8/4K3 w - - 0 1",
+      "status": "resolved",
+      "evidence": "feature-detector",
+      "resolution": "THIS WAS A REAL FALSE POSITIVE and it was reported at the type's ceiling. The matcher tested the precondition per side — no pawn, rook or queen, at most one minor — and that admits two combinations the convention excludes: knight against knight, and bishops of OPPOSITE colours. It now tests the four combinations by name. All four still report: bare kings, a lone bishop, a lone knight, and two bishops of the same colour; and the sentence says which of the four it is, so a reader can check the claim against the board. The distinction matters because this record is filed as TERMINOLOGY rather than as an official rule, precisely so the system does not present a convention as a Law — and a convention that has been widened past what its own definition says is the worst of both."
+    },
+    {
+      "id": "bishops-of-opposite-colours-are-not-insufficient",
+      "concept": "insufficient-material",
+      "surface_pattern": "King and bishop against king and bishop. One minor piece each, nothing else on the board, and the two bishops can never attack one another.",
+      "why_not": "Same trap, other half. The convention covers K+B vs K+B only when the bishops are on the SAME colour, because bishops of opposite colours cover disjoint square sets and a helpmate is available. The record's definition_long says 'with bishops on the same colour' and the matcher did not read the qualifier.",
+      "fen": "4kb2/8/8/8/8/8/8/4KB2 w - - 0 1",
+      "status": "resolved",
+      "evidence": "feature-detector",
+      "resolution": "The API is now silent on insufficient-material here and reports `opposite-coloured-bishops` instead, which is the correct concept for this board and was already firing beside the wrong one. The same position with the black bishop on g8 rather than f8 — both bishops light — still reports insufficient-material, which is the controlled comparison: one bishop, one square, and the difference between a convention that applies and one that does not."
+    },
+    {
+      "id": "opposite-bishops-and-a-dead-position",
+      "concept": "dead-position",
+      "surface_pattern": "King and bishop against king and bishop with nothing else on the board. Neither side can force mate, which is what a dead position sounds like.",
+      "why_not": "FIDE 5.2.2 asks whether checkmate can be reached by ANY possible series of legal moves, not whether it can be forced. With bishops on opposite colours a helpmate exists, so the position is not dead — the players may agree a draw, and the arbiter does not end the game.",
+      "fen": "4kb2/8/8/8/8/8/8/4KB2 w - - 0 1",
+      "status": "resolved",
+      "evidence": "feature-detector",
+      "resolution": "The API does not report dead-position here, and the record's own example shows the contrast: K+B vs K, where no series of legal moves reaches mate at all and Syzygy proves the draw over every continuation. The two records are neighbours and the difference between them is exactly this — `insufficient-material` is a software convention and `dead-position` is the Law it approximates, which is why this base keeps them apart and files the first as terminology."
     }
   ],
   "last_updated": "2026-09-01"

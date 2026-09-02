@@ -1851,10 +1851,13 @@ const STRUCTURAL = [
   {
     concept: 'insufficient-material',
     implements: ("recognition.preconditions: only kings, or a king and a single minor piece, remain for the " +
-                 "side in question. Reported only when NEITHER side can mate, which is the position that is " +
-                 "drawn rather than merely hard to win. The record's indicator_against - 'any pawn, rook or " +
-                 "queen on the board' - is the negation of that precondition and cannot arise: such a " +
-                 "position never reaches the report."),
+                 "side in question - AND the four combinations this record's definition_long names, which " +
+                 "the precondition alone does not give: \"K vs K, K+B vs K, K+N vs K, and (in most " +
+                 "implementations) K+B vs K+B with bishops on the same colour.\" Two knights facing each " +
+                 "other and bishops of opposite colours both satisfy the precondition and are not in the " +
+                 "convention, because a helpmate exists in each. The record's indicator_against - 'any " +
+                 "pawn, rook or queen on the board' - is the negation of the precondition and cannot " +
+                 "arise: such a position never reaches the report."),
     run(f) {
       const bare = c => {
         const m = f.material[c].counts;
@@ -1862,9 +1865,30 @@ const STRUCTURAL = [
         return m.N + m.B <= 1;
       };
       if (!bare('w') || !bare('b')) return null;
+      // THE PRECONDITION IS NOT THE CONVENTION, and reading only the
+      // precondition was wrong in two ways at once. This record's own
+      // definition_long names what the convention covers: "K vs K, K+B vs K,
+      // K+N vs K, and (in most implementations) K+B vs K+B with bishops on the
+      // same colour." A bare per-side test of "at most one minor" also admits
+      // K+N vs K+N and K+B vs K+B on OPPOSITE colours, and neither is in that
+      // list - in both a helpmate exists, so no arbiter and no server declares
+      // the game drawn. The record says so itself, in the sentence about
+      // K+N+N vs K being "drawn in practice but not a dead position under
+      // Art. 5.2.2 because a helpmate exists". The same sentence covers these.
+      const n = c => f.material[c].counts.N, b = c => f.material[c].counts.B;
+      const minors = n('w') + b('w') + n('b') + b('b');
+      let kind = null;
+      if (minors === 0) kind = 'bare kings';
+      else if (minors === 1) kind = (b('w') + b('b')) ? 'a lone bishop' : 'a lone knight';
+      else if (b('w') === 1 && b('b') === 1) {
+        const col = c => ((f.pieces[c].bishops || [])[0] || {}).colour;
+        if (col('w') && col('w') === col('b')) kind = 'two bishops of the same colour';
+      }
+      if (!kind) return null;                    // two knights, or opposite bishops
       return {
         confidence: 'high',
-        because: ['Neither side has enough material left to force mate, so the game is drawn however it is played'],
+        because: [`Only ${kind} remain, which is one of the four cases the ` +
+                  `insufficient-material convention covers, so the game is drawn however it is played`],
         slots: {},
         subjects: ['w', 'b'],
       };
