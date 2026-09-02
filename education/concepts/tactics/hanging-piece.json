@@ -71,7 +71,8 @@
     "In a lost position, giving material to reach a fortress or a perpetual can be correct."
   ],
   "limitations": [
-    "Purely material. It says nothing about whether taking is best."
+    "Purely material. It says nothing about whether taking is best.",
+    "Verified 2026-09-02 by reading blind-chess.html's findMotifs() directly, which is where this concept is detected: the tag arrives from the page and Layer 4 translates it. tools/trap_audit.js reads lib/matchers.js and lib/features.js and cannot see that function, so a condition honoured there reads as unread. This note is the reading. Four of this record's conditions are ENFORCED there and all four by the same two lines. \"Material already loose before the move is not this move's doing - reporting it makes the move look worse than it was\" and \"The piece was ALREADY winnable before this move, so the move is not what hung it\" are one line: `if (see(before, i, attackerColor) > 0) continue;`. \"A defended piece attacked once is not hanging; count both sides of the exchange\" and \"Recapture regains equal or greater material - an even trade is not a hanging piece\" are the other: the test is `see(after, i, attackerColor) > 0`, a static exchange evaluation rather than an attacker count, which is also why \"A nominal defender that is pinned does not defend. SEE catches this; a naive defender count does not\" needs nothing further - the record names the instrument and the instrument is what is used. The two conditions that are NOT built are the two that require reading intentions: \"Taking it walks into a stronger counter-tactic\" and \"It is bait\". Neither is decidable without a search, and this base reports at the board."
   ],
   "misconceptions": [
     "That a piece with a defender cannot be hanging. It can — if the defender is pinned or overloaded, or if it is attacked twice and defended once.",

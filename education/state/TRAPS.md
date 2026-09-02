@@ -13,7 +13,7 @@ implemented; that is a reading, and doing it is the work. What it can do is
 stop the list being rediscovered from scratch each time — and every one of
 the defects listed in the tool's header was unread before it was looked at.
 
-**Of 275 stated conditions (traps and indicators-against): 132 enforced in the matcher, 20 in Layer 3, 54 argued on the record to be unbuildable or already honoured elsewhere, 69 unread.**
+**Of 275 stated conditions (traps and indicators-against): 132 enforced in the matcher, 20 in Layer 3, 75 argued on the record to be unbuildable or already honoured elsewhere, 48 unread.**
 
 ONE CAVEAT ABOUT `indicators_against`, and it is not a technicality. For a
 concept naming an ASSET — an open file, an outpost, a passed pawn — they are
@@ -320,17 +320,17 @@ shared file was added to the search. The test is quotation for that reason.
 - [**unread**] *(indicator against)* The position demands speed
 ## castling
 
-- [**unread**] *(indicator against)* King or that rook has moved at any earlier point
-- [**unread**] *(indicator against)* King is currently in check
-- [**unread**] *(indicator against)* The crossed or destination square is attacked
+- [noted] *(indicator against)* King or that rook has moved at any earlier point
+- [noted] *(indicator against)* King is currently in check
+- [noted] *(indicator against)* The crossed or destination square is attacked
 ## discovered-check
 
 - [**unread**] *(indicator against)* The check is easily blocked or the checking piece captured
 - [**unread**] *(indicator against)* The moving piece has no useful destination
 ## smothered-mate
 
-- [**unread**] *(indicator against)* A flight square is empty or can be vacated
-- [**unread**] *(indicator against)* The knight's square is defended
+- [noted] *(indicator against)* A flight square is empty or can be vacated
+- [noted] *(indicator against)* The knight's square is defended
 ## sacrifice
 
 - [cited] A capture the engine happens to like is not a sacrifice. The repo's own definition is the right one: material that CAN be taken and is offered anyway, measured by SEE.
@@ -360,14 +360,14 @@ shared file was added to the search. The test is quotation for that reason.
 ## fork
 
 - [cited] *(indicator against)* The forking piece can simply be captured
-- [**unread**] *(indicator against)* Both targets are defended and each is worth less than the forker
-- [**unread**] *(indicator against)* The defender has a check or a stronger counter-threat available first
+- [noted] *(indicator against)* Both targets are defended and each is worth less than the forker
+- [noted] *(indicator against)* The defender has a check or a stronger counter-threat available first
 ## pin
 
 - [cited] *(indicator against)* The pinned piece can capture the pinner
 - [**unread**] *(indicator against)* The defender can interpose a third unit on the line
 - [**unread**] *(indicator against)* The target behind can simply step off the line
-- [**unread**] *(indicator against)* The 'pinned' piece is worth more than the piece behind it — that is a skewer, not a pin
+- [noted] *(indicator against)* The 'pinned' piece is worth more than the piece behind it — that is a skewer, not a pin
 ## skewer
 
 - [cited] *(indicator against)* The front unit can capture the skewering piece
@@ -376,18 +376,18 @@ shared file was added to the search. The test is quotation for that reason.
 - [**unread**] *(indicator against)* The rear unit is defended and the exchange is not favourable
 ## discovered-attack
 
-- [**unread**] *(indicator against)* The revealed line is blocked by another unit further along
+- [noted] *(indicator against)* The revealed line is blocked by another unit further along
 - [cited] *(indicator against)* The revealed 'attack' hits something defended and not worth taking
-- [**unread**] *(indicator against)* The defender can answer both threats with one move
+- [noted] *(indicator against)* The defender can answer both threats with one move
 ## double-check
 
-- [**unread**] *(indicator against)* The king has a safe square, in which case the double check may achieve nothing
+- [noted] *(indicator against)* The king has a safe square, in which case the double check may achieve nothing
 ## back-rank-mate
 
-- [**unread**] *(indicator against)* A pawn has moved to create luft
-- [**unread**] *(indicator against)* A second defender covers the back rank
-- [**unread**] *(indicator against)* The checking square is defended
-- [**unread**] *(indicator against)* The king can capture the checking piece
+- [noted] *(indicator against)* A pawn has moved to create luft
+- [noted] *(indicator against)* A second defender covers the back rank
+- [noted] *(indicator against)* The checking square is defended
+- [noted] *(indicator against)* The king can capture the checking piece
 ## trapped-piece
 
 - [**unread**] *(indicator against)* A counter-sacrifice frees it
@@ -395,10 +395,10 @@ shared file was added to the search. The test is quotation for that reason.
 - [**unread**] *(indicator against)* Trapping it costs more material than it is worth
 ## hanging-piece
 
-- [**unread**] A defended piece attacked once is not hanging; count both sides of the exchange.
-- [**unread**] A nominal defender that is pinned does not defend. SEE catches this; a naive defender count does not.
-- [**unread**] Material already loose before the move is not this move's doing — reporting it makes the move look worse than it was.
-- [**unread**] *(indicator against)* Recapture regains equal or greater material — an even trade is not a hanging piece
-- [**unread**] *(indicator against)* Taking it walks into a stronger counter-tactic
+- [noted] A defended piece attacked once is not hanging; count both sides of the exchange.
+- [noted] A nominal defender that is pinned does not defend. SEE catches this; a naive defender count does not.
+- [noted] Material already loose before the move is not this move's doing — reporting it makes the move look worse than it was.
+- [noted] *(indicator against)* Recapture regains equal or greater material — an even trade is not a hanging piece
+- [noted] *(indicator against)* Taking it walks into a stronger counter-tactic
 - [**unread**] *(indicator against)* It is bait: the capture opens a line or removes a defender the opponent wants gone
-- [**unread**] *(indicator against)* The piece was ALREADY winnable before this move, so the move is not what hung it
+- [noted] *(indicator against)* The piece was ALREADY winnable before this move, so the move is not what hung it
