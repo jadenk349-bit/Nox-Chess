@@ -173,7 +173,25 @@
     "conflicts": []
   },
   "examples": [],
-  "counterexamples": [],
+  "counterexamples": [
+    {
+      "fen": "3k4/8/8/8/3N4/8/8/3RK3 w - - 0 1",
+      "move_uci": "d4e6",
+      "note": "Registered false-positive case `a-forcing-line-with-nothing-given-up`, kept on the record as well as in tests/false_positive_cases.json so that the concept carries its own negative evidence. THE SURFACE PATTERN IS PRESENT: A forced sequence of checks running nineteen moves to mate, with the defender's replies determined throughout. A long forcing line ending in mate is what most players mean by a combination. WHY IT IS NOT THE CONCEPT: This record's second trap: \"A forcing sequence without a sacrifice is a manoeuvre on Botvinnik's account and a combination on Romanovsky's. Reporting it either way takes a side in a live disagreement.\" Nothing is sacrificed here at any point. WHAT THE SYSTEM DOES: The API reports double-check and does not report a combination. Syzygy: PROVEN WIN, dtz 17, mate in 19 — so the sequence really is forced and really does reach a goal, which is the third trap's requirement ('length and forcing-ness do not make a combination; there has to be a goal it reaches'). What it does not have is a sacrifice, and this record's FIRST trap forbids the system from deciding whether that matters: 'whether a sacrifice is REQUIRED is contested by named authorities, so this system must not assert either version as the definition.' Not reporting is the only answer that does not take a side.",
+      "origin_kind": "constructed-test",
+      "concept_role": "negative",
+      "tablebase": {
+        "source": "Lichess tablebase (Syzygy, 7-piece)",
+        "pieces": 4,
+        "wdl": "win",
+        "dtz": 17,
+        "dtm": 19,
+        "category": "win",
+        "note": "PROVEN WIN, dtz 17, mate in 19. The sequence really is forced and really does reach a goal, which is what this record's third trap requires of a combination. What it does not contain is a sacrifice, and the record's first trap forbids the system from deciding whether that matters."
+      },
+      "false_positive_case": "a-forcing-line-with-nothing-given-up"
+    }
+  ],
   "ambiguous_examples": [],
   "explanations": {
     "by_level": {

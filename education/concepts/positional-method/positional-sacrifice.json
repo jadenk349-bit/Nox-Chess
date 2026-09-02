@@ -162,7 +162,16 @@
       }
     }
   ],
-  "counterexamples": [],
+  "counterexamples": [
+    {
+      "fen": "3r2k1/5ppp/8/3n4/8/8/5PPP/3RR1K1 w - - 0 1",
+      "move_uci": "d1d5",
+      "note": "Registered false-positive case `a-sacrifice-whose-point-is-mate`, kept on the record as well as in tests/false_positive_cases.json so that the concept carries its own negative evidence. THE SURFACE PATTERN IS PRESENT: Rxd5 gives up a rook for a knight and gets no material back. Material invested for something other than material is what a positional sacrifice is. WHY IT IS NOT THE CONCEPT: This record's first trap: \"Calling any unclear sacrifice positional. If the point is an attack, it is not a positional sacrifice.\" Nothing is invested here at all — the rook cannot be recaptured, because Rxd5 would allow Re8 mate. The 'compensation' is a mate in two. WHAT THE SYSTEM DOES: The API does not report positional-sacrifice. It reports back-rank-mate, hanging-piece and sacrifice, and the engine's line — Rxd5 followed by ...Rb8 rather than ...Rxd5 — shows what the move actually is: Black declines and is simply a knight down, +6.73. This record's second trap is the reason it has no matcher: 'asserting compensation that cannot be named. Positional compensation with no named asset is the vaguest claim in chess writing and must not be produced by this system.' The same position is `exchange-sacrifice`'s registered case and `overloading`'s positive example — three records reading one board, and only one of them is entitled to it.",
+      "origin_kind": "constructed-test",
+      "concept_role": "negative",
+      "false_positive_case": "a-sacrifice-whose-point-is-mate"
+    }
+  ],
   "ambiguous_examples": [],
   "explanations": {
     "by_level": {

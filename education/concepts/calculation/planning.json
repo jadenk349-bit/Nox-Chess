@@ -109,7 +109,16 @@
     "conflicts": []
   },
   "examples": [],
-  "counterexamples": [],
+  "counterexamples": [
+    {
+      "fen": "4k3/pp4pp/3p4/2pPp3/2P1P3/8/PP4PP/4K3 w - - 0 1",
+      "move_uci": "e1d1",
+      "note": "Registered false-positive case `a-quiet-move-called-a-plan`, kept on the record as well as in tests/false_positive_cases.json so that the concept carries its own negative evidence. THE SURFACE PATTERN IS PRESENT: Kd1 in a fully locked position. Any quiet move can be described afterwards as part of a plan — improving the king, preparing to bring it to the queenside, waiting for the opponent to commit. WHY IT IS NOT THE CONCEPT: A plan is a sequence with a goal, and this position has no goal available to anybody: every file is rammed shut and no piece can enter. Describing the move as planful names an intention the board does not contain. WHAT THE SYSTEM DOES: The API reports nothing at all here — not planning, not prophylaxis, not restraint — and the engine says 0.00 with both kings walking about on the kingside. The three concepts share this position as a registered case for the same reason: each is a claim about what a move is FOR, and this base reports what is on the board. A position where every word of three records is true and none of the three concepts is present is the sharpest available test of that discipline.",
+      "origin_kind": "constructed-test",
+      "concept_role": "negative",
+      "false_positive_case": "a-quiet-move-called-a-plan"
+    }
+  ],
   "ambiguous_examples": [],
   "explanations": {
     "by_level": {

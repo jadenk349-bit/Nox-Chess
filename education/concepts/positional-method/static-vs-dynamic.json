@@ -148,7 +148,15 @@
       "attributed_by": "Nicholas Van Der Nat (FM) — corpus entry capablanca-rubinstein-1928-15d4-static-vs-dynamic"
     }
   ],
-  "counterexamples": [],
+  "counterexamples": [
+    {
+      "fen": "6k1/8/8/8/8/3p4/3Q4/6K1 w - - 0 1",
+      "note": "Registered false-positive case `a-passer-that-will-never-run`, kept on the record as well as in tests/false_positive_cases.json so that the concept carries its own negative evidence. THE SURFACE PATTERN IS PRESENT: Black has a passed pawn on d3, one square from the second rank. A passed pawn is the textbook dynamic asset: it must be pushed, and its value expires if it is not. WHY IT IS NOT THE CONCEPT: This record's first trap: \"The classification is not a property of the feature alone. A passed pawn is static if it can be held and dynamic if it must run now.\" This one is held permanently, by a queen standing directly in front of it, and it will never move again. WHAT THE SYSTEM DOES: The API reports blockade and passed-pawn here and says nothing about static or dynamic, which is the correct pair of answers: both features are present and the CLASSIFICATION is a claim about whether the advantage expires, which is a claim about the future. Stockfish 18 at depth 26 says mate in 10 for White — the pawn is not merely held, it is irrelevant. This record's second trap is the reason there is no matcher: 'dynamic is often used loosely to mean sharp. Here it means specifically that the advantage expires', and nothing on a board says when.",
+      "origin_kind": "constructed-test",
+      "concept_role": "negative",
+      "false_positive_case": "a-passer-that-will-never-run"
+    }
+  ],
   "ambiguous_examples": [],
   "explanations": {
     "by_level": {

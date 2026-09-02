@@ -945,6 +945,49 @@
       "status": "resolved",
       "evidence": "feature-detector + human-annotation",
       "resolution": "Adams-Kasparov, Linares 2005, and the two candidate moves are 234 centipawns apart: 22.Be3, the move Speelman says was best and this record's positive example, scores -1.91, and the retreat 22.Nb3 that was played scores -4.25. Both are bad. That is the point of the pair — the choice is not between saving the game and losing it, it is between the least bad move and a worse one, and the passive move is the worse one. The API reports nothing about defensive principles either way, because the concept has no matcher: what makes a move defensive is what it prevents, and this base does not read intentions."
+    },
+    {
+      "id": "a-sacrifice-whose-point-is-mate",
+      "concept": "positional-sacrifice",
+      "surface_pattern": "Rxd5 gives up a rook for a knight and gets no material back. Material invested for something other than material is what a positional sacrifice is.",
+      "why_not": "This record's first trap: \"Calling any unclear sacrifice positional. If the point is an attack, it is not a positional sacrifice.\" Nothing is invested here at all — the rook cannot be recaptured, because Rxd5 would allow Re8 mate. The 'compensation' is a mate in two.",
+      "fen": "3r2k1/5ppp/8/3n4/8/8/5PPP/3RR1K1 w - - 0 1",
+      "move": "d1d5",
+      "status": "resolved",
+      "evidence": "feature-detector + engine",
+      "resolution": "The API does not report positional-sacrifice. It reports back-rank-mate, hanging-piece and sacrifice, and the engine's line — Rxd5 followed by ...Rb8 rather than ...Rxd5 — shows what the move actually is: Black declines and is simply a knight down, +6.73. This record's second trap is the reason it has no matcher: 'asserting compensation that cannot be named. Positional compensation with no named asset is the vaguest claim in chess writing and must not be produced by this system.' The same position is `exchange-sacrifice`'s registered case and `overloading`'s positive example — three records reading one board, and only one of them is entitled to it."
+    },
+    {
+      "id": "a-forcing-line-with-nothing-given-up",
+      "concept": "tactical-combinations",
+      "surface_pattern": "A forced sequence of checks running nineteen moves to mate, with the defender's replies determined throughout. A long forcing line ending in mate is what most players mean by a combination.",
+      "why_not": "This record's second trap: \"A forcing sequence without a sacrifice is a manoeuvre on Botvinnik's account and a combination on Romanovsky's. Reporting it either way takes a side in a live disagreement.\" Nothing is sacrificed here at any point.",
+      "fen": "3k4/8/8/8/3N4/8/8/3RK3 w - - 0 1",
+      "move": "d4e6",
+      "status": "resolved",
+      "evidence": "feature-detector + tablebase",
+      "resolution": "The API reports double-check and does not report a combination. Syzygy: PROVEN WIN, dtz 17, mate in 19 — so the sequence really is forced and really does reach a goal, which is the third trap's requirement ('length and forcing-ness do not make a combination; there has to be a goal it reaches'). What it does not have is a sacrifice, and this record's FIRST trap forbids the system from deciding whether that matters: 'whether a sacrifice is REQUIRED is contested by named authorities, so this system must not assert either version as the definition.' Not reporting is the only answer that does not take a side."
+    },
+    {
+      "id": "a-passer-that-will-never-run",
+      "concept": "static-vs-dynamic",
+      "surface_pattern": "Black has a passed pawn on d3, one square from the second rank. A passed pawn is the textbook dynamic asset: it must be pushed, and its value expires if it is not.",
+      "why_not": "This record's first trap: \"The classification is not a property of the feature alone. A passed pawn is static if it can be held and dynamic if it must run now.\" This one is held permanently, by a queen standing directly in front of it, and it will never move again.",
+      "fen": "6k1/8/8/8/8/3p4/3Q4/6K1 w - - 0 1",
+      "status": "resolved",
+      "evidence": "feature-detector + engine",
+      "resolution": "The API reports blockade and passed-pawn here and says nothing about static or dynamic, which is the correct pair of answers: both features are present and the CLASSIFICATION is a claim about whether the advantage expires, which is a claim about the future. Stockfish 18 at depth 26 says mate in 10 for White — the pawn is not merely held, it is irrelevant. This record's second trap is the reason there is no matcher: 'dynamic is often used loosely to mean sharp. Here it means specifically that the advantage expires', and nothing on a board says when."
+    },
+    {
+      "id": "a-quiet-move-called-a-plan",
+      "concept": "planning",
+      "surface_pattern": "Kd1 in a fully locked position. Any quiet move can be described afterwards as part of a plan — improving the king, preparing to bring it to the queenside, waiting for the opponent to commit.",
+      "why_not": "A plan is a sequence with a goal, and this position has no goal available to anybody: every file is rammed shut and no piece can enter. Describing the move as planful names an intention the board does not contain.",
+      "fen": "4k3/pp4pp/3p4/2pPp3/2P1P3/8/PP4PP/4K3 w - - 0 1",
+      "move": "e1d1",
+      "status": "resolved",
+      "evidence": "feature-detector + engine",
+      "resolution": "The API reports nothing at all here — not planning, not prophylaxis, not restraint — and the engine says 0.00 with both kings walking about on the kingside. The three concepts share this position as a registered case for the same reason: each is a claim about what a move is FOR, and this base reports what is on the board. A position where every word of three records is true and none of the three concepts is present is the sharpest available test of that discipline."
     }
   ],
   "last_updated": "2026-09-01"
