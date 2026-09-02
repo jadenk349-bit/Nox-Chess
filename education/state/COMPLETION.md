@@ -43,14 +43,59 @@ explanation-validated 105. Every rung its record allows: **26 of 137.**
 | human-grounded corpus positions | 6 | 42 |
 | corpus games | 2 | 28 |
 | corpus roles | 5 positive, 1 ambiguous, 0 negative | 19 positive, 13 ambiguous, 10 negative |
-| concepts with human grounding (twice-corrected measure) | 5 | 29 |
+| concepts with human grounding (twice-corrected measure) | 5 | 43 |
 | concepts with a Layer 4 matcher | 32 | 36 |
-| validated positions | 82 | 111 |
+| positions carrying an engine reading | 82 | 178 |
+| positions carrying a tablebase PROOF | 22 | 72 |
 | API false negatives on the corpus | 3 of 6 detectable | 1 of 38, recorded on purpose |
-| rank of the annotated concept | not measured | mean **2.2**, top-three on 11 of 12 |
+| rank of the annotated concept | not measured | mean **2.3**, top-three on 11 of 13 |
 | confidence overclaims | not measured | 1 of 38, recorded on purpose |
-| matchers implementing their record's *traps* | not measured | 201 of 275 stated conditions read, 74 unread |
+| matchers implementing their record's *traps* | not measured | 230 of 275 stated conditions read, 45 unread |
+| registered false-positive cases | 29 | 84 resolved + 1 open on purpose |
+| concepts with a positive example | 68 of 132 | 101 of 132 |
+| concepts with a negative example | 56 of 132 | 82 of 132 |
+| concepts with an ambiguous example | 20 of 94 | 40 of 94 |
+| mean concept completeness | 0.70 | **0.84** |
 | matchers firing on more than half of all positions | 5 | 1 (`passed-pawn`, deliberately) |
+
+## What the last stretch was actually made of
+
+Every number above moved because of one activity: reading each record's stated
+conditions against the code that is supposed to honour them, and then either
+building the condition, arguing on the record that it cannot be built, or
+saying it in the sentence. Nine more defects came out of it after the
+twenty-eight already recorded:
+
+1. **`fork`, `pin` and `skewer` reported at HIGH confidence on geometry their
+   own records refuse.** A pawn "fork" the tablebase says loses; a "pin" the
+   pinned rook dissolves by capture; a "skewer" the front unit eats. All three
+   conditions were written on the records and none was built.
+2. **`sacrifice` called an even rook trade a 500-point sacrifice.** The page's
+   `sacrificeSize()` answers "how much can the opponent take on that square",
+   which is right for Bxh7+ and wrong for RxR because it says nothing about the
+   rook the move just won. 26.5% → 16.6%.
+3. **`insufficient-material` was widened past its own definition** — it reported
+   on knight against knight and on bishops of opposite colours, neither of which
+   is in the convention the record's own definition_long names.
+4. **`trapped-piece` and `discovered-attack` were wrong on shipped puzzles**, 8
+   and 33 of the 788 respectively, found by scanning rather than by inventing a
+   position. One of them is refuted by its own puzzle's solution line.
+5. **`worst-placed-piece` recommended a move that allows mate in one.**
+6. **`back-rank-mate` told the reader a defended back rank was undefended** —
+   one wording level asserting flat what the detector said conditionally.
+7. **A limitation written earlier the same day was wrong**, attributing
+   `back-rank-mate`'s guards to the `mate` tag's test rather than to the
+   separate `backRank` block. The conclusion held; the argument did not.
+8. **Nineteen duplicate positions** accumulated because a promotion script
+   checked `move` where the records store `move_uci`. The suite count fell by
+   fifteen when they were removed.
+9. **`tempo`'s record claimed a registered false-positive case that did not
+   exist.** There is a test for that now.
+
+Two tools grew an arm they had promised and never had: `tools/mine_ambiguous.js`
+writes the ambiguous prospector `tools/prospect.js` describes in its own header,
+and it then had to learn to supply a MOVE, because twelve concepts only speak
+when given one and had been reporting NONE.
 
 ## A number that got worse on purpose, twice
 
