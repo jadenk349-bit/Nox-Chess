@@ -67,7 +67,7 @@
   ],
   "limitations": [
     "TYPICAL_CONFIDENCE RAISED medium -> high, 2026-09-02, and the reason is the schema's own definition of the field: 'how confidently this concept can normally be asserted ONCE ITS PRECONDITIONS HOLD'. This concept's recognition is MECHANICAL and its knowledge type already carries a high ceiling, so once the preconditions hold there is nothing left to be uncertain about - a stalemate is a stalemate, and a fork this base reports is one findMotifs() found, which ARCHITECTURE.md makes the authority and forbids second-guessing. 'Medium' was the default across 32 rule and motif records regardless of detectability, and it was found by measuring what the API reports against what each record permits: twelve concepts were reporting ABOVE their own record. The fix was to make each record its own ceiling in cap(), which then required the records that were wrong to be corrected rather than silently overruled.",
-    "NO AMBIGUOUS EXAMPLE, and the reason is the order of the work rather than a shortage of positions. This record has no POSITIVE example either, and an ambiguous example is a position where the concept is genuinely present and what to conclude from it is unclear - which cannot be written before there is an agreed instance of the concept being present at all. The four motifs in this base that lack a positive - `clearance`, `decoy`, `deflection`, `interference` - lack it for reasons written on each record, and the ambiguous rung waits on that. Writing one first would be asserting a doubtful instance of something this base has not yet shown a clear instance of.",
+    "NO AMBIGUOUS EXAMPLE, and the reason is the order of the work rather than a shortage of positions. This record has no POSITIVE example either, and an ambiguous example is a position where the concept is genuinely present and what to conclude from it is unclear - which cannot be written before there is an agreed instance of the concept being present at all. The four motifs in this base that lack a positive - `clearance`, `decoy`, `deflection`, `interference` - lack it for reasons written on each record, and the ambiguous rung waits on that. Writing one first would be asserting a doubtful instance of something this base has not yet shown a clear instance of. UPDATE: the positive example now exists - 28...Nf5+ in the position above, verified as the only move by 4.43 pawns - so the reason given here no longer holds and the ambiguous example is simply outstanding work rather than blocked work.",
     "NO MASTER-GAME POSITION YET. This concept has no matcher, so the scan that supplied master positions to eleven other records - five famous games replayed and analysed position by position - could not nominate one here: the API never reports the concept, so there is nothing for a scan to find. Identifying an instance in a master game means reading the game, which is research rather than tooling, and it has not been done. Recorded rather than filled."
   ],
   "misconceptions": [],
@@ -82,7 +82,51 @@
     "co_occurring": [],
     "conflicts": []
   },
-  "examples": [],
+  "examples": [
+    {
+      "fen": "3r1r2/1bkp1R2/1p2p3/pPp1p1pp/2P4n/P1N3K1/1BBP3P/5R2 b - - 4 28",
+      "move": "Nf5+",
+      "move_uci": "h4f5",
+      "origin_kind": "puzzle",
+      "concept_role": "positive",
+      "side_to_move_benefits": "black",
+      "note": "THE FIRST VERIFIED POSITION ON THIS RECORD, and it was found by geometry rather than by a detector, because this concept has no detector and the record said so. The scan asked one question of every ply of all 788 shipped solutions: does our move put a piece, uncaptured and en prise, strictly between an enemy line piece and something that piece was defending, such that the defended man becomes winnable and was not before? Six positions in 788 answer yes and this is the cleanest.\n\nWhite's rook on f7 is defended only by the rook on f1, down the f-file. 28...Nf5+ puts the knight in the middle of that file. It cannot be ignored - it is check - and it cannot be taken without the line staying shut: 29.Rxf5 exf5 and the f7 rook, now defended by nothing, goes for the exchange after 30.Rxf5 Rxf5 31.Bxf5 Rf8.\n\nStockfish 18 at depth 30 with three lines: Nf5+ is 0.00 and the next two moves are -4.43 and -4.58. That gap is what makes the position worth keeping. This is not a combination that wins material out of a level position; it is the only move that holds a lost one, and interference is the whole of the reason it holds. A concept whose sole example is a flourish teaches the flourish; one whose example is a rescue teaches the geometry.\n\nPROVENANCE. A shipped puzzle position, not a master game. It grounds the positive-example and engine rungs and NOT the master-game one, and the record's limitation about the master game stands unchanged.",
+      "engine": {
+        "engine_id": "Stockfish 18",
+        "test_level": 3,
+        "depth": 30,
+        "multipv": 3,
+        "best_move": "h4f5",
+        "eval_cp": 0,
+        "mate_in": null,
+        "pv": [
+          "h4f5",
+          "f1f5",
+          "e6f5",
+          "f7f5",
+          "f8f5",
+          "c2f5",
+          "d8f8",
+          "f5e4",
+          "b7e4",
+          "c3e4"
+        ],
+        "alternatives": [
+          {
+            "move": "f8f7",
+            "eval_cp": -443
+          },
+          {
+            "move": "b7f3",
+            "eval_cp": -458
+          }
+        ],
+        "margin_cp": 443,
+        "verdict": "supports",
+        "verdict_note": "Only move, by 4.43 pawns over the second best at depth 30. The interference is not decoration on a won position - it is the position's only defence."
+      }
+    }
+  ],
   "counterexamples": [
     {
       "fen": "3r2k1/5ppp/8/3n4/2N5/8/5PPP/3R2K1 w - - 0 1",
