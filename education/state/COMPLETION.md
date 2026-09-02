@@ -34,7 +34,7 @@ master games · 829 tests + 615 API + 374 audit + 3570 explanation assertions.
 
 Ladder: researched 137, human-grounded 43, engine-verified 101, negative-tested
 68, ambiguity-tested 41, api-validated 53 of the 83 whose record allows it,
-explanation-validated 105. Every rung its record allows: **27 of 137.**
+explanation-validated 105. Every rung its record allows: **26 of 137.**
 
 ## What moved this session
 
