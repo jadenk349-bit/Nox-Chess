@@ -224,7 +224,7 @@ check('and that it is still an online one', ONLINE(), true);
 check('the bot is not the ladder', BOT(), false);
 check('the opponent is named on the board', seatName(B), 'goutham111');
 
-// the strip above the board wears the tag, and only the bot's side of it
+// neither strip wears a tag: the bot is named like any opponent, on purpose
 layoutBoardBars();
 function tagOn(barId){
   var name = elements[barId].querySelector('.bar-name');
@@ -233,8 +233,8 @@ function tagOn(barId){
     if (name.kids[i].className === 'bot') return name.kids[i].textContent;
   return '';
 }
-check('the opponent\'s strip says what it is', tagOn('barTop'), 'BOT · 1221');
-check('and the player\'s strip does not', tagOn('barBottom'), '');
+check('the opponent\'s strip does not say what it is', tagOn('barTop'), '');
+check('and neither does the player\'s', tagOn('barBottom'), '');
 
 say('\nPlaying one out\n');
 

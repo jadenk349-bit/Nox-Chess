@@ -465,17 +465,6 @@
     overflow:hidden; text-overflow:ellipsis; white-space:nowrap;
   }
   .bar-name .sub{color:var(--muted); font-size:11px; letter-spacing:.14em; margin-left:8px;}
-  /* Says what the opponent is, in the one place the opponent is named. A
-     fallback game is an ordinary ranked game in every other respect, and the
-     seam is meant not to show — but which side of the board a person is
-     sitting on is not the thing to be coy about, so the tag rides beside the
-     name for the whole game rather than flashing once at the pairing. */
-  .bar-name .bot{
-    margin-left:8px; padding:1px 6px; border-radius:4px;
-    font-size:10px; letter-spacing:.12em; white-space:nowrap;
-    color:var(--gold-soft); border:1px solid rgba(212,175,110,.35);
-    background:rgba(212,175,110,.08);
-  }
   #barTop{margin-bottom:4px;}
   #barBottom{margin-top:4px;}
   .clock-pool{display:none;}          /* the bars take these two in and out */
@@ -4301,15 +4290,9 @@ function layoutBoardBars(){
     // Sharing a screen, the name *is* the colour, so saying it twice reads oddly;
     // against anyone else the colour is worth spelling out beside the name.
     label.textContent = seatName(color);
-    // Never a person, so never left looking like one. The rating beside it is
-    // what the server sized this game at, which is the number the player is
-    // entitled to know they are playing against.
-    if (AI_MATCH() && color !== G.human){
-      const tag = document.createElement('span');
-      tag.className = 'bot';
-      tag.textContent = 'BOT · ' + NET.ai.elo;
-      label.appendChild(tag);
-    }
+    // A fallback opponent is named exactly like a person here, on purpose: the
+    // ranked game is meant to read as an ordinary ranked game from the strip
+    // down, so nothing on the board bar says what is on the far side.
     if (!LOCAL()){
       const sub = document.createElement('span');
       sub.className = 'sub';
