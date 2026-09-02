@@ -71,6 +71,24 @@ def board_level(c):
     return "meta" not in (c.get("subcategory") or "").lower()
 
 
+# EXPLICIT, JUSTIFIED N/A — the fourth answer, and the one this report could not
+# say before. Some items are not missing from a record, they do not apply to it:
+# `time-management` cannot have a positive example because its subject is the
+# player and not the board, and `chess-terminology` cannot have one because it
+# is an index over other records rather than a claim about a position. Scoring
+# those as gaps makes the number mean less, not more.
+#
+# The mechanism is deliberately expensive to use. A record marks an item N/A by
+# writing `validation_na: {"<item>": "<reason>"}`, tools/validate_kb.py refuses a
+# reason under 120 characters, and the count of N/A-by-justification is PRINTED
+# beside the totals every run - so the figure cannot quietly grow. A marked item
+# that the record could in fact carry is a lie in a file that gets read, which is
+# the same standard every other claim in this base is held to.
+def na_reasons(c):
+    v = c.get("validation_na") or {}
+    return {k: r for k, r in v.items() if isinstance(r, str) and len(r) >= 120}
+
+
 def checklist(c, fp_concepts):
     """Each entry is True (has it), False (missing), or None (N/A)."""
     kt = c.get("knowledge_type")
@@ -81,7 +99,8 @@ def checklist(c, fp_concepts):
     board = board_level(c)
 
     src = c.get("sources") or []
-    return {
+    na = na_reasons(c)
+    out = {
         "definition": len(c.get("definition_long") or "") > 400,
         "terminology": bool(c.get("name_status")) and c.get("name_status") != "unknown",
         "provenance": len(src) >= 2 or (len(src) == 1 and c.get("source_confidence") == "high"),
@@ -117,6 +136,10 @@ def checklist(c, fp_concepts):
         "advanced_explanation": bool((ex.get("by_level") or {}).get("advanced")),
         "explanation_template": bool(ex.get("by_depth")),
     }
+    for k in na:
+        if k in out:
+            out[k] = None
+    return out
 
 
 def completeness(cl):
@@ -281,6 +304,12 @@ def main():
             print(f"  {k:<13} {tally[k]:>3} areas")
     mean_all = sum(c["_score"] for c in C.values()) / len(C)
     print(f"\n  mean concept completeness  {mean_all:.2f}")
+    # Printed beside the totals so the figure cannot quietly grow. See na_reasons().
+    na_items = sum(len(na_reasons(c)) for c in C.values())
+    na_concepts = sum(1 for c in C.values() if na_reasons(c))
+    if na_items:
+        print(f"  {na_items} items on {na_concepts} concepts are N/A BY WRITTEN JUSTIFICATION on the")
+        print(f"  record, not missing. tools/validate_kb.py refuses a reason under 120 characters.")
     # The artefact, printed and not cashed in. See rate_solo().
     print(f"\n  {solo_areas} of {len(ratings)} areas contain exactly ONE concept, and the rule above")
     print(f"  needs two for 'substantial' and three for 'full', so those areas cannot")

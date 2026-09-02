@@ -113,6 +113,24 @@ def main():
                 if f not in allowed:
                     errors.append(f"{rel}: unknown field {f!r}")
 
+            # An N/A justification is a claim like any other and is held to the
+            # same standard: it must name a real checklist item and it must
+            # actually argue. A one-line "n/a" would let the coverage report be
+            # improved by typing rather than by working, which is the exact
+            # failure mode this base has corrected in its own metrics four times.
+            NA_ITEMS = {"definition", "terminology", "provenance", "attribution",
+                        "recognition", "exceptions", "positive_example",
+                        "negative_example", "ambiguous_example", "engine_validation",
+                        "tablebase_validation", "master_game", "false_positive_test",
+                        "beginner_explanation", "advanced_explanation",
+                        "explanation_template"}
+            for k, why in (c.get("validation_na") or {}).items():
+                if k not in NA_ITEMS:
+                    errors.append(f"{rel}: validation_na names unknown item {k!r}")
+                elif not isinstance(why, str) or len(why) < 120:
+                    errors.append(f"{rel}: validation_na[{k!r}] needs a justification of at "
+                                  f"least 120 characters, got {len(why) if isinstance(why,str) else 0}")
+
             kt = c.get("knowledge_type")
             if KNOWLEDGE and kt not in KNOWLEDGE:
                 errors.append(f"{rel}: bad knowledge_type {kt!r}")

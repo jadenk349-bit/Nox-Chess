@@ -541,6 +541,14 @@
           }
         }
       }
+    },
+    "validation_na": {
+      "type": "object",
+      "description": "Validation items that DO NOT APPLY to this concept, each with a written justification. Keys are depth-report checklist item names; values are the reason, which tools/validate_kb.py requires to be at least 120 characters. Use only where the item is inapplicable in principle - a concept whose subject is the player rather than the board, or a record that indexes other records rather than describing a position - never where the evidence is merely absent.",
+      "additionalProperties": {
+        "type": "string",
+        "minLength": 120
+      }
     }
   },
   "$defs": {

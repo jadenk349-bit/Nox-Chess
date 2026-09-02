@@ -114,5 +114,8 @@
     "audit_notes": [
       "2026-09-01: detector field named 'promotionAvailable', which does not exist anywhere in the codebase. The audit's hardcoded whitelist had been accepting it. Repointed at real code, or marked as proposed where nothing implements it."
     ]
+  },
+  "validation_na": {
+    "false_positive_test": "N/A rather than missing. A registered false-positive case is a position where the concept's surface pattern is present and the concept is absent, replayed as an assertion so the system can be shown declining the error. This concept is DECIDED BY THE MOVE GENERATOR - the same function that decides it in a game - so there is no judgement to get wrong and no surface pattern that can be present without the thing itself. The nearest genuine risk is a PATTERN NAME attached to a position that is check and not mate, and that risk belongs to `back-rank-mate` and `smothered-mate`, both of which carry a registered case for it."
   }
 }
