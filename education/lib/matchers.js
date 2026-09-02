@@ -1469,7 +1469,11 @@ const STRUCTURAL = [
                  "three attackers'. The SHIELD arm needs none of them: a king with no shield pawn at " +
                  "all, in its own half, with a line pointing at it, is reported at an attacker count of " +
                  "one - Adams-Kasparov 2005 is the position that put it there, and a string claiming " +
-                 "'ONLY at three or more' described a matcher this is not."),
+                 "'ONLY at three or more' described a matcher this is not. A THIRD arm reads the last " +
+                 "three indicators this record states and nothing was asking for: 'a hook the opponent " +
+                 "can attack to open a line', 'king uncastled with the centre open or opening', and " +
+                 "'key defender exchangeable - the fianchettoed bishop, or the f6 knight'. Two of the " +
+                 "three, because one of them holds in 43.8% of the 788 shipped positions and two in 2.2%."),
     run(f) {
       const hits = [];
       for (const c of ['w', 'b']) {
@@ -1510,8 +1514,23 @@ const STRUCTURAL = [
         const ownHalf = c === 'w' ? Number(k.square[1]) <= 3 : Number(k.square[1]) >= 6;
         const byShield = k.pawnShield === 0 && ownHalf &&
                          (z.fileOpenOnKing || z.fileSemiOpenOnKing || z.attackers >= 2);
-        if (!byCount && !byShield) continue;
-        hits.push({ c, z, k, why: byCount ? 'count' : 'shield' });
+        // A THIRD ARM, and it is the last three indicators_against this record
+        // states: a hook, an uncastled king with the centre open on it, and a
+        // key defender the opponent can trade off. Layer 3 reads all three off
+        // the board (see kingFeatures) and nothing was asking for them.
+        //
+        // TWO of the three, not one, and the number was measured rather than
+        // chosen. Over the 788 shipped positions at least one of them holds in
+        // 43.8% - a fact true of nearly half of all positions cannot be the
+        // reason to call a king unsafe, and firing on it would repeat exactly
+        // the mistake `semi-open-file` was thrown away for. Two of the three
+        // hold in 2.2%, which is what a real shape looks like.
+        const signs = [k.hook && `the pawn on ${k.hook} is a hook the opponent can attack to open a line`,
+                       k.openCentreFile && `the king is uncastled with the ${k.openCentreFile}-file open on it`,
+                       k.exchangeableDefender && `and ${k.exchangeableDefender}`].filter(Boolean);
+        const bySigns = signs.length >= 2;
+        if (!byCount && !byShield && !bySigns) continue;
+        hits.push({ c, z, k, signs, why: byCount ? 'count' : byShield ? 'shield' : 'signs' });
       }
       if (!hits.length) return null;
       return {
@@ -1522,10 +1541,17 @@ const STRUCTURAL = [
         because: hits.map(h =>
           (h.why === 'shield'
             ? `${side(f, h.c)}'s king on ${h.k.square} has no pawn in front of it at all`
+            : h.why === 'signs'
+            ? `${side(f, h.c)}'s king on ${h.k.square}: ${h.signs.join(', ')}`
             : `${side(f, h.c)}'s king on ${h.k.square} has ${h.z.attackers} enemy pieces bearing on its zone ` +
               `against ${h.z.defenders} defenders, with ${h.k.pawnShield} of the three shield pawns still in place`) +
           (h.z.fileOpenOnKing ? `, and the ${h.z.kingFile}-file is open on it`
-            : h.z.fileSemiOpenOnKing ? `, on a file with no pawn of its own` : '')),
+            : h.z.fileSemiOpenOnKing ? `, on a file with no pawn of its own` : '') +
+          // The same three indicators are worth SAYING wherever they hold, even
+          // when the count arm is what fired: they are the concrete half of a
+          // claim whose own record calls the attacker count S-shaped and
+          // unreliable. One sentence names the reason; the count names a score.
+          (h.why !== 'signs' && h.signs.length ? ` (${h.signs.join(', ')})` : '')),
         slots: { square: hits[0].k.square, count: String(hits[0].z.attackers) },
         subjects: hits.map(h => h.c),
       };
@@ -1539,6 +1565,7 @@ const STRUCTURAL = [
                  "to the defender for a counter-blow."),
     run(f) {
       if (f.phase === 'endgame') return null;
+      const P = FEAT.page;
       for (const a of ['w', 'b']) {
         const d = other(a);
         const zd = f.kingZone && f.kingZone[d], za = f.kingZone && f.kingZone[a];
@@ -1563,6 +1590,49 @@ const STRUCTURAL = [
         //    not available." Not a mood: the attacker must not be behind on the
         //    central squares.
         if (f.centre && f.centre.control[a] < f.centre.control[d]) continue;
+        // 4. THE RECORD'S OWN indicators_against, four of which nothing was
+        //    asking for.
+        //
+        //    "The centre is open or can be opened by the defender." Central
+        //    square CONTROL, which arm 3 measures, is not the same fact as an
+        //    open central FILE: a defender with a rook on a file carrying no
+        //    pawn of theirs has the counter-blow whatever the attacked-squares
+        //    count says, and Vukovic's whole rule is that the attack must be
+        //    earned against exactly that resource.
+        const openish = new Set(f.files.open.concat(f.files.semiOpenFor[d]));
+        const heavyOn = fl => f.scopes[d].some(p => (p.type === 'R' || p.type === 'Q') && p.square[0] === fl);
+        if (['d', 'e'].some(fl => openish.has(fl) && heavyOn(fl))) continue;
+        //    "Development is unfinished; a missing rook is often the exact tempo
+        //    the attack lacks." Read as pieces still at home - two or more of
+        //    the attacker's minor pieces on their starting squares is an attack
+        //    launched by half an army, and the rook behind them has not moved
+        //    either.
+        const homeRank = a === 'w' ? '1' : '8';
+        const homeSq = a === 'w' ? ['b1', 'c1', 'f1', 'g1'] : ['b8', 'c8', 'f8', 'g8'];
+        const asleep = f.scopes[a].filter(p => (p.type === 'N' || p.type === 'B') && homeSq.includes(p.square)).length;
+        if (asleep >= 2) continue;
+        //    "The defender can trade queens, which usually ends the attack."
+        //    The testable half is the immediate one, and it is the half that
+        //    matters: the defending queen already attacks the attacking queen
+        //    and comes out of the exchange whole. A trade two moves away is a
+        //    judgement about a line, which belongs to a search.
+        const st = P.stateFromFEN(f.fen);
+        const myQ = f.scopes[a].filter(p => p.type === 'Q').map(p => sqIdx(p.square));
+        const tradeable = myQ.some(q => P.attackersOf(st, q, d)
+          .some(x => st.b[x] && st.b[x].t === 'Q') && P.see(st, q, d) >= 0);
+        if (tradeable) continue;
+        //    "The king's shelter is intact and there is no sacrifice that breaks
+        //    it." Only the first half is a board fact; whether a sacrifice
+        //    breaks a shelter is a search, and nothing on this layer runs one.
+        //    So the guard implements the half it can see, which can only ever
+        //    suppress - the direction that is safe to be wrong in for a concept
+        //    whose own record calls every sign of it a precondition rather than
+        //    a demonstration.
+        if (kd.pawnShield === 3 && !zd.fileOpenOnKing && !zd.fileSemiOpenOnKing) continue;
+        //    "The attacker has no way to bring a third piece to the sector" is
+        //    the one condition here that cannot hold by the time the code
+        //    reaches this line: `zd.attackers < 3` above has already sent that
+        //    position away. It is implemented by arm 1 and needs no guard.
         const because = [
           `${side(f, a)} has ${zd.attackers} pieces bearing on ${side(f, d)}'s king zone against ` +
           `${zd.defenders} defenders, with ${kd.pawnShield} of three shield pawns in front of the king on ${kd.square}`,
@@ -2969,11 +3039,27 @@ const MOVE_BASED = [
   },
 ];
 
+// A MATCHER THAT THROWS IS A MATCHER THAT SAYS NOTHING, AND SAYS IT SILENTLY.
+// The two try/catches below fail open on purpose - one bad matcher must not
+// take the whole API down over a position it dislikes - but "fails open" and
+// "is switched off" look identical from outside, and that is not a theoretical
+// worry: a missing `const P = FEAT.page` inside `king-attack` made that matcher
+// inert on all 788 shipped positions, and the only reason it was noticed at all
+// is that somebody had pinned two positions it must still fire on. Nothing else
+// in the system would have reported the difference between a careful guard and
+// a ReferenceError.
+//
+// So every throw is recorded here, and `tests/test_api.js` asserts the list is
+// empty over the whole corpus. The catch still returns null; what changes is
+// that the silence is now audible.
+const MATCHER_ERRORS = [];
+
 function matchAll(features, moveInfo, concepts, featuresAfter) {
   let found = [];
   for (const m of STRUCTURAL) {
     let r = null;
-    try { r = m.run(features); } catch (e) { r = null; }
+    try { r = m.run(features); }
+    catch (e) { r = null; MATCHER_ERRORS.push({ concept: m.concept, fen: features.fen, error: String(e && e.message || e) }); }
     if (!r) continue;
     const rec = concepts[m.concept];
     if (!rec) continue;                        // never invent a concept id
@@ -2987,7 +3073,8 @@ function matchAll(features, moveInfo, concepts, featuresAfter) {
   if (moveInfo && moveInfo.legal && featuresAfter) {
     for (const m of MOVE_BASED) {
       let r = null;
-      try { r = m.run(features, featuresAfter, moveInfo); } catch (e) { r = null; }
+      try { r = m.run(features, featuresAfter, moveInfo); }
+      catch (e) { r = null; MATCHER_ERRORS.push({ concept: m.concept, fen: features.fen, error: String(e && e.message || e) }); }
       if (!r) continue;
       const rec = concepts[m.concept];
       if (!rec) continue;
@@ -3071,4 +3158,4 @@ function matchAll(features, moveInfo, concepts, featuresAfter) {
   return found;
 }
 
-module.exports = { matchAll, matchMotifs, motifGuard, STRUCTURAL, MOVE_BASED, MOTIF_TO_CONCEPT, CEILING, cap, PRIORITY };
+module.exports = { matchAll, matchMotifs, motifGuard, STRUCTURAL, MOVE_BASED, MOTIF_TO_CONCEPT, CEILING, cap, PRIORITY, MATCHER_ERRORS };

@@ -654,8 +654,114 @@ function kingFeatures(st, colour) {
   const enemy = colour === 'w' ? 'b' : 'w';
   const heavy = pieces(st, enemy, 'R').length + pieces(st, enemy, 'Q').length;
 
+  // THREE OF THE king-safety RECORD'S OWN indicators_against, AS OBSERVABLE
+  // FACTS. They read as reasons not to report the concept only if you forget
+  // what `king-safety` names. It names a SCALE, so its indicators_against are
+  // the conditions under which the king is UNSAFE - and these three were the
+  // last of them that nothing in this system could see. They live here rather
+  // than in the matcher because they are board facts, and because `luft` and
+  // `king-attack` want the same answers.
+
+  // "A hook the opponent can attack to open a line." The hook is OUR pawn, not
+  // theirs: a shield pawn that has stepped forward gives an enemy pawn
+  // something to hit, and the file opens whichever way the exchange goes. So
+  // the test is a pawn of ours on the king's file or a neighbour, off its
+  // starting rank, with an enemy pawn on an adjacent file still BEHIND it -
+  // behind, because a pawn that has already gone past cannot come back to
+  // attack it.
+  //
+  // AND ONLY FOR A KING THAT HAS GONE SOMEWHERE. The first version of this
+  // asked nothing about the king, and reported White's e4 in the Italian Game
+  // as a hook, because Black has a pawn on d7 behind it - e4 is a centre pawn,
+  // the king is on e1, and nothing about that shape is a hook. A hook is a
+  // hole in a SHELTER, so there has to be a shelter.
+  const pawnHome = colour === 'w' ? 6 : 1;
+  const towards = colour === 'w' ? -1 : 1;          // the direction our pawns go
+  const sheltered = r === homeRow && (c >= 6 || c <= 2);
+  let hook = null;
+  for (let dc = -1; dc <= 1 && sheltered && !hook; dc++) {
+    const cc = c + dc;
+    if (cc < 0 || cc > 7) continue;
+    for (const i of pieces(st, colour, 'P')) {
+      if (colOf(i) !== cc || rowOf(i) === pawnHome) continue;
+      const canBeHit = pieces(st, enemy, 'P').some(j => {
+        if (Math.abs(colOf(j) - cc) !== 1) return false;
+        // "Behind" is measured in the enemy pawn's own direction of travel.
+        return towards === -1 ? rowOf(j) < rowOf(i) : rowOf(j) > rowOf(i);
+      });
+      if (canBeHit) { hook = nameOf(i); break; }
+    }
+  }
+
+  // "King uncastled with the centre open or opening." Uncastled is
+  // castledSide === null on the home rank; the centre is read off the d- and
+  // e-files, and the file must have no pawn of OURS on it, which is what makes
+  // it a line rather than a wall.
+  //
+  // "Open or opening" is read strictly, for the reason the first version
+  // failed: it fired on the King's Indian after 8 moves - White uncastled on
+  // e1, no pawn on the d-file, Black's queen on d8 - and White is perfectly
+  // fine there and castling next move. So: fully open, or half-open with an
+  // enemy rook or queen on it AND THE KING STANDING ON THAT FILE. A line
+  // pointing down the board next to the king is not the same fact as a line
+  // pointing AT it.
+  let openCentreFile = null;
+  if (r === homeRow && !(c >= 6 || c <= 2)) {
+    for (const cc of [3, 4]) {
+      const ours = pieces(st, colour, 'P').some(i => colOf(i) === cc);
+      if (ours) continue;
+      const theirHeavy = pieces(st, enemy, 'R').concat(pieces(st, enemy, 'Q'));
+      const theirs = pieces(st, enemy, 'P').some(i => colOf(i) === cc);
+      if (!theirs || (cc === c && theirHeavy.some(i => colOf(i) === cc))) {
+        openCentreFile = FILES[cc]; break;
+      }
+    }
+  }
+
+  // "Key defender exchangeable - the fianchettoed bishop, or the f6 knight."
+  // Exchangeable, not merely attacked: an attacker worth more than the defender
+  // is offering a sacrifice, which is a different claim and one this file has
+  // no business making. So the attacker must be worth no more than the piece it
+  // hits. The two named defenders are the only ones tested, because the record
+  // names two and a general "a defender can be traded" is true of almost every
+  // piece on the board.
+  //
+  // Two tightenings, both from what the first version said. It called c3 a
+  // defender of a king on e1 (two files away and on the other side of it) and
+  // it called a PAWN capture an exchange - d5xc3 does not trade the defender
+  // off, it wins a piece, and that is a different sentence about a different
+  // concept. So the knight must be in front of the king on its own file or a
+  // neighbour, and the attacker must be a minor piece.
+  let exchangeableDefender = null;
+  const defenders = [];
+  for (const i of pieces(st, colour, 'N')) {
+    // A knight in front of the king's shelter - f3/f6 and its mirrors.
+    const inFront = (rowOf(i) - r) * towards > 0 && Math.abs(rowOf(i) - r) <= 2;
+    if (Math.abs(colOf(i) - c) <= 1 && inFront) {
+      defenders.push({ sq: i, what: 'the knight on ' + nameOf(i) });
+    }
+  }
+  for (const i of pieces(st, colour, 'B')) {
+    const n = nameOf(i);
+    const fianchetto = colour === 'w' ? (n === 'g2' || n === 'b2') : (n === 'g7' || n === 'b7');
+    // ...and on the king's own wing, since a queenside fianchetto is not this
+    // king's defender when the king is on g1.
+    if (fianchetto && Math.abs(colOf(i) - c) <= 2) defenders.push({ sq: i, what: 'the fianchettoed bishop on ' + n });
+  }
+  for (const d of defenders) {
+    // Minor for minor, and no value test beyond that. A value test was tried
+    // and it excluded the one line the record names: Bg5xf6 is THE way the f6
+    // knight comes off, and a bishop is ten centipawns dearer than a knight in
+    // this table, so `<= value` said no to the canonical case.
+    const cheap = P.attackersOf(st, d.sq, enemy)
+      .filter(a => st.b[a] && 'NB'.includes(st.b[a].t));
+    if (cheap.length) { exchangeableDefender = d.what + ', which ' +
+      nameOf(cheap[0]) + ' can take off'; break; }
+  }
+
   return {
     square: nameOf(k),
+    hook, openCentreFile, exchangeableDefender,
     onHomeRank: r === homeRow,
     // null in every case where it does not apply, rather than false on one
     // branch and null on another, which read as two different answers.

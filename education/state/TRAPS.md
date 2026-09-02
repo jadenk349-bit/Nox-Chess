@@ -13,7 +13,7 @@ implemented; that is a reading, and doing it is the work. What it can do is
 stop the list being rediscovered from scratch each time — and every one of
 the defects listed in the tool's header was unread before it was looked at.
 
-**Of 275 stated conditions (traps and indicators-against): 142 enforced in the matcher, 19 in Layer 3, 75 argued on the record to be unbuildable or already honoured elsewhere, 39 unread.**
+**Of 275 stated conditions (traps and indicators-against): 150 enforced in the matcher, 21 in Layer 3, 73 argued on the record to be unbuildable or already honoured elsewhere, 31 unread.**
 
 ONE CAVEAT ABOUT `indicators_against`, and it is not a technicality. For a
 concept naming an ASSET — an open file, an outpost, a passed pawn — they are
@@ -102,7 +102,7 @@ shared file was added to the search. The test is quotation for that reason.
 - [**unread**] *(indicator against)* Occupying costs a tempo the position cannot spare, or walks into a concrete tactic
 ## weak-square
 
-- [noted] Every pawn move creates squares no pawn can guard, so the raw feature fires everywhere. Usability is what makes it reportable.
+- [layer 3] Every pawn move creates squares no pawn can guard, so the raw feature fires everywhere. Usability is what makes it reportable.
 - [layer 3] A fianchetto leaves permanent weak squares on the long diagonal that the bishop covers perfectly well. The square is weak; the position is not.
 - [layer 3] A weak square only a queen can occupy is usually not a weakness, since cheaper pieces evict her.
 - [noted] *(indicator against)* A friendly pawn can still advance to cover it
@@ -217,20 +217,20 @@ shared file was added to the search. The test is quotation for that reason.
 - [cited] An exposed king is not a losing king. In a proven drawn ending both kings stand in the open with no pawn shelter, and centralising them is correct - see the recorded counterexample.
 - [cited] *(indicator against)* Three or more attackers can reach the king zone
 - [cited] *(indicator against)* Shield pawns advanced or missing, especially with an open file beside the king
-- [**unread**] *(indicator against)* A hook the opponent can attack to open a line
-- [**unread**] *(indicator against)* King uncastled with the centre open or opening
-- [**unread**] *(indicator against)* Key defender exchangeable — the fianchettoed bishop, or the f6 knight
+- [cited] *(indicator against)* A hook the opponent can attack to open a line
+- [cited] *(indicator against)* King uncastled with the centre open or opening
+- [cited] *(indicator against)* Key defender exchangeable — the fianchettoed bishop, or the f6 knight
 - [cited] *(indicator against)* No escape square, so back-rank tactics are live
 ## king-attack
 
 - [cited] Two checks is not an attack. The repository's `kingAttack` tag fires on checks >= 2 or mate, which is a proxy for puzzle classification and NOT a definition of the concept.
 - [cited] An exposed king is not automatically under attack — with the attacking pieces traded off, an exposed king is often just an active one. This is a registered false-positive case.
 - [cited] Advancing pawns at a king is not an attack unless pieces can follow into the lines that open.
-- [**unread**] *(indicator against)* The centre is open or can be opened by the defender
-- [**unread**] *(indicator against)* Development is unfinished; a missing rook is often the exact tempo the attack lacks
-- [**unread**] *(indicator against)* The defender can trade queens, which usually ends the attack
-- [**unread**] *(indicator against)* The attacker has no way to bring a third piece to the sector
-- [**unread**] *(indicator against)* The king's shelter is intact and there is no sacrifice that breaks it
+- [cited] *(indicator against)* The centre is open or can be opened by the defender
+- [cited] *(indicator against)* Development is unfinished; a missing rook is often the exact tempo the attack lacks
+- [cited] *(indicator against)* The defender can trade queens, which usually ends the attack
+- [cited] *(indicator against)* The attacker has no way to bring a third piece to the sector
+- [cited] *(indicator against)* The king's shelter is intact and there is no sacrifice that breaks it
 ## center-control
 
 - [cited] Counting pawns on central squares measures occupation, not control. A fianchettoed bishop controls e4 without standing anywhere near it.
@@ -367,7 +367,7 @@ shared file was added to the search. The test is quotation for that reason.
 - [cited] *(indicator against)* The pinned piece can capture the pinner
 - [cited] *(indicator against)* The defender can interpose a third unit on the line
 - [cited] *(indicator against)* The target behind can simply step off the line
-- [noted] *(indicator against)* The 'pinned' piece is worth more than the piece behind it — that is a skewer, not a pin
+- [layer 3] *(indicator against)* The 'pinned' piece is worth more than the piece behind it — that is a skewer, not a pin
 ## skewer
 
 - [cited] *(indicator against)* The front unit can capture the skewering piece

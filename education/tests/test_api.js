@@ -423,6 +423,33 @@ const { concepts } = API.knowledge();
   eq('king-attack: the matcher still fires on the positions it was measured on', fired, 2);
 }
 {
+  // NO MATCHER MAY THROW, over the whole shipped corpus.
+  //
+  // `matchAll` catches, which is right - one matcher must not take the API down
+  // over a position it dislikes - but a caught throw and a careful `return null`
+  // are the same thing from outside. A missing binding inside `king-attack`
+  // made it inert on all 788 positions and read, from every metric this project
+  // owns, as a very effective set of false-positive guards. The two pinned
+  // positions above were the only thing that caught it. This asserts the
+  // general case instead of the two.
+  const MATCH = require('../lib/matchers.js');
+  const before = MATCH.MATCHER_ERRORS.length;
+  const fs2 = require('fs'), path2 = require('path');
+  let seen = 0;
+  for (const track of ['opening', 'middlegame', 'endgame']) {
+    const file = path2.join(__dirname, '..', '..', 'puzzles', `${track}.json`);
+    if (!fs2.existsSync(file)) continue;
+    for (const p of JSON.parse(fs2.readFileSync(file, 'utf8'))) {
+      if (!p || !p.fen) continue;
+      seen++;
+      try { API.analyzeWithEducation({ fen: p.fen, move: (p.moves || [])[0] }); } catch (e) { /* the API's own failure is a separate test */ }
+    }
+  }
+  const thrown = MATCH.MATCHER_ERRORS.slice(before);
+  ok(`no matcher throws over ${seen} shipped positions`, thrown.length === 0,
+     thrown.slice(0, 3).map(t => `${t.concept}: ${t.error}`).join(' | '));
+}
+{
   // Reti-Capablanca 1924: Keene's 18...Ne6 raises Black's pawn-and-minor control
   // of the centre. The RAW attacker count falls, because the knight blocks a
   // rook x-raying its own bishop, and an earlier version of the move-based
