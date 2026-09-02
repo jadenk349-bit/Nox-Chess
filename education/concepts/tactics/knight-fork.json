@@ -79,7 +79,8 @@
     "Only another knight can attack a knight back without moving, which is why knight-versus-knight forks behave differently."
   ],
   "limitations": [
-    "Detecting the geometry is mechanical; deciding it wins material requires resolving the exchange."
+    "Detecting the geometry is mechanical; deciding it wins material requires resolving the exchange.",
+    "NO MASTER-GAME POSITION YET, and the search that failed is worth recording. Five famous games were replayed through this base's own move generator and scanned position by position with the API - the Opera Game, the Evergreen, the Immortal, the Game of the Century and Legall's Mate, 225 plies between them - and this concept was not reported in any of them. That is not evidence the motif is rare; it is evidence that the five games this base can currently verify do not contain a clean instance of it, and that adding one means adding a game rather than looking harder at these. tools/replay_game.js is the instrument: a move list that is wrong is refused rather than guessed at."
   ],
   "misconceptions": [
     "That a knight fork always wins material. The landing square's safety decides it.",
