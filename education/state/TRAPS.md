@@ -13,7 +13,7 @@ implemented; that is a reading, and doing it is the work. What it can do is
 stop the list being rediscovered from scratch each time — and every one of
 the defects listed in the tool's header was unread before it was looked at.
 
-**Of 246 stated conditions (traps and indicators-against): 103 enforced in the matcher, 20 in Layer 3, 54 argued on the record to be unbuildable or already honoured elsewhere, 69 unread.**
+**Of 246 stated conditions (traps and indicators-against): 125 enforced in the matcher, 20 in Layer 3, 54 argued on the record to be unbuildable or already honoured elsewhere, 47 unread.**
 
 ONE CAVEAT ABOUT `indicators_against`, and it is not a technicality. For a
 concept naming an ASSET — an open file, an outpost, a passed pawn — they are
@@ -98,7 +98,7 @@ shared file was added to the search. The test is quotation for that reason.
 - [layer 3] *(indicator against)* An enemy pawn can still advance to challenge the square, and doing so costs the defender nothing
 - [cited] *(indicator against)* The occupant can be traded off by a knight or a same-coloured bishop with no compensation
 - [cited] *(indicator against)* The square is on the a/b/g/h files and the intended occupant is a knight — Nimzowitsch assigns flank outposts to rooks
-- [**unread**] *(indicator against)* The piece on the square attacks nothing and restricts nothing; it is safe but idle
+- [cited] *(indicator against)* The piece on the square attacks nothing and restricts nothing; it is safe but idle
 - [**unread**] *(indicator against)* Occupying costs a tempo the position cannot spare, or walks into a concrete tactic
 ## weak-square
 
@@ -132,12 +132,12 @@ shared file was added to the search. The test is quotation for that reason.
 - [noted] The principle describes a method of conversion, not an evaluation. A position with two weaknesses is not thereby winning, and Kotov-Pachman shows the gap: the moves annotators mark necessary and inaccurate differ by 0.05 pawns.
 - [cited] Against opposite-coloured bishops or a reachable fortress, the count of weaknesses is simply not the operative variable.
 - [noted] A pawn that is structurally weak can be the position's KEY DEFENSIVE ASSET, and no pawn-skeleton test tells the two apart. Shirov-Kramnik, Linares 2000, move 20: this base lists Black's f4 among the weaknesses White should play against, and Jan Markos calls the same pawn, together with b4, the cage that 'guards all the roads to d5'. Both readings follow from the skeleton and only one is true of the position.
-- [**unread**] *(indicator against)* The two targets are within two files of each other, so one defending king covers both
-- [**unread**] *(indicator against)* Opposite-coloured bishops with no breakthrough square - the defending bishop holds one colour complex regardless of how many targets exist
+- [cited] *(indicator against)* The two targets are within two files of each other, so one defending king covers both
+- [cited] *(indicator against)* Opposite-coloured bishops with no breakthrough square - the defending bishop holds one colour complex regardless of how many targets exist
 - [**unread**] *(indicator against)* The defender can reach a known fortress
 - [noted] *(indicator against)* Opening the second front concedes counterplay, a passed pawn, or an open line towards the attacker's own king
 - [cited] *(indicator against)* The first weakness can be liquidated by a pawn break or a favourable exchange
-- [**unread**] *(indicator against)* The defending king already stands between the two targets
+- [cited] *(indicator against)* The defending king already stands between the two targets
 ## bad-bishop
 
 - [cited] REGISTERED FALSE POSITIVE: a bishop behind its own pawns is not automatically bad in the sense that matters. Suba's active bad bishop is the counterexample, and it is common, not exotic.
@@ -153,20 +153,20 @@ shared file was added to the search. The test is quotation for that reason.
 - [cited] The drawish reputation is an ENDGAME fact. In the middlegame with heavy pieces on, opposite-coloured bishops favour the attacker, because the bishop operates where the defender's cannot answer. Announcing 'opposite bishops, drawn' with queens on the board is the standard error.
 - [noted] Detecting the material is trivial; whether a blockade is achievable is not.
 - [cited] Two extra pawns are often not enough — but three files of separation often are. The count of pawns is the wrong variable; their separation and the blockade are the right ones.
-- [**unread**] *(indicator against)* Queens or rooks remain — winning chances rise sharply, and in the middlegame the bishops are an ATTACKING asset
-- [**unread**] *(indicator against)* The extra pawns are separated by three files or more
+- [cited] *(indicator against)* Queens or rooks remain — winning chances rise sharply, and in the middlegame the bishops are an ATTACKING asset
+- [cited] *(indicator against)* The extra pawns are separated by three files or more
 - [**unread**] *(indicator against)* The defender cannot establish a blockade on their bishop's colour
-- [**unread**] *(indicator against)* The attacker's king can penetrate on the colour the defending bishop cannot cover
+- [cited] *(indicator against)* The attacker's king can penetrate on the colour the defending bishop cannot cover
 ## rook-on-the-seventh
 
 - [cited] REGISTERED FALSE POSITIVE: a rook arriving on the seventh is not automatically important. With the pawns advanced and the king free, it attacks nothing and confines nobody.
 - [cited] Two rooks on the seventh do NOT generally mate a king whose eighth rank is defended. Explaining them as a mating attack is usually wrong.
 - [cited] Detecting 'rook on rank 7' is trivial and fires often; the reportable facts are what it attacks and whether the king is trapped.
 - [cited] A rook reaching the seventh is not decisive by itself. With an empty seventh rank and an enemy king that has luft, a tested position evaluates level at -0.04.
-- [**unread**] *(indicator against)* The enemy king has escaped to the sixth rank or beyond
-- [**unread**] *(indicator against)* The pawns on the seventh have already advanced, so there is nothing to attack
+- [cited] *(indicator against)* The enemy king has escaped to the sixth rank or beyond
+- [cited] *(indicator against)* The pawns on the seventh have already advanced, so there is nothing to attack
 - [cited] *(indicator against)* The rook can be challenged and traded off, or driven away with gain
-- [**unread**] *(indicator against)* The eighth rank is defended, so the mating dimension of a second rook is absent
+- [cited] *(indicator against)* The eighth rank is defended, so the mating dimension of a second rook is absent
 - [**unread**] *(indicator against)* Reaching the seventh costs a tempo the position cannot spare
 ## luft
 
@@ -251,26 +251,26 @@ shared file was added to the search. The test is quotation for that reason.
 ## battery
 
 - [cited] Two line pieces on one line are only a battery if the line ARRIVES somewhere. Stacked behind their own pawns they combine nothing, and the bare geometry fires on nearly half of all positions.
-- [**unread**] *(indicator against)* The line is blocked further along and cannot be opened
+- [cited] *(indicator against)* The line is blocked further along and cannot be opened
 - [cited] *(indicator against)* The rear piece is more valuable and becomes a target itself
 ## check
 
 - [cited] A check being available is not a reason to play it. Proven case: Ra7+ draws and Rg8+ loses in the same position.
 ## insufficient-material
 
-- [**unread**] *(indicator against)* Any pawn, rook or queen on the board
+- [cited] *(indicator against)* Any pawn, rook or queen on the board
 ## fifty-move-rule
 
-- [**unread**] *(indicator against)* Any capture or pawn move in that span resets the counter
+- [cited] *(indicator against)* Any capture or pawn move in that span resets the counter
 ## en-passant
 
-- [**unread**] *(indicator against)* Any other move has intervened since the two-square advance
+- [cited] *(indicator against)* Any other move has intervened since the two-square advance
 ## wrong-rook-pawn
 
 - [cited] Being in front of the pawn is NOT enough, unlike king-and-pawn endings. The defending king must reach the corner or the square beside it — Mednis gives a position where the same setup wins with White to move and draws with Black to move.
 - [noted] A second pawn on a different file usually changes the verdict entirely.
 - [cited] The bishop's colour relative to the CORNER is what matters, not its current square.
-- [**unread**] *(indicator against)* The bishop DOES control the promotion square — an ordinary win
+- [cited] *(indicator against)* The bishop DOES control the promotion square — an ordinary win
 - [layer 3] *(indicator against)* The defending king cannot reach the corner in time
 - [noted] *(indicator against)* A second pawn on another file exists, which usually wins
 - [cited] *(indicator against)* The pawn is not a rook pawn at all
@@ -287,22 +287,22 @@ shared file was added to the search. The test is quotation for that reason.
 
 - [cited] Being loose is not being bad. Reporting every undefended piece would flag most positions and teach nothing.
 - [cited] It only matters when a forcing move can reach it. A loose rook in a locked position is not a weakness.
-- [**unread**] *(indicator against)* The piece is on a square nothing can reach
-- [**unread**] *(indicator against)* It can be defended or moved in one tempo the opponent cannot deny
+- [cited] *(indicator against)* The piece is on a square nothing can reach
+- [cited] *(indicator against)* It can be defended or moved in one tempo the opponent cannot deny
 - [cited] *(indicator against)* Defending it would cost more than the risk — a loose piece is a risk, not an error
 ## seventy-five-move-rule
 
-- [**unread**] *(indicator against)* The final move delivers checkmate — mate takes precedence
+- [cited] *(indicator against)* The final move delivers checkmate — mate takes precedence
 ## king-activation
 
 - [cited] The single most important trap is rook endings, on the testimony of the principle's own advocate: Shereshevsky found centralisation there to be not merely untimely but sometimes simply wrong, and warns against automatic centralising moves.
 - [cited] A king moving towards the centre is not automatically doing the right thing; the move still has to survive checks. His example has 1...Ke5? losing to 2.Rd5+ while the retreat 1...Kc5! draws.
 - [noted] Centralisation with queens still on is a different matter entirely and this concept does not apply.
 - [cited] Never recommend centralising a king while the opponent has a queen, whatever the piece count says. The phase test in lib/features.js is material-based and can call a queens-on position an endgame.
-- [**unread**] *(indicator against)* Queens or many pieces remain and the king can be attacked
-- [**unread**] *(indicator against)* A rook ending with concrete defensive resources, where the king may be needed at home
-- [**unread**] *(indicator against)* The centralising move loses time in a race
-- [**unread**] *(indicator against)* The king would step into a check that gains the opponent a tempo
+- [cited] *(indicator against)* Queens or many pieces remain and the king can be attacked
+- [cited] *(indicator against)* A rook ending with concrete defensive resources, where the king may be needed at home
+- [cited] *(indicator against)* The centralising move loses time in a race
+- [cited] *(indicator against)* The king would step into a check that gains the opponent a tempo
 ## pawn-break
 
 - [layer 3] Any pawn advance into contact is mechanically a break; whether it is a good one depends on who is placed to use the lines it opens, which the detector cannot see.

@@ -133,7 +133,7 @@ first entry in this corpus scored on weighting rather than on detection.
    `state/TRAPS.md` reached "0 unread" and then turned out to be reading half
    the list: it looked only at `false_positive_traps`, and half the conditions
    in this knowledge base live in `indicators_against`. Counting both, 74 are
-   enforced in the matcher, 20 in Layer 3, 29 argued on a record, **69
+   enforced in the matcher, 20 in Layer 3, 29 argued on a record, **47
    unread**. Twenty-five defects have come out of the reading so far, including one
    in Layer 3 that had been true of every measurement in the project.
 8. **The sharpest failures are no longer about detection.** Two corpus entries

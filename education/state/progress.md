@@ -1816,3 +1816,23 @@ where the pawn move that makes air is also a hook. The wording carried that
 caveat in the abstract already; now it carries it where it applies.
 
 None of the three moves a firing rate. **69 of 246 unread.**
+
+
+## Twenty-two conditions read and found already built
+
+The list went **69 → 47** without a line of new logic, and every row was checked
+against the code before it was quoted. `rook-on-the-seventh`'s "the enemy king
+has escaped to the sixth" is the relative-seventh clause; "the pawns have already
+advanced, so there is nothing to attack" is why a rook with no targets and no
+confinement is not reported at all. `king-activation`'s "queens or many pieces
+remain" is enforced by `phaseOf()`, which requires no queens. `loose-piece`'s "the
+piece is on a square nothing can reach" *is* its forcing-move guard, and "it can
+be defended or moved in one tempo" is why the forcing move must survive being
+forcing. `battery`'s "the line is blocked further along" is the arrival test said
+from the other side. And four rule records — `insufficient-material`,
+`fifty-move-rule`, `en-passant`, `wrong-rook-pawn` — have `indicators_against`
+that are the **negation of their own preconditions** and cannot arise.
+
+The distinction matters because the tool credits by quotation and quoting is
+cheap. What makes these legitimate is that each was read against the body first —
+which is exactly what the four lying `implements` strings are the argument for.

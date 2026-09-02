@@ -718,9 +718,11 @@ const STRUCTURAL = [
         //
         // ...and it must be DOING something there. "A safe square that the piece
         // does nothing from. Safety is a precondition, not the benefit" is the
-        // record's second trap, and it had never been built: the piece has to
-        // bear on an enemy man or on squares inside the enemy camp, or the
-        // report is about a square rather than about a plan.
+        // record's second trap, and the same record says it again as an
+        // indicator_against - "the piece on the square attacks nothing and
+        // restricts nothing; it is safe but idle". It had never been built: the
+        // piece has to bear on an enemy man or on squares inside the enemy camp,
+        // or the report is about a square rather than about a plan.
         //
         // The record's second indicator_against widens the rim test to the b-
         // and g-files as well, and only for knights: "the square is on the
@@ -981,6 +983,16 @@ const STRUCTURAL = [
         const mine = f.weakSpread[c] || { weak: [] };
         if (mine.weak.length > s.weak.length) continue;
         if (f.material[c].counts.R + f.material[c].counts.Q === 0) continue;
+        // Three of this record's indicators_against are already enforced above
+        // and are quoted here so the reading list can see them: "the two targets
+        // are within two files of each other, so one defending king covers both"
+        // is the spread test, deliberately calibrated to two rather than three
+        // and argued on the record; "the defending king already stands between
+        // the two targets" is the king-file check; and "opposite-coloured
+        // bishops with no breakthrough square - the defending bishop holds one
+        // colour complex regardless of how many targets exist" is the refusal
+        // added a day earlier.
+        //
         // "The first weakness can be LIQUIDATED by a pawn break or a favourable
         // exchange" - an indicator_against, and the buildable half is the pawn
         // break: a weak pawn that can simply advance out of the attack is not
@@ -1082,6 +1094,15 @@ const STRUCTURAL = [
       // Saying "drawish" here with queens and rooks on the board is the error
       // the record names, and it is the commonest thing anyone says about this
       // material. The endgame reputation is not transferable to a middlegame.
+      // Two of this record's indicators_against are answered by the two clauses
+      // below: "queens or rooks remain - winning chances rise sharply, and in
+      // the middlegame the bishops are an ATTACKING asset" is the heavy-piece
+      // caveat, and "the extra pawns are separated by three files or more" is
+      // the separation clause. The other two - whether a blockade can be
+      // established, and whether the attacking king can penetrate on the colour
+      // the defending bishop cannot cover - are judgements about a position that
+      // does not exist yet.
+      //
       // "Two extra pawns are often not enough — but THREE FILES OF SEPARATION
       // often are. The count of pawns is the wrong variable; their separation
       // and the blockade are." The record says the count is wrong and then this
@@ -1174,6 +1195,14 @@ const STRUCTURAL = [
       return {
         confidence: 'high',
         because: hits.map(h => {
+          // Three of this record's indicators_against are answered right here.
+          // "The enemy king has escaped to the sixth rank or beyond" is the
+          // relative-seventh clause; "the pawns on the seventh have already
+          // advanced, so there is nothing to attack" is why a rook with no
+          // targets and no confinement is not reported at all; and "the eighth
+          // rank is defended, so the mating dimension of a second rook is
+          // absent" is the pigs clause below.
+          //
           // The record's central distinction, in Nimzowitsch's own vocabulary:
           // the seventh is held ABSOLUTELY when the enemy king is confined to
           // the eighth behind the rook, and only RELATIVELY when it has slipped
@@ -1676,7 +1705,10 @@ const STRUCTURAL = [
                   // behind their own pawns combine nothing, and a first version
                   // that asked only for one empty square beyond the pair fired
                   // on 43% of the 788 shipped positions. The line has to reach
-                  // an enemy man, or run into the enemy half.
+                  // an enemy man, or run into the enemy half. That is also the
+                  // record's first indicator_against - "the line is blocked
+                  // further along and cannot be opened" - said from the other
+                  // side: a line that arrives nowhere is a line that is blocked.
                   let rr = r + dr, ccc = cc + dc, room = 0, target = null;
                   while (rr >= 0 && rr < 8 && ccc >= 0 && ccc < 8) {
                     const q2 = st.b[rr * 8 + ccc];
@@ -1780,7 +1812,9 @@ const STRUCTURAL = [
     concept: 'insufficient-material',
     implements: ("recognition.preconditions: only kings, or a king and a single minor piece, remain for the " +
                  "side in question. Reported only when NEITHER side can mate, which is the position that is " +
-                 "drawn rather than merely hard to win."),
+                 "drawn rather than merely hard to win. The record's indicator_against - 'any pawn, rook or " +
+                 "queen on the board' - is the negation of that precondition and cannot arise: such a " +
+                 "position never reaches the report."),
     run(f) {
       const bare = c => {
         const m = f.material[c].counts;
@@ -1799,7 +1833,9 @@ const STRUCTURAL = [
   {
     concept: 'fifty-move-rule',
     implements: ("recognition.preconditions: 100 ply with no capture and no pawn move. Reported from the " +
-                 "halfmove clock once it is close enough to matter, because a count of 4 is not news."),
+                 "halfmove clock once it is close enough to matter, because a count of 4 is not news. The " +
+                 "record's indicator_against - 'any capture or pawn move in that span resets the counter' - " +
+                 "is what the halfmove clock IS, so there is nothing separate to test."),
     run(f) {
       const P = FEAT.page;
       const st = P.stateFromFEN(f.fen);
@@ -1817,7 +1853,9 @@ const STRUCTURAL = [
     concept: 'en-passant',
     implements: ("recognition.preconditions: the previous move was an enemy pawn advancing two squares and a " +
                  "friendly pawn stands beside it. Reported only when the capture is actually AVAILABLE - a " +
-                 "FEN carries an en-passant target square whether or not anything can use it."),
+                 "FEN carries an en-passant target square whether or not anything can use it. The record's " +
+                 "indicator_against - 'any other move has intervened since the two-square advance' - is " +
+                 "encoded in that target square: a FEN that carries one is a FEN in which nothing has."),
     run(f) {
       const P = FEAT.page;
       const st = P.stateFromFEN(f.fen);
@@ -1841,7 +1879,9 @@ const STRUCTURAL = [
   {
     concept: 'wrong-rook-pawn',
     implements: ("recognition.preconditions verbatim: the attacker has a bishop and a rook pawn, and the " +
-                 "pawn's promotion square is NOT of the bishop's colour. The record's own first trap - that " +
+                 "pawn's promotion square is NOT of the bishop's colour - which makes the record's " +
+                 "indicator_against, 'the bishop DOES control the promotion square, an ordinary win', the " +
+                 "negation of the precondition rather than a separate test. The record's own first trap - that " +
                  "the defending king must REACH the corner, and that being in front of the pawn is not " +
                  "enough - is a fact about the defence, not about the material, so it travels as a caution."),
     run(f) {
@@ -1926,7 +1966,10 @@ const STRUCTURAL = [
     concept: 'loose-piece',
     implements: ("recognition.preconditions: a piece has no friendly defender and is not currently attacked. " +
                  "The record's own second trap is the reason for the guard: 'it only matters when a forcing " +
-                 "move can reach it. A loose rook in a locked position is not a weakness.' So a loose piece " +
+                 "move can reach it. A loose rook in a locked position is not a weakness.' The record's " +
+                 "indicators_against say the same twice more - 'the piece is on a square nothing can " +
+                 "reach' is that guard exactly, and 'it can be defended or moved in one tempo the " +
+                 "opponent cannot deny' is why the forcing move must SURVIVE being forcing. So a loose piece " +
                  "is reported only when an enemy move can attack it."),
     run(f) {
       const P = FEAT.page;
@@ -1990,7 +2033,10 @@ const STRUCTURAL = [
   },
   {
     concept: 'seventy-five-move-rule',
-    implements: "recognition.preconditions: 150 ply with no capture and no pawn move.",
+    implements: ("recognition.preconditions: 150 ply with no capture and no pawn move. The record's " +
+                 "indicator_against - 'the final move delivers checkmate, mate takes precedence' - is " +
+                 "handled by the ordering rather than here: `checkmate` sits near the head of PRIORITY " +
+                 "and this concept in the band below it, so a mating position leads with the mate."),
     run(f) {
       const half = Number(String(f.fen).split(' ')[4] || 0);
       if (!(half >= 130)) return null;
@@ -2009,6 +2055,14 @@ const STRUCTURAL = [
     run(f) {
       // With no pawns there is nothing for an active king to attack or escort,
       // and the concept's whole content is about what the king does once there.
+      //
+      // The phase test also answers the first indicator_against - "queens or many
+      // pieces remain and the king can be attacked" - because phaseOf() requires
+      // no queens and a small non-pawn count. The second, "a rook ending with
+      // concrete defensive resources, where the king may be needed at home", is
+      // the warning the sentence carries below. The last two are about a MOVE -
+      // losing time in a race, stepping into a check that gains a tempo - and
+      // this arm reports a POSITION.
       //
       // The phase test also carries the record's strongest instruction, which is
       // worth stating so it is not lost in a refactor: "never recommend
