@@ -115,7 +115,32 @@
     ]
   },
   "examples": [],
-  "counterexamples": [],
+  "counterexamples": [
+    {
+      "fen": "rnbqnrk1/ppp1ppbp/3p2p1/4P3/2PP1P2/2N1B3/PP4PP/R2QKBNR b KQ - 1 7",
+      "note": "Letelier-Fischer, Leipzig Olympiad 1960, after 7.f4, and it is a NEGATIVE because the annotation names the concept and then says why it failed: 'His opponent decided to launch an early pawn storm against Black's King's Indian and delay his development. When central pawns are not supported by pieces, they can become an easy target for the opponent.' Four pawns advanced, no pieces behind them, and Fischer answered with ...d6 and ...f6 and won in twenty-three moves. This record has no POSITIVE example yet, and that is recorded rather than filled with a constructed one: a storm that works is a storm whose pieces arrive, and choosing a position where that is true is a judgement this base has not yet found a human source for.",
+      "origin_kind": "historical-game",
+      "game": "Letelier-Fischer, Leipzig Olympiad 1960 (preliminaries)",
+      "concept_role": "negative",
+      "attributed_by": "corpus entry letelier-fischer-1960-7c5-center-control-ambiguous",
+      "engine": {
+        "engine_id": "Stockfish 18",
+        "test_level": 3,
+        "depth": 24,
+        "threads": 10,
+        "hash_mb": 4096,
+        "multipv": 1,
+        "best_move": "d6e5",
+        "eval_cp": -10,
+        "mate_in": null,
+        "pv": [],
+        "alternatives": [],
+        "margin_cp": null,
+        "verdict": "supports",
+        "verdict_note": "-0.10 - level, from Black's side, with White's pawns on c4, d4, e5 and f4. The storm has gained no advantage at the moment it is complete, which is the negative claim stated as a number, and the engine's own first move begins dissolving it."
+      }
+    }
+  ],
   "ambiguous_examples": [],
   "explanations": {
     "by_level": {

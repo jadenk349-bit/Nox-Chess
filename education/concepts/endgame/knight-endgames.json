@@ -138,7 +138,40 @@
       }
     ]
   },
-  "examples": [],
+  "examples": [
+    {
+      "fen": "8/8/4k3/8/2n5/8/4PP2/3NK3 w - - 0 1",
+      "note": "Constructed, and it is Botvinnik's sentence with a board under it: knight endings are pawn endings. Two pawns against none, knight against knight, and the extra material converts the way it would if the knights were not there - the knight cannot build a fortress, cannot stop two connected pawns on its own, and cannot lose a tempo to gain the opposition. What it takes is a long time, which is the second half of the lesson and is why the proof matters more than the evaluation.",
+      "origin_kind": "tablebase-position",
+      "concept_role": "positive",
+      "side_to_move_benefits": "white",
+      "engine": {
+        "engine_id": "Stockfish 18",
+        "test_level": 3,
+        "depth": 26,
+        "threads": 10,
+        "hash_mb": 4096,
+        "multipv": 1,
+        "best_move": "e2e3",
+        "eval_cp": 514,
+        "mate_in": null,
+        "pv": [],
+        "alternatives": [],
+        "margin_cp": null,
+        "verdict": "supports",
+        "verdict_note": "+5.14 at depth 26. Two pawns, valued at rather more than two pawns, because in this ending they are going to queen."
+      },
+      "tablebase": {
+        "source": "Lichess tablebase (Syzygy, 7-piece)",
+        "pieces": 6,
+        "wdl": "win",
+        "dtz": 1,
+        "dtm": 65,
+        "category": "win",
+        "note": "PROVEN WIN, dtz 1, mate in 65, best move e3. Sixty-five moves for two extra pawns and no tactics anywhere in it: the proof is what makes this an example of a PRINCIPLE rather than of a position, because no human calculation reaches the end of that and the principle is what tells you to enter it."
+      }
+    }
+  ],
   "counterexamples": [],
   "ambiguous_examples": [],
   "explanations": {

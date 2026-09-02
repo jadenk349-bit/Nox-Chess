@@ -100,7 +100,40 @@
     ],
     "conflicts": []
   },
-  "examples": [],
+  "examples": [
+    {
+      "fen": "r7/8/3k4/8/8/3K4/3B4/3R4 w - - 0 1",
+      "note": "Rook and bishop against rook - the ending this record exists for, because material counting gives the wrong answer and nothing but knowledge of the specific ending gives the right one. An extra bishop is worth about three pawns everywhere else on the board and is worth nothing here with the defence set up correctly. The record's subject is precisely that: endings where the piece values stop applying and the position has to be known rather than calculated.",
+      "origin_kind": "tablebase-position",
+      "concept_role": "positive",
+      "side_to_move_benefits": "neither",
+      "engine": {
+        "engine_id": "Stockfish 18",
+        "test_level": 3,
+        "depth": 26,
+        "threads": 10,
+        "hash_mb": 4096,
+        "multipv": 1,
+        "best_move": "d2c3",
+        "eval_cp": 0,
+        "mate_in": null,
+        "pv": [],
+        "alternatives": [],
+        "margin_cp": null,
+        "verdict": "supports",
+        "verdict_note": "0.00 at depth 26. The engine agrees with the tablebase here, which it does not always do in this ending - the drawn defensive positions are famously hard to find over the board and the winning attempts run past fifty moves."
+      },
+      "tablebase": {
+        "source": "Lichess tablebase (Syzygy, 7-piece)",
+        "pieces": 5,
+        "wdl": "draw",
+        "dtz": 0,
+        "dtm": 0,
+        "category": "draw",
+        "note": "PROVEN DRAW, dtz 0. A whole extra minor piece and a proven draw, established over every legal continuation rather than over a search. This is the sharpest available statement of what a mixed-piece ending is: the material table is a summary of the middlegame and it does not survive into here."
+      }
+    }
+  ],
   "counterexamples": [],
   "ambiguous_examples": [],
   "explanations": {
