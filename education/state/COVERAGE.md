@@ -95,10 +95,10 @@ The completion assessment is judged on the ORIGINAL rule and criterion 1 stays w
 | partial | 0.83 | `ranks-files-diagonals` | 1 |
 | partial | 0.80 | `candidate-moves` | 1 |
 | partial | 0.73 | `planning` | 1 |
+| partial | 0.69 | `corresponding-squares` | 1 |
 | partial | 0.67 | `chess-terminology` | 1 |
 | partial | 0.67 | `named-strategic-concepts` | 1 |
 | partial | 0.67 | `beginner-misconceptions` | 1 |
-| partial | 0.61 | `corresponding-squares` | 1 |
 | partial | 0.60 | `calculation-principles` | 1 |
 | partial | 0.60 | `practical-principles` | 1 |
 | partial | 0.60 | `time-management` | 1 |
@@ -227,6 +227,7 @@ The completion assessment is judged on the ORIGINAL rule and criterion 1 stays w
 | `planning` | 0.73 | x | x | x | x | x | x | - | x | - | - | . | - | x | x | x | x |
 | `promotion` | 0.70 | x | x | x | . | x | . | x | - | . | . | . | . | - | x | x | - |
 | `threefold-repetition` | 0.70 | x | x | x | . | x | . | x | - | . | . | . | . | - | x | x | - |
+| `corresponding-squares` | 0.69 | x | x | x | x | x | . | - | - | . | - | - | . | x | x | x | x |
 | `blindfold-interference` | 0.67 | x | x | x | x | x | . | - | - | . | - | . | . | - | x | x | x |
 | `blindfold-representation` | 0.67 | x | x | x | x | x | . | - | - | . | - | . | . | - | x | x | x |
 | `chunking` | 0.67 | x | x | x | x | x | . | - | - | . | - | . | . | - | x | x | x |
@@ -236,7 +237,6 @@ The completion assessment is judged on the ORIGINAL rule and criterion 1 stays w
 | `clearance` | 0.64 | x | x | x | . | x | x | - | x | - | - | . | - | x | x | x | - |
 | `deflection` | 0.64 | x | x | x | . | x | x | - | x | - | - | . | - | x | x | x | - |
 | `interference` | 0.64 | x | x | x | . | x | x | - | x | - | - | . | - | x | x | x | - |
-| `corresponding-squares` | 0.62 | x | x | x | x | x | . | - | - | . | - | - | . | - | x | x | x |
 | `board-vision` | 0.60 | x | x | x | x | x | x | - | - | - | - | . | - | - | x | x | x |
 | `calculation` | 0.60 | x | x | x | x | x | x | - | - | - | - | . | - | - | x | x | x |
 | `practical-principles` | 0.60 | x | x | x | x | x | x | - | - | - | - | . | - | - | x | x | x |

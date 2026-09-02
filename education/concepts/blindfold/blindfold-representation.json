@@ -97,7 +97,8 @@
   ],
   "limitations": [
     "Binet's monograph and Fine's paper were consulted through summaries rather than in the original.",
-    "This is evidence about representation, not a recipe for acquiring it."
+    "This is evidence about representation, not a recipe for acquiring it.",
+    "NO REGISTERED FALSE-POSITIVE CASE, and a FEN is not the right instrument for one here. A case in tests/false_positive_cases.json is a POSITION where the concept's surface pattern is present and the concept is not, replayed as an assertion so the system can be shown declining the error. This record's `recognition.detectability` is `human-only`: what it describes is something a player does rather than something a board contains, so there is no surface pattern for a position to carry and nothing for the system to decline. The conditions this record states are read and answered in `limitations` and in the trap audit instead. Recorded rather than filled: tools/depth_report.py still counts this concept as missing the item."
   ],
   "misconceptions": [
     "That blindfold players hold a photographic image of the board. This was the hypothesis the first study set out to confirm and had to abandon.",

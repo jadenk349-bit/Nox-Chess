@@ -281,7 +281,13 @@ const { concepts } = API.knowledge();
     for (const fn of fs.readdirSync(dp)) {
       if (!fn.endsWith('.json')) continue;
       const raw = fs.readFileSync(path.join(dp, fn), 'utf8');
-      if (!/registered false[- ]positive case/i.test(raw)) continue;
+      // The AFFIRMATIVE claim only. `tempo` said "This is a registered
+      // false-positive case" and did not have one, which is what this test
+      // exists for. Eighteen records now say the opposite - "NO REGISTERED
+      // FALSE-POSITIVE CASE, and a FEN is not the right instrument for one
+      // here" - and a bare substring match reads those as claims too, which it
+      // did on the first run. Matching the verb is what separates them.
+      if (!/\bis a registered false[- ]positive case/i.test(raw)) continue;
       const c = JSON.parse(raw);
       if (!withCase.has(c.id)) claims.push(c.id);
     }
