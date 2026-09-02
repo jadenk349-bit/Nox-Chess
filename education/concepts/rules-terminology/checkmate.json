@@ -70,7 +70,27 @@
     "conflicts": []
   },
   "examples": [],
-  "counterexamples": [],
+  "counterexamples": [
+    {
+      "fen": "7k/5Q2/6K1/8/8/8/8/8 b - - 0 1",
+      "note": "The mirror of `stalemate`'s counterexample, and the same controlled pair read from the other side: the queen on f7 instead of g7 leaves Black with no legal move and NOT in check, which is a draw rather than a win. Every mechanical sign of mate is present except the one that matters.",
+      "origin_kind": "constructed-test",
+      "concept_role": "negative",
+      "side_to_move_benefits": "neither",
+      "controlled_pair_with": "7k/6Q1/6K1/8/8/8/8/8 b - - 0 1",
+      "tablebase": {
+        "source": "Lichess tablebase (Syzygy, 7-piece)",
+        "pieces": 3,
+        "wdl": "draw",
+        "dtz": 0,
+        "dtm": 0,
+        "category": "draw",
+        "checkmate": false,
+        "stalemate": true,
+        "note": "PROVEN: stalemate true, checkmate false, draw. The paired position with the queen on g7 is a proven loss with checkmate true."
+      }
+    }
+  ],
   "ambiguous_examples": [],
   "explanations": {
     "by_level": {

@@ -70,8 +70,37 @@
     "co_occurring": [],
     "conflicts": []
   },
-  "examples": [],
-  "counterexamples": [],
+  "examples": [
+    {
+      "fen": "8/5k2/8/8/8/8/5K2/6R1 w - - 99 99",
+      "note": "The positive half of the controlled pair, and the tablebase gives it the best possible label: CURSED-WIN. White mates in 21, and the fifty-move rule takes the win away - the position is a theoretical win that the rule converts into a draw. The identical board with the halfmove clock at zero is an ordinary win. Nothing on the board distinguishes them.",
+      "origin_kind": "constructed-test",
+      "concept_role": "supports",
+      "side_to_move_benefits": "neither",
+      "controlled_pair_with": "8/5k2/8/8/8/8/5K2/6R1 w - - 0 99",
+      "tablebase": {
+        "source": "Lichess tablebase (Syzygy, 7-piece)",
+        "pieces": 3,
+        "wdl": "cursed-win",
+        "dtz": 21,
+        "dtm": 21,
+        "category": "cursed-win",
+        "checkmate": false,
+        "stalemate": false,
+        "note": "PROVEN: cursed-win, dtz 21. 'Cursed' is Syzygy's word for exactly this - a win that the fifty-move rule spoils. There is no stronger illustration of the concept available, because the tablebase is naming the rule's effect rather than a position's evaluation."
+      }
+    }
+  ],
+  "counterexamples": [
+    {
+      "fen": "8/5k2/8/8/8/8/5K2/6R1 w - - 0 99",
+      "note": "The same board on move 99 with the halfmove clock at ZERO instead of 99. Nothing about the pieces has changed and the rule is nowhere near applying: the record's indicator_against - 'any capture or pawn move in that span resets the counter' - is the whole of the difference, and it is carried in one FEN field that a reader looking at a diagram cannot see. Move numbers are not the fifty-move rule; the halfmove clock is.",
+      "origin_kind": "constructed-test",
+      "concept_role": "negative",
+      "side_to_move_benefits": "neither",
+      "controlled_pair_with": "8/5k2/8/8/8/8/5K2/6R1 w - - 99 99"
+    }
+  ],
   "ambiguous_examples": [],
   "explanations": {
     "by_level": {

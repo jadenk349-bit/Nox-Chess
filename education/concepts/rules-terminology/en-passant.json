@@ -84,9 +84,37 @@
       "origin_kind": "puzzle",
       "concept_role": "supports",
       "side_to_move_benefits": "neither"
+    },
+    {
+      "fen": "8/8/8/3pP3/8/8/8/4K2k w - d6 0 2",
+      "note": "The same pawns, and the en-passant target square present: exd6 is legal and wins. The positive half of a pair whose only difference is one FEN field, which is the point - the right exists for exactly one move and cannot be read off the picture.",
+      "origin_kind": "constructed-test",
+      "concept_role": "supports",
+      "side_to_move_benefits": "white",
+      "controlled_pair_with": "8/8/8/3pP3/8/8/8/4K2k w - - 0 2",
+      "tablebase": {
+        "source": "Lichess tablebase (Syzygy, 7-piece)",
+        "pieces": 4,
+        "wdl": "win",
+        "dtz": 1,
+        "dtm": 19,
+        "category": "win",
+        "checkmate": false,
+        "stalemate": false,
+        "note": "PROVEN WIN at dtz 1 - the en-passant capture is the winning move. Without the right, the same board is a different game."
+      }
     }
   ],
-  "counterexamples": [],
+  "counterexamples": [
+    {
+      "fen": "8/8/8/3pP3/8/8/8/4K2k w - - 0 2",
+      "note": "A white pawn on e5 beside a black pawn on d5, and no en-passant capture available - because the d-pawn did not arrive there last move. The geometry is identical to the position where exd6 is legal and the difference is one field of the FEN. This record's indicator_against says it: 'any other move has intervened since the two-square advance.' The right to capture en passant exists for exactly one move and this base reads it from the target square rather than from the picture.",
+      "origin_kind": "constructed-test",
+      "concept_role": "negative",
+      "side_to_move_benefits": "neither",
+      "controlled_pair_with": "8/8/8/3pP3/8/8/8/4K2k w - d6 0 2"
+    }
+  ],
   "ambiguous_examples": [],
   "explanations": {
     "by_level": {

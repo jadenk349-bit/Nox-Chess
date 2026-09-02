@@ -93,7 +93,15 @@
       "side_to_move_benefits": "neither"
     }
   ],
-  "counterexamples": [],
+  "counterexamples": [
+    {
+      "fen": "4k3/8/8/8/8/8/4r3/R3K2R w KQ - 0 1",
+      "note": "Full castling rights on both sides and no castling move available: the black rook on e2 gives check, and a king may not castle out of check. This is the position the matcher's own note is about - castling is reported for the MOVE and not for the RIGHTS, because almost every opening position has the rights and a concept true of almost every position is not news. Here the rights are in the FEN and the move does not exist.",
+      "origin_kind": "constructed-test",
+      "concept_role": "negative",
+      "side_to_move_benefits": "black"
+    }
+  ],
   "ambiguous_examples": [],
   "explanations": {
     "by_level": {

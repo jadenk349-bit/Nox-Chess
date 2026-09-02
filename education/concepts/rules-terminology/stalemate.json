@@ -68,7 +68,27 @@
     "conflicts": []
   },
   "examples": [],
-  "counterexamples": [],
+  "counterexamples": [
+    {
+      "fen": "7k/6Q1/6K1/8/8/8/8/8 b - - 0 1",
+      "note": "THE CLASSIC CONFUSION, as a controlled pair: the same three men, the queen one square over. On f7 it is stalemate and the game is drawn; on g7 it is checkmate. A king with no legal move is not stalemate - a king with no legal move AND NOT IN CHECK is. Building this pair found that the base could say 'this position is stalemate' about a board and could not say 'this position is checkmate' about the same board, because checkmate was reachable only through the MOVE; a structural arm was added for it.",
+      "origin_kind": "constructed-test",
+      "concept_role": "negative",
+      "side_to_move_benefits": "neither",
+      "controlled_pair_with": "7k/5Q2/6K1/8/8/8/8/8 b - - 0 1",
+      "tablebase": {
+        "source": "Lichess tablebase (Syzygy, 7-piece)",
+        "pieces": 3,
+        "wdl": "loss",
+        "dtz": -1,
+        "dtm": null,
+        "category": "loss",
+        "checkmate": true,
+        "stalemate": false,
+        "note": "PROVEN: checkmate true, stalemate false, loss for the side to move. The paired position is a proven draw with stalemate true. Syzygy settles both outright, which is the right evidence for a rule."
+      }
+    }
+  ],
   "ambiguous_examples": [],
   "explanations": {
     "by_level": {

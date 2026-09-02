@@ -1865,3 +1865,29 @@ rates Anand's 22.Nxd4 second at +0.64 — and ChessBase's own round report says 
 same in words.
 
 Corpus: **42 positions, 28 games, 19 positive / 13 ambiguous / 10 negative.**
+
+
+## The rules layer had no counterexamples, and building them found a hole
+
+Seven concepts — `stalemate`, `checkmate`, `insufficient-material`,
+`fifty-move-rule`, `en-passant`, `castling`, `smothered-mate` — now carry
+**controlled pairs**: the same position with one thing changed, both halves in
+the base, and every pair settled by **Syzygy** rather than argued.
+
+- Stalemate against mate is the queen one square over.
+- Insufficient material against a **forced win in 57** is a knight added on d3.
+- The fifty-move rule is one FEN field — and the tablebase calls the positive
+  half a **cursed-win**, which is its own word for a win the rule spoils.
+- En passant is one FEN field again; the right exists for exactly one move.
+- Castling is full rights with the king in check.
+- Smothered mate is the h-pawn on h6 instead of h7.
+
+**The hole.** `checkmate` was reachable *only* through the move, because
+`findMotifs` tags a mating move and nothing read the position. So this base could
+say "this position is stalemate" about a board and could **not** say "this
+position is checkmate" about the same board with the queen moved one square — the
+two halves of one rule, one answerable and the other not. A structural arm was
+added, mirroring stalemate's exactly. Found by trying to build the
+counterexample, not by reading the code.
+
+`negative_example` 101 → **94 of 132**; `positive_example` 73 → **70**.

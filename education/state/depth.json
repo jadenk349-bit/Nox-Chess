@@ -2,7 +2,7 @@
   "areas": {
     "official-rules": {
       "rating": "substantial",
-      "mean_completeness": 0.633,
+      "mean_completeness": 0.707,
       "concepts": [
         "castling",
         "check",
@@ -120,7 +120,7 @@
     },
     "named-mating-patterns": {
       "rating": "substantial",
-      "mean_completeness": 0.643,
+      "mean_completeness": 0.726,
       "concepts": [
         "back-rank-mate",
         "smothered-mate"
@@ -1895,7 +1895,7 @@
       }
     },
     "smothered-mate": {
-      "score": 0.5,
+      "score": 0.667,
       "check": {
         "definition": true,
         "terminology": true,
@@ -1903,11 +1903,11 @@
         "attribution": null,
         "recognition": true,
         "exceptions": true,
-        "positive_example": false,
-        "negative_example": false,
+        "positive_example": true,
+        "negative_example": true,
         "ambiguous_example": false,
         "engine_validation": false,
-        "tablebase_validation": null,
+        "tablebase_validation": true,
         "master_game": false,
         "false_positive_test": false,
         "beginner_explanation": true,
@@ -2819,7 +2819,7 @@
       }
     },
     "castling": {
-      "score": 0.7,
+      "score": 0.8,
       "check": {
         "definition": true,
         "terminology": true,
@@ -2828,7 +2828,7 @@
         "recognition": true,
         "exceptions": null,
         "positive_example": true,
-        "negative_example": false,
+        "negative_example": true,
         "ambiguous_example": null,
         "engine_validation": null,
         "tablebase_validation": null,
@@ -2861,7 +2861,7 @@
       }
     },
     "checkmate": {
-      "score": 0.6,
+      "score": 0.727,
       "check": {
         "definition": true,
         "terminology": true,
@@ -2870,10 +2870,10 @@
         "recognition": true,
         "exceptions": null,
         "positive_example": false,
-        "negative_example": false,
+        "negative_example": true,
         "ambiguous_example": null,
         "engine_validation": null,
-        "tablebase_validation": null,
+        "tablebase_validation": true,
         "master_game": null,
         "false_positive_test": false,
         "beginner_explanation": true,
@@ -2924,7 +2924,7 @@
       }
     },
     "en-passant": {
-      "score": 0.7,
+      "score": 0.818,
       "check": {
         "definition": true,
         "terminology": true,
@@ -2933,10 +2933,10 @@
         "recognition": true,
         "exceptions": null,
         "positive_example": true,
-        "negative_example": false,
+        "negative_example": true,
         "ambiguous_example": null,
         "engine_validation": null,
-        "tablebase_validation": null,
+        "tablebase_validation": true,
         "master_game": null,
         "false_positive_test": false,
         "beginner_explanation": true,
@@ -2945,7 +2945,7 @@
       }
     },
     "fifty-move-rule": {
-      "score": 0.6,
+      "score": 0.818,
       "check": {
         "definition": true,
         "terminology": true,
@@ -2953,11 +2953,11 @@
         "attribution": null,
         "recognition": true,
         "exceptions": null,
-        "positive_example": false,
-        "negative_example": false,
+        "positive_example": true,
+        "negative_example": true,
         "ambiguous_example": null,
         "engine_validation": null,
-        "tablebase_validation": null,
+        "tablebase_validation": true,
         "master_game": null,
         "false_positive_test": false,
         "beginner_explanation": true,
@@ -2987,7 +2987,7 @@
       }
     },
     "insufficient-material": {
-      "score": 0.583,
+      "score": 0.769,
       "check": {
         "definition": true,
         "terminology": true,
@@ -2995,11 +2995,11 @@
         "attribution": null,
         "recognition": true,
         "exceptions": true,
-        "positive_example": false,
-        "negative_example": false,
+        "positive_example": true,
+        "negative_example": true,
         "ambiguous_example": null,
         "engine_validation": false,
-        "tablebase_validation": null,
+        "tablebase_validation": true,
         "master_game": null,
         "false_positive_test": false,
         "beginner_explanation": true,
@@ -3071,7 +3071,7 @@
       }
     },
     "stalemate": {
-      "score": 0.6,
+      "score": 0.727,
       "check": {
         "definition": true,
         "terminology": true,
@@ -3080,10 +3080,10 @@
         "recognition": true,
         "exceptions": null,
         "positive_example": false,
-        "negative_example": false,
+        "negative_example": true,
         "ambiguous_example": null,
         "engine_validation": null,
-        "tablebase_validation": null,
+        "tablebase_validation": true,
         "master_game": null,
         "false_positive_test": false,
         "beginner_explanation": true,
@@ -3624,8 +3624,8 @@
     "attribution": 0,
     "recognition": 0,
     "exceptions": 3,
-    "positive_example": 73,
-    "negative_example": 101,
+    "positive_example": 70,
+    "negative_example": 94,
     "ambiguous_example": 74,
     "engine_validation": 78,
     "tablebase_validation": 13,

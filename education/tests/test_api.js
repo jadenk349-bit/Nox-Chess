@@ -2033,6 +2033,62 @@ const { concepts } = API.knowledge();
      al && al.engine.annotated_move_rank === 2 && al.engine.best_move === 'b3');
 }
 
+{
+  // THE RULES LAYER GETS CONTROLLED PAIRS, and building them found a hole: the
+  // base could say "this position is stalemate" about a board and could NOT say
+  // "this position is checkmate" about the same board with the queen one square
+  // over, because checkmate was reachable only through the MOVE. A structural
+  // arm was added.
+  const has = (fen, id) => API.analyzeWithEducation({ fen }).concepts_all.some(c => c.id === id);
+  ok('checkmate is reported about a POSITION, not only about a move',
+     has('7k/6Q1/6K1/8/8/8/8/8 b - - 0 1', 'checkmate'));
+  ok('...and the same board with the queen on f7 is stalemate instead',
+     has('7k/5Q2/6K1/8/8/8/8/8 b - - 0 1', 'stalemate') &&
+     !has('7k/5Q2/6K1/8/8/8/8/8 b - - 0 1', 'checkmate'));
+  ok('...and neither is claimed when the king can move',
+     !has('7k/8/6K1/8/8/8/8/6Q1 b - - 0 1', 'checkmate') &&
+     !has('7k/8/6K1/8/8/8/8/6Q1 b - - 0 1', 'stalemate'));
+
+  // K+B+N is a forced win in 57 — "single minor piece" is load-bearing.
+  ok('insufficient-material: K+B+N is not insufficient',
+     !has('8/8/4k3/8/8/2BN4/8/4K3 w - - 0 1', 'insufficient-material'));
+  ok('...and K+B is', has('8/8/4k3/8/8/2B5/8/4K3 w - - 0 1', 'insufficient-material'));
+
+  // The fifty-move pair differs in one FEN field and the tablebase calls the
+  // positive half a CURSED-WIN — a win the rule spoils.
+  ok('fifty-move-rule: the clock, not the move number',
+     !has('8/5k2/8/8/8/8/5K2/6R1 w - - 0 99', 'fifty-move-rule') &&
+     has('8/5k2/8/8/8/8/5K2/6R1 w - - 99 99', 'fifty-move-rule'));
+  // ...and en passant exists for exactly one move.
+  ok('en-passant: the right is in the target square, not in the picture',
+     !has('8/8/8/3pP3/8/8/8/4K2k w - - 0 2', 'en-passant') &&
+     has('8/8/8/3pP3/8/8/8/4K2k w - d6 0 2', 'en-passant'));
+  // Castling rights are not a castling move.
+  ok('castling: rights with no legal castle are not reported',
+     !has('4k3/8/8/8/8/8/4r3/R3K2R w KQ - 0 1', 'castling'));
+  // Smothered mate needs the mate, not the picture.
+  const sm = (fen, move) => API.analyzeWithEducation({ fen, move })
+    .concepts_all.some(c => c.id === 'smothered-mate');
+  ok('smothered-mate: the picture without the mate is not one',
+     !sm('6rk/6p1/7p/6N1/8/8/8/6K1 w - - 0 1', 'g5f7'));
+  ok('...and with the mate it is', sm('6rk/6pp/8/6N1/8/8/8/6K1 w - - 0 1', 'g5f7'));
+
+  // Every one of these pairs is proved by Syzygy rather than argued.
+  let proved = 0;
+  for (const dir of fs.readdirSync(path.join(ROOT, 'concepts'))) {
+    const d = path.join(ROOT, 'concepts', dir);
+    if (!fs.statSync(d).isDirectory()) continue;
+    for (const fn of fs.readdirSync(d)) {
+      if (!fn.endsWith('.json')) continue;
+      const c = JSON.parse(fs.readFileSync(path.join(d, fn), 'utf8'));
+      for (const p of (c.counterexamples || []).concat(c.examples || [])) {
+        if (p.controlled_pair_with && p.tablebase) proved++;
+      }
+    }
+  }
+  ok('controlled pairs are tablebase-proved, not argued', proved >= 7, String(proved));
+}
+
 /* ---------- report ---------- */
 console.log(`\nAPI  PASS ${pass}   FAIL ${fails.length}`);
 for (const [n, d] of fails) console.log(`  FAIL  ${n}\n        ${d}`);

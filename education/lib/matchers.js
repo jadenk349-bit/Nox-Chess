@@ -1791,6 +1791,30 @@ const STRUCTURAL = [
     },
   },
   {
+    concept: 'checkmate',
+    implements: ("recognition.preconditions verbatim: the side to move is in check and has no legal " +
+                 "move. This arm did not exist. `checkmate` was reachable only through the MOVE - the " +
+                 "page's findMotifs tags the mating move - so the base could say 'this position is " +
+                 "stalemate' about a board and could not say 'this position is checkmate' about the " +
+                 "same board with the queen one square over. Found by building a controlled pair of " +
+                 "counterexamples for `stalemate`, where the negative side of the pair is a mate and " +
+                 "the base reported only `check`."),
+    run(f) {
+      const P = FEAT.page;
+      const st = P.stateFromFEN(f.fen);
+      let moves;
+      try { moves = P.legalMoves(st); } catch (e) { return null; }
+      if (moves.length) return null;
+      if (!P.inCheck(st, st.turn)) return null;              // that is stalemate
+      return {
+        confidence: 'high',
+        because: [`${side(f, st.turn)} is to move, is in check, and has no legal move: the game is over`],
+        slots: {},
+        subjects: [other(st.turn)],
+      };
+    },
+  },
+  {
     concept: 'stalemate',
     implements: "recognition.preconditions verbatim: the side to move has zero legal moves and is not in check.",
     run(f) {

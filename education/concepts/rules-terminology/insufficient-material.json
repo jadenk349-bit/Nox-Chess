@@ -78,8 +78,48 @@
     "co_occurring": [],
     "conflicts": []
   },
-  "examples": [],
-  "counterexamples": [],
+  "examples": [
+    {
+      "fen": "8/8/4k3/8/8/2B5/8/4K3 w - - 0 1",
+      "note": "King and bishop against a bare king: a proven draw, and the positive half of the pair whose other half - the same board with a knight added on d3 - is a forced win in 57.",
+      "origin_kind": "constructed-test",
+      "concept_role": "supports",
+      "side_to_move_benefits": "neither",
+      "controlled_pair_with": "8/8/4k3/8/8/2BN4/8/4K3 w - - 0 1",
+      "tablebase": {
+        "source": "Lichess tablebase (Syzygy, 7-piece)",
+        "pieces": 3,
+        "wdl": "draw",
+        "dtz": 0,
+        "dtm": 0,
+        "category": "draw",
+        "checkmate": false,
+        "stalemate": false,
+        "note": "PROVEN DRAW at dtz 0: mate cannot be forced, which is what insufficient material means."
+      }
+    }
+  ],
+  "counterexamples": [
+    {
+      "fen": "8/8/4k3/8/8/2BN4/8/4K3 w - - 0 1",
+      "note": "King, bishop and knight against a bare king. Two minor pieces, no pawns, and a position that LOOKS like the drawn minor-piece ending - and it is a forced win in 57. The record's precondition is a single minor piece, and this is the position that shows why the word 'single' is load-bearing rather than decorative. Paired with the same board minus the knight, which is a proven draw.",
+      "origin_kind": "constructed-test",
+      "concept_role": "negative",
+      "side_to_move_benefits": "white",
+      "controlled_pair_with": "8/8/4k3/8/8/2B5/8/4K3 w - - 0 1",
+      "tablebase": {
+        "source": "Lichess tablebase (Syzygy, 7-piece)",
+        "pieces": 4,
+        "wdl": "win",
+        "dtz": 57,
+        "dtm": 57,
+        "category": "win",
+        "checkmate": false,
+        "stalemate": false,
+        "note": "PROVEN WIN in 57 for White. Mate is not merely possible here, it is forced, so the material is not insufficient by any reading. The paired K+B ending is a proven draw at dtz 0."
+      }
+    }
+  ],
   "ambiguous_examples": [],
   "explanations": {
     "by_level": {
