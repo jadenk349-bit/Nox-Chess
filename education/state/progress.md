@@ -1567,3 +1567,33 @@ Lisitsin–Capablanca 1935**, a queen ending where Chernev praises exactly the
 queen blockade the record warns about, and which is this corpus's annotated
 instance of the concept. The sentence carries the caveat instead. Fifth "say
 more" in two sessions.
+
+
+## Three more conditions built, and one rate that went up
+
+`piece-activity` now excludes moves by **a piece tied to defending something** —
+a move that abandons a man it was guarding and leaves it hanging is not activity,
+because the piece has the move and not the freedom. The rate **rose**, 33.9% →
+40.2%, and it is reported rather than tuned away: the exclusion is asymmetric, so
+a side whose pieces are tied down loses more moves than a free one and gaps
+widen. Karpov–Polgar 2001 now measures 3 active moves for White against 18 for
+Black, which is exactly Markos's account of that position.
+
+`weak-square`'s "reaching it achieves nothing" had only its first half built, and
+the second half is the same question `outpost` asks in its own traps — two
+records saying the same thing and only one being listened to. There is now **one
+function**, `bearsFrom()` in Layer 3, and both use it. Near-inert: 40.5% → 40.4%.
+
+`two-weaknesses` is the **sixth "say more"** in two sessions. "The first weakness
+can be liquidated by a pawn break" was built as a refusal twice — both weaknesses
+fixed scores 23.1%, one fixed scores 29.4% — and *both delete Rubinstein–Salwe
+1908*. At the moment the annotator marks, where the weaknesses are **created**,
+both a7 and c6 can still advance and Rubinstein's whole game is about preventing
+...c5. The annotation marks the creation; the record's method describes what is
+done afterwards. The sentence now reads:
+
+> Black has weaknesses on a7, c6 — 2 files apart… **a7, c6 can still advance, so
+> the first job is to fix them — the method needs a target that cannot be
+> repaired.**
+
+Which is Rubinstein's method, rather than a verdict about it.

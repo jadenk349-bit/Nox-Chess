@@ -222,30 +222,33 @@ function drivenAwayWithTempo(st, colour, square) {
  * behind these numbers is not free: the scope test exists because of Suba's
  * active bad bishop and was measured against Nimzowitsch-Salwe 1911.
  */
-/* Does the man on this square DO anything from it?
+/* Can this pawn simply step out of the way and survive?
  *
- * `outpost`'s record: "a safe square that the piece does nothing from. Safety is
- * a precondition, not the benefit." The mechanical half of that is what the
- * piece bears on - an enemy man, or squares inside the enemy's own half. It
- * cannot answer whether the piece is on the right side of the board, and does
- * not pretend to.
+ * Two records need the same answer. `semi-open-file`: "whether it produces
+ * pressure depends on whether the TARGET IS FIXED". `two-weaknesses`: "the first
+ * weakness can be liquidated by a pawn break", and its definition_long insists
+ * the weakness be "fixed so it cannot be advanced, exchanged or otherwise
+ * repaired". A pawn that can advance safely is not a target, it is a pawn that
+ * is about to leave.
  */
-function bearsOnSomething(st, colour, square) {
+function canAdvanceSafely(f, colour, square) {
   const P = FEAT.page;
-  const from = (8 - Number(square[1])) * 8 + (square.charCodeAt(0) - 97);
-  let hits = 0, deep = 0;
-  for (let i = 0; i < 64; i++) {
-    if (i === from) continue;
-    let atk;
-    try { atk = P.attackersOf(st, i, colour); } catch (e) { continue; }
-    if (atk.indexOf(from) < 0) continue;
-    const q = st.b[i];
-    if (q && q.c === colour) continue;      // bearing on your own pawn is not bearing on anything
-    if (q) hits++;
-    const row = i >> 3;
-    if (colour === 'w' ? row <= 2 : row >= 5) deep++;
-  }
-  return hits > 0 || deep >= 2;
+  let st;
+  try { st = P.stateFromFEN(f.fen); } catch (e) { return false; }
+  const i = (8 - Number(square[1])) * 8 + (square.charCodeAt(0) - 97);
+  const probe = P.cloneState(st);
+  probe.turn = colour;
+  probe.ep = null;
+  let ms;
+  try { ms = P.legalMoves(probe); } catch (e) { return false; }
+  return ms.some(m => {
+    if (m.from !== i) return false;
+    const pc = probe.b[m.from];
+    if (!pc || pc.t !== 'P') return false;
+    let nx;
+    try { nx = P.makeMove(probe, m); } catch (e) { return false; }
+    return P.see(nx, m.to, colour === 'w' ? 'b' : 'w') <= 0;
+  });
 }
 
 function shutInByItsOwnPawns(b) {
@@ -653,7 +656,7 @@ const STRUCTURAL = [
         const RIM = 'abgh';
         const o = f.outposts[c].filter(x => x.square[0] !== 'a' && x.square[0] !== 'h')
                                .filter(x => !(x.piece === 'N' && RIM.includes(x.square[0])))
-                               .filter(x => bearsOnSomething(st, c, x.square));
+                               .filter(x => FEAT.bearsFrom(st, c, (8 - Number(x.square[1])) * 8 + (x.square.charCodeAt(0) - 97)));
         if (o.length) hits.push({ c, o });
       }
       if (!hits.length) return null;
@@ -838,6 +841,24 @@ const STRUCTURAL = [
         const mine = f.weakSpread[c] || { weak: [] };
         if (mine.weak.length > s.weak.length) continue;
         if (f.material[c].counts.R + f.material[c].counts.Q === 0) continue;
+        // "The first weakness can be LIQUIDATED by a pawn break or a favourable
+        // exchange" - an indicator_against, and the buildable half is the pawn
+        // break: a weak pawn that can simply advance out of the attack is not
+        // yet a fixed target, and the record's definition_long insists the first
+        // weakness be "fixed so it cannot be advanced, exchanged or otherwise
+        // repaired". The same test `semi-open-file` uses, for the same reason.
+        //
+        // It is SAID, not enforced, and two measurements decided that. Requiring
+        // both weaknesses to be fixed scores 23.1% and deletes Rubinstein-Salwe
+        // 1908; requiring one scores 29.4% and deletes it as well. At the moment
+        // the annotator marks - 9.Nxc6 bxc6, where the weaknesses are CREATED -
+        // both a7 and c6 can still advance, and Rubinstein's entire game is
+        // about preventing ...c5. The annotation marks the creation; the record's
+        // method describes what is done afterwards. A matcher that fires only
+        // once the fixing is done cannot report the game the concept is named
+        // for, so the sentence names what still has to be fixed instead. Sixth
+        // time in two sessions that saying more beat firing less.
+        const loose = s.weak.filter(sq => canAdvanceSafely(f, other(c), sq));
         const files = s.weak.map(x => x.charCodeAt(0) - 97);
         const kf = ((f.king[other(c)] || {}).square || 'e1').charCodeAt(0) - 97;
         if (kf > Math.min(...files) && kf < Math.max(...files)) continue;
@@ -845,7 +866,11 @@ const STRUCTURAL = [
           confidence: 'medium',
           because: [`${side(f, other(c))} has weaknesses on ${brief(s.weak, 4)} — ${s.spread} files ` +
                     `apart, with the king on neither side of both, and ${side(f, c)} has a heavy piece ` +
-                    `that can switch wings faster than the defence can follow`],
+                    `that can switch wings faster than the defence can follow` +
+                    (loose.length
+                      ? `. ${brief(loose)} can still advance, so the first job is to fix ${loose.length === 1 ? 'it' : 'them'} — ` +
+                        `the method needs a target that cannot be repaired`
+                      : '')],
           slots: { square: s.weak[0] },
           subjects: [c],
         };
@@ -1134,7 +1159,9 @@ const STRUCTURAL = [
                  "earlier version contradicted: 'counting available squares is not measuring activity. A " +
                  "piece with many moves that bear on nothing is not active.' Counted over ACTIVE moves - " +
                  "captures, moves into the opponent's half, and moves that attack an enemy man from where " +
-                 "they land - rather than legal ones."),
+                 "they land - rather than legal ones. And the record's first indicator_against, 'a piece " +
+                 "TIED TO DEFENDING SOMETHING', which excludes a move that leaves a man it was guarding " +
+                 "hanging: the piece has the move, it does not have the freedom."),
     run(f) {
       const w = f.activity.active.w, b = f.activity.active.b;
       if (w == null || b == null) return null;

@@ -13,7 +13,7 @@ implemented; that is a reading, and doing it is the work. What it can do is
 stop the list being rediscovered from scratch each time — and every one of
 the defects listed in the tool's header was unread before it was looked at.
 
-**Of 246 stated conditions (traps and indicators-against): 87 enforced in the matcher, 20 in Layer 3, 33 argued on the record to be unbuildable or already honoured elsewhere, 106 unread.**
+**Of 246 stated conditions (traps and indicators-against): 89 enforced in the matcher, 21 in Layer 3, 35 argued on the record to be unbuildable or already honoured elsewhere, 101 unread.**
 
 "Noted on the record" is an argument, not a guard. A single "all cited"
 headline would read as "all traps implemented", which would be the same
@@ -99,7 +99,7 @@ shared file was added to the search. The test is quotation for that reason.
 - [layer 3] A weak square only a queen can occupy is usually not a weakness, since cheaper pieces evict her.
 - [**unread**] *(indicator against)* A friendly pawn can still advance to cover it
 - [**unread**] *(indicator against)* A piece covers it durably and cannot be exchanged
-- [**unread**] *(indicator against)* The square is unreachable, or reaching it achieves nothing
+- [layer 3] *(indicator against)* The square is unreachable, or reaching it achieves nothing
 - [cited] *(indicator against)* It is on the edge or deep in the opponent's own half
 ## bishop-pair
 
@@ -128,7 +128,7 @@ shared file was added to the search. The test is quotation for that reason.
 - [**unread**] *(indicator against)* Opposite-coloured bishops with no breakthrough square - the defending bishop holds one colour complex regardless of how many targets exist
 - [**unread**] *(indicator against)* The defender can reach a known fortress
 - [**unread**] *(indicator against)* Opening the second front concedes counterplay, a passed pawn, or an open line towards the attacker's own king
-- [**unread**] *(indicator against)* The first weakness can be liquidated by a pawn break or a favourable exchange
+- [cited] *(indicator against)* The first weakness can be liquidated by a pawn break or a favourable exchange
 - [**unread**] *(indicator against)* The defending king already stands between the two targets
 ## bad-bishop
 
@@ -189,7 +189,7 @@ shared file was added to the search. The test is quotation for that reason.
 - [cited] Counting available squares is not measuring activity. A piece with many moves that bear on nothing is not active.
 - [noted] Active pieces do not guarantee compensation. The Halloween Gambit position in this base has genuinely active pieces and evaluates 1.75 worse.
 - [noted] Activity is generally a temporary advantage and must be converted; reporting it as though it were permanent overstates it.
-- [**unread**] *(indicator against)* A piece tied to defending something
+- [cited] *(indicator against)* A piece tied to defending something
 - [layer 3] *(indicator against)* A bishop shut in by its own pawns
 - [**unread**] *(indicator against)* A piece with moves available that accomplish nothing
 ## pawn-breakthrough
@@ -238,8 +238,8 @@ shared file was added to the search. The test is quotation for that reason.
 - [noted] A blockade becomes a weakness when it ties down a piece needed elsewhere, which is the standard cost and is easy to omit.
 - [cited] A pawn stopped by an enemy PAWN is a ram, not a blockade, and no piece is being spent.
 - [cited] *(indicator against)* The blockader is a queen or rook, which is expensive and evictable
-- [**unread**] *(indicator against)* The blockading piece is needed elsewhere
-- [**unread**] *(indicator against)* The pawn can be supported and the blockade broken by an advance of its neighbours
+- [noted] *(indicator against)* The blockading piece is needed elsewhere
+- [noted] *(indicator against)* The pawn can be supported and the blockade broken by an advance of its neighbours
 ## battery
 
 - [cited] Two line pieces on one line are only a battery if the line ARRIVES somewhere. Stacked behind their own pawns they combine nothing, and the bare geometry fires on nearly half of all positions.

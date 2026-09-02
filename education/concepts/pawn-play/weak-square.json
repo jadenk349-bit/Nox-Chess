@@ -100,7 +100,8 @@
   ],
   "limitations": [
     "Detecting squares no pawn can attack is mechanical; deciding which matter is not.",
-    "Terminology overlaps with `hole` and sources use the two interchangeably."
+    "Terminology overlaps with `hole` and sources use the two interchangeably.",
+    "MEASURED 2026-09-02: the third indicator_against - 'the square is unreachable, or REACHING IT ACHIEVES NOTHING' - had only its first half built. The second half is the same question `outpost`'s traps ask, and only one of the two records was being listened to; there is now ONE function, bearsFrom() in Layer 3, and both use it. Near-inert here: 40.5% -> 40.4%, because a minor piece landing in the enemy half almost always bears on something. The other two indicators are built - 'a friendly pawn can still advance to cover it' is what holesFor() tests, and 'a piece covers it durably and cannot be exchanged' is the fianchetto guard in reachableHoles()."
   ],
   "misconceptions": [
     "That weak squares should always be avoided.",

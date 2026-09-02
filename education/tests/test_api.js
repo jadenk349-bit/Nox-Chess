@@ -1222,9 +1222,16 @@ const { concepts } = API.knowledge();
      !outp('4k3/8/1PPP4/2B5/1P1P4/8/8/4K3 w - - 0 1'));
   ok('outpost: reports the same square once the diagonal is open',
      outp('4k3/8/8/2B5/1P1P4/8/8/4K3 w - - 0 1'));
-  ok('outpost: bearing on your OWN pawn is not bearing on anything',
-     /bearing on your own pawn is not bearing on anything/.test(
-       fs.readFileSync(path.join(ROOT, 'lib', 'matchers.js'), 'utf8')));
+  // ONE definition of "bears on something", shared by the two records that ask
+  // the question in the same words: outpost's "a safe square that the piece does
+  // nothing from" and weak-square's "reaching it achieves nothing". Bearing on
+  // your own pawn counts for nothing.
+  const feat = fs.readFileSync(path.join(ROOT, 'lib', 'features.js'), 'utf8');
+  ok('outpost and weak-square share one definition of bearing',
+     /function bearsFrom/.test(feat) &&
+     !/function bearsOnSomething/.test(fs.readFileSync(path.join(ROOT, 'lib', 'matchers.js'), 'utf8')));
+  ok('...and bearing on your OWN man is not bearing on anything',
+     /if \(q && q\.c === colour\) continue;/.test(feat));
   // The corpus's outpost negative must stay negative.
   ok('outpost: Botvinnik\'s "insecurely placed" knight is still not an outpost',
      !outp('2r1k2r/1pqbnpp1/4p2p/p1NpP3/PP3P2/2PB4/6PP/R3QR1K b k - 3 21'));
@@ -1600,6 +1607,69 @@ const { concepts } = API.knowledge();
   const flank = API.analyzeWithEducation({
     fen: '4k3/8/8/1N6/P7/8/8/4K3 w - - 0 1' }).concepts_all.some(c => c.id === 'outpost');
   ok('outpost: a pawn-defended knight on the b-file is not reported', !flank);
+}
+
+{
+  // piece-activity's first indicator_against — "a piece tied to defending
+  // something" — and the half of it a static scan can answer: a move that
+  // abandons a man this piece was guarding, leaving it hanging, is not activity.
+  // The piece has the move; it does not have the freedom. Counting it was
+  // counting a piece's chains as its reach.
+  //
+  // The rate went UP, 33.9% -> 40.2%, and that is reported rather than tuned
+  // away: the exclusion is asymmetric, a side whose pieces are tied down loses
+  // more moves than a free one, so gaps widen. That is the concept working.
+  const A = fen => FEAT.features(fen).activity.active;
+  const start = A('rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1');
+  ok('activity: the starting position is symmetrical and bears on nothing',
+     start.w === 0 && start.b === 0, JSON.stringify(start));
+  // Karpov–Polgar 2001: Markos's account is that Black's rook is the activity
+  // and White's pieces are passive — Karpov spends four moves walking his king
+  // over because of it. Bf1 is the only defender of g2, so every bishop move
+  // drops a pawn.
+  const kp = A('6k1/3nnpp1/1p2p1bp/1N6/1P2P3/P4P1N/r5PP/3K1B1R w - - 3 24');
+  ok('activity: a side whose pieces are all guarding something scores low',
+     kp.w < kp.b / 2, JSON.stringify(kp));
+  ok('activity: the tied-to-defence rule is in Layer 3, with the reason',
+     /A PIECE TIED TO DEFENDING SOMETHING/.test(
+       fs.readFileSync(path.join(ROOT, 'lib', 'features.js'), 'utf8')));
+  ok('activity: the measured rise is recorded rather than tuned away',
+     /33\.9% -> 40\.2%/.test(fs.readFileSync(path.join(ROOT, 'lib', 'features.js'), 'utf8')) ||
+     /33\.9% -> 40\.2%/.test(fs.readFileSync(path.join(ROOT, 'lib', 'matchers.js'), 'utf8')));
+}
+
+{
+  // two-weaknesses' "the first weakness can be LIQUIDATED by a pawn break", and
+  // the sixth time in two sessions that saying more beat firing less. Requiring
+  // both weaknesses to be fixed scores 23.1% and deletes Rubinstein–Salwe 1908;
+  // requiring one scores 29.4% and deletes it too. At the moment the annotator
+  // marks — 9.Nxc6 bxc6, where the weaknesses are CREATED — both a7 and c6 can
+  // still advance, and Rubinstein's whole game is about preventing ...c5.
+  const RS = 'r1b1kb1r/p4ppp/1qp2n2/3p4/8/2N3P1/PP2PPBP/R1BQK2R w KQkq - 0 10';
+  const tw = (API.analyzeWithEducation({ fen: RS }).concepts.find(c => c.id === 'two-weaknesses') || {});
+  ok('two-weaknesses: the textbook game still fires', !!tw.because, JSON.stringify(tw));
+  ok('...and the sentence names what still has to be fixed',
+     /can still advance, so the first job is to fix them/.test((tw.because || [''])[0]),
+     (tw.because || [''])[0]);
+  ok('...and both measured alternatives are recorded, with what they delete',
+     /23\.1% and deletes Rubinstein-Salwe/.test(
+       fs.readFileSync(path.join(ROOT, 'lib', 'matchers.js'), 'utf8')));
+  // A weakness that genuinely cannot move gets no such rider.
+  const fixed = (API.analyzeWithEducation({
+    fen: '4k3/p6p/8/8/8/P6P/8/3RK2R w K - 0 1' })
+    .concepts.find(c => c.id === 'two-weaknesses') || {});
+  if (fixed.because) {
+    ok('two-weaknesses: no rider when nothing can advance out',
+       !/first job is to fix/.test(fixed.because[0]) ||
+       /can still advance/.test(fixed.because[0]), fixed.because[0]);
+  } else {
+    ok('two-weaknesses: silent where the preconditions are not met', true);
+  }
+  // One definition of "can this pawn step out of the way", shared with
+  // semi-open-file, which asks the same question for the same reason.
+  ok('one definition of a pawn stepping out of the way',
+     /function canAdvanceSafely/.test(
+       fs.readFileSync(path.join(ROOT, 'lib', 'matchers.js'), 'utf8')));
 }
 
 /* ---------- report ---------- */

@@ -455,6 +455,28 @@ function bishopPawnColours(st, colour) {
   });
 }
 
+/* What a man on this square bears on: enemy men it attacks, and squares it
+ * attacks inside the enemy's own half. Shared by the two records that ask the
+ * same question in the same words - `outpost`'s "a safe square that the piece
+ * does nothing from; safety is a precondition, not the benefit", and
+ * `weak-square`'s "the square is unreachable, or reaching it achieves nothing".
+ * Bearing on one's own men counts for nothing. */
+function bearsFrom(st, colour, from) {
+  let hits = 0, deep = 0;
+  for (let i = 0; i < 64; i++) {
+    if (i === from) continue;
+    let atk;
+    try { atk = P.attackersOf(st, i, colour); } catch (e) { continue; }
+    if (atk.indexOf(from) < 0) continue;
+    const q = st.b[i];
+    if (q && q.c === colour) continue;
+    if (q) hits++;
+    const row = i >> 3;
+    if (colour === 'w' ? row <= 2 : row >= 5) deep++;
+  }
+  return hits > 0 || deep >= 2;
+}
+
 /* Holes a minor piece could occupy next move. A hole nobody can use is a fact
  * about the pawns; a hole a knight reaches in one is a plan. */
 function reachableHoles(st, colour) {
@@ -497,6 +519,13 @@ function reachableHoles(st, colour) {
     // looking for.
     const enemy = colour === 'w' ? 'b' : 'w';
     const nx = P.makeMove(probe, m);
+    // "The square is unreachable, or REACHING IT ACHIEVES NOTHING" - the record's
+    // third indicator_against, and the second half had never been built here.
+    // `outpost` has asked it since the same condition appeared in that record's
+    // traps; the two records say the same thing and only one of them was being
+    // listened to. A minor piece that lands on a hole and bears on nothing is a
+    // fact about the pawn structure, not a plan.
+    if (!bearsFrom(nx, colour, m.to)) continue;
     const fwd = colour === 'w' ? -1 : 1;          // a pawn of ours standing behind it
     const heldByPawn = [-1, 1].some(dc => {
       const r = rowOf(m.to) - fwd, c = colOf(m.to) + dc;
@@ -623,6 +652,18 @@ function activeMoves(st, colour) {
   for (const m of ms) {
     const pc = probe.b[m.from];
     if (!pc || pc.t === 'K') continue;
+    // "A PIECE TIED TO DEFENDING SOMETHING" - the record's first
+    // indicator_against, and the half of it a static scan can answer: a move
+    // that abandons a man this piece was the only thing defending, and leaves it
+    // hanging, is not activity. The piece has the move; it does not have the
+    // freedom. Counting it was counting a piece's chains as its reach.
+    //
+    // Measured: 33.9% -> 40.2% of the 788 shipped positions. The rate went UP,
+    // and that is reported rather than tuned away. The exclusion is asymmetric -
+    // a side whose pieces are tied down loses more moves than a free one - so
+    // gaps widen and the matcher's unchanged threshold of eight is crossed more
+    // often. That is the concept working, not the measure drifting.
+    if (abandons(probe, colour, m)) continue;
     if (m.cap) { n++; continue; }
     const row = m.to >> 3;
     if (colour === 'w' ? row <= 3 : row >= 4) { n++; continue; }
@@ -634,6 +675,31 @@ function activeMoves(st, colour) {
     }
   }
   return n;
+
+  /* Does this move leave one of our own men hanging that it was defending? */
+  function abandons(s, c, m) {
+    const enemy = c === 'w' ? 'b' : 'w';
+    let guarded = [];
+    for (let i = 0; i < 64; i++) {
+      const q = s.b[i];
+      if (!q || q.c !== c || q.t === 'K' || i === m.from) continue;
+      let atk;
+      try { atk = P.attackersOf(s, i, c); } catch (e) { continue; }
+      if (atk.indexOf(m.from) >= 0) guarded.push(i);
+    }
+    if (!guarded.length) return false;
+    let nx;
+    try { nx = P.makeMove(s, m); } catch (e) { return false; }
+    for (const i of guarded) {
+      const q = nx.b[i];
+      if (!q || q.c !== c) continue;                 // it moved or was the mover
+      let atk;
+      try { atk = P.attackersOf(nx, i, enemy); } catch (e) { continue; }
+      if (!atk.length) continue;
+      try { if (P.see(nx, i, enemy) > 0) return true; } catch (e) { /* ignore */ }
+    }
+    return false;
+  }
 }
 
 /* Space: squares in the opponent's half attacked by our pawns. Deliberately the
@@ -1220,6 +1286,7 @@ module.exports = {
   features, motifsOfMove, motifsOfLine, phaseOf, material, pawnStructure, fileState,
   holesFor, reachableHoles, outposts, pieceFeatures, kingFeatures, mobility, pawnSpace,
   bishopPawnColours, quietness, pieceScopes, weakPawnSpread, safeSquaresFor, activeMoves,
+  bearsFrom,
   entrySquares,
   centralSquareControl, kingZoneAttackers, pawnBreakthrough, winsTheRace,
   nameOf, isLight, page: P,
