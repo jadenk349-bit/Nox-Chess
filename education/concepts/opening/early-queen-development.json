@@ -148,7 +148,15 @@
       }
     }
   ],
-  "counterexamples": [],
+  "counterexamples": [
+    {
+      "fen": "rnb1kbnr/ppp1pppp/8/3q4/8/8/PPPP1PPP/RNBQKBNR w KQkq - 0 3",
+      "note": "Registered false-positive case `early-queen-not-bad`, kept on the record as well as in tests/false_positive_cases.json so that the concept carries its own negative evidence. THE SURFACE PATTERN IS PRESENT: The queen leaves its starting square in the first few moves. WHY IT IS NOT THE CONCEPT: The guideline exists because the queen can be harassed with tempo. Where no such harassment exists — the Scandinavian after ...Qa5, or 2.Qh5 lines that have concrete point — the objection does not apply. WHAT THE SYSTEM DOES: Tested and only partly as expected, which is why it is recorded as partially resolved. The Scandinavian is a sound opening whose queen comes out on move two, so an early queen move must not be reported as an error - that much holds. But it does NOT escape the tempo cost: White is +0.76 here against +0.30 after 1...e5. The correct statement of the false positive is therefore narrower than first written - the pattern must not be flagged as a mistake, but neither should the base claim such openings pay nothing.",
+      "origin_kind": "constructed-test",
+      "concept_role": "negative",
+      "false_positive_case": "early-queen-not-bad"
+    }
+  ],
   "ambiguous_examples": [
     {
       "fen": "rnb1kbnr/ppp1pppp/8/3q4/8/8/PPPP1PPP/RNBQKBNR w KQkq - 0 3",

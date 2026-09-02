@@ -206,6 +206,29 @@
       "concept_role": "negative",
       "side_to_move_benefits": "neither",
       "controlled_pair_with": "r3k3/pp4pp/8/2PPP3/4N3/8/PP3PPP/R3K3 w Qq - 0 1"
+    },
+    {
+      "fen": "4k3/pp4pp/3p4/2pPp3/2P1P3/8/PP4PP/4K3 w - - 0 1",
+      "note": "Registered false-positive case `space-with-no-entry-square`, kept on the record as well as in tests/false_positive_cases.json so that the concept carries its own negative evidence. THE SURFACE PATTERN IS PRESENT: White's pawns on c4, d5 and e4 sit a rank further up the board than Black's on c5, d6 and e5. By any count of squares controlled behind the pawn line, White has a space advantage. WHY IT IS NOT THE CONCEPT: This record's first trap: \"Counting controlled squares is mechanical and over-reports. Space with no entry point wins nothing.\" Every file is rammed shut and there is no square on Black's half that a white piece can ever occupy. WHAT THE SYSTEM DOES: The API reports nothing at all here. The space matcher was rewritten for this exact trap and the rate fell from 53.3% to 34.6% of the 788 shipped puzzles when entry squares became a requirement rather than a footnote. Stockfish 18 at depth 26: +0.00, and its line is both kings walking about on the kingside. The extra rank of space is real and worth nothing, which is the trap stated as a number.",
+      "origin_kind": "constructed-test",
+      "concept_role": "negative",
+      "engine": {
+        "engine_id": "Stockfish 18",
+        "test_level": 3,
+        "depth": 26,
+        "threads": 10,
+        "hash_mb": 4096,
+        "multipv": 1,
+        "best_move": "e1f2",
+        "eval_cp": 0,
+        "mate_in": null,
+        "pv": [],
+        "alternatives": [],
+        "margin_cp": null,
+        "verdict": "supports",
+        "verdict_note": "0.00, and the engine's line is both kings walking about on the kingside. The extra rank of space is real and worth nothing."
+      },
+      "false_positive_case": "space-with-no-entry-square"
     }
   ],
   "ambiguous_examples": [

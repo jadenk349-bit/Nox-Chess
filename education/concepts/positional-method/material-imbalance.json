@@ -181,6 +181,13 @@
       "concept_role": "negative",
       "side_to_move_benefits": "neither",
       "controlled_pair_with": "4k3/pp3ppp/2nb4/8/8/8/PP3PPP/2R1K3 w - - 0 1"
+    },
+    {
+      "fen": "7k/8/5K2/3B3P/8/8/8/8 w - - 0 1",
+      "note": "Registered false-positive case `material-count-not-evaluation`, kept on the record as well as in tests/false_positive_cases.json so that the concept carries its own negative evidence. THE SURFACE PATTERN IS PRESENT: One side is ahead on the standard 1/3/3/5/9 count. WHY IT IS NOT THE CONCEPT: Piece values are a heuristic for counting, not an evaluation. Compensation in activity, king safety or structure regularly outweighs a pawn or the exchange. WHAT THE SYSTEM DOES: PROVEN draw with an extra BISHOP AND an extra PAWN. A material count says roughly +4; the truth is a dead draw, because the h-pawn promotes on a square the bishop cannot control and the defending king simply sits in the corner. This is the cleanest available demonstration that counting material is not evaluating a position.",
+      "origin_kind": "constructed-test",
+      "concept_role": "negative",
+      "false_positive_case": "material-count-not-evaluation"
     }
   ],
   "ambiguous_examples": [

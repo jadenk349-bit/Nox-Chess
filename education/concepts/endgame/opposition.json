@@ -152,6 +152,13 @@
         "category": "win",
         "note": "PROVEN WIN in 21, best move Rh8+. The kings stand in opposition and it decides nothing: the rooks decide it. That is the record's first trap stated as a proven result rather than as an opinion."
       }
+    },
+    {
+      "fen": "8/4k3/8/4K3/4P3/8/8/8 w - - 0 1",
+      "note": "Registered false-positive case `opposition-pattern-without-condition`, kept on the record as well as in tests/false_positive_cases.json so that the concept carries its own negative evidence. THE SURFACE PATTERN IS PRESENT: Kings facing each other with one square between them on a rank or file. The side NOT to move has the opposition. WHY IT IS NOT THE CONCEPT: Kings facing each other is trivially detectable and means nothing outside endgames where king penetration decides. WHAT THE SYSTEM DOES: Registered from a recorded counterexample: a position where the concept's surface feature is present and its condition is not, verified mechanically by lib/features.js and then scored. ",
+      "origin_kind": "constructed-test",
+      "concept_role": "negative",
+      "false_positive_case": "opposition-pattern-without-condition"
     }
   ],
   "ambiguous_examples": [],

@@ -215,6 +215,29 @@
       "concept_role": "negative",
       "side_to_move_benefits": "neither",
       "controlled_pair_with": "4k3/8/2n2n2/8/8/8/8/4K3 b - - 0 1"
+    },
+    {
+      "fen": "qr2k3/1b6/3ppn2/8/8/8/3PP3/1NBQR1K1 w - - 0 1",
+      "note": "Registered false-positive case `heavy-pieces-pointing-through-their-own-pawns`, kept on the record as well as in tests/false_positive_cases.json so that the concept carries its own negative evidence. THE SURFACE PATTERN IS PRESENT: White's queen on d1 and rook on e1 bear down the d- and e-files at d4 and e4. An attack map that counts every line piece credits White with the centre; Black has no piece standing on a central square at all. WHY IT IS NOT THE CONCEPT: This record's fourth trap: \"A rook or queen whose line to a central square runs through one of its own men counts as an attacker and should not be read as a piece fighting for the square.\" Both white heavy pieces are behind their own d2 and e2 pawns, and both white minors are still at home. Black's bishop on b7 and knight on f6 genuinely bear on the centre from a distance — the record's first trap says the same thing from the other side: \"A fianchettoed bishop controls e4 without standing anywhere near it.\" WHAT THE SYSTEM DOES: The API reports center-control for BLACK, which is the answer the naive attack map does not give. Material is exactly equal (queen, rook, bishop, knight and two pawns each), so nothing else is carrying the reading. Stockfish 18 at depth 26 scores the position at -4.53 from White's side: Black is winning, on piece placement alone, in a position where White's heavy pieces are the ones aimed at the centre.",
+      "origin_kind": "constructed-test",
+      "concept_role": "negative",
+      "engine": {
+        "engine_id": "Stockfish 18",
+        "test_level": 3,
+        "depth": 26,
+        "threads": 10,
+        "hash_mb": 4096,
+        "multipv": 1,
+        "best_move": "e1f1",
+        "eval_cp": -453,
+        "mate_in": null,
+        "pv": [],
+        "alternatives": [],
+        "margin_cp": null,
+        "verdict": "supports",
+        "verdict_note": "-4.53 from White's side with material exactly equal - queen, rook, bishop, knight and two pawns each. Black is winning on piece placement alone, in a position where White's heavy pieces are the ones aimed at the centre."
+      },
+      "false_positive_case": "heavy-pieces-pointing-through-their-own-pawns"
     }
   ],
   "ambiguous_examples": [

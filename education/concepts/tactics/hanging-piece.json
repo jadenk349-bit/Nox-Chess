@@ -140,6 +140,22 @@
       "concept_role": "negative",
       "side_to_move_benefits": "neither",
       "controlled_pair_with": "4k3/8/8/8/8/2n5/8/R3K3 w - - 0 1"
+    },
+    {
+      "fen": "4k3/8/2p5/3n4/8/8/6B1/4K3 w - - 0 1",
+      "note": "Registered false-positive case `defended-knight-attacked-once`, kept on the record as well as in tests/false_positive_cases.json so that the concept carries its own negative evidence. THE SURFACE PATTERN IS PRESENT: A black knight on d5 is attacked by a white bishop. An attacked piece looks hanging. WHY IT IS NOT THE CONCEPT: This record's own trap: \"A defended piece attacked once is not hanging; count both sides of the exchange.\" The knight is defended by the c6 pawn, and bishop-takes-knight is answered by pawn-takes-bishop. WHAT THE SYSTEM DOES: PROVEN, not evaluated. The API is silent on hanging-piece, because the matcher asks SEE rather than counting attackers. Syzygy settles what the capture is worth: 5 pieces, draw, dtz 0, and the tablebase's own best move is Bxd5 — the capture is available, is best, and changes nothing, which is exactly what 'attacked once and defended' means. A detector that counted attackers would have called this a hanging knight.",
+      "origin_kind": "constructed-test",
+      "concept_role": "negative",
+      "tablebase": {
+        "source": "Lichess tablebase (Syzygy, 7-piece)",
+        "pieces": 5,
+        "wdl": "draw",
+        "dtz": 0,
+        "dtm": 0,
+        "category": "draw",
+        "note": "PROVEN draw, and the tablebase's own best move is Bxd5 - the capture is available, is best, and changes nothing. That is what 'attacked once and defended' means, stated as a proven result."
+      },
+      "false_positive_case": "defended-knight-attacked-once"
     }
   ],
   "ambiguous_examples": [],

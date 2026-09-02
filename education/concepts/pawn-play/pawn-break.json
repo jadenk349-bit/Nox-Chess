@@ -139,6 +139,23 @@
       "concept_role": "negative",
       "side_to_move_benefits": "neither",
       "controlled_pair_with": "4k3/2p5/8/1P6/8/8/8/4K3 w - - 0 1"
+    },
+    {
+      "fen": "4k3/8/1p1p4/8/2P5/8/8/4K3 w - - 0 1",
+      "move_uci": "c4c5",
+      "note": "Registered false-positive case `a-break-is-not-a-breakthrough`, kept on the record as well as in tests/false_positive_cases.json so that the concept carries its own negative evidence. THE SURFACE PATTERN IS PRESENT: c4-c5 advances a pawn into contact with two enemy pawns and opens lines. That is mechanically a break, and it looks like a pawn sacrifice to force something through. WHY IT IS NOT THE CONCEPT: This record's second trap is a statement about this base rather than about a position: \"A break is not a pawn-breakthrough. This base keeps them separate: the breakthrough sacrifices to force a passer, the break challenges a structure.\" Nothing is forced through here — the pawn is simply eaten. WHAT THE SYSTEM DOES: The API reports pawn-break at LOW confidence and is silent on pawn-breakthrough, which is the correct pair of answers and the reason the two are separate records with separate matchers. Low is also the honest confidence: this record's first trap says 'whether it is a good one depends on who is placed to use the lines it opens, which the detector cannot see', and Syzygy says this one is not good — Black wins after dxc5, mate in 35. The concept is reported, the judgement is not, and the ceiling on a rule-of-thumb is what keeps the two apart.",
+      "origin_kind": "constructed-test",
+      "concept_role": "negative",
+      "tablebase": {
+        "source": "Lichess tablebase (Syzygy, 7-piece)",
+        "pieces": 5,
+        "wdl": "loss",
+        "dtz": 1,
+        "dtm": 35,
+        "category": "loss",
+        "note": "PROVEN loss for the side making the break. The break is real and it is bad, which is exactly the pair of facts the record says a detector can establish the first of and not the second."
+      },
+      "false_positive_case": "a-break-is-not-a-breakthrough"
     }
   ],
   "ambiguous_examples": [],

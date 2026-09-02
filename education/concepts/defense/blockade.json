@@ -164,6 +164,29 @@
       "concept_role": "negative",
       "side_to_move_benefits": "neither",
       "controlled_pair_with": "4k3/3p4/3N4/8/8/8/4P3/4K3 w - - 0 1"
+    },
+    {
+      "fen": "4k3/8/8/3p4/3P4/8/8/4K3 w - - 0 1",
+      "note": "Registered false-positive case `pawn-stopped-by-an-enemy-pawn-is-a-ram`, kept on the record as well as in tests/false_positive_cases.json so that the concept carries its own negative evidence. THE SURFACE PATTERN IS PRESENT: A black pawn on d5 stands directly in front of White's d4 pawn and stops it dead. Something is blockading the pawn. WHY IT IS NOT THE CONCEPT: This record's own trap: \"A pawn stopped by an enemy PAWN is a ram, not a blockade, and no piece is being spent.\" The whole point of a blockade is the price — a piece is parked in front of the pawn and gives up its freedom to do it. A ram costs nobody anything. WHAT THE SYSTEM DOES: PROVEN. The API reports nothing: the blockade matcher requires a PIECE on the square in front of the pawn. Syzygy: 4 pieces, draw, dtz 0 — neither pawn ever moves again and no piece was spent to arrange it. The distinction is definitional rather than evaluative, so the detector is the instrument that settles it and the tablebase only confirms that nothing is at stake.",
+      "origin_kind": "constructed-test",
+      "concept_role": "negative",
+      "tablebase": {
+        "source": "Lichess tablebase (Syzygy, 7-piece)",
+        "pieces": 4,
+        "wdl": "draw",
+        "dtz": 0,
+        "dtm": 0,
+        "category": "draw",
+        "note": "PROVEN draw. Neither pawn ever moves again and no piece was spent to arrange it, which is the whole difference between a ram and a blockade."
+      },
+      "false_positive_case": "pawn-stopped-by-an-enemy-pawn-is-a-ram"
+    },
+    {
+      "fen": "6k1/8/8/8/8/3p4/3Q4/6K1 w - - 0 1",
+      "note": "Registered false-positive case `a-queen-doing-a-knights-chore`, kept on the record as well as in tests/false_positive_cases.json so that the concept carries its own negative evidence. THE SURFACE PATTERN IS PRESENT: White's queen stands directly in front of Black's passed d3 pawn and the pawn cannot advance. That is the record's precondition word for word, and the blockade is real. WHY IT IS NOT THE CONCEPT: This record's first trap: \"A piece standing in front of a pawn is not necessarily blockading it usefully. The test is whether the piece keeps its powers there — a queen on a blockading square is doing a knight's chore.\" And its first indicator_against: \"The blockader is a queen or rook, which is expensive and evictable.\" A bare report of 'blockade' here tells the reader White has solved a problem. WHAT THE SYSTEM DOES: THE ANSWER HERE IS THE SENTENCE, NOT A GUARD, and this case exists to pin that down. The concept IS present and suppressing it would be a false negative; what would mislead is reporting it bare. The API says: 'White's queen on d2 stands directly in front of Black's pawn on d3, which has nothing of its own to advance behind and cannot pass it — though a queen is an expensive blockader and can usually be chased off by something cheaper', and attaches two of the record's exceptions as cautions. This is the third of the three answers a stated condition can get — build it, argue on the record that it cannot be built, or say it in the sentence — and it was the right one nine times before this.",
+      "origin_kind": "constructed-test",
+      "concept_role": "negative",
+      "false_positive_case": "a-queen-doing-a-knights-chore"
     }
   ],
   "ambiguous_examples": [

@@ -142,7 +142,16 @@
     "conflicts": []
   },
   "examples": [],
-  "counterexamples": [],
+  "counterexamples": [
+    {
+      "fen": "4rrk1/8/8/8/8/8/8/4RRK1 w - - 0 1",
+      "move_uci": "e1e8",
+      "note": "Registered false-positive case `an-even-trade-is-not-a-sacrifice`, kept on the record as well as in tests/false_positive_cases.json so that the concept carries its own negative evidence. THE SURFACE PATTERN IS PRESENT: Rxe8 gives up a rook on a square the enemy rook covers. Material that can be taken, offered anyway — the record's own definition, and SEE returns 500. WHY IT IS NOT THE CONCEPT: This record's second trap: \"An even trade is not a sacrifice.\" The rook that can be taken was won half a move earlier by the same move. WHAT THE SYSTEM DOES: A REGRESSION CASE. The matcher's own comment said 'an even trade is not a sacrifice' on the line that tested the size, and the line did not test it: the page's sacrificeSize() answers 'how much can the opponent take on that square now', which is the right question for Bxh7+ and the wrong one for RxR — it returned 500 here and said nothing about the rook the move had just won. Subtracting what the move captured is the whole fix. sacrifice fell from 26.5% to 16.6% of the 788 shipped puzzles, and the Greek-gift shape is untouched, because Bxh7+ nets a bishop minus a pawn and is still a sacrifice.",
+      "origin_kind": "constructed-test",
+      "concept_role": "negative",
+      "false_positive_case": "an-even-trade-is-not-a-sacrifice"
+    }
+  ],
   "ambiguous_examples": [
     {
       "fen": "r1b2r1k/p5pp/npq4N/2P1pp2/5B2/PQ2P3/5PPP/1R1R2K1 w - - 5 24",

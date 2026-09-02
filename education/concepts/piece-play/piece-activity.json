@@ -180,7 +180,31 @@
       "side_to_move_benefits": "neither"
     }
   ],
-  "counterexamples": [],
+  "counterexamples": [
+    {
+      "fen": "1r4k1/5pp1/7p/8/8/7P/5PP1/R5K1 w - - 0 1",
+      "note": "Registered false-positive case `a-rook-with-many-moves-bearing-on-nothing`, kept on the record as well as in tests/false_positive_cases.json so that the concept carries its own negative evidence. THE SURFACE PATTERN IS PRESENT: White's rook has the only open file on the board and fourteen legal moves. By any count of available squares it is the most active piece in the position. WHY IT IS NOT THE CONCEPT: This record's own trap: \"Counting available squares is not measuring activity. A piece with many moves that bear on nothing is not active.\" The a-file leads to an empty corner; there is no entry square, no target on the rank it could switch to, and nothing on the seventh. WHAT THE SYSTEM DOES: The API reports open-file and does not report piece-activity, which is the correct pair of answers: the file is open and it wins nothing. The matcher stopped counting legal moves for exactly this trap and the rate moved from 44.4% to 33.9%. Stockfish 18 at depth 28: +0.00, and its own first move is Ra6 — the rook goes to the sixth and the position is still dead level. Material is symmetric, so nothing else is carrying the evaluation.",
+      "origin_kind": "constructed-test",
+      "concept_role": "negative",
+      "engine": {
+        "engine_id": "Stockfish 18",
+        "test_level": 3,
+        "depth": 28,
+        "threads": 10,
+        "hash_mb": 4096,
+        "multipv": 1,
+        "best_move": "a1a6",
+        "eval_cp": 0,
+        "mate_in": null,
+        "pv": [],
+        "alternatives": [],
+        "margin_cp": null,
+        "verdict": "supports",
+        "verdict_note": "0.00 with symmetric material, and the engine's own first move puts the rook on the sixth. Fourteen legal moves and a dead draw."
+      },
+      "false_positive_case": "a-rook-with-many-moves-bearing-on-nothing"
+    }
+  ],
   "ambiguous_examples": [
     {
       "fen": "4rnk1/r2n1p2/1p1R2pp/pP5q/3N4/P3N1P1/1Q3PKP/3R4 b - - 0 27",

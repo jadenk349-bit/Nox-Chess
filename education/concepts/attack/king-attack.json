@@ -185,6 +185,29 @@
         "verdict_note": "fully, and it agrees with the named human move. Searching the position AFTER 21...Kxh7, Stockfish 18 at depth 22 returns Be3 - the move Speelman names as White's best - and scores it at -2.13 from White's side. The side with the 'attack' is two pawns worse. Searched from White's move rather than Black's, because the claim being tested is about the position the recapture reaches, not about whether the recapture was forced."
       },
       "attributed_by": "Jon Speelman (GM), reproduced by ChessBase; the king-safety sentence is quoted from a community annotation and is corroborated, not relied on — corpus entry adams-kasparov-2005-21Kxh7-king-attack-negative"
+    },
+    {
+      "fen": "4r1k1/8/8/3p4/3P4/8/8/R5K1 w - - 0 1",
+      "note": "Registered false-positive case `an-exposed-king-with-nothing-left-to-attack-with`, kept on the record as well as in tests/false_positive_cases.json so that the concept carries its own negative evidence. THE SURFACE PATTERN IS PRESENT: The black king on g8 has no pawn cover at all — no f-, g- or h-pawn in front of it. An exposed king looks like a king under attack. WHY IT IS NOT THE CONCEPT: This record's own trap: \"An exposed king is not automatically under attack — with the attacking pieces traded off, an exposed king is often just an active one.\" Both sides have one rook and one pawn. There is nothing left to attack with, and the same is true of White's king. WHAT THE SYSTEM DOES: The API does not report king-attack. The matcher requires attacking pieces bearing on the king zone rather than an absence of pawn cover, which is what the trap asks for. Stockfish 18 at depth 28: +0.00 in a fully symmetric position — the exposure is mutual and neither side can do anything with it. The related trap on the same record, that the repository's `kingAttack` tag fires on two checks or mate and is a puzzle-classification proxy rather than a definition, is why the matcher does not read that tag here.",
+      "origin_kind": "constructed-test",
+      "concept_role": "negative",
+      "engine": {
+        "engine_id": "Stockfish 18",
+        "test_level": 3,
+        "depth": 28,
+        "threads": 10,
+        "hash_mb": 4096,
+        "multipv": 1,
+        "best_move": "a1a5",
+        "eval_cp": 0,
+        "mate_in": null,
+        "pv": [],
+        "alternatives": [],
+        "margin_cp": null,
+        "verdict": "supports",
+        "verdict_note": "0.00 in a fully symmetric position. The exposure is mutual and neither side can do anything with it."
+      },
+      "false_positive_case": "an-exposed-king-with-nothing-left-to-attack-with"
     }
   ],
   "ambiguous_examples": [],

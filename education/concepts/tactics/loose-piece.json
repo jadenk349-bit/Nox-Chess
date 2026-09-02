@@ -124,6 +124,29 @@
         "verdict": "contradicts",
         "verdict_note": "the position is dead level at depth 24, which is the point: nothing is being won here, least of all a queen. The engine is not being asked whether a piece is loose. It is here to say that no material is available."
       }
+    },
+    {
+      "fen": "1r4k1/1p3ppp/1p6/1P6/1P6/8/5PPP/1R4K1 w - - 0 1",
+      "note": "Registered false-positive case `loose-rook-in-a-locked-position`, kept on the record as well as in tests/false_positive_cases.json so that the concept carries its own negative evidence. THE SURFACE PATTERN IS PRESENT: Both rooks are undefended. An undefended piece is a loose piece. WHY IT IS NOT THE CONCEPT: This record's own trap: \"It only matters when a forcing move can reach it. A loose rook in a locked position is not a weakness.\" The b-file is stopped by the rammed b4/b5/b6 pawns and no forcing move touches either rook. WHAT THE SYSTEM DOES: The API does not report loose-piece. The matcher was rewritten for exactly this trap once already — it fired on 66.8% of positions when it counted undefended pieces and on 9.1% once it required a forcing move that survives being forcing. Stockfish 18 at depth 26 evaluates the position at +0.00: two loose rooks and nothing to be done about either. Reporting every undefended piece would flag most positions and teach nothing, which is the trap stated as a firing rate.",
+      "origin_kind": "constructed-test",
+      "concept_role": "negative",
+      "engine": {
+        "engine_id": "Stockfish 18",
+        "test_level": 3,
+        "depth": 26,
+        "threads": 10,
+        "hash_mb": 4096,
+        "multipv": 1,
+        "best_move": "b1d1",
+        "eval_cp": 0,
+        "mate_in": null,
+        "pv": [],
+        "alternatives": [],
+        "margin_cp": null,
+        "verdict": "supports",
+        "verdict_note": "0.00. Two loose rooks and nothing to be done about either, which is the record's trap - 'a loose rook in a locked position is not a weakness' - stated as a number."
+      },
+      "false_positive_case": "loose-rook-in-a-locked-position"
     }
   ],
   "ambiguous_examples": [],

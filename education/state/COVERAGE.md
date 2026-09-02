@@ -16,7 +16,7 @@ Mean completeness **0.75** across 137 concepts.
 
 | rating | mean | area | concepts |
 |---|---|---|---|
-| full | 0.92 | `pawn-structures` | 5 |
+| full | 0.93 | `pawn-structures` | 5 |
 | full | 0.81 | `opening-theory-concepts` | 4 |
 | full | 0.80 | `pawn-breaks` | 3 |
 | full | 0.75 | `named-theoretical-positions` | 3 |
@@ -24,14 +24,14 @@ Mean completeness **0.75** across 137 concepts.
 | substantial | 1.00 | `king-safety` | 2 |
 | substantial | 0.96 | `gambit-principles` | 2 |
 | substantial | 0.96 | `bishop-endgames` | 2 |
-| substantial | 0.90 | `restriction` | 2 |
-| substantial | 0.79 | `positional-sacrifices` | 2 |
+| substantial | 0.93 | `restriction` | 2 |
+| substantial | 0.83 | `positional-sacrifices` | 2 |
 | substantial | 0.77 | `weak-squares` | 2 |
 | substantial | 0.73 | `named-mating-patterns` | 2 |
 | substantial | 0.72 | `attack-principles` | 2 |
 | substantial | 0.71 | `official-rules` | 12 |
 | substantial | 0.65 | `blindfold-visualisation` | 4 |
-| substantial | 0.61 | `tactical-motifs` | 19 |
+| substantial | 0.62 | `tactical-motifs` | 19 |
 | partial | 1.00 | `tactical-combinations` | 1 |
 | partial | 1.00 | `good-bad-bishops` | 1 |
 | partial | 1.00 | `bishop-pair` | 1 |
@@ -42,22 +42,23 @@ Mean completeness **0.75** across 137 concepts.
 | partial | 1.00 | `material-imbalances` | 1 |
 | partial | 1.00 | `two-weaknesses` | 1 |
 | partial | 1.00 | `king-activation` | 1 |
+| partial | 0.94 | `piece-activity` | 1 |
 | partial | 0.94 | `rooks` | 1 |
 | partial | 0.93 | `open-files` | 1 |
 | partial | 0.93 | `semi-open-files` | 1 |
+| partial | 0.93 | `opening-principles` | 1 |
 | partial | 0.92 | `opposition` | 1 |
 | partial | 0.92 | `board-geometry` | 1 |
 | partial | 0.91 | `notation` | 1 |
-| partial | 0.88 | `piece-activity` | 1 |
 | partial | 0.88 | `piece-exchanges` | 1 |
 | partial | 0.87 | `named-tactical-patterns` | 1 |
 | partial | 0.87 | `initiative` | 1 |
 | partial | 0.87 | `exchange-sacrifices` | 1 |
-| partial | 0.86 | `opening-principles` | 1 |
 | partial | 0.85 | `zugzwang` | 1 |
 | partial | 0.83 | `pawn-endgames` | 1 |
 | partial | 0.83 | `drawing-mechanisms` | 1 |
 | partial | 0.80 | `piece-coordination` | 1 |
+| partial | 0.80 | `worst-placed-piece` | 1 |
 | partial | 0.80 | `development` | 1 |
 | partial | 0.80 | `static-vs-dynamic` | 1 |
 | partial | 0.80 | `transformation-of-advantages` | 1 |
@@ -70,7 +71,6 @@ Mean completeness **0.75** across 137 concepts.
 | partial | 0.67 | `chess-terminology` | 1 |
 | partial | 0.67 | `ranks-files-diagonals` | 1 |
 | partial | 0.67 | `forcing-moves` | 1 |
-| partial | 0.67 | `worst-placed-piece` | 1 |
 | partial | 0.67 | `named-strategic-concepts` | 1 |
 | partial | 0.67 | `rules-of-thumb` | 1 |
 | partial | 0.67 | `exceptions-to-rules` | 1 |
@@ -106,7 +106,7 @@ Mean completeness **0.75** across 137 concepts.
 
 | concept | score | def | term | src | attr | recog | exc | pos | neg | amb | eng | tb | game | fp | beg | adv | tmpl |
 |---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|
-| `blockade` | 1.00 | x | x | x | x | x | x | x | x | x | x | . | x | x | x | x | x |
+| `blockade` | 1.00 | x | x | x | x | x | x | x | x | x | x | x | x | x | x | x | x |
 | `center-control` | 1.00 | x | x | x | x | x | x | x | x | x | x | . | x | x | x | x | x |
 | `space` | 1.00 | x | x | x | x | x | x | x | x | x | x | . | x | x | x | x | x |
 | `tempo` | 1.00 | x | x | x | . | x | x | . | . | . | . | . | . | x | x | x | x |
@@ -125,59 +125,61 @@ Mean completeness **0.75** across 137 concepts.
 | `bishop-pair` | 1.00 | x | x | x | x | x | x | x | x | x | x | . | x | x | x | x | x |
 | `material-imbalance` | 1.00 | x | x | x | x | x | x | x | x | x | x | . | x | x | x | x | x |
 | `two-weaknesses` | 1.00 | x | x | x | x | x | x | x | x | x | x | x | x | x | x | x | x |
-| `hanging-piece` | 1.00 | x | x | x | . | x | x | x | x | . | x | . | . | x | x | x | x |
+| `hanging-piece` | 1.00 | x | x | x | . | x | x | x | x | . | x | x | . | x | x | x | x |
 | `loose-piece` | 1.00 | x | x | x | . | x | x | x | x | . | x | . | . | x | x | x | x |
 | `tactical-combinations` | 1.00 | x | x | x | x | x | x | . | . | . | . | . | . | x | x | x | x |
 | `passed-pawn` | 0.94 | x | x | x | x | x | x | x | x | x | x | - | x | x | x | x | x |
+| `piece-activity` | 0.94 | x | x | x | x | x | x | x | x | x | x | - | x | x | x | x | x |
 | `rook-on-the-seventh` | 0.94 | x | x | x | x | x | x | x | x | x | x | - | x | x | x | x | x |
 | `open-file` | 0.93 | x | x | x | x | x | x | x | x | - | x | . | x | x | x | x | x |
 | `semi-open-file` | 0.93 | x | x | x | x | x | x | x | x | - | x | . | x | x | x | x | x |
 | `weak-square` | 0.93 | x | x | x | x | x | x | x | x | - | x | . | x | x | x | x | x |
 | `compensation` | 0.93 | x | x | x | . | x | x | x | x | - | x | . | x | x | x | x | x |
+| `early-queen-development` | 0.93 | x | x | x | . | x | x | x | x | x | x | . | - | x | x | x | x |
 | `pin` | 0.93 | x | x | x | . | x | x | x | x | x | x | . | - | x | x | x | x |
 | `opposition` | 0.92 | x | x | x | x | x | . | x | x | . | - | x | . | x | x | x | x |
 | `wrong-rook-pawn` | 0.92 | x | x | x | x | x | . | x | x | . | - | x | . | x | x | x | x |
+| `sacrifice` | 0.92 | x | x | x | x | x | x | - | x | . | x | . | . | x | x | x | x |
 | `board-geometry` | 0.92 | x | x | x | . | x | . | x | x | . | - | x | . | x | x | x | x |
 | `notation` | 0.91 | x | x | x | x | x | . | x | x | . | . | . | . | - | x | x | x |
-| `piece-activity` | 0.88 | x | x | x | x | x | x | x | - | x | x | - | x | x | x | x | x |
 | `piece-exchanges` | 0.88 | x | x | x | x | x | x | x | x | - | - | x | x | x | x | x | x |
 | `king-attack` | 0.87 | x | x | x | x | x | x | - | x | - | x | . | x | x | x | x | x |
+| `restraint` | 0.87 | x | x | x | x | x | x | x | x | - | - | . | x | x | x | x | x |
 | `initiative` | 0.87 | x | x | x | x | x | x | x | x | - | x | . | x | - | x | x | x |
 | `pawn-breakthrough` | 0.87 | x | x | x | . | x | x | x | x | - | x | - | x | x | x | x | x |
 | `exchange-sacrifice` | 0.87 | x | x | x | x | x | x | x | - | x | x | . | x | - | x | x | x |
+| `fork` | 0.87 | x | x | x | . | x | x | x | x | - | x | x | - | x | x | x | x |
 | `greek-gift` | 0.87 | x | x | x | x | x | x | x | x | - | x | . | - | x | x | x | x |
-| `early-queen-development` | 0.86 | x | x | x | . | x | x | x | - | x | x | . | - | x | x | x | x |
-| `fork` | 0.86 | x | x | x | . | x | x | x | x | - | x | . | - | x | x | x | x |
 | `zugzwang` | 0.85 | x | x | x | x | x | . | x | x | . | - | x | . | - | x | x | x |
-| `sacrifice` | 0.85 | x | x | x | x | x | x | - | - | . | x | . | . | x | x | x | x |
 | `key-square` | 0.83 | x | x | x | . | x | . | x | x | . | - | x | . | - | x | x | x |
 | `perpetual-check` | 0.83 | x | x | x | . | x | x | x | - | . | x | . | . | - | x | x | x |
 | `check` | 0.82 | x | x | x | . | x | . | - | x | . | . | x | . | x | x | x | - |
 | `en-passant` | 0.82 | x | x | x | . | x | . | x | x | . | . | x | . | - | x | x | - |
 | `fifty-move-rule` | 0.82 | x | x | x | . | x | . | x | x | . | . | x | . | - | x | x | - |
 | `vancura-position` | 0.81 | x | x | x | x | x | x | x | x | - | - | x | - | x | x | x | x |
-| `restraint` | 0.80 | x | x | x | x | x | x | x | - | - | - | . | x | x | x | x | x |
 | `opening-development` | 0.80 | x | x | x | x | x | x | - | x | - | x | . | - | x | x | x | x |
+| `pawn-break` | 0.80 | x | x | x | . | x | x | x | x | - | - | x | - | x | x | x | x |
 | `piece-coordination` | 0.80 | x | x | x | x | x | x | x | - | - | x | . | x | - | x | x | x |
 | `static-vs-dynamic` | 0.80 | x | x | x | x | x | x | x | - | - | x | . | x | - | x | x | x |
 | `transformation-of-advantages` | 0.80 | x | x | x | x | x | x | x | - | - | x | . | x | - | x | x | x |
+| `worst-placed-piece` | 0.80 | x | x | x | x | x | x | - | x | - | x | . | - | x | x | x | x |
 | `castling` | 0.80 | x | x | x | . | x | . | x | x | . | . | . | . | - | x | x | - |
+| `skewer` | 0.80 | x | x | x | . | x | x | x | x | - | x | x | - | x | x | x | - |
 | `back-rank-mate` | 0.79 | x | x | x | . | x | x | x | x | - | x | . | - | - | x | x | x |
-| `pawn-break` | 0.79 | x | x | x | . | x | x | x | x | - | - | . | - | x | x | x | x |
-| `skewer` | 0.79 | x | x | x | . | x | x | x | x | - | x | . | - | x | x | x | - |
+| `battery` | 0.79 | x | x | x | . | x | x | x | x | - | x | . | - | x | x | x | - |
+| `discovered-attack` | 0.79 | x | x | x | . | x | x | x | x | - | x | . | - | x | x | x | - |
 | `trapped-piece` | 0.79 | x | x | x | . | x | x | x | x | - | x | . | - | x | x | x | - |
 | `insufficient-material` | 0.77 | x | x | x | . | x | x | x | x | . | - | x | . | - | x | x | - |
 | `piece-properties` | 0.75 | x | x | x | x | x | x | - | x | - | - | x | - | x | x | x | x |
 | `lucena-position` | 0.75 | x | x | x | x | x | x | x | x | - | - | x | - | - | x | x | x |
 | `overprotection` | 0.73 | x | x | x | x | x | x | x | - | - | - | . | x | - | x | x | x |
 | `prophylaxis` | 0.73 | x | x | x | x | x | x | x | - | - | - | . | x | - | x | x | x |
+| `hanging-pawns` | 0.73 | x | x | x | . | x | x | - | x | - | - | x | - | x | x | x | x |
 | `minority-attack` | 0.73 | x | x | x | x | x | x | x | - | - | - | . | x | - | x | x | x |
 | `knight-vs-bishop` | 0.73 | x | x | x | x | x | x | x | - | - | - | . | x | - | x | x | x |
 | `positional-sacrifice` | 0.73 | x | x | x | x | x | x | x | - | - | - | . | x | - | x | x | x |
 | `checkmate` | 0.73 | x | x | x | . | x | . | - | x | . | . | x | . | - | x | x | - |
 | `stalemate` | 0.73 | x | x | x | . | x | . | - | x | . | . | x | . | - | x | x | - |
-| `battery` | 0.71 | x | x | x | . | x | x | x | x | - | - | . | - | x | x | x | - |
-| `discovered-attack` | 0.71 | x | x | x | . | x | x | x | - | - | x | . | - | x | x | x | - |
 | `knight-fork` | 0.71 | x | x | x | . | x | x | x | x | - | - | . | - | - | x | x | x |
 | `promotion` | 0.70 | x | x | x | . | x | . | x | - | . | . | . | . | - | x | x | - |
 | `triangulation` | 0.69 | x | x | x | x | x | . | - | - | . | - | x | . | - | x | x | x |
@@ -193,10 +195,8 @@ Mean completeness **0.75** across 137 concepts.
 | `named-strategic-concepts` | 0.67 | x | x | x | . | x | x | - | - | . | - | . | . | - | x | x | x |
 | `smothered-mate` | 0.67 | x | x | x | . | x | x | x | x | - | - | x | - | - | x | x | - |
 | `transposition` | 0.67 | x | x | x | . | x | x | - | - | . | - | . | . | - | x | x | x |
-| `worst-placed-piece` | 0.67 | x | x | x | x | x | x | - | - | - | - | . | - | x | x | x | x |
 | `chess-terminology` | 0.67 | x | x | x | . | x | x | - | - | . | - | . | . | - | x | x | x |
 | `forcing-moves` | 0.67 | x | x | x | x | x | x | x | - | - | - | . | - | - | x | x | x |
-| `hanging-pawns` | 0.64 | x | x | x | . | x | x | - | - | - | - | . | - | x | x | x | x |
 | `double-check` | 0.64 | x | x | x | . | x | x | x | x | - | - | . | - | - | x | x | - |
 | `corresponding-squares` | 0.62 | x | x | x | x | x | . | - | - | . | - | - | . | - | x | x | x |
 | `building-a-bridge` | 0.62 | x | x | x | x | x | . | - | - | . | - | - | . | - | x | x | x |

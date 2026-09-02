@@ -121,7 +121,24 @@
     ]
   },
   "examples": [],
-  "counterexamples": [],
+  "counterexamples": [
+    {
+      "fen": "4k3/8/8/8/2PPP3/8/8/4K3 w - - 0 1",
+      "note": "Registered false-positive case `a-phalanx-of-three-is-not-a-hanging-pair`, kept on the record as well as in tests/false_positive_cases.json so that the concept carries its own negative evidence. THE SURFACE PATTERN IS PRESENT: Three white pawns stand abreast on c4, d4 and e4 with no friendly pawns beside them — an advanced, unsupported pawn mass on half-open files. WHY IT IS NOT THE CONCEPT: Hanging pawns are a PAIR of adjacent pawns on half-open files with no friendly pawns on the flanking files. Three abreast is a phalanx, which is a different structure with different properties: the outer two support the advance of the middle one, and there is no pair to be attacked as a pair. WHAT THE SYSTEM DOES: This is a REGRESSION CASE, not a hypothetical. The hanging-pawns matcher's `implements` string quoted the flanking-file condition and the code never tested it, so a phalanx of three was reported as a hanging pair; the rate fell from 7.2% to 3.4% when the condition was actually built. The API is now silent here. Syzygy: 5 pieces, WIN for White, dtz 1, mate in 27 — three connected passers on the fourth rank win, which is the opposite of the liability 'hanging pawns' names, and the clearest possible statement that calling this structure by that name would mislead.",
+      "origin_kind": "constructed-test",
+      "concept_role": "negative",
+      "tablebase": {
+        "source": "Lichess tablebase (Syzygy, 7-piece)",
+        "pieces": 5,
+        "wdl": "win",
+        "dtz": 1,
+        "dtm": 27,
+        "category": "win",
+        "note": "PROVEN WIN in 27. Three connected passers on the fourth rank win, which is the opposite of the liability 'hanging pawns' names."
+      },
+      "false_positive_case": "a-phalanx-of-three-is-not-a-hanging-pair"
+    }
+  ],
   "ambiguous_examples": [],
   "explanations": {
     "by_level": {

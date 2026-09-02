@@ -160,6 +160,14 @@
       "concept_role": "negative",
       "side_to_move_benefits": "white",
       "controlled_pair_with": "3k4/8/8/3n4/8/8/8/R3K3 w - - 0 1"
+    },
+    {
+      "fen": "4rrk1/8/8/8/8/8/8/4RRK1 w - - 0 1",
+      "move_uci": "e1e8",
+      "note": "Registered false-positive case `a-pin-the-pinned-piece-dissolves-by-capture`, kept on the record as well as in tests/false_positive_cases.json so that the concept carries its own negative evidence. THE SURFACE PATTERN IS PRESENT: After Rxe8, White's rook on e8 attacks the black rook on f8 with the black king behind it on g8. Line piece, enemy unit, more valuable enemy unit, collinear, nothing between — the record's precondition, word for word. WHY IT IS NOT THE CONCEPT: This record's first indicator_against: \"The pinned piece can capture the pinner.\" The rook on f8 does exactly that, and comes out even. The detector's sentence — \"the rook on f8 is pinned to the king behind it and cannot step aside\" — is true and misleads, because a reader takes 'cannot step aside' to mean the rook is stuck. WHAT THE SYSTEM DOES: Reported at HIGH confidence until a guard was written. The geometry is genuinely there, which is why findMotifs() is right to see it; whether it MEANS anything is the concept record's question and the record answers it. The guard reads the pinned square out of the detector's own sentence rather than re-deriving the pin — two implementations of one motif are how the two start to disagree — and suppresses the report when the pinned piece has a legal capture of the pinner that SEE does not punish. It fails open: if the position cannot be rebuilt or the sentence is not in that shape, the motif is reported, because a guard that cannot run has no standing to overrule the detector. Rate: pin fell to 9.0% of the 788 shipped puzzles.",
+      "origin_kind": "constructed-test",
+      "concept_role": "negative",
+      "false_positive_case": "a-pin-the-pinned-piece-dissolves-by-capture"
     }
   ],
   "ambiguous_examples": [

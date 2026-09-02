@@ -185,6 +185,29 @@
         "verdict": "contradicts",
         "verdict_note": "The feature belongs to White, and White stands at -2.84. This does not show the feature CAUSING the disadvantage — nothing here isolates it — and it does show that possessing the feature is consistent with being worse, which is exactly what a concept stated as a bare advantage would deny."
       }
+    },
+    {
+      "fen": "4k3/pp3ppp/8/2p5/2P5/8/PP3PPP/4K3 w - - 0 1",
+      "note": "Registered false-positive case `rammed-and-isolated-is-not-backward`, kept on the record as well as in tests/false_positive_cases.json so that the concept carries its own negative evidence. THE SURFACE PATTERN IS PRESENT: White's c4 pawn is behind its neighbours on the b- and d-files and cannot advance. That is the surface description of a backward pawn. WHY IT IS NOT THE CONCEPT: Two of this record's traps fire at once. \"A pawn whose advance square is occupied by an enemy pawn is RAMMED. It cannot advance, but not for the reason the concept is about, and the square in front of it is not a hole — an enemy pawn is standing on it.\" And: \"A pawn with no friendly pawn on either adjacent file is ISOLATED, not backward, and reporting both names for one pawn promises the reader a hole in front of it that the isolated case does not create.\" White's c4 is both. WHAT THE SYSTEM DOES: The API reports neither backward-pawn nor anything else here. Layer 3 excludes rammed pawns from the backward set and excludes isolated pawns from it by name, both for the reasons quoted above. Stockfish 18 at depth 26: +0.00, best move f4 — the position is dead level and the play is on the other wing, because c4 is not a weakness at all. This is the case that would fool a detector reading 'cannot advance safely' on its own.",
+      "origin_kind": "constructed-test",
+      "concept_role": "negative",
+      "engine": {
+        "engine_id": "Stockfish 18",
+        "test_level": 3,
+        "depth": 26,
+        "threads": 10,
+        "hash_mb": 4096,
+        "multipv": 1,
+        "best_move": "f2f4",
+        "eval_cp": 0,
+        "mate_in": null,
+        "pv": [],
+        "alternatives": [],
+        "margin_cp": null,
+        "verdict": "supports",
+        "verdict_note": "0.00, and the engine's play is on the other wing. The c4 pawn cannot advance and is not a weakness, which is why 'cannot advance safely' on its own is not the concept."
+      },
+      "false_positive_case": "rammed-and-isolated-is-not-backward"
     }
   ],
   "ambiguous_examples": [

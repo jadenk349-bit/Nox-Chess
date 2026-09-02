@@ -249,6 +249,13 @@
         "verdict": "contradicts",
         "verdict_note": "Quiet and close to balanced at 2.07, which is the combination this base most needs and least often finds: nothing forcing is available and the evaluation is not swamping the feature, so the position is usable as an instance of the concept. What is NOT claimed is that the concept explains the engine's choice of move."
       }
+    },
+    {
+      "fen": "7k/8/5K2/3B3P/8/8/8/8 w - - 0 1",
+      "note": "Registered false-positive case `passed-pawn-not-advantage`, kept on the record as well as in tests/false_positive_cases.json so that the concept carries its own negative evidence. THE SURFACE PATTERN IS PRESENT: A pawn has no enemy pawn ahead of it on its own or adjacent files. WHY IT IS NOT THE CONCEPT: A passed pawn that is permanently blockaded by a minor piece is a target rather than an asset, and it can cost tempi to defend. WHAT THE SYSTEM DOES: PROVEN draw. White has a passed h-pawn, an extra bishop, and the more active king, and cannot win. The pawn is passed and worthless because it is a rook pawn whose promotion square the bishop does not cover. Paired in this base with the identical position with the bishop on the other colour, which is a proven win in 9 - same material, same passed pawn, opposite result.",
+      "origin_kind": "constructed-test",
+      "concept_role": "negative",
+      "false_positive_case": "passed-pawn-not-advantage"
     }
   ],
   "ambiguous_examples": [
