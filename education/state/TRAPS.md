@@ -13,7 +13,7 @@ implemented; that is a reading, and doing it is the work. What it can do is
 stop the list being rediscovered from scratch each time — and every one of
 the defects listed in the tool's header was unread before it was looked at.
 
-**Of 275 stated conditions (traps and indicators-against): 164 enforced in the matcher, 21 in Layer 3, 74 argued on the record to be unbuildable or already honoured elsewhere, 16 unread.**
+**Of 275 stated conditions (traps and indicators-against): 167 enforced in the matcher, 21 in Layer 3, 74 argued on the record to be unbuildable or already honoured elsewhere, 13 unread.**
 
 ONE CAVEAT ABOUT `indicators_against`, and it is not a technicality. For a
 concept naming an ASSET — an open file, an outpost, a passed pawn — they are
@@ -80,7 +80,7 @@ shared file was added to the search. The test is quotation for that reason.
 - [cited] *(indicator against)* Every entry square on the file is defended — the rook stares and does nothing
 - [cited] *(indicator against)* The opponent can contest the file and trade all the rooks off
 - [cited] *(indicator against)* The file can be closed by a pawn advance
-- [**unread**] *(indicator against)* Occupying it costs a tempo the position cannot spare
+- [cited] *(indicator against)* Occupying it costs a tempo the position cannot spare
 ## semi-open-file
 
 - [cited] A semi-open file is a fact about pawns; whether it produces pressure depends on whether the target is fixed and whether you can attack it more times than it can be defended.
@@ -99,7 +99,7 @@ shared file was added to the search. The test is quotation for that reason.
 - [cited] *(indicator against)* The occupant can be traded off by a knight or a same-coloured bishop with no compensation
 - [cited] *(indicator against)* The square is on the a/b/g/h files and the intended occupant is a knight — Nimzowitsch assigns flank outposts to rooks
 - [cited] *(indicator against)* The piece on the square attacks nothing and restricts nothing; it is safe but idle
-- [**unread**] *(indicator against)* Occupying costs a tempo the position cannot spare, or walks into a concrete tactic
+- [cited] *(indicator against)* Occupying costs a tempo the position cannot spare, or walks into a concrete tactic
 ## weak-square
 
 - [layer 3] Every pawn move creates squares no pawn can guard, so the raw feature fires everywhere. Usability is what makes it reportable.
@@ -167,7 +167,7 @@ shared file was added to the search. The test is quotation for that reason.
 - [cited] *(indicator against)* The pawns on the seventh have already advanced, so there is nothing to attack
 - [cited] *(indicator against)* The rook can be challenged and traded off, or driven away with gain
 - [cited] *(indicator against)* The eighth rank is defended, so the mating dimension of a second rook is absent
-- [**unread**] *(indicator against)* Reaching the seventh costs a tempo the position cannot spare
+- [cited] *(indicator against)* Reaching the seventh costs a tempo the position cannot spare
 ## luft
 
 - [cited] Making luft is not automatically prudent. The same move is a hook against an opponent who can storm, and this is the standard error.

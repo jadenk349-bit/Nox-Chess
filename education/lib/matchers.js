@@ -585,10 +585,21 @@ const STRUCTURAL = [
       }
       if (!entries.length) return null;
       const e0 = entries[0];
+      // "Occupying it costs a tempo the position cannot spare" - the last of
+      // this record's indicators_against, and the only one of the three files-
+      // and-ranks records where it can arise at all: the rook is on the file
+      // already, but the ENTRY is still a move that has to be found time for.
+      // A caveat and never a guard, for the reason tempoScarce() gives about
+      // itself - it sees a check and a hanging piece and nothing subtler, so
+      // its silence is not evidence that a tempo is available.
       return {
         confidence: 'high',
         because: entries.map(e => `${side(f, e.c)}'s rook on ${e.from} stands on an open file with a square to ` +
-                                  `enter on: ${e.to}, where nothing wins it`),
+                                  `enter on: ${e.to}, where nothing wins it` +
+                                  (tempoScarce(f, e.c)
+                                    ? ` — though there is something to answer first, so the entry may cost a ` +
+                                      `tempo the position cannot spare`
+                                    : '')),
         slots: { file: e0.from[0], square: e0.to },
         subjects: entries.map(e => e.c),
       };
@@ -772,6 +783,21 @@ const STRUCTURAL = [
           return q.t === 'B' && FEAT.isLight(j) === FEAT.isLight(i);
         });
       };
+      // "Occupying costs a tempo the position cannot spare, or walks into a
+      // concrete tactic" - the record's last indicator_against. The first half
+      // cannot arise here: this matcher reports outposts that are OCCUPIED, and
+      // the tempo that bought the square has already been spent. The second
+      // half can, and it is one SEE away - a piece standing on a square where
+      // the opponent wins material by taking it is not holding an outpost, it
+      // is about to be captured on one.
+      for (const h of hits) {
+        h.o = h.o.filter(x => {
+          try { return P.see(st, sqIdx(x.square), other(h.c)) <= 0; } catch (e) { return true; }
+        });
+      }
+      const live = hits.filter(h => h.o.length);
+      if (!live.length) return null;
+      hits.length = 0; hits.push(...live);
       return {
         confidence: 'high',
         because: hits.map(h => {
@@ -1205,6 +1231,12 @@ const STRUCTURAL = [
           const q = st.b[back * 8 + col];
           if (q && q.c === other(c) && (q.t === 'R' || q.t === 'Q')) { eighthHeld = true; break; }
         }
+        // "Reaching the seventh costs a tempo the position cannot spare" is
+        // the last indicator_against on this record, and it cannot arise here.
+        // This matcher reports a rook that is ALREADY on the rank; whatever the
+        // tempo cost, it has been paid, and a position is not made wrong by
+        // what it cost to reach. The same sentence on `open-file`, where the
+        // entry move is still in the future, IS built.
         hits.push({ c, r: rooks, targets, confined, eighthHeld });
       }
       if (!hits.length) return null;
@@ -2612,6 +2644,42 @@ function between(a, b) {
 // an interposition survives. The piece put there is a knight of the defending
 // side, which is the middle of the value range: a pawn would survive too often
 // and a queen too rarely, and the question is about the SQUARE.
+/* "A tempo the position cannot spare."
+ *
+ * Three records say this in almost the same words - `open-file` about
+ * occupying the file, `outpost` about occupying the square, and
+ * `rook-on-the-seventh` about reaching the rank - and none of them had anything
+ * reading it. It is not a mood. A position cannot spare a tempo when something
+ * has to be answered right now, and there are exactly two board facts that mean
+ * that: the side is in check, or the opponent has a capture that wins material.
+ *
+ * SEE decides the second, which is deliberately narrow. A threat to win
+ * material next move, a mate two moves out, a positional collapse - all of
+ * those also make a tempo scarce and none of them is visible without a search.
+ * So this under-reports, and every caller treats it as a caveat rather than as
+ * a guard: it can add a sentence, and it may not delete a fact about the board.
+ */
+function tempoScarce(f, c) {
+  const P = FEAT.page;
+  let st;
+  try { st = P.stateFromFEN(f.fen); } catch (e) { return false; }
+  if ((f.king[c] || {}).inCheck) return true;
+  const probe = P.cloneState(st);
+  probe.turn = other(c);
+  probe.ep = null;
+  // A board where the side NOT to move is in check is not a position, and
+  // asking it for moves is asking a question with no answer.
+  try { if (P.inCheck(probe, c)) return false; } catch (e) { return false; }
+  let ms;
+  try { ms = P.legalMoves(probe); } catch (e) { return false; }
+  return ms.some(m => {
+    if (!m.cap) return false;
+    let nx;
+    try { nx = P.makeMove(probe, m); } catch (e) { return false; }
+    return (P.VAL[m.cap.t] || 0) - Math.max(0, P.see(nx, m.to, c)) > 0;
+  });
+}
+
 function afterDrop(st, sq) {
   const P = FEAT.page;
   const work = { b: st.b.slice(), turn: st.turn, ep: -1 };
