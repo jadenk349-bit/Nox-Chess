@@ -13,7 +13,7 @@ implemented; that is a reading, and doing it is the work. What it can do is
 stop the list being rediscovered from scratch each time — and every one of
 the defects listed in the tool's header was unread before it was looked at.
 
-**Of 246 stated conditions (traps and indicators-against): 94 enforced in the matcher, 21 in Layer 3, 55 argued on the record to be unbuildable or already honoured elsewhere, 76 unread.**
+**Of 246 stated conditions (traps and indicators-against): 96 enforced in the matcher, 21 in Layer 3, 54 argued on the record to be unbuildable or already honoured elsewhere, 75 unread.**
 
 ONE CAVEAT ABOUT `indicators_against`, and it is not a technicality. For a
 concept naming an ASSET — an open file, an outpost, a passed pawn — they are
@@ -123,7 +123,7 @@ shared file was added to the search. The test is quotation for that reason.
 - [layer 3] Hanging pawns are not automatically weak. The structure is dynamic, and the same pair that loses one game wins the next depending on where the pieces are.
 - [noted] Do not assess them as an isolated pawn. They defend the squares in front of one another and the pair advancing is a genuine threat.
 - [noted] The detector finds the STRUCTURE. Whether it is an asset needs the piece placement, which the detector does not read.
-- [**unread**] *(indicator against)* A friendly pawn still stands on a flanking file — then it is a chain, not a hanging pair
+- [cited] *(indicator against)* A friendly pawn still stands on a flanking file — then it is a chain, not a hanging pair
 - [**unread**] *(indicator against)* One of the two has already advanced, which usually ends the structure
 ## two-weaknesses
 
@@ -152,7 +152,7 @@ shared file was added to the search. The test is quotation for that reason.
 
 - [cited] The drawish reputation is an ENDGAME fact. In the middlegame with heavy pieces on, opposite-coloured bishops favour the attacker, because the bishop operates where the defender's cannot answer. Announcing 'opposite bishops, drawn' with queens on the board is the standard error.
 - [noted] Detecting the material is trivial; whether a blockade is achievable is not.
-- [noted] Two extra pawns are often not enough — but three files of separation often are. The count of pawns is the wrong variable; their separation and the blockade are the right ones.
+- [cited] Two extra pawns are often not enough — but three files of separation often are. The count of pawns is the wrong variable; their separation and the blockade are the right ones.
 - [**unread**] *(indicator against)* Queens or rooks remain — winning chances rise sharply, and in the middlegame the bishops are an ATTACKING asset
 - [**unread**] *(indicator against)* The extra pawns are separated by three files or more
 - [**unread**] *(indicator against)* The defender cannot establish a blockade on their bishop's colour

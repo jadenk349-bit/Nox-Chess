@@ -803,7 +803,19 @@ const STRUCTURAL = [
             if (a >= b) continue;
             const sameRank = a[1] === b[1];
             const adjacent = Math.abs(a.charCodeAt(0) - b.charCodeAt(0)) === 1;
-            if (sameRank && adjacent) {
+            // ...and NO FRIENDLY PAWN ON EITHER FLANKING FILE. The `implements`
+            // string above has claimed this since the matcher was written and
+            // the code never tested it, which is the second `implements` string
+            // found overstating today. The record says it as an
+            // indicator_against - "a friendly pawn still stands on a flanking
+            // file: then it is a chain, not a hanging pair" - and it is the
+            // difference between the structure and a phalanx of three. b5-c5-d5
+            // was being reported as hanging pawns on c5 and d5.
+            const files = f.pawns[c].files || [];
+            const left = String.fromCharCode(Math.min(a.charCodeAt(0), b.charCodeAt(0)) - 1);
+            const right = String.fromCharCode(Math.max(a.charCodeAt(0), b.charCodeAt(0)) + 1);
+            const flanked = files.includes(left) || files.includes(right);
+            if (sameRank && adjacent && !flanked) {
               return {
                 confidence: 'medium',
                 because: [`${side(f, c)} has hanging pawns on ${a} and ${b} — abreast, on half-open ` +
@@ -968,10 +980,28 @@ const STRUCTURAL = [
       // Saying "drawish" here with queens and rooks on the board is the error
       // the record names, and it is the commonest thing anyone says about this
       // material. The endgame reputation is not transferable to a middlegame.
+      // "Two extra pawns are often not enough — but THREE FILES OF SEPARATION
+      // often are. The count of pawns is the wrong variable; their separation
+      // and the blockade are." The record says the count is wrong and then this
+      // base reported nothing at all about either variable. Separation is
+      // measurable; the blockade is not, and is left alone.
+      const ahead = f.material.w.counts.P > f.material.b.counts.P ? 'w'
+                  : f.material.b.counts.P > f.material.w.counts.P ? 'b' : null;
+      let spread = null;
+      if (ahead) {
+        const files = (f.pawns[ahead].files || []).map(x => x.charCodeAt(0));
+        if (files.length >= 2) spread = Math.max(...files) - Math.min(...files);
+      }
       const tail = f.phase !== 'endgame' && heavy > 0
         ? ' — and with heavy pieces still on this is not the drawish ending it is famous for: the ' +
           'bishop on the attacking colour has no counterpart, which favours whoever is attacking'
-        : '';
+        : spread !== null && spread >= 3
+          ? `. ${side(f, ahead)} is a pawn up with the pawns ${spread} files apart, and separation rather ` +
+            `than the count is what decides these endings`
+          : spread !== null
+            ? `. ${side(f, ahead)} is a pawn up, but the pawns are only ${spread} file` +
+              `${spread === 1 ? '' : 's'} apart — one bishop covers that, and the count is the wrong variable`
+            : '';
       return {
         confidence: 'high',
         because: [line + tail],

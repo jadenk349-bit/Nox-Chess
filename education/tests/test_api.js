@@ -1741,6 +1741,51 @@ const { concepts } = API.knowledge();
        fs.readFileSync(path.join(ROOT, 'lib', 'features.js'), 'utf8')));
 }
 
+{
+  // hanging-pawns' `implements` string claimed "no friendly pawn on either
+  // flanking file" from the day it was written and the code never tested it —
+  // the second `implements` string found overstating today. The record says it
+  // as an indicator_against: "a friendly pawn still stands on a flanking file,
+  // then it is a chain, not a hanging pair." b5-c5-d5 was being reported as
+  // hanging pawns on c5 and d5. 7.2% -> 3.4%.
+  const hp = fen => {
+    const c = API.analyzeWithEducation({ fen }).concepts.find(x => x.id === 'hanging-pawns');
+    return c ? (c.because || [''])[0] : null;
+  };
+  ok('hanging-pawns: a phalanx of three is a chain, not a hanging pair',
+     !hp('4k3/pp3ppp/8/1PPP4/8/8/P4PPP/4K3 w - - 0 1'),
+     String(hp('4k3/pp3ppp/8/1PPP4/8/8/P4PPP/4K3 w - - 0 1')));
+  ok('hanging-pawns: a true pair is still reported',
+     /hanging pawns on c5 and d5/.test(String(hp('4k3/pp3ppp/8/2PP4/8/8/P4PPP/4K3 w - - 0 1'))),
+     String(hp('4k3/pp3ppp/8/2PP4/8/8/P4PPP/4K3 w - - 0 1')));
+  // The corpus's own annotated instance — Fischer–Spassky 1972 game 6 — survives.
+  const corpus = JSON.parse(fs.readFileSync(
+    path.join(ROOT, 'corpus', 'annotated_positions.json'), 'utf8')).positions;
+  const fs72 = corpus.find(p => p.id === 'fischer-spassky-1972-g6-hanging-pawns');
+  ok('hanging-pawns: Fischer–Spassky game 6 still fires',
+     !!hp(fs72.fen) || !!hp(fs72.fen_after), fs72.fen);
+
+  // opposite-coloured-bishops: "two extra pawns are often not enough — but THREE
+  // FILES OF SEPARATION often are. The count of pawns is the wrong variable;
+  // their separation and the blockade are." The record said the count was the
+  // wrong variable and this base reported neither variable.
+  const ocb = fen => {
+    const c = API.analyzeWithEducation({ fen }).concepts.find(x => x.id === 'opposite-coloured-bishops');
+    return c ? (c.because || [''])[0] : null;
+  };
+  ok('opposite bishops: widely separated pawns are named as the deciding variable',
+     /separation rather than the count is what decides these endings/
+       .test(String(ocb('4k3/8/8/3b4/8/2B5/P5P1/4K3 w - - 0 1'))),
+     String(ocb('4k3/8/8/3b4/8/2B5/P5P1/4K3 w - - 0 1')));
+  ok('opposite bishops: adjacent pawns are named as one bishop\'s work',
+     /one bishop covers that, and the count is the wrong variable/
+       .test(String(ocb('4k3/8/8/3b4/8/2B5/5PP1/4K3 w - - 0 1'))),
+     String(ocb('4k3/8/8/3b4/8/2B5/5PP1/4K3 w - - 0 1')));
+  ok('opposite bishops: the middlegame caveat still wins over the pawn count',
+     /not the drawish ending it is famous for/
+       .test(String(ocb('r2q1rk1/pp3ppp/4pn2/3b4/8/2B2N2/PP3PPP/R2QK2R w KQ - 0 1'))));
+}
+
 /* ---------- report ---------- */
 console.log(`\nAPI  PASS ${pass}   FAIL ${fails.length}`);
 for (const [n, d] of fails) console.log(`  FAIL  ${n}\n        ${d}`);

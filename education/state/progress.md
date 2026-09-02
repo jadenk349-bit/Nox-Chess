@@ -1652,3 +1652,28 @@ Worth noting what did *not* resolve. **Ftacnik–Roiz 2009**, the recorded
 confidence overclaim, has neither a locked structure nor an enemy knight on an
 outpost. The failure stands — which is the right outcome, because the guards were
 built from the record and not fitted to the position.
+
+
+## A second `implements` string that claimed something the code never did
+
+`hanging-pawns` has said *"no friendly pawn on either flanking file"* since the
+day it was written, and never tested it — so **b5-c5-d5 was reported as hanging
+pawns on c5 and d5**, a phalanx of three called a hanging pair. The record says
+the same thing as an `indicator_against`. Built: 7.2% → **3.4%**, and
+Fischer–Spassky 1972 game 6, this corpus's annotated instance, is untouched.
+
+Two of these in one day — the other was `semi-open-file` — which says the
+`implements` strings are themselves **claims that need checking**, not
+documentation.
+
+`opposite-coloured-bishops` says outright that *"the count of pawns is the wrong
+variable; their separation and the blockade are"* — and the base was reporting
+neither variable. Separation is now measured and named:
+
+> …White is a pawn up with the pawns 6 files apart, and **separation rather than
+> the count is what decides these endings**.
+
+> …White is a pawn up, but the pawns are only 1 file apart — **one bishop covers
+> that, and the count is the wrong variable**.
+
+The blockade half is not measurable and is left alone.
