@@ -2691,6 +2691,32 @@ const MOVE_BASED = [
       if (!tags.includes('discoveredAttack')) return null;
       const text = (moveInfo.motifs.find(m => m.tag === 'discoveredAttack') || {}).text || '';
       if (!/checks the king/.test(text)) return null;
+      // "The check is easily blocked or the checking piece captured" - this
+      // record's first indicator_against, and the whole value of a DISCOVERED
+      // check rather than an ordinary one is that the reply has to answer the
+      // check, which frees the moving piece. If the defender can meet it by
+      // blocking or by taking the checker, the moving piece is not free at all:
+      // the defence deals with the check and keeps its options.
+      //
+      // Measured on the move generator rather than guessed. Every legal reply
+      // is either a king move, a capture of the checking piece, or an
+      // interposition; if any reply of the second or third kind exists and
+      // survives, the discovery has bought nothing and the report is withheld.
+      const P0 = FEAT.page;
+      let repl = null, stAfter = null;
+      try { stAfter = P0.stateFromFEN(moveInfo.fenAfter); repl = P0.legalMoves(stAfter); }
+      catch (e) { repl = null; }
+      if (repl) {
+        const kingSq = P0.kingSq(stAfter, stAfter.turn);
+        const answered = repl.some(x => {
+          if (x.from === kingSq) return false;            // a king move is not an answer
+          let nx;
+          try { nx = P0.makeMove(stAfter, x); } catch (e) { return false; }
+          // and the answering unit has to survive doing it
+          return P0.see(nx, x.to, stAfter.turn === 'w' ? 'b' : 'w') <= 0;
+        });
+        if (answered) return null;
+      }
       return {
         confidence: 'high',
         because: [`${moveInfo.san || 'the move'} uncovers a check, so the piece that moved is free to go ` +
@@ -2812,7 +2838,11 @@ const MOVE_BASED = [
     implements: ("recognition.preconditions: a rook is given for a knight or bishop. The record's MAIN " +
                  "false-positive trap is that a rook given inside a forced mating line is a mating " +
                  "sacrifice with identical material, and no material test can see the difference - so the " +
-                 "caution travels with the claim and the confidence stays at the record's medium."),
+                 "caution travels with the claim and the confidence stays at the record's medium. " +
+                 "The first indicator_against - \"Open files exist for the rooks, so a rook is worth " +
+                 "more than the table says\" - is said in the SENTENCE rather than built as a guard, " +
+                 "because the exchange was given whether or not the position favours it and refusing " +
+                 "to name the move would be judging it instead."),
     run(before, after, moveInfo) {
       if (moveInfo.movedType !== 'R') return null;
       const P = FEAT.page;
@@ -2830,10 +2860,23 @@ const MOVE_BASED = [
         .map(a => nx.b[a] && nx.b[a].t).filter(Boolean)
         .sort((a, b) => ({ P: 1, N: 3, B: 3, R: 5, Q: 9, K: 99 }[a] - { P: 1, N: 3, B: 3, R: 5, Q: 9, K: 99 }[b]))[0];
       if (cheapest !== 'N' && cheapest !== 'B') return null;
+      // "Open files exist for the rooks, so a rook is worth more than the table
+      // says" - this record's first indicator_against, and it gets the third
+      // answer rather than a guard. Suppressing the report would be wrong: the
+      // exchange WAS given, and refusing to say so because the position looks
+      // unfavourable for it would be judging the move rather than naming it.
+      // What the condition earns is a clause, because "about a pawn and a half"
+      // is exactly the figure the condition disputes.
+      const files = (after.files && after.files.open) || [];
+      const openNote = files.length
+        ? ` — and there ${files.length === 1 ? 'is an open file' : 'are ' + files.length + ' open files'} ` +
+          `on the board, where a rook is worth more than the table says`
+        : '';
       return {
         confidence: 'medium',
         because: [`${moveInfo.san || 'the move'} puts a rook where a ${cheapest === 'N' ? 'knight' : 'bishop'} ` +
-                  `wins it, giving up about a pawn and a half of material for whatever the square is worth`],
+                  `wins it, giving up about a pawn and a half of material for whatever the square is worth` +
+                  openNote],
         slots: { square: moveInfo.movedTo || '' },
         subjects: [before.sideToMove],
       };

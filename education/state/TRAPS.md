@@ -13,7 +13,7 @@ implemented; that is a reading, and doing it is the work. What it can do is
 stop the list being rediscovered from scratch each time — and every one of
 the defects listed in the tool's header was unread before it was looked at.
 
-**Of 275 stated conditions (traps and indicators-against): 140 enforced in the matcher, 19 in Layer 3, 75 argued on the record to be unbuildable or already honoured elsewhere, 41 unread.**
+**Of 275 stated conditions (traps and indicators-against): 142 enforced in the matcher, 19 in Layer 3, 75 argued on the record to be unbuildable or already honoured elsewhere, 39 unread.**
 
 ONE CAVEAT ABOUT `indicators_against`, and it is not a technicality. For a
 concept naming an ASSET — an open file, an outpost, a passed pawn — they are
@@ -325,7 +325,7 @@ shared file was added to the search. The test is quotation for that reason.
 - [noted] *(indicator against)* The crossed or destination square is attacked
 ## discovered-check
 
-- [**unread**] *(indicator against)* The check is easily blocked or the checking piece captured
+- [cited] *(indicator against)* The check is easily blocked or the checking piece captured
 - [**unread**] *(indicator against)* The moving piece has no useful destination
 ## smothered-mate
 
@@ -345,7 +345,7 @@ shared file was added to the search. The test is quotation for that reason.
 - [cited] THE MAIN ONE: a rook given up inside a forced mating line is a mating sacrifice, not a positional exchange sacrifice, even though the material given is identical. The engine test on puzzle mi-bb512d9713 in this record is exactly that case — tagged exchangeSacrifice, actually mate in 2.
 - [noted] Detecting 'rook for minor piece' is mechanical; deciding it was POSITIONAL requires that no forced return exists, which the material test cannot see.
 - [noted] In an open position with files for the rooks, the same trade can simply be bad.
-- [**unread**] *(indicator against)* Open files exist for the rooks, so a rook is worth more than the table says
+- [cited] *(indicator against)* Open files exist for the rooks, so a rook is worth more than the table says
 - [**unread**] *(indicator against)* The compensation is an attack that can be defused, rather than a static asset
 - [**unread**] *(indicator against)* The opponent can return the exchange to liquidate favourably
 - [**unread**] *(indicator against)* The position is simplifying and no asset survives
