@@ -117,7 +117,24 @@
     "conflicts": []
   },
   "examples": [],
-  "counterexamples": [],
+  "counterexamples": [
+    {
+      "fen": "8/8/4k3/8/4N3/8/4K3/8 w - - 0 1",
+      "note": "Registered false-positive case `a-knight-cannot-lose-a-tempo`, kept on the record as well as in tests/false_positive_cases.json so that the concept carries its own negative evidence. THE SURFACE PATTERN IS PRESENT: Two kings and a knight in an endgame, with the side to move wanting to hand the move back. Triangulation is the standard way to do that, and the knight looks like a piece with spare moves to make. WHY IT IS NOT THE CONCEPT: A knight cannot lose a single tempo: every knight move changes the colour of the square it stands on, so returning to the same square always takes an even number of moves. Triangulation is precisely the technique of reaching the same position with the OTHER side to move, and a knight can never contribute one. WHAT THE SYSTEM DOES: The API does not report triangulation. Syzygy: 3 pieces, draw, dtz 0 — the position is drawn whoever moves, so there is no tempo worth losing in it either. The geometric fact is the interesting half and it is not evaluative at all: a king triangulates because it can reach a square in two moves or three, and a knight's parity forbids the equivalent. This is why the technique belongs to king-and-pawn endings and to bishops, and why a knight ending is the standard example of a position where zugzwang cannot be manufactured.",
+      "origin_kind": "constructed-test",
+      "concept_role": "negative",
+      "tablebase": {
+        "source": "Lichess tablebase (Syzygy, 7-piece)",
+        "pieces": 3,
+        "wdl": "draw",
+        "dtz": 0,
+        "dtm": 0,
+        "category": "draw",
+        "note": "PROVEN DRAW, dtz 0. The position is drawn whoever moves, so there is no tempo worth losing in it - which is the second half of why triangulation does not apply. The first half is geometric and not evaluative at all: every knight move changes square colour, so a knight can never return to its square in an odd number of moves."
+      },
+      "false_positive_case": "a-knight-cannot-lose-a-tempo"
+    }
+  ],
   "ambiguous_examples": [
     {
       "fen": "8/1p1k4/8/1PPK4/8/8/8/8 w - - 0 1",

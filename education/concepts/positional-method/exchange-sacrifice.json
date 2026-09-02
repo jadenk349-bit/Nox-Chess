@@ -156,7 +156,16 @@
       "side_to_move_benefits": "black"
     }
   ],
-  "counterexamples": [],
+  "counterexamples": [
+    {
+      "fen": "3r2k1/5ppp/8/3n4/8/8/5PPP/3RR1K1 w - - 0 1",
+      "move_uci": "d1d5",
+      "note": "Registered false-positive case `a-rook-given-inside-a-mate`, kept on the record as well as in tests/false_positive_cases.json so that the concept carries its own negative evidence. THE SURFACE PATTERN IS PRESENT: Rxd5 hands over a rook for a knight. That is the material transaction the concept names, and it is available and correct. WHY IT IS NOT THE CONCEPT: This record's MAIN trap, in its own words: \"a rook given up inside a forced mating line is a mating sacrifice, not a positional exchange sacrifice, even though the material given is identical.\" The point of Rxd5 is not a long-term asset — it is that the rook on d8 cannot recapture, because Re8 would then be mate. WHAT THE SYSTEM DOES: The API does not report exchange-sacrifice. It reports back-rank-mate, hanging-piece and sacrifice, which between them describe what is actually happening. Stockfish 18 at depth 22 says +6.73 and its own line is Rxd5 followed by ...Rb8 — Black DECLINES the recapture and is simply a knight down. This position is `overloading`'s positive example, and the two records reading the same board differently is the point: what the exchange record would have to claim is that a rook was invested in a position, and what happened is that a rook was never taken.",
+      "origin_kind": "constructed-test",
+      "concept_role": "negative",
+      "false_positive_case": "a-rook-given-inside-a-mate"
+    }
+  ],
   "ambiguous_examples": [
     {
       "fen": "4q2k/N5p1/5p2/1Q1p3P/2pPr3/2P2pB1/8/1B3KRR b - - 4 50",

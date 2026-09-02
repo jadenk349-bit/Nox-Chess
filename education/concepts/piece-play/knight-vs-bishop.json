@@ -150,7 +150,15 @@
       }
     }
   ],
-  "counterexamples": [],
+  "counterexamples": [
+    {
+      "fen": "6k1/5pbp/6p1/8/8/5N2/5PPP/6K1 w - - 0 1",
+      "note": "Registered false-positive case `all-the-pawns-on-one-wing`, kept on the record as well as in tests/false_positive_cases.json so that the concept carries its own negative evidence. THE SURFACE PATTERN IS PRESENT: A minor-piece ending with no pawns on the queenside at all. 'Bishops are better in the endgame' is the first thing most players learn, and there is nothing here to complicate it. WHY IT IS NOT THE CONCEPT: This record's second trap says the opposite is true in this exact structure: \"Pawns on one side only REVERSES the usual open-position reasoning — the knight is stronger there, which surprises people who have learnt 'bishops are better in the endgame'.\" With one wing to defend, the bishop's range buys nothing and the knight's ability to reach both colours buys everything. WHAT THE SYSTEM DOES: The API does not assert that either piece is better here, and this record has no matcher for exactly the reason its first trap gives: \"There is no default answer. Asserting the bishop is better without naming the structural reason is exactly the claim GM Studer says has no evidence behind it.\" Stockfish 18 at depth 24 says 0.00 — dead level, which is the honest reading and is itself the evidence against the folk rule: if bishops were simply better in endgames, three pawns each and a bishop against a knight would not evaluate to zero.",
+      "origin_kind": "constructed-test",
+      "concept_role": "negative",
+      "false_positive_case": "all-the-pawns-on-one-wing"
+    }
+  ],
   "ambiguous_examples": [],
   "explanations": {
     "by_level": {

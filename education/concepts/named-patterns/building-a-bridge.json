@@ -136,7 +136,24 @@
       }
     }
   ],
-  "counterexamples": [],
+  "counterexamples": [
+    {
+      "fen": "K7/P1k5/8/8/8/8/r7/5R2 w - - 0 1",
+      "note": "Registered false-positive case `the-bridge-needs-a-file-on-each-side`, kept on the record as well as in tests/false_positive_cases.json so that the concept carries its own negative evidence. THE SURFACE PATTERN IS PRESENT: A pawn one square from queening, the king in front of it, the enemy rook checking from behind, and a rook ready to come to the fourth rank. Every ingredient of the bridge is on the board. WHY IT IS NOT THE CONCEPT: The bridge is built by putting the rook on the fourth rank and then interposing it on the file BESIDE the pawn once the king walks out. A rook pawn has no file on one side, so there is nowhere to interpose and nowhere for the king to walk to. WHAT THE SYSTEM DOES: PROVEN DRAW, dtz 0. This record's positive example is the same position with a knight pawn and is a PROVEN WIN in 41 whose first move is Rd1+ — the check that starts the bridge. The two boards differ by the file of one pawn and the file of one rook. A technique record is a claim that a position is winnable BY A METHOD, so the pair it needs is one where the method is unavailable rather than one where the material is different, and this is that pair.",
+      "origin_kind": "constructed-test",
+      "concept_role": "negative",
+      "tablebase": {
+        "source": "Lichess tablebase (Syzygy, 7-piece)",
+        "pieces": 5,
+        "wdl": "draw",
+        "dtz": 0,
+        "dtm": 0,
+        "category": "draw",
+        "note": "PROVEN DRAW, dtz 0, against this record's positive example - the same position with a knight pawn - at a PROVEN WIN in 41. The two boards differ by the file of one pawn."
+      },
+      "false_positive_case": "the-bridge-needs-a-file-on-each-side"
+    }
+  ],
   "ambiguous_examples": [],
   "explanations": {
     "by_level": {
