@@ -128,7 +128,15 @@
       }
     }
   ],
-  "counterexamples": [],
+  "counterexamples": [
+    {
+      "fen": "4k3/pp4pp/3p4/2pPp3/2P1P3/8/PP4PP/4K3 w - - 0 1",
+      "note": "Registered false-positive case `a-middlegame-principle-with-no-middlegame`, kept on the record as well as in tests/false_positive_cases.json so that the concept carries its own negative evidence. THE SURFACE PATTERN IS PRESENT: A quiet position with no checks, no captures and nothing hanging — exactly the conditions under which this record's principles apply, and the state in which 'improve the piece doing least' is the standard advice. WHY IT IS NOT THE CONCEPT: There are no pieces. Every white and black man is a pawn or a king, the structure is rammed shut on every file, and no plan of any kind is available to either side. The principles on this record are about choosing between candidate moves in a position with pieces in it; a position with none is quiet in the way an empty room is quiet. WHAT THE SYSTEM DOES: The API reports nothing at all here, and the same position is registered against `restraint`, `prophylaxis` and `planning` for the same reason — each is a claim about what a move is FOR, and there is nothing for a move to be for. Stockfish 18: 0.00, with both kings walking about on the kingside. Four records now share this board, which makes it the most-reused negative in the base and, for that reason, worth stating plainly: a position where nothing is happening is not evidence that a concept is subtle, it is evidence that the concept needs something to be happening.",
+      "origin_kind": "constructed-test",
+      "concept_role": "negative",
+      "false_positive_case": "a-middlegame-principle-with-no-middlegame"
+    }
+  ],
   "ambiguous_examples": [
     {
       "fen": "r1bq1rk1/pp3ppp/2n5/3Np3/4P3/8/PP3PPP/R1BQ1RK1 w - - 0 1",

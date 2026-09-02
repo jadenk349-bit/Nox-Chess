@@ -1032,6 +1032,46 @@
       "status": "resolved",
       "evidence": "feature-detector + engine",
       "resolution": "The API does not report a desperado. This record has no matcher and its limitations say why: 'cannot be saved' is a claim about every legal move the piece has and about what happens after each, which is a search rather than a static test. What a static test WOULD find here is a piece under attack making a capture, which is the surface pattern and is not the concept. Stockfish: 0.00 — the capture is correct and wins nothing, because king and bishop against king is drawn. This record's positive example is a rook that genuinely cannot be saved and is worth 748 centipawns over the alternative; the difference between the two positions is whether the piece had somewhere to go."
+    },
+    {
+      "id": "philidor-without-the-philidor-rook",
+      "concept": "philidor-position",
+      "surface_pattern": "Rook and pawn against rook, the pawn on the sixth, the attacking king in front of it, the defending king directly opposing on the queening file. Every visible ingredient of the Philidor defence is here.",
+      "why_not": "The defending rook is on the seventh rank, in front of the pawn. Philidor's method is that the rook holds the rank in FRONT of the pawn only until the pawn reaches the sixth, and then drops to the eighth to check from behind. The pawn has reached the sixth and the rook has not dropped back, so the defence is not set up — and by then it is too late to set it up.",
+      "fen": "4k3/1r6/4P3/4K3/8/8/8/R7 w - - 0 1",
+      "status": "resolved",
+      "evidence": "feature-detector + tablebase",
+      "resolution": "PROVEN WIN in 29, dtz 5, best move Kf6. The API does not report the Philidor position. This is the case this record has been missing: four earlier constructions with the pawon on the fourth rank all came back DRAWN, because there the defence holds from almost anywhere, and that finding is registered as this record's OPEN case. It is a different claim from this one. The open case asks for a position where the third-rank defence FAILS; this one shows a position where the defence is ABSENT and the ending is lost, which establishes that the method is necessary rather than that it is breakable."
+    },
+    {
+      "id": "knights-with-no-pawns",
+      "concept": "knight-endgames",
+      "surface_pattern": "Knight against knight with two kings. By material this is a knight ending, and it is the only kind of position the phrase literally describes.",
+      "why_not": "Botvinnik's formula is that 'a knight ending is really a pawn ending', and everything this record contains is about how that transfers: the active king, the outside passed pawn, the breakthrough, zugzwang. With no pawns on the board there is no pawn ending for the knight ending to be like, so the concept has no content here rather than being wrong.",
+      "fen": "8/8/8/8/8/1k1n4/8/1K1N4 w - - 0 1",
+      "status": "resolved",
+      "evidence": "feature-detector + tablebase",
+      "resolution": "PROVEN DRAW, dtz 0. The API reports `opposition` at high confidence — the kings are one square apart in an endgame — and says nothing about knight endings, which is the right pair of answers. The interesting half is what the concept would have to say if it fired: every technique on this record depends on a pawn existing, and a system that reported 'knight ending' here would be naming the material rather than the ending."
+    },
+    {
+      "id": "the-same-kinds-of-material-on-both-sides",
+      "concept": "mixed-piece-endgames",
+      "surface_pattern": "A rook and a knight each, kings on the board, no pawns. Four pieces, two kinds, and an ending that is neither a pure rook ending nor a pure knight ending.",
+      "why_not": "This record's subject is endings where 'the two sides hold DIFFERENT kinds of material — rook against two minors, queen against rook and pieces, bishop against knight'. Here both sides hold the same kinds. There is no exchange-rate question to get wrong, which is the whole thing the record is about: the point count becomes unreliable exactly where the kinds differ.",
+      "fen": "r3k3/8/4n3/8/8/4N3/8/4K2R w - - 0 1",
+      "status": "resolved",
+      "evidence": "feature-detector + tablebase",
+      "resolution": "PROVEN DRAW, dtz 0, best move Nd1. The API reports `open-file` and nothing else. The case is registered because 'mixed' is a word about the RELATION between two armies rather than about how many kinds of piece are present, and a detector counting piece types on a board would get this backwards — it would see two kinds and call the ending mixed, when what makes an ending mixed is the two sides holding different ones."
+    },
+    {
+      "id": "a-middlegame-principle-with-no-middlegame",
+      "concept": "middlegame-principles",
+      "surface_pattern": "A quiet position with no checks, no captures and nothing hanging — exactly the conditions under which this record's principles apply, and the state in which 'improve the piece doing least' is the standard advice.",
+      "why_not": "There are no pieces. Every white and black man is a pawn or a king, the structure is rammed shut on every file, and no plan of any kind is available to either side. The principles on this record are about choosing between candidate moves in a position with pieces in it; a position with none is quiet in the way an empty room is quiet.",
+      "fen": "4k3/pp4pp/3p4/2pPp3/2P1P3/8/PP4PP/4K3 w - - 0 1",
+      "status": "resolved",
+      "evidence": "feature-detector + engine",
+      "resolution": "The API reports nothing at all here, and the same position is registered against `restraint`, `prophylaxis` and `planning` for the same reason — each is a claim about what a move is FOR, and there is nothing for a move to be for. Stockfish 18: 0.00, with both kings walking about on the kingside. Four records now share this board, which makes it the most-reused negative in the base and, for that reason, worth stating plainly: a position where nothing is happening is not evidence that a concept is subtle, it is evidence that the concept needs something to be happening."
     }
   ],
   "last_updated": "2026-09-01"

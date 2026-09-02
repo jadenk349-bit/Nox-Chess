@@ -152,7 +152,24 @@
       }
     }
   ],
-  "counterexamples": [],
+  "counterexamples": [
+    {
+      "fen": "4k3/1r6/4P3/4K3/8/8/8/R7 w - - 0 1",
+      "note": "Registered false-positive case `philidor-without-the-philidor-rook`, kept on the record as well as in tests/false_positive_cases.json so that the concept carries its own negative evidence. THE SURFACE PATTERN IS PRESENT: Rook and pawn against rook, the pawn on the sixth, the attacking king in front of it, the defending king directly opposing on the queening file. Every visible ingredient of the Philidor defence is here. WHY IT IS NOT THE CONCEPT: The defending rook is on the seventh rank, in front of the pawn. Philidor's method is that the rook holds the rank in FRONT of the pawn only until the pawn reaches the sixth, and then drops to the eighth to check from behind. The pawn has reached the sixth and the rook has not dropped back, so the defence is not set up — and by then it is too late to set it up. WHAT THE SYSTEM DOES: PROVEN WIN in 29, dtz 5, best move Kf6. The API does not report the Philidor position. This is the case this record has been missing: four earlier constructions with the pawon on the fourth rank all came back DRAWN, because there the defence holds from almost anywhere, and that finding is registered as this record's OPEN case. It is a different claim from this one. The open case asks for a position where the third-rank defence FAILS; this one shows a position where the defence is ABSENT and the ending is lost, which establishes that the method is necessary rather than that it is breakable.",
+      "origin_kind": "constructed-test",
+      "concept_role": "negative",
+      "tablebase": {
+        "source": "Lichess tablebase (Syzygy, 7-piece)",
+        "pieces": 5,
+        "wdl": "win",
+        "dtz": 5,
+        "dtm": 29,
+        "category": "win",
+        "note": "PROVEN WIN in 29, best move Kf6. The defending rook is on the seventh rather than the eighth and the pawn has already reached the sixth, so the Philidor defence is not set up and cannot be. This record's OPEN case is the complementary and still-unbuilt claim: a position where the defence IS set up and fails."
+      },
+      "false_positive_case": "philidor-without-the-philidor-rook"
+    }
+  ],
   "ambiguous_examples": [
     {
       "fen": "8/8/4k3/4p3/8/R7/1r6/4K3 w - - 0 1",

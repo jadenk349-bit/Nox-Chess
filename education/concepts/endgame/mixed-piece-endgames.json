@@ -134,7 +134,24 @@
       }
     }
   ],
-  "counterexamples": [],
+  "counterexamples": [
+    {
+      "fen": "r3k3/8/4n3/8/8/4N3/8/4K2R w - - 0 1",
+      "note": "Registered false-positive case `the-same-kinds-of-material-on-both-sides`, kept on the record as well as in tests/false_positive_cases.json so that the concept carries its own negative evidence. THE SURFACE PATTERN IS PRESENT: A rook and a knight each, kings on the board, no pawns. Four pieces, two kinds, and an ending that is neither a pure rook ending nor a pure knight ending. WHY IT IS NOT THE CONCEPT: This record's subject is endings where 'the two sides hold DIFFERENT kinds of material — rook against two minors, queen against rook and pieces, bishop against knight'. Here both sides hold the same kinds. There is no exchange-rate question to get wrong, which is the whole thing the record is about: the point count becomes unreliable exactly where the kinds differ. WHAT THE SYSTEM DOES: PROVEN DRAW, dtz 0, best move Nd1. The API reports `open-file` and nothing else. The case is registered because 'mixed' is a word about the RELATION between two armies rather than about how many kinds of piece are present, and a detector counting piece types on a board would get this backwards — it would see two kinds and call the ending mixed, when what makes an ending mixed is the two sides holding different ones.",
+      "origin_kind": "constructed-test",
+      "concept_role": "negative",
+      "tablebase": {
+        "source": "Lichess tablebase (Syzygy, 7-piece)",
+        "pieces": 5,
+        "wdl": "draw",
+        "dtz": 0,
+        "dtm": 0,
+        "category": "draw",
+        "note": "PROVEN DRAW, best move Nd1. Both sides hold the same kinds of material, so there is no exchange-rate question to get wrong - which is the only thing this record is about."
+      },
+      "false_positive_case": "the-same-kinds-of-material-on-both-sides"
+    }
+  ],
   "ambiguous_examples": [
     {
       "fen": "r2k4/8/3K4/8/8/8/4B3/3R4 w - - 0 1",
