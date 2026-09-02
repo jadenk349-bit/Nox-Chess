@@ -3270,11 +3270,43 @@ const MOVE_BASED = [
         ? ` — and there ${files.length === 1 ? 'is an open file' : 'are ' + files.length + ' open files'} ` +
           `on the board, where a rook is worth more than the table says`
         : '';
+      // "The compensation is an attack that can be defused, rather than a
+      // static asset" - the record's second indicator_against, and it gets the
+      // third answer too. Whether an attack can be defused is a search; whether
+      // there IS a static asset is a board fact, and it is the half that
+      // decides how the reader should weigh the move. So the asset is looked
+      // for and named, and when there is none the sentence says the
+      // compensation is an attack and what that means.
+      const us = before.sideToMove;
+      const assets = [];
+      const dbl = a => new Set((a.pawns[them].doubled || []));
+      if (dbl(after).size > dbl(before).size) assets.push(`it doubles ${side(before, them)}'s pawns`);
+      if (after.pieces[us].bishopPair && !before.pieces[us].bishopPair) assets.push('it wins the bishop pair');
+      if ((after.pawns[us].passed || []).length > (before.pawns[us].passed || []).length) {
+        assets.push('it creates a passed pawn');
+      }
+      if ((after.holes[them] || []).length > (before.holes[them] || []).length) {
+        assets.push(`it leaves ${side(before, them)} a permanent hole`);
+      }
+      const assetNote = assets.length
+        ? ` — and the compensation is static: ${assets.join(', and ')}, which cannot be defused`
+        : ` — and no static asset is visible here, so the compensation is an attack, and an attack ` +
+          `can be defused in a way a structural weakness cannot`;
+      // "The position is simplifying and no asset survives" - the third, and
+      // the one board fact behind it is how much is left. An exchange sacrifice
+      // for a long-term square is a middlegame investment; with the pieces
+      // nearly gone there is no middlegame left to spend it in.
+      const left = c => { const m = after.material[c].counts; return m.N + m.B + m.R + m.Q; };
+      const thin = left(us) + left(them) <= 6;
+      const thinNote = thin && !assets.length
+        ? `. There is little left on the board to use it with, which is the position the record warns ` +
+          `about: simplifying, with no asset surviving into the ending`
+        : '';
       return {
         confidence: 'medium',
         because: [`${moveInfo.san || 'the move'} puts a rook where a ${cheapest === 'N' ? 'knight' : 'bishop'} ` +
                   `wins it, giving up about a pawn and a half of material for whatever the square is worth` +
-                  openNote],
+                  openNote + assetNote + thinNote],
         slots: { square: moveInfo.movedTo || '' },
         subjects: [before.sideToMove],
       };
