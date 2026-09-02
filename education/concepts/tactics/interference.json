@@ -67,8 +67,8 @@
   ],
   "limitations": [
     "TYPICAL_CONFIDENCE RAISED medium -> high, 2026-09-02, and the reason is the schema's own definition of the field: 'how confidently this concept can normally be asserted ONCE ITS PRECONDITIONS HOLD'. This concept's recognition is MECHANICAL and its knowledge type already carries a high ceiling, so once the preconditions hold there is nothing left to be uncertain about - a stalemate is a stalemate, and a fork this base reports is one findMotifs() found, which ARCHITECTURE.md makes the authority and forbids second-guessing. 'Medium' was the default across 32 rule and motif records regardless of detectability, and it was found by measuring what the API reports against what each record permits: twelve concepts were reporting ABOVE their own record. The fix was to make each record its own ceiling in cap(), which then required the records that were wrong to be corrected rather than silently overruled.",
-    "NO AMBIGUOUS EXAMPLE, and the reason is the order of the work rather than a shortage of positions. This record has no POSITIVE example either, and an ambiguous example is a position where the concept is genuinely present and what to conclude from it is unclear - which cannot be written before there is an agreed instance of the concept being present at all. The four motifs in this base that lack a positive - `clearance`, `decoy`, `deflection`, `interference` - lack it for reasons written on each record, and the ambiguous rung waits on that. Writing one first would be asserting a doubtful instance of something this base has not yet shown a clear instance of. UPDATE: the positive example now exists - 28...Nf5+ in the position above, verified as the only move by 4.43 pawns - so the reason given here no longer holds and the ambiguous example is simply outstanding work rather than blocked work.",
-    "NO MASTER-GAME POSITION YET. This concept has no matcher, so the scan that supplied master positions to eleven other records - five famous games replayed and analysed position by position - could not nominate one here: the API never reports the concept, so there is nothing for a scan to find. Identifying an instance in a master game means reading the game, which is research rather than tooling, and it has not been done. Recorded rather than filled."
+    "NO AMBIGUOUS EXAMPLE, and the reason is the order of the work rather than a shortage of positions. This record has no POSITIVE example either, and an ambiguous example is a position where the concept is genuinely present and what to conclude from it is unclear - which cannot be written before there is an agreed instance of the concept being present at all. The four motifs in this base that lack a positive - `clearance`, `decoy`, `deflection`, `interference` - lack it for reasons written on each record, and the ambiguous rung waits on that. Writing one first would be asserting a doubtful instance of something this base has not yet shown a clear instance of. UPDATE: the positive example now exists - 28...Nf5+ in the position above, verified as the only move by 4.43 pawns - so the reason given here no longer holds and the ambiguous example is simply outstanding work rather than blocked work. RESOLVED: Alekhine-Capablanca, World Championship 1927 game 13, 39...c4 - the interference on the board, 0.00 at depth 30, and not among the engine's three choices.",
+    "NO MASTER-GAME POSITION YET. This concept has no matcher, so the scan that supplied master positions to eleven other records - five famous games replayed and analysed position by position - could not nominate one here: the API never reports the concept, so there is nothing for a scan to find. Identifying an instance in a master game means reading the game, which is research rather than tooling, and it has not been done. Recorded rather than filled. RESOLVED, and by the position that also resolves the ambiguous rung: Alekhine-Capablanca, World Championship 1927 game 13, 39...c4. The reason recorded here was right about the scan and wrong about the games - a concept with no detector cannot be nominated by a scan that reads the API, but the geometry is decidable without one, and tools/mine_master_motifs.js asks it of 2.8 million positions from replayed master games directly."
   ],
   "misconceptions": [],
   "relationships": {
@@ -153,7 +153,51 @@
       }
     }
   ],
-  "ambiguous_examples": [],
+  "ambiguous_examples": [
+    {
+      "fen": "5r2/p3k3/P7/2p5/r7/2KBP3/1P4RP/8 b - - 2 39",
+      "move": "c4",
+      "move_uci": "c5c4",
+      "origin_kind": "historical-game",
+      "game": "Alekhine-Capablanca, World Championship 1927 (game 13)",
+      "concept_role": "ambiguous",
+      "note": "THE GEOMETRY WITHOUT THE VERDICT, from a World Championship game between the two players this base quotes more than any others. 39...c4 puts the pawn between White's bishop on d3 and the a6 pawn it defends - the interference is on the board and it is exactly the shape the positive example on this record has.\n\nAnd it settles nothing. Stockfish 18 at depth 30 with three lines gives 0.00 for all three, and c4 is not among them: the engine's choices are 39...Rh4, 39...Rf3 and 39...Ra1, all drawing. The rook ending is a draw with the interference and a draw without it.\n\nThis is what makes it worth keeping rather than a failure to find something better. A reader who has learned interference from the positive example - a knight interposed on f5 that is the only move in a lost position - has learned a pattern that WINS, and the next thing they need is a position where the same pattern is present and wins nothing. The motif is a geometric fact about a line. Whether it is worth anything is a separate question about the position, and this base has no business collapsing the two.\n\nPROVENANCE. Found by the same geometric scan of the shipped puzzle corpus and of replayed master games. The move list replayed legally through the page's own move generator; no annotator read.",
+      "engine": {
+        "engine_id": "Stockfish 18",
+        "test_level": 3,
+        "depth": 30,
+        "multipv": 3,
+        "best_move": "a4h4",
+        "eval_cp": 0,
+        "mate_in": null,
+        "pv": [
+          "a4h4",
+          "d3c4",
+          "h4h7",
+          "g2g5",
+          "f8f3",
+          "g5c5",
+          "f3e3",
+          "c3b4",
+          "e7d6",
+          "c5d5"
+        ],
+        "alternatives": [
+          {
+            "move": "f8f3",
+            "eval_cp": 0
+          },
+          {
+            "move": "a4a1",
+            "eval_cp": 0
+          }
+        ],
+        "margin_cp": 0,
+        "verdict": "ambiguous",
+        "verdict_note": "0.00 across all three lines at depth 30, and the move that performs the interference is not one of them. The geometry is present and decides nothing."
+      }
+    }
+  ],
   "explanations": {
     "by_level": {
       "beginner": "This move stands right in the way of the piece that was defending, cutting it off.",
