@@ -13,7 +13,7 @@ implemented; that is a reading, and doing it is the work. What it can do is
 stop the list being rediscovered from scratch each time — and every one of
 the defects listed in the tool's header was unread before it was looked at.
 
-**Of 275 stated conditions (traps and indicators-against): 170 enforced in the matcher, 21 in Layer 3, 74 argued on the record to be unbuildable or already honoured elsewhere, 10 unread.**
+**Of 275 stated conditions (traps and indicators-against): 176 enforced in the matcher, 21 in Layer 3, 75 argued on the record to be unbuildable or already honoured elsewhere, 3 unread.**
 
 ONE CAVEAT ABOUT `indicators_against`, and it is not a technicality. For a
 concept naming an ASSET — an open file, an outpost, a passed pawn — they are
@@ -69,7 +69,7 @@ shared file was added to the search. The test is quotation for that reason.
 - [cited] A pawn whose advance square is occupied by an enemy pawn is RAMMED. It cannot advance, but not for the reason the concept is about, and the square in front of it is not a hole - an enemy pawn is standing on it.
 - [cited] *(indicator against)* It can advance at a moment of its choosing, so the defect is temporary
 - [cited] *(indicator against)* No enemy rook can reach the file
-- [**unread**] *(indicator against)* It is compensated by space or by the activity its structure enables
+- [cited] *(indicator against)* It is compensated by space or by the activity its structure enables
 - [layer 3] *(indicator against)* The square in front is covered by a piece the opponent cannot dislodge
 ## open-file
 
@@ -117,7 +117,7 @@ shared file was added to the search. The test is quotation for that reason.
 - [cited] *(indicator against)* A locked pawn structure with no way to open it
 - [cited] *(indicator against)* The opponent has a knight on a secure outpost
 - [cited] *(indicator against)* One of the bishops is shut in by its own pawns
-- [**unread**] *(indicator against)* The opponent can force the trade of one bishop
+- [cited] *(indicator against)* The opponent can force the trade of one bishop
 ## hanging-pawns
 
 - [layer 3] Hanging pawns are not automatically weak. The structure is dynamic, and the same pair that loses one game wins the next depending on where the pieces are.
@@ -134,7 +134,7 @@ shared file was added to the search. The test is quotation for that reason.
 - [noted] A pawn that is structurally weak can be the position's KEY DEFENSIVE ASSET, and no pawn-skeleton test tells the two apart. Shirov-Kramnik, Linares 2000, move 20: this base lists Black's f4 among the weaknesses White should play against, and Jan Markos calls the same pawn, together with b4, the cage that 'guards all the roads to d5'. Both readings follow from the skeleton and only one is true of the position.
 - [cited] *(indicator against)* The two targets are within two files of each other, so one defending king covers both
 - [cited] *(indicator against)* Opposite-coloured bishops with no breakthrough square - the defending bishop holds one colour complex regardless of how many targets exist
-- [**unread**] *(indicator against)* The defender can reach a known fortress
+- [cited] *(indicator against)* The defender can reach a known fortress
 - [noted] *(indicator against)* Opening the second front concedes counterplay, a passed pawn, or an open line towards the attacker's own king
 - [cited] *(indicator against)* The first weakness can be liquidated by a pawn break or a favourable exchange
 - [cited] *(indicator against)* The defending king already stands between the two targets
@@ -155,7 +155,7 @@ shared file was added to the search. The test is quotation for that reason.
 - [cited] Two extra pawns are often not enough — but three files of separation often are. The count of pawns is the wrong variable; their separation and the blockade are the right ones.
 - [cited] *(indicator against)* Queens or rooks remain — winning chances rise sharply, and in the middlegame the bishops are an ATTACKING asset
 - [cited] *(indicator against)* The extra pawns are separated by three files or more
-- [**unread**] *(indicator against)* The defender cannot establish a blockade on their bishop's colour
+- [cited] *(indicator against)* The defender cannot establish a blockade on their bishop's colour
 - [cited] *(indicator against)* The attacker's king can penetrate on the colour the defending bishop cannot cover
 ## rook-on-the-seventh
 
@@ -346,9 +346,9 @@ shared file was added to the search. The test is quotation for that reason.
 - [noted] Detecting 'rook for minor piece' is mechanical; deciding it was POSITIONAL requires that no forced return exists, which the material test cannot see.
 - [noted] In an open position with files for the rooks, the same trade can simply be bad.
 - [cited] *(indicator against)* Open files exist for the rooks, so a rook is worth more than the table says
-- [**unread**] *(indicator against)* The compensation is an attack that can be defused, rather than a static asset
-- [**unread**] *(indicator against)* The opponent can return the exchange to liquidate favourably
-- [**unread**] *(indicator against)* The position is simplifying and no asset survives
+- [cited] *(indicator against)* The compensation is an attack that can be defused, rather than a static asset
+- [noted] *(indicator against)* The opponent can return the exchange to liquidate favourably
+- [cited] *(indicator against)* The position is simplifying and no asset survives
 ## worst-placed-piece
 
 - [noted] The rule's precondition is the load-bearing part and is usually dropped in quotation. Anderssen says 'unless you can derive immediate advantage by an attack' and Makogonov says 'in positions where no other important matters need to be considered'. Without those, it is not the rule they stated.

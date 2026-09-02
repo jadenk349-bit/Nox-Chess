@@ -493,9 +493,26 @@ const STRUCTURAL = [
         if (real.length) hits.push({ c, sq: real });
       }
       if (!hits.length) return null;
+      // "It is compensated by space or by the activity its structure enables" -
+      // the record's last indicator_against, and the Sveshnikov's whole
+      // argument: the d6 pawn is backward, it is on a half-open file, White has
+      // a rook for it, and Black is fine because of what the structure bought.
+      // A caveat rather than a guard, because the pawn is backward either way
+      // and the compensation is what the reader has to weigh against it. Both
+      // halves are numbers Layer 3 already has.
+      const comp = h => {
+        const o = other(h.c);
+        const sp = f.activity.pawnSpace[h.c] - f.activity.pawnSpace[o];
+        const act = (f.activity.active[h.c] || 0) - (f.activity.active[o] || 0);
+        if (sp >= 2 && act >= 4) return 'space and piece activity';
+        if (sp >= 2) return 'space';
+        if (act >= 4) return 'the piece activity the structure enables';
+        return null;
+      };
       return {
         confidence: 'medium',
-        because: hits.map(h => `${side(f, h.c)}'s pawn on ${h.sq.join(', ')} cannot advance without being met by an enemy pawn, and no friendly pawn can support it from behind`),
+        because: hits.map(h => `${side(f, h.c)}'s pawn on ${h.sq.join(', ')} cannot advance without being met by an enemy pawn, and no friendly pawn can support it from behind` +
+          (comp(h) ? ` — though it is compensated here by ${comp(h)}, which is the argument for every backward pawn a strong player accepts on purpose` : '')),
         slots: { square: hits[0].sq[0] },
         subjects: hits.map(h => h.c),
       };
@@ -927,9 +944,33 @@ const STRUCTURAL = [
               subjects: [c],
             };
           }
+          // "The opponent can force the trade of one bishop" - the record's last
+          // indicator_against, and the one that ends the pair rather than
+          // devaluing it. FORCE is more than this can see: a forced trade means
+          // no square the bishop can go to escapes the same piece, which is a
+          // search. What IS visible is whether the trade is on offer - a knight
+          // or a same-coloured bishop attacking one of them - and the sentence
+          // says exactly that and no more, because "can be traded" and "must be
+          // traded" are different claims and only one of them is tested.
+          const offered = (f.pieces[c].bishopSquares || []).filter(bp => {
+            const i = sqIdx(bp.square);
+            let atk;
+            try { atk = FEAT.page.attackersOf(st, i, other(c)); } catch (e) { return false; }
+            return atk.some(j => {
+              const q = st.b[j];
+              if (!q) return false;
+              if (q.t === 'N') return true;
+              return q.t === 'B' && FEAT.isLight(j) === FEAT.isLight(i);
+            });
+          });
           return {
             confidence: 'high',
-            because: [`${side(f, c)} has both bishops and ${side(f, other(c))} does not`],
+            because: [`${side(f, c)} has both bishops and ${side(f, other(c))} does not` +
+                      (offered.length
+                        ? ` — though the bishop on ${offered[0].square} is attacked by a piece that can trade ` +
+                          `itself for it, and a pair with one bishop traded is not a pair. Whether the trade ` +
+                          `can be FORCED is a further question this does not answer`
+                        : '')],
             subjects: [c],
           };
         }
@@ -1022,6 +1063,34 @@ const STRUCTURAL = [
         // the count says, and the concept's own definition_long makes the same
         // point about the defending king covering both targets.
         if (f.pieces.oppositeColouredBishops) continue;
+        // ...and the OTHER half of that trap, which the record also states on
+        // its own as "The defender can reach a known FORTRESS". It is built for
+        // the one fortress that is decidable without an engine, and only for
+        // that one: the wrong rook pawn. King, bishop and rook pawns all on one
+        // file against a bare king is a draw when the bishop does not cover the
+        // promotion square, and it is a draw however many weaknesses anybody
+        // counts.
+        //
+        // Nothing wider is attempted, and the reason is on the `fortress`
+        // record: its detectability is `heuristic`, its precondition is "no path
+        // exists for the attacker to make progress", and its own first trap says
+        // a position that is merely HARD to break is not a fortress. A static
+        // test that claimed to recognise one in general would be claiming
+        // exactly what that record says cannot be claimed.
+        const wrongRookPawn = (() => {
+          const dm = f.material[other(c)].counts, am = f.material[c].counts;
+          if (dm.P || dm.N || dm.B || dm.R || dm.Q) return false;   // bare king defending
+          if (am.N || am.R || am.Q || am.B !== 1 || !am.P) return false;
+          const pf = new Set((f.pawns[c].files || []));
+          if (pf.size !== 1) return false;
+          const file = [...pf][0];
+          if (file !== 'a' && file !== 'h') return false;
+          const promo = file + (c === 'w' ? '8' : '1');
+          const bcol = ((f.pieces[c].bishopSquares || [])[0] || {}).colour;
+          const pc = ((8 - Number(promo[1])) + (promo.charCodeAt(0) - 97)) % 2 === 0 ? 'light' : 'dark';
+          return !!bcol && bcol !== pc;
+        })();
+        if (wrongRookPawn) continue;
         const mine = f.weakSpread[c] || { weak: [] };
         if (mine.weak.length > s.weak.length) continue;
         if (f.material[c].counts.R + f.material[c].counts.Q === 0) continue;
@@ -1157,6 +1226,37 @@ const STRUCTURAL = [
         const files = (f.pawns[ahead].files || []).map(x => x.charCodeAt(0));
         if (files.length >= 2) spread = Math.max(...files) - Math.min(...files);
       }
+      // "The defender cannot establish a blockade on their bishop's colour."
+      // The comment above once said the blockade is not measurable and left it
+      // alone. Half of it is measurable, and it is the classical half: a
+      // bishop blockades on ITS OWN colour, so the question is what colour the
+      // squares in front of the extra pawns are. A pawn whose stopping square
+      // the defending bishop can never stand on is a pawn that bishop cannot
+      // blockade. What is still not measurable is whether the defender can get
+      // there in time, or hold with the king instead - so the clause reports
+      // the colours and stops.
+      let blockade = '';
+      if (ahead) {
+        const def = other(ahead);
+        const db = (f.pieces[def].bishopSquares || [])[0];
+        if (db) {
+          const light = db.colour === 'light';
+          const stops = (f.pawns[ahead].squares || []).map(sq => {
+            const col = sq.charCodeAt(0) - 97;
+            const row = 8 - Number(sq[1]) + (ahead === 'w' ? -1 : 1);
+            return row < 0 || row > 7 ? null : ((row + col) % 2 === 0);
+          }).filter(x => x !== null);
+          const uncoverable = stops.filter(isLightSq => isLightSq !== light).length;
+          if (stops.length && uncoverable === stops.length) {
+            blockade = `. ${side(f, def)}'s bishop is on ${db.colour} squares and every one of ` +
+                       `${side(f, ahead)}'s pawns stops on the other colour, so there is no blockade for ` +
+                       `that bishop to establish`;
+          } else if (uncoverable === 0) {
+            blockade = `. Every one of ${side(f, ahead)}'s pawns stops on ${db.colour} squares, which is ` +
+                       `where ${side(f, def)}'s bishop lives — the blockade is exactly what it is for`;
+          }
+        }
+      }
       const tail = f.phase !== 'endgame' && heavy > 0
         ? ' — and with heavy pieces still on this is not the drawish ending it is famous for: the ' +
           'bishop on the attacking colour has no counterpart, which favours whoever is attacking'
@@ -1169,7 +1269,7 @@ const STRUCTURAL = [
             : '';
       return {
         confidence: 'high',
-        because: [line + tail],
+        because: [line + tail + blockade],
         subjects: ['w', 'b'],
       };
     },
