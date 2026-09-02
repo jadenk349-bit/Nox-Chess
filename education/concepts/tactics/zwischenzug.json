@@ -86,7 +86,7 @@
   "limitations": [
     "There is no matcher. Recognising a zwischenzug requires knowing what the EXPECTED move was, which is a claim about a line rather than about a position, and this base reports at the board.",
     "The example on this record was FOUND rather than constructed, by scanning the 788 shipped puzzles for a solution whose first move is not the recapture on the square just captured, where a recapture is available and the move played is a check. Fifteen positions match. The scan needs each puzzle's `prev` position to know what was just taken, which is the same field the puzzle generator added so that a turning point could be measured at all.",
-    "NO MASTER-GAME POSITION YET, and the search that failed is worth recording. Five famous games were replayed through this base's own move generator and scanned position by position with the API - the Opera Game, the Evergreen, the Immortal, the Game of the Century and Legall's Mate, 225 plies between them - and this concept was not reported in any of them. That is not evidence the motif is rare; it is evidence that the five games this base can currently verify do not contain a clean instance of it, and that adding one means adding a game rather than looking harder at these. tools/replay_game.js is the instrument: a move list that is wrong is refused rather than guessed at."
+    "NO MASTER-GAME POSITION YET, and the search that failed is worth recording. Five famous games were replayed through this base's own move generator and scanned position by position with the API - the Opera Game, the Evergreen, the Immortal, the Game of the Century and Legall's Mate, 225 plies between them - and this concept was not reported in any of them. That is not evidence the motif is rare; it is evidence that the five games this base can currently verify do not contain a clean instance of it, and that adding one means adding a game rather than looking harder at these. tools/replay_game.js is the instrument: a move list that is wrong is refused rather than guessed at. RESOLVED: Klasup-Tal, Latvian Championship 1952, 21...Nf2+, above."
   ],
   "misconceptions": [],
   "relationships": {
@@ -124,6 +124,50 @@
         "margin_cp": 240,
         "verdict": "supports",
         "verdict_note": "+4.37 for the in-between check against +1.97 for the immediate recapture fxe3 - 240 centipawns bought by move order alone, with the same material taken in both lines. That margin is what a zwischenzug IS, and it is the reason the concept has a name of its own rather than being filed under 'check'."
+      }
+    },
+    {
+      "fen": "r1b4k/pp2qBpp/1bp5/8/1P2nP2/PQ6/6PP/R1B2R1K b - - 0 21",
+      "move": "Nf2+",
+      "move_uci": "e4f2",
+      "origin_kind": "historical-game",
+      "game": "Klasup-Tal, Latvian Championship 1952",
+      "concept_role": "positive",
+      "side_to_move_benefits": "black",
+      "note": "THE SHAPE THE RECORD DESCRIBES, in a game, with the numbers to show what the move order is worth. White has just captured on f7 and Black's queen on e7 is the piece expected to recapture. 21...Nf2+ is played instead. The check has to be answered, the bishop on f7 is not going anywhere, and the position Black recaptures into is a different one.\n\nStockfish 18 at depth 28 with three lines: +7.00 for Nf2+, against +0.18 and +0.10 for the next two. **The in-between move is worth 682 centipawns**, which is the whole difference between a level position and a won one, and the two alternatives include recapturing.\n\nThe engine's line does not recapture at all - 22.Kg1 Qh4 - and that is faithful rather than awkward. The record says the recapture happens 'now under changed circumstances'; sometimes the circumstances change enough that it is no longer the move.\n\nHOW IT WAS FOUND, and what the finder does NOT claim. This concept's detectability is `human-only` and its own definition says it is 'a move-order idea rather than a geometric pattern, which is what makes it hard to see'. The test in tools/mine_master_motifs.js does not claim to find the idea; it finds the shape the idea lives in, and every candidate was read. The shape has three parts, all off the board: the opponent has just captured, we have a recapture available on that square, and instead we give a check elsewhere after which the recapture is STILL there against every reply. That last clause is the whole point - an in-between move that loses the recapture is not an in-between move, it is a different move.\n\nPROVENANCE. Replayed legally through the page's own move generator. `attributed_by` absent - no annotator read; this grounds the MASTER-GAME rung and not the human-grounded one.",
+      "engine": {
+        "engine_id": "Stockfish 18",
+        "test_level": 3,
+        "depth": 28,
+        "multipv": 3,
+        "best_move": "e4f2",
+        "eval_cp": 700,
+        "mate_in": null,
+        "pv": [
+          "e4f2",
+          "h1g1",
+          "e7h4",
+          "b3g3",
+          "f2e4",
+          "g3e3",
+          "h4f6",
+          "a1b1",
+          "b6e3",
+          "c1e3"
+        ],
+        "alternatives": [
+          {
+            "move": "c8f5",
+            "eval_cp": 18
+          },
+          {
+            "move": "e7h4",
+            "eval_cp": 10
+          }
+        ],
+        "margin_cp": 682,
+        "verdict": "supports",
+        "verdict_note": "+7.00 against +0.18 at depth 28. The move order is worth 682 centipawns, which is what this concept claims a move order can be worth and is rarely able to show."
       }
     }
   ],

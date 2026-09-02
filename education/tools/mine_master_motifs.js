@@ -231,6 +231,51 @@ const TESTS = {
     return null;
   },
 
+  // A ZWISCHENZUG. The record calls it "a move-order idea rather than a
+  // geometric pattern, which is what makes it hard to see", and its own
+  // detectability is `human-only` - so this test does not claim to find the
+  // idea. It finds the SHAPE the idea lives in, and every candidate has to be
+  // read.
+  //
+  // The shape has three parts and all three come off the board. The opponent
+  // has just captured; we have a recapture available on that square; and
+  // instead of playing it we play a CHECK somewhere else, after which the
+  // recapture is still there. That last clause is the whole point - an
+  // in-between move that loses the recapture is not an in-between move, it is a
+  // different move.
+  //
+  // `prev` is the position before the opponent's capture, which motifsOfLine
+  // does not carry, so this runs only where the replay hands over the previous
+  // move as well.
+  zwischenzug(st, mv, after, prev) {
+    if (!prev || !prev.mv || !prev.mv.cap) return null;      // they did not just capture
+    const sq = prev.mv.to;
+    const us = st.turn, them = other(us);
+    let ms;
+    try { ms = P.legalMoves(st); } catch (e) { return null; }
+    const recapture = ms.filter(x => x.to === sq && x.cap);
+    if (!recapture.length) return null;                      // nothing was expected of us
+    if (mv.to === sq) return null;                           // we played the expected move
+    if (!P.inCheck(after, them)) return null;                // the insertion has to be forcing
+    // ...and the recapture must survive the insertion. Every reply of theirs is
+    // to a check, so the square cannot run away - but the recapturING piece can
+    // be taken, and then there was never an in-between move to make.
+    let theirs;
+    try { theirs = P.legalMoves(after); } catch (e) { return null; }
+    if (!theirs.length) return null;                         // mate is its own motif
+    const stillThere = theirs.every(y => {
+      let ny;
+      try { ny = P.makeMove(after, y); } catch (e) { return false; }
+      if (!ny.b[sq]) return false;
+      let mine;
+      try { mine = P.legalMoves(ny); } catch (e) { return false; }
+      return mine.some(z => z.to === sq && z.cap);
+    });
+    if (!stillThere) return null;
+    return { note: 'they captured on ' + nameOf(sq) + '; instead of recapturing, ' +
+                   nameOf(mv.from) + '-' + nameOf(mv.to) + ' checks first, and the recapture keeps' };
+  },
+
   // CLEARANCE, in the record's own words: "the moving piece going somewhere
   // pointless or losing itself - the value is entirely in the vacated square".
   // So it must be lost where it lands, it must not be a check (that is a
@@ -318,6 +363,7 @@ for (const file of files) {
     }
     if (!ok) { nBad++; continue; }
     nGames++;
+    let prev = null;
     for (const p of positions) {
       nPly++;
       const after = P.makeMove(p.st, p.mv);
@@ -326,7 +372,7 @@ for (const file of files) {
         if ((found[id] || []).length >= limit) continue;
         if ((fileCount[id] || 0) >= perFile) continue;
         let r = null;
-        try { r = test(p.st, p.mv, after); } catch (e) { r = null; }
+        try { r = test(p.st, p.mv, after, prev); } catch (e) { r = null; }
         if (!r) continue;
         fileCount[id] = (fileCount[id] || 0) + 1;
         (found[id] = found[id] || []).push({
@@ -335,6 +381,7 @@ for (const file of files) {
           file: path.basename(file),
         });
       }
+      prev = p;
     }
   }
 }
