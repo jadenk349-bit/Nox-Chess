@@ -1037,25 +1037,25 @@
   "schema_version": 2,
   "checkpoint": {
     "last_successful": "2026-09-02",
-    "session": "session-11",
+    "session": "session-12",
     "how_to_resume": [
       "1. Read education/README.md, then ARCHITECTURE.md and METHODOLOGY.md.",
       "2. Run: python3 tools/validate_kb.py && python3 tools/run_tests.py && node tests/test_api.js && python3 tools/corpus_check.py && node tools/trap_audit.js",
-      "3. Artifacts: state/COMPLETION.md (ten criteria), state/ladder.json, state/TRAPS.md (the reading list), state/firing_rates.json, state/pawn_endings.json, state/breakthrough_proof.json, state/COVERAGE.md.",
-      "4. THE READING LIST IS THE ENGINE. `node tools/trap_audit.js --unread` lists every condition a record states - false_positive_traps AND indicators_against - that nobody has written about. 75 of 246 remain. Twenty-four defects have come out of it.",
-      "5. `indicators_against` DOES NOT MEAN THE SAME THING ON EVERY RECORD. On a concept naming an ASSET they are reasons not to report it; on one naming a SCALE or a liability (king-safety, isolated-queen-pawn) they are the conditions the matcher fires ON. Read the record before building the row - building them uniformly would invert two concepts.",
-      "6. AN `implements` STRING IS A CLAIM, NOT DOCUMENTATION. Four were found saying something the code does not do. Read them against the body.",
-      "7. THREE ANSWERS TO A CONDITION, and the third keeps being right: build it, argue on the record that it cannot be built, or SAY IT IN THE SENTENCE. Seven times in three sessions a guard was written, measured, found to delete a canonical position, and replaced by a caveat in the wording.",
-      "8. WHEN A GUARD DELETES A CANONICAL POSITION, THE GUARD IS WRONG. Rubinstein-Salwe (two-weaknesses), Capablanca-Tartakower (king-activation), Capablanca-Rubinstein (rook-on-the-seventh), Havasi-Capablanca (bishop-pair), Lisitsin-Capablanca (blockade), Fischer-Spassky g6 (hanging-pawns), Nimzowitsch-Capablanca (semi-open-file), the three-against-three (pawn-breakthrough). Run corpus_check.py before and after every change.",
-      "9. Three corpus entries are RECORDED FAILURES kept failing on purpose - Reti-Capablanca 1924 (piece-activity), Ftacnik-Roiz 2009 (bishop-pair, a confidence overclaim), Karpov-Polgar 2001 (rook-on-the-seventh, a false positive that LEADS). Do not fix them with a rule fitted to one position.",
-      "10. Confidence has TWO ceilings now: knowledge_type and each record's own typical_confidence. Nothing may report above its record. If a record's figure is wrong, correct the record with an argument - do not loosen cap().",
-      "11. The next work is in COMPLETION.md under 'What is still missing, precisely'. Negatives and ambiguous examples are still the largest gap, and they come from articles by named authors ABOUT the failure mode."
+      "3. Artifacts: state/COMPLETION.md (ten criteria), state/ladder.json, state/TRAPS.md, state/firing_rates.json, state/pawn_endings.json, state/breakthrough_proof.json, state/COVERAGE.md.",
+      "4. THE READING LIST IS THE ENGINE. `node tools/trap_audit.js --unread` lists every condition a record states that nobody has written about. 47 of 246 remain. Twenty-five defects have come out of it.",
+      "5. THE TOOL CREDITS BY QUOTATION AND QUOTING IS CHEAP. Twenty-two rows were closed in one pass by READING them against the code and quoting the guard where it already lived - that is legitimate only because each was checked first. Four `implements` strings have been found claiming something the code does not do, which is what the habit is for.",
+      "6. `indicators_against` DOES NOT MEAN THE SAME THING ON EVERY RECORD. On a concept naming an ASSET they are reasons not to report it; on one naming a SCALE or a liability (king-safety, isolated-queen-pawn) they are the conditions the matcher fires ON. Several are also the NEGATION of a precondition and cannot arise at all.",
+      "7. THREE ANSWERS TO A CONDITION, and the third keeps being right: build it, argue on the record that it cannot be built, or SAY IT IN THE SENTENCE. Nine times now a guard was written, measured, found to delete a canonical position, and replaced by a clause.",
+      "8. WHEN A GUARD DELETES A CANONICAL POSITION, THE GUARD IS WRONG. Rubinstein-Salwe, Capablanca-Tartakower, Capablanca-Rubinstein, Havasi-Capablanca, Lisitsin-Capablanca, Fischer-Spassky g6, Nimzowitsch-Capablanca, the three-against-three. Run corpus_check.py before and after every change.",
+      "9. FOUR corpus entries carry a written self-assessment: three RECORDED FAILURES kept failing on purpose (Reti-Capablanca piece-activity, Ftacnik-Roiz bishop-pair confidence, Karpov-Polgar rook-on-the-seventh false positive) and one - Anand-Leko blockade - that grades its own evidence DOWN because the raw feature is absent too. Do not fix any of them with a rule fitted to one position.",
+      "10. Confidence has TWO ceilings: knowledge_type and each record's own typical_confidence. Nothing may report above its record. If a record's figure is wrong, correct the record with an argument.",
+      "11. The largest remaining gap is criterion 4: 77% of applicable concepts have no negative example and 79% no ambiguous one. They come from articles by named authors ABOUT the failure mode - seven corpus entries from five such articles so far."
     ],
     "what_worked_this_session": [
-      "Reading indicators_against, not only false_positive_traps - and noticing that the field's polarity is not uniform before building any of it.",
-      "Reading every `implements` string against its own matcher body. Four were false; two were bugs in the code and two were bugs in the string.",
-      "Measuring reported confidence against each record's typical_confidence, which nothing had ever read. Twelve concepts were above their own record, and the fix exposed that the field was an unconsidered default on 32 rule and motif records.",
-      "Letting the corpus correct a fix made the same day. semi-open-file's new 'fixed target' test dropped the very file Nimzowitsch-Capablanca's annotators name, because a pawn that advances is still on its own file."
+      "Reading a condition against the code before crediting it. Twenty-two rows closed that way, and none of them by loosening the test.",
+      "Saying a condition in the sentence when building it as a guard would delete a canonical position. Nine times now, and it is the answer more often than a guard is.",
+      "Noticing when a matcher HAD the fact and did not say the word - rook-on-the-seventh knew whether the king was confined and never used Nimzowitsch's vocabulary for it.",
+      "Letting a build expose a bug in neighbouring code: the battery ordering was backwards, and only writing the 'expensive way round' clause revealed it."
     ]
   },
   "unresolved_historical_claims": [
