@@ -223,7 +223,23 @@
       }
     }
   ],
-  "ambiguous_examples": [],
+  "ambiguous_examples": [
+    {
+      "fen": "8/1ppk4/8/PPP5/8/8/8/K7 w - - 0 1",
+      "note": "Three white pawns against two on the same wing, abreast on the fifth - the breakthrough structure, and this base's detector reports it. The position is a proven win. The tablebase's own first move is NOT the breakthrough: it is Ka2, a king move, because with the black king on d7 the pawn sacrifice lets the king in and the slow method does not. Filed as ambiguous because the concept is correctly present and correctly reported and is not what wins: the same structure with the defending king further away IS won by the breakthrough, and this record's positive example is that position. The two differ by where one king stands, which is the condition this record states as 'the attacker's own king is needed elsewhere and cannot support'.",
+      "origin_kind": "tablebase-position",
+      "concept_role": "ambiguous",
+      "tablebase": {
+        "source": "Lichess tablebase (Syzygy, 7-piece)",
+        "pieces": 7,
+        "wdl": "win",
+        "dtz": 3,
+        "dtm": null,
+        "category": "win",
+        "note": "PROVEN WIN, dtz 3, and the best move is Ka2 rather than a6 or b6. The breakthrough is on the board and the win runs through the king."
+      }
+    }
+  ],
   "explanations": {
     "by_level": {
       "beginner": "White gives away two pawns so the third one can run all the way to the end, and the king is too far away to catch it.",

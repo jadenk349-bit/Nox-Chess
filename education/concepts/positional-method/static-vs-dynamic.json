@@ -157,7 +157,34 @@
       "false_positive_case": "a-passer-that-will-never-run"
     }
   ],
-  "ambiguous_examples": [],
+  "ambiguous_examples": [
+    {
+      "fen": "3r1nk1/pp3ppp/1bq5/B7/3pQ3/1N4PP/PPP2P2/4R1K1 w - - 1 22",
+      "move": "Qxc6",
+      "move_uci": "e4c6",
+      "note": "Capablanca-Rubinstein 1928, 22.Qxc6, seven moves after this record's positive example from the same game. There Rubinstein took on a static weakness for dynamic central control; here Capablanca gives the static weakness back - after 22...bxc6 Black's isolated pawn is isolated no longer - and the annotation admits it 'looks like a mistake, because Capablanca has apparently thrown away the very weakness he spent the whole game creating'. It is the engine's first choice at +0.34. Filed as ambiguous because the record's own classification cannot be applied here without knowing which advantage is which: the queenless ending Capablanca is entering is a static advantage of a different kind, and this record's second trap says 'dynamic is often used loosely to mean sharp. Here it means specifically that the advantage expires' - and what has expired is the thing the classification was tracking.",
+      "origin_kind": "historical-game",
+      "game": "Capablanca-Rubinstein, Berlin 1928",
+      "concept_role": "ambiguous",
+      "attributed_by": "corpus entry capablanca-rubinstein-1928-22Qxc6-transformation",
+      "engine": {
+        "engine_id": "Stockfish 18",
+        "test_level": 3,
+        "depth": 22,
+        "threads": 10,
+        "hash_mb": 4096,
+        "multipv": 3,
+        "best_move": "e4c6",
+        "eval_cp": 34,
+        "mate_in": null,
+        "pv": [],
+        "alternatives": [],
+        "margin_cp": null,
+        "verdict": "ambiguous",
+        "verdict_note": "+0.34 and the engine's first choice at depth 22 with three lines, for the move that gives back the weakness the whole game was about."
+      }
+    }
+  ],
   "explanations": {
     "by_level": {
       "beginner": "Some advantages last and some run out. If yours will still be there in twenty moves, take your time. If it will not, you have to use it now.",

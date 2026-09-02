@@ -152,7 +152,30 @@
       }
     }
   ],
-  "ambiguous_examples": [],
+  "ambiguous_examples": [
+    {
+      "fen": "6k1/pp2bppp/8/8/8/5N2/PP3PPP/6K1 w - - 0 1",
+      "note": "A knight against a bishop with three pawns each on both wings, and the position is -0.07. The standard table gives a bishop 3.25 and a knight 3.0, a difference of a quarter of a pawn, and this record's whole subject is what those numbers do and do not mean. Here the difference measures at seven hundredths - a third of what the table claims - in the structure that is supposed to favour the bishop most. Filed as ambiguous rather than as a counterexample because the table is not wrong: a bishop IS slightly better on average, and an average is exactly the kind of statement a single position cannot confirm or refute. This record's counterexample is the sharper case, where the bishop's COLOUR turns a win into a proven draw and the number stops applying altogether.",
+      "origin_kind": "constructed-test",
+      "concept_role": "ambiguous",
+      "engine": {
+        "engine_id": "Stockfish 18",
+        "test_level": 3,
+        "depth": 26,
+        "threads": 10,
+        "hash_mb": 4096,
+        "multipv": 1,
+        "best_move": "g1f1",
+        "eval_cp": -7,
+        "mate_in": null,
+        "pv": [],
+        "alternatives": [],
+        "margin_cp": null,
+        "verdict": "ambiguous",
+        "verdict_note": "-0.07 at depth 26, symmetric pawns on both wings. The quarter-pawn the table gives the bishop does not appear."
+      }
+    }
+  ],
   "explanations": {
     "by_level": {
       "beginner": "Pawn 1, knight and bishop 3, rook 5, queen 9. Good enough for most trades.",
