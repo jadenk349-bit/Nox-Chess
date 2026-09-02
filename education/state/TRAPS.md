@@ -13,7 +13,7 @@ implemented; that is a reading, and doing it is the work. What it can do is
 stop the list being rediscovered from scratch each time — and every one of
 the defects listed in the tool's header was unread before it was looked at.
 
-**Of 246 stated conditions (traps and indicators-against): 92 enforced in the matcher, 21 in Layer 3, 55 argued on the record to be unbuildable or already honoured elsewhere, 78 unread.**
+**Of 246 stated conditions (traps and indicators-against): 94 enforced in the matcher, 21 in Layer 3, 55 argued on the record to be unbuildable or already honoured elsewhere, 76 unread.**
 
 ONE CAVEAT ABOUT `indicators_against`, and it is not a technicality. For a
 concept naming an ASSET — an open file, an outpost, a passed pawn — they are
@@ -114,8 +114,8 @@ shared file was added to the search. The test is quotation for that reason.
 - [cited] Detecting two bishops is trivial and says nothing about whether they are worth anything. In a locked position the pair can be worth less than a well-placed knight.
 - [noted] Half a pawn is an AVERAGE over many games and can be arbitrarily wrong in one position.
 - [cited] A bishop pair where one bishop is shut in by its own pawns is not really a pair.
-- [**unread**] *(indicator against)* A locked pawn structure with no way to open it
-- [**unread**] *(indicator against)* The opponent has a knight on a secure outpost
+- [cited] *(indicator against)* A locked pawn structure with no way to open it
+- [cited] *(indicator against)* The opponent has a knight on a secure outpost
 - [cited] *(indicator against)* One of the bishops is shut in by its own pawns
 - [**unread**] *(indicator against)* The opponent can force the trade of one bishop
 ## hanging-pawns

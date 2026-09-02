@@ -719,7 +719,10 @@ const STRUCTURAL = [
     implements: ("recognition.preconditions: two bishops of opposite square colours, opponent has " +
                  "fewer - AND the record's third false-positive trap, which the earlier version " +
                  "ignored: 'a bishop pair where one bishop is shut in by its own pawns is not really " +
-                 "a pair'. Decided by the same test `bad-bishop` uses, so there is one definition."),
+                 "a pair'. Decided by the same test `bad-bishop` uses, so there is one definition. " +
+                 "Plus the other two indicators_against - 'a locked pawn structure with no way to " +
+                 "open it' and 'the opponent has a knight on a secure outpost' - which downgrade " +
+                 "rather than suppress, for the same reason: the pair is a fact."),
     run(f) {
       for (const c of ['w', 'b']) {
         if (f.pieces[c].bishopPair && !f.pieces[other(c)].bishopPair) {
@@ -744,7 +747,30 @@ const STRUCTURAL = [
           // certainty. So the pair is still reported, at low confidence, and the
           // sentence says which bishop is buried instead of advising the reader
           // to keep them both.
+          // The record's other two indicators_against, and they are refutations
+          // of the pair rather than of the fact: "a locked pawn structure with
+          // no way to open it" and "the opponent has a knight on a secure
+          // outpost". Both are answerable and neither was asked. They are
+          // handled the same way the buried bishop is - the pair is still a
+          // fact, so it is reported, at low confidence, with the reason named.
+          // Measured: 5 of the 178 positions where a pair exists are locked, 14
+          // have an enemy knight on an outpost, 18 have one or the other.
+          const st = FEAT.page.stateFromFEN(f.fen);
+          const locked = FEAT.lockedFor(st, c);
+          const knight = (f.outposts[other(c)] || []).some(x => x.piece === 'N');
           const buried = (f.pieces[c].bishops || []).filter(shutInByItsOwnPawns);
+          if (!buried.length && (locked || knight)) {
+            return {
+              confidence: 'low',
+              because: [`${side(f, c)} has both bishops and ${side(f, other(c))} does not — but ` +
+                        (locked
+                          ? 'the pawns are locked nose to nose with no break available, which is the ' +
+                            'structure the pair is worth least in'
+                          : `${side(f, other(c))} has a knight on an outpost, which is the piece the pair ` +
+                            'is least able to do anything about')],
+              subjects: [c],
+            };
+          }
           if (buried.length) {
             return {
               confidence: 'low',

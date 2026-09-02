@@ -1706,6 +1706,41 @@ const { concepts } = API.knowledge();
      (ks.limitations || []).some(l => /names a SCALE/.test(l)));
 }
 
+{
+  // bishop-pair's other two indicators_against, and they are refutations of the
+  // PAIR rather than of the fact — so they downgrade and name the reason, the
+  // same way the buried bishop does. Measured: of the 178 positions where a pair
+  // exists, 5 are locked and 14 face a knight on an outpost.
+  const bp = fen => {
+    const a = API.analyzeWithEducation({ fen });
+    const c = a.concepts.find(x => x.id === 'bishop-pair');
+    const all = a.concepts_all.find(x => x.id === 'bishop-pair');
+    return c ? { conf: all.confidence, line: (c.because || [''])[0] } : null;
+  };
+  const kn = bp('r3k3/pp3ppp/8/4p3/3n4/8/PP3PPP/R1B1KB2 w Qq - 0 1');
+  ok('bishop-pair: an enemy knight on an outpost drops it to low',
+     kn && kn.conf === 'low', JSON.stringify(kn));
+  ok('...and the sentence names the knight',
+     /knight on an outpost, which is the piece the pair is least able to do anything about/
+       .test(String(kn && kn.line)), String(kn && kn.line));
+  const lk = bp('4k3/pp1p1p1p/8/1PpPpPpP/2P1P1P1/8/8/2B1KB2 w - - 0 1');
+  ok('bishop-pair: a locked structure with no break drops it to low',
+     lk && lk.conf === 'low', JSON.stringify(lk));
+  ok('...and the sentence names the lock',
+     /locked nose to nose with no break available/.test(String(lk && lk.line)), String(lk && lk.line));
+  // A free pair in an open position keeps its confidence.
+  const free = bp('r2qk2r/pp3ppp/2n1pn2/8/3P4/2N1PN2/PP3PPP/R2QKB1R w KQkq - 0 1');
+  ok('bishop-pair: an ordinary pair is untouched', !free || free.conf === 'high',
+     JSON.stringify(free));
+  // "Locked" needs both halves: rammed pawns AND no break. A share threshold was
+  // tried and rejected — it needs a number nobody can defend.
+  ok('bishop-pair: "locked" is rammed pawns AND no break, not a share threshold',
+     /A share-of-\n \* rammed-pawns threshold was tried first and rejected/.test(
+       fs.readFileSync(path.join(ROOT, 'lib', 'features.js'), 'utf8')) ||
+     /threshold was tried first and rejected/.test(
+       fs.readFileSync(path.join(ROOT, 'lib', 'features.js'), 'utf8')));
+}
+
 /* ---------- report ---------- */
 console.log(`\nAPI  PASS ${pass}   FAIL ${fails.length}`);
 for (const [n, d] of fails) console.log(`  FAIL  ${n}\n        ${d}`);

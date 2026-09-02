@@ -1625,3 +1625,30 @@ offering side must have a check or a capture that wins material. 28.9% →
 **26.5%**. The second, "the compensation described is not actually present", is
 the difference between '!' and '?' and no material test sees it — which is why
 the record's caution stays attached to every claim.
+
+
+## The two classic refutations of the bishop pair, built
+
+`bishop-pair` fires on 22.6% and leads 9 times, and its record names three ways
+the pair is worth nothing. One was built earlier today; the other two are now
+built, and both **downgrade rather than suppress** — the pair is a fact and only
+its worth is conditional.
+
+*"A locked pawn structure with no way to open it"* needs both halves and contains
+neither a threshold nor a judgement: at least three of our pawns nose to nose with
+an enemy pawn, **and** no pawn advance of ours that arrives in contact with an
+enemy pawn and survives. A share-of-rammed-pawns threshold was tried first and
+rejected — it needs a number nobody can defend, while "no way to open it" is a
+question the board answers.
+
+*"The opponent has a knight on a secure outpost"* is read straight off the
+outpost detector. 5 of 178 are locked, 14 face a knight, 18 have one or the
+other, and each now says which:
+
+> White has both bishops and Black does not — **but Black has a knight on an
+> outpost, which is the piece the pair is least able to do anything about.**
+
+Worth noting what did *not* resolve. **Ftacnik–Roiz 2009**, the recorded
+confidence overclaim, has neither a locked structure nor an enemy knight on an
+outpost. The failure stands — which is the right outcome, because the guards were
+built from the record and not fitted to the position.

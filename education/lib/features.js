@@ -543,6 +543,55 @@ function reachableHoles(st, colour) {
   return [...out];
 }
 
+/* Is the structure LOCKED for this side, with no way to open it?
+ *
+ * `bishop-pair`'s first indicator_against is "a locked pawn structure with no
+ * way to open it", and both halves are needed: rammed pawns alone are a closed
+ * centre that a break can blow open, and a side with a break is not locked in.
+ * So: at least three of our pawns stand nose to nose with an enemy pawn, and no
+ * pawn advance of ours arrives in contact with an enemy pawn and survives.
+ *
+ * Measured on the 788 shipped positions: of the 178 where one side holds the
+ * bishop pair and the other does not, 5 are locked by this test. A share-of-
+ * rammed-pawns threshold was tried first and rejected - it needs a number
+ * nobody can defend, and "no way to open it" is a question the board answers.
+ */
+function lockedFor(st, colour) {
+  const enemy = colour === 'w' ? 'b' : 'w';
+  let rammed = 0;
+  for (let i = 0; i < 64; i++) {
+    const q = st.b[i];
+    if (!q || q.t !== 'P' || q.c !== colour) continue;
+    const ahead = i + (colour === 'w' ? -8 : 8);
+    if (ahead < 0 || ahead > 63) continue;
+    const r = st.b[ahead];
+    if (r && r.t === 'P' && r.c === enemy) rammed++;
+  }
+  if (rammed < 3) return false;
+  const probe = P.cloneState(st);
+  probe.turn = colour;
+  probe.ep = null;
+  let ms;
+  try { ms = P.legalMoves(probe); } catch (e) { return false; }
+  const forward = colour === 'w' ? -1 : 1;
+  const hasBreak = ms.some(m => {
+    const q = probe.b[m.from];
+    if (!q || q.t !== 'P' || m.cap) return false;
+    let nx;
+    try { nx = P.makeMove(probe, m); } catch (e) { return false; }
+    if (P.see(nx, m.to, enemy) > 0) return false;
+    const col = m.to & 7, row = m.to >> 3;
+    for (const dc of [-1, 1]) {
+      const cc = col + dc, rr = row + forward;
+      if (cc < 0 || cc > 7 || rr < 0 || rr > 7) continue;
+      const e = nx.b[rr * 8 + cc];
+      if (e && e.t === 'P' && e.c === enemy) return true;
+    }
+    return false;
+  });
+  return !hasBreak;
+}
+
 /* -- pieces --------------------------------------------------------------- */
 
 function pieceFeatures(st) {
@@ -1286,6 +1335,7 @@ module.exports = {
   features, motifsOfMove, motifsOfLine, phaseOf, material, pawnStructure, fileState,
   holesFor, reachableHoles, outposts, pieceFeatures, kingFeatures, mobility, pawnSpace,
   bishopPawnColours, quietness, pieceScopes, weakPawnSpread, safeSquaresFor, activeMoves,
+  lockedFor,
   bearsFrom,
   entrySquares,
   centralSquareControl, kingZoneAttackers, pawnBreakthrough, winsTheRace,
