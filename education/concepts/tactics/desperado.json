@@ -121,7 +121,32 @@
     }
   ],
   "counterexamples": [],
-  "ambiguous_examples": [],
+  "ambiguous_examples": [
+    {
+      "fen": "8/p7/4R1P1/8/PP5p/3kr3/4p2K/8 w - - 1 56",
+      "move": "Rxe3+",
+      "move_uci": "e6e3",
+      "note": "Shipped puzzle en-4ea9212492. The white rook on e6 is attacked down the file by the rook on e3 and is defended by nothing, and Black's e2 pawn is one square from queening - so the rook is going regardless. It takes the black rook on the way out, is recaptured by the king, and both sides queen: 0.00. Filed as ambiguous because the concept delivers precisely what it promises and the result is a draw. This record's positive example is worth 748 centipawns over the alternative; here the desperado is also the best move on the board and is worth the difference between losing and holding, which is a kind of value the definition - 'sells itself as dearly as possible' - does not describe.",
+      "origin_kind": "puzzle",
+      "concept_role": "ambiguous",
+      "engine": {
+        "engine_id": "Stockfish 18",
+        "test_level": 3,
+        "depth": 22,
+        "threads": 10,
+        "hash_mb": 4096,
+        "multipv": 1,
+        "best_move": "e6e3",
+        "eval_cp": 0,
+        "mate_in": null,
+        "pv": [],
+        "alternatives": [],
+        "margin_cp": null,
+        "verdict": "ambiguous",
+        "verdict_note": "0.00 at depth 22, settled at depth 3, and the desperado is the engine's first choice. Both sides promote and the queens hold each other."
+      }
+    }
+  ],
   "explanations": {
     "by_level": {
       "beginner": "This piece is lost anyway, so it grabs something before it goes.",

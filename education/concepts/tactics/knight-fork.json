@@ -200,7 +200,41 @@
       }
     }
   ],
-  "ambiguous_examples": [],
+  "ambiguous_examples": [
+    {
+      "fen": "8/7r/1k6/q2PN3/8/3N4/4K3/8 w - - 17 108",
+      "move": "Nc4+",
+      "move_uci": "e5c4",
+      "note": "Shipped puzzle en-d6905ae15c. Nc4+ forks the king on b6 and the queen on a5, it is the best move on the board, it wins a queen - and the position is a PROVEN DRAW. White is two knights and a pawn against a queen and a rook, and the fork is what holds the balance rather than what wins it. Filed as ambiguous because everything the concept promises is delivered - the geometry, the double attack, the material - and the outcome is nothing. This record's other constructed example makes the same point with five men and no advantage at all; this one makes it in a real position where the fork is essential.",
+      "origin_kind": "puzzle",
+      "concept_role": "ambiguous",
+      "engine": {
+        "engine_id": "Stockfish 18",
+        "test_level": 3,
+        "depth": 24,
+        "threads": 10,
+        "hash_mb": 4096,
+        "multipv": 1,
+        "best_move": "e5c4",
+        "eval_cp": -9,
+        "mate_in": null,
+        "pv": [],
+        "alternatives": [],
+        "margin_cp": null,
+        "verdict": "ambiguous",
+        "verdict_note": "-0.09 at depth 24, settled at depth 1, and the forking move is the engine's first choice. A fork that wins a queen and evaluates at minus nine hundredths of a pawn."
+      },
+      "tablebase": {
+        "source": "Lichess tablebase (Syzygy, 7-piece)",
+        "pieces": 7,
+        "wdl": "draw",
+        "dtz": 0,
+        "dtm": null,
+        "category": "draw",
+        "note": "PROVEN DRAW, and the tablebase's own best move is Nc4+ - the fork. Everything the concept promises, and a draw."
+      }
+    }
+  ],
   "explanations": {
     "by_level": {
       "beginner": "The knight attacks two pieces at once. They cannot both move, and nothing can block a knight.",

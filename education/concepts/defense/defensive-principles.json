@@ -198,7 +198,30 @@
       "false_positive_case": "a-passive-move-is-not-a-defence"
     }
   ],
-  "ambiguous_examples": [],
+  "ambiguous_examples": [
+    {
+      "fen": "r5k1/pp3pp1/8/8/8/8/PP3PPP/R5K1 w - - 0 1",
+      "note": "Black is a pawn down with one rook each and a trade available at any moment, and the defender's choice is the one this record says the sources contradict each other about. Trading into a pawn ending is simplification, which the literature recommends to the defender, and a pawn down in a pawn ending is usually lost. Keeping the rooks on is complication, which the literature also recommends to the defender, and rook endings a pawn down are famously drawish. The record's second trap says this outright: 'the simplify-versus-complicate advice is genuinely contradictory in the sources and must not be reported as settled. Which applies depends on whether the position is one the defender can hold.' Filed as ambiguous because the concept covers the decision twice and points both ways, and +1.57 is not large enough to settle it.",
+      "origin_kind": "constructed-test",
+      "concept_role": "ambiguous",
+      "engine": {
+        "engine_id": "Stockfish 18",
+        "test_level": 3,
+        "depth": 24,
+        "threads": 10,
+        "hash_mb": 4096,
+        "multipv": 1,
+        "best_move": "a1c1",
+        "eval_cp": 157,
+        "mate_in": null,
+        "pv": [],
+        "alternatives": [],
+        "margin_cp": null,
+        "verdict": "ambiguous",
+        "verdict_note": "+1.57 at depth 24 - a pawn and a half, which is what a clean extra pawn in a rook ending is worth and is not what a won position is worth. The engine keeps the rooks on."
+      }
+    }
+  ],
   "explanations": {
     "by_level": {
       "beginner": "Before you do anything, ask what your opponent's move threatens. Then meet it with the smallest concession you can.",

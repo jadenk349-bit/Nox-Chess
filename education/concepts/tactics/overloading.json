@@ -108,7 +108,30 @@
     }
   ],
   "counterexamples": [],
-  "ambiguous_examples": [],
+  "ambiguous_examples": [
+    {
+      "fen": "3r2k1/5ppp/8/3n4/8/5N2/5PPP/3R2K1 w - - 0 1",
+      "note": "The overload configuration exactly: the rook on d8 defends the knight on d5 down the file AND is the only guard of the back rank, and White's rook is on d1 facing it. It does not work, because White has only one rook - Rxd5 is met by Rxd5 and the back-rank threat never arrives, so the black rook is asked to do one job at a time and can. The position is -0.01. Read against this record's positive example, which is the same picture with a SECOND white rook on e1: one piece added, and the rook on d8 goes from comfortable to unable to recapture. Filed as ambiguous because the configuration the concept names is fully present and the concept is not: an overload is a claim about being asked to do both at once, and nobody is asking.",
+      "origin_kind": "constructed-test",
+      "concept_role": "ambiguous",
+      "engine": {
+        "engine_id": "Stockfish 18",
+        "test_level": 3,
+        "depth": 24,
+        "threads": 10,
+        "hash_mb": 4096,
+        "multipv": 1,
+        "best_move": "h2h3",
+        "eval_cp": -1,
+        "mate_in": null,
+        "pv": [],
+        "alternatives": [],
+        "margin_cp": null,
+        "verdict": "ambiguous",
+        "verdict_note": "-0.01 at depth 24, settled at depth 21, and the engine's move is a quiet pawn push - it does not try Rxd5 at all. The positive example on this record, one rook further, is +6.73."
+      }
+    }
+  ],
   "explanations": {
     "by_level": {
       "beginner": "That piece is guarding two things at once. Take one and it cannot keep guarding the other.",

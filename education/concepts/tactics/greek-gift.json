@@ -247,7 +247,32 @@
       "false_positive_case": "a-bishop-eyeing-h7-is-not-a-greek-gift"
     }
   ],
-  "ambiguous_examples": [],
+  "ambiguous_examples": [
+    {
+      "fen": "r1bq1rk1/pp1n1ppp/4p3/3p4/3P4/2NBPN2/PP3PPP/R2Q1RK1 w - - 0 1",
+      "move": "Bxh7+",
+      "move_uci": "d3h7",
+      "note": "All four of Vukovic's conditions hold. White has the queen, the light-squared bishop and the knight; the bishop reaches h7 with check; the knight reaches g5 safely, because the h-pawn that would cover it has just been captured; and the queen reaches h5 the moment the knight moves. The sacrifice is SOUND - White is still more than two pawns better after it - and it is a mistake, because the quiet 1.Qc2 is worth five. This record's first trap says exactly this and no more: 'Vukovic's conditions are necessary, NOT sufficient.' Filed as ambiguous because the pattern is genuinely present and genuinely playable and is not the move: the conditions tell you the gift is available and nothing about whether to accept the invitation.",
+      "origin_kind": "constructed-test",
+      "concept_role": "ambiguous",
+      "engine": {
+        "engine_id": "Stockfish 18",
+        "test_level": 3,
+        "depth": 22,
+        "threads": 10,
+        "hash_mb": 4096,
+        "multipv": 2,
+        "best_move": "d1c2",
+        "eval_cp": 206,
+        "mate_in": null,
+        "pv": [],
+        "alternatives": [],
+        "margin_cp": null,
+        "verdict": "ambiguous",
+        "verdict_note": "+2.06 for the gift against +5.07 for the quiet 1.Qc2, at depth 22 with two lines. The sacrifice keeps a large advantage and throws away three pawns of it - which is the only kind of number that can distinguish 'the conditions are met' from 'the sacrifice is right'."
+      }
+    }
+  ],
   "explanations": {
     "by_level": {
       "beginner": "White gives up the bishop to take the pawn in front of the king and drag the king out, then brings the knight and queen in for the attack.",

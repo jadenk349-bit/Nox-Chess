@@ -78,7 +78,8 @@
   ],
   "limitations": [
     "Exhaustive search is not available to a human at any level, so all human method is pruning.",
-    "This system cannot observe a player's calculation and so cannot assess it."
+    "This system cannot observe a player's calculation and so cannot assess it.",
+    "NO AMBIGUOUS EXAMPLE, and a FEN is not the right kind of evidence for one here. An ambiguous example in this base is a POSITION where the concept is genuinely present and what to conclude from it is unclear - the pattern is on the board and the reading of it is not. This record's subject is not on the board: its `recognition.detectability` is `human-only`, and what it describes is something a player does at the board rather than something the board contains. A position could illustrate the CONSEQUENCE of doing it well or badly, and that is a different claim, and attaching a FEN here would be evidence for the wrong proposition. Recorded rather than filled: tools/depth_report.py still counts this concept as missing the item, and the completion assessment carries the gap."
   ],
   "misconceptions": [
     "That stronger players calculate more deeply and widely. De Groot found they do not search more, and may search less.",
