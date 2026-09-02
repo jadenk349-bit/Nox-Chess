@@ -459,7 +459,9 @@ const STRUCTURAL = [
     implements: ("recognition: lagging behind its neighbours with its advance square controlled by " +
                  "an enemy pawn - and the record's second trap, which had never been built: \"a " +
                  "backward pawn on a closed file that nothing can attack is a description, not a " +
-                 "weakness.\" The file must be half-open for the opponent."),
+                 "weakness.\" The file must be half-open for the opponent - and, for the same " +
+                 "reason one step further, \"No enemy rook can reach the file\": the opponent " +
+                 "must actually own a rook or a queen."),
     run(f) {
       const hits = [];
       for (const c of ['w', 'b']) {
@@ -472,6 +474,20 @@ const STRUCTURAL = [
         // a target: the opponent needs the file to bring a rook down. 10 of the
         // 15 backward pawns on the 788 shipped positions stand on a file that is
         // half-open for the opponent; the other five are descriptions.
+        // ...and the sharper form of the same condition, which the record states
+        // as an indicator_against and which the half-open test does not cover:
+        // "No enemy rook can reach the file". A half-open file says the file is
+        // AVAILABLE; it says nothing about whether the opponent owns anything
+        // that wants it. In a pure minor-piece ending a backward pawn on a
+        // half-open file is a description again, for the same reason it is one
+        // on a closed file - nothing can get at it.
+        //
+        // The record's first indicator_against, "It can advance at a moment of
+        // its choosing, so the defect is temporary", is the same condition as
+        // its first trap and is enforced in Layer 3: the advance square has to
+        // be controlled by an enemy pawn, so a pawn that can advance at a moment
+        // of its choosing is not in the backward set at all.
+        if (f.material[other(c)].counts.R + f.material[other(c)].counts.Q === 0) continue;
         const semi = new Set(f.files.semiOpenFor[other(c)] || []);
         const real = f.pawns[c].backward.filter(sq => semi.has(sq[0]));
         if (real.length) hits.push({ c, sq: real });
@@ -2310,7 +2326,9 @@ const MOVE_BASED = [
                  "- and it is kept: they are two concept records with two matchers, and " +
                  "pawn-breakthrough runs the rule of the square while this one only asks for " +
                  "contact. The third trap, that a break's value is often as an unplayed THREAT, " +
-                 "is why this arm is MOVE-based and reports nothing about a break merely available."),
+                 "is why this arm is MOVE-based and reports nothing about a break merely available. " +
+                 "Plus the one indicator_against a static test can reach: \"The break opens a line " +
+                 "towards your own king\"."),
     run(before, after, moveInfo) {
       const san = moveInfo.san || '';
       if (!/^[a-h]/.test(san)) return null;              // a pawn move
@@ -2343,6 +2361,29 @@ const MOVE_BASED = [
         if (at(file + df, rank - fwd) === enemyPawnChar) contact = true;   // it attacks us
       }
       if (!contact) return null;
+      // "The break opens a line towards your own king" - the record's second
+      // indicator_against, and the one of the three that a static test can
+      // reach. The other two ask who is better placed to use the lines, which
+      // is the same judgement the record's first trap says the detector cannot
+      // make.
+      //
+      // What is tested is narrow and worth stating exactly: whether the file
+      // the pawn LEFT, or the file it arrived on, is the mover's own king's
+      // file or one next to it, and is open or half-open for the OPPONENT after
+      // the move and was not before. That covers the case the phrase is usually
+      // about - a break in front of your own king that hands the enemy rooks a
+      // road - and does not cover diagonals, which need the enemy bishop's
+      // square and a blocker scan that this arm has no board object to do.
+      const kf = ((before.king[mover] || {}).square || '')[0];
+      if (kf) {
+        const leftFile = String.fromCharCode(97 + file - 0);
+        const files = new Set([leftFile, dest[0]]);
+        const near = [...files].some(x => Math.abs(x.charCodeAt(0) - kf.charCodeAt(0)) <= 1);
+        const openFor = g => new Set((g.files.open || [])
+          .concat(g.files.semiOpenFor[other(mover)] || []));
+        const wasOpen = openFor(before), nowOpen = openFor(after);
+        if (near && [...files].some(x => nowOpen.has(x) && !wasOpen.has(x))) return null;
+      }
       return {
         confidence: 'low',
         because: [`${san} advances a pawn into contact with an enemy pawn, so the structure must ` +

@@ -13,7 +13,7 @@ implemented; that is a reading, and doing it is the work. What it can do is
 stop the list being rediscovered from scratch each time — and every one of
 the defects listed in the tool's header was unread before it was looked at.
 
-**Of 275 stated conditions (traps and indicators-against): 132 enforced in the matcher, 20 in Layer 3, 75 argued on the record to be unbuildable or already honoured elsewhere, 48 unread.**
+**Of 275 stated conditions (traps and indicators-against): 136 enforced in the matcher, 19 in Layer 3, 75 argued on the record to be unbuildable or already honoured elsewhere, 45 unread.**
 
 ONE CAVEAT ABOUT `indicators_against`, and it is not a technicality. For a
 concept naming an ASSET — an open file, an outpost, a passed pawn — they are
@@ -67,8 +67,8 @@ shared file was added to the search. The test is quotation for that reason.
 - [layer 3] Reporting the pawn and not the square in front of it usually misses the more important half.
 - [layer 3] A pawn with no friendly pawn on either adjacent file is ISOLATED, not backward, and reporting both names for one pawn promises the reader a hole in front of it that the isolated case does not create.
 - [cited] A pawn whose advance square is occupied by an enemy pawn is RAMMED. It cannot advance, but not for the reason the concept is about, and the square in front of it is not a hole - an enemy pawn is standing on it.
-- [**unread**] *(indicator against)* It can advance at a moment of its choosing, so the defect is temporary
-- [**unread**] *(indicator against)* No enemy rook can reach the file
+- [cited] *(indicator against)* It can advance at a moment of its choosing, so the defect is temporary
+- [cited] *(indicator against)* No enemy rook can reach the file
 - [**unread**] *(indicator against)* It is compensated by space or by the activity its structure enables
 - [layer 3] *(indicator against)* The square in front is covered by a piece the opponent cannot dislodge
 ## open-file
@@ -305,11 +305,11 @@ shared file was added to the search. The test is quotation for that reason.
 - [cited] *(indicator against)* The king would step into a check that gains the opponent a tempo
 ## pawn-break
 
-- [layer 3] Any pawn advance into contact is mechanically a break; whether it is a good one depends on who is placed to use the lines it opens, which the detector cannot see.
+- [cited] Any pawn advance into contact is mechanically a break; whether it is a good one depends on who is placed to use the lines it opens, which the detector cannot see.
 - [cited] A break is not a pawn-breakthrough. This base keeps them separate: the breakthrough sacrifices to force a passer, the break challenges a structure.
 - [cited] The break's value is often as an unplayed THREAT, and a position where it is available but not played may be the concept working correctly.
 - [**unread**] *(indicator against)* The opponent is better developed and will use the opened lines first
-- [**unread**] *(indicator against)* The break opens a line towards your own king
+- [cited] *(indicator against)* The break opens a line towards your own king
 - [**unread**] *(indicator against)* Nothing of yours is placed to use what opens
 ## restraint
 
