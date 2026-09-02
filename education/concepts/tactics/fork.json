@@ -229,14 +229,6 @@
         "note": "PROVEN, from the mover's side: after c4-c5 White is LOST, mate in 35, and the tablebase's own reply is dxc5. The fork is answered by eating the forker."
       },
       "false_positive_case": "a-pawn-fork-the-pawns-simply-eat"
-    },
-    {
-      "fen": "4k3/8/1p1p4/8/2P5/8/8/4K3 w - - 0 1",
-      "move_uci": "c4c5",
-      "note": "Registered false-positive case `a-pawn-fork-the-pawns-simply-eat`, kept on the record as well as in tests/false_positive_cases.json so that the concept carries its own negative evidence. THE SURFACE PATTERN IS PRESENT: White plays c4-c5, and the pawn on c5 attacks the black pawns on b6 and d6. One piece attacking two enemy units is the definition of a fork, and the detector says so in those words. WHY IT IS NOT THE CONCEPT: This record's first indicator_against: \"The forking piece can simply be captured.\" Both forked units are pawns, both defend the square the forker stands on, and Black moves first. Also the second: \"Both targets are defended and each is worth less than the forker\" — here they are worth exactly the same and there are two of them. WHAT THE SYSTEM DOES: THIS WAS A REAL FALSE POSITIVE and it was reported at HIGH confidence, because a motif tag arrived from findMotifs() with no guard between it and the concept. Syzygy proves the move loses: after c5 the position is 5 pieces, a WIN FOR BLACK, dtz 1, mate in 35, and the tablebase's own best reply is dxc5 — the fork is answered by eating the forker. A guard now implements the record's first indicator_against at the motif-mapping site: if SEE says the piece that just moved can be taken at a profit, the fork is not reported. Rate: fork fell from 16.0% to 11.5% of the 788 shipped puzzles, and the canonical royal fork (Nc7+ forking rook and king) still reports at high.",
-      "origin_kind": "constructed-test",
-      "concept_role": "negative",
-      "false_positive_case": "a-pawn-fork-the-pawns-simply-eat"
     }
   ],
   "ambiguous_examples": [

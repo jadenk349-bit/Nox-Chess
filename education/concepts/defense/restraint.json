@@ -155,14 +155,6 @@
         "verdict": "supports",
         "verdict_note": "0.00 at depth 22, and the engine's line is both kings walking about on the kingside. This is the negative half: the position is fully locked, nothing is being restrained because nothing can advance in the first place, and the evaluation confirms that no advantage attaches to the quiet move that was played."
       }
-    },
-    {
-      "fen": "4k3/pp4pp/3p4/2pPp3/2P1P3/8/PP4PP/4K3 w - - 0 1",
-      "move_uci": "e1d1",
-      "note": "Registered false-positive case `a-quiet-move-that-restrains-nothing`, kept on the record as well as in tests/false_positive_cases.json so that the concept carries its own negative evidence. THE SURFACE PATTERN IS PRESENT: Kd1 in a fully locked position is a quiet, non-committal move that does not lose anything. Quiet moves in blocked positions are the shape prophylaxis and restraint are usually claimed about. WHY IT IS NOT THE CONCEPT: This record's traps, both of them: \"Restraint is not the same as passivity. It reduces the opponent's options; a passive move merely fails to increase yours.\" And: \"Like prophylaxis, it is easy to assert after the fact about any quiet move. Name the advance being prevented.\" No advance is being prevented — the structure prevents them all by itself, and it did so before the move. WHAT THE SYSTEM DOES: The API is silent on restraint. The matcher asks whether the move reduces the opponent's safe destinations rather than whether it is quiet, which is the first trap built rather than quoted; and it is move-based, so it cannot be asserted after the fact about the position. This is the case that a keyword rule would fail: every word in the record about quiet moves in blocked positions is present here and the concept is absent.",
-      "origin_kind": "constructed-test",
-      "concept_role": "negative",
-      "false_positive_case": "a-quiet-move-that-restrains-nothing"
     }
   ],
   "ambiguous_examples": [

@@ -140,7 +140,15 @@
       }
     }
   ],
-  "counterexamples": [],
+  "counterexamples": [
+    {
+      "fen": "1r4k1/1p3ppp/1p6/1P6/1P6/8/5PPP/1R4K1 w - - 0 1",
+      "note": "Registered false-positive case `loose-pieces-that-cannot-drop-off`, kept on the record as well as in tests/false_positive_cases.json so that the concept carries its own negative evidence. THE SURFACE PATTERN IS PRESENT: Both rooks are undefended in a position where the phrase 'loose pieces drop off' would be quoted without a second thought. WHY IT IS NOT THE CONCEPT: This record's first indicator_against: \"Closed position where no forcing move reaches the loose piece.\" The b-file is stopped by rammed pawns and no forcing move touches either rook. And its first trap: \"A piece being undefended is not a mistake, and calling it one teaches a habit of pointless defending.\" WHAT THE SYSTEM DOES: The API reports neither lpdo nor loose-piece here. The `loose-piece` matcher was rewritten for exactly this and fell from 66.8% of shipped positions to 9.1% when it began requiring a forcing move that survives being forcing; `lpdo` is the aphorism about the same fact and inherits the discipline. Stockfish 18: +0.00. Two loose rooks and nothing to be done about either. The record's second trap is worth reading beside this: a ChessBase reader showed that the article which coined the phrase had chosen an example that was not an instance of it.",
+      "origin_kind": "constructed-test",
+      "concept_role": "negative",
+      "false_positive_case": "loose-pieces-that-cannot-drop-off"
+    }
+  ],
   "ambiguous_examples": [],
   "explanations": {
     "by_level": {

@@ -184,11 +184,21 @@
     },
     {
       "fen": "5k2/p1p4R/1pr5/3p1pP1/P2P1P2/2P2K2/8/8 w - - 0 35",
-      "game": "Capablanca-Tartakower, New York 1924",
-      "note": "The position after 34...gxf5, where Capablanca began the king march that made this game the standard illustration of the active king: Kg3-h4-g5-f6-e5-d6. Chernev's comment on the plan is that in a simplified ending Capablanca gave away two pawns and let them be captured WITH CHECK, because the king's route mattered more. FEN derived by replaying all 103 plies through the page's own move generator.",
+      "note": "Capablanca-Tartakower, New York 1924, Kg3. Human ground truth: the concept is named for this position by Irving Chernev, quoted move by move. Corpus entry `capablanca-tartakower-1924-35Kg3-king-activation`. The most famous illustration of the concept there is, and it is a positive example of an unusually pure kind: the move does nothing except walk the king forward, and it costs two pawns with check to do it. The concept record's own claim is that in an endgame the king is a piece and belongs in the middle of the board; here that claim is priced. Nine moves later the king stands o",
       "origin_kind": "historical-game",
-      "concept_role": "supports",
-      "side_to_move_benefits": "white"
+      "game": "Capablanca-Tartakower, New York 1924",
+      "concept_role": "positive",
+      "attributed_by": "Irving Chernev, quoted move by move — corpus entry capablanca-tartakower-1924-35Kg3-king-activation",
+      "engine": {
+        "engine_id": "Stockfish 18",
+        "test_level": 3,
+        "depth": 20,
+        "multipv": 3,
+        "best_move": "Kg3",
+        "eval_cp": 295,
+        "verdict": "supports",
+        "verdict_note": "completely, and by the largest margin in this corpus. 35.Kg3 is the engine's first choice at +2.95; the second-best move is +0.46. The move that gives away two pawns with check is worth two and a half pawns more than any move that keeps them. Depth 20 rather than 24: this is a simplified rook ending, the case this project has already recorded as failing to converge deeper. The 2.49 gap is not a number that needs more depth."
+      }
     },
     {
       "fen": "5k2/p1p4R/1p3KP1/3p1p2/P2Pr3/8/8/8 b - - 3 39",
@@ -213,24 +223,6 @@
       "origin_kind": "historical-game",
       "concept_role": "supports",
       "side_to_move_benefits": "neither"
-    },
-    {
-      "fen": "5k2/p1p4R/1pr5/3p1pP1/P2P1P2/2P2K2/8/8 w - - 0 35",
-      "note": "Capablanca-Tartakower, New York 1924, Kg3. Human ground truth: the concept is named for this position by Irving Chernev, quoted move by move. Corpus entry `capablanca-tartakower-1924-35Kg3-king-activation`. The most famous illustration of the concept there is, and it is a positive example of an unusually pure kind: the move does nothing except walk the king forward, and it costs two pawns with check to do it. The concept record's own claim is that in an endgame the king is a piece and belongs in the middle of the board; here that claim is priced. Nine moves later the king stands o",
-      "origin_kind": "historical-game",
-      "game": "Capablanca-Tartakower, New York 1924",
-      "concept_role": "positive",
-      "attributed_by": "Irving Chernev, quoted move by move — corpus entry capablanca-tartakower-1924-35Kg3-king-activation",
-      "engine": {
-        "engine_id": "Stockfish 18",
-        "test_level": 3,
-        "depth": 20,
-        "multipv": 3,
-        "best_move": "Kg3",
-        "eval_cp": 295,
-        "verdict": "supports",
-        "verdict_note": "completely, and by the largest margin in this corpus. 35.Kg3 is the engine's first choice at +2.95; the second-best move is +0.46. The move that gives away two pawns with check is worth two and a half pawns more than any move that keeps them. Depth 20 rather than 24: this is a simplified rook ending, the case this project has already recorded as failing to converge deeper. The 2.49 gap is not a number that needs more depth."
-      }
     }
   ],
   "counterexamples": [

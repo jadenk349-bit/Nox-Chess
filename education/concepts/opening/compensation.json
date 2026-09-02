@@ -194,6 +194,13 @@
         "verdict": "contradicts",
         "verdict_note": "Activity without compensation. 4.Nxe5 gives a knight for a pawn and produces a genuinely mobile centre and gain of time against the black knights, yet evaluates at -1.67 against +0.08 for the best move. Direct evidence that visible activity is not the same thing as adequate compensation, which is the trap this concept most needs guarding against."
       }
+    },
+    {
+      "fen": "r1bqkb1r/pppp1ppp/5n2/4n3/3PP3/2N5/PPP2PPP/R1BQKB1R b KQkq d3 0 5",
+      "note": "Registered false-positive case `active-pieces-are-not-compensation`, kept on the record as well as in tests/false_positive_cases.json so that the concept carries its own negative evidence. THE SURFACE PATTERN IS PRESENT: After 1.e4 e5 2.Nf3 Nc6 3.Nc3 Nf6 4.Nxe5 Nxe5 5.d4 — the Halloween Gambit. White has given a knight for a pawn and has a big centre with tempo, every piece pointing forward, and Black's knight about to be chased twice. WHY IT IS NOT THE CONCEPT: This record's first trap names this exact opening: \"Being down material with active pieces is not the same as having compensation. The Halloween Gambit position has active pieces and measures 1.75 pawns worse.\" WHAT THE SYSTEM DOES: The API does not report compensation here. Stockfish 18 at depth 22 says +1.71 from Black's side, which is the record's own figure re-measured independently and arriving within four centipawns of it. The activity is real; the compensation is not. Note what the API DOES report — center-control for White — which is true and is the thing that makes the position look compensated.",
+      "origin_kind": "constructed-test",
+      "concept_role": "negative",
+      "false_positive_case": "active-pieces-are-not-compensation"
     }
   ],
   "ambiguous_examples": [],

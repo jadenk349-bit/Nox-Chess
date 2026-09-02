@@ -237,6 +237,14 @@
         "verdict": "supports",
         "verdict_note": "Bxh7+ collapses from BEST at +6.71 to LAST at +3.77 — a swing of 2.94 pawns, and from 1.41 ahead of the field to 1.59 behind it, on one defender of g5. The concept's central precondition is confirmed. HONEST QUALIFICATION: +3.77 still means White is much better, because White is much better in this constructed position for unrelated reasons — the sacrifice throws away most of an advantage rather than losing outright. Note also that the engine's line after Bxh7+ Kxh7 is Bc1-g5, not Ng5+, so White does recover some compensation; the textbook refutation ...Bxg5 is not what Stockfish plays. Contrast this clean tactical isolation with the three failed attempts to isolate the outpost."
       }
+    },
+    {
+      "fen": "r1bq1rk1/pppn1ppp/4pn2/8/8/2NB4/PPP2PPP/R1BQ1RK1 w - - 0 1",
+      "move_uci": "d3h7",
+      "note": "Registered false-positive case `a-bishop-eyeing-h7-is-not-a-greek-gift`, kept on the record as well as in tests/false_positive_cases.json so that the concept carries its own negative evidence. THE SURFACE PATTERN IS PRESENT: A white bishop on d3 bears on h7, the black king is castled short behind an untouched h-pawn, and Bxh7+ is available. That is the picture the pattern is famous for. WHY IT IS NOT THE CONCEPT: This record's third trap, word for word: \"Bxh7+ 'looks like' the Greek gift whenever a bishop eyes h7; without the knight and queen in range it is just a lost bishop.\" White's only knight is on c3 and cannot reach g5. And the fifth indicator_against fires too — a knight covers the kingside: the black knight on f6 guards h7, so the king does not even have to take. WHAT THE SYSTEM DOES: The API does not report greek-gift, because the matcher asks for Vukovic's three pieces rather than for a bishop pointing at h7. Stockfish 18 settles what the move is worth: the position is 0.00 with a normal move and Bxh7+ scores -3.89, and the refutation is not even Kxh7 - the KNIGHT takes on h7. Nearly four pawns, for the most recognisable sacrifice in chess played one piece short. The record's first trap says the pattern's recognisability is exactly why it gets played where it does not work, and this is that sentence with a number.",
+      "origin_kind": "constructed-test",
+      "concept_role": "negative",
+      "false_positive_case": "a-bishop-eyeing-h7-is-not-a-greek-gift"
     }
   ],
   "ambiguous_examples": [],

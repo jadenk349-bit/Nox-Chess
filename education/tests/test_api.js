@@ -2234,6 +2234,35 @@ const { concepts } = API.knowledge();
       }
     }
   }
+  // NO POSITION TWICE ON ONE RECORD, and this exists because it happened. The
+  // script that promotes registered false-positive cases onto their records as
+  // counterexamples checked for an existing entry by (fen, move) and the stored
+  // entries carry the move under `move_uci`, so every promoted case was added
+  // again on the next run. Nineteen duplicates accumulated before anything
+  // noticed, and nothing would have: a duplicated counterexample passes every
+  // other check in this suite twice.
+  {
+    let dupes = [];
+    for (const dir of fs.readdirSync(path.join(ROOT, 'concepts'))) {
+      const dp = path.join(ROOT, 'concepts', dir);
+      if (!fs.statSync(dp).isDirectory()) continue;
+      for (const fn of fs.readdirSync(dp)) {
+        if (!fn.endsWith('.json')) continue;
+        const c = JSON.parse(fs.readFileSync(path.join(dp, fn), 'utf8'));
+        for (const k of ['examples', 'counterexamples', 'ambiguous_examples']) {
+          const seen = new Set();
+          for (const e of c[k] || []) {
+            const key = `${e.fen}|${e.move_uci || e.move || ''}`;
+            if (seen.has(key)) dupes.push(`${c.id}.${k}: ${key}`);
+            seen.add(key);
+          }
+        }
+      }
+    }
+    ok('no position appears twice in one field of one record',
+       dupes.length === 0, dupes.slice(0, 4).join(' | '));
+  }
+
   ok('constructed controlled pairs across the base', pairs >= 30, String(pairs));
   ok('...and every one of them discriminates', broken.length === 0, broken.slice(0, 4).join(' | '));
   // Printed, not asserted away: the count of pairs the matcher is known to be

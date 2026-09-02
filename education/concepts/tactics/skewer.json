@@ -144,14 +144,6 @@
         "note": "PROVEN, from the mover's side: after Rb1 White is LOST in 7, and the tablebase's best move is Qxb1+. The front unit does not move; it eats."
       },
       "false_positive_case": "a-skewer-the-front-unit-eats"
-    },
-    {
-      "fen": "1r4k1/8/8/1q6/8/8/8/R5K1 w - - 0 1",
-      "move_uci": "a1b1",
-      "note": "Registered false-positive case `a-skewer-the-front-unit-eats`, kept on the record as well as in tests/false_positive_cases.json so that the concept carries its own negative evidence. THE SURFACE PATTERN IS PRESENT: Rb1 attacks the black queen on b5 with the rook on b8 directly behind it. More valuable unit in front, less valuable behind, nothing between — the geometry of a skewer, and the detector says so: 'The queen on b5 has to move, and the rook on b8 behind it falls.' WHY IT IS NOT THE CONCEPT: This record's first indicator_against: \"The front unit can capture the skewering piece.\" The queen is not obliged to move at all; she takes the rook, which is undefended. WHAT THE SYSTEM DOES: Reported at HIGH confidence until a guard was written. Syzygy settles it without an opinion: after Rb1 the position is a WIN FOR BLACK, dtz 1, mate in 7, and the tablebase's own best move is Qxb1+. The guard is one step wider than the record's wording — it asks whether ANY capture of the skewering piece is profitable rather than only the front unit's — and that is deliberate, because a skewering piece somebody else eats is not a skewer either. skewer fell from 11.4% to 7.6% of the 788 shipped puzzles.",
-      "origin_kind": "constructed-test",
-      "concept_role": "negative",
-      "false_positive_case": "a-skewer-the-front-unit-eats"
     }
   ],
   "ambiguous_examples": [

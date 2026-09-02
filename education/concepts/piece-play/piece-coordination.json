@@ -159,7 +159,15 @@
       "attributed_by": "unattributed training page; used only for the coordination wording, and the position is independently corroborated — corpus entry karpov-kasparov-1985-g16-16Nd3-piece-coordination"
     }
   ],
-  "counterexamples": [],
+  "counterexamples": [
+    {
+      "fen": "4k3/8/8/8/8/8/8/R3K2R w KQ - 0 1",
+      "note": "Registered false-positive case `pieces-on-opposite-wings`, kept on the record as well as in tests/false_positive_cases.json so that the concept carries its own negative evidence. THE SURFACE PATTERN IS PRESENT: Two rooks and a king, all developed, none in each other's way, each with an open file. Nothing is badly placed and a reader looking for a name would reach for coordination. WHY IT IS NOT THE CONCEPT: This record's second indicator_against: \"Pieces on opposite wings with unrelated purposes.\" And its second trap: \"Individually well-placed pieces are not the same as coordinated pieces, and this is exactly the distinction the concept exists to make.\" WHAT THE SYSTEM DOES: The API reports open-file and piece-activity and does not report coordination, which is the right set of three answers. This record's first trap is the reason it has no matcher at all: \"This is the concept most easily misused as a label for any quiet move whose point is not understood. It must never be the default explanation when nothing else fits\" — so the concept is deliberately unreachable from the board, and this case exists to hold that decision in place rather than to test a guard.",
+      "origin_kind": "constructed-test",
+      "concept_role": "negative",
+      "false_positive_case": "pieces-on-opposite-wings"
+    }
+  ],
   "ambiguous_examples": [],
   "explanations": {
     "by_level": {

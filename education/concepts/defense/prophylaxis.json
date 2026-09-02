@@ -165,7 +165,16 @@
       }
     }
   ],
-  "counterexamples": [],
+  "counterexamples": [
+    {
+      "fen": "4k3/pp4pp/3p4/2pPp3/2P1P3/8/PP4PP/4K3 w - - 0 1",
+      "move_uci": "e1d1",
+      "note": "Registered false-positive case `a-quiet-move-preventing-nothing`, kept on the record as well as in tests/false_positive_cases.json so that the concept carries its own negative evidence. THE SURFACE PATTERN IS PRESENT: Kd1 in a locked position: a quiet, non-committal move that loses nothing and can be described afterwards as restraining Black's plans. WHY IT IS NOT THE CONCEPT: This record's first trap: \"Any quiet move can be called prophylactic after the fact. The claim requires naming the specific idea prevented — if you cannot name it, the move was just quiet.\" Nothing is prevented here; the structure prevents everything by itself, and did so before the move. WHAT THE SYSTEM DOES: The API reports nothing at all here — not prophylaxis, not restraint, not anything. That is the correct answer and it is the one a keyword rule would fail: every word in the record about quiet moves in blocked positions is true of this position, and the concept is absent. This record's third trap is why there is no matcher for it: prophylaxis is a property of what a move DENIES, which requires knowing what the opponent intended, and this base does not guess at intentions.",
+      "origin_kind": "constructed-test",
+      "concept_role": "negative",
+      "false_positive_case": "a-quiet-move-preventing-nothing"
+    }
+  ],
   "ambiguous_examples": [],
   "explanations": {
     "by_level": {

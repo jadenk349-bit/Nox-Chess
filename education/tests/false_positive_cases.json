@@ -566,6 +566,68 @@
       "status": "resolved",
       "evidence": "feature-detector",
       "resolution": "The API does not report dead-position here, and the record's own example shows the contrast: K+B vs K, where no series of legal moves reaches mate at all and Syzygy proves the draw over every continuation. The two records are neighbours and the difference between them is exactly this — `insufficient-material` is a software convention and `dead-position` is the Law it approximates, which is why this base keeps them apart and files the first as terminology."
+    },
+    {
+      "id": "a-bishop-eyeing-h7-is-not-a-greek-gift",
+      "concept": "greek-gift",
+      "surface_pattern": "A white bishop on d3 bears on h7, the black king is castled short behind an untouched h-pawn, and Bxh7+ is available. That is the picture the pattern is famous for.",
+      "why_not": "This record's third trap, word for word: \"Bxh7+ 'looks like' the Greek gift whenever a bishop eyes h7; without the knight and queen in range it is just a lost bishop.\" White's only knight is on c3 and cannot reach g5. And the fifth indicator_against fires too — a knight covers the kingside: the black knight on f6 guards h7, so the king does not even have to take.",
+      "fen": "r1bq1rk1/pppn1ppp/4pn2/8/8/2NB4/PPP2PPP/R1BQ1RK1 w - - 0 1",
+      "move": "d3h7",
+      "status": "resolved",
+      "evidence": "feature-detector + engine",
+      "resolution": "The API does not report greek-gift, because the matcher asks for Vukovic's three pieces rather than for a bishop pointing at h7. Stockfish 18 settles what the move is worth: the position is 0.00 with a normal move and Bxh7+ scores -3.89, and the refutation is not even Kxh7 - the KNIGHT takes on h7. Nearly four pawns, for the most recognisable sacrifice in chess played one piece short. The record's first trap says the pattern's recognisability is exactly why it gets played where it does not work, and this is that sentence with a number."
+    },
+    {
+      "id": "checks-that-improve-the-defender",
+      "concept": "initiative",
+      "surface_pattern": "Black's queen has been to c4, c5, h5 and now e5, hitting something every time, and White has answered every time. One side keeps making threats and the other keeps replying: that is what an initiative looks like from outside.",
+      "why_not": "This record's first trap: \"A series of checks is not an initiative. If the opponent's forced replies improve their position, you are helping them.\" Every one of White's forced answers here — Rxd6, Rad1, Ne3, Nd4, Nc4 — centralises a piece.",
+      "fen": "4rnk1/r2n1p2/1p1R2pp/pP5q/3N4/P3N1P1/1Q3PKP/3R4 b - - 0 27",
+      "status": "resolved",
+      "evidence": "feature-detector + human-annotation",
+      "resolution": "Reti-Capablanca, New York 1924, move 27, and it is a world champion making the mistake. Keene: 'Capablanca is really doing his utmost on the fourth rank with his strongest piece, but the queen is no match for White's heavily centralised knights and rooks. Black had to try an exchange sacrifice and play 27...Rxe3!' The API reports weak-square and open-file here and does not report initiative — correctly, and for a reason the record states as its third trap: the initiative is a property of the SEQUENCE and is not detectable from the board at all. Corpus entry `reti-capablanca-1924-27Qe5-initiative-negative`."
+    },
+    {
+      "id": "active-pieces-are-not-compensation",
+      "concept": "compensation",
+      "surface_pattern": "After 1.e4 e5 2.Nf3 Nc6 3.Nc3 Nf6 4.Nxe5 Nxe5 5.d4 — the Halloween Gambit. White has given a knight for a pawn and has a big centre with tempo, every piece pointing forward, and Black's knight about to be chased twice.",
+      "why_not": "This record's first trap names this exact opening: \"Being down material with active pieces is not the same as having compensation. The Halloween Gambit position has active pieces and measures 1.75 pawns worse.\"",
+      "fen": "r1bqkb1r/pppp1ppp/5n2/4n3/3PP3/2N5/PPP2PPP/R1BQKB1R b KQkq d3 0 5",
+      "status": "resolved",
+      "evidence": "feature-detector + engine",
+      "resolution": "The API does not report compensation here. Stockfish 18 at depth 22 says +1.71 from Black's side, which is the record's own figure re-measured independently and arriving within four centipawns of it. The activity is real; the compensation is not. Note what the API DOES report — center-control for White — which is true and is the thing that makes the position look compensated."
+    },
+    {
+      "id": "a-quiet-move-preventing-nothing",
+      "concept": "prophylaxis",
+      "surface_pattern": "Kd1 in a locked position: a quiet, non-committal move that loses nothing and can be described afterwards as restraining Black's plans.",
+      "why_not": "This record's first trap: \"Any quiet move can be called prophylactic after the fact. The claim requires naming the specific idea prevented — if you cannot name it, the move was just quiet.\" Nothing is prevented here; the structure prevents everything by itself, and did so before the move.",
+      "fen": "4k3/pp4pp/3p4/2pPp3/2P1P3/8/PP4PP/4K3 w - - 0 1",
+      "move": "e1d1",
+      "status": "resolved",
+      "evidence": "feature-detector",
+      "resolution": "The API reports nothing at all here — not prophylaxis, not restraint, not anything. That is the correct answer and it is the one a keyword rule would fail: every word in the record about quiet moves in blocked positions is true of this position, and the concept is absent. This record's third trap is why there is no matcher for it: prophylaxis is a property of what a move DENIES, which requires knowing what the opponent intended, and this base does not guess at intentions."
+    },
+    {
+      "id": "loose-pieces-that-cannot-drop-off",
+      "concept": "lpdo",
+      "surface_pattern": "Both rooks are undefended in a position where the phrase 'loose pieces drop off' would be quoted without a second thought.",
+      "why_not": "This record's first indicator_against: \"Closed position where no forcing move reaches the loose piece.\" The b-file is stopped by rammed pawns and no forcing move touches either rook. And its first trap: \"A piece being undefended is not a mistake, and calling it one teaches a habit of pointless defending.\"",
+      "fen": "1r4k1/1p3ppp/1p6/1P6/1P6/8/5PPP/1R4K1 w - - 0 1",
+      "status": "resolved",
+      "evidence": "feature-detector + engine",
+      "resolution": "The API reports neither lpdo nor loose-piece here. The `loose-piece` matcher was rewritten for exactly this and fell from 66.8% of shipped positions to 9.1% when it began requiring a forcing move that survives being forcing; `lpdo` is the aphorism about the same fact and inherits the discipline. Stockfish 18: +0.00. Two loose rooks and nothing to be done about either. The record's second trap is worth reading beside this: a ChessBase reader showed that the article which coined the phrase had chosen an example that was not an instance of it."
+    },
+    {
+      "id": "pieces-on-opposite-wings",
+      "concept": "piece-coordination",
+      "surface_pattern": "Two rooks and a king, all developed, none in each other's way, each with an open file. Nothing is badly placed and a reader looking for a name would reach for coordination.",
+      "why_not": "This record's second indicator_against: \"Pieces on opposite wings with unrelated purposes.\" And its second trap: \"Individually well-placed pieces are not the same as coordinated pieces, and this is exactly the distinction the concept exists to make.\"",
+      "fen": "4k3/8/8/8/8/8/8/R3K2R w KQ - 0 1",
+      "status": "resolved",
+      "evidence": "feature-detector",
+      "resolution": "The API reports open-file and piece-activity and does not report coordination, which is the right set of three answers. This record's first trap is the reason it has no matcher at all: \"This is the concept most easily misused as a label for any quiet move whose point is not understood. It must never be the default explanation when nothing else fits\" — so the concept is deliberately unreachable from the board, and this case exists to hold that decision in place rather than to test a guard."
     }
   ],
   "last_updated": "2026-09-01"
