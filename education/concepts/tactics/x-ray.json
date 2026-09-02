@@ -115,7 +115,15 @@
       }
     }
   ],
-  "counterexamples": [],
+  "counterexamples": [
+    {
+      "fen": "3qk3/3r4/3b4/8/8/8/8/3RK3 w - - 0 1",
+      "note": "Registered false-positive case `an-x-ray-with-two-blockers`, kept on the record as well as in tests/false_positive_cases.json so that the concept carries its own negative evidence. THE SURFACE PATTERN IS PRESENT: The white rook on d1, the black bishop on d6, the black rook on d7 and the black queen on d8 are all on the d-file with nothing else between them. A line piece acting through another piece towards something more valuable is the definition of an x-ray. WHY IT IS NOT THE CONCEPT: This record's first indicator_against: \"A second blocker sits further along the line.\" The precondition is a line piece, ONE intervening unit and a further square of interest; here there are two intervening units, so the rook acts through nothing — the pressure stops at the bishop. WHAT THE SYSTEM DOES: The API does not report x-ray. The distinction is worth stating because it is arithmetical rather than positional: one blocker is an x-ray, two is a queue, and the difference is a count that a reader looking at a file of pieces will not naturally make. This record's positive example is the DEFENSIVE form of the same geometry with exactly one blocker, tablebase-proven, and the two sit side by side for that reason.",
+      "origin_kind": "constructed-test",
+      "concept_role": "negative",
+      "false_positive_case": "an-x-ray-with-two-blockers"
+    }
+  ],
   "ambiguous_examples": [],
   "explanations": {
     "by_level": {

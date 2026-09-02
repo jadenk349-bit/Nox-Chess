@@ -760,6 +760,59 @@
       "status_note": "OPEN. Four constructions have been tried and Syzygy answered DRAW to every one of them: R7/8/8/8/4k3/4p3/1r6/4K3 b, 8/8/8/4k3/4p3/8/R7/1r2K3 w, 8/8/8/4k3/4p3/4K3/R7/1r6 w and the position on this line, all dtz 0. With the pawn on the fourth rank the defence holds from almost anywhere, which is itself the finding: the method is far more robust than the textbook statement of it, and the position that would show it failing needs the pawn further advanced AND the defending rook misplaced AND the defending king cut off, which is three conditions rather than one.",
       "evidence": "tablebase",
       "resolution": "NOT RESOLVED, and recorded so. This case is deliberately left open rather than filled with a position that does not show what it claims. tools/depth_report.py counts only resolved and partially-resolved cases towards a concept's false-positive coverage, so nothing in this base's score moves because this exists - it is here to keep a known gap visible, which is the whole reason the file has a status field."
+    },
+    {
+      "id": "a-knight-attacking-two-defended-pawns",
+      "concept": "knight-fork",
+      "surface_pattern": "Nd6+ attacks the king on e8 and the pawn on c7 — one knight, two enemy units, with check. That is the geometry of a royal fork.",
+      "why_not": "This record's own paired example makes the distinction: with a bishop on b7 the same knight on the same square forks king and bishop, and with b7 empty it checks and attacks a defended pawn. \"A fork needs two things worth taking\", and a pawn defended by the king it is forking is not one of them.",
+      "fen": "4k3/p1p5/8/1N6/8/8/8/4K3 w - - 0 1",
+      "move": "b5d6",
+      "status": "resolved",
+      "evidence": "feature-detector + tablebase",
+      "resolution": "PROVEN. The API does not report a fork, and Syzygy says the position is a DRAW at dtz 0 whose best move is Nxa7 — a different capture entirely. The controlled pair on this record is one man apart: put a bishop on b7 and the same move becomes a genuine fork, and the tablebase still says draw, because the fork wins a bishop and knight-and-king against king-and-two-pawns is drawn. Two positions, one piece of difference, and the RESULT is the same in both — which is the point of the pair. It isolates whether the fork is there, not who is winning."
+    },
+    {
+      "id": "a-smothered-pattern-with-luft",
+      "concept": "smothered-mate",
+      "surface_pattern": "A knight on g5, a black king on h8, a rook on g8 boxing it in — the smothered-mate picture, and Nf7+ is available.",
+      "why_not": "This record's first indicator_against: \"A flight square is empty or can be vacated.\" One pawn stands on h6 instead of h7, so after Nf7+ the king goes to h7.",
+      "fen": "6rk/6p1/7p/6N1/8/8/8/6K1 w - - 0 1",
+      "move": "g5f7",
+      "status": "resolved",
+      "evidence": "feature-detector + tablebase",
+      "resolution": "PROVEN, and the proof is the sharpest pair in this base. With the pawn on h7 the same knight move is mate in ONE by tablebase. With it on h6 the same move leaves White PROVEN LOST — dtz -4, mate in 38 against — because the knight has walked into a corner it cannot leave. One pawn, one square, and the difference between mate in one and mate in thirty-eight the other way. The API reports neither smothered-mate nor checkmate here."
+    },
+    {
+      "id": "an-x-ray-with-two-blockers",
+      "concept": "x-ray",
+      "surface_pattern": "The white rook on d1, the black bishop on d6, the black rook on d7 and the black queen on d8 are all on the d-file with nothing else between them. A line piece acting through another piece towards something more valuable is the definition of an x-ray.",
+      "why_not": "This record's first indicator_against: \"A second blocker sits further along the line.\" The precondition is a line piece, ONE intervening unit and a further square of interest; here there are two intervening units, so the rook acts through nothing — the pressure stops at the bishop.",
+      "fen": "3qk3/3r4/3b4/8/8/8/8/3RK3 w - - 0 1",
+      "status": "resolved",
+      "evidence": "feature-detector",
+      "resolution": "The API does not report x-ray. The distinction is worth stating because it is arithmetical rather than positional: one blocker is an x-ray, two is a queue, and the difference is a count that a reader looking at a file of pieces will not naturally make. This record's positive example is the DEFENSIVE form of the same geometry with exactly one blocker, tablebase-proven, and the two sit side by side for that reason."
+    },
+    {
+      "id": "removing-one-of-two-defenders",
+      "concept": "removing-the-defender",
+      "surface_pattern": "Bxd5 captures a defended pawn and removes a unit that was guarding it. Capturing what defends the target is the concept's second precondition, word for word.",
+      "why_not": "The first precondition is that the target IS defended after the removal, and here the d5 pawn has two defenders — the pawns on c6 and e6. Taking one leaves the other, so nothing has been removed in the sense the concept means: the whole idea is that the target becomes takeable, and it does not.",
+      "fen": "4k3/8/2p1p3/3p4/8/8/6B1/3RK3 w - - 0 1",
+      "move": "g2d5",
+      "status": "resolved",
+      "evidence": "feature-detector",
+      "resolution": "The API does not report removing-the-defender. This record's positive example is the same shape with ONE defender — a knight on f6 guarding d5, a bishop on g5 to take it, +4.81 — and the two differ by a single pawn. The concept is a counting claim before it is a tactical one, which is why the positive example's note says what makes it clean: the bishop's capture wins nothing by itself, so the move only makes sense as removal of a guard."
+    },
+    {
+      "id": "overprotecting-a-point-nobody-attacks",
+      "concept": "overprotection",
+      "surface_pattern": "The pawn on d5 is defended by the bishop on e4 and the queen on d3 with a rook behind her — three units aimed at one square, which is Nimzowitsch's picture of an overprotected strong point.",
+      "why_not": "This record's second trap: \"This is the idea most likely to license bad advice. Do not report it unless the overprotecting pieces are demonstrably well placed for other reasons as well.\" And its second indicator_against: \"The point is not under any real pressure.\" Nothing attacks d5 at all.",
+      "fen": "4k3/8/8/3P4/4B3/3Q4/8/3RK3 w - - 0 1",
+      "status": "resolved",
+      "evidence": "feature-detector",
+      "resolution": "The API reports battery, center-control and passed-pawn here and does not report overprotection. That is the right set: the geometry really is a battery, the pawn really is passed, and the CLAIM that the extra defence is worthwhile is the one thing nobody can read off the board. This record's first trap says so in as many words — 'counting defenders is mechanical and says nothing' — and it is why there is no matcher."
     }
   ],
   "last_updated": "2026-09-01"

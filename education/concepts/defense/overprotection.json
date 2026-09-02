@@ -138,7 +138,15 @@
       }
     }
   ],
-  "counterexamples": [],
+  "counterexamples": [
+    {
+      "fen": "4k3/8/8/3P4/4B3/3Q4/8/3RK3 w - - 0 1",
+      "note": "Registered false-positive case `overprotecting-a-point-nobody-attacks`, kept on the record as well as in tests/false_positive_cases.json so that the concept carries its own negative evidence. THE SURFACE PATTERN IS PRESENT: The pawn on d5 is defended by the bishop on e4 and the queen on d3 with a rook behind her — three units aimed at one square, which is Nimzowitsch's picture of an overprotected strong point. WHY IT IS NOT THE CONCEPT: This record's second trap: \"This is the idea most likely to license bad advice. Do not report it unless the overprotecting pieces are demonstrably well placed for other reasons as well.\" And its second indicator_against: \"The point is not under any real pressure.\" Nothing attacks d5 at all. WHAT THE SYSTEM DOES: The API reports battery, center-control and passed-pawn here and does not report overprotection. That is the right set: the geometry really is a battery, the pawn really is passed, and the CLAIM that the extra defence is worthwhile is the one thing nobody can read off the board. This record's first trap says so in as many words — 'counting defenders is mechanical and says nothing' — and it is why there is no matcher.",
+      "origin_kind": "constructed-test",
+      "concept_role": "negative",
+      "false_positive_case": "overprotecting-a-point-nobody-attacks"
+    }
+  ],
   "ambiguous_examples": [],
   "explanations": {
     "by_level": {

@@ -107,7 +107,16 @@
       }
     }
   ],
-  "counterexamples": [],
+  "counterexamples": [
+    {
+      "fen": "4k3/8/2p1p3/3p4/8/8/6B1/3RK3 w - - 0 1",
+      "move_uci": "g2d5",
+      "note": "Registered false-positive case `removing-one-of-two-defenders`, kept on the record as well as in tests/false_positive_cases.json so that the concept carries its own negative evidence. THE SURFACE PATTERN IS PRESENT: Bxd5 captures a defended pawn and removes a unit that was guarding it. Capturing what defends the target is the concept's second precondition, word for word. WHY IT IS NOT THE CONCEPT: The first precondition is that the target IS defended after the removal, and here the d5 pawn has two defenders — the pawns on c6 and e6. Taking one leaves the other, so nothing has been removed in the sense the concept means: the whole idea is that the target becomes takeable, and it does not. WHAT THE SYSTEM DOES: The API does not report removing-the-defender. This record's positive example is the same shape with ONE defender — a knight on f6 guarding d5, a bishop on g5 to take it, +4.81 — and the two differ by a single pawn. The concept is a counting claim before it is a tactical one, which is why the positive example's note says what makes it clean: the bishop's capture wins nothing by itself, so the move only makes sense as removal of a guard.",
+      "origin_kind": "constructed-test",
+      "concept_role": "negative",
+      "false_positive_case": "removing-one-of-two-defenders"
+    }
+  ],
   "ambiguous_examples": [],
   "explanations": {
     "by_level": {
