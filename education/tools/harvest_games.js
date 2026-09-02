@@ -23,6 +23,12 @@ const API = require('../lib/analyze.js');
 const argv = process.argv.slice(2);
 const gamesFile = argv.includes('--games') ? argv[argv.indexOf('--games') + 1] : null;
 const needOnly = argv.includes('--need-only');
+// ...and the other gap, which is not the same one. `--need-only` looks for
+// concepts with NO position at all; `--need-master` looks for concepts that
+// have positions but none from a real game. Fifteen records are in the second
+// group and none in the first, so a tool that could only ask the first question
+// reported nothing to do.
+const needMaster = argv.includes('--need-master');
 const jsonOut = argv.includes('--json') ? argv[argv.indexOf('--json') + 1] : null;
 if (!gamesFile) { console.error('usage: --games <module exporting an array>'); process.exit(2); }
 
@@ -33,9 +39,11 @@ const { concepts: KB } = API.knowledge();
 const lacking = new Set();
 for (const [id, c] of Object.entries(KB)) {
   const pos = (c.examples || []).concat(c.counterexamples || [], c.ambiguous_examples || []);
-  if (!pos.length) lacking.add(id);
+  if (needMaster) {
+    if (pos.length && !pos.some(p => p.origin_kind === 'historical-game')) lacking.add(id);
+  } else if (!pos.length) lacking.add(id);
 }
-console.log(`${lacking.size} of ${Object.keys(KB).length} concepts currently have NO example position.\n`);
+console.log(`${lacking.size} of ${Object.keys(KB).length} concepts ${needMaster ? 'have positions but none from a real game' : 'currently have NO example position'}.\n`);
 
 const out = {};
 let totalPositions = 0, quietPositions = 0, badGames = 0;
@@ -60,7 +68,7 @@ for (const g of games) {
     let r;
     try { r = API.analyzeWithEducation({ fen: m.fen }); } catch (e) { continue; }
     for (const c of r.concepts) {
-      if (needOnly && !lacking.has(c.id)) continue;
+      if ((needOnly || needMaster) && !lacking.has(c.id)) continue;
       // Prefer a confident match in a quiet position, later in the game where
       // the structure has actually been decided by play rather than by theory.
       const score = (c.confidence === 'high' ? 3 : c.confidence === 'medium' ? 2 : 1)
