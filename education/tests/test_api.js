@@ -2089,6 +2089,48 @@ const { concepts } = API.knowledge();
   ok('controlled pairs are tablebase-proved, not argued', proved >= 7, String(proved));
 }
 
+{
+  // THE STRICTEST CONTROLLED PAIR THERE IS: the same board, only the side to
+  // move changed. White Ke5, Pe4, Black Ke7. Black to move loses; White to move
+  // draws. Nothing on the board differs at all, and Syzygy states the difference
+  // rather than illustrating it — dtz -4 against dtz 0.
+  //
+  // The same pair serves three records: `zugzwang` (being obliged to move is the
+  // whole of the difference), `key-square` (d6/e6/f6 are reachable in one and
+  // not the other) and, already in the base, `opposition`.
+  const rec = id => {
+    for (const dir of fs.readdirSync(path.join(ROOT, 'concepts'))) {
+      const d = path.join(ROOT, 'concepts', dir);
+      if (!fs.statSync(d).isDirectory()) continue;
+      for (const fn of fs.readdirSync(d)) {
+        if (!fn.endsWith('.json')) continue;
+        const c = JSON.parse(fs.readFileSync(path.join(d, fn), 'utf8'));
+        if (c.id === id) return c;
+      }
+    }
+    return null;
+  };
+  for (const id of ['zugzwang', 'key-square']) {
+    const c = rec(id);
+    ok(`${id}: has a positive and a counterexample`, c.examples.length && c.counterexamples.length);
+    const pair = c.examples[0].controlled_pair_with;
+    ok(`${id}: the pair differs only in the side to move`,
+       pair && pair.split(' ')[0] === c.examples[0].fen.split(' ')[0] &&
+       pair.split(' ')[1] !== c.examples[0].fen.split(' ')[1], pair);
+    ok(`${id}: both halves are tablebase-proved`,
+       c.examples[0].tablebase && c.counterexamples[0].tablebase);
+    ok(`${id}: and they disagree`,
+       c.examples[0].tablebase.wdl !== c.counterexamples[0].tablebase.wdl,
+       `${c.examples[0].tablebase.wdl} vs ${c.counterexamples[0].tablebase.wdl}`);
+  }
+  // Lucena on a rook file is a proven draw with every other ingredient present.
+  const luc = rec('lucena-position');
+  ok('lucena-position: the rook-file version is a proven draw',
+     luc.counterexamples.some(p => p.tablebase && p.tablebase.wdl === 'draw'));
+  ok('...and its pair is the same men one file over, a proven win',
+     luc.examples.some(p => p.tablebase && p.tablebase.wdl === 'win'));
+}
+
 /* ---------- report ---------- */
 console.log(`\nAPI  PASS ${pass}   FAIL ${fails.length}`);
 for (const [n, d] of fails) console.log(`  FAIL  ${n}\n        ${d}`);

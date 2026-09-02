@@ -504,7 +504,7 @@
     },
     "zugzwang": {
       "rating": "partial",
-      "mean_completeness": 0.615,
+      "mean_completeness": 0.846,
       "concepts": [
         "zugzwang"
       ],
@@ -520,7 +520,7 @@
     },
     "pawn-endgames": {
       "rating": "partial",
-      "mean_completeness": 0.583,
+      "mean_completeness": 0.833,
       "concepts": [
         "key-square"
       ],
@@ -592,8 +592,8 @@
       "domain": "endgame"
     },
     "named-theoretical-positions": {
-      "rating": "substantial",
-      "mean_completeness": 0.729,
+      "rating": "full",
+      "mean_completeness": 0.75,
       "concepts": [
         "lucena-position",
         "philidor-position",
@@ -734,9 +734,9 @@
     }
   },
   "tally": {
-    "substantial": 13,
+    "substantial": 12,
     "partial": 70,
-    "full": 2
+    "full": 3
   },
   "concepts": {
     "king-attack": {
@@ -1265,7 +1265,7 @@
       }
     },
     "key-square": {
-      "score": 0.583,
+      "score": 0.833,
       "check": {
         "definition": true,
         "terminology": true,
@@ -1273,11 +1273,11 @@
         "attribution": null,
         "recognition": true,
         "exceptions": null,
-        "positive_example": false,
-        "negative_example": false,
+        "positive_example": true,
+        "negative_example": true,
         "ambiguous_example": null,
         "engine_validation": false,
-        "tablebase_validation": false,
+        "tablebase_validation": true,
         "master_game": null,
         "false_positive_test": false,
         "beginner_explanation": true,
@@ -1496,7 +1496,7 @@
       }
     },
     "zugzwang": {
-      "score": 0.615,
+      "score": 0.846,
       "check": {
         "definition": true,
         "terminology": true,
@@ -1504,11 +1504,11 @@
         "attribution": true,
         "recognition": true,
         "exceptions": null,
-        "positive_example": false,
-        "negative_example": false,
+        "positive_example": true,
+        "negative_example": true,
         "ambiguous_example": null,
         "engine_validation": false,
-        "tablebase_validation": false,
+        "tablebase_validation": true,
         "master_game": null,
         "false_positive_test": false,
         "beginner_explanation": true,
@@ -1937,7 +1937,7 @@
       }
     },
     "lucena-position": {
-      "score": 0.688,
+      "score": 0.75,
       "check": {
         "definition": true,
         "terminology": true,
@@ -1946,7 +1946,7 @@
         "recognition": true,
         "exceptions": true,
         "positive_example": true,
-        "negative_example": false,
+        "negative_example": true,
         "ambiguous_example": false,
         "engine_validation": false,
         "tablebase_validation": true,
@@ -3624,11 +3624,11 @@
     "attribution": 0,
     "recognition": 0,
     "exceptions": 3,
-    "positive_example": 70,
-    "negative_example": 94,
+    "positive_example": 68,
+    "negative_example": 91,
     "ambiguous_example": 74,
     "engine_validation": 78,
-    "tablebase_validation": 13,
+    "tablebase_validation": 11,
     "master_game": 59,
     "false_positive_test": 104,
     "beginner_explanation": 0,

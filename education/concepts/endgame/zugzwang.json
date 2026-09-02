@@ -160,8 +160,44 @@
     ],
     "conflicts": []
   },
-  "examples": [],
-  "counterexamples": [],
+  "examples": [
+    {
+      "fen": "8/4k3/8/4K3/4P3/8/8/8 b - - 0 1",
+      "note": "The textbook zugzwang, and a controlled pair in the strictest form there is: the SAME BOARD with only the side to move changed. White king e5, pawn e4, black king e7. Black to move must give way - 1...Kd7 2.Kf6 or 1...Kf7 2.Kd6 - and loses. White to move is a draw, because White has to give way instead. Being obliged to move is the whole of the difference; nothing on the board differs at all.",
+      "origin_kind": "constructed-test",
+      "concept_role": "supports",
+      "side_to_move_benefits": "white",
+      "controlled_pair_with": "8/4k3/8/4K3/4P3/8/8/8 w - - 0 1",
+      "tablebase": {
+        "source": "Lichess tablebase (Syzygy, 7-piece)",
+        "pieces": 3,
+        "wdl": "loss",
+        "dtz": -4,
+        "dtm": -28,
+        "category": "loss",
+        "note": "PROVEN LOSS for the side to move, dtz -4. The identical position with White to move is a proven draw at dtz 0. Two lookups of one board, differing only in whose turn it is, returning different results is what zugzwang IS, and Syzygy states it rather than illustrating it."
+      }
+    }
+  ],
+  "counterexamples": [
+    {
+      "fen": "8/4k3/8/4K3/4P3/8/8/8 w - - 0 1",
+      "note": "The same board with White to move, which is NOT zugzwang for Black - it is White who must give way, and the position is a draw. A reader shown only the diagram cannot tell which of the two it is, and the concept lives entirely in the half of the FEN that a diagram does not draw.",
+      "origin_kind": "constructed-test",
+      "concept_role": "negative",
+      "side_to_move_benefits": "neither",
+      "controlled_pair_with": "8/4k3/8/4K3/4P3/8/8/8 b - - 0 1",
+      "tablebase": {
+        "source": "Lichess tablebase (Syzygy, 7-piece)",
+        "pieces": 3,
+        "wdl": "draw",
+        "dtz": 0,
+        "dtm": 0,
+        "category": "draw",
+        "note": "PROVEN DRAW at dtz 0. The identical board with Black to move is a proven loss."
+      }
+    }
+  ],
   "ambiguous_examples": [],
   "explanations": {
     "by_level": {

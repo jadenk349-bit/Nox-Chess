@@ -1891,3 +1891,29 @@ added, mirroring stalemate's exactly. Found by trying to build the
 counterexample, not by reading the code.
 
 `negative_example` 101 → **94 of 132**; `positive_example` 73 → **70**.
+
+
+## The strictest controlled pair there is
+
+**The same board, only the side to move changed.** White Ke5, pawn e4, black
+king e7. Black to move **loses** at dtz −4; White to move **draws** at dtz 0.
+Nothing on the board differs at all, and Syzygy states the difference rather than
+illustrating it.
+
+One pair now serves three records — `zugzwang`, where being obliged to move is
+the whole of the difference; `key-square`, where d6/e6/f6 are reachable in one
+and not the other; and `opposition`, which already had it. Both of the first two
+had **no examples of any kind** before.
+
+`lucena-position` gets the other classic: the same setup moved to the a-file with
+the defending king on c7 — a **proven draw** with every ingredient of the Lucena
+present, because on a rook file there is no short side to build the bridge on.
+One file is the difference between a win in 41 and a draw.
+
+**Three constructions were wrong and the tablebase caught every one** before it
+was written down: a rook-pawn Lucena with the defending king too far away is
+still a win; a trébuchet built from memory was a draw both ways; and two Philidor
+"refutations" simply hung a rook. The Philidor counterexample is still open —
+with the attacking pawn only on the fourth rank the defence draws from almost
+anywhere, so a genuine failure needs a more advanced position than the record's
+current example pairs with.

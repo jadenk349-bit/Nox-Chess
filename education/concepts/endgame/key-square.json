@@ -95,8 +95,44 @@
     ],
     "conflicts": []
   },
-  "examples": [],
-  "counterexamples": [],
+  "examples": [
+    {
+      "fen": "8/4k3/8/4K3/4P3/8/8/8 b - - 0 1",
+      "note": "For a pawn on e4 the key squares are d6, e6 and f6: if the white king reaches one of them the pawn queens whoever moves. Here White has not reached one yet, and with Black to move he does - 1...Kd7 2.Kf6, or 1...Kf7 2.Kd6. The pair is the same board with White to move, where Black holds the opposition and keeps him out.",
+      "origin_kind": "constructed-test",
+      "concept_role": "supports",
+      "side_to_move_benefits": "white",
+      "controlled_pair_with": "8/4k3/8/4K3/4P3/8/8/8 w - - 0 1",
+      "tablebase": {
+        "source": "Lichess tablebase (Syzygy, 7-piece)",
+        "pieces": 3,
+        "wdl": "loss",
+        "dtz": -4,
+        "dtm": -28,
+        "category": "loss",
+        "note": "PROVEN LOSS for Black, dtz -4: the key square is reached and the pawn queens. The paired position, White to move, is a proven draw - the key square is not reached."
+      }
+    }
+  ],
+  "counterexamples": [
+    {
+      "fen": "8/4k3/8/4K3/4P3/8/8/8 w - - 0 1",
+      "note": "The same three men, White to move, and the key squares d6/e6/f6 are unreachable: every approach is met by the black king taking the opposition, and the game is drawn. Key squares are a fact about the pawn, not about the king - being near them is not the same as being able to enter one.",
+      "origin_kind": "constructed-test",
+      "concept_role": "negative",
+      "side_to_move_benefits": "neither",
+      "controlled_pair_with": "8/4k3/8/4K3/4P3/8/8/8 b - - 0 1",
+      "tablebase": {
+        "source": "Lichess tablebase (Syzygy, 7-piece)",
+        "pieces": 3,
+        "wdl": "draw",
+        "dtz": 0,
+        "dtm": 0,
+        "category": "draw",
+        "note": "PROVEN DRAW at dtz 0, with the key squares one move out of reach for ever."
+      }
+    }
+  ],
   "ambiguous_examples": [],
   "explanations": {
     "by_level": {
