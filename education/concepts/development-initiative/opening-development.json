@@ -140,7 +140,32 @@
     ],
     "conflicts": []
   },
-  "examples": [],
+  "examples": [
+    {
+      "fen": "r3kb1r/p2nqppp/5n2/1B2p1B1/4P3/1Q6/PPP2PPP/2KR3R b kq - 2 12",
+      "note": "The Opera Game after 12.O-O-O. Every white piece is developed and the king is castled; Black has a queen on e7 that has been chased, a knight that had to come to d7 to block a check, a rook still on a8 and a bishop that has never moved. Morphy has spent twelve moves and used every one of them. The record's own trap is the one that matters here - 'counting developed pieces overstates a development lead. Count the moves each side still needs' - and by that count Black needs four moves to reach a normal position and does not have them: the game ends five plies later. -5.87 for Black in a position where MATERIAL IS LEVEL, which is the only honest way to say what a development lead is worth. PROVENANCE. The move list was replayed through this base's own move generator by tools/replay_game.js, which refuses a wrong list rather than guessing, so the FEN is verified rather than remembered. No named annotator is attached to this position for this concept, so it grounds the MASTER-GAME rung and not the human-grounded one.",
+      "origin_kind": "historical-game",
+      "game": "Morphy-Duke of Brunswick and Count Isouard, Paris 1858 (the Opera Game)",
+      "concept_role": "positive",
+      "side_to_move_benefits": "white",
+      "engine": {
+        "engine_id": "Stockfish 18",
+        "test_level": 3,
+        "depth": 20,
+        "threads": 10,
+        "hash_mb": 4096,
+        "multipv": 1,
+        "best_move": "a8b8",
+        "eval_cp": -587,
+        "mate_in": null,
+        "pv": [],
+        "alternatives": [],
+        "margin_cp": null,
+        "verdict": "supports",
+        "verdict_note": "-5.87 from Black's side at depth 20, settled at depth 20, with material level. Nearly six pawns, and the only thing either side has that the other does not is developed pieces."
+      }
+    }
+  ],
   "counterexamples": [
     {
       "fen": "r1bqkbnr/1ppp1ppp/p1n5/1B2p3/4P3/5N2/PPPP1PPP/RNBQK2R w KQkq - 0 4",

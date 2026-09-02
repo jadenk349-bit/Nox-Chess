@@ -108,6 +108,32 @@
   },
   "examples": [
     {
+      "fen": "1r2k1r1/pbppnp1p/1b3P2/8/Q7/B1PB1q2/P4PPP/3R2K1 w - - 0 21",
+      "move": "Qxd7+",
+      "move_uci": "a4d7",
+      "note": "Anderssen-Dufresne 1852, before 21.Qxd7+ - the position where the rule about search order is worth everything and worth nothing at the same time. Every move of the finish is a check: Qxd7+ Kxd7, Bf5+ Ke8, Bd7+ Kf8, Bxe7 mate. A player who looks at the forcing moves first finds it, which is the rule working; a player who looks at the forcing moves first in almost any other position finds nothing, which is the rule's second trap - it orders the search and does not choose the move. Black is a rook and a bishop up and threatening mate himself, so nothing but a forced sequence would do. PROVENANCE. The move list was replayed through this base's own move generator by tools/replay_game.js, which refuses a wrong list rather than guessing, so the FEN is verified rather than remembered. No named annotator is attached to this position for this concept, so it grounds the MASTER-GAME rung and not the human-grounded one.",
+      "origin_kind": "historical-game",
+      "game": "Anderssen-Dufresne, Berlin 1852 (the Evergreen Game)",
+      "concept_role": "positive",
+      "side_to_move_benefits": "white",
+      "engine": {
+        "engine_id": "Stockfish 18",
+        "test_level": 3,
+        "depth": 20,
+        "threads": 10,
+        "hash_mb": 4096,
+        "multipv": 1,
+        "best_move": "a4d7",
+        "eval_cp": null,
+        "mate_in": 4,
+        "pv": [],
+        "alternatives": [],
+        "margin_cp": null,
+        "verdict": "supports",
+        "verdict_note": "Mate in 4 at depth 20, settled at depth 1, every move of it a check. The limiting case of a forcing line."
+      }
+    },
+    {
       "fen": "r2k1b1r/8/2p1b3/3pPnpp/NP1P3P/B1P1qPPK/P1Q1B3/N2RR3 b - - 1 51",
       "note": "the side to move has 8 checks and 11 captures available — the forcing moves a search should look at first. The feature was established mechanically from the position by the page's own move generator and lib/features.js. What is NOT claimed is that this feature decides the position. Provenance: the puzzle corpus is engine self-play — a real position from a real game between engines, not a master game.",
       "origin_kind": "puzzle",

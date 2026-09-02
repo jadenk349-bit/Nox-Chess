@@ -109,6 +109,32 @@
   },
   "examples": [
     {
+      "fen": "rnbqkbnr/pppp1ppp/8/8/2B1Pp2/8/PPPP2PP/RNBQK1NR b KQkq - 1 3",
+      "move": "Qh4+",
+      "move_uci": "d8h4",
+      "note": "Anderssen-Kieseritzky, London 1851 - the Immortal Game, before 3...Qh4+. The queen comes out on move three, gives check, and cannot be driven away cheaply because g2-g3 is impossible with the f-pawn gone; White's king is committed to f1 and loses castling. This is the early queen sortie in the most famous game ever played, and the record's own engine_era_note is the right frame for it: engines are far more willing than classical teaching to bring the queen out when concrete lines support it. Here they support it. The engine prefers 3...Nc6 by about a third of a pawn, which is the honest size of the objection - the move is not refuted, it is second best. PROVENANCE. The move list was replayed through this base's own move generator by tools/replay_game.js, which refuses a wrong list rather than guessing, so the FEN is verified rather than remembered. No named annotator is attached to this position for this concept, so it grounds the MASTER-GAME rung and not the human-grounded one.",
+      "origin_kind": "historical-game",
+      "game": "Anderssen-Kieseritzky, London 1851 (the Immortal Game)",
+      "concept_role": "positive",
+      "side_to_move_benefits": "neither",
+      "engine": {
+        "engine_id": "Stockfish 18",
+        "test_level": 3,
+        "depth": 20,
+        "threads": 10,
+        "hash_mb": 4096,
+        "multipv": 1,
+        "best_move": "b8c6",
+        "eval_cp": 66,
+        "mate_in": null,
+        "pv": [],
+        "alternatives": [],
+        "margin_cp": null,
+        "verdict": "ambiguous",
+        "verdict_note": "+0.66 for White after the engine's preferred 3...Nc6. The queen sortie is playable and is not the first choice, which is exactly what a rule of thumb with a measured cost should look like."
+      }
+    },
+    {
       "fen": "rnbqkbnr/pppp1ppp/8/4p3/4P3/8/PPPP1PPP/RNBQKBNR w KQkq - 0 2",
       "note": "The measurement position. After 1.e4 e5, four second moves were compared under identical conditions using searchmoves, so this is a genuine controlled comparison: one position, one depth, one engine, only the move varying. The early queen sortie 2.Qh5 comes out 0.68 behind the developing move 2.Nf3. It is also 0.23 AHEAD of the King's Gambit 2.f4.",
       "origin_kind": "constructed-test",

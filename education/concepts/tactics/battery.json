@@ -85,6 +85,32 @@
   },
   "examples": [
     {
+      "fen": "4kb1r/p2rqppp/5n2/1B2p1B1/4P3/1Q6/PPP2PPP/2K4R w k - 0 14",
+      "move": "Rd1",
+      "move_uci": "h1d1",
+      "note": "The Opera Game, Morphy against the Duke of Brunswick and Count Isouard, Paris 1858, at move 14. The battery this base reports is BLACK'S, and it is the expensive kind: 'Black has two long-range pieces stacked on one line, on f8 and e7, and the line runs on to the enemy half - but the queen is in front of the bishop, which is the expensive way round: the front piece has to move first every time the line is touched.' Three moves later Black is mated. That is why this is the right master example rather than a picture of a good battery: the record's trap is that two line pieces on one line are only a battery if the line ARRIVES somewhere, and here a real battery on a real diagonal arrives nowhere and belongs to the losing side. PROVENANCE. The move list was replayed through this base's own move generator by tools/replay_game.js, which refuses a wrong list rather than guessing, so the FEN is verified rather than remembered. No named annotator is attached to this position for this concept, so it grounds the MASTER-GAME rung and not the human-grounded one.",
+      "origin_kind": "historical-game",
+      "game": "Morphy-Duke of Brunswick and Count Isouard, Paris 1858 (the Opera Game)",
+      "concept_role": "positive",
+      "side_to_move_benefits": "white",
+      "engine": {
+        "engine_id": "Stockfish 18",
+        "test_level": 3,
+        "depth": 20,
+        "threads": 10,
+        "hash_mb": 4096,
+        "multipv": 1,
+        "best_move": "a8b8",
+        "eval_cp": -587,
+        "mate_in": null,
+        "pv": [],
+        "alternatives": [],
+        "margin_cp": null,
+        "verdict": "ambiguous",
+        "verdict_note": "-5.87 from Black's side at depth 20 - the side holding the battery is losing by nearly six pawns, three moves from mate."
+      }
+    },
+    {
       "fen": "3k4/8/8/8/8/8/3Q4/3RK3 w - - 0 1",
       "note": "Rook on d1 and queen on d2 with nothing between them and the line running on to the black king: two pieces whose force is combined, which is what a battery is.",
       "origin_kind": "constructed-test",

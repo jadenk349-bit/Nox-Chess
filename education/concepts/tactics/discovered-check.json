@@ -86,6 +86,32 @@
   },
   "examples": [
     {
+      "fen": "r3r1k1/pp3pbp/1Bp3p1/8/2bP4/Q4N2/P3nPPP/3R1K1R b - - 3 20",
+      "move": "Nxd4+",
+      "move_uci": "e2d4",
+      "note": "Byrne-Fischer, New York 1956 - the Game of the Century, 20...Nxd4+, and it is the third check of the windmill. The knight steps off e2 and the detector says what happens: 'moving the knight uncovers the bishop on c4, which now checks the king.' The knight is free to take whatever it likes on the way, and what it takes here is a pawn on d4 with check, which is the entire point of the motif - the reply has to answer the check from a piece that did not move. Fischer, aged thirteen, plays the sequence four times. +6.05 from Black's side and the engine's first choice, in a position where Black has already given a queen. PROVENANCE. The move list was replayed through this base's own move generator by tools/replay_game.js, which refuses a wrong list rather than guessing, so the FEN is verified rather than remembered. No named annotator is attached to this position for this concept, so it grounds the MASTER-GAME rung and not the human-grounded one.",
+      "origin_kind": "historical-game",
+      "game": "D. Byrne-Fischer, New York 1956 (the Game of the Century)",
+      "concept_role": "positive",
+      "side_to_move_benefits": "black",
+      "engine": {
+        "engine_id": "Stockfish 18",
+        "test_level": 3,
+        "depth": 20,
+        "threads": 10,
+        "hash_mb": 4096,
+        "multipv": 1,
+        "best_move": "e2d4",
+        "eval_cp": 605,
+        "mate_in": null,
+        "pv": [],
+        "alternatives": [],
+        "margin_cp": null,
+        "verdict": "supports",
+        "verdict_note": "+6.05 from Black's side at depth 20, settled at depth 18, and the discovered check is the engine's first choice."
+      }
+    },
+    {
       "fen": "1r2k3/8/8/4B3/8/8/8/4R1K1 w - - 0 1",
       "move": "Bxb8+",
       "move_uci": "e5b8",
