@@ -188,9 +188,26 @@
       "origin_kind": "historical-game",
       "concept_role": "supports",
       "side_to_move_benefits": "neither"
+    },
+    {
+      "fen": "r3k3/pp4pp/8/2PPP3/4N3/8/PP3PPP/R3K3 w Qq - 0 1",
+      "note": "White pawns on c5, d5 and e5 controlling five squares in Black's half against none, with a knight on e4 that can enter on d6 or f6. Territory AND a way in, which is what this record requires.",
+      "origin_kind": "constructed-test",
+      "concept_role": "supports",
+      "side_to_move_benefits": "neither",
+      "controlled_pair_with": "r3k3/pp3ppp/8/8/4N3/8/PP3PPP/R3K3 w Qq - 0 1"
     }
   ],
-  "counterexamples": [],
+  "counterexamples": [
+    {
+      "fen": "r3k3/pp3ppp/8/8/4N3/8/PP3PPP/R3K3 w Qq - 0 1",
+      "note": "The same men with the three advanced pawns removed and Black's f-pawn back on f7. No territorial advantage, and the concept is not reported - the pair exists to show that the entry square alone is not the concept either. Both halves are needed and the record says so.",
+      "origin_kind": "constructed-test",
+      "concept_role": "negative",
+      "side_to_move_benefits": "neither",
+      "controlled_pair_with": "r3k3/pp4pp/8/2PPP3/4N3/8/PP3PPP/R3K3 w Qq - 0 1"
+    }
+  ],
   "ambiguous_examples": [
     {
       "fen": "r1bqkBr1/ppp2ppp/n4n2/3pp3/8/1P1PP3/P1PN1PPP/R2QKBNR w KQq - 1 7",

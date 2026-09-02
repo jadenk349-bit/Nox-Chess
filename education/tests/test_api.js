@@ -2173,6 +2173,80 @@ const { concepts } = API.knowledge();
   ok('controlled pairs across the base', paired >= 14, String(paired));
 }
 
+{
+  // EVERY CONTROLLED PAIR IN THE BASE MUST ACTUALLY DISCRIMINATE. Hand-built
+  // pairs get that wrong often — in one afternoon a rook-pawn Lucena with the
+  // defending king too far away turned out to be a win, a trébuchet built from
+  // memory was a draw both ways, two Philidor "refutations" simply hung a rook,
+  // and three constructed FENs put a king in check by accident. This walks the
+  // whole base and checks that the `supports` half reports the concept and the
+  // `negative` half does not.
+  // The true set of concepts a matcher can report, read from the matchers
+  // themselves. state/ladder.json's `api_detectable` is a different and wider
+  // thing - it includes concepts whose records merely CLAIM mechanical
+  // detectability, and `zugzwang` and `key-square` both claim it while saying
+  // "not yet written" in the same breath.
+  const MATCHERS = new Set(
+    MATCH.STRUCTURAL.concat(MATCH.MOVE_BASED).map(m => m.concept)
+      .concat(Object.values(MATCH.MOTIF_TO_CONCEPT)));
+  let pairs = 0, broken = [], blind = [];
+  for (const dir of fs.readdirSync(path.join(ROOT, 'concepts'))) {
+    const d = path.join(ROOT, 'concepts', dir);
+    if (!fs.statSync(d).isDirectory()) continue;
+    for (const fn of fs.readdirSync(d)) {
+      if (!fn.endsWith('.json')) continue;
+      const c = JSON.parse(fs.readFileSync(path.join(d, fn), 'utf8'));
+      const all = (c.examples || []).concat(c.counterexamples || []);
+      for (const p of all) {
+        if (!p.controlled_pair_with || p.origin_kind !== 'constructed-test') continue;
+        pairs++;
+        let said;
+        try {
+          said = API.analyzeWithEducation(p.move_uci ? { fen: p.fen, move: p.move_uci } : { fen: p.fen })
+            .concepts_all.some(x => x.id === c.id);
+        } catch (e) { broken.push(`${c.id}: ${e.message}`); continue; }
+        const want = p.concept_role !== 'negative';
+        // A pair may exist to document a distinction the base cannot detect at
+        // all — those are recorded on the record and excluded here by having no
+        // matcher. Only pairs whose concept IS reported somewhere are checked.
+        // Only pairs whose concept the base can actually RECOGNISE are checked.
+        // `detectability: mechanical` is a claim about what is possible, not
+        // about what is built - `zugzwang` and `key-square` both say mechanical
+        // and both say "not yet written" in the same breath - so the ladder's
+        // list of concepts with a matcher is the right gate.
+        // A KNOWN blind spot is not the same as an unnoticed one. An example
+        // may carry `matcher_blind` with a reason saying why the matcher is
+        // silent on a position that is nevertheless a real instance of the
+        // concept — two-weaknesses' tablebase-proven pawn ending is the first,
+        // where the second front is an outside passed pawn rather than a
+        // structural weakness, and widening the matcher to catch it measured at
+        // 58.5% of generated pawn endings. Those are counted and printed rather
+        // than passed over silently, and a blind flag without a written reason
+        // is itself a failure, because that is how a real bug would be hidden.
+        if (p.matcher_blind) {
+          blind.push(`${c.id}: ${p.fen}`);
+          if (!p.matcher_blind_reason) broken.push(`${c.id}: matcher_blind with no reason`);
+          continue;
+        }
+        if (said !== want && MATCHERS.has(c.id)) {
+          broken.push(`${c.id} ${p.concept_role}: said ${said}, want ${want} — ${p.fen}`);
+        }
+      }
+    }
+  }
+  ok('constructed controlled pairs across the base', pairs >= 30, String(pairs));
+  ok('...and every one of them discriminates', broken.length === 0, broken.slice(0, 4).join(' | '));
+  // Printed, not asserted away: the count of pairs the matcher is known to be
+  // blind to, each with its reason on the record.
+  ok('...and each known blind spot carries its reason',
+     blind.every(Boolean), `${blind.length} known blind: ${blind.join(' | ')}`);
+  // The checker that enforces this while building is a tool, not a habit.
+  ok('pair_check.js exists and never edits a record',
+     fs.existsSync(path.join(ROOT, 'tools', 'pair_check.js')) &&
+     /this tool never edits a record/.test(
+       fs.readFileSync(path.join(ROOT, 'tools', 'pair_check.js'), 'utf8')));
+}
+
 /* ---------- report ---------- */
 console.log(`\nAPI  PASS ${pass}   FAIL ${fails.length}`);
 for (const [n, d] of fails) console.log(`  FAIL  ${n}\n        ${d}`);

@@ -197,9 +197,26 @@
         "verdict_note": "fully, and it is the strongest confirmation in this corpus. The engine's first choice at depth 22 is 18...Ne6 at +0.80 for Black; the second and third are +0.41 and +0.31; and the move Capablanca actually played, 18...N6d7, is not in the top three at all. A GM's one-line positional judgement about the centre, written in 2017, picks the move a 2026 engine puts nearly half a pawn clear. Searched from Black's side. The 0.39 gap between the recommendation and the runner-up is large for a quiet middlegame move."
       },
       "attributed_by": "Raymond Keene (GM), The Spectator Australia — corpus entry reti-capablanca-1924-18Ne6-center-control"
+    },
+    {
+      "fen": "4k3/8/2n2n2/8/8/8/8/4K3 b - - 0 1",
+      "note": "Two black knights on c6 and f6 attacking d4, e4, d5 and e5 between them while White attacks none of the four: control of the centre measured as attacks on the four central squares, which is what the record asks for and what OCCUPATION would miss entirely - neither knight stands on a central square.",
+      "origin_kind": "constructed-test",
+      "concept_role": "supports",
+      "side_to_move_benefits": "neither",
+      "controlled_pair_with": "4k3/8/8/8/8/8/8/4K3 w - - 0 1"
     }
   ],
-  "counterexamples": [],
+  "counterexamples": [
+    {
+      "fen": "4k3/8/8/8/8/8/8/4K3 w - - 0 1",
+      "note": "Two bare kings. Nothing attacks a central square and nothing is reported, which is the point of the pair: this base measures the centre by who attacks it, so an empty board says nothing rather than saying the centre is shared.",
+      "origin_kind": "constructed-test",
+      "concept_role": "negative",
+      "side_to_move_benefits": "neither",
+      "controlled_pair_with": "4k3/8/2n2n2/8/8/8/8/4K3 b - - 0 1"
+    }
+  ],
   "ambiguous_examples": [
     {
       "fen": "rn1q1rk1/pbp1ppbp/1p1p1np1/8/1PP5/3P1NP1/PB2PPBP/RN1Q1RK1 b - - 0 8",

@@ -118,9 +118,30 @@
         "verdict": "supports",
         "verdict_note": "Inherited validation: this position ships as a puzzle, and the generator's standard is that exactly one move is best by at least GAP_MIN at confirmation depth, re-checked deeper by tools/verify_puzzles.js. The move is therefore engine-verified as best without this base running its own search. The motif label comes from findMotifs, not from the engine — the two are independent and both had to agree for this to be recorded."
       }
+    },
+    {
+      "fen": "4k3/8/8/8/8/2n5/8/R3K3 w - - 0 1",
+      "move": "Ra3",
+      "move_uci": "a1a3",
+      "note": "Ra3 attacks a knight on c3 that nothing defends: the piece is hanging and the page's own findMotifs says so.",
+      "origin_kind": "constructed-test",
+      "concept_role": "supports",
+      "side_to_move_benefits": "neither",
+      "controlled_pair_with": "4k3/8/8/8/1p6/2n5/8/R3K3 w - - 0 1"
     }
   ],
-  "counterexamples": [],
+  "counterexamples": [
+    {
+      "fen": "4k3/8/8/8/1p6/2n5/8/R3K3 w - - 0 1",
+      "move": "Ra3",
+      "move_uci": "a1a3",
+      "note": "The same rook move against the same knight, with a black pawn added on b4 to defend it. Undefended is the whole of what 'hanging' means, and one pawn removes it - the knight is still attacked, still worth three points, and no longer hanging. A base that called this hanging would be teaching a reader to count attackers and stop.",
+      "origin_kind": "constructed-test",
+      "concept_role": "negative",
+      "side_to_move_benefits": "neither",
+      "controlled_pair_with": "4k3/8/8/8/8/2n5/8/R3K3 w - - 0 1"
+    }
+  ],
   "ambiguous_examples": [],
   "explanations": {
     "by_level": {

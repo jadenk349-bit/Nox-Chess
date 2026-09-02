@@ -138,20 +138,19 @@
   ],
   "counterexamples": [
     {
-      "fen": "8/4k3/8/4K3/4P3/8/8/8 w - - 0 1",
-      "note": "Constructed controlled pair, negative half. IDENTICAL position; WHITE to move, so Black has the opposition and holds.",
+      "fen": "r3k3/8/8/4K3/4P3/8/8/7R w - - 0 1",
+      "note": "CORRECTED 2026-09-02. The counterexample here used to be the SAME board as the positive with only the side to move changed, labelled negative - and that was wrong: the opposition is present in both halves, held by whoever is NOT to move, so this base reports it in both and was being marked down for being right. The concept is per-side and the old entry read it as per-position. What replaces it is a real negative: the same two kings one square apart with a rook each still on the board, which is this record's own first trap - 'kings facing each other is trivially detectable and MEANS NOTHING outside endgames where king penetration decides'. The matcher's endgame gate refuses it, and the tablebase says why it should: with rooks on, the position is decided by Rh8+ and a mating net rather than by whose turn it is.",
       "origin_kind": "constructed-test",
       "concept_role": "negative",
-      "side_to_move_benefits": "neither",
-      "controlled_pair_with": "8/4k3/8/4K3/4P3/8/8/8 b - - 0 1",
+      "side_to_move_benefits": "white",
       "tablebase": {
         "source": "Lichess tablebase (Syzygy, 7-piece)",
-        "pieces": 3,
-        "wdl": "draw",
-        "dtz": 0,
-        "dtm": 0,
-        "category": "draw",
-        "note": "PROVEN draw. Establishes the necessity half: the extra pawn wins only when the opposition is held. Together with the paired position this proves the concept outright rather than evidencing it — a full point of result swings on which side must move."
+        "pieces": 5,
+        "wdl": "win",
+        "dtz": 3,
+        "dtm": 21,
+        "category": "win",
+        "note": "PROVEN WIN in 21, best move Rh8+. The kings stand in opposition and it decides nothing: the rooks decide it. That is the record's first trap stated as a proven result rather than as an opinion."
       }
     }
   ],

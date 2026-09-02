@@ -146,9 +146,26 @@
       "origin_kind": "historical-game",
       "concept_role": "supports",
       "side_to_move_benefits": "white"
+    },
+    {
+      "fen": "4k3/3p4/3N4/8/8/8/4P3/4K3 w - - 0 1",
+      "note": "A knight on d6 standing directly in front of a black pawn on d7 that has no pawn of its own behind it: the pawn is stopped by a piece or not at all, which is what this record means by a blockade.",
+      "origin_kind": "constructed-test",
+      "concept_role": "supports",
+      "side_to_move_benefits": "neither",
+      "controlled_pair_with": "4k3/3p4/8/3N4/8/8/4P3/4K3 w - - 0 1"
     }
   ],
-  "counterexamples": [],
+  "counterexamples": [
+    {
+      "fen": "4k3/3p4/8/3N4/8/8/4P3/4K3 w - - 0 1",
+      "note": "The same knight one square further back, on d5. It attacks the same pawn's advance square and it is NOT blockading: the pawn can step to d6 and the knight is not in front of anything. A piece near a pawn is not a blockader; a piece ON the square in front of it is, and one square is the whole difference.",
+      "origin_kind": "constructed-test",
+      "concept_role": "negative",
+      "side_to_move_benefits": "neither",
+      "controlled_pair_with": "4k3/3p4/3N4/8/8/8/4P3/4K3 w - - 0 1"
+    }
+  ],
   "ambiguous_examples": [
     {
       "fen": "8/5p2/1p2pkp1/1P4qp/3P4/5P1P/1Q3KP1/8 b - - 17 52",

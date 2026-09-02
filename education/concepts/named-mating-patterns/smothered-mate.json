@@ -84,12 +84,12 @@
   },
   "examples": [
     {
-      "fen": "6rk/5Npp/8/8/8/8/8/6K1 b - - 0 1",
-      "note": "The classical picture: king on h8, its own rook on g8 and its own pawns on g7 and h7, and a knight on f7. Every flight square is occupied by one of Black's own men. The positive half of a pair whose other half moves the h-pawn to h6 and turns the mate into a check.",
+      "fen": "6rk/6pp/8/6N1/8/8/8/6K1 w - - 0 1",
+      "note": "The classical picture, given as the MOVE that makes it rather than the position it leaves: Ng5-f7 mate against a king on h8 whose own rook on g8 and pawns on g7 and h7 occupy every flight square. Recorded as a move because this concept is a move concept - the record says 'reported only on an actual mate, because the pattern without the mate is a king that happens to be surrounded', and a position alone cannot carry that. Paired with the identical position with the h-pawn on h6, where Nf7 is a check and the king has h7.",
       "origin_kind": "constructed-test",
       "concept_role": "supports",
       "side_to_move_benefits": "white",
-      "controlled_pair_with": "6rk/5N1p/6p1/8/8/8/8/6K1 b - - 0 1",
+      "controlled_pair_with": "6rk/6p1/7p/6N1/8/8/8/6K1 w - - 0 1",
       "tablebase": {
         "source": "Lichess tablebase (Syzygy, 7-piece)",
         "pieces": 6,
@@ -100,17 +100,19 @@
         "checkmate": true,
         "stalemate": false,
         "note": "PROVEN: checkmate true. The pattern and the mate coincide here, which is what the record requires before the name is used."
-      }
+      },
+      "move": "Nf7#",
+      "move_uci": "g5f7"
     }
   ],
   "counterexamples": [
     {
-      "fen": "6rk/5N1p/6p1/8/8/8/8/6K1 b - - 0 1",
+      "fen": "6rk/6p1/7p/6N1/8/8/8/6K1 w - - 0 1",
       "note": "The pattern without the mate, which is this record's own phrase for it: a knight checking a king boxed in by its own rook and pawn, where the h-pawn has moved to h6 and h7 is free. Nf7+ is a check and nothing more. Paired with the identical position with the pawn on h7, which is mate in the classical picture.",
       "origin_kind": "constructed-test",
       "concept_role": "negative",
       "side_to_move_benefits": "neither",
-      "controlled_pair_with": "6rk/5Npp/8/8/8/8/8/6K1 b - - 0 1",
+      "controlled_pair_with": "6rk/6pp/8/6N1/8/8/8/6K1 w - - 0 1",
       "tablebase": {
         "source": "Lichess tablebase (Syzygy, 7-piece)",
         "pieces": 6,
@@ -121,7 +123,9 @@
         "checkmate": true,
         "stalemate": false,
         "note": "The PAIRED position - pawns on g7 and h7 - is a proven mate, checkmate true. This one, with the pawn on h6, is not: the king has h7."
-      }
+      },
+      "move": "Nf7+",
+      "move_uci": "g5f7"
     }
   ],
   "ambiguous_examples": [],

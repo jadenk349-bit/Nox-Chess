@@ -85,8 +85,30 @@
     "co_occurring": [],
     "conflicts": []
   },
-  "examples": [],
-  "counterexamples": [],
+  "examples": [
+    {
+      "fen": "4k3/8/8/8/8/5N2/8/1N2K3 w - - 0 1",
+      "move": "Nbd2",
+      "move_uci": "b1d2",
+      "note": "Two knights that can both reach d2, so the move must be written Nbd2 rather than Nd2. Algebraic notation names a move by its destination and adds only as much as is needed to make it unique, which means the NAME of a move depends on the whole position and not on the piece that makes it. The page's own toSAN is asked for both halves of this pair and returns Nbd2 here and Nd2 in the other.",
+      "origin_kind": "constructed-test",
+      "concept_role": "supports",
+      "side_to_move_benefits": "neither",
+      "controlled_pair_with": "4k3/8/8/8/8/8/8/1N2K3 w - - 0 1"
+    }
+  ],
+  "counterexamples": [
+    {
+      "fen": "4k3/8/8/8/8/8/8/1N2K3 w - - 0 1",
+      "move": "Nd2",
+      "move_uci": "b1d2",
+      "note": "The same knight making the same move on an otherwise identical board, written Nd2 - because the knight on f3 is not there and no other knight can reach the square. A reader who learns 'Nbd2' as the name of this move has learned something about the position rather than about the move, and would write it wrongly here.",
+      "origin_kind": "constructed-test",
+      "concept_role": "negative",
+      "side_to_move_benefits": "neither",
+      "controlled_pair_with": "4k3/8/8/8/8/5N2/8/1N2K3 w - - 0 1"
+    }
+  ],
   "ambiguous_examples": [],
   "explanations": {
     "by_level": {

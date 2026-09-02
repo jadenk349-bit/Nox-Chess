@@ -102,9 +102,30 @@
         "verdict": "supports",
         "verdict_note": "Inherited validation: this position ships as a puzzle, and the generator's standard is that exactly one move is best by at least GAP_MIN at confirmation depth, re-checked deeper by tools/verify_puzzles.js. The move is therefore engine-verified as best without this base running its own search. The motif label comes from findMotifs, not from the engine — the two are independent and both had to agree for this to be recorded."
       }
+    },
+    {
+      "fen": "r2qk3/Bp6/8/8/8/8/8/4K3 b q - 0 1",
+      "move": "b6",
+      "move_uci": "b7b6",
+      "note": "The bishop went pawn-grabbing to a7 and ...b6 shuts the door: the a7 bishop has no square that is not covered, which is the oldest trap in the opening repertoire.",
+      "origin_kind": "constructed-test",
+      "concept_role": "supports",
+      "side_to_move_benefits": "neither",
+      "controlled_pair_with": "r2qk3/1p6/B7/8/8/8/8/4K3 b q - 0 1"
     }
   ],
-  "counterexamples": [],
+  "counterexamples": [
+    {
+      "fen": "r2qk3/1p6/B7/8/8/8/8/4K3 b q - 0 1",
+      "move": "b6",
+      "move_uci": "b7b6",
+      "note": "The identical pawn move with the bishop on a6 instead of a7. It has b7 and b5 and the rest of the diagonal, and ...b6 traps nothing. One square of difference between a piece that is lost and a piece that is merely awkward.",
+      "origin_kind": "constructed-test",
+      "concept_role": "negative",
+      "side_to_move_benefits": "neither",
+      "controlled_pair_with": "r2qk3/Bp6/8/8/8/8/8/4K3 b q - 0 1"
+    }
+  ],
   "ambiguous_examples": [],
   "explanations": {
     "by_level": {

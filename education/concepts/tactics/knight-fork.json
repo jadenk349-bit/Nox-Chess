@@ -110,9 +110,30 @@
       "origin_kind": "puzzle",
       "concept_role": "supports",
       "side_to_move_benefits": "neither"
+    },
+    {
+      "fen": "4k3/pbp5/8/1N6/8/8/8/4K3 w - - 0 1",
+      "move": "Nd6+",
+      "move_uci": "b5d6",
+      "note": "Nd6+ forks the king on e8 and the bishop on b7. One man distinguishes it from the paired position: with b7 empty the same knight on the same square checks and attacks nothing else, and a check is not a fork.",
+      "origin_kind": "constructed-test",
+      "concept_role": "supports",
+      "side_to_move_benefits": "white",
+      "controlled_pair_with": "4k3/p1p5/8/1N6/8/8/8/4K3 w - - 0 1"
     }
   ],
-  "counterexamples": [],
+  "counterexamples": [
+    {
+      "fen": "4k3/p1p5/8/1N6/8/8/8/4K3 w - - 0 1",
+      "move": "Nd6+",
+      "move_uci": "b5d6",
+      "note": "The same knight arriving on the same square with b7 empty: Nd6+ is a check and nothing more. Two squares attacked, one of them a king, is not a fork - a fork needs two things worth taking, and this base does not call a check a fork merely because the knight also eyes an empty square. The page's own findMotifs tags the paired position and not this one.",
+      "origin_kind": "constructed-test",
+      "concept_role": "negative",
+      "side_to_move_benefits": "neither",
+      "controlled_pair_with": "4k3/pbp5/8/1N6/8/8/8/4K3 w - - 0 1"
+    }
+  ],
   "ambiguous_examples": [],
   "explanations": {
     "by_level": {

@@ -83,8 +83,26 @@
     "co_occurring": [],
     "conflicts": []
   },
-  "examples": [],
-  "counterexamples": [],
+  "examples": [
+    {
+      "fen": "3k4/8/8/8/8/8/3Q4/3RK3 w - - 0 1",
+      "note": "Rook on d1 and queen on d2 with nothing between them and the line running on to the black king: two pieces whose force is combined, which is what a battery is.",
+      "origin_kind": "constructed-test",
+      "concept_role": "supports",
+      "side_to_move_benefits": "neither",
+      "controlled_pair_with": "3k4/8/8/8/8/3P4/3Q4/3RK3 w - - 0 1"
+    }
+  ],
+  "counterexamples": [
+    {
+      "fen": "3k4/8/8/8/8/3P4/3Q4/3RK3 w - - 0 1",
+      "note": "The same two pieces with a white pawn on d3. The geometry is identical and the battery is gone, because the line no longer arrives anywhere - it stops on the mover's own pawn. Two pieces stacked on a file are a battery only when the file is theirs to use.",
+      "origin_kind": "constructed-test",
+      "concept_role": "negative",
+      "side_to_move_benefits": "neither",
+      "controlled_pair_with": "3k4/8/8/8/8/8/3Q4/3RK3 w - - 0 1"
+    }
+  ],
   "ambiguous_examples": [],
   "explanations": {
     "by_level": {
