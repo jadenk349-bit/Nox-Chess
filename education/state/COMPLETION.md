@@ -28,7 +28,7 @@ finished.
 
 ## Current state
 
-137 concepts · 205 sources · **161 engine-validated positions + 64 tablebase** ·
+137 concepts · 205 sources · **212 engine-validated positions + 60 tablebase-proven, of 343 in the base** ·
 **42 human-annotated corpus positions from 28 master games** · 32 replay-verified
 master games · 857 tests + 717 API + 374 audit + 3570 explanation assertions.
 
@@ -45,8 +45,8 @@ explanation-validated 105. Every rung its record allows: **26 of 137.**
 | corpus roles | 5 positive, 1 ambiguous, 0 negative | 19 positive, 13 ambiguous, 10 negative |
 | concepts with human grounding (twice-corrected measure) | 5 | 43 |
 | concepts with a Layer 4 matcher | 32 | 36 |
-| positions carrying an engine reading | 82 | 178 |
-| positions carrying a tablebase PROOF | 22 | 72 |
+| positions carrying an engine reading | 82 | 212 |
+| positions carrying a tablebase PROOF | 22 | 60 |
 | API false negatives on the corpus | 3 of 6 detectable | 1 of 38, recorded on purpose |
 | rank of the annotated concept | not measured | mean **2.3**, top-three on 11 of 13 |
 | confidence overclaims | not measured | 1 of 38, recorded on purpose |
