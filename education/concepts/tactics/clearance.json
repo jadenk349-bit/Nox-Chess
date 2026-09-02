@@ -84,9 +84,9 @@
     "A clearance that also opens a line towards your own king is a different move from the one you calculated."
   ],
   "limitations": [
-    "NO VERIFIED POSITION HAS BEEN BUILT FOR THIS RECORD, and that is recorded rather than filled. Three constructions were tried and thrown away: each needed the vacating move to come WITH TEMPO, and a minimal position with a queen, a blocking piece and a mating square either had no checking square for the blocker to leave on, or was already mate without the clearance. A wrong example of a motif is worse than none, because the label is the thing the reader is learning to see.",
+    "NO VERIFIED POSITION HAS BEEN BUILT FOR THIS RECORD, and that is recorded rather than filled. Three constructions were tried and thrown away: each needed the vacating move to come WITH TEMPO, and a minimal position with a queen, a blocking piece and a mating square either had no checking square for the blocker to leave on, or was already mate without the clearance. A wrong example of a motif is worse than none, because the label is the thing the reader is learning to see. UPDATE: a verified position now exists - 17...d4 in the position on this record, +6.37 against +0.40 at depth 28 - and it was FOUND rather than constructed. That is the lesson of the three failures: the constructions failed because a clearance needs the vacating move to come with tempo and a hand-built minimal position rarely has one, and a real game has as many as you like if you can state the geometry precisely enough to search for it.",
     "There is deliberately no matcher. Clearance is a claim about what the VACATED square is then used for, which is a property of the continuation and not of the move, and this base does not read continuations at the board.",
-    "NO AMBIGUOUS EXAMPLE, and the reason is the order of the work rather than a shortage of positions. This record has no POSITIVE example either, and an ambiguous example is a position where the concept is genuinely present and what to conclude from it is unclear - which cannot be written before there is an agreed instance of the concept being present at all. The four motifs in this base that lack a positive - `clearance`, `decoy`, `deflection`, `interference` - lack it for reasons written on each record, and the ambiguous rung waits on that. Writing one first would be asserting a doubtful instance of something this base has not yet shown a clear instance of.",
+    "NO AMBIGUOUS EXAMPLE, and the reason is the order of the work rather than a shortage of positions. This record has no POSITIVE example either, and an ambiguous example is a position where the concept is genuinely present and what to conclude from it is unclear - which cannot be written before there is an agreed instance of the concept being present at all. The four motifs in this base that lack a positive - `clearance`, `decoy`, `deflection`, `interference` - lack it for reasons written on each record, and the ambiguous rung waits on that. Writing one first would be asserting a doubtful instance of something this base has not yet shown a clear instance of. UPDATE: the positive example now exists, so the reason given here - that an ambiguous example cannot be written before there is an agreed instance of the concept being present at all - no longer holds. The ambiguous example is outstanding work, not blocked work.",
     "NO MASTER-GAME POSITION YET. This concept has no matcher, so the scan that supplied master positions to eleven other records - five famous games replayed and analysed position by position - could not nominate one here: the API never reports the concept, so there is nothing for a scan to find. Identifying an instance in a master game means reading the game, which is research rather than tooling, and it has not been done. Recorded rather than filled."
   ],
   "misconceptions": [],
@@ -101,7 +101,51 @@
     "co_occurring": [],
     "conflicts": []
   },
-  "examples": [],
+  "examples": [
+    {
+      "fen": "2kr4/ppp3rp/n1q1b2n/2PpPp2/1b6/1Q2P1PP/PP1NN3/1RBK1BR1 b - - 0 17",
+      "move": "d4",
+      "move_uci": "d5d4",
+      "origin_kind": "puzzle",
+      "concept_role": "positive",
+      "side_to_move_benefits": "black",
+      "note": "THE FIRST VERIFIED POSITION ON THIS RECORD. Three earlier constructions were tried by hand and thrown away - the limitation above records why - and this one was not constructed at all. It was found by asking the record's own sentence as a geometric question of every ply of all 788 shipped solutions: does a piece of ours leave a square, land where it is simply lost, give no check, and open a line that one of our own line pieces did not have?\n\n17...d4 is that move. The bishop on e6 looks down the a2-g8 diagonal and its own pawn on d5 is in the way; the pawn steps off and the bishop hits the queen on b3. The pawn cannot be kept - exd4 wins it - and that is the point rather than an objection: the record says clearance is 'usually recognised by the moving piece going somewhere pointless or losing itself, the value is entirely in the vacated square', and normal material reasoning about the pawn is exactly the reasoning that misses the move.\n\nStockfish 18 at depth 28 with three lines: +6.37 for d4, +0.40 and +0.37 for the next two. A gap of 597 centipawns between winning and level. That number is what makes this a teaching position rather than an illustration - the clearance is not a nicer way to win a won game, it is the whole of the difference between winning and not.\n\nWHAT IT IS NOT. The move is not a discovered check and not a discovered attack: it opens a line for the bishop but the pawn itself is not moving off a line to the king, and the page's own findMotifs() tags nothing here. That distinction is the reason this record exists beside `discovered-attack`, and the reason the scan that found it refuses any candidate whose move gives check.\n\nPROVENANCE. A shipped puzzle position, not a master game. It grounds the positive-example and engine rungs and NOT the master-game one; that limitation stands.",
+      "engine": {
+        "engine_id": "Stockfish 18",
+        "test_level": 3,
+        "depth": 28,
+        "multipv": 3,
+        "best_move": "d5d4",
+        "eval_cp": 637,
+        "mate_in": null,
+        "pv": [
+          "d5d4",
+          "b3d3",
+          "d4e3",
+          "d3e3",
+          "b4c5",
+          "e3f4",
+          "a6b4",
+          "e2c3",
+          "c5g1",
+          "f4b4"
+        ],
+        "alternatives": [
+          {
+            "move": "c6e8",
+            "eval_cp": 40
+          },
+          {
+            "move": "b4c5",
+            "eval_cp": 37
+          }
+        ],
+        "margin_cp": 597,
+        "verdict": "supports",
+        "verdict_note": "+6.37 against +0.40 for the second best at depth 28 with three lines. The clearance is the difference between winning and level, not a flourish on a won position."
+      }
+    }
+  ],
   "counterexamples": [
     {
       "fen": "4k3/8/8/3p4/3P4/8/3R4/3RK3 w - - 0 1",
