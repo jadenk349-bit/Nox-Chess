@@ -170,7 +170,34 @@
       }
     ]
   },
-  "examples": [],
+  "examples": [
+    {
+      "fen": "r1r3k1/p2n1ppp/2p1b3/1q1p4/N2Q4/5PP1/PP2PR1P/2R2BK1 w - - 4 20",
+      "move": "e3",
+      "move_uci": "e2e3",
+      "note": "Rubinstein-Salwe, Lodz 1908, 20.e3 - the annotated instance of this concept, and the position the matcher's second version was built against. The annotation lists what one quiet pawn move does: 'it gains a tempo by attacking Black's queen, opens a diagonal for the bishop, and clears the second rank so the rook can swing from f2 to c2'. The two pieces improved are the two doing least. The condition the record insists on is satisfied exactly - nothing urgent is happening - and it is worth noting that the move ALSO gains a tempo, which is why an earlier version of the matcher that demanded a fully quiet position missed this position entirely.",
+      "origin_kind": "historical-game",
+      "game": "Rubinstein-Salwe, Lodz 1908",
+      "concept_role": "positive",
+      "attributed_by": "Nicholas Van Der Nat (Chess.com), following the classical literature - corpus entry rubinstein-salwe-1908-20e3-improving",
+      "engine": {
+        "engine_id": "Stockfish 18",
+        "test_level": 3,
+        "depth": 22,
+        "threads": 10,
+        "hash_mb": 4096,
+        "multipv": 3,
+        "best_move": "e2e3",
+        "eval_cp": 31,
+        "mate_in": null,
+        "pv": [],
+        "alternatives": [],
+        "margin_cp": null,
+        "verdict": "supports",
+        "verdict_note": "+0.31 and the annotated move is the engine's FIRST choice on a three-line search. A clean agreement between a century-old annotation and a modern engine, and a small number - a third of a pawn, for the move the literature calls instructive, which is the right size for a principle about accumulating."
+      }
+    }
+  ],
   "counterexamples": [
     {
       "fen": "4r1k1/5ppp/8/8/8/8/5PPP/N5K1 w - - 0 1",

@@ -119,6 +119,32 @@
   },
   "examples": [
     {
+      "fen": "2r2qk1/r2n2p1/p3p2p/2pp4/8/Q3P3/PP2BPPP/2R2RK1 w - - 0 20",
+      "move": "e4",
+      "move_uci": "e3e4",
+      "note": "Fischer-Spassky 1972, game 6, 20.e4 - and it is here because of what this base did NOT have. The corpus entry was first filed under `pawn-breakthrough`, and the stress test showed that concept is the sacrificial motif for forcing a passer and is a different idea: a break challenges a structure. This record exists because an annotated position exposed the gap. Havanur: '20.e4! probing Black's pawn centre at its most vulnerable point.' The purpose is not material - it is to force one of the hanging pawns to commit, which is the standard method against that structure, and the same game supplies this base's `hanging-pawns` example four moves earlier.",
+      "origin_kind": "historical-game",
+      "game": "Fischer-Spassky, World Championship, Reykjavik 1972 (game 6)",
+      "concept_role": "positive",
+      "attributed_by": "Nagesh Havanur (ChessBase, 2022) and Anthony Levin (Chess.com, 2022) - corpus entry fischer-spassky-1972-g6-20e4-break",
+      "engine": {
+        "engine_id": "Stockfish 18",
+        "test_level": 3,
+        "depth": 22,
+        "threads": 10,
+        "hash_mb": 4096,
+        "multipv": 3,
+        "best_move": "e3e4",
+        "eval_cp": 40,
+        "mate_in": null,
+        "pv": [],
+        "alternatives": [],
+        "margin_cp": null,
+        "verdict": "supports",
+        "verdict_note": "+0.40 and the break is the engine's FIRST choice on a three-line search. Fischer's move confirmed as objectively best fifty years later, and at a size that says what a break is worth rather than what a combination is worth."
+      }
+    },
+    {
       "fen": "4k3/2p5/8/1P6/8/8/8/4K3 w - - 0 1",
       "move": "b6",
       "move_uci": "b5b6",

@@ -120,7 +120,32 @@
       }
     ]
   },
-  "examples": [],
+  "examples": [
+    {
+      "fen": "rnr3k1/4qpp1/p3b2p/1Bpp4/8/Q3PN2/PP3PPP/2R2RK1 b - - 1 16",
+      "note": "Fischer-Spassky, World Championship 1972, game 6, after 16.Bb5 - the position the structure is named for in the modern literature, with Anthony Levin (Chess.com) and Nagesh Havanur (ChessBase) both naming it outright. The annotation is careful in the way this record needs: 'usually, the side with hanging pawns should place his pieces actively and try to advance the pawns at an appropriate moment. Here, however, Spassky's pieces are passively placed.' The structure alone is not the verdict, which is this record's first trap - 'hanging pawns are not automatically weak. The structure is dynamic, and the same pair that loses one game wins the next depending on where the pieces are.' This base's own Layer 3 reports c5 and d5 independently: two pawns abreast that no pawn can defend, on files the opponent has none.",
+      "origin_kind": "historical-game",
+      "game": "Fischer-Spassky, World Championship, Reykjavik 1972 (game 6)",
+      "concept_role": "positive",
+      "attributed_by": "Anthony Levin (Chess.com, 2022) and Nagesh Havanur (ChessBase, 2022) - corpus entry fischer-spassky-1972-g6-hanging-pawns",
+      "engine": {
+        "engine_id": "Stockfish 18",
+        "test_level": 1,
+        "depth": null,
+        "threads": null,
+        "hash_mb": null,
+        "multipv": null,
+        "best_move": null,
+        "eval_cp": null,
+        "mate_in": null,
+        "pv": [],
+        "alternatives": [],
+        "margin_cp": null,
+        "verdict": "ambiguous",
+        "verdict_note": "DELIBERATELY NOT ENGINE-SCORED, and the corpus entry says so too. The human claim here is about a STRUCTURE rather than about a move, and an evaluation of the position would answer a different question - it would say who stands better, which nobody disputes, and not whether the pawn pair is what makes it so. A number attached here would look like evidence and be none."
+      }
+    }
+  ],
   "counterexamples": [
     {
       "fen": "4k3/8/8/8/2PPP3/8/8/4K3 w - - 0 1",

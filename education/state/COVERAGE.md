@@ -21,8 +21,8 @@ The completion assessment is judged on the ORIGINAL rule and criterion 1 stays w
 
 | rating | mean | area | concepts |
 |---|---|---|---|
-| full | 0.96 | `pawn-structures` | 5 |
-| full | 0.91 | `pawn-breaks` | 3 |
+| full | 0.99 | `pawn-structures` | 5 |
+| full | 0.93 | `pawn-breaks` | 3 |
 | full | 0.83 | `named-theoretical-positions` | 3 |
 | full | 0.83 | `official-rules` | 12 |
 | full | 0.81 | `opening-theory-concepts` | 4 |
@@ -42,6 +42,7 @@ The completion assessment is judged on the ORIGINAL rule and criterion 1 stays w
 | partial | 1.00 | `tactical-combinations` | 1 |
 | partial | 1.00 | `good-bad-bishops` | 1 |
 | partial | 1.00 | `bishop-pair` | 1 |
+| partial | 1.00 | `worst-placed-piece` | 1 |
 | partial | 1.00 | `tempo` | 1 |
 | partial | 1.00 | `space` | 1 |
 | partial | 1.00 | `center-control` | 1 |
@@ -69,7 +70,6 @@ The completion assessment is judged on the ORIGINAL rule and criterion 1 stays w
 | partial | 0.92 | `triangulation` | 1 |
 | partial | 0.88 | `fortresses` | 1 |
 | partial | 0.87 | `named-tactical-patterns` | 1 |
-| partial | 0.87 | `worst-placed-piece` | 1 |
 | partial | 0.87 | `strong-squares` | 1 |
 | partial | 0.87 | `rules-of-thumb` | 1 |
 | partial | 0.86 | `queen` | 1 |
@@ -134,14 +134,17 @@ The completion assessment is judged on the ORIGINAL rule and criterion 1 stays w
 | `theoretical-novelty` | 1.00 | x | x | x | . | x | x | . | . | . | . | . | . | x | x | x | x |
 | `backward-pawn` | 1.00 | x | x | x | x | x | x | x | x | x | x | . | x | x | x | x | x |
 | `doubled-pawns` | 1.00 | x | x | x | x | x | x | x | x | x | x | . | x | x | x | x | x |
+| `hanging-pawns` | 1.00 | x | x | x | . | x | x | x | x | x | x | x | x | x | x | x | x |
 | `isolated-queen-pawn` | 1.00 | x | x | x | x | x | x | x | x | x | x | . | x | x | x | x | x |
 | `outpost` | 1.00 | x | x | x | x | x | x | x | x | x | x | . | x | x | x | x | x |
+| `pawn-break` | 1.00 | x | x | x | . | x | x | x | x | x | x | x | x | x | x | x | x |
 | `weak-square` | 1.00 | x | x | x | x | x | x | x | x | x | x | . | x | x | x | x | x |
 | `bad-bishop` | 1.00 | x | x | x | x | x | x | x | x | x | x | . | x | x | x | x | x |
 | `bishop-pair` | 1.00 | x | x | x | x | x | x | x | x | x | x | . | x | x | x | x | x |
 | `exchange-sacrifice` | 1.00 | x | x | x | x | x | x | x | x | x | x | . | x | x | x | x | x |
 | `material-imbalance` | 1.00 | x | x | x | x | x | x | x | x | x | x | . | x | x | x | x | x |
 | `two-weaknesses` | 1.00 | x | x | x | x | x | x | x | x | x | x | x | x | x | x | x | x |
+| `worst-placed-piece` | 1.00 | x | x | x | x | x | x | x | x | x | x | . | x | x | x | x | x |
 | `notation` | 1.00 | x | x | x | x | x | . | x | x | . | . | . | . | x | x | x | x |
 | `hanging-piece` | 1.00 | x | x | x | . | x | x | x | x | . | x | x | . | x | x | x | x |
 | `loose-piece` | 1.00 | x | x | x | . | x | x | x | x | . | x | . | . | x | x | x | x |
@@ -155,7 +158,6 @@ The completion assessment is judged on the ORIGINAL rule and criterion 1 stays w
 | `prophylaxis` | 0.93 | x | x | x | x | x | x | x | x | - | x | . | x | x | x | x | x |
 | `initiative` | 0.93 | x | x | x | x | x | x | x | x | - | x | . | x | x | x | x | x |
 | `minority-attack` | 0.93 | x | x | x | x | x | x | x | x | - | x | . | x | x | x | x | x |
-| `pawn-break` | 0.93 | x | x | x | . | x | x | x | x | x | x | x | - | x | x | x | x |
 | `knight-vs-bishop` | 0.93 | x | x | x | x | x | x | x | x | - | x | . | x | x | x | x | x |
 | `piece-coordination` | 0.93 | x | x | x | x | x | x | x | x | - | x | . | x | x | x | x | x |
 | `fork` | 0.93 | x | x | x | . | x | x | x | x | x | x | x | - | x | x | x | x |
@@ -174,11 +176,9 @@ The completion assessment is judged on the ORIGINAL rule and criterion 1 stays w
 | `lucena-position` | 0.88 | x | x | x | x | x | x | x | x | - | x | x | - | x | x | x | x |
 | `vancura-position` | 0.88 | x | x | x | x | x | x | x | x | - | x | x | - | x | x | x | x |
 | `lpdo` | 0.87 | x | x | x | x | x | x | x | x | - | x | . | - | x | x | x | x |
-| `hanging-pawns` | 0.87 | x | x | x | . | x | x | - | x | x | x | x | - | x | x | x | x |
 | `hole` | 0.87 | x | x | x | x | x | x | x | x | - | x | . | - | x | x | x | x |
 | `pawn-breakthrough` | 0.87 | x | x | x | . | x | x | x | x | - | x | - | x | x | x | x | x |
 | `strong-square` | 0.87 | x | x | x | x | x | x | x | x | - | x | . | - | x | x | x | x |
-| `worst-placed-piece` | 0.87 | x | x | x | x | x | x | - | x | x | x | . | - | x | x | x | x |
 | `greek-gift` | 0.87 | x | x | x | x | x | x | x | x | - | x | . | - | x | x | x | x |
 | `knight-fork` | 0.87 | x | x | x | . | x | x | x | x | - | x | x | - | x | x | x | x |
 | `skewer` | 0.87 | x | x | x | . | x | x | x | x | x | x | x | - | x | x | x | - |
