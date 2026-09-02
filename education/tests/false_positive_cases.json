@@ -1122,6 +1122,47 @@
       "status": "resolved",
       "evidence": "feature-detector + tablebase",
       "resolution": "PROVEN WIN, dtz 15, mate in 41, and the tablebase's own first move is Rd1+ — the first check of the bridge. The API reports `passed-pawn`, `king-activation` and `open-file` and nothing historical. The case exists because this record's subject is the HISTORY of a claim rather than its content, and history is not on a board: what distinguishes a rule that needed qualifying from one that did not is a fact about the literature, and no position can carry it. That is also why the record's detectability is recorded as mechanical only for the narrow purpose of matching named principles by text."
+    },
+    {
+      "id": "a-passed-pawn-that-is-not-advanced",
+      "concept": "queen-endgames",
+      "surface_pattern": "A queen ending with a passed pawn. This record's headline claim is that in queen endings 'an advanced passed pawn outweighs extra material' and that 'how far advanced a passer is matters more than how many pawns each side has'.",
+      "why_not": "The claim has 'advanced' in it and the pawn is on the third rank. The mechanism the record describes is that a queen can escort a passer to promotion alone, without the king; a pawn five squares from queening gives the defending queen five moves to arrange checks, and the material count decides after all.",
+      "fen": "8/8/8/8/8/1P6/1K6/5q1k w - - 0 1",
+      "status": "resolved",
+      "evidence": "feature-detector + tablebase",
+      "resolution": "PROVEN LOSS for the side with the passer, dtz -9, mate in 20 against. The API reports `passed-pawn` and `king-activation` and says nothing about queen endings, which have no matcher. What makes the case worth registering is that the record's own sentence contains the condition and the condition is the whole claim: read without the word 'advanced', the sentence says a passed pawn beats a queen, and this position is what that would mean."
+    },
+    {
+      "id": "rooks-on-the-board-is-not-a-rook-ending",
+      "concept": "rook-endgame-principles",
+      "surface_pattern": "Both sides have two rooks and pawns. Rooks are the most common piece to reach an ending with, and this record is 'the most common and least rule-governed endings'.",
+      "why_not": "Both sides also have a bishop, and every principle on this record is about what rooks do when there is nothing else — an active rook makes threats and goes where it likes, a passive one is chained to a pawn, and giving a pawn to activate a rook is routinely correct. None of that survives a minor piece being on the board to defend with and to trade against.",
+      "fen": "r1b1k2r/pppp1ppp/8/8/8/8/PPPP1PPP/R1B1K2R w KQkq - 0 1",
+      "status": "resolved",
+      "evidence": "feature-detector + engine",
+      "resolution": "The API reports `opposite-coloured-bishops` — which is the concept that DOES apply here — and nothing about rook endings. +0.12 at depth 20 in a symmetric position. The case is registered because 'rook ending' is a claim about what is left rather than about what is present, and a detector reading the piece list would find two rooks each and stop there."
+    },
+    {
+      "id": "a-position-a-feature-scan-cannot-read",
+      "concept": "positional-evaluation",
+      "surface_pattern": "An ordinary middlegame with pieces developed, a queen on d4, bishops on b2 and d5, and no obvious weakness on either side. A positional evaluation would count the features and report a roughly balanced position with a small pull.",
+      "why_not": "The position is decided by a single move. Bxb7+ uncovers a check and wins on the spot: +4.67 at depth 22, first choice by nearly four pawns. Nothing in the static features carries that; the concept's method — identify durable features, weigh them, draw a verdict — is the wrong instrument for a position whose answer is one move deep.",
+      "fen": "r2k1b1r/1pp1q1p1/7p/pbPBn3/3Q1p2/P7/1B3PPP/2KR3R w - - 0 21",
+      "status": "resolved",
+      "evidence": "feature-detector + shipped-corpus + engine",
+      "resolution": "Shipped puzzle mi-f2e1be14e7. The API reports `battery`, `bad-bishop`, `king-safety` and `center-control` — a perfectly reasonable feature scan — and does not claim to have evaluated the position. That separation is the point: this record has no matcher, and the reason on the record is that a positional evaluation is a JUDGEMENT assembled from features rather than a feature, so reporting the features is the honest half of it. This base's ambiguous example for the same record is the opposite failure, Adams-Kasparov, where the features say one thing and the truth is +2.12 the other way."
+    },
+    {
+      "id": "material-given-and-nothing-obtained",
+      "concept": "transformation-of-advantages",
+      "surface_pattern": "Bxh7+ gives up a bishop for a pawn — one advantage, the bishop pair and the extra piece, exchanged for another, an exposed king. Trading one kind of advantage for another is the concept, word for word.",
+      "why_not": "Nothing is obtained. The record's second trap says a transformation must be for a MORE convertible advantage; here the knight on f6 simply takes on h7 and White has given a piece for a pawn. A transformation that acquires nothing is not a transformation, it is a blunder, and this record's first trap warns of the mirror error — that a real transforming move 'often looks like a concession'.",
+      "fen": "r1bq1rk1/pppn1ppp/4pn2/8/8/2NB4/PPP2PPP/R1BQ1RK1 w - - 0 1",
+      "move": "d3h7",
+      "status": "resolved",
+      "evidence": "feature-detector + engine",
+      "resolution": "The API does not report a transformation. It reports `sacrifice` at medium with the record's caution attached, `pin` and `trapped-piece` — all true of the move, none of them claiming it is good. Stockfish 18: the position is 0.00 with a normal move and Bxh7+ scores -3.89, and the refutation is Nxh7 rather than Kxh7. This record has no matcher and its third trap says why: 'the concept describes a player's INTENTION. This system observes moves, not intentions, and must not attribute a transformation to a move without evidence of what it obtained.'"
     }
   ],
   "last_updated": "2026-09-01"

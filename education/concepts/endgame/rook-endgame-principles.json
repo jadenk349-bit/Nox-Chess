@@ -149,7 +149,15 @@
       }
     }
   ],
-  "counterexamples": [],
+  "counterexamples": [
+    {
+      "fen": "r1b1k2r/pppp1ppp/8/8/8/8/PPPP1PPP/R1B1K2R w KQkq - 0 1",
+      "note": "Registered false-positive case `rooks-on-the-board-is-not-a-rook-ending`, kept on the record as well as in tests/false_positive_cases.json so that the concept carries its own negative evidence. THE SURFACE PATTERN IS PRESENT: Both sides have two rooks and pawns. Rooks are the most common piece to reach an ending with, and this record is 'the most common and least rule-governed endings'. WHY IT IS NOT THE CONCEPT: Both sides also have a bishop, and every principle on this record is about what rooks do when there is nothing else — an active rook makes threats and goes where it likes, a passive one is chained to a pawn, and giving a pawn to activate a rook is routinely correct. None of that survives a minor piece being on the board to defend with and to trade against. WHAT THE SYSTEM DOES: The API reports `opposite-coloured-bishops` — which is the concept that DOES apply here — and nothing about rook endings. +0.12 at depth 20 in a symmetric position. The case is registered because 'rook ending' is a claim about what is left rather than about what is present, and a detector reading the piece list would find two rooks each and stop there.",
+      "origin_kind": "constructed-test",
+      "concept_role": "negative",
+      "false_positive_case": "rooks-on-the-board-is-not-a-rook-ending"
+    }
+  ],
   "ambiguous_examples": [
     {
       "fen": "R7/6k1/P7/8/3K4/8/8/r7 w - - 0 1",

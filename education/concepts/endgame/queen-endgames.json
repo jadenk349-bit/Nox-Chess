@@ -141,7 +141,24 @@
       }
     }
   ],
-  "counterexamples": [],
+  "counterexamples": [
+    {
+      "fen": "8/8/8/8/8/1P6/1K6/5q1k w - - 0 1",
+      "note": "Registered false-positive case `a-passed-pawn-that-is-not-advanced`, kept on the record as well as in tests/false_positive_cases.json so that the concept carries its own negative evidence. THE SURFACE PATTERN IS PRESENT: A queen ending with a passed pawn. This record's headline claim is that in queen endings 'an advanced passed pawn outweighs extra material' and that 'how far advanced a passer is matters more than how many pawns each side has'. WHY IT IS NOT THE CONCEPT: The claim has 'advanced' in it and the pawn is on the third rank. The mechanism the record describes is that a queen can escort a passer to promotion alone, without the king; a pawn five squares from queening gives the defending queen five moves to arrange checks, and the material count decides after all. WHAT THE SYSTEM DOES: PROVEN LOSS for the side with the passer, dtz -9, mate in 20 against. The API reports `passed-pawn` and `king-activation` and says nothing about queen endings, which have no matcher. What makes the case worth registering is that the record's own sentence contains the condition and the condition is the whole claim: read without the word 'advanced', the sentence says a passed pawn beats a queen, and this position is what that would mean.",
+      "origin_kind": "constructed-test",
+      "concept_role": "negative",
+      "tablebase": {
+        "source": "Lichess tablebase (Syzygy, 7-piece)",
+        "pieces": 4,
+        "wdl": "loss",
+        "dtz": -9,
+        "dtm": -20,
+        "category": "loss",
+        "note": "PROVEN LOSS for the side holding the passed pawn, mate in 20 against. The record's claim contains the word 'advanced' and that word is the whole of it: five squares from queening gives the defending queen five moves to arrange checks."
+      },
+      "false_positive_case": "a-passed-pawn-that-is-not-advanced"
+    }
+  ],
   "ambiguous_examples": [
     {
       "fen": "8/P7/K7/8/8/8/8/1q4k1 w - - 0 1",

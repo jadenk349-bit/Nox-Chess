@@ -145,7 +145,16 @@
       "attributed_by": "Nicholas Van Der Nat (FM) — corpus entry capablanca-rubinstein-1928-22Qxc6-transformation"
     }
   ],
-  "counterexamples": [],
+  "counterexamples": [
+    {
+      "fen": "r1bq1rk1/pppn1ppp/4pn2/8/8/2NB4/PPP2PPP/R1BQ1RK1 w - - 0 1",
+      "move_uci": "d3h7",
+      "note": "Registered false-positive case `material-given-and-nothing-obtained`, kept on the record as well as in tests/false_positive_cases.json so that the concept carries its own negative evidence. THE SURFACE PATTERN IS PRESENT: Bxh7+ gives up a bishop for a pawn — one advantage, the bishop pair and the extra piece, exchanged for another, an exposed king. Trading one kind of advantage for another is the concept, word for word. WHY IT IS NOT THE CONCEPT: Nothing is obtained. The record's second trap says a transformation must be for a MORE convertible advantage; here the knight on f6 simply takes on h7 and White has given a piece for a pawn. A transformation that acquires nothing is not a transformation, it is a blunder, and this record's first trap warns of the mirror error — that a real transforming move 'often looks like a concession'. WHAT THE SYSTEM DOES: The API does not report a transformation. It reports `sacrifice` at medium with the record's caution attached, `pin` and `trapped-piece` — all true of the move, none of them claiming it is good. Stockfish 18: the position is 0.00 with a normal move and Bxh7+ scores -3.89, and the refutation is Nxh7 rather than Kxh7. This record has no matcher and its third trap says why: 'the concept describes a player's INTENTION. This system observes moves, not intentions, and must not attribute a transformation to a move without evidence of what it obtained.'",
+      "origin_kind": "constructed-test",
+      "concept_role": "negative",
+      "false_positive_case": "material-given-and-nothing-obtained"
+    }
+  ],
   "ambiguous_examples": [
     {
       "fen": "3r1nk1/pp3ppp/1bq5/B7/3pQ3/1N4PP/PPP2P2/4R1K1 w - - 1 22",

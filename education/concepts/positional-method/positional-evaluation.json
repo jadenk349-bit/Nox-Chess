@@ -159,7 +159,15 @@
       }
     }
   ],
-  "counterexamples": [],
+  "counterexamples": [
+    {
+      "fen": "r2k1b1r/1pp1q1p1/7p/pbPBn3/3Q1p2/P7/1B3PPP/2KR3R w - - 0 21",
+      "note": "Registered false-positive case `a-position-a-feature-scan-cannot-read`, kept on the record as well as in tests/false_positive_cases.json so that the concept carries its own negative evidence. THE SURFACE PATTERN IS PRESENT: An ordinary middlegame with pieces developed, a queen on d4, bishops on b2 and d5, and no obvious weakness on either side. A positional evaluation would count the features and report a roughly balanced position with a small pull. WHY IT IS NOT THE CONCEPT: The position is decided by a single move. Bxb7+ uncovers a check and wins on the spot: +4.67 at depth 22, first choice by nearly four pawns. Nothing in the static features carries that; the concept's method — identify durable features, weigh them, draw a verdict — is the wrong instrument for a position whose answer is one move deep. WHAT THE SYSTEM DOES: Shipped puzzle mi-f2e1be14e7. The API reports `battery`, `bad-bishop`, `king-safety` and `center-control` — a perfectly reasonable feature scan — and does not claim to have evaluated the position. That separation is the point: this record has no matcher, and the reason on the record is that a positional evaluation is a JUDGEMENT assembled from features rather than a feature, so reporting the features is the honest half of it. This base's ambiguous example for the same record is the opposite failure, Adams-Kasparov, where the features say one thing and the truth is +2.12 the other way.",
+      "origin_kind": "puzzle",
+      "concept_role": "negative",
+      "false_positive_case": "a-position-a-feature-scan-cannot-read"
+    }
+  ],
   "ambiguous_examples": [
     {
       "fen": "br3rk1/2q2ppP/p2pp3/2n1b1BP/1n1NP3/2N2P2/1PPQB3/1K4RR b - - 0 21",
