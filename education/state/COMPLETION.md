@@ -364,3 +364,27 @@ justification. Suite: 960 pass, 0 fail. API 826, API audit 374, explanations
 3570, all passing. `validate_kb` 0 errors. `audit.py` 0 high findings, 4 low,
 each an access-caveat flag. Corpus: 1 recorded false negative and 1 recorded
 false positive, both kept failing on purpose.
+
+### The master-game gap is the detector gap, counted a second time
+
+Thirteen records still lack a position from a real game, and the reason is now
+measured rather than guessed. **Twelve of the thirteen have no matcher at all** —
+`double-attack`, `fortress`, `hole`, `lpdo`, `piece-properties`, `strong-square`,
+`x-ray`, `zwischenzug` and the four endgame-category records. Running the API
+over **29,372 positions from 400 replayed master games** reports not one of them,
+once, because a scan that reads the API cannot nominate a concept the API never
+reports. That is not a research failure; it is the same gap criterion 2 measures,
+appearing again under a different heading.
+
+The thirteenth, `smothered-mate`, HAS a matcher, and was measured directly: zero
+occurrences in 2,822,256 positions.
+
+So the gap has exactly two roads out and neither is more research. Write matchers
+for the twelve — and `strong-square` is a warning about that road, because a
+matcher written exactly to its record's two preconditions fired on 80.1% of
+positions and was thrown away. Or write a geometric test per concept in
+`tools/mine_master_motifs.js`, asking the record's own sentence of every ply of
+every replayed game, which is how **five of the original eighteen** were filled
+this pass: `clearance`, `greek-gift`, `knight-fork`, `desperado` and
+`interference`. That road works, it is open, and each concept costs one test.
+
