@@ -359,8 +359,9 @@ only), `insufficient-material` (Bondarevsky–Bronstein, king and knight against
 king) and `fifty-move-rule` (Smyslov–Lilienthal, 80 ply on move 123). A
 constructed position can demonstrate a rule that never arises over the board.
 
-Mean concept completeness **0.99**. 91 items on 26 concepts are N/A by written
-justification. Suite: 960 pass, 0 fail. API 826, API audit 374, explanations
+Mean concept completeness **1.00** — up from 0.71 when this file was first
+written, and from 0.99 at the start of this pass. **Nine items are missing across the whole 137-concept checklist**, and every one of them carries a
+written reason. 91 items on 26 concepts are N/A by written justification. Suite: 973 pass, 0 fail. API 826, API audit 374, explanations
 3570, all passing. `validate_kb` 0 errors. `audit.py` 0 high findings, 4 low,
 each an access-caveat flag. Corpus: 1 recorded false negative and 1 recorded
 false positive, both kept failing on purpose.
