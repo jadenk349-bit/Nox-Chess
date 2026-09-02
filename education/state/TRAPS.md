@@ -13,7 +13,7 @@ implemented; that is a reading, and doing it is the work. What it can do is
 stop the list being rediscovered from scratch each time — and every one of
 the defects listed in the tool's header was unread before it was looked at.
 
-**Of 275 stated conditions (traps and indicators-against): 150 enforced in the matcher, 21 in Layer 3, 73 argued on the record to be unbuildable or already honoured elsewhere, 31 unread.**
+**Of 275 stated conditions (traps and indicators-against): 157 enforced in the matcher, 21 in Layer 3, 73 argued on the record to be unbuildable or already honoured elsewhere, 24 unread.**
 
 ONE CAVEAT ABOUT `indicators_against`, and it is not a technicality. For a
 concept naming an ASSET — an open file, an outpost, a passed pawn — they are
@@ -173,8 +173,8 @@ shared file was added to the search. The test is quotation for that reason.
 - [cited] Making luft is not automatically prudent. The same move is a hook against an opponent who can storm, and this is the standard error.
 - [cited] Luft is unnecessary when the back rank is adequately defended or when no heavy pieces remain.
 - [cited] *(indicator against)* The opponent has castled on the other wing and can throw pawns forward
-- [**unread**] *(indicator against)* The advanced pawn becomes a hook for a specific break
-- [**unread**] *(indicator against)* The tempo is needed elsewhere in a sharp position
+- [cited] *(indicator against)* The advanced pawn becomes a hook for a specific break
+- [cited] *(indicator against)* The tempo is needed elsewhere in a sharp position
 ## material-imbalance
 
 - [cited] REGISTERED FALSE POSITIVE: the 1/3/3/5/9 count is not an evaluation. Being 'ahead on material' by that scale says very little once the material is of different kinds.
@@ -190,8 +190,8 @@ shared file was added to the search. The test is quotation for that reason.
 - [noted] The cramped side's standard remedy is exchanging, so a space advantage that cannot prevent trades is temporary.
 - [cited] *(indicator against)* No entry point exists, so the territory buys nothing
 - [cited] *(indicator against)* The advanced pawns are fixed targets rather than a front
-- [**unread**] *(indicator against)* The cramped side can liquidate with exchanges
-- [**unread**] *(indicator against)* The space was gained by overextension the opponent can undermine
+- [cited] *(indicator against)* The cramped side can liquidate with exchanges
+- [cited] *(indicator against)* The space was gained by overextension the opponent can undermine
 ## piece-activity
 
 - [cited] Counting available squares is not measuring activity. A piece with many moves that bear on nothing is not active.
@@ -308,9 +308,9 @@ shared file was added to the search. The test is quotation for that reason.
 - [cited] Any pawn advance into contact is mechanically a break; whether it is a good one depends on who is placed to use the lines it opens, which the detector cannot see.
 - [cited] A break is not a pawn-breakthrough. This base keeps them separate: the breakthrough sacrifices to force a passer, the break challenges a structure.
 - [cited] The break's value is often as an unplayed THREAT, and a position where it is available but not played may be the concept working correctly.
-- [**unread**] *(indicator against)* The opponent is better developed and will use the opened lines first
+- [cited] *(indicator against)* The opponent is better developed and will use the opened lines first
 - [cited] *(indicator against)* The break opens a line towards your own king
-- [**unread**] *(indicator against)* Nothing of yours is placed to use what opens
+- [cited] *(indicator against)* Nothing of yours is placed to use what opens
 ## restraint
 
 - [cited] Restraint is not the same as passivity. It reduces the opponent's options; a passive move merely fails to increase yours.
@@ -326,7 +326,7 @@ shared file was added to the search. The test is quotation for that reason.
 ## discovered-check
 
 - [cited] *(indicator against)* The check is easily blocked or the checking piece captured
-- [**unread**] *(indicator against)* The moving piece has no useful destination
+- [cited] *(indicator against)* The moving piece has no useful destination
 ## smothered-mate
 
 - [noted] *(indicator against)* A flight square is empty or can be vacated

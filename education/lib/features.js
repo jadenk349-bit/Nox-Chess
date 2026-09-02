@@ -677,6 +677,17 @@ function kingFeatures(st, colour) {
   // hole in a SHELTER, so there has to be a shelter.
   const pawnHome = colour === 'w' ? 6 : 1;
   const towards = colour === 'w' ? -1 : 1;          // the direction our pawns go
+
+  // A HOOK NEEDS A PAWN THAT CAN ACTUALLY COME. The pawn that hits the hook is
+  // usually the pawn in front of the OTHER king, and it cannot leave without
+  // opening that king up - which is why the storm is a real plan after opposite
+  // castling and a fantasy when both kings are on the same wing. Without this,
+  // f2-f3 in a symmetrical rook ending "gives Black a hook" because g7 could in
+  // principle walk to g4, and every king in chess has a hook.
+  const ek = pieces(st, enemy, 'K')[0];
+  const ekCol = ek === undefined ? null : colOf(ek);
+  const ekHome = ek === undefined ? false : rowOf(ek) === (enemy === 'w' ? 7 : 0);
+  const canStorm = j => !(ekHome && ekCol !== null && Math.abs(colOf(j) - ekCol) <= 1);
   const sheltered = r === homeRow && (c >= 6 || c <= 2);
   let hook = null;
   for (let dc = -1; dc <= 1 && sheltered && !hook; dc++) {
@@ -686,11 +697,35 @@ function kingFeatures(st, colour) {
       if (colOf(i) !== cc || rowOf(i) === pawnHome) continue;
       const canBeHit = pieces(st, enemy, 'P').some(j => {
         if (Math.abs(colOf(j) - cc) !== 1) return false;
+        if (!canStorm(j)) return false;
         // "Behind" is measured in the enemy pawn's own direction of travel.
         return towards === -1 ? rowOf(j) < rowOf(i) : rowOf(j) > rowOf(i);
       });
       if (canBeHit) { hook = nameOf(i); break; }
     }
+  }
+
+  // "The advanced pawn becomes a hook for a specific break" - the `luft`
+  // record's own indicator_against, and the reason it belongs here is that it
+  // is the SAME test as `hook` asked one move early. A king with no escape
+  // square has an unmoved shield; the move that makes air advances one of those
+  // pawns, and whether the result is a hook is decidable now rather than after
+  // the move. So: a shield pawn whose one-square advance lands it where an
+  // enemy pawn, still behind it on a neighbouring file, could come and hit it.
+  let luftMakesHook = null;
+  for (let dc = -1; dc <= 1 && !luftMakesHook; dc++) {
+    const cc = c + dc;
+    if (cc < 0 || cc > 7) continue;
+    const from = idx(r + towards, cc);
+    const to = idx(r + towards * 2, cc);
+    if (!onBoard(r + towards * 2, cc)) continue;
+    const q = st.b[from];
+    if (!q || q.t !== 'P' || q.c !== colour) continue;      // no pawn there to push
+    if (st.b[to]) continue;                                 // and it can actually go
+    const hit = pieces(st, enemy, 'P').some(j =>
+      Math.abs(colOf(j) - cc) === 1 && canStorm(j) &&
+      (towards === -1 ? rowOf(j) < rowOf(to) : rowOf(j) > rowOf(to)));
+    if (hit) luftMakesHook = nameOf(to);
   }
 
   // "King uncastled with the centre open or opening." Uncastled is
@@ -761,7 +796,7 @@ function kingFeatures(st, colour) {
 
   return {
     square: nameOf(k),
-    hook, openCentreFile, exchangeableDefender,
+    hook, luftMakesHook, openCentreFile, exchangeableDefender,
     onHomeRank: r === homeRow,
     // null in every case where it does not apply, rather than false on one
     // branch and null on another, which read as two different answers.

@@ -1286,12 +1286,31 @@ const STRUCTURAL = [
           const mine = f.king[c] && f.king[c].square, theirs = f.king[other(c)] && f.king[other(c)].square;
           const wing = sq => (sq && sq[0] <= 'c' ? 'q' : sq && sq[0] >= 'f' ? 'k' : null);
           const opposite = mine && theirs && wing(mine) && wing(theirs) && wing(mine) !== wing(theirs);
+          // "The advanced pawn becomes a hook for a specific break" - the
+          // record's other indicator_against, and until Layer 3 could see a
+          // hook this could only be said in the general terms above. It can now
+          // be said about a SQUARE: the pawn move that makes air, and the enemy
+          // pawn that is free to come and hit it there. Free is the load-
+          // bearing word - the pawn in front of the other king cannot storm
+          // without opening that king, so kingFeatures refuses to count it.
+          const hookSq = f.king[c] && f.king[c].luftMakesHook;
+          // "The tempo is needed elsewhere in a sharp position." The
+          // buildable half is whether the position is sharp, which Layer 3
+          // already measures and this matcher was not asking. It is a caveat,
+          // never a guard: a back rank with no air is a fact about the board
+          // whether or not there is time to fix it, and suppressing the report
+          // in exactly the positions where it matters most would be backwards.
+          const sharp = f.quietness && !f.quietness.quiet;
           return `${side(f, c)}'s king is on its back rank with no escape square, and ` +
                  `${side(f, other(c))} has a rook on a file that reaches it` +
                  (opposite
                    ? ` — but the kings are on opposite wings, so the pawn move that makes air here is ` +
                      `also a hook for the pawns coming at it`
-                   : '');
+                   : hookSq
+                   ? ` — but ${hookSq} is a hook: the pawn that makes air there can be attacked by a ` +
+                     `pawn break, and the file opens whichever way that exchange goes`
+                   : '') +
+                 (sharp ? `, and the position is sharp enough that the tempo may be needed elsewhere` : '');
         }),
         subjects: hits,
       };
@@ -1389,10 +1408,51 @@ const STRUCTURAL = [
       if (advanced.length && advanced.every(sq => weak.has(sq) && f.pawns[c].blocked.includes(sq))) {
         return null;
       }
+      // The record's last two indicators_against, neither of which anything was
+      // reading. Both are answers the CRAMPED side has, and the record is
+      // explicit that space is worth nothing against either.
+      const P = FEAT.page;
+      const o = other(c);
+      let st = null;
+      try { st = P.stateFromFEN(f.fen); } catch (e) { st = null; }
+      // "The cramped side can liquidate with exchanges." Nimzowitsch's own
+      // remedy, and it is testable in its immediate form: a piece of theirs
+      // attacking a piece of ours it can trade evenly and survive. Two of them,
+      // not one - a single available trade is true of most middlegames, and a
+      // guard that fires on most middlegames is the failure this file keeps
+      // finding rather than a fix for it.
+      let liquidations = 0;
+      if (st) {
+        for (const p of f.scopes[c]) {
+          const sq = sqIdx(p.square);
+          const theirs = P.attackersOf(st, sq, o).filter(x => st.b[x] && st.b[x].t !== 'K' && st.b[x].t !== 'P');
+          if (theirs.some(x => (P.VAL[st.b[x].t] || 0) <= (P.VAL[st.b[sq].t] || 0)) && P.see(st, sq, o) >= 0) {
+            liquidations++;
+          }
+        }
+      }
+      if (liquidations >= 2) return null;
+      // "The space was gained by overextension the opponent can undermine."
+      // Undermine means a PAWN break at the pawns that hold the territory: an
+      // enemy pawn on a neighbouring file, still behind, that can come and hit
+      // one of them. If every space-creating pawn can be met that way the front
+      // is not a front, it is a line waiting to be opened. Said rather than
+      // suppressed when only some of them can - the space is still there, and
+      // the reader is the one who should weigh a break that has not happened.
+      const undermined = advanced.filter(sq => {
+        const cc = sq.charCodeAt(0) - 97, rr = 8 - +sq[1];
+        return (f.pawns[o].squares || []).some(q => {
+          const qc = q.charCodeAt(0) - 97, qr = 8 - +q[1];
+          return Math.abs(qc - cc) === 1 && (c === 'w' ? qr < rr : qr > rr);
+        });
+      });
+      if (advanced.length && undermined.length === advanced.length) return null;
       return {
         confidence: 'medium',
         because: [`${side(f, c)}'s pawns control ${Math.max(w, b)} squares in the opponent's half against ` +
-                  `${Math.min(w, b)}, and a piece can enter on ${brief(entry)}`],
+                  `${Math.min(w, b)}, and a piece can enter on ${brief(entry)}` +
+                  (undermined.length ? ` — though ${brief(undermined)} can be undermined by a pawn break` : '') +
+                  (liquidations ? `, and ${side(f, o)} has an even trade available to relieve the cramp` : '')],
         slots: { square: entry[0] },
         subjects: [c],
       };
@@ -2586,10 +2646,44 @@ const MOVE_BASED = [
         const wasOpen = openFor(before), nowOpen = openFor(after);
         if (near && [...files].some(x => nowOpen.has(x) && !wasOpen.has(x))) return null;
       }
+      // The record's other two indicators_against. An earlier comment here said
+      // they "ask who is better placed to use the lines, which is the same
+      // judgement the record's first trap says the detector cannot make" — and
+      // that is true of the judgement and false of its two halves, both of
+      // which are counts.
+      //
+      // "The opponent is better developed and will use the opened lines first."
+      // Developed is measured as pieces off their starting squares, which is
+      // the ordinary meaning and needs no engine.
+      const homeOf = col => (col === 'w'
+        ? ['a1', 'b1', 'c1', 'd1', 'e1', 'f1', 'g1', 'h1']
+        : ['a8', 'b8', 'c8', 'd8', 'e8', 'f8', 'g8', 'h8']);
+      const developed = col => (after.scopes[col] || [])
+        .filter(p => !homeOf(col).includes(p.square)).length;
+      const behind = developed(other(mover)) - developed(mover);
+      // "Nothing of yours is placed to use what opens." What opens is the file
+      // the pawn left and the file it arrived on; what uses it is a rook or a
+      // queen standing there. Diagonals are out of reach for the same reason
+      // they are out of reach above — this arm has no board object to scan
+      // blockers with.
+      const opened = [String.fromCharCode(97 + file), dest[0]];
+      const readyToUse = (after.scopes[mover] || [])
+        .some(p => (p.type === 'R' || p.type === 'Q') && opened.includes(p.square[0]));
+      // Suppressed only when both hold. Either alone is common and neither
+      // alone refutes a break; together they are the record's sentence exactly
+      // — the lines open, the other side is the one placed to use them, and
+      // nothing of ours is looking down either file.
+      if (behind >= 2 && !readyToUse) return null;
       return {
         confidence: 'low',
         because: [`${san} advances a pawn into contact with an enemy pawn, so the structure must ` +
-                  `change — the opponent has to take, be taken, or leave the tension standing`],
+                  `change — the opponent has to take, be taken, or leave the tension standing` +
+                  (behind >= 2
+                    ? `, though ${side(before, other(mover))} has ${behind} more pieces developed and ` +
+                      `is better placed to use what opens`
+                    : !readyToUse
+                    ? `, though nothing of ${side(before, mover)}'s is on either file yet to use it`
+                    : '')],
         slots: {},
         subjects: [mover],
       };
@@ -2787,10 +2881,36 @@ const MOVE_BASED = [
         });
         if (answered) return null;
       }
+      // "The moving piece has no useful destination" — this record's other
+      // indicator_against, and the one that decides whether a discovery is a
+      // tactic or a check with extra steps. The freedom the sentence below
+      // promises is worth nothing if the piece has nowhere worth going.
+      //
+      // Useful is read narrowly and off the board: it captured something, or it
+      // attacks an enemy man from where it landed. Withheld only when it did
+      // neither AND can itself be taken profitably, because a piece that lands
+      // safely has at least kept what it had, and calling that a non-discovery
+      // would be a judgement about a plan rather than a fact about a square.
+      let idle = false;
+      if (stAfter) {
+        const me = before.sideToMove, them = other(me);
+        const to = moveInfo.movedTo && sqIdx(moveInfo.movedTo);
+        const captured = /x/.test(moveInfo.san || '');
+        let attacksSomething = false;
+        try {
+          for (const p of (after.scopes[them] || [])) {
+            if (P0.attackersOf(stAfter, sqIdx(p.square), me).includes(to)) { attacksSomething = true; break; }
+          }
+        } catch (e) { attacksSomething = true; }        // unknown is not evidence
+        const enPrise = (() => { try { return P0.see(stAfter, to, them) > 0; } catch (e) { return false; } })();
+        idle = !captured && !attacksSomething;
+        if (idle && enPrise) return null;
+      }
       return {
         confidence: 'high',
         because: [`${moveInfo.san || 'the move'} uncovers a check, so the piece that moved is free to go ` +
-                  `anywhere it likes — the reply has to answer the check`],
+                  `anywhere it likes — the reply has to answer the check` +
+                  (idle ? `, though it has landed without a target, so what is won here is the check itself` : '')],
         slots: { square: moveInfo.movedTo || '' },
         subjects: [before.sideToMove],
       };
