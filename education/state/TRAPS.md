@@ -13,7 +13,7 @@ implemented; that is a reading, and doing it is the work. What it can do is
 stop the list being rediscovered from scratch each time — and every one of
 the defects listed in the tool's header was unread before it was looked at.
 
-**Of 275 stated conditions (traps and indicators-against): 157 enforced in the matcher, 21 in Layer 3, 73 argued on the record to be unbuildable or already honoured elsewhere, 24 unread.**
+**Of 275 stated conditions (traps and indicators-against): 158 enforced in the matcher, 21 in Layer 3, 74 argued on the record to be unbuildable or already honoured elsewhere, 22 unread.**
 
 ONE CAVEAT ABOUT `indicators_against`, and it is not a technicality. For a
 concept naming an ASSET — an open file, an outpost, a passed pawn — they are
@@ -390,9 +390,9 @@ shared file was added to the search. The test is quotation for that reason.
 - [noted] *(indicator against)* The king can capture the checking piece
 ## trapped-piece
 
-- [**unread**] *(indicator against)* A counter-sacrifice frees it
+- [noted] *(indicator against)* A counter-sacrifice frees it
 - [cited] *(indicator against)* It has a desperado capture that recovers the material
-- [**unread**] *(indicator against)* Trapping it costs more material than it is worth
+- [cited] *(indicator against)* Trapping it costs more material than it is worth
 ## hanging-piece
 
 - [noted] A defended piece attacked once is not hanging; count both sides of the exchange.

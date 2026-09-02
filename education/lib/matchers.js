@@ -2425,13 +2425,38 @@ function motifGuard(tag, m, moveInfo) {
     if (i < 0 || !after.b[i]) return false;
     let ms;
     try { ms = P.legalMoves(after); } catch (e) { return false; }
-    return ms.filter(x => x.from === i && x.cap).some(x => {
+    if (ms.filter(x => x.from === i && x.cap).some(x => {
       let nx;
       try { nx = P.makeMove(after, x); } catch (e) { return false; }
       const won = P.VAL[x.cap.t] || 0;
       const lost = Math.max(0, P.see(nx, x.to, nx.turn));
       return won - lost >= 0;                  // it recovers what it is worth
-    });
+    })) return true;
+
+    // "Trapping it costs more material than it is worth" - this record's other
+    // indicator_against, and the cheaper of the two to answer. The piece that
+    // did the trapping is standing somewhere; if it can be taken for a profit
+    // at least as large as the piece it has cornered, the operation is a trade
+    // dressed up as a trap.
+    const trapper = sqIdxSafe(moveInfo.movedTo || '');
+    if (trapper >= 0) {
+      const worth = P.VAL[(after.b[i] || {}).t] || 0;
+      // NET, not gross. `see` answers "what does the side to move win by
+      // capturing here", which on Qxa5 answered by Qxa5 is a whole queen - and
+      // the first version of this guard read that as the trapping move hanging
+      // a queen and suppressed 27 reports, most of them ordinary recaptures.
+      // What the move took comes off the cost.
+      const cost = Math.max(0, P.see(after, trapper, them) - (P.VAL[moveInfo.captured] || 0));
+      if (cost >= worth) return true;
+    }
+
+    // The record's remaining indicator_against - the one about freeing the
+    // piece by giving material back - is NOT built here, and deliberately not
+    // quoted here either, because the trap audit credits a quotation in the
+    // matcher as a guard and this is the opposite of a guard. The argument, and
+    // the wrong version that was written first, are on the record as a
+    // limitation. Read it before writing a fourth attempt.
+    return false;
   }
 
   if (tag === 'discoveredAttack') {

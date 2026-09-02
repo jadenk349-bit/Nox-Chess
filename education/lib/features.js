@@ -1430,6 +1430,12 @@ function motifsOfMove(fen, uci) {
     // the move itself, so a matcher that needs to replay it does not have to
     // reconstruct it from the SAN it was just given
     uci,
+    // ...and WHAT IT TOOK, because "can the piece that just moved be captured"
+    // is a question about the net and every SEE-based guard that forgets the
+    // capture reads an even trade as a piece hanging. Qxa5 answered by Qxa5 is
+    // not a queen en prise; it is a queen recapture, and a guard that cannot
+    // tell the difference switches itself off on every real combination.
+    captured: mv.cap ? mv.cap.t : null,
     // Kept in the page's own {tag, text} shape; matchers read .tag. Normalising
     // to bare strings here would throw away the detector's own sentence, which
     // is worth having for comparison even though this system words its own.
