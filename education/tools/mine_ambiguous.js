@@ -17,6 +17,13 @@
  *                reporting it tells a reader nothing about who stands better.
  *   AGAINST      it fires for the side that is DOWN material, so the feature
  *                the concept names is present on the side losing the argument.
+ *                ONE CAVEAT, and it is the same polarity trap state/TRAPS.md
+ *                warns about: this ground assumes the concept names an ASSET.
+ *                For a concept naming a LIABILITY - `loose-piece`,
+ *                `backward-pawn`, `bad-bishop` - firing for the side that is
+ *                losing is the concept working, not an ambiguity, and a
+ *                candidate of that kind was looked at and thrown away rather
+ *                than written up. Read the record before writing the example.
  *   WORTHLESS    it fires in a quiet position — no check, no winning capture —
  *                where nothing tactical is deciding, and the engine is then
  *                asked whether the feature is worth anything at all.

@@ -155,7 +155,32 @@
       }
     }
   ],
-  "ambiguous_examples": [],
+  "ambiguous_examples": [
+    {
+      "fen": "6n1/pp1RB1k1/3p4/8/4n1P1/2P1qp2/8/R2K4 w - - 3 34",
+      "move": "Bf8+",
+      "move_uci": "e7f8",
+      "note": "Nominated by tools/mine_ambiguous.js on its NOT-THE-MOVE ground: the concept fires on a legal move that is not the solution of a shipped puzzle. Nothing reported is absent - Bf8+ is a real double check - the bishop checks from f8 and the rook on d7 checks along the seventh - and it is MATE IN TWELVE FOR THE OTHER SIDE. This record states one indicator_against and this is it: 'The king has a safe square, in which case the double check may achieve nothing.' The king takes the bishop. Filed as ambiguous rather than as a false positive because the double check is genuinely there and the record's own limitation already explains why the matcher does not refuse it: a double check that is not mate still forces a king move, and that is usually its point. Here it forces the king to eat a bishop.",
+      "origin_kind": "puzzle",
+      "concept_role": "ambiguous",
+      "engine": {
+        "engine_id": "Stockfish 18",
+        "test_level": 3,
+        "depth": 22,
+        "threads": 10,
+        "hash_mb": 4096,
+        "multipv": 2,
+        "best_move": "e7g5",
+        "eval_cp": null,
+        "mate_in": -12,
+        "pv": [],
+        "alternatives": [],
+        "margin_cp": null,
+        "verdict": "ambiguous",
+        "verdict_note": "Bf8+ is mate in 12 AGAINST the side giving the double check; Bg5, the solution, scores +5.24. Two moves of one bishop, one of them a double check and losing by force."
+      }
+    }
+  ],
   "explanations": {
     "by_level": {
       "beginner": "Two pieces are checking the king at the same time. The king has to move — nothing can block or capture both.",

@@ -35,7 +35,7 @@ The completion assessment is judged on the ORIGINAL rule and criterion 1 stays w
 | substantial | 0.86 | `positional-sacrifices` | 2 |
 | substantial | 0.86 | `attack-principles` | 2 |
 | substantial | 0.76 | `named-mating-patterns` | 2 |
-| substantial | 0.68 | `tactical-motifs` | 19 |
+| substantial | 0.69 | `tactical-motifs` | 19 |
 | substantial | 0.65 | `blindfold-visualisation` | 4 |
 | partial | 1.00 | `board-geometry` | 1 |
 | partial | 1.00 | `tactical-combinations` | 1 |
@@ -197,9 +197,11 @@ The completion assessment is judged on the ORIGINAL rule and criterion 1 stays w
 | `static-vs-dynamic` | 0.80 | x | x | x | x | x | x | x | - | - | x | . | x | - | x | x | x |
 | `transformation-of-advantages` | 0.80 | x | x | x | x | x | x | x | - | - | x | . | x | - | x | x | x |
 | `castling` | 0.80 | x | x | x | . | x | . | x | x | . | . | . | . | - | x | x | - |
+| `double-check` | 0.80 | x | x | x | . | x | x | x | x | x | x | x | - | - | x | x | - |
 | `knight-fork` | 0.80 | x | x | x | . | x | x | x | x | - | x | x | - | - | x | x | x |
 | `pawn-storm` | 0.79 | x | x | x | . | x | x | - | x | - | x | . | x | - | x | x | x |
 | `back-rank-mate` | 0.79 | x | x | x | . | x | x | x | x | - | x | . | - | - | x | x | x |
+| `discovered-check` | 0.79 | x | x | x | . | x | x | x | x | x | x | . | - | - | x | x | - |
 | `triangulation` | 0.77 | x | x | x | x | x | . | - | - | . | x | x | . | - | x | x | x |
 | `endgame-principles` | 0.75 | x | x | x | x | x | x | x | - | - | x | - | x | - | x | x | x |
 | `fortress` | 0.75 | x | x | x | x | x | x | x | - | - | x | x | - | - | x | x | x |
@@ -211,9 +213,7 @@ The completion assessment is judged on the ORIGINAL rule and criterion 1 stays w
 | `lpdo` | 0.73 | x | x | x | x | x | x | x | - | - | x | . | - | - | x | x | x |
 | `smothered-mate` | 0.73 | x | x | x | . | x | x | x | x | - | x | x | - | - | x | x | - |
 | `hole` | 0.73 | x | x | x | x | x | x | x | - | - | x | . | - | - | x | x | x |
-| `double-check` | 0.73 | x | x | x | . | x | x | x | x | - | x | x | - | - | x | x | - |
 | `forcing-moves` | 0.73 | x | x | x | x | x | x | x | - | - | x | . | - | - | x | x | x |
-| `discovered-check` | 0.71 | x | x | x | . | x | x | x | x | - | x | . | - | - | x | x | - |
 | `promotion` | 0.70 | x | x | x | . | x | . | x | - | . | . | . | . | - | x | x | - |
 | `seventy-five-move-rule` | 0.70 | x | x | x | . | x | . | x | - | . | . | . | . | - | x | x | - |
 | `threefold-repetition` | 0.70 | x | x | x | . | x | . | x | - | . | . | . | . | - | x | x | - |

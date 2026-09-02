@@ -159,7 +159,32 @@
       "false_positive_case": "defended-knight-attacked-once"
     }
   ],
-  "ambiguous_examples": [],
+  "ambiguous_examples": [
+    {
+      "fen": "r1b2bnr/ppNnpk1p/2p3p1/3p4/3P1B2/2P5/P3QPPP/qN2KB1R w K - 2 12",
+      "move": "Nxe6",
+      "move_uci": "c7e6",
+      "note": "Nominated by tools/mine_ambiguous.js on its NOT-THE-MOVE ground: the concept fires on a legal move that is not the solution of a shipped puzzle. Nothing reported is absent - after Nxe6 something of Black's really is left hanging and the detector says so correctly. It is also a move that gives up a winning position: Qxe6+ is mate in two, and Nxe6 scores -7.34. Hanging material is a fact about a position and it is not a reason to play the move that produces it, which is the distinction this record's third trap already draws from the other direction - 'material already loose before the move is not this move's doing'. The same detector, the same board, and the whole of the difference is which move it was handed.",
+      "origin_kind": "puzzle",
+      "concept_role": "ambiguous",
+      "engine": {
+        "engine_id": "Stockfish 18",
+        "test_level": 3,
+        "depth": 22,
+        "threads": 10,
+        "hash_mb": 4096,
+        "multipv": 2,
+        "best_move": "e2e6",
+        "eval_cp": -734,
+        "mate_in": null,
+        "pv": [],
+        "alternatives": [],
+        "margin_cp": null,
+        "verdict": "ambiguous",
+        "verdict_note": "Nxe6 scores -7.34; Qxe6+, the solution, is mate in 2. The report is true of the move it was given and the move loses."
+      }
+    }
+  ],
   "explanations": {
     "by_level": {
       "beginner": "That piece can just be taken for free — nothing is defending it.",

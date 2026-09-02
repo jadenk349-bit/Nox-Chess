@@ -123,7 +123,32 @@
       "controlled_pair_with": "3k4/8/8/8/3N4/8/8/3RK3 w - - 0 1"
     }
   ],
-  "ambiguous_examples": [],
+  "ambiguous_examples": [
+    {
+      "fen": "6n1/pp1RB1k1/3p4/8/4n1P1/2P1qp2/8/R2K4 w - - 3 34",
+      "move": "Bd8+",
+      "move_uci": "e7d8",
+      "note": "Nominated by tools/mine_ambiguous.js on its NOT-THE-MOVE ground: the concept fires on a legal move that is not the solution of a shipped puzzle. Nothing reported is absent - the bishop steps off the seventh rank, the rook on d7 checks the king behind it, and the moving piece is free to go where it likes, which is this record's precondition in full. It goes to d8, and the position falls apart: -12.55 against +4.99 for the puzzle's answer Bg5. A seventeen-pawn gap between two moves of the same bishop, both of them discovered checks. This record's own first indicator_against is 'the moving piece has no useful destination', and that is exactly what separates the two.",
+      "origin_kind": "puzzle",
+      "concept_role": "ambiguous",
+      "engine": {
+        "engine_id": "Stockfish 18",
+        "test_level": 3,
+        "depth": 22,
+        "threads": 10,
+        "hash_mb": 4096,
+        "multipv": 2,
+        "best_move": "e7g5",
+        "eval_cp": -1255,
+        "mate_in": null,
+        "pv": [],
+        "alternatives": [],
+        "margin_cp": null,
+        "verdict": "ambiguous",
+        "verdict_note": "Bd8+ scores -12.55 and Bg5, the solution, scores +4.99, both at depth 22 with two lines. The discovery is identical in both; where the bishop lands is the whole difference, and no motif detector reads that."
+      }
+    }
+  ],
   "explanations": {
     "by_level": {
       "beginner": "Moving this piece gives check from the piece behind it. Your opponent must answer the check, so this piece can go anywhere — even somewhere it could be taken.",
