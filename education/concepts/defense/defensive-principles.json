@@ -187,7 +187,17 @@
       }
     }
   ],
-  "counterexamples": [],
+  "counterexamples": [
+    {
+      "fen": "br3r2/2q2ppk/p2pp3/2n1b1BP/1n1NP3/2N2P2/1PPQB3/1K4RR w - - 0 22",
+      "move_uci": "d4b3",
+      "note": "Registered false-positive case `a-passive-move-is-not-a-defence`, kept on the record as well as in tests/false_positive_cases.json so that the concept carries its own negative evidence. THE SURFACE PATTERN IS PRESENT: White is much worse and retreats a piece to a square where it defends. Retreating and consolidating is what a worse position seems to call for. WHY IT IS NOT THE CONCEPT: This record's first trap: \"Defence is not passivity. Recommending a passive move because a position is worse is the commonest defensive error, not a defensive principle.\" Speelman's account of the game says exactly this happened — Adams, 'seeing no good way to continue his attack, panicked and blundered' with 22.Nb3. WHAT THE SYSTEM DOES: Adams-Kasparov, Linares 2005, and the two candidate moves are 234 centipawns apart: 22.Be3, the move Speelman says was best and this record's positive example, scores -1.91, and the retreat 22.Nb3 that was played scores -4.25. Both are bad. That is the point of the pair — the choice is not between saving the game and losing it, it is between the least bad move and a worse one, and the passive move is the worse one. The API reports nothing about defensive principles either way, because the concept has no matcher: what makes a move defensive is what it prevents, and this base does not read intentions.",
+      "origin_kind": "historical-game",
+      "game": "Adams-Kasparov, Linares 2005 (round 12)",
+      "concept_role": "negative",
+      "false_positive_case": "a-passive-move-is-not-a-defence"
+    }
+  ],
   "ambiguous_examples": [],
   "explanations": {
     "by_level": {

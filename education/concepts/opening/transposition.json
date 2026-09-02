@@ -82,7 +82,15 @@
     "conflicts": []
   },
   "examples": [],
-  "counterexamples": [],
+  "counterexamples": [
+    {
+      "fen": "r3k2r/8/8/8/8/8/8/R3K2R w - - 0 1",
+      "note": "Registered false-positive case `the-same-board-is-not-the-same-position`, kept on the record as well as in tests/false_positive_cases.json so that the concept carries its own negative evidence. THE SURFACE PATTERN IS PRESENT: Two diagrams, piece for piece identical: kings on e1 and e8, rooks on a1, h1, a8 and h8, nothing else on the board. Any comparison that reads the squares alone calls them the same position. WHY IT IS NOT THE CONCEPT: This record's second trap: \"Castling rights are invisible on the board but are part of the position. Two arrangements that look identical are not transpositions if one side has lost the right to castle.\" WHAT THE SYSTEM DOES: Settled by counting moves. With the rights present this base's move generator produces 26 legal moves including e1g1 and e1c1; with them absent it produces 24 and no castling. Same men, same squares, two legal positions, and the difference is in a FEN field rather than on the board. The `notation` record's third trap is the same fact from the other side — 'a FEN without the castling, en passant and clock fields is not a position, it is a picture of one' — and `en-passant`'s registered case is the third member of that family.",
+      "origin_kind": "constructed-test",
+      "concept_role": "negative",
+      "false_positive_case": "the-same-board-is-not-the-same-position"
+    }
+  ],
   "ambiguous_examples": [],
   "explanations": {
     "by_level": {

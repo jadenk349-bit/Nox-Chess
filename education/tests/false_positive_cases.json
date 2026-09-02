@@ -904,6 +904,47 @@
       "status": "resolved",
       "evidence": "feature-detector + engine",
       "resolution": "The API does not assert that either piece is better here, and this record has no matcher for exactly the reason its first trap gives: \"There is no default answer. Asserting the bishop is better without naming the structural reason is exactly the claim GM Studer says has no evidence behind it.\" Stockfish 18 at depth 24 says 0.00 — dead level, which is the honest reading and is itself the evidence against the folk rule: if bishops were simply better in endgames, three pawns each and a bishop against a knight would not evaluate to zero."
+    },
+    {
+      "id": "one-check-draws-and-another-loses",
+      "concept": "forcing-moves",
+      "surface_pattern": "Black has two checks available with the same rook. A check is the most forcing move there is, and the rule says to look at the forcing moves first.",
+      "why_not": "This record's first trap, and the record names this exact position: \"Forcing is not the same as good, and this is the trap that matters. This base holds a proven position in which one check draws and another loses.\" The Vancura position. ...Rd6+ holds; ...Rf4+ loses.",
+      "fen": "R7/6k1/P4r2/8/3K4/8/8/8 b - - 0 1",
+      "status": "resolved",
+      "evidence": "feature-detector + tablebase",
+      "resolution": "PROVEN, both of them, and this is the claim the record has been making in prose. After ...Rd6+ the position is still a DRAW at dtz 0. After ...Rf4+ it is a WIN FOR WHITE, dtz 21, mate in 67. Two checks by one rook from one square, one holding and one losing by force, and nothing about their forcing-ness distinguishes them. The rule is about search ORDER and not about move choice, which is this record's second trap, and a position where the two most forcing moves available differ by sixty-seven moves of result is the sharpest way to say it."
+    },
+    {
+      "id": "an-advanced-queen-is-not-an-active-one",
+      "concept": "queen-activity",
+      "surface_pattern": "After 1.e4 e5 2.Qh5 the white queen stands on the fifth rank attacking two things at once, further advanced than any other piece on the board.",
+      "why_not": "This record's first trap: \"An advanced queen is not an active queen. It is often a queen about to be chased, and the chasing moves develop the opponent.\"",
+      "fen": "rnbqkbnr/pppp1ppp/8/4p2Q/4P3/8/PPPP1PPP/RNB1KBNR b KQkq - 1 2",
+      "status": "resolved",
+      "evidence": "feature-detector + engine",
+      "resolution": "The API does not report queen-activity. What makes this case worth registering is the SIZE of the effect rather than its direction: the engine says +0.39 for White, an ordinary opening edge, and this base has measured the early-queen cost at about 0.68 in the standard case. The move is not a blunder. This record's second trap says so itself — 'real, and much smaller than the usual teaching tone' — and the case exists to keep the base from adopting the tone."
+    },
+    {
+      "id": "the-same-board-is-not-the-same-position",
+      "concept": "transposition",
+      "surface_pattern": "Two diagrams, piece for piece identical: kings on e1 and e8, rooks on a1, h1, a8 and h8, nothing else on the board. Any comparison that reads the squares alone calls them the same position.",
+      "why_not": "This record's second trap: \"Castling rights are invisible on the board but are part of the position. Two arrangements that look identical are not transpositions if one side has lost the right to castle.\"",
+      "fen": "r3k2r/8/8/8/8/8/8/R3K2R w - - 0 1",
+      "status": "resolved",
+      "evidence": "feature-detector",
+      "resolution": "Settled by counting moves. With the rights present this base's move generator produces 26 legal moves including e1g1 and e1c1; with them absent it produces 24 and no castling. Same men, same squares, two legal positions, and the difference is in a FEN field rather than on the board. The `notation` record's third trap is the same fact from the other side — 'a FEN without the castling, en passant and clock fields is not a position, it is a picture of one' — and `en-passant`'s registered case is the third member of that family."
+    },
+    {
+      "id": "a-passive-move-is-not-a-defence",
+      "concept": "defensive-principles",
+      "surface_pattern": "White is much worse and retreats a piece to a square where it defends. Retreating and consolidating is what a worse position seems to call for.",
+      "why_not": "This record's first trap: \"Defence is not passivity. Recommending a passive move because a position is worse is the commonest defensive error, not a defensive principle.\" Speelman's account of the game says exactly this happened — Adams, 'seeing no good way to continue his attack, panicked and blundered' with 22.Nb3.",
+      "fen": "br3r2/2q2ppk/p2pp3/2n1b1BP/1n1NP3/2N2P2/1PPQB3/1K4RR w - - 0 22",
+      "move": "d4b3",
+      "status": "resolved",
+      "evidence": "feature-detector + human-annotation",
+      "resolution": "Adams-Kasparov, Linares 2005, and the two candidate moves are 234 centipawns apart: 22.Be3, the move Speelman says was best and this record's positive example, scores -1.91, and the retreat 22.Nb3 that was played scores -4.25. Both are bad. That is the point of the pair — the choice is not between saving the game and losing it, it is between the least bad move and a worse one, and the passive move is the worse one. The API reports nothing about defensive principles either way, because the concept has no matcher: what makes a move defensive is what it prevents, and this base does not read intentions."
     }
   ],
   "last_updated": "2026-09-01"

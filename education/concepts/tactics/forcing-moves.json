@@ -131,7 +131,24 @@
       }
     }
   ],
-  "counterexamples": [],
+  "counterexamples": [
+    {
+      "fen": "R7/6k1/P4r2/8/3K4/8/8/8 b - - 0 1",
+      "note": "Registered false-positive case `one-check-draws-and-another-loses`, kept on the record as well as in tests/false_positive_cases.json so that the concept carries its own negative evidence. THE SURFACE PATTERN IS PRESENT: Black has two checks available with the same rook. A check is the most forcing move there is, and the rule says to look at the forcing moves first. WHY IT IS NOT THE CONCEPT: This record's first trap, and the record names this exact position: \"Forcing is not the same as good, and this is the trap that matters. This base holds a proven position in which one check draws and another loses.\" The Vancura position. ...Rd6+ holds; ...Rf4+ loses. WHAT THE SYSTEM DOES: PROVEN, both of them, and this is the claim the record has been making in prose. After ...Rd6+ the position is still a DRAW at dtz 0. After ...Rf4+ it is a WIN FOR WHITE, dtz 21, mate in 67. Two checks by one rook from one square, one holding and one losing by force, and nothing about their forcing-ness distinguishes them. The rule is about search ORDER and not about move choice, which is this record's second trap, and a position where the two most forcing moves available differ by sixty-seven moves of result is the sharpest way to say it.",
+      "origin_kind": "constructed-test",
+      "concept_role": "negative",
+      "tablebase": {
+        "source": "Lichess tablebase (Syzygy, 7-piece)",
+        "pieces": 5,
+        "wdl": "draw",
+        "dtz": 0,
+        "dtm": 0,
+        "category": "draw",
+        "note": "PROVEN both ways, and that is the case. From this position ...Rd6+ leaves a DRAW at dtz 0; ...Rf4+ leaves a WIN FOR WHITE at dtz 21, mate in 67. Two checks by one rook from one square, sixty-seven moves of result apart, and nothing about their forcing-ness distinguishes them."
+      },
+      "false_positive_case": "one-check-draws-and-another-loses"
+    }
+  ],
   "ambiguous_examples": [],
   "explanations": {
     "by_level": {
