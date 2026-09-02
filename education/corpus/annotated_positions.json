@@ -1869,6 +1869,56 @@
         "agrees": "fully, and it is the same analysis this position's doubled-pawns entry carries: 22...Reb8 is the engine's first choice at depth 22 and puts Black at +1.07, 0.64 clear of the second. The move that presses the file is the best move on the board.",
         "note": "The engine says nothing about whether a file is semi-open and was not asked to. It establishes that doubling on it is the move, which is what makes the annotators' 'play on the b-file' a claim about this position rather than a generality."
       }
+    },
+    {
+      "game": "Anand-Leko, Tal Memorial, Moscow 2009, round 5",
+      "source": "markos-chessbase-winning-academy-8-pawn-avalanche-2022",
+      "players": "Viswanathan Anand - Peter Leko",
+      "event": "Tal Memorial, Moscow 2009",
+      "year": 2009,
+      "annotator": "Jan Markos (GM), 'The Winning Academy 8: How to Stop a Pawn Avalanche', ChessBase, 18 March 2022",
+      "attributed_by": "Jan Markos",
+      "fen_verified": "replay: all 89 plies replayed legally through blind-chess.html's move generator, from the ChessBase round report's score. The diagram is 'White to move' at move 22 and the continuation Markos quotes - 22.Nxd4 cxd4 23.Re6 Bc8 24.Rg6+ Kh7 25.axb5 - is plies 43-50 of that replay.",
+      "added": "2026-09-02",
+      "id": "anand-leko-2009-22Nxd4-blockade-negative",
+      "concept": "blockade",
+      "concept_role": "negative",
+      "side": "w",
+      "fen": "r2q1r2/1b4k1/p6p/1pp3pB/P1pp1p2/8/1P2NPPP/R2QR1K1 w - - 0 22",
+      "move": "Nxd4",
+      "move_uci": "e2d4",
+      "fen_after": "r2q1r2/1b4k1/p6p/1pp3pB/P1pN1p2/8/1P3PPP/R2QR1K1 b - - 0 22",
+      "human_annotation": "\"White is a piece up, but the black pawn avalanche looks really threatening. Moreover, White's knight is a poor, restricted piece. In such a situation, a purely defensive approach would probably lead to a disaster. THE PAWNS ARE SIMPLY TOO ADVANCED TO ESTABLISH A SUCCESSFUL BLOCKADE. However, if the pawns are too advanced, there is a lot of space behind them for a quick SWAT squad!... Therefore, Anand played the paradoxical 22.Nxd4!\" And the lesson Markos draws: \"A pawn chain is only threatening from the front. Once you are behind it, it does not bother you a thing.\" The article's frame is Nimzowitsch's own - 'first restrain, then blockade, finally destroy' - which makes the position a case where step two is unavailable.",
+      "explanation": "A negative for `blockade` in the situation the concept is FOR: a pawn avalanche rolling at a piece-up defender, where every instinct the record teaches says find the blockading square. Markos says there is none, and the correct plan is the opposite - go behind the pawns.\n\nThis base does not report a blockade here, and the entry is honest about why that is a weaker test than the two weak-square negatives beside it: the raw Layer 3 feature is absent as well, because no piece of either colour stands directly in front of an enemy pawn. Nothing had to be refused. What makes it worth keeping is the second half - what the base DOES say, and whether that matches the annotation.\n\nIt does, on both counts. `passed-pawn` names Black's d4 and adds the clause built this week: 'what matters is whether it can advance: a passer that is permanently blockaded ties down your pieces rather than theirs' - which is precisely the question Markos says cannot be answered by blockading in this position. And `doubled-pawns` names Black's c5 and c4 and says 'they hold b4, b3, d3, which no enemy pawn can contest', which is the avalanche Markos calls threatening rather than the weakness a bare structure report would have implied. Both clauses are days old; before them the base would have said 'Black has a passed pawn on d4' and 'Black has doubled pawns on c5, c4' and taught the wrong lesson twice.\n\nThe engine disagreement is kept rather than smoothed: Stockfish at depth 28 prefers the quiet 22.b3 at +0.96 and rates Anand's 22.Nxd4 second at +0.64. ChessBase's own round report says the same in words - the move 'does not necessarily win or give White a decisive advantage, but it creates just enough problems for Black that are difficult to solve in real time'. The concept claim is about the blockade, not about the move, and the move being second best does not touch it.",
+      "confidence": "high",
+      "why_not_alternates": "passed-pawn and doubled-pawns are both correctly reported for Black and both are the annotation's own subject - the avalanche. What must not be said is that anything here is blockading, or that a blockade is what White should be looking for.",
+      "also_true_but_secondary": [
+        "passed-pawn",
+        "doubled-pawns",
+        "space"
+      ],
+      "rejected_as_wrong": [
+        "blockade"
+      ],
+      "limitation": "Weaker evidence than the weak-square and space negatives: the raw Layer 3 feature is absent as well, so nothing had to be refused. It is kept for the second half - that the two concepts which ARE reported carry clauses added days earlier, and that those clauses say what the annotator says.",
+      "engine": {
+        "engine_id": "Stockfish 18",
+        "depth": 28,
+        "multipv": 3,
+        "best_move": "b3",
+        "best_eval_cp": 96,
+        "annotated_move": "Nxd4",
+        "annotated_move_eval_cp": 64,
+        "annotated_move_rank": 2,
+        "alternatives": [
+          {
+            "move": "axb5",
+            "eval_cp": 21
+          }
+        ],
+        "agrees": "on the assessment, not on the move, and the disagreement is the interesting part. Scores are from the side to move, and White is to move: the quiet 22.b3 measures +0.96 and Anand's 22.Nxd4 +0.64, second of three. ChessBase's own round report says the same in words - the move 'does not necessarily win or give White a decisive advantage, but it creates just enough problems for Black that are difficult to solve in real time'.",
+        "note": "The engine was not asked whether a blockade is possible and could not answer it. What it establishes is that White is better in a position where a defender would instinctively look for a blockading square, which is what makes Markos's 'there is none, go behind them instead' a claim about this board."
+      }
     }
   ]
 }

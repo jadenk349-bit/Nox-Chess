@@ -1836,3 +1836,32 @@ that are the **negation of their own preconditions** and cannot arise.
 The distinction matters because the tool credits by quotation and quoting is
 cheap. What makes these legitimate is that each was read against the body first —
 which is exactly what the four lying `implements` strings are the argument for.
+
+
+## A negative that grades its own evidence down, and is kept anyway
+
+**Anand–Leko, Tal Memorial 2009** is a `blockade` negative in the situation the
+concept is *for*: a pawn avalanche rolling at a piece-up defender, where every
+instinct the record teaches says find the blockading square. Markos says there is
+none — *"the pawns are simply too advanced to establish a successful blockade… a
+pawn chain is only threatening from the front. Once you are behind it, it does not
+bother you a thing."*
+
+This base reports no blockade, and the entry says plainly that this is **weaker
+evidence** than the weak-square and space negatives beside it, because the raw
+Layer 3 feature is absent as well and nothing had to be refused.
+
+What earns it a place is the second half — what the base *does* say. `passed-pawn`
+names Black's d4 and adds the clause built this week, *"what matters is whether it
+can advance: a passer that is permanently blockaded ties down your pieces rather
+than theirs"* — exactly the question Markos says cannot be answered by blockading
+here. `doubled-pawns` names c5 and c4 and says *"they hold b4, b3, d3, which no
+enemy pawn can contest"* — the avalanche, rather than the weakness a bare
+structure report implies. Both clauses are days old. Before them the base would
+have taught the wrong lesson twice on one board.
+
+The engine disagreement is kept: Stockfish prefers the quiet 22.b3 at +0.96 and
+rates Anand's 22.Nxd4 second at +0.64 — and ChessBase's own round report says the
+same in words.
+
+Corpus: **42 positions, 28 games, 19 positive / 13 ambiguous / 10 negative.**

@@ -1998,6 +1998,41 @@ const { concepts } = API.knowledge();
      String(line('r5k1/5ppp/8/8/8/8/5PPP/R5K1 w - - 0 1', 'luft')));
 }
 
+{
+  // A blockade negative in the situation the concept is FOR: Anand–Leko 2009,
+  // a pawn avalanche rolling at a piece-up defender, where every instinct the
+  // record teaches says find the blockading square. Markos: "the pawns are
+  // simply too advanced to establish a successful blockade… a pawn chain is
+  // only threatening from the front."
+  const AL = 'r2q1r2/1b4k1/p6p/1pp3pB/P1pp1p2/8/1P2NPPP/R2QR1K1 w - - 0 22';
+  const r = API.analyzeWithEducation({ fen: AL });
+  ok('blockade is not reported where a blockade cannot be established',
+     !r.concepts_all.some(c => c.id === 'blockade'),
+     r.concepts_all.map(c => c.id).join(','));
+  // The entry is worth keeping for the second half: what the base DOES say, and
+  // whether it matches the annotation. Both clauses are days old — before them
+  // the base would have taught the wrong lesson twice.
+  const pp = (r.concepts.find(c => c.id === 'passed-pawn') || {}).because || [];
+  const dp = (r.concepts.find(c => c.id === 'doubled-pawns') || {}).because || [];
+  ok('...and the passer clause asks the question the annotator says cannot be answered',
+     /passed pawn on d4/.test(pp.join(' ')) &&
+     /can advance|permanently blockaded/.test(
+       API.analyzeWithEducation({ fen: AL }).explanation.text), pp.join(' '));
+  ok('...and the doubled pair is named as an avalanche, not a weakness',
+     /they hold b4, b3, d3, which no enemy pawn can contest/.test(dp.join(' ')),
+     dp.join(' '));
+  // The entry says plainly that this is weaker evidence than the weak-square
+  // negatives, because the raw feature is absent too and nothing had to be
+  // refused. Saying so is the corpus's own standard.
+  const corpus = JSON.parse(fs.readFileSync(
+    path.join(ROOT, 'corpus', 'annotated_positions.json'), 'utf8')).positions;
+  const al = corpus.find(p => p.id === 'anand-leko-2009-22Nxd4-blockade-negative');
+  ok('...and the entry grades its own evidence honestly',
+     al && /Weaker evidence than/.test(al.limitation || ''));
+  ok('...and keeps the engine disagreement rather than smoothing it',
+     al && al.engine.annotated_move_rank === 2 && al.engine.best_move === 'b3');
+}
+
 /* ---------- report ---------- */
 console.log(`\nAPI  PASS ${pass}   FAIL ${fails.length}`);
 for (const [n, d] of fails) console.log(`  FAIL  ${n}\n        ${d}`);
