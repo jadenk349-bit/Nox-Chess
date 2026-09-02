@@ -126,7 +126,7 @@
   "limitations": [
     "Recognition of the geometric preconditions is mechanical; soundness is not, and the gap between the two is where players go wrong.",
     "TYPICAL_CONFIDENCE RAISED medium -> high, 2026-09-02, and the reason is the schema's own definition of the field: 'how confidently this concept can normally be asserted ONCE ITS PRECONDITIONS HOLD'. This concept's recognition is MECHANICAL and its knowledge type already carries a high ceiling, so once the preconditions hold there is nothing left to be uncertain about - a stalemate is a stalemate, and a fork this base reports is one findMotifs() found, which ARCHITECTURE.md makes the authority and forbids second-guessing. 'Medium' was the default across 32 rule and motif records regardless of detectability, and it was found by measuring what the API reports against what each record permits: twelve concepts were reporting ABOVE their own record. The fix was to make each record its own ceiling in cap(), which then required the records that were wrong to be corrected rather than silently overruled.",
-    "NO MASTER-GAME POSITION YET. This concept has no matcher, so the scan that supplied master positions to eleven other records - five famous games replayed and analysed position by position - could not nominate one here: the API never reports the concept, so there is nothing for a scan to find. Identifying an instance in a master game means reading the game, which is research rather than tooling, and it has not been done. Recorded rather than filled."
+    "NO MASTER-GAME POSITION YET. This concept has no matcher, so the scan that supplied master positions to eleven other records - five famous games replayed and analysed position by position - could not nominate one here: the API never reports the concept, so there is nothing for a scan to find. Identifying an instance in a master game means reading the game, which is research rather than tooling, and it has not been done. Recorded rather than filled. RESOLVED: Karpov-Glauser, Zurich simul 1988, 10.Bxh7+, above, found by tools/mine_master_motifs.js. Sixteen candidates in 2.8 million master positions have the shape AND the Ng5+ follow-up actually available; this one has the queen arriving on h5 in the engine's own principal variation."
   ],
   "misconceptions": [
     "That Bxh7+ works whenever the bishop can reach h7.",
@@ -192,6 +192,50 @@
         "margin_cp": 141,
         "verdict": "supports",
         "verdict_note": "Bxh7+ is best at +6.71, 1.41 clear of the runner-up, and settled from depth 11. Paired with the negative half below, which differs only in the black bishop's square."
+      }
+    },
+    {
+      "fen": "rnbq1rk1/p1pn1ppp/1p2p3/4P3/1b1P4/2NB1N2/PP3PPP/R1BQ1RK1 w - - 1 10",
+      "move": "Bxh7+",
+      "move_uci": "d3h7",
+      "origin_kind": "historical-game",
+      "game": "Karpov-Glauser, Zurich simul 1988",
+      "concept_role": "positive",
+      "side_to_move_benefits": "white",
+      "note": "THE MASTER-GAME RUNG, and the pattern arrives in the order the record states it. 10.Bxh7+ Kxh7 11.Ng5+ Kg8 12.Qh5 is the engine's own principal variation at depth 30 - the bishop, then the knight, then the queen, which is the definition on this record read straight off the board.\n\nEvery precondition holds and can be checked: White has queen, light-squared bishop and knight; the black king has castled kingside with the h-pawn still on h7; g5 is not defended, because Black's dark-squared bishop went to b4 rather than e7 - which is the FIRST indicator_against this record lists, and its absence here is what makes the sacrifice sound; and the knight on d7 is the piece that would have covered h5 from f6, standing one square from the wrong place.\n\nStockfish 18 at depth 30 with three lines: +6.21, ahead of +4.96 and +4.03. White is better before the sacrifice and much better after it - which is honest about what a Greek gift is. It is not usually a rescue; it is the way an attack that has been earned is cashed.\n\nPROVENANCE. A simultaneous exhibition rather than a tournament game, and that is said rather than hidden: the opposition is weaker than Karpov's usual, which is one reason the pattern appears in its textbook form at all. The move list replayed legally through the page's own move generator, and the position was found by tools/mine_master_motifs.js over 2,822,256 positions from 35,648 replayed games. `attributed_by` is absent - no annotator has been read; this grounds the MASTER-GAME rung and not the human-grounded one.",
+      "engine": {
+        "engine_id": "Stockfish 18",
+        "test_level": 3,
+        "depth": 30,
+        "multipv": 3,
+        "best_move": "d3h7",
+        "eval_cp": 621,
+        "mate_in": null,
+        "pv": [
+          "d3h7",
+          "g8h7",
+          "f3g5",
+          "h7g8",
+          "d1h5",
+          "d8g5",
+          "c1g5",
+          "c8b7",
+          "a1d1",
+          "f7f6"
+        ],
+        "alternatives": [
+          {
+            "move": "d3e4",
+            "eval_cp": 496
+          },
+          {
+            "move": "d1e2",
+            "eval_cp": 403
+          }
+        ],
+        "margin_cp": 125,
+        "verdict": "supports",
+        "verdict_note": "+6.21 at depth 30, best by 125 centipawns, and the principal variation is Bxh7+ Kxh7 Ng5+ Kg8 Qh5 - the record's own three-move pattern, in order."
       }
     }
   ],
