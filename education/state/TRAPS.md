@@ -13,7 +13,7 @@ implemented; that is a reading, and doing it is the work. What it can do is
 stop the list being rediscovered from scratch each time — and every one of
 the defects listed in the tool's header was unread before it was looked at.
 
-**Of 246 stated conditions (traps and indicators-against): 96 enforced in the matcher, 21 in Layer 3, 54 argued on the record to be unbuildable or already honoured elsewhere, 75 unread.**
+**Of 246 stated conditions (traps and indicators-against): 96 enforced in the matcher, 21 in Layer 3, 55 argued on the record to be unbuildable or already honoured elsewhere, 74 unread.**
 
 ONE CAVEAT ABOUT `indicators_against`, and it is not a technicality. For a
 concept naming an ASSET — an open file, an outpost, a passed pawn — they are
@@ -124,7 +124,7 @@ shared file was added to the search. The test is quotation for that reason.
 - [noted] Do not assess them as an isolated pawn. They defend the squares in front of one another and the pair advancing is a genuine threat.
 - [noted] The detector finds the STRUCTURE. Whether it is an asset needs the piece placement, which the detector does not read.
 - [cited] *(indicator against)* A friendly pawn still stands on a flanking file — then it is a chain, not a hanging pair
-- [**unread**] *(indicator against)* One of the two has already advanced, which usually ends the structure
+- [noted] *(indicator against)* One of the two has already advanced, which usually ends the structure
 ## two-weaknesses
 
 - [cited] Two weaknesses that the defending king stands between are not two weaknesses in the operative sense. Measured on the Lasker-Capablanca ending, moving the kings to d3/d6 costs the attacker over half the advantage.

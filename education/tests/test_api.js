@@ -1786,6 +1786,36 @@ const { concepts } = API.knowledge();
        .test(String(ocb('r2q1rk1/pp3ppp/4pn2/3b4/8/2B2N2/PP3PPP/R2QK2R w KQ - 0 1'))));
 }
 
+{
+  // AN `implements` STRING IS A CLAIM, NOT DOCUMENTATION. Four were found saying
+  // something the code does not do, in two days: semi-open-file quoted a test
+  // and built neither half; hanging-pawns claimed a flanking-file condition it
+  // never tested; restraint said "total piece scope" where the code counts SAFE
+  // DESTINATIONS; king-safety said "reported ONLY at three or more attackers"
+  // while a second arm fires at one. Two were defects in the code and two were
+  // defects in the string, and only reading them against the body tells you
+  // which.
+  const impl = {};
+  for (const m of MATCH.STRUCTURAL.concat(MATCH.MOVE_BASED)) {
+    impl[m.concept] = (impl[m.concept] || '') + String(m.implements || '');
+  }
+  ok('restraint: the string says what it measures — safe destinations',
+     /SAFE DESTINATIONS/.test(impl['restraint']) &&
+     !/total piece scope, which/.test(impl['restraint']) === false ||
+     /Not 'total piece scope'/.test(impl['restraint']), impl['restraint'].slice(0, 120));
+  ok('king-safety: the string names BOTH arms',
+     /TWO ARMS/.test(impl['king-safety']), impl['king-safety'].slice(0, 120));
+  ok('...and says the shield arm fires at one attacker',
+     /reported at an attacker count of one/.test(impl['king-safety']));
+  // The shield arm really does fire below three attackers — Adams–Kasparov 2005.
+  const corpus = JSON.parse(fs.readFileSync(
+    path.join(ROOT, 'corpus', 'annotated_positions.json'), 'utf8')).positions;
+  const ak = corpus.find(p => p.id === 'adams-kasparov-2005-21Kxh7-king-safety-ambiguous');
+  const said = API.analyzeWithEducation({ fen: ak.fen_after || ak.fen })
+    .concepts_all.some(c => c.id === 'king-safety');
+  ok('king-safety: the shield arm still reports Adams–Kasparov', said);
+}
+
 /* ---------- report ---------- */
 console.log(`\nAPI  PASS ${pass}   FAIL ${fails.length}`);
 for (const [n, d] of fails) console.log(`  FAIL  ${n}\n        ${d}`);

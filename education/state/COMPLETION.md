@@ -29,7 +29,7 @@ ranking. Nothing here should be read as saying the system is nearly finished.
 
 137 concepts · 202 sources · **111 engine-validated positions + 22 tablebase** ·
 **40 human-annotated corpus positions from 27 master games** · 32 replay-verified
-master games · 661 tests + 477 API + 368 audit + 3570 explanation assertions.
+master games · 661 tests + 481 API + 368 audit + 3570 explanation assertions.
 
 Ladder: researched 137, human-grounded 30, engine-verified 54, negative-tested
 32, ambiguity-tested 24, api-validated 53 of the 83 whose record allows it,

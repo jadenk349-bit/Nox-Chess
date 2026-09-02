@@ -1274,9 +1274,13 @@ const STRUCTURAL = [
   {
     concept: 'king-safety',
     implements: ("recognition: pawn shield, open lines at the king, and the count of attackers against " +
-                 "defenders - reported ONLY at three or more attackers, because the record states that " +
-                 "'counting attacking pieces linearly overstates one or two' and that it 'is not worth " +
-                 "reporting an attack below three attackers'."),
+                 "defenders. TWO ARMS, and this string used to name only the first. The COUNT arm needs " +
+                 "three or more attackers, because the record states that 'counting attacking pieces " +
+                 "linearly overstates one or two' and that it 'is not worth reporting an attack below " +
+                 "three attackers'. The SHIELD arm needs none of them: a king with no shield pawn at " +
+                 "all, in its own half, with a line pointing at it, is reported at an attacker count of " +
+                 "one - Adams-Kasparov 2005 is the position that put it there, and a string claiming " +
+                 "'ONLY at three or more' described a matcher this is not."),
     run(f) {
       const hits = [];
       for (const c of ['w', 'b']) {
@@ -1989,7 +1993,10 @@ const MOVE_BASED = [
     concept: 'restraint',
     implements: ("the record's distinction from prophylaxis — restraint reduces the opponent's " +
                  "GENERAL mobility rather than preventing a specific plan. Measured as a quiet move " +
-                 "that lowers the opponent's total piece scope"),
+                 "that lowers the count of SAFE DESTINATIONS for the opponent's pieces. Not 'total " +
+                 "piece scope', which this string used to say and the code never did: a restraining " +
+                 "pawn move usually does not remove a square from the enemy's move list, it makes " +
+                 "the square unusable, and Fischer's 30.h4 is the position that settled it."),
     run(before, after, moveInfo) {
       const san = moveInfo.san || '';
       if (/[x+#]/.test(san)) return null;              // not a capture, not a check

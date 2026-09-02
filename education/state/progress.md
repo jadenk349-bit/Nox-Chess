@@ -1677,3 +1677,23 @@ neither variable. Separation is now measured and named:
 > that, and the count is the wrong variable**.
 
 The blockade half is not measurable and is left alone.
+
+
+## An `implements` string is a claim, not documentation
+
+Every matcher carries an `implements` string naming the part of the record it
+enforces, and the whole trap audit rests on those strings being true. Two days of
+reading found **four that are not**:
+
+- `semi-open-file` **quoted** its record's whole test and built neither half,
+  asserting in a comment that half of it was unanswerable.
+- `hanging-pawns` claimed "no friendly pawn on either flanking file" and never
+  tested it, so a phalanx of three was reported as a hanging pair.
+- `restraint` said it measured "total piece scope" where the code counts **safe
+  destinations** — a different and better measure that the string was hiding.
+- `king-safety` said it was "reported **only** at three or more attackers" while
+  a second arm fires at **one** — the arm Adams–Kasparov 2005 put there.
+
+Two were defects in the code and two were defects in the string, and only reading
+the string against the body tells you which. All four are fixed and a test pins
+them.
