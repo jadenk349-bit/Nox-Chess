@@ -13,7 +13,7 @@ implemented; that is a reading, and doing it is the work. What it can do is
 stop the list being rediscovered from scratch each time — and every one of
 the defects listed in the tool's header was unread before it was looked at.
 
-**Of 246 stated conditions (traps and indicators-against): 96 enforced in the matcher, 21 in Layer 3, 55 argued on the record to be unbuildable or already honoured elsewhere, 74 unread.**
+**Of 246 stated conditions (traps and indicators-against): 98 enforced in the matcher, 20 in Layer 3, 55 argued on the record to be unbuildable or already honoured elsewhere, 73 unread.**
 
 ONE CAVEAT ABOUT `indicators_against`, and it is not a technicality. For a
 concept naming an ASSET — an open file, an outpost, a passed pawn — they are
@@ -160,7 +160,7 @@ shared file was added to the search. The test is quotation for that reason.
 ## rook-on-the-seventh
 
 - [cited] REGISTERED FALSE POSITIVE: a rook arriving on the seventh is not automatically important. With the pawns advanced and the king free, it attacks nothing and confines nobody.
-- [layer 3] Two rooks on the seventh do NOT generally mate a king whose eighth rank is defended. Explaining them as a mating attack is usually wrong.
+- [cited] Two rooks on the seventh do NOT generally mate a king whose eighth rank is defended. Explaining them as a mating attack is usually wrong.
 - [cited] Detecting 'rook on rank 7' is trivial and fires often; the reportable facts are what it attacks and whether the king is trapped.
 - [cited] A rook reaching the seventh is not decisive by itself. With an empty seventh rank and an enemy king that has luft, a tested position evaluates level at -0.04.
 - [**unread**] *(indicator against)* The enemy king has escaped to the sixth rank or beyond
@@ -252,7 +252,7 @@ shared file was added to the search. The test is quotation for that reason.
 
 - [cited] Two line pieces on one line are only a battery if the line ARRIVES somewhere. Stacked behind their own pawns they combine nothing, and the bare geometry fires on nearly half of all positions.
 - [**unread**] *(indicator against)* The line is blocked further along and cannot be opened
-- [**unread**] *(indicator against)* The rear piece is more valuable and becomes a target itself
+- [cited] *(indicator against)* The rear piece is more valuable and becomes a target itself
 ## check
 
 - [cited] A check being available is not a reason to play it. Proven case: Ra7+ draws and Rg8+ loses in the same position.

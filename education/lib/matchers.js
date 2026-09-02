@@ -1057,7 +1057,10 @@ const STRUCTURAL = [
     implements: ("recognition.preconditions: a rook on the opponent's second rank - AND the record's " +
                  "third trap, which the earlier version ignored: \"detecting 'rook on rank 7' is " +
                  "trivial and fires often; the reportable facts are what it attacks and whether the " +
-                 "king is trapped.\" One of those two must be true."),
+                 "king is trapped.\" One of those two must be true. The sentence also carries the " +
+                 "record's central distinction in Nimzowitsch's own words - the ABSOLUTE seventh with " +
+                 "the king confined against the RELATIVE seventh with it out - and Naroditsky's " +
+                 "correction that two rooks on the rank almost never mate when the eighth is defended."),
     run(f) {
       const P = FEAT.page;
       const st = P.stateFromFEN(f.fen);
@@ -1093,16 +1096,41 @@ const STRUCTURAL = [
         // Karpov's, the eviction takes four preparatory king moves and no
         // one-ply test can see it. The failure is a corpus entry rather than a
         // guard fitted to one position.
-        hits.push({ c, r: rooks, targets, confined });
+        // ...and, when there are TWO rooks on the rank, whether the eighth is
+        // defended. The record quotes Naroditsky on exactly this: "with the
+        // eighth rank defended by a rook or queen, two rooks on the seventh can
+        // ALMOST NEVER checkmate by themselves. Their power is mobility and
+        // restriction, not mate." The pigs-on-the-seventh picture is the most
+        // over-taught image in the concept and this base was drawing it without
+        // the condition that makes it wrong.
+        const back = c === 'w' ? 0 : 7;
+        let eighthHeld = false;
+        for (let col = 0; col < 8; col++) {
+          const q = st.b[back * 8 + col];
+          if (q && q.c === other(c) && (q.t === 'R' || q.t === 'Q')) { eighthHeld = true; break; }
+        }
+        hits.push({ c, r: rooks, targets, confined, eighthHeld });
       }
       if (!hits.length) return null;
       return {
         confidence: 'high',
         because: hits.map(h => {
+          // The record's central distinction, in Nimzowitsch's own vocabulary:
+          // the seventh is held ABSOLUTELY when the enemy king is confined to
+          // the eighth behind the rook, and only RELATIVELY when it has slipped
+          // out. "If the king slips out, you are buying a good rook, not a
+          // winning one, and should pay less." The matcher had the fact and the
+          // sentence did not use the word.
           const what = h.targets.length
-            ? `attacking ${brief(h.targets, 3)}` + (h.confined ? ', with the king held on its back rank' : '')
-            : 'holding the enemy king on its back rank';
-          return `${side(f, h.c)} has a rook on ${h.r.join(' and ')}, ${what}`;
+            ? `attacking ${brief(h.targets, 3)}` +
+              (h.confined ? ', with the king held on its back rank — the ABSOLUTE seventh'
+                          : ' — but the king has slipped out, so this is the RELATIVE seventh: a good rook, not a winning one')
+            : 'holding the enemy king on its back rank — the ABSOLUTE seventh';
+          const pigs = h.r.length >= 2 && h.eighthHeld
+            ? '. Two rooks on the rank, but the eighth is defended by a heavy piece — they can almost ' +
+              'never mate by themselves from there; their power is restriction, not mate'
+            : '';
+          return `${side(f, h.c)} has a rook on ${h.r.join(' and ')}, ${what}${pigs}`;
         }),
         slots: { square: hits[0].r[0] },
         subjects: hits.map(h => h.c),
@@ -1584,7 +1612,13 @@ const STRUCTURAL = [
                     if ((c === 'w' && rr <= 3) || (c === 'b' && rr >= 4)) target = target || 'the enemy half';
                     rr += dr; ccc += dc;
                   }
-                  if (target) hits.push({ c, a: FEAT.nameOf(i), b: FEAT.nameOf(j), target });
+                  // `a` is where the scan started and `q` is the piece further
+                  // along the direction it is walking, so the line continues
+                  // PAST q to the target: q is the front piece and a is the
+                  // rear. Getting that round the wrong way told a reader the
+                  // queen was in front when the rook was.
+                  if (target) hits.push({ c, a: FEAT.nameOf(i), b: FEAT.nameOf(j), target,
+                                          front: q.t, rear: a.t });
                 }
                 break;
               }
@@ -1595,10 +1629,24 @@ const STRUCTURAL = [
       }
       if (!hits.length) return null;
       const h = hits[0];
+      // "The REAR PIECE IS MORE VALUABLE and becomes a target itself" - the
+      // record's second indicator_against, and the commonest way a battery is
+      // built the wrong way round. A queen in front of a rook is not a battery
+      // aimed at the enemy, it is a queen that has to move first every time the
+      // line is touched. Said rather than suppressed: the geometry is there
+      // either way, and which piece is in front is exactly what a learner needs
+      // told.
+      const VAL = { B: 3, R: 5, Q: 9 };
+      const wrongOrder = (VAL[h.front] || 0) > (VAL[h.rear] || 0);
+      const name = t => ({ B: 'bishop', R: 'rook', Q: 'queen' }[t] || 'piece');
       return {
         confidence: 'medium',
         because: [`${side(f, h.c)} has two long-range pieces stacked on one line, on ${h.a} and ${h.b}, ` +
-                  `and the line runs on to ${h.target}`],
+                  `and the line runs on to ${h.target}` +
+                  (wrongOrder
+                    ? ` — but the ${name(h.front)} is in front of the ${name(h.rear)}, which is the ` +
+                      `expensive way round: the front piece has to move first every time the line is touched`
+                    : '')],
         slots: { square: h.a },
         subjects: [...new Set(hits.map(x => x.c))],
       };

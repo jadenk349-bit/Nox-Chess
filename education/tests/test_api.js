@@ -1914,6 +1914,50 @@ const { concepts } = API.knowledge();
        .concepts_all.some(c => c.id === 'open-file'));
 }
 
+{
+  // rook-on-the-seventh now says the record's central distinction in
+  // Nimzowitsch's own vocabulary. The matcher had the fact — is the king
+  // confined — and the sentence did not use the word. "The seventh is held
+  // ABSOLUTELY when the enemy king is confined to the eighth behind the rook…
+  // held only RELATIVELY when the king has escaped forward. If the king slips
+  // out, you are buying a good rook, not a winning one."
+  const r7 = fen => {
+    const c = API.analyzeWithEducation({ fen }).concepts.find(x => x.id === 'rook-on-the-seventh');
+    return c ? (c.because || [''])[0] : null;
+  };
+  ok('rook-on-the-seventh: names the ABSOLUTE seventh when the king is confined',
+     /the ABSOLUTE seventh/.test(String(r7('6k1/pR4pp/8/8/8/7P/6P1/6K1 w - - 0 1'))),
+     String(r7('6k1/pR4pp/8/8/8/7P/6P1/6K1 w - - 0 1')));
+  ok('...and the RELATIVE seventh when it has slipped out',
+     /RELATIVE seventh: a good rook, not a winning one/
+       .test(String(r7('8/1R4pp/6k1/8/8/7P/6P1/6K1 w - - 0 1'))),
+     String(r7('8/1R4pp/6k1/8/8/7P/6P1/6K1 w - - 0 1')));
+  // Naroditsky's correction, which the record quotes and the base was ignoring:
+  // "with the eighth rank defended by a rook or queen, two rooks on the seventh
+  // can ALMOST NEVER checkmate by themselves."
+  ok('rook-on-the-seventh: pigs on the seventh with a defended eighth do not mate',
+     /can almost never mate by themselves|their power is restriction, not mate/
+       .test(String(r7('r5k1/1R2R1pp/8/8/8/7P/6P1/6K1 w - - 0 1'))),
+     String(r7('r5k1/1R2R1pp/8/8/8/7P/6P1/6K1 w - - 0 1')));
+
+  // battery's "the REAR PIECE IS MORE VALUABLE and becomes a target itself".
+  // Building it exposed a bug in the matcher's own bookkeeping: `a` is where the
+  // scan started and `q` is further along the direction, so q is the FRONT
+  // piece. Reading them the other way round told a reader the queen was in front
+  // when the rook was.
+  const bat = fen => {
+    const c = API.analyzeWithEducation({ fen }).concepts.find(x => x.id === 'battery');
+    return c ? (c.because || [''])[0] : null;
+  };
+  ok('battery: rook in front of queen is the right way round, and says nothing extra',
+     !/expensive way round/.test(String(bat('4k3/3p4/8/8/8/8/3R4/3QK3 w - - 0 1'))),
+     String(bat('4k3/3p4/8/8/8/8/3R4/3QK3 w - - 0 1')));
+  ok('battery: queen in front of rook is named as the expensive way round',
+     /the queen is in front of the rook, which is the expensive way round/
+       .test(String(bat('4k3/3p4/8/8/8/8/3Q4/3RK3 w - - 0 1'))),
+     String(bat('4k3/3p4/8/8/8/8/3Q4/3RK3 w - - 0 1')));
+}
+
 /* ---------- report ---------- */
 console.log(`\nAPI  PASS ${pass}   FAIL ${fails.length}`);
 for (const [n, d] of fails) console.log(`  FAIL  ${n}\n        ${d}`);

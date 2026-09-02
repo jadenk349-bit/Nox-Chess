@@ -1768,3 +1768,29 @@ conditions — an open file needs an **entry square**, a semi-open one needs a
 correctly not reported.
 
 Corpus: **41 positions, 27 games, 19 positive / 13 ambiguous / 9 negative.**
+
+
+## Two concepts that had the fact and did not say the word
+
+`rook-on-the-seventh` knew whether the enemy king was confined — the matcher has
+used it as a firing condition since yesterday — and the sentence never used
+Nimzowitsch's vocabulary for it. The record makes the distinction central: the
+seventh is held **absolutely** with the king shut on the eighth behind the rook,
+and only **relatively** once it has slipped out, and *"if the king slips out you
+are buying a good rook, not a winning one."* A reader was being told the rook was
+on the seventh and not which kind.
+
+Naroditsky's correction was missing too, though the record quotes it in full:
+with the eighth defended by a heavy piece, two rooks on the seventh almost never
+mate. The pigs-on-the-seventh picture is the most over-taught image in the
+concept, and this base was drawing it without the condition that makes it wrong.
+
+`battery` now names **the expensive way round** — a queen in front of a rook,
+which has to move first every time the line is touched. Building it exposed a bug
+in the matcher's own bookkeeping: the scan walks from one piece along a direction
+to the other, so the *second* piece found is the one nearer the target. Read the
+other way round it would have told a reader the queen was in front when the rook
+was.
+
+Neither change moves a firing rate. Both change what is said — the eighth and
+ninth time in three sessions that has been the right answer.
