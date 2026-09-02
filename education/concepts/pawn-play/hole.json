@@ -206,7 +206,30 @@
       "false_positive_case": "a-fianchetto-hole-the-bishop-covers"
     }
   ],
-  "ambiguous_examples": [],
+  "ambiguous_examples": [
+    {
+      "fen": "r1bq1rk1/pp3ppp/2n5/3Np3/8/4P3/PP3PPP/R1BQ1RK1 w - - 0 1",
+      "note": "The same board as this record's positive example with White's pawn on e3 instead of e4. The HOLE is unchanged - no black pawn can ever attack d5, the c-pawn is gone and the e5 pawn captures the other way - and everything about what it is worth has changed, because the knight standing on it is now held by a queen rather than by a pawn. This is filed as ambiguous rather than negative on purpose: the hole is genuinely there and reporting it would not be an error, and the engine says -0.17 against +0.30 for the version one pawn further up. A hole is a property of the pawns and its VALUE is a property of everything else, which is the distinction this record's first trap draws - 'most of them are irrelevant'.",
+      "origin_kind": "constructed-test",
+      "concept_role": "ambiguous",
+      "engine": {
+        "engine_id": "Stockfish 18",
+        "test_level": 3,
+        "depth": 22,
+        "threads": 10,
+        "hash_mb": 4096,
+        "multipv": 1,
+        "best_move": "e3e4",
+        "eval_cp": -17,
+        "mate_in": null,
+        "pv": [],
+        "alternatives": [],
+        "margin_cp": null,
+        "verdict": "ambiguous",
+        "verdict_note": "-0.17, against +0.30 for the same board with the pawn on e4, and the engine's own first move here is e3-e4. A 47-centipawn swing on one pawn, with the hole identical in both."
+      }
+    }
+  ],
   "explanations": {
     "by_level": {
       "beginner": "Your pawns can never go backwards, so a square they have moved past is one they can never guard again. If your opponent can park a piece there, it will sit there for the rest of the game.",

@@ -175,7 +175,30 @@
       }
     }
   ],
-  "ambiguous_examples": [],
+  "ambiguous_examples": [
+    {
+      "fen": "1r4k1/5pp1/7p/8/8/7P/5PP1/R5K1 w - - 0 1",
+      "note": "One rook each, three pawns each, an open file, and a trade available at any moment on any square either rook chooses. Every question this concept asks - who does the exchange favour, does it simplify towards a won or a drawn ending, is the resulting structure better for one side - has the same answer here, which is that it does not matter. The engine says 0.00. Filed as ambiguous because the concept is fully applicable and produces no information: a trade that changes nothing is neither a good exchange nor a bad one, and a system that had to say which would be inventing a difference. This record's positive example is the opposite case - Capablanca trading into a specific ending he had judged - and its counterexample is a capture that throws away mate in one.",
+      "origin_kind": "constructed-test",
+      "concept_role": "ambiguous",
+      "engine": {
+        "engine_id": "Stockfish 18",
+        "test_level": 3,
+        "depth": 28,
+        "threads": 10,
+        "hash_mb": 4096,
+        "multipv": 1,
+        "best_move": "a1a6",
+        "eval_cp": 0,
+        "mate_in": null,
+        "pv": [],
+        "alternatives": [],
+        "margin_cp": null,
+        "verdict": "ambiguous",
+        "verdict_note": "0.00 at depth 28 with symmetric material. Every trade available leads to the same evaluation, which is what makes the concept inapplicable rather than wrong here."
+      }
+    }
+  ],
   "explanations": {
     "by_level": {
       "beginner": "When you are ahead, trading pieces usually helps. When you are cramped, trading gives you room. When you are behind, avoid trades.",

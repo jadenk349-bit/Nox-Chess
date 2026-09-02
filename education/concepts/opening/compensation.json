@@ -203,7 +203,30 @@
       "false_positive_case": "active-pieces-are-not-compensation"
     }
   ],
-  "ambiguous_examples": [],
+  "ambiguous_examples": [
+    {
+      "fen": "r1bqk1nr/pppp1ppp/2n5/4p3/1bB1P3/5N2/P1PP1PPP/RNBQK2R w KQkq - 0 5",
+      "note": "The Evans Gambit accepted, after 1.e4 e5 2.Nf3 Nc6 3.Bc4 Bc5 4.b4 Bxb4 - a gambit played by Morphy, Chigorin, Fischer and Kasparov, and still unsettled after a hundred and seventy years. White is a pawn down with a tempo, the c3 and d4 squares, and a half-open b-file. The engine says -0.10: full compensation, exactly, and no more. That is the most ambiguous number a gambit can produce, and this record's third trap is precisely about it - 'an evaluation near zero while a pawn down means full compensation NOW; it says nothing about whether it survives the next ten moves.' Read against this record's own false-positive case, the Halloween Gambit at 1.71 worse, where the pieces are just as active and the compensation is not there.",
+      "origin_kind": "constructed-test",
+      "concept_role": "ambiguous",
+      "engine": {
+        "engine_id": "Stockfish 18",
+        "test_level": 3,
+        "depth": 24,
+        "threads": 10,
+        "hash_mb": 4096,
+        "multipv": 1,
+        "best_move": "c2c3",
+        "eval_cp": -10,
+        "mate_in": null,
+        "pv": [],
+        "alternatives": [],
+        "margin_cp": null,
+        "verdict": "ambiguous",
+        "verdict_note": "-0.10 at depth 24, a pawn down. Full compensation and not a centipawn more. The whole difficulty of this concept is that the same number would be reported for a position with no compensation and a pawn's worth of luck, and nothing in the evaluation distinguishes them."
+      }
+    }
+  ],
   "explanations": {
     "by_level": {
       "beginner": "What you get in return for the material you gave away.",

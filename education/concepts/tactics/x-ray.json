@@ -124,7 +124,30 @@
       "false_positive_case": "an-x-ray-with-two-blockers"
     }
   ],
-  "ambiguous_examples": [],
+  "ambiguous_examples": [
+    {
+      "fen": "3qk3/3r4/8/8/8/8/8/3RK3 w - - 0 1",
+      "note": "The attacking form of the motif, with exactly one blocker: the rook on d1 acts through the rook on d7 at the queen on d8. The geometry is textbook and the position is lost - the engine reports mate in 10 AGAINST the side holding the x-ray, because a rook on an open file against a queen is not a threat, it is a target. Filed as ambiguous rather than as a false positive because the x-ray is genuinely present and correctly described; what is absent is any reason to care. This record's second indicator_against is the short version - 'the far target is irrelevant' - and here the far target is irrelevant in the strongest possible sense, being worth more than everything doing the attacking.",
+      "origin_kind": "constructed-test",
+      "concept_role": "ambiguous",
+      "engine": {
+        "engine_id": "Stockfish 18",
+        "test_level": 3,
+        "depth": 20,
+        "threads": 10,
+        "hash_mb": 4096,
+        "multipv": 1,
+        "best_move": "d1d7",
+        "eval_cp": null,
+        "mate_in": -10,
+        "pv": [],
+        "alternatives": [],
+        "margin_cp": null,
+        "verdict": "ambiguous",
+        "verdict_note": "Mate in 10 against the side whose rook is doing the x-raying. The motif is present and the position is lost, which is a pair of facts this base needs to be able to state together."
+      }
+    }
+  ],
   "explanations": {
     "by_level": {
       "beginner": "This piece is working right through another piece — the moment the piece in the middle moves, the attack is real.",
