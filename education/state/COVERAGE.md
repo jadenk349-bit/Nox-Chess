@@ -34,7 +34,7 @@ The completion assessment is judged on the ORIGINAL rule and criterion 1 stays w
 | substantial | 0.87 | `weak-squares` | 2 |
 | substantial | 0.86 | `positional-sacrifices` | 2 |
 | substantial | 0.86 | `attack-principles` | 2 |
-| substantial | 0.76 | `named-mating-patterns` | 2 |
+| substantial | 0.80 | `named-mating-patterns` | 2 |
 | substantial | 0.70 | `tactical-motifs` | 19 |
 | substantial | 0.65 | `blindfold-visualisation` | 4 |
 | partial | 1.00 | `board-geometry` | 1 |
@@ -167,6 +167,7 @@ The completion assessment is judged on the ORIGINAL rule and criterion 1 stays w
 | `worst-placed-piece` | 0.87 | x | x | x | x | x | x | - | x | x | x | . | - | x | x | x | x |
 | `greek-gift` | 0.87 | x | x | x | x | x | x | x | x | - | x | . | - | x | x | x | x |
 | `skewer` | 0.87 | x | x | x | . | x | x | x | x | x | x | x | - | x | x | x | - |
+| `back-rank-mate` | 0.86 | x | x | x | . | x | x | x | x | - | x | . | - | x | x | x | x |
 | `queen-activity` | 0.86 | x | x | x | . | x | x | - | x | x | x | . | x | - | x | x | x |
 | `battery` | 0.86 | x | x | x | . | x | x | x | x | x | x | . | - | x | x | x | - |
 | `discovered-attack` | 0.86 | x | x | x | . | x | x | x | x | x | x | . | - | x | x | x | - |
@@ -201,7 +202,6 @@ The completion assessment is judged on the ORIGINAL rule and criterion 1 stays w
 | `double-check` | 0.80 | x | x | x | . | x | x | x | x | x | x | x | - | - | x | x | - |
 | `knight-fork` | 0.80 | x | x | x | . | x | x | x | x | - | x | x | - | - | x | x | x |
 | `pawn-storm` | 0.79 | x | x | x | . | x | x | - | x | - | x | . | x | - | x | x | x |
-| `back-rank-mate` | 0.79 | x | x | x | . | x | x | x | x | - | x | . | - | - | x | x | x |
 | `discovered-check` | 0.79 | x | x | x | . | x | x | x | x | x | x | . | - | - | x | x | - |
 | `triangulation` | 0.77 | x | x | x | x | x | . | - | - | . | x | x | . | - | x | x | x |
 | `endgame-principles` | 0.75 | x | x | x | x | x | x | x | - | - | x | - | x | - | x | x | x |

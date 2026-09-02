@@ -235,7 +235,13 @@ const { concepts } = API.knowledge();
   for (const c of cases) {
     if (!c.fen || !['resolved', 'partially-resolved'].includes(c.status)) continue;
     replayed++;
-    const r = API.analyzeWithEducation({ fen: c.fen });
+    // WITH THE MOVE, when the case has one. This used to replay `{fen}` alone,
+    // and twenty of these cases are about a MOVE - a fork that loses, a break
+    // that opens a line at your own king, a bishop taking on h7 with no knight
+    // behind it. Without the move the move-based and motif matchers say nothing
+    // at all, so those cases were being replayed as a different question from
+    // the one they ask and passing for the wrong reason.
+    const r = API.analyzeWithEducation(c.move ? { fen: c.fen, move: c.move } : { fen: c.fen });
     ok(`FP ${c.id}: API runs`, !!r.explanation.text);
     ok(`FP ${c.id}: no banned phrasing`, r.phrasing_violations.length === 0,
        JSON.stringify(r.phrasing_violations));
