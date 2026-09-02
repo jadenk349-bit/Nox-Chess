@@ -10,6 +10,13 @@ same way — a challenge is not a second kind of multiplayer, only a third way
 into the first one. Friendships themselves are Supabase's business, not this
 server's; see supabase-social.sql.
 
+A ranked player nobody turns up for is seated with a bot after five seconds,
+which is a fourth way into the same Game and not a fourth kind of multiplayer
+either. It is a fallback and only a fallback: a real opponent takes priority at
+every instant of that wait, and the decision is made here, under the lock that
+pairs two people, because a browser cannot see the queue. See "the fallback
+opponent" below.
+
 The rules live in the browser: both clients run the same move generator, so the
 server's job is to pair players and to keep the two of them on one timeline. It
 enforces whose turn it is and that plies arrive in order — a move from the wrong
@@ -68,6 +75,55 @@ CHALLENGE_TTL = 180
 # waiting to be asked again.
 REMATCH_TTL = 180
 
+# ------------------------------------------------------- the fallback opponent
+#
+# A ranked queue with nobody else in it is a player watching a plate sweep until
+# they give up. So after a few seconds of finding nobody, the server seats a bot
+# instead — but only after, and only because there was nobody. A real opponent
+# beats a bot at every instant of that wait, which is why the decision is made
+# here, under the very lock that pairs two people, rather than by a client
+# counting to five on its own: a browser cannot see the queue, and two browsers
+# each counting to five would hand a bot to each of two players who should have
+# been handed each other.
+#
+# The bot never goes into `lobby`. Nothing can queue one, nothing can meet one
+# in a room or a challenge, and two of them can never be paired, because the
+# timeout below is the only thing in the process that ever builds one.
+AI_WAIT = 5.0
+try:
+    # Only so the tests need not sit out five seconds a time. Not a setting
+    # anybody is expected to change: the five seconds are part of the feature.
+    AI_WAIT = max(0.2, float(os.environ.get("NOX_AI_WAIT") or AI_WAIT))
+except ValueError:
+    pass
+
+# Names, not accounts. Nothing is stored under one, nothing is rated under one,
+# and no row anywhere in Supabase answers to any of them.
+AI_NAMES = [
+    "cutydaeheech0",
+    "TheNlEL",
+    "goutham111",
+    "Paradoxical_MovesbyJJ",
+    "gaymonster",
+    "jungjungkook",
+    "676767",
+]
+
+# How many of a player's last fallback opponents to remember, so the same name
+# does not turn up twice running. Well under len(AI_NAMES) — memory as long as
+# the list would leave nothing to choose from.
+AI_NAME_MEMORY = 3
+AI_RECENT_MAX = 500     # ... and the remembering is a courtesy, so it is bounded
+ai_recent = {}          # player key -> the names they were last given, oldest first
+
+# What the page shows a player who has no rating of their own (START_ELO in
+# blind-chess.html). The fallback opponent is sized against the number the
+# player is actually looking at while they wait, so the two have to agree.
+START_ELO = 100
+RATING_TTL = 120        # seconds a rating read out of Supabase is reused for
+RATING_CACHE_MAX = 500  # ... and how many players' worth of that to keep
+player_ratings = {}     # account id -> (rating, when it was read)
+
 
 def log(*a):
     if LOG:
@@ -99,6 +155,12 @@ class Client:
         self.user_id = None
         self.name = "Guest"
         self.verified = False
+        # A real player only. The bot below overrides it, and every test of
+        # "is this a person" in this file reads it rather than the class.
+        self.is_ai = False
+        # The countdown to a fallback opponent, while this client is in the
+        # ranked queue and nobody has turned up. None whenever it is not.
+        self.ai_timer = None
 
     def send(self, obj):
         if not self.alive:
@@ -113,8 +175,37 @@ class Client:
         return "<client %s>" % self.id
 
 
+class BotClient(Client):
+    """A seat at the board with nobody sitting in it.
+
+    The fallback opponent is not a connection and not an account: it is a name,
+    a rating good for this one game, and something for `Game` to hold the other
+    end of. It plays in the player's own browser — the rules and the engine
+    have always lived there, and there is no chess in this process to play
+    with — so nothing is ever sent to it and nothing ever arrives from it.
+
+    It subclasses Client only so that everything downstream of pairing works
+    unchanged: `Game` seats it, `opponent_of` finds it, `finish_game` tells it
+    the news and hears nothing back. It is never registered under an account,
+    never put in `lobby` or `rooms`, and never handed a challenge, so no real
+    player can be paired with one by any route but the timeout, and two of them
+    can never meet.
+    """
+
+    def __init__(self, name, elo):
+        super().__init__(None, ("bot", 0))
+        self.name = name
+        self.elo = elo            # for this game only; it is not a stored rating
+        self.is_ai = True
+        self.verified = False     # said out loud, and never overridden
+
+    def send(self, obj):
+        """There is nobody there. Swallowed rather than framed at a dead socket."""
+        pass
+
+
 class Game:
-    def __init__(self, white, black, mode, minutes, inc=0, kind="friendly"):
+    def __init__(self, white, black, mode, minutes, inc=0, kind="friendly", ai=None):
         self.id = uuid.uuid4().hex[:8]
         self.players = {WHITE: white, BLACK: black}
         self.mode = mode
@@ -125,6 +216,11 @@ class Game:
         # of them — a ranked game must never be played again as a friendly one.
         self.kind = kind
         self.moves = []          # each: {ply, from, to, promo, san}
+        # {name, elo, bot} when the opponent is the fallback bot, None when the
+        # other side is a person. The server decides this and nothing else may:
+        # a client cannot claim its opponent is a bot, and cannot choose what
+        # the bot is rated.
+        self.ai = ai
         self.turn = WHITE
         self.over = None
         self.started = time.time()
@@ -517,6 +613,141 @@ def time_label(minutes, inc):
     return "%s+%s" % (minutes, inc) if inc else "%s min" % minutes
 
 
+def later(delay, fn, *args):
+    """Run something once, later, on a thread that cannot hold the process open."""
+    timer = threading.Timer(delay, fn, args=args)
+    timer.daemon = True
+    timer.start()
+    return timer
+
+
+def ai_elo_for(rating):
+    """What the fallback opponent is rated at, against this player.
+
+    The player's Elo, a hundredth of it, and nine: a shade above them at every
+    rating, and a shade further above the higher they climb, so the game reads
+    as a small step up rather than as a handout. Worked out fresh for every
+    match — these names are not accounts and carry no rating between games.
+    """
+    return int(round(rating + rating / 100.0 + 9))
+
+
+def player_rating_of(client):
+    """The player's ranked rating, as the server understands it.
+
+    Never called while holding the lock: it may be an HTTP round trip, and
+    nobody else may be paired while this thread holds up matchmaking. Read from
+    Supabase rather than from the client, because the AI's rating follows from
+    this one and a number the browser sends is a number the browser chooses.
+    Cached briefly — a rating cannot move mid-search, and a player who searches
+    twice should not cost two round trips.
+
+    A guest, or a server with no Supabase, gets the starting rating, which is
+    exactly the number the page has been showing them on the badge.
+    """
+    if not client.user_id:
+        return START_ELO
+    with lock:
+        hit = player_ratings.get(client.user_id)
+    if hit and time.time() - hit[1] < RATING_TTL:
+        return hit[0]
+    stored = supabase_db.get_rating(client.user_id)      # ...and this is the slow part
+    rating = stored if isinstance(stored, int) else START_ELO
+    with lock:
+        player_ratings[client.user_id] = (rating, time.time())
+        while len(player_ratings) > RATING_CACHE_MAX:
+            player_ratings.pop(next(iter(player_ratings)))
+    return rating
+
+
+def ai_name_for(client):
+    """A fallback name this player has not just had. Caller holds the lock."""
+    who = client.user_id or client.id
+    seen = ai_recent.get(who, [])
+    fresh = [n for n in AI_NAMES if n not in seen] or list(AI_NAMES)
+    name = random.choice(fresh)
+    ai_recent.pop(who, None)          # re-inserted at the end, so the cap sheds the stalest
+    ai_recent[who] = (seen + [name])[-AI_NAME_MEMORY:]
+    while len(ai_recent) > AI_RECENT_MAX:
+        ai_recent.pop(next(iter(ai_recent)))
+    return name
+
+
+def arm_ai_fallback(client, key):
+    """Start the countdown to a bot. Caller holds the lock.
+
+    The timer object identifies itself when it fires, so a player who gives up
+    and queues again cannot be seated by the countdown they already cancelled.
+    """
+    cancel_ai_fallback(client)
+    timer = later(AI_WAIT, lambda: ai_fallback(client, key, timer))
+    client.ai_timer = timer
+
+
+def cancel_ai_fallback(client):
+    """Call the countdown off — paired, cancelled, or gone. Caller holds the lock."""
+    timer = client.ai_timer
+    if timer is not None:
+        client.ai_timer = None
+        timer.cancel()
+
+
+def ai_fallback(client, key, timer):
+    """Nobody turned up. Seat a bot — unless, by now, somebody has.
+
+    The re-check under the lock is the whole of the race protection, and it is
+    exact rather than approximate: `lobby[key]` is every player waiting on
+    these terms, so this player still standing in it with nobody live beside
+    them is the proof that no compatible opponent exists. (`handle_find` pairs
+    anyone who arrives with whoever is already there, so a second live waiter
+    is a moment rather than a state — but it is asked for rather than assumed,
+    because the queue holds a list and a list can hold two.) `handle_find`
+    pairs under the same lock. Either the pairing gets there first, and this
+    finds itself out of the queue and does nothing, or this gets there first
+    and takes the player out of the queue before the pairing can look. There is
+    no third outcome and no instant at which two players could each be given a
+    bot instead of each other.
+    """
+    if not client.alive:
+        return
+    mode, minutes, inc, kind = key
+    # Read before the lock: it may go to the network, and matchmaking for
+    # everybody on the server stops while this thread holds it.
+    elo = ai_elo_for(player_rating_of(client))
+    with lock:
+        # A timer that fired just as it was cancelled: whatever is armed now,
+        # if anything, is not this one, and it is not this one's business.
+        if client.ai_timer is not timer:
+            return
+        client.ai_timer = None
+        if not client.alive or client.game:
+            return
+        queue = lobby.get(key) or []
+        if client not in queue or client.queue_key != key:
+            return                     # paired, gave up, or queued for something else
+        if any(c is not client and c.alive and not c.game for c in queue):
+            return                     # a person is standing right there; they win
+        leave_lobby(client)
+        name = ai_name_for(client)
+        bot = BotClient(name, elo)
+        # Colours are the server's call here exactly as they are between two
+        # people, and the pairing is the same pairing: one Game, one way out.
+        game, outgoing = start_game_between(
+            client, bot, random.choice((WHITE, BLACK)),
+            mode, minutes, inc, kind=kind,
+            ai={"name": name, "elo": elo, "bot": True})
+    for player, payload in outgoing:
+        player.send(payload)
+    log("no opponent for %s after %.1fs — %s (%d Elo) takes the board, %s %s, %s"
+        % (client.id, AI_WAIT, name, elo, kind, mode, time_label(minutes, inc)))
+
+
+def ai_accept_draw(game):
+    """The fallback opponent takes the half point, through the usual door."""
+    with lock:
+        finish_game(game, "draw", None)
+
+
 def handle_hello(client, msg):
     """Identify the player, by token if they have one.
 
@@ -601,7 +832,9 @@ def handle_find(client, msg):
     with lock:
         queue = lobby.get(key, [])
         if client in queue:
-            return                       # already waiting here; asking twice changes nothing
+            # already waiting here; asking twice changes nothing, and the
+            # countdown to a fallback opponent stands rather than restarting
+            return
         waiting = [c for c in queue if c.alive and not c.game]
         # Whoever you have just played is the one person New Game should not
         # hand you straight back: pressing it means "find me an opponent", and
@@ -616,6 +849,11 @@ def handle_find(client, msg):
         if partner is None and waiting:
             partner = waiting[0]
         if partner is not None:
+            # A real opponent, so neither of them is waiting for a bot any more.
+            # This is the branch that has priority over the countdown, and it
+            # holds the lock the countdown has to take before it can seat one.
+            cancel_ai_fallback(partner)
+            cancel_ai_fallback(client)
             leave_lobby(partner)
             # colours are the server's call, so neither client can pick for itself
             pair = [partner, client]
@@ -646,9 +884,15 @@ def handle_find(client, msg):
                 side.send(payload)
         else:
             leave_lobby(client)          # never in two queues at once
+            cancel_ai_fallback(client)   # ...and a search on other settings is called off
             lobby.setdefault(key, []).append(client)
             client.queue_key = key
             client.send({"t": "waiting"})
+            # Ranked only. A friendly game or a room is arranged with somebody
+            # in particular, and nobody waiting for one asked for a bot —
+            # Play Bot is a screen of its own, with a ladder to choose from.
+            if kind == "ranked":
+                arm_ai_fallback(client, key)
             log("%s waiting — %s %s, %s" % (client.id, kind, mode, time_label(minutes, inc)))
 
 
@@ -748,6 +992,7 @@ def handle_join(client, msg):
 
 def handle_cancel(client):
     with lock:
+        cancel_ai_fallback(client)      # nobody is waiting, so nothing is owed one
         leave_lobby(client)
     client.send({"t": "cancelled"})
 
@@ -757,6 +1002,12 @@ def handle_move(client, msg):
         game = client.game
         if not game or game.over:
             client.send({"t": "error", "msg": "no game in progress"})
+            return
+        if game.ai:
+            # There is nobody to relay to. Both sides of a fallback game are
+            # played in the one browser, which is why the page does not send
+            # its moves here either — and why a move that does arrive is
+            # dropped quietly rather than refused for being out of turn.
             return
         if client.color != game.turn:
             client.send({"t": "error", "msg": "not your turn", "ply": len(game.moves)})
@@ -807,6 +1058,14 @@ def handle_draw_offer(client):
     with lock:
         game = client.game
         if not game or game.over:
+            return
+        if game.ai:
+            # The fallback opponent accepts, and accepts through the same door
+            # two people use: the offer goes out, `over` comes back, and the
+            # player's screen does exactly what it does against anybody else.
+            # The pause is only so that it does not answer an offer faster than
+            # a person could have read it.
+            later(random.uniform(0.9, 2.0), ai_accept_draw, game)
             return
         opponent = game.opponent_of(client)
     opponent.send({"t": "draw-offer"})
@@ -870,37 +1129,54 @@ def handle_chat(client, msg):
 
 # ------------------------------------------------------- challenging a friend
 
-def start_game_between(host, guest, host_color, mode, minutes, inc, kind="friendly"):
+def start_game_between(host, guest, host_color, mode, minutes, inc, kind="friendly", ai=None):
     """Seat two named players at one board. Caller holds the lock.
 
     The same pairing handle_join does for a room, lifted out so a challenge
-    does not grow a second copy of it. Returns what to send each of them,
-    which the caller sends outside the lock.
+    does not grow a second copy of it — and so the fallback opponent does not
+    grow a third. Returns what to send each of them, which the caller sends
+    outside the lock.
+
+    `ai` describes the fallback opponent when that is who the guest is. It goes
+    into the game and into the payload, so the browser learns from the server
+    alone that it is playing a bot, what the bot is called and what it is
+    rated. Nothing a client says can put it there.
     """
     white, black = (host, guest) if host_color == WHITE else (guest, host)
-    game = Game(white, black, mode, minutes, inc, kind)
+    game = Game(white, black, mode, minutes, inc, kind, ai=ai)
     white.color, black.color = WHITE, BLACK
     white.game = black.game = game
     games[game.id] = game
     lobby_subs.discard(host)
     lobby_subs.discard(guest)
-    # neither of them is waiting anywhere else now
+    # neither of them is waiting anywhere else now, and neither is owed a bot
     for player in (host, guest):
+        cancel_ai_fallback(player)
         leave_lobby(player)
+    outgoing = []
+    for color, player in game.players.items():
+        other = game.opponent_of(player)
+        payload = {
+            "t": "start",
+            "game": game.id,
+            "color": color,
+            "mode": mode,
+            "minutes": minutes,
+            "inc": inc,
+            "kind": kind,
+            "opponent": other.name,
+            "opponentVerified": other.verified,
+        }
+        # Only ever true of the side facing the bot, and the bot's own copy is
+        # thrown away by the caller — but say it of the opponent rather than of
+        # the game, because that is the question the page is asking.
+        if ai and other.is_ai:
+            payload["ai"] = dict(ai)
+        outgoing.append((player, payload))
     # Whatever either of them still had out from an earlier board is answered
     # by this one. It rides back with the start payloads because the caller
     # already sends those outside the lock, one at a time.
-    return game, [(player, {
-        "t": "start",
-        "game": game.id,
-        "color": color,
-        "mode": mode,
-        "minutes": minutes,
-        "inc": inc,
-        "kind": kind,
-        "opponent": game.opponent_of(player).name,
-        "opponentVerified": game.opponent_of(player).verified,
-    }) for color, player in game.players.items()] + rematches_cleared_for(host, guest)
+    return game, outgoing + rematches_cleared_for(host, guest)
 
 
 def handle_challenge(client, msg):
@@ -1045,6 +1321,7 @@ def handle_rematch(client, msg):
     crossed = None
     invite = None
     guest = None
+    again = None
     with lock:
         prune_rematches()
         last = client.last_game
@@ -1067,33 +1344,58 @@ def handle_rematch(client, msg):
             client.send({"t": "error", "msg": "ranked play needs a signed-in account"})
             return
         other = last["opponent"]
-        if not other.alive or other.game or not last_game_is(other, game_id):
-            # They have left, or moved on to something else. Either way there
-            # is nobody sitting on the other side of that board any more.
-            client.send({"t": "rematch-gone", "game": game_id, "reason": "away"})
-            return
-
-        # Both pressed at nearly the same moment. The request that got here
-        # first stands and this press answers it, rather than leaving two
-        # invitations crossing in the air with neither one ever accepted.
-        theirs = next((r for r in rematches.values()
-                       if r.host is other and r.guest is client and r.game_id == game_id), None)
-        if theirs is not None:
-            crossed = theirs.id
+        if other.is_ai:
+            # There is nobody to ask. The fallback opponent was seated because
+            # the queue was empty, and it can answer a question the only way it
+            # answers anything — by being there. So a rematch of one is granted
+            # rather than put: the same name at the same rating, the same
+            # terms, colours swapped, and through start_game_between() like
+            # every other way into a Game. Asking would leave a box open until
+            # it lapsed at REMATCH_TTL, which is not a refusal and not a game.
+            # The rating is the one that game was played at rather than a fresh
+            # read: this is the same opponent again, and player_rating_of() may
+            # go to the network, which nothing holding this lock may do.
+            bot = BotClient(other.name, other.elo)
+            host_color = BLACK if last["color"] == WHITE else WHITE
+            game, again = start_game_between(
+                client, bot, host_color, last["mode"], last["minutes"],
+                last["inc"], kind=last["kind"],
+                ai={"name": bot.name, "elo": bot.elo, "bot": True})
         else:
-            # Pressed twice, or a duplicate of the same message arrived. The
-            # invitation already out is the answer to both: sending a second
-            # would leave the opponent with two boxes to answer.
-            mine = next((r for r in rematches.values()
-                         if r.host is client and r.game_id == game_id), None)
-            if mine is not None:
-                client.send({"t": "rematch-sent", "id": mine.id, "game": game_id})
+            if not other.alive or other.game or not last_game_is(other, game_id):
+                # They have left, or moved on to something else. Either way
+                # there is nobody sitting on the other side of that board.
+                client.send({"t": "rematch-gone", "game": game_id, "reason": "away"})
                 return
-            rem = Rematch(client, other, game_id, last["mode"], last["minutes"],
-                          last["inc"], last["kind"], last["color"])
-            rematches[rem.id] = rem
-            invite = dict(rem.public(), t="rematch-request")
-            guest = other
+
+            # Both pressed at nearly the same moment. The request that got here
+            # first stands and this press answers it, rather than leaving two
+            # invitations crossing in the air with neither one ever accepted.
+            theirs = next((r for r in rematches.values()
+                           if r.host is other and r.guest is client and r.game_id == game_id), None)
+            if theirs is not None:
+                crossed = theirs.id
+            else:
+                # Pressed twice, or a duplicate of the same message arrived. The
+                # invitation already out is the answer to both: sending a second
+                # would leave the opponent with two boxes to answer.
+                mine = next((r for r in rematches.values()
+                             if r.host is client and r.game_id == game_id), None)
+                if mine is not None:
+                    client.send({"t": "rematch-sent", "id": mine.id, "game": game_id})
+                    return
+                rem = Rematch(client, other, game_id, last["mode"], last["minutes"],
+                              last["inc"], last["kind"], last["color"])
+                rematches[rem.id] = rem
+                invite = dict(rem.public(), t="rematch-request")
+                guest = other
+    if again is not None:
+        for player, payload in again:
+            player.send(payload)
+        log("%s plays %s again — %s %s, %s"
+            % (client.id, last["opponent"].name, last["kind"], last["mode"],
+               time_label(last["minutes"], last["inc"])))
+        return
     if crossed is not None:
         handle_rematch_accept(client, {"id": crossed})
         return
@@ -1232,6 +1534,7 @@ def drop_client(client):
     client.alive = False
     dropped_room = False
     with lock:
+        cancel_ai_fallback(client)   # a queue nobody is standing in owes nobody a game
         leave_lobby(client)
         lobby_subs.discard(client)
         unregister_user(client.user_id, client)

@@ -166,3 +166,29 @@ def set_puzzle_rating(user_id, rating):
     except (urllib.error.URLError, ValueError, OSError):
         return False
     return bool(rows) and rows[0].get("puzzle_rating") == int(rating)
+
+
+def get_rating(user_id):
+    """A player's ranked rating, or None when it cannot be read.
+
+    Read-only, and read for one reason: the fallback opponent's Elo is worked
+    out from the player's own, and a number the browser sends is a number the
+    browser can choose. `rating` is already a column the browser may read and
+    never write — see the column grants at the bottom of supabase-setup.sql —
+    so nothing here needs the service key's privileges. It uses them only
+    because this is where the credential already lives.
+
+    None on any failure, including a server with no Supabase at all. The caller
+    falls back to the same starting rating the page shows an account-less
+    player, which is what that player is looking at while they wait.
+    """
+    if not enabled() or not user_id:
+        return None
+    try:
+        rows = _request("GET", "/profiles?select=rating&id=eq." + user_id)
+    except (urllib.error.URLError, ValueError, OSError):
+        return None
+    if not rows:
+        return None
+    value = rows[0].get("rating")
+    return value if isinstance(value, int) else None

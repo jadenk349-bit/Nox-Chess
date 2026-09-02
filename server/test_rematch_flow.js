@@ -105,6 +105,8 @@ var DOM = [
 
 var CODE = [
   decl('NET'), decl('CHAL'), decl('CHALLENGE_TTL'), decl('REM'),
+  // the start branch says out loud when the opponent is the ranked fallback bot
+  decl('AI_MATCH'),
   decl('rematchOverlay'),
   fn('showRematch'), fn('hideRematch'), fn('remClear'), fn('remLeave'),
   fn('rematchTerms'), fn('oppWord'), fn('askRematch'), fn('acceptRematch'),
