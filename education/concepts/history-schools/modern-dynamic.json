@@ -119,7 +119,34 @@
     "co_occurring": [],
     "conflicts": []
   },
-  "examples": [],
+  "examples": [
+    {
+      "fen": "br3rk1/2q2ppP/p2pp3/2n1b1BP/1n1NP3/2N2P2/1PPQB3/1K4RR b - - 0 21",
+      "move": "Kxh7",
+      "move_uci": "g8h7",
+      "note": "Adams-Kasparov, Linares 2005, 21...Kxh7 - Watson's thesis with a board under it. Every principle in the classical vocabulary says do not take that pawn: the king steps onto an open h-file in front of a bishop on g5, two rooks and a queen. The annotation is explicit that the decision was made by calculation rather than by judgement: 'Black sees no threats following either gxf7 or gxh7. His king may look exposed, but in actuality, there is no immediate danger to his king, and Garry knows that his attack is much stronger at the moment.' This base carries the same position as a `king-attack` NEGATIVE, because every mechanical sign of an attack is present and the attack is not real - which is the same fact read from the detector's side.",
+      "origin_kind": "historical-game",
+      "game": "Adams-Kasparov, Linares 2005 (round 12)",
+      "concept_role": "positive",
+      "attributed_by": "corpus entry adams-kasparov-2005-21Kxh7-king-attack-negative",
+      "engine": {
+        "engine_id": "Stockfish 18",
+        "test_level": 3,
+        "depth": 24,
+        "threads": 10,
+        "hash_mb": 4096,
+        "multipv": 1,
+        "best_move": "g8h7",
+        "eval_cp": 212,
+        "mate_in": null,
+        "pv": [],
+        "alternatives": [],
+        "margin_cp": null,
+        "verdict": "supports",
+        "verdict_note": "+2.12 from Black's side, and the engine's own first move is 21...Kxh7. Two pawns' worth, for the move that every rule of thumb forbids. This is the largest number attached to any historical example in this base and it is attached to the record about preferring calculation to rules, which is a coincidence worth not over-reading - but the direction is not a coincidence."
+      }
+    }
+  ],
   "counterexamples": [],
   "ambiguous_examples": [],
   "explanations": {

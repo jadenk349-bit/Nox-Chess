@@ -114,7 +114,32 @@
     ],
     "conflicts": []
   },
-  "examples": [],
+  "examples": [
+    {
+      "fen": "rnbqnrk1/ppp1ppbp/3p2p1/4P3/2PP1P2/2N1B3/PP4PP/R2QKBNR b KQ - 1 7",
+      "note": "Letelier-Fischer, Leipzig Olympiad 1960, after 7.f4 - a principle caught in the act of losing its condition, which is the first of the three fates this record catalogues. 'Occupy the centre with pawns' is stated in the classical literature without qualification; White has four of them abreast on c4, d4, e5 and f4 and the annotation names the missing condition: 'When central pawns are not supported by pieces, they can become an easy target for the opponent.' Fischer's answer was ...d6 and ...f6, dissolving the centre, and he won in twenty-three moves. The corpus files the same position under `center-control` as AMBIGUOUS; it is filed here as a positive, because what this record is about is the history of the rule rather than the evaluation of the position.",
+      "origin_kind": "historical-game",
+      "game": "Letelier-Fischer, Leipzig Olympiad 1960 (preliminaries)",
+      "concept_role": "positive",
+      "attributed_by": "corpus entry letelier-fischer-1960-7c5-center-control-ambiguous",
+      "engine": {
+        "engine_id": "Stockfish 18",
+        "test_level": 3,
+        "depth": 24,
+        "threads": 10,
+        "hash_mb": 4096,
+        "multipv": 1,
+        "best_move": "d6e5",
+        "eval_cp": -10,
+        "mate_in": null,
+        "pv": [],
+        "alternatives": [],
+        "margin_cp": null,
+        "verdict": "supports",
+        "verdict_note": "-0.10 - level. Four pawns on the fourth and fifth ranks in the centre and the position is equal, which is the whole point: the rule was followed to the letter and produced nothing. The engine's own first move is ...dxe5, beginning the dissolution the annotation predicts."
+      }
+    }
+  ],
   "counterexamples": [],
   "ambiguous_examples": [],
   "explanations": {
