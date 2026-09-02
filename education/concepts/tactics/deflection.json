@@ -99,7 +99,34 @@
     "co_occurring": [],
     "conflicts": []
   },
-  "examples": [],
+  "examples": [
+    {
+      "fen": "4kb1r/p2n1ppp/4q3/4p1B1/4P3/1Q6/PPP2PPP/2KR4 w k - 0 16",
+      "move": "Qb8+",
+      "move_uci": "b3b8",
+      "note": "Morphy against the Duke of Brunswick and Count Isouard, Paris 1858 - the Opera Game, 16.Qb8+. The knight on d7 is the only thing guarding d8. The queen is offered on a square where the knight must take it, and taking it is leaving the duty: 17.Rd8 mate. This is the deflection every book uses, and it is this record's FIRST positive example - the record has carried a limitation saying it had none, and the reason given there was that the base's nearest candidate was a combination sources call a decoy as often as a deflection. This one is not that: the knight is not being lured anywhere useful, it is being pulled off a square it has to hold. Some sources do call it a decoy as well, and this base does not adjudicate the word - `themesOf()` refuses to claim either motif mechanically, and that refusal stands. PROVENANCE, stated plainly. The game is famous and the move list was replayed through this base's own move generator by tools/replay_game.js - 33 plies, every one legal, which is what makes the FEN trustworthy rather than remembered. No named annotator is attached to this position for this concept, so it grounds the MASTER-GAME rung and NOT the human-grounded one: it is evidence that the concept occurs in master play, and not evidence that a person named it here. The validation ladder already draws that line for eleven other concepts and it is drawn again here.",
+      "origin_kind": "historical-game",
+      "game": "Morphy-Duke of Brunswick and Count Isouard, Paris 1858 (the Opera Game)",
+      "concept_role": "positive",
+      "side_to_move_benefits": "white",
+      "engine": {
+        "engine_id": "Stockfish 18",
+        "test_level": 3,
+        "depth": 20,
+        "threads": 10,
+        "hash_mb": 4096,
+        "multipv": 1,
+        "best_move": "b3b8",
+        "eval_cp": null,
+        "mate_in": 2,
+        "pv": [],
+        "alternatives": [],
+        "margin_cp": null,
+        "verdict": "supports",
+        "verdict_note": "Mate in 2 at depth 20, and the sacrifice is the engine's first choice. The whole line is forced: Qb8+ Nxb8 Rd8#."
+      }
+    }
+  ],
   "counterexamples": [
     {
       "fen": "3rr1k1/5ppp/8/3n4/8/8/5PPP/3RR1K1 w - - 0 1",

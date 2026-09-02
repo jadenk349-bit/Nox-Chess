@@ -85,6 +85,32 @@
   },
   "examples": [
     {
+      "fen": "rn1qkbnr/ppp2p1p/3p2p1/4p3/2B1P1b1/2N2N2/PPPP1PPP/R1BQK2R w KQkq - 0 5",
+      "move": "Nxe5",
+      "move_uci": "f3e5",
+      "note": "Legall's Mate, Paris 1750 - 5.Nxe5, and the detector's reading of it is the honest one: 'moving the knight uncovers the queen on d1, which now attacks the bishop on g4'. That is a discovered attack and it is exactly what the move does mechanically. What the move is FAMOUS for is the other half: Black takes the queen with 5...Bxd1 and is mated by 6.Bxf7+ Ke7 7.Nd5#. Both readings are true of the same move, and this base reports the one it can see. The engine's verdict on the whole idea is +2.04, which is a comment on Black's fourth move rather than on the sacrifice - against best defence White simply recaptures on g4 and is two pawns better. PROVENANCE, stated plainly. The game is famous and the move list was replayed through this base's own move generator by tools/replay_game.js - 13 plies, every one legal, which is what makes the FEN trustworthy rather than remembered. No named annotator is attached to this position for this concept, so it grounds the MASTER-GAME rung and NOT the human-grounded one: it is evidence that the concept occurs in master play, and not evidence that a person named it here. The validation ladder already draws that line for eleven other concepts and it is drawn again here.",
+      "origin_kind": "historical-game",
+      "game": "Legall de Kermeur - Saint Brie, Paris 1750",
+      "concept_role": "positive",
+      "side_to_move_benefits": "white",
+      "engine": {
+        "engine_id": "Stockfish 18",
+        "test_level": 3,
+        "depth": 22,
+        "threads": 10,
+        "hash_mb": 4096,
+        "multipv": 2,
+        "best_move": "f3e5",
+        "eval_cp": 204,
+        "mate_in": null,
+        "pv": [],
+        "alternatives": [],
+        "margin_cp": null,
+        "verdict": "supports",
+        "verdict_note": "+2.04 at depth 22 with two lines, and Nxe5 is the engine's first choice by a full pawn over 5.d4. The discovered attack is sound; the mate that made the game famous depends on Black taking the queen."
+      }
+    },
+    {
       "fen": "r4rk1/pqbp2pB/1P3n1p/2n3N1/N1P1p2P/1Q2P1P1/1B1P1P2/4K2R b K - 2 20",
       "note": "A clean instance: the detector reports discoveredAttack and nothing else, for the move Nxh7. Two things are verified here and a third is not. VERIFIED: findMotifs() in blind-chess.html reports the motif — and that detector, not this system, is the authority on whether a motif is present. ALSO VERIFIED: Nxh7 is the recorded solution of a shipped puzzle, and tools/generate_puzzles.js only admits a position when one move is objectively best by a wide margin at confirmation depth, so the move carries engine backing by construction rather than by a separate search here. NOT claimed: that the motif is the whole reason the move wins. Provenance: the puzzle corpus is engine self-play — a real position from a real game between engines, not a master game.",
       "origin_kind": "puzzle",

@@ -83,6 +83,32 @@
   },
   "examples": [
     {
+      "fen": "3rkb1r/p2nqppp/5n2/1B2p1B1/4P3/1Q6/PPP2PPP/2KR3R w k - 3 13",
+      "move": "Rxd7",
+      "move_uci": "d1d7",
+      "note": "The Opera Game, 13.Rxd7 - the first of the two removals that make the finish work. The knight on d7 is holding the d-file together and Morphy gives a rook for it; three moves later he gives the bishop for the replacement knight, and four moves later the queen for the third defender. The concept's two preconditions are satisfied at every step: a target is defended, and the defender can be captured. What makes this the master-game example rather than a constructed one is that the same idea is executed three times in a row against three different pieces, which is not something a made-up position shows. PROVENANCE, stated plainly. The game is famous and the move list was replayed through this base's own move generator by tools/replay_game.js - 33 plies, every one legal, which is what makes the FEN trustworthy rather than remembered. No named annotator is attached to this position for this concept, so it grounds the MASTER-GAME rung and NOT the human-grounded one: it is evidence that the concept occurs in master play, and not evidence that a person named it here. The validation ladder already draws that line for eleven other concepts and it is drawn again here.",
+      "origin_kind": "historical-game",
+      "game": "Morphy-Duke of Brunswick and Count Isouard, Paris 1858 (the Opera Game)",
+      "concept_role": "positive",
+      "side_to_move_benefits": "white",
+      "engine": {
+        "engine_id": "Stockfish 18",
+        "test_level": 3,
+        "depth": 20,
+        "threads": 10,
+        "hash_mb": 4096,
+        "multipv": 1,
+        "best_move": "d1d7",
+        "eval_cp": 604,
+        "mate_in": null,
+        "pv": [],
+        "alternatives": [],
+        "margin_cp": null,
+        "verdict": "supports",
+        "verdict_note": "+6.04 at depth 20 and the engine's first choice - a rook given for a knight and the evaluation goes up by six pawns."
+      }
+    },
+    {
       "fen": "4k3/8/5n2/3p2B1/8/8/8/3RK3 w - - 0 1",
       "move": "Bxf6",
       "move_uci": "g5f6",

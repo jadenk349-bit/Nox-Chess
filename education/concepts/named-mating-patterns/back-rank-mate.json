@@ -91,6 +91,32 @@
   },
   "examples": [
     {
+      "fen": "1n2kb1r/p4ppp/4q3/4p1B1/4P3/8/PPP2PPP/2KR4 w k - 0 17",
+      "move": "Rd8#",
+      "move_uci": "d1d8",
+      "note": "The Opera Game, 17.Rd8 mate - the position the previous four moves were spent arranging. The black king is on e8 with the f8 bishop beside it and the knight just deflected to b8; the rook arrives on the eighth and there is no square. It is not the castled back-rank mate of the diagrams, and that is why it is worth having: the pattern is a king boxed on its home rank by its OWN men, and here the men are a bishop that never moved and a knight that was forced back, rather than three pawns in front of a castled king. PROVENANCE, stated plainly. The game is famous and the move list was replayed through this base's own move generator by tools/replay_game.js - 33 plies, every one legal, which is what makes the FEN trustworthy rather than remembered. No named annotator is attached to this position for this concept, so it grounds the MASTER-GAME rung and NOT the human-grounded one: it is evidence that the concept occurs in master play, and not evidence that a person named it here. The validation ladder already draws that line for eleven other concepts and it is drawn again here.",
+      "origin_kind": "historical-game",
+      "game": "Morphy-Duke of Brunswick and Count Isouard, Paris 1858 (the Opera Game)",
+      "concept_role": "positive",
+      "side_to_move_benefits": "white",
+      "engine": {
+        "engine_id": "Stockfish 18",
+        "test_level": 3,
+        "depth": 20,
+        "threads": 10,
+        "hash_mb": 4096,
+        "multipv": 1,
+        "best_move": "d1d8",
+        "eval_cp": null,
+        "mate_in": 1,
+        "pv": [],
+        "alternatives": [],
+        "margin_cp": null,
+        "verdict": "supports",
+        "verdict_note": "Mate in 1, settled at depth 1. The move generator agrees: after Rd8 the reply list is empty and the king is in check."
+      }
+    },
+    {
       "fen": "6k1/5ppp/8/8/8/8/5PPP/4R1K1 w - - 0 1",
       "note": "Constructed controlled pair, positive half. Black's f7/g7/h7 pawns are all unmoved, so the king has no flight square.",
       "origin_kind": "constructed-test",
