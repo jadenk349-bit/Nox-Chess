@@ -125,6 +125,7 @@ def completeness(cl):
 
 
 def rate(concepts_in_area):
+    """The ORIGINAL rule, unchanged. See rate_solo() for what it cannot see."""
     if not concepts_in_area:
         return "empty", 0.0
     scores = [completeness(c["_check"]) for c in concepts_in_area]
@@ -133,6 +134,37 @@ def rate(concepts_in_area):
     if n >= 3 and mean >= 0.75 and min(scores) >= 0.5:
         return "full", mean
     if n >= 2 and mean >= 0.60:
+        return "substantial", mean
+    if mean >= 0.45:
+        return "partial", mean
+    return "weak", mean
+
+
+# A MEASUREMENT ARTEFACT, REPORTED AND DELIBERATELY NOT CASHED IN.
+#
+# 69 of this base's 85 areas contain exactly one concept, because the taxonomy is
+# fine-grained: `two-weaknesses` is an area and it contains the concept
+# `two-weaknesses`. rate() requires n >= 2 for "substantial" and n >= 3 for
+# "full", so those 69 areas are locked at "partial" however complete the record
+# is - and `two-weaknesses` scores 1.00 and is rated the same as an area scoring
+# 0.45. That is the metric failing to discriminate rather than a statement about
+# depth.
+#
+# rate_solo() is what the rating would be if a one-concept area were rated by its
+# one concept. The bar there is HIGHER, not lower - 0.85 for "full" against 0.75
+# for the mean of three - because a single record carries no evidence of breadth
+# and should have to be better to earn the same word.
+#
+# Both numbers are printed. The completion assessment is judged on rate(), the
+# original rule, and criterion 1 stays where rate() puts it. This exists so the
+# artefact is visible, not so it can be spent.
+def rate_solo(concepts_in_area):
+    if len(concepts_in_area) != 1:
+        return rate(concepts_in_area)
+    mean = completeness(concepts_in_area[0]["_check"])
+    if mean >= 0.85:
+        return "full", mean
+    if mean >= 0.70:
         return "substantial", mean
     if mean >= 0.45:
         return "partial", mean
@@ -166,7 +198,8 @@ def main():
     ratings = {}
     for aid in area_domain:
         r, m = rate(by_area.get(aid, []))
-        ratings[aid] = {"rating": r, "mean_completeness": round(m, 3),
+        rs, _ = rate_solo(by_area.get(aid, []))
+        ratings[aid] = {"rating": r, "rating_solo": rs, "mean_completeness": round(m, 3),
                         "concepts": sorted(x["id"] for x in by_area.get(aid, [])),
                         "domain": area_domain[aid]}
 
@@ -174,6 +207,10 @@ def main():
     tally = {}
     for v in ratings.values():
         tally[v["rating"]] = tally.get(v["rating"], 0) + 1
+    tally_solo = {}
+    for v in ratings.values():
+        tally_solo[v["rating_solo"]] = tally_solo.get(v["rating_solo"], 0) + 1
+    solo_areas = sum(1 for v in ratings.values() if len(v["concepts"]) == 1)
 
     if a.json:
         gaps = {k: sum(1 for c in C.values() if c["_check"].get(k) is False)
@@ -203,6 +240,17 @@ def main():
         for k in order:
             if tally.get(k):
                 L.append(f"- **{k}**: {tally[k]} areas")
+        L += ["",
+              f"{solo_areas} of {len(ratings)} areas contain exactly ONE concept. The rating rule "
+              "needs two concepts for *substantial* and three for *full*, so those areas cannot rise "
+              "however complete the record is: `two-weaknesses` scores 1.00 and is rated *partial*, "
+              "the same word as an area scoring 0.45. Rating a one-concept area by its one concept, "
+              "at a **higher** bar (0.85 for *full* rather than 0.75 for a mean of three), gives: " +
+              ", ".join(f"**{k}** {tally_solo[k]}" for k in order if tally_solo.get(k)) + ".",
+              "",
+              "The completion assessment is judged on the ORIGINAL rule and criterion 1 stays where "
+              "that rule puts it. This second reading is printed so the artefact is visible, not so "
+              "it can be spent.", ""]
         L += ["", "## Areas", "",
               "| rating | mean | area | concepts |", "|---|---|---|---|"]
         for aid, v in sorted(ratings.items(),
@@ -225,6 +273,15 @@ def main():
             print(f"  {k:<13} {tally[k]:>3} areas")
     mean_all = sum(c["_score"] for c in C.values()) / len(C)
     print(f"\n  mean concept completeness  {mean_all:.2f}")
+    # The artefact, printed and not cashed in. See rate_solo().
+    print(f"\n  {solo_areas} of {len(ratings)} areas contain exactly ONE concept, and the rule above")
+    print(f"  needs two for 'substantial' and three for 'full', so those areas cannot")
+    print(f"  rise however complete the record is - `two-weaknesses` scores 1.00 and is")
+    print(f"  rated the same as an area scoring 0.45. Rating a one-concept area by its one")
+    print(f"  concept, at a HIGHER bar (0.85 for full rather than 0.75 for a mean of three):")
+    print("    " + "   ".join(f"{k} {tally_solo[k]}" for k in order if tally_solo.get(k)))
+    print(f"  The completion assessment is judged on the ORIGINAL rule. This is here so the")
+    print(f"  artefact is visible, not so it can be spent.")
 
     print("\nMISSING MOST OFTEN (of concepts where the item applies)")
     keys = list(next(iter(C.values()))["_check"])

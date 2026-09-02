@@ -12,6 +12,11 @@ Mean completeness **0.81** across 137 concepts.
 - **substantial**: 11 areas
 - **partial**: 69 areas
 
+69 of 85 areas contain exactly ONE concept. The rating rule needs two concepts for *substantial* and three for *full*, so those areas cannot rise however complete the record is: `two-weaknesses` scores 1.00 and is rated *partial*, the same word as an area scoring 0.45. Rating a one-concept area by its one concept, at a **higher** bar (0.85 for *full* rather than 0.75 for a mean of three), gives: **full** 30, **substantial** 41, **partial** 14.
+
+The completion assessment is judged on the ORIGINAL rule and criterion 1 stays where that rule puts it. This second reading is printed so the artefact is visible, not so it can be spent.
+
+
 ## Areas
 
 | rating | mean | area | concepts |
