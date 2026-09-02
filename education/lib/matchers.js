@@ -2153,17 +2153,28 @@ const STRUCTURAL = [
 const sqIdxSafe = n => (/^[a-h][1-8]$/.test(n || '') ? sqIdx(n) : -1);
 
 function motifGuard(tag, m, moveInfo) {
-  if (tag !== 'fork' && tag !== 'pin') return false;
+  if (tag !== 'fork' && tag !== 'pin' && tag !== 'skewer' &&
+      tag !== 'trappedPiece' && tag !== 'discoveredAttack') return false;
   const P = FEAT.page;
   let after;
   try { after = P.stateFromFEN(moveInfo.fenAfter); } catch (e) { return false; }
   if (!after) return false;
   const them = after.turn;                       // the side about to reply
 
-  if (tag === 'fork') {
+  if (tag === 'fork' || tag === 'skewer') {
     // "The forking piece can simply be captured." The forker is the piece that
     // just moved; a fork revealed by a DISCOVERY is delivered by a piece that
     // did not move, and this guard correctly says nothing about those.
+    //
+    // `skewer` states the same thing about its own geometry and one step
+    // narrower - "The front unit can capture the skewering piece" - and this
+    // test is one step wider, because it asks whether ANY capture of the
+    // skewering piece is profitable. That is deliberate and it is worth saying
+    // plainly: on 1r4k1/8/8/1q6/8/8/8/R5K1 w, Rb1 was reported as a skewer at
+    // HIGH confidence and the queen simply takes the rook. Every position the
+    // record's narrower wording covers is covered here; the extra ground is
+    // positions where somebody ELSE eats the skewering piece, which is not a
+    // skewer either.
     const sq = moveInfo.movedTo;
     if (!sq) return false;
     const idx = sqIdxSafe(sq);
@@ -2171,6 +2182,46 @@ function motifGuard(tag, m, moveInfo) {
     const pc = after.b[idx];
     if (!pc || pc.c === them) return false;      // not our piece standing there
     return P.see(after, idx, them) > 0;          // taken, at a profit, and the fork is over
+  }
+
+  if (tag === 'trappedPiece') {
+    // "It has a desperado capture that recovers the material" - this record's
+    // second indicator_against. The detector's sentence is "every square it can
+    // reach loses it", and on 8 of the 788 shipped puzzles a square it can reach
+    // takes something big enough to pay for it. A rook that is lost is trapped;
+    // a rook that is lost after eating a rook is a trade.
+    const mm = ((m && m.text) || '').match(/on ([a-h][1-8])/);
+    if (!mm) return false;
+    const i = sqIdxSafe(mm[1]);
+    if (i < 0 || !after.b[i]) return false;
+    let ms;
+    try { ms = P.legalMoves(after); } catch (e) { return false; }
+    return ms.filter(x => x.from === i && x.cap).some(x => {
+      let nx;
+      try { nx = P.makeMove(after, x); } catch (e) { return false; }
+      const won = P.VAL[x.cap.t] || 0;
+      const lost = Math.max(0, P.see(nx, x.to, nx.turn));
+      return won - lost >= 0;                  // it recovers what it is worth
+    });
+  }
+
+  if (tag === 'discoveredAttack') {
+    // "The revealed 'attack' hits something defended and not worth taking" -
+    // this record's second indicator_against, and it was true of 33 of the 788
+    // shipped puzzles: a rook revealed onto a defended pawn scores SEE -400 and
+    // was reported as a discovered attack at HIGH confidence.
+    //
+    // A revealed CHECK is never guarded. The detector says "now checks the king"
+    // for those and the regex below does not match them, which is deliberate:
+    // a check is worth something whatever SEE says about the square.
+    const mm = ((m && m.text) || '').match(/now attacks the \w+ on ([a-h][1-8])/);
+    if (!mm) return false;
+    const i = sqIdxSafe(mm[1]);
+    if (i < 0) return false;
+    const victim = after.b[i];
+    if (!victim) return false;
+    const taker = victim.c === 'w' ? 'b' : 'w';
+    return P.see(after, i, taker) <= 0;        // defended, and not worth taking
   }
 
   // "The pinned piece can capture the pinner." The pinned square comes from the
@@ -2662,6 +2713,33 @@ const MOVE_BASED = [
       // not an initiative; a hanging piece is.
       const q = after.quietness;
       if (q && q.winningCapturesAvailable > 0) return null;
+      // ...and the other half of the same trap, which the material test cannot
+      // see at all: MATE. "The opponent has a concrete threat that must be met"
+      // is this record's first indicator_against, and the sharpest concrete
+      // threat there is leaves no material on the floor to detect. On
+      // 4r1k1/5ppp/8/8/8/8/5PPP/N5K1 w the knight on a1 is beyond argument the
+      // worst-placed piece on the board, Nb3 improves it, no capture is hanging
+      // - and Black plays Re1 mate. This was reported as an instance of the
+      // rule; it is the textbook illustration of misapplying it.
+      //
+      // Mate in ONE and no further. Whether a threat two moves out "must be
+      // met" is a judgement, and this record's third trap is that identifying
+      // the worst piece is a judgement this system must not claim to make; a
+      // mate the move generator can enumerate is not a judgement.
+      const mateInOne = (() => {
+        const P = FEAT.page;
+        let st;
+        try { st = P.stateFromFEN(after.fen); } catch (e) { return false; }
+        let ms;
+        try { ms = P.legalMoves(st); } catch (e) { return false; }
+        return ms.some(x => {
+          let nx;
+          try { nx = P.makeMove(st, x); } catch (e) { return false; }
+          try { return P.inCheck(nx, nx.turn) && P.legalMoves(nx).length === 0; }
+          catch (e) { return false; }
+        });
+      })();
+      if (mateInOne) return null;
       return {
         confidence: 'low',
         because: [`${moveInfo.san || 'the move'} raises the scope of ${side(before, mover)}'s least ` +

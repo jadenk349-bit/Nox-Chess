@@ -13,7 +13,7 @@ implemented; that is a reading, and doing it is the work. What it can do is
 stop the list being rediscovered from scratch each time — and every one of
 the defects listed in the tool's header was unread before it was looked at.
 
-**Of 246 stated conditions (traps and indicators-against): 125 enforced in the matcher, 20 in Layer 3, 54 argued on the record to be unbuildable or already honoured elsewhere, 47 unread.**
+**Of 275 stated conditions (traps and indicators-against): 132 enforced in the matcher, 20 in Layer 3, 54 argued on the record to be unbuildable or already honoured elsewhere, 69 unread.**
 
 ONE CAVEAT ABOUT `indicators_against`, and it is not a technicality. For a
 concept naming an ASSET — an open file, an outpost, a passed pawn — they are
@@ -354,6 +354,51 @@ shared file was added to the search. The test is quotation for that reason.
 - [noted] The rule's precondition is the load-bearing part and is usually dropped in quotation. Anderssen says 'unless you can derive immediate advantage by an attack' and Makogonov says 'in positions where no other important matters need to be considered'. Without those, it is not the rule they stated.
 - [cited] Improving pieces while the opponent builds an initiative produces individually reasonable moves and a collectively lost position. This is the commonest way the rule is misapplied.
 - [cited] Identifying the worst piece is a judgement, not a measurement. This system has no reliable detector for it and must not claim one.
-- [**unread**] *(indicator against)* The opponent has a concrete threat that must be met
+- [cited] *(indicator against)* The opponent has a concrete threat that must be met
 - [**unread**] *(indicator against)* A forcing line is available that decides matters
 - [**unread**] *(indicator against)* The opponent is building an initiative that a quiet move would concede
+## fork
+
+- [cited] *(indicator against)* The forking piece can simply be captured
+- [**unread**] *(indicator against)* Both targets are defended and each is worth less than the forker
+- [**unread**] *(indicator against)* The defender has a check or a stronger counter-threat available first
+## pin
+
+- [cited] *(indicator against)* The pinned piece can capture the pinner
+- [**unread**] *(indicator against)* The defender can interpose a third unit on the line
+- [**unread**] *(indicator against)* The target behind can simply step off the line
+- [**unread**] *(indicator against)* The 'pinned' piece is worth more than the piece behind it — that is a skewer, not a pin
+## skewer
+
+- [cited] *(indicator against)* The front unit can capture the skewering piece
+- [**unread**] *(indicator against)* A third unit can interpose
+- [cited] *(indicator against)* The front unit can move so that it still defends the rear unit
+- [**unread**] *(indicator against)* The rear unit is defended and the exchange is not favourable
+## discovered-attack
+
+- [**unread**] *(indicator against)* The revealed line is blocked by another unit further along
+- [cited] *(indicator against)* The revealed 'attack' hits something defended and not worth taking
+- [**unread**] *(indicator against)* The defender can answer both threats with one move
+## double-check
+
+- [**unread**] *(indicator against)* The king has a safe square, in which case the double check may achieve nothing
+## back-rank-mate
+
+- [**unread**] *(indicator against)* A pawn has moved to create luft
+- [**unread**] *(indicator against)* A second defender covers the back rank
+- [**unread**] *(indicator against)* The checking square is defended
+- [**unread**] *(indicator against)* The king can capture the checking piece
+## trapped-piece
+
+- [**unread**] *(indicator against)* A counter-sacrifice frees it
+- [cited] *(indicator against)* It has a desperado capture that recovers the material
+- [**unread**] *(indicator against)* Trapping it costs more material than it is worth
+## hanging-piece
+
+- [**unread**] A defended piece attacked once is not hanging; count both sides of the exchange.
+- [**unread**] A nominal defender that is pinned does not defend. SEE catches this; a naive defender count does not.
+- [**unread**] Material already loose before the move is not this move's doing — reporting it makes the move look worse than it was.
+- [**unread**] *(indicator against)* Recapture regains equal or greater material — an even trade is not a hanging piece
+- [**unread**] *(indicator against)* Taking it walks into a stronger counter-tactic
+- [**unread**] *(indicator against)* It is bait: the capture opens a line or removes a defender the opponent wants gone
+- [**unread**] *(indicator against)* The piece was ALREADY winnable before this move, so the move is not what hung it

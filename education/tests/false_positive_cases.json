@@ -482,6 +482,60 @@
       "status": "resolved",
       "evidence": "feature-detector",
       "resolution": "The API is silent on restraint. The matcher asks whether the move reduces the opponent's safe destinations rather than whether it is quiet, which is the first trap built rather than quoted; and it is move-based, so it cannot be asserted after the fact about the position. This is the case that a keyword rule would fail: every word in the record about quiet moves in blocked positions is present here and the concept is absent."
+    },
+    {
+      "id": "a-skewer-the-front-unit-eats",
+      "concept": "skewer",
+      "surface_pattern": "Rb1 attacks the black queen on b5 with the rook on b8 directly behind it. More valuable unit in front, less valuable behind, nothing between — the geometry of a skewer, and the detector says so: 'The queen on b5 has to move, and the rook on b8 behind it falls.'",
+      "why_not": "This record's first indicator_against: \"The front unit can capture the skewering piece.\" The queen is not obliged to move at all; she takes the rook, which is undefended.",
+      "fen": "1r4k1/8/8/1q6/8/8/8/R5K1 w - - 0 1",
+      "move": "a1b1",
+      "status": "resolved",
+      "evidence": "feature-detector + tablebase",
+      "resolution": "Reported at HIGH confidence until a guard was written. Syzygy settles it without an opinion: after Rb1 the position is a WIN FOR BLACK, dtz 1, mate in 7, and the tablebase's own best move is Qxb1+. The guard is one step wider than the record's wording — it asks whether ANY capture of the skewering piece is profitable rather than only the front unit's — and that is deliberate, because a skewering piece somebody else eats is not a skewer either. skewer fell from 11.4% to 7.6% of the 788 shipped puzzles."
+    },
+    {
+      "id": "a-trapped-rook-with-a-desperado",
+      "concept": "trapped-piece",
+      "surface_pattern": "After Qxf8+, the detector reports 'The rook on c8 is trapped — every square it can reach loses it.' Every square it can reach does lose it.",
+      "why_not": "This record's second indicator_against: \"It has a desperado capture that recovers the material.\" One of the squares it can reach is f8, where the white queen is standing.",
+      "fen": "2r4k/3qP2p/7Q/p2p4/5P1P/p3P1P1/6K1/8 w - - 0 48",
+      "move": "h6f8",
+      "status": "resolved",
+      "evidence": "feature-detector + shipped-corpus",
+      "resolution": "This is not a constructed position. It is shipped puzzle mi-9f06a55404, and the puzzle's OWN SOLUTION LINE is the refutation of the label: h6f8, c8f8, e7f8q — the second move of the answer is the trapped rook taking the queen. A rook that is lost is trapped; a rook that is lost after eating a queen is a trade. The scan that found it read all 788 shipped puzzles and asked, of every trapped-piece report, whether any capture available to the piece breaks even after recapture: 8 of them do, and all 8 were being reported. The guard implements the condition and trapped-piece fell to 12.9%."
+    },
+    {
+      "id": "a-discovery-onto-a-defended-pawn",
+      "concept": "discovered-attack",
+      "surface_pattern": "Nf5 steps out of the c4 rook's line and the detector reports 'Moving the knight uncovers the rook on c4, which now attacks the pawn on f4.' The line really is uncovered and the pawn really is attacked.",
+      "why_not": "This record's second indicator_against: \"The revealed 'attack' hits something defended and not worth taking.\" The f4 pawn is defended by the knight on d5, so Rxf4 is answered by Nxf4 and the discovery has won a pawn for a rook.",
+      "fen": "2r5/2p2kr1/pp3p1p/3n4/2RN1p2/P6P/1P3K2/2R5 w - - 10 35",
+      "move": "d4f5",
+      "status": "resolved",
+      "evidence": "feature-detector + shipped-corpus",
+      "resolution": "Shipped puzzle en-f21d044b23, and SEE puts a number on it: taking on f4 scores -400. The move is genuinely strong and the API still says why — Nf5 forks the rook on g7 and the h6 pawn, and that report is untouched. What was wrong was the second label sitting beside the first, telling the reader that a rook had been unleashed onto something. 33 of the 788 shipped puzzles carried a discovered-attack report whose revealed target SEE said was not worth taking; all 33 were at HIGH confidence. A revealed CHECK is never guarded — the detector writes 'now checks the king' for those and the guard does not match that sentence — because a check is worth something whatever SEE says."
+    },
+    {
+      "id": "improving-a-piece-into-mate",
+      "concept": "worst-placed-piece",
+      "surface_pattern": "The knight on a1 is beyond argument the worst-placed piece on the board: it has two moves and bears on nothing. Nb3 improves it, the move is quiet, nothing is hanging, and no check is available. Every condition this matcher tests is satisfied.",
+      "why_not": "This record's second trap: \"Improving pieces while the opponent builds an initiative produces individually reasonable moves and a collectively lost position. This is the commonest way the rule is misapplied.\" And its first indicator_against: \"The opponent has a concrete threat that must be met.\" Black plays Re1 mate.",
+      "fen": "4r1k1/5ppp/8/8/8/8/5PPP/N5K1 w - - 0 1",
+      "move": "a1b3",
+      "status": "resolved",
+      "evidence": "feature-detector + engine",
+      "resolution": "Reported as an instance of the rule until a guard was written, and it is the textbook illustration of misapplying it. The matcher already tested the material half of the trap — it refuses when the move leaves a winning capture available — and the sharpest concrete threat there is leaves no material on the floor to detect: the move generator says Black's only mate is e8e1, and Stockfish 18 agrees at depth 20 with #1. The guard is mate in ONE and no further, because whether a threat two moves out 'must be met' is a judgement and this record's third trap is that identifying the worst piece is a judgement this system must not claim to make. A mate the move generator can enumerate is not a judgement. worst-placed-piece fell from 8.4% to 4.1%, and Rubinstein–Salwe 1908 move 20 — the corpus's own annotated instance — still validates."
+    },
+    {
+      "id": "a-queen-doing-a-knights-chore",
+      "concept": "blockade",
+      "surface_pattern": "White's queen stands directly in front of Black's passed d3 pawn and the pawn cannot advance. That is the record's precondition word for word, and the blockade is real.",
+      "why_not": "This record's first trap: \"A piece standing in front of a pawn is not necessarily blockading it usefully. The test is whether the piece keeps its powers there — a queen on a blockading square is doing a knight's chore.\" And its first indicator_against: \"The blockader is a queen or rook, which is expensive and evictable.\" A bare report of 'blockade' here tells the reader White has solved a problem.",
+      "fen": "6k1/8/8/8/8/3p4/3Q4/6K1 w - - 0 1",
+      "status": "resolved",
+      "evidence": "feature-detector",
+      "resolution": "THE ANSWER HERE IS THE SENTENCE, NOT A GUARD, and this case exists to pin that down. The concept IS present and suppressing it would be a false negative; what would mislead is reporting it bare. The API says: 'White's queen on d2 stands directly in front of Black's pawn on d3, which has nothing of its own to advance behind and cannot pass it — though a queen is an expensive blockader and can usually be chased off by something cheaper', and attaches two of the record's exceptions as cautions. This is the third of the three answers a stated condition can get — build it, argue on the record that it cannot be built, or say it in the sentence — and it was the right one nine times before this."
     }
   ],
   "last_updated": "2026-09-01"
