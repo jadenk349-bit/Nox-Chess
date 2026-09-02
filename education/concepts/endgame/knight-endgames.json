@@ -106,7 +106,7 @@
   "limitations": [
     "This base holds no tablebase-verified knight-ending positions yet; the record rests on textual authority.",
     "Fine's downgraded verdict is recorded from the secondary literature and has not been re-derived here.",
-    "NO MASTER-GAME POSITION. The examples on this record are `tablebase-position`s, and for this family that is the stronger provenance rather than a substitute: the claims here are about what a class of ending can and cannot do, and a proof over every legal continuation settles that where a single game only illustrates it. What a master game would add is evidence that the principle GUIDED a strong player, which is a different claim, and this base has not yet found an annotated position making it for this family. Recorded rather than filled."
+    "NO MASTER-GAME POSITION. The examples on this record are `tablebase-position`s, and for this family that is the stronger provenance rather than a substitute: the claims here are about what a class of ending can and cannot do, and a proof over every legal continuation settles that where a single game only illustrates it. What a master game would add is evidence that the principle GUIDED a strong player, which is a different claim, and this base has not yet found an annotated position making it for this family. Recorded rather than filled. RESOLVED: Karpov-Ponomariov, Zlatoust 1961, above."
   ],
   "misconceptions": [
     "That a knight ending is a pawn ending. It is one for the purposes of several techniques and is not one when the knights start forking.",
@@ -171,6 +171,14 @@
         "category": "win",
         "note": "PROVEN WIN, dtz 1, mate in 65, best move e3. Sixty-five moves for two extra pawns and no tactics anywhere in it: the proof is what makes this an example of a PRINCIPLE rather than of a position, because no human calculation reaches the end of that and the principle is what tells you to enter it."
       }
+    },
+    {
+      "fen": "7n/7P/5K2/2kN4/2P3p1/6P1/8/8 w - - 3 79",
+      "origin_kind": "historical-game",
+      "game": "Karpov-Ponomariov, Zlatoust 1961",
+      "concept_role": "positive",
+      "side_to_move_benefits": "white",
+      "note": "KNIGHTS AND PAWNS ONLY, which is this record's whole precondition, on move 79 of a real game. A white knight on d5 and a black knight on h8, four pawns, two kings, and nothing else.\n\nThe record's claim is that these endings behave like pawn endings because a knight cannot lose a tempo, and the position shows exactly the shape that makes that matter: White's h-pawn is one square from queening and the black knight on h8 is the only thing stopping it, while both kings are on the other side of the board.\n\nWHAT IS CLAIMED AND WHAT IS NOT. The category is decided by the material, which is mechanically certain and needs no engine. Whether the position is INTERESTING, or who is better in it, is a different question and this record does not answer it - its own typical_confidence says as much. What the position establishes is that the class of ending this record is about occurs in master play and can be pointed at.\n\nPROVENANCE. Found by reading the MATERIAL of every position in 330 replayed master games rather than by asking the API, which never reports this concept because it has no matcher. The move list replayed legally through the page's own move generator. No annotator read."
     }
   ],
   "counterexamples": [

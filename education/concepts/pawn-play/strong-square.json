@@ -83,7 +83,7 @@
   "limitations": [
     "The geometry is mechanical; the value is not, and this base has failed three times to isolate outpost value in a controlled test.",
     "DELIBERATELY HAS NO MATCHER, and the measurement is why. A detector written to this record's preconditions - a square no enemy pawn can attack, with a friendly pawn able to defend it - fires on 80.1% of the 788 shipped positions, which is the `semi-open-file` failure this project has already made once. It is also a third name for a fact this base already reports twice: `weak-square` is the same square seen from the defender's side and `outpost` is the same square with a piece on it. This record's own note says an outpost and a strong point are really the same thing. Written, measured, and removed rather than shipped.",
-    "NO MASTER-GAME POSITION YET. This concept has no matcher, so the scan that supplied master positions to eleven other records - five famous games replayed and analysed position by position - could not nominate one here: the API never reports the concept, so there is nothing for a scan to find. Identifying an instance in a master game means reading the game, which is research rather than tooling, and it has not been done. Recorded rather than filled."
+    "NO MASTER-GAME POSITION YET. This concept has no matcher, so the scan that supplied master positions to eleven other records - five famous games replayed and analysed position by position - could not nominate one here: the API never reports the concept, so there is nothing for a scan to find. Identifying an instance in a master game means reading the game, which is research rather than tooling, and it has not been done. Recorded rather than filled. RESOLVED: Ilyin-Zhenevsky - Botvinnik, Leningrad, above."
   ],
   "misconceptions": [
     "That a strong square must be occupied. Controlling it can be worth more, and occupying it can be second best.",
@@ -134,6 +134,14 @@
         "verdict_note": "+0.30 with symmetric material. A real advantage and a small one, which is what this record's own engine_era_note predicts: engines 'are markedly less impressed than classical teaching by occupying one'. Worth keeping against overclaiming - the engine's line goes Nxe7+ and Nxc6, trading the knight off the strong square. The square is an asset, not a plan."
       },
       "controlled_pair_with": "r1bq1rk1/pp3ppp/2n5/3Np3/8/4P3/PP3PPP/R1BQ1RK1 w - - 0 1"
+    },
+    {
+      "fen": "8/5k2/p1p5/1pp1Pp2/2Pn3p/1PKN1R1P/P4Pr1/8 w - - 2 33",
+      "origin_kind": "historical-game",
+      "game": "Ilyin-Zhenevsky - Botvinnik, Leningrad",
+      "concept_role": "positive",
+      "side_to_move_benefits": "black",
+      "note": "A KNIGHT ON A SQUARE NO PAWN CAN EVER ATTACK, held by a world champion, and this record has needed one. Black's knight sits on d4. White's c- and e-pawns are the only pawns that could ever challenge it and both have gone past - c4 and e5 - so d4 cannot be attacked by a pawn for the rest of the game. Black's c5 pawn defends it.\n\nWHY THIS RECORD HAS NO MATCHER, which is the reason the position had to be found this way. A matcher was written for it exactly to the two preconditions its record states, and it fired on 80.1% of the 788 shipped positions. A concept true of three quarters of all boards cannot be the most informative thing about any of them, so the matcher was thrown away and the record kept. The API therefore never reports `strong-square` and no scan that reads the API could nominate a position for it. Layer 3 still computes the feature, and that is what found this one - the outposts list, restricted to the central files, in positions where there is exactly ONE of them. That restriction is doing the work the discarded matcher could not: it is not a definition of the concept, it is a way of finding the positions where the concept is the striking fact rather than one of five.\n\nPROVENANCE. 330 replayed master games, read through Layer 3 rather than through the API. Replayed legally through the page's own move generator. No annotator read."
     }
   ],
   "counterexamples": [

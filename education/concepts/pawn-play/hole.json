@@ -144,7 +144,7 @@
   "limitations": [
     "The term's boundaries are not agreed. Steinitz's definition and Hooper & Whyld's are both current and are not equivalent.",
     "Detecting squares no pawn can attack is mechanical; deciding which of them matter is not.",
-    "NO MASTER-GAME POSITION YET. This concept has no matcher, so the scan that supplied master positions to eleven other records - five famous games replayed and analysed position by position - could not nominate one here: the API never reports the concept, so there is nothing for a scan to find. Identifying an instance in a master game means reading the game, which is research rather than tooling, and it has not been done. Recorded rather than filled."
+    "NO MASTER-GAME POSITION YET. This concept has no matcher, so the scan that supplied master positions to eleven other records - five famous games replayed and analysed position by position - could not nominate one here: the API never reports the concept, so there is nothing for a scan to find. Identifying an instance in a master game means reading the game, which is research rather than tooling, and it has not been done. Recorded rather than filled. RESOLVED: Corzo-Capablanca, Havana 1901, above."
   ],
   "misconceptions": [
     "That every square a pawn cannot guard is a hole worth naming. Most are not.",
@@ -189,6 +189,14 @@
         "verdict": "supports",
         "verdict_note": "+0.30 with symmetric material. Small and real. A hole is worth about a third of a pawn here, and the engine's own line trades the knight off it - the square is a standing feature, not a plan."
       }
+    },
+    {
+      "fen": "6k1/p5p1/1b1pr3/1pp1p3/4Pp2/2PP1P2/PP2KNPR/8 b - - 0 32",
+      "origin_kind": "historical-game",
+      "game": "Corzo-Capablanca, Havana 1901",
+      "concept_role": "positive",
+      "side_to_move_benefits": "black",
+      "note": "A HOLE IN WHITE'S CAMP THAT BLACK CAN REACH, from Capablanca's first match. The square is g4. White's f- and h-pawns are the only pawns that could ever cover it: f3 has gone past and h2 is on the second rank behind its own rook, and after f3 the g4 square can never be attacked by a white pawn again.\n\nA HOLE IS NOT A WEAKNESS UNTIL SOMETHING CAN USE IT, which is why the scan asked Layer 3 for REACHABLE holes rather than for holes. `holesFor()` finds squares no enemy pawn can attack; `reachableHoles()` keeps the ones a minor piece can actually get to and survive on. The difference is the whole concept - every position has holes, and most of them are irrelevant.\n\nAnd it asked for positions with exactly ONE, because a position with four holes is a position where the reader learns nothing about which one matters.\n\nPROVENANCE. Found by reading Layer 3 over 330 replayed master games rather than by asking the API, which never reports this concept because it has no matcher. Replayed legally through the page's own move generator. No annotator read."
     }
   ],
   "counterexamples": [
