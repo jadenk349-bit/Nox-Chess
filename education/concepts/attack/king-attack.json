@@ -210,7 +210,30 @@
       "false_positive_case": "an-exposed-king-with-nothing-left-to-attack-with"
     }
   ],
-  "ambiguous_examples": [],
+  "ambiguous_examples": [
+    {
+      "fen": "4Q3/6pk/6r1/2p1p2p/2P1Rq1P/PP1p4/1R1P2Kb/2B5 w - - 6 49",
+      "note": "Nominated as an AGAINST-THE-MATERIAL candidate and it is the sharpest kind. The base reports a king attack for BLACK - queen on f4, rook on g6, bishop on h2, all aimed at the white king on g2, and Black is 500 centipawns up on material. The engine says White is winning by 16 and plays Qxg6+ immediately. Every mechanical sign of an attack is present and belongs to the side who is lost. This is filed as ambiguous rather than as a false positive on purpose: the attacking configuration IS there and the report is not describing something absent. What is absent is the conclusion a reader would draw from it, and this record's own trap says so - 'two checks is not an attack', 'a proxy for puzzle classification and NOT a definition of the concept'.",
+      "origin_kind": "puzzle",
+      "concept_role": "ambiguous",
+      "engine": {
+        "engine_id": "Stockfish 18",
+        "test_level": 3,
+        "depth": 24,
+        "threads": 10,
+        "hash_mb": 4096,
+        "multipv": 1,
+        "best_move": "e8g6",
+        "eval_cp": 1600,
+        "mate_in": null,
+        "pv": [],
+        "alternatives": [],
+        "margin_cp": null,
+        "verdict": "ambiguous",
+        "verdict_note": "+16.00 for the side being 'attacked', at depth 24 and settled at depth 1. The attack exists and loses on the spot."
+      }
+    }
+  ],
   "explanations": {
     "by_level": {
       "beginner": "White is bringing more pieces near the black king than Black has defending it, and trying to open a line to get at it.",

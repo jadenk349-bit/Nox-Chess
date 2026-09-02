@@ -214,7 +214,30 @@
       }
     }
   ],
-  "ambiguous_examples": [],
+  "ambiguous_examples": [
+    {
+      "fen": "8/1b2knpP/4p3/1pP4B/2p4P/8/2r5/6K1 w - - 1 43",
+      "note": "A BOTH-SIDES candidate in an endgame, which is where this concept is hardest to read. The base reports a weak square for White and one for Black; material says Black by 920 centipawns; the engine says 0.00. The h7 pawn one square from queening is what the position is about, and a hole in either camp is beside the point at this stage. This record has already been tightened twice against traps of its own - the fianchetto trap, the rim, our own half - and this position is the residue: nothing is being reported that is not there, and what is there does not matter.",
+      "origin_kind": "puzzle",
+      "concept_role": "ambiguous",
+      "engine": {
+        "engine_id": "Stockfish 18",
+        "test_level": 3,
+        "depth": 24,
+        "threads": 10,
+        "hash_mb": 4096,
+        "multipv": 1,
+        "best_move": "h5f7",
+        "eval_cp": 0,
+        "mate_in": null,
+        "pv": [],
+        "alternatives": [],
+        "margin_cp": null,
+        "verdict": "ambiguous",
+        "verdict_note": "0.00 at depth 24. The passed h-pawn and the counting race decide it; the weak squares reported for both sides are not part of the calculation."
+      }
+    }
+  ],
   "explanations": {
     "by_level": {
       "beginner": "None of your pawns can ever attack that square again, so their pieces can sit there safely.",

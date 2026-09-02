@@ -139,7 +139,30 @@
       "false_positive_case": "a-phalanx-of-three-is-not-a-hanging-pair"
     }
   ],
-  "ambiguous_examples": [],
+  "ambiguous_examples": [
+    {
+      "fen": "2r3k1/p4qn1/5Q2/5p2/8/6P1/1PP5/1K3R2 w - - 2 37",
+      "note": "Nominated as an AGAINST-THE-MATERIAL candidate: the base reports hanging pawns for White, and White is 220 centipawns down. This record's first trap says the structure is dynamic and 'the same pair that loses one game wins the next depending on where the pieces are', and its third says the detector finds the STRUCTURE while whether it is an asset needs the piece placement, which the detector does not read. This position is that sentence with numbers attached: the pawns are there, White is materially worse, and the engine calls it -0.21 - level. The structure is neither the weakness nor the asset here, and a system that reported it as either would be guessing.",
+      "origin_kind": "puzzle",
+      "concept_role": "ambiguous",
+      "engine": {
+        "engine_id": "Stockfish 18",
+        "test_level": 3,
+        "depth": 24,
+        "threads": 10,
+        "hash_mb": 4096,
+        "multipv": 1,
+        "best_move": "f6f7",
+        "eval_cp": -21,
+        "mate_in": null,
+        "pv": [],
+        "alternatives": [],
+        "margin_cp": null,
+        "verdict": "ambiguous",
+        "verdict_note": "-0.21 at depth 24. Materially down and evaluated level, so the compensation is real and the hanging pair is not the thing that settles it either way."
+      }
+    }
+  ],
   "explanations": {
     "by_level": {
       "beginner": "Two pawns side by side with no pawns next to them — no pawn can defend either one.",

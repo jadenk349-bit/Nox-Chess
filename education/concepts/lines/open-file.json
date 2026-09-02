@@ -237,7 +237,30 @@
       }
     }
   ],
-  "ambiguous_examples": [],
+  "ambiguous_examples": [
+    {
+      "fen": "2r2b2/2q3p1/2r4p/7P/3k1p2/1Q3P2/4RP1K/4n3 w - - 4 57",
+      "note": "A BOTH-SIDES candidate where all three readings disagree. The base reports an open file for White and an open file for Black. Material says Black by 1150 centipawns. The engine says White mates in 3, beginning with Re4+. The open file is in fact what decides the position - the white rook on the e-file delivers the first move of the mate - and none of that is visible in a report that says both sides have one. An ambiguous example is not a position where the feature is absent; it is a position where the feature is present on both sides and being told so leaves the reader exactly where they started.",
+      "origin_kind": "puzzle",
+      "concept_role": "ambiguous",
+      "engine": {
+        "engine_id": "Stockfish 18",
+        "test_level": 3,
+        "depth": 24,
+        "threads": 10,
+        "hash_mb": 4096,
+        "multipv": 1,
+        "best_move": "e2e4",
+        "eval_cp": null,
+        "mate_in": 3,
+        "pv": [],
+        "alternatives": [],
+        "margin_cp": null,
+        "verdict": "ambiguous",
+        "verdict_note": "Mate in 3 for the side 1150 centipawns down on material, and the mate runs along the open file the concept named for both players."
+      }
+    }
+  ],
   "explanations": {
     "by_level": {
       "beginner": "There are no pawns on that file, so a rook there can see all the way down the board.",

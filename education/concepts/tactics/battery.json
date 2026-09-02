@@ -126,7 +126,30 @@
       "false_positive_case": "rooks-doubled-behind-a-rammed-pawn"
     }
   ],
-  "ambiguous_examples": [],
+  "ambiguous_examples": [
+    {
+      "fen": "6k1/2r2p2/4b3/p1q5/P3P3/1r1P1P1P/1B4P1/Q2RKB1R b K - 3 39",
+      "note": "Nominated by tools/mine_ambiguous.js as a BOTH-SIDES candidate and confirmed by the engine. The base reports a battery for White and a battery for Black in the same position, which is the first thing that makes this ambiguous: a concept that fires for everybody tells the reader nothing about who stands better. The second is that the two other readings of the position disagree with each other. Material says White by 730 centipawns. The engine says Black mates in 6, starting with Qe3+. So the honest answer to 'is the battery the point here' is that one of them is and the report cannot say which - the concept is present, correctly, and it is not what the position is about.",
+      "origin_kind": "puzzle",
+      "concept_role": "ambiguous",
+      "engine": {
+        "engine_id": "Stockfish 18",
+        "test_level": 3,
+        "depth": 24,
+        "threads": 10,
+        "hash_mb": 4096,
+        "multipv": 1,
+        "best_move": "c5e3",
+        "eval_cp": null,
+        "mate_in": -6,
+        "pv": [],
+        "alternatives": [],
+        "margin_cp": null,
+        "verdict": "ambiguous",
+        "verdict_note": "Mate in 6 for the side that is 730 centipawns DOWN on material. Neither the material count nor the battery report points at what decides the position, which is the definition of an ambiguous instance rather than a wrong one."
+      }
+    }
+  ],
   "explanations": {
     "by_level": {
       "beginner": "Two pieces are lined up on the same line, so they work together — the one in front can take, and the one behind takes back.",

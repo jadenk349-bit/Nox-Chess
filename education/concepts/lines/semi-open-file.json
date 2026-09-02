@@ -181,7 +181,30 @@
       }
     }
   ],
-  "ambiguous_examples": [],
+  "ambiguous_examples": [
+    {
+      "fen": "3qr1k1/1bp2p2/6nQ/6R1/rpP4p/4Bpp1/P7/1B2K3 w - - 0 39",
+      "note": "A BOTH-SIDES candidate, and the one where the engine's answer is the most instructive: 0.00. The base reports a semi-open file for White and one for Black; material says Black by 890 centipawns; and the position is a dead draw by force, Rxg6+ and perpetual. Three readings, three different stories, and the true one is that nobody is winning. A semi-open file is a standing asset and this is a position where standing assets have stopped mattering, which is the honest boundary of the concept rather than a failure of it.",
+      "origin_kind": "puzzle",
+      "concept_role": "ambiguous",
+      "engine": {
+        "engine_id": "Stockfish 18",
+        "test_level": 3,
+        "depth": 24,
+        "threads": 10,
+        "hash_mb": 4096,
+        "multipv": 1,
+        "best_move": "g5g6",
+        "eval_cp": 0,
+        "mate_in": null,
+        "pv": [],
+        "alternatives": [],
+        "margin_cp": null,
+        "verdict": "ambiguous",
+        "verdict_note": "0.00 at depth 24, settled at depth 1, by force. Material and both file reports point away from the truth."
+      }
+    }
+  ],
   "explanations": {
     "by_level": {
       "beginner": "A file where you have no pawn and they do — so your rook is already pointing at something.",
