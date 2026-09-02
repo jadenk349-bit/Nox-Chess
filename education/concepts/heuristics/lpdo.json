@@ -149,7 +149,30 @@
       "false_positive_case": "loose-pieces-that-cannot-drop-off"
     }
   ],
-  "ambiguous_examples": [],
+  "ambiguous_examples": [
+    {
+      "fen": "r4rk1/pp3ppp/8/2b5/2B5/8/PP3PPP/R4RK1 w - - 0 1",
+      "note": "Both bishops are undefended. 'Loose pieces drop off' applies to White and to Black at once, which is the state in which the aphorism has nothing to say: whoever is warned by it is warned about their own position and their opponent's equally. The engine says 0.00. This record's first trap is that 'a piece being undefended is not a mistake, and calling it one teaches a habit of pointless defending', and a symmetric position is where that habit costs most - a tempo spent defending a bishop nobody can attack is a tempo given away. Filed as ambiguous rather than negative because the loose pieces are genuinely there and the aphorism is genuinely about them.",
+      "origin_kind": "constructed-test",
+      "concept_role": "ambiguous",
+      "engine": {
+        "engine_id": "Stockfish 18",
+        "test_level": 3,
+        "depth": 22,
+        "threads": 10,
+        "hash_mb": 4096,
+        "multipv": 1,
+        "best_move": "a1c1",
+        "eval_cp": 0,
+        "mate_in": null,
+        "pv": [],
+        "alternatives": [],
+        "margin_cp": null,
+        "verdict": "ambiguous",
+        "verdict_note": "0.00 at depth 22, settled at depth 21. Two loose bishops, one on each side, and no forcing move reaches either."
+      }
+    }
+  ],
   "explanations": {
     "by_level": {
       "beginner": "Pieces that nothing is defending tend to get picked off. Before you move, look at which of your pieces are undefended.",

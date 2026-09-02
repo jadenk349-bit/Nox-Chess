@@ -147,7 +147,30 @@
       "false_positive_case": "overprotecting-a-point-nobody-attacks"
     }
   ],
-  "ambiguous_examples": [],
+  "ambiguous_examples": [
+    {
+      "fen": "3rk3/3q1b2/8/3P4/4B3/3Q4/8/3RK3 w - - 0 1",
+      "note": "The d5 pawn is defended three times - bishop on e4, queen on d3, rook on d1 behind her - and attacked once, by the queen on d7. Nimzowitsch's picture exactly. Whether it is OVERPROTECTION is the question this record exists to refuse to answer cheaply: its first trap says 'counting defenders is mechanical and says nothing. Overprotection is a CLAIM that the extra defence is worthwhile, and that claim is often false', and its second says not to report it 'unless the overprotecting pieces are demonstrably well placed for other reasons as well'. Two of the three defenders here are on good squares anyway and one is behind the other. The engine says 0.00. Filed as ambiguous because every observable half of the concept is present and the claim it makes is not observable at all.",
+      "origin_kind": "constructed-test",
+      "concept_role": "ambiguous",
+      "engine": {
+        "engine_id": "Stockfish 18",
+        "test_level": 3,
+        "depth": 22,
+        "threads": 10,
+        "hash_mb": 4096,
+        "multipv": 1,
+        "best_move": "d1d2",
+        "eval_cp": 0,
+        "mate_in": null,
+        "pv": [],
+        "alternatives": [],
+        "margin_cp": null,
+        "verdict": "ambiguous",
+        "verdict_note": "0.00 at depth 22 with an extra pawn on the board - the overprotected one. Three defenders, one attacker, and nothing to show for it."
+      }
+    }
+  ],
   "explanations": {
     "by_level": {
       "beginner": "Defending an important square more times than you strictly need to, so your pieces are ready when the fight for it comes.",

@@ -161,7 +161,30 @@
       "controlled_pair_with": "r1bq1rk1/pp3ppp/2n5/3Np3/4P3/8/PP3PPP/R1BQ1RK1 w - - 0 1"
     }
   ],
-  "ambiguous_examples": [],
+  "ambiguous_examples": [
+    {
+      "fen": "r2q1rk1/pp3ppp/8/4p3/4P3/8/PP1Q1PPP/R4RK1 w - - 0 1",
+      "note": "d5 satisfies both of this record's preconditions: no black pawn can ever attack it, and White's e4 pawn defends it. It is also useless, because there is no minor piece left on the board to put there. This record's second indicator_against is exactly that - \"Nothing useful can reach it\" - and its second trap says the cost of holding a square with pieces can exceed what the square is worth: a queen or a rook on d5 is evictable by anything cheaper, and nothing cheaper exists. Filed as ambiguous rather than negative because the square really is strong in the structural sense the record defines, permanently, and would become valuable the moment a knight appeared.",
+      "origin_kind": "constructed-test",
+      "concept_role": "ambiguous",
+      "engine": {
+        "engine_id": "Stockfish 18",
+        "test_level": 3,
+        "depth": 22,
+        "threads": 10,
+        "hash_mb": 4096,
+        "multipv": 1,
+        "best_move": "d2b4",
+        "eval_cp": 1,
+        "mate_in": null,
+        "pv": [],
+        "alternatives": [],
+        "margin_cp": null,
+        "verdict": "ambiguous",
+        "verdict_note": "+0.01 with symmetric material - queen and two rooks each. The square is real and the position is dead level, which is the honest measure of what a strong square with nothing to put on it is worth."
+      }
+    }
+  ],
   "explanations": {
     "by_level": {
       "beginner": "A square in their half that their pawns can never attack and one of yours can defend.",

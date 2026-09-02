@@ -182,7 +182,30 @@
       }
     }
   ],
-  "ambiguous_examples": [],
+  "ambiguous_examples": [
+    {
+      "fen": "r1bqk1nr/pppp1ppp/2n5/2b1p3/2B1P3/5N2/PPPP1PPP/RNBQK2R w KQkq - 0 4",
+      "note": "The Giuoco Piano after 3...Bc5. Both sides have developed two pieces, both have a bishop on the a2-g8 diagonal and a knight out, neither has castled, and the position is symmetric to the move. Every count this rule of thumb runs - pieces developed, tempi spent, centre occupied - comes out level, which is the case a development rule cannot speak about and is also the commonest case in the opening. This record's own trap is that 'counting developed pieces overstates a development lead. Count the moves each side still needs', and here both sides still need the same moves. Filed as ambiguous because the concept is fully applicable and completely uninformative, which is what a symmetric opening is.",
+      "origin_kind": "constructed-test",
+      "concept_role": "ambiguous",
+      "engine": {
+        "engine_id": "Stockfish 18",
+        "test_level": 3,
+        "depth": 22,
+        "threads": 10,
+        "hash_mb": 4096,
+        "multipv": 1,
+        "best_move": "d2d3",
+        "eval_cp": 31,
+        "mate_in": null,
+        "pv": [],
+        "alternatives": [],
+        "margin_cp": null,
+        "verdict": "ambiguous",
+        "verdict_note": "+0.31 at depth 22 - the ordinary value of the move, and nothing attributable to development, because there is no development difference to attribute it to."
+      }
+    }
+  ],
   "explanations": {
     "by_level": {
       "beginner": "Get your pieces out towards the middle, castle your king to safety, and try not to move the same piece twice — every move counts in the opening.",

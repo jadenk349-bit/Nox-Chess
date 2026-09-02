@@ -127,7 +127,32 @@
     }
   ],
   "counterexamples": [],
-  "ambiguous_examples": [],
+  "ambiguous_examples": [
+    {
+      "fen": "5k2/2N2r2/3p4/1p6/3P2p1/2P1q1p1/PP3NQ1/6K1 w - - 0 41",
+      "move": "Qa8+",
+      "move_uci": "g2a8",
+      "note": "Shipped puzzle mi-5f4be05ec3, and it is the DEFENSIVE form of the motif, which the record describes only in passing. Black has just taken on g3 and White is expected to recapture. Recapturing is mate in three against - Qxg3 Qxg3 and the attack lands. Instead White checks on a8 first, and the check leads to a perpetual: 0.00. So the in-between move is essential and it gains no material at all. Filed as ambiguous because the concept's usual framing is that move order buys material - this record's own positive example buys 240 centipawns by it - and here the same mechanism buys a draw from a lost position, which the definition does not cover and the reader would not predict from it.",
+      "origin_kind": "puzzle",
+      "concept_role": "ambiguous",
+      "engine": {
+        "engine_id": "Stockfish 18",
+        "test_level": 3,
+        "depth": 20,
+        "threads": 10,
+        "hash_mb": 4096,
+        "multipv": 2,
+        "best_move": "g2a8",
+        "eval_cp": 0,
+        "mate_in": null,
+        "pv": [],
+        "alternatives": [],
+        "margin_cp": null,
+        "verdict": "ambiguous",
+        "verdict_note": "0.00 for the in-between check against MATE IN 3 AGAINST for the natural recapture, at depth 20 with two lines. The gap is the whole game rather than a material count, which is why this position is filed beside a positive example whose gap is 240 centipawns."
+      }
+    }
+  ],
   "explanations": {
     "by_level": {
       "beginner": "Instead of recapturing straight away, this makes a bigger threat first. The recapture is still there afterwards.",
