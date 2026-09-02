@@ -174,16 +174,51 @@ def main():
 
     # "All seven rungs" is unreachable for a human-only concept, so the honest
     # headline is two numbers rather than one flattering choice between them.
+    #
+    # A record may also mark a validation item N/A in writing - see na_reasons()
+    # in tools/depth_report.py, and the 120-character minimum validate_kb.py
+    # enforces. Four of those items correspond to rungs here, and a rung whose
+    # item the record argues is inapplicable is not a rung that record allows:
+    # `time-management` cannot be negative-tested with a POSITION, because its
+    # subject is the player. The exemptions are counted and printed, so the
+    # number cannot grow without the reason growing with it.
+    NA_TO_RUNG = {"master_game": "human_grounded", "negative_example": "negative_tested",
+                  "ambiguous_example": "ambiguity_tested", "engine_validation": "engine_verified"}
+    exempt = {}
+    for cid, c in concepts.items():
+        v = c.get("validation_na") or {}
+        got = {NA_TO_RUNG[k] for k, why in v.items()
+               if k in NA_TO_RUNG and isinstance(why, str) and len(why) >= 120}
+        if got:
+            exempt[cid] = got
+    #
+    # TWO numbers again, and for the same reason. A concept like `board-vision`
+    # marks five of its six validation items N/A - correctly, its subject is a
+    # skill and not a position - and so it "reaches every rung its record
+    # allows" having actually earned two of seven. That is true and it is not
+    # the same achievement as `outpost` earning all seven, so the strict count
+    # is printed FIRST and the exempted one underneath it, never instead.
+    strict = [c for c, r in rows.items()
+              if all(r[k] for k in RUNGS if k != "api_validated")
+              and (r["api_validated"] or c not in can_detect)]
     reachable = [c for c, r in rows.items()
-                 if all(r[k] for k in RUNGS if k != "api_validated")
+                 if all(r[k] or k in exempt.get(c, ()) for k in RUNGS if k != "api_validated")
                  and (r["api_validated"] or c not in can_detect)]
-    print(f"  every rung its record allows: {len(reachable)}/{n}")
+    print(f"  every rung its record allows: {len(strict)}/{n}")
+    if exempt:
+        extra = sorted(set(reachable) - set(strict))
+        print(f"  ...{len(reachable)}/{n} counting {len(extra)} concepts that reach it only because "
+              f"a rung is exempted by a written N/A")
+        print(f"  ({sum(len(v) for v in exempt.values())} rung exemptions on {len(exempt)} concepts, "
+              f"each justified in at least 120 characters: {', '.join(extra)})")
 
     if a.json:
         json.dump({"rungs": RUNGS, "concepts": rows,
                    "totals": {k: sum(1 for r in rows.values() if r[k]) for k in RUNGS},
                    "api_detectable": sorted(can_detect),
-                   "every_rung_its_record_allows": sorted(reachable),
+                   "every_rung_its_record_allows": sorted(strict),
+                   "every_rung_allowed_or_na": sorted(reachable),
+                   "rung_exemptions": {k: sorted(v) for k, v in exempt.items()},
                    "all_seven": sorted(full), "researched_only": sorted(only)},
                   open(os.path.join(HERE, a.json), "w"), indent=2)
         print(f"\n  wrote {a.json}")
