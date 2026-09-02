@@ -1597,3 +1597,31 @@ done afterwards. The sentence now reads:
 > repaired.**
 
 Which is Rubinstein's method, rather than a verdict about it.
+
+
+## `indicators_against` does not mean the same thing on every record
+
+Building it uniformly would have inverted two concepts. For a concept naming an
+**asset** — an open file, an outpost, a passed pawn — they are reasons *not* to
+report it, which is how the reading list treats them. For a concept naming a
+**scale or a liability** they are the conditions under which the thing is *bad*,
+which is to say the conditions the matcher fires **on**: `king-safety`'s "three
+or more attackers can reach the king zone" *is* the count arm, and
+`isolated-queen-pawn`'s five are all reasons the pawn is an asset rather than
+reasons to withhold a structure that is on the board.
+
+Building either set as guards would have suppressed the concept exactly where it
+applies. The distinction is now in the artifact's own header and on both records.
+
+The list is at **78 unread** from 101, and most of that movement is *reading*
+rather than building — six records now carry a paragraph saying which of their
+indicators are built, which are the wrong polarity to build, and which are
+judgements about a position that does not exist yet.
+
+One real build came out of it. **`sacrifice` now refuses to call a blunder a
+sacrifice**: its first indicator_against — "material is given up with nothing
+nameable in return" — is tested two plies deep, and if the offer is accepted the
+offering side must have a check or a capture that wins material. 28.9% →
+**26.5%**. The second, "the compensation described is not actually present", is
+the difference between '!' and '?' and no material test sees it — which is why
+the record's caution stays attached to every claim.

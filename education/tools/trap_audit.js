@@ -164,6 +164,13 @@ if (mdOut) {
     `**Of ${rows.length} stated conditions (traps and indicators-against): ${byVerdict('in the matcher')} enforced in the matcher, ` +
     `${byVerdict('in Layer 3')} in Layer 3, ${byVerdict('recorded as unbuildable')} argued on the ` +
     `record to be unbuildable or already honoured elsewhere, ${open.length} unread.**`, '',
+    'ONE CAVEAT ABOUT `indicators_against`, and it is not a technicality. For a',
+    'concept naming an ASSET — an open file, an outpost, a passed pawn — they are',
+    'reasons NOT to report it, which is how this list reads them. For a concept',
+    'naming a SCALE or a liability — `king-safety`, `isolated-queen-pawn` — they',
+    'are the conditions under which the thing is BAD, which is to say the',
+    'conditions the matcher fires on. Building those as guards would invert the',
+    'concept. Read the record before building the row.', '',
     '"Noted on the record" is an argument, not a guard. A single "all cited"',
     'headline would read as "all traps implemented", which would be the same',
     'self-flattery this tool caught in its own first version — it scored keyword',

@@ -13,7 +13,15 @@ implemented; that is a reading, and doing it is the work. What it can do is
 stop the list being rediscovered from scratch each time — and every one of
 the defects listed in the tool's header was unread before it was looked at.
 
-**Of 246 stated conditions (traps and indicators-against): 89 enforced in the matcher, 21 in Layer 3, 35 argued on the record to be unbuildable or already honoured elsewhere, 101 unread.**
+**Of 246 stated conditions (traps and indicators-against): 92 enforced in the matcher, 21 in Layer 3, 55 argued on the record to be unbuildable or already honoured elsewhere, 78 unread.**
+
+ONE CAVEAT ABOUT `indicators_against`, and it is not a technicality. For a
+concept naming an ASSET — an open file, an outpost, a passed pawn — they are
+reasons NOT to report it, which is how this list reads them. For a concept
+naming a SCALE or a liability — `king-safety`, `isolated-queen-pawn` — they
+are the conditions under which the thing is BAD, which is to say the
+conditions the matcher fires on. Building those as guards would invert the
+concept. Read the record before building the row.
 
 "Noted on the record" is an argument, not a guard. A single "all cited"
 headline would read as "all traps implemented", which would be the same
@@ -37,11 +45,11 @@ shared file was added to the search. The test is quotation for that reason.
 - [noted] The structure is trivially detectable and says almost nothing on its own — the material left on the board decides the evaluation more than the structure does.
 - [noted] Reporting it as a weakness while its owner has the initiative inverts the position.
 - [cited] An isolated queen's pawn is not a weakness on sight. In the standard position measured here the side with the isolani is slightly better (+0.14).
-- [**unread**] *(indicator against)* Pieces are still on and the IQP side has the initiative
-- [**unread**] *(indicator against)* The c- and e-files are giving the rooks real work
-- [**unread**] *(indicator against)* Knights are established on the outposts beside the pawn
-- [**unread**] *(indicator against)* Attacking chances against f7 are live
-- [**unread**] *(indicator against)* The pawn can advance at a chosen moment to liquidate favourably
+- [noted] *(indicator against)* Pieces are still on and the IQP side has the initiative
+- [noted] *(indicator against)* The c- and e-files are giving the rooks real work
+- [noted] *(indicator against)* Knights are established on the outposts beside the pawn
+- [noted] *(indicator against)* Attacking chances against f7 are live
+- [noted] *(indicator against)* The pawn can advance at a chosen moment to liquidate favourably
 ## passed-pawn
 
 - [cited] REGISTERED FALSE POSITIVE: a passed pawn is not automatically an advantage. A permanently blockaded passer that must be defended is a liability, and the blockading square is an excellent one for the defender.
@@ -97,8 +105,8 @@ shared file was added to the search. The test is quotation for that reason.
 - [noted] Every pawn move creates squares no pawn can guard, so the raw feature fires everywhere. Usability is what makes it reportable.
 - [layer 3] A fianchetto leaves permanent weak squares on the long diagonal that the bishop covers perfectly well. The square is weak; the position is not.
 - [layer 3] A weak square only a queen can occupy is usually not a weakness, since cheaper pieces evict her.
-- [**unread**] *(indicator against)* A friendly pawn can still advance to cover it
-- [**unread**] *(indicator against)* A piece covers it durably and cannot be exchanged
+- [noted] *(indicator against)* A friendly pawn can still advance to cover it
+- [noted] *(indicator against)* A piece covers it durably and cannot be exchanged
 - [layer 3] *(indicator against)* The square is unreachable, or reaching it achieves nothing
 - [cited] *(indicator against)* It is on the edge or deep in the opponent's own half
 ## bishop-pair
@@ -127,7 +135,7 @@ shared file was added to the search. The test is quotation for that reason.
 - [**unread**] *(indicator against)* The two targets are within two files of each other, so one defending king covers both
 - [**unread**] *(indicator against)* Opposite-coloured bishops with no breakthrough square - the defending bishop holds one colour complex regardless of how many targets exist
 - [**unread**] *(indicator against)* The defender can reach a known fortress
-- [**unread**] *(indicator against)* Opening the second front concedes counterplay, a passed pawn, or an open line towards the attacker's own king
+- [noted] *(indicator against)* Opening the second front concedes counterplay, a passed pawn, or an open line towards the attacker's own king
 - [cited] *(indicator against)* The first weakness can be liquidated by a pawn break or a favourable exchange
 - [**unread**] *(indicator against)* The defending king already stands between the two targets
 ## bad-bishop
@@ -135,11 +143,11 @@ shared file was added to the search. The test is quotation for that reason.
 - [cited] REGISTERED FALSE POSITIVE: a bishop behind its own pawns is not automatically bad in the sense that matters. Suba's active bad bishop is the counterexample, and it is common, not exotic.
 - [cited] Counting pawns on the bishop's colour is mechanical and will fire on pieces that are performing well. Mobility and role must be checked too.
 - [cited] A bad bishop that is the sole guardian of a weak colour complex is a load-bearing defender, not a liability.
-- [**unread**] *(indicator against)* THE SUBA CASE: the bishop is outside the pawn chain and active, however bad it looks structurally
-- [**unread**] *(indicator against)* A pawn break is available that shifts the blocking pawns off its colour
-- [**unread**] *(indicator against)* It is the only defender of a colour complex — a bad bishop with a job is not a bad piece
-- [**unread**] *(indicator against)* The structure is fluid and about to change
-- [**unread**] *(indicator against)* It can be traded for the opponent's good bishop
+- [noted] *(indicator against)* THE SUBA CASE: the bishop is outside the pawn chain and active, however bad it looks structurally
+- [noted] *(indicator against)* A pawn break is available that shifts the blocking pawns off its colour
+- [noted] *(indicator against)* It is the only defender of a colour complex — a bad bishop with a job is not a bad piece
+- [noted] *(indicator against)* The structure is fluid and about to change
+- [noted] *(indicator against)* It can be traded for the opponent's good bishop
 ## opposite-coloured-bishops
 
 - [cited] The drawish reputation is an ENDGAME fact. In the middlegame with heavy pieces on, opposite-coloured bishops favour the attacker, because the bishop operates where the defender's cannot answer. Announcing 'opposite bishops, drawn' with queens on the board is the standard error.
@@ -173,8 +181,8 @@ shared file was added to the search. The test is quotation for that reason.
 - [cited] Detecting the imbalance is mechanical and trivial; saying who it favours is not, and depends on open files, king safety and how much else remains.
 - [noted] Statistical values are averages. They tell you what to expect across many games, not what is true in this one.
 - [cited] MEASURED 2026-09-02: a knight against a bishop is not an imbalance by this record's own preferred numbers - Kaufman puts a knight and an UNPAIRED bishop at the same 3.5 - and the matcher fired on every such swap, 42.1% of the 788 shipped positions. It is a third name for a fact `bishop-pair` and `bad-bishop` already report. The exception is the pair itself, which Kaufman does separate (7.5 against 7.0), so two bishops against two knights is still reported. 42.1% -> 35.5%.
-- [**unread**] *(indicator against)* Material is symmetrical in kind, in which case simple counting applies
-- [**unread**] *(indicator against)* The imbalance is temporary and about to be liquidated
+- [noted] *(indicator against)* Material is symmetrical in kind, in which case simple counting applies
+- [noted] *(indicator against)* The imbalance is temporary and about to be liquidated
 ## space
 
 - [cited] Counting controlled squares is mechanical and over-reports. Space with no entry point wins nothing.
@@ -191,7 +199,7 @@ shared file was added to the search. The test is quotation for that reason.
 - [noted] Activity is generally a temporary advantage and must be converted; reporting it as though it were permanent overstates it.
 - [cited] *(indicator against)* A piece tied to defending something
 - [layer 3] *(indicator against)* A bishop shut in by its own pawns
-- [**unread**] *(indicator against)* A piece with moves available that accomplish nothing
+- [noted] *(indicator against)* A piece with moves available that accomplish nothing
 ## pawn-breakthrough
 
 - [cited] A pawn sacrifice that creates a passer is not a breakthrough unless the passer actually cannot be stopped. The rule of the square decides this and is cheap to check.
@@ -208,11 +216,11 @@ shared file was added to the search. The test is quotation for that reason.
 - [cited] A pawn move near the king is not automatically a weakening — h3 in a quiet position is useful luft; the same move against a queenside-castled opponent is a hook.
 - [cited] An exposed king is not a losing king. In a proven drawn ending both kings stand in the open with no pawn shelter, and centralising them is correct - see the recorded counterexample.
 - [cited] *(indicator against)* Three or more attackers can reach the king zone
-- [**unread**] *(indicator against)* Shield pawns advanced or missing, especially with an open file beside the king
+- [cited] *(indicator against)* Shield pawns advanced or missing, especially with an open file beside the king
 - [**unread**] *(indicator against)* A hook the opponent can attack to open a line
 - [**unread**] *(indicator against)* King uncastled with the centre open or opening
 - [**unread**] *(indicator against)* Key defender exchangeable — the fianchettoed bishop, or the f6 knight
-- [**unread**] *(indicator against)* No escape square, so back-rank tactics are live
+- [cited] *(indicator against)* No escape square, so back-rank tactics are live
 ## king-attack
 
 - [cited] Two checks is not an attack. The repository's `kingAttack` tag fires on checks >= 2 or mate, which is a proxy for puzzle classification and NOT a definition of the concept.
@@ -229,9 +237,9 @@ shared file was added to the search. The test is quotation for that reason.
 - [noted] A big pawn centre is not automatically an advantage. Whether it is an asset or a target is a question of timing and support, and that cannot be read off the structure.
 - [layer 3] Central pieces are only strong while they cannot be kicked; a piece on a central square a pawn can attack is visiting.
 - [layer 3] A rook or queen whose line to a central square runs through one of its own men counts as an attacker and should not be read as a piece fighting for the square. The move-based arm measures pawns and minors for this reason.
-- [**unread**] *(indicator against)* A pawn centre that cannot advance and cannot be defended — a target, not an asset
-- [**unread**] *(indicator against)* Central occupation achieved at the cost of development
-- [**unread**] *(indicator against)* Central squares occupied by pieces that can be evicted with a pawn move
+- [noted] *(indicator against)* A pawn centre that cannot advance and cannot be defended — a target, not an asset
+- [noted] *(indicator against)* Central occupation achieved at the cost of development
+- [noted] *(indicator against)* Central squares occupied by pieces that can be evicted with a pawn move
 ## blockade
 
 - [layer 3] A piece standing in front of a pawn is not necessarily blockading it usefully. The test is whether the piece keeps its powers there — a queen on a blockading square is doing a knight's chore.
@@ -329,9 +337,9 @@ shared file was added to the search. The test is quotation for that reason.
 - [cited] An even trade is not a sacrifice.
 - [cited] Calling a blunder a sacrifice. The difference is whether the compensation is real and nameable — annotators decide between '!' and '?' on exactly that.
 - [noted] Spielmann's distinction is invisible to a material test. A forced mating sacrifice and a speculative one give up the same material and are different things; 'risk is the hallmark of the real sacrifice', and risk is not a property of the position, it is a property of what could be calculated from it.
-- [**unread**] *(indicator against)* Material is given up with nothing nameable in return — that is a blunder, not a sacrifice
+- [cited] *(indicator against)* Material is given up with nothing nameable in return — that is a blunder, not a sacrifice
 - [layer 3] *(indicator against)* The 'sacrifice' can be declined at no cost, and the offering side is then simply worse
-- [**unread**] *(indicator against)* The compensation described is not actually present on the board
+- [noted] *(indicator against)* The compensation described is not actually present on the board
 ## exchange-sacrifice
 
 - [cited] THE MAIN ONE: a rook given up inside a forced mating line is a mating sacrifice, not a positional exchange sacrifice, even though the material given is identical. The engine test on puzzle mi-bb512d9713 in this record is exactly that case — tagged exchangeSacrifice, actually mate in 2.

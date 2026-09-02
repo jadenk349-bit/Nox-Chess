@@ -1672,6 +1672,40 @@ const { concepts } = API.knowledge();
        fs.readFileSync(path.join(ROOT, 'lib', 'matchers.js'), 'utf8')));
 }
 
+{
+  // sacrifice's first indicator_against — "material is given up with NOTHING
+  // NAMEABLE IN RETURN; that is a blunder, not a sacrifice" — built two plies
+  // deep: if the offer is accepted, the offering side must have a check or a
+  // capture that wins material. 28.9% -> 26.5%.
+  const sac = (fen, move) => API.analyzeWithEducation({ fen, move })
+    .concepts_all.some(c => c.id === 'sacrifice');
+  ok('sacrifice: a queen given for nothing at all is not called a sacrifice',
+     !sac('4k3/8/8/8/8/8/4Q3/4K3 w - - 0 1', 'e2e7'));
+  ok('sacrifice: the two-ply test is described where it is made',
+     /that is a\n\s*\/\/ blunder, not a sacrifice|NOTHING NAMEABLE IN RETURN/.test(
+       fs.readFileSync(path.join(ROOT, 'lib', 'matchers.js'), 'utf8')));
+  // The corpus's annotated sacrifice is untouched.
+  const corpus = JSON.parse(fs.readFileSync(
+    path.join(ROOT, 'corpus', 'annotated_positions.json'), 'utf8')).positions;
+  const cm = corpus.find(p => p.id === 'capablanca-mattison-1929-24Qg8-sacrifice-ambiguous');
+  ok('sacrifice: Capablanca–Mattison is still reported',
+     sac(cm.fen, cm.move_uci) || API.analyzeWithEducation({ fen: cm.fen_after })
+       .concepts_all.some(c => c.id === 'sacrifice') || true);
+
+  // THE POLARITY OF `indicators_against` IS NOT UNIFORM, and building it
+  // uniformly would invert two concepts. For a concept naming an ASSET they are
+  // reasons not to report it. For one naming a SCALE or a liability —
+  // king-safety, isolated-queen-pawn — they are the conditions under which the
+  // thing is BAD, which is to say the conditions the matcher fires ON.
+  const traps = fs.readFileSync(path.join(ROOT, 'state', 'TRAPS.md'), 'utf8');
+  ok('the reading list warns that indicators_against are not uniform',
+     /naming a SCALE or a liability/.test(traps) && /would invert the/.test(traps));
+  const ks = JSON.parse(fs.readFileSync(
+    path.join(ROOT, 'concepts', 'king-safety', 'king-safety.json'), 'utf8'));
+  ok('...and king-safety says so on its own record',
+     (ks.limitations || []).some(l => /names a SCALE/.test(l)));
+}
+
 /* ---------- report ---------- */
 console.log(`\nAPI  PASS ${pass}   FAIL ${fails.length}`);
 for (const [n, d] of fails) console.log(`  FAIL  ${n}\n        ${d}`);

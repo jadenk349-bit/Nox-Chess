@@ -1238,6 +1238,19 @@ const STRUCTURAL = [
         // castled; is the pawn shield intact; how many enemy pieces can reach
         // the king's zone against how many defenders; do open files or
         // diagonals point at it".
+        //
+        // A NOTE ON THIS RECORD'S indicators_against, because the field means
+        // something different here from what it means elsewhere. For a concept
+        // naming an ASSET - an open file, an outpost, a passed pawn - the
+        // indicators_against are reasons not to report it, and the trap audit
+        // reads them that way. `king-safety` names a SCALE, so its
+        // indicators_against are the conditions under which the king is UNSAFE,
+        // which is to say the conditions this matcher fires on: "three or more
+        // attackers can reach the king zone" is the count arm below, "shield
+        // pawns advanced or missing" is the bare-shield arm, and "no escape
+        // square, so back-rank tactics are live" is what `luft` reports. They
+        // are built; they are not false-positive guards, and building them as
+        // guards would invert the concept.
         const byCount = z.attackers >= 3 && z.attackers > z.defenders;
         // A king with NO shield pawn at all, still on its own half, with the
         // enemy queen on and a line pointing at it. Adams-Kasparov 2005 after
@@ -2127,7 +2140,9 @@ const MOVE_BASED = [
     implements: ("recognition.preconditions verbatim, and using the detector the record names: the page's " +
                  "own sacrificeSize(), which is SEE-based. 'A capture the engine happens to like is not a " +
                  "sacrifice. The repo's own definition is the right one: material that CAN be taken and is " +
-                 "offered anyway.'"),
+                 "offered anyway.' Plus the first indicator_against - 'material is given up with nothing " +
+                 "nameable in return - that is a blunder, not a sacrifice' - tested two plies deep: if " +
+                 "the offer is accepted, the offering side must have a check or a winning capture."),
     run(before, after, moveInfo) {
       const P = FEAT.page;
       const st = P.stateFromFEN(before.fen);
@@ -2136,6 +2151,38 @@ const MOVE_BASED = [
       if (!mv) return null;
       const size = P.sacrificeSize(st, mv, P.makeMove(st, mv));
       if (size < 100) return null;                  // an even trade is not a sacrifice
+      // "Material is given up with NOTHING NAMEABLE IN RETURN - that is a
+      // blunder, not a sacrifice" - the record's first indicator_against, and
+      // the only half of it a static scan can reach: if the offer is accepted,
+      // does the offering side then have anything forcing? A check or a capture
+      // that wins material is nameable; nothing at all is a blunder as far as
+      // this base can see, and calling it a sacrifice teaches a reader to admire
+      // a lost piece.
+      //
+      // Two plies, and no further. The record's own caution stays attached
+      // either way, because whether the compensation is SUFFICIENT is the
+      // difference between '!' and '?' and no material test sees it.
+      const followsUp = (() => {
+        const nx = P.makeMove(st, mv);
+        let theirs;
+        try { theirs = P.legalMoves(nx); } catch (e) { return true; }
+        const grabs = theirs.filter(x => x.to === mv.to && x.cap);
+        if (!grabs.length) return true;             // not accepted here, not our question
+        return grabs.some(g => {
+          let after2;
+          try { after2 = P.makeMove(nx, g); } catch (e) { return true; }
+          let ours;
+          try { ours = P.legalMoves(after2); } catch (e) { return true; }
+          return ours.some(o => {
+            let nx3;
+            try { nx3 = P.makeMove(after2, o); } catch (e) { return false; }
+            if (P.inCheck(nx3, nx3.turn)) return true;
+            if (!o.cap) return false;
+            try { return P.see(after2, o.to, after2.turn) > 0; } catch (e) { return false; }
+          });
+        });
+      })();
+      if (!followsUp) return null;
       return {
         // The record's own typical confidence is high and the measurement is
         // exact, but what is NOT established is that the compensation is real -
