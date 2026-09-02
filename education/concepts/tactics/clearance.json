@@ -87,7 +87,7 @@
     "NO VERIFIED POSITION HAS BEEN BUILT FOR THIS RECORD, and that is recorded rather than filled. Three constructions were tried and thrown away: each needed the vacating move to come WITH TEMPO, and a minimal position with a queen, a blocking piece and a mating square either had no checking square for the blocker to leave on, or was already mate without the clearance. A wrong example of a motif is worse than none, because the label is the thing the reader is learning to see. UPDATE: a verified position now exists - 17...d4 in the position on this record, +6.37 against +0.40 at depth 28 - and it was FOUND rather than constructed. That is the lesson of the three failures: the constructions failed because a clearance needs the vacating move to come with tempo and a hand-built minimal position rarely has one, and a real game has as many as you like if you can state the geometry precisely enough to search for it.",
     "There is deliberately no matcher. Clearance is a claim about what the VACATED square is then used for, which is a property of the continuation and not of the move, and this base does not read continuations at the board.",
     "NO AMBIGUOUS EXAMPLE, and the reason is the order of the work rather than a shortage of positions. This record has no POSITIVE example either, and an ambiguous example is a position where the concept is genuinely present and what to conclude from it is unclear - which cannot be written before there is an agreed instance of the concept being present at all. The four motifs in this base that lack a positive - `clearance`, `decoy`, `deflection`, `interference` - lack it for reasons written on each record, and the ambiguous rung waits on that. Writing one first would be asserting a doubtful instance of something this base has not yet shown a clear instance of. UPDATE: the positive example now exists, so the reason given here - that an ambiguous example cannot be written before there is an agreed instance of the concept being present at all - no longer holds. The ambiguous example is outstanding work, not blocked work.",
-    "NO MASTER-GAME POSITION YET. This concept has no matcher, so the scan that supplied master positions to eleven other records - five famous games replayed and analysed position by position - could not nominate one here: the API never reports the concept, so there is nothing for a scan to find. Identifying an instance in a master game means reading the game, which is research rather than tooling, and it has not been done. Recorded rather than filled."
+    "NO MASTER-GAME POSITION YET. This concept has no matcher, so the scan that supplied master positions to eleven other records - five famous games replayed and analysed position by position - could not nominate one here: the API never reports the concept, so there is nothing for a scan to find. Identifying an instance in a master game means reading the game, which is research rather than tooling, and it has not been done. Recorded rather than filled. RESOLVED: Alekhine-Nimzowitsch, St Petersburg 1914, 42.Bc4, above. The reason given here was right about the scan and wrong about the games: a concept with no detector cannot be nominated by a scan that reads the API, but the geometry is decidable without one, and tools/mine_master_motifs.js asks it of 2.8 million positions from replayed master games directly."
   ],
   "misconceptions": [],
   "relationships": {
@@ -143,6 +143,50 @@
         "margin_cp": 597,
         "verdict": "supports",
         "verdict_note": "+6.37 against +0.40 for the second best at depth 28 with three lines. The clearance is the difference between winning and level, not a flourish on a won position."
+      }
+    },
+    {
+      "fen": "3r4/6kp/2P3p1/p2B4/4N3/5P2/P2R1K2/2r5 w - - 1 42",
+      "move": "Bc4",
+      "move_uci": "d5c4",
+      "origin_kind": "historical-game",
+      "game": "Alekhine-Nimzowitsch, St Petersburg 1914",
+      "concept_role": "positive",
+      "side_to_move_benefits": "white",
+      "note": "THE MASTER-GAME RUNG, and a different job from the puzzle position on this record. That one is sharp - the clearance is the whole difference between winning and level. This one is real: Alekhine played it against Nimzowitsch, and it is here because a concept whose only evidence is a puzzle has never been shown to occur in a game.\n\n42.Bc4 takes the bishop off d5 so the rook on d2 looks straight down the file at the rook on d8, and the c6 pawn - one square from queening, with d8 the square that stops it - is what makes the file matter. The bishop is not thrown away here; it goes to c4 where the black rook can take it, and after 42...Rxc4 43.Rd8 the pawn goes through.\n\nStockfish 18 at depth 30 with three lines is honest about it and so is this note: 42.Bc4 is the THIRD choice at +5.17, behind two quiet king moves at +5.31. All three win. The clearance is not the only road and the card must not say it was - what it is, is the road a world champion took, in a position where the geometry this record describes is exactly what is on the board.\n\nPROVENANCE. Found by tools/mine_master_motifs.js, which replays every game through the page's own move generator and asks the record's own sentence as a geometric question. 35,648 games replayed, 492 rejected as unplayable and skipped rather than patched. The game is real and the move list parsed; `attributed_by` is absent, because no annotator has been read here - this grounds the MASTER-GAME rung and not the human-grounded one.",
+      "engine": {
+        "engine_id": "Stockfish 18",
+        "test_level": 3,
+        "depth": 30,
+        "multipv": 3,
+        "best_move": "f2e3",
+        "eval_cp": 517,
+        "mate_in": null,
+        "pv": [
+          "d5c4",
+          "c1c4",
+          "d2d8",
+          "c4c6",
+          "f2g3",
+          "h7h6",
+          "d8d7",
+          "g7f8",
+          "d7a7",
+          "c6c1"
+        ],
+        "alternatives": [
+          {
+            "move": "f2e3",
+            "eval_cp": 531
+          },
+          {
+            "move": "f2g3",
+            "eval_cp": 531
+          }
+        ],
+        "margin_cp": -14,
+        "verdict": "supports",
+        "verdict_note": "+5.17 at depth 30, third of three, 14 centipawns behind two quiet king moves that also win. The move works; it is not uniquely best, and the note says so."
       }
     }
   ],
