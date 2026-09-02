@@ -122,7 +122,32 @@
       }
     ]
   },
-  "examples": [],
+  "examples": [
+    {
+      "fen": "r3rnk1/2q2pb1/1p1p1npp/pPp5/2PPb3/P1Q2NP1/1B3PBP/R2R1NK1 b - - 0 18",
+      "note": "Reti-Capablanca, New York 1924, move 18 - a position defined by having exactly two candidates and a world champion choosing the worse one. Keene: 'It is a mystery why Capablanca did not play the obvious 18...Ne6, fighting more directly for control of the centre.' Both moves develop the same knight; the difference is what they bear on. That is what makes this a candidate-moves example rather than a center-control one: the record is about ENUMERATING the moves worth looking at before comparing them, and the annotator's word for the move that was not played is 'obvious', which is the failure mode the record names.",
+      "origin_kind": "historical-game",
+      "game": "Reti-Capablanca, New York 1924 (round 5)",
+      "concept_role": "positive",
+      "attributed_by": "Raymond Keene (GM), The Spectator Australia - corpus entry reti-capablanca-1924-18Ne6-center-control",
+      "engine": {
+        "engine_id": "Stockfish 18",
+        "test_level": 3,
+        "depth": 22,
+        "threads": 10,
+        "hash_mb": 4096,
+        "multipv": 1,
+        "best_move": "f8e6",
+        "eval_cp": 80,
+        "mate_in": null,
+        "pv": [],
+        "alternatives": [],
+        "margin_cp": null,
+        "verdict": "supports",
+        "verdict_note": "The engine's first choice is 18...Ne6, the move Keene says should have been played, at +0.80 on a multipv-3 search recorded in the corpus entry. Both candidates are legal, natural developing moves; the engine separates them and so did the annotator, independently and in the same direction."
+      }
+    }
+  ],
   "counterexamples": [],
   "ambiguous_examples": [],
   "explanations": {

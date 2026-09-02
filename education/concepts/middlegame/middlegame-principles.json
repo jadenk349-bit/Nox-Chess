@@ -100,7 +100,34 @@
     "co_occurring": [],
     "conflicts": []
   },
-  "examples": [],
+  "examples": [
+    {
+      "fen": "r1r3k1/p2n1ppp/2p1b3/1q1p4/N2Q4/5PP1/PP2PR1P/2R2BK1 w - - 4 20",
+      "move": "e3",
+      "move_uci": "e2e3",
+      "note": "Rubinstein-Salwe, Lodz 1908, 20.e3 - one quiet pawn move doing four things, which is what a middlegame principle is for. The corpus annotation lists them: 'it gains a tempo by attacking Black's queen, opens a diagonal for the bishop, and improves the worst-placed piece.' This base already files the same move under `worst-placed-piece`, and it is filed here because the record's subject is the ORDER of middlegame thinking - improve the worst piece when nothing is forcing - and this is the move that shows the precondition and the rule together rather than the rule alone.",
+      "origin_kind": "historical-game",
+      "game": "Rubinstein-Salwe, Lodz 1908",
+      "concept_role": "positive",
+      "attributed_by": "corpus entry rubinstein-salwe-1908-20e3-improving",
+      "engine": {
+        "engine_id": "Stockfish 18",
+        "test_level": 3,
+        "depth": 22,
+        "threads": 10,
+        "hash_mb": 4096,
+        "multipv": 1,
+        "best_move": "e2e3",
+        "eval_cp": 34,
+        "mate_in": null,
+        "pv": [],
+        "alternatives": [],
+        "margin_cp": null,
+        "verdict": "supports",
+        "verdict_note": "+0.34, and the engine's own first move is 20.e3. A third of a pawn: the move is best and it is not decisive, which is the correct size for a principle about accumulating rather than about winning."
+      }
+    }
+  ],
   "counterexamples": [],
   "ambiguous_examples": [],
   "explanations": {

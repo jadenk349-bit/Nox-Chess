@@ -165,7 +165,31 @@
     ],
     "conflicts": []
   },
-  "examples": [],
+  "examples": [
+    {
+      "fen": "r1bq1rk1/pp3ppp/2n5/3Np3/4P3/8/PP3PPP/R1BQ1RK1 w - - 0 1",
+      "note": "Constructed. d5 is a hole in Black's position in the strict sense the record requires: no black pawn can ever attack it, because the c-pawn is gone and the e5 pawn captures towards d4 and f4 rather than backwards. A hole is a property of the PAWNS and survives every piece trade, which is why it is a different concept from the piece standing on it - this base files the square as `hole`, the square-plus-a-friendly-pawn-defending-it as `strong-square`, and the piece parked there as `outpost`, and this one position carries all three descriptions honestly. Material is symmetric down to the pawn count, so the evaluation is about the square.",
+      "origin_kind": "constructed-test",
+      "concept_role": "positive",
+      "side_to_move_benefits": "white",
+      "engine": {
+        "engine_id": "Stockfish 18",
+        "test_level": 3,
+        "depth": 22,
+        "threads": 10,
+        "hash_mb": 4096,
+        "multipv": 1,
+        "best_move": "c1e3",
+        "eval_cp": 30,
+        "mate_in": null,
+        "pv": [],
+        "alternatives": [],
+        "margin_cp": null,
+        "verdict": "supports",
+        "verdict_note": "+0.30 with symmetric material. Small and real. A hole is worth about a third of a pawn here, and the engine's own line trades the knight off it - the square is a standing feature, not a plan."
+      }
+    }
+  ],
   "counterexamples": [],
   "ambiguous_examples": [],
   "explanations": {

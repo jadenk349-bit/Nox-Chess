@@ -133,7 +133,32 @@
     ],
     "conflicts": []
   },
-  "examples": [],
+  "examples": [
+    {
+      "fen": "r1r3k1/p2n1ppp/2p1b3/1q1p4/N2Q4/5PP1/PP2PR1P/2R2BK1 w - - 4 20",
+      "note": "Rubinstein-Salwe, Lodz 1908 at move 20, and it is here because the corpus annotation is itself a worked positional evaluation rather than a comment on a move: 'The bishop on e6 is bad, blocked by its own pawns. The knight was already traded off. The rooks have no open files. The queen is being chased. Black is completely passive.' Five features named, none of them material, and a verdict drawn from them. That is the method the record describes, performed by an annotator on a real board. The engine's number is the check on it: material is level and the position is not.",
+      "origin_kind": "historical-game",
+      "game": "Rubinstein-Salwe, Lodz 1908",
+      "concept_role": "positive",
+      "attributed_by": "corpus entry rubinstein-salwe-1908-20-bad-bishop",
+      "engine": {
+        "engine_id": "Stockfish 18",
+        "test_level": 3,
+        "depth": 22,
+        "threads": 10,
+        "hash_mb": 4096,
+        "multipv": 1,
+        "best_move": "e2e3",
+        "eval_cp": 34,
+        "mate_in": null,
+        "pv": [],
+        "alternatives": [],
+        "margin_cp": null,
+        "verdict": "supports",
+        "verdict_note": "+0.34 with material level. The evaluation the annotator reached from five static features and the evaluation the engine reaches from a twenty-two-ply search point the same way, which is the modest claim this record can make: the method is sound, and it is not precise."
+      }
+    }
+  ],
   "counterexamples": [],
   "ambiguous_examples": [],
   "explanations": {

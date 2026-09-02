@@ -102,7 +102,40 @@
     ],
     "conflicts": []
   },
-  "examples": [],
+  "examples": [
+    {
+      "fen": "1K6/1P1k4/8/8/8/8/r7/5R2 w - - 0 1",
+      "note": "The Lucena position, which is where the technique lives. The bridge is the answer to one problem: the pawn cannot promote while the black rook checks from behind, and the white king cannot escape the checks by itself. The rook goes to the fourth rank, the king walks out, and the rook interposes on the fourth to end the checking - that is the bridge. Filed separately from `lucena-position` on purpose: the position is a named theoretical position, the bridge is the method, and this base keeps a method and the place it is used as two records.",
+      "origin_kind": "tablebase-position",
+      "concept_role": "positive",
+      "side_to_move_benefits": "white",
+      "engine": {
+        "engine_id": "Stockfish 18",
+        "test_level": 3,
+        "depth": 26,
+        "threads": 10,
+        "hash_mb": 4096,
+        "multipv": 1,
+        "best_move": "f1d1",
+        "eval_cp": null,
+        "mate_in": 25,
+        "pv": [],
+        "alternatives": [],
+        "margin_cp": null,
+        "verdict": "supports",
+        "verdict_note": "Mate in 25 by the engine, and its first move is Rd1+ - the check that drives the king across and begins the bridge."
+      },
+      "tablebase": {
+        "source": "Lichess tablebase (Syzygy, 7-piece)",
+        "pieces": 5,
+        "wdl": "win",
+        "dtz": 15,
+        "dtm": 41,
+        "category": "win",
+        "note": "PROVEN WIN, dtz 15, mate in 41, and the tablebase's own first move is Rd1+. A technique is a claim that a position is winnable BY A METHOD, and the proof that it is winnable at all is the half a tablebase can supply. Read against `lucena-position`'s counterexample - the same method with a rook pawn, a proven DRAW - which is what makes this a claim about the method rather than about the material."
+      }
+    }
+  ],
   "counterexamples": [],
   "ambiguous_examples": [],
   "explanations": {

@@ -159,7 +159,34 @@
       }
     ]
   },
-  "examples": [],
+  "examples": [
+    {
+      "fen": "br3r2/2q2ppk/p2pp3/2n1b1BP/1n1NP3/2N2P2/1PPQB3/1K4RR w - - 0 22",
+      "move": "Be3",
+      "move_uci": "g5e3",
+      "note": "Adams-Kasparov, Linares 2005, after 21...Kxh7. Speelman's judgement is that 22.Be3 was the best response and that Adams, 'seeing no good way to continue his attack, panicked and blundered' with 22.Nb3. That is the record's subject exactly: the hardest part of defence is admitting the attack is over and switching to it, and the practical failure is almost never a missed defensive resource - it is the move made while still attacking. The engine agrees with Speelman about the move and about the size of the problem.",
+      "origin_kind": "historical-game",
+      "game": "Adams-Kasparov, Linares 2005 (round 12)",
+      "concept_role": "positive",
+      "attributed_by": "Jonathan Speelman (GM) - corpus entry adams-kasparov-2005-21Kxh7-king-safety-ambiguous",
+      "engine": {
+        "engine_id": "Stockfish 18",
+        "test_level": 3,
+        "depth": 22,
+        "threads": 10,
+        "hash_mb": 4096,
+        "multipv": 1,
+        "best_move": "g5e3",
+        "eval_cp": -221,
+        "mate_in": null,
+        "pv": [],
+        "alternatives": [],
+        "margin_cp": null,
+        "verdict": "supports",
+        "verdict_note": "-2.21 from White's side, and the engine's own first move IS 22.Be3. The best defence in a position that is already lost by two pawns' worth: what a defensive principle buys is the least bad line, and the number says so without pretending the defence saves the game."
+      }
+    }
+  ],
   "counterexamples": [],
   "ambiguous_examples": [],
   "explanations": {

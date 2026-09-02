@@ -115,7 +115,40 @@
       }
     ]
   },
-  "examples": [],
+  "examples": [
+    {
+      "fen": "8/8/8/4k3/4p3/R7/1r6/4K3 w - - 0 1",
+      "note": "The Philidor position, and the reason it belongs to a principles record rather than only to a named-position one: the third-rank defence is the single most-taught rule in rook endgames, and it is a rule with a condition attached - it works while the enemy pawn has not reached the sixth. The defending rook sits on the third rank keeping the enemy king out; when the pawn advances to the sixth the rook drops to the eighth and checks from behind. Both halves are one idea and it holds by force.",
+      "origin_kind": "tablebase-position",
+      "concept_role": "positive",
+      "side_to_move_benefits": "neither",
+      "engine": {
+        "engine_id": "Stockfish 18",
+        "test_level": 3,
+        "depth": 26,
+        "threads": 10,
+        "hash_mb": 4096,
+        "multipv": 1,
+        "best_move": "a3a1",
+        "eval_cp": 0,
+        "mate_in": null,
+        "pv": [],
+        "alternatives": [],
+        "margin_cp": null,
+        "verdict": "supports",
+        "verdict_note": "0.00 at depth 26."
+      },
+      "tablebase": {
+        "source": "Lichess tablebase (Syzygy, 7-piece)",
+        "pieces": 5,
+        "wdl": "draw",
+        "dtz": 0,
+        "dtm": 0,
+        "category": "draw",
+        "note": "PROVEN DRAW over every legal continuation, dtz 0. A defensive principle is a claim that something CANNOT be broken through, and that is the shape of statement only a tablebase makes. Note what this base has not managed to build beside it: a verified counterexample. With the pawn on the fourth rank the defence draws from almost anywhere, so the position that would show the method failing has resisted three attempts, and the record says so rather than shipping a wrong one."
+      }
+    }
+  ],
   "counterexamples": [],
   "ambiguous_examples": [],
   "explanations": {

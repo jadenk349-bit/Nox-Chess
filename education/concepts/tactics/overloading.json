@@ -80,7 +80,33 @@
     "co_occurring": [],
     "conflicts": []
   },
-  "examples": [],
+  "examples": [
+    {
+      "fen": "3r2k1/5ppp/8/3n4/8/8/5PPP/3RR1K1 w - - 0 1",
+      "move": "Rxd5",
+      "move_uci": "d1d5",
+      "note": "Constructed. The rook on d8 has two jobs: it defends the knight on d5 down the file, and it is the only guard of the back rank. Rxd5 asks it to do both at once - if it recaptures it leaves e8, and Re8 is mate. The engine's own line is the demonstration: after Rxd5 it plays ...Rb8 rather than ...Rxd5, which is to say Black DECLINES the recapture and simply loses a knight. That is what overloading means, and it is why this base refuses to detect the motif mechanically: the geometry here is a rook on a file, and what makes it overloading is a mate on a different file that has not happened yet.",
+      "origin_kind": "constructed-test",
+      "concept_role": "positive",
+      "side_to_move_benefits": "white",
+      "engine": {
+        "engine_id": "Stockfish 18",
+        "test_level": 3,
+        "depth": 22,
+        "threads": 10,
+        "hash_mb": 4096,
+        "multipv": 1,
+        "best_move": "d1d5",
+        "eval_cp": 673,
+        "mate_in": null,
+        "pv": [],
+        "alternatives": [],
+        "margin_cp": null,
+        "verdict": "supports",
+        "verdict_note": "+6.73 at depth 22, settled at depth 14, and the engine plays Rxd5. The size is the evidence: a knight plus the refused recapture, in a position where material was level before the move."
+      }
+    }
+  ],
   "counterexamples": [],
   "ambiguous_examples": [],
   "explanations": {
