@@ -15,7 +15,7 @@ finished.
 
 | # | Criterion | Status | Evidence |
 |---|---|---|---|
-| 1 | All major areas have meaningful depth | **NOT MET** | 5 areas `full`, 11 `substantial`, 69 `partial`. Mean concept completeness 0.77 (was 0.71). |
+| 1 | All major areas have meaningful depth | **NOT MET** | 5 areas `full`, 11 `substantial`, 69 `partial`. Mean concept completeness 0.78 (was 0.71). |
 | 2 | Important concepts have strong recognition criteria | **PARTIAL** | 53 of the 83 concepts whose own record permits a detector have one, up from 32. But *having* a matcher is not the standard: `state/TRAPS.md` measures every matcher against every condition its record states — `false_positive_traps` **and** `indicators_against`, which is where half of them live and which the list did not read at all until a position exposed it. **275 conditions: 136 enforced in the matcher, 19 in Layer 3, 75 argued on a record, 45 unread.** The denominator grew by 29 and the unread count by 27 in the same pass, and that is the finding: the nine MOTIF concepts — `fork`, `pin`, `skewer`, `trapped-piece`, `discovered-attack`, `back-rank-mate`, `double-check`, `checkmate`, `hanging-piece` — were absent from this list entirely, because they arrive as tags from `findMotifs()` and have no entry in either matcher table. Every condition their records state was counted nowhere. Two of them were live false positives at HIGH confidence. The audit has a THIRD blind spot beyond the two already named, and it is the page: `findMotifs()` lives in `blind-chess.html` and the audit reads only `lib/matchers.js` and `lib/features.js`, so eight conditions honoured inside that function read as unread. Reading it directly settled all eight — four of `hanging-piece`'s by two lines of SEE, `fork`'s target test, `pin`'s pin-versus-skewer branch — and three whole records (`castling`, `smothered-mate`, `back-rank-mate`) turn out to state conditions that are UNREACHABLE rather than unguarded, because the detector only speaks when the move generator says mate. Twenty-eight defects have now come out of the reading, including two in Layer 3 that had been true of every measurement in the project, and four `implements` strings that claimed something the code does not do. |
 | 3 | Positional concepts tested outside the tactical corpus | **MET** | 42 human-annotated positions from 28 master games, 1908–2005, spanning a century and seven countries; plus 13 replay-verified games and a quiet sub-corpus that is 98 positions rather than the 350 once claimed — `quietness()` had never tested the half of its own definition about winning captures. No longer one tournament. |
 | 4 | Major concepts have positive and negative testing | **NOT MET** | 39% of applicable concepts lack a positive example, 51% a negative one, 71% an ambiguous one. The ambiguous half is the blocker on its own, and `tools/mine_ambiguous.js` now exists to attack it — it writes the arm `tools/prospect.js` promised in its own header and never implemented, which was the same shape of defect as an `implements` string claiming what the code does not do. It nominates on three machine-checkable grounds (the concept fires for BOTH sides; it fires for the side that is DOWN material; it fires in a quiet position) and settles nothing: a candidate is a question, and the engine answers it. The negative half moved because the 20 registered false-positive cases written this session were promoted onto the records themselves, with the engine or tablebase evidence that settled each one — a concept's negative evidence belongs on the concept, not only in a test file. This is the blocker. The rules layer is now done properly — seven concepts carry **controlled pairs**, the same position with one thing changed, both halves in the base and every pair settled by Syzygy rather than argued — and building them exposed that `checkmate` could not be recognised in a position at all. The endgame-theory concepts are done the same way, including the strictest pair there is — the same board with only the side to move changed, which serves `zugzwang`, `key-square` and `opposition` at once. The positional concepts are the remainder and they do not yield to mining. |
@@ -28,13 +28,13 @@ finished.
 
 ## Current state
 
-137 concepts · 205 sources · **119 engine-validated positions + 41 tablebase** ·
+137 concepts · 205 sources · **161 engine-validated positions + 64 tablebase** ·
 **42 human-annotated corpus positions from 28 master games** · 32 replay-verified
-master games · 771 tests + 606 API + 374 audit + 3570 explanation assertions.
+master games · 804 tests + 606 API + 374 audit + 3570 explanation assertions.
 
-Ladder: researched 137, human-grounded 31, engine-verified 66, negative-tested
-64, ambiguity-tested 24, api-validated 53 of the 83 whose record allows it,
-explanation-validated 105. Every rung its record allows: **18 of 137.**
+Ladder: researched 137, human-grounded 32, engine-verified 83, negative-tested
+66, ambiguity-tested 31, api-validated 53 of the 83 whose record allows it,
+explanation-validated 105. Every rung its record allows: **23 of 137.**
 
 ## What moved this session
 

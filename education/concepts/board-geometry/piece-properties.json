@@ -133,6 +133,22 @@
         "dtm": 0,
         "category": "draw",
         "note": "PROVEN draw. The count says about +4 and the position is dead. Recorded here as well as on wrong-rook-pawn because it is the cleanest available demonstration that a point count is an approximation with no standing against a concrete feature of the position."
+      },
+      "engine": {
+        "engine_id": "Stockfish 18",
+        "test_level": 3,
+        "depth": 26,
+        "threads": 10,
+        "hash_mb": 4096,
+        "multipv": 1,
+        "best_move": "d5e4",
+        "eval_cp": 92,
+        "mate_in": null,
+        "pv": [],
+        "alternatives": [],
+        "margin_cp": null,
+        "verdict": "supports",
+        "verdict_note": "THE ENGINE IS WRONG HERE AND THE TABLEBASE IS NOT, which is why both numbers are recorded. Stockfish 18 at depth 26 says +0.92. Syzygy says draw, dtz 0, 4 pieces, best move Kg6 - proven over every legal continuation. The bishop is light-squared and the queening square h8 is dark, so the defending king cannot be driven out of the corner however long White plays. This is the base's own rule about instruments said out loud: a tablebase gives proof, an engine gives an opinion, and where they disagree inside seven pieces the opinion loses."
       }
     }
   ],

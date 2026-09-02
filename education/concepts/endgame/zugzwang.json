@@ -176,6 +176,22 @@
         "dtm": -28,
         "category": "loss",
         "note": "PROVEN LOSS for the side to move, dtz -4. The identical position with White to move is a proven draw at dtz 0. Two lookups of one board, differing only in whose turn it is, returning different results is what zugzwang IS, and Syzygy states it rather than illustrating it."
+      },
+      "engine": {
+        "engine_id": "Stockfish 18",
+        "test_level": 3,
+        "depth": 26,
+        "threads": 10,
+        "hash_mb": 4096,
+        "multipv": 1,
+        "best_move": "e7d7",
+        "eval_cp": null,
+        "mate_in": -15,
+        "pv": [],
+        "alternatives": [],
+        "margin_cp": null,
+        "verdict": "supports",
+        "verdict_note": "PROVEN WIN for White, dtz -4, mate in 28 from Black's side, and the engine reports mate in 15 for the side not to move. Black to move must give ground. This single position serves `opposition`, `key-square` and `zugzwang` at once, and the pair it belongs to - the same board with White to move, proven DRAWN - is the strictest controlled comparison this base contains, because nothing on the board differs at all."
       }
     }
   ],
@@ -195,6 +211,22 @@
         "dtm": 0,
         "category": "draw",
         "note": "PROVEN DRAW at dtz 0. The identical board with Black to move is a proven loss."
+      },
+      "engine": {
+        "engine_id": "Stockfish 18",
+        "test_level": 3,
+        "depth": 26,
+        "threads": 10,
+        "hash_mb": 4096,
+        "multipv": 1,
+        "best_move": "e5f5",
+        "eval_cp": 0,
+        "mate_in": null,
+        "pv": [],
+        "alternatives": [],
+        "margin_cp": null,
+        "verdict": "supports",
+        "verdict_note": "PROVEN DRAW, dtz 0, best move Kd4, and the engine agrees at 0.00. The negative half of the strictest pair in this base: the same board as the winning position with only the side to move changed. Whoever is NOT to move holds the opposition, which is why this half of the pair is a negative for three concepts and not a different position."
       }
     }
   ],

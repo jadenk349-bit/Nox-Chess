@@ -103,7 +103,23 @@
         "note": "PROVEN: checkmate true. The pattern and the mate coincide here, which is what the record requires before the name is used."
       },
       "move": "Nf7#",
-      "move_uci": "g5f7"
+      "move_uci": "g5f7",
+      "engine": {
+        "engine_id": "Stockfish 18",
+        "test_level": 3,
+        "depth": 26,
+        "threads": 10,
+        "hash_mb": 4096,
+        "multipv": 1,
+        "best_move": "g5f7",
+        "eval_cp": null,
+        "mate_in": 1,
+        "pv": [],
+        "alternatives": [],
+        "margin_cp": null,
+        "verdict": "supports",
+        "verdict_note": "PROVEN mate in 1, dtz 1, best move Nf7# - the pattern itself, settled by tablebase rather than by an evaluation. The engine reports #1 as well. Paired with the same position given luft, where the same knight move is not mate and White is LOST."
+      }
     }
   ],
   "counterexamples": [
@@ -126,7 +142,23 @@
         "note": "The PAIRED position - pawns on g7 and h7 - is a proven mate, checkmate true. This one, with the pawn on h6, is not: the king has h7."
       },
       "move": "Nf7+",
-      "move_uci": "g5f7"
+      "move_uci": "g5f7",
+      "engine": {
+        "engine_id": "Stockfish 18",
+        "test_level": 3,
+        "depth": 26,
+        "threads": 10,
+        "hash_mb": 4096,
+        "multipv": 1,
+        "best_move": "g5f7",
+        "eval_cp": -784,
+        "mate_in": null,
+        "pv": [],
+        "alternatives": [],
+        "margin_cp": null,
+        "verdict": "supports",
+        "verdict_note": "PROVEN LOSS for White, dtz -4, mate in 38 against, and the engine says -7.84. One pawn moved from g7 to h6 and the smothered mate is not merely absent, it is a losing attempt: Nf7+ is met and the knight is trapped. A negative example rarely gets to be this sharp - the difference between the halves of this pair is mate in one and mate in thirty-eight the other way."
+      }
     }
   ],
   "ambiguous_examples": [],

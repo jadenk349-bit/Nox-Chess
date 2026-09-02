@@ -168,6 +168,22 @@
         "dtm": 0,
         "category": "draw",
         "note": "PROVEN draw. Paired with the position below, which is identical in material and differs only in where the black rook stands."
+      },
+      "engine": {
+        "engine_id": "Stockfish 18",
+        "test_level": 3,
+        "depth": 26,
+        "threads": 10,
+        "hash_mb": 4096,
+        "multipv": 1,
+        "best_move": "d4c5",
+        "eval_cp": 0,
+        "mate_in": null,
+        "pv": [],
+        "alternatives": [],
+        "margin_cp": null,
+        "verdict": "supports",
+        "verdict_note": "PROVEN DRAW, dtz 0, best move a7, engine 0.00. The Vancura defence: the rook holds from the side, on the sixth, keeping the pawn under fire and the king out. Proven rather than demonstrated."
       }
     }
   ],
@@ -187,6 +203,22 @@
         "dtm": 63,
         "category": "win",
         "note": "PROVEN LOSS for the defender — White wins in 63. This is the most valuable single result in the knowledge base so far, because it does not merely illustrate a concept, it REFUTES a famous rule of thumb in a specific configuration. Tarrasch's 'rook behind the passed pawn' is recorded in `passed-pawn` as a reliable heuristic; here, with material and kings held identical and only the rook relocated, following it turns a proven draw into a proven loss. The mechanism is that behind the pawn the rook attacks a square the pawn will vacate and gives no checks, while beside it the rook attacks the square the pawn occupies and denies the enemy king the rank it needs for shelter."
+      },
+      "engine": {
+        "engine_id": "Stockfish 18",
+        "test_level": 3,
+        "depth": 26,
+        "threads": 10,
+        "hash_mb": 4096,
+        "multipv": 1,
+        "best_move": "d4c5",
+        "eval_cp": 1213,
+        "mate_in": null,
+        "pv": [],
+        "alternatives": [],
+        "margin_cp": null,
+        "verdict": "supports",
+        "verdict_note": "PROVEN WIN, dtz 17, mate in 63, best move Kc5 - and the engine says +12.13. The negative half of the Vancura pair: the same material with the black rook passively behind the pawn on a1 instead of actively on f6 loses. One rook, two squares, draw and loss."
       }
     }
   ],

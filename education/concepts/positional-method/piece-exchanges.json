@@ -122,7 +122,23 @@
       "note": "Reached after Capablanca deliberately traded into this ending with 25.Qxe8+ and 26.Rxe8+, having judged the resulting structure better for him. Recorded as the positive case beside this record's tablebase counterexample where a capture throws away mate in one: exchanging is a method, and which position you exchange INTO is the whole of it.",
       "origin_kind": "historical-game",
       "concept_role": "supports",
-      "side_to_move_benefits": "white"
+      "side_to_move_benefits": "white",
+      "engine": {
+        "engine_id": "Stockfish 18",
+        "test_level": 3,
+        "depth": 22,
+        "threads": 10,
+        "hash_mb": 4096,
+        "multipv": 1,
+        "best_move": "f6c6",
+        "eval_cp": -58,
+        "mate_in": null,
+        "pv": [],
+        "alternatives": [],
+        "margin_cp": null,
+        "verdict": "supports",
+        "verdict_note": "-0.58 at depth 22 from Black's side: the player who chose to trade into this ending is better by rather more than half a pawn, with material level. Capablanca reached it deliberately with 25.Qxe8+ and 26.Rxe8+. What the number supports is that the exchange was a method and not a simplification - the advantage is in the structure that survived it."
+      }
     }
   ],
   "counterexamples": [
@@ -140,6 +156,22 @@
         "dtm": 1,
         "category": "win",
         "note": "PROVEN, every legal move checked. Rb8 is MATE IN ONE. Rxh7+ - the only capture, and a check as well - is a PROVEN DRAW, because after Kxh7 nothing is left but the two kings. Every other rook move on the b-file also wins. So the single move that simplifies is the single move that throws the game away, while being both a capture and a check. This is the resolution position for the trading-while-ahead false-positive case."
+      },
+      "engine": {
+        "engine_id": "Stockfish 18",
+        "test_level": 3,
+        "depth": 26,
+        "threads": 10,
+        "hash_mb": 4096,
+        "multipv": 1,
+        "best_move": "b7b8",
+        "eval_cp": null,
+        "mate_in": 1,
+        "pv": [],
+        "alternatives": [],
+        "margin_cp": null,
+        "verdict": "supports",
+        "verdict_note": "PROVEN mate in 1, dtz 1, best move Rb8#, engine #1. The sharpest available form of 'a trade is not automatically good': one capture is available, Rxh7 is legal, and it throws away mate in one. A counterexample settled by proof rather than by an evaluation."
       }
     }
   ],

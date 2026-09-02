@@ -90,7 +90,32 @@
       "origin_kind": "constructed-test",
       "concept_role": "supports",
       "side_to_move_benefits": "white",
-      "controlled_pair_with": "3k4/8/8/8/3N4/8/8/3RK3 w - - 0 1"
+      "controlled_pair_with": "3k4/8/8/8/3N4/8/8/3RK3 w - - 0 1",
+      "engine": {
+        "engine_id": "Stockfish 18",
+        "test_level": 3,
+        "depth": 26,
+        "threads": 10,
+        "hash_mb": 4096,
+        "multipv": 1,
+        "best_move": "d1c1",
+        "eval_cp": null,
+        "mate_in": 15,
+        "pv": [],
+        "alternatives": [],
+        "margin_cp": null,
+        "verdict": "supports",
+        "verdict_note": "PROVEN WIN, dtz 17, mate in 19, best move Nc6+, and the engine reports mate in 15. Note carefully what the tablebase prefers: Nc6+ is ALSO a double check, so its preference is between two double checks and not between the double check and the single one. The pair on this record turns on the move rather than on the board - Ne6+ checks twice, Nb5+ uncovers the same rook and checks once - and both halves are the same position, which is why one engine reading serves both."
+      },
+      "tablebase": {
+        "source": "Lichess tablebase (Syzygy, 7-piece)",
+        "pieces": 4,
+        "wdl": "win",
+        "dtz": 17,
+        "dtm": 19,
+        "category": "win",
+        "note": "PROVEN, not evaluated. Read from the side to move. The verdict_note on the engine block beside this one says what the two instruments do and do not agree about."
+      }
     }
   ],
   "counterexamples": [
@@ -102,7 +127,32 @@
       "origin_kind": "constructed-test",
       "concept_role": "negative",
       "side_to_move_benefits": "white",
-      "controlled_pair_with": "3k4/8/8/8/3N4/8/8/3RK3 w - - 0 1"
+      "controlled_pair_with": "3k4/8/8/8/3N4/8/8/3RK3 w - - 0 1",
+      "engine": {
+        "engine_id": "Stockfish 18",
+        "test_level": 3,
+        "depth": 26,
+        "threads": 10,
+        "hash_mb": 4096,
+        "multipv": 1,
+        "best_move": "d1c1",
+        "eval_cp": null,
+        "mate_in": 15,
+        "pv": [],
+        "alternatives": [],
+        "margin_cp": null,
+        "verdict": "supports",
+        "verdict_note": "PROVEN WIN, dtz 17, mate in 19, best move Nc6+, and the engine reports mate in 15. Note carefully what the tablebase prefers: Nc6+ is ALSO a double check, so its preference is between two double checks and not between the double check and the single one. The pair on this record turns on the move rather than on the board - Ne6+ checks twice, Nb5+ uncovers the same rook and checks once - and both halves are the same position, which is why one engine reading serves both."
+      },
+      "tablebase": {
+        "source": "Lichess tablebase (Syzygy, 7-piece)",
+        "pieces": 4,
+        "wdl": "win",
+        "dtz": 17,
+        "dtm": 19,
+        "category": "win",
+        "note": "PROVEN, not evaluated. Read from the side to move. The verdict_note on the engine block beside this one says what the two instruments do and do not agree about."
+      }
     }
   ],
   "ambiguous_examples": [],

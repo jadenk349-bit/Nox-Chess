@@ -112,7 +112,23 @@
       "note": "the side to move has 8 checks and 11 captures available — the forcing moves a search should look at first. The feature was established mechanically from the position by the page's own move generator and lib/features.js. What is NOT claimed is that this feature decides the position. Provenance: the puzzle corpus is engine self-play — a real position from a real game between engines, not a master game.",
       "origin_kind": "puzzle",
       "concept_role": "supports",
-      "side_to_move_benefits": "neither"
+      "side_to_move_benefits": "neither",
+      "engine": {
+        "engine_id": "Stockfish 18",
+        "test_level": 3,
+        "depth": 22,
+        "threads": 10,
+        "hash_mb": 4096,
+        "multipv": 1,
+        "best_move": "e3f2",
+        "eval_cp": null,
+        "mate_in": 4,
+        "pv": [],
+        "alternatives": [],
+        "margin_cp": null,
+        "verdict": "supports",
+        "verdict_note": "Mate in 4 at depth 22, beginning with Qxf2. A forcing line settled by the engine finding the mate rather than by an evaluation: the concept is about moves that leave the opponent no choice, and a forced mate is the limiting case of one."
+      }
     }
   ],
   "counterexamples": [],

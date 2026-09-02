@@ -109,7 +109,23 @@
       "note": "the solution Nd4 is a knight fork — the detector reports fork and the moving piece is a knight. The feature was established mechanically from the position by the page's own move generator and lib/features.js. What is NOT claimed is that this feature decides the position. The move is Nd4. Provenance: the puzzle corpus is engine self-play — a real position from a real game between engines, not a master game.",
       "origin_kind": "puzzle",
       "concept_role": "supports",
-      "side_to_move_benefits": "neither"
+      "side_to_move_benefits": "neither",
+      "engine": {
+        "engine_id": "Stockfish 18",
+        "test_level": 3,
+        "depth": 22,
+        "threads": 10,
+        "hash_mb": 4096,
+        "multipv": 1,
+        "best_move": "g3g4",
+        "eval_cp": 300,
+        "mate_in": null,
+        "pv": [],
+        "alternatives": [],
+        "margin_cp": null,
+        "verdict": "supports",
+        "verdict_note": "+3.00 at depth 22. A knight fork in a full middlegame position from the shipped puzzle corpus, and the number says the fork is worth about three pawns here. Recorded against the constructed pair on this same record, which isolates the geometry with five men and no advantage at all."
+      }
     },
     {
       "fen": "4k3/pbp5/8/1N6/8/8/8/4K3 w - - 0 1",
@@ -119,7 +135,32 @@
       "origin_kind": "constructed-test",
       "concept_role": "supports",
       "side_to_move_benefits": "white",
-      "controlled_pair_with": "4k3/p1p5/8/1N6/8/8/8/4K3 w - - 0 1"
+      "controlled_pair_with": "4k3/p1p5/8/1N6/8/8/8/4K3 w - - 0 1",
+      "engine": {
+        "engine_id": "Stockfish 18",
+        "test_level": 3,
+        "depth": 26,
+        "threads": 10,
+        "hash_mb": 4096,
+        "multipv": 1,
+        "best_move": "b5c7",
+        "eval_cp": -1,
+        "mate_in": null,
+        "pv": [],
+        "alternatives": [],
+        "margin_cp": null,
+        "verdict": "supports",
+        "verdict_note": "PROVEN DRAW, dtz 0, and the tablebase's own best move is Nxa7 rather than the forking Nd6+; the engine says -0.01. THE NUMBERS DO NOT SUPPORT AN ADVANTAGE AND THEY ARE RECORDED FOR THAT REASON. Nd6+ does fork the king and the bishop, the move generator confirms both attacks, and winning the bishop still leaves knight and king against king and two pawns, which is drawn. The concept is a geometric claim and this position establishes the geometry and nothing else - which is what this record's other example says in words: 'what is NOT claimed is that this feature decides the position'."
+      },
+      "tablebase": {
+        "source": "Lichess tablebase (Syzygy, 7-piece)",
+        "pieces": 6,
+        "wdl": "draw",
+        "dtz": 0,
+        "dtm": 0,
+        "category": "draw",
+        "note": "PROVEN, not evaluated. Read from the side to move. The verdict_note on the engine block beside this one says what the two instruments do and do not agree about."
+      }
     }
   ],
   "counterexamples": [
@@ -131,7 +172,32 @@
       "origin_kind": "constructed-test",
       "concept_role": "negative",
       "side_to_move_benefits": "neither",
-      "controlled_pair_with": "4k3/pbp5/8/1N6/8/8/8/4K3 w - - 0 1"
+      "controlled_pair_with": "4k3/pbp5/8/1N6/8/8/8/4K3 w - - 0 1",
+      "engine": {
+        "engine_id": "Stockfish 18",
+        "test_level": 3,
+        "depth": 26,
+        "threads": 10,
+        "hash_mb": 4096,
+        "multipv": 1,
+        "best_move": "b5a7",
+        "eval_cp": 0,
+        "mate_in": null,
+        "pv": [],
+        "alternatives": [],
+        "margin_cp": null,
+        "verdict": "supports",
+        "verdict_note": "PROVEN DRAW, dtz 0, best move Nxa7. The negative half of the pair: with b7 empty, Nd6+ attacks a king and an empty square, and this base does not call that a fork. The result is the same as in the positive half, which is the point - the pair isolates whether the FORK is present, not whether anyone is winning, and a pair whose halves differed in result would be testing the wrong thing."
+      },
+      "tablebase": {
+        "source": "Lichess tablebase (Syzygy, 7-piece)",
+        "pieces": 5,
+        "wdl": "draw",
+        "dtz": 0,
+        "dtm": 0,
+        "category": "draw",
+        "note": "PROVEN, not evaluated. Read from the side to move. The verdict_note on the engine block beside this one says what the two instruments do and do not agree about."
+      }
     }
   ],
   "ambiguous_examples": [],

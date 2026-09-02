@@ -143,7 +143,23 @@
       "note": "Petrosian's 25...Re6, offered for static compensation rather than for an attack or a forced recovery of material: a permanent blockading square for the knight on d5, and a bishop with no opposite number. This is the case the concept is built around — material given for factors that do not expire, with no combination attached.",
       "origin_kind": "historical-game",
       "concept_role": "supports",
-      "side_to_move_benefits": "black"
+      "side_to_move_benefits": "black",
+      "engine": {
+        "engine_id": "Stockfish 18",
+        "test_level": 3,
+        "depth": 22,
+        "threads": 10,
+        "hash_mb": 4096,
+        "multipv": 1,
+        "best_move": "g4e6",
+        "eval_cp": 97,
+        "mate_in": null,
+        "pv": [],
+        "alternatives": [],
+        "margin_cp": null,
+        "verdict": "supports",
+        "verdict_note": "+0.97 at depth 22, and the engine's own first move is Bxe6 - the sacrifice itself. Both concepts filed against this position are claims about that one move, and the engine plays it: the material goes and the evaluation stays about a pawn in favour of the side giving it up, which is what compensation means stated as a number rather than asserted."
+      }
     }
   ],
   "counterexamples": [],

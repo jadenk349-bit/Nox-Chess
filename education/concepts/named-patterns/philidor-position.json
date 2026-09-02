@@ -133,6 +133,22 @@
         "dtm": 0,
         "category": "draw",
         "note": "PROVEN draw. The tablebase's best move is a waiting rook move along the rank, which is exactly the third-rank defence's first phase — hold the rank and do nothing until the pawn commits."
+      },
+      "engine": {
+        "engine_id": "Stockfish 18",
+        "test_level": 3,
+        "depth": 26,
+        "threads": 10,
+        "hash_mb": 4096,
+        "multipv": 1,
+        "best_move": "a3c3",
+        "eval_cp": 0,
+        "mate_in": null,
+        "pv": [],
+        "alternatives": [],
+        "margin_cp": null,
+        "verdict": "supports",
+        "verdict_note": "PROVEN DRAW, dtz 0, best move Ra1, engine 0.00 at depth 26. The Philidor defence holds, and it holds over every legal continuation rather than over the twenty the engine looked at. Note what this base has NOT been able to build: a verified counterexample. With the pawn on the fourth rank the defence draws from almost anywhere, so the position that would show the method failing has resisted three attempts and the record says so."
       }
     }
   ],

@@ -133,6 +133,22 @@
         "dtm": -28,
         "category": "loss",
         "note": "PROVEN win for White, mate in 28. Result is from the side to move (Black). Paired with the identical position with White to move, which is a proven draw. The two FENs differ in exactly one character — the side-to-move field — which makes this the most tightly isolated controlled pair possible in chess."
+      },
+      "engine": {
+        "engine_id": "Stockfish 18",
+        "test_level": 3,
+        "depth": 26,
+        "threads": 10,
+        "hash_mb": 4096,
+        "multipv": 1,
+        "best_move": "e7d7",
+        "eval_cp": null,
+        "mate_in": -15,
+        "pv": [],
+        "alternatives": [],
+        "margin_cp": null,
+        "verdict": "supports",
+        "verdict_note": "PROVEN WIN for White, dtz -4, mate in 28 from Black's side, and the engine reports mate in 15 for the side not to move. Black to move must give ground. This single position serves `opposition`, `key-square` and `zugzwang` at once, and the pair it belongs to - the same board with White to move, proven DRAWN - is the strictest controlled comparison this base contains, because nothing on the board differs at all."
       }
     }
   ],
@@ -151,6 +167,22 @@
         "dtm": 21,
         "category": "win",
         "note": "PROVEN WIN in 21, best move Rh8+. The kings stand in opposition and it decides nothing: the rooks decide it. That is the record's first trap stated as a proven result rather than as an opinion."
+      },
+      "engine": {
+        "engine_id": "Stockfish 18",
+        "test_level": 3,
+        "depth": 26,
+        "threads": 10,
+        "hash_mb": 4096,
+        "multipv": 1,
+        "best_move": "h1h8",
+        "eval_cp": null,
+        "mate_in": 13,
+        "pv": [],
+        "alternatives": [],
+        "margin_cp": null,
+        "verdict": "supports",
+        "verdict_note": "PROVEN WIN in 21, dtz 3, best move Rh8+, and the engine agrees with mate in 13. The kings stand in opposition and it decides nothing: the rooks decide it. That is this record's first trap - kings facing each other means nothing outside endgames where king penetration decides - stated as a proven result rather than as an opinion."
       }
     },
     {
@@ -158,7 +190,32 @@
       "note": "Registered false-positive case `opposition-pattern-without-condition`, kept on the record as well as in tests/false_positive_cases.json so that the concept carries its own negative evidence. THE SURFACE PATTERN IS PRESENT: Kings facing each other with one square between them on a rank or file. The side NOT to move has the opposition. WHY IT IS NOT THE CONCEPT: Kings facing each other is trivially detectable and means nothing outside endgames where king penetration decides. WHAT THE SYSTEM DOES: Registered from a recorded counterexample: a position where the concept's surface feature is present and its condition is not, verified mechanically by lib/features.js and then scored. ",
       "origin_kind": "constructed-test",
       "concept_role": "negative",
-      "false_positive_case": "opposition-pattern-without-condition"
+      "false_positive_case": "opposition-pattern-without-condition",
+      "engine": {
+        "engine_id": "Stockfish 18",
+        "test_level": 3,
+        "depth": 26,
+        "threads": 10,
+        "hash_mb": 4096,
+        "multipv": 1,
+        "best_move": "e5f5",
+        "eval_cp": 0,
+        "mate_in": null,
+        "pv": [],
+        "alternatives": [],
+        "margin_cp": null,
+        "verdict": "supports",
+        "verdict_note": "PROVEN DRAW, dtz 0, best move Kd4, and the engine agrees at 0.00. The negative half of the strictest pair in this base: the same board as the winning position with only the side to move changed. Whoever is NOT to move holds the opposition, which is why this half of the pair is a negative for three concepts and not a different position."
+      },
+      "tablebase": {
+        "source": "Lichess tablebase (Syzygy, 7-piece)",
+        "pieces": 3,
+        "wdl": "draw",
+        "dtz": 0,
+        "dtm": 0,
+        "category": "draw",
+        "note": "PROVEN, not evaluated. Read from the side to move. The verdict_note on the engine block beside this one says what the two instruments do and do not agree about."
+      }
     }
   ],
   "ambiguous_examples": [],

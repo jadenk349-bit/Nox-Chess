@@ -98,6 +98,22 @@
         "dtm": 0,
         "category": "draw",
         "note": "PROVEN draw. The king catches the pawn. Paired with the identical position with White to move, which is a proven win in 23."
+      },
+      "engine": {
+        "engine_id": "Stockfish 18",
+        "test_level": 3,
+        "depth": 26,
+        "threads": 10,
+        "hash_mb": 4096,
+        "multipv": 1,
+        "best_move": "d5e6",
+        "eval_cp": 0,
+        "mate_in": null,
+        "pv": [],
+        "alternatives": [],
+        "margin_cp": null,
+        "verdict": "supports",
+        "verdict_note": "0.00, and Syzygy proves it: 4 pieces, draw, dtz 0, best move Ke5. Black to move steps into the square of the h-pawn and catches it. Read against the same board with White to move - a proven WIN, mate in 23 - this pair is the rule of the square measured to the tempo, which is what a geometry record needs and what an evaluation alone would not give."
       }
     }
   ],
@@ -116,6 +132,22 @@
         "dtm": 23,
         "category": "win",
         "note": "PROVEN win in 23, against a proven draw with Black to move. Nothing on the board differs. This is the cleanest demonstration in the base that the rule of the square is a statement about the position AND the side to move, and it is why the concept's principal false-positive trap is counting files without checking the turn."
+      },
+      "engine": {
+        "engine_id": "Stockfish 18",
+        "test_level": 3,
+        "depth": 26,
+        "threads": 10,
+        "hash_mb": 4096,
+        "multipv": 1,
+        "best_move": "h5h6",
+        "eval_cp": null,
+        "mate_in": 14,
+        "pv": [],
+        "alternatives": [],
+        "margin_cp": null,
+        "verdict": "supports",
+        "verdict_note": "Mate in 14 by the engine and a PROVEN win by Syzygy - dtz 1, mate in 23, best move h6. The same board as the positive with only the side to move changed: one tempo is the whole difference between catching the pawn and not, which is the claim the concept makes and here it is exact rather than approximate."
       }
     }
   ],

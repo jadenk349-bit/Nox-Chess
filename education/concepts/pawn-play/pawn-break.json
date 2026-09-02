@@ -126,7 +126,32 @@
       "origin_kind": "constructed-test",
       "concept_role": "supports",
       "side_to_move_benefits": "neither",
-      "controlled_pair_with": "4k3/2p5/8/8/1P6/8/8/4K3 w - - 0 1"
+      "controlled_pair_with": "4k3/2p5/8/8/1P6/8/8/4K3 w - - 0 1",
+      "engine": {
+        "engine_id": "Stockfish 18",
+        "test_level": 3,
+        "depth": 26,
+        "threads": 10,
+        "hash_mb": 4096,
+        "multipv": 1,
+        "best_move": "e1d2",
+        "eval_cp": 0,
+        "mate_in": null,
+        "pv": [],
+        "alternatives": [],
+        "margin_cp": null,
+        "verdict": "supports",
+        "verdict_note": "PROVEN DRAW, dtz 0, best move b6 - the break itself. The break is available, it is correct, and it wins nothing, which is this record's first trap with a proof attached: whether a break is GOOD depends on who can use the lines it opens, and here nobody can."
+      },
+      "tablebase": {
+        "source": "Lichess tablebase (Syzygy, 7-piece)",
+        "pieces": 4,
+        "wdl": "draw",
+        "dtz": 0,
+        "dtm": 0,
+        "category": "draw",
+        "note": "PROVEN, not evaluated. Read from the side to move. The verdict_note on the engine block beside this one says what the two instruments do and do not agree about."
+      }
     }
   ],
   "counterexamples": [
@@ -138,7 +163,32 @@
       "origin_kind": "constructed-test",
       "concept_role": "negative",
       "side_to_move_benefits": "neither",
-      "controlled_pair_with": "4k3/2p5/8/1P6/8/8/8/4K3 w - - 0 1"
+      "controlled_pair_with": "4k3/2p5/8/1P6/8/8/8/4K3 w - - 0 1",
+      "engine": {
+        "engine_id": "Stockfish 18",
+        "test_level": 3,
+        "depth": 26,
+        "threads": 10,
+        "hash_mb": 4096,
+        "multipv": 1,
+        "best_move": "e1d2",
+        "eval_cp": 0,
+        "mate_in": null,
+        "pv": [],
+        "alternatives": [],
+        "margin_cp": null,
+        "verdict": "supports",
+        "verdict_note": "PROVEN DRAW, dtz 0, best move b5. The negative half: the pawn one rank further back cannot come into contact this move, so there is no break to report. Same material, same result, and the difference is entirely about what the move DOES rather than about who stands better - which is why this record is move-based."
+      },
+      "tablebase": {
+        "source": "Lichess tablebase (Syzygy, 7-piece)",
+        "pieces": 4,
+        "wdl": "draw",
+        "dtz": 0,
+        "dtm": 0,
+        "category": "draw",
+        "note": "PROVEN, not evaluated. Read from the side to move. The verdict_note on the engine block beside this one says what the two instruments do and do not agree about."
+      }
     },
     {
       "fen": "4k3/8/1p1p4/8/2P5/8/8/4K3 w - - 0 1",
@@ -155,7 +205,23 @@
         "category": "loss",
         "note": "PROVEN loss for the side making the break. The break is real and it is bad, which is exactly the pair of facts the record says a detector can establish the first of and not the second."
       },
-      "false_positive_case": "a-break-is-not-a-breakthrough"
+      "false_positive_case": "a-break-is-not-a-breakthrough",
+      "engine": {
+        "engine_id": "Stockfish 18",
+        "test_level": 3,
+        "depth": 26,
+        "threads": 10,
+        "hash_mb": 4096,
+        "multipv": 1,
+        "best_move": "e1f2",
+        "eval_cp": 0,
+        "mate_in": null,
+        "pv": [],
+        "alternatives": [],
+        "margin_cp": null,
+        "verdict": "supports",
+        "verdict_note": "PROVEN DRAW with best play, dtz 0, best move Kd1 - and c4-c5, the break, LOSES: after it the position is a proven win for Black, mate in 35, with dxc5. Registered as a false-positive case for `fork` on the same board. The break is real and it is a blunder, which is the pair of facts this record says a detector can establish the first of and not the second."
+      }
     }
   ],
   "ambiguous_examples": [],

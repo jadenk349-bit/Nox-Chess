@@ -152,6 +152,22 @@
         "dtm": 41,
         "category": "win",
         "note": "PROVEN win, mate in 41. The tablebase's own best move is Rd1+ — exactly the first move of the textbook bridge-building method, which is a pleasing confirmation that the human technique is also the objectively correct one."
+      },
+      "engine": {
+        "engine_id": "Stockfish 18",
+        "test_level": 3,
+        "depth": 26,
+        "threads": 10,
+        "hash_mb": 4096,
+        "multipv": 1,
+        "best_move": "f1d1",
+        "eval_cp": null,
+        "mate_in": 25,
+        "pv": [],
+        "alternatives": [],
+        "margin_cp": null,
+        "verdict": "supports",
+        "verdict_note": "PROVEN WIN, dtz 15, mate in 41, best move Rd1+ - the first move of building the bridge. The engine agrees with mate in 25. What the pair establishes is that the win belongs to the position and not to the technique's reputation: the same method with a rook pawn is a proven draw."
       }
     }
   ],
@@ -171,6 +187,22 @@
         "dtm": 0,
         "category": "draw",
         "note": "PROVEN DRAW at dtz 0. The paired position - the same men one file to the right, on the b-file - is a proven win in 41. One file is the whole difference."
+      },
+      "engine": {
+        "engine_id": "Stockfish 18",
+        "test_level": 3,
+        "depth": 26,
+        "threads": 10,
+        "hash_mb": 4096,
+        "multipv": 1,
+        "best_move": "f1c1",
+        "eval_cp": 0,
+        "mate_in": null,
+        "pv": [],
+        "alternatives": [],
+        "margin_cp": null,
+        "verdict": "supports",
+        "verdict_note": "PROVEN DRAW, dtz 0, best move Ra1, and the engine agrees at 0.00. The negative half: the Lucena method needs a file on each side of the pawn to build the bridge, and a rook pawn has only one. Nothing else differs between the halves."
       }
     }
   ],
