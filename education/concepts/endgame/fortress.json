@@ -224,7 +224,24 @@
       }
     }
   ],
-  "counterexamples": [],
+  "counterexamples": [
+    {
+      "fen": "7k/8/5K2/7P/3B4/8/8/8 w - - 0 1",
+      "note": "Registered false-positive case `a-fortress-that-is-not-one`, kept on the record as well as in tests/false_positive_cases.json so that the concept carries its own negative evidence. THE SURFACE PATTERN IS PRESENT: King, bishop and rook-pawn against a bare king in the corner. This is the picture of the most famous fortress in chess: the defender sits on h8 and cannot be dislodged. WHY IT IS NOT THE CONCEPT: The bishop is the WRONG colour for that fortress, or rather the right one. The drawn version needs a bishop that does not control the queening square; here the bishop is dark-squared and h8 is dark, so the defending king can be driven out and the pawn queens. WHAT THE SYSTEM DOES: PROVEN, not evaluated. The API does not report a fortress here. Syzygy: 4 pieces, WIN, dtz 1, mate in 9, best move Kg6+. Read against this record's own positive example, which is the SAME material with the bishop on the other colour and is a proven draw at dtz 0 — one bishop, two colours, mate in nine and a dead draw. That pair is why a fortress claim in this base is only ever made with a proof behind it: the two positions are indistinguishable to any test that counts material.",
+      "origin_kind": "constructed-test",
+      "concept_role": "negative",
+      "tablebase": {
+        "source": "Lichess tablebase (Syzygy, 7-piece)",
+        "pieces": 4,
+        "wdl": "win",
+        "dtz": 1,
+        "dtm": 9,
+        "category": "win",
+        "note": "PROVEN WIN in 9, best move Kg6+. The same material with the bishop on the other colour is a proven draw at dtz 0, and this record's positive example is that position. One bishop, two colours, mate in nine and a dead draw."
+      },
+      "false_positive_case": "a-fortress-that-is-not-one"
+    }
+  ],
   "ambiguous_examples": [],
   "explanations": {
     "by_level": {

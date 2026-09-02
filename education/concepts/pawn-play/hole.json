@@ -190,7 +190,22 @@
       }
     }
   ],
-  "counterexamples": [],
+  "counterexamples": [
+    {
+      "fen": "r1bq1rk1/1p3ppp/2n5/3Np3/4P3/8/1P3PPP/R1BQ1RK1 w - - 0 1",
+      "note": "Registered false-positive case `a-hole-on-the-rim`, kept on the record as well as in tests/false_positive_cases.json so that the concept carries its own negative evidence. THE SURFACE PATTERN IS PRESENT: Neither side has an a-pawn, so a6 and a3 are squares no pawn can ever attack — the definition of a hole, satisfied twice on the same board. WHY IT IS NOT THE CONCEPT: This record's fourth indicator_against: \"The square is on the edge or deep in the opponent's own half, where occupying it achieves nothing.\" And its first trap: \"Every pawn move creates squares no pawn can guard. Most of them are irrelevant.\" WHAT THE SYSTEM DOES: The API reports `outpost` and `weak-square` for d5 and says nothing about a6 or a3. That is the correct set of answers, and the interesting half is what is NOT reported: a naive hole detector finds three holes here and two of them are noise. The record's own trap is that most holes are irrelevant, and this position is that trap with a count attached.",
+      "origin_kind": "constructed-test",
+      "concept_role": "negative",
+      "false_positive_case": "a-hole-on-the-rim"
+    },
+    {
+      "fen": "r1bq1rk1/pp2ppbp/2n2np1/8/3P4/2N1PN2/PP3PPP/R1BQ1RK1 w - - 0 1",
+      "note": "Registered false-positive case `a-fianchetto-hole-the-bishop-covers`, kept on the record as well as in tests/false_positive_cases.json so that the concept carries its own negative evidence. THE SURFACE PATTERN IS PRESENT: Black has played ...g6 and fianchettoed, so f6 and h6 are permanently weak on the dark squares and no black pawn will ever cover them again. This is the most-taught hole in the openings. WHY IT IS NOT THE CONCEPT: This record's third trap, in full: \"Fianchetto structures leave permanent holes on the long-diagonal colour complex that are nonetheless well covered by the bishop; the hole is real, the weakness is not.\" The bishop on g7 covers the complex it created. WHAT THE SYSTEM DOES: The API does not report a hole here. This is the same trap that `weak-square` was tightened against — the fianchetto guard lives in reachableHoles() in Layer 3 and is quoted in a comment there — and `hole` inherits it, because both concepts read the same Layer 3 output. The case exists so that inheritance is pinned down rather than assumed: a guard in a shared function protects whoever happens to call it, and nothing in the code says which concepts those are.",
+      "origin_kind": "constructed-test",
+      "concept_role": "negative",
+      "false_positive_case": "a-fianchetto-hole-the-bishop-covers"
+    }
+  ],
   "ambiguous_examples": [],
   "explanations": {
     "by_level": {

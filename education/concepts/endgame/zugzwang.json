@@ -228,6 +228,22 @@
         "verdict": "supports",
         "verdict_note": "PROVEN DRAW, dtz 0, best move Kd4, and the engine agrees at 0.00. The negative half of the strictest pair in this base: the same board as the winning position with only the side to move changed. Whoever is NOT to move holds the opposition, which is why this half of the pair is a negative for three concepts and not a different position."
       }
+    },
+    {
+      "fen": "8/4k3/8/4K3/4P3/7P/8/8 b - - 0 1",
+      "note": "Registered false-positive case `opposition-with-a-spare-tempo`, kept on the record as well as in tests/false_positive_cases.json so that the concept carries its own negative evidence. THE SURFACE PATTERN IS PRESENT: Kings in direct opposition in a king-and-pawn ending, Black to move and every king move giving ground. That is what zugzwang looks like. WHY IT IS NOT THE CONCEPT: Zugzwang requires that having to move is what hurts, and here it is not: White has a spare pawn on h3 and wins whether it is Black's move or his own. There is no mutual obligation, so nobody is in zugzwang — Black is simply lost. WHAT THE SYSTEM DOES: PROVEN both ways, which is what settles it: with Black to move the position is a loss in 26, and with WHITE to move it is a win in 25 and the tablebase's own best move is h4 — the spare tempo. The API does not report zugzwang. It does report `opposition` at high confidence, and that is correct and worth noticing: the opposition is present and it is not what decides. Remove the h-pawn and the same board becomes this base's strictest controlled pair, where the side to move loses and the side not to move draws.",
+      "origin_kind": "constructed-test",
+      "concept_role": "negative",
+      "tablebase": {
+        "source": "Lichess tablebase (Syzygy, 7-piece)",
+        "pieces": 4,
+        "wdl": "loss",
+        "dtz": -2,
+        "dtm": -26,
+        "category": "loss",
+        "note": "PROVEN both ways, which is what settles it: Black to move loses in 26, and with WHITE to move the same board is a win in 25 whose best move is h4 - the spare tempo. A position that is lost with either side to move contains no zugzwang."
+      },
+      "false_positive_case": "opposition-with-a-spare-tempo"
     }
   ],
   "ambiguous_examples": [],

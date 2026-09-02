@@ -163,6 +163,22 @@
         "verdict": "supports",
         "verdict_note": "PROVEN DRAW, dtz 0, best move Kd4, and the engine agrees at 0.00. The negative half of the strictest pair in this base: the same board as the winning position with only the side to move changed. Whoever is NOT to move holds the opposition, which is why this half of the pair is a negative for three concepts and not a different position."
       }
+    },
+    {
+      "fen": "7k/8/6K1/7P/8/8/8/8 w - - 0 1",
+      "note": "Registered false-positive case `the-square-in-front-of-a-rook-pawn`, kept on the record as well as in tests/false_positive_cases.json so that the concept carries its own negative evidence. THE SURFACE PATTERN IS PRESENT: The white king stands on g6, directly in front of and beside its own passed pawn, with the black king shut in the corner. For any other pawn on the board that square is a key square and the position is winning. WHY IT IS NOT THE CONCEPT: A rook pawn has no key squares in the ordinary sense, because the defending king cannot be driven off the queening square — there is no room on the other side of the pawn to be driven towards. WHAT THE SYSTEM DOES: PROVEN DRAW, dtz 0, and the tablebase's own best move is h6 — which leads nowhere. The API does not report key-square. This is the case that catches a detector built on 'the king is in front of the pawn': the geometry is identical to the winning case and the file is the whole difference. Compare `wrong-rook-pawn`, which is the same fact stated about the bishop instead of the king.",
+      "origin_kind": "constructed-test",
+      "concept_role": "negative",
+      "tablebase": {
+        "source": "Lichess tablebase (Syzygy, 7-piece)",
+        "pieces": 3,
+        "wdl": "draw",
+        "dtz": 0,
+        "dtm": 0,
+        "category": "draw",
+        "note": "PROVEN DRAW, dtz 0, and the tablebase's own best move is h6, which leads nowhere. The king stands where a key square would be for any other file."
+      },
+      "false_positive_case": "the-square-in-front-of-a-rook-pawn"
     }
   ],
   "ambiguous_examples": [],
