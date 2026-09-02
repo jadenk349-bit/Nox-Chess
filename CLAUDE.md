@@ -158,18 +158,28 @@ sweeps a band of light across Start Play with `@keyframes matchsweep` while the
 room is on the list — and the ranked page now does the same rather than being
 sent to the board behind a centred "Finding an Opponent" modal.
 
-The two do **not** share a rule, and the reason is worth keeping. Start Play
-says "working" by going dark with one band of light crossing it, which reads
-correctly beside a board. The ranked Start Game is the only lit thing on an
-otherwise black page, and a button that goes out reads as one that has stopped,
-not one that is busy — so `#btnRankStart.searching` keeps its gold and moves the
-gold instead (`@keyframes rankhunt`). Two things about how it is written are
-load-bearing: the selector carries the **id**, because `button.primary` and
-`.rank-start.dim` both paint this same element, and the background is set in
-**longhands**, because the `background` shorthand resets `background-size` and
-`background-position` to `auto` — one shorthand winning the cascade leaves the
-gradient sitting perfectly still, which looks exactly like an animation that is
-not running. `test_rematch_flow.js` reads the stylesheet and asserts both, since
+The two do not share a *rule* — `.start-btn.searching` is written against a
+class this button does not carry — but they now deliberately share the *effect*:
+a dark plate with the palette's gold running across it. An earlier version kept
+the ranked plate gold and moved gold bands over it, reasoning that the one lit
+thing on a black page must not go out. In the browser that reads as nothing at
+all: gold light on a gold ground has no contrast to carry the movement, so a
+button mid-search looked like the same gold button sitting still and the state
+the whole design rests on was invisible. The dark ground is what makes the light
+legible. The one difference from Start Play is that the band **repeats** rather
+than crossing once — a single band leaves the plate flat dark for the back half
+of every cycle, which beside a board is fine and here is the stopped-button
+worry all over again, so two bands are kept in flight and one is always
+crossing. Two things about how it is written are load-bearing: the selector
+carries the **id**, because `button.primary` and `.rank-start.dim` both paint
+this same element, and the background is set in **longhands**, because the
+`background` shorthand resets `background-size` and `background-position` to
+`auto` — one shorthand winning the cascade leaves the gradient sitting perfectly
+still, which looks exactly like an animation that is not running. `.rank-start`
+itself names **no** `transition`, for the same reason Start Play's rule does not:
+both plates ease on the base `button` list, and an override there that left
+`transform` and `filter` out made this one button snap on hover and press where
+every other button on the site eases. `test_rematch_flow.js` reads the stylesheet and asserts both, since
 every other check in the repo asks what the script does and none of them asks
 what actually gets painted. `setSearching()` drives both; `drawRankPick()` owns what the
 ranked button looks like and is told rather than reached into. Pressing the
