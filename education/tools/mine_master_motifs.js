@@ -113,17 +113,27 @@ const TESTS = {
     return { note: 'knight on ' + nameOf(mv.to) + ' hits ' + hit.join(' and ') };
   },
 
-  // An X-RAY: one of our line pieces bears on an enemy man THROUGH another man,
-  // and the intervening one is the opponent's. Not a pin and not a skewer -
-  // those have their own records and their own detectors - so both are excluded
-  // by requiring the man behind to be worth no more than the man in front.
+  // AN X-RAY DEFENCE: one of our line pieces DEFENDS one of our own men through
+  // an enemy man standing between them. That is the form of the motif that is
+  // neither a pin nor a skewer, and the first version of this test got it
+  // exactly backwards - it looked for an enemy man behind an enemy man, worth
+  // less than the one in front, and that IS a skewer. (A pin is small in front
+  // and big behind; a skewer is big in front and small behind. The test
+  // excluded the pin and then went looking for the skewer.) It reported
+  // Kramnik-Yakovich 17.Bb5 as an x-ray, where the bishop hits the queen on d7
+  // with the rook on e8 behind it, which is a skewer and has its own record and
+  // its own detector in the page.
+  //
+  // The defensive form has no such confusion: the piece at the far end is OURS,
+  // so no exchange on the near square wins it - our line piece is still looking
+  // through when the enemy man moves or is taken.
   xRay(st, mv, after) {
     const pc = after.b[mv.to];
     if (!pc || !'RBQ'.includes(pc.t)) return null;
-    const them = after.turn;
+    const us = pc.c, them = after.turn;
     for (let i = 0; i < 64; i++) {
       const back = after.b[i];
-      if (!back || back.c !== them || i === mv.to) continue;
+      if (!back || back.c !== us || i === mv.to || back.t === 'K') continue;
       if (!canTravel(pc.t, mv.to, i)) continue;
       const btw = between(mv.to, i);
       if (!btw || btw.length === 0) continue;
@@ -131,23 +141,47 @@ const TESTS = {
       if (men.length !== 1) continue;
       const mid = after.b[men[0]];
       if (mid.c !== them) continue;                          // through one of THEIRS
-      if ((P.VAL[back.t] || 0) > (P.VAL[mid.t] || 0)) continue;  // that is a pin or a skewer
-      if ((P.VAL[back.t] || 0) < P.VAL.N) continue;          // and it must be worth seeing
-      return { note: pc.t + ' on ' + nameOf(mv.to) + ' x-rays ' + nameOf(i) +
-                     ' through ' + nameOf(men[0]) };
+      if ((P.VAL[back.t] || 0) < P.VAL.N) continue;          // defending a pawn is not news
+      // ...and the defence must MATTER: the man behind is attacked, and this is
+      // what is holding it up.
+      if (!P.attackersOf(after, i, them).length) continue;
+      return { note: pc.t + ' on ' + nameOf(mv.to) + ' defends ' + nameOf(i) +
+                     ' through the enemy ' + mid.t + ' on ' + nameOf(men[0]) };
     }
     return null;
   },
 
-  // A DESPERADO: a piece of ours that is already lost takes something on its way
-  // out. Read as - before the move our piece on `from` could be won outright,
-  // and the move captures with it.
+  // A DESPERADO: a piece of ours that is already DOOMED takes something on the
+  // way out.
+  //
+  // EVERYTHING RESTS ON THE FIRST WORD, and the record says so in those words:
+  // "a piece that can be saved by moving, or by a counter-threat, is not doomed,
+  // and the desperado is then simply a blunder". The first version of this test
+  // asked only whether the piece could be captured at a profit where it stood,
+  // which is "attacked", not "doomed" - and it nominated Moldobaev-Kramnik
+  // 19...Qxd1, where the queen is attacked and has two safe squares. Taking the
+  // queen happens to be best there by a pawn, and writing it up as a desperado
+  // would have taught the definition wrong on the strength of a good move.
+  //
+  // So doomed is tested the way `trapped-piece` is: every square it can reach
+  // loses it. The capture it makes on the way out is then the whole of what it
+  // gets, which is the concept.
   desperado(st, mv, after) {
     const pc = st.b[mv.from];
     if (!pc || !mv.cap || pc.t === 'P' || pc.t === 'K') return null;
-    if (P.see(st, mv.from, other(pc.c)) <= 0) return null;   // it was not already lost
+    if (P.see(st, mv.from, other(pc.c)) <= 0) return null;   // not even attacked
     if (P.see(after, mv.to, after.turn) <= 0) return null;   // and it dies where it lands
-    return { note: pc.t + ' on ' + nameOf(mv.from) + ' was lost anyway and took ' +
+    // ...and there was nowhere to go. Every legal move of that piece, including
+    // other captures, must leave it winnable.
+    let ms;
+    try { ms = P.legalMoves(st); } catch (e) { return null; }
+    const escapes = ms.filter(x => x.from === mv.from).filter(x => {
+      let nx;
+      try { nx = P.makeMove(st, x); } catch (e) { return false; }
+      return P.see(nx, x.to, other(pc.c)) <= 0;
+    });
+    if (escapes.length) return null;
+    return { note: pc.t + ' on ' + nameOf(mv.from) + ' had no square that saves it and took ' +
                    mv.cap.t + ' on ' + nameOf(mv.to) };
   },
 
