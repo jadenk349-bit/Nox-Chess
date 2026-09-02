@@ -124,7 +124,23 @@
       "note": "Registered false-positive case `two-knights-facing-each-other`, kept on the record as well as in tests/false_positive_cases.json so that the concept carries its own negative evidence. THE SURFACE PATTERN IS PRESENT: Two kings and one knight each. Neither side has a pawn, a rook or a queen, and neither has more than one minor piece — this record's precondition, word for word. WHY IT IS NOT THE CONCEPT: The precondition is not the convention. This record's own definition_long names what the convention covers: \"K vs K, K+B vs K, K+N vs K, and (in most implementations) K+B vs K+B with bishops on the same colour.\" Knight against knight is not on that list, and the reason is the one the record gives in the next paragraph about K+N+N vs K: a helpmate exists, so the position is not dead under Art. 5.2.2 and no arbiter declares the game drawn. WHAT THE SYSTEM DOES: THIS WAS A REAL FALSE POSITIVE and it was reported at the type's ceiling. The matcher tested the precondition per side — no pawn, rook or queen, at most one minor — and that admits two combinations the convention excludes: knight against knight, and bishops of OPPOSITE colours. It now tests the four combinations by name. All four still report: bare kings, a lone bishop, a lone knight, and two bishops of the same colour; and the sentence says which of the four it is, so a reader can check the claim against the board. The distinction matters because this record is filed as TERMINOLOGY rather than as an official rule, precisely so the system does not present a convention as a Law — and a convention that has been widened past what its own definition says is the worst of both.",
       "origin_kind": "constructed-test",
       "concept_role": "negative",
-      "false_positive_case": "two-knights-facing-each-other"
+      "false_positive_case": "two-knights-facing-each-other",
+      "engine": {
+        "engine_id": "Stockfish 18",
+        "test_level": 3,
+        "depth": 24,
+        "threads": 10,
+        "hash_mb": 4096,
+        "multipv": 1,
+        "best_move": "e4f6",
+        "eval_cp": 0,
+        "mate_in": null,
+        "pv": [],
+        "alternatives": [],
+        "margin_cp": null,
+        "verdict": "supports",
+        "verdict_note": "0.00 at depth 24. Knight against knight IS drawn in practice and is NOT covered by the convention, because a helpmate exists and no arbiter ends the game - which is the distinction this record is filed as terminology to preserve. The engine's zero and the convention's silence are two different facts and this position separates them."
+      }
     },
     {
       "fen": "4kb2/8/8/8/8/8/8/4KB2 w - - 0 1",

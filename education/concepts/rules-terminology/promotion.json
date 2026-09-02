@@ -79,7 +79,40 @@
       "side_to_move_benefits": "neither"
     }
   ],
-  "counterexamples": [],
+  "counterexamples": [
+    {
+      "fen": "4k3/4P3/8/8/8/8/8/4K3 w - - 0 1",
+      "note": "A white pawn on the seventh rank and it can never promote. The enemy king stands on the queening square, nothing sits on d8 or f8 to capture, and no white piece can drive the king away - so the pawn is one square from the eighth rank for ever. The rule is not in doubt here and its PRECONDITION is: promotion happens when a pawn REACHES the far rank, and reaching it is a separate question the rule says nothing about. This base's positive example is the rule; this is the condition under it.",
+      "origin_kind": "tablebase-position",
+      "concept_role": "negative",
+      "side_to_move_benefits": "neither",
+      "engine": {
+        "engine_id": "Stockfish 18",
+        "test_level": 3,
+        "depth": 24,
+        "threads": 10,
+        "hash_mb": 4096,
+        "multipv": 1,
+        "best_move": "e1e2",
+        "eval_cp": 0,
+        "mate_in": null,
+        "pv": [],
+        "alternatives": [],
+        "margin_cp": null,
+        "verdict": "supports",
+        "verdict_note": "0.00 at depth 24, settled at depth 9 - both kings shuffle and nothing changes."
+      },
+      "tablebase": {
+        "source": "Lichess tablebase (Syzygy, 7-piece)",
+        "pieces": 3,
+        "wdl": "draw",
+        "dtz": 0,
+        "dtm": 0,
+        "category": "draw",
+        "note": "PROVEN DRAW at dtz 0. A pawn on the seventh, a whole pawn up, and it is a draw over every legal continuation because the defending king never leaves the queening square."
+      }
+    }
+  ],
   "ambiguous_examples": [],
   "explanations": {
     "by_level": {

@@ -225,6 +225,38 @@
         "verdict": "supports",
         "verdict_note": "yes, though narrowly - 23.Re7 is the engine's first choice at depth 24 at +0.20, with the second at +0.17. The margin is small because the position is close to level; the point of the entry is the attribution, not the size of the edge. The engine's principal variation is 23.Re7 d3 24.cxd3 Rxd3 25.Bb4, which is the rook using the seventh to force a favourable trade rather than to win material outright."
       }
+    },
+    {
+      "fen": "6k1/R4p1p/8/8/8/8/8/6K1 w - - 0 1",
+      "note": "Added as the smallest material that can carry this record's claim, so the claim can be PROVEN rather than evaluated. See the tablebase note.",
+      "origin_kind": "tablebase-position",
+      "concept_role": "positive",
+      "side_to_move_benefits": "white",
+      "engine": {
+        "engine_id": "Stockfish 18",
+        "test_level": 3,
+        "depth": 24,
+        "threads": 10,
+        "hash_mb": 4096,
+        "multipv": 1,
+        "best_move": "g1g2",
+        "eval_cp": 8115,
+        "mate_in": null,
+        "pv": [],
+        "alternatives": [],
+        "margin_cp": null,
+        "verdict": "supports",
+        "verdict_note": "+81.15 at depth 24 - the engine's number for a won rook ending, which is a reminder that an evaluation past about ten pawns is a statement that the position is winning and not a measurement of anything. The tablebase line is the useful one: mate in 41."
+      },
+      "tablebase": {
+        "source": "Lichess tablebase (Syzygy, 7-piece)",
+        "pieces": 5,
+        "wdl": "win",
+        "dtz": 9,
+        "dtm": 41,
+        "category": "win",
+        "note": "PROVEN WIN, dtz 9, mate in 41, best move Ra6. A rook alone against a king and two pawns, winning because it stands on the seventh: it attacks both pawns along the rank and the king cannot defend them both. This is the concept's claim in the smallest material that can carry it, and proven rather than argued."
+      }
     }
   ],
   "counterexamples": [

@@ -178,6 +178,38 @@
       "origin_kind": "historical-game",
       "concept_role": "supports",
       "side_to_move_benefits": "neither"
+    },
+    {
+      "fen": "R7/6k1/P4r2/8/3K4/8/8/8 w - - 0 1",
+      "note": "Added as the smallest material that can carry this record's claim, so the claim can be PROVEN rather than evaluated. See the tablebase note.",
+      "origin_kind": "tablebase-position",
+      "concept_role": "positive",
+      "side_to_move_benefits": "white",
+      "engine": {
+        "engine_id": "Stockfish 18",
+        "test_level": 3,
+        "depth": 26,
+        "threads": 10,
+        "hash_mb": 4096,
+        "multipv": 1,
+        "best_move": "a7a8q",
+        "eval_cp": 0,
+        "mate_in": null,
+        "pv": [],
+        "alternatives": [],
+        "margin_cp": null,
+        "verdict": "supports",
+        "verdict_note": "0.00 at depth 26. The engine agrees with the proof, which it does not always do in this ending."
+      },
+      "tablebase": {
+        "source": "Lichess tablebase (Syzygy, 7-piece)",
+        "pieces": 5,
+        "wdl": "draw",
+        "dtz": 0,
+        "dtm": 0,
+        "category": "draw",
+        "note": "PROVEN DRAW at dtz 0 with the defending rook ACTIVE on the sixth, against a PROVEN WIN in 63 for the same five men with that rook passive on a1. Activity is worth the whole game here and the material is identical in both - which is this concept's central claim, stated as a pair of proofs rather than as an evaluation. The Vancura defence is the name of the drawn half."
+      }
     }
   ],
   "counterexamples": [

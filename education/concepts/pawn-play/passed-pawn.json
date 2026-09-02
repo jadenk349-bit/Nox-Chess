@@ -189,6 +189,38 @@
         "verdict": "supports",
         "verdict_note": "yes, and its principal variation escorts the pawn exactly as described: 35.Kg3 Rxc3+ 36.Kh4 c5 37.g6 - the pawn moves the instant the king is close enough to help it. Same search as the king-activation entry on this position; recorded on both because the annotation makes two claims and they are separable."
       }
+    },
+    {
+      "fen": "8/8/8/4k3/8/8/4PK2/8 w - - 0 1",
+      "note": "Added as the smallest material that can carry this record's claim, so the claim can be PROVEN rather than evaluated. See the tablebase note.",
+      "origin_kind": "tablebase-position",
+      "concept_role": "positive",
+      "side_to_move_benefits": "white",
+      "engine": {
+        "engine_id": "Stockfish 18",
+        "test_level": 3,
+        "depth": 24,
+        "threads": 10,
+        "hash_mb": 4096,
+        "multipv": 1,
+        "best_move": "f2e3",
+        "eval_cp": null,
+        "mate_in": 25,
+        "pv": [],
+        "alternatives": [],
+        "margin_cp": null,
+        "verdict": "supports",
+        "verdict_note": "Mate in 25, settled at depth 1. The pawn queens because the king escorts it, which is the condition the concept carries and the one a pawn count does not."
+      },
+      "tablebase": {
+        "source": "Lichess tablebase (Syzygy, 7-piece)",
+        "pieces": 3,
+        "wdl": "win",
+        "dtz": 9,
+        "dtm": 41,
+        "category": "win",
+        "note": "PROVEN WIN, dtz 9, mate in 41. King and pawn against king, with the attacking king in front of its own pawn - the whole content of the concept in the smallest material there is, and proven rather than evaluated. The engine agrees at mate in 25. Read against this base's `key-square` case, the same material one file across where the pawn is a rook pawn and the same geometry is a PROVEN DRAW."
+      }
     }
   ],
   "counterexamples": [

@@ -143,6 +143,15 @@
         "margin_cp": null,
         "verdict": "supports",
         "verdict_note": "Mate in 15 against the side to move at depth 26, and Syzygy proves it: a LOSS in 28, against a PROVEN DRAW at dtz 0 for the same board with the other side to move. The reciprocal zugzwang is real, and the concept that names it here is `opposition` rather than this one - which is this record's own first trap, that the general framework is only needed where simple opposition fails."
+      },
+      "tablebase": {
+        "source": "Lichess tablebase (Syzygy, 7-piece)",
+        "pieces": 4,
+        "wdl": "loss",
+        "dtz": -4,
+        "dtm": -28,
+        "category": "loss",
+        "note": "PROVEN both ways, which is what a reciprocal-zugzwang claim needs: Black to move is a LOSS in 28, and the same board with White to move is a PROVEN DRAW at dtz 0. The pair of squares is real. What this record adds beyond `opposition` is the general theory for positions where counting squares between the kings gives the wrong answer, and this is not one of those - which is why the same position is also this record's registered false-positive case."
       }
     }
   ],

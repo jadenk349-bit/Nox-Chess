@@ -81,7 +81,15 @@
       "concept_role": "positive"
     }
   ],
-  "counterexamples": [],
+  "counterexamples": [
+    {
+      "fen": "r3k2r/8/8/8/8/8/8/R3K2R w Qq - 4 3",
+      "pgn": "1. Rg1 Rg8 2. Rh1 Rh8",
+      "note": "Constructed, and it is a SEQUENCE because the rule is about history. From r3k2r/8/8/8/8/8/8/R3K2R w KQkq - 0 1 both sides move a rook out and back: 1.Rg1 Rg8 2.Rh1 Rh8. Every man is on the square it started on and the position has NOT repeated, because both sides have lost the right to castle kingside - the FEN reads `w Qq - 4 3` where it read `w KQkq - 0 1`. FIDE Art. 9.2.3 includes castling rights in the definition of the same position, so a diagram that looks identical is a different position and no claim exists. This is the exact error the `notation` record's third trap names: a FEN without the castling, en-passant and clock fields is not a position, it is a picture of one. The four moves were played through this base's own move generator, which emitted both FENs.",
+      "origin_kind": "constructed-test",
+      "concept_role": "negative"
+    }
+  ],
   "ambiguous_examples": [],
   "explanations": {
     "by_level": {

@@ -12,7 +12,7 @@
   "name_status": "established-name",
   "difficulty": "intermediate",
   "definition_short": "If the same position appears five times, the game is drawn automatically — no claim needed.",
-  "definition_long": "FIDE Art. 9.6.1: the game is drawn if 'the same position has appeared, as in 9.2.2 at least five times.' Unlike threefold repetition this needs no claim and no agreement; it happens by force of the Laws. Introduced so that a game cannot continue indefinitely when neither player claims.",
+  "definition_long": "FIDE Art. 9.6.1: the game is drawn if 'the same position has appeared, as in 9.2.2 at least five times.' Unlike threefold repetition this needs no claim and no agreement; it happens by force of the Laws. Introduced so that a game cannot continue indefinitely when neither player claims.\n\nTHE COUNT IS THE ONLY DIFFERENCE from Art. 9.2, and that is worth stating plainly because the two rules are otherwise identical. Position identity is the same term of art at 9.2.3: the same men on the same squares, the same side to move, the same castling rights, and the same en-passant possibility. Two of those four are invisible on a diagram, which is why this base's example for both rules is a SEQUENCE rather than a position - sixteen plies replayed through the move generator, in which the starting position recurs five times.\n\nWHY IT EXISTS. The threefold claim was being missed in practice, and declined in practice: a player who has not noticed cannot claim, and a player who is winning has no reason to. The fivefold rule makes the outcome independent of both players and of the arbiter's attention. The seventy-five-move rule at Art. 9.6.2 is its counterpart on the other counter, and both were added in the same revision for the same reason.",
   "history": {
     "attributions": [],
     "first_documented_source": "fide-laws-2023",
@@ -73,7 +73,15 @@
       "concept_role": "positive"
     }
   ],
-  "counterexamples": [],
+  "counterexamples": [
+    {
+      "fen": "r3k2r/8/8/8/8/8/8/R3K2R w Qq - 4 3",
+      "pgn": "1. Rg1 Rg8 2. Rh1 Rh8",
+      "note": "Constructed, and it is a SEQUENCE because the rule is about history. From r3k2r/8/8/8/8/8/8/R3K2R w KQkq - 0 1 both sides move a rook out and back: 1.Rg1 Rg8 2.Rh1 Rh8. Every man is on the square it started on and the position has NOT repeated, because both sides have lost the right to castle kingside - the FEN reads `w Qq - 4 3` where it read `w KQkq - 0 1`. FIDE Art. 9.2.3 includes castling rights in the definition of the same position, so a diagram that looks identical is a different position and no claim exists. This is the exact error the `notation` record's third trap names: a FEN without the castling, en-passant and clock fields is not a position, it is a picture of one. The four moves were played through this base's own move generator, which emitted both FENs. The fivefold rule inherits the same definition of identity and therefore the same negative: a board that returns to its starting arrangement five times has still repeated nothing if a castling right was lost on the way.",
+      "origin_kind": "constructed-test",
+      "concept_role": "negative"
+    }
+  ],
   "ambiguous_examples": [],
   "explanations": {
     "by_level": {
