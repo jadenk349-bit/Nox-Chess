@@ -193,6 +193,40 @@
         "verdict": "supports",
         "verdict_note": "PROVEN WIN for White, dtz -4, mate in 28 from Black's side, and the engine reports mate in 15 for the side not to move. Black to move must give ground. This single position serves `opposition`, `key-square` and `zugzwang` at once, and the pair it belongs to - the same board with White to move, proven DRAWN - is the strictest controlled comparison this base contains, because nothing on the board differs at all."
       }
+    },
+    {
+      "fen": "8/8/3Kp3/4Pk2/8/8/8/8 w - - 0 1",
+      "origin_kind": "constructed-test",
+      "concept_role": "supports",
+      "side_to_move_benefits": "black",
+      "controlled_pair_with": "8/8/3Kp3/4Pk2/8/8/8/8 b - - 0 1",
+      "note": "THE TREBUCHET, which this record's own deep wording has named since it was written - 'reciprocal zugzwang, whose extreme form is the trebuchet, where whoever moves loses' - and never showed. White Kd6 and pawn e5; Black Kf5 and pawn e6. Each king stands beside the other's pawn and each pawn is defended by nothing. Whoever has to move either steps away from the enemy pawn or abandons their own, and loses.\n\nIt is a controlled pair of the strictest kind there is: the SAME BOARD, only the side to move changed, and BOTH readings are a loss. That cannot happen in a position where the obligation to move is not the whole content, which is the proposition this record exists to teach.\n\nIT WAS NOT BUILT BY HAND, and the reason is recorded in state/progress.md: a trebuchet constructed from memory in an earlier session turned out to be a draw both ways, and the tablebase caught it. This one was FOUND - the search enumerates positions with two pawns nose to nose on one file, so neither side has a pawn tempo and the whole game is king moves, and asks Syzygy for both side-to-move readings of each. Random sampling had already been tried and found nothing in 400 boards, which is what should have been expected: a reciprocal zugzwang is a coincidence between two evaluations, and random boards are not where coincidences live.",
+      "tablebase": {
+        "source": "Lichess tablebase (Syzygy, 7-piece)",
+        "pieces": 4,
+        "wdl": "loss",
+        "dtz": -2,
+        "dtm": -34,
+        "category": "loss",
+        "note": "PROVEN LOSS for the side to move, from BOTH sides. White to move: loss, dtz -2, mate in 34 against. Black to move: loss, dtz -2, mate in 24 against. Two lookups of one board differing only in whose turn it is, and both come back losing - which is the trebuchet stated rather than illustrated."
+      }
+    },
+    {
+      "fen": "8/8/3Kp3/4Pk2/8/8/8/8 b - - 0 1",
+      "origin_kind": "constructed-test",
+      "concept_role": "supports",
+      "side_to_move_benefits": "white",
+      "controlled_pair_with": "8/8/3Kp3/4Pk2/8/8/8/8 w - - 0 1",
+      "note": "The other half of the trebuchet, and the half that makes it one. In an ordinary reciprocal zugzwang the pair reads LOSS one way and DRAW the other; here it reads LOSS both ways, and the only way to state that is to put both boards in the base and let the checker resolve each to the other. Black to move: Kf5 must leave the white pawn or the black king must abandon e6, and Syzygy gives mate in 24 against.\n\nThis is the reason the pair is stored as two positions rather than as one position with a sentence about the other. A claim about what happens when the side to move changes is a claim about two boards, and a base that stores one of them is storing half a claim.",
+      "tablebase": {
+        "source": "Lichess tablebase (Syzygy, 7-piece)",
+        "pieces": 4,
+        "wdl": "loss",
+        "dtz": -2,
+        "dtm": -24,
+        "category": "loss",
+        "note": "PROVEN LOSS for Black to move, dtz -2, mate in 24 against. The identical board with White to move is also a proven loss, at mate in 34. Whoever moves loses."
+      }
     }
   ],
   "counterexamples": [
