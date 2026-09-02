@@ -4,6 +4,9 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>NOX CHESS</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bebas+Neue&display=swap">
 <style>
   :root{
     --bg-0:#0b0c10;
@@ -119,13 +122,15 @@
     --tint:var(--gold);
     --tint-lit:var(--gold-soft);
     --tint-glow:rgba(217,164,65,.34);
+    --font:"Bebas Neue",-apple-system,BlinkMacSystemFont,"Segoe UI",Helvetica,Arial,sans-serif;
   }
 
   *{box-sizing:border-box;}
   html,body{height:100%;}
   body{
     margin:0;
-    font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Helvetica,Arial,sans-serif;
+    font-family:var(--font);
+    font-synthesis:style;
     color:var(--text);
     /* Night sky. Very nearly black, with the faintest blue in it — this is
        what shows before the photograph in #sky has arrived, and at any edge
@@ -187,14 +192,14 @@
   /* ---------- header ---------- */
   header{text-align:center; margin-bottom:26px;}
   .eyebrow{
-    font-size:11px; letter-spacing:.42em; text-transform:uppercase;
+    font-size:14.5px; letter-spacing:.42em; text-transform:uppercase;
     color:var(--muted); margin-bottom:12px;
   }
   h1{
     margin:0;
-    font-family:Georgia,"Times New Roman",serif;
+    font-family:var(--font);
     font-weight:400;
-    font-size:clamp(38px,8vw,68px);
+    font-size:clamp(50.5px,10.7vw,91px);
     letter-spacing:.16em;
     text-indent:.16em;
     background:linear-gradient(180deg,#fdf3dd 0%, var(--gold-soft) 45%, #a97821 100%);
@@ -207,8 +212,8 @@
     margin:14px auto 0; max-width:460px; color:var(--gold);
   }
   .rule span{flex:1; height:1px; background:linear-gradient(90deg,transparent,var(--gold),transparent); opacity:.55;}
-  .rule b{font-size:15px; opacity:.8;}
-  .tagline{margin:12px 0 0; color:var(--muted); font-size:13.5px; letter-spacing:.04em;}
+  .rule b{font-size:19px; opacity:.8;}
+  .tagline{margin:12px 0 0; color:var(--muted); font-size:17.5px; letter-spacing:.04em;}
 
   /* ---------- layout ---------- */
   .layout{
@@ -259,7 +264,7 @@
   .sq.light{background:linear-gradient(160deg,#efe3cc,#e2d3b5);}
   .sq.dark{background:linear-gradient(160deg,#87684a,#6d5137);}
   .sq .coord{
-    position:absolute; font-size:9.5px; font-weight:700; letter-spacing:.05em;
+    position:absolute; font-size:12px; font-weight:700; letter-spacing:.05em;
     opacity:.5; pointer-events:none;
   }
   .sq .coord.file{right:3px; bottom:1px;}
@@ -460,15 +465,15 @@
      colour caption, which the name beside it has already given */
   .board-bar .clock{border:0; background:transparent; padding:0; box-shadow:none;}
   .board-bar .clock .who{display:none;}
-  .board-bar .clock .time{font-size:clamp(17px,2.3vw,23px);}
+  .board-bar .clock .time{font-size:clamp(21.5px,2.95vw,29.5px);}
   .board-bar .clock.active{background:transparent; box-shadow:none;}
   .board-bar .clock.active .time{color:var(--gold-soft);}
   .board-bar:empty{display:none;}
   .bar-name{
-    font-size:13px; letter-spacing:.06em; color:var(--text);
+    font-size:17px; letter-spacing:.06em; color:var(--text);
     overflow:hidden; text-overflow:ellipsis; white-space:nowrap;
   }
-  .bar-name .sub{color:var(--muted); font-size:11px; letter-spacing:.14em; margin-left:8px;}
+  .bar-name .sub{color:var(--muted); font-size:14.5px; letter-spacing:.14em; margin-left:8px;}
   #barTop{margin-bottom:4px;}
   #barBottom{margin-top:4px;}
   .clock-pool{display:none;}          /* the bars take these two in and out */
@@ -488,8 +493,8 @@
     background:linear-gradient(180deg,var(--ctl-1),var(--ctl-2));
     border:1px solid var(--ctl-line); color:var(--text);
   }
-  .bot .bn{font-size:11.5px; font-weight:600; letter-spacing:.02em;}
-  .bot .be{font-size:10px; color:var(--muted); font-variant-numeric:tabular-nums;}
+  .bot .bn{font-size:15px; font-weight:600; letter-spacing:.02em;}
+  .bot .be{font-size:12.5px; color:var(--muted); font-variant-numeric:tabular-nums;}
   .bot:hover{border-color:var(--ctl-edge);}
   .bot.active{
     border-color:var(--gold);
@@ -502,8 +507,8 @@
     width:100%; margin-top:7px; flex-direction:row; justify-content:center; gap:10px;
     padding:12px 4px;
   }
-  .bot.big .bn{font-size:14px; letter-spacing:.16em;}
-  .bot.big .be{font-size:12px;}
+  .bot.big .bn{font-size:18px; letter-spacing:.16em;}
+  .bot.big .be{font-size:15.5px;}
   /* the strongest rung is an account's to play; a guest sees it locked */
   .bot.locked{opacity:.5;}
   .bot.locked:hover{border-color:var(--line);}
@@ -526,7 +531,7 @@
     padding:11px 12px; border-radius:var(--r-sm); text-align:left;
     background:linear-gradient(180deg,var(--ctl-1),var(--ctl-2));
     border:1px solid var(--ctl-line); color:var(--text);
-    font-size:12.5px; letter-spacing:.05em;
+    font-size:16px; letter-spacing:.05em;
   }
   .vis:hover{border-color:var(--ctl-edge);}
   .vis.active{
@@ -537,7 +542,7 @@
 
   .time-grid{display:grid; grid-template-columns:repeat(3,1fr); gap:7px;}
   .tm{
-    padding:10px 4px; border-radius:var(--r-sm); font-size:12px; white-space:nowrap;
+    padding:10px 4px; border-radius:var(--r-sm); font-size:15.5px; white-space:nowrap;
     background:linear-gradient(180deg,var(--ctl-1),var(--ctl-2));
     border:1px solid var(--ctl-line); color:var(--text);
   }
@@ -563,7 +568,7 @@
 
   /* ---------- open rooms ---------- */
   .room-who{
-    font-size:13.5px; letter-spacing:.05em; color:var(--text);
+    font-size:17.5px; letter-spacing:.05em; color:var(--text);
     padding:8px 14px; border-radius:999px;
     border:1px solid var(--line); background:rgba(0,0,0,.3);
     max-width:220px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;
@@ -574,13 +579,13 @@
     gap:clamp(18px,3vw,40px); align-items:start;
   }
   @media (max-width:760px){ .rooms-page{grid-template-columns:minmax(0,1fr);} }
-  .rooms-aside .primary{width:100%; padding:14px 0; font-size:13px; letter-spacing:.14em;}
+  .rooms-aside .primary{width:100%; padding:14px 0; font-size:17px; letter-spacing:.14em;}
   .rooms-main{max-width:620px;}
   .rooms-title{
-    margin:0; font-family:Georgia,serif; font-weight:400;
-    font-size:clamp(22px,3.4vw,32px); letter-spacing:.12em; color:var(--gold-soft);
+    margin:0; font-family:var(--font); font-weight:400;
+    font-size:clamp(29.5px,4.55vw,42.5px); letter-spacing:.12em; color:var(--gold-soft);
   }
-  .rooms-sub{margin:8px 0 20px; font-size:13px; color:var(--muted);}
+  .rooms-sub{margin:8px 0 20px; font-size:17px; color:var(--muted);}
 
   /* ---------- clocks ---------- */
   .clocks{
@@ -595,10 +600,10 @@
     transition:border-color .2s var(--ease), background .2s var(--ease),
                box-shadow .2s var(--ease);
   }
-  .clock .who{font-size:10px; letter-spacing:.2em; font-weight:600; color:var(--muted);}
+  .clock .who{font-size:12.5px; letter-spacing:.2em; font-weight:600; color:var(--muted);}
   .clock .time{
-    font-family:ui-monospace,SFMono-Regular,Menlo,monospace;
-    font-size:clamp(19px,3.2vw,26px); font-weight:600;
+    font-family:var(--font);
+    font-size:clamp(24.5px,4.1vw,33.5px); font-weight:600;
     font-variant-numeric:tabular-nums; color:var(--text);
   }
   /* The side to move is lit from within rather than merely outlined: on a
@@ -637,7 +642,7 @@
      tells its members apart. A new control picks a rank; it does not invent a
      fourth, and it does not reach for its own radius or its own shadow. */
   button{
-    font:inherit; font-size:13px; font-weight:500; letter-spacing:.03em;
+    font:inherit; font-size:17px; font-weight:500; letter-spacing:.03em;
     color:var(--text); background:linear-gradient(180deg,var(--ctl-1),var(--ctl-2));
     border:1px solid var(--ctl-line); border-radius:var(--r-md);
     padding:10px 15px; cursor:pointer;
@@ -714,7 +719,7 @@
      panel divided into five. One rule now, and the gold tick in front of it is
      what makes a panel look titled instead of merely labelled. */
   .card h2, .sec h2, .console-title, .rules-title{
-    margin:0 0 12px; font-size:10.5px; letter-spacing:.22em; text-transform:uppercase;
+    margin:0 0 12px; font-size:14px; letter-spacing:.22em; text-transform:uppercase;
     color:var(--muted); font-weight:650;
     /* wraps rather than squeezes: the Levels card is narrow and its counter
        drops to a second line there, exactly as it did when it was floated */
@@ -739,7 +744,7 @@
     display:flex; align-items:center; gap:9px;
     padding:9px 15px; border-radius:10px;
     background:#fff; color:#1f1f1f; border:1px solid #dadce0;
-    font-size:13px; font-weight:600;
+    font-size:17px; font-weight:600;
   }
   .acct-btn:hover{background:#f4f5f7; border-color:#c4c8ce;}
   .acct-btn svg{width:17px; height:17px; flex:none;}
@@ -747,7 +752,7 @@
   .acct-auth{display:flex; align-items:center; gap:8px;}
   .acct-signup, .acct-login{
     padding:9px 17px; border-radius:9px;
-    font-size:12.5px; font-weight:650; letter-spacing:.12em;
+    font-size:16px; font-weight:650; letter-spacing:.12em;
   }
   .acct-signup{
     background:linear-gradient(180deg,#e2b357,#b07f22);
@@ -762,11 +767,11 @@
 
   /* Signed in: the name, and nothing else. */
   .acct-name{
-    font-size:13px; font-weight:600; letter-spacing:.06em; color:var(--gold-soft);
+    font-size:17px; font-weight:600; letter-spacing:.06em; color:var(--gold-soft);
     max-width:190px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;
   }
   @media (max-width:560px){
-    .acct-signup, .acct-login{padding:8px 12px; font-size:11.5px; letter-spacing:.08em;}
+    .acct-signup, .acct-login{padding:8px 12px; font-size:15px; letter-spacing:.08em;}
   }
 
   /* ---------- sign up / log in ----------
@@ -783,12 +788,12 @@
   .auth-logo:hover{transform:none; filter:brightness(1.08);}
   .auth-caption{
     margin:clamp(18px,3vh,32px) 0 0;
-    font-family:Georgia,serif; font-weight:400; letter-spacing:.1em;
-    font-size:clamp(19px,3vw,27px); color:var(--gold-soft);
+    font-family:var(--font); font-weight:400; letter-spacing:.1em;
+    font-size:clamp(24.5px,3.85vw,35px); color:var(--gold-soft);
   }
   .auth-google{
     margin-top:clamp(26px,4.4vh,44px);
-    padding:14px 26px; font-size:15px; border-radius:12px;
+    padding:14px 26px; font-size:19px; border-radius:12px;
     box-shadow:0 10px 30px rgba(0,0,0,.5);
   }
   .auth-google svg{width:20px; height:20px;}
@@ -796,7 +801,7 @@
   .auth-swap{
     margin-top:20px; padding:6px 10px;
     background:transparent; border:0;
-    font-size:12.5px; color:var(--muted);
+    font-size:16px; color:var(--muted);
     text-decoration:underline; text-underline-offset:3px;
   }
   .auth-swap:hover{color:var(--gold-soft); transform:none;}
@@ -805,7 +810,7 @@
   .set-foot{margin-top:26px; display:flex; justify-content:center;}
   .danger-btn{
     padding:11px 30px; border-radius:10px;
-    font-size:12.5px; font-weight:650; letter-spacing:.16em;
+    font-size:16px; font-weight:650; letter-spacing:.16em;
     background:rgba(224,90,77,.10);
     border:1px solid rgba(224,90,77,.45); color:#e8695d;
   }
@@ -815,11 +820,11 @@
   }
   .auth-steps{
     margin:0 0 20px; padding:0 0 0 20px; text-align:left;
-    color:var(--muted); font-size:13px; line-height:1.75;
+    color:var(--muted); font-size:17px; line-height:1.75;
   }
   .auth-steps b{color:var(--gold-soft); font-weight:600;}
   .auth-steps code{
-    font-family:ui-monospace,Menlo,monospace; font-size:12px;
+    font-family:var(--font); font-size:15.5px;
     color:var(--gold-soft); background:rgba(217,164,65,.1);
     padding:1px 5px; border-radius:4px;
   }
@@ -834,7 +839,7 @@
   .welcome h1 img{width:clamp(230px,44vw,420px); height:auto; display:block;}
   .welcome-line{
     margin:clamp(14px,2.4vh,26px) 0 0;
-    font-size:clamp(14px,1.9vw,17.5px); color:var(--muted); letter-spacing:.02em;
+    font-size:clamp(18px,2.44vw,22px); color:var(--muted); letter-spacing:.02em;
   }
 
   /* ---------- screens ---------- */
@@ -874,10 +879,10 @@
   /* the flourish and the line under it sit closer to the title, and read
      quieter, so the eye carries on down to the name box and PLAY */
   .hero .rule{margin-top:clamp(14px,2vh,24px);}
-  .hero .rule b{font-size:clamp(15px,2.2vw,20px); opacity:.85;}
+  .hero .rule b{font-size:clamp(19px,2.82vw,26px); opacity:.85;}
   .hero .tagline{
     margin-top:clamp(11px,1.7vh,18px);
-    font-size:clamp(13px,1.55vw,15.5px); line-height:1.55;
+    font-size:clamp(17px,1.99vw,20px); line-height:1.55;
   }
   /* the same sheen, masked by the artwork instead of by text, so the shine
      travels across the letters and the knight and nothing else */
@@ -896,24 +901,24 @@
   /* who you are, above the buttons — filled in once and remembered */
   .name-title{
     margin:clamp(16px,2.6vh,28px) 0 0;
-    font-family:Georgia,serif; font-weight:400; letter-spacing:.12em;
-    font-size:clamp(24px,4.2vw,38px); color:var(--gold-soft);
+    font-family:var(--font); font-weight:400; letter-spacing:.12em;
+    font-size:clamp(32px,5.61vw,50.5px); color:var(--gold-soft);
   }
   .name-form{display:flex; flex-direction:column; align-items:center; width:100%;}
   .name-hint{
     margin:12px 0 0; min-height:1.4em; max-width:340px; text-align:center;
-    font-size:12px; line-height:1.5; color:var(--muted);
+    font-size:15.5px; line-height:1.5; color:var(--muted);
   }
   .name-hint.bad{color:var(--danger);}
   .name-hint.good{color:var(--good);}
-  .name-save{margin-top:22px; padding:13px 40px; font-size:13px; letter-spacing:.2em;}
+  .name-save{margin-top:22px; padding:13px 40px; font-size:17px; letter-spacing:.2em;}
   .name-save:disabled{opacity:.4; cursor:not-allowed;}
   .name-box input.bad{border-color:var(--danger);}
 
   .name-box{margin-top:clamp(20px,3.2vh,34px); display:flex; justify-content:center;}
   .name-box input{
     width:clamp(220px,62vw,330px); text-align:center;
-    font:inherit; font-size:15px; letter-spacing:.12em;
+    font:inherit; font-size:19px; letter-spacing:.12em;
     padding:13px 18px; border-radius:12px;
     background:rgba(255,255,255,.035);
     border:1px solid var(--line); color:var(--text);
@@ -935,7 +940,7 @@
   }
   .play-btn{
     width:var(--play-w); height:var(--btn-h);
-    font-size:clamp(18px,3.4vw,27px); font-weight:700;
+    font-size:clamp(23.5px,4.37vw,35px); font-weight:700;
     letter-spacing:.3em; text-indent:.3em;
     border-radius:14px; padding:0;
     background:linear-gradient(180deg,#e9bd60,#b07f22);
@@ -950,12 +955,12 @@
     width:var(--btn-h); height:var(--btn-h);
     display:flex; flex-direction:column; align-items:center; justify-content:center; gap:7px;
     border-radius:14px; padding:0;
-    font-size:clamp(11px,2.1vw,15px); font-weight:650; letter-spacing:.14em;
+    font-size:clamp(14.5px,2.7vw,19px); font-weight:650; letter-spacing:.14em;
     background:linear-gradient(180deg,var(--ctl-1),var(--ctl-2));
     border:1px solid var(--ctl-line); color:var(--text);
   }
   .social-btn .ico{
-    font-size:clamp(20px,3.8vw,29px); line-height:1;
+    font-size:clamp(26px,4.88vw,37px); line-height:1;
     color:var(--gold); opacity:.85; letter-spacing:1px;
   }
   .social-btn:hover{border-color:var(--gold); color:var(--gold-soft);}
@@ -967,7 +972,7 @@
     width:calc((var(--play-w) + var(--btn-h) + var(--btn-gap)) * .84);
     height:clamp(54px,10vw,74px);
     border-radius:12px; padding:0;
-    font-size:clamp(12px,2.2vw,15px); font-weight:600; letter-spacing:.2em;
+    font-size:clamp(15.5px,2.82vw,19px); font-weight:600; letter-spacing:.2em;
     background:linear-gradient(180deg,var(--ctl-1),var(--ctl-2));
     border:1px solid var(--ctl-line); color:var(--muted);
   }
@@ -987,7 +992,7 @@
   .nav-item{position:relative;}
   .nav-btn{
     padding:11px 18px; border-radius:10px; background:transparent; border:1px solid transparent;
-    font-size:clamp(12px,1.45vw,15px); font-weight:650; letter-spacing:.16em;
+    font-size:clamp(17.5px,2.19vw,22.5px); font-weight:650; letter-spacing:.16em;
     color:var(--text);
   }
   .nav-btn:hover, .nav-item:focus-within > .nav-btn{
@@ -1022,7 +1027,7 @@
     display:flex; align-items:center; justify-content:space-between; gap:10px;
     width:100%; text-align:left; padding:8px 11px; border-radius:7px;
     background:transparent; border:0; color:#d8dbe4;
-    font-size:12.5px; letter-spacing:.03em; white-space:nowrap;
+    font-size:16px; letter-spacing:.03em; white-space:nowrap;
   }
   .menu-btn:hover, .menu-btn:focus-visible{
     background:rgba(217,164,65,.16); color:var(--gold-soft); transform:none;
@@ -1041,7 +1046,7 @@
   .menu-btn.locked:hover, .menu-btn.locked:focus-visible{
     background:rgba(255,255,255,.05); color:#7d8394;
   }
-  .chev{color:var(--gold); font-size:14px; line-height:1;}
+  .chev{color:var(--gold); font-size:18px; line-height:1;}
 
   /* the second level opens alongside; Play is the leftmost item, so there is
      always room on that side */
@@ -1094,7 +1099,7 @@
 
   .hero-set{
     margin-top:clamp(30px,5vh,50px); display:flex; gap:clamp(8px,2.4vw,22px);
-    font-size:clamp(19px,3.6vw,30px); color:#4a4335;
+    font-size:clamp(24.5px,4.62vw,38.5px); color:#4a4335;
   }
   .hero-set span{opacity:0; animation:riseIn .7s ease forwards;}
   @keyframes riseIn{from{opacity:0; transform:translateY(10px);} to{opacity:.85; transform:none;}}
@@ -1107,10 +1112,10 @@
   }
   .setup-head{text-align:center; margin-bottom:30px;}
   .setup-head h2{
-    margin:0; font-family:Georgia,serif; font-weight:400; font-size:clamp(26px,4.6vw,40px);
+    margin:0; font-family:var(--font); font-weight:400; font-size:clamp(35px,6.15vw,54px);
     letter-spacing:.14em; color:var(--gold-soft);
   }
-  .setup-head p{margin:10px 0 0; color:var(--muted); font-size:13.5px;}
+  .setup-head p{margin:10px 0 0; color:var(--muted); font-size:17.5px;}
 
   .mode-grid{display:grid; grid-template-columns:repeat(3,1fr); gap:16px;}
   /* no vision chosen — all three go red, with one caption under the middle card */
@@ -1154,11 +1159,11 @@
   /* the icons demonstrate the mode — they only come clear on hover */
   .mode-card:hover .icon{filter:none; opacity:1;}
   .mode-card[data-mode="fog"]:hover .icon{-webkit-mask-image:none; mask-image:none;}
-  .mode-card strong{display:block; margin-top:12px; font-size:16px; letter-spacing:.1em; color:var(--gold-soft);}
-  .mode-card small{display:block; margin-top:8px; color:var(--muted); font-size:12.5px;}
+  .mode-card strong{display:block; margin-top:12px; font-size:20.5px; letter-spacing:.1em; color:var(--gold-soft);}
+  .mode-card small{display:block; margin-top:8px; color:var(--muted); font-size:16px;}
   .mode-card .go{
     margin-top:auto; padding-top:18px;
-    font-size:10.5px; letter-spacing:.26em; color:var(--gold);
+    font-size:13px; letter-spacing:.26em; color:var(--gold);
     opacity:.45; transition:opacity .25s;   /* always visible — touch devices never hover */
   }
   .mode-card:hover .go, .mode-card.active .go{opacity:1;}
@@ -1218,9 +1223,9 @@
       linear-gradient(180deg, rgba(217,164,65,.2), rgba(217,164,65,.05)),
       var(--surf-solid);
   }
-  .half-title{font-size:13px; letter-spacing:.15em; font-weight:650; color:var(--gold-soft);}
+  .half-title{font-size:17.5px; letter-spacing:.15em; font-weight:650; color:var(--gold-soft);}
   .half:hover .half-title, .half.active .half-title{color:#fff4dc;}
-  .half-sub{margin-top:8px; font-size:11.5px; line-height:1.45; color:var(--muted);}
+  .half-sub{margin-top:8px; font-size:15px; line-height:1.45; color:var(--muted);}
 
   /* no hover to reveal with — show both halves outright */
   @media (hover:none){
@@ -1231,14 +1236,14 @@
 
   /* ---------- the engine's move, explained ---------- */
   .coach-move{
-    font-family:Georgia,serif; font-size:19px; letter-spacing:.06em;
+    font-family:var(--font); font-size:24.5px; letter-spacing:.06em;
     color:var(--good); display:flex; align-items:baseline; gap:9px;
   }
   .coach-move .cm-eval{
-    font-family:inherit; font-size:12px; letter-spacing:.08em;
+    font-family:inherit; font-size:15.5px; letter-spacing:.08em;
     color:var(--muted); font-variant-numeric:tabular-nums;
   }
-  .coach-why{margin-top:9px; font-size:12.5px; line-height:1.65; color:#c9cdd8;}
+  .coach-why{margin-top:9px; font-size:16px; line-height:1.65; color:#c9cdd8;}
   .coach-why em{color:var(--gold-soft); font-style:normal;}
 
   /* ---------- review arrows and move marks ---------- */
@@ -1259,7 +1264,7 @@
     display:flex; align-items:center; justify-content:center;
     min-width:2.1cqmin; height:2.1cqmin; padding:0 .45cqmin;
     border-radius:.7cqmin;
-    font-family:Georgia,serif; font-weight:700; font-size:1.55cqmin; line-height:1;
+    font-family:var(--font); font-weight:700; font-size:1.55cqmin; line-height:1;
     color:#fff; box-shadow:0 .25cqmin .6cqmin rgba(0,0,0,.45);
   }
   .mark.m-brilliant b{background:#3fa4d8;}
@@ -1279,14 +1284,14 @@
     display:flex; align-items:center; gap:14px;
   }
   .rev-nav{display:flex; gap:6px; flex:none;}
-  .rev-nav button{padding:8px 13px; font-size:13px; line-height:1;}
+  .rev-nav button{padding:8px 13px; font-size:17px; line-height:1;}
   .rev-body{flex:1; min-width:0;}
   .rev-head{display:flex; align-items:center; gap:10px; flex-wrap:wrap;}
   .rev-count{
-    font-size:10.5px; letter-spacing:.18em; text-transform:uppercase; color:var(--muted);
+    font-size:13px; letter-spacing:.18em; text-transform:uppercase; color:var(--muted);
   }
   .rev-verdict{
-    font-size:10px; letter-spacing:.16em; text-transform:uppercase; font-weight:700;
+    font-size:12.5px; letter-spacing:.16em; text-transform:uppercase; font-weight:700;
     padding:3px 9px; border-radius:999px;
   }
   .rev-verdict.v-brilliant{color:#08222e; background:#3fa4d8;}
@@ -1297,11 +1302,11 @@
   .rev-verdict.v-inaccuracy{color:#d8c35a; border:1px solid rgba(216,195,90,.45);}
   .rev-verdict.v-mistake{color:#e0a341; border:1px solid rgba(224,163,65,.5);}
   .rev-verdict.v-blunder{color:#fff; background:var(--danger);}
-  .rev-line{margin-top:6px; font-size:13.5px; color:var(--text); line-height:1.5;}
+  .rev-line{margin-top:6px; font-size:17.5px; color:var(--text); line-height:1.5;}
   .rev-line b{color:var(--gold-soft);}
   .rev-eval{
     margin-left:6px; font-variant-numeric:tabular-nums;
-    font-size:12.5px; color:var(--muted);
+    font-size:16px; color:var(--muted);
   }
   .rev-done{flex:none;}
   @media (max-width:520px){
@@ -1320,10 +1325,10 @@
   #screen-game.puzzle-mode.rush #clockW{display:flex !important;}
   .pz-strikes{letter-spacing:.22em; color:#d0453c;}
   .pz-count{color:var(--gold-soft); font-variant-numeric:tabular-nums;}
-  .puzzle-card .pz-ask{font-size:14px; color:var(--text); line-height:1.5;}
+  .puzzle-card .pz-ask{font-size:18px; color:var(--text); line-height:1.5;}
   .puzzle-card .pz-ask b{color:var(--gold-soft);}
   .pz-say{
-    margin-top:9px; font-size:13.5px; line-height:1.55; color:var(--muted);
+    margin-top:9px; font-size:17.5px; line-height:1.55; color:var(--muted);
     border-left:2px solid transparent; padding-left:0; transition:padding .15s ease;
   }
   .pz-say.right{color:var(--good); border-color:var(--good); padding-left:9px;}
@@ -1331,13 +1336,13 @@
   .pz-say.told{color:var(--muted); border-color:var(--line); padding-left:9px;}
   .pz-themes{display:flex; flex-wrap:wrap; gap:5px; margin-top:10px;}
   .pz-theme{
-    font-size:9.5px; letter-spacing:.14em; text-transform:uppercase;
+    font-size:12px; letter-spacing:.14em; text-transform:uppercase;
     padding:3px 7px; border-radius:999px;
     color:var(--muted); border:1px solid var(--line);
   }
   .pz-theme.rating{color:var(--gold-soft); border-color:rgba(212,175,110,.35);}
   .pz-controls{display:flex; gap:8px; margin-top:14px;}
-  .pz-controls button{flex:1; padding:9px 6px; font-size:12px;}
+  .pz-controls button{flex:1; padding:9px 6px; font-size:15.5px;}
   /* the follow-up gets a row of its own: it is the one control on this card
      that is worth anything only after the puzzle is over, and squeezing a
      fourth button into the row above would shorten the three that are always
@@ -1351,10 +1356,10 @@
   .pz-why p:last-child{margin-bottom:0;}
   .pz-why-lead{font-weight:600;}
   .pz-why-tag{
-    display:inline-block; font-size:10px; letter-spacing:.09em; text-transform:uppercase;
+    display:inline-block; font-size:12.5px; letter-spacing:.09em; text-transform:uppercase;
     color:var(--gold-soft); margin-right:5px;
   }
-  .pz-why-swing{color:var(--muted); font-size:12px;}
+  .pz-why-swing{color:var(--muted); font-size:15.5px;}
   .pz-why-line{list-style:none; margin:0 0 7px; padding:0;}
   .pz-why-line li{margin:0 0 4px; padding-left:11px; border-left:2px solid var(--line);}
   .pz-why-line li.you{border-left-color:var(--gold-soft);}
@@ -1367,10 +1372,10 @@
      side by side. The "before" bar is muted and the "after" bar is gold —
      the same pairing the line above it uses for their moves and yours. */
   .pz-eval{margin-top:10px;}
-  .pz-eval-head{font-size:12px; color:var(--muted); margin-bottom:6px;}
+  .pz-eval-head{font-size:15.5px; color:var(--muted); margin-bottom:6px;}
   .pz-eval-row{display:flex; align-items:center; gap:8px; margin-bottom:5px;}
   .pz-eval-when{
-    flex:0 0 88px; font-size:10px; letter-spacing:.09em; text-transform:uppercase;
+    flex:0 0 88px; font-size:12.5px; letter-spacing:.09em; text-transform:uppercase;
     color:var(--muted); white-space:nowrap; overflow:hidden; text-overflow:ellipsis;
   }
   .pz-eval-track{
@@ -1380,14 +1385,14 @@
   .pz-eval-track i{display:block; height:100%; border-radius:999px; background:var(--muted);}
   .pz-eval-row.after .pz-eval-track i{background:var(--gold-soft);}
   .pz-eval-pct{
-    flex:0 0 32px; text-align:right; font-size:12px;
+    flex:0 0 32px; text-align:right; font-size:15.5px;
     font-variant-numeric:tabular-nums; color:var(--muted);
   }
   .pz-eval-row.after .pz-eval-pct{color:var(--gold-soft);}
-  .pz-eval-note{margin:6px 0 0; font-size:12px; color:var(--muted);}
+  .pz-eval-note{margin:6px 0 0; font-size:15.5px; color:var(--muted);}
   .pz-eval-note b{color:var(--good); font-weight:600;}
   .pz-eval-note b.down{color:#e0864d;}
-  .pz-follow{width:100%; margin-top:8px; padding:9px 6px; font-size:12px;}
+  .pz-follow{width:100%; margin-top:8px; padding:9px 6px; font-size:15.5px;}
   .pz-follow-say{color:var(--gold-soft); border-color:rgba(212,175,110,.45); padding-left:9px;}
   /* study mode speaks in a different voice from the card: the card is the
      verdict on the puzzle, this is a conversation about a position the player
@@ -1399,7 +1404,7 @@
   /* pushed to the far end of the heading by .card h2 > span, not floated: the
      heading is a flex row now */
   .pz-progress{
-    font-size:10px; letter-spacing:.14em; color:var(--muted);
+    font-size:12.5px; letter-spacing:.14em; color:var(--muted);
     font-variant-numeric:tabular-nums; white-space:nowrap;
   }
   .pz-grid{
@@ -1409,7 +1414,7 @@
     background:var(--well); box-shadow:inset 0 1px 3px rgba(0,0,0,.45);
   }
   .pz-lv{
-    padding:7px 0; font-size:11.5px; font-variant-numeric:tabular-nums;
+    padding:7px 0; font-size:15px; font-variant-numeric:tabular-nums;
     border:1px solid var(--line); border-radius:var(--r-xs);
     background:rgba(255,255,255,.03); color:var(--muted); cursor:pointer;
     box-shadow:none;
@@ -1432,7 +1437,7 @@
      reach. */
   .pzv-cat{
     display:inline-block; margin-top:2px;
-    font-size:12px; letter-spacing:.3em; text-transform:uppercase;
+    font-size:15.5px; letter-spacing:.3em; text-transform:uppercase;
     color:var(--gold-soft); font-weight:700;
   }
   #screen-pzvision .setup-head p{margin:8px 0 0;}
@@ -1450,7 +1455,7 @@
     background:radial-gradient(circle at 50% 40%, rgba(255,255,255,.05), rgba(6,7,10,.96) 70%);
   }
   .pzv-art-word{
-    font-family:Georgia,"Times New Roman",serif; font-size:44px; line-height:1;
+    font-family:var(--font); font-size:56.5px; line-height:1;
     color:rgba(212,175,110,.5); filter:blur(1.5px); transition:filter .45s ease;
   }
   .pzv-card:hover .pzv-art-word{filter:none;}
@@ -1472,20 +1477,20 @@
   .pzv-mini .pzv-men{
     position:absolute; left:0; right:0; bottom:0; height:25%;
     display:grid; grid-template-columns:repeat(8,1fr); grid-template-rows:1fr 1fr;
-    font-size:10px; line-height:1; color:#fbf6ea; text-align:center;
+    font-size:12.5px; line-height:1; color:#fbf6ea; text-align:center;
     text-shadow:0 1px 0 #2a2118, 0 0 2px rgba(0,0,0,.6);
   }
   .pzv-mini .pzv-men span{display:flex; align-items:center; justify-content:center;}
   .pzv-facts{
     display:flex; flex-direction:column; gap:3px; margin-top:12px; width:100%;
-    font-size:11px; color:var(--muted);
+    font-size:14.5px; color:var(--muted);
   }
   .pzv-facts span{display:flex; justify-content:space-between; gap:10px;}
   .pzv-facts b{font-weight:600; letter-spacing:.04em;}
   .pzv-facts b.yes{color:var(--good);}
   .pzv-facts b.no{color:#8b8477;}
   .pzv-note{
-    text-align:center; margin:26px 0 0; font-size:12px; color:var(--muted);
+    text-align:center; margin:26px 0 0; font-size:15.5px; color:var(--muted);
   }
   /* the heading is two words longer than the setup screen's and wraps into the
      Back button's corner on a phone; the button is out of the flow, so the
@@ -1509,12 +1514,12 @@
   }
   .pz-pc-row{display:flex; align-items:baseline; gap:12px; line-height:1.5;}
   .pz-pc-tag{
-    flex:0 0 96px; font-size:9.5px; letter-spacing:.16em; text-transform:uppercase;
+    flex:0 0 96px; font-size:12px; letter-spacing:.16em; text-transform:uppercase;
     color:var(--muted); white-space:nowrap;
   }
   .pz-pc-list{
     flex:1 1 auto; min-width:0;
-    font-size:13.5px; letter-spacing:.03em; color:var(--text);
+    font-size:17.5px; letter-spacing:.03em; color:var(--text);
     font-variant-numeric:tabular-nums; word-spacing:.12em;
   }
   .pz-pc-row + .pz-pc-row{border-top:1px solid var(--line); padding-top:6px;}
@@ -1531,12 +1536,12 @@
   }
   .pz-stage-in{text-align:center; padding:20px;}
   .pz-stage-lead{
-    margin:0; font-family:Georgia,"Times New Roman",serif;
-    font-size:clamp(17px,2.4vw,24px); letter-spacing:.12em;
+    margin:0; font-family:var(--font);
+    font-size:clamp(21.5px,3.08vw,30.5px); letter-spacing:.12em;
     color:rgba(212,175,110,.62);
   }
   .pz-stage-sub{
-    margin:10px 0 0; font-size:12px; letter-spacing:.22em;
+    margin:10px 0 0; font-size:15.5px; letter-spacing:.22em;
     text-transform:uppercase; color:var(--muted);
   }
 
@@ -1545,7 +1550,7 @@
   .pz-entry input{flex:1 1 auto; min-width:0;}
   .pz-console .entry-hint{margin:8px 0 0;}
   .pz-console-say{
-    margin-top:8px; font-size:12.5px; line-height:1.5; color:var(--muted);
+    margin-top:8px; font-size:16px; line-height:1.5; color:var(--muted);
     display:none;
   }
   .pz-console-say.show{display:block;}
@@ -1554,16 +1559,16 @@
 
   /* the info card: one line the size of a headline, and everything else small */
   .pz-info .pz-turn{
-    font-size:15px; letter-spacing:.24em; font-weight:700;
+    font-size:19px; letter-spacing:.24em; font-weight:700;
     color:var(--gold-soft); text-transform:uppercase;
   }
   .pz-info .pz-turn.check::after{
-    content:"CHECK"; margin-left:10px; font-size:9.5px; letter-spacing:.18em;
+    content:"CHECK"; margin-left:10px; font-size:12px; letter-spacing:.18em;
     color:#e0864d; vertical-align:2px;
   }
   .pz-meta{
     display:flex; flex-wrap:wrap; gap:4px 14px; margin-top:9px;
-    font-size:11.5px; color:var(--muted);
+    font-size:15px; color:var(--muted);
   }
   .pz-meta b{color:var(--text); font-weight:600;}
   .pz-info .pz-ask{margin-top:11px;}
@@ -1584,7 +1589,7 @@
      only the element is not. */
   .pr-page{margin-top:clamp(10px,2vh,22px); padding-bottom:40px;}
   .pr-head{max-width:760px;}
-  .pr-head p{margin:10px 0 0; color:var(--muted); font-size:13.5px; line-height:1.7;}
+  .pr-head p{margin:10px 0 0; color:var(--muted); font-size:17.5px; line-height:1.7;}
 
   /* what the practising has come to: the level on the left, the numbers beside it */
   .pr-summary{
@@ -1594,11 +1599,11 @@
   }
   @media (max-width:820px){ .pr-summary{grid-template-columns:minmax(0,1fr);} }
   .pr-level-name{
-    font-family:Georgia,serif; font-size:clamp(21px,3.2vw,29px);
+    font-family:var(--font); font-size:clamp(27px,4.1vw,37px);
     letter-spacing:.16em; color:var(--gold-soft);
   }
   .pr-level-cap{
-    margin-top:6px; font-size:9.5px; letter-spacing:.26em;
+    margin-top:6px; font-size:12px; letter-spacing:.26em;
     text-transform:uppercase; color:var(--muted);
   }
   .pr-level .rank-gauge{margin-top:15px;}
@@ -1609,11 +1614,11 @@
     background:var(--well); border:1px solid var(--line);
   }
   .pr-fig b{
-    display:block; font-size:clamp(17px,2.5vw,23px); font-weight:600;
+    display:block; font-size:clamp(21.5px,3.22vw,29.5px); font-weight:600;
     font-variant-numeric:tabular-nums; color:var(--text);
   }
   .pr-fig small{
-    display:block; margin-top:5px; font-size:9px; letter-spacing:.16em;
+    display:block; margin-top:5px; font-size:11.5px; letter-spacing:.16em;
     text-transform:uppercase; color:var(--muted);
   }
 
@@ -1625,8 +1630,8 @@
   @media (max-width:940px){ .pr-cards{grid-template-columns:repeat(2,minmax(0,1fr));} }
   @media (max-width:620px){ .pr-cards{grid-template-columns:minmax(0,1fr);} }
   .pr-card{display:flex; flex-direction:column; padding:18px 18px 16px; text-align:left;}
-  .pr-name{font-size:14.5px; font-weight:650; letter-spacing:.09em; color:var(--gold-soft);}
-  .pr-desc{margin-top:8px; flex:1; color:var(--muted); font-size:12.5px; line-height:1.65;}
+  .pr-name{font-size:18.5px; font-weight:650; letter-spacing:.09em; color:var(--gold-soft);}
+  .pr-desc{margin-top:8px; flex:1; color:var(--muted); font-size:16px; line-height:1.65;}
   .pr-foot{margin-top:15px; display:flex; align-items:center; justify-content:space-between; gap:10px;}
   .pr-dots{display:flex; gap:4px; align-items:center;}
   .pr-dots i{
@@ -1634,9 +1639,9 @@
     background:rgba(255,255,255,.10); border:1px solid var(--line);
   }
   .pr-dots i.on{background:var(--gold); border-color:var(--gold);}
-  .pr-go{padding:8px 15px; font-size:11px; letter-spacing:.16em; font-weight:650;}
+  .pr-go{padding:8px 15px; font-size:14.5px; letter-spacing:.16em; font-weight:650;}
   .pr-score{
-    margin-top:11px; font-size:10px; letter-spacing:.14em; text-transform:uppercase;
+    margin-top:11px; font-size:12.5px; letter-spacing:.14em; text-transform:uppercase;
     color:#5c6070; font-variant-numeric:tabular-nums;
   }
   /* locked reads as not-yet-earned, the way the unbuilt nav items read as
@@ -1658,7 +1663,7 @@
     --board-max:540px;
     display:flex; flex-direction:column; align-items:center; gap:10px;
   }
-  .pr-orient{font-size:9.5px; letter-spacing:.22em; text-transform:uppercase; color:var(--muted);}
+  .pr-orient{font-size:12px; letter-spacing:.22em; text-transform:uppercase; color:var(--muted);}
   /* square colour at its hardest has no board to look at, and the space it
      leaves should say so rather than close up */
   .pr-noboard{
@@ -1666,7 +1671,7 @@
     text-align:center; line-height:1.9;
     background:linear-gradient(160deg, var(--surf-1), var(--surf-2));
     border:1px dashed rgba(217,164,65,.24); color:var(--muted);
-    font-size:12.5px; letter-spacing:.1em;
+    font-size:16px; letter-spacing:.1em;
   }
 
   /* Three states a game has no use for: the square you chose, the square that
@@ -1701,36 +1706,36 @@
   @media (prefers-reduced-motion:reduce){ .sq.pr-target::before{animation:none;} }
 
   /* ---- the question, and the answer to it ---- */
-  .pr-quiz .pr-q{font-size:16px; line-height:1.55; color:var(--text);}
+  .pr-quiz .pr-q{font-size:20.5px; line-height:1.55; color:var(--text);}
   .pr-quiz .pr-q b{
     color:var(--gold-soft); letter-spacing:.06em;
-    font-family:ui-monospace,SFMono-Regular,Menlo,monospace;
+    font-family:var(--font);
   }
-  .pr-sub{margin-top:8px; font-size:12px; color:var(--muted); line-height:1.6;}
+  .pr-sub{margin-top:8px; font-size:15.5px; color:var(--muted); line-height:1.6;}
   .pr-sub:empty{display:none;}
   .pr-seq{
     margin-top:12px; padding:11px 13px; border-radius:10px;
     background:var(--well); border:1px solid var(--line);
-    font-family:ui-monospace,SFMono-Regular,Menlo,monospace;
-    font-size:13px; line-height:1.85; color:#d3d7e1; letter-spacing:.03em;
+    font-family:var(--font);
+    font-size:17px; line-height:1.85; color:#d3d7e1; letter-spacing:.03em;
   }
   .pr-seq:empty{display:none;}
   .pr-seq b{color:var(--gold-soft); font-weight:600;}
   .pr-ans{margin-top:14px; display:flex; flex-wrap:wrap; gap:7px;}
   .pr-ans:empty{display:none;}
-  .pr-ans button{flex:1 1 auto; min-width:62px; padding:10px 8px; font-size:12.5px;}
+  .pr-ans button{flex:1 1 auto; min-width:62px; padding:10px 8px; font-size:16px;}
   /* the twelve men, in two rows of six, with "empty square" under them */
   .pr-ans.glyphs{display:grid; grid-template-columns:repeat(6,1fr);}
   .pr-ans.glyphs button{min-width:0; padding:5px 0; font-size:23px; line-height:1.15;}
-  .pr-ans.glyphs button.wide{grid-column:1/-1; font-size:12px; padding:9px 0;}
+  .pr-ans.glyphs button.wide{grid-column:1/-1; font-size:15.5px; padding:9px 0;}
   .pr-ans.glyphs .pc-svg{width:.86em; height:.86em; margin:0 auto;}
   .pr-ans .g-w{color:#fbf6ea; -webkit-text-stroke:1.2px #2a2118;}
   .pr-ans .g-b{color:#2c2f3a; -webkit-text-stroke:1.2px #0a0b0e;}
   .pr-ans .g-w .pc-svg{fill:#fbf6ea; stroke:#2a2118; stroke-width:1.5;}
   .pr-ans .g-b .pc-svg{fill:#2c2f3a; stroke:#0a0b0e; stroke-width:1.5;}
   .pr-ans input{
-    flex:1; min-width:0; font:inherit; font-size:15px; letter-spacing:.16em; text-align:center;
-    font-family:ui-monospace,SFMono-Regular,Menlo,monospace;
+    flex:1; min-width:0; font:inherit; font-size:19px; letter-spacing:.16em; text-align:center;
+    font-family:var(--font);
     padding:11px 12px; border-radius:9px;
     background:var(--well); border:1px solid var(--line); color:var(--text);
     box-shadow:inset 0 1px 3px rgba(0,0,0,.45);
@@ -1742,27 +1747,27 @@
   #prSay:empty{display:none;}
   .pr-controls{display:flex; gap:8px; margin-top:14px;}
   .pr-controls:empty{display:none;}
-  .pr-controls button{flex:1; padding:10px 6px; font-size:12px;}
+  .pr-controls button{flex:1; padding:10px 6px; font-size:15.5px;}
   .pr-stats{display:grid; grid-template-columns:repeat(3,1fr); gap:8px; margin-bottom:13px;}
   .pr-stats div{text-align:center;}
   .pr-stats span{
-    display:block; font-size:16px; font-weight:600;
+    display:block; font-size:20.5px; font-weight:600;
     font-variant-numeric:tabular-nums; color:var(--gold-soft);
   }
   .pr-stats small{
-    display:block; margin-top:4px; font-size:8.5px; letter-spacing:.16em;
+    display:block; margin-top:4px; font-size:11px; letter-spacing:.16em;
     text-transform:uppercase; color:var(--muted);
   }
   .pr-exit{display:flex; gap:8px;}
-  .pr-exit button{flex:1; padding:10px 6px; font-size:12px;}
+  .pr-exit button{flex:1; padding:10px 6px; font-size:15.5px;}
 
   /* the mini challenge types its moves, exactly as complete blindfold does */
   .pr-log{
     height:min(30vh,232px); overflow-y:auto; margin-top:12px;
     padding:12px 13px; border-radius:10px;
     background:var(--well); border:1px solid var(--line);
-    font-family:ui-monospace,SFMono-Regular,Menlo,monospace;
-    font-size:12.5px; line-height:1.75;
+    font-family:var(--font);
+    font-size:16px; line-height:1.75;
   }
   .pr-log::-webkit-scrollbar{width:8px;}
   .pr-log::-webkit-scrollbar-thumb{background:#2e3340; border-radius:4px;}
@@ -1779,20 +1784,20 @@
     display:flex; align-items:baseline; justify-content:space-between; gap:14px;
     padding:9px 13px; border-radius:10px;
     background:var(--well); border:1px solid var(--line);
-    font-size:10.5px; letter-spacing:.18em; text-transform:uppercase; color:var(--muted);
+    font-size:13px; letter-spacing:.18em; text-transform:uppercase; color:var(--muted);
   }
   .pr-result div b{
-    font-size:15px; letter-spacing:.04em; text-transform:none;
+    font-size:19px; letter-spacing:.04em; text-transform:none;
     color:var(--gold-soft); font-variant-numeric:tabular-nums;
   }
   .pr-tip{
     margin:0 0 18px; padding:11px 13px; border-radius:10px; text-align:left;
     background:rgba(217,164,65,.08); border:1px solid rgba(217,164,65,.24);
-    font-size:12.5px; line-height:1.65; color:#cfd3dd;
+    font-size:16px; line-height:1.65; color:#cfd3dd;
   }
   .pr-tip b{color:var(--gold-soft); font-weight:600;}
   .pr-done-btns{flex-direction:column; gap:8px;}
-  .pr-done-btns button{width:100%; padding:12px 0; font-size:12.5px; letter-spacing:.12em;}
+  .pr-done-btns button{width:100%; padding:12px 0; font-size:16px; letter-spacing:.12em;}
 
 
   /* ---------- the lessons ----------
@@ -1806,14 +1811,14 @@
      a phone, and one word too wide drags the whole page sideways with it. */
   .lsn-title{
     margin:0 0 0 clamp(12px,1.6vw,26px); min-width:0;
-    font-family:Georgia,serif; font-weight:400; line-height:1.15;
-    font-size:clamp(18px,3.2vw,38px); letter-spacing:.1em; color:var(--gold-soft);
+    font-family:var(--font); font-weight:400; line-height:1.15;
+    font-size:clamp(24.5px,4.28vw,50.5px); letter-spacing:.1em; color:var(--gold-soft);
   }
 
   .lsn-hub{max-width:820px; margin:clamp(12px,2.4vh,26px) auto 0;}
   .lsn-lede{
     margin:0 0 clamp(16px,2.6vh,26px); text-align:center;
-    color:var(--muted); font-size:13.5px; line-height:1.75;
+    color:var(--muted); font-size:17.5px; line-height:1.75;
   }
   .lsn-lede b{color:var(--gold-soft); font-weight:600;}
 
@@ -1828,16 +1833,16 @@
   .lsn-row .num{
     flex:none; width:30px; height:30px; border-radius:9px;
     display:flex; align-items:center; justify-content:center;
-    font-size:12px; font-variant-numeric:tabular-nums; font-weight:650;
+    font-size:15.5px; font-variant-numeric:tabular-nums; font-weight:650;
     color:var(--muted); border:1px solid var(--line); background:rgba(0,0,0,.28);
   }
-  .lsn-row .nm{flex:1; min-width:0; font-size:14px; letter-spacing:.04em;}
+  .lsn-row .nm{flex:1; min-width:0; font-size:18px; letter-spacing:.04em;}
   .lsn-row .nm small{
     display:block; margin-top:4px; color:var(--muted);
-    font-size:11.5px; letter-spacing:.02em; line-height:1.55;
+    font-size:15px; letter-spacing:.02em; line-height:1.55;
   }
   .lsn-row .tick{
-    flex:none; font-size:12px; letter-spacing:.16em; text-transform:uppercase;
+    flex:none; font-size:15.5px; letter-spacing:.16em; text-transform:uppercase;
     color:var(--muted); font-weight:650;
   }
   .lsn-row.done{border-color:rgba(111,191,115,.4);}
@@ -1850,21 +1855,21 @@
   .lsn-hub-foot{
     margin-top:20px; display:flex; gap:10px; justify-content:center; flex-wrap:wrap;
   }
-  .lsn-hub-foot button{padding:12px 26px; font-size:12.5px; letter-spacing:.16em; font-weight:650;}
+  .lsn-hub-foot button{padding:12px 26px; font-size:16px; letter-spacing:.16em; font-weight:650;}
 
   /* ---- one lesson, open ---- */
   .lsn-course{margin-top:clamp(10px,2vh,20px);}
   .lsn-bar{
     display:flex; align-items:center; gap:14px; margin-bottom:14px;
   }
-  .lsn-bar .ghost{flex:none; padding:8px 14px; font-size:12px;}
+  .lsn-bar .ghost{flex:none; padding:8px 14px; font-size:15.5px;}
   /* The gauge, and the label that says what it is a gauge of. The label sits
      ABOVE the line rather than beside it so the line itself can run the full
      width of the page: with a dot for every lesson on it, a short line reads
      as a crowd of dots rather than as a course. */
   .lsn-prog{flex:1; min-width:120px; display:flex; flex-direction:column; gap:9px;}
   .lsn-count{
-    font-size:10.5px; letter-spacing:.18em; text-transform:uppercase;
+    font-size:13px; letter-spacing:.18em; text-transform:uppercase;
     color:var(--muted); font-variant-numeric:tabular-nums;
     overflow:hidden; text-overflow:ellipsis; white-space:nowrap;
   }
@@ -1928,38 +1933,38 @@
   .lsn-under button.wide{flex:1 1 100%;}
   .lsn-cap{
     width:min(100%,var(--board-max)); text-align:center; min-height:15px;
-    font-size:11px; letter-spacing:.16em; text-transform:uppercase; color:var(--muted);
+    font-size:14.5px; letter-spacing:.16em; text-transform:uppercase; color:var(--muted);
   }
   .lsn-cap:empty{display:none;}
 
   .lsn-card h2{margin-bottom:10px;}
   .lsn-what{
-    font-size:13px; line-height:1.75; color:#cfd3dd;
+    font-size:17px; line-height:1.75; color:#cfd3dd;
   }
   .lsn-what p{margin:0 0 10px;}
   .lsn-what p:last-child{margin-bottom:0;}
   .lsn-what b{color:var(--gold-soft); font-weight:600;}
   .lsn-what code{
-    font-family:ui-monospace,SFMono-Regular,Menlo,monospace;
-    font-size:12.5px; color:var(--gold-soft);
+    font-family:var(--font);
+    font-size:16px; color:var(--gold-soft);
   }
   .lsn-ask{
     margin-top:13px; padding:11px 13px; border-radius:10px;
     background:rgba(0,0,0,.28); border:1px solid var(--line);
-    font-size:13.5px; line-height:1.6; color:var(--text);
+    font-size:17.5px; line-height:1.6; color:var(--text);
   }
   .lsn-ask:empty{display:none;}
   .lsn-ask b{color:var(--gold-soft);}
   .lsn-ask code{
-    font-family:ui-monospace,SFMono-Regular,Menlo,monospace;
-    font-size:15px; letter-spacing:.06em; color:var(--gold-soft);
+    font-family:var(--font);
+    font-size:19px; letter-spacing:.06em; color:var(--gold-soft);
   }
 
   .lsn-choices{display:grid; grid-template-columns:1fr 1fr; gap:7px; margin-top:11px;}
   .lsn-choices:empty{display:none;}
   .lsn-choices.col{grid-template-columns:1fr;}
   .lsn-choice{
-    padding:10px 11px; border-radius:9px; text-align:center; font-size:12.5px;
+    padding:10px 11px; border-radius:9px; text-align:center; font-size:16px;
     background:linear-gradient(180deg,var(--ctl-1),var(--ctl-2));
     border:1px solid var(--ctl-line); color:var(--text);
   }
@@ -1972,7 +1977,7 @@
   }
 
   .lsn-say{
-    margin-top:11px; min-height:17px; font-size:12.5px; line-height:1.6;
+    margin-top:11px; min-height:17px; font-size:16px; line-height:1.6;
     padding-left:9px; border-left:2px solid transparent; color:var(--muted);
   }
   .lsn-say.good{color:var(--good); border-left-color:rgba(111,191,115,.5);}
@@ -1981,7 +1986,7 @@
 
   /* the sub-heading inside a card that is carrying two things at once */
   .lsn-subcap{
-    margin:14px 0 4px; font-size:10px; letter-spacing:.22em; text-transform:uppercase;
+    margin:14px 0 4px; font-size:12.5px; letter-spacing:.22em; text-transform:uppercase;
     color:var(--muted); font-weight:600;
   }
   /* the challenge position, said in words: a column of men and a column of
@@ -1989,7 +1994,7 @@
   .lsn-pos .lsn-subcap:first-child{margin-top:0;}
   .lsn-pos-row{
     display:flex; align-items:baseline; gap:10px; padding:3px 0;
-    font-size:12.5px; line-height:1.5;
+    font-size:16px; line-height:1.5;
   }
   .lsn-pos-row .man{flex:none; min-width:62px; color:var(--muted);}
   .lsn-pos-row .sqs{
@@ -1998,7 +2003,7 @@
   }
 
   .lsn-acts{display:flex; gap:8px; margin-top:14px;}
-  .lsn-acts button{flex:1; padding:10px 6px; font-size:12px;}
+  .lsn-acts button{flex:1; padding:10px 6px; font-size:15.5px;}
   /* answered, and the way on is the only lit thing in the card */
   @keyframes lsnready{
     0%,100%{box-shadow:0 8px 22px rgba(217,164,65,.20), inset 0 1px 0 rgba(255,255,255,.42);}
@@ -2008,8 +2013,8 @@
 
   /* the lesson's own console — the game's, at the size this column offers */
   .lsn-boardcol .console{width:min(100%,var(--board-max)); padding:15px;}
-  .lsn-boardcol .log{height:min(34vh,280px); font-size:12.5px;}
-  .lsn-boardcol .entry input{font-size:15px; padding:11px 13px;}
+  .lsn-boardcol .log{height:min(34vh,280px); font-size:16px;}
+  .lsn-boardcol .entry input{font-size:19px; padding:11px 13px;}
 
   /* squares the lesson is talking about: a picked one, a right one, a wrong
      one, and the file-and-rank cross a hint lights up. Painted with ::after so
@@ -2044,7 +2049,7 @@
   /* every square named, for the lesson that is about the names */
   .board.named .sq .coord.all{
     position:absolute; left:0; right:0; top:50%; transform:translateY(-50%);
-    text-align:center; font-size:11.5px; font-weight:700; letter-spacing:.04em;
+    text-align:center; font-size:15px; font-weight:700; letter-spacing:.04em;
     opacity:.62; pointer-events:none;
   }
 
@@ -2053,21 +2058,21 @@
     max-width:560px; margin:clamp(30px,8vh,90px) auto 0; text-align:center;
     padding:34px 28px 30px;
   }
-  .lsn-done .lsn-mark{font-size:44px; line-height:1; color:var(--gold); margin-bottom:14px;}
+  .lsn-done .lsn-mark{font-size:56.5px; line-height:1; color:var(--gold); margin-bottom:14px;}
   .lsn-done h2{
-    margin:0; font-family:Georgia,serif; font-weight:400;
-    font-size:clamp(23px,4vw,33px); letter-spacing:.12em; color:var(--gold-soft);
+    margin:0; font-family:var(--font); font-weight:400;
+    font-size:clamp(30.5px,5.35vw,44.5px); letter-spacing:.12em; color:var(--gold-soft);
   }
-  .lsn-done p{margin:14px 0 0; color:var(--muted); font-size:13.5px; line-height:1.75;}
+  .lsn-done p{margin:14px 0 0; color:var(--muted); font-size:17.5px; line-height:1.75;}
   .lsn-done .row{margin-top:24px; display:flex; gap:10px; justify-content:center; flex-wrap:wrap;}
-  .lsn-done .row button{padding:13px 26px; font-size:12.5px; letter-spacing:.16em; font-weight:650;}
+  .lsn-done .row button{padding:13px 26px; font-size:16px; letter-spacing:.16em; font-weight:650;}
 
   @media (max-width:620px){
     .lsn-choices{grid-template-columns:1fr;}
     .lsn-acts{flex-wrap:wrap;}
     .lsn-acts button{flex:1 1 44%;}
     .lsn-row{padding:12px 13px; gap:11px;}
-    .lsn-row .nm{font-size:13px;}
+    .lsn-row .nm{font-size:17px;}
     /* the gauge takes the whole width here rather than sharing a line with
        the way out — a label squeezed beside a button is a label nobody reads */
     .lsn-bar{flex-wrap:wrap; gap:10px;}
@@ -2078,7 +2083,7 @@
   /* ---------- open rooms ---------- */
   #screen-rooms{position:relative;}
   .rooms-top{display:flex; justify-content:center; margin-bottom:26px;}
-  #btnHostRoom{padding:14px 38px; font-size:13px; font-weight:700; letter-spacing:.2em; border-radius:12px;}
+  #btnHostRoom{padding:14px 38px; font-size:17px; font-weight:700; letter-spacing:.2em; border-radius:12px;}
   .room-list{
     width:100%; max-width:620px; margin:0 auto;
     display:flex; flex-direction:column; gap:12px;
@@ -2086,20 +2091,20 @@
   .room{display:flex; align-items:center; gap:16px; padding:18px 20px;}
   .room-main{flex:1; min-width:0; text-align:left;}
   .room-vision{
-    font-size:13px; letter-spacing:.18em; text-transform:uppercase;
+    font-size:17px; letter-spacing:.18em; text-transform:uppercase;
     font-weight:650; color:var(--gold-soft);
   }
-  .room-meta{margin-top:6px; font-size:12.5px; color:var(--muted); line-height:1.5;}
-  .room-play{flex:none; padding:10px 26px; font-size:12px; letter-spacing:.16em; font-weight:700;}
+  .room-meta{margin-top:6px; font-size:16px; color:var(--muted); line-height:1.5;}
+  .room-play{flex:none; padding:10px 26px; font-size:15.5px; letter-spacing:.16em; font-weight:700;}
   .room-empty{
     text-align:center; padding:30px 20px; color:var(--muted);
-    font-size:13px; line-height:1.7;
+    font-size:17px; line-height:1.7;
   }
   .room-mine{border-color:rgba(217,164,65,.45);}
   .room-mine .room-play{opacity:.5;}
   .room-note{
     max-width:620px; margin:0 auto 12px; text-align:center;
-    font-size:11.5px; letter-spacing:.14em; text-transform:uppercase;
+    font-size:15px; letter-spacing:.14em; text-transform:uppercase;
     font-weight:650; color:var(--danger); min-height:14px;
   }
 
@@ -2112,8 +2117,8 @@
   .log{
     height:min(48vh,380px); overflow-y:auto; padding:14px 16px; border-radius:10px;
     background:var(--well); border:1px solid var(--line);
-    font-family:ui-monospace,SFMono-Regular,Menlo,monospace;
-    font-size:13.5px; line-height:1.75;
+    font-family:var(--font);
+    font-size:17.5px; line-height:1.75;
   }
   .log::-webkit-scrollbar{width:8px;}
   .log::-webkit-scrollbar-thumb{background:#2e3340; border-radius:4px;}
@@ -2126,8 +2131,8 @@
 
   .entry{display:flex; gap:10px; margin-top:14px;}
   .entry input{
-    flex:1; min-width:0; font-size:16px; letter-spacing:.08em;
-    font-family:ui-monospace,SFMono-Regular,Menlo,monospace;
+    flex:1; min-width:0; font-size:20.5px; letter-spacing:.08em;
+    font-family:var(--font);
     padding:14px 16px; border-radius:10px;
     background:var(--well); border:1px solid var(--line); color:var(--text);
     box-shadow:inset 0 1px 3px rgba(0,0,0,.45);
@@ -2142,13 +2147,13 @@
   .local-entry:first-child{margin-top:14px;}
   .entry-tag{
     flex:none; width:56px; align-self:center;
-    font-size:10px; letter-spacing:.18em; font-weight:700; color:var(--muted);
+    font-size:12.5px; letter-spacing:.18em; font-weight:700; color:var(--muted);
   }
   .local-entry[data-side="w"] .entry-tag{color:var(--gold-soft);}
   .local-entry input:disabled{opacity:.35;}
 
-  .entry-hint{margin:12px 2px 0; font-size:11.5px; color:var(--muted); line-height:1.6;}
-  .entry-hint b{color:var(--gold-soft); font-weight:600; font-family:ui-monospace,Menlo,monospace;}
+  .entry-hint{margin:12px 2px 0; font-size:15px; color:var(--muted); line-height:1.6;}
+  .entry-hint b{color:var(--gold-soft); font-weight:600; font-family:var(--font);}
 
 
   .setup-opts{
@@ -2159,11 +2164,11 @@
   /* ten strength buttons and six clocks each need a full line to themselves */
   #optTime, #optOpponent{flex-basis:100%; justify-content:center;}
   .seg{flex-wrap:wrap; justify-content:center;}
-  .opt-group label{font-size:10.5px; letter-spacing:.22em; text-transform:uppercase; color:var(--muted);}
+  .opt-group label{font-size:13px; letter-spacing:.22em; text-transform:uppercase; color:var(--muted);}
 
   /* anything left unanswered when Start Play is pressed */
   .please{
-    display:none; font-size:10px; letter-spacing:.16em; text-transform:uppercase;
+    display:none; font-size:12.5px; letter-spacing:.16em; text-transform:uppercase;
     font-weight:650; color:var(--danger); white-space:nowrap;
   }
   /* every option in here is asked for on the box, so the rows inside stay untouched */
@@ -2295,8 +2300,8 @@
   }
   .rank-tier{
     position:relative; margin-top:6px; padding-top:20px;
-    font-family:Georgia,serif;
-    font-size:clamp(19px,3.4vw,27px); letter-spacing:.24em;
+    font-family:var(--font);
+    font-size:clamp(24.5px,4.37vw,35px); letter-spacing:.24em;
     text-transform:uppercase; color:var(--tint-lit);
   }
   /* The line the crest stands on: short, tapered, in the crest's own metal.
@@ -2311,12 +2316,12 @@
   /* Struck out of the same metal, top-lit like everything else here. */
   .rank-elo{
     margin-top:12px; line-height:1; font-weight:600;
-    font-size:clamp(34px,6vw,50px); font-variant-numeric:tabular-nums;
+    font-size:clamp(44px,7.7vw,64px); font-variant-numeric:tabular-nums;
     background:linear-gradient(180deg,#ffffff 0%, var(--tint-lit) 52%, var(--tint) 100%);
     -webkit-background-clip:text; background-clip:text; color:transparent;
   }
   .rank-elo-cap{
-    margin-top:9px; font-size:10.5px; letter-spacing:.28em;
+    margin-top:9px; font-size:13px; letter-spacing:.28em;
     text-transform:uppercase; color:var(--muted);
   }
 
@@ -2338,7 +2343,7 @@
   }
   .gauge-ends{
     display:flex; justify-content:space-between; gap:10px; margin-top:9px;
-    font-size:10.5px; letter-spacing:.18em; color:var(--muted);
+    font-size:13px; letter-spacing:.18em; color:var(--muted);
     font-variant-numeric:tabular-nums;
   }
 
@@ -2346,7 +2351,7 @@
      game it stands for, so what you chose is readable without opening it. */
   .rank-pick{
     width:100%; margin-top:28px; padding:17px 18px; border-radius:var(--r-lg);
-    font-size:12.5px; letter-spacing:.18em; text-transform:uppercase;
+    font-size:16px; letter-spacing:.18em; text-transform:uppercase;
   }
   /* Answered, so it wears the crest's metal rather than the site's gold: on
      this one page the tint is what "that is settled" looks like, which leaves
@@ -2366,7 +2371,7 @@
      it. */
   .rank-start{
     width:100%; margin-top:12px; padding:17px 0; border-radius:var(--r-lg);
-    font-size:13px; letter-spacing:.2em;
+    font-size:17px; letter-spacing:.2em;
   }
   /* Dark until both questions have answers, exactly as Start Play is beside
      the board: a button you cannot use should not look like one you can. */
@@ -2375,21 +2380,21 @@
     border-color:var(--ctl-line); color:#5f6472; box-shadow:none;
   }
   .rank-start.dim:hover{filter:none; transform:none; box-shadow:none;}
-  .rank-note{margin:16px 0 0; font-size:11.5px; color:var(--muted); line-height:1.6;}
+  .rank-note{margin:16px 0 0; font-size:15px; color:var(--muted); line-height:1.6;}
 
   /* the box those two questions are asked in — the one modal that reads as a
      form rather than an announcement, so it is aligned left */
   .rank-modal{max-width:420px; text-align:left;}
   .rank-field + .rank-field{margin-top:22px;}
   .rank-label{
-    margin-bottom:10px; font-size:11px; letter-spacing:.24em;
+    margin-bottom:10px; font-size:14.5px; letter-spacing:.24em;
     text-transform:uppercase; color:var(--muted);
   }
   .rank-opts{display:flex; gap:8px;}
   .rank-opts.col{flex-direction:column;}
   .rank-opts.col button{text-align:left; padding:12px 14px;}
   .rank-opts.row button{flex:1; text-align:center; padding:12px 6px;}
-  .rank-opts button{font-size:12.5px; letter-spacing:.08em;}
+  .rank-opts button{font-size:16px; letter-spacing:.08em;}
   .rank-opts button.active{
     border-color:var(--gold); color:var(--gold-soft); background:rgba(217,164,65,.12);
   }
@@ -2399,11 +2404,11 @@
   .set-row{display:flex; align-items:center; gap:16px; padding:20px 22px;}
   .set-row .txt{flex:1; min-width:0;}
   .set-row strong{
-    display:block; font-size:12px; letter-spacing:.22em; text-transform:uppercase; font-weight:650;
+    display:block; font-size:15.5px; letter-spacing:.22em; text-transform:uppercase; font-weight:650;
   }
-  .set-row small{display:block; margin-top:7px; color:var(--muted); font-size:12.5px; line-height:1.5;}
+  .set-row small{display:block; margin-top:7px; color:var(--muted); font-size:16px; line-height:1.5;}
   .set-state{
-    font-size:10.5px; letter-spacing:.2em; font-weight:650;
+    font-size:13px; letter-spacing:.2em; font-weight:650;
     color:var(--muted); width:30px; text-align:right;
   }
   .set-state.on{color:var(--gold-soft);}
@@ -2432,11 +2437,11 @@
   }
   .setup-back{position:absolute; top:0; left:0; z-index:2;}
   .start-btn{
-    padding:15px 46px; font-size:13px; font-weight:700;
+    padding:15px 46px; font-size:17px; font-weight:700;
     letter-spacing:.24em; text-indent:.24em; border-radius:var(--r-lg);
   }
   .lock-note{
-    margin:16px 0 0; text-align:center; font-size:11.5px; letter-spacing:.16em;
+    margin:16px 0 0; text-align:center; font-size:15px; letter-spacing:.16em;
     text-transform:uppercase; color:#6b7080;
   }
   .setup-foot{margin-top:18px; text-align:center; display:flex; gap:10px; justify-content:center;}
@@ -2529,7 +2534,7 @@
   }
   .match-note{
     display:none; margin:14px auto 0; max-width:420px;
-    font-size:11.5px; line-height:1.6; letter-spacing:.04em; color:var(--muted);
+    font-size:15px; line-height:1.6; letter-spacing:.04em; color:var(--muted);
   }
   .match-note b{color:var(--gold-soft); font-weight:600;}
 
@@ -2540,14 +2545,14 @@
   }
   .chips{display:flex; gap:8px; align-items:center; flex-wrap:wrap;}
   .brand{
-    font-family:Georgia,serif; font-size:clamp(15px,2.4vw,20px); letter-spacing:.24em;
+    font-family:var(--font); font-size:clamp(19px,3.08vw,26px); letter-spacing:.24em;
     color:var(--gold-soft); white-space:nowrap;
   }
   /* The two chips over the side column say what game this is. They are labels,
      not controls, so they are the one pill shape on the page and they never
      take the button family's lip or lift — that difference is the point. */
   .vision-chip{
-    font-size:10px; letter-spacing:.2em; text-transform:uppercase; font-weight:650;
+    font-size:12.5px; letter-spacing:.2em; text-transform:uppercase; font-weight:650;
     color:var(--gold-soft); border:1px solid rgba(217,164,65,.32);
     padding:5px 12px; border-radius:var(--r-pill);
     background:linear-gradient(180deg,rgba(217,164,65,.16),rgba(217,164,65,.05));
@@ -2560,7 +2565,7 @@
 
   .row{display:flex; gap:8px; flex-wrap:wrap;}
   .seg{display:flex; gap:6px;}
-  .seg button{flex:1; padding:8px 10px; font-size:12px; white-space:nowrap;}
+  .seg button{flex:1; padding:8px 10px; font-size:15.5px; white-space:nowrap;}
   .seg button.active{
     border-color:var(--gold); color:var(--gold-soft);
     background:linear-gradient(180deg,rgba(217,164,65,.22),rgba(217,164,65,.05));
@@ -2579,18 +2584,18 @@
   .tray{min-height:26px; font-size:20px; line-height:1.1; letter-spacing:1px; color:#cdc6b8;}
   .tray .b{color:#7e8290;}
   .adv{
-    font-size:11px; letter-spacing:.06em; font-weight:650; color:var(--good);
+    font-size:14.5px; letter-spacing:.06em; font-weight:650; color:var(--good);
     font-variant-numeric:tabular-nums;
   }
 
   .moves{
-    max-height:230px; overflow-y:auto; font-size:13px;
+    max-height:230px; overflow-y:auto; font-size:17px;
     font-variant-numeric:tabular-nums;
     display:grid; grid-template-columns:32px 1fr 1fr; gap:1px 6px; align-content:start;
     padding:9px 10px; border-radius:var(--r-sm);
     background:var(--well); box-shadow:inset 0 1px 3px rgba(0,0,0,.45);
   }
-  .moves .n{color:#6b7080; font-size:11.5px; letter-spacing:.04em; padding-top:4px;}
+  .moves .n{color:#6b7080; font-size:15px; letter-spacing:.04em; padding-top:4px;}
   .moves .m{padding:3px 7px; border-radius:var(--r-xs);}
   .moves .m.cur{
     background:rgba(217,164,65,.20); color:var(--gold-soft);
@@ -2599,7 +2604,7 @@
   .moves .m.pick{cursor:pointer;}
   .moves .m.pick:hover{background:rgba(255,255,255,.07);}
   .moves .m.pick.cur:hover{background:rgba(217,164,65,.28);}
-  .moves .empty{grid-column:1/-1; color:var(--muted); font-size:12.5px;}
+  .moves .empty{grid-column:1/-1; color:var(--muted); font-size:16px;}
 
   /* One scrollbar for everything in the column that scrolls. Three of them
      used to be spelled out separately, and the puzzle ladder had none. */
@@ -2627,7 +2632,7 @@
   .chat-log{
     max-height:190px; overflow-y:auto;
     display:flex; flex-direction:column; gap:7px;
-    font-size:13px; line-height:1.5;
+    font-size:17px; line-height:1.5;
     padding:10px; border-radius:var(--r-sm);
     background:var(--well); box-shadow:inset 0 1px 3px rgba(0,0,0,.45);
   }
@@ -2641,15 +2646,15 @@
     background:rgba(217,164,65,.14); border-color:rgba(217,164,65,.3);
   }
   .chat-who{
-    display:block; font-size:10px; letter-spacing:.16em; text-transform:uppercase;
+    display:block; font-size:12.5px; letter-spacing:.16em; text-transform:uppercase;
     color:var(--muted); font-weight:600; margin-bottom:2px;
   }
   .chat-msg.mine .chat-who{color:var(--gold-soft);}
-  .chat-empty{color:var(--muted); font-size:12.5px;}
-  .chat-sys{align-self:center; color:var(--muted); font-size:11.5px; font-style:italic;}
+  .chat-empty{color:var(--muted); font-size:16px;}
+  .chat-sys{align-self:center; color:var(--muted); font-size:15px; font-style:italic;}
   .chat-entry{display:flex; gap:8px; margin-top:12px;}
   .chat-entry input{
-    flex:1; min-width:0; font:inherit; font-size:13px;
+    flex:1; min-width:0; font:inherit; font-size:17px;
     padding:10px 12px; border-radius:var(--r-md);
     background:#0e1016; border:1px solid var(--line); color:var(--text);
     box-shadow:inset 0 1px 3px rgba(0,0,0,.45);
@@ -2667,15 +2672,15 @@
   }
   .rules-head:hover{transform:none; border-color:transparent; background:transparent;}
   .rules-title{
-    font-size:11px; letter-spacing:.24em; text-transform:uppercase;
+    font-size:15px; letter-spacing:.24em; text-transform:uppercase;
     color:var(--muted); font-weight:600;
   }
   .rules-head:hover .rules-title{color:var(--text);}
   .rules-cap{
-    font-size:10px; letter-spacing:.2em; text-transform:uppercase;
+    font-size:12.5px; letter-spacing:.2em; text-transform:uppercase;
     color:var(--gold); opacity:.85; white-space:nowrap;
   }
-  .rules-cap::after{content:" ▾"; font-size:9px;}
+  .rules-cap::after{content:" ▾"; font-size:11.5px;}
   .rules-card.open .rules-cap::after{content:" ▴";}
   .rules-head:hover .rules-cap{opacity:1;}
 
@@ -2688,10 +2693,10 @@
 
   .rules-table{
     width:100%; border-collapse:collapse; margin-top:14px;
-    font-size:11px; line-height:1.4;
+    font-size:14.5px; line-height:1.4;
   }
   .rules-table th{
-    text-align:left; font-size:9px; letter-spacing:.16em; text-transform:uppercase;
+    text-align:left; font-size:11.5px; letter-spacing:.16em; text-transform:uppercase;
     color:#6b7080; font-weight:600; padding:0 8px 7px 0;
     border-bottom:1px solid var(--line);
   }
@@ -2702,7 +2707,7 @@
   .rules-table tr:last-child td{border-bottom:0;}
   .rules-table td:first-child,
   .rules-table td:last-child{
-    font-family:ui-monospace,SFMono-Regular,Menlo,monospace;
+    font-family:var(--font);
     white-space:nowrap;
   }
   .rules-table td:first-child{color:var(--gold-soft);}
@@ -2718,8 +2723,8 @@
      two read as separate things rather than one crowded line. Only the word
      moves; the mark stays where it is on every other screen. */
   .social-title, .pr-title{
-    margin:0 0 0 clamp(12px,1.6vw,26px); font-family:Georgia,serif; font-weight:400;
-    font-size:clamp(26px,4.4vw,42px); letter-spacing:.12em; color:var(--gold-soft);
+    margin:0 0 0 clamp(12px,1.6vw,26px); font-family:var(--font); font-weight:400;
+    font-size:clamp(35px,5.89vw,56px); letter-spacing:.12em; color:var(--gold-soft);
     white-space:nowrap;
   }
   .social-page{
@@ -2739,7 +2744,7 @@
   .social-search{flex:1; min-width:0;}
   .social-label{
     display:block; margin-bottom:7px;
-    font-size:10.5px; letter-spacing:.22em; text-transform:uppercase; color:var(--muted);
+    font-size:13px; letter-spacing:.22em; text-transform:uppercase; color:var(--muted);
   }
   .social-field{
     display:flex; align-items:center; gap:9px;
@@ -2752,11 +2757,11 @@
   .social-field input{
     flex:1; min-width:0; padding:11px 0;
     background:transparent; border:0; outline:none;
-    color:var(--text); font:inherit; font-size:13.5px;
+    color:var(--text); font:inherit; font-size:17.5px;
   }
   .search-x{
     flex:none; width:24px; height:24px; padding:0; border-radius:6px;
-    background:transparent; border:0; color:var(--muted); font-size:17px; line-height:1;
+    background:transparent; border:0; color:var(--muted); font-size:21.5px; line-height:1;
   }
   .search-x:hover{color:var(--text); transform:none;}
 
@@ -2772,11 +2777,11 @@
   .mail-count{
     position:absolute; top:-6px; right:-6px; min-width:18px; height:18px; padding:0 5px;
     border-radius:999px; background:var(--danger); color:#fff;
-    font-size:11px; font-weight:700; line-height:18px; text-align:center;
+    font-size:14.5px; font-weight:700; line-height:18px; text-align:center;
   }
 
   .social-caption{
-    font-size:10.5px; letter-spacing:.22em; text-transform:uppercase; color:var(--muted);
+    font-size:13px; letter-spacing:.22em; text-transform:uppercase; color:var(--muted);
   }
   .social-rows{
     flex:1; display:flex; flex-direction:column; gap:9px;
@@ -2793,33 +2798,33 @@
     flex:none; width:38px; height:38px; border-radius:50%;
     display:flex; align-items:center; justify-content:center; overflow:hidden;
     background:linear-gradient(160deg,#2c3140,#1b1e26); border:1px solid var(--line);
-    color:var(--gold-soft); font-size:15px; font-weight:650; letter-spacing:.04em;
+    color:var(--gold-soft); font-size:19px; font-weight:650; letter-spacing:.04em;
   }
   .social-face img{width:100%; height:100%; object-fit:cover; display:block;}
   .social-who{flex:1; min-width:0;}
   .social-name{
-    font-size:14px; font-weight:600; letter-spacing:.03em; color:var(--text);
+    font-size:18px; font-weight:600; letter-spacing:.03em; color:var(--text);
     overflow:hidden; text-overflow:ellipsis; white-space:nowrap;
   }
-  .social-meta{margin-top:2px; font-size:11.5px; color:var(--muted); letter-spacing:.05em;}
+  .social-meta{margin-top:2px; font-size:15px; color:var(--muted); letter-spacing:.05em;}
 
   /* add-a-friend: a person with a plus, and nothing else to read */
   .add-btn{
     flex:none; display:flex; align-items:center; gap:7px;
     padding:8px 12px; border-radius:9px;
-    font-size:11.5px; letter-spacing:.1em; font-weight:650;
+    font-size:15px; letter-spacing:.1em; font-weight:650;
     color:var(--gold-soft); background:rgba(217,164,65,.10);
     border:1px solid rgba(217,164,65,.34);
   }
   .add-btn svg{width:17px; height:17px; flex:none;}
   .add-btn:hover{background:rgba(217,164,65,.18); border-color:var(--gold); transform:none;}
   .add-btn:disabled{color:var(--muted); background:transparent; border-color:var(--line);}
-  .row-note{flex:none; font-size:11.5px; letter-spacing:.1em; color:var(--muted);}
+  .row-note{flex:none; font-size:15px; letter-spacing:.1em; color:var(--muted);}
 
   .dots-btn{
     flex:none; width:34px; height:34px; padding:0; border-radius:8px;
     background:transparent; border:1px solid transparent; color:var(--muted);
-    font-size:19px; line-height:1;
+    font-size:24.5px; line-height:1;
   }
   .dots-btn:hover, .dots-btn.open{color:var(--gold-soft); border-color:var(--line); transform:none;}
 
@@ -2838,7 +2843,7 @@
   .friend-menu.up{top:auto; bottom:calc(100% - 6px);}
   .friend-menu button{
     display:block; width:100%; text-align:left; padding:8px 11px; border-radius:7px;
-    background:transparent; border:0; color:#d8dbe4; font-size:12.5px; letter-spacing:.03em;
+    background:transparent; border:0; color:#d8dbe4; font-size:16px; letter-spacing:.03em;
   }
   .friend-menu button:hover{background:rgba(217,164,65,.16); color:var(--gold-soft); transform:none;}
   .friend-menu button.soon{color:#6b7080;}
@@ -2848,7 +2853,7 @@
 
   .social-empty{
     padding:30px 18px; text-align:center; color:var(--muted);
-    font-size:13px; line-height:1.65;
+    font-size:17px; line-height:1.65;
     white-space:pre-line;                    /* the empty states are two lines */
   }
   .social-empty.bad{color:#e7908a;}
@@ -2858,7 +2863,7 @@
   }
   .social-link{
     width:100%; padding:12px 10px; border-radius:10px;
-    font-size:12px; letter-spacing:.12em; font-weight:650;
+    font-size:15.5px; letter-spacing:.12em; font-weight:650;
   }
   /* Quiet, the way the unbuilt items in the home nav are quiet — it should
      read as a button that is not ready, not as one that is broken. */
@@ -2866,7 +2871,7 @@
   .social-link.soon:hover{border-color:var(--line); color:#6b7080; transform:none;}
   .social-soon{
     margin:2px 0 0; text-align:center;
-    font-size:10.5px; letter-spacing:.18em; text-transform:uppercase; color:#5c6070;
+    font-size:13px; letter-spacing:.18em; text-transform:uppercase; color:#5c6070;
   }
 
   /* the notifications box: the same rows, in a modal */
@@ -2882,7 +2887,7 @@
   /* "wants to be friends" is one line or it is nothing */
   .note-row .social-meta{white-space:nowrap;}
   .yn{flex:none; display:flex; gap:6px;}
-  .yn button{padding:7px 11px; font-size:12px; border-radius:8px;}
+  .yn button{padding:7px 11px; font-size:15.5px; border-radius:8px;}
   .yn .yes{color:#9fe0a4; border-color:rgba(111,191,115,.4);}
   .yn .yes:hover{color:#fff; background:rgba(111,191,115,.18); border-color:var(--good);}
   .yn .no{color:#e7908a; border-color:rgba(224,90,77,.4);}
@@ -2920,12 +2925,12 @@
      under it rather than floating over the middle of them. */
   .lb-head{
     margin:0 0 4px; text-align:left;
-    font-family:Georgia,serif; font-weight:400;
-    font-size:clamp(26px,3.2vw,34px); letter-spacing:.1em; color:var(--gold-soft);
+    font-family:var(--font); font-weight:400;
+    font-size:clamp(33.5px,4.1vw,44px); letter-spacing:.1em; color:var(--gold-soft);
   }
   .lb-cap{
     margin:0 0 clamp(16px,2.2vh,22px); text-align:left;
-    font-size:11px; letter-spacing:.22em; text-transform:uppercase; color:var(--muted);
+    font-size:14.5px; letter-spacing:.22em; text-transform:uppercase; color:var(--muted);
   }
   /* Ten rows is the whole list and it is meant to be read at a glance, so the
      panel grows to hold them; the cap is only there for a short window. */
@@ -2940,7 +2945,7 @@
   .lb-row.me{background:rgba(217,164,65,.09); border-color:rgba(217,164,65,.42);}
   .lb-place{
     flex:none; width:28px; text-align:center;
-    font-size:16px; font-weight:700; color:var(--muted);
+    font-size:20.5px; font-weight:700; color:var(--muted);
     font-variant-numeric:tabular-nums;
   }
   .lb-row.top .lb-place{color:var(--gold);}
@@ -2953,16 +2958,16 @@
   }
   .lb-badge img{width:100%; height:100%; object-fit:contain; display:block;}
   /* the same name the social page draws people with, one size up */
-  .lb-row .social-name{font-size:15.5px;}
+  .lb-row .social-name{font-size:20px;}
   .lb-row .social-meta{
-    font-size:10.5px; letter-spacing:.16em; text-transform:uppercase;
+    font-size:13px; letter-spacing:.16em; text-transform:uppercase;
   }
   .lb-elo{flex:none; text-align:right;}
   .lb-num{
-    font-size:19px; font-weight:650; letter-spacing:.03em; color:var(--gold-soft);
+    font-size:24.5px; font-weight:650; letter-spacing:.03em; color:var(--gold-soft);
     font-variant-numeric:tabular-nums;
   }
-  .lb-cap-elo{font-size:10px; letter-spacing:.2em; color:#5c6070;}
+  .lb-cap-elo{font-size:12.5px; letter-spacing:.2em; color:#5c6070;}
   /* Narrow, there is no right half to sit in: it takes the width and the row
      it is on, and stops reserving a screenful of height it cannot centre in. */
   @media (max-width:760px){
@@ -2989,26 +2994,26 @@
     box-shadow:0 30px 80px rgba(0,0,0,.6), var(--lip);
   }
   .modal h3{
-    margin:0 0 6px; font-family:Georgia,serif; font-weight:400;
-    font-size:30px; letter-spacing:.1em; color:var(--gold-soft);
+    margin:0 0 6px; font-family:var(--font); font-weight:400;
+    font-size:38.5px; letter-spacing:.1em; color:var(--gold-soft);
   }
-  .modal p{margin:0 0 20px; color:var(--muted); font-size:14px; line-height:1.5;}
+  .modal p{margin:0 0 20px; color:var(--muted); font-size:18px; line-height:1.5;}
   /* small dismiss in the corner of the game-over box */
   .modal-x{
     position:absolute; top:10px; right:10px;
     width:30px; height:30px; padding:0; border-radius:8px;
     display:flex; align-items:center; justify-content:center;
-    font-size:20px; line-height:1; font-weight:400;
+    font-size:26px; line-height:1; font-weight:400;
     color:var(--muted); background:transparent; border:1px solid transparent;
   }
   .modal-x:hover{color:var(--text); border-color:var(--line); transform:none;}
   .promo{display:flex; gap:10px; justify-content:center;}
   .promo button{font-size:38px; padding:6px 14px; line-height:1.1; color:#fbf6ea;}
 
-  footer{margin-top:28px; text-align:center; color:#5c6070; font-size:11.5px; letter-spacing:.12em;}
+  footer{margin-top:28px; text-align:center; color:#5c6070; font-size:15px; letter-spacing:.12em;}
   kbd{
     background:rgba(24,30,48,.75); border:1px solid var(--line); border-bottom-width:2px;
-    border-radius:5px; padding:1px 5px; font-size:11px; font-family:inherit; color:var(--text);
+    border-radius:5px; padding:1px 5px; font-size:14.5px; font-family:inherit; color:var(--text);
   }
 </style>
 </head>
