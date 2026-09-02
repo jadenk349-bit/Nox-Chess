@@ -1794,3 +1794,25 @@ was.
 
 Neither change moves a firing rate. Both change what is said — the eighth and
 ninth time in three sessions that has been the right answer.
+
+
+## Five more conditions, all of them said rather than enforced
+
+The reason is the same every time: the geometry is there either way, and which
+way it cuts is what a learner needs told.
+
+`doubled-pawns` now names the **outpost the pair holds** and the **king they
+shield** — the doubled f-pawns after ...gxf6 are the classic case. All five of
+that record's indicators are now in the sentence, and none is a guard, because
+doubled pawns are a fact.
+
+`outpost` names a piece that can be **traded off** by a knight or a same-coloured
+bishop: the square survives the swap and the piece does not, so it is *held on
+loan until then*. A bishop of the wrong colour does not count, which is what
+makes the condition worth testing rather than approximating.
+
+`luft` says it concretely when the kings are actually on **opposite wings**,
+where the pawn move that makes air is also a hook. The wording carried that
+caveat in the abstract already; now it carries it where it applies.
+
+None of the three moves a firing rate. **69 of 246 unread.**

@@ -302,6 +302,41 @@ const STRUCTURAL = [
           const semi = f.files.semiOpenFor[h.c] || [];
           const near = semi.filter(fl => h.sq.some(sq => Math.abs(fl.charCodeAt(0) - sq.charCodeAt(0)) === 1));
           if (near.length) line += `; and the ${brief(near)} file beside them is half-open for them`;
+          // The last two compensations the record names, and both are readable
+          // off the board: "they create an OUTPOST the opponent cannot contest"
+          // and "they SHIELD THE KING rather than exposing it". A structure
+          // report that lists neither invites the conclusion the first trap
+          // forbids.
+          const P2 = FEAT.page;
+          let st2 = null;
+          try { st2 = P2.stateFromFEN(f.fen); } catch (e) { st2 = null; }
+          if (st2) {
+            const fwd = h.c === 'w' ? -1 : 1;
+            const holes = new Set(f.holes[h.c] || []);
+            const guarded = [];
+            for (const sq of h.sq) {
+              const col = sq.charCodeAt(0) - 97, row = 8 - Number(sq[1]);
+              for (const dc of [-1, 1]) {
+                const r = row + fwd, cc = col + dc;
+                if (r < 0 || r > 7 || cc < 0 || cc > 7) continue;
+                const name = 'abcdefgh'[cc] + (8 - r);
+                if (holes.has(name)) guarded.push(name);
+              }
+            }
+            if (guarded.length) {
+              line += `; they hold ${brief([...new Set(guarded)])}, which no enemy pawn can contest`;
+            }
+            const k = f.king[h.c];
+            if (k && k.square) {
+              const kf = k.square.charCodeAt(0), kr = Number(k.square[1]);
+              const shields = h.sq.filter(sq => Math.abs(sq.charCodeAt(0) - kf) <= 1 &&
+                                                (h.c === 'w' ? Number(sq[1]) > kr : Number(sq[1]) < kr));
+              if (shields.length >= 2) {
+                line += `; and ${brief(shields)} stand in front of their own king — here they shield it ` +
+                        `rather than expose it`;
+              }
+            }
+          }
           return line;
         }),
         slots: { file: hits[0].sq[0][0], square: hits[0].sq.join(', ') },
@@ -703,9 +738,33 @@ const STRUCTURAL = [
         if (o.length) hits.push({ c, o });
       }
       if (!hits.length) return null;
+      // "The occupant can be TRADED OFF by a knight or a same-coloured bishop
+      // with no compensation" - the record's first indicator_against. A piece
+      // that cannot be driven off but can be swapped off is holding the square
+      // on loan, and that is worth saying rather than hiding: the square is
+      // still a hole afterwards, but the piece is gone.
+      const tradeable = (c, x) => {
+        const i = sqIdx(x.square);
+        let atk;
+        try { atk = FEAT.page.attackersOf(st, i, other(c)); } catch (e) { return false; }
+        return atk.some(j => {
+          const q = st.b[j];
+          if (!q) return false;
+          if (q.t === 'N') return true;
+          return q.t === 'B' && FEAT.isLight(j) === FEAT.isLight(i);
+        });
+      };
       return {
         confidence: 'high',
-        because: hits.map(h => `${side(f, h.c)}'s ${h.o.map(x => `${x.piece === 'N' ? 'knight' : 'bishop'} on ${x.square}`).join(' and ')} cannot be driven off by a pawn, is defended by one, and bears on the position behind it`),
+        because: hits.map(h => {
+          const swap = h.o.filter(x => tradeable(h.c, x));
+          return `${side(f, h.c)}'s ${h.o.map(x => `${x.piece === 'N' ? 'knight' : 'bishop'} on ${x.square}`).join(' and ')} ` +
+                 `cannot be driven off by a pawn, is defended by one, and bears on the position behind it` +
+                 (swap.length
+                   ? ` — though it can be traded off on ${brief(swap.map(x => x.square))}, and the square is ` +
+                     `held on loan until it is`
+                   : '');
+        }),
         slots: { square: hits[0].o[0].square,
                  piece: hits[0].o[0].piece === 'N' ? 'knight' : 'bishop' },
         subjects: hits.map(h => h.c),
@@ -1173,8 +1232,22 @@ const STRUCTURAL = [
         // queen" is weaker than the guard above, which requires a rook standing
         // on a file that reaches the rank - and a sentence looser than its own
         // test teaches the looser rule.
-        because: hits.map(c => `${side(f, c)}'s king is on its back rank with no escape square, and ` +
-                               `${side(f, other(c))} has a rook on a file that reaches it`),
+        // "The opponent has castled on the other wing and can throw pawns
+        // forward" - the record's first indicator_against, and the concrete
+        // half of the caveat the wording already carries in general terms. When
+        // the kings are on opposite wings the pawn move that makes air is also
+        // a hook, and that is the standard error this record names.
+        because: hits.map(c => {
+          const mine = f.king[c] && f.king[c].square, theirs = f.king[other(c)] && f.king[other(c)].square;
+          const wing = sq => (sq && sq[0] <= 'c' ? 'q' : sq && sq[0] >= 'f' ? 'k' : null);
+          const opposite = mine && theirs && wing(mine) && wing(theirs) && wing(mine) !== wing(theirs);
+          return `${side(f, c)}'s king is on its back rank with no escape square, and ` +
+                 `${side(f, other(c))} has a rook on a file that reaches it` +
+                 (opposite
+                   ? ` — but the kings are on opposite wings, so the pawn move that makes air here is ` +
+                     `also a hook for the pawns coming at it`
+                   : '');
+        }),
         subjects: hits,
       };
     },

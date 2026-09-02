@@ -29,7 +29,7 @@ ranking. Nothing here should be read as saying the system is nearly finished.
 
 137 concepts · 202 sources · **111 engine-validated positions + 22 tablebase** ·
 **41 human-annotated corpus positions from 27 master games** · 32 replay-verified
-master games · 661 tests + 498 API + 374 audit + 3562 explanation assertions.
+master games · 661 tests + 504 API + 374 audit + 3570 explanation assertions.
 
 Ladder: researched 137, human-grounded 31, engine-verified 54, negative-tested
 32, ambiguity-tested 24, api-validated 53 of the 83 whose record allows it,
@@ -133,7 +133,7 @@ first entry in this corpus scored on weighting rather than on detection.
    `state/TRAPS.md` reached "0 unread" and then turned out to be reading half
    the list: it looked only at `false_positive_traps`, and half the conditions
    in this knowledge base live in `indicators_against`. Counting both, 74 are
-   enforced in the matcher, 20 in Layer 3, 29 argued on a record, **73
+   enforced in the matcher, 20 in Layer 3, 29 argued on a record, **69
    unread**. Twenty-five defects have come out of the reading so far, including one
    in Layer 3 that had been true of every measurement in the project.
 8. **The sharpest failures are no longer about detection.** Two corpus entries

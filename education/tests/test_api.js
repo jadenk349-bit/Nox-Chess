@@ -1958,6 +1958,46 @@ const { concepts } = API.knowledge();
      String(bat('4k3/3p4/8/8/8/8/3Q4/3RK3 w - - 0 1')));
 }
 
+{
+  // Three more compensations and caveats the records name, said rather than used
+  // as guards — the geometry is there either way and which way it cuts is what a
+  // learner needs told.
+  const line = (fen, id, move) => {
+    const c = API.analyzeWithEducation(move ? { fen, move } : { fen })
+      .concepts.find(x => x.id === id);
+    return c ? (c.because || [''])[0] : null;
+  };
+  // doubled-pawns: "they SHIELD THE KING rather than exposing it" — the doubled
+  // f-pawns after ...gxf6 are the classic case.
+  ok('doubled-pawns: names them as a shield when they stand in front of the king',
+     /stand in front of their own king — here they shield it rather than expose it/
+       .test(String(line('5rk1/5p1p/5p2/8/8/8/PPP2PPP/R3K3 w Q - 0 1', 'doubled-pawns'))),
+     String(line('5rk1/5p1p/5p2/8/8/8/PPP2PPP/R3K3 w Q - 0 1', 'doubled-pawns')));
+
+  // outpost: "the occupant can be TRADED OFF by a knight or a SAME-COLOURED
+  // bishop with no compensation" — the square survives the trade, the piece does
+  // not, and the difference is worth a clause.
+  ok('outpost: a knight that can swap it off is named',
+     /held on loan until it is/.test(String(line('4k3/4n3/8/3N4/2P5/8/8/4K3 w - - 0 1', 'outpost'))),
+     String(line('4k3/4n3/8/3N4/2P5/8/8/4K3 w - - 0 1', 'outpost')));
+  ok('outpost: a same-coloured bishop counts',
+     /held on loan until it is/.test(String(line('4k1b1/8/8/3N4/2P5/8/8/4K3 w - - 0 1', 'outpost'))));
+  ok('outpost: an opposite-coloured bishop does not',
+     !/held on loan/.test(String(line('4k2b/8/8/3N4/2P5/8/8/4K3 w - - 0 1', 'outpost'))),
+     String(line('4k2b/8/8/3N4/2P5/8/8/4K3 w - - 0 1', 'outpost')));
+
+  // luft: "the opponent has castled on the OTHER WING and can throw pawns
+  // forward" — the concrete half of a caveat the wording carried only in
+  // general terms.
+  ok('luft: opposite-wing kings make the air-making move a hook',
+     /the kings are on opposite wings, so the pawn move that makes air here is also a hook/
+       .test(String(line('r5k1/5ppp/8/8/8/8/PPP5/2KR4 w - - 0 1', 'luft'))),
+     String(line('r5k1/5ppp/8/8/8/8/PPP5/2KR4 w - - 0 1', 'luft')));
+  ok('luft: same-wing kings get no such rider',
+     !/opposite wings/.test(String(line('r5k1/5ppp/8/8/8/8/5PPP/R5K1 w - - 0 1', 'luft'))),
+     String(line('r5k1/5ppp/8/8/8/8/5PPP/R5K1 w - - 0 1', 'luft')));
+}
+
 /* ---------- report ---------- */
 console.log(`\nAPI  PASS ${pass}   FAIL ${fails.length}`);
 for (const [n, d] of fails) console.log(`  FAIL  ${n}\n        ${d}`);

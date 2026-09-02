@@ -13,7 +13,7 @@ implemented; that is a reading, and doing it is the work. What it can do is
 stop the list being rediscovered from scratch each time — and every one of
 the defects listed in the tool's header was unread before it was looked at.
 
-**Of 246 stated conditions (traps and indicators-against): 98 enforced in the matcher, 20 in Layer 3, 55 argued on the record to be unbuildable or already honoured elsewhere, 73 unread.**
+**Of 246 stated conditions (traps and indicators-against): 103 enforced in the matcher, 20 in Layer 3, 54 argued on the record to be unbuildable or already honoured elsewhere, 69 unread.**
 
 ONE CAVEAT ABOUT `indicators_against`, and it is not a technicality. For a
 concept naming an ASSET — an open file, an outpost, a passed pawn — they are
@@ -37,8 +37,8 @@ shared file was added to the search. The test is quotation for that reason.
 - [cited] *(indicator against)* The doubling opened a file that is actually being used
 - [cited] *(indicator against)* The bishop pair was obtained in the exchange
 - [cited] *(indicator against)* They increase control of central squares
-- [**unread**] *(indicator against)* They create an outpost the opponent cannot contest
-- [**unread**] *(indicator against)* They shield the king rather than exposing it
+- [cited] *(indicator against)* They create an outpost the opponent cannot contest
+- [cited] *(indicator against)* They shield the king rather than exposing it
 ## isolated-queen-pawn
 
 - [cited] REGISTERED FALSE POSITIVE: an isolated pawn is not automatically a weakness. In the middlegame it is frequently the source of the better side's whole game.
@@ -96,7 +96,7 @@ shared file was added to the search. The test is quotation for that reason.
 - [noted] In the engine test above, the archetypal 'outpost' move was second-best. Being a genuine outpost does not make occupying it the best move.
 - [layer 3] A centralised advanced knight is not an outpost. If an enemy pawn can still challenge the square, the piece is visiting. The detector in lib/features.js checks this and correctly refuses in the recorded counterexample.
 - [layer 3] *(indicator against)* An enemy pawn can still advance to challenge the square, and doing so costs the defender nothing
-- [**unread**] *(indicator against)* The occupant can be traded off by a knight or a same-coloured bishop with no compensation
+- [cited] *(indicator against)* The occupant can be traded off by a knight or a same-coloured bishop with no compensation
 - [cited] *(indicator against)* The square is on the a/b/g/h files and the intended occupant is a knight — Nimzowitsch assigns flank outposts to rooks
 - [**unread**] *(indicator against)* The piece on the square attacks nothing and restricts nothing; it is safe but idle
 - [**unread**] *(indicator against)* Occupying costs a tempo the position cannot spare, or walks into a concrete tactic
@@ -170,9 +170,9 @@ shared file was added to the search. The test is quotation for that reason.
 - [**unread**] *(indicator against)* Reaching the seventh costs a tempo the position cannot spare
 ## luft
 
-- [noted] Making luft is not automatically prudent. The same move is a hook against an opponent who can storm, and this is the standard error.
+- [cited] Making luft is not automatically prudent. The same move is a hook against an opponent who can storm, and this is the standard error.
 - [cited] Luft is unnecessary when the back rank is adequately defended or when no heavy pieces remain.
-- [**unread**] *(indicator against)* The opponent has castled on the other wing and can throw pawns forward
+- [cited] *(indicator against)* The opponent has castled on the other wing and can throw pawns forward
 - [**unread**] *(indicator against)* The advanced pawn becomes a hook for a specific break
 - [**unread**] *(indicator against)* The tempo is needed elsewhere in a sharp position
 ## material-imbalance
