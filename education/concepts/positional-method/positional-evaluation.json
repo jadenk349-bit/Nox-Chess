@@ -160,7 +160,34 @@
     }
   ],
   "counterexamples": [],
-  "ambiguous_examples": [],
+  "ambiguous_examples": [
+    {
+      "fen": "br3rk1/2q2ppP/p2pp3/2n1b1BP/1n1NP3/2N2P2/1PPQB3/1K4RR b - - 0 21",
+      "move": "Kxh7",
+      "move_uci": "g8h7",
+      "note": "Adams-Kasparov, Linares 2005. Every static feature a positional evaluation would count says Black is in trouble: the king is about to step onto an open h-file in front of a bishop on g5, two rooks and a queen; White has a pawn on h7 and one on h5; the black king's cover is being dismantled. The evaluation is +2.12 FOR BLACK, and the engine's own first move is taking the pawn. The annotation says the decision was made by calculation rather than by judgement - 'his king may look exposed, but in actuality, there is no immediate danger.' Filed as ambiguous because this record's method is not wrong in general and is wrong here, and the position gives no way to tell which case you are in from the features alone. This base carries the same board as `king-attack`'s NEGATIVE and `modern-dynamic`'s POSITIVE.",
+      "origin_kind": "historical-game",
+      "game": "Adams-Kasparov, Linares 2005 (round 12)",
+      "concept_role": "ambiguous",
+      "attributed_by": "corpus entry adams-kasparov-2005-21Kxh7-king-attack-negative",
+      "engine": {
+        "engine_id": "Stockfish 18",
+        "test_level": 3,
+        "depth": 24,
+        "threads": 10,
+        "hash_mb": 4096,
+        "multipv": 1,
+        "best_move": "g8h7",
+        "eval_cp": 212,
+        "mate_in": null,
+        "pv": [],
+        "alternatives": [],
+        "margin_cp": null,
+        "verdict": "ambiguous",
+        "verdict_note": "+2.12 from Black's side, and the engine's own first move is the one every static feature argues against. The largest gap in this base between what a feature scan reports and what the position is worth."
+      }
+    }
+  ],
   "explanations": {
     "by_level": {
       "beginner": "Judge a position by more than material: is the king safe, are the pawns healthy, are the pieces doing anything?",

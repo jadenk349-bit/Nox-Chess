@@ -168,7 +168,30 @@
       "false_positive_case": "pieces-on-opposite-wings"
     }
   ],
-  "ambiguous_examples": [],
+  "ambiguous_examples": [
+    {
+      "fen": "r5r1/8/8/3k4/8/8/1B6/R3K2R w KQ - 0 1",
+      "note": "Every white piece is individually well placed - a bishop on the long diagonal, two rooks on open files, the king with both castling rights - and none of them is doing anything with any other. Black's two rooks face them from the eighth. This record's second trap is exactly this distinction: 'individually well-placed pieces are not the same as coordinated pieces, and this is exactly the distinction the concept exists to make.' Filed as ambiguous rather than negative because the pieces are not UNcoordinated either - nothing obstructs anything, no piece is tied down, and the second indicator_against ('pieces on opposite wings with unrelated purposes') is only half true. The concept applies and returns nothing, which is the state this record's first trap warns is most likely to be papered over with the word.",
+      "origin_kind": "constructed-test",
+      "concept_role": "ambiguous",
+      "engine": {
+        "engine_id": "Stockfish 18",
+        "test_level": 3,
+        "depth": 24,
+        "threads": 10,
+        "hash_mb": 4096,
+        "multipv": 1,
+        "best_move": "a1a8",
+        "eval_cp": 0,
+        "mate_in": null,
+        "pv": [],
+        "alternatives": [],
+        "margin_cp": null,
+        "verdict": "ambiguous",
+        "verdict_note": "Material is symmetric except for a bishop, and no arrangement question is being decided. The number is not the evidence here; the record's own definition is, and it says coordination is a property of pieces working TOGETHER, which is a claim no static reading of this position can settle either way."
+      }
+    }
+  ],
   "explanations": {
     "by_level": {
       "beginner": "Your pieces should work together - defending each other and aiming at the same thing.",

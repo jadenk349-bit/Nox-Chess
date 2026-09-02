@@ -242,7 +242,39 @@
       "false_positive_case": "a-fortress-that-is-not-one"
     }
   ],
-  "ambiguous_examples": [],
+  "ambiguous_examples": [
+    {
+      "fen": "r7/8/3k4/8/8/3K4/3B4/3R4 w - - 0 1",
+      "note": "Rook and bishop against rook, a PROVEN DRAW - and whether it is a FORTRESS is the question. A fortress in this record's sense is a position the stronger side cannot break however long they play, and this qualifies by proof: dtz 0, held over every legal continuation. It also requires the defender to find the right square for fifty moves in a row against an opponent with an extra piece, and the same material one arrangement away is a proven WIN in 15. A defence that is theoretically impregnable and practically famous for being lost is exactly the case the word is used loosely about. Filed as ambiguous because both readings are correct and the record cannot choose between them: this base's other fortress example, king and bishop and a rook pawn, needs no accuracy at all.",
+      "origin_kind": "tablebase-position",
+      "concept_role": "ambiguous",
+      "engine": {
+        "engine_id": "Stockfish 18",
+        "test_level": 3,
+        "depth": 26,
+        "threads": 10,
+        "hash_mb": 4096,
+        "multipv": 1,
+        "best_move": "d2c3",
+        "eval_cp": 0,
+        "mate_in": null,
+        "pv": [],
+        "alternatives": [],
+        "margin_cp": null,
+        "verdict": "ambiguous",
+        "verdict_note": "0.00 at depth 26, settled at depth 13 - and the engine does not always find this in the drawn positions of this ending, which is part of why it is famous."
+      },
+      "tablebase": {
+        "source": "Lichess tablebase (Syzygy, 7-piece)",
+        "pieces": 5,
+        "wdl": "draw",
+        "dtz": 0,
+        "dtm": 0,
+        "category": "draw",
+        "note": "PROVEN DRAW at dtz 0. Read against the same five men in `mixed-piece-endgames`' ambiguous example, a PROVEN WIN in 15: one material balance, two results, and whether the drawn one deserves the word fortress is not a question a tablebase answers."
+      }
+    }
+  ],
   "explanations": {
     "by_level": {
       "beginner": "They are ahead on material but there is simply no way in. If you set your pieces up so their king can never get through, the extra material does not matter.",

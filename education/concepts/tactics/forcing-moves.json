@@ -149,7 +149,30 @@
       "false_positive_case": "one-check-draws-and-another-loses"
     }
   ],
-  "ambiguous_examples": [],
+  "ambiguous_examples": [
+    {
+      "fen": "r1bq1rk1/pp3ppp/2n5/3Np3/4P3/8/PP3PPP/R1BQ1RK1 w - - 0 1",
+      "note": "Forcing moves are available - the knight on d5 has Ne7+ and Nb6, both forcing, and the rule says to look at them first. Looking at them first is right and playing them is wrong: the engine's choice is Be3, a quiet developing move, at +0.30. This record's second trap says exactly that the rule is 'about search ORDER, not move choice. Reporting it is forcing as a reason a move is strong misuses it entirely.' Filed as ambiguous because the concept is correctly applicable - there really are forcing moves and they really should be examined - and following it produces the wrong move. A search heuristic that is right about what to look at and silent about what to play is the honest description, and it is not one an explanation can lean on.",
+      "origin_kind": "constructed-test",
+      "concept_role": "ambiguous",
+      "engine": {
+        "engine_id": "Stockfish 18",
+        "test_level": 3,
+        "depth": 22,
+        "threads": 10,
+        "hash_mb": 4096,
+        "multipv": 1,
+        "best_move": "c1e3",
+        "eval_cp": 30,
+        "mate_in": null,
+        "pv": [],
+        "alternatives": [],
+        "margin_cp": null,
+        "verdict": "ambiguous",
+        "verdict_note": "+0.30 for the quiet move, in a position that offers a check and a capture-threatening knight jump. The forcing moves are real and none of them is best."
+      }
+    }
+  ],
   "explanations": {
     "by_level": {
       "beginner": "Look at checks first, then captures, then threats - for both sides.",

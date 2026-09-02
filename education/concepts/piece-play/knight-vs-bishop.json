@@ -159,7 +159,30 @@
       "false_positive_case": "all-the-pawns-on-one-wing"
     }
   ],
-  "ambiguous_examples": [],
+  "ambiguous_examples": [
+    {
+      "fen": "6k1/pp2bppp/8/8/8/5N2/PP3PPP/6K1 w - - 0 1",
+      "note": "Knight against bishop with pawns on BOTH wings and nothing else on the board - the structure the folk rule is actually about, since the open-position argument for the bishop needs targets on two sides and here there are two sides. The engine says -0.07. Neither piece is better. This record's first trap is that 'there is no default answer. Asserting the bishop is better without naming the structural reason is exactly the claim GM Studer says has no evidence behind it', and the position is that trap with a number: the structure that is supposed to favour the bishop produces a dead level game. Filed as ambiguous rather than negative because the concept is fully applicable - this is precisely a knight-versus-bishop ending - and it has nothing to say.",
+      "origin_kind": "constructed-test",
+      "concept_role": "ambiguous",
+      "engine": {
+        "engine_id": "Stockfish 18",
+        "test_level": 3,
+        "depth": 26,
+        "threads": 10,
+        "hash_mb": 4096,
+        "multipv": 1,
+        "best_move": "g1f1",
+        "eval_cp": -7,
+        "mate_in": null,
+        "pv": [],
+        "alternatives": [],
+        "margin_cp": null,
+        "verdict": "ambiguous",
+        "verdict_note": "-0.07 at depth 26. Pawns on both wings, symmetric structure, and the difference between a knight and a bishop measures at seven hundredths of a pawn."
+      }
+    }
+  ],
   "explanations": {
     "by_level": {
       "beginner": "Bishops like open positions and pawns on both sides of the board. Knights like closed positions and a safe square in the middle they cannot be chased off.",
