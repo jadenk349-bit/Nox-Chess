@@ -137,7 +137,34 @@
       "false_positive_case": "a-defender-with-a-spare"
     }
   ],
-  "ambiguous_examples": [],
+  "ambiguous_examples": [
+    {
+      "fen": "r1bk2nr/p2p1pNp/n2B4/1p1NP2P/6P1/3P1Q2/P1P1K3/q5b1 w - - 1 22",
+      "move": "Qf6+",
+      "move_uci": "f3f6",
+      "note": "Anderssen-Kieseritzky, London 1851 - the Immortal Game, 22.Qf6+. The knight on g8 must take the queen, and 23.Be7 is mate. The move is ONE move and it is two motifs, inseparably: the knight is pulled ONTO f6, which is a decoy, and it is pulled OFF the guard of e7, which is a deflection. Neither reading is secondary and no test distinguishes them, because the same forced capture does both at once. Read as a deflection, the duty is the knight's guard of e7 and the point is that taking on f6 abandons it. That is the stronger of the two readings - the mate is ON the square the knight was holding - and this base's positive example for the record, Morphy's 16.Qb8+, is the same idea without the ambiguity, because there the knight is pulled to a square that does nothing whatever. This base carries the position on BOTH records as ambiguous rather than choosing, which is the same decision `themesOf()` makes mechanically - it refuses to claim decoy or deflection at all, because every cheap test for them fires where they are not true and a wrong label is worse than a missing one when the label is what the reader is learning to see. The move list was replayed through this base's own move generator: 45 plies, every one legal, ending on Be7 mate.",
+      "origin_kind": "historical-game",
+      "game": "Anderssen-Kieseritzky, London 1851 (the Immortal Game)",
+      "concept_role": "ambiguous",
+      "side_to_move_benefits": "white",
+      "engine": {
+        "engine_id": "Stockfish 18",
+        "test_level": 3,
+        "depth": 20,
+        "threads": 10,
+        "hash_mb": 4096,
+        "multipv": 1,
+        "best_move": "f3f6",
+        "eval_cp": null,
+        "mate_in": 2,
+        "pv": [],
+        "alternatives": [],
+        "margin_cp": null,
+        "verdict": "ambiguous",
+        "verdict_note": "Mate in 2 at depth 20, settled at depth 15, and the sacrifice is the engine's first choice."
+      }
+    }
+  ],
   "explanations": {
     "by_level": {
       "beginner": "This forces the defending piece to leave, and then the thing it was guarding is yours.",

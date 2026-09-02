@@ -83,6 +83,32 @@
   },
   "examples": [
     {
+      "fen": "2r1r1k1/1p3ppp/3p1b2/pq1P4/6Q1/5N2/PP2RPPP/4R1K1 w - - 2 19",
+      "move": "Qc4",
+      "move_uci": "g4c4",
+      "note": "Adams-Torre, New Orleans 1920, 19.Qc4 - the first of five consecutive queen offers, none of which can be accepted. The state that makes them work is an overload: Black's queen is the only thing defending the rook on e8, and the rook on e8 is the only thing stopping Rxe8+ Rxe8 Rxe8 mate. Every time White attacks the queen, the queen must both move and keep guarding e8, and it cannot do both. That is this record's definition exactly - one piece with two jobs - and it is why the game is the standard illustration. The engine's own line IS the game: Qc4 Qd7 Qc7 Qb5 a4 Qxa4 Re4. This base reports nothing about overloading here, correctly, because the concept has no matcher: whether a piece is asked to do both AT ONCE is a property of what the attacker can arrange rather than of the board. The move list was replayed through this base's own move generator - 45 plies, every one legal. No named annotator is attached to this position for this concept, so it grounds the MASTER-GAME rung and not the human-grounded one.",
+      "origin_kind": "historical-game",
+      "game": "Adams-Torre, New Orleans 1920",
+      "concept_role": "positive",
+      "side_to_move_benefits": "white",
+      "engine": {
+        "engine_id": "Stockfish 18",
+        "test_level": 3,
+        "depth": 22,
+        "threads": 10,
+        "hash_mb": 4096,
+        "multipv": 2,
+        "best_move": "g4c4",
+        "eval_cp": 427,
+        "mate_in": null,
+        "pv": [],
+        "alternatives": [],
+        "margin_cp": 411,
+        "verdict": "supports",
+        "verdict_note": "+4.27 for the queen offer against +0.16 for a quiet move at depth 22 with two lines - four pawns of difference, and the engine's principal variation is the game continuation move for move. The overload is worth the whole advantage."
+      }
+    },
+    {
       "fen": "3r2k1/5ppp/8/3n4/8/8/5PPP/3RR1K1 w - - 0 1",
       "move": "Rxd5",
       "move_uci": "d1d5",
