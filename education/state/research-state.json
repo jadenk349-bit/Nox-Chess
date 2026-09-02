@@ -1177,6 +1177,12 @@
       "result": "REJECTED - the pawn is not backward by the definition this base uses, and the annotation's own stated reason describes a pawn that is not on the board",
       "reason": "The annotation says White 'is left with a backward pawn on a semi-open file' after the exchange on c3, and explains it as 'the b2 and d4 pawns sit on adjacent files blocking its advance'. After 11.bxc3 there IS no b2 pawn - it is the pawn that captured on c3 - and c4 is empty and controlled by no black pawn, so c3 can advance freely. The record's definition, taken from Wikipedia and stated in its preconditions, requires BOTH halves: behind its neighbours AND unable to advance safely. This base's detector reports no backward pawn at any ply of the relevant sequence, and it is right. The pawn is a weak pawn on a half-open file, which is a different and weaker claim than the one the lesson is named after. Recorded rather than added: the corpus is ground truth, and grounding a concept on a loose application of its own definition would poison exactly the thing it exists to protect.",
       "conclusion": "backward-pawn still needs human grounding. Look for an annotation that names the square in FRONT of the pawn as the point, which is the half of the concept that makes it matter and the half a loose usage always omits."
+    },
+    {
+      "date": "2026-09-03",
+      "what": "A positive example for `corresponding-squares` from an exhaustive tablebase search for reciprocal zugzwangs",
+      "result": "REJECTED - the reciprocal zugzwangs the search finds ARE the opposition, which is the position this record's own first trap says the framework should not be invoked for",
+      "reason": "Random sampling found none in 400 boards. Enumerating the shape the technique is FOR - two pawns nose to nose on one file, so neither side has a pawn tempo and the whole game is king moves - found eight, by asking Syzygy for both side-to-move readings of every position with both kings inside a box around the pawns. Six of the eight are the kings two apart on one file, which is simple opposition; the other two are trebuchets. So for a single blocked pawn pair the correspondence and the opposition are the same relation, and a position from this family cannot show what the record needs: 'SIMPLE OPPOSITION GIVES THE WRONG ANSWER and the correspondence gives the right one'. That needs a second pawn making the geometry asymmetric, and the search would have to enumerate five-man positions rather than four. The search was not wasted - it produced the trebuchet that `zugzwang` had named in its deep wording since it was written and never shown."
     }
   ],
   "tool_limitations": [
@@ -1267,6 +1273,16 @@
       "item": "attacker counts as a measure of central control",
       "date": "2026-09-01",
       "note": "Counting attackers of d4/e4/d5/e5 counts a rook whose line runs through its own man as a piece fighting for the square, which makes the best move in Reti-Capablanca 1924 read as a loss of control. The move-based arm therefore counts pawns and minor pieces only. Even so it cannot separate the two candidate knight moves a GM separates, and that is recorded on the concept rather than tuned around."
+    },
+    {
+      "item": "a matcher that throws is indistinguishable from a matcher with excellent guards",
+      "date": "2026-09-03",
+      "note": "matchAll() catches every exception a matcher raises and treats it as 'no match', which is right - one bad matcher must not take the API down over a position it dislikes. But from outside, a caught ReferenceError and a set of false-positive guards that work perfectly look identical: the firing rate goes to zero and every metric in this project reads that as success. A missing `const P = FEAT.page` inside king-attack did exactly that on all 788 shipped positions, and the only thing that caught it was two positions somebody had pinned as 'must still fire'. MATCHER_ERRORS now collects every throw and tests/test_api.js asserts the list is empty over the whole corpus. The general lesson is that a firing rate falling is evidence of nothing until it is known to be evidence of a guard."
+    },
+    {
+      "item": "a motif miner's test can look for a different motif than its name",
+      "date": "2026-09-03",
+      "note": "tools/mine_master_motifs.js had two of its seven geometric tests looking for the wrong thing, and both were caught only by reading a candidate against the record it was meant to serve. The x-ray test excluded the case where the man behind is worth MORE than the man in front on the grounds that that is a pin or a skewer - but a pin is small in front and big behind, so it excluded the pin and then went looking for the skewer. The desperado test asked whether the piece could be captured at a profit where it stood, which is 'attacked' and not 'doomed'; the record's own definition says everything rests on that first word. A geometric test that names a motif is a claim about that motif and has to be checked against the record like any other claim."
     }
   ],
   "awaiting_validation": [
@@ -1839,7 +1855,7 @@
       ]
     }
   ],
-  "last_updated": "2026-09-01",
+  "last_updated": "2026-09-03",
   "milestones": [
     {
       "date": "2026-09-01",
