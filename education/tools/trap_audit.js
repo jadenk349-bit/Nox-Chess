@@ -86,9 +86,27 @@ for (const m of MATCH.STRUCTURAL.concat(MATCH.MOVE_BASED)) {
                       String(m.implements || '') + '\n' + String(m.run);
 }
 
+// THE MOTIF CONCEPTS WERE MISSING FROM THIS LIST ENTIRELY, and that is the same
+// class of hole as reading only `false_positive_traps` was. `fork`, `pin`,
+// `skewer`, `trapped-piece`, `discovered-attack`, `back-rank-mate`,
+// `double-check`, `checkmate` and `hanging-piece` have no entry in STRUCTURAL or
+// MOVE_BASED - they arrive as tags from findMotifs() and are translated by
+// matchMotifs() - so every condition their records state was outside the
+// reading list and counted nowhere. Two of them were live false positives:
+// `fork` states "The forking piece can simply be captured" and `pin` states
+// "The pinned piece can capture the pinner", and both were reported at HIGH
+// confidence until a guard was written. The guards live in matchMotifs() and
+// motifGuard(), so those two functions are the body for all nine.
+const MOTIF_BODY = String(MATCH.matchMotifs || '') + '\n' + String(MATCH.motifGuard || '');
+for (const id of Object.values(MATCH.MOTIF_TO_CONCEPT || {})) {
+  bodies[id] = (bodies[id] || '') + '\n' + MOTIF_BODY;
+}
+
 const rows = [];
 const done = new Set();
-for (const m of MATCH.STRUCTURAL.concat(MATCH.MOVE_BASED)) {
+const ALL = MATCH.STRUCTURAL.concat(MATCH.MOVE_BASED)
+  .concat(Object.values(MATCH.MOTIF_TO_CONCEPT || {}).map(c => ({ concept: c })));
+for (const m of ALL) {
   if (only && m.concept !== only) continue;
   const rec = recs[m.concept];
   if (!rec) continue;
@@ -105,7 +123,7 @@ for (const m of MATCH.STRUCTURAL.concat(MATCH.MOVE_BASED)) {
   if (!traps.length) continue;
   if (done.has(m.concept)) continue;
   done.add(m.concept);
-  const text = norm(bodies[m.concept]);
+  const text = norm(bodies[m.concept] || '');
   const limits = norm(JSON.stringify(rec.limitations || []));
   for (const { text: trap, kind } of traps) {
 

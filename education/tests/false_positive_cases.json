@@ -327,6 +327,161 @@
       "evidence": "engine",
       "resolution": "Registered from a recorded counterexample: a position where the concept's surface feature is present and its condition is not, verified mechanically by lib/features.js and then scored. Bxh7+ collapses from BEST at +6.71 to LAST at +3.77 — a swing of 2.94 pawns, and from 1.41 ahead of the field to 1.59 behind it, on one defender of g5. The concept's central precondition is confirmed. HONEST QUALIFICATION: +3.77 still means White is much better, because White is much better in this constructed position for unrelated reasons — the sacrifice throws away most of an advantage rather than losing outright.",
       "resolved_date": "2026-09-01"
+    },
+    {
+      "id": "rooks-doubled-behind-a-rammed-pawn",
+      "concept": "battery",
+      "surface_pattern": "Two rooks stand one behind the other on the d-file — the exact geometry of a battery.",
+      "why_not": "This record's own trap: \"Two line pieces on one line are only a battery if the line ARRIVES somewhere. Stacked behind their own pawns they combine nothing, and the bare geometry fires on nearly half of all positions.\" Here the d-file dead-ends at White's own d4 pawn, which is rammed against d5 and cannot move.",
+      "fen": "4k3/8/8/3p4/3P4/8/3R4/3RK3 w - - 0 1",
+      "status": "resolved",
+      "evidence": "feature-detector + engine",
+      "resolution": "The system does not make the claim: the API reports nothing at all here, because the battery matcher requires the line to arrive at a target and this one arrives at White's own pawn. Stockfish 18 at depth 26 agrees about what the doubled rooks are worth on that file — the position is mate in 5 and the best move is Ra1, which takes the front rook OFF the d-file. The engine's plan is to abandon the battery, which is the strongest possible statement that the geometry was not doing anything."
+    },
+    {
+      "id": "defended-knight-attacked-once",
+      "concept": "hanging-piece",
+      "surface_pattern": "A black knight on d5 is attacked by a white bishop. An attacked piece looks hanging.",
+      "why_not": "This record's own trap: \"A defended piece attacked once is not hanging; count both sides of the exchange.\" The knight is defended by the c6 pawn, and bishop-takes-knight is answered by pawn-takes-bishop.",
+      "fen": "4k3/8/2p5/3n4/8/8/6B1/4K3 w - - 0 1",
+      "status": "resolved",
+      "evidence": "feature-detector + tablebase",
+      "resolution": "PROVEN, not evaluated. The API is silent on hanging-piece, because the matcher asks SEE rather than counting attackers. Syzygy settles what the capture is worth: 5 pieces, draw, dtz 0, and the tablebase's own best move is Bxd5 — the capture is available, is best, and changes nothing, which is exactly what 'attacked once and defended' means. A detector that counted attackers would have called this a hanging knight."
+    },
+    {
+      "id": "loose-rook-in-a-locked-position",
+      "concept": "loose-piece",
+      "surface_pattern": "Both rooks are undefended. An undefended piece is a loose piece.",
+      "why_not": "This record's own trap: \"It only matters when a forcing move can reach it. A loose rook in a locked position is not a weakness.\" The b-file is stopped by the rammed b4/b5/b6 pawns and no forcing move touches either rook.",
+      "fen": "1r4k1/1p3ppp/1p6/1P6/1P6/8/5PPP/1R4K1 w - - 0 1",
+      "status": "resolved",
+      "evidence": "feature-detector + engine",
+      "resolution": "The API does not report loose-piece. The matcher was rewritten for exactly this trap once already — it fired on 66.8% of positions when it counted undefended pieces and on 9.1% once it required a forcing move that survives being forcing. Stockfish 18 at depth 26 evaluates the position at +0.00: two loose rooks and nothing to be done about either. Reporting every undefended piece would flag most positions and teach nothing, which is the trap stated as a firing rate."
+    },
+    {
+      "id": "pawn-stopped-by-an-enemy-pawn-is-a-ram",
+      "concept": "blockade",
+      "surface_pattern": "A black pawn on d5 stands directly in front of White's d4 pawn and stops it dead. Something is blockading the pawn.",
+      "why_not": "This record's own trap: \"A pawn stopped by an enemy PAWN is a ram, not a blockade, and no piece is being spent.\" The whole point of a blockade is the price — a piece is parked in front of the pawn and gives up its freedom to do it. A ram costs nobody anything.",
+      "fen": "4k3/8/8/3p4/3P4/8/8/4K3 w - - 0 1",
+      "status": "resolved",
+      "evidence": "feature-detector + tablebase",
+      "resolution": "PROVEN. The API reports nothing: the blockade matcher requires a PIECE on the square in front of the pawn. Syzygy: 4 pieces, draw, dtz 0 — neither pawn ever moves again and no piece was spent to arrange it. The distinction is definitional rather than evaluative, so the detector is the instrument that settles it and the tablebase only confirms that nothing is at stake."
+    },
+    {
+      "id": "rammed-and-isolated-is-not-backward",
+      "concept": "backward-pawn",
+      "surface_pattern": "White's c4 pawn is behind its neighbours on the b- and d-files and cannot advance. That is the surface description of a backward pawn.",
+      "why_not": "Two of this record's traps fire at once. \"A pawn whose advance square is occupied by an enemy pawn is RAMMED. It cannot advance, but not for the reason the concept is about, and the square in front of it is not a hole — an enemy pawn is standing on it.\" And: \"A pawn with no friendly pawn on either adjacent file is ISOLATED, not backward, and reporting both names for one pawn promises the reader a hole in front of it that the isolated case does not create.\" White's c4 is both.",
+      "fen": "4k3/pp3ppp/8/2p5/2P5/8/PP3PPP/4K3 w - - 0 1",
+      "status": "resolved",
+      "evidence": "feature-detector + engine",
+      "resolution": "The API reports neither backward-pawn nor anything else here. Layer 3 excludes rammed pawns from the backward set and excludes isolated pawns from it by name, both for the reasons quoted above. Stockfish 18 at depth 26: +0.00, best move f4 — the position is dead level and the play is on the other wing, because c4 is not a weakness at all. This is the case that would fool a detector reading 'cannot advance safely' on its own."
+    },
+    {
+      "id": "a-phalanx-of-three-is-not-a-hanging-pair",
+      "concept": "hanging-pawns",
+      "surface_pattern": "Three white pawns stand abreast on c4, d4 and e4 with no friendly pawns beside them — an advanced, unsupported pawn mass on half-open files.",
+      "why_not": "Hanging pawns are a PAIR of adjacent pawns on half-open files with no friendly pawns on the flanking files. Three abreast is a phalanx, which is a different structure with different properties: the outer two support the advance of the middle one, and there is no pair to be attacked as a pair.",
+      "fen": "4k3/8/8/8/2PPP3/8/8/4K3 w - - 0 1",
+      "status": "resolved",
+      "evidence": "feature-detector + tablebase",
+      "resolution": "This is a REGRESSION CASE, not a hypothetical. The hanging-pawns matcher's `implements` string quoted the flanking-file condition and the code never tested it, so a phalanx of three was reported as a hanging pair; the rate fell from 7.2% to 3.4% when the condition was actually built. The API is now silent here. Syzygy: 5 pieces, WIN for White, dtz 1, mate in 27 — three connected passers on the fourth rank win, which is the opposite of the liability 'hanging pawns' names, and the clearest possible statement that calling this structure by that name would mislead."
+    },
+    {
+      "id": "a-rook-with-many-moves-bearing-on-nothing",
+      "concept": "piece-activity",
+      "surface_pattern": "White's rook has the only open file on the board and fourteen legal moves. By any count of available squares it is the most active piece in the position.",
+      "why_not": "This record's own trap: \"Counting available squares is not measuring activity. A piece with many moves that bear on nothing is not active.\" The a-file leads to an empty corner; there is no entry square, no target on the rank it could switch to, and nothing on the seventh.",
+      "fen": "1r4k1/5pp1/7p/8/8/7P/5PP1/R5K1 w - - 0 1",
+      "status": "resolved",
+      "evidence": "feature-detector + engine",
+      "resolution": "The API reports open-file and does not report piece-activity, which is the correct pair of answers: the file is open and it wins nothing. The matcher stopped counting legal moves for exactly this trap and the rate moved from 44.4% to 33.9%. Stockfish 18 at depth 28: +0.00, and its own first move is Ra6 — the rook goes to the sixth and the position is still dead level. Material is symmetric, so nothing else is carrying the evaluation."
+    },
+    {
+      "id": "an-exposed-king-with-nothing-left-to-attack-with",
+      "concept": "king-attack",
+      "surface_pattern": "The black king on g8 has no pawn cover at all — no f-, g- or h-pawn in front of it. An exposed king looks like a king under attack.",
+      "why_not": "This record's own trap: \"An exposed king is not automatically under attack — with the attacking pieces traded off, an exposed king is often just an active one.\" Both sides have one rook and one pawn. There is nothing left to attack with, and the same is true of White's king.",
+      "fen": "4r1k1/8/8/3p4/3P4/8/8/R5K1 w - - 0 1",
+      "status": "resolved",
+      "evidence": "feature-detector + engine",
+      "resolution": "The API does not report king-attack. The matcher requires attacking pieces bearing on the king zone rather than an absence of pawn cover, which is what the trap asks for. Stockfish 18 at depth 28: +0.00 in a fully symmetric position — the exposure is mutual and neither side can do anything with it. The related trap on the same record, that the repository's `kingAttack` tag fires on two checks or mate and is a puzzle-classification proxy rather than a definition, is why the matcher does not read that tag here."
+    },
+    {
+      "id": "a-pawn-fork-the-pawns-simply-eat",
+      "concept": "fork",
+      "surface_pattern": "White plays c4-c5, and the pawn on c5 attacks the black pawns on b6 and d6. One piece attacking two enemy units is the definition of a fork, and the detector says so in those words.",
+      "why_not": "This record's first indicator_against: \"The forking piece can simply be captured.\" Both forked units are pawns, both defend the square the forker stands on, and Black moves first. Also the second: \"Both targets are defended and each is worth less than the forker\" — here they are worth exactly the same and there are two of them.",
+      "fen": "4k3/8/1p1p4/8/2P5/8/8/4K3 w - - 0 1",
+      "move": "c4c5",
+      "status": "resolved",
+      "evidence": "feature-detector + tablebase",
+      "resolution": "THIS WAS A REAL FALSE POSITIVE and it was reported at HIGH confidence, because a motif tag arrived from findMotifs() with no guard between it and the concept. Syzygy proves the move loses: after c5 the position is 5 pieces, a WIN FOR BLACK, dtz 1, mate in 35, and the tablebase's own best reply is dxc5 — the fork is answered by eating the forker. A guard now implements the record's first indicator_against at the motif-mapping site: if SEE says the piece that just moved can be taken at a profit, the fork is not reported. Rate: fork fell from 16.0% to 11.5% of the 788 shipped puzzles, and the canonical royal fork (Nc7+ forking rook and king) still reports at high."
+    },
+    {
+      "id": "a-pin-the-pinned-piece-dissolves-by-capture",
+      "concept": "pin",
+      "surface_pattern": "After Rxe8, White's rook on e8 attacks the black rook on f8 with the black king behind it on g8. Line piece, enemy unit, more valuable enemy unit, collinear, nothing between — the record's precondition, word for word.",
+      "why_not": "This record's first indicator_against: \"The pinned piece can capture the pinner.\" The rook on f8 does exactly that, and comes out even. The detector's sentence — \"the rook on f8 is pinned to the king behind it and cannot step aside\" — is true and misleads, because a reader takes 'cannot step aside' to mean the rook is stuck.",
+      "fen": "4rrk1/8/8/8/8/8/8/4RRK1 w - - 0 1",
+      "move": "e1e8",
+      "status": "resolved",
+      "evidence": "feature-detector + engine",
+      "resolution": "Reported at HIGH confidence until a guard was written. The geometry is genuinely there, which is why findMotifs() is right to see it; whether it MEANS anything is the concept record's question and the record answers it. The guard reads the pinned square out of the detector's own sentence rather than re-deriving the pin — two implementations of one motif are how the two start to disagree — and suppresses the report when the pinned piece has a legal capture of the pinner that SEE does not punish. It fails open: if the position cannot be rebuilt or the sentence is not in that shape, the motif is reported, because a guard that cannot run has no standing to overrule the detector. Rate: pin fell to 9.0% of the 788 shipped puzzles."
+    },
+    {
+      "id": "an-even-trade-is-not-a-sacrifice",
+      "concept": "sacrifice",
+      "surface_pattern": "Rxe8 gives up a rook on a square the enemy rook covers. Material that can be taken, offered anyway — the record's own definition, and SEE returns 500.",
+      "why_not": "This record's second trap: \"An even trade is not a sacrifice.\" The rook that can be taken was won half a move earlier by the same move.",
+      "fen": "4rrk1/8/8/8/8/8/8/4RRK1 w - - 0 1",
+      "move": "e1e8",
+      "status": "resolved",
+      "evidence": "feature-detector",
+      "resolution": "A REGRESSION CASE. The matcher's own comment said 'an even trade is not a sacrifice' on the line that tested the size, and the line did not test it: the page's sacrificeSize() answers 'how much can the opponent take on that square now', which is the right question for Bxh7+ and the wrong one for RxR — it returned 500 here and said nothing about the rook the move had just won. Subtracting what the move captured is the whole fix. sacrifice fell from 26.5% to 16.6% of the 788 shipped puzzles, and the Greek-gift shape is untouched, because Bxh7+ nets a bishop minus a pawn and is still a sacrifice."
+    },
+    {
+      "id": "a-break-is-not-a-breakthrough",
+      "concept": "pawn-break",
+      "surface_pattern": "c4-c5 advances a pawn into contact with two enemy pawns and opens lines. That is mechanically a break, and it looks like a pawn sacrifice to force something through.",
+      "why_not": "This record's second trap is a statement about this base rather than about a position: \"A break is not a pawn-breakthrough. This base keeps them separate: the breakthrough sacrifices to force a passer, the break challenges a structure.\" Nothing is forced through here — the pawn is simply eaten.",
+      "fen": "4k3/8/1p1p4/8/2P5/8/8/4K3 w - - 0 1",
+      "move": "c4c5",
+      "status": "resolved",
+      "evidence": "feature-detector + tablebase",
+      "resolution": "The API reports pawn-break at LOW confidence and is silent on pawn-breakthrough, which is the correct pair of answers and the reason the two are separate records with separate matchers. Low is also the honest confidence: this record's first trap says 'whether it is a good one depends on who is placed to use the lines it opens, which the detector cannot see', and Syzygy says this one is not good — Black wins after dxc5, mate in 35. The concept is reported, the judgement is not, and the ceiling on a rule-of-thumb is what keeps the two apart."
+    },
+    {
+      "id": "heavy-pieces-pointing-through-their-own-pawns",
+      "concept": "center-control",
+      "surface_pattern": "White's queen on d1 and rook on e1 bear down the d- and e-files at d4 and e4. An attack map that counts every line piece credits White with the centre; Black has no piece standing on a central square at all.",
+      "why_not": "This record's fourth trap: \"A rook or queen whose line to a central square runs through one of its own men counts as an attacker and should not be read as a piece fighting for the square.\" Both white heavy pieces are behind their own d2 and e2 pawns, and both white minors are still at home. Black's bishop on b7 and knight on f6 genuinely bear on the centre from a distance — the record's first trap says the same thing from the other side: \"A fianchettoed bishop controls e4 without standing anywhere near it.\"",
+      "fen": "qr2k3/1b6/3ppn2/8/8/8/3PP3/1NBQR1K1 w - - 0 1",
+      "status": "resolved",
+      "evidence": "feature-detector + engine",
+      "resolution": "The API reports center-control for BLACK, which is the answer the naive attack map does not give. Material is exactly equal (queen, rook, bishop, knight and two pawns each), so nothing else is carrying the reading. Stockfish 18 at depth 26 scores the position at -4.53 from White's side: Black is winning, on piece placement alone, in a position where White's heavy pieces are the ones aimed at the centre."
+    },
+    {
+      "id": "space-with-no-entry-square",
+      "concept": "space",
+      "surface_pattern": "White's pawns on c4, d5 and e4 sit a rank further up the board than Black's on c5, d6 and e5. By any count of squares controlled behind the pawn line, White has a space advantage.",
+      "why_not": "This record's first trap: \"Counting controlled squares is mechanical and over-reports. Space with no entry point wins nothing.\" Every file is rammed shut and there is no square on Black's half that a white piece can ever occupy.",
+      "fen": "4k3/pp4pp/3p4/2pPp3/2P1P3/8/PP4PP/4K3 w - - 0 1",
+      "status": "resolved",
+      "evidence": "feature-detector + engine",
+      "resolution": "The API reports nothing at all here. The space matcher was rewritten for this exact trap and the rate fell from 53.3% to 34.6% of the 788 shipped puzzles when entry squares became a requirement rather than a footnote. Stockfish 18 at depth 26: +0.00, and its line is both kings walking about on the kingside. The extra rank of space is real and worth nothing, which is the trap stated as a number."
+    },
+    {
+      "id": "a-quiet-move-that-restrains-nothing",
+      "concept": "restraint",
+      "surface_pattern": "Kd1 in a fully locked position is a quiet, non-committal move that does not lose anything. Quiet moves in blocked positions are the shape prophylaxis and restraint are usually claimed about.",
+      "why_not": "This record's traps, both of them: \"Restraint is not the same as passivity. It reduces the opponent's options; a passive move merely fails to increase yours.\" And: \"Like prophylaxis, it is easy to assert after the fact about any quiet move. Name the advance being prevented.\" No advance is being prevented — the structure prevents them all by itself, and it did so before the move.",
+      "fen": "4k3/pp4pp/3p4/2pPp3/2P1P3/8/PP4PP/4K3 w - - 0 1",
+      "move": "e1d1",
+      "status": "resolved",
+      "evidence": "feature-detector",
+      "resolution": "The API is silent on restraint. The matcher asks whether the move reduces the opponent's safe destinations rather than whether it is quiet, which is the first trap built rather than quoted; and it is move-based, so it cannot be asserted after the fact about the position. This is the case that a keyword rule would fail: every word in the record about quiet moves in blocked positions is present here and the concept is absent."
     }
   ],
   "last_updated": "2026-09-01"

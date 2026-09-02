@@ -2139,6 +2139,60 @@ const STRUCTURAL = [
  * tags into concept ids using tools/motif_map.json's mapping.
  * ---------------------------------------------------------------------- */
 
+/* The two guards above, kept out of the loop because each is a small piece of
+ * chess rather than a piece of plumbing.
+ *
+ * Both fail OPEN. If the position cannot be rebuilt, or the detector's sentence
+ * is not in the shape this reads, the motif is reported: findMotifs() is the
+ * authority on motifs and a guard that cannot run has no standing to overrule
+ * it. The one thing that must not happen is a silent guard that suppresses a
+ * real fork because a regex missed.
+ */
+// sqIdx() at the top of this file assumes a well-formed name; these two guards
+// read squares out of a detector sentence and out of moveInfo, so they check.
+const sqIdxSafe = n => (/^[a-h][1-8]$/.test(n || '') ? sqIdx(n) : -1);
+
+function motifGuard(tag, m, moveInfo) {
+  if (tag !== 'fork' && tag !== 'pin') return false;
+  const P = FEAT.page;
+  let after;
+  try { after = P.stateFromFEN(moveInfo.fenAfter); } catch (e) { return false; }
+  if (!after) return false;
+  const them = after.turn;                       // the side about to reply
+
+  if (tag === 'fork') {
+    // "The forking piece can simply be captured." The forker is the piece that
+    // just moved; a fork revealed by a DISCOVERY is delivered by a piece that
+    // did not move, and this guard correctly says nothing about those.
+    const sq = moveInfo.movedTo;
+    if (!sq) return false;
+    const idx = sqIdxSafe(sq);
+    if (idx < 0) return false;
+    const pc = after.b[idx];
+    if (!pc || pc.c === them) return false;      // not our piece standing there
+    return P.see(after, idx, them) > 0;          // taken, at a profit, and the fork is over
+  }
+
+  // "The pinned piece can capture the pinner." The pinned square comes from the
+  // detector's own sentence rather than from a second geometry pass, because
+  // re-deriving the pin here is how two implementations of one motif start to
+  // disagree. The sentence is the page's: "The rook on f8 is pinned to the king
+  // behind it and cannot step aside."
+  const text = (m && m.text) || '';
+  const mm = text.match(/on ([a-h][1-8]) is pinned/);
+  if (!mm) return false;
+  const pinnedIdx = sqIdxSafe(mm[1]);
+  const pinnerIdx = sqIdxSafe(moveInfo.movedTo || '');
+  if (pinnedIdx < 0 || pinnerIdx < 0) return false;
+  let moves;
+  try { moves = P.legalMoves(after); } catch (e) { return false; }
+  const takes = moves.some(x => x.from === pinnedIdx && x.to === pinnerIdx && x.cap);
+  if (!takes) return false;
+  // Capturing the pinner has to be worth doing. A pinned knight that can take a
+  // defended queen is not pinned; one that can take a defended pawn still is.
+  return P.see(after, pinnerIdx, them) >= 0;
+}
+
 function matchMotifs(motifs, moveInfo) {
   const out = [];
   // findMotifs() yields {tag, text} records, not bare strings. The text is the
@@ -2148,6 +2202,22 @@ function matchMotifs(motifs, moveInfo) {
     const tag = (m && typeof m === 'object') ? m.tag : m;
     const id = MOTIF_TO_CONCEPT[tag];
     if (!id) continue;
+    // The records' own indicators_against, which a motif tag arrives without.
+    // findMotifs() reports the GEOMETRY and is right to - a pawn on c5 does
+    // attack b6 and d6, a rook on f8 is on the eighth rank in front of its
+    // king. Whether the geometry MEANS anything is the concept record's
+    // question, and both of these records answer it in writing:
+    //
+    //   fork  "The forking piece can simply be captured"
+    //   pin   "The pinned piece can capture the pinner"
+    //
+    // Neither was built. On 4k3/8/1p1p4/8/2P5/8/8/4K3 w, c4-c5 was reported as
+    // a fork at HIGH confidence; Syzygy says the move loses - 5 pieces, Black
+    // wins, and the tablebase's own reply is dxc5. On 4rrk1/8/8/8/8/8/8/4RRK1 w,
+    // Rxe8 was reported as a pin at HIGH confidence, and the pinned rook takes
+    // the pinner. Prefer no concept match over a false concept match.
+    const skip = motifGuard(tag, m, moveInfo);
+    if (skip) continue;
     // findMotifs writes its own sentence about the position — "The knight on c7
     // forks the rook on a8 and the king on e8." — which is specific and already
     // audited by the page's own standards. Prefer it over anything generic this
@@ -2454,7 +2524,19 @@ const MOVE_BASED = [
       const all = P.legalMoves(st);
       const mv = all.find(m => P.uciOf(m) === moveInfo.uci);
       if (!mv) return null;
-      const size = P.sacrificeSize(st, mv, P.makeMove(st, mv));
+      // NET, not gross, and the difference is a false positive this matcher
+      // made for as long as it existed. The page's sacrificeSize() answers "how
+      // much can the opponent take on that square now", which is the right
+      // question for Bxh7+ and the wrong one for RxR: on 4rrk1/8/8/8/8/8/8/4RRK1
+      // it returns 500 for Rxe8, because a rook can indeed be taken there - and
+      // says nothing about the rook this move just won. This record's second
+      // trap is "An even trade is not a sacrifice", the line below claimed to be
+      // implementing it, and it was not: the trade came through as a 500-point
+      // sacrifice at medium confidence. Subtracting what the move captured is
+      // the whole of the fix, and it leaves the Greek-gift shape alone - Bxh7+
+      // nets 330 minus a pawn, which is still a sacrifice.
+      const size = P.sacrificeSize(st, mv, P.makeMove(st, mv)) -
+                   (mv.cap ? (P.VAL[mv.cap.t] || 0) : 0);
       if (size < 100) return null;                  // an even trade is not a sacrifice
       // "Material is given up with NOTHING NAMEABLE IN RETURN - that is a
       // blunder, not a sacrifice" - the record's first indicator_against, and
@@ -2695,4 +2777,4 @@ function matchAll(features, moveInfo, concepts, featuresAfter) {
   return found;
 }
 
-module.exports = { matchAll, matchMotifs, STRUCTURAL, MOVE_BASED, MOTIF_TO_CONCEPT, CEILING, cap, PRIORITY };
+module.exports = { matchAll, matchMotifs, motifGuard, STRUCTURAL, MOVE_BASED, MOTIF_TO_CONCEPT, CEILING, cap, PRIORITY };

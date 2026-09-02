@@ -100,8 +100,19 @@ def checklist(c, fp_concepts):
                                  if board and is_endgame_concept(c) else None),
         "master_game": (any(p.get("origin_kind") == "historical-game" for p in pos)
                         if board and kt not in NOT_ILLUSTRATED_BY_GAMES else None),
-        "false_positive_test": bool(rec.get("false_positive_traps")) and c["id"] in fp_concepts
-                               if board else bool(rec.get("false_positive_traps")),
+        # BOTH FIELDS, for the reason the trap audit already established: half
+        # the stated conditions in this base live in `indicators_against` rather
+        # than in `false_positive_traps`, and reading only the first was a bug
+        # in tools/trap_audit.js before it was one here. `fork` states "The
+        # forking piece can simply be captured" and `pin` states "The pinned
+        # piece can capture the pinner"; both were real false positives, both
+        # are now guarded, both had a registered case - and both scored MISSING,
+        # because the conditions were in the other field. What the item still
+        # requires is the registered case, which is the work; this only fixes
+        # which concepts are eligible to have one.
+        "false_positive_test": bool(rec.get("false_positive_traps") or rec.get("indicators_against"))
+                               and c["id"] in fp_concepts
+                               if board else bool(rec.get("false_positive_traps") or rec.get("indicators_against")),
         "beginner_explanation": bool((ex.get("by_level") or {}).get("beginner")),
         "advanced_explanation": bool((ex.get("by_level") or {}).get("advanced")),
         "explanation_template": bool(ex.get("by_depth")),
