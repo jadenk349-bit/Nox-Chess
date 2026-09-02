@@ -126,7 +126,16 @@
       }
     }
   ],
-  "counterexamples": [],
+  "counterexamples": [
+    {
+      "fen": "6k1/5pp1/7p/8/8/8/5PPP/R5K1 w - - 0 1",
+      "move_uci": "a1a8",
+      "note": "Registered false-positive case `a-check-with-no-exchange-under-way`, kept on the record as well as in tests/false_positive_cases.json so that the concept carries its own negative evidence. THE SURFACE PATTERN IS PRESENT: Ra8+ is a forcing move inserted before anything else happens, and the opponent must answer it before doing what they intended. Inserting a forcing move ahead of the expected continuation is the concept. WHY IT IS NOT THE CONCEPT: There is no expected continuation to insert it ahead of. A zwischenzug is defined against a move the opponent is COMMITTED to — a recapture, most often — and nothing has been captured, nothing is hanging, and Black had no obligation of any kind before the check. An in-between move needs two things to be in between. WHAT THE SYSTEM DOES: The API reports `open-file` and nothing else. This record has no matcher and its limitations give this exact reason: 'recognising a zwischenzug requires knowing what the EXPECTED move was, which is a claim about a line rather than about a position, and this base reports at the board.' The case pins that down with the cheapest possible counterexample — a check, which is the most forcing move there is, in a position where forcing nothing was pending. The same board is `decoy`'s registered case.",
+      "origin_kind": "constructed-test",
+      "concept_role": "negative",
+      "false_positive_case": "a-check-with-no-exchange-under-way"
+    }
+  ],
   "ambiguous_examples": [
     {
       "fen": "5k2/2N2r2/3p4/1p6/3P2p1/2P1q1p1/PP3NQ1/6K1 w - - 0 41",

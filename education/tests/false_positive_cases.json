@@ -1217,6 +1217,47 @@
       "status": "resolved",
       "evidence": "feature-detector + engine",
       "resolution": "The API does not report a double attack. Stockfish 18 at depth 22 says -4.90 for the side making it and retreats the queen to d1. This is the geometric half of the concept without the arithmetic half, and it is the commonest way a reader gets the motif wrong: counting how many enemy pieces a queen touches is easy and says nothing, and what makes the difference is whether taking either one is worth doing."
+    },
+    {
+      "id": "endgame-principles-with-the-queens-on",
+      "concept": "endgame-principles",
+      "surface_pattern": "A simplified position: no minor pieces, a rook and a queen each, pawns on both wings, and nothing tactical happening. It looks like the point at which endgame technique takes over.",
+      "why_not": "The queens are still on the board, and the first principle on this record — that the king is a fighting piece — is a statement about what becomes true ONCE the queens are off. Walking the king up here loses it. Every other principle on the record inherits the same precondition: king activity, the outside passer, the race, all of them assume no queen is available to punish the king.",
+      "fen": "r2q1rk1/pp3ppp/8/8/8/8/PP1Q1PPP/R4RK1 w - - 0 1",
+      "status": "resolved",
+      "evidence": "feature-detector + engine",
+      "resolution": "The API reports nothing at all here, and `endgame-principles` has no matcher. What makes the case worth registering is that phase is not a property a piece count settles: this position has fewer men than many endgames in this base and is not one. Stockfish 18 at depth 20: 0.00, and its line doubles rooks rather than touching the king. This record's positive example is Capablanca marching his king up the board for three pawns — in a position with no queens."
+    },
+    {
+      "id": "a-check-with-no-exchange-under-way",
+      "concept": "zwischenzug",
+      "surface_pattern": "Ra8+ is a forcing move inserted before anything else happens, and the opponent must answer it before doing what they intended. Inserting a forcing move ahead of the expected continuation is the concept.",
+      "why_not": "There is no expected continuation to insert it ahead of. A zwischenzug is defined against a move the opponent is COMMITTED to — a recapture, most often — and nothing has been captured, nothing is hanging, and Black had no obligation of any kind before the check. An in-between move needs two things to be in between.",
+      "fen": "6k1/5pp1/7p/8/8/8/5PPP/R5K1 w - - 0 1",
+      "move": "a1a8",
+      "status": "resolved",
+      "evidence": "feature-detector + engine",
+      "resolution": "The API reports `open-file` and nothing else. This record has no matcher and its limitations give this exact reason: 'recognising a zwischenzug requires knowing what the EXPECTED move was, which is a claim about a line rather than about a position, and this base reports at the board.' The case pins that down with the cheapest possible counterexample — a check, which is the most forcing move there is, in a position where forcing nothing was pending. The same board is `decoy`'s registered case."
+    },
+    {
+      "id": "an-open-file-worth-nothing",
+      "concept": "ranks-files-diagonals",
+      "surface_pattern": "The a-file is open — no pawn of either colour on it — and a white rook stands on it. Open files are what rooks are for, and the line is a fact anyone can read off the board.",
+      "why_not": "This record's own trap, and it names this position type: \"A line being open is a fact; its being useful is not. This base holds a tested position where an open file with a rook of each colour on it is worth exactly nothing.\" Here it is worth nothing: the file leads to an empty corner, there is no entry square, and material is symmetric.",
+      "fen": "1r4k1/5pp1/7p/8/8/7P/5PP1/R5K1 w - - 0 1",
+      "status": "resolved",
+      "evidence": "feature-detector + engine",
+      "resolution": "The API reports `open-file` — which is true and is a statement about the pawns — and refuses `piece-activity`, which would be the claim that the file is doing something. Stockfish 18 at depth 28: 0.00, and its own first move puts the rook on the sixth, where it also achieves nothing. The same position is `piece-activity`'s registered false-positive case; it is registered here as well because the two records make different claims about it and both have to be right at once — the geometry is real and its value is separate."
+    },
+    {
+      "id": "an-exception-does-not-void-the-rule",
+      "concept": "exceptions-to-rules",
+      "surface_pattern": "Here is a position where the most-quoted rule in rook endings fails: the defending rook is behind the passed pawn, exactly as Tarrasch prescribed, and Black is lost. A recorded exception to a recorded rule.",
+      "why_not": "This record's own first trap: \"An exception existing does not make a rule useless. Most of these rules are correct in the large majority of positions.\" Finding this position does not license reporting the rule as unreliable, and the record exists to hold the two claims apart — 254 exceptions are recorded here precisely so that rules can be applied safely rather than abandoned.",
+      "fen": "R7/6k1/P7/8/3K4/8/8/r7 w - - 0 1",
+      "status": "resolved",
+      "evidence": "feature-detector + tablebase",
+      "resolution": "PROVEN WIN in 63 for the attacker, with the defending rook obeying the rule. The API reports the position's features and makes no claim about rules at all, which is the only correct behaviour: `exceptions-to-rules` is a record ABOUT this base's other records rather than about boards, and a system that reported it would be reporting on itself. Read against the same position with that rook on f6, active on the sixth — the Vancura defence, a proven draw. One rook move between the rule failing and the rule being irrelevant, and neither of them is the rule being wrong."
     }
   ],
   "last_updated": "2026-09-01"

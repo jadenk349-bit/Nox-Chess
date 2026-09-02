@@ -82,7 +82,24 @@
     "conflicts": []
   },
   "examples": [],
-  "counterexamples": [],
+  "counterexamples": [
+    {
+      "fen": "R7/6k1/P7/8/3K4/8/8/r7 w - - 0 1",
+      "note": "Registered false-positive case `an-exception-does-not-void-the-rule`, kept on the record as well as in tests/false_positive_cases.json so that the concept carries its own negative evidence. THE SURFACE PATTERN IS PRESENT: Here is a position where the most-quoted rule in rook endings fails: the defending rook is behind the passed pawn, exactly as Tarrasch prescribed, and Black is lost. A recorded exception to a recorded rule. WHY IT IS NOT THE CONCEPT: This record's own first trap: \"An exception existing does not make a rule useless. Most of these rules are correct in the large majority of positions.\" Finding this position does not license reporting the rule as unreliable, and the record exists to hold the two claims apart — 254 exceptions are recorded here precisely so that rules can be applied safely rather than abandoned. WHAT THE SYSTEM DOES: PROVEN WIN in 63 for the attacker, with the defending rook obeying the rule. The API reports the position's features and makes no claim about rules at all, which is the only correct behaviour: `exceptions-to-rules` is a record ABOUT this base's other records rather than about boards, and a system that reported it would be reporting on itself. Read against the same position with that rook on f6, active on the sixth — the Vancura defence, a proven draw. One rook move between the rule failing and the rule being irrelevant, and neither of them is the rule being wrong.",
+      "origin_kind": "constructed-test",
+      "concept_role": "negative",
+      "tablebase": {
+        "source": "Lichess tablebase (Syzygy, 7-piece)",
+        "pieces": 5,
+        "wdl": "win",
+        "dtz": 17,
+        "dtm": 63,
+        "category": "win",
+        "note": "PROVEN WIN in 63 with the defending rook obeying Tarrasch's rule. The same position with that rook active on f6 is a PROVEN DRAW. One rook move between the rule failing and the rule being irrelevant, and neither is the rule being wrong."
+      },
+      "false_positive_case": "an-exception-does-not-void-the-rule"
+    }
+  ],
   "ambiguous_examples": [],
   "explanations": {
     "by_level": {

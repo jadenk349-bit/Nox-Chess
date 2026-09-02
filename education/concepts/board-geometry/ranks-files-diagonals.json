@@ -82,7 +82,15 @@
     "conflicts": []
   },
   "examples": [],
-  "counterexamples": [],
+  "counterexamples": [
+    {
+      "fen": "1r4k1/5pp1/7p/8/8/7P/5PP1/R5K1 w - - 0 1",
+      "note": "Registered false-positive case `an-open-file-worth-nothing`, kept on the record as well as in tests/false_positive_cases.json so that the concept carries its own negative evidence. THE SURFACE PATTERN IS PRESENT: The a-file is open — no pawn of either colour on it — and a white rook stands on it. Open files are what rooks are for, and the line is a fact anyone can read off the board. WHY IT IS NOT THE CONCEPT: This record's own trap, and it names this position type: \"A line being open is a fact; its being useful is not. This base holds a tested position where an open file with a rook of each colour on it is worth exactly nothing.\" Here it is worth nothing: the file leads to an empty corner, there is no entry square, and material is symmetric. WHAT THE SYSTEM DOES: The API reports `open-file` — which is true and is a statement about the pawns — and refuses `piece-activity`, which would be the claim that the file is doing something. Stockfish 18 at depth 28: 0.00, and its own first move puts the rook on the sixth, where it also achieves nothing. The same position is `piece-activity`'s registered false-positive case; it is registered here as well because the two records make different claims about it and both have to be right at once — the geometry is real and its value is separate.",
+      "origin_kind": "constructed-test",
+      "concept_role": "negative",
+      "false_positive_case": "an-open-file-worth-nothing"
+    }
+  ],
   "ambiguous_examples": [],
   "explanations": {
     "by_level": {

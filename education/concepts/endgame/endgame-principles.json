@@ -135,7 +135,15 @@
       }
     }
   ],
-  "counterexamples": [],
+  "counterexamples": [
+    {
+      "fen": "r2q1rk1/pp3ppp/8/8/8/8/PP1Q1PPP/R4RK1 w - - 0 1",
+      "note": "Registered false-positive case `endgame-principles-with-the-queens-on`, kept on the record as well as in tests/false_positive_cases.json so that the concept carries its own negative evidence. THE SURFACE PATTERN IS PRESENT: A simplified position: no minor pieces, a rook and a queen each, pawns on both wings, and nothing tactical happening. It looks like the point at which endgame technique takes over. WHY IT IS NOT THE CONCEPT: The queens are still on the board, and the first principle on this record — that the king is a fighting piece — is a statement about what becomes true ONCE the queens are off. Walking the king up here loses it. Every other principle on the record inherits the same precondition: king activity, the outside passer, the race, all of them assume no queen is available to punish the king. WHAT THE SYSTEM DOES: The API reports nothing at all here, and `endgame-principles` has no matcher. What makes the case worth registering is that phase is not a property a piece count settles: this position has fewer men than many endgames in this base and is not one. Stockfish 18 at depth 20: 0.00, and its line doubles rooks rather than touching the king. This record's positive example is Capablanca marching his king up the board for three pawns — in a position with no queens.",
+      "origin_kind": "constructed-test",
+      "concept_role": "negative",
+      "false_positive_case": "endgame-principles-with-the-queens-on"
+    }
+  ],
   "ambiguous_examples": [
     {
       "fen": "8/P7/K7/8/8/8/8/1q4k1 w - - 0 1",
