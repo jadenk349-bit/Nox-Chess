@@ -592,6 +592,21 @@ const STRUCTURAL = [
         }
         return -1;
       };
+      // "The pawn can simply advance" - and what that has to MEAN on a file is
+      // narrower than it looks, because a pawn that advances is still on the
+      // same file. Nimzowitsch-Capablanca 1914 is the position that settled it:
+      // the annotators name "play on the open b-file" and say the b2 pawn falls
+      // six moves later, and a first version of this test dropped the b-file
+      // because b2-b3 is a perfectly safe move. It is - and the pawn is still
+      // on b3, still on the file, still outnumbered. So the escape is not the
+      // advance; the escape is arriving somewhere it is no longer attacked more
+      // often than it is defended.
+      const outnumbered = (s, c, i) => {
+        try {
+          const a = P.attackersOf(s, i, c).length, d = P.attackersOf(s, i, other(c)).length;
+          return a > 0 && a >= d;
+        } catch (e) { return false; }
+      };
       const canStepAway = (c, i) => {
         const them = other(c);
         const probe = P.cloneState(st); probe.turn = them; probe.ep = null;
@@ -601,7 +616,8 @@ const STRUCTURAL = [
           const pc = probe.b[m.from];
           if (!pc || pc.t !== 'P') return false;
           let nx; try { nx = P.makeMove(probe, m); } catch (e) { return false; }
-          return P.see(nx, m.to, c) <= 0;               // and it survives leaving
+          if (P.see(nx, m.to, c) > 0) return false;      // it does not survive leaving
+          return !outnumbered(nx, c, m.to);              // ...and it is no longer outnumbered
         });
       };
       const withRook = [];
@@ -612,12 +628,7 @@ const STRUCTURAL = [
           if (i < 0) return false;
           if (!h.rooks.some(sq => sq[0] === fl)) return false;   // a rook on THIS file
           if (canStepAway(h.c, i)) return false;                 // not a fixed target
-          let atk = 0, def = 0;
-          try {
-            atk = P.attackersOf(st, i, h.c).length;
-            def = P.attackersOf(st, i, other(h.c)).length;
-          } catch (e) { return false; }
-          return atk >= def && atk > 0;
+          return outnumbered(st, h.c, i);
         });
         if (useful.length) withRook.push({ ...h, useful });
       }
@@ -625,11 +636,28 @@ const STRUCTURAL = [
       const lead = withRook[0];
       return {
         confidence: 'high',
+        // The record's condition is strictly "attack it MORE TIMES THAN IT CAN
+        // BE DEFENDED", and that is the condition for WINNING the pawn. At
+        // parity the pawn is not falling and the file is not nothing either: the
+        // defender is committed to it. Reporting only the strict case measures
+        // 8.6% and loses the b-file in Nimzowitsch-Capablanca 1914, which is the
+        // file the annotators name and where "six moves later the pawn on b2
+        // falls". So both are reported and the sentence says which. Seventh time
+        // in three sessions that saying more beat firing less.
         because: withRook.map(h => {
           const fl = h.useful[0];
           const i = targetOf(h.c, fl);
+          let a = 0, d = 0;
+          try {
+            a = P.attackersOf(st, i, h.c).length;
+            d = P.attackersOf(st, i, other(h.c)).length;
+          } catch (e) { /* ignore */ }
           return `${side(f, h.c)} has a rook on ${h.rooks.filter(sq => h.useful.includes(sq[0])).join(' and ')}, ` +
-                 `bearing down the semi-open ${fl}-file on ${FEAT.nameOf(i)}, which cannot step out of the way`;
+                 `bearing down the semi-open ${fl}-file on ${FEAT.nameOf(i)}, which cannot step out of the way` +
+                 (a > d
+                   ? `, and is attacked ${a} times against ${d} defending it`
+                   : `, and is defended exactly as many times as it is attacked — the pawn is not falling ` +
+                     `yet, but the defence is committed to it`);
         }),
         slots: { file: lead.useful[0] },
         subjects: withRook.map(h => h.c),

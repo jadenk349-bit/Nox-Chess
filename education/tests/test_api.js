@@ -1523,9 +1523,14 @@ const { concepts } = API.knowledge();
   };
   // A rook on a half-open file whose target pawn can simply step forward is a
   // rook looking at a pawn that is about to leave.
-  ok('semi-open-file: silent when the target pawn can step out of the way',
-     !sof('4k3/3p4/2p5/8/8/8/8/3RK3 w - - 0 1'),
-     String(sof('4k3/3p4/2p5/8/8/8/8/3RK3 w - - 0 1')));
+  // "Stepping out of the way" cannot mean the advance itself: a pawn that
+  // advances is still on the same file. Nimzowitsch–Capablanca 1914 settled
+  // that — a first version dropped the b-file because b2-b3 is a safe move, and
+  // the pawn is still on b3, still on the file, still outnumbered. The escape is
+  // arriving somewhere it is no longer attacked at least as often as defended.
+  ok('semi-open-file: silent when the pawn can advance to somewhere better defended',
+     !sof('4k3/3p4/2p1b3/8/8/8/8/3RK3 w - - 0 1'),
+     String(sof('4k3/3p4/2p1b3/8/8/8/8/3RK3 w - - 0 1')));
   // ...and silent when the rook is outnumbered on it — "the rook stares and
   // does nothing", which is the record's own phrase.
   ok('semi-open-file: silent when the target is defended more times than attacked',
@@ -1537,6 +1542,20 @@ const { concepts } = API.knowledge();
   ok('...and the sentence names the pawn it bears down on',
      /bearing down the semi-open d-file on d7, which cannot step out of the way/.test(String(fixed)),
      String(fixed));
+  // The record's condition is strictly "attack it MORE TIMES THAN IT CAN BE
+  // DEFENDED", which is the condition for WINNING the pawn. At parity the pawn
+  // is not falling and the file is not nothing: the defence is committed.
+  // Reporting only the strict case measures 8.6% and loses the b-file in
+  // Nimzowitsch–Capablanca, which is the file the annotators name.
+  const nc = sof('rr4k1/2p2pbp/2pp2p1/8/P1q1P3/2N2P2/1PPQ2PP/1R1R2K1 w - - 3 23');
+  ok('semi-open-file: the file the annotators name is not lost at parity',
+     /attacked 2 times against 1 defending it|defence is committed to it/.test(String(nc)),
+     String(nc));
+  const both = (API.analyzeWithEducation({
+    fen: 'rr4k1/2p2pbp/2pp2p1/8/P1q1P3/2N2P2/1PPQ2PP/1R1R2K1 w - - 3 23' })
+    .concepts.find(c => c.id === 'semi-open-file') || {}).because || [];
+  ok('...and Capablanca\'s second rook on the b-file is named',
+     both.some(l => /rook on a8 and b8/.test(l)), both.join(' | '));
   ok('semi-open-file: the measured rate is recorded in the source',
      /39\.5% -> 16\.4%|83% of tested positions before any guard/.test(
        fs.readFileSync(path.join(ROOT, 'lib', 'matchers.js'), 'utf8')));

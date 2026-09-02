@@ -1728,3 +1728,26 @@ refuses to claim at all.
 Nothing reports above its record now. The corpus's one confidence overclaim is
 untouched: Ftacnik–Roiz is a claim about *weight*, and `bishop-pair`'s record
 says high.
+
+
+## A human-grounded position corrected a fix made the same day
+
+`semi-open-file`'s "target is fixed" test was built as *"the pawn cannot advance
+safely"* — and that is wrong for a **file** concept, because a pawn that advances
+is still on the same file.
+
+**Nimzowitsch–Capablanca 1914** caught it. The annotators name *"play on the open
+b-file"* and say the b2 pawn falls six moves later; the first version dropped the
+b-file entirely because b2-b3 is a perfectly safe move. It is — and the pawn is
+still on b3, still on the file, still outnumbered. The escape is now arriving
+somewhere it is no longer attacked at least as often as it is defended.
+
+The second half was softened too, deliberately and with a measurement. The record
+says "attack it **more times** than it can be defended", which is the condition
+for *winning* the pawn; reporting only that measures 8.6% and again loses the
+b-file, where the count is 1–1. At parity the pawn is not falling and the file is
+not nothing — the defence is committed to it — so both are reported and the
+sentence says which. Seventh "say more" in three sessions.
+
+39.5% → **24.5%**, and Capablanca's second rook on the b-file is now named where
+before only the a-file was.
