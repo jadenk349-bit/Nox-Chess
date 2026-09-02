@@ -465,6 +465,17 @@
     overflow:hidden; text-overflow:ellipsis; white-space:nowrap;
   }
   .bar-name .sub{color:var(--muted); font-size:11px; letter-spacing:.14em; margin-left:8px;}
+  /* Says what the opponent is, in the one place the opponent is named. A
+     fallback game is an ordinary ranked game in every other respect, and the
+     seam is meant not to show — but which side of the board a person is
+     sitting on is not the thing to be coy about, so the tag rides beside the
+     name for the whole game rather than flashing once at the pairing. */
+  .bar-name .bot{
+    margin-left:8px; padding:1px 6px; border-radius:4px;
+    font-size:10px; letter-spacing:.12em; white-space:nowrap;
+    color:var(--gold-soft); border:1px solid rgba(212,175,110,.35);
+    background:rgba(212,175,110,.08);
+  }
   #barTop{margin-bottom:4px;}
   #barBottom{margin-top:4px;}
   .clock-pool{display:none;}          /* the bars take these two in and out */
@@ -4069,6 +4080,11 @@ const CHALLENGE_TTL = 180000;
 // Setting up a game for one particular person rather than for whoever turns up.
 const CHALLENGING = () => ONLINE() && !!CHAL.to;
 const BOT    = () => G.opponent === 'bot';     // the only opponent the engine plays
+/* An online game the server filled with a bot because nobody was queueing. It
+   is ONLINE() in every way that matters — the socket, the ranked screen, the
+   result, the resignation, the draw all run over the same wires — and only the
+   moves come from here instead of from across them. */
+const AI_MATCH = () => ONLINE() && !!NET.ai;
 const PUZZLE = () => G.opponent === 'puzzle';  // a position from a file, not a game
 const humanTurn = () => LOCAL() || G.st.turn === G.human;
 // whose eyes the board is drawn through
@@ -4192,9 +4208,12 @@ function renderStatus(){
   // the rules crib only belongs where you have to type the notation yourself
   rulesCard.style.display = G.mode === 'total' ? 'block' : 'none';
 
-  // there is only somebody to talk to across a socket
-  chatCard.style.display = ONLINE() ? 'block' : 'none';
-  chatInput.disabled = !ONLINE() || NET.state !== 'playing' || NET.oppGone;
+  // there is only somebody to talk to across a socket — and against the
+  // fallback opponent there is a socket but nobody on the far end of it, so
+  // the panel goes rather than sit there swallowing what the player types
+  const talkable = ONLINE() && !AI_MATCH();
+  chatCard.style.display = talkable ? 'block' : 'none';
+  chatInput.disabled = !talkable || NET.state !== 'playing' || NET.oppGone;
 
   // only the move-entry hint remains; Peek is a button, not a key. An open peek
   // takes the line over, because in complete blindfold it has taken the console
@@ -4282,6 +4301,15 @@ function layoutBoardBars(){
     // Sharing a screen, the name *is* the colour, so saying it twice reads oddly;
     // against anyone else the colour is worth spelling out beside the name.
     label.textContent = seatName(color);
+    // Never a person, so never left looking like one. The rating beside it is
+    // what the server sized this game at, which is the number the player is
+    // entitled to know they are playing against.
+    if (AI_MATCH() && color !== G.human){
+      const tag = document.createElement('span');
+      tag.className = 'bot';
+      tag.textContent = 'BOT · ' + NET.ai.elo;
+      label.appendChild(tag);
+    }
     if (!LOCAL()){
       const sub = document.createElement('span');
       sub.className = 'sub';
@@ -4531,8 +4559,12 @@ function applyMove(m, fromNet){
   // The increment is earned by moving, so it lands on the clock of whoever
   // just moved — including their first move, as it does over a real board.
   if (G.inc) G.clock[mover] += G.inc * 1000;
-  // our own moves go out to the opponent; theirs arrive already applied elsewhere
-  if (ONLINE() && !fromNet && mover === G.human){
+  // Our own moves go out to the opponent; theirs arrive already applied
+  // elsewhere. Except against the fallback opponent, where both sides are
+  // played in this one browser and there is nobody across the socket to relay
+  // anything to — the server drops such a move rather than refusing it, but
+  // there is no reason to send one.
+  if (ONLINE() && !AI_MATCH() && !fromNet && mover === G.human){
     netSend({ t:'move', ply:G.sans.length - 1, from:m.from, to:m.to, promo:m.promo || null, san });
   }
   announce(san, m);
@@ -4546,6 +4578,7 @@ function applyMove(m, fromNet){
   render();
   checkEnd();
   if (!G.over && BOT() && G.st.turn !== G.human) scheduleEngine(260);
+  if (!G.over && AI_MATCH() && G.st.turn !== G.human) scheduleAI();
   if (!G.over && LOCAL() && G.mode === 'total') focusLocalInput();
 }
 
@@ -4689,6 +4722,175 @@ function engineTurn(token){
 }
 const scheduleEngine = ms => { const t = G.token; setTimeout(() => engineTurn(t), ms); };
 
+/* ---- the fallback opponent ----
+   Ranked play is a queue, and a queue with nobody else in it is a player
+   watching a plate sweep until they give up. So when five seconds pass with
+   nobody to pair them with, the server seats a bot instead and says so:
+   `start` arrives carrying an `ai` block that names it and rates it. Whether
+   that happens is the server's to decide and never this page's — a browser
+   cannot see the queue, cannot know whether anybody was waiting, and must not
+   be able to claim after a loss that the opponent was a machine.
+
+   The chess is this page's, because the chess has always been this page's.
+   The moves are chosen here, by the same worker the ladder and the review use,
+   and go nowhere: there is no second browser to relay them to.
+
+   Strength is not a rung off LEVELS. A rung is a fixed playing level, and what
+   this opponent is for is a game that stays worth playing to the end — so it
+   steers by what the position is worth rather than by how hard it is allowed
+   to think. Each ply it asks for several candidate moves with a score apiece,
+   turns every score into the chance it would win from there, and plays the
+   candidate whose chance sits nearest the band the game has reached: a near
+   equal fight at the start, then a game the player is gradually getting the
+   better of.
+
+   Two things the band can never do, and they are what keep the chess honest.
+   It cannot reach past AI_SLACK, so no move it plays costs more than an
+   inaccuracy against the best one and nothing it does is a blunder anybody
+   could point at. And when it is already worse off than the band asks for, it
+   plays the best move it has — steering *down* onto a target would be throwing
+   the game, which is the one thing it must never do. Everything it gives away
+   it gives away by choosing the quieter of several reasonable moves. */
+
+const AI_POOL = 4;               // candidate moves to ask the engine for each ply
+/* What the bot's chances should be, by phase. Even-ish while the game is
+   still a game, then a slow handover: the player earns the win against an
+   opponent that was worth beating rather than one that stopped trying. */
+const AI_BAND  = { early:[0.40, 0.55], middle:[0.20, 0.40], late:[0.10, 0.30] };
+/* And the most a candidate may cost against the best move while it is being
+   chosen, in centipawns. A pawn early is a quiet inaccuracy; two pawns in a
+   thin endgame is still a plausible way to fail to convert. Nothing outside
+   this is ever played, which is what stops the band from buying a percentage
+   with a hanging queen. */
+const AI_SLACK = { early:90, middle:140, late:200 };
+
+/* Where the game has got to. Ply count on its own calls a queenless four-piece
+   ending a middlegame if it arrived quickly, so the men left on the board get
+   a say: whichever measure says the game is further along wins. */
+function aiPhase(){
+  const ply = G.sans.length;
+  let officers = 0;                      // everything but kings and pawns, both sides
+  for (const p of G.st.b) if (p && p.t !== 'K' && p.t !== 'P') officers++;
+  if (ply >= 60 || officers <= 4) return 'late';
+  if (ply >= 24 || officers <= 8) return 'middle';
+  return 'early';
+}
+
+/* A centipawn score as a chance of winning. Lichess's curve, which is fitted
+   to what actually happens in games rather than derived from anything — which
+   is the right kind of number here, since the whole point is to aim at how the
+   game will feel and not at how the evaluation reads. */
+function winChance(cp, mate){
+  if (mate !== null && mate !== undefined) return mate > 0 ? 1 : 0;
+  if (cp === null || cp === undefined) return 0.5;
+  return 1 / (1 + Math.exp(-0.00368208 * cp));
+}
+
+/* Mate scores have to be comparable with centipawn ones, because what a
+   candidate costs is a subtraction. Mate in one beats mate in three, and being
+   mated in one is worse than being mated in three, which is what the sign in
+   front of the count is for. */
+function lineScore(line){
+  if (line.mate !== null && line.mate !== undefined)
+    return line.mate > 0 ? 100000 - line.mate : -100000 - line.mate;
+  return (line.cp === null || line.cp === undefined) ? 0 : line.cp;
+}
+
+/* How hard it thinks: from the rating on its tag, and from how far the game
+   has gone. Thinking time rather than search depth, because a move must never
+   take longer than the clock beside it can afford — the fallback opponent's
+   clock is the game's clock and it can flag like anybody else. Skill Level
+   comes down alongside it, so the fall-off is gradual on two dials at once
+   rather than a cliff on either. */
+function aiSearch(elo, phase, left){
+  const ease = phase === 'early' ? 1 : phase === 'middle' ? 0.75 : 0.55;
+  let ms = Math.round(Math.min(700, 140 + elo / 6) * ease);
+  // it cannot spend what it does not have
+  if (left < 60000) ms = Math.min(ms, 200);
+  if (left < 20000) ms = Math.min(ms, 90);
+  const back = phase === 'early' ? 0 : phase === 'middle' ? 2 : 4;
+  return {
+    skill: Math.max(0, Math.min(20, Math.round(elo / 160) - back)),
+    multipv: AI_POOL,
+    movetime: Math.max(80, ms),
+    nocache: true            // the same position twice should not answer twice the same
+  };
+}
+
+/* Which candidate to play, given what each is worth and what each is worth
+   winning from. Pure and separate so that what it does with a set of numbers
+   can be checked without a board, a worker or a game — server/test_ai_fallback
+   .js is the caller that does it. */
+function aiChoose(cands, band, slack, rnd){
+  rnd = rnd || Math.random;
+  if (!cands.length) return null;
+  const top = Math.max.apply(null, cands.map(c => c.score));
+  const near = cands.filter(c => top - c.score <= slack);
+  const pool = near.length ? near : cands;
+  // how far outside the band a candidate sits; zero for anything inside it
+  const off = c => c.win < band[0] ? band[0] - c.win
+                 : c.win > band[1] ? c.win - band[1] : 0;
+  const best = Math.min.apply(null, pool.map(off));
+  // Everything equally close, which is every move inside the band when there
+  // is more than one — and choosing between those at random is the whole of
+  // the variability. Below the band there is only ever one nearest, and it is
+  // the best move on the board.
+  const tied = pool.filter(c => off(c) <= best + 1e-9);
+  return tied[(rnd() * tied.length) | 0];
+}
+
+function aiPick(){
+  const legal = legalMoves(G.st, G.st.turn);
+  if (!legal.length) return Promise.resolve(null);
+  if (legal.length === 1) return Promise.resolve(legal[0]);
+  const phase = aiPhase();
+  const elo = (NET.ai && NET.ai.elo) || 1200;
+  return engineAsk(G.uci.slice(), aiSearch(elo, phase, G.clock[other(G.human)])).then(res => {
+    const cands = [];
+    for (const line of (res && res.lines) || []){
+      if (!line || !line.best) continue;
+      const m = legal.find(x => uciOf(x) === line.best);
+      // Every candidate is a move this board allows, checked here rather than
+      // assumed: an engine answering about a position it has drifted out of
+      // step with must not be able to put an illegal move on the board.
+      if (m) cands.push({ m, score: lineScore(line), win: winChance(line.cp, line.mate) });
+    }
+    const pick = aiChoose(cands, AI_BAND[phase], AI_SLACK[phase]);
+    // No worker, or nothing usable came back: the built-in search still plays
+    // chess, which is the only promise this has to keep.
+    return (pick && pick.m) || bestMove(G.st, phase === 'early' ? 3 : 2) || pickFrom(legal);
+  });
+}
+
+/* The same two guards the ladder's turn has, for the same two reasons: the
+   token is taken when the turn is scheduled, so a reply from a game that has
+   been abandoned cannot wake up inside the next one, and the turn is checked
+   again on the way out so a stray call can never play a move for the player. */
+function aiTurn(token){
+  if (G.over || token !== G.token) return;
+  if (!G.started || !AI_MATCH()) return;
+  if (G.st.turn === G.human) return;
+  G.thinking = true;
+  renderStatus();
+  aiPick().then(m => {
+    if (token !== G.token) return;
+    G.thinking = false;
+    if (G.over){ render(); return; }
+    if (!AI_MATCH() || G.st.turn === G.human){ render(); return; }
+    if (m) applyMove(m);
+    else { render(); checkEnd(); }
+  });
+}
+
+/* A reply that lands on the same tick as the move it answers reads as a
+   machine however good the move is, so there is a pause in front of it — and
+   an uneven one, because a constant delay reads as a machine too. The engine's
+   own thinking time is on top of this. */
+const scheduleAI = ms => {
+  const t = G.token;
+  setTimeout(() => aiTurn(t), ms === undefined ? 240 + Math.random() * 520 : ms);
+};
+
 /* ---- clicks ---- */
 el.squares.addEventListener('click', e => {
   const sqEl = e.target.closest('.sq');
@@ -4761,6 +4963,11 @@ const NET = {
   gameId: null,
   myRoom: null,         // the room this browser is hosting, if any
   opponent: '',         // what the server says the other player is called
+  // { name, elo } when the server seated the fallback bot instead of a person,
+  // null when the opponent is one. The server decides this and says so in
+  // `start`; nothing on this page may set it, because a page that could would
+  // be a page that could claim its opponent was a bot after losing to one.
+  ai: null,
   oppGone: false,       // set once the other side has dropped: there is nobody left to talk to
   reported: false       // whether the server has been told how this game ended
 };
@@ -4882,6 +5089,7 @@ function stopHeartbeat(){
 
 function netClose(){
   NET.state = 'idle';
+  NET.ai = null;            // whatever the next game is, it is not this one
   stopHeartbeat();
   if (NET.sock){
     const s = NET.sock;
@@ -5109,6 +5317,13 @@ function onNetMessage(msg){
       hideChallenge();
       NET.gameId = msg.game;
       NET.opponent = msg.opponent || '';        // who to name on the board bar and in chat
+      // Only the server may say this, and it says it here or not at all. The
+      // shape is checked rather than trusted whole: what the page goes on to
+      // do with it is name an opponent and size an engine, and neither wants
+      // whatever else a message might be carrying.
+      NET.ai = (msg.ai && typeof msg.ai === 'object' && typeof msg.ai.elo === 'number')
+        ? { name: String(msg.ai.name || 'Opponent'), elo: Math.round(msg.ai.elo) }
+        : null;
       NET.oppGone = false;
       G.human = msg.color === 'w' ? W : B;      // colours are the server's call
       G.mode = msg.mode;
@@ -5127,6 +5342,10 @@ function onNetMessage(msg){
       newGame();
       syncOptions();
       logLine('Matched — you are ' + (G.human === W ? 'White' : 'Black') + '.', 'sys');
+      // Said once in the log as well as worn on the bar: nobody should have to
+      // work out from the play whether the other side is a person.
+      if (AI_MATCH()) logLine('Nobody was queueing, so ' + NET.ai.name +
+        ' — a Nox bot rated ' + NET.ai.elo + ' — took the board.', 'sys');
       beep(760,.09); setTimeout(()=>beep(1010,.11), 90);
       break;
 
@@ -7012,6 +7231,8 @@ function newGame(){
   render();
   if (G.mode === 'total') setTimeout(() => LOCAL() ? focusLocalInput() : el.moveInput.focus(), 60);
   if (G.started && BOT() && G.st.turn !== G.human) scheduleEngine(420);
+  // Longer than the bot's, because this one is meant to have just sat down
+  if (G.started && AI_MATCH() && G.st.turn !== G.human) scheduleAI(900);
 }
 
 /* A peek used to be a 1.6-second window that took itself away again whether or

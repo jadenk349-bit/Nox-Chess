@@ -22,6 +22,9 @@ node server/test_review.js               # unit tests for the review's chess rea
 node server/test_puzzle_flow.js          # plays a shipped puzzle against a stub DOM
 node server/test_practice.js             # what the practice drills invent, re-checked
 node server/test_practice_flow.js        # and running one, against a stub DOM + clock
+node server/test_ai_fallback.js          # what the ranked fallback bot decides
+node server/test_ai_game.js              # and playing a whole game against it, stub DOM
+python3 server/test_ai_match.py          # seating one: the queue, the race; no server needed
 python3 server/test_puzzle_rating.py     # the puzzle Elo handler; no server needed
 node tools/test_generate_puzzles.js      # the generator's own decisions, no engine
 python3 tools/check_supabase_puzzles.py  # RLS and column grants, against the real project
@@ -34,15 +37,18 @@ node tools/verify_puzzles.js --track endgame --write        # …and save the co
 docker build -t nox-chess . && docker run --rm -p 8787:8787 nox-chess
 ```
 
-All six JS suites read the code under test out of `blind-chess.html` by name,
+All eight JS suites read the code under test out of `blind-chess.html` by name,
 so renaming or reformatting what they extract breaks them on purpose.
 `test_practice_flow.js` goes further and lifts the whole PRACTICE section out
 between its banner comments, so it runs the screen's own code rather than a
 copy — moving that banner moves the suite with it.
 
 `test_two_clients.py` has no test-case selection flag; it runs the whole
-sequence (matchmaking, turn order, a full game, resign/draw, rooms) and exits
-non-zero on failure. Point it at another host with `WS_TEST_HOST=… PORT=…`.
+sequence (matchmaking, turn order, a full game, resign/draw, rooms, the ranked
+fallback bot) and exits non-zero on failure. Point it at another host with
+`WS_TEST_HOST=… PORT=…`. It really does sit out the fallback's five seconds,
+several times over — `NOX_AI_WAIT`, set on the server *and* on the harness,
+shortens a local run, and is not a knob anybody is meant to turn in production.
 
 Environment: `PORT` (default 8787), `SUPABASE_URL` (enables token
 verification), `SUPABASE_JWT_SECRET` (only for legacy HS256 projects; also what
@@ -86,13 +92,49 @@ games anyone may join), `lobby_subs` (clients watching the room list), `games`,
 Payloads are built under the lock and sent outside it. One thread per
 connection.
 
-**Three ways in, one Game.** Quick match, rooms and friend challenges all end
-in `start_game_between()` and then the same relay — a challenge is not a second
-multiplayer system. A challenge is addressed to an *account id*, not a socket,
+**Four ways in, one Game.** Quick match, rooms, friend challenges and the
+ranked fallback bot all end in `start_game_between()` and then the same relay —
+a challenge is not a second multiplayer system, and neither is the bot. A challenge is addressed to an *account id*, not a socket,
 which is what lets it reach every tab that account has open and what lets the
 server refuse an answer from anyone else (`handle_challenge_accept`). It is
 deliberately not a database row: it means nothing once either side disconnects,
 so it lives in memory and dies with the session.
+
+**A ranked queue with nobody in it seats a bot, after five seconds and not
+before.** `handle_find` arms `arm_ai_fallback()` when a *ranked* search finds
+nobody; `ai_fallback()` fires on a timer thread, takes the same lock the pairing
+takes, looks at `lobby` again, and only builds a `BotClient` if this player is
+still the one waiting there. That re-check is the whole of the race protection
+and it is exact rather than hopeful: `lobby` holds one waiter per key, so still
+being that waiter *is* the proof that no compatible opponent exists. A real
+player therefore wins every photo finish, and two people who could have met can
+never each be handed a bot instead.
+
+A `BotClient` is a Client whose `send()` does nothing. It exists so that
+everything downstream of pairing — `Game`, `opponent_of`, `finish_game`,
+`drop_client` — works unchanged, and it is never registered under an account,
+never put in `lobby` or `rooms`, and never challenged, which is what stops two
+of them meeting or a real player reaching one by any route but the timeout. The
+name comes from `AI_NAMES`, avoiding whatever that player's last few opponents
+were called; the rating is `ai_elo_for()` — the player's own Elo plus a
+hundredth of it plus nine — worked out per game, because these names are not
+accounts and store nothing. Ranked play does not write `profiles.rating` for
+anybody yet, real opponent or bot, so there is no double-counting to avoid and
+no rating a bot game could inflate.
+
+The bot plays in the *browser*, because that is where the chess is: there is no
+move generator in the server and never has been. `start` carries an `ai` block,
+the page's `AI_MATCH()` reads it and nothing else may set it, and `aiPick()`
+chooses the move. What it steers by is not a rung off `LEVELS` but the position:
+several candidates a ply, each score turned into a win chance, and the one
+nearest the phase's band (`AI_BAND`) played — near-even early, easing later —
+subject to `AI_SLACK`, which is what stops a target from ever being bought with
+a piece. Behind the band it simply plays its best move, because steering *down*
+onto a target is throwing the game. Moves are not relayed (`handle_move` drops
+them for an AI game and the page does not send them), a draw offered to it is
+accepted by the server through the ordinary `over` message, and resignation,
+checkmate, the clock and disconnection all run through the paths they already
+ran through.
 
 **The rating only persists with `SUPABASE_SERVICE_KEY`.** The browser is not
 allowed to write `puzzle_rating`, so the server is the only thing that can, and
@@ -262,7 +304,11 @@ game; async engine callbacks capture it and bail if it changed, which is what
 stops a reply from an abandoned game landing in the next one.
 
 Ranked play is a queue, not a room: the ranked screen (`screen-ranked`) shows
-the badge the rating has earned and sends `{t:"find", kind:"ranked"}`. Friendly
+the badge the rating has earned and sends `{t:"find", kind:"ranked"}`. Five
+seconds of that finding nobody and the server seats a bot instead — same
+`start`, same sweep on the Start Game plate, same transition into the game, with
+an `ai` block naming it and a BOT tag beside its name on the board bar. Nothing
+about the search UI changes, and nothing on this side decides that it happened. Friendly
 play still goes through the room list. The rating ladder is written out twice —
 `TIERS` in the page picks the badge, and the generated `tier` column in
 `supabase-setup.sql` names it in the database — so a threshold has to move in
@@ -271,7 +317,9 @@ rung, and only the one on screen is fetched.
 
 Vision modes: `blind` (board, no pieces), `total` (pure notation, typed moves),
 `fog`, `sighted`. Prefer the helpers — `BLINDISH()`, `CAN_PEEK()`, `LOCAL()`,
-`ONLINE()`, `BOT()` — over comparing `G.mode`/`G.opponent` inline.
+`ONLINE()`, `BOT()`, `AI_MATCH()` — over comparing `G.mode`/`G.opponent`
+inline. `AI_MATCH()` is an ONLINE() game with a bot on the far side: it is not
+`BOT()`, which is the Play Bot ladder and a different screen entirely.
 
 **The social page** (`screen-social`, the SOCIAL section of the script) is two
 things that only meet on screen: friends and friend requests are Supabase rows
