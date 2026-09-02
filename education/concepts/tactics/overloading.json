@@ -107,7 +107,16 @@
       }
     }
   ],
-  "counterexamples": [],
+  "counterexamples": [
+    {
+      "fen": "3rr1k1/5ppp/8/3n4/8/8/5PPP/3RR1K1 w - - 0 1",
+      "move_uci": "d1d5",
+      "note": "Registered false-positive case `two-defenders-for-two-duties`, kept on the record as well as in tests/false_positive_cases.json so that the concept carries its own negative evidence. THE SURFACE PATTERN IS PRESENT: A black rook on d8 defends the knight on d5 down the file, the black king is boxed in on the back rank, and White has rooks on d1 and e1. Every piece of the overloading picture is on the board, and it is this record's positive example with one man added. WHY IT IS NOT THE CONCEPT: The one man added is a second black rook, on e8. Overloading is a claim that ONE piece is asked to do two jobs at once; here there are two pieces and two jobs. After Rxd5 Rxd5, the rook on e8 still guards the back rank and there is no mate. WHAT THE SYSTEM DOES: The API does not report overloading. Stockfish 18 says -4.30 at depth 22 and its first move is Rxe8+, trading into a position where Black is a knight up — so Rxd5, the move that works in the positive example, is simply a blunder here. Read against this record's positive at +6.73: one rook added to the defence and the same move goes from winning a knight to losing one. This record has no matcher, and the reason is on the record — an overload is a claim about being asked to do both at once, which is a property of what the attacker can arrange rather than of what is on the board.",
+      "origin_kind": "constructed-test",
+      "concept_role": "negative",
+      "false_positive_case": "two-defenders-for-two-duties"
+    }
+  ],
   "ambiguous_examples": [
     {
       "fen": "3r2k1/5ppp/8/3n4/8/5N2/5PPP/3R2K1 w - - 0 1",

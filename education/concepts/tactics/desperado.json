@@ -120,7 +120,16 @@
       }
     }
   ],
-  "counterexamples": [],
+  "counterexamples": [
+    {
+      "fen": "4k3/8/8/8/6p1/7B/8/4K3 w - - 0 1",
+      "move_uci": "h3g4",
+      "note": "Registered false-positive case `a-piece-that-can-simply-move`, kept on the record as well as in tests/false_positive_cases.json so that the concept carries its own negative evidence. THE SURFACE PATTERN IS PRESENT: The bishop on h3 is attacked by the pawn on g4, and it takes it. A piece under attack that grabs something on its way is the picture of a desperado. WHY IT IS NOT THE CONCEPT: This record's own exception, which it states first: \"The whole idea rests on the piece being genuinely unsaveable. Verify that first.\" The bishop has seven safe squares. Nothing is being sold dearly; a piece that is attacked once and can move is just a piece taking a pawn. WHAT THE SYSTEM DOES: The API does not report a desperado. This record has no matcher and its limitations say why: 'cannot be saved' is a claim about every legal move the piece has and about what happens after each, which is a search rather than a static test. What a static test WOULD find here is a piece under attack making a capture, which is the surface pattern and is not the concept. Stockfish: 0.00 — the capture is correct and wins nothing, because king and bishop against king is drawn. This record's positive example is a rook that genuinely cannot be saved and is worth 748 centipawns over the alternative; the difference between the two positions is whether the piece had somewhere to go.",
+      "origin_kind": "constructed-test",
+      "concept_role": "negative",
+      "false_positive_case": "a-piece-that-can-simply-move"
+    }
+  ],
   "ambiguous_examples": [
     {
       "fen": "8/p7/4R1P1/8/PP5p/3kr3/4p2K/8 w - - 1 56",

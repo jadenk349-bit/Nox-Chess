@@ -988,6 +988,50 @@
       "status": "resolved",
       "evidence": "feature-detector + engine",
       "resolution": "The API reports nothing at all here — not planning, not prophylaxis, not restraint — and the engine says 0.00 with both kings walking about on the kingside. The three concepts share this position as a registered case for the same reason: each is a claim about what a move is FOR, and this base reports what is on the board. A position where every word of three records is true and none of the three concepts is present is the sharpest available test of that discipline."
+    },
+    {
+      "id": "a-discovered-check-that-can-be-blocked",
+      "concept": "discovered-check",
+      "surface_pattern": "Bxb7+ steps the bishop off the d-file, the queen on d4 checks the king on d8 through the gap, and the bishop takes a pawn on the way. That is a discovered check and the detector reports the discovery.",
+      "why_not": "This record's first indicator_against: \"The check is easily blocked or the checking piece captured.\" The whole value of a DISCOVERED check over an ordinary one is that the reply must answer the check, which frees the moving piece to do anything. Here Black answers with ...Nd7, blocking, and keeps every other option.",
+      "fen": "r2k1b1r/1pp1q1p1/7p/pbPBn3/3Q1p2/P7/1B3PPP/2KR3R w - - 0 21",
+      "move": "d5b7",
+      "status": "resolved",
+      "evidence": "feature-detector + shipped-corpus + engine",
+      "resolution": "Shipped puzzle mi-f2e1be14e7, and the useful part is that the MOVE IS EXCELLENT: Stockfish 18 says +4.67 at depth 22, first choice by nearly four pawns. The API reports `discovered-attack` here and refuses `discovered-check`, which is the right pair of answers - the discovery is real and the claim attached to the narrower concept is not, because the moving piece is not free. That separation is what makes this a false-positive case about a LABEL rather than about a move: refusing the label costs the explanation nothing, because the concept that is true is reported beside it. Five of the 788 shipped puzzles carry a discovered check the defender can answer without moving the king."
+    },
+    {
+      "id": "two-pieces-aimed-and-only-one-checking",
+      "concept": "double-check",
+      "surface_pattern": "A knight on d4 stands between a rook on d1 and the enemy king on d8, and Ne6+ gives check from e6 while stepping off the d-file. That is the double-check geometry, and it is the exact shape of this record's own positive example.",
+      "why_not": "A black bishop stands on d6. The rook's line is blocked further along, so moving the knight uncovers nothing and the check is a single one. The `discovered-attack` record states this as an indicator_against — \"the revealed line is blocked by another unit further along\" — and it applies to every concept that reads a battery.",
+      "fen": "3k4/8/3b4/8/3N4/8/8/3RK3 w - - 0 1",
+      "move": "d4e6",
+      "status": "resolved",
+      "evidence": "feature-detector + tablebase",
+      "resolution": "The API does not report a double check. It reports `pin` — correctly, because the bishop on d6 that blocks the rook is itself pinned against the king — and `discovered-attack`. One black bishop, added to this record's positive example, turns a double check into a pin and nothing else. Syzygy: PROVEN WIN, dtz 3, mate in 19, and the tablebase's best move is Nf5 rather than the checking Ne6. The position is still winning and the concept is still absent, which is the distinction this case exists to hold."
+    },
+    {
+      "id": "two-defenders-for-two-duties",
+      "concept": "overloading",
+      "surface_pattern": "A black rook on d8 defends the knight on d5 down the file, the black king is boxed in on the back rank, and White has rooks on d1 and e1. Every piece of the overloading picture is on the board, and it is this record's positive example with one man added.",
+      "why_not": "The one man added is a second black rook, on e8. Overloading is a claim that ONE piece is asked to do two jobs at once; here there are two pieces and two jobs. After Rxd5 Rxd5, the rook on e8 still guards the back rank and there is no mate.",
+      "fen": "3rr1k1/5ppp/8/3n4/8/8/5PPP/3RR1K1 w - - 0 1",
+      "move": "d1d5",
+      "status": "resolved",
+      "evidence": "feature-detector + engine",
+      "resolution": "The API does not report overloading. Stockfish 18 says -4.30 at depth 22 and its first move is Rxe8+, trading into a position where Black is a knight up — so Rxd5, the move that works in the positive example, is simply a blunder here. Read against this record's positive at +6.73: one rook added to the defence and the same move goes from winning a knight to losing one. This record has no matcher, and the reason is on the record — an overload is a claim about being asked to do both at once, which is a property of what the attacker can arrange rather than of what is on the board."
+    },
+    {
+      "id": "a-piece-that-can-simply-move",
+      "concept": "desperado",
+      "surface_pattern": "The bishop on h3 is attacked by the pawn on g4, and it takes it. A piece under attack that grabs something on its way is the picture of a desperado.",
+      "why_not": "This record's own exception, which it states first: \"The whole idea rests on the piece being genuinely unsaveable. Verify that first.\" The bishop has seven safe squares. Nothing is being sold dearly; a piece that is attacked once and can move is just a piece taking a pawn.",
+      "fen": "4k3/8/8/8/6p1/7B/8/4K3 w - - 0 1",
+      "move": "h3g4",
+      "status": "resolved",
+      "evidence": "feature-detector + engine",
+      "resolution": "The API does not report a desperado. This record has no matcher and its limitations say why: 'cannot be saved' is a claim about every legal move the piece has and about what happens after each, which is a search rather than a static test. What a static test WOULD find here is a piece under attack making a capture, which is the surface pattern and is not the concept. Stockfish: 0.00 — the capture is correct and wins nothing, because king and bishop against king is drawn. This record's positive example is a rook that genuinely cannot be saved and is worth 748 centipawns over the alternative; the difference between the two positions is whether the piece had somewhere to go."
     }
   ],
   "last_updated": "2026-09-01"

@@ -121,6 +121,14 @@
       "concept_role": "negative",
       "side_to_move_benefits": "white",
       "controlled_pair_with": "3k4/8/8/8/3N4/8/8/3RK3 w - - 0 1"
+    },
+    {
+      "fen": "r2k1b1r/1pp1q1p1/7p/pbPBn3/3Q1p2/P7/1B3PPP/2KR3R w - - 0 21",
+      "move_uci": "d5b7",
+      "note": "Registered false-positive case `a-discovered-check-that-can-be-blocked`, kept on the record as well as in tests/false_positive_cases.json so that the concept carries its own negative evidence. THE SURFACE PATTERN IS PRESENT: Bxb7+ steps the bishop off the d-file, the queen on d4 checks the king on d8 through the gap, and the bishop takes a pawn on the way. That is a discovered check and the detector reports the discovery. WHY IT IS NOT THE CONCEPT: This record's first indicator_against: \"The check is easily blocked or the checking piece captured.\" The whole value of a DISCOVERED check over an ordinary one is that the reply must answer the check, which frees the moving piece to do anything. Here Black answers with ...Nd7, blocking, and keeps every other option. WHAT THE SYSTEM DOES: Shipped puzzle mi-f2e1be14e7, and the useful part is that the MOVE IS EXCELLENT: Stockfish 18 says +4.67 at depth 22, first choice by nearly four pawns. The API reports `discovered-attack` here and refuses `discovered-check`, which is the right pair of answers - the discovery is real and the claim attached to the narrower concept is not, because the moving piece is not free. That separation is what makes this a false-positive case about a LABEL rather than about a move: refusing the label costs the explanation nothing, because the concept that is true is reported beside it. Five of the 788 shipped puzzles carry a discovered check the defender can answer without moving the king.",
+      "origin_kind": "puzzle",
+      "concept_role": "negative",
+      "false_positive_case": "a-discovered-check-that-can-be-blocked"
     }
   ],
   "ambiguous_examples": [

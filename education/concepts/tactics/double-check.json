@@ -153,6 +153,23 @@
         "category": "win",
         "note": "PROVEN, not evaluated. Read from the side to move. The verdict_note on the engine block beside this one says what the two instruments do and do not agree about."
       }
+    },
+    {
+      "fen": "3k4/8/3b4/8/3N4/8/8/3RK3 w - - 0 1",
+      "move_uci": "d4e6",
+      "note": "Registered false-positive case `two-pieces-aimed-and-only-one-checking`, kept on the record as well as in tests/false_positive_cases.json so that the concept carries its own negative evidence. THE SURFACE PATTERN IS PRESENT: A knight on d4 stands between a rook on d1 and the enemy king on d8, and Ne6+ gives check from e6 while stepping off the d-file. That is the double-check geometry, and it is the exact shape of this record's own positive example. WHY IT IS NOT THE CONCEPT: A black bishop stands on d6. The rook's line is blocked further along, so moving the knight uncovers nothing and the check is a single one. The `discovered-attack` record states this as an indicator_against — \"the revealed line is blocked by another unit further along\" — and it applies to every concept that reads a battery. WHAT THE SYSTEM DOES: The API does not report a double check. It reports `pin` — correctly, because the bishop on d6 that blocks the rook is itself pinned against the king — and `discovered-attack`. One black bishop, added to this record's positive example, turns a double check into a pin and nothing else. Syzygy: PROVEN WIN, dtz 3, mate in 19, and the tablebase's best move is Nf5 rather than the checking Ne6. The position is still winning and the concept is still absent, which is the distinction this case exists to hold.",
+      "origin_kind": "constructed-test",
+      "concept_role": "negative",
+      "tablebase": {
+        "source": "Lichess tablebase (Syzygy, 7-piece)",
+        "pieces": 5,
+        "wdl": "win",
+        "dtz": 3,
+        "dtm": 19,
+        "category": "win",
+        "note": "PROVEN WIN, dtz 3, mate in 19, and the tablebase's best move is Nf5 rather than the checking Ne6. The position is winning and the double check is absent - one black bishop added to this record's positive example turns a double check into a pin."
+      },
+      "false_positive_case": "two-pieces-aimed-and-only-one-checking"
     }
   ],
   "ambiguous_examples": [
