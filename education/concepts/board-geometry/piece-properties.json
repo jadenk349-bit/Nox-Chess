@@ -118,7 +118,40 @@
     "co_occurring": [],
     "conflicts": []
   },
-  "examples": [],
+  "examples": [
+    {
+      "fen": "7k/8/5K2/7P/3B4/8/8/8 w - - 0 1",
+      "note": "King, bishop and rook pawn against a bare king, with the bishop on the SAME colour as the queening square - and it is a proven win in 9. This record is about what the pieces can and cannot do, and a bishop's defining property is that it never leaves one colour. Here that property is the whole position: the bishop covers h8 and drives the king out. This base's counterexample for the record is the same material with the bishop one colour across, which is a PROVEN DRAW at dtz 0 - and where Stockfish 18 at depth 26 says +0.92 and is wrong. Two positions, identical piece counts, opposite results, and the point table cannot see the difference at all.",
+      "origin_kind": "tablebase-position",
+      "concept_role": "positive",
+      "side_to_move_benefits": "white",
+      "engine": {
+        "engine_id": "Stockfish 18",
+        "test_level": 3,
+        "depth": 20,
+        "threads": 10,
+        "hash_mb": 4096,
+        "multipv": 1,
+        "best_move": "f6g6",
+        "eval_cp": null,
+        "mate_in": 7,
+        "pv": [],
+        "alternatives": [],
+        "margin_cp": null,
+        "verdict": "supports",
+        "verdict_note": "Mate in 7, and the engine agrees here - which it does not on the drawn twin, where it reports +0.92 for a position Syzygy proves drawn."
+      },
+      "tablebase": {
+        "source": "Lichess tablebase (Syzygy, 7-piece)",
+        "pieces": 4,
+        "wdl": "win",
+        "dtz": 1,
+        "dtm": 9,
+        "category": "win",
+        "note": "PROVEN WIN in 9, dtz 1, best move Kg6+. The paired position - the same three men with the bishop on the other colour - is a PROVEN DRAW at dtz 0. A piece's colour is a property no material count records."
+      }
+    }
+  ],
   "counterexamples": [
     {
       "fen": "7k/8/5K2/3B3P/8/8/8/8 w - - 0 1",

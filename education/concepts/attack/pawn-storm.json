@@ -114,7 +114,31 @@
       }
     ]
   },
-  "examples": [],
+  "examples": [
+    {
+      "fen": "r1bq1rk1/pp2ppbp/2np1np1/8/3PP1PP/2N1BP2/PPPQ4/2KR1B1R w - - 0 1",
+      "note": "The Yugoslav Attack setup: opposite-side castling, White's h- and g-pawns advancing at a fianchettoed king, and every white piece placed to follow them in - queen on d2, rook on d1, rook on h1, bishop on e3. That last part is the whole of the concept and the part the phrase leaves out. This record's counterexample is Letelier-Fischer 1960, four pawns advanced with every piece at home, and the difference between the two positions is not the pawns. The engine says -0.27 - level - and that is the honest reading: a storm is a PLAN and not an advantage, and both sides are attacking on opposite wings with everything still to play for.",
+      "origin_kind": "constructed-test",
+      "concept_role": "positive",
+      "side_to_move_benefits": "neither",
+      "engine": {
+        "engine_id": "Stockfish 18",
+        "test_level": 3,
+        "depth": 20,
+        "threads": 10,
+        "hash_mb": 4096,
+        "multipv": 1,
+        "best_move": "h4h5",
+        "eval_cp": -27,
+        "mate_in": null,
+        "pv": [],
+        "alternatives": [],
+        "margin_cp": null,
+        "verdict": "supports",
+        "verdict_note": "-0.27 at depth 20, settled at depth 9, and the engine's own first move is h4-h5 - it plays the storm and rates the position level. A plan that the engine adopts and that changes no evaluation is exactly what a middlegame plan is."
+      }
+    }
+  ],
   "counterexamples": [
     {
       "fen": "rnbqnrk1/ppp1ppbp/3p2p1/4P3/2PP1P2/2N1B3/PP4PP/R2QKBNR b KQ - 1 7",

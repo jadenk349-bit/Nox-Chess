@@ -118,7 +118,23 @@
       "note": "Registered false-positive case `a-quiet-move-called-a-plan`, kept on the record as well as in tests/false_positive_cases.json so that the concept carries its own negative evidence. THE SURFACE PATTERN IS PRESENT: Kd1 in a fully locked position. Any quiet move can be described afterwards as part of a plan — improving the king, preparing to bring it to the queenside, waiting for the opponent to commit. WHY IT IS NOT THE CONCEPT: A plan is a sequence with a goal, and this position has no goal available to anybody: every file is rammed shut and no piece can enter. Describing the move as planful names an intention the board does not contain. WHAT THE SYSTEM DOES: The API reports nothing at all here — not planning, not prophylaxis, not restraint — and the engine says 0.00 with both kings walking about on the kingside. The three concepts share this position as a registered case for the same reason: each is a claim about what a move is FOR, and this base reports what is on the board. A position where every word of three records is true and none of the three concepts is present is the sharpest available test of that discipline.",
       "origin_kind": "constructed-test",
       "concept_role": "negative",
-      "false_positive_case": "a-quiet-move-called-a-plan"
+      "false_positive_case": "a-quiet-move-called-a-plan",
+      "engine": {
+        "engine_id": "Stockfish 18",
+        "test_level": 3,
+        "depth": 24,
+        "threads": 10,
+        "hash_mb": 4096,
+        "multipv": 1,
+        "best_move": "e1f2",
+        "eval_cp": 0,
+        "mate_in": null,
+        "pv": [],
+        "alternatives": [],
+        "margin_cp": null,
+        "verdict": "supports",
+        "verdict_note": "0.00 at depth 24, and the engine's line is both kings walking about on the kingside. There is no plan in the position for either side, which is the point: three other records - `prophylaxis`, `restraint` and `middlegame-principles` - carry this same board for the same reason, because each is a claim about what a move is FOR and there is nothing for a move to be for."
+      }
     }
   ],
   "ambiguous_examples": [],

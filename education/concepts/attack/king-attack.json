@@ -166,7 +166,31 @@
       }
     ]
   },
-  "examples": [],
+  "examples": [
+    {
+      "fen": "1r1q2k1/pp3p2/1n2p3/6NQ/3P2R1/3B4/PP3PPP/6K1 w - - 0 1",
+      "note": "Constructed to satisfy all three of Vukovic's conditions at once, which is what this record's matcher tests and what an attacking position has to earn. LOCAL SUPERIORITY: three white pieces bear on the black king's zone against two defenders, with one of three shield pawns left in front of the king on g8. THE ATTACKER'S OWN KING IS SAFE: zero enemy pieces on White's zone against eight defenders, so the operation is not a race being lost. THE CENTRE IS NOT AVAILABLE for a counter-blow. The demonstration is that it mates: Qxh7+ Kf8 Qxf7 is mate in two. Reported at LOW confidence, which is this record's own ceiling and is right - everything the matcher tests is a PRECONDITION for an attack rather than proof of one, and this base's registered counterexample is Adams-Kasparov 2005, where every sign is present and the attack is not real.",
+      "origin_kind": "constructed-test",
+      "concept_role": "positive",
+      "side_to_move_benefits": "white",
+      "engine": {
+        "engine_id": "Stockfish 18",
+        "test_level": 3,
+        "depth": 20,
+        "threads": 10,
+        "hash_mb": 4096,
+        "multipv": 1,
+        "best_move": "h5h7",
+        "eval_cp": null,
+        "mate_in": 2,
+        "pv": [],
+        "alternatives": [],
+        "margin_cp": null,
+        "verdict": "supports",
+        "verdict_note": "Mate in 2 at depth 20, settled at depth 1: Qxh7+ Kf8 Qxf7#. The mate is delivered by the attacking pieces rather than by the extra material, which is what makes the position an example of the concept rather than of a material edge."
+      }
+    }
+  ],
   "counterexamples": [
     {
       "fen": "br3rk1/2q2ppP/p2pp3/2n1b1BP/1n1NP3/2N2P2/1PPQB3/1K4RR b - - 0 21",

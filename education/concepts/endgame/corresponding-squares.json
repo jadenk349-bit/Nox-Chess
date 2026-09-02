@@ -127,7 +127,23 @@
       "note": "Registered false-positive case `opposition-already-answers-it`, kept on the record as well as in tests/false_positive_cases.json so that the concept carries its own negative evidence. THE SURFACE PATTERN IS PRESENT: A king-and-pawn ending decided by which king has to move: Black to move loses, White to move draws. That is reciprocal zugzwang, and reciprocal zugzwang is what a pair of corresponding squares IS. WHY IT IS NOT THE CONCEPT: This record's first trap: \"The framework is only needed where opposition fails. Invoking it where simple opposition answers the question is unhelpful precision.\" And its second indicator_against: \"Simple opposition already answers it.\" The kings are in direct opposition on one file with one pawn on the board; counting the squares between them gives the right answer, which is the case the general theory exists to handle when it does not. WHAT THE SYSTEM DOES: PROVEN both ways: Black to move is a LOSS in 28, and the same board with White to move is a PROVEN DRAW at dtz 0. So the mutual zugzwang is real and the concept that names it here is `opposition`, which the API reports at high confidence, and not this one, which has no matcher. The distinction matters because it is a distinction about the READER rather than about the board — this record's third trap says so outright: 'this is an expert-level tool. Reporting it to a player who has not yet mastered the opposition explains nothing.' The same position is this base's strictest controlled pair and serves `opposition`, `key-square` and `zugzwang`.",
       "origin_kind": "constructed-test",
       "concept_role": "negative",
-      "false_positive_case": "opposition-already-answers-it"
+      "false_positive_case": "opposition-already-answers-it",
+      "engine": {
+        "engine_id": "Stockfish 18",
+        "test_level": 3,
+        "depth": 26,
+        "threads": 10,
+        "hash_mb": 4096,
+        "multipv": 1,
+        "best_move": "e7d7",
+        "eval_cp": null,
+        "mate_in": -15,
+        "pv": [],
+        "alternatives": [],
+        "margin_cp": null,
+        "verdict": "supports",
+        "verdict_note": "Mate in 15 against the side to move at depth 26, and Syzygy proves it: a LOSS in 28, against a PROVEN DRAW at dtz 0 for the same board with the other side to move. The reciprocal zugzwang is real, and the concept that names it here is `opposition` rather than this one - which is this record's own first trap, that the general framework is only needed where simple opposition fails."
+      }
     }
   ],
   "ambiguous_examples": [],
