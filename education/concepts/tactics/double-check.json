@@ -83,6 +83,32 @@
   },
   "examples": [
     {
+      "fen": "1r4r1/pbpknp1p/1b3P2/8/8/B1PB1q2/P4PPP/3R2K1 w - - 0 22",
+      "move": "Bf5+",
+      "move_uci": "d3f5",
+      "note": "Anderssen-Dufresne, Berlin 1852 - the Evergreen Game, 22.Bf5+, and it is this base's cleanest instance of the motif because the detector names it in its own words: 'it is double check - the bishop and the rook on d1 both hit the king, so only the king can move.' That last clause is the whole concept. Black has a queen on f3 and two rooks and none of them can interpose or capture; the king went to d7 one move earlier and must now walk into the mate. Mate in 3. PROVENANCE. The move list was replayed through this base's own move generator by tools/replay_game.js, which refuses a wrong list rather than guessing, so the FEN is verified rather than remembered. No named annotator is attached to this position for this concept, so it grounds the MASTER-GAME rung and not the human-grounded one.",
+      "origin_kind": "historical-game",
+      "game": "Anderssen-Dufresne, Berlin 1852 (the Evergreen Game)",
+      "concept_role": "positive",
+      "side_to_move_benefits": "white",
+      "engine": {
+        "engine_id": "Stockfish 18",
+        "test_level": 3,
+        "depth": 20,
+        "threads": 10,
+        "hash_mb": 4096,
+        "multipv": 1,
+        "best_move": "d3f5",
+        "eval_cp": null,
+        "mate_in": 3,
+        "pv": [],
+        "alternatives": [],
+        "margin_cp": null,
+        "verdict": "supports",
+        "verdict_note": "Mate in 3 at depth 20, settled at depth 1, and the double check is the engine's first choice."
+      }
+    },
+    {
       "fen": "3k4/8/8/8/3N4/8/8/3RK3 w - - 0 1",
       "move": "Ne6+",
       "move_uci": "d4e6",

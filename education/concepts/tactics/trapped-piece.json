@@ -80,6 +80,32 @@
   },
   "examples": [
     {
+      "fen": "rn1qkbnr/ppp2p1p/3p2p1/4N3/2B1P3/2N5/PPPP1PPP/R1BbK2R w KQkq - 0 6",
+      "move": "Bxf7+",
+      "move_uci": "c4f7",
+      "note": "Legall's Mate, Paris 1750, after 5...Bxd1 - and the trapped piece is the bishop that has just taken the queen. The detector: 'the bishop on d1 is trapped - every square it can reach loses it.' That is true and it is beside the point, which is what makes it the right master example for this record: White is not going to collect the bishop, White is going to mate in two with 6.Bxf7+ Ke7 7.Nd5#. A piece can be trapped and irrelevant at the same time, and a system that reported the trapped bishop as the news would be describing the least important thing on the board. PROVENANCE. The move list was replayed through this base's own move generator by tools/replay_game.js, which refuses a wrong list rather than guessing, so the FEN is verified rather than remembered. No named annotator is attached to this position for this concept, so it grounds the MASTER-GAME rung and not the human-grounded one.",
+      "origin_kind": "historical-game",
+      "game": "Legall de Kermeur - Saint Brie, Paris 1750",
+      "concept_role": "positive",
+      "side_to_move_benefits": "white",
+      "engine": {
+        "engine_id": "Stockfish 18",
+        "test_level": 3,
+        "depth": 20,
+        "threads": 10,
+        "hash_mb": 4096,
+        "multipv": 1,
+        "best_move": "c4f7",
+        "eval_cp": null,
+        "mate_in": 2,
+        "pv": [],
+        "alternatives": [],
+        "margin_cp": null,
+        "verdict": "supports",
+        "verdict_note": "Mate in 2 at depth 20 - the trapped bishop is never taken, and the position is decided by a mating net that has nothing to do with it."
+      }
+    },
+    {
       "fen": "7k/5prP/1p1B2n1/p3P3/P7/1PQ2B2/2p1K3/R5q1 b - - 9 60",
       "note": "A clean instance: the detector reports trappedPiece and nothing else, for the move Nf4+. Two things are verified here and a third is not. VERIFIED: findMotifs() in blind-chess.html reports the motif — and that detector, not this system, is the authority on whether a motif is present. ALSO VERIFIED: Nf4+ is the recorded solution of a shipped puzzle, and tools/generate_puzzles.js only admits a position when one move is objectively best by a wide margin at confirmation depth, so the move carries engine backing by construction rather than by a separate search here. NOT claimed: that the motif is the whole reason the move wins. Provenance: the puzzle corpus is engine self-play — a real position from a real game between engines, not a master game.",
       "origin_kind": "puzzle",

@@ -83,6 +83,32 @@
   },
   "examples": [
     {
+      "fen": "2r2rk1/pb1q1ppp/1pn1pn2/8/3P4/P3PB2/3N1PPP/RQB2RK1 b - - 7 15",
+      "move": "Na5",
+      "move_uci": "c6a5",
+      "note": "Havasi-Capablanca, Budapest 1929, 15...Na5 - and the detector reads two things at once: the knight move uncovers the bishop on b7, and what it uncovers is a skewer, 'the bishop on f3 has to move, and the pawn on g2 behind it falls'. The annotation is about neither - Van Der Nat calls it 'a fine strategic move' offering to trade off White's remaining bishop. Both are true of one move, and the strategic reading is why Capablanca played it. A skewer whose rear unit is a PAWN is the modest kind and is the kind that actually occurs: this base's own guard refuses most of them, and this one survives because the g2 pawn genuinely falls. PROVENANCE. The position is a corpus entry - a master game with a verified move list and a named annotator - and the annotator named a DIFFERENT concept there. So this grounds the MASTER-GAME rung and not the human-grounded one: the motif is what this base's own detector reads off the board, and the game is what makes the board real. `attributed_by` is deliberately absent.",
+      "origin_kind": "historical-game",
+      "game": "Havasi-Capablanca, Budapest 1929",
+      "concept_role": "positive",
+      "side_to_move_benefits": "black",
+      "engine": {
+        "engine_id": "Stockfish 18",
+        "test_level": 3,
+        "depth": 22,
+        "threads": 10,
+        "hash_mb": 4096,
+        "multipv": 3,
+        "best_move": "c6a5",
+        "eval_cp": 40,
+        "mate_in": null,
+        "pv": [],
+        "alternatives": [],
+        "margin_cp": null,
+        "verdict": "supports",
+        "verdict_note": "+0.40 and the engine's first choice at depth 22 with three lines. A strategic move that is also objectively best, with the tactic as a by-product."
+      }
+    },
+    {
       "fen": "2r5/1p3q2/p2bk1p1/3p1p2/4pP2/P5P1/BP1R1P1P/5RK1 w - - 0 27",
       "note": "A clean instance: the detector reports skewer and nothing else, for the move Bxd5+. Two things are verified here and a third is not. VERIFIED: findMotifs() in blind-chess.html reports the motif — and that detector, not this system, is the authority on whether a motif is present. ALSO VERIFIED: Bxd5+ is the recorded solution of a shipped puzzle, and tools/generate_puzzles.js only admits a position when one move is objectively best by a wide margin at confirmation depth, so the move carries engine backing by construction rather than by a separate search here. NOT claimed: that the motif is the whole reason the move wins. Provenance: the puzzle corpus is engine self-play — a real position from a real game between engines, not a master game.",
       "origin_kind": "puzzle",

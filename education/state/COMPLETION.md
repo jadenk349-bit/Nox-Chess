@@ -48,7 +48,7 @@ finished.
 
 137 concepts · 205 sources · **212 engine-validated positions + 60 tablebase-proven, of 343 in the base** ·
 **42 human-annotated corpus positions from 28 master games** · 32 replay-verified
-master games · 924 tests + 822 API + 374 audit + 3570 explanation assertions.
+master games · 930 tests + 822 API + 374 audit + 3570 explanation assertions.
 
 Ladder: researched 137, human-grounded 43, engine-verified 101, negative-tested
 71, ambiguity-tested 41, api-validated 53 of the 83 whose record allows it,

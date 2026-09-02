@@ -99,7 +99,34 @@
     "co_occurring": [],
     "conflicts": []
   },
-  "examples": [],
+  "examples": [
+    {
+      "fen": "1r2k1r1/pbppnp1p/1b3P2/8/Q7/B1PB1q2/P4PPP/3R2K1 w - - 0 21",
+      "move": "Qxd7+",
+      "move_uci": "a4d7",
+      "note": "Anderssen-Dufresne, Berlin 1852, 21.Qxd7+ - the queen sacrifice that lures the king to d7, where the double check 22.Bf5+ works and the mate follows. This is this record's FIRST positive example. It has carried a limitation saying it had none, and the reason given there was that four constructions had failed and the base's nearest candidate was a combination sources call a deflection as often as a decoy. This one is the textbook form: a piece is not being pulled off a duty, it is being pulled ONTO a square, and the square is d7 because that is where the rook on d1 and a bishop can check at the same time. Mate in 4. PROVENANCE. The move list was replayed through this base's own move generator by tools/replay_game.js, which refuses a wrong list rather than guessing, so the FEN is verified rather than remembered. No named annotator is attached to this position for this concept, so it grounds the MASTER-GAME rung and not the human-grounded one.",
+      "origin_kind": "historical-game",
+      "game": "Anderssen-Dufresne, Berlin 1852 (the Evergreen Game)",
+      "concept_role": "positive",
+      "side_to_move_benefits": "white",
+      "engine": {
+        "engine_id": "Stockfish 18",
+        "test_level": 3,
+        "depth": 20,
+        "threads": 10,
+        "hash_mb": 4096,
+        "multipv": 1,
+        "best_move": "a4d7",
+        "eval_cp": null,
+        "mate_in": 4,
+        "pv": [],
+        "alternatives": [],
+        "margin_cp": null,
+        "verdict": "supports",
+        "verdict_note": "Mate in 4 at depth 20, settled at depth 1, and the sacrifice is the engine's first choice. The whole line is forced: Qxd7+ Kxd7 Bf5+ Ke8 Bd7+ Kf8 Bxe7#."
+      }
+    }
+  ],
   "counterexamples": [
     {
       "fen": "6k1/5pp1/7p/8/8/8/5PPP/R5K1 w - - 0 1",

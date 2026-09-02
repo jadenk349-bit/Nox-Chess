@@ -93,6 +93,32 @@
   },
   "examples": [
     {
+      "fen": "r3r1k1/2p2pbp/2pp2p1/8/P1q1P3/2N2P2/1PPQ2PP/1R1R2K1 b - - 2 22",
+      "move": "Reb8",
+      "move_uci": "e8b8",
+      "note": "Nimzowitsch-Capablanca, St Petersburg 1914, 22...Reb8 - Capablanca doubling on the b-file, and the detector's reading of what that achieves is a pin: 'the pawn on b2 is pinned to the rook behind it and cannot step aside'. The annotation is about the file rather than the pin - 'his extremely active pieces and PLAY ON THE OPEN B-FILE more than compensate for the structural weakness' - and the pin is what the play on the file consists of. A pin against a ROOK rather than a king is the relative kind, and it is the commoner kind in real games, which is why this is a better master example than a mating-net pin would be. PROVENANCE. The position is a corpus entry - a master game with a verified move list and a named annotator - and the annotator named a DIFFERENT concept there. So this grounds the MASTER-GAME rung and not the human-grounded one: the motif is what this base's own detector reads off the board, and the game is what makes the board real. `attributed_by` is deliberately absent.",
+      "origin_kind": "historical-game",
+      "game": "Nimzowitsch-Capablanca, St Petersburg preliminary 1914",
+      "concept_role": "positive",
+      "side_to_move_benefits": "black",
+      "engine": {
+        "engine_id": "Stockfish 18",
+        "test_level": 3,
+        "depth": 22,
+        "threads": 10,
+        "hash_mb": 4096,
+        "multipv": 3,
+        "best_move": "e8b8",
+        "eval_cp": 107,
+        "mate_in": null,
+        "pv": [],
+        "alternatives": [],
+        "margin_cp": null,
+        "verdict": "supports",
+        "verdict_note": "+1.07 from Black's side and the engine's first choice on a three-line search - the doubling move that creates the pin is also objectively best."
+      }
+    },
+    {
       "fen": "r3k2r/ppp2ppp/2n5/1B6/3P4/2N5/PPP2PPP/R3K2R w KQkq - 0 1",
       "note": "Constructed controlled pair, positive half. Bb5 pins Nc6 absolutely against Ke8, so d4-d5 attacks a knight that cannot move.",
       "origin_kind": "constructed-test",

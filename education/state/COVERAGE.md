@@ -24,8 +24,8 @@ The completion assessment is judged on the ORIGINAL rule and criterion 1 stays w
 | full | 1.00 | `pawn-breaks` | 3 |
 | full | 0.99 | `pawn-structures` | 5 |
 | full | 0.94 | `named-theoretical-positions` | 3 |
+| full | 0.86 | `tactical-motifs` | 19 |
 | full | 0.85 | `opening-theory-concepts` | 4 |
-| full | 0.83 | `tactical-motifs` | 19 |
 | full | 0.83 | `official-rules` | 12 |
 | substantial | 1.00 | `checks-captures-threats` | 2 |
 | substantial | 1.00 | `restriction` | 2 |
@@ -168,8 +168,10 @@ The completion assessment is judged on the ORIGINAL rule and criterion 1 stays w
 | `two-weaknesses` | 1.00 | x | x | x | x | x | x | x | x | x | x | x | x | x | x | x | x |
 | `worst-placed-piece` | 1.00 | x | x | x | x | x | x | x | x | x | x | . | x | x | x | x | x |
 | `notation` | 1.00 | x | x | x | x | x | . | x | x | . | . | . | . | x | x | x | x |
+| `fork` | 1.00 | x | x | x | . | x | x | x | x | x | x | x | x | x | x | x | x |
 | `hanging-piece` | 1.00 | x | x | x | . | x | x | x | x | . | x | x | . | x | x | x | x |
 | `loose-piece` | 1.00 | x | x | x | . | x | x | x | x | . | x | . | . | x | x | x | x |
+| `pin` | 1.00 | x | x | x | . | x | x | x | x | x | x | . | x | x | x | x | x |
 | `tactical-combinations` | 1.00 | x | x | x | x | x | x | . | . | . | . | . | . | x | x | x | x |
 | `fortress` | 0.94 | x | x | x | x | x | x | x | x | x | x | x | - | x | x | x | x |
 | `knight-endgames` | 0.94 | x | x | x | x | x | x | x | x | x | x | x | - | x | x | x | x |
@@ -187,14 +189,15 @@ The completion assessment is judged on the ORIGINAL rule and criterion 1 stays w
 | `lpdo` | 0.93 | x | x | x | x | x | x | x | x | x | x | . | - | x | x | x | x |
 | `hole` | 0.93 | x | x | x | x | x | x | x | x | x | x | . | - | x | x | x | x |
 | `strong-square` | 0.93 | x | x | x | x | x | x | x | x | x | x | . | - | x | x | x | x |
-| `fork` | 0.93 | x | x | x | . | x | x | x | x | x | x | x | - | x | x | x | x |
+| `double-check` | 0.93 | x | x | x | . | x | x | x | x | x | x | x | x | x | x | x | - |
 | `greek-gift` | 0.93 | x | x | x | x | x | x | x | x | x | x | . | - | x | x | x | x |
 | `knight-fork` | 0.93 | x | x | x | . | x | x | x | x | x | x | x | - | x | x | x | x |
+| `skewer` | 0.93 | x | x | x | . | x | x | x | x | x | x | x | x | x | x | x | - |
 | `pawn-storm` | 0.93 | x | x | x | . | x | x | - | x | x | x | . | x | x | x | x | x |
 | `early-queen-development` | 0.93 | x | x | x | . | x | x | x | x | x | x | . | - | x | x | x | x |
 | `queen-activity` | 0.93 | x | x | x | . | x | x | - | x | x | x | . | x | x | x | x | x |
 | `discovered-attack` | 0.93 | x | x | x | . | x | x | x | x | x | x | . | x | x | x | x | - |
-| `pin` | 0.93 | x | x | x | . | x | x | x | x | x | x | . | - | x | x | x | x |
+| `trapped-piece` | 0.93 | x | x | x | . | x | x | x | x | x | x | . | x | x | x | x | - |
 | `triangulation` | 0.92 | x | x | x | x | x | . | - | x | . | x | x | . | x | x | x | x |
 | `sacrifice` | 0.92 | x | x | x | x | x | x | - | x | . | x | . | . | x | x | x | x |
 | `check` | 0.91 | x | x | x | . | x | . | x | x | . | . | x | . | x | x | x | - |
@@ -207,15 +210,12 @@ The completion assessment is judged on the ORIGINAL rule and criterion 1 stays w
 | `opening-development` | 0.87 | x | x | x | x | x | x | - | x | x | x | . | - | x | x | x | x |
 | `smothered-mate` | 0.87 | x | x | x | . | x | x | x | x | x | x | x | - | x | x | x | - |
 | `double-attack` | 0.87 | x | x | x | . | x | x | x | x | x | x | x | - | x | x | x | - |
-| `double-check` | 0.87 | x | x | x | . | x | x | x | x | x | x | x | - | x | x | x | - |
-| `skewer` | 0.87 | x | x | x | . | x | x | x | x | x | x | x | - | x | x | x | - |
 | `x-ray` | 0.87 | x | x | x | . | x | x | x | x | x | x | x | - | x | x | x | - |
 | `battery` | 0.86 | x | x | x | . | x | x | x | x | x | x | . | - | x | x | x | - |
 | `deflection` | 0.86 | x | x | x | . | x | x | x | x | - | x | . | x | x | x | x | - |
 | `discovered-check` | 0.86 | x | x | x | . | x | x | x | x | x | x | . | - | x | x | x | - |
 | `overloading` | 0.86 | x | x | x | . | x | x | x | x | x | x | . | - | x | x | x | - |
 | `removing-the-defender` | 0.86 | x | x | x | . | x | x | x | x | - | x | . | x | x | x | x | - |
-| `trapped-piece` | 0.86 | x | x | x | . | x | x | x | x | x | x | . | - | x | x | x | - |
 | `zwischenzug` | 0.86 | x | x | x | . | x | x | x | x | x | x | . | - | x | x | x | - |
 | `exceptions-to-rules` | 0.85 | x | x | x | . | x | x | - | x | . | - | x | . | x | x | x | x |
 | `insufficient-material` | 0.85 | x | x | x | . | x | x | x | x | . | - | x | . | x | x | x | - |
@@ -224,6 +224,7 @@ The completion assessment is judged on the ORIGINAL rule and criterion 1 stays w
 | `checkmate` | 0.82 | x | x | x | . | x | . | x | x | . | . | x | . | - | x | x | - |
 | `stalemate` | 0.82 | x | x | x | . | x | . | x | x | . | . | x | . | - | x | x | - |
 | `candidate-moves` | 0.80 | x | x | x | x | x | x | x | - | - | x | . | x | - | x | x | x |
+| `decoy` | 0.79 | - | x | x | . | x | x | x | x | - | x | . | x | x | x | x | - |
 | `desperado` | 0.79 | - | x | x | . | x | x | x | x | x | x | . | - | x | x | x | - |
 | `planning` | 0.73 | x | x | x | x | x | x | - | x | - | - | . | - | x | x | x | x |
 | `promotion` | 0.70 | x | x | x | . | x | . | x | - | . | . | . | . | - | x | x | - |
@@ -247,4 +248,3 @@ The completion assessment is judged on the ORIGINAL rule and criterion 1 stays w
 | `intermediate-concepts` | 0.58 | x | x | x | . | x | - | - | - | . | - | . | . | - | x | x | x |
 | `master-concepts` | 0.58 | x | x | x | . | x | - | - | - | . | - | . | . | - | x | x | x |
 | `opening-repertoire` | 0.57 | x | x | x | . | x | x | - | - | - | - | . | - | - | x | x | x |
-| `decoy` | 0.57 | - | x | x | . | x | x | - | x | - | - | . | - | x | x | x | - |

@@ -93,6 +93,32 @@
   },
   "examples": [
     {
+      "fen": "rnbqk1nr/pp3ppp/4p3/b1ppP3/3P4/P1N5/1PP2PPP/R1BQKBNR w KQkq - 1 6",
+      "move": "b4",
+      "move_uci": "b2b4",
+      "note": "Smyslov-Botvinnik, World Championship 1954, game 1, 6.b4 - a pawn fork in a world-championship game, and one recommended in print thirty years earlier. The detector: 'the pawn on b4 forks the bishop on a5 and the pawn on c5.' Botvinnik's own note calls it 'a well-known pawn sacrifice, recommended by Alekhine in the book of the New York international tournament of 1924'. The two readings do not conflict - the fork is the mechanism and the sacrifice is the intention, since Black takes on b4 and White gets the initiative. A PAWN fork is worth having as the master example because the forking piece is the cheapest on the board, which is the condition that makes a fork work at all. PROVENANCE. The position is a corpus entry - a master game with a verified move list and a named annotator - and the annotator named a DIFFERENT concept there. So this grounds the MASTER-GAME rung and not the human-grounded one: the motif is what this base's own detector reads off the board, and the game is what makes the board real. `attributed_by` is deliberately absent.",
+      "origin_kind": "historical-game",
+      "game": "Smyslov-Botvinnik, World Championship match (game 1), Moscow 1954",
+      "concept_role": "positive",
+      "side_to_move_benefits": "white",
+      "engine": {
+        "engine_id": "Stockfish 18",
+        "test_level": 3,
+        "depth": 22,
+        "threads": 10,
+        "hash_mb": 4096,
+        "multipv": 3,
+        "best_move": "d1g4",
+        "eval_cp": 55,
+        "mate_in": null,
+        "pv": [],
+        "alternatives": [],
+        "margin_cp": null,
+        "verdict": "supports",
+        "verdict_note": "+0.53 for the move played against +0.55 for the engine's first choice, at depth 22 with three lines - two centipawns apart, which is agreement in everything but rank. The gambit is sound and is not forced."
+      }
+    },
+    {
       "fen": "r3k3/4bppp/8/3N4/8/8/PPP5/R3KB2 w Qq - 0 1",
       "note": "Constructed controlled pair, positive half. Nc7+ forks Ke8 and Ra8; c7 is unguarded because the black bishop stands on e7.",
       "origin_kind": "constructed-test",
