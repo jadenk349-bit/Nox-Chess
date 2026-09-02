@@ -1288,6 +1288,8 @@ STATIC_FILES = {
     "/engine/stockfish.wasm.js": ("engine/stockfish.wasm.js", "text/javascript; charset=utf-8"),
     "/engine/stockfish.wasm":    ("engine/stockfish.wasm",    "application/wasm"),
     "/assets/nox-logo.png":      ("assets/nox-logo.png",      "image/png"),
+    # the night sky every screen sits on (a JPEG, whatever the source was called)
+    "/assets/sky.jpg":           ("assets/sky.jpg",           "image/jpeg"),
     # the seven rank badges the ranked screen shows, one per tier
     "/assets/tier-bronze.png":      ("assets/tier-bronze.png",      "image/png"),
     "/assets/tier-silver.png":      ("assets/tier-silver.png",      "image/png"),
