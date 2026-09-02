@@ -1751,3 +1751,20 @@ sentence says which. Seventh "say more" in three sessions.
 
 39.5% → **24.5%**, and Capablanca's second rook on the b-file is now named where
 before only the a-file was.
+
+
+## An annotator's "open file" is not this base's
+
+Nimzowitsch–Capablanca 1914 now carries a second corpus entry, giving
+`semi-open-file` **the first human grounding it has ever had**. The annotators
+write "play on the **open** b-file"; this base calls that file **semi-open**,
+because White still has a pawn on b2 and `open-file` is reserved for a file with
+no pawn of either colour.
+
+That is not pedantry. The two concepts have different detectors and different
+conditions — an open file needs an **entry square**, a semi-open one needs a
+**target** — and the b-file here has a target, which is the whole point.
+`open-file` is in the entry's `rejected_as_wrong` for that reason, and is
+correctly not reported.
+
+Corpus: **41 positions, 27 games, 19 positive / 13 ambiguous / 9 negative.**

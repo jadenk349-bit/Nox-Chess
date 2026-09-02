@@ -1892,6 +1892,28 @@ const { concepts } = API.knowledge();
      (recs['fork'].limitations || []).some(l => /TYPICAL_CONFIDENCE RAISED/.test(l)));
 }
 
+{
+  // semi-open-file's first human grounding, and it arrived by catching a bug
+  // rather than confirming one. Nimzowitsch–Capablanca 1914: the annotators name
+  // "play on the open b-file", this base calls it SEMI-open because White still
+  // has a pawn on b2, and the matcher had dropped that file entirely.
+  const corpus = JSON.parse(fs.readFileSync(
+    path.join(ROOT, 'corpus', 'annotated_positions.json'), 'utf8')).positions;
+  const nc = corpus.find(p => p.id === 'nimzowitsch-capablanca-1914-22Reb8-semi-open-file');
+  ok('semi-open-file has a human-grounded positive', !!nc && !!nc.attributed_by);
+  const after = API.analyzeWithEducation({ fen: nc.fen_after })
+    .concepts_all.find(c => c.id === 'semi-open-file');
+  ok('...and the concept is reported for Black there',
+     after && after.subjects.includes('b'), JSON.stringify(after));
+  // The terminology distinction is the point of the entry: an annotator's "open
+  // file" is not this base's, and the two concepts have different detectors.
+  ok('...and `open-file` is rejected, because b2 is still on the board',
+     nc.rejected_as_wrong.includes('open-file'));
+  ok('open-file is NOT reported there',
+     !API.analyzeWithEducation({ fen: nc.fen_after })
+       .concepts_all.some(c => c.id === 'open-file'));
+}
+
 /* ---------- report ---------- */
 console.log(`\nAPI  PASS ${pass}   FAIL ${fails.length}`);
 for (const [n, d] of fails) console.log(`  FAIL  ${n}\n        ${d}`);

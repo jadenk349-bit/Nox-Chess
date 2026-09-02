@@ -35,7 +35,8 @@
     "`attributed_by` names the PERSON whose claim the entry rests on, and it is the field the validation ladder reads - not `annotator`, which is prose and can say things like 'unattributed training page' while still looking like grounding. Backfilled across the file on 2026-09-02, at which point exactly one entry turned out to have no person behind it (karpov-kasparov-1985-g16), and it now correctly grants its concept no human-grounded rung. This is the second time a rung in this project was found counting something looser than its own definition, and both times the number went down.",
     "One entry, added 2026-09-02, is scored on CONFIDENCE rather than on presence, and is the first of its kind here: Ftacnik-Roiz 2009, where White really does have the two bishops and a grandmaster's note reads 'please note how idle White's bishops are' in a position Stockfish scores at -2.66 for him. Nothing the system says is false, so `bishop-pair` does not belong in rejected_as_wrong; what is wrong is the weight. The entry's `confidence` is the annotator's, the checker compares it with the system's, and the gap is a recorded failure rather than a guard fitted to one position.",
     "Torre-Karpov 1977 is the first human-grounded negative for `space`, and it is worth reading beside the two weak-square negatives: all three are positions a named author BUILT to catch the reading a mechanical detector performs, and in all three the raw Layer 3 feature is present and loud. That is what makes them live tests rather than vacuous ones - nine controlled squares to zero, ten holes including d5, a permanent hole on d5 in the Sveshnikov - and in each case what stops the report is a condition the concept's own record already stated.",
-    "karpov-polgar-2001 is this file's first entry whose concept is not merely reported but LEADS the explanation, and it is kept failing. The condition that would refuse it - 'the rook can be challenged and traded off, or driven away with gain' - is stated on the record and was never built, and a one-ply test for it fixes this position while breaking Capablanca-Rubinstein 1928, the corpus's own positive instance of the same concept. When the choice is between fitting a rule to one position and recording a failure, this file records the failure."
+    "karpov-polgar-2001 is this file's first entry whose concept is not merely reported but LEADS the explanation, and it is kept failing. The condition that would refuse it - 'the rook can be challenged and traded off, or driven away with gain' - is stated on the record and was never built, and a one-ply test for it fixes this position while breaking Capablanca-Rubinstein 1928, the corpus's own positive instance of the same concept. When the choice is between fitting a rule to one position and recording a failure, this file records the failure.",
+    "Nimzowitsch-Capablanca 1914 now carries two entries, and the second is there because it caught a bug rather than confirmed one: the semi-open-file matcher had been changed the same morning and dropped the very file the annotators name. `open-file` is in that entry's rejected_as_wrong for a terminology reason worth stating - annotators say 'open' loosely for a file their rooks own, and this base reserves the word for a file with no pawn of either colour, because the two concepts have different detectors and different conditions."
   ],
   "concept_roles": {
     "positive": "the concept clearly applies, on the annotator's authority",
@@ -1823,6 +1824,50 @@
         ],
         "agrees": "on the move and on the assessment. Scores are from the side to move, and White is to move: +0.83 for the side whose second rank is occupied, and 24.Kc1 - the move Markos marks with an exclamation - is the engine's first choice, settled from depth 25. Its principal variation contains b5c3, the knight eviction Markos describes four moves later.",
         "note": "The engine cannot say whether a rook on the seventh is a beast and was not asked to. It establishes that the side with the rook on the seventh, the absolute seventh at that, is nearly a pawn worse and that the defender's plan is the one the annotator gives."
+      }
+    },
+    {
+      "game": "Nimzowitsch-Capablanca, St Petersburg preliminary 1914",
+      "source": "chesscom-doubled-pawns-terms",
+      "players": "Aron Nimzowitsch - Jose Raul Capablanca",
+      "event": "St Petersburg 1914, preliminary",
+      "year": 1914,
+      "annotator": "Chess.com's reference page on doubled pawns, corroborated independently by WGM Sgircea and IM Castellanos",
+      "attributed_by": "Raluca Sgircea (WGM) and Renier Castellanos (IM), corroborating",
+      "fen_verified": "replay: all 83 plies replayed legally through blind-chess.html's move generator",
+      "added": "2026-09-02",
+      "id": "nimzowitsch-capablanca-1914-22Reb8-semi-open-file",
+      "concept": "semi-open-file",
+      "concept_role": "positive",
+      "side": "b",
+      "fen": "r3r1k1/2p2pbp/2pp2p1/8/P1q1P3/2N2P2/1PPQ2PP/1R1R2K1 b - - 2 22",
+      "move": "Reb8",
+      "move_uci": "e8b8",
+      "fen_after": "rr4k1/2p2pbp/2pp2p1/8/P1q1P3/2N2P2/1PPQ2PP/1R1R2K1 w - - 3 23",
+      "human_annotation": "'Black has doubled c-pawns, but his extremely active pieces and PLAY ON THE OPEN B-FILE more than compensate for the structural weakness.' Sgircea and Castellanos on the same game: 'a clear example of how the doubled pawns are strong in the center and how the OPEN FILES created as a consequence of the structure can be a source of counter play.' 22...Reb8 is the move that puts the second rook on that file.",
+      "explanation": "The first human grounding `semi-open-file` has ever had, and it arrived by catching a bug rather than confirming one.\n\nThe file the annotators name is the b-file, and this base calls it SEMI-open: White still has a pawn on b2, and this record reserves 'open' for a file with no pawn of either colour. Annotators use 'open' loosely for a file their rooks own. The distinction is worth keeping, because the two concepts have different detectors and different conditions - an open file needs an entry square, a semi-open one needs a target - and the b-file here has a target, which is the whole point.\n\nWhat this position corrected: the matcher's 'is the target fixed' test had been built the same day as 'the pawn cannot advance safely', and b2-b3 IS safe, so the b-file was dropped and only the a-file reported. A pawn that advances is still on the same file. The test is now 'can it reach somewhere it is no longer attacked at least as often as it is defended', and after b2-b3 the answer is no - c2 defends b3, Rb8 and Qc4 attack it.\n\nIt also settled how strictly to read the record's other half. 'Attack it more times than it can be defended' is the condition for WINNING the pawn, and on this board the count is 1-1: Rb8 against Rb1. Reporting only the strict case measures 8.6% on the shipped corpus and loses this file. So parity is reported too, with a different sentence - 'the pawn is not falling yet, but the defence is committed to it' - which is what a rook on b8 opposite a rook on b1 actually means, and six moves later the b2 pawn falls.",
+      "confidence": "high",
+      "why_not_alternates": "doubled-pawns is the concept the same position is already annotated for, and both are correct: the doubled pawns are the price and the file is what was bought. piece-activity for Black is the annotators' own 'extremely active pieces'. What must not be said is that the b-file is OPEN, which it is not while White has a pawn on b2.",
+      "also_true_but_secondary": [
+        "doubled-pawns",
+        "piece-activity",
+        "battery",
+        "passed-pawn"
+      ],
+      "rejected_as_wrong": [
+        "open-file"
+      ],
+      "engine": {
+        "engine_id": "Stockfish 18",
+        "depth": 22,
+        "multipv": 3,
+        "best_move": "Reb8",
+        "best_eval_cp": 107,
+        "annotated_move": "Reb8",
+        "annotated_move_eval_cp": 107,
+        "annotated_move_rank": 1,
+        "agrees": "fully, and it is the same analysis this position's doubled-pawns entry carries: 22...Reb8 is the engine's first choice at depth 22 and puts Black at +1.07, 0.64 clear of the second. The move that presses the file is the best move on the board.",
+        "note": "The engine says nothing about whether a file is semi-open and was not asked to. It establishes that doubling on it is the move, which is what makes the annotators' 'play on the b-file' a claim about this position rather than a generality."
       }
     }
   ]
