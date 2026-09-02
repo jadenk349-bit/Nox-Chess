@@ -97,6 +97,14 @@
         "stalemate": false,
         "note": "PROVEN DRAW at dtz 0: mate cannot be forced, which is what insufficient material means."
       }
+    },
+    {
+      "fen": "8/8/K7/8/6k1/8/n7/8 w - - 0 53",
+      "origin_kind": "historical-game",
+      "game": "Bondarevsky-Bronstein, USSR Championship",
+      "concept_role": "positive",
+      "side_to_move_benefits": "neither",
+      "note": "KING AND KNIGHT AGAINST KING, reached in a real game and not built to show the rule. That distinction is the whole reason to keep this position: every other example on this record was constructed, and a constructed position can demonstrate a rule that never actually arises over the board.\n\nIt is one of the four cases the convention names - bare kings, a lone bishop, a lone knight, two same-coloured bishops - and the matcher tests the four by name rather than by the looser 'at most one minor per side', which admits knight against knight and opposite-coloured bishops, in both of which a helpmate exists and no arbiter declares the game drawn.\n\nPROVENANCE. Found by tools/harvest_games.js. Replayed legally through the page's own move generator."
     }
   ],
   "counterexamples": [

@@ -150,6 +150,14 @@
         "verdict": "supports",
         "verdict_note": "PROVEN WIN for White, dtz -4, mate in 28 from Black's side, and the engine reports mate in 15 for the side not to move. Black to move must give ground. This single position serves `opposition`, `key-square` and `zugzwang` at once, and the pair it belongs to - the same board with White to move, proven DRAWN - is the strictest controlled comparison this base contains, because nothing on the board differs at all."
       }
+    },
+    {
+      "fen": "8/2k5/2p3p1/1pKp1pP1/3P1P2/P1P5/8/8 b - - 6 45",
+      "origin_kind": "historical-game",
+      "game": "Capablanca-Kostic, New York match 1918",
+      "concept_role": "positive",
+      "side_to_move_benefits": "white",
+      "note": "A PURE PAWN ENDING FROM A REAL GAME, which is what this record has needed and what the matcher was tightened to require. Kings on c5 and c7 with one square between them, Black to move, so White holds the opposition and Black must give way first. Nothing but kings and pawns is on the board.\n\nThe tightening and this position arrived together. An earlier version of the matcher excluded only rooks and queens, and the same harvest that found this offered Mikenas-Bronstein 1944 - kings genuinely in opposition in a knight-against-bishop ending that White wins on material. The opposition was on the board there and was not what decided, which is this record's own indicator_against. Its first indicator_for says 'a KING-AND-PAWN endgame where king penetration decides the result', and between the two that is: no pieces. This position is what the record describes; the other was rejected.\n\nPROVENANCE. Found by tools/harvest_games.js walking the quiet positions of replayed master games. The move list replayed legally through the page's own move generator. No annotator read; this grounds the MASTER-GAME rung and not the human-grounded one."
     }
   ],
   "counterexamples": [
