@@ -113,7 +113,11 @@
       "intermediate": "Dead position: no legal sequence of moves from here could ever produce checkmate, so the game ends drawn at once.",
       "advanced": "Art. 5.2.2. Note this is broader than the 'insufficient material' test implemented by most software."
     },
-    "by_depth": {},
+    "by_depth": {
+      "short": "No series of legal moves can reach checkmate. Drawn immediately.",
+      "normal": "A dead position: neither player can deliver checkmate by ANY sequence of legal moves, however either side cooperates. The game is drawn at once, without a claim.",
+      "deep": "FIDE Art. 5.2.2, and it is broader than the 'insufficient material' test software implements. The article asks about every possible series of moves, which is a statement of the same shape a tablebase makes — this base's example is king and bishop against king, proven drawn over every continuation. Note what the rule does NOT cover: a completely blocked position with ample material is dead in the ordinary sense and is not dead under 5.2.2, because a helpmate exists. That gap is exactly where the software convention and the Law come apart."
+    },
     "hedge": "",
     "lesson": ""
   },

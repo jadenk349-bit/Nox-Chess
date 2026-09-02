@@ -108,7 +108,11 @@
       "intermediate": "Check. Only three replies exist: move the king, interpose, or capture the checking piece. Against a double check only the king move is available.",
       "advanced": "Art. 3.9.1. Note that a pinned piece still gives check."
     },
-    "by_depth": {},
+    "by_depth": {
+      "short": "The king is attacked and the attack must be answered this move.",
+      "normal": "Check: the king is attacked, and the side to move has exactly three ways to answer — move the king, block the line, or capture the attacker. Nothing else is legal, which is why a check is the most forcing move there is.",
+      "deep": "FIDE Art. 3.9.1. Check is decidable rather than judged: the move generator either produces a legal reply or it does not, and this base never second-guesses it. Two consequences are routinely missed. A PINNED piece still gives check, because the pin is about a line to its own king and not about what it attacks. And forcing is not the same as good: this base holds a proven position, the Vancura, where one check draws and another loses by force, sixty-seven moves apart in result."
+    },
     "hedge": "",
     "lesson": ""
   },

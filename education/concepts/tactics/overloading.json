@@ -148,7 +148,11 @@
       "intermediate": "The {piece} is overloaded — it is the only defender of both {a} and {b}.",
       "advanced": "Overloading. The tactical counterpart of the principle of two weaknesses: the same finite-defence logic on a shorter timescale."
     },
-    "by_depth": {},
+    "by_depth": {
+      "short": "A piece with two jobs cannot do both.",
+      "normal": "Overloading: one defender is holding two things at once. Attack either and it must choose — take one, and the other collapses. The claim is about a single piece being asked to do both, not about two pieces each doing one.",
+      "deep": "The distinction that decides it is a count. A back rank guarded by two rooks is not an overload; the same rank guarded by one is. This base's positive and its false-positive case differ by exactly one added rook, and the same move goes from winning a knight to losing one. Overloading and deflection are the same fact seen twice — the overload is the state, the deflection is the move that exploits it — which is why a spare defender destroys both. There is no matcher for it, because whether a piece is asked to do both AT ONCE is a property of what the attacker can arrange rather than of the board."
+    },
     "hedge": "",
     "lesson": ""
   },

@@ -230,7 +230,11 @@
       "intermediate": "Double check. The only legal reply is a king move, so you can ignore everything else for a move.",
       "advanced": "Double check: no interposition or capture can answer two lines, which is what makes smothered mate work."
     },
-    "by_depth": {},
+    "by_depth": {
+      "short": "Two pieces check at once, so only a king move is legal.",
+      "normal": "A double check: the moving piece and the piece it unmasked both attack the king. Nothing can block two lines and nothing can capture two attackers, so the king MUST move — no interposition, no capture, no counter-threat.",
+      "deep": "The strongest forcing move in chess, and the reason is arithmetic rather than tactical: every other check leaves the defender three answers and this one leaves a subset of one. That is what lets a double check be played while the checking side is a queen down. Anderssen's 22.Bf5+ in the Evergreen is the master example — Black has a queen and two rooks and not one of them can interpose. The record's own caution is that a double check which is not mate can still achieve nothing if the king has a safe square, so the motif forces a move rather than winning by itself."
+    },
     "hedge": "",
     "lesson": ""
   },

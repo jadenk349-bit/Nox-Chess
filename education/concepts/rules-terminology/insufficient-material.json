@@ -141,7 +141,11 @@
       "intermediate": "Insufficient material: neither side can force mate with what remains, so the game ends in a draw.",
       "advanced": "The implementation convention for Art. 5.2.2. Note it is narrower than 'dead position' and varies between programs."
     },
-    "by_depth": {},
+    "by_depth": {
+      "short": "The software convention for an automatic draw: what is left could not force mate.",
+      "normal": "Insufficient material is not a term in the FIDE Laws. It is the convention servers and engines use to implement Art. 5.2.2 automatically, and it covers four cases: king against king, king and bishop against king, king and knight against king, and king and bishop against king and bishop with the bishops on the SAME colour.",
+      "deep": "It differs from the Law in both directions, which is why this base files it as terminology rather than as a rule. It MISSES dead positions with ample material that are completely blocked. And it is narrower than people assume at the edges: knight against knight and bishops of OPPOSITE colours both satisfy 'neither side can force mate' and are not in the convention, because a helpmate exists and no arbiter ends the game. This matcher reported both until it was corrected against the record's own definition."
+    },
     "hedge": "This is how most software implements the rule, not a phrase from the FIDE Laws themselves.",
     "lesson": ""
   },

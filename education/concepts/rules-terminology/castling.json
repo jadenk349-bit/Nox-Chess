@@ -117,7 +117,11 @@
       "intermediate": "Castling is legal only if neither piece has moved, the squares between are empty, and the king is not in, through, or into check. Note the rook may be attacked.",
       "advanced": "Art. 3.8.2. Distinguish rights lost permanently (3.8.2.1) from castling prevented temporarily (3.8.2.2); the latter can be restored."
     },
-    "by_depth": {},
+    "by_depth": {
+      "short": "King two squares towards a rook; that rook jumps to the square the king crossed.",
+      "normal": "Castling: a single move of king and rook together. It is legal only when neither piece has moved before, nothing stands between them, the king is not in check, and neither the square it crosses nor the square it lands on is attacked.",
+      "deep": "FIDE Art. 3.8.2, and the distinction the article draws is the one people lose: rights lost PERMANENTLY when the king or that rook has moved (3.8.2.1), against castling prevented TEMPORARILY by check or by an attacked square (3.8.2.2), which can be restored a move later. This base does not re-implement any of it — legalMoves() decides castling in a game and decides it here, which is why the three conditions this record states need no separate guard."
+    },
     "hedge": "",
     "lesson": ""
   },

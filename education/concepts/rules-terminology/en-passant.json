@@ -129,7 +129,11 @@
       "intermediate": "En passant: the two-square advance does not let a pawn slip past an adjacent enemy pawn. The capture is available on this move only.",
       "advanced": "En passant capture (Art. 3.7.3). Note it also affects position identity for repetition claims under Art. 9.2.3.1."
     },
-    "by_depth": {},
+    "by_depth": {
+      "short": "A pawn that just advanced two squares may be taken as though it had advanced one — this move only.",
+      "normal": "En passant: when a pawn advances two squares and lands beside an enemy pawn, that pawn may capture it as if it had moved one square. The right lasts exactly one move and then disappears.",
+      "deep": "FIDE Art. 3.7.3. The one-move window is why the right is part of the POSITION rather than of the board: two identical arrangements of men are different positions if one carries an en-passant target and the other does not, which Art. 9.2.3.1 makes explicit for repetition claims. This base's registered case is two FENs one character apart — with the field set to `-` the move generator gives six legal moves and none of them is the capture; with it set, seven."
+    },
     "hedge": "",
     "lesson": ""
   },
