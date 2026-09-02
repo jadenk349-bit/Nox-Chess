@@ -80,7 +80,23 @@
     "co_occurring": [],
     "conflicts": []
   },
-  "examples": [],
+  "examples": [
+    {
+      "fen": "4k3/8/8/8/8/8/8/4KB2 w - - 0 1",
+      "note": "King and bishop against king. FIDE 5.2.2 calls a position dead when no series of legal moves can lead to checkmate, and this is the textbook instance: with one bishop there is no mating net at all, whatever either side plays. The move generator confirms the position is live in the ordinary sense - 11 legal moves, no check - which is the point: dead-position is not about having no moves, it is about no sequence of moves reaching mate. That is why it is the one official rule in this base whose detectability is recorded as heuristic rather than mechanical.",
+      "origin_kind": "constructed-test",
+      "concept_role": "positive",
+      "tablebase": {
+        "source": "Lichess tablebase (Syzygy, 7-piece)",
+        "pieces": 3,
+        "wdl": "draw",
+        "dtz": 0,
+        "dtm": 0,
+        "category": "draw",
+        "note": "PROVEN draw over every legal continuation, which is the strongest form the claim can take: FIDE 5.2.2 says no series of legal moves can lead to checkmate, and a tablebase is a statement about every series of legal moves. This is one of the few places in this base where the evidence and the definition are the same shape."
+      }
+    }
+  ],
   "counterexamples": [],
   "ambiguous_examples": [],
   "explanations": {

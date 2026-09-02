@@ -84,7 +84,33 @@
     "co_occurring": [],
     "conflicts": []
   },
-  "examples": [],
+  "examples": [
+    {
+      "fen": "1r2k3/8/8/4B3/8/8/8/4R1K1 w - - 0 1",
+      "move": "Bxb8+",
+      "move_uci": "e5b8",
+      "note": "Constructed. The record's precondition, both halves: the rook on e1 is aimed at the black king through exactly one friendly blocker (the bishop on e5), and that blocker has legal moves off the e-file. What makes the discovered CHECK different from a discovered attack is what the bishop is then free to do — it takes the rook on b8 with impunity, because Black must answer the check first. The whole point of the motif is that the moving piece is unconstrained; the bishop could as easily have gone somewhere quiet.",
+      "origin_kind": "constructed-test",
+      "concept_role": "positive",
+      "side_to_move_benefits": "white",
+      "engine": {
+        "engine_id": "Stockfish 18",
+        "test_level": 3,
+        "depth": 18,
+        "threads": 10,
+        "hash_mb": 4096,
+        "multipv": 1,
+        "best_move": "e5b8",
+        "eval_cp": 785,
+        "mate_in": null,
+        "pv": [],
+        "alternatives": [],
+        "margin_cp": null,
+        "verdict": "supports",
+        "verdict_note": "+7.85 and settled at depth 1 - the win of the rook is not a subtlety, it is what a discovered check IS. The bishop is captured by nothing because Black is in check from a piece that did not move."
+      }
+    }
+  ],
   "counterexamples": [
     {
       "fen": "3k4/8/8/8/3N4/8/8/3RK3 w - - 0 1",

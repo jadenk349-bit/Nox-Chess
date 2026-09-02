@@ -69,7 +69,14 @@
     "co_occurring": [],
     "conflicts": []
   },
-  "examples": [],
+  "examples": [
+    {
+      "fen": "R5k1/5ppp/8/8/8/8/5PPP/6K1 b - - 0 1",
+      "note": "Constructed back-rank mate, verified by the move generator: inCheck(black) = true and legalMoves() returns ZERO. That conjunction is the whole definition. The king's three escape squares on the seventh are occupied by its own pawns, which is the pattern the `luft` and `back-rank-mate` records are about, and both are reachable from here.",
+      "origin_kind": "constructed-test",
+      "concept_role": "positive"
+    }
+  ],
   "counterexamples": [
     {
       "fen": "7k/5Q2/6K1/8/8/8/8/8 b - - 0 1",

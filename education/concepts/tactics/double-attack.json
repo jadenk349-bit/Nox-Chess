@@ -77,7 +77,33 @@
     "co_occurring": [],
     "conflicts": []
   },
-  "examples": [],
+  "examples": [
+    {
+      "fen": "r3k3/8/8/8/3Q4/8/8/4K3 w - - 0 1",
+      "move": "Qh8+",
+      "move_uci": "d4h8",
+      "note": "Constructed. The record's precondition is 'after the move, two distinct threats exist that cannot both be met', and the record's definition is deliberately wide - 'any move that creates two threats at once, whether by one piece or two'. Here it is one piece and the two threats are of different kinds: check to the king on e8 along the eighth rank, and capture of the rook on a8 along the same rank. Black must answer the check, and answering it does not defend the rook. This is why this base treats double-attack as a family that contains the fork rather than as a synonym for it.",
+      "origin_kind": "constructed-test",
+      "concept_role": "positive",
+      "side_to_move_benefits": "white",
+      "engine": {
+        "engine_id": "Stockfish 18",
+        "test_level": 3,
+        "depth": 18,
+        "threads": 10,
+        "hash_mb": 4096,
+        "multipv": 1,
+        "best_move": "d4h8",
+        "eval_cp": null,
+        "mate_in": 15,
+        "pv": [],
+        "alternatives": [],
+        "margin_cp": null,
+        "verdict": "supports",
+        "verdict_note": "Mate in 15, and the engine's own first move is the double attack. Note that Qa4+ also forks king and rook and the engine prefers Qh8+; the concept does not depend on which of the two is chosen, which is worth saying because a matcher that insisted on a unique best move would call this position ambiguous."
+      }
+    }
+  ],
   "counterexamples": [],
   "ambiguous_examples": [],
   "explanations": {

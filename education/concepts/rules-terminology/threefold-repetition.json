@@ -72,7 +72,15 @@
     "co_occurring": [],
     "conflicts": []
   },
-  "examples": [],
+  "examples": [
+    {
+      "fen": "4k3/8/8/8/8/8/8/R3K3 w - - 0 1",
+      "pgn": "1. Ra2 Kd8 2. Ra1 Ke8 3. Ra2 Kd8 4. Ra1 Ke8 5. Ra2 Kd8 6. Ra1 Ke8",
+      "note": "A position is not enough for this concept and the example says so by being a SEQUENCE. Threefold repetition is a claim about history: the same position, the same side to move, the same castling and en-passant rights, three times. The line above was replayed through this base's own move generator move by move - every one legal, no capture, no pawn move - and the starting position recurs FIVE times in it. The count is what the generator reports, not what the notation looks like.",
+      "origin_kind": "constructed-test",
+      "concept_role": "positive"
+    }
+  ],
   "counterexamples": [],
   "ambiguous_examples": [],
   "explanations": {

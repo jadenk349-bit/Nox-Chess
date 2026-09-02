@@ -67,7 +67,14 @@
     "co_occurring": [],
     "conflicts": []
   },
-  "examples": [],
+  "examples": [
+    {
+      "fen": "7k/8/6Q1/8/8/8/8/6K1 b - - 0 1",
+      "note": "Constructed, and verified as the exact complement of the checkmate example: the move generator reports inCheck(black) = FALSE and legalMoves() ZERO. The queen on g6 covers g7, g8 and h7 and does not attack h8, which is the whole trick - one square further and it is mate, one square back and Black has a move.",
+      "origin_kind": "constructed-test",
+      "concept_role": "positive"
+    }
+  ],
   "counterexamples": [
     {
       "fen": "7k/6Q1/6K1/8/8/8/8/8 b - - 0 1",

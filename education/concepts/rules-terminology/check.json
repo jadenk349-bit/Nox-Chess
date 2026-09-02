@@ -75,7 +75,14 @@
     "co_occurring": [],
     "conflicts": []
   },
-  "examples": [],
+  "examples": [
+    {
+      "fen": "4k3/8/8/8/8/8/8/4R1K1 b - - 0 1",
+      "note": "Constructed, and verified by the instrument that IS the rule: this base's move generator reports inCheck(black) = true and exactly 4 legal replies, all of them king moves off the e-file. Check is not a judgement and there is nothing here for an engine to add - a position either is check or is not, and the generator that decides it in a game is the same one that decides it here.",
+      "origin_kind": "constructed-test",
+      "concept_role": "positive"
+    }
+  ],
   "counterexamples": [
     {
       "fen": "R7/6k1/P4r2/8/3K4/8/8/8 w - - 0 1",

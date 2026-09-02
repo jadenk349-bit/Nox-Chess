@@ -81,7 +81,40 @@
     "co_occurring": [],
     "conflicts": []
   },
-  "examples": [],
+  "examples": [
+    {
+      "fen": "4kb2/8/8/B7/8/r7/8/RK6 b - - 0 1",
+      "note": "Constructed, and it is the DEFENSIVE form, which is the half of this motif that a detector looking for attacks never sees. The white rook on a1, the black rook on a3 and the white bishop on a5 are collinear with exactly one unit between - the record's precondition word for word - and the consequence is that Black cannot win the bishop. Rxa5 is answered by Rxa5, because the black rook's own departure from a3 opens the line it was standing on. The rook defends through an enemy piece.",
+      "origin_kind": "constructed-test",
+      "concept_role": "positive",
+      "side_to_move_benefits": "neither",
+      "engine": {
+        "engine_id": "Stockfish 18",
+        "test_level": 3,
+        "depth": 22,
+        "threads": 10,
+        "hash_mb": 4096,
+        "multipv": 1,
+        "best_move": "a3a1",
+        "eval_cp": 0,
+        "mate_in": null,
+        "pv": [],
+        "alternatives": [],
+        "margin_cp": null,
+        "verdict": "supports",
+        "verdict_note": "0.00. Black's best is to trade rooks rather than take the bishop, which is the x-ray defence working: the bishop is not hanging, it is defended through the rook that appears to be attacking it."
+      },
+      "tablebase": {
+        "source": "Lichess tablebase (Syzygy, 7-piece)",
+        "pieces": 6,
+        "wdl": "draw",
+        "dtz": 0,
+        "dtm": 0,
+        "category": "draw",
+        "note": "PROVEN draw, and the tablebase's own best move is Rxa1+ rather than Rxa5. A defence that holds over every legal continuation is the strongest statement available about a defensive motif, and it is the reason this example is the defensive form rather than the attacking one."
+      }
+    }
+  ],
   "counterexamples": [],
   "ambiguous_examples": [],
   "explanations": {

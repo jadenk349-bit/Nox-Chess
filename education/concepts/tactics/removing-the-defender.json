@@ -80,7 +80,33 @@
     "co_occurring": [],
     "conflicts": []
   },
-  "examples": [],
+  "examples": [
+    {
+      "fen": "4k3/8/5n2/3p2B1/8/8/8/3RK3 w - - 0 1",
+      "move": "Bxf6",
+      "move_uci": "g5f6",
+      "note": "Constructed, and it is the record's two preconditions and nothing else: the d5 pawn is defended (by the knight on f6, and only by it), and the defender can be captured (by the bishop on g5). Bxf6 then Rxd5. What makes this the clean case rather than a fork is that the bishop's capture wins nothing by itself - the knight is worth more than the pawn that follows - so the move only makes sense as removal of a guard.",
+      "origin_kind": "constructed-test",
+      "concept_role": "positive",
+      "side_to_move_benefits": "white",
+      "engine": {
+        "engine_id": "Stockfish 18",
+        "test_level": 3,
+        "depth": 20,
+        "threads": 10,
+        "hash_mb": 4096,
+        "multipv": 1,
+        "best_move": "g5f6",
+        "eval_cp": 481,
+        "mate_in": null,
+        "pv": [],
+        "alternatives": [],
+        "margin_cp": null,
+        "verdict": "supports",
+        "verdict_note": "+4.81, settled at depth 1. The engine plays the removal and then takes on d5 in its own line."
+      }
+    }
+  ],
   "counterexamples": [],
   "ambiguous_examples": [],
   "explanations": {
