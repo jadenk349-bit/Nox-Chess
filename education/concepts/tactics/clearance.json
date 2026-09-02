@@ -101,7 +101,16 @@
     "conflicts": []
   },
   "examples": [],
-  "counterexamples": [],
+  "counterexamples": [
+    {
+      "fen": "4k3/8/8/3p4/3P4/8/3R4/3RK3 w - - 0 1",
+      "move_uci": "d2a2",
+      "note": "Registered false-positive case `a-line-cleared-to-nowhere`, kept on the record as well as in tests/false_positive_cases.json so that the concept carries its own negative evidence. THE SURFACE PATTERN IS PRESENT: The rook on d2 steps aside and the rook on d1 behind it is left with a clear file. Vacating a square so a friendly piece can use the line is the concept, word for word. WHY IT IS NOT THE CONCEPT: The line arrives nowhere. The d-file dead-ends at White's own pawn on d4, which is rammed against d5 and cannot move. Clearance is 'usually recognised by the moving piece going somewhere pointless or losing itself — the value is entirely in the vacated square', and here the vacated square is worth nothing, so all that is left is the pointless move. WHAT THE SYSTEM DOES: The API reports `worst-placed-piece` at low confidence — the rook does get more scope on a2 — and nothing about clearance, which has no matcher. The same board is `battery`'s registered false-positive case for the same underlying reason: two line pieces on a file that arrives at their own rammed pawn combine nothing, whether they stay stacked or unstack. Stockfish at depth 26 in that entry plays Ra1, taking the front rook OFF the file, which is the engine agreeing that the file is worthless from the other direction.",
+      "origin_kind": "constructed-test",
+      "concept_role": "negative",
+      "false_positive_case": "a-line-cleared-to-nowhere"
+    }
+  ],
   "ambiguous_examples": [],
   "explanations": {
     "by_level": {

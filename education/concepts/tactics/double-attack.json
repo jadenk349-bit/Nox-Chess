@@ -104,7 +104,15 @@
       }
     }
   ],
-  "counterexamples": [],
+  "counterexamples": [
+    {
+      "fen": "rr4k1/5pp1/8/3Q4/8/8/8/6K1 w - - 0 1",
+      "note": "Registered false-positive case `two-threats-answered-by-neither`, kept on the record as well as in tests/false_positive_cases.json so that the concept carries its own negative evidence. THE SURFACE PATTERN IS PRESENT: The queen on d5 attacks the rook on a8 down the long diagonal and the pawn on f7 down the other. Two enemy units attacked at once by one piece, which is this record's precondition exactly. WHY IT IS NOT THE CONCEPT: The precondition has a second half: 'two distinct threats that CANNOT BOTH BE MET'. Both can. The rook on a8 is defended by the rook on b8 and the pawn on f7 by the king, and a queen taking a defended rook or a defended pawn is not a threat at all — nothing needs answering, so there is nothing for one move to fail to answer. WHAT THE SYSTEM DOES: The API does not report a double attack. Stockfish 18 at depth 22 says -4.90 for the side making it and retreats the queen to d1. This is the geometric half of the concept without the arithmetic half, and it is the commonest way a reader gets the motif wrong: counting how many enemy pieces a queen touches is easy and says nothing, and what makes the difference is whether taking either one is worth doing.",
+      "origin_kind": "constructed-test",
+      "concept_role": "negative",
+      "false_positive_case": "two-threats-answered-by-neither"
+    }
+  ],
   "ambiguous_examples": [
     {
       "fen": "4k3/p7/8/8/3Q4/8/8/4K3 w - - 0 1",

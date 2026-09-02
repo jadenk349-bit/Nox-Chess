@@ -82,7 +82,16 @@
     "conflicts": []
   },
   "examples": [],
-  "counterexamples": [],
+  "counterexamples": [
+    {
+      "fen": "3r2k1/5ppp/8/3n4/2N5/8/5PPP/3R2K1 w - - 0 1",
+      "move_uci": "c4d6",
+      "note": "Registered false-positive case `an-interposition-that-is-simply-taken`, kept on the record as well as in tests/false_positive_cases.json so that the concept carries its own negative evidence. THE SURFACE PATTERN IS PRESENT: Nd6 puts a piece on the line between the rook on d8 and the knight it defends on d5. Blocking a defender's line is the definition of interference. WHY IT IS NOT THE CONCEPT: The rook takes it. An interference has to be an obstruction the defender cannot remove, or one whose removal costs more than the target; a knight dropped on a square the defending rook covers is neither. The concept's whole content is that the line stays blocked. WHAT THE SYSTEM DOES: The API reports `hanging-piece` at high confidence — which is exactly right about the knight on d6 — and nothing about interference. The numbers make the case sharper than a description could: with a normal move the position is +4.22 for White, because Ne3 attacks the knight on d5 a second time and wins it; the interfering Nd6 scores -4.20. Eight and a half pawns thrown away by a move that satisfies the concept's surface description.",
+      "origin_kind": "constructed-test",
+      "concept_role": "negative",
+      "false_positive_case": "an-interposition-that-is-simply-taken"
+    }
+  ],
   "ambiguous_examples": [],
   "explanations": {
     "by_level": {

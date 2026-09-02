@@ -1163,6 +1163,60 @@
       "status": "resolved",
       "evidence": "feature-detector + engine",
       "resolution": "The API does not report a transformation. It reports `sacrifice` at medium with the record's caution attached, `pin` and `trapped-piece` — all true of the move, none of them claiming it is good. Stockfish 18: the position is 0.00 with a normal move and Bxh7+ scores -3.89, and the refutation is Nxh7 rather than Kxh7. This record has no matcher and its third trap says why: 'the concept describes a player's INTENTION. This system observes moves, not intentions, and must not attribute a transformation to a move without evidence of what it obtained.'"
+    },
+    {
+      "id": "a-line-cleared-to-nowhere",
+      "concept": "clearance",
+      "surface_pattern": "The rook on d2 steps aside and the rook on d1 behind it is left with a clear file. Vacating a square so a friendly piece can use the line is the concept, word for word.",
+      "why_not": "The line arrives nowhere. The d-file dead-ends at White's own pawn on d4, which is rammed against d5 and cannot move. Clearance is 'usually recognised by the moving piece going somewhere pointless or losing itself — the value is entirely in the vacated square', and here the vacated square is worth nothing, so all that is left is the pointless move.",
+      "fen": "4k3/8/8/3p4/3P4/8/3R4/3RK3 w - - 0 1",
+      "move": "d2a2",
+      "status": "resolved",
+      "evidence": "feature-detector + engine",
+      "resolution": "The API reports `worst-placed-piece` at low confidence — the rook does get more scope on a2 — and nothing about clearance, which has no matcher. The same board is `battery`'s registered false-positive case for the same underlying reason: two line pieces on a file that arrives at their own rammed pawn combine nothing, whether they stay stacked or unstack. Stockfish at depth 26 in that entry plays Ra1, taking the front rook OFF the file, which is the engine agreeing that the file is worthless from the other direction."
+    },
+    {
+      "id": "a-king-decoyed-to-safety",
+      "concept": "decoy",
+      "surface_pattern": "Ra8+ forces the black king to move to h7 — a check that must be answered by a king move to a specific square is exactly how a decoy operates.",
+      "why_not": "Nothing is waiting on h7. A decoy lures a piece ONTO a square where a tactic works against it — a fork square, a mating square, a line where a pin or skewer becomes available — and White has a rook and three pawns. The king is forced to a square and the square is safe.",
+      "fen": "6k1/5pp1/7p/8/8/8/5PPP/R5K1 w - - 0 1",
+      "move": "a1a8",
+      "status": "resolved",
+      "evidence": "feature-detector + engine",
+      "resolution": "The API reports `open-file` and nothing else; `decoy` has no matcher and this record's limitations say why — the motif is 'only identifiable by looking at the resulting position, so it cannot be detected from the move alone'. This case is the cheap version of that: forcing a king to a square is mechanical and trivial to detect, and it is the half of the concept that carries none of the meaning. The position is dead level."
+    },
+    {
+      "id": "a-defender-with-a-spare",
+      "concept": "deflection",
+      "surface_pattern": "Rxd5 attacks the rook on d8 that is defending the knight, and a capture the defender must answer is the standard deflecting device.",
+      "why_not": "There is a second rook on e8. Deflection removes a defender FROM A DUTY, and the duty here — guarding the back rank — is held by two pieces. This record's second exception says it: 'deflecting a defender that has a second defender behind it achieves nothing.'",
+      "fen": "3rr1k1/5ppp/8/3n4/8/8/5PPP/3RR1K1 w - - 0 1",
+      "move": "d1d5",
+      "status": "resolved",
+      "evidence": "feature-detector + engine",
+      "resolution": "The API does not report deflection, which has no matcher at all — `themesOf()` refuses to claim it, because every cheap test for it fires where it is not true. Stockfish 18: -4.30 at depth 22, and its first move is Rxe8+ rather than Rxd5. The same board is `overloading`'s registered false-positive case, and the two records fail on it for one reason said two ways: overloading needs one piece with two duties, deflection needs a duty that ends when the piece leaves, and a spare defender destroys both."
+    },
+    {
+      "id": "an-interposition-that-is-simply-taken",
+      "concept": "interference",
+      "surface_pattern": "Nd6 puts a piece on the line between the rook on d8 and the knight it defends on d5. Blocking a defender's line is the definition of interference.",
+      "why_not": "The rook takes it. An interference has to be an obstruction the defender cannot remove, or one whose removal costs more than the target; a knight dropped on a square the defending rook covers is neither. The concept's whole content is that the line stays blocked.",
+      "fen": "3r2k1/5ppp/8/3n4/2N5/8/5PPP/3R2K1 w - - 0 1",
+      "move": "c4d6",
+      "status": "resolved",
+      "evidence": "feature-detector + engine",
+      "resolution": "The API reports `hanging-piece` at high confidence — which is exactly right about the knight on d6 — and nothing about interference. The numbers make the case sharper than a description could: with a normal move the position is +4.22 for White, because Ne3 attacks the knight on d5 a second time and wins it; the interfering Nd6 scores -4.20. Eight and a half pawns thrown away by a move that satisfies the concept's surface description."
+    },
+    {
+      "id": "two-threats-answered-by-neither",
+      "concept": "double-attack",
+      "surface_pattern": "The queen on d5 attacks the rook on a8 down the long diagonal and the pawn on f7 down the other. Two enemy units attacked at once by one piece, which is this record's precondition exactly.",
+      "why_not": "The precondition has a second half: 'two distinct threats that CANNOT BOTH BE MET'. Both can. The rook on a8 is defended by the rook on b8 and the pawn on f7 by the king, and a queen taking a defended rook or a defended pawn is not a threat at all — nothing needs answering, so there is nothing for one move to fail to answer.",
+      "fen": "rr4k1/5pp1/8/3Q4/8/8/8/6K1 w - - 0 1",
+      "status": "resolved",
+      "evidence": "feature-detector + engine",
+      "resolution": "The API does not report a double attack. Stockfish 18 at depth 22 says -4.90 for the side making it and retreats the queen to d1. This is the geometric half of the concept without the arithmetic half, and it is the commonest way a reader gets the motif wrong: counting how many enemy pieces a queen touches is easy and says nothing, and what makes the difference is whether taking either one is worth doing."
     }
   ],
   "last_updated": "2026-09-01"

@@ -100,7 +100,16 @@
     "conflicts": []
   },
   "examples": [],
-  "counterexamples": [],
+  "counterexamples": [
+    {
+      "fen": "6k1/5pp1/7p/8/8/8/5PPP/R5K1 w - - 0 1",
+      "move_uci": "a1a8",
+      "note": "Registered false-positive case `a-king-decoyed-to-safety`, kept on the record as well as in tests/false_positive_cases.json so that the concept carries its own negative evidence. THE SURFACE PATTERN IS PRESENT: Ra8+ forces the black king to move to h7 — a check that must be answered by a king move to a specific square is exactly how a decoy operates. WHY IT IS NOT THE CONCEPT: Nothing is waiting on h7. A decoy lures a piece ONTO a square where a tactic works against it — a fork square, a mating square, a line where a pin or skewer becomes available — and White has a rook and three pawns. The king is forced to a square and the square is safe. WHAT THE SYSTEM DOES: The API reports `open-file` and nothing else; `decoy` has no matcher and this record's limitations say why — the motif is 'only identifiable by looking at the resulting position, so it cannot be detected from the move alone'. This case is the cheap version of that: forcing a king to a square is mechanical and trivial to detect, and it is the half of the concept that carries none of the meaning. The position is dead level.",
+      "origin_kind": "constructed-test",
+      "concept_role": "negative",
+      "false_positive_case": "a-king-decoyed-to-safety"
+    }
+  ],
   "ambiguous_examples": [],
   "explanations": {
     "by_level": {

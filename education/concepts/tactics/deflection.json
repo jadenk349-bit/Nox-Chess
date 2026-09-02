@@ -100,7 +100,16 @@
     "conflicts": []
   },
   "examples": [],
-  "counterexamples": [],
+  "counterexamples": [
+    {
+      "fen": "3rr1k1/5ppp/8/3n4/8/8/5PPP/3RR1K1 w - - 0 1",
+      "move_uci": "d1d5",
+      "note": "Registered false-positive case `a-defender-with-a-spare`, kept on the record as well as in tests/false_positive_cases.json so that the concept carries its own negative evidence. THE SURFACE PATTERN IS PRESENT: Rxd5 attacks the rook on d8 that is defending the knight, and a capture the defender must answer is the standard deflecting device. WHY IT IS NOT THE CONCEPT: There is a second rook on e8. Deflection removes a defender FROM A DUTY, and the duty here — guarding the back rank — is held by two pieces. This record's second exception says it: 'deflecting a defender that has a second defender behind it achieves nothing.' WHAT THE SYSTEM DOES: The API does not report deflection, which has no matcher at all — `themesOf()` refuses to claim it, because every cheap test for it fires where it is not true. Stockfish 18: -4.30 at depth 22, and its first move is Rxe8+ rather than Rxd5. The same board is `overloading`'s registered false-positive case, and the two records fail on it for one reason said two ways: overloading needs one piece with two duties, deflection needs a duty that ends when the piece leaves, and a spare defender destroys both.",
+      "origin_kind": "constructed-test",
+      "concept_role": "negative",
+      "false_positive_case": "a-defender-with-a-spare"
+    }
+  ],
   "ambiguous_examples": [],
   "explanations": {
     "by_level": {
