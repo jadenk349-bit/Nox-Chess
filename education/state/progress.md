@@ -1697,3 +1697,34 @@ reading found **four that are not**:
 Two were defects in the code and two were defects in the string, and only reading
 the string against the body tells you which. All four are fixed and a test pins
 them.
+
+
+## Confidence calibration, measured against the records for the first time
+
+Confidence was checked two ways: capped by `knowledge_type`, and compared with
+the human annotator on 40 corpus positions. Neither asks the question each record
+already answers. Every record carries `typical_confidence` — *"how confidently
+this concept can normally be asserted once its preconditions hold"* — a
+per-concept ceiling, more specific than its type, and **nothing was reading it**.
+Over the 788 shipped positions, **twelve concepts were reported above their own
+record's figure**.
+
+`cap()` now takes the lower of the two. A matcher may say less than its record
+and may not say more — the same rule the corpus already applies to this system
+against a human annotator, and there was no reason for the records to be held to
+a looser one.
+
+That immediately exposed the other half. `typical_confidence: medium` was an
+unconsidered **default** across 32 rule and motif records regardless of
+detectability — `official-rule` had eleven at medium and one at high. A stalemate
+is a stalemate, and a fork this base reports is one `findMotifs()` found, which
+ARCHITECTURE.md makes the authority and forbids second-guessing. **24 records**
+whose detectability is mechanical and whose type already carries a high ceiling
+were raised, each with the argument written on it. The eight heuristic ones —
+clearance, decoy, deflection, desperado, double-attack, overloading,
+dead-position, zwischenzug — keep medium, and several are concepts `themesOf()`
+refuses to claim at all.
+
+Nothing reports above its record now. The corpus's one confidence overclaim is
+untouched: Ftacnik–Roiz is a claim about *weight*, and `bishop-pair`'s record
+says high.

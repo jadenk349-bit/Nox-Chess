@@ -1816,6 +1816,63 @@ const { concepts } = API.knowledge();
   ok('king-safety: the shield arm still reports Adams–Kasparov', said);
 }
 
+{
+  // CONFIDENCE CALIBRATION, measured for the first time against the RECORDS
+  // rather than against the corpus. Every record carries `typical_confidence`,
+  // which the schema defines as "how confidently this concept can normally be
+  // asserted once its preconditions hold" — a per-concept ceiling, more specific
+  // than its knowledge type. Nothing was reading it, and over the 788 shipped
+  // positions TWELVE concepts were reported above their own record's figure.
+  //
+  // A matcher may say less than its record. It may not say more. That is the
+  // same rule the corpus already applies to this system against a human
+  // annotator, and there was no reason for the records to be held to a looser
+  // one.
+  const RANK = { low: 0, medium: 1, high: 2 };
+  const recs = {};
+  for (const dir of fs.readdirSync(path.join(ROOT, 'concepts'))) {
+    const d = path.join(ROOT, 'concepts', dir);
+    if (!fs.statSync(d).isDirectory()) continue;
+    for (const fn of fs.readdirSync(d)) {
+      if (!fn.endsWith('.json')) continue;
+      const c = JSON.parse(fs.readFileSync(path.join(d, fn), 'utf8'));
+      recs[c.id] = c;
+    }
+  }
+  const over = [];
+  const positions = JSON.parse(fs.readFileSync(
+    path.join(ROOT, 'corpus', 'annotated_positions.json'), 'utf8')).positions.map(p => p.fen);
+  for (const fen of positions) {
+    let r;
+    try { r = API.analyzeWithEducation({ fen }); } catch (e) { continue; }
+    for (const c of r.concepts_all) {
+      const rec = recs[c.id];
+      const typ = rec && (rec.recognition || {}).typical_confidence;
+      if (!typ || !(typ in RANK)) continue;
+      if (RANK[c.confidence] > RANK[typ]) over.push(`${c.id} ${c.confidence} > ${typ}`);
+    }
+  }
+  ok('no concept is reported above its own record\'s typical_confidence',
+     over.length === 0, [...new Set(over)].join(', '));
+  ok('cap() reads the record as well as the knowledge type',
+     /typical && typical in ORDER/.test(
+       fs.readFileSync(path.join(ROOT, 'lib', 'matchers.js'), 'utf8')));
+
+  // ...and the records that were WRONG were corrected rather than silently
+  // overruled. `typical_confidence: medium` was the default across 32 rule and
+  // motif records regardless of detectability, and a stalemate is a stalemate.
+  ok('a mechanical rule asserts at high once its preconditions hold',
+     (recs['stalemate'].recognition || {}).typical_confidence === 'high');
+  ok('...and so does a motif the page\'s own detector found',
+     (recs['fork'].recognition || {}).typical_confidence === 'high');
+  // The heuristic ones are untouched, and several are concepts themesOf()
+  // refuses to claim at all.
+  ok('a heuristic motif is still medium',
+     (recs['deflection'].recognition || {}).typical_confidence === 'medium');
+  ok('...and the raise says why, on each record',
+     (recs['fork'].limitations || []).some(l => /TYPICAL_CONFIDENCE RAISED/.test(l)));
+}
+
 /* ---------- report ---------- */
 console.log(`\nAPI  PASS ${pass}   FAIL ${fails.length}`);
 for (const [n, d] of fails) console.log(`  FAIL  ${n}\n        ${d}`);

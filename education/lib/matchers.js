@@ -40,8 +40,23 @@ const CEILING = {
   'historical-teaching-principle': 'low', 'other': 'low',
 };
 const ORDER = { low: 0, medium: 1, high: 2 };
-const cap = (want, kt) => {
-  const c = CEILING[kt] || 'medium';
+/* Two ceilings, and the record's own is the one that was being ignored.
+ *
+ * CEILING is by knowledge_type and has been enforced since the API was written.
+ * But every record also carries `typical_confidence`, which the schema defines
+ * as "how confidently this concept can normally be asserted once its
+ * preconditions hold" - a per-concept ceiling, more specific than its type - and
+ * nothing was reading it. Measured over the 788 shipped positions, twelve
+ * concepts were REPORTED above their own record's figure.
+ *
+ * A matcher may say less than its record. It may not say more. That is the same
+ * rule the corpus already applies to this system against a human annotator, and
+ * there was no reason for the records to be held to a looser one.
+ */
+const cap = (want, kt, typical) => {
+  const byType = CEILING[kt] || 'medium';
+  let c = byType;
+  if (typical && typical in ORDER && ORDER[typical] < ORDER[c]) c = typical;
   return ORDER[want] < ORDER[c] ? want : c;
 };
 
@@ -2361,7 +2376,7 @@ function matchAll(features, moveInfo, concepts, featuresAfter) {
     if (!rec) continue;                        // never invent a concept id
     found.push({
       concept: m.concept, source: 'features', implements: m.implements,
-      confidence: cap(r.confidence, rec.knowledge_type),
+      confidence: cap(r.confidence, rec.knowledge_type, (rec.recognition || {}).typical_confidence),
       raw_confidence: r.confidence,
       because: r.because, subjects: r.subjects || [], slots: r.slots || {},
     });
@@ -2374,7 +2389,7 @@ function matchAll(features, moveInfo, concepts, featuresAfter) {
       const rec = concepts[m.concept];
       if (!rec) continue;
       found.push({ concept: m.concept, source: 'move', implements: m.implements,
-                   confidence: cap(r.confidence, rec.knowledge_type),
+                   confidence: cap(r.confidence, rec.knowledge_type, (rec.recognition || {}).typical_confidence),
                    raw_confidence: r.confidence, because: r.because,
                    subjects: r.subjects || [], slots: r.slots || {} });
     }
@@ -2384,7 +2399,7 @@ function matchAll(features, moveInfo, concepts, featuresAfter) {
       const rec = concepts[m.concept];
       if (!rec) continue;
       found.push({ ...m, slots: m.slots || {}, implements: 'tools/motif_map.json',
-                   confidence: cap(m.confidence, rec.knowledge_type),
+                   confidence: cap(m.confidence, rec.knowledge_type, (rec.recognition || {}).typical_confidence),
                    raw_confidence: m.confidence });
     }
   }

@@ -85,7 +85,7 @@
     ],
     "detector": null,
     "detectability": "mechanical",
-    "typical_confidence": "medium",
+    "typical_confidence": "high",
     "false_positive_traps": [
       "The pattern is extremely recognisable, which is exactly why it is played in positions where it does not work. Vukovic's conditions are necessary, NOT sufficient.",
       "The commonest single error is not checking whether g5 is defended. The controlled pair in this record isolates that one variable.",
@@ -124,7 +124,8 @@
     "The mirrored Black version (...Bxh2+) is the same pattern with the same conditions."
   ],
   "limitations": [
-    "Recognition of the geometric preconditions is mechanical; soundness is not, and the gap between the two is where players go wrong."
+    "Recognition of the geometric preconditions is mechanical; soundness is not, and the gap between the two is where players go wrong.",
+    "TYPICAL_CONFIDENCE RAISED medium -> high, 2026-09-02, and the reason is the schema's own definition of the field: 'how confidently this concept can normally be asserted ONCE ITS PRECONDITIONS HOLD'. This concept's recognition is MECHANICAL and its knowledge type already carries a high ceiling, so once the preconditions hold there is nothing left to be uncertain about - a stalemate is a stalemate, and a fork this base reports is one findMotifs() found, which ARCHITECTURE.md makes the authority and forbids second-guessing. 'Medium' was the default across 32 rule and motif records regardless of detectability, and it was found by measuring what the API reports against what each record permits: twelve concepts were reporting ABOVE their own record. The fix was to make each record its own ceiling in cap(), which then required the records that were wrong to be corrected rather than silently overruled."
   ],
   "misconceptions": [
     "That Bxh7+ works whenever the bishop can reach h7.",

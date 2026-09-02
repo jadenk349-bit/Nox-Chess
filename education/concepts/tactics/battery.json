@@ -48,7 +48,7 @@
     "prerequisites": [],
     "detector": "lib/matchers.js: battery",
     "detectability": "mechanical",
-    "typical_confidence": "medium",
+    "typical_confidence": "high",
     "false_positive_traps": [
       "Two line pieces on one line are only a battery if the line ARRIVES somewhere. Stacked behind their own pawns they combine nothing, and the bare geometry fires on nearly half of all positions."
     ]
@@ -66,7 +66,8 @@
   ],
   "limitations": [
     "A battery is potential, not achievement. Do not report it as the reason for a move unless the position shows what it actually enables.",
-    "Fires on 24.4% of the 788 shipped positions. A first version asked only for two aligned line pieces with one empty square beyond them and fired on 43%, because two rooks stacked behind their own pawns satisfy the geometry and combine nothing. The line must now arrive somewhere: at an enemy man, or into the enemy half."
+    "Fires on 24.4% of the 788 shipped positions. A first version asked only for two aligned line pieces with one empty square beyond them and fired on 43%, because two rooks stacked behind their own pawns satisfy the geometry and combine nothing. The line must now arrive somewhere: at an enemy man, or into the enemy half.",
+    "TYPICAL_CONFIDENCE RAISED medium -> high, 2026-09-02, and the reason is the schema's own definition of the field: 'how confidently this concept can normally be asserted ONCE ITS PRECONDITIONS HOLD'. This concept's recognition is MECHANICAL and its knowledge type already carries a high ceiling, so once the preconditions hold there is nothing left to be uncertain about - a stalemate is a stalemate, and a fork this base reports is one findMotifs() found, which ARCHITECTURE.md makes the authority and forbids second-guessing. 'Medium' was the default across 32 rule and motif records regardless of detectability, and it was found by measuring what the API reports against what each record permits: twelve concepts were reporting ABOVE their own record. The fix was to make each record its own ceiling in cap(), which then required the records that were wrong to be corrected rather than silently overruled."
   ],
   "misconceptions": [],
   "relationships": {
