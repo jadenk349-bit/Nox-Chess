@@ -814,7 +814,7 @@ Ranked play is a queue, not a room: the ranked screen (`screen-ranked`) shows
 the badge the rating has earned and sends `{t:"find", kind:"ranked"}`. Five
 seconds of that finding nobody and the server seats a bot instead — same
 `start`, same sweep on the Start Game plate, same transition into the game, with
-an `ai` block naming it and a BOT tag beside its name on the board bar. Nothing
+an `ai` block naming it and nothing on the board bar to say it is one. Nothing
 about the search UI changes, and nothing on this side decides that it happened. Friendly
 play still goes through the room list. The rating ladder is written out twice —
 `TIERS` in the page picks the badge, and the generated `tier` column in
