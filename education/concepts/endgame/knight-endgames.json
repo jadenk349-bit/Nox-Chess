@@ -173,7 +173,39 @@
     }
   ],
   "counterexamples": [],
-  "ambiguous_examples": [],
+  "ambiguous_examples": [
+    {
+      "fen": "8/8/4k3/8/4n3/8/4PK2/4N3 w - - 0 1",
+      "note": "One extra pawn, knight against knight, and it is a PROVEN DRAW. This record's positive example is the same kind of ending with TWO extra pawns and is a proven win in 65, so the pair says something the formula on its own does not: Botvinnik's 'a knight ending is really a pawn ending' is exactly right about TEMPO and not about MATERIAL. The tempo half is a theorem - a knight changes square colour every move, so it cannot triangulate, and every technique that depends on losing a move transfers intact. The material half does not follow: in a pawn ending one extra pawn usually wins, and here the defending knight blockades and it does not. Filed as ambiguous because both halves are true and the record's headline sentence does not distinguish them.",
+      "origin_kind": "tablebase-position",
+      "concept_role": "ambiguous",
+      "engine": {
+        "engine_id": "Stockfish 18",
+        "test_level": 3,
+        "depth": 26,
+        "threads": 10,
+        "hash_mb": 4096,
+        "multipv": 1,
+        "best_move": "f2g2",
+        "eval_cp": 0,
+        "mate_in": null,
+        "pv": [],
+        "alternatives": [],
+        "margin_cp": null,
+        "verdict": "ambiguous",
+        "verdict_note": "0.00 at depth 26, settled at depth 16, with a whole extra pawn on the board."
+      },
+      "tablebase": {
+        "source": "Lichess tablebase (Syzygy, 7-piece)",
+        "pieces": 5,
+        "wdl": "draw",
+        "dtz": 0,
+        "dtm": 0,
+        "category": "draw",
+        "note": "PROVEN DRAW over every legal continuation. Read against this record's positive example - the same ending with two extra pawns, a proven win in 65 - the pair locates exactly where Botvinnik's formula stops."
+      }
+    }
+  ],
   "explanations": {
     "by_level": {
       "beginner": "Endings with knights and pawns. Use your king, make a passed pawn — much as in a pawn ending.",

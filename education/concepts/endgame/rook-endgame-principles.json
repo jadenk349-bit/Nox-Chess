@@ -150,7 +150,39 @@
     }
   ],
   "counterexamples": [],
-  "ambiguous_examples": [],
+  "ambiguous_examples": [
+    {
+      "fen": "R7/6k1/P7/8/3K4/8/8/r7 w - - 0 1",
+      "note": "The defending rook is behind the passed pawn, which is the most-quoted rule in rook endings - Tarrasch's, and repeated everywhere since - and Black is PROVEN LOST in 63. The same position with that rook on f6 instead, in front of nothing and beside everything, is a proven draw: the Vancura defence. So the rule and its exception are one rook move apart, and the record's own opening sentence is the honest reading of that - these are 'the most common and least rule-governed endings: activity outweighs material, and almost every general rule has proven exceptions'. Filed as ambiguous because the rule is correctly applied here and loses, and a system that reported it would be quoting Tarrasch at somebody in a position where Tarrasch is wrong.",
+      "origin_kind": "tablebase-position",
+      "concept_role": "ambiguous",
+      "engine": {
+        "engine_id": "Stockfish 18",
+        "test_level": 3,
+        "depth": 26,
+        "threads": 10,
+        "hash_mb": 4096,
+        "multipv": 1,
+        "best_move": "d4c5",
+        "eval_cp": 1213,
+        "mate_in": null,
+        "pv": [],
+        "alternatives": [],
+        "margin_cp": null,
+        "verdict": "ambiguous",
+        "verdict_note": "+12.13 for the side the rule is supposed to be defending against."
+      },
+      "tablebase": {
+        "source": "Lichess tablebase (Syzygy, 7-piece)",
+        "pieces": 5,
+        "wdl": "win",
+        "dtz": 17,
+        "dtm": 63,
+        "category": "win",
+        "note": "PROVEN WIN in 63 for the attacker, with the defending rook obeying the rule. The paired position - the same rook on f6, active on the sixth - is a PROVEN DRAW at dtz 0."
+      }
+    }
+  ],
   "explanations": {
     "by_level": {
       "beginner": "Keep your rook active. A rook stuck defending a pawn is worth much less than one that can attack.",

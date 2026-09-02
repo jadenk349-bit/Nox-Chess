@@ -142,7 +142,39 @@
     }
   ],
   "counterexamples": [],
-  "ambiguous_examples": [],
+  "ambiguous_examples": [
+    {
+      "fen": "8/P7/K7/8/8/8/8/1q4k1 w - - 0 1",
+      "note": "A whole QUEEN against one pawn, and it is a proven draw. This record's own thesis is that 'the usual arithmetic of material breaks down most completely' in queen endings, and here it breaks down as far as it can go: the pawn is a rook pawn on the seventh with its king in front of it, and the stalemate defence holds against anything. What makes this ambiguous rather than simply an exception is that the record cannot say which way it cuts - the same sentence that predicts material will fail also predicts that an advanced passer outweighs the count, and both are operating here on opposite sides. The file of the pawn decides, and no principle on this record names files.",
+      "origin_kind": "tablebase-position",
+      "concept_role": "ambiguous",
+      "engine": {
+        "engine_id": "Stockfish 18",
+        "test_level": 3,
+        "depth": 26,
+        "threads": 10,
+        "hash_mb": 4096,
+        "multipv": 1,
+        "best_move": "a7a8q",
+        "eval_cp": 0,
+        "mate_in": null,
+        "pv": [],
+        "alternatives": [],
+        "margin_cp": null,
+        "verdict": "ambiguous",
+        "verdict_note": "0.00, and the engine's own move is to promote - after which it is queen against queen with bare kings, which is the drawn position the whole defence is aiming at."
+      },
+      "tablebase": {
+        "source": "Lichess tablebase (Syzygy, 7-piece)",
+        "pieces": 4,
+        "wdl": "draw",
+        "dtz": 0,
+        "dtm": 0,
+        "category": "draw",
+        "note": "PROVEN DRAW. A queen against a single pawn, held by the rook-file stalemate defence. The record says the arithmetic of material breaks down in queen endings; this is the largest arithmetic gap in this base and the result is a draw."
+      }
+    }
+  ],
   "explanations": {
     "by_level": {
       "beginner": "Queens and pawns. Watch for endless checks — they save a lot of these positions.",

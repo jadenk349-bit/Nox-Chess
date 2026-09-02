@@ -135,7 +135,39 @@
     }
   ],
   "counterexamples": [],
-  "ambiguous_examples": [],
+  "ambiguous_examples": [
+    {
+      "fen": "r2k4/8/3K4/8/8/8/4B3/3R4 w - - 0 1",
+      "note": "Rook and bishop against rook - the SAME material as this record's positive example, and a PROVEN WIN in 15 rather than a proven draw. Two positions, one material balance, opposite results, and nothing in the point count distinguishes them: what does is where the defending king stands and whether the defence has been set up. That is this record's central claim - 'the point count becomes the least reliable guide exactly where people lean on it most' - and the pair is the claim rather than an illustration of it. Filed as ambiguous because the concept applies fully to both halves and tells a reader nothing about which one they are looking at.",
+      "origin_kind": "tablebase-position",
+      "concept_role": "ambiguous",
+      "engine": {
+        "engine_id": "Stockfish 18",
+        "test_level": 3,
+        "depth": 26,
+        "threads": 10,
+        "hash_mb": 4096,
+        "multipv": 1,
+        "best_move": "d1f1",
+        "eval_cp": null,
+        "mate_in": 11,
+        "pv": [],
+        "alternatives": [],
+        "margin_cp": null,
+        "verdict": "ambiguous",
+        "verdict_note": "Mate in 11 at depth 26, settled at depth 1, in the material the same record's positive example holds to a proven draw."
+      },
+      "tablebase": {
+        "source": "Lichess tablebase (Syzygy, 7-piece)",
+        "pieces": 5,
+        "wdl": "win",
+        "dtz": 7,
+        "dtm": 15,
+        "category": "win",
+        "note": "PROVEN WIN, dtz 7, mate in 15, best move Rg1. The positive example on this record is the same five men in a different arrangement and is a PROVEN DRAW at dtz 0."
+      }
+    }
+  ],
   "explanations": {
     "by_level": {
       "beginner": "Endings where each side has different pieces — a rook against two minor pieces, say. Counting points helps least here.",

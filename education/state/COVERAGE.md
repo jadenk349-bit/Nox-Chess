@@ -12,7 +12,7 @@ Mean completeness **0.85** across 137 concepts.
 - **substantial**: 11 areas
 - **partial**: 69 areas
 
-69 of 85 areas contain exactly ONE concept. The rating rule needs two concepts for *substantial* and three for *full*, so those areas cannot rise however complete the record is: `two-weaknesses` scores 1.00 and is rated *partial*, the same word as an area scoring 0.45. Rating a one-concept area by its one concept, at a **higher** bar (0.85 for *full* rather than 0.75 for a mean of three), gives: **full** 44, **substantial** 28, **partial** 13.
+69 of 85 areas contain exactly ONE concept. The rating rule needs two concepts for *substantial* and three for *full*, so those areas cannot rise however complete the record is: `two-weaknesses` scores 1.00 and is rated *partial*, the same word as an area scoring 0.45. Rating a one-concept area by its one concept, at a **higher** bar (0.85 for *full* rather than 0.75 for a mean of three), gives: **full** 45, **substantial** 27, **partial** 13.
 
 The completion assessment is judged on the ORIGINAL rule and criterion 1 stays where that rule puts it. This second reading is printed so the artefact is visible, not so it can be spent.
 
@@ -72,11 +72,16 @@ The completion assessment is judged on the ORIGINAL rule and criterion 1 stays w
 | partial | 0.93 | `opening-principles` | 1 |
 | partial | 0.92 | `triangulation` | 1 |
 | partial | 0.88 | `forcing-moves` | 1 |
+| partial | 0.88 | `endgame-principles` | 1 |
 | partial | 0.88 | `fortresses` | 1 |
 | partial | 0.87 | `named-tactical-patterns` | 1 |
 | partial | 0.87 | `strong-squares` | 1 |
 | partial | 0.87 | `rules-of-thumb` | 1 |
 | partial | 0.81 | `piece-properties` | 1 |
+| partial | 0.81 | `rook-endgames` | 1 |
+| partial | 0.81 | `knight-endgames` | 1 |
+| partial | 0.81 | `queen-endgames` | 1 |
+| partial | 0.81 | `mixed-piece-endgames` | 1 |
 | partial | 0.80 | `candidate-moves` | 1 |
 | partial | 0.80 | `positional-evaluation` | 1 |
 | partial | 0.80 | `development` | 1 |
@@ -87,11 +92,6 @@ The completion assessment is judged on the ORIGINAL rule and criterion 1 stays w
 | partial | 0.80 | `hypermodern-school` | 1 |
 | partial | 0.80 | `soviet-school` | 1 |
 | partial | 0.80 | `modern-dynamic` | 1 |
-| partial | 0.75 | `endgame-principles` | 1 |
-| partial | 0.75 | `rook-endgames` | 1 |
-| partial | 0.75 | `knight-endgames` | 1 |
-| partial | 0.75 | `queen-endgames` | 1 |
-| partial | 0.75 | `mixed-piece-endgames` | 1 |
 | partial | 0.73 | `planning` | 1 |
 | partial | 0.67 | `chess-terminology` | 1 |
 | partial | 0.67 | `ranks-files-diagonals` | 1 |
@@ -177,6 +177,7 @@ The completion assessment is judged on the ORIGINAL rule and criterion 1 stays w
 | `fifty-move-rule` | 0.91 | x | x | x | . | x | . | x | x | . | . | x | . | x | x | x | - |
 | `castling` | 0.90 | x | x | x | . | x | . | x | x | . | . | . | . | x | x | x | - |
 | `seventy-five-move-rule` | 0.90 | x | x | x | . | x | . | x | x | . | . | . | . | x | x | x | - |
+| `endgame-principles` | 0.88 | x | x | x | x | x | x | x | - | x | x | x | x | - | x | x | x |
 | `fortress` | 0.88 | x | x | x | x | x | x | x | x | - | x | x | - | x | x | x | x |
 | `lucena-position` | 0.88 | x | x | x | x | x | x | x | x | - | x | x | - | x | x | x | x |
 | `vancura-position` | 0.88 | x | x | x | x | x | x | x | x | - | x | x | - | x | x | x | x |
@@ -198,6 +199,10 @@ The completion assessment is judged on the ORIGINAL rule and criterion 1 stays w
 | `checkmate` | 0.82 | x | x | x | . | x | . | x | x | . | . | x | . | - | x | x | - |
 | `stalemate` | 0.82 | x | x | x | . | x | . | x | x | . | . | x | . | - | x | x | - |
 | `piece-properties` | 0.81 | x | x | x | x | x | x | - | x | - | x | x | - | x | x | x | x |
+| `knight-endgames` | 0.81 | x | x | x | x | x | x | x | - | x | x | x | - | - | x | x | x |
+| `mixed-piece-endgames` | 0.81 | x | x | x | x | x | x | x | - | x | x | x | - | - | x | x | x |
+| `queen-endgames` | 0.81 | x | x | x | x | x | x | x | - | x | x | x | - | - | x | x | x |
+| `rook-endgame-principles` | 0.81 | x | x | x | x | x | x | x | - | x | x | x | - | - | x | x | x |
 | `candidate-moves` | 0.80 | x | x | x | x | x | x | x | - | - | x | . | x | - | x | x | x |
 | `opening-development` | 0.80 | x | x | x | x | x | x | - | x | - | x | . | - | x | x | x | x |
 | `classical-school` | 0.80 | x | x | x | x | x | x | x | - | - | x | . | x | - | x | x | x |
@@ -212,11 +217,6 @@ The completion assessment is judged on the ORIGINAL rule and criterion 1 stays w
 | `double-check` | 0.80 | x | x | x | . | x | x | x | x | x | x | x | - | - | x | x | - |
 | `discovered-check` | 0.79 | x | x | x | . | x | x | x | x | x | x | . | - | - | x | x | - |
 | `removing-the-defender` | 0.79 | x | x | x | . | x | x | x | x | - | x | . | - | x | x | x | - |
-| `endgame-principles` | 0.75 | x | x | x | x | x | x | x | - | - | x | - | x | - | x | x | x |
-| `knight-endgames` | 0.75 | x | x | x | x | x | x | x | - | - | x | x | - | - | x | x | x |
-| `mixed-piece-endgames` | 0.75 | x | x | x | x | x | x | x | - | - | x | x | - | - | x | x | x |
-| `queen-endgames` | 0.75 | x | x | x | x | x | x | x | - | - | x | x | - | - | x | x | x |
-| `rook-endgame-principles` | 0.75 | x | x | x | x | x | x | x | - | - | x | x | - | - | x | x | x |
 | `philidor-position` | 0.75 | x | x | x | x | x | x | x | - | - | x | x | - | - | x | x | x |
 | `planning` | 0.73 | x | x | x | x | x | x | - | x | - | - | . | - | x | x | x | x |
 | `promotion` | 0.70 | x | x | x | . | x | . | x | - | . | . | . | . | - | x | x | - |

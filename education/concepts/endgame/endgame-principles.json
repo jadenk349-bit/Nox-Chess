@@ -136,7 +136,39 @@
     }
   ],
   "counterexamples": [],
-  "ambiguous_examples": [],
+  "ambiguous_examples": [
+    {
+      "fen": "8/P7/K7/8/8/8/8/1q4k1 w - - 0 1",
+      "note": "The first principle of the endgame is that the king is a fighting piece, and this record's positive example is Capablanca marching his king up the board at the cost of three pawns. Here the white king is doing the opposite and it is the only reason the position is not lost: it stands on a6 shielding a rook pawn, does nothing, goes nowhere, and holds a draw against a whole queen. Activating it loses at once. Filed as ambiguous rather than negative because the principle is not wrong here so much as silent - 'the king is a fighting piece' is a statement about what the king MAY do once the queens are off, and this position is the case where what it may do is stand still.",
+      "origin_kind": "tablebase-position",
+      "concept_role": "ambiguous",
+      "engine": {
+        "engine_id": "Stockfish 18",
+        "test_level": 3,
+        "depth": 26,
+        "threads": 10,
+        "hash_mb": 4096,
+        "multipv": 1,
+        "best_move": "a7a8q",
+        "eval_cp": 0,
+        "mate_in": null,
+        "pv": [],
+        "alternatives": [],
+        "margin_cp": null,
+        "verdict": "ambiguous",
+        "verdict_note": "0.00 with a queen against a pawn, held by a king that never moves."
+      },
+      "tablebase": {
+        "source": "Lichess tablebase (Syzygy, 7-piece)",
+        "pieces": 4,
+        "wdl": "draw",
+        "dtz": 0,
+        "dtm": 0,
+        "category": "draw",
+        "note": "PROVEN DRAW. The passive king is the whole defence. Read against this record's positive example, Capablanca-Tartakower 1924, where the active king is worth +3.14 and three pawns are given for it."
+      }
+    }
+  ],
   "explanations": {
     "by_level": {
       "beginner": "In the endgame: use your king, make more than one target, and take your time.",
