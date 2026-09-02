@@ -153,7 +153,23 @@
     }
   ],
   "counterexamples": [],
-  "ambiguous_examples": [],
+  "ambiguous_examples": [
+    {
+      "fen": "8/8/4k3/4p3/8/R7/1r6/4K3 w - - 0 1",
+      "note": "A rook-and-pawn ending that any reader would call a Philidor position, and the Philidor defence is not what is holding it. The rank matters: Philidor's method is that the defending rook sits on the rank in front of the pawn until the pawn reaches the sixth, and then checks from behind. With the pawn on e5 the relevant rank is the sixth, and White's rook is on the third - so the defence being executed here is not Philidor's at all, and the position is drawn anyway, because the pawn is too far back and the defending king is in front of it. Filed as ambiguous because the name and the mechanism come apart: the arrangement is the one the name is attached to and the reason for the draw is a different one.",
+      "origin_kind": "tablebase-position",
+      "concept_role": "ambiguous",
+      "tablebase": {
+        "source": "Lichess tablebase (Syzygy, 7-piece)",
+        "pieces": 5,
+        "wdl": "draw",
+        "dtz": 0,
+        "dtm": 0,
+        "category": "draw",
+        "note": "PROVEN DRAW at dtz 0, and this record's positive example - the same pieces with the pawn one rank further advanced, where the third-rank defence IS the reason - is also a proven draw. Two draws, one method, and only one of them is Philidor's."
+      }
+    }
+  ],
   "explanations": {
     "by_level": {
       "beginner": "Keep your king in front of their pawn and your rook across the third row so their king cannot come forward. When the pawn finally advances, drop your rook far back and check them from behind.",

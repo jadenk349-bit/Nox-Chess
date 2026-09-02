@@ -169,7 +169,30 @@
       "false_positive_case": "a-back-rank-threat-the-defender-answers"
     }
   ],
-  "ambiguous_examples": [],
+  "ambiguous_examples": [
+    {
+      "fen": "3r2k1/5ppp/8/8/8/8/5PPP/4R1K1 w - - 0 1",
+      "note": "BOTH back ranks are weak. Neither king has moved a pawn, both are boxed in by their own men, and a rook or queen arriving on either eighth or first rank would be mate. Neither side can arrange it, and the engine says 0.00. This is the standing weakness the record's deep explanation calls the more valuable half - 'more often than the mate itself, the value is the standing WEAKNESS' - present twice over and worth nothing to anybody, because the same feature on both sides cancels. Filed as ambiguous rather than negative: the pattern is genuinely on the board for both players, correctly, and a report of it tells a reader nothing about who stands better.",
+      "origin_kind": "constructed-test",
+      "concept_role": "ambiguous",
+      "engine": {
+        "engine_id": "Stockfish 18",
+        "test_level": 3,
+        "depth": 24,
+        "threads": 10,
+        "hash_mb": 4096,
+        "multipv": 1,
+        "best_move": "g2g3",
+        "eval_cp": 0,
+        "mate_in": null,
+        "pv": [],
+        "alternatives": [],
+        "margin_cp": null,
+        "verdict": "ambiguous",
+        "verdict_note": "0.00 at depth 24, settled at depth 18, and the engine's own first move is g3 - making luft, which is the antidote the record names. It spends a tempo on it in a dead position, which is a fair comment on how much the weakness is worth here."
+      }
+    }
+  ],
   "explanations": {
     "by_level": {
       "beginner": "The king is trapped on the back row by its own pawns, so a rook or queen arriving there is checkmate.",

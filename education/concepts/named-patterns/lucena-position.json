@@ -206,7 +206,23 @@
       }
     }
   ],
-  "ambiguous_examples": [],
+  "ambiguous_examples": [
+    {
+      "fen": "1K6/1P1k4/8/8/8/8/1r6/5R2 w - - 0 1",
+      "note": "Every characteristic this record lists holds except one: the pawn is a knight pawn on the seventh, the attacking king is on the queening square in its own pawn's way, the defending king is cut off - and the DEFENDING ROOK is on the pawn's own file rather than on the file beyond it. The record states that fifth condition as part of the definition. The position is still a proven win, and it is won by a different first move: Ra1 rather than Rd1+, which is to say NOT by building a bridge. So the name is the whole question. A reader who has learnt the five conditions will not call this the Lucena position; a reader who has learnt 'rook and pawn on the seventh with the king in front' will. Both are right about the chess and only one can be right about the word, and this base does not adjudicate the word.",
+      "origin_kind": "tablebase-position",
+      "concept_role": "ambiguous",
+      "tablebase": {
+        "source": "Lichess tablebase (Syzygy, 7-piece)",
+        "pieces": 5,
+        "wdl": "win",
+        "dtz": 7,
+        "dtm": 39,
+        "category": "win",
+        "note": "PROVEN WIN, dtz 7, mate in 39, best move Ra1 - and Ra1 is not the bridge. This record's positive example is a proven win in 41 whose first move IS the bridge's first check, Rd1+. Same material, same result, different technique, and the difference is which file the defending rook stands on."
+      }
+    }
+  ],
   "explanations": {
     "by_level": {
       "beginner": "The pawn is one square from queening but the king is in its way. The trick is to use the rook as a shield so the king can step out.",

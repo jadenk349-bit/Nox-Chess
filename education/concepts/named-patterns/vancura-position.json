@@ -222,7 +222,23 @@
       }
     }
   ],
-  "ambiguous_examples": [],
+  "ambiguous_examples": [
+    {
+      "fen": "R7/6k1/1P3r2/8/3K4/8/8/8 w - - 0 1",
+      "note": "The Vancura ARRANGEMENT exactly - attacking rook behind its own passed pawn on the eighth, defending rook active on the sixth keeping the pawn under fire, defending king beside the pawn's queening corner - with one change: the pawn is a knight pawn instead of a rook pawn. It is a PROVEN WIN in 27. Vancura's defence is specifically a rook-pawn defence, and it works because a rook pawn's queening corner can be reached by the defending king and because the attacking rook in front of its own pawn has nowhere useful to go; neither holds one file across. Filed as ambiguous because nothing visible distinguishes this from the drawn position: the pieces stand in the same relation, and the letter of the file decides.",
+      "origin_kind": "tablebase-position",
+      "concept_role": "ambiguous",
+      "tablebase": {
+        "source": "Lichess tablebase (Syzygy, 7-piece)",
+        "pieces": 5,
+        "wdl": "win",
+        "dtz": 1,
+        "dtm": 27,
+        "category": "win",
+        "note": "PROVEN WIN in 27, best move b7. This record's positive example is the same arrangement with an a-pawn and is a PROVEN DRAW at dtz 0."
+      }
+    }
+  ],
   "explanations": {
     "by_level": {
       "beginner": "Their extra pawn is on the edge of the board. Put your rook beside it on the same row, keep your king in the corner, and they can never make progress.",

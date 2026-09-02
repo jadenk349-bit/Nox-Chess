@@ -161,7 +161,23 @@
       }
     }
   ],
-  "ambiguous_examples": [],
+  "ambiguous_examples": [
+    {
+      "fen": "6rk/6pp/8/8/8/8/1N6/6K1 w - - 0 1",
+      "note": "The precondition is fully present: the black king on h8 has every flight square occupied by its own men - the rook on g8, the pawns on g7 and h7 - which is the smothering the pattern is named for. What is absent is any way to use it. White's knight is on b2 and needs four moves to reach f7, by which time nothing about the position resembles this one, and White is a rook down and PROVEN LOST in 38. Filed as ambiguous because the pattern really is there and this record's own precondition is satisfied by a position where the concept is worth less than nothing: the smothering belongs to the side that is winning.",
+      "origin_kind": "tablebase-position",
+      "concept_role": "ambiguous",
+      "tablebase": {
+        "source": "Lichess tablebase (Syzygy, 7-piece)",
+        "pieces": 5,
+        "wdl": "loss",
+        "dtz": -2,
+        "dtm": -38,
+        "category": "loss",
+        "note": "PROVEN LOSS for the side whose knight would deliver the mate, mate in 38 against. The smothered king belongs to the player who is winning by a rook."
+      }
+    }
+  ],
   "explanations": {
     "by_level": {
       "beginner": "The king is boxed in by its own pieces, so the knight — the only piece that can jump — delivers mate.",
