@@ -32,8 +32,8 @@ finished.
 **42 human-annotated corpus positions from 28 master games** · 32 replay-verified
 master games · 829 tests + 615 API + 374 audit + 3570 explanation assertions.
 
-Ladder: researched 137, human-grounded 42, engine-verified 97, negative-tested
-66, ambiguity-tested 31, api-validated 53 of the 83 whose record allows it,
+Ladder: researched 137, human-grounded 43, engine-verified 101, negative-tested
+68, ambiguity-tested 31, api-validated 53 of the 83 whose record allows it,
 explanation-validated 105. Every rung its record allows: **23 of 137.**
 
 ## What moved this session
