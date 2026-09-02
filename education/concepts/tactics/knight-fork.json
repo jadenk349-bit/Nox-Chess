@@ -80,7 +80,7 @@
   ],
   "limitations": [
     "Detecting the geometry is mechanical; deciding it wins material requires resolving the exchange.",
-    "NO MASTER-GAME POSITION YET, and the search that failed is worth recording. Five famous games were replayed through this base's own move generator and scanned position by position with the API - the Opera Game, the Evergreen, the Immortal, the Game of the Century and Legall's Mate, 225 plies between them - and this concept was not reported in any of them. That is not evidence the motif is rare; it is evidence that the five games this base can currently verify do not contain a clean instance of it, and that adding one means adding a game rather than looking harder at these. tools/replay_game.js is the instrument: a move list that is wrong is refused rather than guessed at."
+    "NO MASTER-GAME POSITION YET, and the search that failed is worth recording. Five famous games were replayed through this base's own move generator and scanned position by position with the API - the Opera Game, the Evergreen, the Immortal, the Game of the Century and Legall's Mate, 225 plies between them - and this concept was not reported in any of them. That is not evidence the motif is rare; it is evidence that the five games this base can currently verify do not contain a clean instance of it, and that adding one means adding a game rather than looking harder at these. tools/replay_game.js is the instrument: a move list that is wrong is refused rather than guessed at. RESOLVED: Ed. Lasker-Alekhine, Scheveningen 1913, 30...Nxf2+, above."
   ],
   "misconceptions": [
     "That a knight fork always wins material. The landing square's safety decides it.",
@@ -161,6 +161,50 @@
         "dtm": 0,
         "category": "draw",
         "note": "PROVEN, not evaluated. Read from the side to move. The verdict_note on the engine block beside this one says what the two instruments do and do not agree about."
+      }
+    },
+    {
+      "fen": "4rrk1/R1p3N1/1p5p/1P6/4np2/2P3P1/1P1n1P1P/3R3K b - - 0 30",
+      "move": "Nxf2+",
+      "move_uci": "e4f2",
+      "origin_kind": "historical-game",
+      "game": "Ed. Lasker-Alekhine, Scheveningen 1913",
+      "concept_role": "positive",
+      "side_to_move_benefits": "black",
+      "note": "THE MASTER-GAME RUNG. 30...Nxf2+ checks the king on h1 and attacks the rook on d1 in the same move, which is the geometry this record is named for: a knight that hits two things cannot be answered by defending either, and cannot be blocked or attacked back except by another knight.\n\nStockfish 18 at depth 30 with three lines: MATE IN 10, and the continuation is a second knight move rather than the capture - 31.Kg1 Nfd1, the other knight arriving. That is worth showing beside the fork, because the reason the fork wins here is not the rook. Both black knights end up in White's position and the king cannot answer both.\n\nWHAT THE CARD MUST NOT SAY. The second-best move is +29.61 - also completely winning. Black was already winning before the fork and the fork is the fastest finish rather than the difference between winning and not. A record whose only example is a move that wins a won game teaches that forks decide games; this note says what the engine says.\n\nPROVENANCE. Found by tools/mine_master_motifs.js. The move list replayed legally through the page's own move generator. `attributed_by` absent - no annotator read; this grounds the MASTER-GAME rung and not the human-grounded one.",
+      "engine": {
+        "engine_id": "Stockfish 18",
+        "test_level": 3,
+        "depth": 30,
+        "multipv": 3,
+        "best_move": "e4f2",
+        "eval_cp": null,
+        "mate_in": 10,
+        "pv": [
+          "e4f2",
+          "h1g1",
+          "f2d1",
+          "g7e8",
+          "f4f3",
+          "h2h4",
+          "f3f2",
+          "g1h2",
+          "f2f1q",
+          "e8f6"
+        ],
+        "alternatives": [
+          {
+            "move": "e8e7",
+            "eval_cp": 2961
+          },
+          {
+            "move": "g8g7",
+            "eval_cp": 1405
+          }
+        ],
+        "margin_cp": null,
+        "verdict": "supports",
+        "verdict_note": "Mate in 10, the engine's first choice at depth 30. The runner-up is +29.61, so the fork is the fastest win rather than the only one, and the note says so."
       }
     }
   ],

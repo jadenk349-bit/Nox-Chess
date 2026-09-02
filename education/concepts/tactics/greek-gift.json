@@ -290,6 +290,49 @@
       "origin_kind": "constructed-test",
       "concept_role": "negative",
       "false_positive_case": "a-bishop-eyeing-h7-is-not-a-greek-gift"
+    },
+    {
+      "fen": "r1bq1rk1/pp2bppp/2n1p3/4P3/4B3/2n2N2/PP2QPPP/R1BR2K1 w - - 0 14",
+      "move": "Bxh7+",
+      "move_uci": "e4h7",
+      "origin_kind": "historical-game",
+      "game": "Euwe-Mattison, The Hague Olympiad 1928",
+      "concept_role": "negative",
+      "note": "THE SHAPE WITHOUT THE PATTERN, from a real game, and the harder version of this record's registered false positive. That one is a position where Bxh7+ is bad. This is a position where Bxh7+ is BEST - +3.85 at depth 30 against +1.82 - and is still not a Greek gift.\n\nBlack's bishop is on e7, which is the first indicator_against this record lists: g5 is defended, so Ng5+ is met by a capture and the pattern is unavailable. The engine never plays it. Its line is 14.Bxh7+ Kxh7 15.Qc2+ Kg8 16.Rxd8 - the bishop is given to deflect the king so the rook takes the queen, which is a deflection wearing the Greek gift's clothes.\n\nThis is the negative that is worth having, because the easy one teaches the wrong lesson. A reader who learns 'Bxh7+ fails when g5 is defended' will disbelieve it the first time they see the sacrifice work anyway. What fails is the CONCEPT, not the move: the three-piece machine this record describes is not running here, and any explanation that names it is describing a mechanism that is not on the board.\n\nBronstein-Smyslov, USSR Championship 1960, move 20, is the same thing again - bishop on e7, Bxh7+ the engine's first choice at +0.08, and no Ng5+ anywhere in the line. Two of the three candidates put to the engine were this case, which says something about how often the shape occurs without the pattern.",
+      "engine": {
+        "engine_id": "Stockfish 18",
+        "test_level": 3,
+        "depth": 30,
+        "multipv": 3,
+        "best_move": "e4h7",
+        "eval_cp": 385,
+        "mate_in": null,
+        "pv": [
+          "e4h7",
+          "g8h7",
+          "e2c2",
+          "h7g8",
+          "d1d8",
+          "f8d8",
+          "b2c3",
+          "b7b6",
+          "c1g5",
+          "c8a6"
+        ],
+        "alternatives": [
+          {
+            "move": "b2c3",
+            "eval_cp": 182
+          },
+          {
+            "move": "e2f1",
+            "eval_cp": -532
+          }
+        ],
+        "margin_cp": 203,
+        "verdict": "contradicts",
+        "verdict_note": "Bxh7+ is BEST here by 203 centipawns and the Greek gift is still absent: the engine's line is Bxh7+ Kxh7 Qc2+ Kg8 Rxd8, a deflection. The move being good is not the same claim as the concept being present, and this record must not be allowed to take credit for the one on the strength of the other."
+      }
     }
   ],
   "ambiguous_examples": [
