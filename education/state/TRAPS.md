@@ -13,7 +13,7 @@ implemented; that is a reading, and doing it is the work. What it can do is
 stop the list being rediscovered from scratch each time — and every one of
 the defects listed in the tool's header was unread before it was looked at.
 
-**Of 275 stated conditions (traps and indicators-against): 167 enforced in the matcher, 21 in Layer 3, 74 argued on the record to be unbuildable or already honoured elsewhere, 13 unread.**
+**Of 275 stated conditions (traps and indicators-against): 170 enforced in the matcher, 21 in Layer 3, 74 argued on the record to be unbuildable or already honoured elsewhere, 10 unread.**
 
 ONE CAVEAT ABOUT `indicators_against`, and it is not a technicality. For a
 concept naming an ASSET — an open file, an outpost, a passed pawn — they are
@@ -355,8 +355,8 @@ shared file was added to the search. The test is quotation for that reason.
 - [cited] Improving pieces while the opponent builds an initiative produces individually reasonable moves and a collectively lost position. This is the commonest way the rule is misapplied.
 - [cited] Identifying the worst piece is a judgement, not a measurement. This system has no reliable detector for it and must not claim one.
 - [cited] *(indicator against)* The opponent has a concrete threat that must be met
-- [**unread**] *(indicator against)* A forcing line is available that decides matters
-- [**unread**] *(indicator against)* The opponent is building an initiative that a quiet move would concede
+- [cited] *(indicator against)* A forcing line is available that decides matters
+- [cited] *(indicator against)* The opponent is building an initiative that a quiet move would concede
 ## fork
 
 - [cited] *(indicator against)* The forking piece can simply be captured
@@ -400,5 +400,5 @@ shared file was added to the search. The test is quotation for that reason.
 - [noted] Material already loose before the move is not this move's doing — reporting it makes the move look worse than it was.
 - [noted] *(indicator against)* Recapture regains equal or greater material — an even trade is not a hanging piece
 - [noted] *(indicator against)* Taking it walks into a stronger counter-tactic
-- [**unread**] *(indicator against)* It is bait: the capture opens a line or removes a defender the opponent wants gone
+- [cited] *(indicator against)* It is bait: the capture opens a line or removes a defender the opponent wants gone
 - [noted] *(indicator against)* The piece was ALREADY winnable before this move, so the move is not what hung it

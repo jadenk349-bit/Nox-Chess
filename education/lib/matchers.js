@@ -2428,7 +2428,7 @@ const sqIdxSafe = n => (/^[a-h][1-8]$/.test(n || '') ? sqIdx(n) : -1);
 
 function motifGuard(tag, m, moveInfo) {
   if (tag !== 'fork' && tag !== 'pin' && tag !== 'skewer' &&
-      tag !== 'trappedPiece' && tag !== 'discoveredAttack') return false;
+      tag !== 'trappedPiece' && tag !== 'discoveredAttack' && tag !== 'hangingPiece') return false;
   const P = FEAT.page;
   let after;
   try { after = P.stateFromFEN(moveInfo.fenAfter); } catch (e) { return false; }
@@ -2515,6 +2515,49 @@ function motifGuard(tag, m, moveInfo) {
     const pc = after.b[idx];
     if (!pc || pc.c === them) return false;      // not our piece standing there
     return P.see(after, idx, them) > 0;          // taken, at a profit, and the fork is over
+  }
+
+  if (tag === 'hangingPiece') {
+    // "It is bait: the capture opens a line or removes a defender the opponent
+    // wants gone" - this record's own indicator_against, and the only one of
+    // them that is not already inside findMotifs()' SEE.
+    //
+    // SEE settles the exchange ON the square. Bait is what happens ELSEWHERE
+    // once our piece has left where it was and their line has opened: a
+    // discovered attack, a fork, a defender that was doing two jobs. So the
+    // test takes the piece with our cheapest attacker and asks what they win
+    // somewhere else - and it compares, rather than merely finding something,
+    // because a pawn recovered for a rook is not bait.
+    //
+    // It shares findMotifs()' own approximation, deliberately: the detector
+    // says "it can simply be taken" without giving the opponent the move that
+    // is actually theirs, and a guard that inserted one would be answering a
+    // different question from the claim it is guarding.
+    const mm = ((m && m.text) || '').match(/on ([a-h][1-8]) hanging/);
+    if (!mm) return false;
+    const i = sqIdxSafe(mm[1]);
+    if (i < 0 || !after.b[i]) return false;
+    const us = other(them);
+    const won = P.VAL[after.b[i].t] || 0;
+    const probe = P.cloneState(after);
+    probe.turn = us; probe.ep = -1;
+    let ours;
+    try { ours = P.legalMoves(probe); } catch (e) { return false; }
+    const takes = ours.filter(x => x.to === i && x.cap)
+      .sort((x, y) => (P.VAL[(probe.b[x.from] || {}).t] || 0) - (P.VAL[(probe.b[y.from] || {}).t] || 0));
+    if (!takes.length) return false;
+    let nx;
+    try { nx = P.makeMove(probe, takes[0]); } catch (e) { return false; }
+    let theirs;
+    try { theirs = P.legalMoves(nx); } catch (e) { return false; }
+    for (const y of theirs) {
+      if (!y.cap || y.to === i) continue;            // the square itself is SEE's business
+      let ny;
+      try { ny = P.makeMove(nx, y); } catch (e) { continue; }
+      const back = (P.VAL[y.cap.t] || 0) - Math.max(0, P.see(ny, y.to, us));
+      if (back >= won) return true;                  // taking it costs at least what it won
+    }
+    return false;
   }
 
   if (tag === 'trappedPiece') {
@@ -3268,6 +3311,35 @@ const MOVE_BASED = [
       // burying two has not improved anything.
       const sum = xs => xs.reduce((n, x) => n + x.moves, 0);
       if (sum(a) < sum(b)) return null;
+      // "A FORCING LINE IS AVAILABLE THAT DECIDES MATTERS" - this record's
+      // other indicator_against, and the mirror of the trap below. That one
+      // asks what the quiet move HANDS the opponent; this asks what it PASSES
+      // UP. Improving your worst piece is the right move when nothing is
+      // happening, and a piece to be won for free is something happening.
+      //
+      // A whole piece, not a pawn, and the bar is the point: "decides matters"
+      // is not "wins a pawn", and a quiet improving move in a position where a
+      // pawn can be grabbed is an ordinary choice rather than a blunder. Mate
+      // in one counts too, on the same reasoning as the guard below - a mate
+      // the move generator can enumerate is not a judgement.
+      {
+        const P = FEAT.page;
+        let st0 = null;
+        try { st0 = P.stateFromFEN(before.fen); } catch (e) { st0 = null; }
+        if (st0) {
+          let ms0 = [];
+          try { ms0 = P.legalMoves(st0); } catch (e) { ms0 = []; }
+          const decisive = ms0.some(m => {
+            if (m.cap) {
+              let nx; try { nx = P.makeMove(st0, m); } catch (e) { return false; }
+              if ((P.VAL[m.cap.t] || 0) - Math.max(0, P.see(nx, m.to, other(mover))) >= 300) return true;
+            }
+            let nx2; try { nx2 = P.makeMove(st0, m); } catch (e) { return false; }
+            try { return P.inCheck(nx2, nx2.turn) && P.legalMoves(nx2).length === 0; } catch (e) { return false; }
+          });
+          if (decisive) return null;
+        }
+      }
       // ...and the opponent must not be handed anything by it. "Improving pieces
       // while the opponent builds an initiative produces individually reasonable
       // moves and a collectively lost position. This is the commonest way the
@@ -3282,6 +3354,13 @@ const MOVE_BASED = [
       // instance of the concept, and the position the comment above already
       // says an earlier over-strict version missed. A check being available is
       // not an initiative; a hanging piece is.
+      //
+      // The record says the same thing a second time in its indicators_against
+      // — "The opponent is building an initiative that a quiet move would
+      // concede" — and this guard is where that is answered, in the only half a
+      // static test can reach: whether the quiet move leaves material to be
+      // taken. An initiative that costs nothing material yet is invisible here,
+      // and no comment should pretend otherwise.
       const q = after.quietness;
       if (q && q.winningCapturesAvailable > 0) return null;
       // ...and the other half of the same trap, which the material test cannot
