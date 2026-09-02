@@ -13,7 +13,7 @@ implemented; that is a reading, and doing it is the work. What it can do is
 stop the list being rediscovered from scratch each time — and every one of
 the defects listed in the tool's header was unread before it was looked at.
 
-**Of 275 stated conditions (traps and indicators-against): 176 enforced in the matcher, 21 in Layer 3, 75 argued on the record to be unbuildable or already honoured elsewhere, 3 unread.**
+**Of 275 stated conditions (traps and indicators-against): 180 enforced in the matcher, 21 in Layer 3, 74 argued on the record to be unbuildable or already honoured elsewhere, 0 unread.**
 
 ONE CAVEAT ABOUT `indicators_against`, and it is not a technicality. For a
 concept naming an ASSET — an open file, an outpost, a passed pawn — they are
@@ -314,10 +314,10 @@ shared file was added to the search. The test is quotation for that reason.
 ## restraint
 
 - [cited] Restraint is not the same as passivity. It reduces the opponent's options; a passive move merely fails to increase yours.
-- [noted] Like prophylaxis, it is easy to assert after the fact about any quiet move. Name the advance being prevented.
-- [**unread**] *(indicator against)* The advance being restrained was not something the opponent wanted anyway
-- [**unread**] *(indicator against)* Restraining costs more than permitting
-- [**unread**] *(indicator against)* The position demands speed
+- [cited] Like prophylaxis, it is easy to assert after the fact about any quiet move. Name the advance being prevented.
+- [cited] *(indicator against)* The advance being restrained was not something the opponent wanted anyway
+- [cited] *(indicator against)* Restraining costs more than permitting
+- [cited] *(indicator against)* The position demands speed
 ## castling
 
 - [noted] *(indicator against)* King or that rook has moved at any earlier point

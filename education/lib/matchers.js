@@ -3014,11 +3014,72 @@ const MOVE_BASED = [
       // unusable. Fischer's 30.h4 is the case that settled this.
       const b = before.safeSquares[enemy], a = after.safeSquares[enemy];
       if (b == null || a == null || b - a < 1) return null;
+      const mover = before.sideToMove;
+      const P = FEAT.page;
+      // NAME THE ADVANCE. The record's second trap says restraint "is easy to
+      // assert after the fact about any quiet move - name the advance being
+      // prevented", and the count above names none: it measures where their
+      // PIECES can go. So the pawn advances are looked at directly. An advance
+      // is restrained when the square it would land on is attacked by us more
+      // times than they defend it, and was not before the move.
+      let stopped = null, wanted = false;
+      try {
+        const s0 = P.stateFromFEN(before.fen), s1 = P.stateFromFEN(after.fen);
+        const pressure = (st, sq) => P.attackersOf(st, sq, mover).length - P.attackersOf(st, sq, enemy).length;
+        const fwd = enemy === 'w' ? -1 : 1;
+        for (let i = 0; i < 64 && !stopped; i++) {
+          const pc = s1.b[i];
+          if (!pc || pc.c !== enemy || pc.t !== 'P') continue;
+          const r = (i >> 3) + fwd, c2 = i & 7;
+          if (r < 0 || r > 7) continue;
+          const to = r * 8 + c2;
+          if (s1.b[to]) continue;                       // the advance is blocked, not restrained
+          if (pressure(s1, to) > 0 && pressure(s0, to) <= 0) {
+            stopped = FEAT.nameOf(i) + '-' + FEAT.nameOf(to);
+            // "The advance being restrained was not something the opponent
+            // wanted anyway" - the record's first indicator_against, and the
+            // question it asks is answerable one way. An advance that would
+            // come into CONTACT with one of our pawns is a break, and a break
+            // is something a player wants; an advance into empty space, hitting
+            // nothing, is a move they may never have intended to make. So the
+            // clause is affirmative when contact is there and hedged when it is
+            // not, rather than asserting a preference nobody has expressed.
+            for (const dc of [-1, 1]) {
+              const cc = c2 + dc, rr = r + fwd;
+              if (cc < 0 || cc > 7 || rr < 0 || rr > 7) continue;
+              const q = s1.b[rr * 8 + cc];
+              if (q && q.t === 'P' && q.c === mover) wanted = true;
+            }
+          }
+        }
+      } catch (e) { stopped = null; }
+      // "Restraining costs more than permitting." The buildable half is what
+      // the move costs US: a quiet move that leaves a new hole in our own camp
+      // has bought the restraint with a weakness, which is the trade the record
+      // is warning about.
+      const holesBefore = (before.holes[mover] || []).length;
+      const holesAfter = (after.holes[mover] || []).length;
+      const cost = holesAfter > holesBefore;
+      // "The position demands speed" - tempoScarce() is the same test three
+      // other records use for the same sentence, and it is a caveat here for
+      // the same reason: a restraining move in a position with something to
+      // answer may be the wrong move, and saying so is not the same as denying
+      // that it restrains.
+      const hurry = tempoScarce(before, mover);
       return {
         confidence: 'low',
         because: [`${san} takes ${b - a} safe square${b - a === 1 ? '' : 's'} away from ` +
                   `${side(before, enemy)}'s pieces without attacking anything — they can still go ` +
-                  `there, and a pawn now meets them if they do`],
+                  `there, and a pawn now meets them if they do` +
+                  (stopped
+                    ? `. The advance it prevents is ${stopped}` +
+                      (wanted ? `, which is a break against ${side(before, mover)}'s own pawns — something ` +
+                                `${side(before, enemy)} wants`
+                              : `, though that advance meets nothing, so it may not be one ` +
+                                `${side(before, enemy)} wanted to make`)
+                    : '') +
+                  (cost ? `. It costs a hole in ${side(before, mover)}'s own camp, which is the trade to weigh` : '') +
+                  (hurry ? `. There is something to answer here, so the position may demand speed instead` : '')],
         slots: {},
         subjects: [before.sideToMove],
       };
