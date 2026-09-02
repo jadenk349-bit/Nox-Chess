@@ -5,14 +5,14 @@
   "concepts_indexed": 137,
   "counts": {
     "avoid_phrasing": 167,
-    "exception": 302,
+    "exception": 306,
     "false_positive_trap": 304,
     "misconception": 268
   },
   "evidence_tiers": {
     "demonstrated": 49,
-    "on-a-tested-record": 791,
-    "sourced": 201
+    "on-a-tested-record": 794,
+    "sourced": 202
   },
   "evidence_tier_meaning": {
     "demonstrated": "the sentence cites a measurement AND its concept holds engine or tablebase evidence",
@@ -20,7 +20,7 @@
     "sourced": "rests on cited sources; no engine or tablebase evidence on the record",
     "unsourced": "neither - should not exist and is a bug if it does"
   },
-  "total": 1041,
+  "total": 1045,
   "soft_concepts_without_exceptions": [],
   "entries": [
     {
@@ -11647,7 +11647,31 @@
       "concept_evidence": "sources-only",
       "path": "concepts/tactics/deflection.json",
       "kind": "exception",
-      "text": "If the deflected piece can return with tempo, or a second defender exists, the tactic fails.",
+      "text": "A deflection fails if the deflected piece can answer the threat and keep its duty, which is the commonest miscalculation in the motif.",
+      "self_evidenced": false,
+      "evidence_tier": "sourced"
+    },
+    {
+      "concept": "deflection",
+      "category": "tactical-motifs",
+      "knowledge_type": "tactical-motif",
+      "difficulty": "intermediate",
+      "concept_evidence": "sources-only",
+      "path": "concepts/tactics/deflection.json",
+      "kind": "exception",
+      "text": "Deflecting a defender that has a second defender behind it achieves nothing.",
+      "self_evidenced": false,
+      "evidence_tier": "sourced"
+    },
+    {
+      "concept": "deflection",
+      "category": "tactical-motifs",
+      "knowledge_type": "tactical-motif",
+      "difficulty": "intermediate",
+      "concept_evidence": "sources-only",
+      "path": "concepts/tactics/deflection.json",
+      "kind": "exception",
+      "text": "If the opponent can decline, it is not a deflection — the whole idea rests on the reply being forced.",
       "self_evidenced": false,
       "evidence_tier": "sourced"
     },
@@ -12508,12 +12532,36 @@
       "category": "tactical-motifs",
       "knowledge_type": "tactical-motif",
       "difficulty": "intermediate",
-      "concept_evidence": "sources-only",
+      "concept_evidence": "engine",
       "path": "concepts/tactics/zwischenzug.json",
       "kind": "exception",
-      "text": "Only works if the postponed capture is still there afterwards.",
+      "text": "An in-between move fails if the opponent's answer to it also answers the original threat.",
       "self_evidenced": false,
-      "evidence_tier": "sourced"
+      "evidence_tier": "on-a-tested-record"
+    },
+    {
+      "concept": "zwischenzug",
+      "category": "tactical-motifs",
+      "knowledge_type": "tactical-motif",
+      "difficulty": "intermediate",
+      "concept_evidence": "engine",
+      "path": "concepts/tactics/zwischenzug.json",
+      "kind": "exception",
+      "text": "A check that lets the opponent improve while answering it is worse than the immediate recapture.",
+      "self_evidenced": false,
+      "evidence_tier": "on-a-tested-record"
+    },
+    {
+      "concept": "zwischenzug",
+      "category": "tactical-motifs",
+      "knowledge_type": "tactical-motif",
+      "difficulty": "intermediate",
+      "concept_evidence": "engine",
+      "path": "concepts/tactics/zwischenzug.json",
+      "kind": "exception",
+      "text": "If the first exchange can be abandoned by the opponent, the in-between move has bought nothing.",
+      "self_evidenced": false,
+      "evidence_tier": "on-a-tested-record"
     }
   ]
 }

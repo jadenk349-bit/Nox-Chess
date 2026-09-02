@@ -55,18 +55,37 @@
     "false_positive_traps": []
   },
   "application": {
-    "typical_plans": [],
-    "typical_moves": [],
+    "typical_plans": [
+      "Before making the recapture the position seems to demand, list every check and every capture that is bigger",
+      "In a forcing line, insert the check first and take second whenever the check cannot be answered by a counter-capture",
+      "When calculating the opponent's reply, look for THEIR in-between move before assuming they must recapture"
+    ],
+    "typical_moves": [
+      "A check with a piece other than the one about to recapture",
+      "A capture of something more valuable, leaving the first exchange standing",
+      "An attack on the queen inserted between a capture and its recapture"
+    ],
     "typical_pawn_structures": [],
-    "typical_piece_arrangements": [],
-    "tactical_consequences": [],
-    "strategic_consequences": []
+    "typical_piece_arrangements": [
+      "An exchange under way on one square while a check is available on another",
+      "Two pieces of the opponent hanging at once, so the order of taking them matters"
+    ],
+    "tactical_consequences": [
+      "The gain is in the ORDER rather than in the material: the same men come off in both lines and the evaluation differs",
+      "Desperado is a special case - a doomed piece acting before the expected recapture is a zwischenzug made by a piece that has nothing to lose"
+    ],
+    "strategic_consequences": [
+      "Whole calculated lines are refuted by an opponent's zwischenzug, which is why this record's advice is to look for theirs and not only for yours"
+    ]
   },
   "exceptions": [
-    "Only works if the postponed capture is still there afterwards."
+    "An in-between move fails if the opponent's answer to it also answers the original threat.",
+    "A check that lets the opponent improve while answering it is worse than the immediate recapture.",
+    "If the first exchange can be abandoned by the opponent, the in-between move has bought nothing."
   ],
   "limitations": [
-    "Cannot be detected from a single position — it is a property of a sequence. Any detector must operate on the move list, not the board."
+    "There is no matcher. Recognising a zwischenzug requires knowing what the EXPECTED move was, which is a claim about a line rather than about a position, and this base reports at the board.",
+    "The example on this record was FOUND rather than constructed, by scanning the 788 shipped puzzles for a solution whose first move is not the recapture on the square just captured, where a recapture is available and the move played is a check. Fifteen positions match. The scan needs each puzzle's `prev` position to know what was just taken, which is the same field the puzzle generator added so that a turning point could be measured at all."
   ],
   "misconceptions": [],
   "relationships": {
@@ -80,7 +99,33 @@
     "co_occurring": [],
     "conflicts": []
   },
-  "examples": [],
+  "examples": [
+    {
+      "fen": "r2q1rk1/pp4pp/n1pbbp2/3pp2N/3P2B1/2P1n2P/PP1N1PP1/R1BQ1RK1 w - - 0 12",
+      "move": "Bxe6+",
+      "move_uci": "g4e6",
+      "note": "Shipped puzzle mi-4fe7c58015, and it is the concept in its purest form. Black has just captured on e3 and White is expected to recapture. Instead White checks on e6 first, and the check has to be answered, so the recapture is still there afterwards - the engine's own line plays Bxe6+ Kh8 and only THEN fxe3. The whole gain is in the order. Found by scanning the 788 shipped puzzles for a solution whose first move is not the recapture on the square just taken, where a recapture IS available and the move played is a check: fifteen positions match that shape.",
+      "origin_kind": "puzzle",
+      "concept_role": "positive",
+      "side_to_move_benefits": "white",
+      "engine": {
+        "engine_id": "Stockfish 18",
+        "test_level": 3,
+        "depth": 22,
+        "threads": 10,
+        "hash_mb": 4096,
+        "multipv": 3,
+        "best_move": "g4e6",
+        "eval_cp": 437,
+        "mate_in": null,
+        "pv": [],
+        "alternatives": [],
+        "margin_cp": 240,
+        "verdict": "supports",
+        "verdict_note": "+4.37 for the in-between check against +1.97 for the immediate recapture fxe3 - 240 centipawns bought by move order alone, with the same material taken in both lines. That margin is what a zwischenzug IS, and it is the reason the concept has a name of its own rather than being filed under 'check'."
+      }
+    }
+  ],
   "counterexamples": [],
   "ambiguous_examples": [],
   "explanations": {

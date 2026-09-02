@@ -35,7 +35,7 @@ The completion assessment is judged on the ORIGINAL rule and criterion 1 stays w
 | substantial | 0.90 | `attack-principles` | 2 |
 | substantial | 0.86 | `positional-sacrifices` | 2 |
 | substantial | 0.83 | `named-mating-patterns` | 2 |
-| substantial | 0.72 | `tactical-motifs` | 19 |
+| substantial | 0.73 | `tactical-motifs` | 19 |
 | substantial | 0.65 | `blindfold-visualisation` | 4 |
 | partial | 1.00 | `notation` | 1 |
 | partial | 1.00 | `board-geometry` | 1 |
@@ -230,6 +230,7 @@ The completion assessment is judged on the ORIGINAL rule and criterion 1 stays w
 | `chess-terminology` | 0.67 | x | x | x | . | x | x | - | - | . | - | . | . | - | x | x | x |
 | `double-attack` | 0.64 | x | x | x | . | x | x | x | - | - | x | . | - | - | x | x | - |
 | `overloading` | 0.64 | x | x | x | . | x | x | x | - | - | x | . | - | - | x | x | - |
+| `zwischenzug` | 0.64 | x | x | x | . | x | x | x | - | - | x | . | - | - | x | x | - |
 | `corresponding-squares` | 0.62 | x | x | x | x | x | . | - | - | . | - | - | . | - | x | x | x |
 | `board-vision` | 0.60 | x | x | x | x | x | x | - | - | - | - | . | - | - | x | x | x |
 | `calculation` | 0.60 | x | x | x | x | x | x | - | - | - | - | . | - | - | x | x | x |
@@ -246,5 +247,4 @@ The completion assessment is judged on the ORIGINAL rule and criterion 1 stays w
 | `clearance` | 0.50 | x | x | x | . | x | x | - | - | - | - | . | - | - | x | x | - |
 | `deflection` | 0.50 | x | x | x | . | x | x | - | - | - | - | . | - | - | x | x | - |
 | `interference` | 0.50 | x | x | x | . | x | x | - | - | - | - | . | - | - | x | x | - |
-| `zwischenzug` | 0.50 | x | x | x | . | x | x | - | - | - | - | . | - | - | x | x | - |
 | `decoy` | 0.43 | - | x | x | . | x | x | - | - | - | - | . | - | - | x | x | - |
