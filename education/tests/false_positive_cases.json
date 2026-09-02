@@ -813,6 +813,46 @@
       "status": "resolved",
       "evidence": "feature-detector",
       "resolution": "The API reports battery, center-control and passed-pawn here and does not report overprotection. That is the right set: the geometry really is a battery, the pawn really is passed, and the CLAIM that the extra defence is worthwhile is the one thing nobody can read off the board. This record's first trap says so in as many words — 'counting defenders is mechanical and says nothing' — and it is why there is no matcher."
+    },
+    {
+      "id": "lucena-with-a-rook-pawn",
+      "concept": "lucena-position",
+      "surface_pattern": "A white pawn one square from queening, the white king in front of it, the black king cut off, and a black rook checking from behind. That is the Lucena position, and the technique is one of the first things any player is taught.",
+      "why_not": "The Lucena method needs a file on each side of the pawn to build the bridge on, and a rook pawn has only one. Nothing else about this position differs from the winning version - the same pieces, the same relative geometry, one file across.",
+      "fen": "K7/P1k5/8/8/8/8/r7/5R2 w - - 0 1",
+      "status": "resolved",
+      "evidence": "feature-detector + tablebase",
+      "resolution": "PROVEN DRAW, dtz 0, best move Ra1, and Stockfish agrees at 0.00. Read against this record's own positive example, which is the same setup with a knight pawn and is a PROVEN WIN in 41. The API does not report lucena-position here. What makes the pair worth having is that no test counting material, files, ranks or piece relationships can separate the two: the difference is the letter of the file, and it is worth the whole game."
+    },
+    {
+      "id": "a-square-held-by-pieces-not-pawns",
+      "concept": "strong-square",
+      "surface_pattern": "A white knight sits on d5, a square no black pawn can ever attack - the c-pawn is gone and the e5 pawn captures towards d4 and f4. The first precondition holds in full.",
+      "why_not": "The second precondition does not: no friendly pawn defends the square. White's pawn is on e3 rather than e4, so the knight is held by the queen on d1 and attacked by the queen on d8. This record's own indicator_against is \"The square can only be held by pieces, not pawns\", and its own sentence for the case is that such a square is a liability wearing a good square's clothes.",
+      "fen": "r1bq1rk1/pp3ppp/2n5/3Np3/8/4P3/PP3PPP/R1BQ1RK1 w - - 0 1",
+      "status": "resolved",
+      "evidence": "feature-detector + engine",
+      "resolution": "The API reports neither strong-square nor outpost nor weak-square here; with the pawn on e4 instead of e3 it reports outpost for White and weak-square for Black. Stockfish 18 at depth 22 puts the difference at 47 centipawns - -0.17 here against +0.30 there - and its own first move in this position is e3-e4, which is to say it plays the move that turns this half of the pair into the other half. That is a stronger statement about what the pawn is worth than either evaluation is."
+    },
+    {
+      "id": "a-majority-advance-is-not-a-minority-attack",
+      "concept": "minority-attack",
+      "surface_pattern": "A wing pawn advance against an enemy pawn group, aiming to create a weakness. That is the plan a minority attack executes, and the word 'minority' is the part readers drop.",
+      "why_not": "This record's first trap: \"Advancing pawns on the wing where you have fewer is only right in this specific structure. Elsewhere it is simply weakening.\" White has THREE queenside pawns against Black's two. Advancing there is a majority attack, whose point is a passed pawn, and this record's third trap draws the line explicitly: \"The goal is a fixed weakness, not space and not a passed pawn.\"",
+      "fen": "r3k2r/pp4pp/8/8/8/8/PPP3PP/R3K2R w KQkq - 0 1",
+      "status": "resolved",
+      "evidence": "feature-detector",
+      "resolution": "The API reports nothing here, which is correct and is the whole content of the case: the concept turns on a COUNT that is trivial to make and trivial to skip. Three against two is a majority and two against three is a minority, and the same pawn move means opposite things in the two cases. This base has no minority-attack matcher, and this position is one reason - the plan is named by the count AND by the structure, and the record's second trap adds a third condition on top of both."
+    },
+    {
+      "id": "checks-available-in-a-winning-position",
+      "concept": "perpetual-check",
+      "surface_pattern": "White's rook can check the black king along the eighth rank and follow it about indefinitely. A stream of checks the defender can never escape is what a perpetual is.",
+      "why_not": "Two of this record's conditions fire at once. The first trap: \"A series of checks that merely delays the end is not a perpetual. The test is whether the position REPEATS, not whether checks are available.\" And the third indicator_against: \"The checking side is BETTER, in which case the perpetual is a failure, not a resource.\" White is a whole rook up.",
+      "fen": "6k1/5pp1/7p/8/8/8/5PPP/R5K1 w - - 0 1",
+      "status": "resolved",
+      "evidence": "feature-detector + engine",
+      "resolution": "The API does not report perpetual-check. Stockfish 18 at depth 26 says +56.95: taking a draw by repetition here would be one of the worst decisions available on the board. This record's third trap is the one that matters most and it is about the reader rather than the detector - 'reporting a perpetual as a good outcome for the side that was winning inverts the meaning entirely' - which is why the concept must be reported with the side named or not at all."
     }
   ],
   "last_updated": "2026-09-01"

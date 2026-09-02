@@ -183,7 +183,15 @@
       }
     }
   ],
-  "counterexamples": [],
+  "counterexamples": [
+    {
+      "fen": "r3k2r/pp4pp/8/8/8/8/PPP3PP/R3K2R w KQkq - 0 1",
+      "note": "Registered false-positive case `a-majority-advance-is-not-a-minority-attack`, kept on the record as well as in tests/false_positive_cases.json so that the concept carries its own negative evidence. THE SURFACE PATTERN IS PRESENT: A wing pawn advance against an enemy pawn group, aiming to create a weakness. That is the plan a minority attack executes, and the word 'minority' is the part readers drop. WHY IT IS NOT THE CONCEPT: This record's first trap: \"Advancing pawns on the wing where you have fewer is only right in this specific structure. Elsewhere it is simply weakening.\" White has THREE queenside pawns against Black's two. Advancing there is a majority attack, whose point is a passed pawn, and this record's third trap draws the line explicitly: \"The goal is a fixed weakness, not space and not a passed pawn.\" WHAT THE SYSTEM DOES: The API reports nothing here, which is correct and is the whole content of the case: the concept turns on a COUNT that is trivial to make and trivial to skip. Three against two is a majority and two against three is a minority, and the same pawn move means opposite things in the two cases. This base has no minority-attack matcher, and this position is one reason - the plan is named by the count AND by the structure, and the record's second trap adds a third condition on top of both.",
+      "origin_kind": "constructed-test",
+      "concept_role": "negative",
+      "false_positive_case": "a-majority-advance-is-not-a-minority-attack"
+    }
+  ],
   "ambiguous_examples": [],
   "explanations": {
     "by_level": {

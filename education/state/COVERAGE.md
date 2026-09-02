@@ -12,7 +12,7 @@ Mean completeness **0.83** across 137 concepts.
 - **substantial**: 11 areas
 - **partial**: 69 areas
 
-69 of 85 areas contain exactly ONE concept. The rating rule needs two concepts for *substantial* and three for *full*, so those areas cannot rise however complete the record is: `two-weaknesses` scores 1.00 and is rated *partial*, the same word as an area scoring 0.45. Rating a one-concept area by its one concept, at a **higher** bar (0.85 for *full* rather than 0.75 for a mean of three), gives: **full** 36, **substantial** 35, **partial** 14.
+69 of 85 areas contain exactly ONE concept. The rating rule needs two concepts for *substantial* and three for *full*, so those areas cannot rise however complete the record is: `two-weaknesses` scores 1.00 and is rated *partial*, the same word as an area scoring 0.45. Rating a one-concept area by its one concept, at a **higher** bar (0.85 for *full* rather than 0.75 for a mean of three), gives: **full** 38, **substantial** 33, **partial** 14.
 
 The completion assessment is judged on the ORIGINAL rule and criterion 1 stays where that rule puts it. This second reading is printed so the artefact is visible, not so it can be spent.
 
@@ -22,9 +22,9 @@ The completion assessment is judged on the ORIGINAL rule and criterion 1 stays w
 | rating | mean | area | concepts |
 |---|---|---|---|
 | full | 0.96 | `pawn-structures` | 5 |
-| full | 0.87 | `pawn-breaks` | 3 |
+| full | 0.91 | `pawn-breaks` | 3 |
+| full | 0.83 | `named-theoretical-positions` | 3 |
 | full | 0.83 | `official-rules` | 12 |
-| full | 0.81 | `named-theoretical-positions` | 3 |
 | full | 0.81 | `opening-theory-concepts` | 4 |
 | substantial | 1.00 | `checks-captures-threats` | 2 |
 | substantial | 1.00 | `restriction` | 2 |
@@ -54,6 +54,7 @@ The completion assessment is judged on the ORIGINAL rule and criterion 1 stays w
 | partial | 1.00 | `opposition` | 1 |
 | partial | 1.00 | `zugzwang` | 1 |
 | partial | 1.00 | `pawn-endgames` | 1 |
+| partial | 1.00 | `drawing-mechanisms` | 1 |
 | partial | 0.94 | `piece-activity` | 1 |
 | partial | 0.94 | `rooks` | 1 |
 | partial | 0.94 | `piece-exchanges` | 1 |
@@ -65,18 +66,17 @@ The completion assessment is judged on the ORIGINAL rule and criterion 1 stays w
 | partial | 0.88 | `fortresses` | 1 |
 | partial | 0.87 | `named-tactical-patterns` | 1 |
 | partial | 0.87 | `worst-placed-piece` | 1 |
+| partial | 0.87 | `strong-squares` | 1 |
 | partial | 0.87 | `exchange-sacrifices` | 1 |
 | partial | 0.87 | `rules-of-thumb` | 1 |
 | partial | 0.86 | `queen` | 1 |
 | partial | 0.85 | `conversion-techniques` | 1 |
-| partial | 0.83 | `drawing-mechanisms` | 1 |
 | partial | 0.81 | `piece-properties` | 1 |
 | partial | 0.80 | `candidate-moves` | 1 |
 | partial | 0.80 | `positional-evaluation` | 1 |
 | partial | 0.80 | `defensive-principles` | 1 |
 | partial | 0.80 | `knights` | 1 |
 | partial | 0.80 | `development` | 1 |
-| partial | 0.80 | `strong-squares` | 1 |
 | partial | 0.80 | `static-vs-dynamic` | 1 |
 | partial | 0.80 | `transformation-of-advantages` | 1 |
 | partial | 0.80 | `middlegame-principles` | 1 |
@@ -121,6 +121,7 @@ The completion assessment is judged on the ORIGINAL rule and criterion 1 stays w
 | `king-activation` | 1.00 | x | x | x | x | x | x | x | x | x | x | x | x | x | x | x | x |
 | `opposite-coloured-bishops` | 1.00 | x | x | x | . | x | x | x | x | x | x | x | x | x | x | x | x |
 | `opposition` | 1.00 | x | x | x | x | x | . | x | x | . | x | x | . | x | x | x | x |
+| `perpetual-check` | 1.00 | x | x | x | . | x | x | x | x | . | x | . | . | x | x | x | x |
 | `wrong-rook-pawn` | 1.00 | x | x | x | x | x | . | x | x | . | x | x | . | x | x | x | x |
 | `zugzwang` | 1.00 | x | x | x | x | x | . | x | x | . | x | x | . | x | x | x | x |
 | `king-safety` | 1.00 | x | x | x | x | x | x | x | x | x | x | x | x | x | x | x | x |
@@ -151,6 +152,7 @@ The completion assessment is judged on the ORIGINAL rule and criterion 1 stays w
 | `overprotection` | 0.93 | x | x | x | x | x | x | x | x | - | x | . | x | x | x | x | x |
 | `prophylaxis` | 0.93 | x | x | x | x | x | x | x | x | - | x | . | x | x | x | x | x |
 | `initiative` | 0.93 | x | x | x | x | x | x | x | x | - | x | . | x | x | x | x | x |
+| `minority-attack` | 0.93 | x | x | x | x | x | x | x | x | - | x | . | x | x | x | x | x |
 | `pawn-break` | 0.93 | x | x | x | . | x | x | x | x | x | x | x | - | x | x | x | x |
 | `piece-coordination` | 0.93 | x | x | x | x | x | x | x | x | - | x | . | x | x | x | x | x |
 | `fork` | 0.93 | x | x | x | . | x | x | x | x | x | x | x | - | x | x | x | x |
@@ -165,11 +167,13 @@ The completion assessment is judged on the ORIGINAL rule and criterion 1 stays w
 | `castling` | 0.90 | x | x | x | . | x | . | x | x | . | . | . | . | x | x | x | - |
 | `seventy-five-move-rule` | 0.90 | x | x | x | . | x | . | x | x | . | . | . | . | x | x | x | - |
 | `fortress` | 0.88 | x | x | x | x | x | x | x | x | - | x | x | - | x | x | x | x |
+| `lucena-position` | 0.88 | x | x | x | x | x | x | x | x | - | x | x | - | x | x | x | x |
 | `vancura-position` | 0.88 | x | x | x | x | x | x | x | x | - | x | x | - | x | x | x | x |
 | `lpdo` | 0.87 | x | x | x | x | x | x | x | x | - | x | . | - | x | x | x | x |
 | `hanging-pawns` | 0.87 | x | x | x | . | x | x | - | x | x | x | x | - | x | x | x | x |
 | `hole` | 0.87 | x | x | x | x | x | x | x | x | - | x | . | - | x | x | x | x |
 | `pawn-breakthrough` | 0.87 | x | x | x | . | x | x | x | x | - | x | - | x | x | x | x | x |
+| `strong-square` | 0.87 | x | x | x | x | x | x | x | x | - | x | . | - | x | x | x | x |
 | `exchange-sacrifice` | 0.87 | x | x | x | x | x | x | x | - | x | x | . | x | - | x | x | x |
 | `worst-placed-piece` | 0.87 | x | x | x | x | x | x | - | x | x | x | . | - | x | x | x | x |
 | `greek-gift` | 0.87 | x | x | x | x | x | x | x | x | - | x | . | - | x | x | x | x |
@@ -182,11 +186,9 @@ The completion assessment is judged on the ORIGINAL rule and criterion 1 stays w
 | `trapped-piece` | 0.86 | x | x | x | . | x | x | x | x | x | x | . | - | x | x | x | - |
 | `building-a-bridge` | 0.85 | x | x | x | x | x | . | x | - | . | x | x | . | - | x | x | x |
 | `insufficient-material` | 0.85 | x | x | x | . | x | x | x | x | . | - | x | . | x | x | x | - |
-| `perpetual-check` | 0.83 | x | x | x | . | x | x | x | - | . | x | . | . | - | x | x | x |
 | `checkmate` | 0.82 | x | x | x | . | x | . | x | x | . | . | x | . | - | x | x | - |
 | `stalemate` | 0.82 | x | x | x | . | x | . | x | x | . | . | x | . | - | x | x | - |
 | `piece-properties` | 0.81 | x | x | x | x | x | x | - | x | - | x | x | - | x | x | x | x |
-| `lucena-position` | 0.81 | x | x | x | x | x | x | x | x | - | x | x | - | - | x | x | x |
 | `candidate-moves` | 0.80 | x | x | x | x | x | x | x | - | - | x | . | x | - | x | x | x |
 | `defensive-principles` | 0.80 | x | x | x | x | x | x | x | - | - | x | . | x | - | x | x | x |
 | `opening-development` | 0.80 | x | x | x | x | x | x | - | x | - | x | . | - | x | x | x | x |
@@ -197,8 +199,6 @@ The completion assessment is judged on the ORIGINAL rule and criterion 1 stays w
 | `soviet-school` | 0.80 | x | x | x | x | x | x | x | - | - | x | . | x | - | x | x | x |
 | `middlegame-principles` | 0.80 | x | x | x | x | x | x | x | - | - | x | . | x | - | x | x | x |
 | `smothered-mate` | 0.80 | x | x | x | . | x | x | x | x | - | x | x | - | x | x | x | - |
-| `minority-attack` | 0.80 | x | x | x | x | x | x | x | - | - | x | . | x | - | x | x | x |
-| `strong-square` | 0.80 | x | x | x | x | x | x | x | x | - | x | . | - | - | x | x | x |
 | `knight-vs-bishop` | 0.80 | x | x | x | x | x | x | x | - | - | x | . | x | - | x | x | x |
 | `positional-evaluation` | 0.80 | x | x | x | x | x | x | x | - | - | x | . | x | - | x | x | x |
 | `positional-sacrifice` | 0.80 | x | x | x | x | x | x | x | - | - | x | . | x | - | x | x | x |

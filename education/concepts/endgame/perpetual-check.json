@@ -166,7 +166,15 @@
       }
     }
   ],
-  "counterexamples": [],
+  "counterexamples": [
+    {
+      "fen": "6k1/5pp1/7p/8/8/8/5PPP/R5K1 w - - 0 1",
+      "note": "Registered false-positive case `checks-available-in-a-winning-position`, kept on the record as well as in tests/false_positive_cases.json so that the concept carries its own negative evidence. THE SURFACE PATTERN IS PRESENT: White's rook can check the black king along the eighth rank and follow it about indefinitely. A stream of checks the defender can never escape is what a perpetual is. WHY IT IS NOT THE CONCEPT: Two of this record's conditions fire at once. The first trap: \"A series of checks that merely delays the end is not a perpetual. The test is whether the position REPEATS, not whether checks are available.\" And the third indicator_against: \"The checking side is BETTER, in which case the perpetual is a failure, not a resource.\" White is a whole rook up. WHAT THE SYSTEM DOES: The API does not report perpetual-check. Stockfish 18 at depth 26 says +56.95: taking a draw by repetition here would be one of the worst decisions available on the board. This record's third trap is the one that matters most and it is about the reader rather than the detector - 'reporting a perpetual as a good outcome for the side that was winning inverts the meaning entirely' - which is why the concept must be reported with the side named or not at all.",
+      "origin_kind": "constructed-test",
+      "concept_role": "negative",
+      "false_positive_case": "checks-available-in-a-winning-position"
+    }
+  ],
   "ambiguous_examples": [],
   "explanations": {
     "by_level": {
