@@ -107,6 +107,13 @@
       "concept_role": "negative",
       "side_to_move_benefits": "neither",
       "controlled_pair_with": "4k3/8/8/8/8/5N2/8/1N2K3 w - - 0 1"
+    },
+    {
+      "fen": "4k3/8/8/8/8/5N2/8/1N1K4 w - - 0 1",
+      "note": "Registered false-positive case `an-ambiguous-san-is-not-a-move`, kept on the record as well as in tests/false_positive_cases.json so that the concept carries its own negative evidence. THE SURFACE PATTERN IS PRESENT: 'Nd2' looks like a complete move. There is a knight, there is a square, the square is empty and reachable. WHY IT IS NOT THE CONCEPT: This record's first trap: \"SAN is contextual: the same text means different moves in different positions, and disambiguation depends on what else is on the board.\" Two knights reach d2 here, so 'Nd2' names two moves and therefore none. WHAT THE SYSTEM DOES: This base's own toSAN() writes the three moves to d2 as Nfd2, Nbd2 and Kd2 — it disambiguates by file because it must, and it is the same function the game writes its move list with. The case exists because the failure here is silent: a reader, a database or a converted quotation that drops the disambiguating letter produces text that looks like notation and denotes nothing, and no error is raised anywhere.",
+      "origin_kind": "constructed-test",
+      "concept_role": "negative",
+      "false_positive_case": "an-ambiguous-san-is-not-a-move"
     }
   ],
   "ambiguous_examples": [],

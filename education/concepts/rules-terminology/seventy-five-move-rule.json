@@ -78,7 +78,15 @@
       "concept_role": "positive"
     }
   ],
-  "counterexamples": [],
+  "counterexamples": [
+    {
+      "fen": "6k1/5ppp/8/8/8/8/5PPP/R5K1 w - - 149 200",
+      "note": "Registered false-positive case `mate-outranks-the-seventy-five-move-rule`, kept on the record as well as in tests/false_positive_cases.json so that the concept carries its own negative evidence. THE SURFACE PATTERN IS PRESENT: The halfmove clock reads 149. One more move with no capture and no pawn move and the arbiter ends the game as a draw, whatever the position looks like. WHY IT IS NOT THE CONCEPT: This record's only indicator_against: \"The final move delivers checkmate — mate takes precedence.\" The move that reaches 150 is Ra8, and it is mate. WHAT THE SYSTEM DOES: The move generator settles it: the only mate in one here is a1a8, and it is a rook move that captures nothing and moves no pawn, so it is precisely the move that would otherwise trigger the rule. FIDE 9.6.2 makes mate take precedence, and this base does not need a guard for that because the rule and the exception are decided by the same function — a position with no legal moves and the king in check is checkmate before anything else is asked about it.",
+      "origin_kind": "constructed-test",
+      "concept_role": "negative",
+      "false_positive_case": "mate-outranks-the-seventy-five-move-rule"
+    }
+  ],
   "ambiguous_examples": [],
   "explanations": {
     "by_level": {

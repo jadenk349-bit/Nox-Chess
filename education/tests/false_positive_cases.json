@@ -689,6 +689,56 @@
       "status": "resolved",
       "evidence": "feature-detector",
       "resolution": "The API does not report a hole here. This is the same trap that `weak-square` was tightened against — the fianchetto guard lives in reachableHoles() in Layer 3 and is quoted in a comment there — and `hole` inherits it, because both concepts read the same Layer 3 output. The case exists so that inheritance is pinned down rather than assumed: a guard in a shared function protects whoever happens to call it, and nothing in the code says which concepts those are."
+    },
+    {
+      "id": "castling-that-looks-legal-and-is-not",
+      "concept": "castling",
+      "surface_pattern": "White's king is on e1, both rooks are on their home squares, nothing stands between them, and the FEN grants both rights. Every visible condition for castling is met.",
+      "why_not": "This record's third indicator_against: \"The crossed or destination square is attacked.\" The black bishop on b5 covers f1, so O-O would take the king through check.",
+      "fen": "4k3/8/8/1b6/8/8/8/R3K2R w KQ - 0 1",
+      "status": "resolved",
+      "evidence": "feature-detector",
+      "resolution": "Settled by the instrument that IS the rule. This base's move generator produces exactly one castling move here, e1c1, and does not produce e1g1; on the same board with the bishop removed it produces both. All three of this record's indicators_against are the Law rather than heuristics, and legalMoves() in blind-chess.html is the only implementation of it this repository has or should have — the same function that decides castling in a game decides it here. There is nothing for a matcher to guard, and adding one would be a second implementation of a rule that already has one."
+    },
+    {
+      "id": "an-en-passant-window-that-has-closed",
+      "concept": "en-passant",
+      "surface_pattern": "A white pawn on e5 stands beside a black pawn on d5. That is the picture of an en-passant capture and it is the position the rule is drawn in every textbook.",
+      "why_not": "This record's only indicator_against: \"Any other move has intervened since the two-square advance.\" The right to capture lasts exactly one move, and the FEN records that in one field.",
+      "fen": "4k3/8/8/3pP3/8/8/8/4K3 w - - 0 1",
+      "status": "resolved",
+      "evidence": "feature-detector",
+      "resolution": "Two FENs, one character apart. With the en-passant field set to `-`, this base's move generator produces six legal moves and none of them is exd6. With the field set to `d6` it produces seven, and the seventh is exd6. The board is identical in both. This is the sharpest available illustration of the `notation` record's third trap — 'a FEN without the castling, en passant and clock fields is not a position, it is a picture of one' — and of why en-passant cannot be read off a diagram."
+    },
+    {
+      "id": "an-ambiguous-san-is-not-a-move",
+      "concept": "notation",
+      "surface_pattern": "'Nd2' looks like a complete move. There is a knight, there is a square, the square is empty and reachable.",
+      "why_not": "This record's first trap: \"SAN is contextual: the same text means different moves in different positions, and disambiguation depends on what else is on the board.\" Two knights reach d2 here, so 'Nd2' names two moves and therefore none.",
+      "fen": "4k3/8/8/8/8/5N2/8/1N1K4 w - - 0 1",
+      "status": "resolved",
+      "evidence": "feature-detector",
+      "resolution": "This base's own toSAN() writes the three moves to d2 as Nfd2, Nbd2 and Kd2 — it disambiguates by file because it must, and it is the same function the game writes its move list with. The case exists because the failure here is silent: a reader, a database or a converted quotation that drops the disambiguating letter produces text that looks like notation and denotes nothing, and no error is raised anywhere."
+    },
+    {
+      "id": "mate-outranks-the-seventy-five-move-rule",
+      "concept": "seventy-five-move-rule",
+      "surface_pattern": "The halfmove clock reads 149. One more move with no capture and no pawn move and the arbiter ends the game as a draw, whatever the position looks like.",
+      "why_not": "This record's only indicator_against: \"The final move delivers checkmate — mate takes precedence.\" The move that reaches 150 is Ra8, and it is mate.",
+      "fen": "6k1/5ppp/8/8/8/8/5PPP/R5K1 w - - 149 200",
+      "status": "resolved",
+      "evidence": "feature-detector",
+      "resolution": "The move generator settles it: the only mate in one here is a1a8, and it is a rook move that captures nothing and moves no pawn, so it is precisely the move that would otherwise trigger the rule. FIDE 9.6.2 makes mate take precedence, and this base does not need a guard for that because the rule and the exception are decided by the same function — a position with no legal moves and the king in check is checkmate before anything else is asked about it."
+    },
+    {
+      "id": "a-counter-about-to-be-reset",
+      "concept": "fifty-move-rule",
+      "surface_pattern": "The halfmove clock reads 96. Two more moves each and either side may claim a draw.",
+      "why_not": "This record's only indicator_against: \"Any capture or pawn move in that span resets the counter.\" White is in check and has exactly one legal move, Kxg2, which is a capture. The counter goes back to zero on the next ply and the claim never becomes available.",
+      "fen": "7k/8/8/8/8/8/6q1/7K w - - 96 60",
+      "status": "resolved",
+      "evidence": "feature-detector",
+      "resolution": "The move generator produces one legal move, h1g2, and it is a capture. The matcher does report fifty-move-rule here — correctly, because what it says is '96 ply have passed with no capture and no pawn move; at 100 either side may claim a draw', which is true and is a statement about the count rather than a prediction. This case is registered to hold that distinction in place: the concept is about a counter, the counter is at 96, and whether it ever reaches 100 is a question about the game and not about the position. A matcher that tried to predict it would be guessing."
     }
   ],
   "last_updated": "2026-09-01"

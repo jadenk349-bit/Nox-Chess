@@ -113,6 +113,13 @@
       "concept_role": "negative",
       "side_to_move_benefits": "neither",
       "controlled_pair_with": "8/8/8/3pP3/8/8/8/4K2k w - d6 0 2"
+    },
+    {
+      "fen": "4k3/8/8/3pP3/8/8/8/4K3 w - - 0 1",
+      "note": "Registered false-positive case `an-en-passant-window-that-has-closed`, kept on the record as well as in tests/false_positive_cases.json so that the concept carries its own negative evidence. THE SURFACE PATTERN IS PRESENT: A white pawn on e5 stands beside a black pawn on d5. That is the picture of an en-passant capture and it is the position the rule is drawn in every textbook. WHY IT IS NOT THE CONCEPT: This record's only indicator_against: \"Any other move has intervened since the two-square advance.\" The right to capture lasts exactly one move, and the FEN records that in one field. WHAT THE SYSTEM DOES: Two FENs, one character apart. With the en-passant field set to `-`, this base's move generator produces six legal moves and none of them is exd6. With the field set to `d6` it produces seven, and the seventh is exd6. The board is identical in both. This is the sharpest available illustration of the `notation` record's third trap — 'a FEN without the castling, en passant and clock fields is not a position, it is a picture of one' — and of why en-passant cannot be read off a diagram.",
+      "origin_kind": "constructed-test",
+      "concept_role": "negative",
+      "false_positive_case": "an-en-passant-window-that-has-closed"
     }
   ],
   "ambiguous_examples": [],

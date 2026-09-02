@@ -101,6 +101,13 @@
       "origin_kind": "constructed-test",
       "concept_role": "negative",
       "side_to_move_benefits": "black"
+    },
+    {
+      "fen": "4k3/8/8/1b6/8/8/8/R3K2R w KQ - 0 1",
+      "note": "Registered false-positive case `castling-that-looks-legal-and-is-not`, kept on the record as well as in tests/false_positive_cases.json so that the concept carries its own negative evidence. THE SURFACE PATTERN IS PRESENT: White's king is on e1, both rooks are on their home squares, nothing stands between them, and the FEN grants both rights. Every visible condition for castling is met. WHY IT IS NOT THE CONCEPT: This record's third indicator_against: \"The crossed or destination square is attacked.\" The black bishop on b5 covers f1, so O-O would take the king through check. WHAT THE SYSTEM DOES: Settled by the instrument that IS the rule. This base's move generator produces exactly one castling move here, e1c1, and does not produce e1g1; on the same board with the bishop removed it produces both. All three of this record's indicators_against are the Law rather than heuristics, and legalMoves() in blind-chess.html is the only implementation of it this repository has or should have — the same function that decides castling in a game decides it here. There is nothing for a matcher to guard, and adding one would be a second implementation of a rule that already has one.",
+      "origin_kind": "constructed-test",
+      "concept_role": "negative",
+      "false_positive_case": "castling-that-looks-legal-and-is-not"
     }
   ],
   "ambiguous_examples": [],

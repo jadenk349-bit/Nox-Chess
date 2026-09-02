@@ -99,6 +99,13 @@
       "concept_role": "negative",
       "side_to_move_benefits": "neither",
       "controlled_pair_with": "8/5k2/8/8/8/8/5K2/6R1 w - - 99 99"
+    },
+    {
+      "fen": "7k/8/8/8/8/8/6q1/7K w - - 96 60",
+      "note": "Registered false-positive case `a-counter-about-to-be-reset`, kept on the record as well as in tests/false_positive_cases.json so that the concept carries its own negative evidence. THE SURFACE PATTERN IS PRESENT: The halfmove clock reads 96. Two more moves each and either side may claim a draw. WHY IT IS NOT THE CONCEPT: This record's only indicator_against: \"Any capture or pawn move in that span resets the counter.\" White is in check and has exactly one legal move, Kxg2, which is a capture. The counter goes back to zero on the next ply and the claim never becomes available. WHAT THE SYSTEM DOES: The move generator produces one legal move, h1g2, and it is a capture. The matcher does report fifty-move-rule here — correctly, because what it says is '96 ply have passed with no capture and no pawn move; at 100 either side may claim a draw', which is true and is a statement about the count rather than a prediction. This case is registered to hold that distinction in place: the concept is about a counter, the counter is at 96, and whether it ever reaches 100 is a question about the game and not about the position. A matcher that tried to predict it would be guessing.",
+      "origin_kind": "constructed-test",
+      "concept_role": "negative",
+      "false_positive_case": "a-counter-about-to-be-reset"
     }
   ],
   "ambiguous_examples": [],
