@@ -236,8 +236,15 @@ const files = fs.statSync(src).isDirectory()
   : [src];
 
 const found = {};
+// A PER-FILE CAP, and the first version did not have one. It filled each
+// motif's quota from whichever file came first alphabetically, so every
+// candidate for every motif came out of Alekhine.pgn and the other twenty-one
+// collections might as well not have been there. A sample that is really one
+// player's games is not a sample of master play.
+const perFile = Math.max(1, Math.ceil(limit / files.length));
 let nGames = 0, nBad = 0, nPly = 0;
 for (const file of files) {
+  const fileCount = {};
   const text = fs.readFileSync(file, 'utf8');
   for (const g of games(text)) {
     const sans = sanMoves(g.moves);
@@ -263,9 +270,11 @@ for (const file of files) {
       for (const [id, test] of Object.entries(TESTS)) {
         if (only && id !== only) continue;
         if ((found[id] || []).length >= limit) continue;
+        if ((fileCount[id] || 0) >= perFile) continue;
         let r = null;
         try { r = test(p.st, p.mv, after); } catch (e) { r = null; }
         if (!r) continue;
+        fileCount[id] = (fileCount[id] || 0) + 1;
         (found[id] = found[id] || []).push({
           motif: id, fen: p.fen, san: p.san, uci: P.uciOf(p.mv), note: r.note,
           game: `${g.tags.White || '?'}-${g.tags.Black || '?'}, ${g.tags.Event || '?'} ${(g.tags.Date || '').slice(0, 4)}`,

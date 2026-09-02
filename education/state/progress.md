@@ -1934,3 +1934,78 @@ once. The distinction is the whole reason a double check is worth a name, and it
 is one knight move wide.
 
 `negative_example` 101 → **87 of 132**; `positive_example` 73 → **67**.
+
+
+## The reading list reaches zero
+
+`state/TRAPS.md` measures every matcher against every condition its own record
+states — each `false_positive_trap` and each `indicator_against`. It stood at
+**39 unread of 275** at the start of this pass and stands at **0**. 180 are
+enforced in the matcher, 21 in Layer 3, 74 argued on a record.
+
+The three answers to a stated condition are unchanged and the split still
+matters, so the tool prints them separately: BUILD it, ARGUE on the record that
+it cannot be built, or SAY it in the sentence. What this pass added, mostly, is
+the third — and it added it where a guard was tried first and found to delete
+positions the concept is about.
+
+- **`king-safety`** got its last three indicators, and they are the opposite of
+  guards. This record names a SCALE, so an `indicator_against` is a condition
+  under which the king is UNSAFE. A hook, an uncastled king with a centre file
+  open ON it, and a key defender a minor piece can trade off — all three now
+  read off the board in Layer 3. They fire the concept only **two at a time**:
+  one holds in 43.8% of the 788 shipped positions and two in 2.2%.
+- Each first draft of those three was wrong in the direction that flatters. e4
+  in the Italian is not a hook; the King's Indian d-file is not an open centre
+  at White's king; and d5xc3 is not an *exchange* of a defender, it is winning a
+  piece. All three now require a shelter to be a hole in, and the hook needs a
+  pawn that can actually come — the pawn in front of the other king cannot storm
+  without opening that king, and without that condition every king in chess has
+  a hook.
+- **`king-attack`** got four guards and an argument that the fifth cannot arise.
+  And the reason that sentence can be trusted at all: a missing `const P` made
+  the matcher throw on every position, `matchAll` caught it, and from outside a
+  ReferenceError and a very effective set of guards look identical. Throws are
+  now collected in `MATCHER_ERRORS` and `tests/test_api.js` asserts the list is
+  empty over all 788 positions.
+- **`space`** got the cramped side's two answers — two available even trades, and
+  a front where every space-creating pawn can be met by a break. 34.6% → 23.9%.
+- **`opposition`** got Averbakh's point, built for the case the term is defined
+  for: one pawn, textbook key squares. Ties go to the holder, and getting that
+  wrong once was instructive — strict distance reported "the opposition leads to
+  no key square" on the position where the opposition wins the key square.
+- **`trapped-piece`** got one guard and one recorded failure. "Trapping it costs
+  more material than it is worth" is built, netted against what the trapping move
+  captured — the first version read Qxa5 answered by Qxa5 as a queen hanging.
+  "A counter-sacrifice frees it" is NOT built: the version that briefly existed
+  iterated the defender's captures and then let the trapped piece move as well,
+  which is the defender playing twice, and it suppressed 34 of 110 reports on
+  that basis.
+- **`hanging-piece`**, which fires more often than anything else in this base and
+  leads 183 explanations, got its one condition: bait. 42.3% → 37.7%, and the
+  cases it removes are real — cxb4 answered by gxf6, cxb4 answered by Rxe8.
+- **`restraint`** now names the advance it prevents, which its own trap demands
+  and the matcher never did: it counted where the opponent's PIECES could go.
+
+## Two records that had no position now have one, and neither was constructed
+
+`interference` and `clearance` each said NO VERIFIED POSITION, and each gave the
+same reason: the concept has no detector, so the scan that filled eleven other
+records — which reads what the API reports — had nothing to nominate. That is a
+limit of the scan and not of the games. **The geometry is decidable whether or
+not Layer 4 reports it.**
+
+- **`interference`**: 28...Nf5+, 0.00 against −4.43 and −4.58 at depth 30. Not a
+  combination that wins from a level position — the only move that holds a lost
+  one.
+- **`clearance`**: 17...d4, +6.37 against +0.40 at depth 28. The bishop's own
+  pawn steps off the diagonal and the queen is hit; exd4 wins the pawn, and that
+  is the point rather than the objection.
+- **`clearance` also gets a master game**: Alekhine–Nimzowitsch, St Petersburg
+  1914, 42.Bc4, found by `tools/mine_master_motifs.js` — 35,648 games replayed
+  through the page's own move generator, 492 rejected as unplayable and skipped
+  rather than patched, 2,822,256 positions.
+
+`smothered-mate` got a measurement rather than an example. Of those 2.8 million
+positions, **zero** are a smothered mate. That is the concept and not the search:
+a master resigns into one rather than allowing it to be played.
