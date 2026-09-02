@@ -147,7 +147,24 @@
       }
     }
   ],
-  "counterexamples": [],
+  "counterexamples": [
+    {
+      "fen": "7k/8/5K2/3B3P/8/8/8/8 w - - 0 1",
+      "note": "Registered false-positive case `a-position-calculation-cannot-help`, kept on the record as well as in tests/false_positive_cases.json so that the concept carries its own negative evidence. THE SURFACE PATTERN IS PRESENT: A concrete position with an extra bishop and an extra pawn, exactly the kind of material edge modern play is supposed to convert by calculation rather than by rule. WHY IT IS NOT THE CONCEPT: No amount of calculation changes it. The bishop is the wrong colour for the h-pawn's queening square and the defending king cannot be driven from the corner by any series of moves. This record's thesis is that concrete analysis has displaced principle; here principle — one sentence about bishop colour — settles the position and analysis adds nothing to it. WHAT THE SYSTEM DOES: PROVEN DRAW, dtz 0, over every legal continuation. The API reports `wrong-rook-pawn` at high confidence, which is the sentence that decides it, and says nothing about calculation. Worth keeping beside this: Stockfish 18 at depth 26 evaluates the same position at +0.92 — the engine, which is the instrument the modern school is built on, is WRONG here and the old rule is right. That is the sharpest available counterweight to this record's own thesis, and it is why the record is filed as a historical-teaching-principle rather than as a fact.",
+      "origin_kind": "constructed-test",
+      "concept_role": "negative",
+      "tablebase": {
+        "source": "Lichess tablebase (Syzygy, 7-piece)",
+        "pieces": 4,
+        "wdl": "draw",
+        "dtz": 0,
+        "dtm": 0,
+        "category": "draw",
+        "note": "PROVEN DRAW over every legal continuation - and Stockfish 18 at depth 26 says +0.92. The engine, which is the instrument this record's thesis is built on, is wrong here and a one-sentence rule about bishop colour is right."
+      },
+      "false_positive_case": "a-position-calculation-cannot-help"
+    }
+  ],
   "ambiguous_examples": [
     {
       "fen": "3r1nk1/pp3ppp/1bq5/B7/3pQ3/1N4PP/PPP2P2/4R1K1 w - - 1 22",

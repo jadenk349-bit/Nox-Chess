@@ -179,7 +179,15 @@
       }
     }
   ],
-  "counterexamples": [],
+  "counterexamples": [
+    {
+      "fen": "r1bq1rk1/pp2ppbp/5np1/3p4/3P4/5NP1/PP2PPBP/R1BQ1RK1 w - - 0 1",
+      "note": "Registered false-positive case `a-fianchetto-with-nothing-behind-it`, kept on the record as well as in tests/false_positive_cases.json so that the concept carries its own negative evidence. THE SURFACE PATTERN IS PRESENT: Both sides have fianchettoed. Bishops on g2 and g7 on the long diagonals, knights on f3 and f6, no pawn on e4 or e5 — the hypermodern picture, twice. WHY IT IS NOT THE CONCEPT: The ground principle is to control the centre INDIRECTLY with pieces, inviting the opponent to occupy it so the pawns become targets. Neither bishop bears on anything: g2 is blocked by its own knight on f3 and by the d4 pawn beyond it, g7 by its own knight on f6 and the d5 pawn. Nobody is being invited to occupy anything, and the centre is already symmetrically fixed. WHAT THE SYSTEM DOES: The API reports nothing here at all. +0.27 at depth 22, settled at depth 21 — an ordinary symmetrical position. The case is registered because the fianchetto is the most recognisable thing about the school and is the part that carries none of the content: this record's positive example, Reti-Capablanca after 8.d3, has White's bishop on b2 bearing down an OPEN long diagonal at a centre Black is about to occupy. The picture is nearly the same and the idea is absent.",
+      "origin_kind": "constructed-test",
+      "concept_role": "negative",
+      "false_positive_case": "a-fianchetto-with-nothing-behind-it"
+    }
+  ],
   "ambiguous_examples": [
     {
       "fen": "r3rnk1/2q2pb1/1p1p1npp/pPp5/2PPb3/P1Q2NP1/1B3PBP/R2R1NK1 b - - 0 18",

@@ -1072,6 +1072,56 @@
       "status": "resolved",
       "evidence": "feature-detector + engine",
       "resolution": "The API reports nothing at all here, and the same position is registered against `restraint`, `prophylaxis` and `planning` for the same reason — each is a claim about what a move is FOR, and there is nothing for a move to be for. Stockfish 18: 0.00, with both kings walking about on the kingside. Four records now share this board, which makes it the most-reused negative in the base and, for that reason, worth stating plainly: a position where nothing is happening is not evidence that a concept is subtle, it is evidence that the concept needs something to be happening."
+    },
+    {
+      "id": "the-classical-prescription-followed-exactly",
+      "concept": "classical-school",
+      "surface_pattern": "White has four pawns abreast in the centre on c4, d4, e5 and f4 and has spent every move building them. Occupy the centre with pawns is the classical instruction, followed to the letter.",
+      "why_not": "The doctrine has two halves and this is only the first. Steinitz's other half is TIMING — you may attack, or commit, only when you have earned the right — and White has developed one piece. This record's own definition says both halves 'are still the base of the game'; a pawn centre built ahead of the pieces is the first half practised without the second.",
+      "fen": "rnbqnrk1/ppp1ppbp/3p2p1/4P3/2PP1P2/2N1B3/PP4PP/R2QKBNR b KQ - 1 7",
+      "status": "resolved",
+      "evidence": "feature-detector + engine + human-annotation",
+      "resolution": "Letelier-Fischer, Leipzig 1960. The API reports `center-control` for White — which is true, White does control more of it — and does not report the classical school, which has no matcher and should not. Stockfish 18 at depth 24: -0.10, level, with the centre complete and nothing gained; Fischer answered with ...d6 and ...f6 and won in twenty-three. The annotation names the mechanism: 'when central pawns are not supported by pieces, they can become an easy target'. The same position is `historical-principles`' positive example, a rule caught losing its condition, and `pawn-storm`'s counterexample."
+    },
+    {
+      "id": "a-fianchetto-with-nothing-behind-it",
+      "concept": "hypermodern-school",
+      "surface_pattern": "Both sides have fianchettoed. Bishops on g2 and g7 on the long diagonals, knights on f3 and f6, no pawn on e4 or e5 — the hypermodern picture, twice.",
+      "why_not": "The ground principle is to control the centre INDIRECTLY with pieces, inviting the opponent to occupy it so the pawns become targets. Neither bishop bears on anything: g2 is blocked by its own knight on f3 and by the d4 pawn beyond it, g7 by its own knight on f6 and the d5 pawn. Nobody is being invited to occupy anything, and the centre is already symmetrically fixed.",
+      "fen": "r1bq1rk1/pp2ppbp/5np1/3p4/3P4/5NP1/PP2PPBP/R1BQ1RK1 w - - 0 1",
+      "status": "resolved",
+      "evidence": "feature-detector + engine",
+      "resolution": "The API reports nothing here at all. +0.27 at depth 22, settled at depth 21 — an ordinary symmetrical position. The case is registered because the fianchetto is the most recognisable thing about the school and is the part that carries none of the content: this record's positive example, Reti-Capablanca after 8.d3, has White's bishop on b2 bearing down an OPEN long diagonal at a centre Black is about to occupy. The picture is nearly the same and the idea is absent."
+    },
+    {
+      "id": "a-gambit-that-is-not-preparation",
+      "concept": "soviet-school",
+      "surface_pattern": "A piece sacrificed in the opening for a big centre and fast development, with every white piece pointing at the black king. A willingness to give material for the initiative is the first thing Britannica lists about this school.",
+      "why_not": "Britannica lists four features and this position has one of them wearing the others' clothes. The Halloween Gambit is not prepared, not sound, and not a considered appreciation of material — it is a piece for two tempi. This record's positive example is a world-championship game opening with a thirty-year-old published recommendation of Alekhine's, which is what the school's word for preparation means.",
+      "fen": "r1bqkb1r/pppp1ppp/5n2/4n3/3PP3/2N5/PPP2PPP/R1BQKB1R b KQkq d3 0 5",
+      "status": "resolved",
+      "evidence": "feature-detector + engine",
+      "resolution": "The API reports `center-control` and `blockade` and says nothing about any school. Stockfish 18 at depth 22: +1.71 from Black's side — the same figure the `compensation` record quotes for this position and the same one that record's trap names, 'the Halloween Gambit position has active pieces and measures 1.75 pawns worse'. Activity, material given, an initiative of a kind, and none of it is the thing the school is named for."
+    },
+    {
+      "id": "a-position-calculation-cannot-help",
+      "concept": "modern-dynamic",
+      "surface_pattern": "A concrete position with an extra bishop and an extra pawn, exactly the kind of material edge modern play is supposed to convert by calculation rather than by rule.",
+      "why_not": "No amount of calculation changes it. The bishop is the wrong colour for the h-pawn's queening square and the defending king cannot be driven from the corner by any series of moves. This record's thesis is that concrete analysis has displaced principle; here principle — one sentence about bishop colour — settles the position and analysis adds nothing to it.",
+      "fen": "7k/8/5K2/3B3P/8/8/8/8 w - - 0 1",
+      "status": "resolved",
+      "evidence": "feature-detector + tablebase",
+      "resolution": "PROVEN DRAW, dtz 0, over every legal continuation. The API reports `wrong-rook-pawn` at high confidence, which is the sentence that decides it, and says nothing about calculation. Worth keeping beside this: Stockfish 18 at depth 26 evaluates the same position at +0.92 — the engine, which is the instrument the modern school is built on, is WRONG here and the old rule is right. That is the sharpest available counterweight to this record's own thesis, and it is why the record is filed as a historical-teaching-principle rather than as a fact."
+    },
+    {
+      "id": "a-principle-that-never-needed-qualifying",
+      "concept": "historical-principles",
+      "surface_pattern": "The Lucena position — a rule taught since the fifteenth century, stated without conditions, and repeated in every endgame book since. Exactly the profile of a principle this record collects.",
+      "why_not": "This record collects principles that have been QUALIFIED, reattributed or disproved, and its own definition names the three fates: losing a condition, losing its author, or being shown false. The Lucena rule has suffered none of them. It is not a rule of thumb at all — it is a proven result, and it is filed in this base as a `named-theoretical-position` for that reason.",
+      "fen": "1K6/1P1k4/8/8/8/8/r7/5R2 w - - 0 1",
+      "status": "resolved",
+      "evidence": "feature-detector + tablebase",
+      "resolution": "PROVEN WIN, dtz 15, mate in 41, and the tablebase's own first move is Rd1+ — the first check of the bridge. The API reports `passed-pawn`, `king-activation` and `open-file` and nothing historical. The case exists because this record's subject is the HISTORY of a claim rather than its content, and history is not on a board: what distinguishes a rule that needed qualifying from one that did not is a fact about the literature, and no position can carry it. That is also why the record's detectability is recorded as mechanical only for the narrow purpose of matching named principles by text."
     }
   ],
   "last_updated": "2026-09-01"

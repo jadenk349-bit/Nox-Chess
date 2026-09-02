@@ -140,7 +140,24 @@
       }
     }
   ],
-  "counterexamples": [],
+  "counterexamples": [
+    {
+      "fen": "1K6/1P1k4/8/8/8/8/r7/5R2 w - - 0 1",
+      "note": "Registered false-positive case `a-principle-that-never-needed-qualifying`, kept on the record as well as in tests/false_positive_cases.json so that the concept carries its own negative evidence. THE SURFACE PATTERN IS PRESENT: The Lucena position — a rule taught since the fifteenth century, stated without conditions, and repeated in every endgame book since. Exactly the profile of a principle this record collects. WHY IT IS NOT THE CONCEPT: This record collects principles that have been QUALIFIED, reattributed or disproved, and its own definition names the three fates: losing a condition, losing its author, or being shown false. The Lucena rule has suffered none of them. It is not a rule of thumb at all — it is a proven result, and it is filed in this base as a `named-theoretical-position` for that reason. WHAT THE SYSTEM DOES: PROVEN WIN, dtz 15, mate in 41, and the tablebase's own first move is Rd1+ — the first check of the bridge. The API reports `passed-pawn`, `king-activation` and `open-file` and nothing historical. The case exists because this record's subject is the HISTORY of a claim rather than its content, and history is not on a board: what distinguishes a rule that needed qualifying from one that did not is a fact about the literature, and no position can carry it. That is also why the record's detectability is recorded as mechanical only for the narrow purpose of matching named principles by text.",
+      "origin_kind": "constructed-test",
+      "concept_role": "negative",
+      "tablebase": {
+        "source": "Lichess tablebase (Syzygy, 7-piece)",
+        "pieces": 5,
+        "wdl": "win",
+        "dtz": 15,
+        "dtm": 41,
+        "category": "win",
+        "note": "PROVEN WIN, dtz 15, mate in 41, first move Rd1+. A rule taught since the fifteenth century that has never needed a condition attached - which is what disqualifies it from this record."
+      },
+      "false_positive_case": "a-principle-that-never-needed-qualifying"
+    }
+  ],
   "ambiguous_examples": [
     {
       "fen": "r2q1rk1/pp3ppp/1b4n1/3p4/8/1N1Q3P/PPP2PP1/R1B1R1K1 b - - 0 15",

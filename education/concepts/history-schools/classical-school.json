@@ -166,7 +166,16 @@
       }
     }
   ],
-  "counterexamples": [],
+  "counterexamples": [
+    {
+      "fen": "rnbqnrk1/ppp1ppbp/3p2p1/4P3/2PP1P2/2N1B3/PP4PP/R2QKBNR b KQ - 1 7",
+      "note": "Registered false-positive case `the-classical-prescription-followed-exactly`, kept on the record as well as in tests/false_positive_cases.json so that the concept carries its own negative evidence. THE SURFACE PATTERN IS PRESENT: White has four pawns abreast in the centre on c4, d4, e5 and f4 and has spent every move building them. Occupy the centre with pawns is the classical instruction, followed to the letter. WHY IT IS NOT THE CONCEPT: The doctrine has two halves and this is only the first. Steinitz's other half is TIMING — you may attack, or commit, only when you have earned the right — and White has developed one piece. This record's own definition says both halves 'are still the base of the game'; a pawn centre built ahead of the pieces is the first half practised without the second. WHAT THE SYSTEM DOES: Letelier-Fischer, Leipzig 1960. The API reports `center-control` for White — which is true, White does control more of it — and does not report the classical school, which has no matcher and should not. Stockfish 18 at depth 24: -0.10, level, with the centre complete and nothing gained; Fischer answered with ...d6 and ...f6 and won in twenty-three. The annotation names the mechanism: 'when central pawns are not supported by pieces, they can become an easy target'. The same position is `historical-principles`' positive example, a rule caught losing its condition, and `pawn-storm`'s counterexample.",
+      "origin_kind": "historical-game",
+      "game": "Letelier-Fischer, Leipzig Olympiad 1960 (preliminaries)",
+      "concept_role": "negative",
+      "false_positive_case": "the-classical-prescription-followed-exactly"
+    }
+  ],
   "ambiguous_examples": [
     {
       "fen": "r2q1rk1/pp3ppp/1b4n1/3p4/8/1N1Q3P/PPP2PP1/R1B1R1K1 b - - 0 15",

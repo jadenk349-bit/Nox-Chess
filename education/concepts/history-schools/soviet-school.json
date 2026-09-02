@@ -160,7 +160,15 @@
       }
     }
   ],
-  "counterexamples": [],
+  "counterexamples": [
+    {
+      "fen": "r1bqkb1r/pppp1ppp/5n2/4n3/3PP3/2N5/PPP2PPP/R1BQKB1R b KQkq d3 0 5",
+      "note": "Registered false-positive case `a-gambit-that-is-not-preparation`, kept on the record as well as in tests/false_positive_cases.json so that the concept carries its own negative evidence. THE SURFACE PATTERN IS PRESENT: A piece sacrificed in the opening for a big centre and fast development, with every white piece pointing at the black king. A willingness to give material for the initiative is the first thing Britannica lists about this school. WHY IT IS NOT THE CONCEPT: Britannica lists four features and this position has one of them wearing the others' clothes. The Halloween Gambit is not prepared, not sound, and not a considered appreciation of material — it is a piece for two tempi. This record's positive example is a world-championship game opening with a thirty-year-old published recommendation of Alekhine's, which is what the school's word for preparation means. WHAT THE SYSTEM DOES: The API reports `center-control` and `blockade` and says nothing about any school. Stockfish 18 at depth 22: +1.71 from Black's side — the same figure the `compensation` record quotes for this position and the same one that record's trap names, 'the Halloween Gambit position has active pieces and measures 1.75 pawns worse'. Activity, material given, an initiative of a kind, and none of it is the thing the school is named for.",
+      "origin_kind": "constructed-test",
+      "concept_role": "negative",
+      "false_positive_case": "a-gambit-that-is-not-preparation"
+    }
+  ],
   "ambiguous_examples": [
     {
       "fen": "2r1k2r/1pqbnpp1/4p2p/p1NpP3/PP3P2/2PB4/6PP/R3QR1K b k - 3 21",

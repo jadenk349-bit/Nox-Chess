@@ -67,6 +67,11 @@ The completion assessment is judged on the ORIGINAL rule and criterion 1 stays w
 | partial | 1.00 | `pawn-endgames` | 1 |
 | partial | 1.00 | `drawing-mechanisms` | 1 |
 | partial | 1.00 | `conversion-techniques` | 1 |
+| partial | 1.00 | `historical-principles` | 1 |
+| partial | 1.00 | `classical-school` | 1 |
+| partial | 1.00 | `hypermodern-school` | 1 |
+| partial | 1.00 | `soviet-school` | 1 |
+| partial | 1.00 | `modern-dynamic` | 1 |
 | partial | 0.94 | `forcing-moves` | 1 |
 | partial | 0.94 | `piece-activity` | 1 |
 | partial | 0.94 | `rooks` | 1 |
@@ -84,11 +89,6 @@ The completion assessment is judged on the ORIGINAL rule and criterion 1 stays w
 | partial | 0.87 | `positional-evaluation` | 1 |
 | partial | 0.87 | `development` | 1 |
 | partial | 0.87 | `transformation-of-advantages` | 1 |
-| partial | 0.87 | `historical-principles` | 1 |
-| partial | 0.87 | `classical-school` | 1 |
-| partial | 0.87 | `hypermodern-school` | 1 |
-| partial | 0.87 | `soviet-school` | 1 |
-| partial | 0.87 | `modern-dynamic` | 1 |
 | partial | 0.81 | `rook-endgames` | 1 |
 | partial | 0.81 | `queen-endgames` | 1 |
 | partial | 0.80 | `candidate-moves` | 1 |
@@ -128,6 +128,11 @@ The completion assessment is judged on the ORIGINAL rule and criterion 1 stays w
 | `perpetual-check` | 1.00 | x | x | x | . | x | x | x | x | . | x | . | . | x | x | x | x |
 | `wrong-rook-pawn` | 1.00 | x | x | x | x | x | . | x | x | . | x | x | . | x | x | x | x |
 | `zugzwang` | 1.00 | x | x | x | x | x | . | x | x | . | x | x | . | x | x | x | x |
+| `classical-school` | 1.00 | x | x | x | x | x | x | x | x | x | x | . | x | x | x | x | x |
+| `historical-principles` | 1.00 | x | x | x | x | x | x | x | x | x | x | x | x | x | x | x | x |
+| `hypermodern-school` | 1.00 | x | x | x | x | x | x | x | x | x | x | . | x | x | x | x | x |
+| `modern-dynamic` | 1.00 | x | x | x | x | x | x | x | x | x | x | x | x | x | x | x | x |
+| `soviet-school` | 1.00 | x | x | x | x | x | x | x | x | x | x | . | x | x | x | x | x |
 | `king-safety` | 1.00 | x | x | x | x | x | x | x | x | x | x | x | x | x | x | x | x |
 | `luft` | 1.00 | x | x | x | . | x | x | x | x | . | x | . | . | x | x | x | x |
 | `open-file` | 1.00 | x | x | x | x | x | x | x | x | x | x | . | x | x | x | x | x |
@@ -195,11 +200,6 @@ The completion assessment is judged on the ORIGINAL rule and criterion 1 stays w
 | `piece-properties` | 0.88 | x | x | x | x | x | x | - | x | x | x | x | - | x | x | x | x |
 | `endgame-principles` | 0.88 | x | x | x | x | x | x | x | - | x | x | x | x | - | x | x | x |
 | `opening-development` | 0.87 | x | x | x | x | x | x | - | x | x | x | . | - | x | x | x | x |
-| `classical-school` | 0.87 | x | x | x | x | x | x | x | - | x | x | . | x | - | x | x | x |
-| `historical-principles` | 0.87 | x | x | x | x | x | x | x | - | x | x | . | x | - | x | x | x |
-| `hypermodern-school` | 0.87 | x | x | x | x | x | x | x | - | x | x | . | x | - | x | x | x |
-| `modern-dynamic` | 0.87 | x | x | x | x | x | x | x | - | x | x | . | x | - | x | x | x |
-| `soviet-school` | 0.87 | x | x | x | x | x | x | x | - | x | x | . | x | - | x | x | x |
 | `smothered-mate` | 0.87 | x | x | x | . | x | x | x | x | x | x | x | - | x | x | x | - |
 | `positional-evaluation` | 0.87 | x | x | x | x | x | x | x | - | x | x | . | x | - | x | x | x |
 | `transformation-of-advantages` | 0.87 | x | x | x | x | x | x | x | - | x | x | . | x | - | x | x | x |
