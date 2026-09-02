@@ -13,7 +13,7 @@ implemented; that is a reading, and doing it is the work. What it can do is
 stop the list being rediscovered from scratch each time — and every one of
 the defects listed in the tool's header was unread before it was looked at.
 
-**Of 275 stated conditions (traps and indicators-against): 158 enforced in the matcher, 21 in Layer 3, 74 argued on the record to be unbuildable or already honoured elsewhere, 22 unread.**
+**Of 275 stated conditions (traps and indicators-against): 164 enforced in the matcher, 21 in Layer 3, 74 argued on the record to be unbuildable or already honoured elsewhere, 16 unread.**
 
 ONE CAVEAT ABOUT `indicators_against`, and it is not a technicality. For a
 concept naming an ASSET — an open file, an outpost, a passed pawn — they are
@@ -205,9 +205,9 @@ shared file was added to the search. The test is quotation for that reason.
 - [cited] A pawn sacrifice that creates a passer is not a breakthrough unless the passer actually cannot be stopped. The rule of the square decides this and is cheap to check.
 - [layer 3] The pattern is highly recognisable and therefore easy to play on autopilot in a position that is one rank short of it working.
 - [cited] *(indicator against)* The defending king is close enough to catch the runner — check the rule of the square first
-- [**unread**] *(indicator against)* The attacking pawns are too far back; the same structure one rank earlier usually fails outright
-- [**unread**] *(indicator against)* The defender can decline the capture and hold
-- [**unread**] *(indicator against)* The attacker's own king is needed elsewhere and cannot support
+- [cited] *(indicator against)* The attacking pawns are too far back; the same structure one rank earlier usually fails outright
+- [cited] *(indicator against)* The defender can decline the capture and hold
+- [cited] *(indicator against)* The attacker's own king is needed elsewhere and cannot support
 ## king-safety
 
 - [cited] REGISTERED FALSE POSITIVE: an exposed king is not automatically losing. With the attacking pieces traded off, an exposed king is often simply an active one — and in the endgame that is the goal.
@@ -280,9 +280,9 @@ shared file was added to the search. The test is quotation for that reason.
 - [noted] Taking the opposition is not always correct. In some positions the king should ignore it and head for a key square directly — this is Averbakh's corrective and it is the standard error.
 - [cited] A spare pawn tempo makes the opposition irrelevant, since it can simply be handed back.
 - [cited] *(indicator against)* A spare pawn tempo exists, so the opposition can be handed back
-- [**unread**] *(indicator against)* The position is decided by a race rather than by penetration
-- [**unread**] *(indicator against)* Taking the opposition does not lead to any key square — Averbakh's point
-- [**unread**] *(indicator against)* Enough material remains that king movement is not the deciding factor
+- [cited] *(indicator against)* The position is decided by a race rather than by penetration
+- [cited] *(indicator against)* Taking the opposition does not lead to any key square — Averbakh's point
+- [cited] *(indicator against)* Enough material remains that king movement is not the deciding factor
 ## loose-piece
 
 - [cited] Being loose is not being bad. Reporting every undefended piece would flag most positions and teach nothing.

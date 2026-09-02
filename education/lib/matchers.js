@@ -1496,6 +1496,27 @@ const STRUCTURAL = [
       const c = hits[0];
       const bt = f.breakthrough[c];
       const sq = bt.first.slice(2, 4);
+      // THE RECORD'S THREE indicators_against, and all three are answered by
+      // the search rather than by a guard, which is worth stating rather than
+      // leaving to be rediscovered.
+      //
+      // "The attacking pawns are too far back; the same structure one rank
+      // earlier usually fails outright" - the race is actually run, from the
+      // pawns where they stand. A structure one rank earlier that fails returns
+      // no line and this matcher never sees it. The condition is not a guard on
+      // the result; it is what the result measures.
+      //
+      // "The attacker's own king is needed elsewhere and cannot support" -
+      // winsTheRace() asks whether the DEFENDING king can catch the passer and
+      // never asks the attacking king for anything. A claim that does not
+      // depend on the attacking king cannot be wrong about where it is.
+      //
+      // "The defender can decline the capture and hold" - NOT answered, and the
+      // honest boundary of the whole claim. Layer 3 searches only captures on
+      // the defender's side, and its own note says so: this proves that
+      // accepting loses, not that declining does. Said in the sentence below,
+      // because a reader who takes "breakthrough" to mean "wins by force" has
+      // been told something false by omission.
       return {
         // MEDIUM, and it used to be high on the grounds that "in the pure pawn
         // ending this detector restricts itself to, the rule of the square is a
@@ -1511,9 +1532,11 @@ const STRUCTURAL = [
           `${side(f, c)} can play a pawn to ${sq}, and by the rule of the square every pawn capture of ` +
           `it loses the race: ${bt.line.join(' ')}. In a multi-pawn ending that is an indication rather ` +
           `than a proof — checked against tablebases, this reading is right about nine times in ten`,
-          bt.offers > 1
+          (bt.offers > 1
             ? `The advance creates ${bt.offers} pawn captures at once, which is the lever geometry the pattern needs`
-            : `The advance offers itself to a pawn capture, and every capture loses`,
+            : `The advance offers itself to a pawn capture, and every capture loses`) +
+          ` — what is shown is that ACCEPTING loses; the defender can decline the capture, and whether ` +
+          `declining holds is a different question this reading does not answer`,
         ],
         slots: { square: sq, line: bt.line.join(' ') },
         subjects: [c],
@@ -2145,12 +2168,61 @@ const STRUCTURAL = [
         });
       };
       const tempo = spare(st.turn);
+      // "Enough material remains that king movement is not the deciding
+      // factor" - the record's own indicator_against, and the reason the phase
+      // test is not enough: a rook ending is an endgame, both kings can face
+      // each other in one, and nothing about the result turns on who gives way.
+      // A rook or a queen on the board is that condition.
+      const heavy = c => f.material[c].counts.R + f.material[c].counts.Q;
+      if (heavy('w') + heavy('b') > 0) return null;
+      // "The position is decided by a race rather than by penetration." Two
+      // passed pawns running in opposite directions is a race, and in a race
+      // the kings are spectators. Read off Layer 3's own passed-pawn list.
+      const racing = (f.pawns.w.passed || []).length && (f.pawns.b.passed || []).length;
+      if (racing) return null;
+      // "Taking the opposition does not lead to any key square - Averbakh's
+      // point." Key squares are a defined term for ONE pawn, which is the case
+      // Averbakh is making the point about, and this says nothing about any
+      // other. The rule is the textbook one: two ranks in front of a pawn still
+      // on its first four ranks, one rank in front once it has passed them, on
+      // the pawn's file and its two neighbours.
+      let keyNote = '';
+      const pawnSquares = (f.pawns.w.squares || []).concat(f.pawns.b.squares || []);
+      if (pawnSquares.length === 1) {
+        const sq = pawnSquares[0];
+        const owner = (f.pawns.w.squares || []).length ? 'w' : 'b';
+        const pf = sq.charCodeAt(0) - 97, pr = Number(sq[1]);
+        const dir = owner === 'w' ? 1 : -1;
+        const advanced = owner === 'w' ? pr >= 5 : pr <= 4;
+        const step = advanced ? 1 : 2;
+        const keys = [];
+        for (const df of [-1, 0, 1]) {
+          const kf = pf + df, kr = pr + dir * step;
+          if (kf < 0 || kf > 7 || kr < 1 || kr > 8) continue;
+          keys.push(String.fromCharCode(97 + kf) + kr);
+        }
+        const cheb = (a, b) => Math.max(Math.abs(a.charCodeAt(0) - b.charCodeAt(0)),
+                                        Math.abs(Number(a[1]) - Number(b[1])));
+        const mine = holder === 'w' ? wk : bk, theirs = holder === 'w' ? bk : wk;
+        // TIES GO TO THE HOLDER, and getting this wrong once is instructive:
+        // strict `<` reported "the opposition leads to no key square" on
+        // 8/8/8/3k4/8/3K4/4P3/8 b, where the kings are equidistant from d4 and
+        // Black has to give way - which is precisely the position in which the
+        // opposition DOES win the key square. Holding the opposition is worth a
+        // tempo, so equal distance is a win for whoever holds it.
+        const nearer = keys.some(k => cheb(mine, k) <= cheb(theirs, k));
+        if (keys.length && !nearer) {
+          keyNote = ` — though the opposition leads to no key square here (${brief(keys)} are the ` +
+                    `squares that matter and ${side(f, other(holder))}'s king is at least as close to each), ` +
+                    `which is Averbakh's point: the opposition is a means, not the end`;
+        }
+      }
       return {
-        confidence: tempo ? 'low' : 'high',
+        confidence: tempo || keyNote ? 'low' : 'high',
         because: [`The kings stand on ${wk} and ${bk} with one square between them, so ${side(f, holder)} ` +
                   `has the opposition — ${side(f, st.turn)} has to give way first` +
                   (tempo ? `, except that ${side(f, st.turn)} has a spare pawn tempo and can hand it straight back`
-                         : '')],
+                         : '') + keyNote],
         slots: { square: holder === 'w' ? wk : bk },
         subjects: [holder],
       };
