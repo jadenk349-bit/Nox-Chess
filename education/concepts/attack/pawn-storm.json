@@ -141,7 +141,34 @@
       }
     }
   ],
-  "ambiguous_examples": [],
+  "ambiguous_examples": [
+    {
+      "fen": "1r1q3k/4r1pn/7p/p1p1PR2/2Bp4/1P4Q1/P5PP/5RK1 w - - 5 30",
+      "move": "h4",
+      "move_uci": "h2h4",
+      "note": "Fischer-Spassky 1972, game 6, 30.h4 - a pawn advanced at the enemy king in a position where White is winning and attacking, which is what a storm looks like. The annotation calls it something else: '30.h4! Restricting the knight on h7 even further', and Havanur adds 'after this move neither the black queen nor the knight can use g5 as a springboard'. One pawn move, and the two readings are a storm gaining ground and a restraining move taking a square. This base already files it as `restraint`'s positive and `prophylaxis`' ambiguous; it is here a third time because the difference between the three is what the move is FOR, and the board is the same in all three readings.",
+      "origin_kind": "historical-game",
+      "game": "Fischer-Spassky, World Championship, Reykjavik 1972 (game 6)",
+      "concept_role": "ambiguous",
+      "attributed_by": "Nagesh Havanur (ChessBase, 2022) - corpus entry fischer-spassky-1972-g6-30h4-restriction",
+      "engine": {
+        "engine_id": "Stockfish 18",
+        "test_level": 3,
+        "depth": 22,
+        "threads": 10,
+        "hash_mb": 4096,
+        "multipv": 3,
+        "best_move": "e6",
+        "eval_cp": 415,
+        "mate_in": null,
+        "pv": [],
+        "alternatives": [],
+        "margin_cp": null,
+        "verdict": "ambiguous",
+        "verdict_note": "The annotated move is the engine's THIRD choice at +3.75 against +4.15 for 30.e6. If it were a storm it would be one the engine slightly prefers not to start; if it is restraint, forty centipawns is the price of the square."
+      }
+    }
+  ],
   "explanations": {
     "by_level": {
       "beginner": "Push your pawns at their king to open a line your rooks and queen can use.",

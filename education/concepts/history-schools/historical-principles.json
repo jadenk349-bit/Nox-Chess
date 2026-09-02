@@ -141,7 +141,34 @@
     }
   ],
   "counterexamples": [],
-  "ambiguous_examples": [],
+  "ambiguous_examples": [
+    {
+      "fen": "r2q1rk1/pp3ppp/1b4n1/3p4/8/1N1Q3P/PPP2PP1/R1B1R1K1 b - - 0 15",
+      "move": "d4",
+      "move_uci": "d5d4",
+      "note": "Capablanca-Rubinstein 1928, 15...d4 - a principle in the middle of being qualified rather than after it. 'Avoid the isolated queen pawn' was taught as law; Rubinstein accepts one voluntarily, 'confident that its central control is worth the long-term weakness', and the modern qualification is exactly that - the pawn is a weakness in the endgame and a source of activity in the middlegame. This record catalogues three fates for an old principle and the first is that it LOSES ITS CONDITION. Filed as ambiguous because the qualification had not been written when the move was played and the move is one of the reasons it was: the position is where the condition came from, so it cannot demonstrate the condition being applied. The engine is only partly on Rubinstein's side, which is the right amount for a rule still being argued about.",
+      "origin_kind": "historical-game",
+      "game": "Capablanca-Rubinstein, Berlin 1928",
+      "concept_role": "ambiguous",
+      "attributed_by": "corpus entry capablanca-rubinstein-1928-15d4-static-vs-dynamic",
+      "engine": {
+        "engine_id": "Stockfish 18",
+        "test_level": 3,
+        "depth": 22,
+        "threads": 10,
+        "hash_mb": 4096,
+        "multipv": 3,
+        "best_move": "Qf6",
+        "eval_cp": 9,
+        "mate_in": null,
+        "pv": [],
+        "alternatives": [],
+        "margin_cp": null,
+        "verdict": "ambiguous",
+        "verdict_note": "The engine's first choice is a different move at +0.09 - level - so the isolated pawn Rubinstein took on is neither refuted nor endorsed at depth 22. A rule caught mid-qualification measures exactly like that."
+      }
+    }
+  ],
   "explanations": {
     "by_level": {
       "beginner": "Old chess rules are mostly still useful, but they were stated more strongly than they should have been.",

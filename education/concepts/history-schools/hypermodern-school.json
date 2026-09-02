@@ -180,7 +180,34 @@
     }
   ],
   "counterexamples": [],
-  "ambiguous_examples": [],
+  "ambiguous_examples": [
+    {
+      "fen": "r3rnk1/2q2pb1/1p1p1npp/pPp5/2PPb3/P1Q2NP1/1B3PBP/R2R1NK1 b - - 0 18",
+      "move": "Ne6",
+      "move_uci": "f8e6",
+      "note": "Reti-Capablanca 1924, move 18 - the canonical hypermodern game, in which the annotator's advice to the losing side is classical. Keene: 'it is a mystery why Capablanca did not play the obvious 18...Ne6, fighting more directly for control of the centre.' Fighting for the centre is the thing hypermodernism was a reaction against being dogmatic about, and here it is the recommendation, inside the game the school is taught from, given against the player the school beat. Filed as ambiguous because both readings survive: Reti's system won by controlling the centre from a distance, and Capablanca's error was not contesting it directly enough, and those are the same claim about central control read from two schools.",
+      "origin_kind": "historical-game",
+      "game": "Reti-Capablanca, New York 1924 (round 5)",
+      "concept_role": "ambiguous",
+      "attributed_by": "Raymond Keene (GM), The Spectator Australia - corpus entry reti-capablanca-1924-18Ne6-center-control",
+      "engine": {
+        "engine_id": "Stockfish 18",
+        "test_level": 3,
+        "depth": 22,
+        "threads": 10,
+        "hash_mb": 4096,
+        "multipv": 3,
+        "best_move": "f8e6",
+        "eval_cp": 80,
+        "mate_in": null,
+        "pv": [],
+        "alternatives": [],
+        "margin_cp": null,
+        "verdict": "ambiguous",
+        "verdict_note": "+0.80, and the engine's first choice is the move Keene recommends. Both candidate knight moves develop and neither occupies a central square; what separates them is how much they contest d4 and c5, which is the hypermodern criterion applied to a classical recommendation."
+      }
+    }
+  ],
   "explanations": {
     "by_level": {
       "beginner": "A group of players in the 1920s argued you do not have to put pawns in the middle — you can aim pieces at it from far away and let your opponent's pawns become targets.",
