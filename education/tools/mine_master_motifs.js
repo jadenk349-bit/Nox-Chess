@@ -142,9 +142,29 @@ const TESTS = {
       const mid = after.b[men[0]];
       if (mid.c !== them) continue;                          // through one of THEIRS
       if ((P.VAL[back.t] || 0) < P.VAL.N) continue;          // defending a pawn is not news
-      // ...and the defence must MATTER: the man behind is attacked, and this is
-      // what is holding it up.
+      // ...and the defence must be OPERATIVE, which is the third time a test in
+      // this file has named a motif and described a shape. "Attacked" is not
+      // enough: an x-ray defence is worth something only when the capture on
+      // the defended square is what OPENS the line. So the man in between has
+      // to be the one that can make that capture - then BxD is answered by LxB
+      // on the square it just arrived at, which is the record's own sentence,
+      // "a recapture that was not visible".
+      //
+      // Kramnik-Yakovich 29.Qc5 is what showed it: the queen on c5 lines up
+      // with its own knight on e5 through Black's pawn on d5, the knight is
+      // attacked, and the pawn cannot take the knight - so the defence never
+      // comes into operation and the geometry is inert. The move is the
+      // engine's first choice and writing it up would have been a true sentence
+      // about a good move and a false one about this concept, which is exactly
+      // what the desperado test nearly did.
       if (!P.attackersOf(after, i, them).length) continue;
+      let capsIt = false;
+      try {
+        const probe = P.cloneState(after);
+        probe.turn = them; probe.ep = -1;
+        capsIt = P.legalMoves(probe).some(x => x.from === men[0] && x.to === i);
+      } catch (e) { capsIt = false; }
+      if (!capsIt) continue;
       return { note: pc.t + ' on ' + nameOf(mv.to) + ' defends ' + nameOf(i) +
                      ' through the enemy ' + mid.t + ' on ' + nameOf(men[0]) };
     }

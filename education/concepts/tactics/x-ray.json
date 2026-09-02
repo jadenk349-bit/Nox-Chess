@@ -67,7 +67,7 @@
   "limitations": [
     "The pin/skewer/x-ray boundary is not agreed between sources; an explanation should prefer the more specific term when the position warrants it.",
     "TYPICAL_CONFIDENCE RAISED medium -> high, 2026-09-02, and the reason is the schema's own definition of the field: 'how confidently this concept can normally be asserted ONCE ITS PRECONDITIONS HOLD'. This concept's recognition is MECHANICAL and its knowledge type already carries a high ceiling, so once the preconditions hold there is nothing left to be uncertain about - a stalemate is a stalemate, and a fork this base reports is one findMotifs() found, which ARCHITECTURE.md makes the authority and forbids second-guessing. 'Medium' was the default across 32 rule and motif records regardless of detectability, and it was found by measuring what the API reports against what each record permits: twelve concepts were reporting ABOVE their own record. The fix was to make each record its own ceiling in cap(), which then required the records that were wrong to be corrected rather than silently overruled.",
-    "NO MASTER-GAME POSITION YET, and the search that failed is worth recording. Five famous games were replayed through this base's own move generator and scanned position by position with the API - the Opera Game, the Evergreen, the Immortal, the Game of the Century and Legall's Mate, 225 plies between them - and this concept was not reported in any of them. That is not evidence the motif is rare; it is evidence that the five games this base can currently verify do not contain a clean instance of it, and that adding one means adding a game rather than looking harder at these. tools/replay_game.js is the instrument: a move list that is wrong is refused rather than guessed at."
+    "NO MASTER-GAME POSITION YET, and the search that failed is worth recording. Five famous games were replayed through this base's own move generator and scanned position by position with the API - the Opera Game, the Evergreen, the Immortal, the Game of the Century and Legall's Mate, 225 plies between them - and this concept was not reported in any of them. That is not evidence the motif is rare; it is evidence that the five games this base can currently verify do not contain a clean instance of it, and that adding one means adding a game rather than looking harder at these. tools/replay_game.js is the instrument: a move list that is wrong is refused rather than guessed at. RESOLVED: Veresov-Bronstein, USSR Championship 1944, 37.Re1, above."
   ],
   "misconceptions": [],
   "relationships": {
@@ -113,6 +113,50 @@
         "dtm": 0,
         "category": "draw",
         "note": "PROVEN draw, and the tablebase's own best move is Rxa1+ rather than Rxa5. A defence that holds over every legal continuation is the strongest statement available about a defensive motif, and it is the reason this example is the defensive form rather than the attacking one."
+      }
+    },
+    {
+      "fen": "7k/4B1pp/p4n2/1b1pr3/5p2/P4P1P/1P3KP1/1B1R4 w - - 1 37",
+      "move": "Re1",
+      "move_uci": "d1e1",
+      "origin_kind": "historical-game",
+      "game": "Veresov-Bronstein, USSR Championship 1944",
+      "concept_role": "positive",
+      "side_to_move_benefits": "white",
+      "note": "AN X-RAY DEFENCE, which is the half of this concept the record keeps the name for: 'the line piece defends a friendly unit through an intervening piece, so a capture on that square is answered by a recapture that was not visible'.\n\n37.Rd1-e1 puts the rook on the e-file behind Black's rook on e5, and behind THAT stands White's bishop on e7. The bishop is attacked and looks undefended. It is not: 37...Rxe7 is answered by 38.Rxe7, the recapture arriving down a line that the black rook itself was blocking until the moment it captured. Nothing else on the board defends e7.\n\nStockfish 18 at depth 26 with three lines: +2.63 for Re1, against +0.50 and +0.36. A 213-centipawn margin, and the engine's own line takes the rook the other way - 37...Rxe1 38.Kxe1 - which is the same fact from the other side: the e-file is White's and the bishop is held.\n\nWHY THIS ONE AND NOT THE OTHERS. Two better-known candidates were rejected. A Petrosian position where the geometry is present is second-best in a lost game. Kramnik-Yakovich 29.Qc5 is the engine's FIRST choice and still not this concept: the queen lines up with its own knight through a black pawn that cannot capture the knight, so the defence never comes into operation. That rejection corrected the miner's test - an x-ray defence is worth something only when the capture on the defended square is what opens the line, so the man in between has to be the one that can make that capture.\n\nPROVENANCE. Found by tools/mine_master_motifs.js. The move list replayed legally through the page's own move generator. `attributed_by` absent - no annotator read.",
+      "engine": {
+        "engine_id": "Stockfish 18",
+        "test_level": 3,
+        "depth": 26,
+        "multipv": 3,
+        "best_move": "d1e1",
+        "eval_cp": 263,
+        "mate_in": null,
+        "pv": [
+          "d1e1",
+          "e5e1",
+          "f2e1",
+          "h8g8",
+          "b2b3",
+          "g8f7",
+          "e7d8",
+          "b5c6",
+          "e1d2",
+          "f6d7"
+        ],
+        "alternatives": [
+          {
+            "move": "e7d6",
+            "eval_cp": 50
+          },
+          {
+            "move": "e7f6",
+            "eval_cp": 36
+          }
+        ],
+        "margin_cp": 213,
+        "verdict": "supports",
+        "verdict_note": "Best by 213 centipawns at depth 26. The two runners-up both MOVE the bishop, which is what a player does when they cannot see that it is defended."
       }
     }
   ],
