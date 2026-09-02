@@ -109,8 +109,58 @@
     ],
     "conflicts": []
   },
-  "examples": [],
-  "counterexamples": [],
+  "examples": [
+    {
+      "fen": "r1bq1rk1/pp3ppp/2n5/3Np3/4P3/8/PP3PPP/R1BQ1RK1 w - - 0 1",
+      "note": "Constructed controlled pair, positive half. Both of this record's preconditions and nothing else: no enemy pawn can ever attack d5 (Black's c-pawn is gone, and the e5 pawn captures towards d4 and f4, never backwards), and a friendly pawn on e4 defends it. The knight on d5 is therefore permanent AND cheap, which is the second condition doing the work this record says it does - 'the first makes a piece there permanent; the second makes it cheap, because the piece is not tying down other pieces to hold it'. Material is symmetric down to the pawn count. What this base actually reports here is `outpost` for White and `weak-square` for Black; `strong-square` has no matcher of its own, and saying so is more useful than pretending the neighbouring concept is this one.",
+      "origin_kind": "constructed-test",
+      "concept_role": "positive",
+      "side_to_move_benefits": "white",
+      "engine": {
+        "engine_id": "Stockfish 18",
+        "test_level": 3,
+        "depth": 22,
+        "threads": 10,
+        "hash_mb": 4096,
+        "multipv": 1,
+        "best_move": "c1e3",
+        "eval_cp": 30,
+        "mate_in": null,
+        "pv": [],
+        "alternatives": [],
+        "margin_cp": null,
+        "verdict": "supports",
+        "verdict_note": "+0.30 with symmetric material. A real advantage and a small one, which is what this record's own engine_era_note predicts: engines 'are markedly less impressed than classical teaching by occupying one'. Worth keeping against overclaiming - the engine's line goes Nxe7+ and Nxc6, trading the knight off the strong square. The square is an asset, not a plan."
+      },
+      "controlled_pair_with": "r1bq1rk1/pp3ppp/2n5/3Np3/8/4P3/PP3PPP/R1BQ1RK1 w - - 0 1"
+    }
+  ],
+  "counterexamples": [
+    {
+      "fen": "r1bq1rk1/pp3ppp/2n5/3Np3/8/4P3/PP3PPP/R1BQ1RK1 w - - 0 1",
+      "note": "Constructed controlled pair, negative half. Identical to the positive except that White's pawn stands on e3 instead of e4, so d5 is still a square no enemy pawn can attack and is no longer defended by a friendly pawn. The record's second precondition fails, and with it this record's own indicator_against comes true - 'the square can only be held by pieces, not pawns': the knight on d5 is attacked by the queen on d8 and held only by the queen on d1. A strong square held by pieces is a liability wearing a good square's clothes, which is this record's own sentence.",
+      "origin_kind": "constructed-test",
+      "concept_role": "negative",
+      "side_to_move_benefits": "neither",
+      "engine": {
+        "engine_id": "Stockfish 18",
+        "test_level": 3,
+        "depth": 22,
+        "threads": 10,
+        "hash_mb": 4096,
+        "multipv": 1,
+        "best_move": "e3e4",
+        "eval_cp": -17,
+        "mate_in": null,
+        "pv": [],
+        "alternatives": [],
+        "margin_cp": null,
+        "verdict": "supports",
+        "verdict_note": "-0.17, against +0.30 for the same position with that pawn one square further up: a swing of 47 centipawns attributable to the pawn and nothing else. And the engine's OWN FIRST MOVE is e3-e4 - it plays the move that turns this half of the pair into the other half, which is a stronger statement about what the pawn is worth than the evaluation is."
+      },
+      "controlled_pair_with": "r1bq1rk1/pp3ppp/2n5/3Np3/4P3/8/PP3PPP/R1BQ1RK1 w - - 0 1"
+    }
+  ],
   "ambiguous_examples": [],
   "explanations": {
     "by_level": {

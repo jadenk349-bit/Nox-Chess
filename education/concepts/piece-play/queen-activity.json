@@ -99,8 +99,59 @@
     "conflicts": []
   },
   "examples": [],
-  "counterexamples": [],
-  "ambiguous_examples": [],
+  "counterexamples": [
+    {
+      "fen": "rnbqkbnr/pppp1ppp/8/4p2Q/4P3/8/PPPP1PPP/RNB1KBNR b KQkq - 1 2",
+      "note": "After 1.e4 e5 2.Qh5 - the most-played illustration in existence of this record's first trap: 'An advanced queen is not an active queen. It is often a queen about to be chased, and the chasing moves develop the opponent.' What makes this a good counterexample rather than a cheap one is the SIZE of the effect. The engine says +0.39 for White, which is an ordinary opening edge, and this base has measured the early-queen cost at about 0.68 in the standard case. The move is not a blunder, and the teaching tone around it is louder than the number. The record says that too, and this position is why it says it.",
+      "origin_kind": "constructed-test",
+      "concept_role": "negative",
+      "side_to_move_benefits": "neither",
+      "engine": {
+        "engine_id": "Stockfish 18",
+        "test_level": 3,
+        "depth": 24,
+        "threads": 10,
+        "hash_mb": 4096,
+        "multipv": 1,
+        "best_move": "b8c6",
+        "eval_cp": 39,
+        "mate_in": null,
+        "pv": [],
+        "alternatives": [],
+        "margin_cp": null,
+        "verdict": "supports",
+        "verdict_note": "+0.39 at depth 24, and the engine's own line is ...Nc6 and ...g6 with Qf3 - the queen driven back to a square it could have reached in one move, having developed two black pieces on the way. The trap's mechanism is visible in the principal variation rather than in the number."
+      }
+    }
+  ],
+  "ambiguous_examples": [
+    {
+      "fen": "4rnk1/r2n1p2/1p1R2pp/pP5q/3N4/P3N1P1/1Q3PKP/3R4 b - - 0 27",
+      "move": "Qe5",
+      "move_uci": "h5e5",
+      "note": "Reti-Capablanca, New York 1924, 27...Qe5, annotated by Raymond Keene: 'Capablanca is really doing his utmost on the fourth rank with his strongest piece, but the queen is no match for White's heavily centralised knights and rooks.' This record's limitations already named this position as the one it exists to cover; this is it, on the record. It is ambiguous in the strict sense - the queen genuinely IS the most active piece on the board, a titled annotator says so in as many words, and it is worth nothing: Keene's own verdict is that Black had to give up the exchange with 27...Rxe3 instead. Corpus entries `reti-capablanca-1924-27Qe5-initiative-negative` and `reti-capablanca-1924-27Qe5-piece-activity-ambiguous` are the same position read for two neighbouring concepts.",
+      "origin_kind": "historical-game",
+      "game": "Reti-Capablanca, New York 1924 (round 5)",
+      "concept_role": "ambiguous",
+      "attributed_by": "Raymond Keene (GM), The Spectator Australia - corpus entry reti-capablanca-1924-27Qe5-piece-activity-ambiguous",
+      "engine": {
+        "engine_id": "Stockfish 18",
+        "test_level": 3,
+        "depth": 22,
+        "threads": 10,
+        "hash_mb": 4096,
+        "multipv": 1,
+        "best_move": "Rxe3",
+        "eval_cp": null,
+        "mate_in": null,
+        "pv": [],
+        "alternatives": [],
+        "margin_cp": null,
+        "verdict": "ambiguous",
+        "verdict_note": "The engine prefers the exchange sacrifice Keene recommends over the queen move that was played: the annotation and the engine agree that one active queen is not the resource here. Depth 22, multipv 3, carried over from the corpus entry."
+      }
+    }
+  ],
   "explanations": {
     "by_level": {
       "beginner": "The queen is the strongest piece, which is why it should not go first — everything can chase it.",
