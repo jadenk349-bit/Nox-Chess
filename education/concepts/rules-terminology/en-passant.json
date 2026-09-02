@@ -103,6 +103,16 @@
         "stalemate": false,
         "note": "PROVEN WIN at dtz 1 - the en-passant capture is the winning move. Without the right, the same board is a different game."
       }
+    },
+    {
+      "fen": "8/3bk1p1/1p1p3p/2pPp1p1/p3P1P1/P1PK2PP/1P2B3/8 w - c6 0 39",
+      "move": "dxc6",
+      "move_uci": "d5c6",
+      "origin_kind": "historical-game",
+      "game": "Marshall-Chigorin, Paris 1900",
+      "concept_role": "positive",
+      "side_to_move_benefits": "white",
+      "note": "A REAL GAME FOR A RULE, which sounds like a small thing and is not. Every other position on this record was constructed to show the rule, and a constructed position can show a rule that never comes up. Black has just played ...c7-c5 past White's d5 pawn, and the capture on c6 is available on this move and no other - the FEN carries `c6` as its en-passant target, which is the rule's one-move window written into the position itself.\n\nFound by tools/harvest_games.js walking the quiet positions of replayed master games and asking the API what it licenses. It is reported at HIGH confidence, which is right: this is not a judgement, it is a legal fact, and the matcher checks that the capture is actually AVAILABLE rather than that the FEN carries a target square - a FEN carries one whether or not anything can use it.\n\nPROVENANCE. The move list replayed legally through the page's own move generator. No annotator read; this grounds the MASTER-GAME rung and not the human-grounded one."
     }
   ],
   "counterexamples": [

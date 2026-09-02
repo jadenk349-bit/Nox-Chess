@@ -81,7 +81,7 @@
   "limitations": [
     "There is no matcher. 'Cannot be saved' is a claim about every legal move the piece has and about what happens after each, which is a search rather than a static test, and the record's own exception says the first thing to do is verify it.",
     "The example on this record was FOUND rather than constructed, by scanning the 788 shipped puzzles for a solution move where the moving piece could already be won before the move and could still be won on its destination. Fifty positions match that shape. Four hand-built minimal positions were thrown away first: trapping a piece with no escape square needs a cage of enemy men, and every small version left the piece a flight square.",
-    "NO MASTER-GAME POSITION YET, and the search that failed is worth recording. Five famous games were replayed through this base's own move generator and scanned position by position with the API - the Opera Game, the Evergreen, the Immortal, the Game of the Century and Legall's Mate, 225 plies between them - and this concept was not reported in any of them. That is not evidence the motif is rare; it is evidence that the five games this base can currently verify do not contain a clean instance of it, and that adding one means adding a game rather than looking harder at these. tools/replay_game.js is the instrument: a move list that is wrong is refused rather than guessed at."
+    "NO MASTER-GAME POSITION YET, and the search that failed is worth recording. Five famous games were replayed through this base's own move generator and scanned position by position with the API - the Opera Game, the Evergreen, the Immortal, the Game of the Century and Legall's Mate, 225 plies between them - and this concept was not reported in any of them. That is not evidence the motif is rare; it is evidence that the five games this base can currently verify do not contain a clean instance of it, and that adding one means adding a game rather than looking harder at these. tools/replay_game.js is the instrument: a move list that is wrong is refused rather than guessed at. RESOLVED: Kramnik-Kuzmin, GMA-Open 1989, 34.Rxh8+, above."
   ],
   "misconceptions": [],
   "relationships": {
@@ -118,6 +118,50 @@
         "margin_cp": 748,
         "verdict": "supports",
         "verdict_note": "+2.55 for the desperado against -4.93 and -4.99 for the two best rook retreats, at depth 24 with three lines. The margin is the concept: a piece that is lost either way is worth exactly what it can take on the way out, and here that is 748 centipawns."
+      }
+    },
+    {
+      "fen": "r5kr/5p2/p2p2pR/1pqPp3/2p1PnP1/2P2PN1/P2Q2PK/5R2 w - - 3 34",
+      "move": "Rxh8+",
+      "move_uci": "h6h8",
+      "origin_kind": "historical-game",
+      "game": "Kramnik-Kuzmin, GMA-Open 1989",
+      "concept_role": "positive",
+      "side_to_move_benefits": "white",
+      "note": "THE MASTER-GAME RUNG, and it earns the record's first word. The rook on h6 is attacked down the h-file and there is no square it can go to that saves it - every retreat is checked against the move generator, which is the test `trapped-piece` uses and the test this record insists on: 'a piece that can be saved by moving, or by a counter-threat, is not doomed, and the desperado is then simply a blunder'.\n\nSo it takes a rook on the way out. 34.Rxh8+ Kxh8 and White has had a rook for a rook instead of a rook for nothing.\n\nStockfish 18 at depth 26 with three lines: −0.54, against −1.89 and −2.14. WHITE IS WORSE IN ALL OF THEM, and that is the right shape for this concept rather than an embarrassment. A desperado is damage limitation - the piece is going, and the question is only what it takes with it. The margin, 135 centipawns, is the value of asking that question instead of retreating.\n\nIT WAS ALMOST A DIFFERENT POSITION. The first version of the miner's desperado test asked whether the piece could be captured at a profit where it stood, which is 'attacked' and not 'doomed', and it nominated a Kramnik game where the queen is attacked and has two safe squares. Taking there is best by a pawn, so the write-up would have been a true sentence about a good move and a false one about this concept.\n\nPROVENANCE. Found by tools/mine_master_motifs.js over 2,822,256 positions from 35,648 replayed games. The move list replayed legally through the page's own move generator. `attributed_by` absent - no annotator read.",
+      "engine": {
+        "engine_id": "Stockfish 18",
+        "test_level": 3,
+        "depth": 26,
+        "multipv": 3,
+        "best_move": "h6h8",
+        "eval_cp": -54,
+        "mate_in": null,
+        "pv": [
+          "h6h8",
+          "g8h8",
+          "g3e2",
+          "f4e2",
+          "d2e2",
+          "h8g7",
+          "h2g3",
+          "a8h8",
+          "e2f2",
+          "c5c7"
+        ],
+        "alternatives": [
+          {
+            "move": "g3f5",
+            "eval_cp": -189
+          },
+          {
+            "move": "g4g5",
+            "eval_cp": -214
+          }
+        ],
+        "margin_cp": 135,
+        "verdict": "supports",
+        "verdict_note": "Best by 135 centipawns at depth 26, in a position White is worse in however it is played. That is what a desperado is worth: not a win, the difference between losing a rook and trading one."
       }
     }
   ],

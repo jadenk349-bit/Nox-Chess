@@ -2305,8 +2305,20 @@ const STRUCTURAL = [
       // test is not enough: a rook ending is an endgame, both kings can face
       // each other in one, and nothing about the result turns on who gives way.
       // A rook or a queen on the board is that condition.
-      const heavy = c => f.material[c].counts.R + f.material[c].counts.Q;
-      if (heavy('w') + heavy('b') > 0) return null;
+      // PIECES, not just heavy ones, and the tightening was earned. A first
+      // version excluded only rooks and queens, and the master-game harvest
+      // promptly offered Mikenas-Bronstein 1944 - kings on f5 and f7 with the
+      // opposition genuinely held, in a knight-against-bishop ending White wins
+      // by eight pawns on material. The opposition is on the board there and is
+      // not what decides. This record's first indicator_for says "a KING-AND-
+      // PAWN endgame where king penetration decides the result", and its
+      // indicator_against says "enough material remains that king movement is
+      // not the deciding factor" - between them that is: no pieces.
+      const pieces = c => {
+        const m = f.material[c].counts;
+        return m.R + m.Q + m.N + m.B;
+      };
+      if (pieces('w') + pieces('b') > 0) return null;
       // "The position is decided by a race rather than by penetration." Two
       // passed pawns running in opposite directions is a race, and in a race
       // the kings are spectators. Read off Layer 3's own passed-pawn list.
