@@ -146,7 +146,34 @@
     }
   ],
   "counterexamples": [],
-  "ambiguous_examples": [],
+  "ambiguous_examples": [
+    {
+      "fen": "3r1nk1/pp3ppp/1bq5/B7/3pQ3/1N4PP/PPP2P2/4R1K1 w - - 1 22",
+      "move": "Qxc6",
+      "move_uci": "e4c6",
+      "note": "Capablanca-Rubinstein 1928, 22.Qxc6 - which this base already carries as this record's POSITIVE example, and it is here a second time for the half the positive cannot say. The annotation is explicit that the move looks like a mistake: 'at first glance this looks like a mistake, because after 22...bxc6 Black's pawns are united and his once-isolated pawn is no longer isolated at all. Capablanca has apparently thrown away the very weakness he spent the whole game creating.' This record's own first trap is that a transforming move 'often looks like a concession and can be reported as an error by anything judging moves on what they give up'. Filed as ambiguous because the concept requires knowing that the new advantage is MORE convertible than the old one, and the record's second trap says outright that this base cannot judge that - so the same position is both the concept's best instance and the proof that the base cannot recognise it.",
+      "origin_kind": "historical-game",
+      "game": "Capablanca-Rubinstein, Berlin 1928",
+      "concept_role": "ambiguous",
+      "attributed_by": "corpus entry capablanca-rubinstein-1928-22Qxc6-transformation",
+      "engine": {
+        "engine_id": "Stockfish 18",
+        "test_level": 3,
+        "depth": 22,
+        "threads": 10,
+        "hash_mb": 4096,
+        "multipv": 3,
+        "best_move": "e4c6",
+        "eval_cp": 34,
+        "mate_in": null,
+        "pv": [],
+        "alternatives": [],
+        "margin_cp": null,
+        "verdict": "ambiguous",
+        "verdict_note": "+0.34 and the engine's first choice at depth 22 with three lines, so the move is objectively best - which settles that it is not an error and settles nothing about whether it is a TRANSFORMATION. That distinction is the record's third trap: the concept describes a player's intention, and this system observes moves."
+      }
+    }
+  ],
   "explanations": {
     "by_level": {
       "beginner": "Trade the advantage you have for one that is easier to win with - a better position for extra material, extra material for a won ending.",

@@ -105,7 +105,25 @@
     }
   ],
   "counterexamples": [],
-  "ambiguous_examples": [],
+  "ambiguous_examples": [
+    {
+      "fen": "4k3/p7/8/8/3Q4/8/8/4K3 w - - 0 1",
+      "move": "Qd7+",
+      "move_uci": "d4d7",
+      "note": "Qd7+ attacks the king on e8 and the pawn on a7 at the same time, and the detector says so in those words. Two distinct threats that cannot both be met is this record's precondition, satisfied exactly. It is also worth nothing: the tablebase's own move is Qxa7, taking the pawn immediately and without any double attack, and the position is a proven win either way. Filed as ambiguous because the concept applies in full and adds no information - a double attack that wins a pawn in a position already winning by a queen is a true description of a move nobody needs to find.",
+      "origin_kind": "constructed-test",
+      "concept_role": "ambiguous",
+      "tablebase": {
+        "source": "Lichess tablebase (Syzygy, 7-piece)",
+        "pieces": 4,
+        "wdl": "win",
+        "dtz": 1,
+        "dtm": 13,
+        "category": "win",
+        "note": "PROVEN WIN in 13, and the best move is Qxa7 rather than the forking Qd7+. The double attack is genuinely on the board and the tablebase prefers simply taking the pawn."
+      }
+    }
+  ],
   "explanations": {
     "by_level": {
       "beginner": "This move makes two threats at once, and only one can be answered.",

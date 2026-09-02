@@ -167,7 +167,34 @@
     }
   ],
   "counterexamples": [],
-  "ambiguous_examples": [],
+  "ambiguous_examples": [
+    {
+      "fen": "r2q1rk1/pp3ppp/1b4n1/3p4/8/1N1Q3P/PPP2PP1/R1B1R1K1 b - - 0 15",
+      "move": "d4",
+      "move_uci": "d5d4",
+      "note": "Capablanca-Rubinstein, Berlin 1928, 15...d4 - Rubinstein voluntarily accepting an isolated queen pawn, 'confident that its central control is worth the long-term weakness'. This is the classical doctrine arguing with itself. Steinitz's evaluation half says a durable structural weakness is an asset for the opponent and should be avoided; the same school's teaching on the centre says central control is worth paying for. One of the greatest classical players chose the second reading against the first, in a game he lost to the most classical player of all. Filed as ambiguous because the doctrine covers the move twice and points opposite ways, and the engine is only partly on Rubinstein's side.",
+      "origin_kind": "historical-game",
+      "game": "Capablanca-Rubinstein, Berlin 1928",
+      "concept_role": "ambiguous",
+      "attributed_by": "corpus entry capablanca-rubinstein-1928-15d4-static-vs-dynamic",
+      "engine": {
+        "engine_id": "Stockfish 18",
+        "test_level": 3,
+        "depth": 22,
+        "threads": 10,
+        "hash_mb": 4096,
+        "multipv": 3,
+        "best_move": "Qf6",
+        "eval_cp": 9,
+        "mate_in": null,
+        "pv": [],
+        "alternatives": [],
+        "margin_cp": null,
+        "verdict": "ambiguous",
+        "verdict_note": "The engine's first choice is a different move at +0.09 - level - and the disagreement is the informative part, which is why the corpus entry files it as partial agreement rather than as support. The isolated pawn Rubinstein took on is neither refuted nor endorsed at depth 22."
+      }
+    }
+  ],
   "explanations": {
     "by_level": {
       "beginner": "The idea that chess is won by building up small lasting advantages rather than by attacking straight away.",
