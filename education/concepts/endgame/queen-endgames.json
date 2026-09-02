@@ -82,7 +82,7 @@
   "limitations": [
     "This base holds no tablebase-verified queen-ending positions yet; the record is orientation rather than theory.",
     "The class is large and mostly concrete; principles help less here than anywhere else in the endgame.",
-    "NO MASTER-GAME POSITION. The examples on this record are `tablebase-position`s, and for this family that is the stronger provenance rather than a substitute: the claims here are about what a class of ending can and cannot do, and a proof over every legal continuation settles that where a single game only illustrates it. What a master game would add is evidence that the principle GUIDED a strong player, which is a different claim, and this base has not yet found an annotated position making it for this family. Recorded rather than filled."
+    "NO MASTER-GAME POSITION. The examples on this record are `tablebase-position`s, and for this family that is the stronger provenance rather than a substitute: the claims here are about what a class of ending can and cannot do, and a proof over every legal continuation settles that where a single game only illustrates it. What a master game would add is evidence that the principle GUIDED a strong player, which is a different claim, and this base has not yet found an annotated position making it for this family. Recorded rather than filled. RESOLVED: Capablanca-Marshall, USA match 1909, above."
   ],
   "misconceptions": [
     "That an extra pawn should win. Queen endings convert less often than rook endings, which are themselves notoriously drawish.",
@@ -140,6 +140,14 @@
         "category": "win",
         "note": "PROVEN WIN, dtz 9, mate in 61, best move Qf5. Sixty-one moves in five pieces. Queen endings are the phase where an engine's evaluation and a proof are furthest apart in practice, and this record exists partly to say that: the number above is an opinion that happens to be right, and the line under it is the fact."
       }
+    },
+    {
+      "fen": "6k1/2p3p1/7p/1p4q1/1PpP4/2P4P/6P1/4Q1K1 b - - 0 31",
+      "origin_kind": "historical-game",
+      "game": "Capablanca-Marshall, USA match 1909",
+      "concept_role": "positive",
+      "side_to_move_benefits": "black",
+      "note": "QUEENS AND PAWNS ONLY, which is this record's whole precondition, from the match that made Capablanca's name. A queen each and eight pawns.\n\nThe record's claim is that an advanced passed pawn outweighs extra material here and that the defender's standing resource is perpetual check, and the position has the ingredients: Black's c4 pawn is passed and two squares from queening, and both kings are in the open where a queen can check them from anywhere.\n\nHOW IT WAS FOUND, AND THE MEASUREMENT THAT CAME WITH IT. A first scan of 100,106 positions from 1,320 replayed master games found NO queen ending at all, and the reason is not master play: this base's own `phaseOf()` calls a queen-and-pawns-against-queen-and-pawns position a MIDDLEGAME. Two queens is more material than its endgame threshold allows, which is right for most purposes and wrong for this record. Dropping the phase gate and asking the material directly found 372, every one of them classified `middlegame`. The limitation is recorded in state/research-state.json.\n\nWHAT IS CLAIMED. The category, which the material decides mechanically. Not who is better - that is a different question and this record's own typical_confidence says so.\n\nPROVENANCE. Replayed legally through the page's own move generator. No annotator read."
     }
   ],
   "counterexamples": [

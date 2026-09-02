@@ -231,6 +231,55 @@ const TESTS = {
     return null;
   },
 
+  // A DOUBLE ATTACK BY TWO PIECES, which is the case this record keeps the name
+  // for. Its own definition says "a fork is a double attack by a single piece;
+  // a discovered attack is a double attack by two pieces, one moving and one
+  // revealed", and both of those have their own records and their own
+  // detectors in the page. So this looks for neither: the moved piece attacks
+  // one man and ANOTHER of ours, which did not attack anything worth taking
+  // before, now attacks a second - and the two are different men.
+  //
+  // The record's indicators_against are built rather than left as prose. "One
+  // 'threat' is not real because the target is adequately defended" is SEE on
+  // each target. "A single defensive move parries both" is asked of every legal
+  // reply: if one move leaves neither target winnable, there was one threat.
+  doubleAttack(st, mv, after) {
+    const us = st.turn, them = other(us);
+    const moved = after.b[mv.to];
+    if (!moved || moved.t === 'N') return null;          // a knight's is knight-fork's
+    const winnable = (s, i) => {
+      const probe = P.cloneState(s); probe.turn = us; probe.ep = -1;
+      try { return P.see(probe, i, us) > 0; } catch (e) { return false; }
+    };
+    const hitBy = (i, from) => {
+      try { return P.attackersOf(after, i, us).includes(from); } catch (e) { return false; }
+    };
+    const targets = [];
+    for (let i = 0; i < 64; i++) {
+      const q = after.b[i];
+      if (!q || q.c !== them || q.t === 'K') continue;
+      if (!winnable(after, i) || winnable(st, i)) continue;   // new, and real
+      targets.push(i);
+    }
+    if (targets.length < 2) return null;
+    const byMover = targets.filter(i => hitBy(i, mv.to));
+    const byOther = targets.filter(i => !hitBy(i, mv.to));
+    if (!byMover.length || !byOther.length) return null;      // that is a fork, not this
+    // "A single defensive move parries both."
+    let replies;
+    try { replies = P.legalMoves(after); } catch (e) { return null; }
+    if (!replies.length) return null;
+    const a = byMover[0], b = byOther[0];
+    const parried = replies.some(y => {
+      let ny;
+      try { ny = P.makeMove(after, y); } catch (e) { return false; }
+      return !winnable(ny, a) && !winnable(ny, b);
+    });
+    if (parried) return null;
+    return { note: nameOf(mv.to) + ' attacks ' + nameOf(a) + ' and a second piece of ours ' +
+                   'attacks ' + nameOf(b) + '; no single reply saves both' };
+  },
+
   // A ZWISCHENZUG. The record calls it "a move-order idea rather than a
   // geometric pattern, which is what makes it hard to see", and its own
   // detectability is `human-only` - so this test does not claim to find the

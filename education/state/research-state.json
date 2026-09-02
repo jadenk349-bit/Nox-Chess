@@ -1283,6 +1283,11 @@
       "item": "a motif miner's test can look for a different motif than its name",
       "date": "2026-09-03",
       "note": "tools/mine_master_motifs.js had two of its seven geometric tests looking for the wrong thing, and both were caught only by reading a candidate against the record it was meant to serve. The x-ray test excluded the case where the man behind is worth MORE than the man in front on the grounds that that is a pin or a skewer - but a pin is small in front and big behind, so it excluded the pin and then went looking for the skewer. The desperado test asked whether the piece could be captured at a profit where it stood, which is 'attacked' and not 'doomed'; the record's own definition says everything rests on that first word. A geometric test that names a motif is a claim about that motif and has to be checked against the record like any other claim."
+    },
+    {
+      "item": "phaseOf() calls a queen ending a middlegame",
+      "date": "2026-09-03",
+      "note": "A position with a queen and pawns on each side and nothing else is classified `middlegame` by lib/features.js phaseOf(), because two queens is more material than its endgame threshold allows. That is right for most purposes - a board with two queens on it usually is a middlegame - and wrong for `queen-endgames`, whose entire precondition is 'queens and pawns only, or nearly so'. Measured: a scan of 100,106 positions from 1,320 replayed master games found ZERO queen endings while the phase gate was on, and 372 with it off, every one of them classified `middlegame`. Any scan for a concept whose category is defined by material should ask the material rather than the phase."
     }
   ],
   "awaiting_validation": [
