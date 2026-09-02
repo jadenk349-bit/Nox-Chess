@@ -192,7 +192,30 @@
       "false_positive_case": "a-majority-advance-is-not-a-minority-attack"
     }
   ],
-  "ambiguous_examples": [],
+  "ambiguous_examples": [
+    {
+      "fen": "r3k2r/pp4pp/8/8/8/8/PP4PP/R3K2R w KQkq - 0 1",
+      "note": "Two queenside pawns against two. A wing advance here is neither a minority attack nor a majority one, because the count that names the plan is equal - and the plan's whole identity is that count. This record's first trap says 'advancing pawns on the wing where you have fewer is only right in this specific structure. Elsewhere it is simply weakening', and here there is no 'fewer'. Read against this record's registered false-positive case, which is the same board with three white pawns against two and is a MAJORITY advance: three positions, three names, and the only difference between them is one pawn. Filed as ambiguous rather than negative because a2-a4 and b2-b4 are both playable and the concept genuinely has nothing to say about which.",
+      "origin_kind": "constructed-test",
+      "concept_role": "ambiguous",
+      "engine": {
+        "engine_id": "Stockfish 18",
+        "test_level": 3,
+        "depth": 22,
+        "threads": 10,
+        "hash_mb": 4096,
+        "multipv": 1,
+        "best_move": "e1g1",
+        "eval_cp": 0,
+        "mate_in": null,
+        "pv": [],
+        "alternatives": [],
+        "margin_cp": null,
+        "verdict": "ambiguous",
+        "verdict_note": "0.00 at depth 22, settled at depth 1, with the pawn counts equal on both wings. The plan's name needs an asymmetry the position does not have."
+      }
+    }
+  ],
   "explanations": {
     "by_level": {
       "beginner": "Pushing your two pawns at their three, so that when they trade off, one of their pawns is left weak.",

@@ -175,7 +175,34 @@
       "false_positive_case": "a-quiet-move-preventing-nothing"
     }
   ],
-  "ambiguous_examples": [],
+  "ambiguous_examples": [
+    {
+      "fen": "1r1q3k/4r1pn/7p/p1p1PR2/2Bp4/1P4Q1/P5PP/5RK1 w - - 5 30",
+      "move": "h4",
+      "move_uci": "h2h4",
+      "note": "Fischer-Spassky 1972, game 6, 30.h4 - and the ambiguity is which concept it belongs to. This base carries it as `restraint`'s positive example, on the annotation '30.h4! Restricting the knight on h7 even further'. But Havanur's wording names a SPECIFIC idea being prevented: 'after this move neither the black queen nor the knight can use g5 as a springboard.' Naming the specific idea is exactly what this record demands before a prophylaxis claim can be made - its first trap is 'the claim requires naming the specific idea prevented' - and a named annotator has named it. The two concepts are separated in this base on the general-versus-specific line, and this move is on the line. The engine adds a second layer: it is the THIRD choice at +3.75 against +4.15 for 30.e6, so the restraining move is good and not best.",
+      "origin_kind": "historical-game",
+      "game": "Fischer-Spassky, World Championship, Reykjavik 1972 (game 6)",
+      "concept_role": "ambiguous",
+      "attributed_by": "Nagesh Havanur (ChessBase, 2022) - corpus entry fischer-spassky-1972-g6-30h4-restriction",
+      "engine": {
+        "engine_id": "Stockfish 18",
+        "test_level": 3,
+        "depth": 22,
+        "threads": 10,
+        "hash_mb": 4096,
+        "multipv": 3,
+        "best_move": "e6",
+        "eval_cp": 415,
+        "mate_in": null,
+        "pv": [],
+        "alternatives": [],
+        "margin_cp": null,
+        "verdict": "ambiguous",
+        "verdict_note": "The annotated move is the engine's THIRD choice at +3.75, against +4.15 for 30.e6, at depth 22 with three lines. Partial agreement, and the gap is 40 centipawns - small enough that the move is not refuted and large enough that it is not endorsed either."
+      }
+    }
+  ],
   "explanations": {
     "by_level": {
       "beginner": "Instead of asking what you want to do, ask what they want to do — and stop it.",

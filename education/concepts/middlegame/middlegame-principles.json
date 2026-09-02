@@ -129,7 +129,30 @@
     }
   ],
   "counterexamples": [],
-  "ambiguous_examples": [],
+  "ambiguous_examples": [
+    {
+      "fen": "r1bq1rk1/pp3ppp/2n5/3Np3/4P3/8/PP3PPP/R1BQ1RK1 w - - 0 1",
+      "note": "Two of this record's principles apply and point at different moves. A knight sits on a permanent outpost and the forcing continuation Ne7+ is available, which is one principle - examine the forcing moves. The other is that when nothing is urgent the right move improves the piece doing least, and the piece doing least is the bishop on c1. The engine plays Be3, the quiet move, at +0.30. Filed as ambiguous because both principles are correctly applicable and this record contains no rule for ordering them: what a middlegame principle gives is a list of candidates and not a choice between them, and the position where two of them disagree is the ordinary case rather than the exception.",
+      "origin_kind": "constructed-test",
+      "concept_role": "ambiguous",
+      "engine": {
+        "engine_id": "Stockfish 18",
+        "test_level": 3,
+        "depth": 22,
+        "threads": 10,
+        "hash_mb": 4096,
+        "multipv": 1,
+        "best_move": "c1e3",
+        "eval_cp": 30,
+        "mate_in": null,
+        "pv": [],
+        "alternatives": [],
+        "margin_cp": null,
+        "verdict": "ambiguous",
+        "verdict_note": "+0.30 for the quiet developing move, in a position that also offers a check. Both principles name a real move and only one of them names the best one."
+      }
+    }
+  ],
   "explanations": {
     "by_level": {
       "beginner": "Once your pieces are out, there is no rule to follow — look at the position and find something to aim at.",

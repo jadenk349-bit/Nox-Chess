@@ -172,7 +172,30 @@
       "false_positive_case": "a-sacrifice-whose-point-is-mate"
     }
   ],
-  "ambiguous_examples": [],
+  "ambiguous_examples": [
+    {
+      "fen": "r1bqk1nr/pppp1ppp/2n5/4p3/1bB1P3/5N2/P1PP1PPP/RNBQK2R w KQkq - 0 5",
+      "note": "The Evans Gambit accepted. A pawn given for a tempo, the c3 and d4 squares and a half-open b-file - no attack yet, no forced line, and nothing material coming back. Whether that is a POSITIONAL sacrifice is precisely what this record refuses to settle, and its third trap says why: 'Spielmann's sense and the modern sense are opposite; using the phrase without saying which is meant is itself a false positive.' In Spielmann's vocabulary a sacrifice for lasting positional assets with no calculable return is the real sacrifice; in the modern one a gambit whose compensation is measurable is not a sacrifice at all. The engine measures it at -0.10 - full compensation exactly - which is the reading that satisfies both senses and settles neither.",
+      "origin_kind": "constructed-test",
+      "concept_role": "ambiguous",
+      "engine": {
+        "engine_id": "Stockfish 18",
+        "test_level": 3,
+        "depth": 24,
+        "threads": 10,
+        "hash_mb": 4096,
+        "multipv": 1,
+        "best_move": "c2c3",
+        "eval_cp": -10,
+        "mate_in": null,
+        "pv": [],
+        "alternatives": [],
+        "margin_cp": null,
+        "verdict": "ambiguous",
+        "verdict_note": "-0.10 at depth 24, a pawn down. The same position is `compensation`'s ambiguous example, and the two records disagree about what to call it while agreeing entirely about the board."
+      }
+    }
+  ],
   "explanations": {
     "by_level": {
       "beginner": "This gives up material not to attack, but to get something that lasts — a better pawn structure, or a square their pieces can never take back.",
