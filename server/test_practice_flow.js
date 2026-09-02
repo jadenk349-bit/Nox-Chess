@@ -182,13 +182,15 @@ function selectMode(m){ visionsPicked.push(m); }
 /* ---- the real half ---- */
 var DECLS = ['VAL','FILES','rowOf','colOf','SQNAME','uciOf','sqName','onBoard','other',
              'idCounter','mk','DIR_N','DIR_B','DIR_R','DIR_K','PST','nodes','PIECE_NAME',
-             'pieceHTML','W'];
+             'GLYPH','pieceHTML','W'];
 var FNS = ['startBoard','newState','cloneState','fenOf','stateFromFEN',
            'slide','step','addPawn','pseudoMoves','isAttacked','kingSq','inCheck',
            'makeMove','legalMoves','toSAN','attackersOf','defendersOf','see',
            'mirror','evaluate','orderMoves','scoreMove','quiesce','negamax','bestMove',
            'parseMoveIn'];
 var bundle = [grab(/\nconst W = 'w', B = 'b';/, "const W/B")];
+// a multi-line string rather than an object, so neither shape of decl() fits it
+bundle.push(grab(/\nconst BISHOP_SVG =\n[\s\S]*?';\n/, 'BISHOP_SVG'));
 for (var d = 0; d < DECLS.length; d++) if (DECLS[d] !== 'W') bundle.push(decl(DECLS[d]));
 for (var f = 0; f < FNS.length; f++) bundle.push(fn(FNS[f]));
 // the whole PRACTICE section, top level and all — this is the screen itself

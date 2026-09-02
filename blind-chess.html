@@ -229,50 +229,39 @@
   /* ---------- board ---------- */
   .board-col{display:flex; flex-direction:column; align-items:center; gap:14px;}
 
-  /* The frame is the photographed board's own frame, cut out of the shot and
-     hung on the element as a nine-slice: the mitred corners keep their mitres
-     at every board size and only the four sides stretch. It is a border and
-     not padding on purpose — --board-max measures the board inside it, and a
-     border-box element then keeps the men square whatever the viewport does.
-     The thin gold liner is part of the photograph, which is why nothing here
-     draws one. */
   .board-frame{
-    --frame:20px;
-    padding:0;
-    border:var(--frame) solid transparent;
-    border-image:url(assets/board-frame.webp?v=1) 69 66 64 68 / var(--frame) stretch;
-    border-radius:0;
-    background:#0b0d13;
-    box-shadow:0 24px 60px rgba(0,0,0,.55);
+    padding:16px;
+    border-radius:18px;
+    background:linear-gradient(160deg,#2a2318,#171410 55%,#241d13);
+    border:1px solid #3a2f1f;
+    box-shadow:0 24px 60px rgba(0,0,0,.55), inset 0 1px 0 rgba(255,255,255,.06);
     position:relative;
     width:min(100%, var(--board-max));
   }
-  @media (max-width:560px){ .board-frame{--frame:13px;} }
+  .board-frame::after{
+    content:""; position:absolute; inset:8px; border-radius:12px;
+    border:1px solid rgba(217,164,65,.22); pointer-events:none;
+  }
 
-  /* One photograph of one board, stretched over the whole grid: every square
-     carries the nebula or the sand it was photographed with, so no two are
-     alike. The squares themselves stay transparent — they are hit targets and
-     highlights, not paint. */
   .board{
     position:relative;
     width:100%; aspect-ratio:1/1;
     container-type:size;
-    overflow:hidden;
-    background:url(assets/board-squares.webp?v=1) center / 100% 100% no-repeat, #121a28;
+    border-radius:6px; overflow:hidden;
     box-shadow:inset 0 0 0 1px rgba(0,0,0,.5), 0 0 30px rgba(0,0,0,.35);
   }
   .squares{position:absolute; inset:0; display:grid; grid-template-columns:repeat(8,1fr); grid-template-rows:repeat(8,1fr);}
   .sq{position:relative; user-select:none; cursor:pointer;}
+  .sq.light{background:linear-gradient(160deg,#efe3cc,#e2d3b5);}
+  .sq.dark{background:linear-gradient(160deg,#87684a,#6d5137);}
   .sq .coord{
     position:absolute; font-size:9.5px; font-weight:700; letter-spacing:.05em;
     opacity:.5; pointer-events:none;
   }
   .sq .coord.file{right:3px; bottom:1px;}
   .sq .coord.rank{left:3px; top:1px;}
-  /* both squares are photographed and busy, so a coordinate gets a shadow in
-     the other square's colour rather than more opacity */
-  .sq.light .coord{color:#4b3a22; text-shadow:0 1px 0 rgba(255,248,232,.35);}
-  .sq.dark  .coord{color:#dbcfb6; text-shadow:0 1px 1px rgba(0,0,0,.55);}
+  .sq.light .coord{color:#6d5137;}
+  .sq.dark  .coord{color:#efe3cc;}
 
   .sq.last::before{
     content:""; position:absolute; inset:0;
@@ -284,18 +273,15 @@
     background:rgba(111,191,115,.30);
     box-shadow:inset 0 0 0 3px rgba(111,191,115,.75);
   }
-  /* a dark dot vanishes on a night square, so each tone gets its own */
   .sq.hint::after{
     content:""; position:absolute; left:50%; top:50%;
     width:26%; height:26%; transform:translate(-50%,-50%);
-    border-radius:50%; background:rgba(20,20,20,.32);
+    border-radius:50%; background:rgba(20,20,20,.30);
   }
-  .sq.dark.hint::after{background:rgba(233,240,252,.42);}
   .sq.hint.occupied::after{
     width:88%; height:88%; background:transparent;
-    border:4px solid rgba(20,20,20,.30); border-radius:50%;
+    border:4px solid rgba(20,20,20,.28); border-radius:50%;
   }
-  .sq.dark.hint.occupied::after{border-color:rgba(233,240,252,.40);}
   .sq.check::before{
     content:""; position:absolute; inset:0;
     background:radial-gradient(circle at 50% 50%, rgba(224,90,77,.85), rgba(224,90,77,0) 70%);
@@ -319,34 +305,36 @@
   .piece{
     position:absolute; left:0; top:0; width:12.5%; height:12.5%;
     display:flex; align-items:center; justify-content:center;
+    /* a square is 12.5cqmin of the board, so this is the glyph's share of it */
+    font-size:min(10.3vw,74px); line-height:1;   /* fallback: no container queries */
+    font-size:11.5cqmin;
     transition:transform .22s cubic-bezier(.2,.9,.3,1), opacity .3s ease;
     will-change:transform;
   }
   .piece span{
-    display:block; width:100%; height:100%;
+    display:block; transform:translateY(-2%);
     transition:opacity .35s ease, filter .35s ease;
   }
-
-  /* The men are photographed too — one sheet, six columns in the order
-     K Q R B N P and two rows, white above black. --pc-x names the man and
-     --pc-y his colour, so the same tag serves the board, the promotion
-     picker, the captured tray and the practice answers; only the colour is
-     inherited, from whatever the man is standing in. Each cell holds the man
-     inside the square he was photographed on, which is why the art is laid
-     over the whole square and not centred in part of it. */
-  .pcart{
-    display:inline-block; width:1.34em; height:1.34em; vertical-align:-.36em;
-    background-image:url(assets/pieces.webp?v=1);
-    background-size:600% 200%;
-    background-position:var(--pc-x,0%) var(--pc-y,0%);
-    background-repeat:no-repeat;
-    filter:drop-shadow(0 2px 3px rgba(0,0,0,.5));
+  .piece.w span{
+    color:#fbf6ea;
+    -webkit-text-stroke:1.6px #2a2118;
+    text-shadow:0 3px 5px rgba(0,0,0,.45);
   }
-  .pc-K{--pc-x:0%;}  .pc-Q{--pc-x:20%;} .pc-R{--pc-x:40%;}
-  .pc-B{--pc-x:60%;} .pc-N{--pc-x:80%;} .pc-P{--pc-x:100%;}
-  .piece.w, .g-w{--pc-y:0%;}
-  .piece.b, .g-b{--pc-y:100%;}
-  .piece .pcart{display:block; width:100%; height:100%; vertical-align:0;}
+  .piece.b span{
+    color:#22242c;
+    -webkit-text-stroke:1.4px #0a0b0e;
+    text-shadow:0 3px 5px rgba(0,0,0,.4), 0 0 1px rgba(255,255,255,.35);
+  }
+  /* the hand-drawn bishop, sized and weighted to sit with the glyph set */
+  .pc-svg{
+    width:.72em; height:.72em; display:inline-block; vertical-align:-.08em;
+    fill:currentColor; stroke:none; overflow:visible;
+  }
+  .pc-svg .slit{fill:none;}
+  .piece span .pc-svg{display:block; filter:drop-shadow(0 3px 5px rgba(0,0,0,.45));}
+  .piece.w span .pc-svg{fill:#fbf6ea; stroke:#2a2118;}
+  .piece.b span .pc-svg{fill:#22242c; stroke:#0a0b0e;}
+  .promo .pc-svg{width:.8em; height:.8em;}
 
   .piece.gone{opacity:0; transform-origin:center; }
   .piece.pop span{animation:pop .3s ease;}
@@ -1514,10 +1502,11 @@
   .pr-ans.glyphs{display:grid; grid-template-columns:repeat(6,1fr);}
   .pr-ans.glyphs button{min-width:0; padding:5px 0; font-size:23px; line-height:1.15;}
   .pr-ans.glyphs button.wide{grid-column:1/-1; font-size:12px; padding:9px 0;}
-  .pr-ans.glyphs .pcart{width:1.5em; height:1.5em; margin:0 auto; display:block;}
-  /* off the board the Black men are dark art on a dark button, so they get a
-     rim of light rather than a lighter button — the board's men are untouched */
-  .pr-ans.glyphs .g-b .pcart{filter:drop-shadow(0 0 3px rgba(206,218,240,.5));}
+  .pr-ans.glyphs .pc-svg{width:.86em; height:.86em; margin:0 auto;}
+  .pr-ans .g-w{color:#fbf6ea; -webkit-text-stroke:1.2px #2a2118;}
+  .pr-ans .g-b{color:#2c2f3a; -webkit-text-stroke:1.2px #0a0b0e;}
+  .pr-ans .g-w .pc-svg{fill:#fbf6ea; stroke:#2a2118; stroke-width:1.5;}
+  .pr-ans .g-b .pc-svg{fill:#2c2f3a; stroke:#0a0b0e; stroke-width:1.5;}
   .pr-ans input{
     flex:1; min-width:0; font:inherit; font-size:15px; letter-spacing:.16em; text-align:center;
     font-family:ui-monospace,SFMono-Regular,Menlo,monospace;
@@ -2035,10 +2024,8 @@
     background:var(--well); box-shadow:inset 0 1px 3px rgba(0,0,0,.40);
   }
   .capbar + .capbar{margin-top:7px;}
-  .tray{min-height:26px; font-size:17px; line-height:1.1; color:#cdc6b8;}
-  /* the men are photographs with their square's worth of air around them, so
-     they are pulled together here rather than sitting a glyph's width apart */
-  .tray .pcart{width:1.6em; height:1.6em; vertical-align:-.5em; margin:0 -.22em;}
+  .tray{min-height:26px; font-size:20px; line-height:1.1; letter-spacing:1px; color:#cdc6b8;}
+  .tray .b{color:#7e8290;}
   .adv{
     font-size:11px; letter-spacing:.06em; font-weight:650; color:var(--good);
     font-variant-numeric:tabular-nums;
@@ -2383,8 +2370,7 @@
   }
   .modal-x:hover{color:var(--text); border-color:var(--line); transform:none;}
   .promo{display:flex; gap:10px; justify-content:center;}
-  .promo button{font-size:30px; padding:6px 14px; line-height:1.1; color:#fbf6ea;}
-  .promo .pcart{width:1.7em; height:1.7em; vertical-align:middle;}
+  .promo button{font-size:38px; padding:6px 14px; line-height:1.1; color:#fbf6ea;}
 
   footer{margin-top:28px; text-align:center; color:#5c6070; font-size:11.5px; letter-spacing:.12em;}
   kbd{
@@ -3074,13 +3060,11 @@
           <div class="card panel">
             <h2>Captured</h2>
             <div class="capbar">
-              <!-- the tray on White's row holds the Black men White has taken, so it
-                   is g-b: the class names the colour of the art, not of the player -->
-              <div class="tray g-b" id="trayW">—</div>
+              <div class="tray" id="trayW">—</div>
               <div class="adv" id="advW"></div>
             </div>
             <div class="capbar">
-              <div class="tray b g-w" id="trayB">—</div>
+              <div class="tray b" id="trayB">—</div>
               <div class="adv" id="advB"></div>
             </div>
           </div>
@@ -3450,13 +3434,22 @@ const SUPABASE_ANON_KEY = 'sb_publishable_FixWUIJ1j8-02yTOg6-rog_ag-ctyET';
    CONSTANTS & HELPERS
    ============================================================ */
 const W = 'w', B = 'b';
-// The men are cut out of a photograph of one board (assets/pieces.webp,
-// made by tools/make_board_art.py) rather than typeset: a font's chess
-// glyphs are flat silhouettes, and half the point of this board is that
-// its men are cast metal catching light. Which man this is goes in the
-// class; whose he is comes from the .w/.b or .g-w/.g-b he sits in, so one
-// tag serves the board, the promotion picker, the tray and the drills.
-const pieceHTML = t => '<i class="pcart pc-' + t + '" aria-hidden="true"></i>';
+const GLYPH = { K:'♚', Q:'♛', R:'♜', B:'♝', N:'♞', P:'♟' };
+
+// The font's bishop is a ball with a small cross — near-identical to the pawn at
+// board size. This one is a proper mitre: tall, pointed, with the diagonal slit.
+const BISHOP_SVG =
+  '<svg class="pc-svg" viewBox="0 0 45 45" aria-hidden="true">' +
+    '<g stroke-width="1.5" stroke-linejoin="round" stroke-linecap="round">' +
+      '<path d="M11 38.6h23c1.2 0 1.2 2.2 0 2.2H11c-1.2 0-1.2-2.2 0-2.2z"/>' +
+      '<path d="M14.5 33h16c2 0 3 2 1.7 3.5l-.9 1H13.7l-.9-1c-1.3-1.5-.3-3.5 1.7-3.5z"/>' +
+      '<path d="M22.5 9c4.8 5.6 7.6 11 7.1 15.6-.3 2.9-3 4.9-7.1 4.9s-6.8-2-7.1-4.9C14.9 20 17.7 14.6 22.5 9z"/>' +
+      '<circle cx="22.5" cy="7.2" r="2.4"/>' +
+      '<path class="slit" d="M19.2 17.4l6 6.4"/>' +
+    '</g>' +
+  '</svg>';
+
+const pieceHTML = t => t === 'B' ? BISHOP_SVG : GLYPH[t];
 const VAL   = { P:100, N:320, B:330, R:500, Q:900, K:20000 };
 const FILES = 'abcdefgh';
 
@@ -4745,8 +4738,7 @@ function askPromotion(moves){
   el.promoBtns.innerHTML = '';
   for (const q of ['Q','R','B','N']){
     const b = document.createElement('button');
-    // the picker shows the man in the colour of whoever is promoting
-    b.innerHTML = `<span class="g-${moves[0].p.c}">${pieceHTML(q)}</span>`;
+    b.innerHTML = `<span style="-webkit-text-stroke:1.4px #2a2118">${pieceHTML(q)}</span>`;
     b.onclick = () => {
       el.promoOverlay.classList.remove('show');
       const m = G.pendingPromo.find(x => x.promo === q);

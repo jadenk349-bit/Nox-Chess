@@ -31,8 +31,6 @@ node tools/generate_puzzles.js --poolsIn /tmp/pools.json    # re-cut the ladders
 node tools/verify_puzzles.js --track endgame                # re-check one shipped ladder
 node tools/verify_puzzles.js --track endgame --write        # …and save the corrections
 
-python3 tools/make_board_art.py <men.png> <empty.png>       # re-cut the board art (needs pillow, numpy, scipy)
-
 docker build -t nox-chess . && docker run --rm -p 8787:8787 nox-chess
 ```
 
@@ -198,28 +196,6 @@ code the browser explains them with. `tools/sf.js` drives the vendored engine
 in a forked process (Node needs `delete global.fetch` and a cwd of `engine/`,
 both explained there). Renaming anything in that file's DECLS/FNS lists breaks
 the tools loudly, which is the trade for having one implementation.
-
-**The board is a photograph, and so are the men.** `assets/board-squares.webp`
-(the 8x8 playfield), `assets/board-frame.webp` (the surround) and
-`assets/pieces.webp` (twelve men, a 6x2 sheet, white row above black) are all
-cut out of two shots of one board — one with the men on it, one empty — by
-`tools/make_board_art.py`. The empty shot is not decoration: it is what tells
-the cutter where a man ends and his square begins, and it is the only thing
-that separates the queens, each of whom stands on her own colour. The
-playfield is rebuilt square by square rather than scaled whole, because the
-photographed squares are a couple of pixels off a perfect grid and the page
-draws its highlights on a perfect one — that resampling is what keeps a
-highlight on top of the square it belongs to.
-
-The page therefore paints no squares and draws no men. `.sq.light`/`.sq.dark`
-carry no colour any more; they still name the tone, because the coordinates,
-the move dots and the practice colour drill all ask which one a square is. The
-frame is a CSS nine-slice (`border-image` on `.board-frame`) so its mitred
-corners survive every board size, and the thin gold liner is part of the
-photograph — nothing draws one. `pieceHTML(t)` returns a tag that names the
-man; whose he is comes from the `.w`/`.b` or `.g-w`/`.g-b` he sits in, which is
-what lets one tag serve the board, the promotion picker, the captured tray and
-the practice answers.
 
 **Two engines.** `blind-chess.html` contains a small negamax/alpha-beta search
 (`bestMove`) *and* drives the vendored Stockfish WASM worker over UCI (`SF`,
