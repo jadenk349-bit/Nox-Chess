@@ -231,6 +231,50 @@ const TESTS = {
     return null;
   },
 
+  // LPDO - loose pieces drop off. The record is careful about what it is: "a
+  // mnemonic for a statistical fact about practical play rather than a rule
+  // about correct play", so the evidence for it is not a clever move. It is a
+  // position where a piece was LOOSE and that is why the tactic worked.
+  //
+  // So: before the move an enemy piece stands undefended and unattacked - which
+  // is `loose-piece`'s own definition - and the move creates a second threat
+  // that makes it the target. The loose piece must be the thing that falls, and
+  // it must have been loose BEFORE, or the mnemonic is being credited for
+  // something else.
+  lpdo(st, mv, after) {
+    const us = st.turn, them = other(us);
+    const loose = [];
+    for (let i = 0; i < 64; i++) {
+      const q = st.b[i];
+      if (!q || q.c !== them || q.t === 'K' || q.t === 'P') continue;
+      try {
+        if (P.defendersOf(st, i, them).length) continue;      // defended
+        if (P.attackersOf(st, i, us).length) continue;        // already attacked
+      } catch (e) { continue; }
+      loose.push(i);
+    }
+    if (!loose.length) return null;
+    // ...and after the move it is attacked and winnable, and it was not before.
+    const winnable = (s, i) => {
+      const probe = P.cloneState(s); probe.turn = us; probe.ep = -1;
+      try { return P.see(probe, i, us) > 0; } catch (e) { return false; }
+    };
+    const target = loose.find(i => i !== mv.to && winnable(after, i));
+    if (target === undefined) return null;
+    // and something ELSE must be threatened too, or this is a simple attack on
+    // a hanging piece rather than the double threat the record describes.
+    let second = null;
+    for (let i = 0; i < 64; i++) {
+      const q = after.b[i];
+      if (!q || q.c !== them || i === target) continue;
+      if (q.t === 'K') { if (P.inCheck(after, them)) second = i; continue; }
+      if (winnable(after, i) && !winnable(st, i)) second = i;
+    }
+    if (second === null) return null;
+    return { note: nameOf(target) + ' was loose before the move - undefended and unattacked - ' +
+                   'and is now the second target beside ' + nameOf(second) };
+  },
+
   // A DOUBLE ATTACK BY TWO PIECES, which is the case this record keeps the name
   // for. Its own definition says "a fork is a double attack by a single piece;
   // a discovered attack is a double attack by two pieces, one moving and one

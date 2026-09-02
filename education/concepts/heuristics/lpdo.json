@@ -93,7 +93,7 @@
   "limitations": [
     "A search heuristic, not an evaluation. It suggests where to look; it does not say a move is bad.",
     "Its force decreases as calculation increases.",
-    "NO MASTER-GAME POSITION YET. This concept has no matcher, so the scan that supplied master positions to eleven other records - five famous games replayed and analysed position by position - could not nominate one here: the API never reports the concept, so there is nothing for a scan to find. Identifying an instance in a master game means reading the game, which is research rather than tooling, and it has not been done. Recorded rather than filled."
+    "NO MASTER-GAME POSITION YET. This concept has no matcher, so the scan that supplied master positions to eleven other records - five famous games replayed and analysed position by position - could not nominate one here: the API never reports the concept, so there is nothing for a scan to find. Identifying an instance in a master game means reading the game, which is research rather than tooling, and it has not been done. Recorded rather than filled. RESOLVED: Kramnik-Yakovich, GMA-qual 1989, 18.Bd3, above."
   ],
   "misconceptions": [
     "That LPDO means you should defend every piece.",
@@ -138,6 +138,50 @@
         "margin_cp": null,
         "verdict": "supports",
         "verdict_note": "+2.81 at depth 22, and the engine's first move is Qxe1 - a capture of a loose piece. The record is 'loose pieces drop off' and the evaluation is what a position full of them is worth: nearly three pawns to the side to move, in a position where material is otherwise level."
+      }
+    },
+    {
+      "fen": "r3r1k1/1p1q1pp1/1bpp2np/pB2p3/P2Pn3/1QP1BN1P/1P3PP1/R3R1K1 w - - 0 18",
+      "move": "Bd3",
+      "move_uci": "b5d3",
+      "origin_kind": "historical-game",
+      "game": "Kramnik-Yakovich, GMA-qual 1989",
+      "concept_role": "positive",
+      "side_to_move_benefits": "white",
+      "note": "THE MNEMONIC DOING WHAT IT CLAIMS TO DO. Black's bishop on b6 is loose - no black man defends it and no white man attacks it, which is `loose-piece`'s definition exactly. Nothing is wrong with it and nothing is threatening it. Then 18.Bd3 goes after the knight on e4, and the loose bishop turns out to be why the sequence works: 18...exd4 19.Bxd4 Bxd4 20.Bxe4 Rxe4 21.Rxe4, and every exchange in that line runs through a piece that was undefended when the move was played.\n\nStockfish 18 at depth 28 with three lines: +1.37 for Bd3, against −1.13 and −1.26 for the next two. **The move is the difference between better and worse — a swing of 250 centipawns — and nothing about it is forcing.**\n\nWHAT THIS RECORD IS AND IS NOT. It is 'a mnemonic for a statistical fact about practical play rather than a rule about correct play', in its own words, so the evidence for it is not a clever move. It is a position where the tactic works BECAUSE a piece was loose, and the search that found it insisted on exactly that: the piece must be undefended and unattacked BEFORE the move, and the move must create a second threat, or the mnemonic is being credited for an ordinary attack on a hanging piece.\n\nPROVENANCE. Found by tools/mine_master_motifs.js over 2,822,256 positions from 35,648 replayed games. Replayed legally through the page's own move generator. No annotator read.",
+      "engine": {
+        "engine_id": "Stockfish 18",
+        "test_level": 3,
+        "depth": 28,
+        "multipv": 3,
+        "best_move": "b5d3",
+        "eval_cp": 137,
+        "mate_in": null,
+        "pv": [
+          "b5d3",
+          "e5d4",
+          "e3d4",
+          "b6d4",
+          "d3e4",
+          "e8e4",
+          "e1e4",
+          "d4c5",
+          "b3c2",
+          "d6d5"
+        ],
+        "alternatives": [
+          {
+            "move": "b5f1",
+            "eval_cp": -113
+          },
+          {
+            "move": "b5c4",
+            "eval_cp": -126
+          }
+        ],
+        "margin_cp": 250,
+        "verdict": "supports",
+        "verdict_note": "+1.37 against −1.13 at depth 28. A 250-centipawn swing on a quiet bishop retreat, and the loose bishop on b6 is the reason."
       }
     }
   ],
