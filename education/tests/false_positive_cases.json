@@ -739,6 +739,27 @@
       "status": "resolved",
       "evidence": "feature-detector",
       "resolution": "The move generator produces one legal move, h1g2, and it is a capture. The matcher does report fifty-move-rule here — correctly, because what it says is '96 ply have passed with no capture and no pawn move; at 100 either side may claim a draw', which is true and is a statement about the count rather than a prediction. This case is registered to hold that distinction in place: the concept is about a counter, the counter is at 96, and whether it ever reaches 100 is a question about the game and not about the position. A matcher that tried to predict it would be guessing."
+    },
+    {
+      "id": "the-same-piece-moved-twice",
+      "concept": "tempo",
+      "surface_pattern": "White's bishop has gone b5 then a4: the same piece moved twice in the opening, and Black has developed a piece in between. By the rule as it is usually taught, White has lost a tempo.",
+      "why_not": "This record's third trap, and it is the one the record itself says is registered: \"Treating 'moved the same piece twice' as automatically a lost tempo. This is a registered false-positive case: a capture, an escape, or a decisively better square are all reasons to move it again.\" Here it is an escape — Black played ...a6 to attack the bishop — and the tempo Black spent attacking it is the same tempo White spent retreating.",
+      "fen": "r1bqkbnr/1ppp1ppp/p1n5/4p3/B3P3/5N2/PPPP1PPP/RNBQK2R b KQkq - 1 4",
+      "status": "resolved",
+      "evidence": "feature-detector + engine",
+      "resolution": "WRITTEN BECAUSE THE RECORD CLAIMED IT ALREADY EXISTED. The `tempo` record said 'this is a registered false-positive case' and no case with that concept was in this file — a claim the file did not back, which is the same defect class as an `implements` string claiming what the code does not do. A test now asserts that any record using that phrase has a case. The position is the Ruy Lopez after 4.Ba4, the most-played opening in the history of the game; Stockfish 18 at depth 22 says -0.43 from Black's side, an ordinary opening edge for White. The API reports nothing about tempo here, correctly: this base has no tempo matcher, because counting tempi requires knowing whether the forced reply was one the opponent wanted, and that is not on the board."
+    },
+    {
+      "id": "philidor-with-the-pawn-further-back",
+      "concept": "philidor-position",
+      "status": "open",
+      "surface_pattern": "A rook-and-pawn ending with the defending rook NOT on its third rank and the attacking king already escorting the pawn. This is what a failed Philidor defence should look like.",
+      "why_not": "The Philidor defence has a condition — the rook holds the third rank until the pawn reaches the sixth, and then checks from behind. A position where the defender has not set up should be lost, and showing that is what a counterexample here would do.",
+      "fen": "8/8/8/4k3/4p3/4K3/R7/1r6 w - - 0 1",
+      "status_note": "OPEN. Four constructions have been tried and Syzygy answered DRAW to every one of them: R7/8/8/8/4k3/4p3/1r6/4K3 b, 8/8/8/4k3/4p3/8/R7/1r2K3 w, 8/8/8/4k3/4p3/4K3/R7/1r6 w and the position on this line, all dtz 0. With the pawn on the fourth rank the defence holds from almost anywhere, which is itself the finding: the method is far more robust than the textbook statement of it, and the position that would show it failing needs the pawn further advanced AND the defending rook misplaced AND the defending king cut off, which is three conditions rather than one.",
+      "evidence": "tablebase",
+      "resolution": "NOT RESOLVED, and recorded so. This case is deliberately left open rather than filled with a position that does not show what it claims. tools/depth_report.py counts only resolved and partially-resolved cases towards a concept's false-positive coverage, so nothing in this base's score moves because this exists - it is here to keep a known gap visible, which is the whole reason the file has a status field."
     }
   ],
   "last_updated": "2026-09-01"

@@ -94,7 +94,15 @@
     "conflicts": []
   },
   "examples": [],
-  "counterexamples": [],
+  "counterexamples": [
+    {
+      "fen": "r1bqkbnr/1ppp1ppp/p1n5/4p3/B3P3/5N2/PPPP1PPP/RNBQK2R b KQkq - 1 4",
+      "note": "Registered false-positive case `the-same-piece-moved-twice`, kept on the record as well as in tests/false_positive_cases.json so that the concept carries its own negative evidence. THE SURFACE PATTERN IS PRESENT: White's bishop has gone b5 then a4: the same piece moved twice in the opening, and Black has developed a piece in between. By the rule as it is usually taught, White has lost a tempo. WHY IT IS NOT THE CONCEPT: This record's third trap, and it is the one the record itself says is registered: \"Treating 'moved the same piece twice' as automatically a lost tempo. This is a registered false-positive case: a capture, an escape, or a decisively better square are all reasons to move it again.\" Here it is an escape — Black played ...a6 to attack the bishop — and the tempo Black spent attacking it is the same tempo White spent retreating. WHAT THE SYSTEM DOES: WRITTEN BECAUSE THE RECORD CLAIMED IT ALREADY EXISTED. The `tempo` record said 'this is a registered false-positive case' and no case with that concept was in this file — a claim the file did not back, which is the same defect class as an `implements` string claiming what the code does not do. A test now asserts that any record using that phrase has a case. The position is the Ruy Lopez after 4.Ba4, the most-played opening in the history of the game; Stockfish 18 at depth 22 says -0.43 from Black's side, an ordinary opening edge for White. The API reports nothing about tempo here, correctly: this base has no tempo matcher, because counting tempi requires knowing whether the forced reply was one the opponent wanted, and that is not on the board.",
+      "origin_kind": "constructed-test",
+      "concept_role": "negative",
+      "false_positive_case": "the-same-piece-moved-twice"
+    }
+  ],
   "ambiguous_examples": [],
   "explanations": {
     "by_level": {

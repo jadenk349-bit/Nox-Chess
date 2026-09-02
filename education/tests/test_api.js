@@ -266,6 +266,30 @@ const { concepts } = API.knowledge();
   ok('FP: replayed every resolved case with a FEN', replayed >= 6, `replayed ${replayed}`);
 }
 
+/* ---------- a record may not claim a case that does not exist ---------- */
+{
+  // The `tempo` record said "this is a registered false-positive case" and no
+  // case with that concept was in the file. That is the same defect class as an
+  // `implements` string claiming what the code does not do, and it went
+  // unnoticed because nothing compared the two files.
+  const cases = JSON.parse(fs.readFileSync(path.join(ROOT, 'tests', 'false_positive_cases.json'), 'utf8')).cases;
+  const withCase = new Set(cases.map(c => c.concept));
+  const claims = [];
+  for (const dir of fs.readdirSync(path.join(ROOT, 'concepts'))) {
+    const dp = path.join(ROOT, 'concepts', dir);
+    if (!fs.statSync(dp).isDirectory()) continue;
+    for (const fn of fs.readdirSync(dp)) {
+      if (!fn.endsWith('.json')) continue;
+      const raw = fs.readFileSync(path.join(dp, fn), 'utf8');
+      if (!/registered false[- ]positive case/i.test(raw)) continue;
+      const c = JSON.parse(raw);
+      if (!withCase.has(c.id)) claims.push(c.id);
+    }
+  }
+  ok('every record claiming a registered false-positive case has one',
+     claims.length === 0, claims.join(', '));
+}
+
 /* ---------- wording: never emit an unfilled template ---------- */
 {
   // 25 concept records write their explanations as templates with {slots}, which

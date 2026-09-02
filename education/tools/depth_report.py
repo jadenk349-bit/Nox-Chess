@@ -185,7 +185,15 @@ def main():
     area_domain = {ar["id"]: d["id"] for d in tax["domains"] for ar in d["areas"]}
 
     fp = json.load(open(os.path.join(HERE, "tests", "false_positive_cases.json"), encoding="utf-8"))
-    fp_concepts = {c.get("concept") for c in fp["cases"]}
+    # RESOLVED cases only. A registered case with status "open" is a known gap
+    # written down, which is worth doing and is not the same as having tested
+    # the concept - and counting it here would let an unresolved problem tick
+    # the box that says the concept HAS a false-positive test. Every case in the
+    # file is currently resolved or partially-resolved, so this changes no
+    # number today; it is here so that writing an open case tomorrow cannot
+    # quietly raise the score.
+    fp_concepts = {c.get("concept") for c in fp["cases"]
+                   if c.get("status") in ("resolved", "partially-resolved")}
 
     for c in C.values():
         c["_check"] = checklist(c, fp_concepts)
