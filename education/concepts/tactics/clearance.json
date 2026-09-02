@@ -55,17 +55,38 @@
     "false_positive_traps": []
   },
   "application": {
-    "typical_plans": [],
-    "typical_moves": [],
+    "typical_plans": [
+      "Look for your own piece standing on the square or line that another piece wants, and price the move that empties it",
+      "Count the tempo: a clearance is only sound if the follow-up is forcing, because the vacated square is worth nothing on the opponent's move",
+      "In endgames, clear a queening square or the file in front of a passed pawn rather than a diagonal"
+    ],
+    "typical_moves": [
+      "A minor piece stepping off a long diagonal with check, so the queen behind it arrives with the opponent still answering",
+      "A rook giving itself up on the back rank so a pawn can promote",
+      "A knight jumping to a square where it is taken, purely to unblock a file"
+    ],
     "typical_pawn_structures": [],
-    "typical_piece_arrangements": [],
-    "tactical_consequences": [],
-    "strategic_consequences": []
+    "typical_piece_arrangements": [
+      "Queen and bishop on one diagonal with a friendly piece between them",
+      "Doubled rooks with a friendly minor on the file in front"
+    ],
+    "tactical_consequences": [
+      "The vacating move is usually a sacrifice, so material counting about it is misleading by design",
+      "Clearance and interference are the same geometry read from opposite sides: one empties a line of yours, the other fills a line of theirs"
+    ],
+    "strategic_consequences": [
+      "Rarely a strategic idea. Clearance is almost always a one-move tactical device inside a forced line"
+    ]
   },
   "exceptions": [
-    "A clearance sacrifice fails if the follow-up is a tempo too slow — the whole idea depends on forcing continuations."
+    "A clearance sacrifice fails if the follow-up is a tempo too slow — the whole idea depends on forcing continuations.",
+    "Clearing a line for a piece that is then driven off achieves nothing; the arriving piece must be able to stay.",
+    "A clearance that also opens a line towards your own king is a different move from the one you calculated."
   ],
-  "limitations": [],
+  "limitations": [
+    "NO VERIFIED POSITION HAS BEEN BUILT FOR THIS RECORD, and that is recorded rather than filled. Three constructions were tried and thrown away: each needed the vacating move to come WITH TEMPO, and a minimal position with a queen, a blocking piece and a mating square either had no checking square for the blocker to leave on, or was already mate without the clearance. A wrong example of a motif is worse than none, because the label is the thing the reader is learning to see.",
+    "There is deliberately no matcher. Clearance is a claim about what the VACATED square is then used for, which is a property of the continuation and not of the move, and this base does not read continuations at the board."
+  ],
   "misconceptions": [],
   "relationships": {
     "broader": [],

@@ -35,7 +35,7 @@ The completion assessment is judged on the ORIGINAL rule and criterion 1 stays w
 | substantial | 0.86 | `positional-sacrifices` | 2 |
 | substantial | 0.86 | `attack-principles` | 2 |
 | substantial | 0.76 | `named-mating-patterns` | 2 |
-| substantial | 0.69 | `tactical-motifs` | 19 |
+| substantial | 0.70 | `tactical-motifs` | 19 |
 | substantial | 0.65 | `blindfold-visualisation` | 4 |
 | partial | 1.00 | `board-geometry` | 1 |
 | partial | 1.00 | `tactical-combinations` | 1 |
@@ -242,9 +242,9 @@ The completion assessment is judged on the ORIGINAL rule and criterion 1 stays w
 | `intermediate-concepts` | 0.58 | x | x | x | . | x | - | - | - | . | - | . | . | - | x | x | x |
 | `master-concepts` | 0.58 | x | x | x | . | x | - | - | - | . | - | . | . | - | x | x | x |
 | `opening-repertoire` | 0.57 | x | x | x | . | x | x | - | - | - | - | . | - | - | x | x | x |
+| `desperado` | 0.57 | - | x | x | . | x | x | x | - | - | x | . | - | - | x | x | - |
 | `clearance` | 0.50 | x | x | x | . | x | x | - | - | - | - | . | - | - | x | x | - |
 | `deflection` | 0.50 | x | x | x | . | x | x | - | - | - | - | . | - | - | x | x | - |
 | `interference` | 0.50 | x | x | x | . | x | x | - | - | - | - | . | - | - | x | x | - |
 | `zwischenzug` | 0.50 | x | x | x | . | x | x | - | - | - | - | . | - | - | x | x | - |
 | `decoy` | 0.43 | - | x | x | . | x | x | - | - | - | - | . | - | - | x | x | - |
-| `desperado` | 0.43 | - | x | x | . | x | x | - | - | - | - | . | - | - | x | x | - |

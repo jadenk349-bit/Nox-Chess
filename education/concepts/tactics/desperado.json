@@ -50,17 +50,38 @@
     "false_positive_traps": []
   },
   "application": {
-    "typical_plans": [],
-    "typical_moves": [],
+    "typical_plans": [
+      "Before conceding a piece, list every capture it can make and every check it can give",
+      "In a capture race, count who runs out of desperados first rather than who is ahead now",
+      "In a lost position, look for a desperado that reaches stalemate rather than one that wins material"
+    ],
+    "typical_moves": [
+      "A doomed rook taking a defended pawn on the seventh before being captured",
+      "A hanging queen giving itself up for a rook rather than for nothing",
+      "A trapped bishop taking the pawn that trapped it"
+    ],
     "typical_pawn_structures": [],
-    "typical_piece_arrangements": [],
-    "tactical_consequences": [],
-    "strategic_consequences": []
+    "typical_piece_arrangements": [
+      "Both sides with a hanging piece at once, so the side to move decides the order",
+      "A piece attacked with every retreat square covered"
+    ],
+    "tactical_consequences": [
+      "A desperado inverts normal move ordering: the piece acts before the recapture rather than after, which is why chess.com classifies it as a special case of the zwischenzug",
+      "The size of the gain is not the value of what is taken, it is the difference between taking and not taking - which can be several pawns even when the capture is an even trade"
+    ],
+    "strategic_consequences": [
+      "In stalemate defences a desperado is a way to shed material deliberately, so material counting reads it backwards"
+    ]
   },
   "exceptions": [
-    "The whole idea rests on the piece being genuinely unsaveable. Verify that first."
+    "The whole idea rests on the piece being genuinely unsaveable. Verify that first.",
+    "A desperado that gives the opponent a tempo they needed is worse than losing the piece quietly.",
+    "If the piece can be saved by a counter-threat rather than by moving, it is not doomed and the desperado is a blunder."
   ],
-  "limitations": [],
+  "limitations": [
+    "There is no matcher. 'Cannot be saved' is a claim about every legal move the piece has and about what happens after each, which is a search rather than a static test, and the record's own exception says the first thing to do is verify it.",
+    "The example on this record was FOUND rather than constructed, by scanning the 788 shipped puzzles for a solution move where the moving piece could already be won before the move and could still be won on its destination. Fifty positions match that shape. Four hand-built minimal positions were thrown away first: trapping a piece with no escape square needs a cage of enemy men, and every small version left the piece a flight square."
+  ],
   "misconceptions": [],
   "relationships": {
     "broader": [
@@ -72,7 +93,33 @@
     "co_occurring": [],
     "conflicts": []
   },
-  "examples": [],
+  "examples": [
+    {
+      "fen": "5r2/1P2k3/4b3/p4p2/4r2p/3p2P1/2P2RKP/4R3 w - - 3 33",
+      "move": "Rxe4",
+      "move_uci": "e1e4",
+      "note": "Shipped puzzle en-a9ff7ebd22, and it is the record's two preconditions on a real board. THE PIECE CANNOT BE SAVED: the white rook on e1 is attacked down the e-file by the rook on e4 and is defended by nothing - the king on g2 does not reach it and the rook on f2 does not either. IT HAS A CAPTURE AVAILABLE: Rxe4, which is answered by fxe4, so the rook does not survive that either. What makes it a desperado rather than a trade is the alternative: retreating scores -4.93 and taking scores +2.55, a gap of 748 centipawns, because the rook that is going to be lost anyway takes a rook with it and the b7 pawn then decides. Found by scanning all 788 shipped puzzles for a solution move where the moving piece was ALREADY losable before the move and is losable on its destination too - fifty positions match that shape and this is the clearest.",
+      "origin_kind": "puzzle",
+      "concept_role": "positive",
+      "side_to_move_benefits": "white",
+      "engine": {
+        "engine_id": "Stockfish 18",
+        "test_level": 3,
+        "depth": 24,
+        "threads": 10,
+        "hash_mb": 4096,
+        "multipv": 3,
+        "best_move": "e1e4",
+        "eval_cp": 255,
+        "mate_in": null,
+        "pv": [],
+        "alternatives": [],
+        "margin_cp": 748,
+        "verdict": "supports",
+        "verdict_note": "+2.55 for the desperado against -4.93 and -4.99 for the two best rook retreats, at depth 24 with three lines. The margin is the concept: a piece that is lost either way is worth exactly what it can take on the way out, and here that is 748 centipawns."
+      }
+    }
+  ],
   "counterexamples": [],
   "ambiguous_examples": [],
   "explanations": {

@@ -5,14 +5,14 @@
   "concepts_indexed": 137,
   "counts": {
     "avoid_phrasing": 167,
-    "exception": 296,
+    "exception": 302,
     "false_positive_trap": 304,
     "misconception": 268
   },
   "evidence_tiers": {
     "demonstrated": 49,
-    "on-a-tested-record": 788,
-    "sourced": 198
+    "on-a-tested-record": 791,
+    "sourced": 201
   },
   "evidence_tier_meaning": {
     "demonstrated": "the sentence cites a measurement AND its concept holds engine or tablebase evidence",
@@ -20,7 +20,7 @@
     "sourced": "rests on cited sources; no engine or tablebase evidence on the record",
     "unsourced": "neither - should not exist and is a bug if it does"
   },
-  "total": 1035,
+  "total": 1041,
   "soft_concepts_without_exceptions": [],
   "entries": [
     {
@@ -11580,6 +11580,30 @@
       "evidence_tier": "sourced"
     },
     {
+      "concept": "clearance",
+      "category": "tactical-motifs",
+      "knowledge_type": "tactical-motif",
+      "difficulty": "advanced",
+      "concept_evidence": "sources-only",
+      "path": "concepts/tactics/clearance.json",
+      "kind": "exception",
+      "text": "Clearing a line for a piece that is then driven off achieves nothing; the arriving piece must be able to stay.",
+      "self_evidenced": false,
+      "evidence_tier": "sourced"
+    },
+    {
+      "concept": "clearance",
+      "category": "tactical-motifs",
+      "knowledge_type": "tactical-motif",
+      "difficulty": "advanced",
+      "concept_evidence": "sources-only",
+      "path": "concepts/tactics/clearance.json",
+      "kind": "exception",
+      "text": "A clearance that also opens a line towards your own king is a different move from the one you calculated.",
+      "self_evidenced": false,
+      "evidence_tier": "sourced"
+    },
+    {
       "concept": "decoy",
       "category": "tactical-motifs",
       "knowledge_type": "tactical-motif",
@@ -11588,6 +11612,30 @@
       "path": "concepts/tactics/decoy.json",
       "kind": "exception",
       "text": "A decoy fails outright if the sacrifice can be declined.",
+      "self_evidenced": false,
+      "evidence_tier": "sourced"
+    },
+    {
+      "concept": "decoy",
+      "category": "tactical-motifs",
+      "knowledge_type": "tactical-motif",
+      "difficulty": "intermediate",
+      "concept_evidence": "sources-only",
+      "path": "concepts/tactics/decoy.json",
+      "kind": "exception",
+      "text": "A decoy that lands the enemy king on a square where the follow-up needs one more move than the defender has is not a decoy, it is a lost piece.",
+      "self_evidenced": false,
+      "evidence_tier": "sourced"
+    },
+    {
+      "concept": "decoy",
+      "category": "tactical-motifs",
+      "knowledge_type": "tactical-motif",
+      "difficulty": "intermediate",
+      "concept_evidence": "sources-only",
+      "path": "concepts/tactics/decoy.json",
+      "kind": "exception",
+      "text": "Decoying a defender onto a square where it still defends is the commonest miscalculation in this motif.",
       "self_evidenced": false,
       "evidence_tier": "sourced"
     },
@@ -11608,12 +11656,36 @@
       "category": "tactical-motifs",
       "knowledge_type": "tactical-motif",
       "difficulty": "advanced",
-      "concept_evidence": "sources-only",
+      "concept_evidence": "engine",
       "path": "concepts/tactics/desperado.json",
       "kind": "exception",
       "text": "The whole idea rests on the piece being genuinely unsaveable. Verify that first.",
       "self_evidenced": false,
-      "evidence_tier": "sourced"
+      "evidence_tier": "on-a-tested-record"
+    },
+    {
+      "concept": "desperado",
+      "category": "tactical-motifs",
+      "knowledge_type": "tactical-motif",
+      "difficulty": "advanced",
+      "concept_evidence": "engine",
+      "path": "concepts/tactics/desperado.json",
+      "kind": "exception",
+      "text": "A desperado that gives the opponent a tempo they needed is worse than losing the piece quietly.",
+      "self_evidenced": false,
+      "evidence_tier": "on-a-tested-record"
+    },
+    {
+      "concept": "desperado",
+      "category": "tactical-motifs",
+      "knowledge_type": "tactical-motif",
+      "difficulty": "advanced",
+      "concept_evidence": "engine",
+      "path": "concepts/tactics/desperado.json",
+      "kind": "exception",
+      "text": "If the piece can be saved by a counter-threat rather than by moving, it is not doomed and the desperado is a blunder.",
+      "self_evidenced": false,
+      "evidence_tier": "on-a-tested-record"
     },
     {
       "concept": "discovered-attack",
