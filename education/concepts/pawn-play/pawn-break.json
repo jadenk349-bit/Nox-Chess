@@ -232,7 +232,32 @@
       "false_positive_case": "a-break-is-not-a-breakthrough"
     }
   ],
-  "ambiguous_examples": [],
+  "ambiguous_examples": [
+    {
+      "fen": "r1q1kb1r/pp1npp2/3pbnpp/P7/2pPP3/2N2N1P/1PP1QPP1/R1B1KB1R w KQkq - 0 12",
+      "move": "e5",
+      "move_uci": "e4e5",
+      "note": "Nominated by tools/mine_ambiguous.js on its fourth ground, NOT-THE-MOVE: the concept fires on a legal move that is not the solution of a shipped puzzle. The first three grounds ask about a POSITION and could not reach a move-based or motif concept at all - this concept and eleven others reported NONE until the tool learned to supply a move. What makes the case ambiguous rather than false is that nothing reported is absent: e4-e5 is a pawn advancing into contact with an enemy pawn, which is this record's precondition exactly, and the base reports it at LOW confidence with the record's own caution attached - 'whether it is a good one depends on who is placed to use the lines it opens, which the detector cannot see'. Here the answer is that somebody else is: d4-d5 is the break that works, and it is worth three and a half pawns more. Two breaks, one position, and the detector correctly declines to choose between them.",
+      "origin_kind": "puzzle",
+      "concept_role": "ambiguous",
+      "engine": {
+        "engine_id": "Stockfish 18",
+        "test_level": 3,
+        "depth": 22,
+        "threads": 10,
+        "hash_mb": 4096,
+        "multipv": 2,
+        "best_move": "d4d5",
+        "eval_cp": 82,
+        "mate_in": null,
+        "pv": [],
+        "alternatives": [],
+        "margin_cp": null,
+        "verdict": "ambiguous",
+        "verdict_note": "e4-e5 scores +0.82 and d4-d5, the puzzle's solution and also a break, scores +4.35. The concept is present in both moves and decides neither."
+      }
+    }
+  ],
   "explanations": {
     "by_level": {
       "beginner": "A pawn move that runs into an enemy pawn, so the structure has to change and lines open up.",

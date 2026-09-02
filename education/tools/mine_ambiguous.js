@@ -39,6 +39,8 @@ const argv = process.argv.slice(2);
 const only = argv.includes('--concept') ? argv[argv.indexOf('--concept') + 1] : null;
 const LIMIT = argv.includes('--limit') ? Number(argv[argv.indexOf('--limit') + 1]) : 3;
 const jsonOut = argv.includes('--json') ? argv[argv.indexOf('--json') + 1] : null;
+const withMoves = argv.includes('--moves');
+const MOVE_TRIES = argv.includes('--tries') ? Number(argv[argv.indexOf('--tries') + 1]) : 10;
 
 function corpus() {
   const seen = new Set(), out = [];
@@ -49,7 +51,8 @@ function corpus() {
       for (const [fen, kind] of [[p.fen, 'puzzle'], [p.prev && p.prev.fen, 'prev']]) {
         if (!fen || seen.has(fen)) continue;
         seen.add(fen);
-        out.push({ fen, track, kind, id: p.id });
+        out.push({ fen, track, kind, id: p.id,
+                   solution: kind === 'puzzle' ? (p.moves || p.line || [])[0] || null : null });
       }
     }
   }
@@ -88,8 +91,39 @@ for (const pos of corpus()) {
   }
 }
 
+// The fourth ground, and the only one that supplies a MOVE. Everything above
+// asks about a position; a move-based matcher never speaks to a question like
+// that, which is why twelve concepts reported NONE before this existed.
+if (withMoves) {
+  const F2 = require('../lib/features.js');
+  const P = F2.page;
+  for (const pos of corpus()) {
+    if (!pos.solution) continue;
+    let st, moves;
+    try { st = P.stateFromFEN(pos.fen); moves = P.legalMoves(st); } catch (e) { continue; }
+    const others = moves.filter(m => P.uciOf(m) !== pos.solution).slice(0, MOVE_TRIES);
+    for (const m of others) {
+      const uci = P.uciOf(m);
+      let r;
+      try { r = API.analyzeWithEducation({ fen: pos.fen, move: uci }); } catch (e) { continue; }
+      for (const c of r.concepts_all || []) {
+        if (only && c.id !== only) continue;
+        if (c.detected_by !== 'move' && c.detected_by !== 'findMotifs') continue;
+        const have = (found[c.id] || []).filter(x => x.reason === 'not-the-move');
+        if (have.length >= LIMIT) continue;
+        (found[c.id] = found[c.id] || []).push({
+          fen: pos.fen, id: pos.id, track: pos.track, kind: 'puzzle',
+          concept: c.id, confidence: c.confidence, subjects: c.subjects || [],
+          reason: 'not-the-move', move: uci, solution: pos.solution,
+          material_edge_cp: 0, quiet: false,
+        });
+      }
+    }
+  }
+}
+
 // Rank: a candidate the tool can settle by itself beats one that needs an engine.
-const RANK = { 'both-sides': 0, 'against-the-material': 1, 'quiet-needs-engine': 2 };
+const RANK = { 'both-sides': 0, 'against-the-material': 1, 'not-the-move': 2, 'quiet-needs-engine': 3 };
 const out = {};
 for (const k of Object.keys(found).sort()) {
   found[k].sort((a, b) => RANK[a.reason] - RANK[b.reason] ||
@@ -103,8 +137,9 @@ for (const k of Object.keys(out)) {
   console.log(`  ${k}`);
   for (const c of out[k])
     console.log(`    [${c.reason}] ${c.subjects.join('+')} conf=${c.confidence} ` +
-                `mat=${c.material_edge_cp > 0 ? '+' : ''}${c.material_edge_cp}` +
-                `${c.quiet ? ' quiet' : ''}  ${c.fen}`);
+                (c.move ? `move=${c.move} (solution ${c.solution}) ` :
+                          `mat=${c.material_edge_cp > 0 ? '+' : ''}${c.material_edge_cp} `) +
+                `${c.quiet ? 'quiet ' : ''} ${c.fen}`);
 }
 console.log(`\n  A candidate is a QUESTION, not an example. "quiet-needs-engine" is a ` +
             `nomination only:\n  nothing here has asked whether the feature is worth ` +

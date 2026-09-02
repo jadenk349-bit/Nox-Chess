@@ -165,7 +165,32 @@
       "false_positive_case": "a-quiet-move-that-restrains-nothing"
     }
   ],
-  "ambiguous_examples": [],
+  "ambiguous_examples": [
+    {
+      "fen": "r1bqkBr1/ppp2ppp/n4n2/3pp3/8/1P1PP3/P1PN1PPP/R2QKBNR w KQq - 1 7",
+      "move": "b4",
+      "move_uci": "b3b4",
+      "note": "Nominated by tools/mine_ambiguous.js on its fourth ground, NOT-THE-MOVE: the concept fires on a legal move that is not the solution of a shipped puzzle. The first three grounds ask about a POSITION and could not reach a move-based or motif concept at all - this concept and eleven others reported NONE until the tool learned to supply a move. What makes the case ambiguous rather than false is that nothing reported is absent: b3-b4 genuinely reduces Black's safe destinations - it takes c5 from the knight on a6 and from the pieces behind it, which is what this base measures rather than 'total piece scope'. It is also a move made while a whole bishop is hanging on f8. This record's third indicator_against says it out loud - 'the position demands speed' - and this position is that sentence with a number: +0.24 for the restraining move, +4.37 for taking the rook.",
+      "origin_kind": "puzzle",
+      "concept_role": "ambiguous",
+      "engine": {
+        "engine_id": "Stockfish 18",
+        "test_level": 3,
+        "depth": 22,
+        "threads": 10,
+        "hash_mb": 4096,
+        "multipv": 2,
+        "best_move": "f8a3",
+        "eval_cp": 24,
+        "mate_in": null,
+        "pv": [],
+        "alternatives": [],
+        "margin_cp": null,
+        "verdict": "ambiguous",
+        "verdict_note": "b4 scores +0.24 and Bxa3, the solution, scores +4.37. Restraint is a slow idea and this is a position with no time in it, which is exactly the condition the record states and the matcher cannot test."
+      }
+    }
+  ],
   "explanations": {
     "by_level": {
       "beginner": "Stop their pawns from moving forward before you try to win them.",

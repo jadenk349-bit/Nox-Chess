@@ -154,7 +154,32 @@
       "false_positive_case": "a-skewer-the-front-unit-eats"
     }
   ],
-  "ambiguous_examples": [],
+  "ambiguous_examples": [
+    {
+      "fen": "r2qkb1r/1pp2ppp/p1n1p3/3P4/4Q1n1/2N2P2/PPPP1P1P/R1B1KB1R b KQkq - 3 9",
+      "move": "Qf6",
+      "move_uci": "d8f6",
+      "note": "Nominated by tools/mine_ambiguous.js on its fourth ground, NOT-THE-MOVE: the concept fires on a legal move that is not the solution of a shipped puzzle. The first three grounds ask about a POSITION and could not reach a move-based or motif concept at all - this concept and eleven others reported NONE until the tool learned to supply a move. What makes the case ambiguous rather than false is that nothing reported is absent: the skewer is real geometry and the move loses by six pawns. ...Qf6 scores -5.48 against ...Nxf6 at +0.78, a gap of 626 centipawns, and the reason is on the board rather than in the motif: after dxc6 the position collapses. A motif detector reports what is geometrically true of the move it is given, and being given the wrong move is not something it can notice.",
+      "origin_kind": "puzzle",
+      "concept_role": "ambiguous",
+      "engine": {
+        "engine_id": "Stockfish 18",
+        "test_level": 3,
+        "depth": 22,
+        "threads": 10,
+        "hash_mb": 4096,
+        "multipv": 2,
+        "best_move": "g4f6",
+        "eval_cp": -548,
+        "mate_in": null,
+        "pv": [],
+        "alternatives": [],
+        "margin_cp": null,
+        "verdict": "ambiguous",
+        "verdict_note": "...Qf6 scores -5.48 and the solution ...Nxf6 scores +0.78, both from Black's side at depth 22."
+      }
+    }
+  ],
   "explanations": {
     "by_level": {
       "beginner": "The valuable piece in front has to move, and then you take the piece behind it.",

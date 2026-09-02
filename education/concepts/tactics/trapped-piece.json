@@ -142,7 +142,32 @@
       "false_positive_case": "a-trapped-rook-with-a-desperado"
     }
   ],
-  "ambiguous_examples": [],
+  "ambiguous_examples": [
+    {
+      "fen": "r1b1kb1r/ppp2ppp/2q1pn2/3pn2Q/1P1PP3/P1N2P2/2P3PP/R1B1KBNR w KQkq - 1 8",
+      "move": "Qxf7+",
+      "move_uci": "h5f7",
+      "note": "Nominated by tools/mine_ambiguous.js on its fourth ground, NOT-THE-MOVE: the concept fires on a legal move that is not the solution of a shipped puzzle. The first three grounds ask about a POSITION and could not reach a move-based or motif concept at all - this concept and eleven others reported NONE until the tool learned to supply a move. What makes the case ambiguous rather than false is that nothing reported is absent: after Qxf7+ Kxf7 something of White's really is trapped, and the detector is right that it is. What the detector cannot see is that White gave a queen for a pawn to arrange it. The solution is Bb5 at +0.80; the move that produces the trapped-piece report is -5.63. This is the sharpest illustration in this base of why a motif tag is not a recommendation.",
+      "origin_kind": "puzzle",
+      "concept_role": "ambiguous",
+      "engine": {
+        "engine_id": "Stockfish 18",
+        "test_level": 3,
+        "depth": 22,
+        "threads": 10,
+        "hash_mb": 4096,
+        "multipv": 2,
+        "best_move": "f1b5",
+        "eval_cp": -563,
+        "mate_in": null,
+        "pv": [],
+        "alternatives": [],
+        "margin_cp": null,
+        "verdict": "ambiguous",
+        "verdict_note": "Qxf7+ scores -5.63 and Bb5, the solution, scores +0.80 - a gap of 643 centipawns. The motif is present in the worse move and absent from the better one."
+      }
+    }
+  ],
   "explanations": {
     "by_level": {
       "beginner": "That piece has nowhere safe to go, so attacking it wins it.",

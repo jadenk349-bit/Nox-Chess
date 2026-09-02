@@ -239,7 +239,32 @@
       "false_positive_case": "a-pawn-fork-the-pawns-simply-eat"
     }
   ],
-  "ambiguous_examples": [],
+  "ambiguous_examples": [
+    {
+      "fen": "rnbqk1nr/ppp1bppp/3p4/1B2p3/6Q1/4P1P1/PPPP1P1P/RNB1K1NR b KQkq - 1 4",
+      "move": "Bd7",
+      "move_uci": "c8d7",
+      "note": "Nominated by tools/mine_ambiguous.js on its fourth ground, NOT-THE-MOVE: the concept fires on a legal move that is not the solution of a shipped puzzle. The first three grounds ask about a POSITION and could not reach a move-based or motif concept at all - this concept and eleven others reported NONE until the tool learned to supply a move. What makes the case ambiguous rather than false is that nothing reported is absent: the fork is on the board and the detector is right about it. It is also a move that throws away a winning position: ...c6 wins the bishop on b5 outright and scores +4.18, while the forking move scores +0.28 - level. A fork that costs four pawns of advantage is a fork, and it is not the answer, and both halves of that need to be sayable at once.",
+      "origin_kind": "puzzle",
+      "concept_role": "ambiguous",
+      "engine": {
+        "engine_id": "Stockfish 18",
+        "test_level": 3,
+        "depth": 22,
+        "threads": 10,
+        "hash_mb": 4096,
+        "multipv": 2,
+        "best_move": "c7c6",
+        "eval_cp": 28,
+        "mate_in": null,
+        "pv": [],
+        "alternatives": [],
+        "margin_cp": null,
+        "verdict": "ambiguous",
+        "verdict_note": "The forking move scores +0.28 and the solution ...c6 scores +4.18, both from Black's side at depth 22. Nothing is wrong with the report; the position simply had a much better move in it."
+      }
+    }
+  ],
   "explanations": {
     "by_level": {
       "beginner": "This one piece attacks two things at the same time. Your opponent can only save one of them.",

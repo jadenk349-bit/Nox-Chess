@@ -205,7 +205,32 @@
       "false_positive_case": "improving-a-piece-into-mate"
     }
   ],
-  "ambiguous_examples": [],
+  "ambiguous_examples": [
+    {
+      "fen": "rnq2bnr/pp2pk2/2p3p1/3pPpPp/3P1B1P/2PQ3N/PP1N1P2/2KR3R b - - 1 14",
+      "move": "Nd7",
+      "move_uci": "b8d7",
+      "note": "Nominated by tools/mine_ambiguous.js on its fourth ground, NOT-THE-MOVE: the concept fires on a legal move that is not the solution of a shipped puzzle. The first three grounds ask about a POSITION and could not reach a move-based or motif concept at all - this concept and eleven others reported NONE until the tool learned to supply a move. What makes the case ambiguous rather than false is that nothing reported is absent: the knight on b8 is the worst-placed piece Black owns and ...Nd7 improves it, in a position with no check against Black and nothing hanging - every condition this matcher tests. This record's own second indicator_against is the one that fires here: 'a forcing line is available that decides matters'. It is ...e6, and it is worth three pawns more. The rule is correctly applied and correctly applied is not the same as right.",
+      "origin_kind": "puzzle",
+      "concept_role": "ambiguous",
+      "engine": {
+        "engine_id": "Stockfish 18",
+        "test_level": 3,
+        "depth": 22,
+        "threads": 10,
+        "hash_mb": 4096,
+        "multipv": 2,
+        "best_move": "e7e6",
+        "eval_cp": -360,
+        "mate_in": null,
+        "pv": [],
+        "alternatives": [],
+        "margin_cp": null,
+        "verdict": "ambiguous",
+        "verdict_note": "...Nd7 scores -3.60 and ...e6, the solution, scores -0.49, both from Black's side. Black is worse either way, which is why this is the honest kind of example: the quiet improving move does not lose the game, it loses three pawns of the defence."
+      }
+    }
+  ],
   "explanations": {
     "by_level": {
       "beginner": "If nothing urgent is happening, find the piece doing the least and give it something to do.",

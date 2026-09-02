@@ -127,7 +127,32 @@
       "false_positive_case": "a-discovery-onto-a-defended-pawn"
     }
   ],
-  "ambiguous_examples": [],
+  "ambiguous_examples": [
+    {
+      "fen": "r3kb1r/p3qppp/2p1bn2/1Q6/B2NpP2/4P3/PP1P1KPP/n1B3NR w kq - 0 14",
+      "move": "Bxa6",
+      "move_uci": "b5a6",
+      "note": "Nominated by tools/mine_ambiguous.js on its fourth ground, NOT-THE-MOVE: the concept fires on a legal move that is not the solution of a shipped puzzle. The first three grounds ask about a POSITION and could not reach a move-based or motif concept at all - this concept and eleven others reported NONE until the tool learned to supply a move. What makes the case ambiguous rather than false is that nothing reported is absent: Qxa6 does uncover the bishop on a4 and the discovery is genuine geometry. It is also a losing move. The puzzle's answer is Qxc6, and the two are 7.7 pawns apart. This is the clearest form of what a discovered attack is worth when the discovery is the only thing recommending it.",
+      "origin_kind": "puzzle",
+      "concept_role": "ambiguous",
+      "engine": {
+        "engine_id": "Stockfish 18",
+        "test_level": 3,
+        "depth": 22,
+        "threads": 10,
+        "hash_mb": 4096,
+        "multipv": 2,
+        "best_move": "b5c6",
+        "eval_cp": -256,
+        "mate_in": null,
+        "pv": [],
+        "alternatives": [],
+        "margin_cp": null,
+        "verdict": "ambiguous",
+        "verdict_note": "Qxa6 scores -2.56 and Qxc6, the puzzle's solution, scores +5.17 - a gap of 773 centipawns between two moves of the same queen. The discovered attack is on the board and the position is about something else entirely."
+      }
+    }
+  ],
   "explanations": {
     "by_level": {
       "beginner": "Moving this piece uncovers an attack from the piece behind it, so you get two attacks in one move.",
