@@ -13,7 +13,7 @@ implemented; that is a reading, and doing it is the work. What it can do is
 stop the list being rediscovered from scratch each time — and every one of
 the defects listed in the tool's header was unread before it was looked at.
 
-**Of 275 stated conditions (traps and indicators-against): 136 enforced in the matcher, 19 in Layer 3, 75 argued on the record to be unbuildable or already honoured elsewhere, 45 unread.**
+**Of 275 stated conditions (traps and indicators-against): 140 enforced in the matcher, 19 in Layer 3, 75 argued on the record to be unbuildable or already honoured elsewhere, 41 unread.**
 
 ONE CAVEAT ABOUT `indicators_against`, and it is not a technicality. For a
 concept naming an ASSET — an open file, an outpost, a passed pawn — they are
@@ -365,15 +365,15 @@ shared file was added to the search. The test is quotation for that reason.
 ## pin
 
 - [cited] *(indicator against)* The pinned piece can capture the pinner
-- [**unread**] *(indicator against)* The defender can interpose a third unit on the line
-- [**unread**] *(indicator against)* The target behind can simply step off the line
+- [cited] *(indicator against)* The defender can interpose a third unit on the line
+- [cited] *(indicator against)* The target behind can simply step off the line
 - [noted] *(indicator against)* The 'pinned' piece is worth more than the piece behind it — that is a skewer, not a pin
 ## skewer
 
 - [cited] *(indicator against)* The front unit can capture the skewering piece
-- [**unread**] *(indicator against)* A third unit can interpose
+- [cited] *(indicator against)* A third unit can interpose
 - [cited] *(indicator against)* The front unit can move so that it still defends the rear unit
-- [**unread**] *(indicator against)* The rear unit is defended and the exchange is not favourable
+- [cited] *(indicator against)* The rear unit is defended and the exchange is not favourable
 ## discovered-attack
 
 - [noted] *(indicator against)* The revealed line is blocked by another unit further along

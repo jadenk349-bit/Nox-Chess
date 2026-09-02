@@ -2201,6 +2201,65 @@ function motifGuard(tag, m, moveInfo) {
   if (!after) return false;
   const them = after.turn;                       // the side about to reply
 
+  if (tag === 'skewer') {
+    // Two more of this record's indicators_against, both answerable from the
+    // board: "The rear unit is defended and the exchange is not favourable",
+    // and "A third unit can interpose". The detector's sentence carries both
+    // squares - "The queen on b5 has to move, and the rook on b8 behind it
+    // falls" - so neither needs a second geometry pass.
+    const mk = ((m && m.text) || '')
+      .match(/on ([a-h][1-8]) has to move, and the \w+ on ([a-h][1-8])/);
+    if (mk) {
+      const front = sqIdxSafe(mk[1]), back = sqIdxSafe(mk[2]);
+      const from = sqIdxSafe(moveInfo.movedTo || '');
+      if (front >= 0 && back >= 0) {
+        // The rear unit falls only if taking it is worth it - and the question
+        // has to be asked of the position the skewer PRODUCES, with the front
+        // unit gone. Asking it of the board as it stands returns nothing, since
+        // the front unit is still in the way; a first version of this guard did
+        // exactly that and deleted 96% of all skewer reports, which is how it
+        // was caught. A defended rook behind a defended rook is a line, not a
+        // skewer.
+        const vacated = { b: after.b.slice(), turn: after.turn, ep: -1 };
+        vacated.b[front] = null;
+        if (after.b[back] && P.see(vacated, back, other(them)) <= 0) return true;
+        // ...and only if the line cannot simply be blocked before it arrives.
+        let ms;
+        try { ms = P.legalMoves(after); } catch (e) { ms = null; }
+        if (ms && from >= 0 && between(from, front).some(sq =>
+              ms.some(x => x.to === sq && x.from !== front) &&
+              P.see(afterDrop(after, sq), sq, other(them)) <= 0))
+          return true;
+        // "The front unit can move so that it still defends the rear unit" -
+        // the third indicator_against, and the one the quotation heuristic in
+        // tools/trap_audit.js credited BY ACCIDENT: the sentence above shares
+        // the four-word run "the front unit can" with the first condition, so
+        // the audit read it as cited while nothing tested it. It is tested now.
+        // A skewer that the front piece answers by stepping aside and keeping
+        // the rear unit guarded has won nothing.
+        if (ms && ms.some(x => {
+          if (x.from !== front || x.to === from) return false;
+          let nx;
+          try { nx = P.makeMove(after, x); } catch (e) { return false; }
+          // The MOVED piece, not any piece: "the front unit can move so that IT
+          // still defends the rear unit". Asking whether anything of theirs
+          // covers the square is a different and much wider question, and a
+          // first version that asked it suppressed two thirds of all skewers.
+          let at;
+          try { at = P.attackersOf(nx, back, them); } catch (e) { return false; }
+          if (at.indexOf(x.to) < 0) return false;
+          // ...AND it has to survive where it lands. A queen that keeps
+          // defending the rook by stepping one square along the same file is
+          // still on the skewering piece's line and is simply taken, which is
+          // not an escape at all; a first version without this test suppressed
+          // 90 of the 90 skewer motifs in the shipped corpus, including this
+          // base's own canonical example.
+          return P.see(nx, x.to, other(them)) <= 0;
+        })) return true;
+      }
+    }
+  }
+
   if (tag === 'fork' || tag === 'skewer') {
     // "The forking piece can simply be captured." The forker is the piece that
     // just moved; a fork revealed by a DISCOVERY is delivered by a piece that
@@ -2278,10 +2337,59 @@ function motifGuard(tag, m, moveInfo) {
   let moves;
   try { moves = P.legalMoves(after); } catch (e) { return false; }
   const takes = moves.some(x => x.from === pinnedIdx && x.to === pinnerIdx && x.cap);
-  if (!takes) return false;
+  if (takes && P.see(after, pinnerIdx, them) >= 0) return true;
   // Capturing the pinner has to be worth doing. A pinned knight that can take a
   // defended queen is not pinned; one that can take a defended pawn still is.
-  return P.see(after, pinnerIdx, them) >= 0;
+  //
+  // "The defender can interpose a third unit on the line" - this record's second
+  // indicator_against, and the one an interposition test can actually answer.
+  // The squares strictly between the pinner and the pinned piece are the line;
+  // if the defending side can legally put something on one of them and keep it
+  // there, the pin is dissolved on the next move rather than standing.
+  //
+  // A pawn or a piece the pinner simply takes is not an interposition, so SEE
+  // decides: a unit that can be won on the blocking square has not blocked
+  // anything. Note that this can only ever REMOVE a report, and the geometry is
+  // the page's own - what is being asked here is whether the geometry lasts.
+  if (between(pinnerIdx, pinnedIdx).some(sq =>
+        moves.some(x => x.to === sq && x.from !== pinnedIdx) &&
+        P.see(afterDrop(after, sq), sq, other(them)) <= 0))
+    return true;
+  // "The target behind can simply step off the line" is the one condition on
+  // this record that was tried and NOT built, and the reason is worth keeping.
+  // For an ABSOLUTE pin the target is the king, and a king can step off the
+  // line in almost every position - so testing it suppressed 40% of all pin
+  // reports and broke this base's own canonical test, a knight in front of a
+  // king. The condition is about a RELATIVE pin whose target chooses to walk
+  // away, and choosing is not a property of the position. Nothing here tests it.
+  return false;
+}
+
+// The squares strictly between two collinear squares, or [] if they are not on
+// one line. Index 0 is a8 and 63 is h1, so a file step is 8 and a rank step 1.
+function between(a, b) {
+  const ra = a >> 3, fa = a & 7, rb = b >> 3, fb = b & 7;
+  const dr = Math.sign(rb - ra), df = Math.sign(fb - fa);
+  if (!(ra === rb || fa === fb || Math.abs(rb - ra) === Math.abs(fb - fa))) return [];
+  const out = [];
+  let r = ra + dr, f = fa + df;
+  while (r !== rb || f !== fb) {
+    if (r < 0 || r > 7 || f < 0 || f > 7) return [];
+    out.push(r * 8 + f);
+    r += dr; f += df;
+  }
+  return out;
+}
+
+// A board with a cheap defender dropped on `sq`, used only to ask SEE whether
+// an interposition survives. The piece put there is a knight of the defending
+// side, which is the middle of the value range: a pawn would survive too often
+// and a queen too rarely, and the question is about the SQUARE.
+function afterDrop(st, sq) {
+  const P = FEAT.page;
+  const work = { b: st.b.slice(), turn: st.turn, ep: -1 };
+  work.b[sq] = { c: st.turn, t: 'N', id: -1 };
+  return work;
 }
 
 function matchMotifs(motifs, moveInfo) {
