@@ -1268,6 +1268,16 @@
       "status": "resolved",
       "evidence": "feature-detector + tablebase",
       "resolution": "PROVEN both ways: Black to move is a LOSS in 28, and the same board with White to move is a PROVEN DRAW at dtz 0. So the mutual zugzwang is real and the concept that names it here is `opposition`, which the API reports at high confidence, and not this one, which has no matcher. The distinction matters because it is a distinction about the READER rather than about the board — this record's third trap says so outright: 'this is an expert-level tool. Reporting it to a player who has not yet mastered the opposition explains nothing.' The same position is this base's strictest controlled pair and serves `opposition`, `key-square` and `zugzwang`."
+    },
+    {
+      "id": "the-same-board-a-move-order-apart",
+      "concept": "transposition",
+      "surface_pattern": "1.d4 Nf6 2.c4 e6 3.Nc3 and 1.c4 Nf6 2.Nc3 e6 3.d4 put every man on the same square, with the same side to move and the same castling rights. Any comparison that reads the diagram calls them the same position and the move orders a transposition.",
+      "why_not": "This record's second trap: \"Castling rights are invisible on the board but are part of the position.\" The same is true of the en-passant possibility, and it is what differs here. In the second order White's last move was d2-d4, so the position carries an en-passant target on d3; in the first it carries none. FIDE Art. 9.2.3 includes that possibility in the definition of the same position, so these are two positions and not one.",
+      "fen": "rnbqkb1r/pppp1ppp/4pn2/8/2PP4/2N5/PP2PPPP/R1BQKBNR b KQkq d3 0 3",
+      "status": "resolved",
+      "evidence": "feature-detector",
+      "resolution": "Both move orders were replayed through this base's own move generator by tools/replay_game.js and it emitted the two FENs: `... b KQkq - 1 3` and `... b KQkq d3 0 3`. The boards are identical and the fourth field is not. This record's positive example is the complementary case and is the more surprising one — 1.d4 Nf6 2.c4 e6 3.Nc3 against 1.c4 e6 2.d4 Nf6 3.Nc3 reach FENs that differ in the HALFMOVE CLOCK, 1 against 2, and are the SAME position, because Art. 9.2.3 does not include the clock. So a FEN string is neither necessary nor sufficient for position identity: two identical positions can have different FENs, and two different positions can differ only in a field a reader skips."
     }
   ],
   "last_updated": "2026-09-01"

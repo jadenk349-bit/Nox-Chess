@@ -81,7 +81,31 @@
     "co_occurring": [],
     "conflicts": []
   },
-  "examples": [],
+  "examples": [
+    {
+      "fen": "rnbqkb1r/pppp1ppp/4pn2/8/2PP4/2N5/PP2PPPP/R1BQKBNR b KQkq - 1 3",
+      "note": "Two move orders reaching one position, both replayed through this base's own move generator: 1.d4 Nf6 2.c4 e6 3.Nc3 and 1.c4 e6 2.d4 Nf6 3.Nc3. The men stand identically, the side to move is the same, the castling rights are the same, and neither carries an en-passant possibility - which is the FIDE Art. 9.2.3 definition of the same position, in full. THE FEN STRINGS DIFFER: the halfmove clocks read 1 and 2. That is the finding worth keeping. Position identity under the Law does not include the halfmove clock, so two different FENs can be the same position, and a system comparing FEN strings would report a transposition as a difference. This base's registered false-positive case for this record is the complementary error, where the boards match and the en-passant field does not.",
+      "origin_kind": "constructed-test",
+      "concept_role": "positive",
+      "side_to_move_benefits": "neither",
+      "engine": {
+        "engine_id": "Stockfish 18",
+        "test_level": 3,
+        "depth": 20,
+        "threads": 10,
+        "hash_mb": 4096,
+        "multipv": 1,
+        "best_move": "g8f6",
+        "eval_cp": 31,
+        "mate_in": null,
+        "pv": [],
+        "alternatives": [],
+        "margin_cp": null,
+        "verdict": "supports",
+        "verdict_note": "An ordinary opening position at about a third of a pawn. The evaluation is not the evidence here - the move generator is, and it produced both orders and reported both final positions."
+      }
+    }
+  ],
   "counterexamples": [
     {
       "fen": "r3k2r/8/8/8/8/8/8/R3K2R w - - 0 1",
@@ -89,6 +113,13 @@
       "origin_kind": "constructed-test",
       "concept_role": "negative",
       "false_positive_case": "the-same-board-is-not-the-same-position"
+    },
+    {
+      "fen": "rnbqkb1r/pppp1ppp/4pn2/8/2PP4/2N5/PP2PPPP/R1BQKBNR b KQkq d3 0 3",
+      "note": "Registered false-positive case `the-same-board-a-move-order-apart`, kept on the record as well as in tests/false_positive_cases.json so that the concept carries its own negative evidence. THE SURFACE PATTERN IS PRESENT: 1.d4 Nf6 2.c4 e6 3.Nc3 and 1.c4 Nf6 2.Nc3 e6 3.d4 put every man on the same square, with the same side to move and the same castling rights. Any comparison that reads the diagram calls them the same position and the move orders a transposition. WHY IT IS NOT THE CONCEPT: This record's second trap: \"Castling rights are invisible on the board but are part of the position.\" The same is true of the en-passant possibility, and it is what differs here. In the second order White's last move was d2-d4, so the position carries an en-passant target on d3; in the first it carries none. FIDE Art. 9.2.3 includes that possibility in the definition of the same position, so these are two positions and not one. WHAT THE SYSTEM DOES: Both move orders were replayed through this base's own move generator by tools/replay_game.js and it emitted the two FENs: `... b KQkq - 1 3` and `... b KQkq d3 0 3`. The boards are identical and the fourth field is not. This record's positive example is the complementary case and is the more surprising one — 1.d4 Nf6 2.c4 e6 3.Nc3 against 1.c4 e6 2.d4 Nf6 3.Nc3 reach FENs that differ in the HALFMOVE CLOCK, 1 against 2, and are the SAME position, because Art. 9.2.3 does not include the clock. So a FEN string is neither necessary nor sufficient for position identity: two identical positions can have different FENs, and two different positions can differ only in a field a reader skips.",
+      "origin_kind": "constructed-test",
+      "concept_role": "negative",
+      "false_positive_case": "the-same-board-a-move-order-apart"
     }
   ],
   "ambiguous_examples": [],

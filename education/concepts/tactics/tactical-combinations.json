@@ -172,7 +172,34 @@
     ],
     "conflicts": []
   },
-  "examples": [],
+  "examples": [
+    {
+      "fen": "1r2k1r1/pbppnp1p/1b3P2/8/Q7/B1PB1q2/P4PPP/3R2K1 w - - 0 21",
+      "move": "Qxd7+",
+      "move_uci": "a4d7",
+      "note": "Anderssen-Dufresne 1852, from 21.Qxd7+ - and it is here because it is a combination on BOTH of the contested definitions at once, which is what this record needs and rarely gets. Botvinnik requires a sacrifice: there is one, a queen. Romanovsky requires only a forced sequence reaching a goal: every move to the end is a check and the goal is mate in four. The record's rule is that this system must not assert either version as the definition, and an example that satisfies both is the way to have a positive without taking a side. The third trap is satisfied too - 'length and forcing-ness do not make a combination; there has to be a goal it reaches' - and the goal is 24.Bxe7 mate.",
+      "origin_kind": "historical-game",
+      "game": "Anderssen-Dufresne, Berlin 1852 (the Evergreen Game)",
+      "concept_role": "positive",
+      "side_to_move_benefits": "white",
+      "engine": {
+        "engine_id": "Stockfish 18",
+        "test_level": 3,
+        "depth": 20,
+        "threads": 10,
+        "hash_mb": 4096,
+        "multipv": 1,
+        "best_move": "a4d7",
+        "eval_cp": null,
+        "mate_in": 4,
+        "pv": [],
+        "alternatives": [],
+        "margin_cp": null,
+        "verdict": "supports",
+        "verdict_note": "Mate in 4 at depth 20, settled at depth 1. Qxd7+ Kxd7, Bf5+ Ke8, Bd7+ Kf8, Bxe7 mate - a queen given and every reply forced."
+      }
+    }
+  ],
   "counterexamples": [
     {
       "fen": "3k4/8/8/8/3N4/8/8/3RK3 w - - 0 1",

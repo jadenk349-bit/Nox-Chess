@@ -81,7 +81,34 @@
     "co_occurring": [],
     "conflicts": []
   },
-  "examples": [],
+  "examples": [
+    {
+      "fen": "3r1nk1/p4ppp/1bp5/B7/3p4/1N4PP/PPP2P2/4R1K1 w - - 0 23",
+      "move": "Re7",
+      "move_uci": "e1e7",
+      "note": "Capablanca-Rubinstein, Berlin 1928, 23.Re7 - a RANK rather than a file, which is why it is the right positive for this record. The three kinds of line are not interchangeable in value: a file is a road, a diagonal is a road with a colour, and the seventh rank is a road that runs behind the enemy pawns. Van Der Nat: 'he plays 23.Re7 and seizes the seventh rank. A rook planted on the seventh, behind the enemy pawns, attacks everything on that rank and hunts any pawn that dares advance.' Read against this record's registered false-positive case, an open FILE that leads to an empty corner and is worth exactly nothing: the same geometric fact, and the difference is entirely what the line arrives at.",
+      "origin_kind": "historical-game",
+      "game": "Capablanca-Rubinstein, Berlin 1928",
+      "concept_role": "positive",
+      "attributed_by": "Nicholas Van Der Nat (FM) - corpus entry capablanca-rubinstein-1928-23Re7-rook-on-the-seventh",
+      "engine": {
+        "engine_id": "Stockfish 18",
+        "test_level": 3,
+        "depth": 24,
+        "threads": 10,
+        "hash_mb": 4096,
+        "multipv": 3,
+        "best_move": "e1e7",
+        "eval_cp": 20,
+        "mate_in": null,
+        "pv": [],
+        "alternatives": [],
+        "margin_cp": null,
+        "verdict": "supports",
+        "verdict_note": "+0.20 and the engine's first choice at depth 24 with three lines, with the second at +0.17. The margin is small, which is the honest size of a line seized in a level ending, and the game was won from it."
+      }
+    }
+  ],
   "counterexamples": [
     {
       "fen": "1r4k1/5pp1/7p/8/8/7P/5PP1/R5K1 w - - 0 1",
