@@ -80,8 +80,30 @@
     "co_occurring": [],
     "conflicts": []
   },
-  "examples": [],
-  "counterexamples": [],
+  "examples": [
+    {
+      "fen": "3k4/8/8/8/3N4/8/8/3RK3 w - - 0 1",
+      "move": "Ne6+",
+      "move_uci": "d4e6",
+      "note": "The double check: the knight uncovers the rook on the d-file and checks from e6 itself. Paired with the same knight going to b5, which uncovers the same rook and is a single check.",
+      "origin_kind": "constructed-test",
+      "concept_role": "supports",
+      "side_to_move_benefits": "white",
+      "controlled_pair_with": "3k4/8/8/8/3N4/8/8/3RK3 w - - 0 1"
+    }
+  ],
+  "counterexamples": [
+    {
+      "fen": "3k4/8/8/8/3N4/8/8/3RK3 w - - 0 1",
+      "move": "Nb5+",
+      "move_uci": "d4b5",
+      "note": "A discovered check that is only a single check, from the position where the same knight has a square that gives two. The knight on d4 stands between a rook on d1 and a king on d8; moving it to b5 uncovers the rook and checks once, moving it to e6 uncovers the rook AND checks with the knight. One knight move apart, and only the second is a double check - which matters because a double check can only be answered by a king move, and a single one can be blocked or the checking piece taken.",
+      "origin_kind": "constructed-test",
+      "concept_role": "negative",
+      "side_to_move_benefits": "white",
+      "controlled_pair_with": "3k4/8/8/8/3N4/8/8/3RK3 w - - 0 1"
+    }
+  ],
   "ambiguous_examples": [],
   "explanations": {
     "by_level": {

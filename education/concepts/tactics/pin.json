@@ -150,7 +150,18 @@
       }
     }
   ],
-  "counterexamples": [],
+  "counterexamples": [
+    {
+      "fen": "3n4/8/8/3k4/8/8/8/R3K3 w - - 0 1",
+      "move": "Rd1+",
+      "move_uci": "a1d1",
+      "note": "THE SAME THREE MEN WITH TWO OF THEM SWAPPED. On the d-file a rook, a knight and a king: with the knight in front it is a PIN and the knight cannot legally move; with the KING in front - this position - it is a skewer, the king must move, and the knight falls behind it. Nothing else on the board changes and the name of the motif does. The page's own findMotifs tags the first `pin` and this one `skewer`, and this base does not second-guess it.",
+      "origin_kind": "constructed-test",
+      "concept_role": "negative",
+      "side_to_move_benefits": "white",
+      "controlled_pair_with": "3k4/8/8/3n4/8/8/8/R3K3 w - - 0 1"
+    }
+  ],
   "ambiguous_examples": [
     {
       "fen": "r4rk1/ppp2ppp/2n5/1B6/3P4/2N5/PPP2PPP/R3K2R w KQ - 0 1",

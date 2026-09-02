@@ -1917,3 +1917,20 @@ still a win; a trébuchet built from memory was a draw both ways; and two Philid
 with the attacking pawn only on the fourth rank the defence draws from almost
 anywhere, so a genuine failure needs a more advanced position than the record's
 current example pairs with.
+
+
+## The same three men with two of them swapped
+
+A rook, a knight and a king on the d-file. **Knight in front is a pin; king in
+front is a skewer.** Nothing else on the board changes and the name of the motif
+does — which is the commonest thing a learner gets backwards, and the page's own
+`findMotifs` gets it right, which is why ARCHITECTURE.md makes it the authority
+and forbids second-guessing. Both records now carry that pair.
+
+`double-check` and `discovered-check` get the other one: a knight between a rook
+and a king, **one move apart**. Ne6+ uncovers the rook *and* checks from e6 — two
+checks, answerable only by a king move. Nb5+ uncovers the same rook and checks
+once. The distinction is the whole reason a double check is worth a name, and it
+is one knight move wide.
+
+`negative_example` 101 → **87 of 132**; `positive_example` 73 → **67**.

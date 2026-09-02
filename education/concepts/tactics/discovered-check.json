@@ -85,7 +85,18 @@
     "conflicts": []
   },
   "examples": [],
-  "counterexamples": [],
+  "counterexamples": [
+    {
+      "fen": "3k4/8/8/8/3N4/8/8/3RK3 w - - 0 1",
+      "move": "Ne6+",
+      "move_uci": "d4e6",
+      "note": "A discovered check that is ALSO a check by the moving piece is a double check, and this base reports it as one: the record's own distinction is that what makes a discovered check powerful is that the moving piece is free to do anything, and a piece that is itself giving check is not free - it is part of the check. Paired with Nb5+ from the same position, which is the discovered check proper.",
+      "origin_kind": "constructed-test",
+      "concept_role": "negative",
+      "side_to_move_benefits": "white",
+      "controlled_pair_with": "3k4/8/8/8/3N4/8/8/3RK3 w - - 0 1"
+    }
+  ],
   "ambiguous_examples": [],
   "explanations": {
     "by_level": {

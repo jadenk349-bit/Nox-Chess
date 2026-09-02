@@ -94,13 +94,13 @@ Mean completeness **0.73** across 137 concepts.
 | partial | 0.58 | `intermediate-concepts` | 1 |
 | partial | 0.58 | `advanced-concepts` | 1 |
 | partial | 0.58 | `master-concepts` | 1 |
+| partial | 0.57 | `tactical-motifs` | 19 |
 | partial | 0.57 | `queen` | 1 |
 | partial | 0.56 | `endgame-principles` | 1 |
 | partial | 0.56 | `rook-endgames` | 1 |
 | partial | 0.56 | `knight-endgames` | 1 |
 | partial | 0.56 | `queen-endgames` | 1 |
 | partial | 0.56 | `mixed-piece-endgames` | 1 |
-| partial | 0.55 | `tactical-motifs` | 19 |
 
 ## Concepts
 
@@ -142,6 +142,7 @@ Mean completeness **0.73** across 137 concepts.
 | `exchange-sacrifice` | 0.87 | x | x | x | x | x | x | x | - | x | x | . | x | - | x | x | x |
 | `greek-gift` | 0.87 | x | x | x | x | x | x | x | x | - | x | . | - | x | x | x | x |
 | `early-queen-development` | 0.86 | x | x | x | . | x | x | x | - | x | x | . | - | x | x | x | x |
+| `pin` | 0.86 | x | x | x | . | x | x | x | x | x | x | . | - | - | x | x | x |
 | `zugzwang` | 0.85 | x | x | x | x | x | . | x | x | . | - | x | . | - | x | x | x |
 | `key-square` | 0.83 | x | x | x | . | x | . | x | x | . | - | x | . | - | x | x | x |
 | `perpetual-check` | 0.83 | x | x | x | . | x | x | x | - | . | x | . | . | - | x | x | x |
@@ -159,7 +160,6 @@ Mean completeness **0.73** across 137 concepts.
 | `castling` | 0.80 | x | x | x | . | x | . | x | x | . | . | . | . | - | x | x | - |
 | `back-rank-mate` | 0.79 | x | x | x | . | x | x | x | x | - | x | . | - | - | x | x | x |
 | `fork` | 0.79 | x | x | x | . | x | x | x | x | - | x | . | - | - | x | x | x |
-| `pin` | 0.79 | x | x | x | . | x | x | x | - | x | x | . | - | - | x | x | x |
 | `sacrifice` | 0.77 | x | x | x | x | x | x | - | - | . | x | . | . | - | x | x | x |
 | `insufficient-material` | 0.77 | x | x | x | . | x | x | x | x | . | - | x | . | - | x | x | - |
 | `piece-properties` | 0.75 | x | x | x | x | x | x | - | x | - | - | x | - | x | x | x | x |
@@ -173,6 +173,7 @@ Mean completeness **0.73** across 137 concepts.
 | `checkmate` | 0.73 | x | x | x | . | x | . | - | x | . | . | x | . | - | x | x | - |
 | `notation` | 0.73 | x | x | x | x | x | . | - | - | . | . | . | . | - | x | x | x |
 | `stalemate` | 0.73 | x | x | x | . | x | . | - | x | . | . | x | . | - | x | x | - |
+| `skewer` | 0.71 | x | x | x | . | x | x | x | x | - | x | . | - | - | x | x | - |
 | `promotion` | 0.70 | x | x | x | . | x | . | x | - | . | . | . | . | - | x | x | - |
 | `triangulation` | 0.69 | x | x | x | x | x | . | - | - | . | - | x | . | - | x | x | x |
 | `fortress` | 0.69 | x | x | x | x | x | x | x | - | - | - | x | - | - | x | x | x |
@@ -190,8 +191,8 @@ Mean completeness **0.73** across 137 concepts.
 | `chess-terminology` | 0.67 | x | x | x | . | x | x | - | - | . | - | . | . | - | x | x | x |
 | `forcing-moves` | 0.67 | x | x | x | x | x | x | x | - | - | - | . | - | - | x | x | x |
 | `discovered-attack` | 0.64 | x | x | x | . | x | x | x | - | - | x | . | - | - | x | x | - |
+| `double-check` | 0.64 | x | x | x | . | x | x | x | x | - | - | . | - | - | x | x | - |
 | `knight-fork` | 0.64 | x | x | x | . | x | x | x | - | - | - | . | - | - | x | x | x |
-| `skewer` | 0.64 | x | x | x | . | x | x | x | - | - | x | . | - | - | x | x | - |
 | `trapped-piece` | 0.64 | x | x | x | . | x | x | x | - | - | x | . | - | - | x | x | - |
 | `corresponding-squares` | 0.62 | x | x | x | x | x | . | - | - | . | - | - | . | - | x | x | x |
 | `building-a-bridge` | 0.62 | x | x | x | x | x | . | - | - | . | - | - | . | - | x | x | x |
@@ -224,6 +225,7 @@ Mean completeness **0.73** across 137 concepts.
 | `hanging-pawns` | 0.57 | x | x | x | . | x | x | - | - | - | - | . | - | - | x | x | x |
 | `pawn-break` | 0.57 | x | x | x | . | x | x | - | - | - | - | . | - | - | x | x | x |
 | `queen-activity` | 0.57 | x | x | x | . | x | x | - | - | - | - | . | - | - | x | x | x |
+| `discovered-check` | 0.57 | x | x | x | . | x | x | - | x | - | - | . | - | - | x | x | - |
 | `endgame-principles` | 0.56 | x | x | x | x | x | x | - | - | - | - | - | - | - | x | x | x |
 | `knight-endgames` | 0.56 | x | x | x | x | x | x | - | - | - | - | - | - | - | x | x | x |
 | `mixed-piece-endgames` | 0.56 | x | x | x | x | x | x | - | - | - | - | - | - | - | x | x | x |
@@ -233,9 +235,7 @@ Mean completeness **0.73** across 137 concepts.
 | `battery` | 0.50 | x | x | x | . | x | x | - | - | - | - | . | - | - | x | x | - |
 | `clearance` | 0.50 | x | x | x | . | x | x | - | - | - | - | . | - | - | x | x | - |
 | `deflection` | 0.50 | x | x | x | . | x | x | - | - | - | - | . | - | - | x | x | - |
-| `discovered-check` | 0.50 | x | x | x | . | x | x | - | - | - | - | . | - | - | x | x | - |
 | `double-attack` | 0.50 | x | x | x | . | x | x | - | - | - | - | . | - | - | x | x | - |
-| `double-check` | 0.50 | x | x | x | . | x | x | - | - | - | - | . | - | - | x | x | - |
 | `interference` | 0.50 | x | x | x | . | x | x | - | - | - | - | . | - | - | x | x | - |
 | `overloading` | 0.50 | x | x | x | . | x | x | - | - | - | - | . | - | - | x | x | - |
 | `removing-the-defender` | 0.50 | x | x | x | . | x | x | - | - | - | - | . | - | - | x | x | - |

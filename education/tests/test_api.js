@@ -2131,6 +2131,48 @@ const { concepts } = API.knowledge();
      luc.examples.some(p => p.tablebase && p.tablebase.wdl === 'win'));
 }
 
+{
+  // THE SAME THREE MEN WITH TWO OF THEM SWAPPED. A rook, a knight and a king on
+  // the d-file: knight in front is a PIN, king in front is a SKEWER. Nothing
+  // else changes and the name of the motif does — which is the commonest thing
+  // a learner gets backwards, and the page's own findMotifs gets it right.
+  const motif = (fen, move, id) =>
+    API.analyzeWithEducation({ fen, move }).concepts_all.some(c => c.id === id);
+  const PIN = '3k4/8/8/3n4/8/8/8/R3K3 w - - 0 1';
+  const SKEW = '3n4/8/8/3k4/8/8/8/R3K3 w - - 0 1';
+  ok('pin: knight in front of the king is a pin', motif(PIN, 'a1d1', 'pin'));
+  ok('...and not a skewer', !motif(PIN, 'a1d1', 'skewer'));
+  ok('skewer: king in front of the knight is a skewer', motif(SKEW, 'a1d1', 'skewer'));
+  ok('...and not a pin', !motif(SKEW, 'a1d1', 'pin'));
+
+  // One knight move apart: Ne6+ uncovers the rook AND checks, Nb5+ only
+  // uncovers. A double check can only be answered by a king move.
+  const DC = '3k4/8/8/8/3N4/8/8/3RK3 w - - 0 1';
+  ok('double-check: Ne6+ checks twice', motif(DC, 'd4e6', 'double-check'));
+  ok('discovered-check: Nb5+ checks once', motif(DC, 'd4b5', 'discovered-check'));
+  ok('...and Nb5+ is not a double check', !motif(DC, 'd4b5', 'double-check'));
+
+  // Every one of these pairs names its other half, and both halves are legal.
+  let paired = 0;
+  for (const dir of fs.readdirSync(path.join(ROOT, 'concepts'))) {
+    const d = path.join(ROOT, 'concepts', dir);
+    if (!fs.statSync(d).isDirectory()) continue;
+    for (const fn of fs.readdirSync(d)) {
+      if (!fn.endsWith('.json')) continue;
+      const c = JSON.parse(fs.readFileSync(path.join(d, fn), 'utf8'));
+      for (const p of (c.counterexamples || []).concat(c.examples || [])) {
+        if (!p.controlled_pair_with) continue;
+        paired++;
+        let ok1 = true;
+        try { FEAT.page.stateFromFEN(p.fen); FEAT.page.stateFromFEN(p.controlled_pair_with); }
+        catch (e) { ok1 = false; }
+        if (!ok1) ok('controlled pair is legal on both sides: ' + c.id, false, p.fen);
+      }
+    }
+  }
+  ok('controlled pairs across the base', paired >= 14, String(paired));
+}
+
 /* ---------- report ---------- */
 console.log(`\nAPI  PASS ${pass}   FAIL ${fails.length}`);
 for (const [n, d] of fails) console.log(`  FAIL  ${n}\n        ${d}`);

@@ -105,9 +105,30 @@
         "verdict": "supports",
         "verdict_note": "Inherited validation: this position ships as a puzzle, and the generator's standard is that exactly one move is best by at least GAP_MIN at confirmation depth, re-checked deeper by tools/verify_puzzles.js. The move is therefore engine-verified as best without this base running its own search. The motif label comes from findMotifs, not from the engine — the two are independent and both had to agree for this to be recorded."
       }
+    },
+    {
+      "fen": "3n4/8/8/3k4/8/8/8/R3K3 w - - 0 1",
+      "move": "Rd1+",
+      "move_uci": "a1d1",
+      "note": "The skewer proper: the king is in front, must move out of check, and the knight behind it is taken. Paired with the identical men in the other order, which is a pin.",
+      "origin_kind": "constructed-test",
+      "concept_role": "supports",
+      "side_to_move_benefits": "white",
+      "controlled_pair_with": "3k4/8/8/3n4/8/8/8/R3K3 w - - 0 1"
     }
   ],
-  "counterexamples": [],
+  "counterexamples": [
+    {
+      "fen": "3k4/8/8/3n4/8/8/8/R3K3 w - - 0 1",
+      "move": "Rd1",
+      "move_uci": "a1d1",
+      "note": "The mirror of `pin`'s counterexample and the other half of one controlled pair: the same rook, knight and king on the d-file with the knight in front instead of the king. That is a pin, not a skewer - the piece behind is the more valuable one, which is the whole distinction between the two motifs and the commonest thing a learner gets backwards.",
+      "origin_kind": "constructed-test",
+      "concept_role": "negative",
+      "side_to_move_benefits": "white",
+      "controlled_pair_with": "3n4/8/8/3k4/8/8/8/R3K3 w - - 0 1"
+    }
+  ],
   "ambiguous_examples": [],
   "explanations": {
     "by_level": {
