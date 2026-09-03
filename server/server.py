@@ -1593,6 +1593,8 @@ STATIC_FILES = {
     "/assets/nox-logo.png":      ("assets/nox-logo.png",      "image/png"),
     # the night sky every screen sits on (a JPEG, whatever the source was called)
     "/assets/sky.jpg":           ("assets/sky.jpg",           "image/jpeg"),
+    # the moon behind the boxes down the right of the game screen (also a JPEG)
+    "/assets/moon.jpg":          ("assets/moon.jpg",          "image/jpeg"),
     # the seven rank badges the ranked screen shows, one per tier
     "/assets/tier-bronze.png":      ("assets/tier-bronze.png",      "image/png"),
     "/assets/tier-silver.png":      ("assets/tier-silver.png",      "image/png"),

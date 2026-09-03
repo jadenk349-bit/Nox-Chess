@@ -235,6 +235,23 @@
     box-shadow:var(--sh-3), var(--lip);
   }
 
+  /* The boxes down the right of the game screen — the setup questions, the
+     captured men, the notation, the controls, the chat, the puzzle card —
+     sit on the moon rather than on the plain plate. The image goes *under*
+     the same gradient every other panel has, not in place of it: the two
+     surface colours are translucent on purpose, so the craters show through
+     at the head of a box and fade under the foot, and the text on top stays
+     as readable as it is everywhere else. Only the game screen's side column
+     gets it; the review bar, the ladder and the overlays keep the plain
+     plate. It is one image per box, sized to cover, so a tall box shows
+     more moon and a short one a crop of it — cropping is deliberate, since
+     the picture is a texture here and not a thing to be looked at whole. */
+  .game-side .panel{
+    background:
+      linear-gradient(180deg, var(--surf-1), var(--surf-2)),
+      url("assets/moon.jpg?v=1") center / cover no-repeat;
+  }
+
   /* ---------- board ---------- */
   .board-col{display:flex; flex-direction:column; align-items:center; gap:14px;}
 
