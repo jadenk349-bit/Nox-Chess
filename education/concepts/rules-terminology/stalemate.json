@@ -1,0 +1,136 @@
+{
+  "schema_version": 2,
+  "id": "stalemate",
+  "canonical_name": "Stalemate",
+  "alternate_names": [],
+  "historical_names": [],
+  "category": "official-rules",
+  "subcategory": "basic rules of play",
+  "tags": [],
+  "knowledge_type": "official-rule",
+  "knowledge_type_note": "Official rule. Its status as a draw rather than a win is a rule choice, not a logical necessity — some historical and regional variants scored it differently.",
+  "name_status": "established-name",
+  "difficulty": "beginner",
+  "definition_short": "The side to move has no legal move and is NOT in check. The game is drawn immediately.",
+  "definition_long": "FIDE Art. 5.2.1: 'The game is drawn when the player to move has no legal move and his/her king is not in check. The game is said to end in stalemate. This immediately ends the game...'\n\nThe absence of check is what separates stalemate from checkmate, and it is a draw regardless of material. A player a queen ahead who stalemates has drawn. This makes stalemate a defensive RESOURCE, not merely an accident, and one of the main reasons endgame technique requires care rather than force.",
+  "history": {
+    "attributions": [],
+    "first_documented_source": "fide-laws-2023",
+    "year": null,
+    "confidence": "unknown",
+    "notes": "The rule that stalemate is a draw was not universal historically; it has been scored as a win and as a loss in various times and places. Not yet researched for this record.",
+    "competing_claims": [],
+    "development": []
+  },
+  "engine_era_status": "not-applicable",
+  "engine_era_note": "",
+  "sources": [
+    "fide-laws-2023",
+    "fide-laws-2023-pdf"
+  ],
+  "source_confidence": "high",
+  "recognition": {
+    "preconditions": [
+      "The side to move has zero legal moves",
+      "That side's king is not in check"
+    ],
+    "indicators_for": [],
+    "indicators_against": [],
+    "prerequisites": [],
+    "detector": "lib/matchers.js: stalemate, over legalMoves and inCheck",
+    "detectability": "mechanical",
+    "typical_confidence": "high",
+    "false_positive_traps": []
+  },
+  "application": {
+    "typical_plans": [],
+    "typical_moves": [],
+    "typical_pawn_structures": [],
+    "typical_piece_arrangements": [],
+    "tactical_consequences": [],
+    "strategic_consequences": []
+  },
+  "exceptions": [],
+  "limitations": [
+    "Being drawn regardless of material makes it a deliberate defensive device; an explanation should treat a stalemate trick as a resource, not a blunder by the winner.",
+    "Fires on none of the 788 shipped positions, which is correct - a puzzle whose answer is stalemate is a stalemate RESOURCE, and the position offered is not itself stalemate.",
+    "TYPICAL_CONFIDENCE RAISED medium -> high, 2026-09-02, and the reason is the schema's own definition of the field: 'how confidently this concept can normally be asserted ONCE ITS PRECONDITIONS HOLD'. This concept's recognition is MECHANICAL and its knowledge type already carries a high ceiling, so once the preconditions hold there is nothing left to be uncertain about - a stalemate is a stalemate, and a fork this base reports is one findMotifs() found, which ARCHITECTURE.md makes the authority and forbids second-guessing. 'Medium' was the default across 32 rule and motif records regardless of detectability, and it was found by measuring what the API reports against what each record permits: twelve concepts were reporting ABOVE their own record. The fix was to make each record its own ceiling in cap(), which then required the records that were wrong to be corrected rather than silently overruled."
+  ],
+  "misconceptions": [],
+  "relationships": {
+    "broader": [],
+    "narrower": [],
+    "related": [
+      "checkmate"
+    ],
+    "contrasting": [],
+    "co_occurring": [],
+    "conflicts": []
+  },
+  "examples": [
+    {
+      "fen": "7k/8/6Q1/8/8/8/8/6K1 b - - 0 1",
+      "note": "Constructed, and verified as the exact complement of the checkmate example: the move generator reports inCheck(black) = FALSE and legalMoves() ZERO. The queen on g6 covers g7, g8 and h7 and does not attack h8, which is the whole trick - one square further and it is mate, one square back and Black has a move.",
+      "origin_kind": "constructed-test",
+      "concept_role": "positive"
+    }
+  ],
+  "counterexamples": [
+    {
+      "fen": "7k/6Q1/6K1/8/8/8/8/8 b - - 0 1",
+      "note": "THE CLASSIC CONFUSION, as a controlled pair: the same three men, the queen one square over. On f7 it is stalemate and the game is drawn; on g7 it is checkmate. A king with no legal move is not stalemate - a king with no legal move AND NOT IN CHECK is. Building this pair found that the base could say 'this position is stalemate' about a board and could not say 'this position is checkmate' about the same board, because checkmate was reachable only through the MOVE; a structural arm was added for it.",
+      "origin_kind": "constructed-test",
+      "concept_role": "negative",
+      "side_to_move_benefits": "neither",
+      "controlled_pair_with": "7k/5Q2/6K1/8/8/8/8/8 b - - 0 1",
+      "tablebase": {
+        "source": "Lichess tablebase (Syzygy, 7-piece)",
+        "pieces": 3,
+        "wdl": "loss",
+        "dtz": -1,
+        "dtm": null,
+        "category": "loss",
+        "checkmate": true,
+        "stalemate": false,
+        "note": "PROVEN: checkmate true, stalemate false, loss for the side to move. The paired position is a proven draw with stalemate true. Syzygy settles both outright, which is the right evidence for a rule."
+      }
+    }
+  ],
+  "ambiguous_examples": [],
+  "explanations": {
+    "by_level": {
+      "beginner": "The player to move has no legal move at all, but is not in check. That is stalemate, and the game is a draw — no matter who was winning.",
+      "intermediate": "Stalemate: no legal move and no check, so the game is drawn. Watch for it whenever you are converting a large material advantage.",
+      "advanced": "Art. 5.2.1. A standing defensive resource in simplified endings."
+    },
+    "by_depth": {
+      "short": "No legal move and no check. The game is drawn however lopsided the position.",
+      "normal": "Stalemate: the side to move has no legal move and is not in check. The game is drawn immediately, whoever was winning and by however much — which is what makes it the defender's standing resource in simplified endings.",
+      "deep": "FIDE Art. 5.2.1, and the exact complement of checkmate: empty reply list, no check. The pair matters more than either half. This base's stalemate example has a queen covering three of the king's four squares and deliberately not the fourth; one square further and it is mate, one square back and the defender has a move. Underpromotion to a rook rather than a queen is the standard practical answer, and it exists entirely because of this rule."
+    },
+    "hedge": "",
+    "lesson": ""
+  },
+  "terminology": {
+    "beginner_words": [
+      "no moves left",
+      "not in check"
+    ],
+    "advanced_words": [
+      "stalemate",
+      "stalemate resource"
+    ],
+    "avoid": []
+  },
+  "status": {
+    "stage": "researched",
+    "last_updated": "2026-09-01",
+    "open_questions": [],
+    "audit_notes": [
+      "2026-09-01: detector field named 'isStalemate', which does not exist anywhere in the codebase. The audit's hardcoded whitelist had been accepting it. Repointed at real code, or marked as proposed where nothing implements it."
+    ]
+  },
+  "validation_na": {
+    "false_positive_test": "N/A rather than missing. A registered false-positive case is a position where the concept's surface pattern is present and the concept is absent, replayed as an assertion so the system can be shown declining the error. This concept is DECIDED BY THE MOVE GENERATOR - the same function that decides it in a game - so there is no judgement to get wrong and no surface pattern that can be present without the thing itself. The nearest genuine risk is a PATTERN NAME attached to a position that is check and not mate, and that risk belongs to `back-rank-mate` and `smothered-mate`, both of which carry a registered case for it."
+  }
+}

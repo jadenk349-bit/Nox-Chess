@@ -1,0 +1,341 @@
+{
+  "schema_version": 2,
+  "alternate_names": [
+    "king activity",
+    "the active king",
+    "the king as a fighting piece"
+  ],
+  "historical_names": [],
+  "tags": [
+    "endgame",
+    "king",
+    "tablebase-tested"
+  ],
+  "subcategory": "endgame method",
+  "difficulty": "intermediate",
+  "knowledge_type_note": "Typed a principle rather than a rule because its own principal advocate documents a class of positions where it fails, and this base follows him.",
+  "name_status": "established-name",
+  "history": {
+    "attributions": [
+      {
+        "relation": "systematized-by",
+        "person": "Mikhail Shereshevsky",
+        "year": 1985,
+        "note": "Lists centralisation of the king first among the four basic endgame principles in Endgame Strategy, and documents its failure mode in rook endings.",
+        "confidence": "high"
+      },
+      {
+        "relation": "later-associated-with",
+        "person": "Jose Raul Capablanca",
+        "year": null,
+        "note": "The standard exemplar of the marching endgame king. Znosko-Borovsky is quoted as contrasting Alekhine's queen with the king as the principal instrument of Capablanca's victories - a quotation this base has not verified at source.",
+        "confidence": "low"
+      }
+    ],
+    "first_documented_source": "shereshevsky-endgame-strategy",
+    "year": 1985,
+    "confidence": "medium",
+    "notes": "The idea long predates Shereshevsky and is not his invention; he is credited with systematising it and, more valuably, with documenting where it breaks. The Znosko-Borovsky quotation reaches this base through an instructional blog and is recorded at low confidence.",
+    "competing_claims": [],
+    "development": []
+  },
+  "engine_era_status": "reliable",
+  "engine_era_note": "Strongly confirmed. Engines value an active king in simplified positions highly and will spend material to activate one, which was the part of Capablanca's method that looked most like intuition and turns out to be calculable.",
+  "recognition": {
+    "preconditions": [
+      "Queens are off or a transition to an endgame is imminent",
+      "No mating threats against the king"
+    ],
+    "indicators_for": [
+      "Weak enemy pawns the king could attack",
+      "A passed pawn needing escort or blockade",
+      "The enemy king is further from the action",
+      "Few enough pieces that mating nets are unlikely"
+    ],
+    "indicators_against": [
+      "Queens or many pieces remain and the king can be attacked",
+      "A rook ending with concrete defensive resources, where the king may be needed at home",
+      "The centralising move loses time in a race",
+      "The king would step into a check that gains the opponent a tempo"
+    ],
+    "prerequisites": [
+      "king-safety"
+    ],
+    "detector": null,
+    "detectability": "heuristic",
+    "typical_confidence": "medium",
+    "false_positive_traps": [
+      "The single most important trap is rook endings, on the testimony of the principle's own advocate: Shereshevsky found centralisation there to be not merely untimely but sometimes simply wrong, and warns against automatic centralising moves.",
+      "A king moving towards the centre is not automatically doing the right thing; the move still has to survive checks. His example has 1...Ke5? losing to 2.Rd5+ while the retreat 1...Kc5! draws.",
+      "Centralisation with queens still on is a different matter entirely and this concept does not apply.",
+      "Never recommend centralising a king while the opponent has a queen, whatever the piece count says. The phase test in lib/features.js is material-based and can call a queens-on position an endgame."
+    ]
+  },
+  "application": {
+    "typical_plans": [
+      "Bring the king to the centre as the queens come off, before it is needed",
+      "Use the king to attack fixed pawn weaknesses",
+      "Escort a passed pawn with the king",
+      "Blockade an enemy passed pawn with the king, freeing pieces for active work"
+    ],
+    "typical_moves": [
+      "Kf2-e3-d4 style marches once queens are exchanged"
+    ],
+    "typical_pawn_structures": [
+      "Fixed pawn weaknesses within a king's reach"
+    ],
+    "typical_piece_arrangements": [
+      "Simplified positions with few or no minor pieces"
+    ],
+    "tactical_consequences": [
+      "An exchange sacrifice to install the king on a strong central square can be sound"
+    ],
+    "strategic_consequences": [
+      "The side whose king arrives first usually wins otherwise level endings"
+    ]
+  },
+  "exceptions": [
+    "Rook endings, where the author of the principle records finding outright incorrect centralisation and attributes it to their concreteness and to the king's larger defensive role.",
+    "Positions where the king is still exposed to checks that gain the opponent tempi.",
+    "Races, where a centralising move may simply be too slow."
+  ],
+  "limitations": [
+    "Whether a particular king move is right remains a concrete question; the principle says where the king belongs, not whether this move gets it there safely.",
+    "This base's attempts to build a controlled pair isolating king activity in rook endings FAILED twice - see the concept's audit notes - which is itself consistent with Shereshevsky's finding.",
+    "MEASURED 2026-09-02: the first trap - 'the single most important trap is ROOK ENDINGS... Shereshevsky found centralisation there to be not merely untimely but sometimes simply wrong, and warns against automatic centralising moves' - is now carried in the sentence, which names the rook ending and the warning. Both stronger answers were tried and both are wrong: refusing the concept in rook endings deletes Capablanca-Tartakower 1924, this corpus's own annotated instance and the most famous king march in a rook ending in the literature; and downgrading to low confidence says 'we are not sure the king is off its back rank', which is not the doubt Shereshevsky is expressing. He warns against centralising AUTOMATICALLY. 33 of the 122 positions this fires on are rook endings.",
+    "MEASURED 2026-09-02: the third trap - 'centralisation with queens still on is a different matter entirely and this concept does not apply' - is enforced by the phase gate rather than by a separate test, and it is the same mechanism as the fourth: phaseOf() returns 'endgame' only when there are NO queens on the board, so a queens-on position never reaches this matcher at all."
+  ],
+  "misconceptions": [
+    "That the king should be kept safe in the endgame as it is earlier. The change in the king's role is what defines the phase.",
+    "That centralisation is always correct. Its own advocate documents rook endings where it is not."
+  ],
+  "relationships": {
+    "broader": [
+      "endgame-principles"
+    ],
+    "narrower": [],
+    "related": [
+      "endgame-principles",
+      "opposition",
+      "two-weaknesses",
+      "passed-pawn",
+      "king-safety",
+      "rook-endgame-principles",
+      "triangulation"
+    ],
+    "contrasting": [
+      "king-safety"
+    ],
+    "co_occurring": [
+      "two-weaknesses"
+    ],
+    "conflicts": [
+      {
+        "concept": "king-safety",
+        "resolution": "The same piece, opposite advice, and the phase decides. King safety governs while a mating attack is possible; king activity governs once it is not. The dangerous ground is the transition, and the honest test is whether any enemy force can still generate threats against the king rather than whether the queens happen to be off."
+      }
+    ]
+  },
+  "examples": [
+    {
+      "fen": "r7/4k3/4P3/4K3/8/8/8/7R w - - 0 1",
+      "note": "Controlled pair, first half: the defending king stands in front of the pawn. Paired with the identical position with that king on a7 - same material, same white setup, only the defending king's square differs.",
+      "origin_kind": "tablebase-position",
+      "concept_role": "supports",
+      "side_to_move_benefits": "white",
+      "tablebase": {
+        "source": "Lichess tablebase (Syzygy, 7-piece)",
+        "pieces": 5,
+        "wdl": "win",
+        "dtz": 7,
+        "dtm": 35,
+        "category": "win",
+        "note": "PROVEN win in 35. The paired position, identical except that the defending king sits on a7 instead of e7, is a proven win in 15. Both are lost, so king placement does not change the RESULT here - but it more than doubles the resistance, 35 against 15, with nothing else on the board different. Recorded as measuring the king's defensive value rather than as proving the principle, which would be a stronger claim than the evidence supports."
+      }
+    },
+    {
+      "fen": "3r4/1P6/5k1p/2PP2pP/r4p2/p2K1P2/8/4R3 w - - 4 52",
+      "note": "The feature is present and was verified mechanically by lib/features.js: White king centralised on d3 in an endgame. The engine puts the position at -0.34, close enough to level that the feature is not being swamped by tactics — so this is usable as an instance of the concept. What is NOT claimed is that the concept explains the engine's move. Provenance: mined from this repository's puzzle corpus, which is engine self-play — a real position from a real game between engines, not a master game.",
+      "origin_kind": "puzzle",
+      "concept_role": "supports",
+      "side_to_move_benefits": "neither",
+      "engine": {
+        "engine_id": "Stockfish 18",
+        "test_level": 2,
+        "depth": 20,
+        "threads": 8,
+        "hash_mb": 2048,
+        "multipv": 2,
+        "best_move": "c5c6",
+        "eval_cp": -34,
+        "mate_in": null,
+        "pv": [],
+        "alternatives": [
+          {
+            "move": "e1c1",
+            "eval_cp": -532,
+            "mate_in": null
+          }
+        ],
+        "margin_cp": 0,
+        "verdict": "supports",
+        "verdict_note": "Level-2 validation: the position was scored, not designed. It confirms the feature is present in real play and, where the score is near level, that the feature is not drowned out. It is not a controlled pair and proves nothing about the concept on its own."
+      }
+    },
+    {
+      "fen": "5k2/p1p4R/1pr5/3p1pP1/P2P1P2/2P2K2/8/8 w - - 0 35",
+      "note": "Capablanca-Tartakower, New York 1924, Kg3. Human ground truth: the concept is named for this position by Irving Chernev, quoted move by move. Corpus entry `capablanca-tartakower-1924-35Kg3-king-activation`. The most famous illustration of the concept there is, and it is a positive example of an unusually pure kind: the move does nothing except walk the king forward, and it costs two pawns with check to do it. The concept record's own claim is that in an endgame the king is a piece and belongs in the middle of the board; here that claim is priced. Nine moves later the king stands o",
+      "origin_kind": "historical-game",
+      "game": "Capablanca-Tartakower, New York 1924",
+      "concept_role": "positive",
+      "attributed_by": "Irving Chernev, quoted move by move — corpus entry capablanca-tartakower-1924-35Kg3-king-activation",
+      "engine": {
+        "engine_id": "Stockfish 18",
+        "test_level": 3,
+        "depth": 20,
+        "multipv": 3,
+        "best_move": "Kg3",
+        "eval_cp": 295,
+        "verdict": "supports",
+        "verdict_note": "completely, and by the largest margin in this corpus. 35.Kg3 is the engine's first choice at +2.95; the second-best move is +0.46. The move that gives away two pawns with check is worth two and a half pawns more than any move that keeps them. Depth 20 rather than 24: this is a simplified rook ending, the case this project has already recorded as failing to converge deeper. The 2.49 gap is not a number that needs more depth."
+      }
+    },
+    {
+      "fen": "5k2/p1p4R/1p3KP1/3p1p2/P2Pr3/8/8/8 b - - 3 39",
+      "game": "Capablanca-Tartakower, New York 1924",
+      "note": "Five moves later, the king has reached f6. Chernev's summary of the resulting position is that White is effectively playing with an extra piece, given the activity of one king and the passivity of the other.",
+      "origin_kind": "historical-game",
+      "concept_role": "supports",
+      "side_to_move_benefits": "white"
+    },
+    {
+      "fen": "3k4/1p3bB1/2p1p2p/2P4P/5PP1/6K1/8/8 b - - 1 59",
+      "game": "Petrosian-Euwe, Candidates, Zurich 1953",
+      "note": "A QUIET position from a master game — after Bg7, ply 117 — in which White's king has come off its back rank to g3, which is where it belongs in an endgame. Quiet here has a mechanical meaning: the side to move has no check and no capture that wins material, so the next move has to be chosen on positional grounds. That matters because this base's other corpus is 788 tactical puzzles, in which a positional feature cannot be isolated.\n\nWHAT IS VERIFIED: the game replays legally end to end through the page's own move generator, so the FEN is derived rather than transcribed; and the feature is present by mechanical measurement in lib/features.js.\n\nWHAT IS NOT CLAIMED: that the concept decides this position, or that the players were thinking about it. Note also a limitation of method — the position was FOUND by this system's own Layer 4, so it demonstrates the concept and cannot by itself validate the matcher that found it. Other concepts licensed here: opposite-coloured-bishops, weak-square, space.",
+      "origin_kind": "historical-game",
+      "concept_role": "supports",
+      "side_to_move_benefits": "neither"
+    },
+    {
+      "fen": "8/1p1k2p1/3bp2p/r3p3/p1RpP3/P2N1PPP/1P3K2/8 b - - 2 31",
+      "game": "Petrosian-Keres, Candidates, Zurich 1953",
+      "note": "A quiet position from a master game — after Kf2, ply 61 — where White's king has come off its back rank to f2, which is where it belongs in an endgame. Quiet has a mechanical meaning here: the side to move has no check and no capture that wins material, so the next move must be chosen positionally. VERIFIED: the game replays legally end to end through the page's own move generator, and the feature is measured by lib/features.js. NOT CLAIMED: that the concept decides this position, or that the players were thinking about it. Method note: the position was found by this system's own Layer 4, so it illustrates the concept and cannot by itself validate the matcher that found it. Other concepts licensed here: passed-pawn, doubled-pawns, open-file, weak-square.",
+      "origin_kind": "historical-game",
+      "concept_role": "supports",
+      "side_to_move_benefits": "neither"
+    }
+  ],
+  "counterexamples": [
+    {
+      "fen": "r7/k7/4P3/4K3/8/8/8/7R w - - 0 1",
+      "note": "Controlled pair, second half: identical to the position above except the defending king is on a7 rather than e7.",
+      "origin_kind": "tablebase-position",
+      "concept_role": "supports",
+      "side_to_move_benefits": "white",
+      "tablebase": {
+        "source": "Lichess tablebase (Syzygy, 7-piece)",
+        "pieces": 5,
+        "wdl": "win",
+        "dtz": 1,
+        "dtm": 15,
+        "category": "win",
+        "note": "PROVEN win in 15, against 35 with the king in front. The 20-move difference is attributable to the king's square alone."
+      }
+    },
+    {
+      "fen": "8/3b2k1/pp1p2pp/n1p1br2/P1P4q/1P1Q1BPP/7K/1R2BR2 b - - 1 31",
+      "note": "A position this base's phase test calls simplified enough to matter, in which BOTH queens are still on the board. Centralising a king here is not a plan but an invitation. Mined from the corpus rather than constructed, as an instance of the pattern the concept's exceptions warn about. Provenance: taken from this repository's puzzle corpus (puzzles/*.json), which tools/generate_puzzles.js mined from ENGINE SELF-PLAY. It is a real, legally reached position from a real game between two engines - not a master game, and this base does not claim it as one.",
+      "origin_kind": "puzzle",
+      "concept_role": "contradicts",
+      "side_to_move_benefits": "neither",
+      "detector": {
+        "source": "lib/features.js",
+        "note": "Queens present for both sides. The king-activation matcher requires phase=endgame AND pawns on the board, and does not check for queens - so this position is recorded as the case that guard does not cover, and the concept's recognition block carries the warning explicitly."
+      }
+    }
+  ],
+  "ambiguous_examples": [
+    {
+      "fen": "8/5r2/2k2p2/pN5p/P1N5/4p1P1/5PK1/8 b - - 1 55",
+      "note": "Black's king stands centralised on c6 in a simplified ending. The position is QUIET by mechanical test: the side to move has no check available and no capture that wins material, so the next move must be chosen on positional grounds. That is the property this base's tactical corpus almost never has. Found by tools/prospect.js, which searches 1576 real positions for a concept's feature and scores quiet positions far higher. Provenance: the puzzle corpus is engine self-play — a real position from a real game between engines, not a master game.",
+      "origin_kind": "puzzle",
+      "concept_role": "ambiguous",
+      "side_to_move_benefits": "neither",
+      "engine": {
+        "engine_id": "Stockfish 18",
+        "test_level": 2,
+        "depth": 20,
+        "threads": 8,
+        "hash_mb": 2048,
+        "multipv": 2,
+        "best_move": "e3e2",
+        "eval_cp": 588,
+        "mate_in": null,
+        "pv": [],
+        "alternatives": [
+          {
+            "move": "e3f2",
+            "eval_cp": 34,
+            "mate_in": null
+          }
+        ],
+        "margin_cp": 0,
+        "verdict": "ambiguous",
+        "verdict_note": "Quiet AND decided, which is worth recording as a pair. The feature is present and the evaluation is 5.88, so nothing forcing is on offer and the position is nonetheless settled. It demonstrates the feature and cannot show the concept deciding anything - and it is a useful reminder that quietness is not balance."
+      }
+    }
+  ],
+  "explanations": {
+    "by_level": {
+      "beginner": "Once the queens come off, bring your king towards the middle. It is a fighting piece now.",
+      "intermediate": "Centralise the king in the endgame. The side whose king gets to the action first usually wins otherwise level endings.",
+      "advanced": "Bring it in anticipation of the ending rather than after it arrives - but be careful in rook endings, which are concrete enough to punish automatic centralising.",
+      "master": "Shereshevsky himself reports finding outright incorrect centralisation in rook endings, and attributes it to the king's larger defensive role there."
+    },
+    "by_depth": {
+      "short": "In the endgame the king is a fighting piece - bring it to the centre.",
+      "normal": "Centralisation of the king: once queens are off and mating attacks are unlikely, the king becomes an active piece and often the strongest one. It attacks weak pawns, escorts passed pawns and blockades enemy ones, and the side whose king arrives first usually wins endings that look level.",
+      "deep": "The change that defines the endgame, and the first of Shereshevsky's four basic principles - stated by him at close to full strength, since centralisation is 'almost never wrong' and 'can only be untimely'. The mechanism is that a short-range piece is finally allowed to move, doing work that would otherwise cost a piece elsewhere. The exception is worth as much as the rule and comes from the same source: Shereshevsky reports being surprised to find centralisation in rook endings that was not merely untimely but wrong, explaining that rook endings are very concrete, full of defensive set-ups and fortresses, and that the king's defensive role there is much larger. His illustration has the natural centralising move losing while a retreat away from the passed pawn draws."
+    },
+    "hedge": "",
+    "lesson": "Bring the king in as the queens come off - but in a rook ending, check the move rather than trusting the plan."
+  },
+  "terminology": {
+    "beginner_words": [
+      "bring your king out",
+      "the king can fight now"
+    ],
+    "advanced_words": [
+      "centralisation",
+      "king activity",
+      "the active king",
+      "opposition"
+    ],
+    "avoid": [
+      "always centralise the king",
+      "keep the king safe in the endgame"
+    ]
+  },
+  "status": {
+    "stage": "researched",
+    "last_updated": "2026-09-01",
+    "open_questions": [],
+    "audit_notes": [
+      "2026-09-01: two attempts to build a controlled pair in which king placement alone flips a rook ending between win and draw both FAILED - one pair came out win/win (dtm 35 vs 15, recorded) and a Philidor-setup pair came out draw/draw. Recorded rather than discarded. This mirrors the three failed outpost pairs and is consistent with Shereshevsky's own remark that rook endings are too concrete for the principle to isolate.",
+      "2026-09-01: a mined position was labelled origin_kind 'historical-game'. The corpus it came from is engine self-play, so that claimed a provenance this base does not have. Relabelled 'puzzle' with the provenance stated."
+    ]
+  },
+  "id": "king-activation",
+  "canonical_name": "Centralisation of the king",
+  "category": "king-activation",
+  "knowledge_type": "strategic-principle",
+  "definition_short": "Once queens are off, the king becomes a fighting piece and belongs in the centre rather than in shelter.",
+  "definition_long": "The change that defines the endgame. In the opening and middlegame the king hides; once the chance of a mating attack recedes, it becomes an active piece and often the strongest one on the board. Shereshevsky lists it first among the four basic principles of endgame play and states the rule at close to full strength: centralisation of the king in the endgame is 'almost never wrong. It can only be untimely.'\n\nTHE MECHANISM is that the king is a short-range piece that is finally allowed to move. It attacks weak pawns, escorts passed pawns, blockades enemy ones, and does all of it without costing a piece elsewhere. The side whose king reaches the action first usually wins endings that look level, which is why experienced players bring the king towards the centre in ANTICIPATION of an ending rather than after one has arrived.\n\nTHE AUTHOR'S OWN EXCEPTION is the reason this record exists in the form it does, and it is unusually honest testimony. Shereshevsky reports being SURPRISED that in rook endings he could find examples of centralisation that were not merely untimely but outright INCORRECT, and offers a candid explanation: rook endings are very concrete, full of specific defensive set-ups and fortresses, and the king's defensive role there is much more significant than in other endings. His own illustration has the natural 1...Ke5? losing while the illogical 1...Kc5!, stepping the king FURTHER from the enemy passed pawn, draws.\n\nMEASURED HERE: with identical material and only the defending king's square changed, the defence lasted more than twice as long with the king in front of the pawn — mate in 35 against mate in 15. That quantifies the king's defensive value directly, in a position where nothing else differs.",
+  "sources": [
+    "shereshevsky-endgame-strategy",
+    "chessentials-endgame-strategy-review",
+    "oldschoolchess-capablanca-endgame",
+    "zurich-1953-games"
+  ],
+  "source_confidence": "high"
+}

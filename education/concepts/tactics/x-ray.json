@@ -1,0 +1,228 @@
+{
+  "schema_version": 2,
+  "id": "x-ray",
+  "canonical_name": "X-ray",
+  "alternate_names": [
+    "x-ray attack",
+    "x-ray defence",
+    "through-attack"
+  ],
+  "historical_names": [],
+  "category": "tactical-motifs",
+  "subcategory": "material-winning motif",
+  "tags": [],
+  "knowledge_type": "tactical-motif",
+  "knowledge_type_note": "Motif (D). Terminology genuinely contested: some sources fold x-ray into pin/skewer. The boundary chosen here is stated explicitly rather than presented as settled.",
+  "name_status": "established-name",
+  "difficulty": "advanced",
+  "definition_short": "A line piece acts through another piece — attacking or defending beyond it.",
+  "definition_long": "A bishop, rook or queen exerts influence through an intervening unit. Two distinct uses share the name, and Chess Tempo maintains them as separate tags:\n\nX-RAY ATTACK — the line piece attacks a target through an intervening piece, so the attack becomes real the moment the blocker leaves.\nX-RAY DEFENCE — the line piece defends a friendly unit through an intervening piece, so a capture on that square is answered by a recapture that was not visible.\n\nSources also disagree about whether x-ray is distinct from pin and skewer at all; some treat all three as one family of line effects. This record keeps x-ray for the case where the effect operates THROUGH a piece without compelling it to move, which is what distinguishes it from a pin or skewer.",
+  "history": {
+    "attributions": [],
+    "first_documented_source": "informant-encyclopedia-combinations",
+    "year": null,
+    "confidence": "unknown",
+    "notes": "Tactical motifs are descriptive pattern names of long and mostly anonymous usage. The Chess Informant classification is cited as a standard enumeration, not as the origin of the term.",
+    "competing_claims": [],
+    "development": []
+  },
+  "engine_era_status": "unassessed",
+  "engine_era_note": "",
+  "sources": [
+    "informant-encyclopedia-combinations",
+    "wikipedia-chess-tactic",
+    "chesstempo-tactical-motifs",
+    "chesscom-tactics-38"
+  ],
+  "source_confidence": "high",
+  "recognition": {
+    "preconditions": [
+      "A line piece, an intervening unit, and a further square of interest are collinear"
+    ],
+    "indicators_for": [
+      "The defence or attack becomes live as soon as the blocker moves",
+      "A capture on the far square is met by a recapture along the x-ray line"
+    ],
+    "indicators_against": [
+      "A second blocker sits further along the line",
+      "The far target is irrelevant"
+    ],
+    "prerequisites": [],
+    "detector": "proposed, and deliberately unclaimed (not yet written)",
+    "detectability": "mechanical",
+    "typical_confidence": "high",
+    "false_positive_traps": []
+  },
+  "application": {
+    "typical_plans": [],
+    "typical_moves": [],
+    "typical_pawn_structures": [],
+    "typical_piece_arrangements": [],
+    "tactical_consequences": [],
+    "strategic_consequences": []
+  },
+  "exceptions": [
+    "An x-ray defence is illusory if the defending piece is itself pinned."
+  ],
+  "limitations": [
+    "The pin/skewer/x-ray boundary is not agreed between sources; an explanation should prefer the more specific term when the position warrants it.",
+    "TYPICAL_CONFIDENCE RAISED medium -> high, 2026-09-02, and the reason is the schema's own definition of the field: 'how confidently this concept can normally be asserted ONCE ITS PRECONDITIONS HOLD'. This concept's recognition is MECHANICAL and its knowledge type already carries a high ceiling, so once the preconditions hold there is nothing left to be uncertain about - a stalemate is a stalemate, and a fork this base reports is one findMotifs() found, which ARCHITECTURE.md makes the authority and forbids second-guessing. 'Medium' was the default across 32 rule and motif records regardless of detectability, and it was found by measuring what the API reports against what each record permits: twelve concepts were reporting ABOVE their own record. The fix was to make each record its own ceiling in cap(), which then required the records that were wrong to be corrected rather than silently overruled.",
+    "NO MASTER-GAME POSITION YET, and the search that failed is worth recording. Five famous games were replayed through this base's own move generator and scanned position by position with the API - the Opera Game, the Evergreen, the Immortal, the Game of the Century and Legall's Mate, 225 plies between them - and this concept was not reported in any of them. That is not evidence the motif is rare; it is evidence that the five games this base can currently verify do not contain a clean instance of it, and that adding one means adding a game rather than looking harder at these. tools/replay_game.js is the instrument: a move list that is wrong is refused rather than guessed at. RESOLVED: Veresov-Bronstein, USSR Championship 1944, 37.Re1, above."
+  ],
+  "misconceptions": [],
+  "relationships": {
+    "broader": [],
+    "narrower": [],
+    "related": [
+      "pin",
+      "skewer",
+      "battery"
+    ],
+    "contrasting": [],
+    "co_occurring": [],
+    "conflicts": []
+  },
+  "examples": [
+    {
+      "fen": "4kb2/8/8/B7/8/r7/8/RK6 b - - 0 1",
+      "note": "Constructed, and it is the DEFENSIVE form, which is the half of this motif that a detector looking for attacks never sees. The white rook on a1, the black rook on a3 and the white bishop on a5 are collinear with exactly one unit between - the record's precondition word for word - and the consequence is that Black cannot win the bishop. Rxa5 is answered by Rxa5, because the black rook's own departure from a3 opens the line it was standing on. The rook defends through an enemy piece.",
+      "origin_kind": "constructed-test",
+      "concept_role": "positive",
+      "side_to_move_benefits": "neither",
+      "engine": {
+        "engine_id": "Stockfish 18",
+        "test_level": 3,
+        "depth": 22,
+        "threads": 10,
+        "hash_mb": 4096,
+        "multipv": 1,
+        "best_move": "a3a1",
+        "eval_cp": 0,
+        "mate_in": null,
+        "pv": [],
+        "alternatives": [],
+        "margin_cp": null,
+        "verdict": "supports",
+        "verdict_note": "0.00. Black's best is to trade rooks rather than take the bishop, which is the x-ray defence working: the bishop is not hanging, it is defended through the rook that appears to be attacking it."
+      },
+      "tablebase": {
+        "source": "Lichess tablebase (Syzygy, 7-piece)",
+        "pieces": 6,
+        "wdl": "draw",
+        "dtz": 0,
+        "dtm": 0,
+        "category": "draw",
+        "note": "PROVEN draw, and the tablebase's own best move is Rxa1+ rather than Rxa5. A defence that holds over every legal continuation is the strongest statement available about a defensive motif, and it is the reason this example is the defensive form rather than the attacking one."
+      }
+    },
+    {
+      "fen": "7k/4B1pp/p4n2/1b1pr3/5p2/P4P1P/1P3KP1/1B1R4 w - - 1 37",
+      "move": "Re1",
+      "move_uci": "d1e1",
+      "origin_kind": "historical-game",
+      "game": "Veresov-Bronstein, USSR Championship 1944",
+      "concept_role": "positive",
+      "side_to_move_benefits": "white",
+      "note": "AN X-RAY DEFENCE, which is the half of this concept the record keeps the name for: 'the line piece defends a friendly unit through an intervening piece, so a capture on that square is answered by a recapture that was not visible'.\n\n37.Rd1-e1 puts the rook on the e-file behind Black's rook on e5, and behind THAT stands White's bishop on e7. The bishop is attacked and looks undefended. It is not: 37...Rxe7 is answered by 38.Rxe7, the recapture arriving down a line that the black rook itself was blocking until the moment it captured. Nothing else on the board defends e7.\n\nStockfish 18 at depth 26 with three lines: +2.63 for Re1, against +0.50 and +0.36. A 213-centipawn margin, and the engine's own line takes the rook the other way - 37...Rxe1 38.Kxe1 - which is the same fact from the other side: the e-file is White's and the bishop is held.\n\nWHY THIS ONE AND NOT THE OTHERS. Two better-known candidates were rejected. A Petrosian position where the geometry is present is second-best in a lost game. Kramnik-Yakovich 29.Qc5 is the engine's FIRST choice and still not this concept: the queen lines up with its own knight through a black pawn that cannot capture the knight, so the defence never comes into operation. That rejection corrected the miner's test - an x-ray defence is worth something only when the capture on the defended square is what opens the line, so the man in between has to be the one that can make that capture.\n\nPROVENANCE. Found by tools/mine_master_motifs.js. The move list replayed legally through the page's own move generator. `attributed_by` absent - no annotator read.",
+      "engine": {
+        "engine_id": "Stockfish 18",
+        "test_level": 3,
+        "depth": 26,
+        "multipv": 3,
+        "best_move": "d1e1",
+        "eval_cp": 263,
+        "mate_in": null,
+        "pv": [
+          "d1e1",
+          "e5e1",
+          "f2e1",
+          "h8g8",
+          "b2b3",
+          "g8f7",
+          "e7d8",
+          "b5c6",
+          "e1d2",
+          "f6d7"
+        ],
+        "alternatives": [
+          {
+            "move": "e7d6",
+            "eval_cp": 50
+          },
+          {
+            "move": "e7f6",
+            "eval_cp": 36
+          }
+        ],
+        "margin_cp": 213,
+        "verdict": "supports",
+        "verdict_note": "Best by 213 centipawns at depth 26. The two runners-up both MOVE the bishop, which is what a player does when they cannot see that it is defended."
+      }
+    }
+  ],
+  "counterexamples": [
+    {
+      "fen": "3qk3/3r4/3b4/8/8/8/8/3RK3 w - - 0 1",
+      "note": "Registered false-positive case `an-x-ray-with-two-blockers`, kept on the record as well as in tests/false_positive_cases.json so that the concept carries its own negative evidence. THE SURFACE PATTERN IS PRESENT: The white rook on d1, the black bishop on d6, the black rook on d7 and the black queen on d8 are all on the d-file with nothing else between them. A line piece acting through another piece towards something more valuable is the definition of an x-ray. WHY IT IS NOT THE CONCEPT: This record's first indicator_against: \"A second blocker sits further along the line.\" The precondition is a line piece, ONE intervening unit and a further square of interest; here there are two intervening units, so the rook acts through nothing — the pressure stops at the bishop. WHAT THE SYSTEM DOES: The API does not report x-ray. The distinction is worth stating because it is arithmetical rather than positional: one blocker is an x-ray, two is a queue, and the difference is a count that a reader looking at a file of pieces will not naturally make. This record's positive example is the DEFENSIVE form of the same geometry with exactly one blocker, tablebase-proven, and the two sit side by side for that reason.",
+      "origin_kind": "constructed-test",
+      "concept_role": "negative",
+      "false_positive_case": "an-x-ray-with-two-blockers"
+    }
+  ],
+  "ambiguous_examples": [
+    {
+      "fen": "3qk3/3r4/8/8/8/8/8/3RK3 w - - 0 1",
+      "note": "The attacking form of the motif, with exactly one blocker: the rook on d1 acts through the rook on d7 at the queen on d8. The geometry is textbook and the position is lost - the engine reports mate in 10 AGAINST the side holding the x-ray, because a rook on an open file against a queen is not a threat, it is a target. Filed as ambiguous rather than as a false positive because the x-ray is genuinely present and correctly described; what is absent is any reason to care. This record's second indicator_against is the short version - 'the far target is irrelevant' - and here the far target is irrelevant in the strongest possible sense, being worth more than everything doing the attacking.",
+      "origin_kind": "constructed-test",
+      "concept_role": "ambiguous",
+      "engine": {
+        "engine_id": "Stockfish 18",
+        "test_level": 3,
+        "depth": 20,
+        "threads": 10,
+        "hash_mb": 4096,
+        "multipv": 1,
+        "best_move": "d1d7",
+        "eval_cp": null,
+        "mate_in": -10,
+        "pv": [],
+        "alternatives": [],
+        "margin_cp": null,
+        "verdict": "ambiguous",
+        "verdict_note": "Mate in 10 against the side whose rook is doing the x-raying. The motif is present and the position is lost, which is a pair of facts this base needs to be able to state together."
+      }
+    }
+  ],
+  "explanations": {
+    "by_level": {
+      "beginner": "This piece is working right through another piece — the moment the piece in the middle moves, the attack is real.",
+      "intermediate": "An x-ray: the {piece} defends {square} through {blocker}, so the recapture is available.",
+      "advanced": "X-ray. Prefer 'pin' or 'skewer' where the front piece is compelled; reserve x-ray for through-effects that compel nothing."
+    },
+    "by_depth": {
+      "short": "A line piece acting through another piece to something beyond it.",
+      "normal": "An x-ray: a line piece, one unit in between, and a further square that matters. The attack or the defence operates through the middle unit, so the moment it moves the line is real.",
+      "deep": "It has two forms and the defensive one is the half a detector looking for attacks never sees: a rook 'attacking' its own bishop through an enemy rook is defending it, because the enemy rook's own departure opens the line. This base's positive example is that shape, tablebase-proven — the defender cannot win the bishop and the position is a proven draw. The precondition names ONE intervening unit, and the count is the whole of it: one blocker is an x-ray, two is a queue. Where the far target is worth less than what is doing the attacking, the geometry is present and worth nothing."
+    },
+    "hedge": "Sources differ on where x-ray ends and pin or skewer begins.",
+    "lesson": ""
+  },
+  "terminology": {
+    "beginner_words": [
+      "works through another piece"
+    ],
+    "advanced_words": [
+      "x-ray attack",
+      "x-ray defence"
+    ],
+    "avoid": []
+  },
+  "status": {
+    "stage": "researched",
+    "last_updated": "2026-09-01",
+    "open_questions": [],
+    "audit_notes": [
+      "2026-09-01: detector field named 'lineAlignment', which does not exist anywhere in the codebase. The audit's hardcoded whitelist had been accepting it. Repointed at real code, or marked as proposed where nothing implements it."
+    ]
+  }
+}

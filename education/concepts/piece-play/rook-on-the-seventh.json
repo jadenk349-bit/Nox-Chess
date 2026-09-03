@@ -1,0 +1,407 @@
+{
+  "schema_version": 2,
+  "alternate_names": [
+    "seventh rank",
+    "rook on the seventh",
+    "pigs on the seventh (two rooks)"
+  ],
+  "historical_names": [],
+  "tags": [
+    "rooks",
+    "nimzowitsch",
+    "endgame",
+    "misunderstood"
+  ],
+  "subcategory": "rook activity",
+  "difficulty": "intermediate",
+  "knowledge_type_note": "A piece-placement concept. That it is decisive is a common overstatement and is handled in the exceptions.",
+  "name_status": "established-name",
+  "history": {
+    "attributions": [
+      {
+        "person": "Aron Nimzowitsch",
+        "relation": "systematized-by",
+        "source": "nimzowitsch-my-system",
+        "year": 1925,
+        "note": "Devoted a chapter of My System to the seventh rank and drew the absolute/relative distinction."
+      },
+      {
+        "person": "Yasser Seirawan",
+        "relation": "named-by",
+        "source": "naroditsky-rooks-seventh",
+        "year": null,
+        "note": "Credited by Naroditsky with introducing 'pigs on the seventh' in the Winning Chess series. Attribution is second-hand and not verified against Seirawan's books."
+      }
+    ],
+    "first_documented_source": "nimzowitsch-my-system",
+    "year": 1925,
+    "confidence": "medium",
+    "notes": "The power of the seventh rank was known long before Nimzowitsch; the absolute/relative distinction is his contribution. The 'pigs' nickname attribution rests on a single secondary source and is recorded as medium.",
+    "competing_claims": [],
+    "development": [
+      {
+        "era": "1925, Nimzowitsch",
+        "change": "Systematised; absolute versus relative seventh introduced.",
+        "source": "nimzowitsch-my-system"
+      },
+      {
+        "era": "modern",
+        "change": "Corrective: two rooks on the seventh rarely mate against a defended eighth rank; the advantage is usually transitional and must be converted.",
+        "source": "naroditsky-rooks-seventh"
+      }
+    ]
+  },
+  "engine_era_status": "useful-with-common-exceptions",
+  "engine_era_note": "Engines are markedly less impressed by a rook on the seventh than club instruction is. They value it when it attacks something and restricts the king, and price it near zero when the pawns on the rank have moved and the king is free.",
+  "recognition": {
+    "preconditions": [
+      "A rook occupies the opponent's seventh rank (second for Black)"
+    ],
+    "indicators_for": [
+      "The enemy king is confined to the eighth rank — the ABSOLUTE seventh",
+      "Two or more enemy pawns still stand on the seventh and can be attacked sideways",
+      "A second rook can be brought to the rank, or a passed pawn supports it",
+      "The rook cannot be evicted with tempo"
+    ],
+    "indicators_against": [
+      "The enemy king has escaped to the sixth rank or beyond",
+      "The pawns on the seventh have already advanced, so there is nothing to attack",
+      "The rook can be challenged and traded off, or driven away with gain",
+      "The eighth rank is defended, so the mating dimension of a second rook is absent",
+      "Reaching the seventh costs a tempo the position cannot spare"
+    ],
+    "prerequisites": [
+      "open-file"
+    ],
+    "detector": "rankOccupancy (not yet written)",
+    "detectability": "mechanical",
+    "typical_confidence": "medium",
+    "false_positive_traps": [
+      "REGISTERED FALSE POSITIVE: a rook arriving on the seventh is not automatically important. With the pawns advanced and the king free, it attacks nothing and confines nobody.",
+      "Two rooks on the seventh do NOT generally mate a king whose eighth rank is defended. Explaining them as a mating attack is usually wrong.",
+      "Detecting 'rook on rank 7' is trivial and fires often; the reportable facts are what it attacks and whether the king is trapped.",
+      "A rook reaching the seventh is not decisive by itself. With an empty seventh rank and an enemy king that has luft, a tested position evaluates level at -0.04."
+    ]
+  },
+  "application": {
+    "typical_plans": [
+      "Establish the rook, then bring a second one to the rank",
+      "Support the rook with a pawn advancing to the sixth, which the defender often cannot allow",
+      "Convert the transitional advantage into material or a favourable trade rather than hunting a mate",
+      "Combine an absolute seventh with a passed pawn"
+    ],
+    "typical_moves": [
+      "Rd7 / Re7 after winning a file",
+      "A rook lift to the third rank and across"
+    ],
+    "typical_pawn_structures": [
+      "Enemy pawns still on their starting squares on the seventh"
+    ],
+    "typical_piece_arrangements": [
+      "Doubled rooks on the seventh; rook on the seventh plus a passed pawn"
+    ],
+    "tactical_consequences": [
+      "Back-rank threats when the king is confined",
+      "Sideways attacks the pawns cannot answer"
+    ],
+    "strategic_consequences": [
+      "Restricts the enemy king and pieces even when it wins nothing directly",
+      "Frequently a transitional advantage to be transformed, not a final one"
+    ]
+  },
+  "exceptions": [
+    "The king escaping forward removes most of the value at a stroke.",
+    "Two rooks on the seventh rarely mate against a defended eighth rank.",
+    "A rook on the seventh with nothing to attack is just a rook on a rank.",
+    "It can be a liability if it can be trapped there."
+  ],
+  "limitations": [
+    "Trivially detectable and therefore easy to over-report. Usefulness depends entirely on targets and on the king.",
+    "MEASURED 2026-09-02 and fixed: the matcher reported the geometry and nothing else, which is this record's own third trap - 'detecting rook on rank 7 is trivial and fires often; the reportable facts are what it ATTACKS and whether the KING is trapped.' One of those two is now required, and the sentence says which. 12.8% -> 10.7% of the 788 shipped positions, and the corpus's annotated instance - Capablanca-Rubinstein 1928, 23.Re7 - still leads.",
+    "RECORDED FAILURE, 2026-09-02. This record's indicators_against say 'the rook can be challenged and traded off, or driven away with gain' and its indicators_for say 'the rook cannot be evicted with tempo'. Neither is built. Karpov-Polgar, Linares 2001 is in the corpus as a failing negative: Black's rook is on a2, attacks g2 and h2, and the white king is on its back rank - the ABSOLUTE seventh this record calls decisive - and Stockfish has White at +0.83, playing Karpov's 24.Kc1 as its first choice with the Nb5-c3 eviction in the principal variation. Jan Markos: 'Polgar's rook is a beast... Yet Karpov nicely shows that the rook lacks sufficient support.' A one-ply eviction test was written and measured: it fixes that position and BREAKS Capablanca-Rubinstein 1928, this corpus's own annotated instance, where ...Rd7 challenges the rook and ...Ng6 attacks it with a lesser piece and the concept is right anyway. Karpov's eviction takes four preparatory king moves and no one-ply test can see it. The failure is recorded rather than fitted around.",
+    "MEASURED 2026-09-02: two more of this record's conditions are now in the SENTENCE rather than absent. The central distinction - Nimzowitsch's ABSOLUTE seventh, with the enemy king confined to the eighth behind the rook, against the RELATIVE seventh once it has slipped out - was a fact the matcher already had and a word the sentence did not use; a reader was told the rook was on the seventh and not which kind. And Naroditsky's correction, which this record quotes in full: 'with the eighth rank defended by a rook or queen, two rooks on the seventh can ALMOST NEVER checkmate by themselves. Their power is mobility and restriction, not mate.' The pigs-on-the-seventh picture is the most over-taught image in the concept and this base was drawing it without the condition that makes it wrong. Neither changes the firing rate; both change what is said."
+  ],
+  "misconceptions": [
+    "That a rook on the seventh is automatically winning.",
+    "That two rooks on the seventh mean mate. Usually they mean material.",
+    "That the aim is the rank. The aim is the pawns on it and the king behind it."
+  ],
+  "relationships": {
+    "broader": [],
+    "narrower": [],
+    "related": [
+      "open-file",
+      "back-rank-mate",
+      "passed-pawn"
+    ],
+    "contrasting": [],
+    "co_occurring": [
+      "open-file",
+      "passed-pawn"
+    ],
+    "conflicts": []
+  },
+  "examples": [
+    {
+      "fen": "r5r1/1bkp1R2/1p2p3/pPp1p1pp/2P1B2n/P1N3K1/1B1P3P/6R1 b - - 6 29",
+      "note": "The feature is present and was verified mechanically by lib/features.js: White has a rook on the seventh with 7 enemy pawn files to work on. The engine puts the position at 0.0, close enough to level that the feature is not being swamped by tactics — so this is usable as an instance of the concept. What is NOT claimed is that the concept explains the engine's move. Provenance: mined from this repository's puzzle corpus, which is engine self-play — a real position from a real game between engines, not a master game.",
+      "origin_kind": "puzzle",
+      "concept_role": "supports",
+      "side_to_move_benefits": "neither",
+      "engine": {
+        "engine_id": "Stockfish 18",
+        "test_level": 2,
+        "depth": 20,
+        "threads": 8,
+        "hash_mb": 2048,
+        "multipv": 2,
+        "best_move": "a8f8",
+        "eval_cp": 0,
+        "mate_in": null,
+        "pv": [],
+        "alternatives": [
+          {
+            "move": "a8e8",
+            "eval_cp": -330,
+            "mate_in": null
+          }
+        ],
+        "margin_cp": 0,
+        "verdict": "supports",
+        "verdict_note": "Level-2 validation: the position was scored, not designed. It confirms the feature is present in real play and, where the score is near level, that the feature is not drowned out. It is not a controlled pair and proves nothing about the concept on its own."
+      }
+    },
+    {
+      "fen": "5k2/p1p4R/1p3rp1/n2p4/P2P1P2/2PB2P1/6K1/8 b - - 3 30",
+      "game": "Capablanca-Tartakower, New York 1924",
+      "note": "After 30.Rh7. This is the seventh rank doing what the concept says it does, and it is worth pairing with this record's counterexamples: the rook ties Black to passive defence for the rest of the game, which is the condition — a confined king and targets — rather than the bare fact of the rank.",
+      "origin_kind": "historical-game",
+      "concept_role": "supports",
+      "side_to_move_benefits": "white"
+    },
+    {
+      "fen": "1q4k1/5pp1/4p2p/1P5P/2P2RPb/5Q2/r2rBP2/1R4K1 w - - 7 38",
+      "note": "Black has doubled rooks on the seventh (a2, d2). The position has no check available, so the next move must be chosen on positional grounds. CORRECTED 2026-09-02: this note used to say the position was QUIET by mechanical test, with \"no capture that wins material\" as half of the test. That half had never run - quietness() passed a move object where see() expects a square index, so winningCapturesAvailable was always zero, and every note written from it claimed something untested. Re-checked with the fixed test, this position DOES have a capture that wins material, so the quiet claim is withdrawn; the concept it illustrates is unaffected, and the position is kept rather than quietly dropped. That is the property this base's tactical corpus almost never has. Found by tools/prospect.js, which searches 1576 real positions for a concept's feature and scores quiet positions far higher. Provenance: the puzzle corpus is engine self-play — a real position from a real game between engines, not a master game.",
+      "origin_kind": "puzzle",
+      "concept_role": "supports",
+      "side_to_move_benefits": "neither",
+      "engine": {
+        "engine_id": "Stockfish 18",
+        "test_level": 2,
+        "depth": 20,
+        "threads": 8,
+        "hash_mb": 2048,
+        "multipv": 2,
+        "best_move": "f4e4",
+        "eval_cp": 4,
+        "mate_in": null,
+        "pv": [],
+        "alternatives": [
+          {
+            "move": "b1e1",
+            "eval_cp": -313,
+            "mate_in": null
+          }
+        ],
+        "margin_cp": 0,
+        "verdict": "supports",
+        "verdict_note": "Quiet and close to balanced at 0.04, which is the combination this base most needs and least often finds: nothing forcing is available and the evaluation is not swamping the feature, so the position is usable as an instance of the concept. What is NOT claimed is that the concept explains the engine's choice of move."
+      }
+    },
+    {
+      "fen": "3r1nk1/p4ppp/1bp5/B7/3p4/1N4PP/PPP2P2/4R1K1 w - - 0 23",
+      "note": "Capablanca-Rubinstein, Berlin 1928, Re7. Human ground truth: the concept is named for this position by Nicholas Van Der Nat (FM). Corpus entry `capablanca-rubinstein-1928-23Re7-rook-on-the-seventh`. A named annotator putting the concept on a specific ply and saying what it is worth relative to a named alternative, which is more than most annotations do. The record's own condition - that the seventh rank matters because the enemy pawns start there and cannot leave without being taken - is exactly the reason given: the rook 'hunts any pawn that dares advance'. It is worth no",
+      "origin_kind": "historical-game",
+      "game": "Capablanca-Rubinstein, Berlin 1928",
+      "concept_role": "positive",
+      "attributed_by": "Nicholas Van Der Nat (FM) — corpus entry capablanca-rubinstein-1928-23Re7-rook-on-the-seventh",
+      "engine": {
+        "engine_id": "Stockfish 18",
+        "test_level": 3,
+        "depth": 24,
+        "multipv": 3,
+        "best_move": "Re7",
+        "eval_cp": 20,
+        "verdict": "supports",
+        "verdict_note": "yes, though narrowly - 23.Re7 is the engine's first choice at depth 24 at +0.20, with the second at +0.17. The margin is small because the position is close to level; the point of the entry is the attribution, not the size of the edge. The engine's principal variation is 23.Re7 d3 24.cxd3 Rxd3 25.Bb4, which is the rook using the seventh to force a favourable trade rather than to win material outright."
+      }
+    },
+    {
+      "fen": "6k1/R4p1p/8/8/8/8/8/6K1 w - - 0 1",
+      "note": "Added as the smallest material that can carry this record's claim, so the claim can be PROVEN rather than evaluated. See the tablebase note.",
+      "origin_kind": "tablebase-position",
+      "concept_role": "positive",
+      "side_to_move_benefits": "white",
+      "engine": {
+        "engine_id": "Stockfish 18",
+        "test_level": 3,
+        "depth": 24,
+        "threads": 10,
+        "hash_mb": 4096,
+        "multipv": 1,
+        "best_move": "g1g2",
+        "eval_cp": 8115,
+        "mate_in": null,
+        "pv": [],
+        "alternatives": [],
+        "margin_cp": null,
+        "verdict": "supports",
+        "verdict_note": "+81.15 at depth 24 - the engine's number for a won rook ending, which is a reminder that an evaluation past about ten pawns is a statement that the position is winning and not a measurement of anything. The tablebase line is the useful one: mate in 41."
+      },
+      "tablebase": {
+        "source": "Lichess tablebase (Syzygy, 7-piece)",
+        "pieces": 5,
+        "wdl": "win",
+        "dtz": 9,
+        "dtm": 41,
+        "category": "win",
+        "note": "PROVEN WIN, dtz 9, mate in 41, best move Ra6. A rook alone against a king and two pawns, winning because it stands on the seventh: it attacks both pawns along the rank and the king cannot defend them both. This is the concept's claim in the smallest material that can carry it, and proven rather than argued."
+      }
+    }
+  ],
+  "counterexamples": [
+    {
+      "fen": "4r1k1/6pp/8/8/8/6PP/r7/4R1K1 w - - 0 1",
+      "note": "A black rook on a2 - the seventh rank from Black's side - with nothing on that rank to attack, since White's pawns have advanced to g3 and h3, and with White's king already provided with an escape square. Constructed to remove exactly the two things that make a seventh-rank rook strong while leaving the rook where it is.",
+      "origin_kind": "constructed-test",
+      "concept_role": "contradicts",
+      "side_to_move_benefits": "neither",
+      "engine": {
+        "engine_id": "Stockfish 18",
+        "test_level": 3,
+        "depth": 26,
+        "threads": 10,
+        "hash_mb": 2048,
+        "multipv": 3,
+        "best_move": "e1e8",
+        "eval_cp": -4,
+        "mate_in": null,
+        "pv": [],
+        "alternatives": [
+          {
+            "move": "e1f1",
+            "eval_cp": null,
+            "mate_in": null
+          },
+          {
+            "move": "e1b1",
+            "eval_cp": null,
+            "mate_in": null
+          }
+        ],
+        "margin_cp": 0,
+        "verdict": "contradicts",
+        "verdict_note": "Level at -0.04 with best play. The rook occupies the seventh and achieves nothing, because the rank is empty and the enemy king is not confined - the two conditions the concept record names. Worth noting what the same search says about the alternatives: 2.Rf1 and 2.Rb1 are mate in 28 and 26 AGAINST White. So the position is level and sharp, which is a different thing from the rook being strong, and is exactly the distinction this case exists to protect."
+      }
+    },
+    {
+      "fen": "r6k/3R2R1/6P1/8/7P/8/8/5K2 b - - 0 59",
+      "note": "White has DOUBLED rooks on the seventh rank and a passed g-pawn, which is the maximal form of the pattern this concept describes. Provenance: mined from this repository's puzzle corpus, which is engine self-play — a real position from a real game between engines, not a master game.",
+      "origin_kind": "puzzle",
+      "concept_role": "contradicts",
+      "side_to_move_benefits": "neither",
+      "engine": {
+        "engine_id": "Stockfish 18",
+        "test_level": 3,
+        "depth": 20,
+        "threads": 8,
+        "hash_mb": 2048,
+        "multipv": 2,
+        "best_move": "a8a1",
+        "eval_cp": -60,
+        "mate_in": null,
+        "pv": [],
+        "alternatives": [
+          {
+            "move": "a8e8",
+            "eval_cp": null,
+            "mate_in": -21
+          }
+        ],
+        "margin_cp": 0,
+        "verdict": "contradicts",
+        "verdict_note": "Doubled rooks on the seventh and a passed pawn, and correct defence still holds close to level: 1...Ra1 evaluates at -0.60. The alternative 1...Re8 is mate in 21 against Black, so the position is sharp AND near-balanced, which are different things. The seventh rank is worth what it attacks and what it traps; here there is almost nothing on it."
+      }
+    }
+  ],
+  "ambiguous_examples": [
+    {
+      "fen": "8/p7/4k3/1pPpr2p/3K3R/2R1B3/2P1r3/8 w - - 4 41",
+      "note": "a rook on the seventh with almost nothing on it and an enemy king that already has luft. The position is QUIET by mechanical test: the side to move has no check available and no capture that wins material, so the next move must be chosen on positional grounds. That is the property this base's tactical corpus almost never has. Found by tools/prospect.js, which searches 1576 real positions for a concept's feature and scores quiet positions far higher. Provenance: the puzzle corpus is engine self-play — a real position from a real game between engines, not a master game.",
+      "origin_kind": "puzzle",
+      "concept_role": "ambiguous",
+      "side_to_move_benefits": "neither",
+      "engine": {
+        "engine_id": "Stockfish 18",
+        "test_level": 2,
+        "depth": 20,
+        "threads": 8,
+        "hash_mb": 2048,
+        "multipv": 2,
+        "best_move": "c5c6",
+        "eval_cp": 647,
+        "mate_in": null,
+        "pv": [],
+        "alternatives": [
+          {
+            "move": "c3a3",
+            "eval_cp": 139,
+            "mate_in": null
+          }
+        ],
+        "margin_cp": 0,
+        "verdict": "ambiguous",
+        "verdict_note": "Quiet AND decided, which is worth recording as a pair. The feature is present and the evaluation is 6.47, so nothing forcing is on offer and the position is nonetheless settled. It demonstrates the feature and cannot show the concept deciding anything - and it is a useful reminder that quietness is not balance."
+      }
+    }
+  ],
+  "explanations": {
+    "by_level": {
+      "beginner": "The rook has got behind their pawns, where they cannot defend themselves, and the king cannot come out past it.",
+      "intermediate": "A rook on the seventh. It matters here because {the king is stuck on the back rank / it attacks {n} pawns} — check both before valuing it.",
+      "advanced": "Absolute seventh, with the king confined. That is the version worth investing in; a relative seventh, with the king out, is a good rook rather than a winning one.",
+      "master": "Treat it as transitional. Two rooks on the seventh will not mate a defended eighth rank, so plan the conversion — material, or a favourable trade — rather than a mating attack."
+    },
+    "by_depth": {
+      "short": "The rook is behind their pawns and cutting off the king.",
+      "normal": "A rook on the seventh rank: it attacks pawns from a side they cannot defend and confines the king. It is decisive mainly when the king is trapped on the eighth behind it — if the king is out, the rook is good rather than winning.",
+      "deep": "Nimzowitsch's distinction is the operative one. The seventh is held absolutely when the enemy king is confined behind it, at which point every threat carries mating undertones and he rated an absolute seventh plus a passed pawn as usually decisive. It is held only relatively when the king has escaped forward, and then the rook eats pawns but nothing more. The famous 'pigs on the seventh' need a corrective: with the eighth rank defended, two rooks on the seventh can almost never mate by themselves, and their real power is restriction and mobility. Treat the configuration as a transitional advantage to convert, not as a mating attack."
+    },
+    "hedge": "",
+    "lesson": "Before you spend anything getting to the seventh rank, look at their king. If it is trapped behind you, pay whatever it costs. If it is not, pay less."
+  },
+  "terminology": {
+    "beginner_words": [
+      "behind their pawns",
+      "the king is stuck on the back row"
+    ],
+    "advanced_words": [
+      "absolute seventh",
+      "relative seventh",
+      "pigs on the seventh",
+      "restriction"
+    ],
+    "avoid": [
+      "a rook on the seventh wins",
+      "two rooks on the seventh is mate"
+    ]
+  },
+  "status": {
+    "stage": "researched",
+    "last_updated": "2026-09-01",
+    "open_questions": [],
+    "audit_notes": []
+  },
+  "id": "rook-on-the-seventh",
+  "canonical_name": "Rook on the seventh rank",
+  "category": "rooks",
+  "knowledge_type": "positional-concept",
+  "definition_short": "A rook on the opponent's second rank, attacking unmoved pawns from the side and confining the king — decisive mainly when the king is trapped behind it.",
+  "definition_long": "A rook reaching the seventh attacks the pawns that have not moved, from a direction they cannot defend against, and simultaneously cuts the king off from the rest of the board.\n\nNIMZOWITSCH'S DISTINCTION is the one that makes the concept usable. The seventh is held ABSOLUTELY when the enemy king is confined to the eighth rank behind the rook: every threat then carries mating undertones, and a second attacker arriving creates immediate mate threats. He rated the absolute seventh plus a passed pawn as usually decisive on its own. The rank is held only RELATIVELY when the king has escaped forward — the rook still eats pawns sideways, but the mating dimension is gone and the defender can often afford to shed a pawn to get active.\n\nThe practical use: before spending moves or material to reach the seventh, look at the enemy king. If the rook will trap it on the back rank, the investment almost always pays. If the king slips out, you are buying a good rook, not a winning one, and should pay less.\n\nTWO ROOKS ON THE SEVENTH ('pigs on the seventh', a nickname Naroditsky attributes to Seirawan) are famous, and famously misunderstood. Naroditsky's corrective is worth quoting in substance: with the eighth rank defended by a rook or queen, two rooks on the seventh can ALMOST NEVER checkmate by themselves. Their power is mobility and restriction, not mate, and they are often best treated as a transitional advantage to be converted into something more tangible — a favourable rook trade, or material.",
+  "sources": [
+    "nimzowitsch-my-system",
+    "naroditsky-rooks-seventh",
+    "oldschoolchess-rook-seventh"
+  ],
+  "source_confidence": "high"
+}

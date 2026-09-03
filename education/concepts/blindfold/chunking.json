@@ -1,0 +1,166 @@
+{
+  "schema_version": 2,
+  "alternate_names": [
+    "perceptual chunks",
+    "pattern recognition in memory"
+  ],
+  "historical_names": [],
+  "tags": [
+    "blindfold",
+    "cognition",
+    "calculation",
+    "research-backed"
+  ],
+  "subcategory": "cognition",
+  "difficulty": "advanced",
+  "knowledge_type_note": "An experimental result about human memory, with a measured mechanism.",
+  "name_status": "established-name",
+  "history": {
+    "attributions": [
+      {
+        "relation": "originated-by",
+        "person": "William G. Chase and Herbert A. Simon",
+        "year": 1973,
+        "note": "Proposed the chunking theory of chess memory and measured the chunk relations.",
+        "confidence": "high"
+      },
+      {
+        "relation": "systematized-by",
+        "person": "Fernand Gobet and Herbert A. Simon",
+        "year": 1996,
+        "note": "Template theory, revising chunking to account for faster encoding into long-term memory and for higher-level knowledge structures.",
+        "confidence": "high"
+      }
+    ],
+    "first_documented_source": "chase-simon-1973",
+    "year": 1973,
+    "confidence": "high",
+    "notes": "The random-position control is due to Chase and Simon (1973); the underlying recall finding is de Groot's (1946/1965). Chase and Simon credit Hans Berliner as a subject. The chunking account rests in turn on Miller's short-term memory limit.",
+    "competing_claims": [],
+    "development": [
+      {
+        "period": "1946",
+        "note": "De Groot's recall task: masters reconstruct positions almost perfectly after five seconds."
+      },
+      {
+        "period": "1973",
+        "note": "Chase and Simon add the random-position control, isolating meaning as the variable."
+      },
+      {
+        "period": "1985-1996",
+        "note": "Chunking criticised for underestimating encoding speed into long-term memory and for saying little about high-level structures; template theory follows."
+      }
+    ]
+  },
+  "engine_era_status": "not-applicable",
+  "engine_era_note": "Not affected by engine analysis; a claim about human cognition.",
+  "recognition": {
+    "preconditions": [
+      "A human player is recalling or holding a position"
+    ],
+    "indicators_for": [],
+    "indicators_against": [],
+    "prerequisites": [],
+    "detector": null,
+    "detectability": "human-only",
+    "typical_confidence": "low",
+    "false_positive_traps": [
+      "A fact about players, not positions. It cannot be reported as a feature of a move.",
+      "Chunking explains recall of MEANINGFUL positions only. The master advantage is zero on random arrangements, and claiming otherwise inverts the central finding."
+    ]
+  },
+  "application": {
+    "typical_plans": [],
+    "typical_moves": [],
+    "typical_pawn_structures": [],
+    "typical_piece_arrangements": [],
+    "tactical_consequences": [],
+    "strategic_consequences": [
+      "Grouping pieces by attack, defence, proximity or type is how a position should be described to someone holding it in memory"
+    ]
+  },
+  "exceptions": [
+    "The advantage does not extend to randomly arranged positions, which is the finding that makes the theory testable.",
+    "Chunking alone underestimates how fast experts encode into long-term memory, which is why template theory was needed."
+  ],
+  "limitations": [
+    "The theory describes recall and recognition; it is a weaker account of planning and high-level reasoning.",
+    "Chunk counts and sizes are estimates from small numbers of subjects.",
+    "NO REGISTERED FALSE-POSITIVE CASE, and a FEN is not the right instrument for one here. A case in tests/false_positive_cases.json is a POSITION where the concept's surface pattern is present and the concept is not, replayed as an assertion so the system can be shown declining the error. This record's `recognition.detectability` is `human-only`: what it describes is something a player does rather than something a board contains, so there is no surface pattern for a position to carry and nothing for the system to decline. The conditions this record states are read and answered in `limitations` and in the trap audit instead. Recorded rather than filled: tools/depth_report.py still counts this concept as missing the item."
+  ],
+  "misconceptions": [
+    "That masters have better memories. On random positions they do not.",
+    "That a chunk is a fixed opening pattern. It is any group of pieces bound by chess relations."
+  ],
+  "relationships": {
+    "broader": [],
+    "narrower": [],
+    "related": [
+      "blindfold-representation",
+      "board-vision",
+      "blindfold-interference",
+      "calculation"
+    ],
+    "contrasting": [],
+    "co_occurring": [
+      "blindfold-representation"
+    ],
+    "conflicts": []
+  },
+  "examples": [],
+  "counterexamples": [],
+  "ambiguous_examples": [],
+  "explanations": {
+    "by_level": {
+      "beginner": "Strong players remember a position as a few groups of pieces that belong together, not as thirty separate pieces.",
+      "intermediate": "Chunking. It is why a master recalls a real position almost perfectly but does no better than a beginner on a random one.",
+      "advanced": "About five chunks in short-term memory, each holding four or five pieces bound by attack, defence, proximity, or common colour and type.",
+      "master": "Recurring chunks become templates with a stable core and variable slots, which is what makes several boards at once tractable."
+    },
+    "by_depth": {
+      "short": "Positions are remembered as a few groups, not many pieces.",
+      "normal": "Chunking: skilled players store a position as a small number of groups of related pieces rather than as individual pieces. This is why a master reconstructs a real position almost perfectly after five seconds and does no better than a novice when the same pieces are scattered at random.",
+      "deep": "The mechanism behind chess memory, established by a genuinely controlled experiment: de Groot showed masters reconstruct positions after five seconds, and Chase and Simon added the control that isolates the cause - the same pieces arranged randomly, on which the master advantage disappears completely. Masters are therefore under the same memory limits as everyone else, and the arithmetic follows: about five chunks holding twenty or more pieces means four or five pieces per chunk, bound by attack, defence, proximity, common colour and common type. The blindfold evidence sharpens it further, since dictated games are recalled almost perfectly when the moves are legal - even when random - and collapse only when they are illegal."
+    },
+    "hedge": "",
+    "lesson": "Meaning is what makes a position memorable. Scatter the same pieces at random and expertise buys nothing."
+  },
+  "terminology": {
+    "beginner_words": [
+      "groups of pieces that belong together"
+    ],
+    "advanced_words": [
+      "chunk",
+      "template",
+      "long-term memory",
+      "short-term memory limit"
+    ],
+    "avoid": [
+      "masters have better memories"
+    ]
+  },
+  "status": {
+    "stage": "researched",
+    "last_updated": "2026-09-01",
+    "open_questions": [],
+    "audit_notes": []
+  },
+  "id": "chunking",
+  "canonical_name": "Chunking",
+  "category": "blindfold-visualisation",
+  "knowledge_type": "proven-result",
+  "definition_short": "Skilled players store positions as a few groups of related pieces rather than as many individual pieces, which is why expertise does not transfer to random positions.",
+  "definition_long": "The mechanism behind chess memory, and the reason blindfold play is possible at all.\n\nTHE CONTROLLED EXPERIMENT that established it is a model of the method this base tries to follow. De Groot found masters could reconstruct a position almost perfectly after five seconds' viewing, while weaker players managed a few pieces. That alone does not distinguish chess skill from general memory, so Chase and Simon added the control: the SAME pieces arranged RANDOMLY. On random positions the master's advantage disappears entirely. One variable changed — whether the arrangement was meaningful — and the effect vanished with it. Masters are bound by the same short-term memory limits as everyone else.\n\nTHE ARITHMETIC. If a player holds around five chunks in short-term memory yet reconstructs twenty or more pieces, each chunk must carry four or five pieces in a single relational structure. Chase and Simon measured which relations bind pieces into a chunk: ATTACK, DEFENCE, PROXIMITY, COMMON COLOUR and COMMON TYPE. There was also evidence of more abstract grouping, notably pieces converging on the enemy king being held together as one attacking unit.\n\nTHE BLINDFOLD EVIDENCE. When games are dictated move by move, masters recall almost perfectly if the moves come from a real game — and also if the moves are random but LEGAL. Performance collapses only when the moves are illegal. Legality, not familiarity, is doing much of the work: illegal sequences cannot be absorbed into the structures a player already has.\n\nTEMPLATE THEORY refined this. Frequently recurring chunks develop into templates with a stable core and variable slots, which is why the opening position and familiar opening positions are held so cheaply, and why templates can be linked to one another and to moves.",
+  "sources": [
+    "chase-simon-1973",
+    "gobet-memory-chunks-schemata",
+    "campitelli-gobet-2004"
+  ],
+  "source_confidence": "high",
+  "validation_na": {
+    "positive_example": "N/A rather than missing. A validation item of this kind is a POSITION, and this record's subject is not a position: `recognition.detectability` is `human-only`, and what it describes is something a player does at the board rather than something the board contains. A FEN could show the CONSEQUENCE of doing it well or badly, which is a different claim from the one this record makes, so attaching one would be evidence for the wrong proposition. The record is validated the way its own claims can be: by sources, by attribution, by stated recognition criteria, and by the conditions its trap list states being read against the code in state/TRAPS.md.",
+    "negative_example": "N/A rather than missing. A validation item of this kind is a POSITION, and this record's subject is not a position: `recognition.detectability` is `human-only`, and what it describes is something a player does at the board rather than something the board contains. A FEN could show the CONSEQUENCE of doing it well or badly, which is a different claim from the one this record makes, so attaching one would be evidence for the wrong proposition. The record is validated the way its own claims can be: by sources, by attribution, by stated recognition criteria, and by the conditions its trap list states being read against the code in state/TRAPS.md.",
+    "engine_validation": "N/A rather than missing. A validation item of this kind is a POSITION, and this record's subject is not a position: `recognition.detectability` is `human-only`, and what it describes is something a player does at the board rather than something the board contains. A FEN could show the CONSEQUENCE of doing it well or badly, which is a different claim from the one this record makes, so attaching one would be evidence for the wrong proposition. The record is validated the way its own claims can be: by sources, by attribution, by stated recognition criteria, and by the conditions its trap list states being read against the code in state/TRAPS.md.",
+    "false_positive_test": "N/A rather than missing. A validation item of this kind is a POSITION, and this record's subject is not a position: `recognition.detectability` is `human-only`, and what it describes is something a player does at the board rather than something the board contains. A FEN could show the CONSEQUENCE of doing it well or badly, which is a different claim from the one this record makes, so attaching one would be evidence for the wrong proposition. The record is validated the way its own claims can be: by sources, by attribution, by stated recognition criteria, and by the conditions its trap list states being read against the code in state/TRAPS.md."
+  }
+}

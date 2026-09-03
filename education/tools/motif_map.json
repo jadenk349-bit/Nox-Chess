@@ -1,0 +1,115 @@
+{
+  "version": 1,
+  "note": [
+    "Maps findMotifs() tags in blind-chess.html to Education System concept ids.",
+    "findMotifs() stays the authority on WHETHER a motif is present in a position.",
+    "The concept record supplies what it means, where it came from, its exceptions,",
+    "and how to word it for a given reader. Neither side has to rename anything.",
+    "A tag with concept null has no researched record yet and is a tracked gap.",
+    "Themes are classified below: some name chess ideas, some are properties of the PUZZLE and must never become chess concepts."
+  ],
+  "detector": "findMotifs(before, move, after, attackerColor) in blind-chess.html",
+  "map": {
+    "mate": {
+      "concept": "checkmate",
+      "note": "the rule, not a pattern; the pattern records are under named-mating-patterns"
+    },
+    "fork": {
+      "concept": "fork",
+      "note": "detector requires target outranked or undefended \u2014 matches this record's indicators_for"
+    },
+    "pin": {
+      "concept": "pin",
+      "note": "detector reports only pins the move CREATED"
+    },
+    "skewer": {
+      "concept": "skewer",
+      "note": "same slider-line pass as pin, split by value ordering"
+    },
+    "discoveredAttack": {
+      "concept": "discovered-attack",
+      "note": ""
+    },
+    "doubleCheck": {
+      "concept": "double-check",
+      "note": ""
+    },
+    "backRank": {
+      "concept": "back-rank-mate",
+      "note": "detector tag covers the weakness as well as the mate; the record distinguishes them"
+    },
+    "trappedPiece": {
+      "concept": "trapped-piece",
+      "note": ""
+    },
+    "hangingPiece": {
+      "concept": "hanging-piece",
+      "note": "concept written this session"
+    }
+  },
+  "theme_tags_without_concepts": {
+    "note": "Puzzle-level themes from tools/puzzle_rules.js themesOf(). Classified by whether they name a chess idea at all. Verified by reading the assignment code, not guessed from the tag name.",
+    "chess_concepts_to_research": {
+      "kingAttack": {
+        "assigned_by": "checks >= 2 || mated",
+        "concept": "king-attack",
+        "caveat": "The tag is a crude proxy. The CONCEPT is real and worth researching; the detector's rule is not the concept's definition."
+      },
+      "sacrifice": {
+        "assigned_by": "material given up that SEE says was takeable",
+        "concept": "sacrifice"
+      },
+      "pawnBreakthrough": {
+        "assigned_by": "pawn advance creating a decisive passer",
+        "concept": "pawn-breakthrough"
+      },
+      "removalOfDefender": {
+        "assigned_by": "capture of a defender",
+        "concept": "removing-the-defender",
+        "caveat": "ALREADY HAS A RECORD under the id removing-the-defender. Name mismatch only."
+      },
+      "perpetual": {
+        "assigned_by": "checks >= 2 and final eval within 60cp of level",
+        "concept": "perpetual-check"
+      },
+      "mateThreat": {
+        "assigned_by": "read off the final evaluation: mate follows but is not delivered",
+        "concept": "mate-threat"
+      },
+      "exchangeSacrifice": {
+        "assigned_by": "rook given for a minor piece",
+        "concept": "exchange-sacrifice"
+      },
+      "positionalTactic": {
+        "assigned_by": "quiet first move, not a capture, not a check",
+        "concept": null,
+        "caveat": "NOT a recognised chess term. It is the generator's label for 'a quiet move with no motif tag'. Do NOT create a concept called 'positional tactic' \u2014 research what such moves actually are (prophylaxis, restriction, improving the worst piece) and map to those."
+      },
+      "promotion": {
+        "assigned_by": "a promotion occurs in the line",
+        "concept": "promotion",
+        "caveat": "already recorded"
+      },
+      "zwischenzug": {
+        "assigned_by": "an in-between move detected in the solution line",
+        "concept": "zwischenzug",
+        "caveat": "already recorded"
+      }
+    },
+    "puzzle_metadata_not_chess_concepts": {
+      "note": "These describe the PUZZLE, not the chess. They must never receive concept records \u2014 doing so would be inventing chess terminology to fit a pipeline tag, which is the failure mode the brief forbids.",
+      "longGame": "rec.moves.length >= 3 and not a mate. A statement about the line's length.",
+      "defensiveResource": "the puzzle's KIND \u2014 tagged on all 509 rescues, i.e. puzzles where the solver is saving rather than punishing."
+    }
+  },
+  "deliberately_unclaimed": {
+    "note": "The puzzle generator refuses these five by design: 'every cheap test for them fires where it is not true'. This knowledge base independently classified the same five detectability:heuristic from the sources. Do not add detectors for them without criteria strong enough to survive false-positive testing.",
+    "tags": [
+      "deflection",
+      "decoy",
+      "overloading",
+      "interference",
+      "double-attack"
+    ]
+  }
+}

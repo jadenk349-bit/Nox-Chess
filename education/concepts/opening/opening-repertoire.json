@@ -1,0 +1,140 @@
+{
+  "schema_version": 2,
+  "alternate_names": [],
+  "historical_names": [],
+  "tags": [
+    "opening",
+    "preparation",
+    "practical"
+  ],
+  "subcategory": "practical preparation",
+  "difficulty": "intermediate",
+  "knowledge_type_note": "Advice about how to prepare, which depends on the player's level and time. It is not a claim about positions.",
+  "name_status": "established-name",
+  "history": {
+    "attributions": [],
+    "first_documented_source": "wikipedia-chess-opening",
+    "year": null,
+    "confidence": "unknown",
+    "notes": "Ordinary practical vocabulary; no coinage researched.",
+    "competing_claims": [],
+    "development": []
+  },
+  "engine_era_status": "substantially-revised-by-engines",
+  "engine_era_note": "Under real pressure at the top. Engine preparation has made narrow specialisation much harder to sustain among elite players, since almost any line can be analysed deeply in advance. Below that level the opposite holds and a focused repertoire remains among the most efficient uses of study time. This base records the two as level-dependent rather than as a single rule.",
+  "recognition": {
+    "preconditions": [
+      "A player choosing which openings to study"
+    ],
+    "indicators_for": [],
+    "indicators_against": [],
+    "prerequisites": [],
+    "detector": null,
+    "detectability": "human-only",
+    "typical_confidence": "low",
+    "false_positive_traps": [
+      "This is advice about study, not about a position on the board. It must never be attached to a move as though it explained it.",
+      "Not detectable by this system: identifying this requires an opening database, which the Education System does not have."
+    ]
+  },
+  "application": {
+    "typical_plans": [
+      "Choose openings by the middlegame structures they produce",
+      "Prefer move orders that funnel opponents into structures you know well",
+      "Keep unsound lines as occasional surprises rather than as foundations"
+    ],
+    "typical_moves": [],
+    "typical_pawn_structures": [],
+    "typical_piece_arrangements": [],
+    "tactical_consequences": [],
+    "strategic_consequences": [
+      "Preparation compounds when the chosen openings share structural characteristics"
+    ]
+  },
+  "exceptions": [
+    "At elite level, narrow specialisation is increasingly impractical against engine-assisted preparation."
+  ],
+  "limitations": [
+    "The right repertoire depends on the player's level, style and available time, so no universal recommendation exists.",
+    "This system does not know the user's repertoire and cannot tailor advice to one.",
+    "NO AMBIGUOUS EXAMPLE, and a FEN is not the right kind of evidence for one here. An ambiguous example in this base is a POSITION where the concept is genuinely present and what to conclude from it is unclear - the pattern is on the board and the reading of it is not. This record's subject is not on the board: its `recognition.detectability` is `human-only`, and what it describes is something a player does at the board rather than something the board contains. A position could illustrate the CONSEQUENCE of doing it well or badly, and that is a different claim, and attaching a FEN here would be evidence for the wrong proposition. Recorded rather than filled: tools/depth_report.py still counts this concept as missing the item, and the completion assessment carries the gap.",
+    "NO REGISTERED FALSE-POSITIVE CASE, and a FEN is not the right instrument for one here. A case in tests/false_positive_cases.json is a POSITION where the concept's surface pattern is present and the concept is not, replayed as an assertion so the system can be shown declining the error. This record's `recognition.detectability` is `human-only`: what it describes is something a player does rather than something a board contains, so there is no surface pattern for a position to carry and nothing for the system to decline. The conditions this record states are read and answered in `limitations` and in the trap audit instead. Recorded rather than filled: tools/depth_report.py still counts this concept as missing the item.",
+    "NO MASTER-GAME POSITION, and the same reason that keeps this record from carrying an ambiguous example or a false-positive case applies: `recognition.detectability` is `human-only`, and what this record describes is something a player does rather than something a board contains. A game position could show the CONSEQUENCE of doing it well or badly, which is a different claim from the one this record makes. tools/depth_report.py still counts the item as missing."
+  ],
+  "misconceptions": [
+    "That a bigger repertoire is a better one. Depth in a few structures generally beats shallow coverage of many lines.",
+    "That memorising lines is what a repertoire is. Memorised lines without understanding are exactly what move-order tricks punish."
+  ],
+  "relationships": {
+    "broader": [],
+    "narrower": [],
+    "related": [
+      "transposition",
+      "tabiya",
+      "theoretical-novelty",
+      "gambit",
+      "opening-development"
+    ],
+    "contrasting": [],
+    "co_occurring": [],
+    "conflicts": []
+  },
+  "examples": [],
+  "counterexamples": [],
+  "ambiguous_examples": [],
+  "explanations": {
+    "by_level": {
+      "beginner": "The openings you have chosen to learn and play.",
+      "intermediate": "Your repertoire. Pick openings whose middlegames you enjoy, and learn a few well rather than many badly.",
+      "advanced": "Build it around pawn structures. Move-order tricks still have to land in some structure, and understanding one deeply beats memorising twenty lines.",
+      "master": "Choose move orders that decide which structures are reachable, and expect the repertoire to keep evolving."
+    },
+    "by_depth": {
+      "short": "The openings you have chosen to play.",
+      "normal": "An opening repertoire: the set of openings a player specialises in. Since theory is unbounded and study time is not, the real content of a repertoire is deciding what not to learn.",
+      "deep": "The openings a player has chosen to know, shaped by the trade-off between soundness and practicality: main lines need to hold up against best defence, while unsound gambits work as surprise weapons and fail as foundations. The most durable advice is to organise around pawn structures rather than move sequences, because every move-order trick still has to land in some structure and structural understanding generalises where memorised lines do not. Repertoires are expected to change, since lines that trouble amateurs are often defused at master level."
+    },
+    "hedge": "This is guidance about preparation, and the right answer depends on a player's level, style and time.",
+    "lesson": "Learn a few structures deeply rather than many lines shallowly."
+  },
+  "terminology": {
+    "beginner_words": [
+      "the openings you play"
+    ],
+    "advanced_words": [
+      "repertoire",
+      "main line",
+      "sideline",
+      "surprise weapon"
+    ],
+    "avoid": [
+      "you must learn more openings"
+    ]
+  },
+  "status": {
+    "stage": "researched",
+    "last_updated": "2026-09-01",
+    "open_questions": [],
+    "audit_notes": []
+  },
+  "id": "opening-repertoire",
+  "canonical_name": "Opening repertoire",
+  "category": "opening-theory-concepts",
+  "knowledge_type": "practical-guideline",
+  "definition_short": "The set of openings a player has chosen to know and play.",
+  "definition_long": "The openings a player has specialised in. A repertoire exists because the amount of theory is unbounded and a player's study time is not: choosing what NOT to learn is the substance of it.\n\nThe governing trade-off is between soundness and practicality. A repertoire's main lines should be sound enough to give playable positions against best defence, since an unsound line is a liability once opponents know it. Unsound gambits work as surprise weapons and fail as foundations.\n\nThe most useful modern advice is to organise a repertoire around PAWN STRUCTURES rather than move sequences. Every move-order trick an opponent tries still has to land in some structure, and understanding a handful of structures deeply generalises where memorised lines do not. Openings sharing structural characteristics also make preparation compound across lines.\n\nA repertoire is expected to change. Lines effective against amateurs can be much less so at master level — the Benko Gambit is the standard illustration, where the activity that troubles club players is defused by stronger defenders who simply keep the pawn — and a repertoire that never evolves can hold a player back.",
+  "sources": [
+    "wikipedia-chess-opening",
+    "chessmind-transposition",
+    "teamliquid-computers-changed-chess"
+  ],
+  "source_confidence": "medium",
+  "validation_na": {
+    "positive_example": "N/A rather than missing. A validation item of this kind is a POSITION, and this record's subject is not a position: `recognition.detectability` is `human-only`, and what it describes is something a player does at the board rather than something the board contains. A FEN could show the CONSEQUENCE of doing it well or badly, which is a different claim from the one this record makes, so attaching one would be evidence for the wrong proposition. The record is validated the way its own claims can be: by sources, by attribution, by stated recognition criteria, and by the conditions its trap list states being read against the code in state/TRAPS.md.",
+    "negative_example": "N/A rather than missing. A validation item of this kind is a POSITION, and this record's subject is not a position: `recognition.detectability` is `human-only`, and what it describes is something a player does at the board rather than something the board contains. A FEN could show the CONSEQUENCE of doing it well or badly, which is a different claim from the one this record makes, so attaching one would be evidence for the wrong proposition. The record is validated the way its own claims can be: by sources, by attribution, by stated recognition criteria, and by the conditions its trap list states being read against the code in state/TRAPS.md.",
+    "ambiguous_example": "N/A rather than missing. A validation item of this kind is a POSITION, and this record's subject is not a position: `recognition.detectability` is `human-only`, and what it describes is something a player does at the board rather than something the board contains. A FEN could show the CONSEQUENCE of doing it well or badly, which is a different claim from the one this record makes, so attaching one would be evidence for the wrong proposition. The record is validated the way its own claims can be: by sources, by attribution, by stated recognition criteria, and by the conditions its trap list states being read against the code in state/TRAPS.md.",
+    "engine_validation": "N/A rather than missing. A validation item of this kind is a POSITION, and this record's subject is not a position: `recognition.detectability` is `human-only`, and what it describes is something a player does at the board rather than something the board contains. A FEN could show the CONSEQUENCE of doing it well or badly, which is a different claim from the one this record makes, so attaching one would be evidence for the wrong proposition. The record is validated the way its own claims can be: by sources, by attribution, by stated recognition criteria, and by the conditions its trap list states being read against the code in state/TRAPS.md.",
+    "master_game": "N/A rather than missing. A validation item of this kind is a POSITION, and this record's subject is not a position: `recognition.detectability` is `human-only`, and what it describes is something a player does at the board rather than something the board contains. A FEN could show the CONSEQUENCE of doing it well or badly, which is a different claim from the one this record makes, so attaching one would be evidence for the wrong proposition. The record is validated the way its own claims can be: by sources, by attribution, by stated recognition criteria, and by the conditions its trap list states being read against the code in state/TRAPS.md.",
+    "false_positive_test": "N/A rather than missing. A validation item of this kind is a POSITION, and this record's subject is not a position: `recognition.detectability` is `human-only`, and what it describes is something a player does at the board rather than something the board contains. A FEN could show the CONSEQUENCE of doing it well or badly, which is a different claim from the one this record makes, so attaching one would be evidence for the wrong proposition. The record is validated the way its own claims can be: by sources, by attribution, by stated recognition criteria, and by the conditions its trap list states being read against the code in state/TRAPS.md."
+  }
+}

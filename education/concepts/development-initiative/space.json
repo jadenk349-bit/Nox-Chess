@@ -1,0 +1,314 @@
+{
+  "schema_version": 2,
+  "alternate_names": [
+    "space"
+  ],
+  "historical_names": [],
+  "tags": [
+    "positional",
+    "silman"
+  ],
+  "subcategory": "positional asset",
+  "difficulty": "intermediate",
+  "knowledge_type_note": "A board feature, mechanically countable, whose VALUE is conditional on being able to use it.",
+  "name_status": "established-name",
+  "history": {
+    "attributions": [
+      {
+        "person": "Jeremy Silman",
+        "relation": "popularized-by",
+        "source": "silman-reassess",
+        "year": 2010,
+        "note": "Treats space as one of the primary imbalances and stresses the entry-point requirement. Full text consulted."
+      }
+    ],
+    "first_documented_source": "silman-reassess",
+    "year": null,
+    "confidence": "low",
+    "notes": "Space is standard vocabulary with no identifiable coiner; only its treatment as a named imbalance is attributable, and weakly.",
+    "competing_claims": [],
+    "development": []
+  },
+  "engine_era_status": "useful-with-common-exceptions",
+  "engine_era_note": "Engines carry space and mobility terms and value them, but considerably less than club instruction implies. They will concede space readily for concrete play, which is closer to the hypermodern position than the classical one.",
+  "recognition": {
+    "preconditions": [
+      "One side controls more squares behind its pawn front"
+    ],
+    "indicators_for": [
+      "The opponent's pieces have few squares and obstruct one another",
+      "An entry square exists or can be created",
+      "The extra space spans both wings, so the opponent cannot defend both",
+      "The opponent cannot trade pieces off"
+    ],
+    "indicators_against": [
+      "No entry point exists, so the territory buys nothing",
+      "The advanced pawns are fixed targets rather than a front",
+      "The cramped side can liquidate with exchanges",
+      "The space was gained by overextension the opponent can undermine"
+    ],
+    "prerequisites": [],
+    "detector": "pawnSpace + entrySquares in lib/features.js; the `space` matcher in lib/matchers.js",
+    "detectability": "mechanical",
+    "typical_confidence": "medium",
+    "false_positive_traps": [
+      "Counting controlled squares is mechanical and over-reports. Space with no entry point wins nothing.",
+      "Advanced pawns are not automatically a space advantage — they may simply be weak and fixed.",
+      "The cramped side's standard remedy is exchanging, so a space advantage that cannot prevent trades is temporary."
+    ]
+  },
+  "application": {
+    "typical_plans": [
+      "Avoid exchanges, improve pieces behind the front, then open a second front",
+      "Create an entry square before advancing further",
+      "As the cramped side: exchange pieces, and look for a freeing pawn break"
+    ],
+    "typical_moves": [
+      "A space-gaining pawn advance supported by pieces",
+      "A freeing break such as ...c5 or ...f6 by the cramped side"
+    ],
+    "typical_pawn_structures": [
+      "Advanced pawn chains",
+      "Maroczy Bind and similar space-clamping structures"
+    ],
+    "typical_piece_arrangements": [],
+    "tactical_consequences": [],
+    "strategic_consequences": [
+      "Enables switching wings faster than the defender",
+      "Combines directly with the principle of two weaknesses, which needs exactly that ability"
+    ]
+  },
+  "exceptions": [
+    "Space with no way in is worth little.",
+    "Space bought by overextension is a liability — the hypermodern critique.",
+    "The cramped side exchanging pieces is the standard and effective antidote."
+  ],
+  "limitations": [
+    "Countable but conditional: the count says nothing about usability.",
+    "TRAP 3 IS NOT IMPLEMENTED AND CANNOT BE, MECHANICALLY. 'The cramped side's standard remedy is exchanging, so a space advantage that cannot prevent trades is temporary' is a claim about what the position will BECOME, and no static feature answers it. The other two traps are built: an entry square is required (53.3% -> 34.6% of the 788 shipped positions), and a territory made entirely of weak, blocked pawns is refused (a further 1 position — it almost never binds, because a side with a real space advantage rarely has EVERY space-creating pawn weak, and the rate is recorded rather than talked up).",
+    "HUMAN-GROUNDED NEGATIVE ADDED 2026-09-02, and it is a live test of the entry-square guard rather than a vacuous one. Torre-Karpov, Bad Lauterberg 1977, move 26: White's pawns control NINE squares in Black's half against zero - as unambiguous a territorial advantage as this corpus contains, and six times the matcher's own threshold - and there is no entry square at all. Until this session the concept would have been reported here with confidence, in a position Stockfish scores at -3.01 after the move actually played. The annotators introduce the game as 'a great example of how not to play when you have space advantage'."
+  ],
+  "misconceptions": [
+    "That more space is simply better. It is better if you can enter.",
+    "That advancing pawns gains space safely. It also fixes them and leaves holes behind them."
+  ],
+  "relationships": {
+    "broader": [],
+    "narrower": [],
+    "related": [
+      "center-control",
+      "two-weaknesses",
+      "hole",
+      "piece-exchanges",
+      "hypermodern-school"
+    ],
+    "contrasting": [],
+    "co_occurring": [
+      "center-control",
+      "two-weaknesses"
+    ],
+    "conflicts": [
+      {
+        "concept": "hypermodern-school",
+        "resolution": "The hypermodern position is precisely that space gained by pawn advance can be a liability, since the pawns become targets. Both are right conditionally: supported and expanded on time, space wins; static and overextended, it is a target. The deciding variable is whether the pawn front can be supported, not the amount of territory."
+      }
+    ]
+  },
+  "examples": [
+    {
+      "fen": "8/3k4/8/2p1R3/1b1p3p/2pP3p/1pP3r1/7K w - - 0 97",
+      "note": "The feature is present and was verified mechanically by lib/features.js: a clear space advantage (0 against 10 squares). The engine puts the position at 0.0, close enough to level that the feature is not being swamped by tactics — so this is usable as an instance of the concept. What is NOT claimed is that the concept explains the engine's move. Provenance: mined from this repository's puzzle corpus, which is engine self-play — a real position from a real game between engines, not a master game.",
+      "origin_kind": "puzzle",
+      "concept_role": "supports",
+      "side_to_move_benefits": "neither",
+      "engine": {
+        "engine_id": "Stockfish 18",
+        "test_level": 2,
+        "depth": 20,
+        "threads": 8,
+        "hash_mb": 2048,
+        "multipv": 2,
+        "best_move": "e5e7",
+        "eval_cp": 0,
+        "mate_in": null,
+        "pv": [],
+        "alternatives": [
+          {
+            "move": "e5d5",
+            "eval_cp": -1750,
+            "mate_in": null
+          }
+        ],
+        "margin_cp": 0,
+        "verdict": "supports",
+        "verdict_note": "Level-2 validation: the position was scored, not designed. It confirms the feature is present in real play and, where the score is near level, that the feature is not drowned out. It is not a controlled pair and proves nothing about the concept on its own."
+      }
+    },
+    {
+      "fen": "3q4/1p2kb2/2p1pp1p/2PB4/1P3PPP/2Q1K3/1B6/8 b - - 0 38",
+      "game": "Petrosian-Euwe, Candidates, Zurich 1953",
+      "note": "A QUIET position from a master game — after Bxd5, ply 75 — in which White's pawns control 8 squares in the opponent's half against 0. The side to move has no check available, so the next move has to be chosen on positional grounds. CORRECTED 2026-09-02: this note used to add \"and no capture that wins material\" as the other half of a mechanical quiet test. That half had never run - quietness() passed a move object where see() expects a square index, so winningCapturesAvailable was always zero and every note written from it claimed something untested. Re-checked with the fixed test, this position DOES have a capture that wins material, so the quiet half of the claim is withdrawn. The position is kept: what it illustrates about the concept is unaffected, and dropping the evidence would be tidying away the consequence of a bug. That matters because this base's other corpus is 788 tactical puzzles, in which a positional feature cannot be isolated.\n\nWHAT IS VERIFIED: the game replays legally end to end through the page's own move generator, so the FEN is derived rather than transcribed; and the feature is present by mechanical measurement in lib/features.js.\n\nWHAT IS NOT CLAIMED: that the concept decides this position, or that the players were thinking about it. Note also a limitation of method — the position was FOUND by this system's own Layer 4, so it demonstrates the concept and cannot by itself validate the matcher that found it. Other concepts licensed here: bishop-pair, bad-bishop.",
+      "origin_kind": "historical-game",
+      "concept_role": "supports",
+      "side_to_move_benefits": "neither"
+    },
+    {
+      "fen": "2b2q2/pp2n1k1/2p4p/Q1Nr1p2/3p3p/1P2p2P/P1P1B1P1/1K1R1R2 b - - 7 29",
+      "note": "a clear space advantage (0 squares against 7). The position is QUIET by mechanical test: the side to move has no check available and no capture that wins material, so the next move must be chosen on positional grounds. That is the property this base's tactical corpus almost never has. Found by tools/prospect.js, which searches 1576 real positions for a concept's feature and scores quiet positions far higher. Provenance: the puzzle corpus is engine self-play — a real position from a real game between engines, not a master game.",
+      "origin_kind": "puzzle",
+      "concept_role": "supports",
+      "side_to_move_benefits": "neither",
+      "engine": {
+        "engine_id": "Stockfish 18",
+        "test_level": 2,
+        "depth": 20,
+        "threads": 8,
+        "hash_mb": 2048,
+        "multipv": 2,
+        "best_move": "b7b6",
+        "eval_cp": 0,
+        "mate_in": null,
+        "pv": [],
+        "alternatives": [
+          {
+            "move": "f8f6",
+            "eval_cp": -306,
+            "mate_in": null
+          }
+        ],
+        "margin_cp": 0,
+        "verdict": "supports",
+        "verdict_note": "Quiet and close to balanced at 0.0, which is the combination this base most needs and least often finds: nothing forcing is available and the evaluation is not swamping the feature, so the position is usable as an instance of the concept. What is NOT claimed is that the concept explains the engine's choice of move."
+      }
+    },
+    {
+      "fen": "3rq1k1/6pp/4p3/pp1nP3/P2P4/2PQ4/1B4PP/4R1K1 b - - 0 31",
+      "game": "Reshevsky-Petrosian, Candidates, Zurich 1953",
+      "note": "A quiet position from a master game — after Qxd3, ply 61 — where White's pawns control 5 squares in the opponent's half against 3. The side to move has no check available, so the next move has to be chosen on positional grounds. CORRECTED 2026-09-02: this note used to add \"and no capture that wins material\" as the other half of a mechanical quiet test. That half had never run - quietness() passed a move object where see() expects a square index, so winningCapturesAvailable was always zero and every note written from it claimed something untested. Re-checked with the fixed test, this position DOES have a capture that wins material, so the quiet half of the claim is withdrawn. The position is kept: what it illustrates about the concept is unaffected, and dropping the evidence would be tidying away the consequence of a bug. VERIFIED: the game replays legally end to end through the page's own move generator, and the feature is measured by lib/features.js. NOT CLAIMED: that the concept decides this position, or that the players were thinking about it. Method note: the position was found by this system's own Layer 4, so it illustrates the concept and cannot by itself validate the matcher that found it. Other concepts licensed here: semi-open-file, weak-square, material-imbalance, bad-bishop.",
+      "origin_kind": "historical-game",
+      "concept_role": "supports",
+      "side_to_move_benefits": "neither"
+    },
+    {
+      "fen": "r3k3/pp4pp/8/2PPP3/4N3/8/PP3PPP/R3K3 w Qq - 0 1",
+      "note": "White pawns on c5, d5 and e5 controlling five squares in Black's half against none, with a knight on e4 that can enter on d6 or f6. Territory AND a way in, which is what this record requires.",
+      "origin_kind": "constructed-test",
+      "concept_role": "supports",
+      "side_to_move_benefits": "neither",
+      "controlled_pair_with": "r3k3/pp3ppp/8/8/4N3/8/PP3PPP/R3K3 w Qq - 0 1"
+    }
+  ],
+  "counterexamples": [
+    {
+      "fen": "r3k3/pp3ppp/8/8/4N3/8/PP3PPP/R3K3 w Qq - 0 1",
+      "note": "The same men with the three advanced pawns removed and Black's f-pawn back on f7. No territorial advantage, and the concept is not reported - the pair exists to show that the entry square alone is not the concept either. Both halves are needed and the record says so.",
+      "origin_kind": "constructed-test",
+      "concept_role": "negative",
+      "side_to_move_benefits": "neither",
+      "controlled_pair_with": "r3k3/pp4pp/8/2PPP3/4N3/8/PP3PPP/R3K3 w Qq - 0 1"
+    },
+    {
+      "fen": "4k3/pp4pp/3p4/2pPp3/2P1P3/8/PP4PP/4K3 w - - 0 1",
+      "note": "Registered false-positive case `space-with-no-entry-square`, kept on the record as well as in tests/false_positive_cases.json so that the concept carries its own negative evidence. THE SURFACE PATTERN IS PRESENT: White's pawns on c4, d5 and e4 sit a rank further up the board than Black's on c5, d6 and e5. By any count of squares controlled behind the pawn line, White has a space advantage. WHY IT IS NOT THE CONCEPT: This record's first trap: \"Counting controlled squares is mechanical and over-reports. Space with no entry point wins nothing.\" Every file is rammed shut and there is no square on Black's half that a white piece can ever occupy. WHAT THE SYSTEM DOES: The API reports nothing at all here. The space matcher was rewritten for this exact trap and the rate fell from 53.3% to 34.6% of the 788 shipped puzzles when entry squares became a requirement rather than a footnote. Stockfish 18 at depth 26: +0.00, and its line is both kings walking about on the kingside. The extra rank of space is real and worth nothing, which is the trap stated as a number.",
+      "origin_kind": "constructed-test",
+      "concept_role": "negative",
+      "engine": {
+        "engine_id": "Stockfish 18",
+        "test_level": 3,
+        "depth": 26,
+        "threads": 10,
+        "hash_mb": 4096,
+        "multipv": 1,
+        "best_move": "e1f2",
+        "eval_cp": 0,
+        "mate_in": null,
+        "pv": [],
+        "alternatives": [],
+        "margin_cp": null,
+        "verdict": "supports",
+        "verdict_note": "0.00, and the engine's line is both kings walking about on the kingside. The extra rank of space is real and worth nothing."
+      },
+      "false_positive_case": "space-with-no-entry-square"
+    }
+  ],
+  "ambiguous_examples": [
+    {
+      "fen": "r1bqkBr1/ppp2ppp/n4n2/3pp3/8/1P1PP3/P1PN1PPP/R2QKBNR w KQq - 1 7",
+      "note": "The feature is present and was verified mechanically by lib/features.js: more space but FEWER available moves — space that is not translating into activity. The engine assessment is 4.13, which is far enough from level that the position is decided by concrete play rather than by this feature. Recorded as an ambiguous example on purpose: it demonstrates the feature and does NOT show the concept deciding anything, and conflating those is the error this base is built to avoid. Provenance: mined from this repository's puzzle corpus, which is engine self-play — a real position from a real game between engines, not a master game.",
+      "origin_kind": "puzzle",
+      "concept_role": "ambiguous",
+      "side_to_move_benefits": "neither",
+      "engine": {
+        "engine_id": "Stockfish 18",
+        "test_level": 2,
+        "depth": 20,
+        "threads": 8,
+        "hash_mb": 2048,
+        "multipv": 2,
+        "best_move": "f8a3",
+        "eval_cp": 413,
+        "mate_in": null,
+        "pv": [],
+        "alternatives": [
+          {
+            "move": "d3d4",
+            "eval_cp": 213,
+            "mate_in": null
+          }
+        ],
+        "margin_cp": 0,
+        "verdict": "ambiguous",
+        "verdict_note": "Level-2 validation: the position was scored, not designed. It confirms the feature is present in real play and, where the score is near level, that the feature is not drowned out. It is not a controlled pair and proves nothing about the concept on its own."
+      }
+    }
+  ],
+  "explanations": {
+    "by_level": {
+      "beginner": "You control more squares, so your pieces have room and theirs are bumping into each other.",
+      "intermediate": "A space advantage. Avoid trades, improve your pieces, and find the square you intend to invade on — space with no way in achieves nothing.",
+      "advanced": "The value is the mobility difference and the ability to switch wings faster than the defender. Watch the cost: advanced pawns are fixed and leave holes.",
+      "master": "Space combines directly with the two-weaknesses method, because that method needs exactly the ability to operate on both wings faster than the defence can follow."
+    },
+    "by_depth": {
+      "short": "More room for your pieces, less for theirs.",
+      "normal": "A space advantage: you control more squares behind your pawn front. The value is mobility — their pieces get in each other's way. Avoid exchanges, and find an entry square, because space without a way in wins nothing.",
+      "deep": "Territory behind the pawn front, whose worth is the mobility difference rather than the squares themselves. Two corollaries matter more than the count: the cramped side should exchange pieces, since fewer pieces need fewer squares, and space must be usable — a big advantage almost certainly wins if a way can be found into enemy territory, which puts the emphasis on the entry point. The cost is real: advancing pawns fixes them and permanently uncovers the squares behind them, and space gained by overextension is a liability. That is exactly the hypermodern critique of the classical pawn centre."
+    },
+    "hedge": "",
+    "lesson": "Space is only worth what you can enter with. Before pushing another pawn, ask which square you intend to invade on."
+  },
+  "terminology": {
+    "beginner_words": [
+      "more room",
+      "their pieces are cramped"
+    ],
+    "advanced_words": [
+      "space",
+      "entry square",
+      "overextension",
+      "freeing break"
+    ],
+    "avoid": [
+      "more space is always better"
+    ]
+  },
+  "status": {
+    "stage": "researched",
+    "last_updated": "2026-09-01",
+    "open_questions": [],
+    "audit_notes": []
+  },
+  "id": "space",
+  "canonical_name": "Space advantage",
+  "category": "space",
+  "knowledge_type": "positional-concept",
+  "definition_short": "More squares controlled behind your own pawns, which gives your pieces room to manoeuvre and denies the opponent room to do the same.",
+  "definition_long": "Space is territory: the squares behind your pawn front, which your pieces can use and the opponent's cannot. Its value is not the territory itself but the MOBILITY difference — a cramped side's pieces get in each other's way and cannot be regrouped quickly, and the side with space can switch wings faster than the defender can follow.\n\nTwo standing corollaries follow, and both are more useful than the raw count. First, the cramped side should EXCHANGE PIECES: fewer pieces need fewer squares, and every trade relieves the cramp. Correspondingly, the side with space should avoid trades. Second, space must be USABLE — Silman's framing is that a big space advantage almost certainly wins if a way can be found to break into enemy territory, which puts the emphasis on the entry point rather than on the territory.\n\nThe cost side is real and easy to forget. Advancing pawns to gain space also fixes them, leaves squares behind them permanently uncovered, and can leave the advanced pawns as targets in an endgame. Space gained by overextension is a liability, which is precisely the hypermodern critique of the classical pawn centre.",
+  "sources": [
+    "silman-reassess",
+    "nimzowitsch-my-system",
+    "wikibooks-chess-centre",
+    "zurich-1953-games"
+  ],
+  "source_confidence": "medium"
+}

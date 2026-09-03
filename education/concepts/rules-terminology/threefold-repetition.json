@@ -1,0 +1,129 @@
+{
+  "schema_version": 2,
+  "id": "threefold-repetition",
+  "canonical_name": "Threefold repetition",
+  "alternate_names": [
+    "repetition of position",
+    "draw by repetition"
+  ],
+  "historical_names": [],
+  "category": "official-rules",
+  "subcategory": "basic rules of play",
+  "tags": [],
+  "knowledge_type": "official-rule",
+  "knowledge_type_note": "Official rule. The claim/automatic distinction against Art. 9.6.1 is explicit.",
+  "name_status": "established-name",
+  "difficulty": "intermediate",
+  "definition_short": "A player to move may CLAIM a draw when the same position is about to appear, or has just appeared, for the third time.",
+  "definition_long": "FIDE Art. 9.2: 'The game is drawn, upon a correct claim by a player having the move, when the same position for at least the third time (not necessarily by a repetition of moves)' either is about to appear (announced in advance) or has just appeared.\n\nIt is a CLAIM, not automatic — play continues if nobody claims. The repetitions need not be consecutive and need not come from repeating moves.\n\nArt. 9.2.3 defines position identity precisely: 'Positions are considered the same if and only if the same player has the move, pieces of the same kind and colour occupy the same squares and the possible moves of all the pieces of both players are the same.' Two riders follow: positions differ if at the start of the sequence a pawn could have been captured en passant (9.2.3.1), and if a king had castling rights with an unmoved rook but forfeited them afterwards (9.2.3.2).",
+  "history": {
+    "attributions": [],
+    "first_documented_source": "fide-laws-2023",
+    "year": null,
+    "confidence": "unknown",
+    "notes": "",
+    "competing_claims": [],
+    "development": []
+  },
+  "engine_era_status": "not-applicable",
+  "engine_era_note": "",
+  "sources": [
+    "fide-laws-2023",
+    "fide-laws-2023-pdf"
+  ],
+  "source_confidence": "high",
+  "recognition": {
+    "preconditions": [
+      "The same position, by the Art. 9.2.3 test, has occurred three times"
+    ],
+    "indicators_for": [],
+    "indicators_against": [],
+    "prerequisites": [],
+    "detector": "posKey",
+    "detectability": "mechanical",
+    "typical_confidence": "high",
+    "false_positive_traps": []
+  },
+  "application": {
+    "typical_plans": [],
+    "typical_moves": [],
+    "typical_pawn_structures": [],
+    "typical_piece_arrangements": [],
+    "tactical_consequences": [],
+    "strategic_consequences": []
+  },
+  "exceptions": [
+    "Not automatic — without a claim the game continues.",
+    "Side to move, castling rights and en-passant availability are all part of the position; ignoring any of them produces false repetitions."
+  ],
+  "limitations": [
+    "TYPICAL_CONFIDENCE RAISED medium -> high, 2026-09-02, and the reason is the schema's own definition of the field: 'how confidently this concept can normally be asserted ONCE ITS PRECONDITIONS HOLD'. This concept's recognition is MECHANICAL and its knowledge type already carries a high ceiling, so once the preconditions hold there is nothing left to be uncertain about - a stalemate is a stalemate, and a fork this base reports is one findMotifs() found, which ARCHITECTURE.md makes the authority and forbids second-guessing. 'Medium' was the default across 32 rule and motif records regardless of detectability, and it was found by measuring what the API reports against what each record permits: twelve concepts were reporting ABOVE their own record. The fix was to make each record its own ceiling in cap(), which then required the records that were wrong to be corrected rather than silently overruled."
+  ],
+  "misconceptions": [],
+  "relationships": {
+    "broader": [],
+    "narrower": [],
+    "related": [
+      "fivefold-repetition",
+      "en-passant",
+      "castling"
+    ],
+    "contrasting": [],
+    "co_occurring": [],
+    "conflicts": []
+  },
+  "examples": [
+    {
+      "fen": "4k3/8/8/8/8/8/8/R3K3 w - - 0 1",
+      "pgn": "1. Ra2 Kd8 2. Ra1 Ke8 3. Ra2 Kd8 4. Ra1 Ke8 5. Ra2 Kd8 6. Ra1 Ke8",
+      "note": "A position is not enough for this concept and the example says so by being a SEQUENCE. Threefold repetition is a claim about history: the same position, the same side to move, the same castling and en-passant rights, three times. The line above was replayed through this base's own move generator move by move - every one legal, no capture, no pawn move - and the starting position recurs FIVE times in it. The count is what the generator reports, not what the notation looks like.",
+      "origin_kind": "constructed-test",
+      "concept_role": "positive"
+    }
+  ],
+  "counterexamples": [
+    {
+      "fen": "r3k2r/8/8/8/8/8/8/R3K2R w Qq - 4 3",
+      "pgn": "1. Rg1 Rg8 2. Rh1 Rh8",
+      "note": "Constructed, and it is a SEQUENCE because the rule is about history. From r3k2r/8/8/8/8/8/8/R3K2R w KQkq - 0 1 both sides move a rook out and back: 1.Rg1 Rg8 2.Rh1 Rh8. Every man is on the square it started on and the position has NOT repeated, because both sides have lost the right to castle kingside - the FEN reads `w Qq - 4 3` where it read `w KQkq - 0 1`. FIDE Art. 9.2.3 includes castling rights in the definition of the same position, so a diagram that looks identical is a different position and no claim exists. This is the exact error the `notation` record's third trap names: a FEN without the castling, en-passant and clock fields is not a position, it is a picture of one. The four moves were played through this base's own move generator, which emitted both FENs.",
+      "origin_kind": "constructed-test",
+      "concept_role": "negative"
+    }
+  ],
+  "ambiguous_examples": [],
+  "explanations": {
+    "by_level": {
+      "beginner": "The same position has now happened three times, so either player whose turn it is may claim a draw.",
+      "intermediate": "Threefold repetition. Remember it is a claim, and that castling rights and en-passant possibilities are part of what makes a position 'the same'.",
+      "advanced": "Art. 9.2, with position identity defined at 9.2.3 including the en-passant and castling-rights riders."
+    },
+    "by_depth": {
+      "short": "The same position three times, with the same side to move, is claimable as a draw.",
+      "normal": "Threefold repetition: a player to move may CLAIM a draw when the same position is about to appear, or has just appeared, for the third time. Positions need not be consecutive, and the claim is a right rather than an automatic result.",
+      "deep": "FIDE Art. 9.2, and 'the same position' is a term of art defined at 9.2.3: the same men on the same squares, the same side to move, the same castling rights, and the same en-passant possibility. Two of those four are invisible on a diagram, which is why this base's example for the rule is a SEQUENCE rather than a position — sixteen plies replayed through the move generator, in which the starting position recurs five times."
+    },
+    "hedge": "",
+    "lesson": ""
+  },
+  "terminology": {
+    "beginner_words": [
+      "same position three times"
+    ],
+    "advanced_words": [
+      "threefold repetition",
+      "claim a draw"
+    ],
+    "avoid": [
+      "same moves three times"
+    ]
+  },
+  "status": {
+    "stage": "researched",
+    "last_updated": "2026-08-31",
+    "open_questions": [],
+    "audit_notes": []
+  },
+  "validation_na": {
+    "false_positive_test": "N/A rather than missing. A registered false-positive case is a position where the concept's surface pattern is present and the concept is absent, replayed as an assertion so the system can be shown declining the error. This concept is DECIDED BY THE MOVE GENERATOR - the same function that decides it in a game - so there is no judgement to get wrong and no surface pattern that can be present without the thing itself. The nearest genuine risk is a PATTERN NAME attached to a position that is check and not mate, and that risk belongs to `back-rank-mate` and `smothered-mate`, both of which carry a registered case for it."
+  }
+}

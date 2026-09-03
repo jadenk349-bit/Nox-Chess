@@ -1,0 +1,169 @@
+{
+  "schema_version": 2,
+  "id": "en-passant",
+  "canonical_name": "En passant capture",
+  "alternate_names": [
+    "en passant",
+    "e.p."
+  ],
+  "historical_names": [],
+  "category": "official-rules",
+  "subcategory": "basic rules of play",
+  "tags": [],
+  "knowledge_type": "official-rule",
+  "knowledge_type_note": "Official rule, quoted verbatim from the authentic English text.",
+  "name_status": "established-name",
+  "difficulty": "beginner",
+  "definition_short": "A pawn that has just advanced two squares may be captured, on the very next move only, by an enemy pawn beside it, as though it had advanced one square.",
+  "definition_long": "FIDE Art. 3.7.3.1: 'A pawn occupying a square on the same rank as and on an adjacent file to an opponent's pawn which has just advanced two squares in one move from its original square may capture this opponent's pawn as though the latter had been moved only one square.' Art. 3.7.3.2: 'This capture is only legal on the move following this advance and is called an en passant capture.'\n\nThe right expires immediately. It exists so that the two-square first move cannot be used to run a pawn past an enemy pawn that would have been able to capture it had it advanced one square at a time.",
+  "history": {
+    "attributions": [],
+    "first_documented_source": "fide-laws-2023",
+    "year": null,
+    "confidence": "unknown",
+    "notes": "The modern rule dates from the introduction of the two-square pawn advance in late-medieval Europe, but no origin research has been done for this record yet. Only the current codification is cited.",
+    "competing_claims": [],
+    "development": []
+  },
+  "engine_era_status": "not-applicable",
+  "engine_era_note": "",
+  "sources": [
+    "fide-laws-2023",
+    "fide-laws-2023-pdf"
+  ],
+  "source_confidence": "high",
+  "recognition": {
+    "preconditions": [
+      "The immediately preceding move was an enemy pawn advancing two squares",
+      "A friendly pawn stands on an adjacent file, on the same rank as that pawn"
+    ],
+    "indicators_for": [
+      "The position's en-passant target square is set"
+    ],
+    "indicators_against": [
+      "Any other move has intervened since the two-square advance"
+    ],
+    "prerequisites": [],
+    "detector": "lib/matchers.js: en-passant",
+    "detectability": "mechanical",
+    "typical_confidence": "high",
+    "false_positive_traps": []
+  },
+  "application": {
+    "typical_plans": [],
+    "typical_moves": [],
+    "typical_pawn_structures": [],
+    "typical_piece_arrangements": [],
+    "tactical_consequences": [],
+    "strategic_consequences": []
+  },
+  "exceptions": [
+    "Cannot be deferred: the right is lost if not exercised immediately.",
+    "Like any move, it is illegal if it leaves or places one's own king in check."
+  ],
+  "limitations": [
+    "Affects repetition claims: see Art. 9.2.3.1 — two positions are not the same if, at the start of the sequence, a pawn could have been captured en passant.",
+    "Reported only when the capture is AVAILABLE. A FEN carries an en-passant target square whether or not any pawn can use it, and most that do are the second kind.",
+    "TYPICAL_CONFIDENCE RAISED medium -> high, 2026-09-02, and the reason is the schema's own definition of the field: 'how confidently this concept can normally be asserted ONCE ITS PRECONDITIONS HOLD'. This concept's recognition is MECHANICAL and its knowledge type already carries a high ceiling, so once the preconditions hold there is nothing left to be uncertain about - a stalemate is a stalemate, and a fork this base reports is one findMotifs() found, which ARCHITECTURE.md makes the authority and forbids second-guessing. 'Medium' was the default across 32 rule and motif records regardless of detectability, and it was found by measuring what the API reports against what each record permits: twelve concepts were reporting ABOVE their own record. The fix was to make each record its own ceiling in cap(), which then required the records that were wrong to be corrected rather than silently overruled."
+  ],
+  "misconceptions": [],
+  "relationships": {
+    "broader": [],
+    "narrower": [],
+    "related": [
+      "threefold-repetition"
+    ],
+    "contrasting": [],
+    "co_occurring": [],
+    "conflicts": []
+  },
+  "examples": [
+    {
+      "fen": "r1b2bnr/ppNnpk1p/2p3p1/3p4/3P1B2/2P5/P3QPPP/qN2KB1R w K - 2 12",
+      "note": "the position carries an en-passant target square, so the capture is legally available for exactly this one move. This is a DEFINITIONAL example: the feature is present by the rules of chess and by the page's own move generator, which is the whole of what needs verifying. No engine was consulted, because no engine is needed to establish that a legal move exists. Provenance: the puzzle corpus is engine self-play — a real position from a real game between engines, not a master game.",
+      "origin_kind": "puzzle",
+      "concept_role": "supports",
+      "side_to_move_benefits": "neither"
+    },
+    {
+      "fen": "8/8/8/3pP3/8/8/8/4K2k w - d6 0 2",
+      "note": "The same pawns, and the en-passant target square present: exd6 is legal and wins. The positive half of a pair whose only difference is one FEN field, which is the point - the right exists for exactly one move and cannot be read off the picture.",
+      "origin_kind": "constructed-test",
+      "concept_role": "supports",
+      "side_to_move_benefits": "white",
+      "controlled_pair_with": "8/8/8/3pP3/8/8/8/4K2k w - - 0 2",
+      "tablebase": {
+        "source": "Lichess tablebase (Syzygy, 7-piece)",
+        "pieces": 4,
+        "wdl": "win",
+        "dtz": 1,
+        "dtm": 19,
+        "category": "win",
+        "checkmate": false,
+        "stalemate": false,
+        "note": "PROVEN WIN at dtz 1 - the en-passant capture is the winning move. Without the right, the same board is a different game."
+      }
+    },
+    {
+      "fen": "8/3bk1p1/1p1p3p/2pPp1p1/p3P1P1/P1PK2PP/1P2B3/8 w - c6 0 39",
+      "move": "dxc6",
+      "move_uci": "d5c6",
+      "origin_kind": "historical-game",
+      "game": "Marshall-Chigorin, Paris 1900",
+      "concept_role": "positive",
+      "side_to_move_benefits": "white",
+      "note": "A REAL GAME FOR A RULE, which sounds like a small thing and is not. Every other position on this record was constructed to show the rule, and a constructed position can show a rule that never comes up. Black has just played ...c7-c5 past White's d5 pawn, and the capture on c6 is available on this move and no other - the FEN carries `c6` as its en-passant target, which is the rule's one-move window written into the position itself.\n\nFound by tools/harvest_games.js walking the quiet positions of replayed master games and asking the API what it licenses. It is reported at HIGH confidence, which is right: this is not a judgement, it is a legal fact, and the matcher checks that the capture is actually AVAILABLE rather than that the FEN carries a target square - a FEN carries one whether or not anything can use it.\n\nPROVENANCE. The move list replayed legally through the page's own move generator. No annotator read; this grounds the MASTER-GAME rung and not the human-grounded one."
+    }
+  ],
+  "counterexamples": [
+    {
+      "fen": "8/8/8/3pP3/8/8/8/4K2k w - - 0 2",
+      "note": "A white pawn on e5 beside a black pawn on d5, and no en-passant capture available - because the d-pawn did not arrive there last move. The geometry is identical to the position where exd6 is legal and the difference is one field of the FEN. This record's indicator_against says it: 'any other move has intervened since the two-square advance.' The right to capture en passant exists for exactly one move and this base reads it from the target square rather than from the picture.",
+      "origin_kind": "constructed-test",
+      "concept_role": "negative",
+      "side_to_move_benefits": "neither",
+      "controlled_pair_with": "8/8/8/3pP3/8/8/8/4K2k w - d6 0 2"
+    },
+    {
+      "fen": "4k3/8/8/3pP3/8/8/8/4K3 w - - 0 1",
+      "note": "Registered false-positive case `an-en-passant-window-that-has-closed`, kept on the record as well as in tests/false_positive_cases.json so that the concept carries its own negative evidence. THE SURFACE PATTERN IS PRESENT: A white pawn on e5 stands beside a black pawn on d5. That is the picture of an en-passant capture and it is the position the rule is drawn in every textbook. WHY IT IS NOT THE CONCEPT: This record's only indicator_against: \"Any other move has intervened since the two-square advance.\" The right to capture lasts exactly one move, and the FEN records that in one field. WHAT THE SYSTEM DOES: Two FENs, one character apart. With the en-passant field set to `-`, this base's move generator produces six legal moves and none of them is exd6. With the field set to `d6` it produces seven, and the seventh is exd6. The board is identical in both. This is the sharpest available illustration of the `notation` record's third trap — 'a FEN without the castling, en passant and clock fields is not a position, it is a picture of one' — and of why en-passant cannot be read off a diagram.",
+      "origin_kind": "constructed-test",
+      "concept_role": "negative",
+      "false_positive_case": "an-en-passant-window-that-has-closed"
+    }
+  ],
+  "ambiguous_examples": [],
+  "explanations": {
+    "by_level": {
+      "beginner": "That pawn just jumped two squares past yours, so you may take it as if it had only moved one — but only right now.",
+      "intermediate": "En passant: the two-square advance does not let a pawn slip past an adjacent enemy pawn. The capture is available on this move only.",
+      "advanced": "En passant capture (Art. 3.7.3). Note it also affects position identity for repetition claims under Art. 9.2.3.1."
+    },
+    "by_depth": {
+      "short": "A pawn that just advanced two squares may be taken as though it had advanced one — this move only.",
+      "normal": "En passant: when a pawn advances two squares and lands beside an enemy pawn, that pawn may capture it as if it had moved one square. The right lasts exactly one move and then disappears.",
+      "deep": "FIDE Art. 3.7.3. The one-move window is why the right is part of the POSITION rather than of the board: two identical arrangements of men are different positions if one carries an en-passant target and the other does not, which Art. 9.2.3.1 makes explicit for repetition claims. This base's registered case is two FENs one character apart — with the field set to `-` the move generator gives six legal moves and none of them is the capture; with it set, seven."
+    },
+    "hedge": "",
+    "lesson": ""
+  },
+  "terminology": {
+    "beginner_words": [
+      "capture in passing",
+      "take it as it goes by"
+    ],
+    "advanced_words": [
+      "en passant",
+      "ep target square"
+    ],
+    "avoid": []
+  },
+  "status": {
+    "stage": "researched",
+    "last_updated": "2026-09-01",
+    "open_questions": [],
+    "audit_notes": [
+      "2026-09-01: detector field named 'epTarget', which does not exist anywhere in the codebase. The audit's hardcoded whitelist had been accepting it. Repointed at real code, or marked as proposed where nothing implements it."
+    ]
+  }
+}

@@ -1,0 +1,355 @@
+{
+  "schema_version": 2,
+  "alternate_names": [],
+  "historical_names": [],
+  "tags": [
+    "pawn-structure",
+    "imbalance",
+    "classical-vs-hypermodern",
+    "misunderstood"
+  ],
+  "subcategory": "pawn structure",
+  "difficulty": "beginner",
+  "knowledge_type_note": "Names a structural fact. Whether it is a weakness is a judgement, and the sources disagree sharply enough that the disagreement is part of the record.",
+  "name_status": "established-name",
+  "history": {
+    "attributions": [
+      {
+        "person": "Wilhelm Steinitz",
+        "relation": "originated-by",
+        "source": "britannica-chess-theory",
+        "year": null,
+        "note": "Britannica lists doubled pawns among the structural weaknesses named by Steinitz's theory. ATTRIBUTION NOT VERIFIED: this is the conventional ascription, taken from a secondary source, and no primary text was consulted for it during this research."
+      },
+      {
+        "person": "Aron Nimzowitsch",
+        "relation": "later-associated-with",
+        "source": "chessbio-doubled-pawns",
+        "year": 1925,
+        "note": "The hypermodern challenge to treating them as an objective weakness."
+      }
+    ],
+    "first_documented_source": "britannica-chess-theory",
+    "year": null,
+    "confidence": "low",
+    "notes": "A widely repeated Capablanca line — 'I would take doubled pawns if in return I may place my rook on the seventh rank' — is attached to this concept in one source, which itself prefaces it 'Legend has it'. It is NOT verified and must not be quoted as Capablanca's. Recorded here only so a later session does not rediscover it and assume it is sound.",
+    "competing_claims": [
+      "Classical school: doubled pawns are an objective weakness to be avoided.",
+      "Hypermodern school: dynamic compensation routinely outweighs the structural defect."
+    ],
+    "development": [
+      {
+        "era": "classical",
+        "change": "Treated as a defect to avoid.",
+        "source": "chessbio-doubled-pawns"
+      },
+      {
+        "era": "hypermodern",
+        "change": "Challenged; compensation in activity and files given equal standing.",
+        "source": "chessbio-doubled-pawns"
+      },
+      {
+        "era": "engine era",
+        "change": "Engines accept severe pawn defects for activity, which has moved practice towards the hypermodern view without settling it.",
+        "source": "chessbio-doubled-pawns"
+      }
+    ]
+  },
+  "engine_era_status": "historically-overstated",
+  "engine_era_note": "The classical assessment is the one engines have most clearly softened. Modern practice takes doubled pawns readily for the bishop pair or an open file. The one drawback engines still price heavily is the crippled majority — doubled pawns in a majority usually cannot make a passer, and that is an endgame fact rather than an opinion.",
+  "recognition": {
+    "preconditions": [
+      "Two or more friendly pawns occupy the same file"
+    ],
+    "indicators_for": [
+      "They are also isolated, so no pawn can ever defend them",
+      "They stand on a half-open file the opponent's rooks can use",
+      "They are in a majority, which therefore cannot produce a passer unaided",
+      "The square in front of the front pawn can be blockaded by an enemy piece",
+      "The position is simplifying towards an endgame"
+    ],
+    "indicators_against": [
+      "The doubling opened a file that is actually being used",
+      "The bishop pair was obtained in the exchange",
+      "They increase control of central squares",
+      "They create an outpost the opponent cannot contest",
+      "They shield the king rather than exposing it"
+    ],
+    "prerequisites": [],
+    "detector": "pawnStructure (not yet written)",
+    "detectability": "mechanical",
+    "typical_confidence": "low",
+    "false_positive_traps": [
+      "REGISTERED FALSE POSITIVE: doubled pawns are not automatically weak. Detecting them is trivial; concluding weakness from the detection is wrong often enough to be a real hazard.",
+      "The compensation is usually invisible to a structure check — the bishop pair and the opened file are elsewhere on the board.",
+      "Doubled CENTRAL pawns are frequently an asset, controlling four squares between them."
+    ]
+  },
+  "application": {
+    "typical_plans": [
+      "Against them: blockade the front pawn, double rooks on the file, and simplify",
+      "With them: use the opened file, play on the squares they control, and avoid endgames if the majority is crippled",
+      "Undouble by advancing and exchanging the front pawn when possible"
+    ],
+    "typical_moves": [
+      "bxc3 in the Nimzo-Indian, accepting the structure for the bishop pair"
+    ],
+    "typical_pawn_structures": [
+      "Nimzo-Indian c3/c4 doubled pawns",
+      "Doubled isolated pawns — the worst case",
+      "Rossolimo and Exchange Ruy structures where doubled pawns are inflicted deliberately"
+    ],
+    "typical_piece_arrangements": [
+      "Enemy knight blockading in front of the front pawn"
+    ],
+    "tactical_consequences": [],
+    "strategic_consequences": [
+      "A majority containing doubled pawns generally cannot make a passer unaided",
+      "The half-open file created is often the compensation"
+    ]
+  },
+  "exceptions": [
+    "Doubled central pawns frequently increase control and are an asset.",
+    "The exchange that doubles them often yields the bishop pair or a usable file, which is the whole point.",
+    "The recapture-towards-the-centre guideline has three standard exceptions: king shelter, a more useful file, and creating a chronic target."
+  ],
+  "limitations": [
+    "Recognition is trivial; evaluation is not, and the compensating factors are usually not in the pawn structure at all.",
+    "MEASURED 2026-09-02: the last two indicators_against are now said as well. 'They create an outpost the opponent cannot contest' is read as a hole the doubled pawns themselves defend, and 'they shield the king rather than exposing it' as a pair standing in front of their own king - the doubled f-pawns after ...gxf6 are the classic case, and a base that lists a structure without them invites exactly the conclusion this record's first trap forbids. All five of this record's indicators are now in the sentence; none of them is a guard, because doubled pawns are a fact."
+  ],
+  "misconceptions": [
+    "That doubled pawns are a weakness. They are a concession with a price attached, and the price is often worth paying.",
+    "That the Capablanca quotation about doubled pawns and the seventh rank is verified. It is not.",
+    "That they matter equally in middlegame and endgame. They mainly bite in the endgame.",
+    "That doubled pawns are a weakness. Measured here: inflicting them cost the inflicting side 0.34, and the side that accepted them is exactly equal."
+  ],
+  "relationships": {
+    "broader": [],
+    "narrower": [],
+    "related": [
+      "open-file",
+      "bishop-pair",
+      "passed-pawn",
+      "outpost"
+    ],
+    "contrasting": [],
+    "co_occurring": [
+      "open-file"
+    ],
+    "conflicts": []
+  },
+  "examples": [
+    {
+      "fen": "r1b2rk1/ppp1q1pp/2n1p3/5PN1/2Bp2Q1/P7/P1PP1P1P/R1B2RK1 b - - 2 12",
+      "note": "The feature is present and was verified mechanically by lib/features.js: White has doubled pawns and 4 pawn islands. The engine puts the position at -0.23, close enough to level that the feature is not being swamped by tactics — so this is usable as an instance of the concept. What is NOT claimed is that the concept explains the engine's move. Provenance: mined from this repository's puzzle corpus, which is engine self-play — a real position from a real game between engines, not a master game.",
+      "origin_kind": "puzzle",
+      "concept_role": "supports",
+      "side_to_move_benefits": "neither",
+      "engine": {
+        "engine_id": "Stockfish 18",
+        "test_level": 2,
+        "depth": 20,
+        "threads": 8,
+        "hash_mb": 2048,
+        "multipv": 2,
+        "best_move": "c6e5",
+        "eval_cp": -23,
+        "mate_in": null,
+        "pv": [],
+        "alternatives": [
+          {
+            "move": "h7h6",
+            "eval_cp": -379,
+            "mate_in": null
+          }
+        ],
+        "margin_cp": 0,
+        "verdict": "supports",
+        "verdict_note": "Level-2 validation: the position was scored, not designed. It confirms the feature is present in real play and, where the score is near level, that the feature is not drowned out. It is not a controlled pair and proves nothing about the concept on its own."
+      }
+    },
+    {
+      "fen": "4r1k1/1b3pb1/pq4pp/3pr3/3p4/1P1B2P1/P2N1P1P/2RQR1K1 w - - 0 31",
+      "game": "Kotov-Petrosian, Candidates, Zurich 1953",
+      "note": "A QUIET position from a master game — after Rxe5, ply 60 — in which Black has doubled pawns on d5, d4. Quiet here has a mechanical meaning: the side to move has no check and no capture that wins material, so the next move has to be chosen on positional grounds. That matters because this base's other corpus is 788 tactical puzzles, in which a positional feature cannot be isolated.\n\nWHAT IS VERIFIED: the game replays legally end to end through the page's own move generator, so the FEN is derived rather than transcribed; and the feature is present by mechanical measurement in lib/features.js.\n\nWHAT IS NOT CLAIMED: that the concept decides this position, or that the players were thinking about it. Note also a limitation of method — the position was FOUND by this system's own Layer 4, so it demonstrates the concept and cannot by itself validate the matcher that found it. Other concepts licensed here: passed-pawn, isolated-queen-pawn, bishop-pair, open-file.",
+      "origin_kind": "historical-game",
+      "concept_role": "supports",
+      "side_to_move_benefits": "neither"
+    },
+    {
+      "fen": "r4rk1/2pp1ppp/6q1/1pP1n3/4bP1P/PR5B/2P2Q2/1N2K2R w K - 2 28",
+      "note": "White has doubled pawns on c5, c2 and 4 islands, without the bishop pair as compensation. The position has no check available, so the next move must be chosen on positional grounds. CORRECTED 2026-09-02: this note used to say the position was QUIET by mechanical test, with \"no capture that wins material\" as half of the test. That half had never run - quietness() passed a move object where see() expects a square index, so winningCapturesAvailable was always zero, and every note written from it claimed something untested. Re-checked with the fixed test, this position DOES have a capture that wins material, so the quiet claim is withdrawn; the concept it illustrates is unaffected, and the position is kept rather than quietly dropped. That is the property this base's tactical corpus almost never has. Found by tools/prospect.js, which searches 1576 real positions for a concept's feature and scores quiet positions far higher. Provenance: the puzzle corpus is engine self-play — a real position from a real game between engines, not a master game.",
+      "origin_kind": "puzzle",
+      "concept_role": "supports",
+      "side_to_move_benefits": "neither",
+      "engine": {
+        "engine_id": "Stockfish 18",
+        "test_level": 2,
+        "depth": 20,
+        "threads": 8,
+        "hash_mb": 2048,
+        "multipv": 2,
+        "best_move": "h1g1",
+        "eval_cp": 101,
+        "mate_in": null,
+        "pv": [],
+        "alternatives": [
+          {
+            "move": "b3g3",
+            "eval_cp": -312,
+            "mate_in": null
+          }
+        ],
+        "margin_cp": 0,
+        "verdict": "supports",
+        "verdict_note": "Quiet and close to balanced at 1.01, which is the combination this base most needs and least often finds: nothing forcing is available and the evaluation is not swamping the feature, so the position is usable as an instance of the concept. What is NOT claimed is that the concept explains the engine's choice of move."
+      }
+    },
+    {
+      "fen": "8/1p1k2p1/3bp2p/r3p3/p1RpP3/P2N1PPP/1P3K2/8 b - - 2 31",
+      "game": "Petrosian-Keres, Candidates, Zurich 1953",
+      "note": "A quiet position from a master game — after Kf2, ply 61 — where Black has doubled pawns on e6, e5. Quiet has a mechanical meaning here: the side to move has no check and no capture that wins material, so the next move must be chosen positionally. VERIFIED: the game replays legally end to end through the page's own move generator, and the feature is measured by lib/features.js. NOT CLAIMED: that the concept decides this position, or that the players were thinking about it. Method note: the position was found by this system's own Layer 4, so it illustrates the concept and cannot by itself validate the matcher that found it. Other concepts licensed here: passed-pawn, open-file, weak-square, material-imbalance.",
+      "origin_kind": "historical-game",
+      "concept_role": "supports",
+      "side_to_move_benefits": "neither"
+    }
+  ],
+  "counterexamples": [
+    {
+      "fen": "r1bqkbnr/1pp2ppp/p1p5/4p3/4P3/5N2/PPPP1PPP/RNBQK2R w KQkq - 0 5",
+      "note": "The Ruy Lopez Exchange Variation after 4.Bxc6 dxc6. Black has doubled c-pawns and the bishop pair. Constructed-test, built from the standard move order.",
+      "origin_kind": "constructed-test",
+      "concept_role": "contradicts",
+      "side_to_move_benefits": "neither",
+      "engine": {
+        "engine_id": "Stockfish 18",
+        "test_level": 3,
+        "depth": 26,
+        "threads": 10,
+        "hash_mb": 2048,
+        "multipv": 3,
+        "best_move": "e1g1",
+        "eval_cp": 0,
+        "mate_in": null,
+        "pv": [],
+        "alternatives": [
+          {
+            "move": "b1c3",
+            "eval_cp": -3,
+            "mate_in": null
+          },
+          {
+            "move": "d2d3",
+            "eval_cp": -20,
+            "mate_in": null
+          }
+        ],
+        "margin_cp": 0,
+        "verdict": "contradicts",
+        "verdict_note": "Doubled pawns without a disadvantage. Black has just accepted doubled c-pawns and the position is dead level at 0.00. Stronger still, the SAME engine run that produced this shows what inflicting them cost: in the position one move earlier, 4.Bxc6 evaluates +0.08 against +0.42 for the simple retreat 4.Ba4 - so giving the opponent doubled pawns was worth MINUS 0.34 to White. The doubling is paid for by the bishop pair and the half-open d-file, and this base will not report doubled pawns as a weakness without evidence in the specific position."
+      }
+    },
+    {
+      "fen": "r2qkb1r/1pp2ppp/p1n1p3/3P4/4Q1n1/2N2P2/PPPP1P1P/R1B1KB1R b KQkq - 3 9",
+      "note": "The feature is present and was verified mechanically by lib/features.js: White has doubled pawns AND the bishop pair — the compensation the concept names. The engine puts the position at 0.87, close enough to level that the feature is not being swamped by tactics — so this is usable as an instance of the concept. What is NOT claimed is that the concept explains the engine's move. Provenance: mined from this repository's puzzle corpus, which is engine self-play — a real position from a real game between engines, not a master game.",
+      "origin_kind": "puzzle",
+      "concept_role": "contradicts",
+      "side_to_move_benefits": "neither",
+      "engine": {
+        "engine_id": "Stockfish 18",
+        "test_level": 2,
+        "depth": 20,
+        "threads": 8,
+        "hash_mb": 2048,
+        "multipv": 2,
+        "best_move": "g4f6",
+        "eval_cp": 87,
+        "mate_in": null,
+        "pv": [],
+        "alternatives": [
+          {
+            "move": "g4f2",
+            "eval_cp": -324,
+            "mate_in": null
+          }
+        ],
+        "margin_cp": 0,
+        "verdict": "contradicts",
+        "verdict_note": "Level-2 validation: the position was scored, not designed. It confirms the feature is present in real play and, where the score is near level, that the feature is not drowned out. It is not a controlled pair and proves nothing about the concept on its own."
+      }
+    }
+  ],
+  "ambiguous_examples": [
+    {
+      "fen": "r3r1k1/2p2pbp/2pp2p1/8/P1q1P3/2N2P2/1PPQ2PP/1R1R2K1 b - - 2 22",
+      "note": "Nimzowitsch-Capablanca, St Petersburg preliminary 1914, Reb8. Human ground truth: the concept is named for this position by Chess.com's reference page on doubled pawns, corroborated independently by WGM Sgircea and IM Castellanos. Corpus entry `nimzowitsch-capablanca-1914-22Reb8-doubled-pawns`. This is the standard textbook illustration that the feature and the verdict are two different things, and it is an AMBIGUOUS example rather than a negative one for exactly that reason. Capablanca's c6 and c7 pawns are doubled - the detector is right to say so, and this base's own wording already refuses to go further ('Doubled pawns are a price, not a verdict. Ask what was boug",
+      "origin_kind": "historical-game",
+      "game": "Nimzowitsch-Capablanca, St Petersburg preliminary 1914",
+      "concept_role": "ambiguous",
+      "engine": {
+        "engine_id": "Stockfish 18",
+        "test_level": 3,
+        "depth": 22,
+        "multipv": 3,
+        "best_move": "Reb8",
+        "eval_cp": 107,
+        "verdict": "ambiguous",
+        "verdict_note": "fully. 22...Reb8 is the engine's first choice at depth 22 and it puts Black at +1.07 - the side with the structural defect is more than a pawn better, and the move that presses the file is the best move on the board by 0.64."
+      },
+      "attributed_by": "Chess.com's reference page on doubled pawns, corroborated independently by WGM Sgircea and IM Castellanos — corpus entry nimzowitsch-capablanca-1914-22Reb8-doubled-pawns"
+    }
+  ],
+  "explanations": {
+    "by_level": {
+      "beginner": "Two of your pawns are on the same file. They cannot protect each other, but the trade that put them there often gave you something in return.",
+      "intermediate": "Doubled pawns on the {file}-file. Ask what the exchange bought — a file, the bishop pair, central control — before calling them a weakness.",
+      "advanced": "Structural concession. The concrete drawback is the crippled majority; the compensation is usually the half-open file or the bishop pair. They bite mainly in the endgame.",
+      "master": "Price them by the majority. Doubled pawns in a majority that can no longer produce a passer is a real, permanent, endgame-deciding defect; doubled central pawns with an open file beside them frequently are not."
+    },
+    "by_depth": {
+      "short": "Two pawns on the {file}-file — they cannot defend each other.",
+      "normal": "Doubled pawns: two friendly pawns on one file. They cannot defend each other and the rear one is blocked, but the capture that created them usually bought something — a file, the bishop pair, or central control.",
+      "deep": "Two pawns on the same file, normally after a capture. Three real drawbacks: they cannot defend each other, the rear one is blocked, and a majority containing them usually cannot manufacture a passed pawn — which is the one engines still price heavily, because it decides endgames. Against that sit the standard compensations of an opened file, the bishop pair, extra central control and new outposts. This is a genuine disagreement between schools rather than an unsettled definition: the classical view treated them as an objective defect, the hypermoderns held that dynamics outweigh structure, and modern practice has moved towards the second without settling it."
+    },
+    "hedge": "",
+    "lesson": "Doubled pawns are a price, not a verdict. Ask what was bought with them — and check whether the majority they sit in can still make a passer."
+  },
+  "terminology": {
+    "beginner_words": [
+      "two pawns on the same line"
+    ],
+    "advanced_words": [
+      "doubled pawns",
+      "crippled majority",
+      "half-open file",
+      "bishop pair",
+      "blockade"
+    ],
+    "avoid": [
+      "doubled pawns are weak",
+      "always avoid doubled pawns"
+    ]
+  },
+  "status": {
+    "stage": "researched",
+    "last_updated": "2026-09-01",
+    "open_questions": [],
+    "audit_notes": [
+      "2026-09-01 audit: attribution to Wilhelm Steinitz carried low confidence without a hedge in the note itself. Hedge added so the caveat travels with the claim rather than sitting only in history.confidence."
+    ]
+  },
+  "id": "doubled-pawns",
+  "canonical_name": "Doubled pawns",
+  "category": "pawn-structures",
+  "knowledge_type": "positional-concept",
+  "definition_short": "Two friendly pawns on the same file, usually after a capture. A structural concession that is frequently worth its price.",
+  "definition_long": "Two pawns of one colour on the same file. They cannot defend each other, because pawns defend diagonally; the rear pawn is blocked by the front one; and a majority containing doubled pawns usually cannot produce a passed pawn without help, which is the most concrete of the drawbacks and the one that decides endgames.\n\nBut the capture that doubles them almost always pays for something. The standard compensations: an opened or half-opened file for a rook, the bishop pair, extra control of central squares (doubled c-pawns on c3 and c4 both bear on d4 and d5), and the outposts that the new structure creates. The Nimzo-Indian 4...Bxc3+ 5.bxc3 is the classic bargain — White takes the doubled c-pawns and gets the bishop pair, a half-open b-file and a broader centre.\n\nTHIS IS A GENUINE SCHOOL DISAGREEMENT, not vagueness. The classical school (Steinitz, Tarrasch) treated doubled pawns as an objective defect to be avoided. The hypermoderns, Nimzowitsch above all, argued that dynamic factors routinely outweigh static structure. Modern engines side with neither absolutely, and will accept severe pawn defects for activity.\n\nThe practical form of the question is almost never 'should I allow doubled pawns' but 'which pawn should I recapture with', and the general answer — recapture towards the centre — has well-known exceptions: not when it tears open your own king's shelter, not when the other capture opens a file you can actually use, and not when it creates a chronic weakness on a file your opponent controls.",
+  "sources": [
+    "thechessworld-doubled-pawns",
+    "oldschoolchess-doubled-pawns",
+    "chessbio-doubled-pawns",
+    "britannica-chess-theory",
+    "zurich-1953-games"
+  ],
+  "source_confidence": "medium"
+}

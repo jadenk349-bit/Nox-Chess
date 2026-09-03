@@ -1,0 +1,302 @@
+{
+  "schema_version": 2,
+  "alternate_names": [
+    "Makogonov's rule",
+    "the principle of the worst piece",
+    "Fischer's rule",
+    "Anderssen's rule"
+  ],
+  "historical_names": [],
+  "tags": [
+    "positional",
+    "piece-activity",
+    "disputed-attribution"
+  ],
+  "subcategory": "positional method",
+  "difficulty": "intermediate",
+  "knowledge_type_note": "Typed a rule of thumb rather than a principle for a specific reason: both of its earliest formulations contain an explicit precondition, so the rule was never stated unconditionally by the people credited with it.",
+  "name_status": "established-name",
+  "history": {
+    "attributions": [
+      {
+        "relation": "originated-by",
+        "person": "Adolf Anderssen",
+        "year": null,
+        "note": "Credited by GM Serper as the first formulation, and it is the one that already contains the exception.",
+        "confidence": "medium"
+      },
+      {
+        "relation": "named-by",
+        "person": "Adrian Mikhalchishin",
+        "year": null,
+        "note": "Calls it Makogonov's rule and supplies the Makogonov quotation.",
+        "confidence": "medium"
+      },
+      {
+        "relation": "popularized-by",
+        "person": "Vladimir Makogonov",
+        "year": null,
+        "note": "The formulation most often quoted, with its precondition intact.",
+        "confidence": "medium"
+      },
+      {
+        "relation": "named-by",
+        "person": "Mark Dvoretsky",
+        "year": null,
+        "note": "Calls it 'the principle of the worst piece'.",
+        "confidence": "medium"
+      },
+      {
+        "relation": "later-associated-with",
+        "person": "Bobby Fischer",
+        "year": null,
+        "note": "Botvinnik called it 'Fischer's rule', though Fischer never stated it - the association rests on his games rather than on anything he wrote.",
+        "confidence": "low"
+      }
+    ],
+    "first_documented_source": "serper-positional-secret",
+    "year": null,
+    "confidence": "disputed",
+    "notes": "One rule, four names, and no settled attribution. Anderssen appears earliest, Makogonov supplies the standard wording, Dvoretsky supplies the standard name, and Botvinnik attached Fischer's name to a rule Fischer never stated. All five attributions reach this base through a single secondary source - a Chess.com article by GM Serper - and none has been verified at primary source, which is why the confidence is recorded as disputed rather than medium.",
+    "competing_claims": [
+      {
+        "claim": "Anderssen's rule",
+        "source": "serper-positional-secret",
+        "note": "Serper's own view: 'I think the great Adolf Anderssen was first.'"
+      },
+      {
+        "claim": "Makogonov's rule",
+        "source": "serper-positional-secret",
+        "note": "Mikhalchishin's name for it."
+      },
+      {
+        "claim": "Fischer's rule",
+        "source": "serper-positional-secret",
+        "note": "Botvinnik's name for it, though Fischer never explicitly stated the rule."
+      },
+      {
+        "claim": "The principle of the worst piece",
+        "source": "serper-positional-secret",
+        "note": "Dvoretsky's name for it."
+      }
+    ],
+    "development": []
+  },
+  "engine_era_status": "reliable",
+  "engine_era_note": "Broadly confirmed in spirit - engines readily play quiet repositioning moves that improve the least active piece - but engines also expose the priority problem sharply, since they will abandon a piece-improvement plan instantly for a concrete idea a human would not see.",
+  "recognition": {
+    "preconditions": [
+      "No forcing sequence or urgent threat demands attention",
+      "One piece is clearly doing less than the others"
+    ],
+    "indicators_for": [
+      "A piece with no available useful squares",
+      "A piece blocking its own side's plan",
+      "A rook on a closed file with nothing to do",
+      "A bishop shut in behind its own pawns"
+    ],
+    "indicators_against": [
+      "The opponent has a concrete threat that must be met",
+      "A forcing line is available that decides matters",
+      "The opponent is building an initiative that a quiet move would concede"
+    ],
+    "prerequisites": [
+      "piece-activity"
+    ],
+    "detector": null,
+    "detectability": "heuristic",
+    "typical_confidence": "medium",
+    "false_positive_traps": [
+      "The rule's precondition is the load-bearing part and is usually dropped in quotation. Anderssen says 'unless you can derive immediate advantage by an attack' and Makogonov says 'in positions where no other important matters need to be considered'. Without those, it is not the rule they stated.",
+      "Improving pieces while the opponent builds an initiative produces individually reasonable moves and a collectively lost position. This is the commonest way the rule is misapplied.",
+      "Identifying the worst piece is a judgement, not a measurement. This system has no reliable detector for it and must not claim one."
+    ]
+  },
+  "application": {
+    "typical_plans": [
+      "Find the piece doing least and give it a route to a better square",
+      "Trade the worst piece for one of the opponent's best",
+      "Reposition rather than advance when the position offers no concrete target"
+    ],
+    "typical_moves": [
+      "Quiet rook lifts to a file that may open",
+      "Bishop redeployments along a longer diagonal",
+      "Knight manoeuvres of two or three moves towards an outpost"
+    ],
+    "typical_pawn_structures": [],
+    "typical_piece_arrangements": [
+      "A piece with no useful squares available"
+    ],
+    "tactical_consequences": [],
+    "strategic_consequences": [
+      "Positional strength accumulates through the least active piece, which is where the cheapest improvement lies"
+    ]
+  },
+  "exceptions": [
+    "Anderssen's own exception: when immediate advantage is available from an attack.",
+    "Makogonov's own precondition: only where no other important matters need consideration.",
+    "When the opponent has counterplay, quiet improvement concedes the initiative."
+  ],
+  "limitations": [
+    "The rule does not establish priority, which is the hard part of positional play and what it is most often asked to supply.",
+    "Every attribution here rests on one secondary source and none is verified at primary source.",
+    "MEASURED 2026-09-02: the first trap - Anderssen's 'unless you can derive immediate advantage by an attack' and Makogonov's 'in positions where no other important matters need to be considered' - is built as far as a static test reaches: the move must not be a capture or a check, the side must not be in check, and the position after it must leave the opponent no winning capture. What is NOT built is 'no other important matters', which is the judgement the record's third trap says this base must not claim, and it does not: it reports that a move raised the scope of the least active piece, at low confidence, and never which piece is worst."
+  ],
+  "misconceptions": [
+    "That the rule is unconditional. Neither of its earliest formulations states it that way.",
+    "That the worst piece is always the one to move. It is the default when nothing else is asking to be done.",
+    "That Fischer formulated it. Botvinnik named it after him; Fischer never stated it."
+  ],
+  "relationships": {
+    "broader": [],
+    "narrower": [],
+    "related": [
+      "piece-activity",
+      "piece-exchanges",
+      "positional-evaluation",
+      "planning",
+      "prophylaxis",
+      "bad-bishop",
+      "outpost"
+    ],
+    "contrasting": [],
+    "co_occurring": [
+      "piece-activity"
+    ],
+    "conflicts": [
+      {
+        "concept": "initiative",
+        "resolution": "The rule yields. Both original formulations say so explicitly - Anderssen excepts an immediate attacking advantage and Makogonov requires that nothing more important is going on. Where the opponent has counterplay, spending moves on quiet improvement is how the advantage is lost."
+      }
+    ]
+  },
+  "examples": [
+    {
+      "fen": "r1r3k1/p2n1ppp/2p1b3/1q1p4/N2Q4/5PP1/PP2PR1P/2R2BK1 w - - 4 20",
+      "move": "e3",
+      "move_uci": "e2e3",
+      "note": "Rubinstein-Salwe, Lodz 1908, 20.e3 - the annotated instance of this concept, and the position the matcher's second version was built against. The annotation lists what one quiet pawn move does: 'it gains a tempo by attacking Black's queen, opens a diagonal for the bishop, and clears the second rank so the rook can swing from f2 to c2'. The two pieces improved are the two doing least. The condition the record insists on is satisfied exactly - nothing urgent is happening - and it is worth noting that the move ALSO gains a tempo, which is why an earlier version of the matcher that demanded a fully quiet position missed this position entirely.",
+      "origin_kind": "historical-game",
+      "game": "Rubinstein-Salwe, Lodz 1908",
+      "concept_role": "positive",
+      "attributed_by": "Nicholas Van Der Nat (Chess.com), following the classical literature - corpus entry rubinstein-salwe-1908-20e3-improving",
+      "engine": {
+        "engine_id": "Stockfish 18",
+        "test_level": 3,
+        "depth": 22,
+        "threads": 10,
+        "hash_mb": 4096,
+        "multipv": 3,
+        "best_move": "e2e3",
+        "eval_cp": 31,
+        "mate_in": null,
+        "pv": [],
+        "alternatives": [],
+        "margin_cp": null,
+        "verdict": "supports",
+        "verdict_note": "+0.31 and the annotated move is the engine's FIRST choice on a three-line search. A clean agreement between a century-old annotation and a modern engine, and a small number - a third of a pawn, for the move the literature calls instructive, which is the right size for a principle about accumulating."
+      }
+    }
+  ],
+  "counterexamples": [
+    {
+      "fen": "4r1k1/5ppp/8/8/8/8/5PPP/N5K1 w - - 0 1",
+      "move_uci": "a1b3",
+      "note": "Registered false-positive case `improving-a-piece-into-mate`, kept on the record as well as in tests/false_positive_cases.json so that the concept carries its own negative evidence. THE SURFACE PATTERN IS PRESENT: The knight on a1 is beyond argument the worst-placed piece on the board: it has two moves and bears on nothing. Nb3 improves it, the move is quiet, nothing is hanging, and no check is available. Every condition this matcher tests is satisfied. WHY IT IS NOT THE CONCEPT: This record's second trap: \"Improving pieces while the opponent builds an initiative produces individually reasonable moves and a collectively lost position. This is the commonest way the rule is misapplied.\" And its first indicator_against: \"The opponent has a concrete threat that must be met.\" Black plays Re1 mate. WHAT THE SYSTEM DOES: Reported as an instance of the rule until a guard was written, and it is the textbook illustration of misapplying it. The matcher already tested the material half of the trap — it refuses when the move leaves a winning capture available — and the sharpest concrete threat there is leaves no material on the floor to detect: the move generator says Black's only mate is e8e1, and Stockfish 18 agrees at depth 20 with #1. The guard is mate in ONE and no further, because whether a threat two moves out 'must be met' is a judgement and this record's third trap is that identifying the worst piece is a judgement this system must not claim to make. A mate the move generator can enumerate is not a judgement. worst-placed-piece fell from 8.4% to 4.1%, and Rubinstein–Salwe 1908 move 20 — the corpus's own annotated instance — still validates.",
+      "origin_kind": "constructed-test",
+      "concept_role": "negative",
+      "engine": {
+        "engine_id": "Stockfish 18",
+        "test_level": 3,
+        "depth": 20,
+        "threads": 10,
+        "hash_mb": 4096,
+        "multipv": 1,
+        "best_move": "e8e1",
+        "eval_cp": null,
+        "mate_in": 1,
+        "pv": [],
+        "alternatives": [],
+        "margin_cp": null,
+        "verdict": "supports",
+        "verdict_note": "#1. The move generator enumerates Black's only mate as e8e1 and the engine agrees. This is the sharpest form of 'the opponent has a concrete threat that must be met' and it leaves no material on the floor for a material test to find."
+      },
+      "false_positive_case": "improving-a-piece-into-mate"
+    }
+  ],
+  "ambiguous_examples": [
+    {
+      "fen": "rnq2bnr/pp2pk2/2p3p1/3pPpPp/3P1B1P/2PQ3N/PP1N1P2/2KR3R b - - 1 14",
+      "move": "Nd7",
+      "move_uci": "b8d7",
+      "note": "Nominated by tools/mine_ambiguous.js on its fourth ground, NOT-THE-MOVE: the concept fires on a legal move that is not the solution of a shipped puzzle. The first three grounds ask about a POSITION and could not reach a move-based or motif concept at all - this concept and eleven others reported NONE until the tool learned to supply a move. What makes the case ambiguous rather than false is that nothing reported is absent: the knight on b8 is the worst-placed piece Black owns and ...Nd7 improves it, in a position with no check against Black and nothing hanging - every condition this matcher tests. This record's own second indicator_against is the one that fires here: 'a forcing line is available that decides matters'. It is ...e6, and it is worth three pawns more. The rule is correctly applied and correctly applied is not the same as right.",
+      "origin_kind": "puzzle",
+      "concept_role": "ambiguous",
+      "engine": {
+        "engine_id": "Stockfish 18",
+        "test_level": 3,
+        "depth": 22,
+        "threads": 10,
+        "hash_mb": 4096,
+        "multipv": 2,
+        "best_move": "e7e6",
+        "eval_cp": -360,
+        "mate_in": null,
+        "pv": [],
+        "alternatives": [],
+        "margin_cp": null,
+        "verdict": "ambiguous",
+        "verdict_note": "...Nd7 scores -3.60 and ...e6, the solution, scores -0.49, both from Black's side. Black is worse either way, which is why this is the honest kind of example: the quiet improving move does not lose the game, it loses three pawns of the defence."
+      }
+    }
+  ],
+  "explanations": {
+    "by_level": {
+      "beginner": "If nothing urgent is happening, find the piece doing the least and give it something to do.",
+      "intermediate": "Improve your worst-placed piece - or trade it for one of their good ones. Two solutions to the same problem.",
+      "advanced": "Note the condition both original formulations carry: only when nothing more important is going on. The hard part is judging that.",
+      "master": "The rule does not supply priority, which is precisely what it is usually asked for."
+    },
+    "by_depth": {
+      "short": "When nothing urgent is happening, improve your worst piece.",
+      "normal": "Find the piece doing least and improve it - or exchange it for one of the opponent's best. It works because a position's strength is the sum of what its pieces do, so the cheapest improvement available is to the piece contributing least.",
+      "deep": "The most practical positional advice there is, and the one most often quoted without the condition its authors attached. Anderssen's version excepts the case where an attack yields immediate advantage; Makogonov's applies only 'in positions where no other important matters need to be considered'. The popular short form drops both, and the truncation is the source of the rule's commonest misuse - spending two or three moves improving pieces while the opponent builds an initiative, each move looking reasonable and the position already worse. The rule tells you what to do when nothing else is asking to be done; it does not tell you whether that is the case, and that judgement is the hard part of positional play."
+    },
+    "hedge": "Both original formulations are conditional, and the condition - that nothing more urgent is happening - is the part that decides whether the rule applies.",
+    "lesson": "The rule is what to do when there is nothing to do. Deciding whether that is true is the real work."
+  },
+  "terminology": {
+    "beginner_words": [
+      "the piece doing the least",
+      "give that piece a job"
+    ],
+    "advanced_words": [
+      "worst-placed piece",
+      "Makogonov's rule",
+      "repositioning",
+      "the principle of the worst piece"
+    ],
+    "avoid": [
+      "always improve your worst piece",
+      "Fischer's rule"
+    ]
+  },
+  "status": {
+    "stage": "researched",
+    "last_updated": "2026-09-01",
+    "open_questions": [],
+    "audit_notes": []
+  },
+  "id": "worst-placed-piece",
+  "canonical_name": "Improve your worst-placed piece",
+  "category": "worst-placed-piece",
+  "knowledge_type": "rule-of-thumb",
+  "definition_short": "When nothing more urgent is happening, find your worst-placed piece and improve it.",
+  "definition_long": "The most practical piece of positional advice there is, and the one most often quoted without the condition its own authors attached to it.\n\nTHE RULE, in the two earliest formulations found here, both of which are conditional:\n- ANDERSSEN: 'Move that one of your pieces, which is in the worst plight, UNLESS you can satisfy yourself that you can derive immediate advantage by an attack.'\n- MAKOGONOV, as quoted by Mikhalchishin: 'IN POSITIONS WHERE NO OTHER IMPORTANT MATTERS NEED TO BE CONSIDERED, one should identify one's worst-placed piece and bring it to a more active square.'\nBoth carry the exception inside the statement. The popular short form — 'improve your worst piece' — is a truncation, and this base treats the truncation as the source of the rule's most common misuse.\n\nWHY IT WORKS is that a position's strength is the sum of what its pieces are doing, so the cheapest available improvement is almost always to the piece doing least. It also turns positional play from something mysterious into something procedural: instead of searching for a plan, look for the unhappiest piece.\n\nTHE FAILURE MODE is priority, not correctness. A position usually contains several valid ideas at once, and improving pieces for two or three moves while the opponent builds an initiative elsewhere produces moves that each look reasonable and a position that is already worse. Principles do not establish which factor dominates — that is exactly what the preconditions in Anderssen's and Makogonov's own wordings are there to guard.\n\nTHE EXCHANGE COROLLARY is worth having alongside it: trade your worst pieces for the opponent's best. Improving a bad piece and trading it off are two solutions to the same problem.",
+  "sources": [
+    "serper-positional-secret",
+    "turzo-worst-piece-critique",
+    "thechessworld-planning"
+  ],
+  "source_confidence": "medium"
+}

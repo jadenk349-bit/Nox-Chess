@@ -1,0 +1,245 @@
+{
+  "schema_version": 2,
+  "alternate_names": [
+    "harmony",
+    "coordination"
+  ],
+  "historical_names": [],
+  "tags": [
+    "positional",
+    "pieces"
+  ],
+  "subcategory": "positional",
+  "difficulty": "advanced",
+  "knowledge_type_note": "A property of a whole position rather than of any single piece, which is why it is the hardest positional concept to detect or attribute to a move.",
+  "name_status": "established-name",
+  "history": {
+    "attributions": [
+      {
+        "relation": "later-associated-with",
+        "person": "Anatoly Karpov",
+        "year": null,
+        "note": "The standard exemplar; sources consistently identify coordination and manoeuvring as the defining and least imitable feature of his play.",
+        "confidence": "medium"
+      },
+      {
+        "relation": "systematized-by",
+        "person": "Mark Dvoretsky",
+        "year": 2016,
+        "note": "Devoted a book, Maneuvering: the Art of Piece Play, to finding the best squares for pieces when no forcing line or obvious plan exists. Known here from its description only, not read.",
+        "confidence": "low"
+      }
+    ],
+    "first_documented_source": "chessbase-karpov-coordination",
+    "year": null,
+    "confidence": "low",
+    "notes": "Ordinary positional vocabulary with no coinage traced. The named associations are to exemplars and treatments rather than to an origin.",
+    "competing_claims": [],
+    "development": []
+  },
+  "engine_era_status": "reliable",
+  "engine_era_note": "Engines coordinate pieces superbly and explain nothing about it, which makes this the concept where the gap between a correct move and an intelligible reason for it is widest. Translating an engine's quiet regrouping move into a human reason is close to the core problem this Education System exists to solve.",
+  "recognition": {
+    "preconditions": [
+      "Several pieces on the board with a shared or conflicting purpose"
+    ],
+    "indicators_for": [
+      "Pieces defending one another",
+      "Several pieces bearing on the same target or break",
+      "A move that vacates a square another piece wants",
+      "A regrouping that prepares a break requiring several pieces at once"
+    ],
+    "indicators_against": [
+      "Pieces obstructing each other",
+      "Pieces on opposite wings with unrelated purposes",
+      "A piece that must stay put to hold something together"
+    ],
+    "prerequisites": [
+      "piece-activity"
+    ],
+    "detector": null,
+    "detectability": "human-only",
+    "typical_confidence": "low",
+    "false_positive_traps": [
+      "This is the concept most easily misused as a label for any quiet move whose point is not understood. It must never be the default explanation when nothing else fits - saying nothing is better.",
+      "Individually well-placed pieces are not the same as coordinated pieces, and this is exactly the distinction the concept exists to make.",
+      "Coordination is a property of a position, so attributing it to a single move requires knowing what the move prepares - which usually requires the continuation, not the move alone."
+    ]
+  },
+  "application": {
+    "typical_plans": [
+      "Regroup so every piece supports the intended break",
+      "Move a piece off a square another piece needs more",
+      "Arrange the pieces harmoniously before committing to an operation"
+    ],
+    "typical_moves": [
+      "Knight retreats from an outpost that is no longer needed",
+      "Modest queen moves that free a file or diagonal",
+      "Rook transfers that connect two plans"
+    ],
+    "typical_pawn_structures": [],
+    "typical_piece_arrangements": [
+      "Pieces converging on one break or one target"
+    ],
+    "tactical_consequences": [
+      "Well-coordinated pieces generate tactics; uncoordinated ones are vulnerable to them"
+    ],
+    "strategic_consequences": [
+      "Coordination is what allows a plan to be executed at all"
+    ]
+  },
+  "exceptions": [
+    "In forcing positions coordination is subordinate to calculation.",
+    "A piece may correctly be left badly placed if moving it costs more than the disharmony does."
+  ],
+  "limitations": [
+    "The least detectable concept in this base: no mechanical signature, and a claim about the whole position rather than a move.",
+    "One of its sources is known only from a publisher description and has not been read.",
+    "No engine or tablebase validation exists for this concept, and none is currently designed.",
+    "No detector, per the record's human-only classification, and the corpus entries for it are scored as 'absent by design'. Two annotated master positions are recorded as human ground truth so that a later session which builds one has something to test it against."
+  ],
+  "misconceptions": [
+    "That coordination means every piece is on a good square. It means they work together, which is a different claim.",
+    "That a retreating or modest-looking move is passive. The characteristic coordinating move looks wrong in isolation."
+  ],
+  "relationships": {
+    "broader": [],
+    "narrower": [],
+    "related": [
+      "piece-activity",
+      "worst-placed-piece",
+      "prophylaxis",
+      "planning",
+      "overprotection",
+      "positional-evaluation",
+      "initiative"
+    ],
+    "contrasting": [],
+    "co_occurring": [
+      "piece-activity",
+      "prophylaxis"
+    ],
+    "conflicts": []
+  },
+  "examples": [
+    {
+      "fen": "r1b2rk1/p5pp/1pn1p3/3n1pN1/5B2/q1P1P3/P1Q1BPPP/1R1R2K1 w - f6 0 16",
+      "note": "Capablanca-Mattison, Karlsbad 1929, Bf3. Human ground truth: the concept is named for this position by Nicholas Van Der Nat (FM), following Irving Chernev's Logical Chess: Move by Move. Corpus entry `capablanca-mattison-1929-16Bf3-piece-coordination`, which carries the full annotation, the alternates the annotator rejected, and the engine's verdict. The concept record's hardest requirement is met here, which is why this position was chosen: 'attributing coordination to a single move requires knowing what the move prepares - which usually requires the continuation, not the move alone.' The continuation exists and is forced. The bishop steps from e2 to f3 so that it and the bishop on f4 rake two parallel diagonals into Black's position, and nin",
+      "origin_kind": "historical-game",
+      "game": "Capablanca-Mattison, Karlsbad 1929",
+      "concept_role": "positive",
+      "engine": {
+        "engine_id": "Stockfish 18",
+        "test_level": 3,
+        "depth": 22,
+        "multipv": 3,
+        "best_move": "Bf3",
+        "eval_cp": 248,
+        "verdict": "supports",
+        "verdict_note": "fully and by a wide margin. 16.Bf3 is the engine's first choice at depth 22 at +2.48, with the second-best move at +1.64 - a gap of 0.84 in a position with no capture and no check on the board. Coordination is classified human-only in its own record and has no detector in this base. The engine can confirm that the move is right; it cannot supply the word, and it was not asked to."
+      },
+      "attributed_by": "Nicholas Van Der Nat (FM), following Irving Chernev's Logical Chess: Move by Move — corpus entry capablanca-mattison-1929-16Bf3-piece-coordination"
+    },
+    {
+      "fen": "r2qr1k1/5ppp/p4n2/1pbP1bB1/1n6/N1N2B2/PP1Q1PPP/3R1RK1 b - - 1 16",
+      "note": "Karpov-Kasparov, World Championship match (game 16), Moscow 1985, Nd3. Human ground truth: the concept is named for this position by unattributed training page; used only for the coordination wording, and the position is independently corroborated. Corpus entry `karpov-kasparov-1985-g16-16Nd3-piece-coordination`, which carries the full annotation, the alternates the annotator rejected, and the engine's verdict. This is coordination read from the other side - what it looks like when an army loses it. One black knight on d3 is not attacking anything decisive; what it does is make every White piece's best square unavailable at once, and the proof is on the board at move 17, where a knight that had reached a3 goes home to b1. The concept record insists the concept is 'about the army, not the piece', and that",
+      "origin_kind": "historical-game",
+      "game": "Karpov-Kasparov, World Championship match (game 16), Moscow 1985",
+      "concept_role": "positive",
+      "engine": {
+        "engine_id": "Stockfish 18",
+        "test_level": 3,
+        "depth": 22,
+        "multipv": 3,
+        "best_move": "Qd6",
+        "eval_cp": 43,
+        "verdict": "supports",
+        "verdict_note": "on the position, not on the move, and both halves matter. 16...Nd3 is only the engine's third choice at depth 22 (+0.29 against +0.43 for 16...Qd6) - a spread of 0.14, which is not a disagreement about the plan. On White's reply the engine is blunter: after 16...Nd3 it wants 17.d6 and does not list the game's 17.Nab1 in its top three at all, which is exactly the human claim that White had no way to reorganise. Two searches: one from Black's move 16, one from White's move 17. The second is the one that tests the annotation's actual claim."
+      },
+      "attributed_by": "unattributed training page; used only for the coordination wording, and the position is independently corroborated — corpus entry karpov-kasparov-1985-g16-16Nd3-piece-coordination"
+    }
+  ],
+  "counterexamples": [
+    {
+      "fen": "4k3/8/8/8/8/8/8/R3K2R w KQ - 0 1",
+      "note": "Registered false-positive case `pieces-on-opposite-wings`, kept on the record as well as in tests/false_positive_cases.json so that the concept carries its own negative evidence. THE SURFACE PATTERN IS PRESENT: Two rooks and a king, all developed, none in each other's way, each with an open file. Nothing is badly placed and a reader looking for a name would reach for coordination. WHY IT IS NOT THE CONCEPT: This record's second indicator_against: \"Pieces on opposite wings with unrelated purposes.\" And its second trap: \"Individually well-placed pieces are not the same as coordinated pieces, and this is exactly the distinction the concept exists to make.\" WHAT THE SYSTEM DOES: The API reports open-file and piece-activity and does not report coordination, which is the right set of three answers. This record's first trap is the reason it has no matcher at all: \"This is the concept most easily misused as a label for any quiet move whose point is not understood. It must never be the default explanation when nothing else fits\" — so the concept is deliberately unreachable from the board, and this case exists to hold that decision in place rather than to test a guard.",
+      "origin_kind": "constructed-test",
+      "concept_role": "negative",
+      "false_positive_case": "pieces-on-opposite-wings"
+    }
+  ],
+  "ambiguous_examples": [
+    {
+      "fen": "r5r1/8/8/3k4/8/8/1B6/R3K2R w KQ - 0 1",
+      "note": "Every white piece is individually well placed - a bishop on the long diagonal, two rooks on open files, the king with both castling rights - and none of them is doing anything with any other. Black's two rooks face them from the eighth. This record's second trap is exactly this distinction: 'individually well-placed pieces are not the same as coordinated pieces, and this is exactly the distinction the concept exists to make.' Filed as ambiguous rather than negative because the pieces are not UNcoordinated either - nothing obstructs anything, no piece is tied down, and the second indicator_against ('pieces on opposite wings with unrelated purposes') is only half true. The concept applies and returns nothing, which is the state this record's first trap warns is most likely to be papered over with the word.",
+      "origin_kind": "constructed-test",
+      "concept_role": "ambiguous",
+      "engine": {
+        "engine_id": "Stockfish 18",
+        "test_level": 3,
+        "depth": 24,
+        "threads": 10,
+        "hash_mb": 4096,
+        "multipv": 1,
+        "best_move": "a1a8",
+        "eval_cp": 0,
+        "mate_in": null,
+        "pv": [],
+        "alternatives": [],
+        "margin_cp": null,
+        "verdict": "ambiguous",
+        "verdict_note": "Material is symmetric except for a bishop, and no arrangement question is being decided. The number is not the evidence here; the record's own definition is, and it says coordination is a property of pieces working TOGETHER, which is a claim no static reading of this position can settle either way."
+      }
+    }
+  ],
+  "explanations": {
+    "by_level": {
+      "beginner": "Your pieces should work together - defending each other and aiming at the same thing.",
+      "intermediate": "Coordination. Every piece can be on a decent square and the position still be badly coordinated, because they are not helping each other.",
+      "advanced": "The skill of quiet positions, where nobody has an active plan and whoever regroups better gets the advantage.",
+      "master": "The characteristic coordinating move looks strange in isolation, because its point is what it frees or prepares for other pieces."
+    },
+    "by_depth": {
+      "short": "Whether your pieces work together.",
+      "normal": "Piece coordination: how well the pieces support one another and one plan. It is a property of the whole army rather than of any piece, and a position can have every piece on a reasonable square and still be badly coordinated.",
+      "deep": "What distinguishes a good position from a collection of good squares. It is the skill of quiet positions - many middlegames reach an equilibrium where neither side has an active plan and the game turns on who regroups better - and it explains the class of move that looks wrong in isolation: a knight retreating from an outpost it no longer needs, a queen stepping to a modest square, correct because of what it frees or what it prepares. It is also the hardest concept here to detect, having no mechanical signature and being a claim about a whole position rather than about a move, which is why this record forbids using it as a default label for quiet moves whose point is not understood."
+    },
+    "hedge": "The least detectable concept in this base; it has no mechanical signature and must not be offered as a fallback explanation.",
+    "lesson": "Ask what the move does for the other pieces, not what it does for itself."
+  },
+  "terminology": {
+    "beginner_words": [
+      "your pieces working together",
+      "helping each other"
+    ],
+    "advanced_words": [
+      "coordination",
+      "harmony",
+      "regrouping",
+      "manoeuvring"
+    ],
+    "avoid": [
+      "good coordination (as a bare label)",
+      "the pieces are harmonious (with no reason given)"
+    ]
+  },
+  "status": {
+    "stage": "researched",
+    "last_updated": "2026-09-01",
+    "open_questions": [],
+    "audit_notes": []
+  },
+  "id": "piece-coordination",
+  "canonical_name": "Piece coordination",
+  "category": "piece-coordination",
+  "knowledge_type": "positional-concept",
+  "definition_short": "How well the pieces work together - whether they support one plan and one another, rather than each being individually well placed.",
+  "definition_long": "The property that distinguishes a good position from a collection of good squares. Coordination is about the army, not the piece: it asks whether the pieces defend each other, aim at the same targets, and leave each other room, and it is entirely possible for every piece to stand on a reasonable square while the position is badly coordinated.\n\nIT IS THE SKILL OF QUIET POSITIONS. Many middlegames reach an equilibrium in which neither side has an active plan available; what remains is manoeuvring, and the player who regroups more skilfully gets the advantage. Karpov is the standard exemplar precisely because of this, and the quality repeatedly identified in his play is the ability to see each piece IN THE CONTEXT OF THE WHOLE ARMY rather than on its own merits.\n\nIT EXPLAINS MOVES THAT LOOK WRONG. The characteristic coordinating move is one that appears strange or even retrograde in isolation — a knight retreating from an outpost it no longer needs, a queen stepping to a modest square — and is correct because it frees a square another piece wants, or prepares a break that needs three pieces at once. This is the class of move a single-move explanation handles worst, and naming coordination is often the only honest account of it.\n\nIT IS CLOSELY TIED TO PROPHYLAXIS. Arranging one's pieces harmoniously before a decisive operation, and doing so in a way that also anticipates the opponent's plan, is the same activity seen from two sides.\n\nTHE HONEST LIMIT is that coordination is the least detectable concept in this base. It has no mechanical signature, it is a claim about a whole position, and it is easy to invoke as a post-hoc label for any quiet move that turned out well. This record therefore states plainly that it must not be used as a default explanation for moves the system cannot otherwise account for.",
+  "sources": [
+    "chessbase-karpov-coordination",
+    "collins-karpov-move-by-move",
+    "dvoretsky-maneuvering",
+    "serper-positional-secret"
+  ],
+  "source_confidence": "medium"
+}

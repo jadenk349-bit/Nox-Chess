@@ -1,0 +1,251 @@
+{
+  "schema_version": 2,
+  "alternate_names": [
+    "trading pieces",
+    "simplification"
+  ],
+  "historical_names": [],
+  "tags": [
+    "exchanges",
+    "rule-of-thumb",
+    "misapplied"
+  ],
+  "subcategory": "method",
+  "difficulty": "beginner",
+  "knowledge_type_note": "Typed rule-of-thumb: the standard exchanging rules are useful defaults with well-known exceptions, and carry mandatory hedging.",
+  "name_status": "established-name",
+  "history": {
+    "attributions": [
+      {
+        "person": "Aron Nimzowitsch",
+        "relation": "systematized-by",
+        "source": "nimzowitsch-my-system",
+        "year": 1925,
+        "note": "Devotes attention to exchanges as an active weapon rather than a neutral simplification. Read in the primary text."
+      }
+    ],
+    "first_documented_source": "nimzowitsch-my-system",
+    "year": 1925,
+    "confidence": "low",
+    "notes": "The exchanging rules are common pedagogical property with no identifiable origin; only Nimzowitsch's treatment of exchanges as a weapon is attributable here.",
+    "competing_claims": [],
+    "development": []
+  },
+  "engine_era_status": "useful-with-common-exceptions",
+  "engine_era_note": "Engines make exchange decisions concretely and are notably less willing than club teaching to simplify when ahead — they will keep pieces on if the position calls for it and trade into a drawn ending never.",
+  "recognition": {
+    "preconditions": [
+      "A capture or trade is available and optional"
+    ],
+    "indicators_for": [
+      "Ahead in material with no drawn-ending risk",
+      "Cramped, with pieces obstructing one another",
+      "Under attack, and the trade removes an attacker",
+      "The trade damages their structure or improves yours"
+    ],
+    "indicators_against": [
+      "The resulting endgame is drawn — a wrong rook pawn, opposite bishops, or insufficient material",
+      "You hold space, which exchanges relieve",
+      "You hold the initiative, which exchanges dissipate",
+      "The trade gives up your better minor piece or breaks your bishop pair"
+    ],
+    "prerequisites": [
+      "material-imbalance"
+    ],
+    "detector": null,
+    "detectability": "heuristic",
+    "typical_confidence": "low",
+    "false_positive_traps": [
+      "'Simplify when ahead' is the most over-applied rule in chess. Trading into a proven drawn ending is how won games are drawn, and this base holds tablebase-proven examples of exactly that.",
+      "The rule is about removing counterplay, not about removing pieces. If the opponent has no counterplay, there is no reason to trade at all.",
+      "Trading one bishop destroys a bishop pair worth half a pawn — a cost that a simple material count does not see.",
+      "A trade being available is not a reason to make it, and being ahead is not a reason either. Proven case: Rxh7+ draws where Rb8 mates in one."
+    ]
+  },
+  "application": {
+    "typical_plans": [
+      "Ahead in material: trade pieces, keep pawns, and check the resulting ending is not drawn",
+      "Cramped: trade to gain room",
+      "Under attack: trade the strongest attacker, ideally queens",
+      "With space or the initiative: keep pieces on"
+    ],
+    "typical_moves": [
+      "An offered queen trade as a defensive resource"
+    ],
+    "typical_pawn_structures": [],
+    "typical_piece_arrangements": [],
+    "tactical_consequences": [],
+    "strategic_consequences": [
+      "Every trade changes what kind of position it is, which is usually a larger decision than the material"
+    ]
+  },
+  "exceptions": [
+    "Simplifying when ahead fails if the ending is drawn — wrong rook pawn, opposite bishops, insufficient material.",
+    "The side ahead in material should keep pawns, not trade them.",
+    "With a rook against two minor pieces, trade major pieces even when nominally behind, because major pieces are redundant."
+  ],
+  "limitations": [
+    "The rules are defaults; almost every one has a named exception recorded elsewhere in this base."
+  ],
+  "misconceptions": [
+    "That trading is good when ahead. It is good when it reduces counterplay and bad when it approaches a drawn ending.",
+    "That an even trade is positionally neutral. It changes the character of the position, which is usually the bigger consequence.",
+    "That capturing or trading is safe when you are winning. A proven position in this base has one available capture, which is also a check, and it converts mate in one into a draw."
+  ],
+  "relationships": {
+    "broader": [],
+    "narrower": [],
+    "related": [
+      "material-imbalance",
+      "space",
+      "initiative",
+      "bishop-pair",
+      "wrong-rook-pawn",
+      "opposite-coloured-bishops",
+      "fortress"
+    ],
+    "contrasting": [],
+    "co_occurring": [
+      "material-imbalance"
+    ],
+    "conflicts": [
+      {
+        "concept": "fortress",
+        "resolution": "Directly opposed in the case that matters most: 'simplify when ahead' meets 'the defender is heading for a fortress'. The fortress wins the argument — trading into a wrong rook pawn or an opposite-bishop blockade converts a win into a proven draw. Always check the resulting ending before simplifying."
+      }
+    ]
+  },
+  "examples": [
+    {
+      "fen": "5k2/p1p4R/1p3rp1/n2p4/P2P1P2/2PB2P1/6K1/8 b - - 3 30",
+      "game": "Capablanca-Tartakower, New York 1924",
+      "note": "Reached after Capablanca deliberately traded into this ending with 25.Qxe8+ and 26.Rxe8+, having judged the resulting structure better for him. Recorded as the positive case beside this record's tablebase counterexample where a capture throws away mate in one: exchanging is a method, and which position you exchange INTO is the whole of it.",
+      "origin_kind": "historical-game",
+      "concept_role": "supports",
+      "side_to_move_benefits": "white",
+      "engine": {
+        "engine_id": "Stockfish 18",
+        "test_level": 3,
+        "depth": 22,
+        "threads": 10,
+        "hash_mb": 4096,
+        "multipv": 1,
+        "best_move": "f6c6",
+        "eval_cp": -58,
+        "mate_in": null,
+        "pv": [],
+        "alternatives": [],
+        "margin_cp": null,
+        "verdict": "supports",
+        "verdict_note": "-0.58 at depth 22 from Black's side: the player who chose to trade into this ending is better by rather more than half a pawn, with material level. Capablanca reached it deliberately with 25.Qxe8+ and 26.Rxe8+. What the number supports is that the exchange was a method and not a simplification - the advantage is in the structure that survived it."
+      }
+    }
+  ],
+  "counterexamples": [
+    {
+      "fen": "7k/1R5p/5K2/8/8/8/8/8 w - - 0 1",
+      "note": "The sharpest available form of 'a trade is not automatically good'. White is winning by force and one capture is available.",
+      "origin_kind": "tablebase-position",
+      "concept_role": "contradicts",
+      "side_to_move_benefits": "white",
+      "tablebase": {
+        "source": "Lichess tablebase (Syzygy, 7-piece)",
+        "pieces": 4,
+        "wdl": "win",
+        "dtz": 1,
+        "dtm": 1,
+        "category": "win",
+        "note": "PROVEN, every legal move checked. Rb8 is MATE IN ONE. Rxh7+ - the only capture, and a check as well - is a PROVEN DRAW, because after Kxh7 nothing is left but the two kings. Every other rook move on the b-file also wins. So the single move that simplifies is the single move that throws the game away, while being both a capture and a check. This is the resolution position for the trading-while-ahead false-positive case."
+      },
+      "engine": {
+        "engine_id": "Stockfish 18",
+        "test_level": 3,
+        "depth": 26,
+        "threads": 10,
+        "hash_mb": 4096,
+        "multipv": 1,
+        "best_move": "b7b8",
+        "eval_cp": null,
+        "mate_in": 1,
+        "pv": [],
+        "alternatives": [],
+        "margin_cp": null,
+        "verdict": "supports",
+        "verdict_note": "PROVEN mate in 1, dtz 1, best move Rb8#, engine #1. The sharpest available form of 'a trade is not automatically good': one capture is available, Rxh7 is legal, and it throws away mate in one. A counterexample settled by proof rather than by an evaluation."
+      }
+    }
+  ],
+  "ambiguous_examples": [
+    {
+      "fen": "1r4k1/5pp1/7p/8/8/7P/5PP1/R5K1 w - - 0 1",
+      "note": "One rook each, three pawns each, an open file, and a trade available at any moment on any square either rook chooses. Every question this concept asks - who does the exchange favour, does it simplify towards a won or a drawn ending, is the resulting structure better for one side - has the same answer here, which is that it does not matter. The engine says 0.00. Filed as ambiguous because the concept is fully applicable and produces no information: a trade that changes nothing is neither a good exchange nor a bad one, and a system that had to say which would be inventing a difference. This record's positive example is the opposite case - Capablanca trading into a specific ending he had judged - and its counterexample is a capture that throws away mate in one.",
+      "origin_kind": "constructed-test",
+      "concept_role": "ambiguous",
+      "engine": {
+        "engine_id": "Stockfish 18",
+        "test_level": 3,
+        "depth": 28,
+        "threads": 10,
+        "hash_mb": 4096,
+        "multipv": 1,
+        "best_move": "a1a6",
+        "eval_cp": 0,
+        "mate_in": null,
+        "pv": [],
+        "alternatives": [],
+        "margin_cp": null,
+        "verdict": "ambiguous",
+        "verdict_note": "0.00 at depth 28 with symmetric material. Every trade available leads to the same evaluation, which is what makes the concept inapplicable rather than wrong here."
+      }
+    }
+  ],
+  "explanations": {
+    "by_level": {
+      "beginner": "When you are ahead, trading pieces usually helps. When you are cramped, trading gives you room. When you are behind, avoid trades.",
+      "intermediate": "Before any trade, ask what the position becomes. Ahead in material, trade pieces but keep pawns — and check the ending is not one of the drawn ones.",
+      "advanced": "Exchanges are the main lever on the character of a position. Trading is about reducing counterplay, not about reducing pieces.",
+      "master": "Also a weapon in Nimzowitsch's sense — exchanges can force an opponent out of a strong post, and weak squares tend to be traded off against each other."
+    },
+    "by_depth": {
+      "short": "Trade when ahead or cramped; keep pieces when behind or attacking.",
+      "normal": "Exchanges: trade when you are ahead in material, cramped, or under attack; avoid trading when behind, when you hold space, or when you have the initiative. Ahead in material, trade pieces but keep pawns.",
+      "deep": "The standard defaults are sound but heavily over-applied. 'Simplify when ahead' is really about reducing counterplay, and it fails outright when the resulting ending is drawn — a wrong rook pawn, an opposite-coloured-bishop blockade, or insufficient material, all of which this base holds tablebase-proven examples of. The classical refinement is to trade pieces but not pawns when ahead, and pawns but not pieces when behind. Nimzowitsch adds that exchanges are an active weapon: they can force an opponent out of a strong position, and weak squares tend to get traded off against each other."
+    },
+    "hedge": "These are defaults, not rules. Almost every one has a named exception, and the most damaging error in the area is simplifying automatically when ahead into an ending that is drawn.",
+    "lesson": "Before you trade, picture the position afterwards and ask whether you would want it. 'I am ahead so I should trade' is how won games become draws."
+  },
+  "terminology": {
+    "beginner_words": [
+      "trading pieces",
+      "simplify"
+    ],
+    "advanced_words": [
+      "exchanges",
+      "simplification",
+      "counterplay",
+      "liquidation"
+    ],
+    "avoid": [
+      "always simplify when ahead"
+    ]
+  },
+  "status": {
+    "stage": "researched",
+    "last_updated": "2026-09-01",
+    "open_questions": [],
+    "audit_notes": []
+  },
+  "id": "piece-exchanges",
+  "canonical_name": "Exchanges",
+  "category": "piece-exchanges",
+  "knowledge_type": "rule-of-thumb",
+  "definition_short": "Deciding what to trade. The defaults: exchange when ahead in material or cramped; avoid exchanges when behind, or when you hold space or the initiative.",
+  "definition_long": "Every capture is a decision about what the position becomes, and the standard guidance is a set of defaults rather than rules.\n\nTRADE WHEN: ahead in material, since fewer pieces makes the advantage easier to convert; cramped, since fewer pieces need fewer squares; under attack, since trading the attackers defuses it — and trading queens is the single strongest defensive resource; or when the trade improves your structure or worsens theirs.\n\nAVOID TRADING WHEN: behind in material; holding space, since exchanges relieve your opponent's cramp; holding the initiative, since it needs pieces to sustain it; or when the trade removes your better minor piece.\n\nThe classical refinement is that when ahead in material you should trade PIECES but not PAWNS, and when behind you should trade pawns but not pieces — because the materially superior side wants pawns left to promote, and the inferior side wants to head towards drawn endings.\n\nTHE STANDARD OVERCORRECTION is simplifying automatically when ahead. It is not true that simplification always helps: trading into a drawn ending, a wrong-rook-pawn fortress or an opposite-coloured-bishop blockade throws the win away, and this base contains proven examples of each. The rule is about reducing counterplay, not about reducing pieces.\n\nNimzowitsch's angle, from My System, is that exchanges are a WEAPON: they can be used to force an opponent out of a strong position, and weak squares tend to be traded off in what he calls an exchange of prisoners of war.",
+  "sources": [
+    "nimzowitsch-my-system",
+    "chessstrategyonline-exchanges",
+    "silman-reassess",
+    "kaufman-material-imbalances"
+  ],
+  "source_confidence": "medium"
+}

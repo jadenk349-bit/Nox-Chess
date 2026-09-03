@@ -1,0 +1,212 @@
+{
+  "schema_version": 2,
+  "id": "battery",
+  "canonical_name": "Battery",
+  "alternate_names": [
+    "doubled pieces on a line"
+  ],
+  "historical_names": [],
+  "category": "tactical-motifs",
+  "subcategory": "piece configuration",
+  "tags": [],
+  "knowledge_type": "tactical-motif",
+  "knowledge_type_note": "Type D by association, but it is really a configuration that enables motifs rather than a motif that wins material. Flagged so an explanation does not claim a battery is itself the reason a move is good.",
+  "name_status": "established-name",
+  "difficulty": "intermediate",
+  "definition_short": "Two or more line pieces stacked on the same file, rank or diagonal, so their force is combined.",
+  "definition_long": "Two rooks on a file, a queen behind a rook, a queen behind a bishop on a diagonal. The front piece can capture on a defended square because the rear piece recaptures, and the pair controls the line far more strongly than either alone.\n\nA battery is also the precondition for a discovered attack: put a piece of your own in front of the rear piece and moving it discovers. The queen-plus-bishop diagonal battery aimed at h7 is the standard attacking configuration; three heavy pieces on one file is sometimes called Alekhine's gun.\n\nRecorded as a piece configuration rather than a tactic: a battery does not by itself do anything, it enables things.",
+  "history": {
+    "attributions": [],
+    "first_documented_source": "informant-encyclopedia-combinations",
+    "year": null,
+    "confidence": "unknown",
+    "notes": "Descriptive pattern name of long, largely anonymous usage.",
+    "competing_claims": [],
+    "development": []
+  },
+  "engine_era_status": "unassessed",
+  "engine_era_note": "",
+  "sources": [
+    "informant-encyclopedia-combinations",
+    "wikipedia-chess-tactic",
+    "chesstempo-tactical-motifs",
+    "chesscom-tactics-38"
+  ],
+  "source_confidence": "high",
+  "recognition": {
+    "preconditions": [
+      "Two or more friendly line pieces share a file, rank or diagonal with nothing between them"
+    ],
+    "indicators_for": [
+      "The line points at the enemy king or a weak square",
+      "The front piece can capture on a defended square, backed by the rear piece"
+    ],
+    "indicators_against": [
+      "The line is blocked further along and cannot be opened",
+      "The rear piece is more valuable and becomes a target itself"
+    ],
+    "prerequisites": [],
+    "detector": "lib/matchers.js: battery",
+    "detectability": "mechanical",
+    "typical_confidence": "high",
+    "false_positive_traps": [
+      "Two line pieces on one line are only a battery if the line ARRIVES somewhere. Stacked behind their own pawns they combine nothing, and the bare geometry fires on nearly half of all positions."
+    ]
+  },
+  "application": {
+    "typical_plans": [],
+    "typical_moves": [],
+    "typical_pawn_structures": [],
+    "typical_piece_arrangements": [],
+    "tactical_consequences": [],
+    "strategic_consequences": []
+  },
+  "exceptions": [
+    "Ordering matters: queen in front of rook is usually worse than rook in front of queen, because the more valuable piece meets the defenders first."
+  ],
+  "limitations": [
+    "A battery is potential, not achievement. Do not report it as the reason for a move unless the position shows what it actually enables.",
+    "Fires on 24.4% of the 788 shipped positions. A first version asked only for two aligned line pieces with one empty square beyond them and fired on 43%, because two rooks stacked behind their own pawns satisfy the geometry and combine nothing. The line must now arrive somewhere: at an enemy man, or into the enemy half.",
+    "TYPICAL_CONFIDENCE RAISED medium -> high, 2026-09-02, and the reason is the schema's own definition of the field: 'how confidently this concept can normally be asserted ONCE ITS PRECONDITIONS HOLD'. This concept's recognition is MECHANICAL and its knowledge type already carries a high ceiling, so once the preconditions hold there is nothing left to be uncertain about - a stalemate is a stalemate, and a fork this base reports is one findMotifs() found, which ARCHITECTURE.md makes the authority and forbids second-guessing. 'Medium' was the default across 32 rule and motif records regardless of detectability, and it was found by measuring what the API reports against what each record permits: twelve concepts were reporting ABOVE their own record. The fix was to make each record its own ceiling in cap(), which then required the records that were wrong to be corrected rather than silently overruled.",
+    "MEASURED 2026-09-02: the second indicator_against - 'the rear piece is more valuable and becomes a target itself' - is now said rather than suppressed, because the geometry is there either way and which piece stands in front is exactly what a learner needs told. A queen in front of a rook is not a battery aimed at the enemy, it is a queen that has to move first every time the line is touched. Building it exposed a bug in the matcher's own bookkeeping: the scan walks from one piece along a direction to the other, so the SECOND piece found is the one nearer the target, and reading them the other way round would have told a reader the queen was in front when the rook was."
+  ],
+  "misconceptions": [],
+  "relationships": {
+    "broader": [],
+    "narrower": [],
+    "related": [
+      "x-ray",
+      "discovered-attack",
+      "open-file"
+    ],
+    "contrasting": [],
+    "co_occurring": [],
+    "conflicts": []
+  },
+  "examples": [
+    {
+      "fen": "4kb1r/p2rqppp/5n2/1B2p1B1/4P3/1Q6/PPP2PPP/2K4R w k - 0 14",
+      "move": "Rd1",
+      "move_uci": "h1d1",
+      "note": "The Opera Game, Morphy against the Duke of Brunswick and Count Isouard, Paris 1858, at move 14. The battery this base reports is BLACK'S, and it is the expensive kind: 'Black has two long-range pieces stacked on one line, on f8 and e7, and the line runs on to the enemy half - but the queen is in front of the bishop, which is the expensive way round: the front piece has to move first every time the line is touched.' Three moves later Black is mated. That is why this is the right master example rather than a picture of a good battery: the record's trap is that two line pieces on one line are only a battery if the line ARRIVES somewhere, and here a real battery on a real diagonal arrives nowhere and belongs to the losing side. PROVENANCE. The move list was replayed through this base's own move generator by tools/replay_game.js, which refuses a wrong list rather than guessing, so the FEN is verified rather than remembered. No named annotator is attached to this position for this concept, so it grounds the MASTER-GAME rung and not the human-grounded one.",
+      "origin_kind": "historical-game",
+      "game": "Morphy-Duke of Brunswick and Count Isouard, Paris 1858 (the Opera Game)",
+      "concept_role": "positive",
+      "side_to_move_benefits": "white",
+      "engine": {
+        "engine_id": "Stockfish 18",
+        "test_level": 3,
+        "depth": 20,
+        "threads": 10,
+        "hash_mb": 4096,
+        "multipv": 1,
+        "best_move": "a8b8",
+        "eval_cp": -587,
+        "mate_in": null,
+        "pv": [],
+        "alternatives": [],
+        "margin_cp": null,
+        "verdict": "ambiguous",
+        "verdict_note": "-5.87 from Black's side at depth 20 - the side holding the battery is losing by nearly six pawns, three moves from mate."
+      }
+    },
+    {
+      "fen": "3k4/8/8/8/8/8/3Q4/3RK3 w - - 0 1",
+      "note": "Rook on d1 and queen on d2 with nothing between them and the line running on to the black king: two pieces whose force is combined, which is what a battery is.",
+      "origin_kind": "constructed-test",
+      "concept_role": "supports",
+      "side_to_move_benefits": "neither",
+      "controlled_pair_with": "3k4/8/8/8/8/3P4/3Q4/3RK3 w - - 0 1"
+    }
+  ],
+  "counterexamples": [
+    {
+      "fen": "3k4/8/8/8/8/3P4/3Q4/3RK3 w - - 0 1",
+      "note": "The same two pieces with a white pawn on d3. The geometry is identical and the battery is gone, because the line no longer arrives anywhere - it stops on the mover's own pawn. Two pieces stacked on a file are a battery only when the file is theirs to use.",
+      "origin_kind": "constructed-test",
+      "concept_role": "negative",
+      "side_to_move_benefits": "neither",
+      "controlled_pair_with": "3k4/8/8/8/8/8/3Q4/3RK3 w - - 0 1"
+    },
+    {
+      "fen": "4k3/8/8/3p4/3P4/8/3R4/3RK3 w - - 0 1",
+      "note": "Registered false-positive case `rooks-doubled-behind-a-rammed-pawn`, kept on the record as well as in tests/false_positive_cases.json so that the concept carries its own negative evidence. THE SURFACE PATTERN IS PRESENT: Two rooks stand one behind the other on the d-file — the exact geometry of a battery. WHY IT IS NOT THE CONCEPT: This record's own trap: \"Two line pieces on one line are only a battery if the line ARRIVES somewhere. Stacked behind their own pawns they combine nothing, and the bare geometry fires on nearly half of all positions.\" Here the d-file dead-ends at White's own d4 pawn, which is rammed against d5 and cannot move. WHAT THE SYSTEM DOES: The system does not make the claim: the API reports nothing at all here, because the battery matcher requires the line to arrive at a target and this one arrives at White's own pawn. Stockfish 18 at depth 26 agrees about what the doubled rooks are worth on that file — the position is mate in 5 and the best move is Ra1, which takes the front rook OFF the d-file. The engine's plan is to abandon the battery, which is the strongest possible statement that the geometry was not doing anything.",
+      "origin_kind": "constructed-test",
+      "concept_role": "negative",
+      "engine": {
+        "engine_id": "Stockfish 18",
+        "test_level": 3,
+        "depth": 26,
+        "threads": 10,
+        "hash_mb": 4096,
+        "multipv": 1,
+        "best_move": "d1a1",
+        "eval_cp": null,
+        "mate_in": 5,
+        "pv": [],
+        "alternatives": [],
+        "margin_cp": null,
+        "verdict": "supports",
+        "verdict_note": "Mate in 5, and the first move takes the front rook OFF the d-file. The engine's plan is to abandon the battery, which is the strongest available statement that the geometry was doing nothing."
+      },
+      "false_positive_case": "rooks-doubled-behind-a-rammed-pawn"
+    }
+  ],
+  "ambiguous_examples": [
+    {
+      "fen": "6k1/2r2p2/4b3/p1q5/P3P3/1r1P1P1P/1B4P1/Q2RKB1R b K - 3 39",
+      "note": "Nominated by tools/mine_ambiguous.js as a BOTH-SIDES candidate and confirmed by the engine. The base reports a battery for White and a battery for Black in the same position, which is the first thing that makes this ambiguous: a concept that fires for everybody tells the reader nothing about who stands better. The second is that the two other readings of the position disagree with each other. Material says White by 730 centipawns. The engine says Black mates in 6, starting with Qe3+. So the honest answer to 'is the battery the point here' is that one of them is and the report cannot say which - the concept is present, correctly, and it is not what the position is about.",
+      "origin_kind": "puzzle",
+      "concept_role": "ambiguous",
+      "engine": {
+        "engine_id": "Stockfish 18",
+        "test_level": 3,
+        "depth": 24,
+        "threads": 10,
+        "hash_mb": 4096,
+        "multipv": 1,
+        "best_move": "c5e3",
+        "eval_cp": null,
+        "mate_in": -6,
+        "pv": [],
+        "alternatives": [],
+        "margin_cp": null,
+        "verdict": "ambiguous",
+        "verdict_note": "Mate in 6 for the side that is 730 centipawns DOWN on material. Neither the material count nor the battery report points at what decides the position, which is the definition of an ambiguous instance rather than a wrong one."
+      }
+    }
+  ],
+  "explanations": {
+    "by_level": {
+      "beginner": "Two pieces are lined up on the same line, so they work together — the one in front can take, and the one behind takes back.",
+      "intermediate": "A battery on the {line}. It doubles the pressure and sets up a discovery if the front piece moves.",
+      "advanced": "Battery. Check the ordering — the cheaper piece generally belongs in front."
+    },
+    "by_depth": {
+      "short": "Two line pieces stacked on one line, so their force is combined.",
+      "normal": "A battery: two long-range pieces on the same file, rank or diagonal, with nothing of their own between them. The front piece can capture and the rear one recaptures, so the pair attacks with more force than either alone.",
+      "deep": "The geometry is trivial to detect and means nothing on its own — the bare pattern fires on nearly half of all positions. What makes a battery worth naming is that the line ARRIVES somewhere: two rooks stacked behind their own rammed pawn combine nothing. The order also matters and is often got backwards. Queen in front of rook or bishop is the expensive way round, because the front piece has to move first every time the line is touched, and the most valuable piece is the one that should not be exposed. This base's master example is Black's queen-in-front battery in the Opera Game, three moves before Black is mated."
+    },
+    "hedge": "A battery enables tactics rather than being one; say what it actually threatens here.",
+    "lesson": ""
+  },
+  "terminology": {
+    "beginner_words": [
+      "lined up together"
+    ],
+    "advanced_words": [
+      "battery",
+      "doubling",
+      "Alekhine's gun"
+    ],
+    "avoid": []
+  },
+  "status": {
+    "stage": "researched",
+    "last_updated": "2026-09-01",
+    "open_questions": [],
+    "audit_notes": [
+      "2026-09-01: detector field named 'lineAlignment', which does not exist anywhere in the codebase. The audit's hardcoded whitelist had been accepting it. Repointed at real code, or marked as proposed where nothing implements it."
+    ]
+  }
+}

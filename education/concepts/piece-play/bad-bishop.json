@@ -1,0 +1,333 @@
+{
+  "schema_version": 2,
+  "alternate_names": [
+    "poor bishop"
+  ],
+  "historical_names": [],
+  "tags": [
+    "bishops",
+    "steinitz",
+    "structure",
+    "misunderstood"
+  ],
+  "subcategory": "piece quality",
+  "difficulty": "intermediate",
+  "knowledge_type_note": "Names a STRUCTURAL relationship between a bishop and its own pawns. Whether the bishop is ineffective is a different, functional question — see the Suba exception.",
+  "name_status": "established-name",
+  "history": {
+    "attributions": [
+      {
+        "person": "Wilhelm Steinitz",
+        "relation": "originated-by",
+        "source": "kingsights-good-bad-bishop",
+        "year": null,
+        "note": "Credited with formalising the good/bad bishop distinction in the 1880s; not verified against The Modern Chess Instructor in this research."
+      },
+      {
+        "person": "Siegbert Tarrasch",
+        "relation": "popularized-by",
+        "source": "kingsights-good-bad-bishop",
+        "year": null,
+        "note": "Made it one of the cornerstones of his positional rules."
+      },
+      {
+        "person": "Mihail Suba",
+        "relation": "named-by",
+        "source": "kingsights-good-bad-bishop",
+        "year": null,
+        "note": "Named the 'active bad bishop' — the structurally bad bishop that is nonetheless effective outside the pawn chain. ATTRIBUTION NOT VERIFIED: this is the conventional ascription, taken from a secondary source, and no primary text was consulted for it during this research."
+      }
+    ],
+    "first_documented_source": null,
+    "year": null,
+    "confidence": "low",
+    "notes": "All three attributions come from a single anonymous source and none has been checked against a primary text. The Steinitz and Tarrasch attributions are conventional and plausible; Suba's coinage is the one most worth verifying, since the distinction it names is load-bearing for this record. Recorded low.",
+    "competing_claims": [],
+    "development": [
+      {
+        "era": "1880s, Steinitz",
+        "change": "The relationship between a bishop and its own pawn colour becomes an explicit evaluation factor.",
+        "source": "kingsights-good-bad-bishop"
+      },
+      {
+        "era": "Tarrasch",
+        "change": "Hardened into a positional rule.",
+        "source": "kingsights-good-bad-bishop"
+      },
+      {
+        "era": "Suba, late 20th c.",
+        "change": "Corrective: structural badness does not entail functional passivity — the 'active bad bishop'.",
+        "source": "kingsights-good-bad-bishop"
+      }
+    ]
+  },
+  "engine_era_status": "useful-with-common-exceptions",
+  "engine_era_note": "Engines weigh bishop mobility directly rather than counting pawns on its colour, which is exactly Suba's point mechanised. A bishop that is 'bad' by the classical count but has an open diagonal outside the chain gets no penalty from an engine.",
+  "recognition": {
+    "preconditions": [
+      "A bishop's own pawns predominantly occupy the colour it moves on"
+    ],
+    "indicators_for": [
+      "Its own central pawns are fixed on its colour and cannot advance",
+      "It is inside its own pawn chain with no route out",
+      "The opponent's pawns are on the opposite colour, so there are no targets either",
+      "The position is closed, so the pawn structure will not change"
+    ],
+    "indicators_against": [
+      "THE SUBA CASE: the bishop is outside the pawn chain and active, however bad it looks structurally",
+      "A pawn break is available that shifts the blocking pawns off its colour",
+      "It is the only defender of a colour complex — a bad bishop with a job is not a bad piece",
+      "The structure is fluid and about to change",
+      "It can be traded for the opponent's good bishop"
+    ],
+    "prerequisites": [],
+    "detector": "pawnsOnBishopColour (not yet written)",
+    "detectability": "mechanical",
+    "typical_confidence": "low",
+    "false_positive_traps": [
+      "REGISTERED FALSE POSITIVE: a bishop behind its own pawns is not automatically bad in the sense that matters. Suba's active bad bishop is the counterexample, and it is common, not exotic.",
+      "Counting pawns on the bishop's colour is mechanical and will fire on pieces that are performing well. Mobility and role must be checked too.",
+      "A bad bishop that is the sole guardian of a weak colour complex is a load-bearing defender, not a liability."
+    ]
+  },
+  "application": {
+    "typical_plans": [
+      "Break with a pawn move that relocates pawns off the bishop's colour",
+      "Trade the bad bishop, ideally for the opponent's good one",
+      "Reroute it outside the pawn chain and give it a job there",
+      "Against one: fix the opponent's pawns on the bishop's colour so the defect is permanent"
+    ],
+    "typical_moves": [
+      "...Bd7-e8-h5 in the French, to trade it",
+      "...Bd7-a4, the active bad bishop",
+      "...b6 and ...Bb7 in the QGD Tartakower"
+    ],
+    "typical_pawn_structures": [
+      "French: black pawns on d5, e6, f7 with the light-squared bishop",
+      "Closed centres where the pawns are fixed"
+    ],
+    "typical_piece_arrangements": [
+      "Bishop shut inside its own chain with no exit square"
+    ],
+    "tactical_consequences": [],
+    "strategic_consequences": [
+      "One of the largest static imbalances available, and durable into the endgame",
+      "Drives the classic technique of simplifying into an endgame with the better bishop"
+    ]
+  },
+  "exceptions": [
+    "Suba's active bad bishop: outside the pawn chain, a structurally bad bishop is often equal or better than a knight.",
+    "A bad bishop defending a colour complex is doing essential work and should not be traded off casually.",
+    "If the structure can change, the badness is temporary."
+  ],
+  "limitations": [
+    "Recognition confidence is LOW. The structural test is mechanical and the conclusion it invites is frequently wrong.",
+    "Sources for the historical attributions are weak; see history.notes.",
+    "MEASURED 2026-09-01, on Rubinstein-Salwe 1908, the game whose annotator says flatly that 'the bishop on e6 is bad, blocked by its own pawns'. Traced ply by ply, this base reports it for exactly ten plies - from 16...Nd7 to 21.Nc5 - and stops, because the `scope > 3` guard releases as pieces shuffle around it, while the pawn share RISES from 0.67 to 0.83 over the same stretch. A human calls the bishop bad for the whole game; the detector calls it bad intermittently. The guard is not a mistake - it is what keeps Suba's active bad bishop off the list, and it is what stopped this base calling Nimzowitsch's blockading bishop bad - but it makes badness a momentary property of a piece the concept says is condemned by the STRUCTURE. Recorded rather than loosened: raising the scope threshold would restore the two false positives this record exists to prevent.",
+    "MEASURED 2026-09-02 against the five indicators_against. 'THE SUBA CASE: the bishop is outside the pawn chain and active, however bad it looks structurally' is built - it is the scope test, and Suba is named in the matcher beside it. 'It is the only defender of a colour complex' is why this reports at LOW confidence and never at high, which is recorded above. The other three - a pawn break that shifts the blocking pawns off its colour, a structure that is fluid and about to change, and a trade for the opponent's good bishop - are all claims about a position that does not exist yet, and none is attempted."
+  ],
+  "misconceptions": [
+    "That a bishop behind its own pawns is a bad piece. It is structurally bad, which is not the same thing.",
+    "That a bad bishop should always be traded.",
+    "That the bishop's square makes it bad. Its own pawn structure does, and moving the bishop takes the problem with it."
+  ],
+  "relationships": {
+    "broader": [],
+    "narrower": [],
+    "related": [
+      "weak-square",
+      "hole",
+      "outpost"
+    ],
+    "contrasting": [],
+    "co_occurring": [
+      "weak-square"
+    ],
+    "conflicts": []
+  },
+  "examples": [
+    {
+      "fen": "3q4/1p2kb2/2p1pp1p/2PB4/1P3PPP/2Q1K3/1B6/8 b - - 0 38",
+      "game": "Petrosian-Euwe, Candidates, Zurich 1953",
+      "note": "A QUIET position from a master game — after Bxd5, ply 75 — in which White's bishop on b2 shares its colour with 4 of its own 5 pawns, and sees only 3 squares. The side to move has no check available, so the next move has to be chosen on positional grounds. CORRECTED 2026-09-02: this note used to add \"and no capture that wins material\" as the other half of a mechanical quiet test. That half had never run - quietness() passed a move object where see() expects a square index, so winningCapturesAvailable was always zero and every note written from it claimed something untested. Re-checked with the fixed test, this position DOES have a capture that wins material, so the quiet half of the claim is withdrawn. The position is kept: what it illustrates about the concept is unaffected, and dropping the evidence would be tidying away the consequence of a bug. That matters because this base's other corpus is 788 tactical puzzles, in which a positional feature cannot be isolated.\n\nWHAT IS VERIFIED: the game replays legally end to end through the page's own move generator, so the FEN is derived rather than transcribed; and the feature is present by mechanical measurement in lib/features.js.\n\nWHAT IS NOT CLAIMED: that the concept decides this position, or that the players were thinking about it. Note also a limitation of method — the position was FOUND by this system's own Layer 4, so it demonstrates the concept and cannot by itself validate the matcher that found it. Other concepts licensed here: bishop-pair, space.",
+      "origin_kind": "historical-game",
+      "concept_role": "supports",
+      "side_to_move_benefits": "neither"
+    },
+    {
+      "fen": "3rq1k1/6pp/4p3/pp1nP3/P2P4/2PQ4/1B4PP/4R1K1 b - - 0 31",
+      "game": "Reshevsky-Petrosian, Candidates, Zurich 1953",
+      "note": "A quiet position from a master game — after Qxd3, ply 61 — where White's bishop on b2 shares its colour with 4 of its own 6 pawns, and sees only 3 squares. The side to move has no check available, so the next move has to be chosen on positional grounds. CORRECTED 2026-09-02: this note used to add \"and no capture that wins material\" as the other half of a mechanical quiet test. That half had never run - quietness() passed a move object where see() expects a square index, so winningCapturesAvailable was always zero and every note written from it claimed something untested. Re-checked with the fixed test, this position DOES have a capture that wins material, so the quiet half of the claim is withdrawn. The position is kept: what it illustrates about the concept is unaffected, and dropping the evidence would be tidying away the consequence of a bug. VERIFIED: the game replays legally end to end through the page's own move generator, and the feature is measured by lib/features.js. NOT CLAIMED: that the concept decides this position, or that the players were thinking about it. Method note: the position was found by this system's own Layer 4, so it illustrates the concept and cannot by itself validate the matcher that found it. Other concepts licensed here: semi-open-file, weak-square, material-imbalance, space.",
+      "origin_kind": "historical-game",
+      "concept_role": "supports",
+      "side_to_move_benefits": "neither"
+    },
+    {
+      "fen": "r1r3k1/p2n1ppp/2p1b3/1q1p4/N2Q4/5PP1/PP2PR1P/2R2BK1 w - - 4 20",
+      "note": "Rubinstein-Salwe, Lodz 1908, e3. Human ground truth: the concept is named for this position by Nicholas Van Der Nat (Chess.com), following the classical literature. Corpus entry `rubinstein-salwe-1908-20-bad-bishop`. The archetype: a light-squared bishop on e6 with four of its own six pawns standing on light squares, in a structure Rubinstein has spent the game fixing so it cannot change. This base's detector agrees here, and the entry exists as much for what the tracing found as for the agreement - see the concept's limitations. The record's distinction between STRUCTURAL badness and FUNCT",
+      "origin_kind": "historical-game",
+      "game": "Rubinstein-Salwe, Lodz 1908",
+      "concept_role": "positive",
+      "attributed_by": "Nicholas Van Der Nat (Chess.com), following the classical literature — corpus entry rubinstein-salwe-1908-20-bad-bishop",
+      "engine": {
+        "engine_id": "Stockfish 18",
+        "test_level": 3,
+        "depth": 22,
+        "multipv": 3,
+        "best_move": "e3",
+        "eval_cp": 31,
+        "verdict": "supports",
+        "verdict_note": "on the move, yes - 20.e3 is the engine's first choice. On the bishop it says nothing, because an evaluation is not an opinion about a piece, and this base does not ask it for one. Same position and same search as the corpus's worst-placed-piece entry for this game; two entries, two claims."
+      }
+    }
+  ],
+  "counterexamples": [
+    {
+      "fen": "8/3b2k1/pp1p2pp/n1p1br2/P1P4q/1P1Q1BPP/7K/1R2BR2 b - - 1 31",
+      "note": "Suba's active bad bishop, found by searching 1576 real positions for the shape rather than constructed to fit it. White's bishop on f3 shares its colour with four of White's five pawns - structurally bad by Steinitz's definition - and sees eleven squares. The concept's own distinction between 'bad' (structural) and 'passive' (functional) is exactly what separates this from a genuine liability. Provenance: taken from this repository's puzzle corpus (puzzles/*.json), which tools/generate_puzzles.js mined from ENGINE SELF-PLAY. It is a real, legally reached position from a real game between two engines - not a master game, and this base does not claim it as one.",
+      "origin_kind": "puzzle",
+      "concept_role": "contradicts",
+      "side_to_move_benefits": "neither",
+      "detector": {
+        "source": "lib/features.js bishopPawnColours",
+        "own_pawns_on_its_colour": 4,
+        "own_pawns_total": 5,
+        "share": 0.8,
+        "scope": 11,
+        "note": "This base's own Layer 3 measurement. The matcher requires scope below 7 before it will report a bad bishop at all, so the system does NOT make this false positive - the structural test fires and the functional one vetoes it."
+      }
+    },
+    {
+      "fen": "r4rk1/2pp1ppp/6q1/1pP1n3/4bP1P/PR5B/2P2Q2/1N2K2R w K - 2 28",
+      "note": "Black's bishop on e4 is structurally bad (4/6 pawns on its colour) and sees 9 squares — Suba's active bad bishop. The position has no check available, so the next move must be chosen on positional grounds. CORRECTED 2026-09-02: this note used to say the position was QUIET by mechanical test, with \"no capture that wins material\" as half of the test. That half had never run - quietness() passed a move object where see() expects a square index, so winningCapturesAvailable was always zero, and every note written from it claimed something untested. Re-checked with the fixed test, this position DOES have a capture that wins material, so the quiet claim is withdrawn; the concept it illustrates is unaffected, and the position is kept rather than quietly dropped. That is the property this base's tactical corpus almost never has. Found by tools/prospect.js, which searches 1576 real positions for a concept's feature and scores quiet positions far higher. Provenance: the puzzle corpus is engine self-play — a real position from a real game between engines, not a master game.",
+      "origin_kind": "puzzle",
+      "concept_role": "contradicts",
+      "side_to_move_benefits": "neither",
+      "engine": {
+        "engine_id": "Stockfish 18",
+        "test_level": 2,
+        "depth": 20,
+        "threads": 8,
+        "hash_mb": 2048,
+        "multipv": 2,
+        "best_move": "h1g1",
+        "eval_cp": 102,
+        "mate_in": null,
+        "pv": [],
+        "alternatives": [
+          {
+            "move": "b3g3",
+            "eval_cp": -306,
+            "mate_in": null
+          }
+        ],
+        "margin_cp": 0,
+        "verdict": "contradicts",
+        "verdict_note": "Quiet and close to balanced at 1.02, which is the combination this base most needs and least often finds: nothing forcing is available and the evaluation is not swamping the feature, so the position is usable as an instance of the concept. What is NOT claimed is that the concept explains the engine's choice of move."
+      }
+    },
+    {
+      "fen": "2r2rk1/ppqb2pp/3bpn2/3pN3/1P1B4/2PB4/P3QPPP/R4RK1 b - - 10 17",
+      "note": "Nimzowitsch-Salwe, Karlsbad 1911, Be8. Human ground truth: the concept is named for this position by Aron Nimzowitsch, annotating his own game. Corpus entry `nimzowitsch-salwe-1911-17Ne5-bad-bishop-negative`. The hardest negative in this corpus, because the structural test PASSES and only a guard stops the error. White's dark-squared bishop on d4 shares its colour with four of its own six pawns - a share of 0.67, over the 0.60 the matcher requires - and it is the piece the entire game is built around, the blockader Nimzowitsch calls a stout fellow and repositions twice on purpose. What saves this base ",
+      "origin_kind": "historical-game",
+      "game": "Nimzowitsch-Salwe, Karlsbad 1911",
+      "concept_role": "negative",
+      "attributed_by": "Aron Nimzowitsch, annotating his own game — corpus entry nimzowitsch-salwe-1911-17Ne5-bad-bishop-negative",
+      "engine": {
+        "engine_id": "Stockfish 18",
+        "test_level": 3,
+        "depth": 22,
+        "multipv": 3,
+        "best_move": "Be8",
+        "eval_cp": -112,
+        "verdict": "contradicts",
+        "verdict_note": "on both counts. The game's 17...Be8 is the engine's first choice, and Black stands at -1.12 - White is more than a pawn better with the 'structurally bad' bishop on d4 doing the work. What is being tested is not the move but whether a piece is called bad. The engine cannot answer that and was not asked to; it is here to say that the side owning the allegedly bad bishop is winning."
+      }
+    }
+  ],
+  "ambiguous_examples": [
+    {
+      "fen": "r1bqkBr1/ppp2ppp/n4n2/3pp3/8/1P1PP3/P1PN1PPP/R2QKBNR w KQq - 1 7",
+      "note": "White's bishop on f1 has 5 of its own 8 pawns on its colour and sees 1 squares. The position is QUIET by mechanical test: the side to move has no check available and no capture that wins material, so the next move must be chosen on positional grounds. That is the property this base's tactical corpus almost never has. Found by tools/prospect.js, which searches 1576 real positions for a concept's feature and scores quiet positions far higher. Provenance: the puzzle corpus is engine self-play — a real position from a real game between engines, not a master game.",
+      "origin_kind": "puzzle",
+      "concept_role": "ambiguous",
+      "side_to_move_benefits": "neither",
+      "engine": {
+        "engine_id": "Stockfish 18",
+        "test_level": 2,
+        "depth": 20,
+        "threads": 8,
+        "hash_mb": 2048,
+        "multipv": 2,
+        "best_move": "f8a3",
+        "eval_cp": 423,
+        "mate_in": null,
+        "pv": [],
+        "alternatives": [
+          {
+            "move": "d3d4",
+            "eval_cp": 214,
+            "mate_in": null
+          }
+        ],
+        "margin_cp": 0,
+        "verdict": "ambiguous",
+        "verdict_note": "Quiet AND decided, which is worth recording as a pair. The feature is present and the evaluation is 4.23, so nothing forcing is on offer and the position is nonetheless settled. It demonstrates the feature and cannot show the concept deciding anything - and it is a useful reminder that quietness is not balance."
+      }
+    }
+  ],
+  "explanations": {
+    "by_level": {
+      "beginner": "Your own pawns are sitting on the same colour squares as your bishop, so they are in its way.",
+      "intermediate": "A bad bishop: its own pawns are fixed on its colour. Before writing it off, check whether it can get outside the chain — a bad bishop with an open diagonal is a real piece.",
+      "advanced": "Structurally bad. Suba's distinction applies: badness is about the pawns, passivity is about the work it does, and an active bad bishop outside the chain is often fine.",
+      "master": "Fix the opponent's pawns on their bishop's colour to make it permanent. And check whether the bad bishop is the sole guardian of a complex before proposing a trade."
+    },
+    "by_depth": {
+      "short": "Its own pawns are on the bishop's colour, blocking it.",
+      "normal": "A bad bishop — its own pawns sit on the squares it travels on, so its diagonals are blocked from the inside and the squares they leave uncovered are ones the bishop cannot use either. The cures are a pawn break, a trade, or getting the bishop outside the chain.",
+      "deep": "A bishop's scope is decided by its own pawn structure, since its colour is fixed forever. Pawns on the bishop's colour block it and leave the other colour unguarded; pawns on the opposite colour give the pair full coverage. Formalised by Steinitz and hardened into a rule by Tarrasch. The essential corrective is Suba's 'active bad bishop': a structurally bad bishop that has got outside its own chain can be an excellent piece, because bad is structural and passive is functional. The French ...Bd7-a4 is the standard case — still bad by definition, and cutting the queenside in half."
+    },
+    "hedge": "",
+    "lesson": "Count the pawns on your bishop's colour to see if it is bad. Then look at what it is actually doing, because those are different questions."
+  },
+  "terminology": {
+    "beginner_words": [
+      "your pawns are in the bishop's way"
+    ],
+    "advanced_words": [
+      "bad bishop",
+      "good bishop",
+      "active bad bishop",
+      "colour complex",
+      "pawn chain"
+    ],
+    "avoid": [
+      "bad bishop means bad piece",
+      "always trade your bad bishop"
+    ]
+  },
+  "status": {
+    "stage": "researched",
+    "last_updated": "2026-09-01",
+    "open_questions": [],
+    "audit_notes": [
+      "2026-09-01 audit: attribution to Mihail Suba carried low confidence without a hedge in the note itself. Hedge added so the caveat travels with the claim rather than sitting only in history.confidence.",
+      "2026-09-01: a detector was written for this concept (bishopPawnColours in lib/features.js) together with a scope measurement, precisely so that the structural test cannot on its own produce the registered false positive. An early version also reported undeveloped bishops on their home squares as bad; a bishop that has not moved has not been condemned by anything.",
+      "2026-09-01: a mined position was labelled origin_kind 'historical-game'. The corpus it came from is engine self-play, so that claimed a provenance this base does not have. Relabelled 'puzzle' with the provenance stated."
+    ]
+  },
+  "id": "bad-bishop",
+  "canonical_name": "Bad bishop",
+  "category": "good-bad-bishops",
+  "knowledge_type": "positional-concept",
+  "definition_short": "A bishop whose own pawns sit on the colour it travels on, so its diagonals are blocked from the inside.",
+  "definition_long": "A bishop moves on one colour forever, so its scope is decided by where its OWN pawns sit. Pawns on the bishop's colour block it from the inside and, worse, leave the other colour uncovered — so the weak squares stay weak and the bishop cannot use them. Pawns on the opposite colour give full-board coverage: pawns hold one colour, bishop holds the other.\n\nThe archetype is the French Defence light-squared bishop, buried behind d5, e6 and f7.\n\nTHE CRITICAL QUALIFICATION, and the reason this concept is so often misapplied: badness is STRUCTURAL, not positional. Mihail Suba's 'active bad bishop' names the case — a structurally bad bishop that has got OUTSIDE its own pawn chain and is doing real work. The French ...Bd7-a4 is the standard illustration: the bishop is still bad by Steinitz's definition, since its own pawns still block its diagonals, and it is nevertheless an excellent piece. As the distinction is usually put: 'bad' is structural, 'passive' is functional, and they are not the same thing.\n\nThe three standard cures are a pawn break that moves the offending pawns off the bishop's colour, trading the bad bishop for the opponent's good one, and rerouting it outside the chain.",
+  "sources": [
+    "kingsights-good-bad-bishop",
+    "steinitz-modern-chess-instructor",
+    "nimzowitsch-my-system",
+    "zurich-1953-games"
+  ],
+  "source_confidence": "medium"
+}

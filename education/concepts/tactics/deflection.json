@@ -1,0 +1,199 @@
+{
+  "schema_version": 2,
+  "id": "deflection",
+  "canonical_name": "Deflection",
+  "alternate_names": [
+    "distraction",
+    "diversion"
+  ],
+  "historical_names": [],
+  "category": "tactical-motifs",
+  "subcategory": "material-winning motif",
+  "tags": [],
+  "knowledge_type": "tactical-motif",
+  "knowledge_type_note": "Motif (D), but recognition is heuristic: it depends on identifying a DUTY, which is a functional judgement rather than a geometric one.",
+  "name_status": "established-name",
+  "difficulty": "intermediate",
+  "definition_short": "Forcing a defending piece away from the square, line, or duty it must hold.",
+  "definition_long": "The defender's piece is doing a job. Deflection forces it to stop — usually with a capture or a check it cannot decline — and the real target then falls.\n\nDeflection and DECOY are constantly conflated; the useful distinction is one of direction. Deflection pushes a piece AWAY from a duty. A decoy lures a piece TOWARDS a bad square. Chess.com merges them into one theme; Chess Tempo and Chess Informant keep them separate (themes d and h). This record keeps them separate and cross-links them.",
+  "history": {
+    "attributions": [],
+    "first_documented_source": "informant-encyclopedia-combinations",
+    "year": null,
+    "confidence": "unknown",
+    "notes": "Tactical motifs are descriptive pattern names of long and mostly anonymous usage. The Chess Informant classification is cited as a standard enumeration, not as the origin of the term.",
+    "competing_claims": [],
+    "development": []
+  },
+  "engine_era_status": "unassessed",
+  "engine_era_note": "",
+  "sources": [
+    "informant-encyclopedia-combinations",
+    "wikipedia-chess-tactic",
+    "chesstempo-tactical-motifs",
+    "chesscom-tactics-38"
+  ],
+  "source_confidence": "high",
+  "recognition": {
+    "preconditions": [
+      "An enemy piece is performing a defensive duty (guarding a square, a piece, or a line)",
+      "A forcing move exists that compels that piece to move or be captured"
+    ],
+    "indicators_for": [
+      "The deflecting move is a check or an offer the defender cannot decline",
+      "The duty is sole — no other unit covers it"
+    ],
+    "indicators_against": [
+      "A second defender covers the same duty",
+      "The defender can decline the offer and keep its post",
+      "Accepting costs the attacker more than the target is worth"
+    ],
+    "prerequisites": [],
+    "detector": null,
+    "detectability": "heuristic",
+    "typical_confidence": "medium",
+    "false_positive_traps": []
+  },
+  "application": {
+    "typical_plans": [
+      "Name the duty before naming the deflection: what is the piece holding, and what happens the moment it stops",
+      "Attack the defender with something it must take or must answer, rather than with something it can ignore",
+      "In the endgame, deflect the king rather than a piece — a king that must answer a check cannot also stop a pawn"
+    ],
+    "typical_moves": [
+      "A sacrifice on a square the defender is obliged to capture on",
+      "A check that forces the defending piece to interpose",
+      "A pawn push attacking the piece that guards a mating square"
+    ],
+    "typical_pawn_structures": [],
+    "typical_piece_arrangements": [
+      "A single piece defending two things at once — deflection and overloading are then the same move seen twice",
+      "A back rank guarded by exactly one rook"
+    ],
+    "tactical_consequences": [
+      "Deflection and decoy are the same sacrifice read from opposite ends: deflection removes a defender from a duty, decoy puts a victim on a square, and one move is very often both",
+      "The material given is usually irrelevant to the arithmetic — what matters is whether the duty can be abandoned"
+    ],
+    "strategic_consequences": []
+  },
+  "exceptions": [
+    "A deflection fails if the deflected piece can answer the threat and keep its duty, which is the commonest miscalculation in the motif.",
+    "Deflecting a defender that has a second defender behind it achieves nothing.",
+    "If the opponent can decline, it is not a deflection — the whole idea rests on the reply being forced."
+  ],
+  "limitations": [
+    "`themesOf()` refuses to claim deflection at all, and deliberately: every cheap test for it fires where it is not true, and a wrong label is worse than a missing one because the label is the thing the reader is learning to see.",
+    "NO POSITION HAS BEEN BUILT FOR THIS RECORD. The nearest candidate this base holds is shipped puzzle mi-9f06a55404, where Qxf8+ forces Rxf8 and exf8=Q is mate, and it is not filed here because sources are divided on whether that combination is a deflection or a decoy - the rook is pulled off its guard of f8 AND pulled onto f8, and the two names describe the same move. `removing-the-defender` has the neighbouring position that IS unambiguous, where the defender is simply captured, and the difference between the two records is exactly the ambiguity that keeps this one empty.",
+    "NO AMBIGUOUS EXAMPLE, and the reason is the order of the work rather than a shortage of positions. This record has no POSITIVE example either, and an ambiguous example is a position where the concept is genuinely present and what to conclude from it is unclear - which cannot be written before there is an agreed instance of the concept being present at all. The four motifs in this base that lack a positive - `clearance`, `decoy`, `deflection`, `interference` - lack it for reasons written on each record, and the ambiguous rung waits on that. Writing one first would be asserting a doubtful instance of something this base has not yet shown a clear instance of."
+  ],
+  "misconceptions": [],
+  "relationships": {
+    "broader": [],
+    "narrower": [],
+    "related": [
+      "decoy",
+      "overloading",
+      "removing-the-defender"
+    ],
+    "contrasting": [],
+    "co_occurring": [],
+    "conflicts": []
+  },
+  "examples": [
+    {
+      "fen": "4kb1r/p2n1ppp/4q3/4p1B1/4P3/1Q6/PPP2PPP/2KR4 w k - 0 16",
+      "move": "Qb8+",
+      "move_uci": "b3b8",
+      "note": "Morphy against the Duke of Brunswick and Count Isouard, Paris 1858 - the Opera Game, 16.Qb8+. The knight on d7 is the only thing guarding d8. The queen is offered on a square where the knight must take it, and taking it is leaving the duty: 17.Rd8 mate. This is the deflection every book uses, and it is this record's FIRST positive example - the record has carried a limitation saying it had none, and the reason given there was that the base's nearest candidate was a combination sources call a decoy as often as a deflection. This one is not that: the knight is not being lured anywhere useful, it is being pulled off a square it has to hold. Some sources do call it a decoy as well, and this base does not adjudicate the word - `themesOf()` refuses to claim either motif mechanically, and that refusal stands. PROVENANCE, stated plainly. The game is famous and the move list was replayed through this base's own move generator by tools/replay_game.js - 33 plies, every one legal, which is what makes the FEN trustworthy rather than remembered. No named annotator is attached to this position for this concept, so it grounds the MASTER-GAME rung and NOT the human-grounded one: it is evidence that the concept occurs in master play, and not evidence that a person named it here. The validation ladder already draws that line for eleven other concepts and it is drawn again here.",
+      "origin_kind": "historical-game",
+      "game": "Morphy-Duke of Brunswick and Count Isouard, Paris 1858 (the Opera Game)",
+      "concept_role": "positive",
+      "side_to_move_benefits": "white",
+      "engine": {
+        "engine_id": "Stockfish 18",
+        "test_level": 3,
+        "depth": 20,
+        "threads": 10,
+        "hash_mb": 4096,
+        "multipv": 1,
+        "best_move": "b3b8",
+        "eval_cp": null,
+        "mate_in": 2,
+        "pv": [],
+        "alternatives": [],
+        "margin_cp": null,
+        "verdict": "supports",
+        "verdict_note": "Mate in 2 at depth 20, and the sacrifice is the engine's first choice. The whole line is forced: Qb8+ Nxb8 Rd8#."
+      }
+    }
+  ],
+  "counterexamples": [
+    {
+      "fen": "3rr1k1/5ppp/8/3n4/8/8/5PPP/3RR1K1 w - - 0 1",
+      "move_uci": "d1d5",
+      "note": "Registered false-positive case `a-defender-with-a-spare`, kept on the record as well as in tests/false_positive_cases.json so that the concept carries its own negative evidence. THE SURFACE PATTERN IS PRESENT: Rxd5 attacks the rook on d8 that is defending the knight, and a capture the defender must answer is the standard deflecting device. WHY IT IS NOT THE CONCEPT: There is a second rook on e8. Deflection removes a defender FROM A DUTY, and the duty here — guarding the back rank — is held by two pieces. This record's second exception says it: 'deflecting a defender that has a second defender behind it achieves nothing.' WHAT THE SYSTEM DOES: The API does not report deflection, which has no matcher at all — `themesOf()` refuses to claim it, because every cheap test for it fires where it is not true. Stockfish 18: -4.30 at depth 22, and its first move is Rxe8+ rather than Rxd5. The same board is `overloading`'s registered false-positive case, and the two records fail on it for one reason said two ways: overloading needs one piece with two duties, deflection needs a duty that ends when the piece leaves, and a spare defender destroys both.",
+      "origin_kind": "constructed-test",
+      "concept_role": "negative",
+      "false_positive_case": "a-defender-with-a-spare"
+    }
+  ],
+  "ambiguous_examples": [
+    {
+      "fen": "r1bk2nr/p2p1pNp/n2B4/1p1NP2P/6P1/3P1Q2/P1P1K3/q5b1 w - - 1 22",
+      "move": "Qf6+",
+      "move_uci": "f3f6",
+      "note": "Anderssen-Kieseritzky, London 1851 - the Immortal Game, 22.Qf6+. The knight on g8 must take the queen, and 23.Be7 is mate. The move is ONE move and it is two motifs, inseparably: the knight is pulled ONTO f6, which is a decoy, and it is pulled OFF the guard of e7, which is a deflection. Neither reading is secondary and no test distinguishes them, because the same forced capture does both at once. Read as a deflection, the duty is the knight's guard of e7 and the point is that taking on f6 abandons it. That is the stronger of the two readings - the mate is ON the square the knight was holding - and this base's positive example for the record, Morphy's 16.Qb8+, is the same idea without the ambiguity, because there the knight is pulled to a square that does nothing whatever. This base carries the position on BOTH records as ambiguous rather than choosing, which is the same decision `themesOf()` makes mechanically - it refuses to claim decoy or deflection at all, because every cheap test for them fires where they are not true and a wrong label is worse than a missing one when the label is what the reader is learning to see. The move list was replayed through this base's own move generator: 45 plies, every one legal, ending on Be7 mate.",
+      "origin_kind": "historical-game",
+      "game": "Anderssen-Kieseritzky, London 1851 (the Immortal Game)",
+      "concept_role": "ambiguous",
+      "side_to_move_benefits": "white",
+      "engine": {
+        "engine_id": "Stockfish 18",
+        "test_level": 3,
+        "depth": 20,
+        "threads": 10,
+        "hash_mb": 4096,
+        "multipv": 1,
+        "best_move": "f3f6",
+        "eval_cp": null,
+        "mate_in": 2,
+        "pv": [],
+        "alternatives": [],
+        "margin_cp": null,
+        "verdict": "ambiguous",
+        "verdict_note": "Mate in 2 at depth 20, settled at depth 15, and the sacrifice is the engine's first choice."
+      }
+    }
+  ],
+  "explanations": {
+    "by_level": {
+      "beginner": "This forces the defending piece to leave, and then the thing it was guarding is yours.",
+      "intermediate": "Deflection: the defender is dragged off its job by a threat it cannot ignore.",
+      "advanced": "Deflection (Informant theme d). Distinguish from decoy, which lures a piece onto a square rather than off a duty."
+    },
+    "by_depth": {
+      "short": "Forcing a defender away from the square or duty it has to hold.",
+      "normal": "Deflection: name the duty first — what is this piece holding, and what happens the moment it stops? Then attack it with something it must take or must answer. The piece leaves, and the thing it was guarding falls.",
+      "deep": "Morphy's 16.Qb8+ in the Opera Game is the standard example: the knight on d7 is the only guard of d8, the queen is offered where the knight must take it, and 17.Rd8 is mate. Three conditions are worth checking before claiming it. The reply must be forced — a deflection that can be declined is not one. The deflected piece must not be able to answer the threat and keep its duty, which is the commonest miscalculation in the motif. And the duty must not be held twice: deflecting a defender that has a spare achieves nothing. This base's detector refuses to claim deflection at all, because every cheap test for it fires where it is not true."
+    },
+    "hedge": "",
+    "lesson": ""
+  },
+  "terminology": {
+    "beginner_words": [
+      "force the guard away"
+    ],
+    "advanced_words": [
+      "deflection",
+      "distraction",
+      "overload"
+    ],
+    "avoid": []
+  },
+  "status": {
+    "stage": "researched",
+    "last_updated": "2026-08-31",
+    "open_questions": [],
+    "audit_notes": []
+  }
+}

@@ -1,0 +1,227 @@
+{
+  "schema_version": 2,
+  "alternate_names": [
+    "perpetual"
+  ],
+  "historical_names": [],
+  "tags": [
+    "draw",
+    "defence",
+    "rules-misconception",
+    "detector-backed"
+  ],
+  "subcategory": "saving resource",
+  "difficulty": "intermediate",
+  "knowledge_type_note": "Terminology for a TECHNIQUE, emphatically NOT an official rule, and this is the single most common rules misconception in the area. A draw by perpetual check has not been a rule of chess for a long time. What actually ends the game is threefold repetition, the fifty-move rule, or agreement. Classifying this as `official-rule` would be exactly the error the epistemic typing exists to prevent.",
+  "name_status": "established-name",
+  "history": {
+    "attributions": [],
+    "first_documented_source": "wikipedia-perpetual-check",
+    "year": null,
+    "confidence": "unknown",
+    "notes": "No coiner researched. The historically interesting question is when perpetual check ceased to be a separate rule in the Western codes, which has not been established here and is recorded as an open question rather than guessed at.",
+    "competing_claims": [],
+    "development": [
+      {
+        "era": "earlier codes",
+        "change": "Treated in some rule sets as a distinct way to draw.",
+        "source": "wikipedia-perpetual-check"
+      },
+      {
+        "era": "modern FIDE",
+        "change": "Not mentioned in the Laws at all; resolved through repetition or the fifty-move rule.",
+        "source": "fide-laws-2023"
+      },
+      {
+        "era": "other chess variants",
+        "change": "Shogi and xiangqi forbid it, with the checking side losing.",
+        "source": "wikipedia-perpetual-check"
+      }
+    ]
+  },
+  "engine_era_status": "reliable",
+  "engine_era_note": "Engines evaluate a perpetual as exactly 0.00 and find them readily, which makes this one of the few defensive ideas that is trivially verifiable. A 0.00 evaluation with a repeating check sequence in the principal variation is as close to a mechanical confirmation as this knowledge base has.",
+  "recognition": {
+    "preconditions": [
+      "A sequence of checks exists that the defending king cannot escape",
+      "The checking side cannot improve on repeating, and the defender cannot deviate without becoming worse"
+    ],
+    "indicators_for": [
+      "The evaluation is exactly 0.00 with a repeating check sequence in the principal variation",
+      "The defending king has only two squares, both reachable by the same checking piece",
+      "The checking side is materially lost, so a draw is a success",
+      "A queen or a knight-plus-queen battery near an exposed king"
+    ],
+    "indicators_against": [
+      "The defender has an interposition that blocks the checks with gain",
+      "The king can step to a square outside the checking pattern",
+      "The checking side is BETTER, in which case the perpetual is a failure, not a resource",
+      "A check can be answered by a counter-check, or by capturing the checking piece"
+    ],
+    "prerequisites": [
+      "check",
+      "threefold-repetition"
+    ],
+    "detector": "puzzle_rules.js: checks >= 2 and final eval within 60cp of level",
+    "detectability": "mechanical",
+    "typical_confidence": "high",
+    "false_positive_traps": [
+      "A series of checks that merely delays the end is not a perpetual. The test is whether the position REPEATS, not whether checks are available.",
+      "The repo's detector is a proxy — two or more checks and a near-level final evaluation — which will also fire on a position that is simply drawn after some checks. Treat the tag as a candidate, not a finding.",
+      "Reporting a perpetual as a good outcome for the side that was winning inverts the meaning entirely."
+    ]
+  },
+  "application": {
+    "typical_plans": [
+      "When lost, look for a check the king cannot escape before looking for anything else",
+      "When winning, spend a tempo removing the enemy queen's checking squares before converting",
+      "Sacrifice material to expose the enemy king enough that the checks never run out"
+    ],
+    "typical_moves": [
+      "A queen check on a square from which it can shuttle between two checking squares"
+    ],
+    "typical_pawn_structures": [
+      "A king whose pawn cover has been stripped, on an open file or diagonal"
+    ],
+    "typical_piece_arrangements": [
+      "Queen alone against an exposed king",
+      "Queen and knight cooperating"
+    ],
+    "tactical_consequences": [
+      "Converts a lost position into a draw"
+    ],
+    "strategic_consequences": [
+      "A standing reason not to strip your own king's cover even when attacking"
+    ]
+  },
+  "exceptions": [
+    "It is not a rule and cannot be claimed as one. The claimable rules are threefold repetition and the fifty-move rule.",
+    "For the side that stands better a perpetual is a failure, not a resource.",
+    "Other chess variants forbid it outright, so it is not a necessary feature of chess-like games."
+  ],
+  "limitations": [
+    "The engine test (0.00 with repeating checks in the PV) is reliable; the repo's two-checks-and-level heuristic is not, and will over-report."
+  ],
+  "misconceptions": [
+    "That perpetual check is a rule of chess. It is not, and has not been for a long time.",
+    "That you can 'claim a perpetual'. You claim threefold repetition or the fifty-move rule.",
+    "That any long series of checks is a perpetual."
+  ],
+  "relationships": {
+    "broader": [],
+    "narrower": [],
+    "related": [
+      "threefold-repetition",
+      "fifty-move-rule",
+      "check",
+      "stalemate"
+    ],
+    "contrasting": [],
+    "co_occurring": [
+      "sacrifice"
+    ],
+    "conflicts": []
+  },
+  "examples": [
+    {
+      "fen": "5k2/2N2r2/3p4/1p6/3P2p1/2P1q1p1/PP3NQ1/6K1 w - - 0 41",
+      "note": "Real position from the shipped middlegame ladder (puzzle mi-5f4be05ec3). White is losing and saves the game with Qa8+. The engine's principal variation is the perpetual itself: Qa8+ Kg7, Ne8+ Kh8, Nf6 Kg7, Ne8+ — the position repeats and neither side can deviate.",
+      "origin_kind": "puzzle",
+      "concept_role": "positive",
+      "side_to_move_benefits": "white",
+      "engine": {
+        "engine_id": "Stockfish 18",
+        "test_level": 3,
+        "depth": 30,
+        "threads": 10,
+        "hash_mb": 2048,
+        "multipv": 4,
+        "best_move": "g2a8",
+        "eval_cp": 0,
+        "mate_in": null,
+        "pv": [
+          "g2a8",
+          "f8g7",
+          "c7e8",
+          "g7h8",
+          "e8f6",
+          "h8g7",
+          "f6e8"
+        ],
+        "alternatives": [
+          {
+            "move": "c7e6",
+            "eval_cp": null,
+            "mate_in": -13
+          },
+          {
+            "move": "g2g3",
+            "eval_cp": null,
+            "mate_in": -3
+          }
+        ],
+        "margin_cp": null,
+        "verdict": "supports",
+        "verdict_note": "As clean as this concept gets. Qa8+ evaluates to exactly 0.00 and the PV contains the repeating check cycle. Every alternative tested is a forced loss for White — Ne6+ is mate in 13 against, Qg3 is mate in 3 against. So the perpetual converts a lost position into a draw, which is precisely the concept's claim. Settled from depth 1, i.e. the engine never changed its mind."
+      }
+    }
+  ],
+  "counterexamples": [
+    {
+      "fen": "6k1/5pp1/7p/8/8/8/5PPP/R5K1 w - - 0 1",
+      "note": "Registered false-positive case `checks-available-in-a-winning-position`, kept on the record as well as in tests/false_positive_cases.json so that the concept carries its own negative evidence. THE SURFACE PATTERN IS PRESENT: White's rook can check the black king along the eighth rank and follow it about indefinitely. A stream of checks the defender can never escape is what a perpetual is. WHY IT IS NOT THE CONCEPT: Two of this record's conditions fire at once. The first trap: \"A series of checks that merely delays the end is not a perpetual. The test is whether the position REPEATS, not whether checks are available.\" And the third indicator_against: \"The checking side is BETTER, in which case the perpetual is a failure, not a resource.\" White is a whole rook up. WHAT THE SYSTEM DOES: The API does not report perpetual-check. Stockfish 18 at depth 26 says +56.95: taking a draw by repetition here would be one of the worst decisions available on the board. This record's third trap is the one that matters most and it is about the reader rather than the detector - 'reporting a perpetual as a good outcome for the side that was winning inverts the meaning entirely' - which is why the concept must be reported with the side named or not at all.",
+      "origin_kind": "constructed-test",
+      "concept_role": "negative",
+      "false_positive_case": "checks-available-in-a-winning-position"
+    }
+  ],
+  "ambiguous_examples": [],
+  "explanations": {
+    "by_level": {
+      "beginner": "White keeps checking and the black king can never get away, so the same position keeps happening and the game is a draw.",
+      "intermediate": "Perpetual check. Note it is not a rule in itself — the checks force the position to repeat, and threefold repetition is what draws.",
+      "advanced": "A perpetual: 0.00 with a repeating check cycle. Worth hunting for first whenever a position turns bad, and worth preventing before converting when you are the one winning.",
+      "master": "Not a rule; a mechanism producing a claimable repetition. The practical corollary is prophylactic — before converting, spend the tempo that removes the enemy queen's checking squares."
+    },
+    "by_depth": {
+      "short": "The checks never end, so the position repeats and the game is drawn.",
+      "normal": "Perpetual check: a sequence of checks the king cannot escape. Strictly it is not a drawing rule — it forces the same position to appear three times, and threefold repetition is the rule that ends the game. In practice players agree the draw long before that.",
+      "deep": "An unending series of checks. Widely believed to be a rule of chess, and it is not: FIDE's Laws do not mention it, and a perpetual reaches a draw through threefold repetition or the fifty-move rule. That its status is a choice rather than a necessity is clear from shogi and xiangqi, where giving perpetual check loses. Its value is asymmetric — for the defender it turns a loss into half a point, and for the attacker it is the thing to prevent before starting to convert. Engines make it unusually easy to confirm: exactly 0.00 with a repeating check cycle in the principal variation."
+    },
+    "hedge": "",
+    "lesson": "When your position collapses, look for a check the enemy king cannot escape before you look for anything else. And when you are winning, spend the tempo that takes those checks away."
+  },
+  "terminology": {
+    "beginner_words": [
+      "endless checks",
+      "the same position keeps happening"
+    ],
+    "advanced_words": [
+      "perpetual check",
+      "repetition",
+      "drawing resource"
+    ],
+    "avoid": [
+      "draw by perpetual check (as a rule)",
+      "claim a perpetual"
+    ]
+  },
+  "status": {
+    "stage": "researched",
+    "last_updated": "2026-08-31",
+    "open_questions": [],
+    "audit_notes": []
+  },
+  "id": "perpetual-check",
+  "canonical_name": "Perpetual check",
+  "category": "drawing-mechanisms",
+  "knowledge_type": "terminology",
+  "definition_short": "An unending series of checks the defender cannot escape. It is not itself a drawing rule — it forces a repetition, and the repetition is what draws.",
+  "definition_long": "One side gives check after check, the enemy king can never escape the sequence, and neither side can profitably deviate. In practice this saves a lost position, and it is the commonest resource for the defending side in sharp middlegames.\n\nTHE RULES POSITION, which is widely misunderstood. Wikipedia states it plainly: 'A draw by perpetual check is no longer one of the rules of chess, but will eventually allow a draw claim by either threefold repetition or the fifty-move rule.' In practice players agree the draw long before either triggers. So a perpetual is a MECHANISM that produces a position covered by a rule; it is not a rule.\n\nThat the status is a rules CHOICE rather than a necessity is shown by other games: shogi and xiangqi forbid perpetual check, and giving it loses.\n\nIts value is asymmetric. For the defender it converts a loss into a half point, which is why it is worth hunting for the instant a position turns bad. For the stronger side it is a danger to avoid, and a reason to keep the enemy queen off checking squares before starting to convert.",
+  "sources": [
+    "wikipedia-perpetual-check",
+    "fide-laws-2023",
+    "fide-laws-2023"
+  ],
+  "source_confidence": "high"
+}

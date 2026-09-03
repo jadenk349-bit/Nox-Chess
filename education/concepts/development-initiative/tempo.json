@@ -1,0 +1,156 @@
+{
+  "schema_version": 2,
+  "alternate_names": [
+    "a move",
+    "time"
+  ],
+  "historical_names": [],
+  "tags": [
+    "time",
+    "foundational"
+  ],
+  "subcategory": "time",
+  "difficulty": "beginner",
+  "knowledge_type_note": "A unit of measurement, not a principle. It is what initiative is counted in.",
+  "name_status": "established-name",
+  "history": {
+    "attributions": [],
+    "first_documented_source": null,
+    "year": null,
+    "confidence": "unknown",
+    "notes": "Ordinary chess vocabulary of long standing; no coinage researched or claimed.",
+    "competing_claims": [],
+    "development": []
+  },
+  "engine_era_status": "reliable",
+  "engine_era_note": "Engines handle time implicitly through search rather than as a term, and they are notably less impressed by tempo-counting than opening books are — a 'lost tempo' that produces a better structure is often simply the right move.",
+  "recognition": {
+    "preconditions": [
+      "A move is being assessed for what it costs or gains in time"
+    ],
+    "indicators_for": [
+      "The move develops or improves a piece AND forces a reply",
+      "The opponent's forced reply does nothing for them",
+      "A piece is being moved twice in the opening without compensation — a lost tempo"
+    ],
+    "indicators_against": [
+      "The 'threat' forcing the reply is not real, so no tempo is gained",
+      "The forced reply actually improves the opponent's position — a common trap",
+      "The position is closed, where time matters little"
+    ],
+    "prerequisites": [],
+    "detector": null,
+    "detectability": "human-only",
+    "typical_confidence": "low",
+    "false_positive_traps": [
+      "Chasing a piece with a threat it WANTED to answer is not gaining a tempo — the classic case is driving a piece to a better square with an attack.",
+      "Counting tempi in a closed position, where they may be worth nothing.",
+      "Treating 'moved the same piece twice' as automatically a lost tempo. This is a registered false-positive case: a capture, an escape, or a decisively better square all justify it."
+    ]
+  },
+  "application": {
+    "typical_plans": [
+      "Develop with threats so each move does two jobs",
+      "In the endgame, keep a spare pawn move in reserve as a tempo",
+      "Triangulate to lose a tempo deliberately"
+    ],
+    "typical_moves": [
+      "A developing move that attacks something",
+      "A spare pawn move held back in a pawn ending"
+    ],
+    "typical_pawn_structures": [],
+    "typical_piece_arrangements": [],
+    "tactical_consequences": [],
+    "strategic_consequences": [
+      "Accumulated tempi become a lead in development and then the initiative"
+    ]
+  },
+  "exceptions": [
+    "'Losing a tempo' is a virtue in the endgame, where triangulation aims at exactly that.",
+    "A tempo has no fixed value; the three-tempi-per-pawn heuristic is an opening rule of thumb only.",
+    "Moving the same piece twice is not automatically a lost tempo."
+  ],
+  "limitations": [
+    "Not mechanically detectable. Whether a move 'gains a tempo' depends on whether the threat is real and whether the reply helps the opponent."
+  ],
+  "misconceptions": [
+    "That a tempo is worth a third of a pawn. It has no fixed value.",
+    "That gaining tempi is always good — driving an enemy piece to a better square costs you more than it gains.",
+    "That tempo and initiative are the same thing."
+  ],
+  "relationships": {
+    "broader": [],
+    "narrower": [],
+    "related": [
+      "initiative",
+      "triangulation",
+      "zugzwang",
+      "opening-development"
+    ],
+    "contrasting": [],
+    "co_occurring": [
+      "initiative"
+    ],
+    "conflicts": []
+  },
+  "examples": [],
+  "counterexamples": [
+    {
+      "fen": "r1bqkbnr/1ppp1ppp/p1n5/4p3/B3P3/5N2/PPPP1PPP/RNBQK2R b KQkq - 1 4",
+      "note": "Registered false-positive case `the-same-piece-moved-twice`, kept on the record as well as in tests/false_positive_cases.json so that the concept carries its own negative evidence. THE SURFACE PATTERN IS PRESENT: White's bishop has gone b5 then a4: the same piece moved twice in the opening, and Black has developed a piece in between. By the rule as it is usually taught, White has lost a tempo. WHY IT IS NOT THE CONCEPT: This record's third trap, and it is the one the record itself says is registered: \"Treating 'moved the same piece twice' as automatically a lost tempo. This is a registered false-positive case: a capture, an escape, or a decisively better square are all reasons to move it again.\" Here it is an escape — Black played ...a6 to attack the bishop — and the tempo Black spent attacking it is the same tempo White spent retreating. WHAT THE SYSTEM DOES: WRITTEN BECAUSE THE RECORD CLAIMED IT ALREADY EXISTED. The `tempo` record said 'this is a registered false-positive case' and no case with that concept was in this file — a claim the file did not back, which is the same defect class as an `implements` string claiming what the code does not do. A test now asserts that any record using that phrase has a case. The position is the Ruy Lopez after 4.Ba4, the most-played opening in the history of the game; Stockfish 18 at depth 22 says -0.43 from Black's side, an ordinary opening edge for White. The API reports nothing about tempo here, correctly: this base has no tempo matcher, because counting tempi requires knowing whether the forced reply was one the opponent wanted, and that is not on the board.",
+      "origin_kind": "constructed-test",
+      "concept_role": "negative",
+      "false_positive_case": "the-same-piece-moved-twice"
+    }
+  ],
+  "ambiguous_examples": [],
+  "explanations": {
+    "by_level": {
+      "beginner": "A tempo is one move's worth of time. You gain one when your move improves your position and forces them to answer with a move that does nothing for them.",
+      "intermediate": "A tempo. Check the threat is real and that answering it does not actually help them — that is where tempo-counting usually goes wrong.",
+      "advanced": "One unit of time. Note the sign flips in the endgame: losing a tempo by triangulation is the goal there, not a cost.",
+      "master": "Tempi are only meaningful relative to the position's sharpness. In a locked structure they are close to worthless; in an open one a single move decides."
+    },
+    "by_depth": {
+      "short": "One move's worth of time.",
+      "normal": "A tempo is one move considered as time. Gaining one means your move improves your position while forcing a reply that does not improve theirs — the move has to do two jobs.",
+      "deep": "The unit initiative is counted in. Gaining a tempo requires a move that both improves your position and compels a reply that does nothing for the opponent; the common error is 'gaining' a tempo by driving an enemy piece somewhere it preferred to be. The word is also used with the opposite sign in the endgame, where triangulation is described as losing a move on purpose in order to return the same position with the opponent to play. There is no fixed exchange rate with material: the familiar three-tempi-per-pawn figure is an opening heuristic, and in a closed position tempi may be worth nothing at all."
+    },
+    "hedge": "",
+    "lesson": "A move gains a tempo only if the reply it forces is one your opponent did not want to make. Check that before congratulating yourself."
+  },
+  "terminology": {
+    "beginner_words": [
+      "a move's worth of time",
+      "making them waste a move"
+    ],
+    "advanced_words": [
+      "tempo",
+      "gaining a tempo",
+      "losing a tempo",
+      "reserve tempo",
+      "triangulation"
+    ],
+    "avoid": [
+      "a tempo is worth a third of a pawn"
+    ]
+  },
+  "status": {
+    "stage": "researched",
+    "last_updated": "2026-08-31",
+    "open_questions": [],
+    "audit_notes": []
+  },
+  "id": "tempo",
+  "canonical_name": "Tempo",
+  "category": "tempo",
+  "knowledge_type": "terminology",
+  "definition_short": "One move, considered as a unit of time. To 'gain a tempo' is to improve your position while forcing a reply that does not.",
+  "definition_long": "A single move regarded as a unit of time. Gaining a tempo means making a move that does two jobs at once — it improves your position AND compels a reply that does not improve theirs. Losing a tempo means spending a move that achieves nothing, or moving the same piece twice for no gain.\n\nThe relationship to INITIATIVE is the thing to keep straight, and the two are constantly conflated: a tempo is one unit, the initiative is the sustained state built out of them. Tempi are the coins; the initiative is what you have when you keep spending them profitably.\n\nConfusingly, 'losing a tempo' is also used APPROVINGLY in the endgame, where triangulation is described as losing a move on purpose in order to hand the same position back with the opponent to play. The two usages are opposite in sign and both are standard.\n\nA tempo has NO fixed value. The common rule of thumb that three tempi are worth a pawn is a rough opening heuristic and nothing more: in a sharp position one move decides the game, and in a locked position several are worth nothing at all.",
+  "sources": [
+    "chessworld-initiative",
+    "playchessonline-tempo-initiative",
+    "spielmann-art-of-sacrifice"
+  ],
+  "source_confidence": "medium"
+}

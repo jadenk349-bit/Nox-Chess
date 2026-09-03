@@ -1,0 +1,148 @@
+{
+  "schema_version": 2,
+  "alternate_names": [],
+  "historical_names": [],
+  "tags": [
+    "practical"
+  ],
+  "subcategory": "practical",
+  "difficulty": "intermediate",
+  "knowledge_type_note": "Advice about playing a game rather than about a position; the distinction is enforced because this system explains positions.",
+  "name_status": "established-name",
+  "history": {
+    "attributions": [
+      {
+        "relation": "later-associated-with",
+        "person": "C.J.S. Purdy",
+        "year": null,
+        "note": "Quoted for the stance that the practical question is the best move rather than the correct assessment.",
+        "confidence": "medium"
+      }
+    ],
+    "first_documented_source": "exeter-theory-of-steinitz",
+    "year": null,
+    "confidence": "low",
+    "notes": "No single tradition; this record collects the practical stance from several sources already held.",
+    "competing_claims": [],
+    "development": []
+  },
+  "engine_era_status": "reliable",
+  "engine_era_note": "Engines sharpened the objective/practical distinction by making the objective half settleable. Before that the two were routinely argued as one thing.",
+  "recognition": {
+    "preconditions": [
+      "A game is being played by people"
+    ],
+    "indicators_for": [],
+    "indicators_against": [],
+    "prerequisites": [],
+    "detector": null,
+    "detectability": "human-only",
+    "typical_confidence": "low",
+    "false_positive_traps": [
+      "Practical advice is not a property of a position and must never be offered as the reason a move is good. This system sees a board, not a player, a clock or a tournament table.",
+      "A line being a good practical try is not a claim that it is sound, and the two must be reported separately."
+    ]
+  },
+  "application": {
+    "typical_plans": [
+      "Ask what the best move is rather than who stands better",
+      "Choose complexity or simplification according to who benefits from a mistake",
+      "Report objective soundness and practical value as two separate things"
+    ],
+    "typical_moves": [],
+    "typical_pawn_structures": [],
+    "typical_piece_arrangements": [],
+    "tactical_consequences": [],
+    "strategic_consequences": []
+  },
+  "exceptions": [
+    "In correspondence or analysis, where time and reference are unlimited, practical considerations largely disappear and only the objective claim remains."
+  ],
+  "limitations": [
+    "Most circulating practical advice is untested, and this record deliberately excludes what it cannot support.",
+    "This system has no access to the clock, the opponent or the standings, and can give no practical advice at all.",
+    "NO AMBIGUOUS EXAMPLE, and a FEN is not the right kind of evidence for one here. An ambiguous example in this base is a POSITION where the concept is genuinely present and what to conclude from it is unclear - the pattern is on the board and the reading of it is not. This record's subject is not on the board: its `recognition.detectability` is `human-only`, and what it describes is something a player does at the board rather than something the board contains. A position could illustrate the CONSEQUENCE of doing it well or badly, and that is a different claim, and attaching a FEN here would be evidence for the wrong proposition. Recorded rather than filled: tools/depth_report.py still counts this concept as missing the item, and the completion assessment carries the gap.",
+    "NO REGISTERED FALSE-POSITIVE CASE, and a FEN is not the right instrument for one here. A case in tests/false_positive_cases.json is a POSITION where the concept's surface pattern is present and the concept is not, replayed as an assertion so the system can be shown declining the error. This record's `recognition.detectability` is `human-only`: what it describes is something a player does rather than something a board contains, so there is no surface pattern for a position to carry and nothing for the system to decline. The conditions this record states are read and answered in `limitations` and in the trap audit instead. Recorded rather than filled: tools/depth_report.py still counts this concept as missing the item.",
+    "NO MASTER-GAME POSITION, and the same reason that keeps this record from carrying an ambiguous example or a false-positive case applies: `recognition.detectability` is `human-only`, and what this record describes is something a player does rather than something a board contains. A game position could show the CONSEQUENCE of doing it well or badly, which is a different claim from the one this record makes. tools/depth_report.py still counts the item as missing."
+  ],
+  "misconceptions": [
+    "That practical and objective advice are the same kind of claim. One depends on who is playing and the other does not.",
+    "That a practically effective line is thereby sound. The engine verdict is the ceiling and practical results are the floor."
+  ],
+  "relationships": {
+    "broader": [],
+    "narrower": [
+      "time-management",
+      "practical-psychology"
+    ],
+    "related": [
+      "time-management",
+      "practical-psychology",
+      "defensive-principles",
+      "gambit",
+      "positional-evaluation",
+      "calculation"
+    ],
+    "contrasting": [],
+    "co_occurring": [],
+    "conflicts": []
+  },
+  "examples": [],
+  "counterexamples": [],
+  "ambiguous_examples": [],
+  "explanations": {
+    "by_level": {
+      "beginner": "Some advice is about the position and some is about playing a game against a person with a clock. They are different things.",
+      "intermediate": "Practical advice depends on who is playing; objective advice does not. Keep them apart.",
+      "advanced": "Purdy: the question that matters is what your best move is, not who has the theoretical advantage.",
+      "master": "An engine verdict is the ceiling of a line's soundness and practical results are its floor; report both rather than blending them."
+    },
+    "by_depth": {
+      "short": "Advice about playing a game, as distinct from the position.",
+      "normal": "Guidance that depends on the players, the clock and the situation rather than on the board. It is kept separate from objective claims on purpose, because a system that explains positions can see the board and cannot see any of the rest.",
+      "deep": "A deliberately small record, because most practical chess advice is untested and this base carries only what it can support. The organising distinction is that an objective claim is about the position and holds regardless of who is playing, while a practical claim is about the game. What is actually supported comes from the research on the neighbouring concepts: spend the clock where the position is unclear, expect risk aversion when short of time and over-reach after an error, and prefer a fast move to a good slow one under real time pressure. The standing caveat is that an engine verdict is the ceiling of a line's soundness and practical results are its floor."
+    },
+    "hedge": "Practical guidance depends on the player, the clock and the occasion; this system sees none of those and records this for vocabulary rather than for application.",
+    "lesson": "Keep the two claims apart: what is true of the position, and what is wise for a person playing it."
+  },
+  "terminology": {
+    "beginner_words": [
+      "playing the game, not just the position"
+    ],
+    "advanced_words": [
+      "practical chances",
+      "objective assessment",
+      "soundness ceiling"
+    ],
+    "avoid": [
+      "objectively best (as a practical recommendation)"
+    ]
+  },
+  "status": {
+    "stage": "researched",
+    "last_updated": "2026-09-01",
+    "open_questions": [],
+    "audit_notes": []
+  },
+  "id": "practical-principles",
+  "canonical_name": "Practical principles",
+  "category": "practical-principles",
+  "knowledge_type": "practical-guideline",
+  "definition_short": "Guidance about how to play a game — the clock, the opponent, your own error patterns — as distinct from what is true of the position.",
+  "definition_long": "A deliberately small record, because most of what circulates as practical chess advice is untested and this base carries only what it can support.\n\nTHE ONE ORGANISING DISTINCTION: an OBJECTIVE claim is about the position and is true regardless of who is playing; a PRACTICAL claim is about the game and depends on the players, the clock and the tournament situation. Both are legitimate, and confusing them is how a system explaining a move ends up asserting something it cannot see. This system explains positions, so practical advice is recorded here for vocabulary and is never attached to a move.\n\nWHAT IS ACTUALLY SUPPORTED, from the research recorded on the neighbouring concepts:\n- Spend the clock in the middlegame and where the position is unclear, because that is where errors compound rather than add.\n- Expect risk aversion when short of time, and expect over-reach immediately after a mistake.\n- Under severe time pressure a fast move beats a good slow one — measurably.\n\nPURDY'S POINT is worth keeping as the practical stance: 'the question that matters to you in actual play is simply, What is my best move?, and if you can decide without being sure who has the theoretical advantage, so much the better.' Assessment serves the move; it is not the product.\n\nAND THE ENGINE-ERA CAVEAT that runs through this base: an engine verdict is the CEILING of a line's soundness and practical results are its floor. A gambit refuted only by a narrow computer defence is a poor objective choice and can be an excellent practical one, because the refutation has to be found at the board. This base states the objective verdict and flags where the practical value diverges, rather than blurring the two.",
+  "sources": [
+    "exeter-theory-of-steinitz",
+    "chessmind-gambit",
+    "turzo-saving-bad-positions",
+    "sigman-response-times-2010"
+  ],
+  "source_confidence": "medium",
+  "validation_na": {
+    "positive_example": "N/A rather than missing. A validation item of this kind is a POSITION, and this record's subject is not a position: `recognition.detectability` is `human-only`, and what it describes is something a player does at the board rather than something the board contains. A FEN could show the CONSEQUENCE of doing it well or badly, which is a different claim from the one this record makes, so attaching one would be evidence for the wrong proposition. The record is validated the way its own claims can be: by sources, by attribution, by stated recognition criteria, and by the conditions its trap list states being read against the code in state/TRAPS.md.",
+    "negative_example": "N/A rather than missing. A validation item of this kind is a POSITION, and this record's subject is not a position: `recognition.detectability` is `human-only`, and what it describes is something a player does at the board rather than something the board contains. A FEN could show the CONSEQUENCE of doing it well or badly, which is a different claim from the one this record makes, so attaching one would be evidence for the wrong proposition. The record is validated the way its own claims can be: by sources, by attribution, by stated recognition criteria, and by the conditions its trap list states being read against the code in state/TRAPS.md.",
+    "ambiguous_example": "N/A rather than missing. A validation item of this kind is a POSITION, and this record's subject is not a position: `recognition.detectability` is `human-only`, and what it describes is something a player does at the board rather than something the board contains. A FEN could show the CONSEQUENCE of doing it well or badly, which is a different claim from the one this record makes, so attaching one would be evidence for the wrong proposition. The record is validated the way its own claims can be: by sources, by attribution, by stated recognition criteria, and by the conditions its trap list states being read against the code in state/TRAPS.md.",
+    "engine_validation": "N/A rather than missing. A validation item of this kind is a POSITION, and this record's subject is not a position: `recognition.detectability` is `human-only`, and what it describes is something a player does at the board rather than something the board contains. A FEN could show the CONSEQUENCE of doing it well or badly, which is a different claim from the one this record makes, so attaching one would be evidence for the wrong proposition. The record is validated the way its own claims can be: by sources, by attribution, by stated recognition criteria, and by the conditions its trap list states being read against the code in state/TRAPS.md.",
+    "master_game": "N/A rather than missing. A validation item of this kind is a POSITION, and this record's subject is not a position: `recognition.detectability` is `human-only`, and what it describes is something a player does at the board rather than something the board contains. A FEN could show the CONSEQUENCE of doing it well or badly, which is a different claim from the one this record makes, so attaching one would be evidence for the wrong proposition. The record is validated the way its own claims can be: by sources, by attribution, by stated recognition criteria, and by the conditions its trap list states being read against the code in state/TRAPS.md.",
+    "false_positive_test": "N/A rather than missing. A validation item of this kind is a POSITION, and this record's subject is not a position: `recognition.detectability` is `human-only`, and what it describes is something a player does at the board rather than something the board contains. A FEN could show the CONSEQUENCE of doing it well or badly, which is a different claim from the one this record makes, so attaching one would be evidence for the wrong proposition. The record is validated the way its own claims can be: by sources, by attribution, by stated recognition criteria, and by the conditions its trap list states being read against the code in state/TRAPS.md."
+  }
+}

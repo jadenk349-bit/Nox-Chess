@@ -1,0 +1,201 @@
+{
+  "schema_version": 2,
+  "id": "overloading",
+  "canonical_name": "Overloading",
+  "alternate_names": [
+    "overworked piece",
+    "overloaded defender"
+  ],
+  "historical_names": [],
+  "category": "tactical-motifs",
+  "subcategory": "material-winning motif",
+  "tags": [],
+  "knowledge_type": "tactical-motif",
+  "knowledge_type_note": "Motif (D). Its relationship to the strategic principle of two weaknesses is a genuine structural link, not an analogy of convenience.",
+  "name_status": "established-name",
+  "difficulty": "intermediate",
+  "definition_short": "A piece with two defensive jobs cannot do both; take one and the other collapses.",
+  "definition_long": "A single unit is the only defender of two things. The tactic exploits the fact that answering one threat abandons the other. It is listed as a category in the Encyclopedia of Chess Middlegames.\n\nOverloading is the tactical form of the same logic that the PRINCIPLE OF TWO WEAKNESSES applies strategically: finite defensive resources stretched across more duties than they can cover. The difference is timescale — overloading resolves in a move or two, two weaknesses over dozens.",
+  "history": {
+    "attributions": [],
+    "first_documented_source": "informant-encyclopedia-combinations",
+    "year": null,
+    "confidence": "unknown",
+    "notes": "Tactical motifs are descriptive pattern names of long and mostly anonymous usage. The Chess Informant classification is cited as a standard enumeration, not as the origin of the term.",
+    "competing_claims": [],
+    "development": []
+  },
+  "engine_era_status": "unassessed",
+  "engine_era_note": "",
+  "sources": [
+    "informant-encyclopedia-combinations",
+    "wikipedia-chess-tactic",
+    "chesstempo-tactical-motifs",
+    "chesscom-tactics-38"
+  ],
+  "source_confidence": "high",
+  "recognition": {
+    "preconditions": [
+      "One enemy unit is the sole defender of two distinct targets or duties"
+    ],
+    "indicators_for": [
+      "Removing or diverting that unit leaves both targets loose",
+      "The two duties require the piece to be on different squares"
+    ],
+    "indicators_against": [
+      "A second defender covers one of the duties",
+      "The piece can perform both duties from one square",
+      "Capturing the overloaded piece is answered by a recapture that restores the defence"
+    ],
+    "prerequisites": [],
+    "detector": null,
+    "detectability": "heuristic",
+    "typical_confidence": "medium",
+    "false_positive_traps": []
+  },
+  "application": {
+    "typical_plans": [],
+    "typical_moves": [],
+    "typical_pawn_structures": [],
+    "typical_piece_arrangements": [],
+    "tactical_consequences": [],
+    "strategic_consequences": []
+  },
+  "exceptions": [
+    "A defender that appears overloaded may be adequate if one 'duty' was never real."
+  ],
+  "limitations": [
+    "Depends on enumerating duties, which is a functional judgement.",
+    "NO MASTER-GAME POSITION YET. This concept has no matcher, so the scan that supplied master positions to eleven other records - five famous games replayed and analysed position by position - could not nominate one here: the API never reports the concept, so there is nothing for a scan to find. Identifying an instance in a master game means reading the game, which is research rather than tooling, and it has not been done. Recorded rather than filled."
+  ],
+  "misconceptions": [],
+  "relationships": {
+    "broader": [],
+    "narrower": [],
+    "related": [
+      "deflection",
+      "removing-the-defender",
+      "two-weaknesses"
+    ],
+    "contrasting": [],
+    "co_occurring": [],
+    "conflicts": []
+  },
+  "examples": [
+    {
+      "fen": "2r1r1k1/1p3ppp/3p1b2/pq1P4/6Q1/5N2/PP2RPPP/4R1K1 w - - 2 19",
+      "move": "Qc4",
+      "move_uci": "g4c4",
+      "note": "Adams-Torre, New Orleans 1920, 19.Qc4 - the first of five consecutive queen offers, none of which can be accepted. The state that makes them work is an overload: Black's queen is the only thing defending the rook on e8, and the rook on e8 is the only thing stopping Rxe8+ Rxe8 Rxe8 mate. Every time White attacks the queen, the queen must both move and keep guarding e8, and it cannot do both. That is this record's definition exactly - one piece with two jobs - and it is why the game is the standard illustration. The engine's own line IS the game: Qc4 Qd7 Qc7 Qb5 a4 Qxa4 Re4. This base reports nothing about overloading here, correctly, because the concept has no matcher: whether a piece is asked to do both AT ONCE is a property of what the attacker can arrange rather than of the board. The move list was replayed through this base's own move generator - 45 plies, every one legal. No named annotator is attached to this position for this concept, so it grounds the MASTER-GAME rung and not the human-grounded one.",
+      "origin_kind": "historical-game",
+      "game": "Adams-Torre, New Orleans 1920",
+      "concept_role": "positive",
+      "side_to_move_benefits": "white",
+      "engine": {
+        "engine_id": "Stockfish 18",
+        "test_level": 3,
+        "depth": 22,
+        "threads": 10,
+        "hash_mb": 4096,
+        "multipv": 2,
+        "best_move": "g4c4",
+        "eval_cp": 427,
+        "mate_in": null,
+        "pv": [],
+        "alternatives": [],
+        "margin_cp": 411,
+        "verdict": "supports",
+        "verdict_note": "+4.27 for the queen offer against +0.16 for a quiet move at depth 22 with two lines - four pawns of difference, and the engine's principal variation is the game continuation move for move. The overload is worth the whole advantage."
+      }
+    },
+    {
+      "fen": "3r2k1/5ppp/8/3n4/8/8/5PPP/3RR1K1 w - - 0 1",
+      "move": "Rxd5",
+      "move_uci": "d1d5",
+      "note": "Constructed. The rook on d8 has two jobs: it defends the knight on d5 down the file, and it is the only guard of the back rank. Rxd5 asks it to do both at once - if it recaptures it leaves e8, and Re8 is mate. The engine's own line is the demonstration: after Rxd5 it plays ...Rb8 rather than ...Rxd5, which is to say Black DECLINES the recapture and simply loses a knight. That is what overloading means, and it is why this base refuses to detect the motif mechanically: the geometry here is a rook on a file, and what makes it overloading is a mate on a different file that has not happened yet.",
+      "origin_kind": "constructed-test",
+      "concept_role": "positive",
+      "side_to_move_benefits": "white",
+      "engine": {
+        "engine_id": "Stockfish 18",
+        "test_level": 3,
+        "depth": 22,
+        "threads": 10,
+        "hash_mb": 4096,
+        "multipv": 1,
+        "best_move": "d1d5",
+        "eval_cp": 673,
+        "mate_in": null,
+        "pv": [],
+        "alternatives": [],
+        "margin_cp": null,
+        "verdict": "supports",
+        "verdict_note": "+6.73 at depth 22, settled at depth 14, and the engine plays Rxd5. The size is the evidence: a knight plus the refused recapture, in a position where material was level before the move."
+      }
+    }
+  ],
+  "counterexamples": [
+    {
+      "fen": "3rr1k1/5ppp/8/3n4/8/8/5PPP/3RR1K1 w - - 0 1",
+      "move_uci": "d1d5",
+      "note": "Registered false-positive case `two-defenders-for-two-duties`, kept on the record as well as in tests/false_positive_cases.json so that the concept carries its own negative evidence. THE SURFACE PATTERN IS PRESENT: A black rook on d8 defends the knight on d5 down the file, the black king is boxed in on the back rank, and White has rooks on d1 and e1. Every piece of the overloading picture is on the board, and it is this record's positive example with one man added. WHY IT IS NOT THE CONCEPT: The one man added is a second black rook, on e8. Overloading is a claim that ONE piece is asked to do two jobs at once; here there are two pieces and two jobs. After Rxd5 Rxd5, the rook on e8 still guards the back rank and there is no mate. WHAT THE SYSTEM DOES: The API does not report overloading. Stockfish 18 says -4.30 at depth 22 and its first move is Rxe8+, trading into a position where Black is a knight up — so Rxd5, the move that works in the positive example, is simply a blunder here. Read against this record's positive at +6.73: one rook added to the defence and the same move goes from winning a knight to losing one. This record has no matcher, and the reason is on the record — an overload is a claim about being asked to do both at once, which is a property of what the attacker can arrange rather than of what is on the board.",
+      "origin_kind": "constructed-test",
+      "concept_role": "negative",
+      "false_positive_case": "two-defenders-for-two-duties"
+    }
+  ],
+  "ambiguous_examples": [
+    {
+      "fen": "3r2k1/5ppp/8/3n4/8/5N2/5PPP/3R2K1 w - - 0 1",
+      "note": "The overload configuration exactly: the rook on d8 defends the knight on d5 down the file AND is the only guard of the back rank, and White's rook is on d1 facing it. It does not work, because White has only one rook - Rxd5 is met by Rxd5 and the back-rank threat never arrives, so the black rook is asked to do one job at a time and can. The position is -0.01. Read against this record's positive example, which is the same picture with a SECOND white rook on e1: one piece added, and the rook on d8 goes from comfortable to unable to recapture. Filed as ambiguous because the configuration the concept names is fully present and the concept is not: an overload is a claim about being asked to do both at once, and nobody is asking.",
+      "origin_kind": "constructed-test",
+      "concept_role": "ambiguous",
+      "engine": {
+        "engine_id": "Stockfish 18",
+        "test_level": 3,
+        "depth": 24,
+        "threads": 10,
+        "hash_mb": 4096,
+        "multipv": 1,
+        "best_move": "h2h3",
+        "eval_cp": -1,
+        "mate_in": null,
+        "pv": [],
+        "alternatives": [],
+        "margin_cp": null,
+        "verdict": "ambiguous",
+        "verdict_note": "-0.01 at depth 24, settled at depth 21, and the engine's move is a quiet pawn push - it does not try Rxd5 at all. The positive example on this record, one rook further, is +6.73."
+      }
+    }
+  ],
+  "explanations": {
+    "by_level": {
+      "beginner": "That piece is guarding two things at once. Take one and it cannot keep guarding the other.",
+      "intermediate": "The {piece} is overloaded — it is the only defender of both {a} and {b}.",
+      "advanced": "Overloading. The tactical counterpart of the principle of two weaknesses: the same finite-defence logic on a shorter timescale."
+    },
+    "by_depth": {
+      "short": "A piece with two jobs cannot do both.",
+      "normal": "Overloading: one defender is holding two things at once. Attack either and it must choose — take one, and the other collapses. The claim is about a single piece being asked to do both, not about two pieces each doing one.",
+      "deep": "The distinction that decides it is a count. A back rank guarded by two rooks is not an overload; the same rank guarded by one is. This base's positive and its false-positive case differ by exactly one added rook, and the same move goes from winning a knight to losing one. Overloading and deflection are the same fact seen twice — the overload is the state, the deflection is the move that exploits it — which is why a spare defender destroys both. There is no matcher for it, because whether a piece is asked to do both AT ONCE is a property of what the attacker can arrange rather than of the board."
+    },
+    "hedge": "",
+    "lesson": ""
+  },
+  "terminology": {
+    "beginner_words": [
+      "guarding too much"
+    ],
+    "advanced_words": [
+      "overloaded",
+      "overworked defender"
+    ],
+    "avoid": []
+  },
+  "status": {
+    "stage": "researched",
+    "last_updated": "2026-08-31",
+    "open_questions": [],
+    "audit_notes": []
+  }
+}

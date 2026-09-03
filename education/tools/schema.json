@@ -1,0 +1,762 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "nox-chess/education/concept.schema.v2.json",
+  "title": "Education System concept record (v2)",
+  "schema_version": 2,
+  "type": "object",
+  "required": [
+    "id",
+    "canonical_name",
+    "category",
+    "knowledge_type",
+    "definition_short",
+    "definition_long",
+    "sources",
+    "source_confidence",
+    "status"
+  ],
+  "additionalProperties": false,
+  "properties": {
+    "schema_version": {
+      "const": 2
+    },
+    "id": {
+      "type": "string",
+      "pattern": "^[a-z0-9]+(-[a-z0-9]+)*$"
+    },
+    "canonical_name": {
+      "type": "string"
+    },
+    "alternate_names": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "historical_names": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "translated_names": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "lang": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          },
+          "note": {
+            "type": "string"
+          }
+        }
+      }
+    },
+    "category": {
+      "type": "string",
+      "description": "An area id from taxonomy.json."
+    },
+    "subcategory": {
+      "type": "string"
+    },
+    "tags": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "knowledge_type": {
+      "enum": [
+        "official-rule",
+        "proven-result",
+        "tablebase-fact",
+        "named-theoretical-position",
+        "tactical-motif",
+        "mating-pattern",
+        "strategic-principle",
+        "positional-concept",
+        "rule-of-thumb",
+        "historical-teaching-principle",
+        "practical-guideline",
+        "terminology",
+        "other"
+      ],
+      "description": "What KIND of knowledge this is. A rule of thumb must never be presented as a proven result."
+    },
+    "knowledge_type_note": {
+      "type": "string",
+      "description": "Required when the classification is arguable: why this type and not a neighbouring one."
+    },
+    "name_status": {
+      "enum": [
+        "established-name",
+        "common-usage",
+        "descriptive-phrase",
+        "contested"
+      ],
+      "description": "Whether sources support this as a recognised NAME (e.g. 'Lucena Position') or whether it is a descriptive phrase that must not be presented as established terminology."
+    },
+    "difficulty": {
+      "enum": [
+        "beginner",
+        "novice",
+        "intermediate",
+        "advanced",
+        "expert",
+        "master",
+        "highly-theoretical"
+      ]
+    },
+    "definition_short": {
+      "type": "string",
+      "maxLength": 400
+    },
+    "definition_long": {
+      "type": "string"
+    },
+    "history": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "attributions": {
+          "type": "array",
+          "description": "Attribution is not one relation. Record the specific kind claimed by each source.",
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+              "person",
+              "relation"
+            ],
+            "properties": {
+              "person": {
+                "type": "string"
+              },
+              "relation": {
+                "enum": [
+                  "originated-by",
+                  "first-documented-by",
+                  "popularized-by",
+                  "systematized-by",
+                  "named-by",
+                  "later-associated-with"
+                ]
+              },
+              "source": {
+                "type": "string"
+              },
+              "year": {
+                "type": [
+                  "integer",
+                  "null"
+                ]
+              },
+              "note": {
+                "type": "string"
+              }
+            }
+          }
+        },
+        "first_documented_source": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "year": {
+          "type": [
+            "integer",
+            "null"
+          ]
+        },
+        "confidence": {
+          "enum": [
+            "high",
+            "medium",
+            "low",
+            "disputed",
+            "unknown"
+          ],
+          "description": "high = primary-source evidence; medium = multiple reliable secondary sources; low = repeated attribution with no primary evidence; disputed = reliable sources disagree; unknown = cannot establish."
+        },
+        "notes": {
+          "type": "string"
+        },
+        "competing_claims": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "development": {
+          "type": "array",
+          "description": "How understanding of the concept changed over time.",
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "properties": {
+              "era": {
+                "type": "string"
+              },
+              "change": {
+                "type": "string"
+              },
+              "source": {
+                "type": "string"
+              }
+            }
+          }
+        }
+      }
+    },
+    "engine_era_status": {
+      "enum": [
+        "reliable",
+        "useful-with-common-exceptions",
+        "historically-overstated",
+        "substantially-revised-by-engines",
+        "not-applicable",
+        "unassessed"
+      ],
+      "description": "How modern engine analysis has affected the concept's standing."
+    },
+    "engine_era_note": {
+      "type": "string"
+    },
+    "sources": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "source_confidence": {
+      "enum": [
+        "high",
+        "medium",
+        "low"
+      ]
+    },
+    "recognition": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "preconditions": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "indicators_for": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "indicators_against": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "prerequisites": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "detector": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "detectability": {
+          "enum": [
+            "mechanical",
+            "heuristic",
+            "human-only"
+          ]
+        },
+        "typical_confidence": {
+          "enum": [
+            "high",
+            "medium",
+            "low"
+          ],
+          "description": "How confidently this concept can normally be asserted once its preconditions hold."
+        },
+        "false_positive_traps": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "description": "Situations that satisfy the surface pattern but where the concept does NOT apply."
+        }
+      }
+    },
+    "application": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "typical_plans": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "typical_moves": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "typical_pawn_structures": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "typical_piece_arrangements": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "tactical_consequences": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "strategic_consequences": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        }
+      }
+    },
+    "exceptions": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "limitations": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "misconceptions": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "relationships": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "broader": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "narrower": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "related": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "contrasting": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "co_occurring": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "conflicts": {
+          "type": "array",
+          "description": "Concepts that recommend the opposite in the same situation, with guidance on which wins.",
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+              "concept",
+              "resolution"
+            ],
+            "properties": {
+              "concept": {
+                "type": "string"
+              },
+              "resolution": {
+                "type": "string"
+              }
+            }
+          }
+        }
+      }
+    },
+    "examples": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/position"
+      }
+    },
+    "counterexamples": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/position"
+      }
+    },
+    "ambiguous_examples": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/position"
+      }
+    },
+    "explanations": {
+      "type": "object",
+      "description": "Two independent axes: LEVEL (who is reading) and DEPTH (how much). Keep them separate.",
+      "additionalProperties": false,
+      "properties": {
+        "by_level": {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "beginner": {
+              "type": "string"
+            },
+            "intermediate": {
+              "type": "string"
+            },
+            "advanced": {
+              "type": "string"
+            },
+            "master": {
+              "type": "string"
+            }
+          }
+        },
+        "by_depth": {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "short": {
+              "type": "string"
+            },
+            "normal": {
+              "type": "string"
+            },
+            "deep": {
+              "type": "string"
+            }
+          }
+        },
+        "hedge": {
+          "type": "string",
+          "description": "Mandatory for rule-of-thumb / historical-teaching-principle / practical-guideline: wording that stops a habit being stated as a law."
+        },
+        "lesson": {
+          "type": "string",
+          "description": "The transferable takeaway."
+        }
+      }
+    },
+    "terminology": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "beginner_words": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "advanced_words": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "avoid": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        }
+      }
+    },
+    "status": {
+      "type": "object",
+      "required": [
+        "stage"
+      ],
+      "additionalProperties": false,
+      "properties": {
+        "stage": {
+          "enum": [
+            "discovered",
+            "researched",
+            "sourced",
+            "structured",
+            "tested",
+            "validated",
+            "ready",
+            "needs-review"
+          ],
+          "description": "Lifecycle. Only 'ready' may be treated as production-ready."
+        },
+        "last_updated": {
+          "type": "string"
+        },
+        "open_questions": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "audit_notes": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        }
+      }
+    },
+    "validation_na": {
+      "type": "object",
+      "description": "Validation items that DO NOT APPLY to this concept, each with a written justification. Keys are depth-report checklist item names; values are the reason, which tools/validate_kb.py requires to be at least 120 characters. Use only where the item is inapplicable in principle - a concept whose subject is the player rather than the board, or a record that indexes other records rather than describing a position - never where the evidence is merely absent.",
+      "additionalProperties": {
+        "type": "string",
+        "minLength": 120
+      }
+    }
+  },
+  "$defs": {
+    "position": {
+      "type": "object",
+      "required": [
+        "fen",
+        "note",
+        "origin_kind"
+      ],
+      "additionalProperties": false,
+      "properties": {
+        "fen": {
+          "type": "string"
+        },
+        "note": {
+          "type": "string"
+        },
+        "origin_kind": {
+          "enum": [
+            "historical-game",
+            "constructed-test",
+            "study-composition",
+            "puzzle",
+            "tablebase-position"
+          ],
+          "description": "Constructed positions must be labelled as such and never presented as historical."
+        },
+        "game": {
+          "type": "string"
+        },
+        "pgn": {
+          "type": "string"
+        },
+        "side_to_move_benefits": {
+          "enum": [
+            "white",
+            "black",
+            "neither"
+          ]
+        },
+        "concept_role": {
+          "enum": [
+            "positive",
+            "negative",
+            "ambiguous"
+          ]
+        },
+        "controlled_pair_with": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "description": "FEN of the paired position this is a controlled comparison against."
+        },
+        "engine": {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "engine_id": {
+              "type": "string"
+            },
+            "test_level": {
+              "enum": [
+                1,
+                2,
+                3,
+                4
+              ],
+              "description": "1 smoke, 2 normal, 3 deep, 4 critical/disputed."
+            },
+            "depth": {
+              "type": "integer"
+            },
+            "threads": {
+              "type": [
+                "integer",
+                "null"
+              ]
+            },
+            "hash_mb": {
+              "type": [
+                "integer",
+                "null"
+              ]
+            },
+            "multipv": {
+              "type": [
+                "integer",
+                "null"
+              ]
+            },
+            "best_move": {
+              "type": [
+                "string",
+                "null"
+              ]
+            },
+            "eval_cp": {
+              "type": [
+                "integer",
+                "null"
+              ]
+            },
+            "mate_in": {
+              "type": [
+                "integer",
+                "null"
+              ]
+            },
+            "pv": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            },
+            "alternatives": {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "additionalProperties": false,
+                "properties": {
+                  "move": {
+                    "type": "string"
+                  },
+                  "eval_cp": {
+                    "type": [
+                      "integer",
+                      "null"
+                    ]
+                  },
+                  "mate_in": {
+                    "type": [
+                      "integer",
+                      "null"
+                    ]
+                  }
+                }
+              }
+            },
+            "margin_cp": {
+              "type": [
+                "integer",
+                "null"
+              ],
+              "description": "Best minus runner-up. The usable signal that a concept is driving the move — best-move agreement alone is not."
+            },
+            "verdict": {
+              "enum": [
+                "supports",
+                "contradicts",
+                "ambiguous",
+                "untested"
+              ]
+            },
+            "verdict_note": {
+              "type": "string"
+            }
+          }
+        },
+        "tablebase": {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "source": {
+              "type": "string"
+            },
+            "pieces": {
+              "type": [
+                "integer",
+                "null"
+              ]
+            },
+            "wdl": {
+              "enum": [
+                "win",
+                "cursed-win",
+                "draw",
+                "blessed-loss",
+                "loss",
+                "unknown"
+              ]
+            },
+            "dtz": {
+              "type": [
+                "integer",
+                "null"
+              ]
+            },
+            "dtm": {
+              "type": [
+                "integer",
+                "null"
+              ]
+            },
+            "category": {
+              "type": "string"
+            },
+            "note": {
+              "type": "string"
+            }
+          }
+        },
+        "attributed_by": {
+          "type": "string",
+          "description": "The HUMAN who named this concept for this position, and the source it is in. Present only when a person said so: a position this system found by running its own Layer 4 over master games is a real position and is not an attribution, and the difference is the whole content of the validation ladder's HUMAN-GROUNDED rung."
+        }
+      }
+    }
+  }
+}

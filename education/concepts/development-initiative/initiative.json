@@ -1,0 +1,232 @@
+{
+  "schema_version": 2,
+  "alternate_names": [],
+  "historical_names": [],
+  "tags": [
+    "dynamic",
+    "steinitz",
+    "temporary"
+  ],
+  "subcategory": "dynamic advantage",
+  "difficulty": "intermediate",
+  "knowledge_type_note": "A dynamic advantage — a positional concept whose defining property is that it EXPIRES. That distinguishes it from static concepts like a weak square, and it is why the same evaluation means different things depending on which kind of advantage produced it.",
+  "name_status": "established-name",
+  "history": {
+    "attributions": [
+      {
+        "person": "Wilhelm Steinitz",
+        "relation": "systematized-by",
+        "source": "lichess-steinitz-advantages",
+        "year": null,
+        "note": "His enumeration of advantages splits them into permanent and temporary, which is where the initiative's defining property comes from. ACCESS CAVEAT: taken from a community study, not from Steinitz's text."
+      }
+    ],
+    "first_documented_source": null,
+    "year": null,
+    "confidence": "low",
+    "notes": "Ordinary chess vocabulary; no coinage claimed. The classification of the initiative as a temporary advantage is conventionally Steinitz's, but the only source consulted for that here is a community study, so confidence is low. Worth verifying against The Modern Chess Instructor, which this project already has access to.",
+    "competing_claims": [],
+    "development": []
+  },
+  "engine_era_status": "useful-with-common-exceptions",
+  "engine_era_note": "Engines evaluate the initiative implicitly and are notably better than humans at telling a real initiative from a series of checks that achieve nothing. The concept is unrevised; what engines correct is the human tendency to overvalue forcing moves.",
+  "recognition": {
+    "preconditions": [
+      "One side is making threats the other must answer",
+      "The answering side has no time for a plan of their own"
+    ],
+    "indicators_for": [
+      "A sequence of forcing moves is available",
+      "The opponent's last several moves were all forced or defensive",
+      "A lead in development in an open position",
+      "The opponent's king is stuck in the centre"
+    ],
+    "indicators_against": [
+      "The threats can be answered by a move that also improves their position",
+      "The position is closed, so threats are hard to generate",
+      "The opponent can trade queens or simplify",
+      "The forcing moves have run out and nothing has been achieved"
+    ],
+    "prerequisites": [
+      "tempo"
+    ],
+    "detector": null,
+    "detectability": "heuristic",
+    "typical_confidence": "low",
+    "false_positive_traps": [
+      "A series of checks is not an initiative. If the opponent's forced replies improve their position, you are helping them.",
+      "Having more active pieces is not the same as having the initiative — the test is whether they must answer you.",
+      "The initiative is invisible to a static feature scan, so it cannot be detected from the board alone; it is a property of the sequence."
+    ]
+  },
+  "application": {
+    "typical_plans": [
+      "Keep making threats so the opponent never gets a free move",
+      "Convert it into something permanent before it expires — material, structure, or a weak square",
+      "Sacrifice material to obtain or prolong it",
+      "As the defender: return material, trade queens, or find the move that both parries and improves"
+    ],
+    "typical_moves": [],
+    "typical_pawn_structures": [],
+    "typical_piece_arrangements": [],
+    "tactical_consequences": [
+      "Forcing sequences that end in material or mate"
+    ],
+    "strategic_consequences": [
+      "Decays if not used — the defining property",
+      "The commonest form of compensation for a sacrifice"
+    ]
+  },
+  "exceptions": [
+    "It expires. An initiative that is not converted into something permanent is worth nothing afterwards.",
+    "A series of forcing moves is not an initiative if the replies help the opponent.",
+    "Black can hold it. It is not White's by right of the first move."
+  ],
+  "limitations": [
+    "Recognition confidence LOW, and it is not detectable from a static position at all — it is a property of the sequence of moves, like the zwischenzug.",
+    "This base has NO detector for the initiative and will not gain one: the record already states it is invisible to a static feature scan. tools/corpus_check.py therefore scores its corpus entries as 'absent by design' rather than as false negatives, and scores a NEGATIVE example for it as vacuous - nothing could have reported it, so its passing is not evidence about false positives."
+  ],
+  "misconceptions": [
+    "That the initiative is the same as being better. A worse position can hold the initiative, and often that is the only reason it survives.",
+    "That checks and captures create an initiative. They create forcing moves, which is not the same thing.",
+    "That it is White's by right."
+  ],
+  "relationships": {
+    "broader": [],
+    "narrower": [],
+    "related": [
+      "tempo",
+      "sacrifice",
+      "king-attack",
+      "opening-development"
+    ],
+    "contrasting": [],
+    "co_occurring": [
+      "sacrifice",
+      "king-attack"
+    ],
+    "conflicts": [
+      {
+        "concept": "two-weaknesses",
+        "resolution": "Opposed in tempo, not in truth. The two-weaknesses method requires TIME — fix, improve every piece, do not hurry — which is exactly what a player holding the initiative cannot afford to spend. Which applies depends on whether the advantage is dynamic or static: convert an initiative before it expires, accumulate a static edge slowly."
+      }
+    ]
+  },
+  "examples": [
+    {
+      "fen": "2r1k2r/1p1bnpp1/1q2p2p/p2pP3/PP3P2/1NPB4/6PP/R3QR1K b k - 1 20",
+      "note": "Smyslov-Botvinnik, World Championship match (game 1), Moscow 1954, Qc7. Human ground truth: the concept is named for this position by Mikhail Botvinnik, annotating his own game (tr. Douglas Griffin). Corpus entry `smyslov-botvinnik-1954-g1-20Qc7-initiative`, which carries the full annotation, the alternates the annotator rejected, and the engine's verdict. This is the concept in its defining form and it is why the entry exists. Botvinnik does not claim Black is better; he claims the roles have swapped - from here White answers and Black asks. The move itself does nothing visible: it steps off the b-file, eyes c3, and leaves White's knight on b3 with no good square, so every White move for the next several is a reply. The concept record's own test is",
+      "origin_kind": "historical-game",
+      "game": "Smyslov-Botvinnik, World Championship match (game 1), Moscow 1954",
+      "concept_role": "positive",
+      "engine": {
+        "engine_id": "Stockfish 18",
+        "test_level": 3,
+        "depth": 22,
+        "multipv": 3,
+        "best_move": "Qc7",
+        "eval_cp": -57,
+        "verdict": "supports",
+        "verdict_note": "on the move, completely - 20...Qc7 is the engine's first choice at depth 22, ahead of 20...O-O by 0.15. On the assessment, not at all: the engine still gives White about half a pawn from Black's side of the board. That split is the finding, and it is worth more than agreement would have been. Holding the initiative is not the same as standing better, which is exactly what the concept record says and exactly what an engine-labelled corpus would have destroyed by throwing this position away."
+      },
+      "attributed_by": "Mikhail Botvinnik, annotating his own game (tr. Douglas Griffin) — corpus entry smyslov-botvinnik-1954-g1-20Qc7-initiative"
+    }
+  ],
+  "counterexamples": [
+    {
+      "fen": "4rnk1/r2n1p2/1p1R2pp/pP5q/3N4/P3N1P1/1Q3PKP/3R4 b - - 0 27",
+      "note": "Reti-Capablanca, New York 1924 (round 5), Qe5. Human ground truth: the concept is named for this position by Raymond Keene (GM), The Spectator Australia. Corpus entry `reti-capablanca-1924-27Qe5-initiative-negative`, which carries the full annotation, the alternates the annotator rejected, and the engine's verdict. The surface of an initiative is all here and none of the substance, which is what makes it a negative example. From move 20 Capablanca's queen has been to c4, c5, h5 and now e5, hitting something every time, and White has answered every time - Rxd6, Rad1, Ne3, Nd4, Nc4. Count only 'one side keeps making threats and the other keeps answering' and Black has the initiative. The concept record's actua",
+      "origin_kind": "historical-game",
+      "game": "Reti-Capablanca, New York 1924 (round 5)",
+      "concept_role": "negative",
+      "engine": {
+        "engine_id": "Stockfish 18",
+        "test_level": 3,
+        "depth": 22,
+        "multipv": 3,
+        "best_move": "Rxe3",
+        "eval_cp": -212,
+        "verdict": "contradicts",
+        "verdict_note": "on both halves, and independently. The engine's first choice at depth 22 is 27...Rxe3, which is the move Keene says Black had to try, and the game move 27...Qe5 is second and 0.36 worse. Black is lost either way, which is the point: the side with the 'threats' is two pawns down in evaluation. A rare case of a 2017 GM annotation and a 2026 engine naming the same move for the same reason."
+      },
+      "attributed_by": "Raymond Keene (GM), The Spectator Australia — corpus entry reti-capablanca-1924-27Qe5-initiative-negative"
+    }
+  ],
+  "ambiguous_examples": [
+    {
+      "fen": "2r1k2r/1pqbnpp1/4p2p/p1NpP3/PP3P2/2PB4/6PP/R3QR1K b k - 3 21",
+      "note": "Smyslov-Botvinnik 1954, game 1, after 21.Nc5 - nine moves after this base's positive example from the same game, where the annotator writes that 'the initiative now passes to Black'. It has passed, both sides are still making and answering threats, and the position is level: -0.08 at depth 22. The knight White was obliged to place on c5 'does not stand safely' and is exchanged off fifteen moves later. Filed as ambiguous because the concept is present, correctly, on the side the annotation gives it to, and has produced nothing measurable - which this record's own fourth indicator_against names: 'the forcing moves have run out and nothing has been achieved'.",
+      "origin_kind": "historical-game",
+      "game": "Smyslov-Botvinnik, World Championship match (game 1), Moscow 1954",
+      "concept_role": "ambiguous",
+      "attributed_by": "corpus entries smyslov-botvinnik-1954-g1-20Qc7-initiative and -21Nc5-outpost-negative",
+      "engine": {
+        "engine_id": "Stockfish 18",
+        "test_level": 3,
+        "depth": 22,
+        "threads": 10,
+        "hash_mb": 4096,
+        "multipv": 3,
+        "best_move": "O-O",
+        "eval_cp": -8,
+        "mate_in": null,
+        "pv": [],
+        "alternatives": [],
+        "margin_cp": null,
+        "verdict": "ambiguous",
+        "verdict_note": "-0.08 from Black's side at depth 22 with three lines: level, in a position the annotation says the initiative belongs to Black in. The concept and the evaluation are both right and they are not about the same thing."
+      }
+    }
+  ],
+  "explanations": {
+    "by_level": {
+      "beginner": "You are the one making threats, so your opponent has to keep answering instead of doing what they want.",
+      "intermediate": "You have the initiative. It does not last — turn it into something permanent, like material or a lasting weakness, before it runs out.",
+      "advanced": "A dynamic advantage: it decays. The question is what it can be converted into before the opponent consolidates.",
+      "master": "Temporary by definition, and therefore in direct tension with slow methods like the two weaknesses. Price the conversion, not the initiative itself."
+    },
+    "by_depth": {
+      "short": "You are making the threats; they are answering.",
+      "normal": "The initiative: your opponent has to answer your threats rather than pursue their own plans. It is temporary — one slow move lets them consolidate — so it has to be converted into something permanent while it lasts.",
+      "deep": "The state of setting the problems. Its defining property is that it expires, which puts it firmly on the dynamic side of Steinitz's split between permanent and temporary advantages and produces the standing instruction to use it or lose it. It is built out of tempi — a tempo is one move, the initiative is the sustained state — and it is the commonest compensation for a real sacrifice: when material is given for 'time', this is what is bought. The usual error is mistaking a run of forcing moves for an initiative; if the forced replies improve the opponent's position, the checks are helping them."
+    },
+    "hedge": "",
+    "lesson": "The initiative is a wasting asset. Ask what you are going to have left when the threats run out — and if the answer is nothing, you did not have an initiative."
+  },
+  "terminology": {
+    "beginner_words": [
+      "you are making the threats",
+      "they have to react"
+    ],
+    "advanced_words": [
+      "initiative",
+      "dynamic advantage",
+      "compensation",
+      "counterplay",
+      "consolidate"
+    ],
+    "avoid": [
+      "the initiative means you are better",
+      "White always has the initiative"
+    ]
+  },
+  "status": {
+    "stage": "researched",
+    "last_updated": "2026-08-31",
+    "open_questions": [],
+    "audit_notes": []
+  },
+  "id": "initiative",
+  "canonical_name": "Initiative",
+  "category": "initiative",
+  "knowledge_type": "positional-concept",
+  "definition_short": "The state of being the one making threats — the opponent must answer rather than pursue their own plans. It is temporary and must be used or lost.",
+  "definition_long": "Whoever is setting the problems has the initiative. The opponent's moves are answers rather than plans, and every tempo spent answering is one they cannot spend improving.\n\nIts defining property is that it is TEMPORARY. Unlike a weak square or a damaged structure, it decays: one slow or decorative move lets the defender consolidate and it is gone. That is what puts it on the dynamic side of Steinitz's division of advantages into permanent and temporary, and it is why the standing instruction attached to it is 'use it or lose it'.\n\nRelation to TEMPO: a tempo is one move; the initiative is the sustained state built from repeatedly gaining them. Relation to a LEAD IN DEVELOPMENT: development is the raw material, the initiative is what it can be converted into if converted quickly.\n\nIt is also the most common form of compensation for a sacrifice. When Spielmann's real sacrifice buys 'time', this is what is meant: a sequence of threats the opponent must answer, each one denying them a free move.\n\nThe first move gives White a small initial initiative, but it is not White's by right — Black takes it with counterplay, central breaks, or rapid development whenever they create the threats that must be answered.",
+  "sources": [
+    "chessworld-initiative",
+    "spielmann-art-of-sacrifice",
+    "lichess-steinitz-advantages",
+    "playchessonline-tempo-initiative"
+  ],
+  "source_confidence": "medium"
+}

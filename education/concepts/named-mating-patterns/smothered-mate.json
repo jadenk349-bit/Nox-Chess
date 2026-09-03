@@ -1,0 +1,215 @@
+{
+  "schema_version": 2,
+  "id": "smothered-mate",
+  "canonical_name": "Smothered mate",
+  "alternate_names": [
+    "Philidor's legacy"
+  ],
+  "historical_names": [],
+  "category": "named-mating-patterns",
+  "subcategory": "mating pattern",
+  "tags": [],
+  "knowledge_type": "mating-pattern",
+  "knowledge_type_note": "Named mating pattern (D). Philidor's Legacy names the specific queen-sacrifice delivery, not every smothered mate; sources sometimes use the terms interchangeably.",
+  "name_status": "established-name",
+  "difficulty": "intermediate",
+  "definition_short": "A knight mates a king that is completely surrounded by its own pieces.",
+  "definition_long": "The king is hemmed in on every side by its own men, so only a knight — which jumps — can reach it. The classic delivery, known as Philidor's Legacy, runs Qg8+ (a queen sacrifice on g8 or b8 forcing the rook to capture) followed by Nf7#, with the rook now blocking the last flight square.\n\nThe mechanism depends on DOUBLE CHECK earlier in the sequence: the knight checks from f7 or h6 with the queen also checking, so the defender cannot capture or interpose and must move the king into the corner.",
+  "history": {
+    "attributions": [],
+    "first_documented_source": "informant-encyclopedia-combinations",
+    "year": null,
+    "confidence": "unknown",
+    "notes": "Descriptive pattern name of long, largely anonymous usage.",
+    "competing_claims": [],
+    "development": []
+  },
+  "engine_era_status": "unassessed",
+  "engine_era_note": "",
+  "sources": [
+    "informant-encyclopedia-combinations",
+    "wikipedia-chess-tactic",
+    "chesstempo-tactical-motifs",
+    "chesscom-tactics-38"
+  ],
+  "source_confidence": "high",
+  "recognition": {
+    "preconditions": [
+      "The enemy king's flight squares are all occupied by its own pieces",
+      "A friendly knight can reach a square giving check"
+    ],
+    "indicators_for": [
+      "The king is in the corner with rook and pawns adjacent",
+      "A queen sacrifice is available to fill the last escape square"
+    ],
+    "indicators_against": [
+      "A flight square is empty or can be vacated",
+      "The knight's square is defended"
+    ],
+    "prerequisites": [
+      "double-check"
+    ],
+    "detector": "lib/matchers.js: smothered-mate",
+    "detectability": "mechanical",
+    "typical_confidence": "high",
+    "false_positive_traps": []
+  },
+  "application": {
+    "typical_plans": [],
+    "typical_moves": [],
+    "typical_pawn_structures": [],
+    "typical_piece_arrangements": [],
+    "tactical_consequences": [],
+    "strategic_consequences": []
+  },
+  "exceptions": [
+    "If any surrounding piece can move away with tempo, the mate evaporates."
+  ],
+  "limitations": [
+    "Reported only on an actual mate. The pattern without the mate is a king that happens to be surrounded, which is a description rather than a mating pattern. Fires on none of the 788 shipped positions and on the constructed Philidor pattern.",
+    "TYPICAL_CONFIDENCE RAISED medium -> high, 2026-09-02, and the reason is the schema's own definition of the field: 'how confidently this concept can normally be asserted ONCE ITS PRECONDITIONS HOLD'. This concept's recognition is MECHANICAL and its knowledge type already carries a high ceiling, so once the preconditions hold there is nothing left to be uncertain about - a stalemate is a stalemate, and a fork this base reports is one findMotifs() found, which ARCHITECTURE.md makes the authority and forbids second-guessing. 'Medium' was the default across 32 rule and motif records regardless of detectability, and it was found by measuring what the API reports against what each record permits: twelve concepts were reporting ABOVE their own record. The fix was to make each record its own ceiling in cap(), which then required the records that were wrong to be corrected rather than silently overruled.",
+    "Verified 2026-09-02. Both of this record's indicators_against - \"A flight square is empty or can be vacated\" and \"The knight's square is defended\" - describe positions that are not mate, and the detector only speaks when the position IS mate: findMotifs() computes `const mated = !theirMoves.length && inCheck(after, them)` from the move generator's own reply list. If a flight square existed, theirMoves would not be empty; if the knight could be taken, the same. Both conditions are unreachable rather than unguarded, which is a different and better answer than a guard would be.",
+    "NO MASTER-GAME POSITION YET, and the search that failed is worth recording. Five famous games were replayed through this base's own move generator and scanned position by position with the API - the Opera Game, the Evergreen, the Immortal, the Game of the Century and Legall's Mate, 225 plies between them - and this concept was not reported in any of them. That is not evidence the motif is rare; it is evidence that the five games this base can currently verify do not contain a clean instance of it, and that adding one means adding a game rather than looking harder at these. tools/replay_game.js is the instrument: a move list that is wrong is refused rather than guessed at.",
+    "NO MASTER-GAME POSITION, and this record now has a MEASUREMENT rather than an excuse. tools/mine_master_motifs.js replayed 35,648 games from 22 world-champion and grandmaster collections through the page's own move generator - 2,822,256 positions, 492 games rejected as unplayable and skipped rather than patched - and asked at every ply the test this concept's own matcher asks: a knight gives check, it is mate, and every flight square is blocked by the king's OWN men. It found ZERO. That is not a failure of the search; it is the concept. A smothered mate is forced two or three moves before it lands, and a master resigns into it rather than allowing it to be played, so the mate itself is missing from the score even where the combination was the reason the game ended. The famous instances - Philidor's legacy, Lucena, the Polerio game - are compositions or pre-modern games outside these collections. The rung stays MISSING rather than N/A: a master game containing one certainly exists and the search that would find it is a search for the position two moves BEFORE the mate, which is a different test than the one this base's matcher makes and would have to be written and argued for on its own."
+  ],
+  "misconceptions": [],
+  "relationships": {
+    "broader": [],
+    "narrower": [],
+    "related": [
+      "double-check",
+      "decoy",
+      "knight-fork"
+    ],
+    "contrasting": [],
+    "co_occurring": [],
+    "conflicts": []
+  },
+  "examples": [
+    {
+      "fen": "6rk/6pp/8/6N1/8/8/8/6K1 w - - 0 1",
+      "note": "The classical picture, given as the MOVE that makes it rather than the position it leaves: Ng5-f7 mate against a king on h8 whose own rook on g8 and pawns on g7 and h7 occupy every flight square. Recorded as a move because this concept is a move concept - the record says 'reported only on an actual mate, because the pattern without the mate is a king that happens to be surrounded', and a position alone cannot carry that. Paired with the identical position with the h-pawn on h6, where Nf7 is a check and the king has h7.",
+      "origin_kind": "constructed-test",
+      "concept_role": "supports",
+      "side_to_move_benefits": "white",
+      "controlled_pair_with": "6rk/6p1/7p/6N1/8/8/8/6K1 w - - 0 1",
+      "tablebase": {
+        "source": "Lichess tablebase (Syzygy, 7-piece)",
+        "pieces": 6,
+        "wdl": "loss",
+        "dtz": -1,
+        "dtm": null,
+        "category": "loss",
+        "checkmate": true,
+        "stalemate": false,
+        "note": "PROVEN: checkmate true. The pattern and the mate coincide here, which is what the record requires before the name is used."
+      },
+      "move": "Nf7#",
+      "move_uci": "g5f7",
+      "engine": {
+        "engine_id": "Stockfish 18",
+        "test_level": 3,
+        "depth": 26,
+        "threads": 10,
+        "hash_mb": 4096,
+        "multipv": 1,
+        "best_move": "g5f7",
+        "eval_cp": null,
+        "mate_in": 1,
+        "pv": [],
+        "alternatives": [],
+        "margin_cp": null,
+        "verdict": "supports",
+        "verdict_note": "PROVEN mate in 1, dtz 1, best move Nf7# - the pattern itself, settled by tablebase rather than by an evaluation. The engine reports #1 as well. Paired with the same position given luft, where the same knight move is not mate and White is LOST."
+      }
+    }
+  ],
+  "counterexamples": [
+    {
+      "fen": "6rk/6p1/7p/6N1/8/8/8/6K1 w - - 0 1",
+      "note": "The pattern without the mate, which is this record's own phrase for it: a knight checking a king boxed in by its own rook and pawn, where the h-pawn has moved to h6 and h7 is free. Nf7+ is a check and nothing more. Paired with the identical position with the pawn on h7, which is mate in the classical picture.",
+      "origin_kind": "constructed-test",
+      "concept_role": "negative",
+      "side_to_move_benefits": "neither",
+      "controlled_pair_with": "6rk/6pp/8/6N1/8/8/8/6K1 w - - 0 1",
+      "tablebase": {
+        "source": "Lichess tablebase (Syzygy, 7-piece)",
+        "pieces": 6,
+        "wdl": "loss",
+        "dtz": -1,
+        "dtm": null,
+        "category": "loss",
+        "checkmate": true,
+        "stalemate": false,
+        "note": "The PAIRED position - pawns on g7 and h7 - is a proven mate, checkmate true. This one, with the pawn on h6, is not: the king has h7."
+      },
+      "move": "Nf7+",
+      "move_uci": "g5f7",
+      "engine": {
+        "engine_id": "Stockfish 18",
+        "test_level": 3,
+        "depth": 26,
+        "threads": 10,
+        "hash_mb": 4096,
+        "multipv": 1,
+        "best_move": "g5f7",
+        "eval_cp": -784,
+        "mate_in": null,
+        "pv": [],
+        "alternatives": [],
+        "margin_cp": null,
+        "verdict": "supports",
+        "verdict_note": "PROVEN LOSS for White, dtz -4, mate in 38 against, and the engine says -7.84. One pawn moved from g7 to h6 and the smothered mate is not merely absent, it is a losing attempt: Nf7+ is met and the knight is trapped. A negative example rarely gets to be this sharp - the difference between the halves of this pair is mate in one and mate in thirty-eight the other way."
+      }
+    }
+  ],
+  "ambiguous_examples": [
+    {
+      "fen": "6rk/6pp/8/8/8/8/1N6/6K1 w - - 0 1",
+      "note": "The precondition is fully present: the black king on h8 has every flight square occupied by its own men - the rook on g8, the pawns on g7 and h7 - which is the smothering the pattern is named for. What is absent is any way to use it. White's knight is on b2 and needs four moves to reach f7, by which time nothing about the position resembles this one, and White is a rook down and PROVEN LOST in 38. Filed as ambiguous because the pattern really is there and this record's own precondition is satisfied by a position where the concept is worth less than nothing: the smothering belongs to the side that is winning.",
+      "origin_kind": "tablebase-position",
+      "concept_role": "ambiguous",
+      "tablebase": {
+        "source": "Lichess tablebase (Syzygy, 7-piece)",
+        "pieces": 5,
+        "wdl": "loss",
+        "dtz": -2,
+        "dtm": -38,
+        "category": "loss",
+        "note": "PROVEN LOSS for the side whose knight would deliver the mate, mate in 38 against. The smothered king belongs to the player who is winning by a rook."
+      }
+    }
+  ],
+  "explanations": {
+    "by_level": {
+      "beginner": "The king is boxed in by its own pieces, so the knight — the only piece that can jump — delivers mate.",
+      "intermediate": "Smothered mate: every escape square is occupied by the king's own men.",
+      "advanced": "Smothered mate. The Philidor's Legacy delivery uses a double check and a queen sacrifice to fill the last flight square."
+    },
+    "by_depth": {
+      "short": "A knight mates a king hemmed in by its own pieces.",
+      "normal": "Smothered mate: the king's flight squares are all occupied by its own men, so a knight — the only piece that can jump — delivers a check nothing can answer. It cannot be blocked, and if the knight cannot be captured it is mate.",
+      "deep": "Philidor's Legacy is the standard delivery and it is a manufactured version of the pattern: a queen sacrifice on g8 or b1 forces a rook to fill the last flight square, a double check drives the king into the corner, and the knight mates. What makes the pattern hard to detect honestly is that the precondition — a king boxed in by its own men — is common and worth nothing without a knight that can reach the square. This base holds the two positions one pawn apart: with the h-pawn on h7 the knight move is mate in one, and with it on h6 the same move leaves the mating side PROVEN LOST in thirty-eight."
+    },
+    "hedge": "",
+    "lesson": ""
+  },
+  "terminology": {
+    "beginner_words": [
+      "boxed in by its own pieces"
+    ],
+    "advanced_words": [
+      "smothered mate",
+      "Philidor's Legacy"
+    ],
+    "avoid": []
+  },
+  "status": {
+    "stage": "researched",
+    "last_updated": "2026-09-01",
+    "open_questions": [],
+    "audit_notes": [
+      "2026-09-01: detector field named 'kingFlightSquares', which does not exist anywhere in the codebase. The audit's hardcoded whitelist had been accepting it. Repointed at real code, or marked as proposed where nothing implements it."
+    ]
+  }
+}

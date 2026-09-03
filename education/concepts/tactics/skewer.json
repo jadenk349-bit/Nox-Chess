@@ -1,0 +1,233 @@
+{
+  "schema_version": 2,
+  "id": "skewer",
+  "canonical_name": "Skewer",
+  "alternate_names": [
+    "thrust",
+    "reverse pin"
+  ],
+  "historical_names": [],
+  "category": "tactical-motifs",
+  "subcategory": "material-winning motif",
+  "tags": [],
+  "knowledge_type": "tactical-motif",
+  "knowledge_type_note": "Motif (D), mechanically detectable, defined purely by the value ordering along a line.",
+  "name_status": "established-name",
+  "difficulty": "beginner",
+  "definition_short": "A line attack where the MORE valuable piece is in front; when it moves, the lesser piece behind it is captured.",
+  "definition_long": "The pin's mirror image. A bishop, rook or queen attacks a valuable enemy unit that has a lesser unit directly behind it on the same line. The front piece must move — by force if it is the king — and the piece behind falls.\n\nSkewers are ABSOLUTE when the front piece is the king (the move is compelled) and RELATIVE otherwise (the defender may prefer to lose the exchange, counter-attack, or defend the rear piece).\n\nSkewers are most common in endgames, where kings are exposed on open lines and there are few pieces to interpose.",
+  "history": {
+    "attributions": [],
+    "first_documented_source": "informant-encyclopedia-combinations",
+    "year": null,
+    "confidence": "unknown",
+    "notes": "Tactical motifs are descriptive pattern names of long and mostly anonymous usage. The Chess Informant classification is cited as a standard enumeration, not as the origin of the term.",
+    "competing_claims": [],
+    "development": []
+  },
+  "engine_era_status": "unassessed",
+  "engine_era_note": "",
+  "sources": [
+    "informant-encyclopedia-combinations",
+    "wikipedia-chess-tactic",
+    "chesstempo-tactical-motifs",
+    "chesscom-tactics-38"
+  ],
+  "source_confidence": "high",
+  "recognition": {
+    "preconditions": [
+      "A friendly line piece attacks an enemy unit with a second enemy unit directly behind it on the same line",
+      "The front unit is worth more than the one behind, or is the king"
+    ],
+    "indicators_for": [
+      "The front unit is the king, so the move is forced",
+      "The rear unit is undefended once exposed"
+    ],
+    "indicators_against": [
+      "The front unit can capture the skewering piece",
+      "A third unit can interpose",
+      "The front unit can move so that it still defends the rear unit",
+      "The rear unit is defended and the exchange is not favourable"
+    ],
+    "prerequisites": [],
+    "detector": "findMotifs -> skewer",
+    "detectability": "mechanical",
+    "typical_confidence": "high",
+    "false_positive_traps": []
+  },
+  "application": {
+    "typical_plans": [],
+    "typical_moves": [],
+    "typical_pawn_structures": [],
+    "typical_piece_arrangements": [],
+    "tactical_consequences": [],
+    "strategic_consequences": []
+  },
+  "exceptions": [
+    "If the front piece moves along the same line it may keep defending the piece behind."
+  ],
+  "limitations": [
+    "Same as the pin: geometry is mechanical, profitability is not.",
+    "TYPICAL_CONFIDENCE RAISED medium -> high, 2026-09-02, and the reason is the schema's own definition of the field: 'how confidently this concept can normally be asserted ONCE ITS PRECONDITIONS HOLD'. This concept's recognition is MECHANICAL and its knowledge type already carries a high ceiling, so once the preconditions hold there is nothing left to be uncertain about - a stalemate is a stalemate, and a fork this base reports is one findMotifs() found, which ARCHITECTURE.md makes the authority and forbids second-guessing. 'Medium' was the default across 32 rule and motif records regardless of detectability, and it was found by measuring what the API reports against what each record permits: twelve concepts were reporting ABOVE their own record. The fix was to make each record its own ceiling in cap(), which then required the records that were wrong to be corrected rather than silently overruled."
+  ],
+  "misconceptions": [],
+  "relationships": {
+    "broader": [],
+    "narrower": [],
+    "related": [],
+    "contrasting": [
+      "pin"
+    ],
+    "co_occurring": [],
+    "conflicts": []
+  },
+  "examples": [
+    {
+      "fen": "2r2rk1/pb1q1ppp/1pn1pn2/8/3P4/P3PB2/3N1PPP/RQB2RK1 b - - 7 15",
+      "move": "Na5",
+      "move_uci": "c6a5",
+      "note": "Havasi-Capablanca, Budapest 1929, 15...Na5 - and the detector reads two things at once: the knight move uncovers the bishop on b7, and what it uncovers is a skewer, 'the bishop on f3 has to move, and the pawn on g2 behind it falls'. The annotation is about neither - Van Der Nat calls it 'a fine strategic move' offering to trade off White's remaining bishop. Both are true of one move, and the strategic reading is why Capablanca played it. A skewer whose rear unit is a PAWN is the modest kind and is the kind that actually occurs: this base's own guard refuses most of them, and this one survives because the g2 pawn genuinely falls. PROVENANCE. The position is a corpus entry - a master game with a verified move list and a named annotator - and the annotator named a DIFFERENT concept there. So this grounds the MASTER-GAME rung and not the human-grounded one: the motif is what this base's own detector reads off the board, and the game is what makes the board real. `attributed_by` is deliberately absent.",
+      "origin_kind": "historical-game",
+      "game": "Havasi-Capablanca, Budapest 1929",
+      "concept_role": "positive",
+      "side_to_move_benefits": "black",
+      "engine": {
+        "engine_id": "Stockfish 18",
+        "test_level": 3,
+        "depth": 22,
+        "threads": 10,
+        "hash_mb": 4096,
+        "multipv": 3,
+        "best_move": "c6a5",
+        "eval_cp": 40,
+        "mate_in": null,
+        "pv": [],
+        "alternatives": [],
+        "margin_cp": null,
+        "verdict": "supports",
+        "verdict_note": "+0.40 and the engine's first choice at depth 22 with three lines. A strategic move that is also objectively best, with the tactic as a by-product."
+      }
+    },
+    {
+      "fen": "2r5/1p3q2/p2bk1p1/3p1p2/4pP2/P5P1/BP1R1P1P/5RK1 w - - 0 27",
+      "note": "A clean instance: the detector reports skewer and nothing else, for the move Bxd5+. Two things are verified here and a third is not. VERIFIED: findMotifs() in blind-chess.html reports the motif — and that detector, not this system, is the authority on whether a motif is present. ALSO VERIFIED: Bxd5+ is the recorded solution of a shipped puzzle, and tools/generate_puzzles.js only admits a position when one move is objectively best by a wide margin at confirmation depth, so the move carries engine backing by construction rather than by a separate search here. NOT claimed: that the motif is the whole reason the move wins. Provenance: the puzzle corpus is engine self-play — a real position from a real game between engines, not a master game.",
+      "origin_kind": "puzzle",
+      "concept_role": "supports",
+      "side_to_move_benefits": "neither",
+      "move": "Bxd5+",
+      "engine": {
+        "engine_id": "Stockfish (via tools/generate_puzzles.js at confirmation depth)",
+        "test_level": 2,
+        "depth": null,
+        "threads": null,
+        "hash_mb": null,
+        "multipv": null,
+        "best_move": "Bxd5+",
+        "eval_cp": null,
+        "mate_in": null,
+        "pv": [],
+        "alternatives": [],
+        "margin_cp": null,
+        "verdict": "supports",
+        "verdict_note": "Inherited validation: this position ships as a puzzle, and the generator's standard is that exactly one move is best by at least GAP_MIN at confirmation depth, re-checked deeper by tools/verify_puzzles.js. The move is therefore engine-verified as best without this base running its own search. The motif label comes from findMotifs, not from the engine — the two are independent and both had to agree for this to be recorded."
+      }
+    },
+    {
+      "fen": "3n4/8/8/3k4/8/8/8/R3K3 w - - 0 1",
+      "move": "Rd1+",
+      "move_uci": "a1d1",
+      "note": "The skewer proper: the king is in front, must move out of check, and the knight behind it is taken. Paired with the identical men in the other order, which is a pin.",
+      "origin_kind": "constructed-test",
+      "concept_role": "supports",
+      "side_to_move_benefits": "white",
+      "controlled_pair_with": "3k4/8/8/3n4/8/8/8/R3K3 w - - 0 1"
+    }
+  ],
+  "counterexamples": [
+    {
+      "fen": "3k4/8/8/3n4/8/8/8/R3K3 w - - 0 1",
+      "move": "Rd1",
+      "move_uci": "a1d1",
+      "note": "The mirror of `pin`'s counterexample and the other half of one controlled pair: the same rook, knight and king on the d-file with the knight in front instead of the king. That is a pin, not a skewer - the piece behind is the more valuable one, which is the whole distinction between the two motifs and the commonest thing a learner gets backwards.",
+      "origin_kind": "constructed-test",
+      "concept_role": "negative",
+      "side_to_move_benefits": "white",
+      "controlled_pair_with": "3n4/8/8/3k4/8/8/8/R3K3 w - - 0 1"
+    },
+    {
+      "fen": "1r4k1/8/8/1q6/8/8/8/R5K1 w - - 0 1",
+      "move_uci": "a1b1",
+      "note": "Registered false-positive case `a-skewer-the-front-unit-eats`, kept on the record as well as in tests/false_positive_cases.json so that the concept carries its own negative evidence. THE SURFACE PATTERN IS PRESENT: Rb1 attacks the black queen on b5 with the rook on b8 directly behind it. More valuable unit in front, less valuable behind, nothing between — the geometry of a skewer, and the detector says so: 'The queen on b5 has to move, and the rook on b8 behind it falls.' WHY IT IS NOT THE CONCEPT: This record's first indicator_against: \"The front unit can capture the skewering piece.\" The queen is not obliged to move at all; she takes the rook, which is undefended. WHAT THE SYSTEM DOES: Reported at HIGH confidence until a guard was written. Syzygy settles it without an opinion: after Rb1 the position is a WIN FOR BLACK, dtz 1, mate in 7, and the tablebase's own best move is Qxb1+. The guard is one step wider than the record's wording — it asks whether ANY capture of the skewering piece is profitable rather than only the front unit's — and that is deliberate, because a skewering piece somebody else eats is not a skewer either. skewer fell from 11.4% to 7.6% of the 788 shipped puzzles.",
+      "origin_kind": "constructed-test",
+      "concept_role": "negative",
+      "tablebase": {
+        "source": "Lichess tablebase (Syzygy, 7-piece)",
+        "pieces": 5,
+        "wdl": "loss",
+        "dtz": 1,
+        "dtm": 7,
+        "category": "loss",
+        "note": "PROVEN, from the mover's side: after Rb1 White is LOST in 7, and the tablebase's best move is Qxb1+. The front unit does not move; it eats."
+      },
+      "false_positive_case": "a-skewer-the-front-unit-eats"
+    }
+  ],
+  "ambiguous_examples": [
+    {
+      "fen": "r2qkb1r/1pp2ppp/p1n1p3/3P4/4Q1n1/2N2P2/PPPP1P1P/R1B1KB1R b KQkq - 3 9",
+      "move": "Qf6",
+      "move_uci": "d8f6",
+      "note": "Nominated by tools/mine_ambiguous.js on its fourth ground, NOT-THE-MOVE: the concept fires on a legal move that is not the solution of a shipped puzzle. The first three grounds ask about a POSITION and could not reach a move-based or motif concept at all - this concept and eleven others reported NONE until the tool learned to supply a move. What makes the case ambiguous rather than false is that nothing reported is absent: the skewer is real geometry and the move loses by six pawns. ...Qf6 scores -5.48 against ...Nxf6 at +0.78, a gap of 626 centipawns, and the reason is on the board rather than in the motif: after dxc6 the position collapses. A motif detector reports what is geometrically true of the move it is given, and being given the wrong move is not something it can notice.",
+      "origin_kind": "puzzle",
+      "concept_role": "ambiguous",
+      "engine": {
+        "engine_id": "Stockfish 18",
+        "test_level": 3,
+        "depth": 22,
+        "threads": 10,
+        "hash_mb": 4096,
+        "multipv": 2,
+        "best_move": "g4f6",
+        "eval_cp": -548,
+        "mate_in": null,
+        "pv": [],
+        "alternatives": [],
+        "margin_cp": null,
+        "verdict": "ambiguous",
+        "verdict_note": "...Qf6 scores -5.48 and the solution ...Nxf6 scores +0.78, both from Black's side at depth 22."
+      }
+    }
+  ],
+  "explanations": {
+    "by_level": {
+      "beginner": "The valuable piece in front has to move, and then you take the piece behind it.",
+      "intermediate": "A skewer — the pin turned around, with the bigger piece in front.",
+      "advanced": "Skewer, absolute if the front unit is the king. Check whether the front piece can move along the line and keep defending."
+    },
+    "by_depth": {
+      "short": "The valuable piece in front must move, and the one behind it falls.",
+      "normal": "A skewer: a line attack with the MORE valuable unit in front. It moves, and what stands behind it is taken. The inverse of a pin, and it wins material immediately rather than paralysing.",
+      "deep": "Three conditions separate a skewer from a line of pieces, and all three are commonly skipped. The front unit must not simply capture the skewering piece. The rear unit must be worth taking once it is exposed — a piece skewered to a defended PAWN is a line and not a skewer, and this base's guard removes most reported skewers on that test alone. And the front unit must not be able to step aside and keep defending the rear one, which it often can along the same line. Where the two units are worth the SAME, this base reports neither pin nor skewer rather than guessing which."
+    },
+    "hedge": "",
+    "lesson": ""
+  },
+  "terminology": {
+    "beginner_words": [
+      "the big piece has to move"
+    ],
+    "advanced_words": [
+      "skewer",
+      "absolute skewer"
+    ],
+    "avoid": []
+  },
+  "status": {
+    "stage": "researched",
+    "last_updated": "2026-09-01",
+    "open_questions": [],
+    "audit_notes": [
+      "2026-09-01: detector field named 'lineAlignment', which does not exist anywhere in the codebase. The audit's hardcoded whitelist had been accepting it. Repointed at real code, or marked as proposed where nothing implements it."
+    ]
+  }
+}

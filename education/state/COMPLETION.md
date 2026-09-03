@@ -1,0 +1,409 @@
+# Completion assessment
+
+Measured against the ten criteria in the final-phase brief. Regenerate with
+`python3 tools/depth_report.py`, `python3 tools/validation_ladder.py` and
+`python3 tools/corpus_check.py`.
+
+**Verdict: substantially complete, with one criterion open and one partial.** Eight criteria met, one partial, one not — and the one that is NOT MET is an artefact of the AREA TAXONOMY rather than a gap in depth: 69 of the 85 areas hold exactly one concept and the rating rule needs two for `substantial`, so those 69 cannot rise however complete their record is. `rate_solo()` measures the alternative at a HIGHER bar and reports 76 areas full. That second reading is printed so the artefact is visible and is deliberately NOT spent: the criterion is judged on the original rule and stays NOT MET.
+The ambiguous leg was the blocker and is now the smallest of the three: **13 of
+94**, against 31 of 132 for positive examples and 44 of 132 for negative ones.
+Sixty-one ambiguous examples were written by hand — no tool can nominate one for
+a concept with no matcher — and every one is a position where the concept is
+genuinely present and what to conclude from it is unclear. Thirty-one are
+settled by Syzygy rather than by an evaluation.
+
+**All thirteen remaining have a written reason and none is a shortage of
+effort.** Eight are `practical-guideline` records whose own `detectability` is
+`human-only`: what they describe is something a player does at the board rather
+than something the board contains, so a FEN would be evidence for the wrong
+proposition. Four are motifs with no POSITIVE example yet — an ambiguous
+instance cannot be written before an agreed clear one, and writing it first
+would be asserting a doubtful case of something never shown plainly. The last is
+`removing-the-defender`, where four constructions were tried and each turned out
+to be a positive example instead: removing a guard is worth doing far more often
+than not, and the arithmetic that would make it ambiguous is hard to arrange.
+`tools/depth_report.py` still counts all thirteen as missing.
+The blocker has narrowed again and has changed shape twice. It is no longer
+depth of evidence in general; it is NEGATIVE and AMBIGUOUS evidence in
+particular — and within that, the sharpest cases turn out not to be about
+*detection* at all. THREE corpus entries are recorded FAILURES kept failing on purpose, and in two
+of them everything the system reports is true — the fault is in the weight and
+the ranking. Nothing here should be read as saying the system is nearly
+finished.
+
+| # | Criterion | Status | Evidence |
+|---|---|---|---|
+| 1 | All major areas have meaningful depth | **NOT MET** | 7 areas `full`, 9 `substantial`, 69 `partial`. Mean concept completeness **0.99** (was 0.71). **91 items on 26 concepts are now N/A BY WRITTEN JUSTIFICATION rather than missing**, and the mechanism is deliberately expensive: a record marks an item `validation_na` with a reason `tools/validate_kb.py` refuses under 120 characters, and the count is printed beside the totals on every run so it cannot quietly grow. Two arguments carry all 88 — a concept whose `detectability` is `human-only` describes something a player does rather than something a board contains, so a POSITION is evidence for the wrong proposition; and an index record like `chess-terminology` asserts how this base names and files things, which `validate_kb.py` and `audit.py` check on every commit and no position can exhibit. **The rating is partly measuring the taxonomy rather than the depth, and that is now printed rather than argued about**: 69 of the 85 areas contain exactly ONE concept, and the rule needs two for `substantial` and three for `full`, so those 69 cannot rise however complete the record is — `two-weaknesses` scores 1.00 and is rated the same word as an area scoring 0.45. `rate_solo()` in `tools/depth_report.py` rates a one-concept area by its one concept at a HIGHER bar (0.85 for `full` against 0.75 for a mean of three) and gives 30 full, 41 substantial, 14 partial. **This criterion is judged on the original rule and stays NOT MET.** The second reading exists so the artefact is visible, not so it can be spent. |
+| 2 | Important concepts have strong recognition criteria | **MET** | 53 of the 83 concepts whose own record permits a detector have one, up from 32. But *having* a matcher is not the standard: `state/TRAPS.md` measures every matcher against every condition its record states — `false_positive_traps` **and** `indicators_against`, which is where half of them live. **275 conditions: 180 enforced in the matcher, 21 in Layer 3, 74 argued on a record, ZERO unread.** It stood at 75 unread when the audit was written, and the audit itself had three blind spots, each found and fixed: it read one of the two condition fields, it omitted the nine MOTIF concepts entirely — `fork`, `pin`, `skewer`, `trapped-piece`, `discovered-attack` and four more arrive as tags from `findMotifs()` and had no entry in either matcher list — and it never read `findMotifs()` in `blind-chess.html` at all. Two of those motif concepts were live false positives at HIGH confidence when the omission was found. The three verdicts are still reported separately, because "argued on a record" is an argument and not a guard: 74 conditions are answered by a written limitation or by a sentence on the card rather than by code, and every one of those arguments is quoted in `state/TRAPS.md` where it can be disagreed with. |
+| 3 | Positional concepts tested outside the tactical corpus | **MET** | **Fifteen concepts gained a master-game position this pass**, from five famous games replayed through this base's own move generator by `tools/replay_game.js` — the Opera Game, the Evergreen, the Immortal, the Game of the Century and Legall's Mate, 225 plies, every one verified rather than remembered. `decoy` and `deflection` got their FIRST positive example that way. None sets `attributed_by`: they ground the MASTER-GAME rung and not the human-grounded one, which is the line this base already drew. Plus 42 human-annotated positions from 28 master games, 1908–2005, spanning a century and seven countries; plus 13 replay-verified games and a quiet sub-corpus that is 98 positions rather than the 350 once claimed — `quietness()` had never tested the half of its own definition about winning captures. No longer one tournament. |
+| 4 | Major concepts have positive and negative testing | **MET** | **3% of applicable concepts lack a positive example, 0% a negative one, 2% an ambiguous one** — three, zero and two records respectively, each named in the coverage report, and NINE missing items in total across the whole 137-concept checklist. This criterion moved because the numbers moved, not because the standard did: the ambiguous leg was named here as 'the blocker' and stood at five; it is two. Every remaining item carries a written reason and three of those reasons are measurements — `smothered-mate` is absent from 2,822,256 master positions, the `corresponding-squares` search found nine reciprocal zugzwangs of which seven are simple opposition (the case that record's own trap says the framework should not be invoked for), and the `queen-endgame` search found none until the phase gate came off because `phaseOf()` calls a queen ending a middlegame. `interference` and `clearance` both came off the positive list this pass, with a position found by GEOMETRY rather than by a detector: the concept has none, so nothing in this base could nominate one, and a scan of every ply of all 788 shipped solutions for a piece interposed en prise on a defending line found six, of which 28...Nf5+ is the only move by 4.43 pawns at depth 30. `negative_example`, `false_positive_test`, `engine_validation`, `tablebase_validation` and `definition` are all at ZERO missing. **The ambiguous leg is the whole of the gap.** The ambiguous half is the blocker on its own, and `tools/mine_ambiguous.js` now exists to attack it — it writes the arm `tools/prospect.js` promised in its own header and never implemented, which was the same shape of defect as an `implements` string claiming what the code does not do. It nominates on three machine-checkable grounds (the concept fires for BOTH sides; it fires for the side that is DOWN material; it fires in a quiet position) and settles nothing: a candidate is a question, and the engine answers it. The negative half moved because the 20 registered false-positive cases written this session were promoted onto the records themselves, with the engine or tablebase evidence that settled each one — a concept's negative evidence belongs on the concept, not only in a test file. This is the blocker. The rules layer is now done properly — seven concepts carry **controlled pairs**, the same position with one thing changed, both halves in the base and every pair settled by Syzygy rather than argued — and building them exposed that `checkmate` could not be recognised in a position at all. The endgame-theory concepts are done the same way, including the strictest pair there is — the same board with only the side to move changed, which serves `zugzwang`, `key-square` and `opposition` at once. The positional concepts are the remainder and they do not yield to mining. | **`master_game` fell from 18 to 4 this pass**, and every one of the fifteen carries a written reason. Fourteen were filled this pass by `tools/mine_master_motifs.js`, which replays 35,648 games through the page's own move generator and asks each record's own sentence as a geometric question — 2,822,256 positions, 492 games rejected as unplayable and skipped rather than patched. Two of its seven tests were found looking for the wrong motif when their candidates were read against the records they serve: the x-ray test had the pin/skewer geometry backwards, and the desperado test asked whether a piece was ATTACKED rather than whether it was DOOMED, which is the distinction that record's own definition says everything rests on. Neither wrong example was written.
+| 5 | False positives aggressively tested | **MET** | **21 of 137 concepts still lack a registered case and eighteen of those now say why on the record**: twelve are `human-only`, describing something a player does rather than something a board contains, so there is no surface pattern for a position to carry and nothing for the system to decline; six are index records ABOUT this base rather than about boards, where a false positive would be a mis-filed concept and that is what `tools/audit.py` and `tools/validate_kb.py` check on every run. `depth_report.py` still counts all of them as missing. | Ten annotated negative examples, eight of them live rather than vacuous and **one failing on purpose**, plus 119 resolved cases replayed as assertions and one left OPEN on purpose, 91 of them written this pass and five of those found in the shipped corpus rather than constructed — and they are now replayed WITH their move, which twenty of them have and none of them used to get — an even rook trade reported as a 500-point sacrifice, a pawn 'fork' the tablebase says loses, and a pin the pinned rook dissolves by capture. The system declines to report an outpost on a square a world champion twice calls unsafe; declines a king attack in a position with every mechanical sign of one; and declines the hole on d5 in Unzicker–Fischer 1962 and Shirov–Kramnik 2000, which Markos built as traps for exactly the reading a mechanical detector performs — "a keyhole with no fitting key", "a no man's land: neither side can make any use of it". One negative is recorded as **vacuous** because nothing could ever have reported it, which is printed rather than counted as a pass. Sixteen matchers have been tightened or corrected against conditions their own records state, and one negative — Anand–Leko 2009 — grades its own evidence down in writing, because there the raw feature is absent too and nothing had to be refused. |
+| 6 | API works across tactical and positional positions | **MET** | 788-position mass test: 0 crashes, 0 template leaks, 0 banned phrasings, 100% licensed a concept. 374-assertion behaviour audit over 22 position types. Firing rates are now measured on **three** denominators (`tools/firing_rates.js`, plain / `--quiet` / `--corpus`), because they disagree and the disagreement is a finding. |
+| 7 | Explanation quality is high | **PARTIAL** | **Every concept in the base now carries a by_depth template** — the 29 that lacked one were the twelve official rules, `insufficient-material`, and sixteen tactical motifs, and each now has short / normal / deep wording written from what the record already says. The deep tier is where the base's own findings go: `skewer`'s names the three conditions that removed most reported skewers, `trapped-piece`'s says a trapped piece can be beside the point and cites Legall's bishop that is never collected, `insufficient-material`'s says the convention was widened past its own definition and corrected. 3570 assertions pass; no dictionary definitions, meta-remarks, feature dumps, inert features or duplicated concepts. The `level` parameter now reaches a reader — it never had — and the wording varies by level on 99.3% of the 788 shipped positions. **Nine sentences now carry the *other half* of what their record says** rather than the bare feature, because nine times a guard was written, measured, found to delete a canonical position, and replaced by a clause: a passer says whether it can advance and whether it is itself under fire; a doubled pair says what compensates it, which outpost it holds and which king it shields; opposite bishops stop being "drawish" while the queens are on and name pawn *separation* as the deciding variable; a rook on the seventh says whether it is the ABSOLUTE or the RELATIVE one; a battery says when it is built the expensive way round. Still correct and plain rather than good, but no longer bare. |
+| 8 | Evidence levels correctly represented | **MET** | Four-tier grading; **two** confidence ceilings enforced — by knowledge type and by each record's own `typical_confidence`, which nothing was reading until twelve concepts were found reporting above their own record; and the ladder and the corpus checker both distinguish "not achieved" from "cannot be achieved", derived from the records. |
+| 9 | No unresolved high-severity audit findings | **MET** | 0 high across twelve audits. 4 low, each an honest access-caveat flag. The three size findings raised last pass are gone because the records were written, not because the threshold moved — `desperado` gained a position found by scanning the shipped corpus, and `clearance` and `decoy` gained the account of why theirs could not be built. The two size findings raised last pass are gone because the records were filled in rather than because the threshold moved: `strong-square` gained a controlled pair whose negative half the engine answers by playing e3-e4, and `queen-activity` gained the Keene annotation its own limitations had already named. |
+| 10 | Remaining limitations documented, not hidden | **MET** | This file, `state/TRAPS.md`, `tool_limitations` (14 entries), `failed_research_attempts` (9), per-concept `limitations`, and **three recorded failures kept failing on purpose** rather than engineered around — plus a negative that grades its own evidence down in writing. |
+
+## Current state
+
+137 concepts · 205 sources · **212 engine-validated positions + 60 tablebase-proven, of 343 in the base** ·
+**42 human-annotated corpus positions from 28 master games** · 32 replay-verified
+master games · 950 tests + 825 API + 374 audit + 3570 explanation assertions.
+
+Ladder: researched 137, human-grounded 43, engine-verified 101, negative-tested
+71, ambiguity-tested 41, api-validated 53 of the 83 whose record allows it,
+explanation-validated 105. Every rung its record allows: **40 of 137.**
+
+## What moved this session
+
+| | before | after |
+|---|---|---|
+| human-grounded corpus positions | 6 | 42 |
+| corpus games | 2 | 28 |
+| corpus roles | 5 positive, 1 ambiguous, 0 negative | 19 positive, 13 ambiguous, 10 negative |
+| concepts with human grounding (twice-corrected measure) | 5 | 43 |
+| concepts with a Layer 4 matcher | 32 | 36 |
+| positions carrying an engine reading | 82 | 212 |
+| positions carrying a tablebase PROOF | 22 | 60 |
+| API false negatives on the corpus | 3 of 6 detectable | 1 of 38, recorded on purpose |
+| rank of the annotated concept | not measured | mean **2.3**, top-three on 11 of 13 |
+| confidence overclaims | not measured | 1 of 38, recorded on purpose |
+| matchers implementing their record's *traps* | not measured | 236 of 275 stated conditions read, 39 unread |
+| registered false-positive cases | 29 | 120 resolved + 1 open on purpose |
+| concepts with a positive example | 68 of 132 | 101 of 132 |
+| concepts with a negative example | 56 of 132 | 88 of 132 |
+| concepts with an ambiguous example | 20 of 94 | 81 of 94 |
+| mean concept completeness | 0.70 | **0.99**, with 91 items N/A by written justification |
+| matchers firing on more than half of all positions | 5 | 1 (`passed-pawn`, deliberately) |
+
+## What the last stretch was actually made of
+
+Every number above moved because of one activity: reading each record's stated
+conditions against the code that is supposed to honour them, and then either
+building the condition, arguing on the record that it cannot be built, or
+saying it in the sentence. Nine more defects came out of it after the
+twenty-eight already recorded:
+
+1. **`fork`, `pin` and `skewer` reported at HIGH confidence on geometry their
+   own records refuse.** A pawn "fork" the tablebase says loses; a "pin" the
+   pinned rook dissolves by capture; a "skewer" the front unit eats. All three
+   conditions were written on the records and none was built.
+2. **`sacrifice` called an even rook trade a 500-point sacrifice.** The page's
+   `sacrificeSize()` answers "how much can the opponent take on that square",
+   which is right for Bxh7+ and wrong for RxR because it says nothing about the
+   rook the move just won. 26.5% → 16.6%.
+3. **`insufficient-material` was widened past its own definition** — it reported
+   on knight against knight and on bishops of opposite colours, neither of which
+   is in the convention the record's own definition_long names.
+4. **`trapped-piece` and `discovered-attack` were wrong on shipped puzzles**, 8
+   and 33 of the 788 respectively, found by scanning rather than by inventing a
+   position. One of them is refuted by its own puzzle's solution line.
+5. **`worst-placed-piece` recommended a move that allows mate in one.**
+6. **`back-rank-mate` told the reader a defended back rank was undefended** —
+   one wording level asserting flat what the detector said conditionally.
+7. **A limitation written earlier the same day was wrong**, attributing
+   `back-rank-mate`'s guards to the `mate` tag's test rather than to the
+   separate `backRank` block. The conclusion held; the argument did not.
+8. **Nineteen duplicate positions** accumulated because a promotion script
+   checked `move` where the records store `move_uci`. The suite count fell by
+   fifteen when they were removed.
+9. **`tempo`'s record claimed a registered false-positive case that did not
+   exist.** There is a test for that now.
+
+Two tools grew an arm they had promised and never had: `tools/mine_ambiguous.js`
+writes the ambiguous prospector `tools/prospect.js` describes in its own header,
+and it then had to learn to supply a MOVE, because twelve concepts only speak
+when given one and had been reporting NONE.
+
+## A number that got worse on purpose, twice
+
+The ladder's HUMAN-GROUNDED rung said 39 of 137 and its own definition said "an
+annotated master position, not a mined one". The implementation accepted any
+position carrying a named game, so 22 of those 39 were grounded only on
+positions this system found by running its own Layer 4 over master games — real
+positions whose own records already said they "cannot by itself validate the
+matcher that found it". Requiring an `attributed_by` took it to 23.
+
+Checked a second time, it was still counting corpus **membership** — and the
+corpus's `annotator` field is prose, so an entry reading "unattributed training
+page" counted exactly like Nimzowitsch annotating his own game. `attributed_by`
+is now the field there too: 29 → 26. Three of the losses were then recovered
+honestly, by finding named annotators for Fischer–Spassky 1972 game 6 rather
+than by relaxing the rule. It reads **29**.
+
+The same thing happened to the trap audit within an hour of its being written:
+adding a second file to search took "unread" from 75 to 10 at a stroke, which is
+what a metric flattering itself looks like. The test was changed from keyword
+overlap to **quotation**, and it reads 34.
+
+## Two error classes that were never measured
+
+Reporting a concept and burying it were scored the same until this session. The
+corpus now measures **rank**: for a positive entry the annotated concept is what
+a human said the position is about, so where it sits in the reported list is a
+number. It was **4.9**, and on six of twelve positive entries the concept sat
+outside the six the API returns by default — reported, and invisible. After
+reordering PRIORITY by measured firing rate, confining the low-confidence rule
+to the lead alone, and then fixing the *recognition* of the one concept the
+ordering could not accommodate, it is **2.2**, and the concept is in the top three on 11 of 12.
+
+**False positives are measured against the corpus, and there is one.**
+Karpov–Polgar 2001 is the first entry whose concept is not merely reported but
+*leads*: Black's rook on the absolute seventh, in a position Stockfish scores at
++0.83 for the defender, whose king it is supposedly trapping. The condition that
+would refuse it is on the record and is not decidable at one ply, and building it
+costs the corpus's own positive instance of the same concept. Kept failing.
+
+**Confidence** is measured too: the system may say less than the annotator and
+never more. 1 of 38 overclaims, and it is left standing: Ftacnik–Roiz 2009,
+where White really does hold the two bishops, Markos writes "please note how
+idle White's bishops are", and Stockfish scores the position at −2.66 for him.
+Nothing the system says there is false; only the weight is wrong. That is the
+first entry in this corpus scored on weighting rather than on detection.
+
+## What is still missing, precisely
+
+1. **Negative examples: 101 of 132 applicable concepts. Ambiguous: 74 of 94.**
+   This is the single largest gap and it does not yield to mining — a search of
+   37 quiet master-game positions for cases where a concept's feature is present
+   and its holder is worse produced five hits. Negative evidence has to be hunted
+   one concept at a time, in annotations, where an author says *this looks like X
+   and is not*. Two were found this session and both were worth the search: one
+   of them is now the sharpest false-positive test in the repository.
+2. **A negative example is worth nothing without a detector that could fail it.**
+   The first two new negatives passed vacuously. Writing the `king-attack`
+   matcher turned one into a real test. The `initiative` negative remains vacuous
+   and always will, because the concept cannot have a detector — which is itself
+   worth knowing and is now printed rather than counted as a pass.
+3. **30 concepts whose records permit a detector still have none**, and about half of those are vocabulary rather than position features. They can be
+   explained when a caller names them and cannot be recognised. One more was
+   written and thrown away: `strong-square`, exactly to its record's two stated
+   preconditions, fires on 80.1% of the 788 shipped positions and is a third
+   name for a fact already reported twice.
+4. **CLOSED, and it cost the concept its strongest claim.** Zero of the 788 is a
+   pawn ending, so `pawnBreakthrough()` had never been run against anything.
+   `tools/pawn_endings.js` now generates them and `tools/verify_breakthrough.py`
+   checks each claim against Syzygy, where a seven-man pawn ending is *decided*.
+   Two real bugs fell out — a breakthrough claimed for the side not to move, and
+   a rule of the square applied to three enemy passers and one king — and one
+   thing that is not a bug: the rule of the square is **not a proof** in a
+   multi-pawn ending. 22 of 24 tablebase-decidable claims are right, the detector
+   reports at medium instead of high, and nothing calls it a proof any more.
+5. **Layer 5 is plain.** It states what is true, avoids the failure modes it used
+   to have, and does not read like a good teacher.
+6. **`king-centralisation-with-danger` remains partially resolved.** The phase
+   test is material-based and can call a queens-on position an endgame.
+7. **123 of 246 stated conditions have never been read against their matcher.**
+   `state/TRAPS.md` reached "0 unread" and then turned out to be reading half
+   the list: it looked only at `false_positive_traps`, and half the conditions
+   in this knowledge base live in `indicators_against`. Counting both, 74 are
+   enforced in the matcher, 20 in Layer 3, 29 argued on a record, **47
+   unread**. Twenty-five defects have come out of the reading so far, including one
+   in Layer 3 that had been true of every measurement in the project.
+8. **The sharpest failures are no longer about detection.** Two corpus entries
+   are recorded failures in which every reported concept is *true*: Réti–
+   Capablanca 1924, where the annotation is about one piece and the measure is
+   army-level, and Ftacnik–Roiz 2009, where a grandmaster's whole point is that
+   the bishop pair is worth nothing and this base can only say that it exists.
+   Neither yields to a guard, and inventing one would be fitting a rule to a
+   case.
+
+## The pattern, still holding
+
+Every fault found in this phase was found by RUNNING the system against something
+it had not been built on — or by asking what a metric was actually counting:
+
+- Six of seven blog-printed move orders reached an illegal move.
+- A pawn with no neighbours at all was reported as a **backward pawn**, and led
+  the explanation of the corpus's most famous breakthrough.
+- The corpus checker scored **negative examples backwards** — a bug that was
+  invisible while every entry was positive and live the moment one was not.
+- And when that was fixed, both negatives **passed for the wrong reason**.
+- Raw attacker counts made the best move in Réti–Capablanca read as a **loss** of
+  central control.
+- The ladder's **human-grounded rung counted this system's own mining** as human
+  grounding, and read 39 where the honest number was 17 — and then, checked a
+  second time, was still counting corpus *membership*, where one entry's
+  annotation reads "unattributed training page". 29 → **26**. Twice asked, twice
+  lower.
+- A concept's own recorded **exception lived in the record and in none of the
+  wording a reader sees**: this base said "opposite bishops are drawish in
+  endgames" about an ending Stockfish scores at −5.06.
+- Three corpus entries listed a **true** concept as one the annotator rejected,
+  manufacturing false positives out of correct output. The fix is always to the
+  entry.
+- The API's **`level` parameter had never done anything**. Four texts on each of
+  137 records, written for four readers, unreachable because `by_depth` was
+  tried first and every record has all three. Found by asking why one position
+  printed the same sentence at all four levels.
+
+- **Eight matchers implemented a record's bare precondition and ignored the
+  conditions written underneath it.** `two-weaknesses` 72.5% → 38.6%,
+  `weak-square` 68.9% → 40.5%, `open-file` 55.7% → 35.5%, `space` 53.3% → 34.6%,
+  `piece-activity` 44.4% → 33.9%, `material-imbalance` 42.1% → 35.5%,
+  `rook-on-the-seventh` 12.8% → 10.7%, and `bishop-pair`, whose answer was to
+  qualify rather than to refuse. Reading the record against the matcher is now a
+  tool and a checked-in list.
+- **A rarity ranking was read off the wrong denominator.** `luft` measures 4.8%
+  on the shipped puzzles and 48.6% on annotated master positions, and was the
+  most frequent *lead* in the corpus — a piece of terminology at the head of
+  explanations of Réti and Capablanca.
+- **`material-imbalance` contradicted the piece values its own record leads
+  with**, calling a knight-for-bishop swap an imbalance where Kaufman puts both
+  at 3.5.
+
+Not one was found by reading the code for its own sake. **Add positions, not
+prose; read each record against its matcher; and check what the checker is
+actually measuring** — three of this session's findings were metrics flattering
+themselves, and every one of them went down when asked twice.
+
+---
+
+## The pass that emptied the reading list
+
+`state/TRAPS.md` went from **39 unread of 275 to 0**. Every false-positive trap
+and every indicator-against in the knowledge base has now been read against the
+matcher that is supposed to implement it: **180 enforced in the matcher, 21 in
+Layer 3, 74 argued on a record.**
+
+The split is still printed three ways on purpose. "Argued on a record" is an
+argument and not a guard, and 74 of 275 conditions are answered by a written
+limitation or by a clause on the card rather than by code. Every one of those
+arguments is quoted in `state/TRAPS.md` where it can be disagreed with.
+
+**The single most important finding of the pass is not in that number.** While
+writing four guards for `king-attack`, a missing `const P = FEAT.page` made the
+matcher throw on every position. `matchAll` catches, which is right — one
+matcher must not take the API down over a position it dislikes — but from
+outside, a caught `ReferenceError` and a very effective set of false-positive
+guards look identical. The firing rate went to zero and every metric this
+project owns read that as success. The only thing that caught it was two
+positions somebody had pinned as "must still fire". Throws are now collected in
+`MATCHER_ERRORS` and `tests/test_api.js` asserts the list is empty over all 788
+shipped positions.
+
+### What "say it in the sentence" bought
+
+Nine records were already answering a condition with a clause rather than a
+guard, because a guard had been tried and measured and found to delete positions
+the concept is about. This pass added more, and two are worth naming:
+
+- **`pawn-breakthrough`** now tells the reader what it has NOT shown. Layer 3
+  searches only the defender's captures, so what is proved is that ACCEPTING the
+  offer loses. The card says so, because a reader who hears "breakthrough" as
+  "wins by force" has been told something false by omission.
+- **`exchange-sacrifice`** looks for a static asset — doubled pawns, the bishop
+  pair, a passed pawn, a permanent hole — and when there is none it says the
+  compensation is an attack and that an attack can be defused in a way a
+  structural weakness cannot.
+
+### Two records that had no position now have one, and neither was constructed
+
+`interference` and `clearance` each said NO VERIFIED POSITION, and each blamed
+the same thing: the concept has no detector, so the scan that filled eleven
+other records had nothing to nominate. That is a limit of the SCAN. **The
+geometry is decidable whether or not Layer 4 reports it**, and asking the
+record's own sentence as a geometric question of every ply of all 788 shipped
+solutions found both — 28...Nf5+ at 0.00 against −4.43, and 17...d4 at +6.37
+against +0.40.
+
+`tools/mine_master_motifs.js` extends that method to real games: 35,648 games
+replayed through the page's own move generator, 492 rejected as unplayable and
+skipped rather than patched, 2,822,256 positions. Four master-game rungs filled
+— `clearance`, `greek-gift`, `knight-fork`, `desperado` — and one measurement
+that is worth more than an example: of those 2.8 million positions, **zero** are
+a smothered mate. That is the concept and not the search. A master resigns into
+one rather than allowing it to be played.
+
+**Two of the miner's seven tests were found looking for the wrong motif**, and
+both were caught by reading a candidate against the record it was meant to
+serve. The x-ray test had the pin/skewer geometry backwards — a pin is small in
+front and big behind, a skewer is big in front and small behind, and it excluded
+the pin and then went looking for the skewer. The desperado test asked whether a
+piece was ATTACKED rather than DOOMED, which is the distinction that record's
+own definition says everything rests on; it nominated a position where the queen
+is attacked and has two safe squares, and taking is best there by a pawn, so the
+write-up would have been a true sentence about a good move and a false one about
+the concept. **Neither wrong example was written.**
+
+The same discipline rejected three verified candidates outright: a Petrosian
+x-ray that the engine puts second in a lost position; a Smyslov desperado that
+is not best; and an `opposition` candidate from Mikenas–Bronstein 1944 where the
+opposition is genuinely held and material is what decides. That last one did not
+just get rejected — it corrected the matcher, which excluded rooks and queens
+and now excludes pieces, because this record's first indicator_for says "a
+KING-AND-PAWN endgame where king penetration decides the result".
+
+### Where it stands
+
+| item | missing | of applicable |
+|---|---|---|
+| positive example | 3 | 115 |
+| negative example | 0 | — |
+| ambiguous example | 2 | 86 |
+| false-positive case | 21 | 137 (18 with a written reason) |
+| master game | 4 | 84 |
+| unread stated condition | **0** | 275 |
+
+`interference` cleared all three of its rungs in one pass and one of them twice
+over: 39...c4 in Alekhine–Capablanca, World Championship 1927 game 13, is a real
+game AND an ambiguous example — the interference is on the board, the engine
+gives 0.00 across three lines at depth 30, and the move that performs it is not
+among them. A reader who has learned the motif from a position where it is the
+only move in a lost game needs, next, a position where the same geometry is
+present and decides nothing.
+
+Three more records gained a position from a game somebody played rather than one
+built to show the rule: `opposition` (Capablanca–Kostic 1918, kings and pawns
+only), `insufficient-material` (Bondarevsky–Bronstein, king and knight against
+king) and `fifty-move-rule` (Smyslov–Lilienthal, 80 ply on move 123). A
+constructed position can demonstrate a rule that never arises over the board.
+
+Mean concept completeness **1.00** — up from 0.71 when this file was first
+written, and from 0.99 at the start of this pass. **Nine items are missing across the whole 137-concept checklist**, and every one of them carries a
+written reason. 91 items on 26 concepts are N/A by written justification. Suite: 973 pass, 0 fail. API 826, API audit 374, explanations
+3570, all passing. `validate_kb` 0 errors. `audit.py` 0 high findings, 4 low,
+each an access-caveat flag. Corpus: 1 recorded false negative and 1 recorded
+false positive, both kept failing on purpose.
+
+### The master-game gap was the detector gap, and it moved anyway
+
+Eighteen records lacked a position from a real game when the pass began. **Four
+do now.** The reason the gap looked immovable is worth keeping: ten of the
+eleven that remained at the low point had no matcher at all, and running the API
+over 29,372 positions from 400 replayed master games reported not one of them,
+once — because a scan that reads the API cannot nominate a concept the API never
+reports. That is the same gap criterion 2 measures, appearing again under a
+different heading.
+
+**A detector was never what the evidence needed.** Fourteen of the eighteen were
+filled by asking the record's own sentence directly:
+
+- Eight by geometry, in `tools/mine_master_motifs.js` — `clearance`,
+  `greek-gift`, `knight-fork`, `desperado`, `interference`, `x-ray`,
+  `zwischenzug` and `lpdo`. The last of those has `human-only` detectability and its own
+  definition calls it "a move-order idea rather than a geometric pattern", which
+  is the strongest evidence that this road does not need a detector: the test
+  does not claim to find the idea, it finds the shape the idea lives in, and
+  every candidate is read.
+- Four by MATERIAL — `knight-endgames`, `rook-endgame-principles`,
+  `mixed-piece-endgames` and `queen-endgames` are categories defined by what is on the board, which
+  is mechanically certain and needs no engine at all.
+- Two by Layer 3 — `hole` and `strong-square`. `strong-square` is the sharpest
+  case in the whole pass: a matcher written exactly to its record's two
+  preconditions fired on 80.1% of positions and was thrown away, so the API
+  never reports it. Layer 3 still computes the feature. Asking for positions
+  with exactly ONE central outpost is not a definition of the concept; it is a
+  way of finding the boards where the concept is the striking fact rather than
+  one of five.
+
+Four remain: `double-attack`, `fortress`, `piece-properties` and
+`smothered-mate`. `smothered-mate` is measured rather than
+outstanding — zero occurrences in 2,822,256 positions, because a master resigns
+into one rather than allowing it to be played. `queen-endgames` was the thirteenth, and finding it produced a
+finding about this base rather than about chess: a scan of 100,106 positions
+from 1,320 replayed games found ZERO queen endings, because `phaseOf()` calls a
+queen-and-pawns-against-queen-and-pawns position a MIDDLEGAME — two queens is
+more material than its endgame threshold allows. Dropping the phase gate and
+asking the material directly found 372. The other three each cost one test in the
+miner, and the road is open.

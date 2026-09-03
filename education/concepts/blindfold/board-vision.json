@@ -1,0 +1,151 @@
+{
+  "schema_version": 2,
+  "alternate_names": [
+    "square vision",
+    "board awareness"
+  ],
+  "historical_names": [],
+  "tags": [
+    "blindfold",
+    "training",
+    "nox-specific"
+  ],
+  "subcategory": "training",
+  "difficulty": "beginner",
+  "knowledge_type_note": "Training advice. The drills are widely recommended and internally sensible, but this base has found no controlled evidence that they transfer to playing strength, and says so.",
+  "name_status": "established-name",
+  "history": {
+    "attributions": [
+      {
+        "relation": "first-documented-by",
+        "person": "al-Adli ar-Rumi",
+        "year": 840,
+        "note": "Knight's tours traced to him by Murray, per an instructional source. NOT verified here against Murray's text.",
+        "confidence": "low"
+      }
+    ],
+    "first_documented_source": "darksquares-blindfold-drills",
+    "year": null,
+    "confidence": "low",
+    "notes": "The drill progression is anonymous modern instructional practice. The al-Adli attribution and the blindfold records cited alongside it - Najdorf's 45-board simultaneous display in Sao Paulo in 1947 and Koltanowski's 56 consecutive games in San Francisco in 1960 - come from an instructional blog and are recorded as unverified.",
+    "competing_claims": [],
+    "development": []
+  },
+  "engine_era_status": "not-applicable",
+  "engine_era_note": "Not applicable; a human training matter.",
+  "recognition": {
+    "preconditions": [
+      "A player working without sight of the board"
+    ],
+    "indicators_for": [],
+    "indicators_against": [],
+    "prerequisites": [],
+    "detector": null,
+    "detectability": "human-only",
+    "typical_confidence": "low",
+    "false_positive_traps": [
+      "This describes a player's skill, not a position. It cannot be attached to a move.",
+      "The transfer claim - that these drills raise playing strength - is not evidenced and must not be repeated as fact."
+    ]
+  },
+  "application": {
+    "typical_plans": [
+      "Name square colours until it is automatic",
+      "Trace knight routes between squares mentally",
+      "Play simple endgames unseen before whole games"
+    ],
+    "typical_moves": [],
+    "typical_pawn_structures": [],
+    "typical_piece_arrangements": [],
+    "tactical_consequences": [],
+    "strategic_consequences": [
+      "Fluency in the board frees attention for the position"
+    ]
+  },
+  "exceptions": [
+    "Blindfold play is an advanced application, not a starting point; the drills come first.",
+    "Fine reported that a blank board was a hindrance rather than a help to him, while other players found it useful - individual variation is real."
+  ],
+  "limitations": [
+    "No controlled evidence is known to this base that these drills improve playing strength.",
+    "The historical claims recorded here (al-Adli, the Najdorf and Koltanowski records) come from a low-confidence source and are unverified.",
+    "NO AMBIGUOUS EXAMPLE, and a FEN is not the right kind of evidence for one here. An ambiguous example in this base is a POSITION where the concept is genuinely present and what to conclude from it is unclear - the pattern is on the board and the reading of it is not. This record's subject is not on the board: its `recognition.detectability` is `human-only`, and what it describes is something a player does at the board rather than something the board contains. A position could illustrate the CONSEQUENCE of doing it well or badly, and that is a different claim, and attaching a FEN here would be evidence for the wrong proposition. Recorded rather than filled: tools/depth_report.py still counts this concept as missing the item, and the completion assessment carries the gap.",
+    "NO REGISTERED FALSE-POSITIVE CASE, and a FEN is not the right instrument for one here. A case in tests/false_positive_cases.json is a POSITION where the concept's surface pattern is present and the concept is not, replayed as an assertion so the system can be shown declining the error. This record's `recognition.detectability` is `human-only`: what it describes is something a player does rather than something a board contains, so there is no surface pattern for a position to carry and nothing for the system to decline. The conditions this record states are read and answered in `limitations` and in the trap audit instead. Recorded rather than filled: tools/depth_report.py still counts this concept as missing the item.",
+    "NO MASTER-GAME POSITION, and the same reason that keeps this record from carrying an ambiguous example or a false-positive case applies: `recognition.detectability` is `human-only`, and what this record describes is something a player does rather than something a board contains. A game position could show the CONSEQUENCE of doing it well or badly, which is a different claim from the one this record makes. tools/depth_report.py still counts the item as missing."
+  ],
+  "misconceptions": [
+    "That blindfold play requires a rare gift. The evidence points at accumulated knowledge and trainable sub-skills.",
+    "That one should begin by attempting a whole blindfold game. The instructional consensus is the reverse."
+  ],
+  "relationships": {
+    "broader": [],
+    "narrower": [],
+    "related": [
+      "blindfold-representation",
+      "chunking",
+      "blindfold-interference"
+    ],
+    "contrasting": [],
+    "co_occurring": [],
+    "conflicts": []
+  },
+  "examples": [],
+  "counterexamples": [],
+  "ambiguous_examples": [],
+  "explanations": {
+    "by_level": {
+      "beginner": "Knowing the board itself without looking - which squares are light or dark, and where a knight can go.",
+      "intermediate": "Board vision. Practise square colours and knight routes until they are automatic, then try simple endings unseen.",
+      "advanced": "Fluency in the relations is the substrate the blindfold representation is built on; computing them costs attention the position needs.",
+      "master": "Worth noting that the transfer of these drills to playing strength is asserted rather than demonstrated."
+    },
+    "by_depth": {
+      "short": "Knowing the board without looking at it.",
+      "normal": "Board vision: fluent knowledge of the board itself - square colours, piece routes, which squares connect to which - held without needing to see it. It is the layer beneath blindfold play, and the standard drills build it before any whole game is attempted.",
+      "deep": "The foundation beneath holding a position unseen: before the position can be held without the board, the board must be. The drill progression is consistent across sources - square colours, then piece routes, then following a knight, then reconstructing small positions, then simple endgames unseen - with the knight's tour the most-recommended single exercise. Why it plausibly matters follows from the research on representation: if what a player holds is relational rather than pictorial, fluency in those relations is exactly the substrate, and effort spent computing them is effort not spent on the position. What is not established is that any of it raises playing strength."
+    },
+    "hedge": "The drills are widely recommended, but this base knows of no controlled evidence that they transfer to playing strength.",
+    "lesson": "Learn the board before trying to hold a position on it."
+  },
+  "terminology": {
+    "beginner_words": [
+      "knowing the squares",
+      "seeing where the knight can go"
+    ],
+    "advanced_words": [
+      "board vision",
+      "square colour recognition",
+      "knight's tour"
+    ],
+    "avoid": [
+      "blindfold chess requires a gift"
+    ]
+  },
+  "status": {
+    "stage": "researched",
+    "last_updated": "2026-09-01",
+    "open_questions": [],
+    "audit_notes": []
+  },
+  "id": "board-vision",
+  "canonical_name": "Board vision",
+  "category": "blindfold-visualisation",
+  "knowledge_type": "practical-guideline",
+  "definition_short": "Fluent knowledge of the board itself — where each square is, what colour it is, and how pieces travel between squares — held without needing to look.",
+  "definition_long": "The foundation layer beneath blindfold play. Before a player can hold a POSITION without sight of the board, they need the BOARD without sight of it: which squares are light and which dark, which squares a knight on a given square reaches, which diagonal connects two squares.\n\nTHE STANDARD DRILL PROGRESSION is consistent across instructional sources: name the colour of a named square; trace a piece's route between two squares; follow a knight's path without a board; reconstruct a small position from brief exposure; then play out simple endgames unseen before attempting whole games. The KNIGHT'S TOUR — visiting all sixty-four squares in sixty-three legal knight moves — is the most-recommended single exercise, and it is very old; Murray traced tours to al-Adli ar-Rumi around 840 AD.\n\nWHY IT PLAUSIBLY MATTERS is consistent with the research on representation. If what a blindfold player holds is relational rather than pictorial, then fluency in the relations — this square is dark, that knight reaches these squares — is exactly the substrate the representation is built on, and effort spent computing it is effort not spent on the position.\n\nWHAT IS NOT ESTABLISHED is that these drills improve playing strength. That claim is made confidently by instructional sources and this base has found no controlled study supporting it. The honest statement is that the drills train the specific skills they exercise, and that those skills are prerequisites for blindfold play.",
+  "sources": [
+    "chesscom-blindfold-exercises",
+    "darksquares-blindfold-drills",
+    "chessworld-visualisation",
+    "campitelli-gobet-2004"
+  ],
+  "source_confidence": "low",
+  "validation_na": {
+    "positive_example": "N/A rather than missing. A validation item of this kind is a POSITION, and this record's subject is not a position: `recognition.detectability` is `human-only`, and what it describes is something a player does at the board rather than something the board contains. A FEN could show the CONSEQUENCE of doing it well or badly, which is a different claim from the one this record makes, so attaching one would be evidence for the wrong proposition. The record is validated the way its own claims can be: by sources, by attribution, by stated recognition criteria, and by the conditions its trap list states being read against the code in state/TRAPS.md.",
+    "negative_example": "N/A rather than missing. A validation item of this kind is a POSITION, and this record's subject is not a position: `recognition.detectability` is `human-only`, and what it describes is something a player does at the board rather than something the board contains. A FEN could show the CONSEQUENCE of doing it well or badly, which is a different claim from the one this record makes, so attaching one would be evidence for the wrong proposition. The record is validated the way its own claims can be: by sources, by attribution, by stated recognition criteria, and by the conditions its trap list states being read against the code in state/TRAPS.md.",
+    "ambiguous_example": "N/A rather than missing. A validation item of this kind is a POSITION, and this record's subject is not a position: `recognition.detectability` is `human-only`, and what it describes is something a player does at the board rather than something the board contains. A FEN could show the CONSEQUENCE of doing it well or badly, which is a different claim from the one this record makes, so attaching one would be evidence for the wrong proposition. The record is validated the way its own claims can be: by sources, by attribution, by stated recognition criteria, and by the conditions its trap list states being read against the code in state/TRAPS.md.",
+    "engine_validation": "N/A rather than missing. A validation item of this kind is a POSITION, and this record's subject is not a position: `recognition.detectability` is `human-only`, and what it describes is something a player does at the board rather than something the board contains. A FEN could show the CONSEQUENCE of doing it well or badly, which is a different claim from the one this record makes, so attaching one would be evidence for the wrong proposition. The record is validated the way its own claims can be: by sources, by attribution, by stated recognition criteria, and by the conditions its trap list states being read against the code in state/TRAPS.md.",
+    "master_game": "N/A rather than missing. A validation item of this kind is a POSITION, and this record's subject is not a position: `recognition.detectability` is `human-only`, and what it describes is something a player does at the board rather than something the board contains. A FEN could show the CONSEQUENCE of doing it well or badly, which is a different claim from the one this record makes, so attaching one would be evidence for the wrong proposition. The record is validated the way its own claims can be: by sources, by attribution, by stated recognition criteria, and by the conditions its trap list states being read against the code in state/TRAPS.md.",
+    "false_positive_test": "N/A rather than missing. A validation item of this kind is a POSITION, and this record's subject is not a position: `recognition.detectability` is `human-only`, and what it describes is something a player does at the board rather than something the board contains. A FEN could show the CONSEQUENCE of doing it well or badly, which is a different claim from the one this record makes, so attaching one would be evidence for the wrong proposition. The record is validated the way its own claims can be: by sources, by attribution, by stated recognition criteria, and by the conditions its trap list states being read against the code in state/TRAPS.md."
+  }
+}

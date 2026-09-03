@@ -1,0 +1,256 @@
+{
+  "schema_version": 2,
+  "alternate_names": [
+    "half-open file"
+  ],
+  "historical_names": [],
+  "tags": [
+    "lines",
+    "rooks",
+    "structure"
+  ],
+  "subcategory": "lines",
+  "difficulty": "intermediate",
+  "knowledge_type_note": "An observable feature of the pawn structure, with the usual gap between the feature being present and its being worth anything.",
+  "name_status": "established-name",
+  "history": {
+    "attributions": [],
+    "first_documented_source": "nimzowitsch-my-system",
+    "year": 1925,
+    "confidence": "low",
+    "notes": "Standard vocabulary; Nimzowitsch's treatment of files is the classical source but the term is not his coinage.",
+    "competing_claims": [],
+    "development": []
+  },
+  "engine_era_status": "reliable",
+  "engine_era_note": "Unremarkable to engines, which evaluate the resulting pressure directly. The concept survives as the explanation for why the pressure exists.",
+  "recognition": {
+    "preconditions": [
+      "A file carrying an enemy pawn and none of your own"
+    ],
+    "indicators_for": [
+      "The enemy pawn on it is backward or otherwise fixed",
+      "You can bring more pieces to bear than can defend it",
+      "A rook already stands on the file"
+    ],
+    "indicators_against": [
+      "The pawn can simply advance",
+      "Another enemy pawn can defend it",
+      "The file has no entry square beyond the pawn"
+    ],
+    "prerequisites": [
+      "ranks-files-diagonals"
+    ],
+    "detector": "fileState in lib/features.js reports semiOpenFor per colour",
+    "detectability": "mechanical",
+    "typical_confidence": "high",
+    "false_positive_traps": [
+      "A semi-open file is a fact about pawns; whether it produces pressure depends on whether the target is fixed and whether you can attack it more times than it can be defended.",
+      "Both sides can have semi-open files, usually on opposite wings, and each will be attacking on their own. Reporting only one side's is half the position."
+    ]
+  },
+  "application": {
+    "typical_plans": [
+      "Double rooks against the pawn on the file",
+      "Fix the target first so it cannot advance out of the pressure",
+      "Trade off its defenders rather than adding attackers"
+    ],
+    "typical_moves": [],
+    "typical_pawn_structures": [
+      "A backward pawn on a semi-open file",
+      "Sicilian and French structures, which are largely arguments about which files each side gets"
+    ],
+    "typical_piece_arrangements": [
+      "Doubled rooks on the file"
+    ],
+    "tactical_consequences": [],
+    "strategic_consequences": [
+      "The file usually outlives the pieces currently on it, so it is a durable asset"
+    ]
+  },
+  "exceptions": [
+    "A semi-open file with no entry square and a defensible pawn achieves nothing.",
+    "Where the enemy pawn can advance freely, the file is a route rather than a lever."
+  ],
+  "limitations": [
+    "Detecting the file is mechanical; judging whether the target is fixed is not.",
+    "MEASURED 2026-09-02: this record's first trap states the whole test - 'whether it produces pressure depends on whether the TARGET IS FIXED and whether you can ATTACK IT MORE TIMES THAN IT CAN BE DEFENDED' - and the matcher quoted it and built neither half. A comment in it claimed a rook on the file was 'the half a static scan can answer', which was a claim nobody had checked: both halves are answerable. The enemy pawn on the file must have no safe advance, and it must be attacked at least as many times as it is defended. 39.5% -> 16.4% of the 788 shipped positions, and the sentence now names the pawn being bear down on.",
+    "CORRECTED 2026-09-02, by a human-grounded position. The 'target is fixed' half of this record's first trap was built as 'the pawn cannot advance safely', and that is wrong for a FILE concept: a pawn that advances is still on the same file. Nimzowitsch-Capablanca 1914 settled it - the annotators name 'play on the open b-file' and say the b2 pawn falls six moves later, and the first version dropped the b-file entirely because b2-b3 is a perfectly safe move. It is, and the pawn is still on b3, still on the file, still outnumbered. The escape is now defined as arriving somewhere it is no longer attacked at least as often as it is defended. The second half is also softened, deliberately and with a measurement. The record says 'attack it MORE TIMES THAN IT CAN BE DEFENDED', which is the condition for WINNING the pawn; reporting only that measures 8.6% and again loses the b-file in the annotated position, where the count is 1-1. At parity the pawn is not falling and the file is not nothing - the defence is committed to it - so both are reported and the sentence says which. 39.5% -> 24.5%."
+  ],
+  "misconceptions": [
+    "That an open file is better than a semi-open one. The open file is symmetric and often belongs to nobody; the semi-open file comes with a target.",
+    "That the file is the asset. The fixed pawn on it is the asset."
+  ],
+  "relationships": {
+    "broader": [
+      "open-file"
+    ],
+    "narrower": [],
+    "related": [
+      "open-file",
+      "backward-pawn",
+      "ranks-files-diagonals",
+      "rook-on-the-seventh",
+      "isolated-queen-pawn",
+      "doubled-pawns",
+      "two-weaknesses"
+    ],
+    "contrasting": [
+      "open-file"
+    ],
+    "co_occurring": [
+      "backward-pawn"
+    ],
+    "conflicts": []
+  },
+  "examples": [
+    {
+      "fen": "r3r3/2p2q1k/1p1p2pb/3Ppp1p/p1P4P/P4PP1/1PQ1R1NK/4R3 w - - 7 31",
+      "game": "Stahlberg-Petrosian, Candidates, Zurich 1953",
+      "note": "A QUIET position from a master game — after Qf7, ply 60 — in which White has a rook on e2 and e1, on a semi-open file. Quiet here has a mechanical meaning: the side to move has no check and no capture that wins material, so the next move has to be chosen on positional grounds. That matters because this base's other corpus is 788 tactical puzzles, in which a positional feature cannot be isolated.\n\nWHAT IS VERIFIED: the game replays legally end to end through the page's own move generator, so the FEN is derived rather than transcribed; and the feature is present by mechanical measurement in lib/features.js.\n\nWHAT IS NOT CLAIMED: that the concept decides this position, or that the players were thinking about it. Note also a limitation of method — the position was FOUND by this system's own Layer 4, so it demonstrates the concept and cannot by itself validate the matcher that found it. Other concepts licensed here: weak-square, material-imbalance.",
+      "origin_kind": "historical-game",
+      "concept_role": "supports",
+      "side_to_move_benefits": "neither"
+    },
+    {
+      "fen": "2b2q2/pp2n1k1/2p4p/Q1Nr1p2/3p3p/1P2p2P/P1P1B1P1/1K1R1R2 b - - 7 29",
+      "note": "White has doubled rooks on a semi-open file (d1, f1). The position is QUIET by mechanical test: the side to move has no check available and no capture that wins material, so the next move must be chosen on positional grounds. That is the property this base's tactical corpus almost never has. Found by tools/prospect.js, which searches 1576 real positions for a concept's feature and scores quiet positions far higher. Provenance: the puzzle corpus is engine self-play — a real position from a real game between engines, not a master game.",
+      "origin_kind": "puzzle",
+      "concept_role": "supports",
+      "side_to_move_benefits": "neither",
+      "engine": {
+        "engine_id": "Stockfish 18",
+        "test_level": 2,
+        "depth": 20,
+        "threads": 8,
+        "hash_mb": 2048,
+        "multipv": 2,
+        "best_move": "b7b6",
+        "eval_cp": 59,
+        "mate_in": null,
+        "pv": [],
+        "alternatives": [
+          {
+            "move": "d5d8",
+            "eval_cp": -297,
+            "mate_in": null
+          }
+        ],
+        "margin_cp": 0,
+        "verdict": "supports",
+        "verdict_note": "Quiet and close to balanced at 0.59, which is the combination this base most needs and least often finds: nothing forcing is available and the evaluation is not swamping the feature, so the position is usable as an instance of the concept. What is NOT claimed is that the concept explains the engine's choice of move."
+      }
+    },
+    {
+      "fen": "3rq1k1/6pp/4p3/pp1nP3/P2P4/2PQ4/1B4PP/4R1K1 b - - 0 31",
+      "game": "Reshevsky-Petrosian, Candidates, Zurich 1953",
+      "note": "A quiet position from a master game — after Qxd3, ply 61 — where Black has a rook on d8, on a semi-open file. The side to move has no check available, so the next move has to be chosen on positional grounds. CORRECTED 2026-09-02: this note used to add \"and no capture that wins material\" as the other half of a mechanical quiet test. That half had never run - quietness() passed a move object where see() expects a square index, so winningCapturesAvailable was always zero and every note written from it claimed something untested. Re-checked with the fixed test, this position DOES have a capture that wins material, so the quiet half of the claim is withdrawn. The position is kept: what it illustrates about the concept is unaffected, and dropping the evidence would be tidying away the consequence of a bug. VERIFIED: the game replays legally end to end through the page's own move generator, and the feature is measured by lib/features.js. NOT CLAIMED: that the concept decides this position, or that the players were thinking about it. Method note: the position was found by this system's own Layer 4, so it illustrates the concept and cannot by itself validate the matcher that found it. Other concepts licensed here: weak-square, material-imbalance, space, bad-bishop.",
+      "origin_kind": "historical-game",
+      "concept_role": "supports",
+      "side_to_move_benefits": "neither"
+    }
+  ],
+  "counterexamples": [
+    {
+      "fen": "r2qkb1r/1pp2ppp/p1n1p3/3P4/4Q1n1/2N2P2/PPPP1P1P/R1B1KB1R b KQkq - 3 9",
+      "note": "White has 2 semi-open files and no rook on any of them. The position is QUIET by mechanical test: the side to move has no check available and no capture that wins material, so the next move must be chosen on positional grounds. That is the property this base's tactical corpus almost never has. Found by tools/prospect.js, which searches 1576 real positions for a concept's feature and scores quiet positions far higher. Provenance: the puzzle corpus is engine self-play — a real position from a real game between engines, not a master game.",
+      "origin_kind": "puzzle",
+      "concept_role": "contradicts",
+      "side_to_move_benefits": "neither",
+      "engine": {
+        "engine_id": "Stockfish 18",
+        "test_level": 2,
+        "depth": 20,
+        "threads": 8,
+        "hash_mb": 2048,
+        "multipv": 2,
+        "best_move": "g4f6",
+        "eval_cp": 91,
+        "mate_in": null,
+        "pv": [],
+        "alternatives": [
+          {
+            "move": "g4f2",
+            "eval_cp": -323,
+            "mate_in": null
+          }
+        ],
+        "margin_cp": 0,
+        "verdict": "contradicts",
+        "verdict_note": "Quiet and close to balanced at 0.91, which is the combination this base most needs and least often finds: nothing forcing is available and the evaluation is not swamping the feature, so the position is usable as an instance of the concept. What is NOT claimed is that the concept explains the engine's choice of move."
+      }
+    }
+  ],
+  "ambiguous_examples": [
+    {
+      "fen": "3qr1k1/1bp2p2/6nQ/6R1/rpP4p/4Bpp1/P7/1B2K3 w - - 0 39",
+      "note": "A BOTH-SIDES candidate, and the one where the engine's answer is the most instructive: 0.00. The base reports a semi-open file for White and one for Black; material says Black by 890 centipawns; and the position is a dead draw by force, Rxg6+ and perpetual. Three readings, three different stories, and the true one is that nobody is winning. A semi-open file is a standing asset and this is a position where standing assets have stopped mattering, which is the honest boundary of the concept rather than a failure of it.",
+      "origin_kind": "puzzle",
+      "concept_role": "ambiguous",
+      "engine": {
+        "engine_id": "Stockfish 18",
+        "test_level": 3,
+        "depth": 24,
+        "threads": 10,
+        "hash_mb": 4096,
+        "multipv": 1,
+        "best_move": "g5g6",
+        "eval_cp": 0,
+        "mate_in": null,
+        "pv": [],
+        "alternatives": [],
+        "margin_cp": null,
+        "verdict": "ambiguous",
+        "verdict_note": "0.00 at depth 24, settled at depth 1, by force. Material and both file reports point away from the truth."
+      }
+    }
+  ],
+  "explanations": {
+    "by_level": {
+      "beginner": "A file where you have no pawn and they do — so your rook is already pointing at something.",
+      "intermediate": "A semi-open file. Better than an open one for attacking, because it comes with a target that cannot step aside.",
+      "advanced": "Fix the pawn first. A target that can advance out of the pressure is not a target.",
+      "master": "Most opening choices are really arguments about which semi-open files each side ends up with."
+    },
+    "by_depth": {
+      "short": "A file with their pawn on it and none of yours.",
+      "normal": "A semi-open file: no pawn of your own, one of the opponent's. It is often more useful than a fully open file, because it is asymmetric - the enemy pawn is a target that cannot move sideways, and you can usually attack it more times than it can be defended.",
+      "deep": "The asymmetric half of the open-file idea. An open file is a road both sides can use, and this base holds a tested position where one with a rook of each colour on it is worth exactly nothing; a semi-open file comes with a target built in. It is created by the pawn structure rather than chosen, which is why so many openings are arguments about which files each side gets. And the target is worth having only when it is fixed: a backward pawn on a semi-open file is the classic pairing, because it can neither advance out of the pressure nor be defended by its neighbours."
+    },
+    "hedge": "",
+    "lesson": "The file is not the asset. The pawn stuck on it is."
+  },
+  "terminology": {
+    "beginner_words": [
+      "your rook points at their pawn"
+    ],
+    "advanced_words": [
+      "semi-open file",
+      "half-open file",
+      "fixed target",
+      "doubling rooks"
+    ],
+    "avoid": [
+      "an open file is better"
+    ]
+  },
+  "status": {
+    "stage": "researched",
+    "last_updated": "2026-09-01",
+    "open_questions": [],
+    "audit_notes": []
+  },
+  "id": "semi-open-file",
+  "canonical_name": "Semi-open file",
+  "category": "semi-open-files",
+  "knowledge_type": "positional-concept",
+  "definition_short": "A file with none of your own pawns on it but one of the opponent's — so your rook looks straight at a pawn that cannot run away sideways.",
+  "definition_long": "The more useful half of the open-file idea, and the one that supplies targets rather than merely space.\n\nWHY IT IS OFTEN BETTER THAN AN OPEN FILE: an open file is a road both sides can use, and this base holds a tested position where an open file with a rook of each colour on it is worth exactly nothing. A semi-open file is asymmetric by construction. The enemy pawn on it is a TARGET that cannot step sideways out of the way, and pressure against it can be built with more pieces than can defend it.\n\nIT IS CREATED BY THE STRUCTURE, not chosen. Every pawn capture that leaves one side with a pawn on a file and the other without makes one, which is why so many openings are really arguments about which files each side gets. The Sicilian's whole character comes from Black's semi-open c-file, the French's from the same on the other wing.\n\nTHE TARGET IS BEST WHEN IT IS FIXED. A backward pawn on a semi-open file is the classic combination, because the pawn cannot advance to escape and its own neighbours cannot defend it. Where the pawn can simply advance or be defended by another pawn, the file is a route rather than a lever.",
+  "sources": [
+    "nimzowitsch-my-system",
+    "chessprogramming-rook-open-file",
+    "wikipedia-backward-pawn",
+    "zurich-1953-games"
+  ],
+  "source_confidence": "medium"
+}

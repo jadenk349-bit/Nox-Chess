@@ -1,0 +1,213 @@
+{
+  "schema_version": 2,
+  "alternate_names": [
+    "candidates",
+    "the shortlist"
+  ],
+  "historical_names": [],
+  "tags": [
+    "calculation",
+    "thinking-method",
+    "disputed"
+  ],
+  "subcategory": "thinking technique",
+  "difficulty": "intermediate",
+  "knowledge_type_note": "A thinking technique, not a property of positions. Its first half is close to universally endorsed and its second half is close to universally rejected, which is why the two are kept apart here.",
+  "name_status": "established-name",
+  "history": {
+    "attributions": [
+      {
+        "relation": "originated-by",
+        "person": "Alexander Kotov",
+        "year": 1971,
+        "note": "Introduced the candidate-moves technique and the tree of analysis in Think Like a Grandmaster. The book was written in the early 1950s; 1971 is the widely cited English edition.",
+        "confidence": "high"
+      },
+      {
+        "relation": "later-associated-with",
+        "person": "Mark Dvoretsky and Artur Yusupov",
+        "year": 1998,
+        "note": "Revised the technique, keeping the candidate list and rejecting the one-pass rule.",
+        "confidence": "high"
+      },
+      {
+        "relation": "later-associated-with",
+        "person": "John Nunn",
+        "year": 1998,
+        "note": "The principal critique of the tree of analysis, on efficiency and on the interaction between lines.",
+        "confidence": "high"
+      }
+    ],
+    "first_documented_source": "kotov-think-like-gm",
+    "year": 1971,
+    "confidence": "high",
+    "notes": "Attribution to Kotov is secure and uncontested across every source consulted. The date carries a caveat: the book was written in the early 1950s and the commonly cited 1971 date is the English edition. Kotov's book was consulted only through secondary accounts.",
+    "competing_claims": [],
+    "development": [
+      {
+        "period": "1950s-1971",
+        "note": "Kotov formulates candidates plus the one-pass tree as a single method."
+      },
+      {
+        "period": "1997-1998",
+        "note": "Tisdall, Nunn and Dvoretsky each reject the one-pass rule while keeping candidate generation."
+      },
+      {
+        "period": "2016-2024",
+        "note": "Leitao shows Kotov's own worked analysis violating his method; the Chessable survey finds the revised form is the consensus."
+      }
+    ]
+  },
+  "engine_era_status": "historically-overstated",
+  "engine_era_note": "The revision came mainly from human authors rather than from engines, and largely before engines dominated preparation. What engines added was the ability to check Kotov's own published analysis, which turned out to contain both missed candidates and a miscalculation - Leitao is careful to note that Kotov had no such tool available.",
+  "recognition": {
+    "preconditions": [
+      "A player choosing a move in a position with several plausible options"
+    ],
+    "indicators_for": [],
+    "indicators_against": [],
+    "prerequisites": [],
+    "detector": null,
+    "detectability": "human-only",
+    "typical_confidence": "low",
+    "false_positive_traps": [
+      "This is a technique for the player, not a property of the position, and must never be presented as an explanation of why a move is good.",
+      "The one-pass tree must not be taught as current best practice. Nunn, Dvoretsky, Tisdall and Leitao all reject it, and this base records the rejection as the consensus.",
+      "Some strong moves are unreachable by candidate generation at all. Nunn's example is a move that 'makes absolutely no sense except as part of the whole tactical operation' and so never enters a candidate list."
+    ]
+  },
+  "application": {
+    "typical_plans": [
+      "List the candidates before calculating anything",
+      "Include the opponent's candidate replies, not only your own moves",
+      "Scan shallowly to eliminate the clearly deficient, then go deep on the critical line",
+      "Re-examine the position with fresh eyes after analysing"
+    ],
+    "typical_moves": [],
+    "typical_pawn_structures": [],
+    "typical_piece_arrangements": [],
+    "tactical_consequences": [],
+    "strategic_consequences": []
+  },
+  "exceptions": [
+    "Positions with one forced line need no list; the tree is a single branch.",
+    "Nunn's goal-seeking case: moves that only make sense as part of a larger operation will not appear in any candidate list, and must be found another way.",
+    "Tisdall argues the candidate list should not be the primary task at all, and that leaning on an instinctive first choice engages intuition and starts the abstract assessment."
+  ],
+  "limitations": [
+    "The evidence is grandmaster testimony and argument, not controlled experiment. The Chessable survey notes there was no prior scientific research on candidate moves specifically.",
+    "This system cannot observe a player's thinking and so cannot tell whether the technique is being used.",
+    "NO AMBIGUOUS EXAMPLE. This record does have a positive - Reti-Capablanca move 18, where a world champion chose the worse of two candidates and the annotator calls the other 'obvious' - and an ambiguous one would have to be a position where it is unclear whether the concept applies. It is not clear what that would look like: enumerating candidates applies to every position without exception, so the concept is never in doubt and never informative on its own. That is a property of the concept rather than a gap in the evidence, and it is written here instead of being filled with a position that would not test anything.",
+    "NO REGISTERED FALSE-POSITIVE CASE, and a FEN is not the right instrument for one here. A case in tests/false_positive_cases.json is a POSITION where the concept's surface pattern is present and the concept is not, replayed as an assertion so the system can be shown declining the error. This record's `recognition.detectability` is `human-only`: what it describes is something a player does rather than something a board contains, so there is no surface pattern for a position to carry and nothing for the system to decline. The conditions this record states are read and answered in `limitations` and in the trap audit instead. Recorded rather than filled: tools/depth_report.py still counts this concept as missing the item."
+  ],
+  "misconceptions": [
+    "That Kotov's tree describes how strong players actually think. It does not, on the testimony of several grandmasters including one who checked Kotov's own analysis.",
+    "That revisiting a line is a lack of discipline. It is how the comparison between lines is made, and the ideas found in one line frequently belong in another.",
+    "That a longer candidate list is better. Breadth is for generating; the work is done by going deep on the critical one."
+  ],
+  "relationships": {
+    "broader": [
+      "calculation"
+    ],
+    "narrower": [],
+    "related": [
+      "calculation",
+      "chunking",
+      "prophylaxis"
+    ],
+    "contrasting": [],
+    "co_occurring": [],
+    "conflicts": [
+      {
+        "concept": "calculation",
+        "resolution": "Breadth and depth compete for the same clock. The resolution the sources converge on is sequencing rather than balance: be broad and shallow first to prune, then deep on the one line the position turns on."
+      }
+    ]
+  },
+  "examples": [
+    {
+      "fen": "r3rnk1/2q2pb1/1p1p1npp/pPp5/2PPb3/P1Q2NP1/1B3PBP/R2R1NK1 b - - 0 18",
+      "note": "Reti-Capablanca, New York 1924, move 18 - a position defined by having exactly two candidates and a world champion choosing the worse one. Keene: 'It is a mystery why Capablanca did not play the obvious 18...Ne6, fighting more directly for control of the centre.' Both moves develop the same knight; the difference is what they bear on. That is what makes this a candidate-moves example rather than a center-control one: the record is about ENUMERATING the moves worth looking at before comparing them, and the annotator's word for the move that was not played is 'obvious', which is the failure mode the record names.",
+      "origin_kind": "historical-game",
+      "game": "Reti-Capablanca, New York 1924 (round 5)",
+      "concept_role": "positive",
+      "attributed_by": "Raymond Keene (GM), The Spectator Australia - corpus entry reti-capablanca-1924-18Ne6-center-control",
+      "engine": {
+        "engine_id": "Stockfish 18",
+        "test_level": 3,
+        "depth": 22,
+        "threads": 10,
+        "hash_mb": 4096,
+        "multipv": 1,
+        "best_move": "f8e6",
+        "eval_cp": 80,
+        "mate_in": null,
+        "pv": [],
+        "alternatives": [],
+        "margin_cp": null,
+        "verdict": "supports",
+        "verdict_note": "The engine's first choice is 18...Ne6, the move Keene says should have been played, at +0.80 on a multipv-3 search recorded in the corpus entry. Both candidates are legal, natural developing moves; the engine separates them and so did the annotator, independently and in the same direction."
+      }
+    }
+  ],
+  "counterexamples": [],
+  "ambiguous_examples": [],
+  "explanations": {
+    "by_level": {
+      "beginner": "Before you calculate, make a short list of the moves worth calculating - and do not just analyse the first one you thought of.",
+      "intermediate": "Candidate moves. Your move can never be better than your list, so build the list first, and include your opponent's replies.",
+      "advanced": "Generate, prune shallowly, then go deep on the critical line. Jumping between lines is how comparison works, whatever Kotov said.",
+      "master": "Note the limit: moves that only make sense as part of a whole operation never enter a candidate list, and need goal-seeking instead."
+    },
+    "by_depth": {
+      "short": "List the moves worth calculating before calculating.",
+      "normal": "Candidate moves: the short list of moves worth analysing, drawn up deliberately before any line is calculated deeply. The reason is simple - a move that never makes the list will never be played, however well the rest is analysed.",
+      "deep": "The most widely taught thinking technique in chess, and one where the sources agree on the idea and reject the original method. The idea is undisputed: fix the shortlist before calculating, extend it to subsequent moves and to the opponent's replies, and accept that the move played can never be better than the list it came from. The method is not: Kotov prescribed examining each branch exactly once and never returning, and Nunn, Dvoretsky, Tisdall and Leitao all reject it - as inefficient, and more seriously as blind to the interaction between lines, since an idea found in one variation often belongs in another and may even change the list. What survives is the structure rather than the discipline: generate, prune, deep-dive, verify."
+    },
+    "hedge": "The candidate-list idea is consensus; Kotov's one-pass tree is rejected by essentially every later authority, and this base follows the rejection.",
+    "lesson": "Your move can only be as good as your list. Build the list first - then feel free to jump between lines."
+  },
+  "terminology": {
+    "beginner_words": [
+      "the moves worth looking at"
+    ],
+    "advanced_words": [
+      "candidate moves",
+      "tree of analysis",
+      "pruning",
+      "critical line",
+      "goal seeking"
+    ],
+    "avoid": [
+      "analyse each line only once",
+      "never go back in a variation"
+    ]
+  },
+  "status": {
+    "stage": "researched",
+    "last_updated": "2026-09-01",
+    "open_questions": [],
+    "audit_notes": []
+  },
+  "id": "candidate-moves",
+  "canonical_name": "Candidate moves",
+  "category": "candidate-moves",
+  "knowledge_type": "practical-guideline",
+  "definition_short": "The short list of moves worth calculating, drawn up deliberately before any line is analysed deeply.",
+  "definition_long": "The most widely taught thinking technique in chess, and one where the sources agree on the idea and disagree sharply on the method.\n\nTHE IDEA, which nobody disputes: before calculating, fix a list of the moves worth calculating — typically two to four — rather than analysing whichever move occurred to you first. The justification is unanswerable. The quality of the move played can never exceed the quality of the list, because a move that never entered the shortlist will not be found however well the shortlist is analysed. Dvoretsky adds the extensions that matter most in practice: draw up candidates not only for your first move but for subsequent ones, and not only for yourself but FOR YOUR OPPONENT. This is also where de Groot's finding lands — masters do not search more widely than weaker players and may search less, but they generate the right moves to look at.\n\nTHE METHOD, which almost every later authority rejects: Kotov's tree of analysis prescribed examining each branch exactly ONCE, in order, never returning to a line already analysed. The objections converge. Nunn calls it extremely inefficient, since twenty minutes may be spent reaching a negative verdict a quick scan would have reached at once, and — the deeper point — it ignores the interaction between lines, because an idea discovered in one variation often applies in another, and may even change the candidate list itself. Dvoretsky: going down each branch once 'seems dubious', because we are not surveying possibilities but hunting for the strongest moves, and those do not always arrive on schedule. Leitao states flatly that no grandmaster calculates this way, and demonstrates it the hard way: Kotov's own showcase analysis misses candidate moves and its main line contains a miscalculation.\n\nWHAT SURVIVES is the structure rather than the discipline: generate candidates, prune shallowly, go deep on the critical one, verify. The jumping between lines that Kotov forbade turns out to be how comparison works.",
+  "sources": [
+    "kotov-think-like-gm",
+    "nunn-secrets-practical-chess",
+    "dvoretsky-attack-and-defence",
+    "leitao-candidate-moves",
+    "chessable-candidate-moves-research",
+    "tisdall-improve-your-chess-now",
+    "chessmind-candidate-moves"
+  ],
+  "source_confidence": "high",
+  "validation_na": {
+    "negative_example": "N/A rather than missing. A validation item of this kind is a POSITION, and this record's subject is not a position: `recognition.detectability` is `human-only`, and what it describes is something a player does at the board rather than something the board contains. A FEN could show the CONSEQUENCE of doing it well or badly, which is a different claim from the one this record makes, so attaching one would be evidence for the wrong proposition. The record is validated the way its own claims can be: by sources, by attribution, by stated recognition criteria, and by the conditions its trap list states being read against the code in state/TRAPS.md.",
+    "ambiguous_example": "N/A rather than missing. A validation item of this kind is a POSITION, and this record's subject is not a position: `recognition.detectability` is `human-only`, and what it describes is something a player does at the board rather than something the board contains. A FEN could show the CONSEQUENCE of doing it well or badly, which is a different claim from the one this record makes, so attaching one would be evidence for the wrong proposition. The record is validated the way its own claims can be: by sources, by attribution, by stated recognition criteria, and by the conditions its trap list states being read against the code in state/TRAPS.md.",
+    "false_positive_test": "N/A rather than missing. A validation item of this kind is a POSITION, and this record's subject is not a position: `recognition.detectability` is `human-only`, and what it describes is something a player does at the board rather than something the board contains. A FEN could show the CONSEQUENCE of doing it well or badly, which is a different claim from the one this record makes, so attaching one would be evidence for the wrong proposition. The record is validated the way its own claims can be: by sources, by attribution, by stated recognition criteria, and by the conditions its trap list states being read against the code in state/TRAPS.md."
+  }
+}

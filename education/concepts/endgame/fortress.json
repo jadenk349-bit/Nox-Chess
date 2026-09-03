@@ -1,0 +1,320 @@
+{
+  "schema_version": 2,
+  "id": "fortress",
+  "canonical_name": "Fortress",
+  "alternate_names": [
+    "drawing fortress",
+    "impregnable position"
+  ],
+  "historical_names": [],
+  "category": "fortresses",
+  "subcategory": "drawing technique",
+  "tags": [
+    "endgame",
+    "draw",
+    "defence",
+    "engine-blind-spot",
+    "dvoretsky"
+  ],
+  "knowledge_type": "positional-concept",
+  "knowledge_type_note": "A positional concept in general, though individual fortresses within tablebase range are proven results. The general concept is not decidable; the specific ones are.",
+  "name_status": "established-name",
+  "difficulty": "advanced",
+  "definition_short": "A defensive setup, usually material down, that the stronger side simply cannot break into — the material advantage becomes unconvertible.",
+  "definition_long": "Dvoretsky's definition, as quoted in the sources: 'a situation in which a king, with or without the assistance of pieces or pawns, successfully defends a small territory'. The defender gives up on activity and instead builds a wall the attacker has no way through, so an advantage that would normally win is simply never realised.\n\nTwo senses are worth keeping apart. An ELEMENTARY fortress is a theoretically drawn position — a book draw — that passive defence maintains: the wrong rook pawn, king and bishop against king, and similar. The general sense covers constructed positions where the defender is material down and holds anyway, typically by keeping the enemy king out or by blockading on a colour complex the attacker cannot contest.\n\nThe commonest vehicles are opposite-coloured bishops, where the defending bishop holds one colour indefinitely, and blocked pawn structures where no entry square exists.\n\nIT IS THE CLEAREST ENGINE BLIND SPOT IN CHESS. A fortress is defined by the ABSENCE of progress rather than by a line, so a search that looks n moves ahead sees the material and reports an advantage that does not exist. This is why tablebase integration is standard practice for endgame analysis, and why an evaluation bar showing +3 in a fortress should be disbelieved rather than explained.\n\nThe concept also cuts directly against the principle of two weaknesses: once a fortress is reached, the number of weaknesses stops being the operative variable, because none of them can be converted.",
+  "history": {
+    "attributions": [
+      {
+        "person": "Mark Dvoretsky",
+        "relation": "systematized-by",
+        "source": "lichess-dvoretsky-fortress",
+        "year": null,
+        "note": "The standard definition quoted throughout the literature is his. ACCESS CAVEAT: taken from a community study quoting him, not from his text."
+      }
+    ],
+    "first_documented_source": "wikipedia-fortress",
+    "year": null,
+    "confidence": "low",
+    "notes": "Fortresses are as old as endgame study and no coinage is claimed. Only the standard modern definition is attributable, and that at second hand.",
+    "competing_claims": [],
+    "development": [
+      {
+        "era": "classical study composition",
+        "change": "Fortress ideas appear throughout composed endgame studies long before the term is systematised.",
+        "source": "wikipedia-fortress"
+      },
+      {
+        "era": "engine era",
+        "change": "Becomes a recognised evaluation failure mode: search cannot see the absence of progress, so fortresses must be hard-coded or looked up.",
+        "source": "chessprogramming-wrong-bishop"
+      }
+    ]
+  },
+  "engine_era_status": "substantially-revised-by-engines",
+  "engine_era_note": "Revised in an unusual direction: engines are WORSE at this than a knowledgeable human, and knowingly so. A fortress is the absence of a way through, which a bounded search cannot represent, so evaluation functions encode specific fortresses by hand and serious analysis uses tablebases. An explanation should never repeat an engine's evaluation of a suspected fortress without checking it.",
+  "sources": [
+    "wikipedia-fortress",
+    "lichess-dvoretsky-fortress",
+    "chessprogramming-wrong-bishop",
+    "wikipedia-ocb",
+    "chessify-engine-eval"
+  ],
+  "source_confidence": "medium",
+  "recognition": {
+    "preconditions": [
+      "The defender is material down, or would otherwise be losing",
+      "No path exists for the attacker to make progress"
+    ],
+    "indicators_for": [
+      "The attacking king has no entry square anywhere",
+      "The defending bishop covers a colour complex the attacker cannot contest",
+      "The pawn structure is blocked and no pawn break exists",
+      "The defender has spare waiting moves, so zugzwang cannot be imposed",
+      "The position falls into a known elementary case — wrong rook pawn, opposite bishops with a blockade"
+    ],
+    "indicators_against": [
+      "A pawn break exists that opens a line",
+      "The defender will eventually run out of waiting moves — that is zugzwang, not a fortress",
+      "The attacker can sacrifice material to break the wall and still be winning",
+      "An entry square exists that the defender cannot permanently cover"
+    ],
+    "prerequisites": [
+      "zugzwang"
+    ],
+    "detector": null,
+    "detectability": "heuristic",
+    "typical_confidence": "low",
+    "false_positive_traps": [
+      "A position that is merely HARD to break is not a fortress. The test is that no progress is possible at all, and that is a strong claim.",
+      "Claiming a fortress on the basis of an engine evaluation being stuck is backwards — engines misjudge these in BOTH directions.",
+      "A defender with a limited number of waiting moves does not have a fortress; they have a position that loses to zugzwang.",
+      "The commonest error is the reverse one: declaring a real fortress lost because the material count says so."
+    ]
+  },
+  "application": {
+    "typical_plans": [
+      "As the defender: identify the entry squares, cover them permanently, and stop trying to be active",
+      "As the defender: use opposite-coloured bishops or a blocked structure as the wall",
+      "As the attacker: look for a sacrifice that creates an entry square, or a zugzwang the defender cannot answer",
+      "As the attacker: avoid liquidating into a known elementary fortress"
+    ],
+    "typical_moves": [
+      "Passive but permanent piece placement",
+      "A sacrifice to break the wall"
+    ],
+    "typical_pawn_structures": [
+      "Blocked chains with no break available",
+      "Pawns fixed on the defending bishop's colour"
+    ],
+    "typical_piece_arrangements": [
+      "Bishop holding a long diagonal indefinitely",
+      "King and minor piece covering all entry squares"
+    ],
+    "tactical_consequences": [
+      "Justifies material sacrifices that look absurd on a material count"
+    ],
+    "strategic_consequences": [
+      "Makes a material advantage unconvertible",
+      "The standing counterexample to material-based evaluation"
+    ]
+  },
+  "exceptions": [
+    "A fortress that can be broken by a sacrifice was never a fortress.",
+    "Many apparent fortresses fail to zugzwang once the defender's waiting moves run out.",
+    "Within tablebase range the question is not a judgement at all — look it up."
+  ],
+  "limitations": [
+    "Recognition confidence is LOW and the concept is not mechanically detectable, since it is defined by the absence of a continuation.",
+    "Engines are unreliable here in both directions, so their evaluation cannot be used as evidence.",
+    "NO MASTER-GAME POSITION YET. This concept has no matcher, so the scan that supplied master positions to eleven other records - five famous games replayed and analysed position by position - could not nominate one here: the API never reports the concept, so there is nothing for a scan to find. Identifying an instance in a master game means reading the game, which is research rather than tooling, and it has not been done. Recorded rather than filled."
+  ],
+  "misconceptions": [
+    "That a fortress is any stubborn defence. It is the impossibility of progress.",
+    "That the engine bar settles it. This is the clearest case where it does not.",
+    "That being material down means losing. A fortress makes the material count irrelevant."
+  ],
+  "relationships": {
+    "broader": [],
+    "narrower": [
+      "wrong-rook-pawn",
+      "vancura-position"
+    ],
+    "related": [
+      "opposite-coloured-bishops",
+      "wrong-rook-pawn",
+      "dead-position",
+      "vancura-position",
+      "stalemate",
+      "perpetual-check"
+    ],
+    "contrasting": [],
+    "co_occurring": [
+      "opposite-coloured-bishops",
+      "wrong-rook-pawn"
+    ],
+    "conflicts": [
+      {
+        "concept": "two-weaknesses",
+        "resolution": "A fortress ends the two-weaknesses method outright. That principle converts an advantage by stretching the defence across targets; a fortress means no target can be converted at all, so the count stops mattering. Where a fortress is available, look for a sacrifice that breaks it rather than for a second weakness."
+      }
+    ]
+  },
+  "examples": [
+    {
+      "fen": "7k/8/5K2/3B3P/8/8/8/8 w - - 0 1",
+      "note": "An elementary fortress: the wrong rook pawn. The defending king in the corner cannot be evicted because the bishop cannot cover h8, and the attacking king cannot force it without stalemate. Shared with the `wrong-rook-pawn` record, where the controlled pair lives.",
+      "origin_kind": "constructed-test",
+      "concept_role": "positive",
+      "side_to_move_benefits": "neither",
+      "tablebase": {
+        "source": "Lichess tablebase (Syzygy, 7-piece)",
+        "pieces": 4,
+        "wdl": "draw",
+        "dtz": 0,
+        "dtm": 0,
+        "category": "draw",
+        "note": "PROVEN draw with an extra bishop and pawn — an elementary fortress in the strict sense."
+      },
+      "engine": {
+        "engine_id": "Stockfish 18",
+        "test_level": 3,
+        "depth": 26,
+        "threads": 10,
+        "hash_mb": 4096,
+        "multipv": 1,
+        "best_move": "d5e4",
+        "eval_cp": 92,
+        "mate_in": null,
+        "pv": [],
+        "alternatives": [],
+        "margin_cp": null,
+        "verdict": "supports",
+        "verdict_note": "THE ENGINE IS WRONG HERE AND THE TABLEBASE IS NOT, which is why both numbers are recorded. Stockfish 18 at depth 26 says +0.92. Syzygy says draw, dtz 0, 4 pieces, best move Kg6 - proven over every legal continuation. The bishop is light-squared and the queening square h8 is dark, so the defending king cannot be driven out of the corner however long White plays. This is the base's own rule about instruments said out loud: a tablebase gives proof, an engine gives an opinion, and where they disagree inside seven pieces the opinion loses."
+      }
+    },
+    {
+      "fen": "8/4k3/4P3/3P4/2B1K3/b7/8/8 w - - 0 1",
+      "note": "A blockading fortress with opposite-coloured bishops, two connected pawns down.",
+      "origin_kind": "constructed-test",
+      "concept_role": "positive",
+      "side_to_move_benefits": "neither",
+      "tablebase": {
+        "source": "Lichess tablebase (Syzygy, 7-piece)",
+        "pieces": 6,
+        "wdl": "draw",
+        "dtz": 0,
+        "dtm": 0,
+        "category": "draw",
+        "note": "PROVEN draw two pawns down; the defending bishop holds the blockade square indefinitely."
+      },
+      "engine": {
+        "engine_id": "Stockfish 18",
+        "test_level": 3,
+        "depth": 26,
+        "threads": 10,
+        "hash_mb": 4096,
+        "multipv": 1,
+        "best_move": "c4e2",
+        "eval_cp": 0,
+        "mate_in": null,
+        "pv": [],
+        "alternatives": [],
+        "margin_cp": null,
+        "verdict": "supports",
+        "verdict_note": "0.00 by the engine and PROVEN drawn by Syzygy - 5 pieces, dtz 0, best move d6+. A fortress claim is a claim that no series of moves breaks through, and that is exactly the shape of statement a tablebase makes and an evaluation does not. The two agreeing here is worth less than the tablebase alone; the engine number is recorded because it is what a reader without a tablebase would see."
+      }
+    }
+  ],
+  "counterexamples": [
+    {
+      "fen": "7k/8/5K2/7P/3B4/8/8/8 w - - 0 1",
+      "note": "Registered false-positive case `a-fortress-that-is-not-one`, kept on the record as well as in tests/false_positive_cases.json so that the concept carries its own negative evidence. THE SURFACE PATTERN IS PRESENT: King, bishop and rook-pawn against a bare king in the corner. This is the picture of the most famous fortress in chess: the defender sits on h8 and cannot be dislodged. WHY IT IS NOT THE CONCEPT: The bishop is the WRONG colour for that fortress, or rather the right one. The drawn version needs a bishop that does not control the queening square; here the bishop is dark-squared and h8 is dark, so the defending king can be driven out and the pawn queens. WHAT THE SYSTEM DOES: PROVEN, not evaluated. The API does not report a fortress here. Syzygy: 4 pieces, WIN, dtz 1, mate in 9, best move Kg6+. Read against this record's own positive example, which is the SAME material with the bishop on the other colour and is a proven draw at dtz 0 — one bishop, two colours, mate in nine and a dead draw. That pair is why a fortress claim in this base is only ever made with a proof behind it: the two positions are indistinguishable to any test that counts material.",
+      "origin_kind": "constructed-test",
+      "concept_role": "negative",
+      "tablebase": {
+        "source": "Lichess tablebase (Syzygy, 7-piece)",
+        "pieces": 4,
+        "wdl": "win",
+        "dtz": 1,
+        "dtm": 9,
+        "category": "win",
+        "note": "PROVEN WIN in 9, best move Kg6+. The same material with the bishop on the other colour is a proven draw at dtz 0, and this record's positive example is that position. One bishop, two colours, mate in nine and a dead draw."
+      },
+      "false_positive_case": "a-fortress-that-is-not-one"
+    }
+  ],
+  "ambiguous_examples": [
+    {
+      "fen": "r7/8/3k4/8/8/3K4/3B4/3R4 w - - 0 1",
+      "note": "Rook and bishop against rook, a PROVEN DRAW - and whether it is a FORTRESS is the question. A fortress in this record's sense is a position the stronger side cannot break however long they play, and this qualifies by proof: dtz 0, held over every legal continuation. It also requires the defender to find the right square for fifty moves in a row against an opponent with an extra piece, and the same material one arrangement away is a proven WIN in 15. A defence that is theoretically impregnable and practically famous for being lost is exactly the case the word is used loosely about. Filed as ambiguous because both readings are correct and the record cannot choose between them: this base's other fortress example, king and bishop and a rook pawn, needs no accuracy at all.",
+      "origin_kind": "tablebase-position",
+      "concept_role": "ambiguous",
+      "engine": {
+        "engine_id": "Stockfish 18",
+        "test_level": 3,
+        "depth": 26,
+        "threads": 10,
+        "hash_mb": 4096,
+        "multipv": 1,
+        "best_move": "d2c3",
+        "eval_cp": 0,
+        "mate_in": null,
+        "pv": [],
+        "alternatives": [],
+        "margin_cp": null,
+        "verdict": "ambiguous",
+        "verdict_note": "0.00 at depth 26, settled at depth 13 - and the engine does not always find this in the drawn positions of this ending, which is part of why it is famous."
+      },
+      "tablebase": {
+        "source": "Lichess tablebase (Syzygy, 7-piece)",
+        "pieces": 5,
+        "wdl": "draw",
+        "dtz": 0,
+        "dtm": 0,
+        "category": "draw",
+        "note": "PROVEN DRAW at dtz 0. Read against the same five men in `mixed-piece-endgames`' ambiguous example, a PROVEN WIN in 15: one material balance, two results, and whether the drawn one deserves the word fortress is not a question a tablebase answers."
+      }
+    }
+  ],
+  "explanations": {
+    "by_level": {
+      "beginner": "They are ahead on material but there is simply no way in. If you set your pieces up so their king can never get through, the extra material does not matter.",
+      "intermediate": "A fortress: a wall the stronger side cannot break. Stop trying to be active, work out which squares they need to enter on, and cover them permanently.",
+      "advanced": "Progress must be impossible, not merely hard. Check the defender has enough waiting moves to avoid zugzwang, and that no sacrifice opens a line.",
+      "master": "The standing counterexample to material evaluation, and the clearest engine blind spot — a bounded search cannot represent the absence of a continuation. Within seven pieces, look it up rather than judging it."
+    },
+    "by_depth": {
+      "short": "A wall the stronger side cannot break, whatever the material says.",
+      "normal": "A fortress: the defender, usually material down, sets up a position the attacker cannot penetrate. The material advantage becomes unconvertible — there is no entry square, no pawn break, and no zugzwang available.",
+      "deep": "Dvoretsky's definition is the standard one: a situation in which a king, with or without pieces or pawns, successfully defends a small territory. Elementary fortresses are book draws held by passive defence, like the wrong rook pawn; the general sense covers any constructed wall the attacker cannot breach, most often built on opposite-coloured bishops or a blocked structure. It is the clearest engine blind spot in chess, because a fortress is defined by the absence of a way through and a bounded search cannot represent an absence — which is why engines hard-code specific fortresses and why serious endgame analysis uses tablebases. It also ends the principle of two weaknesses: once the wall holds, the number of targets stops mattering."
+    },
+    "hedge": "",
+    "lesson": "When you are losing on material, stop looking for activity and start asking whether there is a wall you can build. And when you are winning and cannot make progress, check whether you are looking at one — the evaluation bar will not tell you."
+  },
+  "terminology": {
+    "beginner_words": [
+      "no way in",
+      "a wall they cannot break"
+    ],
+    "advanced_words": [
+      "fortress",
+      "elementary fortress",
+      "blockade",
+      "entry square",
+      "positional draw"
+    ],
+    "avoid": [
+      "the engine says +3 so it is winning"
+    ]
+  },
+  "status": {
+    "stage": "researched",
+    "last_updated": "2026-09-01",
+    "open_questions": [
+      "Read Dvoretsky's definition from the Endgame Manual rather than via a community study.",
+      "Build a controlled pair: a fortress and a near-identical position with one entry square available, to demonstrate the boundary.",
+      "Collect an example where an engine evaluation is badly wrong and the tablebase corrects it, as a direct demonstration of the blind spot."
+    ],
+    "audit_notes": []
+  }
+}

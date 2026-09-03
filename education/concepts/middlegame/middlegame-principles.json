@@ -1,0 +1,212 @@
+{
+  "schema_version": 2,
+  "alternate_names": [],
+  "historical_names": [],
+  "tags": [
+    "middlegame",
+    "overview"
+  ],
+  "subcategory": "overview",
+  "difficulty": "intermediate",
+  "knowledge_type_note": "An umbrella record. The middlegame has no compact principle set of its own, and saying so is part of the content.",
+  "name_status": "established-name",
+  "history": {
+    "attributions": [
+      {
+        "relation": "systematized-by",
+        "person": "Wilhelm Steinitz",
+        "year": 1873,
+        "note": "The accumulation theory is the closest thing the middlegame has to a governing principle: when to attack and why.",
+        "confidence": "medium"
+      }
+    ],
+    "first_documented_source": "exeter-steinitz-accumulation",
+    "year": null,
+    "confidence": "low",
+    "notes": "No single tradition; the middlegame literature is organised by structure and by example rather than by principle.",
+    "competing_claims": [],
+    "development": []
+  },
+  "engine_era_status": "reliable",
+  "engine_era_note": "The phase engines changed least in principle and most in practice. There is still no compact rule set, but engine analysis has made it possible to check individual judgements, which is what most of this base's measurements are.",
+  "recognition": {
+    "preconditions": [
+      "Development is broadly complete",
+      "Queens or several pieces remain"
+    ],
+    "indicators_for": [],
+    "indicators_against": [],
+    "prerequisites": [],
+    "detector": "phaseOf in lib/features.js",
+    "detectability": "mechanical",
+    "typical_confidence": "medium",
+    "false_positive_traps": [
+      "The phase boundaries are not sharp, and a queenless position with many pieces is still a middlegame. Treating it as an endgame is how kings get mated.",
+      "This is an umbrella record. Attaching it to a move explains nothing; the specific concept under it is what carries content."
+    ]
+  },
+  "application": {
+    "typical_plans": [
+      "Assess, then plan from the assessment rather than from preference",
+      "Ask what the opponent intends before pursuing your own idea",
+      "Improve the worst-placed piece when nothing is urgent",
+      "Act once an advantage is sufficient, since it otherwise dissipates"
+    ],
+    "typical_moves": [],
+    "typical_pawn_structures": [
+      "The structure decides which plans exist, which is why structures are studied rather than positions"
+    ],
+    "typical_piece_arrangements": [],
+    "tactical_consequences": [],
+    "strategic_consequences": [
+      "Small advantages accumulate here and are converted in the endgame"
+    ]
+  },
+  "exceptions": [
+    "Sharp theoretical positions are played from preparation rather than from principle.",
+    "Forcing positions require calculation and the procedure above does not apply."
+  ],
+  "limitations": [
+    "Deliberately an umbrella; the content is on the concepts it points at.",
+    "This is the phase where this base's coverage is broadest and its confidence lowest."
+  ],
+  "misconceptions": [
+    "That the middlegame has principles like the opening does. It has a procedure, and the general rules are exactly what have run out by then.",
+    "That a plan should be found before the position is assessed. The plan is supposed to follow from the assessment."
+  ],
+  "relationships": {
+    "broader": [],
+    "narrower": [
+      "planning",
+      "positional-evaluation",
+      "worst-placed-piece",
+      "prophylaxis"
+    ],
+    "related": [
+      "positional-evaluation",
+      "planning",
+      "prophylaxis",
+      "worst-placed-piece",
+      "two-weaknesses",
+      "calculation",
+      "transformation-of-advantages",
+      "piece-activity",
+      "time-management"
+    ],
+    "contrasting": [
+      "endgame-principles",
+      "opening-development"
+    ],
+    "co_occurring": [],
+    "conflicts": []
+  },
+  "examples": [
+    {
+      "fen": "r1r3k1/p2n1ppp/2p1b3/1q1p4/N2Q4/5PP1/PP2PR1P/2R2BK1 w - - 4 20",
+      "move": "e3",
+      "move_uci": "e2e3",
+      "note": "Rubinstein-Salwe, Lodz 1908, 20.e3 - one quiet pawn move doing four things, which is what a middlegame principle is for. The corpus annotation lists them: 'it gains a tempo by attacking Black's queen, opens a diagonal for the bishop, and improves the worst-placed piece.' This base already files the same move under `worst-placed-piece`, and it is filed here because the record's subject is the ORDER of middlegame thinking - improve the worst piece when nothing is forcing - and this is the move that shows the precondition and the rule together rather than the rule alone.",
+      "origin_kind": "historical-game",
+      "game": "Rubinstein-Salwe, Lodz 1908",
+      "concept_role": "positive",
+      "attributed_by": "corpus entry rubinstein-salwe-1908-20e3-improving",
+      "engine": {
+        "engine_id": "Stockfish 18",
+        "test_level": 3,
+        "depth": 22,
+        "threads": 10,
+        "hash_mb": 4096,
+        "multipv": 1,
+        "best_move": "e2e3",
+        "eval_cp": 34,
+        "mate_in": null,
+        "pv": [],
+        "alternatives": [],
+        "margin_cp": null,
+        "verdict": "supports",
+        "verdict_note": "+0.34, and the engine's own first move is 20.e3. A third of a pawn: the move is best and it is not decisive, which is the correct size for a principle about accumulating rather than about winning."
+      }
+    }
+  ],
+  "counterexamples": [
+    {
+      "fen": "4k3/pp4pp/3p4/2pPp3/2P1P3/8/PP4PP/4K3 w - - 0 1",
+      "note": "Registered false-positive case `a-middlegame-principle-with-no-middlegame`, kept on the record as well as in tests/false_positive_cases.json so that the concept carries its own negative evidence. THE SURFACE PATTERN IS PRESENT: A quiet position with no checks, no captures and nothing hanging — exactly the conditions under which this record's principles apply, and the state in which 'improve the piece doing least' is the standard advice. WHY IT IS NOT THE CONCEPT: There are no pieces. Every white and black man is a pawn or a king, the structure is rammed shut on every file, and no plan of any kind is available to either side. The principles on this record are about choosing between candidate moves in a position with pieces in it; a position with none is quiet in the way an empty room is quiet. WHAT THE SYSTEM DOES: The API reports nothing at all here, and the same position is registered against `restraint`, `prophylaxis` and `planning` for the same reason — each is a claim about what a move is FOR, and there is nothing for a move to be for. Stockfish 18: 0.00, with both kings walking about on the kingside. Four records now share this board, which makes it the most-reused negative in the base and, for that reason, worth stating plainly: a position where nothing is happening is not evidence that a concept is subtle, it is evidence that the concept needs something to be happening.",
+      "origin_kind": "constructed-test",
+      "concept_role": "negative",
+      "false_positive_case": "a-middlegame-principle-with-no-middlegame"
+    }
+  ],
+  "ambiguous_examples": [
+    {
+      "fen": "r1bq1rk1/pp3ppp/2n5/3Np3/4P3/8/PP3PPP/R1BQ1RK1 w - - 0 1",
+      "note": "Two of this record's principles apply and point at different moves. A knight sits on a permanent outpost and the forcing continuation Ne7+ is available, which is one principle - examine the forcing moves. The other is that when nothing is urgent the right move improves the piece doing least, and the piece doing least is the bishop on c1. The engine plays Be3, the quiet move, at +0.30. Filed as ambiguous because both principles are correctly applicable and this record contains no rule for ordering them: what a middlegame principle gives is a list of candidates and not a choice between them, and the position where two of them disagree is the ordinary case rather than the exception.",
+      "origin_kind": "constructed-test",
+      "concept_role": "ambiguous",
+      "engine": {
+        "engine_id": "Stockfish 18",
+        "test_level": 3,
+        "depth": 22,
+        "threads": 10,
+        "hash_mb": 4096,
+        "multipv": 1,
+        "best_move": "c1e3",
+        "eval_cp": 30,
+        "mate_in": null,
+        "pv": [],
+        "alternatives": [],
+        "margin_cp": null,
+        "verdict": "ambiguous",
+        "verdict_note": "+0.30 for the quiet developing move, in a position that also offers a check. Both principles name a real move and only one of them names the best one."
+      }
+    }
+  ],
+  "explanations": {
+    "by_level": {
+      "beginner": "Once your pieces are out, there is no rule to follow — look at the position and find something to aim at.",
+      "intermediate": "Assess, plan from the assessment, check what your opponent wants, and improve your worst piece when nothing is urgent.",
+      "advanced": "Steinitz's condition governs timing: do not attack without an advantage, and do act once you have one, because it dissipates.",
+      "master": "There is no short list because the position differs every game, which is also why this is where the clock goes."
+    },
+    "by_depth": {
+      "short": "The phase where you have to judge rather than follow rules.",
+      "normal": "The middlegame has no compact set of principles, because unlike the opening the position differs every game and unlike the endgame it cannot be solved. What replaces them is a procedure: assess, plan from the assessment, watch the opponent's plan, improve the worst piece, and calculate before committing.",
+      "deep": "The absence of a short list is a fact about the phase rather than a gap. The opening has principles because the starting position is always the same; the endgame has principles and, where it does not, tablebases; the middlegame has neither. What replaces them is a procedure whose every step is a concept in its own right, governed by Steinitz's condition on timing - do not attack without an advantage, and do act once you have one, since it otherwise dissipates. It is also measurably the expensive phase: options grow roughly linearly for twenty moves, and strong players spend less time on openings and endings precisely to spend more here."
+    },
+    "hedge": "An umbrella over a procedure rather than a rule set; the middlegame is where this base's coverage is broadest and its confidence lowest.",
+    "lesson": "There is no rule to follow here. Assess first, and let the plan come from the assessment."
+  },
+  "terminology": {
+    "beginner_words": [
+      "after the pieces are out"
+    ],
+    "advanced_words": [
+      "assessment",
+      "plan",
+      "prophylaxis",
+      "accumulation"
+    ],
+    "avoid": [
+      "the middlegame principles are"
+    ]
+  },
+  "status": {
+    "stage": "researched",
+    "last_updated": "2026-09-01",
+    "open_questions": [],
+    "audit_notes": []
+  },
+  "id": "middlegame-principles",
+  "canonical_name": "Middlegame principles",
+  "category": "middlegame-principles",
+  "knowledge_type": "strategic-principle",
+  "definition_short": "The phase where development is finished and the position must be judged and acted on rather than followed.",
+  "definition_long": "THE MIDDLEGAME HAS NO SHORT LIST, and that is a fact about it rather than a gap here. The opening has principles because the starting position is the same every time. The endgame has principles, and where it does not it has tablebases. The middlegame has neither: it is the phase in which the position is different every game and the general rules have run out.\n\nWHAT REPLACES THEM IS A PROCEDURE, and every part of it is a concept in its own right here: ASSESS the position by its elements, form a PLAN that the assessment actually points at, check the opponent's plan (PROPHYLAXIS), improve the WORST-PLACED PIECE when nothing is urgent, and CALCULATE the forcing lines before committing.\n\nSTEINITZ'S CONDITION governs when to act: do not attack without an advantage, because an attack on a balanced position should fail against correct defence and leave the attacker worse for trying — and conversely, once a sufficient advantage exists it MUST be acted on or it dissipates. Lasker put the same thing from the tactical side: no combination without a considerable plus, and no considerable plus without a combination.\n\nTHE MEASURED FACT ABOUT THE PHASE, from this base's practical research, is that the middlegame is where strong players spend their clock. Options grow roughly linearly for the first twenty moves, and players above 1900 spend LESS time than weaker ones on openings and endings in order to spend more here. The phase is expensive because the decisions are genuinely harder, and that is measurable rather than impressionistic.\n\nTHIS IS ALSO WHERE THIS SYSTEM HAS THE MOST TO OFFER AND THE LEAST CERTAINTY. The shipped explanation layer names a motif in 65% of tactical puzzles and manages 4% on positional ones; the gap is almost entirely middlegame judgement.",
+  "sources": [
+    "exeter-steinitz-accumulation",
+    "dvoretsky-attack-and-defence",
+    "thechessworld-planning",
+    "sigman-response-times-2010"
+  ],
+  "source_confidence": "medium"
+}

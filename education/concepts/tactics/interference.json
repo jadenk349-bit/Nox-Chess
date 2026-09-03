@@ -1,0 +1,234 @@
+{
+  "schema_version": 2,
+  "id": "interference",
+  "canonical_name": "Interference",
+  "alternate_names": [
+    "interception",
+    "line blocking",
+    "obstruction"
+  ],
+  "historical_names": [],
+  "category": "tactical-motifs",
+  "subcategory": "material-winning motif",
+  "tags": [],
+  "knowledge_type": "tactical-motif",
+  "knowledge_type_note": "Motif (D), mechanically detectable in principle, but rarely spotted because the candidate move looks unnatural.",
+  "name_status": "established-name",
+  "difficulty": "advanced",
+  "definition_short": "Placing a piece — often as a sacrifice — on the line between an enemy piece and what it defends.",
+  "definition_long": "A unit is inserted onto the line a defending bishop, rook or queen needs, cutting the defence. Because the interfering unit is usually en prise, interference is typically a sacrifice; the point is the line, not the material.\n\nIt is the rarest of the common motifs, and the hardest to see, because the interfering move goes to a square that looks absurd. Informant theme i; the ECM lists it as 'Interception'.",
+  "history": {
+    "attributions": [],
+    "first_documented_source": "informant-encyclopedia-combinations",
+    "year": null,
+    "confidence": "unknown",
+    "notes": "Tactical motifs are descriptive pattern names of long and mostly anonymous usage. The Chess Informant classification is cited as a standard enumeration, not as the origin of the term.",
+    "competing_claims": [],
+    "development": []
+  },
+  "engine_era_status": "unassessed",
+  "engine_era_note": "",
+  "sources": [
+    "informant-encyclopedia-combinations",
+    "wikipedia-chess-tactic",
+    "chesstempo-tactical-motifs",
+    "chesscom-tactics-38"
+  ],
+  "source_confidence": "high",
+  "recognition": {
+    "preconditions": [
+      "An enemy line piece defends a target along a line",
+      "A friendly unit can be placed on a square of that line"
+    ],
+    "indicators_for": [
+      "The interfering unit cannot be captured without abandoning something bigger",
+      "Two enemy defenders share the crossing square, so one move cuts both"
+    ],
+    "indicators_against": [
+      "Capturing the interfering unit restores the defence at no cost",
+      "The defender has an alternative route to the target"
+    ],
+    "prerequisites": [],
+    "detector": "proposed, and deliberately unclaimed: every cheap test fires where it is not true (not yet written)",
+    "detectability": "mechanical",
+    "typical_confidence": "high",
+    "false_positive_traps": []
+  },
+  "application": {
+    "typical_plans": [],
+    "typical_moves": [],
+    "typical_pawn_structures": [],
+    "typical_piece_arrangements": [],
+    "tactical_consequences": [],
+    "strategic_consequences": []
+  },
+  "exceptions": [
+    "Fails if the interposed unit can be captured by a piece that does not itself have a duty."
+  ],
+  "limitations": [
+    "TYPICAL_CONFIDENCE RAISED medium -> high, 2026-09-02, and the reason is the schema's own definition of the field: 'how confidently this concept can normally be asserted ONCE ITS PRECONDITIONS HOLD'. This concept's recognition is MECHANICAL and its knowledge type already carries a high ceiling, so once the preconditions hold there is nothing left to be uncertain about - a stalemate is a stalemate, and a fork this base reports is one findMotifs() found, which ARCHITECTURE.md makes the authority and forbids second-guessing. 'Medium' was the default across 32 rule and motif records regardless of detectability, and it was found by measuring what the API reports against what each record permits: twelve concepts were reporting ABOVE their own record. The fix was to make each record its own ceiling in cap(), which then required the records that were wrong to be corrected rather than silently overruled.",
+    "NO AMBIGUOUS EXAMPLE, and the reason is the order of the work rather than a shortage of positions. This record has no POSITIVE example either, and an ambiguous example is a position where the concept is genuinely present and what to conclude from it is unclear - which cannot be written before there is an agreed instance of the concept being present at all. The four motifs in this base that lack a positive - `clearance`, `decoy`, `deflection`, `interference` - lack it for reasons written on each record, and the ambiguous rung waits on that. Writing one first would be asserting a doubtful instance of something this base has not yet shown a clear instance of. UPDATE: the positive example now exists - 28...Nf5+ in the position above, verified as the only move by 4.43 pawns - so the reason given here no longer holds and the ambiguous example is simply outstanding work rather than blocked work. RESOLVED: Alekhine-Capablanca, World Championship 1927 game 13, 39...c4 - the interference on the board, 0.00 at depth 30, and not among the engine's three choices.",
+    "NO MASTER-GAME POSITION YET. This concept has no matcher, so the scan that supplied master positions to eleven other records - five famous games replayed and analysed position by position - could not nominate one here: the API never reports the concept, so there is nothing for a scan to find. Identifying an instance in a master game means reading the game, which is research rather than tooling, and it has not been done. Recorded rather than filled. RESOLVED, and by the position that also resolves the ambiguous rung: Alekhine-Capablanca, World Championship 1927 game 13, 39...c4. The reason recorded here was right about the scan and wrong about the games - a concept with no detector cannot be nominated by a scan that reads the API, but the geometry is decidable without one, and tools/mine_master_motifs.js asks it of 2.8 million positions from replayed master games directly."
+  ],
+  "misconceptions": [],
+  "relationships": {
+    "broader": [],
+    "narrower": [],
+    "related": [
+      "clearance",
+      "deflection"
+    ],
+    "contrasting": [],
+    "co_occurring": [],
+    "conflicts": []
+  },
+  "examples": [
+    {
+      "fen": "3r1r2/1bkp1R2/1p2p3/pPp1p1pp/2P4n/P1N3K1/1BBP3P/5R2 b - - 4 28",
+      "move": "Nf5+",
+      "move_uci": "h4f5",
+      "origin_kind": "puzzle",
+      "concept_role": "positive",
+      "side_to_move_benefits": "black",
+      "note": "THE FIRST VERIFIED POSITION ON THIS RECORD, and it was found by geometry rather than by a detector, because this concept has no detector and the record said so. The scan asked one question of every ply of all 788 shipped solutions: does our move put a piece, uncaptured and en prise, strictly between an enemy line piece and something that piece was defending, such that the defended man becomes winnable and was not before? Six positions in 788 answer yes and this is the cleanest.\n\nWhite's rook on f7 is defended only by the rook on f1, down the f-file. 28...Nf5+ puts the knight in the middle of that file. It cannot be ignored - it is check - and it cannot be taken without the line staying shut: 29.Rxf5 exf5 and the f7 rook, now defended by nothing, goes for the exchange after 30.Rxf5 Rxf5 31.Bxf5 Rf8.\n\nStockfish 18 at depth 30 with three lines: Nf5+ is 0.00 and the next two moves are -4.43 and -4.58. That gap is what makes the position worth keeping. This is not a combination that wins material out of a level position; it is the only move that holds a lost one, and interference is the whole of the reason it holds. A concept whose sole example is a flourish teaches the flourish; one whose example is a rescue teaches the geometry.\n\nPROVENANCE. A shipped puzzle position, not a master game. It grounds the positive-example and engine rungs and NOT the master-game one, and the record's limitation about the master game stands unchanged.",
+      "engine": {
+        "engine_id": "Stockfish 18",
+        "test_level": 3,
+        "depth": 30,
+        "multipv": 3,
+        "best_move": "h4f5",
+        "eval_cp": 0,
+        "mate_in": null,
+        "pv": [
+          "h4f5",
+          "f1f5",
+          "e6f5",
+          "f7f5",
+          "f8f5",
+          "c2f5",
+          "d8f8",
+          "f5e4",
+          "b7e4",
+          "c3e4"
+        ],
+        "alternatives": [
+          {
+            "move": "f8f7",
+            "eval_cp": -443
+          },
+          {
+            "move": "b7f3",
+            "eval_cp": -458
+          }
+        ],
+        "margin_cp": 443,
+        "verdict": "supports",
+        "verdict_note": "Only move, by 4.43 pawns over the second best at depth 30. The interference is not decoration on a won position - it is the position's only defence."
+      }
+    }
+  ],
+  "counterexamples": [
+    {
+      "fen": "3r2k1/5ppp/8/3n4/2N5/8/5PPP/3R2K1 w - - 0 1",
+      "move_uci": "c4d6",
+      "note": "Registered false-positive case `an-interposition-that-is-simply-taken`, kept on the record as well as in tests/false_positive_cases.json so that the concept carries its own negative evidence. THE SURFACE PATTERN IS PRESENT: Nd6 puts a piece on the line between the rook on d8 and the knight it defends on d5. Blocking a defender's line is the definition of interference. WHY IT IS NOT THE CONCEPT: The rook takes it. An interference has to be an obstruction the defender cannot remove, or one whose removal costs more than the target; a knight dropped on a square the defending rook covers is neither. The concept's whole content is that the line stays blocked. WHAT THE SYSTEM DOES: The API reports `hanging-piece` at high confidence — which is exactly right about the knight on d6 — and nothing about interference. The numbers make the case sharper than a description could: with a normal move the position is +4.22 for White, because Ne3 attacks the knight on d5 a second time and wins it; the interfering Nd6 scores -4.20. Eight and a half pawns thrown away by a move that satisfies the concept's surface description.",
+      "origin_kind": "constructed-test",
+      "concept_role": "negative",
+      "false_positive_case": "an-interposition-that-is-simply-taken",
+      "engine": {
+        "engine_id": "Stockfish 18",
+        "test_level": 3,
+        "depth": 22,
+        "threads": 10,
+        "hash_mb": 4096,
+        "multipv": 1,
+        "best_move": "c4e3",
+        "eval_cp": 422,
+        "mate_in": null,
+        "pv": [],
+        "alternatives": [],
+        "margin_cp": null,
+        "verdict": "supports",
+        "verdict_note": "+4.22 for the best move against -4.20 for the interfering Nd6 - eight and a half pawns thrown away by a move that satisfies the concept's surface description. The winning idea is Ne3, attacking the knight on d5 a second time, which is the ordinary way to win a defended piece and needs no motif at all."
+      }
+    }
+  ],
+  "ambiguous_examples": [
+    {
+      "fen": "5r2/p3k3/P7/2p5/r7/2KBP3/1P4RP/8 b - - 2 39",
+      "move": "c4",
+      "move_uci": "c5c4",
+      "origin_kind": "historical-game",
+      "game": "Alekhine-Capablanca, World Championship 1927 (game 13)",
+      "concept_role": "ambiguous",
+      "note": "THE GEOMETRY WITHOUT THE VERDICT, from a World Championship game between the two players this base quotes more than any others. 39...c4 puts the pawn between White's bishop on d3 and the a6 pawn it defends - the interference is on the board and it is exactly the shape the positive example on this record has.\n\nAnd it settles nothing. Stockfish 18 at depth 30 with three lines gives 0.00 for all three, and c4 is not among them: the engine's choices are 39...Rh4, 39...Rf3 and 39...Ra1, all drawing. The rook ending is a draw with the interference and a draw without it.\n\nThis is what makes it worth keeping rather than a failure to find something better. A reader who has learned interference from the positive example - a knight interposed on f5 that is the only move in a lost position - has learned a pattern that WINS, and the next thing they need is a position where the same pattern is present and wins nothing. The motif is a geometric fact about a line. Whether it is worth anything is a separate question about the position, and this base has no business collapsing the two.\n\nPROVENANCE. Found by the same geometric scan of the shipped puzzle corpus and of replayed master games. The move list replayed legally through the page's own move generator; no annotator read.",
+      "engine": {
+        "engine_id": "Stockfish 18",
+        "test_level": 3,
+        "depth": 30,
+        "multipv": 3,
+        "best_move": "a4h4",
+        "eval_cp": 0,
+        "mate_in": null,
+        "pv": [
+          "a4h4",
+          "d3c4",
+          "h4h7",
+          "g2g5",
+          "f8f3",
+          "g5c5",
+          "f3e3",
+          "c3b4",
+          "e7d6",
+          "c5d5"
+        ],
+        "alternatives": [
+          {
+            "move": "f8f3",
+            "eval_cp": 0
+          },
+          {
+            "move": "a4a1",
+            "eval_cp": 0
+          }
+        ],
+        "margin_cp": 0,
+        "verdict": "ambiguous",
+        "verdict_note": "0.00 across all three lines at depth 30, and the move that performs the interference is not one of them. The geometry is present and decides nothing."
+      }
+    }
+  ],
+  "explanations": {
+    "by_level": {
+      "beginner": "This move stands right in the way of the piece that was defending, cutting it off.",
+      "intermediate": "Interference: the {piece} is placed on the defender's line, so the defence is cut even though the piece can be taken.",
+      "advanced": "Interference / interception (Informant theme i). Look for a square where two enemy defensive lines cross."
+    },
+    "by_depth": {
+      "short": "Putting a piece on the line between a defender and what it defends.",
+      "normal": "Interference: a piece — often a sacrifice — is placed on the line an enemy piece is defending along, cutting the defence. The obstruction has to be one the defender cannot simply remove, or one whose removal costs more than the target.",
+      "deep": "The opposite of clearance: instead of emptying your own line you block theirs. The Nowotny and Plachutta themes are the composed forms, where one interposition cuts two defending lines at once and whichever piece captures blocks the other. Over the board the motif fails in one common way, and it is arithmetic: a piece dropped on a square the defender covers is simply taken, and the line reopens. In this base's registered case the interfering move throws away eight and a half pawns, because the position was already winning by attacking the target a second time instead."
+    },
+    "hedge": "",
+    "lesson": ""
+  },
+  "terminology": {
+    "beginner_words": [
+      "get in the way"
+    ],
+    "advanced_words": [
+      "interference",
+      "interception",
+      "line blocking"
+    ],
+    "avoid": []
+  },
+  "status": {
+    "stage": "researched",
+    "last_updated": "2026-09-01",
+    "open_questions": [],
+    "audit_notes": [
+      "2026-09-01: detector field named 'lineAlignment', which does not exist anywhere in the codebase. The audit's hardcoded whitelist had been accepting it. Repointed at real code, or marked as proposed where nothing implements it."
+    ]
+  }
+}
