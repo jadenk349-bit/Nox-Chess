@@ -1,0 +1,241 @@
+{
+  "schema_version": 2,
+  "id": "zwischenzug",
+  "canonical_name": "Zwischenzug",
+  "alternate_names": [
+    "intermezzo",
+    "in-between move",
+    "intermediate move"
+  ],
+  "historical_names": [],
+  "category": "tactical-motifs",
+  "subcategory": "material-winning motif",
+  "tags": [],
+  "knowledge_type": "tactical-motif",
+  "knowledge_type_note": "Motif (D), but categorically different from the geometric motifs: it is about sequencing, so it cannot be detected from a static position at all.",
+  "name_status": "established-name",
+  "difficulty": "intermediate",
+  "definition_short": "An in-between move that inserts a bigger threat before making the reply the opponent expected.",
+  "definition_long": "In a forcing sequence — typically a capture that 'obviously' must be recaptured — a player inserts a different, stronger move first, usually a check or a larger threat. The opponent must deal with it; only then does the original recapture happen, now under changed circumstances.\n\nIt is a move-order idea rather than a geometric pattern, which is what makes it hard to see: the losing move is often not a bad move but a correct move played one turn too early. ECM lists it as 'Intermediate Move'.",
+  "history": {
+    "attributions": [],
+    "first_documented_source": "informant-encyclopedia-combinations",
+    "year": null,
+    "confidence": "unknown",
+    "notes": "Tactical motifs are descriptive pattern names of long and mostly anonymous usage. The Chess Informant classification is cited as a standard enumeration, not as the origin of the term.",
+    "competing_claims": [],
+    "development": []
+  },
+  "engine_era_status": "unassessed",
+  "engine_era_note": "",
+  "sources": [
+    "informant-encyclopedia-combinations",
+    "wikipedia-chess-tactic",
+    "chesstempo-tactical-motifs",
+    "chesscom-tactics-38"
+  ],
+  "source_confidence": "high",
+  "recognition": {
+    "preconditions": [
+      "A forcing exchange is under way and one side is expected to recapture",
+      "An alternative move exists that creates a threat at least as urgent"
+    ],
+    "indicators_for": [
+      "The in-between move is a check",
+      "The original recapture remains available afterwards"
+    ],
+    "indicators_against": [
+      "The delay allows the opponent to save the material",
+      "The in-between threat can be met while also defending"
+    ],
+    "prerequisites": [],
+    "detector": null,
+    "detectability": "human-only",
+    "typical_confidence": "medium",
+    "false_positive_traps": []
+  },
+  "application": {
+    "typical_plans": [
+      "Before making the recapture the position seems to demand, list every check and every capture that is bigger",
+      "In a forcing line, insert the check first and take second whenever the check cannot be answered by a counter-capture",
+      "When calculating the opponent's reply, look for THEIR in-between move before assuming they must recapture"
+    ],
+    "typical_moves": [
+      "A check with a piece other than the one about to recapture",
+      "A capture of something more valuable, leaving the first exchange standing",
+      "An attack on the queen inserted between a capture and its recapture"
+    ],
+    "typical_pawn_structures": [],
+    "typical_piece_arrangements": [
+      "An exchange under way on one square while a check is available on another",
+      "Two pieces of the opponent hanging at once, so the order of taking them matters"
+    ],
+    "tactical_consequences": [
+      "The gain is in the ORDER rather than in the material: the same men come off in both lines and the evaluation differs",
+      "Desperado is a special case - a doomed piece acting before the expected recapture is a zwischenzug made by a piece that has nothing to lose"
+    ],
+    "strategic_consequences": [
+      "Whole calculated lines are refuted by an opponent's zwischenzug, which is why this record's advice is to look for theirs and not only for yours"
+    ]
+  },
+  "exceptions": [
+    "An in-between move fails if the opponent's answer to it also answers the original threat.",
+    "A check that lets the opponent improve while answering it is worse than the immediate recapture.",
+    "If the first exchange can be abandoned by the opponent, the in-between move has bought nothing."
+  ],
+  "limitations": [
+    "There is no matcher. Recognising a zwischenzug requires knowing what the EXPECTED move was, which is a claim about a line rather than about a position, and this base reports at the board.",
+    "The example on this record was FOUND rather than constructed, by scanning the 788 shipped puzzles for a solution whose first move is not the recapture on the square just captured, where a recapture is available and the move played is a check. Fifteen positions match. The scan needs each puzzle's `prev` position to know what was just taken, which is the same field the puzzle generator added so that a turning point could be measured at all.",
+    "NO MASTER-GAME POSITION YET, and the search that failed is worth recording. Five famous games were replayed through this base's own move generator and scanned position by position with the API - the Opera Game, the Evergreen, the Immortal, the Game of the Century and Legall's Mate, 225 plies between them - and this concept was not reported in any of them. That is not evidence the motif is rare; it is evidence that the five games this base can currently verify do not contain a clean instance of it, and that adding one means adding a game rather than looking harder at these. tools/replay_game.js is the instrument: a move list that is wrong is refused rather than guessed at. RESOLVED: Klasup-Tal, Latvian Championship 1952, 21...Nf2+, above."
+  ],
+  "misconceptions": [],
+  "relationships": {
+    "broader": [],
+    "narrower": [],
+    "related": [
+      "desperado",
+      "double-attack"
+    ],
+    "contrasting": [],
+    "co_occurring": [],
+    "conflicts": []
+  },
+  "examples": [
+    {
+      "fen": "r2q1rk1/pp4pp/n1pbbp2/3pp2N/3P2B1/2P1n2P/PP1N1PP1/R1BQ1RK1 w - - 0 12",
+      "move": "Bxe6+",
+      "move_uci": "g4e6",
+      "note": "Shipped puzzle mi-4fe7c58015, and it is the concept in its purest form. Black has just captured on e3 and White is expected to recapture. Instead White checks on e6 first, and the check has to be answered, so the recapture is still there afterwards - the engine's own line plays Bxe6+ Kh8 and only THEN fxe3. The whole gain is in the order. Found by scanning the 788 shipped puzzles for a solution whose first move is not the recapture on the square just taken, where a recapture IS available and the move played is a check: fifteen positions match that shape.",
+      "origin_kind": "puzzle",
+      "concept_role": "positive",
+      "side_to_move_benefits": "white",
+      "engine": {
+        "engine_id": "Stockfish 18",
+        "test_level": 3,
+        "depth": 22,
+        "threads": 10,
+        "hash_mb": 4096,
+        "multipv": 3,
+        "best_move": "g4e6",
+        "eval_cp": 437,
+        "mate_in": null,
+        "pv": [],
+        "alternatives": [],
+        "margin_cp": 240,
+        "verdict": "supports",
+        "verdict_note": "+4.37 for the in-between check against +1.97 for the immediate recapture fxe3 - 240 centipawns bought by move order alone, with the same material taken in both lines. That margin is what a zwischenzug IS, and it is the reason the concept has a name of its own rather than being filed under 'check'."
+      }
+    },
+    {
+      "fen": "r1b4k/pp2qBpp/1bp5/8/1P2nP2/PQ6/6PP/R1B2R1K b - - 0 21",
+      "move": "Nf2+",
+      "move_uci": "e4f2",
+      "origin_kind": "historical-game",
+      "game": "Klasup-Tal, Latvian Championship 1952",
+      "concept_role": "positive",
+      "side_to_move_benefits": "black",
+      "note": "THE SHAPE THE RECORD DESCRIBES, in a game, with the numbers to show what the move order is worth. White has just captured on f7 and Black's queen on e7 is the piece expected to recapture. 21...Nf2+ is played instead. The check has to be answered, the bishop on f7 is not going anywhere, and the position Black recaptures into is a different one.\n\nStockfish 18 at depth 28 with three lines: +7.00 for Nf2+, against +0.18 and +0.10 for the next two. **The in-between move is worth 682 centipawns**, which is the whole difference between a level position and a won one, and the two alternatives include recapturing.\n\nThe engine's line does not recapture at all - 22.Kg1 Qh4 - and that is faithful rather than awkward. The record says the recapture happens 'now under changed circumstances'; sometimes the circumstances change enough that it is no longer the move.\n\nHOW IT WAS FOUND, and what the finder does NOT claim. This concept's detectability is `human-only` and its own definition says it is 'a move-order idea rather than a geometric pattern, which is what makes it hard to see'. The test in tools/mine_master_motifs.js does not claim to find the idea; it finds the shape the idea lives in, and every candidate was read. The shape has three parts, all off the board: the opponent has just captured, we have a recapture available on that square, and instead we give a check elsewhere after which the recapture is STILL there against every reply. That last clause is the whole point - an in-between move that loses the recapture is not an in-between move, it is a different move.\n\nPROVENANCE. Replayed legally through the page's own move generator. `attributed_by` absent - no annotator read; this grounds the MASTER-GAME rung and not the human-grounded one.",
+      "engine": {
+        "engine_id": "Stockfish 18",
+        "test_level": 3,
+        "depth": 28,
+        "multipv": 3,
+        "best_move": "e4f2",
+        "eval_cp": 700,
+        "mate_in": null,
+        "pv": [
+          "e4f2",
+          "h1g1",
+          "e7h4",
+          "b3g3",
+          "f2e4",
+          "g3e3",
+          "h4f6",
+          "a1b1",
+          "b6e3",
+          "c1e3"
+        ],
+        "alternatives": [
+          {
+            "move": "c8f5",
+            "eval_cp": 18
+          },
+          {
+            "move": "e7h4",
+            "eval_cp": 10
+          }
+        ],
+        "margin_cp": 682,
+        "verdict": "supports",
+        "verdict_note": "+7.00 against +0.18 at depth 28. The move order is worth 682 centipawns, which is what this concept claims a move order can be worth and is rarely able to show."
+      }
+    }
+  ],
+  "counterexamples": [
+    {
+      "fen": "6k1/5pp1/7p/8/8/8/5PPP/R5K1 w - - 0 1",
+      "move_uci": "a1a8",
+      "note": "Registered false-positive case `a-check-with-no-exchange-under-way`, kept on the record as well as in tests/false_positive_cases.json so that the concept carries its own negative evidence. THE SURFACE PATTERN IS PRESENT: Ra8+ is a forcing move inserted before anything else happens, and the opponent must answer it before doing what they intended. Inserting a forcing move ahead of the expected continuation is the concept. WHY IT IS NOT THE CONCEPT: There is no expected continuation to insert it ahead of. A zwischenzug is defined against a move the opponent is COMMITTED to — a recapture, most often — and nothing has been captured, nothing is hanging, and Black had no obligation of any kind before the check. An in-between move needs two things to be in between. WHAT THE SYSTEM DOES: The API reports `open-file` and nothing else. This record has no matcher and its limitations give this exact reason: 'recognising a zwischenzug requires knowing what the EXPECTED move was, which is a claim about a line rather than about a position, and this base reports at the board.' The case pins that down with the cheapest possible counterexample — a check, which is the most forcing move there is, in a position where forcing nothing was pending. The same board is `decoy`'s registered case.",
+      "origin_kind": "constructed-test",
+      "concept_role": "negative",
+      "false_positive_case": "a-check-with-no-exchange-under-way"
+    }
+  ],
+  "ambiguous_examples": [
+    {
+      "fen": "5k2/2N2r2/3p4/1p6/3P2p1/2P1q1p1/PP3NQ1/6K1 w - - 0 41",
+      "move": "Qa8+",
+      "move_uci": "g2a8",
+      "note": "Shipped puzzle mi-5f4be05ec3, and it is the DEFENSIVE form of the motif, which the record describes only in passing. Black has just taken on g3 and White is expected to recapture. Recapturing is mate in three against - Qxg3 Qxg3 and the attack lands. Instead White checks on a8 first, and the check leads to a perpetual: 0.00. So the in-between move is essential and it gains no material at all. Filed as ambiguous because the concept's usual framing is that move order buys material - this record's own positive example buys 240 centipawns by it - and here the same mechanism buys a draw from a lost position, which the definition does not cover and the reader would not predict from it.",
+      "origin_kind": "puzzle",
+      "concept_role": "ambiguous",
+      "engine": {
+        "engine_id": "Stockfish 18",
+        "test_level": 3,
+        "depth": 20,
+        "threads": 10,
+        "hash_mb": 4096,
+        "multipv": 2,
+        "best_move": "g2a8",
+        "eval_cp": 0,
+        "mate_in": null,
+        "pv": [],
+        "alternatives": [],
+        "margin_cp": null,
+        "verdict": "ambiguous",
+        "verdict_note": "0.00 for the in-between check against MATE IN 3 AGAINST for the natural recapture, at depth 20 with two lines. The gap is the whole game rather than a material count, which is why this position is filed beside a positive example whose gap is 240 centipawns."
+      }
+    }
+  ],
+  "explanations": {
+    "by_level": {
+      "beginner": "Instead of recapturing straight away, this makes a bigger threat first. The recapture is still there afterwards.",
+      "intermediate": "A zwischenzug. Check that the delayed capture will still be available.",
+      "advanced": "In-between move. The commonest source of error is treating a forced-looking recapture as actually forced."
+    },
+    "by_depth": {
+      "short": "An in-between move played before the reply the opponent expects.",
+      "normal": "A zwischenzug: instead of making the move the position seems to demand — usually a recapture — a bigger threat is inserted first. The opponent must answer it, and the original move is still available afterwards.",
+      "deep": "The gain is in the ORDER rather than in the material: the same men come off in both lines and the evaluation differs, which is why the idea needs a name of its own. This base's example buys 240 centipawns by playing a check before recapturing, with an identical material result. It also has a defensive form the usual definition does not cover — an in-between check that reaches a perpetual from a position where the natural recapture is mate in three against, where what the move order buys is a draw rather than material. The condition that fails most often: if the opponent's answer to the in-between move also answers the original threat, nothing has been bought."
+    },
+    "hedge": "",
+    "lesson": ""
+  },
+  "terminology": {
+    "beginner_words": [
+      "do something else first"
+    ],
+    "advanced_words": [
+      "zwischenzug",
+      "intermezzo",
+      "in-between move"
+    ],
+    "avoid": []
+  },
+  "status": {
+    "stage": "researched",
+    "last_updated": "2026-08-31",
+    "open_questions": [],
+    "audit_notes": []
+  }
+}

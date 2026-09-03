@@ -1,0 +1,152 @@
+{
+  "schema_version": 2,
+  "id": "fifty-move-rule",
+  "canonical_name": "The fifty-move rule",
+  "alternate_names": [],
+  "historical_names": [],
+  "category": "official-rules",
+  "subcategory": "basic rules of play",
+  "tags": [],
+  "knowledge_type": "official-rule",
+  "knowledge_type_note": "Official rule. The tablebase point is a genuine conflict between rule (A) and proven result (B) and is recorded as such.",
+  "name_status": "established-name",
+  "difficulty": "intermediate",
+  "definition_short": "A player to move may CLAIM a draw when the last 50 moves by each player have been made with no pawn move and no capture.",
+  "definition_long": "FIDE Art. 9.3: the game is drawn on a correct claim if the player indicates a move that 'will result in the last 50 moves by each player having been made without the movement of any pawn and without any capture' (9.3.1), or if 'the last 50 moves by each player have been completed without the movement of any pawn and without any capture' (9.3.2).\n\n'50 moves by each player' means 100 ply. Any capture or any pawn move resets the count. Like threefold repetition it is a claim, not automatic — Art. 9.6.2 supplies the automatic version at 75.\n\nHistorically FIDE granted exceptions for specific endgames later shown by tablebases to need more than 50 moves; those exceptions were removed, so some theoretically won endings are drawn under the current Laws.",
+  "history": {
+    "attributions": [],
+    "first_documented_source": "fide-laws-2023",
+    "year": null,
+    "confidence": "unknown",
+    "notes": "History of the exception list not yet researched for this record.",
+    "competing_claims": [],
+    "development": []
+  },
+  "engine_era_status": "not-applicable",
+  "engine_era_note": "",
+  "sources": [
+    "fide-laws-2023",
+    "fide-laws-2023-pdf"
+  ],
+  "source_confidence": "high",
+  "recognition": {
+    "preconditions": [
+      "100 ply have elapsed with no capture and no pawn move"
+    ],
+    "indicators_for": [],
+    "indicators_against": [
+      "Any capture or pawn move in that span resets the counter"
+    ],
+    "prerequisites": [],
+    "detector": "lib/matchers.js: fifty-move-rule, over the halfmove clock",
+    "detectability": "mechanical",
+    "typical_confidence": "high",
+    "false_positive_traps": []
+  },
+  "application": {
+    "typical_plans": [],
+    "typical_moves": [],
+    "typical_pawn_structures": [],
+    "typical_piece_arrangements": [],
+    "tactical_consequences": [],
+    "strategic_consequences": []
+  },
+  "exceptions": [
+    "Not automatic — it must be claimed.",
+    "Some endgames proven winnable by tablebase require more than 50 moves and are therefore drawn under the Laws. The rule and the theoretical truth genuinely diverge here."
+  ],
+  "limitations": [
+    "Reported from 80 ply, because a count of 4 is not news and a count of 92 is.",
+    "TYPICAL_CONFIDENCE RAISED medium -> high, 2026-09-02, and the reason is the schema's own definition of the field: 'how confidently this concept can normally be asserted ONCE ITS PRECONDITIONS HOLD'. This concept's recognition is MECHANICAL and its knowledge type already carries a high ceiling, so once the preconditions hold there is nothing left to be uncertain about - a stalemate is a stalemate, and a fork this base reports is one findMotifs() found, which ARCHITECTURE.md makes the authority and forbids second-guessing. 'Medium' was the default across 32 rule and motif records regardless of detectability, and it was found by measuring what the API reports against what each record permits: twelve concepts were reporting ABOVE their own record. The fix was to make each record its own ceiling in cap(), which then required the records that were wrong to be corrected rather than silently overruled."
+  ],
+  "misconceptions": [],
+  "relationships": {
+    "broader": [],
+    "narrower": [],
+    "related": [
+      "seventy-five-move-rule"
+    ],
+    "contrasting": [],
+    "co_occurring": [],
+    "conflicts": []
+  },
+  "examples": [
+    {
+      "fen": "8/5k2/8/8/8/8/5K2/6R1 w - - 99 99",
+      "note": "The positive half of the controlled pair, and the tablebase gives it the best possible label: CURSED-WIN. White mates in 21, and the fifty-move rule takes the win away - the position is a theoretical win that the rule converts into a draw. The identical board with the halfmove clock at zero is an ordinary win. Nothing on the board distinguishes them.",
+      "origin_kind": "constructed-test",
+      "concept_role": "supports",
+      "side_to_move_benefits": "neither",
+      "controlled_pair_with": "8/5k2/8/8/8/8/5K2/6R1 w - - 0 99",
+      "tablebase": {
+        "source": "Lichess tablebase (Syzygy, 7-piece)",
+        "pieces": 3,
+        "wdl": "cursed-win",
+        "dtz": 21,
+        "dtm": 21,
+        "category": "cursed-win",
+        "checkmate": false,
+        "stalemate": false,
+        "note": "PROVEN: cursed-win, dtz 21. 'Cursed' is Syzygy's word for exactly this - a win that the fifty-move rule spoils. There is no stronger illustration of the concept available, because the tablebase is naming the rule's effect rather than a position's evaluation."
+      }
+    },
+    {
+      "fen": "8/7n/7P/8/1n6/8/2k5/K7 b - - 80 123",
+      "origin_kind": "historical-game",
+      "game": "Smyslov-Lilienthal, Leningrad",
+      "concept_role": "positive",
+      "side_to_move_benefits": "neither",
+      "note": "EIGHTY PLY WITH NO CAPTURE AND NO PAWN MOVE, in a game somebody actually played to move 123. The halfmove clock in the FEN is the rule: it counts what the rule counts and it resets on exactly what the rule resets on, which is why this record's indicator_against - 'any capture or pawn move in that span resets the counter' - needs no separate test.\n\nThe matcher reports from 80 rather than from 1, because a count of 4 is not news, and a position at 80 is one where a player should be counting. This is what that looks like on a real board: two knights and a pawn, neither side able to force anything, the clock at 80 and twenty ply left.\n\nPROVENANCE. Found by tools/harvest_games.js. Replayed legally through the page's own move generator, which is also what makes the halfmove clock trustworthy - it was computed by playing the game, not copied from a source."
+    }
+  ],
+  "counterexamples": [
+    {
+      "fen": "8/5k2/8/8/8/8/5K2/6R1 w - - 0 99",
+      "note": "The same board on move 99 with the halfmove clock at ZERO instead of 99. Nothing about the pieces has changed and the rule is nowhere near applying: the record's indicator_against - 'any capture or pawn move in that span resets the counter' - is the whole of the difference, and it is carried in one FEN field that a reader looking at a diagram cannot see. Move numbers are not the fifty-move rule; the halfmove clock is.",
+      "origin_kind": "constructed-test",
+      "concept_role": "negative",
+      "side_to_move_benefits": "neither",
+      "controlled_pair_with": "8/5k2/8/8/8/8/5K2/6R1 w - - 99 99"
+    },
+    {
+      "fen": "7k/8/8/8/8/8/6q1/7K w - - 96 60",
+      "note": "Registered false-positive case `a-counter-about-to-be-reset`, kept on the record as well as in tests/false_positive_cases.json so that the concept carries its own negative evidence. THE SURFACE PATTERN IS PRESENT: The halfmove clock reads 96. Two more moves each and either side may claim a draw. WHY IT IS NOT THE CONCEPT: This record's only indicator_against: \"Any capture or pawn move in that span resets the counter.\" White is in check and has exactly one legal move, Kxg2, which is a capture. The counter goes back to zero on the next ply and the claim never becomes available. WHAT THE SYSTEM DOES: The move generator produces one legal move, h1g2, and it is a capture. The matcher does report fifty-move-rule here — correctly, because what it says is '96 ply have passed with no capture and no pawn move; at 100 either side may claim a draw', which is true and is a statement about the count rather than a prediction. This case is registered to hold that distinction in place: the concept is about a counter, the counter is at 96, and whether it ever reaches 100 is a question about the game and not about the position. A matcher that tried to predict it would be guessing.",
+      "origin_kind": "constructed-test",
+      "concept_role": "negative",
+      "false_positive_case": "a-counter-about-to-be-reset"
+    }
+  ],
+  "ambiguous_examples": [],
+  "explanations": {
+    "by_level": {
+      "beginner": "Fifty moves have gone by for each side with no capture and no pawn move, so a draw can be claimed.",
+      "intermediate": "The fifty-move rule. Any capture or pawn move resets the counter, and the draw must be claimed.",
+      "advanced": "Art. 9.3. Note the divergence from tablebase truth in long theoretical endings."
+    },
+    "by_depth": {
+      "short": "After fifty moves each with no capture and no pawn move, either player may claim a draw.",
+      "normal": "The fifty-move rule: a player to move may CLAIM a draw when the last fifty moves by each side have passed with no capture and no pawn move. It is a claim and not an automatic result — the game continues if nobody makes it.",
+      "deep": "FIDE Art. 9.3. The counter is the halfmove clock in the FEN, and any capture or any pawn move resets it to zero, which is the whole of the rule's second half. Two things are worth keeping separate from it. The seventy-five-move rule at Art. 9.6.2 is automatic and needs no claim. And tablebase truth diverges from both: several theoretical endings are won and need more than fifty moves, so a proven win can be a drawn game."
+    },
+    "hedge": "",
+    "lesson": ""
+  },
+  "terminology": {
+    "beginner_words": [
+      "fifty moves with nothing happening"
+    ],
+    "advanced_words": [
+      "fifty-move rule",
+      "halfmove clock"
+    ],
+    "avoid": []
+  },
+  "status": {
+    "stage": "researched",
+    "last_updated": "2026-09-01",
+    "open_questions": [],
+    "audit_notes": [
+      "2026-09-01: detector field named 'halfmoveClock', which does not exist anywhere in the codebase. The audit's hardcoded whitelist had been accepting it. Repointed at real code, or marked as proposed where nothing implements it."
+    ]
+  }
+}

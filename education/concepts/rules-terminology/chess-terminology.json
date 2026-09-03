@@ -1,0 +1,135 @@
+{
+  "schema_version": 2,
+  "alternate_names": [],
+  "historical_names": [],
+  "tags": [
+    "meta",
+    "terminology",
+    "epistemics"
+  ],
+  "subcategory": "meta",
+  "difficulty": "intermediate",
+  "knowledge_type_note": "A meta-record about how this base handles naming, and why the distinction between a name and a description is enforced structurally.",
+  "name_status": "descriptive-phrase",
+  "history": {
+    "attributions": [],
+    "first_documented_source": null,
+    "year": null,
+    "confidence": "unknown",
+    "notes": "A meta-record about this base's own practice; no external history.",
+    "competing_claims": [],
+    "development": []
+  },
+  "engine_era_status": "not-applicable",
+  "engine_era_note": "Engines name nothing, which is precisely why the naming problem is the human half of the work and cannot be delegated.",
+  "recognition": {
+    "preconditions": [
+      "A concept is about to be named for a reader"
+    ],
+    "indicators_for": [],
+    "indicators_against": [],
+    "prerequisites": [],
+    "detector": "name_status field, enforced by tools/schema.json",
+    "detectability": "mechanical",
+    "typical_confidence": "high",
+    "false_positive_traps": [
+      "A descriptive phrase must never be presented as an established term. The schema records which is which precisely so this cannot happen by accident.",
+      "Do not create a concept because a detector needed a label. positionalTactic is the standing example of a pipeline tag that is not a chess idea.",
+      "Deflection, decoy, overloading, interference and double attack are deliberately unclaimed here. Adding a detector for them without criteria that survive false-positive testing would reintroduce exactly the wrong-label problem."
+    ]
+  },
+  "application": {
+    "typical_plans": [
+      "Check name_status before using a term in an explanation",
+      "Prefer describing what is happening over naming it wrongly"
+    ],
+    "typical_moves": [],
+    "typical_pawn_structures": [],
+    "typical_piece_arrangements": [],
+    "tactical_consequences": [],
+    "strategic_consequences": []
+  },
+  "exceptions": [
+    "Where no recognised name exists, describing the thing plainly is correct and is not a failure."
+  ],
+  "limitations": [
+    "Name status is a judgement from the sources consulted, and a term rated descriptive here may be standard in a literature this base has not read.",
+    "The base's research is English-language, which will under-represent terms established elsewhere.",
+    "NO REGISTERED FALSE-POSITIVE CASE, because this record is about the BASE rather than about boards. It is an index over other concepts, and the conditions it states are conditions on how this system names and files things - not patterns a position can exhibit. A false-positive case here would have to be a mis-filed concept rather than a mistaken reading of a board, and that is what tools/audit.py and tools/validate_kb.py check, on every record, on every run. Recorded rather than filled: tools/depth_report.py still counts this concept as missing the item, and the completion assessment carries the gap."
+  ],
+  "misconceptions": [
+    "That every chess idea has a name. Many do not, and inventing one is worse than describing the idea.",
+    "That a term appearing in many articles makes it established. Several widely repeated terms have no canonical definition behind them."
+  ],
+  "relationships": {
+    "broader": [],
+    "narrower": [],
+    "related": [
+      "beginner-misconceptions",
+      "exceptions-to-rules",
+      "notation",
+      "lucena-position",
+      "fork",
+      "gambit"
+    ],
+    "contrasting": [],
+    "co_occurring": [],
+    "conflicts": []
+  },
+  "examples": [],
+  "counterexamples": [],
+  "ambiguous_examples": [],
+  "explanations": {
+    "by_level": {
+      "beginner": "Some chess ideas have proper names and some do not — and using the wrong name is worse than using none.",
+      "intermediate": "Every concept here records whether its name is established, common, contested, or just our description.",
+      "advanced": "Research names concepts and the engine validates moves; neither does the other's job, and no concept is created because a detector wanted a label.",
+      "master": "Five motifs are deliberately unclaimed because every cheap test for them fires where they are not true."
+    },
+    "by_depth": {
+      "short": "Whether a term is a real chess name or just a description.",
+      "normal": "Chess vocabulary is inconsistent and full of terms that sound official and are not. Every concept here declares whether its name is established, common usage, contested, or a description of this base's own — because the label is what a learner is being taught to see, and a wrong one teaches a category that does not exist.",
+      "deep": "The naming problem is the human half of this work and cannot be delegated, since engines name nothing. So name status is a structural field rather than a note: established, common usage, descriptive phrase, or contested. The rule that follows is that no concept is ever created because a detector needed a label — the standing example is a puzzle-pipeline tag meaning 'a quiet move with no motif', which is not a chess term and gets no record. Five motifs are deliberately unclaimed for the same reason: every cheap test for deflection, decoy, overloading, interference and double attack fires where they are not true, and a wrong label is worse than a missing one."
+    },
+    "hedge": "",
+    "lesson": "If you cannot name it correctly, describe it. A wrong name teaches a category that does not exist."
+  },
+  "terminology": {
+    "beginner_words": [
+      "what this idea is called"
+    ],
+    "advanced_words": [
+      "established name",
+      "descriptive phrase",
+      "attribution",
+      "name status"
+    ],
+    "avoid": [
+      "the technical term is"
+    ]
+  },
+  "status": {
+    "stage": "researched",
+    "last_updated": "2026-09-01",
+    "open_questions": [],
+    "audit_notes": []
+  },
+  "id": "chess-terminology",
+  "canonical_name": "Chess terminology",
+  "category": "chess-terminology",
+  "knowledge_type": "terminology",
+  "definition_short": "The difference between a recognised chess NAME and a description of what is happening — and the rule that this system never invents the former.",
+  "definition_long": "Chess vocabulary is inconsistent, unevenly attested, and full of terms that sound official and are not. That matters here more than it would in a book, because the label is the thing a learner is being taught to see: a wrong name is worse than no name, since it teaches a category that does not exist.\n\nSO EVERY CONCEPT DECLARES ITS NAME STATUS, and the values are enforced by the schema:\n- ESTABLISHED-NAME — sources support this as a recognised term (fork, zugzwang, Lucena position).\n- COMMON-USAGE — widely used, without a canonical definition behind it.\n- DESCRIPTIVE-PHRASE — this base's own words for something real that has no agreed name. It must never be presented to a reader as established terminology.\n- CONTESTED — sources disagree about the name or about what it covers.\n\nTHE RULE THAT FOLLOWS: research names concepts; the engine validates moves; and neither may be used for the other's job. A concept is never created because a detector needed a label. The clearest instance is the puzzle generator's tag `positionalTactic`, which is not a chess term at all but the pipeline's word for 'a quiet move with no motif tag'. This base explicitly refuses to create a concept for it and instead maps such moves onto the things they actually are — prophylaxis, restriction, improving the worst piece.\n\nAND FIVE MOTIFS ARE DELIBERATELY UNCLAIMED: deflection, decoy, overloading, interference and double attack. Every cheap test for them fires where they are not true, and a wrong label is worse than a missing one because the label is precisely what the player is learning to recognise. The puzzle generator reached the same conclusion independently, which is the closest thing to corroboration available.\n\nNAMES ALSO DRIFT AND MISATTRIBUTE. The Lucena position is not in Lucena's book; 'the best way to refute a gambit is to accept it' drifts between 'gambit' and 'sacrifice' across sources and may not be Steinitz's; the worst-piece rule carries four different names. Each is recorded with its trail rather than tidied.",
+  "sources": [
+    "wikipedia-chess-tactic",
+    "informant-encyclopedia-combinations",
+    "wikipedia-chess-opening"
+  ],
+  "source_confidence": "medium",
+  "validation_na": {
+    "positive_example": "N/A rather than missing. This record is an INDEX over other concepts in this base rather than a claim about a position: what it asserts is how this system names, files and separates things, and a position cannot exhibit or refute that. The corresponding check exists and runs on every record on every commit - tools/validate_kb.py for structure and naming, tools/audit.py for source discipline and stage promotion - which is the right instrument for a claim about the base. Attaching a board position here would be decoration.",
+    "negative_example": "N/A rather than missing. This record is an INDEX over other concepts in this base rather than a claim about a position: what it asserts is how this system names, files and separates things, and a position cannot exhibit or refute that. The corresponding check exists and runs on every record on every commit - tools/validate_kb.py for structure and naming, tools/audit.py for source discipline and stage promotion - which is the right instrument for a claim about the base. Attaching a board position here would be decoration.",
+    "engine_validation": "N/A rather than missing. This record is an INDEX over other concepts in this base rather than a claim about a position: what it asserts is how this system names, files and separates things, and a position cannot exhibit or refute that. The corresponding check exists and runs on every record on every commit - tools/validate_kb.py for structure and naming, tools/audit.py for source discipline and stage promotion - which is the right instrument for a claim about the base. Attaching a board position here would be decoration.",
+    "false_positive_test": "N/A rather than missing. This record is an INDEX over other concepts in this base rather than a claim about a position: what it asserts is how this system names, files and separates things, and a position cannot exhibit or refute that. The corresponding check exists and runs on every record on every commit - tools/validate_kb.py for structure and naming, tools/audit.py for source discipline and stage promotion - which is the right instrument for a claim about the base. Attaching a board position here would be decoration."
+  }
+}

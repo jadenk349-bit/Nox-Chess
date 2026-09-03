@@ -1,0 +1,233 @@
+{
+  "schema_version": 2,
+  "alternate_names": [
+    "critical square"
+  ],
+  "historical_names": [],
+  "tags": [
+    "endgame",
+    "kings",
+    "pawns"
+  ],
+  "subcategory": "king technique",
+  "difficulty": "intermediate",
+  "knowledge_type_note": "Which squares are key is determined by the pawn's position and is computable, not a matter of judgement.",
+  "name_status": "established-name",
+  "history": {
+    "attributions": [],
+    "first_documented_source": "wikipedia-opposition",
+    "year": null,
+    "confidence": "unknown",
+    "notes": "No coinage researched. The concept is standard endgame theory of long standing.",
+    "competing_claims": [],
+    "development": []
+  },
+  "engine_era_status": "reliable",
+  "engine_era_note": "Computable and confirmed; tablebases make key squares derivable rather than memorised.",
+  "recognition": {
+    "preconditions": [
+      "A king-and-pawn ending where king penetration decides the result"
+    ],
+    "indicators_for": [
+      "The attacking king can reach a key square by force",
+      "The defending king cannot occupy or cover all of them",
+      "A route exists around the pawn that the defender cannot mirror"
+    ],
+    "indicators_against": [
+      "The defending king holds all the key squares",
+      "The pawn is a rook pawn, where the key squares are fewer and the draw is common",
+      "Pieces remain on the board, so the ending is not decided by king geometry"
+    ],
+    "prerequisites": [
+      "opposition"
+    ],
+    "detector": "keySquares — computable from the pawn's square; not yet written",
+    "detectability": "mechanical",
+    "typical_confidence": "high",
+    "false_positive_traps": [
+      "Key squares are only meaningful in king-and-pawn endings. Reporting them with pieces on the board is a category error.",
+      "For a rook pawn the usual rules do not apply and the ending is frequently drawn regardless.",
+      "Reaching a key square is the goal; taking the opposition is only one way of getting there and is sometimes the wrong one."
+    ]
+  },
+  "application": {
+    "typical_plans": [
+      "Head for a key square, taking the opposition only when it helps you get there",
+      "Approach around the side of the pawn when the direct route is blocked",
+      "As the defender: cover the key squares and take the opposition when the attacking king advances"
+    ],
+    "typical_moves": [
+      "A king move that sidesteps rather than taking the opposition"
+    ],
+    "typical_pawn_structures": [
+      "King and pawn versus king",
+      "Blocked opposing pawns"
+    ],
+    "typical_piece_arrangements": [],
+    "tactical_consequences": [],
+    "strategic_consequences": [
+      "Gives the opposition a purpose and tells you when to ignore it"
+    ]
+  },
+  "exceptions": [
+    "Rook pawns have their own, much more restrictive key squares and are often drawn.",
+    "Reaching a key square by the direct route is sometimes impossible while a route around the pawn works."
+  ],
+  "limitations": [
+    "Applies to king-and-pawn endings; not a general concept."
+  ],
+  "misconceptions": [
+    "That the opposition is the goal. The key square is the goal; the opposition is a means.",
+    "That key squares are the same for every pawn. They depend on the pawn's rank and file."
+  ],
+  "relationships": {
+    "broader": [],
+    "narrower": [],
+    "related": [
+      "opposition",
+      "corresponding-squares",
+      "zugzwang",
+      "passed-pawn"
+    ],
+    "contrasting": [],
+    "co_occurring": [
+      "opposition"
+    ],
+    "conflicts": []
+  },
+  "examples": [
+    {
+      "fen": "8/4k3/8/4K3/4P3/8/8/8 b - - 0 1",
+      "note": "For a pawn on e4 the key squares are d6, e6 and f6: if the white king reaches one of them the pawn queens whoever moves. Here White has not reached one yet, and with Black to move he does - 1...Kd7 2.Kf6, or 1...Kf7 2.Kd6. The pair is the same board with White to move, where Black holds the opposition and keeps him out.",
+      "origin_kind": "constructed-test",
+      "concept_role": "supports",
+      "side_to_move_benefits": "white",
+      "controlled_pair_with": "8/4k3/8/4K3/4P3/8/8/8 w - - 0 1",
+      "tablebase": {
+        "source": "Lichess tablebase (Syzygy, 7-piece)",
+        "pieces": 3,
+        "wdl": "loss",
+        "dtz": -4,
+        "dtm": -28,
+        "category": "loss",
+        "note": "PROVEN LOSS for Black, dtz -4: the key square is reached and the pawn queens. The paired position, White to move, is a proven draw - the key square is not reached."
+      },
+      "engine": {
+        "engine_id": "Stockfish 18",
+        "test_level": 3,
+        "depth": 26,
+        "threads": 10,
+        "hash_mb": 4096,
+        "multipv": 1,
+        "best_move": "e7d7",
+        "eval_cp": null,
+        "mate_in": -15,
+        "pv": [],
+        "alternatives": [],
+        "margin_cp": null,
+        "verdict": "supports",
+        "verdict_note": "PROVEN WIN for White, dtz -4, mate in 28 from Black's side, and the engine reports mate in 15 for the side not to move. Black to move must give ground. This single position serves `opposition`, `key-square` and `zugzwang` at once, and the pair it belongs to - the same board with White to move, proven DRAWN - is the strictest controlled comparison this base contains, because nothing on the board differs at all."
+      }
+    }
+  ],
+  "counterexamples": [
+    {
+      "fen": "8/4k3/8/4K3/4P3/8/8/8 w - - 0 1",
+      "note": "The same three men, White to move, and the key squares d6/e6/f6 are unreachable: every approach is met by the black king taking the opposition, and the game is drawn. Key squares are a fact about the pawn, not about the king - being near them is not the same as being able to enter one.",
+      "origin_kind": "constructed-test",
+      "concept_role": "negative",
+      "side_to_move_benefits": "neither",
+      "controlled_pair_with": "8/4k3/8/4K3/4P3/8/8/8 b - - 0 1",
+      "tablebase": {
+        "source": "Lichess tablebase (Syzygy, 7-piece)",
+        "pieces": 3,
+        "wdl": "draw",
+        "dtz": 0,
+        "dtm": 0,
+        "category": "draw",
+        "note": "PROVEN DRAW at dtz 0, with the key squares one move out of reach for ever."
+      },
+      "engine": {
+        "engine_id": "Stockfish 18",
+        "test_level": 3,
+        "depth": 26,
+        "threads": 10,
+        "hash_mb": 4096,
+        "multipv": 1,
+        "best_move": "e5f5",
+        "eval_cp": 0,
+        "mate_in": null,
+        "pv": [],
+        "alternatives": [],
+        "margin_cp": null,
+        "verdict": "supports",
+        "verdict_note": "PROVEN DRAW, dtz 0, best move Kd4, and the engine agrees at 0.00. The negative half of the strictest pair in this base: the same board as the winning position with only the side to move changed. Whoever is NOT to move holds the opposition, which is why this half of the pair is a negative for three concepts and not a different position."
+      }
+    },
+    {
+      "fen": "7k/8/6K1/7P/8/8/8/8 w - - 0 1",
+      "note": "Registered false-positive case `the-square-in-front-of-a-rook-pawn`, kept on the record as well as in tests/false_positive_cases.json so that the concept carries its own negative evidence. THE SURFACE PATTERN IS PRESENT: The white king stands on g6, directly in front of and beside its own passed pawn, with the black king shut in the corner. For any other pawn on the board that square is a key square and the position is winning. WHY IT IS NOT THE CONCEPT: A rook pawn has no key squares in the ordinary sense, because the defending king cannot be driven off the queening square — there is no room on the other side of the pawn to be driven towards. WHAT THE SYSTEM DOES: PROVEN DRAW, dtz 0, and the tablebase's own best move is h6 — which leads nowhere. The API does not report key-square. This is the case that catches a detector built on 'the king is in front of the pawn': the geometry is identical to the winning case and the file is the whole difference. Compare `wrong-rook-pawn`, which is the same fact stated about the bishop instead of the king.",
+      "origin_kind": "constructed-test",
+      "concept_role": "negative",
+      "tablebase": {
+        "source": "Lichess tablebase (Syzygy, 7-piece)",
+        "pieces": 3,
+        "wdl": "draw",
+        "dtz": 0,
+        "dtm": 0,
+        "category": "draw",
+        "note": "PROVEN DRAW, dtz 0, and the tablebase's own best move is h6, which leads nowhere. The king stands where a key square would be for any other file."
+      },
+      "false_positive_case": "the-square-in-front-of-a-rook-pawn"
+    }
+  ],
+  "ambiguous_examples": [],
+  "explanations": {
+    "by_level": {
+      "beginner": "If your king can get to one of these squares, the pawn promotes. That is what your king is trying to do.",
+      "intermediate": "Key squares. Take the opposition when it gets you to one; if it does not, head for them directly instead.",
+      "advanced": "The pawn's rank determines them. Averbakh's point applies: the opposition is a means and this is the end.",
+      "master": "Computable from the pawn. In blocked-pawn positions they extend three files either side of the enemy pawn, and the first king to arrive wins one pawn while holding its own."
+    },
+    "by_depth": {
+      "short": "Get the king here and the pawn queens.",
+      "normal": "Key squares: if the king reaches one, the result follows by force. For a pawn on the second to fourth rank they are the square two ranks ahead of it and the squares either side.",
+      "deep": "Squares whose occupation by the king forces a gain. In king and pawn versus king they depend only on the pawn's position and are computable. Their real importance is that they give the opposition a purpose — Averbakh's formulation is that the opposition is a means to an end and the end is penetration to a key square, which is what stops opposition-taking being a ritual. In some positions the correct move ignores the opposition entirely and marches for a key square by a route around the pawn."
+    },
+    "hedge": "",
+    "lesson": "Work out the key squares first. Then the opposition tells you how to get there — or that you should not bother."
+  },
+  "terminology": {
+    "beginner_words": [
+      "the squares that win the game",
+      "get your king here"
+    ],
+    "advanced_words": [
+      "key square",
+      "critical square",
+      "opposition",
+      "rule of the square"
+    ],
+    "avoid": [
+      "always take the opposition"
+    ]
+  },
+  "status": {
+    "stage": "researched",
+    "last_updated": "2026-09-01",
+    "open_questions": [],
+    "audit_notes": []
+  },
+  "id": "key-square",
+  "canonical_name": "Key square",
+  "category": "pawn-endgames",
+  "knowledge_type": "proven-result",
+  "definition_short": "A square such that if a king reaches it, some gain follows by force — usually the promotion of a pawn or the capture of one.",
+  "definition_long": "Squares whose occupation by the king forces a result. In king and pawn versus king they depend only on where the pawn is and are easy to state: for a pawn on the second to fourth rank there are three key squares, two ranks ahead of the pawn and the squares either side of that; for a pawn on the fifth or sixth rank the squares one rank ahead also become key; for a rook pawn the key squares are different again.\n\nTheir importance is that they give the OPPOSITION its purpose. Averbakh's formulation — the opposition is a means to an end, and the end is penetration to a key square — is what stops the opposition being a ritual. If taking the opposition does not lead to a key square, taking it may be pointless; and in some positions the king should ignore the opposition and march for a key square directly.\n\nIn blocked-pawn positions the concept generalises: with a pair of pawns facing each other, the key squares extend three files either side of the opponent's pawn, and the first king to reach one wins the opposing pawn while defending its own.",
+  "sources": [
+    "wikipedia-opposition",
+    "wikipedia-corresponding-squares",
+    "lichess-tablebase"
+  ],
+  "source_confidence": "medium"
+}

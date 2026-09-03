@@ -1,0 +1,274 @@
+{
+  "schema_version": 2,
+  "id": "pin",
+  "canonical_name": "Pin",
+  "alternate_names": [
+    "pinning"
+  ],
+  "historical_names": [],
+  "category": "tactical-motifs",
+  "subcategory": "material-winning motif",
+  "tags": [],
+  "knowledge_type": "tactical-motif",
+  "knowledge_type_note": "Motif (D), mechanically detectable. The interaction with FIDE Art. 3.9.1 makes it a rules matter as well.",
+  "name_status": "established-name",
+  "difficulty": "beginner",
+  "definition_short": "A line piece attacks through a less valuable enemy unit to a more valuable one behind it, so moving the front unit is illegal or costly.",
+  "definition_long": "Only bishops, rooks and queens can pin, because a pin needs a line. The pinned unit stands between the pinning piece and a target behind it.\n\nAn ABSOLUTE pin is against the king: moving the pinned piece is illegal. A RELATIVE pin is against any other piece: moving is legal but loses material.\n\nTwo consequences follow. First, a pinned piece is a poor defender — it may be attacked again and cannot run. Second, and routinely misunderstood: a pinned piece STILL GIVES CHECK and still controls the squares it attacks. FIDE Art. 3.9.1 is explicit that a king is in check 'even if such pieces are constrained from moving to the square occupied by the king because they would then leave or place their own king in check.' A pinned knight defending a square does not defend it against the king, but it does defend it against everything else.",
+  "history": {
+    "attributions": [],
+    "first_documented_source": "informant-encyclopedia-combinations",
+    "year": null,
+    "confidence": "unknown",
+    "notes": "Tactical motifs are descriptive pattern names of long and mostly anonymous usage. The Chess Informant classification is cited as a standard enumeration, not as the origin of the term.",
+    "competing_claims": [],
+    "development": []
+  },
+  "engine_era_status": "unassessed",
+  "engine_era_note": "",
+  "sources": [
+    "informant-encyclopedia-combinations",
+    "wikipedia-chess-tactic",
+    "chesstempo-tactical-motifs",
+    "chesscom-tactics-38"
+  ],
+  "source_confidence": "high",
+  "recognition": {
+    "preconditions": [
+      "A friendly line piece, an enemy unit, and a more valuable enemy unit are collinear, in that order, with no other piece between"
+    ],
+    "indicators_for": [
+      "The target behind is the king (absolute pin)",
+      "The pinned unit is currently defending something",
+      "The pinned unit can be attacked again to win it"
+    ],
+    "indicators_against": [
+      "The pinned piece can capture the pinner",
+      "The defender can interpose a third unit on the line",
+      "The target behind can simply step off the line",
+      "The 'pinned' piece is worth more than the piece behind it — that is a skewer, not a pin"
+    ],
+    "prerequisites": [
+      "check"
+    ],
+    "detector": "findMotifs -> pin",
+    "detectability": "mechanical",
+    "typical_confidence": "high",
+    "false_positive_traps": []
+  },
+  "application": {
+    "typical_plans": [
+      "Attack the pinned piece again with a pawn or a minor piece",
+      "Prevent the pin from being broken before adding attackers"
+    ],
+    "typical_moves": [],
+    "typical_pawn_structures": [],
+    "typical_piece_arrangements": [],
+    "tactical_consequences": [],
+    "strategic_consequences": []
+  },
+  "exceptions": [
+    "A pinned piece still delivers check and still guards squares against non-king units.",
+    "A relative pin can be broken profitably when moving the front piece creates a bigger threat.",
+    "Pinning is not automatically good: a pin can be dissolved and the pinning piece can end up misplaced."
+  ],
+  "limitations": [
+    "Detecting alignment is mechanical; deciding whether the pin is exploitable is not.",
+    "Engine agreement does not establish that a pin explains a move. In a controlled test the same move (d4-d5) was best both with and without the pin; only the margin over alternatives distinguished the two (1.57 vs 0.28).",
+    "TYPICAL_CONFIDENCE RAISED medium -> high, 2026-09-02, and the reason is the schema's own definition of the field: 'how confidently this concept can normally be asserted ONCE ITS PRECONDITIONS HOLD'. This concept's recognition is MECHANICAL and its knowledge type already carries a high ceiling, so once the preconditions hold there is nothing left to be uncertain about - a stalemate is a stalemate, and a fork this base reports is one findMotifs() found, which ARCHITECTURE.md makes the authority and forbids second-guessing. 'Medium' was the default across 32 rule and motif records regardless of detectability, and it was found by measuring what the API reports against what each record permits: twelve concepts were reporting ABOVE their own record. The fix was to make each record its own ceiling in cap(), which then required the records that were wrong to be corrected rather than silently overruled.",
+    "Verified 2026-09-02 by reading blind-chess.html's findMotifs() directly, which is where this concept is detected: the tag arrives from the page and Layer 4 translates it. tools/trap_audit.js reads lib/matchers.js and lib/features.js and cannot see that function, so a condition honoured there reads as unread. This note is the reading. \"The 'pinned' piece is worth more than the piece behind it - that is a skewer, not a pin\" is ENFORCED, and it is the branch that decides which tag is emitted: `if (VAL[l.backP.t] > VAL[l.frontP.t]) pins.push(...) else if (VAL[l.frontP.t] > VAL[l.backP.t]) skewers.push(...)`. Worth noting what falls between: when the two are worth the SAME, neither tag is emitted, so a rook lined up in front of a rook is reported as nothing rather than as the wrong one of the two. The other two indicators_against - interposition, and the rear unit stepping off the line - are not built, and both are properties of the DEFENDER'S next move rather than of the position, which is the class of condition this base has consistently declined to guess at."
+  ],
+  "misconceptions": [],
+  "relationships": {
+    "broader": [],
+    "narrower": [],
+    "related": [
+      "x-ray"
+    ],
+    "contrasting": [
+      "skewer"
+    ],
+    "co_occurring": [],
+    "conflicts": []
+  },
+  "examples": [
+    {
+      "fen": "r3r1k1/2p2pbp/2pp2p1/8/P1q1P3/2N2P2/1PPQ2PP/1R1R2K1 b - - 2 22",
+      "move": "Reb8",
+      "move_uci": "e8b8",
+      "note": "Nimzowitsch-Capablanca, St Petersburg 1914, 22...Reb8 - Capablanca doubling on the b-file, and the detector's reading of what that achieves is a pin: 'the pawn on b2 is pinned to the rook behind it and cannot step aside'. The annotation is about the file rather than the pin - 'his extremely active pieces and PLAY ON THE OPEN B-FILE more than compensate for the structural weakness' - and the pin is what the play on the file consists of. A pin against a ROOK rather than a king is the relative kind, and it is the commoner kind in real games, which is why this is a better master example than a mating-net pin would be. PROVENANCE. The position is a corpus entry - a master game with a verified move list and a named annotator - and the annotator named a DIFFERENT concept there. So this grounds the MASTER-GAME rung and not the human-grounded one: the motif is what this base's own detector reads off the board, and the game is what makes the board real. `attributed_by` is deliberately absent.",
+      "origin_kind": "historical-game",
+      "game": "Nimzowitsch-Capablanca, St Petersburg preliminary 1914",
+      "concept_role": "positive",
+      "side_to_move_benefits": "black",
+      "engine": {
+        "engine_id": "Stockfish 18",
+        "test_level": 3,
+        "depth": 22,
+        "threads": 10,
+        "hash_mb": 4096,
+        "multipv": 3,
+        "best_move": "e8b8",
+        "eval_cp": 107,
+        "mate_in": null,
+        "pv": [],
+        "alternatives": [],
+        "margin_cp": null,
+        "verdict": "supports",
+        "verdict_note": "+1.07 from Black's side and the engine's first choice on a three-line search - the doubling move that creates the pin is also objectively best."
+      }
+    },
+    {
+      "fen": "r3k2r/ppp2ppp/2n5/1B6/3P4/2N5/PPP2PPP/R3K2R w KQkq - 0 1",
+      "note": "Constructed controlled pair, positive half. Bb5 pins Nc6 absolutely against Ke8, so d4-d5 attacks a knight that cannot move.",
+      "origin_kind": "constructed-test",
+      "concept_role": "positive",
+      "side_to_move_benefits": "white",
+      "engine": {
+        "engine_id": "Stockfish 18",
+        "test_level": 2,
+        "depth": 26,
+        "threads": 10,
+        "hash_mb": 4096,
+        "multipv": 3,
+        "best_move": "d4d5",
+        "eval_cp": 726,
+        "mate_in": null,
+        "pv": [],
+        "alternatives": [
+          {
+            "move": "a2a3",
+            "eval_cp": 569,
+            "mate_in": null
+          },
+          {
+            "move": "e1g1",
+            "eval_cp": 531,
+            "mate_in": null
+          }
+        ],
+        "margin_cp": 157,
+        "verdict": "supports",
+        "verdict_note": "d5 is best at +7.26, 1.57 clear of the next move (a3, +5.12... ranked 2nd at +5.69). The pinned knight cannot step away."
+      }
+    },
+    {
+      "fen": "rnbqkbnr/p2p3p/2p1ppp1/1p1B4/1P2P3/8/P1PPQPPP/RNB1K1NR w KQkq - 0 6",
+      "note": "A clean instance: the detector reports pin and nothing else, for the move Bb3. Two things are verified here and a third is not. VERIFIED: findMotifs() in blind-chess.html reports the motif — and that detector, not this system, is the authority on whether a motif is present. ALSO VERIFIED: Bb3 is the recorded solution of a shipped puzzle, and tools/generate_puzzles.js only admits a position when one move is objectively best by a wide margin at confirmation depth, so the move carries engine backing by construction rather than by a separate search here. NOT claimed: that the motif is the whole reason the move wins. Provenance: the puzzle corpus is engine self-play — a real position from a real game between engines, not a master game.",
+      "origin_kind": "puzzle",
+      "concept_role": "supports",
+      "side_to_move_benefits": "neither",
+      "move": "Bb3",
+      "engine": {
+        "engine_id": "Stockfish (via tools/generate_puzzles.js at confirmation depth)",
+        "test_level": 2,
+        "depth": null,
+        "threads": null,
+        "hash_mb": null,
+        "multipv": null,
+        "best_move": "Bb3",
+        "eval_cp": null,
+        "mate_in": null,
+        "pv": [],
+        "alternatives": [],
+        "margin_cp": null,
+        "verdict": "supports",
+        "verdict_note": "Inherited validation: this position ships as a puzzle, and the generator's standard is that exactly one move is best by at least GAP_MIN at confirmation depth, re-checked deeper by tools/verify_puzzles.js. The move is therefore engine-verified as best without this base running its own search. The motif label comes from findMotifs, not from the engine — the two are independent and both had to agree for this to be recorded."
+      }
+    }
+  ],
+  "counterexamples": [
+    {
+      "fen": "3n4/8/8/3k4/8/8/8/R3K3 w - - 0 1",
+      "move": "Rd1+",
+      "move_uci": "a1d1",
+      "note": "THE SAME THREE MEN WITH TWO OF THEM SWAPPED. On the d-file a rook, a knight and a king: with the knight in front it is a PIN and the knight cannot legally move; with the KING in front - this position - it is a skewer, the king must move, and the knight falls behind it. Nothing else on the board changes and the name of the motif does. The page's own findMotifs tags the first `pin` and this one `skewer`, and this base does not second-guess it.",
+      "origin_kind": "constructed-test",
+      "concept_role": "negative",
+      "side_to_move_benefits": "white",
+      "controlled_pair_with": "3k4/8/8/3n4/8/8/8/R3K3 w - - 0 1"
+    },
+    {
+      "fen": "4rrk1/8/8/8/8/8/8/4RRK1 w - - 0 1",
+      "move_uci": "e1e8",
+      "note": "Registered false-positive case `a-pin-the-pinned-piece-dissolves-by-capture`, kept on the record as well as in tests/false_positive_cases.json so that the concept carries its own negative evidence. THE SURFACE PATTERN IS PRESENT: After Rxe8, White's rook on e8 attacks the black rook on f8 with the black king behind it on g8. Line piece, enemy unit, more valuable enemy unit, collinear, nothing between — the record's precondition, word for word. WHY IT IS NOT THE CONCEPT: This record's first indicator_against: \"The pinned piece can capture the pinner.\" The rook on f8 does exactly that, and comes out even. The detector's sentence — \"the rook on f8 is pinned to the king behind it and cannot step aside\" — is true and misleads, because a reader takes 'cannot step aside' to mean the rook is stuck. WHAT THE SYSTEM DOES: Reported at HIGH confidence until a guard was written. The geometry is genuinely there, which is why findMotifs() is right to see it; whether it MEANS anything is the concept record's question and the record answers it. The guard reads the pinned square out of the detector's own sentence rather than re-deriving the pin — two implementations of one motif are how the two start to disagree — and suppresses the report when the pinned piece has a legal capture of the pinner that SEE does not punish. It fails open: if the position cannot be rebuilt or the sentence is not in that shape, the motif is reported, because a guard that cannot run has no standing to overrule the detector. Rate: pin fell to 9.0% of the 788 shipped puzzles.",
+      "origin_kind": "constructed-test",
+      "concept_role": "negative",
+      "false_positive_case": "a-pin-the-pinned-piece-dissolves-by-capture"
+    }
+  ],
+  "ambiguous_examples": [
+    {
+      "fen": "r4rk1/ppp2ppp/2n5/1B6/3P4/2N5/PPP2PPP/R3K2R w KQ - 0 1",
+      "note": "Constructed controlled pair, negative half. IDENTICAL except the black king has castled to g8, so Nc6 is not pinned (verified with python-chess is_pinned: True in the positive position, False here).",
+      "origin_kind": "constructed-test",
+      "concept_role": "ambiguous",
+      "side_to_move_benefits": "white",
+      "engine": {
+        "engine_id": "Stockfish 18",
+        "test_level": 2,
+        "depth": 26,
+        "threads": 10,
+        "hash_mb": 4096,
+        "multipv": 3,
+        "best_move": "d4d5",
+        "eval_cp": 540,
+        "mate_in": null,
+        "pv": [],
+        "alternatives": [
+          {
+            "move": "a2a3",
+            "eval_cp": 512,
+            "mate_in": null
+          },
+          {
+            "move": "e1g1",
+            "eval_cp": 483,
+            "mate_in": null
+          }
+        ],
+        "margin_cp": 28,
+        "verdict": "ambiguous",
+        "verdict_note": "IMPORTANT NEGATIVE RESULT. d5 is STILL the best move here (+5.40) — the pin is not what makes it best. What changes is (a) the value of the move, +7.26 vs +5.40, and (b) how clearly best it is: a 1.57 margin over the runner-up with the pin, only 0.28 without it. So 'the engine picked this move' is NOT evidence that the pin concept applies; using best-move agreement as the test would produce a false positive here. Reliable signals are the margin over alternatives and the paired eval delta."
+      }
+    }
+  ],
+  "explanations": {
+    "by_level": {
+      "beginner": "That piece cannot move, because moving it would expose the more valuable piece behind it.",
+      "intermediate": "A pin. The pinned piece is stuck and makes a poor defender, so you can pile up on it.",
+      "advanced": "Absolute pin against the king (illegal to move) or relative pin (legal but costly). Remember a pinned piece still gives check."
+    },
+    "by_depth": {
+      "short": "That piece cannot move without exposing something more valuable.",
+      "normal": "A pin: the {piece} on {square} is stuck, because moving it would expose the {target} behind it. A pinned piece is a poor defender, so it can often be attacked again.",
+      "deep": "A line piece attacks through a less valuable enemy unit to a more valuable one behind it. Absolute against the king, where moving is illegal; relative against anything else, where moving is legal but costly. Two consequences follow, and the second is routinely misunderstood: a pinned piece makes a poor defender and can be piled on, but it STILL GIVES CHECK and still controls its squares against everything except the king — FIDE Art. 3.9.1 is explicit about this. Note also that engine testing showed a pin does not necessarily change which move is best, only how clearly best it is."
+    },
+    "hedge": "",
+    "lesson": ""
+  },
+  "terminology": {
+    "beginner_words": [
+      "stuck",
+      "cannot move away"
+    ],
+    "advanced_words": [
+      "pin",
+      "absolute pin",
+      "relative pin",
+      "pinned piece"
+    ],
+    "avoid": [
+      "a pinned piece cannot do anything"
+    ]
+  },
+  "status": {
+    "stage": "validated",
+    "last_updated": "2026-09-01",
+    "open_questions": [],
+    "audit_notes": [
+      "2026-09-01 audit: flagged for being promoted while relying on a source carrying an access caveat. REVIEWED AND ACCEPTED — the promotion rests on ENGINE evidence, not on the unread text; the unread source supplies the concept's name and classification only. The caveat stands and is the reason this is not promoted further to 'ready'.",
+      "2026-09-01: detector field named 'lineAlignment', which does not exist anywhere in the codebase. The audit's hardcoded whitelist had been accepting it. Repointed at real code, or marked as proposed where nothing implements it."
+    ]
+  }
+}

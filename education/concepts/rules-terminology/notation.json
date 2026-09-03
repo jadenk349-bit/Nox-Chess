@@ -1,0 +1,172 @@
+{
+  "schema_version": 2,
+  "alternate_names": [],
+  "historical_names": [],
+  "tags": [
+    "rules",
+    "notation",
+    "nox-relevant"
+  ],
+  "subcategory": "recording",
+  "difficulty": "beginner",
+  "knowledge_type_note": "Algebraic notation is defined by the FIDE Laws; the other systems here are conventions, and are labelled as such.",
+  "name_status": "established-name",
+  "history": {
+    "attributions": [],
+    "first_documented_source": "fide-laws-appendix-c",
+    "year": null,
+    "confidence": "medium",
+    "notes": "Algebraic notation displaced descriptive notation in English-language literature during the 1970s and 1980s. FIDE recognises only algebraic for official play.",
+    "competing_claims": [],
+    "development": [
+      {
+        "period": "to the 1970s",
+        "note": "Descriptive notation standard in English-language chess literature."
+      },
+      {
+        "period": "1970s-1980s",
+        "note": "Algebraic displaces it; FIDE recognises algebraic alone."
+      },
+      {
+        "period": "computer era",
+        "note": "UCI, FEN and PGN become the machine-readable layer alongside it."
+      }
+    ]
+  },
+  "engine_era_status": "not-applicable",
+  "engine_era_note": "UCI and FEN exist because engines needed unambiguous, position-independent formats. They are additions rather than replacements.",
+  "recognition": {
+    "preconditions": [
+      "A move or position is being written down"
+    ],
+    "indicators_for": [],
+    "indicators_against": [],
+    "prerequisites": [],
+    "detector": "toSAN / uciOf / fenOf in blind-chess.html",
+    "detectability": "mechanical",
+    "typical_confidence": "high",
+    "false_positive_traps": [
+      "SAN is contextual: the same text means different moves in different positions, and disambiguation depends on what else is on the board. It cannot be parsed without a position.",
+      "Descriptive notation named a square differently for each player, so a quotation converted from it can silently name the wrong square. Treat converted historical lines with care.",
+      "A FEN without the castling, en passant and clock fields is not a position - it is a picture of one."
+    ]
+  },
+  "application": {
+    "typical_plans": [],
+    "typical_moves": [],
+    "typical_pawn_structures": [],
+    "typical_piece_arrangements": [],
+    "tactical_consequences": [],
+    "strategic_consequences": [
+      "In blindfold play notation is the interface, not the record"
+    ]
+  },
+  "exceptions": [
+    "FIDE recognises algebraic only; the other systems are conventions, however universal.",
+    "PGN carries game metadata as well as moves and is a container format rather than a notation."
+  ],
+  "limitations": [
+    "This record covers what the systems are, not how to teach reading them - the course in blind-chess.html does that."
+  ],
+  "misconceptions": [
+    "That UCI and algebraic are the same thing written differently. UCI is position-independent and algebraic is not.",
+    "That a FEN is just the board. Half its fields are about rights and counters that the board cannot show."
+  ],
+  "relationships": {
+    "broader": [],
+    "narrower": [],
+    "related": [
+      "transposition",
+      "board-geometry",
+      "ranks-files-diagonals",
+      "blindfold-representation"
+    ],
+    "contrasting": [],
+    "co_occurring": [],
+    "conflicts": []
+  },
+  "examples": [
+    {
+      "fen": "4k3/8/8/8/8/5N2/8/1N2K3 w - - 0 1",
+      "move": "Nbd2",
+      "move_uci": "b1d2",
+      "note": "Two knights that can both reach d2, so the move must be written Nbd2 rather than Nd2. Algebraic notation names a move by its destination and adds only as much as is needed to make it unique, which means the NAME of a move depends on the whole position and not on the piece that makes it. The page's own toSAN is asked for both halves of this pair and returns Nbd2 here and Nd2 in the other.",
+      "origin_kind": "constructed-test",
+      "concept_role": "supports",
+      "side_to_move_benefits": "neither",
+      "controlled_pair_with": "4k3/8/8/8/8/8/8/1N2K3 w - - 0 1"
+    }
+  ],
+  "counterexamples": [
+    {
+      "fen": "4k3/8/8/8/8/8/8/1N2K3 w - - 0 1",
+      "move": "Nd2",
+      "move_uci": "b1d2",
+      "note": "The same knight making the same move on an otherwise identical board, written Nd2 - because the knight on f3 is not there and no other knight can reach the square. A reader who learns 'Nbd2' as the name of this move has learned something about the position rather than about the move, and would write it wrongly here.",
+      "origin_kind": "constructed-test",
+      "concept_role": "negative",
+      "side_to_move_benefits": "neither",
+      "controlled_pair_with": "4k3/8/8/8/8/5N2/8/1N2K3 w - - 0 1"
+    },
+    {
+      "fen": "4k3/8/8/8/8/5N2/8/1N1K4 w - - 0 1",
+      "note": "Registered false-positive case `an-ambiguous-san-is-not-a-move`, kept on the record as well as in tests/false_positive_cases.json so that the concept carries its own negative evidence. THE SURFACE PATTERN IS PRESENT: 'Nd2' looks like a complete move. There is a knight, there is a square, the square is empty and reachable. WHY IT IS NOT THE CONCEPT: This record's first trap: \"SAN is contextual: the same text means different moves in different positions, and disambiguation depends on what else is on the board.\" Two knights reach d2 here, so 'Nd2' names two moves and therefore none. WHAT THE SYSTEM DOES: This base's own toSAN() writes the three moves to d2 as Nfd2, Nbd2 and Kd2 — it disambiguates by file because it must, and it is the same function the game writes its move list with. The case exists because the failure here is silent: a reader, a database or a converted quotation that drops the disambiguating letter produces text that looks like notation and denotes nothing, and no error is raised anywhere.",
+      "origin_kind": "constructed-test",
+      "concept_role": "negative",
+      "false_positive_case": "an-ambiguous-san-is-not-a-move"
+    }
+  ],
+  "ambiguous_examples": [],
+  "explanations": {
+    "by_level": {
+      "beginner": "Squares are named by file letter and rank number — e4, g8 — and pieces by a letter, so Nf3 means a knight to f3.",
+      "intermediate": "Algebraic for reading, UCI for engines, FEN for positions. Algebraic needs a position to make sense of it; UCI does not.",
+      "advanced": "A FEN's last four fields — castling, en passant, and the two clocks — are precisely the state a board cannot show.",
+      "master": "Descriptive notation named squares from each player's own side, which is why converted historical quotations need checking."
+    },
+    "by_depth": {
+      "short": "How moves and positions are written down.",
+      "normal": "Algebraic notation (Nf3) is the standard and the only one FIDE recognises; UCI (g1f3) gives the origin square too and is what engines speak; FEN records a whole position including castling and en passant rights.",
+      "deep": "Four systems answering different questions. Algebraic is written from the reader's side so a square has one name for both players, and is contextual - it needs a position to be interpreted, and disambiguation when two pieces can reach the square. UCI and long algebraic give the origin as well, so they are unambiguous without a position, at the cost of being unreadable as chess. FEN records a position rather than a move, and half its fields cover what a board cannot show: castling rights, en passant, and the clocks. Descriptive notation, used until the 1970s, named squares from each player's own side, so the same square had two names."
+    },
+    "hedge": "",
+    "lesson": "Algebraic needs a position to mean anything; UCI does not. Pick the one that matches what you have."
+  },
+  "terminology": {
+    "beginner_words": [
+      "writing the moves down",
+      "e4",
+      "Nf3"
+    ],
+    "advanced_words": [
+      "algebraic",
+      "SAN",
+      "UCI",
+      "FEN",
+      "PGN",
+      "descriptive notation",
+      "disambiguation"
+    ],
+    "avoid": [
+      "notation is just shorthand"
+    ]
+  },
+  "status": {
+    "stage": "researched",
+    "last_updated": "2026-09-01",
+    "open_questions": [],
+    "audit_notes": []
+  },
+  "id": "notation",
+  "canonical_name": "Chess notation",
+  "category": "notation",
+  "knowledge_type": "official-rule",
+  "definition_short": "The systems for writing down a position or a move.",
+  "definition_long": "Four systems matter, and they answer different questions.\n\nALGEBRAIC (SAN) is the only notation FIDE recognises for official play. Files a-h, ranks 1-8, pieces by an initial letter, and — the property that matters — it is written from the READER's point of view rather than a player's, so a square has one name for both sides. It is also CONTEXTUAL: Nf3 names a move only relative to a position, and needs disambiguation (Nbd2) when two pieces of a kind can reach the square.\n\nLONG ALGEBRAIC and UCI give the origin square as well (e2e4), which makes them unambiguous without knowing the position. UCI is what engines speak, and adds a promotion letter (e7e8q). The trade is that a UCI move is unreadable as chess and a SAN move is unreadable without a board.\n\nFEN records a POSITION rather than a move: piece placement, side to move, castling rights, en passant target, halfmove clock, fullmove number. Those last four fields are exactly the state a position cannot be reconstructed without, which is the same list that makes transposition work.\n\nDESCRIPTIVE notation (P-K4) is historical and was written from each player's own side, so the same square had two names. Reading pre-1970s literature requires it, and this base flags quotations that may have passed through a conversion.\n\nIN THIS CODEBASE all four appear: `toSAN` for display, `uciOf` for the engine and the wire protocol, `fenOf`/`stateFromFEN` for positions, and `parseMoveIn` for reading what a player types. That is not incidental — a blindfold game is played in notation, so notation IS the interface here rather than a way of recording it afterwards.",
+  "sources": [
+    "fide-laws-appendix-c",
+    "fide-laws-2023",
+    "wikipedia-chess-notation"
+  ],
+  "source_confidence": "high"
+}

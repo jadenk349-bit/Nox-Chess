@@ -1,0 +1,249 @@
+{
+  "schema_version": 2,
+  "alternate_names": [
+    "assessing a position",
+    "the elements"
+  ],
+  "historical_names": [],
+  "tags": [
+    "positional",
+    "evaluation",
+    "classical"
+  ],
+  "subcategory": "method",
+  "difficulty": "intermediate",
+  "knowledge_type_note": "A method for assessing positions, originating in a specific theoretical claim about how chess games are won.",
+  "name_status": "established-name",
+  "history": {
+    "attributions": [
+      {
+        "relation": "originated-by",
+        "person": "Wilhelm Steinitz",
+        "year": 1873,
+        "note": "Changed his style from romantic to classical in 1873 and formulated the theory the elements serve.",
+        "confidence": "high"
+      },
+      {
+        "relation": "systematized-by",
+        "person": "David Hooper",
+        "year": 1984,
+        "note": "The seven numbered propositions as commonly quoted come from Hooper's article in the British Chess Magazine.",
+        "confidence": "medium"
+      },
+      {
+        "relation": "later-associated-with",
+        "person": "Emanuel Lasker",
+        "year": null,
+        "note": "His maxim 'no combination without a considerable plus, no considerable plus without a combination' states the same doctrine from the tactical side.",
+        "confidence": "medium"
+      },
+      {
+        "relation": "originated-by",
+        "person": "Louis Paulsen",
+        "year": null,
+        "note": "Credited by the Exeter Chess Club with FIRST indicating proposition 4 - that an attack from an equal position can be refuted by correct defence - and described there as the progenitor of the fully formed theory of Steinitz. He declared, unfashionably for the time, that all gambits can be defended, and played that way. Recorded because the theory is normally credited wholly to Steinitz; the claim rests on a single club source and is not verified further.",
+        "confidence": "low"
+      }
+    ],
+    "first_documented_source": "exeter-steinitz-accumulation",
+    "year": 1873,
+    "confidence": "medium",
+    "notes": "The element lists as circulated are explicitly a REFINED version rather than Steinitz's own words - one source consulted here says so directly - so this record credits Steinitz with the theory and treats the itemised lists as a later tidying. Hooper's propositions were quoted at second hand through the Exeter page, not read in the British Chess Magazine. A single source consulted here credits Louis Paulsen with first indicating the fourth proposition, making him the theory's progenitor rather than Steinitz alone. That is recorded at low confidence because only one source states it.",
+    "competing_claims": [],
+    "development": [
+      {
+        "period": "1873",
+        "note": "Steinitz turns from the romantic style to positional assessment."
+      },
+      {
+        "period": "1984",
+        "note": "Hooper's seven-proposition summary becomes the standard formulation."
+      },
+      {
+        "period": "engine era",
+        "note": "Evaluation becomes a number, and the elements survive as the vocabulary for explaining it."
+      }
+    ]
+  },
+  "engine_era_status": "useful-with-common-exceptions",
+  "engine_era_note": "Engines evaluate positions numerically without decomposing them into named elements, and the modern neural-network evaluation is not element-based at all. The elements survive as the language humans use to EXPLAIN an evaluation rather than as the means of producing one - which is exactly the role they play in this system. Steinitz's central claim has aged well: engine analysis of the initial position supports equilibrium and games decided by error rather than by winning attacks.",
+  "recognition": {
+    "preconditions": [
+      "A position to be assessed"
+    ],
+    "indicators_for": [],
+    "indicators_against": [],
+    "prerequisites": [],
+    "detector": null,
+    "detectability": "heuristic",
+    "typical_confidence": "low",
+    "false_positive_traps": [
+      "Listing elements is not evaluating. A position with several observations attached and no judgement about which dominates has not been assessed.",
+      "The permanent/temporary division is about durability, not importance. A temporary advantage can be decisive precisely because it is about to expire.",
+      "This system should use the elements to explain an engine's number, never to argue against it."
+    ]
+  },
+  "application": {
+    "typical_plans": [
+      "Assess before planning, and let the plan follow from the assessment",
+      "Attack where you are strongest or the opponent is weakest",
+      "Convert temporary advantages before they expire; bank permanent ones"
+    ],
+    "typical_moves": [],
+    "typical_pawn_structures": [],
+    "typical_piece_arrangements": [],
+    "tactical_consequences": [
+      "Steinitz's rule that a combination requires a pre-existing advantage, which Lasker restated"
+    ],
+    "strategic_consequences": [
+      "Small advantages accumulate into decisive ones"
+    ]
+  },
+  "exceptions": [
+    "The theory's claim that attacks cannot succeed against correct defence in an equal position is a statement about correct defence, not about practical play, where unsound attacks win regularly.",
+    "The element lists are a later refinement and not Steinitz's own enumeration."
+  ],
+  "limitations": [
+    "The elements organise a search; they do not weigh the results, and the weighing is the skill.",
+    "Hooper's propositions were consulted at second hand.",
+    "This base has not tested any element list against engine evaluation, and does not claim the lists are complete or correctly weighted."
+  ],
+  "misconceptions": [
+    "That positional evaluation means counting material and adding adjustments. King safety and threats can make material irrelevant.",
+    "That Steinitz's lists are his own words. What circulates is a later refinement.",
+    "That an advantage can be accumulated indefinitely. Steinitz's seventh proposition says a sufficient advantage must be acted on or it dissipates."
+  ],
+  "relationships": {
+    "broader": [],
+    "narrower": [],
+    "related": [
+      "static-vs-dynamic",
+      "planning",
+      "worst-placed-piece",
+      "classical-school",
+      "material-imbalance",
+      "king-safety",
+      "space",
+      "piece-activity",
+      "two-weaknesses"
+    ],
+    "contrasting": [],
+    "co_occurring": [
+      "planning"
+    ],
+    "conflicts": []
+  },
+  "examples": [
+    {
+      "fen": "r1r3k1/p2n1ppp/2p1b3/1q1p4/N2Q4/5PP1/PP2PR1P/2R2BK1 w - - 4 20",
+      "note": "Rubinstein-Salwe, Lodz 1908 at move 20, and it is here because the corpus annotation is itself a worked positional evaluation rather than a comment on a move: 'The bishop on e6 is bad, blocked by its own pawns. The knight was already traded off. The rooks have no open files. The queen is being chased. Black is completely passive.' Five features named, none of them material, and a verdict drawn from them. That is the method the record describes, performed by an annotator on a real board. The engine's number is the check on it: material is level and the position is not.",
+      "origin_kind": "historical-game",
+      "game": "Rubinstein-Salwe, Lodz 1908",
+      "concept_role": "positive",
+      "attributed_by": "corpus entry rubinstein-salwe-1908-20-bad-bishop",
+      "engine": {
+        "engine_id": "Stockfish 18",
+        "test_level": 3,
+        "depth": 22,
+        "threads": 10,
+        "hash_mb": 4096,
+        "multipv": 1,
+        "best_move": "e2e3",
+        "eval_cp": 34,
+        "mate_in": null,
+        "pv": [],
+        "alternatives": [],
+        "margin_cp": null,
+        "verdict": "supports",
+        "verdict_note": "+0.34 with material level. The evaluation the annotator reached from five static features and the evaluation the engine reaches from a twenty-two-ply search point the same way, which is the modest claim this record can make: the method is sound, and it is not precise."
+      }
+    }
+  ],
+  "counterexamples": [
+    {
+      "fen": "r2k1b1r/1pp1q1p1/7p/pbPBn3/3Q1p2/P7/1B3PPP/2KR3R w - - 0 21",
+      "note": "Registered false-positive case `a-position-a-feature-scan-cannot-read`, kept on the record as well as in tests/false_positive_cases.json so that the concept carries its own negative evidence. THE SURFACE PATTERN IS PRESENT: An ordinary middlegame with pieces developed, a queen on d4, bishops on b2 and d5, and no obvious weakness on either side. A positional evaluation would count the features and report a roughly balanced position with a small pull. WHY IT IS NOT THE CONCEPT: The position is decided by a single move. Bxb7+ uncovers a check and wins on the spot: +4.67 at depth 22, first choice by nearly four pawns. Nothing in the static features carries that; the concept's method — identify durable features, weigh them, draw a verdict — is the wrong instrument for a position whose answer is one move deep. WHAT THE SYSTEM DOES: Shipped puzzle mi-f2e1be14e7. The API reports `battery`, `bad-bishop`, `king-safety` and `center-control` — a perfectly reasonable feature scan — and does not claim to have evaluated the position. That separation is the point: this record has no matcher, and the reason on the record is that a positional evaluation is a JUDGEMENT assembled from features rather than a feature, so reporting the features is the honest half of it. This base's ambiguous example for the same record is the opposite failure, Adams-Kasparov, where the features say one thing and the truth is +2.12 the other way.",
+      "origin_kind": "puzzle",
+      "concept_role": "negative",
+      "false_positive_case": "a-position-a-feature-scan-cannot-read"
+    }
+  ],
+  "ambiguous_examples": [
+    {
+      "fen": "br3rk1/2q2ppP/p2pp3/2n1b1BP/1n1NP3/2N2P2/1PPQB3/1K4RR b - - 0 21",
+      "move": "Kxh7",
+      "move_uci": "g8h7",
+      "note": "Adams-Kasparov, Linares 2005. Every static feature a positional evaluation would count says Black is in trouble: the king is about to step onto an open h-file in front of a bishop on g5, two rooks and a queen; White has a pawn on h7 and one on h5; the black king's cover is being dismantled. The evaluation is +2.12 FOR BLACK, and the engine's own first move is taking the pawn. The annotation says the decision was made by calculation rather than by judgement - 'his king may look exposed, but in actuality, there is no immediate danger.' Filed as ambiguous because this record's method is not wrong in general and is wrong here, and the position gives no way to tell which case you are in from the features alone. This base carries the same board as `king-attack`'s NEGATIVE and `modern-dynamic`'s POSITIVE.",
+      "origin_kind": "historical-game",
+      "game": "Adams-Kasparov, Linares 2005 (round 12)",
+      "concept_role": "ambiguous",
+      "attributed_by": "corpus entry adams-kasparov-2005-21Kxh7-king-attack-negative",
+      "engine": {
+        "engine_id": "Stockfish 18",
+        "test_level": 3,
+        "depth": 24,
+        "threads": 10,
+        "hash_mb": 4096,
+        "multipv": 1,
+        "best_move": "g8h7",
+        "eval_cp": 212,
+        "mate_in": null,
+        "pv": [],
+        "alternatives": [],
+        "margin_cp": null,
+        "verdict": "ambiguous",
+        "verdict_note": "+2.12 from Black's side, and the engine's own first move is the one every static feature argues against. The largest gap in this base between what a feature scan reports and what the position is worth."
+      }
+    }
+  ],
+  "explanations": {
+    "by_level": {
+      "beginner": "Judge a position by more than material: is the king safe, are the pawns healthy, are the pieces doing anything?",
+      "intermediate": "Assess in order - king safety, material, threats, activity, pawn structure, space - because the first two can make the rest irrelevant.",
+      "advanced": "Separate permanent advantages from temporary ones. Temporary advantages must be used before they expire.",
+      "master": "Steinitz's point was theoretical, not procedural: equilibrium holds until someone errs, so an attack without a pre-existing advantage should fail."
+    },
+    "by_depth": {
+      "short": "Judge a position by its elements, not by material.",
+      "normal": "Positional evaluation: assessing a position by breaking it into elements - king safety, material, threats, piece activity, pawn structure and open lines, space - and dividing the advantages found into permanent ones, which can be banked, and temporary ones, which must be used before they expire.",
+      "deep": "The method began as a theory rather than a checklist. Steinitz's propositions start from equilibrium and reach a striking conclusion: correct play maintains it and draws, so a player wins only through an opponent's error and there is no such thing as a winning move. An attack on a position still in equilibrium must fail and leave the attacker worse for trying, so one should not attack without an advantage - and, the proposition that stops this being mere caution, once a sufficient advantage exists one MUST attack or it dissipates. The elements serve that argument, divided by durability into permanent advantages such as material, weak enemy pawns and the bishop pair, and temporary ones such as development, centralisation and space. What the method does not supply is priority, and priority is the skill."
+    },
+    "hedge": "",
+    "lesson": "Assess before you plan, and decide which single factor dominates - the list organises the search, it does not answer it."
+  },
+  "terminology": {
+    "beginner_words": [
+      "is the king safe",
+      "are the pieces doing anything"
+    ],
+    "advanced_words": [
+      "the elements",
+      "permanent and temporary advantages",
+      "accumulation",
+      "equilibrium"
+    ],
+    "avoid": [
+      "evaluation means counting material"
+    ]
+  },
+  "status": {
+    "stage": "researched",
+    "last_updated": "2026-09-01",
+    "open_questions": [],
+    "audit_notes": []
+  },
+  "id": "positional-evaluation",
+  "canonical_name": "Positional evaluation",
+  "category": "positional-evaluation",
+  "knowledge_type": "strategic-principle",
+  "definition_short": "Judging a position by breaking it into elements - king safety, material, pawn structure, piece activity, space - rather than by counting material.",
+  "definition_long": "The method that turned chess from a game of attacks into a game of assessment, and it began as a theory rather than a checklist.\n\nSTEINITZ'S ACCUMULATION THEORY, in Hooper's seven propositions, is the argument the elements serve. It begins with equilibrium at the start of the game and reaches a startling conclusion: correct play by both sides maintains that equilibrium and draws, so a player can win only as a consequence of an error — 'there is no such thing as a winning move'. An attack against a position still in equilibrium must fail against correct defence and leave the attacker worse for having tried. Therefore one must not attack until an advantage exists, and — the proposition that stops the theory being merely cautious — once a sufficient advantage HAS been obtained, one MUST attack, or it dissipates.\n\nTHE ELEMENTS follow from that, and are divided by durability. PERMANENT advantages: material, a bad enemy king position, passed pawns, weak enemy pawns, strong and weak squares, pawn islands, a strong pawn centre, control of a file, rank or diagonal, and the bishop pair. TEMPORARY advantages: bad piece placement, inharmonious pieces, a lead in development, centralisation, and space. The division is the same one this base records as static versus dynamic, and it carries the same practical consequence: temporary advantages must be used before they expire, permanent ones can be banked.\n\nTHE MODERN WORKING ORDER is a short list applied consistently: king safety, material, threats, piece activity, pawn structure and the open lines it creates, and space. The order matters more than the contents, because king safety and immediate threats can make everything below them irrelevant.\n\nWHAT EVALUATION DOES NOT SUPPLY is priority. A position usually contains several valid observations at once, and knowing which one dominates is the skill; the element list organises the search rather than answering it.",
+  "sources": [
+    "exeter-steinitz-accumulation",
+    "hooper-steinitz-theory",
+    "chesswise-strategic-elements",
+    "thechessworld-planning",
+    "exeter-theory-of-steinitz"
+  ],
+  "source_confidence": "medium"
+}

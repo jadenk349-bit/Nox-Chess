@@ -1,0 +1,244 @@
+{
+  "schema_version": 2,
+  "alternate_names": [
+    "concrete play",
+    "the modern school"
+  ],
+  "historical_names": [],
+  "tags": [
+    "history",
+    "schools",
+    "engine-era"
+  ],
+  "subcategory": "school",
+  "difficulty": "advanced",
+  "knowledge_type_note": "A description of how top-level play changed, and a thesis about why. The thesis is attributable and contestable.",
+  "name_status": "established-name",
+  "history": {
+    "attributions": [
+      {
+        "relation": "popularized-by",
+        "person": "John Watson",
+        "year": 1998,
+        "note": "Secrets of Modern Chess Strategy argues that concrete analysis over rule-based thinking is the core of modern strategy. Cited at second hand here, not read.",
+        "confidence": "medium"
+      },
+      {
+        "relation": "later-associated-with",
+        "person": "Alexander Kotov",
+        "year": null,
+        "note": "His own account attributes his progress to clear analysis of variations rather than to principles.",
+        "confidence": "medium"
+      }
+    ],
+    "first_documented_source": "watson-secrets-modern-strategy",
+    "year": 1998,
+    "confidence": "low",
+    "notes": "A thesis rather than an event, and recorded at low confidence because the primary source was not read directly. The corroboration from the cognitive-psychology literature is independent of the chess literature, which is what makes it worth recording at all.",
+    "competing_claims": [],
+    "development": [
+      {
+        "period": "classical and hypermodern",
+        "note": "Play organised around principles and structural advantages."
+      },
+      {
+        "period": "mid-20th century Soviet school",
+        "note": "Concrete analysis becomes the deciding method."
+      },
+      {
+        "period": "engine era",
+        "note": "Engines reward and intensify concreteness, and make principles checkable."
+      }
+    ]
+  },
+  "engine_era_status": "substantially-revised-by-engines",
+  "engine_era_note": "Engines are the extreme case of the tendency this concept describes: pure concrete calculation with no principles at all, willing to break every classical rule when a line supports it. They did not start the shift but they settled it.",
+  "recognition": {
+    "preconditions": [
+      "A position where a principle and a concrete line disagree"
+    ],
+    "indicators_for": [
+      "A move that breaks a classical rule and is supported by a line",
+      "Dynamic assets with an expiry date being spent rather than banked"
+    ],
+    "indicators_against": [],
+    "prerequisites": [
+      "classical-school",
+      "hypermodern-school"
+    ],
+    "detector": null,
+    "detectability": "human-only",
+    "typical_confidence": "low",
+    "false_positive_traps": [
+      "This describes a historical tendency, not a property of a position, and must not be attached to a move.",
+      "'Modern play ignores principles' is an overstatement of the thesis. Principles remain the fastest route to a reasonable move; what changed is which has the final word.",
+      "A move breaking a classical rule is not thereby modern or good. It needs the concrete line that justifies it."
+    ]
+  },
+  "application": {
+    "typical_plans": [
+      "Check the principle against a concrete line before trusting it",
+      "Treat dynamic advantages as assets to be spent before they expire"
+    ],
+    "typical_moves": [],
+    "typical_pawn_structures": [],
+    "typical_piece_arrangements": [],
+    "tactical_consequences": [],
+    "strategic_consequences": [
+      "Structural concessions are accepted far more readily than classical teaching allowed, when a line supports them"
+    ]
+  },
+  "exceptions": [
+    "In quiet positions with no concrete content the classical method is not merely adequate but correct.",
+    "Concrete analysis is expensive; below master level the principles do most of the work."
+  ],
+  "limitations": [
+    "A thesis about a trend, argued by identifiable people rather than measured.",
+    "The primary source for the thesis was not read directly."
+  ],
+  "misconceptions": [
+    "That modern play has abandoned principles. It has demoted them from deciders to orientation.",
+    "That engines caused the shift. It predates strong engines, which rewarded and settled it."
+  ],
+  "relationships": {
+    "broader": [],
+    "narrower": [],
+    "related": [
+      "classical-school",
+      "hypermodern-school",
+      "soviet-school",
+      "static-vs-dynamic",
+      "calculation",
+      "initiative",
+      "compensation",
+      "positional-evaluation"
+    ],
+    "contrasting": [
+      "classical-school"
+    ],
+    "co_occurring": [],
+    "conflicts": []
+  },
+  "examples": [
+    {
+      "fen": "br3rk1/2q2ppP/p2pp3/2n1b1BP/1n1NP3/2N2P2/1PPQB3/1K4RR b - - 0 21",
+      "move": "Kxh7",
+      "move_uci": "g8h7",
+      "note": "Adams-Kasparov, Linares 2005, 21...Kxh7 - Watson's thesis with a board under it. Every principle in the classical vocabulary says do not take that pawn: the king steps onto an open h-file in front of a bishop on g5, two rooks and a queen. The annotation is explicit that the decision was made by calculation rather than by judgement: 'Black sees no threats following either gxf7 or gxh7. His king may look exposed, but in actuality, there is no immediate danger to his king, and Garry knows that his attack is much stronger at the moment.' This base carries the same position as a `king-attack` NEGATIVE, because every mechanical sign of an attack is present and the attack is not real - which is the same fact read from the detector's side.",
+      "origin_kind": "historical-game",
+      "game": "Adams-Kasparov, Linares 2005 (round 12)",
+      "concept_role": "positive",
+      "attributed_by": "corpus entry adams-kasparov-2005-21Kxh7-king-attack-negative",
+      "engine": {
+        "engine_id": "Stockfish 18",
+        "test_level": 3,
+        "depth": 24,
+        "threads": 10,
+        "hash_mb": 4096,
+        "multipv": 1,
+        "best_move": "g8h7",
+        "eval_cp": 212,
+        "mate_in": null,
+        "pv": [],
+        "alternatives": [],
+        "margin_cp": null,
+        "verdict": "supports",
+        "verdict_note": "+2.12 from Black's side, and the engine's own first move is 21...Kxh7. Two pawns' worth, for the move that every rule of thumb forbids. This is the largest number attached to any historical example in this base and it is attached to the record about preferring calculation to rules, which is a coincidence worth not over-reading - but the direction is not a coincidence."
+      }
+    }
+  ],
+  "counterexamples": [
+    {
+      "fen": "7k/8/5K2/3B3P/8/8/8/8 w - - 0 1",
+      "note": "Registered false-positive case `a-position-calculation-cannot-help`, kept on the record as well as in tests/false_positive_cases.json so that the concept carries its own negative evidence. THE SURFACE PATTERN IS PRESENT: A concrete position with an extra bishop and an extra pawn, exactly the kind of material edge modern play is supposed to convert by calculation rather than by rule. WHY IT IS NOT THE CONCEPT: No amount of calculation changes it. The bishop is the wrong colour for the h-pawn's queening square and the defending king cannot be driven from the corner by any series of moves. This record's thesis is that concrete analysis has displaced principle; here principle — one sentence about bishop colour — settles the position and analysis adds nothing to it. WHAT THE SYSTEM DOES: PROVEN DRAW, dtz 0, over every legal continuation. The API reports `wrong-rook-pawn` at high confidence, which is the sentence that decides it, and says nothing about calculation. Worth keeping beside this: Stockfish 18 at depth 26 evaluates the same position at +0.92 — the engine, which is the instrument the modern school is built on, is WRONG here and the old rule is right. That is the sharpest available counterweight to this record's own thesis, and it is why the record is filed as a historical-teaching-principle rather than as a fact.",
+      "origin_kind": "constructed-test",
+      "concept_role": "negative",
+      "tablebase": {
+        "source": "Lichess tablebase (Syzygy, 7-piece)",
+        "pieces": 4,
+        "wdl": "draw",
+        "dtz": 0,
+        "dtm": 0,
+        "category": "draw",
+        "note": "PROVEN DRAW over every legal continuation - and Stockfish 18 at depth 26 says +0.92. The engine, which is the instrument this record's thesis is built on, is wrong here and a one-sentence rule about bishop colour is right."
+      },
+      "false_positive_case": "a-position-calculation-cannot-help"
+    }
+  ],
+  "ambiguous_examples": [
+    {
+      "fen": "3r1nk1/pp3ppp/1bq5/B7/3pQ3/1N4PP/PPP2P2/4R1K1 w - - 1 22",
+      "move": "Qxc6",
+      "move_uci": "e4c6",
+      "note": "Capablanca-Rubinstein, Berlin 1928, 22.Qxc6 - a move made by concrete calculation twenty years before the school this record dates. The annotation says it 'looks like a mistake' by every principle available at the time: it dissolves the isolated pawn Capablanca spent the game creating. He played it because of what he had calculated the resulting ending to be, which is this record's thesis - principles demoted to orientation, concrete analysis deciding - performed by the most classical player in the game's history. Filed as ambiguous because the record's own dividing line is historical and this position sits on the wrong side of it: either the thesis is about a style that predates the school, or the move is classical judgement that happens to look modern, and nothing on the board decides which.",
+      "origin_kind": "historical-game",
+      "game": "Capablanca-Rubinstein, Berlin 1928",
+      "concept_role": "ambiguous",
+      "attributed_by": "corpus entry capablanca-rubinstein-1928-22Qxc6-transformation",
+      "engine": {
+        "engine_id": "Stockfish 18",
+        "test_level": 3,
+        "depth": 22,
+        "threads": 10,
+        "hash_mb": 4096,
+        "multipv": 3,
+        "best_move": "e4c6",
+        "eval_cp": 34,
+        "mate_in": null,
+        "pv": [],
+        "alternatives": [],
+        "margin_cp": null,
+        "verdict": "ambiguous",
+        "verdict_note": "+0.34 and the engine's first choice at depth 22 - a move that looks like a concession and is best, which is the shape this record says principle-based judgement gets wrong and calculation gets right."
+      }
+    }
+  ],
+  "explanations": {
+    "by_level": {
+      "beginner": "Modern players work out what actually happens in this position rather than following general rules.",
+      "intermediate": "Concrete analysis over principle. Rules orient you; the line decides.",
+      "advanced": "Dynamic factors — initiative, activity, compensation — are treated as real assets with expiry dates rather than as debts.",
+      "master": "The shift predates engines and was settled by them; several measurements in this base are that check being carried out on individual principles."
+    },
+    "by_depth": {
+      "short": "Concrete analysis over general rules.",
+      "normal": "The modern preference for working out the specific position over applying a principle to it, and for dynamic factors over static ones. Principles are demoted from deciding to orienting.",
+      "deep": "Classical strategy and the hypermodern reaction both worked by principle: find the feature, apply the rule, follow the plan. Modern high-level play works by concrete analysis with principles demoted to orientation, and Watson's thesis is that this is the real dividing line between classical and modern chess. The cognitive-psychology literature says the same thing independently, describing the rule-driven picture of the strong player as the outdated view and modern play as concrete. What 'dynamic' adds is the elevation of the temporary over the permanent - initiative and activity treated as assets to be spent before they expire. Engines did not start this and did settle it, being the purest concrete players there are."
+    },
+    "hedge": "A thesis about a historical trend, argued by identifiable writers rather than measured, and easy to overstate: the classical principles remain the fastest route to a reasonable move.",
+    "lesson": "Let the principle suggest the move and the line decide it."
+  },
+  "terminology": {
+    "beginner_words": [
+      "work out what actually happens"
+    ],
+    "advanced_words": [
+      "concrete play",
+      "dynamic factors",
+      "the modern school"
+    ],
+    "avoid": [
+      "modern chess ignores principles",
+      "principles are obsolete"
+    ]
+  },
+  "status": {
+    "stage": "researched",
+    "last_updated": "2026-09-01",
+    "open_questions": [],
+    "audit_notes": []
+  },
+  "id": "modern-dynamic",
+  "canonical_name": "Modern dynamic chess",
+  "category": "modern-dynamic",
+  "knowledge_type": "historical-teaching-principle",
+  "definition_short": "The modern preference for concrete calculation over rule-based judgement, and for dynamic factors over static ones.",
+  "definition_long": "WHAT CHANGED. Classical strategy, and the hypermodern reaction to it, both worked by PRINCIPLE: identify the position's features, apply the rule that fits, follow the plan. Modern high-level play works by CONCRETE ANALYSIS of the position in front of you, with principles demoted to orientation. Watson's thesis is that this shift is the core of the modern Soviet school and the real dividing line between classical and modern chess.\n\nTHE COGNITIVE LITERATURE INDEPENDENTLY SAYS THE SAME THING, which is unusual corroboration. A study of time pressure notes that the picture of the strong player running on rules and pattern recognition corresponds to the OLD and 'somewhat outdated' view associated with Nimzowitsch, and that modern high-level play no longer relies on rule-oriented thinking but on concrete analysis. Kotov's own account agrees: the ability to analyse enough variations clearly was, he concluded, the basic condition for success.\n\nWHAT 'DYNAMIC' MEANS HERE is the elevation of the temporary over the permanent — initiative, activity, the initiative's expiry date, compensation — against the classical preference for durable structural advantages. It is not that structure stopped mattering; it is that a temporary advantage is now treated as a real asset to be spent rather than a debt to be repaid.\n\nTHE ENGINE ERA INTENSIFIED IT rather than caused it. The shift predates strong engines, but engines rewarded it: they are the purest concrete players, they routinely violate the classical rules when a line supports it, and they made it possible to check whether a principle was true. Several of this base's own measurements are that check being carried out.\n\nTHE HONEST QUALIFICATION: this is a thesis about a trend, argued by identifiable people, not a measured fact. It is also easy to overstate — the classical principles remain the fastest way to reach a reasonable move, and the concrete method is expensive. What changed is which one has the final word.",
+  "sources": [
+    "watson-secrets-modern-strategy",
+    "harreveld-time-pressure",
+    "kotov-think-like-gm",
+    "wikipedia-hypermodernism"
+  ],
+  "source_confidence": "medium"
+}

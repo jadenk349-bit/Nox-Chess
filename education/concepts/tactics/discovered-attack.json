@@ -1,0 +1,207 @@
+{
+  "schema_version": 2,
+  "id": "discovered-attack",
+  "canonical_name": "Discovered attack",
+  "alternate_names": [
+    "discovery"
+  ],
+  "historical_names": [],
+  "category": "tactical-motifs",
+  "subcategory": "material-winning motif",
+  "tags": [],
+  "knowledge_type": "tactical-motif",
+  "knowledge_type_note": "Motif (D). Informant theme e.",
+  "name_status": "established-name",
+  "difficulty": "intermediate",
+  "definition_short": "One piece moves out of the way, unmasking an attack by a piece behind it.",
+  "definition_long": "A friendly unit steps off a line, revealing an attack by a friendly bishop, rook or queen behind it. Its power is that the MOVING piece is free to make a second threat of its own, so one move produces two attacks — and the moving piece can go somewhere it would otherwise never be allowed to stand, including en prise, because the revealed threat outweighs it.\n\nIf the revealed attack hits the king it is a DISCOVERED CHECK, which is far stronger because the defender must answer the check and has no time for the moving piece. If both the moving and the revealed piece attack the king it is a DOUBLE CHECK, and only a king move is legal.",
+  "history": {
+    "attributions": [],
+    "first_documented_source": "informant-encyclopedia-combinations",
+    "year": null,
+    "confidence": "unknown",
+    "notes": "Tactical motifs are descriptive pattern names of long and mostly anonymous usage. The Chess Informant classification is cited as a standard enumeration, not as the origin of the term.",
+    "competing_claims": [],
+    "development": []
+  },
+  "engine_era_status": "unassessed",
+  "engine_era_note": "",
+  "sources": [
+    "informant-encyclopedia-combinations",
+    "wikipedia-chess-tactic",
+    "chesstempo-tactical-motifs",
+    "chesscom-tactics-38"
+  ],
+  "source_confidence": "high",
+  "recognition": {
+    "preconditions": [
+      "A friendly line piece is behind a friendly unit, aimed at an enemy target",
+      "The intervening friendly unit has a move that leaves the line"
+    ],
+    "indicators_for": [
+      "The revealed attack hits the king or the queen",
+      "The moving piece can create its own threat",
+      "The moving piece may safely occupy an attacked square because the discovery outweighs it"
+    ],
+    "indicators_against": [
+      "The revealed line is blocked by another unit further along",
+      "The revealed 'attack' hits something defended and not worth taking",
+      "The defender can answer both threats with one move"
+    ],
+    "prerequisites": [],
+    "detector": "findMotifs -> discoveredAttack",
+    "detectability": "mechanical",
+    "typical_confidence": "high",
+    "false_positive_traps": []
+  },
+  "application": {
+    "typical_plans": [],
+    "typical_moves": [],
+    "typical_pawn_structures": [],
+    "typical_piece_arrangements": [],
+    "tactical_consequences": [],
+    "strategic_consequences": []
+  },
+  "exceptions": [
+    "A discovery is worthless if the unmasked line hits nothing of value.",
+    "In a discovered check the moving piece may stand en prise with impunity — normal safety reasoning does not apply to it."
+  ],
+  "limitations": [
+    "Detecting that a line opens is mechanical; judging whether the two threats together are decisive is not.",
+    "TYPICAL_CONFIDENCE RAISED medium -> high, 2026-09-02, and the reason is the schema's own definition of the field: 'how confidently this concept can normally be asserted ONCE ITS PRECONDITIONS HOLD'. This concept's recognition is MECHANICAL and its knowledge type already carries a high ceiling, so once the preconditions hold there is nothing left to be uncertain about - a stalemate is a stalemate, and a fork this base reports is one findMotifs() found, which ARCHITECTURE.md makes the authority and forbids second-guessing. 'Medium' was the default across 32 rule and motif records regardless of detectability, and it was found by measuring what the API reports against what each record permits: twelve concepts were reporting ABOVE their own record. The fix was to make each record its own ceiling in cap(), which then required the records that were wrong to be corrected rather than silently overruled.",
+    "Verified 2026-09-02. \"The revealed line is blocked by another unit further along\" is unreachable rather than unguarded: findMotifs() does not report that a line was opened, it reports a specific unit on a specific square that the revealed piece now attacks, computed from the board after the move. A line blocked before it reaches anything produces no target and no tag. The condition that WAS live on this record - \"The revealed 'attack' hits something defended and not worth taking\" - was true of 33 of the 788 shipped puzzles and is now guarded by SEE at the motif-mapping site. \"The defender can answer both threats with one move\" remains unbuilt and needs a search."
+  ],
+  "misconceptions": [],
+  "relationships": {
+    "broader": [],
+    "narrower": [
+      "discovered-check",
+      "double-check"
+    ],
+    "related": [],
+    "contrasting": [],
+    "co_occurring": [],
+    "conflicts": []
+  },
+  "examples": [
+    {
+      "fen": "rn1qkbnr/ppp2p1p/3p2p1/4p3/2B1P1b1/2N2N2/PPPP1PPP/R1BQK2R w KQkq - 0 5",
+      "move": "Nxe5",
+      "move_uci": "f3e5",
+      "note": "Legall's Mate, Paris 1750 - 5.Nxe5, and the detector's reading of it is the honest one: 'moving the knight uncovers the queen on d1, which now attacks the bishop on g4'. That is a discovered attack and it is exactly what the move does mechanically. What the move is FAMOUS for is the other half: Black takes the queen with 5...Bxd1 and is mated by 6.Bxf7+ Ke7 7.Nd5#. Both readings are true of the same move, and this base reports the one it can see. The engine's verdict on the whole idea is +2.04, which is a comment on Black's fourth move rather than on the sacrifice - against best defence White simply recaptures on g4 and is two pawns better. PROVENANCE, stated plainly. The game is famous and the move list was replayed through this base's own move generator by tools/replay_game.js - 13 plies, every one legal, which is what makes the FEN trustworthy rather than remembered. No named annotator is attached to this position for this concept, so it grounds the MASTER-GAME rung and NOT the human-grounded one: it is evidence that the concept occurs in master play, and not evidence that a person named it here. The validation ladder already draws that line for eleven other concepts and it is drawn again here.",
+      "origin_kind": "historical-game",
+      "game": "Legall de Kermeur - Saint Brie, Paris 1750",
+      "concept_role": "positive",
+      "side_to_move_benefits": "white",
+      "engine": {
+        "engine_id": "Stockfish 18",
+        "test_level": 3,
+        "depth": 22,
+        "threads": 10,
+        "hash_mb": 4096,
+        "multipv": 2,
+        "best_move": "f3e5",
+        "eval_cp": 204,
+        "mate_in": null,
+        "pv": [],
+        "alternatives": [],
+        "margin_cp": null,
+        "verdict": "supports",
+        "verdict_note": "+2.04 at depth 22 with two lines, and Nxe5 is the engine's first choice by a full pawn over 5.d4. The discovered attack is sound; the mate that made the game famous depends on Black taking the queen."
+      }
+    },
+    {
+      "fen": "r4rk1/pqbp2pB/1P3n1p/2n3N1/N1P1p2P/1Q2P1P1/1B1P1P2/4K2R b K - 2 20",
+      "note": "A clean instance: the detector reports discoveredAttack and nothing else, for the move Nxh7. Two things are verified here and a third is not. VERIFIED: findMotifs() in blind-chess.html reports the motif — and that detector, not this system, is the authority on whether a motif is present. ALSO VERIFIED: Nxh7 is the recorded solution of a shipped puzzle, and tools/generate_puzzles.js only admits a position when one move is objectively best by a wide margin at confirmation depth, so the move carries engine backing by construction rather than by a separate search here. NOT claimed: that the motif is the whole reason the move wins. Provenance: the puzzle corpus is engine self-play — a real position from a real game between engines, not a master game.",
+      "origin_kind": "puzzle",
+      "concept_role": "supports",
+      "side_to_move_benefits": "neither",
+      "move": "Nxh7",
+      "engine": {
+        "engine_id": "Stockfish (via tools/generate_puzzles.js at confirmation depth)",
+        "test_level": 2,
+        "depth": null,
+        "threads": null,
+        "hash_mb": null,
+        "multipv": null,
+        "best_move": "Nxh7",
+        "eval_cp": null,
+        "mate_in": null,
+        "pv": [],
+        "alternatives": [],
+        "margin_cp": null,
+        "verdict": "supports",
+        "verdict_note": "Inherited validation: this position ships as a puzzle, and the generator's standard is that exactly one move is best by at least GAP_MIN at confirmation depth, re-checked deeper by tools/verify_puzzles.js. The move is therefore engine-verified as best without this base running its own search. The motif label comes from findMotifs, not from the engine — the two are independent and both had to agree for this to be recorded."
+      }
+    }
+  ],
+  "counterexamples": [
+    {
+      "fen": "2r5/2p2kr1/pp3p1p/3n4/2RN1p2/P6P/1P3K2/2R5 w - - 10 35",
+      "move_uci": "d4f5",
+      "note": "Shipped puzzle, and a registered false-positive case `a-discovery-onto-a-defended-pawn`, kept on the record as well as in tests/false_positive_cases.json so that the concept carries its own negative evidence. THE SURFACE PATTERN IS PRESENT: Nf5 steps out of the c4 rook's line and the detector reports 'Moving the knight uncovers the rook on c4, which now attacks the pawn on f4.' The line really is uncovered and the pawn really is attacked. WHY IT IS NOT THE CONCEPT: This record's second indicator_against: \"The revealed 'attack' hits something defended and not worth taking.\" The f4 pawn is defended by the knight on d5, so Rxf4 is answered by Nxf4 and the discovery has won a pawn for a rook. WHAT THE SYSTEM DOES: Shipped puzzle en-f21d044b23, and SEE puts a number on it: taking on f4 scores -400. The move is genuinely strong and the API still says why — Nf5 forks the rook on g7 and the h6 pawn, and that report is untouched. What was wrong was the second label sitting beside the first, telling the reader that a rook had been unleashed onto something. 33 of the 788 shipped puzzles carried a discovered-attack report whose revealed target SEE said was not worth taking; all 33 were at HIGH confidence. A revealed CHECK is never guarded — the detector writes 'now checks the king' for those and the guard does not match that sentence — because a check is worth something whatever SEE says.",
+      "origin_kind": "puzzle",
+      "concept_role": "negative",
+      "false_positive_case": "a-discovery-onto-a-defended-pawn"
+    }
+  ],
+  "ambiguous_examples": [
+    {
+      "fen": "r3kb1r/p3qppp/2p1bn2/1Q6/B2NpP2/4P3/PP1P1KPP/n1B3NR w kq - 0 14",
+      "move": "Bxa6",
+      "move_uci": "b5a6",
+      "note": "Nominated by tools/mine_ambiguous.js on its fourth ground, NOT-THE-MOVE: the concept fires on a legal move that is not the solution of a shipped puzzle. The first three grounds ask about a POSITION and could not reach a move-based or motif concept at all - this concept and eleven others reported NONE until the tool learned to supply a move. What makes the case ambiguous rather than false is that nothing reported is absent: Qxa6 does uncover the bishop on a4 and the discovery is genuine geometry. It is also a losing move. The puzzle's answer is Qxc6, and the two are 7.7 pawns apart. This is the clearest form of what a discovered attack is worth when the discovery is the only thing recommending it.",
+      "origin_kind": "puzzle",
+      "concept_role": "ambiguous",
+      "engine": {
+        "engine_id": "Stockfish 18",
+        "test_level": 3,
+        "depth": 22,
+        "threads": 10,
+        "hash_mb": 4096,
+        "multipv": 2,
+        "best_move": "b5c6",
+        "eval_cp": -256,
+        "mate_in": null,
+        "pv": [],
+        "alternatives": [],
+        "margin_cp": null,
+        "verdict": "ambiguous",
+        "verdict_note": "Qxa6 scores -2.56 and Qxc6, the puzzle's solution, scores +5.17 - a gap of 773 centipawns between two moves of the same queen. The discovered attack is on the board and the position is about something else entirely."
+      }
+    }
+  ],
+  "explanations": {
+    "by_level": {
+      "beginner": "Moving this piece uncovers an attack from the piece behind it, so you get two attacks in one move.",
+      "intermediate": "A discovered attack. The moving piece is free to threaten something else, because the revealed attack does the work.",
+      "advanced": "Discovery. If the unmasked line hits the king it is a discovered check, and the moving piece may go anywhere, including en prise."
+    },
+    "by_depth": {
+      "short": "A piece moves aside and unmasks an attack from the piece behind it.",
+      "normal": "A discovered attack: two attacks for one move — whatever the moving piece does, and whatever the piece behind it now hits. The moving piece is comparatively free, because the opponent has to deal with the revealed threat.",
+      "deep": "The revealed attack has to be worth something, and that is where the motif is most often overclaimed: a rook unmasked onto a defended pawn is a discovery that wins nothing, and 33 of the 788 puzzles in this repository carried exactly that report before it was guarded. Two other conditions matter. The revealed line must not be blocked further along — a second unit in the way makes the discovery empty. And the defender must not be able to answer both threats with one move. When the revealed line gives CHECK the motif becomes much stronger and gets its own record, because a check cannot be ignored."
+    },
+    "hedge": "",
+    "lesson": ""
+  },
+  "terminology": {
+    "beginner_words": [
+      "uncovers an attack"
+    ],
+    "advanced_words": [
+      "discovered attack",
+      "discovery",
+      "battery"
+    ],
+    "avoid": []
+  },
+  "status": {
+    "stage": "researched",
+    "last_updated": "2026-09-01",
+    "open_questions": [],
+    "audit_notes": [
+      "2026-09-01: detector field named 'lineAlignment', which does not exist anywhere in the codebase. The audit's hardcoded whitelist had been accepting it. Repointed at real code, or marked as proposed where nothing implements it."
+    ]
+  }
+}

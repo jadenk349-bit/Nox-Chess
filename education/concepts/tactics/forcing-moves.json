@@ -1,0 +1,252 @@
+{
+  "schema_version": 2,
+  "alternate_names": [
+    "checks, captures and threats",
+    "CCT"
+  ],
+  "historical_names": [],
+  "tags": [
+    "tactics",
+    "calculation",
+    "detector-backed"
+  ],
+  "subcategory": "calculation method",
+  "difficulty": "beginner",
+  "knowledge_type_note": "A rule about what to look at first, not a claim that forcing moves are good. Its whole value is in ordering the search.",
+  "name_status": "established-name",
+  "history": {
+    "attributions": [
+      {
+        "relation": "systematized-by",
+        "person": "Mark Dvoretsky",
+        "year": 1998,
+        "note": "Gives examining the most forcing line first among his rules for calculating variations.",
+        "confidence": "high"
+      }
+    ],
+    "first_documented_source": "dvoretsky-attack-and-defence",
+    "year": null,
+    "confidence": "low",
+    "notes": "Anonymous standard advice with no traceable coinage; the named sources state it rather than originate it.",
+    "competing_claims": [],
+    "development": []
+  },
+  "engine_era_status": "reliable",
+  "engine_era_note": "Engines order their search by much the same logic, extending forcing lines further than quiet ones, which is a rare case of human calculation advice and machine implementation converging on the same principle for the same reason.",
+  "recognition": {
+    "preconditions": [
+      "A check, capture or direct threat is available to either side"
+    ],
+    "indicators_for": [
+      "The opponent's king can be checked",
+      "A capture changes the material balance",
+      "A threat cannot be met without concession"
+    ],
+    "indicators_against": [],
+    "prerequisites": [],
+    "detector": "legal move generation; findMotifs for threats",
+    "detectability": "mechanical",
+    "typical_confidence": "high",
+    "false_positive_traps": [
+      "Forcing is not the same as good, and this is the trap that matters. This base holds a proven position in which one check draws and another loses.",
+      "The rule is about search order, not move choice. Reporting 'it is forcing' as a reason a move is strong misuses it entirely.",
+      "Applying it only to your own moves is how calculated lines get refuted; the opponent's forcing replies are the ones that overturn analysis."
+    ]
+  },
+  "application": {
+    "typical_plans": [
+      "Examine checks, then captures, then threats, before quiet moves",
+      "Check the opponent's forcing replies before committing",
+      "Use a forcing sequence to reach a position you can evaluate"
+    ],
+    "typical_moves": [
+      "Checks",
+      "Captures",
+      "Direct threats against a piece or square"
+    ],
+    "typical_pawn_structures": [],
+    "typical_piece_arrangements": [],
+    "tactical_consequences": [
+      "Forcing sequences are where combinations are found, because the opponent's options are constrained"
+    ],
+    "strategic_consequences": [
+      "A forcing line spends the position's tension and cannot be taken back"
+    ]
+  },
+  "exceptions": [
+    "Quiet positions may contain no useful forcing move at all, and the search then has to be conducted differently.",
+    "Nunn's goal-seeking case: some strong moves make no sense except as part of a whole operation and will never appear in a forcing-move scan."
+  ],
+  "limitations": [
+    "The rule orders the search and does not evaluate anything.",
+    "Detecting checks and captures is mechanical; detecting threats is not, and the threat half is the weakest."
+  ],
+  "misconceptions": [
+    "That forcing moves are usually best. They are usually cheapest to check.",
+    "That checking first means checking always. A check spends a resource and can be the losing move."
+  ],
+  "relationships": {
+    "broader": [
+      "calculation"
+    ],
+    "narrower": [],
+    "related": [
+      "calculation",
+      "candidate-moves",
+      "check",
+      "zwischenzug",
+      "defensive-principles",
+      "initiative",
+      "double-check",
+      "perpetual-check"
+    ],
+    "contrasting": [],
+    "co_occurring": [
+      "calculation"
+    ],
+    "conflicts": []
+  },
+  "examples": [
+    {
+      "fen": "1r2k1r1/pbppnp1p/1b3P2/8/Q7/B1PB1q2/P4PPP/3R2K1 w - - 0 21",
+      "move": "Qxd7+",
+      "move_uci": "a4d7",
+      "note": "Anderssen-Dufresne 1852, before 21.Qxd7+ - the position where the rule about search order is worth everything and worth nothing at the same time. Every move of the finish is a check: Qxd7+ Kxd7, Bf5+ Ke8, Bd7+ Kf8, Bxe7 mate. A player who looks at the forcing moves first finds it, which is the rule working; a player who looks at the forcing moves first in almost any other position finds nothing, which is the rule's second trap - it orders the search and does not choose the move. Black is a rook and a bishop up and threatening mate himself, so nothing but a forced sequence would do. PROVENANCE. The move list was replayed through this base's own move generator by tools/replay_game.js, which refuses a wrong list rather than guessing, so the FEN is verified rather than remembered. No named annotator is attached to this position for this concept, so it grounds the MASTER-GAME rung and not the human-grounded one.",
+      "origin_kind": "historical-game",
+      "game": "Anderssen-Dufresne, Berlin 1852 (the Evergreen Game)",
+      "concept_role": "positive",
+      "side_to_move_benefits": "white",
+      "engine": {
+        "engine_id": "Stockfish 18",
+        "test_level": 3,
+        "depth": 20,
+        "threads": 10,
+        "hash_mb": 4096,
+        "multipv": 1,
+        "best_move": "a4d7",
+        "eval_cp": null,
+        "mate_in": 4,
+        "pv": [],
+        "alternatives": [],
+        "margin_cp": null,
+        "verdict": "supports",
+        "verdict_note": "Mate in 4 at depth 20, settled at depth 1, every move of it a check. The limiting case of a forcing line."
+      }
+    },
+    {
+      "fen": "r2k1b1r/8/2p1b3/3pPnpp/NP1P3P/B1P1qPPK/P1Q1B3/N2RR3 b - - 1 51",
+      "note": "the side to move has 8 checks and 11 captures available — the forcing moves a search should look at first. The feature was established mechanically from the position by the page's own move generator and lib/features.js. What is NOT claimed is that this feature decides the position. Provenance: the puzzle corpus is engine self-play — a real position from a real game between engines, not a master game.",
+      "origin_kind": "puzzle",
+      "concept_role": "supports",
+      "side_to_move_benefits": "neither",
+      "engine": {
+        "engine_id": "Stockfish 18",
+        "test_level": 3,
+        "depth": 22,
+        "threads": 10,
+        "hash_mb": 4096,
+        "multipv": 1,
+        "best_move": "e3f2",
+        "eval_cp": null,
+        "mate_in": 4,
+        "pv": [],
+        "alternatives": [],
+        "margin_cp": null,
+        "verdict": "supports",
+        "verdict_note": "Mate in 4 at depth 22, beginning with Qxf2. A forcing line settled by the engine finding the mate rather than by an evaluation: the concept is about moves that leave the opponent no choice, and a forced mate is the limiting case of one."
+      }
+    }
+  ],
+  "counterexamples": [
+    {
+      "fen": "R7/6k1/P4r2/8/3K4/8/8/8 b - - 0 1",
+      "note": "Registered false-positive case `one-check-draws-and-another-loses`, kept on the record as well as in tests/false_positive_cases.json so that the concept carries its own negative evidence. THE SURFACE PATTERN IS PRESENT: Black has two checks available with the same rook. A check is the most forcing move there is, and the rule says to look at the forcing moves first. WHY IT IS NOT THE CONCEPT: This record's first trap, and the record names this exact position: \"Forcing is not the same as good, and this is the trap that matters. This base holds a proven position in which one check draws and another loses.\" The Vancura position. ...Rd6+ holds; ...Rf4+ loses. WHAT THE SYSTEM DOES: PROVEN, both of them, and this is the claim the record has been making in prose. After ...Rd6+ the position is still a DRAW at dtz 0. After ...Rf4+ it is a WIN FOR WHITE, dtz 21, mate in 67. Two checks by one rook from one square, one holding and one losing by force, and nothing about their forcing-ness distinguishes them. The rule is about search ORDER and not about move choice, which is this record's second trap, and a position where the two most forcing moves available differ by sixty-seven moves of result is the sharpest way to say it.",
+      "origin_kind": "constructed-test",
+      "concept_role": "negative",
+      "tablebase": {
+        "source": "Lichess tablebase (Syzygy, 7-piece)",
+        "pieces": 5,
+        "wdl": "draw",
+        "dtz": 0,
+        "dtm": 0,
+        "category": "draw",
+        "note": "PROVEN both ways, and that is the case. From this position ...Rd6+ leaves a DRAW at dtz 0; ...Rf4+ leaves a WIN FOR WHITE at dtz 21, mate in 67. Two checks by one rook from one square, sixty-seven moves of result apart, and nothing about their forcing-ness distinguishes them."
+      },
+      "false_positive_case": "one-check-draws-and-another-loses"
+    }
+  ],
+  "ambiguous_examples": [
+    {
+      "fen": "r1bq1rk1/pp3ppp/2n5/3Np3/4P3/8/PP3PPP/R1BQ1RK1 w - - 0 1",
+      "note": "Forcing moves are available - the knight on d5 has Ne7+ and Nb6, both forcing, and the rule says to look at them first. Looking at them first is right and playing them is wrong: the engine's choice is Be3, a quiet developing move, at +0.30. This record's second trap says exactly that the rule is 'about search ORDER, not move choice. Reporting it is forcing as a reason a move is strong misuses it entirely.' Filed as ambiguous because the concept is correctly applicable - there really are forcing moves and they really should be examined - and following it produces the wrong move. A search heuristic that is right about what to look at and silent about what to play is the honest description, and it is not one an explanation can lean on.",
+      "origin_kind": "constructed-test",
+      "concept_role": "ambiguous",
+      "engine": {
+        "engine_id": "Stockfish 18",
+        "test_level": 3,
+        "depth": 22,
+        "threads": 10,
+        "hash_mb": 4096,
+        "multipv": 1,
+        "best_move": "c1e3",
+        "eval_cp": 30,
+        "mate_in": null,
+        "pv": [],
+        "alternatives": [],
+        "margin_cp": null,
+        "verdict": "ambiguous",
+        "verdict_note": "+0.30 for the quiet move, in a position that offers a check and a capture-threatening knight jump. The forcing moves are real and none of them is best."
+      }
+    }
+  ],
+  "explanations": {
+    "by_level": {
+      "beginner": "Look at checks first, then captures, then threats - for both sides.",
+      "intermediate": "Forcing moves limit the replies, so they are the cheapest lines to calculate to the end. Start there.",
+      "advanced": "It is a search-ordering rule, not a quality judgement, and the opponent's forcing replies matter as much as yours.",
+      "master": "Checking first is efficient; checking always spends a resource - a check can be the losing move in a drawn position."
+    },
+    "by_depth": {
+      "short": "Look at checks, captures and threats first.",
+      "normal": "Forcing moves - checks, captures and direct threats - sharply restrict the opponent's legal replies, which makes them much cheaper to calculate to a conclusion. That is why they are examined first, for both sides.",
+      "deep": "The organising rule of practical calculation, and one of the few shared by authors who disagree about everything else. The reason is arithmetic rather than optimism: a check may leave two or three legal replies where a quiet move leaves thirty, so since all human calculation is pruning, starting where the tree is narrowest is simply efficient. The order is checks, captures, threats, in decreasing degree of compulsion, and it applies to the opponent's moves as much as your own, since a missed enemy in-between move is what refutes most calculated lines. What it does not do is say anything about quality - this base holds a proven position containing two checks, one of which draws and the other loses."
+    },
+    "hedge": "This orders the search; it is not a claim that forcing moves are good, and a forcing move can be the worst move available.",
+    "lesson": "Look at them first because they are cheap to check - not because they are likely to be right."
+  },
+  "terminology": {
+    "beginner_words": [
+      "checks, captures and threats",
+      "look at the forcing moves first"
+    ],
+    "advanced_words": [
+      "forcing move",
+      "forcing line",
+      "search order",
+      "blunder-check"
+    ],
+    "avoid": [
+      "forcing moves are strong",
+      "always check first"
+    ]
+  },
+  "status": {
+    "stage": "researched",
+    "last_updated": "2026-09-01",
+    "open_questions": [],
+    "audit_notes": []
+  },
+  "id": "forcing-moves",
+  "canonical_name": "Forcing moves",
+  "category": "forcing-moves",
+  "knowledge_type": "practical-guideline",
+  "definition_short": "Moves that sharply limit the opponent's legal replies - checks, captures and direct threats - which is why they are examined first.",
+  "definition_long": "The organising rule of practical calculation, and the one piece of advice shared by authors who disagree about everything else in how to think.\n\nWHY THEY COME FIRST is arithmetic, not optimism. A check may leave two or three legal replies where a quiet move leaves thirty, so a forcing line is far cheaper to calculate to the end. Since all human calculation is pruning, starting where the tree is narrowest is simply efficient. Dvoretsky puts examining the most forcing line first; Tisdall recommends starting with the most direct.\n\nTHE ORDER, conventionally: CHECKS, then CAPTURES, then THREATS. Checks are the most forcing because the reply is legally compelled; captures because ignoring one usually costs material; threats because they can sometimes be met in several ways or ignored for a bigger threat.\n\nIT APPLIES TO BOTH SIDES, and this is the half that is usually dropped. The opponent's forcing moves need checking as carefully as your own — a missed enemy zwischenzug is what refutes most calculated lines. The routine survives as the blunder-check before committing to a move.\n\nIT SAYS NOTHING ABOUT QUALITY, and this base is strict about it. Forcing is a property of the move's effect on the opponent's options, not evidence about its value. This base holds a tablebase-proven position containing two checks where one draws and the other loses, which settles the point: a forcing move can be the best move and the worst move in the same position. The rule tells you where to look, and nothing more.\n\nIN THIS CODEBASE the underlying detection is already mechanical: checks and captures are generated by the move generator, and the motif detector recognises several kinds of threat.",
+  "sources": [
+    "dvoretsky-attack-and-defence",
+    "tisdall-improve-your-chess-now",
+    "nunn-secrets-practical-chess",
+    "markushin-defensive-principles"
+  ],
+  "source_confidence": "high"
+}

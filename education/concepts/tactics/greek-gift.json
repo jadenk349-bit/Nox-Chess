@@ -1,0 +1,406 @@
+{
+  "schema_version": 2,
+  "id": "greek-gift",
+  "canonical_name": "Greek gift sacrifice",
+  "alternate_names": [
+    "classic bishop sacrifice",
+    "classical bishop sacrifice",
+    "Bxh7+ sacrifice"
+  ],
+  "historical_names": [],
+  "category": "named-tactical-patterns",
+  "subcategory": "attacking pattern",
+  "tags": [
+    "vukovic",
+    "attack",
+    "sacrifice",
+    "named-pattern",
+    "precise-conditions"
+  ],
+  "knowledge_type": "tactical-motif",
+  "knowledge_type_note": "A named tactical pattern with unusually precise preconditions, which is what makes it worth a record of its own rather than an instance of `sacrifice`. Vukovic states the conditions explicitly, so recognition can be close to mechanical — rare for an attacking idea.",
+  "name_status": "established-name",
+  "difficulty": "intermediate",
+  "definition_short": "Bxh7+ against a castled king, followed by Ng5+ and Qh5 — a bishop given to strip the h-pawn and drag the king out.",
+  "definition_long": "The best-known sacrificial pattern in chess. White plays Bxh7+, Kxh7 is usually forced, Ng5+ follows, and the queen arrives on h5. The bishop buys the h-pawn and the king's exposure; the knight and queen do the work.\n\nVUKOVIC'S CONDITIONS, which is why this is a pattern rather than a hope. He states four:\n\n  1. White must have a queen, a bishop and a knight — all three.\n  2. The light-squared bishop must be able to reach h7 'in order to force the tempo of the attack', though it need not give check or win a pawn in doing so.\n  3. The knight must be 'within easy and safe reach of the square g5'.\n  4. The queen must be within reach of h5, 'though in some cases it is enough for it to be able to get to some other square on the h-file'.\n\nThe single most common refutation is that condition 3 fails in a specific way: g5 is DEFENDED, so Ng5+ is answered by a capture and White has given a bishop for a pawn. A black bishop on e7, or a queen on the d8-h4 diagonal, does this. Other standard defences are the king walking to g6 rather than back to g8, and a knight reaching f6 in time to cover h5.\n\nIt is the reason the Colle System is recommended to players learning attacking chess: the bishop reaches d3 by itself, and from there condition 2 is met almost automatically.",
+  "history": {
+    "attributions": [
+      {
+        "person": "Vladimir Vukovic",
+        "relation": "systematized-by",
+        "source": "vukovic-art-of-attack",
+        "year": 1965,
+        "note": "The Art of Attack in Chess gives the conditions under which the sacrifice is sound; the chapter is titled 'The classic bishop sacrifice'."
+      },
+      {
+        "person": "Gioachino Greco",
+        "relation": "later-associated-with",
+        "source": null,
+        "year": null,
+        "note": "The name 'Greek gift' is conventionally linked to Greco, the 17th-century Italian player, and separately to the Trojan horse of the Aeneid ('beware of Greeks bearing gifts'). NEITHER derivation has been verified in this research and the two are not compatible. Recorded as an open question rather than repeated as fact."
+      }
+    ],
+    "first_documented_source": "vukovic-art-of-attack",
+    "year": 1965,
+    "confidence": "low",
+    "notes": "The CONDITIONS are securely Vukovic's. The NAME's origin is not established: two incompatible derivations circulate (Greco the player; the Trojan horse) and neither was verified here. This is precisely the sort of appealing etymology the brief warns against repeating, so it is recorded as uncertain.",
+    "competing_claims": [
+      "Named after Gioachino Greco, who is said to have played or analysed it.",
+      "Named from 'beware of Greeks bearing gifts' — the Trojan horse — with no reference to Greco."
+    ],
+    "development": []
+  },
+  "engine_era_status": "useful-with-common-exceptions",
+  "engine_era_note": "Engines settle any individual instance instantly, which has sharpened rather than overturned the pattern: Vukovic's conditions turn out to be necessary but not sufficient, and borderline cases that were once argued about are now simply checked. The pattern remains sound when the conditions hold and the defensive resources listed are absent.",
+  "sources": [
+    "vukovic-art-of-attack",
+    "chessable-art-of-attack",
+    "wikipedia-sacrifice"
+  ],
+  "source_confidence": "high",
+  "recognition": {
+    "preconditions": [
+      "The attacker has queen, light-squared bishop and knight",
+      "The bishop can reach h7 (h2 mirrored) with tempo",
+      "The knight can reach g5 safely",
+      "The queen can reach h5, or another square on the h-file"
+    ],
+    "indicators_for": [
+      "The defending king has castled kingside with the h-pawn still on h7",
+      "g5 is not defended by an enemy piece",
+      "No enemy knight can reach f6 to cover h5",
+      "The defending king's escape squares on the f-file and g6 are covered or unhelpful",
+      "The attacker has a rook that can join on the h-file or via a lift"
+    ],
+    "indicators_against": [
+      "g5 IS defended — a bishop on e7, or a queen on the d8-h4 diagonal — so Ng5+ is simply met by a capture",
+      "A knight can reach f6 covering h5",
+      "The king can go to g6 and survive",
+      "The h-pawn has already moved, so there is nothing to take with tempo",
+      "The attacker lacks one of the three required pieces"
+    ],
+    "prerequisites": [
+      "sacrifice",
+      "king-attack"
+    ],
+    "detector": null,
+    "detectability": "mechanical",
+    "typical_confidence": "high",
+    "false_positive_traps": [
+      "The pattern is extremely recognisable, which is exactly why it is played in positions where it does not work. Vukovic's conditions are necessary, NOT sufficient.",
+      "The commonest single error is not checking whether g5 is defended. The controlled pair in this record isolates that one variable.",
+      "Bxh7+ 'looks like' the Greek gift whenever a bishop eyes h7; without the knight and queen in range it is just a lost bishop."
+    ]
+  },
+  "application": {
+    "typical_plans": [
+      "Bxh7+ Kxh7, Ng5+, then Qh5 with mating threats on the h-file",
+      "If the king walks to g6, follow with h4-h5+ or Qd3+ depending on the structure",
+      "Bring a rook to the h-file or via the third rank as the third attacker"
+    ],
+    "typical_moves": [
+      "Bxh7+",
+      "Ng5+",
+      "Qh5"
+    ],
+    "typical_pawn_structures": [
+      "Black pawns f7-g7-h7 intact with the king on g8",
+      "Colle and Queen's-Gambit structures where the bishop sits on d3"
+    ],
+    "typical_piece_arrangements": [
+      "Bishop on d3, knight on f3, queen on d1 with the d1-h5 route clear"
+    ],
+    "tactical_consequences": [
+      "Mating attack, or the recovery of material with a decisive king walk"
+    ],
+    "strategic_consequences": [
+      "A standing reason to keep a defender able to cover g5, and a reason to consider ...h6 before castling into it"
+    ]
+  },
+  "exceptions": [
+    "Vukovic's conditions are necessary but not sufficient. Every instance still has to be calculated.",
+    "If g5 is defended, the sacrifice is refuted outright — a bishop for a pawn.",
+    "The king walking to g6 rather than retreating is the standard tricky defence and must be checked separately.",
+    "The mirrored Black version (...Bxh2+) is the same pattern with the same conditions."
+  ],
+  "limitations": [
+    "Recognition of the geometric preconditions is mechanical; soundness is not, and the gap between the two is where players go wrong.",
+    "TYPICAL_CONFIDENCE RAISED medium -> high, 2026-09-02, and the reason is the schema's own definition of the field: 'how confidently this concept can normally be asserted ONCE ITS PRECONDITIONS HOLD'. This concept's recognition is MECHANICAL and its knowledge type already carries a high ceiling, so once the preconditions hold there is nothing left to be uncertain about - a stalemate is a stalemate, and a fork this base reports is one findMotifs() found, which ARCHITECTURE.md makes the authority and forbids second-guessing. 'Medium' was the default across 32 rule and motif records regardless of detectability, and it was found by measuring what the API reports against what each record permits: twelve concepts were reporting ABOVE their own record. The fix was to make each record its own ceiling in cap(), which then required the records that were wrong to be corrected rather than silently overruled.",
+    "NO MASTER-GAME POSITION YET. This concept has no matcher, so the scan that supplied master positions to eleven other records - five famous games replayed and analysed position by position - could not nominate one here: the API never reports the concept, so there is nothing for a scan to find. Identifying an instance in a master game means reading the game, which is research rather than tooling, and it has not been done. Recorded rather than filled. RESOLVED: Karpov-Glauser, Zurich simul 1988, 10.Bxh7+, above, found by tools/mine_master_motifs.js. Sixteen candidates in 2.8 million master positions have the shape AND the Ng5+ follow-up actually available; this one has the queen arriving on h5 in the engine's own principal variation."
+  ],
+  "misconceptions": [
+    "That Bxh7+ works whenever the bishop can reach h7.",
+    "That the name's origin is settled. Two incompatible derivations circulate and neither is verified here.",
+    "That Kxh7 is forced. Declining is sometimes better, and that possibility has to be checked too."
+  ],
+  "relationships": {
+    "broader": [
+      "king-attack",
+      "sacrifice"
+    ],
+    "narrower": [],
+    "related": [
+      "king-safety",
+      "weak-square"
+    ],
+    "contrasting": [],
+    "co_occurring": [
+      "king-attack",
+      "sacrifice"
+    ],
+    "conflicts": []
+  },
+  "examples": [
+    {
+      "fen": "r1b2rk1/p1pn1ppp/1q2p3/3pP3/3P4/2PB1N2/PP3PPP/R1BQ1RK1 w - - 0 1",
+      "note": "Constructed controlled pair, positive half. Vukovic's conditions are met: White has queen, light-squared bishop and knight; the bishop reaches h7; g5 is undefended; the queen has the d1-h5 route. Black's bishop sits on c8, blocked behind the d7 knight.",
+      "origin_kind": "constructed-test",
+      "concept_role": "positive",
+      "side_to_move_benefits": "white",
+      "controlled_pair_with": "r4rk1/p1pnbppp/1q2p3/3pP3/3P4/2PB1N2/PP3PPP/R1BQ1RK1 w - - 0 1",
+      "engine": {
+        "engine_id": "Stockfish 18",
+        "test_level": 3,
+        "depth": 20,
+        "threads": 10,
+        "hash_mb": 2048,
+        "multipv": 3,
+        "best_move": "d3h7",
+        "eval_cp": 671,
+        "mate_in": null,
+        "pv": [
+          "d3h7",
+          "g8h8",
+          "h7c2",
+          "f7f5",
+          "f1e1",
+          "f8e8",
+          "f3g5"
+        ],
+        "alternatives": [
+          {
+            "move": "d1c2",
+            "eval_cp": 530,
+            "mate_in": null
+          },
+          {
+            "move": "c1e3",
+            "eval_cp": 516,
+            "mate_in": null
+          }
+        ],
+        "margin_cp": 141,
+        "verdict": "supports",
+        "verdict_note": "Bxh7+ is best at +6.71, 1.41 clear of the runner-up, and settled from depth 11. Paired with the negative half below, which differs only in the black bishop's square."
+      }
+    },
+    {
+      "fen": "rnbq1rk1/p1pn1ppp/1p2p3/4P3/1b1P4/2NB1N2/PP3PPP/R1BQ1RK1 w - - 1 10",
+      "move": "Bxh7+",
+      "move_uci": "d3h7",
+      "origin_kind": "historical-game",
+      "game": "Karpov-Glauser, Zurich simul 1988",
+      "concept_role": "positive",
+      "side_to_move_benefits": "white",
+      "note": "THE MASTER-GAME RUNG, and the pattern arrives in the order the record states it. 10.Bxh7+ Kxh7 11.Ng5+ Kg8 12.Qh5 is the engine's own principal variation at depth 30 - the bishop, then the knight, then the queen, which is the definition on this record read straight off the board.\n\nEvery precondition holds and can be checked: White has queen, light-squared bishop and knight; the black king has castled kingside with the h-pawn still on h7; g5 is not defended, because Black's dark-squared bishop went to b4 rather than e7 - which is the FIRST indicator_against this record lists, and its absence here is what makes the sacrifice sound; and the knight on d7 is the piece that would have covered h5 from f6, standing one square from the wrong place.\n\nStockfish 18 at depth 30 with three lines: +6.21, ahead of +4.96 and +4.03. White is better before the sacrifice and much better after it - which is honest about what a Greek gift is. It is not usually a rescue; it is the way an attack that has been earned is cashed.\n\nPROVENANCE. A simultaneous exhibition rather than a tournament game, and that is said rather than hidden: the opposition is weaker than Karpov's usual, which is one reason the pattern appears in its textbook form at all. The move list replayed legally through the page's own move generator, and the position was found by tools/mine_master_motifs.js over 2,822,256 positions from 35,648 replayed games. `attributed_by` is absent - no annotator has been read; this grounds the MASTER-GAME rung and not the human-grounded one.",
+      "engine": {
+        "engine_id": "Stockfish 18",
+        "test_level": 3,
+        "depth": 30,
+        "multipv": 3,
+        "best_move": "d3h7",
+        "eval_cp": 621,
+        "mate_in": null,
+        "pv": [
+          "d3h7",
+          "g8h7",
+          "f3g5",
+          "h7g8",
+          "d1h5",
+          "d8g5",
+          "c1g5",
+          "c8b7",
+          "a1d1",
+          "f7f6"
+        ],
+        "alternatives": [
+          {
+            "move": "d3e4",
+            "eval_cp": 496
+          },
+          {
+            "move": "d1e2",
+            "eval_cp": 403
+          }
+        ],
+        "margin_cp": 125,
+        "verdict": "supports",
+        "verdict_note": "+6.21 at depth 30, best by 125 centipawns, and the principal variation is Bxh7+ Kxh7 Ng5+ Kg8 Qh5 - the record's own three-move pattern, in order."
+      }
+    }
+  ],
+  "counterexamples": [
+    {
+      "fen": "r4rk1/p1pnbppp/1q2p3/3pP3/3P4/2PB1N2/PP3PPP/R1BQ1RK1 w - - 0 1",
+      "note": "Constructed controlled pair, negative half. IDENTICAL material — the same black bishop, relocated from c8 to e7, where it covers g5. Verified with python-chess `attackers`: g5 has no black defender in the positive position and is defended from e7 here. Every other piece and pawn is on the same square.",
+      "origin_kind": "constructed-test",
+      "concept_role": "negative",
+      "side_to_move_benefits": "white",
+      "controlled_pair_with": "r1b2rk1/p1pn1ppp/1q2p3/3pP3/3P4/2PB1N2/PP3PPP/R1BQ1RK1 w - - 0 1",
+      "engine": {
+        "engine_id": "Stockfish 18",
+        "test_level": 3,
+        "depth": 20,
+        "threads": 10,
+        "hash_mb": 2048,
+        "multipv": 3,
+        "best_move": "d1c2",
+        "eval_cp": 536,
+        "mate_in": null,
+        "pv": [
+          "d1c2",
+          "g7g6",
+          "c2b3",
+          "c7c5",
+          "b3b6",
+          "d7b6",
+          "d4c5"
+        ],
+        "alternatives": [
+          {
+            "move": "c1e3",
+            "eval_cp": 480,
+            "mate_in": null
+          },
+          {
+            "move": "d3h7",
+            "eval_cp": 377,
+            "mate_in": null
+          }
+        ],
+        "margin_cp": 56,
+        "verdict": "supports",
+        "verdict_note": "Bxh7+ collapses from BEST at +6.71 to LAST at +3.77 — a swing of 2.94 pawns, and from 1.41 ahead of the field to 1.59 behind it, on one defender of g5. The concept's central precondition is confirmed. HONEST QUALIFICATION: +3.77 still means White is much better, because White is much better in this constructed position for unrelated reasons — the sacrifice throws away most of an advantage rather than losing outright. Note also that the engine's line after Bxh7+ Kxh7 is Bc1-g5, not Ng5+, so White does recover some compensation; the textbook refutation ...Bxg5 is not what Stockfish plays. Contrast this clean tactical isolation with the three failed attempts to isolate the outpost."
+      }
+    },
+    {
+      "fen": "r1bq1rk1/pppn1ppp/4pn2/8/8/2NB4/PPP2PPP/R1BQ1RK1 w - - 0 1",
+      "move_uci": "d3h7",
+      "note": "Registered false-positive case `a-bishop-eyeing-h7-is-not-a-greek-gift`, kept on the record as well as in tests/false_positive_cases.json so that the concept carries its own negative evidence. THE SURFACE PATTERN IS PRESENT: A white bishop on d3 bears on h7, the black king is castled short behind an untouched h-pawn, and Bxh7+ is available. That is the picture the pattern is famous for. WHY IT IS NOT THE CONCEPT: This record's third trap, word for word: \"Bxh7+ 'looks like' the Greek gift whenever a bishop eyes h7; without the knight and queen in range it is just a lost bishop.\" White's only knight is on c3 and cannot reach g5. And the fifth indicator_against fires too — a knight covers the kingside: the black knight on f6 guards h7, so the king does not even have to take. WHAT THE SYSTEM DOES: The API does not report greek-gift, because the matcher asks for Vukovic's three pieces rather than for a bishop pointing at h7. Stockfish 18 settles what the move is worth: the position is 0.00 with a normal move and Bxh7+ scores -3.89, and the refutation is not even Kxh7 - the KNIGHT takes on h7. Nearly four pawns, for the most recognisable sacrifice in chess played one piece short. The record's first trap says the pattern's recognisability is exactly why it gets played where it does not work, and this is that sentence with a number.",
+      "origin_kind": "constructed-test",
+      "concept_role": "negative",
+      "false_positive_case": "a-bishop-eyeing-h7-is-not-a-greek-gift"
+    },
+    {
+      "fen": "r1bq1rk1/pp2bppp/2n1p3/4P3/4B3/2n2N2/PP2QPPP/R1BR2K1 w - - 0 14",
+      "move": "Bxh7+",
+      "move_uci": "e4h7",
+      "origin_kind": "historical-game",
+      "game": "Euwe-Mattison, The Hague Olympiad 1928",
+      "concept_role": "negative",
+      "note": "THE SHAPE WITHOUT THE PATTERN, from a real game, and the harder version of this record's registered false positive. That one is a position where Bxh7+ is bad. This is a position where Bxh7+ is BEST - +3.85 at depth 30 against +1.82 - and is still not a Greek gift.\n\nBlack's bishop is on e7, which is the first indicator_against this record lists: g5 is defended, so Ng5+ is met by a capture and the pattern is unavailable. The engine never plays it. Its line is 14.Bxh7+ Kxh7 15.Qc2+ Kg8 16.Rxd8 - the bishop is given to deflect the king so the rook takes the queen, which is a deflection wearing the Greek gift's clothes.\n\nThis is the negative that is worth having, because the easy one teaches the wrong lesson. A reader who learns 'Bxh7+ fails when g5 is defended' will disbelieve it the first time they see the sacrifice work anyway. What fails is the CONCEPT, not the move: the three-piece machine this record describes is not running here, and any explanation that names it is describing a mechanism that is not on the board.\n\nBronstein-Smyslov, USSR Championship 1960, move 20, is the same thing again - bishop on e7, Bxh7+ the engine's first choice at +0.08, and no Ng5+ anywhere in the line. Two of the three candidates put to the engine were this case, which says something about how often the shape occurs without the pattern.",
+      "engine": {
+        "engine_id": "Stockfish 18",
+        "test_level": 3,
+        "depth": 30,
+        "multipv": 3,
+        "best_move": "e4h7",
+        "eval_cp": 385,
+        "mate_in": null,
+        "pv": [
+          "e4h7",
+          "g8h7",
+          "e2c2",
+          "h7g8",
+          "d1d8",
+          "f8d8",
+          "b2c3",
+          "b7b6",
+          "c1g5",
+          "c8a6"
+        ],
+        "alternatives": [
+          {
+            "move": "b2c3",
+            "eval_cp": 182
+          },
+          {
+            "move": "e2f1",
+            "eval_cp": -532
+          }
+        ],
+        "margin_cp": 203,
+        "verdict": "contradicts",
+        "verdict_note": "Bxh7+ is BEST here by 203 centipawns and the Greek gift is still absent: the engine's line is Bxh7+ Kxh7 Qc2+ Kg8 Rxd8, a deflection. The move being good is not the same claim as the concept being present, and this record must not be allowed to take credit for the one on the strength of the other."
+      }
+    }
+  ],
+  "ambiguous_examples": [
+    {
+      "fen": "r1bq1rk1/pp1n1ppp/4p3/3p4/3P4/2NBPN2/PP3PPP/R2Q1RK1 w - - 0 1",
+      "move": "Bxh7+",
+      "move_uci": "d3h7",
+      "note": "All four of Vukovic's conditions hold. White has the queen, the light-squared bishop and the knight; the bishop reaches h7 with check; the knight reaches g5 safely, because the h-pawn that would cover it has just been captured; and the queen reaches h5 the moment the knight moves. The sacrifice is SOUND - White is still more than two pawns better after it - and it is a mistake, because the quiet 1.Qc2 is worth five. This record's first trap says exactly this and no more: 'Vukovic's conditions are necessary, NOT sufficient.' Filed as ambiguous because the pattern is genuinely present and genuinely playable and is not the move: the conditions tell you the gift is available and nothing about whether to accept the invitation.",
+      "origin_kind": "constructed-test",
+      "concept_role": "ambiguous",
+      "engine": {
+        "engine_id": "Stockfish 18",
+        "test_level": 3,
+        "depth": 22,
+        "threads": 10,
+        "hash_mb": 4096,
+        "multipv": 2,
+        "best_move": "d1c2",
+        "eval_cp": 206,
+        "mate_in": null,
+        "pv": [],
+        "alternatives": [],
+        "margin_cp": null,
+        "verdict": "ambiguous",
+        "verdict_note": "+2.06 for the gift against +5.07 for the quiet 1.Qc2, at depth 22 with two lines. The sacrifice keeps a large advantage and throws away three pawns of it - which is the only kind of number that can distinguish 'the conditions are met' from 'the sacrifice is right'."
+      }
+    }
+  ],
+  "explanations": {
+    "by_level": {
+      "beginner": "White gives up the bishop to take the pawn in front of the king and drag the king out, then brings the knight and queen in for the attack.",
+      "intermediate": "The Greek gift: Bxh7+ Kxh7 Ng5+ and Qh5. Before playing it, check whether anything defends g5 — that is the usual refutation.",
+      "advanced": "Vukovic's conditions: queen, bishop and knight present; bishop reaching h7 with tempo; knight safely to g5; queen to h5 or the h-file. Necessary, not sufficient — calculate the Kg6 defence separately.",
+      "master": "Check the g5 defenders, whether a knight reaches f6 in time, and the king's walk to g6. The conditions get you to a candidate; only calculation gets you to a move."
+    },
+    "by_depth": {
+      "short": "Bxh7+ strips the king's pawn and brings the knight and queen in.",
+      "normal": "The Greek gift sacrifice: Bxh7+ Kxh7, Ng5+, Qh5. It needs the queen, bishop and knight all in range, and it fails if g5 is defended or a knight can reach f6 to cover h5.",
+      "deep": "The classic bishop sacrifice, and the pattern Vukovic gave precise conditions for: the attacker needs a queen, a bishop and a knight; the bishop must reach h7 with tempo; the knight must have safe access to g5; the queen must reach h5 or the h-file. The bishop buys the h-pawn and the king's exposure, and the knight and queen convert it. The commonest refutation is that g5 turns out to be defended — a bishop on e7 or a queen on the d8-h4 diagonal answers Ng5+ with a capture, and the sacrifice is just a lost bishop. The conditions are necessary but not sufficient, so the pattern identifies a candidate and calculation decides it."
+    },
+    "hedge": "",
+    "lesson": "The Greek gift is the most recognisable sacrifice in chess, which is why it is played in positions where it loses. Check g5 before you check anything else."
+  },
+  "terminology": {
+    "beginner_words": [
+      "giving the bishop to open up their king"
+    ],
+    "advanced_words": [
+      "Greek gift",
+      "classic bishop sacrifice",
+      "Bxh7+",
+      "focal point"
+    ],
+    "avoid": [
+      "Bxh7+ always works when the bishop eyes h7"
+    ]
+  },
+  "status": {
+    "stage": "validated",
+    "last_updated": "2026-08-31",
+    "open_questions": [
+      "Establish the origin of the NAME. Two incompatible derivations circulate (Greco; the Trojan horse) and neither is verified. Check Winter's Chess Notes, which is the right place for exactly this kind of question.",
+      "Read Vukovic's conditions from the book rather than via the Chessable summary.",
+      "Construct and test the Kg6 defence as a second controlled pair."
+    ],
+    "audit_notes": [
+      "Promoted to validated on a controlled pair that isolates Vukovic's g5 condition with identical material. Not promoted to 'ready': the name's origin is unverified, Vukovic's conditions were read via a secondary source, and the Kg6 defence has not been tested separately.",
+      "2026-09-01 audit: flagged for being promoted while relying on a source carrying an access caveat. REVIEWED AND ACCEPTED — the promotion rests on ENGINE evidence, not on the unread text; the unread source supplies the concept's name and classification only. The caveat stands and is the reason this is not promoted further to 'ready'."
+    ]
+  }
+}

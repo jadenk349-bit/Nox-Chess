@@ -1,0 +1,255 @@
+{
+  "schema_version": 2,
+  "alternate_names": [
+    "the modern school (contemporary name)",
+    "positional school"
+  ],
+  "historical_names": [
+    "the Modern school"
+  ],
+  "tags": [
+    "history",
+    "steinitz",
+    "tarrasch",
+    "positional"
+  ],
+  "subcategory": "school of thought",
+  "difficulty": "advanced",
+  "knowledge_type_note": "A historical school. Its claims were teaching principles of their era; several were later shown to be overstated, and the record hedges accordingly.",
+  "name_status": "established-name",
+  "knowledge_type": "historical-teaching-principle",
+  "history": {
+    "attributions": [
+      {
+        "person": "Wilhelm Steinitz",
+        "relation": "originated-by",
+        "source": "britannica-chess-theory",
+        "year": 1889,
+        "note": "The first systematic positional theory, set out in The Modern Chess Instructor. Well attested; the primary text has been consulted for the 'hole' passage."
+      },
+      {
+        "person": "Siegbert Tarrasch",
+        "relation": "popularized-by",
+        "source": "wikipedia-hypermodernism",
+        "year": null,
+        "note": "Codified Steinitz's ideas into rules; described as 'the father of Classical dogma'. Second-hand."
+      },
+      {
+        "person": "Emanuel Lasker",
+        "relation": "systematized-by",
+        "source": "winter-chess-notes-steinitz",
+        "year": 1901,
+        "note": "Summarised Steinitz's theory in three principles in a newspaper article; quoted by Winter."
+      }
+    ],
+    "first_documented_source": "steinitz-modern-chess-instructor",
+    "year": 1889,
+    "confidence": "high",
+    "notes": "Better founded than most historical entries here, because Steinitz's own text was consulted directly for this project's `hole` record and Winter's Chess Notes were used for the Lasker summary. The Tarrasch half is second-hand.",
+    "competing_claims": [],
+    "development": [
+      {
+        "era": "pre-1870, Romantic",
+        "change": "Games decided by sacrificial attack; positional features not systematically evaluated.",
+        "source": "wikipedia-hypermodernism"
+      },
+      {
+        "era": "1886-1889, Steinitz",
+        "change": "Positional theory established: weak points, accumulation, attack only with an advantage.",
+        "source": "steinitz-modern-chess-instructor"
+      },
+      {
+        "era": "1890s, Tarrasch",
+        "change": "Codified into rules — the form the hypermoderns attacked.",
+        "source": "wikipedia-hypermodernism"
+      },
+      {
+        "era": "1920s onward",
+        "change": "The dogmatic form is corrected; the evaluation framework survives and remains the basis of positional chess.",
+        "source": "wikipedia-hypermodernism"
+      }
+    ]
+  },
+  "engine_era_status": "useful-with-common-exceptions",
+  "engine_era_note": "Steinitz's evaluative framework is essentially what engine evaluation functions encode — pawn structure, square control, king safety, piece quality. Tarrasch's dogmatic form does not survive: engines accept doubled pawns, cede the centre, and trade good bishops for knights whenever concrete play justifies it.",
+  "recognition": {
+    "preconditions": [
+      "A plan built on accumulating durable positional features rather than on immediate tactics"
+    ],
+    "indicators_for": [
+      "Play directed at fixed weaknesses",
+      "Central pawn occupation with pieces developed behind it",
+      "Refusal to attack before an advantage exists"
+    ],
+    "indicators_against": [
+      "The plan depends on a concrete tactical justification rather than a static feature"
+    ],
+    "prerequisites": [],
+    "detector": null,
+    "false_positive_traps": [
+      "Do not conflate Steinitz with Tarrasch. Steinitz's evaluation framework survived; Tarrasch's dogmatic rules did not, and the hypermodern attack was aimed at the second.",
+      "The school was called 'Modern' in its own time, which makes contemporary quotations easy to misread."
+    ]
+  },
+  "application": {
+    "typical_plans": [
+      "Identify the opponent's durable weaknesses and play against them",
+      "Accumulate small advantages rather than seeking a knockout",
+      "Occupy the centre and develop behind it"
+    ],
+    "typical_moves": [
+      "1.e4 and 1.d4 with quick development"
+    ],
+    "typical_pawn_structures": [
+      "Broad supported pawn centre"
+    ],
+    "typical_piece_arrangements": [],
+    "tactical_consequences": [],
+    "strategic_consequences": [
+      "Provides the evaluative vocabulary nearly all later theory is written in"
+    ]
+  },
+  "exceptions": [
+    "Tarrasch's dogmatic form is widely and correctly broken; the underlying evaluation framework is not.",
+    "'Do not attack without an advantage' remains sound, but 'advantage' turned out to include dynamic factors the classical school undervalued."
+  ],
+  "limitations": [
+    "A historical school, so it is context for other concepts rather than a technique to apply."
+  ],
+  "misconceptions": [
+    "That the classical school was refuted. Its evaluation framework is the basis of modern positional chess and of engine evaluation.",
+    "That Steinitz and Tarrasch held the same views with the same rigidity.",
+    "That 'classical' was what they called themselves — they were the Modern school."
+  ],
+  "relationships": {
+    "broader": [],
+    "narrower": [],
+    "related": [
+      "hypermodern-school",
+      "soviet-school",
+      "center-control",
+      "hole",
+      "weak-square",
+      "bad-bishop"
+    ],
+    "contrasting": [
+      "hypermodern-school"
+    ],
+    "co_occurring": [],
+    "conflicts": []
+  },
+  "examples": [
+    {
+      "fen": "r1b1kb1r/pp3ppp/1qn2n2/3p4/3N4/2N3P1/PP2PPBP/R1BQK2R w KQkq - 1 9",
+      "move": "Nxc6",
+      "move_uci": "d4c6",
+      "note": "Rubinstein-Salwe, Lodz 1908, 9.Nxc6 - the doctrine's two halves in one move. EVALUATION: the trade hands Black a doubled isolated c-pawn beside an already weak d-pawn, which are durable static features of exactly the kind Steinitz taught to identify. TIMING: nothing is attacked for another fifteen moves; Rubinstein manoeuvres until the second weakness is fixed, which is the 'you may only attack when you have earned the right' half. The annotation is quoted in the corpus: 'The critical moment comes at move 9 when Rubinstein plays 9.Nxc6!, trading the knight to give Black a doubled, isolated c-pawn. Black now has two problems.' This base already carries this game as the canonical `two-weaknesses` position; it is filed here for the method rather than for the motif.",
+      "origin_kind": "historical-game",
+      "game": "Rubinstein-Salwe, Lodz 1908",
+      "concept_role": "positive",
+      "attributed_by": "corpus entry rubinstein-salwe-1908-9Nxc6-two-weaknesses",
+      "engine": {
+        "engine_id": "Stockfish 18",
+        "test_level": 3,
+        "depth": 24,
+        "threads": 10,
+        "hash_mb": 4096,
+        "multipv": 1,
+        "best_move": "d4c6",
+        "eval_cp": 50,
+        "mate_in": null,
+        "pv": [],
+        "alternatives": [],
+        "margin_cp": null,
+        "verdict": "supports",
+        "verdict_note": "+0.50, and the engine's own first move IS 9.Nxc6. A classical accumulation is worth about half a pawn at the moment it is created, which is the honest size of the thing: the doctrine is about what is durable, not about what is decisive, and the game took another forty moves."
+      }
+    }
+  ],
+  "counterexamples": [
+    {
+      "fen": "rnbqnrk1/ppp1ppbp/3p2p1/4P3/2PP1P2/2N1B3/PP4PP/R2QKBNR b KQ - 1 7",
+      "note": "Registered false-positive case `the-classical-prescription-followed-exactly`, kept on the record as well as in tests/false_positive_cases.json so that the concept carries its own negative evidence. THE SURFACE PATTERN IS PRESENT: White has four pawns abreast in the centre on c4, d4, e5 and f4 and has spent every move building them. Occupy the centre with pawns is the classical instruction, followed to the letter. WHY IT IS NOT THE CONCEPT: The doctrine has two halves and this is only the first. Steinitz's other half is TIMING — you may attack, or commit, only when you have earned the right — and White has developed one piece. This record's own definition says both halves 'are still the base of the game'; a pawn centre built ahead of the pieces is the first half practised without the second. WHAT THE SYSTEM DOES: Letelier-Fischer, Leipzig 1960. The API reports `center-control` for White — which is true, White does control more of it — and does not report the classical school, which has no matcher and should not. Stockfish 18 at depth 24: -0.10, level, with the centre complete and nothing gained; Fischer answered with ...d6 and ...f6 and won in twenty-three. The annotation names the mechanism: 'when central pawns are not supported by pieces, they can become an easy target'. The same position is `historical-principles`' positive example, a rule caught losing its condition, and `pawn-storm`'s counterexample.",
+      "origin_kind": "historical-game",
+      "game": "Letelier-Fischer, Leipzig Olympiad 1960 (preliminaries)",
+      "concept_role": "negative",
+      "false_positive_case": "the-classical-prescription-followed-exactly"
+    }
+  ],
+  "ambiguous_examples": [
+    {
+      "fen": "r2q1rk1/pp3ppp/1b4n1/3p4/8/1N1Q3P/PPP2PP1/R1B1R1K1 b - - 0 15",
+      "move": "d4",
+      "move_uci": "d5d4",
+      "note": "Capablanca-Rubinstein, Berlin 1928, 15...d4 - Rubinstein voluntarily accepting an isolated queen pawn, 'confident that its central control is worth the long-term weakness'. This is the classical doctrine arguing with itself. Steinitz's evaluation half says a durable structural weakness is an asset for the opponent and should be avoided; the same school's teaching on the centre says central control is worth paying for. One of the greatest classical players chose the second reading against the first, in a game he lost to the most classical player of all. Filed as ambiguous because the doctrine covers the move twice and points opposite ways, and the engine is only partly on Rubinstein's side.",
+      "origin_kind": "historical-game",
+      "game": "Capablanca-Rubinstein, Berlin 1928",
+      "concept_role": "ambiguous",
+      "attributed_by": "corpus entry capablanca-rubinstein-1928-15d4-static-vs-dynamic",
+      "engine": {
+        "engine_id": "Stockfish 18",
+        "test_level": 3,
+        "depth": 22,
+        "threads": 10,
+        "hash_mb": 4096,
+        "multipv": 3,
+        "best_move": "Qf6",
+        "eval_cp": 9,
+        "mate_in": null,
+        "pv": [],
+        "alternatives": [],
+        "margin_cp": null,
+        "verdict": "ambiguous",
+        "verdict_note": "The engine's first choice is a different move at +0.09 - level - and the disagreement is the informative part, which is why the corpus entry files it as partial agreement rather than as support. The isolated pawn Rubinstein took on is neither refuted nor endorsed at depth 22."
+      }
+    }
+  ],
+  "explanations": {
+    "by_level": {
+      "beginner": "The idea that chess is won by building up small lasting advantages rather than by attacking straight away.",
+      "intermediate": "The classical school: evaluate the position's durable features, accumulate them, and attack only once you have an advantage.",
+      "advanced": "Steinitz's framework plus Tarrasch's codification. The first survived, the second was corrected by the hypermoderns.",
+      "master": "The vocabulary nearly all later theory is written in. Note the distinction between Steinitz's evaluative claims and Tarrasch's prescriptive ones when reading period sources."
+    },
+    "by_depth": {
+      "short": "Build small advantages; attack only when you have earned it.",
+      "normal": "The classical school, from Steinitz and codified by Tarrasch: positions have durable features that can be identified and accumulated, and an attack must be justified by an advantage you already hold.",
+      "deep": "Steinitz was the first player to demonstrate systematic positional understanding, replacing the Romantic style with an evaluative one. Two halves: positions have durable features — weak squares, pawn weaknesses, good and bad bishops — that can be accumulated; and one must not attack without a tangible advantage, but should when one exists. Lasker compressed it to three principles: the initial position is balanced, do not attack without an advantage, attack the weak points. Tarrasch turned this into teachable rules, and it was that dogmatic form the hypermoderns attacked rather than Steinitz himself. The evaluation framework survived intact and is the basis of most positional vocabulary — and, recognisably, of engine evaluation functions."
+    },
+    "hedge": "A historical school. Its evaluative framework survives essentially unchanged, but its prescriptive form — particularly Tarrasch's — has well-known exceptions and should not be quoted as law.",
+    "lesson": "Steinitz's question is still the right one to start with: what are the durable features of this position, and which of them can I play against?"
+  },
+  "terminology": {
+    "beginner_words": [
+      "small advantages",
+      "weak points"
+    ],
+    "advanced_words": [
+      "classical school",
+      "accumulation",
+      "static advantage",
+      "positional play"
+    ],
+    "avoid": [
+      "the classical school was refuted"
+    ]
+  },
+  "status": {
+    "stage": "researched",
+    "last_updated": "2026-09-01",
+    "open_questions": [],
+    "audit_notes": []
+  },
+  "id": "classical-school",
+  "canonical_name": "The classical school",
+  "category": "classical-school",
+  "definition_short": "Steinitz's positional doctrine, codified by Tarrasch: accumulate small static advantages, occupy the centre with pawns, and attack only when you have earned the right.",
+  "definition_long": "The school that replaced the Romantic style of Anderssen and Blackburne, whose games were decided by sacrificial attack. Steinitz was the first player to demonstrate systematic positional understanding, and his doctrine has two halves that are still the base of the game.\n\nFirst, EVALUATION: positions have durable features — pawn weaknesses, weak squares, good and bad bishops, holes — which can be identified and accumulated. Second, TIMING: you may not attack without a tangible advantage in position, and if you have one you are more or less obliged to. Lasker summarised the theory in three principles: the initial position is balanced; do not attack without an advantage; attack the weak points.\n\nSteinitz also held the striking view that with best play a draw is the legitimate result — a claim that reads as unremarkable now and was radical then.\n\nTarrasch codified all this into teachable rules, and that codification is what the hypermoderns attacked. The distinction matters: Steinitz's evaluation framework survived essentially intact and is the basis of most of the concepts in this knowledge base. What was overturned was Tarrasch's DOGMATIC form of it — that the centre must be occupied by pawns, that certain structures are simply bad, that the rules admit few exceptions.\n\nConfusingly, this school was called 'the Modern school' at the time. It is now the classical one.",
+  "sources": [
+    "steinitz-modern-chess-instructor",
+    "britannica-chess-theory",
+    "wikipedia-hypermodernism",
+    "winter-chess-notes-steinitz"
+  ],
+  "source_confidence": "high"
+}

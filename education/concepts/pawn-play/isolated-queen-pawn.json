@@ -1,0 +1,355 @@
+{
+  "schema_version": 2,
+  "alternate_names": [
+    "IQP",
+    "isolani",
+    "isolated d-pawn"
+  ],
+  "historical_names": [],
+  "tags": [
+    "pawn-structure",
+    "static-vs-dynamic",
+    "baburin",
+    "misunderstood"
+  ],
+  "subcategory": "pawn structure",
+  "difficulty": "advanced",
+  "knowledge_type_note": "The textbook case of a feature that is simultaneously a static weakness and a dynamic asset, which is why it is classified as a concept rather than as a weakness.",
+  "name_status": "established-name",
+  "history": {
+    "attributions": [
+      {
+        "person": "Wilhelm Steinitz",
+        "relation": "originated-by",
+        "source": "britannica-chess-theory",
+        "year": null,
+        "note": "Britannica records isolated pawns among the weaknesses named by Steinitz, and notes explicitly that they 'may confer middlegame compensation through control of important squares'. ATTRIBUTION NOT VERIFIED: this is the conventional ascription, taken from a secondary source, and no primary text was consulted for it during this research."
+      },
+      {
+        "person": "Siegbert Tarrasch",
+        "relation": "later-associated-with",
+        "source": null,
+        "year": null,
+        "note": "Conventionally associated with an optimistic view of the IQP's dynamic side; not verified in this research."
+      },
+      {
+        "person": "Alexander Baburin",
+        "relation": "systematized-by",
+        "source": "baburin-winning-pawn-structures",
+        "year": 1998,
+        "note": "Winning Pawn Structures is the standard modern treatment of the structure."
+      }
+    ],
+    "first_documented_source": "britannica-chess-theory",
+    "year": null,
+    "confidence": "low",
+    "notes": "Notably, Britannica's summary of Steinitz already contains BOTH halves — isolated pawns are a weakness, and they may confer middlegame compensation. The Tarrasch association is conventional and unverified here. Baburin's book has not been read.",
+    "competing_claims": [],
+    "development": [
+      {
+        "era": "Steinitz",
+        "change": "Named as a structural weakness, with the compensation already noted.",
+        "source": "britannica-chess-theory"
+      },
+      {
+        "era": "1998, Baburin",
+        "change": "Systematic treatment of the structure's plans for both sides.",
+        "source": "baburin-winning-pawn-structures"
+      }
+    ]
+  },
+  "engine_era_status": "useful-with-common-exceptions",
+  "engine_era_note": "Engines handle the IQP better than the rules of thumb do, because they simply evaluate the position rather than choosing a side. The received teaching — weakness in the endgame, asset in the middlegame — survives as a description of the tendency; what does not survive is any general verdict on whether the structure is good.",
+  "recognition": {
+    "preconditions": [
+      "A d-pawn with no friendly pawns on the c- or e-files"
+    ],
+    "indicators_for": [
+      "Minor pieces have been exchanged, so the pawn is a target and little else",
+      "The square in front is securely blockaded",
+      "The position is heading for an endgame",
+      "The half-open files are contested or neutralised"
+    ],
+    "indicators_against": [
+      "Pieces are still on and the IQP side has the initiative",
+      "The c- and e-files are giving the rooks real work",
+      "Knights are established on the outposts beside the pawn",
+      "Attacking chances against f7 are live",
+      "The pawn can advance at a chosen moment to liquidate favourably"
+    ],
+    "prerequisites": [
+      "hole",
+      "backward-pawn"
+    ],
+    "detector": "pawnStructure (not yet written)",
+    "detectability": "mechanical",
+    "typical_confidence": "low",
+    "false_positive_traps": [
+      "REGISTERED FALSE POSITIVE: an isolated pawn is not automatically a weakness. In the middlegame it is frequently the source of the better side's whole game.",
+      "The structure is trivially detectable and says almost nothing on its own — the material left on the board decides the evaluation more than the structure does.",
+      "Reporting it as a weakness while its owner has the initiative inverts the position.",
+      "An isolated queen's pawn is not a weakness on sight. In the standard position measured here the side with the isolani is slightly better (+0.14)."
+    ]
+  },
+  "application": {
+    "typical_plans": [
+      "With the IQP: keep pieces on, use the c- and e-files, occupy e5 and c5, attack f7, and time the d4-d5 break",
+      "Against it: exchange minor pieces, blockade the pawn with a knight, keep a queen and rook to attack it, and steer for an endgame"
+    ],
+    "typical_moves": [
+      "d4-d5 as the liberating break",
+      "Ne5 and Nc5 occupying the outposts",
+      "Nd4 as the blockader"
+    ],
+    "typical_pawn_structures": [
+      "Queen's Gambit and Panov structures with White's d4 isolated"
+    ],
+    "typical_piece_arrangements": [
+      "Knight blockading on d5 or d4",
+      "Rooks on the c- and e-files"
+    ],
+    "tactical_consequences": [
+      "Sacrifices against f7 and h7 arising from the space and open lines"
+    ],
+    "strategic_consequences": [
+      "The clearest instance of a static-versus-dynamic race in standard theory"
+    ]
+  },
+  "exceptions": [
+    "The blanket rule 'trade pieces against an IQP' has an important qualification: trade MINOR pieces, but keep a queen and a rook, or there is nothing left to attack the pawn with.",
+    "A d4-d5 break at the right moment can dissolve the weakness entirely and leave only the activity.",
+    "In some structures the isolated pawn is an asset even in the endgame, if it cramps the opponent and cannot be won."
+  ],
+  "limitations": [
+    "Detecting the structure is mechanical; nothing about the evaluation follows from it without counting the remaining pieces.",
+    "MEASURED 2026-09-02, on the two traps about interpretation rather than detection: 'the structure is trivially detectable and says almost nothing on its own - the material left on the board decides the evaluation more than the structure does', and 'reporting it as a weakness while its owner has the initiative inverts the position'. Neither is answerable by a static feature, and neither has to be: this base never calls an isolated queen's pawn a weakness. The sentence reports the structure and the wording layer supplies the record's two-sided reading - space and two half-open files in the middlegame, a target in the endgame - and test_explanations.js forbids the word.",
+    "A NOTE ON THIS RECORD'S indicators_against, 2026-09-02, because the field means something different here from what it means on a concept that names an asset. All five - 'pieces are still on and the IQP side has the initiative', 'the c- and e-files are giving the rooks real work', 'knights are established on the outposts beside the pawn', 'attacking chances against f7 are live', 'the pawn can advance at a chosen moment to liquidate favourably' - are reasons the isolated pawn is an ASSET rather than a liability. They are not reasons to withhold the concept: the pawn is on the board either way. This base answers them by never calling it a weakness. The matcher reports the structure and the wording layer supplies the record's two-sided reading, and test_explanations.js forbids the word. Building any of them as a guard would suppress a structure that is present."
+  ],
+  "misconceptions": [
+    "That an IQP is a weakness. It is a weakness in the endgame and often an asset in the middlegame.",
+    "That the correct plan against it is to trade everything. Trading the ATTACKERS leaves nothing to attack it with.",
+    "That the pawn is the target. The square in front of it is the more permanent asset."
+  ],
+  "relationships": {
+    "broader": [],
+    "narrower": [],
+    "related": [
+      "hole",
+      "outpost",
+      "open-file",
+      "static-vs-dynamic"
+    ],
+    "contrasting": [],
+    "co_occurring": [
+      "outpost",
+      "open-file"
+    ],
+    "conflicts": [
+      {
+        "concept": "passed-pawn",
+        "resolution": "Not opposed, but they illustrate the same trap from two directions: a structural feature that is trivially detectable and whose value depends entirely on what else is on the board. Report the feature, then the condition that decides it — remaining material for the IQP, mobility for a passer."
+      }
+    ]
+  },
+  "examples": [
+    {
+      "fen": "r1bqkb1r/pp3ppp/2n1p3/3n4/2BP4/2N2N2/PP3PPP/R1BQK2R b KQkq - 0 8",
+      "note": "A standard isolated-queen's-pawn position: White has the isolani on d4 with the usual compensation - space, the c4 bishop, and the e5 and c5 squares. Constructed-test, built from a mainline move order.",
+      "origin_kind": "constructed-test",
+      "concept_role": "supports",
+      "side_to_move_benefits": "white",
+      "engine": {
+        "engine_id": "Stockfish 18",
+        "test_level": 3,
+        "depth": 26,
+        "threads": 10,
+        "hash_mb": 2048,
+        "multipv": 3,
+        "best_move": "f8b4",
+        "eval_cp": -14,
+        "mate_in": null,
+        "pv": [],
+        "alternatives": [
+          {
+            "move": "f8e7",
+            "eval_cp": -14,
+            "mate_in": null
+          },
+          {
+            "move": "f8d6",
+            "eval_cp": -18,
+            "mate_in": null
+          }
+        ],
+        "margin_cp": 0,
+        "verdict": "supports",
+        "verdict_note": "The side WITH the isolated pawn stands slightly better: the evaluation is -0.14 from Black's perspective, so White is +0.14. An isolated queen's pawn is therefore not a weakness in itself - it is a trade of a long-term structural liability for short-term activity and space, and at this stage the activity is worth marginally more. Recorded to stop this base reporting an isolated pawn as a defect on sight."
+      }
+    },
+    {
+      "fen": "r2qkbnr/p4pp1/b1pPp2p/2p5/Q2P4/5N2/PP1N1PPP/R1B1K2R b KQkq - 1 11",
+      "note": "The feature is present and was verified mechanically by lib/features.js: White holds an isolated d-pawn in a middlegame. The engine puts the position at 0.58, close enough to level that the feature is not being swamped by tactics — so this is usable as an instance of the concept. What is NOT claimed is that the concept explains the engine's move. Provenance: mined from this repository's puzzle corpus, which is engine self-play — a real position from a real game between engines, not a master game.",
+      "origin_kind": "puzzle",
+      "concept_role": "supports",
+      "side_to_move_benefits": "neither",
+      "engine": {
+        "engine_id": "Stockfish 18",
+        "test_level": 2,
+        "depth": 20,
+        "threads": 8,
+        "hash_mb": 2048,
+        "multipv": 2,
+        "best_move": "a6b5",
+        "eval_cp": 58,
+        "mate_in": null,
+        "pv": [],
+        "alternatives": [
+          {
+            "move": "d8c8",
+            "eval_cp": -329,
+            "mate_in": null
+          }
+        ],
+        "margin_cp": 0,
+        "verdict": "supports",
+        "verdict_note": "Level-2 validation: the position was scored, not designed. It confirms the feature is present in real play and, where the score is near level, that the feature is not drowned out. It is not a controlled pair and proves nothing about the concept on its own."
+      }
+    },
+    {
+      "fen": "8/p2PB1pk/1p5p/4q3/6K1/2Pp1P2/6PP/8 w - - 0 48",
+      "game": "Smyslov-Petrosian, Candidates, Zurich 1953",
+      "note": "A QUIET position from a master game — after cxd3, ply 94 — in which Black has an isolated pawn on d3 with no friendly pawn on the c- or e-file. Quiet here has a mechanical meaning: the side to move has no check and no capture that wins material, so the next move has to be chosen on positional grounds. That matters because this base's other corpus is 788 tactical puzzles, in which a positional feature cannot be isolated.\n\nWHAT IS VERIFIED: the game replays legally end to end through the page's own move generator, so the FEN is derived rather than transcribed; and the feature is present by mechanical measurement in lib/features.js.\n\nWHAT IS NOT CLAIMED: that the concept decides this position, or that the players were thinking about it. Note also a limitation of method — the position was FOUND by this system's own Layer 4, so it demonstrates the concept and cannot by itself validate the matcher that found it. Other concepts licensed here: passed-pawn, backward-pawn, weak-square, material-imbalance.",
+      "origin_kind": "historical-game",
+      "concept_role": "supports",
+      "side_to_move_benefits": "neither"
+    },
+    {
+      "fen": "4r1k1/1b3pb1/pq4pp/3pr3/3p4/1P1B2P1/P2N1P1P/2RQR1K1 w - - 0 31",
+      "game": "Kotov-Petrosian, Candidates, Zurich 1953",
+      "note": "A quiet position from a master game — after Rxe5, ply 60 — where Black has an isolated pawn on d5, d4 with no friendly pawn on the c- or e-file. Quiet has a mechanical meaning here: the side to move has no check and no capture that wins material, so the next move must be chosen positionally. VERIFIED: the game replays legally end to end through the page's own move generator, and the feature is measured by lib/features.js. NOT CLAIMED: that the concept decides this position, or that the players were thinking about it. Method note: the position was found by this system's own Layer 4, so it illustrates the concept and cannot by itself validate the matcher that found it. Other concepts licensed here: passed-pawn, doubled-pawns, bishop-pair, open-file.",
+      "origin_kind": "historical-game",
+      "concept_role": "supports",
+      "side_to_move_benefits": "neither"
+    },
+    {
+      "fen": "r1bqkb1r/pp3ppp/2n2n2/8/3P4/2N1BN2/PP3PPP/R2QKB1R w KQkq - 0 1",
+      "note": "A white d-pawn with no pawn on the c- or e-file, and minor pieces still on: the isolated queen's pawn proper.",
+      "origin_kind": "constructed-test",
+      "concept_role": "supports",
+      "side_to_move_benefits": "neither",
+      "controlled_pair_with": "r1bqkb1r/pp3ppp/2n2n2/8/2PP4/2N1BN2/PP3PPP/R2QKB1R w KQkq - 0 1"
+    }
+  ],
+  "counterexamples": [
+    {
+      "fen": "r1bqkb1r/pp3ppp/2n2n2/8/2PP4/2N1BN2/PP3PPP/R2QKB1R w KQkq - 0 1",
+      "note": "The same position with a white pawn added on c4. The d-pawn now has a neighbour and the structure is not an isolani at all - it is a broad pawn centre, which the record's own definition excludes and which plays by different rules. One pawn is the difference between the two most-discussed structures in the queen's-pawn openings.",
+      "origin_kind": "constructed-test",
+      "concept_role": "negative",
+      "side_to_move_benefits": "neither",
+      "controlled_pair_with": "r1bqkb1r/pp3ppp/2n2n2/8/3P4/2N1BN2/PP3PPP/R2QKB1R w KQkq - 0 1"
+    }
+  ],
+  "ambiguous_examples": [
+    {
+      "fen": "6k1/6p1/3Pp3/p6p/P6P/8/8/1nK2b2 w - - 0 57",
+      "note": "The feature is present and was verified mechanically by lib/features.js: an isolated d-pawn in an ENDGAME, where the dynamic compensation the concept relies on has gone. The engine assessment is 5.72, which is far enough from level that the position is decided by concrete play rather than by this feature. Recorded as an ambiguous example on purpose: it demonstrates the feature and does NOT show the concept deciding anything, and conflating those is the error this base is built to avoid. Provenance: mined from this repository's puzzle corpus, which is engine self-play — a real position from a real game between engines, not a master game.",
+      "origin_kind": "puzzle",
+      "concept_role": "ambiguous",
+      "side_to_move_benefits": "neither",
+      "engine": {
+        "engine_id": "Stockfish 18",
+        "test_level": 2,
+        "depth": 20,
+        "threads": 8,
+        "hash_mb": 2048,
+        "multipv": 2,
+        "best_move": "d6d7",
+        "eval_cp": 572,
+        "mate_in": null,
+        "pv": [],
+        "alternatives": [
+          {
+            "move": "c1b1",
+            "eval_cp": -1087,
+            "mate_in": null
+          }
+        ],
+        "margin_cp": 0,
+        "verdict": "ambiguous",
+        "verdict_note": "Level-2 validation: the position was scored, not designed. It confirms the feature is present in real play and, where the score is near level, that the feature is not drowned out. It is not a controlled pair and proves nothing about the concept on its own."
+      }
+    },
+    {
+      "fen": "r2q1rk1/pp1bbppp/1n2pn2/6B1/3P4/1BNQ1N2/PP3PPP/R4RK1 b - - 4 12",
+      "note": "Botvinnik-Vidmar, Nottingham 1936, Nbd5. Human ground truth: the concept is named for this position by Mark Buckley in Practical Chess Analysis, quoted on this game; corroborated by IM Jeremy Silman on the structure. Corpus entry `botvinnik-vidmar-1936-12Qd3-isolated-queen-pawn-ambiguous`. The other half of the isolani, and the reason this base's own record registers 'an isolated pawn is not automatically a weakness' as a false positive. The d4 pawn is what gives White the e5 square, the two open files and the two attacking diagonals, and Botvinnik uses all of them: 13.Ne5, 17.f4, 18.f5, and the famous 20.Nxf7. It is an AMBIGUOUS entry rather than a positive one because the concept ",
+      "origin_kind": "historical-game",
+      "game": "Botvinnik-Vidmar, Nottingham 1936",
+      "concept_role": "ambiguous",
+      "attributed_by": "Mark Buckley in Practical Chess Analysis, quoted on this game; corroborated by IM Jeremy Silman on the structure — corpus entry botvinnik-vidmar-1936-12Qd3-isolated-queen-pawn-ambiguous",
+      "engine": {
+        "engine_id": "Stockfish 18",
+        "test_level": 3,
+        "depth": 22,
+        "multipv": 3,
+        "best_move": "Nfd5",
+        "eval_cp": -23,
+        "verdict": "ambiguous",
+        "verdict_note": "on the assessment, which is the claim being tested: at depth 22 the side WITH the isolated queen's pawn is better, by 0.23, in a structure the same base's detector reports as a weakness in the pawn structure. The game's 12...Nbd5 is not in the engine's top three; it prefers the other knight, which is a question about Vidmar's move and not about the structure. Deliberately scored as a structure rather than a move, on the same footing as this corpus's hanging-pawns entry. Running a search to rank 12...Nbd5 would answer a question nobody asked."
+      }
+    }
+  ],
+  "explanations": {
+    "by_level": {
+      "beginner": "That pawn has no pawns next to it to defend it, so pieces have to. In return it gives more space and open lines for the rooks.",
+      "intermediate": "An IQP. In the middlegame it gives space, two half-open files and outposts on {squares}; in the endgame it is a target. The race is between those two clocks.",
+      "advanced": "Static weakness, dynamic asset. With it, keep pieces on and look for the d5 break. Against it, trade minor pieces but keep a queen and rook — trading everything leaves nothing to attack it with.",
+      "master": "The evaluation is a function of remaining material more than of structure. Blockade first, exchange the right pieces, and note that d4-d5 at the right moment converts the liability into pure activity."
+    },
+    "by_depth": {
+      "short": "An isolated d-pawn: a target later, space and open files now.",
+      "normal": "An isolated queen's pawn. It cannot be defended by a pawn and the square in front is a permanent hole — but it gives central space, half-open c- and e-files, and outposts beside it. It is an asset while pieces are on and a liability once they come off.",
+      "deep": "The thematic case of static weakness against dynamic compensation, which is why it is taught more than any other structure. The static side: no pawn can defend it, and the square in front is a permanent blockading square. The dynamic side: central space, two half-open files for the rooks, outposts on the squares beside the pawn, and attacking chances against f7. The practical shape is a race — the IQP side must create something before the minor pieces come off, and the other side must trade them and reach an endgame. Note the qualification the blanket rule omits: trade MINOR pieces against an IQP, but keep a queen and a rook, because otherwise nothing remains to attack the pawn with."
+    },
+    "hedge": "",
+    "lesson": "An isolated pawn is a weakness in an endgame and a source of activity in a middlegame. Before judging it, count what is still on the board."
+  },
+  "terminology": {
+    "beginner_words": [
+      "a lonely pawn with no pawns beside it"
+    ],
+    "advanced_words": [
+      "IQP",
+      "isolani",
+      "blockade",
+      "static",
+      "dynamic",
+      "d5 break"
+    ],
+    "avoid": [
+      "the isolated pawn is weak",
+      "trade everything against an IQP"
+    ]
+  },
+  "status": {
+    "stage": "researched",
+    "last_updated": "2026-09-01",
+    "open_questions": [],
+    "audit_notes": [
+      "2026-09-01 audit: attribution to Wilhelm Steinitz carried low confidence without a hedge in the note itself. Hedge added so the caveat travels with the claim rather than sitting only in history.confidence."
+    ]
+  },
+  "id": "isolated-queen-pawn",
+  "canonical_name": "Isolated queen's pawn",
+  "category": "pawn-structures",
+  "knowledge_type": "positional-concept",
+  "definition_short": "A d-pawn with no friendly pawns on the c- or e-files: a static endgame liability and a middlegame source of space, open files and outposts.",
+  "definition_long": "An isolated pawn on the d-file. It cannot be defended by a pawn, and the square in front of it is a permanent hole. That is the static side, and it grows more serious with every exchange — which is why the standard rule against it is 'trade pieces and it becomes a target'.\n\nThe dynamic side is equally real. The IQP grants a central space advantage, two half-open files (c and e) for the rooks, and outposts on the squares beside the pawn — e5 and c5 for White — which are exactly the squares knights want. Attacking chances against f7 flow from the same source.\n\nIt is the most thematic case in chess of static weakness against dynamic compensation, which is why it is taught so heavily; Baburin's Winning Pawn Structures is the standard treatment. The practical shape is a race between two clocks: the IQP side must generate something before the pieces come off, and the other side must trade minor pieces and reach an endgame.\n\nHence the two rules of thumb that follow, and they are genuinely opposed by design: with the IQP, keep pieces on; against it, trade minor pieces but keep the queen and a rook so the pawn can be attacked.",
+  "sources": [
+    "baburin-winning-pawn-structures",
+    "pawnbreak-iqp",
+    "britannica-chess-theory",
+    "zurich-1953-games"
+  ],
+  "source_confidence": "medium"
+}

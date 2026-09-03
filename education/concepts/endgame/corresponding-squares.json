@@ -1,0 +1,208 @@
+{
+  "schema_version": 2,
+  "alternate_names": [
+    "relative squares",
+    "sister squares",
+    "coordinate squares",
+    "conjugate squares"
+  ],
+  "historical_names": [],
+  "tags": [
+    "endgame",
+    "kings",
+    "advanced",
+    "zugzwang"
+  ],
+  "subcategory": "king technique",
+  "difficulty": "expert",
+  "knowledge_type_note": "A decidable relationship between squares, not a guideline. Which squares correspond is a fact about the position.",
+  "name_status": "established-name",
+  "history": {
+    "attributions": [
+      {
+        "person": "Emanuel Lasker and Gustavus Charles Reichhelm",
+        "relation": "first-documented-by",
+        "source": "wikipedia-corresponding-squares",
+        "year": 1901,
+        "note": "Composed the study that became the standard hard case for the method. Second-hand attribution."
+      },
+      {
+        "person": "Vitaly Halberstadt and Marcel Duchamp",
+        "relation": "systematized-by",
+        "source": "wikipedia-corresponding-squares",
+        "year": 1932,
+        "note": "Their treatise 'L'opposition et cases conjuguées sont réconciliées' is the standard treatment. Second-hand; the book has not been consulted."
+      }
+    ],
+    "first_documented_source": "wikipedia-corresponding-squares",
+    "year": 1901,
+    "confidence": "low",
+    "notes": "Both attributions come from a single encyclopedia entry and neither primary work was consulted.",
+    "competing_claims": [],
+    "development": []
+  },
+  "engine_era_status": "substantially-revised-by-engines",
+  "engine_era_note": "Not that the theory is wrong — it is exactly right — but that tablebases have made it largely unnecessary for analysis. What was once the only way to solve these positions is now a way to UNDERSTAND them, while the answer is looked up. That is a real change in the concept's role rather than in its content.",
+  "recognition": {
+    "preconditions": [
+      "A blocked or semi-blocked position where king penetration decides",
+      "Simple opposition gives the wrong answer or no answer"
+    ],
+    "indicators_for": [
+      "Several pawns fixed, with a small number of entry squares to fight over",
+      "The attacking king has more squares in the system than the defender",
+      "The position is mutual zugzwang at several points"
+    ],
+    "indicators_against": [
+      "The position is open enough that king manoeuvring is not decisive",
+      "Simple opposition already answers it",
+      "Pawn tempi remain, which break the correspondence"
+    ],
+    "prerequisites": [
+      "opposition",
+      "zugzwang"
+    ],
+    "detector": null,
+    "detectability": "human-only",
+    "typical_confidence": "low",
+    "false_positive_traps": [
+      "The framework is only needed where opposition fails. Invoking it where simple opposition answers the question is unhelpful precision.",
+      "Correspondences break the moment a pawn tempo becomes available.",
+      "This is an expert-level tool. Reporting it to a player who has not yet mastered the opposition explains nothing."
+    ]
+  },
+  "application": {
+    "typical_plans": [
+      "Number the key squares for both kings, then move only to squares whose partner the defender cannot reach",
+      "As the defender: shift between your numbered squares, always mirroring"
+    ],
+    "typical_moves": [],
+    "typical_pawn_structures": [
+      "Fixed pawn chains with one or two entry squares"
+    ],
+    "typical_piece_arrangements": [
+      "Kings manoeuvring behind blocked pawns"
+    ],
+    "tactical_consequences": [],
+    "strategic_consequences": [
+      "Decides blocked king-and-pawn endings that opposition cannot analyse"
+    ]
+  },
+  "exceptions": [
+    "Any spare pawn tempo dissolves the correspondence.",
+    "Where opposition suffices, the extra machinery adds nothing."
+  ],
+  "limitations": [
+    "Human-only in practice: constructing the correspondence is a manual analytical technique.",
+    "Largely superseded as an ANALYTICAL tool by tablebases, though not as an explanatory one.",
+    "NO POSITIVE EXAMPLE, and the reason is the same one that makes this concept advanced. A positive would have to be a position where SIMPLE OPPOSITION GIVES THE WRONG ANSWER and the correspondence gives the right one - this record's own first trap is that invoking the framework where opposition answers the question is unhelpful precision. The candidates tried were all positions where opposition answers it, which is why the same board is registered here as a false-positive case instead. Building the positive means finding a blocked multi-pawn position small enough for a tablebase, and the ones tried were either symmetric and drawn both ways or too large for Syzygy at seven pieces. Recorded rather than filled. MEASURED 2026-09-03, and the reason is now a number rather than an impression. An exhaustive tablebase search was run over the shape the technique is FOR - two pawns nose to nose on one file, so neither side has a pawn tempo and the whole game is king moves - asking Syzygy for BOTH side-to-move readings of every position with both kings inside a box around the pawns. It found NINE reciprocal zugzwangs (the enumeration was still running when the count was taken, and every later find has been the same shape). SEVEN of the nine are the two kings two squares apart on one file, which is simple opposition; the other two are trebuchets. So for a single blocked pawn pair the correspondence and the opposition are the same relation, and no position from this family can show what this record needs. A genuine correspondence that opposition gets wrong needs a second pawn making the geometry asymmetric, which means enumerating five-man positions rather than four. That is the next attempt, and it is written down so it is not started from scratch again."
+  ],
+  "misconceptions": [
+    "That it is a more complicated version of the opposition. It is the general theory; the opposition is its simplest case.",
+    "That it applies broadly. It applies to blocked king-and-pawn endings and almost nowhere else."
+  ],
+  "relationships": {
+    "broader": [
+      "zugzwang"
+    ],
+    "narrower": [
+      "opposition"
+    ],
+    "related": [
+      "opposition",
+      "triangulation",
+      "zugzwang",
+      "key-square"
+    ],
+    "contrasting": [],
+    "co_occurring": [
+      "triangulation",
+      "opposition"
+    ],
+    "conflicts": []
+  },
+  "examples": [],
+  "counterexamples": [
+    {
+      "fen": "8/4k3/8/4K3/4P3/8/8/8 b - - 0 1",
+      "note": "Registered false-positive case `opposition-already-answers-it`, kept on the record as well as in tests/false_positive_cases.json so that the concept carries its own negative evidence. THE SURFACE PATTERN IS PRESENT: A king-and-pawn ending decided by which king has to move: Black to move loses, White to move draws. That is reciprocal zugzwang, and reciprocal zugzwang is what a pair of corresponding squares IS. WHY IT IS NOT THE CONCEPT: This record's first trap: \"The framework is only needed where opposition fails. Invoking it where simple opposition answers the question is unhelpful precision.\" And its second indicator_against: \"Simple opposition already answers it.\" The kings are in direct opposition on one file with one pawn on the board; counting the squares between them gives the right answer, which is the case the general theory exists to handle when it does not. WHAT THE SYSTEM DOES: PROVEN both ways: Black to move is a LOSS in 28, and the same board with White to move is a PROVEN DRAW at dtz 0. So the mutual zugzwang is real and the concept that names it here is `opposition`, which the API reports at high confidence, and not this one, which has no matcher. The distinction matters because it is a distinction about the READER rather than about the board — this record's third trap says so outright: 'this is an expert-level tool. Reporting it to a player who has not yet mastered the opposition explains nothing.' The same position is this base's strictest controlled pair and serves `opposition`, `key-square` and `zugzwang`.",
+      "origin_kind": "constructed-test",
+      "concept_role": "negative",
+      "false_positive_case": "opposition-already-answers-it",
+      "engine": {
+        "engine_id": "Stockfish 18",
+        "test_level": 3,
+        "depth": 26,
+        "threads": 10,
+        "hash_mb": 4096,
+        "multipv": 1,
+        "best_move": "e7d7",
+        "eval_cp": null,
+        "mate_in": -15,
+        "pv": [],
+        "alternatives": [],
+        "margin_cp": null,
+        "verdict": "supports",
+        "verdict_note": "Mate in 15 against the side to move at depth 26, and Syzygy proves it: a LOSS in 28, against a PROVEN DRAW at dtz 0 for the same board with the other side to move. The reciprocal zugzwang is real, and the concept that names it here is `opposition` rather than this one - which is this record's own first trap, that the general framework is only needed where simple opposition fails."
+      },
+      "tablebase": {
+        "source": "Lichess tablebase (Syzygy, 7-piece)",
+        "pieces": 4,
+        "wdl": "loss",
+        "dtz": -4,
+        "dtm": -28,
+        "category": "loss",
+        "note": "PROVEN both ways, which is what a reciprocal-zugzwang claim needs: Black to move is a LOSS in 28, and the same board with White to move is a PROVEN DRAW at dtz 0. The pair of squares is real. What this record adds beyond `opposition` is the general theory for positions where counting squares between the kings gives the wrong answer, and this is not one of those - which is why the same position is also this record's registered false-positive case."
+      }
+    }
+  ],
+  "ambiguous_examples": [],
+  "explanations": {
+    "by_level": {
+      "beginner": "Some squares come in pairs: if your king goes to one, theirs has to go to the matching one or you get through.",
+      "intermediate": "Corresponding squares — a more general version of the opposition, for blocked positions where counting squares between the kings does not work.",
+      "advanced": "Squares of mutual zugzwang. Number them for both sides; if you have more squares in the system than the defender, they run out first.",
+      "master": "The general framework the opposition specialises. Note that tablebases have moved it from an analytical necessity to an explanatory one."
+    },
+    "by_depth": {
+      "short": "Paired squares — if their king cannot match yours, you break through.",
+      "normal": "Corresponding squares: pairs where one king occupying its square forces the other to occupy the partner. They are squares of mutual zugzwang, and the method is to number them and always answer with the matching number.",
+      "deep": "The general theory of which opposition is the simplest case, and the tool for blocked positions where counting squares between kings misleads. Two squares correspond when occupying one obliges the enemy king to occupy the other; with only one pair they are called mined squares. The practical method is numbering — the defender shifts between numbered squares answering each attacking move with its partner, and loses when the attacker has more squares in the system than they do. The famous hard case is a Lasker and Reichhelm study of 1901, treated in a 1932 book by Halberstadt and Marcel Duchamp."
+    },
+    "hedge": "",
+    "lesson": "Reach for this only when the opposition gives you the wrong answer. That is the signal that the position has a correspondence structure instead."
+  },
+  "terminology": {
+    "beginner_words": [
+      "matching squares",
+      "if their king cannot copy you"
+    ],
+    "advanced_words": [
+      "corresponding squares",
+      "conjugate squares",
+      "mined squares",
+      "mutual zugzwang"
+    ],
+    "avoid": [
+      "corresponding squares are just the opposition"
+    ]
+  },
+  "status": {
+    "stage": "researched",
+    "last_updated": "2026-09-01",
+    "open_questions": [],
+    "audit_notes": []
+  },
+  "id": "corresponding-squares",
+  "canonical_name": "Corresponding squares",
+  "category": "corresponding-squares",
+  "knowledge_type": "proven-result",
+  "definition_short": "Pairs of squares such that if one king occupies its square, the other king must occupy the partner square to hold — squares of mutual zugzwang.",
+  "definition_long": "Two squares correspond when a king occupying one obliges the enemy king to occupy the other in order to hold the position. They are squares of RECIPROCAL ZUGZWANG: whoever steps onto their square first, while the opponent can answer on the partner square, is the one in trouble.\n\nIt is the GENERAL theory of which the opposition is a special case, and it is what you need when simple opposition misleads — typically in blocked positions with several pawns, where counting squares between kings gives the wrong answer. Where there is only one pair, they are called MINED SQUARES: step on yours and you lose if the opponent can step on theirs.\n\nThe method in practice is to number the squares: the defending king shifts between its numbered squares, always answering the attacker's move with the corresponding number. If the attacker has more squares in the system than the defender, the defender eventually cannot answer and the position is broken through.\n\nThe most celebrated example is a study by Lasker and Reichhelm from 1901, analysed in the 1932 treatise 'L'opposition et cases conjuguées sont réconciliées' by Vitaly Halberstadt and Marcel Duchamp — the artist.",
+  "sources": [
+    "wikipedia-corresponding-squares",
+    "wikipedia-opposition",
+    "lichess-tablebase"
+  ],
+  "source_confidence": "medium"
+}

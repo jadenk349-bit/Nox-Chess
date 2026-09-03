@@ -1,0 +1,138 @@
+{
+  "schema_version": 2,
+  "id": "checkmate",
+  "canonical_name": "Checkmate",
+  "alternate_names": [
+    "mate"
+  ],
+  "historical_names": [],
+  "category": "official-rules",
+  "subcategory": "basic rules of play",
+  "tags": [],
+  "knowledge_type": "official-rule",
+  "knowledge_type_note": "Official rule, and the game's objective.",
+  "name_status": "established-name",
+  "difficulty": "beginner",
+  "definition_short": "The king is in check and no legal move removes the check. The game ends immediately.",
+  "definition_long": "FIDE Art. 5.1.1: 'The game is won by the player who has checkmated his/her opponent's king. This immediately ends the game, provided that the move producing the checkmate position was in accordance with Article 3 and Articles 4.2 – 4.7.'\n\nCheckmate takes precedence over the automatic-draw provisions: Art. 9.6.2 ends with 'If the last move resulted in checkmate, that shall take precedence' — so a move that both completes 75 moves without capture or pawn move AND delivers mate is a win, not a draw.",
+  "history": {
+    "attributions": [],
+    "first_documented_source": "fide-laws-2023",
+    "year": null,
+    "confidence": "unknown",
+    "notes": "",
+    "competing_claims": [],
+    "development": []
+  },
+  "engine_era_status": "not-applicable",
+  "engine_era_note": "",
+  "sources": [
+    "fide-laws-2023",
+    "fide-laws-2023-pdf"
+  ],
+  "source_confidence": "high",
+  "recognition": {
+    "preconditions": [
+      "The side to move is in check",
+      "The side to move has no legal move"
+    ],
+    "indicators_for": [],
+    "indicators_against": [],
+    "prerequisites": [],
+    "detector": "legalMoves and inCheck in blind-chess.html",
+    "detectability": "mechanical",
+    "typical_confidence": "high",
+    "false_positive_traps": []
+  },
+  "application": {
+    "typical_plans": [],
+    "typical_moves": [],
+    "typical_pawn_structures": [],
+    "typical_piece_arrangements": [],
+    "tactical_consequences": [],
+    "strategic_consequences": []
+  },
+  "exceptions": [],
+  "limitations": [
+    "TYPICAL_CONFIDENCE RAISED medium -> high, 2026-09-02, and the reason is the schema's own definition of the field: 'how confidently this concept can normally be asserted ONCE ITS PRECONDITIONS HOLD'. This concept's recognition is MECHANICAL and its knowledge type already carries a high ceiling, so once the preconditions hold there is nothing left to be uncertain about - a stalemate is a stalemate, and a fork this base reports is one findMotifs() found, which ARCHITECTURE.md makes the authority and forbids second-guessing. 'Medium' was the default across 32 rule and motif records regardless of detectability, and it was found by measuring what the API reports against what each record permits: twelve concepts were reporting ABOVE their own record. The fix was to make each record its own ceiling in cap(), which then required the records that were wrong to be corrected rather than silently overruled."
+  ],
+  "misconceptions": [],
+  "relationships": {
+    "broader": [],
+    "narrower": [],
+    "related": [
+      "check",
+      "stalemate",
+      "seventy-five-move-rule"
+    ],
+    "contrasting": [],
+    "co_occurring": [],
+    "conflicts": []
+  },
+  "examples": [
+    {
+      "fen": "R5k1/5ppp/8/8/8/8/5PPP/6K1 b - - 0 1",
+      "note": "Constructed back-rank mate, verified by the move generator: inCheck(black) = true and legalMoves() returns ZERO. That conjunction is the whole definition. The king's three escape squares on the seventh are occupied by its own pawns, which is the pattern the `luft` and `back-rank-mate` records are about, and both are reachable from here.",
+      "origin_kind": "constructed-test",
+      "concept_role": "positive"
+    }
+  ],
+  "counterexamples": [
+    {
+      "fen": "7k/5Q2/6K1/8/8/8/8/8 b - - 0 1",
+      "note": "The mirror of `stalemate`'s counterexample, and the same controlled pair read from the other side: the queen on f7 instead of g7 leaves Black with no legal move and NOT in check, which is a draw rather than a win. Every mechanical sign of mate is present except the one that matters.",
+      "origin_kind": "constructed-test",
+      "concept_role": "negative",
+      "side_to_move_benefits": "neither",
+      "controlled_pair_with": "7k/6Q1/6K1/8/8/8/8/8 b - - 0 1",
+      "tablebase": {
+        "source": "Lichess tablebase (Syzygy, 7-piece)",
+        "pieces": 3,
+        "wdl": "draw",
+        "dtz": 0,
+        "dtm": 0,
+        "category": "draw",
+        "checkmate": false,
+        "stalemate": true,
+        "note": "PROVEN: stalemate true, checkmate false, draw. The paired position with the queen on g7 is a proven loss with checkmate true."
+      }
+    }
+  ],
+  "ambiguous_examples": [],
+  "explanations": {
+    "by_level": {
+      "beginner": "The king is attacked and there is no way out. The game is over.",
+      "intermediate": "Checkmate ends the game immediately.",
+      "advanced": "Art. 5.1.1. Mate takes precedence over the automatic draw in Art. 9.6.2."
+    },
+    "by_depth": {
+      "short": "The king is in check and no legal move removes it. The game ends at once.",
+      "normal": "Checkmate: the king is attacked and every legal reply still leaves it attacked, so there are no legal moves at all. The game ends immediately — there is no claim to make and no agreement to reach.",
+      "deep": "FIDE Art. 5.1.1. The test is the conjunction of two things the move generator answers directly: the king is in check, and the list of legal moves is empty. Neither half alone is mate — the same empty list without check is stalemate and a draw, and this base's two examples are built one square apart to make that visible. Mate also takes precedence over the automatic draw of Art. 9.6.2, so a move that reaches the 75-move limit AND mates is mate."
+    },
+    "hedge": "",
+    "lesson": ""
+  },
+  "terminology": {
+    "beginner_words": [
+      "the king cannot escape"
+    ],
+    "advanced_words": [
+      "checkmate",
+      "mate in N"
+    ],
+    "avoid": []
+  },
+  "status": {
+    "stage": "researched",
+    "last_updated": "2026-09-01",
+    "open_questions": [],
+    "audit_notes": [
+      "2026-09-01 audit: flagged as short relative to the median record. REVIEWED AND ACCEPTED — this is a simple, fully specified rule quoted from the FIDE Laws. There is no further research to do, and padding it to match the median would add words without adding knowledge. Short is the correct length here.",
+      "2026-09-01: detector field named 'isCheckmate', which does not exist anywhere in the codebase. The audit's hardcoded whitelist had been accepting it. Repointed at real code, or marked as proposed where nothing implements it."
+    ]
+  },
+  "validation_na": {
+    "false_positive_test": "N/A rather than missing. A registered false-positive case is a position where the concept's surface pattern is present and the concept is absent, replayed as an assertion so the system can be shown declining the error. This concept is DECIDED BY THE MOVE GENERATOR - the same function that decides it in a game - so there is no judgement to get wrong and no surface pattern that can be present without the thing itself. The nearest genuine risk is a PATTERN NAME attached to a position that is check and not mate, and that risk belongs to `back-rank-mate` and `smothered-mate`, both of which carry a registered case for it."
+  }
+}

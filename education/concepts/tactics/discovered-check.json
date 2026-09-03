@@ -1,0 +1,218 @@
+{
+  "schema_version": 2,
+  "id": "discovered-check",
+  "canonical_name": "Discovered check",
+  "alternate_names": [],
+  "historical_names": [],
+  "category": "tactical-motifs",
+  "subcategory": "material-winning motif",
+  "tags": [],
+  "knowledge_type": "tactical-motif",
+  "knowledge_type_note": "Motif (D). Strictly a sub-case of discovered attack, distinguished because the forced reply changes what the moving piece may do.",
+  "name_status": "established-name",
+  "difficulty": "intermediate",
+  "definition_short": "A discovered attack where the revealed line gives check, so the moving piece is free to do anything.",
+  "definition_long": "A friendly unit steps off a line and the piece behind it checks the king. Because the opponent must answer the check immediately, the MOVING piece is effectively unconstrained for one move: it may capture, it may threaten a second target, and it may stand on a square where it is attacked, because there is no time to take it.\n\nThat last point is the one that makes discovered checks so hard to see. Ordinary safety reasoning — 'I cannot go there, it is defended' — does not apply to the discovering piece.",
+  "history": {
+    "attributions": [],
+    "first_documented_source": "informant-encyclopedia-combinations",
+    "year": null,
+    "confidence": "unknown",
+    "notes": "Descriptive pattern name of long, largely anonymous usage.",
+    "competing_claims": [],
+    "development": []
+  },
+  "engine_era_status": "unassessed",
+  "engine_era_note": "",
+  "sources": [
+    "informant-encyclopedia-combinations",
+    "wikipedia-chess-tactic",
+    "chesstempo-tactical-motifs",
+    "chesscom-tactics-38"
+  ],
+  "source_confidence": "high",
+  "recognition": {
+    "preconditions": [
+      "A friendly line piece is aimed at the enemy king through exactly one friendly blocker",
+      "That blocker has a legal move off the line"
+    ],
+    "indicators_for": [
+      "The moving piece can capture something or create a second threat",
+      "The moving piece lands on a square that would otherwise be unsafe"
+    ],
+    "indicators_against": [
+      "The check is easily blocked or the checking piece captured",
+      "The moving piece has no useful destination"
+    ],
+    "prerequisites": [
+      "discovered-attack",
+      "check"
+    ],
+    "detector": "lib/matchers.js: discovered-check, over findMotifs",
+    "detectability": "mechanical",
+    "typical_confidence": "high",
+    "false_positive_traps": []
+  },
+  "application": {
+    "typical_plans": [],
+    "typical_moves": [],
+    "typical_pawn_structures": [],
+    "typical_piece_arrangements": [],
+    "tactical_consequences": [],
+    "strategic_consequences": []
+  },
+  "exceptions": [
+    "If the discovered check can be met by a capture of the checking piece, the free move is not free."
+  ],
+  "limitations": [
+    "Fires on 1.5% of the 788 shipped positions. Defers to double-check, whose record says more about the same move.",
+    "TYPICAL_CONFIDENCE RAISED medium -> high, 2026-09-02, and the reason is the schema's own definition of the field: 'how confidently this concept can normally be asserted ONCE ITS PRECONDITIONS HOLD'. This concept's recognition is MECHANICAL and its knowledge type already carries a high ceiling, so once the preconditions hold there is nothing left to be uncertain about - a stalemate is a stalemate, and a fork this base reports is one findMotifs() found, which ARCHITECTURE.md makes the authority and forbids second-guessing. 'Medium' was the default across 32 rule and motif records regardless of detectability, and it was found by measuring what the API reports against what each record permits: twelve concepts were reporting ABOVE their own record. The fix was to make each record its own ceiling in cap(), which then required the records that were wrong to be corrected rather than silently overruled."
+  ],
+  "misconceptions": [],
+  "relationships": {
+    "broader": [
+      "discovered-attack"
+    ],
+    "narrower": [
+      "double-check"
+    ],
+    "related": [
+      "check",
+      "battery"
+    ],
+    "contrasting": [],
+    "co_occurring": [],
+    "conflicts": []
+  },
+  "examples": [
+    {
+      "fen": "r3r1k1/pp3pbp/1Bp3p1/8/2bP4/Q4N2/P3nPPP/3R1K1R b - - 3 20",
+      "move": "Nxd4+",
+      "move_uci": "e2d4",
+      "note": "Byrne-Fischer, New York 1956 - the Game of the Century, 20...Nxd4+, and it is the third check of the windmill. The knight steps off e2 and the detector says what happens: 'moving the knight uncovers the bishop on c4, which now checks the king.' The knight is free to take whatever it likes on the way, and what it takes here is a pawn on d4 with check, which is the entire point of the motif - the reply has to answer the check from a piece that did not move. Fischer, aged thirteen, plays the sequence four times. +6.05 from Black's side and the engine's first choice, in a position where Black has already given a queen. PROVENANCE. The move list was replayed through this base's own move generator by tools/replay_game.js, which refuses a wrong list rather than guessing, so the FEN is verified rather than remembered. No named annotator is attached to this position for this concept, so it grounds the MASTER-GAME rung and not the human-grounded one.",
+      "origin_kind": "historical-game",
+      "game": "D. Byrne-Fischer, New York 1956 (the Game of the Century)",
+      "concept_role": "positive",
+      "side_to_move_benefits": "black",
+      "engine": {
+        "engine_id": "Stockfish 18",
+        "test_level": 3,
+        "depth": 20,
+        "threads": 10,
+        "hash_mb": 4096,
+        "multipv": 1,
+        "best_move": "e2d4",
+        "eval_cp": 605,
+        "mate_in": null,
+        "pv": [],
+        "alternatives": [],
+        "margin_cp": null,
+        "verdict": "supports",
+        "verdict_note": "+6.05 from Black's side at depth 20, settled at depth 18, and the discovered check is the engine's first choice."
+      }
+    },
+    {
+      "fen": "1r2k3/8/8/4B3/8/8/8/4R1K1 w - - 0 1",
+      "move": "Bxb8+",
+      "move_uci": "e5b8",
+      "note": "Constructed. The record's precondition, both halves: the rook on e1 is aimed at the black king through exactly one friendly blocker (the bishop on e5), and that blocker has legal moves off the e-file. What makes the discovered CHECK different from a discovered attack is what the bishop is then free to do — it takes the rook on b8 with impunity, because Black must answer the check first. The whole point of the motif is that the moving piece is unconstrained; the bishop could as easily have gone somewhere quiet.",
+      "origin_kind": "constructed-test",
+      "concept_role": "positive",
+      "side_to_move_benefits": "white",
+      "engine": {
+        "engine_id": "Stockfish 18",
+        "test_level": 3,
+        "depth": 18,
+        "threads": 10,
+        "hash_mb": 4096,
+        "multipv": 1,
+        "best_move": "e5b8",
+        "eval_cp": 785,
+        "mate_in": null,
+        "pv": [],
+        "alternatives": [],
+        "margin_cp": null,
+        "verdict": "supports",
+        "verdict_note": "+7.85 and settled at depth 1 - the win of the rook is not a subtlety, it is what a discovered check IS. The bishop is captured by nothing because Black is in check from a piece that did not move."
+      }
+    }
+  ],
+  "counterexamples": [
+    {
+      "fen": "3k4/8/8/8/3N4/8/8/3RK3 w - - 0 1",
+      "move": "Ne6+",
+      "move_uci": "d4e6",
+      "note": "A discovered check that is ALSO a check by the moving piece is a double check, and this base reports it as one: the record's own distinction is that what makes a discovered check powerful is that the moving piece is free to do anything, and a piece that is itself giving check is not free - it is part of the check. Paired with Nb5+ from the same position, which is the discovered check proper.",
+      "origin_kind": "constructed-test",
+      "concept_role": "negative",
+      "side_to_move_benefits": "white",
+      "controlled_pair_with": "3k4/8/8/8/3N4/8/8/3RK3 w - - 0 1"
+    },
+    {
+      "fen": "r2k1b1r/1pp1q1p1/7p/pbPBn3/3Q1p2/P7/1B3PPP/2KR3R w - - 0 21",
+      "move_uci": "d5b7",
+      "note": "Registered false-positive case `a-discovered-check-that-can-be-blocked`, kept on the record as well as in tests/false_positive_cases.json so that the concept carries its own negative evidence. THE SURFACE PATTERN IS PRESENT: Bxb7+ steps the bishop off the d-file, the queen on d4 checks the king on d8 through the gap, and the bishop takes a pawn on the way. That is a discovered check and the detector reports the discovery. WHY IT IS NOT THE CONCEPT: This record's first indicator_against: \"The check is easily blocked or the checking piece captured.\" The whole value of a DISCOVERED check over an ordinary one is that the reply must answer the check, which frees the moving piece to do anything. Here Black answers with ...Nd7, blocking, and keeps every other option. WHAT THE SYSTEM DOES: Shipped puzzle mi-f2e1be14e7, and the useful part is that the MOVE IS EXCELLENT: Stockfish 18 says +4.67 at depth 22, first choice by nearly four pawns. The API reports `discovered-attack` here and refuses `discovered-check`, which is the right pair of answers - the discovery is real and the claim attached to the narrower concept is not, because the moving piece is not free. That separation is what makes this a false-positive case about a LABEL rather than about a move: refusing the label costs the explanation nothing, because the concept that is true is reported beside it. Five of the 788 shipped puzzles carry a discovered check the defender can answer without moving the king.",
+      "origin_kind": "puzzle",
+      "concept_role": "negative",
+      "false_positive_case": "a-discovered-check-that-can-be-blocked"
+    }
+  ],
+  "ambiguous_examples": [
+    {
+      "fen": "6n1/pp1RB1k1/3p4/8/4n1P1/2P1qp2/8/R2K4 w - - 3 34",
+      "move": "Bd8+",
+      "move_uci": "e7d8",
+      "note": "Nominated by tools/mine_ambiguous.js on its NOT-THE-MOVE ground: the concept fires on a legal move that is not the solution of a shipped puzzle. Nothing reported is absent - the bishop steps off the seventh rank, the rook on d7 checks the king behind it, and the moving piece is free to go where it likes, which is this record's precondition in full. It goes to d8, and the position falls apart: -12.55 against +4.99 for the puzzle's answer Bg5. A seventeen-pawn gap between two moves of the same bishop, both of them discovered checks. This record's own first indicator_against is 'the moving piece has no useful destination', and that is exactly what separates the two.",
+      "origin_kind": "puzzle",
+      "concept_role": "ambiguous",
+      "engine": {
+        "engine_id": "Stockfish 18",
+        "test_level": 3,
+        "depth": 22,
+        "threads": 10,
+        "hash_mb": 4096,
+        "multipv": 2,
+        "best_move": "e7g5",
+        "eval_cp": -1255,
+        "mate_in": null,
+        "pv": [],
+        "alternatives": [],
+        "margin_cp": null,
+        "verdict": "ambiguous",
+        "verdict_note": "Bd8+ scores -12.55 and Bg5, the solution, scores +4.99, both at depth 22 with two lines. The discovery is identical in both; where the bishop lands is the whole difference, and no motif detector reads that."
+      }
+    }
+  ],
+  "explanations": {
+    "by_level": {
+      "beginner": "Moving this piece gives check from the piece behind it. Your opponent must answer the check, so this piece can go anywhere — even somewhere it could be taken.",
+      "intermediate": "Discovered check. The opponent must deal with the check, so the moving piece gets a free move.",
+      "advanced": "Discovered check. Suspend normal safety reasoning for the discovering piece; the check buys the tempo."
+    },
+    "by_depth": {
+      "short": "Moving a piece uncovers a check, so the moving piece can go anywhere.",
+      "normal": "A discovered check: the piece that moves is not the piece that checks, so the reply must answer the check and the moving piece is free to take, threaten or run wherever it likes. That freedom is the whole value of the motif.",
+      "deep": "It is only free if the check cannot be answered another way. If the defender can interpose or capture the checking piece rather than moving the king, the moving piece is not free at all — the defence deals with the check and keeps its options, and this base withholds the report when the move generator finds such a reply. Byrne-Fischer 1956 is the master example and shows why the motif is worth a name: Fischer plays the same discovered check four times in a row, taking something different each time, in a position where he has already given up his queen."
+    },
+    "hedge": "",
+    "lesson": ""
+  },
+  "terminology": {
+    "beginner_words": [
+      "uncovers a check"
+    ],
+    "advanced_words": [
+      "discovered check",
+      "discoverer"
+    ],
+    "avoid": []
+  },
+  "status": {
+    "stage": "researched",
+    "last_updated": "2026-09-01",
+    "open_questions": [],
+    "audit_notes": [
+      "2026-09-01: detector field named 'lineAlignment', which does not exist anywhere in the codebase. The audit's hardcoded whitelist had been accepting it. Repointed at real code, or marked as proposed where nothing implements it."
+    ]
+  }
+}

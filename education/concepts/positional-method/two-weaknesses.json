@@ -1,0 +1,396 @@
+{
+  "schema_version": 2,
+  "id": "two-weaknesses",
+  "canonical_name": "The principle of two weaknesses",
+  "alternate_names": [
+    "principle of the two weaknesses",
+    "creating a second weakness",
+    "the second weakness",
+    "playing against two weaknesses",
+    "combined play on both wings",
+    "attacking on two fronts"
+  ],
+  "historical_names": [
+    "manoeuvring (Nimzowitsch)",
+    "tacking (Nimzowitsch, translated)",
+    "changing tack",
+    "changing place"
+  ],
+  "category": "two-weaknesses",
+  "subcategory": "converting an advantage",
+  "tags": [],
+  "knowledge_type": "strategic-principle",
+  "knowledge_type_note": "A strategic principle, not a theorem and not merely a rule of thumb. It is stronger than a rule of thumb because a controlled engine test shows the mechanism is real and can be decisive (a dead draw becomes a forced mate purely by adding a distant second target). It is weaker than a proven result because well-documented classes of position defeat it entirely - fortresses, opposite-coloured bishops, and targets close enough for one king to cover both.",
+  "name_status": "established-name",
+  "difficulty": "advanced",
+  "definition_short": "A single weakness can usually be defended, because the defender can concentrate every piece on it. Creating a second target far from the first stretches the defence past what it can cover, and something falls.",
+  "definition_long": "When one side has a lasting positional advantage but no immediate tactic, attacking the opponent's single weak point normally fails: the defender parks enough force beside it and waits. The method is to fix that first weakness so it cannot be advanced, exchanged or otherwise repaired, tie the defending pieces to it, improve every one of your own pieces while the opponent has no active move, and only then open a second front far enough away that the defenders cannot cover both. Play then alternates between the two targets, attacking whichever is less defended. The defence cracks not because either target is indefensible but because finite pieces cannot be in two places at once.\n\nThe distance between the targets is what does the work. Rooks and queens change wings in one or two moves; kings and minor pieces do not. When the defending king can shuttle between both targets, the mechanism largely fails - which is why the principle belongs above all to the endgame, where the defender has least counterplay, and why sources pair it with 'do not hurry': the second front should be opened only after the first weakness is permanent and every piece is already at its best square.",
+  "history": {
+    "attributions": [
+      {
+        "person": "Aron Nimzowitsch",
+        "relation": "later-associated-with",
+        "note": "Relation not yet differentiated; see history.notes."
+      },
+      {
+        "person": "Sergey Belavenets",
+        "relation": "later-associated-with",
+        "note": "Relation not yet differentiated; see history.notes."
+      },
+      {
+        "person": "Mark Dvoretsky",
+        "relation": "later-associated-with",
+        "note": "Relation not yet differentiated; see history.notes."
+      },
+      {
+        "person": "Mikhail Shereshevsky",
+        "relation": "later-associated-with",
+        "note": "Relation not yet differentiated; see history.notes."
+      }
+    ],
+    "first_documented_source": "nimzowitsch-my-system",
+    "year": 1925,
+    "confidence": "disputed",
+    "notes": "The substance and the name have different origins, and secondary sources conflate them.\n\nSUBSTANCE: present in Nimzowitsch's My System, chapter 'Manoeuvring' (Ch. 5/VI; Ch. 14 in the New in Chess edition). Verified against the full text. He writes: 'an opposing weakness can be attacked in at least two ways, but each of these attacks will meet a satisfactory defence. So to seize the opposing weak point, our attack alternates between the methods (manoeuvring is like a sailing boat tacking)'. Section 2(b) is headed 'Two pawn weaknesses, in this case c3 and h3' and speaks of 'the logical connection between the two separate battlefields'; section 3 is 'Combining play on both wings, when for the moment the weaknesses either do not exist or are hidden'.\n\nNAME: Nimzowitsch never calls it the principle of two weaknesses. The phrase comes from the Soviet training tradition. Shereshevsky's Endgame Strategy (1985) has it as a named chapter and credits the formulations to an article by Sergey Belavenets; Dvoretsky separately describes his own notebook 'General Principles of Endgame Play', says Shereshevsky built the book from it, and says he was himself prompted by reading Belavenets. GM Alex Fishbein, editing My System (Fast Track Edition), retitled Nimzowitsch's 'changing tack' chapter to 'playing against two weaknesses' because 'that is basically what it is' - which is the bridge between the two traditions.\n\nSources asserting 'Nimzowitsch formulated the principle of two weaknesses in My System, 1925' are therefore right about the idea and wrong about the name. Certainty is marked 'disputed' for the naming, not for the substance.",
+    "competing_claims": [
+      "Nimzowitsch, My System, 1925 - widely repeated; correct as to substance, wrong as to name",
+      "Sergey Belavenets - credited by Shereshevsky as the source of the formulation",
+      "Mark Dvoretsky - transmitted it as a training principle; Shereshevsky built his chapter from Dvoretsky's notes",
+      "Mikhail Shereshevsky, Endgame Strategy, 1985 - where it becomes a named, taught principle"
+    ],
+    "development": []
+  },
+  "engine_era_status": "useful-with-common-exceptions",
+  "engine_era_note": "The mechanism survives engine scrutiny and is provable by tablebase in simple material. What engines revise is the RHETORIC around it. Shereshevsky's 'the position would be drawn' with the kings centralised is +0.75, not 0.00. Dvoretsky's necessary/inaccurate marks in Kotov-Pachman separate two moves by 0.05 pawns at depth 32. The principle is a sound method of conversion whose classical statements overstate how forced its consequences are.",
+  "sources": [
+    "nimzowitsch-my-system",
+    "shereshevsky-endgame-strategy",
+    "dvoretsky-technique-in-chess",
+    "dvoretsky-endgame-manual",
+    "dvoretsky-shereshevsky-interview",
+    "fishbein-my-system-interview",
+    "chesscom-ipatov-two-weaknesses",
+    "chesscom-smith-endgame-strategy",
+    "thechessworld-two-weaknesses",
+    "britishchessnews-kotov-pachman",
+    "chessskill-lasker-capablanca-g10",
+    "qualitymag-two-weaknesses"
+  ],
+  "source_confidence": "high",
+  "recognition": {
+    "preconditions": [
+      "The position is materially level or the stronger side is ahead, with no forcing tactic available",
+      "The defender has at least one durable target: a backward, isolated or doubled pawn, a fixed pawn on the colour of its own bishop, an exposed king, or a piece tied to defence",
+      "The attacker has at least one piece that can change wings faster than the defender can follow (rook or queen against king or minor piece)",
+      "The attacker's own king is safe and the attacker has no weakness of comparable value"
+    ],
+    "indicators_for": [
+      "Two distinct targets at least three files apart",
+      "At least one defending piece has no move that does not abandon a target",
+      "The attacker has an unopposed pawn break, space gain or king entry square on the far wing",
+      "The defender's rook is passive (tied to a pawn) while the attacker's is active",
+      "The first weakness is fixed: it cannot advance, and it cannot be exchanged off"
+    ],
+    "indicators_against": [
+      "The two targets are within two files of each other, so one defending king covers both",
+      "Opposite-coloured bishops with no breakthrough square - the defending bishop holds one colour complex regardless of how many targets exist",
+      "The defender can reach a known fortress",
+      "Opening the second front concedes counterplay, a passed pawn, or an open line towards the attacker's own king",
+      "The first weakness can be liquidated by a pawn break or a favourable exchange",
+      "The defending king already stands between the two targets"
+    ],
+    "prerequisites": [],
+    "detector": "lib/matchers.js: two-weaknesses, implementing three preconditions that had been written and not built",
+    "detectability": "heuristic",
+    "typical_confidence": "medium",
+    "false_positive_traps": [
+      "Two weaknesses that the defending king stands between are not two weaknesses in the operative sense. Measured on the Lasker-Capablanca ending, moving the kings to d3/d6 costs the attacker over half the advantage.",
+      "Any position has several imperfections. Calling any two of them 'two weaknesses' is the commonest misuse — they must require DIFFERENT defensive resources and be far enough apart that the defence cannot cover both.",
+      "The principle describes a method of conversion, not an evaluation. A position with two weaknesses is not thereby winning, and Kotov-Pachman shows the gap: the moves annotators mark necessary and inaccurate differ by 0.05 pawns.",
+      "Against opposite-coloured bishops or a reachable fortress, the count of weaknesses is simply not the operative variable.",
+      "A pawn that is structurally weak can be the position's KEY DEFENSIVE ASSET, and no pawn-skeleton test tells the two apart. Shirov-Kramnik, Linares 2000, move 20: this base lists Black's f4 among the weaknesses White should play against, and Jan Markos calls the same pawn, together with b4, the cage that 'guards all the roads to d5'. Both readings follow from the skeleton and only one is true of the position."
+    ]
+  },
+  "application": {
+    "typical_plans": [
+      "Fix the first weakness, then improve every piece before touching the second wing",
+      "Provoke a pawn advance on the far wing and fix the resulting pawn as the second target",
+      "Advance a rook-file or knight-file pawn to create a second front by force",
+      "Activate the king towards a second entry square while the defender is tied to the first target",
+      "Alternate threats between the two targets to induce zugzwang or a decisive concession"
+    ],
+    "typical_moves": [
+      "A quiet flank pawn move that forces the defender to create a second isolated pawn (Capablanca's 31...a5 against Lasker, 1921)",
+      "A space-gaining advance such as h4-h5 or g4-g5 that fixes an enemy pawn as a target",
+      "A rook swing from the blockaded wing to the opposite wing once the defence is committed",
+      "Declining to capture the first weakness in order to keep the defender tied to it"
+    ],
+    "typical_pawn_structures": [],
+    "typical_piece_arrangements": [],
+    "tactical_consequences": [
+      "Defending pieces become overloaded, so a tactic against one target wins the other",
+      "Zugzwang becomes available once every defensive piece has a fixed job",
+      "A defender forced to guard both wings often loses to a decoy or deflection"
+    ],
+    "strategic_consequences": [
+      "Converts a static positional edge into material or a passed pawn",
+      "Turns an equal-looking endgame into a one-sided practical struggle",
+      "Justifies keeping pieces on: fewer pieces means fewer overloads to exploit"
+    ]
+  },
+  "exceptions": [
+    "Fortresses: once the defender reaches a fortress the number of weaknesses stops mattering, since none of them can be converted.",
+    "Opposite-coloured bishops: extra material and multiple targets are routinely insufficient, because the defending bishop guards one colour complex indefinitely. A second weakness helps only if it creates a breakthrough square or drags the bishop off its blockade.",
+    "Targets too close together: if the defending king can shuttle between both, the mechanism largely fails. Measured on the Lasker-Capablanca ending - moving the kings from g1/g8 to d3/d6 drops the evaluation from +1.74 to +0.75.",
+    "Self-weakening: pushing pawns to open a second front can create new targets in the attacker's own camp, or hand the defender a passed pawn.",
+    "Winning the first weakness may be wrong even when possible, if the capture activates the defender's pieces. The fixed pawn can be worth more as a permanent burden than as material."
+  ],
+  "limitations": [
+    "It describes a method of conversion, not an evaluation. A position with two weaknesses is not thereby winning.",
+    "Its effect is often practical rather than objective. In Kotov-Pachman 1950 the moves annotators mark as necessary and inaccurate differ by 0.05 pawns at depth 32; the second weakness made the defence hard to find over the board, and the game was decided by a later error.",
+    "It presupposes the attacker has time. Against active counterplay the slow improving phase is unavailable.",
+    "Recognition is heuristic, not mechanical: 'a target' and 'far enough apart' are judgements, and the detector for this concept is not yet written.",
+    "MEASURED 2026-09-01 and fixed: three of this record's four preconditions were written down and never implemented, and the matcher fired on 72.5% of the 788 shipped positions - which is this record's own second trap, 'any position has several imperfections; calling any two of them two weaknesses is the commonest misuse'. Adding the heavy piece that can switch wings, the first trap's requirement that the defending king not stand between the targets, and a comparison of the two sides' weakness counts brings it to 38.6%.",
+    "'The attacker has no weakness of comparable value' cannot be measured by counting, and the attempt to do so produced a false negative on the textbook game. After 9.Nxc6 bxc6 in Rubinstein-Salwe 1908, White's b2 and e2 count the same as Black's a7 and c6 - one pair a fixed target complex on half-open files, the other two pawns on their original squares on move nine. The test is therefore only that the attacker is not MORE weak than the defender, and the rest of the precondition is recorded here rather than pretended.",
+    "MEASURED 2026-09-02: the SECOND half of precondition 1 - 'with no forcing tactic available' - is still not implemented, and it was tried. Layer 3 already answers it (quietness.quiet), and requiring it would remove this concept from the corpus's own textbook instance: Rubinstein-Salwe 1908 at move 24, the moment the SECOND weakness is created and the entry this base annotates as two-weaknesses, is not quiet. So the same thing happened as with 'no weakness of comparable value' - the precondition as written cannot be implemented without losing the game it was written about, and it is recorded here rather than pretended. What the attempt did produce is worth keeping: the 788 shipped positions are TACTICAL puzzles, every one of which has a forcing solution by construction, so any quietness-gated rate on that corpus measures the corpus. tools/firing_rates.js --quiet restricts to the quiet ones, where this concept fires on 28.6% rather than 38.6%. RE-MEASURED 2026-09-02 after quietness() was found to be broken - it had been counting no winning captures at all, so 172 of the 788 looked quiet where 98 are; the conclusion is unchanged, and BOTH Rubinstein-Salwe entries are non-quiet under the fixed test rather than one.",
+    "MEASURED 2026-09-02: the fourth trap - 'against opposite-coloured bishops or a reachable fortress, the count of weaknesses is simply not the operative variable' - is now built for the half this base can see. With one bishop each on opposite colours the concept is not reported at all, whatever the count says, because the defender holds a whole colour complex. 38.6% -> 33.8%. The fortress half is not detectable and is not attempted.",
+    "MEASURED 2026-09-02: the fifth trap, added the same day from Shirov-Kramnik, is recorded and NOT implemented on purpose - 'a pawn that is structurally weak can be the position's KEY DEFENSIVE ASSET, and no pawn-skeleton test tells the two apart'. Markos calls Black's b4 and f4 the cage guarding the roads to d5; this base lists f4 among the weaknesses White should play against. Both readings follow from the skeleton and only one is true of the position. Dropping f4 would not change the claim, which also names f7 and d6.",
+    "MEASURED 2026-09-02: 'the first weakness can be LIQUIDATED by a pawn break or a favourable exchange' is now SAID rather than enforced, and two measurements decided that. Requiring both weaknesses to be unable to advance safely scores 23.1% and deletes Rubinstein-Salwe 1908; requiring one scores 29.4% and deletes it as well. At the moment the annotator marks - 9.Nxc6 bxc6, where the weaknesses are CREATED - both a7 and c6 can still advance, and Rubinstein's entire game is about preventing ...c5. The annotation marks the creation; this record's method describes what is done afterwards. A matcher that fires only once the fixing is done cannot report the game the concept is named for, so the sentence names what still has to be fixed instead. Three of the remaining indicators - a fortress, counterplay conceded by opening the second front, and a favourable EXCHANGE liquidating the weakness - are judgements about a future position and are not attempted.",
+    "KNOWN FALSE NEGATIVE, kept visible. The matcher reads 'two weaknesses' as two structural pawn weaknesses of the defender, far enough apart, with the defending king not between them, and an attacker able to switch wings faster than the defence. The classic ENDGAME instance is often none of that: an outside passed pawn decoys the defending king to one wing while the attacking king eats the other, and neither front is a structural weakness at all. This record's own tablebase-proven positive example (8/8/3k1pp1/8/P2K4/5PP1/8/8 b, mate in 23 by Syzygy) is exactly that shape and the matcher is silent on it. Widening the matcher to catch it was tried and measured at 58.5% of generated pawn endings, which is a detector that means nothing; the false negative is the better of the two errors, and it is recorded here rather than papered over."
+  ],
+  "misconceptions": [
+    "That two weaknesses make a position winning. They make it convertible, not won; the tablebase pair shows the mechanism can be decisive, and the Kotov-Pachman example shows it often is not.",
+    "That the second weakness must be another weak pawn. An exposed king, an invasion square or a passive piece serve equally.",
+    "That the first weakness should be captured as soon as possible. Holding it fixed often binds more defenders than taking it wins material."
+  ],
+  "relationships": {
+    "broader": [],
+    "narrower": [],
+    "related": [],
+    "contrasting": [],
+    "co_occurring": [
+      "overloading"
+    ],
+    "conflicts": [
+      {
+        "concept": "overloading",
+        "resolution": "Not a true conflict but a scale difference: overloading is the same finite-defence logic resolving in a move or two, this is the same logic over dozens. If a concrete overload exists now, explain the tactic; reach for the strategic principle only when no forcing line exists."
+      }
+    ]
+  },
+  "examples": [
+    {
+      "fen": "8/8/3k1pp1/8/P2K4/5PP1/8/8 b - - 0 1",
+      "note": "Constructed controlled pair, positive half. Symmetric f+g pawns, kings in opposition, plus one distant White a-pawn. The a-pawn decoys the black king and the white king eats the kingside. Paired with the counterexample below, which is identical except that the a-pawn is absent.",
+      "origin_kind": "constructed-test",
+      "concept_role": "positive",
+      "side_to_move_benefits": "white",
+      "engine": {
+        "engine_id": "Stockfish 18",
+        "test_level": 3,
+        "depth": 36,
+        "threads": 10,
+        "hash_mb": 4096,
+        "multipv": 1,
+        "best_move": "d6e6",
+        "eval_cp": null,
+        "mate_in": -23,
+        "pv": [],
+        "alternatives": [],
+        "margin_cp": null,
+        "verdict": "supports",
+        "verdict_note": "Mate in 23 for White. The paired position without the a-pawn is 0.00. The only difference between them is the presence of a second, distant target, so the mechanism is isolated from every other factor. Strongest single piece of evidence for this concept."
+      },
+      "tablebase": {
+        "source": "Lichess tablebase (Syzygy, 7-piece)",
+        "pieces": 7,
+        "wdl": "loss",
+        "dtz": -2,
+        "dtm": null,
+        "category": "loss",
+        "note": "PROVEN, not evaluated. Result is from the side to move (Black), so this is a forced win for White. Supersedes the earlier Stockfish 'mate in 23': within tablebase reach the theoretical status is a fact and no search is needed."
+      },
+      "controlled_pair_with": "8/8/3k1pp1/8/3K4/5PP1/8/8 b - - 0 1",
+      "matcher_blind": true,
+      "matcher_blind_reason": "The matcher does not report two-weaknesses here, and the example stays anyway. This position is a proven instance of the PRINCIPLE and not an instance of what the detector reads. Layer 3's weakSpread finds Black's weak pawns and there are none: f6 and g6 defend each other, neither is isolated, backward or doubled. The second front here is White's outside a-pawn - a passed pawn of the ATTACKER, not a structural weakness of the defender - and the detector has no notion of that. Measured, not assumed: the relaxation that would report it was written and then thrown away, because dropping the heavy-piece requirement in pawn endings fired on 58.5% of 4000 generated pawn endings (tools/pawn_endings.js --n 4000 --seed 11) and still did not report this position. A guard that admits half of all pawn endings to catch one proven example is a worse detector, so the false negative is kept and written down instead."
+    },
+    {
+      "fen": "6k1/5p2/2r1p1p1/3p1n2/3P3p/1P5P/3RNPP1/6K1 b - - 0 35",
+      "note": "Lasker-Capablanca, World Championship game 10, after 35.axb3. Capablanca has manufactured a second isolated pawn on b3 to go with White's weak d4, and the white rook cannot defend both. He called his play from move 24 on one of his best efforts; Lasker called it 'enchanting'.",
+      "origin_kind": "historical-game",
+      "concept_role": "positive",
+      "game": "Emanuel Lasker - Jose Raul Capablanca, World Championship (10), Havana 1921",
+      "side_to_move_benefits": "black",
+      "engine": {
+        "engine_id": "Stockfish 18",
+        "test_level": 3,
+        "depth": 30,
+        "threads": 10,
+        "hash_mb": 4096,
+        "multipv": 1,
+        "best_move": "c6b6",
+        "eval_cp": 174,
+        "mate_in": null,
+        "pv": [],
+        "alternatives": [],
+        "margin_cp": null,
+        "verdict": "supports",
+        "verdict_note": "+1.74 for Black in a materially level rook-and-knight ending. The engine's own first move, 35...Rb6, is Capablanca's move, and its continuation 36.Rd3 Ra6 follows the game exactly - the rook goes behind the pawns and both weaknesses are attacked."
+      }
+    }
+  ],
+  "counterexamples": [
+    {
+      "fen": "8/8/3k1pp1/8/3K4/5PP1/8/8 b - - 0 1",
+      "note": "Constructed controlled pair, negative half. Identical to the positive example except the White a-pawn is removed, leaving one front. With a single area of operations the defending king holds everything.",
+      "origin_kind": "constructed-test",
+      "concept_role": "negative",
+      "side_to_move_benefits": "neither",
+      "engine": {
+        "engine_id": "Stockfish 18",
+        "test_level": 3,
+        "depth": 36,
+        "threads": 10,
+        "hash_mb": 4096,
+        "multipv": 1,
+        "best_move": "d6e6",
+        "eval_cp": 0,
+        "mate_in": null,
+        "pv": [],
+        "alternatives": [],
+        "margin_cp": null,
+        "verdict": "supports",
+        "verdict_note": "0.00. Establishes the necessity half of the claim: the same structure with one target is a dead draw, so the win in the paired position is attributable to the second target and nothing else."
+      },
+      "tablebase": {
+        "source": "Lichess tablebase (Syzygy, 7-piece)",
+        "pieces": 6,
+        "wdl": "draw",
+        "dtz": 0,
+        "dtm": 0,
+        "category": "draw",
+        "note": "PROVEN draw. Together with the paired position this establishes the concept's core claim as a theoretical fact in this material: identical kings and identical kingside structure, one distant second target, win vs draw."
+      },
+      "controlled_pair_with": "8/8/3k1pp1/8/P2K4/5PP1/8/8 b - - 0 1"
+    }
+  ],
+  "ambiguous_examples": [
+    {
+      "fen": "R7/2r2pkp/2pb2p1/3p4/3P4/3NP1P1/5P1P/6K1 b - - 0 42",
+      "note": "Kotov-Pachman, Venice 1950, Black to move at 42. Dvoretsky's example: White's advantage is the weak c6 pawn alone, which is not enough; after 42...Kf6?! 43.g4! White fixes h7 and g6 as a second front. Included as a case where the concept is practically decisive but objectively almost neutral.",
+      "origin_kind": "historical-game",
+      "concept_role": "ambiguous",
+      "game": "Alexander Kotov - Ludek Pachman, Venice 1950",
+      "side_to_move_benefits": "white",
+      "engine": {
+        "engine_id": "Stockfish 18",
+        "test_level": 3,
+        "depth": 32,
+        "threads": 10,
+        "hash_mb": 4096,
+        "multipv": 4,
+        "best_move": "h7h5",
+        "eval_cp": -11,
+        "mate_in": null,
+        "pv": [],
+        "alternatives": [
+          {
+            "move": "g7f6",
+            "eval_cp": -16,
+            "mate_in": null
+          },
+          {
+            "move": "c7b7",
+            "eval_cp": -41,
+            "mate_in": null
+          },
+          {
+            "move": "f7f5",
+            "eval_cp": -58,
+            "mate_in": null
+          }
+        ],
+        "margin_cp": 5,
+        "verdict": "ambiguous",
+        "verdict_note": "Dvoretsky and British Chess News mark 42...h5 as necessary and 42...Kf6 as an inaccuracy. At depth 32 the gap is 0.05 pawns (-0.11 vs -0.16) - objectively nothing. Both hold. The second weakness created a defensive task Pachman failed thirteen moves later, not a lost position. Recorded as ambiguous deliberately: it supports the concept's PRACTICAL force and contradicts any claim that a second weakness is objectively decisive."
+      }
+    },
+    {
+      "fen": "8/5p2/2rkp1p1/3p1n2/3P3p/1P1K3P/3RNPP1/8 b - - 0 35",
+      "note": "Shereshevsky's hypothetical on the Lasker-Capablanca position: the same material and structure, but with the kings on d3 and d6 instead of g1 and g8. He states it 'would be drawn', because the defending king stands between the two weaknesses. This is the concept's central exception, stated by a source that teaches the concept.",
+      "origin_kind": "constructed-test",
+      "concept_role": "ambiguous",
+      "side_to_move_benefits": "black",
+      "engine": {
+        "engine_id": "Stockfish 18",
+        "test_level": 3,
+        "depth": 30,
+        "threads": 10,
+        "hash_mb": 4096,
+        "multipv": 1,
+        "best_move": "c6a6",
+        "eval_cp": 75,
+        "mate_in": null,
+        "pv": [],
+        "alternatives": [],
+        "margin_cp": null,
+        "verdict": "ambiguous",
+        "verdict_note": "+0.75, against +1.74 for the real position. Shereshevsky's mechanism is confirmed and large - centralising the defending king removes over half the advantage - but his absolute claim of a draw is not supported at depth 30. Recorded as the exception being real and the wording being overstated."
+      }
+    }
+  ],
+  "explanations": {
+    "by_level": {
+      "beginner": "Your opponent can defend one weak point, because every piece can gather around it. Give them a second thing to worry about on the other side of the board, and they cannot guard both.",
+      "intermediate": "One weakness is usually holdable. Fix it so it cannot run away, improve your pieces while your opponent has nothing to do, then open a second front on the far wing. Attack whichever target is less defended - the defence breaks in transit, not at either target.",
+      "advanced": "The first weakness is a magnet, not a meal: its value is the defensive commitment it forces, which is often worth more than the pawn. Convert by fixing it, restricting counterplay, bringing every piece to its best square, and only then creating a second target far enough away that the defending king cannot cover both. Distance between targets is the operative variable.",
+      "master": "Price the tempo, not the target. The method costs time - fix, restrain, improve every piece, and only then open the second front - and that is exactly what a player holding a dynamic advantage cannot spend, which is why this and the initiative are recorded as being in direct tension. The operative variable is the DISTANCE between the two targets against the defending king's speed, not the count of them: two weaknesses the king can cover from one square are one weakness. Against a fortress it fails outright, and no amount of alternating will find the entry that is not there."
+    },
+    "by_depth": {
+      "short": "One weakness can be defended. Create a second one far away and the defence breaks.",
+      "normal": "A single weak point is holdable because every defender can gather around it. Fix it so it cannot be repaired, improve your own pieces while the opponent has nothing to do, then open a second front on the far wing. The defence cracks in transit between the two, not at either one.",
+      "deep": "Method of conversion attributed in substance to Nimzowitsch (as 'tacking') and named in the Soviet training line Belavenets - Dvoretsky - Shereshevsky. Procedure: fix the first weakness, deny counterplay, improve every piece, create a second target far enough that the defending king cannot cover both, then alternate. Distance between targets is the operative variable — moving the kings from g1/g8 to d3/d6 in the Lasker-Capablanca ending costs the attacker over half the advantage. Fails against fortresses and opposite-coloured bishops regardless of how many targets exist."
+    },
+    "hedge": "This is a method for converting an advantage, not a law. It fails against fortresses and against opposite-coloured bishops, and it fails when the two targets are close enough for one king to guard both.",
+    "lesson": "When your opponent is holding a weak point comfortably, stop attacking it harder. Fix it, improve everything, and go make a second problem somewhere they cannot reach quickly."
+  },
+  "terminology": {
+    "beginner_words": [
+      "weak point",
+      "target",
+      "second target",
+      "the other side of the board",
+      "too much to defend"
+    ],
+    "advanced_words": [
+      "second weakness",
+      "second front",
+      "fixing the weakness",
+      "overload",
+      "defensive resources",
+      "conversion",
+      "do not hurry"
+    ],
+    "avoid": [
+      "theorem",
+      "always wins",
+      "rule",
+      "guarantees"
+    ]
+  },
+  "status": {
+    "stage": "ready",
+    "last_updated": "2026-08-31",
+    "open_questions": [
+      "Write a mechanical detector: candidate targets = backward/isolated/doubled pawns plus pieces with zero non-abandoning moves; require file distance >= 3. Then measure false-match rate against engine-labelled positions.",
+      "Confirm the Belavenets article directly (title, journal, year). Currently attested only through Shereshevsky's and Dvoretsky's descriptions of it.",
+      "Test the opposite-coloured-bishop exception with a constructed controlled pair, as was done for the main claim.",
+      "Locate the position for Nimzowitsch's own two-weaknesses example (Kalaschnikow-Nimzowitsch 1914) and validate it.",
+      "Kotov-Pachman move 55 (FEN 3R4/r6p/2p1kpp1/2Pp4/6PP/4PK2/5P2/8 b - - 4 55): British Chess News claims 55...Ra4! holds and 55...Ke7? loses. Attempted at depth 34; the rook ending did not converge in 16 minutes and the run was stopped to free CPU. Retry at depth 28-30, or with Syzygy tablebases installed."
+    ],
+    "audit_notes": [
+      "Promoted to 'ready': primary-text history, 12 sources, engine-tested positive/negative/ambiguous positions, and a tablebase-proven controlled pair. The remaining open questions are extensions, not gaps in the core claim.",
+      "2026-09-01 audit: false_positive_traps was empty on a strategic principle that is easy to over-apply. Populated from the exceptions and engine findings already in the record."
+    ]
+  }
+}

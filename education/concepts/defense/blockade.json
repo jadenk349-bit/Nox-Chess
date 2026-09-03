@@ -1,0 +1,262 @@
+{
+  "schema_version": 2,
+  "alternate_names": [],
+  "historical_names": [],
+  "tags": [
+    "nimzowitsch",
+    "positional",
+    "primary-sourced",
+    "passed-pawns"
+  ],
+  "subcategory": "positional method",
+  "difficulty": "advanced",
+  "knowledge_type_note": "A strategic method with a concrete, checkable object: a piece placed in front of a pawn to stop it.",
+  "name_status": "established-name",
+  "history": {
+    "attributions": [
+      {
+        "person": "Aron Nimzowitsch",
+        "relation": "systematized-by",
+        "source": "nimzowitsch-my-system",
+        "year": 1925,
+        "note": "Verified in the primary text. He is explicit that masters already blockaded by custom and that his contribution was the theoretical rationale: 'It is customary, at least in master practice, to block the enemy pawn. But to my knowledge no attempt has so far been made to provide a theoretical rationale.'"
+      }
+    ],
+    "first_documented_source": "nimzowitsch-my-system",
+    "year": 1925,
+    "confidence": "high",
+    "notes": "Well founded, and notable for what he does NOT claim: he says explicitly that the practice predates him and only the justification is his. That is a more careful self-attribution than he is usually given credit for.",
+    "competing_claims": [],
+    "development": [
+      {
+        "era": "pre-1925",
+        "change": "Blockading is customary in master practice without a stated rationale.",
+        "source": "nimzowitsch-my-system"
+      },
+      {
+        "era": "1925",
+        "change": "The rationale is supplied, along with the requirements on the blockading piece.",
+        "source": "nimzowitsch-my-system"
+      }
+    ]
+  },
+  "engine_era_status": "reliable",
+  "engine_era_note": "Uncontroversial and confirmed. The specific claim that a knight is the best blockader and a queen the worst is borne out by any engine evaluation of the same position with the blockading piece swapped.",
+  "recognition": {
+    "preconditions": [
+      "An enemy passed or advancing pawn",
+      "A friendly piece on the square directly in front of it"
+    ],
+    "indicators_for": [
+      "The blockader is a knight",
+      "The blockading square cannot be attacked by an enemy pawn",
+      "The blockader still makes threats from the square",
+      "The blockade is supported from behind"
+    ],
+    "indicators_against": [
+      "The blockader is a queen or rook, which is expensive and evictable",
+      "The blockading piece is needed elsewhere",
+      "The pawn can be supported and the blockade broken by an advance of its neighbours"
+    ],
+    "prerequisites": [
+      "passed-pawn",
+      "hole"
+    ],
+    "detector": "lib/matchers.js: blockade",
+    "detectability": "mechanical",
+    "typical_confidence": "high",
+    "false_positive_traps": [
+      "A piece standing in front of a pawn is not necessarily blockading it usefully. The test is whether the piece keeps its powers there — a queen on a blockading square is doing a knight's chore.",
+      "A blockade becomes a weakness when it ties down a piece needed elsewhere, which is the standard cost and is easy to omit.",
+      "A pawn stopped by an enemy PAWN is a ram, not a blockade, and no piece is being spent."
+    ]
+  },
+  "application": {
+    "typical_plans": [
+      "Blockade with a knight, support it, and then attack the pawn",
+      "Restrain, blockade, destroy — in that order",
+      "Against a blockade: advance the neighbouring pawns to challenge the square"
+    ],
+    "typical_moves": [
+      "Nd4 or Nd5 in front of an isolated queen's pawn"
+    ],
+    "typical_pawn_structures": [
+      "Isolated queen's pawn — the square in front is the standard blockade square",
+      "Passed pawns of any kind"
+    ],
+    "typical_piece_arrangements": [
+      "Knight in front of the pawn, supported from behind"
+    ],
+    "tactical_consequences": [
+      "A blockaded pawn cannot generate promotion threats, so the tactics that depend on it disappear"
+    ],
+    "strategic_consequences": [
+      "Converts a passed pawn from an asset into a fixed target",
+      "The blockading square is by construction a square no pawn can attack, so it is also an outpost"
+    ]
+  },
+  "exceptions": [
+    "A blockade that ties down a piece needed elsewhere is a liability.",
+    "Blockading with a heavy piece is expensive and usually temporary.",
+    "The pawn must not be allowed too far forward before the blockade is established — Nimzowitsch's own caveat."
+  ],
+  "limitations": [
+    "Detecting a piece in front of a pawn is mechanical; judging whether the blockade is worth its cost is not.",
+    "Fires on 27.3% of the 788 shipped positions. A first version used Layer 3's `blockadedPassers`, which is only the PASSED half of this record's own precondition, and it did not fire on Nimzowitsch-Salwe 1911 - the game the concept is named after, where the pawn being blockaded is a backward e-pawn and Nimzowitsch's own note is that its 'immobility is now greater than ever'. The matcher now implements both halves: an enemy pawn with no pawn of its own ahead of it on the file, stopped by one of our PIECES. A pawn stopped by a pawn is a ram, and the whole point of the record is that a piece is spending itself to do this.",
+    "It reports the geometry and cannot judge the cost. The record's second trap - that a blockade becomes a weakness when it ties down a piece needed elsewhere - is not decidable from one position.",
+    "MEASURED 2026-09-02: the first indicator_against - 'the blockader is a queen or rook, which is expensive and evictable' - is the only one of the three a static scan can answer, and it is SAID rather than used to suppress. Refusing heavy blockaders was tried and measured: 27.3% -> 20.3%, and it deletes Lisitsin-Capablanca 1935, a queen ending where Chernev praises exactly the queen blockade this record warns about and which is this corpus's annotated instance of the concept. The sentence now carries the caveat instead. The other two - 'the blockading piece is needed elsewhere' and 'the pawn can be supported and the blockade broken by an advance of its neighbours' - are judgements about a future position.",
+    "HUMAN-GROUNDED NEGATIVE ADDED 2026-09-02: Anand-Leko, Tal Memorial 2009, where Jan Markos says outright that 'the pawns are simply too advanced to establish a successful blockade' and the correct plan is the opposite of what this concept teaches - get behind the chain, because 'a pawn chain is only threatening from the front'. The entry grades its own evidence as weaker than the weak-square negatives, because the raw Layer 3 feature is absent too and nothing had to be refused. It is kept for the second half: the two concepts that ARE reported there, passed-pawn and doubled-pawns, both carry clauses added days earlier - 'what matters is whether it can advance' and 'they hold b4, b3, d3, which no enemy pawn can contest' - and both say what the annotator says. Before those clauses the base would have said 'Black has a passed pawn on d4' and 'Black has doubled pawns on c5, c4' and taught the wrong lesson twice."
+  ],
+  "misconceptions": [
+    "That any piece will do. The choice of blockader is most of the concept.",
+    "That blockading is free. It commits a piece, and Nimzowitsch says so."
+  ],
+  "relationships": {
+    "broader": [
+      "restraint"
+    ],
+    "narrower": [],
+    "related": [
+      "passed-pawn",
+      "outpost",
+      "hole",
+      "overprotection",
+      "isolated-queen-pawn"
+    ],
+    "contrasting": [],
+    "co_occurring": [
+      "outpost",
+      "passed-pawn"
+    ],
+    "conflicts": []
+  },
+  "examples": [
+    {
+      "fen": "2r2rk1/ppqb2pp/3bpn2/3pN3/1P1B4/2PB4/P3QPPP/R4RK1 b - - 10 17",
+      "game": "Nimzowitsch-Salwe, Karlsbad 1911",
+      "note": "After 17.Ne5, the position Nimzowitsch annotated with 'The immobility of the e-pawn is now greater than ever.' The blockading knight on e5 stands in front of Black's backward e-pawn on a square no black pawn can attack, and the whole game was played to establish and reinforce it. This is the concept illustrated by the player who formulated it. FEN derived by replaying all 77 plies through the page's own move generator.",
+      "origin_kind": "historical-game",
+      "concept_role": "supports",
+      "side_to_move_benefits": "white"
+    },
+    {
+      "fen": "2r3k1/pp1b1rpp/2q1pn2/3p4/1P1B4/2PBR3/P1Q2PPP/5RK1 b - - 6 22",
+      "game": "Nimzowitsch-Salwe, Karlsbad 1911",
+      "note": "Later in the same game, after 22.Re3. The blockading knight has been traded but the immobility it created has outlived it: Black's e- and d-pawns are still fixed and White has switched to attacking on the other wing. Recorded as the second half of the blockade idea — the blockade is a means, and what it produces is a position the defender cannot free.",
+      "origin_kind": "historical-game",
+      "concept_role": "supports",
+      "side_to_move_benefits": "white"
+    },
+    {
+      "fen": "4k3/3p4/3N4/8/8/8/4P3/4K3 w - - 0 1",
+      "note": "A knight on d6 standing directly in front of a black pawn on d7 that has no pawn of its own behind it: the pawn is stopped by a piece or not at all, which is what this record means by a blockade.",
+      "origin_kind": "constructed-test",
+      "concept_role": "supports",
+      "side_to_move_benefits": "neither",
+      "controlled_pair_with": "4k3/3p4/8/3N4/8/8/4P3/4K3 w - - 0 1"
+    }
+  ],
+  "counterexamples": [
+    {
+      "fen": "4k3/3p4/8/3N4/8/8/4P3/4K3 w - - 0 1",
+      "note": "The same knight one square further back, on d5. It attacks the same pawn's advance square and it is NOT blockading: the pawn can step to d6 and the knight is not in front of anything. A piece near a pawn is not a blockader; a piece ON the square in front of it is, and one square is the whole difference.",
+      "origin_kind": "constructed-test",
+      "concept_role": "negative",
+      "side_to_move_benefits": "neither",
+      "controlled_pair_with": "4k3/3p4/3N4/8/8/8/4P3/4K3 w - - 0 1"
+    },
+    {
+      "fen": "4k3/8/8/3p4/3P4/8/8/4K3 w - - 0 1",
+      "note": "Registered false-positive case `pawn-stopped-by-an-enemy-pawn-is-a-ram`, kept on the record as well as in tests/false_positive_cases.json so that the concept carries its own negative evidence. THE SURFACE PATTERN IS PRESENT: A black pawn on d5 stands directly in front of White's d4 pawn and stops it dead. Something is blockading the pawn. WHY IT IS NOT THE CONCEPT: This record's own trap: \"A pawn stopped by an enemy PAWN is a ram, not a blockade, and no piece is being spent.\" The whole point of a blockade is the price — a piece is parked in front of the pawn and gives up its freedom to do it. A ram costs nobody anything. WHAT THE SYSTEM DOES: PROVEN. The API reports nothing: the blockade matcher requires a PIECE on the square in front of the pawn. Syzygy: 4 pieces, draw, dtz 0 — neither pawn ever moves again and no piece was spent to arrange it. The distinction is definitional rather than evaluative, so the detector is the instrument that settles it and the tablebase only confirms that nothing is at stake.",
+      "origin_kind": "constructed-test",
+      "concept_role": "negative",
+      "tablebase": {
+        "source": "Lichess tablebase (Syzygy, 7-piece)",
+        "pieces": 4,
+        "wdl": "draw",
+        "dtz": 0,
+        "dtm": 0,
+        "category": "draw",
+        "note": "PROVEN draw. Neither pawn ever moves again and no piece was spent to arrange it, which is the whole difference between a ram and a blockade."
+      },
+      "false_positive_case": "pawn-stopped-by-an-enemy-pawn-is-a-ram"
+    },
+    {
+      "fen": "6k1/8/8/8/8/3p4/3Q4/6K1 w - - 0 1",
+      "note": "Registered false-positive case `a-queen-doing-a-knights-chore`, kept on the record as well as in tests/false_positive_cases.json so that the concept carries its own negative evidence. THE SURFACE PATTERN IS PRESENT: White's queen stands directly in front of Black's passed d3 pawn and the pawn cannot advance. That is the record's precondition word for word, and the blockade is real. WHY IT IS NOT THE CONCEPT: This record's first trap: \"A piece standing in front of a pawn is not necessarily blockading it usefully. The test is whether the piece keeps its powers there — a queen on a blockading square is doing a knight's chore.\" And its first indicator_against: \"The blockader is a queen or rook, which is expensive and evictable.\" A bare report of 'blockade' here tells the reader White has solved a problem. WHAT THE SYSTEM DOES: THE ANSWER HERE IS THE SENTENCE, NOT A GUARD, and this case exists to pin that down. The concept IS present and suppressing it would be a false negative; what would mislead is reporting it bare. The API says: 'White's queen on d2 stands directly in front of Black's pawn on d3, which has nothing of its own to advance behind and cannot pass it — though a queen is an expensive blockader and can usually be chased off by something cheaper', and attaches two of the record's exceptions as cautions. This is the third of the three answers a stated condition can get — build it, argue on the record that it cannot be built, or say it in the sentence — and it was the right one nine times before this.",
+      "origin_kind": "constructed-test",
+      "concept_role": "negative",
+      "false_positive_case": "a-queen-doing-a-knights-chore"
+    }
+  ],
+  "ambiguous_examples": [
+    {
+      "fen": "8/5p2/1p2pkp1/1P4qp/3P4/5P1P/1Q3KP1/8 b - - 17 52",
+      "note": "Lisitsin-Capablanca, Moscow 1935, Qd5. Human ground truth: the concept is named for this position by Irving Chernev, quoted; Max Euwe on the ending. Corpus entry `lisitsin-capablanca-1935-52Qd5-blockade-ambiguous`. A queen blockading, praised by name, in a position that is objectively drawn - which makes it ambiguous twice over. This base's blockade record carries a false-positive trap that reads almost as a warning against this exact move: 'a piece standing in front of a pawn is not necessarily blockading it usefully. The test is whether the piece keeps its powers there - a queen on a blockading square is d",
+      "origin_kind": "historical-game",
+      "game": "Lisitsin-Capablanca, Moscow 1935",
+      "concept_role": "ambiguous",
+      "attributed_by": "Irving Chernev, quoted; Max Euwe on the ending — corpus entry lisitsin-capablanca-1935-52Qd5-blockade-ambiguous",
+      "engine": {
+        "engine_id": "Stockfish 18",
+        "test_level": 3,
+        "depth": 24,
+        "multipv": 3,
+        "best_move": "Ke7",
+        "eval_cp": 0,
+        "verdict": "ambiguous",
+        "verdict_note": "with the annotation's own caveat rather than with its enthusiasm, which is the useful outcome. At depth 24 the position is 0.00 and so is 52...Qd5, the engine's second choice among three moves it scores identically. Capablanca won it anyway, and the page says in as many words that the ending is a theoretical draw. An annotation that names its own limits is worth more than one that does not, and this entry is here partly to record that."
+      }
+    }
+  ],
+  "explanations": {
+    "by_level": {
+      "beginner": "Put a piece right in front of their pawn so it cannot move. A knight is best at this — it still does its job from there.",
+      "intermediate": "Blockade the pawn. Choose the blockader carefully: a knight loses nothing standing there, a queen loses almost everything.",
+      "advanced": "Nimzowitsch's three requirements: effectiveness as a blocker, threats from the square, and elasticity. The blockading square is also a hole by construction, so it doubles as an outpost.",
+      "master": "Restrain, blockade, destroy, in that order — and weigh the tying-down cost, which he states explicitly."
+    },
+    "by_depth": {
+      "short": "A piece in front of the pawn stops it dead.",
+      "normal": "Blockade: park a piece directly in front of an enemy pawn so it cannot advance. A knight is the ideal blockader because it keeps all its power from the square; a queen is the worst, because any minor piece evicts her.",
+      "deep": "Nimzowitsch supplied the rationale for something masters already did by custom, and said so — his claim was the theory, not the practice. He sets three requirements on a blockading piece: effectiveness as a blocker, the threats it makes from the square, and elasticity to leave when needed. The third decides which piece should do it. He also notes that the blockading square tends to become a good square, because the pawn it blocks can never attack it — which makes blockade and outpost the same geometry from two sides. All of it sits inside the formula his primary text states verbatim: first restrain, then blockade, and finally destroy."
+    },
+    "hedge": "",
+    "lesson": "Stop a passed pawn with a knight if you can. And remember the blockade costs you a piece's freedom — make sure the pawn was worth it."
+  },
+  "terminology": {
+    "beginner_words": [
+      "stand in front of the pawn",
+      "it cannot move"
+    ],
+    "advanced_words": [
+      "blockade",
+      "blockader",
+      "elasticity",
+      "restraint",
+      "outpost"
+    ],
+    "avoid": [
+      "blockade with anything"
+    ]
+  },
+  "status": {
+    "stage": "researched",
+    "last_updated": "2026-09-01",
+    "open_questions": [],
+    "audit_notes": []
+  },
+  "id": "blockade",
+  "canonical_name": "Blockade",
+  "category": "restriction",
+  "knowledge_type": "strategic-principle",
+  "definition_short": "Stopping an enemy pawn by placing a piece directly in front of it — ideally a knight, which loses nothing by standing there.",
+  "definition_long": "A piece parked immediately in front of an enemy pawn stops it dead. Nimzowitsch devoted a chapter to justifying what masters had done by instinct, and his framing survives intact.\n\nHe sets out what a blockading piece must offer: basic effectiveness as a blocker, the threats it can make FROM the blockading square, and elasticity — the ability to leave when needed. That third requirement is what decides which piece should do the job. A knight blockades ideally because it loses none of its power standing in front of a pawn and still radiates over squares beyond it. A queen is the worst blockader, because any minor piece attacking her forces the post to be abandoned.\n\nHe also notes the blockading square tends to BECOME a good square: because the pawn in front of it can never attack it, the blockade square is by construction a hole. That is why the blockade and the outpost are the same geometry seen from two sides.\n\nThe blockade sits inside his larger formula, which is in the primary text verbatim: 'First restrain, then blockade and finally destroy!' — restrain the pawn from advancing, blockade it so it cannot, then win it.",
+  "sources": [
+    "nimzowitsch-my-system",
+    "wikipedia-passed-pawn",
+    "scribd-hypermodern-revolt",
+    "nimzowitsch-salwe-1911"
+  ],
+  "source_confidence": "high"
+}

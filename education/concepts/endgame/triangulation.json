@@ -1,0 +1,221 @@
+{
+  "schema_version": 2,
+  "alternate_names": [
+    "losing a tempo",
+    "losing a move"
+  ],
+  "historical_names": [],
+  "tags": [
+    "endgame",
+    "zugzwang",
+    "tempo",
+    "tablebase-tested"
+  ],
+  "subcategory": "tempo technique",
+  "difficulty": "advanced",
+  "knowledge_type_note": "A technique whose effect is exact: it returns the same position with the other side to move. Whether that wins is then decidable, so this is a proven result rather than a heuristic.",
+  "name_status": "established-name",
+  "history": {
+    "attributions": [
+      {
+        "person": "George Walker",
+        "relation": "first-documented-by",
+        "source": "wikipedia-zugzwang",
+        "year": null,
+        "note": "The British master analysed a king-and-rook-versus-king position giving a manoeuvre that returned to the initial position with the inferior side to move, describing it as 'throwing the move upon Black'. ATTRIBUTION NOT VERIFIED against a primary text; taken from a secondary source."
+      }
+    ],
+    "first_documented_source": "wikipedia-triangulation",
+    "year": null,
+    "confidence": "low",
+    "notes": "No coinage established. Walker's description is the earliest use found in the sources consulted, and it is second-hand.",
+    "competing_claims": [],
+    "development": []
+  },
+  "engine_era_status": "reliable",
+  "engine_era_note": "Exact, and now decidable: a tablebase settles whether the triangulated position is actually better, and — as the example in this record shows — whether triangulation was the best way to get there at all.",
+  "recognition": {
+    "preconditions": [
+      "The same position with the opponent to move would be better",
+      "One side's piece has a three-square route back to its square; the opponent's has only two"
+    ],
+    "indicators_for": [
+      "A mutual-zugzwang position where whoever moves must concede",
+      "The opposing king is confined to two squares by its defensive duties",
+      "No pawn tempo is available to either side"
+    ],
+    "indicators_against": [
+      "A spare pawn move exists, which is a cheaper way to lose a tempo",
+      "The defender has the same number of squares and can mirror the manoeuvre",
+      "A direct route wins faster — check before triangulating",
+      "The piece is a knight, which cannot triangulate at all"
+    ],
+    "prerequisites": [
+      "zugzwang",
+      "opposition"
+    ],
+    "detector": null,
+    "detectability": "heuristic",
+    "typical_confidence": "medium",
+    "false_positive_traps": [
+      "MEASURED: the standard textbook position for triangulation does not require it. Every king move wins there and a direct pawn move wins fastest. Do not report triangulation as necessary without checking that the alternatives fail.",
+      "A spare pawn tempo achieves the same thing more cheaply and is usually available.",
+      "A knight cannot triangulate; asserting it can is a geometric error."
+    ]
+  },
+  "application": {
+    "typical_plans": [
+      "Identify the corresponding squares, then use the extra square you have and the defender does not",
+      "Verify the target position is actually winning with the opponent to move before spending the moves"
+    ],
+    "typical_moves": [
+      "A king triangle such as d5-e5-d4-d5"
+    ],
+    "typical_pawn_structures": [
+      "Blocked structures where no pawn tempo remains"
+    ],
+    "typical_piece_arrangements": [
+      "Kings in a corresponding-squares relationship"
+    ],
+    "tactical_consequences": [
+      "Imposes zugzwang without any threat being made"
+    ],
+    "strategic_consequences": [
+      "Converts a drawn-looking opposition standoff into a win"
+    ]
+  },
+  "exceptions": [
+    "A knight cannot triangulate — it cannot return to a square in an odd number of moves.",
+    "A spare pawn move does the same job more cheaply.",
+    "The textbook example does not require triangulation; several moves win and a direct one wins faster."
+  ],
+  "limitations": [
+    "Recognising the opportunity requires the corresponding-squares relationship, which is a judgement outside tablebase range.",
+    "Instructional sources overstate its necessity; verify before asserting it.",
+    "NO POSITIVE EXAMPLE, and eight constructions were tried and thrown away. A triangulation position needs a RECIPROCAL zugzwang - the same board won with one side to move and drawn or lost with the other - plus a three-square king route for the winning side that the defender cannot mirror. Symmetric blocked structures are drawn with either side to move, which Syzygy confirmed for four of them; the asymmetric ones either gave the winning side a spare PAWN tempo, which removes the need to triangulate at all, or turned out to be illegal with one side to move because a pawn was checking the king. The ambiguous example on this record is a proven win whose first move is a pawn break rather than a king manoeuvre, which is the same difficulty seen from the other side. Recorded so the next attempt does not repeat these eight."
+  ],
+  "misconceptions": [
+    "That triangulation is the only way to lose a tempo. A spare pawn move is usually available and simpler.",
+    "That any king manoeuvre returning to the same square is triangulation. It must return the position with the OTHER side to move.",
+    "That a knight can do it."
+  ],
+  "relationships": {
+    "broader": [
+      "zugzwang"
+    ],
+    "narrower": [],
+    "related": [
+      "zugzwang",
+      "opposition",
+      "corresponding-squares",
+      "tempo"
+    ],
+    "contrasting": [],
+    "co_occurring": [
+      "zugzwang",
+      "opposition"
+    ],
+    "conflicts": []
+  },
+  "examples": [],
+  "counterexamples": [
+    {
+      "fen": "8/8/4k3/8/4N3/8/4K3/8 w - - 0 1",
+      "note": "Registered false-positive case `a-knight-cannot-lose-a-tempo`, kept on the record as well as in tests/false_positive_cases.json so that the concept carries its own negative evidence. THE SURFACE PATTERN IS PRESENT: Two kings and a knight in an endgame, with the side to move wanting to hand the move back. Triangulation is the standard way to do that, and the knight looks like a piece with spare moves to make. WHY IT IS NOT THE CONCEPT: A knight cannot lose a single tempo: every knight move changes the colour of the square it stands on, so returning to the same square always takes an even number of moves. Triangulation is precisely the technique of reaching the same position with the OTHER side to move, and a knight can never contribute one. WHAT THE SYSTEM DOES: The API does not report triangulation. Syzygy: 3 pieces, draw, dtz 0 — the position is drawn whoever moves, so there is no tempo worth losing in it either. The geometric fact is the interesting half and it is not evaluative at all: a king triangulates because it can reach a square in two moves or three, and a knight's parity forbids the equivalent. This is why the technique belongs to king-and-pawn endings and to bishops, and why a knight ending is the standard example of a position where zugzwang cannot be manufactured.",
+      "origin_kind": "constructed-test",
+      "concept_role": "negative",
+      "tablebase": {
+        "source": "Lichess tablebase (Syzygy, 7-piece)",
+        "pieces": 3,
+        "wdl": "draw",
+        "dtz": 0,
+        "dtm": 0,
+        "category": "draw",
+        "note": "PROVEN DRAW, dtz 0. The position is drawn whoever moves, so there is no tempo worth losing in it - which is the second half of why triangulation does not apply. The first half is geometric and not evaluative at all: every knight move changes square colour, so a knight can never return to its square in an odd number of moves."
+      },
+      "false_positive_case": "a-knight-cannot-lose-a-tempo"
+    }
+  ],
+  "ambiguous_examples": [
+    {
+      "fen": "8/1p1k4/8/1PPK4/8/8/8/8 w - - 0 1",
+      "note": "The standard textbook triangulation position: White Kd5 with pawns b5 and c5, Black Kd7 with a pawn on b7. The instructional line is 1.Ke5! Kc6 2.Kd4 Kd7 3.Kd5, returning the same position with Black to move. Included as the concept's principal caveat, not as a clean positive.",
+      "origin_kind": "study-composition",
+      "concept_role": "ambiguous",
+      "side_to_move_benefits": "white",
+      "tablebase": {
+        "source": "Lichess tablebase (Syzygy, 7-piece)",
+        "pieces": 5,
+        "wdl": "win",
+        "dtz": 1,
+        "dtm": 23,
+        "category": "win",
+        "note": "PROVEN, and it corrects the teaching. Every legal move was checked. The direct 1.b6 wins in 22; the triangulating 1.Ke5 wins in 46; Kc4, Kd4 and Ke4 all win in 48. Only 1.c6+ is a draw. So the position genuinely teaches 'do not push the pawn', and it does NOT establish that triangulation was necessary — it is one of five winning moves and the slowest of them. Recorded as ambiguous because it supports the technique's existence while contradicting the necessity the source implies."
+      },
+      "engine": {
+        "engine_id": "Stockfish 18",
+        "test_level": 3,
+        "depth": 26,
+        "threads": 10,
+        "hash_mb": 4096,
+        "multipv": 1,
+        "best_move": "b5b6",
+        "eval_cp": null,
+        "mate_in": 14,
+        "pv": [],
+        "alternatives": [],
+        "margin_cp": null,
+        "verdict": "supports",
+        "verdict_note": "PROVEN WIN, dtz 1, mate in 23, best move b6 - and the engine agrees at mate in 14. Filed as AMBIGUOUS because what is in doubt is not the result but whether triangulation is what achieves it: the tablebase's own first move is a pawn break rather than a king manoeuvre, so the position wins and this concept may not be the reason."
+      }
+    }
+  ],
+  "explanations": {
+    "by_level": {
+      "beginner": "The king walks around a little triangle and comes back to the same square, having used one more move than the other king can. Now it is their turn in a position where they did not want it to be.",
+      "intermediate": "Triangulation: lose a move on purpose so the same position comes back with your opponent to play. Useful only when that position is mutual zugzwang.",
+      "advanced": "Losing a tempo via a three-square route the defender cannot mirror. Check first whether a spare pawn move does it more cheaply, and whether a direct win exists.",
+      "master": "The corresponding-squares relationship is what makes it work — you have an extra square from which the relationship holds and the defender does not. Verify the target position before spending the moves."
+    },
+    "by_depth": {
+      "short": "Walk the king round a triangle to hand the move back.",
+      "normal": "Triangulation: manoeuvre so the identical position arises with your opponent to move. It works when they have only two squares to your three, and it decides mutual-zugzwang positions.",
+      "deep": "A method of losing a tempo deliberately. The king takes a three-square route home while the defending king has only two, so the same position returns with the other side to play — decisive in mutual zugzwang. Queens, rooks and bishops can do it; a knight cannot, since its move always changes square colour. Worth a caution: the standard textbook example does not actually require the technique. Checked against tablebase, every king move there wins and the direct pawn advance wins fastest, with only one move throwing the win away. Triangulation is a real technique that instructional sources routinely present as more necessary than it is."
+    },
+    "hedge": "",
+    "lesson": "Before triangulating, check two things: that the position you are aiming for is actually won, and that a spare pawn move or a direct route does not do the job faster."
+  },
+  "terminology": {
+    "beginner_words": [
+      "walking the king around to waste a move"
+    ],
+    "advanced_words": [
+      "triangulation",
+      "losing a tempo",
+      "corresponding squares",
+      "mutual zugzwang"
+    ],
+    "avoid": [
+      "you must triangulate here"
+    ]
+  },
+  "status": {
+    "stage": "researched",
+    "last_updated": "2026-09-01",
+    "open_questions": [],
+    "audit_notes": []
+  },
+  "id": "triangulation",
+  "canonical_name": "Triangulation",
+  "category": "triangulation",
+  "knowledge_type": "proven-result",
+  "definition_short": "Manoeuvring a piece around three squares to return to the start having spent an extra move, so the same position arises with the opponent to play.",
+  "definition_long": "A way of losing a tempo on purpose. A king that can reach its square by a three-square route while the opposing king has only two available returns to the identical position with the opponent to move — which, in a mutual-zugzwang position, is decisive.\n\nThe mechanism depends on CORRESPONDING SQUARES: the triangulating king has more squares from which it maintains the relationship than the defender does, so the defender runs out first.\n\nA queen, rook or bishop can also triangulate. A KNIGHT CANNOT — its move always changes square colour, so it can never return to a square in an odd number of moves.\n\nIMPORTANT AND MEASURED CAVEAT. The technique is real, but instructional sources routinely present positions as REQUIRING it when they do not. In the standard textbook example — White Kd5 with pawns b5 and c5, Black Kd7 with a pawn on b7 — the tablebase says every king move wins and the direct 1.b6 wins fastest at mate in 22, against mate in 46 for the triangulating 1.Ke5. Only 1.c6+ throws the win away. So the position teaches the idea, and it does not establish that the idea was necessary. Recorded because presenting a demonstration as a necessity is the standard way instructional material overstates.",
+  "sources": [
+    "wikipedia-triangulation",
+    "wikipedia-zugzwang",
+    "lichess-tablebase",
+    "wikipedia-corresponding-squares"
+  ],
+  "source_confidence": "high"
+}

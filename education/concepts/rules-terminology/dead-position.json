@@ -1,0 +1,142 @@
+{
+  "schema_version": 2,
+  "id": "dead-position",
+  "canonical_name": "Dead position",
+  "alternate_names": [
+    "dead drawn (rules sense)"
+  ],
+  "historical_names": [],
+  "category": "official-rules",
+  "subcategory": "basic rules of play",
+  "tags": [],
+  "knowledge_type": "official-rule",
+  "knowledge_type_note": "Official rule (A). The commonly used 'insufficient material' shortcut is an implementation convention, not the FIDE rule, and is classified separately.",
+  "name_status": "established-name",
+  "difficulty": "intermediate",
+  "definition_short": "A position from which neither player can checkmate by ANY series of legal moves. The game is drawn immediately.",
+  "definition_long": "FIDE Art. 5.2.2: 'The game is drawn when a position has arisen in which neither player can checkmate the opponent's king with any series of legal moves. The game is said to end in a dead position. This immediately ends the game...'\n\nThis is broader and stricter than the 'insufficient material' test most software implements. 'Insufficient material' asks whether the material present could ever mate; a dead position asks whether mate is reachable from THIS position by any legal continuation, which includes blocked positions with plenty of material. Conversely, K+B vs K+B on the same colour is insufficient in the FIDE sense, whereas K+N vs K+N is NOT automatically dead, because a helpmate exists.\n\nNox Chess should not conflate the two terms when explaining a draw.",
+  "history": {
+    "attributions": [],
+    "first_documented_source": "fide-laws-2023",
+    "year": null,
+    "confidence": "unknown",
+    "notes": "",
+    "competing_claims": [],
+    "development": []
+  },
+  "engine_era_status": "not-applicable",
+  "engine_era_note": "",
+  "sources": [
+    "fide-laws-2023",
+    "fide-laws-2023-pdf"
+  ],
+  "source_confidence": "high",
+  "recognition": {
+    "preconditions": [
+      "No sequence of legal moves from this position ends in checkmate"
+    ],
+    "indicators_for": [
+      "K vs K",
+      "K+B vs K",
+      "K+N vs K",
+      "K+B vs K+B with bishops on the same colour"
+    ],
+    "indicators_against": [
+      "Any pawn remains on the board",
+      "A rook or queen remains on the board",
+      "K+N+N vs K — mate is not forcible but is not impossible, so the position is not dead"
+    ],
+    "prerequisites": [],
+    "detector": null,
+    "detectability": "heuristic",
+    "typical_confidence": "medium",
+    "false_positive_traps": []
+  },
+  "application": {
+    "typical_plans": [],
+    "typical_moves": [],
+    "typical_pawn_structures": [],
+    "typical_piece_arrangements": [],
+    "tactical_consequences": [],
+    "strategic_consequences": []
+  },
+  "exceptions": [
+    "K+N+N vs K is a draw in practice but is NOT a dead position: mate is legally reachable with cooperation, so the game does not end automatically.",
+    "A completely blocked position with full material can be a dead position even though material is ample."
+  ],
+  "limitations": [
+    "Deciding the general case is hard; engines and servers approximate it with a material test. The approximation is correct in the common cases and wrong at the edges."
+  ],
+  "misconceptions": [],
+  "relationships": {
+    "broader": [],
+    "narrower": [],
+    "related": [
+      "insufficient-material",
+      "stalemate",
+      "fortress"
+    ],
+    "contrasting": [],
+    "co_occurring": [],
+    "conflicts": []
+  },
+  "examples": [
+    {
+      "fen": "4k3/8/8/8/8/8/8/4KB2 w - - 0 1",
+      "note": "King and bishop against king. FIDE 5.2.2 calls a position dead when no series of legal moves can lead to checkmate, and this is the textbook instance: with one bishop there is no mating net at all, whatever either side plays. The move generator confirms the position is live in the ordinary sense - 11 legal moves, no check - which is the point: dead-position is not about having no moves, it is about no sequence of moves reaching mate. That is why it is the one official rule in this base whose detectability is recorded as heuristic rather than mechanical.",
+      "origin_kind": "constructed-test",
+      "concept_role": "positive",
+      "tablebase": {
+        "source": "Lichess tablebase (Syzygy, 7-piece)",
+        "pieces": 3,
+        "wdl": "draw",
+        "dtz": 0,
+        "dtm": 0,
+        "category": "draw",
+        "note": "PROVEN draw over every legal continuation, which is the strongest form the claim can take: FIDE 5.2.2 says no series of legal moves can lead to checkmate, and a tablebase is a statement about every series of legal moves. This is one of the few places in this base where the evidence and the definition are the same shape."
+      }
+    }
+  ],
+  "counterexamples": [
+    {
+      "fen": "4kb2/8/8/8/8/8/8/4KB2 w - - 0 1",
+      "note": "Registered false-positive case `opposite-bishops-and-a-dead-position`, kept on the record as well as in tests/false_positive_cases.json so that the concept carries its own negative evidence. THE SURFACE PATTERN IS PRESENT: King and bishop against king and bishop with nothing else on the board. Neither side can force mate, which is what a dead position sounds like. WHY IT IS NOT THE CONCEPT: FIDE 5.2.2 asks whether checkmate can be reached by ANY possible series of legal moves, not whether it can be forced. With bishops on opposite colours a helpmate exists, so the position is not dead — the players may agree a draw, and the arbiter does not end the game. WHAT THE SYSTEM DOES: The API does not report dead-position here, and the record's own example shows the contrast: K+B vs K, where no series of legal moves reaches mate at all and Syzygy proves the draw over every continuation. The two records are neighbours and the difference between them is exactly this — `insufficient-material` is a software convention and `dead-position` is the Law it approximates, which is why this base keeps them apart and files the first as terminology.",
+      "origin_kind": "constructed-test",
+      "concept_role": "negative",
+      "false_positive_case": "opposite-bishops-and-a-dead-position"
+    }
+  ],
+  "ambiguous_examples": [],
+  "explanations": {
+    "by_level": {
+      "beginner": "Neither side has enough left to deliver checkmate, so the game is a draw.",
+      "intermediate": "Dead position: no legal sequence of moves from here could ever produce checkmate, so the game ends drawn at once.",
+      "advanced": "Art. 5.2.2. Note this is broader than the 'insufficient material' test implemented by most software."
+    },
+    "by_depth": {
+      "short": "No series of legal moves can reach checkmate. Drawn immediately.",
+      "normal": "A dead position: neither player can deliver checkmate by ANY sequence of legal moves, however either side cooperates. The game is drawn at once, without a claim.",
+      "deep": "FIDE Art. 5.2.2, and it is broader than the 'insufficient material' test software implements. The article asks about every possible series of moves, which is a statement of the same shape a tablebase makes — this base's example is king and bishop against king, proven drawn over every continuation. Note what the rule does NOT cover: a completely blocked position with ample material is dead in the ordinary sense and is not dead under 5.2.2, because a helpmate exists. That gap is exactly where the software convention and the Law come apart."
+    },
+    "hedge": "",
+    "lesson": ""
+  },
+  "terminology": {
+    "beginner_words": [
+      "not enough pieces to checkmate"
+    ],
+    "advanced_words": [
+      "dead position",
+      "Art. 5.2.2"
+    ],
+    "avoid": [
+      "insufficient material (when the FIDE rule is meant)"
+    ]
+  },
+  "status": {
+    "stage": "researched",
+    "last_updated": "2026-08-31",
+    "open_questions": [],
+    "audit_notes": []
+  }
+}

@@ -1,0 +1,165 @@
+{
+  "schema_version": 2,
+  "id": "double-attack",
+  "canonical_name": "Double attack",
+  "alternate_names": [
+    "dual threat"
+  ],
+  "historical_names": [],
+  "category": "tactical-motifs",
+  "subcategory": "material-winning motif",
+  "tags": [],
+  "knowledge_type": "tactical-motif",
+  "knowledge_type_note": "Motif (D). The fork/double-attack boundary is a terminological disagreement between sources, recorded rather than resolved.",
+  "name_status": "established-name",
+  "difficulty": "beginner",
+  "definition_short": "Any move that creates two threats at once, whether by one piece or two.",
+  "definition_long": "The general case of which the fork is the special case. A fork is a double attack by a single piece; a discovered attack is a double attack by two pieces, one moving and one revealed. Chess Informant treats 'Double Attack' as a top-level theme.\n\nSources disagree on whether 'fork' and 'double attack' are synonyms. Chess.com treats them as one theme; Wikipedia and Chess Tempo keep the distinction that a fork is by one unit. This record follows the narrower usage and records the conflation as an alternate usage rather than an error.",
+  "history": {
+    "attributions": [],
+    "first_documented_source": "informant-encyclopedia-combinations",
+    "year": null,
+    "confidence": "unknown",
+    "notes": "Tactical motifs are descriptive pattern names of long and mostly anonymous usage. The Chess Informant classification is cited as a standard enumeration, not as the origin of the term.",
+    "competing_claims": [],
+    "development": []
+  },
+  "engine_era_status": "unassessed",
+  "engine_era_note": "",
+  "sources": [
+    "informant-encyclopedia-combinations",
+    "wikipedia-chess-tactic",
+    "chesstempo-tactical-motifs",
+    "chesscom-tactics-38"
+  ],
+  "source_confidence": "high",
+  "recognition": {
+    "preconditions": [
+      "After the move, two distinct threats exist that cannot both be met"
+    ],
+    "indicators_for": [
+      "The two threats require different defensive resources",
+      "One threat is a check, forcing the reply"
+    ],
+    "indicators_against": [
+      "A single defensive move parries both",
+      "One 'threat' is not real because the target is adequately defended"
+    ],
+    "prerequisites": [],
+    "detector": "threatsAfterMove",
+    "detectability": "heuristic",
+    "typical_confidence": "medium",
+    "false_positive_traps": []
+  },
+  "application": {
+    "typical_plans": [],
+    "typical_moves": [],
+    "typical_pawn_structures": [],
+    "typical_piece_arrangements": [],
+    "tactical_consequences": [],
+    "strategic_consequences": []
+  },
+  "exceptions": [
+    "A single move can sometimes answer both threats — an interposition that also defends, or a counter-check."
+  ],
+  "limitations": [
+    "'Threat' is broader than 'attacks a piece' and includes mate threats and positional threats, which makes fully mechanical detection unreliable.",
+    "NO MASTER-GAME POSITION YET. This concept has no matcher, so the scan that supplied master positions to eleven other records - five famous games replayed and analysed position by position - could not nominate one here: the API never reports the concept, so there is nothing for a scan to find. Identifying an instance in a master game means reading the game, which is research rather than tooling, and it has not been done. Recorded rather than filled."
+  ],
+  "misconceptions": [],
+  "relationships": {
+    "broader": [],
+    "narrower": [],
+    "related": [
+      "fork",
+      "discovered-attack"
+    ],
+    "contrasting": [],
+    "co_occurring": [],
+    "conflicts": []
+  },
+  "examples": [
+    {
+      "fen": "r3k3/8/8/8/3Q4/8/8/4K3 w - - 0 1",
+      "move": "Qh8+",
+      "move_uci": "d4h8",
+      "note": "Constructed. The record's precondition is 'after the move, two distinct threats exist that cannot both be met', and the record's definition is deliberately wide - 'any move that creates two threats at once, whether by one piece or two'. Here it is one piece and the two threats are of different kinds: check to the king on e8 along the eighth rank, and capture of the rook on a8 along the same rank. Black must answer the check, and answering it does not defend the rook. This is why this base treats double-attack as a family that contains the fork rather than as a synonym for it.",
+      "origin_kind": "constructed-test",
+      "concept_role": "positive",
+      "side_to_move_benefits": "white",
+      "engine": {
+        "engine_id": "Stockfish 18",
+        "test_level": 3,
+        "depth": 18,
+        "threads": 10,
+        "hash_mb": 4096,
+        "multipv": 1,
+        "best_move": "d4h8",
+        "eval_cp": null,
+        "mate_in": 15,
+        "pv": [],
+        "alternatives": [],
+        "margin_cp": null,
+        "verdict": "supports",
+        "verdict_note": "Mate in 15, and the engine's own first move is the double attack. Note that Qa4+ also forks king and rook and the engine prefers Qh8+; the concept does not depend on which of the two is chosen, which is worth saying because a matcher that insisted on a unique best move would call this position ambiguous."
+      }
+    }
+  ],
+  "counterexamples": [
+    {
+      "fen": "rr4k1/5pp1/8/3Q4/8/8/8/6K1 w - - 0 1",
+      "note": "Registered false-positive case `two-threats-answered-by-neither`, kept on the record as well as in tests/false_positive_cases.json so that the concept carries its own negative evidence. THE SURFACE PATTERN IS PRESENT: The queen on d5 attacks the rook on a8 down the long diagonal and the pawn on f7 down the other. Two enemy units attacked at once by one piece, which is this record's precondition exactly. WHY IT IS NOT THE CONCEPT: The precondition has a second half: 'two distinct threats that CANNOT BOTH BE MET'. Both can. The rook on a8 is defended by the rook on b8 and the pawn on f7 by the king, and a queen taking a defended rook or a defended pawn is not a threat at all — nothing needs answering, so there is nothing for one move to fail to answer. WHAT THE SYSTEM DOES: The API does not report a double attack. Stockfish 18 at depth 22 says -4.90 for the side making it and retreats the queen to d1. This is the geometric half of the concept without the arithmetic half, and it is the commonest way a reader gets the motif wrong: counting how many enemy pieces a queen touches is easy and says nothing, and what makes the difference is whether taking either one is worth doing.",
+      "origin_kind": "constructed-test",
+      "concept_role": "negative",
+      "false_positive_case": "two-threats-answered-by-neither"
+    }
+  ],
+  "ambiguous_examples": [
+    {
+      "fen": "4k3/p7/8/8/3Q4/8/8/4K3 w - - 0 1",
+      "move": "Qd7+",
+      "move_uci": "d4d7",
+      "note": "Qd7+ attacks the king on e8 and the pawn on a7 at the same time, and the detector says so in those words. Two distinct threats that cannot both be met is this record's precondition, satisfied exactly. It is also worth nothing: the tablebase's own move is Qxa7, taking the pawn immediately and without any double attack, and the position is a proven win either way. Filed as ambiguous because the concept applies in full and adds no information - a double attack that wins a pawn in a position already winning by a queen is a true description of a move nobody needs to find.",
+      "origin_kind": "constructed-test",
+      "concept_role": "ambiguous",
+      "tablebase": {
+        "source": "Lichess tablebase (Syzygy, 7-piece)",
+        "pieces": 4,
+        "wdl": "win",
+        "dtz": 1,
+        "dtm": 13,
+        "category": "win",
+        "note": "PROVEN WIN in 13, and the best move is Qxa7 rather than the forking Qd7+. The double attack is genuinely on the board and the tablebase prefers simply taking the pawn."
+      }
+    }
+  ],
+  "explanations": {
+    "by_level": {
+      "beginner": "This move makes two threats at once, and only one can be answered.",
+      "intermediate": "A double attack: two threats, needing two different answers.",
+      "advanced": "Double attack (Informant theme j). Distinguish from a fork proper, which is a double attack by a single unit."
+    },
+    "by_depth": {
+      "short": "One move, two threats, and only one can be answered.",
+      "normal": "A double attack: any move that creates two threats at once, whether by one piece or two. The test is not how many enemy units are touched — it is whether both threats are real and whether one move can meet them both.",
+      "deep": "The family that contains the fork rather than a synonym for it: a fork is one piece hitting two targets, and a double attack includes a move that makes one threat while a second piece makes another. Counting how many enemy pieces a queen touches is the easy half and says nothing. Both targets must be worth taking — two defended units both cheaper than the attacker are not threats at all — and the defender must not have a single move that covers both, which is the condition a static scan cannot see. Smyslov-Botvinnik 1954 is the master example and the forking piece there is a pawn, which is the cheapest attacker there is and the condition that makes a double attack work."
+    },
+    "hedge": "",
+    "lesson": ""
+  },
+  "terminology": {
+    "beginner_words": [
+      "two threats at once"
+    ],
+    "advanced_words": [
+      "double attack"
+    ],
+    "avoid": []
+  },
+  "status": {
+    "stage": "researched",
+    "last_updated": "2026-08-31",
+    "open_questions": [],
+    "audit_notes": []
+  }
+}

@@ -1,0 +1,330 @@
+{
+  "schema_version": 2,
+  "alternate_names": [
+    "family fork (when it hits king, queen and rook)",
+    "royal fork (king and queen)"
+  ],
+  "historical_names": [],
+  "tags": [
+    "tactics",
+    "knights",
+    "detector-backed"
+  ],
+  "subcategory": "fork variant",
+  "difficulty": "beginner",
+  "knowledge_type_note": "A named variant of the fork, kept separate because the knight's geometry makes it behave differently from every other forking piece.",
+  "name_status": "established-name",
+  "history": {
+    "attributions": [],
+    "first_documented_source": "informant-encyclopedia-combinations",
+    "year": null,
+    "confidence": "unknown",
+    "notes": "A descriptive name of long, anonymous usage.",
+    "competing_claims": [],
+    "development": []
+  },
+  "engine_era_status": "reliable",
+  "engine_era_note": "Wholly mechanical and unaffected by engine-era revision. findMotifs() in this repository detects it as part of its general fork test.",
+  "recognition": {
+    "preconditions": [
+      "A knight attacks two or more enemy units after the move"
+    ],
+    "indicators_for": [
+      "One target is the king, making the fork absolute",
+      "A target is undefended or outranks the knight",
+      "The landing square cannot be attacked by an enemy pawn",
+      "The classic c7/f7 geometry against a king and a corner rook"
+    ],
+    "indicators_against": [
+      "The landing square is defended and the knight is simply lost",
+      "Both targets are defended and cheaper than the knight",
+      "The defender has a check or stronger counter-threat first"
+    ],
+    "prerequisites": [
+      "fork"
+    ],
+    "detector": "findMotifs -> fork",
+    "detectability": "mechanical",
+    "typical_confidence": "high",
+    "false_positive_traps": [
+      "The landing square must be safe. This base's fork controlled pair shows the same knight move at +7.39 and at +0.57 depending only on whether one bishop guards the square.",
+      "A knight attacking two defended pawns is not a fork worth reporting."
+    ]
+  },
+  "application": {
+    "typical_plans": [
+      "Manoeuvre the knight towards a square from which it forks",
+      "Force the enemy pieces onto squares of one colour, which is the geometry a knight fork needs",
+      "Decoy a piece onto a forking square with a sacrifice"
+    ],
+    "typical_moves": [
+      "Nc7+ and Nf7 forking king and rook",
+      "Nd6+ and Ne7+ family forks"
+    ],
+    "typical_pawn_structures": [
+      "Structures where the knight has an outpost within forking range"
+    ],
+    "typical_piece_arrangements": [
+      "King and rook on squares of the same colour, a knight's move apart"
+    ],
+    "tactical_consequences": [
+      "Wins material outright when absolute"
+    ],
+    "strategic_consequences": [
+      "An outpost within forking distance of the king is worth more than one that is not"
+    ]
+  },
+  "exceptions": [
+    "A knight fork on a guarded square wins nothing.",
+    "Only another knight can attack a knight back without moving, which is why knight-versus-knight forks behave differently."
+  ],
+  "limitations": [
+    "Detecting the geometry is mechanical; deciding it wins material requires resolving the exchange.",
+    "NO MASTER-GAME POSITION YET, and the search that failed is worth recording. Five famous games were replayed through this base's own move generator and scanned position by position with the API - the Opera Game, the Evergreen, the Immortal, the Game of the Century and Legall's Mate, 225 plies between them - and this concept was not reported in any of them. That is not evidence the motif is rare; it is evidence that the five games this base can currently verify do not contain a clean instance of it, and that adding one means adding a game rather than looking harder at these. tools/replay_game.js is the instrument: a move list that is wrong is refused rather than guessed at. RESOLVED: Ed. Lasker-Alekhine, Scheveningen 1913, 30...Nxf2+, above."
+  ],
+  "misconceptions": [
+    "That a knight fork always wins material. The landing square's safety decides it.",
+    "That the family and royal fork are distinct motifs. They are the same motif with more expensive targets."
+  ],
+  "relationships": {
+    "broader": [
+      "fork"
+    ],
+    "narrower": [],
+    "related": [
+      "fork",
+      "outpost",
+      "double-attack",
+      "smothered-mate",
+      "loose-piece"
+    ],
+    "contrasting": [],
+    "co_occurring": [
+      "loose-piece"
+    ],
+    "conflicts": []
+  },
+  "examples": [
+    {
+      "fen": "2k3r1/2N2R2/1p4P1/pp3ppr/1b2p3/3pP1P1/P3NP2/1R4K1 w - - 4 38",
+      "note": "the solution Nd4 is a knight fork — the detector reports fork and the moving piece is a knight. The feature was established mechanically from the position by the page's own move generator and lib/features.js. What is NOT claimed is that this feature decides the position. The move is Nd4. Provenance: the puzzle corpus is engine self-play — a real position from a real game between engines, not a master game.",
+      "origin_kind": "puzzle",
+      "concept_role": "supports",
+      "side_to_move_benefits": "neither",
+      "engine": {
+        "engine_id": "Stockfish 18",
+        "test_level": 3,
+        "depth": 22,
+        "threads": 10,
+        "hash_mb": 4096,
+        "multipv": 1,
+        "best_move": "g3g4",
+        "eval_cp": 300,
+        "mate_in": null,
+        "pv": [],
+        "alternatives": [],
+        "margin_cp": null,
+        "verdict": "supports",
+        "verdict_note": "+3.00 at depth 22. A knight fork in a full middlegame position from the shipped puzzle corpus, and the number says the fork is worth about three pawns here. Recorded against the constructed pair on this same record, which isolates the geometry with five men and no advantage at all."
+      }
+    },
+    {
+      "fen": "4k3/pbp5/8/1N6/8/8/8/4K3 w - - 0 1",
+      "move": "Nd6+",
+      "move_uci": "b5d6",
+      "note": "Nd6+ forks the king on e8 and the bishop on b7. One man distinguishes it from the paired position: with b7 empty the same knight on the same square checks and attacks nothing else, and a check is not a fork.",
+      "origin_kind": "constructed-test",
+      "concept_role": "supports",
+      "side_to_move_benefits": "white",
+      "controlled_pair_with": "4k3/p1p5/8/1N6/8/8/8/4K3 w - - 0 1",
+      "engine": {
+        "engine_id": "Stockfish 18",
+        "test_level": 3,
+        "depth": 26,
+        "threads": 10,
+        "hash_mb": 4096,
+        "multipv": 1,
+        "best_move": "b5c7",
+        "eval_cp": -1,
+        "mate_in": null,
+        "pv": [],
+        "alternatives": [],
+        "margin_cp": null,
+        "verdict": "supports",
+        "verdict_note": "PROVEN DRAW, dtz 0, and the tablebase's own best move is Nxa7 rather than the forking Nd6+; the engine says -0.01. THE NUMBERS DO NOT SUPPORT AN ADVANTAGE AND THEY ARE RECORDED FOR THAT REASON. Nd6+ does fork the king and the bishop, the move generator confirms both attacks, and winning the bishop still leaves knight and king against king and two pawns, which is drawn. The concept is a geometric claim and this position establishes the geometry and nothing else - which is what this record's other example says in words: 'what is NOT claimed is that this feature decides the position'."
+      },
+      "tablebase": {
+        "source": "Lichess tablebase (Syzygy, 7-piece)",
+        "pieces": 6,
+        "wdl": "draw",
+        "dtz": 0,
+        "dtm": 0,
+        "category": "draw",
+        "note": "PROVEN, not evaluated. Read from the side to move. The verdict_note on the engine block beside this one says what the two instruments do and do not agree about."
+      }
+    },
+    {
+      "fen": "4rrk1/R1p3N1/1p5p/1P6/4np2/2P3P1/1P1n1P1P/3R3K b - - 0 30",
+      "move": "Nxf2+",
+      "move_uci": "e4f2",
+      "origin_kind": "historical-game",
+      "game": "Ed. Lasker-Alekhine, Scheveningen 1913",
+      "concept_role": "positive",
+      "side_to_move_benefits": "black",
+      "note": "THE MASTER-GAME RUNG. 30...Nxf2+ checks the king on h1 and attacks the rook on d1 in the same move, which is the geometry this record is named for: a knight that hits two things cannot be answered by defending either, and cannot be blocked or attacked back except by another knight.\n\nStockfish 18 at depth 30 with three lines: MATE IN 10, and the continuation is a second knight move rather than the capture - 31.Kg1 Nfd1, the other knight arriving. That is worth showing beside the fork, because the reason the fork wins here is not the rook. Both black knights end up in White's position and the king cannot answer both.\n\nWHAT THE CARD MUST NOT SAY. The second-best move is +29.61 - also completely winning. Black was already winning before the fork and the fork is the fastest finish rather than the difference between winning and not. A record whose only example is a move that wins a won game teaches that forks decide games; this note says what the engine says.\n\nPROVENANCE. Found by tools/mine_master_motifs.js. The move list replayed legally through the page's own move generator. `attributed_by` absent - no annotator read; this grounds the MASTER-GAME rung and not the human-grounded one.",
+      "engine": {
+        "engine_id": "Stockfish 18",
+        "test_level": 3,
+        "depth": 30,
+        "multipv": 3,
+        "best_move": "e4f2",
+        "eval_cp": null,
+        "mate_in": 10,
+        "pv": [
+          "e4f2",
+          "h1g1",
+          "f2d1",
+          "g7e8",
+          "f4f3",
+          "h2h4",
+          "f3f2",
+          "g1h2",
+          "f2f1q",
+          "e8f6"
+        ],
+        "alternatives": [
+          {
+            "move": "e8e7",
+            "eval_cp": 2961
+          },
+          {
+            "move": "g8g7",
+            "eval_cp": 1405
+          }
+        ],
+        "margin_cp": null,
+        "verdict": "supports",
+        "verdict_note": "Mate in 10, the engine's first choice at depth 30. The runner-up is +29.61, so the fork is the fastest win rather than the only one, and the note says so."
+      }
+    }
+  ],
+  "counterexamples": [
+    {
+      "fen": "4k3/p1p5/8/1N6/8/8/8/4K3 w - - 0 1",
+      "move": "Nd6+",
+      "move_uci": "b5d6",
+      "note": "The same knight arriving on the same square with b7 empty: Nd6+ is a check and nothing more. Two squares attacked, one of them a king, is not a fork - a fork needs two things worth taking, and this base does not call a check a fork merely because the knight also eyes an empty square. The page's own findMotifs tags the paired position and not this one.",
+      "origin_kind": "constructed-test",
+      "concept_role": "negative",
+      "side_to_move_benefits": "neither",
+      "controlled_pair_with": "4k3/pbp5/8/1N6/8/8/8/4K3 w - - 0 1",
+      "engine": {
+        "engine_id": "Stockfish 18",
+        "test_level": 3,
+        "depth": 26,
+        "threads": 10,
+        "hash_mb": 4096,
+        "multipv": 1,
+        "best_move": "b5a7",
+        "eval_cp": 0,
+        "mate_in": null,
+        "pv": [],
+        "alternatives": [],
+        "margin_cp": null,
+        "verdict": "supports",
+        "verdict_note": "PROVEN DRAW, dtz 0, best move Nxa7. The negative half of the pair: with b7 empty, Nd6+ attacks a king and an empty square, and this base does not call that a fork. The result is the same as in the positive half, which is the point - the pair isolates whether the FORK is present, not whether anyone is winning, and a pair whose halves differed in result would be testing the wrong thing."
+      },
+      "tablebase": {
+        "source": "Lichess tablebase (Syzygy, 7-piece)",
+        "pieces": 5,
+        "wdl": "draw",
+        "dtz": 0,
+        "dtm": 0,
+        "category": "draw",
+        "note": "PROVEN, not evaluated. Read from the side to move. The verdict_note on the engine block beside this one says what the two instruments do and do not agree about."
+      }
+    }
+  ],
+  "ambiguous_examples": [
+    {
+      "fen": "8/7r/1k6/q2PN3/8/3N4/4K3/8 w - - 17 108",
+      "move": "Nc4+",
+      "move_uci": "e5c4",
+      "note": "Shipped puzzle en-d6905ae15c. Nc4+ forks the king on b6 and the queen on a5, it is the best move on the board, it wins a queen - and the position is a PROVEN DRAW. White is two knights and a pawn against a queen and a rook, and the fork is what holds the balance rather than what wins it. Filed as ambiguous because everything the concept promises is delivered - the geometry, the double attack, the material - and the outcome is nothing. This record's other constructed example makes the same point with five men and no advantage at all; this one makes it in a real position where the fork is essential.",
+      "origin_kind": "puzzle",
+      "concept_role": "ambiguous",
+      "engine": {
+        "engine_id": "Stockfish 18",
+        "test_level": 3,
+        "depth": 24,
+        "threads": 10,
+        "hash_mb": 4096,
+        "multipv": 1,
+        "best_move": "e5c4",
+        "eval_cp": -9,
+        "mate_in": null,
+        "pv": [],
+        "alternatives": [],
+        "margin_cp": null,
+        "verdict": "ambiguous",
+        "verdict_note": "-0.09 at depth 24, settled at depth 1, and the forking move is the engine's first choice. A fork that wins a queen and evaluates at minus nine hundredths of a pawn."
+      },
+      "tablebase": {
+        "source": "Lichess tablebase (Syzygy, 7-piece)",
+        "pieces": 7,
+        "wdl": "draw",
+        "dtz": 0,
+        "dtm": null,
+        "category": "draw",
+        "note": "PROVEN DRAW, and the tablebase's own best move is Nc4+ - the fork. Everything the concept promises, and a draw."
+      }
+    }
+  ],
+  "explanations": {
+    "by_level": {
+      "beginner": "The knight attacks two pieces at once. They cannot both move, and nothing can block a knight.",
+      "intermediate": "A knight fork. Check the square the knight lands on is safe first — that is what decides whether it wins anything.",
+      "advanced": "The knight attacks the opposite colour to the square it stands on, so a forked piece can never defend itself by attacking back. Nothing interposes either.",
+      "master": "Geometry first: get the enemy pieces onto one colour and the knight within range. The forking square's safety is the whole condition."
+    },
+    "by_depth": {
+      "short": "The knight hits two things at once.",
+      "normal": "A knight fork: one knight attacks two or more pieces, and neither interposition nor counter-attack defends, because a knight cannot be blocked and attacks the opposite colour to the one it occupies.",
+      "deep": "The most dangerous form of fork, for three reasons rooted in the knight's move. It attacks squares of the opposite colour to the one it stands on, so a forked piece cannot defend itself by attacking back — only another knight can. Its move is the hardest to visualise, so these are the tactics most often missed. And it cannot be blocked, so interposition is never a defence. The classic squares are c7 and f7 against a king and a corner rook. The conditions for it to win material are the fork's general ones and they bite hard: in a controlled test the same Nc7+ is worth +7.39 with the landing square free and +0.57 with one bishop guarding it."
+    },
+    "hedge": "",
+    "lesson": "When you see a knight fork, check the square it lands on before you check anything else."
+  },
+  "terminology": {
+    "beginner_words": [
+      "the knight attacks two things"
+    ],
+    "advanced_words": [
+      "knight fork",
+      "family fork",
+      "royal fork",
+      "absolute fork"
+    ],
+    "avoid": [
+      "a knight fork always wins material"
+    ]
+  },
+  "status": {
+    "stage": "researched",
+    "last_updated": "2026-09-01",
+    "open_questions": [],
+    "audit_notes": []
+  },
+  "id": "knight-fork",
+  "canonical_name": "Knight fork",
+  "category": "tactical-motifs",
+  "knowledge_type": "tactical-motif",
+  "definition_short": "A fork delivered by a knight — the most dangerous kind, because no other piece can be defended against it by standing next to it.",
+  "definition_long": "The fork's most common and most dangerous form. Three properties of the knight's move are responsible.\n\nFirst, the knight attacks squares of the OPPOSITE colour to the one it stands on, so a forked piece can never simply defend itself by attacking the knight back — except another knight. Second, its move is the hardest to visualise, so knight forks are the tactics most often missed. Third, the knight cannot be blocked, so interposition is never a defence.\n\nThe archetypal squares are c7 and f7 (c2 and f2 mirrored), where a knight forks the king and a rook in the corner. When king, queen and rook are hit at once, the result is often called a FAMILY FORK; when it is king and queen, a ROYAL FORK. Both names are attested and neither is essential.\n\nThe conditions for it to WIN are the fork's general ones, and they matter as much here: the landing square must be safe, and at least one target must be undefended or worth more than the knight. A knight fork on a defended square wins nothing, and this base contains an engine-tested controlled pair demonstrating exactly that — the same Nc7+ swings 6.82 pawns depending on whether one bishop covers the landing square.",
+  "sources": [
+    "informant-encyclopedia-combinations",
+    "wikipedia-chess-tactic",
+    "chesstempo-tactical-motifs"
+  ],
+  "source_confidence": "high"
+}

@@ -1,0 +1,309 @@
+{
+  "schema_version": 2,
+  "alternate_names": [],
+  "historical_names": [],
+  "tags": [
+    "opening",
+    "sacrifice",
+    "initiative",
+    "engine-measured"
+  ],
+  "subcategory": "gambit play",
+  "difficulty": "intermediate",
+  "knowledge_type_note": "The term itself is definitional. Whether a particular gambit is SOUND is a separate, concrete question that this base answers only with evidence.",
+  "name_status": "established-name",
+  "history": {
+    "attributions": [
+      {
+        "relation": "named-by",
+        "person": "Ruy Lopez de Segura",
+        "year": 1561,
+        "note": "Applied the Spanish 'gambito' to chess openings, from the Italian expression dare il gambetto, to put a leg forward in order to trip someone.",
+        "confidence": "high"
+      }
+    ],
+    "first_documented_source": "murray-history-of-chess",
+    "year": 1561,
+    "confidence": "high",
+    "notes": "Murray (A History of Chess, 1913, p.813) quotes Lopez's own derivation at folio 108a from gamba, a leg, with gambitare meaning to set traps. The word first appears in English in Francis Beale's 1656 translation of a Greco manuscript, The Royall Game of Chesse-play, advertised as 'illustrated with almost one hundred Gambetts'; the general metaphorical sense is first recorded in English in 1855. Murray was consulted at second hand through Winter, not read directly.",
+    "competing_claims": [],
+    "development": [
+      {
+        "period": "Romantic era",
+        "note": "Gambit play was the norm and declining one was near-unthinkable socially."
+      },
+      {
+        "period": "c.1900",
+        "note": "Gambit play declined as defensive technique improved; Exeter names Mieses-Maroczy, Monte Carlo 1902 as illustrating the defensive method that undid the romantic gambits - returning material to complete development."
+      }
+    ]
+  },
+  "engine_era_status": "substantially-revised-by-engines",
+  "engine_era_note": "Engines have sorted the historical gambits, and mostly downwards. Two-pawn gambits largely do not survive computer analysis; one-pawn gambits vary from fully compensated to merely playable. The important qualification is that an engine verdict is the CEILING of a gambit's soundness and not its practical value: a line refuted only by a narrow computer defence remains a strong practical weapon, because the refutation has to be found at the board.",
+  "recognition": {
+    "preconditions": [
+      "Material is offered in the opening",
+      "It can be declined or accepted"
+    ],
+    "indicators_for": [
+      "The offer opens a file or diagonal towards the enemy king",
+      "The capture costs the opponent tempi and decentralises a piece",
+      "The gambiteer's development lead is large after the capture"
+    ],
+    "indicators_against": [
+      "The material offered is more than a pawn without a forcing follow-up",
+      "The opponent can return the material at will to finish developing",
+      "The compensation is only tempi, which expire"
+    ],
+    "prerequisites": [
+      "sacrifice",
+      "opening-development",
+      "initiative"
+    ],
+    "detector": null,
+    "detectability": "human-only",
+    "typical_confidence": "low",
+    "false_positive_traps": [
+      "A pawn offered in the opening is not automatically a gambit with compensation. The Halloween Gambit is measured here at 1.75 pawns worse than the best move.",
+      "Openings named 'Gambit' are not necessarily gambits - the Queen's Gambit is the standard example, since the pawn cannot be held.",
+      "This system has no opening database and cannot identify a named gambit. It can only observe that material was given and ask what came back.",
+      "Not detectable by this system: identifying this requires an opening database, which the Education System does not have."
+    ]
+  },
+  "application": {
+    "typical_plans": [
+      "Open lines towards the uncastled enemy king and attack before development completes",
+      "Use the tempi gained while the opponent secures and holds the material",
+      "Accept, then return the material at the moment it buys development or a favourable trade"
+    ],
+    "typical_moves": [],
+    "typical_pawn_structures": [],
+    "typical_piece_arrangements": [],
+    "tactical_consequences": [
+      "The defender's extra material is often returned under duress"
+    ],
+    "strategic_consequences": [
+      "If the attack is neutralised, the gambiteer is simply a pawn down for the endgame"
+    ]
+  },
+  "exceptions": [
+    "Openings called gambits where the material cannot actually be held, such as the Queen's Gambit.",
+    "Gambits whose compensation is structural rather than dynamic - the Benko is the standard case, where the pressure on the a- and b-files persists into the endgame instead of expiring."
+  ],
+  "limitations": [
+    "Soundness is specific to each gambit and cannot be inferred from the word.",
+    "The three measurements here cover three gambits at one depth; they do not license a general claim about gambits as a class."
+  ],
+  "misconceptions": [
+    "That a gambit must be accepted. Declining is often entirely satisfactory.",
+    "That compensation is automatic. It is a claim to be checked, and one of the three gambits measured here has none.",
+    "That gambits are unsound in general. The Evans measures at exactly equal, which is not the same as bad."
+  ],
+  "relationships": {
+    "broader": [
+      "sacrifice"
+    ],
+    "narrower": [],
+    "related": [
+      "compensation",
+      "initiative",
+      "opening-development",
+      "tempo",
+      "open-file",
+      "positional-sacrifice",
+      "opening-repertoire"
+    ],
+    "contrasting": [
+      "positional-sacrifice"
+    ],
+    "co_occurring": [
+      "initiative",
+      "compensation"
+    ],
+    "conflicts": []
+  },
+  "examples": [
+    {
+      "fen": "r1bqk1nr/pppp1ppp/2n5/2b1p3/2B1P3/5N2/PPPP1PPP/RNBQK2R w KQkq - 4 4",
+      "note": "The Evans Gambit position: after 1.e4 e5 2.Nf3 Nc6 3.Bc4 Bc5, White may play 4.b4. Compared under searchmoves against the quiet alternatives in the SAME position, which makes this a controlled test of whether the compensation is real. (Recorded as constructed-test: the FEN was built from the standard move sequence specifically for this comparison, not taken from a game.)",
+      "origin_kind": "constructed-test",
+      "concept_role": "supports",
+      "side_to_move_benefits": "neither",
+      "engine": {
+        "engine_id": "Stockfish 18",
+        "test_level": 3,
+        "depth": 26,
+        "threads": 10,
+        "hash_mb": 2048,
+        "multipv": 3,
+        "best_move": "c2c3",
+        "eval_cp": 28,
+        "mate_in": null,
+        "pv": [],
+        "alternatives": [
+          {
+            "move": "d2d3",
+            "eval_cp": 24,
+            "mate_in": null
+          },
+          {
+            "move": "b2b4",
+            "eval_cp": 0,
+            "mate_in": null
+          }
+        ],
+        "margin_cp": 28,
+        "verdict": "supports",
+        "verdict_note": "A sound gambit measured. 4.c3 +0.28, 4.d3 +0.24, 4.b4 exactly 0.00. Being a pawn down, the Evans still evaluates to equality, so the compensation recovers essentially the whole pawn; what it costs is White's opening edge of 0.28, not material. This is the clearest evidence in this base that gambit compensation is a real, measurable quantity rather than a figure of speech."
+      }
+    },
+    {
+      "fen": "rnbqk1nr/pp3ppp/4p3/b1ppP3/3P4/P1N5/1PP2PPP/R1BQKBNR w KQkq - 1 6",
+      "note": "Smyslov-Botvinnik, World Championship match (game 1), Moscow 1954, b4. Human ground truth: the concept is named for this position by Mikhail Botvinnik, annotating his own game (tr. Douglas Griffin). Corpus entry `smyslov-botvinnik-1954-g1-6b4-gambit`. A world champion naming a move a gambit, giving its author, its publication and its first practical test, in a world championship game - which is as much provenance as this concept can get. The record's own conditions are all visible: material is offered voluntarily in the opening, it can be declined (Botvinnik declines it with 6...cxd4), and the compensation is named as pressu",
+      "origin_kind": "historical-game",
+      "game": "Smyslov-Botvinnik, World Championship match (game 1), Moscow 1954",
+      "concept_role": "positive",
+      "attributed_by": "Mikhail Botvinnik, annotating his own game (tr. Douglas Griffin) — corpus entry smyslov-botvinnik-1954-g1-6b4-gambit",
+      "engine": {
+        "engine_id": "Stockfish 18",
+        "test_level": 3,
+        "depth": 22,
+        "multipv": 3,
+        "best_move": "Qg4",
+        "eval_cp": 55,
+        "verdict": "supports",
+        "verdict_note": "substantially - 6.b4 is the engine's second choice at depth 22, two hundredths of a pawn behind 6.Qg4 and one ahead of 6.Bd2. Three moves inside 0.03 of each other is a position with several good moves in it, not a refutation of a gambit that has been in the books since 1924."
+      }
+    }
+  ],
+  "counterexamples": [
+    {
+      "fen": "r1bqkb1r/pppp1ppp/2n2n2/4p3/4P3/2N2N2/PPPP1PPP/R1BQKB1R w KQkq - 4 4",
+      "note": "The Halloween Gambit position: after 1.e4 e5 2.Nf3 Nc6 3.Nc3 Nf6, White may play 4.Nxe5, giving a knight for a pawn to gain a mobile centre. Same controlled method as the Evans test. (Recorded as constructed-test: the FEN was built from the standard move sequence specifically for this comparison, not taken from a game.)",
+      "origin_kind": "constructed-test",
+      "concept_role": "contradicts",
+      "side_to_move_benefits": "black",
+      "engine": {
+        "engine_id": "Stockfish 18",
+        "test_level": 3,
+        "depth": 26,
+        "threads": 10,
+        "hash_mb": 2048,
+        "multipv": 3,
+        "best_move": "d2d4",
+        "eval_cp": 8,
+        "mate_in": null,
+        "pv": [],
+        "alternatives": [
+          {
+            "move": "f1b5",
+            "eval_cp": 3,
+            "mate_in": null
+          },
+          {
+            "move": "f3e5",
+            "eval_cp": -167,
+            "mate_in": null
+          }
+        ],
+        "margin_cp": 175,
+        "verdict": "contradicts",
+        "verdict_note": "A gambit with no adequate compensation, measured. 4.d4 +0.08, 4.Bb5 +0.03, 4.Nxe5 -1.67 - a loss of 1.75 against the best move. The investment of a knight for one pawn is not repaid by the resulting centre. Recorded as a counterexample deliberately: it is what stops this base from treating 'a gambit was played' as evidence that compensation exists."
+      }
+    }
+  ],
+  "ambiguous_examples": [
+    {
+      "fen": "rnbqkbnr/pppp1ppp/8/4p3/4P3/8/PPPP1PPP/RNBQKBNR w KQkq - 0 2",
+      "note": "The King's Gambit, 2.f4, measured against the alternatives in the same position. Several modern sources describe it flatly as unsound; the measurement supports something weaker. (Recorded as constructed-test: the FEN was built from the standard move sequence specifically for this comparison, not taken from a game.)",
+      "origin_kind": "constructed-test",
+      "concept_role": "ambiguous",
+      "side_to_move_benefits": "black",
+      "engine": {
+        "engine_id": "Stockfish 18",
+        "test_level": 3,
+        "depth": 26,
+        "threads": 10,
+        "hash_mb": 2048,
+        "multipv": 4,
+        "best_move": "g1f3",
+        "eval_cp": 30,
+        "mate_in": null,
+        "pv": [],
+        "alternatives": [
+          {
+            "move": "b1c3",
+            "eval_cp": 15,
+            "mate_in": null
+          },
+          {
+            "move": "d1h5",
+            "eval_cp": -38,
+            "mate_in": null
+          },
+          {
+            "move": "f2f4",
+            "eval_cp": -61,
+            "mate_in": null
+          }
+        ],
+        "margin_cp": 91,
+        "verdict": "ambiguous",
+        "verdict_note": "2.Nf3 +0.30 against 2.f4 -0.61, a concession of 0.91. That is a genuine deficit and it does not support calling the opening refuted; -0.61 is closer to an inferior line than a losing one. Recorded as ambiguous because it partially contradicts the sources that call the King's Gambit unsound while confirming it gives up more than the pawn is worth at depth 26. Note also that 2.f4 evaluates BELOW 2.Qh5, the move beginners are told never to play."
+      }
+    }
+  ],
+  "explanations": {
+    "by_level": {
+      "beginner": "Giving up a pawn early on to get your pieces out fast and attack.",
+      "intermediate": "A gambit. You pay material for time, open lines or the centre - and whether that is a fair price depends on the gambit.",
+      "advanced": "Judge it by what comes back: tempi expire, open lines and structural damage do not.",
+      "master": "The engine verdict is the ceiling of soundness and practical results are the floor; a narrow computer refutation is still a good practical weapon."
+    },
+    "by_depth": {
+      "short": "Offering material in the opening for activity.",
+      "normal": "A gambit: material, usually a pawn, deliberately offered in the opening in exchange for time, open lines or central control. Whether the compensation is adequate is a separate question for each gambit, not something the word guarantees.",
+      "deep": "A material offer made before the fight starts, in exchange for something that is not material. Soundness is judged on three counts: the time the opponent spends capturing and then holding the material, the activity difference created when their pieces decentralise and lines open, and any lasting structural damage. Measured in this base against the quiet alternatives in each position: the Evans Gambit comes to exactly equal where the quiet move gives +0.28, so a pawn is fully compensated; the King's Gambit concedes 0.91, a real deficit but far from a refutation; the Halloween Gambit, a knight for a pawn, loses 1.75. Compensation is real, it can be complete, and it must be established case by case."
+    },
+    "hedge": "The soundness of any particular gambit is a concrete question; the three measured here span the range from fully compensated to plainly insufficient.",
+    "lesson": "Ask what came back, and whether it expires. Tempi run out; open lines and ruined structures do not."
+  },
+  "terminology": {
+    "beginner_words": [
+      "giving up a pawn to get ahead in development"
+    ],
+    "advanced_words": [
+      "gambit",
+      "accepted",
+      "declined",
+      "countergambit",
+      "compensation",
+      "soundness"
+    ],
+    "avoid": [
+      "gambits are unsound",
+      "you must accept a gambit"
+    ]
+  },
+  "status": {
+    "stage": "validated",
+    "last_updated": "2026-09-01",
+    "open_questions": [],
+    "audit_notes": []
+  },
+  "id": "gambit",
+  "canonical_name": "Gambit",
+  "category": "gambit-principles",
+  "knowledge_type": "terminology",
+  "definition_short": "An opening in which material, usually a pawn, is deliberately offered for non-material compensation.",
+  "definition_long": "A material offer made in the opening in exchange for something that is not material — time, open lines, central control, or an enemy king that never gets safe.\n\nSOUNDNESS is the whole question, and it is asked in three standard terms: the opponent spends time capturing and then reorganising to hold the material; the captures decentralise their pieces and open lines and diagonals that favour the gambiteer; and accepting may leave lasting structural damage. A gambit is sound when these together are worth what was given.\n\nTHE MEASURED SPECTRUM. This base compared three gambits against the quiet alternatives in their own positions, under identical search conditions. The Evans Gambit (a pawn) evaluates to exactly 0.00 where the quiet 4.c3 gives +0.28 — the pawn is fully compensated, and what is surrendered is not material but White's opening edge. The King's Gambit (a pawn) comes to -0.61 against +0.30 for 2.Nf3, a concession of 0.91: a real deficit, but nothing resembling refutation. The Halloween Gambit (a knight for a pawn) evaluates to -1.67 against +0.08, a loss of 1.75. The conclusion the numbers support is narrow and worth stating plainly: compensation is real and measurable, it can be complete, and whether it is adequate has to be established for each gambit rather than assumed from the fact that one was offered.\n\nNOT EVERY MATERIAL OFFER IS A GAMBIT, and not everything named one is. The Queen's Gambit is not a true gambit, since Black cannot hold the pawn profitably. Conversely some genuine pawn sacrifices in the opening carry other names. The nomenclature is inconsistent and is not a guide to the chess.",
+  "sources": [
+    "wikipedia-gambit",
+    "murray-history-of-chess",
+    "winter-chess-gambits",
+    "exeter-gambits",
+    "chessmind-gambit",
+    "wikipedia-chess-opening"
+  ],
+  "source_confidence": "high"
+}

@@ -1,0 +1,328 @@
+{
+  "schema_version": 2,
+  "alternate_names": [
+    "the break",
+    "freeing move"
+  ],
+  "historical_names": [],
+  "tags": [
+    "structure",
+    "pawns",
+    "master-game"
+  ],
+  "subcategory": "pawn play",
+  "difficulty": "intermediate",
+  "knowledge_type_note": "A method rather than a tactic; it is kept separate from pawn-breakthrough, which is the sacrificial motif for forcing a passer.",
+  "name_status": "established-name",
+  "history": {
+    "attributions": [],
+    "first_documented_source": "nimzowitsch-my-system",
+    "year": null,
+    "confidence": "unknown",
+    "notes": "Standard vocabulary; no coinage traced.",
+    "competing_claims": [],
+    "development": []
+  },
+  "engine_era_status": "reliable",
+  "engine_era_note": "Engines time breaks far better than humans and are notably readier to delay one; the timing question the concept is about is exactly where they are strongest.",
+  "recognition": {
+    "preconditions": [
+      "A pawn advances into contact with an enemy pawn"
+    ],
+    "indicators_for": [
+      "Pieces already placed on the lines the break will open",
+      "The opponent must answer, committing their structure",
+      "A file or diagonal opens towards a target"
+    ],
+    "indicators_against": [
+      "The opponent is better developed and will use the opened lines first",
+      "The break opens a line towards your own king",
+      "Nothing of yours is placed to use what opens"
+    ],
+    "prerequisites": [
+      "pawn-structures"
+    ],
+    "detector": "a pawn move that attacks an enemy pawn, from lib/features.js and the move generator",
+    "detectability": "mechanical",
+    "typical_confidence": "medium",
+    "false_positive_traps": [
+      "Any pawn advance into contact is mechanically a break; whether it is a good one depends on who is placed to use the lines it opens, which the detector cannot see.",
+      "A break is not a pawn-breakthrough. This base keeps them separate: the breakthrough sacrifices to force a passer, the break challenges a structure.",
+      "The break's value is often as an unplayed THREAT, and a position where it is available but not played may be the concept working correctly."
+    ]
+  },
+  "application": {
+    "typical_plans": [
+      "Place the pieces on the lines the break will open, then break",
+      "Break to force the opponent's structure to commit",
+      "Hold the break in reserve as a standing threat"
+    ],
+    "typical_moves": [
+      "c4-c5 and d4-d5 in queen's pawn structures",
+      "f4-f5 and e4-e5 against a king's position",
+      "...c5 and ...f5 as the standard freeing breaks for Black"
+    ],
+    "typical_pawn_structures": [
+      "Any fixed structure — the break is how a fixed structure stops being fixed"
+    ],
+    "typical_piece_arrangements": [
+      "Rooks behind the pawn that is about to advance"
+    ],
+    "tactical_consequences": [
+      "The moment of the break is usually the sharpest moment of the game"
+    ],
+    "strategic_consequences": [
+      "Whoever chooses the moment of the break usually chooses the resulting structure"
+    ]
+  },
+  "exceptions": [
+    "A break that opens lines for a better-developed opponent helps them.",
+    "Some positions are won by NOT breaking — keeping the tension is itself a plan, and the threat can be worth more than the move."
+  ],
+  "limitations": [
+    "Detecting a pawn advancing into contact is mechanical; judging whether it is right is not, and this record does not claim the detector does.",
+    "This base holds one master-game example and no counterexample of a break played too early."
+  ],
+  "misconceptions": [
+    "That a break wins material. It changes the structure and opens lines; material is a separate question.",
+    "That you should break as soon as it is available. The threat is often worth more than the execution.",
+    "That a break and a breakthrough are the same thing."
+  ],
+  "relationships": {
+    "broader": [],
+    "narrower": [
+      "pawn-breakthrough",
+      "minority-attack"
+    ],
+    "related": [
+      "pawn-breakthrough",
+      "minority-attack",
+      "hanging-pawns",
+      "open-file",
+      "semi-open-file",
+      "planning",
+      "space",
+      "restraint"
+    ],
+    "contrasting": [
+      "restraint"
+    ],
+    "co_occurring": [
+      "open-file"
+    ],
+    "conflicts": [
+      {
+        "concept": "restraint",
+        "resolution": "Opposite methods against a structure and both correct at different moments: restraint keeps the opponent's pawns where they are, a break forces them to move. The question is which side benefits from the structure changing, and the answer is usually whoever is better placed for the lines that open."
+      }
+    ]
+  },
+  "examples": [
+    {
+      "fen": "2r2qk1/r2n2p1/p3p2p/2pp4/8/Q3P3/PP2BPPP/2R2RK1 w - - 0 20",
+      "move": "e4",
+      "move_uci": "e3e4",
+      "note": "Fischer-Spassky 1972, game 6, 20.e4 - and it is here because of what this base did NOT have. The corpus entry was first filed under `pawn-breakthrough`, and the stress test showed that concept is the sacrificial motif for forcing a passer and is a different idea: a break challenges a structure. This record exists because an annotated position exposed the gap. Havanur: '20.e4! probing Black's pawn centre at its most vulnerable point.' The purpose is not material - it is to force one of the hanging pawns to commit, which is the standard method against that structure, and the same game supplies this base's `hanging-pawns` example four moves earlier.",
+      "origin_kind": "historical-game",
+      "game": "Fischer-Spassky, World Championship, Reykjavik 1972 (game 6)",
+      "concept_role": "positive",
+      "attributed_by": "Nagesh Havanur (ChessBase, 2022) and Anthony Levin (Chess.com, 2022) - corpus entry fischer-spassky-1972-g6-20e4-break",
+      "engine": {
+        "engine_id": "Stockfish 18",
+        "test_level": 3,
+        "depth": 22,
+        "threads": 10,
+        "hash_mb": 4096,
+        "multipv": 3,
+        "best_move": "e3e4",
+        "eval_cp": 40,
+        "mate_in": null,
+        "pv": [],
+        "alternatives": [],
+        "margin_cp": null,
+        "verdict": "supports",
+        "verdict_note": "+0.40 and the break is the engine's FIRST choice on a three-line search. Fischer's move confirmed as objectively best fifty years later, and at a size that says what a break is worth rather than what a combination is worth."
+      }
+    },
+    {
+      "fen": "4k3/2p5/8/1P6/8/8/8/4K3 w - - 0 1",
+      "move": "b6",
+      "move_uci": "b5b6",
+      "note": "b5-b6 advances into contact with the black c7 pawn: the pawn now attacks c7 and can be taken by it, which is the contact this record defines a break as.",
+      "origin_kind": "constructed-test",
+      "concept_role": "supports",
+      "side_to_move_benefits": "neither",
+      "controlled_pair_with": "4k3/2p5/8/8/1P6/8/8/4K3 w - - 0 1",
+      "engine": {
+        "engine_id": "Stockfish 18",
+        "test_level": 3,
+        "depth": 26,
+        "threads": 10,
+        "hash_mb": 4096,
+        "multipv": 1,
+        "best_move": "e1d2",
+        "eval_cp": 0,
+        "mate_in": null,
+        "pv": [],
+        "alternatives": [],
+        "margin_cp": null,
+        "verdict": "supports",
+        "verdict_note": "PROVEN DRAW, dtz 0, best move b6 - the break itself. The break is available, it is correct, and it wins nothing, which is this record's first trap with a proof attached: whether a break is GOOD depends on who can use the lines it opens, and here nobody can."
+      },
+      "tablebase": {
+        "source": "Lichess tablebase (Syzygy, 7-piece)",
+        "pieces": 4,
+        "wdl": "draw",
+        "dtz": 0,
+        "dtm": 0,
+        "category": "draw",
+        "note": "PROVEN, not evaluated. Read from the side to move. The verdict_note on the engine block beside this one says what the two instruments do and do not agree about."
+      }
+    }
+  ],
+  "counterexamples": [
+    {
+      "fen": "4k3/2p5/8/8/1P6/8/8/4K3 w - - 0 1",
+      "move": "b5",
+      "move_uci": "b4b5",
+      "note": "The same pawn one rank earlier making the same advance. b4-b5 arrives on a square where it touches nothing - c7 is still two ranks away - so it is a pawn move and not a break. The record's own note is that any advance into contact is mechanically a break; this is what happens one rank short of it.",
+      "origin_kind": "constructed-test",
+      "concept_role": "negative",
+      "side_to_move_benefits": "neither",
+      "controlled_pair_with": "4k3/2p5/8/1P6/8/8/8/4K3 w - - 0 1",
+      "engine": {
+        "engine_id": "Stockfish 18",
+        "test_level": 3,
+        "depth": 26,
+        "threads": 10,
+        "hash_mb": 4096,
+        "multipv": 1,
+        "best_move": "e1d2",
+        "eval_cp": 0,
+        "mate_in": null,
+        "pv": [],
+        "alternatives": [],
+        "margin_cp": null,
+        "verdict": "supports",
+        "verdict_note": "PROVEN DRAW, dtz 0, best move b5. The negative half: the pawn one rank further back cannot come into contact this move, so there is no break to report. Same material, same result, and the difference is entirely about what the move DOES rather than about who stands better - which is why this record is move-based."
+      },
+      "tablebase": {
+        "source": "Lichess tablebase (Syzygy, 7-piece)",
+        "pieces": 4,
+        "wdl": "draw",
+        "dtz": 0,
+        "dtm": 0,
+        "category": "draw",
+        "note": "PROVEN, not evaluated. Read from the side to move. The verdict_note on the engine block beside this one says what the two instruments do and do not agree about."
+      }
+    },
+    {
+      "fen": "4k3/8/1p1p4/8/2P5/8/8/4K3 w - - 0 1",
+      "move_uci": "c4c5",
+      "note": "Registered false-positive case `a-break-is-not-a-breakthrough`, kept on the record as well as in tests/false_positive_cases.json so that the concept carries its own negative evidence. THE SURFACE PATTERN IS PRESENT: c4-c5 advances a pawn into contact with two enemy pawns and opens lines. That is mechanically a break, and it looks like a pawn sacrifice to force something through. WHY IT IS NOT THE CONCEPT: This record's second trap is a statement about this base rather than about a position: \"A break is not a pawn-breakthrough. This base keeps them separate: the breakthrough sacrifices to force a passer, the break challenges a structure.\" Nothing is forced through here — the pawn is simply eaten. WHAT THE SYSTEM DOES: The API reports pawn-break at LOW confidence and is silent on pawn-breakthrough, which is the correct pair of answers and the reason the two are separate records with separate matchers. Low is also the honest confidence: this record's first trap says 'whether it is a good one depends on who is placed to use the lines it opens, which the detector cannot see', and Syzygy says this one is not good — Black wins after dxc5, mate in 35. The concept is reported, the judgement is not, and the ceiling on a rule-of-thumb is what keeps the two apart.",
+      "origin_kind": "constructed-test",
+      "concept_role": "negative",
+      "tablebase": {
+        "source": "Lichess tablebase (Syzygy, 7-piece)",
+        "pieces": 5,
+        "wdl": "loss",
+        "dtz": 1,
+        "dtm": 35,
+        "category": "loss",
+        "note": "PROVEN loss for the side making the break. The break is real and it is bad, which is exactly the pair of facts the record says a detector can establish the first of and not the second."
+      },
+      "false_positive_case": "a-break-is-not-a-breakthrough",
+      "engine": {
+        "engine_id": "Stockfish 18",
+        "test_level": 3,
+        "depth": 26,
+        "threads": 10,
+        "hash_mb": 4096,
+        "multipv": 1,
+        "best_move": "e1f2",
+        "eval_cp": 0,
+        "mate_in": null,
+        "pv": [],
+        "alternatives": [],
+        "margin_cp": null,
+        "verdict": "supports",
+        "verdict_note": "PROVEN DRAW with best play, dtz 0, best move Kd1 - and c4-c5, the break, LOSES: after it the position is a proven win for Black, mate in 35, with dxc5. Registered as a false-positive case for `fork` on the same board. The break is real and it is a blunder, which is the pair of facts this record says a detector can establish the first of and not the second."
+      }
+    }
+  ],
+  "ambiguous_examples": [
+    {
+      "fen": "r1q1kb1r/pp1npp2/3pbnpp/P7/2pPP3/2N2N1P/1PP1QPP1/R1B1KB1R w KQkq - 0 12",
+      "move": "e5",
+      "move_uci": "e4e5",
+      "note": "Nominated by tools/mine_ambiguous.js on its fourth ground, NOT-THE-MOVE: the concept fires on a legal move that is not the solution of a shipped puzzle. The first three grounds ask about a POSITION and could not reach a move-based or motif concept at all - this concept and eleven others reported NONE until the tool learned to supply a move. What makes the case ambiguous rather than false is that nothing reported is absent: e4-e5 is a pawn advancing into contact with an enemy pawn, which is this record's precondition exactly, and the base reports it at LOW confidence with the record's own caution attached - 'whether it is a good one depends on who is placed to use the lines it opens, which the detector cannot see'. Here the answer is that somebody else is: d4-d5 is the break that works, and it is worth three and a half pawns more. Two breaks, one position, and the detector correctly declines to choose between them.",
+      "origin_kind": "puzzle",
+      "concept_role": "ambiguous",
+      "engine": {
+        "engine_id": "Stockfish 18",
+        "test_level": 3,
+        "depth": 22,
+        "threads": 10,
+        "hash_mb": 4096,
+        "multipv": 2,
+        "best_move": "d4d5",
+        "eval_cp": 82,
+        "mate_in": null,
+        "pv": [],
+        "alternatives": [],
+        "margin_cp": null,
+        "verdict": "ambiguous",
+        "verdict_note": "e4-e5 scores +0.82 and d4-d5, the puzzle's solution and also a break, scores +4.35. The concept is present in both moves and decides neither."
+      }
+    }
+  ],
+  "explanations": {
+    "by_level": {
+      "beginner": "A pawn move that runs into an enemy pawn, so the structure has to change and lines open up.",
+      "intermediate": "A pawn break. Get your pieces onto the lines it will open BEFORE you play it.",
+      "advanced": "It is often played to make the OPPONENT commit rather than to gain anything directly.",
+      "master": "The break's value is frequently as an unplayed threat; timing it is the whole skill."
+    },
+    "by_depth": {
+      "short": "A pawn advance that forces the structure to change.",
+      "normal": "A pawn break: an advance into contact with an enemy pawn, played to open a file or a diagonal for the pieces behind it, or to force the opponent's structure to commit. It is not played to win a pawn.",
+      "deep": "Pawn structures are stable because pawns cannot retreat, so a structure changes only when a pawn advances into contact — and whoever chooses when that happens usually chooses the terms. The break opens lines for both sides, so it favours whoever is better placed to use them, which is why breaking against a better-developed opponent is the standard misapplication. Its other and less obvious use is to force the opponent to commit: Fischer's 20.e4 against Spassky in 1972 was played not to gain material but to make one of two hanging pawns advance, so that the square it left could be occupied."
+    },
+    "hedge": "",
+    "lesson": "Put the pieces where the lines will open before you open them."
+  },
+  "terminology": {
+    "beginner_words": [
+      "a pawn move that opens things up"
+    ],
+    "advanced_words": [
+      "pawn break",
+      "freeing move",
+      "the tension",
+      "timing the break"
+    ],
+    "avoid": [
+      "break as soon as you can",
+      "a break wins a pawn"
+    ]
+  },
+  "status": {
+    "stage": "researched",
+    "last_updated": "2026-09-01",
+    "open_questions": [],
+    "audit_notes": []
+  },
+  "id": "pawn-break",
+  "canonical_name": "Pawn break",
+  "category": "pawn-breaks",
+  "knowledge_type": "strategic-principle",
+  "definition_short": "A pawn advance that challenges an enemy pawn, forcing the structure to change and opening lines the pieces behind it want.",
+  "definition_long": "The move that turns a static position into a decided one. Pawn structures are stable because pawns cannot retreat, so a structure only changes when a pawn advances into contact — and whoever chooses WHEN that happens usually chooses the terms.\n\nIT IS NOT PLAYED TO WIN A PAWN. A break is played to open a file for the rooks, a diagonal for a bishop, or a square for a knight; or, in its other and less obvious use, to force the OPPONENT to commit — Fischer's 20.e4 against Spassky in 1972 is the model, played not to gain material but to make one of two hanging pawns advance so that the square it left could be occupied.\n\nTHE PIECES COME FIRST. A break opens lines for both sides, so it favours whoever is better placed to use them. Breaking while the opponent is better developed opens the position for them, which is the standard way the idea is misapplied.\n\nTIMING IS THE WHOLE SKILL. The break exists as a threat before it is played, and the threat is often worth more than the execution — the opponent must keep guarding against it, which is a restraint on their own plans.\n\nDISTINGUISH IT FROM A BREAKTHROUGH. A pawn BREAK challenges a structure and usually costs nothing; a pawn BREAKTHROUGH sacrifices material to force a passer past the defenders. This base keeps them as separate records because the second is a tactic with a calculation attached and the first is a strategic decision.",
+  "sources": [
+    "nimzowitsch-my-system",
+    "lichess-fischer-spassky-g6",
+    "thechessworld-hanging-pawns",
+    "thechessworld-planning"
+  ],
+  "source_confidence": "medium"
+}

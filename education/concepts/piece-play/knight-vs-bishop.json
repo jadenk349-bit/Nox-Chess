@@ -1,0 +1,235 @@
+{
+  "schema_version": 2,
+  "alternate_names": [
+    "the minor piece imbalance",
+    "bishop versus knight"
+  ],
+  "historical_names": [],
+  "tags": [
+    "minor-pieces",
+    "imbalance",
+    "disputed-value"
+  ],
+  "subcategory": "minor piece comparison",
+  "difficulty": "intermediate",
+  "knowledge_type_note": "A comparison whose answer is entirely positional. The individual piece values are disputed; only the bishop PAIR has a measured advantage.",
+  "name_status": "established-name",
+  "history": {
+    "attributions": [
+      {
+        "person": "Bobby Fischer",
+        "relation": "later-associated-with",
+        "source": "chessstack-bishop-knight",
+        "year": null,
+        "note": "Known for preferring the bishop and for the 3.25 versus 3 valuation. ATTRIBUTION NOT VERIFIED against Fischer's own writing."
+      },
+      {
+        "person": "Larry Kaufman",
+        "relation": "systematized-by",
+        "source": "kaufman-material-imbalances",
+        "year": 1999,
+        "note": "Statistical values put the two pieces equal at 3.5 and locate the advantage in the pair."
+      }
+    ],
+    "first_documented_source": null,
+    "year": null,
+    "confidence": "disputed",
+    "notes": "Disputed as to the VALUES, not the concept. Fischer's preference, Kaufman's parity and Studer's scepticism about the evidence for bishop superiority are all recorded rather than reconciled. What is not disputed is the pair.",
+    "competing_claims": [
+      "Bishop 3.25 versus knight 3 (Fischer, and much popular teaching).",
+      "Bishop 3.5 and knight 3.5 — equal — with the pair worth an extra half pawn (Kaufman, statistical).",
+      "The claim of individual bishop superiority is unsupported by evidence (Studer)."
+    ],
+    "development": []
+  },
+  "engine_era_status": "useful-with-common-exceptions",
+  "engine_era_note": "Engine values differ between middlegame and endgame and are close enough that the two pieces are effectively equal in the abstract, which supports Kaufman over the popular 3.25-versus-3 teaching. What engines confirm firmly is the bishop-pair bonus.",
+  "recognition": {
+    "preconditions": [
+      "One side has a bishop where the other has a knight"
+    ],
+    "indicators_for": [
+      "BISHOP: open position, pawns on both wings, rook alongside it, no outpost for the enemy knight",
+      "KNIGHT: closed position, secure outpost, pawns on one side only, queen alongside it, blockading duty"
+    ],
+    "indicators_against": [
+      "The bishop is shut in by its own pawns",
+      "The knight has no square it can reach and hold",
+      "The structure is about to change, which can reverse the assessment"
+    ],
+    "prerequisites": [
+      "outpost",
+      "bad-bishop"
+    ],
+    "detector": null,
+    "detectability": "heuristic",
+    "typical_confidence": "low",
+    "false_positive_traps": [
+      "There is no default answer. Asserting the bishop is better without naming the structural reason is exactly the claim GM Studer says has no evidence behind it.",
+      "Pawns on one side only REVERSES the usual open-position reasoning — the knight is stronger there, which surprises people who have learnt 'bishops are better in the endgame'.",
+      "A knight without a stable square is not a knight worth keeping; the outpost is the whole condition."
+    ]
+  },
+  "application": {
+    "typical_plans": [
+      "With the bishop: open the position and create play on both wings",
+      "With the knight: close the position and secure an outpost",
+      "Studer's rule: with two knights and a bishop, play on your bishop's colour; with two bishops and a knight, play on the colour your opponent's missing bishop covered"
+    ],
+    "typical_moves": [],
+    "typical_pawn_structures": [
+      "Closed centres favouring the knight",
+      "Pawns on both wings favouring the bishop"
+    ],
+    "typical_piece_arrangements": [
+      "Knight on a protected outpost",
+      "Bishop on a long open diagonal"
+    ],
+    "tactical_consequences": [],
+    "strategic_consequences": [
+      "Determines whether to open or close the position",
+      "The bishop pair is complementary; a knight pair is redundant"
+    ]
+  },
+  "exceptions": [
+    "Pawns on one wing only favours the knight, reversing the usual endgame guidance.",
+    "A queen prefers a knight as a partner; a rook prefers a bishop.",
+    "A knight with no secure square is worse than almost any bishop."
+  ],
+  "limitations": [
+    "The individual values are disputed between reputable sources and this record does not resolve it.",
+    "Recognition confidence is low because the answer depends on structure that may change."
+  ],
+  "misconceptions": [
+    "That bishops are simply better than knights. Kaufman's data has them equal and a grandmaster says the superiority claim is unevidenced.",
+    "That bishops are always better in the endgame. With all the pawns on one wing the knight is stronger.",
+    "That two knights are a 'pair'. They are redundant — they want the same squares."
+  ],
+  "relationships": {
+    "broader": [
+      "material-imbalance"
+    ],
+    "narrower": [],
+    "related": [
+      "bishop-pair",
+      "bad-bishop",
+      "outpost",
+      "opposite-coloured-bishops",
+      "piece-exchanges"
+    ],
+    "contrasting": [],
+    "co_occurring": [
+      "outpost",
+      "bad-bishop"
+    ],
+    "conflicts": []
+  },
+  "examples": [
+    {
+      "fen": "5k2/p1p4R/1p3rp1/n2p4/P2P1P2/2PB2P1/6K1/8 b - - 3 30",
+      "game": "Capablanca-Tartakower, New York 1924",
+      "note": "White's bishop against Black's knight on a5, in the position Alekhine annotated: 'it happens — as usual in mobile pawn formations — that the Bishop is superior to the Knight. The rest of the game is a very fine example of the utilization of such an advantage.' Note the qualification Alekhine attaches, which matches this record's own account: the bishop's advantage is conditional on the pawns being mobile and on both wings, not general.",
+      "origin_kind": "historical-game",
+      "concept_role": "supports",
+      "side_to_move_benefits": "white",
+      "engine": {
+        "engine_id": "Stockfish 18",
+        "test_level": 3,
+        "depth": 22,
+        "threads": 10,
+        "hash_mb": 4096,
+        "multipv": 1,
+        "best_move": "f6c6",
+        "eval_cp": -58,
+        "mate_in": null,
+        "pv": [],
+        "alternatives": [],
+        "margin_cp": null,
+        "verdict": "supports",
+        "verdict_note": "-0.58 at depth 22 from Black's side: the player who chose to trade into this ending is better by rather more than half a pawn, with material level. Capablanca reached it deliberately with 25.Qxe8+ and 26.Rxe8+. What the number supports is that the exchange was a method and not a simplification - the advantage is in the structure that survived it."
+      }
+    }
+  ],
+  "counterexamples": [
+    {
+      "fen": "6k1/5pbp/6p1/8/8/5N2/5PPP/6K1 w - - 0 1",
+      "note": "Registered false-positive case `all-the-pawns-on-one-wing`, kept on the record as well as in tests/false_positive_cases.json so that the concept carries its own negative evidence. THE SURFACE PATTERN IS PRESENT: A minor-piece ending with no pawns on the queenside at all. 'Bishops are better in the endgame' is the first thing most players learn, and there is nothing here to complicate it. WHY IT IS NOT THE CONCEPT: This record's second trap says the opposite is true in this exact structure: \"Pawns on one side only REVERSES the usual open-position reasoning — the knight is stronger there, which surprises people who have learnt 'bishops are better in the endgame'.\" With one wing to defend, the bishop's range buys nothing and the knight's ability to reach both colours buys everything. WHAT THE SYSTEM DOES: The API does not assert that either piece is better here, and this record has no matcher for exactly the reason its first trap gives: \"There is no default answer. Asserting the bishop is better without naming the structural reason is exactly the claim GM Studer says has no evidence behind it.\" Stockfish 18 at depth 24 says 0.00 — dead level, which is the honest reading and is itself the evidence against the folk rule: if bishops were simply better in endgames, three pawns each and a bishop against a knight would not evaluate to zero.",
+      "origin_kind": "constructed-test",
+      "concept_role": "negative",
+      "false_positive_case": "all-the-pawns-on-one-wing"
+    }
+  ],
+  "ambiguous_examples": [
+    {
+      "fen": "6k1/pp2bppp/8/8/8/5N2/PP3PPP/6K1 w - - 0 1",
+      "note": "Knight against bishop with pawns on BOTH wings and nothing else on the board - the structure the folk rule is actually about, since the open-position argument for the bishop needs targets on two sides and here there are two sides. The engine says -0.07. Neither piece is better. This record's first trap is that 'there is no default answer. Asserting the bishop is better without naming the structural reason is exactly the claim GM Studer says has no evidence behind it', and the position is that trap with a number: the structure that is supposed to favour the bishop produces a dead level game. Filed as ambiguous rather than negative because the concept is fully applicable - this is precisely a knight-versus-bishop ending - and it has nothing to say.",
+      "origin_kind": "constructed-test",
+      "concept_role": "ambiguous",
+      "engine": {
+        "engine_id": "Stockfish 18",
+        "test_level": 3,
+        "depth": 26,
+        "threads": 10,
+        "hash_mb": 4096,
+        "multipv": 1,
+        "best_move": "g1f1",
+        "eval_cp": -7,
+        "mate_in": null,
+        "pv": [],
+        "alternatives": [],
+        "margin_cp": null,
+        "verdict": "ambiguous",
+        "verdict_note": "-0.07 at depth 26. Pawns on both wings, symmetric structure, and the difference between a knight and a bishop measures at seven hundredths of a pawn."
+      }
+    }
+  ],
+  "explanations": {
+    "by_level": {
+      "beginner": "Bishops like open positions and pawns on both sides of the board. Knights like closed positions and a safe square in the middle they cannot be chased off.",
+      "intermediate": "Knight or bishop? Ask whether the position is open, whether the pawns are on one wing or two, and whether the knight has a square it can hold.",
+      "advanced": "The individual values are disputed — Kaufman's data has them equal, with the bonus attaching to the pair. Note the reversal: pawns on one wing only favours the knight.",
+      "master": "With two knights and a bishop, play on your bishop's colour; with two bishops and a knight, play on the colour your opponent's missing bishop covered."
+    },
+    "by_depth": {
+      "short": "Bishops want open positions; knights want closed ones and an outpost.",
+      "normal": "The commonest imbalance. Bishops are better in open positions and with pawns on both wings; knights are better in closed positions, with a secure outpost, and when all the pawns are on one side.",
+      "deep": "Which piece is better is entirely positional, and the individual values are genuinely disputed — Fischer put the bishop above the knight, Kaufman's statistics put them equal at 3.5 each, and GM Studer says the superiority claim has no evidence behind it. What is agreed and measured is the PAIR, worth about half a pawn, and the reason is complementarity: two bishops cover different colours while two knights compete for the same outposts. A reversal worth remembering is that endgames with pawns on one wing only favour the knight, because the bishop's range buys nothing there and access to both colours matters more."
+    },
+    "hedge": "",
+    "lesson": "Do not ask which piece is better. Ask which piece has the better future in this pawn structure — and if the pawns are all on one side, expect the knight to win that argument."
+  },
+  "terminology": {
+    "beginner_words": [
+      "open or closed?",
+      "does the knight have a good square?"
+    ],
+    "advanced_words": [
+      "minor piece imbalance",
+      "outpost",
+      "bishop pair",
+      "colour complex"
+    ],
+    "avoid": [
+      "bishops are better than knights"
+    ]
+  },
+  "status": {
+    "stage": "researched",
+    "last_updated": "2026-09-01",
+    "open_questions": [],
+    "audit_notes": []
+  },
+  "id": "knight-vs-bishop",
+  "canonical_name": "Knight versus bishop",
+  "category": "knights",
+  "knowledge_type": "positional-concept",
+  "definition_short": "Which minor piece is better depends on the structure: bishops want open positions and pawns on both wings, knights want closed positions and a secure outpost.",
+  "definition_long": "The most common imbalance in chess, and the one where 'it depends on the position' is a real answer rather than an evasion.\n\nTHE BISHOP is better in open positions, where its range tells; with pawns on BOTH wings, where it can defend on one and attack on the other in a single move; alongside a rook, since rook and bishop coordinate better than rook and knight; and when the knight has no secure central square.\n\nTHE KNIGHT is better in closed positions, where it jumps over what blocks a bishop; when it has a stable outpost it cannot be evicted from; with pawns on ONE side only, where the bishop's range buys nothing and the knight's access to both colours matters more; as a blockader; and alongside a queen, since the queen already moves like a bishop and gains more from a knight's different geometry.\n\nTHE INDIVIDUAL VALUES ARE DISPUTED and this record does not resolve it. Fischer valued the bishop at 3.25 against a knight's 3. Kaufman's statistical work puts an unpaired bishop and a knight at 3.5 EACH — equal — with the half-pawn bonus attaching to the PAIR rather than to the bishop. GM Studer goes further and says the claim of individual bishop superiority 'is not funded with evidence' and that he knows of no statistic supporting it. What is agreed and measured is that two bishops beat bishop-and-knight or two knights.\n\nA useful asymmetry: the bishop pair is complementary, because the two bishops cover different colours, while a knight 'pair' is redundant, since knights compete for the same outposts. That is why the pair is a named advantage and two knights are not.\n\nStuder's refinement is worth knowing and is rarely taught: with two knights and a bishop, play on the colour of your OWN bishop, which you then control three times over; with two bishops and a knight, play on the colour of the bishop your opponent does NOT have.",
+  "sources": [
+    "studer-bishop-vs-knight",
+    "kaufman-material-imbalances",
+    "thechessworld-bishop-better",
+    "chessstack-bishop-knight"
+  ],
+  "source_confidence": "high"
+}

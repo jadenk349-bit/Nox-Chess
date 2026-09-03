@@ -1,0 +1,311 @@
+{
+  "schema_version": 2,
+  "alternate_names": [
+    "activity",
+    "active pieces"
+  ],
+  "historical_names": [],
+  "tags": [
+    "positional",
+    "pieces",
+    "tablebase-tested"
+  ],
+  "subcategory": "positional",
+  "difficulty": "beginner",
+  "knowledge_type_note": "A property of a position that can be described concretely - what squares a piece reaches and what it bears on - even though measuring it is a judgement.",
+  "name_status": "established-name",
+  "history": {
+    "attributions": [
+      {
+        "relation": "systematized-by",
+        "person": "Wilhelm Steinitz",
+        "year": 1873,
+        "note": "Piece placement and centralisation appear among the temporary advantages in the element lists descended from his theory.",
+        "confidence": "medium"
+      }
+    ],
+    "first_documented_source": "exeter-steinitz-accumulation",
+    "year": null,
+    "confidence": "low",
+    "notes": "Ordinary vocabulary with no coinage; the classification as a temporary advantage is the traceable part.",
+    "competing_claims": [],
+    "development": []
+  },
+  "engine_era_status": "reliable",
+  "engine_era_note": "Engines weigh activity heavily and are markedly more willing than classical human teaching to give material for it, which has shifted practice - the modern preference for the active defence over the passive one owes a good deal to engine analysis.",
+  "recognition": {
+    "preconditions": [
+      "Pieces are on the board with differing scope"
+    ],
+    "indicators_for": [
+      "A piece bearing on enemy weaknesses",
+      "A rook on an open file or the seventh rank",
+      "A knight on a protected advanced square",
+      "Pieces with several useful squares available"
+    ],
+    "indicators_against": [
+      "A piece tied to defending something",
+      "A bishop shut in by its own pawns",
+      "A piece with moves available that accomplish nothing"
+    ],
+    "prerequisites": [],
+    "detector": "lib/matchers.js: piece-activity, over lib/features.js activeMoves()",
+    "detectability": "heuristic",
+    "typical_confidence": "medium",
+    "false_positive_traps": [
+      "Counting available squares is not measuring activity. A piece with many moves that bear on nothing is not active.",
+      "Active pieces do not guarantee compensation. The Halloween Gambit position in this base has genuinely active pieces and evaluates 1.75 worse.",
+      "Activity is generally a temporary advantage and must be converted; reporting it as though it were permanent overstates it."
+    ]
+  },
+  "application": {
+    "typical_plans": [
+      "Improve the least active piece",
+      "Trade passive pieces for the opponent's active ones",
+      "Open lines for pieces that would benefit",
+      "Tie enemy pieces to defence and keep your own free"
+    ],
+    "typical_moves": [
+      "Rook lifts to open files",
+      "Giving a pawn to activate a rook in an endgame"
+    ],
+    "typical_pawn_structures": [
+      "Open positions favouring long-range pieces",
+      "Closed structures favouring knights"
+    ],
+    "typical_piece_arrangements": [
+      "A rook chained to a pawn's defence",
+      "A knight on a supported outpost"
+    ],
+    "tactical_consequences": [
+      "Active pieces generate threats, and threats gain tempi"
+    ],
+    "strategic_consequences": [
+      "Activity is usually temporary and must be converted into something durable"
+    ]
+  },
+  "exceptions": [
+    "Passive defence is sometimes objectively correct, particularly where a known drawing set-up requires it.",
+    "Activity purchased with too much material is not compensation, as this base's gambit measurements show."
+  ],
+  "limitations": [
+    "No reliable measure of activity exists in this system; the judgement is heuristic.",
+    "The concept is broad enough that it risks being applied to any move, which is exactly why the false-positive traps are stated.",
+    "MEASURED 2026-09-02 and fixed: the matcher counted LEGAL moves, which is exactly what this record's first false-positive trap forbids - 'counting available squares is not measuring activity. A piece with many moves that bear on nothing is not active.' It now counts ACTIVE moves: captures, moves into the opponent's half, and moves that attack an enemy man from where they land. The threshold is unchanged at a gap of eight; what changed is what is counted, and the firing rate went from 44.4% of the 788 shipped positions to 33.9%.",
+    "ARMY-LEVEL ONLY, and this base has a corpus entry failing on it. Keene on Reti-Capablanca 1924 writes that Capablanca 'is doing his utmost with his strongest piece' - a claim about ONE PIECE carrying a side, which this measure cannot express: Black's queen has a scope of 13 against its own next-best piece's 9, while White's army has 24 active moves to Black's 20. The concept that fits is queen-activity, which has no matcher. The entry is left failing rather than resolved by loosening the measure.",
+    "MEASURED 2026-09-02, on the two traps about what activity is WORTH: 'active pieces do not guarantee compensation. The Halloween Gambit position in this base has genuinely active pieces and evaluates 1.75 worse', and 'activity is generally a temporary advantage and must be converted; reporting it as though it were permanent overstates it'. This base reports activity at LOW confidence and never says it is worth anything - no compensation claim, no evaluation. That is the whole of what a static count can honestly do with them.",
+    "MEASURED 2026-09-02: the first indicator_against - 'a piece TIED TO DEFENDING SOMETHING' - is now built for the half a static scan can answer: a move that abandons a man this piece was guarding, leaving it hanging, is not counted as activity. The piece has the move; it does not have the freedom. The rate went UP, 33.9% -> 40.2%, and that is reported rather than tuned away: the exclusion is asymmetric, a side whose pieces are tied down loses more moves than a free one, so gaps widen and the unchanged threshold of eight is crossed more often. The second indicator, 'a piece with moves available that accomplish nothing', is the activeMoves change already recorded above."
+  ],
+  "misconceptions": [
+    "That activity means having many legal moves. It means bearing on things that matter.",
+    "That active pieces always justify a material deficit. The amount matters and is measurable.",
+    "That the most advanced piece is the most active. An advanced piece with no support is often the worst-placed one."
+  ],
+  "relationships": {
+    "broader": [],
+    "narrower": [
+      "worst-placed-piece"
+    ],
+    "related": [
+      "worst-placed-piece",
+      "outpost",
+      "bad-bishop",
+      "open-file",
+      "rook-on-the-seventh",
+      "initiative",
+      "compensation",
+      "positional-evaluation",
+      "static-vs-dynamic",
+      "space",
+      "rook-endgame-principles",
+      "king-activation"
+    ],
+    "contrasting": [
+      "material-imbalance"
+    ],
+    "co_occurring": [
+      "initiative"
+    ],
+    "conflicts": [
+      {
+        "concept": "material-imbalance",
+        "resolution": "The trade-off is real and has a measurable rate. This base's controlled gambit comparison found activity worth exactly one pawn in the Evans Gambit and not worth a knight in the Halloween Gambit, so the resolution is arithmetic rather than stylistic."
+      }
+    ]
+  },
+  "examples": [
+    {
+      "fen": "8/p2PB1pk/1p5p/4q3/6K1/2Pp1P2/6PP/8 w - - 0 48",
+      "game": "Smyslov-Petrosian, Candidates, Zurich 1953",
+      "note": "A QUIET position from a master game — after cxd3, ply 94 — in which Black has 32 legal moves against 20. Quiet here has a mechanical meaning: the side to move has no check and no capture that wins material, so the next move has to be chosen on positional grounds. That matters because this base's other corpus is 788 tactical puzzles, in which a positional feature cannot be isolated.\n\nWHAT IS VERIFIED: the game replays legally end to end through the page's own move generator, so the FEN is derived rather than transcribed; and the feature is present by mechanical measurement in lib/features.js.\n\nWHAT IS NOT CLAIMED: that the concept decides this position, or that the players were thinking about it. Note also a limitation of method — the position was FOUND by this system's own Layer 4, so it demonstrates the concept and cannot by itself validate the matcher that found it. Other concepts licensed here: passed-pawn, isolated-queen-pawn, backward-pawn, weak-square.",
+      "origin_kind": "historical-game",
+      "concept_role": "supports",
+      "side_to_move_benefits": "neither"
+    },
+    {
+      "fen": "r4r2/1qp1kp1P/ppb5/2N1PBP1/P2R3n/1P2Q3/2P2K2/R7 b - - 0 30",
+      "note": "a large mobility gap — 62 legal moves against 32. The position has no check available, so the next move must be chosen on positional grounds. CORRECTED 2026-09-02: this note used to say the position was QUIET by mechanical test, with \"no capture that wins material\" as half of the test. That half had never run - quietness() passed a move object where see() expects a square index, so winningCapturesAvailable was always zero, and every note written from it claimed something untested. Re-checked with the fixed test, this position DOES have a capture that wins material, so the quiet claim is withdrawn; the concept it illustrates is unaffected, and the position is kept rather than quietly dropped. That is the property this base's tactical corpus almost never has. Found by tools/prospect.js, which searches 1576 real positions for a concept's feature and scores quiet positions far higher. Provenance: the puzzle corpus is engine self-play — a real position from a real game between engines, not a master game.",
+      "origin_kind": "puzzle",
+      "concept_role": "supports",
+      "side_to_move_benefits": "neither",
+      "engine": {
+        "engine_id": "Stockfish 18",
+        "test_level": 2,
+        "depth": 20,
+        "threads": 8,
+        "hash_mb": 2048,
+        "multipv": 2,
+        "best_move": "h4f5",
+        "eval_cp": 5,
+        "mate_in": null,
+        "pv": [],
+        "alternatives": [
+          {
+            "move": "c6a4",
+            "eval_cp": -816,
+            "mate_in": null
+          }
+        ],
+        "margin_cp": 0,
+        "verdict": "supports",
+        "verdict_note": "Quiet and close to balanced at 0.05, which is the combination this base most needs and least often finds: nothing forcing is available and the evaluation is not swamping the feature, so the position is usable as an instance of the concept. What is NOT claimed is that the concept explains the engine's choice of move."
+      }
+    },
+    {
+      "fen": "3rq1k1/6pp/4p3/p2nP3/PP1P4/3Q4/1B4PP/4R1K1 b - - 0 32",
+      "game": "Reshevsky-Petrosian, Candidates, Zurich 1953",
+      "note": "A quiet position from a master game — after cxb4, ply 63 — where White has 41 legal moves against 30. The side to move has no check available, so the next move has to be chosen on positional grounds. CORRECTED 2026-09-02: this note used to add \"and no capture that wins material\" as the other half of a mechanical quiet test. That half had never run - quietness() passed a move object where see() expects a square index, so winningCapturesAvailable was always zero and every note written from it claimed something untested. Re-checked with the fixed test, this position DOES have a capture that wins material, so the quiet half of the claim is withdrawn. The position is kept: what it illustrates about the concept is unaffected, and dropping the evidence would be tidying away the consequence of a bug. VERIFIED: the game replays legally end to end through the page's own move generator, and the feature is measured by lib/features.js. NOT CLAIMED: that the concept decides this position, or that the players were thinking about it. Method note: the position was found by this system's own Layer 4, so it illustrates the concept and cannot by itself validate the matcher that found it. Other concepts licensed here: outpost, semi-open-file, weak-square, material-imbalance.",
+      "origin_kind": "historical-game",
+      "concept_role": "supports",
+      "side_to_move_benefits": "neither"
+    },
+    {
+      "fen": "R7/6k1/P4r2/8/3K4/8/8/8 w - - 0 1",
+      "note": "Added as the smallest material that can carry this record's claim, so the claim can be PROVEN rather than evaluated. See the tablebase note.",
+      "origin_kind": "tablebase-position",
+      "concept_role": "positive",
+      "side_to_move_benefits": "white",
+      "engine": {
+        "engine_id": "Stockfish 18",
+        "test_level": 3,
+        "depth": 26,
+        "threads": 10,
+        "hash_mb": 4096,
+        "multipv": 1,
+        "best_move": "a7a8q",
+        "eval_cp": 0,
+        "mate_in": null,
+        "pv": [],
+        "alternatives": [],
+        "margin_cp": null,
+        "verdict": "supports",
+        "verdict_note": "0.00 at depth 26. The engine agrees with the proof, which it does not always do in this ending."
+      },
+      "tablebase": {
+        "source": "Lichess tablebase (Syzygy, 7-piece)",
+        "pieces": 5,
+        "wdl": "draw",
+        "dtz": 0,
+        "dtm": 0,
+        "category": "draw",
+        "note": "PROVEN DRAW at dtz 0 with the defending rook ACTIVE on the sixth, against a PROVEN WIN in 63 for the same five men with that rook passive on a1. Activity is worth the whole game here and the material is identical in both - which is this concept's central claim, stated as a pair of proofs rather than as an evaluation. The Vancura defence is the name of the drawn half."
+      }
+    }
+  ],
+  "counterexamples": [
+    {
+      "fen": "1r4k1/5pp1/7p/8/8/7P/5PP1/R5K1 w - - 0 1",
+      "note": "Registered false-positive case `a-rook-with-many-moves-bearing-on-nothing`, kept on the record as well as in tests/false_positive_cases.json so that the concept carries its own negative evidence. THE SURFACE PATTERN IS PRESENT: White's rook has the only open file on the board and fourteen legal moves. By any count of available squares it is the most active piece in the position. WHY IT IS NOT THE CONCEPT: This record's own trap: \"Counting available squares is not measuring activity. A piece with many moves that bear on nothing is not active.\" The a-file leads to an empty corner; there is no entry square, no target on the rank it could switch to, and nothing on the seventh. WHAT THE SYSTEM DOES: The API reports open-file and does not report piece-activity, which is the correct pair of answers: the file is open and it wins nothing. The matcher stopped counting legal moves for exactly this trap and the rate moved from 44.4% to 33.9%. Stockfish 18 at depth 28: +0.00, and its own first move is Ra6 — the rook goes to the sixth and the position is still dead level. Material is symmetric, so nothing else is carrying the evaluation.",
+      "origin_kind": "constructed-test",
+      "concept_role": "negative",
+      "engine": {
+        "engine_id": "Stockfish 18",
+        "test_level": 3,
+        "depth": 28,
+        "threads": 10,
+        "hash_mb": 4096,
+        "multipv": 1,
+        "best_move": "a1a6",
+        "eval_cp": 0,
+        "mate_in": null,
+        "pv": [],
+        "alternatives": [],
+        "margin_cp": null,
+        "verdict": "supports",
+        "verdict_note": "0.00 with symmetric material, and the engine's own first move puts the rook on the sixth. Fourteen legal moves and a dead draw."
+      },
+      "false_positive_case": "a-rook-with-many-moves-bearing-on-nothing"
+    }
+  ],
+  "ambiguous_examples": [
+    {
+      "fen": "4rnk1/r2n1p2/1p1R2pp/pP5q/3N4/P3N1P1/1Q3PKP/3R4 b - - 0 27",
+      "note": "Reti-Capablanca, New York 1924 (round 5), Qe5. Human ground truth: the concept is named for this position by Raymond Keene (GM), The Spectator Australia. Corpus entry `reti-capablanca-1924-27Qe5-piece-activity-ambiguous`. The same position as this corpus's initiative counterexample, and a different and gentler claim about it, which is why both exist. Piece activity genuinely applies: Black's queen is the most active piece on the board and Keene says so in as many words. It does not decide anything, because activity concentrated in one piece against a coordinated group is not activity in the sens",
+      "origin_kind": "historical-game",
+      "game": "Reti-Capablanca, New York 1924 (round 5)",
+      "concept_role": "ambiguous",
+      "engine": {
+        "engine_id": "Stockfish 18",
+        "test_level": 3,
+        "depth": 22,
+        "multipv": 3,
+        "best_move": "Rxe3",
+        "eval_cp": -212,
+        "verdict": "ambiguous",
+        "verdict_note": "yes, and it prices the activity. Black is more than two pawns worse with the most active piece on the board, and the engine's preferred move is an exchange sacrifice that gives that activity away in order to break White's coordination. Same search as the initiative counterexample on this position; recorded on both because the two entries make different claims about it."
+      },
+      "attributed_by": "Raymond Keene (GM), The Spectator Australia — corpus entry reti-capablanca-1924-27Qe5-initiative-negative"
+    }
+  ],
+  "explanations": {
+    "by_level": {
+      "beginner": "A piece is active if it is doing something - attacking, defending something important, or controlling squares the opponent wants.",
+      "intermediate": "Piece activity. A rook chained to defending a pawn is worth far less than one free to make threats, whatever the material says.",
+      "advanced": "Activity competes with material at a real exchange rate, and it is usually temporary - convert it before it expires.",
+      "master": "Most positional concepts are special cases of this one: an outpost, a bad bishop and an open file are all statements about activity."
+    },
+    "by_depth": {
+      "short": "How much a piece is actually doing.",
+      "normal": "Piece activity: the squares a piece controls and the targets it bears on. An active piece makes threats and chooses where to go; a passive one is tied to defence and loses material the moment it leaves.",
+      "deep": "The most general positional idea, and the one most others are special cases of - an outpost is a square that makes a knight active, a bad bishop is an inactive one, an open file is a rook's route to activity. It is not mobility alone: a piece with many available squares bearing on nothing is not active. It trades against material at a rate that can be measured, and this base has measured it - the Evans Gambit is a pawn down and evaluates exactly level, so that activity is worth precisely one pawn, while the Halloween Gambit produces real activity and a mobile centre and still evaluates 1.75 worse, because a knight is too much to pay. And it is usually temporary, so it has to be converted into something durable before it expires."
+    },
+    "hedge": "",
+    "lesson": "Ask what each piece is actually doing, not how many squares it can reach."
+  },
+  "terminology": {
+    "beginner_words": [
+      "what is this piece doing",
+      "a piece stuck defending"
+    ],
+    "advanced_words": [
+      "activity",
+      "passive piece",
+      "scope",
+      "mobility",
+      "conversion"
+    ],
+    "avoid": [
+      "active means many moves"
+    ]
+  },
+  "status": {
+    "stage": "researched",
+    "last_updated": "2026-09-01",
+    "open_questions": [],
+    "audit_notes": []
+  },
+  "id": "piece-activity",
+  "canonical_name": "Piece activity",
+  "category": "piece-activity",
+  "knowledge_type": "positional-concept",
+  "definition_short": "How much a piece actually does: the squares it controls, the targets it bears on, and whether it is free to move at all.",
+  "definition_long": "The most general positional idea there is, and the one most other positional concepts are special cases of. An outpost is a square that makes a knight active; a bad bishop is an inactive one; an open file is a route to activity for a rook.\n\nACTIVITY IS NOT MOBILITY ALONE. A piece with many available squares that bear on nothing is not active in any useful sense. What counts is whether the squares it controls MATTER — whether it attacks something, defends something that needs defending, or controls squares the opponent wants.\n\nTHE SHARPEST FORM OF THE IDEA is the active-versus-passive contrast, clearest with rooks. An active rook makes threats and goes where it likes; a passive rook is chained to defending a pawn and loses material the moment it leaves. That asymmetry costs the passive side nothing in material and decides games, which is why giving a pawn to activate a rook is routinely correct in rook endings.\n\nIT COMPETES WITH MATERIAL, and the exchange rate is the interesting part. A pawn for lasting activity is often a good trade; this base measured the Evans Gambit at exactly equal a pawn down, which is activity worth precisely one pawn. The same measurement showed the reverse: the Halloween Gambit produces genuinely active pieces and a mobile centre and still evaluates 1.75 worse, because a knight is too much to pay. Activity is real, measurable, and finite.\n\nIT IS USUALLY TEMPORARY. In Steinitz's division, piece placement and centralisation are TEMPORARY advantages, which means activity must be converted into something durable — material, a weakness, a passed pawn — before it expires.",
+  "sources": [
+    "exeter-steinitz-accumulation",
+    "oldschoolchess-capablanca-endgame",
+    "serper-positional-secret",
+    "chesswise-strategic-elements",
+    "zurich-1953-games"
+  ],
+  "source_confidence": "medium"
+}

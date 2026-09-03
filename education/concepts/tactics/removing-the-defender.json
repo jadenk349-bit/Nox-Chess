@@ -1,0 +1,181 @@
+{
+  "schema_version": 2,
+  "id": "removing-the-defender",
+  "canonical_name": "Removing the defender",
+  "alternate_names": [
+    "removing the guard",
+    "annihilation of defence",
+    "undermining"
+  ],
+  "historical_names": [],
+  "category": "tactical-motifs",
+  "subcategory": "material-winning motif",
+  "tags": [],
+  "knowledge_type": "tactical-motif",
+  "knowledge_type_note": "Motif (D). The three defender-removal ideas (removal, deflection, overloading) shade into each other and sources draw the lines differently.",
+  "name_status": "established-name",
+  "difficulty": "beginner",
+  "definition_short": "Capturing or driving off the piece that defends a target, so the target can then be taken.",
+  "definition_long": "The most direct of the defender-removal ideas: instead of attacking the target, attack what holds it. Informant theme a, 'Annihilation of Defence'. UNDERMINING is the same idea applied to a pawn that supports a piece or a key square.\n\nIt differs from deflection in that the defender is destroyed or driven off rather than lured into abandoning its post, and from overloading in that the defender may have only one job — it is simply removed.",
+  "history": {
+    "attributions": [],
+    "first_documented_source": "informant-encyclopedia-combinations",
+    "year": null,
+    "confidence": "unknown",
+    "notes": "Tactical motifs are descriptive pattern names of long and mostly anonymous usage. The Chess Informant classification is cited as a standard enumeration, not as the origin of the term.",
+    "competing_claims": [],
+    "development": []
+  },
+  "engine_era_status": "unassessed",
+  "engine_era_note": "",
+  "sources": [
+    "informant-encyclopedia-combinations",
+    "wikipedia-chess-tactic",
+    "chesstempo-tactical-motifs",
+    "chesscom-tactics-38"
+  ],
+  "source_confidence": "high",
+  "recognition": {
+    "preconditions": [
+      "A target is defended",
+      "The defender can be captured or driven away"
+    ],
+    "indicators_for": [
+      "The defender is the only one",
+      "Capturing it is at worst an even trade"
+    ],
+    "indicators_against": [
+      "A second defender exists",
+      "Removing the defender costs more than the target"
+    ],
+    "prerequisites": [],
+    "detector": "proposed, and deliberately unclaimed (not yet written)",
+    "detectability": "mechanical",
+    "typical_confidence": "high",
+    "false_positive_traps": []
+  },
+  "application": {
+    "typical_plans": [],
+    "typical_moves": [],
+    "typical_pawn_structures": [],
+    "typical_piece_arrangements": [],
+    "tactical_consequences": [],
+    "strategic_consequences": []
+  },
+  "exceptions": [
+    "Fails against a second defender, or when the removal costs more than it wins."
+  ],
+  "limitations": [
+    "TYPICAL_CONFIDENCE RAISED medium -> high, 2026-09-02, and the reason is the schema's own definition of the field: 'how confidently this concept can normally be asserted ONCE ITS PRECONDITIONS HOLD'. This concept's recognition is MECHANICAL and its knowledge type already carries a high ceiling, so once the preconditions hold there is nothing left to be uncertain about - a stalemate is a stalemate, and a fork this base reports is one findMotifs() found, which ARCHITECTURE.md makes the authority and forbids second-guessing. 'Medium' was the default across 32 rule and motif records regardless of detectability, and it was found by measuring what the API reports against what each record permits: twelve concepts were reporting ABOVE their own record. The fix was to make each record its own ceiling in cap(), which then required the records that were wrong to be corrected rather than silently overruled.",
+    "NO AMBIGUOUS EXAMPLE YET, and four constructions were tried and thrown away. Each failed the same way: a position where removing the defender is available and WRONG turns out, on inspection, to be one where the removal simply wins - taking a knight with a rook and then collecting the target is worth doing far more often than not, so the material arithmetic that would make the concept ambiguous is hard to arrange. The nearest attempt, two rooks against a rook and knight with the defender capturable, evaluates at +5.66 for the removal against +0.19 for the alternative, which is a positive example rather than an ambiguous one. Recorded so the next attempt does not start over."
+  ],
+  "misconceptions": [],
+  "relationships": {
+    "broader": [],
+    "narrower": [],
+    "related": [
+      "deflection",
+      "overloading"
+    ],
+    "contrasting": [],
+    "co_occurring": [],
+    "conflicts": []
+  },
+  "examples": [
+    {
+      "fen": "3rkb1r/p2nqppp/5n2/1B2p1B1/4P3/1Q6/PPP2PPP/2KR3R w k - 3 13",
+      "move": "Rxd7",
+      "move_uci": "d1d7",
+      "note": "The Opera Game, 13.Rxd7 - the first of the two removals that make the finish work. The knight on d7 is holding the d-file together and Morphy gives a rook for it; three moves later he gives the bishop for the replacement knight, and four moves later the queen for the third defender. The concept's two preconditions are satisfied at every step: a target is defended, and the defender can be captured. What makes this the master-game example rather than a constructed one is that the same idea is executed three times in a row against three different pieces, which is not something a made-up position shows. PROVENANCE, stated plainly. The game is famous and the move list was replayed through this base's own move generator by tools/replay_game.js - 33 plies, every one legal, which is what makes the FEN trustworthy rather than remembered. No named annotator is attached to this position for this concept, so it grounds the MASTER-GAME rung and NOT the human-grounded one: it is evidence that the concept occurs in master play, and not evidence that a person named it here. The validation ladder already draws that line for eleven other concepts and it is drawn again here.",
+      "origin_kind": "historical-game",
+      "game": "Morphy-Duke of Brunswick and Count Isouard, Paris 1858 (the Opera Game)",
+      "concept_role": "positive",
+      "side_to_move_benefits": "white",
+      "engine": {
+        "engine_id": "Stockfish 18",
+        "test_level": 3,
+        "depth": 20,
+        "threads": 10,
+        "hash_mb": 4096,
+        "multipv": 1,
+        "best_move": "d1d7",
+        "eval_cp": 604,
+        "mate_in": null,
+        "pv": [],
+        "alternatives": [],
+        "margin_cp": null,
+        "verdict": "supports",
+        "verdict_note": "+6.04 at depth 20 and the engine's first choice - a rook given for a knight and the evaluation goes up by six pawns."
+      }
+    },
+    {
+      "fen": "4k3/8/5n2/3p2B1/8/8/8/3RK3 w - - 0 1",
+      "move": "Bxf6",
+      "move_uci": "g5f6",
+      "note": "Constructed, and it is the record's two preconditions and nothing else: the d5 pawn is defended (by the knight on f6, and only by it), and the defender can be captured (by the bishop on g5). Bxf6 then Rxd5. What makes this the clean case rather than a fork is that the bishop's capture wins nothing by itself - the knight is worth more than the pawn that follows - so the move only makes sense as removal of a guard.",
+      "origin_kind": "constructed-test",
+      "concept_role": "positive",
+      "side_to_move_benefits": "white",
+      "engine": {
+        "engine_id": "Stockfish 18",
+        "test_level": 3,
+        "depth": 20,
+        "threads": 10,
+        "hash_mb": 4096,
+        "multipv": 1,
+        "best_move": "g5f6",
+        "eval_cp": 481,
+        "mate_in": null,
+        "pv": [],
+        "alternatives": [],
+        "margin_cp": null,
+        "verdict": "supports",
+        "verdict_note": "+4.81, settled at depth 1. The engine plays the removal and then takes on d5 in its own line."
+      }
+    }
+  ],
+  "counterexamples": [
+    {
+      "fen": "4k3/8/2p1p3/3p4/8/8/6B1/3RK3 w - - 0 1",
+      "move_uci": "g2d5",
+      "note": "Registered false-positive case `removing-one-of-two-defenders`, kept on the record as well as in tests/false_positive_cases.json so that the concept carries its own negative evidence. THE SURFACE PATTERN IS PRESENT: Bxd5 captures a defended pawn and removes a unit that was guarding it. Capturing what defends the target is the concept's second precondition, word for word. WHY IT IS NOT THE CONCEPT: The first precondition is that the target IS defended after the removal, and here the d5 pawn has two defenders — the pawns on c6 and e6. Taking one leaves the other, so nothing has been removed in the sense the concept means: the whole idea is that the target becomes takeable, and it does not. WHAT THE SYSTEM DOES: The API does not report removing-the-defender. This record's positive example is the same shape with ONE defender — a knight on f6 guarding d5, a bishop on g5 to take it, +4.81 — and the two differ by a single pawn. The concept is a counting claim before it is a tactical one, which is why the positive example's note says what makes it clean: the bishop's capture wins nothing by itself, so the move only makes sense as removal of a guard.",
+      "origin_kind": "constructed-test",
+      "concept_role": "negative",
+      "false_positive_case": "removing-one-of-two-defenders"
+    }
+  ],
+  "ambiguous_examples": [],
+  "explanations": {
+    "by_level": {
+      "beginner": "Take the piece that was guarding it, and then the guarded piece falls too.",
+      "intermediate": "Removing the defender. Count defenders first — this only works if it is the last one.",
+      "advanced": "Annihilation of defence (Informant theme a). Undermining is the pawn-support version."
+    },
+    "by_depth": {
+      "short": "Capture or drive off the guard, and the guarded piece falls.",
+      "normal": "Removing the defender: the target is defended, the defender can be captured or chased away, and once it is gone the target is takeable. The move that removes the guard often wins nothing by itself, which is what marks it out from an ordinary capture.",
+      "deep": "It is a counting claim before it is a tactical one, and the count is how many defenders there are: taking one of two removes nothing. Morphy does it three times in a row in the Opera Game — a rook for the knight on d7, then a bishop for the knight that replaces it, then the queen for the third defender — which is not something a constructed position shows. The exchange also has to be worth making: capturing a guard worth more than the target it guards is a different move with a different name."
+    },
+    "hedge": "",
+    "lesson": ""
+  },
+  "terminology": {
+    "beginner_words": [
+      "take the guard"
+    ],
+    "advanced_words": [
+      "removing the defender",
+      "undermining",
+      "annihilation of defence"
+    ],
+    "avoid": []
+  },
+  "status": {
+    "stage": "researched",
+    "last_updated": "2026-09-01",
+    "open_questions": [],
+    "audit_notes": [
+      "2026-09-01: detector field named 'defenderCount', which does not exist anywhere in the codebase. The audit's hardcoded whitelist had been accepting it. Repointed at real code, or marked as proposed where nothing implements it."
+    ]
+  }
+}

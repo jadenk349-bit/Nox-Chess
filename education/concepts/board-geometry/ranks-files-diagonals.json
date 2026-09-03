@@ -1,0 +1,172 @@
+{
+  "schema_version": 2,
+  "alternate_names": [],
+  "historical_names": [],
+  "tags": [
+    "geometry",
+    "fundamentals",
+    "nox-relevant"
+  ],
+  "subcategory": "fundamentals",
+  "difficulty": "beginner",
+  "knowledge_type_note": "Vocabulary for the board's lines, and the observation that the lines are what long-range pieces actually fight over.",
+  "name_status": "established-name",
+  "history": {
+    "attributions": [],
+    "first_documented_source": "fide-laws-2023",
+    "year": null,
+    "confidence": "unknown",
+    "notes": "Elementary vocabulary defined in the Laws of Chess.",
+    "competing_claims": [],
+    "development": []
+  },
+  "engine_era_status": "not-applicable",
+  "engine_era_note": "Not applicable.",
+  "recognition": {
+    "preconditions": [
+      "A board"
+    ],
+    "indicators_for": [],
+    "indicators_against": [],
+    "prerequisites": [],
+    "detector": "fileState / sliderLines in lib/features.js and blind-chess.html",
+    "detectability": "mechanical",
+    "typical_confidence": "high",
+    "false_positive_traps": [
+      "A line being open is a fact; its being useful is not. This base holds a tested position where an open file with a rook of each colour on it is worth exactly nothing."
+    ]
+  },
+  "application": {
+    "typical_plans": [
+      "Open a file for the rooks with a pawn break",
+      "Fianchetto to take a long diagonal",
+      "Keep the pawns off the colour your bishop travels on"
+    ],
+    "typical_moves": [],
+    "typical_pawn_structures": [],
+    "typical_piece_arrangements": [],
+    "tactical_consequences": [
+      "Pins, skewers, x-rays and batteries all require a line"
+    ],
+    "strategic_consequences": [
+      "Pawn moves are the only way to open or close a file, which is why structure governs activity"
+    ]
+  },
+  "exceptions": [
+    "Knights ignore lines entirely, which is what makes them the right piece for closed positions."
+  ],
+  "limitations": [
+    "Vocabulary. It names what the pieces fight over; it does not say who wins the fight.",
+    "Rests on the Laws of Chess for the definitions and one encyclopedia article for the rest, with no evidence of this base's own; the source confidence is medium accordingly."
+  ],
+  "misconceptions": [
+    "That a rook belongs on any open file. It belongs on one with a square to invade.",
+    "That diagonals are secondary to files. The long diagonals are the longest lines on the board."
+  ],
+  "relationships": {
+    "broader": [],
+    "narrower": [],
+    "related": [
+      "open-file",
+      "board-geometry",
+      "rook-on-the-seventh",
+      "battery",
+      "pin",
+      "skewer",
+      "x-ray",
+      "bishop-pair",
+      "notation"
+    ],
+    "contrasting": [],
+    "co_occurring": [],
+    "conflicts": []
+  },
+  "examples": [
+    {
+      "fen": "3r1nk1/p4ppp/1bp5/B7/3p4/1N4PP/PPP2P2/4R1K1 w - - 0 23",
+      "move": "Re7",
+      "move_uci": "e1e7",
+      "note": "Capablanca-Rubinstein, Berlin 1928, 23.Re7 - a RANK rather than a file, which is why it is the right positive for this record. The three kinds of line are not interchangeable in value: a file is a road, a diagonal is a road with a colour, and the seventh rank is a road that runs behind the enemy pawns. Van Der Nat: 'he plays 23.Re7 and seizes the seventh rank. A rook planted on the seventh, behind the enemy pawns, attacks everything on that rank and hunts any pawn that dares advance.' Read against this record's registered false-positive case, an open FILE that leads to an empty corner and is worth exactly nothing: the same geometric fact, and the difference is entirely what the line arrives at.",
+      "origin_kind": "historical-game",
+      "game": "Capablanca-Rubinstein, Berlin 1928",
+      "concept_role": "positive",
+      "attributed_by": "Nicholas Van Der Nat (FM) - corpus entry capablanca-rubinstein-1928-23Re7-rook-on-the-seventh",
+      "engine": {
+        "engine_id": "Stockfish 18",
+        "test_level": 3,
+        "depth": 24,
+        "threads": 10,
+        "hash_mb": 4096,
+        "multipv": 3,
+        "best_move": "e1e7",
+        "eval_cp": 20,
+        "mate_in": null,
+        "pv": [],
+        "alternatives": [],
+        "margin_cp": null,
+        "verdict": "supports",
+        "verdict_note": "+0.20 and the engine's first choice at depth 24 with three lines, with the second at +0.17. The margin is small, which is the honest size of a line seized in a level ending, and the game was won from it."
+      }
+    }
+  ],
+  "counterexamples": [
+    {
+      "fen": "1r4k1/5pp1/7p/8/8/7P/5PP1/R5K1 w - - 0 1",
+      "note": "Registered false-positive case `an-open-file-worth-nothing`, kept on the record as well as in tests/false_positive_cases.json so that the concept carries its own negative evidence. THE SURFACE PATTERN IS PRESENT: The a-file is open — no pawn of either colour on it — and a white rook stands on it. Open files are what rooks are for, and the line is a fact anyone can read off the board. WHY IT IS NOT THE CONCEPT: This record's own trap, and it names this position type: \"A line being open is a fact; its being useful is not. This base holds a tested position where an open file with a rook of each colour on it is worth exactly nothing.\" Here it is worth nothing: the file leads to an empty corner, there is no entry square, and material is symmetric. WHAT THE SYSTEM DOES: The API reports `open-file` — which is true and is a statement about the pawns — and refuses `piece-activity`, which would be the claim that the file is doing something. Stockfish 18 at depth 28: 0.00, and its own first move puts the rook on the sixth, where it also achieves nothing. The same position is `piece-activity`'s registered false-positive case; it is registered here as well because the two records make different claims about it and both have to be right at once — the geometry is real and its value is separate.",
+      "origin_kind": "constructed-test",
+      "concept_role": "negative",
+      "false_positive_case": "an-open-file-worth-nothing"
+    }
+  ],
+  "ambiguous_examples": [],
+  "explanations": {
+    "by_level": {
+      "beginner": "Rows are ranks, columns are files, slants are diagonals.",
+      "intermediate": "Long-range pieces fight over lines rather than squares — a rook is worth what its file is worth.",
+      "advanced": "Only pawns can open or close a file, which is the mechanical link between structure and activity.",
+      "master": "The long diagonals are the longest lines on the board and run through the centre, which is the whole case for the fianchetto."
+    },
+    "by_depth": {
+      "short": "Ranks are rows, files are columns, diagonals are slants.",
+      "normal": "The board's three kinds of line. They matter because long-range pieces fight over lines rather than squares: a rook's strength is a property of its file, a bishop's of its diagonal.",
+      "deep": "Ranks run across, files up and down, diagonals at a slant, and the vocabulary earns its place because the long-range pieces contest lines rather than squares. Pins, skewers, x-rays and batteries exist only along one. Pawns decide which lines exist, since they are the only pieces that cannot move sideways — a file is opened by a pawn move and by nothing else — which is the mechanical reason pawn structure governs piece activity and is treated as the more permanent of the two."
+    },
+    "hedge": "",
+    "lesson": "Ask what line a piece is on before asking what square it is on."
+  },
+  "terminology": {
+    "beginner_words": [
+      "row",
+      "column",
+      "slant"
+    ],
+    "advanced_words": [
+      "rank",
+      "file",
+      "diagonal",
+      "long diagonal",
+      "open file",
+      "half-open file"
+    ],
+    "avoid": [
+      "diagonals are less important than files"
+    ]
+  },
+  "status": {
+    "stage": "researched",
+    "last_updated": "2026-09-01",
+    "open_questions": [],
+    "audit_notes": []
+  },
+  "id": "ranks-files-diagonals",
+  "canonical_name": "Ranks, files and diagonals",
+  "category": "ranks-files-diagonals",
+  "knowledge_type": "terminology",
+  "definition_short": "The three kinds of straight line on the board: rows, columns and slants.",
+  "definition_long": "RANKS are the rows, numbered 1 to 8 from White's side. FILES are the columns, lettered a to h from White's left. DIAGONALS are the slants, named by their end squares (the a1-h8 diagonal).\n\nWHY THE VOCABULARY MATTERS is that the long-range pieces do not fight over squares so much as over LINES. A rook's power is a function of the file it stands on; a bishop's is a function of the diagonal. This is why so many positional concepts in this base are stated as facts about lines — open and semi-open files, the seventh rank, the long diagonal, batteries, pins and skewers, which exist only along a line.\n\nPAWNS DECIDE THE LINES. Pawns are the only pieces that cannot move sideways, so a file is opened or closed by pawn moves and by nothing else, and a diagonal is blocked by whichever pawns sit on its colour. That is the mechanical link between pawn structure and piece activity, and it is why structure is treated as the more permanent of the two.\n\nTHE LONG DIAGONALS (a1-h8 and h1-a8) are singled out because they are the longest lines on the board and pass through the centre, which is what makes a fianchettoed bishop a strategic asset rather than a developed piece.",
+  "sources": [
+    "fide-laws-2023",
+    "wikipedia-chess-notation"
+  ],
+  "source_confidence": "medium"
+}
