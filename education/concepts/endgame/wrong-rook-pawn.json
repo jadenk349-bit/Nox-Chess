@@ -1,0 +1,257 @@
+{
+  "schema_version": 2,
+  "alternate_names": [
+    "wrong bishop",
+    "wrong-coloured bishop",
+    "bishop of the wrong colour"
+  ],
+  "historical_names": [],
+  "tags": [
+    "bishop-endgame",
+    "tablebase-proven",
+    "fortress",
+    "engine-blind-spot"
+  ],
+  "subcategory": "drawn material configuration",
+  "difficulty": "intermediate",
+  "knowledge_type_note": "Typed tablebase-fact: the result is proven, and the controlled pair in this record settles it in both directions. Nothing here is a judgement.",
+  "name_status": "established-name",
+  "history": {
+    "attributions": [
+      {
+        "person": "Gioachino Greco",
+        "relation": "first-documented-by",
+        "source": "wikipedia-wrong-rook-pawn",
+        "year": 1623,
+        "note": "A 1623 study turns on the theme, which dates the knowledge to at least then. Second-hand; Greco's text not consulted."
+      },
+      {
+        "person": "Ercole del Rio",
+        "relation": "later-associated-with",
+        "source": "wikipedia-wrong-bishop",
+        "year": 1750,
+        "note": "Studied the analogous rook-and-bishop-pawn-versus-bishop case around 1750. Second-hand."
+      }
+    ],
+    "first_documented_source": "wikipedia-wrong-rook-pawn",
+    "year": 1623,
+    "confidence": "medium",
+    "notes": "Dating is well attested across two encyclopedia entries; neither primary source was consulted.",
+    "competing_claims": [],
+    "development": [
+      {
+        "era": "1623, Greco",
+        "change": "The theme appears in a composed study.",
+        "source": "wikipedia-wrong-rook-pawn"
+      },
+      {
+        "era": "engine era",
+        "change": "Becomes a known evaluation blind spot that has to be hard-coded, since search alone misjudges it.",
+        "source": "chessprogramming-wrong-bishop"
+      }
+    ]
+  },
+  "engine_era_status": "reliable",
+  "engine_era_note": "A rare case where engines are WORSE than a rule: search does not find the draw because it lies beyond the horizon, so engines encode it explicitly. Any explanation of such a position should trust the tablebase over the evaluation bar.",
+  "recognition": {
+    "preconditions": [
+      "The attacker has a bishop and a rook pawn",
+      "The pawn's promotion square is NOT of the bishop's colour"
+    ],
+    "indicators_for": [
+      "The defending king can reach the promotion-square corner, or the square beside it",
+      "There is no second pawn on a different file to change the picture"
+    ],
+    "indicators_against": [
+      "The bishop DOES control the promotion square — an ordinary win",
+      "The defending king cannot reach the corner in time",
+      "A second pawn on another file exists, which usually wins",
+      "The pawn is not a rook pawn at all"
+    ],
+    "prerequisites": [
+      "bad-bishop",
+      "fortress"
+    ],
+    "detector": "lib/matchers.js: wrong-rook-pawn",
+    "detectability": "mechanical",
+    "typical_confidence": "high",
+    "false_positive_traps": [
+      "Being in front of the pawn is NOT enough, unlike king-and-pawn endings. The defending king must reach the corner or the square beside it — Mednis gives a position where the same setup wins with White to move and draws with Black to move.",
+      "A second pawn on a different file usually changes the verdict entirely.",
+      "The bishop's colour relative to the CORNER is what matters, not its current square."
+    ]
+  },
+  "application": {
+    "typical_plans": [
+      "As the defender: head for the corner, and consider sacrificing to reach this ending",
+      "As the attacker: avoid trading into it, and keep a second pawn if possible"
+    ],
+    "typical_moves": [
+      "A bishop or exchange sacrifice to liquidate into the drawn ending"
+    ],
+    "typical_pawn_structures": [
+      "A lone a- or h-pawn with a bishop of the other colour"
+    ],
+    "typical_piece_arrangements": [
+      "Defending king on h8 (or a8) with the attacker's bishop unable to cover it"
+    ],
+    "tactical_consequences": [
+      "Enables saving sacrifices that look absurd on material grounds"
+    ],
+    "strategic_consequences": [
+      "An extra piece and pawn can be worth exactly nothing",
+      "A standing reason to check which rook pawn survives before trading into a bishop ending"
+    ]
+  },
+  "exceptions": [
+    "A second pawn on a different file normally wins.",
+    "If the defending king cannot reach the corner in time, the attacker wins normally.",
+    "In the mirrored rook-versus-bishop cases the logic inverts: there the DEFENDER has the wrong bishop when it is the colour of the corner its king is confined to."
+  ],
+  "limitations": [
+    "Fires on none of the 788 shipped positions - the material is B+RP against a bare king and none of them is that - and on a constructed case with a light-squared bishop and an h-pawn. The record's first trap is not detectable and travels as a caution: the defending king must REACH the corner, and being in front of the pawn is not enough.",
+    "MEASURED 2026-09-02: the trap 'a second pawn on a different file usually changes the verdict entirely' is not implemented. The matcher's own preconditions require the lone rook's pawn, so a second pawn on another file takes the position out of the concept before the trap applies - but that is the reason, and it is written here rather than left implicit."
+  ],
+  "misconceptions": [
+    "That an extra bishop and pawn must win. Against the wrong rook pawn it is a dead draw.",
+    "That getting the king in front of the pawn draws, as it does with king and pawn alone. It does not.",
+    "That the engine evaluation can be trusted here. This is a documented evaluation blind spot."
+  ],
+  "relationships": {
+    "broader": [
+      "fortress"
+    ],
+    "narrower": [],
+    "related": [
+      "fortress",
+      "opposite-coloured-bishops",
+      "bad-bishop",
+      "dead-position"
+    ],
+    "contrasting": [],
+    "co_occurring": [
+      "fortress",
+      "opposite-coloured-bishops"
+    ],
+    "conflicts": []
+  },
+  "examples": [
+    {
+      "fen": "7k/8/5K2/3B3P/8/8/8/8 w - - 0 1",
+      "note": "The basic case. White has a light-squared bishop on d5 and an h-pawn, which promotes on h8 — a DARK square the bishop can never control. Black's king is already in the corner.",
+      "origin_kind": "constructed-test",
+      "concept_role": "positive",
+      "side_to_move_benefits": "neither",
+      "controlled_pair_with": "7k/8/5K2/7P/3B4/8/8/8 w - - 0 1",
+      "tablebase": {
+        "source": "Lichess tablebase (Syzygy, 7-piece)",
+        "pieces": 4,
+        "wdl": "draw",
+        "dtz": 0,
+        "dtm": 0,
+        "category": "draw",
+        "note": "PROVEN draw with an extra bishop AND an extra pawn. Paired with the identical material below, where only the bishop's colour differs."
+      },
+      "engine": {
+        "engine_id": "Stockfish 18",
+        "test_level": 3,
+        "depth": 26,
+        "threads": 10,
+        "hash_mb": 4096,
+        "multipv": 1,
+        "best_move": "d5e4",
+        "eval_cp": 92,
+        "mate_in": null,
+        "pv": [],
+        "alternatives": [],
+        "margin_cp": null,
+        "verdict": "supports",
+        "verdict_note": "THE ENGINE IS WRONG HERE AND THE TABLEBASE IS NOT, which is why both numbers are recorded. Stockfish 18 at depth 26 says +0.92. Syzygy says draw, dtz 0, 4 pieces, best move Kg6 - proven over every legal continuation. The bishop is light-squared and the queening square h8 is dark, so the defending king cannot be driven out of the corner however long White plays. This is the base's own rule about instruments said out loud: a tablebase gives proof, an engine gives an opinion, and where they disagree inside seven pieces the opinion loses."
+      }
+    }
+  ],
+  "counterexamples": [
+    {
+      "fen": "7k/8/5K2/7P/3B4/8/8/8 w - - 0 1",
+      "note": "IDENTICAL material and identical king and pawn squares — the bishop is on d4, a DARK square, so it controls h8. That single change is the whole concept.",
+      "origin_kind": "constructed-test",
+      "concept_role": "negative",
+      "side_to_move_benefits": "white",
+      "controlled_pair_with": "7k/8/5K2/3B3P/8/8/8/8 w - - 0 1",
+      "tablebase": {
+        "source": "Lichess tablebase (Syzygy, 7-piece)",
+        "pieces": 4,
+        "wdl": "win",
+        "dtz": 1,
+        "dtm": 9,
+        "category": "win",
+        "note": "PROVEN win, mate in 9. Same pieces, same squares for king and pawn; only the bishop's colour complex differs. Draw against mate in 9 — as clean an isolation as the opposition pair, and a full point turning on which diagonal a bishop happens to travel on."
+      },
+      "engine": {
+        "engine_id": "Stockfish 18",
+        "test_level": 3,
+        "depth": 26,
+        "threads": 10,
+        "hash_mb": 4096,
+        "multipv": 1,
+        "best_move": "f6f7",
+        "eval_cp": null,
+        "mate_in": 7,
+        "pv": [],
+        "alternatives": [],
+        "margin_cp": null,
+        "verdict": "supports",
+        "verdict_note": "PROVEN WIN in 9, dtz 1, best move Kg6+, against a PROVEN DRAW for the same material with the bishop on the other colour. That is the whole content of the concept and it is settled rather than argued: one bishop, two colours, win and draw. The engine agrees here (mate in 7) and disagreed on the drawn half, which is the reason both halves carry both numbers."
+      }
+    }
+  ],
+  "ambiguous_examples": [],
+  "explanations": {
+    "by_level": {
+      "beginner": "Their bishop can never reach the corner square your pawn needs, so if your king sits in that corner they can never push you out. Extra piece or not, it is a draw.",
+      "intermediate": "The wrong rook pawn: the bishop is on the wrong colour for the promotion square. Get the king to the corner and it is drawn — a standard saving resource worth sacrificing for.",
+      "advanced": "Wrong bishop. Note the king must reach the corner itself, not merely get in front of the pawn, which is the difference from a pure king-and-pawn ending.",
+      "master": "Check which rook pawn survives before liquidating into a bishop ending — and remember this is a documented engine evaluation blind spot, so trust the tablebase over the bar."
+    },
+    "by_depth": {
+      "short": "The bishop cannot cover the promotion square, so the corner is a fortress.",
+      "normal": "The wrong rook pawn: a bishop can never control the promotion square of one of the two rook pawns. With that pawn, a king that reaches the corner cannot be driven out, so bishop and pawn against a bare king is drawn.",
+      "deep": "A bishop travels on one colour forever, so one of the two rook pawns always promotes on a square it cannot touch. With that pawn the ending is a draw once the defending king reaches the corner — an extra piece and an extra pawn worth exactly nothing. The precision that catches people is that the king must reach the CORNER, or the square beside it; merely standing in front of the pawn is not enough, unlike the pure king-and-pawn case. Known since at least a Greco study of 1623, and it generates the standard practical resource of sacrificing into it. It is also a documented engine blind spot: the draw lies beyond search's horizon, so evaluation functions hard-code it, and in one TCEC superfinal one engine knew it and the other apparently did not."
+    },
+    "hedge": "",
+    "lesson": "Before you trade into a bishop ending with a rook pawn, check whether your bishop covers the promotion square. If it does not, you have nothing."
+  },
+  "terminology": {
+    "beginner_words": [
+      "the bishop is the wrong colour for the corner"
+    ],
+    "advanced_words": [
+      "wrong rook pawn",
+      "wrong bishop",
+      "safe corner",
+      "fortress"
+    ],
+    "avoid": [
+      "an extra piece always wins"
+    ]
+  },
+  "status": {
+    "stage": "researched",
+    "last_updated": "2026-09-01",
+    "open_questions": [],
+    "audit_notes": []
+  },
+  "id": "wrong-rook-pawn",
+  "canonical_name": "Wrong rook pawn",
+  "category": "bishop-endgames",
+  "knowledge_type": "tablebase-fact",
+  "definition_short": "A rook pawn whose promotion square is the opposite colour to the bishop's. Bishop and wrong rook pawn cannot win against a king that reaches the corner — the extra material is worth nothing.",
+  "definition_long": "A bishop moves on one colour forever, so it can never control the promotion square of one of the two rook pawns. An h-pawn promotes on h8, a dark square; an a-pawn promotes on a8, a light one. Whichever of those the bishop cannot cover is the WRONG rook pawn for that bishop.\n\nThe consequence is stark: king, bishop and wrong rook pawn against a bare king is a DRAW if the defending king reaches the corner in front of the pawn. The bishop cannot evict it, and the attacking king cannot either without stalemating. A whole extra piece and pawn are worth nothing.\n\nMednis adds a precision that is easy to miss: unlike king and pawn against king, where getting in front of the pawn is enough, here the defending king must reach the corner ITSELF or the square beside it. Merely being in front of the pawn does not draw.\n\nThe knowledge is old — Gioachino Greco composed a study turning on it in 1623 — and it generates a standard practical resource: a defender who is losing can head for one of these endings deliberately, often by sacrificing.\n\nIT IS A KNOWN ENGINE BLIND SPOT. The Chess Programming Wiki records that this fortress 'needs to be encoded in the evaluation function, as search would not evaluate them properly', and cites the TCEC Season 5 Superfinal where Komodo had the knowledge and Stockfish apparently did not. Below eight pieces the tablebase is the authority; above it, a bare evaluation may be wrong about exactly this.",
+  "sources": [
+    "wikipedia-wrong-rook-pawn",
+    "wikipedia-wrong-bishop",
+    "chessprogramming-wrong-bishop",
+    "lichess-tablebase"
+  ],
+  "source_confidence": "high"
+}

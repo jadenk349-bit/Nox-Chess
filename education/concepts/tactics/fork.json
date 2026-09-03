@@ -1,0 +1,325 @@
+{
+  "schema_version": 2,
+  "id": "fork",
+  "canonical_name": "Fork",
+  "alternate_names": [
+    "fork (single-piece double attack)"
+  ],
+  "historical_names": [],
+  "category": "tactical-motifs",
+  "subcategory": "material-winning motif",
+  "tags": [],
+  "knowledge_type": "tactical-motif",
+  "knowledge_type_note": "A tactical motif: a geometric pattern, mechanically detectable, not a guideline. NOTE ON NAMING: 'double attack' was previously listed here as an alias, which the audit flagged as a possible duplicate of the `double-attack` record. They are NOT the same concept in the usage this base follows — a fork is a double attack by ONE piece, while `double-attack` is the general case including discovered attacks. Chess.com merges them; Wikipedia and Chess Tempo do not. The alias has been removed so the distinction is not undermined by the record's own metadata.",
+  "name_status": "established-name",
+  "difficulty": "beginner",
+  "definition_short": "One piece attacks two or more enemy units at once, so only one can be saved.",
+  "definition_long": "A single piece attacks two or more targets simultaneously. The defender can normally answer only one threat, so material falls. Knights fork most often because no other piece attacks a knight back from a forked square, and because the knight's move is the hardest to see. Pawns fork cheaply: the forked pieces being defended does not help, since the pawn is worth less than either.\n\nForks are ABSOLUTE when one target is the king — the defender is forced to answer the check and cannot save the other piece or insert a zwischenzug (except a cross-check). Otherwise they are RELATIVE, and the defender may have resources: defending both, counter-attacking, or an in-between move.\n\nTargets need not be pieces. A square, a mate threat, or a follow-up fork can be one prong.",
+  "history": {
+    "attributions": [],
+    "first_documented_source": "informant-encyclopedia-combinations",
+    "year": null,
+    "confidence": "unknown",
+    "notes": "Tactical motifs are descriptive pattern names of long and mostly anonymous usage. The Chess Informant classification is cited as a standard enumeration, not as the origin of the term.",
+    "competing_claims": [],
+    "development": []
+  },
+  "engine_era_status": "unassessed",
+  "engine_era_note": "",
+  "sources": [
+    "informant-encyclopedia-combinations",
+    "wikipedia-chess-tactic",
+    "chesstempo-tactical-motifs",
+    "chesscom-tactics-38"
+  ],
+  "source_confidence": "high",
+  "recognition": {
+    "preconditions": [
+      "One piece attacks two or more enemy units after the move"
+    ],
+    "indicators_for": [
+      "At least one target is undefended, or worth more than the forking piece",
+      "One target is the king, making the fork absolute",
+      "The forking piece is not itself capturable on its square"
+    ],
+    "indicators_against": [
+      "The forking piece can simply be captured",
+      "Both targets are defended and each is worth less than the forker",
+      "The defender has a check or a stronger counter-threat available first"
+    ],
+    "prerequisites": [],
+    "detector": "findMotifs -> fork",
+    "detectability": "mechanical",
+    "typical_confidence": "high",
+    "false_positive_traps": []
+  },
+  "application": {
+    "typical_plans": [],
+    "typical_moves": [
+      "A knight to a square attacking king and rook (the classic Nc7+ / Nf7 pattern)",
+      "A pawn advance attacking two pieces on adjacent diagonals",
+      "A queen check that also picks up a loose piece"
+    ],
+    "typical_pawn_structures": [],
+    "typical_piece_arrangements": [],
+    "tactical_consequences": [
+      "Wins material when at least one target cannot be saved"
+    ],
+    "strategic_consequences": [
+      "Loose pieces invite forks; keeping pieces defended is prophylaxis against them"
+    ]
+  },
+  "exceptions": [
+    "A fork wins nothing if the forking piece can be taken, or if every target is adequately defended and cheaper than the forker.",
+    "A relative fork can be met by a zwischenzug; an absolute fork cannot."
+  ],
+  "limitations": [
+    "Detecting the geometry is mechanical; deciding whether it WINS material requires resolving the whole capture sequence, so recognition alone is not enough.",
+    "TYPICAL_CONFIDENCE RAISED medium -> high, 2026-09-02, and the reason is the schema's own definition of the field: 'how confidently this concept can normally be asserted ONCE ITS PRECONDITIONS HOLD'. This concept's recognition is MECHANICAL and its knowledge type already carries a high ceiling, so once the preconditions hold there is nothing left to be uncertain about - a stalemate is a stalemate, and a fork this base reports is one findMotifs() found, which ARCHITECTURE.md makes the authority and forbids second-guessing. 'Medium' was the default across 32 rule and motif records regardless of detectability, and it was found by measuring what the API reports against what each record permits: twelve concepts were reporting ABOVE their own record. The fix was to make each record its own ceiling in cap(), which then required the records that were wrong to be corrected rather than silently overruled.",
+    "Verified 2026-09-02 by reading blind-chess.html's findMotifs() directly, which is where this concept is detected: the tag arrives from the page and Layer 4 translates it. tools/trap_audit.js reads lib/matchers.js and lib/features.js and cannot see that function, so a condition honoured there reads as unread. This note is the reading. \"Both targets are defended and each is worth less than the forker\" is ENFORCED, and the line is `if (VAL[p.t] > VAL[moved.t] || !defendersOf(after, i, them).length) hit.push(...)`. A square only joins the fork's target list if the unit on it outranks the forking piece OR has no defender at all; two defended targets both cheaper than the forker leave the list empty and no fork is reported. The remaining indicator_against on this record - \"The defender has a check or a stronger counter-threat available first\" - is NOT built and is the harder kind: a zwischenzug is not a property of the forking move, and finding one needs a search this base does not run at the board."
+  ],
+  "misconceptions": [],
+  "relationships": {
+    "broader": [
+      "double-attack"
+    ],
+    "narrower": [],
+    "related": [
+      "double-attack"
+    ],
+    "contrasting": [],
+    "co_occurring": [],
+    "conflicts": []
+  },
+  "examples": [
+    {
+      "fen": "rnbqk1nr/pp3ppp/4p3/b1ppP3/3P4/P1N5/1PP2PPP/R1BQKBNR w KQkq - 1 6",
+      "move": "b4",
+      "move_uci": "b2b4",
+      "note": "Smyslov-Botvinnik, World Championship 1954, game 1, 6.b4 - a pawn fork in a world-championship game, and one recommended in print thirty years earlier. The detector: 'the pawn on b4 forks the bishop on a5 and the pawn on c5.' Botvinnik's own note calls it 'a well-known pawn sacrifice, recommended by Alekhine in the book of the New York international tournament of 1924'. The two readings do not conflict - the fork is the mechanism and the sacrifice is the intention, since Black takes on b4 and White gets the initiative. A PAWN fork is worth having as the master example because the forking piece is the cheapest on the board, which is the condition that makes a fork work at all. PROVENANCE. The position is a corpus entry - a master game with a verified move list and a named annotator - and the annotator named a DIFFERENT concept there. So this grounds the MASTER-GAME rung and not the human-grounded one: the motif is what this base's own detector reads off the board, and the game is what makes the board real. `attributed_by` is deliberately absent.",
+      "origin_kind": "historical-game",
+      "game": "Smyslov-Botvinnik, World Championship match (game 1), Moscow 1954",
+      "concept_role": "positive",
+      "side_to_move_benefits": "white",
+      "engine": {
+        "engine_id": "Stockfish 18",
+        "test_level": 3,
+        "depth": 22,
+        "threads": 10,
+        "hash_mb": 4096,
+        "multipv": 3,
+        "best_move": "d1g4",
+        "eval_cp": 55,
+        "mate_in": null,
+        "pv": [],
+        "alternatives": [],
+        "margin_cp": null,
+        "verdict": "supports",
+        "verdict_note": "+0.53 for the move played against +0.55 for the engine's first choice, at depth 22 with three lines - two centipawns apart, which is agreement in everything but rank. The gambit is sound and is not forced."
+      }
+    },
+    {
+      "fen": "r3k3/4bppp/8/3N4/8/8/PPP5/R3KB2 w Qq - 0 1",
+      "note": "Constructed controlled pair, positive half. Nc7+ forks Ke8 and Ra8; c7 is unguarded because the black bishop stands on e7.",
+      "origin_kind": "constructed-test",
+      "concept_role": "positive",
+      "side_to_move_benefits": "white",
+      "engine": {
+        "engine_id": "Stockfish 18",
+        "test_level": 2,
+        "depth": 26,
+        "threads": 10,
+        "hash_mb": 4096,
+        "multipv": 3,
+        "best_move": "d5c7",
+        "eval_cp": 739,
+        "mate_in": null,
+        "pv": [],
+        "alternatives": [
+          {
+            "move": "f1d3",
+            "eval_cp": 518,
+            "mate_in": null
+          },
+          {
+            "move": "d5f4",
+            "eval_cp": 435,
+            "mate_in": null
+          }
+        ],
+        "margin_cp": 221,
+        "verdict": "supports",
+        "verdict_note": "Nc7+ is best at +7.39, a full 2.21 ahead of the next move (Bd3, +5.18). The engine line is 1.Nc7+ Kd7 2.Nxa8 — the rook simply falls. Confirms the motif when the forking square is safe."
+      }
+    },
+    {
+      "fen": "5k2/6p1/8/3Q3p/6PP/8/P2pr1P1/6K1 b - - 0 43",
+      "note": "Real position from the shipped endgame ladder (puzzle en-154023780e). Black plays Re1+, and the point is that the check means the reply is not free — the rook then promotes on d1. Tagged fork by findMotifs() alongside hangingPiece, promotion and zwischenzug, which is a good illustration that several motifs usually co-occur and that ranking them by explanatory importance is the real problem, not detecting them.",
+      "origin_kind": "puzzle",
+      "concept_role": "positive",
+      "side_to_move_benefits": "black",
+      "engine": {
+        "engine_id": "Stockfish 18 (via tools/verify_puzzles.js, repo pipeline)",
+        "test_level": 2,
+        "depth": null,
+        "threads": null,
+        "hash_mb": null,
+        "multipv": null,
+        "best_move": "e2e1",
+        "eval_cp": null,
+        "mate_in": null,
+        "pv": [
+          "e2e1",
+          "g1f2",
+          "d2d1q"
+        ],
+        "alternatives": [],
+        "margin_cp": null,
+        "verdict": "supports",
+        "verdict_note": "Numbers come from the repository's own puzzle verification pipeline at its verdict depth, NOT from education/tools/sf_analyse.py. Recorded that way deliberately so provenance stays honest. The puzzle's stored `why` says the runner-up (Re4) leaves Black losing, so the move is uniquely correct here."
+      }
+    },
+    {
+      "fen": "rnbqkbr1/pp3ppp/2pp4/4P2Q/4n3/3B3P/PPPP2P1/RNB1K1NR b KQq - 1 7",
+      "note": "A clean instance: the detector reports fork alongside hangingPiece, for the move Ng3. Two things are verified here and a third is not. VERIFIED: findMotifs() in blind-chess.html reports the motif — and that detector, not this system, is the authority on whether a motif is present. ALSO VERIFIED: Ng3 is the recorded solution of a shipped puzzle, and tools/generate_puzzles.js only admits a position when one move is objectively best by a wide margin at confirmation depth, so the move carries engine backing by construction rather than by a separate search here. NOT claimed: that the motif is the whole reason the move wins. Provenance: the puzzle corpus is engine self-play — a real position from a real game between engines, not a master game.",
+      "origin_kind": "puzzle",
+      "concept_role": "supports",
+      "side_to_move_benefits": "neither",
+      "move": "Ng3",
+      "engine": {
+        "engine_id": "Stockfish (via tools/generate_puzzles.js at confirmation depth)",
+        "test_level": 2,
+        "depth": null,
+        "threads": null,
+        "hash_mb": null,
+        "multipv": null,
+        "best_move": "Ng3",
+        "eval_cp": null,
+        "mate_in": null,
+        "pv": [],
+        "alternatives": [],
+        "margin_cp": null,
+        "verdict": "supports",
+        "verdict_note": "Inherited validation: this position ships as a puzzle, and the generator's standard is that exactly one move is best by at least GAP_MIN at confirmation depth, re-checked deeper by tools/verify_puzzles.js. The move is therefore engine-verified as best without this base running its own search. The motif label comes from findMotifs, not from the engine — the two are independent and both had to agree for this to be recorded."
+      }
+    }
+  ],
+  "counterexamples": [
+    {
+      "fen": "r2bk3/5ppp/8/3N4/8/8/PPP5/R3KB2 w Qq - 0 1",
+      "note": "Constructed controlled pair, negative half. IDENTICAL to the positive example except the black bishop is on d8 instead of e7, so it guards c7. The fork geometry is unchanged.",
+      "origin_kind": "constructed-test",
+      "concept_role": "negative",
+      "side_to_move_benefits": "white",
+      "engine": {
+        "engine_id": "Stockfish 18",
+        "test_level": 2,
+        "depth": 26,
+        "threads": 10,
+        "hash_mb": 4096,
+        "multipv": 3,
+        "best_move": "f1d3",
+        "eval_cp": 473,
+        "mate_in": null,
+        "pv": [],
+        "alternatives": [
+          {
+            "move": "d5f4",
+            "eval_cp": 425,
+            "mate_in": null
+          },
+          {
+            "move": "d5c7",
+            "eval_cp": 57,
+            "mate_in": null
+          }
+        ],
+        "margin_cp": 48,
+        "verdict": "supports",
+        "verdict_note": "Nc7+ collapses to +0.57 and is ranked LAST of the three moves tested, 4.16 behind the best (Bd3, +4.73). The line is 1.Nc7+ Bxc7 — the knight is simply lost. The same geometric pattern swings 6.82 pawns between the two positions purely on whether the forking square is defended. This is the canonical false-match case: geometric detection alone is NOT sufficient to report a fork."
+      }
+    },
+    {
+      "fen": "4k3/8/1p1p4/8/2P5/8/8/4K3 w - - 0 1",
+      "move_uci": "c4c5",
+      "note": "Registered false-positive case `a-pawn-fork-the-pawns-simply-eat`, kept on the record as well as in tests/false_positive_cases.json so that the concept carries its own negative evidence. THE SURFACE PATTERN IS PRESENT: White plays c4-c5, and the pawn on c5 attacks the black pawns on b6 and d6. One piece attacking two enemy units is the definition of a fork, and the detector says so in those words. WHY IT IS NOT THE CONCEPT: This record's first indicator_against: \"The forking piece can simply be captured.\" Both forked units are pawns, both defend the square the forker stands on, and Black moves first. Also the second: \"Both targets are defended and each is worth less than the forker\" — here they are worth exactly the same and there are two of them. WHAT THE SYSTEM DOES: THIS WAS A REAL FALSE POSITIVE and it was reported at HIGH confidence, because a motif tag arrived from findMotifs() with no guard between it and the concept. Syzygy proves the move loses: after c5 the position is 5 pieces, a WIN FOR BLACK, dtz 1, mate in 35, and the tablebase's own best reply is dxc5 — the fork is answered by eating the forker. A guard now implements the record's first indicator_against at the motif-mapping site: if SEE says the piece that just moved can be taken at a profit, the fork is not reported. Rate: fork fell from 16.0% to 11.5% of the 788 shipped puzzles, and the canonical royal fork (Nc7+ forking rook and king) still reports at high.",
+      "origin_kind": "constructed-test",
+      "concept_role": "negative",
+      "tablebase": {
+        "source": "Lichess tablebase (Syzygy, 7-piece)",
+        "pieces": 5,
+        "wdl": "loss",
+        "dtz": 1,
+        "dtm": 35,
+        "category": "loss",
+        "note": "PROVEN, from the mover's side: after c4-c5 White is LOST, mate in 35, and the tablebase's own reply is dxc5. The fork is answered by eating the forker."
+      },
+      "false_positive_case": "a-pawn-fork-the-pawns-simply-eat"
+    }
+  ],
+  "ambiguous_examples": [
+    {
+      "fen": "rnbqk1nr/ppp1bppp/3p4/1B2p3/6Q1/4P1P1/PPPP1P1P/RNB1K1NR b KQkq - 1 4",
+      "move": "Bd7",
+      "move_uci": "c8d7",
+      "note": "Nominated by tools/mine_ambiguous.js on its fourth ground, NOT-THE-MOVE: the concept fires on a legal move that is not the solution of a shipped puzzle. The first three grounds ask about a POSITION and could not reach a move-based or motif concept at all - this concept and eleven others reported NONE until the tool learned to supply a move. What makes the case ambiguous rather than false is that nothing reported is absent: the fork is on the board and the detector is right about it. It is also a move that throws away a winning position: ...c6 wins the bishop on b5 outright and scores +4.18, while the forking move scores +0.28 - level. A fork that costs four pawns of advantage is a fork, and it is not the answer, and both halves of that need to be sayable at once.",
+      "origin_kind": "puzzle",
+      "concept_role": "ambiguous",
+      "engine": {
+        "engine_id": "Stockfish 18",
+        "test_level": 3,
+        "depth": 22,
+        "threads": 10,
+        "hash_mb": 4096,
+        "multipv": 2,
+        "best_move": "c7c6",
+        "eval_cp": 28,
+        "mate_in": null,
+        "pv": [],
+        "alternatives": [],
+        "margin_cp": null,
+        "verdict": "ambiguous",
+        "verdict_note": "The forking move scores +0.28 and the solution ...c6 scores +4.18, both from Black's side at depth 22. Nothing is wrong with the report; the position simply had a much better move in it."
+      }
+    }
+  ],
+  "explanations": {
+    "by_level": {
+      "beginner": "This one piece attacks two things at the same time. Your opponent can only save one of them.",
+      "intermediate": "A fork. Because it hits {targets} at once and {reason}, the defender cannot cover both.",
+      "advanced": "Fork. Note whether it is absolute (a target is the king, so no zwischenzug is available) or relative (the defender may have an in-between resource)."
+    },
+    "by_depth": {
+      "short": "One piece attacks two things at once.",
+      "normal": "A fork: this piece hits {targets} simultaneously, and only one can be saved. It works because {target} is {undefended / worth more than the forking piece} and the forking square is safe.",
+      "deep": "A single piece attacking two or more targets. It wins material only when at least one target is undefended or outranks the forking piece, and when the forking square itself is safe — those conditions are what separate a fork from a move that merely looks like one. An absolute fork hits the king, so the defender is forced to answer the check and cannot insert a zwischenzug; a relative fork leaves them resources. Targets need not be pieces: a mate threat or a follow-up fork can serve as a prong."
+    },
+    "hedge": "",
+    "lesson": ""
+  },
+  "terminology": {
+    "beginner_words": [
+      "attacks two things at once",
+      "double attack"
+    ],
+    "advanced_words": [
+      "fork",
+      "absolute fork",
+      "relative fork",
+      "family fork"
+    ],
+    "avoid": [
+      "forks always win material"
+    ]
+  },
+  "status": {
+    "stage": "validated",
+    "last_updated": "2026-09-01",
+    "open_questions": [],
+    "audit_notes": [
+      "2026-09-01 audit: removed the alias 'double attack (by a single piece)', which collided with the canonical name of the `double-attack` record and read as a claim that the two are one concept. Added broader: double-attack instead, which is the actual relationship. Added by_depth.",
+      "2026-09-01 audit: flagged for being promoted while relying on a source carrying an access caveat. REVIEWED AND ACCEPTED — the promotion rests on ENGINE evidence, not on the unread text; the unread source supplies the concept's name and classification only. The caveat stands and is the reason this is not promoted further to 'ready'.",
+      "2026-09-01: detector field named 'attacksAfterMove', which does not exist anywhere in the codebase. The audit's hardcoded whitelist had been accepting it. Repointed at real code, or marked as proposed where nothing implements it."
+    ]
+  }
+}

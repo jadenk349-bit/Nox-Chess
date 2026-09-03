@@ -1,0 +1,137 @@
+{
+  "schema_version": 2,
+  "alternate_names": [
+    "novelty",
+    "TN",
+    "prepared variation (when kept secret)"
+  ],
+  "historical_names": [],
+  "tags": [
+    "opening",
+    "preparation",
+    "terminology"
+  ],
+  "subcategory": "opening theory",
+  "difficulty": "advanced",
+  "knowledge_type_note": "A term of art about the state of published theory, not a judgement about a move's quality.",
+  "name_status": "established-name",
+  "history": {
+    "attributions": [],
+    "first_documented_source": "wikipedia-chess-opening",
+    "year": null,
+    "confidence": "unknown",
+    "notes": "Standard vocabulary of tournament practice; the abbreviation TN is common in game annotation.",
+    "competing_claims": [],
+    "development": []
+  },
+  "engine_era_status": "substantially-revised-by-engines",
+  "engine_era_note": "The most heavily changed item in this domain. Novelties at elite level are now predominantly engine-generated and essentially all engine-checked, which shifts the skill from finding a new move to choosing which of many engine-approved moves poses the most practical problems. The depth of preparation has grown to the point where opening lines are contested fifteen and more moves in with both sides following home analysis.",
+  "recognition": {
+    "preconditions": [
+      "An opening move with no precedent in the reference database"
+    ],
+    "indicators_for": [
+      "The move departs from established theory at a known branching point"
+    ],
+    "indicators_against": [
+      "The move is merely rare rather than unprecedented",
+      "The position is already outside the opening"
+    ],
+    "prerequisites": [],
+    "detector": null,
+    "detectability": "human-only",
+    "typical_confidence": "low",
+    "false_positive_traps": [
+      "Novelty is relative to a particular database. A move absent from one corpus may be well known in another, so the label is only as good as the reference used.",
+      "A novelty is not automatically good. The term describes the literature, not the move's merit, and this base will not report one as an improvement without evidence.",
+      "Not detectable by this system: identifying this requires an opening database, which the Education System does not have."
+    ]
+  },
+  "application": {
+    "typical_plans": [
+      "Prepare a new move at home and keep it for a chosen opponent",
+      "Depart from theory early to leave a better-prepared opponent on their own"
+    ],
+    "typical_moves": [],
+    "typical_pawn_structures": [],
+    "typical_piece_arrangements": [],
+    "tactical_consequences": [],
+    "strategic_consequences": [
+      "Transfers the burden of solving the position from the preparer to the opponent, and with it the clock time"
+    ]
+  },
+  "exceptions": [
+    "A novelty played by accident carries none of the preparation value that gives the term its point."
+  ],
+  "limitations": [
+    "This system has no opening database, so it cannot identify novelties and does not attempt to.",
+    "The claim 'never played before' is unverifiable without a defined corpus, and should be stated with the corpus named.",
+    "NO REGISTERED FALSE-POSITIVE CASE, and a FEN is not the right instrument for one here. A case in tests/false_positive_cases.json is a POSITION where the concept's surface pattern is present and the concept is not, replayed as an assertion so the system can be shown declining the error. This record's `recognition.detectability` is `human-only`: what it describes is something a player does rather than something a board contains, so there is no surface pattern for a position to carry and nothing for the system to decline. The conditions this record states are read and answered in `limitations` and in the trap audit instead. Recorded rather than filled: tools/depth_report.py still counts this concept as missing the item."
+  ],
+  "misconceptions": [
+    "That a novelty is by definition a strong move. It is by definition an unplayed one.",
+    "That novelties are found by human insight alone. At the top level they are overwhelmingly engine-generated now."
+  ],
+  "relationships": {
+    "broader": [],
+    "narrower": [],
+    "related": [
+      "opening-repertoire",
+      "tabiya",
+      "transposition"
+    ],
+    "contrasting": [],
+    "co_occurring": [],
+    "conflicts": []
+  },
+  "examples": [],
+  "counterexamples": [],
+  "ambiguous_examples": [],
+  "explanations": {
+    "by_level": {
+      "beginner": "A move in the opening that has not been played before.",
+      "intermediate": "A theoretical novelty - a new move in a known opening. New does not mean good.",
+      "advanced": "A novelty kept back deliberately is a prepared variation; its value is that the opponent must solve at the board what you solved at home.",
+      "master": "The scarce resource is no longer the new move but the choice of which engine-approved line sets the hardest practical problems."
+    },
+    "by_depth": {
+      "short": "A new move in a known opening.",
+      "normal": "A theoretical novelty: an opening move with no precedent in the recorded body of theory. The term describes the state of the literature rather than the quality of the move - a novelty can be an improvement, an error, or simply something nobody had tried.",
+      "deep": "A move without precedent in the recorded corpus, which makes the label bibliographic rather than evaluative. Its competitive value appears when it is found in advance and withheld - a prepared variation - because then the opponent must solve at the board, on the clock, what the preparer solved at home with unlimited time and an engine. The value is spent on first use: after the game the move is theory. In the engine era the skill has shifted, since novelties at the top are now overwhelmingly machine-generated and universally machine-checked, so the difficulty lies in choosing which sound line poses the most practical problems rather than in finding a new move at all."
+    },
+    "hedge": "This system has no opening database and therefore cannot tell whether a move is a novelty; the concept is recorded for vocabulary and explanation, not for detection.",
+    "lesson": "New is a fact about the books, not about the move."
+  },
+  "terminology": {
+    "beginner_words": [
+      "a new move"
+    ],
+    "advanced_words": [
+      "theoretical novelty",
+      "TN",
+      "prepared variation",
+      "home preparation"
+    ],
+    "avoid": [
+      "a novelty means an improvement"
+    ]
+  },
+  "status": {
+    "stage": "researched",
+    "last_updated": "2026-09-01",
+    "open_questions": [],
+    "audit_notes": []
+  },
+  "id": "theoretical-novelty",
+  "canonical_name": "Theoretical novelty",
+  "category": "opening-theory-concepts",
+  "knowledge_type": "terminology",
+  "definition_short": "A new move in the opening — one not previously played in the recorded body of theory.",
+  "definition_long": "A sequence of opening moves that has not appeared before in the recorded corpus. The term says something about the LITERATURE, not about the move: a novelty may be an improvement, a mistake, or simply a move nobody had bothered to play. Calling a move a novelty is a bibliographic claim.\n\nWhen a novelty is found in advance and deliberately withheld until a chosen game, it is a PREPARED VARIATION, and that is where its competitive value lies. The point is not that the move is unknown to theory but that it is unknown to the opponent, who must solve at the board what the player solved at home with unlimited time.\n\nThe concept has a defined shelf life. A novelty is novel exactly once; after the game it enters theory, and its value as a surprise is spent even if its value as a move is permanent.",
+  "sources": [
+    "wikipedia-chess-opening",
+    "chessify-novelties",
+    "teamliquid-computers-changed-chess"
+  ],
+  "source_confidence": "medium"
+}

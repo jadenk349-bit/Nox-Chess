@@ -1,0 +1,323 @@
+{
+  "schema_version": 2,
+  "alternate_names": [],
+  "historical_names": [],
+  "tags": [
+    "pawn-structure",
+    "weakness",
+    "semi-open-file"
+  ],
+  "subcategory": "pawn weakness",
+  "difficulty": "intermediate",
+  "knowledge_type_note": "Names a structural feature. Whether it is a WEAKNESS is a separate judgement and is not part of the definition.",
+  "name_status": "established-name",
+  "history": {
+    "attributions": [
+      {
+        "person": "Wilhelm Steinitz",
+        "relation": "originated-by",
+        "source": "britannica-chess-theory",
+        "year": null,
+        "note": "Part of the pawn-weakness doctrine Steinitz introduced; Britannica lists backward pawns among the structural weaknesses his theory named. ATTRIBUTION NOT VERIFIED: this is the conventional ascription, taken from a secondary source, and no primary text was consulted for it during this research."
+      }
+    ],
+    "first_documented_source": "britannica-chess-theory",
+    "year": null,
+    "confidence": "low",
+    "notes": "Attribution is weak. Britannica associates the classification of pawn weaknesses with Steinitz, but no source consulted gives a first use of 'backward pawn' specifically. Recorded low rather than guessed at.",
+    "competing_claims": [],
+    "development": []
+  },
+  "engine_era_status": "useful-with-common-exceptions",
+  "engine_era_note": "Engines carry backward-pawn penalties, but modern practice is markedly more relaxed about accepting one in return for activity or space than classical teaching was. The square in front is generally valued more highly than the pawn.",
+  "recognition": {
+    "preconditions": [
+      "A pawn is on a lower rank than all friendly pawns on adjacent files",
+      "It cannot advance safely — the square ahead is controlled by an enemy pawn or piece"
+    ],
+    "indicators_for": [
+      "It stands on a file that is half-open for the opponent",
+      "The square in front of it is controlled by an enemy pawn and can be occupied by a piece",
+      "It cannot be defended by a pawn and needs pieces to hold it",
+      "The position is simplifying, so fewer pieces are available to defend it"
+    ],
+    "indicators_against": [
+      "It can advance at a moment of its choosing, so the defect is temporary",
+      "No enemy rook can reach the file",
+      "It is compensated by space or by the activity its structure enables",
+      "The square in front is covered by a piece the opponent cannot dislodge"
+    ],
+    "prerequisites": [
+      "hole",
+      "weak-square"
+    ],
+    "detector": "pawnStructure (not yet written)",
+    "detectability": "mechanical",
+    "typical_confidence": "medium",
+    "false_positive_traps": [
+      "A pawn that is merely behind its neighbours but CAN advance safely is not backward in the operative sense.",
+      "A backward pawn on a closed file that nothing can attack is a description, not a weakness.",
+      "Reporting the pawn and not the square in front of it usually misses the more important half.",
+      "A pawn with no friendly pawn on either adjacent file is ISOLATED, not backward, and reporting both names for one pawn promises the reader a hole in front of it that the isolated case does not create.",
+      "A pawn whose advance square is occupied by an enemy pawn is RAMMED. It cannot advance, but not for the reason the concept is about, and the square in front of it is not a hole - an enemy pawn is standing on it."
+    ]
+  },
+  "application": {
+    "typical_plans": [
+      "Fix it by preventing the freeing advance, then attack it with rooks on the half-open file",
+      "Occupy the square in front of it with a knight",
+      "As the defender: prepare and execute the freeing pawn break, or exchange into a position where it cannot be attacked"
+    ],
+    "typical_moves": [],
+    "typical_pawn_structures": [
+      "Sicilian structures with a backward d-pawn on a half-open d-file",
+      "The result of a minority attack, which aims to leave a backward pawn behind"
+    ],
+    "typical_piece_arrangements": [
+      "Enemy rooks doubled on the half-open file, knight on the square in front"
+    ],
+    "tactical_consequences": [],
+    "strategic_consequences": [
+      "Fixes the defender's pieces to passive defence",
+      "The square in front becomes a permanent outpost"
+    ]
+  },
+  "exceptions": [
+    "Not a weakness if it cannot be attacked, or if the freeing break is always available.",
+    "Accepting one for space or activity is routine modern practice.",
+    "The square in front is often the real asset; winning the pawn can be the lesser goal."
+  ],
+  "limitations": [
+    "The geometric test is mechanical; 'cannot advance safely' requires evaluating the square ahead, which is position-dependent.",
+    "FIXED 2026-09-01, found by Wade-Korchnoi 1960: the detector reported a pawn with NO friendly pawn on either adjacent file as backward, because the 'is it behind its neighbours' test returns false both when the neighbours are all advanced and when there are none. A pawn with no neighbours is isolated. It also reported a pawn whose advance square is OCCUPIED by an enemy pawn, which is rammed rather than backward and creates no hole in front of it.",
+    "MEASURED 2026-09-02: the second trap - 'a backward pawn on a closed file that nothing can attack is a description, not a weakness' - had never been built. The file must now be half-open for the opponent, so a rook can actually come down it. 1.9% -> 1.3%: 10 of the 15 backward pawns on the 788 shipped positions stand on such a file and the other five were descriptions. The first trap is Layer 3's and was already built there - the advance square has to be controlled by an enemy pawn, which is what makes advancing unsafe by definition."
+  ],
+  "misconceptions": [
+    "That every backward pawn is a weakness.",
+    "That the pawn is the target. The square in front of it is usually worth more."
+  ],
+  "relationships": {
+    "broader": [
+      "weak-square"
+    ],
+    "narrower": [],
+    "related": [
+      "hole",
+      "outpost",
+      "open-file",
+      "two-weaknesses"
+    ],
+    "contrasting": [],
+    "co_occurring": [
+      "outpost",
+      "hole"
+    ],
+    "conflicts": []
+  },
+  "examples": [
+    {
+      "fen": "r2qkbnr/p4pp1/b1pPp2p/2p5/Q2P4/5N2/PP1N1PPP/R1B1K2R b KQkq - 1 11",
+      "note": "The feature is present and was verified mechanically by lib/features.js: White has a backward pawn on d6, on a file the opponent's rooks can use. The engine puts the position at 0.57, close enough to level that the feature is not being swamped by tactics — so this is usable as an instance of the concept. What is NOT claimed is that the concept explains the engine's move. Provenance: mined from this repository's puzzle corpus, which is engine self-play — a real position from a real game between engines, not a master game.",
+      "origin_kind": "puzzle",
+      "concept_role": "supports",
+      "side_to_move_benefits": "neither",
+      "engine": {
+        "engine_id": "Stockfish 18",
+        "test_level": 2,
+        "depth": 20,
+        "threads": 8,
+        "hash_mb": 2048,
+        "multipv": 2,
+        "best_move": "a6b5",
+        "eval_cp": 57,
+        "mate_in": null,
+        "pv": [],
+        "alternatives": [
+          {
+            "move": "d8c8",
+            "eval_cp": -322,
+            "mate_in": null
+          }
+        ],
+        "margin_cp": 0,
+        "verdict": "supports",
+        "verdict_note": "Level-2 validation: the position was scored, not designed. It confirms the feature is present in real play and, where the score is near level, that the feature is not drowned out. It is not a controlled pair and proves nothing about the concept on its own."
+      }
+    },
+    {
+      "fen": "8/p2PB1pk/1p5p/4q3/6K1/2Pp1P2/6PP/8 w - - 0 48",
+      "game": "Smyslov-Petrosian, Candidates, Zurich 1953",
+      "note": "A QUIET position from a master game — after cxd3, ply 94 — in which White's pawn on c3 cannot advance without being met by an enemy pawn, and no friendly pawn can support it from behind. Quiet here has a mechanical meaning: the side to move has no check and no capture that wins material, so the next move has to be chosen on positional grounds. That matters because this base's other corpus is 788 tactical puzzles, in which a positional feature cannot be isolated.\n\nWHAT IS VERIFIED: the game replays legally end to end through the page's own move generator, so the FEN is derived rather than transcribed; and the feature is present by mechanical measurement in lib/features.js.\n\nWHAT IS NOT CLAIMED: that the concept decides this position, or that the players were thinking about it. Note also a limitation of method — the position was FOUND by this system's own Layer 4, so it demonstrates the concept and cannot by itself validate the matcher that found it. Other concepts licensed here: passed-pawn, isolated-queen-pawn, weak-square, material-imbalance.",
+      "origin_kind": "historical-game",
+      "concept_role": "supports",
+      "side_to_move_benefits": "neither"
+    },
+    {
+      "fen": "6r1/2p4k/3p1rpq/2pPp2p/p3R2P/P1Q2PRK/1P6/8 w - - 0 39",
+      "game": "Stahlberg-Petrosian, Candidates, Zurich 1953",
+      "note": "A quiet position from a master game — after bxc5, ply 76 — where White's pawn on d5 cannot advance without being met by an enemy pawn, and no friendly pawn can support it from behind. The side to move has no check available, so the next move has to be chosen on positional grounds. CORRECTED 2026-09-02: this note used to add \"and no capture that wins material\" as the other half of a mechanical quiet test. That half had never run - quietness() passed a move object where see() expects a square index, so winningCapturesAvailable was always zero and every note written from it claimed something untested. Re-checked with the fixed test, this position DOES have a capture that wins material, so the quiet half of the claim is withdrawn. The position is kept: what it illustrates about the concept is unaffected, and dropping the evidence would be tidying away the consequence of a bug. VERIFIED: the game replays legally end to end through the page's own move generator, and the feature is measured by lib/features.js. NOT CLAIMED: that the concept decides this position, or that the players were thinking about it. Method note: the position was found by this system's own Layer 4, so it illustrates the concept and cannot by itself validate the matcher that found it. Other concepts licensed here: isolated-queen-pawn, doubled-pawns, semi-open-file, space.",
+      "origin_kind": "historical-game",
+      "concept_role": "supports",
+      "side_to_move_benefits": "neither"
+    }
+  ],
+  "counterexamples": [
+    {
+      "fen": "6r1/2p4k/3p1rpq/2pPp2p/R6P/P1Q2PRK/1P6/8 b - - 0 39",
+      "game": "Stahlberg-Petrosian, Candidates, Zurich 1953",
+      "note": "A quiet master-game position — after Rxa4, ply 77 — in which White's pawn on d5 cannot advance without being met by an enemy pawn, and no friendly pawn can support it from behind, and the side holding that feature is WORSE. The engine puts White at -2.84. Found by a deliberate search for exactly this: positions where a concept's feature is present and is not helping. Those are the hardest evidence to find and the kind this base has least of, because a feature that helps is easy to illustrate and a feature that does not is the thing a learner actually needs to see.",
+      "origin_kind": "historical-game",
+      "concept_role": "contradicts",
+      "side_to_move_benefits": "neither",
+      "engine": {
+        "engine_id": "Stockfish 18",
+        "test_level": 2,
+        "depth": 20,
+        "threads": 8,
+        "hash_mb": 2048,
+        "multipv": 1,
+        "best_move": "h6g7",
+        "eval_cp": 284,
+        "mate_in": null,
+        "pv": [],
+        "alternatives": [],
+        "margin_cp": 0,
+        "verdict": "contradicts",
+        "verdict_note": "The feature belongs to White, and White stands at -2.84. This does not show the feature CAUSING the disadvantage — nothing here isolates it — and it does show that possessing the feature is consistent with being worse, which is exactly what a concept stated as a bare advantage would deny."
+      }
+    },
+    {
+      "fen": "4k3/pp3ppp/8/2p5/2P5/8/PP3PPP/4K3 w - - 0 1",
+      "note": "Registered false-positive case `rammed-and-isolated-is-not-backward`, kept on the record as well as in tests/false_positive_cases.json so that the concept carries its own negative evidence. THE SURFACE PATTERN IS PRESENT: White's c4 pawn is behind its neighbours on the b- and d-files and cannot advance. That is the surface description of a backward pawn. WHY IT IS NOT THE CONCEPT: Two of this record's traps fire at once. \"A pawn whose advance square is occupied by an enemy pawn is RAMMED. It cannot advance, but not for the reason the concept is about, and the square in front of it is not a hole — an enemy pawn is standing on it.\" And: \"A pawn with no friendly pawn on either adjacent file is ISOLATED, not backward, and reporting both names for one pawn promises the reader a hole in front of it that the isolated case does not create.\" White's c4 is both. WHAT THE SYSTEM DOES: The API reports neither backward-pawn nor anything else here. Layer 3 excludes rammed pawns from the backward set and excludes isolated pawns from it by name, both for the reasons quoted above. Stockfish 18 at depth 26: +0.00, best move f4 — the position is dead level and the play is on the other wing, because c4 is not a weakness at all. This is the case that would fool a detector reading 'cannot advance safely' on its own.",
+      "origin_kind": "constructed-test",
+      "concept_role": "negative",
+      "engine": {
+        "engine_id": "Stockfish 18",
+        "test_level": 3,
+        "depth": 26,
+        "threads": 10,
+        "hash_mb": 4096,
+        "multipv": 1,
+        "best_move": "f2f4",
+        "eval_cp": 0,
+        "mate_in": null,
+        "pv": [],
+        "alternatives": [],
+        "margin_cp": null,
+        "verdict": "supports",
+        "verdict_note": "0.00, and the engine's play is on the other wing. The c4 pawn cannot advance and is not a weakness, which is why 'cannot advance safely' on its own is not the concept."
+      },
+      "false_positive_case": "rammed-and-isolated-is-not-backward"
+    }
+  ],
+  "ambiguous_examples": [
+    {
+      "fen": "rr6/1bq3p1/3p3k/pBpPppbp/P4n1P/1PR5/3B1PP1/3QR1K1 w - - 2 40",
+      "note": "The feature is present and was verified mechanically by lib/features.js: a backward pawn on a CLOSED file, where it cannot be attacked by rooks. The engine assessment is 5.05, which is far enough from level that the position is decided by concrete play rather than by this feature. Recorded as an ambiguous example on purpose: it demonstrates the feature and does NOT show the concept deciding anything, and conflating those is the error this base is built to avoid. Provenance: mined from this repository's puzzle corpus, which is engine self-play — a real position from a real game between engines, not a master game.",
+      "origin_kind": "puzzle",
+      "concept_role": "ambiguous",
+      "side_to_move_benefits": "neither",
+      "engine": {
+        "engine_id": "Stockfish 18",
+        "test_level": 2,
+        "depth": 20,
+        "threads": 8,
+        "hash_mb": 2048,
+        "multipv": 2,
+        "best_move": "h4g5",
+        "eval_cp": 505,
+        "mate_in": null,
+        "pv": [],
+        "alternatives": [
+          {
+            "move": "c3f3",
+            "eval_cp": -82,
+            "mate_in": null
+          }
+        ],
+        "margin_cp": 0,
+        "verdict": "ambiguous",
+        "verdict_note": "Level-2 validation: the position was scored, not designed. It confirms the feature is present in real play and, where the score is near level, that the feature is not drowned out. It is not a controlled pair and proves nothing about the concept on its own."
+      }
+    },
+    {
+      "fen": "5r2/p1nnq1p1/7k/2p2P1B/PpPpP1Qp/3P3P/P4RP1/R1b3K1 b - - 1 35",
+      "note": "a backward pawn on a CLOSED file, where no rook can attack it. The position is QUIET by mechanical test: the side to move has no check available and no capture that wins material, so the next move must be chosen on positional grounds. That is the property this base's tactical corpus almost never has. Found by tools/prospect.js, which searches 1576 real positions for a concept's feature and scores quiet positions far higher. Provenance: the puzzle corpus is engine self-play — a real position from a real game between engines, not a master game.",
+      "origin_kind": "puzzle",
+      "concept_role": "ambiguous",
+      "side_to_move_benefits": "neither",
+      "engine": {
+        "engine_id": "Stockfish 18",
+        "test_level": 2,
+        "depth": 20,
+        "threads": 8,
+        "hash_mb": 2048,
+        "multipv": 2,
+        "best_move": "e7g5",
+        "eval_cp": 439,
+        "mate_in": null,
+        "pv": [],
+        "alternatives": [
+          {
+            "move": "d7e5",
+            "eval_cp": 386,
+            "mate_in": null
+          }
+        ],
+        "margin_cp": 0,
+        "verdict": "ambiguous",
+        "verdict_note": "Quiet AND decided, which is worth recording as a pair. The feature is present and the evaluation is 4.39, so nothing forcing is on offer and the position is nonetheless settled. It demonstrates the feature and cannot show the concept deciding anything - and it is a useful reminder that quietness is not balance."
+      }
+    }
+  ],
+  "explanations": {
+    "by_level": {
+      "beginner": "That pawn has fallen behind the pawns next to it and cannot move up safely, so it has to be defended by pieces.",
+      "intermediate": "A backward pawn on {square}. It cannot advance, it sits on a file their rooks can use, and the square in front of it is a hole for your knight.",
+      "advanced": "Backward on a half-open file. Fix the freeing break first, then decide whether the target is the pawn or the square in front of it — usually the square.",
+      "master": "Two assets, not one: a fixed target on a half-open file, and a permanent outpost on the square ahead. Weigh both against whatever space or activity was received for it."
+    },
+    "by_depth": {
+      "short": "{square} cannot advance and cannot be defended by a pawn.",
+      "normal": "A backward pawn: it has fallen behind its neighbours and cannot safely advance, so it must be defended by pieces. It usually stands on a file that is half-open for the opponent, and the square in front of it is a hole.",
+      "deep": "Defined as a pawn behind all friendly pawns on the adjacent files that cannot be safely advanced. The inability to advance is the operative half, because it means the defect is permanent. It produces two assets for the opponent: the pawn as a fixed target on a half-open file, and the square in front as an outpost no pawn can contest. The second is usually worth more, and it is exactly the mechanism behind Nimzowitsch's outpost — provoke the pawn move that leaves a backward pawn, and the square appears with it. Modern practice accepts backward pawns far more readily than classical teaching did, when space or activity is received in return."
+    },
+    "hedge": "",
+    "lesson": "When you see a backward pawn, look at the square in front of it before you look at the pawn."
+  },
+  "terminology": {
+    "beginner_words": [
+      "a pawn that has been left behind"
+    ],
+    "advanced_words": [
+      "backward pawn",
+      "half-open file",
+      "freeing break",
+      "outpost"
+    ],
+    "avoid": [
+      "backward pawns are always weak"
+    ]
+  },
+  "status": {
+    "stage": "researched",
+    "last_updated": "2026-09-01",
+    "open_questions": [],
+    "audit_notes": [
+      "2026-09-01 audit: attribution to Wilhelm Steinitz carried low confidence without a hedge in the note itself. Hedge added so the caveat travels with the claim rather than sitting only in history.confidence."
+    ]
+  },
+  "id": "backward-pawn",
+  "canonical_name": "Backward pawn",
+  "category": "pawn-structures",
+  "knowledge_type": "positional-concept",
+  "definition_short": "A pawn behind all friendly pawns on the adjacent files, which cannot safely advance — usually standing on a half-open file where enemy rooks can attack it.",
+  "definition_long": "Wikipedia's definition is the standard one: 'a pawn that is behind all pawns of the same colour on the adjacent files and cannot be safely advanced.' Both halves matter. Being behind its neighbours is the geometry; being unable to advance safely is what makes it a problem, because it means the defect cannot be repaired.\n\nTwo consequences follow and they are what make the concept useful:\n\n  1. The pawn itself is a fixed target, and it usually sits on a HALF-OPEN FILE for the opponent, so rooks and queens can pile onto it from a distance.\n  2. The square DIRECTLY IN FRONT of it is a hole. That square is often worth more than the pawn, because a piece placed there cannot be challenged by a pawn — which is exactly the outpost condition.\n\nThis is why backward pawns and outposts are usually discussed together: creating a backward pawn in the opponent's camp creates the square in front of it at the same time. Nimzowitsch's outpost mechanism is precisely this — provoking the pawn advance that leaves a backward pawn behind it.\n\nIt is not automatically a weakness. A backward pawn that cannot be attacked, or that is compensated by space or activity, is a feature of the structure rather than a defect.",
+  "sources": [
+    "wikipedia-backward-pawn",
+    "britannica-chess-theory",
+    "nimzowitsch-my-system",
+    "zurich-1953-games"
+  ],
+  "source_confidence": "medium"
+}

@@ -1,0 +1,238 @@
+{
+  "schema_version": 2,
+  "alternate_names": [
+    "permanent and temporary advantages",
+    "static versus dynamic factors"
+  ],
+  "historical_names": [],
+  "tags": [
+    "evaluation",
+    "steinitz",
+    "foundational"
+  ],
+  "subcategory": "evaluation framework",
+  "difficulty": "advanced",
+  "knowledge_type_note": "A framework for classifying other advantages rather than an advantage itself. Its practical content is a rule about TIMING.",
+  "name_status": "established-name",
+  "history": {
+    "attributions": [
+      {
+        "person": "Wilhelm Steinitz",
+        "relation": "originated-by",
+        "source": "lichess-steinitz-advantages",
+        "year": null,
+        "note": "His enumeration of advantages divides them into permanent and temporary, which is the origin of the distinction. ATTRIBUTION NOT VERIFIED: taken from a community study of his list rather than from The Modern Chess Instructor itself."
+      },
+      {
+        "person": "The Soviet school",
+        "relation": "later-associated-with",
+        "source": "britannica-chess-theory-3",
+        "year": null,
+        "note": "Re-weighted the framework decisively towards dynamic factors."
+      }
+    ],
+    "first_documented_source": "lichess-steinitz-advantages",
+    "year": null,
+    "confidence": "low",
+    "notes": "The framework is universally used and weakly sourced here; the Steinitz attribution is conventional and unverified.",
+    "competing_claims": [],
+    "development": [
+      {
+        "era": "Steinitz",
+        "change": "Advantages classified as permanent or temporary.",
+        "source": "lichess-steinitz-advantages"
+      },
+      {
+        "era": "Soviet era",
+        "change": "Dynamic factors elevated; structural concessions accepted for activity.",
+        "source": "britannica-chess-theory-3"
+      },
+      {
+        "era": "engine era",
+        "change": "Engines weigh dynamic factors very highly and will accept large static damage for concrete play, which vindicates the Soviet re-weighting.",
+        "source": null
+      }
+    ]
+  },
+  "engine_era_status": "useful-with-common-exceptions",
+  "engine_era_note": "Engines have shifted the balance further towards the dynamic side than any human school did, accepting structural damage that classical theory would have called simply bad whenever concrete play justifies it. The FRAMEWORK is unaffected — it is the weighting that moved.",
+  "recognition": {
+    "preconditions": [
+      "An advantage exists and its durability is being assessed"
+    ],
+    "indicators_for": [
+      "STATIC: pawn structure, weak squares, the bishop pair, a permanent outpost — all survive exchanges",
+      "DYNAMIC: the initiative, a development lead, an exposed king, a temporarily awkward enemy piece — all decay"
+    ],
+    "indicators_against": [
+      "The advantage is being described without asking whether it survives simplification"
+    ],
+    "prerequisites": [],
+    "detector": null,
+    "detectability": "heuristic",
+    "typical_confidence": "medium",
+    "false_positive_traps": [
+      "The classification is not a property of the feature alone. A passed pawn is static if it can be held and dynamic if it must run now.",
+      "'Dynamic' is often used loosely to mean 'sharp'. Here it means specifically that the advantage expires."
+    ]
+  },
+  "application": {
+    "typical_plans": [
+      "Static: improve every piece, do not hurry, trade into an endgame",
+      "Dynamic: force matters immediately, avoid trades, convert into something permanent before it fades",
+      "Ask which kind you hold before choosing a tempo"
+    ],
+    "typical_moves": [],
+    "typical_pawn_structures": [],
+    "typical_piece_arrangements": [],
+    "tactical_consequences": [
+      "Dynamic advantages are what justify sacrifices; static ones rarely do"
+    ],
+    "strategic_consequences": [
+      "Determines whether to accelerate or slow down, which is the most common strategic decision"
+    ]
+  },
+  "exceptions": [
+    "The same feature can be either, depending on whether it can be maintained.",
+    "A dynamic advantage can be converted into a static one, which is usually the correct plan.",
+    "Modern practice weights dynamics more heavily than the classical framework implied."
+  ],
+  "limitations": [
+    "A classification framework rather than a technique; its value is entirely in the timing decision it drives.",
+    "No detector, and the record's own first false-positive trap says why: the classification is not a property of the feature alone. The same isolated pawn is dynamic on move 15 of Capablanca-Rubinstein 1928 and static on move 30, and no reading of one position can tell them apart."
+  ],
+  "misconceptions": [
+    "That static means good and dynamic means risky. They are different clocks, not different qualities.",
+    "That an advantage is permanently one or the other."
+  ],
+  "relationships": {
+    "broader": [],
+    "narrower": [],
+    "related": [
+      "initiative",
+      "two-weaknesses",
+      "sacrifice",
+      "positional-sacrifice",
+      "material-imbalance",
+      "isolated-queen-pawn",
+      "soviet-school"
+    ],
+    "contrasting": [],
+    "co_occurring": [
+      "initiative"
+    ],
+    "conflicts": [
+      {
+        "concept": "two-weaknesses",
+        "resolution": "Not a conflict but the framework that resolves several others. The two-weaknesses method is the correct handling of a STATIC advantage — fix, improve, do not hurry. Applying it while holding a dynamic advantage loses the advantage, and that is exactly the tension recorded on the initiative concept."
+      }
+    ]
+  },
+  "examples": [
+    {
+      "fen": "r2q1rk1/pp3ppp/1b4n1/3p4/8/1N1Q3P/PPP2PP1/R1B1R1K1 b - - 0 15",
+      "note": "Capablanca-Rubinstein, Berlin 1928, d4. Human ground truth: the concept is named for this position by Nicholas Van Der Nat (FM). Corpus entry `capablanca-rubinstein-1928-15d4-static-vs-dynamic`, which carries the full annotation, the alternates the annotator rejected, and the engine's verdict. The isolated queen's pawn is the textbook case of the classification and this is a game in which the classification decides the result. What Black holds is dynamic - space, an advanced pawn, open lines for the pieces - and it expires as pieces come off. What White holds is static: a fixed target that cannot be repaired, which grows more valuable with every exchange. The concept record's instructio",
+      "origin_kind": "historical-game",
+      "game": "Capablanca-Rubinstein, Berlin 1928",
+      "concept_role": "positive",
+      "engine": {
+        "engine_id": "Stockfish 18",
+        "test_level": 3,
+        "depth": 22,
+        "multipv": 3,
+        "best_move": "Qf6",
+        "eval_cp": 9,
+        "verdict": "supports",
+        "verdict_note": "partly, and the disagreement is informative. The engine's first choice at depth 22 is 15...Qf6 (+0.09 for Black) and the game move 15...d4 is not in its top three. The position is level either way, so the engine is not calling the advance a mistake - it is declining to spend the tension. The annotation's claim is about which KIND of advantage Black is buying, not about whether this was the best move to buy it with, and this base does not let an engine overrule the first because it disagreed about the second. This is the second entry in this corpus where a sound concept sits on a move the engine does not choose, and both are kept for the same reason."
+      },
+      "attributed_by": "Nicholas Van Der Nat (FM) — corpus entry capablanca-rubinstein-1928-15d4-static-vs-dynamic"
+    }
+  ],
+  "counterexamples": [
+    {
+      "fen": "6k1/8/8/8/8/3p4/3Q4/6K1 w - - 0 1",
+      "note": "Registered false-positive case `a-passer-that-will-never-run`, kept on the record as well as in tests/false_positive_cases.json so that the concept carries its own negative evidence. THE SURFACE PATTERN IS PRESENT: Black has a passed pawn on d3, one square from the second rank. A passed pawn is the textbook dynamic asset: it must be pushed, and its value expires if it is not. WHY IT IS NOT THE CONCEPT: This record's first trap: \"The classification is not a property of the feature alone. A passed pawn is static if it can be held and dynamic if it must run now.\" This one is held permanently, by a queen standing directly in front of it, and it will never move again. WHAT THE SYSTEM DOES: The API reports blockade and passed-pawn here and says nothing about static or dynamic, which is the correct pair of answers: both features are present and the CLASSIFICATION is a claim about whether the advantage expires, which is a claim about the future. Stockfish 18 at depth 26 says mate in 10 for White — the pawn is not merely held, it is irrelevant. This record's second trap is the reason there is no matcher: 'dynamic is often used loosely to mean sharp. Here it means specifically that the advantage expires', and nothing on a board says when.",
+      "origin_kind": "constructed-test",
+      "concept_role": "negative",
+      "false_positive_case": "a-passer-that-will-never-run"
+    }
+  ],
+  "ambiguous_examples": [
+    {
+      "fen": "3r1nk1/pp3ppp/1bq5/B7/3pQ3/1N4PP/PPP2P2/4R1K1 w - - 1 22",
+      "move": "Qxc6",
+      "move_uci": "e4c6",
+      "note": "Capablanca-Rubinstein 1928, 22.Qxc6, seven moves after this record's positive example from the same game. There Rubinstein took on a static weakness for dynamic central control; here Capablanca gives the static weakness back - after 22...bxc6 Black's isolated pawn is isolated no longer - and the annotation admits it 'looks like a mistake, because Capablanca has apparently thrown away the very weakness he spent the whole game creating'. It is the engine's first choice at +0.34. Filed as ambiguous because the record's own classification cannot be applied here without knowing which advantage is which: the queenless ending Capablanca is entering is a static advantage of a different kind, and this record's second trap says 'dynamic is often used loosely to mean sharp. Here it means specifically that the advantage expires' - and what has expired is the thing the classification was tracking.",
+      "origin_kind": "historical-game",
+      "game": "Capablanca-Rubinstein, Berlin 1928",
+      "concept_role": "ambiguous",
+      "attributed_by": "corpus entry capablanca-rubinstein-1928-22Qxc6-transformation",
+      "engine": {
+        "engine_id": "Stockfish 18",
+        "test_level": 3,
+        "depth": 22,
+        "threads": 10,
+        "hash_mb": 4096,
+        "multipv": 3,
+        "best_move": "e4c6",
+        "eval_cp": 34,
+        "mate_in": null,
+        "pv": [],
+        "alternatives": [],
+        "margin_cp": null,
+        "verdict": "ambiguous",
+        "verdict_note": "+0.34 and the engine's first choice at depth 22 with three lines, for the move that gives back the weakness the whole game was about."
+      }
+    }
+  ],
+  "explanations": {
+    "by_level": {
+      "beginner": "Some advantages last and some run out. If yours will still be there in twenty moves, take your time. If it will not, you have to use it now.",
+      "intermediate": "Static or dynamic? Structure and squares last; initiative and development leads expire. That decides how fast you should be playing.",
+      "advanced": "The classification drives tempo. Playing a dynamic edge slowly loses it; hurrying a static one throws it away — and that mismatch is the commonest strategic error.",
+      "master": "Also the framework for judging a sacrifice: static compensation must survive simplification, dynamic compensation must be cashed before it does."
+    },
+    "by_depth": {
+      "short": "Does your advantage last, or does it expire?",
+      "normal": "Static advantages — structure, weak squares, the bishop pair — persist and reward patience. Dynamic ones — the initiative, a development lead, an exposed king — expire and must be used at once. Which you hold decides your speed.",
+      "deep": "Steinitz's separation of permanent from temporary advantages, and the most useful classification in positional chess because it converts an evaluation into an instruction about tempo. Static advantages often grow as pieces come off, so the method is the slow one: improve everything, do not hurry, trade towards an endgame. Dynamic advantages decay, so they must be converted into something permanent before they fade, and exchanges work against you. Most strategic errors below master level are a mismatch between the kind of advantage held and the speed played. The Soviet contribution was a re-weighting towards the dynamic side, and engines have pushed it further still — they accept structural damage classical theory called simply bad whenever concrete play justifies it."
+    },
+    "hedge": "",
+    "lesson": "Before choosing a plan, ask one question: will this advantage still be here in twenty moves? The answer tells you whether to hurry."
+  },
+  "terminology": {
+    "beginner_words": [
+      "does it last?",
+      "use it or lose it"
+    ],
+    "advanced_words": [
+      "static",
+      "dynamic",
+      "permanent advantage",
+      "temporary advantage",
+      "compensation"
+    ],
+    "avoid": [
+      "dynamic means risky"
+    ]
+  },
+  "status": {
+    "stage": "researched",
+    "last_updated": "2026-09-01",
+    "open_questions": [],
+    "audit_notes": []
+  },
+  "id": "static-vs-dynamic",
+  "canonical_name": "Static and dynamic advantages",
+  "category": "static-vs-dynamic",
+  "knowledge_type": "strategic-principle",
+  "definition_short": "Static advantages are durable and can be built on slowly; dynamic ones expire and must be used at once. Which kind you hold decides how fast you must play.",
+  "definition_long": "The division goes back to Steinitz's separation of permanent from temporary advantages, and it is the most useful single classification in positional chess because it converts an evaluation into an instruction about TEMPO.\n\nSTATIC advantages persist and often grow as pieces come off: a superior pawn structure, a weak square, the bishop pair, a permanent outpost, a better minor piece. They reward patience, and the correct method is the slow one — improve every piece, do not hurry, and let exchanges work for you.\n\nDYNAMIC advantages decay: the initiative, a lead in development, an exposed enemy king, a temporary piece placement. They must be converted into something permanent before they expire, and exchanges usually work against you.\n\nThe practical rule is therefore: identify which kind you hold, and let it set your speed. Playing a dynamic advantage slowly loses it; playing a static advantage in a hurry throws it away. Most strategic errors below master level are this mismatch rather than a wrong plan.\n\nThe whole Soviet contribution can be read as a re-weighting of this framework — they were willing to accept static damage for dynamic gain far more readily than the classical school, and modern engines agree with them.",
+  "sources": [
+    "lichess-steinitz-advantages",
+    "britannica-chess-theory-3",
+    "silman-reassess",
+    "shereshevsky-endgame-strategy"
+  ],
+  "source_confidence": "medium"
+}

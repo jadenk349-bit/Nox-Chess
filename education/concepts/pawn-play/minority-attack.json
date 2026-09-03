@@ -1,0 +1,271 @@
+{
+  "schema_version": 2,
+  "alternate_names": [
+    "the b4-b5 plan"
+  ],
+  "historical_names": [],
+  "tags": [
+    "structure",
+    "pawn-breaks",
+    "master-game"
+  ],
+  "subcategory": "pawn break",
+  "difficulty": "advanced",
+  "knowledge_type_note": "A named plan with a specific structural precondition, and one whose point is easy to state and easy to execute badly.",
+  "name_status": "established-name",
+  "history": {
+    "attributions": [
+      {
+        "relation": "later-associated-with",
+        "person": "Aron Nimzowitsch",
+        "year": null,
+        "note": "POSSIBLY the source of the formulation that a numerical pawn minority can be a qualitative majority, given the freedom of those pawns to attack the base of the enemy chain. This base has NOT verified the attribution: it rests on a single university lecture note that credits him, and the claim was not found in his own text during this research. The relation is recorded as association rather than origin for that reason, and the plan itself is older than any individual credit for it.",
+        "confidence": "low"
+      },
+      {
+        "relation": "popularized-by",
+        "person": "Anatoly Karpov",
+        "year": null,
+        "note": "The standard modern exponent, and the source of the caution against executing it mechanically.",
+        "confidence": "medium"
+      }
+    ],
+    "first_documented_source": "umbc-carlsbad-lesson",
+    "year": 1923,
+    "confidence": "low",
+    "notes": "The Carlsbad structure is named for the 1923 tournament where it came to prominence. The Nimzowitsch attribution is UNVERIFIED — one lecture note credits him with the qualitative-majority formulation and this base did not find it in his own text. Treat the plan as having no established individual origin.",
+    "competing_claims": [],
+    "development": []
+  },
+  "engine_era_status": "reliable",
+  "engine_era_note": "Unremarkable to engines, which evaluate the resulting weakness directly. It has held up as a plan: the resulting structures are still assessed as pleasant for the attacker, and the modern refinement is about timing rather than about soundness.",
+  "recognition": {
+    "preconditions": [
+      "A Carlsbad-type structure: locked centre, each side with a half-open file",
+      "The attacker has fewer pawns on the wing being attacked"
+    ],
+    "indicators_for": [
+      "Rooks already on the c-file",
+      "The a-pawn left at home",
+      "b4-b5 achievable in a few moves",
+      "The defender's counterplay is slow"
+    ],
+    "indicators_against": [
+      "The defender is faster in the centre or on the other wing",
+      "b5 can be met by ...c5 or ...a6 favourably",
+      "The attacker's own king is exposed to the counter-attack"
+    ],
+    "prerequisites": [
+      "semi-open-file",
+      "backward-pawn"
+    ],
+    "detector": "proposed: Carlsbad structure recognition plus wing pawn counts (not yet written)",
+    "detectability": "heuristic",
+    "typical_confidence": "low",
+    "false_positive_traps": [
+      "Advancing pawns on the wing where you have fewer is only right in this specific structure. Elsewhere it is simply weakening.",
+      "The plan is slow. Reporting it without checking the defender's counterplay recommends the form of the idea and not its content.",
+      "The goal is a fixed weakness, not space and not a passed pawn. A minority attack that gains space and creates no target has failed."
+    ]
+  },
+  "application": {
+    "typical_plans": [
+      "Rooks to the c-file, then b4-b5, then bxc6",
+      "Leave the a-pawn at home so it cannot become a target",
+      "Manoeuvre around c5 rather than forcing b5 through when the defender is ready",
+      "After the exchange, attack the fixed pawn with more pieces than can defend it"
+    ],
+    "typical_moves": [
+      "Rb1 and Rc1",
+      "b2-b4-b5",
+      "bxc6"
+    ],
+    "typical_pawn_structures": [
+      "The Carlsbad structure from the Queen's Gambit Declined, Exchange Variation"
+    ],
+    "typical_piece_arrangements": [
+      "Doubled rooks on the c-file"
+    ],
+    "tactical_consequences": [],
+    "strategic_consequences": [
+      "Converts a nominal pawn deficit on a wing into a permanent structural target"
+    ]
+  },
+  "exceptions": [
+    "Where Black is faster in the centre the whole plan is too slow, which is its standard refutation.",
+    "Black can recapture on c6 with a piece instead, accepting a weak d5 pawn rather than a weak c6 pawn — the weakness moves rather than disappearing.",
+    "Karpov's practice: where b5 is well met, the correct plan is to manoeuvre instead, not to force it."
+  ],
+  "limitations": [
+    "No detector exists for the Carlsbad structure, so this system cannot recognise the plan; the record is for explanation and vocabulary.",
+    "The Nimzowitsch attribution is second-hand and low confidence.",
+    "The master game cited verifies only for its first 46 plies; the source's later moves do not replay and are not used.",
+    "The Nimzowitsch attribution is unverified and is recorded as an association rather than an origin; do not repeat it as his formulation."
+  ],
+  "misconceptions": [
+    "That you should always play where you have more pawns. This is the standard counterexample, and the reason is that the minority pawns are the mobile ones.",
+    "That the aim is a passed pawn. The aim is a fixed weakness on a half-open file.",
+    "That b4-b5 should be forced through. Its most successful practitioner routinely declined to."
+  ],
+  "relationships": {
+    "broader": [],
+    "narrower": [],
+    "related": [
+      "semi-open-file",
+      "backward-pawn",
+      "two-weaknesses",
+      "weak-square",
+      "planning",
+      "prophylaxis",
+      "doubled-pawns",
+      "space"
+    ],
+    "contrasting": [
+      "pawn-storm"
+    ],
+    "co_occurring": [
+      "semi-open-file"
+    ],
+    "conflicts": [
+      {
+        "concept": "space",
+        "resolution": "A minority attack deliberately gives up space on the wing it attacks — the advancing pawns are exchanged off. The two aims are incompatible and the structural target is the one worth having, because space on a wing with no target is not an advantage."
+      }
+    ]
+  },
+  "examples": [
+    {
+      "fen": "1r1r4/p3npbk/2pq2pp/2Np4/3P4/1Q2PNP1/P1R2P1P/2R3K1 w - - 0 23",
+      "game": "Petrosian-Krogius, Tbilisi 1959",
+      "note": "The position immediately after 22.bxc6 bxc6, the moment the minority attack has done its work. This base's own feature detector confirms the textbook result: Black now has three pawn islands and an isolated a7 pawn, White has a semi-open c-file with BOTH rooks already on it, and the b-file is open. FEN derived by replaying the game through the page's own move generator; the source's score fails to replay from Black's 24th move, so only the verified prefix is used.",
+      "origin_kind": "historical-game",
+      "concept_role": "supports",
+      "side_to_move_benefits": "white",
+      "engine": {
+        "engine_id": "Stockfish 18",
+        "test_level": 3,
+        "depth": 22,
+        "threads": 10,
+        "hash_mb": 4096,
+        "multipv": 1,
+        "best_move": "b3a4",
+        "eval_cp": 196,
+        "mate_in": null,
+        "pv": [],
+        "alternatives": [],
+        "margin_cp": null,
+        "verdict": "supports",
+        "verdict_note": "+1.96 at depth 22 for the side conducting the minority attack, in a position where material is level. The concept is a plan rather than a feature, so what the number establishes is modest and real: the plan's typical structure, with the attack under way, is worth about two pawns here."
+      }
+    },
+    {
+      "fen": "rnbq1rk1/ppp2pbp/6p1/3p4/1P1P4/2N1PN2/P4PPP/R2QKB1R b KQ b3 0 10",
+      "game": "Petrosian-Krogius, Tbilisi 1959",
+      "note": "After 10.b4, the start of the plan. White has two queenside pawns to Black's three and advances into the majority anyway. The a-pawn stays at home throughout, which is the detail the sources single out.",
+      "origin_kind": "historical-game",
+      "concept_role": "supports",
+      "side_to_move_benefits": "white",
+      "engine": {
+        "engine_id": "Stockfish 18",
+        "test_level": 3,
+        "depth": 22,
+        "threads": 10,
+        "hash_mb": 4096,
+        "multipv": 1,
+        "best_move": "c7c6",
+        "eval_cp": 21,
+        "mate_in": null,
+        "pv": [],
+        "alternatives": [],
+        "margin_cp": null,
+        "verdict": "supports",
+        "verdict_note": "+0.21 at depth 22 - level. This is the minority attack at its STARTING position rather than at its conclusion, and the evaluation is the honest reading of that: the plan has been chosen and has not yet achieved anything. A record whose only example were the finished attack would teach that the plan is worth two pawns on move ten."
+      }
+    }
+  ],
+  "counterexamples": [
+    {
+      "fen": "r3k2r/pp4pp/8/8/8/8/PPP3PP/R3K2R w KQkq - 0 1",
+      "note": "Registered false-positive case `a-majority-advance-is-not-a-minority-attack`, kept on the record as well as in tests/false_positive_cases.json so that the concept carries its own negative evidence. THE SURFACE PATTERN IS PRESENT: A wing pawn advance against an enemy pawn group, aiming to create a weakness. That is the plan a minority attack executes, and the word 'minority' is the part readers drop. WHY IT IS NOT THE CONCEPT: This record's first trap: \"Advancing pawns on the wing where you have fewer is only right in this specific structure. Elsewhere it is simply weakening.\" White has THREE queenside pawns against Black's two. Advancing there is a majority attack, whose point is a passed pawn, and this record's third trap draws the line explicitly: \"The goal is a fixed weakness, not space and not a passed pawn.\" WHAT THE SYSTEM DOES: The API reports nothing here, which is correct and is the whole content of the case: the concept turns on a COUNT that is trivial to make and trivial to skip. Three against two is a majority and two against three is a minority, and the same pawn move means opposite things in the two cases. This base has no minority-attack matcher, and this position is one reason - the plan is named by the count AND by the structure, and the record's second trap adds a third condition on top of both.",
+      "origin_kind": "constructed-test",
+      "concept_role": "negative",
+      "false_positive_case": "a-majority-advance-is-not-a-minority-attack"
+    }
+  ],
+  "ambiguous_examples": [
+    {
+      "fen": "r3k2r/pp4pp/8/8/8/8/PP4PP/R3K2R w KQkq - 0 1",
+      "note": "Two queenside pawns against two. A wing advance here is neither a minority attack nor a majority one, because the count that names the plan is equal - and the plan's whole identity is that count. This record's first trap says 'advancing pawns on the wing where you have fewer is only right in this specific structure. Elsewhere it is simply weakening', and here there is no 'fewer'. Read against this record's registered false-positive case, which is the same board with three white pawns against two and is a MAJORITY advance: three positions, three names, and the only difference between them is one pawn. Filed as ambiguous rather than negative because a2-a4 and b2-b4 are both playable and the concept genuinely has nothing to say about which.",
+      "origin_kind": "constructed-test",
+      "concept_role": "ambiguous",
+      "engine": {
+        "engine_id": "Stockfish 18",
+        "test_level": 3,
+        "depth": 22,
+        "threads": 10,
+        "hash_mb": 4096,
+        "multipv": 1,
+        "best_move": "e1g1",
+        "eval_cp": 0,
+        "mate_in": null,
+        "pv": [],
+        "alternatives": [],
+        "margin_cp": null,
+        "verdict": "ambiguous",
+        "verdict_note": "0.00 at depth 22, settled at depth 1, with the pawn counts equal on both wings. The plan's name needs an asymmetry the position does not have."
+      }
+    }
+  ],
+  "explanations": {
+    "by_level": {
+      "beginner": "Pushing your two pawns at their three, so that when they trade off, one of their pawns is left weak.",
+      "intermediate": "The minority attack: b4-b5 and bxc6, which leaves Black a weak c-pawn on a file your rooks already own.",
+      "advanced": "The minority is the mobile majority — your pawns can attack the base of their chain and their extra pawn cannot do anything. Leave your a-pawn at home.",
+      "master": "It is slow, and Karpov's lesson is that it should be manoeuvred towards rather than forced through."
+    },
+    "by_depth": {
+      "short": "Advancing fewer pawns against more, to leave a weakness behind.",
+      "normal": "A minority attack: advancing your two queenside pawns against their three, so that the exchange on c6 leaves them with a fixed weak pawn on a half-open file your rooks are already using. The aim is a target, not space.",
+      "deep": "The plan that looks like a mistake — you advance on the wing where you are outnumbered. Nimzowitsch's justification is that the minority is the QUALITATIVE majority, because those pawns are free to attack the base of the enemy chain while the defender's extra pawn does nothing. The mechanism is rooks to the c-file, then b4-b5 without moving the a-pawn, then bxc6, after which every recapture concedes something: with the b-pawn a fixed weakness on c6, with a piece a weakened d5 instead. Its real cost is time, which is why its most successful practitioner routinely declined to force b5 through and manoeuvred instead."
+    },
+    "hedge": "",
+    "lesson": "You are playing for a weakness, not for space. If the attack gains ground and leaves no target, it has failed."
+  },
+  "terminology": {
+    "beginner_words": [
+      "pushing your pawns to make theirs weak"
+    ],
+    "advanced_words": [
+      "minority attack",
+      "Carlsbad structure",
+      "half-open file",
+      "fixed weakness"
+    ],
+    "avoid": [
+      "always attack where you have more pawns",
+      "push b4-b5"
+    ]
+  },
+  "status": {
+    "stage": "researched",
+    "last_updated": "2026-09-01",
+    "open_questions": [],
+    "audit_notes": [
+      "2026-09-01: first written with an originated-by attribution to Nimzowitsch at low confidence. The audit flagged it as an unhedged attribution, correctly — one lecture note is not grounds for crediting an origin. Downgraded to later-associated-with with the uncertainty stated."
+    ]
+  },
+  "id": "minority-attack",
+  "canonical_name": "Minority attack",
+  "category": "pawn-breaks",
+  "knowledge_type": "strategic-principle",
+  "definition_short": "Advancing a pawn minority against an enemy pawn majority in order to force a weakness, not to win space.",
+  "definition_long": "The plan that looks like a mistake. On the queenside White has two pawns to Black's three, and advances them anyway — against the general advice to play where you are stronger.\n\nNIMZOWITSCH'S JUSTIFICATION is that the numerical minority is a QUALITATIVE majority: White's pawns are free to advance and attack the base of Black's chain, while Black's extra pawn is not doing anything. The attack is not for space or for a passed pawn. It is for a WEAKNESS.\n\nTHE MECHANISM in the Carlsbad structure, which is where it lives: rooks to the c-file, then b4-b5 — usually WITHOUT moving the a-pawn, since a2-a4 would give Black a target — and finally bxc6. Black must then recapture, and every recapture concedes something. With the b-pawn, the c6 pawn becomes a fixed weakness on a half-open file with White's rooks already on it; with a piece, the d5 pawn is weakened instead. The point is that Black gets to choose which weakness, not whether to have one.\n\nIT IS SLOW, and that is its real cost. Setting up b4-b5 takes several moves, and Black's counterplay in the centre or on the kingside runs on the same clock. The instruction most worth keeping is Karpov's: he never forced b4-b5 through mechanically, and often manoeuvred around c5 instead, because a plan pushed through against a prepared defence achieves the form of the idea and none of its content.\n\nTHE TARGETS ARE a7 AND c6, and this base's own feature detector confirms them in the master game recorded here: after the exchange on c6, Black has three pawn islands, an isolated a-pawn, and White has both rooks on the resulting semi-open c-file.",
+  "sources": [
+    "umbc-carlsbad-lesson",
+    "thechessworld-minority-attack",
+    "thechessworld-carlsbad-karpov",
+    "petrosian-krogius-1959",
+    "nimzowitsch-my-system"
+  ],
+  "source_confidence": "medium"
+}

@@ -1,0 +1,334 @@
+{
+  "schema_version": 2,
+  "alternate_names": [
+    "compulsion to move"
+  ],
+  "historical_names": [
+    "squeeze (some writers, for the one-sided case)"
+  ],
+  "tags": [
+    "endgame",
+    "tempo",
+    "german-term",
+    "well-dated"
+  ],
+  "subcategory": "tempo",
+  "difficulty": "intermediate",
+  "knowledge_type_note": "A proven result rather than a heuristic: whether a given position is zugzwang is decidable, and in the endgame it is decidable by tablebase. The concept names a fact about a position, not a recommendation.",
+  "name_status": "established-name",
+  "history": {
+    "attributions": [
+      {
+        "person": "Max Lange",
+        "relation": "named-by",
+        "source": "winter-zugzwang",
+        "year": null,
+        "note": "ALLEGED only. Edward Winter's Chess Notes records the claim and states plainly that 'The first use of the word Zugzwang, allegedly originated by Max Lange, needs to be determined.' Recorded because the claim circulates, NOT as established."
+      },
+      {
+        "person": "Emanuel Lasker",
+        "relation": "popularized-by",
+        "source": "wikipedia-zugzwang",
+        "year": 1905,
+        "note": "First known use of the term in ENGLISH. He also cited a Philidor position as an example in Lasker's Manual of Chess."
+      },
+      {
+        "person": "Alessandro Salvio",
+        "relation": "first-documented-by",
+        "source": "wikipedia-zugzwang",
+        "year": 1604,
+        "note": "An endgame study exhibiting the CONCEPT, more than two centuries before the term."
+      }
+    ],
+    "first_documented_source": "wikipedia-zugzwang",
+    "year": 1858,
+    "confidence": "disputed",
+    "notes": "Unusually well dated for a chess term, and unusually clearly unsettled at the same time. The word appears in German chess literature in 1858 or earlier and in English from Lasker in 1905. Who coined it is NOT established: Max Lange is alleged, and Winter — the standard authority on exactly this kind of question — says the first use needs to be determined. The CONCEPT is far older than the word, appearing in Salvio's 1604 study and in shatranj studies from the early 9th century, over a thousand years before the term. Confidence 'disputed' refers to the coinage; the dating of first appearances is solid.",
+    "competing_claims": [
+      "Coined by Max Lange — alleged, and explicitly unverified by Winter.",
+      "Terminology split: most writers call the one-sided case zugzwang and the two-sided case reciprocal zugzwang; some call the one-sided case a 'squeeze' and the two-sided case zugzwang."
+    ],
+    "development": [
+      {
+        "era": "9th century, shatranj",
+        "change": "The concept appears in studies over a millennium before it is named.",
+        "source": "wikipedia-zugzwang"
+      },
+      {
+        "era": "1604, Salvio",
+        "change": "An endgame study exhibiting zugzwang.",
+        "source": "wikipedia-zugzwang"
+      },
+      {
+        "era": "1858 or earlier",
+        "change": "The term is in use in German chess literature.",
+        "source": "wikipedia-zugzwang"
+      },
+      {
+        "era": "1905, Lasker",
+        "change": "First known use in English.",
+        "source": "wikipedia-zugzwang"
+      },
+      {
+        "era": "tablebase era",
+        "change": "Reciprocal zugzwang becomes decidable rather than analysed; Nunn notes how often it turns out to matter.",
+        "source": "wikipedia-zugzwang"
+      }
+    ]
+  },
+  "engine_era_status": "reliable",
+  "engine_era_note": "Not merely reliable but DECIDABLE. Within tablebase range, whether a position is zugzwang is settled by comparing the result with each side to move — the two lookups differ by one bit. The opposition record in this base contains exactly that pair.",
+  "recognition": {
+    "preconditions": [
+      "Every legal move available to the side to move worsens their position",
+      "The same position with the other side to move would be better for them"
+    ],
+    "indicators_for": [
+      "Few pieces and few legal moves — typically a king-and-pawn endgame",
+      "The king is tied to defending something and has no waiting move",
+      "All pawn moves are exhausted or would create a fatal weakness",
+      "The tablebase result flips when the side to move is flipped"
+    ],
+    "indicators_against": [
+      "A waiting move exists that changes nothing",
+      "A spare pawn tempo is available",
+      "Many pieces remain, so a neutral move is almost always available"
+    ],
+    "prerequisites": [],
+    "detector": "tablebase comparison with side-to-move flipped",
+    "detectability": "mechanical",
+    "typical_confidence": "high",
+    "false_positive_traps": [
+      "A position where the side to move is simply losing is not zugzwang. The test is whether having to MOVE is the cause — flip the side to move and see whether the result changes.",
+      "Being short of good moves is not zugzwang; every move must worsen the position.",
+      "In middlegames, apparent zugzwang is usually just a bad position."
+    ]
+  },
+  "application": {
+    "typical_plans": [
+      "Exhaust the opponent's waiting moves, then hand them the move",
+      "Triangulate to lose a tempo and return the same position with the other side to play",
+      "Keep a spare pawn tempo in reserve rather than spending it"
+    ],
+    "typical_moves": [
+      "A king triangulation",
+      "A waiting move with a rook along a rank"
+    ],
+    "typical_pawn_structures": [
+      "Blocked pawn chains where no pawn can move safely"
+    ],
+    "typical_piece_arrangements": [
+      "Kings in opposition"
+    ],
+    "tactical_consequences": [
+      "Wins material or forces a decisive concession without any threat being made"
+    ],
+    "strategic_consequences": [
+      "Required for some elementary wins; king and rook against king cannot be forced without it",
+      "The reason reserve tempi are worth hoarding in pawn endings"
+    ]
+  },
+  "exceptions": [
+    "A side with a spare tempo is not in zugzwang, however constrained it looks.",
+    "In the middlegame, with many pieces on, genuine zugzwang is rare — usually a bad position is just a bad position."
+  ],
+  "limitations": [
+    "Decidable within tablebase range; a judgement outside it.",
+    "The terminology is not agreed: 'squeeze' versus 'zugzwang' for the one-sided case."
+  ],
+  "misconceptions": [
+    "That zugzwang means having no good moves. It means every move is bad AND that being obliged to move is what causes it.",
+    "That Lasker or Nimzowitsch coined it. Lasker introduced it to English in 1905; the coinage is unestablished.",
+    "That it is a modern idea. The concept predates the word by over a thousand years."
+  ],
+  "relationships": {
+    "broader": [],
+    "narrower": [
+      "opposition",
+      "triangulation"
+    ],
+    "related": [
+      "opposition",
+      "triangulation",
+      "corresponding-squares",
+      "stalemate"
+    ],
+    "contrasting": [],
+    "co_occurring": [
+      "opposition",
+      "triangulation"
+    ],
+    "conflicts": []
+  },
+  "examples": [
+    {
+      "fen": "8/4k3/8/4K3/4P3/8/8/8 b - - 0 1",
+      "note": "The textbook zugzwang, and a controlled pair in the strictest form there is: the SAME BOARD with only the side to move changed. White king e5, pawn e4, black king e7. Black to move must give way - 1...Kd7 2.Kf6 or 1...Kf7 2.Kd6 - and loses. White to move is a draw, because White has to give way instead. Being obliged to move is the whole of the difference; nothing on the board differs at all.",
+      "origin_kind": "constructed-test",
+      "concept_role": "supports",
+      "side_to_move_benefits": "white",
+      "controlled_pair_with": "8/4k3/8/4K3/4P3/8/8/8 w - - 0 1",
+      "tablebase": {
+        "source": "Lichess tablebase (Syzygy, 7-piece)",
+        "pieces": 3,
+        "wdl": "loss",
+        "dtz": -4,
+        "dtm": -28,
+        "category": "loss",
+        "note": "PROVEN LOSS for the side to move, dtz -4. The identical position with White to move is a proven draw at dtz 0. Two lookups of one board, differing only in whose turn it is, returning different results is what zugzwang IS, and Syzygy states it rather than illustrating it."
+      },
+      "engine": {
+        "engine_id": "Stockfish 18",
+        "test_level": 3,
+        "depth": 26,
+        "threads": 10,
+        "hash_mb": 4096,
+        "multipv": 1,
+        "best_move": "e7d7",
+        "eval_cp": null,
+        "mate_in": -15,
+        "pv": [],
+        "alternatives": [],
+        "margin_cp": null,
+        "verdict": "supports",
+        "verdict_note": "PROVEN WIN for White, dtz -4, mate in 28 from Black's side, and the engine reports mate in 15 for the side not to move. Black to move must give ground. This single position serves `opposition`, `key-square` and `zugzwang` at once, and the pair it belongs to - the same board with White to move, proven DRAWN - is the strictest controlled comparison this base contains, because nothing on the board differs at all."
+      }
+    },
+    {
+      "fen": "8/8/3Kp3/4Pk2/8/8/8/8 w - - 0 1",
+      "origin_kind": "constructed-test",
+      "concept_role": "supports",
+      "side_to_move_benefits": "black",
+      "controlled_pair_with": "8/8/3Kp3/4Pk2/8/8/8/8 b - - 0 1",
+      "note": "THE TREBUCHET, which this record's own deep wording has named since it was written - 'reciprocal zugzwang, whose extreme form is the trebuchet, where whoever moves loses' - and never showed. White Kd6 and pawn e5; Black Kf5 and pawn e6. Each king stands beside the other's pawn and each pawn is defended by nothing. Whoever has to move either steps away from the enemy pawn or abandons their own, and loses.\n\nIt is a controlled pair of the strictest kind there is: the SAME BOARD, only the side to move changed, and BOTH readings are a loss. That cannot happen in a position where the obligation to move is not the whole content, which is the proposition this record exists to teach.\n\nIT WAS NOT BUILT BY HAND, and the reason is recorded in state/progress.md: a trebuchet constructed from memory in an earlier session turned out to be a draw both ways, and the tablebase caught it. This one was FOUND - the search enumerates positions with two pawns nose to nose on one file, so neither side has a pawn tempo and the whole game is king moves, and asks Syzygy for both side-to-move readings of each. Random sampling had already been tried and found nothing in 400 boards, which is what should have been expected: a reciprocal zugzwang is a coincidence between two evaluations, and random boards are not where coincidences live.",
+      "tablebase": {
+        "source": "Lichess tablebase (Syzygy, 7-piece)",
+        "pieces": 4,
+        "wdl": "loss",
+        "dtz": -2,
+        "dtm": -34,
+        "category": "loss",
+        "note": "PROVEN LOSS for the side to move, from BOTH sides. White to move: loss, dtz -2, mate in 34 against. Black to move: loss, dtz -2, mate in 24 against. Two lookups of one board differing only in whose turn it is, and both come back losing - which is the trebuchet stated rather than illustrated."
+      }
+    },
+    {
+      "fen": "8/8/3Kp3/4Pk2/8/8/8/8 b - - 0 1",
+      "origin_kind": "constructed-test",
+      "concept_role": "supports",
+      "side_to_move_benefits": "white",
+      "controlled_pair_with": "8/8/3Kp3/4Pk2/8/8/8/8 w - - 0 1",
+      "note": "The other half of the trebuchet, and the half that makes it one. In an ordinary reciprocal zugzwang the pair reads LOSS one way and DRAW the other; here it reads LOSS both ways, and the only way to state that is to put both boards in the base and let the checker resolve each to the other. Black to move: Kf5 must leave the white pawn or the black king must abandon e6, and Syzygy gives mate in 24 against.\n\nThis is the reason the pair is stored as two positions rather than as one position with a sentence about the other. A claim about what happens when the side to move changes is a claim about two boards, and a base that stores one of them is storing half a claim.",
+      "tablebase": {
+        "source": "Lichess tablebase (Syzygy, 7-piece)",
+        "pieces": 4,
+        "wdl": "loss",
+        "dtz": -2,
+        "dtm": -24,
+        "category": "loss",
+        "note": "PROVEN LOSS for Black to move, dtz -2, mate in 24 against. The identical board with White to move is also a proven loss, at mate in 34. Whoever moves loses."
+      }
+    }
+  ],
+  "counterexamples": [
+    {
+      "fen": "8/4k3/8/4K3/4P3/8/8/8 w - - 0 1",
+      "note": "The same board with White to move, which is NOT zugzwang for Black - it is White who must give way, and the position is a draw. A reader shown only the diagram cannot tell which of the two it is, and the concept lives entirely in the half of the FEN that a diagram does not draw.",
+      "origin_kind": "constructed-test",
+      "concept_role": "negative",
+      "side_to_move_benefits": "neither",
+      "controlled_pair_with": "8/4k3/8/4K3/4P3/8/8/8 b - - 0 1",
+      "tablebase": {
+        "source": "Lichess tablebase (Syzygy, 7-piece)",
+        "pieces": 3,
+        "wdl": "draw",
+        "dtz": 0,
+        "dtm": 0,
+        "category": "draw",
+        "note": "PROVEN DRAW at dtz 0. The identical board with Black to move is a proven loss."
+      },
+      "engine": {
+        "engine_id": "Stockfish 18",
+        "test_level": 3,
+        "depth": 26,
+        "threads": 10,
+        "hash_mb": 4096,
+        "multipv": 1,
+        "best_move": "e5f5",
+        "eval_cp": 0,
+        "mate_in": null,
+        "pv": [],
+        "alternatives": [],
+        "margin_cp": null,
+        "verdict": "supports",
+        "verdict_note": "PROVEN DRAW, dtz 0, best move Kd4, and the engine agrees at 0.00. The negative half of the strictest pair in this base: the same board as the winning position with only the side to move changed. Whoever is NOT to move holds the opposition, which is why this half of the pair is a negative for three concepts and not a different position."
+      }
+    },
+    {
+      "fen": "8/4k3/8/4K3/4P3/7P/8/8 b - - 0 1",
+      "note": "Registered false-positive case `opposition-with-a-spare-tempo`, kept on the record as well as in tests/false_positive_cases.json so that the concept carries its own negative evidence. THE SURFACE PATTERN IS PRESENT: Kings in direct opposition in a king-and-pawn ending, Black to move and every king move giving ground. That is what zugzwang looks like. WHY IT IS NOT THE CONCEPT: Zugzwang requires that having to move is what hurts, and here it is not: White has a spare pawn on h3 and wins whether it is Black's move or his own. There is no mutual obligation, so nobody is in zugzwang — Black is simply lost. WHAT THE SYSTEM DOES: PROVEN both ways, which is what settles it: with Black to move the position is a loss in 26, and with WHITE to move it is a win in 25 and the tablebase's own best move is h4 — the spare tempo. The API does not report zugzwang. It does report `opposition` at high confidence, and that is correct and worth noticing: the opposition is present and it is not what decides. Remove the h-pawn and the same board becomes this base's strictest controlled pair, where the side to move loses and the side not to move draws.",
+      "origin_kind": "constructed-test",
+      "concept_role": "negative",
+      "tablebase": {
+        "source": "Lichess tablebase (Syzygy, 7-piece)",
+        "pieces": 4,
+        "wdl": "loss",
+        "dtz": -2,
+        "dtm": -26,
+        "category": "loss",
+        "note": "PROVEN both ways, which is what settles it: Black to move loses in 26, and with WHITE to move the same board is a win in 25 whose best move is h4 - the spare tempo. A position that is lost with either side to move contains no zugzwang."
+      },
+      "false_positive_case": "opposition-with-a-spare-tempo"
+    }
+  ],
+  "ambiguous_examples": [],
+  "explanations": {
+    "by_level": {
+      "beginner": "It is their turn, and every move they can make makes things worse. If they could pass, they would be fine — but you cannot pass in chess.",
+      "intermediate": "Zugzwang. The position is fine for them; having to move is what loses it. Check whether they have a spare tempo before relying on it.",
+      "advanced": "Zugzwang, and note whether it is one-sided or reciprocal — the second means you must not step into it yourself.",
+      "master": "Within tablebase range this is decidable: flip the side to move and compare results. Reciprocal zugzwang is the case worth identifying precisely, since both sides must avoid moving first."
+    },
+    "by_depth": {
+      "short": "Every move they have makes things worse.",
+      "normal": "Zugzwang: the position would be fine if they could pass, but chess has no pass, and every legal move worsens things. The way to impose it is to run their waiting moves out.",
+      "deep": "From German, compulsion to move. Positions divide three ways: neither side minds moving, one side does, or both do — the last being reciprocal zugzwang, whose extreme form is the trébuchet, where whoever moves loses. Terminology is not fully agreed; a minority of writers call the one-sided case a squeeze. It is required for some elementary wins — king and rook against king cannot be forced without it — and the standard tool for imposing it is triangulation. The word appears in German chess literature by 1858 and in English from Lasker in 1905, but the concept is over a thousand years older, appearing in shatranj studies from the 9th century."
+    },
+    "hedge": "",
+    "lesson": "In simple endings, count the waiting moves. Whoever runs out first usually loses, and hoarding one spare pawn tempo can be worth more than a pawn."
+  },
+  "terminology": {
+    "beginner_words": [
+      "every move makes it worse",
+      "they wish they could pass"
+    ],
+    "advanced_words": [
+      "zugzwang",
+      "reciprocal zugzwang",
+      "mutual zugzwang",
+      "trebuchet",
+      "reserve tempo"
+    ],
+    "avoid": [
+      "zugzwang means no good moves"
+    ]
+  },
+  "status": {
+    "stage": "researched",
+    "last_updated": "2026-08-31",
+    "open_questions": [],
+    "audit_notes": []
+  },
+  "id": "zugzwang",
+  "canonical_name": "Zugzwang",
+  "category": "zugzwang",
+  "knowledge_type": "proven-result",
+  "definition_short": "A position in which having to move is itself the disadvantage — every legal move worsens the position.",
+  "definition_long": "From German, 'compulsion to move'. Chess has no pass, so a player who would be fine if allowed to do nothing can be lost purely because they must move.\n\nTHREE KINDS OF POSITION, and this classification is what makes the term usable. Either neither side would be disadvantaged by having to move (the great majority), or one side would, or both would. Most writers call the second case zugzwang and the third RECIPROCAL or MUTUAL zugzwang. A minority reverse it, calling the second a 'squeeze' and reserving 'zugzwang' for the third. Both usages are attested and the disagreement is recorded rather than resolved.\n\nThe extreme form of reciprocal zugzwang is the TRÉBUCHET, where whoever must move loses outright — a full-point mutual zugzwang.\n\nIt matters most in the endgame, where few moves are available and each is critical, and it is REQUIRED for some elementary results: king and rook against king cannot be won without it. John Nunn's assessment is that reciprocal zugzwang positions are surprisingly important in endgame analysis generally.\n\nThe standard way to impose it is TRIANGULATION — losing a move so as to hand the same position back with the opponent to play.",
+  "sources": [
+    "wikipedia-zugzwang",
+    "winter-zugzwang",
+    "lichess-tablebase",
+    "wikipedia-triangulation"
+  ],
+  "source_confidence": "high"
+}

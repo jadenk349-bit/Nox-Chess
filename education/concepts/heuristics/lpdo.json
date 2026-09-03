@@ -1,0 +1,270 @@
+{
+  "schema_version": 2,
+  "alternate_names": [
+    "LPDO"
+  ],
+  "historical_names": [],
+  "tags": [
+    "heuristic",
+    "nunn",
+    "practical",
+    "mnemonic"
+  ],
+  "subcategory": "practical tactics",
+  "difficulty": "beginner",
+  "knowledge_type_note": "A rule of thumb and explicitly described as one by its sources — 'as usual, this is a rule of thumb which happily may be ignored by a strong player'. It carries mandatory hedging wording. It is NOT a law: strong players leave pieces loose deliberately and correctly.",
+  "name_status": "established-name",
+  "history": {
+    "attributions": [
+      {
+        "person": "Mike Cook",
+        "relation": "originated-by",
+        "source": "chessbase-lpdo",
+        "year": null,
+        "note": "Two independent sources say 'PROBABLY coined by the English player Mike Cook'. The hedge is theirs and is kept. Cook is the 2300-rated player who lost the 100-game match to Nunn and used the phrase to explain his losses."
+      },
+      {
+        "person": "John Nunn",
+        "relation": "popularized-by",
+        "source": "nunn-secrets-practical-chess",
+        "year": 1998,
+        "note": "Recounted the match in Secrets of Practical Chess, which is how the phrase reached general usage."
+      }
+    ],
+    "first_documented_source": "nunn-secrets-practical-chess",
+    "year": 1998,
+    "confidence": "medium",
+    "notes": "Popularisation by Nunn is well attested. Coinage by Cook is reported by two sources, both hedged with 'probably', and no primary evidence has been seen. Recorded as medium: this is exactly the 'repeated attribution, no primary evidence' case the confidence scale exists for. Do not write 'Nunn coined LPDO' — he popularised it.",
+    "competing_claims": [
+      "Some sources credit Nunn with the term itself; the better-sourced account credits Cook with the phrase and Nunn with its currency."
+    ],
+    "development": []
+  },
+  "engine_era_status": "useful-with-common-exceptions",
+  "engine_era_note": "Nothing in engine analysis undermines the statistical observation, and engines punish loose material ruthlessly. What engine play does contradict is any strict reading: top engines leave pieces undefended constantly, because they can calculate that no forcing move reaches them. The heuristic is a substitute for calculation, and loses its force exactly to the extent that calculation is available.",
+  "recognition": {
+    "preconditions": [
+      "One or more pieces are undefended",
+      "Forcing moves are available in the position"
+    ],
+    "indicators_for": [
+      "Two or more loose pieces on the same side",
+      "An undefended piece on a line the enemy queen or a knight can reach with check",
+      "Open position, queens on, several forcing moves available"
+    ],
+    "indicators_against": [
+      "Closed position where no forcing move reaches the loose piece",
+      "The loose piece can be defended or moved with tempo at any time",
+      "Defending would cost a tempo the position cannot spare"
+    ],
+    "prerequisites": [
+      "loose-piece"
+    ],
+    "detector": null,
+    "detectability": "heuristic",
+    "typical_confidence": "medium",
+    "false_positive_traps": [
+      "A piece being undefended is not a mistake, and calling it one teaches a habit of pointless defending.",
+      "Not every loss of a loose piece is an LPDO instance. A ChessBase reader demonstrated that the article's own headline example was not: the piece did not fall because it was loose but because a square had become a forking square. If the tactic would work against a defended piece too, LPDO is not the explanation."
+    ]
+  },
+  "application": {
+    "typical_plans": [
+      "Scan both sides for undefended units before calculating",
+      "Given two loose enemy pieces, look for the move that attacks both"
+    ],
+    "typical_moves": [
+      "A queen check that also hits an undefended piece"
+    ],
+    "typical_pawn_structures": [],
+    "typical_piece_arrangements": [],
+    "tactical_consequences": [
+      "Directs the search towards double attacks that actually pay"
+    ],
+    "strategic_consequences": [
+      "Prophylactically, coordination reduces exposure to tactics"
+    ]
+  },
+  "exceptions": [
+    "Strong players leave pieces loose deliberately, having calculated that nothing reaches them.",
+    "Defending everything is a real error in the other direction: it wastes tempi and produces passive pieces.",
+    "The heuristic describes a tendency across many games, not a property of any one position."
+  ],
+  "limitations": [
+    "A search heuristic, not an evaluation. It suggests where to look; it does not say a move is bad.",
+    "Its force decreases as calculation increases.",
+    "NO MASTER-GAME POSITION YET. This concept has no matcher, so the scan that supplied master positions to eleven other records - five famous games replayed and analysed position by position - could not nominate one here: the API never reports the concept, so there is nothing for a scan to find. Identifying an instance in a master game means reading the game, which is research rather than tooling, and it has not been done. Recorded rather than filled. RESOLVED: Kramnik-Yakovich, GMA-qual 1989, 18.Bd3, above."
+  ],
+  "misconceptions": [
+    "That LPDO means you should defend every piece.",
+    "That Nunn coined it — the better-sourced account is that Mike Cook did and Nunn popularised it.",
+    "That any lost undefended piece illustrates LPDO. It illustrates it only when being undefended is why the tactic worked."
+  ],
+  "relationships": {
+    "broader": [],
+    "narrower": [],
+    "related": [
+      "loose-piece",
+      "hanging-piece",
+      "fork",
+      "double-attack"
+    ],
+    "contrasting": [],
+    "co_occurring": [
+      "fork",
+      "discovered-attack"
+    ],
+    "conflicts": []
+  },
+  "examples": [
+    {
+      "fen": "r3k1nr/p4pbp/1p2p1p1/Q1pp4/P3PP1q/N2b1P2/1PP4P/R1BK1BNR w kq - 0 14",
+      "note": "8 undefended pieces on the board at once — the condition the maxim is about. The feature was established mechanically from the position by the page's own move generator and lib/features.js. What is NOT claimed is that this feature decides the position. Provenance: the puzzle corpus is engine self-play — a real position from a real game between engines, not a master game.",
+      "origin_kind": "puzzle",
+      "concept_role": "supports",
+      "side_to_move_benefits": "neither",
+      "engine": {
+        "engine_id": "Stockfish 18",
+        "test_level": 3,
+        "depth": 22,
+        "threads": 10,
+        "hash_mb": 4096,
+        "multipv": 1,
+        "best_move": "a5e1",
+        "eval_cp": 281,
+        "mate_in": null,
+        "pv": [],
+        "alternatives": [],
+        "margin_cp": null,
+        "verdict": "supports",
+        "verdict_note": "+2.81 at depth 22, and the engine's first move is Qxe1 - a capture of a loose piece. The record is 'loose pieces drop off' and the evaluation is what a position full of them is worth: nearly three pawns to the side to move, in a position where material is otherwise level."
+      }
+    },
+    {
+      "fen": "r3r1k1/1p1q1pp1/1bpp2np/pB2p3/P2Pn3/1QP1BN1P/1P3PP1/R3R1K1 w - - 0 18",
+      "move": "Bd3",
+      "move_uci": "b5d3",
+      "origin_kind": "historical-game",
+      "game": "Kramnik-Yakovich, GMA-qual 1989",
+      "concept_role": "positive",
+      "side_to_move_benefits": "white",
+      "note": "THE MNEMONIC DOING WHAT IT CLAIMS TO DO. Black's bishop on b6 is loose - no black man defends it and no white man attacks it, which is `loose-piece`'s definition exactly. Nothing is wrong with it and nothing is threatening it. Then 18.Bd3 goes after the knight on e4, and the loose bishop turns out to be why the sequence works: 18...exd4 19.Bxd4 Bxd4 20.Bxe4 Rxe4 21.Rxe4, and every exchange in that line runs through a piece that was undefended when the move was played.\n\nStockfish 18 at depth 28 with three lines: +1.37 for Bd3, against −1.13 and −1.26 for the next two. **The move is the difference between better and worse — a swing of 250 centipawns — and nothing about it is forcing.**\n\nWHAT THIS RECORD IS AND IS NOT. It is 'a mnemonic for a statistical fact about practical play rather than a rule about correct play', in its own words, so the evidence for it is not a clever move. It is a position where the tactic works BECAUSE a piece was loose, and the search that found it insisted on exactly that: the piece must be undefended and unattacked BEFORE the move, and the move must create a second threat, or the mnemonic is being credited for an ordinary attack on a hanging piece.\n\nPROVENANCE. Found by tools/mine_master_motifs.js over 2,822,256 positions from 35,648 replayed games. Replayed legally through the page's own move generator. No annotator read.",
+      "engine": {
+        "engine_id": "Stockfish 18",
+        "test_level": 3,
+        "depth": 28,
+        "multipv": 3,
+        "best_move": "b5d3",
+        "eval_cp": 137,
+        "mate_in": null,
+        "pv": [
+          "b5d3",
+          "e5d4",
+          "e3d4",
+          "b6d4",
+          "d3e4",
+          "e8e4",
+          "e1e4",
+          "d4c5",
+          "b3c2",
+          "d6d5"
+        ],
+        "alternatives": [
+          {
+            "move": "b5f1",
+            "eval_cp": -113
+          },
+          {
+            "move": "b5c4",
+            "eval_cp": -126
+          }
+        ],
+        "margin_cp": 250,
+        "verdict": "supports",
+        "verdict_note": "+1.37 against −1.13 at depth 28. A 250-centipawn swing on a quiet bishop retreat, and the loose bishop on b6 is the reason."
+      }
+    }
+  ],
+  "counterexamples": [
+    {
+      "fen": "1r4k1/1p3ppp/1p6/1P6/1P6/8/5PPP/1R4K1 w - - 0 1",
+      "note": "Registered false-positive case `loose-pieces-that-cannot-drop-off`, kept on the record as well as in tests/false_positive_cases.json so that the concept carries its own negative evidence. THE SURFACE PATTERN IS PRESENT: Both rooks are undefended in a position where the phrase 'loose pieces drop off' would be quoted without a second thought. WHY IT IS NOT THE CONCEPT: This record's first indicator_against: \"Closed position where no forcing move reaches the loose piece.\" The b-file is stopped by rammed pawns and no forcing move touches either rook. And its first trap: \"A piece being undefended is not a mistake, and calling it one teaches a habit of pointless defending.\" WHAT THE SYSTEM DOES: The API reports neither lpdo nor loose-piece here. The `loose-piece` matcher was rewritten for exactly this and fell from 66.8% of shipped positions to 9.1% when it began requiring a forcing move that survives being forcing; `lpdo` is the aphorism about the same fact and inherits the discipline. Stockfish 18: +0.00. Two loose rooks and nothing to be done about either. The record's second trap is worth reading beside this: a ChessBase reader showed that the article which coined the phrase had chosen an example that was not an instance of it.",
+      "origin_kind": "constructed-test",
+      "concept_role": "negative",
+      "false_positive_case": "loose-pieces-that-cannot-drop-off"
+    }
+  ],
+  "ambiguous_examples": [
+    {
+      "fen": "r4rk1/pp3ppp/8/2b5/2B5/8/PP3PPP/R4RK1 w - - 0 1",
+      "note": "Both bishops are undefended. 'Loose pieces drop off' applies to White and to Black at once, which is the state in which the aphorism has nothing to say: whoever is warned by it is warned about their own position and their opponent's equally. The engine says 0.00. This record's first trap is that 'a piece being undefended is not a mistake, and calling it one teaches a habit of pointless defending', and a symmetric position is where that habit costs most - a tempo spent defending a bishop nobody can attack is a tempo given away. Filed as ambiguous rather than negative because the loose pieces are genuinely there and the aphorism is genuinely about them.",
+      "origin_kind": "constructed-test",
+      "concept_role": "ambiguous",
+      "engine": {
+        "engine_id": "Stockfish 18",
+        "test_level": 3,
+        "depth": 22,
+        "threads": 10,
+        "hash_mb": 4096,
+        "multipv": 1,
+        "best_move": "a1c1",
+        "eval_cp": 0,
+        "mate_in": null,
+        "pv": [],
+        "alternatives": [],
+        "margin_cp": null,
+        "verdict": "ambiguous",
+        "verdict_note": "0.00 at depth 22, settled at depth 21. Two loose bishops, one on each side, and no forcing move reaches either."
+      }
+    }
+  ],
+  "explanations": {
+    "by_level": {
+      "beginner": "Pieces that nothing is defending tend to get picked off. Before you move, look at which of your pieces are undefended.",
+      "intermediate": "LPDO — loose pieces drop off. With {n} undefended pieces here, look for a forcing move that hits two things at once.",
+      "advanced": "Nunn's heuristic. Useful as a search filter rather than as an evaluation: undefended units are the natural second target of any double attack.",
+      "master": "A statistical regularity about practical play. Weigh it against the tempo cost of defending, and note that it says nothing once the relevant lines are calculated."
+    },
+    "by_depth": {
+      "short": "Undefended pieces tend to get lost to tactics.",
+      "normal": "Loose pieces drop off: nearly every double attack needs a target that is undefended, so a camp with several undefended pieces is likely to lose one sooner or later. Use it as a scan, not as a rule to defend everything.",
+      "deep": "Popularised by John Nunn in Secrets of Practical Chess, and probably coined by Mike Cook, the opponent whose losses it explained. The mechanism is that forks, discoveries and skewers all need a second target that is either outranked by the attacker or undefended, and an undefended piece qualifies automatically. Its practical use is as a search heuristic. Its limit is that it is a substitute for calculation, so it loses force wherever calculation is actually done — which is why strong players leave pieces loose without concern."
+    },
+    "hedge": "This is a rule of thumb, not a law. Strong players leave pieces undefended deliberately and correctly whenever no forcing move can reach them, and defending everything costs tempi and produces passive pieces.",
+    "lesson": "Undefended pieces are what combinations are made of. Scan for them on both sides before you calculate — but do not spend moves defending what nothing can attack."
+  },
+  "terminology": {
+    "beginner_words": [
+      "undefended pieces get taken"
+    ],
+    "advanced_words": [
+      "LPDO",
+      "loose",
+      "double attack"
+    ],
+    "avoid": [
+      "always defend your pieces",
+      "LPDO is a rule",
+      "Nunn coined LPDO"
+    ]
+  },
+  "status": {
+    "stage": "researched",
+    "last_updated": "2026-09-01",
+    "open_questions": [],
+    "audit_notes": []
+  },
+  "id": "lpdo",
+  "canonical_name": "Loose Pieces Drop Off (LPDO)",
+  "category": "rules-of-thumb",
+  "knowledge_type": "rule-of-thumb",
+  "definition_short": "Undefended pieces tend to be lost to tactics sooner or later, because almost every double-threat device needs an undefended target.",
+  "definition_long": "A mnemonic for a statistical fact about practical play rather than a rule about correct play. Forks, discovered attacks, skewers and double attacks all work by creating two problems at once, and an undefended piece is the ideal second problem — it needs no other justification to be worth taking. So a position with several loose pieces is disproportionately likely to lose material to a tactic, whether or not any tactic exists right now.\n\nIts practical value is as a SEARCH HEURISTIC. It converts an open-ended hunt for tactics into a fast scan: list the undefended units on both sides, then look for a forcing move that reaches two of them, or one of them and the king.\n\nIt is not advice to defend everything. Defending costs tempi, and a piece that no forcing move can reach is not at risk.",
+  "sources": [
+    "nunn-secrets-practical-chess",
+    "chessbase-lpdo",
+    "chessworld-lpdo",
+    "chessmind-en-prise"
+  ],
+  "source_confidence": "high"
+}

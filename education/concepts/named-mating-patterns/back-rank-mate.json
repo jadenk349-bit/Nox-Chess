@@ -1,0 +1,257 @@
+{
+  "schema_version": 2,
+  "id": "back-rank-mate",
+  "canonical_name": "Back-rank mate",
+  "alternate_names": [
+    "back rank mate",
+    "corridor mate",
+    "back-rank weakness"
+  ],
+  "historical_names": [],
+  "category": "named-mating-patterns",
+  "subcategory": "mating pattern",
+  "tags": [],
+  "knowledge_type": "mating-pattern",
+  "knowledge_type_note": "A named mating pattern (D). The derived 'back-rank weakness' is a standing positional feature rather than a one-move tactic, and the two should not be conflated in an explanation.",
+  "name_status": "established-name",
+  "difficulty": "beginner",
+  "definition_short": "A rook or queen mates on the back rank because the king's own pawns block every escape square.",
+  "definition_long": "The castled king sits behind three unmoved pawns. A heavy piece arriving on the back rank gives check, and the king has nowhere to go because its own pawns occupy the only flight squares. The standard prophylactic is to make LUFT — advancing a pawn (usually h2-h3 or h7-h6) to open an escape square.\n\nThe back rank is more often a weakness to be exploited indirectly than a mate to be played immediately: it makes defenders of the back rank overloaded, so deflecting or removing them wins material even when mate never actually occurs.",
+  "history": {
+    "attributions": [],
+    "first_documented_source": "informant-encyclopedia-combinations",
+    "year": null,
+    "confidence": "unknown",
+    "notes": "Descriptive pattern name of long, largely anonymous usage.",
+    "competing_claims": [],
+    "development": []
+  },
+  "engine_era_status": "unassessed",
+  "engine_era_note": "",
+  "sources": [
+    "informant-encyclopedia-combinations",
+    "wikipedia-chess-tactic",
+    "chesstempo-tactical-motifs",
+    "chesscom-tactics-38"
+  ],
+  "source_confidence": "high",
+  "recognition": {
+    "preconditions": [
+      "The enemy king is on its back rank",
+      "Its escape squares on the second rank are occupied by its own pawns",
+      "A friendly rook or queen can reach the back rank with check"
+    ],
+    "indicators_for": [
+      "No luft has been made",
+      "The back rank is defended by exactly one piece, which can be deflected or is overloaded"
+    ],
+    "indicators_against": [
+      "A pawn has moved to create luft",
+      "A second defender covers the back rank",
+      "The checking square is defended",
+      "The king can capture the checking piece"
+    ],
+    "prerequisites": [],
+    "detector": "findMotifs -> backRank",
+    "detectability": "mechanical",
+    "typical_confidence": "high",
+    "false_positive_traps": []
+  },
+  "application": {
+    "typical_plans": [],
+    "typical_moves": [],
+    "typical_pawn_structures": [],
+    "typical_piece_arrangements": [],
+    "tactical_consequences": [],
+    "strategic_consequences": []
+  },
+  "exceptions": [
+    "Luft defeats it outright: one pawn move can turn mate into nothing.",
+    "A defended back rank is not weak; count defenders before claiming the pattern."
+  ],
+  "limitations": [
+    "The pattern is easy to detect but easy to over-report — most back ranks that look weak are adequately defended.",
+    "TYPICAL_CONFIDENCE RAISED medium -> high, 2026-09-02, and the reason is the schema's own definition of the field: 'how confidently this concept can normally be asserted ONCE ITS PRECONDITIONS HOLD'. This concept's recognition is MECHANICAL and its knowledge type already carries a high ceiling, so once the preconditions hold there is nothing left to be uncertain about - a stalemate is a stalemate, and a fork this base reports is one findMotifs() found, which ARCHITECTURE.md makes the authority and forbids second-guessing. 'Medium' was the default across 32 rule and motif records regardless of detectability, and it was found by measuring what the API reports against what each record permits: twelve concepts were reporting ABOVE their own record. The fix was to make each record its own ceiling in cap(), which then required the records that were wrong to be corrected rather than silently overruled.",
+    "CORRECTED 2026-09-02, and the correction is to the ARGUMENT rather than to the conclusion. An earlier note here said this record's four indicators_against are unreachable because the detector reports only completed mate, `!theirMoves.length && inCheck(after, them)`. That is the test the `mate` tag uses and it is NOT the test this concept uses. findMotifs() has a separate `backRank` block: it checks that all three squares in front of the king are occupied by the king's own men, then hands the move back to the attacker and looks for a rook or queen move to the home rank that the move generator says is mate. So the report is a verified THREAT, not a completed mate. All four indicators_against are still unreachable, and now for the right reason. \"A pawn has moved to create luft\" makes the boxed-in test fail, because that test requires all three front squares to hold the king's own men. \"A second defender covers the back rank\" and \"The checking square is defended\" and \"The king can capture the checking piece\" all leave the reply list non-empty after the rook lands, so `!legalMoves(nx, them).length` is false and no mate is found. Four conditions, one mechanism, and the mechanism is the move generator rather than a guard.",
+    "The report is a threat and one sentence used to state it as a fact. `explanations.by_level.intermediate` said 'the back rank is not adequately defended', which on 3r2k1/5ppp/8/3n4/8/8/5PPP/3R2K1 after Rxd5 is simply false - the rook on d8 defends it and Black is to move. The detector's own sentence was correct and conditional ('a rook or queen landing there is mate'), `by_depth.normal` and `by_depth.deep` were correct and conditional, and one level of one wording was not. It is conditional now. This is the third of the three answers a stated condition can get - build it, argue it cannot be built, or say it in the sentence - and here the sentence was the thing that was wrong."
+  ],
+  "misconceptions": [],
+  "relationships": {
+    "broader": [],
+    "narrower": [],
+    "related": [
+      "deflection",
+      "overloading",
+      "battery",
+      "luft"
+    ],
+    "contrasting": [],
+    "co_occurring": [],
+    "conflicts": []
+  },
+  "examples": [
+    {
+      "fen": "1n2kb1r/p4ppp/4q3/4p1B1/4P3/8/PPP2PPP/2KR4 w k - 0 17",
+      "move": "Rd8#",
+      "move_uci": "d1d8",
+      "note": "The Opera Game, 17.Rd8 mate - the position the previous four moves were spent arranging. The black king is on e8 with the f8 bishop beside it and the knight just deflected to b8; the rook arrives on the eighth and there is no square. It is not the castled back-rank mate of the diagrams, and that is why it is worth having: the pattern is a king boxed on its home rank by its OWN men, and here the men are a bishop that never moved and a knight that was forced back, rather than three pawns in front of a castled king. PROVENANCE, stated plainly. The game is famous and the move list was replayed through this base's own move generator by tools/replay_game.js - 33 plies, every one legal, which is what makes the FEN trustworthy rather than remembered. No named annotator is attached to this position for this concept, so it grounds the MASTER-GAME rung and NOT the human-grounded one: it is evidence that the concept occurs in master play, and not evidence that a person named it here. The validation ladder already draws that line for eleven other concepts and it is drawn again here.",
+      "origin_kind": "historical-game",
+      "game": "Morphy-Duke of Brunswick and Count Isouard, Paris 1858 (the Opera Game)",
+      "concept_role": "positive",
+      "side_to_move_benefits": "white",
+      "engine": {
+        "engine_id": "Stockfish 18",
+        "test_level": 3,
+        "depth": 20,
+        "threads": 10,
+        "hash_mb": 4096,
+        "multipv": 1,
+        "best_move": "d1d8",
+        "eval_cp": null,
+        "mate_in": 1,
+        "pv": [],
+        "alternatives": [],
+        "margin_cp": null,
+        "verdict": "supports",
+        "verdict_note": "Mate in 1, settled at depth 1. The move generator agrees: after Rd8 the reply list is empty and the king is in check."
+      }
+    },
+    {
+      "fen": "6k1/5ppp/8/8/8/8/5PPP/4R1K1 w - - 0 1",
+      "note": "Constructed controlled pair, positive half. Black's f7/g7/h7 pawns are all unmoved, so the king has no flight square.",
+      "origin_kind": "constructed-test",
+      "concept_role": "positive",
+      "side_to_move_benefits": "white",
+      "engine": {
+        "engine_id": "Stockfish 18",
+        "test_level": 2,
+        "depth": 26,
+        "threads": 10,
+        "hash_mb": 4096,
+        "multipv": 3,
+        "best_move": "e1e8",
+        "eval_cp": null,
+        "mate_in": 1,
+        "pv": [],
+        "alternatives": [
+          {
+            "move": "h2h3",
+            "eval_cp": null,
+            "mate_in": 31
+          },
+          {
+            "move": "g1f1",
+            "eval_cp": null,
+            "mate_in": 32
+          }
+        ],
+        "margin_cp": null,
+        "verdict": "supports",
+        "verdict_note": "Re8 is mate in 1. The next-best move is mate in 31. As clean a demonstration of the pattern as exists."
+      }
+    }
+  ],
+  "counterexamples": [
+    {
+      "fen": "6k1/5pp1/7p/8/8/8/5PPP/4R1K1 w - - 0 1",
+      "note": "Constructed controlled pair, negative half. IDENTICAL except Black's h-pawn stands on h6 instead of h7 — one pawn move of luft.",
+      "origin_kind": "constructed-test",
+      "concept_role": "negative",
+      "side_to_move_benefits": "white",
+      "engine": {
+        "engine_id": "Stockfish 18",
+        "test_level": 2,
+        "depth": 26,
+        "threads": 10,
+        "hash_mb": 4096,
+        "multipv": 3,
+        "best_move": "h2h3",
+        "eval_cp": null,
+        "mate_in": 28,
+        "pv": [],
+        "alternatives": [
+          {
+            "move": "e1e8",
+            "eval_cp": null,
+            "mate_in": 30
+          },
+          {
+            "move": "g1f1",
+            "eval_cp": null,
+            "mate_in": 30
+          }
+        ],
+        "margin_cp": null,
+        "verdict": "supports",
+        "verdict_note": "Re8+ is no longer mate in 1 but mate in 30, and is no longer even the best move (h3 is mate in 28). A single tempo of luft converts a mate in 1 into a mate in 30. Exact quantification of the standard antidote, and a hard demonstration that the pattern must be re-checked against escape squares before it is reported."
+      }
+    },
+    {
+      "fen": "3r2k1/5ppp/8/3n4/8/8/5PPP/3R2K1 w - - 0 1",
+      "move_uci": "d1d5",
+      "note": "Registered false-positive case `a-back-rank-threat-the-defender-answers`, kept on the record as well as in tests/false_positive_cases.json so that the concept carries its own negative evidence. THE SURFACE PATTERN IS PRESENT: After Rxd5 the black king sits behind three unmoved pawns with no luft, and a rook landing on the eighth rank would be mate. The detector verifies that with the move generator rather than assuming it. WHY IT IS NOT THE CONCEPT: This record's second indicator_against: \"A second defender covers the back rank.\" The rook on d8 covers it, and Black is to move — the mate exists only if White is handed a free move, which is exactly how the detector asks the question. WHAT THE SYSTEM DOES: THE ANSWER IS THE SENTENCE, and one sentence was wrong. The detector's own text is conditional and correct — 'the king is shut in on its own back rank by its own pieces, and a rook or queen landing there is mate' — and so are by_depth.normal and by_depth.deep. But `explanations.by_level.intermediate` said 'the back rank is not adequately defended', which is false here: it is defended, by the rook that is about to capture. That level now reads 'unless a defender covers it, and the standing weakness is that whatever covers it can then be deflected', which is both true of this position and the actual content of the concept. The concept is still reported, correctly: the back-rank weakness is real and permanent, and the deflection theme is what it is for.",
+      "origin_kind": "constructed-test",
+      "concept_role": "negative",
+      "false_positive_case": "a-back-rank-threat-the-defender-answers"
+    }
+  ],
+  "ambiguous_examples": [
+    {
+      "fen": "3r2k1/5ppp/8/8/8/8/5PPP/4R1K1 w - - 0 1",
+      "note": "BOTH back ranks are weak. Neither king has moved a pawn, both are boxed in by their own men, and a rook or queen arriving on either eighth or first rank would be mate. Neither side can arrange it, and the engine says 0.00. This is the standing weakness the record's deep explanation calls the more valuable half - 'more often than the mate itself, the value is the standing WEAKNESS' - present twice over and worth nothing to anybody, because the same feature on both sides cancels. Filed as ambiguous rather than negative: the pattern is genuinely on the board for both players, correctly, and a report of it tells a reader nothing about who stands better.",
+      "origin_kind": "constructed-test",
+      "concept_role": "ambiguous",
+      "engine": {
+        "engine_id": "Stockfish 18",
+        "test_level": 3,
+        "depth": 24,
+        "threads": 10,
+        "hash_mb": 4096,
+        "multipv": 1,
+        "best_move": "g2g3",
+        "eval_cp": 0,
+        "mate_in": null,
+        "pv": [],
+        "alternatives": [],
+        "margin_cp": null,
+        "verdict": "ambiguous",
+        "verdict_note": "0.00 at depth 24, settled at depth 18, and the engine's own first move is g3 - making luft, which is the antidote the record names. It spends a tempo on it in a dead position, which is a fair comment on how much the weakness is worth here."
+      }
+    }
+  ],
+  "explanations": {
+    "by_level": {
+      "beginner": "The king is trapped on the back row by its own pawns, so a rook or queen arriving there is checkmate.",
+      "intermediate": "Back-rank mate. The king's pawns block every escape square, so a rook or queen reaching the back rank is mate - unless a defender covers it, and the standing weakness is that whatever covers it can then be deflected.",
+      "advanced": "Back-rank pattern. Often the real value is the standing weakness: it overloads whatever defends the rank."
+    },
+    "by_depth": {
+      "short": "The king is boxed in by its own pawns on the back rank.",
+      "normal": "A back-rank mate: the king's own f, g and h pawns block every escape square, so a rook or queen arriving on the back rank is mate — provided the rank is not adequately defended.",
+      "deep": "The castled king sits behind three unmoved pawns, and a heavy piece arriving on the back rank gives a check it cannot escape. The standard antidote is luft, and the cost of omitting it is exact: in a controlled test, moving one pawn from h7 to h6 turned a mate in one into a mate in thirty. More often than the mate itself, the value is the standing WEAKNESS — a back rank that must be guarded overloads whatever guards it, so deflecting that defender wins material even when mate never occurs."
+    },
+    "hedge": "",
+    "lesson": ""
+  },
+  "terminology": {
+    "beginner_words": [
+      "trapped by its own pawns",
+      "back row"
+    ],
+    "advanced_words": [
+      "back-rank mate",
+      "back-rank weakness",
+      "luft"
+    ],
+    "avoid": []
+  },
+  "status": {
+    "stage": "validated",
+    "last_updated": "2026-09-01",
+    "open_questions": [],
+    "audit_notes": [
+      "2026-09-01 audit: flagged for being promoted while relying on a source carrying an access caveat. REVIEWED AND ACCEPTED — the promotion rests on ENGINE evidence, not on the unread text; the unread source supplies the concept's name and classification only. The caveat stands and is the reason this is not promoted further to 'ready'.",
+      "2026-09-01: detector field named 'backRankEscape', which does not exist anywhere in the codebase. The audit's hardcoded whitelist had been accepting it. Repointed at real code, or marked as proposed where nothing implements it."
+    ]
+  }
+}

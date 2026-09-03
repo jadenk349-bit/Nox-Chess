@@ -1,0 +1,152 @@
+{
+  "schema_version": 2,
+  "alternate_names": [
+    "tabia",
+    "ta'biya"
+  ],
+  "historical_names": [
+    "ta'biya (shatranj)"
+  ],
+  "tags": [
+    "opening",
+    "terminology",
+    "history"
+  ],
+  "subcategory": "opening theory",
+  "difficulty": "advanced",
+  "knowledge_type_note": "A term for a class of position, used mainly in opening literature.",
+  "name_status": "established-name",
+  "history": {
+    "attributions": [],
+    "first_documented_source": "chessstack-tabiya",
+    "year": null,
+    "confidence": "low",
+    "notes": "The Arabic derivation (ta'biya, battle array) is well attested and consistent across sources. One community answer instead traces the word through Sanskrit and Old Persian; that chain is not corroborated here and the two accounts are not reconciled, so the etymology is recorded at low confidence. The count of sixteen named ta'biyat in 9th-10th century shatranj manuscripts comes from a community answer and has NOT been verified against a scholarly source such as Murray.",
+    "competing_claims": [
+      {
+        "claim": "From Arabic ta'biya, battle formation",
+        "source": "chessstack-tabiya",
+        "note": "Consistent with the standard literature on shatranj."
+      },
+      {
+        "claim": "From Sanskrit, passing into Old Persian",
+        "source": "chessstack-tabiya",
+        "note": "Uncorroborated; recorded but not endorsed."
+      }
+    ],
+    "development": []
+  },
+  "engine_era_status": "reliable",
+  "engine_era_note": "Tabiyas have been pushed deeper. Where preparation once ended around the tabiya, elite games now frequently follow analysis well past it.",
+  "recognition": {
+    "preconditions": [
+      "A position reached by a standardised sequence",
+      "Several distinct plans available from it"
+    ],
+    "indicators_for": [
+      "The position recurs constantly across many games and move orders",
+      "The branching continuations embody different strategic ideas"
+    ],
+    "indicators_against": [
+      "The continuations differ only in move order while aiming at the same plan",
+      "The position is merely common rather than a branching point"
+    ],
+    "prerequisites": [
+      "transposition"
+    ],
+    "detector": null,
+    "detectability": "human-only",
+    "typical_confidence": "low",
+    "false_positive_traps": [
+      "A frequently occurring position is not a tabiya unless genuinely different plans start there.",
+      "Which positions count is a matter of editorial convention, so the label is softer than it sounds.",
+      "Not detectable by this system: identifying this requires an opening database, which the Education System does not have."
+    ]
+  },
+  "application": {
+    "typical_plans": [
+      "Learn the plans from a tabiya rather than the moves leading to it",
+      "Use it as the unit of opening study, since the moves before it are near-automatic"
+    ],
+    "typical_moves": [],
+    "typical_pawn_structures": [],
+    "typical_piece_arrangements": [],
+    "tactical_consequences": [],
+    "strategic_consequences": [
+      "Concentrates study on the point where choices actually differ"
+    ]
+  },
+  "exceptions": [
+    "The term is not used consistently, and many writers avoid it entirely."
+  ],
+  "limitations": [
+    "No formal criterion decides what is or is not a tabiya; the usage is editorial.",
+    "This system has no opening database and cannot identify tabiyas.",
+    "NO REGISTERED FALSE-POSITIVE CASE, and a FEN is not the right instrument for one here. A case in tests/false_positive_cases.json is a POSITION where the concept's surface pattern is present and the concept is not, replayed as an assertion so the system can be shown declining the error. This record's `recognition.detectability` is `human-only`: what it describes is something a player does rather than something a board contains, so there is no surface pattern for a position to carry and nothing for the system to decline. The conditions this record states are read and answered in `limitations` and in the trap audit instead. Recorded rather than filled: tools/depth_report.py still counts this concept as missing the item."
+  ],
+  "misconceptions": [
+    "That a tabiya is a forced position. The moves to it are conventional, not forced.",
+    "That it is simply a common position. The branching into different plans is the defining part."
+  ],
+  "relationships": {
+    "broader": [],
+    "narrower": [],
+    "related": [
+      "transposition",
+      "opening-repertoire",
+      "theoretical-novelty"
+    ],
+    "contrasting": [],
+    "co_occurring": [],
+    "conflicts": []
+  },
+  "examples": [],
+  "counterexamples": [],
+  "ambiguous_examples": [],
+  "explanations": {
+    "by_level": {
+      "beginner": "The standard position an opening always seems to reach, where the real choices begin.",
+      "intermediate": "A tabiya - the position where an opening's theory starts, after the near-automatic moves are done.",
+      "advanced": "What makes it a tabiya is that different plans, not merely different move orders, branch from it.",
+      "master": "The natural unit of opening study, though preparation now routinely runs well past it."
+    },
+    "by_depth": {
+      "short": "The standard starting position of an opening's real theory.",
+      "normal": "A tabiya: a position reached after a heavily standardised sequence, from which several genuinely different plans branch. The moves leading to it are played quickly and by convention; the choices that matter start there.",
+      "deep": "The point where an opening's theory actually begins. What distinguishes it from any other frequently seen position is that its continuations represent different plans rather than different routes to the same one. Depth varies widely, from eight or nine moves in some openings to seventeen in others. The word is Arabic - ta'biya, a battle array - and comes from shatranj, where the pieces moved so slowly that the approach phase was nearly uncontested and the named formations were themselves the body of opening theory."
+    },
+    "hedge": "The etymology and the count of documented shatranj formations are recorded at low confidence and were not verified against a scholarly history.",
+    "lesson": "Study the plans that branch from the standard position, not the moves that lead to it."
+  },
+  "terminology": {
+    "beginner_words": [
+      "the standard position"
+    ],
+    "advanced_words": [
+      "tabiya",
+      "main line",
+      "branching point"
+    ],
+    "avoid": [
+      "a tabiya is forced"
+    ]
+  },
+  "status": {
+    "stage": "researched",
+    "last_updated": "2026-09-01",
+    "open_questions": [],
+    "audit_notes": []
+  },
+  "id": "tabiya",
+  "canonical_name": "Tabiya",
+  "category": "opening-theory-concepts",
+  "knowledge_type": "terminology",
+  "definition_short": "A standard position reached after a heavily established sequence, from which several genuinely different plans branch.",
+  "definition_long": "The position where an opening's theory really begins. The moves leading to it are more or less forced by convention rather than by force — strong players reach it quickly and without much thought — and the branching that matters starts there.\n\nThe distinguishing feature is that the continuations from a tabiya represent DIFFERENT PLANS, not merely different move orders aiming at the same thing. That is what separates a tabiya from any other well-known position.\n\nHow deep a tabiya sits varies enormously by opening: some are reached in eight or nine moves, others as many as seventeen. The word is Arabic, ta'biya, meaning a battle formation or array. In shatranj — the medieval Arabic game — the pieces moved so slowly that the approach phase was nearly uncontested, and the named ta'biyat were the formal body of opening theory; sixteen of them are documented in ninth- and tenth-century manuscripts. The modern usage is a direct descendant of that meaning.",
+  "sources": [
+    "chessstack-tabiya",
+    "wiktionary-tabiya",
+    "wikipedia-chess-opening"
+  ],
+  "source_confidence": "low"
+}

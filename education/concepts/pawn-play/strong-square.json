@@ -1,0 +1,245 @@
+{
+  "schema_version": 2,
+  "alternate_names": [
+    "support point",
+    "strong point"
+  ],
+  "historical_names": [],
+  "tags": [
+    "squares",
+    "structure"
+  ],
+  "subcategory": "squares",
+  "difficulty": "intermediate",
+  "knowledge_type_note": "The mirror of a weak square, seen from the side that gets to use it.",
+  "name_status": "established-name",
+  "history": {
+    "attributions": [
+      {
+        "relation": "systematized-by",
+        "person": "Aron Nimzowitsch",
+        "year": 1925,
+        "note": "My System treats strong points and their overprotection as a central strategic device.",
+        "confidence": "high"
+      }
+    ],
+    "first_documented_source": "nimzowitsch-my-system",
+    "year": 1925,
+    "confidence": "medium",
+    "notes": "The vocabulary of weak and strong squares is older and anonymous; Nimzowitsch's contribution is the systematic treatment and the overprotection idea.",
+    "competing_claims": [],
+    "development": []
+  },
+  "engine_era_status": "reliable",
+  "engine_era_note": "Engines value control of such squares implicitly and are markedly less impressed than classical teaching by occupying one when a concrete alternative exists.",
+  "recognition": {
+    "preconditions": [
+      "A square no enemy pawn can attack",
+      "A friendly pawn able to defend it"
+    ],
+    "indicators_for": [
+      "The square is in or adjacent to the enemy camp",
+      "A knight can reach it in a move or two",
+      "It sits on a file your rooks can use"
+    ],
+    "indicators_against": [
+      "The square can only be held by pieces, not pawns",
+      "Nothing useful can reach it",
+      "Occupying it achieves nothing concrete"
+    ],
+    "prerequisites": [
+      "weak-square"
+    ],
+    "detector": "holesFor in lib/features.js, from the occupying side",
+    "detectability": "mechanical",
+    "typical_confidence": "high",
+    "false_positive_traps": [
+      "A square being safe is not a reason to put a piece on it. This base's outpost testing found the textbook outpost move to be only second best in the textbook outpost position.",
+      "A strong square held by pieces rather than by a pawn is expensive, and the cost can exceed what the square is worth."
+    ]
+  },
+  "application": {
+    "typical_plans": [
+      "Manoeuvre a knight towards it",
+      "Overprotect it so the defenders gain scope from doing so",
+      "Trade off the enemy piece that could contest it, usually a knight or a same-coloured bishop"
+    ],
+    "typical_moves": [],
+    "typical_pawn_structures": [
+      "Structures where an enemy pawn has advanced past the square"
+    ],
+    "typical_piece_arrangements": [
+      "A knight on the square, defended by a pawn"
+    ],
+    "tactical_consequences": [],
+    "strategic_consequences": [
+      "A strong square is permanent in a way a piece placement is not, because it is a property of the pawns"
+    ]
+  },
+  "exceptions": [
+    "A strong square is worth nothing if nothing valuable can reach it.",
+    "Occupying is not the only use: controlling the square may matter more than standing on it."
+  ],
+  "limitations": [
+    "The geometry is mechanical; the value is not, and this base has failed three times to isolate outpost value in a controlled test.",
+    "DELIBERATELY HAS NO MATCHER, and the measurement is why. A detector written to this record's preconditions - a square no enemy pawn can attack, with a friendly pawn able to defend it - fires on 80.1% of the 788 shipped positions, which is the `semi-open-file` failure this project has already made once. It is also a third name for a fact this base already reports twice: `weak-square` is the same square seen from the defender's side and `outpost` is the same square with a piece on it. This record's own note says an outpost and a strong point are really the same thing. Written, measured, and removed rather than shipped.",
+    "NO MASTER-GAME POSITION YET. This concept has no matcher, so the scan that supplied master positions to eleven other records - five famous games replayed and analysed position by position - could not nominate one here: the API never reports the concept, so there is nothing for a scan to find. Identifying an instance in a master game means reading the game, which is research rather than tooling, and it has not been done. Recorded rather than filled. RESOLVED: Ilyin-Zhenevsky - Botvinnik, Leningrad, above."
+  ],
+  "misconceptions": [
+    "That a strong square must be occupied. Controlling it can be worth more, and occupying it can be second best.",
+    "That the centre has the strong squares. They are wherever the enemy pawns have gone past."
+  ],
+  "relationships": {
+    "broader": [],
+    "narrower": [
+      "outpost"
+    ],
+    "related": [
+      "weak-square",
+      "outpost",
+      "overprotection",
+      "hole",
+      "knight-vs-bishop",
+      "prophylaxis"
+    ],
+    "contrasting": [
+      "weak-square"
+    ],
+    "co_occurring": [
+      "outpost"
+    ],
+    "conflicts": []
+  },
+  "examples": [
+    {
+      "fen": "r1bq1rk1/pp3ppp/2n5/3Np3/4P3/8/PP3PPP/R1BQ1RK1 w - - 0 1",
+      "note": "Constructed controlled pair, positive half. Both of this record's preconditions and nothing else: no enemy pawn can ever attack d5 (Black's c-pawn is gone, and the e5 pawn captures towards d4 and f4, never backwards), and a friendly pawn on e4 defends it. The knight on d5 is therefore permanent AND cheap, which is the second condition doing the work this record says it does - 'the first makes a piece there permanent; the second makes it cheap, because the piece is not tying down other pieces to hold it'. Material is symmetric down to the pawn count. What this base actually reports here is `outpost` for White and `weak-square` for Black; `strong-square` has no matcher of its own, and saying so is more useful than pretending the neighbouring concept is this one.",
+      "origin_kind": "constructed-test",
+      "concept_role": "positive",
+      "side_to_move_benefits": "white",
+      "engine": {
+        "engine_id": "Stockfish 18",
+        "test_level": 3,
+        "depth": 22,
+        "threads": 10,
+        "hash_mb": 4096,
+        "multipv": 1,
+        "best_move": "c1e3",
+        "eval_cp": 30,
+        "mate_in": null,
+        "pv": [],
+        "alternatives": [],
+        "margin_cp": null,
+        "verdict": "supports",
+        "verdict_note": "+0.30 with symmetric material. A real advantage and a small one, which is what this record's own engine_era_note predicts: engines 'are markedly less impressed than classical teaching by occupying one'. Worth keeping against overclaiming - the engine's line goes Nxe7+ and Nxc6, trading the knight off the strong square. The square is an asset, not a plan."
+      },
+      "controlled_pair_with": "r1bq1rk1/pp3ppp/2n5/3Np3/8/4P3/PP3PPP/R1BQ1RK1 w - - 0 1"
+    },
+    {
+      "fen": "8/5k2/p1p5/1pp1Pp2/2Pn3p/1PKN1R1P/P4Pr1/8 w - - 2 33",
+      "origin_kind": "historical-game",
+      "game": "Ilyin-Zhenevsky - Botvinnik, Leningrad",
+      "concept_role": "positive",
+      "side_to_move_benefits": "black",
+      "note": "A KNIGHT ON A SQUARE NO PAWN CAN EVER ATTACK, held by a world champion, and this record has needed one. Black's knight sits on d4. White's c- and e-pawns are the only pawns that could ever challenge it and both have gone past - c4 and e5 - so d4 cannot be attacked by a pawn for the rest of the game. Black's c5 pawn defends it.\n\nWHY THIS RECORD HAS NO MATCHER, which is the reason the position had to be found this way. A matcher was written for it exactly to the two preconditions its record states, and it fired on 80.1% of the 788 shipped positions. A concept true of three quarters of all boards cannot be the most informative thing about any of them, so the matcher was thrown away and the record kept. The API therefore never reports `strong-square` and no scan that reads the API could nominate a position for it. Layer 3 still computes the feature, and that is what found this one - the outposts list, restricted to the central files, in positions where there is exactly ONE of them. That restriction is doing the work the discarded matcher could not: it is not a definition of the concept, it is a way of finding the positions where the concept is the striking fact rather than one of five.\n\nPROVENANCE. 330 replayed master games, read through Layer 3 rather than through the API. Replayed legally through the page's own move generator. No annotator read."
+    }
+  ],
+  "counterexamples": [
+    {
+      "fen": "r1bq1rk1/pp3ppp/2n5/3Np3/8/4P3/PP3PPP/R1BQ1RK1 w - - 0 1",
+      "note": "Constructed controlled pair, negative half. Identical to the positive except that White's pawn stands on e3 instead of e4, so d5 is still a square no enemy pawn can attack and is no longer defended by a friendly pawn. The record's second precondition fails, and with it this record's own indicator_against comes true - 'the square can only be held by pieces, not pawns': the knight on d5 is attacked by the queen on d8 and held only by the queen on d1. A strong square held by pieces is a liability wearing a good square's clothes, which is this record's own sentence.",
+      "origin_kind": "constructed-test",
+      "concept_role": "negative",
+      "side_to_move_benefits": "neither",
+      "engine": {
+        "engine_id": "Stockfish 18",
+        "test_level": 3,
+        "depth": 22,
+        "threads": 10,
+        "hash_mb": 4096,
+        "multipv": 1,
+        "best_move": "e3e4",
+        "eval_cp": -17,
+        "mate_in": null,
+        "pv": [],
+        "alternatives": [],
+        "margin_cp": null,
+        "verdict": "supports",
+        "verdict_note": "-0.17, against +0.30 for the same position with that pawn one square further up: a swing of 47 centipawns attributable to the pawn and nothing else. And the engine's OWN FIRST MOVE is e3-e4 - it plays the move that turns this half of the pair into the other half, which is a stronger statement about what the pawn is worth than the evaluation is."
+      },
+      "controlled_pair_with": "r1bq1rk1/pp3ppp/2n5/3Np3/4P3/8/PP3PPP/R1BQ1RK1 w - - 0 1"
+    }
+  ],
+  "ambiguous_examples": [
+    {
+      "fen": "r2q1rk1/pp3ppp/8/4p3/4P3/8/PP1Q1PPP/R4RK1 w - - 0 1",
+      "note": "d5 satisfies both of this record's preconditions: no black pawn can ever attack it, and White's e4 pawn defends it. It is also useless, because there is no minor piece left on the board to put there. This record's second indicator_against is exactly that - \"Nothing useful can reach it\" - and its second trap says the cost of holding a square with pieces can exceed what the square is worth: a queen or a rook on d5 is evictable by anything cheaper, and nothing cheaper exists. Filed as ambiguous rather than negative because the square really is strong in the structural sense the record defines, permanently, and would become valuable the moment a knight appeared.",
+      "origin_kind": "constructed-test",
+      "concept_role": "ambiguous",
+      "engine": {
+        "engine_id": "Stockfish 18",
+        "test_level": 3,
+        "depth": 22,
+        "threads": 10,
+        "hash_mb": 4096,
+        "multipv": 1,
+        "best_move": "d2b4",
+        "eval_cp": 1,
+        "mate_in": null,
+        "pv": [],
+        "alternatives": [],
+        "margin_cp": null,
+        "verdict": "ambiguous",
+        "verdict_note": "+0.01 with symmetric material - queen and two rooks each. The square is real and the position is dead level, which is the honest measure of what a strong square with nothing to put on it is worth."
+      }
+    }
+  ],
+  "explanations": {
+    "by_level": {
+      "beginner": "A square in their half that their pawns can never attack and one of yours can defend.",
+      "intermediate": "A strong square. Get a knight there — but check that being there actually does something.",
+      "advanced": "Two conditions: no enemy pawn can attack it, and one of your pawns can defend it. The second is what makes it cheap.",
+      "master": "Nimzowitsch's move is to overprotect it, on the grounds that the defenders gain scope from bearing on a square that matters."
+    },
+    "by_depth": {
+      "short": "A square their pawns cannot attack and yours can defend.",
+      "normal": "A strong square: the mirror of a weak one, seen from the side that gets to use it. It needs both conditions - no enemy pawn able to attack it, and a friendly pawn able to defend it - because the first makes a piece there permanent and the second makes it cheap.",
+      "deep": "The same geometry as a weak square, from the other side. What makes it strong rather than merely reachable is the pair of conditions: no enemy pawn can attack it, so a piece there cannot be driven away, and one of your own pawns can defend it, so holding it does not tie down other pieces. Nimzowitsch's contribution was overprotection - defending such a point beyond necessity, on the reasoning that the defenders gain their own scope from bearing on a square that matters. The outpost is the special case where a minor piece actually occupies it, and this base's own engine testing is the standing warning that occupying is not automatically best."
+    },
+    "hedge": "",
+    "lesson": "Ask whether a pawn can defend it. That is what separates a strong square from a square you can reach."
+  },
+  "terminology": {
+    "beginner_words": [
+      "a safe square in their half"
+    ],
+    "advanced_words": [
+      "strong point",
+      "support point",
+      "outpost",
+      "overprotection"
+    ],
+    "avoid": [
+      "put a knight on it",
+      "the centre squares are strong"
+    ]
+  },
+  "status": {
+    "stage": "researched",
+    "last_updated": "2026-09-01",
+    "open_questions": [],
+    "audit_notes": []
+  },
+  "id": "strong-square",
+  "canonical_name": "Strong square",
+  "category": "strong-squares",
+  "knowledge_type": "positional-concept",
+  "definition_short": "A square in or near the enemy position that your pawns can defend and theirs cannot attack.",
+  "definition_long": "The same geometry as a weak square, described from the other side of the board. A square is weak FOR the player who can no longer cover it with a pawn, and strong FOR the opponent who can.\n\nTWO CONDITIONS make it strong rather than merely reachable: no enemy pawn can attack it, and one of your own pawns can defend it. The first makes a piece there permanent; the second makes it cheap, because the piece is not tying down other pieces to hold it. A piece on a strong square that has to be defended by two pieces is a liability wearing a good square's clothes.\n\nNIMZOWITSCH'S CONTRIBUTION was to treat such a point as something to be OVERPROTECTED — defended beyond necessity — on the reasoning that the defenders gain their own scope from bearing on a square that matters, so the overprotection costs less than it appears to. That is the constructive form of the idea, and it is recorded on its own concept.\n\nTHE OUTPOST IS THE SPECIAL CASE: a strong square actually occupied by a minor piece, usually a knight. The strong square is the real estate; the outpost is what gets built on it. And this base's engine testing on outposts is the standing warning that occupying one is not automatically the best move.",
+  "sources": [
+    "nimzowitsch-my-system",
+    "wikipedia-outpost",
+    "chessprogramming-outposts"
+  ],
+  "source_confidence": "high"
+}

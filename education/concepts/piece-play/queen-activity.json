@@ -1,0 +1,204 @@
+{
+  "schema_version": 2,
+  "alternate_names": [],
+  "historical_names": [],
+  "tags": [
+    "pieces",
+    "queen"
+  ],
+  "subcategory": "pieces",
+  "difficulty": "intermediate",
+  "knowledge_type_note": "Observations about how the most valuable piece behaves, which is mostly a story about what it cannot afford to do.",
+  "name_status": "established-name",
+  "history": {
+    "attributions": [],
+    "first_documented_source": "wikipedia-chess-piece-values",
+    "year": null,
+    "confidence": "unknown",
+    "notes": "No coinage; ordinary observations about the piece.",
+    "competing_claims": [],
+    "development": []
+  },
+  "engine_era_status": "reliable",
+  "engine_era_note": "Engines are far more willing than classical teaching to bring the queen out early when concrete lines support it, which has softened the rule without removing its basis - the tempo cost is real and measurable.",
+  "recognition": {
+    "preconditions": [
+      "A queen is on the board"
+    ],
+    "indicators_for": [
+      "Weaknesses on both square colours",
+      "An exposed enemy king",
+      "A passed pawn the queen can escort"
+    ],
+    "indicators_against": [
+      "The queen can be attacked by cheaper pieces with tempo",
+      "The queen is tied to defending a single point"
+    ],
+    "prerequisites": [
+      "piece-activity"
+    ],
+    "detector": null,
+    "detectability": "heuristic",
+    "typical_confidence": "low",
+    "false_positive_traps": [
+      "An advanced queen is not an active queen. It is often a queen about to be chased, and the chasing moves develop the opponent.",
+      "This base measured the early-queen cost at about 0.68 in the standard case - real, and much smaller than the usual teaching tone."
+    ]
+  },
+  "application": {
+    "typical_plans": [
+      "Bring the queen in after the minor pieces, not before",
+      "Use it against positions weak on both colours",
+      "Escort a passed pawn with it in the endgame",
+      "Decide deliberately whether to allow the queen trade"
+    ],
+    "typical_moves": [],
+    "typical_pawn_structures": [],
+    "typical_piece_arrangements": [
+      "Queen behind a rook or bishop in a battery, rather than in front",
+      "Queen and knight together"
+    ],
+    "tactical_consequences": [
+      "The queen is the piece most vulnerable to forks and skewers, precisely because of its value"
+    ],
+    "strategic_consequences": [
+      "Trading queens changes the phase and with it what the king is for"
+    ]
+  },
+  "exceptions": [
+    "In endgames the queen leads perfectly well, since there is nothing cheap left to chase it.",
+    "Some openings bring the queen out early by design and pay a measured, affordable price."
+  ],
+  "limitations": [
+    "The queen-and-knight claim is recorded from the literature and has not been tested here.",
+    "Most of this record is about what the queen should not do, which reflects the sources rather than a bias.",
+    "Named 2026-09-02 as the concept that fits a corpus position `piece-activity` cannot: Keene's note on Reti-Capablanca 1924 that Capablanca 'is doing his utmost with his strongest piece'. A single-piece activity claim needs a single-piece detector, and this concept has none."
+  ],
+  "misconceptions": [
+    "That the strongest piece should attack first. Its value is exactly why it should not.",
+    "That an advanced queen is doing something. It is usually about to be attacked."
+  ],
+  "relationships": {
+    "broader": [
+      "piece-activity"
+    ],
+    "narrower": [],
+    "related": [
+      "piece-activity",
+      "early-queen-development",
+      "queen-endgames",
+      "piece-exchanges",
+      "battery",
+      "fork",
+      "skewer",
+      "perpetual-check",
+      "king-attack"
+    ],
+    "contrasting": [],
+    "co_occurring": [],
+    "conflicts": []
+  },
+  "examples": [],
+  "counterexamples": [
+    {
+      "fen": "rnbqkbnr/pppp1ppp/8/4p2Q/4P3/8/PPPP1PPP/RNB1KBNR b KQkq - 1 2",
+      "note": "After 1.e4 e5 2.Qh5 - the most-played illustration in existence of this record's first trap: 'An advanced queen is not an active queen. It is often a queen about to be chased, and the chasing moves develop the opponent.' What makes this a good counterexample rather than a cheap one is the SIZE of the effect. The engine says +0.39 for White, which is an ordinary opening edge, and this base has measured the early-queen cost at about 0.68 in the standard case. The move is not a blunder, and the teaching tone around it is louder than the number. The record says that too, and this position is why it says it.",
+      "origin_kind": "constructed-test",
+      "concept_role": "negative",
+      "side_to_move_benefits": "neither",
+      "engine": {
+        "engine_id": "Stockfish 18",
+        "test_level": 3,
+        "depth": 24,
+        "threads": 10,
+        "hash_mb": 4096,
+        "multipv": 1,
+        "best_move": "b8c6",
+        "eval_cp": 39,
+        "mate_in": null,
+        "pv": [],
+        "alternatives": [],
+        "margin_cp": null,
+        "verdict": "supports",
+        "verdict_note": "+0.39 at depth 24, and the engine's own line is ...Nc6 and ...g6 with Qf3 - the queen driven back to a square it could have reached in one move, having developed two black pieces on the way. The trap's mechanism is visible in the principal variation rather than in the number."
+      }
+    }
+  ],
+  "ambiguous_examples": [
+    {
+      "fen": "4rnk1/r2n1p2/1p1R2pp/pP5q/3N4/P3N1P1/1Q3PKP/3R4 b - - 0 27",
+      "move": "Qe5",
+      "move_uci": "h5e5",
+      "note": "Reti-Capablanca, New York 1924, 27...Qe5, annotated by Raymond Keene: 'Capablanca is really doing his utmost on the fourth rank with his strongest piece, but the queen is no match for White's heavily centralised knights and rooks.' This record's limitations already named this position as the one it exists to cover; this is it, on the record. It is ambiguous in the strict sense - the queen genuinely IS the most active piece on the board, a titled annotator says so in as many words, and it is worth nothing: Keene's own verdict is that Black had to give up the exchange with 27...Rxe3 instead. Corpus entries `reti-capablanca-1924-27Qe5-initiative-negative` and `reti-capablanca-1924-27Qe5-piece-activity-ambiguous` are the same position read for two neighbouring concepts.",
+      "origin_kind": "historical-game",
+      "game": "Reti-Capablanca, New York 1924 (round 5)",
+      "concept_role": "ambiguous",
+      "attributed_by": "Raymond Keene (GM), The Spectator Australia - corpus entry reti-capablanca-1924-27Qe5-piece-activity-ambiguous",
+      "engine": {
+        "engine_id": "Stockfish 18",
+        "test_level": 3,
+        "depth": 22,
+        "threads": 10,
+        "hash_mb": 4096,
+        "multipv": 1,
+        "best_move": "Rxe3",
+        "eval_cp": null,
+        "mate_in": null,
+        "pv": [],
+        "alternatives": [],
+        "margin_cp": null,
+        "verdict": "ambiguous",
+        "verdict_note": "The engine prefers the exchange sacrifice Keene recommends over the queen move that was played: the annotation and the engine agree that one active queen is not the resource here. Depth 22, multipv 3, carried over from the corpus entry."
+      }
+    }
+  ],
+  "explanations": {
+    "by_level": {
+      "beginner": "The queen is the strongest piece, which is why it should not go first — everything can chase it.",
+      "intermediate": "Bring the queen in behind the other pieces. In front, it gets attacked and driven back with tempo.",
+      "advanced": "It is strongest where its rook and bishop movements combine rather than duplicate — weaknesses on both colours, or an exposed king.",
+      "master": "Whether to allow the queen trade is often the whole strategic question, because it changes what the king is for."
+    },
+    "by_depth": {
+      "short": "The strongest piece, and the wrong one to attack with first.",
+      "normal": "The queen moves as rook and bishop together, and is worth more than anything that can attack it - so it must retreat from every threat. That is why it should not lead an attack or come out early, and why tying it to defending one point wastes it.",
+      "deep": "Almost everything true about queen play follows from its value: it must retreat from any threat, so a queen that arrives first is driven back with tempo by cheaper pieces, and a queen tied to one defensive job is a nine-point piece doing a one-point task. It is strongest where its two movements combine rather than duplicate - against weaknesses on both colours, against an exposed king, and escorting a passed pawn it can shepherd alone. Queen and knight complement each other where queen and rook duplicate lines, which is a real asymmetry though an untested one here. And the queen trade is often the most consequential exchange available, because it changes what the king is for."
+    },
+    "hedge": "",
+    "lesson": "The queen goes in last, and the decision to trade it is usually bigger than it looks."
+  },
+  "terminology": {
+    "beginner_words": [
+      "the strongest piece",
+      "she gets chased"
+    ],
+    "advanced_words": [
+      "queen activity",
+      "battery",
+      "the queen trade",
+      "escorting"
+    ],
+    "avoid": [
+      "attack with the queen",
+      "an advanced queen is active"
+    ]
+  },
+  "status": {
+    "stage": "researched",
+    "last_updated": "2026-09-01",
+    "open_questions": [],
+    "audit_notes": []
+  },
+  "id": "queen-activity",
+  "canonical_name": "Queen activity",
+  "category": "queen",
+  "knowledge_type": "positional-concept",
+  "definition_short": "The queen combines rook and bishop movement, which makes it the strongest piece and the worst attacker to lead with.",
+  "definition_long": "THE QUEEN'S PROBLEM IS ITS VALUE. It moves like a rook and a bishop together and is therefore worth more than any piece that can attack it, so it must retreat from every threat. That single fact generates most of what is true about queen play:\n\n- IT SHOULD NOT LEAD AN ATTACK. A queen arriving first is attacked by cheaper pieces and driven off with tempo. It belongs behind the attack, arriving when the defenders are already committed.\n- IT SHOULD NOT COME OUT EARLY, for the same reason, which this base has measured at about two thirds of a pawn in the standard case.\n- IT IS A POOR BLOCKADER and a poor defender of a single point, because tying a nine-point piece to one job wastes most of it.\n\nWHERE IT IS STRONGEST is where its two movements combine rather than duplicate: against a position with weaknesses on both colours, against an exposed king where checks come from everywhere, and in endgames with a passed pawn it can escort alone.\n\nTHE QUEEN AND KNIGHT PAIRING is a genuine observation worth keeping: the two complement each other because the knight covers the squares the queen cannot reach in one move, while queen and rook duplicate lines. It is a real asymmetry rather than a saying, though this base has not tested it and records it as sourced rather than demonstrated.\n\nTHE EXCHANGE OF QUEENS is often the most consequential trade on the board, because it converts the position into one where the king is a piece rather than a liability. Deciding whether to allow it is frequently the whole strategic question.",
+  "sources": [
+    "wikipedia-chess-piece-values",
+    "chessstrategyonline-opening-principles",
+    "dvoretsky-endgame-manual"
+  ],
+  "source_confidence": "medium"
+}

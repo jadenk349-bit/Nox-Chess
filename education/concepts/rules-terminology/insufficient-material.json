@@ -1,0 +1,193 @@
+{
+  "schema_version": 2,
+  "id": "insufficient-material",
+  "canonical_name": "Insufficient material",
+  "alternate_names": [
+    "insufficient mating material",
+    "no mating material"
+  ],
+  "historical_names": [],
+  "category": "official-rules",
+  "subcategory": "implementation convention",
+  "tags": [],
+  "knowledge_type": "terminology",
+  "knowledge_type_note": "Type I, not A. This is the single clearest case in the rules area where a widely used term is a convention rather than the codified rule, and it is the reason the epistemic typing exists.",
+  "name_status": "common-usage",
+  "difficulty": "beginner",
+  "definition_short": "The common software test for an automatic draw: the material on the board could not force mate. It approximates, but is not identical to, FIDE's 'dead position'.",
+  "definition_long": "'Insufficient material' is not a term in the FIDE Laws. It is the convention chess servers and engines use to implement Art. 5.2.2 automatically, normally covering K vs K, K+B vs K, K+N vs K, and (in most implementations) K+B vs K+B with bishops on the same colour.\n\nIt differs from the rule in both directions. It misses dead positions that have ample material but are completely blocked. And implementations disagree at the edges — notably K+N+N vs K, which is drawn in practice but is not a dead position under Art. 5.2.2 because a helpmate exists.\n\nRecorded as terminology (type I) rather than as an official rule, precisely so the Education System does not present a convention as a Law.",
+  "history": {
+    "attributions": [],
+    "first_documented_source": null,
+    "year": null,
+    "confidence": "unknown",
+    "notes": "A software convention with no single origin; not codified by FIDE.",
+    "competing_claims": [],
+    "development": []
+  },
+  "engine_era_status": "not-applicable",
+  "engine_era_note": "",
+  "sources": [
+    "fide-laws-2023",
+    "fide-laws-2023-pdf"
+  ],
+  "source_confidence": "medium",
+  "recognition": {
+    "preconditions": [
+      "Only kings, or a king and a single minor piece, remain for the side in question"
+    ],
+    "indicators_for": [
+      "K vs K",
+      "K+B vs K",
+      "K+N vs K",
+      "K+B vs K+B same colour squares"
+    ],
+    "indicators_against": [
+      "Any pawn, rook or queen on the board"
+    ],
+    "prerequisites": [],
+    "detector": "lib/matchers.js: insufficient-material, over the material counts",
+    "detectability": "mechanical",
+    "typical_confidence": "medium",
+    "false_positive_traps": []
+  },
+  "application": {
+    "typical_plans": [],
+    "typical_moves": [],
+    "typical_pawn_structures": [],
+    "typical_piece_arrangements": [],
+    "tactical_consequences": [],
+    "strategic_consequences": []
+  },
+  "exceptions": [
+    "Implementations differ on K+N+N vs K and on K+B vs K+N; do not state a universal rule.",
+    "Blocked positions with full material are dead under the Laws but are not caught by this test."
+  ],
+  "limitations": [
+    "Because implementations vary, an explanation should say what THIS program does, not what 'the rules' say.",
+    "Reported only when NEITHER side can force mate, which is the position that is drawn rather than merely hard to win. Adding it corrected a test that had asserted the OPPOSITE: three suites required bare kings to license nothing at all, which was a missing detector being asserted as a virtue. The refusal principle they were demonstrating is real and is now demonstrated on two kings and two blocked e-pawns, where nothing researched applies."
+  ],
+  "misconceptions": [],
+  "relationships": {
+    "broader": [],
+    "narrower": [],
+    "related": [
+      "dead-position"
+    ],
+    "contrasting": [],
+    "co_occurring": [],
+    "conflicts": []
+  },
+  "examples": [
+    {
+      "fen": "8/8/4k3/8/8/2B5/8/4K3 w - - 0 1",
+      "note": "King and bishop against a bare king: a proven draw, and the positive half of the pair whose other half - the same board with a knight added on d3 - is a forced win in 57.",
+      "origin_kind": "constructed-test",
+      "concept_role": "supports",
+      "side_to_move_benefits": "neither",
+      "controlled_pair_with": "8/8/4k3/8/8/2BN4/8/4K3 w - - 0 1",
+      "tablebase": {
+        "source": "Lichess tablebase (Syzygy, 7-piece)",
+        "pieces": 3,
+        "wdl": "draw",
+        "dtz": 0,
+        "dtm": 0,
+        "category": "draw",
+        "checkmate": false,
+        "stalemate": false,
+        "note": "PROVEN DRAW at dtz 0: mate cannot be forced, which is what insufficient material means."
+      }
+    },
+    {
+      "fen": "8/8/K7/8/6k1/8/n7/8 w - - 0 53",
+      "origin_kind": "historical-game",
+      "game": "Bondarevsky-Bronstein, USSR Championship",
+      "concept_role": "positive",
+      "side_to_move_benefits": "neither",
+      "note": "KING AND KNIGHT AGAINST KING, reached in a real game and not built to show the rule. That distinction is the whole reason to keep this position: every other example on this record was constructed, and a constructed position can demonstrate a rule that never actually arises over the board.\n\nIt is one of the four cases the convention names - bare kings, a lone bishop, a lone knight, two same-coloured bishops - and the matcher tests the four by name rather than by the looser 'at most one minor per side', which admits knight against knight and opposite-coloured bishops, in both of which a helpmate exists and no arbiter declares the game drawn.\n\nPROVENANCE. Found by tools/harvest_games.js. Replayed legally through the page's own move generator."
+    }
+  ],
+  "counterexamples": [
+    {
+      "fen": "8/8/4k3/8/8/2BN4/8/4K3 w - - 0 1",
+      "note": "King, bishop and knight against a bare king. Two minor pieces, no pawns, and a position that LOOKS like the drawn minor-piece ending - and it is a forced win in 57. The record's precondition is a single minor piece, and this is the position that shows why the word 'single' is load-bearing rather than decorative. Paired with the same board minus the knight, which is a proven draw.",
+      "origin_kind": "constructed-test",
+      "concept_role": "negative",
+      "side_to_move_benefits": "white",
+      "controlled_pair_with": "8/8/4k3/8/8/2B5/8/4K3 w - - 0 1",
+      "tablebase": {
+        "source": "Lichess tablebase (Syzygy, 7-piece)",
+        "pieces": 4,
+        "wdl": "win",
+        "dtz": 57,
+        "dtm": 57,
+        "category": "win",
+        "checkmate": false,
+        "stalemate": false,
+        "note": "PROVEN WIN in 57 for White. Mate is not merely possible here, it is forced, so the material is not insufficient by any reading. The paired K+B ending is a proven draw at dtz 0."
+      }
+    },
+    {
+      "fen": "4k3/8/8/3n4/4N3/8/8/4K3 w - - 0 1",
+      "note": "Registered false-positive case `two-knights-facing-each-other`, kept on the record as well as in tests/false_positive_cases.json so that the concept carries its own negative evidence. THE SURFACE PATTERN IS PRESENT: Two kings and one knight each. Neither side has a pawn, a rook or a queen, and neither has more than one minor piece — this record's precondition, word for word. WHY IT IS NOT THE CONCEPT: The precondition is not the convention. This record's own definition_long names what the convention covers: \"K vs K, K+B vs K, K+N vs K, and (in most implementations) K+B vs K+B with bishops on the same colour.\" Knight against knight is not on that list, and the reason is the one the record gives in the next paragraph about K+N+N vs K: a helpmate exists, so the position is not dead under Art. 5.2.2 and no arbiter declares the game drawn. WHAT THE SYSTEM DOES: THIS WAS A REAL FALSE POSITIVE and it was reported at the type's ceiling. The matcher tested the precondition per side — no pawn, rook or queen, at most one minor — and that admits two combinations the convention excludes: knight against knight, and bishops of OPPOSITE colours. It now tests the four combinations by name. All four still report: bare kings, a lone bishop, a lone knight, and two bishops of the same colour; and the sentence says which of the four it is, so a reader can check the claim against the board. The distinction matters because this record is filed as TERMINOLOGY rather than as an official rule, precisely so the system does not present a convention as a Law — and a convention that has been widened past what its own definition says is the worst of both.",
+      "origin_kind": "constructed-test",
+      "concept_role": "negative",
+      "false_positive_case": "two-knights-facing-each-other",
+      "engine": {
+        "engine_id": "Stockfish 18",
+        "test_level": 3,
+        "depth": 24,
+        "threads": 10,
+        "hash_mb": 4096,
+        "multipv": 1,
+        "best_move": "e4f6",
+        "eval_cp": 0,
+        "mate_in": null,
+        "pv": [],
+        "alternatives": [],
+        "margin_cp": null,
+        "verdict": "supports",
+        "verdict_note": "0.00 at depth 24. Knight against knight IS drawn in practice and is NOT covered by the convention, because a helpmate exists and no arbiter ends the game - which is the distinction this record is filed as terminology to preserve. The engine's zero and the convention's silence are two different facts and this position separates them."
+      }
+    },
+    {
+      "fen": "4kb2/8/8/8/8/8/8/4KB2 w - - 0 1",
+      "note": "Registered false-positive case `bishops-of-opposite-colours-are-not-insufficient`, kept on the record as well as in tests/false_positive_cases.json so that the concept carries its own negative evidence. THE SURFACE PATTERN IS PRESENT: King and bishop against king and bishop. One minor piece each, nothing else on the board, and the two bishops can never attack one another. WHY IT IS NOT THE CONCEPT: Same trap, other half. The convention covers K+B vs K+B only when the bishops are on the SAME colour, because bishops of opposite colours cover disjoint square sets and a helpmate is available. The record's definition_long says 'with bishops on the same colour' and the matcher did not read the qualifier. WHAT THE SYSTEM DOES: The API is now silent on insufficient-material here and reports `opposite-coloured-bishops` instead, which is the correct concept for this board and was already firing beside the wrong one. The same position with the black bishop on g8 rather than f8 — both bishops light — still reports insufficient-material, which is the controlled comparison: one bishop, one square, and the difference between a convention that applies and one that does not.",
+      "origin_kind": "constructed-test",
+      "concept_role": "negative",
+      "false_positive_case": "bishops-of-opposite-colours-are-not-insufficient"
+    }
+  ],
+  "ambiguous_examples": [],
+  "explanations": {
+    "by_level": {
+      "beginner": "There is not enough material left on the board to checkmate, so the game is drawn.",
+      "intermediate": "Insufficient material: neither side can force mate with what remains, so the game ends in a draw.",
+      "advanced": "The implementation convention for Art. 5.2.2. Note it is narrower than 'dead position' and varies between programs."
+    },
+    "by_depth": {
+      "short": "The software convention for an automatic draw: what is left could not force mate.",
+      "normal": "Insufficient material is not a term in the FIDE Laws. It is the convention servers and engines use to implement Art. 5.2.2 automatically, and it covers four cases: king against king, king and bishop against king, king and knight against king, and king and bishop against king and bishop with the bishops on the SAME colour.",
+      "deep": "It differs from the Law in both directions, which is why this base files it as terminology rather than as a rule. It MISSES dead positions with ample material that are completely blocked. And it is narrower than people assume at the edges: knight against knight and bishops of OPPOSITE colours both satisfy 'neither side can force mate' and are not in the convention, because a helpmate exists and no arbiter ends the game. This matcher reported both until it was corrected against the record's own definition."
+    },
+    "hedge": "This is how most software implements the rule, not a phrase from the FIDE Laws themselves.",
+    "lesson": ""
+  },
+  "terminology": {
+    "beginner_words": [
+      "not enough pieces left"
+    ],
+    "advanced_words": [
+      "insufficient material"
+    ],
+    "avoid": [
+      "the rules say insufficient material"
+    ]
+  },
+  "status": {
+    "stage": "researched",
+    "last_updated": "2026-08-31",
+    "open_questions": [],
+    "audit_notes": []
+  }
+}

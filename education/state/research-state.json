@@ -1,0 +1,1876 @@
+{
+  "version": 1,
+  "last_session": "2026-09-03",
+  "engine": {
+    "id": "Stockfish 18",
+    "note": "Filled in by tools/sf_analyse.py --probe"
+  },
+  "counters": {
+    "concepts_total": 137,
+    "concepts_stub": 0,
+    "concepts_researched": 29,
+    "concepts_validated": 4,
+    "concepts_needs_review": 0,
+    "sources_reviewed": 205,
+    "positions_tested": 292,
+    "matches_validated": 170,
+    "false_matches": 28,
+    "ambiguous_matches": 94,
+    "by_stage": {
+      "ready": 2,
+      "researched": 126,
+      "validated": 9
+    },
+    "tablebase_positions": 91,
+    "concepts_fully_covered": 51,
+    "areas_touched": 85,
+    "areas_total": 85
+  },
+  "areas": {
+    "official-rules": {
+      "domain": "rules-terminology",
+      "status": "researched",
+      "concepts": [
+        "castling",
+        "en-passant",
+        "checkmate",
+        "threefold-repetition",
+        "stalemate",
+        "insufficient-material",
+        "dead-position",
+        "seventy-five-move-rule",
+        "check",
+        "fivefold-repetition",
+        "fifty-move-rule",
+        "promotion"
+      ],
+      "open_questions": [],
+      "last_touched": "2026-08-31"
+    },
+    "chess-terminology": {
+      "domain": "rules-terminology",
+      "status": "covered",
+      "concepts": [
+        "chess-terminology"
+      ],
+      "open_questions": [],
+      "last_touched": "2026-09-01",
+      "last_updated": "2026-09-01",
+      "note": "Meta-record of the naming discipline: name_status, the refusal to coin terms for detector tags, and the five deliberately unclaimed motifs."
+    },
+    "notation": {
+      "domain": "rules-terminology",
+      "status": "covered",
+      "concepts": [
+        "notation"
+      ],
+      "open_questions": [],
+      "last_touched": "2026-09-01",
+      "last_updated": "2026-09-01",
+      "note": "Four systems and why they differ; all four are in use in this codebase."
+    },
+    "board-geometry": {
+      "domain": "board-geometry",
+      "status": "covered",
+      "concepts": [
+        "board-geometry"
+      ],
+      "open_questions": [],
+      "last_touched": "2026-09-01",
+      "last_updated": "2026-09-01",
+      "note": "Colour-boundedness, the knight's colour change, and the rule of the square with a tablebase-proven side-to-move pair."
+    },
+    "piece-properties": {
+      "domain": "board-geometry",
+      "status": "covered",
+      "concepts": [
+        "piece-properties"
+      ],
+      "open_questions": [],
+      "last_touched": "2026-09-01",
+      "last_updated": "2026-09-01",
+      "note": "The point count typed as a rule of thumb, with the bishop/knight dispute and a proven-draw counterexample a bishop and pawn up."
+    },
+    "ranks-files-diagonals": {
+      "domain": "board-geometry",
+      "status": "covered",
+      "concepts": [
+        "ranks-files-diagonals"
+      ],
+      "open_questions": [],
+      "last_touched": "2026-09-01",
+      "last_updated": "2026-09-01",
+      "note": "Lines as what long-range pieces actually contest, and pawns as the only thing that opens or closes a file."
+    },
+    "tactical-motifs": {
+      "domain": "tactics",
+      "status": "not-started",
+      "concepts": [
+        "skewer",
+        "zwischenzug",
+        "removing-the-defender",
+        "trapped-piece",
+        "double-attack",
+        "overloading",
+        "discovered-attack",
+        "desperado",
+        "interference",
+        "pin",
+        "double-check",
+        "fork",
+        "clearance",
+        "x-ray",
+        "deflection",
+        "decoy",
+        "discovered-check",
+        "battery",
+        "knight-fork"
+      ],
+      "open_questions": [],
+      "last_touched": "2026-09-01"
+    },
+    "tactical-combinations": {
+      "domain": "tactics",
+      "status": "covered",
+      "concepts": [
+        "tactical-combinations"
+      ],
+      "open_questions": [],
+      "last_touched": "2026-09-01",
+      "last_updated": "2026-09-01",
+      "note": "Written as a contested definition: four named authorities, a failed 1952 consensus attempt, and Averbakh arguing both sides four years apart."
+    },
+    "checks-captures-threats": {
+      "domain": "tactics",
+      "status": "not-started",
+      "concepts": [
+        "hanging-piece",
+        "loose-piece"
+      ],
+      "open_questions": [],
+      "last_touched": "2026-08-31"
+    },
+    "forcing-moves": {
+      "domain": "tactics",
+      "status": "covered",
+      "concepts": [
+        "forcing-moves"
+      ],
+      "open_questions": [],
+      "last_touched": "2026-09-01",
+      "last_updated": "2026-09-01",
+      "note": "Written as a search-ordering rule with an explicit refusal to treat forcing as evidence of quality."
+    },
+    "named-tactical-patterns": {
+      "domain": "tactics",
+      "status": "not-started",
+      "concepts": [
+        "greek-gift"
+      ],
+      "open_questions": [],
+      "last_touched": "2026-08-31"
+    },
+    "named-mating-patterns": {
+      "domain": "tactics",
+      "status": "not-started",
+      "concepts": [
+        "smothered-mate",
+        "back-rank-mate"
+      ],
+      "open_questions": [],
+      "last_touched": "2026-08-31"
+    },
+    "calculation-principles": {
+      "domain": "calculation",
+      "status": "covered",
+      "concepts": [
+        "calculation"
+      ],
+      "open_questions": [],
+      "last_touched": "2026-09-01",
+      "last_updated": "2026-09-01",
+      "note": "calculation written, covering forcing-moves-first, breadth before depth, and the human pruning limit."
+    },
+    "candidate-moves": {
+      "domain": "calculation",
+      "status": "covered",
+      "concepts": [
+        "candidate-moves"
+      ],
+      "open_questions": [],
+      "last_touched": "2026-09-01",
+      "last_updated": "2026-09-01",
+      "note": "candidate-moves written, recording the Kotov/Nunn/Dvoretsky dispute rather than resolving it in Kotov's favour."
+    },
+    "planning": {
+      "domain": "calculation",
+      "status": "covered",
+      "concepts": [
+        "planning"
+      ],
+      "open_questions": [],
+      "last_touched": "2026-09-01",
+      "last_updated": "2026-09-01",
+      "note": "Written as guidance with the three standard failure modes named; the Steinitz link recorded as association, not attribution."
+    },
+    "positional-evaluation": {
+      "domain": "calculation",
+      "status": "covered",
+      "concepts": [
+        "positional-evaluation"
+      ],
+      "open_questions": [],
+      "last_touched": "2026-09-01",
+      "last_updated": "2026-09-01",
+      "note": "Steinitz's accumulation theory plus the permanent/temporary element lists, flagged as a later refinement rather than his own words."
+    },
+    "attack-principles": {
+      "domain": "attack",
+      "status": "not-started",
+      "concepts": [
+        "king-attack",
+        "pawn-storm"
+      ],
+      "open_questions": [],
+      "last_touched": "2026-09-01"
+    },
+    "initiative": {
+      "domain": "attack",
+      "status": "not-started",
+      "concepts": [
+        "initiative"
+      ],
+      "open_questions": [],
+      "last_touched": "2026-08-31"
+    },
+    "defensive-principles": {
+      "domain": "defense",
+      "status": "covered",
+      "concepts": [
+        "defensive-principles"
+      ],
+      "open_questions": [],
+      "last_touched": "2026-09-01",
+      "last_updated": "2026-09-01",
+      "note": "Written with the simplify-vs-complicate conflict recorded rather than resolved, plus the Paulsen attribution finding."
+    },
+    "prophylaxis": {
+      "domain": "defense",
+      "status": "not-started",
+      "concepts": [
+        "prophylaxis"
+      ],
+      "open_questions": [],
+      "last_touched": "2026-09-01"
+    },
+    "restriction": {
+      "domain": "defense",
+      "status": "not-started",
+      "concepts": [
+        "blockade",
+        "restraint"
+      ],
+      "open_questions": [],
+      "last_touched": "2026-09-01"
+    },
+    "overprotection": {
+      "domain": "defense",
+      "status": "not-started",
+      "concepts": [
+        "overprotection"
+      ],
+      "open_questions": [],
+      "last_touched": "2026-09-01"
+    },
+    "king-safety": {
+      "domain": "king-safety",
+      "status": "not-started",
+      "concepts": [
+        "king-safety",
+        "luft"
+      ],
+      "open_questions": [],
+      "last_touched": "2026-09-01"
+    },
+    "piece-activity": {
+      "domain": "piece-play",
+      "status": "covered",
+      "concepts": [
+        "piece-activity"
+      ],
+      "open_questions": [],
+      "last_touched": "2026-09-01",
+      "last_updated": "2026-09-01",
+      "note": "Written as the general case most other positional concepts specialise, with the activity/material exchange rate taken from this base's own gambit measurements."
+    },
+    "piece-coordination": {
+      "domain": "piece-play",
+      "status": "covered",
+      "concepts": [
+        "piece-coordination"
+      ],
+      "open_questions": [],
+      "last_touched": "2026-09-01",
+      "last_updated": "2026-09-01",
+      "note": "Written with an explicit prohibition on using it as a fallback label; it is the least detectable concept in this base and says so."
+    },
+    "good-bad-bishops": {
+      "domain": "piece-play",
+      "status": "not-started",
+      "concepts": [
+        "bad-bishop"
+      ],
+      "open_questions": [],
+      "last_touched": "2026-08-31"
+    },
+    "bishop-pair": {
+      "domain": "piece-play",
+      "status": "not-started",
+      "concepts": [
+        "bishop-pair"
+      ],
+      "open_questions": [],
+      "last_touched": "2026-09-01"
+    },
+    "knights": {
+      "domain": "piece-play",
+      "status": "not-started",
+      "concepts": [
+        "knight-vs-bishop"
+      ],
+      "open_questions": [],
+      "last_touched": "2026-09-01"
+    },
+    "rooks": {
+      "domain": "piece-play",
+      "status": "not-started",
+      "concepts": [
+        "rook-on-the-seventh"
+      ],
+      "open_questions": [],
+      "last_touched": "2026-08-31"
+    },
+    "queen": {
+      "domain": "piece-play",
+      "status": "covered",
+      "concepts": [
+        "queen-activity"
+      ],
+      "open_questions": [],
+      "last_touched": "2026-09-01",
+      "last_updated": "2026-09-01",
+      "note": "queen-activity."
+    },
+    "piece-exchanges": {
+      "domain": "piece-play",
+      "status": "not-started",
+      "concepts": [
+        "piece-exchanges"
+      ],
+      "open_questions": [],
+      "last_touched": "2026-09-01"
+    },
+    "worst-placed-piece": {
+      "domain": "piece-play",
+      "status": "covered",
+      "concepts": [
+        "worst-placed-piece"
+      ],
+      "open_questions": [],
+      "last_touched": "2026-09-01",
+      "last_updated": "2026-09-01",
+      "note": "Written with the four-way attribution dispute intact (Anderssen / Makogonov / Fischer / Dvoretsky) and with the precondition both original formulations carry."
+    },
+    "development": {
+      "domain": "development-initiative",
+      "status": "not-started",
+      "concepts": [
+        "opening-development"
+      ],
+      "open_questions": [],
+      "last_touched": "2026-09-01"
+    },
+    "tempo": {
+      "domain": "development-initiative",
+      "status": "not-started",
+      "concepts": [
+        "tempo"
+      ],
+      "open_questions": [],
+      "last_touched": "2026-08-31"
+    },
+    "space": {
+      "domain": "development-initiative",
+      "status": "not-started",
+      "concepts": [
+        "space"
+      ],
+      "open_questions": [],
+      "last_touched": "2026-09-01"
+    },
+    "center-control": {
+      "domain": "development-initiative",
+      "status": "not-started",
+      "concepts": [
+        "center-control"
+      ],
+      "open_questions": [],
+      "last_touched": "2026-09-01"
+    },
+    "pawn-structures": {
+      "domain": "pawn-play",
+      "status": "not-started",
+      "concepts": [
+        "backward-pawn",
+        "passed-pawn",
+        "doubled-pawns",
+        "isolated-queen-pawn",
+        "hanging-pawns"
+      ],
+      "open_questions": [],
+      "last_touched": "2026-09-01"
+    },
+    "pawn-breaks": {
+      "domain": "pawn-play",
+      "status": "covered",
+      "concepts": [
+        "pawn-breakthrough",
+        "minority-attack",
+        "pawn-break"
+      ],
+      "open_questions": [],
+      "last_touched": "2026-09-01",
+      "last_updated": "2026-09-01",
+      "note": "pawn-breakthrough and minority-attack. The latter was a gap the final-phase brief named and the base did not have."
+    },
+    "weak-squares": {
+      "domain": "pawn-play",
+      "status": "in-progress",
+      "concepts": [
+        "hole",
+        "weak-square"
+      ],
+      "open_questions": [],
+      "last_touched": "2026-08-31"
+    },
+    "strong-squares": {
+      "domain": "pawn-play",
+      "status": "covered",
+      "concepts": [
+        "strong-square"
+      ],
+      "open_questions": [],
+      "last_touched": "2026-09-01",
+      "last_updated": "2026-09-01",
+      "note": "strong-square."
+    },
+    "outposts": {
+      "domain": "pawn-play",
+      "status": "in-progress",
+      "concepts": [
+        "outpost"
+      ],
+      "open_questions": [],
+      "last_touched": "2026-08-31"
+    },
+    "open-files": {
+      "domain": "lines",
+      "status": "not-started",
+      "concepts": [
+        "open-file"
+      ],
+      "open_questions": [],
+      "last_touched": "2026-08-31"
+    },
+    "semi-open-files": {
+      "domain": "lines",
+      "status": "covered",
+      "concepts": [
+        "semi-open-file"
+      ],
+      "open_questions": [],
+      "last_touched": "2026-09-01",
+      "last_updated": "2026-09-01",
+      "note": "semi-open-file, with a Layer 4 matcher."
+    },
+    "positional-sacrifices": {
+      "domain": "positional-method",
+      "status": "not-started",
+      "concepts": [
+        "positional-sacrifice",
+        "sacrifice"
+      ],
+      "open_questions": [],
+      "last_touched": "2026-08-31"
+    },
+    "exchange-sacrifices": {
+      "domain": "positional-method",
+      "status": "not-started",
+      "concepts": [
+        "exchange-sacrifice"
+      ],
+      "open_questions": [],
+      "last_touched": "2026-08-31"
+    },
+    "material-imbalances": {
+      "domain": "positional-method",
+      "status": "not-started",
+      "concepts": [
+        "material-imbalance"
+      ],
+      "open_questions": [],
+      "last_touched": "2026-09-01"
+    },
+    "static-vs-dynamic": {
+      "domain": "positional-method",
+      "status": "not-started",
+      "concepts": [
+        "static-vs-dynamic"
+      ],
+      "open_questions": [],
+      "last_touched": "2026-09-01"
+    },
+    "two-weaknesses": {
+      "domain": "positional-method",
+      "status": "validated",
+      "concepts": [
+        "two-weaknesses"
+      ],
+      "open_questions": [],
+      "last_touched": "2026-08-31"
+    },
+    "transformation-of-advantages": {
+      "domain": "positional-method",
+      "status": "covered",
+      "concepts": [
+        "transformation-of-advantages"
+      ],
+      "open_questions": [],
+      "last_touched": "2026-09-01",
+      "last_updated": "2026-09-01",
+      "note": "Written from Dvoretsky & Yusupov's Technique in Chess, including the authors' own statement that concrete play runs contrary to their golden principles, and a published objection to that framing."
+    },
+    "opening-principles": {
+      "domain": "opening",
+      "status": "covered",
+      "concepts": [
+        "compensation",
+        "early-queen-development",
+        "gambit"
+      ],
+      "open_questions": [],
+      "last_touched": "2026-09-01",
+      "last_updated": "2026-09-01",
+      "note": "early-queen-development written with a controlled engine measurement; opening-development, center-control, castling and tempo already existed."
+    },
+    "opening-theory-concepts": {
+      "domain": "opening",
+      "status": "covered",
+      "concepts": [
+        "opening-repertoire",
+        "tabiya",
+        "theoretical-novelty",
+        "transposition"
+      ],
+      "open_questions": [],
+      "last_touched": "2026-09-01",
+      "last_updated": "2026-09-01",
+      "note": "transposition, theoretical-novelty, tabiya, opening-repertoire. Three of the four are not detectable without an opening database, which is recorded on each."
+    },
+    "gambit-principles": {
+      "domain": "opening",
+      "status": "covered",
+      "concepts": [
+        "compensation",
+        "gambit"
+      ],
+      "open_questions": [],
+      "last_touched": "2026-09-01",
+      "last_updated": "2026-09-01",
+      "note": "gambit and compensation, both validated against the controlled searchmoves spectrum."
+    },
+    "middlegame-principles": {
+      "domain": "middlegame",
+      "status": "covered",
+      "concepts": [
+        "middlegame-principles"
+      ],
+      "open_questions": [],
+      "last_touched": "2026-09-01",
+      "last_updated": "2026-09-01",
+      "note": "Umbrella; records that the phase has a procedure rather than a rule set."
+    },
+    "endgame-principles": {
+      "domain": "endgame",
+      "status": "covered",
+      "concepts": [
+        "endgame-principles"
+      ],
+      "open_questions": [],
+      "last_touched": "2026-09-01",
+      "last_updated": "2026-09-01",
+      "note": "Umbrella record of Shereshevsky's four principles, with the point that the endgame is the one phase where claims can be proven."
+    },
+    "king-activation": {
+      "domain": "endgame",
+      "status": "covered",
+      "concepts": [
+        "king-activation"
+      ],
+      "open_questions": [],
+      "last_touched": "2026-09-01",
+      "last_updated": "2026-09-01",
+      "note": "Written with a tablebase pair measuring the king's defensive value (dtm 35 vs 15) and with Shereshevsky's own documented rook-ending exception."
+    },
+    "opposition": {
+      "domain": "endgame",
+      "status": "not-started",
+      "concepts": [
+        "opposition"
+      ],
+      "open_questions": [],
+      "last_touched": "2026-08-31"
+    },
+    "corresponding-squares": {
+      "domain": "endgame",
+      "status": "not-started",
+      "concepts": [
+        "corresponding-squares"
+      ],
+      "open_questions": [],
+      "last_touched": "2026-09-01"
+    },
+    "zugzwang": {
+      "domain": "endgame",
+      "status": "not-started",
+      "concepts": [
+        "zugzwang"
+      ],
+      "open_questions": [],
+      "last_touched": "2026-08-31"
+    },
+    "triangulation": {
+      "domain": "endgame",
+      "status": "not-started",
+      "concepts": [
+        "triangulation"
+      ],
+      "open_questions": [],
+      "last_touched": "2026-09-01"
+    },
+    "pawn-endgames": {
+      "domain": "endgame",
+      "status": "not-started",
+      "concepts": [
+        "key-square"
+      ],
+      "open_questions": [],
+      "last_touched": "2026-09-01"
+    },
+    "rook-endgames": {
+      "domain": "endgame",
+      "status": "covered",
+      "concepts": [
+        "rook-endgame-principles"
+      ],
+      "open_questions": [],
+      "last_touched": "2026-09-01",
+      "last_updated": "2026-09-01",
+      "note": "rook-endgame-principles, deliberately an umbrella of caveats: three standard rules have proven counterexamples in this base."
+    },
+    "bishop-endgames": {
+      "domain": "endgame",
+      "status": "not-started",
+      "concepts": [
+        "opposite-coloured-bishops",
+        "wrong-rook-pawn"
+      ],
+      "open_questions": [],
+      "last_touched": "2026-09-01"
+    },
+    "knight-endgames": {
+      "domain": "endgame",
+      "status": "covered",
+      "concepts": [
+        "knight-endgames"
+      ],
+      "open_questions": [],
+      "last_touched": "2026-09-01",
+      "last_updated": "2026-09-01",
+      "note": "Botvinnik's formula, with the standard reference's own admission that knight-vs-knight-and-pawn has no operative principles."
+    },
+    "queen-endgames": {
+      "domain": "endgame",
+      "status": "covered",
+      "concepts": [
+        "queen-endgames"
+      ],
+      "open_questions": [],
+      "last_touched": "2026-09-01",
+      "last_updated": "2026-09-01",
+      "note": "Orientation only; the class resisted complete human analysis until tablebases, and the record says to look positions up rather than reason about them."
+    },
+    "mixed-piece-endgames": {
+      "domain": "endgame",
+      "status": "covered",
+      "concepts": [
+        "mixed-piece-endgames"
+      ],
+      "open_questions": [],
+      "last_touched": "2026-09-01",
+      "last_updated": "2026-09-01",
+      "note": "Orientation only, and says the class is under-researched here."
+    },
+    "fortresses": {
+      "domain": "endgame",
+      "status": "not-started",
+      "concepts": [
+        "fortress"
+      ],
+      "open_questions": [],
+      "last_touched": "2026-09-01"
+    },
+    "drawing-mechanisms": {
+      "domain": "endgame",
+      "status": "not-started",
+      "concepts": [
+        "perpetual-check"
+      ],
+      "open_questions": [],
+      "last_touched": "2026-08-31"
+    },
+    "conversion-techniques": {
+      "domain": "endgame",
+      "status": "not-started",
+      "concepts": [
+        "building-a-bridge"
+      ],
+      "open_questions": [],
+      "last_touched": "2026-09-01"
+    },
+    "named-theoretical-positions": {
+      "domain": "named-patterns",
+      "status": "not-started",
+      "concepts": [
+        "lucena-position",
+        "philidor-position",
+        "vancura-position"
+      ],
+      "open_questions": [],
+      "last_touched": "2026-09-01"
+    },
+    "named-strategic-concepts": {
+      "domain": "named-patterns",
+      "status": "covered",
+      "concepts": [
+        "named-strategic-concepts"
+      ],
+      "open_questions": [],
+      "last_touched": "2026-09-01",
+      "last_updated": "2026-09-01",
+      "note": "Meta-record of this base's attribution findings."
+    },
+    "historical-principles": {
+      "domain": "history-schools",
+      "status": "covered",
+      "concepts": [
+        "historical-principles"
+      ],
+      "open_questions": [],
+      "last_touched": "2026-09-01",
+      "last_updated": "2026-09-01",
+      "note": "What happens to old principles: condition lost, disproved, or quantified."
+    },
+    "classical-school": {
+      "domain": "history-schools",
+      "status": "not-started",
+      "concepts": [
+        "classical-school"
+      ],
+      "open_questions": [],
+      "last_touched": "2026-09-01"
+    },
+    "hypermodern-school": {
+      "domain": "history-schools",
+      "status": "not-started",
+      "concepts": [
+        "hypermodern-school"
+      ],
+      "open_questions": [],
+      "last_touched": "2026-09-01"
+    },
+    "soviet-school": {
+      "domain": "history-schools",
+      "status": "not-started",
+      "concepts": [
+        "soviet-school"
+      ],
+      "open_questions": [],
+      "last_touched": "2026-09-01"
+    },
+    "modern-dynamic": {
+      "domain": "history-schools",
+      "status": "covered",
+      "concepts": [
+        "modern-dynamic"
+      ],
+      "open_questions": [],
+      "last_touched": "2026-09-01",
+      "last_updated": "2026-09-01",
+      "note": "Watson's thesis, corroborated independently by the cognitive-psychology literature."
+    },
+    "rules-of-thumb": {
+      "domain": "heuristics",
+      "status": "not-started",
+      "concepts": [
+        "lpdo"
+      ],
+      "open_questions": [],
+      "last_touched": "2026-08-31"
+    },
+    "exceptions-to-rules": {
+      "domain": "heuristics",
+      "status": "covered",
+      "concepts": [
+        "exceptions-to-rules"
+      ],
+      "open_questions": [],
+      "last_touched": "2026-09-01",
+      "last_updated": "2026-09-01",
+      "note": "Meta-record of this base's structural commitment that every soft-typed concept records where it fails; enforced by the test suite."
+    },
+    "beginner-misconceptions": {
+      "domain": "heuristics",
+      "status": "covered",
+      "concepts": [
+        "beginner-misconceptions"
+      ],
+      "open_questions": [],
+      "last_touched": "2026-09-01",
+      "last_updated": "2026-09-01",
+      "note": "Meta-record indexing what this base has established that people wrongly believe; backed by the generated warnings index."
+    },
+    "intermediate-concepts": {
+      "domain": "heuristics",
+      "status": "covered",
+      "concepts": [
+        "intermediate-concepts"
+      ],
+      "open_questions": [],
+      "last_touched": "2026-09-01",
+      "last_updated": "2026-09-01",
+      "note": "Meta; difficulty is about the concept, not the player."
+    },
+    "advanced-concepts": {
+      "domain": "heuristics",
+      "status": "covered",
+      "concepts": [
+        "advanced-concepts"
+      ],
+      "open_questions": [],
+      "last_touched": "2026-09-01",
+      "last_updated": "2026-09-01",
+      "note": "Meta; dependency rather than difficulty, and the tier this system detects worst."
+    },
+    "master-concepts": {
+      "domain": "heuristics",
+      "status": "covered",
+      "concepts": [
+        "master-concepts"
+      ],
+      "open_questions": [],
+      "last_touched": "2026-09-01",
+      "last_updated": "2026-09-01",
+      "note": "Meta; deliberately thin and says so."
+    },
+    "practical-principles": {
+      "domain": "practical",
+      "status": "covered",
+      "concepts": [
+        "practical-principles"
+      ],
+      "open_questions": [],
+      "last_touched": "2026-09-01",
+      "last_updated": "2026-09-01",
+      "note": "The objective/practical distinction, kept small deliberately."
+    },
+    "time-management": {
+      "domain": "practical",
+      "status": "covered",
+      "concepts": [
+        "time-management"
+      ],
+      "open_questions": [],
+      "last_touched": "2026-09-01",
+      "last_updated": "2026-09-01",
+      "note": "Built from large-sample studies rather than folklore."
+    },
+    "practical-psychology": {
+      "domain": "practical",
+      "status": "covered",
+      "concepts": [
+        "practical-psychology"
+      ],
+      "open_questions": [],
+      "last_touched": "2026-09-01",
+      "last_updated": "2026-09-01",
+      "note": "Restricted to measured effects, and names what it omits."
+    },
+    "blindfold-visualisation": {
+      "domain": "blindfold",
+      "status": "covered",
+      "concepts": [
+        "blindfold-interference",
+        "blindfold-representation",
+        "board-vision",
+        "chunking"
+      ],
+      "open_questions": [],
+      "last_touched": "2026-09-01",
+      "last_updated": "2026-09-01",
+      "note": "blindfold-representation, chunking, board-vision, blindfold-interference. Nox-specific; built from the peer-reviewed cognitive-science literature (Binet, Chase & Simon, Saariluoma, Campitelli & Gobet)."
+    }
+  },
+  "current_area": "weak-squares",
+  "next_areas": [
+    "piece-properties",
+    "board-geometry",
+    "open-files",
+    "pawn-structures",
+    "king-safety",
+    "passed-pawn",
+    "material-imbalances"
+  ],
+  "discovered_concepts_unresearched": [
+    {
+      "id": "knight-fork",
+      "seen_in": "fork",
+      "note": "named sub-pattern; covered descriptively inside `fork` for now"
+    },
+    {
+      "id": "royal-fork",
+      "seen_in": "fork",
+      "note": "fork hitting king and queen; distinct name in several sources"
+    },
+    {
+      "id": "absolute-pin",
+      "seen_in": "pin",
+      "note": "pin against the king; covered inside `pin`, may warrant its own record"
+    },
+    {
+      "id": "relative-pin",
+      "seen_in": "pin",
+      "note": "pin against a non-king piece; covered inside `pin`"
+    },
+    {
+      "id": "king-safety-basic",
+      "seen_in": "castling",
+      "note": "king-safety area not yet researched"
+    },
+    {
+      "id": "fortress-basic",
+      "seen_in": "dead-position",
+      "note": "endgame/fortresses area not yet researched"
+    },
+    {
+      "id": "drawing-mechanism-basic",
+      "seen_in": "stalemate",
+      "note": "endgame/drawing-mechanisms area not yet researched"
+    },
+    {
+      "id": "luft",
+      "seen_in": "back-rank-mate",
+      "note": "the standard antidote; belongs in king-safety"
+    },
+    {
+      "id": "open-file",
+      "seen_in": "battery",
+      "note": "lines area not yet researched"
+    },
+    {
+      "id": "perpetual-check",
+      "seen_in": "ECM 'Pursuit'",
+      "note": "listed by Encyclopedia of Chess Middlegames"
+    },
+    {
+      "id": "windmill",
+      "seen_in": "ChessTempo/chess.com",
+      "note": "see-saw; discovered-check repetition"
+    },
+    {
+      "id": "greek-gift",
+      "seen_in": "ChessTempo",
+      "note": "named sacrificial attacking pattern Bxh7+"
+    },
+    {
+      "id": "pawn-breakthrough",
+      "seen_in": "ECM",
+      "note": "listed by Encyclopedia of Chess Middlegames"
+    },
+    {
+      "id": "blockade",
+      "seen_in": "Informant theme b",
+      "note": "Nimzowitsch concept; positional and tactical"
+    },
+    {
+      "id": "demolition-of-pawn-structure",
+      "seen_in": "Informant theme g",
+      "note": "sacrificial destruction of the king's pawn cover"
+    },
+    {
+      "id": "weak-square",
+      "seen_in": "hole, outpost",
+      "note": "broader modern term; overlaps 'hole', boundary not agreed between sources"
+    },
+    {
+      "id": "backward-pawn",
+      "seen_in": "outpost, hole",
+      "note": "pawn-structures area"
+    },
+    {
+      "id": "knight-vs-bishop",
+      "seen_in": "outpost",
+      "note": "piece-play area"
+    }
+  ],
+  "blocked": [],
+  "schema_version": 2,
+  "checkpoint": {
+    "last_successful": "2026-09-02",
+    "session": "session-12",
+    "how_to_resume": [
+      "1. Read education/README.md, then ARCHITECTURE.md and METHODOLOGY.md.",
+      "2. Run: python3 tools/validate_kb.py && python3 tools/run_tests.py && node tests/test_api.js && python3 tools/corpus_check.py && node tools/trap_audit.js",
+      "3. Artifacts: state/COMPLETION.md (ten criteria), state/ladder.json, state/TRAPS.md, state/firing_rates.json, state/pawn_endings.json, state/breakthrough_proof.json, state/COVERAGE.md.",
+      "4. THE READING LIST IS THE ENGINE. `node tools/trap_audit.js --unread` lists every condition a record states that nobody has written about. 47 of 246 remain. Twenty-five defects have come out of it.",
+      "5. THE TOOL CREDITS BY QUOTATION AND QUOTING IS CHEAP. Twenty-two rows were closed in one pass by READING them against the code and quoting the guard where it already lived - that is legitimate only because each was checked first. Four `implements` strings have been found claiming something the code does not do, which is what the habit is for.",
+      "6. `indicators_against` DOES NOT MEAN THE SAME THING ON EVERY RECORD. On a concept naming an ASSET they are reasons not to report it; on one naming a SCALE or a liability (king-safety, isolated-queen-pawn) they are the conditions the matcher fires ON. Several are also the NEGATION of a precondition and cannot arise at all.",
+      "7. THREE ANSWERS TO A CONDITION, and the third keeps being right: build it, argue on the record that it cannot be built, or SAY IT IN THE SENTENCE. Nine times now a guard was written, measured, found to delete a canonical position, and replaced by a clause.",
+      "8. WHEN A GUARD DELETES A CANONICAL POSITION, THE GUARD IS WRONG. Rubinstein-Salwe, Capablanca-Tartakower, Capablanca-Rubinstein, Havasi-Capablanca, Lisitsin-Capablanca, Fischer-Spassky g6, Nimzowitsch-Capablanca, the three-against-three. Run corpus_check.py before and after every change.",
+      "9. FOUR corpus entries carry a written self-assessment: three RECORDED FAILURES kept failing on purpose (Reti-Capablanca piece-activity, Ftacnik-Roiz bishop-pair confidence, Karpov-Polgar rook-on-the-seventh false positive) and one - Anand-Leko blockade - that grades its own evidence DOWN because the raw feature is absent too. Do not fix any of them with a rule fitted to one position.",
+      "10. Confidence has TWO ceilings: knowledge_type and each record's own typical_confidence. Nothing may report above its record. If a record's figure is wrong, correct the record with an argument.",
+      "11. The largest remaining gap is criterion 4: 77% of applicable concepts have no negative example and 79% no ambiguous one. They come from articles by named authors ABOUT the failure mode - seven corpus entries from five such articles so far."
+    ],
+    "what_worked_this_session": [
+      "Reading a condition against the code before crediting it. Twenty-two rows closed that way, and none of them by loosening the test.",
+      "Saying a condition in the sentence when building it as a guard would delete a canonical position. Nine times now, and it is the answer more often than a guard is.",
+      "Noticing when a matcher HAD the fact and did not say the word - rook-on-the-seventh knew whether the king was confined and never used Nimzowitsch's vocabulary for it.",
+      "Letting a build expose a bug in neighbouring code: the battery ordering was backwards, and only writing the 'expensive way round' clause revealed it."
+    ]
+  },
+  "unresolved_historical_claims": [
+    {
+      "claim": "Sergey Belavenets published an article formulating the endgame principles that Shereshevsky's Endgame Strategy credits.",
+      "status": "unverified",
+      "confidence": "low",
+      "needed": "Title, journal and year of the Belavenets article itself. Currently attested only through Shereshevsky's and Dvoretsky's descriptions of it.",
+      "concepts": [
+        "two-weaknesses"
+      ]
+    },
+    {
+      "claim": "The rule that stalemate is a draw was not universal historically; it has been scored as a win and as a loss in various times and places.",
+      "status": "unverified",
+      "confidence": "low",
+      "needed": "Primary or scholarly sources on regional stalemate conventions before standardisation.",
+      "concepts": [
+        "stalemate"
+      ]
+    },
+    {
+      "claim": "FIDE formerly granted exceptions to the fifty-move rule for specific endgames later shown by tablebase to require more than 50 moves, and removed them.",
+      "status": "unverified",
+      "confidence": "medium",
+      "needed": "The specific FIDE handbook editions that added and removed the exception list.",
+      "concepts": [
+        "fifty-move-rule"
+      ]
+    },
+    {
+      "claim": "The Encyclopaedia of Chess Combinations theme list (a-j) as recorded.",
+      "status": "partially-verified",
+      "confidence": "medium",
+      "needed": "The list was read from a publisher product description and corroborated against Wikipedia's citation of the companion volume, but the book itself has not been seen. Any WORDING attributed to the book remains unverified.",
+      "concepts": [
+        "fork",
+        "pin",
+        "deflection",
+        "decoy",
+        "interference",
+        "clearance"
+      ]
+    },
+    {
+      "claim": "Kotov's Think Like a Grandmaster date",
+      "note": "Written in the early 1950s per Leitao; the commonly cited 1971 is the English edition. Recorded with the caveat rather than resolved.",
+      "date": "2026-09-01"
+    },
+    {
+      "claim": "Knight's tour traced to al-Adli ar-Rumi c.840 AD by Murray",
+      "note": "Claimed by an instructional blog citing Murray. NOT verified against Murray's text. Same for the Najdorf 45-board (Sao Paulo 1947) and Koltanowski 56-consecutive-game (San Francisco 1960) blindfold records.",
+      "date": "2026-09-01"
+    },
+    {
+      "claim": "Louis Paulsen as progenitor of Steinitz's theory",
+      "date": "2026-09-01",
+      "note": "The Exeter Chess Club states that proposition 4 of Steinitz's theory - that an attack from an equal position can be refuted by correct defence - was FIRST indicated by Paulsen, who declared unfashionably that all gambits can be defended. If correct this materially changes an attribution normally given wholly to Steinitz. Only one source consulted says it; recorded at low confidence on both defensive-principles and positional-evaluation, and not adopted."
+    }
+  ],
+  "failed_research_attempts": [
+    {
+      "what": "tvly extract on https://britishchessnews.com/tag/training/",
+      "result": "returned empty",
+      "reason": "JS-heavy tag-archive page; content came from Exa search highlights instead",
+      "date": "2026-08-31"
+    },
+    {
+      "what": "Stockfish depth-34 multipv-3 analysis of the Kotov-Pachman move-55 rook ending",
+      "result": "no convergence in 16 minutes; killed to free CPU",
+      "reason": "simplified rook endings explode at high depth; cap at 28-30 or use tablebase",
+      "date": "2026-08-31"
+    },
+    {
+      "what": "Controlled pair for Nimzowitsch's open-file condition on outposts",
+      "result": "inconclusive — test design was invalid",
+      "reason": "The 'closed file' half was built by adding a white pawn on d3, which also added a pawn of material (+0.52 -> +2.22 baseline). The halves were not comparable. Retest by relocating the c2 pawn to d3 so material is identical.",
+      "date": "2026-08-31"
+    },
+    {
+      "what": "Controlled pair for the outpost's 'cannot be challenged by a pawn' condition",
+      "result": "inconclusive — variable could not be isolated",
+      "reason": "Moving Black's c-pawn c7->c5 made d5 unchallengeable as intended, but also made d6 backward and opened b5. Nb5 became +2.47 while Nd5 fell to last at +0.93. Side effects swamped the tested variable.",
+      "date": "2026-08-31"
+    },
+    {
+      "what": "Corrected relocation pair (c2->d3) for Nimzowitsch's open-file condition",
+      "result": "inconclusive — position lacked discriminating power",
+      "reason": "Material was correctly held constant, but all four candidate moves fell within 0.08 of each other. The result ran mildly opposite to Nimzowitsch's prediction, which is noise rather than evidence. A discriminating position is needed, not a quieter one.",
+      "date": "2026-08-31"
+    },
+    {
+      "what": "Greek Gift controlled pair at depth 28 with MultiPV 4, and the breakthrough pair at depth 34, run concurrently",
+      "result": "neither converged in ~12 minutes; both killed and rerun at depth 20/26",
+      "reason": "Two compounding mistakes. (1) MultiPV disables most pruning, so a MultiPV search on a 28-piece middlegame costs far more than a single-PV search to the same depth — depth 20-22 is ample for a question whose answer is a forced sequence. (2) sf_analyse.py defaults threads to cpu_count-2 = 10, so two concurrent runs requested 20 threads on 12 cores and thrashed. Run engine jobs SEQUENTIALLY, or pass --threads.",
+      "date": "2026-08-31"
+    },
+    {
+      "what": "Two background waiter shells left polling for sentinels that could never appear",
+      "result": "orphaned; they would have spun forever",
+      "reason": "When the over-deep Stockfish runs were killed, sf_analyse.py raised BrokenPipeError writing `quit` to the dead engine. That escaped and killed the wrapping shell script BEFORE it echoed its DONE sentinel, so the `until grep -q DONE...` waiters had nothing to wait for. The results themselves were fine — obtained by reruns and already incorporated — but the waiters were unrecoverable.",
+      "date": "2026-09-01"
+    },
+    {
+      "date": "2026-09-01",
+      "item": "controlled pair isolating king activity in a rook ending",
+      "detail": "Two designs tried, both failed to split. Pair 1 (defending king e7 vs a7 in R+P vs R) came out win/win, though with dtm 35 vs 15, which was kept as a measurement of defensive value. Pair 2 (Philidor setup, defending king e7 vs g7) came out draw/draw - the rook on the sixth holds regardless of the king's square. Consistent with the three failed outpost pairs and with Shereshevsky's own remark that rook endings are too concrete for the principle to isolate.",
+      "conclusion": "Recorded on the king-activation concept as a limitation; the concept claims only what the win/win pair measured."
+    },
+    {
+      "date": "2026-09-01",
+      "item": "Petrosian-Krogius 1959 full game score",
+      "detail": "The score printed in the UMBC lecture notes does not replay: Black's 24th move (Ra3) is not legal in the position reached. The first 46 plies verify. Rather than guess a correction, only the verified prefix is used and the source note says so.",
+      "conclusion": "Verified prefix used; the remainder is neither used nor cited."
+    },
+    {
+      "date": "2026-09-01",
+      "what": "Grounding `backward-pawn` on Marshall-Tarrasch, Nuremberg 1905, which a FIDE Master's annotation presents as 'the backward pawn on the semi-open file' and makes the title of its lesson",
+      "result": "REJECTED - the pawn is not backward by the definition this base uses, and the annotation's own stated reason describes a pawn that is not on the board",
+      "reason": "The annotation says White 'is left with a backward pawn on a semi-open file' after the exchange on c3, and explains it as 'the b2 and d4 pawns sit on adjacent files blocking its advance'. After 11.bxc3 there IS no b2 pawn - it is the pawn that captured on c3 - and c4 is empty and controlled by no black pawn, so c3 can advance freely. The record's definition, taken from Wikipedia and stated in its preconditions, requires BOTH halves: behind its neighbours AND unable to advance safely. This base's detector reports no backward pawn at any ply of the relevant sequence, and it is right. The pawn is a weak pawn on a half-open file, which is a different and weaker claim than the one the lesson is named after. Recorded rather than added: the corpus is ground truth, and grounding a concept on a loose application of its own definition would poison exactly the thing it exists to protect.",
+      "conclusion": "backward-pawn still needs human grounding. Look for an annotation that names the square in FRONT of the pawn as the point, which is the half of the concept that makes it matter and the half a loose usage always omits."
+    },
+    {
+      "date": "2026-09-03",
+      "what": "A positive example for `corresponding-squares` from an exhaustive tablebase search for reciprocal zugzwangs",
+      "result": "REJECTED - the reciprocal zugzwangs the search finds ARE the opposition, which is the position this record's own first trap says the framework should not be invoked for",
+      "reason": "Random sampling found none in 400 boards. Enumerating the shape the technique is FOR - two pawns nose to nose on one file, so neither side has a pawn tempo and the whole game is king moves - found nine, by asking Syzygy for both side-to-move readings of every position with both kings inside a box around the pawns. Seven of the nine are the kings two apart on one file, which is simple opposition; the other two are trebuchets. The enumeration was still running when the count was taken and every later find has had the same shape. So for a single blocked pawn pair the correspondence and the opposition are the same relation, and a position from this family cannot show what the record needs: 'SIMPLE OPPOSITION GIVES THE WRONG ANSWER and the correspondence gives the right one'. That needs a second pawn making the geometry asymmetric, and the search would have to enumerate five-man positions rather than four. The search was not wasted - it produced the trebuchet that `zugzwang` had named in its deep wording since it was written and never shown."
+    }
+  ],
+  "tool_limitations": [
+    {
+      "tool": "Stockfish (native 18)",
+      "limits": [
+        "Piping all UCI commands at once and closing stdin makes it read `quit` mid-search and exit before printing any info line — it returns a bestmove with no evaluation and LOOKS like it worked. tools/sf_analyse.py streams and waits for `bestmove`.",
+        "Simplified endgames can fail to converge at depth 34+. Prefer tablebase below 8 pieces.",
+        "Two concurrent instances halve each other's throughput on this 12-core machine.",
+        "MultiPV is expensive: it suppresses pruning, so multipv 3-4 at depth 28 on a full board can take an order of magnitude longer than depth 28 single-PV. For forced-sequence questions depth 20-22 with MultiPV is plenty.",
+        "education/tools/sf_analyse.py defaults to cpu_count-2 threads. Two concurrent invocations oversubscribe the machine. Run jobs sequentially in one script.",
+        "FIXED: sf_analyse.py used to raise BrokenPipeError if the engine died mid-search, killing the calling script. It now tolerates a dead pipe and raises a clear RuntimeError naming the problem instead."
+      ]
+    },
+    {
+      "tool": "Lichess tablebase API",
+      "limits": [
+        "7 pieces maximum. Above that, engine analysis is the only option.",
+        "Network dependent; tools/tablebase.py retries three times then records wdl 'unknown'."
+      ]
+    },
+    {
+      "tool": "Tavily",
+      "limits": [
+        "tvly extract returns site chrome and JSON-wrapped raw_content that needs stripping.",
+        "Search can rank a SUPERSEDED FIDE Laws PDF above the current one — verify edition dates.",
+        "tvly research takes 3-5 minutes and pads its source count with index pages."
+      ]
+    },
+    {
+      "tool": "Exa",
+      "limits": [
+        "Highlights are excerpts and can stitch together non-adjacent text; fetch the page before quoting anything as continuous prose."
+      ]
+    },
+    {
+      "tool": "python-chess",
+      "limits": [
+        "Installed only in a scratchpad venv, not a project dependency. Repo tools must not require it; it is used optionally for SAN rendering and legality checks."
+      ]
+    },
+    {
+      "tool": "controlled-pair methodology",
+      "limits": [
+        "Works on tactical motifs, which depend on one geometric relation.",
+        "Does NOT work on positional concepts: no pawn can be moved without changing several structural facts simultaneously. Three separate designs failed on the outpost. Use annotated real positions plus recognition criteria instead, and do not mark positional concepts 'validated' on controlled-pair evidence."
+      ]
+    },
+    {
+      "tool": "background shell scripts (Bash run_in_background + until-loop waiters)",
+      "limits": [
+        "A waiter polling for a sentinel is only safe if the producing script writes that sentinel UNCONDITIONALLY. If a step raises, the script dies before the echo and the waiter spins forever. Use `trap 'echo DONE_X' EXIT` at the top of the script, not a bare echo at the bottom.",
+        "Renaming or rerunning an analysis under a different output filename orphans any waiter still watching the old one. Kill the waiter or reuse the filename.",
+        "Orphaned waiters are harmless — idle sleep loops — but they are invisible in ps output unless you grep for the loop body rather than for the analysis tool."
+      ]
+    },
+    {
+      "item": "no opening database",
+      "note": "theoretical-novelty, tabiya and gambit identification all require a game database the Education System does not have. Recorded on each concept as a limitation rather than left for a caller to discover.",
+      "date": "2026-09-01"
+    },
+    {
+      "item": "warnings index does not grade its own evidence",
+      "date": "2026-09-01",
+      "note": "state/warnings_index.json compiles 826 warnings but does not distinguish those proven by tablebase or controlled measurement from those resting on source authority. A caller cannot currently tell a proof from an opinion. Recorded as a known gap on both meta-concepts."
+    },
+    {
+      "item": "detector claims were unverified until now",
+      "date": "2026-09-01",
+      "note": "For most of this project a concept could claim a mechanical detector that did not exist, because the audit compared against a list rather than the code. Fixed; the check now reads lib/*.js, blind-chess.html and tools/*.js."
+    },
+    {
+      "item": "no quiet-position corpus",
+      "date": "2026-09-01",
+      "note": "Mass testing runs on 788 tactical puzzles because that is the corpus this repository has. The positional half of the system would be better judged on quiet middlegame positions, and no such labelled corpus exists here."
+    },
+    {
+      "item": "annotated-blog move orders",
+      "date": "2026-09-01",
+      "note": "Six of seven 'full move order' listings printed by an otherwise useful annotation blog failed to replay through the page's own move generator, reaching an illegal move between move 24 and move 36. The prose is citable; the move list is not. Game scores now come from pgnmentor player collections and are replay-verified before any FEN is derived. This is the second time in this project a printed score has failed - the first was a UMBC lecture page - and it should be assumed rather than discovered next time."
+    },
+    {
+      "item": "the shipped puzzle corpus cannot validate a pawn-ending detector",
+      "date": "2026-09-01",
+      "note": "Zero of the 788 shipped puzzle positions is a pure pawn ending, so pawnBreakthrough() fires on none of them and the corpus provides no evidence whatever about its false-positive rate. Any future work on pawn-ending concepts needs a corpus of pawn endings; the 788 will silently return 'no false positives' forever."
+    },
+    {
+      "item": "attacker counts as a measure of central control",
+      "date": "2026-09-01",
+      "note": "Counting attackers of d4/e4/d5/e5 counts a rook whose line runs through its own man as a piece fighting for the square, which makes the best move in Reti-Capablanca 1924 read as a loss of control. The move-based arm therefore counts pawns and minor pieces only. Even so it cannot separate the two candidate knight moves a GM separates, and that is recorded on the concept rather than tuned around."
+    },
+    {
+      "item": "a matcher that throws is indistinguishable from a matcher with excellent guards",
+      "date": "2026-09-03",
+      "note": "matchAll() catches every exception a matcher raises and treats it as 'no match', which is right - one bad matcher must not take the API down over a position it dislikes. But from outside, a caught ReferenceError and a set of false-positive guards that work perfectly look identical: the firing rate goes to zero and every metric in this project reads that as success. A missing `const P = FEAT.page` inside king-attack did exactly that on all 788 shipped positions, and the only thing that caught it was two positions somebody had pinned as 'must still fire'. MATCHER_ERRORS now collects every throw and tests/test_api.js asserts the list is empty over the whole corpus. The general lesson is that a firing rate falling is evidence of nothing until it is known to be evidence of a guard."
+    },
+    {
+      "item": "a motif miner's test can look for a different motif than its name",
+      "date": "2026-09-03",
+      "note": "tools/mine_master_motifs.js had two of its seven geometric tests looking for the wrong thing, and both were caught only by reading a candidate against the record it was meant to serve. The x-ray test excluded the case where the man behind is worth MORE than the man in front on the grounds that that is a pin or a skewer - but a pin is small in front and big behind, so it excluded the pin and then went looking for the skewer. The desperado test asked whether the piece could be captured at a profit where it stood, which is 'attacked' and not 'doomed'; the record's own definition says everything rests on that first word. A geometric test that names a motif is a claim about that motif and has to be checked against the record like any other claim."
+    },
+    {
+      "item": "phaseOf() calls a queen ending a middlegame",
+      "date": "2026-09-03",
+      "note": "A position with a queen and pawns on each side and nothing else is classified `middlegame` by lib/features.js phaseOf(), because two queens is more material than its endgame threshold allows. That is right for most purposes - a board with two queens on it usually is a middlegame - and wrong for `queen-endgames`, whose entire precondition is 'queens and pawns only, or nearly so'. Measured: a scan of 100,106 positions from 1,320 replayed master games found ZERO queen endings while the phase gate was on, and 372 with it off, every one of them classified `middlegame`. Any scan for a concept whose category is defined by material should ask the material rather than the phase."
+    }
+  ],
+  "awaiting_validation": [
+    "castling",
+    "en-passant",
+    "checkmate",
+    "threefold-repetition",
+    "stalemate",
+    "insufficient-material",
+    "dead-position",
+    "seventy-five-move-rule",
+    "check",
+    "fivefold-repetition",
+    "fifty-move-rule",
+    "promotion",
+    "skewer",
+    "zwischenzug",
+    "removing-the-defender",
+    "trapped-piece",
+    "double-attack",
+    "overloading",
+    "discovered-attack",
+    "desperado",
+    "interference",
+    "double-check",
+    "clearance",
+    "x-ray",
+    "deflection",
+    "decoy",
+    "discovered-check",
+    "battery",
+    "smothered-mate"
+  ],
+  "phase0": {
+    "last_redone": "2026-08-31",
+    "against_commit": "9ae184e (agent-4 after merging main)",
+    "record": "INTEGRATION.md",
+    "corrections": [
+      {
+        "was": "There is no FEN anywhere in the codebase; a FEN reader/writer is a prerequisite the Education System must add.",
+        "now": "fenOf() and stateFromFEN() exist at blind-chess.html:3913/:3929 and are round-trip tested. Do NOT write a second implementation.",
+        "cause": "inspected agent-4 while it was 44 commits behind main"
+      },
+      {
+        "was": "LESSON and PUZZLE are 'soon' stubs with nothing to preserve.",
+        "now": "Both are shipped features with their own test suites, plus a Practice system and 788 Stockfish-verified puzzles.",
+        "cause": "same"
+      },
+      {
+        "was": "The existing explanation system is judgeMove (centipawn loss -> 4 verdicts) and describeBest (3 board facts).",
+        "now": "judgeMove works in win percentage, takes both engine readings, distinguishes six verdicts and detects sacrifices by SEE. tools/puzzle_words.js is a separate, more capable explanation writer with an auditClaims() pass.",
+        "cause": "same"
+      },
+      {
+        "was": "Education System layers 3 and 5 are greenfield.",
+        "now": "The tactical half of layer 3 exists as findMotifs() (nine SEE-checked tags) and layer 5 exists for puzzles as tools/puzzle_words.js. The Education System supplies knowledge, the positional layer, extra registers and retrieval instead.",
+        "cause": "same"
+      }
+    ],
+    "convergence_note": "The puzzle generator deliberately refuses to claim deflection, decoy, overloading, interference and double attack because 'every cheap test for them fires where it is not true'. This knowledge base had independently classified the same five detectability:heuristic from the sources. Two independent routes to the same line."
+  },
+  "audits": [
+    {
+      "date": "2026-09-01",
+      "tool": "tools/audit.py",
+      "concepts_audited": 59,
+      "findings": {
+        "high": 6,
+        "low": 10
+      },
+      "high_findings_fixed": [
+        "Four attributions (backward-pawn, bad-bishop, doubled-pawns, isolated-queen-pawn) asserted originated-by/named-by at history confidence 'low' with no hedge in the attribution note itself. Hedge added so the caveat travels with the claim.",
+        "fork listed 'double attack (by a single piece)' as an alias, which is the canonical name of the separate `double-attack` record — the record's own metadata contradicted the distinction its prose draws. Alias removed, `broader: double-attack` added instead.",
+        "pawn-breakthrough claimed source_confidence 'high' with no source rated high. Downgraded to medium; the engine evidence is unaffected."
+      ],
+      "low_findings_accepted": [
+        "Four concepts promoted while relying on a source with an access caveat — accepted, because the promotions rest on engine evidence and the caveat is why none is promoted to 'ready'.",
+        "Two short records (checkmate, fivefold-repetition) — accepted, they are simple rules quoted from the Laws and padding them would add words, not knowledge."
+      ],
+      "note": "First periodic audit. The high findings were all real and all invisible to validate_kb.py and run_tests.py, which is the point of having a third tool that looks for what is wrong but legal."
+    },
+    {
+      "date": "2026-09-01",
+      "findings_high": 1,
+      "findings_low": 5,
+      "note": "Audit caught an originated-by attribution of planning to Steinitz at low confidence with no hedge - an overclaim this base had introduced. Downgraded to later-associated-with with the inference stated explicitly. Also downgraded endgame-principles source_confidence to medium, resting as it does substantially on one source."
+    },
+    {
+      "date": "2026-09-01",
+      "findings_high": 0,
+      "findings_low": 29,
+      "note": "Rewrote the audit's detector check to verify identifiers against the actual source files instead of a hardcoded whitelist, and it immediately exposed 24 concepts naming detectors that do not exist anywhere in the codebase - isCheckmate, lineAlignment, backRankEscape, castlingRights and others. The whitelist had been rubber-stamping aspirational names written during the research phase. All 24 repointed at real code or marked 'not yet written', each with an audit note recording what it used to claim."
+    },
+    {
+      "date": "2026-09-01",
+      "findings_high": 0,
+      "findings_low": 4,
+      "note": "Twelfth audit, after adding four Layer 4 matchers and three Layer 3 detectors. Still 0 high; the same 4 low findings, each an honest access-caveat flag on a source used for a validated tactical motif."
+    }
+  ],
+  "measurements": [
+    {
+      "date": "2026-09-01",
+      "tool": "tools/explanation_gap.py",
+      "what": "How many of the 788 shipped puzzle `why` cards name a motif in chess vocabulary",
+      "result": {
+        "total": 788,
+        "name_a_motif": 517,
+        "pct": 65,
+        "fallback_to_numbers": 271,
+        "fallback_pct": 34,
+        "by_theme_high": {
+          "pin": 98,
+          "kingAttack": 100,
+          "perpetual": 100,
+          "zwischenzug": 100
+        },
+        "by_theme_low": {
+          "positionalTactic": 4,
+          "pawnBreakthrough": 38,
+          "defensiveResource": 60
+        }
+      },
+      "conclusion": "Quantifies the Education System's surface. The tactical single-move case is covered at 88-100% by findMotifs() and puzzle_words.js and cannot be improved on by this project. The quiet/structural case is at 4-38%, and overall a third of all cards contain no chess vocabulary at all. Research priority is therefore positional, not tactical."
+    },
+    {
+      "id": "opening-compensation-spectrum",
+      "date": "2026-09-01",
+      "method": "Controlled searchmoves comparison: Stockfish 18, depth 26, 10 threads, 2048MB. For each position every candidate was evaluated inside ONE search of that position, so the only variable is the move. This avoids the separate-search artefacts that make cross-position gambit comparisons unreliable.",
+      "results": {
+        "after 1.e4 e5": {
+          "2.Nf3": 30,
+          "2.Nc3": 15,
+          "2.Qh5": -38,
+          "2.f4 (King's Gambit)": -61
+        },
+        "after 1.e4 e5 2.Nf3 Nc6 3.Bc4 Bc5": {
+          "4.c3": 28,
+          "4.d3": 24,
+          "4.b4 (Evans Gambit)": 0
+        },
+        "after 1.e4 e5 2.Nf3 Nc6 3.Nc3 Nf6": {
+          "4.d4": 8,
+          "4.Bb5": 3,
+          "4.Nxe5 (Halloween Gambit)": -167
+        }
+      },
+      "findings": [
+        "Gambit compensation is a measurable quantity, and it can be complete: the Evans Gambit is a pawn down and evaluates to exactly 0.00, so what is surrendered is White's opening edge (0.28) rather than the pawn.",
+        "Compensation must be established per gambit, never inferred from the word: the Halloween Gambit gives a knight for a pawn and measures 1.75 worse than the best move, with visible activity and no adequate compensation.",
+        "The 'don't bring the queen out early' rule is confirmed in direction and is smaller than its usual phrasing implies: 2.Qh5 costs 0.68 against 2.Nf3.",
+        "The claim that the King's Gambit is simply unsound is only partly supported. 2.f4 concedes 0.91 relative to 2.Nf3, which is an inferior line rather than a refuted one - and it evaluates BELOW 2.Qh5, the move beginners are told never to play.",
+        "Methodological: openings are one of the few positional areas where controlled comparison is easy, because the alternatives are all legal moves in a single position. This is the same searchmoves technique that failed to isolate outposts, and it works here for exactly that reason."
+      ],
+      "concepts": [
+        "gambit",
+        "compensation",
+        "early-queen-development"
+      ]
+    },
+    {
+      "id": "false-positive-resolutions-openings",
+      "date": "2026-09-01",
+      "method": "Stockfish 18, depth 26, MultiPV, on standard opening positions constructed from mainline move orders.",
+      "results": {
+        "Ruy Lopez after 3...a6": {
+          "4.Ba4 (second bishop move)": 42,
+          "4.Bxc6": 8,
+          "4.Bc4": 4,
+          "4.Be2": -29
+        },
+        "standard IQP after 8.exd4 (Black to move)": {
+          "best": -14,
+          "note": "White, who holds the isolani, is +0.14"
+        },
+        "Ruy Exchange after 4.Bxc6 dxc6": {
+          "best": 0,
+          "note": "dead level with doubled c-pawns"
+        }
+      },
+      "findings": [
+        "'Do not move the same piece twice' is refuted as a rule: 4.Ba4 is best by 0.34 over any alternative in one of the most-played positions in chess.",
+        "An isolated queen's pawn is not a weakness on sight - in the standard position the side holding it is slightly better.",
+        "Doubled pawns are not a weakness on sight, and the cost of inflicting them is measurable: 4.Bxc6 is 0.34 worse than the quiet retreat, and the side accepting them is exactly equal.",
+        "All three surface patterns are ones a naive detector would flag as errors. Each is now a recorded counterexample on its concept."
+      ],
+      "concepts": [
+        "opening-development",
+        "isolated-queen-pawn",
+        "doubled-pawns"
+      ]
+    },
+    {
+      "id": "false-positive-resolutions-structural",
+      "date": "2026-09-01",
+      "method": "Constructed positions verified with lib/features.js, then judged by Stockfish 18 at depth 24-26, or by the Syzygy tablebase where the position was small enough.",
+      "results": {
+        "knight on d5 Black can challenge": {
+          "detector": "d5 not a hole; outposts empty",
+          "engine": "Black +0.74"
+        },
+        "symmetric open d-file, rook each": {
+          "engine": "+0.02"
+        },
+        "rook on the seventh, empty rank, king has luft": {
+          "engine": "-0.04"
+        },
+        "both kings exposed in a pawn ending": {
+          "tablebase": "proven draw, pawnShield 0 each"
+        }
+      },
+      "findings": [
+        "A centralised advanced knight is not an outpost, and this base's own detector refuses it - the question is definitional, so the feature detector rather than the engine is the instrument that settles it.",
+        "An open file confers nothing by itself: symmetric, with a rook of each colour on it, the position is dead level.",
+        "A rook on the seventh is not decisive when the rank is empty and the enemy king has luft - the two conditions the concept names are exactly what was removed.",
+        "An exposed king is not a losing king; king safety is phase-dependent, and the proven-drawn position has both kings in the open with no shelter at all."
+      ],
+      "concepts": [
+        "outpost",
+        "open-file",
+        "rook-on-the-seventh",
+        "king-safety"
+      ]
+    },
+    {
+      "id": "rule-of-the-square-side-to-move",
+      "date": "2026-09-01",
+      "method": "Syzygy tablebase, 3-piece positions differing only in the side to move.",
+      "results": {
+        "Kd5 vs Ph5, Black to move": "proven draw",
+        "Kd5 vs Ph5, White to move": "proven win in 23",
+        "Ke5 vs Ph5, Black to move": "proven draw",
+        "Kc5 vs Ph5, Black to move": "proven loss for Black in 24"
+      },
+      "findings": [
+        "The rule of the square is a statement about the position AND the side to move: the identical board is a draw or a mate in 23 depending only on whose turn it is.",
+        "The turn is worth exactly one file, which is why counting files without checking the move is the rule's standard failure."
+      ],
+      "concepts": [
+        "board-geometry"
+      ]
+    },
+    {
+      "id": "mass-position-test-788",
+      "date": "2026-09-01",
+      "method": "tools/mass_test.js runs analyzeWithEducation over all 788 shipped puzzle positions with their known solution move, no engine supplied.",
+      "results": {
+        "crashes": 0,
+        "unfilled_templates": 0,
+        "banned_phrasings": 0,
+        "licensed_a_concept": "787 of 788 (99.9%)",
+        "said_nothing": "1 (0.1%)",
+        "lead_is_a_tactical_motif": "500 (63.5%)",
+        "lead_is_a_positional_concept": "287 (36.4%)",
+        "agreement_with_generator_tags": "500 of 703 comparable (71.1%)",
+        "by_track_motif_lead": {
+          "opening": "84.5%",
+          "middlegame": "72.3%",
+          "endgame": "43.4%"
+        }
+      },
+      "findings": [
+        "Robustness is clean at scale: no crashes, no unfilled templates, no banned phrasings across 788 positions.",
+        "The first version of this test reported 99.7% 'positional coverage' and that number was worthless - it counted any positional concept anywhere in a list of six, and the matchers were firing on nearly everything. semi-open-file fired on 83% of positions, open-file on 61%, weak-square on 57%.",
+        "Three matchers were tightened against their own concept records as a result: open-file and semi-open-file now require a rook actually on the file, and weak-square reports a hole a minor piece can MOVE TO rather than any hole at all.",
+        "The measurement was then changed to the lead concept, which is what the explanation actually says. Lead is a motif 63.5% of the time and positional 36.4%.",
+        "That 63.5% is expected and not an achievement: the tactical half delegates to findMotifs, the same detector the shipped layer uses, which explanation_gap.py measured at 65%. The addition is the 36.4%, which is close to the 34% of puzzles where the shipped card layer fell back to comparing numbers.",
+        "Agreement with the puzzle generator's independent tagging is 71% on comparable positions. The largest disagreement is hangingPiece, which the generator assigns across a whole solution line while findMotifs judges a single move - an explainable difference in scope rather than a contradiction.",
+        "CAVEAT ON THE WHOLE TEST: these are tactical puzzle positions selected for having one best move. They are not a representative sample of quiet positions, which is where a positional explanation layer would most need to be judged, and this base has no such corpus."
+      ],
+      "concepts": [
+        "open-file",
+        "semi-open-file",
+        "weak-square"
+      ]
+    },
+    {
+      "id": "positional-corpus-and-master-games",
+      "date": "2026-09-01",
+      "method": "Mined 1576 real positions from the puzzle corpus for concept features with lib/features.js, validated 42 of them with Stockfish 18 at depth 20, and separately replayed two master games through the page's own move generator to derive verified FENs.",
+      "results": {
+        "positions_before": 32,
+        "positions_after": 53,
+        "master_game_positions": 7,
+        "engine_validated_added": 21,
+        "validation_errors": 0,
+        "depth_mean_before": 0.61,
+        "depth_mean_after": 0.63,
+        "areas_full_before": 1,
+        "areas_full_after": 2
+      },
+      "findings": [
+        "Two master games were verified end to end rather than transcribed: Capablanca-Tartakower 1924 (103 plies) and Nimzowitsch-Salwe 1911 (77 plies) both replayed legally through the page's own move generator, so every derived FEN is checked rather than remembered.",
+        "Testing against those games immediately exposed three false positives that the tactical corpus had not: bad-bishop fired on Nimzowitsch's BLOCKADING bishop, outpost fired on Capablanca's opponent's rim knight on a5, and isolated-queen-pawn fired on a lone d-pawn in a pure rook ending. All three are fixed.",
+        "A fourth and more structural problem surfaced with them: ordering by informativeness let a LOW-confidence claim lead. A low-confidence claim must never be the headline, and the sort now demotes them regardless of how interesting the concept would be if true.",
+        "Most mined positions are too sharp to isolate a positional concept - the corpus is tactical puzzles - so 13 of them are recorded as AMBIGUOUS examples whose notes say the feature is present and the position is decided by tactics. That is an honest use of them rather than a wasted one.",
+        "The depth needle moved very little (0.61 to 0.63) for 21 added positions, which is the real scale of the remaining gap: 129 board-level concepts would need several hundred positions to reach high completeness."
+      ],
+      "concepts": [
+        "king-activation",
+        "rook-on-the-seventh",
+        "blockade",
+        "weak-square",
+        "knight-vs-bishop",
+        "piece-exchanges",
+        "bad-bishop",
+        "outpost",
+        "isolated-queen-pawn"
+      ]
+    },
+    {
+      "id": "false-negative-scope-mismatch",
+      "date": "2026-09-01",
+      "method": "Compared this system's motif detection against the puzzle generator's independent theme tagging on 649 comparable positions, first reading only the solution's first move and then reading the whole solution line.",
+      "results": {
+        "first_move_only": "500/649 (77.0%)",
+        "whole_line": "626/649 (96.5%)",
+        "mass_test_agreement_before": "71.1%",
+        "mass_test_agreement_after": "89.0%"
+      },
+      "findings": [
+        "The apparent false negatives were almost entirely a SCOPE mismatch, not a detection failure. The generator tags themes across a whole solution; the API was reading one move. A combination's fork frequently lands on move three.",
+        "Reading the line lifts direct agreement from 77.0% to 96.5%, with only hanging-piece (23) still diverging.",
+        "This was a real capability gap in the API rather than a measurement artefact: a caller explaining a combination could not get its motifs. analyzeWithEducation now accepts a `line`, reports motifs per ply, and says which move produced each one.",
+        "The residue in the mass test - king-attack 134, sacrifice 119, pawn-breakthrough 86, removing-the-defender 67, perpetual-check 52 - are generator themes computed from the line's EVALUATION rather than by motif detection, so they have no findMotifs equivalent. That is expected and is already documented in tools/motif_map.json."
+      ],
+      "concepts": [
+        "fork",
+        "pin",
+        "skewer",
+        "discovered-attack",
+        "trapped-piece",
+        "hanging-piece"
+      ]
+    },
+    {
+      "id": "quiet-corpus-and-master-game-expansion",
+      "date": "2026-09-01",
+      "method": "Added a mechanical quietness test to Layer 3; widened the prospector to 17 concepts with a strong quiet-position preference; verified 13 Zurich 1953 games by replay; harvested quiet positions from them; and searched for positions where a concept's feature is present and its HOLDER is worse.",
+      "results": {
+        "positions_before": 53,
+        "positions_after": 82,
+        "master_games_before": 3,
+        "master_games_after": 13,
+        "corpus_quiet_fraction": "350/1576 (22.2%)",
+        "depth_mean_before": 0.61,
+        "depth_mean_after": 0.7,
+        "motif_agreement_before": "71.1%",
+        "motif_agreement_after": "89.0%"
+      },
+      "findings": [
+        "Quietness is measurable and worth measuring: 22% of the tactical corpus is quiet by the test that the side to move has no check and no winning capture.",
+        "Quiet is NOT balanced. Of 62 prospected quiet positions, 29 were still decided by more than three pawns. Those are recorded as ambiguous examples rather than discarded or overclaimed.",
+        "Master games break matchers that a tactical corpus does not. Testing against Reshevsky-Petrosian and Nimzowitsch-Salwe exposed the passed-pawn matcher leading on a blockaded pawn and the luft matcher leading where no enemy piece could reach the back rank. Both are now guarded on the concepts' own stated conditions.",
+        "Searching for positions where the feature-HOLDER is worse produced only 5 hits from 37 candidates, which is itself informative: in master play a feature is usually held by the side it is helping, so negative evidence is genuinely scarce and cannot be mined in bulk.",
+        "Reading the whole solution line rather than its first move lifted mass-test motif detection from 63.5% to 83.5% and agreement with the generator from 71.1% to 89.0%."
+      ],
+      "concepts": [
+        "passed-pawn",
+        "luft",
+        "backward-pawn",
+        "exchange-sacrifice",
+        "positional-sacrifice",
+        "prophylaxis",
+        "compensation"
+      ]
+    },
+    {
+      "id": "human-grounded-corpus-v1",
+      "date": "2026-09-01",
+      "method": "Built corpus/annotated_positions.json: positions where a reputable human source names the concept, FENs derived by replaying the whole game through the page's own move generator, and Stockfish used only to verify the annotated move. tools/corpus_check.py validates provenance and runs the real API against every entry.",
+      "results": {
+        "positions": 6,
+        "games": 2,
+        "primary": 3,
+        "secondary": 3,
+        "false_negative": 0,
+        "false_positive": 0,
+        "at_start": "0 primary, 0 secondary, 3 false negatives on the first three entries"
+      },
+      "findings": [
+        "The first run scored 3 of 3 FALSE NEGATIVES. Human-grounded ground truth found in one sitting what 1576 mined positions and 13 master games had not.",
+        "A real Layer 3 BUG: the weak-pawn test counted a pawn on the SAME RANK on an adjacent file as a defender. Pawns capture diagonally forward, so c5 and d5 cannot defend each other - they are the definition of hanging pawns, and the bug hid them. Fischer-Spassky 1972 game 6, where the annotation says outright 'we've reached a position with hanging pawns', reported nothing weak at all.",
+        "Fixing that overcorrected: every home-rank pawn became 'undefendable', which is literally true and useless. Qualified by requiring the file to be open on the opponent's side, which is the classical weak-pawn definition.",
+        "Restraint is NOT measurable as a drop in legal moves. After Fischer's 30.h4, annotated 'restricting the knight on h7 even further', the knight's move count is UNCHANGED - h4 does not remove g5, it makes g5 unsafe. The matcher now counts destinations not attacked by a pawn.",
+        "Two concepts were missing entirely and the corpus exposed both: hanging-pawns, and pawn-break as distinct from pawn-breakthrough (a structural break versus a sacrifice to force a passer).",
+        "The two-weaknesses file-distance threshold was my guess. I demanded 3 files on the record's wording 'the far side of the board'; the textbook game has them on a and c, two files apart, both on the queenside. Calibrated to the canonical example.",
+        "The API was MATCHING concepts and then slicing them off the returned list because low confidence sorts last and the display cap is six. Added concepts_all: a display cap must not double as a claim that nothing else was found.",
+        "Engine verification came back MIXED and is recorded as a finding rather than a filter: 20.e3 and 20.e4 are the engine's first choice, 9.Nxc6 its second by 0.05, 30.h4 its third by 0.40, and 24.b4 - annotated 'the decisive pawn break' - is not in its top three."
+      ],
+      "concepts": [
+        "two-weaknesses",
+        "worst-placed-piece",
+        "hanging-pawns",
+        "pawn-break",
+        "restraint"
+      ]
+    },
+    {
+      "id": "human-grounded-corpus-phase-2-and-four-new-detectors",
+      "date": "2026-09-01",
+      "method": "Targeted the seven concepts the previous checkpoint named as lacking human grounding - initiative, king safety, centre control, static-vs-dynamic, piece coordination, transformation of advantages and the pawn breakthrough. Annotations were found first and positions second, never the other way round. Game scores were taken from a database (pgnmentor player files) rather than from the annotating page, because six of seven move orders printed by one otherwise useful blog failed to replay; every score used here was replayed end to end through blind-chess.html's own move generator, and every claim was then re-measured with Stockfish 18 at depth 20-22 with MultiPV 3.",
+      "results": {
+        "corpus_positions_before": 6,
+        "corpus_positions_after": 29,
+        "corpus_master_games_before": 2,
+        "corpus_master_games_after": 16,
+        "corpus_roles_after": "18 positive, 8 ambiguous, 3 negative",
+        "api_false_negatives_on_detectable_concepts": "0 of 29",
+        "api_false_positives": "0 of 29",
+        "ladder_human_grounded": "5 -> 23 on the corrected measure",
+        "ladder_api_validated": "32 -> 36 (36 of the 83 concepts whose own record allows a detector)",
+        "ladder_negative_tested": "29 -> 31",
+        "ladder_ambiguity_tested": "17 -> 22",
+        "validated_positions": "82 -> 105",
+        "depth_mean": "0.70 -> 0.71",
+        "new_detectors": "centralSquareControl, kingZoneAttackers, pawnBreakthrough (Layer 3); center-control, king-safety, king-attack, pawn-breakthrough (Layer 4)",
+        "firing_rates_over_788_positions": "center-control 20.3%, king-attack 1.5%, king-safety-by-count 1.1% of king-sides, king-safety-by-bare-shield 12.4% of king-sides, move-based centre 7.1%, move-based shield damage 2.6%, pawn-breakthrough 0.0%",
+        "tests": "632 -> 655 pass, 0 fail (plus 266 API, 376 audit, 3282 explanation)",
+        "ladder_every_rung_its_record_allows": "2 -> 11 on the corrected measure",
+        "level_parameter": "dead for the whole life of the API; now varies the wording on 99.3% of the 788 shipped positions"
+      },
+      "findings": [
+        "SIX of seven blog-printed 'full move orders' failed to replay. Only Capablanca-Mattison 1929 survived; Janowsky-Alapin, Rubinstein-Maroczy, Pillsbury-Marco, Havasi-Capablanca and Chekhover-Rudakovsky all reached an illegal move. Prose from such a page can still be cited; its move list cannot. Every score in this corpus now comes from a database and is replay-verified.",
+        "A REAL LAYER 3 BUG, found by a corpus position and nothing else. Wade-Korchnoi 1960 has a black pawn on e5 with no d- or f-pawn at all and a white pawn on e4 in front of it, and the detector called it BACKWARD - so the explanation of the most famous pawn breakthrough in the corpus led with 'Black's pawn on e5 cannot advance'. Two causes: the 'is it behind its neighbours' test returns false both when the neighbours are all advanced and when there are none, and the advance square was never checked for occupancy. A pawn with no neighbours is isolated; a pawn blocked by an enemy pawn is rammed. Fixed with a regression test.",
+        "THE CHECKER SCORED NEGATIVE EXAMPLES BACKWARDS. corpus_check.py had one rule - is the annotated concept the lead - which scores a negative example as a success exactly when the system has failed it. The bug was invisible while the corpus was all positive, and became live the moment negative entries existed. Now three roles, three standards.",
+        "AND THEN THE NEGATIVE EXAMPLES PASSED VACUOUSLY. Both new negatives passed because neither concept had a matcher: nothing could have reported them. A negative example for an undetectable concept is not evidence, and the checker now says so in those words. Writing a king-attack matcher turned one of them into a real test, which it passes.",
+        "RAW ATTACKER COUNTS MISREAD THE CENTRE. On Reti-Capablanca 1924, 18...Ne6 - Keene's recommendation and Stockfish's first choice by 0.39 - makes Black's raw attacker count on the four central squares FALL, from 7 to 6, because the arriving knight blocks a rook x-raying its own bishop. Control is now measured on pawns and minor pieces for the move-based arm. It still cannot tell Ne6 from the game's N6d7, and that is recorded on the record rather than tuned away.",
+        "THE ENGINE AND THE ANNOTATOR AGREED FOUR TIMES AND DISAGREED THREE TIMES, and both are kept. Agreements: Botvinnik's 20...Qc7, Keene's 18...Ne6 (+0.39 clear, with the game move outside the top three), Keene's 27...Rxe3, Speelman's 22.Be3, Capablanca's 22.Qxc6, 15.Ng5 and 16.Bf3, and Wade's 38.a5 at +9.17 with the engine's variation identical to this base's own detector's line. Disagreements: 20...Qc7 holds the initiative and is still half a pawn worse; 15...d4 and 16...Nd3 are sound ideas the engine does not rank first. An engine-filtered corpus would have thrown all three away and destroyed the distinction the learner needs.",
+        "THE PUZZLE GENERATOR AND THE EDUCATION LAYER MEAN DIFFERENT THINGS BY THE SAME WORDS, measured: the generator tags 86 positions `pawnBreakthrough` and ZERO of them is a pawn ending; it tags 134 `kingAttack` and this base reports 12. Both gaps are the concepts' own registered false-positive traps made numeric, and neither number should move.",
+        "FIVE OF THE SEVEN TARGET CONCEPTS CANNOT HAVE A DETECTOR, by their own records, and pretending otherwise would have been the easy way to move the numbers. initiative is 'invisible to a static feature scan'; piece-coordination and transformation-of-advantages are human-only; static-vs-dynamic is not a property of a feature. They now have human ground truth instead, and both the ladder and the corpus checker report the distinction from the records rather than from a list.",
+        "A NEGATIVE EXAMPLE ONLY COUNTS IF A DETECTOR COULD HAVE FAILED IT, and the corpus now holds one that could: Smyslov-Botvinnik 1954 after 21.Nc5, where a centralised advanced knight in front of an enemy pawn chain is the outpost pattern as any scan sees it and Botvinnik says twice in his own notes that the piece is badly placed. This base's outpost detector agrees and reports nothing, because ...b6 challenges c5 and no white pawn defends it. Two of the corpus's three negatives are now live tests rather than vacuous ones.",
+        "TWO FEATURES THAT ARE CORRECT AND WORTH NOTHING, which is what an ambiguous example is for. Nimzowitsch-Capablanca 1914: Black has doubled c-pawns and is +1.07 with the best move on the board being the one that presses the file they opened. Havasi-Capablanca 1929: White has the bishop pair and the engine's first choice for Black, at +0.40, is the move that trades it off. Both features are reported, both correctly, and this base's wording already refuses to go further - 'doubled pawns are a price, not a verdict'.",
+        "THE HUMAN-GROUNDED RUNG WAS MEASURING THE WRONG THING, and it was flattering itself. Its own definition says 'an annotated master position, NOT a mined one', and its implementation accepted any position carrying a named game and a historical origin - so 22 of the 36 concepts it counted were grounded only on positions this system found by running its own Layer 4 over master games. Those positions' own notes already said they 'cannot by itself validate the matcher that found it'. Fixed by adding an `attributed_by` field that names the person who said so, and the number fell from 39 to 17. The looser count is still printed underneath, because a drop that large should be legible rather than silent.",
+        "A DETECTOR THAT FLICKERS ON AND OFF ACROSS A GAME A HUMAN CALLS SETTLED. Traced ply by ply through Rubinstein-Salwe 1908 - the game whose annotator says flatly that the e6 bishop is bad - this base reports bad-bishop for exactly ten plies, from 16...Nd7 to 21.Nc5, and then stops, while the bishop's pawn share RISES from 0.67 to 0.83 over the same stretch. The cause is the `scope > 3` guard, which is there to keep Suba's active bad bishop off the list and is what stopped this base calling Nimzowitsch's blockading bishop bad. So the guard is right and the concept is momentary in a way its own record says it should not be. Recorded on the record and pinned at both ends by a test, rather than loosened: raising the threshold would restore two false positives to remove one false negative.",
+        "AN EXCEPTION THAT LIVED IN THE RECORD AND IN NONE OF THE WORDING. Capablanca-Thomas, Hastings 1929 is an opposite-coloured-bishop ending that Stockfish scores at -5.06 with White a single pawn up, and this base told a reader 'Opposite bishops are drawish in endgames'. The record's own second exception - 'three files of separation between passed pawns usually wins' - was present in the `exceptions` list and in the master-level wording, and absent from the beginner, intermediate, advanced, short and normal wordings and from the lesson line, which is what a reader actually sees. All six now carry the condition. The test written for it does not forbid the word 'draw', which would be the wrong lesson: it requires the condition to travel with the claim.",
+        "REJECTED A GROUNDING RATHER THAN TAKE IT. A FIDE Master's lesson titled 'The Backward Pawn on the Semi-Open File' calls White's c3 pawn backward in Marshall-Tarrasch 1905 and explains it as 'the b2 and d4 pawns sit on adjacent files blocking its advance' - after a capture in which the b2 pawn became the c3 pawn, with c4 empty and controlled by nothing. This base's detector reports no backward pawn at any ply of the sequence and is right by the definition the record takes from Wikipedia. Logged in failed_research_attempts and NOT added: the corpus is ground truth, and grounding a concept on a loose application of its own definition would poison the thing it exists to protect. backward-pawn still has no human grounding.",
+        "THE `level` PARAMETER HAD NEVER DONE ANYTHING. The API accepts beginner/intermediate/advanced/master, the README documents it, every concept record carries four texts written for those four readers, and asking for master and for beginner returned the SAME SENTENCE on every position. Cause: wordFor() tried `by_depth[depth]` before `by_level[level]`, and every record carries all three by_depth texts, so the by_level branch was unreachable. 137 records times four texts, written and unread. Found by asking, on the Letelier-Fischer position, why four levels printed one string. tests/test_explanations.js had a comment saying 'level must be able to' change the wording with no assertion under it; there is one now, and the wording varies by level on 99.3% of the 788 shipped positions. Two consequences came with the fix: level feeds the TEACHING half rather than the observation, because the observation must name the square and the level texts are general; and teachingSentence() now prefers a sentence long enough to teach something, because the advanced text for `outpost` opens 'Outpost in the modern sense.' and that label was the whole of what an advanced reader used to get.",
+        "A FALSE-POSITIVE TEST THAT BANNED A WORD RATHER THAN A CLAIM. The regression suite failed the new intermediate wording 'ask what the exchange bought before calling them a weakness' because it contains the word 'weakness' - which is the opposite of the fault it guards against. The check now splits the explanation into sentences and only fails a sentence that asserts a verdict without a hedging cue."
+      ]
+    },
+    {
+      "id": "ranking-and-confidence-measured-for-the-first-time",
+      "date": "2026-09-01",
+      "method": "Added RANK and CONFIDENCE measurement to tools/corpus_check.py. Reporting a concept and burying it were scored the same before this; for a positive entry the annotated concept is what a human said the position is ABOUT, so its rank in the reported list is a measurement. Then measured the firing rate of every concept over the 788 shipped positions, with the solution move supplied, and compared it with the order the PRIORITY list actually used.",
+      "results": {
+        "mean_rank_before": 4.9,
+        "mean_rank_after": 2.6,
+        "in_the_six_the_API_returns_before": "6 of 12",
+        "in_the_six_after": "12 of 12",
+        "top_3_before": 5,
+        "top_3_after": 8,
+        "confidence_overclaimed": "0 of 29, before and after",
+        "worst_ranks_before": "restraint 10, king-safety 10, worst-placed-piece 8, king-safety 7, center-control 7",
+        "mass_test_leads": "unchanged: 83.5% tactical, and the positional leads are the same set",
+        "tests": "655 -> 658 pass, 283 API, 377 audit, 3274 explanation",
+        "corpus_positions_after": 32,
+        "corpus_roles_after": "18 positive, 10 ambiguous, 4 negative",
+        "corpus_master_games_after": 21
+      },
+      "findings": [
+        "HALF THE HUMAN-ATTRIBUTED CONCEPTS WERE INVISIBLE. The API returns six concepts by default. On six of twelve positive corpus entries the concept a named annotator attributed to the position sat at rank 7, 8 or 10 - present in concepts_all, absent from anything a caller reads. Nothing measured this until the corpus did.",
+        "TWO CAUSES, AND THE FIRST WAS THE PRIORITY LIST CALLING ITSELF INFORMATIVENESS. Measured firing rates: two-weaknesses 72.5%, weak-square 68.9%, passed-pawn 60.4%, open-file 55.7%, space 53.3% - and all five ranked ahead of king-attack (1.5%), backward-pawn (1.9%), luft (4.8%), pawn-break (4.9%) and hanging-pawns (7.2%). A concept true of three quarters of all positions cannot be the most informative thing about any of them. Reordered by the measurement, with the measurement written into the source and two exceptions stated: passed-pawn, which names a concrete asset and whose 60% is an artefact of a corpus one third endgames, and pawn-breakthrough, whose 0% is scope rather than rarity.",
+        "AND THE SECOND WAS A RULE APPLIED TO THE WHOLE LIST INSTEAD OF TO ONE ENTRY. The comparator demoted every low-confidence claim below every medium one. Its comment says the rule is that a low-confidence claim must never be the HEADLINE - one position, not all of them - and every badly-ranked corpus concept was a low-confidence one. Now the lead is chosen that way and everything below it is ordered by informativeness. Mean rank 4.9 -> 2.6, and nothing is outside the six any more.",
+        "A METRIC MEASURING ITS OWN MAINTENANCE. mass_test.js decided what counts as 'positional' from a hand-written list that had gone stale: center-control, king-safety, king-attack and pawn-breakthrough were all missing, so when one of them took a slot in the visible six it displaced a counted concept and the headline fell from 96.4% to 94.9%. Now derived from each record's knowledge_type - and the number goes back to 99.4%, which this project has already recorded as a figure worth nothing, so the line now says so out loud and points at the LEAD figures instead.",
+        "THE HARDEST NEGATIVE SO FAR, AND IT NEEDED AN API CHANGE TO WRITE DOWN. Nimzowitsch-Salwe, Karlsbad 1911 - the founding game of blockade theory, annotated by Nimzowitsch himself - has his dark-squared bishop on d4 PASSING this base's structural test for a bad bishop: four of its own six pawns on its colour, a share of 0.67 against the 0.60 required. Only the scope guard stops the error, and this base called that bishop bad before the guard existed. Recording the claim needed a `side` field, because BLACK's bishop in the same game is bad in every sense and is correctly reported five moves later - and the API's concepts_all carried no `subjects`, so a caller was told 'bad bishop' and not whose. Fixed in the API, in the checker and in the corpus schema; a whole class of per-side negative was unwritable before.",
+        "A 1953 SACRIFICE FOR 'QUALITY OF POSITION' IS A 2026 ENGINE'S FIRST CHOICE BY THREE QUARTERS OF A PAWN. Reshevsky-Petrosian, Zurich 1953: 25...Re6 is Stockfish 18's top move at depth 24, 0.76 clear, and its principal variation plays out the annotation's own plan - 26.Rg3 Ne7 27.Bxe6 fxe6 28.Rf1 Nd5, the knight reaching d5 by the exact route described. Black is still a pawn worse, which is the honest half: the sacrifice rescues a difficult position rather than winning one. Recorded as an AMBIGUOUS example for material-imbalance and named against WHITE: the side up the exchange is the side the reader must conclude nothing about."
+      ]
+    },
+    {
+      "id": "four-more-detectors-and-one-refused",
+      "date": "2026-09-01",
+      "method": "Listed the 47 concepts whose own records name a mechanical detector and have no matcher, and built the five best-grounded of them. Each was measured over the 788 shipped positions before it was accepted, and each was tested against the game its concept is usually taught from.",
+      "results": {
+        "api_validated": "36 -> 53 of the 83 concepts whose records permit a detector (32 at the start of the session)",
+        "firing_rates": "blockade 27.3%, sacrifice 28.9% (with a move), battery 24.4%, exchange-sacrifice 1.0%, check 8.4%, en-passant 0.1%, promotion 0.3%, castling 0.1%, stalemate/insufficient-material/fifty-move-rule 0.0% on this corpus, which is what rare events look like",
+        "refused": "strong-square, measured at 80.1%",
+        "tests": "658 pass, 323 API, 402 audit, 3558 explanation"
+      },
+      "findings": [
+        "A DETECTOR THAT IMPLEMENTED HALF ITS OWN PRECONDITION. The blockade record says 'an enemy passed OR ADVANCING pawn'. The first version used Layer 3's existing `blockadedPassers`, which is the passed half, and it did not fire on Nimzowitsch-Salwe 1911 - the game the concept is named after, where the pawn being blockaded is a backward e-pawn and Nimzowitsch's own note is that its 'immobility is now greater than ever'. Testing a new detector against the game its concept is taught from caught it immediately. The matcher now requires an enemy pawn with no pawn of its own ahead of it on the file, stopped by one of our PIECES, because a pawn stopped by a pawn is a ram and no piece is being spent.",
+        "A GEOMETRY THAT FIRED ON 43% BECAUSE IT ARRIVED NOWHERE. `battery` written to its record's bare precondition - two aligned line pieces with a square beyond them - fired on 43% of positions, because two rooks stacked behind their own pawns satisfy it and combine nothing. Requiring the line to reach an enemy man or the enemy half brings it to 24.4%.",
+        "AND ONE DETECTOR WRITTEN, MEASURED AND REFUSED. `strong-square` implemented exactly to its record's two preconditions fires on 80.1% of the 788 positions - the `semi-open-file` failure this project has already made once - and it is a third name for a fact already reported twice, since `weak-square` is the same square from the defender's side and `outpost` is the same square with a piece on it. The record's own note says an outpost and a strong point are really the same thing. Removed rather than shipped, with the measurement on the record and a test that keeps it unimplemented.",
+        "THREE SUITES ASSERTED A MISSING DETECTOR AS A VIRTUE. tests/test_api.js, tools/api_audit.js and tests/test_explanations.js all demonstrated the 'no forced label' refusal on BARE KINGS, requiring that the position license nothing. But bare kings is where the most certain statement in chess is available - neither side can force mate - and saying nothing there is a gap, not a refusal. Adding `insufficient-material` broke all three, which is the correct outcome and not a regression. The refusal is a real principle and is now demonstrated where it really applies: two kings and two blocked e-pawns, a legal position in which no researched concept fits. Found by building a detector, not by reading a test.",
+        "THE RULES LAYER, WHICH THIS SYSTEM COULD NEVER SPEAK. Seven concepts whose records name detectors that already existed - check, stalemate, insufficient-material, fifty-move-rule, en-passant, promotion, castling - had no matcher, so a system built to explain chess could not say 'this is stalemate' or 'the fifty-move count is at 92'. They are the one class of claim it can make with certainty. Two guards were needed to keep them from being noise: `castling` is reported for the MOVE rather than for the rights, which almost every opening position has, and `en-passant` only when the capture is actually available, because a FEN carries the target square whether or not any pawn can use it.",
+        "A RECORD WITH TWO TRAPS, WHERE THE FIRST IS ONLY AVOIDED BY HONOURING THE SECOND. `loose-piece` warns that 'reporting every undefended piece would flag most positions and teach nothing' and, separately, that 'it only matters when a FORCING move can reach it'. A detector written to the preconditions plus the obvious guard - is there a move after which this can be won - fired on 66.8% of the 788 tactical positions and 40.6% of the annotated master corpus, because 'undefended and attackable' describes most pieces. Requiring the move to be a check or a capture brings it to 34.9% and 34.4%, and the agreement between two unrelated corpora is the sign that it is measuring the position rather than the corpus. The first trap was the symptom; the second was the cure, and they are two sentences apart in the same record."
+      ]
+    },
+    {
+      "id": "negatives-and-ambiguity-against-the-broadest-detectors",
+      "date": "2026-09-01",
+      "method": "Took the mandate's target directly: the concepts with the broadest, most easily triggered recognition rules, and hunted human annotations that would break them. Three of the four newest detectors - blockade, sacrifice, loose-piece - had no human grounding and no negatives at all while firing on a quarter to a third of positions.",
+      "results": {
+        "corpus_positions": "32 -> 35",
+        "corpus_roles": "18 positive, 12 ambiguous, 5 negative; 4 of the 5 negatives are live tests",
+        "mean_rank": "2.6 -> 2.4; leads 3 -> 4",
+        "two_weaknesses_firing_rate": "72.5% -> 38.6%",
+        "loose_piece_firing_rate": "34.9% -> 9.1% on the 788, 34.4% -> 0% on the annotated corpus",
+        "false_negatives": "1 of 35, recorded on purpose - see the findings",
+        "false_positives": "0 of 35",
+        "confidence_overclaims": "0 of 35",
+        "tests": "661 pass, 337 API, 388 audit, 3578 explanation",
+        "open_file_firing_rate": "55.7% -> 35.5%",
+        "piece_activity_firing_rate": "33.9% -> 40.2%, and the rise is reported rather than tuned away",
+        "weak_square_firing_rate": "68.9% -> 40.5%, by implementing three conditions its record already stated",
+        "firing_rates": "now an artifact, state/firing_rates.json, regenerated by tools/firing_rates.js",
+        "space_firing_rate": "53.3% -> 34.6%, by requiring the entry square its record demands",
+        "matchers_above_half": "0, apart from passed-pawn, which is kept high deliberately",
+        "corpus": "42 positions, 28 games; 19 positive / 13 ambiguous / 10 negative",
+        "human_grounded_rung": "31 of 137",
+        "rank_of_the_annotated_concept": "mean 4.9 -> 2.4 -> 2.2; top-3 on 11 of 12 positives",
+        "material_imbalance_firing_rate": "42.1% -> 35.5%, against the record's own preferred piece values",
+        "trap_audit": "246 stated conditions; 125 in the matcher, 20 in Layer 3, 54 argued on a record, 47 unread",
+        "rook_on_the_seventh_firing_rate": "12.8% -> 10.7%, and the sentence now says what the rook is doing there",
+        "quiet_positions_of_788": "98, not 172 - quietness() had never tested for winning captures",
+        "worst_placed_piece_firing_rate": "8.4% -> 4.1%, once the guard it grew could actually fire",
+        "pawn_endings": "20,000 generated; 0 crashes, 0 template leaks, 3 silent; pawn-breakthrough fires on 6.1%",
+        "breakthrough_vs_tablebase": "22 of 24 tablebase-decidable claims proved, 2 disproved",
+        "semi_open_file_firing_rate": "39.5% -> 24.5%, after a human-grounded position corrected the first attempt",
+        "outpost_firing_rate": "15.5% -> 11.9%, and it leads 30 times instead of 43",
+        "sacrifice_firing_rate": "28.9% -> 26.5%, by refusing to call a blunder a sacrifice",
+        "hanging_pawns_firing_rate": "7.2% -> 3.4%, by building a condition its own implements string claimed",
+        "confidence_vs_records": "12 concepts reported above their own record's typical_confidence; now 0",
+        "negative_examples": "87 of 132 concepts lack one, from 101; positive_example 67 of 132, from 73"
+      },
+      "findings": [
+        "A FALSE POSITIVE IN A PURE QUEEN ENDING, AND THE GUARD THAT WAS MISSING. Lisitsin-Capablanca 1935 at move 52 is a queen ending, and this base reported White's queen as a LOOSE PIECE. The cause: the guard asked for a forcing move after which static exchange evaluation says the piece is won, and 52...Qd2+ is a check that also attacks b2, so SEE reported a queen won - while White simply answers the check with Qxd2 and Black has won nothing. The forcing move must also survive being forcing. Every queen in a queen ending is undefended and attackable by the other one, which is the record's own first trap. 34.9% -> 9.1%, and 34.4% -> 0% on the annotated corpus.",
+        "THREE OF FOUR PRECONDITIONS WRITTEN AND NEVER BUILT. `two-weaknesses` fired on 72.5% of the 788 positions because its matcher implemented one of the four conditions its own record states. The corpus is what exposed it, and it did so indirectly: the concept had been ranked LAST in PRIORITY to stop it leading everywhere, and that pushed the one corpus entry whose annotated concept IS two-weaknesses to rank 8, outside the six the API returns. The fix belonged in the recognition, not in the order. Adding the heavy piece that can switch wings, the requirement that the defending king not stand between the targets, and a comparison of the two sides' weakness counts: 38.6%, the concept back in its measured place in the order, and the textbook entry back at rank 1.",
+        "AND ONE PRECONDITION THAT CANNOT BE COUNTED. 'The attacker has no weakness of comparable value' looks measurable and is not. Requiring the attacker to have strictly fewer weak pawns removed Rubinstein-Salwe 1908 from its own concept, because after 9.Nxc6 bxc6 White's b2 and e2 count the same as Black's a7 and c6 - one pair a fixed target complex on half-open files, the other two pawns on their original squares on move nine. The test was loosened to 'not MORE weak', and the remainder recorded as a limitation rather than pretended. This is the second time a corpus position has forced a precondition to be written down as unmeasurable instead of approximated.",
+        "SPIELMANN'S SHAM/REAL CLASSIFICATION WAS MISSING FROM THE SACRIFICE RECORD. The standard taxonomy of sacrifices - 'sham sacrifices involve losses of material only for a definable amount of time ... Properly speaking, there is no sacrifice, only an advantageous business deal' - was not in the base at all. Found while looking for a negative example for a detector that fires on 28.9% of positions. It is now on the record, sourced to the book, with the consequence stated: the SEE test detects that material was OFFERED and cannot tell sham from real, because that turns on whether the consequences could be calculated. Capablanca's 24.Qg8+ against Mattison is mate in two and is therefore sham - 'properly speaking, no sacrifice' - while Chernev and the literature call it a queen sacrifice. Recorded as an ambiguous example: two named authorities, both right about different questions, and this base adjudicating neither.",
+        "THE SAME BUG AGAIN, IN THE SECOND-BROADEST LABEL. `open-file` carries a REGISTERED false positive - 'a file with no pawns is not automatically useful; without an entry square, a rook on it accomplishes nothing' - and a third trap saying 'contested files where all rooks come off leave neither side with anything'. Neither was implemented. The matcher required a rook on the file, which took it from 61% to 55.7% and left it the second-broadest label in the base. Requiring the rook to be able to ENTER, and excluding files the enemy also has a heavy piece on, brings it to 35.5%. Three matchers now - two-weaknesses, loose-piece, open-file - have turned out to implement a record's bare precondition and ignore the traps written underneath it, and in every case the traps were the part that mattered. That is worth treating as a class of defect rather than three incidents: the next audit should read every matcher against its record's TRAPS, not its preconditions.",
+        "A FOURTH MATCHER CONTRADICTING ITS OWN TRAP, AND A FAILURE KEPT ON PURPOSE. `piece-activity` counted LEGAL moves; its record's first trap says 'counting available squares is not measuring activity. A piece with many moves that bear on nothing is not active.' It now counts ACTIVE moves - captures, moves into the opponent's half, and moves that attack an enemy man from where they land - with the threshold unchanged at a gap of eight: 44.4% -> 33.9%. The change then BROKE a corpus entry, and the break was the useful part. Keene's note on Reti-Capablanca 1924 is that Capablanca 'is doing his utmost with his strongest piece', and the entry had been passing because piece-activity was reported for WHITE - whose army really is the more active - while the annotation is about BLACK's queen. Naming the side made that visible. The entry is left FAILING: an army-level measure cannot state a single-piece claim, the concept that fits is `queen-activity` and it has no matcher, and the limitation is now written on both records. Loosening the measure or dropping the side would have made the number better and the record worse.",
+        "A FIFTH, AND THE AUDIT NOW HAS A TOOL. `weak-square` fired on 68.9% of the 788 shipped positions and implemented exactly one line of its record - the precondition. Three conditions written underneath it were not built: (1) the fianchetto trap, 'a fianchetto leaves permanent weak squares on the long diagonal that the bishop covers perfectly well'; (2) indicators_against, 'it is on the edge, or deep in the opponent's own half'; and (3) the definition's own words, 'a square in ONE'S OWN CAMP'. 68.9% -> 40.5%. The fianchetto guard is the interesting one, because the naive form of it deletes the classic outpost too: Nd5 met by ...Nxd5 exd5 is an even trade on the square, exactly like Bh6 met by Bxh6 Qxh6. The difference is the PAWN recapture, which keeps the square where a piece recapture leaves it to nobody - and pawn support is what the record's own indicators_for names. Both cases are pinned by tests. Two smaller things fell out of it. see() answers 0 both for an even trade and for a square nothing attacks at all, so a guard reading those as the same thing throws away precisely the safe holes it is looking for - an intermediate version measured 19.0% and was wrong. And the rank narrowing is in Layer 4, not in holesFor(), because `outpost` legitimately wants the middle rank and moving the test down would have silently changed what an outpost is. The measurement is now `tools/firing_rates.js` rather than a script written from scratch each time, and state/firing_rates.json is its output.",
+        "A SIXTH, AND THE LAST ONE ABOVE HALF. `space` counted controlled squares and stopped, which is the one thing its record warns about in the same breath: 'counting controlled squares is mechanical and over-reports. Space with no entry point wins nothing.' An entry square is now required and the rate falls 53.3% -> 34.6%. Layer 3's new entrySquares() is deliberately wider than reachableHoles(): that answers a question about OUTPOSTS - a minor piece on one of three ranks - and the classic way to cash a space advantage is a rook arriving on the seventh down a file nobody can contest, which is an entry square and is not an outpost. The record's second trap is built too and almost never binds: a territory made entirely of weak, blocked pawns is refused, which is 1 position of 274. It is built anyway, because a stated condition a matcher ignores is how all six of these went wrong, and the rate is written down rather than talked up. The third trap - 'the cramped side's standard remedy is exchanging' - is a claim about what the position will BECOME and no static feature answers it; that is now recorded on the record as unimplementable rather than left looking unnoticed. With this, no matcher fires on more than half of the 788 shipped positions except `passed-pawn`, which is kept where it is for the reason already written beside PRIORITY.",
+        "WEAK-SQUARE HAS HUMAN GROUNDING AT LAST, AND IT IS NEGATIVE BOTH TIMES - which is the right way round for a concept whose own record says every pawn move creates squares no pawn can guard. Both positions come from one article by Jan Markos (GM), who built them as traps for exactly the reading a mechanical detector performs: 'a keyhole is useless when you don't have a key that fits into it.' Unzicker-Fischer, Varna 1962 after 20.c3: d5 is a permanent hole in Black's camp, Layer 3 sees it, and Markos's pupils are meant to say White is better for it. Stockfish, from the side to move, says +0.39 for Black. The system is silent, and the entry records WHICH guard does the work - the one-move reachability rule, not this session's new ones - because a pass for a cruder reason than the human's is a pass and not a proof. It is also a live instance of the record's third trap: White's queen is standing on d5 as the diagram is drawn, and is driven off within six moves. Shirov-Kramnik, Linares 2000 after 20.Qh5 is the sharper one and names NO side: 'd5 is a no man's land. Neither side can make any use of it.' Stockfish scores it 0.00 and plays Kramnik's 20...d5 as its own first choice, settled from depth 8. The second position also produced a disagreement worth keeping. Markos calls Black's b4 and f4 'the cage that guards all the roads to d5'; this base's two-weaknesses matcher lists f4 among the weaknesses White should play against. Both readings follow from the pawn skeleton and only one is true of the position. It is written on the record as a trap rather than engineered away, because dropping f4 would not change the claim, which also names f7 and d6 - and because putting a concept in rejected_as_wrong on an annotator's behalf is how three earlier entries in this file manufactured false positives.",
+        "A SECOND RUNG COUNTING SOMETHING LOOSER THAN ITS OWN DEFINITION. HUMAN-GROUNDED was fixed once this project when it turned out to be counting this system's own mining (39 -> 17). It was still counting corpus MEMBERSHIP, and the corpus's `annotator` field is prose: one entry reads 'unattributed training page' and counted exactly like Nimzowitsch annotating his own game. `attributed_by` - the person whose claim it is - is now the field, backfilled across all 37 entries, and four entries turned out to name no person. 29 -> 26, and hanging-pawns, pawn-break and restraint lose the rung until a named annotator is found for Fischer-Spassky 1972 game 6, which is not a hard search and is honest work rather than a number. Twice now this check has been made and twice the honest number was lower.",
+        "AND A PRECONDITION THAT CANNOT BE BUILT, MEASURED RATHER THAN ASSUMED. two-weaknesses' precondition 1 ends 'with no forcing tactic available', which Layer 3 already answers (quietness.quiet). Requiring it removes the concept from this corpus's own textbook instance - Rubinstein-Salwe 1908 at move 24, the moment the SECOND weakness is created, is not quiet. Same shape as 'no weakness of comparable value': the precondition as written cannot be implemented without losing the game it was written about, so it is recorded on the record instead of pretended. The attempt left something useful behind: the 788 shipped positions are TACTICAL puzzles, every one with a forcing solution by construction, so any quietness-gated rate measured on them measures the corpus. tools/firing_rates.js --quiet restricts to the 172 quiet ones.",
+        "THE FIRING-RATE METRIC WAS BEING READ OFF THE WRONG CORPUS, AND A HUMAN-GROUNDED POSITION SHOWED IT. `luft` measures 4.8% on the 788 shipped puzzles and was ranked with the rare, specific concepts for it. Measured on the 37 ANNOTATED MASTER positions - the only set here where a human has said what each position is about - it fires on 48.6% and was the most frequent LEAD in the whole file, ahead of every tactic. Both numbers are correct and the puzzle one is the misleading one: puzzles are late-game positions whose kings have often already moved, and master middlegames are full of castled kings behind three unmoved pawns. A rarity ranking read off the wrong denominator put a piece of TERMINOLOGY - which is this concept's own knowledge_type - at the head of the explanation of positions Reti and Capablanca were playing. Its recognition is NOT the problem and was not touched: the matcher already requires an enemy rook standing on a file that reaches the rank, which is more than the record asks. Being true is not the same as being the most informative thing to say. Demoting it to last: mean rank of the annotated concept 2.4 -> 2.2, top-3 8 -> 11 of 12, and luft's leads on the corpus 5 -> 1. tools/firing_rates.js now measures all three denominators - the 788, the 172 quiet ones, and the annotated corpus - because the discrepancy between them is a finding rather than noise. One smaller thing fell out: luft's sentence said 'still has a rook or queen' where its guard requires a rook on a file that reaches the rank. A sentence looser than its own test teaches the looser rule.",
+        "A CONCEPT CONTRADICTED BY THE NUMBERS ITS OWN RECORD LEADS WITH. `material-imbalance` fired on every knight-for-bishop swap. The record's headline is Kaufman's statistical values and they are explicit - 'knight 3.5, unpaired bishop 3.5', the same number - so that swap is not an imbalance at all by the record's own standard, and it is a third name for a fact `bishop-pair` and `bad-bishop` already report. 42.1% -> 35.5%. The first version of the guard went too far and refused two bishops against two knights, which is the most discussed minor-piece imbalance there is and one Kaufman DOES separate (the pair at 7.5 against two knights at 7.0), so the exception is written in and tested. A SCAN for the same base-rate discrepancy that demoted `luft` found no second case: `luft` is +43.8 points higher on the annotated corpus than on the 788, the next largest gap is +13.2 (worst-placed-piece), and the whole negative tail (passed-pawn -41.5, weak-square -24.3) is the puzzle corpus's known skew towards endgames. With 37 positions a ten-point gap is noise; a forty-point one is not.",
+        "A SEVENTH MATCHER WITH ITS TRAPS UNBUILT, AND THE FIRST ONE WHERE THE ANSWER WAS TO QUALIFY RATHER THAN TO REFUSE. `bishop-pair` implemented 'one side has both bishops' and none of its three traps. The mechanical one is 'a bishop pair where one bishop is shut in by its own pawns is not really a pair', which is the bad-bishop condition word for word, so it is now one shared function rather than two thresholds for one idea. Suppressing the pair outright was tried first and failed on this base's own annotated bishop-pair position: Havasi-Capablanca 1929, where White's c1 bishop shares its colour with five of its six pawns and sees one square, and where the annotation is exactly that Capablanca proved the pair overrated - so the concept has to be REPORTED there to be argued with. The direction matters for a second reason: bad-bishop's own record says the conclusion its structural test invites 'is frequently wrong', and it reports at low confidence for that reason; letting it VETO a fact that is certain would be the wrong way round. So the pair is still reported, at low confidence, with a sentence naming the buried bishop instead of the record's usual advice to keep both. 23 of the 178 positions where a pair exists change from a confident recommendation to a qualified observation; the rate does not move, and saying it moved would be the wrong claim to make about this change.",
+        "A SECOND RECORDED FAILURE, AND THE FIRST TEST OF WEIGHTING RATHER THAN DETECTION. Jan Markos's 'Hypnotised by the bishops' gives three master games in which the bishop pair is worth nothing. Ftacnik-Roiz, Bundesliga 2008/09, is now in the corpus: after 18...d4 White really does hold the two bishops, Markos writes 'please note how idle White's bishops are', and Stockfish scores the position at -2.66 for the side holding them, with every alternative worse. Nothing this base says about that position is false - it reports the pair, the doubled f-pawns, Black's isolated pawn, Black's grip on the centre. What it cannot do is weight them, which is Markos's whole thesis: 'we tend to overestimate what is well-defined and clear-cut, and underestimate what is vague and hazy.' So `bishop-pair` is NOT put in rejected_as_wrong - it is not wrong to say White has two bishops, and three entries in this corpus once manufactured false positives exactly that way. The entry records the ANNOTATOR'S confidence as low, and corpus_check's existing confidence measure catches the gap: 1 overclaim of 38, standing. The guard added the same day for this record's buried-bishop trap does not fire here and should not: White's bishops share their colour with three of six pawns each and see seven and five squares. They are not buried by pawns, they are pointing at nothing while the king they left behind is mated. Same class of limit as the recorded piece-activity failure on Reti-Capablanca. One tool came out of it: `tools/trap_audit.js` and `state/TRAPS.md`, which list every false-positive trap a record states against the matcher meant to implement it. 108 traps across 24 matchers, 58 cited somewhere, 50 never written about either way. Every one of the eight defects found by this method was in the second group before someone read it. The tool is deliberately a READING LIST and not a verdict.",
+        "THE READING LIST IMMEDIATELY PAID FOR ITSELF, AND THEN CAUGHT ITSELF FLATTERING. tools/trap_audit.js first scored keyword OVERLAP and reported 75 of 122 traps unread. Adding lib/features.js as a second place to look - correctly, since half the guards live in Layer 3 - took it to 10 unread at a stroke, which is the shape of a metric flattering itself: a shared thousand-line file contains half of any sentence's words by accident. The test is now QUOTATION - a four-word run from the trap appearing in the code - because quoting the condition beside the guard is what this project actually does, and a bag of words is not something anyone did on purpose. 66 of 108 cited, 42 unread. Working the first few items found one real defect: `rook-on-the-seventh` reported the geometry and nothing else, which is its own third trap word for word - 'detecting rook on rank 7 is trivial and fires often; the reportable facts are what it ATTACKS and whether the KING is trapped'. It now requires one of the two and says which. 12.8% -> 10.7%, and it leads 26 times instead of 36. Three more traps turned out to be implemented and merely unquoted (open-file's entry square, semi-open-file's both-sides rule, king-activation's 'never centralise a king while the opponent has a queen', which the phase test enforces because phaseOf() requires no queens), and one is genuinely open and now says so on its record: `restraint` cannot 'name the advance being prevented' and reports a count instead.",
+        "A THIRD KIND OF ANSWER TO A TRAP: SAY MORE, RATHER THAN FIRE LESS. Working down the reading list, two of the highest-firing concepts turned out to have traps that ask for INFORMATION rather than for silence, and both had been read as if they asked for a guard. `passed-pawn` fires on 60.4% of the 788 and leads 128 times; its record says 'detecting a passer is trivial and fires constantly in endgames. Reporting one is only informative alongside whether it can actually advance.' A passer that cannot move today is still a passer, so the rate is unchanged and the sentence now carries the other half - the push is tried and whether it survives is said out loud - plus the second trap, 'a passer created from doubled pawns is often born weak', which is readable straight off the structure. `doubled-pawns` reported the structure and stopped, which invites exactly the conclusion its first trap forbids. Both compensations the record names are visible from the board and both are now said: a central pair 'controls four squares between them', and a side holding the bishop pair has its compensation off the pawn structure. Nothing there says 'weak', and test_explanations.js enforces that. Saying the rate did not move is the honest report on both. The temptation with a firing-rate metric in front of you is to answer every trap with a guard.",
+        "TWO MORE OFF THE READING LIST, AND ONE OF THEM IS A GUARD THAT ALMOST NEVER BINDS - WHICH IS ALSO A RESULT. `outpost` had never built its second trap, 'a safe square that the piece does nothing from. Safety is a precondition, not the benefit.' Built, it refuses 1 of 122 positions: the outpost zone IS the enemy's half, so a knight standing in it bears on something almost by construction, and the shape the guard catches is a bishop walled in by its own pawns. 15.5% -> 15.4%, and saying it moved would overstate it. Writing the guard did expose a real bug in the first version of it, which counted the piece's attacks on ITS OWN pawns as bearing on something - so the walled-in bishop passed. `opposite-coloured-bishops` said one thing in every position. Its first trap: 'the drawish reputation is an ENDGAME fact. In the middlegame with heavy pieces on, opposite-coloured bishops favour the attacker, because the bishop on the attacking colour has no counterpart.' The phase and the heavy-piece count now decide which half is said. Saying 'drawish' with queens and rooks on the board is the commonest thing anyone says about this material, and it is the error the record names.",
+        "A LAYER 3 BUG THAT HAD BEEN TRUE OF EVERY MEASUREMENT IN THIS PROJECT, FOUND BY A GUARD THAT NEVER FIRED. quietness() called P.see(st, m) with a MOVE object where see(state, SQUARE, side) expects a square index. s.b[move] is undefined, see() returned 0 for every capture, and winningCapturesAvailable was ALWAYS ZERO - so `quiet` has only ever meant 'not in check and no check available'. It was found by the trap audit rather than by reading the code: `worst-placed-piece` grew a guard implementing its record's second trap ('improving pieces while the opponent builds an initiative produces individually reasonable moves and a collectively lost position'), the guard refused 0 of 788 positions, and a guard that never fires is either unnecessary or broken. Consequences, all measured and all corrected: quiet positions among the 788 are 98, not 172, so today's --quiet denominator was wrong the day it was written; `worst-placed-piece` falls 8.4% -> 4.1% now that its new guard can fire; and 21 of the 53 concept-record notes claiming a position is 'QUIET by mechanical test: no check available and no capture that wins material' were claiming something that had never been tested and are false. All 21 are corrected IN PLACE, naming the bug, and the positions are kept - dropping the evidence would be tidying away the consequence of a bug. The two-weaknesses limitation that cited the quiet experiment is re-measured too: 28.6% rather than 32.6%, conclusion unchanged.",
+        "THREE MORE TRAPS BUILT AND ONE MEASURED AS UNBUILDABLE, WHICH IS THE MORE USEFUL RESULT OF THE FOUR. `two-weaknesses` now refuses the concept outright when there are opposite-coloured bishops on the board - 'against opposite-coloured bishops or a reachable fortress, the count of weaknesses is simply not the operative variable', and the defender holds a whole colour complex whatever the count says. 38.6% -> 33.8%. `backward-pawn` now requires the file to be half-open for the opponent - 'a backward pawn on a closed file that nothing can attack is a description, not a weakness' - and 10 of the 15 backward pawns on the shipped corpus qualify, the other five having been descriptions. 1.9% -> 1.3%. `luft`'s second trap is the interesting one. 'Luft is unnecessary when the back rank is adequately defended or when no heavy pieces remain': the second half is enforced, the first is not mechanical at any threshold this base could defend, and the number says why - 36 of the 39 side-instances where luft fires have a friendly rook or queen ON their own back rank. Refusing those would delete the concept, because a rook on the back rank is exactly what most back-rank mates happen in spite of. Recorded rather than attempted.",
+        "AN OVERCLAIM HIDING IN A FIELD NOBODY READS AS A CLAIM. `material-imbalance` set `subjects` to the side ahead on the 1/3/3/5/9 count - which is saying who the imbalance FAVOURS, by the very scale this record's first trap says stops applying once the material is of different kinds, and its second trap forbids in so many words. `subjects` is not decoration: it is what the corpus checker filters per-side claims on and what a caller reads to know whose concept this is. Both sides are now named, always. And an `implements` string that was not true: `opposition` said the wording named the spare-tempo escape, and the wording did not. It does now, and the claim drops to LOW confidence when the side to move has a pawn push that loses nothing - which is the commonest reason a king that 'has the opposition' has nothing. The reading list is at 89 of 108 cited, 19 unread, and the remainder are mostly traps about JUDGEMENT that no static feature answers - which is the useful thing to have established about them.",
+        "THE READING LIST IS AT ZERO UNREAD, AND THE HEADLINE HAD TO BE SPLIT SO NOBODY MISREADS IT. Every one of the 108 false-positive traps stated across 34 concept records has now been read against the matcher meant to implement it. The split matters more than the total: 66 are enforced in the matcher, 14 in Layer 3, and 28 are ARGUED ON THE RECORD to be unbuildable or already honoured elsewhere. A single '108/108 cited' headline would read as 'all traps implemented', which is the same self-flattery this tool caught in its own first version, so the tool prints three numbers and says in the artifact that noted is an argument and not a guard. The last of them: `king-activation`'s most important trap, on the testimony of the principle's own advocate - 'the single most important trap is ROOK ENDINGS. Shereshevsky found centralisation there to be not merely untimely but sometimes simply wrong.' Both stronger answers were tried and both are wrong. Refusing the concept in rook endings deletes Capablanca-Tartakower 1924, this corpus's own annotated instance and the most famous king march in a rook ending in the literature; downgrading to low confidence says 'we are not sure the king is off its back rank', which is not the doubt being expressed. He warns against centralising AUTOMATICALLY, so the sentence carries the warning and the confidence stays. That is the third time today that saying more was the right answer where firing less was the tempting one.",
+        "THE ENTRY-SQUARE GUARD MET A MASTER GAME CHOSEN TO CATCH IT, AND HELD. Torre-Karpov, Bad Lauterberg 1977 is introduced by its annotators as 'a great example of how not to play when you have space advantage. Instead of controlling black's counterplay, white deliberately went on to grab more space and all of a sudden found himself under a very strong counterattack.' At move 26 White's pawns control NINE squares in Black's half against zero - six times the matcher's own threshold - and Layer 3 finds no entry square at all. Before this session the concept would have been reported here, with confidence. The engine agrees with the annotators about the MOVE and not only the position: 26.Qg2, which they call the only move, is Stockfish's first choice at +0.05; the game's 26.e5 measures -3.01 and is not in the top three. A three-pawn swing on one move is what 'suddenly found himself under a very strong counterattack' looks like in numbers. And the other half of the annotation IS reported, for the other side: `piece-activity` names Black, 24 active moves to 12, which is the counterplay White allowed. This is the first human-grounded negative `space` has ever had, and it belongs beside the two weak-square negatives: all three are positions a named author BUILT to catch the reading a mechanical detector performs, in all three the raw Layer 3 feature is present and loud, and in all three what stops the report is a condition the concept's own record already stated and the matcher had not implemented.",
+        "THE ONE NAMED GAP IN COMPLETION.md THAT COULD BE CLOSED BY BUILDING SOMETHING, AND IT HELD TWO BUGS. 'Zero of the 788 shipped positions is a pawn ending, so pawnBreakthrough() fires on none and the corpus offers no evidence at all about its false-positive rate' had been standing for several sessions. tools/pawn_endings.js now generates pawn endings through the page's own move generator - 20,000 of them, 0 crashes, 0 unfilled templates, 3 licensing no concept - and tools/verify_breakthrough.py checks each breakthrough claim against Syzygy, where a pawn ending of seven men or fewer is DECIDED rather than estimated. The claim checked is the narrow one the matcher makes, accepting the offer loses, so the position tested is the one after the offer and after a pawn capture of it. TWO REAL BUGS. (1) A breakthrough is a move and cannot be played out of turn: pawnBreakthrough() asked P.legalMoves(st) and never checked whose moves they were, so when features() asked it for the side NOT to move - which it does for both sides, every time - it read the OPPONENT'S pawn moves as the offer and claimed the line for the wrong colour. On 3K4/p7/2p5/4P3/1P2k3/8/P7/8 b it returned a breakthrough for White whose first move was a7a5, a black pawn. (2) One king cannot be in two places: the rule of the square was applied to each enemy passer in turn, which assumes one king catches all of them. AND ONE THING THAT IS NOT A BUG. The rule of the square is not a proof in a multi-pawn ending, and the record and the matcher both said it was. Promoting one move before the defender is not winning - Syzygy calls 8/8/2K4P/1p6/4p3/8/k4P2/8 w a DRAW after 1.f3 exf3 2.h7 f2 3.h8=Q f1=Q - so an enemy passer must be two tempi slower rather than one. Four margins were measured (0: 15.7% firing, 22/30 right; 1: 10.3%, 19/24; 2: 6.1%, 22/24; 3: 4.1%, 22/24) and so was refusing every enemy passer, which scores 20/23 and DELETES the canonical pattern, because in a real breakthrough both sides get a passer and the point is that ours is faster. Margin 2 is the chess, not a fitted number: it is the free move that lets the new queen stop the other pawn. The ORDER of the two questions matters too, and getting it wrong deleted the textbook three-against-three: speed must be asked before the king, or two hopeless enemy pawns five steps from promotion count as two calls on a king that never needed to move. pawn-breakthrough now reports at MEDIUM and its sentence says 'an indication rather than a proof - checked against tablebases, right about nine times in ten'. It used to say high, and the PRIORITY comment used to call it 'a PROOF by the rule of the square'.",
+        "THE READING LIST WAS HALF THE LIST. tools/trap_audit.js reached '0 unread' by reading every concept record's `false_positive_traps` - and half the conditions in this knowledge base live in `indicators_against`, which it had never looked at. Counting both, there are 246 stated conditions and 123 are unread. A number that reached zero and then turned out to be measuring half the thing is the fourth metric this project has caught flattering itself, and the count went up rather than down for once. What found it was a position. Karpov-Polgar, Linares 2001, is now in the corpus as the first entry whose concept is not merely reported but LEADS: Black's rook on a2 attacks g2 and h2 with the white king on its back rank - the ABSOLUTE seventh the record calls decisive - so the explanation opens with it and then says 'if it is trapped behind you, pay whatever it costs'. Stockfish has White at +0.83 and plays Karpov's 24.Kc1 as its own first choice, with the Nb5-c3 eviction in the principal variation. Markos: 'Polgar's rook is a beast... Yet Karpov nicely shows that the rook lacks sufficient support.' The missing condition is on the record, in indicators_against: 'the rook can be challenged and traded off, or driven away with gain'. A one-ply test for it was written, measured and thrown away - it fixes this position and breaks Capablanca-Rubinstein 1928, the corpus's own annotated instance, where the rook is both challenged and attacked by a lesser piece and the concept is right anyway. Karpov's eviction takes four preparatory king moves. Fitting a rule to one position would have cost the textbook one, so the failure is recorded: the corpus now reports 1 false positive of 40, where it reported 0 of 39.",
+        "A MATCHER THAT QUOTED ITS TEST AND BUILT NEITHER HALF OF IT. `semi-open-file` fired on 39.5% of the 788 shipped positions and had zero human grounding. Its record states the whole test - 'whether it produces pressure depends on whether the TARGET IS FIXED and whether you can ATTACK IT MORE TIMES THAN IT CAN BE DEFENDED' - and the matcher quoted that sentence in a comment and then said 'a rook on the file is the half a static scan can answer'. That was a claim nobody had checked, and it is false: both halves are answerable. The enemy pawn must have no safe advance, and it must be attacked at least as often as it is defended. 39.5% -> 16.4%, and the sentence now names the pawn. This is worth separating from the eight earlier cases. Those were matchers that IGNORED a stated condition. This one quoted the condition, asserted that half of it was unanswerable, and was wrong about that - which is how a trap can be marked 'cited' by the audit and still not be built. The audit's own artifact says 'noted is an argument, not a guard'; this says the same thing about a citation. `open-file`'s last answerable indicator_against - 'the file can be closed by a pawn advance' - is built too, and is near-inert: 35.5% -> 35.4%, because a file is open precisely when both pawns have left it. Built, measured and reported as near-inert rather than dressed up.",
+        "SIX MORE CONDITIONS OFF THE SECOND LIST, AND THE FOURTH 'SAY MORE' IN TWO SESSIONS. `passed-pawn` is the most-reported concept in the base at 60.4% and leads 128 times; three of its five indicators_against are judgements no static scan reaches and are recorded as such, and the other two are built. 'Securely blockaded by a piece that cannot be dislodged' has been enforced since the Reshevsky-Petrosian correction. 'It stands on a square where it is easily attacked' is now carried in the SENTENCE rather than used to suppress: a passer attacked more times than it is defended is named as a target rather than an asset. The rate does not move and saying it did would be the wrong claim. The other five were already built and merely unquoted - `space`'s 'no entry point exists, so the territory buys nothing' and 'the advanced pawns are fixed targets rather than a front', and `doubled-pawns`' three compensations. The audit's quotation test under-credits when a record says the same thing twice in different words, which is the price of a test that cannot be gamed; the fix is to quote the second wording too, not to loosen the test.",
+        "NIMZOWITSCH ASSIGNS FLANK OUTPOSTS TO ROOKS, AND THIS BASE HAD BEEN GIVING THEM TO KNIGHTS. `outpost`'s second indicator_against says 'the square is on the a/b/g/h files and the intended occupant is a knight', and the matcher filtered only a and h - and only because Capablanca-Tartakower 1924 had forced it in an earlier session. Widening to b and g for knights takes it 15.4% -> 11.9% and its leads 43 -> 30. That is more than it looks: a pawn-defended knight on b5 or g5 in the enemy half is not rare in a corpus of tactical puzzles, and every one was being called an outpost by a base whose own record assigns the square to a rook. `blockade` went the other way, and the position decided it. Its first indicator_against - 'the blockader is a queen or rook, which is expensive and evictable' - was built as a refusal and measured at 27.3% -> 20.3%, and it deletes Lisitsin-Capablanca 1935: a queen ending where Chernev praises exactly the queen blockade the record warns about, and which is this corpus's annotated instance of the concept. The sentence carries the caveat instead. Fifth 'say more' in two sessions.",
+        "THREE MORE CONDITIONS BUILT, AND ONE RATE THAT WENT UP. `piece-activity` now excludes moves by a piece TIED TO DEFENDING SOMETHING - a move that abandons a man it was guarding and leaves it hanging is not activity, because the piece has the move and not the freedom. The rate rose, 33.9% -> 40.2%, and it is reported rather than tuned away: the exclusion is asymmetric, so a side whose pieces are tied down loses more moves than a free one and gaps widen. Karpov-Polgar 2001 now measures 3 active moves for White against 18 for Black, which is exactly Markos's account of that position. `weak-square`'s 'reaching it achieves nothing' had only its first half built, and the second half is the same question `outpost` asks in its own traps - two records saying the same thing and only one being listened to. There is now one function, bearsFrom() in Layer 3, and both use it. Near-inert, 40.5% -> 40.4%. `two-weaknesses` is the sixth 'say more' in two sessions. 'The first weakness can be LIQUIDATED by a pawn break' was built as a refusal twice - both weaknesses fixed scores 23.1%, one fixed scores 29.4% - and both delete Rubinstein-Salwe 1908. At the moment the annotator marks, where the weaknesses are CREATED, both a7 and c6 can still advance and Rubinstein's whole game is about preventing ...c5. The annotation marks the creation; the record's method describes what is done afterwards. The sentence now names what still has to be fixed, which is the method rather than a verdict.",
+        "`indicators_against` DOES NOT MEAN THE SAME THING ON EVERY RECORD, and building it uniformly would have inverted two concepts. For a concept naming an ASSET - an open file, an outpost, a passed pawn - they are reasons NOT to report it, which is how the reading list treats them. For a concept naming a SCALE or a liability they are the conditions under which the thing is BAD, which is to say the conditions the matcher fires ON: `king-safety`'s 'three or more attackers can reach the king zone' IS the count arm, and `isolated-queen-pawn`'s five are all reasons the pawn is an asset rather than reasons to withhold a structure that is on the board. Building either set as guards would have suppressed the concept exactly where it applies. The distinction is now in the artifact's own header and on both records. The list is at 78 unread from 101, and most of that movement is READING rather than building - six records now carry a paragraph saying which of their indicators are built, which are the wrong polarity to build, and which are judgements about a position that does not exist yet. One real build came out of it: `sacrifice` now refuses to call a blunder a sacrifice. Its first indicator_against - 'material is given up with NOTHING NAMEABLE IN RETURN' - is tested two plies deep: if the offer is accepted, the offering side must have a check or a capture that wins material. 28.9% -> 26.5%. The second, 'the compensation described is not actually present', is the difference between '!' and '?' and no material test sees it - which is why the record's caution stays attached to every claim.",
+        "THE TWO CLASSIC REFUTATIONS OF THE BISHOP PAIR, BUILT. `bishop-pair` fires on 22.6% and leads 9 times, and its record names three ways the pair is worth nothing. One was built earlier today; the other two are now built and both DOWNGRADE rather than suppress, for the same reason - the pair is a fact and only its worth is conditional. 'A locked pawn structure with no way to open it' needs both halves and contains neither a threshold nor a judgement: at least three of our pawns nose to nose with an enemy pawn, and no pawn advance of ours that arrives in contact with an enemy pawn and survives. A share-of-rammed-pawns threshold was tried first and rejected because it needs a number nobody can defend, while 'no way to open it' is a question the board answers. 'The opponent has a knight on a secure outpost' is read straight off the outpost detector. 5 of 178 are locked, 14 face a knight, 18 have one or the other, and each now says which. Worth noting what did NOT resolve: Ftacnik-Roiz 2009, the recorded confidence overclaim, has neither a locked structure nor an enemy knight on an outpost. The failure stands, which is the right outcome - the guards were built from the record, not fitted to the position.",
+        "A SECOND `implements` STRING THAT CLAIMED SOMETHING THE CODE NEVER DID. `hanging-pawns` has said 'no friendly pawn on either flanking file' since the day it was written and never tested it, so b5-c5-d5 was reported as hanging pawns on c5 and d5 - a phalanx of three called a hanging pair. The record says the same thing as an indicator_against, 'a friendly pawn still stands on a flanking file: then it is a chain, not a hanging pair'. Built: 7.2% -> 3.4%, and Fischer-Spassky 1972 game 6, this corpus's annotated instance, is untouched. Two of these in one day - the other was `semi-open-file` - which says the `implements` strings are themselves claims that need checking, not documentation. `opposite-coloured-bishops` says outright that 'the count of pawns is the wrong variable; their separation and the blockade are' - and the base was reporting neither variable. Separation is now measured and named in the sentence: three files or more and the reader is told that separation decides these endings; closer than that and they are told one bishop covers it. The blockade half is not measurable and is left alone.",
+        "AN `implements` STRING IS A CLAIM, NOT DOCUMENTATION - four of them were wrong, and reading them against the code is a check nobody had run. Every matcher in this base carries an `implements` string naming the part of the record it enforces, and the whole trap audit rests on those strings being true. Two days of reading found four that are not: `semi-open-file` QUOTED its record's whole test and built neither half, asserting in a comment that half of it was unanswerable; `hanging-pawns` claimed 'no friendly pawn on either flanking file' and never tested it, so a phalanx of three was reported as a hanging pair; `restraint` said it measured 'total piece scope' where the code counts SAFE DESTINATIONS, which is a different and better measure that the string was hiding; and `king-safety` said it was 'reported ONLY at three or more attackers' while a second arm fires at ONE - the arm that Adams-Kasparov 2005 put there. Two of the four were defects in the code and two were defects in the string, and only reading the string against the body tells you which. All four are fixed and a test pins them.",
+        "CONFIDENCE CALIBRATION, MEASURED AGAINST THE RECORDS FOR THE FIRST TIME. Until now confidence was checked two ways: capped by knowledge_type, and compared with the human annotator on 40 corpus positions. Neither asks the question each record already answers. Every record carries `typical_confidence`, which the schema defines as 'how confidently this concept can normally be asserted ONCE ITS PRECONDITIONS HOLD' - a per-concept ceiling, more specific than its type - and nothing was reading it. Measured over the 788 shipped positions, TWELVE concepts were reported above their own record's figure. cap() now takes the lower of the two ceilings. A matcher may say less than its record and may not say more, which is the same rule the corpus already applies to this system against a human annotator; there was no reason for the records to be held to a looser one. That immediately exposed the other half of the problem: `typical_confidence: medium` was an unconsidered DEFAULT across 32 rule and motif records regardless of detectability - official-rule had eleven records at medium and one at high. A stalemate is a stalemate, and a fork this base reports is one findMotifs() found, which ARCHITECTURE.md makes the authority and forbids second-guessing. 24 records whose detectability is MECHANICAL and whose knowledge type already carries a high ceiling were raised to high, each with the argument written on it. The eight heuristic ones - clearance, decoy, deflection, desperado, double-attack, overloading, dead-position, zwischenzug - keep medium, and several of them are concepts themesOf() refuses to claim at all. Nothing reports above its record now, and the corpus's one confidence overclaim is untouched: Ftacnik-Roiz is a claim about WEIGHT, and bishop-pair's record says high.",
+        "A HUMAN-GROUNDED POSITION CORRECTED A FIX MADE THE SAME DAY, WHICH IS THE CORPUS DOING ITS JOB. `semi-open-file`'s 'target is fixed' test was built as 'the pawn cannot advance safely', and that is wrong for a FILE concept: a pawn that advances is still on the same file. Nimzowitsch-Capablanca 1914 caught it. The annotators name 'play on the open b-file' and say the b2 pawn falls six moves later; the first version dropped the b-file entirely because b2-b3 is a perfectly safe move. It is - and the pawn is still on b3, still on the file, still outnumbered. The escape is now arriving somewhere it is no longer attacked at least as often as it is defended. The second half was softened too, deliberately and with a measurement. The record says 'attack it MORE TIMES THAN IT CAN BE DEFENDED', which is the condition for WINNING the pawn; reporting only that measures 8.6% and again loses the b-file, where the count is 1-1. At parity the pawn is not falling and the file is not nothing - the defence is committed to it - so both are reported and the sentence says which. Seventh 'say more' in three sessions. 39.5% -> 24.5%, and Capablanca's second rook on the b-file is now named where before only the a-file was.",
+        "AN ANNOTATOR'S 'OPEN FILE' IS NOT THIS BASE'S, AND THE DISTINCTION IS LOAD-BEARING. Nimzowitsch-Capablanca 1914 now carries a second corpus entry, giving `semi-open-file` the first human grounding it has ever had. The annotators write 'play on the open b-file' and this base calls that file SEMI-open, because White still has a pawn on b2 and `open-file` is reserved for a file with no pawn of either colour. That is not pedantry: the two concepts have different detectors and different conditions - an open file needs an ENTRY SQUARE, a semi-open one needs a TARGET - and the b-file here has a target, which is the whole point. `open-file` is in the entry's rejected_as_wrong for that reason, and is correctly not reported.",
+        "TWO CONCEPTS THAT HAD THE FACT AND DID NOT SAY THE WORD. `rook-on-the-seventh` knew whether the enemy king was confined - the matcher has used it as a firing condition since yesterday - and the sentence never used Nimzowitsch's vocabulary for it. The record makes the distinction central: the seventh is held ABSOLUTELY with the king shut on the eighth behind the rook and only RELATIVELY once it has slipped out, and 'if the king slips out you are buying a good rook, not a winning one'. A reader was being told the rook was on the seventh and not which kind. Naroditsky's correction, which the record quotes in full, was missing too: with the eighth defended by a heavy piece, two rooks on the seventh almost never mate. The pigs-on-the-seventh picture is the most over-taught image in the concept and this base was drawing it without the condition that makes it wrong. `battery` now names the expensive way round - a queen in front of a rook, which has to move first every time the line is touched - and building it exposed a bug in the matcher's own bookkeeping: the scan walks from one piece along a direction to the other, so the SECOND piece found is the one nearer the target. Read the other way round it would have told a reader the queen was in front when the rook was. Neither change moves a firing rate. Both change what is said, which is the eighth and ninth time in three sessions that has been the right answer.",
+        "FIVE MORE CONDITIONS, ALL OF THEM SAID RATHER THAN ENFORCED, AND THE REASON IS THE SAME EVERY TIME: the geometry is there either way and which way it cuts is what a learner needs told. `doubled-pawns` now names the outpost the pair holds and the king they shield - the doubled f-pawns after ...gxf6 are the classic case, and all five of that record's indicators are now in the sentence. `outpost` names a piece that can be traded off by a knight or a same-coloured bishop, because the square survives the swap and the piece does not: it is held on loan until then, and a bishop of the wrong colour does not count. `luft` says it concretely when the kings are actually on opposite wings, where the pawn move that makes air is also a hook. None of the three moves a firing rate.",
+        "TWENTY-TWO CONDITIONS READ AND FOUND ALREADY BUILT, WHICH IS NOT THE SAME AS CREDITING THEM. The reading list went 69 -> 47 without a line of new logic, and every one of those rows was checked against the code before it was quoted: `rook-on-the-seventh`'s 'the enemy king has escaped to the sixth' is the relative-seventh clause, 'the pawns have already advanced so there is nothing to attack' is why a rook with no targets and no confinement is not reported at all, and 'the eighth rank is defended' is the pigs clause; `king-activation`'s 'queens or many pieces remain' is enforced by phaseOf(), which requires no queens; `loose-piece`'s 'the piece is on a square nothing can reach' IS its forcing-move guard and 'it can be defended or moved in one tempo' is why the forcing move must survive being forcing; `battery`'s 'the line is blocked further along' is the arrival test said from the other side; and four rule records - insufficient-material, fifty-move-rule, en-passant, wrong-rook-pawn - have indicators_against that are the NEGATION of their own preconditions and cannot arise. The distinction matters because the tool credits by quotation and quoting is cheap. What makes these legitimate is that each was read against the body first; the four `implements` strings found lying yesterday are what that habit is for.",
+        "A NEGATIVE THAT GRADES ITS OWN EVIDENCE DOWN, AND IS KEPT ANYWAY. Anand-Leko, Tal Memorial 2009 is a blockade negative in the situation the concept is FOR - a pawn avalanche rolling at a piece-up defender, where every instinct the record teaches says find the blockading square. Markos says there is none: 'the pawns are simply too advanced to establish a successful blockade... a pawn chain is only threatening from the front. Once you are behind it, it does not bother you a thing.' This base reports no blockade, and the entry says plainly that this is WEAKER evidence than the weak-square and space negatives beside it, because the raw Layer 3 feature is absent as well and nothing had to be refused. What earns it a place is the second half - what the base DOES say. `passed-pawn` names Black's d4 and adds the clause built this week, 'what matters is whether it can advance: a passer that is permanently blockaded ties down your pieces rather than theirs', which is exactly the question Markos says cannot be answered by blockading here. `doubled-pawns` names c5 and c4 and says 'they hold b4, b3, d3, which no enemy pawn can contest', which is the avalanche rather than the weakness a bare structure report implies. Both clauses are days old; before them the base would have taught the wrong lesson twice on one board. The engine disagreement is kept: Stockfish prefers the quiet 22.b3 at +0.96 and rates Anand's 22.Nxd4 second at +0.64, and ChessBase's own round report says the same in words.",
+        "THE RULES LAYER HAD NO COUNTEREXAMPLES, AND BUILDING THEM FOUND A HOLE IN THE BASE. Seven concepts - stalemate, checkmate, insufficient-material, fifty-move-rule, en-passant, castling, smothered-mate - now carry CONTROLLED PAIRS: the same position with one thing changed, both halves in the base, and every pair settled by Syzygy rather than argued. Stalemate against mate is the queen one square over; insufficient material against a forced win in 57 is a knight added on d3; the fifty-move rule is one FEN field and the tablebase calls the positive half a CURSED-WIN, which is its own word for a win the rule spoils; en passant is one FEN field again; castling is full rights with the king in check; smothered mate is the h-pawn on h6 instead of h7. The hole: `checkmate` was reachable ONLY through the move, because findMotifs tags a mating move and nothing read the position. So this base could say 'this position is stalemate' about a board and could not say 'this position is checkmate' about the same board with the queen moved one square - the two halves of one rule, one of them answerable and the other not. A structural arm was added, mirroring stalemate's exactly. Found by trying to build the counterexample, not by reading the code.",
+        "THE STRICTEST CONTROLLED PAIR THERE IS: THE SAME BOARD, ONLY THE SIDE TO MOVE CHANGED. White Ke5, pawn e4, black king e7. Black to move LOSES at dtz -4; White to move DRAWS at dtz 0. Nothing on the board differs at all, and Syzygy states the difference rather than illustrating it. One pair now serves three records - `zugzwang`, where being obliged to move is the whole of the difference; `key-square`, where d6/e6/f6 are reachable in one and not the other; and `opposition`, which already had it. Both concepts had NO examples of any kind before. `lucena-position` gets the other classic: the same setup moved to the a-file with the defending king on c7, which is a PROVEN DRAW with every ingredient of the Lucena present - king in front of its own pawn on the seventh, rook free, defender checking from behind - because on a rook file there is no short side to build the bridge on. One file is the whole difference between a win in 41 and a draw. Three constructions were WRONG and the tablebase caught every one before it was written down: a rook-pawn Lucena with the defending king too far away is still a win; a trebuchet built from memory was a draw both ways; and two Philidor 'refutations' simply hung a rook. The Philidor counterexample is still open - with the attacking pawn only on the fourth rank the defence draws from almost anywhere, so a genuine failure needs a more advanced position than the record's current example pairs with.",
+        "THE SAME THREE MEN WITH TWO OF THEM SWAPPED. A rook, a knight and a king on the d-file: knight in front is a PIN, king in front is a SKEWER. Nothing else on the board changes and the name of the motif does, which is the commonest thing a learner gets backwards - and the page's own findMotifs gets it right, which is why ARCHITECTURE.md makes it the authority and forbids second-guessing. Both records now carry that pair. `double-check` and `discovered-check` get the other one: a knight between a rook and a king, one move apart. Ne6+ uncovers the rook AND checks from e6 - two checks, answerable only by a king move. Nb5+ uncovers the same rook and checks once. The distinction is the whole reason a double check is worth a name, and it is one knight move wide."
+      ]
+    }
+  ],
+  "last_updated": "2026-09-03",
+  "milestones": [
+    {
+      "date": "2026-09-01",
+      "milestone": "all 85 taxonomy areas have at least one researched concept",
+      "note": "Coverage is breadth, not depth: 12 of 85 areas are 'fully covered' by the coverage model, and several records (mixed-piece-endgames, queen-endgames) are explicitly orientation rather than theory and say so."
+    },
+    {
+      "date": "2026-09-01",
+      "milestone": "every concept the previous checkpoint named as ungrounded now has a human-annotated master position",
+      "note": "initiative, king safety, centre control, static-vs-dynamic, piece coordination, transformation of advantages and the pawn breakthrough. Grounding is not detection: five of the seven cannot have a detector by their own records, and the corpus records what a human said about them so that a later attempt has something to fail against."
+    }
+  ]
+}

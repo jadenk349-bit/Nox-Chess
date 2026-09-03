@@ -1,0 +1,138 @@
+{
+  "schema_version": 2,
+  "id": "check",
+  "canonical_name": "Check",
+  "alternate_names": [
+    "in check"
+  ],
+  "historical_names": [],
+  "category": "official-rules",
+  "subcategory": "basic rules of play",
+  "tags": [],
+  "knowledge_type": "official-rule",
+  "knowledge_type_note": "Official rule, quoted verbatim.",
+  "name_status": "established-name",
+  "difficulty": "beginner",
+  "definition_short": "A king is in check when it is attacked by one or more enemy pieces.",
+  "definition_long": "FIDE Art. 3.9.1: 'The king is said to be in check if it is attacked by one or more of the opponent's pieces, even if such pieces are constrained from moving to the square occupied by the king because they would then leave or place their own king in check.'\n\nThe trailing clause matters and is routinely misunderstood: a PINNED piece still gives check. Art. 3.9.2: 'No piece can be moved that will either expose the king of the same colour to check or leave that king in check.' There is no rule requiring check to be announced, and no rule making it compulsory to escape by any particular means.",
+  "history": {
+    "attributions": [],
+    "first_documented_source": "fide-laws-2023",
+    "year": null,
+    "confidence": "unknown",
+    "notes": "",
+    "competing_claims": [],
+    "development": []
+  },
+  "engine_era_status": "not-applicable",
+  "engine_era_note": "",
+  "sources": [
+    "fide-laws-2023",
+    "fide-laws-2023-pdf"
+  ],
+  "source_confidence": "high",
+  "recognition": {
+    "preconditions": [
+      "A king stands on a square attacked by an enemy piece"
+    ],
+    "indicators_for": [],
+    "indicators_against": [],
+    "prerequisites": [],
+    "detector": "lib/matchers.js: check, over inCheck",
+    "detectability": "mechanical",
+    "typical_confidence": "high",
+    "false_positive_traps": [
+      "A check being available is not a reason to play it. Proven case: Ra7+ draws and Rg8+ loses in the same position."
+    ]
+  },
+  "application": {
+    "typical_plans": [],
+    "typical_moves": [],
+    "typical_pawn_structures": [],
+    "typical_piece_arrangements": [],
+    "tactical_consequences": [],
+    "strategic_consequences": []
+  },
+  "exceptions": [
+    "A pinned piece still delivers check — being unable to legally move does not stop a piece attacking the king."
+  ],
+  "limitations": [
+    "Check is not a threat to be evaluated; it is a state. Being in check is not itself bad, and giving check is not itself good.",
+    "Fires on 8.4% of the 788 shipped positions with the solution move supplied.",
+    "TYPICAL_CONFIDENCE RAISED medium -> high, 2026-09-02, and the reason is the schema's own definition of the field: 'how confidently this concept can normally be asserted ONCE ITS PRECONDITIONS HOLD'. This concept's recognition is MECHANICAL and its knowledge type already carries a high ceiling, so once the preconditions hold there is nothing left to be uncertain about - a stalemate is a stalemate, and a fork this base reports is one findMotifs() found, which ARCHITECTURE.md makes the authority and forbids second-guessing. 'Medium' was the default across 32 rule and motif records regardless of detectability, and it was found by measuring what the API reports against what each record permits: twelve concepts were reporting ABOVE their own record. The fix was to make each record its own ceiling in cap(), which then required the records that were wrong to be corrected rather than silently overruled."
+  ],
+  "misconceptions": [
+    "That a check is a good move because it forces a reply. In the Vancura position one check draws and another loses."
+  ],
+  "relationships": {
+    "broader": [],
+    "narrower": [],
+    "related": [
+      "checkmate",
+      "double-check"
+    ],
+    "contrasting": [],
+    "co_occurring": [],
+    "conflicts": []
+  },
+  "examples": [
+    {
+      "fen": "4k3/8/8/8/8/8/8/4R1K1 b - - 0 1",
+      "note": "Constructed, and verified by the instrument that IS the rule: this base's move generator reports inCheck(black) = true and exactly 4 legal replies, all of them king moves off the e-file. Check is not a judgement and there is nothing here for an engine to add - a position either is check or is not, and the generator that decides it in a game is the same one that decides it here.",
+      "origin_kind": "constructed-test",
+      "concept_role": "positive"
+    }
+  ],
+  "counterexamples": [
+    {
+      "fen": "R7/6k1/P4r2/8/3K4/8/8/8 w - - 0 1",
+      "note": "The Vancura drawing position, used here for a different purpose: it contains two checks with opposite results, which makes it an unusually clean demonstration that 'a check is available' says nothing about whether checking is right.",
+      "origin_kind": "tablebase-position",
+      "concept_role": "contradicts",
+      "side_to_move_benefits": "neither",
+      "tablebase": {
+        "source": "Lichess tablebase (Syzygy, 7-piece)",
+        "pieces": 5,
+        "wdl": "draw",
+        "dtz": 0,
+        "dtm": 0,
+        "category": "draw",
+        "note": "PROVEN, every legal move checked. Ra7+ is a check and HOLDS THE DRAW. Rg8+ is also a check and LOSES. Rh8 and Rf8 lose as well, so three of seventeen legal moves throw away a proven draw. Two checks, one position, opposite results - the surface feature carries no information on its own. This is the resolution position for the check-not-good false-positive case."
+      }
+    }
+  ],
+  "ambiguous_examples": [],
+  "explanations": {
+    "by_level": {
+      "beginner": "Your king is under attack. You must deal with it this move — move the king, block the line, or capture the attacker.",
+      "intermediate": "Check. Only three replies exist: move the king, interpose, or capture the checking piece. Against a double check only the king move is available.",
+      "advanced": "Art. 3.9.1. Note that a pinned piece still gives check."
+    },
+    "by_depth": {
+      "short": "The king is attacked and the attack must be answered this move.",
+      "normal": "Check: the king is attacked, and the side to move has exactly three ways to answer — move the king, block the line, or capture the attacker. Nothing else is legal, which is why a check is the most forcing move there is.",
+      "deep": "FIDE Art. 3.9.1. Check is decidable rather than judged: the move generator either produces a legal reply or it does not, and this base never second-guesses it. Two consequences are routinely missed. A PINNED piece still gives check, because the pin is about a line to its own king and not about what it attacks. And forcing is not the same as good: this base holds a proven position, the Vancura, where one check draws and another loses by force, sixty-seven moves apart in result."
+    },
+    "hedge": "",
+    "lesson": ""
+  },
+  "terminology": {
+    "beginner_words": [
+      "your king is attacked"
+    ],
+    "advanced_words": [
+      "check",
+      "discovered check",
+      "double check"
+    ],
+    "avoid": [
+      "check is always good"
+    ]
+  },
+  "status": {
+    "stage": "researched",
+    "last_updated": "2026-09-01",
+    "open_questions": [],
+    "audit_notes": []
+  }
+}

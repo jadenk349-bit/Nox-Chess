@@ -1,0 +1,378 @@
+{
+  "schema_version": 2,
+  "alternate_names": [
+    "passer"
+  ],
+  "historical_names": [],
+  "tags": [
+    "pawn-structure",
+    "endgame",
+    "nimzowitsch",
+    "conversion"
+  ],
+  "subcategory": "pawn asset",
+  "difficulty": "beginner",
+  "knowledge_type_note": "A board feature, defined mechanically. That it is an ADVANTAGE is a separate judgement, and one that is wrong often enough to be worth separating.",
+  "name_status": "established-name",
+  "history": {
+    "attributions": [
+      {
+        "person": "Aron Nimzowitsch",
+        "relation": "popularized-by",
+        "source": "nimzowitsch-my-system",
+        "year": 1925,
+        "note": "The blockade doctrine and the much-quoted 'A passed pawn is a criminal which should be kept under lock and key. Mild measures, such as police surveillance, are not sufficient.' Widely attributed and cited by Wikipedia; the passage has NOT been located in the primary text during this research, so the quotation is recorded as attributed rather than verified."
+      },
+      {
+        "person": "Siegbert Tarrasch",
+        "relation": "named-by",
+        "source": "wikipedia-passed-pawn",
+        "year": null,
+        "note": "The rule that rooks belong behind passed pawns is CONVENTIONALLY Tarrasch's. ATTRIBUTION DISPUTED: a second source consulted attributes it instead to TARTAKOWER. Neither was checked against a primary text. Do not state either as fact."
+      }
+    ],
+    "first_documented_source": "wikipedia-passed-pawn",
+    "year": null,
+    "confidence": "low",
+    "notes": "Passed pawns are as old as chess and nobody coined the term. Both attached rules of thumb are attributed to Nimzowitsch and Tarrasch respectively by convention. Neither attribution has been checked against a primary text in this research, and the 'criminal' quotation in particular is exactly the kind of famous line the brief warns about. Confidence low, deliberately.",
+    "competing_claims": [
+      "'Rooks belong behind passed pawns' attributed to Siegbert Tarrasch (conventional).",
+      "The same rule attributed to Savielly Tartakower by another source. Unresolved."
+    ],
+    "development": [
+      {
+        "era": "1925, Nimzowitsch",
+        "change": "The blockade is systematised: a passer must be stopped by a piece, and which piece matters.",
+        "source": "nimzowitsch-my-system"
+      },
+      {
+        "era": "engine era",
+        "change": "Engines weigh passers by rank and by whether they are blockaded, and are markedly less impressed by a passer that ties down its own side.",
+        "source": "wikipedia-passed-pawn"
+      }
+    ]
+  },
+  "engine_era_status": "useful-with-common-exceptions",
+  "engine_era_note": "Engines value passers strongly and by rank, but they are also the clearest demonstration of the exception: a securely blockaded passer often evaluates as no advantage at all. The engine does not share the human bias towards being impressed by one.",
+  "recognition": {
+    "preconditions": [
+      "No enemy pawn ahead on the pawn's own file",
+      "No enemy pawn ahead on either adjacent file"
+    ],
+    "indicators_for": [
+      "It is advanced — the further, the more it is worth",
+      "It is protected by a friendly pawn, or escorted by the king",
+      "It is outside, far from the other pawns, so it deflects the enemy king",
+      "It has a connected partner and the two can advance in tandem",
+      "The blockading square cannot be safely occupied by an enemy piece"
+    ],
+    "indicators_against": [
+      "It is securely blockaded by a piece that cannot be dislodged, especially a knight",
+      "Defending it ties down more of the owner's pieces than of the opponent's",
+      "It stands on a square where it is easily attacked",
+      "It was created by a pawn trade that also fixed it as a target",
+      "The position has no second front, so the blockader is never distracted"
+    ],
+    "prerequisites": [],
+    "detector": "pawnStructure (not yet written)",
+    "detectability": "mechanical",
+    "typical_confidence": "high",
+    "false_positive_traps": [
+      "REGISTERED FALSE POSITIVE: a passed pawn is not automatically an advantage. A permanently blockaded passer that must be defended is a liability, and the blockading square is an excellent one for the defender.",
+      "Detecting a passer is trivial and fires constantly in endgames. Reporting one is only informative alongside whether it can actually advance.",
+      "A passer created from doubled pawns is often born weak."
+    ]
+  },
+  "application": {
+    "typical_plans": [
+      "Mobilise a healthy majority; the candidate pawn — the one with no direct opponent — leads",
+      "Escort it with the king in simplified positions",
+      "Put the rook behind it",
+      "Use it to deflect the enemy king while operating on the other wing",
+      "As the defender: blockade with a knight, and if possible make the blockade permanent"
+    ],
+    "typical_moves": [
+      "The breakthrough b6! in the classic trio structure"
+    ],
+    "typical_pawn_structures": [
+      "A healthy 3-vs-2 majority, which produces a passer almost by force",
+      "Outside passer against a symmetric kingside — the two-weaknesses mechanism"
+    ],
+    "typical_piece_arrangements": [
+      "Knight blockading on the square in front",
+      "Rook behind the pawn"
+    ],
+    "tactical_consequences": [
+      "The threat of promotion forces pieces into passive defence and creates deflection tactics"
+    ],
+    "strategic_consequences": [
+      "Often the single most important asset in an endgame",
+      "An outside passer wins by deflection rather than by promoting"
+    ]
+  },
+  "exceptions": [
+    "A blockaded passer that ties down its owner's pieces is a liability, not an asset. Nimzowitsch's blockade rule is right about half the time, which is the honest figure.",
+    "A passer pushed too early becomes a fixed target.",
+    "A passer created from doubled pawns is frequently weak from birth.",
+    "Even a blockaded passer retains value if there is a second front the blockader can be pulled towards — which is the principle of two weaknesses doing the work.",
+    "PROVEN EXCEPTION to Tarrasch's 'rook behind the passed pawn': in the Vancura configuration — a rook pawn on the sixth with the attacking rook in front of it — putting the rook behind the pawn LOSES. Tablebase-verified on a pair differing only in the defending rook's square: beside the pawn is a draw, behind it is a loss in 63. See `vancura-position`."
+  ],
+  "limitations": [
+    "The definition is mechanical and reliable; the evaluation is not.",
+    "Both attached rules of thumb (blockade, rook behind) are heuristics with well-known exceptions.",
+    "MEASURED 2026-09-02: three of this record's five indicators_against are judgements no static scan reaches - 'defending it ties down more of the owner's pieces than of the opponent's', 'it was created by a pawn trade that also fixed it as a target', and 'the position has no second front, so the blockader is never distracted'. The other two are built. 'Securely blockaded by a piece that cannot be dislodged' has been enforced since the Reshevsky-Petrosian correction: a passer with an enemy piece directly in front of it is not reported at all. 'It stands on a square where it is easily attacked' is now carried in the SENTENCE rather than used to suppress - a passer attacked more times than it is defended is named as a target rather than an asset, which is what the whole record is about. The firing rate is unchanged at 60.4%, and it would be the wrong claim to make about this change."
+  ],
+  "misconceptions": [
+    "That a passed pawn is always an advantage.",
+    "That the aim is to promote it. Often the aim is to make the opponent spend pieces stopping it.",
+    "That any piece will do as a blockader. A knight loses nothing standing there; a queen loses almost everything.",
+    "That 'rook behind the passed pawn' is always right. It is a heuristic with a proven counterexample — see vancura-position."
+  ],
+  "relationships": {
+    "broader": [],
+    "narrower": [
+      "pawn-breakthrough"
+    ],
+    "related": [
+      "two-weaknesses",
+      "pawn-breakthrough",
+      "backward-pawn",
+      "outpost",
+      "vancura-position"
+    ],
+    "contrasting": [],
+    "co_occurring": [
+      "two-weaknesses"
+    ],
+    "conflicts": [
+      {
+        "concept": "two-weaknesses",
+        "resolution": "Not opposed but complementary, and the interaction is the interesting part: a blockaded passer is worthless alone but decisive when a second front exists, because the blockader cannot be in two places. The tablebase-proven pair in the two-weaknesses record is exactly an outside passer plus a second target."
+      },
+      {
+        "concept": "vancura-position",
+        "resolution": "Tarrasch's rule is a good default and a proven mistake in one specific configuration. Where the pawn is a rook pawn on the sixth with the attacking rook already in front, the Vancura side-attack draws and the rule loses. Prefer the specific proven result over the general heuristic whenever the configuration matches."
+      }
+    ]
+  },
+  "examples": [
+    {
+      "fen": "8/p2PB1pk/1p5p/4q3/6K1/2Pp1P2/6PP/8 w - - 0 48",
+      "game": "Smyslov-Petrosian, Candidates, Zurich 1953",
+      "note": "A QUIET position from a master game — after cxd3, ply 94 — in which White has a passed pawn on d7. Quiet here has a mechanical meaning: the side to move has no check and no capture that wins material, so the next move has to be chosen on positional grounds. That matters because this base's other corpus is 788 tactical puzzles, in which a positional feature cannot be isolated.\n\nWHAT IS VERIFIED: the game replays legally end to end through the page's own move generator, so the FEN is derived rather than transcribed; and the feature is present by mechanical measurement in lib/features.js.\n\nWHAT IS NOT CLAIMED: that the concept decides this position, or that the players were thinking about it. Note also a limitation of method — the position was FOUND by this system's own Layer 4, so it demonstrates the concept and cannot by itself validate the matcher that found it. Other concepts licensed here: isolated-queen-pawn, backward-pawn, weak-square, material-imbalance.",
+      "origin_kind": "historical-game",
+      "concept_role": "supports",
+      "side_to_move_benefits": "neither"
+    },
+    {
+      "fen": "3rq1k1/6pp/4p3/P2nP3/1p1P4/3Q4/1B4PP/4R1K1 b - - 0 33",
+      "game": "Reshevsky-Petrosian, Candidates, Zurich 1953",
+      "note": "A quiet position from a master game — after a5, ply 65 — where White has a passed pawn on a5. Quiet has a mechanical meaning here: the side to move has no check and no capture that wins material, so the next move must be chosen positionally. VERIFIED: the game replays legally end to end through the page's own move generator, and the feature is measured by lib/features.js. NOT CLAIMED: that the concept decides this position, or that the players were thinking about it. Method note: the position was found by this system's own Layer 4, so it illustrates the concept and cannot by itself validate the matcher that found it. Other concepts licensed here: outpost, semi-open-file, weak-square, material-imbalance.",
+      "origin_kind": "historical-game",
+      "concept_role": "supports",
+      "side_to_move_benefits": "neither"
+    },
+    {
+      "fen": "5k2/p1p4R/1pr5/3p1pP1/P2P1P2/2P2K2/8/8 w - - 0 35",
+      "note": "Capablanca-Tartakower, New York 1924, Kg3. Human ground truth: the concept is named for this position by Irving Chernev, quoted move by move. Corpus entry `capablanca-tartakower-1924-35Kg3-passed-pawn`. The same position and a different concept, recorded separately because the annotation names both and they are not the same claim. The g5 pawn is passed - no black pawn stands on the f-, g- or h-file ahead of it - and Chernev counts its remaining journey exactly: three steps. What makes this human ground truth rather than a feature report is the second half of the sentence, that",
+      "origin_kind": "historical-game",
+      "game": "Capablanca-Tartakower, New York 1924",
+      "concept_role": "positive",
+      "attributed_by": "Irving Chernev, quoted move by move — corpus entry capablanca-tartakower-1924-35Kg3-passed-pawn",
+      "engine": {
+        "engine_id": "Stockfish 18",
+        "test_level": 3,
+        "depth": 20,
+        "multipv": 3,
+        "best_move": "Kg3",
+        "eval_cp": 295,
+        "verdict": "supports",
+        "verdict_note": "yes, and its principal variation escorts the pawn exactly as described: 35.Kg3 Rxc3+ 36.Kh4 c5 37.g6 - the pawn moves the instant the king is close enough to help it. Same search as the king-activation entry on this position; recorded on both because the annotation makes two claims and they are separable."
+      }
+    },
+    {
+      "fen": "8/8/8/4k3/8/8/4PK2/8 w - - 0 1",
+      "note": "Added as the smallest material that can carry this record's claim, so the claim can be PROVEN rather than evaluated. See the tablebase note.",
+      "origin_kind": "tablebase-position",
+      "concept_role": "positive",
+      "side_to_move_benefits": "white",
+      "engine": {
+        "engine_id": "Stockfish 18",
+        "test_level": 3,
+        "depth": 24,
+        "threads": 10,
+        "hash_mb": 4096,
+        "multipv": 1,
+        "best_move": "f2e3",
+        "eval_cp": null,
+        "mate_in": 25,
+        "pv": [],
+        "alternatives": [],
+        "margin_cp": null,
+        "verdict": "supports",
+        "verdict_note": "Mate in 25, settled at depth 1. The pawn queens because the king escorts it, which is the condition the concept carries and the one a pawn count does not."
+      },
+      "tablebase": {
+        "source": "Lichess tablebase (Syzygy, 7-piece)",
+        "pieces": 3,
+        "wdl": "win",
+        "dtz": 9,
+        "dtm": 41,
+        "category": "win",
+        "note": "PROVEN WIN, dtz 9, mate in 41. King and pawn against king, with the attacking king in front of its own pawn - the whole content of the concept in the smallest material there is, and proven rather than evaluated. The engine agrees at mate in 25. Read against this base's `key-square` case, the same material one file across where the pawn is a rook pawn and the same geometry is a PROVEN DRAW."
+      }
+    }
+  ],
+  "counterexamples": [
+    {
+      "fen": "r7/1p1k2p1/1Ppb2q1/3p3n/pP2P3/5BP1/3NQ2K/7R w - - 3 35",
+      "note": "Black holds a passed a-pawn with bishops of opposite colours on the board. Provenance: mined from this repository's puzzle corpus, which is engine self-play — a real position from a real game between engines, not a master game.",
+      "origin_kind": "puzzle",
+      "concept_role": "contradicts",
+      "side_to_move_benefits": "neither",
+      "engine": {
+        "engine_id": "Stockfish 18",
+        "test_level": 3,
+        "depth": 20,
+        "threads": 8,
+        "hash_mb": 2048,
+        "multipv": 2,
+        "best_move": "f3g4",
+        "eval_cp": 78,
+        "mate_in": null,
+        "pv": [],
+        "alternatives": [
+          {
+            "move": "d2f1",
+            "eval_cp": -397,
+            "mate_in": null
+          }
+        ],
+        "margin_cp": 0,
+        "verdict": "contradicts",
+        "verdict_note": "+0.78 — near level — despite Black owning a passed pawn. A passer is worth what it can become, and one that cannot be escorted past a blockade on the wrong colour is a unit tying down its own side as much as the defender. Supports the concept's own statement that a permanently blockaded passer is a liability rather than an asset."
+      }
+    },
+    {
+      "fen": "2k5/1p1r4/p1b1p3/2P4r/1q6/R2nQ1BP/5PP1/R5K1 w - - 2 35",
+      "note": "a passed rook pawn with opposite-coloured bishops — a passer that wins nothing. The position has no check available, so the next move must be chosen on positional grounds. CORRECTED 2026-09-02: this note used to say the position was QUIET by mechanical test, with \"no capture that wins material\" as half of the test. That half had never run - quietness() passed a move object where see() expects a square index, so winningCapturesAvailable was always zero, and every note written from it claimed something untested. Re-checked with the fixed test, this position DOES have a capture that wins material, so the quiet claim is withdrawn; the concept it illustrates is unaffected, and the position is kept rather than quietly dropped. That is the property this base's tactical corpus almost never has. Found by tools/prospect.js, which searches 1576 real positions for a concept's feature and scores quiet positions far higher. Provenance: the puzzle corpus is engine self-play — a real position from a real game between engines, not a master game.",
+      "origin_kind": "puzzle",
+      "concept_role": "contradicts",
+      "side_to_move_benefits": "neither",
+      "engine": {
+        "engine_id": "Stockfish 18",
+        "test_level": 2,
+        "depth": 20,
+        "threads": 8,
+        "hash_mb": 2048,
+        "multipv": 2,
+        "best_move": "a3d3",
+        "eval_cp": 207,
+        "mate_in": null,
+        "pv": [],
+        "alternatives": [
+          {
+            "move": "e3e6",
+            "eval_cp": -285,
+            "mate_in": null
+          }
+        ],
+        "margin_cp": 0,
+        "verdict": "contradicts",
+        "verdict_note": "Quiet and close to balanced at 2.07, which is the combination this base most needs and least often finds: nothing forcing is available and the evaluation is not swamping the feature, so the position is usable as an instance of the concept. What is NOT claimed is that the concept explains the engine's choice of move."
+      }
+    },
+    {
+      "fen": "7k/8/5K2/3B3P/8/8/8/8 w - - 0 1",
+      "note": "Registered false-positive case `passed-pawn-not-advantage`, kept on the record as well as in tests/false_positive_cases.json so that the concept carries its own negative evidence. THE SURFACE PATTERN IS PRESENT: A pawn has no enemy pawn ahead of it on its own or adjacent files. WHY IT IS NOT THE CONCEPT: A passed pawn that is permanently blockaded by a minor piece is a target rather than an asset, and it can cost tempi to defend. WHAT THE SYSTEM DOES: PROVEN draw. White has a passed h-pawn, an extra bishop, and the more active king, and cannot win. The pawn is passed and worthless because it is a rook pawn whose promotion square the bishop does not cover. Paired in this base with the identical position with the bishop on the other colour, which is a proven win in 9 - same material, same passed pawn, opposite result.",
+      "origin_kind": "constructed-test",
+      "concept_role": "negative",
+      "false_positive_case": "passed-pawn-not-advantage"
+    }
+  ],
+  "ambiguous_examples": [
+    {
+      "fen": "5k2/8/3KP2P/p1p2PP1/2Pp4/8/5r2/8 b - - 0 82",
+      "note": "The feature is present and was verified mechanically by lib/features.js: White has an advanced passed pawn on e6, f5, g5, h6. The engine assessment is 5.98, which is far enough from level that the position is decided by concrete play rather than by this feature. Recorded as an ambiguous example on purpose: it demonstrates the feature and does NOT show the concept deciding anything, and conflating those is the error this base is built to avoid. Provenance: mined from this repository's puzzle corpus, which is engine self-play — a real position from a real game between engines, not a master game.",
+      "origin_kind": "puzzle",
+      "concept_role": "ambiguous",
+      "side_to_move_benefits": "neither",
+      "engine": {
+        "engine_id": "Stockfish 18",
+        "test_level": 2,
+        "depth": 20,
+        "threads": 8,
+        "hash_mb": 2048,
+        "multipv": 2,
+        "best_move": "d4d3",
+        "eval_cp": 598,
+        "mate_in": null,
+        "pv": [],
+        "alternatives": [
+          {
+            "move": "f2e2",
+            "eval_cp": -1336,
+            "mate_in": null
+          }
+        ],
+        "margin_cp": 0,
+        "verdict": "ambiguous",
+        "verdict_note": "Level-2 validation: the position was scored, not designed. It confirms the feature is present in real play and, where the score is near level, that the feature is not drowned out. It is not a controlled pair and proves nothing about the concept on its own."
+      }
+    }
+  ],
+  "explanations": {
+    "by_level": {
+      "beginner": "No enemy pawn can stop that pawn — only their pieces can. If it gets far enough, they have to give up a piece for it.",
+      "intermediate": "A passed pawn on {square}. What matters is whether it can advance: a passer that is permanently blockaded ties down your pieces rather than theirs.",
+      "advanced": "Passer on {square}, {protected / outside / connected}. Blockade with a knight if defending; if attacking, ask whether the blockader can be distracted by a second front.",
+      "master": "Value scales with rank and with whether the blockade is permanent. The decisive question is which side's pieces are tied down by it."
+    },
+    "by_depth": {
+      "short": "Nothing can stop {square} except a piece.",
+      "normal": "A passed pawn: no enemy pawn ahead of it on its file or either neighbour, so only pieces can stop it. Its worth depends almost entirely on whether it can advance — a permanently blockaded passer is a liability rather than an asset.",
+      "deep": "Defined by three conditions: no enemy pawn ahead on its own file or either adjacent file. Adjacent files count because pawns capture diagonally. Value rises steeply with rank, and the named variants matter — protected, connected, outside. Nimzowitsch's blockade doctrine attaches: stop it with a piece, and prefer a knight, which loses none of its powers standing guard, over a queen, which loses almost all of hers. Tarrasch's rule attaches too: rooks belong behind passed pawns. Both are heuristics with real exceptions. The most important is that a securely blockaded passer achieves nothing while its owner defends it — unless a second front exists to pull the blockader away, which is where this concept and the principle of two weaknesses meet."
+    },
+    "hedge": "",
+    "lesson": "A passed pawn is only as good as its ability to move. Before counting it as an advantage, ask who is tied down by it."
+  },
+  "terminology": {
+    "beginner_words": [
+      "a pawn no pawn can stop"
+    ],
+    "advanced_words": [
+      "passed pawn",
+      "passer",
+      "protected passer",
+      "outside passer",
+      "blockade",
+      "candidate"
+    ],
+    "avoid": [
+      "a passed pawn is always good",
+      "every passed pawn must be blockaded (as a law)"
+    ]
+  },
+  "status": {
+    "stage": "researched",
+    "last_updated": "2026-09-01",
+    "open_questions": [],
+    "audit_notes": [
+      "2026-09-01: added the tablebase-proven Vancura exception to Tarrasch's rule, which this record previously stated without qualification.",
+      "2026-09-01: a second source attributes the rook-behind-passed-pawns rule to Tartakower rather than Tarrasch. Recorded as a competing claim; neither verified against a primary text. The record already carried history confidence 'low', which turns out to have been the right call."
+    ]
+  },
+  "id": "passed-pawn",
+  "canonical_name": "Passed pawn",
+  "category": "pawn-structures",
+  "knowledge_type": "positional-concept",
+  "definition_short": "A pawn with no enemy pawn ahead of it on its own file or on either adjacent file, so only pieces can stop it.",
+  "definition_long": "Three conditions, all necessary: no enemy pawn ahead on its own file, and none ahead on either adjacent file. Enemy pawns BEHIND it are irrelevant. The adjacent files matter because pawns capture diagonally — a pawn on an adjacent file ahead of the passer can always trade itself for it eventually.\n\nValue scales sharply with advancement: a passer on the third rank is a long-term asset, one on the seventh is a crisis the opponent must solve now. Variants worth naming: a PROTECTED passed pawn is defended by a friendly pawn; CONNECTED passed pawns on adjacent files are very strong, and are best advanced in tandem on the same rank so they cannot be blockaded singly; an OUTSIDE passed pawn is separated by several files from the rest and wins by deflecting the enemy king — which is the mechanism behind the two-weaknesses controlled pair in this base.\n\nTwo standing rules of thumb attach to it. Nimzowitsch: every passed pawn must be blockaded, and the blockader should be a piece that keeps its powers while standing guard — the knight is the best, the queen the worst. Tarrasch: the rook belongs behind the passed pawn, yours to push it and the enemy's to attack it.\n\nTHE IMPORTANT EXCEPTION. A passed pawn is not automatically good. A firmly blockaded passer that requires constant defence is a liability: you are guarding a pawn that generates no threats, while the blockading piece stands on an excellent square. The operative test is whether it ties down THEIR pieces or YOURS.",
+  "sources": [
+    "wikipedia-passed-pawn",
+    "nimzowitsch-my-system",
+    "chesscom-passed-or-weak",
+    "zurich-1953-games"
+  ],
+  "source_confidence": "medium"
+}

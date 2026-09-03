@@ -1,0 +1,251 @@
+{
+  "schema_version": 2,
+  "id": "clearance",
+  "canonical_name": "Clearance",
+  "alternate_names": [
+    "clearance sacrifice",
+    "space clearance",
+    "vacating sacrifice"
+  ],
+  "historical_names": [],
+  "category": "tactical-motifs",
+  "subcategory": "material-winning motif",
+  "tags": [],
+  "knowledge_type": "tactical-motif",
+  "knowledge_type_note": "Motif (D). Detection requires reasoning about what the VACATED square enables, so it is heuristic in practice.",
+  "name_status": "established-name",
+  "difficulty": "advanced",
+  "definition_short": "Vacating a square or line — often by sacrificing the piece occupying it — so a friendly piece can use it.",
+  "definition_long": "The opposite of interference: instead of blocking an enemy line you clear your own. A piece moves, or is given away, purely to empty a square, file, rank or diagonal that another friendly piece needs. Informant theme c; ECM 'Space Clearance'.\n\nClearance is usually recognised by the moving piece going somewhere pointless or losing itself — the value is entirely in the vacated square, and normal material reasoning about the moving piece is misleading.",
+  "history": {
+    "attributions": [],
+    "first_documented_source": "informant-encyclopedia-combinations",
+    "year": null,
+    "confidence": "unknown",
+    "notes": "Tactical motifs are descriptive pattern names of long and mostly anonymous usage. The Chess Informant classification is cited as a standard enumeration, not as the origin of the term.",
+    "competing_claims": [],
+    "development": []
+  },
+  "engine_era_status": "unassessed",
+  "engine_era_note": "",
+  "sources": [
+    "informant-encyclopedia-combinations",
+    "wikipedia-chess-tactic",
+    "chesstempo-tactical-motifs",
+    "chesscom-tactics-38"
+  ],
+  "source_confidence": "high",
+  "recognition": {
+    "preconditions": [
+      "A friendly unit occupies a square or line another friendly unit needs",
+      "That unit has a move, possibly a sacrifice, that vacates it"
+    ],
+    "indicators_for": [
+      "The vacated square gives a decisive check, mate or fork",
+      "The clearing move is forcing, so the opponent has no time to reorganise"
+    ],
+    "indicators_against": [
+      "The vacated square is covered by the defender",
+      "The clearance is too slow and the defender consolidates"
+    ],
+    "prerequisites": [],
+    "detector": null,
+    "detectability": "heuristic",
+    "typical_confidence": "medium",
+    "false_positive_traps": []
+  },
+  "application": {
+    "typical_plans": [
+      "Look for your own piece standing on the square or line that another piece wants, and price the move that empties it",
+      "Count the tempo: a clearance is only sound if the follow-up is forcing, because the vacated square is worth nothing on the opponent's move",
+      "In endgames, clear a queening square or the file in front of a passed pawn rather than a diagonal"
+    ],
+    "typical_moves": [
+      "A minor piece stepping off a long diagonal with check, so the queen behind it arrives with the opponent still answering",
+      "A rook giving itself up on the back rank so a pawn can promote",
+      "A knight jumping to a square where it is taken, purely to unblock a file"
+    ],
+    "typical_pawn_structures": [],
+    "typical_piece_arrangements": [
+      "Queen and bishop on one diagonal with a friendly piece between them",
+      "Doubled rooks with a friendly minor on the file in front"
+    ],
+    "tactical_consequences": [
+      "The vacating move is usually a sacrifice, so material counting about it is misleading by design",
+      "Clearance and interference are the same geometry read from opposite sides: one empties a line of yours, the other fills a line of theirs"
+    ],
+    "strategic_consequences": [
+      "Rarely a strategic idea. Clearance is almost always a one-move tactical device inside a forced line"
+    ]
+  },
+  "exceptions": [
+    "A clearance sacrifice fails if the follow-up is a tempo too slow — the whole idea depends on forcing continuations.",
+    "Clearing a line for a piece that is then driven off achieves nothing; the arriving piece must be able to stay.",
+    "A clearance that also opens a line towards your own king is a different move from the one you calculated."
+  ],
+  "limitations": [
+    "NO VERIFIED POSITION HAS BEEN BUILT FOR THIS RECORD, and that is recorded rather than filled. Three constructions were tried and thrown away: each needed the vacating move to come WITH TEMPO, and a minimal position with a queen, a blocking piece and a mating square either had no checking square for the blocker to leave on, or was already mate without the clearance. A wrong example of a motif is worse than none, because the label is the thing the reader is learning to see. UPDATE: a verified position now exists - 17...d4 in the position on this record, +6.37 against +0.40 at depth 28 - and it was FOUND rather than constructed. That is the lesson of the three failures: the constructions failed because a clearance needs the vacating move to come with tempo and a hand-built minimal position rarely has one, and a real game has as many as you like if you can state the geometry precisely enough to search for it.",
+    "There is deliberately no matcher. Clearance is a claim about what the VACATED square is then used for, which is a property of the continuation and not of the move, and this base does not read continuations at the board.",
+    "NO AMBIGUOUS EXAMPLE, and the reason is the order of the work rather than a shortage of positions. This record has no POSITIVE example either, and an ambiguous example is a position where the concept is genuinely present and what to conclude from it is unclear - which cannot be written before there is an agreed instance of the concept being present at all. The four motifs in this base that lack a positive - `clearance`, `decoy`, `deflection`, `interference` - lack it for reasons written on each record, and the ambiguous rung waits on that. Writing one first would be asserting a doubtful instance of something this base has not yet shown a clear instance of. UPDATE: the positive example now exists, so the reason given here - that an ambiguous example cannot be written before there is an agreed instance of the concept being present at all - no longer holds. The ambiguous example is outstanding work, not blocked work.",
+    "NO MASTER-GAME POSITION YET. This concept has no matcher, so the scan that supplied master positions to eleven other records - five famous games replayed and analysed position by position - could not nominate one here: the API never reports the concept, so there is nothing for a scan to find. Identifying an instance in a master game means reading the game, which is research rather than tooling, and it has not been done. Recorded rather than filled. RESOLVED: Alekhine-Nimzowitsch, St Petersburg 1914, 42.Bc4, above. The reason given here was right about the scan and wrong about the games: a concept with no detector cannot be nominated by a scan that reads the API, but the geometry is decidable without one, and tools/mine_master_motifs.js asks it of 2.8 million positions from replayed master games directly."
+  ],
+  "misconceptions": [],
+  "relationships": {
+    "broader": [],
+    "narrower": [],
+    "related": [
+      "interference",
+      "discovered-attack"
+    ],
+    "contrasting": [],
+    "co_occurring": [],
+    "conflicts": []
+  },
+  "examples": [
+    {
+      "fen": "2kr4/ppp3rp/n1q1b2n/2PpPp2/1b6/1Q2P1PP/PP1NN3/1RBK1BR1 b - - 0 17",
+      "move": "d4",
+      "move_uci": "d5d4",
+      "origin_kind": "puzzle",
+      "concept_role": "positive",
+      "side_to_move_benefits": "black",
+      "note": "THE FIRST VERIFIED POSITION ON THIS RECORD. Three earlier constructions were tried by hand and thrown away - the limitation above records why - and this one was not constructed at all. It was found by asking the record's own sentence as a geometric question of every ply of all 788 shipped solutions: does a piece of ours leave a square, land where it is simply lost, give no check, and open a line that one of our own line pieces did not have?\n\n17...d4 is that move. The bishop on e6 looks down the a2-g8 diagonal and its own pawn on d5 is in the way; the pawn steps off and the bishop hits the queen on b3. The pawn cannot be kept - exd4 wins it - and that is the point rather than an objection: the record says clearance is 'usually recognised by the moving piece going somewhere pointless or losing itself, the value is entirely in the vacated square', and normal material reasoning about the pawn is exactly the reasoning that misses the move.\n\nStockfish 18 at depth 28 with three lines: +6.37 for d4, +0.40 and +0.37 for the next two. A gap of 597 centipawns between winning and level. That number is what makes this a teaching position rather than an illustration - the clearance is not a nicer way to win a won game, it is the whole of the difference between winning and not.\n\nWHAT IT IS NOT. The move is not a discovered check and not a discovered attack: it opens a line for the bishop but the pawn itself is not moving off a line to the king, and the page's own findMotifs() tags nothing here. That distinction is the reason this record exists beside `discovered-attack`, and the reason the scan that found it refuses any candidate whose move gives check.\n\nPROVENANCE. A shipped puzzle position, not a master game. It grounds the positive-example and engine rungs and NOT the master-game one; that limitation stands.",
+      "engine": {
+        "engine_id": "Stockfish 18",
+        "test_level": 3,
+        "depth": 28,
+        "multipv": 3,
+        "best_move": "d5d4",
+        "eval_cp": 637,
+        "mate_in": null,
+        "pv": [
+          "d5d4",
+          "b3d3",
+          "d4e3",
+          "d3e3",
+          "b4c5",
+          "e3f4",
+          "a6b4",
+          "e2c3",
+          "c5g1",
+          "f4b4"
+        ],
+        "alternatives": [
+          {
+            "move": "c6e8",
+            "eval_cp": 40
+          },
+          {
+            "move": "b4c5",
+            "eval_cp": 37
+          }
+        ],
+        "margin_cp": 597,
+        "verdict": "supports",
+        "verdict_note": "+6.37 against +0.40 for the second best at depth 28 with three lines. The clearance is the difference between winning and level, not a flourish on a won position."
+      }
+    },
+    {
+      "fen": "3r4/6kp/2P3p1/p2B4/4N3/5P2/P2R1K2/2r5 w - - 1 42",
+      "move": "Bc4",
+      "move_uci": "d5c4",
+      "origin_kind": "historical-game",
+      "game": "Alekhine-Nimzowitsch, St Petersburg 1914",
+      "concept_role": "positive",
+      "side_to_move_benefits": "white",
+      "note": "THE MASTER-GAME RUNG, and a different job from the puzzle position on this record. That one is sharp - the clearance is the whole difference between winning and level. This one is real: Alekhine played it against Nimzowitsch, and it is here because a concept whose only evidence is a puzzle has never been shown to occur in a game.\n\n42.Bc4 takes the bishop off d5 so the rook on d2 looks straight down the file at the rook on d8, and the c6 pawn - one square from queening, with d8 the square that stops it - is what makes the file matter. The bishop is not thrown away here; it goes to c4 where the black rook can take it, and after 42...Rxc4 43.Rd8 the pawn goes through.\n\nStockfish 18 at depth 30 with three lines is honest about it and so is this note: 42.Bc4 is the THIRD choice at +5.17, behind two quiet king moves at +5.31. All three win. The clearance is not the only road and the card must not say it was - what it is, is the road a world champion took, in a position where the geometry this record describes is exactly what is on the board.\n\nPROVENANCE. Found by tools/mine_master_motifs.js, which replays every game through the page's own move generator and asks the record's own sentence as a geometric question. 35,648 games replayed, 492 rejected as unplayable and skipped rather than patched. The game is real and the move list parsed; `attributed_by` is absent, because no annotator has been read here - this grounds the MASTER-GAME rung and not the human-grounded one.",
+      "engine": {
+        "engine_id": "Stockfish 18",
+        "test_level": 3,
+        "depth": 30,
+        "multipv": 3,
+        "best_move": "f2e3",
+        "eval_cp": 517,
+        "mate_in": null,
+        "pv": [
+          "d5c4",
+          "c1c4",
+          "d2d8",
+          "c4c6",
+          "f2g3",
+          "h7h6",
+          "d8d7",
+          "g7f8",
+          "d7a7",
+          "c6c1"
+        ],
+        "alternatives": [
+          {
+            "move": "f2e3",
+            "eval_cp": 531
+          },
+          {
+            "move": "f2g3",
+            "eval_cp": 531
+          }
+        ],
+        "margin_cp": -14,
+        "verdict": "supports",
+        "verdict_note": "+5.17 at depth 30, third of three, 14 centipawns behind two quiet king moves that also win. The move works; it is not uniquely best, and the note says so."
+      }
+    }
+  ],
+  "counterexamples": [
+    {
+      "fen": "4k3/8/8/3p4/3P4/8/3R4/3RK3 w - - 0 1",
+      "move_uci": "d2a2",
+      "note": "Registered false-positive case `a-line-cleared-to-nowhere`, kept on the record as well as in tests/false_positive_cases.json so that the concept carries its own negative evidence. THE SURFACE PATTERN IS PRESENT: The rook on d2 steps aside and the rook on d1 behind it is left with a clear file. Vacating a square so a friendly piece can use the line is the concept, word for word. WHY IT IS NOT THE CONCEPT: The line arrives nowhere. The d-file dead-ends at White's own pawn on d4, which is rammed against d5 and cannot move. Clearance is 'usually recognised by the moving piece going somewhere pointless or losing itself — the value is entirely in the vacated square', and here the vacated square is worth nothing, so all that is left is the pointless move. WHAT THE SYSTEM DOES: The API reports `worst-placed-piece` at low confidence — the rook does get more scope on a2 — and nothing about clearance, which has no matcher. The same board is `battery`'s registered false-positive case for the same underlying reason: two line pieces on a file that arrives at their own rammed pawn combine nothing, whether they stay stacked or unstack. Stockfish at depth 26 in that entry plays Ra1, taking the front rook OFF the file, which is the engine agreeing that the file is worthless from the other direction.",
+      "origin_kind": "constructed-test",
+      "concept_role": "negative",
+      "false_positive_case": "a-line-cleared-to-nowhere",
+      "engine": {
+        "engine_id": "Stockfish 18",
+        "test_level": 3,
+        "depth": 26,
+        "threads": 10,
+        "hash_mb": 4096,
+        "multipv": 1,
+        "best_move": "d1a1",
+        "eval_cp": null,
+        "mate_in": 5,
+        "pv": [],
+        "alternatives": [],
+        "margin_cp": null,
+        "verdict": "supports",
+        "verdict_note": "Mate in 5, and the engine's own first move takes the front rook OFF the d-file. That is the strongest available statement that the file was worth nothing: the vacated square a clearance would create is on a line that dead-ends at White's own rammed pawn, and the engine abandons the line rather than clearing it."
+      }
+    }
+  ],
+  "ambiguous_examples": [],
+  "explanations": {
+    "by_level": {
+      "beginner": "This gets a piece out of the way so another one can use the square.",
+      "intermediate": "Clearance: the point is the square that is emptied, not the piece that moves.",
+      "advanced": "Clearance / space clearance (Informant theme c). Judge the moving piece by the square it vacates, not by where it lands."
+    },
+    "by_depth": {
+      "short": "Getting a piece out of the way so another can use the square or line.",
+      "normal": "Clearance: a piece moves, or is given away, purely to empty a square, file, rank or diagonal that a friendly piece needs. The moving piece often goes somewhere pointless or loses itself — the value is entirely in what it vacated.",
+      "deep": "The opposite of interference: instead of blocking an enemy line you clear your own. Informant theme c. Normal material reasoning about the moving piece is misleading by design, which is why the motif is hard to see and easy to misdescribe. Two conditions decide whether it works. The vacating move must come WITH TEMPO — a check or a capture — because a vacated square is worth nothing on the opponent's move; and the arriving piece must be able to stay, since clearing a line for a piece that is then driven off achieves nothing."
+    },
+    "hedge": "",
+    "lesson": ""
+  },
+  "terminology": {
+    "beginner_words": [
+      "get out of the way"
+    ],
+    "advanced_words": [
+      "clearance",
+      "clearance sacrifice",
+      "vacating"
+    ],
+    "avoid": []
+  },
+  "status": {
+    "stage": "researched",
+    "last_updated": "2026-08-31",
+    "open_questions": [],
+    "audit_notes": []
+  }
+}

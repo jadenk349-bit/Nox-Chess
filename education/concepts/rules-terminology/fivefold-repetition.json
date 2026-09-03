@@ -1,0 +1,120 @@
+{
+  "schema_version": 2,
+  "id": "fivefold-repetition",
+  "canonical_name": "Fivefold repetition",
+  "alternate_names": [],
+  "historical_names": [],
+  "category": "official-rules",
+  "subcategory": "basic rules of play",
+  "tags": [],
+  "knowledge_type": "official-rule",
+  "knowledge_type_note": "Official rule; the automatic counterpart to the claimable Art. 9.2.",
+  "name_status": "established-name",
+  "difficulty": "intermediate",
+  "definition_short": "If the same position appears five times, the game is drawn automatically — no claim needed.",
+  "definition_long": "FIDE Art. 9.6.1: the game is drawn if 'the same position has appeared, as in 9.2.2 at least five times.' Unlike threefold repetition this needs no claim and no agreement; it happens by force of the Laws. Introduced so that a game cannot continue indefinitely when neither player claims.\n\nTHE COUNT IS THE ONLY DIFFERENCE from Art. 9.2, and that is worth stating plainly because the two rules are otherwise identical. Position identity is the same term of art at 9.2.3: the same men on the same squares, the same side to move, the same castling rights, and the same en-passant possibility. Two of those four are invisible on a diagram, which is why this base's example for both rules is a SEQUENCE rather than a position - sixteen plies replayed through the move generator, in which the starting position recurs five times.\n\nWHY IT EXISTS. The threefold claim was being missed in practice, and declined in practice: a player who has not noticed cannot claim, and a player who is winning has no reason to. The fivefold rule makes the outcome independent of both players and of the arbiter's attention. The seventy-five-move rule at Art. 9.6.2 is its counterpart on the other counter, and both were added in the same revision for the same reason.",
+  "history": {
+    "attributions": [],
+    "first_documented_source": "fide-laws-2023",
+    "year": null,
+    "confidence": "unknown",
+    "notes": "",
+    "competing_claims": [],
+    "development": []
+  },
+  "engine_era_status": "not-applicable",
+  "engine_era_note": "",
+  "sources": [
+    "fide-laws-2023",
+    "fide-laws-2023-pdf"
+  ],
+  "source_confidence": "high",
+  "recognition": {
+    "preconditions": [
+      "The same position, by the Art. 9.2.3 test, has occurred five times"
+    ],
+    "indicators_for": [],
+    "indicators_against": [],
+    "prerequisites": [],
+    "detector": "posKey",
+    "detectability": "mechanical",
+    "typical_confidence": "high",
+    "false_positive_traps": []
+  },
+  "application": {
+    "typical_plans": [],
+    "typical_moves": [],
+    "typical_pawn_structures": [],
+    "typical_piece_arrangements": [],
+    "tactical_consequences": [],
+    "strategic_consequences": []
+  },
+  "exceptions": [],
+  "limitations": [
+    "TYPICAL_CONFIDENCE RAISED medium -> high, 2026-09-02, and the reason is the schema's own definition of the field: 'how confidently this concept can normally be asserted ONCE ITS PRECONDITIONS HOLD'. This concept's recognition is MECHANICAL and its knowledge type already carries a high ceiling, so once the preconditions hold there is nothing left to be uncertain about - a stalemate is a stalemate, and a fork this base reports is one findMotifs() found, which ARCHITECTURE.md makes the authority and forbids second-guessing. 'Medium' was the default across 32 rule and motif records regardless of detectability, and it was found by measuring what the API reports against what each record permits: twelve concepts were reporting ABOVE their own record. The fix was to make each record its own ceiling in cap(), which then required the records that were wrong to be corrected rather than silently overruled."
+  ],
+  "misconceptions": [],
+  "relationships": {
+    "broader": [],
+    "narrower": [],
+    "related": [
+      "threefold-repetition"
+    ],
+    "contrasting": [],
+    "co_occurring": [],
+    "conflicts": []
+  },
+  "examples": [
+    {
+      "fen": "4k3/8/8/8/8/8/8/R3K3 w - - 0 1",
+      "pgn": "1. Ra2 Kd8 2. Ra1 Ke8 3. Ra2 Kd8 4. Ra1 Ke8 5. Ra2 Kd8 6. Ra1 Ke8 7. Ra2 Kd8 8. Ra1 Ke8",
+      "note": "The same line as the threefold example, carried to eight moves, and deliberately the same position: the two rules differ only in the count and in who has to speak. Threefold is a CLAIM a player may make; fivefold is automatic and the arbiter ends the game whether anyone notices or not. Replayed through this base's move generator: every move legal, the starting position recurring five times.",
+      "origin_kind": "constructed-test",
+      "concept_role": "positive"
+    }
+  ],
+  "counterexamples": [
+    {
+      "fen": "r3k2r/8/8/8/8/8/8/R3K2R w Qq - 4 3",
+      "pgn": "1. Rg1 Rg8 2. Rh1 Rh8",
+      "note": "Constructed, and it is a SEQUENCE because the rule is about history. From r3k2r/8/8/8/8/8/8/R3K2R w KQkq - 0 1 both sides move a rook out and back: 1.Rg1 Rg8 2.Rh1 Rh8. Every man is on the square it started on and the position has NOT repeated, because both sides have lost the right to castle kingside - the FEN reads `w Qq - 4 3` where it read `w KQkq - 0 1`. FIDE Art. 9.2.3 includes castling rights in the definition of the same position, so a diagram that looks identical is a different position and no claim exists. This is the exact error the `notation` record's third trap names: a FEN without the castling, en-passant and clock fields is not a position, it is a picture of one. The four moves were played through this base's own move generator, which emitted both FENs. The fivefold rule inherits the same definition of identity and therefore the same negative: a board that returns to its starting arrangement five times has still repeated nothing if a castling right was lost on the way.",
+      "origin_kind": "constructed-test",
+      "concept_role": "negative"
+    }
+  ],
+  "ambiguous_examples": [],
+  "explanations": {
+    "by_level": {
+      "beginner": "The same position has appeared five times, so the game is automatically a draw.",
+      "intermediate": "Fivefold repetition ends the game at once, with no claim required.",
+      "advanced": "Art. 9.6.1."
+    },
+    "by_depth": {
+      "short": "The same position five times ends the game automatically.",
+      "normal": "Fivefold repetition: once the same position has occurred five times, the arbiter declares the game drawn. Unlike the threefold rule, nobody has to claim it and nobody has to notice.",
+      "deep": "FIDE Art. 9.6.1. It differs from Art. 9.2 in the count and in who must speak, and in nothing else — position identity is the same term of art, including the castling and en-passant riders. The pair exists because the threefold claim was being missed or declined in practice; the fivefold rule makes the outcome independent of the players. This base files the two rules on the same replayed line for that reason."
+    },
+    "hedge": "",
+    "lesson": ""
+  },
+  "terminology": {
+    "beginner_words": [
+      "automatic draw"
+    ],
+    "advanced_words": [
+      "fivefold repetition"
+    ],
+    "avoid": []
+  },
+  "status": {
+    "stage": "researched",
+    "last_updated": "2026-08-31",
+    "open_questions": [],
+    "audit_notes": [
+      "2026-09-01 audit: flagged as short relative to the median record. REVIEWED AND ACCEPTED — this is a simple, fully specified rule quoted from the FIDE Laws. There is no further research to do, and padding it to match the median would add words without adding knowledge. Short is the correct length here."
+    ]
+  },
+  "validation_na": {
+    "false_positive_test": "N/A rather than missing. A registered false-positive case is a position where the concept's surface pattern is present and the concept is absent, replayed as an assertion so the system can be shown declining the error. This concept is DECIDED BY THE MOVE GENERATOR - the same function that decides it in a game - so there is no judgement to get wrong and no surface pattern that can be present without the thing itself. The nearest genuine risk is a PATTERN NAME attached to a position that is check and not mate, and that risk belongs to `back-rank-mate` and `smothered-mate`, both of which carry a registered case for it."
+  }
+}

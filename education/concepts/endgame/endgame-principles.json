@@ -1,0 +1,228 @@
+{
+  "schema_version": 2,
+  "alternate_names": [
+    "basic principles of endgame play"
+  ],
+  "historical_names": [],
+  "tags": [
+    "endgame",
+    "overview"
+  ],
+  "subcategory": "overview",
+  "difficulty": "intermediate",
+  "knowledge_type_note": "An umbrella record naming the standard principles and pointing at the concepts that hold the detail and the exceptions.",
+  "name_status": "established-name",
+  "history": {
+    "attributions": [
+      {
+        "relation": "systematized-by",
+        "person": "Mikhail Shereshevsky",
+        "year": 1985,
+        "note": "Endgame Strategy sets out the four principles as an organising scheme; he states them as four and this record follows his enumeration.",
+        "confidence": "high"
+      }
+    ],
+    "first_documented_source": "shereshevsky-endgame-strategy",
+    "year": 1985,
+    "confidence": "medium",
+    "notes": "None of the individual principles originates with Shereshevsky - two weaknesses in particular has a longer and disputed history recorded on its own concept - but the grouping into four is his and is quoted from his own preface.",
+    "competing_claims": [],
+    "development": []
+  },
+  "engine_era_status": "useful-with-common-exceptions",
+  "engine_era_note": "The endgame is the phase where engines and tablebases have most changed what can be asserted. Principles that were previously supported by authority alone can now be tested, and several have not survived unchanged.",
+  "recognition": {
+    "preconditions": [
+      "Few pieces remain",
+      "Queens usually exchanged",
+      "Promotion rather than mate is the governing objective"
+    ],
+    "indicators_for": [
+      "The king can move without being attacked",
+      "Passed pawns or pawn majorities exist"
+    ],
+    "indicators_against": [
+      "Queens remain and mating attacks are still live"
+    ],
+    "prerequisites": [],
+    "detector": null,
+    "detectability": "heuristic",
+    "typical_confidence": "medium",
+    "false_positive_traps": [
+      "The boundary is not sharp. A queenless position with many pieces may still be a middlegame, and treating it as an endgame is how kings get mated.",
+      "These are organising ideas, not a substitute for calculation. Every one of them has recorded exceptions, several proven by tablebase in this base."
+    ]
+  },
+  "application": {
+    "typical_plans": [
+      "Activate the king",
+      "Create a second weakness and attack on two fronts",
+      "Improve every piece before committing",
+      "Decide the target arrangement, then find the route to it"
+    ],
+    "typical_moves": [],
+    "typical_pawn_structures": [
+      "Pawn majorities capable of producing a passed pawn"
+    ],
+    "typical_piece_arrangements": [],
+    "tactical_consequences": [],
+    "strategic_consequences": [
+      "Small advantages that are meaningless in a middlegame become decisive"
+    ]
+  },
+  "exceptions": [
+    "Do not hurry does not apply against a concrete threat or in a race, where a single tempo decides.",
+    "Centralisation of the king has documented failures in rook endings, recorded on its own concept.",
+    "Simplification, the other common endgame reflex, can convert a proven win into a proven draw - this base holds tablebase proofs of exactly that."
+  ],
+  "limitations": [
+    "This is an umbrella record. The detail and the exceptions live on the individual concepts.",
+    "Where a position is small enough, principles are unnecessary: the position can simply be solved.",
+    "Rests substantially on a single source (Shereshevsky), which is why the source confidence is medium despite that source being a primary text read directly."
+  ],
+  "misconceptions": [
+    "That endgames are simple because few pieces remain. They are the most exact phase, which is the opposite of forgiving.",
+    "That trading into an endgame is safe when ahead. Which endgame is reached decides, and several are proven draws a piece down."
+  ],
+  "relationships": {
+    "broader": [],
+    "narrower": [
+      "king-activation",
+      "two-weaknesses",
+      "rook-endgame-principles"
+    ],
+    "related": [
+      "king-activation",
+      "two-weaknesses",
+      "rook-endgame-principles",
+      "opposition",
+      "zugzwang",
+      "triangulation",
+      "fortress",
+      "passed-pawn",
+      "piece-exchanges",
+      "wrong-rook-pawn"
+    ],
+    "contrasting": [],
+    "co_occurring": [],
+    "conflicts": []
+  },
+  "examples": [
+    {
+      "fen": "5k2/p1p4R/1pr5/3p1pP1/P2P1P2/2P2K2/8/8 w - - 0 35",
+      "move": "Kg3",
+      "move_uci": "f3g3",
+      "note": "Capablanca-Tartakower, New York 1924, 35.Kg3 - the position every endgame book uses for the first principle of the phase, which is that the king is a fighting piece once the queens are off. Chernev: 'Le roi s'amuse! The King is headed for B6 (f6), a square from which he can assist the White Rook in threats of mate, and also help the passed pawn take those last three steps.' Capablanca gives up three pawns on the way. The point is not that the king is safe; it is that safety has stopped being the question, which is the difference between this phase and the middlegame that the record is about.",
+      "origin_kind": "historical-game",
+      "game": "Capablanca-Tartakower, New York 1924",
+      "concept_role": "positive",
+      "attributed_by": "Irving Chernev - corpus entry capablanca-tartakower-1924-35Kg3-king-activation",
+      "engine": {
+        "engine_id": "Stockfish 18",
+        "test_level": 3,
+        "depth": 24,
+        "threads": 10,
+        "hash_mb": 4096,
+        "multipv": 1,
+        "best_move": "f3g3",
+        "eval_cp": 314,
+        "mate_in": null,
+        "pv": [],
+        "alternatives": [],
+        "margin_cp": null,
+        "verdict": "supports",
+        "verdict_note": "+3.14 at depth 24, and the engine's own first move is 35.Kg3. Three pawns' worth, for a king march that costs three pawns."
+      }
+    }
+  ],
+  "counterexamples": [
+    {
+      "fen": "r2q1rk1/pp3ppp/8/8/8/8/PP1Q1PPP/R4RK1 w - - 0 1",
+      "note": "Registered false-positive case `endgame-principles-with-the-queens-on`, kept on the record as well as in tests/false_positive_cases.json so that the concept carries its own negative evidence. THE SURFACE PATTERN IS PRESENT: A simplified position: no minor pieces, a rook and a queen each, pawns on both wings, and nothing tactical happening. It looks like the point at which endgame technique takes over. WHY IT IS NOT THE CONCEPT: The queens are still on the board, and the first principle on this record — that the king is a fighting piece — is a statement about what becomes true ONCE the queens are off. Walking the king up here loses it. Every other principle on the record inherits the same precondition: king activity, the outside passer, the race, all of them assume no queen is available to punish the king. WHAT THE SYSTEM DOES: The API reports nothing at all here, and `endgame-principles` has no matcher. What makes the case worth registering is that phase is not a property a piece count settles: this position has fewer men than many endgames in this base and is not one. Stockfish 18 at depth 20: 0.00, and its line doubles rooks rather than touching the king. This record's positive example is Capablanca marching his king up the board for three pawns — in a position with no queens.",
+      "origin_kind": "constructed-test",
+      "concept_role": "negative",
+      "false_positive_case": "endgame-principles-with-the-queens-on"
+    }
+  ],
+  "ambiguous_examples": [
+    {
+      "fen": "8/P7/K7/8/8/8/8/1q4k1 w - - 0 1",
+      "note": "The first principle of the endgame is that the king is a fighting piece, and this record's positive example is Capablanca marching his king up the board at the cost of three pawns. Here the white king is doing the opposite and it is the only reason the position is not lost: it stands on a6 shielding a rook pawn, does nothing, goes nowhere, and holds a draw against a whole queen. Activating it loses at once. Filed as ambiguous rather than negative because the principle is not wrong here so much as silent - 'the king is a fighting piece' is a statement about what the king MAY do once the queens are off, and this position is the case where what it may do is stand still.",
+      "origin_kind": "tablebase-position",
+      "concept_role": "ambiguous",
+      "engine": {
+        "engine_id": "Stockfish 18",
+        "test_level": 3,
+        "depth": 26,
+        "threads": 10,
+        "hash_mb": 4096,
+        "multipv": 1,
+        "best_move": "a7a8q",
+        "eval_cp": 0,
+        "mate_in": null,
+        "pv": [],
+        "alternatives": [],
+        "margin_cp": null,
+        "verdict": "ambiguous",
+        "verdict_note": "0.00 with a queen against a pawn, held by a king that never moves."
+      },
+      "tablebase": {
+        "source": "Lichess tablebase (Syzygy, 7-piece)",
+        "pieces": 4,
+        "wdl": "draw",
+        "dtz": 0,
+        "dtm": 0,
+        "category": "draw",
+        "note": "PROVEN DRAW. The passive king is the whole defence. Read against this record's positive example, Capablanca-Tartakower 1924, where the active king is worth +3.14 and three pawns are given for it."
+      }
+    }
+  ],
+  "explanations": {
+    "by_level": {
+      "beginner": "In the endgame: use your king, make more than one target, and take your time.",
+      "intermediate": "Four ideas govern endgames - centralise the king, create a second weakness, do not hurry, and think in target positions rather than move by move.",
+      "advanced": "Do not hurry means improve everything improvable first; thinking in schemes means decide the arrangement you want, then find the route.",
+      "master": "The one phase where claims can be proven rather than argued, and where several standard rules do not survive being checked."
+    },
+    "by_depth": {
+      "short": "Active king, two weaknesses, do not hurry, think in schemes.",
+      "normal": "The ideas that govern endgame play: centralise the king, create a second weakness so a finite defence is stretched past breaking, do not hurry - improve everything before committing - and think in schemes, deciding the arrangement you want to reach rather than calculating move by move.",
+      "deep": "An endgame has arrived when material is limited, the king becomes a fighting piece, and promotion rather than mate is the objective - the second being the real marker. Four principles organise the phase, and the fourth is the least known and most useful: thinking in schemes means choosing the piece arrangement you want and then finding the route, which suits endgames because the piece count is low and the target is often recognisable. What separates this phase from every other is that truth is available - positions of seven pieces or fewer are solved - so claims can be checked rather than argued, and several standard teachings have not survived the check."
+    },
+    "hedge": "",
+    "lesson": "In the endgame you can often find the truth instead of reasoning towards it. Where you can, do."
+  },
+  "terminology": {
+    "beginner_words": [
+      "use your king",
+      "take your time"
+    ],
+    "advanced_words": [
+      "centralisation",
+      "two weaknesses",
+      "do not hurry",
+      "thinking in schemes"
+    ],
+    "avoid": [
+      "endgames are simple",
+      "always trade when ahead"
+    ]
+  },
+  "status": {
+    "stage": "researched",
+    "last_updated": "2026-09-01",
+    "open_questions": [],
+    "audit_notes": []
+  },
+  "id": "endgame-principles",
+  "canonical_name": "Endgame principles",
+  "category": "endgame-principles",
+  "knowledge_type": "strategic-principle",
+  "definition_short": "The small set of ideas that govern play once queens and most pieces are off: an active king, two weaknesses, not hurrying, and thinking in schemes.",
+  "definition_long": "WHEN AN ENDGAME HAS ARRIVED is itself a judgement rather than a fact, and the working test used in the literature has three parts: material is limited, the king becomes an active fighting piece, and the governing objective shifts from attacking the king to promoting a pawn. The second is the one that really marks the change.\n\nTHE FOUR PRINCIPLES, as Shereshevsky sets them out:\n1. CENTRALISATION OF THE KING. The king stops hiding and starts working.\n2. THE PRINCIPLE OF TWO WEAKNESSES. One weakness can usually be held; a second on the far side of the board stretches a finite defence until it breaks.\n3. 'DO NOT HURRY'. Improve everything improvable before committing to a concrete operation. Endgames reward patience because the defender rarely has counterplay to punish it, and a position played out too fast throws away the free improvements.\n4. THINKING IN SCHEMES. Decide what arrangement of your pieces you want to reach, then work out how to get there — as against calculating move by move from where you stand. Endgames are peculiarly suited to this because the piece count is low and the target arrangement is often recognisable.\n\nWHAT MAKES ENDGAMES DIFFERENT is that they are the one phase where truth is available. Positions of seven pieces or fewer are solved, so a claim about them can be checked rather than argued, and this base has used that repeatedly — including to disprove a rule of Tarrasch's and to correct a piece of standard teaching about triangulation. Endgame principles are therefore held here to a higher evidential standard than any other part of the taxonomy, because they can be.\n\nTHE MATCHING WARNING is that endgames are concrete. Every principle in this list has proven exceptions recorded against it, several of them established by tablebase in this base.",
+  "sources": [
+    "shereshevsky-endgame-strategy",
+    "chessentials-endgame-strategy-review"
+  ],
+  "source_confidence": "medium"
+}

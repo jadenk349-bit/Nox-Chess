@@ -1,0 +1,253 @@
+{
+  "schema_version": 2,
+  "alternate_names": [
+    "rook and pawn endings"
+  ],
+  "historical_names": [],
+  "tags": [
+    "endgame",
+    "rooks",
+    "tablebase-tested"
+  ],
+  "subcategory": "endgame type",
+  "difficulty": "advanced",
+  "knowledge_type_note": "Typed a principle rather than a rule, and hedged hard, because this is the endgame type in which general rules most often fail - a claim this base can support with proofs rather than assert.",
+  "name_status": "established-name",
+  "history": {
+    "attributions": [
+      {
+        "relation": "originated-by",
+        "person": "Siegbert Tarrasch",
+        "year": null,
+        "note": "The rule of placing the rook behind the passed pawn is conventionally attributed to him; this base records the attribution as DISPUTED, with Tartakower a competing claimant, on the passed-pawn concept.",
+        "confidence": "disputed"
+      }
+    ],
+    "first_documented_source": "shereshevsky-endgame-strategy",
+    "year": null,
+    "confidence": "low",
+    "notes": "No single origin. The named drawing positions carry their own histories, including the Lucena position's well-documented misattribution, recorded on its own concept.",
+    "competing_claims": [],
+    "development": []
+  },
+  "engine_era_status": "useful-with-common-exceptions",
+  "engine_era_note": "Tablebases have been harder on rook-endgame folklore than on any other area, because rook endings are small enough to solve and numerous enough in practice for the difference to matter. Several rules of thumb are now known to be wrong as stated rather than merely approximate.",
+  "recognition": {
+    "preconditions": [
+      "Rooks and pawns only, or nearly so"
+    ],
+    "indicators_for": [
+      "An activity difference between the rooks",
+      "A passed pawn on either side",
+      "A known drawing set-up available to the defender"
+    ],
+    "indicators_against": [],
+    "prerequisites": [
+      "endgame-principles"
+    ],
+    "detector": null,
+    "detectability": "heuristic",
+    "typical_confidence": "low",
+    "false_positive_traps": [
+      "This is the endgame type where general rules are least trustworthy, and this base holds proofs against three of them: Tarrasch's rule, king centralisation, and the value of a check.",
+      "A pawn advantage is much weaker evidence here than elsewhere, because the defensive constructions are so numerous.",
+      "Recognising the material as a rook ending says almost nothing. The concrete configuration decides."
+    ]
+  },
+  "application": {
+    "typical_plans": [
+      "Activate the rook, giving a pawn for it if necessary",
+      "Cut the enemy king off from the pawn along a rank or file",
+      "Tie the enemy rook to defence and then open a second front",
+      "As the defender, aim for a known drawing set-up rather than counting material"
+    ],
+    "typical_moves": [],
+    "typical_pawn_structures": [
+      "A single passed pawn against a lone rook"
+    ],
+    "typical_piece_arrangements": [
+      "A rook cut off from the action",
+      "A rook chained to a pawn's defence"
+    ],
+    "tactical_consequences": [
+      "Giving a pawn to activate the rook is frequently correct"
+    ],
+    "strategic_consequences": [
+      "An extra pawn is often insufficient, so conversion technique matters more than acquisition"
+    ]
+  },
+  "exceptions": [
+    "Tarrasch's rule fails in the Vancura configuration, proven in this base.",
+    "King centralisation fails in some rook endings, on the testimony of the principle's own advocate.",
+    "Passive defence is sometimes correct, in defiance of the activity principle, when a known drawing set-up requires it."
+  ],
+  "limitations": [
+    "This record is deliberately an umbrella of caveats; the load-bearing knowledge lives in the named positions - Lucena, Philidor, Vancura - each of which is validated here against tablebase.",
+    "This base has not systematically covered rook-endgame technique; only the positions it has proven.",
+    "NO MASTER-GAME POSITION. The examples on this record are `tablebase-position`s, and for this family that is the stronger provenance rather than a substitute: the claims here are about what a class of ending can and cannot do, and a proof over every legal continuation settles that where a single game only illustrates it. What a master game would add is evidence that the principle GUIDED a strong player, which is a different claim, and this base has not yet found an annotated position making it for this family. Recorded rather than filled. RESOLVED: Botvinnik-Shebarshin, Leningrad 1926, above."
+  ],
+  "misconceptions": [
+    "That an extra pawn wins a rook ending. A great many such positions are drawn, because of how many defensive constructions exist.",
+    "That the rook belongs behind the passed pawn. It often does, and this base holds a proof that as a general rule it is false.",
+    "That rook endings can be played on principle. They are the type most resistant to that."
+  ],
+  "relationships": {
+    "broader": [
+      "endgame-principles"
+    ],
+    "narrower": [],
+    "related": [
+      "endgame-principles",
+      "lucena-position",
+      "philidor-position",
+      "vancura-position",
+      "king-activation",
+      "passed-pawn",
+      "rook-on-the-seventh",
+      "open-file",
+      "fortress"
+    ],
+    "contrasting": [],
+    "co_occurring": [],
+    "conflicts": [
+      {
+        "concept": "king-activation",
+        "resolution": "Rook endings are the recorded exception to king centralisation. Where the two collide, the concrete line decides and the general principle yields - which is Shereshevsky's own position, not a hedge invented here."
+      }
+    ]
+  },
+  "examples": [
+    {
+      "fen": "8/8/8/4k3/4p3/R7/1r6/4K3 w - - 0 1",
+      "note": "The Philidor position, and the reason it belongs to a principles record rather than only to a named-position one: the third-rank defence is the single most-taught rule in rook endgames, and it is a rule with a condition attached - it works while the enemy pawn has not reached the sixth. The defending rook sits on the third rank keeping the enemy king out; when the pawn advances to the sixth the rook drops to the eighth and checks from behind. Both halves are one idea and it holds by force.",
+      "origin_kind": "tablebase-position",
+      "concept_role": "positive",
+      "side_to_move_benefits": "neither",
+      "engine": {
+        "engine_id": "Stockfish 18",
+        "test_level": 3,
+        "depth": 26,
+        "threads": 10,
+        "hash_mb": 4096,
+        "multipv": 1,
+        "best_move": "a3a1",
+        "eval_cp": 0,
+        "mate_in": null,
+        "pv": [],
+        "alternatives": [],
+        "margin_cp": null,
+        "verdict": "supports",
+        "verdict_note": "0.00 at depth 26."
+      },
+      "tablebase": {
+        "source": "Lichess tablebase (Syzygy, 7-piece)",
+        "pieces": 5,
+        "wdl": "draw",
+        "dtz": 0,
+        "dtm": 0,
+        "category": "draw",
+        "note": "PROVEN DRAW over every legal continuation, dtz 0. A defensive principle is a claim that something CANNOT be broken through, and that is the shape of statement only a tablebase makes. Note what this base has not managed to build beside it: a verified counterexample. With the pawn on the fourth rank the defence draws from almost anywhere, so the position that would show the method failing has resisted three attempts, and the record says so rather than shipping a wrong one."
+      }
+    },
+    {
+      "fen": "8/P7/7R/2k3p1/r5P1/5KP1/8/8 b - - 0 77",
+      "origin_kind": "historical-game",
+      "game": "Botvinnik-Shebarshin, Leningrad 1926",
+      "concept_role": "positive",
+      "side_to_move_benefits": "white",
+      "note": "ROOKS AND PAWNS ONLY - the most common ending there is, and the one this record calls the least rule-governed. Rook and passed a-pawn against rook, with a kingside pawn each.\n\nThe record's first claim is that activity outweighs material, and the position is that claim in miniature: material is level, White's rook is on the sixth cutting the black king off, and White's a-pawn is one square from the eighth rank. Nothing about the material count says anything about who is winning.\n\nWHAT IS CLAIMED AND WHAT IS NOT. The category is decided by the material, which is mechanically certain and needs no engine. Whether the position is INTERESTING, or who is better in it, is a different question and this record does not answer it - its own typical_confidence says as much. What the position establishes is that the class of ending this record is about occurs in master play and can be pointed at.\n\nPROVENANCE. Found by reading the MATERIAL of every position in 330 replayed master games rather than by asking the API, which never reports this concept because it has no matcher. The move list replayed legally through the page's own move generator. No annotator read."
+    }
+  ],
+  "counterexamples": [
+    {
+      "fen": "r1b1k2r/pppp1ppp/8/8/8/8/PPPP1PPP/R1B1K2R w KQkq - 0 1",
+      "note": "Registered false-positive case `rooks-on-the-board-is-not-a-rook-ending`, kept on the record as well as in tests/false_positive_cases.json so that the concept carries its own negative evidence. THE SURFACE PATTERN IS PRESENT: Both sides have two rooks and pawns. Rooks are the most common piece to reach an ending with, and this record is 'the most common and least rule-governed endings'. WHY IT IS NOT THE CONCEPT: Both sides also have a bishop, and every principle on this record is about what rooks do when there is nothing else — an active rook makes threats and goes where it likes, a passive one is chained to a pawn, and giving a pawn to activate a rook is routinely correct. None of that survives a minor piece being on the board to defend with and to trade against. WHAT THE SYSTEM DOES: The API reports `opposite-coloured-bishops` — which is the concept that DOES apply here — and nothing about rook endings. +0.12 at depth 20 in a symmetric position. The case is registered because 'rook ending' is a claim about what is left rather than about what is present, and a detector reading the piece list would find two rooks each and stop there.",
+      "origin_kind": "constructed-test",
+      "concept_role": "negative",
+      "false_positive_case": "rooks-on-the-board-is-not-a-rook-ending"
+    }
+  ],
+  "ambiguous_examples": [
+    {
+      "fen": "R7/6k1/P7/8/3K4/8/8/r7 w - - 0 1",
+      "note": "The defending rook is behind the passed pawn, which is the most-quoted rule in rook endings - Tarrasch's, and repeated everywhere since - and Black is PROVEN LOST in 63. The same position with that rook on f6 instead, in front of nothing and beside everything, is a proven draw: the Vancura defence. So the rule and its exception are one rook move apart, and the record's own opening sentence is the honest reading of that - these are 'the most common and least rule-governed endings: activity outweighs material, and almost every general rule has proven exceptions'. Filed as ambiguous because the rule is correctly applied here and loses, and a system that reported it would be quoting Tarrasch at somebody in a position where Tarrasch is wrong.",
+      "origin_kind": "tablebase-position",
+      "concept_role": "ambiguous",
+      "engine": {
+        "engine_id": "Stockfish 18",
+        "test_level": 3,
+        "depth": 26,
+        "threads": 10,
+        "hash_mb": 4096,
+        "multipv": 1,
+        "best_move": "d4c5",
+        "eval_cp": 1213,
+        "mate_in": null,
+        "pv": [],
+        "alternatives": [],
+        "margin_cp": null,
+        "verdict": "ambiguous",
+        "verdict_note": "+12.13 for the side the rule is supposed to be defending against."
+      },
+      "tablebase": {
+        "source": "Lichess tablebase (Syzygy, 7-piece)",
+        "pieces": 5,
+        "wdl": "win",
+        "dtz": 17,
+        "dtm": 63,
+        "category": "win",
+        "note": "PROVEN WIN in 63 for the attacker, with the defending rook obeying the rule. The paired position - the same rook on f6, active on the sixth - is a PROVEN DRAW at dtz 0."
+      }
+    }
+  ],
+  "explanations": {
+    "by_level": {
+      "beginner": "Keep your rook active. A rook stuck defending a pawn is worth much less than one that can attack.",
+      "intermediate": "Activity beats material in rook endings - giving a pawn to free your rook is often right. And many rook endings a pawn down are drawn.",
+      "advanced": "Learn the drawing positions. The defence has more resources here than in any other ending, and the general rules are least reliable.",
+      "master": "Three standard rules have proven counterexamples in this base alone: the rook behind the passed pawn, king centralisation, and the value of a check."
+    },
+    "by_depth": {
+      "short": "Activity beats material; learn the drawing positions.",
+      "normal": "Rook endings are the commonest in practice and the least governed by rules. An active rook is worth more than a pawn, so giving a pawn to activate one is routinely right, and the defence has so many known drawing set-ups that an extra pawn frequently wins nothing.",
+      "deep": "The commonest endings and the ones where general principles are least reliable. Activity over material is the idea that survives everywhere - a passive rook chained to a pawn loses material the moment it moves, and that asymmetry decides more rook endings than a pawn does. What makes the type distinctive is the depth of the defensive resources: named drawing constructions hold positions that material counting calls lost, which is why so many rook endings a pawn down are drawn. And the general rules fail here demonstrably rather than arguably - Tarrasch's rule about the rook behind the passed pawn is disproved by a proven pair in this base, king centralisation is documented as sometimes wrong by its own advocate, and one check can draw while another loses in the same position."
+    },
+    "hedge": "Rook endings are the endgame type in which general rules are least trustworthy; prefer a known position to a principle wherever one applies.",
+    "lesson": "Reach for a known position before reaching for a rule."
+  },
+  "terminology": {
+    "beginner_words": [
+      "keep the rook active",
+      "a rook stuck defending is nearly useless"
+    ],
+    "advanced_words": [
+      "active rook",
+      "passive rook",
+      "cutting off the king",
+      "Philidor",
+      "Vancura"
+    ],
+    "avoid": [
+      "the rook belongs behind the passed pawn",
+      "an extra pawn wins"
+    ]
+  },
+  "status": {
+    "stage": "researched",
+    "last_updated": "2026-09-01",
+    "open_questions": [],
+    "audit_notes": []
+  },
+  "id": "rook-endgame-principles",
+  "canonical_name": "Rook endgame principles",
+  "category": "rook-endgames",
+  "knowledge_type": "strategic-principle",
+  "definition_short": "The most common and least rule-governed endings: activity outweighs material, and almost every general rule has proven exceptions.",
+  "definition_long": "The commonest endings in practice, and the ones where general principles are least reliable.\n\nACTIVITY OVER MATERIAL is the one idea that survives everywhere. An active rook makes threats and goes where it likes; a passive rook is chained to a pawn and loses material the moment it moves. That asymmetry decides rook endings more often than a pawn does, which is why giving a pawn to activate a rook is routinely correct — a trade that would be absurd in most other endings.\n\nTHE DEFENDER'S RESOURCES ARE UNUSUALLY DEEP, and this is what makes the type distinctive. Rook endings are full of specific drawing set-ups — Philidor, Vancura — which hold positions that material counting says are lost. The practical consequence is the old observation that a great many rook endings a pawn down are drawn, and it is not a joke about laziness: it is a statement about how many defensive constructions exist.\n\nWHY GENERAL RULES FAIL HERE, with evidence rather than assertion:\n- TARRASCH'S RULE, to put the rook behind the passed pawn, is DISPROVED as a general rule by this base's Vancura pair: same material, one rook moved, and the result changes from a proven draw to a proven loss in 63.\n- CENTRALISING THE KING, elsewhere almost never wrong, is documented by Shereshevsky himself as sometimes outright incorrect in rook endings, which he attributes to their concreteness and to the king's larger defensive role.\n- A CHECK is not even weak evidence: this base holds a rook ending where one check draws and another loses.\n\nThe honest summary is that rook endings are learned as concrete positions and techniques rather than derived from principles, and that a system explaining them should reach for a known position before reaching for a rule.",
+  "sources": [
+    "shereshevsky-endgame-strategy",
+    "oldschoolchess-capablanca-endgame",
+    "chessentials-endgame-strategy-review"
+  ],
+  "source_confidence": "medium"
+}

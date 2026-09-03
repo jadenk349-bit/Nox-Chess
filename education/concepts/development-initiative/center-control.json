@@ -1,0 +1,333 @@
+{
+  "schema_version": 2,
+  "alternate_names": [
+    "centre control",
+    "center control"
+  ],
+  "historical_names": [],
+  "tags": [
+    "centre",
+    "foundational",
+    "classical-vs-hypermodern"
+  ],
+  "subcategory": "strategic foundation",
+  "difficulty": "beginner",
+  "knowledge_type_note": "A strategic principle rather than a rule, and one whose CONTENT was the subject of the most famous disagreement in chess theory. What is agreed is that the centre matters; what was disputed is what to do about it.",
+  "name_status": "established-name",
+  "history": {
+    "attributions": [
+      {
+        "person": "François-André Danican Philidor",
+        "relation": "originated-by",
+        "source": "britannica-chess-theory-3",
+        "year": null,
+        "note": "The centre as a goal dates back to Philidor per Britannica. ATTRIBUTION NOT VERIFIED against a primary text."
+      },
+      {
+        "person": "Wilhelm Steinitz",
+        "relation": "systematized-by",
+        "source": "wikibooks-chess-centre",
+        "year": null,
+        "note": "First master to teach the centre's importance systematically. Second-hand."
+      },
+      {
+        "person": "Siegbert Tarrasch",
+        "relation": "popularized-by",
+        "source": "wikipedia-hypermodernism",
+        "year": null,
+        "note": "Hardened Steinitz's ideas into the dogmatic form the hypermoderns attacked; called 'the father of Classical dogma'."
+      },
+      {
+        "person": "Aron Nimzowitsch and Richard Réti",
+        "relation": "later-associated-with",
+        "source": "wikipedia-hypermodernism",
+        "year": 1920,
+        "note": "Reframed the question as control versus occupation."
+      }
+    ],
+    "first_documented_source": "wikipedia-hypermodernism",
+    "year": null,
+    "confidence": "medium",
+    "notes": "The history is well attested in outline across three sources; no primary texts consulted, and the Philidor attribution in particular is a summary claim.",
+    "competing_claims": [
+      "Classical: the centre should be occupied by pawns.",
+      "Hypermodern: the centre should be controlled by pieces, and occupation invites a target.",
+      "Modern synthesis: both are conditional on support and timing; the schools are complementary."
+    ],
+    "development": [
+      {
+        "era": "classical, Steinitz to Tarrasch",
+        "change": "Central pawn occupation becomes doctrine.",
+        "source": "wikibooks-chess-centre"
+      },
+      {
+        "era": "1920s, hypermodern",
+        "change": "Control distinguished from occupation; the pawn centre reframed as a potential target.",
+        "source": "wikipedia-hypermodernism"
+      },
+      {
+        "era": "Soviet era",
+        "change": "Both subordinated to the initiative; structures earlier called bad are accepted for dynamic play.",
+        "source": "britannica-chess-theory-3"
+      },
+      {
+        "era": "modern",
+        "change": "Treated as complementary; textbooks present hypermodernism as an extension of classical theory.",
+        "source": "wikipedia-hypermodernism"
+      }
+    ]
+  },
+  "engine_era_status": "useful-with-common-exceptions",
+  "engine_era_note": "Engines vindicate neither school and both. They are entirely comfortable ceding the centre for concrete compensation and entirely comfortable building a pawn centre when it can be supported — which is the synthesis stated computationally. What they do not support is either position held as a rule.",
+  "recognition": {
+    "preconditions": [
+      "The four central squares are contested"
+    ],
+    "indicators_for": [
+      "Pawns occupying central squares WITH pieces supporting them",
+      "Pieces attacking central squares from a distance, especially fianchettoed bishops",
+      "The opponent cannot advance in the centre without loosening something",
+      "You can switch wings faster than the opponent"
+    ],
+    "indicators_against": [
+      "A pawn centre that cannot advance and cannot be defended — a target, not an asset",
+      "Central occupation achieved at the cost of development",
+      "Central squares occupied by pieces that can be evicted with a pawn move"
+    ],
+    "prerequisites": [],
+    "detector": "lib/features.js: centralSquareControl(); lib/matchers.js: center-control (a structural arm and a move-based one)",
+    "detectability": "mechanical",
+    "typical_confidence": "medium",
+    "false_positive_traps": [
+      "Counting pawns on central squares measures occupation, not control. A fianchettoed bishop controls e4 without standing anywhere near it.",
+      "A big pawn centre is not automatically an advantage. Whether it is an asset or a target is a question of timing and support, and that cannot be read off the structure.",
+      "Central pieces are only strong while they cannot be kicked; a piece on a central square a pawn can attack is visiting.",
+      "A rook or queen whose line to a central square runs through one of its own men counts as an attacker and should not be read as a piece fighting for the square. The move-based arm measures pawns and minors for this reason."
+    ]
+  },
+  "application": {
+    "typical_plans": [
+      "Occupy with pawns and support them before expanding",
+      "Or influence from the flanks, invite the advance, and undermine it with a break",
+      "Control the centre before starting a wing attack",
+      "Meet a wing attack with a central counter-blow"
+    ],
+    "typical_moves": [
+      "e4 and d4 (classical)",
+      "Nf3, g3 and Bg2 (hypermodern)",
+      "...c5 and ...e5 undermining breaks"
+    ],
+    "typical_pawn_structures": [
+      "Broad pawn centre",
+      "Fianchetto structures conceding it",
+      "Closed and fixed centres"
+    ],
+    "typical_piece_arrangements": [
+      "Fianchettoed bishop on the long diagonal",
+      "Knights on f3/c3 supporting central squares"
+    ],
+    "tactical_consequences": [
+      "A central break is the standard refutation of a premature wing attack"
+    ],
+    "strategic_consequences": [
+      "Determines whose wing attack is viable",
+      "A centre that is fixed makes flank play safe; a fluid one makes it dangerous"
+    ]
+  },
+  "exceptions": [
+    "Occupying the centre is not always right — an unsupported pawn centre is a target, which is the hypermodern case.",
+    "Ceding the centre is not always right either — against proper support it just loses space.",
+    "In the endgame the logic inverts: the centre matters for king activity rather than for restriction."
+  ],
+  "limitations": [
+    "The single most contested concept in the base: two respected schools gave opposite prescriptions and the resolution is 'it depends on support and timing', which is true and not very operational.",
+    "The detector measures control as ATTACKERS of d4/e4/d5/e5 and cannot tell WHICH central squares matter in a given structure. Measured against Reti-Capablanca 1924: it reports center-control for both 18...Ne6 - the move Keene names as fighting for the centre and the move Stockfish puts 0.39 clear - and 18...N6d7, the move actually played, which neither likes. Both raise Black's pawn-and-minor control by one, because moving the f6 knight unblocks the g7 bishop onto d4 and e5. The count is real and it is not doing the discriminating work the annotation does.",
+    "The RAW attacker count is worse than useless for a move: on 18...Ne6 it FALLS, from 7 to 6, because the arriving knight blocks a rook that was x-raying its own bishop. The move-based arm therefore measures pawns and minor pieces only, and this is recorded because it is the kind of thing that gets 'simplified' back.",
+    "MEASURED 2026-09-02: the second trap - 'a big pawn centre is not automatically an advantage. Whether it is an asset or a target is a question of timing and support, and that cannot be read off the structure' - is honoured by never measuring occupation. The matcher counts ATTACKERS of the four central squares and says so; a big pawn centre with nothing behind it produces no report at all, because pawns standing on squares are not the measure.",
+    "MEASURED 2026-09-02 against the three unread indicators_against. 'Central squares occupied by pieces that can be evicted with a pawn move' is built and said out loud - `visiting` names them in the sentence. 'A pawn centre that cannot advance and cannot be defended - a target, not an asset' cannot arise as a false positive here, because this matcher never measures occupation: it counts ATTACKERS of the four central squares, so a pawn centre with nothing behind it produces no report at all. 'Central occupation achieved at the cost of development' is a judgement about the whole position and is not attempted."
+  ],
+  "misconceptions": [
+    "That controlling the centre means putting pawns there.",
+    "That the hypermoderns thought the centre was unimportant — they thought it was too important to commit to early.",
+    "That one school won. Textbooks treat hypermodernism as an extension of classical theory, not a replacement."
+  ],
+  "relationships": {
+    "broader": [],
+    "narrower": [],
+    "related": [
+      "classical-school",
+      "hypermodern-school",
+      "opening-development",
+      "space",
+      "king-attack"
+    ],
+    "contrasting": [],
+    "co_occurring": [
+      "opening-development"
+    ],
+    "conflicts": [
+      {
+        "concept": "king-attack",
+        "resolution": "Not opposed but ordered: a wing attack is viable in proportion to central control. With a fixed or controlled centre the flank attack is safe; with a fluid centre the defender's central break refutes it. Establish the centre first."
+      }
+    ]
+  },
+  "examples": [
+    {
+      "fen": "rn2kb1r/1p3ppp/8/pqppP1Nb/3PP1n1/2P3PB/PP4KP/RNBQR3 b kq - 2 12",
+      "note": "White holds two pawns in the centre (e5, d4, e4). The feature was established mechanically from the position by the page's own move generator and lib/features.js. What is NOT claimed is that this feature decides the position. Provenance: the puzzle corpus is engine self-play — a real position from a real game between engines, not a master game.",
+      "origin_kind": "puzzle",
+      "concept_role": "supports",
+      "side_to_move_benefits": "neither"
+    },
+    {
+      "fen": "r3rnk1/2q2pb1/1p1p1npp/pPp5/2PPb3/P1Q2NP1/1B3PBP/R2R1NK1 b - - 0 18",
+      "note": "Reti-Capablanca, New York 1924 (round 5), Ne6. Human ground truth: the concept is named for this position by Raymond Keene (GM), The Spectator Australia. Corpus entry `reti-capablanca-1924-18Ne6-center-control`, which carries the full annotation, the alternates the annotator rejected, and the engine's verdict. A human annotator naming central control as the criterion that decides between two knight moves, in the game that is the canonical demonstration of the hypermodern claim about the centre. Both candidate moves develop a knight and neither occupies a central square; what separates them is how much they contest d4 and c5 - the concept record's first false-positive trap is exactly this distinction, th",
+      "origin_kind": "historical-game",
+      "game": "Reti-Capablanca, New York 1924 (round 5)",
+      "concept_role": "positive",
+      "engine": {
+        "engine_id": "Stockfish 18",
+        "test_level": 3,
+        "depth": 22,
+        "multipv": 3,
+        "best_move": "Ne6",
+        "eval_cp": 80,
+        "verdict": "supports",
+        "verdict_note": "fully, and it is the strongest confirmation in this corpus. The engine's first choice at depth 22 is 18...Ne6 at +0.80 for Black; the second and third are +0.41 and +0.31; and the move Capablanca actually played, 18...N6d7, is not in the top three at all. A GM's one-line positional judgement about the centre, written in 2017, picks the move a 2026 engine puts nearly half a pawn clear. Searched from Black's side. The 0.39 gap between the recommendation and the runner-up is large for a quiet middlegame move."
+      },
+      "attributed_by": "Raymond Keene (GM), The Spectator Australia — corpus entry reti-capablanca-1924-18Ne6-center-control"
+    },
+    {
+      "fen": "4k3/8/2n2n2/8/8/8/8/4K3 b - - 0 1",
+      "note": "Two black knights on c6 and f6 attacking d4, e4, d5 and e5 between them while White attacks none of the four: control of the centre measured as attacks on the four central squares, which is what the record asks for and what OCCUPATION would miss entirely - neither knight stands on a central square.",
+      "origin_kind": "constructed-test",
+      "concept_role": "supports",
+      "side_to_move_benefits": "neither",
+      "controlled_pair_with": "4k3/8/8/8/8/8/8/4K3 w - - 0 1"
+    }
+  ],
+  "counterexamples": [
+    {
+      "fen": "4k3/8/8/8/8/8/8/4K3 w - - 0 1",
+      "note": "Two bare kings. Nothing attacks a central square and nothing is reported, which is the point of the pair: this base measures the centre by who attacks it, so an empty board says nothing rather than saying the centre is shared.",
+      "origin_kind": "constructed-test",
+      "concept_role": "negative",
+      "side_to_move_benefits": "neither",
+      "controlled_pair_with": "4k3/8/2n2n2/8/8/8/8/4K3 b - - 0 1"
+    },
+    {
+      "fen": "qr2k3/1b6/3ppn2/8/8/8/3PP3/1NBQR1K1 w - - 0 1",
+      "note": "Registered false-positive case `heavy-pieces-pointing-through-their-own-pawns`, kept on the record as well as in tests/false_positive_cases.json so that the concept carries its own negative evidence. THE SURFACE PATTERN IS PRESENT: White's queen on d1 and rook on e1 bear down the d- and e-files at d4 and e4. An attack map that counts every line piece credits White with the centre; Black has no piece standing on a central square at all. WHY IT IS NOT THE CONCEPT: This record's fourth trap: \"A rook or queen whose line to a central square runs through one of its own men counts as an attacker and should not be read as a piece fighting for the square.\" Both white heavy pieces are behind their own d2 and e2 pawns, and both white minors are still at home. Black's bishop on b7 and knight on f6 genuinely bear on the centre from a distance — the record's first trap says the same thing from the other side: \"A fianchettoed bishop controls e4 without standing anywhere near it.\" WHAT THE SYSTEM DOES: The API reports center-control for BLACK, which is the answer the naive attack map does not give. Material is exactly equal (queen, rook, bishop, knight and two pawns each), so nothing else is carrying the reading. Stockfish 18 at depth 26 scores the position at -4.53 from White's side: Black is winning, on piece placement alone, in a position where White's heavy pieces are the ones aimed at the centre.",
+      "origin_kind": "constructed-test",
+      "concept_role": "negative",
+      "engine": {
+        "engine_id": "Stockfish 18",
+        "test_level": 3,
+        "depth": 26,
+        "threads": 10,
+        "hash_mb": 4096,
+        "multipv": 1,
+        "best_move": "e1f1",
+        "eval_cp": -453,
+        "mate_in": null,
+        "pv": [],
+        "alternatives": [],
+        "margin_cp": null,
+        "verdict": "supports",
+        "verdict_note": "-4.53 from White's side with material exactly equal - queen, rook, bishop, knight and two pawns each. Black is winning on piece placement alone, in a position where White's heavy pieces are the ones aimed at the centre."
+      },
+      "false_positive_case": "heavy-pieces-pointing-through-their-own-pawns"
+    }
+  ],
+  "ambiguous_examples": [
+    {
+      "fen": "rn1q1rk1/pbp1ppbp/1p1p1np1/8/1PP5/3P1NP1/PB2PPBP/RN1Q1RK1 b - - 0 8",
+      "note": "Reti-Capablanca, New York 1924 (round 5), e5. Human ground truth: the concept is named for this position by Raymond Keene (GM), The Spectator Australia. Corpus entry `reti-capablanca-1924-8d3-center-control-ambiguous`, which carries the full annotation, the alternates the annotator rejected, and the engine's verdict. This is the position the hypermodern argument is about, and it is an ambiguous example on purpose. After 8.d3 White has not one pawn on a central square; his influence over d4, e4 and e5 comes from a fianchettoed bishop on the long diagonal, a knight on f3 and pawns on c4 and d3. Black is about to occupy the centre with ...e5. Both sides have a coherent claim to be fighting for the centre, and the",
+      "origin_kind": "historical-game",
+      "game": "Reti-Capablanca, New York 1924 (round 5)",
+      "concept_role": "ambiguous",
+      "engine": {
+        "engine_id": "Stockfish 18",
+        "test_level": 3,
+        "depth": 22,
+        "multipv": 3,
+        "best_move": "c5",
+        "eval_cp": -23,
+        "verdict": "ambiguous",
+        "verdict_note": "on the assessment, which is the claim being tested. Depth 22 gives -0.23 for Black across all three of its top moves, so neither the distant control nor the coming occupation is worth anything measurable yet. The move recorded here is the game's 9...e5, played a move later; it is recorded for what it shows about occupation, not as a recommendation. The move field is the plan Black carries out, not a move the engine was asked to rank in this position."
+      },
+      "attributed_by": "Raymond Keene (GM), The Spectator Australia — corpus entry reti-capablanca-1924-8d3-center-control-ambiguous"
+    },
+    {
+      "fen": "rnbqnrk1/ppp1ppbp/3p2p1/4P3/2PP1P2/2N1B3/PP4PP/R2QKBNR b KQ - 1 7",
+      "note": "Letelier-Fischer, Leipzig Olympiad 1960 (preliminaries), c5. Human ground truth: the concept is named for this position by WGM Raluca Sgircea and IM Renier Castellanos. Corpus entry `letelier-fischer-1960-7c5-center-control-ambiguous`. The position the literature uses to teach that the centre can be a target, and this base measures White's central control at seven attacks to two, leading on three of the four squares. Both readings are correct and that is the point of an ambiguous entry: the measurement is right, and the verdict everybody attaches to it is wrong. The engine calls the position level. Sixteen mo",
+      "origin_kind": "historical-game",
+      "game": "Letelier-Fischer, Leipzig Olympiad 1960 (preliminaries)",
+      "concept_role": "ambiguous",
+      "attributed_by": "WGM Raluca Sgircea and IM Renier Castellanos — corpus entry letelier-fischer-1960-7c5-center-control-ambiguous",
+      "engine": {
+        "engine_id": "Stockfish 18",
+        "test_level": 3,
+        "depth": 22,
+        "multipv": 3,
+        "best_move": "dxe5",
+        "eval_cp": -9,
+        "verdict": "ambiguous",
+        "verdict_note": "on the assessment, which is the whole claim: at depth 22 the position is level, -0.09 from Black's side, with White holding pawns on d4, e5, c4 and f4 and Black holding no central square at all. The game's 7...c5 is the engine's second choice, 0.17 behind 7...dxe5. An imposing centre worth nothing, measured. Any system that turns a central attacker count into an evaluation gets this position exactly backwards."
+      }
+    }
+  ],
+  "explanations": {
+    "by_level": {
+      "beginner": "Pieces in the middle of the board reach more squares. Fight for the centre — either by putting pawns there or by aiming pieces at it.",
+      "intermediate": "Centre control. Note that controlling is not the same as occupying: a bishop on the long diagonal controls e4 without going near it, and a pawn there can be attacked.",
+      "advanced": "Two schools gave opposite prescriptions and both were conditionally right. A pawn centre is an asset when supported and expanded on time, and a target when static.",
+      "master": "Identify which kind of centre is on the board before choosing a plan, and remember the corollary: a wing attack is only as sound as your control of the middle."
+    },
+    "by_depth": {
+      "short": "Whoever controls the middle can do more.",
+      "normal": "Control of the centre: influence over the four central squares, whether by occupying them with pawns or attacking them from a distance with pieces. Occupation gives space; control without commitment avoids giving a target.",
+      "deep": "The most contested idea in chess theory. The classical school, from Steinitz and codified by Tarrasch, held that the centre should be occupied by pawns. The hypermoderns of the 1920s replied that occupation and control are different — a fianchettoed bishop influences central squares without committing to them, and a pawn centre you have committed to can be shot at. The modern position treats these as complementary rather than rival: a big pawn centre is simultaneously an asset and a liability, and which it becomes is a question of support and timing. Ceding the centre on principle against an opponent who supports theirs properly simply loses. One corollary survives both schools intact — a wing attack succeeds in proportion to your control of the centre."
+    },
+    "hedge": "",
+    "lesson": "Ask what kind of centre is on the board before you choose a plan, and never start a flank attack while your opponent can hit back in the middle."
+  },
+  "terminology": {
+    "beginner_words": [
+      "the middle of the board",
+      "pieces reach further from the centre"
+    ],
+    "advanced_words": [
+      "centre control",
+      "occupation",
+      "fianchetto",
+      "undermining",
+      "central break"
+    ],
+    "avoid": [
+      "always occupy the centre with pawns",
+      "the centre does not matter"
+    ]
+  },
+  "status": {
+    "stage": "researched",
+    "last_updated": "2026-09-01",
+    "open_questions": [],
+    "audit_notes": []
+  },
+  "id": "center-control",
+  "canonical_name": "Control of the centre",
+  "category": "center-control",
+  "knowledge_type": "strategic-principle",
+  "definition_short": "Influence over the four central squares — which can be achieved by occupying them with pawns or by attacking them from a distance with pieces.",
+  "definition_long": "Pieces in the centre reach more squares, and a side that controls it can switch wings faster than an opponent who does not. Both are uncontroversial. What was fought over for a generation is whether control requires OCCUPATION.\n\nTHE CLASSICAL POSITION, from Steinitz and hardened into rules by Tarrasch: occupy the centre with pawns, ideally e4 and d4, and develop behind them. A pawn centre grants space, restricts the opponent and supports an attack.\n\nTHE HYPERMODERN REPLY, from the 1920s: occupation and control are different things. A fianchettoed bishop influences central squares from the flank WITHOUT committing to them, and a pawn centre you have committed to is a pawn centre your opponent can shoot at. So invite the occupation, then undermine it.\n\nTHE SYNTHESIS is not a compromise but a recognition that both are conditional. A large pawn centre is an asset and a liability at once, and which it turns out to be is a question of TIMING: supported properly and expanded at the right moment it crushes, and left static it becomes a fixed target. Equally, ceding the centre on principle against an opponent who supports it properly simply loses to the space advantage you invited. The honest summary found in the sources is that hypermodern play is 'correct as a correction and false as a dogma' — and modern textbooks accordingly present hypermodernism as an EXTENSION of classical theory rather than a replacement for it.\n\nA standing corollary that survives both schools: a wing attack succeeds in proportion to your control of the centre. An attack on the flank launched while the opponent can strike back in the middle tends to rebound.",
+  "sources": [
+    "wikipedia-hypermodernism",
+    "britannica-chess-theory-3",
+    "nimzowitsch-my-system",
+    "wikibooks-chess-centre",
+    "scribd-hypermodern-revolt"
+  ],
+  "source_confidence": "high"
+}

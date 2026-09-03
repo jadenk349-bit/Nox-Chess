@@ -1,0 +1,287 @@
+{
+  "schema_version": 2,
+  "id": "vancura-position",
+  "canonical_name": "Vancura position",
+  "alternate_names": [
+    "Vancura draw",
+    "Vančura position"
+  ],
+  "historical_names": [],
+  "category": "named-theoretical-positions",
+  "subcategory": "rook and rook-pawn versus rook",
+  "tags": [
+    "rook-endgame",
+    "theoretical-position",
+    "tablebase-proven",
+    "rule-exception"
+  ],
+  "knowledge_type": "named-theoretical-position",
+  "knowledge_type_note": "A named theoretical position with a proven result. It matters beyond itself because it is a PROVEN COUNTEREXAMPLE to Tarrasch's rule that the rook belongs behind the passed pawn — here that rule loses by force.",
+  "name_status": "established-name",
+  "difficulty": "expert",
+  "definition_short": "The drawing method against a rook pawn on the sixth: the defending rook attacks the pawn from the SIDE along the rank, never from behind, with the defending king tucked on g7 or h7.",
+  "definition_long": "The specialist defence for rook and rook-pawn against rook, when the pawn is on the sixth and the attacking rook is already stuck in front of it on the eighth.\n\nThe setup: the defending rook goes to the pawn's rank and attacks it SIDEWAYS from maximum distance — against a white a6-pawn, the black rook sits on f6, g6 or h6. The defending king goes to g7 or h7 and stays there.\n\nThree things happen at once, and they are what makes it hold. The pawn is attacked, so the white rook can never leave a8. The whole sixth rank is raked, so the white king can never cross it — and the squares beside the pawn, which are the only shelter from checks, are ON that rank. And the rook keeps maximum checking distance, so when the king approaches it can check indefinitely down the file.\n\nThe king's position is not arbitrary. g7 and h7 are the DRAWING ZONE because from anywhere else White plays Rh8, the rook takes on a7, and Rh7+ skewers king and rook. Karsten Müller notes that 2...Kf7? loses in exactly that way.\n\nWHY IT MATTERS BEYOND ITSELF. Tarrasch's rule says the rook belongs behind the passed pawn. Here that rule LOSES. Behind the pawn, the rook attacks a square the pawn will vacate, gives no checks, and cannot stop the enemy king sheltering in front of the pawn. Beside the pawn it attacks the square the pawn actually occupies and denies the king the rank it needs. This is proven, not argued: the two positions in this record differ only in whether the rook is on f6 or a1, and they are a draw and a loss respectively.\n\nIt is not general theory. With any pawn other than a rook pawn the attacking king has room on both sides and the side-attack bind cannot hold; there the defence is the Philidor.",
+  "history": {
+    "attributions": [
+      {
+        "person": "Josef Vančura",
+        "relation": "originated-by",
+        "source": "chessbase-vancura",
+        "year": 1924,
+        "note": "Czech study composer, 1898-1921. He died at 23 and the analysis of rook and pawn versus rook was published posthumously in 1924. Dates and publication year agree across two independent sources."
+      },
+      {
+        "person": "Karsten Müller",
+        "relation": "popularized-by",
+        "source": "chessbase-vancura",
+        "year": 2014,
+        "note": "The standard modern exposition, including the g7/h7 drawing zone and its reason."
+      }
+    ],
+    "first_documented_source": "chessbase-vancura",
+    "year": 1924,
+    "confidence": "high",
+    "notes": "Well attested and consistent across sources: the composer, his dates, his early death and the posthumous 1924 publication all agree between ChessBase and a second source.",
+    "competing_claims": [],
+    "development": [
+      {
+        "era": "1924",
+        "change": "Published posthumously; enters the standard repertoire.",
+        "source": "chessbase-vancura"
+      },
+      {
+        "era": "2014",
+        "change": "Aronian holds it against Carlsen at the Sinquefield Cup, with spectators' engines wrongly calling it a win — a demonstration that shallow evaluation misreads the fortress.",
+        "source": "chessbase-vancura"
+      }
+    ]
+  },
+  "engine_era_status": "reliable",
+  "engine_era_note": "Tablebase-proven, and a good illustration of the gap between search and proof: during Carlsen-Aronian 2014 the public engines called the position a win while it was in fact a dead draw. Below eight pieces the tablebase is the authority, not the evaluation.",
+  "sources": [
+    "chessbase-vancura",
+    "wikipedia-lucena",
+    "chessmind-vancura",
+    "lichess-tablebase"
+  ],
+  "source_confidence": "high",
+  "recognition": {
+    "preconditions": [
+      "Rook and a rook pawn against rook",
+      "The pawn is on its sixth rank",
+      "The attacking rook is in front of its own pawn on the eighth"
+    ],
+    "indicators_for": [
+      "The defending rook can reach the pawn's rank with several files of distance",
+      "The defending king can reach g7/h7 (or the mirror) in time",
+      "The whole rank between rook and pawn is empty"
+    ],
+    "indicators_against": [
+      "The defending king is stranded in the middle — the skewer Rh8 and Rh7+ then wins",
+      "The defending king blocks its own rook's rank",
+      "The pawn is not a rook pawn, in which case this bind does not exist and the Philidor applies",
+      "The rook cannot reach the rank before the pawn and king coordinate"
+    ],
+    "prerequisites": [
+      "passed-pawn",
+      "philidor-position"
+    ],
+    "detector": "materialPattern KRP-KR with a/h pawn — not yet written",
+    "detectability": "mechanical",
+    "typical_confidence": "high",
+    "false_positive_traps": [
+      "It is specialist theory for the ROOK PAWN on the sixth. Applying the side-attack idea to a central pawn does not work.",
+      "The defending king's square is part of the position, not a detail. Outside g7/h7 the skewer wins.",
+      "Most practical failures happen several moves earlier, while the rook is still elsewhere — recognising the crisis configuration in time is the actual skill."
+    ]
+  },
+  "application": {
+    "typical_plans": [
+      "Get the rook to the pawn's rank at maximum distance before the attacker coordinates",
+      "Keep the king on g7/h7 and out of the rook's way",
+      "Slide along the rank when approached; check down the file when the king nears the pawn"
+    ],
+    "typical_moves": [
+      "...Rf6 attacking a6 sideways",
+      "...Rf5+ / ...Rf6+ / ...Rf7+ chasing the king"
+    ],
+    "typical_pawn_structures": [
+      "Rook pawn on the sixth with the attacking rook in front of it"
+    ],
+    "typical_piece_arrangements": [
+      "Attacking rook entombed on a8; defending rook on the sixth rank; defending king on g7"
+    ],
+    "tactical_consequences": [
+      "The skewer Rh8 and Rh7+ is what punishes a misplaced defending king"
+    ],
+    "strategic_consequences": [
+      "Turns a nominally winning extra pawn into a dead draw",
+      "A standing reason not to push the rook pawn to the seventh, which releases the bind entirely"
+    ]
+  },
+  "exceptions": [
+    "Once the pawn goes to the seventh the position is drawn more easily — the pawn buries its own rook and removes the king's shelter, and even the passive rook-behind defence then holds.",
+    "It does not apply to non-rook pawns.",
+    "It fails if the defending king cannot reach the g7/h7 zone in time."
+  ],
+  "limitations": [
+    "Specialist. It covers one material configuration and one pawn.",
+    "NO MASTER-GAME POSITION, and the reason is what this record IS. A named theoretical position is a position rather than a moment in a game: it is defined by its own geometry, it is reached from thousands of different games and from none in particular, and its authority is a tablebase rather than an annotator. The examples on this record carry `origin_kind: tablebase-position` for that reason and it is the correct provenance, not a weaker one - a Syzygy result is a statement about every continuation, which is more than any game can be. A famous game that REACHED this position would be a fact about that game and would add nothing to the claim."
+  ],
+  "misconceptions": [
+    "That the rook belongs behind a passed pawn. Here that is the losing method, and it is proven.",
+    "That an extra rook pawn wins a rook ending.",
+    "That an engine evaluation settles it — in 2014 public engines called a Vancura draw a win."
+  ],
+  "relationships": {
+    "broader": [],
+    "narrower": [],
+    "related": [
+      "philidor-position",
+      "lucena-position",
+      "passed-pawn",
+      "fortress"
+    ],
+    "contrasting": [
+      "lucena-position"
+    ],
+    "co_occurring": [],
+    "conflicts": [
+      {
+        "concept": "passed-pawn",
+        "resolution": "Direct and PROVEN conflict with Tarrasch's rule that the rook belongs behind the passed pawn, which `passed-pawn` records as a rule of thumb. In this configuration the rule loses by force: the tablebase pair in this record differs only in whether the defending rook is beside the pawn or behind it, and the results are a draw and a loss in 63. Where the two collide, the Vancura wins — but only for a rook pawn on the sixth with the attacking rook already in front of it."
+      }
+    ]
+  },
+  "examples": [
+    {
+      "fen": "R7/6k1/P4r2/8/3K4/8/8/8 w - - 0 1",
+      "note": "The Vancura setup as given by Karsten Müller: White Ra8, pawn a6, king d4; Black king g7 in the drawing zone, rook f6 attacking the pawn sideways at maximum distance.",
+      "origin_kind": "study-composition",
+      "concept_role": "positive",
+      "side_to_move_benefits": "neither",
+      "controlled_pair_with": "R7/6k1/P7/8/3K4/8/8/r7 w - - 0 1",
+      "tablebase": {
+        "source": "Lichess tablebase (Syzygy, 7-piece)",
+        "pieces": 5,
+        "wdl": "draw",
+        "dtz": 0,
+        "dtm": 0,
+        "category": "draw",
+        "note": "PROVEN draw. Paired with the position below, which is identical in material and differs only in where the black rook stands."
+      },
+      "engine": {
+        "engine_id": "Stockfish 18",
+        "test_level": 3,
+        "depth": 26,
+        "threads": 10,
+        "hash_mb": 4096,
+        "multipv": 1,
+        "best_move": "d4c5",
+        "eval_cp": 0,
+        "mate_in": null,
+        "pv": [],
+        "alternatives": [],
+        "margin_cp": null,
+        "verdict": "supports",
+        "verdict_note": "PROVEN DRAW, dtz 0, best move a7, engine 0.00. The Vancura defence: the rook holds from the side, on the sixth, keeping the pawn under fire and the king out. Proven rather than demonstrated."
+      }
+    }
+  ],
+  "counterexamples": [
+    {
+      "fen": "R7/6k1/P7/8/3K4/8/8/r7 w - - 0 1",
+      "note": "The SAME position with the black rook behind the pawn on a1 instead of beside it on f6 — that is, playing Tarrasch's rule that the rook belongs behind the passed pawn. Identical material, identical kings, one rook moved.",
+      "origin_kind": "constructed-test",
+      "concept_role": "negative",
+      "side_to_move_benefits": "white",
+      "controlled_pair_with": "R7/6k1/P4r2/8/3K4/8/8/8 w - - 0 1",
+      "tablebase": {
+        "source": "Lichess tablebase (Syzygy, 7-piece)",
+        "pieces": 5,
+        "wdl": "win",
+        "dtz": 17,
+        "dtm": 63,
+        "category": "win",
+        "note": "PROVEN LOSS for the defender — White wins in 63. This is the most valuable single result in the knowledge base so far, because it does not merely illustrate a concept, it REFUTES a famous rule of thumb in a specific configuration. Tarrasch's 'rook behind the passed pawn' is recorded in `passed-pawn` as a reliable heuristic; here, with material and kings held identical and only the rook relocated, following it turns a proven draw into a proven loss. The mechanism is that behind the pawn the rook attacks a square the pawn will vacate and gives no checks, while beside it the rook attacks the square the pawn occupies and denies the enemy king the rank it needs for shelter."
+      },
+      "engine": {
+        "engine_id": "Stockfish 18",
+        "test_level": 3,
+        "depth": 26,
+        "threads": 10,
+        "hash_mb": 4096,
+        "multipv": 1,
+        "best_move": "d4c5",
+        "eval_cp": 1213,
+        "mate_in": null,
+        "pv": [],
+        "alternatives": [],
+        "margin_cp": null,
+        "verdict": "supports",
+        "verdict_note": "PROVEN WIN, dtz 17, mate in 63, best move Kc5 - and the engine says +12.13. The negative half of the Vancura pair: the same material with the black rook passively behind the pawn on a1 instead of actively on f6 loses. One rook, two squares, draw and loss."
+      }
+    }
+  ],
+  "ambiguous_examples": [
+    {
+      "fen": "R7/6k1/1P3r2/8/3K4/8/8/8 w - - 0 1",
+      "note": "The Vancura ARRANGEMENT exactly - attacking rook behind its own passed pawn on the eighth, defending rook active on the sixth keeping the pawn under fire, defending king beside the pawn's queening corner - with one change: the pawn is a knight pawn instead of a rook pawn. It is a PROVEN WIN in 27. Vancura's defence is specifically a rook-pawn defence, and it works because a rook pawn's queening corner can be reached by the defending king and because the attacking rook in front of its own pawn has nowhere useful to go; neither holds one file across. Filed as ambiguous because nothing visible distinguishes this from the drawn position: the pieces stand in the same relation, and the letter of the file decides.",
+      "origin_kind": "tablebase-position",
+      "concept_role": "ambiguous",
+      "tablebase": {
+        "source": "Lichess tablebase (Syzygy, 7-piece)",
+        "pieces": 5,
+        "wdl": "win",
+        "dtz": 1,
+        "dtm": 27,
+        "category": "win",
+        "note": "PROVEN WIN in 27, best move b7. This record's positive example is the same arrangement with an a-pawn and is a PROVEN DRAW at dtz 0."
+      }
+    }
+  ],
+  "explanations": {
+    "by_level": {
+      "beginner": "Their extra pawn is on the edge of the board. Put your rook beside it on the same row, keep your king in the corner, and they can never make progress.",
+      "intermediate": "The Vancura draw. Attack the rook pawn from the SIDE, not from behind, and keep your king on g7 or h7 — anywhere else and Rh8 followed by Rh7+ skewers you.",
+      "advanced": "Vancura. The side attack ties their rook to the pawn, rakes the rank their king needs for shelter, and keeps checking distance. Note this is the documented exception to putting the rook behind a passed pawn.",
+      "master": "The crisis configuration is a rook pawn on the sixth with the attacking rook already in front. Recognise it early — the practical failure is almost always a few moves before the setup, while the rook is still on the wrong part of the board."
+    },
+    "by_depth": {
+      "short": "Attack the rook pawn from the side, king on g7 — it holds.",
+      "normal": "The Vancura position: against a rook pawn on the sixth with their rook stuck in front of it, put your rook on the pawn's rank attacking it sideways from far away, and your king on g7 or h7. Their rook cannot leave, their king cannot cross the rank, and you can check forever.",
+      "deep": "Josef Vančura's defence, published posthumously in 1924. Against a rook pawn on the sixth with the attacking rook already in front of it, the defending rook attacks the pawn along the rank from maximum distance and the king tucks on g7 or h7. Three things hold simultaneously: the pawn is attacked so the enemy rook is chained, the sixth rank is raked so the enemy king can never reach the shelter squares beside its own pawn, and the rook keeps checking distance. The king's square is not a detail — from anywhere else, Rh8 and Rh7+ skewers. Most importantly this is the proven exception to the rule that the rook belongs behind a passed pawn: relocate the same rook from f6 to a1 and a proven draw becomes a proven loss in 63."
+    },
+    "hedge": "",
+    "lesson": "Against a rook pawn, forget the rule about putting your rook behind the passed pawn. Beside it is what draws, and behind it loses — that is proven, not a matter of taste."
+  },
+  "terminology": {
+    "beginner_words": [
+      "attack the pawn from the side",
+      "keep the king in the corner"
+    ],
+    "advanced_words": [
+      "Vancura position",
+      "drawing zone",
+      "checking distance",
+      "skewer"
+    ],
+    "avoid": [
+      "the rook belongs behind the passed pawn (unqualified)"
+    ]
+  },
+  "status": {
+    "stage": "validated",
+    "last_updated": "2026-09-01",
+    "open_questions": [
+      "Verify Vančura's dates and the 1924 publication against a primary or scholarly source rather than two encyclopedic ones.",
+      "Test the transition positions (pawn on a4/a5) where the defence must be set up in time — that is where it is actually lost in practice."
+    ],
+    "audit_notes": [
+      "Promoted straight to validated: both halves of a properly isolated controlled pair are tablebase-PROVEN, which is the strongest evidence available."
+    ]
+  },
+  "validation_na": {
+    "master_game": "N/A rather than missing, and the argument is what this record IS. A named theoretical position is a POSITION rather than a moment in a game: it is defined by its own geometry, it is reached from thousands of games and from none in particular, and its authority is a tablebase. The examples here carry `origin_kind: tablebase-position`, which is the stronger provenance and not a weaker one - a Syzygy result is a statement about every legal continuation, and a game is a statement about one. A famous game that happened to REACH this position would be a fact about that game and would add nothing whatever to the claim the record makes."
+  }
+}

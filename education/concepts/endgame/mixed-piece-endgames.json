@@ -1,0 +1,246 @@
+{
+  "schema_version": 2,
+  "alternate_names": [
+    "unbalanced material endings"
+  ],
+  "historical_names": [],
+  "tags": [
+    "endgame",
+    "material-imbalance"
+  ],
+  "subcategory": "endgame type",
+  "difficulty": "advanced",
+  "knowledge_type_note": "A record about a class whose defining property is that class-level principles do not apply to it.",
+  "name_status": "established-name",
+  "history": {
+    "attributions": [],
+    "first_documented_source": "wikipedia-chess-endgame",
+    "year": null,
+    "confidence": "low",
+    "notes": "Not a tradition with an origin; a residual category in the endgame literature.",
+    "competing_claims": [],
+    "development": []
+  },
+  "engine_era_status": "substantially-revised-by-engines",
+  "engine_era_note": "The class most transformed by tablebases, because the hardest mixed endings are small enough to solve and were previously matters of opinion. Several long-held evaluations of specific material balances have been overturned outright.",
+  "recognition": {
+    "preconditions": [
+      "Few pieces remain",
+      "The two sides hold different kinds of material"
+    ],
+    "indicators_for": [
+      "A passed pawn one side's material is suited to stopping",
+      "Pieces that defend one another against a piece that must work alone"
+    ],
+    "indicators_against": [],
+    "prerequisites": [
+      "endgame-principles",
+      "material-imbalance"
+    ],
+    "detector": "material in lib/features.js reports the counts; the imbalance is visible from them",
+    "detectability": "mechanical",
+    "typical_confidence": "low",
+    "false_positive_traps": [
+      "The point count is least reliable exactly here, and this is where people rely on it most. This base holds a proven draw a bishop and a pawn up.",
+      "The 60% figure for bishops over knights in endings is a population statistic and says nothing about a particular position.",
+      "This class is under-researched in this base, and confidence should stay low regardless of how clean the material description looks."
+    ]
+  },
+  "application": {
+    "typical_plans": [
+      "Ask which side's material suits the pawn structure",
+      "Keep two minor pieces defending each other rather than operating separately",
+      "Use a knight to blockade a passer and a rook to chase one",
+      "Look for a fortress when material down"
+    ],
+    "typical_moves": [],
+    "typical_pawn_structures": [
+      "Pawns on both wings, which favours the bishop",
+      "A symmetrical structure on one wing, which favours the knight"
+    ],
+    "typical_piece_arrangements": [],
+    "tactical_consequences": [],
+    "strategic_consequences": [
+      "Conversion is unusually hard, and fortresses are unusually common"
+    ]
+  },
+  "exceptions": [
+    "Fortresses defeat material reasoning entirely and are common in this class.",
+    "The bishop's statistical edge reverses when the pawns are all on one wing."
+  ],
+  "limitations": [
+    "This base has not researched mixed-material endings in depth; the record is orientation and says so.",
+    "No tablebase-verified position of this class is held here beyond the wrong-rook-pawn and opposite-bishop cases already recorded.",
+    "NO MASTER-GAME POSITION. The examples on this record are `tablebase-position`s, and for this family that is the stronger provenance rather than a substitute: the claims here are about what a class of ending can and cannot do, and a proof over every legal continuation settles that where a single game only illustrates it. What a master game would add is evidence that the principle GUIDED a strong player, which is a different claim, and this base has not yet found an annotated position making it for this family. Recorded rather than filled. RESOLVED: Arbakov-Kramnik, GMA-qual 1989, above."
+  ],
+  "misconceptions": [
+    "That the point count settles unbalanced endings. It is least reliable precisely here.",
+    "That two minor pieces automatically beat a rook. They do when coordinated and lose when they are not."
+  ],
+  "relationships": {
+    "broader": [
+      "endgame-principles"
+    ],
+    "narrower": [],
+    "related": [
+      "endgame-principles",
+      "material-imbalance",
+      "knight-vs-bishop",
+      "fortress",
+      "piece-properties",
+      "opposite-coloured-bishops",
+      "wrong-rook-pawn",
+      "king-activation",
+      "passed-pawn"
+    ],
+    "contrasting": [
+      "rook-endgame-principles"
+    ],
+    "co_occurring": [
+      "fortress"
+    ],
+    "conflicts": []
+  },
+  "examples": [
+    {
+      "fen": "r7/8/3k4/8/8/3K4/3B4/3R4 w - - 0 1",
+      "note": "Rook and bishop against rook - the ending this record exists for, because material counting gives the wrong answer and nothing but knowledge of the specific ending gives the right one. An extra bishop is worth about three pawns everywhere else on the board and is worth nothing here with the defence set up correctly. The record's subject is precisely that: endings where the piece values stop applying and the position has to be known rather than calculated.",
+      "origin_kind": "tablebase-position",
+      "concept_role": "positive",
+      "side_to_move_benefits": "neither",
+      "engine": {
+        "engine_id": "Stockfish 18",
+        "test_level": 3,
+        "depth": 26,
+        "threads": 10,
+        "hash_mb": 4096,
+        "multipv": 1,
+        "best_move": "d2c3",
+        "eval_cp": 0,
+        "mate_in": null,
+        "pv": [],
+        "alternatives": [],
+        "margin_cp": null,
+        "verdict": "supports",
+        "verdict_note": "0.00 at depth 26. The engine agrees with the tablebase here, which it does not always do in this ending - the drawn defensive positions are famously hard to find over the board and the winning attempts run past fifty moves."
+      },
+      "tablebase": {
+        "source": "Lichess tablebase (Syzygy, 7-piece)",
+        "pieces": 5,
+        "wdl": "draw",
+        "dtz": 0,
+        "dtm": 0,
+        "category": "draw",
+        "note": "PROVEN DRAW, dtz 0. A whole extra minor piece and a proven draw, established over every legal continuation rather than over a search. This is the sharpest available statement of what a mixed-piece ending is: the material table is a summary of the middlegame and it does not survive into here."
+      }
+    },
+    {
+      "fen": "8/8/R3pkp1/1B3p1p/4p2P/4nrP1/7K/8 b - - 1 73",
+      "origin_kind": "historical-game",
+      "game": "Arbakov-Kramnik, GMA-qual 1989",
+      "concept_role": "positive",
+      "side_to_move_benefits": "neither",
+      "note": "BOTH HALVES OF THE PRECONDITION, which is what separates this record from the three beside it. Few pieces remain - four - and the two sides hold DIFFERENT KINDS of material: White a rook and a bishop, Black a rook and a knight.\n\nThat asymmetry is the concept. A rook-and-bishop against rook-and-knight ending cannot be reasoned about with the rules for either of the pure endings, which is why the record exists separately from `rook-endgame-principles` and `knight-endgames`, and why it was the hardest of the three to find: the scan has to compare the two material signatures rather than read one.\n\nWHAT IS CLAIMED AND WHAT IS NOT. The category is decided by the material, which is mechanically certain and needs no engine. Whether the position is INTERESTING, or who is better in it, is a different question and this record does not answer it - its own typical_confidence says as much. What the position establishes is that the class of ending this record is about occurs in master play and can be pointed at.\n\nPROVENANCE. Found by reading the MATERIAL of every position in 330 replayed master games rather than by asking the API, which never reports this concept because it has no matcher. The move list replayed legally through the page's own move generator. No annotator read."
+    }
+  ],
+  "counterexamples": [
+    {
+      "fen": "r3k3/8/4n3/8/8/4N3/8/4K2R w - - 0 1",
+      "note": "Registered false-positive case `the-same-kinds-of-material-on-both-sides`, kept on the record as well as in tests/false_positive_cases.json so that the concept carries its own negative evidence. THE SURFACE PATTERN IS PRESENT: A rook and a knight each, kings on the board, no pawns. Four pieces, two kinds, and an ending that is neither a pure rook ending nor a pure knight ending. WHY IT IS NOT THE CONCEPT: This record's subject is endings where 'the two sides hold DIFFERENT kinds of material — rook against two minors, queen against rook and pieces, bishop against knight'. Here both sides hold the same kinds. There is no exchange-rate question to get wrong, which is the whole thing the record is about: the point count becomes unreliable exactly where the kinds differ. WHAT THE SYSTEM DOES: PROVEN DRAW, dtz 0, best move Nd1. The API reports `open-file` and nothing else. The case is registered because 'mixed' is a word about the RELATION between two armies rather than about how many kinds of piece are present, and a detector counting piece types on a board would get this backwards — it would see two kinds and call the ending mixed, when what makes an ending mixed is the two sides holding different ones.",
+      "origin_kind": "constructed-test",
+      "concept_role": "negative",
+      "tablebase": {
+        "source": "Lichess tablebase (Syzygy, 7-piece)",
+        "pieces": 5,
+        "wdl": "draw",
+        "dtz": 0,
+        "dtm": 0,
+        "category": "draw",
+        "note": "PROVEN DRAW, best move Nd1. Both sides hold the same kinds of material, so there is no exchange-rate question to get wrong - which is the only thing this record is about."
+      },
+      "false_positive_case": "the-same-kinds-of-material-on-both-sides"
+    }
+  ],
+  "ambiguous_examples": [
+    {
+      "fen": "r2k4/8/3K4/8/8/8/4B3/3R4 w - - 0 1",
+      "note": "Rook and bishop against rook - the SAME material as this record's positive example, and a PROVEN WIN in 15 rather than a proven draw. Two positions, one material balance, opposite results, and nothing in the point count distinguishes them: what does is where the defending king stands and whether the defence has been set up. That is this record's central claim - 'the point count becomes the least reliable guide exactly where people lean on it most' - and the pair is the claim rather than an illustration of it. Filed as ambiguous because the concept applies fully to both halves and tells a reader nothing about which one they are looking at.",
+      "origin_kind": "tablebase-position",
+      "concept_role": "ambiguous",
+      "engine": {
+        "engine_id": "Stockfish 18",
+        "test_level": 3,
+        "depth": 26,
+        "threads": 10,
+        "hash_mb": 4096,
+        "multipv": 1,
+        "best_move": "d1f1",
+        "eval_cp": null,
+        "mate_in": 11,
+        "pv": [],
+        "alternatives": [],
+        "margin_cp": null,
+        "verdict": "ambiguous",
+        "verdict_note": "Mate in 11 at depth 26, settled at depth 1, in the material the same record's positive example holds to a proven draw."
+      },
+      "tablebase": {
+        "source": "Lichess tablebase (Syzygy, 7-piece)",
+        "pieces": 5,
+        "wdl": "win",
+        "dtz": 7,
+        "dtm": 15,
+        "category": "win",
+        "note": "PROVEN WIN, dtz 7, mate in 15, best move Rg1. The positive example on this record is the same five men in a different arrangement and is a PROVEN DRAW at dtz 0."
+      }
+    }
+  ],
+  "explanations": {
+    "by_level": {
+      "beginner": "Endings where each side has different pieces — a rook against two minor pieces, say. Counting points helps least here.",
+      "intermediate": "What decides them is whether the pieces work together and whose material suits the pawn structure.",
+      "advanced": "Bishops beat knights in about 60% of endings, and the more symmetrical the structure the better for the knight — a statistic, not a rule.",
+      "master": "The class most rewritten by tablebases, and the one where principles help least."
+    },
+    "by_depth": {
+      "short": "Endings with different material on each side.",
+      "normal": "Endings where the two sides hold different kinds of material. They are defined by not being one of the studied types, and the point count - already a rule of thumb - is least reliable exactly here.",
+      "deep": "The endings that are not a type. What decides them is coordination rather than count, since two minor pieces beat a rook when they work together and lose to it when they do not; which side's material suits the pawn structure, since a knight blockades superbly and chases badly while a rook does the reverse; and the presence of fortresses, which live in unbalanced material because a fortress is precisely a position where extra material cannot be converted. The commonest case has a real result behind it - bishops outperform knights in about 60% of endings, and symmetry favours the knight - but that is a statistic about a population and not a claim about any position."
+    },
+    "hedge": "Under-researched in this base and orientation rather than theory; where a position is small enough for a tablebase, the tablebase is the authority.",
+    "lesson": "Ask whose pieces suit the pawns, not whose pieces add up to more."
+  },
+  "terminology": {
+    "beginner_words": [
+      "different pieces on each side"
+    ],
+    "advanced_words": [
+      "material imbalance",
+      "coordination",
+      "blockade",
+      "fortress"
+    ],
+    "avoid": [
+      "two minors beat a rook",
+      "count the material"
+    ]
+  },
+  "status": {
+    "stage": "researched",
+    "last_updated": "2026-09-01",
+    "open_questions": [],
+    "audit_notes": []
+  },
+  "id": "mixed-piece-endgames",
+  "canonical_name": "Mixed-piece endgames",
+  "category": "mixed-piece-endgames",
+  "knowledge_type": "strategic-principle",
+  "definition_short": "Endings where the two sides hold different KINDS of material — rook against two minors, queen against rook and pieces, bishop against knight.",
+  "definition_long": "The endings that are not a type. Rook-and-pawn endings have a body of theory and named positions; so do knight endings and queen endings. Mixed-material endings are defined by what they are not, and the practical consequence is that the point count — already a rule of thumb — becomes the least reliable guide exactly where people lean on it most.\n\nWHAT ACTUALLY DECIDES THEM:\n- COORDINATION over count. Two minor pieces beat a rook when they work together and lose to it when they do not, which is why these endings turn on whether the pieces defend each other and have squares.\n- PASSED PAWNS, and specifically who can BLOCKADE. A knight blockades superbly and chases badly; a rook does the opposite. Mixed endings are usually decided by which side's material suits the pawn structure it is facing.\n- KING ACTIVITY, as everywhere in the endgame.\n- FORTRESSES. Unbalanced material is where fortresses live, because a fortress is precisely a position in which extra material cannot be converted. This base holds proven examples.\n\nTHE BISHOP-VERSUS-KNIGHT ENDING is the commonest mixed case and the one with a real result behind it: bishops are better than knights in the endgame roughly 60% of the time, and the more SYMMETRICAL the pawn structure the better for the knight. That is a statistic about a population, not a rule about a position, and this base records it as such.\n\nTHE HONEST POSITION on this class is that principles help less here than anywhere else in the endgame, and where a position is small enough for a tablebase the tablebase is the authority. This base has not researched the class in depth and says so.",
+  "sources": [
+    "wikipedia-chess-endgame",
+    "dvoretsky-endgame-manual",
+    "kaufman-material-imbalances",
+    "studer-bishop-vs-knight"
+  ],
+  "source_confidence": "medium"
+}

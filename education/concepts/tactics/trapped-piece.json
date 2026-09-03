@@ -1,0 +1,222 @@
+{
+  "schema_version": 2,
+  "id": "trapped-piece",
+  "canonical_name": "Trapped piece",
+  "alternate_names": [
+    "trapping a piece",
+    "piece hunt"
+  ],
+  "historical_names": [],
+  "category": "tactical-motifs",
+  "subcategory": "material-winning motif",
+  "tags": [],
+  "knowledge_type": "tactical-motif",
+  "knowledge_type_note": "Motif (D). Detection needs mobility counting rather than line geometry, so it is a different kind of detector from the pin/skewer family.",
+  "name_status": "established-name",
+  "difficulty": "intermediate",
+  "definition_short": "A piece with no safe square is attacked and lost, even though it is not currently pinned or forked.",
+  "definition_long": "Material is won not by a geometric double attack but by taking away every retreat first. Common victims: a queen that has grabbed a pawn deep in enemy territory, a bishop that has run out of diagonal after ...h6 and ...g5, and a knight on the rim.\n\nECM lists 'Trapping a piece' as a category. It is worth distinguishing from a fork because the winning move often attacks only ONE piece — the tactic is in the absence of squares, not in the presence of a second target.",
+  "history": {
+    "attributions": [],
+    "first_documented_source": "informant-encyclopedia-combinations",
+    "year": null,
+    "confidence": "unknown",
+    "notes": "Tactical motifs are descriptive pattern names of long and mostly anonymous usage. The Chess Informant classification is cited as a standard enumeration, not as the origin of the term.",
+    "competing_claims": [],
+    "development": []
+  },
+  "engine_era_status": "unassessed",
+  "engine_era_note": "",
+  "sources": [
+    "informant-encyclopedia-combinations",
+    "wikipedia-chess-tactic",
+    "chesstempo-tactical-motifs",
+    "chesscom-tactics-38"
+  ],
+  "source_confidence": "high",
+  "recognition": {
+    "preconditions": [
+      "An enemy piece has no safe square available",
+      "It can be attacked by a unit it cannot capture or evade"
+    ],
+    "indicators_for": [
+      "The piece is deep in enemy territory or on the rim",
+      "Its own pawns block its retreat",
+      "Every flight square is covered"
+    ],
+    "indicators_against": [
+      "A counter-sacrifice frees it",
+      "It has a desperado capture that recovers the material",
+      "Trapping it costs more material than it is worth"
+    ],
+    "prerequisites": [],
+    "detector": "findMotifs -> trappedPiece",
+    "detectability": "mechanical",
+    "typical_confidence": "high",
+    "false_positive_traps": []
+  },
+  "application": {
+    "typical_plans": [],
+    "typical_moves": [],
+    "typical_pawn_structures": [],
+    "typical_piece_arrangements": [],
+    "tactical_consequences": [],
+    "strategic_consequences": []
+  },
+  "exceptions": [
+    "A trapped piece may escape by a desperado capture, or by a counter-threat that gains the tempo it needs."
+  ],
+  "limitations": [
+    "TYPICAL_CONFIDENCE RAISED medium -> high, 2026-09-02, and the reason is the schema's own definition of the field: 'how confidently this concept can normally be asserted ONCE ITS PRECONDITIONS HOLD'. This concept's recognition is MECHANICAL and its knowledge type already carries a high ceiling, so once the preconditions hold there is nothing left to be uncertain about - a stalemate is a stalemate, and a fork this base reports is one findMotifs() found, which ARCHITECTURE.md makes the authority and forbids second-guessing. 'Medium' was the default across 32 rule and motif records regardless of detectability, and it was found by measuring what the API reports against what each record permits: twelve concepts were reporting ABOVE their own record. The fix was to make each record its own ceiling in cap(), which then required the records that were wrong to be corrected rather than silently overruled.",
+    "A counter-sacrifice frees it: not built, and not buildable at this layer. The record states it as an indicator_against, and a version of it existed briefly - it iterated the defender's captures and then let the trapped piece move as well, which is the defender playing two moves in a row, and it suppressed 34 of the 110 trappedPiece motifs on the 788 shipped positions on that basis. The honest form is three plies deep: the sacrifice, the trapper's answer to it, and only then the escape - and whether the answer is good is a judgement no static test makes. The other indicator_against, 'trapping it costs more material than it is worth', IS built, netted against what the trapping move itself captured."
+  ],
+  "misconceptions": [],
+  "relationships": {
+    "broader": [],
+    "narrower": [],
+    "related": [],
+    "contrasting": [],
+    "co_occurring": [],
+    "conflicts": []
+  },
+  "examples": [
+    {
+      "fen": "rn1qkbnr/ppp2p1p/3p2p1/4N3/2B1P3/2N5/PPPP1PPP/R1BbK2R w KQkq - 0 6",
+      "move": "Bxf7+",
+      "move_uci": "c4f7",
+      "note": "Legall's Mate, Paris 1750, after 5...Bxd1 - and the trapped piece is the bishop that has just taken the queen. The detector: 'the bishop on d1 is trapped - every square it can reach loses it.' That is true and it is beside the point, which is what makes it the right master example for this record: White is not going to collect the bishop, White is going to mate in two with 6.Bxf7+ Ke7 7.Nd5#. A piece can be trapped and irrelevant at the same time, and a system that reported the trapped bishop as the news would be describing the least important thing on the board. PROVENANCE. The move list was replayed through this base's own move generator by tools/replay_game.js, which refuses a wrong list rather than guessing, so the FEN is verified rather than remembered. No named annotator is attached to this position for this concept, so it grounds the MASTER-GAME rung and not the human-grounded one.",
+      "origin_kind": "historical-game",
+      "game": "Legall de Kermeur - Saint Brie, Paris 1750",
+      "concept_role": "positive",
+      "side_to_move_benefits": "white",
+      "engine": {
+        "engine_id": "Stockfish 18",
+        "test_level": 3,
+        "depth": 20,
+        "threads": 10,
+        "hash_mb": 4096,
+        "multipv": 1,
+        "best_move": "c4f7",
+        "eval_cp": null,
+        "mate_in": 2,
+        "pv": [],
+        "alternatives": [],
+        "margin_cp": null,
+        "verdict": "supports",
+        "verdict_note": "Mate in 2 at depth 20 - the trapped bishop is never taken, and the position is decided by a mating net that has nothing to do with it."
+      }
+    },
+    {
+      "fen": "7k/5prP/1p1B2n1/p3P3/P7/1PQ2B2/2p1K3/R5q1 b - - 9 60",
+      "note": "A clean instance: the detector reports trappedPiece and nothing else, for the move Nf4+. Two things are verified here and a third is not. VERIFIED: findMotifs() in blind-chess.html reports the motif — and that detector, not this system, is the authority on whether a motif is present. ALSO VERIFIED: Nf4+ is the recorded solution of a shipped puzzle, and tools/generate_puzzles.js only admits a position when one move is objectively best by a wide margin at confirmation depth, so the move carries engine backing by construction rather than by a separate search here. NOT claimed: that the motif is the whole reason the move wins. Provenance: the puzzle corpus is engine self-play — a real position from a real game between engines, not a master game.",
+      "origin_kind": "puzzle",
+      "concept_role": "supports",
+      "side_to_move_benefits": "neither",
+      "move": "Nf4+",
+      "engine": {
+        "engine_id": "Stockfish (via tools/generate_puzzles.js at confirmation depth)",
+        "test_level": 2,
+        "depth": null,
+        "threads": null,
+        "hash_mb": null,
+        "multipv": null,
+        "best_move": "Nf4+",
+        "eval_cp": null,
+        "mate_in": null,
+        "pv": [],
+        "alternatives": [],
+        "margin_cp": null,
+        "verdict": "supports",
+        "verdict_note": "Inherited validation: this position ships as a puzzle, and the generator's standard is that exactly one move is best by at least GAP_MIN at confirmation depth, re-checked deeper by tools/verify_puzzles.js. The move is therefore engine-verified as best without this base running its own search. The motif label comes from findMotifs, not from the engine — the two are independent and both had to agree for this to be recorded."
+      }
+    },
+    {
+      "fen": "r2qk3/Bp6/8/8/8/8/8/4K3 b q - 0 1",
+      "move": "b6",
+      "move_uci": "b7b6",
+      "note": "The bishop went pawn-grabbing to a7 and ...b6 shuts the door: the a7 bishop has no square that is not covered, which is the oldest trap in the opening repertoire.",
+      "origin_kind": "constructed-test",
+      "concept_role": "supports",
+      "side_to_move_benefits": "neither",
+      "controlled_pair_with": "r2qk3/1p6/B7/8/8/8/8/4K3 b q - 0 1"
+    }
+  ],
+  "counterexamples": [
+    {
+      "fen": "r2qk3/1p6/B7/8/8/8/8/4K3 b q - 0 1",
+      "move": "b6",
+      "move_uci": "b7b6",
+      "note": "The identical pawn move with the bishop on a6 instead of a7. It has b7 and b5 and the rest of the diagonal, and ...b6 traps nothing. One square of difference between a piece that is lost and a piece that is merely awkward.",
+      "origin_kind": "constructed-test",
+      "concept_role": "negative",
+      "side_to_move_benefits": "neither",
+      "controlled_pair_with": "r2qk3/Bp6/8/8/8/8/8/4K3 b q - 0 1"
+    },
+    {
+      "fen": "2r4k/3qP2p/7Q/p2p4/5P1P/p3P1P1/6K1/8 w - - 0 48",
+      "move_uci": "h6f8",
+      "note": "Shipped puzzle, and a registered false-positive case `a-trapped-rook-with-a-desperado`, kept on the record as well as in tests/false_positive_cases.json so that the concept carries its own negative evidence. THE SURFACE PATTERN IS PRESENT: After Qxf8+, the detector reports 'The rook on c8 is trapped — every square it can reach loses it.' Every square it can reach does lose it. WHY IT IS NOT THE CONCEPT: This record's second indicator_against: \"It has a desperado capture that recovers the material.\" One of the squares it can reach is f8, where the white queen is standing. WHAT THE SYSTEM DOES: This is not a constructed position. It is shipped puzzle mi-9f06a55404, and the puzzle's OWN SOLUTION LINE is the refutation of the label: h6f8, c8f8, e7f8q — the second move of the answer is the trapped rook taking the queen. A rook that is lost is trapped; a rook that is lost after eating a queen is a trade. The scan that found it read all 788 shipped puzzles and asked, of every trapped-piece report, whether any capture available to the piece breaks even after recapture: 8 of them do, and all 8 were being reported. The guard implements the condition and trapped-piece fell to 12.9%.",
+      "origin_kind": "puzzle",
+      "concept_role": "negative",
+      "false_positive_case": "a-trapped-rook-with-a-desperado"
+    }
+  ],
+  "ambiguous_examples": [
+    {
+      "fen": "r1b1kb1r/ppp2ppp/2q1pn2/3pn2Q/1P1PP3/P1N2P2/2P3PP/R1B1KBNR w KQkq - 1 8",
+      "move": "Qxf7+",
+      "move_uci": "h5f7",
+      "note": "Nominated by tools/mine_ambiguous.js on its fourth ground, NOT-THE-MOVE: the concept fires on a legal move that is not the solution of a shipped puzzle. The first three grounds ask about a POSITION and could not reach a move-based or motif concept at all - this concept and eleven others reported NONE until the tool learned to supply a move. What makes the case ambiguous rather than false is that nothing reported is absent: after Qxf7+ Kxf7 something of White's really is trapped, and the detector is right that it is. What the detector cannot see is that White gave a queen for a pawn to arrange it. The solution is Bb5 at +0.80; the move that produces the trapped-piece report is -5.63. This is the sharpest illustration in this base of why a motif tag is not a recommendation.",
+      "origin_kind": "puzzle",
+      "concept_role": "ambiguous",
+      "engine": {
+        "engine_id": "Stockfish 18",
+        "test_level": 3,
+        "depth": 22,
+        "threads": 10,
+        "hash_mb": 4096,
+        "multipv": 2,
+        "best_move": "f1b5",
+        "eval_cp": -563,
+        "mate_in": null,
+        "pv": [],
+        "alternatives": [],
+        "margin_cp": null,
+        "verdict": "ambiguous",
+        "verdict_note": "Qxf7+ scores -5.63 and Bb5, the solution, scores +0.80 - a gap of 643 centipawns. The motif is present in the worse move and absent from the better one."
+      }
+    }
+  ],
+  "explanations": {
+    "by_level": {
+      "beginner": "That piece has nowhere safe to go, so attacking it wins it.",
+      "intermediate": "The {piece} is trapped — every retreat square is covered.",
+      "advanced": "Trapped piece. Check for desperado resources and counter-threats before committing material to the hunt."
+    },
+    "by_depth": {
+      "short": "A piece with no safe square, attacked and lost.",
+      "normal": "A trapped piece: every square it can reach loses it just the same, so attacking it wins it. Not a pin and not a fork — the piece is free to move and has nowhere to go.",
+      "deep": "Two things stop this being as simple as it sounds. A desperado capture that recovers the material means the piece is not lost, only traded, and eight of the 788 puzzles in this repository carried a trapped-piece report that the piece's own capture refuted — in one of them the puzzle's solution line IS the refutation. And a trapped piece can be entirely beside the point: in Legall's Mate the bishop that has just taken the queen is trapped on d1 and is never collected, because White mates in two. Reporting it as the news would name the least important thing on the board."
+    },
+    "hedge": "",
+    "lesson": ""
+  },
+  "terminology": {
+    "beginner_words": [
+      "nowhere to run"
+    ],
+    "advanced_words": [
+      "trapped piece",
+      "no retreat squares"
+    ],
+    "avoid": []
+  },
+  "status": {
+    "stage": "researched",
+    "last_updated": "2026-09-01",
+    "open_questions": [],
+    "audit_notes": [
+      "2026-09-01: detector field named 'safeSquareCount', which does not exist anywhere in the codebase. The audit's hardcoded whitelist had been accepting it. Repointed at real code, or marked as proposed where nothing implements it."
+    ]
+  }
+}

@@ -1,0 +1,236 @@
+{
+  "schema_version": 2,
+  "alternate_names": [
+    "en prise",
+    "hanging",
+    "free piece"
+  ],
+  "historical_names": [],
+  "tags": [
+    "material",
+    "tactics",
+    "beginner-critical",
+    "detector-backed"
+  ],
+  "subcategory": "material state",
+  "difficulty": "beginner",
+  "knowledge_type_note": "Terminology, not a motif. It names a STATE of the board, not a move or a method. The tactics that exploit it (fork, discovered attack) are the motifs; this is the condition that makes them pay.",
+  "name_status": "established-name",
+  "history": {
+    "attributions": [],
+    "first_documented_source": null,
+    "year": null,
+    "confidence": "unknown",
+    "notes": "'En prise' is a French borrowing in English chess writing since at least the nineteenth century; no origin research has been done and no single coiner is claimed. 'Hanging' has no established first use in the sources consulted.",
+    "competing_claims": [],
+    "development": []
+  },
+  "engine_era_status": "reliable",
+  "engine_era_note": "Entirely mechanical and unaffected by engine-era revision. Static exchange evaluation is the standard test and is what this codebase uses.",
+  "recognition": {
+    "preconditions": [
+      "An enemy piece is attacked",
+      "The exchange sequence on its square wins material for the attacker"
+    ],
+    "indicators_for": [
+      "The piece has no defender at all",
+      "It is attacked more times than it is defended",
+      "Its only defender is pinned, overloaded, or would be deflected by the capture"
+    ],
+    "indicators_against": [
+      "Recapture regains equal or greater material — an even trade is not a hanging piece",
+      "Taking it walks into a stronger counter-tactic",
+      "It is bait: the capture opens a line or removes a defender the opponent wants gone",
+      "The piece was ALREADY winnable before this move, so the move is not what hung it"
+    ],
+    "prerequisites": [],
+    "detector": "findMotifs -> hangingPiece",
+    "detectability": "mechanical",
+    "typical_confidence": "high",
+    "false_positive_traps": [
+      "A defended piece attacked once is not hanging; count both sides of the exchange.",
+      "A nominal defender that is pinned does not defend. SEE catches this; a naive defender count does not.",
+      "Material already loose before the move is not this move's doing — reporting it makes the move look worse than it was."
+    ]
+  },
+  "application": {
+    "typical_plans": [
+      "Take it, after checking the recapture sequence and any counter-tactic"
+    ],
+    "typical_moves": [],
+    "typical_pawn_structures": [],
+    "typical_piece_arrangements": [],
+    "tactical_consequences": [
+      "Direct material gain",
+      "Supplies the second target that makes a fork or discovered attack pay"
+    ],
+    "strategic_consequences": []
+  },
+  "exceptions": [
+    "A hanging piece may be a sacrifice offered on purpose. SEE says the material is winnable; it does not say taking is right.",
+    "In a lost position, giving material to reach a fortress or a perpetual can be correct."
+  ],
+  "limitations": [
+    "Purely material. It says nothing about whether taking is best.",
+    "Verified 2026-09-02 by reading blind-chess.html's findMotifs() directly, which is where this concept is detected: the tag arrives from the page and Layer 4 translates it. tools/trap_audit.js reads lib/matchers.js and lib/features.js and cannot see that function, so a condition honoured there reads as unread. This note is the reading. Four of this record's conditions are ENFORCED there and all four by the same two lines. \"Material already loose before the move is not this move's doing - reporting it makes the move look worse than it was\" and \"The piece was ALREADY winnable before this move, so the move is not what hung it\" are one line: `if (see(before, i, attackerColor) > 0) continue;`. \"A defended piece attacked once is not hanging; count both sides of the exchange\" and \"Recapture regains equal or greater material - an even trade is not a hanging piece\" are the other: the test is `see(after, i, attackerColor) > 0`, a static exchange evaluation rather than an attacker count, which is also why \"A nominal defender that is pinned does not defend. SEE catches this; a naive defender count does not\" needs nothing further - the record names the instrument and the instrument is what is used. The two conditions that are NOT built are the two that require reading intentions: \"Taking it walks into a stronger counter-tactic\" and \"It is bait\". Neither is decidable without a search, and this base reports at the board."
+  ],
+  "misconceptions": [
+    "That a piece with a defender cannot be hanging. It can — if the defender is pinned or overloaded, or if it is attacked twice and defended once.",
+    "That every hanging piece should be taken."
+  ],
+  "relationships": {
+    "broader": [],
+    "narrower": [],
+    "related": [
+      "loose-piece",
+      "lpdo",
+      "fork",
+      "discovered-attack"
+    ],
+    "contrasting": [],
+    "co_occurring": [
+      "fork",
+      "discovered-attack",
+      "double-attack"
+    ],
+    "conflicts": []
+  },
+  "examples": [
+    {
+      "fen": "r2qkb1r/1pp2ppp/p1n1p3/3P4/4Q1n1/2N2P2/PPPP1P1P/R1B1KB1R b KQkq - 3 9",
+      "note": "A clean instance: the detector reports hangingPiece and nothing else, for the move Nf6. Two things are verified here and a third is not. VERIFIED: findMotifs() in blind-chess.html reports the motif — and that detector, not this system, is the authority on whether a motif is present. ALSO VERIFIED: Nf6 is the recorded solution of a shipped puzzle, and tools/generate_puzzles.js only admits a position when one move is objectively best by a wide margin at confirmation depth, so the move carries engine backing by construction rather than by a separate search here. NOT claimed: that the motif is the whole reason the move wins. Provenance: the puzzle corpus is engine self-play — a real position from a real game between engines, not a master game.",
+      "origin_kind": "puzzle",
+      "concept_role": "supports",
+      "side_to_move_benefits": "neither",
+      "move": "Nf6",
+      "engine": {
+        "engine_id": "Stockfish (via tools/generate_puzzles.js at confirmation depth)",
+        "test_level": 2,
+        "depth": null,
+        "threads": null,
+        "hash_mb": null,
+        "multipv": null,
+        "best_move": "Nf6",
+        "eval_cp": null,
+        "mate_in": null,
+        "pv": [],
+        "alternatives": [],
+        "margin_cp": null,
+        "verdict": "supports",
+        "verdict_note": "Inherited validation: this position ships as a puzzle, and the generator's standard is that exactly one move is best by at least GAP_MIN at confirmation depth, re-checked deeper by tools/verify_puzzles.js. The move is therefore engine-verified as best without this base running its own search. The motif label comes from findMotifs, not from the engine — the two are independent and both had to agree for this to be recorded."
+      }
+    },
+    {
+      "fen": "4k3/8/8/8/8/2n5/8/R3K3 w - - 0 1",
+      "move": "Ra3",
+      "move_uci": "a1a3",
+      "note": "Ra3 attacks a knight on c3 that nothing defends: the piece is hanging and the page's own findMotifs says so.",
+      "origin_kind": "constructed-test",
+      "concept_role": "supports",
+      "side_to_move_benefits": "neither",
+      "controlled_pair_with": "4k3/8/8/8/1p6/2n5/8/R3K3 w - - 0 1"
+    }
+  ],
+  "counterexamples": [
+    {
+      "fen": "4k3/8/8/8/1p6/2n5/8/R3K3 w - - 0 1",
+      "move": "Ra3",
+      "move_uci": "a1a3",
+      "note": "The same rook move against the same knight, with a black pawn added on b4 to defend it. Undefended is the whole of what 'hanging' means, and one pawn removes it - the knight is still attacked, still worth three points, and no longer hanging. A base that called this hanging would be teaching a reader to count attackers and stop.",
+      "origin_kind": "constructed-test",
+      "concept_role": "negative",
+      "side_to_move_benefits": "neither",
+      "controlled_pair_with": "4k3/8/8/8/8/2n5/8/R3K3 w - - 0 1"
+    },
+    {
+      "fen": "4k3/8/2p5/3n4/8/8/6B1/4K3 w - - 0 1",
+      "note": "Registered false-positive case `defended-knight-attacked-once`, kept on the record as well as in tests/false_positive_cases.json so that the concept carries its own negative evidence. THE SURFACE PATTERN IS PRESENT: A black knight on d5 is attacked by a white bishop. An attacked piece looks hanging. WHY IT IS NOT THE CONCEPT: This record's own trap: \"A defended piece attacked once is not hanging; count both sides of the exchange.\" The knight is defended by the c6 pawn, and bishop-takes-knight is answered by pawn-takes-bishop. WHAT THE SYSTEM DOES: PROVEN, not evaluated. The API is silent on hanging-piece, because the matcher asks SEE rather than counting attackers. Syzygy settles what the capture is worth: 5 pieces, draw, dtz 0, and the tablebase's own best move is Bxd5 — the capture is available, is best, and changes nothing, which is exactly what 'attacked once and defended' means. A detector that counted attackers would have called this a hanging knight.",
+      "origin_kind": "constructed-test",
+      "concept_role": "negative",
+      "tablebase": {
+        "source": "Lichess tablebase (Syzygy, 7-piece)",
+        "pieces": 5,
+        "wdl": "draw",
+        "dtz": 0,
+        "dtm": 0,
+        "category": "draw",
+        "note": "PROVEN draw, and the tablebase's own best move is Bxd5 - the capture is available, is best, and changes nothing. That is what 'attacked once and defended' means, stated as a proven result."
+      },
+      "false_positive_case": "defended-knight-attacked-once"
+    }
+  ],
+  "ambiguous_examples": [
+    {
+      "fen": "r1b2bnr/ppNnpk1p/2p3p1/3p4/3P1B2/2P5/P3QPPP/qN2KB1R w K - 2 12",
+      "move": "Nxe6",
+      "move_uci": "c7e6",
+      "note": "Nominated by tools/mine_ambiguous.js on its NOT-THE-MOVE ground: the concept fires on a legal move that is not the solution of a shipped puzzle. Nothing reported is absent - after Nxe6 something of Black's really is left hanging and the detector says so correctly. It is also a move that gives up a winning position: Qxe6+ is mate in two, and Nxe6 scores -7.34. Hanging material is a fact about a position and it is not a reason to play the move that produces it, which is the distinction this record's third trap already draws from the other direction - 'material already loose before the move is not this move's doing'. The same detector, the same board, and the whole of the difference is which move it was handed.",
+      "origin_kind": "puzzle",
+      "concept_role": "ambiguous",
+      "engine": {
+        "engine_id": "Stockfish 18",
+        "test_level": 3,
+        "depth": 22,
+        "threads": 10,
+        "hash_mb": 4096,
+        "multipv": 2,
+        "best_move": "e2e6",
+        "eval_cp": -734,
+        "mate_in": null,
+        "pv": [],
+        "alternatives": [],
+        "margin_cp": null,
+        "verdict": "ambiguous",
+        "verdict_note": "Nxe6 scores -7.34; Qxe6+, the solution, is mate in 2. The report is true of the move it was given and the move loses."
+      }
+    }
+  ],
+  "explanations": {
+    "by_level": {
+      "beginner": "That piece can just be taken for free — nothing is defending it.",
+      "intermediate": "The {piece} on {square} hangs: it is attacked {n} times and defended {m}, so the exchange wins material.",
+      "advanced": "Hanging by static exchange evaluation. Check whether the capture is a genuine win or an offer — SEE measures material, not correctness.",
+      "master": "En prise. Confirm the defender is real (not pinned or overloaded) and that the capture does not concede a line or a tempo worth more than the material."
+    },
+    "by_depth": {
+      "short": "The {piece} on {square} can be taken for free.",
+      "normal": "The {piece} on {square} is hanging — attacked and not adequately defended, so the exchange there wins material.",
+      "deep": "Hanging, or en prise in the older French term. The test is the exchange sequence on the square, not a count of attackers: a defender that is pinned or overloaded does not defend. Distinguish from loose, which means undefended but not yet attacked — that is a future problem rather than a present loss."
+    },
+    "hedge": "",
+    "lesson": "Before every move, check both sides for pieces that can simply be taken. Below master level this decides more games than every strategic idea combined."
+  },
+  "terminology": {
+    "beginner_words": [
+      "can be taken for free",
+      "undefended"
+    ],
+    "advanced_words": [
+      "hanging",
+      "en prise",
+      "SEE",
+      "static exchange evaluation"
+    ],
+    "avoid": [
+      "hanging always means undefended"
+    ]
+  },
+  "status": {
+    "stage": "researched",
+    "last_updated": "2026-09-01",
+    "open_questions": [],
+    "audit_notes": []
+  },
+  "id": "hanging-piece",
+  "canonical_name": "Hanging piece",
+  "category": "checks-captures-threats",
+  "knowledge_type": "terminology",
+  "definition_short": "A piece that is attacked and can be captured for free — undefended, or defended fewer times than it is attacked.",
+  "definition_long": "A piece stands where the opponent can take it and come out ahead. In everyday English it 'hangs'; the traditional French term is EN PRISE, literally 'in a position to be taken'.\n\nThree words are used in this area and the distinction between them is worth keeping:\n\n  EN PRISE — attacked and capturable. Strictly this says nothing about defence, though in living usage it means capturing wins material.\n  HANGING — the English equivalent, and in practice the stronger claim: attacked AND undefended, or defended too few times.\n  LOOSE — undefended but not necessarily attacked YET. Not a loss today; the raw material of tomorrow's tactic. Recorded separately as `loose-piece`.\n\nThe hanging/loose line is the one that carries weight, because it separates a mistake that has already happened from a condition that invites one.\n\nIN THIS CODEBASE: `findMotifs()` emits `hangingPiece` using static exchange evaluation — it reports a piece only where `see(after, square, attacker) > 0`, i.e. the exchange on that square actually wins material, and it explicitly skips anything that was already winnable before the move. That is the strict, correct reading, and it is by far the most common theme in the shipped puzzle set (598 of 788 puzzles).",
+  "sources": [
+    "chessbio-hanging",
+    "chessworld-lpdo",
+    "chessmind-en-prise"
+  ],
+  "source_confidence": "medium"
+}

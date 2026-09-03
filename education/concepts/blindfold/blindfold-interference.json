@@ -1,0 +1,152 @@
+{
+  "schema_version": 2,
+  "alternate_names": [
+    "losing the position",
+    "game interference"
+  ],
+  "historical_names": [],
+  "tags": [
+    "blindfold",
+    "cognition",
+    "nox-specific",
+    "research-backed"
+  ],
+  "subcategory": "cognition",
+  "difficulty": "advanced",
+  "knowledge_type_note": "Experimental findings about when a held position degrades, with a measured time course.",
+  "name_status": "established-name",
+  "history": {
+    "attributions": [
+      {
+        "relation": "first-documented-by",
+        "person": "Pertti Saariluoma",
+        "year": 1991,
+        "note": "Established the interference time course by dictating games under concurrent tasks.",
+        "confidence": "high"
+      },
+      {
+        "relation": "later-associated-with",
+        "person": "Guillermo Campitelli and Fernand Gobet",
+        "year": 2004,
+        "note": "Isolated novelty rather than mere presence of irrelevant information as the disruptive factor.",
+        "confidence": "high"
+      }
+    ],
+    "first_documented_source": "campitelli-gobet-2004",
+    "year": 1991,
+    "confidence": "high",
+    "notes": "Saariluoma's experiments are known here through Campitelli & Gobet's review rather than from the original papers.",
+    "competing_claims": [],
+    "development": []
+  },
+  "engine_era_status": "not-applicable",
+  "engine_era_note": "Not applicable; a claim about human cognition.",
+  "recognition": {
+    "preconditions": [
+      "A player is holding a position without sight of it"
+    ],
+    "indicators_for": [],
+    "indicators_against": [],
+    "prerequisites": [],
+    "detector": null,
+    "detectability": "human-only",
+    "typical_confidence": "low",
+    "false_positive_traps": [
+      "A fact about the player and the interface, not about the position or any move.",
+      "The finding is specifically about visual and attention-demanding interference during encoding. Generalising it to 'distraction is bad' loses the whole result, which is that timing decides."
+    ]
+  },
+  "application": {
+    "typical_plans": [],
+    "typical_moves": [],
+    "typical_pawn_structures": [],
+    "typical_piece_arrangements": [],
+    "tactical_consequences": [],
+    "strategic_consequences": [
+      "A stable display matters more than a minimal one, because change is what interferes"
+    ]
+  },
+  "exceptions": [
+    "Interference after a position is encoded is comparatively harmless, which is the opposite of what the folklore suggests.",
+    "Static irrelevant information is tolerated by masters; only changing information disrupts."
+  ],
+  "limitations": [
+    "The experiments used dictated games at fixed rates, which is not the same as playing.",
+    "The findings concern masters and medium-strength players; weaker players may be more fragile throughout.",
+    "NO REGISTERED FALSE-POSITIVE CASE, and a FEN is not the right instrument for one here. A case in tests/false_positive_cases.json is a POSITION where the concept's surface pattern is present and the concept is not, replayed as an assertion so the system can be shown declining the error. This record's `recognition.detectability` is `human-only`: what it describes is something a player does rather than something a board contains, so there is no surface pattern for a position to carry and nothing for the system to decline. The conditions this record states are read and answered in `limitations` and in the trap audit instead. Recorded rather than filled: tools/depth_report.py still counts this concept as missing the item."
+  ],
+  "misconceptions": [
+    "That any distraction is equally damaging. Timing and novelty decide.",
+    "That the danger is forgetting individual pieces. The evidence points at disruption of pattern matching during encoding."
+  ],
+  "relationships": {
+    "broader": [],
+    "narrower": [],
+    "related": [
+      "blindfold-representation",
+      "chunking",
+      "board-vision"
+    ],
+    "contrasting": [],
+    "co_occurring": [
+      "blindfold-representation"
+    ],
+    "conflicts": []
+  },
+  "examples": [],
+  "counterexamples": [],
+  "ambiguous_examples": [],
+  "explanations": {
+    "by_level": {
+      "beginner": "It is hardest to hold the position while you are taking a move in. Once it is settled, distraction matters less.",
+      "intermediate": "Interference bites during encoding, not after. Changing surroundings hurt; static ones do not.",
+      "advanced": "Visuo-spatial working memory is essential early and much less so later - once information is matched to stored patterns it is comparatively safe.",
+      "master": "Novelty is what the mind's eye uses to separate figure from ground, which is why changing irrelevant information is the disruptive kind."
+    },
+    "by_depth": {
+      "short": "Distraction hurts while you are taking a move in, much less afterwards.",
+      "normal": "What disrupts a mentally held position is more specific than general distraction: visual or attention-demanding tasks hurt badly while a position is being encoded and little once it is stored, and irrelevant surroundings interfere only when they change.",
+      "deep": "The research characterises failure more precisely than folklore does. The time course is the central finding: visuo-spatial working memory is essential during early encoding and much less so afterwards, because once incoming information has been matched to structures in long-term memory it is comparatively safe - the matching is the fragile part. Novelty rather than clutter is what breaks it, since irrelevant background affects masters only when it changes during presentation, the mind's eye apparently using novelty to separate figure from ground. Similar concurrent games interfere with each other, and transposing the board's halves badly impairs recall - further evidence that the representation is matched against stored patterns rather than read off an image."
+    },
+    "hedge": "",
+    "lesson": "The vulnerable moment is while the move is going in. A stable display is worth more than a sparse one."
+  },
+  "terminology": {
+    "beginner_words": [
+      "losing track of the position"
+    ],
+    "advanced_words": [
+      "interference",
+      "encoding",
+      "visuo-spatial working memory",
+      "figure and ground"
+    ],
+    "avoid": [
+      "distraction is always equally bad"
+    ]
+  },
+  "status": {
+    "stage": "researched",
+    "last_updated": "2026-09-01",
+    "open_questions": [],
+    "audit_notes": []
+  },
+  "id": "blindfold-interference",
+  "canonical_name": "Interference in blindfold play",
+  "category": "blindfold-visualisation",
+  "knowledge_type": "proven-result",
+  "definition_short": "What disrupts a mentally held position: visual-spatial distraction during encoding, changing irrelevant surroundings, and similarity between concurrent games.",
+  "definition_long": "How a blindfold representation fails, which the research characterises more precisely than the folklore does.\n\nTHE TIME COURSE IS THE KEY FINDING. Visuo-spatial working memory is essential during the EARLY stages of encoding a position and much less so afterwards. A distracting visual or attention-demanding task hurts badly when it coincides with a game being presented, and hurts little when it comes after the position is already stored. The explanation offered is that once the incoming information has been matched to structures in long-term memory it is comparatively safe; it is the matching that is fragile.\n\nNOVELTY, NOT CLUTTER, is what breaks concentration. Irrelevant background information affects masters only when it CHANGES during presentation of the game. A static irrelevant position alongside is tolerated. The interpretation is that the mind's eye uses novelty to separate figure from ground, so changing surroundings compete for exactly that mechanism.\n\nSIMILARITY BETWEEN GAMES. Fine, describing his own simultaneous blindfold play, noted interference between games that resembled one another — a hazard specific to playing several at once, and a reason blindfold simultaneous players sometimes deliberately steer games apart.\n\nTRANSPOSING THE BOARD'S HALVES badly impairs recall, which is further evidence that the representation is matched against stored patterns rather than read off an image: an image would not care.\n\nFOR A BLINDFOLD PROGRAM the practical reading is that a changing visual interface during the moment a player is taking in a move is the costly kind of distraction, and that a stable display is worth more than a sparse one.",
+  "sources": [
+    "campitelli-gobet-2004",
+    "fine-1965-blindfold",
+    "gobet-memory-chunks-schemata"
+  ],
+  "source_confidence": "high",
+  "validation_na": {
+    "positive_example": "N/A rather than missing. A validation item of this kind is a POSITION, and this record's subject is not a position: `recognition.detectability` is `human-only`, and what it describes is something a player does at the board rather than something the board contains. A FEN could show the CONSEQUENCE of doing it well or badly, which is a different claim from the one this record makes, so attaching one would be evidence for the wrong proposition. The record is validated the way its own claims can be: by sources, by attribution, by stated recognition criteria, and by the conditions its trap list states being read against the code in state/TRAPS.md.",
+    "negative_example": "N/A rather than missing. A validation item of this kind is a POSITION, and this record's subject is not a position: `recognition.detectability` is `human-only`, and what it describes is something a player does at the board rather than something the board contains. A FEN could show the CONSEQUENCE of doing it well or badly, which is a different claim from the one this record makes, so attaching one would be evidence for the wrong proposition. The record is validated the way its own claims can be: by sources, by attribution, by stated recognition criteria, and by the conditions its trap list states being read against the code in state/TRAPS.md.",
+    "engine_validation": "N/A rather than missing. A validation item of this kind is a POSITION, and this record's subject is not a position: `recognition.detectability` is `human-only`, and what it describes is something a player does at the board rather than something the board contains. A FEN could show the CONSEQUENCE of doing it well or badly, which is a different claim from the one this record makes, so attaching one would be evidence for the wrong proposition. The record is validated the way its own claims can be: by sources, by attribution, by stated recognition criteria, and by the conditions its trap list states being read against the code in state/TRAPS.md.",
+    "false_positive_test": "N/A rather than missing. A validation item of this kind is a POSITION, and this record's subject is not a position: `recognition.detectability` is `human-only`, and what it describes is something a player does at the board rather than something the board contains. A FEN could show the CONSEQUENCE of doing it well or badly, which is a different claim from the one this record makes, so attaching one would be evidence for the wrong proposition. The record is validated the way its own claims can be: by sources, by attribution, by stated recognition criteria, and by the conditions its trap list states being read against the code in state/TRAPS.md."
+  }
+}

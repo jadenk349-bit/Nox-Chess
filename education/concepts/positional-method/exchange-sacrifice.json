@@ -1,0 +1,255 @@
+{
+  "schema_version": 2,
+  "alternate_names": [
+    "sacrificing the exchange",
+    "giving up the exchange"
+  ],
+  "historical_names": [],
+  "tags": [
+    "petrosian",
+    "material-imbalance",
+    "positional"
+  ],
+  "subcategory": "material imbalance",
+  "difficulty": "advanced",
+  "knowledge_type_note": "A strategic method: it prescribes converting a specific, small material deficit into a specific kind of asset. Spielmann gave it a chapter of its own, classified by the material given rather than by object, because the trade-off is unusually consistent.",
+  "name_status": "established-name",
+  "history": {
+    "attributions": [
+      {
+        "person": "Rudolf Spielmann",
+        "relation": "systematized-by",
+        "source": "spielmann-art-of-sacrifice",
+        "year": 1935,
+        "note": "Gave it a chapter of its own, classified by material given rather than by object."
+      },
+      {
+        "person": "Tigran Petrosian",
+        "relation": "popularized-by",
+        "source": "thechessworld-positional-sacrifice",
+        "year": null,
+        "note": "Raised it to a positional art form; devoted a chapter of one of his own books to it."
+      }
+    ],
+    "first_documented_source": "spielmann-art-of-sacrifice",
+    "year": 1935,
+    "confidence": "medium",
+    "notes": "Both attributions are secure as relations but neither is a claim of invention — players gave up the exchange long before either wrote about it. Petrosian's association is with the positional USE, not with the idea.",
+    "competing_claims": [],
+    "development": [
+      {
+        "era": "1935, Spielmann",
+        "change": "Classified as its own category.",
+        "source": "spielmann-art-of-sacrifice"
+      },
+      {
+        "era": "mid-20th c., Petrosian",
+        "change": "Becomes a standing positional method rather than a tactical device.",
+        "source": "thechessworld-positional-sacrifice"
+      },
+      {
+        "era": "engine era",
+        "change": "Neural-network evaluation values the resulting compensation much more highly than classical material-weighted search, endorsing many exchange sacrifices earlier engines rejected.",
+        "source": "wikipedia-sacrifice"
+      }
+    ]
+  },
+  "engine_era_status": "substantially-revised-by-engines",
+  "engine_era_note": "Older engines systematically undervalued exchange sacrifices because a rook outweighs a minor piece in any material table. Neural-network evaluation weighs the compensating factors directly and endorses far more of them. This is one of the clearest cases where engine progress changed an assessment rather than confirming it.",
+  "recognition": {
+    "preconditions": [
+      "A rook is given for a knight or bishop"
+    ],
+    "indicators_for": [
+      "The captured minor piece was the defender of a colour complex or a key square",
+      "The capture permanently damages the enemy pawn structure",
+      "The remaining rook has no open file to work on, so the material lost had no role",
+      "A knight obtains a square no pawn can challenge",
+      "The enemy bishop pair is broken up"
+    ],
+    "indicators_against": [
+      "Open files exist for the rooks, so a rook is worth more than the table says",
+      "The compensation is an attack that can be defused, rather than a static asset",
+      "The opponent can return the exchange to liquidate favourably",
+      "The position is simplifying and no asset survives"
+    ],
+    "prerequisites": [
+      "sacrifice"
+    ],
+    "detector": "lib/matchers.js: exchange-sacrifice",
+    "detectability": "mechanical",
+    "typical_confidence": "medium",
+    "false_positive_traps": [
+      "THE MAIN ONE: a rook given up inside a forced mating line is a mating sacrifice, not a positional exchange sacrifice, even though the material given is identical. The engine test on puzzle mi-bb512d9713 in this record is exactly that case — tagged exchangeSacrifice, actually mate in 2.",
+      "Detecting 'rook for minor piece' is mechanical; deciding it was POSITIONAL requires that no forced return exists, which the material test cannot see.",
+      "In an open position with files for the rooks, the same trade can simply be bad."
+    ]
+  },
+  "application": {
+    "typical_plans": [
+      "Capture the knight defending a colour complex, then occupy it",
+      "Take on c3 to double the c-pawns and take the dark squares",
+      "Remove the piece blockading a passed pawn",
+      "Defensively, give the exchange to eliminate the opponent's most dangerous attacker"
+    ],
+    "typical_moves": [
+      "...Rxc3 in Sicilian structures",
+      "...Rxe4",
+      "Rxf6 destroying the knight that guards the dark squares"
+    ],
+    "typical_pawn_structures": [
+      "Sicilian structures where ...Rxc3 leaves doubled, fixed c-pawns",
+      "Closed positions where the rooks have no files"
+    ],
+    "typical_piece_arrangements": [
+      "A knight installed on a square no pawn can attack, paid for with the exchange"
+    ],
+    "tactical_consequences": [
+      "Can also occur inside a forced mating line, where it is a sham sacrifice"
+    ],
+    "strategic_consequences": [
+      "The material deficit is small enough to be outweighed by one permanent asset",
+      "Closed positions reduce a rook's value, which is what makes the trade affordable"
+    ]
+  },
+  "exceptions": [
+    "In open positions with files available, a rook is worth more than the nominal margin and the sacrifice is correspondingly worse.",
+    "Returning the exchange at the right moment is a standard resource for the defender and must be accounted for.",
+    "An exchange sacrifice inside a forced mate is not a positional sacrifice at all, whatever it is tagged."
+  ],
+  "limitations": [
+    "The material pattern is mechanically detectable; its CLASSIFICATION as positional is not.",
+    "Confidence is medium: 'rook for minor piece' fires reliably, 'and it was positional' does not.",
+    "Fires on 1.0% of the 788 shipped positions with the solution move supplied, and on Reshevsky-Petrosian 1953 at 25...Re6, which is the game this concept is usually taught from. It requires the rook to be winnable where it lands and the cheapest attacker to be a MINOR piece - a rook taken by a rook is a trade. The record's main trap stands and is not detectable: a rook given inside a forced mating line is a mating sacrifice with identical material.",
+    "MEASURED 2026-09-02: the trap 'in an open position with files for the rooks, the same trade can simply be bad' is not implemented. It could be approximated by counting open files, and was not, because the concept fires on 1.0% of the 788 shipped positions and a threshold fitted to eight cases is a threshold fitted to nothing. Recorded rather than guessed at.",
+    "The opponent can return the exchange to liquidate favourably: stated on this record as an indicator_against and NOT built, because giving the exchange back is a move at least two plies out and whether the liquidation is favourable is an evaluation, not a board fact. The two conditions beside it are answered instead: whether there is a STATIC asset is read off the position after the move - doubled pawns, the bishop pair, a passed pawn, a permanent hole - and when there is none the card says the compensation is an attack and that an attack can be defused; and 'the position is simplifying and no asset survives' is read off how much material is left. Neither is a guard, for the reason this record already gives about its first indicator: the exchange WAS given, and refusing to name the move because the position looks unfavourable for it would be judging the move rather than naming it."
+  ],
+  "misconceptions": [
+    "That an exchange sacrifice is always positional. It is frequently just a mating combination.",
+    "That Petrosian invented it. He popularised its positional use.",
+    "That the exchange is worth a fixed amount. Its value depends on whether the rook would have had a file."
+  ],
+  "relationships": {
+    "broader": [
+      "sacrifice",
+      "positional-sacrifice"
+    ],
+    "narrower": [],
+    "related": [
+      "outpost",
+      "weak-square",
+      "material-imbalance"
+    ],
+    "contrasting": [],
+    "co_occurring": [
+      "positional-sacrifice",
+      "outpost"
+    ],
+    "conflicts": []
+  },
+  "examples": [
+    {
+      "fen": "3rq1k1/5ppp/2n1r1b1/pp2P3/2pP1QB1/P1P1R3/1B4PP/4R1K1 w - - 4 26",
+      "game": "Reshevsky-Petrosian, Candidates, Zurich 1953",
+      "note": "The position immediately after 25...Re6, the move usually called the first modern positional exchange sacrifice. The rook steps onto a square where White's bishop can take it, and Petrosian is not calculating a combination — Kasparov's judgement is that he sacrificed 'for the sake of quality of position'. His own reasoning, as reported by Watson, was that he disliked his position, foresaw h4 provoking a kingside weakness, and wanted a knight on d5; vacating e7 was the way to get one there. FEN derived by replaying all 81 plies through the page's own move generator.",
+      "origin_kind": "historical-game",
+      "concept_role": "supports",
+      "side_to_move_benefits": "black"
+    }
+  ],
+  "counterexamples": [
+    {
+      "fen": "3r2k1/5ppp/8/3n4/8/8/5PPP/3RR1K1 w - - 0 1",
+      "move_uci": "d1d5",
+      "note": "Registered false-positive case `a-rook-given-inside-a-mate`, kept on the record as well as in tests/false_positive_cases.json so that the concept carries its own negative evidence. THE SURFACE PATTERN IS PRESENT: Rxd5 hands over a rook for a knight. That is the material transaction the concept names, and it is available and correct. WHY IT IS NOT THE CONCEPT: This record's MAIN trap, in its own words: \"a rook given up inside a forced mating line is a mating sacrifice, not a positional exchange sacrifice, even though the material given is identical.\" The point of Rxd5 is not a long-term asset — it is that the rook on d8 cannot recapture, because Re8 would then be mate. WHAT THE SYSTEM DOES: The API does not report exchange-sacrifice. It reports back-rank-mate, hanging-piece and sacrifice, which between them describe what is actually happening. Stockfish 18 at depth 22 says +6.73 and its own line is Rxd5 followed by ...Rb8 — Black DECLINES the recapture and is simply a knight down. This position is `overloading`'s positive example, and the two records reading the same board differently is the point: what the exchange record would have to claim is that a rook was invested in a position, and what happened is that a rook was never taken.",
+      "origin_kind": "constructed-test",
+      "concept_role": "negative",
+      "false_positive_case": "a-rook-given-inside-a-mate"
+    }
+  ],
+  "ambiguous_examples": [
+    {
+      "fen": "4q2k/N5p1/5p2/1Q1p3P/2pPr3/2P2pB1/8/1B3KRR b - - 4 50",
+      "note": "Real position from the shipped middlegame ladder (puzzle mi-bb512d9713), tagged `exchangeSacrifice` by the repository's own pipeline. Black plays Re1+ giving the rook, and Bxe1 is forced. Included as the concept's principal FALSE-POSITIVE case.",
+      "origin_kind": "puzzle",
+      "concept_role": "ambiguous",
+      "side_to_move_benefits": "black",
+      "engine": {
+        "engine_id": "Stockfish 18",
+        "test_level": 3,
+        "depth": 30,
+        "threads": 10,
+        "hash_mb": 2048,
+        "multipv": 3,
+        "best_move": "e4e1",
+        "eval_cp": null,
+        "mate_in": 2,
+        "pv": [
+          "e4e1",
+          "f1f2",
+          "e8e2"
+        ],
+        "alternatives": [
+          {
+            "move": "e4e2",
+            "eval_cp": null,
+            "mate_in": -14
+          }
+        ],
+        "margin_cp": null,
+        "verdict": "contradicts",
+        "verdict_note": "Re1+ is MATE IN TWO (Re1+ Kf2 Re2#). The material given is a rook for a bishop, so the mechanical 'exchange sacrifice' test fires correctly — but this is a MATING sacrifice, sham in Spielmann's sense, not a positional exchange sacrifice. Recorded as `contradicts` deliberately: it shows the material pattern alone cannot establish the concept, and that using corpus tags as ground truth for 'positional exchange sacrifice' would produce false matches. The alternative Rxe2 loses to mate in 14, so the move is also uniquely correct."
+      }
+    }
+  ],
+  "explanations": {
+    "by_level": {
+      "beginner": "This gives a rook for a smaller piece. That normally loses material, but here it buys something worth more.",
+      "intermediate": "An exchange sacrifice: rook for a minor piece. First check whether it is forced — if mate or material follows by force, calculate it. If not, name the lasting asset it buys.",
+      "advanced": "Rook for minor. The margin is small enough that one permanent asset — a colour complex, a fixed structural wound, an unassailable knight — can outweigh it, especially where the rooks have no open files.",
+      "master": "Petrosian's instrument. Price it by what the rook would actually have done: in a closed position with no files, the nominal deficit is not an operative one."
+    },
+    "by_depth": {
+      "short": "A rook given for a minor piece, in return for {asset}.",
+      "normal": "An exchange sacrifice — rook for knight or bishop, about a pawn and a half. That margin is small enough to be outweighed by a permanent asset such as {asset}, particularly when the rooks have no open files to work on.",
+      "deep": "The smallest material investment that buys a real positional asset, which is why it is the most common positional sacrifice. Spielmann gave it its own chapter and Petrosian made it a standing method. The critical distinction is one the name hides: an exchange sacrifice can be sham or real. A rook given inside a forced mating line is a mating sacrifice that happens to cost the exchange; a rook given for a dark-square grip is a positional one. Most software tags both identically. Modern neural-network evaluation endorses far more exchange sacrifices than earlier engines did, because it weighs the compensation directly rather than counting material."
+    },
+    "hedge": "",
+    "lesson": "Before calling a rook-for-minor trade a positional sacrifice, check whether anything is forced. If mate or material comes back by force, it is a combination, not a positional decision."
+  },
+  "terminology": {
+    "beginner_words": [
+      "giving a rook for a smaller piece"
+    ],
+    "advanced_words": [
+      "exchange sacrifice",
+      "the exchange",
+      "compensation",
+      "colour complex"
+    ],
+    "avoid": [
+      "the exchange is worth 1.5 pawns (as a fixed fact)"
+    ]
+  },
+  "status": {
+    "stage": "researched",
+    "last_updated": "2026-09-01",
+    "open_questions": [],
+    "audit_notes": []
+  },
+  "id": "exchange-sacrifice",
+  "canonical_name": "Exchange sacrifice",
+  "category": "exchange-sacrifices",
+  "knowledge_type": "strategic-principle",
+  "definition_short": "Giving a rook for a minor piece — roughly a pawn and a half of material — in return for squares, structure or the neutralisation of the opponent's best piece.",
+  "definition_long": "The smallest material investment that buys a genuine positional asset, which is why it is the most common positional sacrifice and the one strong players make most readily. A rook is worth about a pawn and a half more than a knight or bishop, and that margin is small enough to be outweighed by a permanent square, a wrecked structure, or the removal of a defender.\n\nSpielmann treated it separately from his object-based taxonomy, classifying it by the material given up rather than by aim. Petrosian made it a standing strategic instrument rather than an occasional device, and is the player the idea is now attached to.\n\nIT IS NOT ONE THING. An exchange sacrifice can be sham or real in Spielmann's sense, and the difference matters more here than the name does. A rook given to force mate in two is a MATING sacrifice that happens to cost the exchange; a rook given for a dark-square grip that will still matter in forty moves is a positional sacrifice. Both are tagged the same way by most software, including this repository's puzzle generator, and confusing them is the principal false-positive risk for this concept.\n\nThe classic vehicles are ...Rxc3 in Sicilian structures, wrecking the queenside pawns and seizing the dark squares, and ...Rxe4 type captures giving the exchange for a pawn, the bishop pair and a better structure.",
+  "sources": [
+    "spielmann-art-of-sacrifice",
+    "thechessworld-positional-sacrifice",
+    "wikipedia-sacrifice",
+    "chessgames-reshevsky-petrosian-1953",
+    "naroditsky-petrosian-exchange-sacs",
+    "zurich-1953-games"
+  ],
+  "source_confidence": "high"
+}

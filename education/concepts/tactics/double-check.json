@@ -1,0 +1,258 @@
+{
+  "schema_version": 2,
+  "id": "double-check",
+  "canonical_name": "Double check",
+  "alternate_names": [],
+  "historical_names": [],
+  "category": "tactical-motifs",
+  "subcategory": "material-winning motif",
+  "tags": [],
+  "knowledge_type": "tactical-motif",
+  "knowledge_type_note": "Motif (D) with a hard consequence that follows from the rules — the forced king move is a proven consequence, not a heuristic.",
+  "name_status": "established-name",
+  "difficulty": "intermediate",
+  "definition_short": "A discovered check where both the moving piece and the revealed piece give check. The king MUST move.",
+  "definition_long": "Two pieces check the king at once. Neither can be captured (capturing one leaves the other checking), and no interposition covers two lines. FIDE leaves only one legal reply: a king move. Wikipedia notes the rare third case where a third piece delivers the second check, possible via an en passant capture.\n\nThis is why double check underlies smothered mate and many king hunts: it strips the defender of every resource except moving the king, so the attacker can sacrifice freely.",
+  "history": {
+    "attributions": [],
+    "first_documented_source": "informant-encyclopedia-combinations",
+    "year": null,
+    "confidence": "unknown",
+    "notes": "Tactical motifs are descriptive pattern names of long and mostly anonymous usage. The Chess Informant classification is cited as a standard enumeration, not as the origin of the term.",
+    "competing_claims": [],
+    "development": []
+  },
+  "engine_era_status": "unassessed",
+  "engine_era_note": "",
+  "sources": [
+    "informant-encyclopedia-combinations",
+    "wikipedia-chess-tactic",
+    "chesstempo-tactical-motifs",
+    "chesscom-tactics-38"
+  ],
+  "source_confidence": "high",
+  "recognition": {
+    "preconditions": [
+      "After the move, two enemy pieces attack the king simultaneously"
+    ],
+    "indicators_for": [
+      "The king has few or no flight squares"
+    ],
+    "indicators_against": [
+      "The king has a safe square, in which case the double check may achieve nothing"
+    ],
+    "prerequisites": [
+      "check",
+      "discovered-attack"
+    ],
+    "detector": "findMotifs -> doubleCheck",
+    "detectability": "mechanical",
+    "typical_confidence": "high",
+    "false_positive_traps": []
+  },
+  "application": {
+    "typical_plans": [],
+    "typical_moves": [],
+    "typical_pawn_structures": [],
+    "typical_piece_arrangements": [],
+    "tactical_consequences": [
+      "Only a king move is legal, so material on any other square is irrelevant for one move"
+    ],
+    "strategic_consequences": []
+  },
+  "exceptions": [
+    "A double check is not automatically strong: if the king simply steps aside safely, the attacker may have given away material for nothing."
+  ],
+  "limitations": [
+    "TYPICAL_CONFIDENCE RAISED medium -> high, 2026-09-02, and the reason is the schema's own definition of the field: 'how confidently this concept can normally be asserted ONCE ITS PRECONDITIONS HOLD'. This concept's recognition is MECHANICAL and its knowledge type already carries a high ceiling, so once the preconditions hold there is nothing left to be uncertain about - a stalemate is a stalemate, and a fork this base reports is one findMotifs() found, which ARCHITECTURE.md makes the authority and forbids second-guessing. 'Medium' was the default across 32 rule and motif records regardless of detectability, and it was found by measuring what the API reports against what each record permits: twelve concepts were reporting ABOVE their own record. The fix was to make each record its own ceiling in cap(), which then required the records that were wrong to be corrected rather than silently overruled.",
+    "Verified 2026-09-02, and the answer is a hedge rather than a guard. \"The king has a safe square, in which case the double check may achieve nothing\" is checkable - the move generator would list the flight squares - but suppressing the report would be wrong, because a double check that is not mate still forces a king move and that is usually its whole point: it is what lets the discovered piece do something the defender cannot answer. The record's own wording says 'may achieve nothing', and a matcher that turned a 'may' into a refusal would be claiming more than the record does. This is the third of the three answers a stated condition can get, and here it is the right one."
+  ],
+  "misconceptions": [],
+  "relationships": {
+    "broader": [
+      "discovered-attack"
+    ],
+    "narrower": [],
+    "related": [
+      "check",
+      "discovered-check"
+    ],
+    "contrasting": [],
+    "co_occurring": [],
+    "conflicts": []
+  },
+  "examples": [
+    {
+      "fen": "1r4r1/pbpknp1p/1b3P2/8/8/B1PB1q2/P4PPP/3R2K1 w - - 0 22",
+      "move": "Bf5+",
+      "move_uci": "d3f5",
+      "note": "Anderssen-Dufresne, Berlin 1852 - the Evergreen Game, 22.Bf5+, and it is this base's cleanest instance of the motif because the detector names it in its own words: 'it is double check - the bishop and the rook on d1 both hit the king, so only the king can move.' That last clause is the whole concept. Black has a queen on f3 and two rooks and none of them can interpose or capture; the king went to d7 one move earlier and must now walk into the mate. Mate in 3. PROVENANCE. The move list was replayed through this base's own move generator by tools/replay_game.js, which refuses a wrong list rather than guessing, so the FEN is verified rather than remembered. No named annotator is attached to this position for this concept, so it grounds the MASTER-GAME rung and not the human-grounded one.",
+      "origin_kind": "historical-game",
+      "game": "Anderssen-Dufresne, Berlin 1852 (the Evergreen Game)",
+      "concept_role": "positive",
+      "side_to_move_benefits": "white",
+      "engine": {
+        "engine_id": "Stockfish 18",
+        "test_level": 3,
+        "depth": 20,
+        "threads": 10,
+        "hash_mb": 4096,
+        "multipv": 1,
+        "best_move": "d3f5",
+        "eval_cp": null,
+        "mate_in": 3,
+        "pv": [],
+        "alternatives": [],
+        "margin_cp": null,
+        "verdict": "supports",
+        "verdict_note": "Mate in 3 at depth 20, settled at depth 1, and the double check is the engine's first choice."
+      }
+    },
+    {
+      "fen": "3k4/8/8/8/3N4/8/8/3RK3 w - - 0 1",
+      "move": "Ne6+",
+      "move_uci": "d4e6",
+      "note": "The double check: the knight uncovers the rook on the d-file and checks from e6 itself. Paired with the same knight going to b5, which uncovers the same rook and is a single check.",
+      "origin_kind": "constructed-test",
+      "concept_role": "supports",
+      "side_to_move_benefits": "white",
+      "controlled_pair_with": "3k4/8/8/8/3N4/8/8/3RK3 w - - 0 1",
+      "engine": {
+        "engine_id": "Stockfish 18",
+        "test_level": 3,
+        "depth": 26,
+        "threads": 10,
+        "hash_mb": 4096,
+        "multipv": 1,
+        "best_move": "d1c1",
+        "eval_cp": null,
+        "mate_in": 15,
+        "pv": [],
+        "alternatives": [],
+        "margin_cp": null,
+        "verdict": "supports",
+        "verdict_note": "PROVEN WIN, dtz 17, mate in 19, best move Nc6+, and the engine reports mate in 15. Note carefully what the tablebase prefers: Nc6+ is ALSO a double check, so its preference is between two double checks and not between the double check and the single one. The pair on this record turns on the move rather than on the board - Ne6+ checks twice, Nb5+ uncovers the same rook and checks once - and both halves are the same position, which is why one engine reading serves both."
+      },
+      "tablebase": {
+        "source": "Lichess tablebase (Syzygy, 7-piece)",
+        "pieces": 4,
+        "wdl": "win",
+        "dtz": 17,
+        "dtm": 19,
+        "category": "win",
+        "note": "PROVEN, not evaluated. Read from the side to move. The verdict_note on the engine block beside this one says what the two instruments do and do not agree about."
+      }
+    }
+  ],
+  "counterexamples": [
+    {
+      "fen": "3k4/8/8/8/3N4/8/8/3RK3 w - - 0 1",
+      "move": "Nb5+",
+      "move_uci": "d4b5",
+      "note": "A discovered check that is only a single check, from the position where the same knight has a square that gives two. The knight on d4 stands between a rook on d1 and a king on d8; moving it to b5 uncovers the rook and checks once, moving it to e6 uncovers the rook AND checks with the knight. One knight move apart, and only the second is a double check - which matters because a double check can only be answered by a king move, and a single one can be blocked or the checking piece taken.",
+      "origin_kind": "constructed-test",
+      "concept_role": "negative",
+      "side_to_move_benefits": "white",
+      "controlled_pair_with": "3k4/8/8/8/3N4/8/8/3RK3 w - - 0 1",
+      "engine": {
+        "engine_id": "Stockfish 18",
+        "test_level": 3,
+        "depth": 26,
+        "threads": 10,
+        "hash_mb": 4096,
+        "multipv": 1,
+        "best_move": "d1c1",
+        "eval_cp": null,
+        "mate_in": 15,
+        "pv": [],
+        "alternatives": [],
+        "margin_cp": null,
+        "verdict": "supports",
+        "verdict_note": "PROVEN WIN, dtz 17, mate in 19, best move Nc6+, and the engine reports mate in 15. Note carefully what the tablebase prefers: Nc6+ is ALSO a double check, so its preference is between two double checks and not between the double check and the single one. The pair on this record turns on the move rather than on the board - Ne6+ checks twice, Nb5+ uncovers the same rook and checks once - and both halves are the same position, which is why one engine reading serves both."
+      },
+      "tablebase": {
+        "source": "Lichess tablebase (Syzygy, 7-piece)",
+        "pieces": 4,
+        "wdl": "win",
+        "dtz": 17,
+        "dtm": 19,
+        "category": "win",
+        "note": "PROVEN, not evaluated. Read from the side to move. The verdict_note on the engine block beside this one says what the two instruments do and do not agree about."
+      }
+    },
+    {
+      "fen": "3k4/8/3b4/8/3N4/8/8/3RK3 w - - 0 1",
+      "move_uci": "d4e6",
+      "note": "Registered false-positive case `two-pieces-aimed-and-only-one-checking`, kept on the record as well as in tests/false_positive_cases.json so that the concept carries its own negative evidence. THE SURFACE PATTERN IS PRESENT: A knight on d4 stands between a rook on d1 and the enemy king on d8, and Ne6+ gives check from e6 while stepping off the d-file. That is the double-check geometry, and it is the exact shape of this record's own positive example. WHY IT IS NOT THE CONCEPT: A black bishop stands on d6. The rook's line is blocked further along, so moving the knight uncovers nothing and the check is a single one. The `discovered-attack` record states this as an indicator_against — \"the revealed line is blocked by another unit further along\" — and it applies to every concept that reads a battery. WHAT THE SYSTEM DOES: The API does not report a double check. It reports `pin` — correctly, because the bishop on d6 that blocks the rook is itself pinned against the king — and `discovered-attack`. One black bishop, added to this record's positive example, turns a double check into a pin and nothing else. Syzygy: PROVEN WIN, dtz 3, mate in 19, and the tablebase's best move is Nf5 rather than the checking Ne6. The position is still winning and the concept is still absent, which is the distinction this case exists to hold.",
+      "origin_kind": "constructed-test",
+      "concept_role": "negative",
+      "tablebase": {
+        "source": "Lichess tablebase (Syzygy, 7-piece)",
+        "pieces": 5,
+        "wdl": "win",
+        "dtz": 3,
+        "dtm": 19,
+        "category": "win",
+        "note": "PROVEN WIN, dtz 3, mate in 19, and the tablebase's best move is Nf5 rather than the checking Ne6. The position is winning and the double check is absent - one black bishop added to this record's positive example turns a double check into a pin."
+      },
+      "false_positive_case": "two-pieces-aimed-and-only-one-checking"
+    }
+  ],
+  "ambiguous_examples": [
+    {
+      "fen": "6n1/pp1RB1k1/3p4/8/4n1P1/2P1qp2/8/R2K4 w - - 3 34",
+      "move": "Bf8+",
+      "move_uci": "e7f8",
+      "note": "Nominated by tools/mine_ambiguous.js on its NOT-THE-MOVE ground: the concept fires on a legal move that is not the solution of a shipped puzzle. Nothing reported is absent - Bf8+ is a real double check - the bishop checks from f8 and the rook on d7 checks along the seventh - and it is MATE IN TWELVE FOR THE OTHER SIDE. This record states one indicator_against and this is it: 'The king has a safe square, in which case the double check may achieve nothing.' The king takes the bishop. Filed as ambiguous rather than as a false positive because the double check is genuinely there and the record's own limitation already explains why the matcher does not refuse it: a double check that is not mate still forces a king move, and that is usually its point. Here it forces the king to eat a bishop.",
+      "origin_kind": "puzzle",
+      "concept_role": "ambiguous",
+      "engine": {
+        "engine_id": "Stockfish 18",
+        "test_level": 3,
+        "depth": 22,
+        "threads": 10,
+        "hash_mb": 4096,
+        "multipv": 2,
+        "best_move": "e7g5",
+        "eval_cp": null,
+        "mate_in": -12,
+        "pv": [],
+        "alternatives": [],
+        "margin_cp": null,
+        "verdict": "ambiguous",
+        "verdict_note": "Bf8+ is mate in 12 AGAINST the side giving the double check; Bg5, the solution, scores +5.24. Two moves of one bishop, one of them a double check and losing by force."
+      }
+    }
+  ],
+  "explanations": {
+    "by_level": {
+      "beginner": "Two pieces are checking the king at the same time. The king has to move — nothing can block or capture both.",
+      "intermediate": "Double check. The only legal reply is a king move, so you can ignore everything else for a move.",
+      "advanced": "Double check: no interposition or capture can answer two lines, which is what makes smothered mate work."
+    },
+    "by_depth": {
+      "short": "Two pieces check at once, so only a king move is legal.",
+      "normal": "A double check: the moving piece and the piece it unmasked both attack the king. Nothing can block two lines and nothing can capture two attackers, so the king MUST move — no interposition, no capture, no counter-threat.",
+      "deep": "The strongest forcing move in chess, and the reason is arithmetic rather than tactical: every other check leaves the defender three answers and this one leaves a subset of one. That is what lets a double check be played while the checking side is a queen down. Anderssen's 22.Bf5+ in the Evergreen is the master example — Black has a queen and two rooks and not one of them can interpose. The record's own caution is that a double check which is not mate can still achieve nothing if the king has a safe square, so the motif forces a move rather than winning by itself."
+    },
+    "hedge": "",
+    "lesson": ""
+  },
+  "terminology": {
+    "beginner_words": [
+      "two checks at once"
+    ],
+    "advanced_words": [
+      "double check"
+    ],
+    "avoid": []
+  },
+  "status": {
+    "stage": "researched",
+    "last_updated": "2026-09-01",
+    "open_questions": [],
+    "audit_notes": [
+      "2026-09-01: detector field named 'checkersAfterMove', which does not exist anywhere in the codebase. The audit's hardcoded whitelist had been accepting it. Repointed at real code, or marked as proposed where nothing implements it."
+    ]
+  }
+}

@@ -1,0 +1,313 @@
+{
+  "schema_version": 2,
+  "alternate_names": [
+    "kingside attack",
+    "mating attack",
+    "attack on the castled king"
+  ],
+  "historical_names": [],
+  "tags": [
+    "vukovic",
+    "attack",
+    "king-safety"
+  ],
+  "subcategory": "attacking method",
+  "difficulty": "advanced",
+  "knowledge_type_note": "A strategic principle with an unusually firm PRECONDITION attached, which is what stops it being merely a rule of thumb. Vukovic's tradition holds that an attack is not a choice of style but a consequence of an existing advantage.",
+  "name_status": "established-name",
+  "history": {
+    "attributions": [
+      {
+        "person": "Wilhelm Steinitz",
+        "relation": "originated-by",
+        "source": "steinitz-modern-chess-instructor",
+        "year": 1889,
+        "note": "The doctrine that one must not attack without an advantage is his; Lasker summarised his theory as 'Do not attack when you have no tangible advantage in position.'"
+      },
+      {
+        "person": "Vladimir Vukovic",
+        "relation": "systematized-by",
+        "source": "vukovic-art-of-attack",
+        "year": 1965,
+        "note": "The Art of Attack in Chess is the standard systematic treatment; focal points and the conditions for the classic bishop sacrifice are his."
+      }
+    ],
+    "first_documented_source": "vukovic-art-of-attack",
+    "year": 1965,
+    "confidence": "medium",
+    "notes": "Attacking the king is as old as chess; what is attributable is the doctrine that it requires justification (Steinitz) and its systematic treatment (Vukovic). Neither is a claim of invention. Vukovic's text has not been read directly — see the source's access caveat.",
+    "competing_claims": [],
+    "development": [
+      {
+        "era": "romantic era",
+        "change": "Attack treated as the normal way to play; soundness a secondary question.",
+        "source": null
+      },
+      {
+        "era": "1889, Steinitz",
+        "change": "Attack becomes conditional on an existing advantage rather than a matter of style.",
+        "source": "steinitz-modern-chess-instructor"
+      },
+      {
+        "era": "1965, Vukovic",
+        "change": "Systematised: preconditions, timing, focal points, pawn-shelter types, named sacrifices.",
+        "source": "vukovic-art-of-attack"
+      },
+      {
+        "era": "modern",
+        "change": "Defensive resources better understood; the third opposite-castling scenario — attacking while also slowing the opponent — becomes the common treatment.",
+        "source": "gambit-art-of-attacking-chess"
+      }
+    ]
+  },
+  "engine_era_status": "useful-with-common-exceptions",
+  "engine_era_note": "Engines have raised the bar for what counts as a justified attack, refuting many attacking sacrifices that were played on general grounds, and have made defence look far more resilient than classical writing assumed. The PRECONDITION doctrine survives this well; what does not survive is the romantic assumption that a king with a damaged shelter is losing.",
+  "recognition": {
+    "preconditions": [
+      "More attacking units bear on the king's sector than defending units, or the king's cover is durably weakened",
+      "The attacker's own king is safe, or safe enough for the time the operation needs",
+      "The centre is closed or under control, so a counter-blow there is not available"
+    ],
+    "indicators_for": [
+      "A clear focal point — a weak square next to the king that pieces can occupy or sacrifice on",
+      "The defender's key defensive piece (often a knight on f6 or a fianchettoed bishop) can be exchanged or driven off",
+      "A file or diagonal can be opened towards the king by a pawn break",
+      "Opposite-side castling, so pawns can advance without cost",
+      "A hook — an advanced enemy pawn that gives the attacker something to attack in order to open a line"
+    ],
+    "indicators_against": [
+      "The centre is open or can be opened by the defender",
+      "Development is unfinished; a missing rook is often the exact tempo the attack lacks",
+      "The defender can trade queens, which usually ends the attack",
+      "The attacker has no way to bring a third piece to the sector",
+      "The king's shelter is intact and there is no sacrifice that breaks it"
+    ],
+    "prerequisites": [
+      "king-safety"
+    ],
+    "detector": "lib/matchers.js: king-attack, implementing all three of the record's preconditions. The repository's `kingAttack` puzzle tag (checks >= 2 or mate) remains a proxy for puzzle classification and is NOT this.",
+    "detectability": "heuristic",
+    "typical_confidence": "low",
+    "false_positive_traps": [
+      "Two checks is not an attack. The repository's `kingAttack` tag fires on checks >= 2 or mate, which is a proxy for puzzle classification and NOT a definition of the concept.",
+      "An exposed king is not automatically under attack — with the attacking pieces traded off, an exposed king is often just an active one. This is a registered false-positive case.",
+      "Advancing pawns at a king is not an attack unless pieces can follow into the lines that open."
+    ]
+  },
+  "application": {
+    "typical_plans": [
+      "Exchange the defender — the f6 knight, the g7 bishop — before striking",
+      "Open a file or diagonal with a pawn break, then double heavy pieces on it",
+      "Sacrifice on a focal point to strip the shelter, with a follow-up piece already in range",
+      "In opposite-side castling, count tempi to contact and start the storm first",
+      "Combine the attack with prophylaxis against the opponent's counter-attack"
+    ],
+    "typical_moves": [
+      "h4-h5 and g4-g5 pawn storms",
+      "Bxh7+ and Bxh6 sacrifices on the shelter",
+      "Rook lifts to the third rank and across"
+    ],
+    "typical_pawn_structures": [
+      "f7-g7-h7 intact — most resistant, usually needs a sacrifice",
+      "f7-g6-h7 — holes on f6 and h6, but sound while a bishop sits on g7",
+      "f7-g7-h6 — h6 is both a target and a hook for g4-g5"
+    ],
+    "typical_piece_arrangements": [
+      "Queen and bishop battery on b1-h7",
+      "Rook on the g- or h-file behind an advancing pawn",
+      "Knight reaching g5 or f5"
+    ],
+    "tactical_consequences": [
+      "Mating nets, sacrifices on focal points, forced king walks"
+    ],
+    "strategic_consequences": [
+      "An attack that fails usually leaves the attacker structurally worse, especially after a pawn storm"
+    ]
+  },
+  "exceptions": [
+    "An attack without a positional advantage generally fails; this is the doctrine's core and it is a genuine constraint, not encouragement.",
+    "A wing attack can be refuted by a central counter-blow — the standard antidote.",
+    "Trading queens usually ends an attack, so the defender's simplest defence is often to seek that trade.",
+    "Damaged pawn cover is not decisive by itself. It matters in proportion to the attacking force that remains."
+  ],
+  "limitations": [
+    "Recognition confidence is LOW. 'Local superiority near the king' is a judgement about which pieces count, and no mechanical detector in this repository attempts it.",
+    "The repo's kingAttack tag is a puzzle-classification proxy and should not be read as the concept.",
+    "Fires on 12 of the 788 shipped positions (1.5%). It is a claim that the PRECONDITIONS for an attack are met, never that an attack exists, and the difference is why the confidence is capped at low.",
+    "Adams-Kasparov 2005 after 21...Kxh7 is the registered case it must refuse: opposite-side castling, a pawn storm arrived, the shield gone, two rooks on the files at the king - and no attack, because only one piece bears on the king's zone and White's own king is the one being mated. It refuses.",
+    "MEASURED 2026-09-01: the shipped puzzle generator tags 134 of the 788 positions `kingAttack` and this base reports the concept on 12. The gap is the record's own first false-positive trap made numeric - the generator's test is `checks >= 2 or mated`, which is a proxy for sorting puzzles and not a definition, and a two-check sequence is not an attack. Recorded rather than reconciled: moving either number toward the other would mean one of the two systems telling a lie it does not currently tell."
+  ],
+  "misconceptions": [
+    "That attacking is a matter of temperament. The classical position is that it is a consequence of an advantage you already hold.",
+    "That an exposed king is losing.",
+    "That pushing pawns at the king is an attack. Without pieces to follow, it is a structural concession."
+  ],
+  "relationships": {
+    "broader": [],
+    "narrower": [
+      "greek-gift"
+    ],
+    "related": [
+      "king-safety",
+      "weak-square",
+      "sacrifice",
+      "initiative",
+      "pawn-storm"
+    ],
+    "contrasting": [],
+    "co_occurring": [
+      "sacrifice",
+      "weak-square"
+    ],
+    "conflicts": [
+      {
+        "concept": "king-safety",
+        "resolution": "Directly opposed for the same pawn moves: advancing the g- and h-pawns attacks and simultaneously exposes your own king. Opposite-side castling resolves the conflict (the pawns are not in front of your king); same-side castling does not, and there the burden of proof is on the attacker."
+      }
+    ]
+  },
+  "examples": [
+    {
+      "fen": "1r1q2k1/pp3p2/1n2p3/6NQ/3P2R1/3B4/PP3PPP/6K1 w - - 0 1",
+      "note": "Constructed to satisfy all three of Vukovic's conditions at once, which is what this record's matcher tests and what an attacking position has to earn. LOCAL SUPERIORITY: three white pieces bear on the black king's zone against two defenders, with one of three shield pawns left in front of the king on g8. THE ATTACKER'S OWN KING IS SAFE: zero enemy pieces on White's zone against eight defenders, so the operation is not a race being lost. THE CENTRE IS NOT AVAILABLE for a counter-blow. The demonstration is that it mates: Qxh7+ Kf8 Qxf7 is mate in two. Reported at LOW confidence, which is this record's own ceiling and is right - everything the matcher tests is a PRECONDITION for an attack rather than proof of one, and this base's registered counterexample is Adams-Kasparov 2005, where every sign is present and the attack is not real.",
+      "origin_kind": "constructed-test",
+      "concept_role": "positive",
+      "side_to_move_benefits": "white",
+      "engine": {
+        "engine_id": "Stockfish 18",
+        "test_level": 3,
+        "depth": 20,
+        "threads": 10,
+        "hash_mb": 4096,
+        "multipv": 1,
+        "best_move": "h5h7",
+        "eval_cp": null,
+        "mate_in": 2,
+        "pv": [],
+        "alternatives": [],
+        "margin_cp": null,
+        "verdict": "supports",
+        "verdict_note": "Mate in 2 at depth 20, settled at depth 1: Qxh7+ Kf8 Qxf7#. The mate is delivered by the attacking pieces rather than by the extra material, which is what makes the position an example of the concept rather than of a material edge."
+      }
+    }
+  ],
+  "counterexamples": [
+    {
+      "fen": "br3rk1/2q2ppP/p2pp3/2n1b1BP/1n1NP3/2N2P2/1PPQB3/1K4RR b - - 0 21",
+      "note": "Adams-Kasparov, Linares 2005 (round 12), Kxh7. Human ground truth: the concept is named for this position by Jon Speelman (GM), reproduced by ChessBase; the king-safety sentence is quoted from a community annotation and is corroborated, not relied on. Corpus entry `adams-kasparov-2005-21Kxh7-king-attack-negative`, which carries the full annotation, the alternates the annotator rejected, and the engine's verdict. Every mechanical sign of a winning king attack is present - opposite-side castling, a pawn storm that has arrived, the shield gone, two rooks on the files pointing at the king, a bishop on g5 and a queen able to reach h6 - and the attack does not exist. This is the sharpest kind of negative example because nothing about the pattern is missing; what is missing is a threat, and a threat is a propert",
+      "origin_kind": "historical-game",
+      "game": "Adams-Kasparov, Linares 2005 (round 12)",
+      "concept_role": "negative",
+      "engine": {
+        "engine_id": "Stockfish 18",
+        "test_level": 3,
+        "depth": 22,
+        "multipv": 3,
+        "best_move": "Be3",
+        "eval_cp": -213,
+        "verdict": "contradicts",
+        "verdict_note": "fully, and it agrees with the named human move. Searching the position AFTER 21...Kxh7, Stockfish 18 at depth 22 returns Be3 - the move Speelman names as White's best - and scores it at -2.13 from White's side. The side with the 'attack' is two pawns worse. Searched from White's move rather than Black's, because the claim being tested is about the position the recapture reaches, not about whether the recapture was forced."
+      },
+      "attributed_by": "Jon Speelman (GM), reproduced by ChessBase; the king-safety sentence is quoted from a community annotation and is corroborated, not relied on — corpus entry adams-kasparov-2005-21Kxh7-king-attack-negative"
+    },
+    {
+      "fen": "4r1k1/8/8/3p4/3P4/8/8/R5K1 w - - 0 1",
+      "note": "Registered false-positive case `an-exposed-king-with-nothing-left-to-attack-with`, kept on the record as well as in tests/false_positive_cases.json so that the concept carries its own negative evidence. THE SURFACE PATTERN IS PRESENT: The black king on g8 has no pawn cover at all — no f-, g- or h-pawn in front of it. An exposed king looks like a king under attack. WHY IT IS NOT THE CONCEPT: This record's own trap: \"An exposed king is not automatically under attack — with the attacking pieces traded off, an exposed king is often just an active one.\" Both sides have one rook and one pawn. There is nothing left to attack with, and the same is true of White's king. WHAT THE SYSTEM DOES: The API does not report king-attack. The matcher requires attacking pieces bearing on the king zone rather than an absence of pawn cover, which is what the trap asks for. Stockfish 18 at depth 28: +0.00 in a fully symmetric position — the exposure is mutual and neither side can do anything with it. The related trap on the same record, that the repository's `kingAttack` tag fires on two checks or mate and is a puzzle-classification proxy rather than a definition, is why the matcher does not read that tag here.",
+      "origin_kind": "constructed-test",
+      "concept_role": "negative",
+      "engine": {
+        "engine_id": "Stockfish 18",
+        "test_level": 3,
+        "depth": 28,
+        "threads": 10,
+        "hash_mb": 4096,
+        "multipv": 1,
+        "best_move": "a1a5",
+        "eval_cp": 0,
+        "mate_in": null,
+        "pv": [],
+        "alternatives": [],
+        "margin_cp": null,
+        "verdict": "supports",
+        "verdict_note": "0.00 in a fully symmetric position. The exposure is mutual and neither side can do anything with it."
+      },
+      "false_positive_case": "an-exposed-king-with-nothing-left-to-attack-with"
+    }
+  ],
+  "ambiguous_examples": [
+    {
+      "fen": "4Q3/6pk/6r1/2p1p2p/2P1Rq1P/PP1p4/1R1P2Kb/2B5 w - - 6 49",
+      "note": "Nominated as an AGAINST-THE-MATERIAL candidate and it is the sharpest kind. The base reports a king attack for BLACK - queen on f4, rook on g6, bishop on h2, all aimed at the white king on g2, and Black is 500 centipawns up on material. The engine says White is winning by 16 and plays Qxg6+ immediately. Every mechanical sign of an attack is present and belongs to the side who is lost. This is filed as ambiguous rather than as a false positive on purpose: the attacking configuration IS there and the report is not describing something absent. What is absent is the conclusion a reader would draw from it, and this record's own trap says so - 'two checks is not an attack', 'a proxy for puzzle classification and NOT a definition of the concept'.",
+      "origin_kind": "puzzle",
+      "concept_role": "ambiguous",
+      "engine": {
+        "engine_id": "Stockfish 18",
+        "test_level": 3,
+        "depth": 24,
+        "threads": 10,
+        "hash_mb": 4096,
+        "multipv": 1,
+        "best_move": "e8g6",
+        "eval_cp": 1600,
+        "mate_in": null,
+        "pv": [],
+        "alternatives": [],
+        "margin_cp": null,
+        "verdict": "ambiguous",
+        "verdict_note": "+16.00 for the side being 'attacked', at depth 24 and settled at depth 1. The attack exists and loses on the spot."
+      }
+    }
+  ],
+  "explanations": {
+    "by_level": {
+      "beginner": "White is bringing more pieces near the black king than Black has defending it, and trying to open a line to get at it.",
+      "intermediate": "An attack on the king. It works here because {more attackers than defenders / the shelter is weakened} — and note the centre is {closed / controlled}, so there is no counter-blow.",
+      "advanced": "The attack is justified by {local superiority / a focal point on {square}}. The critical question is the defender's key defensive piece and whether it can be removed.",
+      "master": "Count attackers against defenders in the sector, identify the focal point, and check the centre and the queen trade before committing. The doctrine since Steinitz is that an attack must be earned, not chosen."
+    },
+    "by_depth": {
+      "short": "More force is bearing on the king than is defending it.",
+      "normal": "An attack on the king, justified by {reason}. Attacks require a pre-existing advantage — usually more pieces near the king than the defender has, or holes in the pawn cover — and they fail when the centre is open or the defender can trade queens.",
+      "deep": "Vukovic's treatment is the standard one. An attack is a consequence of an advantage rather than a choice of style, a doctrine going back to Steinitz. It is usually best understood as an operation against a specific weak square next to the king — a focal point — rather than against the king in general. The pawn shelter's type matters: f7-g7-h7 intact is the most resistant and normally needs a sacrifice; f7-g6-h7 has holes on f6 and h6 but is sound while a bishop stands on g7, which is why trading that bishop is so often the whole plan. Opposite-side castling turns the game into a race where a tempo decides, and the modern treatment combines attacking with slowing the opponent down rather than pure racing."
+    },
+    "hedge": "",
+    "lesson": "Before attacking, count: how many of your pieces can reach the king's sector, and how many of theirs defend it? If the answer is not in your favour, improve the position instead — and check the centre first."
+  },
+  "terminology": {
+    "beginner_words": [
+      "more pieces near their king",
+      "opening a line to the king"
+    ],
+    "advanced_words": [
+      "local superiority",
+      "focal point",
+      "pawn shelter",
+      "hook",
+      "pawn storm",
+      "prophylaxis"
+    ],
+    "avoid": [
+      "attack because the king looks exposed",
+      "always attack"
+    ]
+  },
+  "status": {
+    "stage": "researched",
+    "last_updated": "2026-08-31",
+    "open_questions": [],
+    "audit_notes": []
+  },
+  "id": "king-attack",
+  "canonical_name": "Attack on the king",
+  "category": "attack-principles",
+  "knowledge_type": "strategic-principle",
+  "definition_short": "A concerted operation against the enemy king, justified only by an existing advantage — usually local superiority in force near the king, or weaknesses in its cover.",
+  "definition_long": "Not a mood but a consequence. The classical position, following Vukovic, is that an attack must be EARNED: you cannot attack the king without a positional advantage, and attacking without one fails against any competent defence. The advantage usually takes the form of LOCAL SUPERIORITY — more pieces bearing on the king's sector than the defender has defending it, or a pawn majority there — or of durable weaknesses in the king's pawn cover.\n\nFOCAL POINTS. Vukovic's central contribution: 'every focal-point is a weak square in the defender's territory and a potentially strong one for the attacker', especially when adjacent to the king. g7 and h7 (g2 and h2 mirrored) are the classic ones. An attack is usually best understood as an operation against a specific square rather than against the king in general.\n\nPAWN COVER. The three common shelters differ sharply in resilience. f7-g7-h7 unmoved is the most resistant and usually has to be broken by sacrifice. f7-g6-h7 leaves f6 and h6 as holes and invites h4-h5 or f4-f5 to open a file — but is not weak while a bishop sits on g7, which is why exchanging that bishop is so often the whole plan. f7-g7-h6 gives the h6 pawn as a target and a hook for g4-g5.\n\nOPPOSITE-SIDE CASTLING changes the character completely: pawns can be thrown forward without exposing one's own king, and the game becomes a race where a single tempo decides. Franco distinguishes three scenarios — a mutual race, an attack against pure defence, and the modern treatment that combines attacking with prophylaxis on one's own wing.\n\nThe standing counter-principle is that a wing attack is answered in the centre. An attack launched while the centre is open, or while one's own development is unfinished, tends to rebound.",
+  "sources": [
+    "vukovic-art-of-attack",
+    "gambit-art-of-attacking-chess",
+    "chessable-art-of-attack",
+    "steinitz-modern-chess-instructor"
+  ],
+  "source_confidence": "high"
+}
