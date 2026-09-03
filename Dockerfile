@@ -29,6 +29,13 @@ COPY assets/ ./assets/
 # tools/ itself is deliberately absent — it is a build-time thing, not a
 # serving one.
 COPY puzzles/ ./puzzles/
+# The Education System's runtime half, and only that half. lib/ is the three
+# files the page evaluates to name concepts; dist/ is the corpus as one bundle.
+# education/concepts/, education/state/ and education/tools/ are research and
+# build-time material and stay out for the same reason tools/ does — the bundle
+# in dist/ is what serving needs, and it is checked in.
+COPY education/lib/ ./education/lib/
+COPY education/dist/ ./education/dist/
 COPY blind-chess.html ./blind-chess.html
 
 # Nothing here needs root, and the process only ever reads these files.
