@@ -192,3 +192,29 @@ def get_rating(user_id):
         return None
     value = rows[0].get("rating")
     return value if isinstance(value, int) else None
+
+
+def get_display_name(user_id):
+    """The name a player's profile row carries, or None when it cannot be read.
+
+    Read for the same reason `get_rating` is: the token's `game_name` is
+    metadata the account can write through Supabase's own API, so a player
+    who wanted somebody else's name could put it there and skip the username
+    screen. `profiles.display_name` cannot be skipped — it is the column the
+    unique index in supabase-migrate-usernames.sql is on — so it is the copy
+    the server answers to when it can read it. Like `rating`, it is a column
+    everybody may read; the service key is used only because it is the
+    credential this module has.
+
+    None on any failure, and the caller falls back to the token.
+    """
+    if not enabled() or not user_id:
+        return None
+    try:
+        rows = _request("GET", "/profiles?select=display_name&id=eq." + user_id)
+    except (urllib.error.URLError, ValueError, OSError):
+        return None
+    if not rows:
+        return None
+    value = rows[0].get("display_name")
+    return value if isinstance(value, str) else None

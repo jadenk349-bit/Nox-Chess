@@ -29,6 +29,7 @@ node server/test_lessons.js              # walks the whole five-lesson course (~
 node server/test_ai_fallback.js          # what the ranked fallback bot decides
 node server/test_ai_game.js              # and playing a whole game against it, stub DOM
 python3 server/test_ai_match.py          # seating one: the queue, the race; no server needed
+python3 server/test_names.py             # one name per player, guests included; no server needed
 python3 server/test_puzzle_rating.py     # the puzzle Elo handler; no server needed
 node tools/test_generate_puzzles.js      # the generator's own decisions, no engine
 python3 tools/check_supabase_puzzles.py  # RLS and column grants, against the real project
@@ -80,8 +81,9 @@ and is not a knob anybody is meant to turn in production.
 Environment: `PORT` (default 8787), `SUPABASE_URL` (enables token
 verification), `SUPABASE_JWT_SECRET` (only for legacy HS256 projects; also what
 `test_two_clients.py` uses to mint test tokens — without it the tests play as
-guests), `SUPABASE_SERVICE_KEY` (lets the server persist `puzzle_rating`;
-without it ratings live in memory for the life of the process). That last one
+guests), `SUPABASE_SERVICE_KEY` (lets the server persist `puzzle_rating` and read a
+player's `display_name` off their profile row; without it ratings live in
+memory for the life of the process and names come from the token). That last one
 takes either a modern `sb_secret_…` key or a legacy `service_role` JWT —
 `supabase_db.py` tells them apart by shape, because only the JWT may go in the
 `Authorization` header, and it refuses a publishable/anon key by name. With neither Supabase variable set, accounts are simply off and
@@ -812,11 +814,39 @@ ES256 against the project's JWKS. A failed or absent token means guest, not
 rejection — guests play friendly games. Ranked play requires a verified account
 *only when* the server is actually able to verify anyone.
 
-**A verified player's name comes from the token, never from the message** —
-otherwise signing in would be a way to wear someone else's name. `clean_name()`
-(3–25 chars, `[A-Za-z0-9 _-]`, at least one letter) is applied server-side even
-to token metadata, because that metadata is writable through Supabase's own
-API. Guest names go through the same rule.
+**A verified player's name comes from their profile row, or failing that the
+token, never from the message** — otherwise signing in would be a way to wear
+someone else's name. `clean_name()` (3–25 chars, `[A-Za-z0-9 _-]`, at least
+one letter) is applied server-side even to token metadata, because that
+metadata is writable through Supabase's own API. Guest names go through the
+same rule.
+
+**One name per player, across the whole server, guests included.** A name is
+what the other player reads across the board, and two boards that both say
+"Alex" are two boards lying to somebody — so there is one namespace for
+accounts and guests together, and it is enforced in three places that each
+cover what the others cannot. `supabase-migrate-usernames.sql` (run once, by
+hand, like the other SQL files) puts a case-insensitive unique index on
+`profiles.display_name` and adds `username_available()`, which the username
+screen asks as you type and again on Continue; the screen now writes the
+profile row *before* the token, because the row is the copy that can say no,
+and reads a unique violation as "that name is taken". The server keeps
+`names`, a registry of every name in use on it, claimed under the lock in
+`handle_hello()` by `claim_name()` and released by `drop_client()` or the next
+hello — an account holds its name across every tab, a guest for one socket.
+With a service key the server reads the name off the profile row
+(`supabase_db.get_display_name()`), since the token's `game_name` is metadata
+the account can write for itself and so cannot be the authority on a name that
+has to be nobody else's. A guest whose offered name is taken — or who offers
+none, or a name that fails the rule — is minted a fresh `Guest-#####` and told
+in the `welcome`, which the page adopts as its guest name; first come, first
+served, except that an account's name is the account's, and a guest found
+wearing one is renamed and sent a second `welcome`. An account whose name a
+different account already holds — which only two profiles that agree on a name
+can bring about, and the index exists to prevent — plays under its placeholder
+(`player_` + eight characters of its id) until the other signs off, because
+there is no fair way to choose between two accounts and there is between an
+account and a guest. `test_names.py` walks all of it without a server.
 
 **`supabase-social.sql`** is the second hand-run file, after
 `supabase-setup.sql`. Friendships are **one row per pair**, stored sorted

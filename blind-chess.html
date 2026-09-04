@@ -6285,6 +6285,18 @@ function onNetMessage(msg){
       NET.serverName = msg.name || '';
       NET.accountsOffered = !!msg.accounts;
       if (msg.reason) console.warn('Signed-in play unavailable:', msg.reason);
+      // The name we offered was a proposal. The server keeps one registry of
+      // every name in play and will not hand a name out twice, so a guest
+      // whose Guest-##### was already somebody's — or who offered none —
+      // comes back called something else, and that is the name the other
+      // player is going to read, so it is the one to show here. An account's
+      // name is not taken from this: it is the account's, and the corner
+      // already says it.
+      if (!account && msg.name && msg.name !== G.guestName){
+        G.guestName = G.playerName = msg.name;
+        const who = document.getElementById('roomWho');
+        if (who) who.textContent = myName() || 'Playing as a guest';
+      }
       break;
 
     case 'waiting':
@@ -13399,6 +13411,30 @@ const nameInput = document.getElementById('gameName');
 const nameHint = document.getElementById('nameHint');
 const nameSave = document.getElementById('btnNameSave');
 
+/* A name has to be nobody else's, and only the database knows that. The
+   rule itself is the unique index in supabase-migrate-usernames.sql; this is
+   the question asked ahead of it so the answer arrives as a hint rather
+   than as a failed save. Case-insensitive, because "Alex" and "alex" are
+   the same name to anybody reading a board bar.
+   Three answers: true, false, or null when it could not be asked — no
+   client, or a project that has not run the migration and so has no
+   username_available() yet. null is not "free": the save goes ahead and the
+   index, if there is one, has the last word. */
+async function nameAvailable(name){
+  if (!sb) return null;
+  try {
+    const { data, error } = await sb.rpc('username_available', { wanted: name });
+    if (error) throw error;
+    return typeof data === 'boolean' ? data : null;
+  } catch (err){
+    console.warn('username check unavailable:', err && err.message);
+    return null;
+  }
+}
+
+const NAME_TAKEN = 'That name is taken — try another.';
+let nameCheck = 0;          // which keystroke's question the answer belongs to
+
 function judgeName(){
   const raw = nameInput.value;
   const problem = nameProblem(raw);
@@ -13411,31 +13447,81 @@ function judgeName(){
     : (problem || 'Looks good.');
   return problem;
 }
-nameInput.addEventListener('input', judgeName);
+
+/* The hint says "taken" as you type, a moment after you stop. The button is
+   left alone until an answer comes back rather than disabled meanwhile — a
+   name that turns out to be taken is still refused on Continue, by the same
+   question asked again and by the index behind it, so nothing rests on the
+   hint having caught up. */
+let nameCheckTimer = 0;
+nameInput.addEventListener('input', () => {
+  if (judgeName()) return;
+  clearTimeout(nameCheckTimer);
+  const asked = ++nameCheck;
+  const name = nameInput.value.trim();
+  nameCheckTimer = setTimeout(async () => {
+    const free = await nameAvailable(name);
+    // a later keystroke has asked a different question since
+    if (asked !== nameCheck || nameInput.value.trim() !== name) return;
+    if (free === false){
+      nameHint.className = 'name-hint bad';
+      nameHint.textContent = NAME_TAKEN;
+      nameInput.classList.add('bad');
+      nameSave.disabled = true;
+    }
+  }, 350);
+});
+
+/** Postgres's unique-violation code, which PostgREST passes through. */
+function isNameClash(err){
+  return !!err && (err.code === '23505' || /duplicate key|unique/i.test(err.message || ''));
+}
 
 document.getElementById('nameForm').addEventListener('submit', async e => {
   e.preventDefault();
   const name = nameInput.value.trim();
   if (judgeName() || !sb || !account) return;
+  clearTimeout(nameCheckTimer);
+  nameCheck++;                     // whatever the hint was about to say is moot
   nameSave.disabled = true;
   nameSave.textContent = 'Saving…';
+  let clashed = false;
   try {
-    // Into the token first: the game server reads the name from there, so this
-    // is the copy that decides what other players see.
+    if (await nameAvailable(name) === false) throw { code: '23505' };
+    // Into the profile first: that is the copy the unique index guards, so it
+    // is the one that can say no, and the game server reads the name from it
+    // whenever it can. Nothing goes into the token until the row has taken
+    // the name, or a name the database refused would still be in the token
+    // the next time the page looked to see whether one had been chosen.
+    const saved = await sb.from('profiles').update({ display_name: name })
+      .eq('id', account.id).select('display_name').maybeSingle();
+    if (saved.error) throw saved.error;
+    // The row may not exist yet — the trigger makes it a moment after signup
+    // — in which case the update matched nothing and said so quietly. The
+    // token still carries the name, and the profile catches up on the next
+    // visit; the server, meanwhile, falls back to the token.
+    if (!saved.data) console.warn('profile row not there yet; name kept in the token');
+    // And into the token, which is what the server falls back to when it has
+    // no service key to read the profile with, and what this page reads to
+    // know whether a name has been chosen at all.
     const { error } = await sb.auth.updateUser({ data: { game_name: name } });
     if (error) throw error;
-    // And into the profile, which is what friend search will read later.
-    try { await sb.from('profiles').update({ display_name: name }).eq('id', account.id); }
-    catch (err){ console.warn('profile name not saved:', err && err.message); }
     account.gameName = account.name = G.playerName = name;
     updateAccountUI();
     showScreen('home');
   } catch (err){
+    clashed = isNameClash(err);
     nameHint.className = 'name-hint bad';
-    nameHint.textContent = 'Could not save that — ' + ((err && err.message) || 'try again.');
+    nameHint.textContent = clashed
+      ? NAME_TAKEN
+      : 'Could not save that — ' + ((err && err.message) || 'try again.');
+    nameInput.classList.add('bad');
   } finally {
     nameSave.textContent = 'Continue';
-    judgeName();
+    // A taken name stays refused until the box changes; anything else is
+    // judged afresh so the button comes back for another try.
+    if (clashed) nameSave.disabled = true;
+    else judgeName();
   }
 });
 
