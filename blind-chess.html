@@ -1696,6 +1696,13 @@
   @media (max-width:940px){ .pr-cards{grid-template-columns:repeat(2,minmax(0,1fr));} }
   @media (max-width:620px){ .pr-cards{grid-template-columns:minmax(0,1fr);} }
   .pr-card{display:flex; flex-direction:column; padding:18px 18px 16px; text-align:left;}
+  /* The practice overview shares the supplied lunar material. The dark wash
+     keeps descriptions readable without changing the cards or their controls. */
+  #screen-practice .pr-card,
+  #screen-practice .pr-summary{
+    background:linear-gradient(150deg,rgba(12,18,28,.64),rgba(7,12,21,.88)),
+      url("assets/moon.jpg?v=1") center / cover no-repeat;
+  }
   .pr-name{font-size:18.5px; font-weight:650; letter-spacing:.09em; color:var(--gold-soft);}
   .pr-desc{margin-top:8px; flex:1; color:var(--muted); font-size:16px; line-height:1.65;}
   .pr-foot{margin-top:15px; display:flex; align-items:center; justify-content:space-between; gap:10px;}
