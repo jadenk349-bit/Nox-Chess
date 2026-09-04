@@ -1588,6 +1588,18 @@ def drop_client(client):
 # type is not decoration — browsers refuse to stream-compile without it.
 ROOT = os.path.dirname(HERE)
 STATIC_FILES = {
+    "/assets/pieces/black-bishop.svg": ("assets/pieces/black-bishop.svg", "image/svg+xml"),
+    "/assets/pieces/black-king.svg": ("assets/pieces/black-king.svg", "image/svg+xml"),
+    "/assets/pieces/black-knight.svg": ("assets/pieces/black-knight.svg", "image/svg+xml"),
+    "/assets/pieces/black-pawn.svg": ("assets/pieces/black-pawn.svg", "image/svg+xml"),
+    "/assets/pieces/black-queen.svg": ("assets/pieces/black-queen.svg", "image/svg+xml"),
+    "/assets/pieces/black-rook.svg": ("assets/pieces/black-rook.svg", "image/svg+xml"),
+    "/assets/pieces/white-bishop.svg": ("assets/pieces/white-bishop.svg", "image/svg+xml"),
+    "/assets/pieces/white-king.svg": ("assets/pieces/white-king.svg", "image/svg+xml"),
+    "/assets/pieces/white-knight.svg": ("assets/pieces/white-knight.svg", "image/svg+xml"),
+    "/assets/pieces/white-pawn.svg": ("assets/pieces/white-pawn.svg", "image/svg+xml"),
+    "/assets/pieces/white-queen.svg": ("assets/pieces/white-queen.svg", "image/svg+xml"),
+    "/assets/pieces/white-rook.svg": ("assets/pieces/white-rook.svg", "image/svg+xml"),
     "/assets/board-midnight.svg": ("assets/board-midnight.svg", "image/svg+xml"),
     "/engine/stockfish.wasm.js": ("engine/stockfish.wasm.js", "text/javascript; charset=utf-8"),
     "/engine/stockfish.wasm":    ("engine/stockfish.wasm",    "application/wasm"),

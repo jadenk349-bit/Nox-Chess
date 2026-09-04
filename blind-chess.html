@@ -356,16 +356,21 @@
     -webkit-text-stroke:1.4px #a59678;
     text-shadow:0 3px 5px rgba(0,0,0,.4), 0 0 1px rgba(255,255,255,.35);
   }
-  /* the hand-drawn bishop, sized and weighted to sit with the glyph set */
+  /* One scalable silhouette set, with an ivory or charcoal body. The warm
+     rim keeps black pieces readable on the midnight inlays without changing
+     their outline, and all decoration disappears with the existing span. */
   .pc-svg{
-    width:.72em; height:.72em; display:inline-block; vertical-align:-.08em;
-    fill:currentColor; stroke:none; overflow:visible;
+    width:.82em; height:.86em; display:inline-block; vertical-align:-.12em;
+    overflow:visible; -webkit-text-stroke:0;
   }
-  .pc-svg .slit{fill:none;}
-  .piece span .pc-svg{display:block; filter:drop-shadow(0 3px 5px rgba(0,0,0,.45));}
-  .piece.w span .pc-svg{fill:#fbf6ea; stroke:#2a2118;}
-  .piece.b span .pc-svg{fill:#22242c; stroke:#a59678;}
-  .promo .pc-svg{width:.8em; height:.8em;}
+  .piece span .pc-svg{display:block; filter:drop-shadow(0 2px 2px rgba(0,0,0,.55));}
+  .piece.w, .g-w{color:#eee6d5; --piece-edge:#514538;}
+  .piece.b, .g-b{color:#252d38; --piece-edge:#b9a681;}
+  .piece.w span{color:#eee6d5;}
+  .piece.b span{color:#252d38;}
+  .promo .pc-svg{width:1em; height:1.04em;}
+  .tray{--piece-edge:#514538;}
+  #trayB{color:#252d38; --piece-edge:#b9a681;}
 
   .piece.gone{opacity:0; transform-origin:center; }
   .piece.pop span{animation:pop .3s ease;}
@@ -1491,7 +1496,7 @@
     transition:border-color .22s ease;
   }
   /* Fog of War's board carries one side's men and nothing of the other's,
-     which is exactly the claim the card is making. Two rows of glyphs, laid
+     which is exactly the claim the card is making. Two rows of pieces, laid
      over the bottom two ranks. */
   .pzv-mini .pzv-men{
     position:absolute; left:0; right:0; bottom:0; height:25%;
@@ -1750,8 +1755,6 @@
   .pr-ans.glyphs .pc-svg{width:.86em; height:.86em; margin:0 auto;}
   .pr-ans .g-w{color:#fbf6ea; -webkit-text-stroke:1.2px #2a2118;}
   .pr-ans .g-b{color:#2c2f3a; -webkit-text-stroke:1.2px #0a0b0e;}
-  .pr-ans .g-w .pc-svg{fill:#fbf6ea; stroke:#2a2118; stroke-width:1.5;}
-  .pr-ans .g-b .pc-svg{fill:#2c2f3a; stroke:#0a0b0e; stroke-width:1.5;}
   .pr-ans input{
     flex:1; min-width:0; font:inherit; font-size:19px; letter-spacing:.16em; text-align:center;
     font-family:var(--font);
@@ -3696,8 +3699,7 @@
             <div class="pzv-mini" id="pzvMiniFog">
               <!-- one side's men and nothing of the other's, which is the claim -->
               <div class="pzv-men">
-                <span>&#9820;</span><span>&#9822;</span><span>&#9821;</span><span>&#9819;</span><span>&#9818;</span><span>&#9821;</span><span>&#9822;</span><span>&#9820;</span>
-                <span>&#9823;</span><span>&#9823;</span><span>&#9823;</span><span>&#9823;</span><span>&#9823;</span><span>&#9823;</span><span>&#9823;</span><span>&#9823;</span>
+<span><svg class="pc-svg" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 104" aria-hidden="true"><g fill="currentColor" stroke="var(--piece-edge, #514538)" stroke-width="2.2" stroke-linejoin="round" stroke-linecap="round"><path d="M17 12H29V22H40V12H53V22H65V12H78V29Q77 35 69 39L67 66Q67 73 75 80L77 86H84V95H13V86H20L22 79Q30 73 30 66L28 39Q18 34 17 29Z"/><path d="M19 29H76M28 39H69M30 66H67M24 77H72M21 86H77M17 91H80" fill="none"/><path d="M22 16H25M34 44V61M26 81H69" fill="none" stroke="#fff4da" stroke-opacity=".32" stroke-width="1.5"/></g></svg></span><span><svg class="pc-svg" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 104" aria-hidden="true"><g fill="currentColor" stroke="var(--piece-edge, #514538)" stroke-width="2.2" stroke-linejoin="round" stroke-linecap="round"><path d="M27 7L39 14L43 7L52 18C75 19 88 39 87 67L86 94H29Q26 81 38 66L52 48L45 53L36 56L23 70Q19 76 15 70Q7 70 10 60L19 40L24 25Z"/><path d="M59 26C77 36 83 63 77 93M24 67L32 60M52 48L56 39M27 33L33 30L29 35Z M15 61L17 59" fill="none"/><path d="M30 14L36 18M64 28C79 42 83 66 81 80M34 87Q34 77 43 66" fill="none" stroke="#fff4da" stroke-opacity=".32" stroke-width="1.5"/></g></svg></span><span><svg class="pc-svg" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 104" aria-hidden="true"><g fill="currentColor" stroke="var(--piece-edge, #514538)" stroke-width="2.2" stroke-linejoin="round" stroke-linecap="round"><path d="M46 18C39 9 45 3 50 4C58 4 61 13 55 18C65 29 77 37 74 52Q74 60 64 67L65 75Q70 82 60 84L57 87Q64 92 77 88Q88 86 91 93L87 99Q70 95 59 98Q53 98 50 93Q46 99 38 98L16 97L11 100L8 94Q7 88 18 88L37 90L43 86L40 84Q30 83 35 76L36 67Q25 60 25 48C25 35 37 26 46 18Z"/><path d="M36 67Q50 64 64 67M35 76H65M40 84H60M50 36V54M42 45H58" fill="none"/><path d="M32 47Q31 36 45 25M39 71H59M17 92H35" fill="none" stroke="#fff4da" stroke-opacity=".32" stroke-width="1.5"/></g></svg></span><span><svg class="pc-svg" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 104" aria-hidden="true"><g fill="currentColor" stroke="var(--piece-edge, #514538)" stroke-width="2.2" stroke-linejoin="round" stroke-linecap="round"><path d="M14 31L30 59L29 21L44 58L49 16L57 58L71 22L69 60L87 32L76 72L74 91Q49 101 25 91L23 72Z"/><circle cx="12" cy="28" r="5.5"/><circle cx="28" cy="17" r="5.5"/><circle cx="50" cy="11" r="5.5"/><circle cx="72" cy="17" r="5.5"/><circle cx="89" cy="28" r="5.5"/><path d="M23 72Q49 61 76 72M25 80Q49 71 75 80M26 89Q49 81 74 89" fill="none"/><path d="M30 72Q49 67 68 72M31 89Q47 85 65 88" fill="none" stroke="#fff4da" stroke-opacity=".32" stroke-width="1.5"/></g></svg></span><span><svg class="pc-svg" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 104" aria-hidden="true"><g fill="currentColor" stroke="var(--piece-edge, #514538)" stroke-width="2.2" stroke-linejoin="round" stroke-linecap="round"><path d="M27 66C14 51 4 38 13 29C25 14 43 35 48 58C46 43 36 30 44 22L47 18V13H40V7H47V1H53V7H60V13H53V18L57 22C65 30 55 45 52 58C60 33 76 16 88 29C100 44 79 62 74 67L74 88Q50 99 26 88Z"/><path d="M27 66Q50 58 74 67M27 76Q50 68 74 76M27 88Q50 80 74 88M36 78L40 77M48 76H52M61 77L65 78" fill="none"/><path d="M17 34Q24 24 36 40M63 43Q75 26 83 33M32 69Q49 64 67 69" fill="none" stroke="#fff4da" stroke-opacity=".32" stroke-width="1.5"/></g></svg></span><span><svg class="pc-svg" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 104" aria-hidden="true"><g fill="currentColor" stroke="var(--piece-edge, #514538)" stroke-width="2.2" stroke-linejoin="round" stroke-linecap="round"><path d="M46 18C39 9 45 3 50 4C58 4 61 13 55 18C65 29 77 37 74 52Q74 60 64 67L65 75Q70 82 60 84L57 87Q64 92 77 88Q88 86 91 93L87 99Q70 95 59 98Q53 98 50 93Q46 99 38 98L16 97L11 100L8 94Q7 88 18 88L37 90L43 86L40 84Q30 83 35 76L36 67Q25 60 25 48C25 35 37 26 46 18Z"/><path d="M36 67Q50 64 64 67M35 76H65M40 84H60M50 36V54M42 45H58" fill="none"/><path d="M32 47Q31 36 45 25M39 71H59M17 92H35" fill="none" stroke="#fff4da" stroke-opacity=".32" stroke-width="1.5"/></g></svg></span><span><svg class="pc-svg" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 104" aria-hidden="true"><g fill="currentColor" stroke="var(--piece-edge, #514538)" stroke-width="2.2" stroke-linejoin="round" stroke-linecap="round"><path d="M27 7L39 14L43 7L52 18C75 19 88 39 87 67L86 94H29Q26 81 38 66L52 48L45 53L36 56L23 70Q19 76 15 70Q7 70 10 60L19 40L24 25Z"/><path d="M59 26C77 36 83 63 77 93M24 67L32 60M52 48L56 39M27 33L33 30L29 35Z M15 61L17 59" fill="none"/><path d="M30 14L36 18M64 28C79 42 83 66 81 80M34 87Q34 77 43 66" fill="none" stroke="#fff4da" stroke-opacity=".32" stroke-width="1.5"/></g></svg></span><span><svg class="pc-svg" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 104" aria-hidden="true"><g fill="currentColor" stroke="var(--piece-edge, #514538)" stroke-width="2.2" stroke-linejoin="round" stroke-linecap="round"><path d="M17 12H29V22H40V12H53V22H65V12H78V29Q77 35 69 39L67 66Q67 73 75 80L77 86H84V95H13V86H20L22 79Q30 73 30 66L28 39Q18 34 17 29Z"/><path d="M19 29H76M28 39H69M30 66H67M24 77H72M21 86H77M17 91H80" fill="none"/><path d="M22 16H25M34 44V61M26 81H69" fill="none" stroke="#fff4da" stroke-opacity=".32" stroke-width="1.5"/></g></svg></span><span><svg class="pc-svg" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 104" aria-hidden="true"><g fill="currentColor" stroke="var(--piece-edge, #514538)" stroke-width="2.2" stroke-linejoin="round" stroke-linecap="round"><path d="M39 35C26 27 31 9 43 7C58 4 65 22 56 33L61 36L62 43H55C55 57 58 66 67 73Q74 80 74 87V94H26V87Q26 78 35 71C43 63 45 53 45 43H36L37 36Z"/><path d="M37 36H61M36 43H62M27 86H73M29 91H71" fill="none"/><path d="M38 18Q40 11 47 11M31 81Q35 75 41 73" fill="none" stroke="#fff4da" stroke-opacity=".32" stroke-width="1.5"/></g></svg></span><span><svg class="pc-svg" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 104" aria-hidden="true"><g fill="currentColor" stroke="var(--piece-edge, #514538)" stroke-width="2.2" stroke-linejoin="round" stroke-linecap="round"><path d="M39 35C26 27 31 9 43 7C58 4 65 22 56 33L61 36L62 43H55C55 57 58 66 67 73Q74 80 74 87V94H26V87Q26 78 35 71C43 63 45 53 45 43H36L37 36Z"/><path d="M37 36H61M36 43H62M27 86H73M29 91H71" fill="none"/><path d="M38 18Q40 11 47 11M31 81Q35 75 41 73" fill="none" stroke="#fff4da" stroke-opacity=".32" stroke-width="1.5"/></g></svg></span><span><svg class="pc-svg" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 104" aria-hidden="true"><g fill="currentColor" stroke="var(--piece-edge, #514538)" stroke-width="2.2" stroke-linejoin="round" stroke-linecap="round"><path d="M39 35C26 27 31 9 43 7C58 4 65 22 56 33L61 36L62 43H55C55 57 58 66 67 73Q74 80 74 87V94H26V87Q26 78 35 71C43 63 45 53 45 43H36L37 36Z"/><path d="M37 36H61M36 43H62M27 86H73M29 91H71" fill="none"/><path d="M38 18Q40 11 47 11M31 81Q35 75 41 73" fill="none" stroke="#fff4da" stroke-opacity=".32" stroke-width="1.5"/></g></svg></span><span><svg class="pc-svg" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 104" aria-hidden="true"><g fill="currentColor" stroke="var(--piece-edge, #514538)" stroke-width="2.2" stroke-linejoin="round" stroke-linecap="round"><path d="M39 35C26 27 31 9 43 7C58 4 65 22 56 33L61 36L62 43H55C55 57 58 66 67 73Q74 80 74 87V94H26V87Q26 78 35 71C43 63 45 53 45 43H36L37 36Z"/><path d="M37 36H61M36 43H62M27 86H73M29 91H71" fill="none"/><path d="M38 18Q40 11 47 11M31 81Q35 75 41 73" fill="none" stroke="#fff4da" stroke-opacity=".32" stroke-width="1.5"/></g></svg></span><span><svg class="pc-svg" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 104" aria-hidden="true"><g fill="currentColor" stroke="var(--piece-edge, #514538)" stroke-width="2.2" stroke-linejoin="round" stroke-linecap="round"><path d="M39 35C26 27 31 9 43 7C58 4 65 22 56 33L61 36L62 43H55C55 57 58 66 67 73Q74 80 74 87V94H26V87Q26 78 35 71C43 63 45 53 45 43H36L37 36Z"/><path d="M37 36H61M36 43H62M27 86H73M29 91H71" fill="none"/><path d="M38 18Q40 11 47 11M31 81Q35 75 41 73" fill="none" stroke="#fff4da" stroke-opacity=".32" stroke-width="1.5"/></g></svg></span><span><svg class="pc-svg" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 104" aria-hidden="true"><g fill="currentColor" stroke="var(--piece-edge, #514538)" stroke-width="2.2" stroke-linejoin="round" stroke-linecap="round"><path d="M39 35C26 27 31 9 43 7C58 4 65 22 56 33L61 36L62 43H55C55 57 58 66 67 73Q74 80 74 87V94H26V87Q26 78 35 71C43 63 45 53 45 43H36L37 36Z"/><path d="M37 36H61M36 43H62M27 86H73M29 91H71" fill="none"/><path d="M38 18Q40 11 47 11M31 81Q35 75 41 73" fill="none" stroke="#fff4da" stroke-opacity=".32" stroke-width="1.5"/></g></svg></span><span><svg class="pc-svg" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 104" aria-hidden="true"><g fill="currentColor" stroke="var(--piece-edge, #514538)" stroke-width="2.2" stroke-linejoin="round" stroke-linecap="round"><path d="M39 35C26 27 31 9 43 7C58 4 65 22 56 33L61 36L62 43H55C55 57 58 66 67 73Q74 80 74 87V94H26V87Q26 78 35 71C43 63 45 53 45 43H36L37 36Z"/><path d="M37 36H61M36 43H62M27 86H73M29 91H71" fill="none"/><path d="M38 18Q40 11 47 11M31 81Q35 75 41 73" fill="none" stroke="#fff4da" stroke-opacity=".32" stroke-width="1.5"/></g></svg></span><span><svg class="pc-svg" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 104" aria-hidden="true"><g fill="currentColor" stroke="var(--piece-edge, #514538)" stroke-width="2.2" stroke-linejoin="round" stroke-linecap="round"><path d="M39 35C26 27 31 9 43 7C58 4 65 22 56 33L61 36L62 43H55C55 57 58 66 67 73Q74 80 74 87V94H26V87Q26 78 35 71C43 63 45 53 45 43H36L37 36Z"/><path d="M37 36H61M36 43H62M27 86H73M29 91H71" fill="none"/><path d="M38 18Q40 11 47 11M31 81Q35 75 41 73" fill="none" stroke="#fff4da" stroke-opacity=".32" stroke-width="1.5"/></g></svg></span>
               </div>
             </div>
           </div>
@@ -4232,20 +4234,18 @@ const SUPABASE_ANON_KEY = 'sb_publishable_FixWUIJ1j8-02yTOg6-rog_ag-ctyET';
    CONSTANTS & HELPERS
    ============================================================ */
 const W = 'w', B = 'b';
-const GLYPH = { K:'♚', Q:'♛', R:'♜', B:'♝', N:'♞', P:'♟' };
-
-// The font's bishop is a ball with a small cross — near-identical to the pawn at
-// board size. This one is a proper mitre: tall, pointed, with the diagonal slit.
+// Reference-inspired silhouettes are shared by both colors and every screen.
+// Color and edge contrast belong to the surrounding piece, so promotion and
+// captured-piece trays use the same geometry as the live board.
+const GLYPH = {
+  "P": "<svg class=\"pc-svg\" xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 100 104\" aria-hidden=\"true\"><g fill=\"currentColor\" stroke=\"var(--piece-edge, #514538)\" stroke-width=\"2.2\" stroke-linejoin=\"round\" stroke-linecap=\"round\"><path d=\"M37 35C27 27 29 12 39 7C46 3 54 3 61 7C71 12 73 27 63 35H68Q72 35 72 40V44H59C60 57 63 66 72 73Q82 81 82 89V96H18V89Q18 81 28 73C37 66 40 57 41 44H28V40Q28 35 32 35Z\"/><path d=\"M32 35H68M28 44H72M19 86H81M19 92H81\" fill=\"none\"/><path d=\"M36 20Q36 10 48 9M25 81Q28 77 34 74M23 89H76\" fill=\"none\" stroke=\"#fff4da\" stroke-opacity=\".32\" stroke-width=\"1.5\"/></g></svg>",
+  "R": "<svg class=\"pc-svg\" xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 100 104\" aria-hidden=\"true\"><g fill=\"currentColor\" stroke=\"var(--piece-edge, #514538)\" stroke-width=\"2.2\" stroke-linejoin=\"round\" stroke-linecap=\"round\"><path d=\"M17 12H29V22H40V12H53V22H65V12H78V29Q77 35 69 39L67 66Q67 73 75 80L77 86H84V95H13V86H20L22 79Q30 73 30 66L28 39Q18 34 17 29Z\"/><path d=\"M19 29H76M28 39H69M30 66H67M24 77H72M21 86H77M17 91H80\" fill=\"none\"/><path d=\"M22 16H25M34 44V61M26 81H69\" fill=\"none\" stroke=\"#fff4da\" stroke-opacity=\".32\" stroke-width=\"1.5\"/></g></svg>",
+  "N": "<svg class=\"pc-svg\" xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 100 104\" aria-hidden=\"true\"><g fill=\"currentColor\" stroke=\"var(--piece-edge, #514538)\" stroke-width=\"2.2\" stroke-linejoin=\"round\" stroke-linecap=\"round\"><path d=\"M27 7L39 14L43 7L52 18C75 19 88 39 87 67L86 94H29Q26 81 38 66L52 48L45 53L36 56L23 70Q19 76 15 70Q7 70 10 60L19 40L24 25Z\"/><path d=\"M59 26C77 36 83 63 77 93M24 67L32 60M52 48L56 39M27 33L33 30L29 35Z M15 61L17 59\" fill=\"none\"/><path d=\"M30 14L36 18M64 28C79 42 83 66 81 80M34 87Q34 77 43 66\" fill=\"none\" stroke=\"#fff4da\" stroke-opacity=\".32\" stroke-width=\"1.5\"/></g></svg>",
+  "Q": "<svg class=\"pc-svg\" xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 100 104\" aria-hidden=\"true\"><g fill=\"currentColor\" stroke=\"var(--piece-edge, #514538)\" stroke-width=\"2.2\" stroke-linejoin=\"round\" stroke-linecap=\"round\"><path d=\"M14 31L30 59L29 21L44 58L49 16L57 58L71 22L69 60L87 32L76 72L74 91Q49 101 25 91L23 72Z\"/><circle cx=\"12\" cy=\"28\" r=\"5.5\"/><circle cx=\"28\" cy=\"17\" r=\"5.5\"/><circle cx=\"50\" cy=\"11\" r=\"5.5\"/><circle cx=\"72\" cy=\"17\" r=\"5.5\"/><circle cx=\"89\" cy=\"28\" r=\"5.5\"/><path d=\"M23 72Q49 61 76 72M25 80Q49 71 75 80M26 89Q49 81 74 89\" fill=\"none\"/><path d=\"M30 72Q49 67 68 72M31 89Q47 85 65 88\" fill=\"none\" stroke=\"#fff4da\" stroke-opacity=\".32\" stroke-width=\"1.5\"/></g></svg>",
+  "K": "<svg class=\"pc-svg\" xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 100 104\" aria-hidden=\"true\"><g fill=\"currentColor\" stroke=\"var(--piece-edge, #514538)\" stroke-width=\"2.2\" stroke-linejoin=\"round\" stroke-linecap=\"round\"><path d=\"M27 66C14 51 4 38 13 29C25 14 43 35 48 58C46 43 36 30 44 22L47 18V13H40V7H47V1H53V7H60V13H53V18L57 22C65 30 55 45 52 58C60 33 76 16 88 29C100 44 79 62 74 67L74 88Q50 99 26 88Z\"/><path d=\"M27 66Q50 58 74 67M27 76Q50 68 74 76M27 88Q50 80 74 88M36 78L40 77M48 76H52M61 77L65 78\" fill=\"none\"/><path d=\"M17 34Q24 24 36 40M63 43Q75 26 83 33M32 69Q49 64 67 69\" fill=\"none\" stroke=\"#fff4da\" stroke-opacity=\".32\" stroke-width=\"1.5\"/></g></svg>"
+};
 const BISHOP_SVG =
-  '<svg class="pc-svg" viewBox="0 0 45 45" aria-hidden="true">' +
-    '<g stroke-width="1.5" stroke-linejoin="round" stroke-linecap="round">' +
-      '<path d="M11 38.6h23c1.2 0 1.2 2.2 0 2.2H11c-1.2 0-1.2-2.2 0-2.2z"/>' +
-      '<path d="M14.5 33h16c2 0 3 2 1.7 3.5l-.9 1H13.7l-.9-1c-1.3-1.5-.3-3.5 1.7-3.5z"/>' +
-      '<path d="M22.5 9c4.8 5.6 7.6 11 7.1 15.6-.3 2.9-3 4.9-7.1 4.9s-6.8-2-7.1-4.9C14.9 20 17.7 14.6 22.5 9z"/>' +
-      '<circle cx="22.5" cy="7.2" r="2.4"/>' +
-      '<path class="slit" d="M19.2 17.4l6 6.4"/>' +
-    '</g>' +
-  '</svg>';
+  '<svg class="pc-svg" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 104" aria-hidden="true"><g fill="currentColor" stroke="var(--piece-edge, #514538)" stroke-width="2.2" stroke-linejoin="round" stroke-linecap="round"><path d="M46 18C39 9 45 3 50 4C58 4 61 13 55 18C65 29 77 37 74 52Q74 60 64 67L65 75Q70 82 60 84L57 87Q64 92 77 88Q88 86 91 93L87 99Q70 95 59 98Q53 98 50 93Q46 99 38 98L16 97L11 100L8 94Q7 88 18 88L37 90L43 86L40 84Q30 83 35 76L36 67Q25 60 25 48C25 35 37 26 46 18Z"/><path d="M36 67Q50 64 64 67M35 76H65M40 84H60M50 36V54M42 45H58" fill="none"/><path d="M32 47Q31 36 45 25M39 71H59M17 92H35" fill="none" stroke="#fff4da" stroke-opacity=".32" stroke-width="1.5"/></g></svg>';
 
 const pieceHTML = t => t === 'B' ? BISHOP_SVG : GLYPH[t];
 const VAL   = { P:100, N:320, B:330, R:500, Q:900, K:20000 };
@@ -5809,7 +5809,7 @@ function askPromotion(moves){
   el.promoBtns.innerHTML = '';
   for (const q of ['Q','R','B','N']){
     const b = document.createElement('button');
-    b.innerHTML = `<span style="-webkit-text-stroke:1.4px #2a2118">${pieceHTML(q)}</span>`;
+    b.innerHTML = `<span class="${G.st.turn === W ? 'g-w' : 'g-b'}">${pieceHTML(q)}</span>`;
     b.onclick = () => {
       el.promoOverlay.classList.remove('show');
       const m = G.pendingPromo.find(x => x.promo === q);
