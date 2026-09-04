@@ -1588,6 +1588,7 @@ def drop_client(client):
 # type is not decoration — browsers refuse to stream-compile without it.
 ROOT = os.path.dirname(HERE)
 STATIC_FILES = {
+    "/assets/board-midnight.svg": ("assets/board-midnight.svg", "image/svg+xml"),
     "/engine/stockfish.wasm.js": ("engine/stockfish.wasm.js", "text/javascript; charset=utf-8"),
     "/engine/stockfish.wasm":    ("engine/stockfish.wasm",    "application/wasm"),
     "/assets/nox-logo.png":      ("assets/nox-logo.png",      "image/png"),
