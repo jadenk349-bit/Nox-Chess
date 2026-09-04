@@ -60,6 +60,14 @@ games = {}        # game id -> Game
 # is challenged by who they are rather than by which socket they happen to be
 # on, so this is what turns an account id into somewhere to send.
 by_user = {}      # supabase user id -> set of Clients
+# Every name on this server, lower-cased, -> the party holding it and the
+# connections holding it for them. There is one namespace for accounts and
+# guests together: a name is what the other player reads across the board, and
+# two boards that both say "Alex" are two boards lying to somebody, whichever
+# kind of player each Alex is. Held for as long as a connection is, and no
+# longer — the durable half of the rule, for accounts, is the unique index in
+# supabase-migrate-usernames.sql. See claim_name().
+names = {}        # lower-cased name -> NameHold
 challenges = {}   # challenge id -> Challenge, one per invitation in the air
 # A rematch is asked for after the game it is about has already ended, which is
 # why it cannot live on the Game: finish_game() has let go of that by then, and
@@ -399,6 +407,124 @@ def unregister_user(user_id, client):
             by_user.pop(user_id, None)
 
 
+class NameHold:
+    """Who a name belongs to on this server, and which connections say so."""
+
+    __slots__ = ("owner", "clients")
+
+    def __init__(self, owner):
+        self.owner = owner        # ("user", account id) or ("guest", client id)
+        self.clients = set()
+
+
+def name_owner_of(client):
+    """The party a connection holds its name for.
+
+    An account holds a name across every tab it has open, so the key is the
+    account; a guest is nobody but this one socket, so the key is the socket.
+    """
+    if client.user_id:
+        return ("user", client.user_id)
+    return ("guest", client.id)
+
+
+def name_taken(name, owner):
+    """True when somebody *else* is called this. Caller holds the lock."""
+    hold = names.get(name.lower())
+    return hold is not None and hold.owner != owner
+
+
+def mint_guest_name():
+    """Guest-38154: the shape the page mints, minted here for the same reason.
+
+    The page names a guest before it connects and offers that name in hello;
+    when the offer cannot be honoured this is what they are called instead,
+    and the welcome tells them so.
+    """
+    return "Guest-%05d" % random.randrange(100000)
+
+
+def free_name_for(client, wanted):
+    """The name this connection will actually go by. Caller holds the lock.
+
+    `wanted` is what the token or the message asked for, already cleaned.
+    Their own name is always theirs — an account's second tab, or a guest
+    saying hello again, is not a collision. Anybody else's is not: a guest
+    is handed a fresh Guest-##### instead, and an account falls back to the
+    placeholder its profile row was created with, `player_` and the first
+    eight characters of its id, which is unique by construction and is
+    exactly what the page shows an account that has never chosen a name.
+    Both loop, because a hand-written client can call itself anything,
+    including somebody's fallback.
+    """
+    owner = name_owner_of(client)
+    if wanted and not name_taken(wanted, owner):
+        return wanted
+    if client.user_id:
+        base = "player_" + client.user_id[:8]
+        candidate = base
+        n = 1
+        while name_taken(candidate, owner):
+            n += 1
+            candidate = "%s-%d" % (base, n)
+        return candidate
+    candidate = mint_guest_name()
+    while name_taken(candidate, owner):
+        candidate = mint_guest_name()
+    return candidate
+
+
+def release_name(client):
+    """This connection no longer answers to its name. Caller holds the lock.
+
+    The name stays taken while another connection of the same account still
+    holds it; a guest's goes the moment their one socket does.
+    """
+    hold = names.get(client.name.lower())
+    if hold is None:
+        return
+    hold.clients.discard(client)
+    if not hold.clients:
+        names.pop(client.name.lower(), None)
+
+
+def claim_name(client, wanted):
+    """Give this connection a name nobody else on the server has.
+
+    Caller holds the lock. Sets `client.name` and returns the guests, if any,
+    who were wearing an account's name and have just been renamed — the
+    caller tells them, since nothing may be sent under the lock.
+
+    First come, first served, with one exception: an account's name is the
+    account's. A guest is a name for one visit and nothing more, so a guest
+    who turns up already called what somebody's profile says — only a
+    hand-written client can, the page mints Guest-##### — gives it up when
+    that account arrives, and is given a fresh guest name in its place. The
+    other way round, an account whose name a *different account* already
+    holds — two profiles that agree on a name, which the unique index exists
+    to prevent — keeps the placeholder until the other signs off. There is no
+    fair way to pick between two accounts here; there is a fair way to pick
+    between an account and a guest.
+    """
+    release_name(client)
+    owner = name_owner_of(client)
+    evicted = []
+    if wanted and client.user_id:
+        hold = names.get(wanted.lower())
+        if hold is not None and hold.owner[0] == "guest":
+            names.pop(wanted.lower())
+            evicted = list(hold.clients)
+    client.name = free_name_for(client, wanted)
+    names.setdefault(client.name.lower(), NameHold(owner)).clients.add(client)
+    # The account is on the register before the guest is renamed, so the fresh
+    # guest name cannot be the one just given up — the mint would otherwise
+    # see it as free.
+    for guest in evicted:
+        guest.name = free_name_for(guest, None)
+        names.setdefault(guest.name.lower(), NameHold(("guest", guest.id))).clients.add(guest)
+    return evicted
+
+
 def prune_challenges(now=None):
     """Drop invitations nobody answered. Caller holds the lock.
 
@@ -585,16 +711,6 @@ def handle_puzzle_result(client, msg):
     client.send({"t": "puzzleRating", "rating": after, "delta": after - before, "saved": saved})
 
 
-def clean_guest_name(raw):
-    """Guests are held to the same naming rule as accounts.
-
-    The page no longer offers guests a name box at all, so in practice this
-    only sees hand-written clients — but whatever an opponent ends up reading
-    on their screen should have passed the same rule either way.
-    """
-    return supabase_auth.clean_name(raw) or "Guest"
-
-
 def clean_inc(raw):
     """The seconds added after each move, from a message we do not trust.
 
@@ -758,44 +874,69 @@ def handle_hello(client, msg):
     """
     was = client.user_id
     token = msg.get("token")
+    reason = None
     if token:
         try:
             claims = supabase_auth.verify(token)
         except supabase_auth.AuthError as err:
-            client.user_id = None
-            client.verified = False
-            client.name = clean_guest_name(msg.get("name"))
-            with lock:
-                unregister_user(was, client)   # no longer anybody, if it ever was
+            claims = None
+            reason = str(err)
             log("%s rejected token: %s" % (client.id, err))
-            client.send({
-                "t": "welcome",
-                "verified": False,
-                "name": client.name,
-                "reason": str(err),
-            })
-            return
+    else:
+        claims = None
+    if claims:
         client.user_id = claims["sub"]
-        client.name = supabase_auth.display_name(claims)
         client.verified = True
-        log("%s signed in as %s (%s)" % (client.id, client.name, client.user_id[:8]))
+        # The profile row is the copy the unique index guards, so it is the
+        # copy that decides — the token's metadata is the fallback for a
+        # server with no service key, and it is writable by the account
+        # itself, which is why it cannot be the authority on a name that has
+        # to be nobody else's. This may be a round trip, and hello holds no
+        # lock, so that is fine here and would not be lower down.
+        stored = supabase_auth.clean_name(supabase_db.get_display_name(client.user_id))
+        wanted = stored or supabase_auth.display_name(claims)
     else:
         client.user_id = None
         client.verified = False
-        client.name = clean_guest_name(msg.get("name"))
+        wanted = supabase_auth.clean_name(msg.get("name"))
 
     # A second hello on the same socket re-identifies it, so the old entry has
     # to go or a signed-out tab would still be reachable as whoever it was.
+    # The name is claimed under the same lock: two hellos arriving together
+    # asking for one name must not both be told yes.
     with lock:
         unregister_user(was, client)
         register_user(client)
+        renamed = claim_name(client, wanted)
 
-    client.send({
+    if client.verified:
+        log("%s signed in as %s (%s)%s" % (
+            client.id, client.name, client.user_id[:8],
+            "" if client.name == wanted else " — %r is taken" % wanted))
+    elif wanted and client.name != wanted:
+        log("%s wanted to be %r, is %s" % (client.id, wanted, client.name))
+
+    # A guest just renamed out from under an account's name hears about it the
+    # same way they heard their name the first time: the welcome is what the
+    # page takes its guest name from.
+    for guest in renamed:
+        log("%s was wearing %s's name; now %s" % (guest.id, client.name, guest.name))
+        guest.send({
+            "t": "welcome",
+            "verified": False,
+            "name": guest.name,
+            "accounts": supabase_auth.enabled(),
+        })
+
+    welcome = {
         "t": "welcome",
         "verified": client.verified,
         "name": client.name,
         "accounts": supabase_auth.enabled(),
-    })
+    }
+    if reason:
+        welcome["reason"] = reason
+    client.send(welcome)
 
 
 def may_play_ranked(client):
@@ -1538,6 +1679,7 @@ def drop_client(client):
         leave_lobby(client)
         lobby_subs.discard(client)
         unregister_user(client.user_id, client)
+        release_name(client)
         # A challenge is only worth anything while both ends are connected.
         # This client's own invitations go; invitations aimed at this account
         # go too, but only once its last connection has gone — another tab is
