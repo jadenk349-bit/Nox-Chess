@@ -21,6 +21,7 @@ node server/test_rematch_e2e.js          # two whole pages on real sockets — R
 node server/test_ws_url.js               # unit tests for wsURLFrom(); no server needed
 node server/test_rematch_flow.js         # the page's rematch and New Game wiring, against scripted replies
 node server/test_review.js               # unit tests for the review's chess reasoning
+node server/test_study_education.js      # Study Board's concept card, and how it fails
 node server/test_puzzle_flow.js          # plays a shipped puzzle against a stub DOM
 node server/test_practice.js             # what the practice drills invent, re-checked
 node server/test_practice_flow.js        # and running one, against a stub DOM + clock
@@ -31,6 +32,10 @@ python3 server/test_ai_match.py          # seating one: the queue, the race; no 
 python3 server/test_puzzle_rating.py     # the puzzle Elo handler; no server needed
 node tools/test_generate_puzzles.js      # the generator's own decisions, no engine
 python3 tools/check_supabase_puzzles.py  # RLS and column grants, against the real project
+
+node education/tools/build_bundle.js            # rebuild the corpus the browser reads
+node education/tools/build_bundle.js --check    # ...and fail if it is stale
+python3 education/tools/run_tests.py            # the knowledge base's own suite (~974)
 
 node tools/generate_puzzles.js --games 1600 --poolsOut /tmp/pools.json   # mine (slow: ~75 min)
 node tools/generate_puzzles.js --poolsIn /tmp/pools.json    # re-cut the ladders only (instant)
@@ -104,7 +109,9 @@ the server and the test harness, because the stdlib has no WebSocket support.
 there is no directory serving and no path to traverse. Adding an asset means
 adding an entry there with its MIME type (`application/wasm` is required for
 the engine, not optional). Allowlisted assets are cached for a week, so every
-reference in the page carries `?v=N`; bump it when a file changes.
+reference in the page carries `?v=N`; bump it when a file changes. Four of the
+entries are the Education System — see below — and they are the only part of
+`education/` that is served or copied into the image.
 
 **Server state** is module-level dicts guarded by one `RLock`: `lobby` (quick
 match, keyed by `(mode, minutes, inc, kind)` — ranked and friendly are separate
@@ -714,6 +721,46 @@ card for a track written before `why` existed — which is why a puzzle tagged
 `fork` is explained with the word fork. Keep the dependency one-way: `PZ` may
 call the review's pure helpers, the review must never learn what a puzzle is.
 
+**Study Board names concepts with the Education System, and runs its actual
+code.** `judgeMove()` says whether a move was good; it cannot say what the
+position is *about*, and its own comment admits it — "this is not chess
+understanding, and it only ever claims what it can see". `education/` is that
+missing half, and `THE EDUCATION LAYER` in the page is the wiring: `eduLoad()`
+fetches `education/lib/{features,matchers,analyze}.js` and evaluates them
+through a small CommonJS shim, and `eduChess()` hands them the page's own chess
+under the names `tools/page_chess.js` uses. **It is the mirror image of that
+file** — `page_chess.js` lifts the page's chess into Node so the tests can run
+it; this lifts the tested library into the page so a player gets the same
+answer. The page carries no copy, and `server/test_study_education.js` asserts
+the two agree byte for byte on the same position.
+
+The corpus cannot be walked from a browser, so `education/tools/build_bundle.js`
+flattens the 137 records and the warnings index into
+`education/dist/education-bundle.json` and `setKnowledge()` hands it back.
+**Nothing is trimmed on purpose**: a bundle carrying a subset would silently
+change what matches, and `education/tests/test_bundle.js` is what would license
+a trim — it asserts the bundle is fresh and that analysing through it is
+byte-identical to analysing through the filesystem. Regenerating means bumping
+`EDU_VERSION`, exactly as regenerating a puzzle ladder means bumping
+`PZ_VERSION`.
+
+The division of labour is the whole point and runs both ways: **Stockfish
+decides whether a move works and is never asked to name an idea; the knowledge
+base names the idea and is never asked whether the move works.** The API
+enforces its own half — with no engine result it refuses to assess the move, and
+it will not reach for the nearest label when nothing matches. `#conceptCard`
+shows that refusal rather than hiding it, because "nothing here matches a
+researched concept" is a true answer and a guess dressed as a concept is not.
+Do not add a fallback.
+
+`eduAnalyse()` is called from `reviewRender()` **above** the four `quiet()`
+returns, because all four are about the engine — it cannot run, it is starting,
+the game is over, the search has not answered — and none of them is a reason to
+stop naming what is on the board. The whole feature is additive: a failed fetch
+leaves `EDU.ready` false, `#conceptCard` hidden, and Study Board exactly what it
+was. That path is the default in the test suites, whose `fetch` stub answers 404
+to everything.
+
 **Puzzle Rush borrows the game's clock.** `tickClock()` and `renderClocks()`
 each grow one branch for `RUSH.on`; there is no second timer. `rushClock()` puts
 that clock in the *top* strip itself rather than letting `layoutBoardBars()`
@@ -795,8 +842,8 @@ grants.
 Navigate by the `/* ==== TITLE ==== */` banners in the script — THE SKY,
 CONSTANTS & HELPERS, MOVE GENERATION, ENGINE, GAME / UI STATE, CLOCK, SOUND,
 COMPLETE BLINDFOLD, PLAYING MOVES, ONLINE PLAY, RESIGNING…, THE ENGINE, THE
-REVIEW, THE PUZZLES, STUDY ALTERNATIVES, THE LESSONS, CONTROLS, PRACTICE,
-SCREENS, ACCOUNTS, SOCIAL.
+REVIEW, THE EDUCATION LAYER, THE PUZZLES, STUDY ALTERNATIVES, THE LESSONS,
+CONTROLS, PRACTICE, SCREENS, ACCOUNTS, SOCIAL.
 
 Screens are `<section class="screen" id="screen-NAME">` toggled by
 `showScreen(name)`; `screenName` is the current one and several handlers branch

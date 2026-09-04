@@ -1622,6 +1622,23 @@ STATIC_FILES = {
     "/puzzles/opening.json":     ("puzzles/opening.json",     "application/json; charset=utf-8"),
     "/puzzles/middlegame.json":  ("puzzles/middlegame.json",  "application/json; charset=utf-8"),
     "/puzzles/endgame.json":     ("puzzles/endgame.json",     "application/json; charset=utf-8"),
+    # The Education System, which Study Board calls to name what a position is
+    # about. The three library files are the SAME files education/tools/run_tests.py
+    # runs its 973 assertions over — the page evaluates them rather than carrying a
+    # copy, so what a player is told and what the tests check cannot drift apart.
+    # The bundle is the 137 concept records and the warnings index as one file,
+    # written by education/tools/build_bundle.js because a browser cannot walk a
+    # directory. All four are fetched only when Study Board is opened.
+    #
+    # Regenerating the bundle needs EDU_VERSION bumped in the page, for the same
+    # reason the puzzle ladders do: a week of cache will otherwise serve the old
+    # corpus. Note what is NOT here — concepts/, state/ and education/tools/ are
+    # research and build-time material and have no business on a socket.
+    "/education/lib/features.js": ("education/lib/features.js", "text/javascript; charset=utf-8"),
+    "/education/lib/matchers.js": ("education/lib/matchers.js", "text/javascript; charset=utf-8"),
+    "/education/lib/analyze.js":  ("education/lib/analyze.js",  "text/javascript; charset=utf-8"),
+    "/education/dist/education-bundle.json":
+        ("education/dist/education-bundle.json", "application/json; charset=utf-8"),
 }
 
 

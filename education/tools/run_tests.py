@@ -110,6 +110,19 @@ def main():
     if verbose and aline:
         print("   " + aline[0])
 
+    # 3e-bis. The browser's copy of the corpus. Study Board cannot walk a
+    # directory, so the records ship as one generated bundle; this asserts the
+    # bundle is fresh AND that analysing through it is byte-identical to
+    # analysing through the filesystem. Without it the page could quietly be
+    # matching against a corpus that has moved on.
+    bun = subprocess.run(["node", os.path.join(HERE, "tests", "test_bundle.js")],
+                         capture_output=True, text=True)
+    bline = [l for l in (bun.stdout or "").splitlines() if l.startswith("BUNDLE  PASS")]
+    check("browser_bundle", bun.returncode == 0,
+          (bline[0] if bline else (bun.stderr or "test_bundle.js failed").strip().splitlines()[-1]))
+    if verbose and bline:
+        print("   " + bline[0])
+
     # 3f. The human-grounded corpus: provenance complete, and the API agreeing
     # with what a human expert actually said about the position.
     cc = subprocess.run([sys.executable, os.path.join(HERE, "tools", "corpus_check.py")],

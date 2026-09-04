@@ -33,6 +33,25 @@ const MATCH = require('./matchers.js');
 const ROOT = path.join(__dirname, '..');
 
 let _cache = null;
+
+/* THE ONE SEAM FOR A CALLER WITH NO FILESYSTEM.
+ *
+ * `knowledge()` below walks 137 files and reads an index off disk, which is
+ * right in Node and impossible in a browser. Study Board fetches the same
+ * {concepts, warnings} as one generated bundle and hands it in here, and
+ * everything downstream then runs unchanged — the page and the tests match the
+ * same corpus with the same matchers, which is the only way the 973 assertions
+ * mean anything about what a player is shown.
+ *
+ * It is a setter and not a parameter on purpose: `knowledge()` is called from
+ * inside analyzeWithEducation() and threading a corpus through every caller
+ * would put a second way to supply one into the API. Nothing in Node calls
+ * this, so the filesystem path is untouched.
+ */
+function setKnowledge(k) {
+  _cache = (k && k.concepts) ? { concepts: k.concepts, warnings: k.warnings || { entries: [] } } : null;
+}
+
 function knowledge() {
   if (_cache) return _cache;
   const concepts = {};
@@ -441,7 +460,7 @@ const lower1 = s => (!s ? s
   : /^(White|Black|[KQRBN][a-h1-8x]|O-O)/.test(s) ? s
   : s[0].toLowerCase() + s.slice(1));
 
-module.exports = { analyzeWithEducation, knowledge, cautionsFor, auditPhrasing, LEVELS, DEPTHS };
+module.exports = { analyzeWithEducation, knowledge, setKnowledge, cautionsFor, auditPhrasing, LEVELS, DEPTHS };
 
 /* CLI: node lib/analyze.js "<fen>" [uci] [--level L] [--depth D] [--json] */
 if (require.main === module) {

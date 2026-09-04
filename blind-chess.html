@@ -229,9 +229,18 @@
      controls row, the review bar and the puzzle ladder are all this with
      different padding — none of them may invent a second panel, because two
      panels are how a page starts looking auto-generated. */
+  /* Every box on the page keeps its 1px border but paints it in its own
+     background colour. Those backgrounds are washes and gradients, so no
+     single colour *is* the background; `transparent` is the one value that
+     always matches, because a box's background is painted under its border
+     (background-clip defaults to border-box) and shows through it exactly. A
+     translucent colour laid on top would double up into a darker ring
+     instead. The lip stays: it is a shadow, not the border. The state
+     colours — gold on hover, active or "yours", red on an unanswered form —
+     are indicators, and stay. */
   .panel{
     background:linear-gradient(180deg, var(--surf-1), var(--surf-2));
-    border:1px solid var(--line);
+    border:1px solid transparent;
     border-radius:var(--radius);
     box-shadow:var(--sh-3), var(--lip);
   }
@@ -484,7 +493,7 @@
     width:min(100%,var(--board-max));
     display:flex; align-items:center; justify-content:space-between; gap:12px;
     padding:4px 14px; border-radius:var(--r-md);
-    border:1px solid var(--line); background:var(--well);
+    border:1px solid transparent; background:var(--well);
     box-shadow:var(--sh-1), var(--lip);
     min-height:36px;   /* slim: every pixel here is a pixel off the board */
   }
@@ -597,7 +606,7 @@
   .room-who{
     font-size:17.5px; letter-spacing:.05em; color:var(--text);
     padding:8px 14px; border-radius:999px;
-    border:1px solid var(--line); background:rgba(0,0,0,.3);
+    border:1px solid transparent; background:rgba(0,0,0,.3);
     max-width:220px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;
   }
   .room-who:empty{display:none;}
@@ -622,7 +631,7 @@
   .clock{
     display:flex; align-items:center; justify-content:space-between; gap:10px;
     padding:9px 16px; border-radius:var(--r-md);
-    border:1px solid var(--line); background:var(--well);
+    border:1px solid transparent; background:var(--well);
     box-shadow:inset 0 1px 3px rgba(0,0,0,.35);
     transition:border-color .2s var(--ease), background .2s var(--ease),
                box-shadow .2s var(--ease);
@@ -1031,15 +1040,15 @@
   /* the dropdowns: open on hover, and on keyboard focus so they are reachable */
   /* Dark glass rather than a grey panel: the sky shows through it, blurred, so
      the menu reads as something laid over the night rather than a chip of a
-     different interface. The hairline is gold at low strength, which is the
-     only colour the rest of the page uses. */
+     different interface. The border is transparent, like every box's — see
+     .panel. */
   .menu, .submenu{
     position:absolute; z-index:60; min-width:184px;
     padding:5px; border-radius:11px;
     background:rgba(9,11,19,.86);
     -webkit-backdrop-filter:blur(14px) saturate(120%);
             backdrop-filter:blur(14px) saturate(120%);
-    border:1px solid rgba(217,164,65,.22);
+    border:1px solid transparent;
     box-shadow:0 16px 38px rgba(0,0,0,.72), inset 0 1px 0 rgba(255,255,255,.05);
     opacity:0; visibility:hidden; transform:translateY(-6px);
     transition:opacity .16s ease, transform .16s ease, visibility .16s;
@@ -1156,7 +1165,7 @@
     display:flex; flex-direction:column; align-items:center; text-align:center;
     padding:26px 20px 24px; border-radius:16px; line-height:1.45;
     background:linear-gradient(180deg, var(--surf-1), var(--surf-2));
-    border:1px solid var(--line);
+    border:1px solid transparent;
     box-shadow:0 14px 34px rgba(0,0,0,.36);
     cursor:pointer; color:var(--text);
     transition:transform .16s ease, border-color .22s ease, background .22s ease;
@@ -1272,6 +1281,39 @@
   }
   .coach-why{margin-top:9px; font-size:16px; line-height:1.65; color:#c9cdd8;}
   .coach-why em{color:var(--gold-soft); font-style:normal;}
+
+  /* ---------- what the position is about ---------- */
+  .cc-concept{margin-bottom:11px;}
+  .cc-concept + .cc-concept{padding-top:10px; border-top:1px solid rgba(255,255,255,.06);}
+  .cc-head{display:flex; align-items:baseline; gap:9px; flex-wrap:wrap;}
+  .cc-name{
+    font-family:Georgia,serif; font-size:16px; letter-spacing:.05em; color:var(--gold-soft);
+  }
+  .cc-secondary .cc-name{font-size:13.5px; color:#c9cdd8;}
+  /* Confidence is shown, never implied. A rule of thumb that matched perfectly
+     is still a rule of thumb, and the reader is told which they are reading. */
+  .cc-conf{
+    font-size:10px; letter-spacing:.12em; text-transform:uppercase;
+    padding:1px 6px; border-radius:999px; border:1px solid currentColor; opacity:.85;
+  }
+  .cc-conf.high{color:var(--good);}
+  .cc-conf.medium{color:var(--gold-soft);}
+  .cc-conf.low{color:var(--muted);}
+  .cc-kind{font-size:10.5px; letter-spacing:.06em; color:var(--muted);}
+  .cc-say{margin-top:6px; font-size:12.5px; line-height:1.65; color:#c9cdd8;}
+  .cc-why{margin:6px 0 0; padding-left:16px; font-size:12px; line-height:1.6; color:var(--muted);}
+  .cc-why li{margin:2px 0;}
+  .cc-hedge, .cc-caution{
+    margin-top:6px; font-size:11.5px; line-height:1.55; color:var(--muted); font-style:italic;
+  }
+  .cc-caution::before{content:'\2014\00a0';}
+  .cc-alt{
+    margin-top:11px; padding-top:9px; border-top:1px solid rgba(255,255,255,.06);
+    font-size:12px; line-height:1.6; color:var(--muted);
+  }
+  .cc-alt b{color:#c9cdd8; font-weight:600;}
+  /* The refusal, shown rather than papered over: an empty result is an answer. */
+  .cc-none{font-size:12.5px; line-height:1.65; color:var(--muted); font-style:italic;}
 
   /* ---------- review arrows and move marks ---------- */
   .arrows{position:absolute; inset:0; pointer-events:none; overflow:visible;}
@@ -1555,7 +1597,7 @@
     width:min(100%,var(--board-max)); aspect-ratio:1/1;
     max-height:calc(100vh - var(--chrome) - 200px);
     display:flex; align-items:center; justify-content:center;
-    border-radius:14px; border:1px solid var(--line);
+    border-radius:14px; border:1px solid transparent;
     background:radial-gradient(circle at 50% 42%, rgba(255,255,255,.035), rgba(6,7,10,.9) 72%);
   }
   .pz-stage-in{text-align:center; padding:20px;}
@@ -1635,7 +1677,7 @@
   @media (max-width:520px){ .pr-figs{grid-template-columns:repeat(2,1fr);} }
   .pr-fig{
     padding:12px 8px; border-radius:11px; text-align:center;
-    background:var(--well); border:1px solid var(--line);
+    background:var(--well); border:1px solid transparent;
   }
   .pr-fig b{
     display:block; font-size:clamp(21.5px,3.22vw,29.5px); font-weight:600;
@@ -1694,7 +1736,7 @@
     width:min(100%,540px); padding:clamp(50px,12vh,96px) 20px; border-radius:18px;
     text-align:center; line-height:1.9;
     background:linear-gradient(160deg, var(--surf-1), var(--surf-2));
-    border:1px dashed rgba(217,164,65,.24); color:var(--muted);
+    border:1px dashed transparent; color:var(--muted);
     font-size:16px; letter-spacing:.1em;
   }
 
@@ -1739,7 +1781,7 @@
   .pr-sub:empty{display:none;}
   .pr-seq{
     margin-top:12px; padding:11px 13px; border-radius:10px;
-    background:var(--well); border:1px solid var(--line);
+    background:var(--well); border:1px solid transparent;
     font-family:var(--font);
     font-size:17px; line-height:1.85; color:#d3d7e1; letter-spacing:.03em;
   }
@@ -1787,7 +1829,7 @@
   .pr-log{
     height:min(30vh,232px); overflow-y:auto; margin-top:12px;
     padding:12px 13px; border-radius:10px;
-    background:var(--well); border:1px solid var(--line);
+    background:var(--well); border:1px solid transparent;
     font-family:var(--font);
     font-size:16px; line-height:1.75;
   }
@@ -1805,7 +1847,7 @@
   .pr-result div{
     display:flex; align-items:baseline; justify-content:space-between; gap:14px;
     padding:9px 13px; border-radius:10px;
-    background:var(--well); border:1px solid var(--line);
+    background:var(--well); border:1px solid transparent;
     font-size:13px; letter-spacing:.18em; text-transform:uppercase; color:var(--muted);
   }
   .pr-result div b{
@@ -1814,7 +1856,7 @@
   }
   .pr-tip{
     margin:0 0 18px; padding:11px 13px; border-radius:10px; text-align:left;
-    background:rgba(217,164,65,.08); border:1px solid rgba(217,164,65,.24);
+    background:rgba(217,164,65,.08); border:1px solid transparent;
     font-size:16px; line-height:1.65; color:#cfd3dd;
   }
   .pr-tip b{color:var(--gold-soft); font-weight:600;}
@@ -1849,7 +1891,7 @@
     display:flex; align-items:center; gap:15px; width:100%;
     padding:14px 18px; border-radius:12px; text-align:left;
     background:linear-gradient(180deg, rgba(28,31,40,.92), rgba(18,20,26,.92));
-    border:1px solid var(--line); color:var(--text);
+    border:1px solid transparent; color:var(--text);
   }
   .lsn-row:hover{border-color:var(--gold); transform:translateY(-1px);}
   .lsn-row .num{
@@ -1972,7 +2014,7 @@
   }
   .lsn-ask{
     margin-top:13px; padding:11px 13px; border-radius:10px;
-    background:rgba(0,0,0,.28); border:1px solid var(--line);
+    background:rgba(0,0,0,.28); border:1px solid transparent;
     font-size:17.5px; line-height:1.6; color:var(--text);
   }
   .lsn-ask:empty{display:none;}
@@ -2138,7 +2180,7 @@
   .console.show{display:flex;}
   .log{
     height:min(48vh,380px); overflow-y:auto; padding:14px 16px; border-radius:10px;
-    background:var(--well); border:1px solid var(--line);
+    background:var(--well); border:1px solid transparent;
     font-family:var(--font);
     font-size:17.5px; line-height:1.75;
   }
@@ -2661,11 +2703,11 @@
   .chat-msg{
     max-width:92%; padding:6px 10px; border-radius:9px;
     overflow-wrap:anywhere;
-    background:rgba(255,255,255,.05); border:1px solid var(--line);
+    background:rgba(255,255,255,.05); border:1px solid transparent;
   }
   .chat-msg.mine{
     align-self:flex-end;
-    background:rgba(217,164,65,.14); border-color:rgba(217,164,65,.3);
+    background:rgba(217,164,65,.14); border-color:transparent;
   }
   .chat-who{
     display:block; font-size:12.5px; letter-spacing:.16em; text-transform:uppercase;
@@ -2813,7 +2855,7 @@
     position:relative;                       /* the dots menu hangs off this */
     display:flex; align-items:center; gap:13px;
     padding:11px 14px; border-radius:12px;
-    background:rgba(0,0,0,.24); border:1px solid var(--line);
+    background:rgba(0,0,0,.24); border:1px solid transparent;
   }
   .social-row:hover{border-color:#3a4152;}
   .social-face{
@@ -2857,7 +2899,7 @@
     background:rgba(9,11,19,.92);
     -webkit-backdrop-filter:blur(14px) saturate(120%);
             backdrop-filter:blur(14px) saturate(120%);
-    border:1px solid rgba(217,164,65,.22);
+    border:1px solid transparent;
     box-shadow:0 16px 38px rgba(0,0,0,.72), inset 0 1px 0 rgba(255,255,255,.05);
   }
   /* The list scrolls, so a menu on one of the last rows would open into the
@@ -2903,7 +2945,7 @@
   .note-row{
     display:flex; align-items:center; gap:12px;
     padding:10px 12px; border-radius:11px;
-    background:var(--well); border:1px solid var(--line);
+    background:var(--well); border:1px solid transparent;
   }
   .note-row .social-who{text-align:left;}
   /* "wants to be friends" is one line or it is nothing */
@@ -2960,7 +3002,7 @@
   .lb-row{
     display:flex; align-items:center; gap:14px;
     padding:11px 14px; border-radius:13px;
-    background:rgba(0,0,0,.28); border:1px solid var(--line);
+    background:rgba(0,0,0,.28); border:1px solid transparent;
   }
   /* your own row, wherever it lands: the list is worth twice as much when you
      can find yourself in it without reading it */
@@ -3012,7 +3054,7 @@
        scrim over the page, and a translucent box there would read as a smudge
        rather than as something handed to you. Same colours, full weight. */
     background:var(--surf-solid);
-    border:1px solid var(--line);
+    border:1px solid transparent;
     box-shadow:0 30px 80px rgba(0,0,0,.6), var(--lip);
   }
   .modal h3{
@@ -3933,6 +3975,17 @@
             <h2>The Engine's Move</h2>
             <div class="coach-move" id="coachMove"></div>
             <div class="coach-why" id="coachWhy"></div>
+          </div>
+
+          <!-- review only: what the position is ABOUT, from the Education
+               System. Separate from the coach card on purpose. That one only
+               appears when there was a better move; this one has something to
+               say when the player found it too. And it is additive: if the
+               concept library or its corpus fails to load, this card never
+               shows and Study Board is exactly what it was before. -->
+          <div class="card panel concept-card" id="conceptCard" style="display:none">
+            <h2>What This Position Is About</h2>
+            <div class="cc-body" id="conceptBody"></div>
           </div>
 
           <div class="card panel rules-card" id="rulesCard">
@@ -6841,6 +6894,9 @@ function enterReview(){
   document.getElementById('reviewBar').style.display = 'flex';
   document.getElementById('screen-game').classList.add('reviewing');
   engineStart();
+  // Start fetching the concept library now rather than on the first render:
+  // it is 2.3MB of corpus and the player is about to read a card.
+  eduLoad();
   reviewGoto(0);
 }
 
@@ -6856,6 +6912,7 @@ function reviewClose(restore){
   document.getElementById('reviewBar').style.display = 'none';
   document.getElementById('screen-game').classList.remove('reviewing');
   document.getElementById('coachCard').style.display = 'none';
+  document.getElementById('conceptCard').style.display = 'none';
   document.getElementById('arrows').innerHTML = '';
   document.getElementById('marks').innerHTML = '';
 }
@@ -7372,6 +7429,16 @@ function reviewRender(){
   if (!REV.on) return;
   const ply = REV.ply, last = REV.states.length - 1;
   const st = REV.states[ply];
+
+  /* What the position is ABOUT, from education/. Deliberately ABOVE the four
+     quiet() returns below: those are all about the ENGINE — it cannot run, it
+     is still starting, the game is over, the search has not answered yet — and
+     none of them is a reason to stop naming what is on the board. The
+     knowledge base does not need an engine and says so itself when it has
+     none, which is exactly the case a player on a browser without WebAssembly
+     is in. Additive and quiet on failure: if education/ is not there this does
+     nothing at all. */
+  eduAnalyse(ply);
   // ply i is the position *before* move i, so it is move i under the microscope
   // here: number (i>>1)+1, and White on even plies.
   document.getElementById('revCount').textContent =
@@ -7455,6 +7522,325 @@ function reviewRender(){
   }
 
   drawReviewOverlay(played, bestMove, v);
+}
+
+/* ============================================================
+   THE EDUCATION LAYER — what the position is ABOUT
+
+   Study Board already says whether a move was good: judgeMove() turns
+   Stockfish's numbers into a verdict, and describeBest() writes what it can
+   see. Its own comment names the limit — "This is not chess understanding,
+   and it only ever claims what it can see." It can see that a knight is on
+   d5 and cannot say that this is an outpost, what makes a square one, or
+   when the idea does not apply.
+
+   That half lives in education/ — 137 researched concepts, and one entry
+   point, analyzeWithEducation(). This section is the wiring, and it is
+   deliberately thin: it fetches the library, hands it the corpus, gives it
+   the position and the engine's numbers, and renders what comes back. It
+   contains no chess knowledge of its own and must not grow any. A second
+   opinion about what a fork is would be a second knowledge system, which is
+   the one thing this integration exists not to build.
+
+   THE DIVISION OF LABOUR IS THE POINT, and it runs both ways. Stockfish
+   decides whether a move works; the knowledge base is never asked. The
+   knowledge base names the idea; the engine is never asked to. The API
+   enforces its own half — without an engine result it refuses to say a move
+   was good, and it will not reach for the nearest label when nothing
+   matches. The card below shows that refusal rather than hiding it, because
+   "nothing here matches a researched concept" is a true answer and a guess
+   dressed as a concept is not.
+
+   ADDITIVE, AND IT FAILS QUIET. Everything here hangs off one call at the
+   end of reviewRender(). If the fetch fails — an old cache, a container
+   built without education/, a page opened from the filesystem — EDU.ready
+   stays false, #conceptCard never appears, and Study Board is exactly what
+   it was. server/test_study_education.js asserts that path, because it is
+   the one the tests' own fetch stub takes.
+
+   THE LIBRARY IS EVALUATED, NOT COPIED. education/lib/*.js are served as
+   they are and run here through a small CommonJS shim, which is the mirror
+   image of tools/page_chess.js: that file lifts this page's chess into Node
+   so the tests can run it, and this lifts the tests' library into the page
+   so a player gets the same answer. A copy would drift; 973 assertions
+   would be about something other than what is on screen.
+   ============================================================ */
+const EDU_VERSION = 1;             // ?v= on the library and the bundle; bump when either changes
+const EDU_LEVEL = 'intermediate';  // the reader the wording is written for
+const EDU_DEPTH = 'normal';
+const EDU_MAX_SECONDARY = 3;
+const EDU = { ready:false, failed:false, loading:null, api:null, matchers:null, errs:0 };
+
+/* The page's own chess, under the names education/lib/features.js expects.
+ *
+ * tools/page_chess.js cuts these same declarations out of this file so Node
+ * can run them; here they already exist, so the whole port is this object.
+ * The list is that file's DECLS and FNS, in its order — if a name is renamed
+ * there this throws here, which is the same loud failure and for the same
+ * reason. Built inside a function so a missing name fails the LOAD and not
+ * the page. */
+function eduChess(){
+  return { W:W, B:B,
+    VAL:VAL, FILES:FILES, rowOf:rowOf, colOf:colOf, SQNAME:SQNAME, uciOf:uciOf, sqName:sqName,
+    onBoard:onBoard, other:other, idCounter:idCounter, mk:mk, DIR_N:DIR_N, DIR_B:DIR_B,
+    DIR_R:DIR_R, DIR_K:DIR_K, PIECE_WORD:PIECE_WORD, VERDICT:VERDICT, LEVELS:LEVELS,
+    levelFor:levelFor, PST:PST,
+    startBoard:startBoard, newState:newState, cloneState:cloneState, posKey:posKey,
+    fenOf:fenOf, stateFromFEN:stateFromFEN, slide:slide, step:step, addPawn:addPawn,
+    pseudoMoves:pseudoMoves, isAttacked:isAttacked, kingSq:kingSq, inCheck:inCheck,
+    makeMove:makeMove, legalMoves:legalMoves, toSAN:toSAN, mirror:mirror, evaluate:evaluate,
+    attackersOf:attackersOf, defendersOf:defendersOf, see:see, sliderLines:sliderLines,
+    betweenSq:betweenSq, findMotifs:findMotifs, winPct:winPct, sacrificeSize:sacrificeSize,
+    sfScore:sfScore, judgeMove:judgeMove, describeBest:describeBest, pvLine:pvLine,
+    materialFor:materialFor, materialWord:materialWord, readInfoLine:readInfoLine,
+    botShortcut:botShortcut, botChoice:botChoice };
+}
+
+/* Evaluate one CommonJS file with a require() that only knows the three names
+ * the library actually asks for. fs and path are stubs and are never called:
+ * knowledge() is short-circuited by setKnowledge() before any analysis runs,
+ * and if that ever stopped being true the stub throws rather than quietly
+ * returning nothing. */
+function eduModule(src, name, loaded, chess){
+  const module = { exports:{} };
+  /* `path` has to WORK, not merely exist: analyze.js computes a ROOT at load
+     time and would die on the first line. It resolves nothing here — the
+     result is only ever handed back to `fs`, which is where the refusal
+     belongs. `fs` throws on use rather than returning empty, because a corpus
+     that silently came back empty would look exactly like a position with no
+     concepts in it, and that is the one failure this integration must never
+     produce quietly. */
+  const req = function(id){
+    if (/page_chess/.test(id)) return chess;
+    if (/features\.js$/.test(id)) return loaded.features;
+    if (/matchers\.js$/.test(id)) return loaded.matchers;
+    if (id === 'path') return { join:function(){ return Array.prototype.join.call(arguments, '/'); },
+                                dirname:function(x){ return String(x).replace(/\/[^/]*$/, ''); },
+                                basename:function(x){ return String(x).split('/').pop(); },
+                                relative:function(a, b){ return b; } };
+    if (id === 'fs')
+      return new Proxy({}, { get:function(t, k){
+        return function(){ throw new Error('education: fs.' + String(k) +
+          ' in the browser — setKnowledge() should have supplied the corpus'); }; } });
+    throw new Error('education: unexpected require(' + id + ') from ' + name);
+  };
+  new Function('module', 'exports', 'require', '__dirname', '__filename', src)(
+    module, module.exports, req, '/education/lib', '/education/lib/' + name);
+  return module.exports;
+}
+
+/* Fetch the library and the corpus once. Memoised on the promise, so pressing
+ * ◀ ▶ during the fetch does not start a second one. */
+function eduLoad(){
+  if (EDU.loading) return EDU.loading;
+  const v = '?v=' + EDU_VERSION;
+  const get = function(url){
+    return fetch(url + v).then(function(r){
+      if (!r.ok) throw new Error('http ' + r.status + ' for ' + url);
+      return r;
+    });
+  };
+  EDU.loading = Promise.all([
+    get('education/lib/features.js').then(function(r){ return r.text(); }),
+    get('education/lib/matchers.js').then(function(r){ return r.text(); }),
+    get('education/lib/analyze.js').then(function(r){ return r.text(); }),
+    get('education/dist/education-bundle.json').then(function(r){ return r.json(); }),
+  ]).then(function(parts){
+    const chess = eduChess();
+    const loaded = {};
+    loaded.features = eduModule(parts[0], 'features.js', loaded, chess);
+    loaded.matchers = eduModule(parts[1], 'matchers.js', loaded, chess);
+    const api = eduModule(parts[2], 'analyze.js', loaded, chess);
+    // The corpus knowledge() would have read off disk, handed in whole.
+    api.setKnowledge({ concepts: parts[3].concepts, warnings: parts[3].warnings });
+    EDU.api = api;
+    // MATCHER_ERRORS lives on matchers.js and analyze.js does not re-export it.
+    // Keeping the module rather than reaching through the API is the difference
+    // between a guard and a branch that can never fire — which is the exact bug
+    // that array was added to catch, so getting it wrong here would have been
+    // funny in the wrong way.
+    EDU.matchers = loaded.matchers;
+    EDU.ready = true;
+    return api;
+  }).catch(function(e){
+    // Not an error the player needs. The card simply never appears.
+    EDU.failed = true;
+    if (typeof console !== 'undefined') console.warn('education layer unavailable:', e && e.message);
+    return null;
+  });
+  return EDU.loading;
+}
+
+function eduEsc(s){
+  return String(s == null ? '' : s)
+    .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+}
+
+/* WHAT KIND OF CLAIM THIS IS, in the reader's words. The record's own
+ * knowledge_type decides and this page only translates it — a table here that
+ * invented its own categories would be a second opinion about what kind of
+ * thing a chess idea is, and that is the knowledge base's job.
+ *
+ * Every type in the corpus has an entry, and an unknown one falls through to
+ * nothing rather than to a guess. A first version sorted the twelve types into
+ * three buckets and labelled `hanging-piece` "a rule of the game", because
+ * `terminology` landed in the default. A term is not a rule, and a label that
+ * is wrong about what KIND of knowledge it is undermines the confidence badge
+ * sitting beside it. */
+const EDU_KIND_WORD = {
+  'tactical-motif': 'tactical',
+  'mating-pattern': 'a mating pattern',
+  'positional-concept': 'positional',
+  'strategic-principle': 'strategic',
+  'rule-of-thumb': 'a rule of thumb',
+  'practical-guideline': 'a practical guideline',
+  'historical-teaching-principle': 'a teaching principle',
+  'official-rule': 'a rule of the game',
+  'proven-result': 'proven',
+  'tablebase-fact': 'proven by tablebase',
+  'named-theoretical-position': 'a known position',
+  'terminology': 'terminology',
+};
+
+function eduKind(kt){
+  return EDU_KIND_WORD[kt] || '';
+}
+
+/* SAN for one UCI move in one position, using the page's own generator and
+ * toSAN — the review already refuses to keep a second opinion about how a
+ * move is spelled, and neither does this. */
+function eduSan(st, uci){
+  if (!st || !uci) return null;
+  let ms;
+  try { ms = legalMoves(st); } catch (e) { return null; }
+  for (let i = 0; i < ms.length; i++) if (uciOf(ms[i]) === uci) return toSAN(st, ms[i], ms);
+  return null;
+}
+
+/* One concept, as html. `because` is what Layer 3 actually observed on THIS
+ * board, which is the answer to "why does that apply here" and the reason the
+ * card quotes it rather than the definition. */
+function eduConceptHTML(c, primary){
+  const out = [];
+  const conf = ['low','medium','high'].indexOf(c.confidence) >= 0 ? c.confidence : 'low';
+  out.push('<div class="cc-head"><span class="cc-name">' + eduEsc(c.name || c.id) + '</span>' +
+           '<span class="cc-conf ' + conf + '">' + eduEsc(conf) + '</span>' +
+           (eduKind(c.knowledge_type)
+             ? '<span class="cc-kind">' + eduEsc(eduKind(c.knowledge_type)) + '</span>' : '') + '</div>');
+  if (primary && c.wording) out.push('<div class="cc-say">' + eduEsc(c.wording) + '</div>');
+  const why = (c.because || []).slice(0, primary ? 3 : 1);
+  if (why.length)
+    out.push('<ul class="cc-why">' + why.map(function(w){
+      return '<li>' + eduEsc(w) + '</li>';
+    }).join('') + '</ul>');
+  if (primary){
+    // A rule of thumb that matched perfectly is still a rule of thumb.
+    if (c.hedge) out.push('<div class="cc-hedge">' + eduEsc(c.hedge) + '</div>');
+    // The record's own reason not to trust the match, strongest evidence
+    // first. This is the false-positive protection made visible rather than
+    // used silently and thrown away.
+    const caution = (c.cautions || [])[0];
+    if (caution) out.push('<div class="cc-caution">' + eduEsc(caution.text) + '</div>');
+  }
+  return '<div class="cc-concept' + (primary ? '' : ' cc-secondary') + '">' + out.join('') + '</div>';
+}
+
+/* The card. Everything here comes out of the API result or out of numbers the
+ * review already had; nothing is invented on the way to the screen. */
+function eduRender(r, st, before){
+  const card = document.getElementById('conceptCard');
+  const body = document.getElementById('conceptBody');
+  if (!card || !body) return;
+  const cs = (r && r.concepts) || [];
+  const out = [];
+
+  if (!cs.length){
+    // Refusal 1, shown. The API's own note says it better than a paraphrase
+    // would, and a nearest-label fallback here would undo the reason to use
+    // this system at all.
+    const note = (r && (r.notes || []).filter(function(n){ return /no researched concept/.test(n); })[0]);
+    out.push('<div class="cc-none">' + eduEsc(note ||
+      'Nothing in this position matches a researched concept in this knowledge base.') + '</div>');
+  } else {
+    out.push(eduConceptHTML(cs[0], true));
+    const rest = cs.slice(1, 1 + EDU_MAX_SECONDARY);
+    for (let i = 0; i < rest.length; i++) out.push(eduConceptHTML(rest[i], false));
+  }
+
+  // The alternatives the engine actually weighed. MultiPV is already 2 for the
+  // review, so this is the top line and the runner-up — the same two numbers
+  // the verdict was decided by, said in words.
+  if (before && before.lines && before.lines.length > 1){
+    const alts = [];
+    for (let i = 0; i < before.lines.length && alts.length < 2; i++){
+      const ln = before.lines[i];
+      const san = eduSan(st, ln && ln.best);
+      if (san) alts.push('<b>' + eduEsc(san) + '</b> ' + eduEsc(fmtScore(ln, st.turn)));
+    }
+    if (alts.length > 1)
+      out.push('<div class="cc-alt">The engine weighed ' + alts.join(' against ') + '.</div>');
+  }
+
+  body.innerHTML = out.join('');
+  card.style.display = '';
+}
+
+/* Called at the end of reviewRender(). Synchronous once the library is in;
+ * before that it starts the fetch and leaves the card hidden, then renders
+ * when it arrives — guarded on the ply, exactly as reviewAnalyse() is, so a
+ * slow load cannot draw a card for a position the player has left. */
+function eduAnalyse(ply){
+  const card = document.getElementById('conceptCard');
+  if (!card) return;
+  if (EDU.failed){ card.style.display = 'none'; return; }
+  if (!EDU.ready){
+    card.style.display = 'none';
+    eduLoad().then(function(){
+      if (EDU.ready && REV.on && REV.ply === ply) eduAnalyse(ply);
+    });
+    return;
+  }
+  const st = REV.states[ply];
+  const played = G.uci[ply] || null;
+  if (!st){ card.style.display = 'none'; return; }
+
+  const before = reviewCached(ply);
+  // Refusal 2 is the API's, not this page's: with no engine result it says so
+  // and claims nothing about the move. So the numbers are passed when they are
+  // there and withheld when they are not, rather than being faked.
+  const engine = (before && (before.cp !== null || before.mate !== null)) ? {
+    eval_cp: sfScore(before),
+    best_move: before.best || null,
+    engine_id: 'Stockfish WASM (single-threaded, movetime ' + SF_MOVETIME + 'ms)',
+  } : null;
+
+  let r = null;
+  const errsBefore = ((EDU.matchers || {}).MATCHER_ERRORS || []).length;
+  try {
+    r = EDU.api.analyzeWithEducation({
+      fen: fenOf(st), move: played, engine: engine,
+      level: EDU_LEVEL, depth: EDU_DEPTH,
+    });
+  } catch (e){
+    if (typeof console !== 'undefined') console.warn('education analysis failed:', e && e.message);
+    card.style.display = 'none';
+    return;
+  }
+
+  // A bug the API found in its own output is returned rather than hidden, and
+  // is not swallowed here either. It never reaches the card; it reaches the
+  // console, where it can be fixed.
+  const bugs = (r.notes || []).filter(function(n){ return /^(TEMPLATE|PHRASING) BUG/.test(n); });
+  if (bugs.length && typeof console !== 'undefined') console.warn('education:', bugs.join(' | '));
+  if ((r.phrasing_violations || []).length && typeof console !== 'undefined')
+    console.warn('education: banned phrasing', r.phrasing_violations);
+  const errsAfter = ((EDU.matchers || {}).MATCHER_ERRORS || []).length;
+  if (errsAfter > errsBefore && typeof console !== 'undefined'){
+    EDU.errs = errsAfter;
+    console.warn('education: a matcher threw — see MATCHER_ERRORS');
+  }
+
+  eduRender(r, st, before);
 }
 
 /* ============================================================
