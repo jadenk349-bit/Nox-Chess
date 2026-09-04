@@ -2474,8 +2474,8 @@
     display:grid;
     grid-template-columns:minmax(0,1.12fr) minmax(0,1fr);
     grid-template-areas:"badge tier" "badge elo" "badge cap" "badge gauge" "badge pick" "badge start" "badge note";
-    column-gap:42px; row-gap:0;
-    width:100%; max-width:880px; min-height:480px;
+    column-gap:48px; row-gap:0;
+    width:100%; max-width:1040px; min-height:550px;
     margin:clamp(18px,5vh,56px) auto 36px;
     padding:44px 42px 38px 24px;
     align-items:center; justify-content:normal; text-align:left;
@@ -2503,52 +2503,52 @@
   }
   #screen-ranked .rank-tier{
     grid-area:tier; margin:0; padding:0;
-    color:var(--tint-lit); font-size:clamp(23px,3vw,31px); letter-spacing:.20em;
+    color:var(--tint-lit); font-size:clamp(28px,3.6vw,38px); letter-spacing:.20em;
   }
   #screen-ranked .rank-tier::before{content:none;}
   #screen-ranked .rank-elo{
-    grid-area:elo; margin:12px 0 0; font-size:clamp(56px,7vw,78px);
+    grid-area:elo; margin:12px 0 0; font-size:clamp(68px,8.5vw,96px);
     font-weight:400; color:#eeeae2; background:none;
     -webkit-text-fill-color:currentColor;
   }
   #screen-ranked .rank-elo-cap{
     grid-area:cap; margin-top:7px; color:var(--tint-lit); letter-spacing:.32em;
     font-family:system-ui,-apple-system,"Segoe UI",sans-serif;
-    font-size:11px; font-weight:500; line-height:16px;
+    font-size:13px; font-weight:500; line-height:19px;
     text-shadow:0 0 14px var(--tint-glow);
   }
   #screen-ranked .rank-gauge{grid-area:gauge; margin-top:26px;}
   /* The track is quiet machined metal; only earned progress catches light.
      In particular, a rating at its tier floor must still show zero fill. */
   #screen-ranked .gauge-track{
-    height:12px; border:0; border-radius:6px;
+    height:16px; border:0; border-radius:8px;
     background:linear-gradient(180deg,#090d14 0%,#1c2633 48%,#303c4b 100%);
     box-shadow:0 1px 0 rgba(191,211,236,.13),inset 0 1px 2px rgba(0,0,0,.75);
   }
   #screen-ranked .gauge-fill{
-    border-radius:6px;
+    border-radius:8px;
     background:linear-gradient(90deg,var(--tint),var(--tint-lit));
     box-shadow:inset 0 1px 0 rgba(255,255,255,.42),0 0 10px var(--tint-glow);
   }
   #screen-ranked .gauge-ends{
     color:#a8b5c5; letter-spacing:.08em; margin-top:10px;
     font-family:system-ui,-apple-system,"Segoe UI",sans-serif;
-    font-size:12px;font-weight:500;line-height:16px;
+    font-size:14px;font-weight:500;line-height:20px;
     font-variant-numeric:tabular-nums;
   }
   #screen-ranked #rankFloor{color:var(--tint-lit);}
   #screen-ranked #rankCeil{color:#a8b5c5;}
   #screen-ranked .rank-pick{
-    grid-area:pick; margin-top:30px; padding:15px 12px;
+    grid-area:pick; margin-top:30px; padding:19px 16px;
     border-radius:6px; border-color:#38414d;
     background:linear-gradient(rgba(12,19,29,.40),rgba(7,12,20,.72)),url("assets/moon.jpg?v=1") center 44% / cover; color:#e2e6ec;
-    font-size:16px; letter-spacing:.10em; box-shadow:inset 0 1px 0 rgba(255,255,255,.035);
+    font-size:20px; letter-spacing:.10em; box-shadow:inset 0 1px 0 rgba(255,255,255,.035);
   }
   #screen-ranked .rank-pick:hover{border-color:var(--tint);}
   #screen-ranked .rank-pick.set{border-color:var(--tint);color:var(--tint-lit);background:linear-gradient(rgba(12,19,29,.32),rgba(7,12,20,.65)),url("assets/moon.jpg?v=1") center 44% / cover;}
   #screen-ranked .rank-start{
-    grid-area:start; margin-top:10px; padding:15px 12px;
-    border-radius:6px; font-size:17px; letter-spacing:.16em;
+    grid-area:start; margin-top:10px; padding:19px 16px;
+    border-radius:6px; font-size:21px; letter-spacing:.16em;
   }
   /* Excluding searching is essential: its longhand background and animation
      continue to be owned by #btnRankStart.searching below. */
@@ -2559,28 +2559,35 @@
   #screen-ranked .rank-start.dim{
     background:linear-gradient(rgba(10,15,24,.58),rgba(5,9,16,.79)),url("assets/moon.jpg?v=1") center 72% / cover;border-color:#38414e;color:#929aa8;
   }
-  #screen-ranked .rank-note{grid-area:note;margin-top:16px;font-size:14px;color:#a2abb8;line-height:1.55;letter-spacing:.025em;}
+  #screen-ranked .rank-note{grid-area:note;margin-top:18px;font-size:16px;color:#a2abb8;line-height:1.55;letter-spacing:.025em;}
   #screen-ranked .rank-note:empty{margin-top:0;}
   #rankSetOverlay .rank-modal{
-    background:linear-gradient(150deg,#18202c,#0b111b);border-color:#455062;
+    max-width:500px; padding:34px; max-height:calc(100dvh - 40px); overflow-y:auto;
+    background:linear-gradient(150deg,rgba(12,18,28,.58),rgba(7,12,21,.83)),url("assets/moon.jpg?v=1") center / cover;
+    border-color:#657082;
     box-shadow:0 24px 70px rgba(0,0,0,.7),inset 0 1px 0 rgba(255,255,255,.06);
   }
-  #rankSetOverlay .rank-label{color:#b8c0cc;}
-  #rankSetOverlay .rank-opts button{background:#0e1520;border-color:#323e4e;border-radius:6px;color:#cbd1da;}
+  #rankSetOverlay .rank-label{color:#e0e4eb;font-size:17px;}
+  #rankSetOverlay .rank-opts button{font-size:19px;}
+  #rankSetOverlay .rank-opts.col button{padding:15px 16px;}
+  #rankSetOverlay .rank-opts.row button{padding:15px 8px;}
+  #rankSetOverlay .modal-x{width:36px;height:36px;font-size:24px;}
+  #rankSetOverlay .rank-opts button{background:rgba(8,14,23,.82);border-color:#4b586a;border-radius:6px;color:#cbd1da;}
   #rankSetOverlay .rank-opts button.active{background:#2d281e;border-color:#c5a367;color:#efd6a4;}
-  @media(max-width:680px){
+  @media(max-width:780px){
     #screen-ranked .ranked{
       grid-template-columns:minmax(0,1fr);
       grid-template-areas:"badge" "tier" "elo" "cap" "gauge" "pick" "start" "note";
-      max-width:460px; min-height:0; margin:12px auto 28px; padding:16px 24px 26px;
+      max-width:460px; min-height:0; margin:12px auto 28px; padding:16px 14px 28px;
       text-align:center;
     }
     #screen-ranked .ranked::before{content:none;}
-    #screen-ranked .rank-badge{height:auto;max-width:320px;}
-    #screen-ranked .rank-tier{margin-top:4px;font-size:26px;}
-    #screen-ranked .rank-elo{font-size:58px;margin-top:10px;}
+    #screen-ranked .rank-badge{height:auto;max-width:380px;}
+    #screen-ranked .rank-tier{margin-top:4px;font-size:32px;}
+    #screen-ranked .rank-elo{font-size:72px;margin-top:10px;}
     #screen-ranked .rank-gauge{margin-top:22px;}
     #screen-ranked .rank-pick{margin-top:24px;}
+    #rankSetOverlay .rank-modal{padding:30px 20px 24px;}
   }
 
   /* ---------- settings screen ---------- */
