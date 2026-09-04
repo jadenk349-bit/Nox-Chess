@@ -3084,14 +3084,14 @@
      window under the header.
 
      The panel itself has no ground of its own — no plate, no border, no blur.
-     The sky is the background, and the ten rows are the only things drawn on
-     it, each with just enough shading of its own to keep a name readable over
+     The sky is the background, and the twenty rows are the only things drawn
+     on it, each with just enough shading of its own to keep a name readable over
      a passing star.
 
      The badge art is here rather than the player's avatar, which costs
      something worth knowing about: the ranked screen fetches exactly one of
-     these files because only one is ever on it, and this list can put up to
-     seven of them on screen at a couple of hundred kilobytes each. They are
+     these files because only one is ever on it, and this list can put every
+     one of them on screen at a couple of hundred kilobytes each. They are
      fetched once per tier, not once per row, and the server serves the assets
      with a week of cache — but if this page ever needs to be light on a cold
      load, small copies of the badges are the first thing to make. */
@@ -3116,8 +3116,10 @@
     margin:0 0 clamp(16px,2.2vh,22px); text-align:left;
     font-size:14.5px; letter-spacing:.22em; text-transform:uppercase; color:var(--muted);
   }
-  /* Ten rows is the whole list and it is meant to be read at a glance, so the
-     panel grows to hold them; the cap is only there for a short window. */
+  /* Twenty rows is the whole list. The panel grows to hold as many as the
+     window has room for and scrolls for the rest — the top of the ladder is
+     what is read at a glance, and the tail is a short scroll away rather
+     than a second page. */
   .lb-list{display:flex; flex-direction:column; gap:9px; max-height:62vh; overflow-y:auto;}
   .lb-row{
     display:flex; align-items:center; gap:14px;
@@ -3357,7 +3359,7 @@
     <div class="home-body">
       <aside class="lb-panel" aria-labelledby="lbTitle">
         <h2 class="lb-head" id="lbTitle">Leaderboard</h2>
-        <p class="lb-cap">Top 10</p>
+        <p class="lb-cap">Top 20</p>
         <div class="lb-list" id="lbList"></div>
       </aside>
     </div>
@@ -13813,12 +13815,16 @@ document.getElementById('authClose').onclick  =
    The top of the ranked ladder, read straight out of profiles. It needs no
    account of its own: supabase-setup.sql makes that table readable by anon as
    well as authenticated, and rating is one of the columns the browser may
-   read and never write — so a guest sees exactly the ten names a signed-in
-   player sees, and neither of them can touch the numbers.
+   read and never write — so a guest sees exactly the twenty names a
+   signed-in player sees, and neither of them can touch the numbers.
 
    It is re-read on every open rather than kept for the session. It is one
    small query, and a ladder that is quietly out of date is worse company than
    one that takes a moment to arrive. */
+/* How much of the ladder is shown. Twenty is the whole list and there is no
+   "show more": the caption above the rows says the same number, so change
+   both or the panel will promise one thing and deliver another. */
+const LB_TOP = 20;
 const LB = { rows: null, loading: false, error: '', token: 0 };
 const lbList = document.getElementById('lbList');
 
@@ -13847,9 +13853,10 @@ async function loadBoard(){
       .order('rating', { ascending: false })
       // Ties are broken by name here rather than left to whatever order the
       // database felt like: everybody starts on the same rating, so without
-      // this the tenth and eleventh place could swap between two opens.
+      // this the twentieth and twenty-first place could swap between two
+      // opens.
       .order('display_name')
-      .limit(10);
+      .limit(LB_TOP);
     if (error) throw error;
     if (token !== LB.token) return;          // a later read has already answered
     LB.rows = (data || []).map(asPerson);
