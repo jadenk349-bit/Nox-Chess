@@ -618,7 +618,13 @@ def main():
     listed = [r for r in s2.expect("rooms")["rooms"] if r["minutes"] == 48]
     check("that room reaches the list", len(listed) == 1, "(%s)" % listed)
     s2.send(t="join", room=listed[0]["id"])
-    n1 = s1.expect("start"); n2 = s2.expect("start")
+    # S2 may be handed the room list twice: handle_host() sends "hosting" to
+    # the host and only then broadcasts the list to its watchers, and S2
+    # subscribes in between — so under the wrong scheduling the host's
+    # broadcast reaches S2 after its own reply from handle_lobby() and before
+    # the start. A watcher seeing the same list twice is harmless by design,
+    # and either order is a correct one, which is what await_kind() is for.
+    n1 = s1.expect("start"); n2 = s2.await_kind("start")
     check("a finished player can join again", n1["game"] == n2["game"])
     check("and it is a different game from the one before",
           n1["game"] != st1["game"], "(%s vs %s)" % (n1["game"], st1["game"]))

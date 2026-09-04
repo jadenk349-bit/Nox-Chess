@@ -13610,7 +13610,14 @@ document.getElementById('authClose').onclick  =
 
    It is re-read on every open rather than kept for the session. It is one
    small query, and a ladder that is quietly out of date is worse company than
-   one that takes a moment to arrive. */
+   one that takes a moment to arrive.
+
+   The twenty-one system profiles at the top of it (supabase-system-profiles.sql)
+   arrive through this same query and nothing else: they are rows in profiles
+   with a rating, sorted with everybody by that rating, and a real player who
+   climbs past one goes above it. Nothing here knows they exist, and nothing
+   here may — a list that special-cases them is a list that lies about the
+   order. The flag that marks them is deliberately not selected. */
 const LB = { rows: null, loading: false, error: '', token: 0 };
 const lbList = document.getElementById('lbList');
 
@@ -13872,7 +13879,11 @@ async function runSearch(q){
     const { data, error } = await sb.from('profiles')
       .select('id, display_name, avatar_url, rating')
       // part of a name, anywhere in it, in any case: ChessMaster123 answers
-      // to "Chess", to "Master" and to "chessmaster" alike
+      // to "Chess", to "Master" and to "chessmaster" alike. The system
+      // profiles (supabase-system-profiles.sql) are found here like anybody
+      // — same table, same query — and a request sent to one is sent like
+      // any other and is simply never answered; the database refuses to
+      // make the friendship by any door.
       .ilike('display_name', '%' + term + '%')
       .neq('id', account.id)            // you are never a result of your own search
       .order('display_name')

@@ -29,6 +29,7 @@ node server/test_lessons.js              # walks the whole five-lesson course (~
 node server/test_ai_fallback.js          # what the ranked fallback bot decides
 node server/test_ai_game.js              # and playing a whole game against it, stub DOM
 python3 server/test_ai_match.py          # seating one: the queue, the race; no server needed
+python3 server/test_system_profiles.py   # the 21 leaderboard profiles: refused everywhere; no server needed
 python3 server/test_puzzle_rating.py     # the puzzle Elo handler; no server needed
 node tools/test_generate_puzzles.js      # the generator's own decisions, no engine
 python3 tools/check_supabase_puzzles.py  # RLS and column grants, against the real project
@@ -276,6 +277,41 @@ into `start_game_between()` like every other way into a Game. The rating is the
 one that game was played at rather than a fresh `player_rating_of()`, because
 it is the same opponent again and because that call may go to the network,
 which nothing holding the lock may do.
+
+**The twenty-one system profiles are accounts with no seat, and the fallback
+bot is a seat with no account.** `supabase-system-profiles.sql` — the fourth
+hand-run file, after setup and social — puts Arvenko, LeoFromPrague and
+nineteen others into `profiles` at fixed ratings, flagged `is_bot`. They are
+rows and nothing more: the leaderboard, the Social search and a friend request
+all find them through the same table and the same queries as anybody, and the
+page does not select the flag, let alone special-case it — a list that knew
+about them would be a list that could lie about the order. They are *not* the
+ranked fallback: `AI_NAMES` are names that live for one game and are never
+rows, and `test_system_profiles.py` checks the two lists share nothing.
+
+`profiles.id` is a foreign key to `auth.users`, and that relationship is kept
+rather than relaxed: each profile gets an `auth.users` row with a fixed
+UUIDv5 id, an address on `.invalid`, no password, a ban to the year 3000, and
+`is_bot` in `app_metadata` — the half of the metadata a user cannot write. The
+signup trigger then makes the profile and the file upserts it, so running the
+file again re-asserts the same twenty-one rows and creates nothing twice. Three
+triggers make the rest structural: a system profile's name, rating and flag
+survive any UPDATE (a bulk `set rating = 100` still runs for everybody and
+leaves them alone), a `friendships` row may never contain one by any door
+including `accept_friend_request()`, and one may never send a request. A
+request *to* one is allowed on purpose, so the Social page behaves as it does
+for anybody; it simply sits unanswered.
+
+On the server the exclusion is three checks deep, none of which is "they are
+offline". `handle_hello()` refuses the token — `supabase_db.bot_ids()` reads
+the flagged ids once every `BOT_IDS_TTL`, outside the lock, and the token's
+own `app_metadata` is a second answer that needs no database — leaving the
+connection a guest with `Client.is_bot` set. `may_play_ranked()` then refuses
+that flag by name (even on a server with accounts off, where every guest may),
+`handle_find()` refuses it at the door and again when choosing a partner, and
+`ai_fallback()`'s second-waiter check ignores it. `is_ai` and `is_bot` are two
+flags on purpose: one says the fallback is sitting here, the other says this
+token is a system profile, and nothing is ever both.
 
 **The rating only persists with `SUPABASE_SERVICE_KEY`.** The browser is not
 allowed to write `puzzle_rating`, so the server is the only thing that can, and
@@ -819,7 +855,8 @@ to token metadata, because that metadata is writable through Supabase's own
 API. Guest names go through the same rule.
 
 **`supabase-social.sql`** is the second hand-run file, after
-`supabase-setup.sql`. Friendships are **one row per pair**, stored sorted
+`supabase-setup.sql` (and `supabase-system-profiles.sql` the fourth, after
+both — see the system profiles above). Friendships are **one row per pair**, stored sorted
 (`user_low < user_high`, enforced by a check constraint): the primary key is
 then also the "already friends" guard, reading it from either side is the same
 query, and removing it is one delete both players see. There is no insert

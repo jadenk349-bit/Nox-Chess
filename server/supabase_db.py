@@ -192,3 +192,29 @@ def get_rating(user_id):
         return None
     value = rows[0].get("rating")
     return value if isinstance(value, int) else None
+
+
+def bot_ids():
+    """The account ids of every system profile, or None when they cannot be read.
+
+    The twenty-one names at the top of the ladder (supabase-system-profiles.sql)
+    are flagged `is_bot` in profiles, and this is the server's copy of that
+    flag: handle_hello() refuses a token for any id in it, so a system profile
+    can never become a verified client, never mind a ranked one. The set is
+    read whole rather than one id at a time because it is small, it changes
+    only when that file is run, and one request every few minutes is cheaper
+    than one per sign-in.
+
+    None on any failure — including a project that has not run the file yet,
+    where the column does not exist and PostgREST answers 400 — and the caller
+    keeps whatever it last read. The flag also travels in the token's
+    app_metadata, so a server that cannot read this still has a second way of
+    telling; this is the one that does not depend on how the token was made.
+    """
+    if not enabled():
+        return None
+    try:
+        rows = _request("GET", "/profiles?select=id&is_bot=eq.true")
+    except (urllib.error.URLError, ValueError, OSError):
+        return None
+    return {row.get("id") for row in rows or [] if isinstance(row.get("id"), str)}

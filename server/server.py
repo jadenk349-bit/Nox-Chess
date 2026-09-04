@@ -17,6 +17,11 @@ every instant of that wait, and the decision is made here, under the lock that
 pairs two people, because a browser cannot see the queue. See "the fallback
 opponent" below.
 
+The twenty-one system profiles at the top of the leaderboard are none of the
+above. They are rows in Supabase, not seats, and this server's only business
+with them is to refuse them: a token for one is never verified, and the ranked
+door and the queue turn the flag away again. See "the system profiles" below.
+
 The rules live in the browser: both clients run the same move generator, so the
 server's job is to pair players and to keep the two of them on one timeline. It
 enforces whose turn it is and that plies arrive in order — a move from the wrong
@@ -124,6 +129,35 @@ RATING_TTL = 120        # seconds a rating read out of Supabase is reused for
 RATING_CACHE_MAX = 500  # ... and how many players' worth of that to keep
 player_ratings = {}     # account id -> (rating, when it was read)
 
+# ------------------------------------------------------- the system profiles
+#
+# Twenty-one accounts at the top of the ladder that nobody can sign in as —
+# supabase-system-profiles.sql makes them, and flags each row `is_bot`. They
+# exist so that the leaderboard, the Social search and a friend request find
+# them exactly as they find anybody, through the profiles table and nothing
+# else. They are the opposite of the fallback opponent above in every way that
+# matters here: that is a seat with no account, and these are accounts with no
+# seat. `is_ai` on a Client says "the fallback bot is sitting here"; `is_bot`
+# says "this token belongs to a system profile", and the two are never both
+# true, because a system profile never gets a seat at all.
+#
+# The exclusion is structural rather than a matter of them being offline.
+# handle_hello() refuses the token — a system profile is a guest at most, never
+# a verified client — and may_play_ranked() and handle_find() refuse the flag
+# again, so a future route into the ranked queue would have to get past all
+# three. The fallback opponent never comes from this set: ai_fallback() builds
+# a BotClient out of AI_NAMES, which are names and not rows, and
+# test_system_profiles.py checks that the two lists share nothing.
+#
+# The server learns the set from the database (supabase_db.bot_ids()) rather
+# than from a list of its own, so there is one list of them and it is the one
+# the leaderboard reads. It is read at startup and again when it has gone
+# stale, always outside the lock — and the flag also rides in the token's
+# app_metadata, so a server that cannot read the table still refuses them.
+BOT_IDS_TTL = 600
+bot_ids = set()         # account ids flagged is_bot, as last read out of profiles
+bot_ids_read = 0.0      # when; 0 means never
+
 
 def log(*a):
     if LOG:
@@ -158,6 +192,12 @@ class Client:
         # A real player only. The bot below overrides it, and every test of
         # "is this a person" in this file reads it rather than the class.
         self.is_ai = False
+        # A token for one of the system profiles — the twenty-one leaderboard
+        # accounts nobody can sign in as. Set by handle_hello(), which also
+        # refuses to verify such a token; kept as a flag of its own so that
+        # the ranked door and the queue can refuse it again without having to
+        # know why the client is not verified. Never true on a BotClient.
+        self.is_bot = False
         # The countdown to a fallback opponent, while this client is in the
         # ranked queue and nobody has turned up. None whenever it is not.
         self.ai_timer = None
@@ -725,7 +765,7 @@ def ai_fallback(client, key, timer):
         queue = lobby.get(key) or []
         if client not in queue or client.queue_key != key:
             return                     # paired, gave up, or queued for something else
-        if any(c is not client and c.alive and not c.game for c in queue):
+        if any(c is not client and c.alive and not c.game and not c.is_bot for c in queue):
             return                     # a person is standing right there; they win
         leave_lobby(client)
         name = ai_name_for(client)
@@ -748,6 +788,41 @@ def ai_accept_draw(game):
         finish_game(game, "draw", None)
 
 
+def refresh_bot_ids():
+    """Re-read the system profiles' ids when the last read is stale.
+
+    Never called while holding the lock: it may be an HTTP round trip. A read
+    that fails keeps the last set rather than emptying it — an unreachable
+    database is not evidence that the profiles have gone.
+    """
+    global bot_ids, bot_ids_read
+    with lock:
+        stale = time.time() - bot_ids_read >= BOT_IDS_TTL
+    if not stale:
+        return
+    found = supabase_db.bot_ids()            # ...and this is the slow part
+    with lock:
+        bot_ids_read = time.time()
+        if found is not None:
+            bot_ids = found
+
+
+def is_system_profile(user_id, claims):
+    """Does this verified token belong to one of the system profiles?
+
+    Two independent answers, either of which is enough: the id is in the set
+    read out of profiles, or the token's own app_metadata says so.
+    app_metadata is the half of a Supabase user's metadata that the user
+    cannot write, which is what makes it worth reading — user_metadata is
+    written through the public API and would be a way for anybody to call
+    themselves a system profile, or to stop being one.
+    """
+    with lock:
+        flagged = user_id in bot_ids
+    meta = claims.get("app_metadata")
+    return flagged or (isinstance(meta, dict) and meta.get("is_bot") is True)
+
+
 def handle_hello(client, msg):
     """Identify the player, by token if they have one.
 
@@ -757,23 +832,38 @@ def handle_hello(client, msg):
     still play friendly games.
     """
     was = client.user_id
+    client.is_bot = False              # a second hello may be somebody else
     token = msg.get("token")
+
+    def turned_away(reason):
+        """The token is not accepted; the connection stays, as a guest."""
+        client.user_id = None
+        client.verified = False
+        client.name = clean_guest_name(msg.get("name"))
+        with lock:
+            unregister_user(was, client)   # no longer anybody, if it ever was
+        log("%s rejected token: %s" % (client.id, reason))
+        client.send({
+            "t": "welcome",
+            "verified": False,
+            "name": client.name,
+            "reason": str(reason),
+        })
+
     if token:
         try:
             claims = supabase_auth.verify(token)
         except supabase_auth.AuthError as err:
-            client.user_id = None
-            client.verified = False
-            client.name = clean_guest_name(msg.get("name"))
-            with lock:
-                unregister_user(was, client)   # no longer anybody, if it ever was
-            log("%s rejected token: %s" % (client.id, err))
-            client.send({
-                "t": "welcome",
-                "verified": False,
-                "name": client.name,
-                "reason": str(err),
-            })
+            turned_away(err)
+            return
+        refresh_bot_ids()              # outside the lock, and only when stale
+        if is_system_profile(claims["sub"], claims):
+            # A real signature over a real account, and still not a player:
+            # see "the system profiles". Refused like a bad token, except that
+            # the flag stays on the connection so that even the guest it is
+            # left as is turned away from the queue.
+            client.is_bot = True
+            turned_away("system profiles cannot sign in")
             return
         client.user_id = claims["sub"]
         client.name = supabase_auth.display_name(claims)
@@ -807,6 +897,13 @@ def may_play_ranked(client):
     game — the queue and a rematch of one — and a rule enforced at one of them
     is not a rule.
     """
+    if client.is_bot:
+        # Never, on any server. A system profile has no seat to play from and a
+        # rating that is not allowed to move; a hello that refused the token
+        # already made it a guest, and this refuses it again by name so that a
+        # server with accounts switched off — where every guest may play
+        # ranked — still does not seat one.
+        return False
     return client.verified or not supabase_auth.enabled()
 
 
@@ -819,6 +916,10 @@ def handle_find(client, msg):
     kind = msg.get("kind", "friendly")
     if kind not in ("ranked", "friendly"):
         kind = "friendly"
+    if client.is_bot:
+        # Not a player at all, in either queue: see "the system profiles".
+        client.send({"t": "error", "msg": "system profiles do not play"})
+        return
     if kind == "ranked" and not may_play_ranked(client):
         client.send({"t": "error", "msg": "ranked play needs a signed-in account"})
         return
@@ -835,7 +936,10 @@ def handle_find(client, msg):
             # already waiting here; asking twice changes nothing, and the
             # countdown to a fallback opponent stands rather than restarting
             return
-        waiting = [c for c in queue if c.alive and not c.game]
+        # ...and never a system profile, even if one were somehow standing
+        # here: the door above is the rule, and this is the rule again at the
+        # one place a candidate is actually chosen.
+        waiting = [c for c in queue if c.alive and not c.game and not c.is_bot]
         # Whoever you have just played is the one person New Game should not
         # hand you straight back: pressing it means "find me an opponent", and
         # being given the same one a second later reads as a rematch nobody
@@ -1760,6 +1864,13 @@ def handle_connection(sock, addr):
 
 def main():
     load_puzzles()
+    # Which accounts are the system profiles, if the database can say. Read
+    # here so the very first hello already knows; refreshed when stale.
+    refresh_bot_ids()
+    with lock:
+        known = len(bot_ids)
+    if known:
+        log("%d system profiles known — none of them can sign in or be matched" % known)
     # $PORT is what most hosts inject; --port wins when it is given explicitly
     port = int(os.environ.get("PORT") or 8787)
     if "--port" in sys.argv:
