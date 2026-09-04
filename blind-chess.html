@@ -19,6 +19,7 @@
     --line:rgba(150,170,215,.15);
     --gold:#d9a441;
     --gold-soft:#f0c775;
+    --board-art:url("assets/board-midnight.svg?v=1");
     --text:#e8e6e1;
     --muted:#8f93a0;
     --light-sq:#e9dcc3;
@@ -265,38 +266,40 @@
   .board-col{display:flex; flex-direction:column; align-items:center; gap:14px;}
 
   .board-frame{
-    padding:16px;
-    border-radius:18px;
-    background:linear-gradient(160deg,#2a2318,#171410 55%,#241d13);
-    border:1px solid #3a2f1f;
+    padding:clamp(12px,2.4vw,26px);
+    border-radius:7px;
+    background:linear-gradient(135deg,#344047 0%,#111d27 19%,#09121b 48%,#223440 78%,#111920);
+    border:1px solid #74664e;
     box-shadow:0 24px 60px rgba(0,0,0,.55), inset 0 1px 0 rgba(255,255,255,.06);
     position:relative;
     width:min(100%, var(--board-max));
   }
   .board-frame::after{
-    content:""; position:absolute; inset:8px; border-radius:12px;
-    border:1px solid rgba(217,164,65,.22); pointer-events:none;
+    content:""; position:absolute; inset:5px; border-radius:3px;
+    border:1px solid rgba(196,170,118,.25); pointer-events:none;
   }
 
   .board{
     position:relative;
     width:100%; aspect-ratio:1/1;
     container-type:size;
-    border-radius:6px; overflow:hidden;
-    box-shadow:inset 0 0 0 1px rgba(0,0,0,.5), 0 0 30px rgba(0,0,0,.35);
+    border-radius:1px; overflow:hidden;
+    background:#081522 var(--board-art) center / 100% 100%;
+    box-shadow:0 0 0 2px #b79b64, 0 0 0 4px #423a2e, 0 0 22px rgba(0,0,0,.65);
   }
   .squares{position:absolute; inset:0; display:grid; grid-template-columns:repeat(8,1fr); grid-template-rows:repeat(8,1fr);}
   .sq{position:relative; user-select:none; cursor:pointer;}
-  .sq.light{background:linear-gradient(160deg,#efe3cc,#e2d3b5);}
-  .sq.dark{background:linear-gradient(160deg,#87684a,#6d5137);}
+  /* The art lies beneath the interactive squares, so fog and move markers keep
+     their own layers. A half-turn preserves checkerboard parity in either seat. */
+  .sq.light,.sq.dark{background:transparent;}
   .sq .coord{
     position:absolute; font-size:12px; font-weight:700; letter-spacing:.05em;
-    opacity:.5; pointer-events:none;
+    opacity:.8; pointer-events:none;
   }
   .sq .coord.file{right:3px; bottom:1px;}
   .sq .coord.rank{left:3px; top:1px;}
-  .sq.light .coord{color:#6d5137;}
-  .sq.dark  .coord{color:#efe3cc;}
+  .sq.light .coord{color:#30291f;}
+  .sq.dark  .coord{color:#d7c49c;}
 
   .sq.last::before{
     content:""; position:absolute; inset:0;
@@ -317,6 +320,8 @@
     width:88%; height:88%; background:transparent;
     border:4px solid rgba(20,20,20,.28); border-radius:50%;
   }
+  .sq.dark.hint::after{background:rgba(240,199,117,.55);}
+  .sq.dark.hint.occupied::after{background:transparent; border-color:rgba(240,199,117,.65);}
   .sq.check::before{
     content:""; position:absolute; inset:0;
     background:radial-gradient(circle at 50% 50%, rgba(224,90,77,.85), rgba(224,90,77,0) 70%);
@@ -357,7 +362,7 @@
   }
   .piece.b span{
     color:#22242c;
-    -webkit-text-stroke:1.4px #0a0b0e;
+    -webkit-text-stroke:1.4px #a59678;
     text-shadow:0 3px 5px rgba(0,0,0,.4), 0 0 1px rgba(255,255,255,.35);
   }
   /* the hand-drawn bishop, sized and weighted to sit with the glyph set */
@@ -368,7 +373,7 @@
   .pc-svg .slit{fill:none;}
   .piece span .pc-svg{display:block; filter:drop-shadow(0 3px 5px rgba(0,0,0,.45));}
   .piece.w span .pc-svg{fill:#fbf6ea; stroke:#2a2118;}
-  .piece.b span .pc-svg{fill:#22242c; stroke:#0a0b0e;}
+  .piece.b span .pc-svg{fill:#22242c; stroke:#a59678;}
   .promo .pc-svg{width:.8em; height:.8em;}
 
   .piece.gone{opacity:0; transform-origin:center; }
@@ -1518,16 +1523,13 @@
     color:rgba(212,175,110,.5); filter:blur(1.5px); transition:filter .45s ease;
   }
   .pzv-card:hover .pzv-art-word{filter:none;}
-  /* the other two are a real 8×8, painted by one gradient rather than by
-     sixty-four elements: it is a picture of a board, not a board */
+  /* These previews use the same art as the game, lessons and practice boards.
+     Keeping the asset in one variable also keeps cached versions in step. */
   .pzv-mini{
-    width:100%; height:100%; border-radius:8px; overflow:hidden;
-    border:1px solid var(--line); position:relative;
-    /* one conic gradient tiled sixteen times is a crisp 8x8; the two crossed
-       45-degree linear gradients that usually draw this are antialiased along
-       every diagonal and read as diamonds at this size */
-    background-image:conic-gradient(#efdcbc 25%, #a97d55 0 50%, #efdcbc 0 75%, #a97d55 0);
-    background-size:25% 25%;
+    width:100%; height:100%; border-radius:1px; overflow:hidden;
+    border:1px solid #b79b64; position:relative;
+    background:#081522 var(--board-art) center / 100% 100%;
+    box-shadow:0 0 0 3px #111d27, 0 0 0 4px #74664e;
     transition:border-color .22s ease;
   }
   /* Fog of War's board carries one side's men and nothing of the other's,
