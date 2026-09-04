@@ -2463,6 +2463,126 @@
     border-color:var(--gold); color:var(--gold-soft); background:rgba(217,164,65,.12);
   }
 
+  /* Ranked alone: the crest and controls share a grid directly on the sky.
+     The outer panel is intentionally unpainted; its transparent border keeps
+     the established positions unchanged. Grid areas reorder existing children
+     without new markup, assets or queue behavior. Shared badge files stay
+     untouched because other screens use them too. */
+  #screen-ranked::before, #screen-ranked::after{content:none;}
+  #screen-ranked .ranked{
+    position:relative; isolation:isolate;
+    display:grid;
+    grid-template-columns:minmax(0,1.12fr) minmax(0,1fr);
+    grid-template-areas:"badge tier" "badge elo" "badge cap" "badge gauge" "badge pick" "badge start" "badge note";
+    column-gap:42px; row-gap:0;
+    width:100%; max-width:880px; min-height:480px;
+    margin:clamp(18px,5vh,56px) auto 36px;
+    padding:44px 42px 38px 24px;
+    align-items:center; justify-content:normal; text-align:left;
+    /* Keep the layout footprint while letting the existing sky show through. */
+    border:1px solid transparent; border-radius:12px;
+    background:transparent;
+    box-shadow:none;
+  }
+  #screen-ranked .ranked::before{
+    content:""; position:absolute; pointer-events:none;
+    left:49%; top:32px; bottom:32px; width:1px;
+    background:linear-gradient(transparent,rgba(166,184,208,.20),transparent);
+  }
+  /* Light follows the badge's grid area on desktop and mobile. It is paint,
+     not another panel, and cannot intercept a button or change the layout. */
+  #screen-ranked .ranked::after{
+    content:"";position:absolute;grid-area:badge;inset:0;z-index:-1;pointer-events:none;
+    background:radial-gradient(ellipse at 50% 50%,var(--tint-glow) 0%,color-mix(in srgb,var(--tint) 16%,transparent) 35%,transparent 70%);
+    filter:blur(14px);
+  }
+  #screen-ranked .rank-badge{
+    grid-area:badge; justify-self:center;
+    width:100%; height:auto; aspect-ratio:1.25; max-width:100%; object-fit:cover;
+    filter:drop-shadow(0 15px 18px rgba(0,0,0,.65)) drop-shadow(0 0 24px color-mix(in srgb,var(--tint) 32%,transparent));
+  }
+  #screen-ranked .rank-tier{
+    grid-area:tier; margin:0; padding:0;
+    color:var(--tint-lit); font-size:clamp(23px,3vw,31px); letter-spacing:.20em;
+  }
+  #screen-ranked .rank-tier::before{content:none;}
+  #screen-ranked .rank-elo{
+    grid-area:elo; margin:12px 0 0; font-size:clamp(56px,7vw,78px);
+    font-weight:400; color:#eeeae2; background:none;
+    -webkit-text-fill-color:currentColor;
+  }
+  #screen-ranked .rank-elo-cap{
+    grid-area:cap; margin-top:7px; color:var(--tint-lit); letter-spacing:.32em;
+    font-family:system-ui,-apple-system,"Segoe UI",sans-serif;
+    font-size:11px; font-weight:500; line-height:16px;
+    text-shadow:0 0 14px var(--tint-glow);
+  }
+  #screen-ranked .rank-gauge{grid-area:gauge; margin-top:26px;}
+  /* The track is quiet machined metal; only earned progress catches light.
+     In particular, a rating at its tier floor must still show zero fill. */
+  #screen-ranked .gauge-track{
+    height:12px; border:0; border-radius:6px;
+    background:linear-gradient(180deg,#090d14 0%,#1c2633 48%,#303c4b 100%);
+    box-shadow:0 1px 0 rgba(191,211,236,.13),inset 0 1px 2px rgba(0,0,0,.75);
+  }
+  #screen-ranked .gauge-fill{
+    border-radius:6px;
+    background:linear-gradient(90deg,var(--tint),var(--tint-lit));
+    box-shadow:inset 0 1px 0 rgba(255,255,255,.42),0 0 10px var(--tint-glow);
+  }
+  #screen-ranked .gauge-ends{
+    color:#a8b5c5; letter-spacing:.08em; margin-top:10px;
+    font-family:system-ui,-apple-system,"Segoe UI",sans-serif;
+    font-size:12px;font-weight:500;line-height:16px;
+    font-variant-numeric:tabular-nums;
+  }
+  #screen-ranked #rankFloor{color:var(--tint-lit);}
+  #screen-ranked #rankCeil{color:#a8b5c5;}
+  #screen-ranked .rank-pick{
+    grid-area:pick; margin-top:30px; padding:15px 12px;
+    border-radius:6px; border-color:#38414d;
+    background:linear-gradient(rgba(12,19,29,.40),rgba(7,12,20,.72)),url("assets/moon.jpg?v=1") center 44% / cover; color:#e2e6ec;
+    font-size:16px; letter-spacing:.10em; box-shadow:inset 0 1px 0 rgba(255,255,255,.035);
+  }
+  #screen-ranked .rank-pick:hover{border-color:var(--tint);}
+  #screen-ranked .rank-pick.set{border-color:var(--tint);color:var(--tint-lit);background:linear-gradient(rgba(12,19,29,.32),rgba(7,12,20,.65)),url("assets/moon.jpg?v=1") center 44% / cover;}
+  #screen-ranked .rank-start{
+    grid-area:start; margin-top:10px; padding:15px 12px;
+    border-radius:6px; font-size:17px; letter-spacing:.16em;
+  }
+  /* Excluding searching is essential: its longhand background and animation
+     continue to be owned by #btnRankStart.searching below. */
+  #screen-ranked .rank-start:not(.dim):not(.searching){
+    background:linear-gradient(rgba(102,75,31,.28),rgba(18,16,14,.65)),url("assets/moon.jpg?v=1") center 72% / cover;color:#f5e5c3;border-color:#c5a266;
+    box-shadow:inset 0 1px 0 rgba(255,244,218,.3),0 4px 14px rgba(0,0,0,.24);
+  }
+  #screen-ranked .rank-start.dim{
+    background:linear-gradient(rgba(10,15,24,.58),rgba(5,9,16,.79)),url("assets/moon.jpg?v=1") center 72% / cover;border-color:#38414e;color:#929aa8;
+  }
+  #screen-ranked .rank-note{grid-area:note;margin-top:16px;font-size:14px;color:#a2abb8;line-height:1.55;letter-spacing:.025em;}
+  #screen-ranked .rank-note:empty{margin-top:0;}
+  #rankSetOverlay .rank-modal{
+    background:linear-gradient(150deg,#18202c,#0b111b);border-color:#455062;
+    box-shadow:0 24px 70px rgba(0,0,0,.7),inset 0 1px 0 rgba(255,255,255,.06);
+  }
+  #rankSetOverlay .rank-label{color:#b8c0cc;}
+  #rankSetOverlay .rank-opts button{background:#0e1520;border-color:#323e4e;border-radius:6px;color:#cbd1da;}
+  #rankSetOverlay .rank-opts button.active{background:#2d281e;border-color:#c5a367;color:#efd6a4;}
+  @media(max-width:680px){
+    #screen-ranked .ranked{
+      grid-template-columns:minmax(0,1fr);
+      grid-template-areas:"badge" "tier" "elo" "cap" "gauge" "pick" "start" "note";
+      max-width:460px; min-height:0; margin:12px auto 28px; padding:16px 24px 26px;
+      text-align:center;
+    }
+    #screen-ranked .ranked::before{content:none;}
+    #screen-ranked .rank-badge{height:auto;max-width:320px;}
+    #screen-ranked .rank-tier{margin-top:4px;font-size:26px;}
+    #screen-ranked .rank-elo{font-size:58px;margin-top:10px;}
+    #screen-ranked .rank-gauge{margin-top:22px;}
+    #screen-ranked .rank-pick{margin-top:24px;}
+  }
+
   /* ---------- settings screen ---------- */
   .set-list{width:100%; max-width:560px; margin:0 auto; display:flex; flex-direction:column; gap:12px;}
   .set-row{display:flex; align-items:center; gap:16px; padding:20px 22px;}
