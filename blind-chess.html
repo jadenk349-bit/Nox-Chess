@@ -1062,11 +1062,18 @@
   .menu-btn{
     display:flex; align-items:center; justify-content:space-between; gap:10px;
     width:100%; text-align:left; padding:8px 11px; border-radius:7px;
-    background:transparent; border:0; color:#d8dbe4;
+    background:
+      linear-gradient(100deg,rgba(9,14,22,.30),rgba(4,8,14,.55)),
+      url("assets/moon.jpg?v=1") center / 100% auto no-repeat;
+    border:1px solid rgba(205,212,224,.24); color:#f0f2f6;
     font-size:16px; letter-spacing:.03em; white-space:nowrap;
   }
   .menu-btn:hover, .menu-btn:focus-visible{
-    background:rgba(217,164,65,.16); color:var(--gold-soft); transform:none;
+    background:
+      linear-gradient(100deg,rgba(217,164,65,.08),rgba(6,10,17,.32)),
+      url("assets/moon.jpg?v=1") center / 100% auto no-repeat;
+    border-color:rgba(217,164,65,.62); color:#ffe2a1; transform:none;
+    filter:brightness(1.18);
   }
   .menu-btn.soon{color:#6b7080;}
   .menu-btn.soon:hover{background:rgba(255,255,255,.05); color:#6b7080;}
@@ -2931,6 +2938,15 @@
     margin-top:clamp(14px,2.4vh,26px);
   }
   @media (max-width:760px){ .social-page{grid-template-columns:minmax(0,1fr);} }
+
+  /* The two Social work areas use the supplied lunar material: search and
+     friends on the left, link actions on the right. The dark wash keeps every
+     existing row and control readable without changing their layout. */
+  #screen-social .social-main,
+  #screen-social .social-aside{
+    background:linear-gradient(150deg,rgba(12,18,28,.64),rgba(7,12,21,.88)),
+      url("assets/moon.jpg?v=1") center / cover no-repeat;
+  }
 
   .social-main{
     padding:20px 22px 22px;
