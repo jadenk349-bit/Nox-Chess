@@ -123,6 +123,49 @@ def _request(method, path, body=None, prefer=None):
     return json.loads(raw) if raw else None
 
 
+def request(method, path, body=None, prefer=None):
+    """One PostgREST call with the service key, for the league.
+
+    The league (server/league.py) reads bot profiles, writes game rows and
+    calls the three functions supabase-migrate-league.sql defines, and none of
+    those is a puzzle rating — so the transport is opened up here rather than
+    copied there. Errors are the caller's to interpret: a missing table and a
+    network failure are both worth different log lines, and both come back as
+    the urllib exception they were. Returns the decoded body, or None when the
+    module is off, which every caller treats as "cannot be stored".
+    """
+    if not enabled():
+        return None
+    return _request(method, path, body, prefer)
+
+
+def rpc(name, args):
+    """Call a Postgres function by name, the way PostgREST exposes it.
+
+    Written separately so the path is built in one place: /rpc/<name>, POST,
+    the arguments as one JSON object keyed by parameter name.
+    """
+    return request("POST", "/rpc/" + name, args or {})
+
+
+def error_body(err):
+    """What PostgREST said, out of the HTTPError it said it in.
+
+    A 404 with PGRST205 in it means the table is not there — the migration
+    has not been run — and that is worth telling the operator in words rather
+    than as a stack trace every ten seconds. Returns "" when there is nothing
+    readable to show.
+    """
+    try:
+        raw = err.read()
+    except Exception:                       # noqa: BLE001 - best effort, for a log line
+        return ""
+    try:
+        return raw.decode("utf-8", "replace")[:300]
+    except Exception:                       # noqa: BLE001
+        return ""
+
+
 def get_puzzle_rating(user_id):
     """The stored rating, or None if there is nowhere to look or nothing there.
 

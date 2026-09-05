@@ -30,6 +30,7 @@ Run:  python3 server/server.py [--port 8787]
 import json
 import os
 import random
+import signal
 import socket
 import sys
 import threading
@@ -40,6 +41,7 @@ sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 import wsproto
 import supabase_auth
 import supabase_db
+import league
 from wsproto import Framer, WSClosed, WSError
 
 HERE = os.path.dirname(os.path.abspath(__file__))
@@ -74,6 +76,13 @@ challenges = {}   # challenge id -> Challenge, one per invitation in the air
 # of both players with it. Like a challenge it means nothing once either side
 # has gone, so it lives here beside them and dies with the session.
 rematches = {}    # rematch id -> Rematch, one per request in the air
+# The 24/7 AI league — the strongest bot accounts playing each other, one
+# ladder per vision, whether or not anybody is watching. Built in main(), and
+# None when it cannot run (no engine, no key, no `chess` package), in which
+# case the home page is told there is nothing live and everything else is as
+# it was. It is not a way into a Game: its players are never Clients, and
+# nothing in `lobby`, `rooms` or `challenges` can reach one. See league.py.
+LEAGUE = None
 LOG = True
 
 # A challenge nobody answers should not sit in memory for the life of the
@@ -1665,15 +1674,41 @@ def handle_message(client, raw):
         handle_rematch_cancel(client, msg)
     elif kind == "puzzleResult":
         handle_puzzle_result(client, msg)
+    elif kind == "live":
+        handle_live(client)
+    elif kind == "unlive":
+        handle_unlive(client)
     elif kind == "ping":
         client.send({"t": "pong"})
     else:
         client.send({"t": "error", "msg": "unknown message %r" % (kind,)})
 
 
+def handle_live(client):
+    """Start watching the league's featured games, and get them as they stand.
+
+    Needs no hello: what is being watched is public, the same way the room
+    list is, and a home page should not have to claim a guest name to look at
+    a board. The subscription lives on the league rather than in `lobby_subs`
+    because it is pushed by the league's own thread, on every move, and the
+    room list is pushed by whoever changed a room.
+    """
+    if LEAGUE is None:
+        client.send({"t": "live-games", "at": int(time.time() * 1000), "games": [], "off": True})
+        return
+    LEAGUE.subscribe(client)
+
+
+def handle_unlive(client):
+    if LEAGUE is not None:
+        LEAGUE.unsubscribe(client)
+
+
 def drop_client(client):
     client.alive = False
     dropped_room = False
+    if LEAGUE is not None:
+        LEAGUE.unsubscribe(client)
     with lock:
         cancel_ai_fallback(client)   # a queue nobody is standing in owes nobody a game
         leave_lobby(client)
@@ -1833,15 +1868,29 @@ def serve_http(sock, request_line):
         serve_static_file(sock, path)
     elif path == "/health":
         with lock:
-            body = json.dumps({
+            status = {
                 "ok": True,
                 # players waiting, not queues with somebody in them — the
                 # queue holds a list per time control now
                 "waiting": sum(len(q) for q in lobby.values()),
                 "games": len(games),
-            }).encode()
+            }
+        status["league"] = LEAGUE.health() if LEAGUE is not None else None
+        body = json.dumps(status).encode()
         sock.sendall(
             b"HTTP/1.1 200 OK\r\nContent-Type: application/json\r\nContent-Length: "
+            + str(len(body)).encode() + b"\r\n\r\n" + body
+        )
+    elif path == "/live.json":
+        # The same snapshot the socket pushes, for anybody polling — a
+        # debugging aid first, and the fallback for a viewer whose socket
+        # will not open. Never cached: it is wrong within seconds.
+        payload = LEAGUE.payload() if LEAGUE is not None else \
+            {"t": "live-games", "at": int(time.time() * 1000), "games": [], "off": True}
+        body = json.dumps(payload).encode()
+        sock.sendall(
+            b"HTTP/1.1 200 OK\r\nContent-Type: application/json\r\n"
+            b"Cache-Control: no-store\r\nContent-Length: "
             + str(len(body)).encode() + b"\r\n\r\n" + body
         )
     else:
@@ -1913,8 +1962,35 @@ def handle_connection(sock, addr):
             pass
 
 
+def start_league():
+    """Boot the AI league, and make sure a stop hands its games on cleanly.
+
+    Render replaces an instance by starting the next one and then sending
+    this one SIGTERM. Releasing the league's leases on the way out is what
+    lets the next instance sit down at the same boards straight away instead
+    of waiting for the leases to lapse — and it is the only thing the handler
+    does before exiting the way the default would have.
+    """
+    global LEAGUE
+    LEAGUE = league.build()
+    if LEAGUE is None:
+        return
+
+    def on_term(signum, frame):
+        log("SIGTERM — handing the league's games on")
+        LEAGUE.stop()
+        sys.exit(0)
+
+    try:
+        signal.signal(signal.SIGTERM, on_term)
+    except (ValueError, OSError):
+        pass                    # not the main thread, or a platform without it
+    LEAGUE.start()
+
+
 def main():
     load_puzzles()
+    start_league()
     # $PORT is what most hosts inject; --port wins when it is given explicitly
     port = int(os.environ.get("PORT") or 8787)
     if "--port" in sys.argv:
@@ -1940,6 +2016,8 @@ def main():
     except KeyboardInterrupt:
         log("shutting down")
     finally:
+        if LEAGUE is not None:
+            LEAGUE.stop()
         server.close()
 
 

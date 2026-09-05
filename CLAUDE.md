@@ -33,6 +33,10 @@ python3 server/test_names.py             # one name per player, guests included;
 python3 server/test_puzzle_rating.py     # the puzzle Elo handler; no server needed
 node tools/test_generate_puzzles.js      # the generator's own decisions, no engine
 python3 tools/check_supabase_puzzles.py  # RLS and column grants, against the real project
+python3 server/test_league.py           # the AI league: pairing, ratings, endings, restart; no server, stub engine
+node server/test_live_games.js            # the home page's live cards — what each vision may show
+NOX_LEAGUE_FAST=1 python3 server/server.py    # ...and, against that server (real accounts, results in memory):
+python3 server/test_league_socket.py      # real games, real engine, over the socket — REQUIRES that server
 
 node education/tools/build_bundle.js            # rebuild the corpus the browser reads
 node education/tools/build_bundle.js --check    # ...and fail if it is stale
@@ -87,7 +91,10 @@ memory for the life of the process and names come from the token). That last one
 takes either a modern `sb_secret_…` key or a legacy `service_role` JWT —
 `supabase_db.py` tells them apart by shape, because only the JWT may go in the
 `Authorization` header, and it refuses a publishable/anon key by name. With neither Supabase variable set, accounts are simply off and
-everything else still works.
+everything else still works. The AI league adds `NOX_LEAGUE`
+(`on`/`off`/`memory`), `NOX_STOCKFISH`, `NOX_LEAGUE_GAMES_PER_MODE`,
+`NOX_LEAGUE_ENGINES`, `NOX_LEAGUE_FIXTURE` and `NOX_LEAGUE_FAST`, all optional — see "The AI
+league" below.
 
 ## Architecture
 
@@ -278,6 +285,106 @@ into `start_game_between()` like every other way into a Game. The rating is the
 one that game was played at rather than a fresh `player_rating_of()`, because
 it is the same opponent again and because that call may go to the network,
 which nothing holding the lock may do.
+
+**The AI league plays the strongest bot accounts against each other around
+the clock, and it is the one place the server plays chess.** `server/league.py`
+(`LEAGUE` in `server.py`, built by `league.build()` at startup) runs four
+ladders — Sighted, Complete Blindfold, Board Only and Fog of War — each with
+its own pool, its own games and its own rating column: `profiles.rating` is
+still the Sighted ladder, and `complete_blindfold_rating`, `board_only_rating` and `fog_of_war_rating`
+arrived with `supabase-migrate-league.sql`, server-owned like `rating` and
+outside the browser's column grants. The pool is the leaderboard itself:
+`top()` ranks a ladder exactly as the home page does (rating descending, then
+name) and takes twenty, and `eligible()` keeps the `is_bot` accounts among
+them — re-read every minute and after every result, so an account that falls
+to twenty-first is out of the next pairing (never out of a game in progress)
+and one that climbs to twentieth is in. Nothing is invented to fill a board:
+no name, no account, no rating, and the account id in a game row is the
+profile's own. A human in the top twenty holds a place on it and is never
+seated: `is_bot` is the whole test, and nothing in `lobby`, `rooms` or
+`challenges` can reach a league game. The page shows these accounts as it
+shows anybody — name and rating — and nothing on it says which are bots.
+
+Everything downstream of the browser's absence is a real dependency rather
+than stdlib: `python-chess` (requirements.txt) referees — legality, mate,
+stalemate, repetition, the fifty-move rule, insufficient material, SAN and
+PGN — and a native Stockfish on PATH (the Dockerfile installs Debian's;
+`NOX_STOCKFISH` overrides) chooses the moves over UCI. One engine process
+(`EnginePool`, `NOX_LEAGUE_ENGINES`) serves every game, because the games are
+paced by their own pauses and a move costs the engine a few hundred
+milliseconds. Strength follows the ladder: `engine_elo_for()` maps a
+leaderboard rating onto `UCI_LimitStrength`/`UCI_Elo` between 2500 and 3000
+(2000 → 2500, 2300 → 2650, 2600 → 2800, 2800 → 2920), clamped to whatever
+range the installed build reports, with `movetime_for()` giving the stronger
+seat a little more search. The pauses a viewer sees are `think_seconds()`,
+not the search: log-normal around a base that rises into the middlegame,
+stretched by the number of legal moves, cut when the reply is forced or the
+game decided, one move in twenty a long think, and shortened by a short
+clock. Clocks are thirty minutes a side, kept as "what each side had left
+after its last move, and when that was", so nothing writes a row per second.
+Games end by the rules (`outcome_of()`), on time, by resignation (a side that
+has judged itself lost by 900cp or more on four moves running, past move
+twenty) or by agreement (ten level evaluations past move forty with nothing
+captured or pushed), and in no other way — there is no draw offer, because
+there is nobody to offer one to.
+
+Matchmaking (`pick_pair()`) shuffles the eligible players, seats the first
+who has anybody within a hundred points, prefers an opponent neither has met
+in their last three games (`RECENT_MEMORY`, seeded from the last forty
+finished rows at startup), draws at random from whatever that leaves, and
+gives white to whoever had black last. A player has one seat per vision:
+`league_seats` in the database has `(mode, player_id)` as its primary key and
+`league_start()` inserts the game and both seats in one transaction, so the
+second game to try to seat somebody fails rather than doubling them.
+`NOX_LEAGUE_GAMES_PER_MODE` (default 1) is how many run at once per ladder;
+the home page features the live game with the highest combined rating
+(`featured()`), or, for `RESULT_PAUSE` seconds after it ends, the finished one.
+
+**Every game is a row, and every write to it is guarded.** A move is a PATCH
+whose filter names the owner and requires the row's `ply` to be behind the
+move (`SupabaseStore.write_move()`), so two servers — Render starting the
+new instance before stopping the old — cannot both play ply 41: the second
+to try changes nothing, re-reads the row, and lets go of the game.
+`league_finish()` is a Postgres function guarded on `status = 'live'`: it
+records the result, moves the two ratings by four in that vision's column
+(a draw moves nothing), and frees the seats — once, whatever asks twice, so
+nobody is ever paid eight. Ownership is a lease (`owner`, `lease_until`,
+`LEASE_SECONDS`) renewed by every write; on startup `recover()` claims every
+live row whose lease is lapsed or released, replays its moves (a row that
+does not replay is abandoned with `league_abandon()` and no rating change),
+finishes it properly if the rules already call it over, and otherwise sits
+back down with the clocks as they were written — the time the process was
+away is not charged, since the bots did not spend it. SIGTERM releases the
+leases so the next instance adopts at once. Rows another live process owns
+are counted (`foreign`) and not duplicated. A database that stops answering
+pauses the games rather than forking them: a move that cannot be written is
+not played, and a finish that cannot be written is retried.
+
+The page watches on a socket of its own — `{t:"live"}`, answered and then
+pushed `{t:"live-games"}` on every move, `{t:"unlive"}` to stop — opened by
+`liveOpen()` on the home page and closed by `liveLeave()` on the way off it,
+and never NET's, which is a player's connection and goes up and down with
+rooms and games. `/live.json` is the same snapshot by HTTP and `/health`
+carries the league's counts. The four cards (`liveCardHTML()`) are the
+game's own board a fourth time — same art, same glyphs, same `.fog` — and
+show only what the vision allows: Sighted every man and the last move, Board
+Only the squares and no men, Fog of War the side to move's men with every
+other square fogged (`visibleSet()`'s rule from the chair of whoever is
+thinking), and Complete Blindfold no board at all, the console instead.
+Clocks count down client-side from the snapshot on the server's own
+timestamp (`liveRemaining()`), and a result re-reads all four ladders
+(`loadBoard()`, now four queries of `profiles`, one per column; the old
+`LB_BOARDS` fixture is gone). A card opens the spectator view, which has
+nothing on it to press. `NOX_LEAGUE=off` turns the league off. Without a
+service key (or with `NOX_LEAGUE=memory`) it still reads the real accounts,
+with the publishable key the page ships (`public_profiles()`), and plays them
+with the results kept in memory — the same degradation puzzle ratings have —
+so a laptop shows the real names and a production box without the key does
+not quietly invent any; `NOX_LEAGUE_FIXTURE` reads profile rows from a JSON
+file instead, for a test with no network. `NOX_LEAGUE_FAST` shortens every
+pause for the tests. Without an engine, or with no AI account on any ladder,
+the server says which once at startup and runs without the league; the cards
+say the server is not running it.
 
 **The rating only persists with `SUPABASE_SERVICE_KEY`.** The browser is not
 allowed to write `puzzle_rating`, so the server is the only thing that can, and

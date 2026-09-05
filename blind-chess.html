@@ -3146,8 +3146,14 @@
      with a week of cache — but if this page ever needs to be light on a cold
      load, small copies of the badges are the first thing to make. */
   .home-body{
-    display:flex; align-items:flex-start; justify-content:flex-end;
+    display:flex; align-items:flex-start; justify-content:space-between;
+    gap:clamp(18px,3vw,56px);
     padding:clamp(6px,1.6vh,18px) 0 clamp(20px,5vh,54px);
+    /* Tall enough that the live games can stand at the FOOT of the page
+       while the ladders hang from its head: the body's own padding and the
+       header are taken off the window's height, and the flex row fills what
+       is left. */
+    min-height:calc(100vh - var(--logo-box) - 130px);
   }
   .lb-stack{
     width:min(290px,100%);
@@ -3221,6 +3227,214 @@
     font-size:13px; font-weight:650; letter-spacing:.02em; color:var(--gold-soft);
     font-variant-numeric:tabular-nums;
   }
+  /* ---------- the live games ----------
+     The league's four featured games, at the bottom-left of the home page:
+     one per vision, each the strongest pair at a board right now. The ladders
+     hang from the header on the right; these stand on the floor on the left,
+     which is why the stack aligns itself to the end of the row rather than to
+     its start. They are cards rather than bare rows because each is a small
+     picture — a board, or a console — and a picture wants an edge.
+
+     Each card is the game's own board a fourth time (the game, Practice and
+     the lessons each build one): the same art under the squares, the same
+     glyphs, the same .fog overlay and the same rule about what a vision may
+     show. Sighted draws everything; Board Only draws the squares and no men,
+     exactly as .board.blind does; Fog of War draws the side to move's men and
+     fogs every other square, as the game does through visibleSet(); and
+     Complete Blindfold draws no board at all — the notation IS the game
+     there, so the card shows the console instead. Nothing is revealed here
+     that the players themselves could not see. */
+  .live-stack{
+    align-self:flex-end;
+    width:min(660px,100%);
+    display:flex; flex-direction:column; gap:10px;
+  }
+  .live-title{
+    margin:0 0 2px; text-align:left;
+    font-family:var(--font); font-weight:400;
+    font-size:clamp(26px,2.6vw,32px); letter-spacing:.1em; color:var(--gold-soft);
+    display:flex; align-items:center; gap:14px;
+  }
+  .live-grid{
+    display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:12px;
+  }
+  .live-card{
+    min-width:0; padding:10px 12px 9px;
+    display:flex; flex-direction:column; gap:6px;
+    border-radius:var(--radius);
+    background:linear-gradient(180deg, var(--surf-1), var(--surf-2));
+    border:1px solid transparent;
+    box-shadow:var(--sh-3), var(--lip);
+    cursor:pointer;
+    transition:border-color .2s var(--ease), transform .14s var(--ease);
+  }
+  .live-card:hover{border-color:var(--ctl-edge); transform:translateY(-1px);}
+  .live-card:focus-visible{outline:2px solid var(--gold); outline-offset:2px;}
+  .live-head{
+    display:flex; align-items:center; justify-content:space-between; gap:8px;
+  }
+  .live-mode{
+    font-family:var(--font); font-weight:400;
+    font-size:clamp(16px,1.55vw,20px); letter-spacing:.09em; color:var(--gold-soft);
+    white-space:nowrap; overflow:hidden; text-overflow:ellipsis;
+  }
+  /* LIVE: a red dot breathing beside the word, the one thing on the page that
+     moves on its own. It goes out with the game — a finished card wears the
+     result in the same place. */
+  .live-pill{
+    flex:none; display:inline-flex; align-items:center; gap:5px;
+    padding:2px 8px; border-radius:999px;
+    font-size:10px; font-weight:700; letter-spacing:.22em; text-transform:uppercase;
+    color:#f0c775; background:rgba(0,0,0,.36); border:1px solid rgba(217,164,65,.28);
+  }
+  .live-pill::before{
+    content:""; width:6px; height:6px; border-radius:50%;
+    background:var(--danger); box-shadow:0 0 6px rgba(224,90,77,.9);
+    animation:livepulse 1.6s ease-in-out infinite;
+  }
+  .live-card.over .live-pill{color:var(--muted); border-color:rgba(150,170,215,.18);}
+  .live-card.over .live-pill::before, .live-card.waiting .live-pill::before{
+    background:var(--muted); box-shadow:none; animation:none;
+  }
+  @keyframes livepulse{0%,100%{opacity:1; transform:scale(1);} 50%{opacity:.35; transform:scale(.7);}}
+  @media (prefers-reduced-motion:reduce){ .live-pill::before{animation:none;} }
+  /* The card is compact by being wide rather than tall: the board stands on
+     the left at a fixed size and the two seats and the last moves stack
+     beside it, so four cards are two rows of a few hundred pixels rather than
+     a column of boards. The spectator view undoes this and stacks everything
+     under a large board — see .live-modal below. */
+  .live-body{
+    display:grid; grid-template-columns:150px minmax(0,1fr); gap:10px; align-items:stretch;
+  }
+  .live-side{display:flex; flex-direction:column; gap:5px; min-width:0;}
+  /* A seat: the name, the rating, the clock. The side to move is lit the way
+     the game lights its clock — from within, in gold — and the dot before the
+     name is the colour it is playing. */
+  .live-seat{
+    display:flex; flex-direction:column; gap:1px;
+    padding:4px 8px; border-radius:8px;
+    background:rgba(0,0,0,.28); border:1px solid transparent;
+    transition:border-color .2s var(--ease), background .2s var(--ease);
+  }
+  .live-who{display:flex; align-items:center; gap:6px; min-width:0;}
+  .live-nums{display:flex; align-items:baseline; justify-content:space-between; gap:8px;}
+  .live-seat.turn{border-color:rgba(217,164,65,.45); background:rgba(217,164,65,.09);}
+  .live-dot{
+    flex:none; width:9px; height:9px; border-radius:50%;
+    border:1px solid rgba(255,255,255,.35);
+  }
+  .live-seat.w .live-dot{background:#eee6d5;}
+  .live-seat.b .live-dot{background:#252d38;}
+  .live-name{
+    flex:1; min-width:0; font-size:13px; font-weight:600; letter-spacing:.02em; color:var(--text);
+    overflow:hidden; text-overflow:ellipsis; white-space:nowrap;
+  }
+  .live-elo{
+    flex:none; font-size:12.5px; font-weight:650; color:var(--gold-soft);
+    font-variant-numeric:tabular-nums;
+  }
+  .live-clock{
+    flex:none; min-width:44px; text-align:right;
+    font-family:var(--font); font-size:18px; line-height:1; letter-spacing:.06em; color:var(--muted);
+    font-variant-numeric:tabular-nums;
+  }
+  .live-seat.turn .live-clock{color:var(--text);}
+  .live-seat.low .live-clock{color:#e7908a;}
+  /* The board: the same art and the same squares as the game's, one eighth
+     the size. Container units size the glyphs off the board itself, so the
+     same markup is the small card and the large spectator view. */
+  .live-view{position:relative;}
+  .live-board{
+    position:relative; width:100%; aspect-ratio:1/1;
+    display:grid; grid-template-columns:repeat(8,1fr); grid-template-rows:repeat(8,1fr);
+    container-type:size;
+    border-radius:1px; overflow:hidden;
+    background:#081522 var(--board-art) center / 100% 100%;
+    box-shadow:0 0 0 1px #b79b64, 0 0 0 2px #423a2e, 0 0 12px rgba(0,0,0,.6);
+  }
+  .lsq{position:relative; display:flex; align-items:center; justify-content:center;}
+  .lsq.last::before{
+    content:""; position:absolute; inset:0;
+    background:rgba(242,193,78,.30); box-shadow:inset 0 0 0 1px rgba(242,193,78,.45);
+  }
+  .lsq.check::before{
+    content:""; position:absolute; inset:0;
+    background:radial-gradient(circle at 50% 50%, rgba(224,90,77,.85), rgba(224,90,77,0) 70%);
+  }
+  .lsq .fog{
+    position:absolute; inset:0; pointer-events:none;
+    background:linear-gradient(160deg, rgba(9,10,14,.86), rgba(9,10,14,.93));
+    opacity:0; transition:opacity .35s ease;
+  }
+  .lsq.hidden .fog{opacity:1;}
+  .lpc{position:relative; display:block; line-height:1; font-size:10.5cqmin; font-size:min(10.5cqmin, 64px);}
+  .lpc .pc-svg{display:block; width:.82em; height:.86em; filter:drop-shadow(0 1px 1px rgba(0,0,0,.55));}
+  /* Complete Blindfold has no board, so the card shows what the players have:
+     the moves, as written. The well is the game's own console colour. */
+  .live-console{
+    aspect-ratio:1/1; overflow:hidden; padding:7px 8px; border-radius:8px;
+    background:var(--well); box-shadow:inset 0 1px 3px rgba(0,0,0,.35);
+    display:flex; flex-direction:column;
+    font-family:"SF Mono",Menlo,Consolas,monospace; font-size:11px; line-height:1.4;
+    color:var(--text);
+  }
+  /* the tail of the game: whatever does not fit is cut at the top, not the end.
+     Its own class names throughout — .moves, .n, .m and .cur belong to the
+     game screen's notation panel, and a console that borrowed them would be
+     laid out as that panel is. */
+  .live-moves{margin-top:auto; overflow:hidden; max-height:100%; display:flex; flex-wrap:wrap; align-content:flex-end; gap:0 8px;}
+  .ln{color:var(--muted);}
+  .lm.cur-move{color:var(--gold-soft);}
+  .live-console .empty{color:var(--muted); font-family:inherit;}
+  .live-console .eyes{
+    font-size:9px; letter-spacing:.18em; text-transform:uppercase;
+    color:var(--muted); font-family:var(--font); margin-bottom:4px;
+  }
+  /* what was just played, beside every board, in the same hand as the console */
+  .live-line{
+    flex:1; min-height:1.4em; padding:0 2px;
+    font-family:"SF Mono",Menlo,Consolas,monospace; font-size:11px; line-height:1.4;
+    color:var(--muted); overflow:hidden;
+    display:flex; flex-wrap:wrap; align-content:flex-end; gap:0 7px;
+  }
+
+  .live-status{
+    display:flex; justify-content:space-between; gap:8px;
+    font-size:10.5px; letter-spacing:.18em; text-transform:uppercase; color:var(--muted);
+  }
+  .live-card.over .live-status{color:var(--gold-soft);}
+  .live-note{margin:0; font-size:12.5px; color:var(--muted); min-height:1.2em;}
+  .live-note.bad{color:#e7908a;}
+  /* The spectator view: the same card, larger, on the modal's plate, and
+     stacked the way a board is read — black's seat above it, white's below,
+     the moves in between. display:contents lifts the side column's children
+     up beside the board so `order` can arrange them. */
+  .live-modal{max-width:560px; padding:18px 18px 16px; text-align:left;}
+  .live-modal .live-card{cursor:default; box-shadow:none; background:transparent; padding:6px 0 0;}
+  .live-modal .live-card:hover{transform:none; border-color:transparent;}
+  .live-modal .live-body{display:flex; flex-direction:column; gap:8px;}
+  .live-modal .live-side{display:contents;}
+  .live-modal .live-seat{flex-direction:row; align-items:center; justify-content:space-between;}
+  .live-modal .live-seat.b{order:-1;}
+  .live-modal .live-view{order:0;}
+  .live-modal .live-line{order:1; flex:none; max-height:4.4em;}
+  .live-modal .live-seat.w{order:2;}
+  .live-modal .live-console{aspect-ratio:auto; height:min(52vh,420px); font-size:13px;}
+  .live-modal .live-name{font-size:16px;}
+  .live-modal .live-elo{font-size:14.5px;}
+  .live-modal .live-clock{font-size:22px;}
+  .live-modal .live-mode{font-size:22px;}
+  .live-modal .live-only{display:block;}
+  .live-only{
+    display:none; margin-top:8px; font-size:12.5px; color:var(--muted); letter-spacing:.06em;
+  }
+  @media (max-width:900px){
+    .home-body{flex-direction:column; align-items:stretch; min-height:0;}
+    .lb-stack{order:1; width:100%;}
+    .live-stack{order:2; align-self:stretch; width:100%;}
+  }
+  @media (max-width:560px){ .live-grid{grid-template-columns:minmax(0,1fr);} }
+  @media (max-width:380px){ .live-body{grid-template-columns:120px minmax(0,1fr);} }
   /* Narrow, there is no right-hand end to hang from: the column takes the
      width and stays at the top. */
   @media (max-width:520px){
@@ -3419,14 +3633,23 @@
       </div>
     </header>
 
-    <!-- The ladders stand on the page rather than behind a button. They are
-         the only thing in the home page's body: four small panels, one per
-         vision, in one column under the account cluster at the right-hand end
-         of the header, beneath one heading — the ranked ladder read out of
-         profiles first, then the three drawn by renderStaticBoards() from
-         LB_BOARDS. Nothing here is a link — this is the ladders being shown,
-         and everything that can be done about them is up in the nav. -->
+    <!-- The ladders stand on the page rather than behind a button: four small
+         panels, one per vision, in one column under the account cluster at the
+         right-hand end of the header, beneath one heading, every one of them
+         read out of profiles (loadBoard()). Nothing there is a link — this is
+         the ladders being shown, and everything that can be done about them is
+         up in the nav.
+
+         At the foot of the left-hand side stand the league's live games: one
+         per vision, the strongest pair at a board right now, drawn by
+         liveRender() from what the server pushes over its own socket. A card
+         opens the spectator view, which can watch and nothing else. -->
     <div class="home-body">
+      <div class="live-stack" id="liveStack" aria-labelledby="liveTitle">
+        <h2 class="live-title" id="liveTitle">Live Top Games</h2>
+        <div class="live-grid" id="liveGrid"></div>
+        <p class="live-note" id="liveNote"></p>
+      </div>
       <div class="lb-stack" aria-labelledby="lbTitleAll">
         <h2 class="lb-title" id="lbTitleAll">Leaderboard</h2>
         <aside class="lb-panel" aria-labelledby="lbTitle">
@@ -3440,7 +3663,7 @@
           <div class="lb-list" id="lbListTotal"></div>
         </aside>
         <aside class="lb-panel" aria-labelledby="lbTitleBlind">
-          <h3 class="lb-head" id="lbTitleBlind">Only Board</h3>
+          <h3 class="lb-head" id="lbTitleBlind">Board Only</h3>
           <p class="lb-cap" id="lbCapBlind"></p>
           <div class="lb-list" id="lbListBlind"></div>
         </aside>
@@ -4344,6 +4567,18 @@
       <button class="ghost" id="drawDecline">Decline</button>
       <button class="primary" id="drawAccept">Accept Draw</button>
     </div>
+  </div>
+</div>
+
+<!-- the spectator view of one of the league's live games: the same card the
+     home page shows, larger. View only — there is nothing on it to press but
+     the corner, because a spectator cannot move, resign, offer or interfere
+     with a clock, and a board with no buttons cannot be asked to. -->
+<div class="overlay" id="liveOverlay">
+  <div class="modal live-modal" role="dialog" aria-label="Live game">
+    <button class="modal-x" id="liveX" aria-label="Close" title="Close">×</button>
+    <div id="liveBig"></div>
+    <p class="live-only">Spectating. The players are the league's own accounts; nothing here can be moved.</p>
   </div>
 </div>
 
@@ -12796,6 +13031,10 @@ function showScreen(name){
   // challenge has somewhere to land. netConnect reuses whatever is already
   // there, so this is a no-op on the second visit.
   if (name === 'home' || name === 'social') socialConnect();
+  // The league's live games are watched from the home page and nowhere else:
+  // their socket opens with it and closes with it, so no other screen is
+  // being pushed boards it has nowhere to draw.
+  if (name === 'home') liveOpen(); else liveLeave();
   // The ladder is on the home page itself, so coming back to it is the only
   // gesture there is for "show me where things stand now".
   if (name === 'home' && authSettled) loadBoard();
@@ -13900,22 +14139,38 @@ document.getElementById('authClose').onclick  =
   () => document.getElementById('authOverlay').classList.remove('show');
 
 /* ---- the leaderboards ----
-   Four ladders, one per vision, and only the first is measured by anything.
+   Four ladders, one per vision, every one of them read out of profiles.
 
-   Sighted is the top of the ranked ladder, read straight out of profiles. It
-   needs no account of its own: supabase-setup.sql makes that table readable by
-   anon as well as authenticated, and rating is one of the columns the browser
-   may read and never write — so a guest sees exactly the twenty names a
-   signed-in player sees, and neither of them can touch the numbers.
+   Sighted is `rating`, the ranked rating the site has always had. The other
+   three are `complete_blindfold_rating`, `board_only_rating` and
+   `fog_of_war_rating`, which supabase-migrate-league.sql added — one column per vision, because a rating
+   earned with the board in front of you says nothing about what you can do
+   without it, and the server's AI league writes each of them from the games
+   played in that vision and no other. They used to be a fixture in this file;
+   they are a query now, and nothing that draws them had to change.
 
-   It is re-read on every open rather than kept for the session. It is one
-   small query, and a ladder that is quietly out of date is worse company than
-   one that takes a moment to arrive. */
-/* How much of the ranked ladder is shown. Twenty is the whole list and there
-   is no "show more": the caption above the rows says the same number, so
-   change both or the panel will promise one thing and deliver another. */
+   None of the four needs an account: supabase-setup.sql makes the table
+   readable by anon as well as authenticated, and every rating column is one
+   the browser may read and never write — so a guest sees exactly the twenty
+   names a signed-in player sees, and neither of them can touch the numbers.
+
+   They are re-read on every open rather than kept for the session, and again
+   whenever the live games below report a result, because that is the moment
+   the numbers move. It is four small queries, and a ladder that is quietly
+   out of date is worse company than one that takes a moment to arrive. */
+/* How much of each ladder is shown. Twenty is the whole list and there is no
+   "show more": the caption above the rows says the same number, so change
+   both or the panel will promise one thing and deliver another. */
 const LB_TOP = 20;
-const LB = { rows: null, loading: false, error: '', token: 0 };
+/* The four panels, by the key G.mode uses for the vision (PZ_VISION_NAME's
+   keys, and the league's): the column each is ranked by, and where it goes. */
+const LB_PANELS = {
+  sighted: { col: 'rating',       list: 'lbList',      cap: null },
+  total:   { col: 'complete_blindfold_rating', list: 'lbListTotal', cap: 'lbCapTotal' },
+  blind:   { col: 'board_only_rating',         list: 'lbListBlind', cap: 'lbCapBlind' },
+  fog:     { col: 'fog_of_war_rating',         list: 'lbListFog',   cap: 'lbCapFog' }
+};
+const LB = { rows: {}, loading: false, error: {}, token: 0 };
 const lbList = document.getElementById('lbList');
 
 async function loadBoard(){
@@ -13925,8 +14180,9 @@ async function loadBoard(){
        ask yet, and the panel says so by saying nothing; once it has settled —
        no keys, or a CDN that never answered — there is no ladder to show and
        that is worth a sentence. Neither one may read as "nobody is ranked". */
-    LB.rows = null;
-    LB.error = authSettled
+    LB.rows = {};
+    LB.error = {};
+    for (const key in LB_PANELS) LB.error[key] = authSettled
       ? 'The leaderboard needs the account server, and it is not reachable right now.'
       : '';
     renderBoard();
@@ -13934,133 +14190,77 @@ async function loadBoard(){
   }
   const token = ++LB.token;
   LB.loading = true;
-  LB.error = '';
+  LB.error = {};
   renderBoard();
-  try {
-    const { data, error } = await sb.from('profiles')
-      // no avatar_url: this list wears the tier badge, not the player's face
-      .select('id, display_name, rating')
-      .order('rating', { ascending: false })
-      // Ties are broken by name here rather than left to whatever order the
-      // database felt like: everybody starts on the same rating, so without
-      // this the twentieth and twenty-first place could swap between two
-      // opens.
-      .order('display_name')
-      .limit(LB_TOP);
-    if (error) throw error;
-    if (token !== LB.token) return;          // a later read has already answered
-    LB.rows = (data || []).map(asPerson);
-  } catch (err){
-    if (token !== LB.token) return;
-    LB.rows = null;
-    LB.error = 'Could not load the leaderboard — ' + ((err && err.message) || 'try again in a moment.');
-  } finally {
-    if (token === LB.token){ LB.loading = false; renderBoard(); }
-  }
+  const reads = Object.keys(LB_PANELS).map(async key => {
+    const col = LB_PANELS[key].col;
+    try {
+      const { data, error } = await sb.from('profiles')
+        // no avatar_url: this list wears the tier badge, not the player's face
+        .select('id, display_name, ' + col)
+        .not(col, 'is', null)
+        .order(col, { ascending: false })
+        // Ties are broken by name here rather than left to whatever order the
+        // database felt like: everybody starts on the same rating, so without
+        // this the twentieth and twenty-first place could swap between two
+        // opens.
+        .order('display_name')
+        .limit(LB_TOP);
+      if (error) throw error;
+      if (token !== LB.token) return;          // a later read has already answered
+      LB.rows[key] = (data || []).map(r => asPerson(Object.assign({}, r, { rating: r[col] })));
+    } catch (err){
+      if (token !== LB.token) return;
+      LB.rows[key] = null;
+      // A column that is not there yet is the migration not having been run,
+      // and that is worth saying in those words rather than as a code.
+      const msg = (err && err.message) || 'try again in a moment.';
+      LB.error[key] = /column|42703/i.test(msg) && key !== 'sighted'
+        ? 'This ladder needs supabase-migrate-league.sql to be run.'
+        : 'Could not load the leaderboard — ' + msg;
+    }
+  });
+  await Promise.all(reads);
+  if (token === LB.token){ LB.loading = false; renderBoard(); }
 }
 
 function renderBoard(){
-  if (LB.error){ lbList.innerHTML = ''; lbList.appendChild(emptyNote(LB.error, true)); return; }
-  // Anything short of rows in hand is "loading", including the wait before the
-  // account client exists. A refresh over rows that are already up says
-  // nothing at all rather than blanking the list to announce itself.
-  if (!LB.rows){ lbList.innerHTML = ''; lbList.appendChild(emptyNote('Loading the ladder…')); return; }
-  if (!LB.rows.length){ lbList.innerHTML = ''; lbList.appendChild(emptyNote('Nobody has a ranked rating yet.')); return; }
-  fillBoard(lbList, LB.rows);
-}
-
-/* ---- the other three ----
-   Nothing yet rates a game played Complete Blindfold, in Fog of War or on the
-   bare board — profiles.rating is the sighted ranked rating and the server
-   writes nothing else — so those three ladders are, for now, a fixture: a
-   table in the page rather than a column in the database. They are kept apart
-   from each other and from the ranked rating on purpose. A player's standing
-   in one vision says nothing about the others, and the same name stands on
-   several of these lists at several different numbers — Kasper21 is 2455
-   blindfold and 2631 on the bare board, and neither is their ranked rating,
-   nor may either ever be written to it.
-
-   Each ladder is written as [name, rating] pairs in no particular order and
-   ranked by boardPeople() when drawn — so adding a player means adding a
-   line, not finding their place, and the file's order can never be mistaken
-   for the ranking. Names are copied exactly as they are: this is the name the
-   player chose, underscores, casing and all, and prettifying one would be
-   giving them a name they did not pick — the rule clean_name() and the whole
-   username system already live by.
-
-   The keys are G.mode's, exactly as PZ_VISION_NAME's are: total is Complete
-   Blindfold, fog is Fog of War, blind is the board with no men on it, and
-   sighted — the ranked ladder above — is the fourth. When the server starts
-   rating these games, this is the table that becomes a query, and nothing
-   that draws it should need to change. */
-const LB_BOARDS = {
-  total: { list: 'lbListTotal', cap: 'lbCapTotal', players: [
-    ['NemoPlays', 2501], ['Velmor', 2474], ['Kasper21', 2455], ['fiftyfourthmove', 2430],
-    ['CedricChessLab', 2407], ['Noah_Vortex', 2386], ['tacticalmango', 2344],
-    ['LeoFromPrague', 2268], ['Milo_Anders', 2253], ['Cedro', 2247], ['novaendgame', 2242],
-    ['Nash_B', 2239], ['Luca_Mirnov', 2199], ['Arvenko', 2185], ['chessnori', 2180],
-    ['tomasik_', 2175], ['Artem_Koslov', 2172], ['ivanorbit', 2144], ['justleon', 2143],
-    ['MarekZed', 2140]
-  ]},
-  fog: { list: 'lbListFog', cap: 'lbCapFog', players: [
-    ['Kasper21', 2673], ['RivenCross', 2648], ['tacticalmango', 2622], ['ElianVoss', 2597],
-    ['Luca_Mirnov', 2574], ['OrionVale', 2549], ['Velmor', 2523], ['MaxenRook', 2498],
-    ['justleon', 2471], ['SorenKnight', 2446], ['Cedro', 2421], ['nova_ember', 2397],
-    ['Artem_Koslov', 2372], ['FelixArden', 2348], ['NemoPlays', 2324], ['rookzero', 2299],
-    ['MarekZed', 2277], ['LevinCore', 2254],
-    ['Kasper21', 2501], ['ViktorEndgame', 2847], ['Leonid64', 2826]
-  ]},
-  blind: { list: 'lbListBlind', cap: 'lbCapBlind', players: [
-    ['Velmor', 2762], ['DorianVale', 2744], ['FelixArden', 2725], ['KaiVektor', 2706],
-    ['RookHarbor', 2687], ['Cedro', 2669], ['MilanCore', 2650], ['Kasper21', 2631],
-    ['TheoDrift', 2612], ['chessnori', 2594], ['ElianVoss', 2575], ['NovaRook', 2556],
-    ['NemoPlays', 2537], ['SorenKnight', 2519], ['Varek_17', 2500], ['MarekZed', 2481],
-    ['LennoxFile', 2462], ['tacticalmango', 2444], ['ArloKnight', 2423], ['RivenCross', 2402]
-  ]}
-};
-
-/* [name, rating] pairs into people in ranking order: highest first, ties by
-   name so two opens agree, and one row per player. The same name twice in a
-   ladder is one player counted twice — the fog table arrived with Kasper21
-   on it at two numbers — and the higher standing is the one kept, since a
-   ladder is where somebody stands and not a history of where they have been.
-   Names are compared the way the server compares them, without regard to
-   case, because that is the sense in which two of them are the same name.
-   The people have no id: nothing on these lists is an account, so no row is
-   ever "me" and none can be confused with a profile. */
-function boardPeople(pairs){
-  const seen = new Set(), out = [];
-  const people = pairs
-    .map(([name, rating]) => ({ id: null, name, avatar: '', rating }))
-    .sort((a, b) => b.rating - a.rating || a.name.localeCompare(b.name));
-  for (const p of people){
-    const key = p.name.toLowerCase();
-    if (seen.has(key)) continue;
-    seen.add(key);
-    out.push(p);
+  for (const key in LB_PANELS){
+    const panel = LB_PANELS[key];
+    const list = document.getElementById(panel.list);
+    const cap = panel.cap && document.getElementById(panel.cap);
+    const rows = LB.rows[key];
+    if (LB.error[key]){
+      list.innerHTML = ''; list.appendChild(emptyNote(LB.error[key], true));
+      if (cap) cap.textContent = '';
+      continue;
+    }
+    // Anything short of rows in hand is "loading", including the wait before
+    // the account client exists. A refresh over rows that are already up says
+    // nothing at all rather than blanking the list to announce itself.
+    if (!rows){
+      if (!list.children.length || !list.querySelector('.lb-row')){
+        list.innerHTML = ''; list.appendChild(emptyNote('Loading the ladder…'));
+      }
+      continue;
+    }
+    if (!rows.length){
+      list.innerHTML = ''; list.appendChild(emptyNote('Nobody has a rating here yet.'));
+      if (cap) cap.textContent = '';
+      continue;
+    }
+    if (cap) cap.textContent = rows.length + ' players';
+    fillBoard(list, rows);
   }
-  return out;
 }
 
 /* One list filled from the top. The place is the row's index and nothing
    else, so the order the people arrive in *is* the ranking — which is why
-   both callers hand this a list already sorted by rating. */
+   the caller hands this a list already sorted by rating. */
 function fillBoard(list, people){
   list.innerHTML = '';
   people.forEach((person, i) => list.appendChild(boardRow(person, i + 1)));
 }
-
-/* Drawn once, at load: nothing about these changes while the page is up, and
-   they need neither the account client nor a signed-in player. */
-function renderStaticBoards(){
-  for (const key in LB_BOARDS){
-    const board = LB_BOARDS[key];
-    const people = boardPeople(board.players);
-    document.getElementById(board.cap).textContent = people.length + ' players';
-    fillBoard(document.getElementById(board.list), people);
-  }
-}
-renderStaticBoards();
 
 /* The tier's badge, the same file and the same naming the ranked screen uses,
    and read off the same TIERS ladder for every one of the four lists: a
@@ -14115,6 +14315,336 @@ function boardRow(person, place){
   return row;
 }
 
+
+/* ============================================================
+   THE LIVE LEAGUE — the strongest bots, playing each other around the clock
+   The server runs it (server/league.py): four ladders, four pools, four
+   sets of games, and it plays them whether or not anybody is looking. This
+   is only the window onto that — a socket of its own that says {t:'live'}
+   and is pushed the featured game of each vision on every move, and four
+   cards that draw what arrives.
+
+   The socket is deliberately not NET's. NET is a player's connection and
+   goes up and down with rooms, queues and games; a viewer on the home page
+   is not a player, need not say hello, and should not have a name claimed
+   for them to look at a board. It is opened when the home page is shown and
+   closed when it is left, so a game screen is not being sent boards it
+   cannot show — and it reconnects, on a short backoff, for as long as the
+   page stays home.
+
+   Nothing here decides anything. The server chooses which game is featured
+   (the strongest pair in each vision, and both players in it are among that
+   ladder's own top twenty — the names on a card are names in the ladder
+   beside it, shown exactly as the ladder shows them), keeps the clocks, and
+   reports the result; the page shows the clocks running by counting down from the last
+   snapshot, and reads the ladders again when a game ends, because that is
+   the moment the numbers move.
+   ============================================================ */
+const LIVE = {
+  sock: null,        // the watching socket, while the home page is up
+  open: false,       // whether the home page wants one
+  games: [],         // the last snapshot: one entry per vision
+  at: 0,             // the server's clock when it was taken
+  skew: 0,           // server time minus ours, so the clocks count from its moment
+  off: false,        // the server said it runs no league
+  tick: null,        // the half-second clock timer
+  retry: null,       // the reconnect timer
+  seen: {},          // mode -> the id and status last drawn, to notice a result
+  big: null          // the mode open in the spectator view, if any
+};
+const LIVE_RETRY = 8000;
+const LIVE_NAME = { sighted:'Sighted', total:'Complete Blindfold', blind:'Board Only', fog:'Fog of War' };
+const liveGrid = document.getElementById('liveGrid');
+const liveNoteEl = document.getElementById('liveNote');
+const liveOverlay = document.getElementById('liveOverlay');
+
+function liveNote(text, bad){
+  liveNoteEl.textContent = text || '';
+  liveNoteEl.classList.toggle('bad', !!bad);
+}
+
+function liveOpen(){
+  LIVE.open = true;
+  if (!LIVE.games.length) liveRender();
+  liveConnect();
+  if (!LIVE.tick) LIVE.tick = setInterval(liveTickClocks, 500);
+}
+
+function liveLeave(){
+  LIVE.open = false;
+  clearTimeout(LIVE.retry); LIVE.retry = null;
+  clearInterval(LIVE.tick); LIVE.tick = null;
+  liveCloseBig();
+  liveDisconnect();
+}
+
+function liveConnect(){
+  if (!LIVE.open) return;
+  if (!ONLINE_AVAILABLE){
+    liveNote('Live games need this page to be served by the Nox Chess server.', true);
+    return;
+  }
+  if (LIVE.sock) return;
+  let sock;
+  try { sock = new WebSocket(serverURL()); }
+  catch (e){ liveRetryLater(); return; }
+  LIVE.sock = sock;
+  sock.onopen = () => sock.send(JSON.stringify({ t:'live' }));
+  sock.onmessage = ev => {
+    let msg;
+    try { msg = JSON.parse(ev.data); } catch (e){ return; }
+    if (msg.t === 'live-games') liveUpdate(msg);
+  };
+  sock.onerror = () => {};
+  sock.onclose = () => {
+    if (LIVE.sock !== sock) return;
+    LIVE.sock = null;
+    if (LIVE.open){
+      liveNote('The live games lost their connection — reconnecting…');
+      liveRetryLater();
+    }
+  };
+}
+
+function liveRetryLater(){
+  clearTimeout(LIVE.retry);
+  LIVE.retry = setTimeout(() => { LIVE.retry = null; liveConnect(); }, LIVE_RETRY);
+}
+
+function liveDisconnect(){
+  const s = LIVE.sock;
+  LIVE.sock = null;
+  if (!s) return;
+  s.onclose = s.onerror = s.onmessage = s.onopen = null;
+  try { if (s.readyState === WebSocket.OPEN) s.send(JSON.stringify({ t:'unlive' })); } catch (e){}
+  try { s.close(); } catch (e){}
+}
+
+/* A fresh snapshot from the server. A card whose game has just ended, or
+   whose game has been replaced, is what tells this page the ladders have
+   moved — so those are re-read here, once, rather than on a timer. */
+let liveBoardsTimer = null;
+function liveUpdate(msg){
+  LIVE.at = msg.at || Date.now();
+  LIVE.skew = LIVE.at - Date.now();
+  LIVE.off = !!msg.off;
+  LIVE.games = Array.isArray(msg.games) ? msg.games : [];
+  let moved = false;
+  for (const g of LIVE.games){
+    const was = LIVE.seen[g.mode];
+    if (was && ((was.id === g.id && was.status !== g.status && g.status === 'finished') ||
+                (was.id !== g.id && was.status === 'live'))) moved = true;
+    LIVE.seen[g.mode] = { id: g.id, status: g.status };
+  }
+  if (LIVE.off) liveNote('The server is not running the AI league right now.');
+  else if (!LIVE.games.some(g => g.status === 'live' || g.status === 'finished'))
+    liveNote('Arranging the first games…');
+  else liveNote('');
+  liveRender();
+  if (moved && authSettled){
+    clearTimeout(liveBoardsTimer);
+    liveBoardsTimer = setTimeout(loadBoard, 1200);
+  }
+}
+
+/* ---- reading a snapshot ---- */
+
+/* What a side has left, now: the snapshot's figure, less what has run off it
+   since the snapshot if it is that side's move. Counted on the server's clock,
+   which is what the snapshot was stamped with. */
+function liveRemaining(g, color, now){
+  const base = color === 'w' ? g.whiteMs : g.blackMs;
+  if (typeof base !== 'number') return 0;
+  if (g.status !== 'live' || g.turn !== color) return Math.max(0, base);
+  const elapsed = Math.max(0, (now + LIVE.skew) - LIVE.at);
+  return Math.max(0, base - elapsed);
+}
+
+/* One line for the foot of the card: whose move, or how it ended. */
+function liveStatusText(g){
+  if (!g || g.status === 'waiting') return 'Arranging the next game…';
+  if (g.status === 'finished' || g.status === 'finishing'){
+    const how = g.termination ? g.termination.charAt(0).toUpperCase() + g.termination.slice(1) : 'Game over';
+    return (g.result || '') + ' · ' + how;
+  }
+  const who = g.turn === 'w' ? 'White' : 'Black';
+  return who + ' to move' + (g.check ? ' · Check' : '');
+}
+
+function liveEsc(text){
+  return String(text == null ? '' : text)
+    .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+}
+
+/* ---- drawing ---- */
+
+/* The board of a live game, in the vision it is played in. Reads the FEN the
+   same way the puzzles do (stateFromFEN) and draws the men with the game's
+   own glyphs (pieceHTML), so a piece here is the piece on the game screen.
+
+   What each vision may show is the game's rule, restated for a viewer:
+     sighted  — every man, and the last move lit
+     blind    — the squares, and no men at all (.board.blind hides the men
+                but keeps the board; here they are simply not drawn)
+     fog      — the men of the side to move on the squares they stand on,
+                and fog over every other square: visibleSet()'s rule, from
+                the chair of whoever is thinking
+   Complete Blindfold has no board and does not come here — liveConsoleHTML()
+   is what it shows. The last move is lit only where the game would light it,
+   which is the sighted board and nowhere else; a check is ringed only on a
+   king the vision allows to be seen. */
+function liveBoardHTML(fen, mode, lastMove, check){
+  const st = stateFromFEN(fen);
+  const viewer = st.turn;
+  // sqIndex is the console's own "e4" -> board index reader
+  const from = lastMove && lastMove.length >= 4 ? sqIndex(lastMove.slice(0, 2)) : -1;
+  const to   = lastMove && lastMove.length >= 4 ? sqIndex(lastMove.slice(2, 4)) : -1;
+  let html = '<div class="live-board' + (mode === 'fog' ? ' fog' : '') + '" aria-hidden="true">';
+  for (let i = 0; i < 64; i++){
+    const p = st.b[i];
+    const cls = ['lsq'];
+    let shown = !!p;
+    if (mode === 'blind') shown = false;
+    if (mode === 'fog'){
+      const mine = !!p && p.c === viewer;
+      if (!mine) cls.push('hidden');
+      shown = mine;
+    }
+    if (mode === 'sighted' && (i === from || i === to)) cls.push('last');
+    if (check && p && p.t === 'K' && p.c === st.turn && (mode === 'sighted' || mode === 'fog')) cls.push('check');
+    html += '<div class="' + cls.join(' ') + '">';
+    if (mode === 'fog') html += '<div class="fog"></div>';
+    if (shown) html += '<span class="lpc ' + (p.c === W ? 'g-w' : 'g-b') + '">' + pieceHTML(p.t) + '</span>';
+    html += '</div>';
+  }
+  return html + '</div>';
+}
+
+/* The written moves, numbered as the game numbers them, the last one lit.
+   `count` is how many moves (pairs) fit; the tail is what is shown. */
+function liveMovesHTML(sans, count){
+  if (!sans || !sans.length) return '<span class="empty">No moves yet.</span>';
+  const pairs = [];
+  for (let i = 0; i < sans.length; i += 2){
+    pairs.push({ n: i / 2 + 1, w: sans[i], b: sans[i + 1], last: i + 1 >= sans.length - 1 });
+  }
+  const shown = pairs.slice(-count);
+  return shown.map((p, k) => {
+    const lastPair = k === shown.length - 1;
+    const wCur = lastPair && !p.b;
+    const bCur = lastPair && !!p.b;
+    return '<span class="ln">' + p.n + '.</span>' +
+      '<span class="lm' + (wCur ? ' cur-move' : '') + '">' + liveEsc(p.w) + '</span>' +
+      (p.b ? '<span class="lm' + (bCur ? ' cur-move' : '') + '">' + liveEsc(p.b) + '</span>' : '');
+  }).join(' ');
+}
+
+/* Complete Blindfold: no board. The players have the notation and their
+   own heads, and so does the viewer. */
+function liveConsoleHTML(sans, big){
+  return '<div class="live-console">' +
+    '<div class="eyes">No board</div>' +
+    '<div class="live-moves">' + liveMovesHTML(sans, big ? 60 : 8) + '</div></div>';
+}
+
+function liveSeatHTML(g, color, now){
+  const side = color === 'w' ? g.white : g.black;
+  const ms = liveRemaining(g, color, now);
+  const cls = ['live-seat', color];
+  if (g.status === 'live' && g.turn === color) cls.push('turn');
+  if (g.status === 'live' && ms < 60000) cls.push('low');
+  return '<div class="' + cls.join(' ') + '" data-side="' + color + '">' +
+    '<div class="live-who"><span class="live-dot"></span>' +
+    '<span class="live-name">' + liveEsc(side ? side.name : '—') + '</span></div>' +
+    '<div class="live-nums"><span class="live-elo">' +
+    (side && typeof side.rating === 'number' ? side.rating : '') + '</span>' +
+    '<span class="live-clock">' + fmtClock(ms) + '</span></div></div>';
+}
+
+function liveCardHTML(g, big){
+  const now = Date.now();
+  const mode = g.mode;
+  const state = g.status === 'live' ? 'live' : (g.status === 'waiting' ? 'waiting' : 'over');
+  let html = '<article class="live-card ' + state + '" data-mode="' + mode + '" tabindex="0" ' +
+    'role="button" aria-label="' + liveEsc(LIVE_NAME[mode] || mode) + ' live game">';
+  html += '<div class="live-head"><span class="live-mode">' + liveEsc(LIVE_NAME[mode] || g.modeName || mode) +
+    '</span><span class="live-pill">' + (state === 'live' ? 'Live' : state === 'over' ? 'Final' : 'Soon') + '</span></div>';
+  if (state === 'waiting'){
+    html += '<div class="live-body"><div class="live-view"><div class="live-console">' +
+      '<span class="empty">Arranging the next game…</span></div></div>' +
+      '<div class="live-side"></div></div>';
+    html += '<div class="live-status"><span>' + liveEsc(liveStatusText(g)) + '</span></div>';
+    return html + '</article>';
+  }
+  html += '<div class="live-body">';
+  html += '<div class="live-view">' +
+    (mode === 'total' ? liveConsoleHTML(g.sans, big) : liveBoardHTML(g.fen, mode, g.lastMove, g.check)) +
+    '</div>';
+  html += '<div class="live-side">' + liveSeatHTML(g, 'b', now) +
+    '<div class="live-line">' + (mode === 'total' && !big ? '' : liveMovesHTML(g.sans, big ? 30 : 4)) + '</div>' +
+    liveSeatHTML(g, 'w', now) + '</div>';
+  html += '</div>';
+  html += '<div class="live-status"><span>' + liveEsc(liveStatusText(g)) + '</span>' +
+    '<span>' + (g.ply ? 'Move ' + Math.floor(g.ply / 2 + 1) : '') + '</span></div>';
+  return html + '</article>';
+}
+
+function liveRender(){
+  const order = ['sighted', 'total', 'blind', 'fog'];
+  const byMode = {};
+  for (const g of LIVE.games) byMode[g.mode] = g;
+  liveGrid.innerHTML = order.map(mode => liveCardHTML(byMode[mode] || { mode, status:'waiting' }, false)).join('');
+  if (LIVE.big) liveRenderBig();
+}
+
+/* Half a second at a time, without redrawing the cards: only the clocks
+   change between snapshots, so only the clocks are touched. */
+function liveTickClocks(){
+  const now = Date.now();
+  const roots = [liveGrid];
+  if (LIVE.big) roots.push(document.getElementById('liveBig'));
+  for (const root of roots){
+    for (const card of root.querySelectorAll('.live-card')){
+      const g = LIVE.games.find(x => x.mode === card.dataset.mode);
+      if (!g || g.status !== 'live') continue;
+      for (const seat of card.querySelectorAll('.live-seat')){
+        const color = seat.dataset.side;
+        const ms = liveRemaining(g, color, now);
+        seat.querySelector('.live-clock').textContent = fmtClock(ms);
+        seat.classList.toggle('low', ms < 60000);
+      }
+    }
+  }
+}
+
+/* ---- the spectator view ---- */
+function liveOpenBig(mode){
+  const g = LIVE.games.find(x => x.mode === mode);
+  if (!g || g.status === 'waiting') return;
+  LIVE.big = mode;
+  liveRenderBig();
+  liveOverlay.classList.add('show');
+}
+function liveRenderBig(){
+  const g = LIVE.games.find(x => x.mode === LIVE.big);
+  const box = document.getElementById('liveBig');
+  box.innerHTML = g ? liveCardHTML(g, true) : '';
+}
+function liveCloseBig(){
+  LIVE.big = null;
+  liveOverlay.classList.remove('show');
+}
+liveGrid.addEventListener('click', e => {
+  const card = e.target.closest('.live-card');
+  if (card) liveOpenBig(card.dataset.mode);
+});
+liveGrid.addEventListener('keydown', e => {
+  const card = e.target.closest('.live-card');
+  if (card && (e.key === 'Enter' || e.key === ' ')){ e.preventDefault(); liveOpenBig(card.dataset.mode); }
+});
+document.getElementById('liveX').onclick = liveCloseBig;
+liveOverlay.addEventListener('click', e => { if (e.target === liveOverlay) liveCloseBig(); });
+document.addEventListener('keydown', e => { if (e.key === 'Escape' && LIVE.big) liveCloseBig(); });
 
 /* ============================================================
    SOCIAL — friends, the requests that make them, and challenges
@@ -14771,6 +15301,7 @@ document.getElementById('chalDecline').onclick = () => {
 syncOptions();
 render();
 initAuth();          // arriving leads to the home page; nothing gates it
+liveOpen();          // ...and the home page is where the live games are watched from
 </script>
 </body>
 </html>
