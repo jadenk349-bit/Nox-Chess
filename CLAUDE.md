@@ -40,6 +40,7 @@ python3 tools/check_supabase_visions.py  # the four ladders and their grants, ag
 python3 server/test_league.py           # the AI league: pairing, ratings, endings, restart, boot; no server, stub engine
 python3 server/test_league_boot.py      # the production startup path: runs server/server.py itself, needs a Stockfish
 node server/test_live_games.js            # the home page's live cards — what each vision may show
+node server/test_spectate_flow.js         # a card to the full-screen spectator page and back, scripted socket
 NOX_LEAGUE_FAST=1 python3 server/server.py    # ...and, against that server (real accounts, results in memory):
 python3 server/test_league_socket.py      # real games, real engine, over the socket — REQUIRES that server
 
@@ -469,8 +470,52 @@ thinking), and Complete Blindfold no board at all, the console instead.
 Clocks count down client-side from the snapshot on the server's own
 timestamp (`liveRemaining()`), and a result re-reads all four ladders
 (`loadBoard()`, now four queries of `profiles`, one per column; the old
-`LB_BOARDS` fixture is gone). A card opens the spectator view, which has
-nothing on it to press. `NOX_LEAGUE=off` turns the league off. Without a
+`LB_BOARDS` fixture is gone). `NOX_LEAGUE=off` turns the league off.
+
+**A live card opens that game, by id, on the game screen — full screen, view
+only.** The SPECTATING section of the script (`SPEC`, `specOpen()`) is the
+whole of it, and it is deliberately not a second game page: `G.opponent`
+becomes `'spectate'` — a fourth kind of opponent, so `LOCAL()`, `BOT()` and
+`ONLINE()` are all false and nothing that lets a move be entered can be
+reached — and the ordinary game screen draws the game exactly as a game of
+that vision is drawn: the same board and glyphs, the same strips (with the
+rating beside the colour), the same clocks, the console for Complete
+Blindfold, `visibleSet()`'s fog from the chair of whoever is to move
+(`G.human` follows the snapshot's turn). The things a player has — Resign,
+Offer Draw, Peek, the move box, the chat — are absent rather than disabled
+(`body.spectating` in the CSS, `specStatus()` in the script), the board takes
+no pointer, the square handler and `canConcede()` refuse, and `checkEnd()`
+and `flagFall()` are not asked: the result is whatever the server says
+(`specFinish()`), because a game may end on time, by resignation or by
+agreement and only the server can see those. Moves are replayed through
+`applyMove(m, true)`, so notation, captures, sounds and the console are the
+game's own; a snapshot that is not a continuation rebuilds from the start.
+
+Only a live card is a button, and it carries `data-id`: a waiting card has
+nothing behind it and a finished one is a result being read, so neither
+opens. The page watches on a socket of its own — `{t:"watch", id}`, answered
+and pushed as `{t:"watch-game"}` on every change to *that* game and no other,
+`{t:"unwatch"}` to stop — and the server's `handle_watch()` gives the
+connection nothing: no seat, no colour, no `client.game`, so a move, a
+resignation, a result or a draw offer from it meets the same refusal every
+seatless socket meets, and a league game is not a `Game` in `games` for
+anything to reach anyway. `League.watch()`/`unwatch()`/`snapshot_of()`
+answer by id from the live matches, then from `finished_by_id` (the last
+forty this process ended), then from the store (`store.game()`,
+`snapshot_from_row()`), so a refresh on a finished game shows how it ended;
+`next_live_id()` is what "Watch Next Live Game" offers once the ladder's next
+game exists, and it is never entered without a press. The address is
+`/spectate/<id>`: the server serves the page for it (`SPECTATE_PATH`) and
+looks nothing up, `specBoot()` reads it back, and the `<base>` written at the
+top of `<head>` is why every relative asset still resolves under it. The
+end-of-game box is borrowed — New Game reads Back to Home, Rematch reads
+Watch Next Live Game, Study Board is hidden — and `specButtons(false)` puts it
+back. `showScreen()` calls `specStop()` on the way to any other screen, which
+closes the socket and hands `G` back as it was; the game goes on on the
+server whether or not anybody is watching, and a second watcher is only a
+second socket. `test_spectate_flow.js` drives the whole thing under the DOM
+shim against a scripted socket; `test_league_socket.py` does the server's
+half for real, including everything a spectator might send. Without a
 service key (or with `NOX_LEAGUE=memory`) it still reads the real accounts,
 with the publishable key the page ships (`public_profiles()`), and plays them
 with the results kept in memory — the same degradation puzzle ratings have —

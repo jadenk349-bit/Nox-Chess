@@ -3,6 +3,14 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
+<!-- Every asset, worker and fetch in this file is a relative URL, and the page
+     is served at /spectate/<game id> as well as at / (see SPECTATING in the
+     script). A relative "assets/nox-logo.png" under /spectate/x would resolve
+     to /spectate/assets/..., which is nothing. So the base is pinned to where
+     the page really lives: its own path with any /spectate/<id> taken off —
+     which leaves a file:// copy and a sub-path host exactly as they were, and
+     is written by script rather than as a fixed "/" for that reason. -->
+<script>document.write('<base href="' + location.pathname.replace(/\/spectate\/[^/]*\/?$/, '/').replace(/"/g, '') + '">');</script>
 <title>NOX CHESS</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -418,6 +426,25 @@
   }
   .site-logo img, .logo-btn img{width:var(--logo-w); height:auto; display:block;}
   .logo-btn:hover{transform:none; filter:brightness(1.12);}
+  /* Spectating one of the league's games: the way back, at the other end of
+     the row the logo hangs from — out of the flow like the logo, so the board
+     gives up nothing for it, and only there while spectating. */
+  .spec-back{
+    display:none; position:absolute; right:0; top:0; z-index:3;
+    min-height:var(--logo-box); align-items:center; gap:6px;
+    padding:8px 14px; font-size:12px; letter-spacing:.2em; text-transform:uppercase;
+  }
+  body.spectating .spec-back{display:inline-flex;}
+  /* View only. The buttons a player has are not disabled but absent: a
+     disabled Resign is still a promise that somebody here could resign. The
+     board takes no pointer, and the console keeps its log and loses its box. */
+  body.spectating #controls, body.spectating #chatCard, body.spectating #btnPeek,
+  body.spectating .console .entry, body.spectating .console .entry-hint,
+  body.spectating #entryLocal{display:none !important;}
+  body.spectating .board, body.spectating .sq, body.spectating .piece{cursor:default;}
+  body.spectating .board{pointer-events:none;}
+  /* the rating beside the colour, on the strips above and below the board */
+  .bar-name .elo{margin-left:8px; color:var(--gold-soft); font-variant-numeric:tabular-nums;}
 
   .game-layout{
     display:grid;
@@ -3285,6 +3312,20 @@
   }
   .live-card:hover{border-color:var(--ctl-edge); transform:translateY(-1px);}
   .live-card:focus-visible{outline:2px solid var(--gold); outline-offset:2px;}
+  /* Only a game in progress opens: a card still arranging its next game has
+     nothing behind it, and a finished one is a result being read for a few
+     seconds before the next board. Neither lifts, neither is a pointer. */
+  .live-card.waiting, .live-card.over{cursor:default;}
+  .live-card.waiting:hover, .live-card.over:hover{border-color:transparent; transform:none;}
+  /* ...and the one that does says so on hover, in the same gold the pill
+     wears, without the card changing shape. */
+  .live-card.live .live-pill::after{
+    content:"Watch"; display:none; margin-left:2px; color:var(--gold);
+  }
+  @media (hover:hover){
+    .live-card.live:hover{border-color:rgba(217,164,65,.45);}
+    .live-card.live:hover .live-pill::after{display:inline;}
+  }
   .live-head{
     display:flex; align-items:center; justify-content:space-between; gap:8px;
   }
@@ -3316,8 +3357,8 @@
   /* The card is compact by being wide rather than tall: the board stands on
      the left at a fixed size and the two seats and the last moves stack
      beside it, so four cards are two rows of a few hundred pixels rather than
-     a column of boards. The spectator view undoes this and stacks everything
-     under a large board — see .live-modal below. */
+     a column of boards. Pressing a live card leaves this page altogether
+     for the game screen — see "SPECTATING" in the script. */
   .live-body{
     display:grid; grid-template-columns:150px minmax(0,1fr); gap:10px; align-items:stretch;
   }
@@ -3420,29 +3461,6 @@
   .live-card.over .live-status{color:var(--gold-soft);}
   .live-note{margin:0; font-size:12.5px; color:var(--muted); min-height:1.2em;}
   .live-note.bad{color:#e7908a;}
-  /* The spectator view: the same card, larger, on the modal's plate, and
-     stacked the way a board is read — black's seat above it, white's below,
-     the moves in between. display:contents lifts the side column's children
-     up beside the board so `order` can arrange them. */
-  .live-modal{max-width:560px; padding:18px 18px 16px; text-align:left;}
-  .live-modal .live-card{cursor:default; box-shadow:none; background:transparent; padding:6px 0 0;}
-  .live-modal .live-card:hover{transform:none; border-color:transparent;}
-  .live-modal .live-body{display:flex; flex-direction:column; gap:8px;}
-  .live-modal .live-side{display:contents;}
-  .live-modal .live-seat{flex-direction:row; align-items:center; justify-content:space-between;}
-  .live-modal .live-seat.b{order:-1;}
-  .live-modal .live-view{order:0;}
-  .live-modal .live-line{order:1; flex:none; max-height:4.4em;}
-  .live-modal .live-seat.w{order:2;}
-  .live-modal .live-console{aspect-ratio:auto; height:min(52vh,420px); font-size:13px;}
-  .live-modal .live-name{font-size:16px;}
-  .live-modal .live-elo{font-size:14.5px;}
-  .live-modal .live-clock{font-size:22px;}
-  .live-modal .live-mode{font-size:22px;}
-  .live-modal .live-only{display:block;}
-  .live-only{
-    display:none; margin-top:8px; font-size:12.5px; color:var(--muted); letter-spacing:.06em;
-  }
   @media (max-width:900px){
     .home-body{flex-direction:column; align-items:stretch; min-height:0;}
     .lb-stack{order:1; width:100%;}
@@ -3658,8 +3676,9 @@
 
          At the foot of the left-hand side stand the league's live games: one
          per vision, the strongest pair at a board right now, drawn by
-         liveRender() from what the server pushes over its own socket. A card
-         opens the spectator view, which can watch and nothing else. -->
+         liveRender() from what the server pushes over its own socket. A live
+         card opens that very game — by its id — on the game screen, full
+         screen, to watch and nothing else; see SPECTATING in the script. -->
     <div class="home-body">
       <div class="live-stack" id="liveStack" aria-labelledby="liveTitle">
         <h2 class="live-title" id="liveTitle">Live Top Games</h2>
@@ -4216,6 +4235,9 @@
       <button class="logo-btn" id="btnMenu" aria-label="Nox Chess — back to the home page">
         <img src="assets/nox-logo.png?v=1" alt="Nox Chess" width="976" height="730">
       </button>
+      <!-- spectating only: the way back to the home page, which leaves the
+           game running on the server exactly as it was -->
+      <button class="ghost spec-back" id="specBack" aria-label="Back to the home page">← Back</button>
     </header>
 
     <div class="game-layout">
@@ -4583,18 +4605,6 @@
       <button class="ghost" id="drawDecline">Decline</button>
       <button class="primary" id="drawAccept">Accept Draw</button>
     </div>
-  </div>
-</div>
-
-<!-- the spectator view of one of the league's live games: the same card the
-     home page shows, larger. View only — there is nothing on it to press but
-     the corner, because a spectator cannot move, resign, offer or interfere
-     with a clock, and a board with no buttons cannot be asked to. -->
-<div class="overlay" id="liveOverlay">
-  <div class="modal live-modal" role="dialog" aria-label="Live game">
-    <button class="modal-x" id="liveX" aria-label="Close" title="Close">×</button>
-    <div id="liveBig"></div>
-    <p class="live-only">Spectating. The players are the league's own accounts; nothing here can be moved.</p>
   </div>
 </div>
 
@@ -5403,6 +5413,10 @@ const CHALLENGE_TTL = 180000;
 // Setting up a game for one particular person rather than for whoever turns up.
 const CHALLENGING = () => ONLINE() && !!CHAL.to;
 const BOT    = () => G.opponent === 'bot';     // the only opponent the engine plays
+// Watching one of the league's games: nobody at this end is playing at all.
+// Not LOCAL, not BOT, not ONLINE — every one of those means a move can be
+// entered here, and the whole of spectating is that none can. See SPECTATING.
+const SPECTATING = () => G.opponent === 'spectate';
 /* An online game the server filled with a bot because nobody was queueing. It
    is ONLINE() in every way that matters — the socket, the ranked screen, the
    result, the resignation, the draw all run over the same wires — and only the
@@ -5511,6 +5525,7 @@ function renderStatus(){
   // The logo is the way home and stays put; walking out of a game in progress
   // is caught by the confirmation on the way, not by hiding the door.
   document.getElementById('btnMenu').style.display = '';
+  if (SPECTATING()){ specStatus(); return; }
 
   const peekBtn = document.getElementById('btnPeek');
   peekBtn.style.display = CAN_PEEK(G.mode) ? '' : 'none';   // nothing to peek at otherwise
@@ -5608,7 +5623,8 @@ function renderCaptures(){
   el.trayW.innerHTML = fmt(G.caps.w);
   el.trayB.innerHTML = fmt(G.caps.b);
   const sum = a => a.reduce((n,t)=>n+VAL[t],0)/100;
-  const dw = sum(G.caps.w) - sum(G.caps.b);
+  // in whole centipawns before dividing: 3.1 - 2.8 in floats is 0.2999…
+  const dw = Math.round(sum(G.caps.w) * 100 - sum(G.caps.b) * 100) / 100;
   el.advW.textContent = dw > 0 ? '+' + dw : '';
   el.advB.textContent = dw < 0 ? '+' + (-dw) : '';
 }
@@ -5625,6 +5641,12 @@ function fmtClock(ms){
 
 /** Who to call each side, on the strips above and below the board. */
 function seatName(color){
+  // the league's own accounts, by the name the leaderboard gives them, and
+  // nothing beside it to say what moves the pieces
+  if (SPECTATING()){
+    const side = SPEC.game && (color === W ? SPEC.game.white : SPEC.game.black);
+    return side && side.name ? side.name : (color === W ? 'White' : 'Black');
+  }
   if (LOCAL()) return color === W ? 'White' : 'Black';
   if (BOT()){
     if (color === G.human) return myName() || 'You';
@@ -5661,6 +5683,17 @@ function layoutBoardBars(){
       const sub = document.createElement('span');
       sub.className = 'sub';
       sub.textContent = color === W ? 'WHITE' : 'BLACK';
+      // a spectator is shown the rating too: it is the one thing the home
+      // page's card says about a player that the strip would otherwise not
+      if (SPECTATING() && SPEC.game){
+        const side = color === W ? SPEC.game.white : SPEC.game.black;
+        if (side && typeof side.rating === 'number'){
+          const elo = document.createElement('span');
+          elo.className = 'elo';
+          elo.textContent = side.rating;
+          sub.appendChild(elo);
+        }
+      }
       label.appendChild(sub);
     }
     if (clock.parentElement !== bar) bar.appendChild(clock);
@@ -5710,7 +5743,9 @@ function tickClock(){
   const c = G.st.turn;
   G.clock[c] = Math.max(0, G.clock[c] - dt);
   renderClocks();
-  if (G.clock[c] === 0) flagFall(c);
+  // a spectator's clock reaching zero is a clock waiting for the server to say
+  // so, not a result this page may declare
+  if (G.clock[c] === 0 && !SPECTATING()) flagFall(c);
 }
 
 // a lone king (or king and one minor) can't mate, so a flag fall there is a draw
@@ -5778,6 +5813,15 @@ function logLine(text, cls){
 
 function resetLog(){
   el.log.innerHTML = '';
+  if (SPECTATING()){
+    const g = SPEC.game;
+    logLine(g ? 'Watching ' + g.white.name + ' (' + g.white.rating + ') against ' +
+                g.black.name + ' (' + g.black.rating + ') — Complete Blindfold.'
+              : 'Watching a Complete Blindfold game.', 'sys');
+    logLine('There is no board. The moves arrive in notation, as the players see them.', 'sys');
+    logLine(' ');
+    return;
+  }
   if (LOCAL()){
     logLine('New game — two players, one screen.', 'sys');
     logLine('There is no board. Each side types into its own box, in turn.', 'sys');
@@ -5949,6 +5993,11 @@ function applyMove(m, fromNet){
 }
 
 function checkEnd(){
+  // A spectator's board ends when the server says the game ended — on time,
+  // by resignation, by agreement, by the rules — and the page could only
+  // ever see the last of those. So the rules are not asked here; the
+  // snapshot that carries the result is what ends it (specFinish).
+  if (SPECTATING()) return;
   const s = G.st;
   const moves = legalMoves(s, s.turn);
   if (!moves.length){
@@ -6263,6 +6312,7 @@ const scheduleAI = ms => {
 /* ---- clicks ---- */
 el.squares.addEventListener('click', e => {
   const sqEl = e.target.closest('.sq');
+  if (SPECTATING()) return;                     // a viewer's click is not a move begun
   if (!G.started) return;                       // nothing moves until Start Play
   if (!sqEl || G.over || G.thinking || G.pendingPromo) return;
   // A peek is looking, not playing: the board has to be closed again before it
@@ -7061,7 +7111,7 @@ document.getElementById('chatForm').onsubmit = e => { e.preventDefault(); sendCh
 const resignOverlay = document.getElementById('resignOverlay');
 const drawOverlay   = document.getElementById('drawOverlay');
 
-function canConcede(){ return screenName === 'game' && !G.over && !REV.on; }
+function canConcede(){ return screenName === 'game' && !G.over && !REV.on && !SPECTATING(); }
 
 function showDraw(title, text, mode){
   document.getElementById('drawTitle').textContent = title;
@@ -10335,7 +10385,7 @@ function lsnCapsHTML(){
     ? arr.slice().sort((a, b) => order[a] - order[b]).map(pieceHTML).join('')
     : '—';
   const sum = a => a.reduce((n, t) => n + VAL[t], 0) / 100;
-  const dw = sum(LSN.caps.w) - sum(LSN.caps.b);
+  const dw = Math.round(sum(LSN.caps.w) * 100 - sum(LSN.caps.b) * 100) / 100;
   return '<div class="capbar"><div class="tray">' + fmt(LSN.caps.w) + '</div>' +
          '<div class="adv">' + (dw > 0 ? '+' + dw : '') + '</div></div>' +
          '<div class="capbar"><div class="tray b">' + fmt(LSN.caps.b) + '</div>' +
@@ -11434,6 +11484,7 @@ document.getElementById('rulesToggle').onclick = () => setRulesOpen(!rulesCard.c
    it would only mean saying hello again. */
 document.getElementById('endNew').onclick = () => {
   el.endOverlay.classList.remove('show');
+  if (SPECTATING()){ specLeave(); return; }          // "Back to Home" on that box
   if (ONLINE()){
     // showScreen() withdraws anything still in the air on the way out
     if (G.matchKind === 'ranked'){ rankedAgain(); return; }
@@ -11448,6 +11499,7 @@ document.getElementById('endNew').onclick = () => {
    asked for — the opponent may not want one — so the button opens the question
    rather than the next game. Against the engine there is nobody to ask. */
 document.getElementById('endRematch').onclick = () => {
+  if (SPECTATING()){ if (SPEC.next) specOpen(SPEC.next, true); return; }   // "Watch Next Live Game"
   if (ONLINE()){ askRematch(); return; }
   el.endOverlay.classList.remove('show');
   newGame();
@@ -12996,6 +13048,10 @@ function showScreen(name){
   if (screenName === 'ranked' && name !== 'ranked' && searching) stopRankSearch();
   if (name !== 'game') reviewClose(false);
   if (name !== 'game') pzClose();
+  // A game being watched is let go of the same way: the socket closes, the
+  // game goes on on the server, and the board is handed back to whatever
+  // the next screen wants it for.
+  if (name !== 'game') specStop();
   // A drill left behind stops with the page: its countdown, the click still
   // wired to a question nobody can see, the reply on its way from the engine.
   if (name !== 'practice') prLeave();
@@ -13155,7 +13211,9 @@ function syncOptions(){
   warn('secYouPlay',  !BOT() || chosen.side);
 
   document.getElementById('visionChip').textContent = MODE_NAME[G.mode];
-  document.getElementById('setupChip').textContent = (LOCAL()
+  document.getElementById('setupChip').textContent = SPECTATING()
+    ? 'Spectating · Live · ' + timeLabel(G.minutes, G.inc)
+    : (LOCAL()
     ? 'Same Computer'
     : ONLINE()
       ? (G.matchKind === 'ranked' ? 'Ranked' : 'Friendly') +
@@ -13255,6 +13313,8 @@ document.getElementById('btnHostRoom').onclick = () => {
 const leaveOverlay = document.getElementById('leaveOverlay');
 // the logo doubles as the way out; a game in progress asks first
 document.getElementById('btnMenu').onclick = () => {
+  // leaving a game being watched abandons nothing: it goes on without us
+  if (SPECTATING()){ specLeave(); return; }
   if (gameInProgress() || (ONLINE() && NET.state === 'playing' && !G.over)){
     leaveOverlay.classList.add('show');
   } else {
@@ -13730,6 +13790,13 @@ document.addEventListener('keydown', e => {
   // Peek and New Game are button-only — no keyboard shortcuts while playing,
   // and there is no take-back to bind a key to
 
+  // spectating: escape closes the result box if it is up, and otherwise is
+  // the Back button — there is nothing selected on a board that takes no clicks
+  if (SPECTATING() && k === 'escape'){
+    if (el.endOverlay.classList.contains('show')) el.endOverlay.classList.remove('show');
+    else specLeave();
+    return;
+  }
   if (k === 'escape'){ G.sel = -1; render(); }
 });
 
@@ -14420,14 +14487,12 @@ const LIVE = {
   off: false,        // the server said it runs no league
   tick: null,        // the half-second clock timer
   retry: null,       // the reconnect timer
-  seen: {},          // mode -> the id and status last drawn, to notice a result
-  big: null          // the mode open in the spectator view, if any
+  seen: {}           // mode -> the id and status last drawn, to notice a result
 };
 const LIVE_RETRY = 8000;
 const LIVE_NAME = { sighted:'Sighted', total:'Complete Blindfold', blind:'Board Only', fog:'Fog of War' };
 const liveGrid = document.getElementById('liveGrid');
 const liveNoteEl = document.getElementById('liveNote');
-const liveOverlay = document.getElementById('liveOverlay');
 
 function liveNote(text, bad){
   liveNoteEl.textContent = text || '';
@@ -14445,7 +14510,6 @@ function liveLeave(){
   LIVE.open = false;
   clearTimeout(LIVE.retry); LIVE.retry = null;
   clearInterval(LIVE.tick); LIVE.tick = null;
-  liveCloseBig();
   liveDisconnect();
 }
 
@@ -14639,8 +14703,14 @@ function liveCardHTML(g, big){
   const now = Date.now();
   const mode = g.mode;
   const state = g.status === 'live' ? 'live' : (g.status === 'waiting' ? 'waiting' : 'over');
-  let html = '<article class="live-card ' + state + '" data-mode="' + mode + '" tabindex="0" ' +
-    'role="button" aria-label="' + liveEsc(LIVE_NAME[mode] || mode) + ' live game">';
+  /* Only a live card is a button, and what it opens is the game by its id —
+     never "whatever is on this ladder now", because by the time it is pressed
+     that may be the next game. A card with no game, or a finished one, is
+     a panel: no id, no role, nothing for the keyboard to land on. */
+  const opens = state === 'live' && !!g.id;
+  let html = '<article class="live-card ' + state + '" data-mode="' + mode + '"' +
+    (opens ? ' data-id="' + liveEsc(g.id) + '" tabindex="0" role="button" aria-label="Watch the ' +
+             liveEsc(LIVE_NAME[mode] || mode) + ' live game"' : '') + '>';
   html += '<div class="live-head"><span class="live-mode">' + liveEsc(LIVE_NAME[mode] || g.modeName || mode) +
     '</span><span class="live-pill">' + (state === 'live' ? 'Live' : state === 'over' ? 'Final' : 'Soon') + '</span></div>';
   if (state === 'waiting'){
@@ -14668,57 +14738,368 @@ function liveRender(){
   const byMode = {};
   for (const g of LIVE.games) byMode[g.mode] = g;
   liveGrid.innerHTML = order.map(mode => liveCardHTML(byMode[mode] || { mode, status:'waiting' }, false)).join('');
-  if (LIVE.big) liveRenderBig();
 }
 
 /* Half a second at a time, without redrawing the cards: only the clocks
    change between snapshots, so only the clocks are touched. */
 function liveTickClocks(){
   const now = Date.now();
-  const roots = [liveGrid];
-  if (LIVE.big) roots.push(document.getElementById('liveBig'));
-  for (const root of roots){
-    for (const card of root.querySelectorAll('.live-card')){
-      const g = LIVE.games.find(x => x.mode === card.dataset.mode);
-      if (!g || g.status !== 'live') continue;
-      for (const seat of card.querySelectorAll('.live-seat')){
-        const color = seat.dataset.side;
-        const ms = liveRemaining(g, color, now);
-        seat.querySelector('.live-clock').textContent = fmtClock(ms);
-        seat.classList.toggle('low', ms < 60000);
-      }
+  for (const card of liveGrid.querySelectorAll('.live-card')){
+    const g = LIVE.games.find(x => x.mode === card.dataset.mode);
+    if (!g || g.status !== 'live') continue;
+    for (const seat of card.querySelectorAll('.live-seat')){
+      const color = seat.dataset.side;
+      const ms = liveRemaining(g, color, now);
+      seat.querySelector('.live-clock').textContent = fmtClock(ms);
+      seat.classList.toggle('low', ms < 60000);
     }
   }
 }
 
-/* ---- the spectator view ---- */
-function liveOpenBig(mode){
-  const g = LIVE.games.find(x => x.mode === mode);
-  if (!g || g.status === 'waiting') return;
-  LIVE.big = mode;
-  liveRenderBig();
-  liveOverlay.classList.add('show');
+/* ============================================================
+   SPECTATING — one of the league's games, on the game screen, view only
+
+   A live card on the home page opens the game it shows — by its id, never by
+   "whatever is on that ladder now" — on the ordinary game screen, full screen,
+   exactly as a game of that vision is played: the same board, the same
+   glyphs, the same strips with the same clocks, the same console for Complete
+   Blindfold, the same fog from the chair of whoever is thinking. Nothing on it
+   is disabled; the things a player has (Resign, Offer Draw, Peek, the move
+   box, the chat) are absent, and the board takes no pointer. SPECTATING() is
+   what every branch of the game code asks, and it is a fourth kind of
+   opponent — 'spectate' — so that LOCAL(), BOT() and ONLINE() are all false
+   and nothing that would let a move be entered can be reached.
+
+   What arrives is what the home page's card gets, for one game: {t:'watch',
+   id} on a socket of its own, answered with {t:'watch-game'} and pushed again
+   on every change to that game. The moves are replayed here through
+   applyMove(), so the notation, the captures, the sounds and the console are
+   the game's own; the clocks count from the server's snapshot on the server's
+   clock; and the result is whatever the server says it was — the page's rules
+   are not asked (checkEnd, flagFall), because a game may end on time, by
+   resignation or by agreement and only the server can see those.
+
+   The address is /spectate/<id>: opening a card pushes it, a refresh reads
+   it back and asks for the same game, a link kept after the game has ended
+   shows how it ended. The server serves the same page for it and looks
+   nothing up. Leaving — the Back button, the logo, the browser's back — closes
+   the socket and nothing else: the game goes on, on the server, whether or
+   not anybody is watching, and a second watcher is only a second socket.
+   ============================================================ */
+const SPEC = {
+  on: false,         // G.opponent === 'spectate', and the socket below is wanted
+  id: null,          // the game being watched
+  game: null,        // its last snapshot
+  next: null,        // the id of the next live game in its vision, once there is one
+  sock: null,
+  retry: null,
+  at: 0,             // the server's clock when the snapshot was taken
+  skew: 0,           // server time minus ours
+  shown: null,       // the game id whose result box has been put up
+  missing: false,    // the server had no such game
+  saved: null        // what G looked like before, to put back on the way out
+};
+const SPEC_RETRY = 5000;
+const SPEC_PATH = /^\/spectate\/([A-Za-z0-9-]{1,64})\/?$/;
+
+function specIdFromLocation(){
+  const m = SPEC_PATH.exec(location.pathname || '');
+  return m ? m[1] : null;
 }
-function liveRenderBig(){
-  const g = LIVE.games.find(x => x.mode === LIVE.big);
-  const box = document.getElementById('liveBig');
-  box.innerHTML = g ? liveCardHTML(g, true) : '';
+
+/* The address bar follows the screen — guarded, because the page also runs
+   under a test harness with no history and no pathname. */
+function specSetURL(path, push){
+  try {
+    if (typeof history === 'undefined' || !history.replaceState) return;
+    if ((location.pathname || '') === path) return;
+    if (push) history.pushState({ spec: path }, '', path);
+    else history.replaceState(history.state, '', path);
+  } catch (e){}
 }
-function liveCloseBig(){
-  LIVE.big = null;
-  liveOverlay.classList.remove('show');
+
+/* Open one game by id. `mode` is what the card knows, so the board is drawn
+   in the right vision before the first snapshot arrives; without it the empty
+   squares of Board Only stand in for "loading" rather than a full sighted
+   board that may be about to be taken away. */
+function specOpen(id, push, mode){
+  if (!id) return;
+  if (SPEC.on && SPEC.id === id) return;
+  if (!SPEC.on){
+    SPEC.saved = { opponent: G.opponent, minutes: G.minutes, inc: G.inc, mode: G.mode,
+                   human: G.human, picked: picked.mode };
+  } else {
+    specDetach();                      // the next game, on the same screen
+  }
+  Object.assign(SPEC, { on: true, id, game: null, next: null, shown: null, missing: false });
+  G.opponent = 'spectate';
+  G.started = true; picked.mode = true;
+  G.human = W; G.minutes = 30; G.inc = 0;
+  G.mode = MODE_NAME[mode] ? mode : 'blind';
+  newGame();                           // a clean board, and 30:00 on both clocks
+  document.body.classList.add('spectating');
+  specButtons(true);
+  if (screenName !== 'game') showScreen('game');
+  else { syncOptions(); render(); }
+  specSetURL('/spectate/' + id, push);
+  specConnect();
 }
+
+/* ---- the socket ---- */
+function specConnect(){
+  if (!SPEC.on || SPEC.sock) return;
+  if (!ONLINE_AVAILABLE){
+    specMissing({ off: true, note: 'Live games need this page to be served by the Nox Chess server.' });
+    return;
+  }
+  let sock;
+  try { sock = new WebSocket(serverURL()); }
+  catch (e){ specRetryLater(); return; }
+  SPEC.sock = sock;
+  sock.onopen = () => sock.send(JSON.stringify({ t:'watch', id: SPEC.id }));
+  sock.onmessage = ev => {
+    let msg;
+    try { msg = JSON.parse(ev.data); } catch (e){ return; }
+    if (msg.t === 'watch-game') specUpdate(msg);
+  };
+  sock.onerror = () => {};
+  sock.onclose = () => {
+    if (SPEC.sock !== sock) return;
+    SPEC.sock = null;
+    if (SPEC.on) specRetryLater();
+  };
+}
+function specRetryLater(){
+  clearTimeout(SPEC.retry);
+  SPEC.retry = setTimeout(() => { SPEC.retry = null; specConnect(); }, SPEC_RETRY);
+}
+function specDetach(){
+  clearTimeout(SPEC.retry); SPEC.retry = null;
+  const s = SPEC.sock;
+  SPEC.sock = null;
+  if (!s) return;
+  s.onclose = s.onerror = s.onmessage = s.onopen = null;
+  try { if (s.readyState === WebSocket.OPEN) s.send(JSON.stringify({ t:'unwatch' })); } catch (e){}
+  try { s.close(); } catch (e){}
+}
+
+/* ---- a snapshot ---- */
+function specUpdate(msg){
+  if (!SPEC.on || msg.id !== SPEC.id) return;
+  SPEC.at = msg.at || Date.now();
+  SPEC.skew = SPEC.at - Date.now();
+  SPEC.next = msg.next || null;
+  const g = msg.game;
+  if (!g){ specMissing(msg); return; }
+  const first = !SPEC.game;
+  SPEC.game = g;
+  if (first || G.mode !== g.mode){
+    G.mode = MODE_NAME[g.mode] ? g.mode : 'sighted';
+    if (G.mode === 'total') resetLog();     // the header now knows the names
+  }
+  // The moves, as the server has them. Ours must be a prefix of theirs; if
+  // they are not — a different game under this id, which cannot happen, or a
+  // board that has drifted, which must not — the position is rebuilt from
+  // the start rather than trusted.
+  const want = (g.moves || '').split(' ').filter(Boolean);
+  let prefix = want.length >= G.uci.length;
+  for (let i = 0; prefix && i < G.uci.length; i++) if (G.uci[i] !== want[i]) prefix = false;
+  if (!prefix) specRebuild();
+  // Catching up on more than one move — a refresh, a reconnection — is done
+  // in silence: sixty captures played at once is not a sound anybody wants.
+  const catching = want.length - G.uci.length > 1;
+  const sound = G.sound;
+  if (catching) G.sound = false;
+  try {
+    for (let i = G.uci.length; i < want.length; i++) if (!specApply(want[i])) break;
+  } finally { G.sound = sound; }
+  // Fog of War is seen from the chair of whoever is thinking, as the card
+  // shows it: the viewer is the side to move.
+  G.human = g.turn === 'b' ? B : W;
+  specClocks(g);
+  if (g.status === 'finished' || g.status === 'finishing') specFinish(g);
+  else if (G.over){ G.over = null; G.revealed = false; startClock(); }
+  syncOptions();
+  render();
+}
+
+/* One UCI move, through the game's own applyMove — so the notation, the
+   captures, the console line and the sound are the game's. */
+function specApply(uci){
+  if (typeof uci !== 'string' || uci.length < 4) return false;
+  const from = sqIndex(uci.slice(0, 2)), to = sqIndex(uci.slice(2, 4));
+  const promo = uci.length > 4 ? uci[4].toUpperCase() : null;
+  const here = legalMoves(G.st, G.st.turn).filter(m => m.from === from && m.to === to);
+  const m = here.length > 1 ? (here.find(x => x.promo === promo) || here[0]) : here[0];
+  if (!m) return false;
+  applyMove(m, true);
+  return true;
+}
+
+function specRebuild(){
+  G.st = newState();
+  G.token++;
+  G.sel = -1; G.lastMove = null; G.sans = []; G.uci = [];
+  G.caps = { w: [], b: [] };
+  G.reps = {}; G.over = null;
+  G.revealed = false; G.peeking = false;
+  for (const [,e] of pieceEls) e.remove();
+  pieceEls.clear();
+  if (G.mode === 'total') resetLog();
+}
+
+/* What a side has left now: the snapshot's figure, less what has run off it
+   since, if it is that side's move — on the server's clock. tickClock() then
+   counts on from here until the next snapshot resets it. */
+function specRemaining(g, color, now){
+  const base = color === 'w' ? g.whiteMs : g.blackMs;
+  if (typeof base !== 'number') return 0;
+  if (g.status !== 'live' || g.turn !== color) return Math.max(0, base);
+  return Math.max(0, base - Math.max(0, (now + SPEC.skew) - SPEC.at));
+}
+function specClocks(g){
+  const now = Date.now();
+  G.clock.w = specRemaining(g, 'w', now);
+  G.clock.b = specRemaining(g, 'b', now);
+  G.tickAt = now;
+}
+
+/* ---- the end ---- */
+function specHow(g){
+  const t = (g.termination || '').toLowerCase();
+  const loser = g.winner === 'w' ? 'Black' : g.winner === 'b' ? 'White' : null;
+  if (t === 'checkmate') return 'Checkmate.';
+  if (t === 'timeout') return loser ? loser + ' ran out of time.'
+                                    : 'A flag fell, but there was no way to force mate.';
+  if (t === 'resignation') return loser + ' resigned.';
+  if (t === 'stalemate') return 'Stalemate.';
+  if (t === 'draw by agreement') return 'Drawn by agreement.';
+  if (t === 'insufficient material') return 'Neither side has enough material to force mate.';
+  if (t.indexOf('repetition') >= 0) return 'The same position occurred three times.';
+  if (t.indexOf('move rule') >= 0) return 'Fifty moves without a capture or a pawn move.';
+  if (t === 'abandoned' || t === 'corrupt record') return 'The game was abandoned.';
+  return g.termination ? g.termination.charAt(0).toUpperCase() + g.termination.slice(1) + '.' : 'Game over.';
+}
+function specResultLine(g){
+  const how = g.termination || 'game over';
+  if (g.winner === 'w') return 'White wins — ' + how;
+  if (g.winner === 'b') return 'Black wins — ' + how;
+  if (g.result === '1/2-1/2') return 'Draw — ' + how;
+  return 'Game over — ' + how;
+}
+function specFinish(g){
+  const was = !!G.over;
+  G.over = { text: specResultLine(g) };
+  G.revealed = true; G.peeking = false;
+  stopClock();
+  if (!was){
+    logLine(' ');
+    logLine('— ' + G.over.text + ' —', 'sys');
+    logLine('The board is shown below.', 'sys');
+  }
+  render();
+  if (SPEC.shown === g.id){ specButtons(true); return; }   // the box is up; only the next-game button can change
+  SPEC.shown = g.id;
+  el.endTitle.textContent = g.winner === 'w' ? 'White Wins' : g.winner === 'b' ? 'Black Wins' : 'Draw';
+  el.endText.textContent = specHow(g);
+  specButtons(true);
+  el.endOverlay.classList.add('show');
+  beep(330,.2); setTimeout(()=>beep(262,.35),180);
+}
+/* The end-of-game box, borrowed: New Game is the way home, Rematch is the
+   next game on this ladder when there is one, and Study Board — a review of a
+   game the viewer did not play — is not offered. Put back on the way out. */
+function specButtons(on){
+  const nw = document.getElementById('endNew');
+  const rm = document.getElementById('endRematch');
+  const st = document.getElementById('endClose');
+  nw.textContent = on ? 'Back to Home' : 'New Game';
+  rm.textContent = on ? 'Watch Next Live Game' : 'Rematch';
+  rm.style.display = on ? (SPEC.next ? '' : 'none') : '';
+  st.style.display = on ? 'none' : '';
+}
+function specMissing(msg){
+  SPEC.missing = true;
+  G.over = { text: 'not found' };
+  stopClock();
+  render();
+  const off = !!(msg && msg.off);
+  el.endTitle.textContent = off ? 'Not Running' : 'Game Not Found';
+  el.endText.textContent = off ? (msg.note || 'The server is not running the AI league right now.')
+                               : 'This game is over, and no record of it is available.';
+  specButtons(true);
+  el.endOverlay.classList.add('show');
+}
+
+/* ---- what the game screen shows a viewer ---- */
+function specStatus(){
+  document.getElementById('btnPeek').style.display = 'none';
+  document.getElementById('entryForm').style.display = 'none';
+  document.getElementById('entryLocal').style.display = 'none';
+  el.moveInput.disabled = true;
+  el.moveInput.placeholder = 'spectating';
+  document.querySelectorAll('.local-input').forEach(inp => { inp.disabled = true; });
+  rulesCard.style.display = 'none';
+  chatCard.style.display = 'none';
+  chatInput.disabled = true;
+  const g = SPEC.game;
+  const live = g && g.status === 'live' && !G.over;
+  document.getElementById('footHint').innerHTML = !live ? (G.over && !SPEC.missing ? '' : 'SPECTATING')
+    : 'SPECTATING · ' + (G.st.turn === W ? 'WHITE' : 'BLACK') + ' TO MOVE' +
+      (inCheck(G.st, G.st.turn) ? ' · CHECK' : '');
+}
+
+/* ---- leaving ---- */
+/* Let go of the game and hand the board back: the socket closes (the server
+   forgets this viewer and nothing else), and G is put back as it was. Called
+   by showScreen() on the way to any other screen, so there is one door out. */
+function specStop(){
+  if (!SPEC.on) return;
+  specDetach();
+  const saved = SPEC.saved || {};
+  Object.assign(SPEC, { on: false, id: null, game: null, next: null, shown: null, missing: false, saved: null });
+  document.body.classList.remove('spectating');
+  specButtons(false);
+  el.endOverlay.classList.remove('show');
+  G.opponent = saved.opponent || 'bot';
+  G.minutes = saved.minutes || 10; G.inc = saved.inc || 0;
+  G.mode = saved.mode || G.mode; G.human = saved.human || W;
+  G.started = false; picked.mode = !!saved.picked;
+  G.over = null;
+  newGame();                           // drop the watched position
+}
+function specLeave(){
+  if (!SPEC.on) return;
+  specSetURL('/', false);
+  showScreen('home');                  // ...which calls specStop()
+  // back beside the cards, which stand at the foot of the left-hand side
+  setTimeout(() => {
+    const stack = document.getElementById('liveStack');
+    if (stack && stack.scrollIntoView) stack.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  }, 80);
+}
+function specBoot(){
+  const id = specIdFromLocation();
+  if (id) specOpen(id, false);
+}
+
 liveGrid.addEventListener('click', e => {
   const card = e.target.closest('.live-card');
-  if (card) liveOpenBig(card.dataset.mode);
+  if (card && card.dataset.id) specOpen(card.dataset.id, true, card.dataset.mode);
 });
 liveGrid.addEventListener('keydown', e => {
   const card = e.target.closest('.live-card');
-  if (card && (e.key === 'Enter' || e.key === ' ')){ e.preventDefault(); liveOpenBig(card.dataset.mode); }
+  if (card && card.dataset.id && (e.key === 'Enter' || e.key === ' ')){
+    e.preventDefault();
+    specOpen(card.dataset.id, true, card.dataset.mode);
+  }
 });
-document.getElementById('liveX').onclick = liveCloseBig;
-liveOverlay.addEventListener('click', e => { if (e.target === liveOverlay) liveCloseBig(); });
-document.addEventListener('keydown', e => { if (e.key === 'Escape' && LIVE.big) liveCloseBig(); });
+document.getElementById('specBack').onclick = specLeave;
+window.addEventListener('popstate', () => {
+  const id = specIdFromLocation();
+  if (id) specOpen(id, false);
+  else if (SPEC.on) showScreen('home');
+});
 
 /* ============================================================
    SOCIAL — friends, the requests that make them, and challenges
@@ -15380,6 +15761,7 @@ syncOptions();
 render();
 initAuth();          // arriving leads to the home page; nothing gates it
 liveOpen();          // ...and the home page is where the live games are watched from
+specBoot();          // ...unless the address names one of them: /spectate/<id>
 </script>
 </body>
 </html>
