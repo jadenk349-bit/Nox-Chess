@@ -1582,21 +1582,44 @@
   #screen-game.puzzle-mode.rush #barTop{display:flex; justify-content:flex-end;}
   #screen-game.puzzle-mode .board-bar .bar-name{display:none;}
   .pz-pieces{
-    width:min(100%,var(--board-max)); padding:11px 14px;
-    display:flex; flex-direction:column; gap:6px;
+    width:min(90%,calc(100vh - var(--chrome) - 86px)); padding:24px 27px 27px;
+    display:flex; flex-direction:column; gap:12px;
+    margin-bottom:-9px; z-index:2;
+    border-radius:14px 14px 0 0;
+    background:
+      linear-gradient(105deg,rgba(8,13,21,.42),rgba(4,8,14,.72)),
+      url("assets/moon.jpg?v=1") center 44% / cover no-repeat;
+    border-color:rgba(205,212,224,.22);
+    box-shadow:0 12px 30px rgba(0,0,0,.44), inset 0 1px 0 rgba(255,255,255,.09);
   }
-  .pz-pc-row{display:flex; align-items:baseline; gap:12px; line-height:1.5;}
+  .pz-pc-row{display:flex; align-items:baseline; gap:20px; line-height:1.65;}
   .pz-pc-tag{
-    flex:0 0 96px; font-size:12px; letter-spacing:.16em; text-transform:uppercase;
-    color:var(--muted); white-space:nowrap;
+    flex:0 0 145px; font-size:17px; letter-spacing:.17em; text-transform:uppercase;
+    color:#d5d8df; white-space:nowrap; font-weight:650;
   }
   .pz-pc-list{
     flex:1 1 auto; min-width:0;
-    font-size:17.5px; letter-spacing:.03em; color:var(--text);
+    font-size:28px; line-height:1.65; letter-spacing:.045em; color:#f2f3f6;
     font-variant-numeric:tabular-nums; word-spacing:.12em;
   }
-  .pz-pc-row + .pz-pc-row{border-top:1px solid var(--line); padding-top:6px;}
-  .pz-pc-row + .pz-pc-row .pz-pc-list{color:#cfc7b6;}
+  .pz-pc-row + .pz-pc-row{border-top:1px solid rgba(220,225,234,.22); padding-top:12px;}
+  .pz-pc-row + .pz-pc-row .pz-pc-list{color:#ddd7c9;}
+  /* The written position and whichever play surface is active share one exact
+     width, so the panel reads as the play surface's attached header. */
+  #screen-game.puzzle-mode .board-frame,
+  #screen-game.puzzle-mode .pz-stage,
+  #screen-game.puzzle-mode .pz-console{
+    width:min(90%,calc(100vh - var(--chrome) - 86px));
+  }
+  @media (max-width:600px){
+    .pz-pieces{width:94%; padding:19px 17px 21px;}
+    .pz-pc-row{gap:10px;}
+    .pz-pc-tag{flex-basis:104px; font-size:12.5px;}
+    .pz-pc-list{font-size:21px; line-height:1.65;}
+    #screen-game.puzzle-mode .board-frame,
+    #screen-game.puzzle-mode .pz-stage,
+    #screen-game.puzzle-mode .pz-console{width:94%;}
+  }
 
   /* the empty middle of Complete Blindfold. It is sized off the board so that
      switching visions does not move the panels above and below it. */
