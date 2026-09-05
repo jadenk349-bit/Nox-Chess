@@ -700,18 +700,28 @@ def main():
     joiner = TestClient("JOIN")
 
     watcher.send(t="lobby")
-    check("the list starts empty for a new watcher", watcher.expect("rooms")["rooms"] == [])
+    # The house keeps seven rooms of its own on the list at all times (HOUSE_ROOMS
+    # in server.py), so "empty" here means "nothing but those". They are told
+    # apart by name — the names are fixed for the life of the process — because
+    # the list itself says nothing about which rooms are the house's, on purpose.
+    first = watcher.expect("rooms")["rooms"]
+    house_names = {r["name"] for r in first}
+    ours = lambda rs: [r for r in rs if r["name"] not in house_names]
+    check("a new watcher sees the house's rooms and nobody else's",
+          len(first) == 7 and ours(first) == [], "(%s)" % first)
 
     host.send(t="lobby")
     host.expect("rooms")
     host.send(t="host", mode="fog", minutes=15, color="b")
     check("the host is told its room exists", "room" in host.expect("hosting"))
 
-    seen = watcher.expect("rooms")["rooms"]
+    seen = ours(watcher.expect("rooms")["rooms"])
     check("everyone watching sees the new room", len(seen) == 1, "(%s)" % seen)
     check("the room carries its settings",
           seen and seen[0]["mode"] == "fog" and seen[0]["minutes"] == 15
           and seen[0]["inc"] == 0 and seen[0]["color"] == "b", "(%s)" % seen)
+    check("and names its host, with a rating",
+          seen and seen[0]["name"] == "HOST" and isinstance(seen[0]["rating"], int), "(%s)" % seen)
     room_id = seen[0]["id"]
     host.expect("rooms")        # the host watches the list too, so it sees its own room
 
@@ -727,7 +737,7 @@ def main():
     check("the joiner gets the other colour", js["color"] == "w", "(%s)" % js)
     check("the room's settings carry into the game",
           hs["mode"] == "fog" and hs["minutes"] == 15)
-    check("the filled room leaves the list", watcher.expect("rooms")["rooms"] == [])
+    check("the filled room leaves the list", ours(watcher.expect("rooms")["rooms"]) == [])
 
     # the game itself must work exactly like a matched one
     joiner.timeline = []
@@ -745,10 +755,81 @@ def main():
     ghost = TestClient("GHOST")
     ghost.send(t="host", mode="blind", minutes=5, color="w")
     ghost.expect("hosting")
-    check("the room appears for watchers", len(watcher.expect("rooms")["rooms"]) == 1)
+    check("the room appears for watchers", len(ours(watcher.expect("rooms")["rooms"])) == 1)
     ghost.close()
     check("a dropped host takes its room off the list",
-          watcher.expect("rooms", timeout=5)["rooms"] == [])
+          ours(watcher.expect("rooms", timeout=5)["rooms"]) == [])
+
+    print("\n\033[1mThe house rooms\033[0m")
+    # Seven rooms the house hosts, always on the list: two of each vision that
+    # hides something and one Sighted, each with a bot behind a name that reads
+    # like anybody's. Joining one is joining a room — same message, same start,
+    # same game — except that the start carries the `ai` block the ranked
+    # fallback's does, because the joiner's browser is where the bot plays.
+    watcher.send(t="lobby")
+    house = [r for r in watcher.expect("rooms")["rooms"] if r["name"] in house_names]
+    check("seven of them", len(house) == 7, "(%d)" % len(house))
+    modes = sorted(r["mode"] for r in house)
+    check("two Complete Blindfold, two See the Board, two Fog of War, one Sighted",
+          modes == ["blind", "blind", "fog", "fog", "sighted", "total", "total"], "(%s)" % modes)
+    check("seven different names", len({r["name"] for r in house}) == 7)
+    check("none of which says what it is",
+          not any(w in r["name"].lower() for r in house
+                  for w in ("bot", "computer", "engine", "stockfish", "cpu", "nox")))
+    check("every card names its host and a rating",
+          all(r.get("name") and isinstance(r.get("rating"), int) for r in house))
+    check("and nothing on a card says who is behind it",
+          not any(k in r for r in house for k in ("ai", "bot", "house", "slot", "is_ai")),
+          "(%s)" % sorted(house[0].keys()))
+    order = [r["name"] for r in house]      # ...and this order is checked again below
+
+    for r in house:
+        g = TestClient("SEAT-" + r["mode"])
+        g.send(t="join", room=r["id"])
+        st = g.expect("start")
+        ai = st.get("ai") or {}
+        check("joining %s's %s room starts that game, against them" % (r["name"], r["mode"]),
+              st["mode"] == r["mode"] and st["minutes"] == r["minutes"] and st["inc"] == r["inc"]
+              and st["kind"] == "friendly" and st["opponent"] == r["name"]
+              and st["color"] == ("b" if r["color"] == "w" else "w")
+              and ai.get("name") == r["name"] and ai.get("elo") == r["rating"], "(%s)" % st)
+        relisted = watcher.expect("rooms")["rooms"]
+        back = [x for x in relisted if x["name"] == r["name"]]
+        check("...and the room is re-seated on the spot",
+              len(back) == 1 and back[0]["id"] != r["id"] and back[0]["mode"] == r["mode"]
+              and back[0]["rating"] == r["rating"], "(%s)" % back)
+        g.send(t="move", ply=0, san="e4", **{"from": 52, "to": 36})
+        check("a move is played at home, not relayed, and not refused", g.nothing_arrives(0.4))
+        g.send(t="resign")
+        over = g.expect("over")
+        check("and resigning ends it", over["reason"] == "resign" and over["winner"] != st["color"])
+        g.close()
+
+    watcher.send(t="lobby")
+    after = watcher.expect("rooms")["rooms"]
+    check("after seven games the seven rooms are all still there, in the same order",
+          [r["name"] for r in after if r["name"] in house_names] == order
+          and sorted(r["mode"] for r in after) == modes, "(%s)" % [r["name"] for r in after])
+    check("and nobody else's crept in", ours(after) == [], "(%s)" % ours(after))
+
+    # A rematch of a house game is granted on the spot, as the ranked fallback's
+    # is — there is nobody to ask — and stays a friendly game.
+    again = TestClient("AGAIN")
+    again.send(t="join", room=after[0]["id"])
+    st = again.expect("start")
+    watcher.expect("rooms")
+    again.send(t="resign")
+    again.expect("over")
+    again.send(t="rematch")
+    re_st = again.expect("start")
+    check("a rematch of a house game starts at once, colours swapped, still friendly",
+          re_st["game"] != st["game"] and re_st["color"] != st["color"]
+          and re_st["kind"] == "friendly" and re_st["opponent"] == st["opponent"]
+          and (re_st.get("ai") or {}).get("name") == st["opponent"], "(%s)" % re_st)
+    again.send(t="draw-offer")
+    check("and a draw offered to it is accepted",
+          again.expect("over", timeout=4)["reason"] == "draw")
+    again.close()
 
     print("\n\033[1mRematch — the opponent has to agree\033[0m")
 
@@ -1065,7 +1146,7 @@ def main():
     watcher.expect("rooms")
     host2.send(t="unhost")
     check("cancelling a room removes it for everyone",
-          watcher.expect("rooms")["rooms"] == [])
+          ours(watcher.expect("rooms")["rooms"]) == [])
 
     for client in (a, b, d, e, f, g, h, i, j, k, p1, p2, p3, p4, c1, c2, c3,
                    ai1, ai2, ai3, ai4, ai5, ai6,
