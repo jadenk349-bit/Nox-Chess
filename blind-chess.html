@@ -4,6 +4,9 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>NOX CHESS</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bebas+Neue&display=swap">
 <style>
   :root{
     --bg-0:#0b0c10;
@@ -16,6 +19,7 @@
     --line:rgba(150,170,215,.15);
     --gold:#d9a441;
     --gold-soft:#f0c775;
+    --board-art:url("assets/board-midnight.svg?v=1");
     --text:#e8e6e1;
     --muted:#8f93a0;
     --light-sq:#e9dcc3;
@@ -119,13 +123,15 @@
     --tint:var(--gold);
     --tint-lit:var(--gold-soft);
     --tint-glow:rgba(217,164,65,.34);
+    --font:"Bebas Neue",-apple-system,BlinkMacSystemFont,"Segoe UI",Helvetica,Arial,sans-serif;
   }
 
   *{box-sizing:border-box;}
   html,body{height:100%;}
   body{
     margin:0;
-    font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Helvetica,Arial,sans-serif;
+    font-family:var(--font);
+    font-synthesis:style;
     color:var(--text);
     /* Night sky. Very nearly black, with the faintest blue in it — this is
        what shows before the photograph in #sky has arrived, and at any edge
@@ -187,14 +193,14 @@
   /* ---------- header ---------- */
   header{text-align:center; margin-bottom:26px;}
   .eyebrow{
-    font-size:11px; letter-spacing:.42em; text-transform:uppercase;
+    font-size:14.5px; letter-spacing:.42em; text-transform:uppercase;
     color:var(--muted); margin-bottom:12px;
   }
   h1{
     margin:0;
-    font-family:Georgia,"Times New Roman",serif;
+    font-family:var(--font);
     font-weight:400;
-    font-size:clamp(38px,8vw,68px);
+    font-size:clamp(50.5px,10.7vw,91px);
     letter-spacing:.16em;
     text-indent:.16em;
     background:linear-gradient(180deg,#fdf3dd 0%, var(--gold-soft) 45%, #a97821 100%);
@@ -207,8 +213,8 @@
     margin:14px auto 0; max-width:460px; color:var(--gold);
   }
   .rule span{flex:1; height:1px; background:linear-gradient(90deg,transparent,var(--gold),transparent); opacity:.55;}
-  .rule b{font-size:15px; opacity:.8;}
-  .tagline{margin:12px 0 0; color:var(--muted); font-size:13.5px; letter-spacing:.04em;}
+  .rule b{font-size:19px; opacity:.8;}
+  .tagline{margin:12px 0 0; color:var(--muted); font-size:17.5px; letter-spacing:.04em;}
 
   /* ---------- layout ---------- */
   .layout{
@@ -239,42 +245,61 @@
     box-shadow:var(--sh-3), var(--lip);
   }
 
+  /* The boxes down the right of the game screen — the setup questions, the
+     captured men, the notation, the controls, the chat, the puzzle card —
+     sit on the moon rather than on the plain plate. The image goes *under*
+     the same gradient every other panel has, not in place of it: the two
+     surface colours are translucent on purpose, so the craters show through
+     at the head of a box and fade under the foot, and the text on top stays
+     as readable as it is everywhere else. Only the game screen's side column
+     gets it; the review bar, the ladder and the overlays keep the plain
+     plate. It is one image per box, sized to cover, so a tall box shows
+     more moon and a short one a crop of it — cropping is deliberate, since
+     the picture is a texture here and not a thing to be looked at whole. */
+  .game-side .panel{
+    background:
+      linear-gradient(180deg, var(--surf-1), var(--surf-2)),
+      url("assets/moon.jpg?v=1") center / cover no-repeat;
+  }
+
   /* ---------- board ---------- */
   .board-col{display:flex; flex-direction:column; align-items:center; gap:14px;}
 
   .board-frame{
-    padding:16px;
-    border-radius:18px;
-    background:linear-gradient(160deg,#2a2318,#171410 55%,#241d13);
-    border:1px solid #3a2f1f;
+    padding:clamp(12px,2.4vw,26px);
+    border-radius:7px;
+    background:linear-gradient(135deg,#344047 0%,#111d27 19%,#09121b 48%,#223440 78%,#111920);
+    border:1px solid #74664e;
     box-shadow:0 24px 60px rgba(0,0,0,.55), inset 0 1px 0 rgba(255,255,255,.06);
     position:relative;
     width:min(100%, var(--board-max));
   }
   .board-frame::after{
-    content:""; position:absolute; inset:8px; border-radius:12px;
-    border:1px solid rgba(217,164,65,.22); pointer-events:none;
+    content:""; position:absolute; inset:5px; border-radius:3px;
+    border:1px solid rgba(196,170,118,.25); pointer-events:none;
   }
 
   .board{
     position:relative;
     width:100%; aspect-ratio:1/1;
     container-type:size;
-    border-radius:6px; overflow:hidden;
-    box-shadow:inset 0 0 0 1px rgba(0,0,0,.5), 0 0 30px rgba(0,0,0,.35);
+    border-radius:1px; overflow:hidden;
+    background:#081522 var(--board-art) center / 100% 100%;
+    box-shadow:0 0 0 2px #b79b64, 0 0 0 4px #423a2e, 0 0 22px rgba(0,0,0,.65);
   }
   .squares{position:absolute; inset:0; display:grid; grid-template-columns:repeat(8,1fr); grid-template-rows:repeat(8,1fr);}
   .sq{position:relative; user-select:none; cursor:pointer;}
-  .sq.light{background:linear-gradient(160deg,#efe3cc,#e2d3b5);}
-  .sq.dark{background:linear-gradient(160deg,#87684a,#6d5137);}
+  /* The art lies beneath the interactive squares, so fog and move markers keep
+     their own layers. A half-turn preserves checkerboard parity in either seat. */
+  .sq.light,.sq.dark{background:transparent;}
   .sq .coord{
-    position:absolute; font-size:9.5px; font-weight:700; letter-spacing:.05em;
-    opacity:.5; pointer-events:none;
+    position:absolute; font-size:12px; font-weight:700; letter-spacing:.05em;
+    opacity:.8; pointer-events:none;
   }
   .sq .coord.file{right:3px; bottom:1px;}
   .sq .coord.rank{left:3px; top:1px;}
-  .sq.light .coord{color:#6d5137;}
-  .sq.dark  .coord{color:#efe3cc;}
+  .sq.light .coord{color:#30291f;}
+  .sq.dark  .coord{color:#d7c49c;}
 
   .sq.last::before{
     content:""; position:absolute; inset:0;
@@ -295,6 +320,8 @@
     width:88%; height:88%; background:transparent;
     border:4px solid rgba(20,20,20,.28); border-radius:50%;
   }
+  .sq.dark.hint::after{background:rgba(240,199,117,.55);}
+  .sq.dark.hint.occupied::after{background:transparent; border-color:rgba(240,199,117,.65);}
   .sq.check::before{
     content:""; position:absolute; inset:0;
     background:radial-gradient(circle at 50% 50%, rgba(224,90,77,.85), rgba(224,90,77,0) 70%);
@@ -335,19 +362,24 @@
   }
   .piece.b span{
     color:#22242c;
-    -webkit-text-stroke:1.4px #0a0b0e;
+    -webkit-text-stroke:1.4px #a59678;
     text-shadow:0 3px 5px rgba(0,0,0,.4), 0 0 1px rgba(255,255,255,.35);
   }
-  /* the hand-drawn bishop, sized and weighted to sit with the glyph set */
+  /* One scalable silhouette set, with an ivory or charcoal body. The warm
+     rim keeps black pieces readable on the midnight inlays without changing
+     their outline, and all decoration disappears with the existing span. */
   .pc-svg{
-    width:.72em; height:.72em; display:inline-block; vertical-align:-.08em;
-    fill:currentColor; stroke:none; overflow:visible;
+    width:.82em; height:.86em; display:inline-block; vertical-align:-.12em;
+    overflow:visible; -webkit-text-stroke:0;
   }
-  .pc-svg .slit{fill:none;}
-  .piece span .pc-svg{display:block; filter:drop-shadow(0 3px 5px rgba(0,0,0,.45));}
-  .piece.w span .pc-svg{fill:#fbf6ea; stroke:#2a2118;}
-  .piece.b span .pc-svg{fill:#22242c; stroke:#0a0b0e;}
-  .promo .pc-svg{width:.8em; height:.8em;}
+  .piece span .pc-svg{display:block; filter:drop-shadow(0 2px 2px rgba(0,0,0,.55));}
+  .piece.w, .g-w{color:#eee6d5; --piece-edge:#514538;}
+  .piece.b, .g-b{color:#252d38; --piece-edge:#b9a681;}
+  .piece.w span{color:#eee6d5;}
+  .piece.b span{color:#252d38;}
+  .promo .pc-svg{width:1em; height:1.04em;}
+  .tray{--piece-edge:#514538;}
+  #trayB{color:#252d38; --piece-edge:#b9a681;}
 
   .piece.gone{opacity:0; transform-origin:center; }
   .piece.pop span{animation:pop .3s ease;}
@@ -469,15 +501,15 @@
      colour caption, which the name beside it has already given */
   .board-bar .clock{border:0; background:transparent; padding:0; box-shadow:none;}
   .board-bar .clock .who{display:none;}
-  .board-bar .clock .time{font-size:clamp(17px,2.3vw,23px);}
+  .board-bar .clock .time{font-size:clamp(21.5px,2.95vw,29.5px);}
   .board-bar .clock.active{background:transparent; box-shadow:none;}
   .board-bar .clock.active .time{color:var(--gold-soft);}
   .board-bar:empty{display:none;}
   .bar-name{
-    font-size:13px; letter-spacing:.06em; color:var(--text);
+    font-size:17px; letter-spacing:.06em; color:var(--text);
     overflow:hidden; text-overflow:ellipsis; white-space:nowrap;
   }
-  .bar-name .sub{color:var(--muted); font-size:11px; letter-spacing:.14em; margin-left:8px;}
+  .bar-name .sub{color:var(--muted); font-size:14.5px; letter-spacing:.14em; margin-left:8px;}
   #barTop{margin-bottom:4px;}
   #barBottom{margin-top:4px;}
   .clock-pool{display:none;}          /* the bars take these two in and out */
@@ -497,8 +529,8 @@
     background:linear-gradient(180deg,var(--ctl-1),var(--ctl-2));
     border:1px solid var(--ctl-line); color:var(--text);
   }
-  .bot .bn{font-size:11.5px; font-weight:600; letter-spacing:.02em;}
-  .bot .be{font-size:10px; color:var(--muted); font-variant-numeric:tabular-nums;}
+  .bot .bn{font-size:15px; font-weight:600; letter-spacing:.02em;}
+  .bot .be{font-size:12.5px; color:var(--muted); font-variant-numeric:tabular-nums;}
   .bot:hover{border-color:var(--ctl-edge);}
   .bot.active{
     border-color:var(--gold);
@@ -511,8 +543,8 @@
     width:100%; margin-top:7px; flex-direction:row; justify-content:center; gap:10px;
     padding:12px 4px;
   }
-  .bot.big .bn{font-size:14px; letter-spacing:.16em;}
-  .bot.big .be{font-size:12px;}
+  .bot.big .bn{font-size:18px; letter-spacing:.16em;}
+  .bot.big .be{font-size:15.5px;}
   /* the strongest rung is an account's to play; a guest sees it locked */
   .bot.locked{opacity:.5;}
   .bot.locked:hover{border-color:var(--line);}
@@ -535,7 +567,7 @@
     padding:11px 12px; border-radius:var(--r-sm); text-align:left;
     background:linear-gradient(180deg,var(--ctl-1),var(--ctl-2));
     border:1px solid var(--ctl-line); color:var(--text);
-    font-size:12.5px; letter-spacing:.05em;
+    font-size:16px; letter-spacing:.05em;
   }
   .vis:hover{border-color:var(--ctl-edge);}
   .vis.active{
@@ -546,7 +578,7 @@
 
   .time-grid{display:grid; grid-template-columns:repeat(3,1fr); gap:7px;}
   .tm{
-    padding:10px 4px; border-radius:var(--r-sm); font-size:12px; white-space:nowrap;
+    padding:10px 4px; border-radius:var(--r-sm); font-size:15.5px; white-space:nowrap;
     background:linear-gradient(180deg,var(--ctl-1),var(--ctl-2));
     border:1px solid var(--ctl-line); color:var(--text);
   }
@@ -572,7 +604,7 @@
 
   /* ---------- open rooms ---------- */
   .room-who{
-    font-size:13.5px; letter-spacing:.05em; color:var(--text);
+    font-size:17.5px; letter-spacing:.05em; color:var(--text);
     padding:8px 14px; border-radius:999px;
     border:1px solid transparent; background:rgba(0,0,0,.3);
     max-width:220px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;
@@ -583,13 +615,13 @@
     gap:clamp(18px,3vw,40px); align-items:start;
   }
   @media (max-width:760px){ .rooms-page{grid-template-columns:minmax(0,1fr);} }
-  .rooms-aside .primary{width:100%; padding:14px 0; font-size:13px; letter-spacing:.14em;}
+  .rooms-aside .primary{width:100%; padding:14px 0; font-size:17px; letter-spacing:.14em;}
   .rooms-main{max-width:620px;}
   .rooms-title{
-    margin:0; font-family:Georgia,serif; font-weight:400;
-    font-size:clamp(22px,3.4vw,32px); letter-spacing:.12em; color:var(--gold-soft);
+    margin:0; font-family:var(--font); font-weight:400;
+    font-size:clamp(29.5px,4.55vw,42.5px); letter-spacing:.12em; color:var(--gold-soft);
   }
-  .rooms-sub{margin:8px 0 20px; font-size:13px; color:var(--muted);}
+  .rooms-sub{margin:8px 0 20px; font-size:17px; color:var(--muted);}
 
   /* ---------- clocks ---------- */
   .clocks{
@@ -604,10 +636,10 @@
     transition:border-color .2s var(--ease), background .2s var(--ease),
                box-shadow .2s var(--ease);
   }
-  .clock .who{font-size:10px; letter-spacing:.2em; font-weight:600; color:var(--muted);}
+  .clock .who{font-size:12.5px; letter-spacing:.2em; font-weight:600; color:var(--muted);}
   .clock .time{
-    font-family:ui-monospace,SFMono-Regular,Menlo,monospace;
-    font-size:clamp(19px,3.2vw,26px); font-weight:600;
+    font-family:var(--font);
+    font-size:clamp(24.5px,4.1vw,33.5px); font-weight:600;
     font-variant-numeric:tabular-nums; color:var(--text);
   }
   /* The side to move is lit from within rather than merely outlined: on a
@@ -646,7 +678,7 @@
      tells its members apart. A new control picks a rank; it does not invent a
      fourth, and it does not reach for its own radius or its own shadow. */
   button{
-    font:inherit; font-size:13px; font-weight:500; letter-spacing:.03em;
+    font:inherit; font-size:17px; font-weight:500; letter-spacing:.03em;
     color:var(--text); background:linear-gradient(180deg,var(--ctl-1),var(--ctl-2));
     border:1px solid var(--ctl-line); border-radius:var(--r-md);
     padding:10px 15px; cursor:pointer;
@@ -723,7 +755,7 @@
      panel divided into five. One rule now, and the gold tick in front of it is
      what makes a panel look titled instead of merely labelled. */
   .card h2, .sec h2, .console-title, .rules-title{
-    margin:0 0 12px; font-size:10.5px; letter-spacing:.22em; text-transform:uppercase;
+    margin:0 0 12px; font-size:14px; letter-spacing:.22em; text-transform:uppercase;
     color:var(--muted); font-weight:650;
     /* wraps rather than squeezes: the Levels card is narrow and its counter
        drops to a second line there, exactly as it did when it was floated */
@@ -748,7 +780,7 @@
     display:flex; align-items:center; gap:9px;
     padding:9px 15px; border-radius:10px;
     background:#fff; color:#1f1f1f; border:1px solid #dadce0;
-    font-size:13px; font-weight:600;
+    font-size:17px; font-weight:600;
   }
   .acct-btn:hover{background:#f4f5f7; border-color:#c4c8ce;}
   .acct-btn svg{width:17px; height:17px; flex:none;}
@@ -756,7 +788,7 @@
   .acct-auth{display:flex; align-items:center; gap:8px;}
   .acct-signup, .acct-login{
     padding:9px 17px; border-radius:9px;
-    font-size:12.5px; font-weight:650; letter-spacing:.12em;
+    font-size:16px; font-weight:650; letter-spacing:.12em;
   }
   .acct-signup{
     background:linear-gradient(180deg,#e2b357,#b07f22);
@@ -771,11 +803,11 @@
 
   /* Signed in: the name, and nothing else. */
   .acct-name{
-    font-size:13px; font-weight:600; letter-spacing:.06em; color:var(--gold-soft);
+    font-size:17px; font-weight:600; letter-spacing:.06em; color:var(--gold-soft);
     max-width:190px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;
   }
   @media (max-width:560px){
-    .acct-signup, .acct-login{padding:8px 12px; font-size:11.5px; letter-spacing:.08em;}
+    .acct-signup, .acct-login{padding:8px 12px; font-size:15px; letter-spacing:.08em;}
   }
 
   /* ---------- sign up / log in ----------
@@ -792,12 +824,12 @@
   .auth-logo:hover{transform:none; filter:brightness(1.08);}
   .auth-caption{
     margin:clamp(18px,3vh,32px) 0 0;
-    font-family:Georgia,serif; font-weight:400; letter-spacing:.1em;
-    font-size:clamp(19px,3vw,27px); color:var(--gold-soft);
+    font-family:var(--font); font-weight:400; letter-spacing:.1em;
+    font-size:clamp(24.5px,3.85vw,35px); color:var(--gold-soft);
   }
   .auth-google{
     margin-top:clamp(26px,4.4vh,44px);
-    padding:14px 26px; font-size:15px; border-radius:12px;
+    padding:14px 26px; font-size:19px; border-radius:12px;
     box-shadow:0 10px 30px rgba(0,0,0,.5);
   }
   .auth-google svg{width:20px; height:20px;}
@@ -805,7 +837,7 @@
   .auth-swap{
     margin-top:20px; padding:6px 10px;
     background:transparent; border:0;
-    font-size:12.5px; color:var(--muted);
+    font-size:16px; color:var(--muted);
     text-decoration:underline; text-underline-offset:3px;
   }
   .auth-swap:hover{color:var(--gold-soft); transform:none;}
@@ -814,7 +846,7 @@
   .set-foot{margin-top:26px; display:flex; justify-content:center;}
   .danger-btn{
     padding:11px 30px; border-radius:10px;
-    font-size:12.5px; font-weight:650; letter-spacing:.16em;
+    font-size:16px; font-weight:650; letter-spacing:.16em;
     background:rgba(224,90,77,.10);
     border:1px solid rgba(224,90,77,.45); color:#e8695d;
   }
@@ -824,11 +856,11 @@
   }
   .auth-steps{
     margin:0 0 20px; padding:0 0 0 20px; text-align:left;
-    color:var(--muted); font-size:13px; line-height:1.75;
+    color:var(--muted); font-size:17px; line-height:1.75;
   }
   .auth-steps b{color:var(--gold-soft); font-weight:600;}
   .auth-steps code{
-    font-family:ui-monospace,Menlo,monospace; font-size:12px;
+    font-family:var(--font); font-size:15.5px;
     color:var(--gold-soft); background:rgba(217,164,65,.1);
     padding:1px 5px; border-radius:4px;
   }
@@ -843,7 +875,7 @@
   .welcome h1 img{width:clamp(230px,44vw,420px); height:auto; display:block;}
   .welcome-line{
     margin:clamp(14px,2.4vh,26px) 0 0;
-    font-size:clamp(14px,1.9vw,17.5px); color:var(--muted); letter-spacing:.02em;
+    font-size:clamp(18px,2.44vw,22px); color:var(--muted); letter-spacing:.02em;
   }
 
   /* ---------- screens ---------- */
@@ -883,10 +915,10 @@
   /* the flourish and the line under it sit closer to the title, and read
      quieter, so the eye carries on down to the name box and PLAY */
   .hero .rule{margin-top:clamp(14px,2vh,24px);}
-  .hero .rule b{font-size:clamp(15px,2.2vw,20px); opacity:.85;}
+  .hero .rule b{font-size:clamp(19px,2.82vw,26px); opacity:.85;}
   .hero .tagline{
     margin-top:clamp(11px,1.7vh,18px);
-    font-size:clamp(13px,1.55vw,15.5px); line-height:1.55;
+    font-size:clamp(17px,1.99vw,20px); line-height:1.55;
   }
   /* the same sheen, masked by the artwork instead of by text, so the shine
      travels across the letters and the knight and nothing else */
@@ -905,24 +937,24 @@
   /* who you are, above the buttons — filled in once and remembered */
   .name-title{
     margin:clamp(16px,2.6vh,28px) 0 0;
-    font-family:Georgia,serif; font-weight:400; letter-spacing:.12em;
-    font-size:clamp(24px,4.2vw,38px); color:var(--gold-soft);
+    font-family:var(--font); font-weight:400; letter-spacing:.12em;
+    font-size:clamp(32px,5.61vw,50.5px); color:var(--gold-soft);
   }
   .name-form{display:flex; flex-direction:column; align-items:center; width:100%;}
   .name-hint{
     margin:12px 0 0; min-height:1.4em; max-width:340px; text-align:center;
-    font-size:12px; line-height:1.5; color:var(--muted);
+    font-size:15.5px; line-height:1.5; color:var(--muted);
   }
   .name-hint.bad{color:var(--danger);}
   .name-hint.good{color:var(--good);}
-  .name-save{margin-top:22px; padding:13px 40px; font-size:13px; letter-spacing:.2em;}
+  .name-save{margin-top:22px; padding:13px 40px; font-size:17px; letter-spacing:.2em;}
   .name-save:disabled{opacity:.4; cursor:not-allowed;}
   .name-box input.bad{border-color:var(--danger);}
 
   .name-box{margin-top:clamp(20px,3.2vh,34px); display:flex; justify-content:center;}
   .name-box input{
     width:clamp(220px,62vw,330px); text-align:center;
-    font:inherit; font-size:15px; letter-spacing:.12em;
+    font:inherit; font-size:19px; letter-spacing:.12em;
     padding:13px 18px; border-radius:12px;
     background:rgba(255,255,255,.035);
     border:1px solid var(--line); color:var(--text);
@@ -944,7 +976,7 @@
   }
   .play-btn{
     width:var(--play-w); height:var(--btn-h);
-    font-size:clamp(18px,3.4vw,27px); font-weight:700;
+    font-size:clamp(23.5px,4.37vw,35px); font-weight:700;
     letter-spacing:.3em; text-indent:.3em;
     border-radius:14px; padding:0;
     background:linear-gradient(180deg,#e9bd60,#b07f22);
@@ -959,12 +991,12 @@
     width:var(--btn-h); height:var(--btn-h);
     display:flex; flex-direction:column; align-items:center; justify-content:center; gap:7px;
     border-radius:14px; padding:0;
-    font-size:clamp(11px,2.1vw,15px); font-weight:650; letter-spacing:.14em;
+    font-size:clamp(14.5px,2.7vw,19px); font-weight:650; letter-spacing:.14em;
     background:linear-gradient(180deg,var(--ctl-1),var(--ctl-2));
     border:1px solid var(--ctl-line); color:var(--text);
   }
   .social-btn .ico{
-    font-size:clamp(20px,3.8vw,29px); line-height:1;
+    font-size:clamp(26px,4.88vw,37px); line-height:1;
     color:var(--gold); opacity:.85; letter-spacing:1px;
   }
   .social-btn:hover{border-color:var(--gold); color:var(--gold-soft);}
@@ -976,7 +1008,7 @@
     width:calc((var(--play-w) + var(--btn-h) + var(--btn-gap)) * .84);
     height:clamp(54px,10vw,74px);
     border-radius:12px; padding:0;
-    font-size:clamp(12px,2.2vw,15px); font-weight:600; letter-spacing:.2em;
+    font-size:clamp(15.5px,2.82vw,19px); font-weight:600; letter-spacing:.2em;
     background:linear-gradient(180deg,var(--ctl-1),var(--ctl-2));
     border:1px solid var(--ctl-line); color:var(--muted);
   }
@@ -996,7 +1028,7 @@
   .nav-item{position:relative;}
   .nav-btn{
     padding:11px 18px; border-radius:10px; background:transparent; border:1px solid transparent;
-    font-size:clamp(12px,1.45vw,15px); font-weight:650; letter-spacing:.16em;
+    font-size:clamp(17.5px,2.19vw,22.5px); font-weight:650; letter-spacing:.16em;
     color:var(--text);
   }
   .nav-btn:hover, .nav-item:focus-within > .nav-btn{
@@ -1030,11 +1062,18 @@
   .menu-btn{
     display:flex; align-items:center; justify-content:space-between; gap:10px;
     width:100%; text-align:left; padding:8px 11px; border-radius:7px;
-    background:transparent; border:0; color:#d8dbe4;
-    font-size:12.5px; letter-spacing:.03em; white-space:nowrap;
+    background:
+      linear-gradient(100deg,rgba(9,14,22,.30),rgba(4,8,14,.55)),
+      url("assets/moon.jpg?v=1") center / 100% auto no-repeat;
+    border:1px solid rgba(205,212,224,.24); color:#f0f2f6;
+    font-size:16px; letter-spacing:.03em; white-space:nowrap;
   }
   .menu-btn:hover, .menu-btn:focus-visible{
-    background:rgba(217,164,65,.16); color:var(--gold-soft); transform:none;
+    background:
+      linear-gradient(100deg,rgba(217,164,65,.08),rgba(6,10,17,.32)),
+      url("assets/moon.jpg?v=1") center / 100% auto no-repeat;
+    border-color:rgba(217,164,65,.62); color:#ffe2a1; transform:none;
+    filter:brightness(1.18);
   }
   .menu-btn.soon{color:#6b7080;}
   .menu-btn.soon:hover{background:rgba(255,255,255,.05); color:#6b7080;}
@@ -1050,7 +1089,7 @@
   .menu-btn.locked:hover, .menu-btn.locked:focus-visible{
     background:rgba(255,255,255,.05); color:#7d8394;
   }
-  .chev{color:var(--gold); font-size:14px; line-height:1;}
+  .chev{color:var(--gold); font-size:18px; line-height:1;}
 
   /* the second level opens alongside; Play is the leftmost item, so there is
      always room on that side */
@@ -1103,7 +1142,7 @@
 
   .hero-set{
     margin-top:clamp(30px,5vh,50px); display:flex; gap:clamp(8px,2.4vw,22px);
-    font-size:clamp(19px,3.6vw,30px); color:#4a4335;
+    font-size:clamp(24.5px,4.62vw,38.5px); color:#4a4335;
   }
   .hero-set span{opacity:0; animation:riseIn .7s ease forwards;}
   @keyframes riseIn{from{opacity:0; transform:translateY(10px);} to{opacity:.85; transform:none;}}
@@ -1116,10 +1155,10 @@
   }
   .setup-head{text-align:center; margin-bottom:30px;}
   .setup-head h2{
-    margin:0; font-family:Georgia,serif; font-weight:400; font-size:clamp(26px,4.6vw,40px);
+    margin:0; font-family:var(--font); font-weight:400; font-size:clamp(35px,6.15vw,54px);
     letter-spacing:.14em; color:var(--gold-soft);
   }
-  .setup-head p{margin:10px 0 0; color:var(--muted); font-size:13.5px;}
+  .setup-head p{margin:10px 0 0; color:var(--muted); font-size:17.5px;}
 
   .mode-grid{display:grid; grid-template-columns:repeat(3,1fr); gap:16px;}
   /* no vision chosen — all three go red, with one caption under the middle card */
@@ -1163,11 +1202,11 @@
   /* the icons demonstrate the mode — they only come clear on hover */
   .mode-card:hover .icon{filter:none; opacity:1;}
   .mode-card[data-mode="fog"]:hover .icon{-webkit-mask-image:none; mask-image:none;}
-  .mode-card strong{display:block; margin-top:12px; font-size:16px; letter-spacing:.1em; color:var(--gold-soft);}
-  .mode-card small{display:block; margin-top:8px; color:var(--muted); font-size:12.5px;}
+  .mode-card strong{display:block; margin-top:12px; font-size:20.5px; letter-spacing:.1em; color:var(--gold-soft);}
+  .mode-card small{display:block; margin-top:8px; color:var(--muted); font-size:16px;}
   .mode-card .go{
     margin-top:auto; padding-top:18px;
-    font-size:10.5px; letter-spacing:.26em; color:var(--gold);
+    font-size:13px; letter-spacing:.26em; color:var(--gold);
     opacity:.45; transition:opacity .25s;   /* always visible — touch devices never hover */
   }
   .mode-card:hover .go, .mode-card.active .go{opacity:1;}
@@ -1227,9 +1266,9 @@
       linear-gradient(180deg, rgba(217,164,65,.2), rgba(217,164,65,.05)),
       var(--surf-solid);
   }
-  .half-title{font-size:13px; letter-spacing:.15em; font-weight:650; color:var(--gold-soft);}
+  .half-title{font-size:17.5px; letter-spacing:.15em; font-weight:650; color:var(--gold-soft);}
   .half:hover .half-title, .half.active .half-title{color:#fff4dc;}
-  .half-sub{margin-top:8px; font-size:11.5px; line-height:1.45; color:var(--muted);}
+  .half-sub{margin-top:8px; font-size:15px; line-height:1.45; color:var(--muted);}
 
   /* no hover to reveal with — show both halves outright */
   @media (hover:none){
@@ -1240,15 +1279,48 @@
 
   /* ---------- the engine's move, explained ---------- */
   .coach-move{
-    font-family:Georgia,serif; font-size:19px; letter-spacing:.06em;
+    font-family:var(--font); font-size:24.5px; letter-spacing:.06em;
     color:var(--good); display:flex; align-items:baseline; gap:9px;
   }
   .coach-move .cm-eval{
-    font-family:inherit; font-size:12px; letter-spacing:.08em;
+    font-family:inherit; font-size:15.5px; letter-spacing:.08em;
     color:var(--muted); font-variant-numeric:tabular-nums;
   }
-  .coach-why{margin-top:9px; font-size:12.5px; line-height:1.65; color:#c9cdd8;}
+  .coach-why{margin-top:9px; font-size:16px; line-height:1.65; color:#c9cdd8;}
   .coach-why em{color:var(--gold-soft); font-style:normal;}
+
+  /* ---------- what the position is about ---------- */
+  .cc-concept{margin-bottom:11px;}
+  .cc-concept + .cc-concept{padding-top:10px; border-top:1px solid rgba(255,255,255,.06);}
+  .cc-head{display:flex; align-items:baseline; gap:9px; flex-wrap:wrap;}
+  .cc-name{
+    font-family:Georgia,serif; font-size:16px; letter-spacing:.05em; color:var(--gold-soft);
+  }
+  .cc-secondary .cc-name{font-size:13.5px; color:#c9cdd8;}
+  /* Confidence is shown, never implied. A rule of thumb that matched perfectly
+     is still a rule of thumb, and the reader is told which they are reading. */
+  .cc-conf{
+    font-size:10px; letter-spacing:.12em; text-transform:uppercase;
+    padding:1px 6px; border-radius:999px; border:1px solid currentColor; opacity:.85;
+  }
+  .cc-conf.high{color:var(--good);}
+  .cc-conf.medium{color:var(--gold-soft);}
+  .cc-conf.low{color:var(--muted);}
+  .cc-kind{font-size:10.5px; letter-spacing:.06em; color:var(--muted);}
+  .cc-say{margin-top:6px; font-size:12.5px; line-height:1.65; color:#c9cdd8;}
+  .cc-why{margin:6px 0 0; padding-left:16px; font-size:12px; line-height:1.6; color:var(--muted);}
+  .cc-why li{margin:2px 0;}
+  .cc-hedge, .cc-caution{
+    margin-top:6px; font-size:11.5px; line-height:1.55; color:var(--muted); font-style:italic;
+  }
+  .cc-caution::before{content:'\2014\00a0';}
+  .cc-alt{
+    margin-top:11px; padding-top:9px; border-top:1px solid rgba(255,255,255,.06);
+    font-size:12px; line-height:1.6; color:var(--muted);
+  }
+  .cc-alt b{color:#c9cdd8; font-weight:600;}
+  /* The refusal, shown rather than papered over: an empty result is an answer. */
+  .cc-none{font-size:12.5px; line-height:1.65; color:var(--muted); font-style:italic;}
 
   /* ---------- review arrows and move marks ---------- */
   .arrows{position:absolute; inset:0; pointer-events:none; overflow:visible;}
@@ -1268,7 +1340,7 @@
     display:flex; align-items:center; justify-content:center;
     min-width:2.1cqmin; height:2.1cqmin; padding:0 .45cqmin;
     border-radius:.7cqmin;
-    font-family:Georgia,serif; font-weight:700; font-size:1.55cqmin; line-height:1;
+    font-family:var(--font); font-weight:700; font-size:1.55cqmin; line-height:1;
     color:#fff; box-shadow:0 .25cqmin .6cqmin rgba(0,0,0,.45);
   }
   .mark.m-brilliant b{background:#3fa4d8;}
@@ -1288,14 +1360,14 @@
     display:flex; align-items:center; gap:14px;
   }
   .rev-nav{display:flex; gap:6px; flex:none;}
-  .rev-nav button{padding:8px 13px; font-size:13px; line-height:1;}
+  .rev-nav button{padding:8px 13px; font-size:17px; line-height:1;}
   .rev-body{flex:1; min-width:0;}
   .rev-head{display:flex; align-items:center; gap:10px; flex-wrap:wrap;}
   .rev-count{
-    font-size:10.5px; letter-spacing:.18em; text-transform:uppercase; color:var(--muted);
+    font-size:13px; letter-spacing:.18em; text-transform:uppercase; color:var(--muted);
   }
   .rev-verdict{
-    font-size:10px; letter-spacing:.16em; text-transform:uppercase; font-weight:700;
+    font-size:12.5px; letter-spacing:.16em; text-transform:uppercase; font-weight:700;
     padding:3px 9px; border-radius:999px;
   }
   .rev-verdict.v-brilliant{color:#08222e; background:#3fa4d8;}
@@ -1306,11 +1378,11 @@
   .rev-verdict.v-inaccuracy{color:#d8c35a; border:1px solid rgba(216,195,90,.45);}
   .rev-verdict.v-mistake{color:#e0a341; border:1px solid rgba(224,163,65,.5);}
   .rev-verdict.v-blunder{color:#fff; background:var(--danger);}
-  .rev-line{margin-top:6px; font-size:13.5px; color:var(--text); line-height:1.5;}
+  .rev-line{margin-top:6px; font-size:17.5px; color:var(--text); line-height:1.5;}
   .rev-line b{color:var(--gold-soft);}
   .rev-eval{
     margin-left:6px; font-variant-numeric:tabular-nums;
-    font-size:12.5px; color:var(--muted);
+    font-size:16px; color:var(--muted);
   }
   .rev-done{flex:none;}
   @media (max-width:520px){
@@ -1329,10 +1401,10 @@
   #screen-game.puzzle-mode.rush #clockW{display:flex !important;}
   .pz-strikes{letter-spacing:.22em; color:#d0453c;}
   .pz-count{color:var(--gold-soft); font-variant-numeric:tabular-nums;}
-  .puzzle-card .pz-ask{font-size:14px; color:var(--text); line-height:1.5;}
+  .puzzle-card .pz-ask{font-size:18px; color:var(--text); line-height:1.5;}
   .puzzle-card .pz-ask b{color:var(--gold-soft);}
   .pz-say{
-    margin-top:9px; font-size:13.5px; line-height:1.55; color:var(--muted);
+    margin-top:9px; font-size:17.5px; line-height:1.55; color:var(--muted);
     border-left:2px solid transparent; padding-left:0; transition:padding .15s ease;
   }
   .pz-say.right{color:var(--good); border-color:var(--good); padding-left:9px;}
@@ -1340,13 +1412,13 @@
   .pz-say.told{color:var(--muted); border-color:var(--line); padding-left:9px;}
   .pz-themes{display:flex; flex-wrap:wrap; gap:5px; margin-top:10px;}
   .pz-theme{
-    font-size:9.5px; letter-spacing:.14em; text-transform:uppercase;
+    font-size:12px; letter-spacing:.14em; text-transform:uppercase;
     padding:3px 7px; border-radius:999px;
     color:var(--muted); border:1px solid var(--line);
   }
   .pz-theme.rating{color:var(--gold-soft); border-color:rgba(212,175,110,.35);}
   .pz-controls{display:flex; gap:8px; margin-top:14px;}
-  .pz-controls button{flex:1; padding:9px 6px; font-size:12px;}
+  .pz-controls button{flex:1; padding:9px 6px; font-size:15.5px;}
   /* the follow-up gets a row of its own: it is the one control on this card
      that is worth anything only after the puzzle is over, and squeezing a
      fourth button into the row above would shorten the three that are always
@@ -1360,10 +1432,10 @@
   .pz-why p:last-child{margin-bottom:0;}
   .pz-why-lead{font-weight:600;}
   .pz-why-tag{
-    display:inline-block; font-size:10px; letter-spacing:.09em; text-transform:uppercase;
+    display:inline-block; font-size:12.5px; letter-spacing:.09em; text-transform:uppercase;
     color:var(--gold-soft); margin-right:5px;
   }
-  .pz-why-swing{color:var(--muted); font-size:12px;}
+  .pz-why-swing{color:var(--muted); font-size:15.5px;}
   .pz-why-line{list-style:none; margin:0 0 7px; padding:0;}
   .pz-why-line li{margin:0 0 4px; padding-left:11px; border-left:2px solid var(--line);}
   .pz-why-line li.you{border-left-color:var(--gold-soft);}
@@ -1376,10 +1448,10 @@
      side by side. The "before" bar is muted and the "after" bar is gold —
      the same pairing the line above it uses for their moves and yours. */
   .pz-eval{margin-top:10px;}
-  .pz-eval-head{font-size:12px; color:var(--muted); margin-bottom:6px;}
+  .pz-eval-head{font-size:15.5px; color:var(--muted); margin-bottom:6px;}
   .pz-eval-row{display:flex; align-items:center; gap:8px; margin-bottom:5px;}
   .pz-eval-when{
-    flex:0 0 88px; font-size:10px; letter-spacing:.09em; text-transform:uppercase;
+    flex:0 0 88px; font-size:12.5px; letter-spacing:.09em; text-transform:uppercase;
     color:var(--muted); white-space:nowrap; overflow:hidden; text-overflow:ellipsis;
   }
   .pz-eval-track{
@@ -1389,14 +1461,14 @@
   .pz-eval-track i{display:block; height:100%; border-radius:999px; background:var(--muted);}
   .pz-eval-row.after .pz-eval-track i{background:var(--gold-soft);}
   .pz-eval-pct{
-    flex:0 0 32px; text-align:right; font-size:12px;
+    flex:0 0 32px; text-align:right; font-size:15.5px;
     font-variant-numeric:tabular-nums; color:var(--muted);
   }
   .pz-eval-row.after .pz-eval-pct{color:var(--gold-soft);}
-  .pz-eval-note{margin:6px 0 0; font-size:12px; color:var(--muted);}
+  .pz-eval-note{margin:6px 0 0; font-size:15.5px; color:var(--muted);}
   .pz-eval-note b{color:var(--good); font-weight:600;}
   .pz-eval-note b.down{color:#e0864d;}
-  .pz-follow{width:100%; margin-top:8px; padding:9px 6px; font-size:12px;}
+  .pz-follow{width:100%; margin-top:8px; padding:9px 6px; font-size:15.5px;}
   .pz-follow-say{color:var(--gold-soft); border-color:rgba(212,175,110,.45); padding-left:9px;}
   /* study mode speaks in a different voice from the card: the card is the
      verdict on the puzzle, this is a conversation about a position the player
@@ -1408,7 +1480,7 @@
   /* pushed to the far end of the heading by .card h2 > span, not floated: the
      heading is a flex row now */
   .pz-progress{
-    font-size:10px; letter-spacing:.14em; color:var(--muted);
+    font-size:12.5px; letter-spacing:.14em; color:var(--muted);
     font-variant-numeric:tabular-nums; white-space:nowrap;
   }
   .pz-grid{
@@ -1418,7 +1490,7 @@
     background:var(--well); box-shadow:inset 0 1px 3px rgba(0,0,0,.45);
   }
   .pz-lv{
-    padding:7px 0; font-size:11.5px; font-variant-numeric:tabular-nums;
+    padding:7px 0; font-size:15px; font-variant-numeric:tabular-nums;
     border:1px solid var(--line); border-radius:var(--r-xs);
     background:rgba(255,255,255,.03); color:var(--muted); cursor:pointer;
     box-shadow:none;
@@ -1441,7 +1513,7 @@
      reach. */
   .pzv-cat{
     display:inline-block; margin-top:2px;
-    font-size:12px; letter-spacing:.3em; text-transform:uppercase;
+    font-size:15.5px; letter-spacing:.3em; text-transform:uppercase;
     color:var(--gold-soft); font-weight:700;
   }
   #screen-pzvision .setup-head p{margin:8px 0 0;}
@@ -1459,42 +1531,39 @@
     background:radial-gradient(circle at 50% 40%, rgba(255,255,255,.05), rgba(6,7,10,.96) 70%);
   }
   .pzv-art-word{
-    font-family:Georgia,"Times New Roman",serif; font-size:44px; line-height:1;
+    font-family:var(--font); font-size:56.5px; line-height:1;
     color:rgba(212,175,110,.5); filter:blur(1.5px); transition:filter .45s ease;
   }
   .pzv-card:hover .pzv-art-word{filter:none;}
-  /* the other two are a real 8×8, painted by one gradient rather than by
-     sixty-four elements: it is a picture of a board, not a board */
+  /* These previews use the same art as the game, lessons and practice boards.
+     Keeping the asset in one variable also keeps cached versions in step. */
   .pzv-mini{
-    width:100%; height:100%; border-radius:8px; overflow:hidden;
-    border:1px solid var(--line); position:relative;
-    /* one conic gradient tiled sixteen times is a crisp 8x8; the two crossed
-       45-degree linear gradients that usually draw this are antialiased along
-       every diagonal and read as diamonds at this size */
-    background-image:conic-gradient(#efdcbc 25%, #a97d55 0 50%, #efdcbc 0 75%, #a97d55 0);
-    background-size:25% 25%;
+    width:100%; height:100%; border-radius:1px; overflow:hidden;
+    border:1px solid #b79b64; position:relative;
+    background:#081522 var(--board-art) center / 100% 100%;
+    box-shadow:0 0 0 3px #111d27, 0 0 0 4px #74664e;
     transition:border-color .22s ease;
   }
   /* Fog of War's board carries one side's men and nothing of the other's,
-     which is exactly the claim the card is making. Two rows of glyphs, laid
+     which is exactly the claim the card is making. Two rows of pieces, laid
      over the bottom two ranks. */
   .pzv-mini .pzv-men{
     position:absolute; left:0; right:0; bottom:0; height:25%;
     display:grid; grid-template-columns:repeat(8,1fr); grid-template-rows:1fr 1fr;
-    font-size:10px; line-height:1; color:#fbf6ea; text-align:center;
+    font-size:12.5px; line-height:1; color:#fbf6ea; text-align:center;
     text-shadow:0 1px 0 #2a2118, 0 0 2px rgba(0,0,0,.6);
   }
   .pzv-mini .pzv-men span{display:flex; align-items:center; justify-content:center;}
   .pzv-facts{
     display:flex; flex-direction:column; gap:3px; margin-top:12px; width:100%;
-    font-size:11px; color:var(--muted);
+    font-size:14.5px; color:var(--muted);
   }
   .pzv-facts span{display:flex; justify-content:space-between; gap:10px;}
   .pzv-facts b{font-weight:600; letter-spacing:.04em;}
   .pzv-facts b.yes{color:var(--good);}
   .pzv-facts b.no{color:#8b8477;}
   .pzv-note{
-    text-align:center; margin:26px 0 0; font-size:12px; color:var(--muted);
+    text-align:center; margin:26px 0 0; font-size:15.5px; color:var(--muted);
   }
   /* the heading is two words longer than the setup screen's and wraps into the
      Back button's corner on a phone; the button is out of the flow, so the
@@ -1513,21 +1582,44 @@
   #screen-game.puzzle-mode.rush #barTop{display:flex; justify-content:flex-end;}
   #screen-game.puzzle-mode .board-bar .bar-name{display:none;}
   .pz-pieces{
-    width:min(100%,var(--board-max)); padding:11px 14px;
-    display:flex; flex-direction:column; gap:6px;
+    width:min(90%,calc(100vh - var(--chrome) - 86px)); padding:24px 27px 27px;
+    display:flex; flex-direction:column; gap:12px;
+    margin-bottom:-9px; z-index:2;
+    border-radius:14px 14px 0 0;
+    background:
+      linear-gradient(105deg,rgba(8,13,21,.42),rgba(4,8,14,.72)),
+      url("assets/moon.jpg?v=1") center 44% / cover no-repeat;
+    border-color:rgba(205,212,224,.22);
+    box-shadow:0 12px 30px rgba(0,0,0,.44), inset 0 1px 0 rgba(255,255,255,.09);
   }
-  .pz-pc-row{display:flex; align-items:baseline; gap:12px; line-height:1.5;}
+  .pz-pc-row{display:flex; align-items:baseline; gap:20px; line-height:1.65;}
   .pz-pc-tag{
-    flex:0 0 96px; font-size:9.5px; letter-spacing:.16em; text-transform:uppercase;
-    color:var(--muted); white-space:nowrap;
+    flex:0 0 145px; font-size:17px; letter-spacing:.17em; text-transform:uppercase;
+    color:#d5d8df; white-space:nowrap; font-weight:650;
   }
   .pz-pc-list{
     flex:1 1 auto; min-width:0;
-    font-size:13.5px; letter-spacing:.03em; color:var(--text);
+    font-size:28px; line-height:1.65; letter-spacing:.045em; color:#f2f3f6;
     font-variant-numeric:tabular-nums; word-spacing:.12em;
   }
-  .pz-pc-row + .pz-pc-row{border-top:1px solid var(--line); padding-top:6px;}
-  .pz-pc-row + .pz-pc-row .pz-pc-list{color:#cfc7b6;}
+  .pz-pc-row + .pz-pc-row{border-top:1px solid rgba(220,225,234,.22); padding-top:12px;}
+  .pz-pc-row + .pz-pc-row .pz-pc-list{color:#ddd7c9;}
+  /* The written position and whichever play surface is active share one exact
+     width, so the panel reads as the play surface's attached header. */
+  #screen-game.puzzle-mode .board-frame,
+  #screen-game.puzzle-mode .pz-stage,
+  #screen-game.puzzle-mode .pz-console{
+    width:min(90%,calc(100vh - var(--chrome) - 86px));
+  }
+  @media (max-width:600px){
+    .pz-pieces{width:94%; padding:19px 17px 21px;}
+    .pz-pc-row{gap:10px;}
+    .pz-pc-tag{flex-basis:104px; font-size:12.5px;}
+    .pz-pc-list{font-size:21px; line-height:1.65;}
+    #screen-game.puzzle-mode .board-frame,
+    #screen-game.puzzle-mode .pz-stage,
+    #screen-game.puzzle-mode .pz-console{width:94%;}
+  }
 
   /* the empty middle of Complete Blindfold. It is sized off the board so that
      switching visions does not move the panels above and below it. */
@@ -1540,12 +1632,12 @@
   }
   .pz-stage-in{text-align:center; padding:20px;}
   .pz-stage-lead{
-    margin:0; font-family:Georgia,"Times New Roman",serif;
-    font-size:clamp(17px,2.4vw,24px); letter-spacing:.12em;
+    margin:0; font-family:var(--font);
+    font-size:clamp(21.5px,3.08vw,30.5px); letter-spacing:.12em;
     color:rgba(212,175,110,.62);
   }
   .pz-stage-sub{
-    margin:10px 0 0; font-size:12px; letter-spacing:.22em;
+    margin:10px 0 0; font-size:15.5px; letter-spacing:.22em;
     text-transform:uppercase; color:var(--muted);
   }
 
@@ -1554,7 +1646,7 @@
   .pz-entry input{flex:1 1 auto; min-width:0;}
   .pz-console .entry-hint{margin:8px 0 0;}
   .pz-console-say{
-    margin-top:8px; font-size:12.5px; line-height:1.5; color:var(--muted);
+    margin-top:8px; font-size:16px; line-height:1.5; color:var(--muted);
     display:none;
   }
   .pz-console-say.show{display:block;}
@@ -1563,16 +1655,16 @@
 
   /* the info card: one line the size of a headline, and everything else small */
   .pz-info .pz-turn{
-    font-size:15px; letter-spacing:.24em; font-weight:700;
+    font-size:19px; letter-spacing:.24em; font-weight:700;
     color:var(--gold-soft); text-transform:uppercase;
   }
   .pz-info .pz-turn.check::after{
-    content:"CHECK"; margin-left:10px; font-size:9.5px; letter-spacing:.18em;
+    content:"CHECK"; margin-left:10px; font-size:12px; letter-spacing:.18em;
     color:#e0864d; vertical-align:2px;
   }
   .pz-meta{
     display:flex; flex-wrap:wrap; gap:4px 14px; margin-top:9px;
-    font-size:11.5px; color:var(--muted);
+    font-size:15px; color:var(--muted);
   }
   .pz-meta b{color:var(--text); font-weight:600;}
   .pz-info .pz-ask{margin-top:11px;}
@@ -1593,7 +1685,7 @@
      only the element is not. */
   .pr-page{margin-top:clamp(10px,2vh,22px); padding-bottom:40px;}
   .pr-head{max-width:760px;}
-  .pr-head p{margin:10px 0 0; color:var(--muted); font-size:13.5px; line-height:1.7;}
+  .pr-head p{margin:10px 0 0; color:var(--muted); font-size:17.5px; line-height:1.7;}
 
   /* what the practising has come to: the level on the left, the numbers beside it */
   .pr-summary{
@@ -1603,11 +1695,11 @@
   }
   @media (max-width:820px){ .pr-summary{grid-template-columns:minmax(0,1fr);} }
   .pr-level-name{
-    font-family:Georgia,serif; font-size:clamp(21px,3.2vw,29px);
+    font-family:var(--font); font-size:clamp(27px,4.1vw,37px);
     letter-spacing:.16em; color:var(--gold-soft);
   }
   .pr-level-cap{
-    margin-top:6px; font-size:9.5px; letter-spacing:.26em;
+    margin-top:6px; font-size:12px; letter-spacing:.26em;
     text-transform:uppercase; color:var(--muted);
   }
   .pr-level .rank-gauge{margin-top:15px;}
@@ -1618,11 +1710,11 @@
     background:var(--well); border:1px solid transparent;
   }
   .pr-fig b{
-    display:block; font-size:clamp(17px,2.5vw,23px); font-weight:600;
+    display:block; font-size:clamp(21.5px,3.22vw,29.5px); font-weight:600;
     font-variant-numeric:tabular-nums; color:var(--text);
   }
   .pr-fig small{
-    display:block; margin-top:5px; font-size:9px; letter-spacing:.16em;
+    display:block; margin-top:5px; font-size:11.5px; letter-spacing:.16em;
     text-transform:uppercase; color:var(--muted);
   }
 
@@ -1634,8 +1726,15 @@
   @media (max-width:940px){ .pr-cards{grid-template-columns:repeat(2,minmax(0,1fr));} }
   @media (max-width:620px){ .pr-cards{grid-template-columns:minmax(0,1fr);} }
   .pr-card{display:flex; flex-direction:column; padding:18px 18px 16px; text-align:left;}
-  .pr-name{font-size:14.5px; font-weight:650; letter-spacing:.09em; color:var(--gold-soft);}
-  .pr-desc{margin-top:8px; flex:1; color:var(--muted); font-size:12.5px; line-height:1.65;}
+  /* The practice overview shares the supplied lunar material. The dark wash
+     keeps descriptions readable without changing the cards or their controls. */
+  #screen-practice .pr-card,
+  #screen-practice .pr-summary{
+    background:linear-gradient(150deg,rgba(12,18,28,.64),rgba(7,12,21,.88)),
+      url("assets/moon.jpg?v=1") center / cover no-repeat;
+  }
+  .pr-name{font-size:18.5px; font-weight:650; letter-spacing:.09em; color:var(--gold-soft);}
+  .pr-desc{margin-top:8px; flex:1; color:var(--muted); font-size:16px; line-height:1.65;}
   .pr-foot{margin-top:15px; display:flex; align-items:center; justify-content:space-between; gap:10px;}
   .pr-dots{display:flex; gap:4px; align-items:center;}
   .pr-dots i{
@@ -1643,9 +1742,9 @@
     background:rgba(255,255,255,.10); border:1px solid var(--line);
   }
   .pr-dots i.on{background:var(--gold); border-color:var(--gold);}
-  .pr-go{padding:8px 15px; font-size:11px; letter-spacing:.16em; font-weight:650;}
+  .pr-go{padding:8px 15px; font-size:14.5px; letter-spacing:.16em; font-weight:650;}
   .pr-score{
-    margin-top:11px; font-size:10px; letter-spacing:.14em; text-transform:uppercase;
+    margin-top:11px; font-size:12.5px; letter-spacing:.14em; text-transform:uppercase;
     color:#5c6070; font-variant-numeric:tabular-nums;
   }
   /* locked reads as not-yet-earned, the way the unbuilt nav items read as
@@ -1667,7 +1766,7 @@
     --board-max:540px;
     display:flex; flex-direction:column; align-items:center; gap:10px;
   }
-  .pr-orient{font-size:9.5px; letter-spacing:.22em; text-transform:uppercase; color:var(--muted);}
+  .pr-orient{font-size:12px; letter-spacing:.22em; text-transform:uppercase; color:var(--muted);}
   /* square colour at its hardest has no board to look at, and the space it
      leaves should say so rather than close up */
   .pr-noboard{
@@ -1675,7 +1774,7 @@
     text-align:center; line-height:1.9;
     background:linear-gradient(160deg, var(--surf-1), var(--surf-2));
     border:1px dashed transparent; color:var(--muted);
-    font-size:12.5px; letter-spacing:.1em;
+    font-size:16px; letter-spacing:.1em;
   }
 
   /* Three states a game has no use for: the square you chose, the square that
@@ -1710,36 +1809,34 @@
   @media (prefers-reduced-motion:reduce){ .sq.pr-target::before{animation:none;} }
 
   /* ---- the question, and the answer to it ---- */
-  .pr-quiz .pr-q{font-size:16px; line-height:1.55; color:var(--text);}
+  .pr-quiz .pr-q{font-size:20.5px; line-height:1.55; color:var(--text);}
   .pr-quiz .pr-q b{
     color:var(--gold-soft); letter-spacing:.06em;
-    font-family:ui-monospace,SFMono-Regular,Menlo,monospace;
+    font-family:var(--font);
   }
-  .pr-sub{margin-top:8px; font-size:12px; color:var(--muted); line-height:1.6;}
+  .pr-sub{margin-top:8px; font-size:15.5px; color:var(--muted); line-height:1.6;}
   .pr-sub:empty{display:none;}
   .pr-seq{
     margin-top:12px; padding:11px 13px; border-radius:10px;
     background:var(--well); border:1px solid transparent;
-    font-family:ui-monospace,SFMono-Regular,Menlo,monospace;
-    font-size:13px; line-height:1.85; color:#d3d7e1; letter-spacing:.03em;
+    font-family:var(--font);
+    font-size:17px; line-height:1.85; color:#d3d7e1; letter-spacing:.03em;
   }
   .pr-seq:empty{display:none;}
   .pr-seq b{color:var(--gold-soft); font-weight:600;}
   .pr-ans{margin-top:14px; display:flex; flex-wrap:wrap; gap:7px;}
   .pr-ans:empty{display:none;}
-  .pr-ans button{flex:1 1 auto; min-width:62px; padding:10px 8px; font-size:12.5px;}
+  .pr-ans button{flex:1 1 auto; min-width:62px; padding:10px 8px; font-size:16px;}
   /* the twelve men, in two rows of six, with "empty square" under them */
   .pr-ans.glyphs{display:grid; grid-template-columns:repeat(6,1fr);}
   .pr-ans.glyphs button{min-width:0; padding:5px 0; font-size:23px; line-height:1.15;}
-  .pr-ans.glyphs button.wide{grid-column:1/-1; font-size:12px; padding:9px 0;}
+  .pr-ans.glyphs button.wide{grid-column:1/-1; font-size:15.5px; padding:9px 0;}
   .pr-ans.glyphs .pc-svg{width:.86em; height:.86em; margin:0 auto;}
   .pr-ans .g-w{color:#fbf6ea; -webkit-text-stroke:1.2px #2a2118;}
   .pr-ans .g-b{color:#2c2f3a; -webkit-text-stroke:1.2px #0a0b0e;}
-  .pr-ans .g-w .pc-svg{fill:#fbf6ea; stroke:#2a2118; stroke-width:1.5;}
-  .pr-ans .g-b .pc-svg{fill:#2c2f3a; stroke:#0a0b0e; stroke-width:1.5;}
   .pr-ans input{
-    flex:1; min-width:0; font:inherit; font-size:15px; letter-spacing:.16em; text-align:center;
-    font-family:ui-monospace,SFMono-Regular,Menlo,monospace;
+    flex:1; min-width:0; font:inherit; font-size:19px; letter-spacing:.16em; text-align:center;
+    font-family:var(--font);
     padding:11px 12px; border-radius:9px;
     background:var(--well); border:1px solid var(--line); color:var(--text);
     box-shadow:inset 0 1px 3px rgba(0,0,0,.45);
@@ -1751,27 +1848,27 @@
   #prSay:empty{display:none;}
   .pr-controls{display:flex; gap:8px; margin-top:14px;}
   .pr-controls:empty{display:none;}
-  .pr-controls button{flex:1; padding:10px 6px; font-size:12px;}
+  .pr-controls button{flex:1; padding:10px 6px; font-size:15.5px;}
   .pr-stats{display:grid; grid-template-columns:repeat(3,1fr); gap:8px; margin-bottom:13px;}
   .pr-stats div{text-align:center;}
   .pr-stats span{
-    display:block; font-size:16px; font-weight:600;
+    display:block; font-size:20.5px; font-weight:600;
     font-variant-numeric:tabular-nums; color:var(--gold-soft);
   }
   .pr-stats small{
-    display:block; margin-top:4px; font-size:8.5px; letter-spacing:.16em;
+    display:block; margin-top:4px; font-size:11px; letter-spacing:.16em;
     text-transform:uppercase; color:var(--muted);
   }
   .pr-exit{display:flex; gap:8px;}
-  .pr-exit button{flex:1; padding:10px 6px; font-size:12px;}
+  .pr-exit button{flex:1; padding:10px 6px; font-size:15.5px;}
 
   /* the mini challenge types its moves, exactly as complete blindfold does */
   .pr-log{
     height:min(30vh,232px); overflow-y:auto; margin-top:12px;
     padding:12px 13px; border-radius:10px;
     background:var(--well); border:1px solid transparent;
-    font-family:ui-monospace,SFMono-Regular,Menlo,monospace;
-    font-size:12.5px; line-height:1.75;
+    font-family:var(--font);
+    font-size:16px; line-height:1.75;
   }
   .pr-log::-webkit-scrollbar{width:8px;}
   .pr-log::-webkit-scrollbar-thumb{background:#2e3340; border-radius:4px;}
@@ -1788,20 +1885,20 @@
     display:flex; align-items:baseline; justify-content:space-between; gap:14px;
     padding:9px 13px; border-radius:10px;
     background:var(--well); border:1px solid transparent;
-    font-size:10.5px; letter-spacing:.18em; text-transform:uppercase; color:var(--muted);
+    font-size:13px; letter-spacing:.18em; text-transform:uppercase; color:var(--muted);
   }
   .pr-result div b{
-    font-size:15px; letter-spacing:.04em; text-transform:none;
+    font-size:19px; letter-spacing:.04em; text-transform:none;
     color:var(--gold-soft); font-variant-numeric:tabular-nums;
   }
   .pr-tip{
     margin:0 0 18px; padding:11px 13px; border-radius:10px; text-align:left;
     background:rgba(217,164,65,.08); border:1px solid transparent;
-    font-size:12.5px; line-height:1.65; color:#cfd3dd;
+    font-size:16px; line-height:1.65; color:#cfd3dd;
   }
   .pr-tip b{color:var(--gold-soft); font-weight:600;}
   .pr-done-btns{flex-direction:column; gap:8px;}
-  .pr-done-btns button{width:100%; padding:12px 0; font-size:12.5px; letter-spacing:.12em;}
+  .pr-done-btns button{width:100%; padding:12px 0; font-size:16px; letter-spacing:.12em;}
 
 
   /* ---------- the lessons ----------
@@ -1815,14 +1912,14 @@
      a phone, and one word too wide drags the whole page sideways with it. */
   .lsn-title{
     margin:0 0 0 clamp(12px,1.6vw,26px); min-width:0;
-    font-family:Georgia,serif; font-weight:400; line-height:1.15;
-    font-size:clamp(18px,3.2vw,38px); letter-spacing:.1em; color:var(--gold-soft);
+    font-family:var(--font); font-weight:400; line-height:1.15;
+    font-size:clamp(24.5px,4.28vw,50.5px); letter-spacing:.1em; color:var(--gold-soft);
   }
 
   .lsn-hub{max-width:820px; margin:clamp(12px,2.4vh,26px) auto 0;}
   .lsn-lede{
     margin:0 0 clamp(16px,2.6vh,26px); text-align:center;
-    color:var(--muted); font-size:13.5px; line-height:1.75;
+    color:var(--muted); font-size:17.5px; line-height:1.75;
   }
   .lsn-lede b{color:var(--gold-soft); font-weight:600;}
 
@@ -1837,16 +1934,16 @@
   .lsn-row .num{
     flex:none; width:30px; height:30px; border-radius:9px;
     display:flex; align-items:center; justify-content:center;
-    font-size:12px; font-variant-numeric:tabular-nums; font-weight:650;
+    font-size:15.5px; font-variant-numeric:tabular-nums; font-weight:650;
     color:var(--muted); border:1px solid var(--line); background:rgba(0,0,0,.28);
   }
-  .lsn-row .nm{flex:1; min-width:0; font-size:14px; letter-spacing:.04em;}
+  .lsn-row .nm{flex:1; min-width:0; font-size:18px; letter-spacing:.04em;}
   .lsn-row .nm small{
     display:block; margin-top:4px; color:var(--muted);
-    font-size:11.5px; letter-spacing:.02em; line-height:1.55;
+    font-size:15px; letter-spacing:.02em; line-height:1.55;
   }
   .lsn-row .tick{
-    flex:none; font-size:12px; letter-spacing:.16em; text-transform:uppercase;
+    flex:none; font-size:15.5px; letter-spacing:.16em; text-transform:uppercase;
     color:var(--muted); font-weight:650;
   }
   .lsn-row.done{border-color:rgba(111,191,115,.4);}
@@ -1859,21 +1956,21 @@
   .lsn-hub-foot{
     margin-top:20px; display:flex; gap:10px; justify-content:center; flex-wrap:wrap;
   }
-  .lsn-hub-foot button{padding:12px 26px; font-size:12.5px; letter-spacing:.16em; font-weight:650;}
+  .lsn-hub-foot button{padding:12px 26px; font-size:16px; letter-spacing:.16em; font-weight:650;}
 
   /* ---- one lesson, open ---- */
   .lsn-course{margin-top:clamp(10px,2vh,20px);}
   .lsn-bar{
     display:flex; align-items:center; gap:14px; margin-bottom:14px;
   }
-  .lsn-bar .ghost{flex:none; padding:8px 14px; font-size:12px;}
+  .lsn-bar .ghost{flex:none; padding:8px 14px; font-size:15.5px;}
   /* The gauge, and the label that says what it is a gauge of. The label sits
      ABOVE the line rather than beside it so the line itself can run the full
      width of the page: with a dot for every lesson on it, a short line reads
      as a crowd of dots rather than as a course. */
   .lsn-prog{flex:1; min-width:120px; display:flex; flex-direction:column; gap:9px;}
   .lsn-count{
-    font-size:10.5px; letter-spacing:.18em; text-transform:uppercase;
+    font-size:13px; letter-spacing:.18em; text-transform:uppercase;
     color:var(--muted); font-variant-numeric:tabular-nums;
     overflow:hidden; text-overflow:ellipsis; white-space:nowrap;
   }
@@ -1937,38 +2034,38 @@
   .lsn-under button.wide{flex:1 1 100%;}
   .lsn-cap{
     width:min(100%,var(--board-max)); text-align:center; min-height:15px;
-    font-size:11px; letter-spacing:.16em; text-transform:uppercase; color:var(--muted);
+    font-size:14.5px; letter-spacing:.16em; text-transform:uppercase; color:var(--muted);
   }
   .lsn-cap:empty{display:none;}
 
   .lsn-card h2{margin-bottom:10px;}
   .lsn-what{
-    font-size:13px; line-height:1.75; color:#cfd3dd;
+    font-size:17px; line-height:1.75; color:#cfd3dd;
   }
   .lsn-what p{margin:0 0 10px;}
   .lsn-what p:last-child{margin-bottom:0;}
   .lsn-what b{color:var(--gold-soft); font-weight:600;}
   .lsn-what code{
-    font-family:ui-monospace,SFMono-Regular,Menlo,monospace;
-    font-size:12.5px; color:var(--gold-soft);
+    font-family:var(--font);
+    font-size:16px; color:var(--gold-soft);
   }
   .lsn-ask{
     margin-top:13px; padding:11px 13px; border-radius:10px;
     background:rgba(0,0,0,.28); border:1px solid transparent;
-    font-size:13.5px; line-height:1.6; color:var(--text);
+    font-size:17.5px; line-height:1.6; color:var(--text);
   }
   .lsn-ask:empty{display:none;}
   .lsn-ask b{color:var(--gold-soft);}
   .lsn-ask code{
-    font-family:ui-monospace,SFMono-Regular,Menlo,monospace;
-    font-size:15px; letter-spacing:.06em; color:var(--gold-soft);
+    font-family:var(--font);
+    font-size:19px; letter-spacing:.06em; color:var(--gold-soft);
   }
 
   .lsn-choices{display:grid; grid-template-columns:1fr 1fr; gap:7px; margin-top:11px;}
   .lsn-choices:empty{display:none;}
   .lsn-choices.col{grid-template-columns:1fr;}
   .lsn-choice{
-    padding:10px 11px; border-radius:9px; text-align:center; font-size:12.5px;
+    padding:10px 11px; border-radius:9px; text-align:center; font-size:16px;
     background:linear-gradient(180deg,var(--ctl-1),var(--ctl-2));
     border:1px solid var(--ctl-line); color:var(--text);
   }
@@ -1981,7 +2078,7 @@
   }
 
   .lsn-say{
-    margin-top:11px; min-height:17px; font-size:12.5px; line-height:1.6;
+    margin-top:11px; min-height:17px; font-size:16px; line-height:1.6;
     padding-left:9px; border-left:2px solid transparent; color:var(--muted);
   }
   .lsn-say.good{color:var(--good); border-left-color:rgba(111,191,115,.5);}
@@ -1990,7 +2087,7 @@
 
   /* the sub-heading inside a card that is carrying two things at once */
   .lsn-subcap{
-    margin:14px 0 4px; font-size:10px; letter-spacing:.22em; text-transform:uppercase;
+    margin:14px 0 4px; font-size:12.5px; letter-spacing:.22em; text-transform:uppercase;
     color:var(--muted); font-weight:600;
   }
   /* the challenge position, said in words: a column of men and a column of
@@ -1998,7 +2095,7 @@
   .lsn-pos .lsn-subcap:first-child{margin-top:0;}
   .lsn-pos-row{
     display:flex; align-items:baseline; gap:10px; padding:3px 0;
-    font-size:12.5px; line-height:1.5;
+    font-size:16px; line-height:1.5;
   }
   .lsn-pos-row .man{flex:none; min-width:62px; color:var(--muted);}
   .lsn-pos-row .sqs{
@@ -2007,7 +2104,7 @@
   }
 
   .lsn-acts{display:flex; gap:8px; margin-top:14px;}
-  .lsn-acts button{flex:1; padding:10px 6px; font-size:12px;}
+  .lsn-acts button{flex:1; padding:10px 6px; font-size:15.5px;}
   /* answered, and the way on is the only lit thing in the card */
   @keyframes lsnready{
     0%,100%{box-shadow:0 8px 22px rgba(217,164,65,.20), inset 0 1px 0 rgba(255,255,255,.42);}
@@ -2017,8 +2114,8 @@
 
   /* the lesson's own console — the game's, at the size this column offers */
   .lsn-boardcol .console{width:min(100%,var(--board-max)); padding:15px;}
-  .lsn-boardcol .log{height:min(34vh,280px); font-size:12.5px;}
-  .lsn-boardcol .entry input{font-size:15px; padding:11px 13px;}
+  .lsn-boardcol .log{height:min(34vh,280px); font-size:16px;}
+  .lsn-boardcol .entry input{font-size:19px; padding:11px 13px;}
 
   /* squares the lesson is talking about: a picked one, a right one, a wrong
      one, and the file-and-rank cross a hint lights up. Painted with ::after so
@@ -2053,7 +2150,7 @@
   /* every square named, for the lesson that is about the names */
   .board.named .sq .coord.all{
     position:absolute; left:0; right:0; top:50%; transform:translateY(-50%);
-    text-align:center; font-size:11.5px; font-weight:700; letter-spacing:.04em;
+    text-align:center; font-size:15px; font-weight:700; letter-spacing:.04em;
     opacity:.62; pointer-events:none;
   }
 
@@ -2062,21 +2159,21 @@
     max-width:560px; margin:clamp(30px,8vh,90px) auto 0; text-align:center;
     padding:34px 28px 30px;
   }
-  .lsn-done .lsn-mark{font-size:44px; line-height:1; color:var(--gold); margin-bottom:14px;}
+  .lsn-done .lsn-mark{font-size:56.5px; line-height:1; color:var(--gold); margin-bottom:14px;}
   .lsn-done h2{
-    margin:0; font-family:Georgia,serif; font-weight:400;
-    font-size:clamp(23px,4vw,33px); letter-spacing:.12em; color:var(--gold-soft);
+    margin:0; font-family:var(--font); font-weight:400;
+    font-size:clamp(30.5px,5.35vw,44.5px); letter-spacing:.12em; color:var(--gold-soft);
   }
-  .lsn-done p{margin:14px 0 0; color:var(--muted); font-size:13.5px; line-height:1.75;}
+  .lsn-done p{margin:14px 0 0; color:var(--muted); font-size:17.5px; line-height:1.75;}
   .lsn-done .row{margin-top:24px; display:flex; gap:10px; justify-content:center; flex-wrap:wrap;}
-  .lsn-done .row button{padding:13px 26px; font-size:12.5px; letter-spacing:.16em; font-weight:650;}
+  .lsn-done .row button{padding:13px 26px; font-size:16px; letter-spacing:.16em; font-weight:650;}
 
   @media (max-width:620px){
     .lsn-choices{grid-template-columns:1fr;}
     .lsn-acts{flex-wrap:wrap;}
     .lsn-acts button{flex:1 1 44%;}
     .lsn-row{padding:12px 13px; gap:11px;}
-    .lsn-row .nm{font-size:13px;}
+    .lsn-row .nm{font-size:17px;}
     /* the gauge takes the whole width here rather than sharing a line with
        the way out — a label squeezed beside a button is a label nobody reads */
     .lsn-bar{flex-wrap:wrap; gap:10px;}
@@ -2087,7 +2184,7 @@
   /* ---------- open rooms ---------- */
   #screen-rooms{position:relative;}
   .rooms-top{display:flex; justify-content:center; margin-bottom:26px;}
-  #btnHostRoom{padding:14px 38px; font-size:13px; font-weight:700; letter-spacing:.2em; border-radius:12px;}
+  #btnHostRoom{padding:14px 38px; font-size:17px; font-weight:700; letter-spacing:.2em; border-radius:12px;}
   .room-list{
     width:100%; max-width:620px; margin:0 auto;
     display:flex; flex-direction:column; gap:12px;
@@ -2095,20 +2192,20 @@
   .room{display:flex; align-items:center; gap:16px; padding:18px 20px;}
   .room-main{flex:1; min-width:0; text-align:left;}
   .room-vision{
-    font-size:13px; letter-spacing:.18em; text-transform:uppercase;
+    font-size:17px; letter-spacing:.18em; text-transform:uppercase;
     font-weight:650; color:var(--gold-soft);
   }
-  .room-meta{margin-top:6px; font-size:12.5px; color:var(--muted); line-height:1.5;}
-  .room-play{flex:none; padding:10px 26px; font-size:12px; letter-spacing:.16em; font-weight:700;}
+  .room-meta{margin-top:6px; font-size:16px; color:var(--muted); line-height:1.5;}
+  .room-play{flex:none; padding:10px 26px; font-size:15.5px; letter-spacing:.16em; font-weight:700;}
   .room-empty{
     text-align:center; padding:30px 20px; color:var(--muted);
-    font-size:13px; line-height:1.7;
+    font-size:17px; line-height:1.7;
   }
   .room-mine{border-color:rgba(217,164,65,.45);}
   .room-mine .room-play{opacity:.5;}
   .room-note{
     max-width:620px; margin:0 auto 12px; text-align:center;
-    font-size:11.5px; letter-spacing:.14em; text-transform:uppercase;
+    font-size:15px; letter-spacing:.14em; text-transform:uppercase;
     font-weight:650; color:var(--danger); min-height:14px;
   }
 
@@ -2121,8 +2218,8 @@
   .log{
     height:min(48vh,380px); overflow-y:auto; padding:14px 16px; border-radius:10px;
     background:var(--well); border:1px solid transparent;
-    font-family:ui-monospace,SFMono-Regular,Menlo,monospace;
-    font-size:13.5px; line-height:1.75;
+    font-family:var(--font);
+    font-size:17.5px; line-height:1.75;
   }
   .log::-webkit-scrollbar{width:8px;}
   .log::-webkit-scrollbar-thumb{background:#2e3340; border-radius:4px;}
@@ -2135,8 +2232,8 @@
 
   .entry{display:flex; gap:10px; margin-top:14px;}
   .entry input{
-    flex:1; min-width:0; font-size:16px; letter-spacing:.08em;
-    font-family:ui-monospace,SFMono-Regular,Menlo,monospace;
+    flex:1; min-width:0; font-size:20.5px; letter-spacing:.08em;
+    font-family:var(--font);
     padding:14px 16px; border-radius:10px;
     background:var(--well); border:1px solid var(--line); color:var(--text);
     box-shadow:inset 0 1px 3px rgba(0,0,0,.45);
@@ -2151,13 +2248,13 @@
   .local-entry:first-child{margin-top:14px;}
   .entry-tag{
     flex:none; width:56px; align-self:center;
-    font-size:10px; letter-spacing:.18em; font-weight:700; color:var(--muted);
+    font-size:12.5px; letter-spacing:.18em; font-weight:700; color:var(--muted);
   }
   .local-entry[data-side="w"] .entry-tag{color:var(--gold-soft);}
   .local-entry input:disabled{opacity:.35;}
 
-  .entry-hint{margin:12px 2px 0; font-size:11.5px; color:var(--muted); line-height:1.6;}
-  .entry-hint b{color:var(--gold-soft); font-weight:600; font-family:ui-monospace,Menlo,monospace;}
+  .entry-hint{margin:12px 2px 0; font-size:15px; color:var(--muted); line-height:1.6;}
+  .entry-hint b{color:var(--gold-soft); font-weight:600; font-family:var(--font);}
 
 
   .setup-opts{
@@ -2168,11 +2265,11 @@
   /* ten strength buttons and six clocks each need a full line to themselves */
   #optTime, #optOpponent{flex-basis:100%; justify-content:center;}
   .seg{flex-wrap:wrap; justify-content:center;}
-  .opt-group label{font-size:10.5px; letter-spacing:.22em; text-transform:uppercase; color:var(--muted);}
+  .opt-group label{font-size:13px; letter-spacing:.22em; text-transform:uppercase; color:var(--muted);}
 
   /* anything left unanswered when Start Play is pressed */
   .please{
-    display:none; font-size:10px; letter-spacing:.16em; text-transform:uppercase;
+    display:none; font-size:12.5px; letter-spacing:.16em; text-transform:uppercase;
     font-weight:650; color:var(--danger); white-space:nowrap;
   }
   /* every option in here is asked for on the box, so the rows inside stay untouched */
@@ -2304,8 +2401,8 @@
   }
   .rank-tier{
     position:relative; margin-top:6px; padding-top:20px;
-    font-family:Georgia,serif;
-    font-size:clamp(19px,3.4vw,27px); letter-spacing:.24em;
+    font-family:var(--font);
+    font-size:clamp(24.5px,4.37vw,35px); letter-spacing:.24em;
     text-transform:uppercase; color:var(--tint-lit);
   }
   /* The line the crest stands on: short, tapered, in the crest's own metal.
@@ -2320,12 +2417,12 @@
   /* Struck out of the same metal, top-lit like everything else here. */
   .rank-elo{
     margin-top:12px; line-height:1; font-weight:600;
-    font-size:clamp(34px,6vw,50px); font-variant-numeric:tabular-nums;
+    font-size:clamp(44px,7.7vw,64px); font-variant-numeric:tabular-nums;
     background:linear-gradient(180deg,#ffffff 0%, var(--tint-lit) 52%, var(--tint) 100%);
     -webkit-background-clip:text; background-clip:text; color:transparent;
   }
   .rank-elo-cap{
-    margin-top:9px; font-size:10.5px; letter-spacing:.28em;
+    margin-top:9px; font-size:13px; letter-spacing:.28em;
     text-transform:uppercase; color:var(--muted);
   }
 
@@ -2347,7 +2444,7 @@
   }
   .gauge-ends{
     display:flex; justify-content:space-between; gap:10px; margin-top:9px;
-    font-size:10.5px; letter-spacing:.18em; color:var(--muted);
+    font-size:13px; letter-spacing:.18em; color:var(--muted);
     font-variant-numeric:tabular-nums;
   }
 
@@ -2355,7 +2452,7 @@
      game it stands for, so what you chose is readable without opening it. */
   .rank-pick{
     width:100%; margin-top:28px; padding:17px 18px; border-radius:var(--r-lg);
-    font-size:12.5px; letter-spacing:.18em; text-transform:uppercase;
+    font-size:16px; letter-spacing:.18em; text-transform:uppercase;
   }
   /* Answered, so it wears the crest's metal rather than the site's gold: on
      this one page the tint is what "that is settled" looks like, which leaves
@@ -2375,7 +2472,7 @@
      it. */
   .rank-start{
     width:100%; margin-top:12px; padding:17px 0; border-radius:var(--r-lg);
-    font-size:13px; letter-spacing:.2em;
+    font-size:17px; letter-spacing:.2em;
   }
   /* Dark until both questions have answers, exactly as Start Play is beside
      the board: a button you cannot use should not look like one you can. */
@@ -2384,23 +2481,150 @@
     border-color:var(--ctl-line); color:#5f6472; box-shadow:none;
   }
   .rank-start.dim:hover{filter:none; transform:none; box-shadow:none;}
-  .rank-note{margin:16px 0 0; font-size:11.5px; color:var(--muted); line-height:1.6;}
+  .rank-note{margin:16px 0 0; font-size:15px; color:var(--muted); line-height:1.6;}
 
   /* the box those two questions are asked in — the one modal that reads as a
      form rather than an announcement, so it is aligned left */
   .rank-modal{max-width:420px; text-align:left;}
   .rank-field + .rank-field{margin-top:22px;}
   .rank-label{
-    margin-bottom:10px; font-size:11px; letter-spacing:.24em;
+    margin-bottom:10px; font-size:14.5px; letter-spacing:.24em;
     text-transform:uppercase; color:var(--muted);
   }
   .rank-opts{display:flex; gap:8px;}
   .rank-opts.col{flex-direction:column;}
   .rank-opts.col button{text-align:left; padding:12px 14px;}
   .rank-opts.row button{flex:1; text-align:center; padding:12px 6px;}
-  .rank-opts button{font-size:12.5px; letter-spacing:.08em;}
+  .rank-opts button{font-size:16px; letter-spacing:.08em;}
   .rank-opts button.active{
     border-color:var(--gold); color:var(--gold-soft); background:rgba(217,164,65,.12);
+  }
+
+  /* Ranked alone: the crest and controls share a grid directly on the sky.
+     The outer panel is intentionally unpainted; its transparent border keeps
+     the established positions unchanged. Grid areas reorder existing children
+     without new markup, assets or queue behavior. Shared badge files stay
+     untouched because other screens use them too. */
+  #screen-ranked::before, #screen-ranked::after{content:none;}
+  #screen-ranked .ranked{
+    position:relative; isolation:isolate;
+    display:grid;
+    grid-template-columns:minmax(0,1.12fr) minmax(0,1fr);
+    grid-template-areas:"badge tier" "badge elo" "badge cap" "badge gauge" "badge pick" "badge start" "badge note";
+    column-gap:48px; row-gap:0;
+    width:100%; max-width:1040px; min-height:550px;
+    margin:clamp(18px,5vh,56px) auto 36px;
+    padding:44px 42px 38px 24px;
+    align-items:center; justify-content:normal; text-align:left;
+    /* Keep the layout footprint while letting the existing sky show through. */
+    border:1px solid transparent; border-radius:12px;
+    background:transparent;
+    box-shadow:none;
+  }
+  #screen-ranked .ranked::before{
+    content:""; position:absolute; pointer-events:none;
+    left:49%; top:32px; bottom:32px; width:1px;
+    background:linear-gradient(transparent,rgba(166,184,208,.20),transparent);
+  }
+  /* Light follows the badge's grid area on desktop and mobile. It is paint,
+     not another panel, and cannot intercept a button or change the layout. */
+  #screen-ranked .ranked::after{
+    content:"";position:absolute;grid-area:badge;inset:0;z-index:-1;pointer-events:none;
+    background:radial-gradient(ellipse at 50% 50%,var(--tint-glow) 0%,color-mix(in srgb,var(--tint) 16%,transparent) 35%,transparent 70%);
+    filter:blur(14px);
+  }
+  #screen-ranked .rank-badge{
+    grid-area:badge; justify-self:center;
+    width:100%; height:auto; aspect-ratio:1.25; max-width:100%; object-fit:cover;
+    filter:drop-shadow(0 15px 18px rgba(0,0,0,.65)) drop-shadow(0 0 24px color-mix(in srgb,var(--tint) 32%,transparent));
+  }
+  #screen-ranked .rank-tier{
+    grid-area:tier; margin:0; padding:0;
+    color:var(--tint-lit); font-size:clamp(28px,3.6vw,38px); letter-spacing:.20em;
+  }
+  #screen-ranked .rank-tier::before{content:none;}
+  #screen-ranked .rank-elo{
+    grid-area:elo; margin:12px 0 0; font-size:clamp(68px,8.5vw,96px);
+    font-weight:400; color:#eeeae2; background:none;
+    -webkit-text-fill-color:currentColor;
+  }
+  #screen-ranked .rank-elo-cap{
+    grid-area:cap; margin-top:7px; color:var(--tint-lit); letter-spacing:.32em;
+    font-family:system-ui,-apple-system,"Segoe UI",sans-serif;
+    font-size:13px; font-weight:500; line-height:19px;
+    text-shadow:0 0 14px var(--tint-glow);
+  }
+  #screen-ranked .rank-gauge{grid-area:gauge; margin-top:26px;}
+  /* The track is quiet machined metal; only earned progress catches light.
+     In particular, a rating at its tier floor must still show zero fill. */
+  #screen-ranked .gauge-track{
+    height:16px; border:0; border-radius:8px;
+    background:linear-gradient(180deg,#090d14 0%,#1c2633 48%,#303c4b 100%);
+    box-shadow:0 1px 0 rgba(191,211,236,.13),inset 0 1px 2px rgba(0,0,0,.75);
+  }
+  #screen-ranked .gauge-fill{
+    border-radius:8px;
+    background:linear-gradient(90deg,var(--tint),var(--tint-lit));
+    box-shadow:inset 0 1px 0 rgba(255,255,255,.42),0 0 10px var(--tint-glow);
+  }
+  #screen-ranked .gauge-ends{
+    color:#a8b5c5; letter-spacing:.08em; margin-top:10px;
+    font-family:system-ui,-apple-system,"Segoe UI",sans-serif;
+    font-size:14px;font-weight:500;line-height:20px;
+    font-variant-numeric:tabular-nums;
+  }
+  #screen-ranked #rankFloor{color:var(--tint-lit);}
+  #screen-ranked #rankCeil{color:#a8b5c5;}
+  #screen-ranked .rank-pick{
+    grid-area:pick; margin-top:30px; padding:19px 16px;
+    border-radius:6px; border-color:#38414d;
+    background:linear-gradient(rgba(12,19,29,.40),rgba(7,12,20,.72)),url("assets/moon.jpg?v=1") center 44% / cover; color:#e2e6ec;
+    font-size:20px; letter-spacing:.10em; box-shadow:inset 0 1px 0 rgba(255,255,255,.035);
+  }
+  #screen-ranked .rank-pick:hover{border-color:var(--tint);}
+  #screen-ranked .rank-pick.set{border-color:var(--tint);color:var(--tint-lit);background:linear-gradient(rgba(12,19,29,.32),rgba(7,12,20,.65)),url("assets/moon.jpg?v=1") center 44% / cover;}
+  #screen-ranked .rank-start{
+    grid-area:start; margin-top:10px; padding:19px 16px;
+    border-radius:6px; font-size:21px; letter-spacing:.16em;
+  }
+  /* Excluding searching is essential: its longhand background and animation
+     continue to be owned by #btnRankStart.searching below. */
+  #screen-ranked .rank-start:not(.dim):not(.searching){
+    background:linear-gradient(rgba(102,75,31,.28),rgba(18,16,14,.65)),url("assets/moon.jpg?v=1") center 72% / cover;color:#f5e5c3;border-color:#c5a266;
+    box-shadow:inset 0 1px 0 rgba(255,244,218,.3),0 4px 14px rgba(0,0,0,.24);
+  }
+  #screen-ranked .rank-start.dim{
+    background:linear-gradient(rgba(10,15,24,.58),rgba(5,9,16,.79)),url("assets/moon.jpg?v=1") center 72% / cover;border-color:#38414e;color:#929aa8;
+  }
+  #screen-ranked .rank-note{grid-area:note;margin-top:18px;font-size:16px;color:#a2abb8;line-height:1.55;letter-spacing:.025em;}
+  #screen-ranked .rank-note:empty{margin-top:0;}
+  #rankSetOverlay .rank-modal{
+    max-width:500px; padding:34px; max-height:calc(100dvh - 40px); overflow-y:auto;
+    background:linear-gradient(150deg,rgba(12,18,28,.58),rgba(7,12,21,.83)),url("assets/moon.jpg?v=1") center / cover;
+    border-color:#657082;
+    box-shadow:0 24px 70px rgba(0,0,0,.7),inset 0 1px 0 rgba(255,255,255,.06);
+  }
+  #rankSetOverlay .rank-label{color:#e0e4eb;font-size:17px;}
+  #rankSetOverlay .rank-opts button{font-size:19px;}
+  #rankSetOverlay .rank-opts.col button{padding:15px 16px;}
+  #rankSetOverlay .rank-opts.row button{padding:15px 8px;}
+  #rankSetOverlay .modal-x{width:36px;height:36px;font-size:24px;}
+  #rankSetOverlay .rank-opts button{background:rgba(8,14,23,.82);border-color:#4b586a;border-radius:6px;color:#cbd1da;}
+  #rankSetOverlay .rank-opts button.active{background:#2d281e;border-color:#c5a367;color:#efd6a4;}
+  @media(max-width:780px){
+    #screen-ranked .ranked{
+      grid-template-columns:minmax(0,1fr);
+      grid-template-areas:"badge" "tier" "elo" "cap" "gauge" "pick" "start" "note";
+      max-width:460px; min-height:0; margin:12px auto 28px; padding:16px 14px 28px;
+      text-align:center;
+    }
+    #screen-ranked .ranked::before{content:none;}
+    #screen-ranked .rank-badge{height:auto;max-width:380px;}
+    #screen-ranked .rank-tier{margin-top:4px;font-size:32px;}
+    #screen-ranked .rank-elo{font-size:72px;margin-top:10px;}
+    #screen-ranked .rank-gauge{margin-top:22px;}
+    #screen-ranked .rank-pick{margin-top:24px;}
+    #rankSetOverlay .rank-modal{padding:30px 20px 24px;}
   }
 
   /* ---------- settings screen ---------- */
@@ -2408,11 +2632,11 @@
   .set-row{display:flex; align-items:center; gap:16px; padding:20px 22px;}
   .set-row .txt{flex:1; min-width:0;}
   .set-row strong{
-    display:block; font-size:12px; letter-spacing:.22em; text-transform:uppercase; font-weight:650;
+    display:block; font-size:15.5px; letter-spacing:.22em; text-transform:uppercase; font-weight:650;
   }
-  .set-row small{display:block; margin-top:7px; color:var(--muted); font-size:12.5px; line-height:1.5;}
+  .set-row small{display:block; margin-top:7px; color:var(--muted); font-size:16px; line-height:1.5;}
   .set-state{
-    font-size:10.5px; letter-spacing:.2em; font-weight:650;
+    font-size:13px; letter-spacing:.2em; font-weight:650;
     color:var(--muted); width:30px; text-align:right;
   }
   .set-state.on{color:var(--gold-soft);}
@@ -2441,11 +2665,11 @@
   }
   .setup-back{position:absolute; top:0; left:0; z-index:2;}
   .start-btn{
-    padding:15px 46px; font-size:13px; font-weight:700;
+    padding:15px 46px; font-size:17px; font-weight:700;
     letter-spacing:.24em; text-indent:.24em; border-radius:var(--r-lg);
   }
   .lock-note{
-    margin:16px 0 0; text-align:center; font-size:11.5px; letter-spacing:.16em;
+    margin:16px 0 0; text-align:center; font-size:15px; letter-spacing:.16em;
     text-transform:uppercase; color:#6b7080;
   }
   .setup-foot{margin-top:18px; text-align:center; display:flex; gap:10px; justify-content:center;}
@@ -2538,7 +2762,7 @@
   }
   .match-note{
     display:none; margin:14px auto 0; max-width:420px;
-    font-size:11.5px; line-height:1.6; letter-spacing:.04em; color:var(--muted);
+    font-size:15px; line-height:1.6; letter-spacing:.04em; color:var(--muted);
   }
   .match-note b{color:var(--gold-soft); font-weight:600;}
 
@@ -2549,14 +2773,14 @@
   }
   .chips{display:flex; gap:8px; align-items:center; flex-wrap:wrap;}
   .brand{
-    font-family:Georgia,serif; font-size:clamp(15px,2.4vw,20px); letter-spacing:.24em;
+    font-family:var(--font); font-size:clamp(19px,3.08vw,26px); letter-spacing:.24em;
     color:var(--gold-soft); white-space:nowrap;
   }
   /* The two chips over the side column say what game this is. They are labels,
      not controls, so they are the one pill shape on the page and they never
      take the button family's lip or lift — that difference is the point. */
   .vision-chip{
-    font-size:10px; letter-spacing:.2em; text-transform:uppercase; font-weight:650;
+    font-size:12.5px; letter-spacing:.2em; text-transform:uppercase; font-weight:650;
     color:var(--gold-soft); border:1px solid rgba(217,164,65,.32);
     padding:5px 12px; border-radius:var(--r-pill);
     background:linear-gradient(180deg,rgba(217,164,65,.16),rgba(217,164,65,.05));
@@ -2569,7 +2793,7 @@
 
   .row{display:flex; gap:8px; flex-wrap:wrap;}
   .seg{display:flex; gap:6px;}
-  .seg button{flex:1; padding:8px 10px; font-size:12px; white-space:nowrap;}
+  .seg button{flex:1; padding:8px 10px; font-size:15.5px; white-space:nowrap;}
   .seg button.active{
     border-color:var(--gold); color:var(--gold-soft);
     background:linear-gradient(180deg,rgba(217,164,65,.22),rgba(217,164,65,.05));
@@ -2588,18 +2812,18 @@
   .tray{min-height:26px; font-size:20px; line-height:1.1; letter-spacing:1px; color:#cdc6b8;}
   .tray .b{color:#7e8290;}
   .adv{
-    font-size:11px; letter-spacing:.06em; font-weight:650; color:var(--good);
+    font-size:14.5px; letter-spacing:.06em; font-weight:650; color:var(--good);
     font-variant-numeric:tabular-nums;
   }
 
   .moves{
-    max-height:230px; overflow-y:auto; font-size:13px;
+    max-height:230px; overflow-y:auto; font-size:17px;
     font-variant-numeric:tabular-nums;
     display:grid; grid-template-columns:32px 1fr 1fr; gap:1px 6px; align-content:start;
     padding:9px 10px; border-radius:var(--r-sm);
     background:var(--well); box-shadow:inset 0 1px 3px rgba(0,0,0,.45);
   }
-  .moves .n{color:#6b7080; font-size:11.5px; letter-spacing:.04em; padding-top:4px;}
+  .moves .n{color:#6b7080; font-size:15px; letter-spacing:.04em; padding-top:4px;}
   .moves .m{padding:3px 7px; border-radius:var(--r-xs);}
   .moves .m.cur{
     background:rgba(217,164,65,.20); color:var(--gold-soft);
@@ -2608,7 +2832,7 @@
   .moves .m.pick{cursor:pointer;}
   .moves .m.pick:hover{background:rgba(255,255,255,.07);}
   .moves .m.pick.cur:hover{background:rgba(217,164,65,.28);}
-  .moves .empty{grid-column:1/-1; color:var(--muted); font-size:12.5px;}
+  .moves .empty{grid-column:1/-1; color:var(--muted); font-size:16px;}
 
   /* One scrollbar for everything in the column that scrolls. Three of them
      used to be spelled out separately, and the puzzle ladder had none. */
@@ -2636,7 +2860,7 @@
   .chat-log{
     max-height:190px; overflow-y:auto;
     display:flex; flex-direction:column; gap:7px;
-    font-size:13px; line-height:1.5;
+    font-size:17px; line-height:1.5;
     padding:10px; border-radius:var(--r-sm);
     background:var(--well); box-shadow:inset 0 1px 3px rgba(0,0,0,.45);
   }
@@ -2650,15 +2874,15 @@
     background:rgba(217,164,65,.14); border-color:transparent;
   }
   .chat-who{
-    display:block; font-size:10px; letter-spacing:.16em; text-transform:uppercase;
+    display:block; font-size:12.5px; letter-spacing:.16em; text-transform:uppercase;
     color:var(--muted); font-weight:600; margin-bottom:2px;
   }
   .chat-msg.mine .chat-who{color:var(--gold-soft);}
-  .chat-empty{color:var(--muted); font-size:12.5px;}
-  .chat-sys{align-self:center; color:var(--muted); font-size:11.5px; font-style:italic;}
+  .chat-empty{color:var(--muted); font-size:16px;}
+  .chat-sys{align-self:center; color:var(--muted); font-size:15px; font-style:italic;}
   .chat-entry{display:flex; gap:8px; margin-top:12px;}
   .chat-entry input{
-    flex:1; min-width:0; font:inherit; font-size:13px;
+    flex:1; min-width:0; font:inherit; font-size:17px;
     padding:10px 12px; border-radius:var(--r-md);
     background:#0e1016; border:1px solid var(--line); color:var(--text);
     box-shadow:inset 0 1px 3px rgba(0,0,0,.45);
@@ -2676,15 +2900,15 @@
   }
   .rules-head:hover{transform:none; border-color:transparent; background:transparent;}
   .rules-title{
-    font-size:11px; letter-spacing:.24em; text-transform:uppercase;
+    font-size:15px; letter-spacing:.24em; text-transform:uppercase;
     color:var(--muted); font-weight:600;
   }
   .rules-head:hover .rules-title{color:var(--text);}
   .rules-cap{
-    font-size:10px; letter-spacing:.2em; text-transform:uppercase;
+    font-size:12.5px; letter-spacing:.2em; text-transform:uppercase;
     color:var(--gold); opacity:.85; white-space:nowrap;
   }
-  .rules-cap::after{content:" ▾"; font-size:9px;}
+  .rules-cap::after{content:" ▾"; font-size:11.5px;}
   .rules-card.open .rules-cap::after{content:" ▴";}
   .rules-head:hover .rules-cap{opacity:1;}
 
@@ -2697,10 +2921,10 @@
 
   .rules-table{
     width:100%; border-collapse:collapse; margin-top:14px;
-    font-size:11px; line-height:1.4;
+    font-size:14.5px; line-height:1.4;
   }
   .rules-table th{
-    text-align:left; font-size:9px; letter-spacing:.16em; text-transform:uppercase;
+    text-align:left; font-size:11.5px; letter-spacing:.16em; text-transform:uppercase;
     color:#6b7080; font-weight:600; padding:0 8px 7px 0;
     border-bottom:1px solid var(--line);
   }
@@ -2711,7 +2935,7 @@
   .rules-table tr:last-child td{border-bottom:0;}
   .rules-table td:first-child,
   .rules-table td:last-child{
-    font-family:ui-monospace,SFMono-Regular,Menlo,monospace;
+    font-family:var(--font);
     white-space:nowrap;
   }
   .rules-table td:first-child{color:var(--gold-soft);}
@@ -2727,8 +2951,8 @@
      two read as separate things rather than one crowded line. Only the word
      moves; the mark stays where it is on every other screen. */
   .social-title, .pr-title{
-    margin:0 0 0 clamp(12px,1.6vw,26px); font-family:Georgia,serif; font-weight:400;
-    font-size:clamp(26px,4.4vw,42px); letter-spacing:.12em; color:var(--gold-soft);
+    margin:0 0 0 clamp(12px,1.6vw,26px); font-family:var(--font); font-weight:400;
+    font-size:clamp(35px,5.89vw,56px); letter-spacing:.12em; color:var(--gold-soft);
     white-space:nowrap;
   }
   .social-page{
@@ -2737,6 +2961,15 @@
     margin-top:clamp(14px,2.4vh,26px);
   }
   @media (max-width:760px){ .social-page{grid-template-columns:minmax(0,1fr);} }
+
+  /* The two Social work areas use the supplied lunar material: search and
+     friends on the left, link actions on the right. The dark wash keeps every
+     existing row and control readable without changing their layout. */
+  #screen-social .social-main,
+  #screen-social .social-aside{
+    background:linear-gradient(150deg,rgba(12,18,28,.64),rgba(7,12,21,.88)),
+      url("assets/moon.jpg?v=1") center / cover no-repeat;
+  }
 
   .social-main{
     padding:20px 22px 22px;
@@ -2748,7 +2981,7 @@
   .social-search{flex:1; min-width:0;}
   .social-label{
     display:block; margin-bottom:7px;
-    font-size:10.5px; letter-spacing:.22em; text-transform:uppercase; color:var(--muted);
+    font-size:13px; letter-spacing:.22em; text-transform:uppercase; color:var(--muted);
   }
   .social-field{
     display:flex; align-items:center; gap:9px;
@@ -2761,11 +2994,11 @@
   .social-field input{
     flex:1; min-width:0; padding:11px 0;
     background:transparent; border:0; outline:none;
-    color:var(--text); font:inherit; font-size:13.5px;
+    color:var(--text); font:inherit; font-size:17.5px;
   }
   .search-x{
     flex:none; width:24px; height:24px; padding:0; border-radius:6px;
-    background:transparent; border:0; color:var(--muted); font-size:17px; line-height:1;
+    background:transparent; border:0; color:var(--muted); font-size:21.5px; line-height:1;
   }
   .search-x:hover{color:var(--text); transform:none;}
 
@@ -2781,11 +3014,11 @@
   .mail-count{
     position:absolute; top:-6px; right:-6px; min-width:18px; height:18px; padding:0 5px;
     border-radius:999px; background:var(--danger); color:#fff;
-    font-size:11px; font-weight:700; line-height:18px; text-align:center;
+    font-size:14.5px; font-weight:700; line-height:18px; text-align:center;
   }
 
   .social-caption{
-    font-size:10.5px; letter-spacing:.22em; text-transform:uppercase; color:var(--muted);
+    font-size:13px; letter-spacing:.22em; text-transform:uppercase; color:var(--muted);
   }
   .social-rows{
     flex:1; display:flex; flex-direction:column; gap:9px;
@@ -2802,33 +3035,33 @@
     flex:none; width:38px; height:38px; border-radius:50%;
     display:flex; align-items:center; justify-content:center; overflow:hidden;
     background:linear-gradient(160deg,#2c3140,#1b1e26); border:1px solid var(--line);
-    color:var(--gold-soft); font-size:15px; font-weight:650; letter-spacing:.04em;
+    color:var(--gold-soft); font-size:19px; font-weight:650; letter-spacing:.04em;
   }
   .social-face img{width:100%; height:100%; object-fit:cover; display:block;}
   .social-who{flex:1; min-width:0;}
   .social-name{
-    font-size:14px; font-weight:600; letter-spacing:.03em; color:var(--text);
+    font-size:18px; font-weight:600; letter-spacing:.03em; color:var(--text);
     overflow:hidden; text-overflow:ellipsis; white-space:nowrap;
   }
-  .social-meta{margin-top:2px; font-size:11.5px; color:var(--muted); letter-spacing:.05em;}
+  .social-meta{margin-top:2px; font-size:15px; color:var(--muted); letter-spacing:.05em;}
 
   /* add-a-friend: a person with a plus, and nothing else to read */
   .add-btn{
     flex:none; display:flex; align-items:center; gap:7px;
     padding:8px 12px; border-radius:9px;
-    font-size:11.5px; letter-spacing:.1em; font-weight:650;
+    font-size:15px; letter-spacing:.1em; font-weight:650;
     color:var(--gold-soft); background:rgba(217,164,65,.10);
     border:1px solid rgba(217,164,65,.34);
   }
   .add-btn svg{width:17px; height:17px; flex:none;}
   .add-btn:hover{background:rgba(217,164,65,.18); border-color:var(--gold); transform:none;}
   .add-btn:disabled{color:var(--muted); background:transparent; border-color:var(--line);}
-  .row-note{flex:none; font-size:11.5px; letter-spacing:.1em; color:var(--muted);}
+  .row-note{flex:none; font-size:15px; letter-spacing:.1em; color:var(--muted);}
 
   .dots-btn{
     flex:none; width:34px; height:34px; padding:0; border-radius:8px;
     background:transparent; border:1px solid transparent; color:var(--muted);
-    font-size:19px; line-height:1;
+    font-size:24.5px; line-height:1;
   }
   .dots-btn:hover, .dots-btn.open{color:var(--gold-soft); border-color:var(--line); transform:none;}
 
@@ -2847,7 +3080,7 @@
   .friend-menu.up{top:auto; bottom:calc(100% - 6px);}
   .friend-menu button{
     display:block; width:100%; text-align:left; padding:8px 11px; border-radius:7px;
-    background:transparent; border:0; color:#d8dbe4; font-size:12.5px; letter-spacing:.03em;
+    background:transparent; border:0; color:#d8dbe4; font-size:16px; letter-spacing:.03em;
   }
   .friend-menu button:hover{background:rgba(217,164,65,.16); color:var(--gold-soft); transform:none;}
   .friend-menu button.soon{color:#6b7080;}
@@ -2857,7 +3090,7 @@
 
   .social-empty{
     padding:30px 18px; text-align:center; color:var(--muted);
-    font-size:13px; line-height:1.65;
+    font-size:17px; line-height:1.65;
     white-space:pre-line;                    /* the empty states are two lines */
   }
   .social-empty.bad{color:#e7908a;}
@@ -2867,7 +3100,7 @@
   }
   .social-link{
     width:100%; padding:12px 10px; border-radius:10px;
-    font-size:12px; letter-spacing:.12em; font-weight:650;
+    font-size:15.5px; letter-spacing:.12em; font-weight:650;
   }
   /* Quiet, the way the unbuilt items in the home nav are quiet — it should
      read as a button that is not ready, not as one that is broken. */
@@ -2875,7 +3108,7 @@
   .social-link.soon:hover{border-color:var(--line); color:#6b7080; transform:none;}
   .social-soon{
     margin:2px 0 0; text-align:center;
-    font-size:10.5px; letter-spacing:.18em; text-transform:uppercase; color:#5c6070;
+    font-size:13px; letter-spacing:.18em; text-transform:uppercase; color:#5c6070;
   }
 
   /* the notifications box: the same rows, in a modal */
@@ -2891,65 +3124,103 @@
   /* "wants to be friends" is one line or it is nothing */
   .note-row .social-meta{white-space:nowrap;}
   .yn{flex:none; display:flex; gap:6px;}
-  .yn button{padding:7px 11px; font-size:12px; border-radius:8px;}
+  .yn button{padding:7px 11px; font-size:15.5px; border-radius:8px;}
   .yn .yes{color:#9fe0a4; border-color:rgba(111,191,115,.4);}
   .yn .yes:hover{color:#fff; background:rgba(111,191,115,.18); border-color:var(--good);}
   .yn .no{color:#e7908a; border-color:rgba(224,90,77,.4);}
   .yn .no:hover{color:#fff; background:rgba(224,90,77,.16); border-color:var(--danger);}
 
-  /* ---------- the leaderboard ----------
-     The home page is a header and a sky, and this is the one thing standing in
-     it, so it is furniture rather than a box laid over the page: parked
-     against the right edge of the row and centred in whatever is left of the
-     window under the header.
+  /* ---------- the leaderboards ----------
+     The home page is a header and a sky, and this is the one thing standing
+     in it. There used to be a single ladder here, parked against the right
+     edge of the row at reading size. There are four now — one per vision,
+     because a rating earned with the board in front of you says nothing about
+     what you can do without it — and four panels at that size would be a page
+     and a half of scrolling. So they are small, and they stand in one column
+     under the account cluster at the right-hand end of the header, beneath a
+     single "Leaderboard" heading: each panel has rows a third the old height
+     and a list scrolling inside a fixed height of its own, so the column is a
+     rail down the right of the page rather than the page. The panel's title
+     and caption sit above its scrolling list rather than inside it, which is
+     what keeps them in view while the tail is read.
 
-     The panel itself has no ground of its own — no plate, no border, no blur.
-     The sky is the background, and the ten rows are the only things drawn on
-     it, each with just enough shading of its own to keep a name readable over
-     a passing star.
+     The column is pinned to the top of the body rather than centred in the
+     window: it hangs from the header the way the account cluster does, and a
+     column that floated to the middle of a tall window would look unmoored.
+
+     The panels have no ground of their own — no plate, no border, no blur.
+     The sky is the background, and the rows are the only things drawn on it,
+     each with just enough shading of its own to keep a name readable over a
+     passing star.
 
      The badge art is here rather than the player's avatar, which costs
      something worth knowing about: the ranked screen fetches exactly one of
-     these files because only one is ever on it, and this list can put up to
-     seven of them on screen at a couple of hundred kilobytes each. They are
+     these files because only one is ever on it, and these lists can put every
+     one of them on screen at a couple of hundred kilobytes each. They are
      fetched once per tier, not once per row, and the server serves the assets
      with a week of cache — but if this page ever needs to be light on a cold
      load, small copies of the badges are the first thing to make. */
   .home-body{
-    display:flex; align-items:center; justify-content:flex-end;
-    min-height:calc(100vh - var(--logo-box) - 150px);
-    padding:clamp(10px,3vh,34px) 0 clamp(20px,5vh,54px);
+    display:flex; align-items:flex-start; justify-content:space-between;
+    gap:clamp(18px,3vw,56px);
+    padding:clamp(6px,1.6vh,18px) 0 clamp(20px,5vh,54px);
+    /* Tall enough that the live games can stand at the FOOT of the page
+       while the ladders hang from its head: the body's own padding and the
+       header are taken off the window's height, and the flex row fills what
+       is left. */
+    min-height:calc(100vh - var(--logo-box) - 130px);
+  }
+  .lb-stack{
+    width:min(290px,100%);
+    display:flex; flex-direction:column; gap:14px;
+  }
+  /* The one heading over the four: the section's name, at the size the single
+     ladder's title used to be, so the column reads as one thing with four
+     parts rather than four things. */
+  .lb-title{
+    margin:0 0 2px; text-align:left;
+    font-family:var(--font); font-weight:400;
+    font-size:clamp(26px,2.6vw,32px); letter-spacing:.1em; color:var(--gold-soft);
   }
   .lb-panel{
-    width:min(500px,100%);
-    padding:clamp(8px,1.6vw,16px) 0;
+    min-width:0;
+    padding:0;
     background:transparent; border:0; box-shadow:none;
   }
   /* Ranged left, with the rows: the heading lines up with the place numbers
      under it rather than floating over the middle of them. */
   .lb-head{
-    margin:0 0 4px; text-align:left;
-    font-family:Georgia,serif; font-weight:400;
-    font-size:clamp(26px,3.2vw,34px); letter-spacing:.1em; color:var(--gold-soft);
+    margin:0 0 1px; text-align:left;
+    font-family:var(--font); font-weight:400;
+    font-size:clamp(16px,1.55vw,20px); letter-spacing:.09em; color:var(--gold-soft);
+    white-space:nowrap; overflow:hidden; text-overflow:ellipsis;
   }
   .lb-cap{
-    margin:0 0 clamp(16px,2.2vh,22px); text-align:left;
-    font-size:11px; letter-spacing:.22em; text-transform:uppercase; color:var(--muted);
+    margin:0 0 6px; text-align:left;
+    font-size:9.5px; letter-spacing:.2em; text-transform:uppercase; color:var(--muted);
+    min-height:1.3em;
   }
-  /* Ten rows is the whole list and it is meant to be read at a glance, so the
-     panel grows to hold them; the cap is only there for a short window. */
-  .lb-list{display:flex; flex-direction:column; gap:9px; max-height:62vh; overflow-y:auto;}
+  /* The list is the only thing on the panel that scrolls, and it is capped
+     rather than sized to its rows: the top of a ladder is what is read at a
+     glance, and the tail is a short scroll away rather than a longer page.
+     Twenty rows at this height is about six in view. */
+  .lb-list{
+    display:flex; flex-direction:column; gap:3px;
+    max-height:clamp(150px,22vh,190px); overflow-y:auto;
+    padding-right:3px;
+    scrollbar-width:thin; scrollbar-color:rgba(217,164,65,.32) transparent;
+  }
   .lb-row{
-    display:flex; align-items:center; gap:14px;
-    padding:11px 14px; border-radius:13px;
+    display:flex; align-items:center; gap:6px;
+    padding:3px 7px; border-radius:7px;
     background:rgba(0,0,0,.28); border:1px solid transparent;
   }
   /* your own row, wherever it lands: the list is worth twice as much when you
      can find yourself in it without reading it */
   .lb-row.me{background:rgba(217,164,65,.09); border-color:rgba(217,164,65,.42);}
   .lb-place{
-    flex:none; width:28px; text-align:center;
-    font-size:16px; font-weight:700; color:var(--muted);
+    flex:none; width:16px; text-align:center;
+    font-size:11.5px; font-weight:700; color:var(--muted);
     font-variant-numeric:tabular-nums;
   }
   .lb-row.top .lb-place{color:var(--gold);}
@@ -2957,25 +3228,233 @@
      and no crop — it is set into the row the way it is set into the ranked
      screen, on nothing. */
   .lb-badge{
-    flex:none; width:46px; height:46px;
+    flex:none; width:20px; height:20px;
     display:flex; align-items:center; justify-content:center;
   }
   .lb-badge img{width:100%; height:100%; object-fit:contain; display:block;}
-  /* the same name the social page draws people with, one size up */
-  .lb-row .social-name{font-size:15.5px;}
-  .lb-row .social-meta{
-    font-size:10.5px; letter-spacing:.16em; text-transform:uppercase;
-  }
-  .lb-elo{flex:none; text-align:right;}
+  /* the same name the social page draws people with; it already clips a long
+     one with an ellipsis rather than pushing the rating off the row */
+  .lb-row .social-name{font-size:12.5px; letter-spacing:.02em;}
+  /* Right-ranged and in tabular figures, so the ratings line up down the
+     column and a four-figure Elo is as wide as the next. */
+  .lb-elo{flex:none; min-width:32px; text-align:right;}
   .lb-num{
-    font-size:19px; font-weight:650; letter-spacing:.03em; color:var(--gold-soft);
+    font-size:13px; font-weight:650; letter-spacing:.02em; color:var(--gold-soft);
     font-variant-numeric:tabular-nums;
   }
-  .lb-cap-elo{font-size:10px; letter-spacing:.2em; color:#5c6070;}
-  /* Narrow, there is no right half to sit in: it takes the width and the row
-     it is on, and stops reserving a screenful of height it cannot centre in. */
-  @media (max-width:760px){
-    .home-body{min-height:0; justify-content:center; padding-top:18px;}
+  /* ---------- the live games ----------
+     The league's four featured games, at the bottom-left of the home page:
+     one per vision, each the strongest pair at a board right now. The ladders
+     hang from the header on the right; these stand on the floor on the left,
+     which is why the stack aligns itself to the end of the row rather than to
+     its start. They are cards rather than bare rows because each is a small
+     picture — a board, or a console — and a picture wants an edge.
+
+     Each card is the game's own board a fourth time (the game, Practice and
+     the lessons each build one): the same art under the squares, the same
+     glyphs, the same .fog overlay and the same rule about what a vision may
+     show. Sighted draws everything; Board Only draws the squares and no men,
+     exactly as .board.blind does; Fog of War draws the side to move's men and
+     fogs every other square, as the game does through visibleSet(); and
+     Complete Blindfold draws no board at all — the notation IS the game
+     there, so the card shows the console instead. Nothing is revealed here
+     that the players themselves could not see. */
+  .live-stack{
+    align-self:flex-end;
+    width:min(660px,100%);
+    display:flex; flex-direction:column; gap:10px;
+  }
+  .live-title{
+    margin:0 0 2px; text-align:left;
+    font-family:var(--font); font-weight:400;
+    font-size:clamp(26px,2.6vw,32px); letter-spacing:.1em; color:var(--gold-soft);
+    display:flex; align-items:center; gap:14px;
+  }
+  .live-grid{
+    display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:12px;
+  }
+  .live-card{
+    min-width:0; padding:10px 12px 9px;
+    display:flex; flex-direction:column; gap:6px;
+    border-radius:var(--radius);
+    background:linear-gradient(180deg, var(--surf-1), var(--surf-2));
+    border:1px solid transparent;
+    box-shadow:var(--sh-3), var(--lip);
+    cursor:pointer;
+    transition:border-color .2s var(--ease), transform .14s var(--ease);
+  }
+  .live-card:hover{border-color:var(--ctl-edge); transform:translateY(-1px);}
+  .live-card:focus-visible{outline:2px solid var(--gold); outline-offset:2px;}
+  .live-head{
+    display:flex; align-items:center; justify-content:space-between; gap:8px;
+  }
+  .live-mode{
+    font-family:var(--font); font-weight:400;
+    font-size:clamp(16px,1.55vw,20px); letter-spacing:.09em; color:var(--gold-soft);
+    white-space:nowrap; overflow:hidden; text-overflow:ellipsis;
+  }
+  /* LIVE: a red dot breathing beside the word, the one thing on the page that
+     moves on its own. It goes out with the game — a finished card wears the
+     result in the same place. */
+  .live-pill{
+    flex:none; display:inline-flex; align-items:center; gap:5px;
+    padding:2px 8px; border-radius:999px;
+    font-size:10px; font-weight:700; letter-spacing:.22em; text-transform:uppercase;
+    color:#f0c775; background:rgba(0,0,0,.36); border:1px solid rgba(217,164,65,.28);
+  }
+  .live-pill::before{
+    content:""; width:6px; height:6px; border-radius:50%;
+    background:var(--danger); box-shadow:0 0 6px rgba(224,90,77,.9);
+    animation:livepulse 1.6s ease-in-out infinite;
+  }
+  .live-card.over .live-pill{color:var(--muted); border-color:rgba(150,170,215,.18);}
+  .live-card.over .live-pill::before, .live-card.waiting .live-pill::before{
+    background:var(--muted); box-shadow:none; animation:none;
+  }
+  @keyframes livepulse{0%,100%{opacity:1; transform:scale(1);} 50%{opacity:.35; transform:scale(.7);}}
+  @media (prefers-reduced-motion:reduce){ .live-pill::before{animation:none;} }
+  /* The card is compact by being wide rather than tall: the board stands on
+     the left at a fixed size and the two seats and the last moves stack
+     beside it, so four cards are two rows of a few hundred pixels rather than
+     a column of boards. The spectator view undoes this and stacks everything
+     under a large board — see .live-modal below. */
+  .live-body{
+    display:grid; grid-template-columns:150px minmax(0,1fr); gap:10px; align-items:stretch;
+  }
+  .live-side{display:flex; flex-direction:column; gap:5px; min-width:0;}
+  /* A seat: the name, the rating, the clock. The side to move is lit the way
+     the game lights its clock — from within, in gold — and the dot before the
+     name is the colour it is playing. */
+  .live-seat{
+    display:flex; flex-direction:column; gap:1px;
+    padding:4px 8px; border-radius:8px;
+    background:rgba(0,0,0,.28); border:1px solid transparent;
+    transition:border-color .2s var(--ease), background .2s var(--ease);
+  }
+  .live-who{display:flex; align-items:center; gap:6px; min-width:0;}
+  .live-nums{display:flex; align-items:baseline; justify-content:space-between; gap:8px;}
+  .live-seat.turn{border-color:rgba(217,164,65,.45); background:rgba(217,164,65,.09);}
+  .live-dot{
+    flex:none; width:9px; height:9px; border-radius:50%;
+    border:1px solid rgba(255,255,255,.35);
+  }
+  .live-seat.w .live-dot{background:#eee6d5;}
+  .live-seat.b .live-dot{background:#252d38;}
+  .live-name{
+    flex:1; min-width:0; font-size:13px; font-weight:600; letter-spacing:.02em; color:var(--text);
+    overflow:hidden; text-overflow:ellipsis; white-space:nowrap;
+  }
+  .live-elo{
+    flex:none; font-size:12.5px; font-weight:650; color:var(--gold-soft);
+    font-variant-numeric:tabular-nums;
+  }
+  .live-clock{
+    flex:none; min-width:44px; text-align:right;
+    font-family:var(--font); font-size:18px; line-height:1; letter-spacing:.06em; color:var(--muted);
+    font-variant-numeric:tabular-nums;
+  }
+  .live-seat.turn .live-clock{color:var(--text);}
+  .live-seat.low .live-clock{color:#e7908a;}
+  /* The board: the same art and the same squares as the game's, one eighth
+     the size. Container units size the glyphs off the board itself, so the
+     same markup is the small card and the large spectator view. */
+  .live-view{position:relative;}
+  .live-board{
+    position:relative; width:100%; aspect-ratio:1/1;
+    display:grid; grid-template-columns:repeat(8,1fr); grid-template-rows:repeat(8,1fr);
+    container-type:size;
+    border-radius:1px; overflow:hidden;
+    background:#081522 var(--board-art) center / 100% 100%;
+    box-shadow:0 0 0 1px #b79b64, 0 0 0 2px #423a2e, 0 0 12px rgba(0,0,0,.6);
+  }
+  .lsq{position:relative; display:flex; align-items:center; justify-content:center;}
+  .lsq.last::before{
+    content:""; position:absolute; inset:0;
+    background:rgba(242,193,78,.30); box-shadow:inset 0 0 0 1px rgba(242,193,78,.45);
+  }
+  .lsq.check::before{
+    content:""; position:absolute; inset:0;
+    background:radial-gradient(circle at 50% 50%, rgba(224,90,77,.85), rgba(224,90,77,0) 70%);
+  }
+  .lsq .fog{
+    position:absolute; inset:0; pointer-events:none;
+    background:linear-gradient(160deg, rgba(9,10,14,.86), rgba(9,10,14,.93));
+    opacity:0; transition:opacity .35s ease;
+  }
+  .lsq.hidden .fog{opacity:1;}
+  .lpc{position:relative; display:block; line-height:1; font-size:10.5cqmin; font-size:min(10.5cqmin, 64px);}
+  .lpc .pc-svg{display:block; width:.82em; height:.86em; filter:drop-shadow(0 1px 1px rgba(0,0,0,.55));}
+  /* Complete Blindfold has no board, so the card shows what the players have:
+     the moves, as written. The well is the game's own console colour. */
+  .live-console{
+    aspect-ratio:1/1; overflow:hidden; padding:7px 8px; border-radius:8px;
+    background:var(--well); box-shadow:inset 0 1px 3px rgba(0,0,0,.35);
+    display:flex; flex-direction:column;
+    font-family:"SF Mono",Menlo,Consolas,monospace; font-size:11px; line-height:1.4;
+    color:var(--text);
+  }
+  /* the tail of the game: whatever does not fit is cut at the top, not the end.
+     Its own class names throughout — .moves, .n, .m and .cur belong to the
+     game screen's notation panel, and a console that borrowed them would be
+     laid out as that panel is. */
+  .live-moves{margin-top:auto; overflow:hidden; max-height:100%; display:flex; flex-wrap:wrap; align-content:flex-end; gap:0 8px;}
+  .ln{color:var(--muted);}
+  .lm.cur-move{color:var(--gold-soft);}
+  .live-console .empty{color:var(--muted); font-family:inherit;}
+  .live-console .eyes{
+    font-size:9px; letter-spacing:.18em; text-transform:uppercase;
+    color:var(--muted); font-family:var(--font); margin-bottom:4px;
+  }
+  /* what was just played, beside every board, in the same hand as the console */
+  .live-line{
+    flex:1; min-height:1.4em; padding:0 2px;
+    font-family:"SF Mono",Menlo,Consolas,monospace; font-size:11px; line-height:1.4;
+    color:var(--muted); overflow:hidden;
+    display:flex; flex-wrap:wrap; align-content:flex-end; gap:0 7px;
+  }
+
+  .live-status{
+    display:flex; justify-content:space-between; gap:8px;
+    font-size:10.5px; letter-spacing:.18em; text-transform:uppercase; color:var(--muted);
+  }
+  .live-card.over .live-status{color:var(--gold-soft);}
+  .live-note{margin:0; font-size:12.5px; color:var(--muted); min-height:1.2em;}
+  .live-note.bad{color:#e7908a;}
+  /* The spectator view: the same card, larger, on the modal's plate, and
+     stacked the way a board is read — black's seat above it, white's below,
+     the moves in between. display:contents lifts the side column's children
+     up beside the board so `order` can arrange them. */
+  .live-modal{max-width:560px; padding:18px 18px 16px; text-align:left;}
+  .live-modal .live-card{cursor:default; box-shadow:none; background:transparent; padding:6px 0 0;}
+  .live-modal .live-card:hover{transform:none; border-color:transparent;}
+  .live-modal .live-body{display:flex; flex-direction:column; gap:8px;}
+  .live-modal .live-side{display:contents;}
+  .live-modal .live-seat{flex-direction:row; align-items:center; justify-content:space-between;}
+  .live-modal .live-seat.b{order:-1;}
+  .live-modal .live-view{order:0;}
+  .live-modal .live-line{order:1; flex:none; max-height:4.4em;}
+  .live-modal .live-seat.w{order:2;}
+  .live-modal .live-console{aspect-ratio:auto; height:min(52vh,420px); font-size:13px;}
+  .live-modal .live-name{font-size:16px;}
+  .live-modal .live-elo{font-size:14.5px;}
+  .live-modal .live-clock{font-size:22px;}
+  .live-modal .live-mode{font-size:22px;}
+  .live-modal .live-only{display:block;}
+  .live-only{
+    display:none; margin-top:8px; font-size:12.5px; color:var(--muted); letter-spacing:.06em;
+  }
+  @media (max-width:900px){
+    .home-body{flex-direction:column; align-items:stretch; min-height:0;}
+    .lb-stack{order:1; width:100%;}
+    .live-stack{order:2; align-self:stretch; width:100%;}
+  }
+  @media (max-width:560px){ .live-grid{grid-template-columns:minmax(0,1fr);} }
+  @media (max-width:380px){ .live-body{grid-template-columns:120px minmax(0,1fr);} }
+  /* Narrow, there is no right-hand end to hang from: the column takes the
+     width and stays at the top. */
+  @media (max-width:520px){
+    .home-body{padding-top:12px;}
+    .lb-stack{width:100%;}
   }
 
   /* ---------- overlays ---------- */
@@ -2998,26 +3477,26 @@
     box-shadow:0 30px 80px rgba(0,0,0,.6), var(--lip);
   }
   .modal h3{
-    margin:0 0 6px; font-family:Georgia,serif; font-weight:400;
-    font-size:30px; letter-spacing:.1em; color:var(--gold-soft);
+    margin:0 0 6px; font-family:var(--font); font-weight:400;
+    font-size:38.5px; letter-spacing:.1em; color:var(--gold-soft);
   }
-  .modal p{margin:0 0 20px; color:var(--muted); font-size:14px; line-height:1.5;}
+  .modal p{margin:0 0 20px; color:var(--muted); font-size:18px; line-height:1.5;}
   /* small dismiss in the corner of the game-over box */
   .modal-x{
     position:absolute; top:10px; right:10px;
     width:30px; height:30px; padding:0; border-radius:8px;
     display:flex; align-items:center; justify-content:center;
-    font-size:20px; line-height:1; font-weight:400;
+    font-size:26px; line-height:1; font-weight:400;
     color:var(--muted); background:transparent; border:1px solid transparent;
   }
   .modal-x:hover{color:var(--text); border-color:var(--line); transform:none;}
   .promo{display:flex; gap:10px; justify-content:center;}
   .promo button{font-size:38px; padding:6px 14px; line-height:1.1; color:#fbf6ea;}
 
-  footer{margin-top:28px; text-align:center; color:#5c6070; font-size:11.5px; letter-spacing:.12em;}
+  footer{margin-top:28px; text-align:center; color:#5c6070; font-size:15px; letter-spacing:.12em;}
   kbd{
     background:rgba(24,30,48,.75); border:1px solid var(--line); border-bottom-width:2px;
-    border-radius:5px; padding:1px 5px; font-size:11px; font-family:inherit; color:var(--text);
+    border-radius:5px; padding:1px 5px; font-size:14.5px; font-family:inherit; color:var(--text);
   }
 </style>
 </head>
@@ -3169,17 +3648,47 @@
       </div>
     </header>
 
-    <!-- The ladder stands on the page rather than behind a button. It is the
-         only thing in the home page's body, so it is given room: pinned to the
-         right of the row and centred in what is left of the window under the
-         header. Nothing here is a link — this is the ladder being shown, and
-         everything that can be done about it is up in the nav. -->
+    <!-- The ladders stand on the page rather than behind a button: four small
+         panels, one per vision, in one column under the account cluster at the
+         right-hand end of the header, beneath one heading — all four read out
+         of profiles by loadBoard(), one rating column per vision (LB_VISIONS),
+         the Sighted one first. Nothing there is a link — this is the ladders
+         being shown, and everything that can be done about them is up in the
+         nav.
+
+         At the foot of the left-hand side stand the league's live games: one
+         per vision, the strongest pair at a board right now, drawn by
+         liveRender() from what the server pushes over its own socket. A card
+         opens the spectator view, which can watch and nothing else. -->
     <div class="home-body">
-      <aside class="lb-panel" aria-labelledby="lbTitle">
-        <h2 class="lb-head" id="lbTitle">Leaderboard</h2>
-        <p class="lb-cap">Top 10</p>
-        <div class="lb-list" id="lbList"></div>
-      </aside>
+      <div class="live-stack" id="liveStack" aria-labelledby="liveTitle">
+        <h2 class="live-title" id="liveTitle">Live Top Games</h2>
+        <div class="live-grid" id="liveGrid"></div>
+        <p class="live-note" id="liveNote"></p>
+      </div>
+      <div class="lb-stack" aria-labelledby="lbTitleAll">
+        <h2 class="lb-title" id="lbTitleAll">Leaderboard</h2>
+        <aside class="lb-panel" aria-labelledby="lbTitle">
+          <h3 class="lb-head" id="lbTitle">Sighted</h3>
+          <p class="lb-cap">Top 20</p>
+          <div class="lb-list" id="lbList"></div>
+        </aside>
+        <aside class="lb-panel" aria-labelledby="lbTitleTotal">
+          <h3 class="lb-head" id="lbTitleTotal">Complete Blindfold</h3>
+          <p class="lb-cap" id="lbCapTotal"></p>
+          <div class="lb-list" id="lbListTotal"></div>
+        </aside>
+        <aside class="lb-panel" aria-labelledby="lbTitleBlind">
+          <h3 class="lb-head" id="lbTitleBlind">Board Only</h3>
+          <p class="lb-cap" id="lbCapBlind"></p>
+          <div class="lb-list" id="lbListBlind"></div>
+        </aside>
+        <aside class="lb-panel" aria-labelledby="lbTitleFog">
+          <h3 class="lb-head" id="lbTitleFog">Fog of War</h3>
+          <p class="lb-cap" id="lbCapFog"></p>
+          <div class="lb-list" id="lbListFog"></div>
+        </aside>
+      </div>
     </div>
   </section>
 
@@ -3681,8 +4190,7 @@
             <div class="pzv-mini" id="pzvMiniFog">
               <!-- one side's men and nothing of the other's, which is the claim -->
               <div class="pzv-men">
-                <span>&#9820;</span><span>&#9822;</span><span>&#9821;</span><span>&#9819;</span><span>&#9818;</span><span>&#9821;</span><span>&#9822;</span><span>&#9820;</span>
-                <span>&#9823;</span><span>&#9823;</span><span>&#9823;</span><span>&#9823;</span><span>&#9823;</span><span>&#9823;</span><span>&#9823;</span><span>&#9823;</span>
+<span><svg class="pc-svg" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 104" aria-hidden="true"><g fill="currentColor" stroke="var(--piece-edge, #514538)" stroke-width="2.2" stroke-linejoin="round" stroke-linecap="round"><path d="M17 12H29V22H40V12H53V22H65V12H78V29Q77 35 69 39L67 66Q67 73 75 80L77 86H84V95H13V86H20L22 79Q30 73 30 66L28 39Q18 34 17 29Z"/><path d="M19 29H76M28 39H69M30 66H67M24 77H72M21 86H77M17 91H80" fill="none"/><path d="M22 16H25M34 44V61M26 81H69" fill="none" stroke="#fff4da" stroke-opacity=".32" stroke-width="1.5"/></g></svg></span><span><svg class="pc-svg" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 104" aria-hidden="true"><g fill="currentColor" stroke="var(--piece-edge, #514538)" stroke-width="2.2" stroke-linejoin="round" stroke-linecap="round"><path d="M27 7L39 14L43 7L52 18C75 19 88 39 87 67L86 94H29Q26 81 38 66L52 48L45 53L36 56L23 70Q19 76 15 70Q7 70 10 60L19 40L24 25Z"/><path d="M59 26C77 36 83 63 77 93M24 67L32 60M52 48L56 39M27 33L33 30L29 35Z M15 61L17 59" fill="none"/><path d="M30 14L36 18M64 28C79 42 83 66 81 80M34 87Q34 77 43 66" fill="none" stroke="#fff4da" stroke-opacity=".32" stroke-width="1.5"/></g></svg></span><span><svg class="pc-svg" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 104" aria-hidden="true"><g fill="currentColor" stroke="var(--piece-edge, #514538)" stroke-width="2.2" stroke-linejoin="round" stroke-linecap="round"><path d="M46 18C39 9 45 3 50 4C58 4 61 13 55 18C65 29 77 37 74 52Q74 60 64 67L65 75Q70 82 60 84L57 87Q64 92 77 88Q88 86 91 93L87 99Q70 95 59 98Q53 98 50 93Q46 99 38 98L16 97L11 100L8 94Q7 88 18 88L37 90L43 86L40 84Q30 83 35 76L36 67Q25 60 25 48C25 35 37 26 46 18Z"/><path d="M36 67Q50 64 64 67M35 76H65M40 84H60M50 36V54M42 45H58" fill="none"/><path d="M32 47Q31 36 45 25M39 71H59M17 92H35" fill="none" stroke="#fff4da" stroke-opacity=".32" stroke-width="1.5"/></g></svg></span><span><svg class="pc-svg" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 104" aria-hidden="true"><g fill="currentColor" stroke="var(--piece-edge, #514538)" stroke-width="2.2" stroke-linejoin="round" stroke-linecap="round"><path d="M14 31L30 59L29 21L44 58L49 16L57 58L71 22L69 60L87 32L76 72L74 91Q49 101 25 91L23 72Z"/><circle cx="12" cy="28" r="5.5"/><circle cx="28" cy="17" r="5.5"/><circle cx="50" cy="11" r="5.5"/><circle cx="72" cy="17" r="5.5"/><circle cx="89" cy="28" r="5.5"/><path d="M23 72Q49 61 76 72M25 80Q49 71 75 80M26 89Q49 81 74 89" fill="none"/><path d="M30 72Q49 67 68 72M31 89Q47 85 65 88" fill="none" stroke="#fff4da" stroke-opacity=".32" stroke-width="1.5"/></g></svg></span><span><svg class="pc-svg" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 104" aria-hidden="true"><g fill="currentColor" stroke="var(--piece-edge, #514538)" stroke-width="2.2" stroke-linejoin="round" stroke-linecap="round"><path d="M27 66C14 51 4 38 13 29C25 14 43 35 48 58C46 43 36 30 44 22L47 18V13H40V7H47V1H53V7H60V13H53V18L57 22C65 30 55 45 52 58C60 33 76 16 88 29C100 44 79 62 74 67L74 88Q50 99 26 88Z"/><path d="M27 66Q50 58 74 67M27 76Q50 68 74 76M27 88Q50 80 74 88M36 78L40 77M48 76H52M61 77L65 78" fill="none"/><path d="M17 34Q24 24 36 40M63 43Q75 26 83 33M32 69Q49 64 67 69" fill="none" stroke="#fff4da" stroke-opacity=".32" stroke-width="1.5"/></g></svg></span><span><svg class="pc-svg" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 104" aria-hidden="true"><g fill="currentColor" stroke="var(--piece-edge, #514538)" stroke-width="2.2" stroke-linejoin="round" stroke-linecap="round"><path d="M46 18C39 9 45 3 50 4C58 4 61 13 55 18C65 29 77 37 74 52Q74 60 64 67L65 75Q70 82 60 84L57 87Q64 92 77 88Q88 86 91 93L87 99Q70 95 59 98Q53 98 50 93Q46 99 38 98L16 97L11 100L8 94Q7 88 18 88L37 90L43 86L40 84Q30 83 35 76L36 67Q25 60 25 48C25 35 37 26 46 18Z"/><path d="M36 67Q50 64 64 67M35 76H65M40 84H60M50 36V54M42 45H58" fill="none"/><path d="M32 47Q31 36 45 25M39 71H59M17 92H35" fill="none" stroke="#fff4da" stroke-opacity=".32" stroke-width="1.5"/></g></svg></span><span><svg class="pc-svg" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 104" aria-hidden="true"><g fill="currentColor" stroke="var(--piece-edge, #514538)" stroke-width="2.2" stroke-linejoin="round" stroke-linecap="round"><path d="M27 7L39 14L43 7L52 18C75 19 88 39 87 67L86 94H29Q26 81 38 66L52 48L45 53L36 56L23 70Q19 76 15 70Q7 70 10 60L19 40L24 25Z"/><path d="M59 26C77 36 83 63 77 93M24 67L32 60M52 48L56 39M27 33L33 30L29 35Z M15 61L17 59" fill="none"/><path d="M30 14L36 18M64 28C79 42 83 66 81 80M34 87Q34 77 43 66" fill="none" stroke="#fff4da" stroke-opacity=".32" stroke-width="1.5"/></g></svg></span><span><svg class="pc-svg" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 104" aria-hidden="true"><g fill="currentColor" stroke="var(--piece-edge, #514538)" stroke-width="2.2" stroke-linejoin="round" stroke-linecap="round"><path d="M17 12H29V22H40V12H53V22H65V12H78V29Q77 35 69 39L67 66Q67 73 75 80L77 86H84V95H13V86H20L22 79Q30 73 30 66L28 39Q18 34 17 29Z"/><path d="M19 29H76M28 39H69M30 66H67M24 77H72M21 86H77M17 91H80" fill="none"/><path d="M22 16H25M34 44V61M26 81H69" fill="none" stroke="#fff4da" stroke-opacity=".32" stroke-width="1.5"/></g></svg></span><span><svg class="pc-svg" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 104" aria-hidden="true"><g fill="currentColor" stroke="var(--piece-edge, #514538)" stroke-width="2.2" stroke-linejoin="round" stroke-linecap="round"><path d="M37 35C27 27 29 12 39 7C46 3 54 3 61 7C71 12 73 27 63 35H68Q72 35 72 40V44H59C60 57 63 66 72 73Q82 81 82 89V96H18V89Q18 81 28 73C37 66 40 57 41 44H28V40Q28 35 32 35Z"/><path d="M32 35H68M28 44H72M19 86H81M19 92H81" fill="none"/><path d="M36 20Q36 10 48 9M25 81Q28 77 34 74M23 89H76" fill="none" stroke="#fff4da" stroke-opacity=".32" stroke-width="1.5"/></g></svg></span><span><svg class="pc-svg" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 104" aria-hidden="true"><g fill="currentColor" stroke="var(--piece-edge, #514538)" stroke-width="2.2" stroke-linejoin="round" stroke-linecap="round"><path d="M37 35C27 27 29 12 39 7C46 3 54 3 61 7C71 12 73 27 63 35H68Q72 35 72 40V44H59C60 57 63 66 72 73Q82 81 82 89V96H18V89Q18 81 28 73C37 66 40 57 41 44H28V40Q28 35 32 35Z"/><path d="M32 35H68M28 44H72M19 86H81M19 92H81" fill="none"/><path d="M36 20Q36 10 48 9M25 81Q28 77 34 74M23 89H76" fill="none" stroke="#fff4da" stroke-opacity=".32" stroke-width="1.5"/></g></svg></span><span><svg class="pc-svg" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 104" aria-hidden="true"><g fill="currentColor" stroke="var(--piece-edge, #514538)" stroke-width="2.2" stroke-linejoin="round" stroke-linecap="round"><path d="M37 35C27 27 29 12 39 7C46 3 54 3 61 7C71 12 73 27 63 35H68Q72 35 72 40V44H59C60 57 63 66 72 73Q82 81 82 89V96H18V89Q18 81 28 73C37 66 40 57 41 44H28V40Q28 35 32 35Z"/><path d="M32 35H68M28 44H72M19 86H81M19 92H81" fill="none"/><path d="M36 20Q36 10 48 9M25 81Q28 77 34 74M23 89H76" fill="none" stroke="#fff4da" stroke-opacity=".32" stroke-width="1.5"/></g></svg></span><span><svg class="pc-svg" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 104" aria-hidden="true"><g fill="currentColor" stroke="var(--piece-edge, #514538)" stroke-width="2.2" stroke-linejoin="round" stroke-linecap="round"><path d="M37 35C27 27 29 12 39 7C46 3 54 3 61 7C71 12 73 27 63 35H68Q72 35 72 40V44H59C60 57 63 66 72 73Q82 81 82 89V96H18V89Q18 81 28 73C37 66 40 57 41 44H28V40Q28 35 32 35Z"/><path d="M32 35H68M28 44H72M19 86H81M19 92H81" fill="none"/><path d="M36 20Q36 10 48 9M25 81Q28 77 34 74M23 89H76" fill="none" stroke="#fff4da" stroke-opacity=".32" stroke-width="1.5"/></g></svg></span><span><svg class="pc-svg" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 104" aria-hidden="true"><g fill="currentColor" stroke="var(--piece-edge, #514538)" stroke-width="2.2" stroke-linejoin="round" stroke-linecap="round"><path d="M37 35C27 27 29 12 39 7C46 3 54 3 61 7C71 12 73 27 63 35H68Q72 35 72 40V44H59C60 57 63 66 72 73Q82 81 82 89V96H18V89Q18 81 28 73C37 66 40 57 41 44H28V40Q28 35 32 35Z"/><path d="M32 35H68M28 44H72M19 86H81M19 92H81" fill="none"/><path d="M36 20Q36 10 48 9M25 81Q28 77 34 74M23 89H76" fill="none" stroke="#fff4da" stroke-opacity=".32" stroke-width="1.5"/></g></svg></span><span><svg class="pc-svg" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 104" aria-hidden="true"><g fill="currentColor" stroke="var(--piece-edge, #514538)" stroke-width="2.2" stroke-linejoin="round" stroke-linecap="round"><path d="M37 35C27 27 29 12 39 7C46 3 54 3 61 7C71 12 73 27 63 35H68Q72 35 72 40V44H59C60 57 63 66 72 73Q82 81 82 89V96H18V89Q18 81 28 73C37 66 40 57 41 44H28V40Q28 35 32 35Z"/><path d="M32 35H68M28 44H72M19 86H81M19 92H81" fill="none"/><path d="M36 20Q36 10 48 9M25 81Q28 77 34 74M23 89H76" fill="none" stroke="#fff4da" stroke-opacity=".32" stroke-width="1.5"/></g></svg></span><span><svg class="pc-svg" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 104" aria-hidden="true"><g fill="currentColor" stroke="var(--piece-edge, #514538)" stroke-width="2.2" stroke-linejoin="round" stroke-linecap="round"><path d="M37 35C27 27 29 12 39 7C46 3 54 3 61 7C71 12 73 27 63 35H68Q72 35 72 40V44H59C60 57 63 66 72 73Q82 81 82 89V96H18V89Q18 81 28 73C37 66 40 57 41 44H28V40Q28 35 32 35Z"/><path d="M32 35H68M28 44H72M19 86H81M19 92H81" fill="none"/><path d="M36 20Q36 10 48 9M25 81Q28 77 34 74M23 89H76" fill="none" stroke="#fff4da" stroke-opacity=".32" stroke-width="1.5"/></g></svg></span><span><svg class="pc-svg" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 104" aria-hidden="true"><g fill="currentColor" stroke="var(--piece-edge, #514538)" stroke-width="2.2" stroke-linejoin="round" stroke-linecap="round"><path d="M37 35C27 27 29 12 39 7C46 3 54 3 61 7C71 12 73 27 63 35H68Q72 35 72 40V44H59C60 57 63 66 72 73Q82 81 82 89V96H18V89Q18 81 28 73C37 66 40 57 41 44H28V40Q28 35 32 35Z"/><path d="M32 35H68M28 44H72M19 86H81M19 92H81" fill="none"/><path d="M36 20Q36 10 48 9M25 81Q28 77 34 74M23 89H76" fill="none" stroke="#fff4da" stroke-opacity=".32" stroke-width="1.5"/></g></svg></span>
               </div>
             </div>
           </div>
@@ -3918,6 +4426,17 @@
             <div class="coach-why" id="coachWhy"></div>
           </div>
 
+          <!-- review only: what the position is ABOUT, from the Education
+               System. Separate from the coach card on purpose. That one only
+               appears when there was a better move; this one has something to
+               say when the player found it too. And it is additive: if the
+               concept library or its corpus fails to load, this card never
+               shows and Study Board is exactly what it was before. -->
+          <div class="card panel concept-card" id="conceptCard" style="display:none">
+            <h2>What This Position Is About</h2>
+            <div class="cc-body" id="conceptBody"></div>
+          </div>
+
           <div class="card panel rules-card" id="rulesCard">
             <button class="rules-head" id="rulesToggle" aria-expanded="false" aria-controls="rulesBody">
               <span class="rules-title">Notation Rules</span>
@@ -4064,6 +4583,18 @@
       <button class="ghost" id="drawDecline">Decline</button>
       <button class="primary" id="drawAccept">Accept Draw</button>
     </div>
+  </div>
+</div>
+
+<!-- the spectator view of one of the league's live games: the same card the
+     home page shows, larger. View only — there is nothing on it to press but
+     the corner, because a spectator cannot move, resign, offer or interfere
+     with a clock, and a board with no buttons cannot be asked to. -->
+<div class="overlay" id="liveOverlay">
+  <div class="modal live-modal" role="dialog" aria-label="Live game">
+    <button class="modal-x" id="liveX" aria-label="Close" title="Close">×</button>
+    <div id="liveBig"></div>
+    <p class="live-only">Spectating. The players are the league's own accounts; nothing here can be moved.</p>
   </div>
 </div>
 
@@ -4217,20 +4748,18 @@ const SUPABASE_ANON_KEY = 'sb_publishable_FixWUIJ1j8-02yTOg6-rog_ag-ctyET';
    CONSTANTS & HELPERS
    ============================================================ */
 const W = 'w', B = 'b';
-const GLYPH = { K:'♚', Q:'♛', R:'♜', B:'♝', N:'♞', P:'♟' };
-
-// The font's bishop is a ball with a small cross — near-identical to the pawn at
-// board size. This one is a proper mitre: tall, pointed, with the diagonal slit.
+// Reference-inspired silhouettes are shared by both colors and every screen.
+// Color and edge contrast belong to the surrounding piece, so promotion and
+// captured-piece trays use the same geometry as the live board.
+const GLYPH = {
+  "P": "<svg class=\"pc-svg\" xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 100 104\" aria-hidden=\"true\"><g fill=\"currentColor\" stroke=\"var(--piece-edge, #514538)\" stroke-width=\"2.2\" stroke-linejoin=\"round\" stroke-linecap=\"round\"><path d=\"M37 35C27 27 29 12 39 7C46 3 54 3 61 7C71 12 73 27 63 35H68Q72 35 72 40V44H59C60 57 63 66 72 73Q82 81 82 89V96H18V89Q18 81 28 73C37 66 40 57 41 44H28V40Q28 35 32 35Z\"/><path d=\"M32 35H68M28 44H72M19 86H81M19 92H81\" fill=\"none\"/><path d=\"M36 20Q36 10 48 9M25 81Q28 77 34 74M23 89H76\" fill=\"none\" stroke=\"#fff4da\" stroke-opacity=\".32\" stroke-width=\"1.5\"/></g></svg>",
+  "R": "<svg class=\"pc-svg\" xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 100 104\" aria-hidden=\"true\"><g fill=\"currentColor\" stroke=\"var(--piece-edge, #514538)\" stroke-width=\"2.2\" stroke-linejoin=\"round\" stroke-linecap=\"round\"><path d=\"M17 12H29V22H40V12H53V22H65V12H78V29Q77 35 69 39L67 66Q67 73 75 80L77 86H84V95H13V86H20L22 79Q30 73 30 66L28 39Q18 34 17 29Z\"/><path d=\"M19 29H76M28 39H69M30 66H67M24 77H72M21 86H77M17 91H80\" fill=\"none\"/><path d=\"M22 16H25M34 44V61M26 81H69\" fill=\"none\" stroke=\"#fff4da\" stroke-opacity=\".32\" stroke-width=\"1.5\"/></g></svg>",
+  "N": "<svg class=\"pc-svg\" xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 100 104\" aria-hidden=\"true\"><g fill=\"currentColor\" stroke=\"var(--piece-edge, #514538)\" stroke-width=\"2.2\" stroke-linejoin=\"round\" stroke-linecap=\"round\"><path d=\"M27 7L39 14L43 7L52 18C75 19 88 39 87 67L86 94H29Q26 81 38 66L52 48L45 53L36 56L23 70Q19 76 15 70Q7 70 10 60L19 40L24 25Z\"/><path d=\"M59 26C77 36 83 63 77 93M24 67L32 60M52 48L56 39M27 33L33 30L29 35Z M15 61L17 59\" fill=\"none\"/><path d=\"M30 14L36 18M64 28C79 42 83 66 81 80M34 87Q34 77 43 66\" fill=\"none\" stroke=\"#fff4da\" stroke-opacity=\".32\" stroke-width=\"1.5\"/></g></svg>",
+  "Q": "<svg class=\"pc-svg\" xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 100 104\" aria-hidden=\"true\"><g fill=\"currentColor\" stroke=\"var(--piece-edge, #514538)\" stroke-width=\"2.2\" stroke-linejoin=\"round\" stroke-linecap=\"round\"><path d=\"M14 31L30 59L29 21L44 58L49 16L57 58L71 22L69 60L87 32L76 72L74 91Q49 101 25 91L23 72Z\"/><circle cx=\"12\" cy=\"28\" r=\"5.5\"/><circle cx=\"28\" cy=\"17\" r=\"5.5\"/><circle cx=\"50\" cy=\"11\" r=\"5.5\"/><circle cx=\"72\" cy=\"17\" r=\"5.5\"/><circle cx=\"89\" cy=\"28\" r=\"5.5\"/><path d=\"M23 72Q49 61 76 72M25 80Q49 71 75 80M26 89Q49 81 74 89\" fill=\"none\"/><path d=\"M30 72Q49 67 68 72M31 89Q47 85 65 88\" fill=\"none\" stroke=\"#fff4da\" stroke-opacity=\".32\" stroke-width=\"1.5\"/></g></svg>",
+  "K": "<svg class=\"pc-svg\" xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 100 104\" aria-hidden=\"true\"><g fill=\"currentColor\" stroke=\"var(--piece-edge, #514538)\" stroke-width=\"2.2\" stroke-linejoin=\"round\" stroke-linecap=\"round\"><path d=\"M27 66C14 51 4 38 13 29C25 14 43 35 48 58C46 43 36 30 44 22L47 18V13H40V7H47V1H53V7H60V13H53V18L57 22C65 30 55 45 52 58C60 33 76 16 88 29C100 44 79 62 74 67L74 88Q50 99 26 88Z\"/><path d=\"M27 66Q50 58 74 67M27 76Q50 68 74 76M27 88Q50 80 74 88M36 78L40 77M48 76H52M61 77L65 78\" fill=\"none\"/><path d=\"M17 34Q24 24 36 40M63 43Q75 26 83 33M32 69Q49 64 67 69\" fill=\"none\" stroke=\"#fff4da\" stroke-opacity=\".32\" stroke-width=\"1.5\"/></g></svg>"
+};
 const BISHOP_SVG =
-  '<svg class="pc-svg" viewBox="0 0 45 45" aria-hidden="true">' +
-    '<g stroke-width="1.5" stroke-linejoin="round" stroke-linecap="round">' +
-      '<path d="M11 38.6h23c1.2 0 1.2 2.2 0 2.2H11c-1.2 0-1.2-2.2 0-2.2z"/>' +
-      '<path d="M14.5 33h16c2 0 3 2 1.7 3.5l-.9 1H13.7l-.9-1c-1.3-1.5-.3-3.5 1.7-3.5z"/>' +
-      '<path d="M22.5 9c4.8 5.6 7.6 11 7.1 15.6-.3 2.9-3 4.9-7.1 4.9s-6.8-2-7.1-4.9C14.9 20 17.7 14.6 22.5 9z"/>' +
-      '<circle cx="22.5" cy="7.2" r="2.4"/>' +
-      '<path class="slit" d="M19.2 17.4l6 6.4"/>' +
-    '</g>' +
-  '</svg>';
+  '<svg class="pc-svg" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 104" aria-hidden="true"><g fill="currentColor" stroke="var(--piece-edge, #514538)" stroke-width="2.2" stroke-linejoin="round" stroke-linecap="round"><path d="M46 18C39 9 45 3 50 4C58 4 61 13 55 18C65 29 77 37 74 52Q74 60 64 67L65 75Q70 82 60 84L57 87Q64 92 77 88Q88 86 91 93L87 99Q70 95 59 98Q53 98 50 93Q46 99 38 98L16 97L11 100L8 94Q7 88 18 88L37 90L43 86L40 84Q30 83 35 76L36 67Q25 60 25 48C25 35 37 26 46 18Z"/><path d="M36 67Q50 64 64 67M35 76H65M40 84H60M50 36V54M42 45H58" fill="none"/><path d="M32 47Q31 36 45 25M39 71H59M17 92H35" fill="none" stroke="#fff4da" stroke-opacity=".32" stroke-width="1.5"/></g></svg>';
 
 const pieceHTML = t => t === 'B' ? BISHOP_SVG : GLYPH[t];
 const VAL   = { P:100, N:320, B:330, R:500, Q:900, K:20000 };
@@ -5794,7 +6323,7 @@ function askPromotion(moves){
   el.promoBtns.innerHTML = '';
   for (const q of ['Q','R','B','N']){
     const b = document.createElement('button');
-    b.innerHTML = `<span style="-webkit-text-stroke:1.4px #2a2118">${pieceHTML(q)}</span>`;
+    b.innerHTML = `<span class="${G.st.turn === W ? 'g-w' : 'g-b'}">${pieceHTML(q)}</span>`;
     b.onclick = () => {
       el.promoOverlay.classList.remove('show');
       const m = G.pendingPromo.find(x => x.promo === q);
@@ -6097,6 +6626,18 @@ function onNetMessage(msg){
       NET.serverName = msg.name || '';
       NET.accountsOffered = !!msg.accounts;
       if (msg.reason) console.warn('Signed-in play unavailable:', msg.reason);
+      // The name we offered was a proposal. The server keeps one registry of
+      // every name in play and will not hand a name out twice, so a guest
+      // whose Guest-##### was already somebody's — or who offered none —
+      // comes back called something else, and that is the name the other
+      // player is going to read, so it is the one to show here. An account's
+      // name is not taken from this: it is the account's, and the corner
+      // already says it.
+      if (!account && msg.name && msg.name !== G.guestName){
+        G.guestName = G.playerName = msg.name;
+        const who = document.getElementById('roomWho');
+        if (who) who.textContent = myName() || 'Playing as a guest';
+      }
       break;
 
     case 'waiting':
@@ -6826,6 +7367,9 @@ function enterReview(){
   document.getElementById('reviewBar').style.display = 'flex';
   document.getElementById('screen-game').classList.add('reviewing');
   engineStart();
+  // Start fetching the concept library now rather than on the first render:
+  // it is 2.3MB of corpus and the player is about to read a card.
+  eduLoad();
   reviewGoto(0);
 }
 
@@ -6841,6 +7385,7 @@ function reviewClose(restore){
   document.getElementById('reviewBar').style.display = 'none';
   document.getElementById('screen-game').classList.remove('reviewing');
   document.getElementById('coachCard').style.display = 'none';
+  document.getElementById('conceptCard').style.display = 'none';
   document.getElementById('arrows').innerHTML = '';
   document.getElementById('marks').innerHTML = '';
 }
@@ -7357,6 +7902,16 @@ function reviewRender(){
   if (!REV.on) return;
   const ply = REV.ply, last = REV.states.length - 1;
   const st = REV.states[ply];
+
+  /* What the position is ABOUT, from education/. Deliberately ABOVE the four
+     quiet() returns below: those are all about the ENGINE — it cannot run, it
+     is still starting, the game is over, the search has not answered yet — and
+     none of them is a reason to stop naming what is on the board. The
+     knowledge base does not need an engine and says so itself when it has
+     none, which is exactly the case a player on a browser without WebAssembly
+     is in. Additive and quiet on failure: if education/ is not there this does
+     nothing at all. */
+  eduAnalyse(ply);
   // ply i is the position *before* move i, so it is move i under the microscope
   // here: number (i>>1)+1, and White on even plies.
   document.getElementById('revCount').textContent =
@@ -7440,6 +7995,325 @@ function reviewRender(){
   }
 
   drawReviewOverlay(played, bestMove, v);
+}
+
+/* ============================================================
+   THE EDUCATION LAYER — what the position is ABOUT
+
+   Study Board already says whether a move was good: judgeMove() turns
+   Stockfish's numbers into a verdict, and describeBest() writes what it can
+   see. Its own comment names the limit — "This is not chess understanding,
+   and it only ever claims what it can see." It can see that a knight is on
+   d5 and cannot say that this is an outpost, what makes a square one, or
+   when the idea does not apply.
+
+   That half lives in education/ — 137 researched concepts, and one entry
+   point, analyzeWithEducation(). This section is the wiring, and it is
+   deliberately thin: it fetches the library, hands it the corpus, gives it
+   the position and the engine's numbers, and renders what comes back. It
+   contains no chess knowledge of its own and must not grow any. A second
+   opinion about what a fork is would be a second knowledge system, which is
+   the one thing this integration exists not to build.
+
+   THE DIVISION OF LABOUR IS THE POINT, and it runs both ways. Stockfish
+   decides whether a move works; the knowledge base is never asked. The
+   knowledge base names the idea; the engine is never asked to. The API
+   enforces its own half — without an engine result it refuses to say a move
+   was good, and it will not reach for the nearest label when nothing
+   matches. The card below shows that refusal rather than hiding it, because
+   "nothing here matches a researched concept" is a true answer and a guess
+   dressed as a concept is not.
+
+   ADDITIVE, AND IT FAILS QUIET. Everything here hangs off one call at the
+   end of reviewRender(). If the fetch fails — an old cache, a container
+   built without education/, a page opened from the filesystem — EDU.ready
+   stays false, #conceptCard never appears, and Study Board is exactly what
+   it was. server/test_study_education.js asserts that path, because it is
+   the one the tests' own fetch stub takes.
+
+   THE LIBRARY IS EVALUATED, NOT COPIED. education/lib/*.js are served as
+   they are and run here through a small CommonJS shim, which is the mirror
+   image of tools/page_chess.js: that file lifts this page's chess into Node
+   so the tests can run it, and this lifts the tests' library into the page
+   so a player gets the same answer. A copy would drift; 973 assertions
+   would be about something other than what is on screen.
+   ============================================================ */
+const EDU_VERSION = 1;             // ?v= on the library and the bundle; bump when either changes
+const EDU_LEVEL = 'intermediate';  // the reader the wording is written for
+const EDU_DEPTH = 'normal';
+const EDU_MAX_SECONDARY = 3;
+const EDU = { ready:false, failed:false, loading:null, api:null, matchers:null, errs:0 };
+
+/* The page's own chess, under the names education/lib/features.js expects.
+ *
+ * tools/page_chess.js cuts these same declarations out of this file so Node
+ * can run them; here they already exist, so the whole port is this object.
+ * The list is that file's DECLS and FNS, in its order — if a name is renamed
+ * there this throws here, which is the same loud failure and for the same
+ * reason. Built inside a function so a missing name fails the LOAD and not
+ * the page. */
+function eduChess(){
+  return { W:W, B:B,
+    VAL:VAL, FILES:FILES, rowOf:rowOf, colOf:colOf, SQNAME:SQNAME, uciOf:uciOf, sqName:sqName,
+    onBoard:onBoard, other:other, idCounter:idCounter, mk:mk, DIR_N:DIR_N, DIR_B:DIR_B,
+    DIR_R:DIR_R, DIR_K:DIR_K, PIECE_WORD:PIECE_WORD, VERDICT:VERDICT, LEVELS:LEVELS,
+    levelFor:levelFor, PST:PST,
+    startBoard:startBoard, newState:newState, cloneState:cloneState, posKey:posKey,
+    fenOf:fenOf, stateFromFEN:stateFromFEN, slide:slide, step:step, addPawn:addPawn,
+    pseudoMoves:pseudoMoves, isAttacked:isAttacked, kingSq:kingSq, inCheck:inCheck,
+    makeMove:makeMove, legalMoves:legalMoves, toSAN:toSAN, mirror:mirror, evaluate:evaluate,
+    attackersOf:attackersOf, defendersOf:defendersOf, see:see, sliderLines:sliderLines,
+    betweenSq:betweenSq, findMotifs:findMotifs, winPct:winPct, sacrificeSize:sacrificeSize,
+    sfScore:sfScore, judgeMove:judgeMove, describeBest:describeBest, pvLine:pvLine,
+    materialFor:materialFor, materialWord:materialWord, readInfoLine:readInfoLine,
+    botShortcut:botShortcut, botChoice:botChoice };
+}
+
+/* Evaluate one CommonJS file with a require() that only knows the three names
+ * the library actually asks for. fs and path are stubs and are never called:
+ * knowledge() is short-circuited by setKnowledge() before any analysis runs,
+ * and if that ever stopped being true the stub throws rather than quietly
+ * returning nothing. */
+function eduModule(src, name, loaded, chess){
+  const module = { exports:{} };
+  /* `path` has to WORK, not merely exist: analyze.js computes a ROOT at load
+     time and would die on the first line. It resolves nothing here — the
+     result is only ever handed back to `fs`, which is where the refusal
+     belongs. `fs` throws on use rather than returning empty, because a corpus
+     that silently came back empty would look exactly like a position with no
+     concepts in it, and that is the one failure this integration must never
+     produce quietly. */
+  const req = function(id){
+    if (/page_chess/.test(id)) return chess;
+    if (/features\.js$/.test(id)) return loaded.features;
+    if (/matchers\.js$/.test(id)) return loaded.matchers;
+    if (id === 'path') return { join:function(){ return Array.prototype.join.call(arguments, '/'); },
+                                dirname:function(x){ return String(x).replace(/\/[^/]*$/, ''); },
+                                basename:function(x){ return String(x).split('/').pop(); },
+                                relative:function(a, b){ return b; } };
+    if (id === 'fs')
+      return new Proxy({}, { get:function(t, k){
+        return function(){ throw new Error('education: fs.' + String(k) +
+          ' in the browser — setKnowledge() should have supplied the corpus'); }; } });
+    throw new Error('education: unexpected require(' + id + ') from ' + name);
+  };
+  new Function('module', 'exports', 'require', '__dirname', '__filename', src)(
+    module, module.exports, req, '/education/lib', '/education/lib/' + name);
+  return module.exports;
+}
+
+/* Fetch the library and the corpus once. Memoised on the promise, so pressing
+ * ◀ ▶ during the fetch does not start a second one. */
+function eduLoad(){
+  if (EDU.loading) return EDU.loading;
+  const v = '?v=' + EDU_VERSION;
+  const get = function(url){
+    return fetch(url + v).then(function(r){
+      if (!r.ok) throw new Error('http ' + r.status + ' for ' + url);
+      return r;
+    });
+  };
+  EDU.loading = Promise.all([
+    get('education/lib/features.js').then(function(r){ return r.text(); }),
+    get('education/lib/matchers.js').then(function(r){ return r.text(); }),
+    get('education/lib/analyze.js').then(function(r){ return r.text(); }),
+    get('education/dist/education-bundle.json').then(function(r){ return r.json(); }),
+  ]).then(function(parts){
+    const chess = eduChess();
+    const loaded = {};
+    loaded.features = eduModule(parts[0], 'features.js', loaded, chess);
+    loaded.matchers = eduModule(parts[1], 'matchers.js', loaded, chess);
+    const api = eduModule(parts[2], 'analyze.js', loaded, chess);
+    // The corpus knowledge() would have read off disk, handed in whole.
+    api.setKnowledge({ concepts: parts[3].concepts, warnings: parts[3].warnings });
+    EDU.api = api;
+    // MATCHER_ERRORS lives on matchers.js and analyze.js does not re-export it.
+    // Keeping the module rather than reaching through the API is the difference
+    // between a guard and a branch that can never fire — which is the exact bug
+    // that array was added to catch, so getting it wrong here would have been
+    // funny in the wrong way.
+    EDU.matchers = loaded.matchers;
+    EDU.ready = true;
+    return api;
+  }).catch(function(e){
+    // Not an error the player needs. The card simply never appears.
+    EDU.failed = true;
+    if (typeof console !== 'undefined') console.warn('education layer unavailable:', e && e.message);
+    return null;
+  });
+  return EDU.loading;
+}
+
+function eduEsc(s){
+  return String(s == null ? '' : s)
+    .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+}
+
+/* WHAT KIND OF CLAIM THIS IS, in the reader's words. The record's own
+ * knowledge_type decides and this page only translates it — a table here that
+ * invented its own categories would be a second opinion about what kind of
+ * thing a chess idea is, and that is the knowledge base's job.
+ *
+ * Every type in the corpus has an entry, and an unknown one falls through to
+ * nothing rather than to a guess. A first version sorted the twelve types into
+ * three buckets and labelled `hanging-piece` "a rule of the game", because
+ * `terminology` landed in the default. A term is not a rule, and a label that
+ * is wrong about what KIND of knowledge it is undermines the confidence badge
+ * sitting beside it. */
+const EDU_KIND_WORD = {
+  'tactical-motif': 'tactical',
+  'mating-pattern': 'a mating pattern',
+  'positional-concept': 'positional',
+  'strategic-principle': 'strategic',
+  'rule-of-thumb': 'a rule of thumb',
+  'practical-guideline': 'a practical guideline',
+  'historical-teaching-principle': 'a teaching principle',
+  'official-rule': 'a rule of the game',
+  'proven-result': 'proven',
+  'tablebase-fact': 'proven by tablebase',
+  'named-theoretical-position': 'a known position',
+  'terminology': 'terminology',
+};
+
+function eduKind(kt){
+  return EDU_KIND_WORD[kt] || '';
+}
+
+/* SAN for one UCI move in one position, using the page's own generator and
+ * toSAN — the review already refuses to keep a second opinion about how a
+ * move is spelled, and neither does this. */
+function eduSan(st, uci){
+  if (!st || !uci) return null;
+  let ms;
+  try { ms = legalMoves(st); } catch (e) { return null; }
+  for (let i = 0; i < ms.length; i++) if (uciOf(ms[i]) === uci) return toSAN(st, ms[i], ms);
+  return null;
+}
+
+/* One concept, as html. `because` is what Layer 3 actually observed on THIS
+ * board, which is the answer to "why does that apply here" and the reason the
+ * card quotes it rather than the definition. */
+function eduConceptHTML(c, primary){
+  const out = [];
+  const conf = ['low','medium','high'].indexOf(c.confidence) >= 0 ? c.confidence : 'low';
+  out.push('<div class="cc-head"><span class="cc-name">' + eduEsc(c.name || c.id) + '</span>' +
+           '<span class="cc-conf ' + conf + '">' + eduEsc(conf) + '</span>' +
+           (eduKind(c.knowledge_type)
+             ? '<span class="cc-kind">' + eduEsc(eduKind(c.knowledge_type)) + '</span>' : '') + '</div>');
+  if (primary && c.wording) out.push('<div class="cc-say">' + eduEsc(c.wording) + '</div>');
+  const why = (c.because || []).slice(0, primary ? 3 : 1);
+  if (why.length)
+    out.push('<ul class="cc-why">' + why.map(function(w){
+      return '<li>' + eduEsc(w) + '</li>';
+    }).join('') + '</ul>');
+  if (primary){
+    // A rule of thumb that matched perfectly is still a rule of thumb.
+    if (c.hedge) out.push('<div class="cc-hedge">' + eduEsc(c.hedge) + '</div>');
+    // The record's own reason not to trust the match, strongest evidence
+    // first. This is the false-positive protection made visible rather than
+    // used silently and thrown away.
+    const caution = (c.cautions || [])[0];
+    if (caution) out.push('<div class="cc-caution">' + eduEsc(caution.text) + '</div>');
+  }
+  return '<div class="cc-concept' + (primary ? '' : ' cc-secondary') + '">' + out.join('') + '</div>';
+}
+
+/* The card. Everything here comes out of the API result or out of numbers the
+ * review already had; nothing is invented on the way to the screen. */
+function eduRender(r, st, before){
+  const card = document.getElementById('conceptCard');
+  const body = document.getElementById('conceptBody');
+  if (!card || !body) return;
+  const cs = (r && r.concepts) || [];
+  const out = [];
+
+  if (!cs.length){
+    // Refusal 1, shown. The API's own note says it better than a paraphrase
+    // would, and a nearest-label fallback here would undo the reason to use
+    // this system at all.
+    const note = (r && (r.notes || []).filter(function(n){ return /no researched concept/.test(n); })[0]);
+    out.push('<div class="cc-none">' + eduEsc(note ||
+      'Nothing in this position matches a researched concept in this knowledge base.') + '</div>');
+  } else {
+    out.push(eduConceptHTML(cs[0], true));
+    const rest = cs.slice(1, 1 + EDU_MAX_SECONDARY);
+    for (let i = 0; i < rest.length; i++) out.push(eduConceptHTML(rest[i], false));
+  }
+
+  // The alternatives the engine actually weighed. MultiPV is already 2 for the
+  // review, so this is the top line and the runner-up — the same two numbers
+  // the verdict was decided by, said in words.
+  if (before && before.lines && before.lines.length > 1){
+    const alts = [];
+    for (let i = 0; i < before.lines.length && alts.length < 2; i++){
+      const ln = before.lines[i];
+      const san = eduSan(st, ln && ln.best);
+      if (san) alts.push('<b>' + eduEsc(san) + '</b> ' + eduEsc(fmtScore(ln, st.turn)));
+    }
+    if (alts.length > 1)
+      out.push('<div class="cc-alt">The engine weighed ' + alts.join(' against ') + '.</div>');
+  }
+
+  body.innerHTML = out.join('');
+  card.style.display = '';
+}
+
+/* Called at the end of reviewRender(). Synchronous once the library is in;
+ * before that it starts the fetch and leaves the card hidden, then renders
+ * when it arrives — guarded on the ply, exactly as reviewAnalyse() is, so a
+ * slow load cannot draw a card for a position the player has left. */
+function eduAnalyse(ply){
+  const card = document.getElementById('conceptCard');
+  if (!card) return;
+  if (EDU.failed){ card.style.display = 'none'; return; }
+  if (!EDU.ready){
+    card.style.display = 'none';
+    eduLoad().then(function(){
+      if (EDU.ready && REV.on && REV.ply === ply) eduAnalyse(ply);
+    });
+    return;
+  }
+  const st = REV.states[ply];
+  const played = G.uci[ply] || null;
+  if (!st){ card.style.display = 'none'; return; }
+
+  const before = reviewCached(ply);
+  // Refusal 2 is the API's, not this page's: with no engine result it says so
+  // and claims nothing about the move. So the numbers are passed when they are
+  // there and withheld when they are not, rather than being faked.
+  const engine = (before && (before.cp !== null || before.mate !== null)) ? {
+    eval_cp: sfScore(before),
+    best_move: before.best || null,
+    engine_id: 'Stockfish WASM (single-threaded, movetime ' + SF_MOVETIME + 'ms)',
+  } : null;
+
+  let r = null;
+  const errsBefore = ((EDU.matchers || {}).MATCHER_ERRORS || []).length;
+  try {
+    r = EDU.api.analyzeWithEducation({
+      fen: fenOf(st), move: played, engine: engine,
+      level: EDU_LEVEL, depth: EDU_DEPTH,
+    });
+  } catch (e){
+    if (typeof console !== 'undefined') console.warn('education analysis failed:', e && e.message);
+    card.style.display = 'none';
+    return;
+  }
+
+  // A bug the API found in its own output is returned rather than hidden, and
+  // is not swallowed here either. It never reaches the card; it reaches the
+  // console, where it can be fixed.
+  const bugs = (r.notes || []).filter(function(n){ return /^(TEMPLATE|PHRASING) BUG/.test(n); });
+  if (bugs.length && typeof console !== 'undefined') console.warn('education:', bugs.join(' | '));
+  if ((r.phrasing_violations || []).length && typeof console !== 'undefined')
+    console.warn('education: banned phrasing', r.phrasing_violations);
+  const errsAfter = ((EDU.matchers || {}).MATCHER_ERRORS || []).length;
+  if (errsAfter > errsBefore && typeof console !== 'undefined'){
+    EDU.errs = errsAfter;
+    console.warn('education: a matcher threw — see MATCHER_ERRORS');
+  }
+
+  eduRender(r, st, before);
 }
 
 /* ============================================================
@@ -12173,6 +13047,10 @@ function showScreen(name){
   // challenge has somewhere to land. netConnect reuses whatever is already
   // there, so this is a no-op on the second visit.
   if (name === 'home' || name === 'social') socialConnect();
+  // The league's live games are watched from the home page and nowhere else:
+  // their socket opens with it and closes with it, so no other screen is
+  // being pushed boards it has nowhere to draw.
+  if (name === 'home') liveOpen(); else liveLeave();
   // The ladder is on the home page itself, so coming back to it is the only
   // gesture there is for "show me where things stand now".
   if (name === 'home' && authSettled) loadBoard();
@@ -12878,6 +13756,30 @@ const nameInput = document.getElementById('gameName');
 const nameHint = document.getElementById('nameHint');
 const nameSave = document.getElementById('btnNameSave');
 
+/* A name has to be nobody else's, and only the database knows that. The
+   rule itself is the unique index in supabase-migrate-usernames.sql; this is
+   the question asked ahead of it so the answer arrives as a hint rather
+   than as a failed save. Case-insensitive, because "Alex" and "alex" are
+   the same name to anybody reading a board bar.
+   Three answers: true, false, or null when it could not be asked — no
+   client, or a project that has not run the migration and so has no
+   username_available() yet. null is not "free": the save goes ahead and the
+   index, if there is one, has the last word. */
+async function nameAvailable(name){
+  if (!sb) return null;
+  try {
+    const { data, error } = await sb.rpc('username_available', { wanted: name });
+    if (error) throw error;
+    return typeof data === 'boolean' ? data : null;
+  } catch (err){
+    console.warn('username check unavailable:', err && err.message);
+    return null;
+  }
+}
+
+const NAME_TAKEN = 'That name is taken — try another.';
+let nameCheck = 0;          // which keystroke's question the answer belongs to
+
 function judgeName(){
   const raw = nameInput.value;
   const problem = nameProblem(raw);
@@ -12890,31 +13792,81 @@ function judgeName(){
     : (problem || 'Looks good.');
   return problem;
 }
-nameInput.addEventListener('input', judgeName);
+
+/* The hint says "taken" as you type, a moment after you stop. The button is
+   left alone until an answer comes back rather than disabled meanwhile — a
+   name that turns out to be taken is still refused on Continue, by the same
+   question asked again and by the index behind it, so nothing rests on the
+   hint having caught up. */
+let nameCheckTimer = 0;
+nameInput.addEventListener('input', () => {
+  if (judgeName()) return;
+  clearTimeout(nameCheckTimer);
+  const asked = ++nameCheck;
+  const name = nameInput.value.trim();
+  nameCheckTimer = setTimeout(async () => {
+    const free = await nameAvailable(name);
+    // a later keystroke has asked a different question since
+    if (asked !== nameCheck || nameInput.value.trim() !== name) return;
+    if (free === false){
+      nameHint.className = 'name-hint bad';
+      nameHint.textContent = NAME_TAKEN;
+      nameInput.classList.add('bad');
+      nameSave.disabled = true;
+    }
+  }, 350);
+});
+
+/** Postgres's unique-violation code, which PostgREST passes through. */
+function isNameClash(err){
+  return !!err && (err.code === '23505' || /duplicate key|unique/i.test(err.message || ''));
+}
 
 document.getElementById('nameForm').addEventListener('submit', async e => {
   e.preventDefault();
   const name = nameInput.value.trim();
   if (judgeName() || !sb || !account) return;
+  clearTimeout(nameCheckTimer);
+  nameCheck++;                     // whatever the hint was about to say is moot
   nameSave.disabled = true;
   nameSave.textContent = 'Saving…';
+  let clashed = false;
   try {
-    // Into the token first: the game server reads the name from there, so this
-    // is the copy that decides what other players see.
+    if (await nameAvailable(name) === false) throw { code: '23505' };
+    // Into the profile first: that is the copy the unique index guards, so it
+    // is the one that can say no, and the game server reads the name from it
+    // whenever it can. Nothing goes into the token until the row has taken
+    // the name, or a name the database refused would still be in the token
+    // the next time the page looked to see whether one had been chosen.
+    const saved = await sb.from('profiles').update({ display_name: name })
+      .eq('id', account.id).select('display_name').maybeSingle();
+    if (saved.error) throw saved.error;
+    // The row may not exist yet — the trigger makes it a moment after signup
+    // — in which case the update matched nothing and said so quietly. The
+    // token still carries the name, and the profile catches up on the next
+    // visit; the server, meanwhile, falls back to the token.
+    if (!saved.data) console.warn('profile row not there yet; name kept in the token');
+    // And into the token, which is what the server falls back to when it has
+    // no service key to read the profile with, and what this page reads to
+    // know whether a name has been chosen at all.
     const { error } = await sb.auth.updateUser({ data: { game_name: name } });
     if (error) throw error;
-    // And into the profile, which is what friend search will read later.
-    try { await sb.from('profiles').update({ display_name: name }).eq('id', account.id); }
-    catch (err){ console.warn('profile name not saved:', err && err.message); }
     account.gameName = account.name = G.playerName = name;
     updateAccountUI();
     showScreen('home');
   } catch (err){
+    clashed = isNameClash(err);
     nameHint.className = 'name-hint bad';
-    nameHint.textContent = 'Could not save that — ' + ((err && err.message) || 'try again.');
+    nameHint.textContent = clashed
+      ? NAME_TAKEN
+      : 'Could not save that — ' + ((err && err.message) || 'try again.');
+    nameInput.classList.add('bad');
   } finally {
     nameSave.textContent = 'Continue';
-    judgeName();
+    // A taken name stays refused until the box changes; anything else is
+    // judged afresh so the button comes back for another try.
+    if (clashed) nameSave.disabled = true;
+    else judgeName();
   }
 });
 
@@ -13053,7 +14005,7 @@ function updateAccountUI(){
   // for the one the account has actually earned
   if (screenName === 'ranked') drawRank();
   // and the leaderboard marks one row as yours, which is now somebody else's
-  if (LB.rows) renderBoard();
+  renderBoard();
   // and the social page is about one particular account, so it starts over
   socialAccountChanged();
   // practice is kept per account too, so the dashboard on screen is now
@@ -13202,74 +14154,190 @@ document.querySelectorAll('[data-home]').forEach(b => {
 document.getElementById('authClose').onclick  =
   () => document.getElementById('authOverlay').classList.remove('show');
 
-/* ---- the leaderboard ----
-   The top of the ranked ladder, read straight out of profiles. It needs no
-   account of its own: supabase-setup.sql makes that table readable by anon as
-   well as authenticated, and rating is one of the columns the browser may
-   read and never write — so a guest sees exactly the ten names a signed-in
-   player sees, and neither of them can touch the numbers.
+/* ---- the leaderboards ----
+   Four ladders, one per vision, and all four are read out of profiles.
 
-   It is re-read on every open rather than kept for the session. It is one
-   small query, and a ladder that is quietly out of date is worse company than
-   one that takes a moment to arrive. */
-const LB = { rows: null, loading: false, error: '', token: 0 };
-const lbList = document.getElementById('lbList');
+   Each vision has a rating column of its own. `rating` is the Sighted ladder
+   and has been since supabase-setup.sql; the other three —
+   complete_blindfold_rating, board_only_rating and fog_of_war_rating —
+   arrive with supabase-migrate-visions.sql, which also seeds them with the
+   sixty places this page used to carry as a fixture, so the first ladders
+   drawn from the database are the ladders that were drawn before it. All
+   four are columns the browser may read and never write, the arrangement
+   `rating` and `puzzle_rating` already have, and the only thing that moves
+   any of them is record_rated_game() in that file, which the server alone
+   may call: a player's standing in one vision says nothing about the others,
+   and a game in one vision cannot move another vision's number.
 
-async function loadBoard(){
+   The ladders need no account, only the client: profiles is readable by anon
+   as well as authenticated, so a guest sees exactly the twenty names a
+   signed-in player sees, and neither of them can touch the numbers. They are
+   re-read on every open rather than kept for the session. Each is one small
+   query, and a ladder that is quietly out of date is worse company than one
+   that takes a moment to arrive.
+
+   Four queries rather than one, on purpose. A select naming a column that
+   does not exist fails the whole request, so one query for all four columns
+   would take the Sighted ladder down on every project that has not run the
+   visions migration yet; asked for separately, each panel answers for
+   itself, and the one that cannot be read says which file it is waiting for
+   (ladderError) instead of pretending to have loaded.
+
+   The system profiles — the twenty-one of supabase-system-profiles.sql and
+   the twenty more the visions file adds — arrive through these same queries
+   and nothing else: they are rows in profiles with a rating, sorted with
+   everybody by that rating, and a real player who climbs past one goes above
+   it. Nothing here knows they exist, and nothing here may — a list that
+   special-cases them is a list that lies about the order. The flag that
+   marks them is deliberately not selected. */
+/* How much of each ladder is shown. Twenty is the whole list and there is no
+   "show more": the captions say the same number, so change both or a panel
+   will promise one thing and deliver another. */
+const LB_TOP = 20;
+
+/* One column per vision, and the panel it fills. The keys are G.mode's,
+   exactly as PZ_VISION_NAME's are — total is Complete Blindfold, blind is
+   the board with no men on it, fog is Fog of War, sighted is the ranked
+   ladder — and the columns are the ones supabase-migrate-visions.sql adds
+   and server/supabase_db.py's VISION_COLUMNS names; test_leaderboard.js
+   holds the three to each other. `needs` is the file a missing column is
+   waiting for: the Sighted column exists from setup, the other three from
+   the visions migration. */
+const LB_VISIONS = {
+  sighted: { column: 'rating',                    list: 'lbList',      cap: '',           needs: 'supabase-setup.sql' },
+  total:   { column: 'complete_blindfold_rating', list: 'lbListTotal', cap: 'lbCapTotal', needs: 'supabase-migrate-visions.sql' },
+  blind:   { column: 'board_only_rating',         list: 'lbListBlind', cap: 'lbCapBlind', needs: 'supabase-migrate-visions.sql' },
+  fog:     { column: 'fog_of_war_rating',         list: 'lbListFog',   cap: 'lbCapFog',   needs: 'supabase-migrate-visions.sql' }
+};
+
+/* What each ladder currently holds: rows in ranking order once read, the
+   error that stopped a read, and a token so that the answer to an earlier
+   read cannot land over a later one. Four of these rather than one, because
+   the four are read separately and each fails or arrives on its own. */
+const LB = {
+  sighted: { rows: null, loading: false, error: '', token: 0 },
+  total:   { rows: null, loading: false, error: '', token: 0 },
+  blind:   { rows: null, loading: false, error: '', token: 0 },
+  fog:     { rows: null, loading: false, error: '', token: 0 }
+};
+
+/* All four, each on its own: nothing here waits for anything, so the Sighted
+   ladder is up while the others are still arriving, and a panel that fails
+   fails alone. */
+function loadBoard(){
+  for (const key in LB_VISIONS) loadLadder(key);
+}
+
+async function loadLadder(key){
+  const spec = LB_VISIONS[key], st = LB[key];
   if (!sb){
     /* Two different silences, and the panel must not confuse them. Before
        initAuth has finished importing the client there is simply nothing to
        ask yet, and the panel says so by saying nothing; once it has settled —
        no keys, or a CDN that never answered — there is no ladder to show and
        that is worth a sentence. Neither one may read as "nobody is ranked". */
-    LB.rows = null;
-    LB.error = authSettled
+    st.rows = null;
+    st.error = authSettled
       ? 'The leaderboard needs the account server, and it is not reachable right now.'
       : '';
-    renderBoard();
+    renderLadder(key);
     return;
   }
-  const token = ++LB.token;
-  LB.loading = true;
-  LB.error = '';
-  renderBoard();
+  const token = ++st.token;
+  st.loading = true;
+  st.error = '';
+  renderLadder(key);
   try {
     const { data, error } = await sb.from('profiles')
       // no avatar_url: this list wears the tier badge, not the player's face
-      .select('id, display_name, rating')
-      .order('rating', { ascending: false })
+      .select('id, display_name, ' + spec.column)
+      .order(spec.column, { ascending: false })
       // Ties are broken by name here rather than left to whatever order the
       // database felt like: everybody starts on the same rating, so without
-      // this the tenth and eleventh place could swap between two opens.
+      // this the twentieth and twenty-first place could swap between two
+      // opens.
       .order('display_name')
-      .limit(10);
+      .limit(LB_TOP);
     if (error) throw error;
-    if (token !== LB.token) return;          // a later read has already answered
-    LB.rows = (data || []).map(asPerson);
+    if (token !== st.token) return;          // a later read has already answered
+    st.rows = (data || []).map(row => ratedPerson(row, spec.column));
   } catch (err){
-    if (token !== LB.token) return;
-    LB.rows = null;
-    LB.error = 'Could not load the leaderboard — ' + ((err && err.message) || 'try again in a moment.');
+    if (token !== st.token) return;
+    st.rows = null;
+    st.error = ladderError(err, spec);
   } finally {
-    if (token === LB.token){ LB.loading = false; renderBoard(); }
+    if (token === st.token){ st.loading = false; renderLadder(key); }
   }
 }
 
-function renderBoard(){
-  lbList.innerHTML = '';
-  if (LB.error){ lbList.appendChild(emptyNote(LB.error, true)); return; }
+/* A row of profiles as a person on one particular ladder. asPerson() reads
+   `rating`, which is the Sighted number, and a Fog of War row wearing a
+   Sighted rating is exactly the mix-up the four columns exist to prevent —
+   so the column is named, and nothing else on the row is read as a rating. */
+function ratedPerson(row, column){
+  return {
+    id: row.id,
+    name: row.display_name || 'Player',
+    avatar: '',
+    rating: typeof row[column] === 'number' ? row[column] : null
+  };
+}
+
+/* What a failed read says. A column that does not exist is not a fault in
+   the network or the code: it is a project that has not run the file that
+   adds it, and the panel says which file, in one line, so that somebody
+   looking at a blank ladder is told what to do rather than left to guess —
+   and so that the panel never pretends to have loaded. Postgres reports it
+   as undefined_column (42703), and PostgREST passes that code through; the
+   message is matched as well for the client versions that do not. Every
+   other error is shown as itself, since hiding a real database error behind
+   a friendly sentence is how one stays broken. */
+function ladderError(err, spec){
+  const code = err && err.code, message = (err && err.message) || '';
+  if (code === '42703' || /column .* does not exist/i.test(message)){
+    return 'This ladder needs ' + spec.needs + ' to be run.';
+  }
+  return 'Could not load the leaderboard — ' + (message || 'try again in a moment.');
+}
+
+function renderLadder(key){
+  const spec = LB_VISIONS[key], st = LB[key];
+  const list = document.getElementById(spec.list);
+  // The Sighted caption is written in the markup ("Top 20"); the other three
+  // say how many are on the list, as they did when the list was a fixture.
+  const cap = spec.cap ? document.getElementById(spec.cap) : null;
+  if (cap) cap.textContent = st.rows ? st.rows.length + ' players' : '';
+  if (st.error){ list.innerHTML = ''; list.appendChild(emptyNote(st.error, true)); return; }
   // Anything short of rows in hand is "loading", including the wait before the
   // account client exists. A refresh over rows that are already up says
   // nothing at all rather than blanking the list to announce itself.
-  if (!LB.rows){ lbList.appendChild(emptyNote('Loading the ladder…')); return; }
-  if (!LB.rows.length){ lbList.appendChild(emptyNote('Nobody has a ranked rating yet.')); return; }
-  LB.rows.forEach((person, i) => lbList.appendChild(boardRow(person, i + 1)));
+  if (!st.rows){ list.innerHTML = ''; list.appendChild(emptyNote('Loading the ladder…')); return; }
+  if (!st.rows.length){ list.innerHTML = ''; list.appendChild(emptyNote('Nobody is rated on this ladder yet.')); return; }
+  fillBoard(list, st.rows);
 }
 
-/* The tier's badge, the same file and the same naming the ranked screen uses.
-   A row with no rating to read gets no badge rather than a guessed one — the
-   only way that happens is a profile row from before the column existed, and
-   Bronze would be a claim about somebody nobody has measured. */
+/* Every ladder that has rows, drawn again — what signing in or out calls,
+   because one row may now be yours, or no longer be. A ladder still loading
+   or in error is left saying so. */
+function renderBoard(){
+  for (const key in LB_VISIONS) if (LB[key].rows) renderLadder(key);
+}
+
+/* One list filled from the top. The place is the row's index and nothing
+   else, so the order the people arrive in *is* the ranking — which is why
+   every ladder hands this rows the database has already sorted by rating. */
+function fillBoard(list, people){
+  list.innerHTML = '';
+  people.forEach((person, i) => list.appendChild(boardRow(person, i + 1)));
+}
+
+/* The tier's badge, the same file and the same naming the ranked screen uses,
+   and read off the same TIERS ladder for every one of the four lists: a
+   vision has no thresholds of its own yet, and until it does the ranked
+   ladder's are the only honest way to turn a rating into a badge. A row with
+   no rating to read gets no badge rather than a guessed one — the only way
+   that happens is a profile row from before the column existed, and Bronze
+   would be a claim about somebody nobody has measured. */
 function badgeFor(person){
   const box = document.createElement('div');
   box.className = 'lb-badge';
@@ -13278,16 +14346,20 @@ function badgeFor(person){
   const img = document.createElement('img');
   img.src = tierArt(tier);
   img.alt = tier;
-  img.width = 46; img.height = 46;
-  // a badge that will not load leaves the row's spacing alone; the tier is
-  // written under the name anyway
+  // the tier used to be written under the name; the rows are half that height
+  // now, so it is the badge's tooltip instead
+  img.title = tier;
+  img.width = 30; img.height = 30;
+  // a badge that will not load leaves the row's spacing alone
   img.onerror = () => img.remove();
   box.appendChild(img);
   return box;
 }
 
-/* One row: the place, the badge the rating has earned, the name, the tier it
-   is called by, and the rating itself. */
+/* One row: the place, the badge the rating has earned, the name, and the
+   rating itself. The tier's name and the word "ELO" used to be written under
+   the name and the number; with four lists on the page instead of one, a row
+   is one line, and the badge and the column say what those two said. */
 function boardRow(person, place){
   const row = document.createElement('div');
   row.className = 'lb-row'
@@ -13300,22 +14372,353 @@ function boardRow(person, place){
   row.appendChild(at);
 
   row.appendChild(badgeFor(person));
-  row.appendChild(whoBlock(person, person.rating === null ? '' : tierFor(person.rating)));
+  row.appendChild(whoBlock(person, ''));
 
   const elo = document.createElement('div');
   elo.className = 'lb-elo';
   const num = document.createElement('div');
   num.className = 'lb-num';
   num.textContent = person.rating === null ? '—' : person.rating;
-  const cap = document.createElement('div');
-  cap.className = 'lb-cap-elo';
-  cap.textContent = 'ELO';
   elo.appendChild(num);
-  elo.appendChild(cap);
   row.appendChild(elo);
   return row;
 }
 
+
+/* ============================================================
+   THE LIVE LEAGUE — the strongest bots, playing each other around the clock
+   The server runs it (server/league.py): four ladders, four pools, four
+   sets of games, and it plays them whether or not anybody is looking. This
+   is only the window onto that — a socket of its own that says {t:'live'}
+   and is pushed the featured game of each vision on every move, and four
+   cards that draw what arrives.
+
+   The socket is deliberately not NET's. NET is a player's connection and
+   goes up and down with rooms, queues and games; a viewer on the home page
+   is not a player, need not say hello, and should not have a name claimed
+   for them to look at a board. It is opened when the home page is shown and
+   closed when it is left, so a game screen is not being sent boards it
+   cannot show — and it reconnects, on a short backoff, for as long as the
+   page stays home.
+
+   Nothing here decides anything. The server chooses which game is featured
+   (the strongest pair in each vision, and both players in it are among that
+   ladder's own top twenty — the names on a card are names in the ladder
+   beside it, shown exactly as the ladder shows them), keeps the clocks, and
+   reports the result; the page shows the clocks running by counting down from the last
+   snapshot, and reads the ladders again when a game ends, because that is
+   the moment the numbers move — the same four columns loadBoard() reads,
+   which record_rated_game() in supabase-migrate-visions.sql is the one
+   thing that writes.
+   ============================================================ */
+const LIVE = {
+  sock: null,        // the watching socket, while the home page is up
+  open: false,       // whether the home page wants one
+  games: [],         // the last snapshot: one entry per vision
+  at: 0,             // the server's clock when it was taken
+  skew: 0,           // server time minus ours, so the clocks count from its moment
+  off: false,        // the server said it runs no league
+  tick: null,        // the half-second clock timer
+  retry: null,       // the reconnect timer
+  seen: {},          // mode -> the id and status last drawn, to notice a result
+  big: null          // the mode open in the spectator view, if any
+};
+const LIVE_RETRY = 8000;
+const LIVE_NAME = { sighted:'Sighted', total:'Complete Blindfold', blind:'Board Only', fog:'Fog of War' };
+const liveGrid = document.getElementById('liveGrid');
+const liveNoteEl = document.getElementById('liveNote');
+const liveOverlay = document.getElementById('liveOverlay');
+
+function liveNote(text, bad){
+  liveNoteEl.textContent = text || '';
+  liveNoteEl.classList.toggle('bad', !!bad);
+}
+
+function liveOpen(){
+  LIVE.open = true;
+  if (!LIVE.games.length) liveRender();
+  liveConnect();
+  if (!LIVE.tick) LIVE.tick = setInterval(liveTickClocks, 500);
+}
+
+function liveLeave(){
+  LIVE.open = false;
+  clearTimeout(LIVE.retry); LIVE.retry = null;
+  clearInterval(LIVE.tick); LIVE.tick = null;
+  liveCloseBig();
+  liveDisconnect();
+}
+
+function liveConnect(){
+  if (!LIVE.open) return;
+  if (!ONLINE_AVAILABLE){
+    liveNote('Live games need this page to be served by the Nox Chess server.', true);
+    return;
+  }
+  if (LIVE.sock) return;
+  let sock;
+  try { sock = new WebSocket(serverURL()); }
+  catch (e){ liveRetryLater(); return; }
+  LIVE.sock = sock;
+  sock.onopen = () => sock.send(JSON.stringify({ t:'live' }));
+  sock.onmessage = ev => {
+    let msg;
+    try { msg = JSON.parse(ev.data); } catch (e){ return; }
+    if (msg.t === 'live-games') liveUpdate(msg);
+  };
+  sock.onerror = () => {};
+  sock.onclose = () => {
+    if (LIVE.sock !== sock) return;
+    LIVE.sock = null;
+    if (LIVE.open){
+      liveNote('The live games lost their connection — reconnecting…');
+      liveRetryLater();
+    }
+  };
+}
+
+function liveRetryLater(){
+  clearTimeout(LIVE.retry);
+  LIVE.retry = setTimeout(() => { LIVE.retry = null; liveConnect(); }, LIVE_RETRY);
+}
+
+function liveDisconnect(){
+  const s = LIVE.sock;
+  LIVE.sock = null;
+  if (!s) return;
+  s.onclose = s.onerror = s.onmessage = s.onopen = null;
+  try { if (s.readyState === WebSocket.OPEN) s.send(JSON.stringify({ t:'unlive' })); } catch (e){}
+  try { s.close(); } catch (e){}
+}
+
+/* A fresh snapshot from the server. A card whose game has just ended, or
+   whose game has been replaced, is what tells this page the ladders have
+   moved — so those are re-read here, once, rather than on a timer. */
+let liveBoardsTimer = null;
+function liveUpdate(msg){
+  LIVE.at = msg.at || Date.now();
+  LIVE.skew = LIVE.at - Date.now();
+  LIVE.off = !!msg.off;
+  LIVE.games = Array.isArray(msg.games) ? msg.games : [];
+  let moved = false;
+  for (const g of LIVE.games){
+    const was = LIVE.seen[g.mode];
+    if (was && ((was.id === g.id && was.status !== g.status && g.status === 'finished') ||
+                (was.id !== g.id && was.status === 'live'))) moved = true;
+    LIVE.seen[g.mode] = { id: g.id, status: g.status };
+  }
+  /* Off comes with a sentence saying why — starting, no engine, waiting on
+     its database — written by the server for the public and carrying no
+     detail; the detail is in the server's log and on /health. */
+  if (LIVE.off) liveNote(msg.note || 'The server is not running the AI league right now.');
+  else if (!LIVE.games.some(g => g.status === 'live' || g.status === 'finished'))
+    liveNote('Arranging the first games…');
+  else liveNote('');
+  liveRender();
+  if (moved && authSettled){
+    clearTimeout(liveBoardsTimer);
+    liveBoardsTimer = setTimeout(loadBoard, 1200);
+  }
+}
+
+/* ---- reading a snapshot ---- */
+
+/* What a side has left, now: the snapshot's figure, less what has run off it
+   since the snapshot if it is that side's move. Counted on the server's clock,
+   which is what the snapshot was stamped with. */
+function liveRemaining(g, color, now){
+  const base = color === 'w' ? g.whiteMs : g.blackMs;
+  if (typeof base !== 'number') return 0;
+  if (g.status !== 'live' || g.turn !== color) return Math.max(0, base);
+  const elapsed = Math.max(0, (now + LIVE.skew) - LIVE.at);
+  return Math.max(0, base - elapsed);
+}
+
+/* One line for the foot of the card: whose move, or how it ended. */
+function liveStatusText(g){
+  if (!g || g.status === 'waiting') return 'Arranging the next game…';
+  if (g.status === 'finished' || g.status === 'finishing'){
+    const how = g.termination ? g.termination.charAt(0).toUpperCase() + g.termination.slice(1) : 'Game over';
+    return (g.result || '') + ' · ' + how;
+  }
+  const who = g.turn === 'w' ? 'White' : 'Black';
+  return who + ' to move' + (g.check ? ' · Check' : '');
+}
+
+function liveEsc(text){
+  return String(text == null ? '' : text)
+    .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+}
+
+/* ---- drawing ---- */
+
+/* The board of a live game, in the vision it is played in. Reads the FEN the
+   same way the puzzles do (stateFromFEN) and draws the men with the game's
+   own glyphs (pieceHTML), so a piece here is the piece on the game screen.
+
+   What each vision may show is the game's rule, restated for a viewer:
+     sighted  — every man, and the last move lit
+     blind    — the squares, and no men at all (.board.blind hides the men
+                but keeps the board; here they are simply not drawn)
+     fog      — the men of the side to move on the squares they stand on,
+                and fog over every other square: visibleSet()'s rule, from
+                the chair of whoever is thinking
+   Complete Blindfold has no board and does not come here — liveConsoleHTML()
+   is what it shows. The last move is lit only where the game would light it,
+   which is the sighted board and nowhere else; a check is ringed only on a
+   king the vision allows to be seen. */
+function liveBoardHTML(fen, mode, lastMove, check){
+  const st = stateFromFEN(fen);
+  const viewer = st.turn;
+  // sqIndex is the console's own "e4" -> board index reader
+  const from = lastMove && lastMove.length >= 4 ? sqIndex(lastMove.slice(0, 2)) : -1;
+  const to   = lastMove && lastMove.length >= 4 ? sqIndex(lastMove.slice(2, 4)) : -1;
+  let html = '<div class="live-board' + (mode === 'fog' ? ' fog' : '') + '" aria-hidden="true">';
+  for (let i = 0; i < 64; i++){
+    const p = st.b[i];
+    const cls = ['lsq'];
+    let shown = !!p;
+    if (mode === 'blind') shown = false;
+    if (mode === 'fog'){
+      const mine = !!p && p.c === viewer;
+      if (!mine) cls.push('hidden');
+      shown = mine;
+    }
+    if (mode === 'sighted' && (i === from || i === to)) cls.push('last');
+    if (check && p && p.t === 'K' && p.c === st.turn && (mode === 'sighted' || mode === 'fog')) cls.push('check');
+    html += '<div class="' + cls.join(' ') + '">';
+    if (mode === 'fog') html += '<div class="fog"></div>';
+    if (shown) html += '<span class="lpc ' + (p.c === W ? 'g-w' : 'g-b') + '">' + pieceHTML(p.t) + '</span>';
+    html += '</div>';
+  }
+  return html + '</div>';
+}
+
+/* The written moves, numbered as the game numbers them, the last one lit.
+   `count` is how many moves (pairs) fit; the tail is what is shown. */
+function liveMovesHTML(sans, count){
+  if (!sans || !sans.length) return '<span class="empty">No moves yet.</span>';
+  const pairs = [];
+  for (let i = 0; i < sans.length; i += 2){
+    pairs.push({ n: i / 2 + 1, w: sans[i], b: sans[i + 1], last: i + 1 >= sans.length - 1 });
+  }
+  const shown = pairs.slice(-count);
+  return shown.map((p, k) => {
+    const lastPair = k === shown.length - 1;
+    const wCur = lastPair && !p.b;
+    const bCur = lastPair && !!p.b;
+    return '<span class="ln">' + p.n + '.</span>' +
+      '<span class="lm' + (wCur ? ' cur-move' : '') + '">' + liveEsc(p.w) + '</span>' +
+      (p.b ? '<span class="lm' + (bCur ? ' cur-move' : '') + '">' + liveEsc(p.b) + '</span>' : '');
+  }).join(' ');
+}
+
+/* Complete Blindfold: no board. The players have the notation and their
+   own heads, and so does the viewer. */
+function liveConsoleHTML(sans, big){
+  return '<div class="live-console">' +
+    '<div class="eyes">No board</div>' +
+    '<div class="live-moves">' + liveMovesHTML(sans, big ? 60 : 8) + '</div></div>';
+}
+
+function liveSeatHTML(g, color, now){
+  const side = color === 'w' ? g.white : g.black;
+  const ms = liveRemaining(g, color, now);
+  const cls = ['live-seat', color];
+  if (g.status === 'live' && g.turn === color) cls.push('turn');
+  if (g.status === 'live' && ms < 60000) cls.push('low');
+  return '<div class="' + cls.join(' ') + '" data-side="' + color + '">' +
+    '<div class="live-who"><span class="live-dot"></span>' +
+    '<span class="live-name">' + liveEsc(side ? side.name : '—') + '</span></div>' +
+    '<div class="live-nums"><span class="live-elo">' +
+    (side && typeof side.rating === 'number' ? side.rating : '') + '</span>' +
+    '<span class="live-clock">' + fmtClock(ms) + '</span></div></div>';
+}
+
+function liveCardHTML(g, big){
+  const now = Date.now();
+  const mode = g.mode;
+  const state = g.status === 'live' ? 'live' : (g.status === 'waiting' ? 'waiting' : 'over');
+  let html = '<article class="live-card ' + state + '" data-mode="' + mode + '" tabindex="0" ' +
+    'role="button" aria-label="' + liveEsc(LIVE_NAME[mode] || mode) + ' live game">';
+  html += '<div class="live-head"><span class="live-mode">' + liveEsc(LIVE_NAME[mode] || g.modeName || mode) +
+    '</span><span class="live-pill">' + (state === 'live' ? 'Live' : state === 'over' ? 'Final' : 'Soon') + '</span></div>';
+  if (state === 'waiting'){
+    html += '<div class="live-body"><div class="live-view"><div class="live-console">' +
+      '<span class="empty">Arranging the next game…</span></div></div>' +
+      '<div class="live-side"></div></div>';
+    html += '<div class="live-status"><span>' + liveEsc(liveStatusText(g)) + '</span></div>';
+    return html + '</article>';
+  }
+  html += '<div class="live-body">';
+  html += '<div class="live-view">' +
+    (mode === 'total' ? liveConsoleHTML(g.sans, big) : liveBoardHTML(g.fen, mode, g.lastMove, g.check)) +
+    '</div>';
+  html += '<div class="live-side">' + liveSeatHTML(g, 'b', now) +
+    '<div class="live-line">' + (mode === 'total' && !big ? '' : liveMovesHTML(g.sans, big ? 30 : 4)) + '</div>' +
+    liveSeatHTML(g, 'w', now) + '</div>';
+  html += '</div>';
+  html += '<div class="live-status"><span>' + liveEsc(liveStatusText(g)) + '</span>' +
+    '<span>' + (g.ply ? 'Move ' + Math.floor(g.ply / 2 + 1) : '') + '</span></div>';
+  return html + '</article>';
+}
+
+function liveRender(){
+  const order = ['sighted', 'total', 'blind', 'fog'];
+  const byMode = {};
+  for (const g of LIVE.games) byMode[g.mode] = g;
+  liveGrid.innerHTML = order.map(mode => liveCardHTML(byMode[mode] || { mode, status:'waiting' }, false)).join('');
+  if (LIVE.big) liveRenderBig();
+}
+
+/* Half a second at a time, without redrawing the cards: only the clocks
+   change between snapshots, so only the clocks are touched. */
+function liveTickClocks(){
+  const now = Date.now();
+  const roots = [liveGrid];
+  if (LIVE.big) roots.push(document.getElementById('liveBig'));
+  for (const root of roots){
+    for (const card of root.querySelectorAll('.live-card')){
+      const g = LIVE.games.find(x => x.mode === card.dataset.mode);
+      if (!g || g.status !== 'live') continue;
+      for (const seat of card.querySelectorAll('.live-seat')){
+        const color = seat.dataset.side;
+        const ms = liveRemaining(g, color, now);
+        seat.querySelector('.live-clock').textContent = fmtClock(ms);
+        seat.classList.toggle('low', ms < 60000);
+      }
+    }
+  }
+}
+
+/* ---- the spectator view ---- */
+function liveOpenBig(mode){
+  const g = LIVE.games.find(x => x.mode === mode);
+  if (!g || g.status === 'waiting') return;
+  LIVE.big = mode;
+  liveRenderBig();
+  liveOverlay.classList.add('show');
+}
+function liveRenderBig(){
+  const g = LIVE.games.find(x => x.mode === LIVE.big);
+  const box = document.getElementById('liveBig');
+  box.innerHTML = g ? liveCardHTML(g, true) : '';
+}
+function liveCloseBig(){
+  LIVE.big = null;
+  liveOverlay.classList.remove('show');
+}
+liveGrid.addEventListener('click', e => {
+  const card = e.target.closest('.live-card');
+  if (card) liveOpenBig(card.dataset.mode);
+});
+liveGrid.addEventListener('keydown', e => {
+  const card = e.target.closest('.live-card');
+  if (card && (e.key === 'Enter' || e.key === ' ')){ e.preventDefault(); liveOpenBig(card.dataset.mode); }
+});
+document.getElementById('liveX').onclick = liveCloseBig;
+liveOverlay.addEventListener('click', e => { if (e.target === liveOverlay) liveCloseBig(); });
+document.addEventListener('keydown', e => { if (e.key === 'Escape' && LIVE.big) liveCloseBig(); });
 
 /* ============================================================
    SOCIAL — friends, the requests that make them, and challenges
@@ -13473,7 +14876,11 @@ async function runSearch(q){
     const { data, error } = await sb.from('profiles')
       .select('id, display_name, avatar_url, rating')
       // part of a name, anywhere in it, in any case: ChessMaster123 answers
-      // to "Chess", to "Master" and to "chessmaster" alike
+      // to "Chess", to "Master" and to "chessmaster" alike. The system
+      // profiles (supabase-system-profiles.sql) are found here like anybody
+      // — same table, same query — and a request sent to one is sent like
+      // any other and is simply never answered; the database refuses to
+      // make the friendship by any door.
       .ilike('display_name', '%' + term + '%')
       .neq('id', account.id)            // you are never a result of your own search
       .order('display_name')
@@ -13972,6 +15379,7 @@ document.getElementById('chalDecline').onclick = () => {
 syncOptions();
 render();
 initAuth();          // arriving leads to the home page; nothing gates it
+liveOpen();          // ...and the home page is where the live games are watched from
 </script>
 </body>
 </html>

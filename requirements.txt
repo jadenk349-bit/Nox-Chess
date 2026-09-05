@@ -7,3 +7,10 @@
 # PyJWT does the JWT work and pulls in `cryptography` for the curve maths.
 # Both ship manylinux wheels, so the Docker build needs no compiler.
 PyJWT[crypto]==2.13.0
+
+# The 24/7 AI league (server/league.py) referees its own games — a game nobody
+# is watching has no browser to run the rules in — and python-chess is those
+# rules: legality, checkmate, stalemate, repetition, the fifty-move rule,
+# insufficient material, SAN and PGN. Pure Python, no compiler. The engine it
+# drives is a native Stockfish on PATH, which the Dockerfile installs.
+chess==1.11.2

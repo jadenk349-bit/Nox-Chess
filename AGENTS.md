@@ -1,6 +1,6 @@
-# CLAUDE.md
+# AGENTS.md
 
-This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
+This file provides guidance to Codex (Codex.ai/code) when working with code in this repository.
 
 ## What this is
 
@@ -37,8 +37,7 @@ python3 server/test_visions.py           # the three vision ratings: what the mi
 node tools/test_generate_puzzles.js      # the generator's own decisions, no engine
 python3 tools/check_supabase_puzzles.py  # RLS and column grants, against the real project
 python3 tools/check_supabase_visions.py  # the four ladders and their grants, against the real project
-python3 server/test_league.py           # the AI league: pairing, ratings, endings, restart, boot; no server, stub engine
-python3 server/test_league_boot.py      # the production startup path: runs server/server.py itself, needs a Stockfish
+python3 server/test_league.py           # the AI league: pairing, ratings, endings, restart; no server, stub engine
 node server/test_live_games.js            # the home page's live cards — what each vision may show
 NOX_LEAGUE_FAST=1 python3 server/server.py    # ...and, against that server (real accounts, results in memory):
 python3 server/test_league_socket.py      # real games, real engine, over the socket — REQUIRES that server
@@ -477,43 +476,9 @@ with the results kept in memory — the same degradation puzzle ratings have —
 so a laptop shows the real names and a production box without the key does
 not quietly invent any; `NOX_LEAGUE_FIXTURE` reads profile rows from a JSON
 file instead, for a test with no network. `NOX_LEAGUE_FAST` shortens every
-pause for the tests.
-
-**The league starts itself, and keeps trying.** `start_league()` in
-`server.py` is called once from `main()` before the port is bound, and
-`league.build()` answers None for `NOX_LEAGUE=off` and nothing else. Every
-other precondition — python-chess, the database, its schema, the engine, an
-AI account to seat — is checked by `League.boot()` on the league's own thread,
-in that order, by `prepare()`, and a miss is a *state* (`STATES`: starting,
-running, database unavailable, migration missing, stockfish unavailable,
-python-chess unavailable, no eligible players, crashed, off) rather than an
-exit: logged with the full reason when it changes, retried at a doubling
-interval up to a minute (`BOOT_RETRY_MIN`/`MAX`), what was found kept across
-attempts. It used to be decided once, synchronously, in `build()`, and that is
-how production ran for weeks without a league: Debian's `stockfish` package
-installs to `/usr/games`, which is not on PATH in `python:3.12-slim`, so
-`Popen(["stockfish"])` failed at boot, `build()` returned None, and nothing
-ever asked again. `find_stockfish()` now looks — `NOX_STOCKFISH` if set (and
-only that), else PATH, else `STOCKFISH_CANDIDATES`, `/usr/games/stockfish`
-first — and logs where it found the engine; the Dockerfile also puts
-`/usr/games` on PATH and refuses to build an image whose engine does not
-answer `uci`. `SupabaseStore.verify_schema()` asks for the four rating
-columns, `is_bot`, the three tables and the four functions by name before the
-first game, and names the file that adds whatever is missing. `/health`
-carries the state, its public sentence, the store kind, the engine's path,
-the attempt count and, per ladder, playing / waiting / error with the reason
-(`pairing_report()` and `explain_pairing()` — "20 leaderboard rows, 19 bots in
-the top 20, 17 free, 11 valid pairings", or "no valid pairing within 100
-Elo"); the socket payload carries `off`, `state` and `note` while not running,
-and the cards print the note. Nothing public quotes an error body or a path
-but the engine's. `tick()` isolates each board and each ladder: an exception
-in one is logged against its vision (`mode_failed()`) and the other three
-carry on; only the database being away is everybody's problem. `start()` is
-idempotent and `start_league()` refuses a second league. Every log line is
-prefixed `[AI League]`. `test_league_boot.py` runs the real entrypoint as a
-subprocess — with the engine on PATH, with PATH stripped, with `NOX_STOCKFISH`
-pointing at nothing, and with `NOX_LEAGUE=off` — and reads `/health`,
-`/live.json` and the log.
+pause for the tests. Without an engine, or with no AI account on any ladder,
+the server says which once at startup and runs without the league; the cards
+say the server is not running it.
 
 **The rating only persists with `SUPABASE_SERVICE_KEY`.** The browser is not
 allowed to write `puzzle_rating`, so the server is the only thing that can, and
