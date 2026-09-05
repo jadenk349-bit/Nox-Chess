@@ -1582,21 +1582,44 @@
   #screen-game.puzzle-mode.rush #barTop{display:flex; justify-content:flex-end;}
   #screen-game.puzzle-mode .board-bar .bar-name{display:none;}
   .pz-pieces{
-    width:min(100%,var(--board-max)); padding:11px 14px;
-    display:flex; flex-direction:column; gap:6px;
+    width:min(90%,calc(100vh - var(--chrome) - 86px)); padding:24px 27px 27px;
+    display:flex; flex-direction:column; gap:12px;
+    margin-bottom:-9px; z-index:2;
+    border-radius:14px 14px 0 0;
+    background:
+      linear-gradient(105deg,rgba(8,13,21,.42),rgba(4,8,14,.72)),
+      url("assets/moon.jpg?v=1") center 44% / cover no-repeat;
+    border-color:rgba(205,212,224,.22);
+    box-shadow:0 12px 30px rgba(0,0,0,.44), inset 0 1px 0 rgba(255,255,255,.09);
   }
-  .pz-pc-row{display:flex; align-items:baseline; gap:12px; line-height:1.5;}
+  .pz-pc-row{display:flex; align-items:baseline; gap:20px; line-height:1.65;}
   .pz-pc-tag{
-    flex:0 0 96px; font-size:12px; letter-spacing:.16em; text-transform:uppercase;
-    color:var(--muted); white-space:nowrap;
+    flex:0 0 145px; font-size:17px; letter-spacing:.17em; text-transform:uppercase;
+    color:#d5d8df; white-space:nowrap; font-weight:650;
   }
   .pz-pc-list{
     flex:1 1 auto; min-width:0;
-    font-size:17.5px; letter-spacing:.03em; color:var(--text);
+    font-size:28px; line-height:1.65; letter-spacing:.045em; color:#f2f3f6;
     font-variant-numeric:tabular-nums; word-spacing:.12em;
   }
-  .pz-pc-row + .pz-pc-row{border-top:1px solid var(--line); padding-top:6px;}
-  .pz-pc-row + .pz-pc-row .pz-pc-list{color:#cfc7b6;}
+  .pz-pc-row + .pz-pc-row{border-top:1px solid rgba(220,225,234,.22); padding-top:12px;}
+  .pz-pc-row + .pz-pc-row .pz-pc-list{color:#ddd7c9;}
+  /* The written position and whichever play surface is active share one exact
+     width, so the panel reads as the play surface's attached header. */
+  #screen-game.puzzle-mode .board-frame,
+  #screen-game.puzzle-mode .pz-stage,
+  #screen-game.puzzle-mode .pz-console{
+    width:min(90%,calc(100vh - var(--chrome) - 86px));
+  }
+  @media (max-width:600px){
+    .pz-pieces{width:94%; padding:19px 17px 21px;}
+    .pz-pc-row{gap:10px;}
+    .pz-pc-tag{flex-basis:104px; font-size:12.5px;}
+    .pz-pc-list{font-size:21px; line-height:1.65;}
+    #screen-game.puzzle-mode .board-frame,
+    #screen-game.puzzle-mode .pz-stage,
+    #screen-game.puzzle-mode .pz-console{width:94%;}
+  }
 
   /* the empty middle of Complete Blindfold. It is sized off the board so that
      switching visions does not move the panels above and below it. */
@@ -3107,61 +3130,91 @@
   .yn .no{color:#e7908a; border-color:rgba(224,90,77,.4);}
   .yn .no:hover{color:#fff; background:rgba(224,90,77,.16); border-color:var(--danger);}
 
-  /* ---------- the leaderboard ----------
-     The home page is a header and a sky, and this is the one thing standing in
-     it, so it is furniture rather than a box laid over the page: parked
-     against the right edge of the row and centred in whatever is left of the
-     window under the header.
+  /* ---------- the leaderboards ----------
+     The home page is a header and a sky, and this is the one thing standing
+     in it. There used to be a single ladder here, parked against the right
+     edge of the row at reading size. There are four now — one per vision,
+     because a rating earned with the board in front of you says nothing about
+     what you can do without it — and four panels at that size would be a page
+     and a half of scrolling. So they are small, and they stand in one column
+     under the account cluster at the right-hand end of the header, beneath a
+     single "Leaderboard" heading: each panel has rows a third the old height
+     and a list scrolling inside a fixed height of its own, so the column is a
+     rail down the right of the page rather than the page. The panel's title
+     and caption sit above its scrolling list rather than inside it, which is
+     what keeps them in view while the tail is read.
 
-     The panel itself has no ground of its own — no plate, no border, no blur.
-     The sky is the background, and the twenty rows are the only things drawn
-     on it, each with just enough shading of its own to keep a name readable over
-     a passing star.
+     The column is pinned to the top of the body rather than centred in the
+     window: it hangs from the header the way the account cluster does, and a
+     column that floated to the middle of a tall window would look unmoored.
+
+     The panels have no ground of their own — no plate, no border, no blur.
+     The sky is the background, and the rows are the only things drawn on it,
+     each with just enough shading of its own to keep a name readable over a
+     passing star.
 
      The badge art is here rather than the player's avatar, which costs
      something worth knowing about: the ranked screen fetches exactly one of
-     these files because only one is ever on it, and this list can put every
+     these files because only one is ever on it, and these lists can put every
      one of them on screen at a couple of hundred kilobytes each. They are
      fetched once per tier, not once per row, and the server serves the assets
      with a week of cache — but if this page ever needs to be light on a cold
      load, small copies of the badges are the first thing to make. */
   .home-body{
-    display:flex; align-items:center; justify-content:flex-end;
-    min-height:calc(100vh - var(--logo-box) - 150px);
-    padding:clamp(10px,3vh,34px) 0 clamp(20px,5vh,54px);
+    display:flex; align-items:flex-start; justify-content:flex-end;
+    padding:clamp(6px,1.6vh,18px) 0 clamp(20px,5vh,54px);
+  }
+  .lb-stack{
+    width:min(290px,100%);
+    display:flex; flex-direction:column; gap:14px;
+  }
+  /* The one heading over the four: the section's name, at the size the single
+     ladder's title used to be, so the column reads as one thing with four
+     parts rather than four things. */
+  .lb-title{
+    margin:0 0 2px; text-align:left;
+    font-family:var(--font); font-weight:400;
+    font-size:clamp(26px,2.6vw,32px); letter-spacing:.1em; color:var(--gold-soft);
   }
   .lb-panel{
-    width:min(500px,100%);
-    padding:clamp(8px,1.6vw,16px) 0;
+    min-width:0;
+    padding:0;
     background:transparent; border:0; box-shadow:none;
   }
   /* Ranged left, with the rows: the heading lines up with the place numbers
      under it rather than floating over the middle of them. */
   .lb-head{
-    margin:0 0 4px; text-align:left;
+    margin:0 0 1px; text-align:left;
     font-family:var(--font); font-weight:400;
-    font-size:clamp(33.5px,4.1vw,44px); letter-spacing:.1em; color:var(--gold-soft);
+    font-size:clamp(16px,1.55vw,20px); letter-spacing:.09em; color:var(--gold-soft);
+    white-space:nowrap; overflow:hidden; text-overflow:ellipsis;
   }
   .lb-cap{
-    margin:0 0 clamp(16px,2.2vh,22px); text-align:left;
-    font-size:14.5px; letter-spacing:.22em; text-transform:uppercase; color:var(--muted);
+    margin:0 0 6px; text-align:left;
+    font-size:9.5px; letter-spacing:.2em; text-transform:uppercase; color:var(--muted);
+    min-height:1.3em;
   }
-  /* Twenty rows is the whole list. The panel grows to hold as many as the
-     window has room for and scrolls for the rest — the top of the ladder is
-     what is read at a glance, and the tail is a short scroll away rather
-     than a second page. */
-  .lb-list{display:flex; flex-direction:column; gap:9px; max-height:62vh; overflow-y:auto;}
+  /* The list is the only thing on the panel that scrolls, and it is capped
+     rather than sized to its rows: the top of a ladder is what is read at a
+     glance, and the tail is a short scroll away rather than a longer page.
+     Twenty rows at this height is about six in view. */
+  .lb-list{
+    display:flex; flex-direction:column; gap:3px;
+    max-height:clamp(150px,22vh,190px); overflow-y:auto;
+    padding-right:3px;
+    scrollbar-width:thin; scrollbar-color:rgba(217,164,65,.32) transparent;
+  }
   .lb-row{
-    display:flex; align-items:center; gap:14px;
-    padding:11px 14px; border-radius:13px;
+    display:flex; align-items:center; gap:6px;
+    padding:3px 7px; border-radius:7px;
     background:rgba(0,0,0,.28); border:1px solid transparent;
   }
   /* your own row, wherever it lands: the list is worth twice as much when you
      can find yourself in it without reading it */
   .lb-row.me{background:rgba(217,164,65,.09); border-color:rgba(217,164,65,.42);}
   .lb-place{
-    flex:none; width:28px; text-align:center;
-    font-size:20.5px; font-weight:700; color:var(--muted);
+    flex:none; width:16px; text-align:center;
+    font-size:11.5px; font-weight:700; color:var(--muted);
     font-variant-numeric:tabular-nums;
   }
   .lb-row.top .lb-place{color:var(--gold);}
@@ -3169,25 +3222,25 @@
      and no crop — it is set into the row the way it is set into the ranked
      screen, on nothing. */
   .lb-badge{
-    flex:none; width:46px; height:46px;
+    flex:none; width:20px; height:20px;
     display:flex; align-items:center; justify-content:center;
   }
   .lb-badge img{width:100%; height:100%; object-fit:contain; display:block;}
-  /* the same name the social page draws people with, one size up */
-  .lb-row .social-name{font-size:20px;}
-  .lb-row .social-meta{
-    font-size:13px; letter-spacing:.16em; text-transform:uppercase;
-  }
-  .lb-elo{flex:none; text-align:right;}
+  /* the same name the social page draws people with; it already clips a long
+     one with an ellipsis rather than pushing the rating off the row */
+  .lb-row .social-name{font-size:12.5px; letter-spacing:.02em;}
+  /* Right-ranged and in tabular figures, so the ratings line up down the
+     column and a four-figure Elo is as wide as the next. */
+  .lb-elo{flex:none; min-width:32px; text-align:right;}
   .lb-num{
-    font-size:24.5px; font-weight:650; letter-spacing:.03em; color:var(--gold-soft);
+    font-size:13px; font-weight:650; letter-spacing:.02em; color:var(--gold-soft);
     font-variant-numeric:tabular-nums;
   }
-  .lb-cap-elo{font-size:12.5px; letter-spacing:.2em; color:#5c6070;}
-  /* Narrow, there is no right half to sit in: it takes the width and the row
-     it is on, and stops reserving a screenful of height it cannot centre in. */
-  @media (max-width:760px){
-    .home-body{min-height:0; justify-content:center; padding-top:18px;}
+  /* Narrow, there is no right-hand end to hang from: the column takes the
+     width and stays at the top. */
+  @media (max-width:520px){
+    .home-body{padding-top:12px;}
+    .lb-stack{width:100%;}
   }
 
   /* ---------- overlays ---------- */
@@ -3381,17 +3434,37 @@
       </div>
     </header>
 
-    <!-- The ladder stands on the page rather than behind a button. It is the
-         only thing in the home page's body, so it is given room: pinned to the
-         right of the row and centred in what is left of the window under the
-         header. Nothing here is a link — this is the ladder being shown, and
-         everything that can be done about it is up in the nav. -->
+    <!-- The ladders stand on the page rather than behind a button. They are
+         the only thing in the home page's body: four small panels, one per
+         vision, in one column under the account cluster at the right-hand end
+         of the header, beneath one heading — the ranked ladder read out of
+         profiles first, then the three drawn by renderStaticBoards() from
+         LB_BOARDS. Nothing here is a link — this is the ladders being shown,
+         and everything that can be done about them is up in the nav. -->
     <div class="home-body">
-      <aside class="lb-panel" aria-labelledby="lbTitle">
-        <h2 class="lb-head" id="lbTitle">Leaderboard</h2>
-        <p class="lb-cap">Top 20</p>
-        <div class="lb-list" id="lbList"></div>
-      </aside>
+      <div class="lb-stack" aria-labelledby="lbTitleAll">
+        <h2 class="lb-title" id="lbTitleAll">Leaderboard</h2>
+        <aside class="lb-panel" aria-labelledby="lbTitle">
+          <h3 class="lb-head" id="lbTitle">Sighted</h3>
+          <p class="lb-cap">Top 20</p>
+          <div class="lb-list" id="lbList"></div>
+        </aside>
+        <aside class="lb-panel" aria-labelledby="lbTitleTotal">
+          <h3 class="lb-head" id="lbTitleTotal">Complete Blindfold</h3>
+          <p class="lb-cap" id="lbCapTotal"></p>
+          <div class="lb-list" id="lbListTotal"></div>
+        </aside>
+        <aside class="lb-panel" aria-labelledby="lbTitleBlind">
+          <h3 class="lb-head" id="lbTitleBlind">Only Board</h3>
+          <p class="lb-cap" id="lbCapBlind"></p>
+          <div class="lb-list" id="lbListBlind"></div>
+        </aside>
+        <aside class="lb-panel" aria-labelledby="lbTitleFog">
+          <h3 class="lb-head" id="lbTitleFog">Fog of War</h3>
+          <p class="lb-cap" id="lbCapFog"></p>
+          <div class="lb-list" id="lbListFog"></div>
+        </aside>
+      </div>
     </div>
   </section>
 
@@ -13841,26 +13914,29 @@ document.querySelectorAll('[data-home]').forEach(b => {
 document.getElementById('authClose').onclick  =
   () => document.getElementById('authOverlay').classList.remove('show');
 
-/* ---- the leaderboard ----
-   The top of the ranked ladder, read straight out of profiles. It needs no
-   account of its own: supabase-setup.sql makes that table readable by anon as
-   well as authenticated, and rating is one of the columns the browser may
-   read and never write — so a guest sees exactly the twenty names a
+/* ---- the leaderboards ----
+   Four ladders, one per vision, and only the first is measured by anything.
+
+   Sighted is the top of the ranked ladder, read straight out of profiles. It
+   needs no account of its own: supabase-setup.sql makes that table readable by
+   anon as well as authenticated, and rating is one of the columns the browser
+   may read and never write — so a guest sees exactly the twenty names a
    signed-in player sees, and neither of them can touch the numbers.
 
    It is re-read on every open rather than kept for the session. It is one
    small query, and a ladder that is quietly out of date is worse company than
    one that takes a moment to arrive.
 
-   The twenty-one system profiles at the top of it (supabase-system-profiles.sql)
-   arrive through this same query and nothing else: they are rows in profiles
-   with a rating, sorted with everybody by that rating, and a real player who
-   climbs past one goes above it. Nothing here knows they exist, and nothing
-   here may — a list that special-cases them is a list that lies about the
-   order. The flag that marks them is deliberately not selected. */
-/* How much of the ladder is shown. Twenty is the whole list and there is no
-   "show more": the caption above the rows says the same number, so change
-   both or the panel will promise one thing and deliver another. */
+   The twenty-one system profiles at the top of the ranked ladder
+   (supabase-system-profiles.sql) arrive through this same query and nothing
+   else: they are rows in profiles with a rating, sorted with everybody by that
+   rating, and a real player who climbs past one goes above it. Nothing here
+   knows they exist, and nothing here may — a list that special-cases them is a
+   list that lies about the order. The flag that marks them is deliberately not
+   selected. */
+/* How much of the ranked ladder is shown. Twenty is the whole list and there
+   is no "show more": the caption above the rows says the same number, so
+   change both or the panel will promise one thing and deliver another. */
 const LB_TOP = 20;
 const LB = { rows: null, loading: false, error: '', token: 0 };
 const lbList = document.getElementById('lbList');
@@ -13907,20 +13983,115 @@ async function loadBoard(){
 }
 
 function renderBoard(){
-  lbList.innerHTML = '';
-  if (LB.error){ lbList.appendChild(emptyNote(LB.error, true)); return; }
+  if (LB.error){ lbList.innerHTML = ''; lbList.appendChild(emptyNote(LB.error, true)); return; }
   // Anything short of rows in hand is "loading", including the wait before the
   // account client exists. A refresh over rows that are already up says
   // nothing at all rather than blanking the list to announce itself.
-  if (!LB.rows){ lbList.appendChild(emptyNote('Loading the ladder…')); return; }
-  if (!LB.rows.length){ lbList.appendChild(emptyNote('Nobody has a ranked rating yet.')); return; }
-  LB.rows.forEach((person, i) => lbList.appendChild(boardRow(person, i + 1)));
+  if (!LB.rows){ lbList.innerHTML = ''; lbList.appendChild(emptyNote('Loading the ladder…')); return; }
+  if (!LB.rows.length){ lbList.innerHTML = ''; lbList.appendChild(emptyNote('Nobody has a ranked rating yet.')); return; }
+  fillBoard(lbList, LB.rows);
 }
 
-/* The tier's badge, the same file and the same naming the ranked screen uses.
-   A row with no rating to read gets no badge rather than a guessed one — the
-   only way that happens is a profile row from before the column existed, and
-   Bronze would be a claim about somebody nobody has measured. */
+/* ---- the other three ----
+   Nothing yet rates a game played Complete Blindfold, in Fog of War or on the
+   bare board — profiles.rating is the sighted ranked rating and the server
+   writes nothing else — so those three ladders are, for now, a fixture: a
+   table in the page rather than a column in the database. They are kept apart
+   from each other and from the ranked rating on purpose. A player's standing
+   in one vision says nothing about the others, and the same name stands on
+   several of these lists at several different numbers — Kasper21 is 2455
+   blindfold and 2631 on the bare board, and neither is their ranked rating,
+   nor may either ever be written to it.
+
+   Each ladder is written as [name, rating] pairs in no particular order and
+   ranked by boardPeople() when drawn — so adding a player means adding a
+   line, not finding their place, and the file's order can never be mistaken
+   for the ranking. Names are copied exactly as they are: this is the name the
+   player chose, underscores, casing and all, and prettifying one would be
+   giving them a name they did not pick — the rule clean_name() and the whole
+   username system already live by.
+
+   The keys are G.mode's, exactly as PZ_VISION_NAME's are: total is Complete
+   Blindfold, fog is Fog of War, blind is the board with no men on it, and
+   sighted — the ranked ladder above — is the fourth. When the server starts
+   rating these games, this is the table that becomes a query, and nothing
+   that draws it should need to change. */
+const LB_BOARDS = {
+  total: { list: 'lbListTotal', cap: 'lbCapTotal', players: [
+    ['NemoPlays', 2501], ['Velmor', 2474], ['Kasper21', 2455], ['fiftyfourthmove', 2430],
+    ['CedricChessLab', 2407], ['Noah_Vortex', 2386], ['tacticalmango', 2344],
+    ['LeoFromPrague', 2268], ['Milo_Anders', 2253], ['Cedro', 2247], ['novaendgame', 2242],
+    ['Nash_B', 2239], ['Luca_Mirnov', 2199], ['Arvenko', 2185], ['chessnori', 2180],
+    ['tomasik_', 2175], ['Artem_Koslov', 2172], ['ivanorbit', 2144], ['justleon', 2143],
+    ['MarekZed', 2140]
+  ]},
+  fog: { list: 'lbListFog', cap: 'lbCapFog', players: [
+    ['Kasper21', 2673], ['RivenCross', 2648], ['tacticalmango', 2622], ['ElianVoss', 2597],
+    ['Luca_Mirnov', 2574], ['OrionVale', 2549], ['Velmor', 2523], ['MaxenRook', 2498],
+    ['justleon', 2471], ['SorenKnight', 2446], ['Cedro', 2421], ['nova_ember', 2397],
+    ['Artem_Koslov', 2372], ['FelixArden', 2348], ['NemoPlays', 2324], ['rookzero', 2299],
+    ['MarekZed', 2277], ['LevinCore', 2254],
+    ['Kasper21', 2501], ['ViktorEndgame', 2847], ['Leonid64', 2826]
+  ]},
+  blind: { list: 'lbListBlind', cap: 'lbCapBlind', players: [
+    ['Velmor', 2762], ['DorianVale', 2744], ['FelixArden', 2725], ['KaiVektor', 2706],
+    ['RookHarbor', 2687], ['Cedro', 2669], ['MilanCore', 2650], ['Kasper21', 2631],
+    ['TheoDrift', 2612], ['chessnori', 2594], ['ElianVoss', 2575], ['NovaRook', 2556],
+    ['NemoPlays', 2537], ['SorenKnight', 2519], ['Varek_17', 2500], ['MarekZed', 2481],
+    ['LennoxFile', 2462], ['tacticalmango', 2444], ['ArloKnight', 2423], ['RivenCross', 2402]
+  ]}
+};
+
+/* [name, rating] pairs into people in ranking order: highest first, ties by
+   name so two opens agree, and one row per player. The same name twice in a
+   ladder is one player counted twice — the fog table arrived with Kasper21
+   on it at two numbers — and the higher standing is the one kept, since a
+   ladder is where somebody stands and not a history of where they have been.
+   Names are compared the way the server compares them, without regard to
+   case, because that is the sense in which two of them are the same name.
+   The people have no id: nothing on these lists is an account, so no row is
+   ever "me" and none can be confused with a profile. */
+function boardPeople(pairs){
+  const seen = new Set(), out = [];
+  const people = pairs
+    .map(([name, rating]) => ({ id: null, name, avatar: '', rating }))
+    .sort((a, b) => b.rating - a.rating || a.name.localeCompare(b.name));
+  for (const p of people){
+    const key = p.name.toLowerCase();
+    if (seen.has(key)) continue;
+    seen.add(key);
+    out.push(p);
+  }
+  return out;
+}
+
+/* One list filled from the top. The place is the row's index and nothing
+   else, so the order the people arrive in *is* the ranking — which is why
+   both callers hand this a list already sorted by rating. */
+function fillBoard(list, people){
+  list.innerHTML = '';
+  people.forEach((person, i) => list.appendChild(boardRow(person, i + 1)));
+}
+
+/* Drawn once, at load: nothing about these changes while the page is up, and
+   they need neither the account client nor a signed-in player. */
+function renderStaticBoards(){
+  for (const key in LB_BOARDS){
+    const board = LB_BOARDS[key];
+    const people = boardPeople(board.players);
+    document.getElementById(board.cap).textContent = people.length + ' players';
+    fillBoard(document.getElementById(board.list), people);
+  }
+}
+renderStaticBoards();
+
+/* The tier's badge, the same file and the same naming the ranked screen uses,
+   and read off the same TIERS ladder for every one of the four lists: a
+   vision has no thresholds of its own yet, and until it does the ranked
+   ladder's are the only honest way to turn a rating into a badge. A row with
+   no rating to read gets no badge rather than a guessed one — the only way
+   that happens is a profile row from before the column existed, and Bronze
+   would be a claim about somebody nobody has measured. */
 function badgeFor(person){
   const box = document.createElement('div');
   box.className = 'lb-badge';
@@ -13929,16 +14100,20 @@ function badgeFor(person){
   const img = document.createElement('img');
   img.src = tierArt(tier);
   img.alt = tier;
-  img.width = 46; img.height = 46;
-  // a badge that will not load leaves the row's spacing alone; the tier is
-  // written under the name anyway
+  // the tier used to be written under the name; the rows are half that height
+  // now, so it is the badge's tooltip instead
+  img.title = tier;
+  img.width = 30; img.height = 30;
+  // a badge that will not load leaves the row's spacing alone
   img.onerror = () => img.remove();
   box.appendChild(img);
   return box;
 }
 
-/* One row: the place, the badge the rating has earned, the name, the tier it
-   is called by, and the rating itself. */
+/* One row: the place, the badge the rating has earned, the name, and the
+   rating itself. The tier's name and the word "ELO" used to be written under
+   the name and the number; with four lists on the page instead of one, a row
+   is one line, and the badge and the column say what those two said. */
 function boardRow(person, place){
   const row = document.createElement('div');
   row.className = 'lb-row'
@@ -13951,18 +14126,14 @@ function boardRow(person, place){
   row.appendChild(at);
 
   row.appendChild(badgeFor(person));
-  row.appendChild(whoBlock(person, person.rating === null ? '' : tierFor(person.rating)));
+  row.appendChild(whoBlock(person, ''));
 
   const elo = document.createElement('div');
   elo.className = 'lb-elo';
   const num = document.createElement('div');
   num.className = 'lb-num';
   num.textContent = person.rating === null ? '—' : person.rating;
-  const cap = document.createElement('div');
-  cap.className = 'lb-cap-elo';
-  cap.textContent = 'ELO';
   elo.appendChild(num);
-  elo.appendChild(cap);
   row.appendChild(elo);
   return row;
 }
