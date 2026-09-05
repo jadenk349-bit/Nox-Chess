@@ -241,17 +241,17 @@ async function main(){
 
   console.log('\nBack');
   const savedMinutes = pb.G.minutes;
-  pb.press('specBack');
-  check('Back returns to the home page', pb.screen() === 'home');
+  pb.press('btnMenu');
+  check('the logo returns to the home page', pb.screen() === 'home');
   check('...no longer spectating', !pb.SPEC.on && !pb.SPECTATING() && !pb.bodyHas('spectating'));
   check('...at /', pb.loc.pathname === '/');
   check('...with the socket closed and an unwatch sent, nothing more', (() => { const s = sockets.find(x => x.sent[0] && x.sent[0].id === 'game-blind-1'); return s.closed && s.sent.map(m=>m.t).join(',') === 'watch,unwatch'; })());
   check('...and the board handed back to the player', pb.G.opponent === 'bot' && pb.G.started === false && pb.G.uci.length === 0);
   check('...with the end box put back as it was', pb.text('endNew') === 'New Game' && pb.text('endRematch') === 'Rematch');
+  check('...without asking', !pf.up('leaveOverlay'));
   pf.press('btnMenu');
-  check('the logo leaves without asking', pf.screen() === 'home' && !pf.up('leaveOverlay'));
-  // the browser's back button
-  p.press('specBack');
+  check('there is no separate Back button', pf.doc.getElementById('specBack').onclick === null);
+  p.press('endNew');
   check('leaving from the result box\'s Back to Home works too', p.screen() === 'home' && !p.up('endOverlay'));
 
   console.log('\nA direct link, and a refresh');

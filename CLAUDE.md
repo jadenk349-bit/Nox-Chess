@@ -491,7 +491,9 @@ agreement and only the server can see those. Moves are replayed through
 `applyMove(m, true)`, so notation, captures, sounds and the console are the
 game's own; a snapshot that is not a continuation rebuilds from the start.
 
-Only a live card is a button, and it carries `data-id`: a waiting card has
+There is no Back button of its own: the logo is the way home, as on any
+game screen, and so are Back to Home on the result box, escape and the
+browser's back. Only a live card is a button, and it carries `data-id`: a waiting card has
 nothing behind it and a finished one is a result being read, so neither
 opens. The page watches on a socket of its own — `{t:"watch", id}`, answered
 and pushed as `{t:"watch-game"}` on every change to *that* game and no other,

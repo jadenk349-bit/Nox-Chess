@@ -426,15 +426,6 @@
   }
   .site-logo img, .logo-btn img{width:var(--logo-w); height:auto; display:block;}
   .logo-btn:hover{transform:none; filter:brightness(1.12);}
-  /* Spectating one of the league's games: the way back, at the other end of
-     the row the logo hangs from — out of the flow like the logo, so the board
-     gives up nothing for it, and only there while spectating. */
-  .spec-back{
-    display:none; position:absolute; right:0; top:0; z-index:3;
-    min-height:var(--logo-box); align-items:center; gap:6px;
-    padding:8px 14px; font-size:12px; letter-spacing:.2em; text-transform:uppercase;
-  }
-  body.spectating .spec-back{display:inline-flex;}
   /* View only. The buttons a player has are not disabled but absent: a
      disabled Resign is still a promise that somebody here could resign. The
      board takes no pointer, and the console keeps its log and loses its box. */
@@ -4235,9 +4226,6 @@
       <button class="logo-btn" id="btnMenu" aria-label="Nox Chess — back to the home page">
         <img src="assets/nox-logo.png?v=1" alt="Nox Chess" width="976" height="730">
       </button>
-      <!-- spectating only: the way back to the home page, which leaves the
-           game running on the server exactly as it was -->
-      <button class="ghost spec-back" id="specBack" aria-label="Back to the home page">← Back</button>
     </header>
 
     <div class="game-layout">
@@ -14782,8 +14770,8 @@ function liveTickClocks(){
    The address is /spectate/<id>: opening a card pushes it, a refresh reads
    it back and asks for the same game, a link kept after the game has ended
    shows how it ended. The server serves the same page for it and looks
-   nothing up. Leaving — the Back button, the logo, the browser's back — closes
-   the socket and nothing else: the game goes on, on the server, whether or
+   nothing up. Leaving — the logo, Back to Home on the result box, escape,
+   the browser's back — closes the socket and nothing else: the game goes on, on the server, whether or
    not anybody is watching, and a second watcher is only a second socket.
    ============================================================ */
 const SPEC = {
@@ -15094,7 +15082,6 @@ liveGrid.addEventListener('keydown', e => {
     specOpen(card.dataset.id, true, card.dataset.mode);
   }
 });
-document.getElementById('specBack').onclick = specLeave;
 window.addEventListener('popstate', () => {
   const id = specIdFromLocation();
   if (id) specOpen(id, false);
