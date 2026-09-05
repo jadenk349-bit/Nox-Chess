@@ -3210,6 +3210,27 @@
      fetched once per tier, not once per row, and the server serves the assets
      with a week of cache — but if this page ever needs to be light on a cold
      load, small copies of the badges are the first thing to make. */
+  .home-shortcuts{display:grid; grid-template-columns:228px; justify-items:stretch; gap:10px; width:fit-content; max-width:100%; margin:0; align-self:flex-end;}
+  .home-shortcut{
+    width:100%; height:64px; min-height:64px; padding:12px 16px 12px 24px; border-radius:9px; text-align:left;
+    background:linear-gradient(180deg,rgba(5,8,12,.18),rgba(5,8,12,.68)),url("assets/home-button-moon.jpg?v=1") center 48% / cover;
+    border:1px solid transparent; color:var(--gold-soft);
+    font-family:var(--font); font-size:clamp(22px,2vw,28px); letter-spacing:.045em;
+    text-shadow:0 2px 8px #000; box-shadow:inset 0 1px 0 rgba(255,255,255,.1),0 8px 24px rgba(0,0,0,.2);
+  }
+  .home-shortcut:hover{border-color:transparent; filter:brightness(1.2); transform:translateY(-2px);}
+  .home-shortcut:focus-visible{outline:2px solid #d3d7e1; outline-offset:4px;}
+  .home-shortcuts > :nth-child(2){background-position:center 20%;}
+  .home-shortcuts > :nth-child(3){background-position:center 75%;}
+  .home-shortcuts > :nth-child(4){background-position:center 95%;}
+  .home-shortcuts > :nth-child(5){background-position:center 60%;}
+  .home-shortcuts .menu{left:auto; right:0;}
+  @media(max-width:900px){.home-shortcuts{gap:8px;} .home-shortcut{font-size:24px;}}
+  @media(max-width:620px){.home-shortcuts .menu{left:0; right:auto;}}
+
+  .home-ladder-area{display:flex; flex-direction:column; align-items:flex-start; gap:28px; flex:1; min-width:0; max-width:100%;}
+  .home-ladder-area .lb-stack{min-width:0; width:100%; display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:24px 22px;}
+  .home-ladder-area .lb-title{grid-column:1 / -1;}
   .home-body{
     display:flex; align-items:flex-start; justify-content:space-between;
     gap:clamp(18px,3vw,56px);
@@ -3311,7 +3332,7 @@
      that the players themselves could not see. */
   .live-stack{
     align-self:flex-end;
-    width:min(660px,100%);
+    width:min(660px,54%); flex:none; min-width:0;
     display:flex; flex-direction:column; gap:10px;
   }
   .live-title{
@@ -3486,7 +3507,8 @@
   .live-note.bad{color:#e7908a;}
   @media (max-width:900px){
     .home-body{flex-direction:column; align-items:stretch; min-height:0;}
-    .lb-stack{order:1; width:100%;}
+    .home-ladder-area{order:1; width:100%;}
+    .home-ladder-area .lb-stack{width:100%;}
     .live-stack{order:2; align-self:stretch; width:100%;}
   }
   @media (max-width:560px){ .live-grid{grid-template-columns:minmax(0,1fr);} }
@@ -3708,6 +3730,24 @@
         <div class="live-grid" id="liveGrid"></div>
         <p class="live-note" id="liveNote"></p>
       </div>
+      <div class="home-ladder-area">
+    <nav class="home-shortcuts" aria-label="Quick play and training">
+      <button class="home-shortcut" id="homeRanked">Ranked Match</button>
+      <button class="home-shortcut" id="homeFriendly">Friendly Match</button>
+      <button class="home-shortcut" id="homeBot">Play Bot</button>
+      <button class="home-shortcut" id="homeSocial">Social</button>
+      <button class="home-shortcut" id="homePractice">Practice</button>
+      <div class="nav-item">
+        <button class="home-shortcut" id="homePuzzle" aria-haspopup="true">Puzzle</button>
+        <div class="menu">
+          <button class="menu-btn" id="homeOpening">Opening</button>
+          <button class="menu-btn" id="homeMiddle">Middle Game</button>
+          <button class="menu-btn" id="homeEnd">End Game</button>
+          <button class="menu-btn" id="homeRush">Puzzle Rush</button>
+        </div>
+      </div>
+    </nav>
+
       <div class="lb-stack" aria-labelledby="lbTitleAll">
         <h2 class="lb-title" id="lbTitleAll">Leaderboard</h2>
         <aside class="lb-panel" aria-labelledby="lbTitle">
@@ -3730,6 +3770,7 @@
           <p class="lb-cap" id="lbCapFog"></p>
           <div class="lb-list" id="lbListFog"></div>
         </aside>
+      </div>
       </div>
     </div>
   </section>
@@ -13348,6 +13389,12 @@ document.getElementById('navMiddle').onclick  = goTrack('middlegame');
 document.getElementById('navEnd').onclick     = goTrack('endgame');
 document.getElementById('navRush').onclick    = goTrack('rush');
 
+// Homepage shortcuts use the same destinations and account gates as the header.
+for (const name of ['Ranked','Friendly','Bot','Social','Practice','Puzzle','Opening','Middle','End','Rush']){
+  document.getElementById('home' + name).onclick = () => document.getElementById('nav' + name).click();
+}
+
+
 document.getElementById('btnSettings').onclick = () => { beep(560,.07); showScreen('settings'); };
 document.getElementById('btnSetBack').onclick  = () => showScreen('home');
 
@@ -14159,7 +14206,8 @@ const GUEST = () => accountsAvailable() && !account;
    nothing, so the lock is a door rather than a wall. They stay ordinary
    buttons for exactly that reason: [disabled] would swallow the click that
    was the whole invitation. */
-const LOCKED_IDS = ['navRanked', 'navSocial', 'navPuzzle',
+const LOCKED_IDS = ['homeRanked', 'homeSocial', 'homePuzzle', 'homeOpening', 'homeMiddle', 'homeEnd', 'homeRush',
+                    'navRanked', 'navSocial', 'navPuzzle',
                     'navOpening', 'navMiddle', 'navEnd', 'navRush'];
 
 function lockedControls(){
