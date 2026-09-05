@@ -634,7 +634,7 @@
   }
   @media (max-width:760px){ .rooms-page{grid-template-columns:minmax(0,1fr);} }
   .rooms-aside .primary{width:100%; padding:14px 0; font-size:17px; letter-spacing:.14em;}
-  .rooms-main{max-width:620px;}
+  .rooms-main{max-width:1100px; min-width:0;}
   .rooms-title{
     margin:0; font-family:var(--font); font-weight:400;
     font-size:clamp(29.5px,4.55vw,42.5px); letter-spacing:.12em; color:var(--gold-soft);
@@ -2211,33 +2211,48 @@
   #screen-rooms{position:relative;}
   .rooms-top{display:flex; justify-content:center; margin-bottom:26px;}
   #btnHostRoom{padding:14px 38px; font-size:17px; font-weight:700; letter-spacing:.2em; border-radius:12px;}
+  /* Shared columns make each open table easy to compare with the next one. */
   .room-list{
-    width:100%; max-width:620px; margin:0 auto;
-    display:flex; flex-direction:column; gap:12px;
+    width:100%; margin:0 auto; overflow:hidden; border-radius:14px;
+    border:1px solid rgba(212,175,110,.22); background:rgba(12,14,19,.92);
   }
-  .room{display:flex; align-items:center; gap:16px; padding:18px 20px;}
-  .room-main{flex:1; min-width:0; text-align:left;}
-  .room-vision{
-    font-size:17px; letter-spacing:.18em; text-transform:uppercase;
-    font-weight:650; color:var(--gold-soft);
+  .room, .room-columns{
+    display:grid; grid-template-columns:minmax(82px,.7fr) minmax(130px,1.25fr) 90px minmax(155px,1.4fr) 110px;
+    gap:18px; align-items:center; padding:20px 24px;
   }
-  /* who is sitting there, and what they are rated — the same two things the
-     board bar and the leaderboard say about anybody, in the same order */
-  .room-host{
-    margin-top:6px; font-size:18px; letter-spacing:.04em; color:var(--text);
-    overflow:hidden; text-overflow:ellipsis; white-space:nowrap;
+  .room-columns{
+    padding-top:13px; padding-bottom:13px; background:rgba(212,175,110,.07);
+    color:var(--muted); font-size:13px; letter-spacing:.16em; text-transform:uppercase;
   }
-  .room-rating{
-    margin-left:10px; font-size:15px; letter-spacing:.08em; color:var(--muted);
+  .room{border-top:1px solid rgba(212,175,110,.13); transition:background .2s;}
+  .room:hover, .room:focus-within{background:rgba(212,175,110,.055);}
+  .room-id{font-size:15px; letter-spacing:.06em; color:var(--muted); overflow-wrap:anywhere;}
+  .room-vision{font-size:18px; letter-spacing:.07em; color:var(--gold-soft);}
+  .room-clock{font-size:21px; font-variant-numeric:tabular-nums; color:var(--text);}
+  .room-seats{display:flex; flex-direction:column; gap:8px; min-width:0; font-size:16px;}
+  .room-seat{display:flex; align-items:center; gap:9px; color:var(--muted);}
+  .room-seat.open{color:var(--gold-soft);}
+  .room-seat::before{content:''; width:9px; height:9px; border-radius:50%; flex:none; background:#e2dfd5; border:1px solid #e2dfd5;}
+  .room-seat.black::before{background:#191c24; border-color:#9c9fa9;}
+  .room-seat.open::before{box-shadow:0 0 0 3px rgba(212,175,110,.1);}
+  .room-play{padding:11px 12px; min-height:44px; font-size:16px; letter-spacing:.1em; font-weight:700;}
+  .room-empty{text-align:center; padding:48px 24px; color:var(--muted); font-size:17px; line-height:1.7;}
+  .room-mine{background:rgba(212,175,110,.04);}
+  .room-mine .room-play{opacity:.6;}
+  @media(max-width:1100px) and (min-width:761px){
+    .rooms-page{grid-template-columns:180px minmax(0,1fr); gap:20px;}
+    .room, .room-columns{grid-template-columns:68px minmax(95px,1fr) 65px minmax(125px,1.2fr) 88px; gap:10px; padding-left:16px; padding-right:16px;}
   }
-  .room-meta{margin-top:6px; font-size:16px; color:var(--muted); line-height:1.5;}
-  .room-play{flex:none; padding:10px 26px; font-size:15.5px; letter-spacing:.16em; font-weight:700;}
-  .room-empty{
-    text-align:center; padding:30px 20px; color:var(--muted);
-    font-size:17px; line-height:1.7;
+  @media(max-width:620px){
+    .room-columns{display:none;}
+    .room{grid-template-columns:minmax(0,1fr) auto; gap:12px 16px; padding:20px;}
+    .room:first-child{border-top:0;}
+    .room-id{grid-column:1; font-size:13px;}
+    .room-vision{grid-column:1; grid-row:2;}
+    .room-clock{grid-column:2; grid-row:1 / span 2; text-align:right;}
+    .room-seats{grid-column:1; grid-row:3;}
+    .room-play{grid-column:2; grid-row:3; min-width:104px;}
   }
-  .room-mine{border-color:rgba(217,164,65,.45);}
-  .room-mine .room-play{opacity:.5;}
   .room-note{
     max-width:620px; margin:0 auto 12px; text-align:center;
     font-size:15px; letter-spacing:.14em; text-transform:uppercase;
@@ -6641,49 +6656,40 @@ function renderRooms(list){
                     'Host a room and the first person to take a seat plays you.</div>';
     return;
   }
+  const columns = document.createElement('div');
+  columns.className = 'room-columns';
+  columns.setAttribute('aria-hidden', 'true');
+  columns.innerHTML = '<span>Table</span><span>Vision</span><span>Clock</span><span>Seats</span><span>Join</span>';
+  box.appendChild(columns);
   for (const r of list){
     const mine = r.id === NET.myRoom;
     const row = document.createElement('div');
-    row.className = 'room panel' + (mine ? ' room-mine' : '');
+    row.className = 'room' + (mine ? ' room-mine' : '');
 
-    /* A card is a vision, who is sitting there, what they are rated, and a
-       button — and that is all it is for every room on the list, whoever is
-       behind it. The server names the host and the rating; nothing here
-       adds anything beside the name, because the seven the house keeps open
-       (HOUSE_ROOMS in server.py) are on this list on exactly the same terms
-       as a room a person opened, and the page is not told which is which. */
-    const main = document.createElement('div');
-    main.className = 'room-main';
+    // Room IDs come from the server; all labels use textContent so even an
+    // unexpected value stays text rather than becoming lobby markup.
+    const cell = (className, text) => {
+      const el = document.createElement('div');
+      el.className = className;
+      el.textContent = text;
+      return el;
+    };
     const yours = r.color === 'w' ? 'Black' : 'White';
-    const who = document.createElement('div');
-    who.className = 'room-host';
-    who.textContent = mine ? (myName() || 'You') : (r.name || 'Someone');
-    if (typeof r.rating === 'number'){
-      const rating = document.createElement('span');
-      rating.className = 'room-rating';
-      rating.textContent = String(r.rating);
-      who.appendChild(rating);
-    }
-    const vision = document.createElement('div');
-    vision.className = 'room-vision';
-    vision.textContent = ROOM_VISION_NAME[r.mode] || MODE_NAME[r.mode] || r.mode;
-    const meta = document.createElement('div');
-    meta.className = 'room-meta';
-    meta.textContent = timeLabel(r.minutes, r.inc || 0) + ' · ' +
-      (mine ? 'your room — waiting for someone'
-            : (r.name || 'the host') + ' plays ' + (r.color === 'w' ? 'White' : 'Black') +
-              ', you play ' + yours);
-    main.appendChild(vision);
-    main.appendChild(who);
-    main.appendChild(meta);
+    const hostColor = r.color === 'w' ? 'White' : 'Black';
+    row.appendChild(cell('room-id', '#' + r.id));
+    row.appendChild(cell('room-vision', ROOM_VISION_NAME[r.mode] || MODE_NAME[r.mode] || r.mode));
+    row.appendChild(cell('room-clock', timeLabel(r.minutes, r.inc || 0)));
+    const seats = cell('room-seats', '');
+    seats.appendChild(cell('room-seat ' + hostColor.toLowerCase(), (mine ? (myName() || 'You') : (r.name || 'Someone')) + (typeof r.rating === 'number' ? ' (' + r.rating + ')' : '') + ' · ' + hostColor));
+    seats.appendChild(cell('room-seat open ' + yours.toLowerCase(), 'Open seat · ' + yours));
+    row.appendChild(seats);
 
     const play = document.createElement('button');
     play.className = 'primary room-play';
-    play.textContent = 'Join Room';
+    play.textContent = mine ? 'Your room' : 'Join →';
+    play.setAttribute('aria-label', mine ? 'Your room, waiting for an opponent' : 'Join room ' + r.id + ' as ' + yours);
     play.disabled = mine;                 // you cannot sit down at your own table
     play.onclick = () => joinRoom(r.id);
-
-    row.appendChild(main);
     row.appendChild(play);
     box.appendChild(row);
   }
