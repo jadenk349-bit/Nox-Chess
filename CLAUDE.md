@@ -479,9 +479,16 @@ becomes `'spectate'` — a fourth kind of opponent, so `LOCAL()`, `BOT()` and
 `ONLINE()` are all false and nothing that lets a move be entered can be
 reached — and the ordinary game screen draws the game exactly as a game of
 that vision is drawn: the same board and glyphs, the same strips (with the
-rating beside the colour), the same clocks, the console for Complete
-Blindfold, `visibleSet()`'s fog from the chair of whoever is to move
-(`G.human` follows the snapshot's turn). The things a player has — Resign,
+rating directly after the name, then the colour), the same clocks, the
+console for Complete Blindfold, `visibleSet()`'s fog from the chair of
+whoever is to move (`G.human` follows the snapshot's turn). One thing a
+player's screen does not have: `#specMoves`, a slim row between the board
+and the lower strip carrying the last four moves, oldest first, newest lit
+— read off `G.sans` by `specMoves()` on every render, so it is the game's
+own notation in every vision and follows each snapshot without a reload;
+fewer than four moves fill fewer of its four columns and nothing stands in
+for the rest. It is not a move history, which a player still does not get
+during play; it is the last four. The things a player has — Resign,
 Offer Draw, Peek, the move box, the chat — are absent rather than disabled
 (`body.spectating` in the CSS, `specStatus()` in the script), the board takes
 no pointer, the square handler and `canConcede()` refuse, and `checkEnd()`

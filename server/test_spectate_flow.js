@@ -123,6 +123,19 @@ function makePage(path){
 }
 const wait = ms => new Promise(r => setTimeout(r, ms));
 
+/* The row of recent moves between the strips, as the page last wrote it. */
+const recent = p => [...p.doc.getElementById('specMoves').innerHTML.matchAll(/<div class="m( cur)?">([^<]+)<\/div>/g)]
+  .map(m => ({ san: m[2], lit: !!m[1] }));
+/* The name strip above or below the board, under the stub: layoutBoardBars()
+   appends the rating and the colour tag to it on every render and the stub
+   keeps them all, so the last two children are the latest render's. */
+const strip = (p, barId) => {
+  const kids = p.doc.getElementById(barId).querySelector('.bar-name').children;
+  const last = kids.slice(-2);
+  return { name: p.doc.getElementById(barId).querySelector('.bar-name').textContent,
+           order: last.map(k => k.className).join(','), elo: last[0] && String(last[0].textContent) };
+};
+
 /* ---- a game, as the server would describe it ---- */
 const NAMES = { w: { id:'u-white', name:'Arvenko', rating:2854 }, b: { id:'u-black', name:'LeoFromPrague', rating:2801 } };
 function snap(id, mode, moves, opts){
@@ -174,6 +187,11 @@ async function main(){
   check('...in the game\'s vision', p.G.mode === 'sighted');
   check('white below, as a viewer reads a board', p.G.flipped === false);
   check('the strips name the players', p.seatName('w') === 'Arvenko' && p.seatName('b') === 'LeoFromPrague');
+  check('white\'s rating stands directly after white\'s name, before the colour', strip(p, 'barBottom').order === 'elo,sub' && strip(p, 'barBottom').elo === '2854', strip(p, 'barBottom'));
+  check('black\'s rating stands directly after black\'s name', strip(p, 'barTop').order === 'elo,sub' && strip(p, 'barTop').elo === '2801', strip(p, 'barTop'));
+  check('...each the ladder\'s figure from the snapshot, nothing invented', p.SPEC.game.white.rating === 2854 && p.SPEC.game.black.rating === 2801);
+  check('the row between the strips shows the moves so far, oldest first', recent(p).map(m => m.san).join(' ') === 'e4 e5', recent(p));
+  check('...with the newest lit', recent(p).map(m => m.lit).join(',') === 'false,true');
   check('the chips say what this is', p.text('setupChip').indexOf('Spectating') === 0 && p.text('visionChip') === 'Sighted', p.text('setupChip'));
   check('the clocks come from the snapshot', p.G.clock.w <= 1700000 && p.G.clock.w > 1690000 && p.G.clock.b === 1650000, p.G.clock);
   check('the setup form is not shown', p.doc.getElementById('gameSetup').style.display === 'none');
@@ -185,11 +203,17 @@ async function main(){
   check('...and the board is at that position', p.G.st.b[p.sqIndex('f3')] && p.G.st.b[p.sqIndex('f3')].t === 'N');
   check('...and the clocks with it', p.G.clock.b <= 1650000 && p.G.clock.w <= 1690000);
   check('the side to move is black', p.G.st.turn === 'b');
+  check('the row follows the move, without a reload', recent(p).map(m => m.san).join(' ') === 'e4 e5 Nf3', recent(p));
+  check('...three moves shown as three, nothing standing in for a fourth', recent(p).length === 3 && p.doc.getElementById('specMoves').innerHTML.indexOf('-') < 0);
   const g3 = snap('game-sighted-1', 'sighted', 'e2e4 e7e5 g1f3 b8c6 f1c4', { sans:['e4','e5','Nf3','Nc6','Bc4'] });
   sock.push(watchMsg(g3));
   check('two moves at once are both applied, in order', p.G.uci.join(' ') === g3.moves);
+  check('the row keeps only the last four, in order, the oldest gone', recent(p).map(m => m.san).join(' ') === 'e5 Nf3 Nc6 Bc4', recent(p));
+  check('...the newest lit and no other', recent(p).map(m => m.lit).join(',') === 'false,false,false,true');
+  check('...in the game\'s own notation', p.G.sans.slice(-4).join(' ') === recent(p).map(m => m.san).join(' '));
   sock.push(watchMsg(g2));
   check('a snapshot that is not a continuation rebuilds the position', p.G.uci.join(' ') === g2.moves);
+  check('...and the row with it', recent(p).map(m => m.san).join(' ') === 'e4 e5 Nf3', recent(p));
 
   console.log('\nView only');
   p.G.sel = -1;
@@ -230,13 +254,21 @@ async function main(){
   check('Complete Blindfold shows the console and no board', p.G.mode === 'total' && p.el.console.classList.contains('show') && p.el.boardFrame.style.display === 'none');
   check('...with the players named in it', p.el.log.children.some(c => /Arvenko \(2854\)/.test(c.textContent)), p.el.log.children.map(c => c.textContent));
   check('...and the move written there', p.el.log.children.some(c => /d4/.test(c.textContent)));
+  check('...and in the row between the strips: one move, shown as one', recent(p).map(m => m.san).join(' ') === 'd4' && recent(p).length === 1, recent(p));
   const pf = makePage('/'); await wait(5); pf.specOpen('game-fog-1', true, 'fog'); await wait(5);
   sockets[sockets.length - 1].push(watchMsg(snap('game-fog-1', 'fog', 'd2d4', { sans:['d4'] })));
   check('Fog of War is drawn as fog', pf.G.mode === 'fog' && pf.board.classList.contains('fog'));
   check('...from the chair of the side to move', pf.G.human === 'b' && pf.G.st.turn === 'b');
+  check('...and its row shows the move', recent(pf).map(m => m.san).join(' ') === 'd4', recent(pf));
   const pb = makePage('/'); await wait(5); pb.specOpen('game-blind-1', true, 'blind'); await wait(5);
   sockets[sockets.length - 1].push(watchMsg(snap('game-blind-1', 'blind', '')));
   check('Board Only hides the men', pb.G.mode === 'blind' && pb.board.classList.contains('blind') && !pb.board.classList.contains('fog'));
+  check('...and before the first move its row is empty — no placeholder', recent(pb).length === 0 && pb.doc.getElementById('specMoves').innerHTML === '', pb.doc.getElementById('specMoves').innerHTML);
+  sockets[sockets.length - 1].push(watchMsg(snap('game-blind-1', 'blind', 'e2e4', { sans:['e4'] })));
+  check('...and after it, that move', recent(pb).map(m => m.san).join(' ') === 'e4', recent(pb));
+  check('the row is there for a spectator only', /body\.spectating #specMoves\{display:grid;\}/.test(SRC) && /#specMoves\{\s*display:none;/.test(SRC));
+  check('...four columns on one row, no wrapping', /#specMoves\{[^}]*grid-template-columns:repeat\(4,minmax\(0,1fr\)\)/.test(SRC));
+  check('...that the board pays for in height', /body\.spectating \.game-layout\{--board-max:min\(100%, calc\(100vh - var\(--chrome\) - 45px\)\);\}/.test(SRC));
   check('Sighted shows everything', !p.board.classList.contains('blind') || p.G.mode !== 'sighted');
 
   console.log('\nBack');
