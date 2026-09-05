@@ -2,8 +2,9 @@
 
 supabase_auth.py holds no secret at all: it verifies tokens against a public
 key set. This module is the other half — the one that needs a real credential,
-because it writes `profiles.puzzle_rating`, and the whole point of that column
-is that the player cannot set it themselves. Progress is different and does not
+because it writes `profiles.puzzle_rating` — and, through record_rated_game(),
+the four ranked ratings — and the whole point of those columns is that the
+player cannot set them themselves. Progress is different and does not
 come through here: which puzzles you have finished is personal state, so the
 browser writes those rows directly under row-level security. What a player is
 *worth* is not personal state.
@@ -261,3 +262,170 @@ def get_display_name(user_id):
         return None
     value = rows[0].get("display_name")
     return value if isinstance(value, str) else None
+
+
+def bot_ids():
+    """The account ids of every system profile, or None when they cannot be read.
+
+    The twenty-one names at the top of the ladder (supabase-system-profiles.sql)
+    are flagged `is_bot` in profiles, and this is the server's copy of that
+    flag: handle_hello() refuses a token for any id in it, so a system profile
+    can never become a verified client, never mind a ranked one. The set is
+    read whole rather than one id at a time because it is small, it changes
+    only when that file is run, and one request every few minutes is cheaper
+    than one per sign-in.
+
+    None on any failure — including a project that has not run the file yet,
+    where the column does not exist and PostgREST answers 400 — and the caller
+    keeps whatever it last read. The flag also travels in the token's
+    app_metadata, so a server that cannot read this still has a second way of
+    telling; this is the one that does not depend on how the token was made.
+    """
+    if not enabled():
+        return None
+    try:
+        rows = _request("GET", "/profiles?select=id&is_bot=eq.true")
+    except (urllib.error.URLError, ValueError, OSError):
+        return None
+    return {row.get("id") for row in rows or [] if isinstance(row.get("id"), str)}
+
+
+# ------------------------------------------------------------- the four ladders
+#
+# One rating per vision, each its own column on profiles, and this is the only
+# place on the server that knows which column is which. The keys are the
+# page's G.mode values, the same four the puzzle visions and the leaderboard
+# panels answer to, so a game's mode names its ladder without translation.
+# `rating` is the Sighted ladder and has been since supabase-setup.sql; the
+# other three arrive with supabase-migrate-visions.sql, and the CASE at the
+# heart of record_rated_game() in that file is this same table written in SQL
+# — test_visions.py holds the two to each other, because a rating that moved
+# under one name and was read under another would be a ladder that lies.
+VISION_COLUMNS = {
+    "sighted": "rating",
+    "total": "complete_blindfold_rating",
+    "blind": "board_only_rating",
+    "fog": "fog_of_war_rating",
+}
+
+# The whole list, and there is no "show more": the page's LB_TOP says the same
+# number, and its captions promise it.
+LADDER_TOP = 20
+
+
+def vision_column(mode):
+    """The profiles column a vision's rating lives in, or a ValueError.
+
+    Raised rather than defaulted on purpose: a mode this table does not know
+    must never quietly become somebody's Sighted rating.
+    """
+    try:
+        return VISION_COLUMNS[mode]
+    except KeyError:
+        raise ValueError("no rating column for vision %r" % (mode,))
+
+
+def leaderboard(mode, limit=LADDER_TOP):
+    """The top of one vision's ladder, highest first, or None if it cannot be read.
+
+    Rows are {id, name, rating}, in ranking order — ties broken by name, so
+    two reads agree on who is twentieth. The same query the page makes for
+    its four panels, made here for whatever on the server wants a ladder
+    (a log line, a test, a league) without a browser in front of it.
+
+    None on any failure, including a project that has not run
+    supabase-migrate-visions.sql yet, where three of the four columns do not
+    exist and PostgREST answers 400. The caller must tell that apart from an
+    empty ladder, which is [].
+    """
+    col = vision_column(mode)
+    if not enabled():
+        return None
+    try:
+        rows = _request(
+            "GET",
+            "/profiles?select=id,display_name,%s&order=%s.desc,display_name.asc&limit=%d"
+            % (col, col, int(limit)),
+        )
+    except (urllib.error.URLError, ValueError, OSError):
+        return None
+    out = []
+    for row in rows or []:
+        value = row.get(col)
+        if not isinstance(row.get("id"), str) or not isinstance(value, int):
+            continue
+        out.append({"id": row["id"], "name": row.get("display_name") or "Player", "rating": value})
+    return out
+
+
+def get_vision_rating(user_id, mode):
+    """A player's rating in one vision, or None when it cannot be read.
+
+    get_rating() is this for 'sighted' and predates it; it is kept as it is
+    because the ranked queue reads it on a hot path and nothing there has a
+    mode to hand over. Everything new asks by vision.
+    """
+    col = vision_column(mode)
+    if not enabled() or not user_id:
+        return None
+    try:
+        rows = _request("GET", "/profiles?select=%s&id=eq.%s" % (col, user_id))
+    except (urllib.error.URLError, ValueError, OSError):
+        return None
+    if not rows:
+        return None
+    value = rows[0].get(col)
+    return value if isinstance(value, int) else None
+
+
+def record_rated_game(game_id, mode, white_id, black_id, result, points=4):
+    """Settle one rated game: the vision's column moves, once, and nothing else.
+
+    The rule lives in the database, in record_rated_game() from
+    supabase-migrate-visions.sql, and this only carries the game there: its
+    id, the vision it was played in, both accounts and the result as
+    '1-0', '0-1' or '1/2-1/2'. Four points to the winner and four from the
+    loser in the column of that vision — `rating` for a Sighted game and the
+    vision's own column for the other three — and nothing on a draw. The
+    numbers are read from the rows under a lock rather than sent from here,
+    because a rating the server remembers is a rating that may be stale.
+
+    Once per game id. The function keys its record on the id, so the same
+    game settled twice — a handler that ran twice, a second process that
+    also thought it owned the game — moves nothing the second time and says
+    so: the answer is the recorded row with `applied` False. A caller that
+    wants to know whether *its* call was the one that counted reads that flag
+    and nothing else.
+
+    Returns the function's row — applied, rating_column, white_before,
+    black_before, white_after, black_after — or None when nothing could be
+    written: no key, a network failure, a project that has not run the
+    migration, or a refusal (an unknown vision, two identical seats, a
+    profile that does not exist), all of which the log is the place for. A
+    ValueError for a mode this module does not know is raised before any
+    request is made, since that is a bug here and not a state of the
+    database.
+    """
+    vision_column(mode)                      # refuse an unknown vision up front
+    if result not in ("1-0", "0-1", "1/2-1/2"):
+        raise ValueError("not a result: %r" % (result,))
+    if not enabled():
+        return None
+    try:
+        rows = _request(
+            "POST",
+            "/rpc/record_rated_game",
+            {
+                "p_game": str(game_id),
+                "p_mode": mode,
+                "p_white": white_id,
+                "p_black": black_id,
+                "p_result": result,
+                "p_points": int(points),
+            },
+        )
+    except (urllib.error.URLError, ValueError, OSError):
+        return None
+    if not rows or not isinstance(rows[0], dict) or "applied" not in rows[0]:
+        return None
+    return rows[0]

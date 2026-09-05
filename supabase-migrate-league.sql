@@ -1,150 +1,71 @@
 -- ============================================================
 --  NOX CHESS — migration: the 24/7 ranked AI league
 --
---  Run once, by hand, in the Supabase SQL editor, after supabase-setup.sql
---  and supabase-migrate-usernames.sql. Running it twice is harmless.
+--  Run once, by hand, in the Supabase SQL editor, AFTER supabase-migrate-visions.sql.
+--  Running it twice is harmless. The order of the hand-run files is:
 --
---  The server (server/league.py) keeps the highest-rated AI accounts playing
---  each other around the clock, one ladder per vision, and this file is
---  everything the database has to know for that:
+--    1. supabase-setup.sql
+--    2. supabase-social.sql
+--    3. supabase-migrate-usernames.sql
+--    4. supabase-migrate-puzzles.sql
+--    5. supabase-system-profiles.sql       the twenty-one AI accounts
+--    6. supabase-migrate-visions.sql       the four rating columns, twenty more
+--                                          AI accounts, record_rated_game()
+--    7. supabase-migrate-league.sql        this file
 --
---    · three more rating columns on profiles — one per vision that had no
---      rating of its own until now. `rating` stays the Sighted ladder, exactly
---      as it was; complete_blindfold_rating, board_only_rating and fog_of_war_rating are Complete
---      Blindfold, Board Only and Fog of War. They are server-owned like
---      `rating`: the browser may read them and never write them.
---    · the twenty players on each of the three page-fixture ladders, seeded
---      as bot accounts. Twenty of the names are bot profiles already; the
---      other twenty had no account at all and are created here, so that one
---      name means one player across every ladder and across the server.
---      From then on the league reads the top twenty of each ladder out of
---      these columns and never a list of its own.
---    · league_games — every AI game, live or finished, and the record that
---      lets a restarted server carry on rather than start over.
---    · league_seats — one row per (vision, player) while they are playing,
---      which is what makes "never in two games at once" a rule the database
---      enforces rather than one the server hopes to keep.
+--  This file owns NO rating. The four columns the ladders and the league
+--  read — rating, complete_blindfold_rating, board_only_rating and
+--  fog_of_war_rating — are the visions file's, and the one thing that moves
+--  any of them is record_rated_game() from that same file: four points to
+--  the winner and four from the loser in the column of the vision played,
+--  nothing on a draw, once per game id. league_finish() below calls it and
+--  adds nothing to the rule. Nor does this file seed a player: the league's
+--  players are whoever the ladders already rank, read at run time.
+--
+--  What it adds is the league's memory — what the server needs so that a
+--  restart, a redeploy or a crash resumes the games in progress rather than
+--  starting over, and so that two server processes can never both play one:
+--
+--    · league_games — every AI game, live or finished: both accounts by id,
+--      the moves, the position, the clocks, the result and how it came, the
+--      ratings before and after, a PGN, and the lease that says which server
+--      process is playing it.
+--    · league_seats — one row per (vision, account) while they are at a
+--      board. The primary key is the rule "never in two games at once in one
+--      vision", enforced by the database rather than hoped for by the server.
 --    · league_start / league_finish / league_abandon — the three writes that
---      have to be all-or-nothing. league_finish is the one that moves
---      ratings, and it moves them exactly once per game whatever asks twice.
+--      must be all-or-nothing.
 -- ============================================================
 
 begin;
 
 -- ------------------------------------------------------------
---  1. Ratings per vision, and the bot flag
+--  0. Refuse to run before the visions file
 --
---     Nullable on purpose: NULL is "unrated in this vision", which is what
---     every human account and most bots are. A ladder query filters on the
---     column being present, so nobody unrated turns up at 0.
---     is_bot exists on the live project already (the sighted bots carry it);
---     `if not exists` makes this file safe for a project that never had it.
--- ------------------------------------------------------------
-alter table public.profiles add column if not exists is_bot boolean not null default false;
-alter table public.profiles add column if not exists complete_blindfold_rating integer;
-alter table public.profiles add column if not exists board_only_rating integer;
-alter table public.profiles add column if not exists fog_of_war_rating   integer;
-
--- The same rule supabase-setup.sql applies to `rating`: the browser writes
--- display_name and avatar_url and nothing else. The column grant is restated
--- rather than trusted, because `add column` widens nothing but a fresh grant
--- somewhere else might have.
-revoke update on public.profiles from authenticated;
-grant  update (display_name, avatar_url) on public.profiles to authenticated;
-grant  select on public.profiles to authenticated, anon;
-
--- ------------------------------------------------------------
---  2. The players. The three ladders the page used to carry as a fixture,
---     copied out exactly — same names, same numbers — so the ladders a player
---     sees the day after this runs are the ladders they saw the day before,
---     and only then start to move.
---
---     A name already in profiles gets the column set on its row. A name with
---     no profile gets an account: a row in auth.users, so the profile's
---     foreign key holds, and then the profile itself. The id is a hash of the
---     name, so running this twice cannot make two of anybody. The auth row is
---     inserted with an empty password hash and a reserved-domain email, which
---     is an account nobody can sign in to — a bot is a name and a rating, not
---     a login. The insert is wrapped so that a project whose auth schema
---     refuses it (a column renamed in a later GoTrue) reports which name it
---     could not create and carries on with the rest.
+--     Everything below reads the vision columns and calls record_rated_game().
+--     Without them the functions would compile and fail at the first game,
+--     which is a worse place to find out than here.
 -- ------------------------------------------------------------
 do $$
-declare
-  seed record;
-  bot_id uuid;
-  existing uuid;
 begin
-  for seed in
-    select * from (values
-      -- Complete Blindfold
-      ('total', 'NemoPlays', 2501), ('total', 'Velmor', 2474), ('total', 'Kasper21', 2455),
-      ('total', 'fiftyfourthmove', 2430), ('total', 'CedricChessLab', 2407), ('total', 'Noah_Vortex', 2386),
-      ('total', 'tacticalmango', 2344), ('total', 'LeoFromPrague', 2268), ('total', 'Milo_Anders', 2253),
-      ('total', 'Cedro', 2247), ('total', 'novaendgame', 2242), ('total', 'Nash_B', 2239),
-      ('total', 'Luca_Mirnov', 2199), ('total', 'Arvenko', 2185), ('total', 'chessnori', 2180),
-      ('total', 'tomasik_', 2175), ('total', 'Artem_Koslov', 2172), ('total', 'ivanorbit', 2144),
-      ('total', 'justleon', 2143), ('total', 'MarekZed', 2140),
-      -- Fog of War (the fixture listed Kasper21 twice; the higher standing is the one kept)
-      ('fog', 'ViktorEndgame', 2847), ('fog', 'Leonid64', 2826), ('fog', 'Kasper21', 2673),
-      ('fog', 'RivenCross', 2648), ('fog', 'tacticalmango', 2622), ('fog', 'ElianVoss', 2597),
-      ('fog', 'Luca_Mirnov', 2574), ('fog', 'OrionVale', 2549), ('fog', 'Velmor', 2523),
-      ('fog', 'MaxenRook', 2498), ('fog', 'justleon', 2471), ('fog', 'SorenKnight', 2446),
-      ('fog', 'Cedro', 2421), ('fog', 'nova_ember', 2397), ('fog', 'Artem_Koslov', 2372),
-      ('fog', 'FelixArden', 2348), ('fog', 'NemoPlays', 2324), ('fog', 'rookzero', 2299),
-      ('fog', 'MarekZed', 2277), ('fog', 'LevinCore', 2254),
-      -- Board Only
-      ('blind', 'Velmor', 2762), ('blind', 'DorianVale', 2744), ('blind', 'FelixArden', 2725),
-      ('blind', 'KaiVektor', 2706), ('blind', 'RookHarbor', 2687), ('blind', 'Cedro', 2669),
-      ('blind', 'MilanCore', 2650), ('blind', 'Kasper21', 2631), ('blind', 'TheoDrift', 2612),
-      ('blind', 'chessnori', 2594), ('blind', 'ElianVoss', 2575), ('blind', 'NovaRook', 2556),
-      ('blind', 'NemoPlays', 2537), ('blind', 'SorenKnight', 2519), ('blind', 'Varek_17', 2500),
-      ('blind', 'MarekZed', 2481), ('blind', 'LennoxFile', 2462), ('blind', 'tacticalmango', 2444),
-      ('blind', 'ArloKnight', 2423), ('blind', 'RivenCross', 2402)
-    ) as t(mode, name, elo)
-  loop
-    select id into existing from public.profiles where lower(display_name) = lower(seed.name) limit 1;
-    if existing is null then
-      bot_id := md5('nox-bot:' || lower(seed.name))::uuid;
-      begin
-        insert into auth.users (
-          instance_id, id, aud, role, email, encrypted_password, email_confirmed_at,
-          raw_app_meta_data, raw_user_meta_data, created_at, updated_at,
-          confirmation_token, recovery_token, email_change, email_change_token_new
-        ) values (
-          '00000000-0000-0000-0000-000000000000', bot_id, 'authenticated', 'authenticated',
-          lower(seed.name) || '@bots.noxchess.invalid', '', now(),
-          '{"provider":"email","providers":["email"]}'::jsonb, '{}'::jsonb, now(), now(),
-          '', '', '', ''
-        ) on conflict (id) do nothing;
-      exception when others then
-        raise notice 'could not create an auth row for bot %: % — inserting the profile on its own', seed.name, sqlerrm;
-      end;
-      -- handle_new_user() may already have made the placeholder row; either
-      -- way this leaves one row wearing the seeded name.
-      insert into public.profiles (id, display_name, is_bot, rating)
-      values (bot_id, seed.name, true, 100)
-      on conflict (id) do update set display_name = excluded.display_name, is_bot = true;
-      existing := bot_id;
-    end if;
-
-    -- Only where the column is still empty: a ladder that has started moving
-    -- must not be reset to the fixture by somebody running this file again.
-    if seed.mode = 'total' then
-      update public.profiles set complete_blindfold_rating = seed.elo, is_bot = true
-       where id = existing and complete_blindfold_rating is null;
-    elsif seed.mode = 'blind' then
-      update public.profiles set board_only_rating = seed.elo, is_bot = true
-       where id = existing and board_only_rating is null;
-    elsif seed.mode = 'fog' then
-      update public.profiles set fog_of_war_rating = seed.elo, is_bot = true
-       where id = existing and fog_of_war_rating is null;
-    end if;
-  end loop;
+  if not exists (
+    select 1 from information_schema.columns
+     where table_schema = 'public' and table_name = 'profiles'
+       and column_name in ('complete_blindfold_rating', 'board_only_rating', 'fog_of_war_rating')
+    having count(*) = 3
+  ) then
+    raise exception 'run supabase-migrate-visions.sql first: the vision rating columns are missing';
+  end if;
+  if not exists (
+    select 1 from pg_proc p join pg_namespace n on n.oid = p.pronamespace
+     where n.nspname = 'public' and p.proname = 'record_rated_game'
+  ) then
+    raise exception 'run supabase-migrate-visions.sql first: record_rated_game() is missing';
+  end if;
 end $$;
 
 -- ------------------------------------------------------------
---  3. The games
+--  1. The games
 --
 --     One row per game from the moment it is arranged. `moves` is the whole
 --     game in UCI and `fen` the position it has reached, so a server that
@@ -160,6 +81,11 @@ end $$;
 --     overlapping the instance it replaces — avoid both driving one game.
 --     A move is written only by the owner and only at the ply it expects,
 --     so the second process to try loses cleanly rather than doubling a move.
+--
+--     white_elo_before/after and black_elo_before/after are copied from what
+--     record_rated_game() reports when the game is settled, so the row reads
+--     on its own; rated_games (the visions file) remains the record of the
+--     rating change itself.
 -- ------------------------------------------------------------
 create table if not exists public.league_games (
   id                uuid primary key default gen_random_uuid(),
@@ -205,12 +131,12 @@ create policy "league games are readable by everyone"
 grant select on public.league_games to anon, authenticated;
 
 -- ------------------------------------------------------------
---  4. Who is at a board right now
+--  2. Who is at a board right now
 --
---     The primary key is the rule: a player has one seat per vision, whichever
---     colour they hold. Two games in one vision cannot both seat them, because
---     the second insert is a duplicate key. Rows live exactly as long as the
---     game does — league_finish and league_abandon delete them.
+--     The primary key is the rule: an account has one seat per vision,
+--     whichever colour it holds. Two games in one vision cannot both seat it,
+--     because the second insert is a duplicate key. Rows live exactly as long
+--     as the game does — league_finish and league_abandon delete them.
 -- ------------------------------------------------------------
 create table if not exists public.league_seats (
   mode        text not null,
@@ -222,12 +148,14 @@ alter table public.league_seats enable row level security;
 -- no policies: only the service role, which bypasses them, reads or writes this
 
 -- ------------------------------------------------------------
---  5. league_start: a game and both seats, or nothing
+--  3. league_start: a game and both seats, or nothing
 --
---     Returns the new game's id. A player already seated in this vision makes
---     the seat insert fail, the transaction roll back, and the caller hear an
---     error — which is the answer "no", and a better one than a game that
---     seats somebody twice.
+--     Returns the new game's id. Both accounts must be system profiles
+--     (is_bot): the league never seats a person, and the database says so
+--     as well as the server. A player already seated in this vision makes
+--     the seat insert fail, the transaction roll back, and the caller hear
+--     an error — which is the answer "no", and a better one than a game
+--     that seats somebody twice.
 -- ------------------------------------------------------------
 create or replace function public.league_start(
   p_mode text, p_white uuid, p_black uuid, p_white_name text, p_black_name text,
@@ -245,6 +173,12 @@ begin
   if p_white = p_black then
     raise exception 'a player cannot be seated against themselves';
   end if;
+  if p_mode not in ('sighted', 'total', 'blind', 'fog') then
+    raise exception 'unknown vision %', p_mode;
+  end if;
+  if (select count(*) from public.profiles where id in (p_white, p_black) and is_bot) <> 2 then
+    raise exception 'the league seats system profiles only';
+  end if;
   insert into public.league_games (
     mode, white_id, black_id, white_name, black_name, white_elo_before, black_elo_before,
     fen, white_ms, black_ms, owner, lease_until
@@ -259,14 +193,16 @@ end;
 $$;
 
 -- ------------------------------------------------------------
---  6. league_finish: the result, the ratings, the seats — once
+--  4. league_finish: the result, the ratings, the seats — once
 --
 --     The update is guarded on status = 'live'. A second caller — the same
 --     server finishing twice, or a second server that thought it owned the
 --     game — matches no row, gets no row back, and moves no rating: the
---     winner cannot be paid twice. Ratings move by a flat four points, in the
---     column of the vision that was played and in no other; a draw moves
---     nothing. Returns the before-and-after numbers for the log.
+--     winner cannot be paid twice. The ratings move through
+--     record_rated_game(), keyed by this game's id, which is its own guard
+--     against the same thing and the only place the rule (+4 / -4 / 0, in
+--     the vision's own column) is written. Returns the before-and-after
+--     numbers it reported, for the log and for the row.
 -- ------------------------------------------------------------
 create or replace function public.league_finish(
   p_game uuid, p_result text, p_winner uuid, p_termination text,
@@ -283,11 +219,7 @@ set search_path = ''
 as $$
 declare
   g public.league_games%rowtype;
-  col text;
-  w_before integer;
-  b_before integer;
-  w_delta integer := 0;
-  b_delta integer := 0;
+  r record;
 begin
   update public.league_games
      set status = 'finished', result = p_result, winner_id = p_winner,
@@ -300,40 +232,22 @@ begin
     return;                         -- already settled by somebody: nothing to do, twice
   end if;
 
-  col := case g.mode
-           when 'sighted' then 'rating'
-           when 'total'   then 'complete_blindfold_rating'
-           when 'blind'   then 'board_only_rating'
-           when 'fog'     then 'fog_of_war_rating'
-         end;
-  execute format('select %I from public.profiles where id = $1', col) into w_before using g.white_id;
-  execute format('select %I from public.profiles where id = $1', col) into b_before using g.black_id;
-  w_before := coalesce(w_before, g.white_elo_before);
-  b_before := coalesce(b_before, g.black_elo_before);
+  select * into r
+    from public.record_rated_game(g.id::text, g.mode, g.white_id, g.black_id, p_result, p_points);
 
-  if p_result = '1-0' then
-    w_delta := p_points; b_delta := -p_points;
-  elsif p_result = '0-1' then
-    w_delta := -p_points; b_delta := p_points;
-  end if;
-
-  execute format('update public.profiles set %I = $1 where id = $2', col)
-    using w_before + w_delta, g.white_id;
-  execute format('update public.profiles set %I = $1 where id = $2', col)
-    using b_before + b_delta, g.black_id;
   update public.league_games
-     set white_elo_before = w_before, black_elo_before = b_before,
-         white_elo_after = w_before + w_delta, black_elo_after = b_before + b_delta
+     set white_elo_before = r.white_before, black_elo_before = r.black_before,
+         white_elo_after = r.white_after, black_elo_after = r.black_after
    where id = p_game;
   delete from public.league_seats where game_id = p_game;
 
-  return query select g.white_id, g.black_id, w_before, b_before,
-                      w_before + w_delta, b_before + b_delta;
+  return query select g.white_id, g.black_id, r.white_before, r.black_before,
+                      r.white_after, r.black_after;
 end;
 $$;
 
 -- ------------------------------------------------------------
---  7. league_abandon: a live game nobody can carry on with
+--  5. league_abandon: a live game nobody can carry on with
 --
 --     A row whose moves no longer replay, or that a server found it could
 --     not resume. No result, no rating change, seats freed. Guarded the same
@@ -362,6 +276,9 @@ $$;
 revoke all on function public.league_start(text, uuid, uuid, text, text, integer, integer, text, integer, text, integer) from public;
 revoke all on function public.league_finish(uuid, text, uuid, text, text, text, text, integer, text, integer, integer, integer) from public;
 revoke all on function public.league_abandon(uuid, text) from public;
+revoke all on function public.league_start(text, uuid, uuid, text, text, integer, integer, text, integer, text, integer) from anon, authenticated;
+revoke all on function public.league_finish(uuid, text, uuid, text, text, text, text, integer, text, integer, integer, integer) from anon, authenticated;
+revoke all on function public.league_abandon(uuid, text) from anon, authenticated;
 grant execute on function public.league_start(text, uuid, uuid, text, text, integer, integer, text, integer, text, integer) to service_role;
 grant execute on function public.league_finish(uuid, text, uuid, text, text, text, text, integer, text, integer, integer, integer) to service_role;
 grant execute on function public.league_abandon(uuid, text) to service_role;
@@ -371,18 +288,34 @@ commit;
 -- ------------------------------------------------------------
 --  Check it worked. Each on its own; none of them writes anything.
 --
---    -- twenty on each of the three new ladders, every one a bot
---    select count(*) filter (where complete_blindfold_rating is not null) as total,
---           count(*) filter (where board_only_rating is not null) as blind,
---           count(*) filter (where fog_of_war_rating   is not null) as fog
---      from public.profiles where is_bot;
---
---    -- the browser still cannot write any rating. Expect four rows of false.
---    select column_name, has_column_privilege('authenticated', 'public.profiles', column_name, 'update')
---      from information_schema.columns
---     where table_schema = 'public' and table_name = 'profiles'
---       and column_name in ('rating', 'complete_blindfold_rating', 'board_only_rating', 'fog_of_war_rating');
---
---    -- nothing is live yet; the server fills this the moment it starts
+--    -- the two tables exist and are empty until the server starts
 --    select mode, status, count(*) from public.league_games group by 1, 2;
+--    select count(*) from public.league_seats;
+--
+--    -- the browser cannot start, finish or abandon a game (expect false ×3),
+--    -- and the server can (true ×3)
+--    select has_function_privilege('anon', 'public.league_finish(uuid, text, uuid, text, text, text, text, integer, text, integer, integer, integer)', 'execute'),
+--           has_function_privilege('authenticated', 'public.league_finish(uuid, text, uuid, text, text, text, text, integer, text, integer, integer, integer)', 'execute'),
+--           has_function_privilege('service_role', 'public.league_finish(uuid, text, uuid, text, text, text, text, integer, text, integer, integer, integer)', 'execute');
+--
+--    -- the whole chain, undone afterwards: a game is seated, settled 1-0,
+--    -- Kasper21's fog rating is four higher and Velmor's four lower, the
+--    -- seats are gone, and settling it again moves nothing
+--    begin;
+--      select public.league_start('fog',
+--        (select id from public.profiles where display_name = 'Kasper21'),
+--        (select id from public.profiles where display_name = 'Velmor'),
+--        'Kasper21', 'Velmor', 2673, 2523,
+--        'rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1', 1800000, 'probe') as game \gset
+--      select * from public.league_finish(:'game', '1-0',
+--        (select id from public.profiles where display_name = 'Kasper21'),
+--        'probe', 'e2e4', 'e4', 'rnbqkbnr/pppppppp/8/8/4P3/8/PPPP1PPP/RNBQKBNR b KQkq - 0 1',
+--        1, '', 1800000, 1800000);
+--      select display_name, fog_of_war_rating from public.profiles
+--       where display_name in ('Kasper21', 'Velmor');
+--      select count(*) from public.league_seats;
+--      select * from public.league_finish(:'game', '1-0', null, 'probe', '', '', '', 0, '', 0, 0);
+--    rollback;
+--    (In the Supabase editor, which has no \gset, run league_start on its own
+--     inside the transaction and paste the returned id into the two calls.)
 -- ------------------------------------------------------------

@@ -26,13 +26,17 @@ node server/test_puzzle_flow.js          # plays a shipped puzzle against a stub
 node server/test_practice.js             # what the practice drills invent, re-checked
 node server/test_practice_flow.js        # and running one, against a stub DOM + clock
 node server/test_lessons.js              # walks the whole five-lesson course (~90s)
+node server/test_leaderboard.js          # the home page's four ladders, against a scripted account client
 node server/test_ai_fallback.js          # what the ranked fallback bot decides
 node server/test_ai_game.js              # and playing a whole game against it, stub DOM
 python3 server/test_ai_match.py          # seating one: the queue, the race; no server needed
 python3 server/test_names.py             # one name per player, guests included; no server needed
+python3 server/test_system_profiles.py   # the 21 leaderboard profiles: refused everywhere; no server needed
 python3 server/test_puzzle_rating.py     # the puzzle Elo handler; no server needed
+python3 server/test_visions.py           # the three vision ratings: what the migration seeds, what the server writes; no server needed
 node tools/test_generate_puzzles.js      # the generator's own decisions, no engine
 python3 tools/check_supabase_puzzles.py  # RLS and column grants, against the real project
+python3 tools/check_supabase_visions.py  # the four ladders and their grants, against the real project
 python3 server/test_league.py           # the AI league: pairing, ratings, endings, restart; no server, stub engine
 node server/test_live_games.js            # the home page's live cards — what each vision may show
 NOX_LEAGUE_FAST=1 python3 server/server.py    # ...and, against that server (real accounts, results in memory):
@@ -85,7 +89,8 @@ and is not a knob anybody is meant to turn in production.
 Environment: `PORT` (default 8787), `SUPABASE_URL` (enables token
 verification), `SUPABASE_JWT_SECRET` (only for legacy HS256 projects; also what
 `test_two_clients.py` uses to mint test tokens — without it the tests play as
-guests), `SUPABASE_SERVICE_KEY` (lets the server persist `puzzle_rating` and read a
+guests), `SUPABASE_SERVICE_KEY` (lets the server persist `puzzle_rating`, settle a rated
+game through `record_rated_game()` and read a
 player's `display_name` off their profile row; without it ratings live in
 memory for the life of the process and names come from the token). That last one
 takes either a modern `sb_secret_…` key or a legacy `service_role` JWT —
@@ -260,7 +265,9 @@ were called; the rating is `ai_elo_for()` — the player's own Elo plus a
 hundredth of it plus nine — worked out per game, because these names are not
 accounts and store nothing. Ranked play does not write `profiles.rating` for
 anybody yet, real opponent or bot, so there is no double-counting to avoid and
-no rating a bot game could inflate.
+no rating a bot game could inflate. The one thing that may move any of the four
+rating columns is `record_rated_game()` — see the four ladders below — and the
+AI league is the one caller.
 
 The bot plays in the *browser*, because that is where the chess is: there is no
 move generator in the server and never has been. `start` carries an `ai` block,
@@ -286,14 +293,99 @@ one that game was played at rather than a fresh `player_rating_of()`, because
 it is the same opponent again and because that call may go to the network,
 which nothing holding the lock may do.
 
+**The twenty-one system profiles are accounts with no seat, and the fallback
+bot is a seat with no account.** `supabase-system-profiles.sql` — the fourth
+hand-run file, after setup and social — puts Arvenko, LeoFromPrague and
+nineteen others into `profiles` at fixed ratings, flagged `is_bot`. They are
+rows and nothing more: the leaderboard, the Social search and a friend request
+all find them through the same table and the same queries as anybody, and the
+page does not select the flag, let alone special-case it — a list that knew
+about them would be a list that could lie about the order. They are *not* the
+ranked fallback: `AI_NAMES` are names that live for one game and are never
+rows, and `test_system_profiles.py` checks the two lists share nothing.
+`supabase-migrate-visions.sql` adds twenty more on identical terms, for the
+fixture names on the three vision ladders that had no account — forty-one
+system profiles in all once both files have run, and `bot_ids()` reads the
+flag rather than counting.
+
+`profiles.id` is a foreign key to `auth.users`, and that relationship is kept
+rather than relaxed: each profile gets an `auth.users` row with a fixed
+UUIDv5 id, an address on `.invalid`, no password, a ban to the year 3000, and
+`is_bot` in `app_metadata` — the half of the metadata a user cannot write. The
+signup trigger then makes the profile and the file upserts it, so running the
+file again re-asserts the same twenty-one rows and creates nothing twice. Three
+triggers make the rest structural: a system profile's name, rating and flag
+survive any UPDATE (a bulk `set rating = 100` still runs for everybody and
+leaves them alone), a `friendships` row may never contain one by any door
+including `accept_friend_request()`, and one may never send a request. A
+request *to* one is allowed on purpose, so the Social page behaves as it does
+for anybody; it simply sits unanswered.
+
+On the server the exclusion is three checks deep, none of which is "they are
+offline". `handle_hello()` refuses the token — `supabase_db.bot_ids()` reads
+the flagged ids once every `BOT_IDS_TTL`, outside the lock, and the token's
+own `app_metadata` is a second answer that needs no database — leaving the
+connection a guest with `Client.is_bot` set. `may_play_ranked()` then refuses
+that flag by name (even on a server with accounts off, where every guest may),
+`handle_find()` refuses it at the door and again when choosing a partner, and
+`ai_fallback()`'s second-waiter check ignores it. `is_ai` and `is_bot` are two
+flags on purpose: one says the fallback is sitting here, the other says this
+token is a system profile, and nothing is ever both.
+
+**Four ladders, four columns, one door.** Each vision has a rating column of
+its own on `profiles`: `rating` is the Sighted ladder and has been since
+`supabase-setup.sql`; `complete_blindfold_rating`, `board_only_rating` and
+`fog_of_war_rating` arrive with `supabase-migrate-visions.sql` — the fifth
+hand-run file, after the system profiles — shaped exactly like `rating`
+(`integer not null default 100`) and closed to the browser exactly like it:
+the file restates the column grant the setup file wrote, and
+`tools/check_supabase_visions.py` proves it against the real project. The
+keys that name them are `G.mode`'s — `LB_VISIONS` in the page and
+`VISION_COLUMNS` in `server/supabase_db.py` are the same table twice, and the
+`CASE` inside `record_rated_game()` is it a third time; `test_visions.py` and
+`test_leaderboard.js` hold the three to each other, because a rating moved
+under one name and read under another is a ladder that lies.
+
+The home page reads all four straight out of `profiles`, one query per column
+(`loadLadder`), highest first, ties by name, top twenty. Four queries rather
+than one on purpose: a select naming a column that does not exist fails the
+whole request, so on a project that has not run the visions file the Sighted
+ladder stays up and each of the other three says which file it is waiting for
+(`ladderError`, on Postgres's `42703`) instead of pretending to have loaded.
+Every other error is printed as itself. The fixture the page used to carry
+for those three ladders (`LB_BOARDS`) is gone: the migration seeds the same
+sixty places — same names, same numbers, the fog table's second Kasper21
+dropped in favour of the higher standing, as the page already did — so the
+first ladders drawn from the database are the ladders that were drawn before
+it. Forty of the sixty places belong to twenty of the system profiles; the
+other twenty names had no account, and the file creates them as system
+profiles on the same terms as the twenty-one, announcing each with a NOTICE.
+Each place is written once, recorded in `rating_seeds`, so running the file
+again never puts a ladder that has started to move back to the fixture.
+
+The only thing that moves any of the four is `record_rated_game()`, a
+security-definer function that `service_role` alone may execute:
+`supabase_db.record_rated_game()` hands it a game id, the vision, both
+accounts and the result, and it moves that vision's column and no other — four
+to the winner, four from the loser, nothing on a draw — reading both rows under
+a lock rather than trusting the caller, and recording the game in
+`rated_games` keyed by that id, so the same game settled twice moves nothing
+the second time and answers `applied = false`. It stands the system-profile
+guard down for its own transaction, because a rated game is the thing those
+rows were made to play. A ranked game between two people is still unrated, and the fallback bot has
+no row to rate; the AI league below is the one caller, through
+`league_finish()`.
+
 **The AI league plays the strongest bot accounts against each other around
 the clock, and it is the one place the server plays chess.** `server/league.py`
 (`LEAGUE` in `server.py`, built by `league.build()` at startup) runs four
 ladders — Sighted, Complete Blindfold, Board Only and Fog of War — each with
-its own pool, its own games and its own rating column: `profiles.rating` is
-still the Sighted ladder, and `complete_blindfold_rating`, `board_only_rating` and `fog_of_war_rating`
-arrived with `supabase-migrate-league.sql`, server-owned like `rating` and
-outside the browser's column grants. The pool is the leaderboard itself:
+its own pool, its own games and its own rating column — the four of the
+visions file above, `rating`, `complete_blindfold_rating`,
+`board_only_rating` and `fog_of_war_rating`, read by `RATING_COL`, which *is*
+`supabase_db.VISION_COLUMNS` rather than a copy. `supabase-migrate-league.sql`
+owns no rating and seeds no player: it adds the league's memory (the two
+tables and three functions below) and refuses to run before the visions file. The pool is the leaderboard itself:
 `top()` ranks a ladder exactly as the home page does (rating descending, then
 name) and takes twenty, and `eligible()` keeps the `is_bot` accounts among
 them — re-read every minute and after every result, so an account that falls
@@ -346,9 +438,11 @@ move (`SupabaseStore.write_move()`), so two servers — Render starting the
 new instance before stopping the old — cannot both play ply 41: the second
 to try changes nothing, re-reads the row, and lets go of the game.
 `league_finish()` is a Postgres function guarded on `status = 'live'`: it
-records the result, moves the two ratings by four in that vision's column
-(a draw moves nothing), and frees the seats — once, whatever asks twice, so
-nobody is ever paid eight. Ownership is a lease (`owner`, `lease_until`,
+records the result, hands the game by id to `record_rated_game()` — the one
+door, which moves that vision's column by four each way, nothing on a draw,
+and stands the system-profile guard down for its own transaction — and frees
+the seats; once, whatever asks twice, so nobody is ever paid eight, and the
+league adds nothing to the rating rule. Ownership is a lease (`owner`, `lease_until`,
 `LEASE_SECONDS`) renewed by every write; on startup `recover()` claims every
 live row whose lease is lapsed or released, replays its moves (a row that
 does not replay is abandoned with `league_abandon()` and no rating change),
@@ -956,7 +1050,8 @@ there is no fair way to choose between two accounts and there is between an
 account and a guest. `test_names.py` walks all of it without a server.
 
 **`supabase-social.sql`** is the second hand-run file, after
-`supabase-setup.sql`. Friendships are **one row per pair**, stored sorted
+`supabase-setup.sql` (and `supabase-system-profiles.sql` the fourth, after
+both — see the system profiles above). Friendships are **one row per pair**, stored sorted
 (`user_low < user_high`, enforced by a check constraint): the primary key is
 then also the "already friends" guard, reading it from either side is the same
 query, and removing it is one delete both players see. There is no insert
@@ -972,7 +1067,8 @@ load-bearing part is at the bottom: RLS alone would let a signed-in user set
 their own `rating`, so column-level grants restrict the browser to writing
 `display_name` and `avatar_url`. `tier` is a generated column, and
 `subscription` is server-owned. Keep any new server-owned column outside those
-grants.
+grants — the puzzles and visions files each restate them for exactly that
+reason.
 
 ## Working in blind-chess.html
 

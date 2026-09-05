@@ -39,8 +39,11 @@ second to try sees no row change and lets go. A lease says who owns a game,
 and a lapsed lease is how the survivor adopts the other's games.
 
 Finishing goes through one database function (league_finish) that is guarded
-on the game still being live: it moves the two ratings by four points, in the
-column of the vision that was played, exactly once, whatever asks twice.
+on the game still being live, and the ratings themselves move through
+record_rated_game() from supabase-migrate-visions.sql — the one door through
+which any of the four ratings moves, for the league as for anything else:
+four points in the column of the vision that was played, exactly once,
+whatever asks twice.
 """
 
 import datetime
@@ -73,14 +76,13 @@ MODE_NAME = {
     "blind": "Board Only",
     "fog": "Fog of War",
 }
-# The column each vision's rating lives in. Sighted is the ranked rating the
-# site has always had; the other three arrived with supabase-migrate-league.sql.
-RATING_COL = {
-    "sighted": "rating",
-    "total": "complete_blindfold_rating",
-    "blind": "board_only_rating",
-    "fog": "fog_of_war_rating",
-}
+# The column each vision's rating lives in: supabase_db.VISION_COLUMNS, and
+# not a copy of it. `rating` is the Sighted ladder the site has always had;
+# the other three arrived with supabase-migrate-visions.sql, and the CASE in
+# record_rated_game() there is the same table in SQL. One table, three
+# readers, and test_visions.py holds them to each other — a rating moved
+# under one name and read under another is a ladder that lies.
+RATING_COL = supabase_db.VISION_COLUMNS
 
 # The pool is the leaderboard: the top twenty of a ladder, exactly as the home
 # page ranks it (rating descending, then name), of whom the AI accounts play.
@@ -548,7 +550,8 @@ class SupabaseStore:
             text = supabase_db.error_body(err)
             if err.code in (404, 400) and ("PGRST205" in text or "PGRST202" in text or "42703" in text
                                             or "42P01" in text):
-                raise StoreUnavailable("supabase-migrate-league.sql has not been run: " + text)
+                raise StoreUnavailable("the migrations have not been run (supabase-migrate-visions.sql, "
+                                       "then supabase-migrate-league.sql): " + text)
             if err.code == 409 or "23505" in text:
                 raise SeatTaken(text)
             raise StoreUnavailable("%s %s: %s %s" % (method, path, err.code, text))
@@ -1293,8 +1296,8 @@ def build(setting=None):
             return None
     seated = sum(1 for p in store.players() if p["is_bot"] and any(v is not None for v in p["ratings"].values()))
     if not seated:
-        log("not running: no AI accounts on any ladder (is profiles.is_bot set, and has "
-            "supabase-migrate-league.sql been run?)")
+        log("not running: no AI accounts on any ladder (have supabase-system-profiles.sql "
+            "and supabase-migrate-visions.sql been run?)")
         return None
     try:
         engines = EnginePool(ENGINES, STOCKFISH)

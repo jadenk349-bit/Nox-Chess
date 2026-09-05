@@ -1726,6 +1726,13 @@
   @media (max-width:940px){ .pr-cards{grid-template-columns:repeat(2,minmax(0,1fr));} }
   @media (max-width:620px){ .pr-cards{grid-template-columns:minmax(0,1fr);} }
   .pr-card{display:flex; flex-direction:column; padding:18px 18px 16px; text-align:left;}
+  /* The practice overview shares the supplied lunar material. The dark wash
+     keeps descriptions readable without changing the cards or their controls. */
+  #screen-practice .pr-card,
+  #screen-practice .pr-summary{
+    background:linear-gradient(150deg,rgba(12,18,28,.64),rgba(7,12,21,.88)),
+      url("assets/moon.jpg?v=1") center / cover no-repeat;
+  }
   .pr-name{font-size:18.5px; font-weight:650; letter-spacing:.09em; color:var(--gold-soft);}
   .pr-desc{margin-top:8px; flex:1; color:var(--muted); font-size:16px; line-height:1.65;}
   .pr-foot{margin-top:15px; display:flex; align-items:center; justify-content:space-between; gap:10px;}
@@ -2504,8 +2511,8 @@
     display:grid;
     grid-template-columns:minmax(0,1.12fr) minmax(0,1fr);
     grid-template-areas:"badge tier" "badge elo" "badge cap" "badge gauge" "badge pick" "badge start" "badge note";
-    column-gap:42px; row-gap:0;
-    width:100%; max-width:880px; min-height:480px;
+    column-gap:48px; row-gap:0;
+    width:100%; max-width:1040px; min-height:550px;
     margin:clamp(18px,5vh,56px) auto 36px;
     padding:44px 42px 38px 24px;
     align-items:center; justify-content:normal; text-align:left;
@@ -2533,52 +2540,52 @@
   }
   #screen-ranked .rank-tier{
     grid-area:tier; margin:0; padding:0;
-    color:var(--tint-lit); font-size:clamp(23px,3vw,31px); letter-spacing:.20em;
+    color:var(--tint-lit); font-size:clamp(28px,3.6vw,38px); letter-spacing:.20em;
   }
   #screen-ranked .rank-tier::before{content:none;}
   #screen-ranked .rank-elo{
-    grid-area:elo; margin:12px 0 0; font-size:clamp(56px,7vw,78px);
+    grid-area:elo; margin:12px 0 0; font-size:clamp(68px,8.5vw,96px);
     font-weight:400; color:#eeeae2; background:none;
     -webkit-text-fill-color:currentColor;
   }
   #screen-ranked .rank-elo-cap{
     grid-area:cap; margin-top:7px; color:var(--tint-lit); letter-spacing:.32em;
     font-family:system-ui,-apple-system,"Segoe UI",sans-serif;
-    font-size:11px; font-weight:500; line-height:16px;
+    font-size:13px; font-weight:500; line-height:19px;
     text-shadow:0 0 14px var(--tint-glow);
   }
   #screen-ranked .rank-gauge{grid-area:gauge; margin-top:26px;}
   /* The track is quiet machined metal; only earned progress catches light.
      In particular, a rating at its tier floor must still show zero fill. */
   #screen-ranked .gauge-track{
-    height:6px; border:0; border-radius:3px;
+    height:16px; border:0; border-radius:8px;
     background:linear-gradient(180deg,#090d14 0%,#1c2633 48%,#303c4b 100%);
     box-shadow:0 1px 0 rgba(191,211,236,.13),inset 0 1px 2px rgba(0,0,0,.75);
   }
   #screen-ranked .gauge-fill{
-    border-radius:3px;
+    border-radius:8px;
     background:linear-gradient(90deg,var(--tint),var(--tint-lit));
     box-shadow:inset 0 1px 0 rgba(255,255,255,.42),0 0 10px var(--tint-glow);
   }
   #screen-ranked .gauge-ends{
     color:#a8b5c5; letter-spacing:.08em; margin-top:10px;
     font-family:system-ui,-apple-system,"Segoe UI",sans-serif;
-    font-size:12px;font-weight:500;line-height:16px;
+    font-size:14px;font-weight:500;line-height:20px;
     font-variant-numeric:tabular-nums;
   }
   #screen-ranked #rankFloor{color:var(--tint-lit);}
   #screen-ranked #rankCeil{color:#a8b5c5;}
   #screen-ranked .rank-pick{
-    grid-area:pick; margin-top:30px; padding:15px 12px;
+    grid-area:pick; margin-top:30px; padding:19px 16px;
     border-radius:6px; border-color:#38414d;
     background:linear-gradient(rgba(12,19,29,.40),rgba(7,12,20,.72)),url("assets/moon.jpg?v=1") center 44% / cover; color:#e2e6ec;
-    font-size:16px; letter-spacing:.10em; box-shadow:inset 0 1px 0 rgba(255,255,255,.035);
+    font-size:20px; letter-spacing:.10em; box-shadow:inset 0 1px 0 rgba(255,255,255,.035);
   }
   #screen-ranked .rank-pick:hover{border-color:var(--tint);}
   #screen-ranked .rank-pick.set{border-color:var(--tint);color:var(--tint-lit);background:linear-gradient(rgba(12,19,29,.32),rgba(7,12,20,.65)),url("assets/moon.jpg?v=1") center 44% / cover;}
   #screen-ranked .rank-start{
-    grid-area:start; margin-top:10px; padding:15px 12px;
-    border-radius:6px; font-size:17px; letter-spacing:.16em;
+    grid-area:start; margin-top:10px; padding:19px 16px;
+    border-radius:6px; font-size:21px; letter-spacing:.16em;
   }
   /* Excluding searching is essential: its longhand background and animation
      continue to be owned by #btnRankStart.searching below. */
@@ -2589,28 +2596,35 @@
   #screen-ranked .rank-start.dim{
     background:linear-gradient(rgba(10,15,24,.58),rgba(5,9,16,.79)),url("assets/moon.jpg?v=1") center 72% / cover;border-color:#38414e;color:#929aa8;
   }
-  #screen-ranked .rank-note{grid-area:note;margin-top:16px;font-size:14px;color:#a2abb8;line-height:1.55;letter-spacing:.025em;}
+  #screen-ranked .rank-note{grid-area:note;margin-top:18px;font-size:16px;color:#a2abb8;line-height:1.55;letter-spacing:.025em;}
   #screen-ranked .rank-note:empty{margin-top:0;}
   #rankSetOverlay .rank-modal{
-    background:linear-gradient(150deg,#18202c,#0b111b);border-color:#455062;
+    max-width:500px; padding:34px; max-height:calc(100dvh - 40px); overflow-y:auto;
+    background:linear-gradient(150deg,rgba(12,18,28,.58),rgba(7,12,21,.83)),url("assets/moon.jpg?v=1") center / cover;
+    border-color:#657082;
     box-shadow:0 24px 70px rgba(0,0,0,.7),inset 0 1px 0 rgba(255,255,255,.06);
   }
-  #rankSetOverlay .rank-label{color:#b8c0cc;}
-  #rankSetOverlay .rank-opts button{background:#0e1520;border-color:#323e4e;border-radius:6px;color:#cbd1da;}
+  #rankSetOverlay .rank-label{color:#e0e4eb;font-size:17px;}
+  #rankSetOverlay .rank-opts button{font-size:19px;}
+  #rankSetOverlay .rank-opts.col button{padding:15px 16px;}
+  #rankSetOverlay .rank-opts.row button{padding:15px 8px;}
+  #rankSetOverlay .modal-x{width:36px;height:36px;font-size:24px;}
+  #rankSetOverlay .rank-opts button{background:rgba(8,14,23,.82);border-color:#4b586a;border-radius:6px;color:#cbd1da;}
   #rankSetOverlay .rank-opts button.active{background:#2d281e;border-color:#c5a367;color:#efd6a4;}
-  @media(max-width:680px){
+  @media(max-width:780px){
     #screen-ranked .ranked{
       grid-template-columns:minmax(0,1fr);
       grid-template-areas:"badge" "tier" "elo" "cap" "gauge" "pick" "start" "note";
-      max-width:460px; min-height:0; margin:12px auto 28px; padding:16px 24px 26px;
+      max-width:460px; min-height:0; margin:12px auto 28px; padding:16px 14px 28px;
       text-align:center;
     }
     #screen-ranked .ranked::before{content:none;}
-    #screen-ranked .rank-badge{height:auto;max-width:320px;}
-    #screen-ranked .rank-tier{margin-top:4px;font-size:26px;}
-    #screen-ranked .rank-elo{font-size:58px;margin-top:10px;}
+    #screen-ranked .rank-badge{height:auto;max-width:380px;}
+    #screen-ranked .rank-tier{margin-top:4px;font-size:32px;}
+    #screen-ranked .rank-elo{font-size:72px;margin-top:10px;}
     #screen-ranked .rank-gauge{margin-top:22px;}
     #screen-ranked .rank-pick{margin-top:24px;}
+    #rankSetOverlay .rank-modal{padding:30px 20px 24px;}
   }
 
   /* ---------- settings screen ---------- */
@@ -2956,6 +2970,7 @@
     background:linear-gradient(150deg,rgba(12,18,28,.64),rgba(7,12,21,.88)),
       url("assets/moon.jpg?v=1") center / cover no-repeat;
   }
+
   .social-main{
     padding:20px 22px 22px;
     display:flex; flex-direction:column; gap:14px;
@@ -3635,10 +3650,11 @@
 
     <!-- The ladders stand on the page rather than behind a button: four small
          panels, one per vision, in one column under the account cluster at the
-         right-hand end of the header, beneath one heading, every one of them
-         read out of profiles (loadBoard()). Nothing there is a link — this is
-         the ladders being shown, and everything that can be done about them is
-         up in the nav.
+         right-hand end of the header, beneath one heading — all four read out
+         of profiles by loadBoard(), one rating column per vision (LB_VISIONS),
+         the Sighted one first. Nothing there is a link — this is the ladders
+         being shown, and everything that can be done about them is up in the
+         nav.
 
          At the foot of the left-hand side stand the league's live games: one
          per vision, the strongest pair at a board right now, drawn by
@@ -13989,7 +14005,7 @@ function updateAccountUI(){
   // for the one the account has actually earned
   if (screenName === 'ranked') drawRank();
   // and the leaderboard marks one row as yours, which is now somebody else's
-  if (LB.rows) renderBoard();
+  renderBoard();
   // and the social page is about one particular account, so it starts over
   socialAccountChanged();
   // practice is kept per account too, so the dashboard on screen is now
@@ -14139,124 +14155,177 @@ document.getElementById('authClose').onclick  =
   () => document.getElementById('authOverlay').classList.remove('show');
 
 /* ---- the leaderboards ----
-   Four ladders, one per vision, every one of them read out of profiles.
+   Four ladders, one per vision, and all four are read out of profiles.
 
-   Sighted is `rating`, the ranked rating the site has always had. The other
-   three are `complete_blindfold_rating`, `board_only_rating` and
-   `fog_of_war_rating`, which supabase-migrate-league.sql added — one column per vision, because a rating
-   earned with the board in front of you says nothing about what you can do
-   without it, and the server's AI league writes each of them from the games
-   played in that vision and no other. They used to be a fixture in this file;
-   they are a query now, and nothing that draws them had to change.
+   Each vision has a rating column of its own. `rating` is the Sighted ladder
+   and has been since supabase-setup.sql; the other three —
+   complete_blindfold_rating, board_only_rating and fog_of_war_rating —
+   arrive with supabase-migrate-visions.sql, which also seeds them with the
+   sixty places this page used to carry as a fixture, so the first ladders
+   drawn from the database are the ladders that were drawn before it. All
+   four are columns the browser may read and never write, the arrangement
+   `rating` and `puzzle_rating` already have, and the only thing that moves
+   any of them is record_rated_game() in that file, which the server alone
+   may call: a player's standing in one vision says nothing about the others,
+   and a game in one vision cannot move another vision's number.
 
-   None of the four needs an account: supabase-setup.sql makes the table
-   readable by anon as well as authenticated, and every rating column is one
-   the browser may read and never write — so a guest sees exactly the twenty
-   names a signed-in player sees, and neither of them can touch the numbers.
+   The ladders need no account, only the client: profiles is readable by anon
+   as well as authenticated, so a guest sees exactly the twenty names a
+   signed-in player sees, and neither of them can touch the numbers. They are
+   re-read on every open rather than kept for the session. Each is one small
+   query, and a ladder that is quietly out of date is worse company than one
+   that takes a moment to arrive.
 
-   They are re-read on every open rather than kept for the session, and again
-   whenever the live games below report a result, because that is the moment
-   the numbers move. It is four small queries, and a ladder that is quietly
-   out of date is worse company than one that takes a moment to arrive. */
+   Four queries rather than one, on purpose. A select naming a column that
+   does not exist fails the whole request, so one query for all four columns
+   would take the Sighted ladder down on every project that has not run the
+   visions migration yet; asked for separately, each panel answers for
+   itself, and the one that cannot be read says which file it is waiting for
+   (ladderError) instead of pretending to have loaded.
+
+   The system profiles — the twenty-one of supabase-system-profiles.sql and
+   the twenty more the visions file adds — arrive through these same queries
+   and nothing else: they are rows in profiles with a rating, sorted with
+   everybody by that rating, and a real player who climbs past one goes above
+   it. Nothing here knows they exist, and nothing here may — a list that
+   special-cases them is a list that lies about the order. The flag that
+   marks them is deliberately not selected. */
 /* How much of each ladder is shown. Twenty is the whole list and there is no
-   "show more": the caption above the rows says the same number, so change
-   both or the panel will promise one thing and deliver another. */
+   "show more": the captions say the same number, so change both or a panel
+   will promise one thing and deliver another. */
 const LB_TOP = 20;
-/* The four panels, by the key G.mode uses for the vision (PZ_VISION_NAME's
-   keys, and the league's): the column each is ranked by, and where it goes. */
-const LB_PANELS = {
-  sighted: { col: 'rating',       list: 'lbList',      cap: null },
-  total:   { col: 'complete_blindfold_rating', list: 'lbListTotal', cap: 'lbCapTotal' },
-  blind:   { col: 'board_only_rating',         list: 'lbListBlind', cap: 'lbCapBlind' },
-  fog:     { col: 'fog_of_war_rating',         list: 'lbListFog',   cap: 'lbCapFog' }
-};
-const LB = { rows: {}, loading: false, error: {}, token: 0 };
-const lbList = document.getElementById('lbList');
 
-async function loadBoard(){
+/* One column per vision, and the panel it fills. The keys are G.mode's,
+   exactly as PZ_VISION_NAME's are — total is Complete Blindfold, blind is
+   the board with no men on it, fog is Fog of War, sighted is the ranked
+   ladder — and the columns are the ones supabase-migrate-visions.sql adds
+   and server/supabase_db.py's VISION_COLUMNS names; test_leaderboard.js
+   holds the three to each other. `needs` is the file a missing column is
+   waiting for: the Sighted column exists from setup, the other three from
+   the visions migration. */
+const LB_VISIONS = {
+  sighted: { column: 'rating',                    list: 'lbList',      cap: '',           needs: 'supabase-setup.sql' },
+  total:   { column: 'complete_blindfold_rating', list: 'lbListTotal', cap: 'lbCapTotal', needs: 'supabase-migrate-visions.sql' },
+  blind:   { column: 'board_only_rating',         list: 'lbListBlind', cap: 'lbCapBlind', needs: 'supabase-migrate-visions.sql' },
+  fog:     { column: 'fog_of_war_rating',         list: 'lbListFog',   cap: 'lbCapFog',   needs: 'supabase-migrate-visions.sql' }
+};
+
+/* What each ladder currently holds: rows in ranking order once read, the
+   error that stopped a read, and a token so that the answer to an earlier
+   read cannot land over a later one. Four of these rather than one, because
+   the four are read separately and each fails or arrives on its own. */
+const LB = {
+  sighted: { rows: null, loading: false, error: '', token: 0 },
+  total:   { rows: null, loading: false, error: '', token: 0 },
+  blind:   { rows: null, loading: false, error: '', token: 0 },
+  fog:     { rows: null, loading: false, error: '', token: 0 }
+};
+
+/* All four, each on its own: nothing here waits for anything, so the Sighted
+   ladder is up while the others are still arriving, and a panel that fails
+   fails alone. */
+function loadBoard(){
+  for (const key in LB_VISIONS) loadLadder(key);
+}
+
+async function loadLadder(key){
+  const spec = LB_VISIONS[key], st = LB[key];
   if (!sb){
     /* Two different silences, and the panel must not confuse them. Before
        initAuth has finished importing the client there is simply nothing to
        ask yet, and the panel says so by saying nothing; once it has settled —
        no keys, or a CDN that never answered — there is no ladder to show and
        that is worth a sentence. Neither one may read as "nobody is ranked". */
-    LB.rows = {};
-    LB.error = {};
-    for (const key in LB_PANELS) LB.error[key] = authSettled
+    st.rows = null;
+    st.error = authSettled
       ? 'The leaderboard needs the account server, and it is not reachable right now.'
       : '';
-    renderBoard();
+    renderLadder(key);
     return;
   }
-  const token = ++LB.token;
-  LB.loading = true;
-  LB.error = {};
-  renderBoard();
-  const reads = Object.keys(LB_PANELS).map(async key => {
-    const col = LB_PANELS[key].col;
-    try {
-      const { data, error } = await sb.from('profiles')
-        // no avatar_url: this list wears the tier badge, not the player's face
-        .select('id, display_name, ' + col)
-        .not(col, 'is', null)
-        .order(col, { ascending: false })
-        // Ties are broken by name here rather than left to whatever order the
-        // database felt like: everybody starts on the same rating, so without
-        // this the twentieth and twenty-first place could swap between two
-        // opens.
-        .order('display_name')
-        .limit(LB_TOP);
-      if (error) throw error;
-      if (token !== LB.token) return;          // a later read has already answered
-      LB.rows[key] = (data || []).map(r => asPerson(Object.assign({}, r, { rating: r[col] })));
-    } catch (err){
-      if (token !== LB.token) return;
-      LB.rows[key] = null;
-      // A column that is not there yet is the migration not having been run,
-      // and that is worth saying in those words rather than as a code.
-      const msg = (err && err.message) || 'try again in a moment.';
-      LB.error[key] = /column|42703/i.test(msg) && key !== 'sighted'
-        ? 'This ladder needs supabase-migrate-league.sql to be run.'
-        : 'Could not load the leaderboard — ' + msg;
-    }
-  });
-  await Promise.all(reads);
-  if (token === LB.token){ LB.loading = false; renderBoard(); }
+  const token = ++st.token;
+  st.loading = true;
+  st.error = '';
+  renderLadder(key);
+  try {
+    const { data, error } = await sb.from('profiles')
+      // no avatar_url: this list wears the tier badge, not the player's face
+      .select('id, display_name, ' + spec.column)
+      .order(spec.column, { ascending: false })
+      // Ties are broken by name here rather than left to whatever order the
+      // database felt like: everybody starts on the same rating, so without
+      // this the twentieth and twenty-first place could swap between two
+      // opens.
+      .order('display_name')
+      .limit(LB_TOP);
+    if (error) throw error;
+    if (token !== st.token) return;          // a later read has already answered
+    st.rows = (data || []).map(row => ratedPerson(row, spec.column));
+  } catch (err){
+    if (token !== st.token) return;
+    st.rows = null;
+    st.error = ladderError(err, spec);
+  } finally {
+    if (token === st.token){ st.loading = false; renderLadder(key); }
+  }
 }
 
-function renderBoard(){
-  for (const key in LB_PANELS){
-    const panel = LB_PANELS[key];
-    const list = document.getElementById(panel.list);
-    const cap = panel.cap && document.getElementById(panel.cap);
-    const rows = LB.rows[key];
-    if (LB.error[key]){
-      list.innerHTML = ''; list.appendChild(emptyNote(LB.error[key], true));
-      if (cap) cap.textContent = '';
-      continue;
-    }
-    // Anything short of rows in hand is "loading", including the wait before
-    // the account client exists. A refresh over rows that are already up says
-    // nothing at all rather than blanking the list to announce itself.
-    if (!rows){
-      if (!list.children.length || !list.querySelector('.lb-row')){
-        list.innerHTML = ''; list.appendChild(emptyNote('Loading the ladder…'));
-      }
-      continue;
-    }
-    if (!rows.length){
-      list.innerHTML = ''; list.appendChild(emptyNote('Nobody has a rating here yet.'));
-      if (cap) cap.textContent = '';
-      continue;
-    }
-    if (cap) cap.textContent = rows.length + ' players';
-    fillBoard(list, rows);
+/* A row of profiles as a person on one particular ladder. asPerson() reads
+   `rating`, which is the Sighted number, and a Fog of War row wearing a
+   Sighted rating is exactly the mix-up the four columns exist to prevent —
+   so the column is named, and nothing else on the row is read as a rating. */
+function ratedPerson(row, column){
+  return {
+    id: row.id,
+    name: row.display_name || 'Player',
+    avatar: '',
+    rating: typeof row[column] === 'number' ? row[column] : null
+  };
+}
+
+/* What a failed read says. A column that does not exist is not a fault in
+   the network or the code: it is a project that has not run the file that
+   adds it, and the panel says which file, in one line, so that somebody
+   looking at a blank ladder is told what to do rather than left to guess —
+   and so that the panel never pretends to have loaded. Postgres reports it
+   as undefined_column (42703), and PostgREST passes that code through; the
+   message is matched as well for the client versions that do not. Every
+   other error is shown as itself, since hiding a real database error behind
+   a friendly sentence is how one stays broken. */
+function ladderError(err, spec){
+  const code = err && err.code, message = (err && err.message) || '';
+  if (code === '42703' || /column .* does not exist/i.test(message)){
+    return 'This ladder needs ' + spec.needs + ' to be run.';
   }
+  return 'Could not load the leaderboard — ' + (message || 'try again in a moment.');
+}
+
+function renderLadder(key){
+  const spec = LB_VISIONS[key], st = LB[key];
+  const list = document.getElementById(spec.list);
+  // The Sighted caption is written in the markup ("Top 20"); the other three
+  // say how many are on the list, as they did when the list was a fixture.
+  const cap = spec.cap ? document.getElementById(spec.cap) : null;
+  if (cap) cap.textContent = st.rows ? st.rows.length + ' players' : '';
+  if (st.error){ list.innerHTML = ''; list.appendChild(emptyNote(st.error, true)); return; }
+  // Anything short of rows in hand is "loading", including the wait before the
+  // account client exists. A refresh over rows that are already up says
+  // nothing at all rather than blanking the list to announce itself.
+  if (!st.rows){ list.innerHTML = ''; list.appendChild(emptyNote('Loading the ladder…')); return; }
+  if (!st.rows.length){ list.innerHTML = ''; list.appendChild(emptyNote('Nobody is rated on this ladder yet.')); return; }
+  fillBoard(list, st.rows);
+}
+
+/* Every ladder that has rows, drawn again — what signing in or out calls,
+   because one row may now be yours, or no longer be. A ladder still loading
+   or in error is left saying so. */
+function renderBoard(){
+  for (const key in LB_VISIONS) if (LB[key].rows) renderLadder(key);
 }
 
 /* One list filled from the top. The place is the row's index and nothing
    else, so the order the people arrive in *is* the ranking — which is why
-   the caller hands this a list already sorted by rating. */
+   every ladder hands this rows the database has already sorted by rating. */
 function fillBoard(list, people){
   list.innerHTML = '';
   people.forEach((person, i) => list.appendChild(boardRow(person, i + 1)));
@@ -14338,7 +14407,9 @@ function boardRow(person, place){
    beside it, shown exactly as the ladder shows them), keeps the clocks, and
    reports the result; the page shows the clocks running by counting down from the last
    snapshot, and reads the ladders again when a game ends, because that is
-   the moment the numbers move.
+   the moment the numbers move — the same four columns loadBoard() reads,
+   which record_rated_game() in supabase-migrate-visions.sql is the one
+   thing that writes.
    ============================================================ */
 const LIVE = {
   sock: null,        // the watching socket, while the home page is up
@@ -14802,7 +14873,11 @@ async function runSearch(q){
     const { data, error } = await sb.from('profiles')
       .select('id, display_name, avatar_url, rating')
       // part of a name, anywhere in it, in any case: ChessMaster123 answers
-      // to "Chess", to "Master" and to "chessmaster" alike
+      // to "Chess", to "Master" and to "chessmaster" alike. The system
+      // profiles (supabase-system-profiles.sql) are found here like anybody
+      // — same table, same query — and a request sent to one is sent like
+      // any other and is simply never answered; the database refuses to
+      // make the friendship by any door.
       .ilike('display_name', '%' + term + '%')
       .neq('id', account.id)            // you are never a result of your own search
       .order('display_name')
