@@ -498,6 +498,28 @@ agreement and only the server can see those. Moves are replayed through
 `applyMove(m, true)`, so notation, captures, sounds and the console are the
 game's own; a snapshot that is not a continuation rebuilds from the start.
 
+**Every match is watched from its first move.** The league plays around the
+clock, so a viewer almost always arrives mid-game, and the first version of
+the screen put them straight onto the position as it stood. Now the moves a
+snapshot carries that the board has not shown go into `SPEC.queue`, the board
+opens on the starting position, and `specStep()` plays them out one at a time
+at a pace fixed by `SPEC_REPLAY` — about twenty seconds for the whole
+catch-up, no move faster than 180ms or slower than 700ms — after which the
+view is live (`specLive()`). One new move on a board that is already caught
+up is the game happening and is played at once, with its sound; a move that
+arrives while the replay is running joins the end of the queue and the
+replay runs on into the live game. The replay is silent, the foot of the
+screen reads FROM THE START · MOVE n OF m while it runs, and the clocks stand
+at the snapshot's figures without ticking (`clockRunning()` refuses while the
+queue is non-empty) because the page has no record of what either clock read
+at move twelve and will not invent one. A finished game opened by its link is
+replayed the same way and its result box waits for the last move
+(`specCatching()` keeps `G.over` clear until then). Fog of War follows the
+replay from the chair of whoever is to move in the position on the board.
+`specHalt()` is the one way to drop a replay — a rebuild, the next game,
+leaving — and `SPEC_REPLAY` is a mutable object only so that
+`test_spectate_flow.js` can shorten the pace to milliseconds.
+
 There is no Back button of its own: the logo is the way home, as on any
 game screen, and so are Back to Home on the result box, escape and the
 browser's back. Only a live card is a button, and it carries `data-id`: a waiting card has
