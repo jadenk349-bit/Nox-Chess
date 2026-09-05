@@ -42,14 +42,14 @@ var BUNDLE = [
   fn('stateFromFEN'), fn('fmtClock'),
   grab(/\nconst LIVE_NAME = \{[^\n]*\};/, 'LIVE_NAME'),
   fn('liveRemaining'), fn('liveStatusText'), fn('liveEsc'), fn('liveBoardHTML'),
-  fn('liveMovesHTML'), fn('liveConsoleHTML'), fn('liveSeatHTML'), fn('liveCardHTML')
+  fn('liveMovesHTML'), fn('liveColumnsHTML'), fn('liveConsoleHTML'), fn('liveSeatHTML'), fn('liveCardHTML')
 ];
 // idCounter is declared beside mk(); a glyph is a marker here, not the art
 var PRE = 'var idCounter = 1; var GLYPH = {}; var BISHOP_SVG = "";' +
           'var pieceHTML = function(t){ return "<i class=\\"glyph-" + t + "\\"></i>"; };' +
           'var LIVE = { at: 0, skew: 0 };';
 var page = new Function(PRE + BUNDLE.join('\n') +
-  '\nreturn { liveBoardHTML:liveBoardHTML, liveMovesHTML:liveMovesHTML, liveConsoleHTML:liveConsoleHTML,' +
+  '\nreturn { liveBoardHTML:liveBoardHTML, liveMovesHTML:liveMovesHTML, liveColumnsHTML:liveColumnsHTML, liveConsoleHTML:liveConsoleHTML,' +
   ' liveSeatHTML:liveSeatHTML, liveCardHTML:liveCardHTML, liveRemaining:liveRemaining,' +
   ' liveStatusText:liveStatusText, liveEsc:liveEsc, LIVE:LIVE };')();
 
@@ -102,8 +102,12 @@ check('...but never on the bare board', count(page.liveBoardHTML(CHECK_FEN, 'bli
 say('\nComplete Blindfold');
 var console_ = page.liveConsoleHTML(SNAP.sans, false);
 check('shows no board', count(console_, /live-board/g), 0);
-check('...and the moves, numbered', /8\.<\/span><span class="lm cur-move">Ne5/.test(console_), true);
-check('...the last one lit and no other', count(console_, /cur-move/g), 1);
+check('...and no line saying so', /No board/.test(console_), false);
+check('...but the scoresheet, six moves deep', [count(console_, /live-cols/g), count(console_, /class="lc-n"/g)], [1, 6]);
+check('...the last one lit and no other', [count(console_, /cur-move/g), /lc-m cur-move">Ne5/.test(console_)], [1, true]);
+var bigConsole = page.liveConsoleHTML(SNAP.sans, true);
+check('the spectator view keeps the console as it was', [/No board/.test(bigConsole), count(bigConsole, /live-cols/g)], [true, 0]);
+check('...and the moves, numbered', /8\.<\/span><span class="lm cur-move">Ne5/.test(bigConsole), true);
 var card = page.liveCardHTML(Object.assign({}, SNAP, { mode: 'total' }), false);
 check('the card has the console and no squares', [count(card, /live-console/g) > 0, count(card, /class="lsq/g)], [true, 0]);
 
@@ -113,11 +117,26 @@ check('the tail is what fits', count(page.liveMovesHTML(SNAP.sans, 3), /class="l
 check('a lone white move is the current one', count(page.liveMovesHTML(['e4'], 3), /cur-move/g), 1);
 check('names and moves are escaped', page.liveEsc('<b>&"'), '&lt;b&gt;&amp;&quot;');
 
+say('\nThe columns beside the board');
+var cols = page.liveColumnsHTML(SNAP.sans, 4);
+check('a column each for White and Black, headed', [/lc-h lc-w">White/.test(cols), /lc-h lc-b">Black/.test(cols)], [true, true]);
+check('the last four moves and no more', count(cols, /class="lc-n"/g), 4);
+check('...numbered as the game numbers them', /lc-n">8\.<\/span>/.test(cols), true);
+check('...the last one lit and no other', [count(cols, /cur-move/g), /lc-w"><span class="lc-m cur-move">Ne5/.test(cols)], [1, true]);
+check('a black cell is left empty after a white move', /<span class="lc-b"><\/span><\/div>$/.test(cols), true);
+check('a lone white move is the current one', count(page.liveColumnsHTML(['e4'], 4), /cur-move/g), 1);
+check('nothing yet', /class="empty">No moves yet/.test(page.liveColumnsHTML([], 4)), true);
+check('a short game fills what it has', count(page.liveColumnsHTML(['e4', 'e5', 'Nf3'], 4), /class="lc-n"/g), 2);
+
 say('\nThe card');
 page.LIVE.at = Date.now(); page.LIVE.skew = 0;   // the snapshot is fresh, so no clock is low
 card = page.liveCardHTML(SNAP, false);
 check('names both players', [/Kasper21/.test(card), /Velmor/.test(card)], [true, true]);
 check('...and both ratings', [/2809/.test(card), /2742/.test(card)], [true, true]);
+check('...each beside its name, on the name row', [/live-name">Kasper21<\/span><span class="live-elo">2809<\/span><\/div>/.test(card), /live-name">Velmor<\/span><span class="live-elo">2742<\/span><\/div>/.test(card)], [true, true]);
+check('the small card carries the columns, not the line', [count(card, /live-cols/g), count(card, /live-line/g)], [1, 0]);
+check('...and the spectator view the line, not the columns', [count(page.liveCardHTML(SNAP, true), /live-cols/g), count(page.liveCardHTML(SNAP, true), /live-line/g)], [0, 1]);
+check('Complete Blindfold\'s card has the columns in its box and nowhere else', count(page.liveCardHTML(Object.assign({}, SNAP, { mode: 'total' }), false), /live-cols/g), 1);
 check('says LIVE', /live-pill">Live/.test(card), true);
 check('lights the seat to move', /live-seat b turn/.test(card), true);
 check('...and only that one', count(card, /live-seat [wb] turn/g), 1);
