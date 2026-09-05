@@ -46,6 +46,7 @@ four points in the column of the vision that was played, exactly once,
 whatever asks twice.
 """
 
+import collections
 import datetime
 import json
 import math
@@ -97,6 +98,10 @@ POINTS = 4               # what a win is worth, and a loss costs; a draw moves n
 MINUTES = 30             # each side's clock
 CLOCK_MS = MINUTES * 60 * 1000
 RECENT_MEMORY = 3        # opponents remembered per player per vision, to avoid repeats
+FINISHED_MEMORY = 40     # finished games kept by id in memory, for a spectator arriving late
+# A game id as the page may ask for one: a uuid, or the hex the memory store
+# mints. Checked before it goes anywhere near a query string.
+GAME_ID_RE = re.compile(r"[A-Za-z0-9-]{1,64}")
 LEASE_SECONDS = 90       # how long a game stays another process's after its last write
 ADOPT_EVERY = 30.0       # how often to look for games whose owner has gone quiet
 PLAYERS_EVERY = 60.0     # how often the ladders are re-read, so a move in or out of the top twenty counts
@@ -536,6 +541,12 @@ class MemoryStore:
         rows.sort(key=lambda g: g["finished_at"] or "", reverse=True)
         return [dict(g) for g in rows[:limit]]
 
+    def game(self, game_id):
+        """One row by id, live or not, or None."""
+        with self.lock:
+            g = self.games.get(game_id)
+            return dict(g) if g else None
+
     def start_game(self, mode, white, black, fen, ms, owner):
         with self.lock:
             if white["id"] == black["id"]:
@@ -729,6 +740,12 @@ class SupabaseStore:
                                  "&status=eq.finished&mode=eq.%s&order=finished_at.desc&limit=%d"
                           % (mode, limit)) or []
 
+    def game(self, game_id):
+        if not GAME_ID_RE.fullmatch(game_id or ""):
+            return None
+        rows = self._call("GET", "/league_games?select=*&id=eq.%s" % game_id) or []
+        return rows[0] if rows else None
+
     def start_game(self, mode, white, black, fen, ms, owner):
         gid = self._call("POST", "/rpc/league_start", {
             "p_mode": mode, "p_white": white["id"], "p_black": black["id"],
@@ -891,6 +908,66 @@ def outcome_of(board):
     return ("1-0", "w", term) if out.winner == chess.WHITE else ("0-1", "b", term)
 
 
+def snapshot_from_row(row):
+    """A game row as the page's snapshot — the same keys Match.snapshot() writes.
+
+    For a spectator arriving after the game left this process's memory: a
+    refresh on a finished game, or a link kept from yesterday. Everything
+    the page draws is in the row; whose turn it was and whether that side
+    was in check are read off the FEN, which is what the row was written
+    from. A row that will not replay is shown as it stands.
+    """
+    fen = row.get("fen") or START_FEN
+    moves = (row.get("moves") or "").split()
+    sans = (row.get("sans") or "").split()
+    try:
+        board = chess.Board(fen)
+        turn = "w" if board.turn == chess.WHITE else "b"
+        check = bool(board.is_check())
+    except ValueError:
+        turn, check = ("w" if len(moves) % 2 == 0 else "b"), False
+    status = row.get("status") or "finished"
+    if status == "abandoned":
+        status, termination = "finished", row.get("termination") or "abandoned"
+    else:
+        termination = row.get("termination")
+    winner = None
+    if row.get("winner_id"):
+        winner = "w" if row["winner_id"] == row.get("white_id") else "b"
+    elif row.get("result") in ("1-0", "0-1"):
+        winner = "w" if row["result"] == "1-0" else "b"
+    started = from_iso(row.get("started_at"))
+    finished = from_iso(row.get("finished_at"))
+    last = from_iso(row.get("last_move_at"))
+    return {
+        "id": row.get("id"),
+        "mode": row.get("mode"),
+        "modeName": MODE_NAME.get(row.get("mode"), row.get("mode")),
+        "white": {"id": row.get("white_id"), "name": row.get("white_name"),
+                  "rating": row.get("white_elo_after") if row.get("white_elo_after") is not None
+                  else row.get("white_elo_before")},
+        "black": {"id": row.get("black_id"), "name": row.get("black_name"),
+                  "rating": row.get("black_elo_after") if row.get("black_elo_after") is not None
+                  else row.get("black_elo_before")},
+        "fen": fen,
+        "moves": " ".join(moves),
+        "sans": sans,
+        "ply": len(moves),
+        "turn": turn,
+        "lastMove": moves[-1] if moves else None,
+        "whiteMs": max(0, int(row.get("white_ms") or 0)),
+        "blackMs": max(0, int(row.get("black_ms") or 0)),
+        "lastMoveAt": int(last * 1000) if last else None,
+        "startedAt": int(started * 1000) if started else None,
+        "status": status,
+        "result": row.get("result"),
+        "winner": winner,
+        "termination": termination,
+        "finishedAt": int(finished * 1000) if finished else None,
+        "check": check,
+    }
+
+
 # ----------------------------------------------------------------- the league
 
 # What the league is doing, in one word or three, for /health and the log.
@@ -962,6 +1039,15 @@ class League:
         self.last_color = {m: {} for m in MODES}    # mode -> player id -> colour last played
         self.next_fill = {m: 0.0 for m in MODES}    # mode -> when a new game may be arranged
         self.listeners = set()
+        # Spectators: client -> {"id": game id, "sent": what they were last
+        # sent, as (ply, status, next)}. One game each, pushed on every
+        # change to it and on nothing else — a spectator of the Fog game is
+        # not sent the Sighted game's moves.
+        self.watchers = {}
+        # Finished games this process remembers by id, newest last, so a
+        # spectator who was watching when it ended, or who arrives a minute
+        # later, gets the final position without a database read.
+        self.finished_by_id = collections.OrderedDict()
         self.running = False
         self.thread = None
         self.store_down_since = None
@@ -1582,7 +1668,11 @@ class League:
                     elif p["id"] == b["id"]:
                         p["rating"] = done["black_after"]
         with self.lock:
-            self.last_finished[match.mode] = match.snapshot(now)
+            snap = match.snapshot(now)
+            self.last_finished[match.mode] = snap
+            self.finished_by_id[match.id] = snap
+            while len(self.finished_by_id) > FINISHED_MEMORY:
+                self.finished_by_id.popitem(last=False)
             self.matches.pop(match.id, None)
             self.next_fill[match.mode] = max(self.next_fill[match.mode], now + RESULT_PAUSE)
         self.publish()
@@ -1627,16 +1717,93 @@ class League:
     def unsubscribe(self, client):
         with self.lock:
             self.listeners.discard(client)
+            self.watchers.pop(client, None)
+
+    # ---- one game, by id, for a spectator
+
+    def snapshot_of(self, game_id, now=None):
+        """The game with this id as the page draws it, or None.
+
+        Live here first; then a game this process finished and still
+        remembers; then the store — which is what answers a refresh on a
+        game that ended before this process started. A game another
+        server is playing is in the store too, as its row stands, and is
+        shown from there: a little behind, but the real game.
+        """
+        now = now or time.time()
+        with self.lock:
+            match = self.matches.get(game_id)
+            if match is not None:
+                return match.snapshot(now)
+            snap = self.finished_by_id.get(game_id)
+            if snap is not None:
+                return snap
+        row = self.store.game(game_id) if self.store is not None else None
+        return snapshot_from_row(row) if row else None
+
+    def next_live_id(self, mode, not_this):
+        """The id of the game a spectator of a finished one may move on to:
+        the featured live game in the same vision, if it is a different one."""
+        with self.lock:
+            live = [m for m in self.matches.values() if m.mode == mode and m.status == "live" and m.id != not_this]
+        if not live:
+            return None
+        return max(live, key=lambda m: m.white["rating"] + m.black["rating"]).id
+
+    def watch_payload(self, game_id, now=None):
+        now = now or time.time()
+        snap = self.snapshot_of(game_id, now)
+        nxt = self.next_live_id(snap["mode"], game_id) if snap else None
+        out = {"t": "watch-game", "id": game_id, "at": int(now * 1000), "game": snap, "next": nxt}
+        if self.state != "running":
+            out["off"] = True
+            out["note"] = self.public_note()
+        return out
+
+    def watch(self, client, game_id):
+        """Attach this client to one game: the snapshot now, and every change
+        to it after. Replaces whatever the client was watching before. It is
+        a subscription and nothing more — a spectator is never a Client
+        with a seat, so nothing they send can reach the board."""
+        payload = self.watch_payload(game_id)
+        snap = payload["game"]
+        with self.lock:
+            self.watchers[client] = {"id": game_id, "sent": self._version(snap, payload["next"])}
+        client.send(payload)
+
+    def unwatch(self, client):
+        with self.lock:
+            self.watchers.pop(client, None)
+
+    @staticmethod
+    def _version(snap, nxt):
+        if snap is None:
+            return (None, None, nxt)
+        return (snap.get("ply"), snap.get("status"), nxt)
 
     def publish(self):
         payload = self.payload()
+        now = time.time()
         with self.lock:
-            watchers = list(self.listeners)
-        for client in watchers:
+            listeners = list(self.listeners)
+            watching = list(self.watchers.items())
+        for client in listeners:
             if getattr(client, "alive", True):
                 client.send(payload)
             else:
                 self.unsubscribe(client)
+        for client, w in watching:
+            if not getattr(client, "alive", True):
+                self.unsubscribe(client)
+                continue
+            out = self.watch_payload(w["id"], now)
+            version = self._version(out["game"], out["next"])
+            if version == w["sent"]:
+                continue
+            with self.lock:
+                if self.watchers.get(client) is w:
+                    w["sent"] = version
+            client.send(out)
 
     def health(self):
         """For /health: the state and, per ladder, what it is doing and why.
@@ -1663,6 +1830,8 @@ class League:
                 "store": self.store_kind,
                 "live": len(self.matches),
                 "elsewhere": len(self.foreign),
+                "watching": len(self.listeners),
+                "spectators": len(self.watchers),
                 "moves": self.stats["moves"],
                 "finished": self.stats["finished"],
                 "errors": self.stats["errors"],

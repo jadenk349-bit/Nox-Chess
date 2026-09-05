@@ -113,7 +113,7 @@ for (var i = 0; i < 64; i++) sqEls.push(fakeEl());
 var DECLS = ['VAL','FILES','rowOf','colOf','SQNAME','uciOf','sqName','onBoard','other',
              'idCounter','mk','DIR_N','DIR_B','DIR_R','DIR_K','PIECE_WORD',
              'G','NET','el','BLINDISH','BOT_NAME','LOCAL','ONLINE','HOSTING','CHAL',
-             'CHALLENGE_TTL','CHALLENGING','BOT','PUZZLE','AI_MATCH','humanTurn','viewer',
+             'CHALLENGE_TTL','CHALLENGING','BOT','SPECTATING','PUZZLE','AI_MATCH','humanTurn','viewer',
              'CAN_PEEK','AI_POOL','AI_BAND','AI_SLACK','scheduleAI','W'];
 var FNS = ['startBoard','newState','cloneState','posKey','slide','step','addPawn',
            'pseudoMoves','isAttacked','kingSq','inCheck','makeMove','legalMoves','toSAN',

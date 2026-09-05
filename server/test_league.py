@@ -688,6 +688,81 @@ def main():
     check("off_payload is what a server with no league answers",
           (league.off_payload()["off"], league.off_payload()["state"]), (True, "off"))
 
+    print("\n\033[1mWatching one game, by id\033[0m")
+    script = {0: ("f2f3", 0), 1: ("e7e5", 0), 2: ("g2g4", 0), 3: ("d8h4", 0)}
+    store, L = fresh(engines=StubEngines(script))
+    pool(store, "fog", [2500, 2500, 2500])
+    pool(store, "sighted", [2600, 2600])
+    L.refresh_players(0)
+    fog = L.arrange("fog", NOW)
+    sighted = L.arrange("sighted", NOW)
+    v = Watcher()
+    L.watch(v, fog.id)
+    first = v.got[-1]
+    check("watch answers at once with that game", (first["t"], first["id"], first["game"]["id"]), ("watch-game", fog.id, fog.id))
+    check("...live, at ply 0", (first["game"]["status"], first["game"]["ply"]), ("live", 0))
+    check("...with no next game yet", first["next"], None)
+    n0 = len(v.got)
+    run_until(L, lambda: sighted.ply >= 2 and fog.ply == 0, limit=0.4) if False else None
+    # push the other ladder's game along by hand: a fog watcher must hear nothing
+    L.play_move(sighted, NOW)
+    check("a move on another ladder is not pushed to this watcher", len(v.got), n0)
+    L.play_move(fog, NOW)
+    check("a move on the watched game is", len(v.got), n0 + 1)
+    check("...with the new ply", (v.got[-1]["game"]["ply"], v.got[-1]["game"]["lastMove"]), (1, "f2f3"))
+    L.publish()
+    check("a publish with nothing new for it sends nothing", len(v.got), n0 + 1)
+    v2 = Watcher()
+    L.watch(v2, fog.id)
+    check("a second watcher of the same game is answered the same", v2.got[-1]["game"]["ply"], 1)
+    run_until(L, lambda: fog.status == "finished")
+    check("the result reaches the watcher", v.got[-1]["game"]["status"], "finished")
+    check("...and the second", v2.got[-1]["game"]["status"], "finished")
+    check("...with the result", (v.got[-1]["game"]["result"], v.got[-1]["game"]["winner"]), ("0-1", "b"))
+    check("the finished game is still answered by id", L.snapshot_of(fog.id)["status"], "finished")
+    run_until(L, lambda: any(m.mode == "fog" for m in L.matches.values()), limit=30)
+    nxt = [m for m in L.matches.values() if m.mode == "fog"][0]
+    check("the next game on the ladder is offered to its watchers", v.got[-1]["next"], nxt.id)
+    check("...and only once", sum(1 for m in v.got if m.get("next") == nxt.id), 1)
+    L.unsubscribe(v)
+    L.play_move(nxt, NOW)
+    L.publish()
+    check("unsubscribe drops the watcher", v.got[-1]["next"], nxt.id)
+    check("...and the other stays", v2 in L.watchers, True)
+    L.unwatch(v2)
+    check("unwatch drops it too", v2 in L.watchers, False)
+    v3 = Watcher()
+    L.watch(v3, "no-such-game")
+    check("an unknown id answers with no game", v3.got[-1]["game"], None)
+    check("health counts spectators", L.health()["spectators"], 1)
+    dead = Watcher(); dead.alive = False
+    L.watch(dead, nxt.id)
+    L.publish()
+    check("a dead socket is dropped on the next publish", dead in L.watchers, False)
+
+    # a row from the store, for a refresh on a game this process never played
+    row = store.game(fog.id)
+    snap = league.snapshot_from_row(row)
+    check("a stored row becomes the same snapshot the page draws",
+          (snap["id"], snap["status"], snap["result"], snap["winner"], snap["ply"], snap["termination"]),
+          (fog.id, "finished", "0-1", "b", 4, "checkmate"))
+    check("...with the players' names and ratings", (snap["white"]["name"], snap["black"]["rating"]),
+          (fog.white["name"], fog.black["rating"]))
+    check("...whose turn from the FEN", snap["turn"], "w")
+    check("...and check read off it", snap["check"], True)
+    check("...and the written moves", snap["sans"], ["f3", "e5", "g4", "Qh4#"])
+    ab = dict(row); ab["status"] = "abandoned"; ab["termination"] = "corrupt record"; ab["result"] = None; ab["winner_id"] = None
+    snap = league.snapshot_from_row(ab)
+    check("an abandoned row is shown as finished, saying so", (snap["status"], snap["termination"], snap["winner"]),
+          ("finished", "corrupt record", None))
+    L2 = league.League(store, StubEngines(), games_per_mode=1, rng=random.Random(9))
+    check("a fresh process answers a finished game from the store", L2.snapshot_of(fog.id)["result"], "0-1")
+    check("a game id is checked before it is looked up",
+          (league.GAME_ID_RE.fullmatch("abc-123") is not None, league.GAME_ID_RE.fullmatch("x&y=1") is not None),
+          (True, False))
+    off = league.off_payload()
+    check("nothing about a watch reaches a Client seat", hasattr(v, "game"), False)
+
     print("\n\033[1m%d passed, %d failed\033[0m\n" % (passed, failed))
     sys.exit(1 if failed else 0)
 

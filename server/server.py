@@ -35,6 +35,7 @@ Run:  python3 server/server.py [--port 8787]
 import json
 import os
 import random
+import re
 import signal
 import socket
 import sys
@@ -1906,6 +1907,10 @@ def handle_message(client, raw):
         handle_live(client)
     elif kind == "unlive":
         handle_unlive(client)
+    elif kind == "watch":
+        handle_watch(client, msg)
+    elif kind == "unwatch":
+        handle_unwatch(client)
     elif kind == "ping":
         client.send({"t": "pong"})
     else:
@@ -1930,6 +1935,37 @@ def handle_live(client):
 def handle_unlive(client):
     if LEAGUE is not None:
         LEAGUE.unsubscribe(client)
+
+
+def handle_watch(client, msg):
+    """Spectate one league game, by its id: its state now and every change.
+
+    Like `live`, it needs no hello and gives the connection nothing — no
+    seat, no colour, no `client.game` — which is the whole of the spectator
+    protection on this side. A move, a resignation, a result or a draw
+    offer from this connection meets the same "no game in progress" every
+    other seatless socket meets (handle_move and the rest), and a league
+    game is not a Game in `games` for anything to reach in the first place:
+    it is played on the league's thread, from the league's own state, and
+    the only way to change it is to be that thread.
+
+    The id is checked before it is looked up, because with a service key it
+    ends up in a query string.
+    """
+    game_id = str(msg.get("id") or "")
+    if not league.GAME_ID_RE.fullmatch(game_id):
+        client.send({"t": "error", "msg": "bad game id"})
+        return
+    if LEAGUE is None:
+        client.send({"t": "watch-game", "id": game_id, "at": int(time.time() * 1000),
+                     "game": None, "next": None, "off": True, "note": league.PUBLIC_NOTE["off"]})
+        return
+    LEAGUE.watch(client, game_id)
+
+
+def handle_unwatch(client):
+    if LEAGUE is not None:
+        LEAGUE.unwatch(client)
 
 
 def drop_client(client):
@@ -2067,6 +2103,9 @@ def serve_static_file(sock, path):
     sock.sendall(head.encode() + body)
 
 
+SPECTATE_PATH = re.compile(r"/spectate/[A-Za-z0-9-]{1,64}/?$")
+
+
 def serve_http(sock, request_line):
     try:
         method, path, _ = request_line.split(" ", 2)
@@ -2077,7 +2116,12 @@ def serve_http(sock, request_line):
         sock.sendall(b"HTTP/1.1 405 Method Not Allowed\r\n\r\n")
         return
     path = path.split("?", 1)[0]
-    if path in ("/", "/index.html", "/blind-chess.html"):
+    # /spectate/<game id> is the page: the id is read off the URL by the
+    # page itself, which then asks the socket for that game — so a link to a
+    # game survives a refresh, and a link kept after the game has ended
+    # shows how it ended. The server serves the same file and looks nothing
+    # up; the socket is where the id is checked (handle_watch).
+    if path in ("/", "/index.html", "/blind-chess.html") or SPECTATE_PATH.match(path):
         try:
             with open(PAGE, "rb") as fh:
                 body = fh.read()

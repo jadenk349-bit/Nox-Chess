@@ -80,6 +80,8 @@ var STUB = [
   'var waitingFailed = note("waitingFailed"), enterRooms = note("enterRooms");',
   'var netClose = note("netClose"), showWaiting = function(){ CALLED.push("showWaiting"); };',
   'function ONLINE(){ return G.opponent === "online"; }',
+  'function SPECTATING(){ return G.opponent === "spectate"; }',
+  'var specStop = note("specStop");',
   'function rankedAgain(){ CALLED.push("rankedAgain"); showScreen("ranked"); }',
   'function goFriendly(){ CALLED.push("goFriendly"); showScreen("rooms"); }'
 ].join('\n');

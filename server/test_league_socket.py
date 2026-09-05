@@ -24,6 +24,7 @@ import os
 import socket
 import sys
 import time
+import urllib.error
 import urllib.request
 
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
@@ -198,6 +199,116 @@ def main():
             quiet = False
     check("unlive stops the pushes", quiet, True)
     w2.sock.close()
+
+    print("\n\033[1mSpectating one game, by id\033[0m")
+    # the game the Sighted card would open: the live one, by its id
+    live = http_json("/live.json")
+    target = next((g for g in live["games"] if g["status"] == "live"), None)
+    if not target:
+        deadline = time.time() + 20
+        while time.time() < deadline and not target:
+            time.sleep(0.5)
+            live = http_json("/live.json")
+            target = next((g for g in live["games"] if g["status"] == "live"), None)
+    check("there is a live game to watch", bool(target), True)
+    gid = target["id"]
+
+    class Spectator(Watcher):
+        def __init__(self, game_id):
+            self.sock = socket.create_connection((HOST, PORT), timeout=10)
+            self.framer = client_handshake(self.sock, "%s:%d" % (HOST, PORT), "/ws")
+            self.framer.send(json.dumps({"t": "watch", "id": game_id}))
+
+        def send(self, obj):
+            self.framer.send(json.dumps(obj))
+
+    a = Spectator(gid)
+    first = a.read()
+    check("{t:'watch', id} answers with that game", (first.get("t"), first.get("id"), (first.get("game") or {}).get("id")),
+          ("watch-game", gid, gid))
+    check("...its players by name and rating", all(isinstance(first["game"][s]["name"], str) and
+          isinstance(first["game"][s]["rating"], int) for s in ("white", "black")), True)
+    check("...in its own vision", first["game"]["mode"], target["mode"])
+    b = Spectator(gid)
+    second = b.read()
+    check("a second spectator of the same game is answered the same game", (second.get("game") or {}).get("id"), gid)
+    check("/health counts them", http_json("/health")["league"].get("spectators", 0) >= 2, True)
+
+    # Everything a player could send, from a spectator: refused or ignored,
+    # and the game goes on unchanged by any of it.
+    ply0 = first["game"]["ply"]
+    a.send({"t": "move", "ply": ply0, "from": 12, "to": 28, "san": "e4"})
+    err = a.read(3)
+    check("a spectator's move is refused", err and err.get("t") == "error" and "no game" in err.get("msg", ""), True)
+    for bad in ({"t": "resign"}, {"t": "result", "status": "resign", "winner": "w"}, {"t": "draw-offer"},
+                {"t": "draw-accept"}, {"t": "chat", "text": "hi"}, {"t": "cancel"}):
+        a.send(bad)
+    # wait for the game to advance past where it was and check nothing ended it
+    advanced = False
+    same_game = True
+    ended_by_us = False
+    deadline = time.time() + 25
+    latest = first
+    while time.time() < deadline:
+        msg = a.read(5)
+        if not msg or msg.get("t") != "watch-game":
+            continue
+        latest = msg
+        g = msg.get("game") or {}
+        if g.get("id") != gid:
+            same_game = False
+        if g.get("ply", 0) > ply0:
+            advanced = True
+        if g.get("status") == "finished" and g.get("termination") in ("resignation",) and g.get("ply", 0) <= ply0 + 1:
+            ended_by_us = True
+        if advanced and (g.get("ply", 0) >= ply0 + 2 or g.get("status") == "finished"):
+            break
+    check("the game went on after all of that", advanced, True)
+    check("...as the same game", same_game, True)
+    check("...and nothing a spectator sent ended it", ended_by_us, False)
+    check("every pushed position replays", replays(latest["game"]) if latest.get("game") else False, True)
+    other = b.read(10)
+    check("the other spectator is pushed the same moves", other and other.get("game", {}).get("id"), gid)
+    # leaving: one spectator goes, the other keeps getting moves
+    a.send({"t": "unwatch"})
+    a.sock.close()
+    still = None
+    deadline = time.time() + 20
+    while time.time() < deadline:
+        msg = b.read(5)
+        if msg and msg.get("t") == "watch-game":
+            still = msg
+            if (still.get("game") or {}).get("ply", 0) > latest["game"]["ply"] or still["game"]["status"] == "finished":
+                break
+    check("the game continues for whoever is still watching", bool(still), True)
+    b.sock.close()
+
+    # a refresh: the same id answered again, live or finished, by a fresh socket
+    c = Spectator(gid)
+    again = c.read()
+    check("the same id is answered again on a fresh socket", (again.get("game") or {}).get("id"), gid)
+    check("...live or with its result", again["game"]["status"] in ("live", "finished"), True)
+    c.sock.close()
+    d = Spectator("no-such-game-id")
+    none = d.read()
+    check("an unknown id answers with no game, not an error", (none.get("t"), none.get("game")), ("watch-game", None))
+    d.sock.close()
+    e = Spectator("x&y=1")
+    bad = e.read()
+    check("an id that is not one is refused", bad.get("t"), "error")
+    e.sock.close()
+
+    # the route: the page itself, for a link kept or a refresh
+    with urllib.request.urlopen("http://%s:%d/spectate/%s" % (HOST, PORT, gid), timeout=5) as resp:
+        page = resp.read().decode("utf-8", "replace")
+        ctype = resp.headers.get("Content-Type", "")
+    check("/spectate/<id> serves the page", "text/html" in ctype and "specBoot" in page, True)
+    try:
+        urllib.request.urlopen("http://%s:%d/spectate/not%%20an%%20id/x" % (HOST, PORT), timeout=5)
+        code = 200
+    except urllib.error.HTTPError as err:
+        code = err.code
+    check("...and nothing else under it", code, 404)
 
     print("\n\033[1m%d passed, %d failed\033[0m\n" % (passed, failed))
     sys.exit(1 if failed else 0)
