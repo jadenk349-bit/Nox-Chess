@@ -7,11 +7,18 @@
  * wants next. What is being checked is the page's half of the brief — that
  * a live card carries the game's id and a waiting one does not; that opening
  * one lands on the game screen as a spectator, in that game's vision, with
- * the players named as the leaderboard names them; that moves and clocks
- * follow the snapshots without a reload; that nothing a player could do is
- * possible; that the result is shown when the server says so, with the way
- * home and, once there is one, the next game; that leaving puts the board
- * back; and that /spectate/<id> boots straight into the same game.
+ * the players named as the leaderboard names them; that the game is watched
+ * from its first move — the moves already played are replayed one at a time,
+ * silently, with the clocks standing still, before the view goes live; that
+ * moves and clocks then follow the snapshots without a reload; that nothing
+ * a player could do is possible; that the result is shown when the server
+ * says so — after the replay, never before — with the way home and, once
+ * there is one, the next game; that leaving puts the board back; and that
+ * /spectate/<id> boots straight into the same game.
+ *
+ * The replay's pace (SPEC_REPLAY) is shortened to PACE milliseconds a move
+ * so the whole thing runs in seconds; the page's own figures are asserted
+ * from the source instead.
  *
  * No server, no network:  node server/test_spectate_flow.js
  */
@@ -103,8 +110,8 @@ function makePage(path){
                 innerWidth:1200, innerHeight:900, devicePixelRatio:1, location:loc, localStorage:storage, history };
   let out = null;
   const src = '"use strict";' + BODY.replace(/await import\([^)]*\)/g, 'await Promise.reject(new Error("no cdn"))') +
-    '\n__expose({ G, SPEC, LIVE, el, picked, showScreen, liveUpdate, specOpen, specLeave, specUpdate, seatName, canConcede,' +
-    ' SPECTATING, liveCardHTML, sqIndex, legalMoves, screen:()=>screenName, board:document.getElementById("board"),' +
+    '\n__expose({ G, SPEC, SPEC_REPLAY, LIVE, el, picked, showScreen, liveUpdate, specOpen, specLeave, specUpdate, seatName, canConcede,' +
+    ' SPECTATING, liveCardHTML, sqIndex, legalMoves, clockRunning, screen:()=>screenName, board:document.getElementById("board"),' +
     ' liveGrid:document.getElementById("liveGrid") });';
   new Function('document','window','location','localStorage','WebSocket','AudioContext',
                'webkitAudioContext','fetch','Image','requestAnimationFrame','cancelAnimationFrame',
@@ -115,6 +122,7 @@ function makePage(path){
     () => ({ getPropertyValue: () => '' }), { userAgent:'node' },
     { log(){}, warn(){}, error(){} }, history, o => { out = o; });
   out.doc = doc; out.loc = loc; out.history = history; out.win = winListeners;
+  out.SPEC_REPLAY.total = 0; out.SPEC_REPLAY.min = PACE; out.SPEC_REPLAY.max = PACE;
   out.press = id => doc.getElementById(id).onclick();
   out.up = id => doc.getElementById(id).classList.contains('show');
   out.text = id => doc.getElementById(id).textContent;
@@ -122,6 +130,24 @@ function makePage(path){
   return out;
 }
 const wait = ms => new Promise(r => setTimeout(r, ms));
+/* A replayed move every PACE ms under test; `settle(n)` waits for n of them
+   and a little over, so a check made after it sees the replay finished. */
+const PACE = 50;
+const settle = n => wait(n * PACE + PACE / 2);
+const hint = p => p.doc.getElementById('footHint').innerHTML;
+
+/* The row of recent moves between the strips, as the page last wrote it. */
+const recent = p => [...p.doc.getElementById('specMoves').innerHTML.matchAll(/<div class="m( cur)?">([^<]+)<\/div>/g)]
+  .map(m => ({ san: m[2], lit: !!m[1] }));
+/* The name strip above or below the board, under the stub: layoutBoardBars()
+   appends the rating and the colour tag to it on every render and the stub
+   keeps them all, so the last two children are the latest render's. */
+const strip = (p, barId) => {
+  const kids = p.doc.getElementById(barId).querySelector('.bar-name').children;
+  const last = kids.slice(-2);
+  return { name: p.doc.getElementById(barId).querySelector('.bar-name').textContent,
+           order: last.map(k => k.className).join(','), elo: last[0] && String(last[0].textContent) };
+};
 
 /* ---- a game, as the server would describe it ---- */
 const NAMES = { w: { id:'u-white', name:'Arvenko', rating:2854 }, b: { id:'u-black', name:'LeoFromPrague', rating:2801 } };
@@ -170,10 +196,30 @@ async function main(){
   check('...on a socket of its own, asking for that game by id', sock !== home && sock.sent[0].t === 'watch' && sock.sent[0].id === 'game-sighted-1', sock.sent);
   check('...and nothing else — no hello, no find, no join', sock.asked().join(',') === 'watch', sock.asked());
   sock.push(watchMsg(g1));
-  check('the snapshot puts the moves on the board', p.G.uci.join(' ') === 'e2e4 e7e5' && p.G.sans.join(' ') === 'e4 e5', p.G.sans);
+  check('the game opens at its first move: nothing on the board yet, two moves waiting', p.G.uci.length === 0 && p.SPEC.queue.join(' ') === 'e2e4 e7e5', { uci: p.G.uci, queue: p.SPEC.queue });
+  check('...the position is the starting one', p.G.st.b[p.sqIndex('e2')] && p.G.st.b[p.sqIndex('e2')].t === 'P' && !p.G.st.b[p.sqIndex('e4')]);
+  check('...the row between the strips is still empty', recent(p).length === 0, recent(p));
+  check('...the foot of the screen says so', hint(p) === 'SPECTATING · FROM THE START · MOVE 1 OF 2', hint(p));
+  check('...and the clocks stand still', p.clockRunning() === false);
+  check('...at the snapshot\'s figures', p.G.clock.w <= 1700000 && p.G.clock.w > 1690000 && p.G.clock.b === 1650000, p.G.clock);
+  check('the pace is the page\'s: about twenty seconds, a fifth of a second to seven tenths a move', /const SPEC_REPLAY = \{ total: 20000, min: 180, max: 700 \};/.test(SRC));
+  await settle(1);
+  check('the first move plays after a pace, alone', p.G.uci.join(' ') === 'e2e4' && p.G.sans.join(' ') === 'e4', p.G.sans);
+  check('...and the row shows it, lit', recent(p).map(m => m.san + (m.lit ? '*' : '')).join(' ') === 'e4*', recent(p));
+  check('...the foot counting on', hint(p) === 'SPECTATING · FROM THE START · MOVE 1 OF 2', hint(p));
+  check('...the clocks still standing', p.clockRunning() === false);
+  await settle(1);
+  check('the second follows, and the board is caught up', p.G.uci.join(' ') === 'e2e4 e7e5' && p.G.sans.join(' ') === 'e4 e5' && p.SPEC.queue.length === 0, p.G.sans);
+  check('...the clocks run', p.clockRunning() === true);
+  check('...and the foot says whose move it is', hint(p) === 'SPECTATING · WHITE TO MOVE', hint(p));
   check('...in the game\'s vision', p.G.mode === 'sighted');
   check('white below, as a viewer reads a board', p.G.flipped === false);
   check('the strips name the players', p.seatName('w') === 'Arvenko' && p.seatName('b') === 'LeoFromPrague');
+  check('white\'s rating stands directly after white\'s name, before the colour', strip(p, 'barBottom').order === 'elo,sub' && strip(p, 'barBottom').elo === '2854', strip(p, 'barBottom'));
+  check('black\'s rating stands directly after black\'s name', strip(p, 'barTop').order === 'elo,sub' && strip(p, 'barTop').elo === '2801', strip(p, 'barTop'));
+  check('...each the ladder\'s figure from the snapshot, nothing invented', p.SPEC.game.white.rating === 2854 && p.SPEC.game.black.rating === 2801);
+  check('the row between the strips shows the moves so far, oldest first', recent(p).map(m => m.san).join(' ') === 'e4 e5', recent(p));
+  check('...with the newest lit', recent(p).map(m => m.lit).join(',') === 'false,true');
   check('the chips say what this is', p.text('setupChip').indexOf('Spectating') === 0 && p.text('visionChip') === 'Sighted', p.text('setupChip'));
   check('the clocks come from the snapshot', p.G.clock.w <= 1700000 && p.G.clock.w > 1690000 && p.G.clock.b === 1650000, p.G.clock);
   check('the setup form is not shown', p.doc.getElementById('gameSetup').style.display === 'none');
@@ -181,15 +227,26 @@ async function main(){
   console.log('\nLive updates');
   const g2 = snap('game-sighted-1', 'sighted', 'e2e4 e7e5 g1f3', { sans:['e4','e5','Nf3'], whiteMs:1690000 });
   sock.push(watchMsg(g2));
-  check('a move arrives without a reload', p.G.uci.length === 3 && p.G.sans[2] === 'Nf3');
+  check('a move arrives without a reload, and is played at once — the game is live', p.G.uci.length === 3 && p.G.sans[2] === 'Nf3' && p.SPEC.queue.length === 0);
   check('...and the board is at that position', p.G.st.b[p.sqIndex('f3')] && p.G.st.b[p.sqIndex('f3')].t === 'N');
   check('...and the clocks with it', p.G.clock.b <= 1650000 && p.G.clock.w <= 1690000);
   check('the side to move is black', p.G.st.turn === 'b');
+  check('the row follows the move, without a reload', recent(p).map(m => m.san).join(' ') === 'e4 e5 Nf3', recent(p));
+  check('...three moves shown as three, nothing standing in for a fourth', recent(p).length === 3 && p.doc.getElementById('specMoves').innerHTML.indexOf('-') < 0);
   const g3 = snap('game-sighted-1', 'sighted', 'e2e4 e7e5 g1f3 b8c6 f1c4', { sans:['e4','e5','Nf3','Nc6','Bc4'] });
   sock.push(watchMsg(g3));
-  check('two moves at once are both applied, in order', p.G.uci.join(' ') === g3.moves);
+  check('two moves at once are caught up one at a time', p.G.uci.length === 3 && p.SPEC.queue.join(' ') === 'b8c6 f1c4', p.SPEC.queue);
+  check('...the foot saying so', hint(p) === 'SPECTATING · FROM THE START · MOVE 2 OF 3', hint(p));
+  await settle(2);
+  check('...and both are on the board, in order', p.G.uci.join(' ') === g3.moves && p.SPEC.queue.length === 0, p.G.uci);
+  check('the row keeps only the last four, in order, the oldest gone', recent(p).map(m => m.san).join(' ') === 'e5 Nf3 Nc6 Bc4', recent(p));
+  check('...the newest lit and no other', recent(p).map(m => m.lit).join(',') === 'false,false,false,true');
+  check('...in the game\'s own notation', p.G.sans.slice(-4).join(' ') === recent(p).map(m => m.san).join(' '));
   sock.push(watchMsg(g2));
-  check('a snapshot that is not a continuation rebuilds the position', p.G.uci.join(' ') === g2.moves);
+  check('a snapshot that is not a continuation rebuilds the position, from the start', p.G.uci.length === 0 && p.SPEC.queue.join(' ') === g2.moves, { uci: p.G.uci, queue: p.SPEC.queue });
+  await settle(3);
+  check('...and replays it', p.G.uci.join(' ') === g2.moves && p.SPEC.queue.length === 0, p.G.uci);
+  check('...and the row with it', recent(p).map(m => m.san).join(' ') === 'e4 e5 Nf3', recent(p));
 
   console.log('\nView only');
   p.G.sel = -1;
@@ -225,18 +282,37 @@ async function main(){
   check('...on the same screen', p.screen() === 'game' && p.SPECTATING());
   const t1 = snap('game-sighted-2', 'total', 'd2d4', { sans:['d4'] });
   sock2.push(watchMsg(t1));
+  check('the next game opens at its first move too', p.G.uci.length === 0 && p.SPEC.queue.join(' ') === 'd2d4', p.SPEC.queue);
+  await settle(1);
 
   console.log('\nEach vision');
   check('Complete Blindfold shows the console and no board', p.G.mode === 'total' && p.el.console.classList.contains('show') && p.el.boardFrame.style.display === 'none');
   check('...with the players named in it', p.el.log.children.some(c => /Arvenko \(2854\)/.test(c.textContent)), p.el.log.children.map(c => c.textContent));
   check('...and the move written there', p.el.log.children.some(c => /d4/.test(c.textContent)));
+  check('...and in the row between the strips: one move, shown as one', recent(p).map(m => m.san).join(' ') === 'd4' && recent(p).length === 1, recent(p));
   const pf = makePage('/'); await wait(5); pf.specOpen('game-fog-1', true, 'fog'); await wait(5);
-  sockets[sockets.length - 1].push(watchMsg(snap('game-fog-1', 'fog', 'd2d4', { sans:['d4'] })));
+  const fs1 = sockets[sockets.length - 1];
+  fs1.push(watchMsg(snap('game-fog-1', 'fog', 'd2d4 d7d5 c2c4', { sans:['d4','d5','c4'] })));
   check('Fog of War is drawn as fog', pf.G.mode === 'fog' && pf.board.classList.contains('fog'));
-  check('...from the chair of the side to move', pf.G.human === 'b' && pf.G.st.turn === 'b');
+  check('...opening at the start, from white\'s chair, white to move', pf.G.uci.length === 0 && pf.G.human === 'w' && pf.G.st.turn === 'w');
+  await settle(1);
+  check('...the first replayed move seen from the chair of whoever is then to move', pf.G.uci.join(' ') === 'd2d4' && pf.G.human === 'b' && pf.G.st.turn === 'b', { human: pf.G.human, turn: pf.G.st.turn });
+  // the game goes on while the board is catching up: the new move joins the queue
+  fs1.push(watchMsg(snap('game-fog-1', 'fog', 'd2d4 d7d5 c2c4 e7e6', { sans:['d4','d5','c4','e6'] })));
+  check('a move arriving mid-replay joins the end of the queue', pf.G.uci.length === 1 && pf.SPEC.queue.join(' ') === 'd7d5 c2c4 e7e6', { uci: pf.G.uci, queue: pf.SPEC.queue });
+  await settle(3);
+  check('...and the replay runs on into the live game', pf.G.uci.join(' ') === 'd2d4 d7d5 c2c4 e7e6' && pf.SPEC.queue.length === 0 && pf.clockRunning() === true, pf.G.uci);
+  check('...from the chair of the side to move', pf.G.human === 'w' && pf.G.st.turn === 'w');
+  check('...and its row shows the moves', recent(pf).map(m => m.san).join(' ') === 'd4 d5 c4 e6', recent(pf));
   const pb = makePage('/'); await wait(5); pb.specOpen('game-blind-1', true, 'blind'); await wait(5);
   sockets[sockets.length - 1].push(watchMsg(snap('game-blind-1', 'blind', '')));
   check('Board Only hides the men', pb.G.mode === 'blind' && pb.board.classList.contains('blind') && !pb.board.classList.contains('fog'));
+  check('...and before the first move its row is empty — no placeholder', recent(pb).length === 0 && pb.doc.getElementById('specMoves').innerHTML === '', pb.doc.getElementById('specMoves').innerHTML);
+  sockets[sockets.length - 1].push(watchMsg(snap('game-blind-1', 'blind', 'e2e4', { sans:['e4'] })));
+  check('...and after it, that move', recent(pb).map(m => m.san).join(' ') === 'e4', recent(pb));
+  check('the row is there for a spectator only', /body\.spectating #specMoves\{display:grid;\}/.test(SRC) && /#specMoves\{\s*display:none;/.test(SRC));
+  check('...four columns on one row, no wrapping', /#specMoves\{[^}]*grid-template-columns:repeat\(4,minmax\(0,1fr\)\)/.test(SRC));
+  check('...that the board pays for in height', /body\.spectating \.game-layout\{--board-max:min\(100%, calc\(100vh - var\(--chrome\) - 45px\)\);\}/.test(SRC));
   check('Sighted shows everything', !p.board.classList.contains('blind') || p.G.mode !== 'sighted');
 
   console.log('\nBack');
@@ -261,7 +337,10 @@ async function main(){
   check('/spectate/<id> boots into that game', pr.screen() === 'game' && pr.SPEC.id === 'game-fog-1' && rs.sent[0].id === 'game-fog-1');
   check('...without touching the history', pr.history.pushed.length === 0);
   rs.push(watchMsg(snap('game-fog-1', 'fog', 'd2d4 d7d5 c2c4', { sans:['d4','d5','c4'], status:'finished', result:'1/2-1/2', termination:'draw by agreement' })));
-  check('a link to a finished game shows how it ended', pr.up('endOverlay') && pr.text('endTitle') === 'Draw' && pr.text('endText') === 'Drawn by agreement.');
+  check('a link to a finished game is watched from the start as well', pr.G.uci.length === 0 && pr.SPEC.queue.length === 3 && !pr.G.over && !pr.G.revealed);
+  check('...with no result box up yet', !pr.up('endOverlay'));
+  await settle(3);
+  check('...then shows how it ended', pr.up('endOverlay') && pr.text('endTitle') === 'Draw' && pr.text('endText') === 'Drawn by agreement.', pr.text('endTitle'));
   check('...with the final position on the board', pr.G.uci.length === 3 && pr.G.revealed);
   const pm = makePage('/spectate/gone');
   await wait(10);
@@ -273,9 +352,14 @@ async function main(){
   check('...and a server not running the league says that', pm.up('endOverlay') && po.text('endTitle') === 'Not Running' && /engine/.test(po.text('endText')));
   // popstate: the browser's back from a spectator page
   const pp = makePage('/'); await wait(5); pp.specOpen('game-sighted-1', true, 'sighted'); await wait(5);
+  sockets[sockets.length - 1].push(watchMsg(snap('game-sighted-1', 'sighted', 'e2e4 e7e5 g1f3 b8c6', { sans:['e4','e5','Nf3','Nc6'] })));
+  check('(a replay is under way)', pp.SPEC.queue.length === 4 && pp.SPEC.timer !== null);
   pp.loc.pathname = '/';
   for (const f of pp.win.popstate) f();
   check('the browser\'s back leaves the game', pp.screen() === 'home' && !pp.SPEC.on);
+  check('...and stops the replay with it', pp.SPEC.queue.length === 0 && pp.SPEC.timer === null);
+  await settle(4);
+  check('...nothing plays on after leaving', pp.G.uci.length === 0);
 
   console.log('\n' + passed + ' passed, ' + failed + ' failed\n');
   process.exit(failed ? 1 : 0);
