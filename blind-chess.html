@@ -434,8 +434,48 @@
   body.spectating #entryLocal{display:none !important;}
   body.spectating .board, body.spectating .sq, body.spectating .piece{cursor:default;}
   body.spectating .board{pointer-events:none;}
-  /* the rating beside the colour, on the strips above and below the board */
-  .bar-name .elo{margin-left:8px; color:var(--gold-soft); font-variant-numeric:tabular-nums;}
+  /* The rating, on the strips above and below the board: directly to the
+     right of the name, so the two read as one thing — "ARVENKO 2854" — with
+     the colour tag after them. It used to trail the colour, which put the
+     number a word away from the name it belongs to. A little smaller than
+     the name and in the accent, still plainly a number. */
+  .bar-name .elo{
+    margin-left:9px; color:var(--gold-soft); font-size:15px; letter-spacing:.04em;
+    font-variant-numeric:tabular-nums;
+  }
+  /* The last four moves, between the two strips: a slim row under the board
+     (under the console in Complete Blindfold), the same well as the strips
+     and no taller than it has to be. Four equal columns filled from the left,
+     so a move keeps its column as the ones before it slide off and the row
+     never jumps; the newest is lit as the notation panel lights it. Fewer
+     than four moves fill fewer columns and nothing stands in for the rest —
+     the plate keeps its height, which is all the stability the layout needs.
+     Only a spectator sees it: a player has no move history during play, and
+     this is not one, it is the last four. */
+  #specMoves{
+    display:none;
+    width:min(100%,var(--board-max));
+    grid-template-columns:repeat(4,minmax(0,1fr)); gap:6px; align-items:center;
+    margin-top:4px; padding:3px 14px; min-height:32px; border-radius:var(--r-md);
+    border:1px solid transparent; background:var(--well);
+    box-shadow:var(--sh-1), var(--lip);
+    font-size:16.5px; letter-spacing:.06em; font-variant-numeric:tabular-nums;
+  }
+  body.spectating #specMoves{display:grid;}
+  #specMoves .m{
+    justify-self:center; max-width:100%; min-width:3.6em;
+    text-align:center; padding:2px 8px; border-radius:var(--r-xs);
+    overflow:hidden; text-overflow:ellipsis; white-space:nowrap;
+  }
+  #specMoves .m.cur{
+    background:rgba(217,164,65,.20); color:var(--gold-soft);
+    box-shadow:inset 0 0 0 1px rgba(217,164,65,.28);
+  }
+  @media (max-width:520px){
+    #specMoves{font-size:14.5px; gap:4px; padding:3px 10px; min-height:30px; letter-spacing:.04em;}
+    #specMoves .m{padding:2px 4px;}
+    .bar-name .elo{margin-left:7px; font-size:14px;}
+  }
 
   .game-layout{
     display:grid;
@@ -505,6 +545,10 @@
      game that fitted on screen a moment earlier — otherwise its ◀ ▶ land below
      the fold. Off --chrome, so it still holds under the media query above. */
   #screen-game.reviewing .game-layout{--board-max:min(100%, calc(100vh - var(--chrome) - 104px));}
+  /* The spectator's row of moves is paid for the same way: its 45px (32 of
+     plate, 4 of margin, 9 of the column's gap) come off the board, so the
+     lower strip sits where it sat before the row was there. */
+  body.spectating .game-layout{--board-max:min(100%, calc(100vh - var(--chrome) - 45px));}
 
   /* the slim name-and-clock strips clamped to the board's edges */
   .board-bar{
@@ -4309,6 +4353,9 @@
           </div>
         </div>
 
+        <!-- spectators only: the last four moves, between the two strips -->
+        <div id="specMoves" aria-label="The last four moves"></div>
+
         <div class="board-bar" id="barBottom"></div>
 
         <!-- Complete Blindfold's move console. Deliberately the only vision
@@ -5694,20 +5741,25 @@ function layoutBoardBars(){
     // ranked game is meant to read as an ordinary ranked game from the strip
     // down, so nothing on the board bar says what is on the far side.
     if (!LOCAL()){
-      const sub = document.createElement('span');
-      sub.className = 'sub';
-      sub.textContent = color === W ? 'WHITE' : 'BLACK';
-      // a spectator is shown the rating too: it is the one thing the home
-      // page's card says about a player that the strip would otherwise not
+      // A spectator is shown the rating too: it is the one thing the home
+      // page's card says about a player that the strip would otherwise not.
+      // It goes straight after the name — "ARVENKO 2854", then the colour —
+      // because the number is the name's, not the colour's, and a rating
+      // read a word away from its name is a rating the eye has to fetch.
+      // It is the ladder's own figure for this vision, as the snapshot
+      // carries it, and nothing on this side rounds or invents it.
       if (SPECTATING() && SPEC.game){
         const side = color === W ? SPEC.game.white : SPEC.game.black;
         if (side && typeof side.rating === 'number'){
           const elo = document.createElement('span');
           elo.className = 'elo';
           elo.textContent = side.rating;
-          sub.appendChild(elo);
+          label.appendChild(elo);
         }
       }
+      const sub = document.createElement('span');
+      sub.className = 'sub';
+      sub.textContent = color === W ? 'WHITE' : 'BLACK';
       label.appendChild(sub);
     }
     if (clock.parentElement !== bar) bar.appendChild(clock);
@@ -15085,7 +15137,26 @@ function specMissing(msg){
 }
 
 /* ---- what the game screen shows a viewer ---- */
+/* The last four moves, in the row between the two strips. Read off G.sans —
+   the notation applyMove() wrote as each snapshot's moves were replayed — so
+   it is the same word the notation panel and the console use, in every
+   vision, and there is no second list that could disagree with the board.
+   Oldest first, newest last and lit; and only as many as have been played,
+   so an opening shows one move, then two, and nothing is printed in place of
+   the ones that have not happened. It is redrawn with every render, and a
+   snapshot renders, which is what makes it follow the game without a reload. */
+const SPEC_RECENT = 4;
+function specMoves(){
+  const box = document.getElementById('specMoves');
+  if (!box) return;
+  const n = G.sans.length, from = Math.max(0, n - SPEC_RECENT);
+  let html = '';
+  for (let i = from; i < n; i++)
+    html += `<div class="m${i === n - 1 ? ' cur' : ''}">${G.sans[i]}</div>`;
+  box.innerHTML = html;
+}
 function specStatus(){
+  specMoves();
   document.getElementById('btnPeek').style.display = 'none';
   document.getElementById('entryForm').style.display = 'none';
   document.getElementById('entryLocal').style.display = 'none';
