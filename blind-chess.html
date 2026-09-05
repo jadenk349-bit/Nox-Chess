@@ -3321,36 +3321,47 @@
   .live-body{
     display:grid; grid-template-columns:150px minmax(0,1fr); gap:10px; align-items:stretch;
   }
+  /* Two seats of two rows and four moves of notation between them stand a
+     little taller than the 150px board, and the card lets them: the board
+     is centred on the column rather than the column cut to the board. */
   .live-side{display:flex; flex-direction:column; gap:5px; min-width:0;}
-  /* A seat: the name, the rating, the clock. The side to move is lit the way
-     the game lights its clock — from within, in gold — and the dot before the
-     name is the colour it is playing. */
+  .live-view{display:flex; flex-direction:column; justify-content:center;}
+  /* A seat: two rows. The first is the colour it is playing, the name, and
+     the rating beside the name — the pair the ladder under the cards prints,
+     so a viewer reads the same thing in both places; the second is the
+     clock. The rating used to sit on the clock's row instead, which left the
+     name the whole of the first, but a side column ~140px wide (the stack is
+     capped at 660px and the board takes 150 of a card) cannot hold name,
+     rating and clock on one row at any size that can be read, so the name
+     gives up a little width to the rating rather than the rating going
+     below. The side to move is lit the way the game lights its clock — from
+     within, in gold. */
   .live-seat{
     display:flex; flex-direction:column; gap:1px;
     padding:4px 8px; border-radius:8px;
     background:rgba(0,0,0,.28); border:1px solid transparent;
     transition:border-color .2s var(--ease), background .2s var(--ease);
   }
-  .live-who{display:flex; align-items:center; gap:6px; min-width:0;}
-  .live-nums{display:flex; align-items:baseline; justify-content:space-between; gap:8px;}
+  .live-who{display:flex; align-items:baseline; gap:6px; min-width:0;}
+  .live-nums{display:flex; justify-content:flex-end; align-items:baseline;}
   .live-seat.turn{border-color:rgba(217,164,65,.45); background:rgba(217,164,65,.09);}
   .live-dot{
-    flex:none; width:9px; height:9px; border-radius:50%;
+    flex:none; width:9px; height:9px; border-radius:50%; align-self:center;
     border:1px solid rgba(255,255,255,.35);
   }
   .live-seat.w .live-dot{background:#eee6d5;}
   .live-seat.b .live-dot{background:#252d38;}
   .live-name{
-    flex:1; min-width:0; font-size:13px; font-weight:600; letter-spacing:.02em; color:var(--text);
+    flex:0 1 auto; min-width:0; font-size:13px; font-weight:600; letter-spacing:.02em; color:var(--text);
     overflow:hidden; text-overflow:ellipsis; white-space:nowrap;
   }
   .live-elo{
-    flex:none; font-size:12.5px; font-weight:650; color:var(--gold-soft);
+    flex:none; font-size:12px; font-weight:650; color:var(--gold-soft);
     font-variant-numeric:tabular-nums;
   }
   .live-clock{
     flex:none; min-width:44px; text-align:right;
-    font-family:var(--font); font-size:18px; line-height:1; letter-spacing:.06em; color:var(--muted);
+    font-family:var(--font); font-size:16px; line-height:1; letter-spacing:.06em; color:var(--muted);
     font-variant-numeric:tabular-nums;
   }
   .live-seat.turn .live-clock{color:var(--text);}
@@ -3405,7 +3416,37 @@
     font-size:9px; letter-spacing:.18em; text-transform:uppercase;
     color:var(--muted); font-family:var(--font); margin-bottom:4px;
   }
-  /* what was just played, beside every board, in the same hand as the console */
+  /* What was just played, beside every board, as a scoresheet: a gutter of
+     move numbers and two columns, White's and Black's, each ruled on its
+     left so the two read as two lines down the card. Four moves is what
+     fits beside a board without the card growing much past it; the grid is
+     anchored to its bottom so the newest move sits nearest White's seat and
+     an opening game fills upward. The flowing .live-line is what the spectator view
+     still uses, where thirty moves wrap under a large board. */
+  .live-cols{
+    flex:1; min-height:0; overflow:hidden; padding:0 2px;
+    display:grid; grid-template-columns:auto minmax(0,1fr) minmax(0,1fr);
+    grid-auto-rows:max-content; align-content:end; column-gap:0; row-gap:1px;
+    font-family:"SF Mono",Menlo,Consolas,monospace; font-size:11px; line-height:1.3;
+    color:var(--text); font-variant-numeric:tabular-nums;
+  }
+  .live-cols .lc-h{
+    font-family:var(--font); font-size:9px; letter-spacing:.18em; text-transform:uppercase;
+    color:var(--muted); line-height:1.5;
+  }
+  .live-cols .lc-n{color:var(--muted); padding-right:6px; text-align:right;}
+  .live-cols .lc-w, .live-cols .lc-b, .live-cols .lc-h.lc-w, .live-cols .lc-h.lc-b{
+    padding-left:6px; border-left:1px solid rgba(150,170,215,.22);
+    overflow:hidden; text-overflow:ellipsis; white-space:nowrap;
+  }
+  .live-cols .lc-m.cur-move{color:var(--gold-soft);}
+  .live-cols .empty{grid-column:1 / -1; color:var(--muted); font-family:inherit;}
+  /* ...and in the Complete Blindfold box, where they are the whole picture:
+     a little larger, since a board's height is theirs alone, and centred in
+     it rather than sunk to the floor, since there is no seat beneath to sit
+     against. */
+  .live-console .live-cols{font-size:12px; align-content:center; padding:0;}
+  /* what was just played under the large board, in the same hand as the console */
   .live-line{
     flex:1; min-height:1.4em; padding:0 2px;
     font-family:"SF Mono",Menlo,Consolas,monospace; font-size:11px; line-height:1.4;
@@ -3413,7 +3454,13 @@
     display:flex; flex-wrap:wrap; align-content:flex-end; gap:0 7px;
   }
 
+  /* At the foot, whatever the card holds: a card with two seats and four
+     moves beside its board stands a little taller than the console card
+     beside it, and the row's cards are stretched to one height, so the
+     status line is pushed to the bottom rather than left where the body
+     happened to end. */
   .live-status{
+    margin-top:auto;
     display:flex; justify-content:space-between; gap:8px;
     font-size:10.5px; letter-spacing:.18em; text-transform:uppercase; color:var(--muted);
   }
@@ -3436,7 +3483,7 @@
   .live-modal .live-seat.w{order:2;}
   .live-modal .live-console{aspect-ratio:auto; height:min(52vh,420px); font-size:13px;}
   .live-modal .live-name{font-size:16px;}
-  .live-modal .live-elo{font-size:14.5px;}
+  .live-modal .live-elo{font-size:14px;}
   .live-modal .live-clock{font-size:22px;}
   .live-modal .live-mode{font-size:22px;}
   .live-modal .live-only{display:block;}
@@ -14610,12 +14657,41 @@ function liveMovesHTML(sans, count){
   }).join(' ');
 }
 
+/* The same tail as a scoresheet, for the small card: a gutter of move
+   numbers and a column each for White and Black, the last move lit. `count`
+   is how many moves (rows) fit beside the board — four, on the home page.
+   The cells are laid out by .live-cols; nothing here is positioned. */
+function liveColumnsHTML(sans, count){
+  if (!sans || !sans.length) return '<div class="live-cols"><span class="empty">No moves yet.</span></div>';
+  const pairs = [];
+  for (let i = 0; i < sans.length; i += 2) pairs.push({ n: i / 2 + 1, w: sans[i], b: sans[i + 1] });
+  const shown = pairs.slice(-count);
+  let html = '<div class="live-cols"><span class="lc-h"></span>' +
+    '<span class="lc-h lc-w">White</span><span class="lc-h lc-b">Black</span>';
+  shown.forEach((p, k) => {
+    const lastPair = k === shown.length - 1;
+    const wCur = lastPair && !p.b;
+    const bCur = lastPair && !!p.b;
+    html += '<span class="lc-n">' + p.n + '.</span>' +
+      '<span class="lc-w"><span class="lc-m' + (wCur ? ' cur-move' : '') + '">' + liveEsc(p.w) + '</span></span>' +
+      '<span class="lc-b">' + (p.b ? '<span class="lc-m' + (bCur ? ' cur-move' : '') + '">' + liveEsc(p.b) + '</span>' : '') + '</span>';
+  });
+  return html + '</div>';
+}
+
 /* Complete Blindfold: no board. The players have the notation and their
-   own heads, and so does the viewer. */
+   own heads, and so does the viewer. On the home page the box the board
+   would fill holds the scoresheet instead — the same two columns as beside
+   the other boards, six moves deep because the box is a board's height and
+   nothing else is in it, and no "No board" line over them: the absence of a
+   board is the whole card, and a label saying so was the one thing in the
+   box that was not a move. The spectator view keeps the wrapping console,
+   where sixty moves have the room to read as a game. */
 function liveConsoleHTML(sans, big){
+  if (!big) return '<div class="live-console">' + liveColumnsHTML(sans, 6) + '</div>';
   return '<div class="live-console">' +
     '<div class="eyes">No board</div>' +
-    '<div class="live-moves">' + liveMovesHTML(sans, big ? 60 : 8) + '</div></div>';
+    '<div class="live-moves">' + liveMovesHTML(sans, 60) + '</div></div>';
 }
 
 function liveSeatHTML(g, color, now){
@@ -14626,10 +14702,9 @@ function liveSeatHTML(g, color, now){
   if (g.status === 'live' && ms < 60000) cls.push('low');
   return '<div class="' + cls.join(' ') + '" data-side="' + color + '">' +
     '<div class="live-who"><span class="live-dot"></span>' +
-    '<span class="live-name">' + liveEsc(side ? side.name : '—') + '</span></div>' +
-    '<div class="live-nums"><span class="live-elo">' +
-    (side && typeof side.rating === 'number' ? side.rating : '') + '</span>' +
-    '<span class="live-clock">' + fmtClock(ms) + '</span></div></div>';
+    '<span class="live-name">' + liveEsc(side ? side.name : '—') + '</span>' +
+    '<span class="live-elo">' + (side && typeof side.rating === 'number' ? side.rating : '') + '</span></div>' +
+    '<div class="live-nums"><span class="live-clock">' + fmtClock(ms) + '</span></div></div>';
 }
 
 function liveCardHTML(g, big){
@@ -14651,9 +14726,14 @@ function liveCardHTML(g, big){
   html += '<div class="live-view">' +
     (mode === 'total' ? liveConsoleHTML(g.sans, big) : liveBoardHTML(g.fen, mode, g.lastMove, g.check)) +
     '</div>';
-  html += '<div class="live-side">' + liveSeatHTML(g, 'b', now) +
-    '<div class="live-line">' + (mode === 'total' && !big ? '' : liveMovesHTML(g.sans, big ? 30 : 4)) + '</div>' +
-    liveSeatHTML(g, 'w', now) + '</div>';
+  // Between the seats: the last four moves as two columns on the card, the
+  // whole tail as one wrapping line in the spectator view. Complete
+  // Blindfold's small card leaves the gap empty — its console box holds the
+  // same columns, six deep, and the same moves twice on one card is a
+  // mistake to read.
+  const moves = big ? '<div class="live-line">' + liveMovesHTML(g.sans, 30) + '</div>' :
+    (mode === 'total' ? '<div class="live-line"></div>' : liveColumnsHTML(g.sans, 4));
+  html += '<div class="live-side">' + liveSeatHTML(g, 'b', now) + moves + liveSeatHTML(g, 'w', now) + '</div>';
   html += '</div>';
   html += '<div class="live-status"><span>' + liveEsc(liveStatusText(g)) + '</span>' +
     '<span>' + (g.ply ? 'Move ' + Math.floor(g.ply / 2 + 1) : '') + '</span></div>';
