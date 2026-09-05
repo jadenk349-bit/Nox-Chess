@@ -22,6 +22,16 @@ WORKDIR /app
 RUN apt-get update \
     && apt-get install -y --no-install-recommends stockfish \
     && rm -rf /var/lib/apt/lists/*
+# Debian installs it as /usr/games/stockfish, and /usr/games is not on PATH
+# in the python:*-slim images — so a server asking for "stockfish" found
+# nothing in the very container that had just installed it, and the league
+# never started. Put it on PATH, and refuse to build an image whose engine
+# does not answer `uci`, so this cannot regress quietly. league.py also
+# looks in /usr/games itself (STOCKFISH_CANDIDATES), for a box that is not
+# this image.
+ENV PATH="/usr/games:${PATH}"
+RUN command -v stockfish \
+    && printf 'uci\nquit\n' | stockfish | grep -q '^uciok'
 
 # Dependencies first: this layer is cached until requirements.txt itself changes.
 COPY requirements.txt ./requirements.txt

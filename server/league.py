@@ -52,10 +52,12 @@ import math
 import os
 import random
 import re
+import shutil
 import subprocess
 import sys
 import threading
 import time
+import traceback
 import urllib.error
 import urllib.request
 import uuid
@@ -118,17 +120,84 @@ STRENGTH_MIN, STRENGTH_MAX = 2500, 3000
 FAST = bool(os.environ.get("NOX_LEAGUE_FAST"))
 GAMES_PER_MODE = max(1, int(os.environ.get("NOX_LEAGUE_GAMES_PER_MODE") or 1))
 ENGINES = max(1, int(os.environ.get("NOX_LEAGUE_ENGINES") or 1))
-STOCKFISH = os.environ.get("NOX_STOCKFISH") or "stockfish"
+# NOX_STOCKFISH is a path or a command name, and it is an instruction rather
+# than a hint: set, it is the one binary tried. Unset, find_stockfish() looks
+# — see it and STOCKFISH_CANDIDATES below.
+STOCKFISH = (os.environ.get("NOX_STOCKFISH") or "").strip()
 FIXTURE = os.environ.get("NOX_LEAGUE_FIXTURE") or ""
 PAGE = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), "blind-chess.html")
 RESULT_PAUSE = 1.0 if FAST else 12.0      # a finished game is shown for this long before the next
+# How long the league waits between attempts to get itself ready — a database
+# that is not answering, a migration that has not been run yet, an engine
+# that is not there. Doubling from the first to the second, so a project that
+# is a minute from being ready is picked up in a minute and one that is never
+# ready asks once a minute rather than once a second.
+BOOT_RETRY_MIN = 0.2 if FAST else 5.0
+BOOT_RETRY_MAX = 1.0 if FAST else 60.0
+# A ladder that cannot be paired says why in the log when the reason changes,
+# and again this often while it stays the same, so a quiet server is not a
+# silent one and a noisy one is not a wall of the same line.
+WHY_REPEAT = 5.0 if FAST else 600.0
+
+# Where a Stockfish binary is when it is not on PATH. The first entry is the
+# one that matters in production: Debian's `stockfish` package — the one the
+# Dockerfile installs — puts the executable in /usr/games, and /usr/games is
+# not on PATH in the python:3.12-slim image the server runs in. A server that
+# asked only for "stockfish" therefore found nothing in the very container
+# that had just installed it, and ran without the league while the home page
+# said so. The Dockerfile now adds /usr/games to PATH as well, but the league
+# does not depend on that: it looks here, and says where it found the engine.
+STOCKFISH_CANDIDATES = (
+    "/usr/games/stockfish",
+    "/usr/local/bin/stockfish",
+    "/usr/bin/stockfish",
+    "/usr/local/games/stockfish",
+    "/opt/homebrew/bin/stockfish",
+    "/snap/bin/stockfish",
+)
 
 LOG = True
 
 
 def log(*a):
     if LOG:
-        print("[%s] [AI Competition]" % time.strftime("%H:%M:%S"), *a, flush=True)
+        print("[%s] [AI League]" % time.strftime("%H:%M:%S"), *a, flush=True)
+
+
+def _runnable(path):
+    return bool(path) and os.path.isfile(path) and os.access(path, os.X_OK)
+
+
+def find_stockfish(setting=None, candidates=STOCKFISH_CANDIDATES, which=shutil.which, path_env=None):
+    """(path to run, how it was found) — or (None, why not), in words for the log.
+
+    NOX_STOCKFISH, when set, is the one thing tried: a path is checked as a
+    file, a bare name is looked up on PATH, and neither falls through to the
+    list, because an operator who named a binary wants that binary or an
+    error. Unset, `stockfish` on PATH wins, and then each of
+    STOCKFISH_CANDIDATES in turn. The reason for a miss names PATH and every
+    location looked at, since "no engine" on its own is what left the last
+    outage undiagnosed.
+    """
+    setting = STOCKFISH if setting is None else setting
+    path_env = os.environ.get("PATH", "") if path_env is None else path_env
+    if setting:
+        if os.sep in setting:
+            if _runnable(setting):
+                return setting, "NOX_STOCKFISH"
+            return None, "NOX_STOCKFISH=%r is not an executable file" % setting
+        found = which(setting)
+        if found:
+            return found, "NOX_STOCKFISH=%r, on PATH" % setting
+        return None, "NOX_STOCKFISH=%r is not on PATH (%s)" % (setting, path_env)
+    found = which("stockfish")
+    if found:
+        return found, "on PATH"
+    for candidate in candidates:
+        if _runnable(candidate):
+            return candidate, "not on PATH, found by looking"
+    return None, ("no `stockfish` on PATH (%s) and none at %s — install stockfish, or set "
+                  "NOX_STOCKFISH to the binary" % (path_env, ", ".join(candidates)))
 
 
 def now_ms():
@@ -224,7 +293,7 @@ class EngineDead(Exception):
 class Engine:
     """One Stockfish process on UCI, asked one question at a time."""
 
-    def __init__(self, path=STOCKFISH):
+    def __init__(self, path):
         self.path = path
         self.lock = threading.Lock()
         self.proc = None
@@ -334,7 +403,8 @@ class EnginePool:
     pauses, so a single process comfortably serves all four ladders; the count
     is a knob for a busier box, not a requirement."""
 
-    def __init__(self, count=ENGINES, path=STOCKFISH):
+    def __init__(self, count, path):
+        self.path = path
         self.engines = [Engine(path) for _ in range(max(1, count))]
         self.free = list(self.engines)
         self.cv = threading.Condition()
@@ -367,7 +437,41 @@ class SeatTaken(Exception):
 
 
 class StoreUnavailable(Exception):
-    """The database could not be reached, or has not had the migration run."""
+    """The database could not be reached, or refused the request.
+
+    `code` is the HTTP status when there was one (a 401 is a refused key,
+    which is worth a different sentence from a timeout), and None otherwise.
+    """
+
+    def __init__(self, message, code=None):
+        super().__init__(message)
+        self.code = code
+
+
+class MigrationMissing(StoreUnavailable):
+    """The database answered, and what it answered is that a table, a column
+    or a function the league needs is not there: one of the SQL files has
+    not been run. Its own class because the fix is different — nothing about
+    waiting will help, and the log should name the file."""
+
+
+# What the league needs of the database, by name, and the hand-run file each
+# comes from. verify_schema() asks for every one of these before the first
+# game is arranged, so a project that has run one migration and not the other
+# is told which, rather than failing on the first insert with a code.
+VISIONS_FILE = "supabase-migrate-visions.sql"
+LEAGUE_FILE = "supabase-migrate-league.sql"
+PROFILES_FILE = "supabase-system-profiles.sql"
+REQUIRED_COLUMNS = (
+    ("id", "supabase-setup.sql"), ("display_name", "supabase-setup.sql"),
+    ("is_bot", PROFILES_FILE), ("rating", "supabase-setup.sql"),
+    ("complete_blindfold_rating", VISIONS_FILE), ("board_only_rating", VISIONS_FILE),
+    ("fog_of_war_rating", VISIONS_FILE),
+)
+REQUIRED_TABLES = (("league_games", "id", LEAGUE_FILE), ("league_seats", "player_id", LEAGUE_FILE),
+                   ("rated_games", "id", VISIONS_FILE))
+REQUIRED_FUNCTIONS = (("league_start", LEAGUE_FILE), ("league_finish", LEAGUE_FILE),
+                      ("league_abandon", LEAGUE_FILE), ("record_rated_game", VISIONS_FILE))
 
 
 def players_from_rows(rows):
@@ -549,14 +653,67 @@ class SupabaseStore:
         except urllib.error.HTTPError as err:
             text = supabase_db.error_body(err)
             if err.code in (404, 400) and ("PGRST205" in text or "PGRST202" in text or "42703" in text
-                                            or "42P01" in text):
-                raise StoreUnavailable("the migrations have not been run (supabase-migrate-visions.sql, "
-                                       "then supabase-migrate-league.sql): " + text)
+                                            or "42P01" in text or "42883" in text):
+                # PGRST205: no such table. PGRST202 / 42883: no such function.
+                # 42703: no such column. 42P01: no such relation. Every one of
+                # them is a migration that has not been run.
+                raise MigrationMissing("%s %s: the database has no such table, column or function "
+                                       "(%s, then %s): %s" % (method, path, VISIONS_FILE, LEAGUE_FILE, text),
+                                       err.code)
             if err.code == 409 or "23505" in text:
                 raise SeatTaken(text)
-            raise StoreUnavailable("%s %s: %s %s" % (method, path, err.code, text))
+            if err.code in (401, 403):
+                raise StoreUnavailable("%s %s: %s — the database refused the server's key (is "
+                                       "SUPABASE_SERVICE_KEY a secret key for this project?): %s"
+                                       % (method, path, err.code, text), err.code)
+            raise StoreUnavailable("%s %s: %s %s" % (method, path, err.code, text), err.code)
         except (urllib.error.URLError, OSError, ValueError) as err:
             raise StoreUnavailable("%s %s: %s" % (method, path, err))
+
+    def verify_schema(self):
+        """Every table, column and function the league will touch, by name.
+
+        Raises MigrationMissing naming what is absent and the file that adds
+        it, StoreUnavailable when the database cannot be asked, and returns
+        a one-line summary otherwise. Columns and tables are asked for with a
+        select that names them and returns at most one row; the functions
+        are read off the OpenAPI document PostgREST serves at the root of the
+        API, which lists every RPC the role can call — and if that document
+        cannot be read, or is not one, the functions are taken on trust and
+        the log says so, because a project that hides its schema is not a
+        project that has not run the migration.
+        """
+        # a column at a time would be seven requests; one select finds the
+        # first missing one, which is the one to name
+        try:
+            self._call("GET", "/profiles?select=%s&limit=1" % ",".join(c for c, _ in REQUIRED_COLUMNS))
+        except MigrationMissing as err:
+            missing = [(c, f) for c, f in REQUIRED_COLUMNS if ("column profiles.%s" % c) in str(err)
+                       or ("'%s'" % c) in str(err)]
+            if missing:
+                raise MigrationMissing("profiles has no column %r — run %s" % missing[0], err.code)
+            raise MigrationMissing("profiles is missing one of %s — run %s and %s: %s"
+                                   % (", ".join(c for c, _ in REQUIRED_COLUMNS), PROFILES_FILE,
+                                      VISIONS_FILE, err), err.code)
+        for table, col, source in REQUIRED_TABLES:
+            try:
+                self._call("GET", "/%s?select=%s&limit=1" % (table, col))
+            except MigrationMissing as err:
+                raise MigrationMissing("no table %r — run %s (%s)" % (table, source, err), err.code)
+        checked = "%d columns, %d tables" % (len(REQUIRED_COLUMNS), len(REQUIRED_TABLES))
+        spec = None
+        try:
+            spec = self._call("GET", "/")
+        except StoreUnavailable:
+            spec = None
+        paths = spec.get("paths") if isinstance(spec, dict) else None
+        if not isinstance(paths, dict):
+            log("the API's OpenAPI document could not be read; taking the four functions on trust")
+            return checked + ", functions unverified"
+        for fn, source in REQUIRED_FUNCTIONS:
+            if ("/rpc/" + fn) not in paths:
+                raise MigrationMissing("no function %s() — run %s" % (fn, source))
+        return checked + ", %d functions" % len(REQUIRED_FUNCTIONS)
 
     def players(self):
         # select=* rather than a column list, so a project that has not run
@@ -736,14 +893,65 @@ def outcome_of(board):
 
 # ----------------------------------------------------------------- the league
 
+# What the league is doing, in one word or three, for /health and the log.
+# "running" is the only state in which games are arranged; every other one
+# names the thing that is stopping it, and all but "crashed" and "off" are
+# retried from — see League.boot().
+STATES = ("starting", "running", "database unavailable", "migration missing",
+          "stockfish unavailable", "python-chess unavailable", "no eligible players",
+          "crashed", "off")
+# The sentence the home page prints for each, under the four cards. Public,
+# so it says what is wrong and never how — no paths, no error bodies, no key.
+PUBLIC_NOTE = {
+    "starting": "The AI league is starting…",
+    "running": "",
+    "database unavailable": "The AI league is waiting for its database.",
+    "migration missing": "The AI league's database migration has not been run yet.",
+    "stockfish unavailable": "The server has no chess engine, so the AI league cannot run.",
+    "python-chess unavailable": "The server is missing a package the AI league needs.",
+    "no eligible players": "No AI accounts are on any ladder yet, so there is nobody to seat.",
+    "crashed": "The AI league has stopped and the server needs a restart.",
+    "off": "The server is not running the AI league right now.",
+}
+
+
+def off_payload():
+    """What the socket and /live.json answer on a server with no league at all."""
+    return {"t": "live-games", "at": now_ms(), "games": [], "off": True,
+            "state": "off", "note": PUBLIC_NOTE["off"]}
+
+
+class NotReady(Exception):
+    """One thing the league still needs before it can run: which STATE that
+    is, and the reason in full for the log. `terminal` marks the ones no
+    amount of waiting will mend."""
+
+    def __init__(self, state, reason, terminal=False):
+        super().__init__(reason)
+        self.state = state
+        self.reason = reason
+        self.terminal = terminal
+
+
 class League:
-    def __init__(self, store, engines, games_per_mode=GAMES_PER_MODE, rng=None):
+    def __init__(self, store=None, engines=None, games_per_mode=GAMES_PER_MODE, rng=None, setting="on"):
+        # Both may be None: then boot() finds them, and keeps trying until it
+        # has. The tests hand both in and drive tick() by hand.
         self.store = store
         self.engines = engines
+        self.setting = setting
+        self.store_kind = "memory" if isinstance(store, MemoryStore) else ("supabase" if store else None)
+        self.engine_path = getattr(engines, "path", None)
         self.games_per_mode = games_per_mode
         self.rng = rng or random.Random()
         self.owner = uuid.uuid4().hex[:12]
         self.lock = threading.RLock()
+        self.state = "starting"
+        self.reason = ""                            # the full reason, for the log and nowhere public
+        self.state_since = time.time()
+        self.attempts = 0                           # boot attempts so far
+        self.mode_status = {m: {"status": "idle", "why": "", "at": 0.0, "said": 0.0} for m in MODES}
+        self.counts = {}                            # mode -> how many AI accounts are rated on it
         self.matches = {}                           # game id -> Match, the ones this process plays
         self.foreign = {}                           # game id -> row, live elsewhere
         self.last_finished = {}                     # mode -> snapshot of the last game to end
@@ -757,40 +965,187 @@ class League:
         self.running = False
         self.thread = None
         self.store_down_since = None
-        self.stats = {"moves": 0, "games": 0, "finished": 0}
+        self.stats = {"moves": 0, "games": 0, "finished": 0, "errors": 0}
 
     # ---- lifecycle
 
     def start(self):
+        """Once per process. A second call is a mistake and does nothing."""
+        if self.thread is not None and self.thread.is_alive():
+            return
         self.running = True
         self.thread = threading.Thread(target=self.run, name="ai-league", daemon=True)
         self.thread.start()
 
     def stop(self):
         self.running = False
-        try:
-            self.store.release(self.owner)
-        except (StoreUnavailable, SeatTaken):
-            pass
+        if self.store is not None:
+            try:
+                self.store.release(self.owner)
+            except (StoreUnavailable, SeatTaken):
+                pass
+        close = getattr(self.engines, "close", None)
+        if close:
+            try:
+                close()
+            except Exception:                   # noqa: BLE001 - going down anyway
+                pass
+
+    def set_state(self, state, reason=""):
+        """Move to a state, say so once, and tell the page.
+
+        The page is told because the four cards carry the sentence for the
+        state, and a league that came up a minute after the page did should
+        replace "starting" with the games without a reload.
+        """
+        assert state in STATES, state
+        with self.lock:
+            changed = state != self.state or (reason and reason != self.reason)
+            self.state = state
+            self.reason = reason or ""
+            if changed:
+                self.state_since = time.time()
+        if changed and state != "running":
+            log("%s%s" % (state, (": " + reason) if reason else ""))
+        if changed:
+            self.publish()
 
     def run(self):
         try:
-            self.recover()
-        except StoreUnavailable as err:
-            log("cannot read the database at startup: %s" % err)
-        while self.running:
+            if not self.boot():
+                return
             try:
-                self.tick(time.time())
+                self.recover()
             except StoreUnavailable as err:
                 self.store_trouble(err)
-            except Exception as err:            # noqa: BLE001 - the loop must survive one bad game
-                log("tick failed: %r" % (err,))
-            time.sleep(0.05 if FAST else 0.25)
+            log("ready: %d ladders, %d game%s each; engine %s at %s"
+                % (len(MODES), self.games_per_mode, "" if self.games_per_mode == 1 else "s",
+                   getattr(self.engines, "name", "?") or "?", self.engine_path or "?"))
+            if self.store_down_since is None:
+                # a database that failed recover() flips this to running from
+                # tick(), the moment it answers
+                self.set_state("running")
+                log("running")
+            while self.running:
+                try:
+                    self.tick(time.time())
+                except StoreUnavailable as err:
+                    self.store_trouble(err)
+                except Exception:               # noqa: BLE001 - the loop must survive one bad tick
+                    self.stats["errors"] += 1
+                    log("tick failed — carrying on:\n" + traceback.format_exc().rstrip())
+                time.sleep(0.05 if FAST else 0.25)
+        except Exception:                       # noqa: BLE001 - the thread must not die silently
+            self.set_state("crashed", traceback.format_exc().rstrip().splitlines()[-1])
+            log("the league thread has died:\n" + traceback.format_exc().rstrip())
+
+    def boot(self):
+        """Get everything the league needs, however long that takes.
+
+        Each pass of prepare() checks what is still missing — the database,
+        the migration, the engine, an AI account to seat — and keeps what it
+        found, so an engine found on the first pass is not respawned on the
+        tenth. A miss is a state, said once when it changes and again every
+        few attempts, and then a wait that lengthens from BOOT_RETRY_MIN to
+        BOOT_RETRY_MAX. Nothing here is decided once for the life of the
+        process: a migration run after the deploy, or a database that was
+        asleep for the first minute, is picked up on the next pass. Returns
+        True when ready, False when stopped while waiting or when the miss
+        is one that waiting cannot mend.
+        """
+        delay = BOOT_RETRY_MIN
+        while self.running:
+            self.attempts += 1
+            try:
+                self.prepare()
+                return True
+            except NotReady as err:
+                self.set_state(err.state, err.reason)
+                if err.terminal:
+                    log("the league cannot run in this process; it will not be retried")
+                    return False
+            except Exception:                   # noqa: BLE001 - a bug in prepare() is not a reason to die
+                self.stats["errors"] += 1
+                self.set_state("starting", "unexpected error while starting: "
+                               + traceback.format_exc().rstrip().splitlines()[-1])
+                log(traceback.format_exc().rstrip())
+            if self.attempts == 1 or self.attempts % 10 == 0:
+                log("not ready (attempt %d): %s — trying again in %.0fs" % (self.attempts, self.reason, delay))
+            waited = 0.0
+            while self.running and waited < delay:
+                time.sleep(0.05 if FAST else 0.25)
+                waited += 0.05 if FAST else 0.25
+            delay = min(BOOT_RETRY_MAX, delay * 2)
+        return False
+
+    def prepare(self):
+        """One pass at readiness, in the order the pieces depend on each other.
+
+        The rules, then the database, then its schema, then the engine, then
+        somebody to seat. Each raises NotReady naming its state; what is
+        found stays found.
+        """
+        if chess is None:
+            raise NotReady("python-chess unavailable",
+                           "the `chess` package is not installed (pip install -r requirements.txt)",
+                           terminal=True)
+        if self.store is None:
+            if self.setting != "memory" and supabase_db.enabled():
+                store = SupabaseStore()
+                try:
+                    checked = store.verify_schema()
+                except MigrationMissing as err:
+                    raise NotReady("migration missing", str(err))
+                except StoreUnavailable as err:
+                    raise NotReady("database unavailable", str(err))
+                self.store, self.store_kind = store, "supabase"
+                log("database: Supabase with the service key; schema verified (%s)" % checked)
+            else:
+                if supabase_db.enabled():
+                    log("database: NOX_LEAGUE=memory — the real accounts, results kept in this process")
+                else:
+                    log("database: no SUPABASE_SERVICE_KEY — the real accounts read with the "
+                        "publishable key, results kept in this process and lost on restart")
+                try:
+                    self.store = memory_store()
+                except (StoreUnavailable, OSError, ValueError) as err:
+                    raise NotReady("database unavailable", str(err))
+                self.store_kind = "memory"
+        if self.engines is None:
+            path, how = find_stockfish()
+            if not path:
+                raise NotReady("stockfish unavailable", how)
+            try:
+                self.engines = EnginePool(ENGINES, path)
+            except (OSError, EngineDead) as err:
+                raise NotReady("stockfish unavailable", "%s would not start (%s): %r" % (path, how, err))
+            self.engine_path = path
+            log("engine: %s at %s (%s), %d process%s"
+                % (self.engines.name or "unnamed", path, how, ENGINES, "" if ENGINES == 1 else "es"))
+        try:
+            players = self.store.players()
+        except MigrationMissing as err:
+            raise NotReady("migration missing", str(err))
+        except StoreUnavailable as err:
+            raise NotReady("database unavailable", str(err))
+        counts = {m: sum(1 for p in players if p["is_bot"] and isinstance(p["ratings"].get(m), int))
+                  for m in MODES}
+        self.counts = counts
+        log("players: %d profile rows, %d AI accounts; rated AI accounts per ladder: %s"
+            % (len(players), sum(1 for p in players if p["is_bot"]),
+               ", ".join("%s %d" % (MODE_NAME[m], counts[m]) for m in MODES)))
+        if not any(counts.values()):
+            raise NotReady("no eligible players",
+                           "no AI account has a rating on any ladder — have %s and %s been run?"
+                           % (PROFILES_FILE, VISIONS_FILE))
 
     def store_trouble(self, err):
         if self.store_down_since is None:
             self.store_down_since = time.time()
             log("database unavailable — games pause until it answers: %s" % err)
+        if self.state == "running":
+            self.set_state("migration missing" if isinstance(err, MigrationMissing) else "database unavailable",
+                           str(err))
 
     # ---- the pool
 
@@ -866,6 +1221,52 @@ class League:
             return seat(white), seat(black)
         return None
 
+    def pairing_report(self, mode):
+        """The numbers behind a pairing, for the log: how many rows the ladder
+        has, how many of the top twenty are AI accounts, how many of those
+        are free, and how many pairs among the free are within MAX_GAP."""
+        top = self.top(mode)
+        bots = [p for p in top if p["is_bot"]]
+        free = self.eligible(mode)
+        pairs = 0
+        for i, a in enumerate(free):
+            for b in free[i + 1:]:
+                if abs(a["rating"] - b["rating"]) <= MAX_GAP:
+                    pairs += 1
+        return {"rows": len(self.players[mode]), "top": len(top), "bots": len(bots),
+                "free": len(free), "pairings": pairs}
+
+    def explain_pairing(self, mode, report):
+        """Why this ladder has no game right now, as one log line."""
+        name = MODE_NAME[mode]
+        if not report["rows"]:
+            return "%s: nobody has a rating on this ladder (has %s been run?)" % (name, VISIONS_FILE)
+        if not report["bots"]:
+            return ("%s: no AI accounts in the top %d (%d leaderboard rows) — nothing to seat"
+                    % (name, TOP_N, report["rows"]))
+        if report["bots"] < 2:
+            return ("%s: only one AI account in the top %d (%d leaderboard rows) — nobody for it to play"
+                    % (name, TOP_N, report["rows"]))
+        if report["free"] < 2:
+            return ("%s: %d leaderboard rows, %d bots in the top %d, %d free — the rest are at a board"
+                    % (name, report["rows"], report["bots"], TOP_N, report["free"]))
+        return ("%s: no valid pairing within %d Elo (%d leaderboard rows, %d bots in the top %d, %d free)"
+                % (name, MAX_GAP, report["rows"], report["bots"], TOP_N, report["free"]))
+
+    def note_mode(self, mode, status, why, now):
+        """Record what a ladder is doing, and log it when it changes — or
+        again after WHY_REPEAT, so a ladder stuck for an hour is still in
+        the last hour of the log."""
+        with self.lock:
+            st = self.mode_status[mode]
+            changed = st["status"] != status or st["why"] != why
+            st["status"], st["why"], st["at"] = status, why, now
+            say = why and (changed or now - st["said"] >= WHY_REPEAT)
+            if say:
+                st["said"] = now
+        if say:
+            log(why)
+
     def note_pairing(self, mode, white, black):
         for me, them, color in ((white, black, "w"), (black, white, "b")):
             seen = self.recent[mode].setdefault(me["id"], [])
@@ -881,8 +1282,10 @@ class League:
         return n
 
     def arrange(self, mode, now):
+        report = self.pairing_report(mode)
         pair = self.pick_pair(mode)
         if pair is None:
+            self.note_mode(mode, "waiting", self.explain_pairing(mode, report), now)
             self.next_fill[mode] = now + (2.0 if FAST else 30.0)
             return None
         white, black = pair
@@ -891,7 +1294,8 @@ class League:
         except SeatTaken as err:
             # Somebody else's game seats one of them: see what is live and try
             # again next tick rather than guessing.
-            log("%s: seat taken (%s) — re-reading live games" % (MODE_NAME[mode], err))
+            self.note_mode(mode, "waiting", "%s: seat taken (%s) — re-reading live games"
+                           % (MODE_NAME[mode], err), now)
             self.adopted_at = 0.0
             self.next_fill[mode] = now + 2.0
             return None
@@ -901,8 +1305,11 @@ class League:
             self.matches[gid] = match
             self.note_pairing(mode, white, black)
             self.stats["games"] += 1
+        log("%s: %d leaderboard rows, %d bots in the top %d, %d free, %d valid pairings"
+            % (MODE_NAME[mode], report["rows"], report["bots"], TOP_N, report["free"], report["pairings"]))
         log("%s match created:\n  %s (%d) vs %s (%d)"
             % (MODE_NAME[mode], white["name"], white["rating"], black["name"], black["rating"]))
+        self.note_mode(mode, "playing", "", now)
         self.publish()
         return match
 
@@ -995,14 +1402,39 @@ class League:
         if self.store_down_since is not None:
             log("database is answering again after %.0fs" % (now - self.store_down_since))
             self.store_down_since = None
+            if self.state != "running":
+                self.set_state("running")
+        # One ladder's trouble is one ladder's: a game that raises, or a pool
+        # that cannot be arranged, is logged against its vision and the loop
+        # goes on to the next. Only the database being away is everybody's
+        # problem, and that one is still raised through to run().
         for match in list(self.matches.values()):
-            if match.pending_finish and now >= match.retry_at:
-                self.finish(match, *match.pending_finish, now=now)
-            elif match.status == "live" and now >= match.due:
-                self.play_move(match, now)
+            try:
+                if match.pending_finish and now >= match.retry_at:
+                    self.finish(match, *match.pending_finish, now=now)
+                elif match.status == "live" and now >= match.due:
+                    self.play_move(match, now)
+            except StoreUnavailable:
+                raise
+            except Exception:               # noqa: BLE001 - one board, not the league
+                self.mode_failed(match.mode, "game %s" % match.id[:8], now)
+                match.due = now + (0.5 if FAST else 5.0)
         for mode in MODES:
             if self.live_in(mode) < self.games_per_mode and now >= self.next_fill[mode]:
-                self.arrange(mode, now)
+                try:
+                    self.arrange(mode, now)
+                except StoreUnavailable:
+                    raise
+                except Exception:           # noqa: BLE001 - one ladder, not the league
+                    self.mode_failed(mode, "arranging a game", now)
+                    self.next_fill[mode] = now + (2.0 if FAST else 30.0)
+
+    def mode_failed(self, mode, doing, now):
+        self.stats["errors"] += 1
+        text = traceback.format_exc().rstrip()
+        self.note_mode(mode, "error", "%s: error while %s — %s"
+                       % (MODE_NAME[mode], doing, text.splitlines()[-1]), now)
+        log("%s: error while %s; the other ladders carry on:\n%s" % (MODE_NAME[mode], doing, text))
 
     def play_move(self, match, now):
         color = match.turn()
@@ -1175,8 +1607,17 @@ class League:
         return out
 
     def payload(self):
+        """The socket's snapshot. `off` and `note` appear only while the
+        league is not running, and say what is wrong in public terms."""
         now = time.time()
-        return {"t": "live-games", "at": int(now * 1000), "games": self.featured(now)}
+        out = {"t": "live-games", "at": int(now * 1000), "games": self.featured(now), "state": self.state}
+        if self.state != "running":
+            out["off"] = True
+            out["note"] = self.public_note()
+        return out
+
+    def public_note(self):
+        return PUBLIC_NOTE.get(self.state, PUBLIC_NOTE["off"])
 
     def subscribe(self, client):
         with self.lock:
@@ -1198,14 +1639,37 @@ class League:
                 self.unsubscribe(client)
 
     def health(self):
+        """For /health: the state and, per ladder, what it is doing and why.
+
+        Public, like the endpoint: the state's public sentence, never the
+        full reason (which may quote an error body), no path but the
+        engine's, and no key. The full reason is in the log.
+        """
         with self.lock:
+            modes = {}
+            for m in MODES:
+                st = self.mode_status[m]
+                live = sum(1 for x in self.matches.values() if x.mode == m)
+                status = "playing" if live else (st["status"] if st["status"] != "idle" else
+                                                 ("waiting" if self.state == "running" else "idle"))
+                modes[m] = {"name": MODE_NAME[m], "live": live, "status": status,
+                            "why": st["why"] if status != "playing" else "",
+                            "rated": self.counts.get(m)}
             return {
+                "state": self.state,
+                "note": self.public_note(),
+                "since": iso(self.state_since),
+                "attempts": self.attempts,
+                "store": self.store_kind,
                 "live": len(self.matches),
                 "elsewhere": len(self.foreign),
                 "moves": self.stats["moves"],
                 "finished": self.stats["finished"],
-                "engine": self.engines.name,
+                "errors": self.stats["errors"],
+                "engine": getattr(self.engines, "name", "") or "",
+                "enginePath": self.engine_path,
                 "owner": self.owner,
+                "modes": modes,
             }
 
 
@@ -1261,50 +1725,28 @@ def memory_store():
 
 
 def build(setting=None):
-    """The league the server should run, or None with the reason logged.
+    """The league the server should run, or None only when it is switched off.
 
-    NOX_LEAGUE=off turns it off. With a service key the league runs against
-    Supabase and every game and rating is written back; without one, or with
-    NOX_LEAGUE=memory, it runs on the same accounts read with the page's
-    publishable key and keeps the results in memory. Either way the players
-    are the leaderboard's: nothing is ever made up to fill a board. Missing
-    pieces — the chess package, the engine binary, the database — are each
-    said once, in words, and the server goes on without the league rather
-    than without the site.
+    NOX_LEAGUE=off is the one thing that turns it off. Everything else —
+    with a service key the league runs against Supabase and every game and
+    rating is written back; without one, or with NOX_LEAGUE=memory, on the
+    same accounts read with the page's publishable key, results kept in
+    memory — is decided by League.boot() on its own thread, once start() is
+    called, and decided again as often as it has to be. This used to check
+    the database, the engine and the players here, once, and answer None on
+    the first miss; a server that booted a minute before its migration was
+    run, or with its engine a directory off PATH, then had no league until
+    somebody redeployed it, and the log line saying why had scrolled off.
+    Now a miss is a state on /health and a sentence under the cards, the
+    reason is logged when it changes, and the next attempt is never more
+    than a minute away. Either way the players are the leaderboard's:
+    nothing is ever made up to fill a board.
     """
     setting = (setting if setting is not None else os.environ.get("NOX_LEAGUE") or "on").strip().lower()
     if setting == "off":
         log("off (NOX_LEAGUE=off)")
         return None
-    if chess is None:
-        log("not running: the `chess` package is not installed (pip install -r requirements.txt)")
-        return None
-    store = None
-    if setting != "memory" and supabase_db.enabled():
-        try:
-            store = SupabaseStore()
-            store.players()
-            store.live_games()
-        except StoreUnavailable as err:
-            log("not running: %s" % err)
-            return None
-    if store is None:
-        try:
-            store = memory_store()
-        except StoreUnavailable as err:
-            log("not running: %s" % err)
-            return None
-    seated = sum(1 for p in store.players() if p["is_bot"] and any(v is not None for v in p["ratings"].values()))
-    if not seated:
-        log("not running: no AI accounts on any ladder (have supabase-system-profiles.sql "
-            "and supabase-migrate-visions.sql been run?)")
-        return None
-    try:
-        engines = EnginePool(ENGINES, STOCKFISH)
-    except (OSError, EngineDead) as err:
-        log("not running: no engine at %r (%s) — install stockfish or set NOX_STOCKFISH" % (STOCKFISH, err))
-        return None
-    log("engine: %s, %d process%s; %d game%s per ladder; %d-minute clocks"
-        % (engines.name, ENGINES, "" if ENGINES == 1 else "es",
-           GAMES_PER_MODE, "" if GAMES_PER_MODE == 1 else "s", MINUTES))
-    return League(store, engines)
+    log("starting: %s; %d game%s per ladder; %d-minute clocks%s"
+        % ("Supabase" if (setting != "memory" and supabase_db.enabled()) else "memory store",
+           GAMES_PER_MODE, "" if GAMES_PER_MODE == 1 else "s", MINUTES, " (FAST)" if FAST else ""))
+    return League(setting=setting)

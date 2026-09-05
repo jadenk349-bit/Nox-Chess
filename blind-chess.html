@@ -14507,7 +14507,10 @@ function liveUpdate(msg){
                 (was.id !== g.id && was.status === 'live'))) moved = true;
     LIVE.seen[g.mode] = { id: g.id, status: g.status };
   }
-  if (LIVE.off) liveNote('The server is not running the AI league right now.');
+  /* Off comes with a sentence saying why — starting, no engine, waiting on
+     its database — written by the server for the public and carrying no
+     detail; the detail is in the server's log and on /health. */
+  if (LIVE.off) liveNote(msg.note || 'The server is not running the AI league right now.');
   else if (!LIVE.games.some(g => g.status === 'live' || g.status === 'finished'))
     liveNote('Arranging the first games…');
   else liveNote('');

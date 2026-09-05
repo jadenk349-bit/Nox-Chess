@@ -427,6 +427,267 @@ def main():
     check("...and is a different game", nxt[0].id != first.id, True)
     check("the loser and winner may play again, or a third", nxt[0].white["id"] != nxt[0].black["id"], True)
 
+    print("\n\033[1mFinding the engine\033[0m")
+    import stat
+    import tempfile
+    tmp = tempfile.mkdtemp()
+    fake = os.path.join(tmp, "stockfish")
+    with open(fake, "w") as fh:
+        fh.write("#!/bin/sh\n")
+    os.chmod(fake, os.stat(fake).st_mode | stat.S_IXUSR)
+    nothing = lambda name: None
+    found = league.find_stockfish("", candidates=(fake,), which=nothing, path_env="/nowhere")
+    check("a binary in a known place is found when PATH has none", found[0], fake)
+    check("...and the log is told it was found by looking", "not on PATH" in found[1], True)
+    found = league.find_stockfish("", candidates=(os.path.join(tmp, "absent"),), which=nothing, path_env="/nowhere")
+    check("nothing anywhere is None", found[0], None)
+    check("...naming PATH", "/nowhere" in found[1], True)
+    check("...and every place looked", "absent" in found[1], True)
+    check("...and the setting that fixes it", "NOX_STOCKFISH" in found[1], True)
+    found = league.find_stockfish("", candidates=(fake,), which=lambda n: "/from/path/" + n)
+    check("PATH wins over the list", found, ("/from/path/stockfish", "on PATH"))
+    found = league.find_stockfish(fake, candidates=(), which=nothing)
+    check("NOX_STOCKFISH as a path is used as given", found[0], fake)
+    found = league.find_stockfish(os.path.join(tmp, "absent"), candidates=(fake,), which=nothing)
+    check("NOX_STOCKFISH naming a missing file does not fall through to the list", found[0], None)
+    check("...and says which file", "absent" in found[1] and "NOX_STOCKFISH" in found[1], True)
+    found = league.find_stockfish("sf", candidates=(fake,), which=nothing, path_env="/p")
+    check("NOX_STOCKFISH as a name not on PATH does not fall through either", found[0], None)
+    check("the Debian package's directory is the first place looked", league.STOCKFISH_CANDIDATES[0],
+          "/usr/games/stockfish")
+
+    print("\n\033[1mThe schema, verified by name\033[0m")
+
+    class Fake(league.SupabaseStore):
+        """A store whose PostgREST answers are scripted: `missing` names
+        what the project does not have."""
+
+        def __init__(self, missing=(), spec=True):
+            self.missing = set(missing)
+            self.spec = spec
+            self.asked = []
+
+        def _call(self, method, path, body=None, prefer=None):
+            self.asked.append(path)
+            if path == "/":
+                if not self.spec:
+                    raise league.StoreUnavailable("no spec", 406)
+                fns = [f for f, _ in league.REQUIRED_FUNCTIONS if f not in self.missing]
+                return {"paths": {"/rpc/" + f: {} for f in fns}}
+            table = path[1:].split("?", 1)[0]
+            if table in self.missing:
+                raise league.MigrationMissing("PGRST205 no such table %s" % table, 404)
+            if table == "profiles":
+                cols = path.split("select=")[1].split("&")[0].split(",")
+                for c in cols:
+                    if c in self.missing:
+                        raise league.MigrationMissing("42703 column profiles.%s does not exist" % c, 400)
+            return []
+
+    whole = Fake()
+    check("everything present verifies", "4 functions" in whole.verify_schema(), True)
+    asked = whole.asked
+    for want in ("profiles", "league_games", "league_seats", "rated_games"):
+        check("...having asked for %s" % want, any(a.startswith("/" + want) for a in asked), True)
+    check("...naming all four rating columns in one select",
+          all(c in asked[0] for c in ("rating", "complete_blindfold_rating", "board_only_rating",
+                                      "fog_of_war_rating", "is_bot")), True)
+
+    def fails(store):
+        try:
+            store.verify_schema()
+        except league.MigrationMissing as err:
+            return str(err)
+        return None
+
+    why = fails(Fake(missing=("fog_of_war_rating",)))
+    check("a missing rating column is a missing migration", why is not None, True)
+    check("...naming the column", "fog_of_war_rating" in why, True)
+    check("...and the visions file", "supabase-migrate-visions.sql" in why, True)
+    why = fails(Fake(missing=("is_bot",)))
+    check("a missing is_bot names the system profiles file", "supabase-system-profiles.sql" in (why or ""), True)
+    why = fails(Fake(missing=("league_seats",)))
+    check("a missing table names it", "league_seats" in (why or ""), True)
+    check("...and the league file", "supabase-migrate-league.sql" in (why or ""), True)
+    why = fails(Fake(missing=("record_rated_game",)))
+    check("a missing function names it", "record_rated_game" in (why or ""), True)
+    check("...and the visions file", "supabase-migrate-visions.sql" in (why or ""), True)
+    why = fails(Fake(missing=("league_finish",)))
+    check("league_finish is checked too", "league_finish" in (why or ""), True)
+    check("an unreadable OpenAPI document is not a missing migration",
+          "unverified" in Fake(spec=False).verify_schema(), True)
+
+    print("\n\033[1mBooting: kept trying, and said why\033[0m")
+    # The pieces boot() reaches for, replaced one at a time. Each league here
+    # is started on its own thread and waited on, exactly as the server does.
+    real_find, real_pool, real_memory = league.find_stockfish, league.EnginePool, league.memory_store
+
+    def seeded():
+        st = league.MemoryStore()
+        pool(st, "sighted", [2600, 2590, 2580])
+        pool(st, "total", [2600, 2590])
+        return st
+
+    def wait_for(L, cond, limit=5.0):
+        t0 = time.time()
+        while time.time() - t0 < limit and not cond():
+            time.sleep(0.02)
+        return cond()
+
+    states = []
+    real_set_state = league.League.set_state
+
+    def spy_set_state(self, state, reason=""):
+        states.append(state)
+        real_set_state(self, state, reason)
+
+    league.League.set_state = spy_set_state
+    try:
+        # 1. the engine is missing, then appears
+        calls = {"n": 0}
+
+        def find_later():
+            calls["n"] += 1
+            return (None, "no engine yet") if calls["n"] < 3 else ("/fake/stockfish", "found")
+
+        league.find_stockfish = find_later
+        league.EnginePool = lambda count, path: StubEngines()
+        league.memory_store = seeded
+        L = league.League(setting="memory")
+        L.start()
+        check("no engine is a state, not an exit", wait_for(L, lambda: L.state == "stockfish unavailable"), True)
+        check("...with the reason kept for the log", L.reason, "no engine yet")
+        check("...and a public sentence that says only that",
+              "engine" in L.public_note() and "no engine yet" not in L.public_note(), True)
+        check("...and the page is told it is off", L.payload().get("off"), True)
+        check("the league comes up once the engine is there", wait_for(L, lambda: L.state == "running"), True)
+        check("...having tried more than once", L.attempts >= 3, True)
+        check("...and the page is told again", L.payload().get("off"), None)
+        check("/health says running", L.health()["state"], "running")
+        check("...and names the engine's path", L.health()["enginePath"], "/fake/stockfish")
+        check("...and the store", L.health()["store"], "memory")
+        check("games are then arranged on the thread", wait_for(L, lambda: L.live_in("sighted") == 1), True)
+        check("a second start() is ignored", (L.start(), L.thread.is_alive())[1], True)
+        L.stop()
+        check("stop closes nothing it did not open", True, True)
+
+        # 2. the database is away, then answers
+        calls["n"] = 0
+        league.find_stockfish = lambda: ("/fake/stockfish", "found")
+
+        def store_later():
+            calls["n"] += 1
+            if calls["n"] < 2:
+                raise league.StoreUnavailable("timed out")
+            return seeded()
+
+        league.memory_store = store_later
+        states[:] = []
+        L = league.League(setting="memory")
+        L.start()
+        check("a database that does not answer is waited for", wait_for(L, lambda: L.state == "running"), True)
+        check("...through the 'database unavailable' state", "database unavailable" in states, True)
+        L.stop()
+
+        # 3. no AI account anywhere
+        league.memory_store = lambda: league.MemoryStore()
+        L = league.League(setting="memory")
+        L.start()
+        check("an empty leaderboard is 'no eligible players'",
+              wait_for(L, lambda: L.state == "no eligible players"), True)
+        check("...and is retried rather than given up on", wait_for(L, lambda: L.attempts >= 2), True)
+        L.stop()
+
+        # 4. a missing migration, through a Supabase store
+        class Unmigrated(Fake):
+            def __init__(self):
+                Fake.__init__(self, missing=("league_games",))
+
+        real_enabled, real_sstore = league.supabase_db.enabled, league.SupabaseStore
+        league.supabase_db.enabled = lambda: True
+        league.SupabaseStore = Unmigrated
+        L = league.League(setting="on")
+        L.start()
+        check("a missing table is 'migration missing'", wait_for(L, lambda: L.state == "migration missing"), True)
+        check("...naming the table", "league_games" in L.reason, True)
+        check("...and the file", "supabase-migrate-league.sql" in L.reason, True)
+        check("...while /health carries only the public sentence",
+              "league_games" not in L.health()["note"] and L.health()["state"], "migration missing")
+        L.stop()
+        league.supabase_db.enabled, league.SupabaseStore = real_enabled, real_sstore
+
+        # 5. no python-chess is terminal
+        saved = league.chess
+        league.chess = None
+        L = league.League(setting="memory")
+        L.start()
+        check("no python-chess is said", wait_for(L, lambda: L.state == "python-chess unavailable"), True)
+        check("...and the thread ends rather than retrying", wait_for(L, lambda: not L.thread.is_alive()), True)
+        league.chess = saved
+        L.stop()
+    finally:
+        league.League.set_state = real_set_state
+        league.find_stockfish, league.EnginePool, league.memory_store = real_find, real_pool, real_memory
+
+    print("\n\033[1mOne ladder's trouble is one ladder's\033[0m")
+
+    class OneBadLadder(league.MemoryStore):
+        def start_game(self, mode, white, black, fen, ms, owner):
+            if mode == "fog":
+                raise RuntimeError("fog is broken today")
+            return league.MemoryStore.start_game(self, mode, white, black, fen, ms, owner)
+
+    store = OneBadLadder()
+    L = league.League(store, StubEngines(), games_per_mode=1, rng=random.Random(2))
+    for mode in league.MODES:
+        pool(store, mode, [2600, 2590, 2580])
+    L.refresh_players(0)
+    L.tick(NOW)
+    check("the other three ladders have games", sorted(m.mode for m in L.matches.values()),
+          ["blind", "sighted", "total"])
+    check("the broken one is reported, not fatal", L.health()["modes"]["fog"]["status"], "error")
+    check("...with the error", "fog is broken today" in L.health()["modes"]["fog"]["why"], True)
+    check("...counted", L.stats["errors"], 1)
+    L.tick(NOW + 100)
+    check("the loop keeps ticking", L.stats["errors"] >= 1 and len(L.matches), 3)
+
+    print("\n\033[1mWhy a ladder has no game\033[0m")
+    store, L = fresh()
+    L.refresh_players(0)
+    L.arrange("fog", NOW)
+    check("an empty ladder says so", L.mode_status["fog"]["why"],
+          "Fog of War: nobody has a rating on this ladder (has supabase-migrate-visions.sql been run?)")
+    store, L = fresh()
+    store.add_player("human", {"fog": 2600}, is_bot=False)
+    L.refresh_players(0)
+    L.arrange("fog", NOW)
+    check("a ladder of humans says nothing to seat", "no AI accounts in the top 20" in L.mode_status["fog"]["why"], True)
+    store, L = fresh()
+    pool(store, "fog", [2600])
+    L.refresh_players(0)
+    L.arrange("fog", NOW)
+    check("one bot says nobody to play", "only one AI account" in L.mode_status["fog"]["why"], True)
+    store, L = fresh()
+    pool(store, "fog", [2600, 2400])
+    L.refresh_players(0)
+    L.arrange("fog", NOW)
+    check("two far apart say no pairing within 100",
+          L.mode_status["fog"]["why"].startswith("Fog of War: no valid pairing within 100 Elo"), True)
+    check("/health carries it", L.health()["modes"]["fog"]["why"], L.mode_status["fog"]["why"])
+    store, L = fresh()
+    pool(store, "fog", [2600, 2590, 2580, 2570])
+    L.refresh_players(0)
+    rep_ = L.pairing_report("fog")
+    check("the report counts rows, bots, free and pairings",
+          (rep_["rows"], rep_["bots"], rep_["free"], rep_["pairings"]), (4, 4, 4, 6))
+    L.arrange("fog", NOW)
+    check("a seated ladder has no complaint", L.mode_status["fog"]["why"], "")
+    check("...and reads as playing", L.health()["modes"]["fog"]["status"], "playing")
+    rep_ = L.pairing_report("fog")
+    check("the two at the board are no longer free", (rep_["bots"], rep_["free"], rep_["pairings"]), (4, 2, 1))
+    check("off_payload is what a server with no league answers",
+          (league.off_payload()["off"], league.off_payload()["state"]), (True, "off"))
+
     print("\n\033[1m%d passed, %d failed\033[0m\n" % (passed, failed))
     sys.exit(1 if failed else 0)
 

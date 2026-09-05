@@ -91,9 +91,19 @@ def replays(snapshot):
 
 
 def main():
-    health = http_json("/health")
-    if not health.get("league"):
-        print("the server is not running the league (NOX_LEAGUE=memory to test without a key)")
+    # The league boots on its own thread and may still be finding its feet;
+    # give it a moment, and say what /health says if it never gets there.
+    deadline = time.time() + 30
+    state = None
+    while time.time() < deadline:
+        health = http_json("/health")
+        state = (health.get("league") or {}).get("state")
+        if state == "running":
+            break
+        time.sleep(0.5)
+    if state != "running":
+        print("the server is not running the league: /health says %r (NOX_LEAGUE=memory to test "
+              "without a key; the reason is in the server's log)" % (state,))
         sys.exit(1)
     print("\n\033[1mBy HTTP\033[0m")
     check("/health names the engine", bool(health["league"].get("engine")), True)

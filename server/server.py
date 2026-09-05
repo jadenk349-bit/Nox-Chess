@@ -1797,7 +1797,7 @@ def handle_live(client):
     room list is pushed by whoever changed a room.
     """
     if LEAGUE is None:
-        client.send({"t": "live-games", "at": int(time.time() * 1000), "games": [], "off": True})
+        client.send(league.off_payload())
         return
     LEAGUE.subscribe(client)
 
@@ -1978,7 +1978,11 @@ def serve_http(sock, request_line):
                 "waiting": sum(len(q) for q in lobby.values()),
                 "games": len(games),
             }
-        status["league"] = LEAGUE.health() if LEAGUE is not None else None
+        # The league's own state, always: "off" is a state too, and the
+        # difference between off, starting, and stuck on a missing engine is
+        # exactly what somebody reading this endpoint is trying to learn.
+        status["league"] = LEAGUE.health() if LEAGUE is not None else \
+            {"state": "off", "note": league.PUBLIC_NOTE["off"]}
         body = json.dumps(status).encode()
         sock.sendall(
             b"HTTP/1.1 200 OK\r\nContent-Type: application/json\r\nContent-Length: "
@@ -1988,8 +1992,7 @@ def serve_http(sock, request_line):
         # The same snapshot the socket pushes, for anybody polling — a
         # debugging aid first, and the fallback for a viewer whose socket
         # will not open. Never cached: it is wrong within seconds.
-        payload = LEAGUE.payload() if LEAGUE is not None else \
-            {"t": "live-games", "at": int(time.time() * 1000), "games": [], "off": True}
+        payload = LEAGUE.payload() if LEAGUE is not None else league.off_payload()
         body = json.dumps(payload).encode()
         sock.sendall(
             b"HTTP/1.1 200 OK\r\nContent-Type: application/json\r\n"
@@ -2068,6 +2071,14 @@ def handle_connection(sock, addr):
 def start_league():
     """Boot the AI league, and make sure a stop hands its games on cleanly.
 
+    Called once, from main(), before the port is bound: the league is a
+    thread of this process and nothing else — no command to run, no
+    endpoint to hit, no browser to connect. build() answers None only for
+    NOX_LEAGUE=off; everything that can go wrong after that (the database,
+    the migration, the engine, the players) is the league's own business,
+    retried on its thread and reported on /health, so this process never
+    decides at startup that it will have no league for the rest of its life.
+
     Render replaces an instance by starting the next one and then sending
     this one SIGTERM. Releasing the league's leases on the way out is what
     lets the next instance sit down at the same boards straight away instead
@@ -2075,6 +2086,8 @@ def start_league():
     does before exiting the way the default would have.
     """
     global LEAGUE
+    if LEAGUE is not None:
+        return                      # one league per process, whatever calls this twice
     LEAGUE = league.build()
     if LEAGUE is None:
         return
