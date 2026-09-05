@@ -30,6 +30,7 @@ node server/test_leaderboard.js          # the home page's four ladders, against
 node server/test_ai_fallback.js          # what the ranked fallback bot decides
 node server/test_ai_game.js              # and playing a whole game against it, stub DOM
 python3 server/test_ai_match.py          # seating one: the queue, the race; no server needed
+python3 server/test_house_rooms.py       # the friendly page's seven standing rooms; no server needed
 python3 server/test_names.py             # one name per player, guests included; no server needed
 python3 server/test_system_profiles.py   # the 21 leaderboard profiles: refused everywhere; no server needed
 python3 server/test_puzzle_rating.py     # the puzzle Elo handler; no server needed
@@ -293,6 +294,48 @@ into `start_game_between()` like every other way into a Game. The rating is the
 one that game was played at rather than a fresh `player_rating_of()`, because
 it is the same opponent again and because that call may go to the network,
 which nothing holding the lock may do.
+
+**The friendly page always has seven rooms on it, and the house hosts them.**
+A room used to exist only while a person sat in it, so on a small server the
+list was "Nobody is hosting yet" for almost everybody. `HOUSE_ROOMS` in
+`server.py` is seven rooms the house keeps open at all times — two Complete
+Blindfold, two See the Board (`blind`), two Fog of War and one Sighted — each
+hosted by a `BotClient` under a name that reads like anybody's, at a fixed
+rating, on its own clock. They are the ranked fallback wearing a room instead
+of a queue, and deliberately nothing more: `seed_house_rooms()` puts a
+`Room` whose host is a bot into `rooms` at startup, `handle_join()` seats the
+joiner through `start_game_between()` with the same `ai` block the fallback's
+`start` carries, and the page plays the bot's moves exactly as it does for
+the fallback — `AI_MATCH()` is true of both, and `G.matchKind` is what tells
+them apart where the page says anything about it. A joined room is re-seated
+under the same lock that emptied it (`house_room()`: a fresh `BotClient`, the
+same name and rating, the colour drawn again), so the list is seven long at
+every instant and never drains; `room_list()` puts the seven first in slot
+order, then everybody else's rooms, so the list does not reshuffle when
+somebody sits down. A rematch of one is granted on the spot by the branch
+`handle_rematch()` already had for the fallback, a draw offered to one is
+accepted through `ai_accept_draw()`, and a move sent to the server for one is
+dropped as it always was. None of it touches ranked play: a house bot is never
+in `lobby`, `handle_find()` never sees one, `may_play_ranked()` is not asked,
+and no rating is written for anybody.
+
+The card does not know. Every room on the list — the house's and a person's —
+is sent as `{id, mode, minutes, inc, color, name, rating}` and drawn by
+`renderRooms()` as a vision, a name, a rating, a clock line and a Join Room
+button; `handle_host()` reads a person's rating with `player_rating_of()`
+before it takes the lock, so their card looks exactly like the house's.
+Nothing on the wire or on the page says which rooms are the house's, on
+purpose, and the brief's rule that nothing beside a name may hint at who is
+behind it is enforced by `test_two_clients.py` and the driver checks rather
+than by a flag the page could read. Two things the page does differently
+from a ranked fallback game, both because the card presented this host as
+anybody: the "Nobody was queueing, so … a Nox bot … took the board" line is
+written only for a ranked game, and the chat panel stays up. The names are
+held in `names` for the life of the process so no guest can wear one, and
+`test_system_profiles.py` checks they share nothing with `AI_NAMES` or the
+system profiles. `test_house_rooms.py` walks the rest without a server, and
+the "Hosted rooms" section of `test_two_clients.py` tells the house's rooms
+apart from its own by name — the list itself will not say.
 
 **The twenty-one system profiles are accounts with no seat, and the fallback
 bot is a seat with no account.** `supabase-system-profiles.sql` — the fourth

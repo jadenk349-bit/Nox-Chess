@@ -138,6 +138,49 @@ AI_NAME_MEMORY = 3
 AI_RECENT_MAX = 500     # ... and the remembering is a courtesy, so it is bounded
 ai_recent = {}          # player key -> the names they were last given, oldest first
 
+# ------------------------------------------------------------ the house rooms
+#
+# The friendly page used to open on "Nobody is hosting yet" for almost everybody,
+# because a room only exists while a person is sitting in it, and a small
+# server rarely has one sitting there when the next one arrives. So the house
+# keeps seven rooms of its own on the list, always: two of each vision that
+# hides something and one Sighted, each hosted by a bot under a name that
+# reads like anybody else's. They are the fallback opponent above wearing a
+# room instead of a queue — a `BotClient` at the head of a `Room`, joined
+# through `handle_join()` like any other room, seated by
+# `start_game_between()` like any other pairing, played in the joiner's own
+# browser like any other fallback game, and offered a rematch, a draw and a
+# resignation through the doors every game uses. Nothing here is a second
+# multiplayer system, and nothing here touches the ranked queue: a house bot
+# is never in `lobby`, `handle_find()` never sees one, `may_play_ranked()` is
+# not consulted (these are friendly games, and stay friendly across a
+# rematch), and no rating is ever written for anybody.
+#
+# A room that is joined is re-seated on the spot — a fresh `BotClient`, the same
+# name at the same rating, the colour drawn again — so the list is seven
+# rooms long at every instant and never drains. The order is the slot order
+# below, whatever order the dict happens to hold them in, so the page does not
+# reshuffle the list every time somebody sits down.
+#
+# The names are names and nothing more: not rows, not accounts, not on any
+# ladder, and test_system_profiles.py checks they share nothing with the
+# system profiles or with AI_NAMES. Each is held in `names` for the life of
+# the process, so no guest can turn up wearing one — two boards that both say
+# "SashaLund" would be two boards lying to somebody. The rating on the card is
+# what the game is played at (the page sizes its engine from it), fixed per
+# name rather than derived from the joiner, because a card has to say a number
+# before it knows who is reading it.
+HOUSE_ROOMS = [
+    # (vision, name, rating, minutes, increment)
+    ("total",   "quietRook88",  1340, 15, 0),
+    ("total",   "HalvardM",     1510, 10, 0),
+    ("blind",   "pawnstorm_ed",  960, 10, 0),
+    ("blind",   "SashaLund",    1180,  5, 3),
+    ("fog",     "mirrorknight", 1090, 10, 0),
+    ("fog",     "Teodor_V",     1425,  5, 0),
+    ("sighted", "emberline7",    820, 10, 0),
+]
+
 # What the page shows a player who has no rating of their own (START_ELO in
 # blind-chess.html). The fallback opponent is sized against the number the
 # player is actually looking at while they wait, so the two have to agree.
@@ -294,13 +337,22 @@ class Game:
 class Room:
     """A game someone has set up and is sitting in, waiting for anyone to join."""
 
-    def __init__(self, host, mode, minutes, inc, color):
+    def __init__(self, host, mode, minutes, inc, color, rating=START_ELO, slot=None):
         self.id = uuid.uuid4().hex[:8]
         self.host = host
         self.mode = mode
         self.minutes = minutes
         self.inc = inc
         self.color = color        # the colour the host will play; joiner takes the other
+        # What the card says the host is rated. Read once, when the room is
+        # made — a rating cannot move while a room is open — and read by the
+        # caller rather than here, since a host's may come off the network and
+        # a Room is made under the lock.
+        self.rating = rating
+        # Which of HOUSE_ROOMS this is, or None for a room a person is hosting.
+        # The page is not told: a card is a vision, a name, a rating and a
+        # button, whoever is behind it.
+        self.slot = slot
         self.created = time.time()
 
     def public(self):
@@ -310,6 +362,8 @@ class Room:
             "minutes": self.minutes,
             "inc": self.inc,
             "color": self.color,
+            "name": self.host.name,
+            "rating": self.rating,
         }
 
 
@@ -598,6 +652,20 @@ def take_challenges_of(client, user_id=None):
     return mine
 
 
+def room_list():
+    """The list as the page shows it. Caller holds the lock.
+
+    The house rooms first, in slot order, then everybody else's in the order
+    they were opened. Slot order rather than dict order because a house room
+    that has just been joined is a new entry at the end of the dict, and a
+    list that reshuffled itself every time somebody sat down would be a list
+    that said which rooms are the house's.
+    """
+    house = sorted((r for r in rooms.values() if r.slot is not None), key=lambda r: r.slot)
+    theirs = [r for r in rooms.values() if r.slot is None]
+    return [r.public() for r in house + theirs]
+
+
 def broadcast_rooms():
     """Everyone watching the list sees it the moment it changes.
 
@@ -605,7 +673,7 @@ def broadcast_rooms():
     must not hold up the room list for everybody else.
     """
     with lock:
-        payload = {"t": "rooms", "rooms": [r.public() for r in rooms.values()]}
+        payload = {"t": "rooms", "rooms": room_list()}
         watchers = list(lobby_subs)
     for client in watchers:
         client.send(payload)
@@ -1170,11 +1238,51 @@ def leave_lobby(client):
         lobby.pop(key, None)
 
 
+def house_room(slot):
+    """One of the seven, freshly seated. Caller holds the lock.
+
+    A new BotClient every time rather than the old one moved back, because the
+    old one is now a player in somebody's game — `Game` holds it, `finish_game`
+    will write its `last_game`, a rematch will name it — and a seat cannot be
+    at two boards. The colour is drawn again, so the same room does not always
+    hand the joiner the same side.
+    """
+    mode, name, rating, minutes, inc = HOUSE_ROOMS[slot]
+    host = BotClient(name, rating)
+    room = Room(host, mode, minutes, inc, random.choice((WHITE, BLACK)),
+                rating=rating, slot=slot)
+    host.room = room
+    # The name is the house's for as long as the process runs: held in the
+    # same register a guest's or an account's name goes in, under an owner
+    # nobody can connect as, so hello can never hand it to anyone else. The
+    # bot is kept in the hold's client set so that the hold is never empty
+    # and so never released. Re-asserting it on every re-seat is harmless.
+    hold = names.setdefault(name.lower(), NameHold(("house", slot)))
+    hold.clients.add(host)
+    return room
+
+
+def seed_house_rooms():
+    """Put the seven house rooms on the list. Once, at startup.
+
+    Idempotent: a slot that is already seated is left alone, so a test may
+    call it again after clearing `rooms` and get the same seven back.
+    """
+    with lock:
+        seated = {r.slot for r in rooms.values() if r.slot is not None}
+        for slot in range(len(HOUSE_ROOMS)):
+            if slot not in seated:
+                room = house_room(slot)
+                rooms[room.id] = room
+    log("%d house rooms open on the friendly page — %s"
+        % (len(HOUSE_ROOMS), ", ".join("%s (%s)" % (n, m) for m, n, _, _, _ in HOUSE_ROOMS)))
+
+
 def handle_lobby(client):
     """Start watching the room list, and get it as it stands right now."""
     with lock:
         lobby_subs.add(client)
-        payload = {"t": "rooms", "rooms": [r.public() for r in rooms.values()]}
+        payload = {"t": "rooms", "rooms": room_list()}
     client.send(payload)
 
 
@@ -1190,13 +1298,17 @@ def handle_host(client, msg):
     color = msg.get("color", WHITE)
     if color not in (WHITE, BLACK):
         color = WHITE
+    # What the card will say the host is rated. Before the lock, because for
+    # an account this may be a round trip to Supabase, and the same read the
+    # fallback opponent is sized from — the card and the badge agree.
+    rating = player_rating_of(client)
     with lock:
         if client.game:
             client.send({"t": "error", "msg": "already in a game"})
             return
         if client.room:                     # one room per host — replace the old one
             rooms.pop(client.room.id, None)
-        room = Room(client, mode, minutes, inc, color)
+        room = Room(client, mode, minutes, inc, color, rating=rating)
         rooms[room.id] = room
         client.room = room
     client.send({"t": "hosting", "room": room.id})
@@ -1232,9 +1344,22 @@ def handle_join(client, msg):
         del rooms[room.id]
         host = room.host
         host.room = None
+        # A house room's host is a bot, and the page has to be told so — it
+        # is the page that will play the bot's moves, exactly as it does for
+        # the ranked fallback, and the server is the only party allowed to
+        # say who is a bot. The name and the rating are the card's own.
+        ai = None
+        if host.is_ai:
+            ai = {"name": host.name, "elo": host.elo, "bot": True}
         # the host plays the colour they asked for; the joiner takes the other
         game, outgoing = start_game_between(host, client, room.color,
-                                            room.mode, room.minutes, room.inc)
+                                            room.mode, room.minutes, room.inc, ai=ai)
+        # ...and the house keeps its table. Re-seated here, under the same
+        # lock that emptied it, so no listing between the two ever comes up
+        # six rooms long.
+        if room.slot is not None:
+            again = house_room(room.slot)
+            rooms[again.id] = again
     for player, payload in outgoing:
         player.send(payload)
     log("room %s filled — %s (w) vs %s (b), %s, %s"
@@ -2117,6 +2242,9 @@ def main():
     # twenty of each ladder out of the same flag, and is the one thing on this
     # server that ever moves one of their ratings (through record_rated_game).
     start_league()
+    # The friendly page's seven standing rooms. Before the socket opens, so the
+    # first lobby subscriber already sees them.
+    seed_house_rooms()
     # $PORT is what most hosts inject; --port wins when it is given explicitly
     port = int(os.environ.get("PORT") or 8787)
     if "--port" in sys.argv:

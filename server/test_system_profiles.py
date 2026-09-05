@@ -136,6 +136,11 @@ def main():
           [n for n, _, _ in rows if supabase_auth.clean_name(n) != n], [])
     check("none of them is a fallback opponent's name",
           sorted(set(server.AI_NAMES) & {n for n, _, _ in rows}), [])
+    house = [n for _, n, _, _, _ in server.HOUSE_ROOMS]
+    check("nor a house room host's",
+          sorted(set(house) & {n for n, _, _ in rows}), [])
+    check("and the house's names are not the fallback's",
+          sorted(set(house) & set(server.AI_NAMES)), [])
     text = open(SQL, encoding="utf-8").read()
     check("the profile flag is the column the server reads",
           "is_bot boolean not null default false" in text
@@ -317,6 +322,8 @@ def main():
     check("and is not a system profile", bot.is_bot, False)
     check("the fallback names are names, not rows in the file",
           [n for n in server.AI_NAMES if n in text], [])
+    check("and so are the house's",
+          [n for _, n, _, _, _ in server.HOUSE_ROOMS if n in text], [])
 
     print("\n%d passed, %d failed" % (passed, failed))
     sys.exit(1 if failed else 0)

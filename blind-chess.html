@@ -2203,6 +2203,15 @@
     font-size:17px; letter-spacing:.18em; text-transform:uppercase;
     font-weight:650; color:var(--gold-soft);
   }
+  /* who is sitting there, and what they are rated — the same two things the
+     board bar and the leaderboard say about anybody, in the same order */
+  .room-host{
+    margin-top:6px; font-size:18px; letter-spacing:.04em; color:var(--text);
+    overflow:hidden; text-overflow:ellipsis; white-space:nowrap;
+  }
+  .room-rating{
+    margin-left:10px; font-size:15px; letter-spacing:.08em; color:var(--muted);
+  }
   .room-meta{margin-top:6px; font-size:16px; color:var(--muted); line-height:1.5;}
   .room-play{flex:none; padding:10px 26px; font-size:15.5px; letter-spacing:.16em; font-weight:700;}
   .room-empty{
@@ -5411,10 +5420,14 @@ const CHALLENGE_TTL = 180000;
 // Setting up a game for one particular person rather than for whoever turns up.
 const CHALLENGING = () => ONLINE() && !!CHAL.to;
 const BOT    = () => G.opponent === 'bot';     // the only opponent the engine plays
-/* An online game the server filled with a bot because nobody was queueing. It
-   is ONLINE() in every way that matters — the socket, the ranked screen, the
-   result, the resignation, the draw all run over the same wires — and only the
-   moves come from here instead of from across them. */
+/* An online game with a bot on the far side: the ranked fallback the server
+   seated because nobody was queueing, or one of the seven house rooms on the
+   friendly page, whose host is a bot on the same terms. G.matchKind tells the
+   two apart where the page needs to, which is in what it says, not in how it
+   plays — the moves are chosen here for both. Either is ONLINE() in every way
+   that matters — the socket, the result, the resignation, the draw all run
+   over the same wires — and only the moves come from here instead of from
+   across them. */
 const AI_MATCH = () => ONLINE() && !!NET.ai;
 const PUZZLE = () => G.opponent === 'puzzle';  // a position from a file, not a game
 const humanTurn = () => LOCAL() || G.st.turn === G.human;
@@ -5570,9 +5583,14 @@ function renderStatus(){
   rulesCard.style.display = G.mode === 'total' ? 'block' : 'none';
 
   // there is only somebody to talk to across a socket — and against the
-  // fallback opponent there is a socket but nobody on the far end of it, so
-  // the panel goes rather than sit there swallowing what the player types
-  const talkable = ONLINE() && !AI_MATCH();
+  // ranked fallback opponent there is a socket but nobody on the far end of
+  // it, so the panel goes rather than sit there swallowing what the player
+  // types. A house room on the friendly page is the other way about: the
+  // card presented its host as anybody, and a board that lost its chat panel
+  // the moment that host sat down would be the one thing on it saying
+  // otherwise. So the panel stays, and what is typed goes where it goes
+  // against anybody who is not answering.
+  const talkable = ONLINE() && !(AI_MATCH() && G.matchKind === 'ranked');
   chatCard.style.display = talkable ? 'block' : 'none';
   chatInput.disabled = !talkable || NET.state !== 'playing' || NET.oppGone;
 
@@ -5790,7 +5808,11 @@ function resetLog(){
     logLine('New game — two players, one screen.', 'sys');
     logLine('There is no board. Each side types into its own box, in turn.', 'sys');
   } else {
-    logLine(`New game — you are ${G.human === W ? 'White' : 'Black'} against ${G.level} Elo.`, 'sys');
+    // Online the other side has a name and the ladder's rung means nothing —
+    // G.level is whatever Play Bot was last set to, and "against 1300 Elo"
+    // over a room game would be naming a number the player never chose.
+    const who = ONLINE() ? (NET.opponent || 'your opponent') : G.level + ' Elo';
+    logLine(`New game — you are ${G.human === W ? 'White' : 'Black'} against ${who}.`, 'sys');
     logLine('There is no board. Type your moves; the replies come back in notation.', 'sys');
   }
   logLine(' ');
@@ -6561,6 +6583,14 @@ function roomNote(text){
   roomNoteTimer = setTimeout(() => { el.textContent = ''; }, 4000);
 }
 
+/* What a room card calls each vision. MODE_NAME's "Board Only" is the board
+   bar's word for the vision, and this page says "See the Board" for the same
+   one, as the puzzle vision cards do — a card is an invitation, and it is
+   named for what the player will get rather than for what the board withholds. */
+const ROOM_VISION_NAME = {
+  total:'Complete Blindfold', blind:'See the Board', fog:'Fog of War', sighted:'Sighted'
+};
+
 function renderRooms(list){
   const box = document.getElementById('roomList');
   box.innerHTML = '';
@@ -6578,19 +6608,40 @@ function renderRooms(list){
     const row = document.createElement('div');
     row.className = 'room panel' + (mine ? ' room-mine' : '');
 
+    /* A card is a vision, who is sitting there, what they are rated, and a
+       button — and that is all it is for every room on the list, whoever is
+       behind it. The server names the host and the rating; nothing here
+       adds anything beside the name, because the seven the house keeps open
+       (HOUSE_ROOMS in server.py) are on this list on exactly the same terms
+       as a room a person opened, and the page is not told which is which. */
     const main = document.createElement('div');
     main.className = 'room-main';
     const yours = r.color === 'w' ? 'Black' : 'White';
-    main.innerHTML =
-      '<div class="room-vision">' + (MODE_NAME[r.mode] || r.mode) + '</div>' +
-      '<div class="room-meta">' + timeLabel(r.minutes, r.inc || 0) + ' · ' +
+    const who = document.createElement('div');
+    who.className = 'room-host';
+    who.textContent = mine ? (myName() || 'You') : (r.name || 'Someone');
+    if (typeof r.rating === 'number'){
+      const rating = document.createElement('span');
+      rating.className = 'room-rating';
+      rating.textContent = String(r.rating);
+      who.appendChild(rating);
+    }
+    const vision = document.createElement('div');
+    vision.className = 'room-vision';
+    vision.textContent = ROOM_VISION_NAME[r.mode] || MODE_NAME[r.mode] || r.mode;
+    const meta = document.createElement('div');
+    meta.className = 'room-meta';
+    meta.textContent = timeLabel(r.minutes, r.inc || 0) + ' · ' +
       (mine ? 'your room — waiting for someone'
-            : 'host plays ' + (r.color === 'w' ? 'White' : 'Black') + ', you play ' + yours) +
-      '</div>';
+            : (r.name || 'the host') + ' plays ' + (r.color === 'w' ? 'White' : 'Black') +
+              ', you play ' + yours);
+    main.appendChild(vision);
+    main.appendChild(who);
+    main.appendChild(meta);
 
     const play = document.createElement('button');
     play.className = 'primary room-play';
-    play.textContent = 'Play';
+    play.textContent = 'Join Room';
     play.disabled = mine;                 // you cannot sit down at your own table
     play.onclick = () => joinRoom(r.id);
 
@@ -6751,9 +6802,15 @@ function onNetMessage(msg){
       syncOptions();
       logLine('Matched — you are ' + (G.human === W ? 'White' : 'Black') + '.', 'sys');
       // Said once in the log as well as worn on the bar: nobody should have to
-      // work out from the play whether the other side is a person.
-      if (AI_MATCH()) logLine('Nobody was queueing, so ' + NET.ai.name +
-        ' — a Nox bot rated ' + NET.ai.elo + ' — took the board.', 'sys');
+      // work out from the play whether the other side is a person. Only for
+      // the ranked fallback, which was seated *instead* of the game the player
+      // asked for and is owed an explanation. A house room on the friendly
+      // page is the game the player asked for — they read the card and
+      // pressed Join — and nothing on the board says any more about who is
+      // sitting there than it would for anybody else.
+      if (AI_MATCH() && G.matchKind === 'ranked')
+        logLine('Nobody was queueing, so ' + NET.ai.name +
+          ' — a Nox bot rated ' + NET.ai.elo + ' — took the board.', 'sys');
       beep(760,.09); setTimeout(()=>beep(1010,.11), 90);
       break;
 
