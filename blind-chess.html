@@ -5800,6 +5800,10 @@ let clockTimer = null;
 function clockRunning(){
   return screenName === 'game' && !G.over &&
          G.sans.length > 0 &&                      // nothing ticks until the first move
+         // a spectator's board being replayed from the start is behind the
+         // game, and the page has no record of what the clocks read then —
+         // they stand at the snapshot's figures until the board catches up
+         !(SPECTATING() && SPEC.queue.length) &&
          !document.getElementById('leaveOverlay').classList.contains('show');
 }
 function startClock(){
@@ -14890,6 +14894,27 @@ function liveTickClocks(){
    are not asked (checkEnd, flagFall), because a game may end on time, by
    resignation or by agreement and only the server can see those.
 
+   Every match is watched from the beginning. The league plays around the
+   clock, so a viewer almost always arrives in the middle of a game, and the
+   first version of this screen put them straight onto move forty: the board
+   as it stood, the last four moves, and no way of knowing how it got there.
+   Now the first snapshot is not applied but *queued* (SPEC.queue), the board
+   opens on the starting position, and the moves already played are replayed
+   one at a time at a viewing pace (SPEC_REPLAY: about twenty seconds for the
+   whole catch-up, each move between a fifth of a second and seven tenths),
+   after which the view is live. A move that arrives while the replay is
+   still running joins the end of the queue, so the replay runs on into the
+   live game without a seam; one that arrives on a board already caught up is
+   played at once, with its sound. The replay itself is silent — forty
+   captures in twenty seconds is not a sound anybody wants — and while it
+   runs the clocks stand at the snapshot's figures without ticking
+   (clockRunning() refuses), because the page has no record of what either
+   clock read at move twelve and will not invent one; the foot of the screen
+   says FROM THE START and how far along it is. A game that has already
+   ended is watched the same way, and its result box waits for the last
+   move. Fog of War follows the replay from the chair of whoever is to move
+   in the position on the board, as it follows the live game.
+
    The address is /spectate/<id>: opening a card pushes it, a refresh reads
    it back and asks for the same game, a link kept after the game has ended
    shows how it ended. The server serves the same page for it and looks
@@ -14908,9 +14933,19 @@ const SPEC = {
   skew: 0,           // server time minus ours
   shown: null,       // the game id whose result box has been put up
   missing: false,    // the server had no such game
-  saved: null        // what G looked like before, to put back on the way out
+  saved: null,       // what G looked like before, to put back on the way out
+  queue: [],         // moves the server has and the board has not yet shown, oldest first
+  timer: null,       // the replay's timer, while the queue is being played out
+  pace: 0            // milliseconds between two replayed moves, fixed when a replay begins
 };
 const SPEC_RETRY = 5000;
+/* The pace of a replay: the whole catch-up aims to take about `total`, and
+   a move never goes by faster than `min` or slower than `max` — so a game
+   opened at move five is read at a comfortable stride and one opened at move
+   a hundred is still live within the minute. A mutable object rather than
+   three consts because test_spectate_flow.js shortens it to run the same
+   replay in milliseconds; nothing else writes to it. */
+const SPEC_REPLAY = { total: 20000, min: 180, max: 700 };
 const SPEC_PATH = /^\/spectate\/([A-Za-z0-9-]{1,64})\/?$/;
 
 function specIdFromLocation(){
@@ -14941,6 +14976,7 @@ function specOpen(id, push, mode){
                    human: G.human, picked: picked.mode };
   } else {
     specDetach();                      // the next game, on the same screen
+    specHalt();                        // ...and whatever the last one was still replaying
   }
   Object.assign(SPEC, { on: true, id, game: null, next: null, shown: null, missing: false });
   G.opponent = 'spectate';
@@ -15016,22 +15052,73 @@ function specUpdate(msg){
   let prefix = want.length >= G.uci.length;
   for (let i = 0; prefix && i < G.uci.length; i++) if (G.uci[i] !== want[i]) prefix = false;
   if (!prefix) specRebuild();
-  // Catching up on more than one move — a refresh, a reconnection — is done
-  // in silence: sixty captures played at once is not a sound anybody wants.
-  const catching = want.length - G.uci.length > 1;
+  // What the board has not shown yet. One new move on a board that is up to
+  // date is the game happening: it is played now, with its sound. Anything
+  // else — the game as it stood when this viewer arrived, a rebuilt board,
+  // the moves missed across a reconnection — is watched from where the
+  // board is, one move at a time, and the queue replaces rather than
+  // extends, since whatever was waiting is in `want` too.
+  const behind = want.slice(G.uci.length);
+  if (behind.length === 1 && !SPEC.queue.length && !first && prefix) specApply(behind[0]);
+  else if (behind.length) specQueue(behind);
+  if (SPEC.queue.length) specCatching(g);
+  else specLive(g);
+  syncOptions();
+  render();
+}
+
+/* ---- from the beginning ---- */
+/* Queue the moves the board has still to show, and start playing them out
+   if nothing is. The pace is fixed here, for the whole of this catch-up,
+   from how far behind the board is: a move that joins the queue later is
+   played at the stride already set rather than hurrying the rest. */
+function specQueue(moves){
+  SPEC.queue = moves.slice();
+  if (SPEC.timer || !SPEC.queue.length) return;
+  SPEC.pace = Math.max(SPEC_REPLAY.min, Math.min(SPEC_REPLAY.max, SPEC_REPLAY.total / SPEC.queue.length));
+  SPEC.timer = setTimeout(specStep, SPEC.pace);
+}
+/* One replayed move: silently, from the chair of whoever will then be to
+   move — set before the move, because applyMove() renders, and the fog it
+   draws has to be the fog of the position it draws. A move the rules refuse
+   empties the queue rather than trying the next one on a board it does not
+   fit; the next snapshot finds the board short and says so again. */
+function specStep(){
+  SPEC.timer = null;
+  if (!SPEC.on || !SPEC.queue.length) return;
+  const uci = SPEC.queue.shift();
+  G.human = other(G.st.turn);
   const sound = G.sound;
-  if (catching) G.sound = false;
-  try {
-    for (let i = G.uci.length; i < want.length; i++) if (!specApply(want[i])) break;
-  } finally { G.sound = sound; }
-  // Fog of War is seen from the chair of whoever is thinking, as the card
-  // shows it: the viewer is the side to move.
+  G.sound = false;
+  let ok = false;
+  try { ok = specApply(uci); } finally { G.sound = sound; }
+  if (!ok) SPEC.queue = [];
+  if (SPEC.queue.length){ SPEC.timer = setTimeout(specStep, SPEC.pace); return; }
+  if (SPEC.game) specLive(SPEC.game);  // caught up: the clocks run, and a result may be shown
+  syncOptions();
+  render();
+}
+/* The board is being caught up: the viewer sits with whoever is to move in
+   the position on the board, the clocks stand at the snapshot's figures
+   (clockRunning() will not move them), and nothing is over yet, whatever the
+   snapshot says — the result waits for the last move to be shown. */
+function specCatching(g){
+  G.human = G.st.turn;
+  specClocks(g);
+  if (G.over){ G.over = null; G.revealed = false; }
+}
+/* The board shows what the server has. Fog of War is seen from the chair of
+   whoever is thinking, as the card shows it: the viewer is the side to move. */
+function specLive(g){
   G.human = g.turn === 'b' ? B : W;
   specClocks(g);
   if (g.status === 'finished' || g.status === 'finishing') specFinish(g);
   else if (G.over){ G.over = null; G.revealed = false; startClock(); }
-  syncOptions();
-  render();
+}
+/* Stop a replay and forget what it had left to show. */
+function specHalt(){
+  clearTimeout(SPEC.timer); SPEC.timer = null;
+  SPEC.queue = [];
 }
 
 /* One UCI move, through the game's own applyMove — so the notation, the
@@ -15048,6 +15135,7 @@ function specApply(uci){
 }
 
 function specRebuild(){
+  specHalt();
   G.st = newState();
   G.token++;
   G.sel = -1; G.lastMove = null; G.sans = []; G.uci = [];
@@ -15130,6 +15218,7 @@ function specButtons(on){
   st.style.display = on ? 'none' : '';
 }
 function specMissing(msg){
+  specHalt();
   SPEC.missing = true;
   G.over = { text: 'not found' };
   stopClock();
@@ -15174,7 +15263,11 @@ function specStatus(){
   chatInput.disabled = true;
   const g = SPEC.game;
   const live = g && g.status === 'live' && !G.over;
-  document.getElementById('footHint').innerHTML = !live ? (G.over && !SPEC.missing ? '' : 'SPECTATING')
+  // move numbers as the card counts them: the one being played, or about to be
+  const moveNo = ply => Math.floor(ply / 2) + 1;
+  document.getElementById('footHint').innerHTML = SPEC.queue.length
+    ? 'SPECTATING · FROM THE START · MOVE ' + moveNo(G.uci.length) + ' OF ' + moveNo(G.uci.length + SPEC.queue.length)
+    : !live ? (G.over && !SPEC.missing ? '' : 'SPECTATING')
     : 'SPECTATING · ' + (G.st.turn === W ? 'WHITE' : 'BLACK') + ' TO MOVE' +
       (inCheck(G.st, G.st.turn) ? ' · CHECK' : '');
 }
@@ -15186,6 +15279,7 @@ function specStatus(){
 function specStop(){
   if (!SPEC.on) return;
   specDetach();
+  specHalt();
   const saved = SPEC.saved || {};
   Object.assign(SPEC, { on: false, id: null, game: null, next: null, shown: null, missing: false, saved: null });
   document.body.classList.remove('spectating');
