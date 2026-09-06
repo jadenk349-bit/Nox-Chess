@@ -3,6 +3,14 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
+<!-- Every asset, worker and fetch in this file is a relative URL, and the page
+     is served at /spectate/<game id> as well as at / (see SPECTATING in the
+     script). A relative "assets/nox-logo.png" under /spectate/x would resolve
+     to /spectate/assets/..., which is nothing. So the base is pinned to where
+     the page really lives: its own path with any /spectate/<id> taken off —
+     which leaves a file:// copy and a sub-path host exactly as they were, and
+     is written by script rather than as a fixed "/" for that reason. -->
+<script>document.write('<base href="' + location.pathname.replace(/\/spectate\/[^/]*\/?$/, '/').replace(/"/g, '') + '">');</script>
 <title>NOX CHESS</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -418,6 +426,56 @@
   }
   .site-logo img, .logo-btn img{width:var(--logo-w); height:auto; display:block;}
   .logo-btn:hover{transform:none; filter:brightness(1.12);}
+  /* View only. The buttons a player has are not disabled but absent: a
+     disabled Resign is still a promise that somebody here could resign. The
+     board takes no pointer, and the console keeps its log and loses its box. */
+  body.spectating #controls, body.spectating #chatCard, body.spectating #btnPeek,
+  body.spectating .console .entry, body.spectating .console .entry-hint,
+  body.spectating #entryLocal{display:none !important;}
+  body.spectating .board, body.spectating .sq, body.spectating .piece{cursor:default;}
+  body.spectating .board{pointer-events:none;}
+  /* The rating, on the strips above and below the board: directly to the
+     right of the name, so the two read as one thing — "ARVENKO 2854" — with
+     the colour tag after them. It used to trail the colour, which put the
+     number a word away from the name it belongs to. A little smaller than
+     the name and in the accent, still plainly a number. */
+  .bar-name .elo{
+    margin-left:9px; color:var(--gold-soft); font-size:15px; letter-spacing:.04em;
+    font-variant-numeric:tabular-nums;
+  }
+  /* The last four moves, between the two strips: a slim row under the board
+     (under the console in Complete Blindfold), the same well as the strips
+     and no taller than it has to be. Four equal columns filled from the left,
+     so a move keeps its column as the ones before it slide off and the row
+     never jumps; the newest is lit as the notation panel lights it. Fewer
+     than four moves fill fewer columns and nothing stands in for the rest —
+     the plate keeps its height, which is all the stability the layout needs.
+     Only a spectator sees it: a player has no move history during play, and
+     this is not one, it is the last four. */
+  #specMoves{
+    display:none;
+    width:min(100%,var(--board-max));
+    grid-template-columns:repeat(4,minmax(0,1fr)); gap:6px; align-items:center;
+    margin-top:4px; padding:3px 14px; min-height:32px; border-radius:var(--r-md);
+    border:1px solid transparent; background:var(--well);
+    box-shadow:var(--sh-1), var(--lip);
+    font-size:16.5px; letter-spacing:.06em; font-variant-numeric:tabular-nums;
+  }
+  body.spectating #specMoves{display:grid;}
+  #specMoves .m{
+    justify-self:center; max-width:100%; min-width:3.6em;
+    text-align:center; padding:2px 8px; border-radius:var(--r-xs);
+    overflow:hidden; text-overflow:ellipsis; white-space:nowrap;
+  }
+  #specMoves .m.cur{
+    background:rgba(217,164,65,.20); color:var(--gold-soft);
+    box-shadow:inset 0 0 0 1px rgba(217,164,65,.28);
+  }
+  @media (max-width:520px){
+    #specMoves{font-size:14.5px; gap:4px; padding:3px 10px; min-height:30px; letter-spacing:.04em;}
+    #specMoves .m{padding:2px 4px;}
+    .bar-name .elo{margin-left:7px; font-size:14px;}
+  }
 
   .game-layout{
     display:grid;
@@ -487,6 +545,10 @@
      game that fitted on screen a moment earlier — otherwise its ◀ ▶ land below
      the fold. Off --chrome, so it still holds under the media query above. */
   #screen-game.reviewing .game-layout{--board-max:min(100%, calc(100vh - var(--chrome) - 104px));}
+  /* The spectator's row of moves is paid for the same way: its 45px (32 of
+     plate, 4 of margin, 9 of the column's gap) come off the board, so the
+     lower strip sits where it sat before the row was there. */
+  body.spectating .game-layout{--board-max:min(100%, calc(100vh - var(--chrome) - 45px));}
 
   /* the slim name-and-clock strips clamped to the board's edges */
   .board-bar{
@@ -616,7 +678,7 @@
   }
   @media (max-width:760px){ .rooms-page{grid-template-columns:minmax(0,1fr);} }
   .rooms-aside .primary{width:100%; padding:14px 0; font-size:17px; letter-spacing:.14em;}
-  .rooms-main{max-width:620px;}
+  .rooms-main{max-width:1100px; min-width:0;}
   .rooms-title{
     margin:0; font-family:var(--font); font-weight:400;
     font-size:clamp(29.5px,4.55vw,42.5px); letter-spacing:.12em; color:var(--gold-soft);
@@ -1916,30 +1978,37 @@
     font-size:clamp(24.5px,4.28vw,50.5px); letter-spacing:.1em; color:var(--gold-soft);
   }
 
-  .lsn-hub{max-width:820px; margin:clamp(12px,2.4vh,26px) auto 0;}
+  .lsn-hub{max-width:1040px; margin:clamp(12px,2.4vh,26px) auto 0;}
   .lsn-lede{
     margin:0 0 clamp(16px,2.6vh,26px); text-align:center;
     color:var(--muted); font-size:17.5px; line-height:1.75;
   }
   .lsn-lede b{color:var(--gold-soft); font-weight:600;}
 
-  .lsn-list{display:flex; flex-direction:column; gap:9px;}
+  .lsn-list{display:flex; flex-direction:column; gap:14px;}
   .lsn-row{
-    display:flex; align-items:center; gap:15px; width:100%;
-    padding:14px 18px; border-radius:12px; text-align:left;
-    background:linear-gradient(180deg, rgba(28,31,40,.92), rgba(18,20,26,.92));
-    border:1px solid transparent; color:var(--text);
+    display:flex; align-items:center; gap:22px; width:100%; min-height:120px;
+    padding:26px 28px; border-radius:14px; text-align:left;
+    /* Shade the lunar image behind the words while leaving its craters visible. */
+    background:linear-gradient(90deg, rgba(8,10,14,.82), rgba(8,10,14,.48)),
+      url('assets/moon.jpg?v=1') center 45% / cover;
+    border:1px solid var(--line); color:var(--text);
   }
+  .lsn-row:nth-child(2){background-position:center, center 25%;}
+  .lsn-row:nth-child(3){background-position:center, center 60%;}
+  .lsn-row:nth-child(4){background-position:center, center 75%;}
+  .lsn-row:nth-child(5){background-position:center, center 95%;}
   .lsn-row:hover{border-color:var(--gold); transform:translateY(-1px);}
+  .lsn-row:disabled{opacity:.72;}
   .lsn-row .num{
-    flex:none; width:30px; height:30px; border-radius:9px;
+    flex:none; width:44px; height:44px; border-radius:10px;
     display:flex; align-items:center; justify-content:center;
     font-size:15.5px; font-variant-numeric:tabular-nums; font-weight:650;
     color:var(--muted); border:1px solid var(--line); background:rgba(0,0,0,.28);
   }
   .lsn-row .nm{flex:1; min-width:0; font-size:18px; letter-spacing:.04em;}
   .lsn-row .nm small{
-    display:block; margin-top:4px; color:var(--muted);
+    display:block; margin-top:7px; color:#c6c8ce;
     font-size:15px; letter-spacing:.02em; line-height:1.55;
   }
   .lsn-row .tick{
@@ -2172,8 +2241,9 @@
     .lsn-choices{grid-template-columns:1fr;}
     .lsn-acts{flex-wrap:wrap;}
     .lsn-acts button{flex:1 1 44%;}
-    .lsn-row{padding:12px 13px; gap:11px;}
-    .lsn-row .nm{font-size:17px;}
+    .lsn-row{padding:22px 16px; gap:14px; flex-wrap:wrap;}
+    .lsn-row .nm{font-size:17px; flex-basis:calc(100% - 58px);}
+    .lsn-row .tick{margin-left:58px;}
     /* the gauge takes the whole width here rather than sharing a line with
        the way out — a label squeezed beside a button is a label nobody reads */
     .lsn-bar{flex-wrap:wrap; gap:10px;}
@@ -2185,33 +2255,48 @@
   #screen-rooms{position:relative;}
   .rooms-top{display:flex; justify-content:center; margin-bottom:26px;}
   #btnHostRoom{padding:14px 38px; font-size:17px; font-weight:700; letter-spacing:.2em; border-radius:12px;}
+  /* Shared columns make each open table easy to compare with the next one. */
   .room-list{
-    width:100%; max-width:620px; margin:0 auto;
-    display:flex; flex-direction:column; gap:12px;
+    width:100%; margin:0 auto; overflow:hidden; border-radius:14px;
+    border:1px solid rgba(212,175,110,.22); background:rgba(12,14,19,.92);
   }
-  .room{display:flex; align-items:center; gap:16px; padding:18px 20px;}
-  .room-main{flex:1; min-width:0; text-align:left;}
-  .room-vision{
-    font-size:17px; letter-spacing:.18em; text-transform:uppercase;
-    font-weight:650; color:var(--gold-soft);
+  .room, .room-columns{
+    display:grid; grid-template-columns:minmax(82px,.7fr) minmax(130px,1.25fr) 90px minmax(155px,1.4fr) 110px;
+    gap:18px; align-items:center; padding:20px 24px;
   }
-  /* who is sitting there, and what they are rated — the same two things the
-     board bar and the leaderboard say about anybody, in the same order */
-  .room-host{
-    margin-top:6px; font-size:18px; letter-spacing:.04em; color:var(--text);
-    overflow:hidden; text-overflow:ellipsis; white-space:nowrap;
+  .room-columns{
+    padding-top:13px; padding-bottom:13px; background:rgba(212,175,110,.07);
+    color:var(--muted); font-size:13px; letter-spacing:.16em; text-transform:uppercase;
   }
-  .room-rating{
-    margin-left:10px; font-size:15px; letter-spacing:.08em; color:var(--muted);
+  .room{border-top:1px solid rgba(212,175,110,.13); transition:background .2s;}
+  .room:hover, .room:focus-within{background:rgba(212,175,110,.055);}
+  .room-id{font-size:15px; letter-spacing:.06em; color:var(--muted); overflow-wrap:anywhere;}
+  .room-vision{font-size:18px; letter-spacing:.07em; color:var(--gold-soft);}
+  .room-clock{font-size:21px; font-variant-numeric:tabular-nums; color:var(--text);}
+  .room-seats{display:flex; flex-direction:column; gap:8px; min-width:0; font-size:16px;}
+  .room-seat{display:flex; align-items:center; gap:9px; color:var(--muted);}
+  .room-seat.open{color:var(--gold-soft);}
+  .room-seat::before{content:''; width:9px; height:9px; border-radius:50%; flex:none; background:#e2dfd5; border:1px solid #e2dfd5;}
+  .room-seat.black::before{background:#191c24; border-color:#9c9fa9;}
+  .room-seat.open::before{box-shadow:0 0 0 3px rgba(212,175,110,.1);}
+  .room-play{padding:11px 12px; min-height:44px; font-size:16px; letter-spacing:.1em; font-weight:700;}
+  .room-empty{text-align:center; padding:48px 24px; color:var(--muted); font-size:17px; line-height:1.7;}
+  .room-mine{background:rgba(212,175,110,.04);}
+  .room-mine .room-play{opacity:.6;}
+  @media(max-width:1100px) and (min-width:761px){
+    .rooms-page{grid-template-columns:180px minmax(0,1fr); gap:20px;}
+    .room, .room-columns{grid-template-columns:68px minmax(95px,1fr) 65px minmax(125px,1.2fr) 88px; gap:10px; padding-left:16px; padding-right:16px;}
   }
-  .room-meta{margin-top:6px; font-size:16px; color:var(--muted); line-height:1.5;}
-  .room-play{flex:none; padding:10px 26px; font-size:15.5px; letter-spacing:.16em; font-weight:700;}
-  .room-empty{
-    text-align:center; padding:30px 20px; color:var(--muted);
-    font-size:17px; line-height:1.7;
+  @media(max-width:620px){
+    .room-columns{display:none;}
+    .room{grid-template-columns:minmax(0,1fr) auto; gap:12px 16px; padding:20px;}
+    .room:first-child{border-top:0;}
+    .room-id{grid-column:1; font-size:13px;}
+    .room-vision{grid-column:1; grid-row:2;}
+    .room-clock{grid-column:2; grid-row:1 / span 2; text-align:right;}
+    .room-seats{grid-column:1; grid-row:3;}
+    .room-play{grid-column:2; grid-row:3; min-width:104px;}
   }
-  .room-mine{border-color:rgba(217,164,65,.45);}
-  .room-mine .room-play{opacity:.5;}
   .room-note{
     max-width:620px; margin:0 auto 12px; text-align:center;
     font-size:15px; letter-spacing:.14em; text-transform:uppercase;
@@ -3169,6 +3254,27 @@
      fetched once per tier, not once per row, and the server serves the assets
      with a week of cache — but if this page ever needs to be light on a cold
      load, small copies of the badges are the first thing to make. */
+  .home-shortcuts{display:grid; grid-template-columns:228px; justify-items:stretch; gap:10px; width:fit-content; max-width:100%; margin:0; align-self:flex-end;}
+  .home-shortcut{
+    width:100%; height:64px; min-height:64px; padding:12px 16px 12px 24px; border-radius:9px; text-align:left;
+    background:linear-gradient(180deg,rgba(5,8,12,.18),rgba(5,8,12,.68)),url("assets/home-button-moon.jpg?v=1") center 48% / cover;
+    border:1px solid transparent; color:var(--gold-soft);
+    font-family:var(--font); font-size:clamp(22px,2vw,28px); letter-spacing:.045em;
+    text-shadow:0 2px 8px #000; box-shadow:inset 0 1px 0 rgba(255,255,255,.1),0 8px 24px rgba(0,0,0,.2);
+  }
+  .home-shortcut:hover{border-color:transparent; filter:brightness(1.2); transform:translateY(-2px);}
+  .home-shortcut:focus-visible{outline:2px solid #d3d7e1; outline-offset:4px;}
+  .home-shortcuts > :nth-child(2){background-position:center 20%;}
+  .home-shortcuts > :nth-child(3){background-position:center 75%;}
+  .home-shortcuts > :nth-child(4){background-position:center 95%;}
+  .home-shortcuts > :nth-child(5){background-position:center 60%;}
+  .home-shortcuts .menu{left:auto; right:0;}
+  @media(max-width:900px){.home-shortcuts{gap:8px;} .home-shortcut{font-size:24px;}}
+  @media(max-width:620px){.home-shortcuts .menu{left:0; right:auto;}}
+
+  .home-ladder-area{display:flex; flex-direction:column; align-items:flex-start; gap:28px; flex:1; min-width:0; max-width:100%;}
+  .home-ladder-area .lb-stack{min-width:0; width:100%; display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:24px 22px;}
+  .home-ladder-area .lb-title{grid-column:1 / -1;}
   .home-body{
     display:flex; align-items:flex-start; justify-content:space-between;
     gap:clamp(18px,3vw,56px);
@@ -3270,7 +3376,7 @@
      that the players themselves could not see. */
   .live-stack{
     align-self:flex-end;
-    width:min(660px,100%);
+    width:min(660px,54%); flex:none; min-width:0;
     display:flex; flex-direction:column; gap:10px;
   }
   .live-title{
@@ -3294,6 +3400,20 @@
   }
   .live-card:hover{border-color:var(--ctl-edge); transform:translateY(-1px);}
   .live-card:focus-visible{outline:2px solid var(--gold); outline-offset:2px;}
+  /* Only a game in progress opens: a card still arranging its next game has
+     nothing behind it, and a finished one is a result being read for a few
+     seconds before the next board. Neither lifts, neither is a pointer. */
+  .live-card.waiting, .live-card.over{cursor:default;}
+  .live-card.waiting:hover, .live-card.over:hover{border-color:transparent; transform:none;}
+  /* ...and the one that does says so on hover, in the same gold the pill
+     wears, without the card changing shape. */
+  .live-card.live .live-pill::after{
+    content:"Watch"; display:none; margin-left:2px; color:var(--gold);
+  }
+  @media (hover:hover){
+    .live-card.live:hover{border-color:rgba(217,164,65,.45);}
+    .live-card.live:hover .live-pill::after{display:inline;}
+  }
   .live-head{
     display:flex; align-items:center; justify-content:space-between; gap:8px;
   }
@@ -3325,41 +3445,52 @@
   /* The card is compact by being wide rather than tall: the board stands on
      the left at a fixed size and the two seats and the last moves stack
      beside it, so four cards are two rows of a few hundred pixels rather than
-     a column of boards. The spectator view undoes this and stacks everything
-     under a large board — see .live-modal below. */
+     a column of boards. Pressing a live card leaves this page altogether
+     for the game screen — see "SPECTATING" in the script. */
   .live-body{
     display:grid; grid-template-columns:150px minmax(0,1fr); gap:10px; align-items:stretch;
   }
+  /* Two seats of two rows and four moves of notation between them stand a
+     little taller than the 150px board, and the card lets them: the board
+     is centred on the column rather than the column cut to the board. */
   .live-side{display:flex; flex-direction:column; gap:5px; min-width:0;}
-  /* A seat: the name, the rating, the clock. The side to move is lit the way
-     the game lights its clock — from within, in gold — and the dot before the
-     name is the colour it is playing. */
+  .live-view{display:flex; flex-direction:column; justify-content:center;}
+  /* A seat: two rows. The first is the colour it is playing, the name, and
+     the rating beside the name — the pair the ladder under the cards prints,
+     so a viewer reads the same thing in both places; the second is the
+     clock. The rating used to sit on the clock's row instead, which left the
+     name the whole of the first, but a side column ~140px wide (the stack is
+     capped at 660px and the board takes 150 of a card) cannot hold name,
+     rating and clock on one row at any size that can be read, so the name
+     gives up a little width to the rating rather than the rating going
+     below. The side to move is lit the way the game lights its clock — from
+     within, in gold. */
   .live-seat{
     display:flex; flex-direction:column; gap:1px;
     padding:4px 8px; border-radius:8px;
     background:rgba(0,0,0,.28); border:1px solid transparent;
     transition:border-color .2s var(--ease), background .2s var(--ease);
   }
-  .live-who{display:flex; align-items:center; gap:6px; min-width:0;}
-  .live-nums{display:flex; align-items:baseline; justify-content:space-between; gap:8px;}
+  .live-who{display:flex; align-items:baseline; gap:6px; min-width:0;}
+  .live-nums{display:flex; justify-content:flex-end; align-items:baseline;}
   .live-seat.turn{border-color:rgba(217,164,65,.45); background:rgba(217,164,65,.09);}
   .live-dot{
-    flex:none; width:9px; height:9px; border-radius:50%;
+    flex:none; width:9px; height:9px; border-radius:50%; align-self:center;
     border:1px solid rgba(255,255,255,.35);
   }
   .live-seat.w .live-dot{background:#eee6d5;}
   .live-seat.b .live-dot{background:#252d38;}
   .live-name{
-    flex:1; min-width:0; font-size:13px; font-weight:600; letter-spacing:.02em; color:var(--text);
+    flex:0 1 auto; min-width:0; font-size:13px; font-weight:600; letter-spacing:.02em; color:var(--text);
     overflow:hidden; text-overflow:ellipsis; white-space:nowrap;
   }
   .live-elo{
-    flex:none; font-size:12.5px; font-weight:650; color:var(--gold-soft);
+    flex:none; font-size:12px; font-weight:650; color:var(--gold-soft);
     font-variant-numeric:tabular-nums;
   }
   .live-clock{
     flex:none; min-width:44px; text-align:right;
-    font-family:var(--font); font-size:18px; line-height:1; letter-spacing:.06em; color:var(--muted);
+    font-family:var(--font); font-size:16px; line-height:1; letter-spacing:.06em; color:var(--muted);
     font-variant-numeric:tabular-nums;
   }
   .live-seat.turn .live-clock{color:var(--text);}
@@ -3414,7 +3545,37 @@
     font-size:9px; letter-spacing:.18em; text-transform:uppercase;
     color:var(--muted); font-family:var(--font); margin-bottom:4px;
   }
-  /* what was just played, beside every board, in the same hand as the console */
+  /* What was just played, beside every board, as a scoresheet: a gutter of
+     move numbers and two columns, White's and Black's, each ruled on its
+     left so the two read as two lines down the card. Four moves is what
+     fits beside a board without the card growing much past it; the grid is
+     anchored to its bottom so the newest move sits nearest White's seat and
+     an opening game fills upward. The flowing .live-line is what the spectator view
+     still uses, where thirty moves wrap under a large board. */
+  .live-cols{
+    flex:1; min-height:0; overflow:hidden; padding:0 2px;
+    display:grid; grid-template-columns:auto minmax(0,1fr) minmax(0,1fr);
+    grid-auto-rows:max-content; align-content:end; column-gap:0; row-gap:1px;
+    font-family:"SF Mono",Menlo,Consolas,monospace; font-size:11px; line-height:1.3;
+    color:var(--text); font-variant-numeric:tabular-nums;
+  }
+  .live-cols .lc-h{
+    font-family:var(--font); font-size:9px; letter-spacing:.18em; text-transform:uppercase;
+    color:var(--muted); line-height:1.5;
+  }
+  .live-cols .lc-n{color:var(--muted); padding-right:6px; text-align:right;}
+  .live-cols .lc-w, .live-cols .lc-b, .live-cols .lc-h.lc-w, .live-cols .lc-h.lc-b{
+    padding-left:6px; border-left:1px solid rgba(150,170,215,.22);
+    overflow:hidden; text-overflow:ellipsis; white-space:nowrap;
+  }
+  .live-cols .lc-m.cur-move{color:var(--gold-soft);}
+  .live-cols .empty{grid-column:1 / -1; color:var(--muted); font-family:inherit;}
+  /* ...and in the Complete Blindfold box, where they are the whole picture:
+     a little larger, since a board's height is theirs alone, and centred in
+     it rather than sunk to the floor, since there is no seat beneath to sit
+     against. */
+  .live-console .live-cols{font-size:12px; align-content:center; padding:0;}
+  /* what was just played under the large board, in the same hand as the console */
   .live-line{
     flex:1; min-height:1.4em; padding:0 2px;
     font-family:"SF Mono",Menlo,Consolas,monospace; font-size:11px; line-height:1.4;
@@ -3422,39 +3583,23 @@
     display:flex; flex-wrap:wrap; align-content:flex-end; gap:0 7px;
   }
 
+  /* At the foot, whatever the card holds: a card with two seats and four
+     moves beside its board stands a little taller than the console card
+     beside it, and the row's cards are stretched to one height, so the
+     status line is pushed to the bottom rather than left where the body
+     happened to end. */
   .live-status{
+    margin-top:auto;
     display:flex; justify-content:space-between; gap:8px;
     font-size:10.5px; letter-spacing:.18em; text-transform:uppercase; color:var(--muted);
   }
   .live-card.over .live-status{color:var(--gold-soft);}
   .live-note{margin:0; font-size:12.5px; color:var(--muted); min-height:1.2em;}
   .live-note.bad{color:#e7908a;}
-  /* The spectator view: the same card, larger, on the modal's plate, and
-     stacked the way a board is read — black's seat above it, white's below,
-     the moves in between. display:contents lifts the side column's children
-     up beside the board so `order` can arrange them. */
-  .live-modal{max-width:560px; padding:18px 18px 16px; text-align:left;}
-  .live-modal .live-card{cursor:default; box-shadow:none; background:transparent; padding:6px 0 0;}
-  .live-modal .live-card:hover{transform:none; border-color:transparent;}
-  .live-modal .live-body{display:flex; flex-direction:column; gap:8px;}
-  .live-modal .live-side{display:contents;}
-  .live-modal .live-seat{flex-direction:row; align-items:center; justify-content:space-between;}
-  .live-modal .live-seat.b{order:-1;}
-  .live-modal .live-view{order:0;}
-  .live-modal .live-line{order:1; flex:none; max-height:4.4em;}
-  .live-modal .live-seat.w{order:2;}
-  .live-modal .live-console{aspect-ratio:auto; height:min(52vh,420px); font-size:13px;}
-  .live-modal .live-name{font-size:16px;}
-  .live-modal .live-elo{font-size:14.5px;}
-  .live-modal .live-clock{font-size:22px;}
-  .live-modal .live-mode{font-size:22px;}
-  .live-modal .live-only{display:block;}
-  .live-only{
-    display:none; margin-top:8px; font-size:12.5px; color:var(--muted); letter-spacing:.06em;
-  }
   @media (max-width:900px){
     .home-body{flex-direction:column; align-items:stretch; min-height:0;}
-    .lb-stack{order:1; width:100%;}
+    .home-ladder-area{order:1; width:100%;}
+    .home-ladder-area .lb-stack{width:100%;}
     .live-stack{order:2; align-self:stretch; width:100%;}
   }
   @media (max-width:560px){ .live-grid{grid-template-columns:minmax(0,1fr);} }
@@ -3667,14 +3812,33 @@
 
          At the foot of the left-hand side stand the league's live games: one
          per vision, the strongest pair at a board right now, drawn by
-         liveRender() from what the server pushes over its own socket. A card
-         opens the spectator view, which can watch and nothing else. -->
+         liveRender() from what the server pushes over its own socket. A live
+         card opens that very game — by its id — on the game screen, full
+         screen, to watch and nothing else; see SPECTATING in the script. -->
     <div class="home-body">
       <div class="live-stack" id="liveStack" aria-labelledby="liveTitle">
         <h2 class="live-title" id="liveTitle">Live Top Games</h2>
         <div class="live-grid" id="liveGrid"></div>
         <p class="live-note" id="liveNote"></p>
       </div>
+      <div class="home-ladder-area">
+    <nav class="home-shortcuts" aria-label="Quick play and training">
+      <button class="home-shortcut" id="homeRanked">Ranked Match</button>
+      <button class="home-shortcut" id="homeFriendly">Friendly Match</button>
+      <button class="home-shortcut" id="homeBot">Play Bot</button>
+      <button class="home-shortcut" id="homeSocial">Social</button>
+      <button class="home-shortcut" id="homePractice">Practice</button>
+      <div class="nav-item">
+        <button class="home-shortcut" id="homePuzzle" aria-haspopup="true">Puzzle</button>
+        <div class="menu">
+          <button class="menu-btn" id="homeOpening">Opening</button>
+          <button class="menu-btn" id="homeMiddle">Middle Game</button>
+          <button class="menu-btn" id="homeEnd">End Game</button>
+          <button class="menu-btn" id="homeRush">Puzzle Rush</button>
+        </div>
+      </div>
+    </nav>
+
       <div class="lb-stack" aria-labelledby="lbTitleAll">
         <h2 class="lb-title" id="lbTitleAll">Leaderboard</h2>
         <aside class="lb-panel" aria-labelledby="lbTitle">
@@ -3697,6 +3861,7 @@
           <p class="lb-cap" id="lbCapFog"></p>
           <div class="lb-list" id="lbListFog"></div>
         </aside>
+      </div>
       </div>
     </div>
   </section>
@@ -4291,6 +4456,9 @@
           </div>
         </div>
 
+        <!-- spectators only: the last four moves, between the two strips -->
+        <div id="specMoves" aria-label="The last four moves"></div>
+
         <div class="board-bar" id="barBottom"></div>
 
         <!-- Complete Blindfold's move console. Deliberately the only vision
@@ -4592,18 +4760,6 @@
       <button class="ghost" id="drawDecline">Decline</button>
       <button class="primary" id="drawAccept">Accept Draw</button>
     </div>
-  </div>
-</div>
-
-<!-- the spectator view of one of the league's live games: the same card the
-     home page shows, larger. View only — there is nothing on it to press but
-     the corner, because a spectator cannot move, resign, offer or interfere
-     with a clock, and a board with no buttons cannot be asked to. -->
-<div class="overlay" id="liveOverlay">
-  <div class="modal live-modal" role="dialog" aria-label="Live game">
-    <button class="modal-x" id="liveX" aria-label="Close" title="Close">×</button>
-    <div id="liveBig"></div>
-    <p class="live-only">Spectating. The players are the league's own accounts; nothing here can be moved.</p>
   </div>
 </div>
 
@@ -5412,6 +5568,10 @@ const CHALLENGE_TTL = 180000;
 // Setting up a game for one particular person rather than for whoever turns up.
 const CHALLENGING = () => ONLINE() && !!CHAL.to;
 const BOT    = () => G.opponent === 'bot';     // the only opponent the engine plays
+// Watching one of the league's games: nobody at this end is playing at all.
+// Not LOCAL, not BOT, not ONLINE — every one of those means a move can be
+// entered here, and the whole of spectating is that none can. See SPECTATING.
+const SPECTATING = () => G.opponent === 'spectate';
 /* An online game with a bot on the far side: the ranked fallback the server
    seated because nobody was queueing, or one of the seven house rooms on the
    friendly page, whose host is a bot on the same terms. G.matchKind tells the
@@ -5524,6 +5684,7 @@ function renderStatus(){
   // The logo is the way home and stays put; walking out of a game in progress
   // is caught by the confirmation on the way, not by hiding the door.
   document.getElementById('btnMenu').style.display = '';
+  if (SPECTATING()){ specStatus(); return; }
 
   const peekBtn = document.getElementById('btnPeek');
   peekBtn.style.display = CAN_PEEK(G.mode) ? '' : 'none';   // nothing to peek at otherwise
@@ -5626,7 +5787,8 @@ function renderCaptures(){
   el.trayW.innerHTML = fmt(G.caps.w);
   el.trayB.innerHTML = fmt(G.caps.b);
   const sum = a => a.reduce((n,t)=>n+VAL[t],0)/100;
-  const dw = sum(G.caps.w) - sum(G.caps.b);
+  // in whole centipawns before dividing: 3.1 - 2.8 in floats is 0.2999…
+  const dw = Math.round(sum(G.caps.w) * 100 - sum(G.caps.b) * 100) / 100;
   el.advW.textContent = dw > 0 ? '+' + dw : '';
   el.advB.textContent = dw < 0 ? '+' + (-dw) : '';
 }
@@ -5643,6 +5805,12 @@ function fmtClock(ms){
 
 /** Who to call each side, on the strips above and below the board. */
 function seatName(color){
+  // the league's own accounts, by the name the leaderboard gives them, and
+  // nothing beside it to say what moves the pieces
+  if (SPECTATING()){
+    const side = SPEC.game && (color === W ? SPEC.game.white : SPEC.game.black);
+    return side && side.name ? side.name : (color === W ? 'White' : 'Black');
+  }
   if (LOCAL()) return color === W ? 'White' : 'Black';
   if (BOT()){
     if (color === G.human) return myName() || 'You';
@@ -5676,6 +5844,22 @@ function layoutBoardBars(){
     // ranked game is meant to read as an ordinary ranked game from the strip
     // down, so nothing on the board bar says what is on the far side.
     if (!LOCAL()){
+      // A spectator is shown the rating too: it is the one thing the home
+      // page's card says about a player that the strip would otherwise not.
+      // It goes straight after the name — "ARVENKO 2854", then the colour —
+      // because the number is the name's, not the colour's, and a rating
+      // read a word away from its name is a rating the eye has to fetch.
+      // It is the ladder's own figure for this vision, as the snapshot
+      // carries it, and nothing on this side rounds or invents it.
+      if (SPECTATING() && SPEC.game){
+        const side = color === W ? SPEC.game.white : SPEC.game.black;
+        if (side && typeof side.rating === 'number'){
+          const elo = document.createElement('span');
+          elo.className = 'elo';
+          elo.textContent = side.rating;
+          label.appendChild(elo);
+        }
+      }
       const sub = document.createElement('span');
       sub.className = 'sub';
       sub.textContent = color === W ? 'WHITE' : 'BLACK';
@@ -5704,6 +5888,10 @@ let clockTimer = null;
 function clockRunning(){
   return screenName === 'game' && !G.over &&
          G.sans.length > 0 &&                      // nothing ticks until the first move
+         // a spectator's board being replayed from the start is behind the
+         // game, and the page has no record of what the clocks read then —
+         // they stand at the snapshot's figures until the board catches up
+         !(SPECTATING() && SPEC.queue.length) &&
          !document.getElementById('leaveOverlay').classList.contains('show');
 }
 function startClock(){
@@ -5728,7 +5916,9 @@ function tickClock(){
   const c = G.st.turn;
   G.clock[c] = Math.max(0, G.clock[c] - dt);
   renderClocks();
-  if (G.clock[c] === 0) flagFall(c);
+  // a spectator's clock reaching zero is a clock waiting for the server to say
+  // so, not a result this page may declare
+  if (G.clock[c] === 0 && !SPECTATING()) flagFall(c);
 }
 
 // a lone king (or king and one minor) can't mate, so a flag fall there is a draw
@@ -5759,8 +5949,13 @@ function flagFall(loser){
    SOUND
    ============================================================ */
 let actx = null;
+/* Arriving at a page from the browser's Back button goes through the same
+   functions the nav buttons call, and those click. A page that was asked for
+   with the browser's own button is not a button press, so the click is held
+   while it is being restored (set by navGo(), in HISTORY). */
+let navRestoring = false;
 function beep(freq, dur, type, vol){
-  if (!G.sound) return;
+  if (!G.sound || navRestoring) return;
   try{
     actx = actx || new (window.AudioContext || window.webkitAudioContext)();
     const o = actx.createOscillator(), g = actx.createGain();
@@ -5796,6 +5991,15 @@ function logLine(text, cls){
 
 function resetLog(){
   el.log.innerHTML = '';
+  if (SPECTATING()){
+    const g = SPEC.game;
+    logLine(g ? 'Watching ' + g.white.name + ' (' + g.white.rating + ') against ' +
+                g.black.name + ' (' + g.black.rating + ') — Complete Blindfold.'
+              : 'Watching a Complete Blindfold game.', 'sys');
+    logLine('There is no board. The moves arrive in notation, as the players see them.', 'sys');
+    logLine(' ');
+    return;
+  }
   if (LOCAL()){
     logLine('New game — two players, one screen.', 'sys');
     logLine('There is no board. Each side types into its own box, in turn.', 'sys');
@@ -5971,6 +6175,11 @@ function applyMove(m, fromNet){
 }
 
 function checkEnd(){
+  // A spectator's board ends when the server says the game ended — on time,
+  // by resignation, by agreement, by the rules — and the page could only
+  // ever see the last of those. So the rules are not asked here; the
+  // snapshot that carries the result is what ends it (specFinish).
+  if (SPECTATING()) return;
   const s = G.st;
   const moves = legalMoves(s, s.turn);
   if (!moves.length){
@@ -6285,6 +6494,7 @@ const scheduleAI = ms => {
 /* ---- clicks ---- */
 el.squares.addEventListener('click', e => {
   const sqEl = e.target.closest('.sq');
+  if (SPECTATING()) return;                     // a viewer's click is not a move begun
   if (!G.started) return;                       // nothing moves until Start Play
   if (!sqEl || G.over || G.thinking || G.pendingPromo) return;
   // A peek is looking, not playing: the board has to be closed again before it
@@ -6595,49 +6805,40 @@ function renderRooms(list){
                     'Host a room and the first person to take a seat plays you.</div>';
     return;
   }
+  const columns = document.createElement('div');
+  columns.className = 'room-columns';
+  columns.setAttribute('aria-hidden', 'true');
+  columns.innerHTML = '<span>Table</span><span>Vision</span><span>Clock</span><span>Seats</span><span>Join</span>';
+  box.appendChild(columns);
   for (const r of list){
     const mine = r.id === NET.myRoom;
     const row = document.createElement('div');
-    row.className = 'room panel' + (mine ? ' room-mine' : '');
+    row.className = 'room' + (mine ? ' room-mine' : '');
 
-    /* A card is a vision, who is sitting there, what they are rated, and a
-       button — and that is all it is for every room on the list, whoever is
-       behind it. The server names the host and the rating; nothing here
-       adds anything beside the name, because the seven the house keeps open
-       (HOUSE_ROOMS in server.py) are on this list on exactly the same terms
-       as a room a person opened, and the page is not told which is which. */
-    const main = document.createElement('div');
-    main.className = 'room-main';
+    // Room IDs come from the server; all labels use textContent so even an
+    // unexpected value stays text rather than becoming lobby markup.
+    const cell = (className, text) => {
+      const el = document.createElement('div');
+      el.className = className;
+      el.textContent = text;
+      return el;
+    };
     const yours = r.color === 'w' ? 'Black' : 'White';
-    const who = document.createElement('div');
-    who.className = 'room-host';
-    who.textContent = mine ? (myName() || 'You') : (r.name || 'Someone');
-    if (typeof r.rating === 'number'){
-      const rating = document.createElement('span');
-      rating.className = 'room-rating';
-      rating.textContent = String(r.rating);
-      who.appendChild(rating);
-    }
-    const vision = document.createElement('div');
-    vision.className = 'room-vision';
-    vision.textContent = ROOM_VISION_NAME[r.mode] || MODE_NAME[r.mode] || r.mode;
-    const meta = document.createElement('div');
-    meta.className = 'room-meta';
-    meta.textContent = timeLabel(r.minutes, r.inc || 0) + ' · ' +
-      (mine ? 'your room — waiting for someone'
-            : (r.name || 'the host') + ' plays ' + (r.color === 'w' ? 'White' : 'Black') +
-              ', you play ' + yours);
-    main.appendChild(vision);
-    main.appendChild(who);
-    main.appendChild(meta);
+    const hostColor = r.color === 'w' ? 'White' : 'Black';
+    row.appendChild(cell('room-id', '#' + r.id));
+    row.appendChild(cell('room-vision', ROOM_VISION_NAME[r.mode] || MODE_NAME[r.mode] || r.mode));
+    row.appendChild(cell('room-clock', timeLabel(r.minutes, r.inc || 0)));
+    const seats = cell('room-seats', '');
+    seats.appendChild(cell('room-seat ' + hostColor.toLowerCase(), (mine ? (myName() || 'You') : (r.name || 'Someone')) + (typeof r.rating === 'number' ? ' (' + r.rating + ')' : '') + ' · ' + hostColor));
+    seats.appendChild(cell('room-seat open ' + yours.toLowerCase(), 'Open seat · ' + yours));
+    row.appendChild(seats);
 
     const play = document.createElement('button');
     play.className = 'primary room-play';
-    play.textContent = 'Join Room';
+    play.textContent = mine ? 'Your room' : 'Join →';
+    play.setAttribute('aria-label', mine ? 'Your room, waiting for an opponent' : 'Join room ' + r.id + ' as ' + yours);
     play.disabled = mine;                 // you cannot sit down at your own table
     play.onclick = () => joinRoom(r.id);
-
-    row.appendChild(main);
     row.appendChild(play);
     box.appendChild(row);
   }
@@ -7118,7 +7319,7 @@ document.getElementById('chatForm').onsubmit = e => { e.preventDefault(); sendCh
 const resignOverlay = document.getElementById('resignOverlay');
 const drawOverlay   = document.getElementById('drawOverlay');
 
-function canConcede(){ return screenName === 'game' && !G.over && !REV.on; }
+function canConcede(){ return screenName === 'game' && !G.over && !REV.on && !SPECTATING(); }
 
 function showDraw(title, text, mode){
   document.getElementById('drawTitle').textContent = title;
@@ -10392,7 +10593,7 @@ function lsnCapsHTML(){
     ? arr.slice().sort((a, b) => order[a] - order[b]).map(pieceHTML).join('')
     : '—';
   const sum = a => a.reduce((n, t) => n + VAL[t], 0) / 100;
-  const dw = sum(LSN.caps.w) - sum(LSN.caps.b);
+  const dw = Math.round(sum(LSN.caps.w) * 100 - sum(LSN.caps.b) * 100) / 100;
   return '<div class="capbar"><div class="tray">' + fmt(LSN.caps.w) + '</div>' +
          '<div class="adv">' + (dw > 0 ? '+' + dw : '') + '</div></div>' +
          '<div class="capbar"><div class="tray b">' + fmt(LSN.caps.b) + '</div>' +
@@ -10525,6 +10726,7 @@ function lsnFace(which){
 function lsnHub(){
   lsnResetStep();
   lsnFace('hub');
+  navSync();
   document.getElementById('lsnHeading').textContent = 'How to Play Blind Chess';
 
   const done = lsnDone(), reach = lsnReach();
@@ -10566,6 +10768,10 @@ function lsnShow(){
   if (s && s.setup) s.setup();
   lsnPaint();
   lsnRender();
+  // A lesson is a page of the course: Back goes to the lesson before it, or
+  // to the ladder. A step within one only refreshes the entry, so that a
+  // refresh comes back to the step and Back does not walk every step twice.
+  navSync();
 }
 
 function lsnOpen(n, step){
@@ -10595,6 +10801,7 @@ function lsnBack(){
 function lsnFinish(){
   lsnResetStep();
   lsnFace('done');
+  navSync();
   document.getElementById('lsnHeading').textContent = 'How to Play Blind Chess';
   beep(660, .1); setTimeout(() => beep(880, .14), 130);
 }
@@ -11491,6 +11698,7 @@ document.getElementById('rulesToggle').onclick = () => setRulesOpen(!rulesCard.c
    it would only mean saying hello again. */
 document.getElementById('endNew').onclick = () => {
   el.endOverlay.classList.remove('show');
+  if (SPECTATING()){ specLeave(); return; }          // "Back to Home" on that box
   if (ONLINE()){
     // showScreen() withdraws anything still in the air on the way out
     if (G.matchKind === 'ranked'){ rankedAgain(); return; }
@@ -11505,6 +11713,7 @@ document.getElementById('endNew').onclick = () => {
    asked for — the opponent may not want one — so the button opens the question
    rather than the next game. Against the engine there is nobody to ask. */
 document.getElementById('endRematch').onclick = () => {
+  if (SPECTATING()){ if (SPEC.next) specOpen(SPEC.next, true); return; }   // "Watch Next Live Game"
   if (ONLINE()){ askRematch(); return; }
   el.endOverlay.classList.remove('show');
   newGame();
@@ -12752,6 +12961,7 @@ function prBegin(){
   PR.answered = false;
   PR.q = null; PR.click = null; PR.onSubmit = null; PR.mini = null;
   prLaid = null;                                   // relay the board for this drill's settings
+  navSync();                                       // a drill is a page: Back is the dashboard
   prClearPieces();
   prMarksClear();
   prSay(''); prSeq(''); prAnsClear(); prCtl([]);
@@ -12854,6 +13064,7 @@ function prRecommend(sessionAcc){
 function prShowDash(){
   prClearTimers();
   PR.view = 'dash';
+  navSync();
   PR.q = null; PR.click = null; PR.onSubmit = null; PR.mini = null;
   document.getElementById('prDoneOverlay').classList.remove('show');
   document.getElementById('prRun').style.display = 'none';
@@ -13046,13 +13257,17 @@ function resetChoices(){
   flagged = false;
 }
 
-function showScreen(name){
+function showScreen(name, how){
   // The ranked search lives on its own page as a state of its own button, so
   // walking off that page is giving it up — there is no longer a box standing
   // in the way to make that impossible.
   if (screenName === 'ranked' && name !== 'ranked' && searching) stopRankSearch();
   if (name !== 'game') reviewClose(false);
   if (name !== 'game') pzClose();
+  // A game being watched is let go of the same way: the socket closes, the
+  // game goes on on the server, and the board is handed back to whatever
+  // the next screen wants it for.
+  if (name !== 'game') specStop();
   // A drill left behind stops with the page: its countdown, the click still
   // wired to a question nobody can see, the reply on its way from the engine.
   if (name !== 'practice') prLeave();
@@ -13120,8 +13335,317 @@ function showScreen(name){
   if (name === 'game'){ startClock(); render(); }
   else stopClock();
   window.scrollTo({ top:0, behavior:'smooth' });
+  // And into the browser's history, as a page — see HISTORY below. A screen
+  // arrived at by a redirect ('replace') takes over the entry it was reached
+  // from rather than standing behind it.
+  navSync(how === 'replace' ? 'replace' : 'push');
 }
 const gameInProgress = () => G.sans.length > 0 && !G.over;
+// A game that leaving would abandon: the wordmark asks first, and so does the
+// browser's Back button.
+// A game being watched (SPECTATING) is not ours to lose, so it is never live
+// in this sense: the logo, escape and the browser's Back all simply leave it.
+const gameLive = () => !SPECTATING() && (gameInProgress() || (ONLINE() && NET.state === 'playing' && !G.over));
+
+/* ============================================================
+   HISTORY — the browser's Back and Forward, over the screens above
+   ============================================================ */
+/* The page is one document and showScreen() is the whole of its navigation,
+   which left the browser's own history with nothing in it: Back from anywhere
+   in Nox went to whatever site came before it. Every page a player can stand
+   on is now a history entry, with a hash naming it (#ranked, #lessons/3,
+   #puzzle/opening), so a refresh, a bookmark and a link land on the page and
+   not on the home screen. The entries are pushed by showScreen() and by the
+   three view switches inside a screen that are pages in their own right — a
+   lesson, a drill running, and one of the league's games being watched
+   (SPECTATING, further down), whose entry is /spectate/<id>: a path rather
+   than a hash, because the server serves the page for that address.
+
+   The rule is describe, compare, push. navSync() reads the page the globals
+   say we are on (navDescribe()) and pushes an entry only when that differs
+   from the entry we are standing in. A second render, a rematch showing the
+   game screen it is already showing, one puzzle after another: all describe
+   the same page and only refresh the entry, which is what stops a re-render
+   from becoming a duplicate entry. It is also what keeps the popstate
+   handler from chasing itself: while an entry is being restored, every
+   showScreen() it causes replaces rather than pushes, so restoring a page
+   cannot push the page it is restoring.
+
+   Arriving at an entry from history (navApply()) goes through the same
+   functions the buttons call — goSocial(), enterRooms(), goPractice(),
+   lsnEnter() — and not showScreen() alone, because most screens need more
+   than showing: the room list needs its socket, Practice needs PR.on, a
+   lesson needs its steps built. The one page that cannot be re-entered is a
+   game somebody else started: the server's pairing is what starts a ranked,
+   friendly or challenged game, and Back cannot ask it to again. A dead game
+   entry is stepped over on the way back (history.go(-1) once more) and, on
+   the way forward, replaced by the page where that kind of game is arranged —
+   the rule New Game already follows. A bot or local game is different: its
+   entry *is* the setup beside the board, and enterGameSetup() is the way back
+   into it. A puzzle re-opens the ladder where it stands, since the file has
+   it and nothing was invented to get there.
+
+   A game in progress is protected the way the wordmark protects it: Back
+   opens the leave box instead of leaving, and the history is put back where
+   it was (history.go the other way) until Confirm, which then finishes the
+   step that was refused rather than going home. Nothing here knows chess;
+   it asks gameLive(), the wordmark's own test.
+
+   Every one of the whole-page test harnesses runs without a `history`, and
+   under them all of this is inert: NAV.hist is null and navSync() returns. */
+const NAV = {
+  hist: (typeof history === 'object' && history && typeof history.pushState === 'function') ? history : null,
+  n: 0,            // ordinal of the entry we stand in; a popstate's direction is the sign of the difference
+  cur: null,       // what that entry describes
+  ready: false,    // navBoot() has run
+  pending: 0,      // the direction of a Back or Forward the leave box is holding up
+  deferred: null   // a route that has to wait for the account to be known
+};
+
+/** The page the globals say we are on. `s` is the screen, `v` the page within
+    it where a screen has several; the rest is what re-entering needs. */
+function navDescribe(){
+  const s = screenName;
+  if (s === 'home')     return { s, v:'' };
+  if (s === 'lessons')  return { s, v: LSN.view === 'lesson' ? String(LSN.n) : LSN.view === 'done' ? 'done' : '',
+                                 step: LSN.step | 0 };
+  if (s === 'practice') return { s, v: PR.view === 'run' && PR.mode ? PR.mode.key : '', diff: PR.diff, len: PR.len };
+  if (s === 'pzvision') return { s, v: pzPick.rush ? 'rush' : (pzPick.track || '') };
+  if (s === 'setup')    return { s, v: HOSTING() ? 'host' : (G.opponent || '') };
+  if (s === 'game'){
+    if (SPECTATING()) return { s, v:'spectate', id: SPEC.id || '', mode: G.mode };
+    if (PZ.on) return RUSH.on ? { s, v:'rush' } : { s, v:'puzzle', track: PZ.track || '' };
+    if (G.opponent === 'bot' || G.opponent === 'local') return { s, v: G.opponent };
+    if (CHAL.to && !G.started) return { s, v:'challenge' };
+    return { s, v:'online', kind: G.matchKind || '' };
+  }
+  return { s, v:'' };
+}
+const navSame = (a, b) => !!(a && b) && a.s === b.s && a.v === b.v && (a.track || '') === (b.track || '') &&
+                          (a.id || '') === (b.id || '');
+
+/** The hash for a page, and the page for a hash — one table, read both ways. */
+function navHash(d){
+  switch (d.s){
+    case 'home':     return '';
+    case 'rooms':    return 'friendly';
+    case 'pzvision': return 'puzzles' + (d.v ? '/' + d.v : '');
+    case 'game':
+      if (d.v === 'spectate') return '';           // its address is the path, below
+      if (d.v === 'bot' || d.v === 'local') return 'play/' + d.v;
+      if (d.v === 'puzzle')   return 'puzzle' + (d.track ? '/' + d.track : '');
+      if (d.v === 'rush')     return 'puzzle/rush';
+      if (d.v === 'challenge') return 'challenge';
+      return 'game' + (d.kind ? '/' + d.kind : '');
+    default:         return d.s + (d.v ? '/' + d.v : '');
+  }
+}
+function navParse(hash){
+  const parts = String(hash || '').replace(/^#\/?/, '').split('/');
+  const head = parts[0] || '', tail = parts[1] || '';
+  switch (head){
+    case '':          return { s:'home', v:'' };
+    case 'friendly':  return { s:'rooms', v:'' };
+    case 'puzzles':   return { s:'pzvision', v: tail };
+    case 'play':      return { s:'game', v: tail === 'local' ? 'local' : 'bot' };
+    case 'puzzle':    return tail === 'rush' ? { s:'game', v:'rush' } : { s:'game', v:'puzzle', track: tail };
+    case 'challenge': return { s:'game', v:'challenge' };
+    case 'game':      return { s:'game', v:'online', kind: tail };
+    default:
+      // anything else is a screen by name, or nothing we know — the token
+      // Supabase hands back in the hash after Google, for one
+      return /^[a-z]+$/.test(head) && document.getElementById('screen-' + head)
+        ? { s: head, v: tail } : { s:'home', v:'' };
+  }
+}
+/** A spectator page is the one whose address is a path, /spectate/<id>; every
+    other page stands at the root, which is also where a spectator page is
+    left from — so the path is put back to '/' on the way off one. */
+function navPath(d){
+  if (d.s === 'game' && d.v === 'spectate') return '/spectate/' + d.id;
+  const p = location.pathname || '/';
+  return SPEC_PATH.test(p) ? '/' : p;
+}
+const navURL = d => { const h = navHash(d); return navPath(d) + location.search + (h ? '#' + h : ''); };
+
+/** The pages a guest is sent to sign up for instead — the same gate the
+    home page's buttons keep, so the address bar is not a way round it. */
+function navGated(d){
+  if (d.s === 'social' || d.s === 'ranked' || d.s === 'pzvision') return true;
+  return d.s === 'game' && (d.v === 'puzzle' || d.v === 'rush' || d.v === 'challenge' ||
+                            (d.v === 'online' && d.kind === 'ranked'));
+}
+
+/** Record the page we are on: a new entry if it is a new page, the same
+    entry refreshed if it is not. `how` is 'replace' for a redirect. */
+function navSync(how){
+  if (!NAV.hist || !NAV.ready) return;
+  const d = navDescribe();
+  const same = navSame(d, NAV.cur);
+  const push = !same && !navRestoring && how !== 'replace';
+  if (push) NAV.n++;
+  d.n = NAV.n;
+  NAV.cur = d;
+  try {
+    if (push) NAV.hist.pushState(d, '', navURL(d));
+    else NAV.hist.replaceState(d, '', navURL(d));
+  } catch (e){ /* a file: URL, or a browser that will not — the page still works */ }
+}
+
+/** Back or Forward was pressed: the browser has already moved to the entry,
+    and this is where the page catches up. */
+function navPop(e){
+  let d = e && e.state && typeof e.state === 'object' && e.state.s ? e.state : null;
+  let dir;
+  if (d){
+    if (d.n === NAV.n) return;             // where we already stand — put back after a refusal
+    dir = d.n > NAV.n ? 1 : -1;
+  } else {
+    // A hash typed into the address bar: the browser pushed it after us.
+    d = navParse(location.hash);
+    d.n = NAV.n + 1;
+    dir = 1;
+  }
+  navGo(d, dir);
+}
+
+function navGo(d, dir){
+  if (screenName === 'game' && gameLive()){
+    // A game in progress is asked about, not abandoned — the box the wordmark
+    // opens, holding the direction so that Confirm can finish the step.
+    NAV.pending = dir;
+    leaveOverlay.classList.add('show');
+    if (dir) NAV.hist.go(-dir);
+    return;
+  }
+  navRestoring = true;
+  let landed;
+  try { landed = navApply(d, dir); }
+  finally { navRestoring = false; }
+  if (landed === false) return;            // stepped over: the next popstate lands somewhere real
+  NAV.n = d.n;
+  NAV.cur = d;
+  // The entry is rewritten as the page actually reached, which differs from
+  // what it named when it was dead, gated, or gone. A puzzle arrives later
+  // (pzOpen, after its file) and describes itself then.
+  if (landed !== 'async') navSync('replace');
+}
+
+/** Arrive at the page an entry names. Returns false when it moved the
+    history itself instead, 'async' when the page is still on its way. */
+function navApply(d, dir){
+  if (GUEST() && navGated(d)) d = { s:'home', v:'', n:d.n };
+  // Leaving: what the Back button on the screen we are on would have done.
+  if (screenName === 'rooms' && d.s !== 'rooms') leaveRooms();
+  else if (screenName === 'setup' && searching) stopHosting();
+  else if (screenName === 'game' && !SPECTATING()){ netClose(); G.started = false; }
+  // (a game being watched is handed back by specStop(), which showScreen()
+  // calls on the way to anywhere else — there is no socket of ours to close)
+  switch (d.s){
+    case 'home':
+      if (screenName !== 'home') showScreen('home');
+      break;
+    case 'settings': case 'signup': case 'login':
+      showScreen(d.s); break;
+    case 'name':
+      showScreen(needsName() ? 'name' : 'home'); break;
+    case 'social':
+      goSocial(); break;
+    case 'ranked':
+      showScreen('ranked'); break;
+    case 'rooms':
+      G.matchKind = 'friendly'; G.opponent = 'online'; G.hosting = false;
+      enterRooms(); break;
+    case 'setup':
+      if (d.v === 'host' || d.v === 'online'){ G.matchKind = 'friendly'; G.opponent = 'online'; G.hosting = true; }
+      else { G.hosting = false; if (d.v === 'bot' || d.v === 'local') G.opponent = d.v; }
+      showScreen('setup'); break;
+    case 'pzvision':
+      goPuzzleVision(d.v === 'rush' || PZ_TRACKS.indexOf(d.v) >= 0 ? d.v : 'opening'); break;
+    case 'lessons':
+      lsnEnter();
+      if (d.v === 'done') lsnFinish();
+      else if (+d.v > 0) lsnOpen(Math.min(+d.v, lsnReach()), d.step | 0);
+      break;
+    case 'practice': {
+      goPractice();
+      const mode = d.v && PR_MODES.find(m => m.key === d.v);
+      if (mode){
+        PR.mode = mode;
+        PR.diff = d.diff || 1;
+        PR.len = d.len != null ? d.len : (mode.key === 'mini' ? 0 : 10);
+        prBegin();
+      }
+      break;
+    }
+    case 'game':
+      if (d.v === 'spectate'){
+        if (d.id) specOpen(d.id, false, d.mode);   // the game goes on whether or not we watch
+        else showScreen('home');
+        break;
+      }
+      if (d.v === 'bot' || d.v === 'local'){
+        G.opponent = d.v;
+        if (d.v === 'local') G.human = W;   // hot-seat opens from White's side, as goLocal() has it
+        else ensureGuestName();
+        enterGameSetup();
+        break;
+      }
+      if (d.v === 'rush'){ goPuzzleVision('rush'); break; }   // a run is not resumed, only started
+      if (d.v === 'puzzle'){
+        const track = PZ_TRACKS.indexOf(d.track) >= 0 ? d.track : 'opening';
+        if (PZ_VISIONS.indexOf(PZ.vision) >= 0){
+          pzPick.rush = false; pzPick.track = track;
+          pzChooseVision(PZ.vision);        // the ladder where it stands, after its file
+          return 'async';
+        }
+        goPuzzleVision(track);              // no vision chosen yet: the page that asks
+        break;
+      }
+      // Online, or the challenge form: a page the server made, and only ours
+      // to show while the game it made is still being played.
+      if (gameLive()){ showScreen('game'); break; }
+      if (dir < 0 && d.n > 0){ NAV.hist.go(-1); return false; }
+      if (d.v === 'challenge') goSocial();
+      else if (d.kind === 'ranked') showScreen('ranked');
+      else { G.matchKind = 'friendly'; G.opponent = 'online'; G.hosting = false; enterRooms(); }
+      break;
+    default:
+      showScreen('home');
+  }
+  return true;
+}
+
+/** At load: adopt the entry we are on. A reload or a return from another site
+    brings its state back; an address typed or followed brings a hash. The URL
+    is left exactly as it is here, because Supabase reads its own token out of
+    the hash after Google and has not yet had the chance. */
+function navBoot(){
+  if (!NAV.hist) return;
+  window.addEventListener('popstate', navPop);
+  const st = NAV.hist.state;
+  // ...and /spectate/<id> is the one address that is a path: a link to a
+  // game, or a refresh on one (specBoot() asks again, and finds it open).
+  const spec = specIdFromLocation();
+  const d = st && typeof st === 'object' && st.s ? st
+          : spec ? { s:'game', v:'spectate', id: spec } : navParse(location.hash);
+  NAV.n = d.n | 0;
+  NAV.cur = { s:'home', v:'', n: NAV.n };
+  NAV.ready = true;
+  try { NAV.hist.replaceState(NAV.cur, ''); } catch (e){}
+  if (d.s === 'home' && !d.v) return;
+  d.n = NAV.n;
+  // A page an account has to be signed in for is not decided until the
+  // account is known (navSettled); anything else is shown at once.
+  const go = () => { if (screenName === 'home' && NAV.n === d.n) navGo(d, 0); };
+  if (navGated(d)) NAV.deferred = go; else go();
+}
+/** The account is known, one way or the other: the route that waited for it. */
+function navSettled(){
+  const go = NAV.deferred;
+  NAV.deferred = null;
+  if (go) go();
+}
 
 // every setting lives on the setup screen; the game screen only reports them
 function syncOptions(){
@@ -13212,7 +13736,9 @@ function syncOptions(){
   warn('secYouPlay',  !BOT() || chosen.side);
 
   document.getElementById('visionChip').textContent = MODE_NAME[G.mode];
-  document.getElementById('setupChip').textContent = (LOCAL()
+  document.getElementById('setupChip').textContent = SPECTATING()
+    ? 'Spectating · Live · ' + timeLabel(G.minutes, G.inc)
+    : (LOCAL()
     ? 'Same Computer'
     : ONLINE()
       ? (G.matchKind === 'ranked' ? 'Ranked' : 'Friendly') +
@@ -13288,6 +13814,12 @@ document.getElementById('navMiddle').onclick  = goTrack('middlegame');
 document.getElementById('navEnd').onclick     = goTrack('endgame');
 document.getElementById('navRush').onclick    = goTrack('rush');
 
+// Homepage shortcuts use the same destinations and account gates as the header.
+for (const name of ['Ranked','Friendly','Bot','Social','Practice','Puzzle','Opening','Middle','End','Rush']){
+  document.getElementById('home' + name).onclick = () => document.getElementById('nav' + name).click();
+}
+
+
 document.getElementById('btnSettings').onclick = () => { beep(560,.07); showScreen('settings'); };
 document.getElementById('btnSetBack').onclick  = () => showScreen('home');
 
@@ -13312,7 +13844,10 @@ document.getElementById('btnHostRoom').onclick = () => {
 const leaveOverlay = document.getElementById('leaveOverlay');
 // the logo doubles as the way out; a game in progress asks first
 document.getElementById('btnMenu').onclick = () => {
-  if (gameInProgress() || (ONLINE() && NET.state === 'playing' && !G.over)){
+  // leaving a game being watched abandons nothing: it goes on without us
+  if (SPECTATING()){ specLeave(); return; }
+  if (gameLive()){
+    NAV.pending = 0;                 // the wordmark asked, not the browser
     leaveOverlay.classList.add('show');
   } else {
     netClose();
@@ -13320,13 +13855,17 @@ document.getElementById('btnMenu').onclick = () => {
     showScreen('home');
   }
 };
-document.getElementById('leaveCancel').onclick  = () => leaveOverlay.classList.remove('show');
+document.getElementById('leaveCancel').onclick  = () => { leaveOverlay.classList.remove('show'); NAV.pending = 0; };
 document.getElementById('leaveConfirm').onclick = () => {
   leaveOverlay.classList.remove('show');
   if (ONLINE() && NET.state === 'playing' && !G.over) netSend({ t:'resign' });
   netClose();
   G.started = false;
   newGame();               // drop the abandoned position
+  // The browser's Back (or Forward) opened this box: now that the game is
+  // given up, finish the step it was refused — to the page it was going to,
+  // not to the home page (navGo, in HISTORY).
+  if (NAV.pending){ const dir = NAV.pending; NAV.pending = 0; NAV.hist.go(dir); return; }
   showScreen('home');
 };
 
@@ -13787,6 +14326,13 @@ document.addEventListener('keydown', e => {
   // Peek and New Game are button-only — no keyboard shortcuts while playing,
   // and there is no take-back to bind a key to
 
+  // spectating: escape closes the result box if it is up, and otherwise is
+  // the Back button — there is nothing selected on a board that takes no clicks
+  if (SPECTATING() && k === 'escape'){
+    if (el.endOverlay.classList.contains('show')) el.endOverlay.classList.remove('show');
+    else specLeave();
+    return;
+  }
   if (k === 'escape'){ G.sel = -1; render(); }
 });
 
@@ -14090,7 +14636,8 @@ const GUEST = () => accountsAvailable() && !account;
    nothing, so the lock is a door rather than a wall. They stay ordinary
    buttons for exactly that reason: [disabled] would swallow the click that
    was the whole invitation. */
-const LOCKED_IDS = ['navRanked', 'navSocial', 'navPuzzle',
+const LOCKED_IDS = ['homeRanked', 'homeSocial', 'homePuzzle', 'homeOpening', 'homeMiddle', 'homeEnd', 'homeRush',
+                    'navRanked', 'navSocial', 'navPuzzle',
                     'navOpening', 'navMiddle', 'navEnd', 'navRush'];
 
 function lockedControls(){
@@ -14160,13 +14707,16 @@ const needsName = () => !!account && !account.gameName;
 function decideFirstScreen(){
   const opening = ['home', 'signup', 'login', 'name'];
   if (opening.indexOf(screenName) === -1) return;
+  // Both of these are redirects rather than pages chosen, so neither leaves a
+  // history entry behind it: Back from the username screen would otherwise
+  // be a way past it, and Back after signing in would land on the login page.
   if (needsName()){
-    if (screenName !== 'name') showScreen('name');
+    if (screenName !== 'name') showScreen('name', 'replace');
     return;
   }
   // Signing in finishes whichever of the two pages you were on.
   if (account && (screenName === 'signup' || screenName === 'login' || screenName === 'name')){
-    showScreen('home');
+    showScreen('home', 'replace');
   }
 }
 
@@ -14477,14 +15027,12 @@ const LIVE = {
   off: false,        // the server said it runs no league
   tick: null,        // the half-second clock timer
   retry: null,       // the reconnect timer
-  seen: {},          // mode -> the id and status last drawn, to notice a result
-  big: null          // the mode open in the spectator view, if any
+  seen: {}           // mode -> the id and status last drawn, to notice a result
 };
 const LIVE_RETRY = 8000;
 const LIVE_NAME = { sighted:'Sighted', total:'Complete Blindfold', blind:'Board Only', fog:'Fog of War' };
 const liveGrid = document.getElementById('liveGrid');
 const liveNoteEl = document.getElementById('liveNote');
-const liveOverlay = document.getElementById('liveOverlay');
 
 function liveNote(text, bad){
   liveNoteEl.textContent = text || '';
@@ -14502,7 +15050,6 @@ function liveLeave(){
   LIVE.open = false;
   clearTimeout(LIVE.retry); LIVE.retry = null;
   clearInterval(LIVE.tick); LIVE.tick = null;
-  liveCloseBig();
   liveDisconnect();
 }
 
@@ -14564,7 +15111,10 @@ function liveUpdate(msg){
                 (was.id !== g.id && was.status === 'live'))) moved = true;
     LIVE.seen[g.mode] = { id: g.id, status: g.status };
   }
-  if (LIVE.off) liveNote('The server is not running the AI league right now.');
+  /* Off comes with a sentence saying why — starting, no engine, waiting on
+     its database — written by the server for the public and carrying no
+     detail; the detail is in the server's log and on /health. */
+  if (LIVE.off) liveNote(msg.note || 'The server is not running the AI league right now.');
   else if (!LIVE.games.some(g => g.status === 'live' || g.status === 'finished'))
     liveNote('Arranging the first games…');
   else liveNote('');
@@ -14667,12 +15217,41 @@ function liveMovesHTML(sans, count){
   }).join(' ');
 }
 
+/* The same tail as a scoresheet, for the small card: a gutter of move
+   numbers and a column each for White and Black, the last move lit. `count`
+   is how many moves (rows) fit beside the board — four, on the home page.
+   The cells are laid out by .live-cols; nothing here is positioned. */
+function liveColumnsHTML(sans, count){
+  if (!sans || !sans.length) return '<div class="live-cols"><span class="empty">No moves yet.</span></div>';
+  const pairs = [];
+  for (let i = 0; i < sans.length; i += 2) pairs.push({ n: i / 2 + 1, w: sans[i], b: sans[i + 1] });
+  const shown = pairs.slice(-count);
+  let html = '<div class="live-cols"><span class="lc-h"></span>' +
+    '<span class="lc-h lc-w">White</span><span class="lc-h lc-b">Black</span>';
+  shown.forEach((p, k) => {
+    const lastPair = k === shown.length - 1;
+    const wCur = lastPair && !p.b;
+    const bCur = lastPair && !!p.b;
+    html += '<span class="lc-n">' + p.n + '.</span>' +
+      '<span class="lc-w"><span class="lc-m' + (wCur ? ' cur-move' : '') + '">' + liveEsc(p.w) + '</span></span>' +
+      '<span class="lc-b">' + (p.b ? '<span class="lc-m' + (bCur ? ' cur-move' : '') + '">' + liveEsc(p.b) + '</span>' : '') + '</span>';
+  });
+  return html + '</div>';
+}
+
 /* Complete Blindfold: no board. The players have the notation and their
-   own heads, and so does the viewer. */
+   own heads, and so does the viewer. On the home page the box the board
+   would fill holds the scoresheet instead — the same two columns as beside
+   the other boards, six moves deep because the box is a board's height and
+   nothing else is in it, and no "No board" line over them: the absence of a
+   board is the whole card, and a label saying so was the one thing in the
+   box that was not a move. The spectator view keeps the wrapping console,
+   where sixty moves have the room to read as a game. */
 function liveConsoleHTML(sans, big){
+  if (!big) return '<div class="live-console">' + liveColumnsHTML(sans, 6) + '</div>';
   return '<div class="live-console">' +
     '<div class="eyes">No board</div>' +
-    '<div class="live-moves">' + liveMovesHTML(sans, big ? 60 : 8) + '</div></div>';
+    '<div class="live-moves">' + liveMovesHTML(sans, 60) + '</div></div>';
 }
 
 function liveSeatHTML(g, color, now){
@@ -14683,18 +15262,23 @@ function liveSeatHTML(g, color, now){
   if (g.status === 'live' && ms < 60000) cls.push('low');
   return '<div class="' + cls.join(' ') + '" data-side="' + color + '">' +
     '<div class="live-who"><span class="live-dot"></span>' +
-    '<span class="live-name">' + liveEsc(side ? side.name : '—') + '</span></div>' +
-    '<div class="live-nums"><span class="live-elo">' +
-    (side && typeof side.rating === 'number' ? side.rating : '') + '</span>' +
-    '<span class="live-clock">' + fmtClock(ms) + '</span></div></div>';
+    '<span class="live-name">' + liveEsc(side ? side.name : '—') + '</span>' +
+    '<span class="live-elo">' + (side && typeof side.rating === 'number' ? side.rating : '') + '</span></div>' +
+    '<div class="live-nums"><span class="live-clock">' + fmtClock(ms) + '</span></div></div>';
 }
 
 function liveCardHTML(g, big){
   const now = Date.now();
   const mode = g.mode;
   const state = g.status === 'live' ? 'live' : (g.status === 'waiting' ? 'waiting' : 'over');
-  let html = '<article class="live-card ' + state + '" data-mode="' + mode + '" tabindex="0" ' +
-    'role="button" aria-label="' + liveEsc(LIVE_NAME[mode] || mode) + ' live game">';
+  /* Only a live card is a button, and what it opens is the game by its id —
+     never "whatever is on this ladder now", because by the time it is pressed
+     that may be the next game. A card with no game, or a finished one, is
+     a panel: no id, no role, nothing for the keyboard to land on. */
+  const opens = state === 'live' && !!g.id;
+  let html = '<article class="live-card ' + state + '" data-mode="' + mode + '"' +
+    (opens ? ' data-id="' + liveEsc(g.id) + '" tabindex="0" role="button" aria-label="Watch the ' +
+             liveEsc(LIVE_NAME[mode] || mode) + ' live game"' : '') + '>';
   html += '<div class="live-head"><span class="live-mode">' + liveEsc(LIVE_NAME[mode] || g.modeName || mode) +
     '</span><span class="live-pill">' + (state === 'live' ? 'Live' : state === 'over' ? 'Final' : 'Soon') + '</span></div>';
   if (state === 'waiting'){
@@ -14708,9 +15292,14 @@ function liveCardHTML(g, big){
   html += '<div class="live-view">' +
     (mode === 'total' ? liveConsoleHTML(g.sans, big) : liveBoardHTML(g.fen, mode, g.lastMove, g.check)) +
     '</div>';
-  html += '<div class="live-side">' + liveSeatHTML(g, 'b', now) +
-    '<div class="live-line">' + (mode === 'total' && !big ? '' : liveMovesHTML(g.sans, big ? 30 : 4)) + '</div>' +
-    liveSeatHTML(g, 'w', now) + '</div>';
+  // Between the seats: the last four moves as two columns on the card, the
+  // whole tail as one wrapping line in the spectator view. Complete
+  // Blindfold's small card leaves the gap empty — its console box holds the
+  // same columns, six deep, and the same moves twice on one card is a
+  // mistake to read.
+  const moves = big ? '<div class="live-line">' + liveMovesHTML(g.sans, 30) + '</div>' :
+    (mode === 'total' ? '<div class="live-line"></div>' : liveColumnsHTML(g.sans, 4));
+  html += '<div class="live-side">' + liveSeatHTML(g, 'b', now) + moves + liveSeatHTML(g, 'w', now) + '</div>';
   html += '</div>';
   html += '<div class="live-status"><span>' + liveEsc(liveStatusText(g)) + '</span>' +
     '<span>' + (g.ply ? 'Move ' + Math.floor(g.ply / 2 + 1) : '') + '</span></div>';
@@ -14722,58 +15311,465 @@ function liveRender(){
   const byMode = {};
   for (const g of LIVE.games) byMode[g.mode] = g;
   liveGrid.innerHTML = order.map(mode => liveCardHTML(byMode[mode] || { mode, status:'waiting' }, false)).join('');
-  if (LIVE.big) liveRenderBig();
 }
 
 /* Half a second at a time, without redrawing the cards: only the clocks
    change between snapshots, so only the clocks are touched. */
 function liveTickClocks(){
   const now = Date.now();
-  const roots = [liveGrid];
-  if (LIVE.big) roots.push(document.getElementById('liveBig'));
-  for (const root of roots){
-    for (const card of root.querySelectorAll('.live-card')){
-      const g = LIVE.games.find(x => x.mode === card.dataset.mode);
-      if (!g || g.status !== 'live') continue;
-      for (const seat of card.querySelectorAll('.live-seat')){
-        const color = seat.dataset.side;
-        const ms = liveRemaining(g, color, now);
-        seat.querySelector('.live-clock').textContent = fmtClock(ms);
-        seat.classList.toggle('low', ms < 60000);
-      }
+  for (const card of liveGrid.querySelectorAll('.live-card')){
+    const g = LIVE.games.find(x => x.mode === card.dataset.mode);
+    if (!g || g.status !== 'live') continue;
+    for (const seat of card.querySelectorAll('.live-seat')){
+      const color = seat.dataset.side;
+      const ms = liveRemaining(g, color, now);
+      seat.querySelector('.live-clock').textContent = fmtClock(ms);
+      seat.classList.toggle('low', ms < 60000);
     }
   }
 }
 
-/* ---- the spectator view ---- */
-function liveOpenBig(mode){
-  const g = LIVE.games.find(x => x.mode === mode);
-  if (!g || g.status === 'waiting') return;
-  LIVE.big = mode;
-  liveRenderBig();
-  liveOverlay.classList.add('show');
+/* ============================================================
+   SPECTATING — one of the league's games, on the game screen, view only
+
+   A live card on the home page opens the game it shows — by its id, never by
+   "whatever is on that ladder now" — on the ordinary game screen, full screen,
+   exactly as a game of that vision is played: the same board, the same
+   glyphs, the same strips with the same clocks, the same console for Complete
+   Blindfold, the same fog from the chair of whoever is thinking. Nothing on it
+   is disabled; the things a player has (Resign, Offer Draw, Peek, the move
+   box, the chat) are absent, and the board takes no pointer. SPECTATING() is
+   what every branch of the game code asks, and it is a fourth kind of
+   opponent — 'spectate' — so that LOCAL(), BOT() and ONLINE() are all false
+   and nothing that would let a move be entered can be reached.
+
+   What arrives is what the home page's card gets, for one game: {t:'watch',
+   id} on a socket of its own, answered with {t:'watch-game'} and pushed again
+   on every change to that game. The moves are replayed here through
+   applyMove(), so the notation, the captures, the sounds and the console are
+   the game's own; the clocks count from the server's snapshot on the server's
+   clock; and the result is whatever the server says it was — the page's rules
+   are not asked (checkEnd, flagFall), because a game may end on time, by
+   resignation or by agreement and only the server can see those.
+
+   Every match is watched from the beginning. The league plays around the
+   clock, so a viewer almost always arrives in the middle of a game, and the
+   first version of this screen put them straight onto move forty: the board
+   as it stood, the last four moves, and no way of knowing how it got there.
+   Now the first snapshot is not applied but *queued* (SPEC.queue), the board
+   opens on the starting position, and the moves already played are replayed
+   one at a time at a viewing pace (SPEC_REPLAY: about twenty seconds for the
+   whole catch-up, each move between a fifth of a second and seven tenths),
+   after which the view is live. A move that arrives while the replay is
+   still running joins the end of the queue, so the replay runs on into the
+   live game without a seam; one that arrives on a board already caught up is
+   played at once, with its sound. The replay itself is silent — forty
+   captures in twenty seconds is not a sound anybody wants — and while it
+   runs the clocks stand at the snapshot's figures without ticking
+   (clockRunning() refuses), because the page has no record of what either
+   clock read at move twelve and will not invent one; the foot of the screen
+   says FROM THE START and how far along it is. A game that has already
+   ended is watched the same way, and its result box waits for the last
+   move. Fog of War follows the replay from the chair of whoever is to move
+   in the position on the board, as it follows the live game.
+
+   The address is /spectate/<id>: opening a card pushes it, a refresh reads
+   it back and asks for the same game, a link kept after the game has ended
+   shows how it ended. The server serves the same page for it and looks
+   nothing up. The history entry is HISTORY's (navSync, further up): it
+   describes this page by the game's id and puts /spectate/<id> in the
+   address bar in place of a hash, so the browser's Back and Forward move
+   between it and the pages around it as they do everywhere else, and nothing
+   here touches the history itself. Leaving — the logo, Back to Home on the result box, escape,
+   the browser's back — closes the socket and nothing else: the game goes on, on the server, whether or
+   not anybody is watching, and a second watcher is only a second socket.
+   ============================================================ */
+const SPEC = {
+  on: false,         // G.opponent === 'spectate', and the socket below is wanted
+  id: null,          // the game being watched
+  game: null,        // its last snapshot
+  next: null,        // the id of the next live game in its vision, once there is one
+  sock: null,
+  retry: null,
+  at: 0,             // the server's clock when the snapshot was taken
+  skew: 0,           // server time minus ours
+  shown: null,       // the game id whose result box has been put up
+  missing: false,    // the server had no such game
+  saved: null,       // what G looked like before, to put back on the way out
+  queue: [],         // moves the server has and the board has not yet shown, oldest first
+  timer: null,       // the replay's timer, while the queue is being played out
+  pace: 0            // milliseconds between two replayed moves, fixed when a replay begins
+};
+const SPEC_RETRY = 5000;
+/* The pace of a replay: the whole catch-up aims to take about `total`, and
+   a move never goes by faster than `min` or slower than `max` — so a game
+   opened at move five is read at a comfortable stride and one opened at move
+   a hundred is still live within the minute. A mutable object rather than
+   three consts because test_spectate_flow.js shortens it to run the same
+   replay in milliseconds; nothing else writes to it. */
+const SPEC_REPLAY = { total: 20000, min: 180, max: 700 };
+const SPEC_PATH = /^\/spectate\/([A-Za-z0-9-]{1,64})\/?$/;
+
+function specIdFromLocation(){
+  const m = SPEC_PATH.exec(location.pathname || '');
+  return m ? m[1] : null;
 }
-function liveRenderBig(){
-  const g = LIVE.games.find(x => x.mode === LIVE.big);
-  const box = document.getElementById('liveBig');
-  box.innerHTML = g ? liveCardHTML(g, true) : '';
+
+/* Open one game by id. `mode` is what the card knows, so the board is drawn
+   in the right vision before the first snapshot arrives; without it the empty
+   squares of Board Only stand in for "loading" rather than a full sighted
+   board that may be about to be taken away. */
+function specOpen(id, push, mode){
+  if (!id) return;
+  if (SPEC.on && SPEC.id === id) return;
+  if (!SPEC.on){
+    SPEC.saved = { opponent: G.opponent, minutes: G.minutes, inc: G.inc, mode: G.mode,
+                   human: G.human, picked: picked.mode };
+  } else {
+    specDetach();                      // the next game, on the same screen
+    specHalt();                        // ...and whatever the last one was still replaying
+  }
+  Object.assign(SPEC, { on: true, id, game: null, next: null, shown: null, missing: false });
+  G.opponent = 'spectate';
+  G.started = true; picked.mode = true;
+  G.human = W; G.minutes = 30; G.inc = 0;
+  G.mode = MODE_NAME[mode] ? mode : 'blind';
+  newGame();                           // a clean board, and 30:00 on both clocks
+  document.body.classList.add('spectating');
+  specButtons(true);
+  // The entry — /spectate/<id> — is HISTORY's: opened from a card it is
+  // pushed, arrived at from the address bar or from Back it is the entry
+  // already stood in (`push` is false, and navRestoring would refuse anyway).
+  if (screenName !== 'game') showScreen('game', push ? 'push' : 'replace');
+  else { syncOptions(); render(); navSync(push ? 'push' : 'replace'); }
+  specConnect();
 }
-function liveCloseBig(){
-  LIVE.big = null;
-  liveOverlay.classList.remove('show');
+
+/* ---- the socket ---- */
+function specConnect(){
+  if (!SPEC.on || SPEC.sock) return;
+  if (!ONLINE_AVAILABLE){
+    specMissing({ off: true, note: 'Live games need this page to be served by the Nox Chess server.' });
+    return;
+  }
+  let sock;
+  try { sock = new WebSocket(serverURL()); }
+  catch (e){ specRetryLater(); return; }
+  SPEC.sock = sock;
+  sock.onopen = () => sock.send(JSON.stringify({ t:'watch', id: SPEC.id }));
+  sock.onmessage = ev => {
+    let msg;
+    try { msg = JSON.parse(ev.data); } catch (e){ return; }
+    if (msg.t === 'watch-game') specUpdate(msg);
+  };
+  sock.onerror = () => {};
+  sock.onclose = () => {
+    if (SPEC.sock !== sock) return;
+    SPEC.sock = null;
+    if (SPEC.on) specRetryLater();
+  };
 }
+function specRetryLater(){
+  clearTimeout(SPEC.retry);
+  SPEC.retry = setTimeout(() => { SPEC.retry = null; specConnect(); }, SPEC_RETRY);
+}
+function specDetach(){
+  clearTimeout(SPEC.retry); SPEC.retry = null;
+  const s = SPEC.sock;
+  SPEC.sock = null;
+  if (!s) return;
+  s.onclose = s.onerror = s.onmessage = s.onopen = null;
+  try { if (s.readyState === WebSocket.OPEN) s.send(JSON.stringify({ t:'unwatch' })); } catch (e){}
+  try { s.close(); } catch (e){}
+}
+
+/* ---- a snapshot ---- */
+function specUpdate(msg){
+  if (!SPEC.on || msg.id !== SPEC.id) return;
+  SPEC.at = msg.at || Date.now();
+  SPEC.skew = SPEC.at - Date.now();
+  SPEC.next = msg.next || null;
+  const g = msg.game;
+  if (!g){ specMissing(msg); return; }
+  const first = !SPEC.game;
+  SPEC.game = g;
+  if (first || G.mode !== g.mode){
+    G.mode = MODE_NAME[g.mode] ? g.mode : 'sighted';
+    if (G.mode === 'total') resetLog();     // the header now knows the names
+  }
+  // The moves, as the server has them. Ours must be a prefix of theirs; if
+  // they are not — a different game under this id, which cannot happen, or a
+  // board that has drifted, which must not — the position is rebuilt from
+  // the start rather than trusted.
+  const want = (g.moves || '').split(' ').filter(Boolean);
+  let prefix = want.length >= G.uci.length;
+  for (let i = 0; prefix && i < G.uci.length; i++) if (G.uci[i] !== want[i]) prefix = false;
+  if (!prefix) specRebuild();
+  // What the board has not shown yet. One new move on a board that is up to
+  // date is the game happening: it is played now, with its sound. Anything
+  // else — the game as it stood when this viewer arrived, a rebuilt board,
+  // the moves missed across a reconnection — is watched from where the
+  // board is, one move at a time, and the queue replaces rather than
+  // extends, since whatever was waiting is in `want` too.
+  const behind = want.slice(G.uci.length);
+  if (behind.length === 1 && !SPEC.queue.length && !first && prefix) specApply(behind[0]);
+  else if (behind.length) specQueue(behind);
+  if (SPEC.queue.length) specCatching(g);
+  else specLive(g);
+  syncOptions();
+  render();
+}
+
+/* ---- from the beginning ---- */
+/* Queue the moves the board has still to show, and start playing them out
+   if nothing is. The pace is fixed here, for the whole of this catch-up,
+   from how far behind the board is: a move that joins the queue later is
+   played at the stride already set rather than hurrying the rest. */
+function specQueue(moves){
+  SPEC.queue = moves.slice();
+  if (SPEC.timer || !SPEC.queue.length) return;
+  SPEC.pace = Math.max(SPEC_REPLAY.min, Math.min(SPEC_REPLAY.max, SPEC_REPLAY.total / SPEC.queue.length));
+  SPEC.timer = setTimeout(specStep, SPEC.pace);
+}
+/* One replayed move: silently, from the chair of whoever will then be to
+   move — set before the move, because applyMove() renders, and the fog it
+   draws has to be the fog of the position it draws. A move the rules refuse
+   empties the queue rather than trying the next one on a board it does not
+   fit; the next snapshot finds the board short and says so again. */
+function specStep(){
+  SPEC.timer = null;
+  if (!SPEC.on || !SPEC.queue.length) return;
+  const uci = SPEC.queue.shift();
+  G.human = other(G.st.turn);
+  const sound = G.sound;
+  G.sound = false;
+  let ok = false;
+  try { ok = specApply(uci); } finally { G.sound = sound; }
+  if (!ok) SPEC.queue = [];
+  if (SPEC.queue.length){ SPEC.timer = setTimeout(specStep, SPEC.pace); return; }
+  if (SPEC.game) specLive(SPEC.game);  // caught up: the clocks run, and a result may be shown
+  syncOptions();
+  render();
+}
+/* The board is being caught up: the viewer sits with whoever is to move in
+   the position on the board, the clocks stand at the snapshot's figures
+   (clockRunning() will not move them), and nothing is over yet, whatever the
+   snapshot says — the result waits for the last move to be shown. */
+function specCatching(g){
+  G.human = G.st.turn;
+  specClocks(g);
+  if (G.over){ G.over = null; G.revealed = false; }
+}
+/* The board shows what the server has. Fog of War is seen from the chair of
+   whoever is thinking, as the card shows it: the viewer is the side to move. */
+function specLive(g){
+  G.human = g.turn === 'b' ? B : W;
+  specClocks(g);
+  if (g.status === 'finished' || g.status === 'finishing') specFinish(g);
+  else if (G.over){ G.over = null; G.revealed = false; startClock(); }
+}
+/* Stop a replay and forget what it had left to show. */
+function specHalt(){
+  clearTimeout(SPEC.timer); SPEC.timer = null;
+  SPEC.queue = [];
+}
+
+/* One UCI move, through the game's own applyMove — so the notation, the
+   captures, the console line and the sound are the game's. */
+function specApply(uci){
+  if (typeof uci !== 'string' || uci.length < 4) return false;
+  const from = sqIndex(uci.slice(0, 2)), to = sqIndex(uci.slice(2, 4));
+  const promo = uci.length > 4 ? uci[4].toUpperCase() : null;
+  const here = legalMoves(G.st, G.st.turn).filter(m => m.from === from && m.to === to);
+  const m = here.length > 1 ? (here.find(x => x.promo === promo) || here[0]) : here[0];
+  if (!m) return false;
+  applyMove(m, true);
+  return true;
+}
+
+function specRebuild(){
+  specHalt();
+  G.st = newState();
+  G.token++;
+  G.sel = -1; G.lastMove = null; G.sans = []; G.uci = [];
+  G.caps = { w: [], b: [] };
+  G.reps = {}; G.over = null;
+  G.revealed = false; G.peeking = false;
+  for (const [,e] of pieceEls) e.remove();
+  pieceEls.clear();
+  if (G.mode === 'total') resetLog();
+}
+
+/* What a side has left now: the snapshot's figure, less what has run off it
+   since, if it is that side's move — on the server's clock. tickClock() then
+   counts on from here until the next snapshot resets it. */
+function specRemaining(g, color, now){
+  const base = color === 'w' ? g.whiteMs : g.blackMs;
+  if (typeof base !== 'number') return 0;
+  if (g.status !== 'live' || g.turn !== color) return Math.max(0, base);
+  return Math.max(0, base - Math.max(0, (now + SPEC.skew) - SPEC.at));
+}
+function specClocks(g){
+  const now = Date.now();
+  G.clock.w = specRemaining(g, 'w', now);
+  G.clock.b = specRemaining(g, 'b', now);
+  G.tickAt = now;
+}
+
+/* ---- the end ---- */
+function specHow(g){
+  const t = (g.termination || '').toLowerCase();
+  const loser = g.winner === 'w' ? 'Black' : g.winner === 'b' ? 'White' : null;
+  if (t === 'checkmate') return 'Checkmate.';
+  if (t === 'timeout') return loser ? loser + ' ran out of time.'
+                                    : 'A flag fell, but there was no way to force mate.';
+  if (t === 'resignation') return loser + ' resigned.';
+  if (t === 'stalemate') return 'Stalemate.';
+  if (t === 'draw by agreement') return 'Drawn by agreement.';
+  if (t === 'insufficient material') return 'Neither side has enough material to force mate.';
+  if (t.indexOf('repetition') >= 0) return 'The same position occurred three times.';
+  if (t.indexOf('move rule') >= 0) return 'Fifty moves without a capture or a pawn move.';
+  if (t === 'abandoned' || t === 'corrupt record') return 'The game was abandoned.';
+  return g.termination ? g.termination.charAt(0).toUpperCase() + g.termination.slice(1) + '.' : 'Game over.';
+}
+function specResultLine(g){
+  const how = g.termination || 'game over';
+  if (g.winner === 'w') return 'White wins — ' + how;
+  if (g.winner === 'b') return 'Black wins — ' + how;
+  if (g.result === '1/2-1/2') return 'Draw — ' + how;
+  return 'Game over — ' + how;
+}
+function specFinish(g){
+  const was = !!G.over;
+  G.over = { text: specResultLine(g) };
+  G.revealed = true; G.peeking = false;
+  stopClock();
+  if (!was){
+    logLine(' ');
+    logLine('— ' + G.over.text + ' —', 'sys');
+    logLine('The board is shown below.', 'sys');
+  }
+  render();
+  if (SPEC.shown === g.id){ specButtons(true); return; }   // the box is up; only the next-game button can change
+  SPEC.shown = g.id;
+  el.endTitle.textContent = g.winner === 'w' ? 'White Wins' : g.winner === 'b' ? 'Black Wins' : 'Draw';
+  el.endText.textContent = specHow(g);
+  specButtons(true);
+  el.endOverlay.classList.add('show');
+  beep(330,.2); setTimeout(()=>beep(262,.35),180);
+}
+/* The end-of-game box, borrowed: New Game is the way home, Rematch is the
+   next game on this ladder when there is one, and Study Board — a review of a
+   game the viewer did not play — is not offered. Put back on the way out. */
+function specButtons(on){
+  const nw = document.getElementById('endNew');
+  const rm = document.getElementById('endRematch');
+  const st = document.getElementById('endClose');
+  nw.textContent = on ? 'Back to Home' : 'New Game';
+  rm.textContent = on ? 'Watch Next Live Game' : 'Rematch';
+  rm.style.display = on ? (SPEC.next ? '' : 'none') : '';
+  st.style.display = on ? 'none' : '';
+}
+function specMissing(msg){
+  specHalt();
+  SPEC.missing = true;
+  G.over = { text: 'not found' };
+  stopClock();
+  render();
+  const off = !!(msg && msg.off);
+  el.endTitle.textContent = off ? 'Not Running' : 'Game Not Found';
+  el.endText.textContent = off ? (msg.note || 'The server is not running the AI league right now.')
+                               : 'This game is over, and no record of it is available.';
+  specButtons(true);
+  el.endOverlay.classList.add('show');
+}
+
+/* ---- what the game screen shows a viewer ---- */
+/* The last four moves, in the row between the two strips. Read off G.sans —
+   the notation applyMove() wrote as each snapshot's moves were replayed — so
+   it is the same word the notation panel and the console use, in every
+   vision, and there is no second list that could disagree with the board.
+   Oldest first, newest last and lit; and only as many as have been played,
+   so an opening shows one move, then two, and nothing is printed in place of
+   the ones that have not happened. It is redrawn with every render, and a
+   snapshot renders, which is what makes it follow the game without a reload. */
+const SPEC_RECENT = 4;
+function specMoves(){
+  const box = document.getElementById('specMoves');
+  if (!box) return;
+  const n = G.sans.length, from = Math.max(0, n - SPEC_RECENT);
+  let html = '';
+  for (let i = from; i < n; i++)
+    html += `<div class="m${i === n - 1 ? ' cur' : ''}">${G.sans[i]}</div>`;
+  box.innerHTML = html;
+}
+function specStatus(){
+  specMoves();
+  document.getElementById('btnPeek').style.display = 'none';
+  document.getElementById('entryForm').style.display = 'none';
+  document.getElementById('entryLocal').style.display = 'none';
+  el.moveInput.disabled = true;
+  el.moveInput.placeholder = 'spectating';
+  document.querySelectorAll('.local-input').forEach(inp => { inp.disabled = true; });
+  rulesCard.style.display = 'none';
+  chatCard.style.display = 'none';
+  chatInput.disabled = true;
+  const g = SPEC.game;
+  const live = g && g.status === 'live' && !G.over;
+  // move numbers as the card counts them: the one being played, or about to be
+  const moveNo = ply => Math.floor(ply / 2) + 1;
+  document.getElementById('footHint').innerHTML = SPEC.queue.length
+    ? 'SPECTATING · FROM THE START · MOVE ' + moveNo(G.uci.length) + ' OF ' + moveNo(G.uci.length + SPEC.queue.length)
+    : !live ? (G.over && !SPEC.missing ? '' : 'SPECTATING')
+    : 'SPECTATING · ' + (G.st.turn === W ? 'WHITE' : 'BLACK') + ' TO MOVE' +
+      (inCheck(G.st, G.st.turn) ? ' · CHECK' : '');
+}
+
+/* ---- leaving ---- */
+/* Let go of the game and hand the board back: the socket closes (the server
+   forgets this viewer and nothing else), and G is put back as it was. Called
+   by showScreen() on the way to any other screen, so there is one door out. */
+function specStop(){
+  if (!SPEC.on) return;
+  specDetach();
+  specHalt();
+  const saved = SPEC.saved || {};
+  Object.assign(SPEC, { on: false, id: null, game: null, next: null, shown: null, missing: false, saved: null });
+  document.body.classList.remove('spectating');
+  specButtons(false);
+  el.endOverlay.classList.remove('show');
+  G.opponent = saved.opponent || 'bot';
+  G.minutes = saved.minutes || 10; G.inc = saved.inc || 0;
+  G.mode = saved.mode || G.mode; G.human = saved.human || W;
+  G.started = false; picked.mode = !!saved.picked;
+  G.over = null;
+  newGame();                           // drop the watched position
+}
+function specLeave(){
+  if (!SPEC.on) return;
+  showScreen('home');                  // ...which calls specStop(), and writes the address
+  // back beside the cards, which stand at the foot of the left-hand side
+  setTimeout(() => {
+    const stack = document.getElementById('liveStack');
+    if (stack && stack.scrollIntoView) stack.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  }, 80);
+}
+function specBoot(){
+  const id = specIdFromLocation();
+  if (id) specOpen(id, false);
+}
+
 liveGrid.addEventListener('click', e => {
   const card = e.target.closest('.live-card');
-  if (card) liveOpenBig(card.dataset.mode);
+  if (card && card.dataset.id) specOpen(card.dataset.id, true, card.dataset.mode);
 });
 liveGrid.addEventListener('keydown', e => {
   const card = e.target.closest('.live-card');
-  if (card && (e.key === 'Enter' || e.key === ' ')){ e.preventDefault(); liveOpenBig(card.dataset.mode); }
+  if (card && card.dataset.id && (e.key === 'Enter' || e.key === ' ')){
+    e.preventDefault();
+    specOpen(card.dataset.id, true, card.dataset.mode);
+  }
 });
-document.getElementById('liveX').onclick = liveCloseBig;
-liveOverlay.addEventListener('click', e => { if (e.target === liveOverlay) liveCloseBig(); });
-document.addEventListener('keydown', e => { if (e.key === 'Escape' && LIVE.big) liveCloseBig(); });
-
 /* ============================================================
    SOCIAL — friends, the requests that make them, and challenges
    Two halves, deliberately kept apart:
@@ -15432,8 +16428,17 @@ document.getElementById('chalDecline').onclick = () => {
 /* ---- boot ---- */
 syncOptions();
 render();
-initAuth();          // arriving leads to the home page; nothing gates it
-liveOpen();          // ...and the home page is where the live games are watched from
+navBoot();           // the page we are on, or the one the address bar names (HISTORY)
+initAuth().then(navSettled);   // arriving leads to the home page; nothing gates it —
+                               // except that a page an account has to be signed in
+                               // for waits until the account is known
+// ...and the home page is where the live games are watched from — if that is
+// where navBoot() left us; a page named by the address bar has no cards to
+// push boards to, and showScreen() closes this socket on the way to any other
+if (screenName === 'home') liveOpen();
+specBoot();          // ...unless the address names one of them: /spectate/<id>
+                     // (navBoot() has usually opened it already, and this finds it open;
+                     // under a harness with no history it is the way in)
 </script>
 </body>
 </html>
