@@ -32,6 +32,26 @@ HOST = os.environ.get("WS_TEST_HOST", "127.0.0.1")
 PUZZLE_FLOOR = 400        # what server.py clamps a rating to
 PORT = int(os.environ.get("PORT", "8787"))
 
+# The ranked fallback, spelled the same way the server spells it. Five seconds
+# is the feature, so the tests really do sit them out — set NOX_AI_WAIT on both
+# the server and the harness to shorten a local run.
+AI_WAIT = float(os.environ.get("NOX_AI_WAIT") or 5.0)
+AI_NAMES = [
+    "cutydaeheech0", "TheNlEL", "goutham111", "Paradoxical_MovesbyJJ",
+    "gaymonster", "jungjungkook", "676767",
+]
+START_ELO = 100           # what a player with no rating of their own is shown
+
+
+def ai_elo_for(rating):
+    """The server's arithmetic, written out again on purpose.
+
+    Reimplemented rather than imported, so that a change to the formula has to
+    be made twice and meant twice. It is a number a player reads off the board
+    and it should not be able to drift quietly.
+    """
+    return int(round(rating + rating / 100.0 + 9))
+
 # Scholar's mate. Squares are the board indices the page uses: 0 = a8, 63 = h1.
 SCHOLARS = [
     ("w", 52, 36, "e4"),
@@ -90,7 +110,12 @@ class TestClient:
 
     def __init__(self, name):
         self.name = name
-        self.sock = socket.create_connection((HOST, PORT), timeout=5)
+        # Longer than the ranked fallback's own wait, and deliberately so: a
+        # client sitting out those five seconds is a client whose socket has
+        # heard nothing for five seconds, and a five-second timeout on this end
+        # would kill the reader a moment before the game it is waiting for
+        # arrives.
+        self.sock = socket.create_connection((HOST, PORT), timeout=max(20.0, AI_WAIT + 12))
         self.framer = client_handshake(self.sock, "%s:%d" % (HOST, PORT), "/ws")
         self.inbox = queue.Queue()
         self.color = None
@@ -380,6 +405,123 @@ def main():
         check("an unknown kind falls back to friendly rather than its own queue",
               start_j.get("kind") == "friendly", "(%s)" % start_j)
 
+    print("\n\033[1mThe ranked fallback opponent\033[0m")
+    ai1 = ai2 = ai3 = ai4 = ai5 = ai6 = None
+    if g.accounts and not g.verified:
+        print("  \033[33mSKIP\033[0m the fallback opponent — ranked play needs an account here")
+    else:
+        # Priority one, and the only one that matters: somebody turning up
+        # inside the window is matched with the player who was waiting, and
+        # neither of them ever sees a bot.
+        ai1 = TestClient("AI1")
+        ai2 = TestClient("AI2")
+        ai1.send(t="find", mode="sighted", minutes=17, kind="ranked")
+        ai1.expect("waiting")
+        time.sleep(min(2.0, AI_WAIT * 0.4))       # well into the wait, not past it
+        ai2.send(t="find", mode="sighted", minutes=17, kind="ranked")
+        start_1 = ai1.expect("start")
+        start_2 = ai2.expect("start")
+        check("a real player arriving mid-search is matched at once",
+              start_1["game"] == start_2["game"], "(%s vs %s)" % (start_1, start_2))
+        check("and neither of them is given a bot",
+              "ai" not in start_1 and "ai" not in start_2, "(%s)" % start_1)
+        check("the pairing is still ranked", start_1.get("kind") == "ranked",
+              "(%s)" % start_1.get("kind"))
+
+        # And with nobody there at all, the wait ends in a bot rather than in
+        # nothing. This is the one test in the suite that really sits out the
+        # five seconds, because five seconds is the feature.
+        ai3 = TestClient("AI3")
+        ai3.send(t="find", mode="blind", minutes=19, inc=3, kind="ranked")
+        ai3.expect("waiting")
+        check("nothing arrives before the wait is up", ai3.nothing_arrives(AI_WAIT * 0.5))
+        seated = ai3.expect("start", timeout=AI_WAIT + 5)
+        bot = seated.get("ai") or {}
+        check("a lone ranked player is eventually seated", seated["t"] == "start")
+        check("the opponent is declared a bot", bot.get("bot") is True, "(%s)" % seated)
+        check("it is one of the fallback names",
+              bot.get("name") in AI_NAMES, "(%s)" % bot.get("name"))
+        check("the name on the bar is the bot's",
+              seated.get("opponent") == bot.get("name"), "(%s)" % seated)
+        check("it is not passed off as a verified account",
+              seated.get("opponentVerified") is False, "(%s)" % seated)
+        check("the rating follows from the player's own",
+              bot.get("elo") == ai_elo_for(START_ELO),
+              "(%s, wanted %s)" % (bot.get("elo"), ai_elo_for(START_ELO)))
+        check("the game is ranked, like the queue it came from",
+              seated.get("kind") == "ranked", "(%s)" % seated.get("kind"))
+        check("with the settings that were asked for",
+              (seated.get("mode"), seated.get("minutes"), seated.get("inc"))
+              == ("blind", 19, 3), "(%s)" % seated)
+
+        # The draw workflow is the ordinary one: an offer goes out over the
+        # socket and `over` comes back, exactly as between two people.
+        ai3.send(t="draw-offer")
+        ended = ai3.expect("over", timeout=6)
+        check("a draw offered to the bot is accepted",
+              ended.get("reason") == "draw", "(%s)" % ended)
+        check("and it is a draw, not a win", ended.get("winner") is None, "(%s)" % ended)
+
+        # Resigning to one is a resignation like any other.
+        ai4 = TestClient("AI4")
+        ai4.send(t="find", mode="fog", minutes=21, kind="ranked")
+        ai4.expect("waiting")
+        seated4 = ai4.expect("start", timeout=AI_WAIT + 5)
+        ai4.send(t="resign")
+        ended4 = ai4.expect("over", timeout=5)
+        check("resigning to the bot ends the game",
+              ended4.get("reason") == "resign", "(%s)" % ended4)
+        check("and hands it the win",
+              ended4.get("winner") not in (None, seated4["color"]), "(%s)" % ended4)
+        # ...and the seat is free again the moment it is over
+        ai4.send(t="find", mode="fog", minutes=23, kind="ranked")
+        check("the player is free to queue again straight away",
+              ai4.expect("waiting")["t"] == "waiting")
+        ai4.send(t="cancel")
+        ai4.expect("cancelled")
+
+        # A friendly queue is not touched by any of this.
+        ai5 = TestClient("AI5")
+        ai5.send(t="find", mode="sighted", minutes=25, kind="friendly")
+        ai5.expect("waiting")
+        check("a friendly search is never given a bot",
+              ai5.nothing_arrives(AI_WAIT + 1.5))
+
+        # Leaning on Start Play is one search, and one game.
+        ai6 = TestClient("AI6")
+        for _ in range(5):
+            ai6.send(t="find", mode="blind", minutes=27, kind="ranked")
+        check("pressing Start Play five times is one search",
+              ai6.expect("waiting")["t"] == "waiting")
+        again = ai6.expect("start", timeout=AI_WAIT + 5)
+        check("and brings exactly one game", again["t"] == "start")
+        check("with exactly one opponent", ai6.nothing_arrives(1.0))
+
+        # Giving up inside the window really gives up.
+        quit_early = TestClient("AI7")
+        quit_early.send(t="find", mode="blind", minutes=29, kind="ranked")
+        quit_early.expect("waiting")
+        quit_early.send(t="cancel")
+        quit_early.expect("cancelled")
+        check("cancelling inside the window cancels the bot too",
+              quit_early.nothing_arrives(AI_WAIT + 1.5))
+        quit_early.close()
+
+        # And so does walking out: a player who drops mid-search leaves nothing
+        # behind that a bot could later be seated against.
+        vanish = TestClient("AI8")
+        vanish.send(t="find", mode="blind", minutes=31, kind="ranked")
+        vanish.expect("waiting")
+        vanish.close()
+        time.sleep(AI_WAIT + 1.0)
+        after = TestClient("AI9")
+        after.send(t="find", mode="blind", minutes=31, kind="ranked")
+        check("a dropped searcher leaves nothing in the queue",
+              after.expect("waiting")["t"] == "waiting")
+        after.send(t="cancel")
+        after.expect("cancelled")
+        after.close()
+
     print("\n\033[1mResigning and offering a draw\033[0m")
     r1 = TestClient("R1"); r2 = TestClient("R2")
     r1.send(t="find", mode="blind", minutes=45); r1.expect("waiting")
@@ -476,7 +618,13 @@ def main():
     listed = [r for r in s2.expect("rooms")["rooms"] if r["minutes"] == 48]
     check("that room reaches the list", len(listed) == 1, "(%s)" % listed)
     s2.send(t="join", room=listed[0]["id"])
-    n1 = s1.expect("start"); n2 = s2.expect("start")
+    # S2 may be handed the room list twice: handle_host() sends "hosting" to
+    # the host and only then broadcasts the list to its watchers, and S2
+    # subscribes in between — so under the wrong scheduling the host's
+    # broadcast reaches S2 after its own reply from handle_lobby() and before
+    # the start. A watcher seeing the same list twice is harmless by design,
+    # and either order is a correct one, which is what await_kind() is for.
+    n1 = s1.expect("start"); n2 = s2.await_kind("start")
     check("a finished player can join again", n1["game"] == n2["game"])
     check("and it is a different game from the one before",
           n1["game"] != st1["game"], "(%s vs %s)" % (n1["game"], st1["game"]))
@@ -552,18 +700,28 @@ def main():
     joiner = TestClient("JOIN")
 
     watcher.send(t="lobby")
-    check("the list starts empty for a new watcher", watcher.expect("rooms")["rooms"] == [])
+    # The house keeps seven rooms of its own on the list at all times (HOUSE_ROOMS
+    # in server.py), so "empty" here means "nothing but those". They are told
+    # apart by name — the names are fixed for the life of the process — because
+    # the list itself says nothing about which rooms are the house's, on purpose.
+    first = watcher.expect("rooms")["rooms"]
+    house_names = {r["name"] for r in first}
+    ours = lambda rs: [r for r in rs if r["name"] not in house_names]
+    check("a new watcher sees the house's rooms and nobody else's",
+          len(first) == 7 and ours(first) == [], "(%s)" % first)
 
     host.send(t="lobby")
     host.expect("rooms")
     host.send(t="host", mode="fog", minutes=15, color="b")
     check("the host is told its room exists", "room" in host.expect("hosting"))
 
-    seen = watcher.expect("rooms")["rooms"]
+    seen = ours(watcher.expect("rooms")["rooms"])
     check("everyone watching sees the new room", len(seen) == 1, "(%s)" % seen)
     check("the room carries its settings",
           seen and seen[0]["mode"] == "fog" and seen[0]["minutes"] == 15
           and seen[0]["inc"] == 0 and seen[0]["color"] == "b", "(%s)" % seen)
+    check("and names its host, with a rating",
+          seen and seen[0]["name"] == "HOST" and isinstance(seen[0]["rating"], int), "(%s)" % seen)
     room_id = seen[0]["id"]
     host.expect("rooms")        # the host watches the list too, so it sees its own room
 
@@ -579,7 +737,7 @@ def main():
     check("the joiner gets the other colour", js["color"] == "w", "(%s)" % js)
     check("the room's settings carry into the game",
           hs["mode"] == "fog" and hs["minutes"] == 15)
-    check("the filled room leaves the list", watcher.expect("rooms")["rooms"] == [])
+    check("the filled room leaves the list", ours(watcher.expect("rooms")["rooms"]) == [])
 
     # the game itself must work exactly like a matched one
     joiner.timeline = []
@@ -597,10 +755,81 @@ def main():
     ghost = TestClient("GHOST")
     ghost.send(t="host", mode="blind", minutes=5, color="w")
     ghost.expect("hosting")
-    check("the room appears for watchers", len(watcher.expect("rooms")["rooms"]) == 1)
+    check("the room appears for watchers", len(ours(watcher.expect("rooms")["rooms"])) == 1)
     ghost.close()
     check("a dropped host takes its room off the list",
-          watcher.expect("rooms", timeout=5)["rooms"] == [])
+          ours(watcher.expect("rooms", timeout=5)["rooms"]) == [])
+
+    print("\n\033[1mThe house rooms\033[0m")
+    # Seven rooms the house hosts, always on the list: two of each vision that
+    # hides something and one Sighted, each with a bot behind a name that reads
+    # like anybody's. Joining one is joining a room — same message, same start,
+    # same game — except that the start carries the `ai` block the ranked
+    # fallback's does, because the joiner's browser is where the bot plays.
+    watcher.send(t="lobby")
+    house = [r for r in watcher.expect("rooms")["rooms"] if r["name"] in house_names]
+    check("seven of them", len(house) == 7, "(%d)" % len(house))
+    modes = sorted(r["mode"] for r in house)
+    check("two Complete Blindfold, two See the Board, two Fog of War, one Sighted",
+          modes == ["blind", "blind", "fog", "fog", "sighted", "total", "total"], "(%s)" % modes)
+    check("seven different names", len({r["name"] for r in house}) == 7)
+    check("none of which says what it is",
+          not any(w in r["name"].lower() for r in house
+                  for w in ("bot", "computer", "engine", "stockfish", "cpu", "nox")))
+    check("every card names its host and a rating",
+          all(r.get("name") and isinstance(r.get("rating"), int) for r in house))
+    check("and nothing on a card says who is behind it",
+          not any(k in r for r in house for k in ("ai", "bot", "house", "slot", "is_ai")),
+          "(%s)" % sorted(house[0].keys()))
+    order = [r["name"] for r in house]      # ...and this order is checked again below
+
+    for r in house:
+        g = TestClient("SEAT-" + r["mode"])
+        g.send(t="join", room=r["id"])
+        st = g.expect("start")
+        ai = st.get("ai") or {}
+        check("joining %s's %s room starts that game, against them" % (r["name"], r["mode"]),
+              st["mode"] == r["mode"] and st["minutes"] == r["minutes"] and st["inc"] == r["inc"]
+              and st["kind"] == "friendly" and st["opponent"] == r["name"]
+              and st["color"] == ("b" if r["color"] == "w" else "w")
+              and ai.get("name") == r["name"] and ai.get("elo") == r["rating"], "(%s)" % st)
+        relisted = watcher.expect("rooms")["rooms"]
+        back = [x for x in relisted if x["name"] == r["name"]]
+        check("...and the room is re-seated on the spot",
+              len(back) == 1 and back[0]["id"] != r["id"] and back[0]["mode"] == r["mode"]
+              and back[0]["rating"] == r["rating"], "(%s)" % back)
+        g.send(t="move", ply=0, san="e4", **{"from": 52, "to": 36})
+        check("a move is played at home, not relayed, and not refused", g.nothing_arrives(0.4))
+        g.send(t="resign")
+        over = g.expect("over")
+        check("and resigning ends it", over["reason"] == "resign" and over["winner"] != st["color"])
+        g.close()
+
+    watcher.send(t="lobby")
+    after = watcher.expect("rooms")["rooms"]
+    check("after seven games the seven rooms are all still there, in the same order",
+          [r["name"] for r in after if r["name"] in house_names] == order
+          and sorted(r["mode"] for r in after) == modes, "(%s)" % [r["name"] for r in after])
+    check("and nobody else's crept in", ours(after) == [], "(%s)" % ours(after))
+
+    # A rematch of a house game is granted on the spot, as the ranked fallback's
+    # is — there is nobody to ask — and stays a friendly game.
+    again = TestClient("AGAIN")
+    again.send(t="join", room=after[0]["id"])
+    st = again.expect("start")
+    watcher.expect("rooms")
+    again.send(t="resign")
+    again.expect("over")
+    again.send(t="rematch")
+    re_st = again.expect("start")
+    check("a rematch of a house game starts at once, colours swapped, still friendly",
+          re_st["game"] != st["game"] and re_st["color"] != st["color"]
+          and re_st["kind"] == "friendly" and re_st["opponent"] == st["opponent"]
+          and (re_st.get("ai") or {}).get("name") == st["opponent"], "(%s)" % re_st)
+    again.send(t="draw-offer")
+    check("and a draw offered to it is accepted",
+          again.expect("over", timeout=4)["reason"] == "draw")
+    again.close()
 
     print("\n\033[1mRematch — the opponent has to agree\033[0m")
 
@@ -917,9 +1146,10 @@ def main():
     watcher.expect("rooms")
     host2.send(t="unhost")
     check("cancelling a room removes it for everyone",
-          watcher.expect("rooms")["rooms"] == [])
+          ours(watcher.expect("rooms")["rooms"]) == [])
 
     for client in (a, b, d, e, f, g, h, i, j, k, p1, p2, p3, p4, c1, c2, c3,
+                   ai1, ai2, ai3, ai4, ai5, ai6,
                    host, watcher, joiner, late, host2):
         if client is not None:               # ranked and challenge clients may have been skipped
             client.close()

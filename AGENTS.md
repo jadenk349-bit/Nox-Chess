@@ -1,6 +1,6 @@
-# CLAUDE.md
+# AGENTS.md
 
-This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
+This file provides guidance to Codex (Codex.ai/code) when working with code in this repository.
 
 ## What this is
 
@@ -30,7 +30,6 @@ node server/test_leaderboard.js          # the home page's four ladders, against
 node server/test_ai_fallback.js          # what the ranked fallback bot decides
 node server/test_ai_game.js              # and playing a whole game against it, stub DOM
 python3 server/test_ai_match.py          # seating one: the queue, the race; no server needed
-python3 server/test_house_rooms.py       # the friendly page's seven standing rooms; no server needed
 python3 server/test_names.py             # one name per player, guests included; no server needed
 python3 server/test_system_profiles.py   # the 21 leaderboard profiles: refused everywhere; no server needed
 python3 server/test_puzzle_rating.py     # the puzzle Elo handler; no server needed
@@ -41,10 +40,8 @@ node tools/test_practice_scheduling.js   # what a board Practice has to clear to
 node tools/test_verify_resume.js         # the verifier picking up a run where it stopped
 python3 tools/check_supabase_puzzles.py  # RLS and column grants, against the real project
 python3 tools/check_supabase_visions.py  # the four ladders and their grants, against the real project
-python3 server/test_league.py           # the AI league: pairing, ratings, endings, restart, boot; no server, stub engine
-python3 server/test_league_boot.py      # the production startup path: runs server/server.py itself, needs a Stockfish
+python3 server/test_league.py           # the AI league: pairing, ratings, endings, restart; no server, stub engine
 node server/test_live_games.js            # the home page's live cards — what each vision may show
-node server/test_spectate_flow.js         # a card to the full-screen spectator page and back, scripted socket
 NOX_LEAGUE_FAST=1 python3 server/server.py    # ...and, against that server (real accounts, results in memory):
 python3 server/test_league_socket.py      # real games, real engine, over the socket — REQUIRES that server
 
@@ -302,48 +299,6 @@ one that game was played at rather than a fresh `player_rating_of()`, because
 it is the same opponent again and because that call may go to the network,
 which nothing holding the lock may do.
 
-**The friendly page always has seven rooms on it, and the house hosts them.**
-A room used to exist only while a person sat in it, so on a small server the
-list was "Nobody is hosting yet" for almost everybody. `HOUSE_ROOMS` in
-`server.py` is seven rooms the house keeps open at all times — two Complete
-Blindfold, two See the Board (`blind`), two Fog of War and one Sighted — each
-hosted by a `BotClient` under a name that reads like anybody's, at a fixed
-rating, on its own clock. They are the ranked fallback wearing a room instead
-of a queue, and deliberately nothing more: `seed_house_rooms()` puts a
-`Room` whose host is a bot into `rooms` at startup, `handle_join()` seats the
-joiner through `start_game_between()` with the same `ai` block the fallback's
-`start` carries, and the page plays the bot's moves exactly as it does for
-the fallback — `AI_MATCH()` is true of both, and `G.matchKind` is what tells
-them apart where the page says anything about it. A joined room is re-seated
-under the same lock that emptied it (`house_room()`: a fresh `BotClient`, the
-same name and rating, the colour drawn again), so the list is seven long at
-every instant and never drains; `room_list()` puts the seven first in slot
-order, then everybody else's rooms, so the list does not reshuffle when
-somebody sits down. A rematch of one is granted on the spot by the branch
-`handle_rematch()` already had for the fallback, a draw offered to one is
-accepted through `ai_accept_draw()`, and a move sent to the server for one is
-dropped as it always was. None of it touches ranked play: a house bot is never
-in `lobby`, `handle_find()` never sees one, `may_play_ranked()` is not asked,
-and no rating is written for anybody.
-
-The card does not know. Every room on the list — the house's and a person's —
-is sent as `{id, mode, minutes, inc, color, name, rating}` and drawn by
-`renderRooms()` as a vision, a name, a rating, a clock line and a Join Room
-button; `handle_host()` reads a person's rating with `player_rating_of()`
-before it takes the lock, so their card looks exactly like the house's.
-Nothing on the wire or on the page says which rooms are the house's, on
-purpose, and the brief's rule that nothing beside a name may hint at who is
-behind it is enforced by `test_two_clients.py` and the driver checks rather
-than by a flag the page could read. Two things the page does differently
-from a ranked fallback game, both because the card presented this host as
-anybody: the "Nobody was queueing, so … a Nox bot … took the board" line is
-written only for a ranked game, and the chat panel stays up. The names are
-held in `names` for the life of the process so no guest can wear one, and
-`test_system_profiles.py` checks they share nothing with `AI_NAMES` or the
-system profiles. `test_house_rooms.py` walks the rest without a server, and
-the "Hosted rooms" section of `test_two_clients.py` tells the house's rooms
-apart from its own by name — the list itself will not say.
-
 **The twenty-one system profiles are accounts with no seat, and the fallback
 bot is a seat with no account.** `supabase-system-profiles.sql` — the fourth
 hand-run file, after setup and social — puts Arvenko, LeoFromPrague and
@@ -519,120 +474,17 @@ thinking), and Complete Blindfold no board at all, the console instead.
 Clocks count down client-side from the snapshot on the server's own
 timestamp (`liveRemaining()`), and a result re-reads all four ladders
 (`loadBoard()`, now four queries of `profiles`, one per column; the old
-`LB_BOARDS` fixture is gone). `NOX_LEAGUE=off` turns the league off.
-
-**A live card opens that game, by id, on the game screen — full screen, view
-only.** The SPECTATING section of the script (`SPEC`, `specOpen()`) is the
-whole of it, and it is deliberately not a second game page: `G.opponent`
-becomes `'spectate'` — a fourth kind of opponent, so `LOCAL()`, `BOT()` and
-`ONLINE()` are all false and nothing that lets a move be entered can be
-reached — and the ordinary game screen draws the game exactly as a game of
-that vision is drawn: the same board and glyphs, the same strips (with the
-rating directly after the name, then the colour), the same clocks, the
-console for Complete Blindfold, `visibleSet()`'s fog from the chair of
-whoever is to move (`G.human` follows the snapshot's turn). Nothing a
-player's screen does not have: no move history, and no row of recent moves
-under the board either — a version had one, the last four, and it went out
-with the replay below. The things a player has — Resign,
-Offer Draw, Peek, the move box, the chat — are absent rather than disabled
-(`body.spectating` in the CSS, `specStatus()` in the script), the board takes
-no pointer, the square handler and `canConcede()` refuse, and `checkEnd()`
-and `flagFall()` are not asked: the result is whatever the server says
-(`specFinish()`), because a game may end on time, by resignation or by
-agreement and only the server can see those. Moves are replayed through
-`applyMove(m, true)`, so notation, captures, sounds and the console are the
-game's own; a snapshot that is not a continuation rebuilds from the start.
-
-**A viewer arrives at the game as it stands.** The league plays around the
-clock, so almost everybody opens a card mid-game, and the board shows the
-position at that moment — the same position the card showed — with the
-clocks running. A version of this screen replayed the whole game first,
-from move one at a viewing pace of about twenty seconds, with the clocks
-standing still and FROM THE START at the foot of the screen; it was taken
-out because it is not what a live card promises. The card is a picture of
-the game now, and pressing it opens that picture larger, not a recording of
-how it came about. So the moves a snapshot carries that the board has not
-shown are applied at once by `specCatchUp()` — through `applyMove()`, so the
-notation, the captures and the console are the game's own, but with the
-sound off and every piece element dropped before the final `render()`,
-because `render()` slides a piece it already has and forty silent moves
-would otherwise end in every man on the board sliding from where it stood
-at move one, the replay over again in a fifth of a second. One move arriving
-on a board that is already caught up is the game happening and is played at
-once, with its sound. A finished game opened by its link shows its final
-position and its result box together. Fog of War is seen from the chair of
-whoever is to move, as the card shows it.
-
-There is no Back button of its own: the logo is the way home, as on any
-game screen, and so are Back to Home on the result box, escape and the
-browser's back. Only a live card is a button, and it carries `data-id`: a waiting card has
-nothing behind it and a finished one is a result being read, so neither
-opens. The page watches on a socket of its own — `{t:"watch", id}`, answered
-and pushed as `{t:"watch-game"}` on every change to *that* game and no other,
-`{t:"unwatch"}` to stop — and the server's `handle_watch()` gives the
-connection nothing: no seat, no colour, no `client.game`, so a move, a
-resignation, a result or a draw offer from it meets the same refusal every
-seatless socket meets, and a league game is not a `Game` in `games` for
-anything to reach anyway. `League.watch()`/`unwatch()`/`snapshot_of()`
-answer by id from the live matches, then from `finished_by_id` (the last
-forty this process ended), then from the store (`store.game()`,
-`snapshot_from_row()`), so a refresh on a finished game shows how it ended;
-`next_live_id()` is what "Watch Next Live Game" offers once the ladder's next
-game exists, and it is never entered without a press. The address is
-`/spectate/<id>`: the server serves the page for it (`SPECTATE_PATH`) and
-looks nothing up, `specBoot()` reads it back, and the `<base>` written at the
-top of `<head>` is why every relative asset still resolves under it. The
-end-of-game box is borrowed — New Game reads Back to Home, Rematch reads
-Watch Next Live Game, Study Board is hidden — and `specButtons(false)` puts it
-back. `showScreen()` calls `specStop()` on the way to any other screen, which
-closes the socket and hands `G` back as it was; the game goes on on the
-server whether or not anybody is watching, and a second watcher is only a
-second socket. `test_spectate_flow.js` drives the whole thing under the DOM
-shim against a scripted socket; `test_league_socket.py` does the server's
-half for real, including everything a spectator might send. Without a
+`LB_BOARDS` fixture is gone). A card opens the spectator view, which has
+nothing on it to press. `NOX_LEAGUE=off` turns the league off. Without a
 service key (or with `NOX_LEAGUE=memory`) it still reads the real accounts,
 with the publishable key the page ships (`public_profiles()`), and plays them
 with the results kept in memory — the same degradation puzzle ratings have —
 so a laptop shows the real names and a production box without the key does
 not quietly invent any; `NOX_LEAGUE_FIXTURE` reads profile rows from a JSON
 file instead, for a test with no network. `NOX_LEAGUE_FAST` shortens every
-pause for the tests.
-
-**The league starts itself, and keeps trying.** `start_league()` in
-`server.py` is called once from `main()` before the port is bound, and
-`league.build()` answers None for `NOX_LEAGUE=off` and nothing else. Every
-other precondition — python-chess, the database, its schema, the engine, an
-AI account to seat — is checked by `League.boot()` on the league's own thread,
-in that order, by `prepare()`, and a miss is a *state* (`STATES`: starting,
-running, database unavailable, migration missing, stockfish unavailable,
-python-chess unavailable, no eligible players, crashed, off) rather than an
-exit: logged with the full reason when it changes, retried at a doubling
-interval up to a minute (`BOOT_RETRY_MIN`/`MAX`), what was found kept across
-attempts. It used to be decided once, synchronously, in `build()`, and that is
-how production ran for weeks without a league: Debian's `stockfish` package
-installs to `/usr/games`, which is not on PATH in `python:3.12-slim`, so
-`Popen(["stockfish"])` failed at boot, `build()` returned None, and nothing
-ever asked again. `find_stockfish()` now looks — `NOX_STOCKFISH` if set (and
-only that), else PATH, else `STOCKFISH_CANDIDATES`, `/usr/games/stockfish`
-first — and logs where it found the engine; the Dockerfile also puts
-`/usr/games` on PATH and refuses to build an image whose engine does not
-answer `uci`. `SupabaseStore.verify_schema()` asks for the four rating
-columns, `is_bot`, the three tables and the four functions by name before the
-first game, and names the file that adds whatever is missing. `/health`
-carries the state, its public sentence, the store kind, the engine's path,
-the attempt count and, per ladder, playing / waiting / error with the reason
-(`pairing_report()` and `explain_pairing()` — "20 leaderboard rows, 19 bots in
-the top 20, 17 free, 11 valid pairings", or "no valid pairing within 100
-Elo"); the socket payload carries `off`, `state` and `note` while not running,
-and the cards print the note. Nothing public quotes an error body or a path
-but the engine's. `tick()` isolates each board and each ladder: an exception
-in one is logged against its vision (`mode_failed()`) and the other three
-carry on; only the database being away is everybody's problem. `start()` is
-idempotent and `start_league()` refuses a second league. Every log line is
-prefixed `[AI League]`. `test_league_boot.py` runs the real entrypoint as a
-subprocess — with the engine on PATH, with PATH stripped, with `NOX_STOCKFISH`
-pointing at nothing, and with `NOX_LEAGUE=off` — and reads `/health`,
-`/live.json` and the log.
+pause for the tests. Without an engine, or with no AI account on any ladder,
+the server says which once at startup and runs without the league; the cards
+say the server is not running it.
 
 **The rating only persists with `SUPABASE_SERVICE_KEY`.** The browser is not
 allowed to write `puzzle_rating`, so the server is the only thing that can, and
@@ -1311,63 +1163,12 @@ Navigate by the `/* ==== TITLE ==== */` banners in the script — THE SKY,
 CONSTANTS & HELPERS, MOVE GENERATION, ENGINE, GAME / UI STATE, CLOCK, SOUND,
 COMPLETE BLINDFOLD, PLAYING MOVES, ONLINE PLAY, RESIGNING…, THE ENGINE, THE
 REVIEW, THE EDUCATION LAYER, THE PUZZLES, STUDY ALTERNATIVES, THE LESSONS,
-CONTROLS, PRACTICE, SCREENS, HISTORY, ACCOUNTS, SOCIAL.
+CONTROLS, PRACTICE, SCREENS, ACCOUNTS, SOCIAL.
 
 Screens are `<section class="screen" id="screen-NAME">` toggled by
 `showScreen(name)`; `screenName` is the current one and several handlers branch
-on it.
-
-**Every page is a browser history entry, and `showScreen()` is where it is
-written.** The page is one document, and for a long time that meant Chrome's
-Back button knew nothing about it: from three pages deep in Nox it went to
-whatever site came before. The HISTORY section fixes that with the smallest
-thing that fits — no router, no URLs on the server (`STATIC_FILES` is an
-allowlist, and a path like `/ranked` would 404 on refresh), just
-`history.pushState` with a hash naming the page (`#ranked`, `#friendly`,
-`#lessons/3`, `#practice/coord`, `#puzzle/fog`, `#puzzle/practice-opening`,
-`#play/bot`,
-`#game/ranked`) and a `popstate` handler. The one address that is a path
-rather than a hash is the spectator page, `/spectate/<id>`, because the
-server serves the page for it; `navPath()` writes it and puts `/` back on
-the way off. The rule is
-*describe, compare, push*: `navSync()` reads the page the globals say we are
-on (`navDescribe()`) and pushes only when that differs from the entry we are
-standing in, so a re-render, a rematch, or the next puzzle in a ladder only
-refreshes the entry and never duplicates it. `showScreen()` calls it last;
-so do the three view switches that are pages in their own right — a lesson
-(`lsnShow`/`lsnHub`/`lsnFinish`), a drill running (`prBegin`/`prShowDash`)
-and a league game being watched (`specOpen`/`specLeave`, the SPECTATING
-section, which pushes nothing itself). A step within a lesson
-is not a page: it refreshes the entry, so a refresh comes back to the step and
-Back does not walk every step twice. `showScreen(name, 'replace')` is for
-redirects — the username gate and "signing in finishes the login page" — so
-that Back is not a way past them.
-
-Arriving from history (`navApply()`) goes through the functions the buttons
-call — `goSocial()`, `enterRooms()`, `goPractice()`, `lsnEnter()` — because
-most screens need more than showing, and it first does what the screen's own
-Back button would have done on the way out (`leaveRooms()`, `stopHosting()`,
-`netClose()`). While that runs, `navRestoring` makes every `showScreen()`
-replace instead of push and mutes `beep()`, which is what makes a loop
-impossible. The one page that cannot be re-entered is a game somebody else
-started — the server's pairing starts a ranked, friendly or challenged game,
-and Back cannot ask it to again — so a dead game entry is stepped over on the
-way back (`history.go(-1)` once more) and, forwards, replaced by the page
-where that kind of game is arranged, the rule New Game already follows. A bot
-or local game's entry *is* the setup beside the board, and a puzzle's re-opens
-the ladder where it stands. A game in progress is protected exactly as the
-wordmark protects it: Back opens the leave box, the history is put back
-(`history.go` the other way, held in `NAV.pending`), and Confirm finishes the
-refused step rather than going home. `gameLive()` is the wordmark's test,
-shared. Pages a guest is sent to sign up for are gated on arrival too
-(`navGated()`), and at boot such a route waits for the account to be known
-(`navSettled`, after `initAuth()`); `navBoot()` leaves the URL untouched on
-purpose, because Supabase reads its own token out of the hash after Google.
-None of the test harnesses has a `history`, and under them the whole layer is
-inert (`NAV.hist` null) — `test_practice_flow.js` stubs `navSync` because it
-lifts the PRACTICE section on its own. A puzzle's address is the door it came
-through, written by `pzRoute()` and read back by `navApply()` through
-`PZ_MODE`, `PC_CAT` and `PZ_TRACKS` in that order — see "Five doors" above.
+on it. Every puzzle goes straight from its door to `screen-game` — the vision
+screen between them is gone; see "Five doors" above.
 There is only one account cluster (`#headRight`), and `showScreen()`
 moves it into whichever screen's header offers a `.head-mount` — home and
 social both do, so it sits in the same place on each. Don't duplicate it.

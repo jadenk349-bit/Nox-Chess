@@ -80,6 +80,8 @@ var STUB = [
   'var waitingFailed = note("waitingFailed"), enterRooms = note("enterRooms");',
   'var netClose = note("netClose"), showWaiting = function(){ CALLED.push("showWaiting"); };',
   'function ONLINE(){ return G.opponent === "online"; }',
+  'function SPECTATING(){ return G.opponent === "spectate"; }',
+  'var specStop = note("specStop");',
   'function rankedAgain(){ CALLED.push("rankedAgain"); showScreen("ranked"); }',
   'function goFriendly(){ CALLED.push("goFriendly"); showScreen("rooms"); }'
 ].join('\n');
@@ -105,6 +107,8 @@ var DOM = [
 
 var CODE = [
   decl('NET'), decl('CHAL'), decl('CHALLENGE_TTL'), decl('REM'),
+  // the start branch says out loud when the opponent is the ranked fallback bot
+  decl('AI_MATCH'),
   decl('rematchOverlay'),
   fn('showRematch'), fn('hideRematch'), fn('remClear'), fn('remLeave'),
   fn('rematchTerms'), fn('oppWord'), fn('askRematch'), fn('acceptRematch'),

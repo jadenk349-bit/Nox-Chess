@@ -10,6 +10,18 @@ same way — a challenge is not a second kind of multiplayer, only a third way
 into the first one. Friendships themselves are Supabase's business, not this
 server's; see supabase-social.sql.
 
+A ranked player nobody turns up for is seated with a bot after five seconds,
+which is a fourth way into the same Game and not a fourth kind of multiplayer
+either. It is a fallback and only a fallback: a real opponent takes priority at
+every instant of that wait, and the decision is made here, under the lock that
+pairs two people, because a browser cannot see the queue. See "the fallback
+opponent" below.
+
+The twenty-one system profiles at the top of the leaderboard are none of the
+above. They are rows in Supabase, not seats, and this server's only business
+with them is to refuse them: a token for one is never verified, and the ranked
+door and the queue turn the flag away again. See "the system profiles" below.
+
 The rules live in the browser: both clients run the same move generator, so the
 server's job is to pair players and to keep the two of them on one timeline. It
 enforces whose turn it is and that plies arrive in order — a move from the wrong
@@ -23,6 +35,8 @@ Run:  python3 server/server.py [--port 8787]
 import json
 import os
 import random
+import re
+import signal
 import socket
 import sys
 import threading
@@ -33,6 +47,7 @@ sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 import wsproto
 import supabase_auth
 import supabase_db
+import league
 from wsproto import Framer, WSClosed, WSError
 
 HERE = os.path.dirname(os.path.abspath(__file__))
@@ -53,12 +68,27 @@ games = {}        # game id -> Game
 # is challenged by who they are rather than by which socket they happen to be
 # on, so this is what turns an account id into somewhere to send.
 by_user = {}      # supabase user id -> set of Clients
+# Every name on this server, lower-cased, -> the party holding it and the
+# connections holding it for them. There is one namespace for accounts and
+# guests together: a name is what the other player reads across the board, and
+# two boards that both say "Alex" are two boards lying to somebody, whichever
+# kind of player each Alex is. Held for as long as a connection is, and no
+# longer — the durable half of the rule, for accounts, is the unique index in
+# supabase-migrate-usernames.sql. See claim_name().
+names = {}        # lower-cased name -> NameHold
 challenges = {}   # challenge id -> Challenge, one per invitation in the air
 # A rematch is asked for after the game it is about has already ended, which is
 # why it cannot live on the Game: finish_game() has let go of that by then, and
 # of both players with it. Like a challenge it means nothing once either side
 # has gone, so it lives here beside them and dies with the session.
 rematches = {}    # rematch id -> Rematch, one per request in the air
+# The 24/7 AI league — the strongest bot accounts playing each other, one
+# ladder per vision, whether or not anybody is watching. Built in main(), and
+# None when it cannot run (no engine, no key, no `chess` package), in which
+# case the home page is told there is nothing live and everything else is as
+# it was. It is not a way into a Game: its players are never Clients, and
+# nothing in `lobby`, `rooms` or `challenges` can reach one. See league.py.
+LEAGUE = None
 LOG = True
 
 # A challenge nobody answers should not sit in memory for the life of the
@@ -67,6 +97,127 @@ CHALLENGE_TTL = 180
 # The same, for a rematch: nobody sits on a finished board for longer than this
 # waiting to be asked again.
 REMATCH_TTL = 180
+
+# ------------------------------------------------------- the fallback opponent
+#
+# A ranked queue with nobody else in it is a player watching a plate sweep until
+# they give up. So after a few seconds of finding nobody, the server seats a bot
+# instead — but only after, and only because there was nobody. A real opponent
+# beats a bot at every instant of that wait, which is why the decision is made
+# here, under the very lock that pairs two people, rather than by a client
+# counting to five on its own: a browser cannot see the queue, and two browsers
+# each counting to five would hand a bot to each of two players who should have
+# been handed each other.
+#
+# The bot never goes into `lobby`. Nothing can queue one, nothing can meet one
+# in a room or a challenge, and two of them can never be paired, because the
+# timeout below is the only thing in the process that ever builds one.
+AI_WAIT = 5.0
+try:
+    # Only so the tests need not sit out five seconds a time. Not a setting
+    # anybody is expected to change: the five seconds are part of the feature.
+    AI_WAIT = max(0.2, float(os.environ.get("NOX_AI_WAIT") or AI_WAIT))
+except ValueError:
+    pass
+
+# Names, not accounts. Nothing is stored under one, nothing is rated under one,
+# and no row anywhere in Supabase answers to any of them.
+AI_NAMES = [
+    "cutydaeheech0",
+    "TheNlEL",
+    "goutham111",
+    "Paradoxical_MovesbyJJ",
+    "gaymonster",
+    "jungjungkook",
+    "676767",
+]
+
+# How many of a player's last fallback opponents to remember, so the same name
+# does not turn up twice running. Well under len(AI_NAMES) — memory as long as
+# the list would leave nothing to choose from.
+AI_NAME_MEMORY = 3
+AI_RECENT_MAX = 500     # ... and the remembering is a courtesy, so it is bounded
+ai_recent = {}          # player key -> the names they were last given, oldest first
+
+# ------------------------------------------------------------ the house rooms
+#
+# The friendly page used to open on "Nobody is hosting yet" for almost everybody,
+# because a room only exists while a person is sitting in it, and a small
+# server rarely has one sitting there when the next one arrives. So the house
+# keeps seven rooms of its own on the list, always: two of each vision that
+# hides something and one Sighted, each hosted by a bot under a name that
+# reads like anybody else's. They are the fallback opponent above wearing a
+# room instead of a queue — a `BotClient` at the head of a `Room`, joined
+# through `handle_join()` like any other room, seated by
+# `start_game_between()` like any other pairing, played in the joiner's own
+# browser like any other fallback game, and offered a rematch, a draw and a
+# resignation through the doors every game uses. Nothing here is a second
+# multiplayer system, and nothing here touches the ranked queue: a house bot
+# is never in `lobby`, `handle_find()` never sees one, `may_play_ranked()` is
+# not consulted (these are friendly games, and stay friendly across a
+# rematch), and no rating is ever written for anybody.
+#
+# A room that is joined is re-seated on the spot — a fresh `BotClient`, the same
+# name at the same rating, the colour drawn again — so the list is seven
+# rooms long at every instant and never drains. The order is the slot order
+# below, whatever order the dict happens to hold them in, so the page does not
+# reshuffle the list every time somebody sits down.
+#
+# The names are names and nothing more: not rows, not accounts, not on any
+# ladder, and test_system_profiles.py checks they share nothing with the
+# system profiles or with AI_NAMES. Each is held in `names` for the life of
+# the process, so no guest can turn up wearing one — two boards that both say
+# "SashaLund" would be two boards lying to somebody. The rating on the card is
+# what the game is played at (the page sizes its engine from it), fixed per
+# name rather than derived from the joiner, because a card has to say a number
+# before it knows who is reading it.
+HOUSE_ROOMS = [
+    # (vision, name, rating, minutes, increment)
+    ("total",   "quietRook88",  1340, 15, 0),
+    ("total",   "HalvardM",     1510, 10, 0),
+    ("blind",   "pawnstorm_ed",  960, 10, 0),
+    ("blind",   "SashaLund",    1180,  5, 3),
+    ("fog",     "mirrorknight", 1090, 10, 0),
+    ("fog",     "Teodor_V",     1425,  5, 0),
+    ("sighted", "emberline7",    820, 10, 0),
+]
+
+# What the page shows a player who has no rating of their own (START_ELO in
+# blind-chess.html). The fallback opponent is sized against the number the
+# player is actually looking at while they wait, so the two have to agree.
+START_ELO = 100
+RATING_TTL = 120        # seconds a rating read out of Supabase is reused for
+RATING_CACHE_MAX = 500  # ... and how many players' worth of that to keep
+player_ratings = {}     # account id -> (rating, when it was read)
+
+# ------------------------------------------------------- the system profiles
+#
+# Twenty-one accounts at the top of the ladder that nobody can sign in as —
+# supabase-system-profiles.sql makes them, and flags each row `is_bot`. They
+# exist so that the leaderboard, the Social search and a friend request find
+# them exactly as they find anybody, through the profiles table and nothing
+# else. They are the opposite of the fallback opponent above in every way that
+# matters here: that is a seat with no account, and these are accounts with no
+# seat. `is_ai` on a Client says "the fallback bot is sitting here"; `is_bot`
+# says "this token belongs to a system profile", and the two are never both
+# true, because a system profile never gets a seat at all.
+#
+# The exclusion is structural rather than a matter of them being offline.
+# handle_hello() refuses the token — a system profile is a guest at most, never
+# a verified client — and may_play_ranked() and handle_find() refuse the flag
+# again, so a future route into the ranked queue would have to get past all
+# three. The fallback opponent never comes from this set: ai_fallback() builds
+# a BotClient out of AI_NAMES, which are names and not rows, and
+# test_system_profiles.py checks that the two lists share nothing.
+#
+# The server learns the set from the database (supabase_db.bot_ids()) rather
+# than from a list of its own, so there is one list of them and it is the one
+# the leaderboard reads. It is read at startup and again when it has gone
+# stale, always outside the lock — and the flag also rides in the token's
+# app_metadata, so a server that cannot read the table still refuses them.
+BOT_IDS_TTL = 600
+bot_ids = set()         # account ids flagged is_bot, as last read out of profiles
+bot_ids_read = 0.0      # when; 0 means never
 
 
 def log(*a):
@@ -99,6 +250,18 @@ class Client:
         self.user_id = None
         self.name = "Guest"
         self.verified = False
+        # A real player only. The bot below overrides it, and every test of
+        # "is this a person" in this file reads it rather than the class.
+        self.is_ai = False
+        # A token for one of the system profiles — the twenty-one leaderboard
+        # accounts nobody can sign in as. Set by handle_hello(), which also
+        # refuses to verify such a token; kept as a flag of its own so that
+        # the ranked door and the queue can refuse it again without having to
+        # know why the client is not verified. Never true on a BotClient.
+        self.is_bot = False
+        # The countdown to a fallback opponent, while this client is in the
+        # ranked queue and nobody has turned up. None whenever it is not.
+        self.ai_timer = None
 
     def send(self, obj):
         if not self.alive:
@@ -113,8 +276,37 @@ class Client:
         return "<client %s>" % self.id
 
 
+class BotClient(Client):
+    """A seat at the board with nobody sitting in it.
+
+    The fallback opponent is not a connection and not an account: it is a name,
+    a rating good for this one game, and something for `Game` to hold the other
+    end of. It plays in the player's own browser — the rules and the engine
+    have always lived there, and there is no chess in this process to play
+    with — so nothing is ever sent to it and nothing ever arrives from it.
+
+    It subclasses Client only so that everything downstream of pairing works
+    unchanged: `Game` seats it, `opponent_of` finds it, `finish_game` tells it
+    the news and hears nothing back. It is never registered under an account,
+    never put in `lobby` or `rooms`, and never handed a challenge, so no real
+    player can be paired with one by any route but the timeout, and two of them
+    can never meet.
+    """
+
+    def __init__(self, name, elo):
+        super().__init__(None, ("bot", 0))
+        self.name = name
+        self.elo = elo            # for this game only; it is not a stored rating
+        self.is_ai = True
+        self.verified = False     # said out loud, and never overridden
+
+    def send(self, obj):
+        """There is nobody there. Swallowed rather than framed at a dead socket."""
+        pass
+
+
 class Game:
-    def __init__(self, white, black, mode, minutes, inc=0, kind="friendly"):
+    def __init__(self, white, black, mode, minutes, inc=0, kind="friendly", ai=None):
         self.id = uuid.uuid4().hex[:8]
         self.players = {WHITE: white, BLACK: black}
         self.mode = mode
@@ -125,6 +317,11 @@ class Game:
         # of them — a ranked game must never be played again as a friendly one.
         self.kind = kind
         self.moves = []          # each: {ply, from, to, promo, san}
+        # {name, elo, bot} when the opponent is the fallback bot, None when the
+        # other side is a person. The server decides this and nothing else may:
+        # a client cannot claim its opponent is a bot, and cannot choose what
+        # the bot is rated.
+        self.ai = ai
         self.turn = WHITE
         self.over = None
         self.started = time.time()
@@ -141,13 +338,22 @@ class Game:
 class Room:
     """A game someone has set up and is sitting in, waiting for anyone to join."""
 
-    def __init__(self, host, mode, minutes, inc, color):
+    def __init__(self, host, mode, minutes, inc, color, rating=START_ELO, slot=None):
         self.id = uuid.uuid4().hex[:8]
         self.host = host
         self.mode = mode
         self.minutes = minutes
         self.inc = inc
         self.color = color        # the colour the host will play; joiner takes the other
+        # What the card says the host is rated. Read once, when the room is
+        # made — a rating cannot move while a room is open — and read by the
+        # caller rather than here, since a host's may come off the network and
+        # a Room is made under the lock.
+        self.rating = rating
+        # Which of HOUSE_ROOMS this is, or None for a room a person is hosting.
+        # The page is not told: a card is a vision, a name, a rating and a
+        # button, whoever is behind it.
+        self.slot = slot
         self.created = time.time()
 
     def public(self):
@@ -157,6 +363,8 @@ class Room:
             "minutes": self.minutes,
             "inc": self.inc,
             "color": self.color,
+            "name": self.host.name,
+            "rating": self.rating,
         }
 
 
@@ -303,6 +511,124 @@ def unregister_user(user_id, client):
             by_user.pop(user_id, None)
 
 
+class NameHold:
+    """Who a name belongs to on this server, and which connections say so."""
+
+    __slots__ = ("owner", "clients")
+
+    def __init__(self, owner):
+        self.owner = owner        # ("user", account id) or ("guest", client id)
+        self.clients = set()
+
+
+def name_owner_of(client):
+    """The party a connection holds its name for.
+
+    An account holds a name across every tab it has open, so the key is the
+    account; a guest is nobody but this one socket, so the key is the socket.
+    """
+    if client.user_id:
+        return ("user", client.user_id)
+    return ("guest", client.id)
+
+
+def name_taken(name, owner):
+    """True when somebody *else* is called this. Caller holds the lock."""
+    hold = names.get(name.lower())
+    return hold is not None and hold.owner != owner
+
+
+def mint_guest_name():
+    """Guest-38154: the shape the page mints, minted here for the same reason.
+
+    The page names a guest before it connects and offers that name in hello;
+    when the offer cannot be honoured this is what they are called instead,
+    and the welcome tells them so.
+    """
+    return "Guest-%05d" % random.randrange(100000)
+
+
+def free_name_for(client, wanted):
+    """The name this connection will actually go by. Caller holds the lock.
+
+    `wanted` is what the token or the message asked for, already cleaned.
+    Their own name is always theirs — an account's second tab, or a guest
+    saying hello again, is not a collision. Anybody else's is not: a guest
+    is handed a fresh Guest-##### instead, and an account falls back to the
+    placeholder its profile row was created with, `player_` and the first
+    eight characters of its id, which is unique by construction and is
+    exactly what the page shows an account that has never chosen a name.
+    Both loop, because a hand-written client can call itself anything,
+    including somebody's fallback.
+    """
+    owner = name_owner_of(client)
+    if wanted and not name_taken(wanted, owner):
+        return wanted
+    if client.user_id:
+        base = "player_" + client.user_id[:8]
+        candidate = base
+        n = 1
+        while name_taken(candidate, owner):
+            n += 1
+            candidate = "%s-%d" % (base, n)
+        return candidate
+    candidate = mint_guest_name()
+    while name_taken(candidate, owner):
+        candidate = mint_guest_name()
+    return candidate
+
+
+def release_name(client):
+    """This connection no longer answers to its name. Caller holds the lock.
+
+    The name stays taken while another connection of the same account still
+    holds it; a guest's goes the moment their one socket does.
+    """
+    hold = names.get(client.name.lower())
+    if hold is None:
+        return
+    hold.clients.discard(client)
+    if not hold.clients:
+        names.pop(client.name.lower(), None)
+
+
+def claim_name(client, wanted):
+    """Give this connection a name nobody else on the server has.
+
+    Caller holds the lock. Sets `client.name` and returns the guests, if any,
+    who were wearing an account's name and have just been renamed — the
+    caller tells them, since nothing may be sent under the lock.
+
+    First come, first served, with one exception: an account's name is the
+    account's. A guest is a name for one visit and nothing more, so a guest
+    who turns up already called what somebody's profile says — only a
+    hand-written client can, the page mints Guest-##### — gives it up when
+    that account arrives, and is given a fresh guest name in its place. The
+    other way round, an account whose name a *different account* already
+    holds — two profiles that agree on a name, which the unique index exists
+    to prevent — keeps the placeholder until the other signs off. There is no
+    fair way to pick between two accounts here; there is a fair way to pick
+    between an account and a guest.
+    """
+    release_name(client)
+    owner = name_owner_of(client)
+    evicted = []
+    if wanted and client.user_id:
+        hold = names.get(wanted.lower())
+        if hold is not None and hold.owner[0] == "guest":
+            names.pop(wanted.lower())
+            evicted = list(hold.clients)
+    client.name = free_name_for(client, wanted)
+    names.setdefault(client.name.lower(), NameHold(owner)).clients.add(client)
+    # The account is on the register before the guest is renamed, so the fresh
+    # guest name cannot be the one just given up — the mint would otherwise
+    # see it as free.
+    for guest in evicted:
+        guest.name = free_name_for(guest, None)
+        names.setdefault(guest.name.lower(), NameHold(("guest", guest.id))).clients.add(guest)
+    return evicted
+
+
 def prune_challenges(now=None):
     """Drop invitations nobody answered. Caller holds the lock.
 
@@ -327,6 +653,20 @@ def take_challenges_of(client, user_id=None):
     return mine
 
 
+def room_list():
+    """The list as the page shows it. Caller holds the lock.
+
+    The house rooms first, in slot order, then everybody else's in the order
+    they were opened. Slot order rather than dict order because a house room
+    that has just been joined is a new entry at the end of the dict, and a
+    list that reshuffled itself every time somebody sat down would be a list
+    that said which rooms are the house's.
+    """
+    house = sorted((r for r in rooms.values() if r.slot is not None), key=lambda r: r.slot)
+    theirs = [r for r in rooms.values() if r.slot is None]
+    return [r.public() for r in house + theirs]
+
+
 def broadcast_rooms():
     """Everyone watching the list sees it the moment it changes.
 
@@ -334,7 +674,7 @@ def broadcast_rooms():
     must not hold up the room list for everybody else.
     """
     with lock:
-        payload = {"t": "rooms", "rooms": [r.public() for r in rooms.values()]}
+        payload = {"t": "rooms", "rooms": room_list()}
         watchers = list(lobby_subs)
     for client in watchers:
         client.send(payload)
@@ -518,16 +858,6 @@ def handle_puzzle_result(client, msg):
     client.send({"t": "puzzleRating", "rating": after, "delta": after - before, "saved": saved})
 
 
-def clean_guest_name(raw):
-    """Guests are held to the same naming rule as accounts.
-
-    The page no longer offers guests a name box at all, so in practice this
-    only sees hand-written clients — but whatever an opponent ends up reading
-    on their screen should have passed the same rule either way.
-    """
-    return supabase_auth.clean_name(raw) or "Guest"
-
-
 def clean_inc(raw):
     """The seconds added after each move, from a message we do not trust.
 
@@ -546,6 +876,176 @@ def time_label(minutes, inc):
     return "%s+%s" % (minutes, inc) if inc else "%s min" % minutes
 
 
+def later(delay, fn, *args):
+    """Run something once, later, on a thread that cannot hold the process open."""
+    timer = threading.Timer(delay, fn, args=args)
+    timer.daemon = True
+    timer.start()
+    return timer
+
+
+def ai_elo_for(rating):
+    """What the fallback opponent is rated at, against this player.
+
+    The player's Elo, a hundredth of it, and nine: a shade above them at every
+    rating, and a shade further above the higher they climb, so the game reads
+    as a small step up rather than as a handout. Worked out fresh for every
+    match — these names are not accounts and carry no rating between games.
+    """
+    return int(round(rating + rating / 100.0 + 9))
+
+
+def player_rating_of(client):
+    """The player's ranked rating, as the server understands it.
+
+    Never called while holding the lock: it may be an HTTP round trip, and
+    nobody else may be paired while this thread holds up matchmaking. Read from
+    Supabase rather than from the client, because the AI's rating follows from
+    this one and a number the browser sends is a number the browser chooses.
+    Cached briefly — a rating cannot move mid-search, and a player who searches
+    twice should not cost two round trips.
+
+    A guest, or a server with no Supabase, gets the starting rating, which is
+    exactly the number the page has been showing them on the badge.
+    """
+    if not client.user_id:
+        return START_ELO
+    with lock:
+        hit = player_ratings.get(client.user_id)
+    if hit and time.time() - hit[1] < RATING_TTL:
+        return hit[0]
+    stored = supabase_db.get_rating(client.user_id)      # ...and this is the slow part
+    rating = stored if isinstance(stored, int) else START_ELO
+    with lock:
+        player_ratings[client.user_id] = (rating, time.time())
+        while len(player_ratings) > RATING_CACHE_MAX:
+            player_ratings.pop(next(iter(player_ratings)))
+    return rating
+
+
+def ai_name_for(client):
+    """A fallback name this player has not just had. Caller holds the lock."""
+    who = client.user_id or client.id
+    seen = ai_recent.get(who, [])
+    fresh = [n for n in AI_NAMES if n not in seen] or list(AI_NAMES)
+    name = random.choice(fresh)
+    ai_recent.pop(who, None)          # re-inserted at the end, so the cap sheds the stalest
+    ai_recent[who] = (seen + [name])[-AI_NAME_MEMORY:]
+    while len(ai_recent) > AI_RECENT_MAX:
+        ai_recent.pop(next(iter(ai_recent)))
+    return name
+
+
+def arm_ai_fallback(client, key):
+    """Start the countdown to a bot. Caller holds the lock.
+
+    The timer object identifies itself when it fires, so a player who gives up
+    and queues again cannot be seated by the countdown they already cancelled.
+    """
+    cancel_ai_fallback(client)
+    timer = later(AI_WAIT, lambda: ai_fallback(client, key, timer))
+    client.ai_timer = timer
+
+
+def cancel_ai_fallback(client):
+    """Call the countdown off — paired, cancelled, or gone. Caller holds the lock."""
+    timer = client.ai_timer
+    if timer is not None:
+        client.ai_timer = None
+        timer.cancel()
+
+
+def ai_fallback(client, key, timer):
+    """Nobody turned up. Seat a bot — unless, by now, somebody has.
+
+    The re-check under the lock is the whole of the race protection, and it is
+    exact rather than approximate: `lobby[key]` is every player waiting on
+    these terms, so this player still standing in it with nobody live beside
+    them is the proof that no compatible opponent exists. (`handle_find` pairs
+    anyone who arrives with whoever is already there, so a second live waiter
+    is a moment rather than a state — but it is asked for rather than assumed,
+    because the queue holds a list and a list can hold two.) `handle_find`
+    pairs under the same lock. Either the pairing gets there first, and this
+    finds itself out of the queue and does nothing, or this gets there first
+    and takes the player out of the queue before the pairing can look. There is
+    no third outcome and no instant at which two players could each be given a
+    bot instead of each other.
+    """
+    if not client.alive:
+        return
+    mode, minutes, inc, kind = key
+    # Read before the lock: it may go to the network, and matchmaking for
+    # everybody on the server stops while this thread holds it.
+    elo = ai_elo_for(player_rating_of(client))
+    with lock:
+        # A timer that fired just as it was cancelled: whatever is armed now,
+        # if anything, is not this one, and it is not this one's business.
+        if client.ai_timer is not timer:
+            return
+        client.ai_timer = None
+        if not client.alive or client.game:
+            return
+        queue = lobby.get(key) or []
+        if client not in queue or client.queue_key != key:
+            return                     # paired, gave up, or queued for something else
+        if any(c is not client and c.alive and not c.game and not c.is_bot for c in queue):
+            return                     # a person is standing right there; they win
+        leave_lobby(client)
+        name = ai_name_for(client)
+        bot = BotClient(name, elo)
+        # Colours are the server's call here exactly as they are between two
+        # people, and the pairing is the same pairing: one Game, one way out.
+        game, outgoing = start_game_between(
+            client, bot, random.choice((WHITE, BLACK)),
+            mode, minutes, inc, kind=kind,
+            ai={"name": name, "elo": elo, "bot": True})
+    for player, payload in outgoing:
+        player.send(payload)
+    log("no opponent for %s after %.1fs — %s (%d Elo) takes the board, %s %s, %s"
+        % (client.id, AI_WAIT, name, elo, kind, mode, time_label(minutes, inc)))
+
+
+def ai_accept_draw(game):
+    """The fallback opponent takes the half point, through the usual door."""
+    with lock:
+        finish_game(game, "draw", None)
+
+
+def refresh_bot_ids():
+    """Re-read the system profiles' ids when the last read is stale.
+
+    Never called while holding the lock: it may be an HTTP round trip. A read
+    that fails keeps the last set rather than emptying it — an unreachable
+    database is not evidence that the profiles have gone.
+    """
+    global bot_ids, bot_ids_read
+    with lock:
+        stale = time.time() - bot_ids_read >= BOT_IDS_TTL
+    if not stale:
+        return
+    found = supabase_db.bot_ids()            # ...and this is the slow part
+    with lock:
+        bot_ids_read = time.time()
+        if found is not None:
+            bot_ids = found
+
+
+def is_system_profile(user_id, claims):
+    """Does this verified token belong to one of the system profiles?
+
+    Two independent answers, either of which is enough: the id is in the set
+    read out of profiles, or the token's own app_metadata says so.
+    app_metadata is the half of a Supabase user's metadata that the user
+    cannot write, which is what makes it worth reading — user_metadata is
+    written through the public API and would be a way for anybody to call
+    themselves a system profile, or to stop being one.
+    """
+    with lock:
+        flagged = user_id in bot_ids
+    meta = claims.get("app_metadata")
+    return flagged or (isinstance(meta, dict) and meta.get("is_bot") is True)
+
+
 def handle_hello(client, msg):
     """Identify the player, by token if they have one.
 
@@ -555,45 +1055,84 @@ def handle_hello(client, msg):
     still play friendly games.
     """
     was = client.user_id
+    client.is_bot = False              # a second hello may be somebody else
     token = msg.get("token")
+    reason = None
     if token:
         try:
             claims = supabase_auth.verify(token)
         except supabase_auth.AuthError as err:
-            client.user_id = None
-            client.verified = False
-            client.name = clean_guest_name(msg.get("name"))
-            with lock:
-                unregister_user(was, client)   # no longer anybody, if it ever was
+            claims = None
+            reason = str(err)
             log("%s rejected token: %s" % (client.id, err))
-            client.send({
-                "t": "welcome",
-                "verified": False,
-                "name": client.name,
-                "reason": str(err),
-            })
-            return
+        else:
+            refresh_bot_ids()          # outside the lock, and only when stale
+            if is_system_profile(claims["sub"], claims):
+                # A real signature over a real account, and still not a
+                # player: see "the system profiles". Refused like a bad
+                # token — the connection goes on as a guest below, claims a
+                # guest's name like any other, and the welcome says why —
+                # except that the flag stays on the connection so that even
+                # the guest it is left as is turned away from the queue.
+                client.is_bot = True
+                claims = None
+                reason = "system profiles cannot sign in"
+                log("%s rejected token: %s" % (client.id, reason))
+    else:
+        claims = None
+    if claims:
         client.user_id = claims["sub"]
-        client.name = supabase_auth.display_name(claims)
         client.verified = True
-        log("%s signed in as %s (%s)" % (client.id, client.name, client.user_id[:8]))
+        # The profile row is the copy the unique index guards, so it is the
+        # copy that decides — the token's metadata is the fallback for a
+        # server with no service key, and it is writable by the account
+        # itself, which is why it cannot be the authority on a name that has
+        # to be nobody else's. This may be a round trip, and hello holds no
+        # lock, so that is fine here and would not be lower down.
+        stored = supabase_auth.clean_name(supabase_db.get_display_name(client.user_id))
+        wanted = stored or supabase_auth.display_name(claims)
     else:
         client.user_id = None
         client.verified = False
-        client.name = clean_guest_name(msg.get("name"))
+        wanted = supabase_auth.clean_name(msg.get("name"))
 
     # A second hello on the same socket re-identifies it, so the old entry has
     # to go or a signed-out tab would still be reachable as whoever it was.
+    # The name is claimed under the same lock: two hellos arriving together
+    # asking for one name must not both be told yes.
     with lock:
         unregister_user(was, client)
         register_user(client)
+        renamed = claim_name(client, wanted)
 
-    client.send({
+    if client.verified:
+        log("%s signed in as %s (%s)%s" % (
+            client.id, client.name, client.user_id[:8],
+            "" if client.name == wanted else " — %r is taken" % wanted))
+    elif wanted and client.name != wanted:
+        log("%s wanted to be %r, is %s" % (client.id, wanted, client.name))
+
+    # A guest just renamed out from under an account's name hears about it the
+    # same way they heard their name the first time: the welcome is what the
+    # page takes its guest name from.
+    for guest in renamed:
+        log("%s was wearing %s's name; now %s" % (guest.id, client.name, guest.name))
+        guest.send({
+            "t": "welcome",
+            "verified": False,
+            "name": guest.name,
+            "accounts": supabase_auth.enabled(),
+        })
+
+    welcome = {
         "t": "welcome",
         "verified": client.verified,
         "name": client.name,
         "accounts": supabase_auth.enabled(),
-    })
+    }
+    if reason:
+        welcome["reason"] = reason
+    client.send(welcome)
 
 
 def may_play_ranked(client):
@@ -605,6 +1144,13 @@ def may_play_ranked(client):
     game — the queue and a rematch of one — and a rule enforced at one of them
     is not a rule.
     """
+    if client.is_bot:
+        # Never, on any server. A system profile has no seat to play from and a
+        # rating that is not allowed to move; a hello that refused the token
+        # already made it a guest, and this refuses it again by name so that a
+        # server with accounts switched off — where every guest may play
+        # ranked — still does not seat one.
+        return False
     return client.verified or not supabase_auth.enabled()
 
 
@@ -617,6 +1163,10 @@ def handle_find(client, msg):
     kind = msg.get("kind", "friendly")
     if kind not in ("ranked", "friendly"):
         kind = "friendly"
+    if client.is_bot:
+        # Not a player at all, in either queue: see "the system profiles".
+        client.send({"t": "error", "msg": "system profiles do not play"})
+        return
     if kind == "ranked" and not may_play_ranked(client):
         client.send({"t": "error", "msg": "ranked play needs a signed-in account"})
         return
@@ -630,8 +1180,13 @@ def handle_find(client, msg):
     with lock:
         queue = lobby.get(key, [])
         if client in queue:
-            return                       # already waiting here; asking twice changes nothing
-        waiting = [c for c in queue if c.alive and not c.game]
+            # already waiting here; asking twice changes nothing, and the
+            # countdown to a fallback opponent stands rather than restarting
+            return
+        # ...and never a system profile, even if one were somehow standing
+        # here: the door above is the rule, and this is the rule again at the
+        # one place a candidate is actually chosen.
+        waiting = [c for c in queue if c.alive and not c.game and not c.is_bot]
         # Whoever you have just played is the one person New Game should not
         # hand you straight back: pressing it means "find me an opponent", and
         # being given the same one a second later reads as a rematch nobody
@@ -645,6 +1200,11 @@ def handle_find(client, msg):
         if partner is None and waiting:
             partner = waiting[0]
         if partner is not None:
+            # A real opponent, so neither of them is waiting for a bot any more.
+            # This is the branch that has priority over the countdown, and it
+            # holds the lock the countdown has to take before it can seat one.
+            cancel_ai_fallback(partner)
+            cancel_ai_fallback(client)
             leave_lobby(partner)
             # colours are the server's call, so neither client can pick for itself
             pair = [partner, client]
@@ -675,9 +1235,15 @@ def handle_find(client, msg):
                 side.send(payload)
         else:
             leave_lobby(client)          # never in two queues at once
+            cancel_ai_fallback(client)   # ...and a search on other settings is called off
             lobby.setdefault(key, []).append(client)
             client.queue_key = key
             client.send({"t": "waiting"})
+            # Ranked only. A friendly game or a room is arranged with somebody
+            # in particular, and nobody waiting for one asked for a bot —
+            # Play Bot is a screen of its own, with a ladder to choose from.
+            if kind == "ranked":
+                arm_ai_fallback(client, key)
             log("%s waiting — %s %s, %s" % (client.id, kind, mode, time_label(minutes, inc)))
 
 
@@ -702,11 +1268,51 @@ def leave_lobby(client):
         lobby.pop(key, None)
 
 
+def house_room(slot):
+    """One of the seven, freshly seated. Caller holds the lock.
+
+    A new BotClient every time rather than the old one moved back, because the
+    old one is now a player in somebody's game — `Game` holds it, `finish_game`
+    will write its `last_game`, a rematch will name it — and a seat cannot be
+    at two boards. The colour is drawn again, so the same room does not always
+    hand the joiner the same side.
+    """
+    mode, name, rating, minutes, inc = HOUSE_ROOMS[slot]
+    host = BotClient(name, rating)
+    room = Room(host, mode, minutes, inc, random.choice((WHITE, BLACK)),
+                rating=rating, slot=slot)
+    host.room = room
+    # The name is the house's for as long as the process runs: held in the
+    # same register a guest's or an account's name goes in, under an owner
+    # nobody can connect as, so hello can never hand it to anyone else. The
+    # bot is kept in the hold's client set so that the hold is never empty
+    # and so never released. Re-asserting it on every re-seat is harmless.
+    hold = names.setdefault(name.lower(), NameHold(("house", slot)))
+    hold.clients.add(host)
+    return room
+
+
+def seed_house_rooms():
+    """Put the seven house rooms on the list. Once, at startup.
+
+    Idempotent: a slot that is already seated is left alone, so a test may
+    call it again after clearing `rooms` and get the same seven back.
+    """
+    with lock:
+        seated = {r.slot for r in rooms.values() if r.slot is not None}
+        for slot in range(len(HOUSE_ROOMS)):
+            if slot not in seated:
+                room = house_room(slot)
+                rooms[room.id] = room
+    log("%d house rooms open on the friendly page — %s"
+        % (len(HOUSE_ROOMS), ", ".join("%s (%s)" % (n, m) for m, n, _, _, _ in HOUSE_ROOMS)))
+
+
 def handle_lobby(client):
     """Start watching the room list, and get it as it stands right now."""
     with lock:
         lobby_subs.add(client)
-        payload = {"t": "rooms", "rooms": [r.public() for r in rooms.values()]}
+        payload = {"t": "rooms", "rooms": room_list()}
     client.send(payload)
 
 
@@ -722,13 +1328,17 @@ def handle_host(client, msg):
     color = msg.get("color", WHITE)
     if color not in (WHITE, BLACK):
         color = WHITE
+    # What the card will say the host is rated. Before the lock, because for
+    # an account this may be a round trip to Supabase, and the same read the
+    # fallback opponent is sized from — the card and the badge agree.
+    rating = player_rating_of(client)
     with lock:
         if client.game:
             client.send({"t": "error", "msg": "already in a game"})
             return
         if client.room:                     # one room per host — replace the old one
             rooms.pop(client.room.id, None)
-        room = Room(client, mode, minutes, inc, color)
+        room = Room(client, mode, minutes, inc, color, rating=rating)
         rooms[room.id] = room
         client.room = room
     client.send({"t": "hosting", "room": room.id})
@@ -764,9 +1374,22 @@ def handle_join(client, msg):
         del rooms[room.id]
         host = room.host
         host.room = None
+        # A house room's host is a bot, and the page has to be told so — it
+        # is the page that will play the bot's moves, exactly as it does for
+        # the ranked fallback, and the server is the only party allowed to
+        # say who is a bot. The name and the rating are the card's own.
+        ai = None
+        if host.is_ai:
+            ai = {"name": host.name, "elo": host.elo, "bot": True}
         # the host plays the colour they asked for; the joiner takes the other
         game, outgoing = start_game_between(host, client, room.color,
-                                            room.mode, room.minutes, room.inc)
+                                            room.mode, room.minutes, room.inc, ai=ai)
+        # ...and the house keeps its table. Re-seated here, under the same
+        # lock that emptied it, so no listing between the two ever comes up
+        # six rooms long.
+        if room.slot is not None:
+            again = house_room(room.slot)
+            rooms[again.id] = again
     for player, payload in outgoing:
         player.send(payload)
     log("room %s filled — %s (w) vs %s (b), %s, %s"
@@ -777,6 +1400,7 @@ def handle_join(client, msg):
 
 def handle_cancel(client):
     with lock:
+        cancel_ai_fallback(client)      # nobody is waiting, so nothing is owed one
         leave_lobby(client)
     client.send({"t": "cancelled"})
 
@@ -786,6 +1410,12 @@ def handle_move(client, msg):
         game = client.game
         if not game or game.over:
             client.send({"t": "error", "msg": "no game in progress"})
+            return
+        if game.ai:
+            # There is nobody to relay to. Both sides of a fallback game are
+            # played in the one browser, which is why the page does not send
+            # its moves here either — and why a move that does arrive is
+            # dropped quietly rather than refused for being out of turn.
             return
         if client.color != game.turn:
             client.send({"t": "error", "msg": "not your turn", "ply": len(game.moves)})
@@ -836,6 +1466,14 @@ def handle_draw_offer(client):
     with lock:
         game = client.game
         if not game or game.over:
+            return
+        if game.ai:
+            # The fallback opponent accepts, and accepts through the same door
+            # two people use: the offer goes out, `over` comes back, and the
+            # player's screen does exactly what it does against anybody else.
+            # The pause is only so that it does not answer an offer faster than
+            # a person could have read it.
+            later(random.uniform(0.9, 2.0), ai_accept_draw, game)
             return
         opponent = game.opponent_of(client)
     opponent.send({"t": "draw-offer"})
@@ -899,37 +1537,54 @@ def handle_chat(client, msg):
 
 # ------------------------------------------------------- challenging a friend
 
-def start_game_between(host, guest, host_color, mode, minutes, inc, kind="friendly"):
+def start_game_between(host, guest, host_color, mode, minutes, inc, kind="friendly", ai=None):
     """Seat two named players at one board. Caller holds the lock.
 
     The same pairing handle_join does for a room, lifted out so a challenge
-    does not grow a second copy of it. Returns what to send each of them,
-    which the caller sends outside the lock.
+    does not grow a second copy of it — and so the fallback opponent does not
+    grow a third. Returns what to send each of them, which the caller sends
+    outside the lock.
+
+    `ai` describes the fallback opponent when that is who the guest is. It goes
+    into the game and into the payload, so the browser learns from the server
+    alone that it is playing a bot, what the bot is called and what it is
+    rated. Nothing a client says can put it there.
     """
     white, black = (host, guest) if host_color == WHITE else (guest, host)
-    game = Game(white, black, mode, minutes, inc, kind)
+    game = Game(white, black, mode, minutes, inc, kind, ai=ai)
     white.color, black.color = WHITE, BLACK
     white.game = black.game = game
     games[game.id] = game
     lobby_subs.discard(host)
     lobby_subs.discard(guest)
-    # neither of them is waiting anywhere else now
+    # neither of them is waiting anywhere else now, and neither is owed a bot
     for player in (host, guest):
+        cancel_ai_fallback(player)
         leave_lobby(player)
+    outgoing = []
+    for color, player in game.players.items():
+        other = game.opponent_of(player)
+        payload = {
+            "t": "start",
+            "game": game.id,
+            "color": color,
+            "mode": mode,
+            "minutes": minutes,
+            "inc": inc,
+            "kind": kind,
+            "opponent": other.name,
+            "opponentVerified": other.verified,
+        }
+        # Only ever true of the side facing the bot, and the bot's own copy is
+        # thrown away by the caller — but say it of the opponent rather than of
+        # the game, because that is the question the page is asking.
+        if ai and other.is_ai:
+            payload["ai"] = dict(ai)
+        outgoing.append((player, payload))
     # Whatever either of them still had out from an earlier board is answered
     # by this one. It rides back with the start payloads because the caller
     # already sends those outside the lock, one at a time.
-    return game, [(player, {
-        "t": "start",
-        "game": game.id,
-        "color": color,
-        "mode": mode,
-        "minutes": minutes,
-        "inc": inc,
-        "kind": kind,
-        "opponent": game.opponent_of(player).name,
-        "opponentVerified": game.opponent_of(player).verified,
-    }) for color, player in game.players.items()] + rematches_cleared_for(host, guest)
+    return game, outgoing + rematches_cleared_for(host, guest)
 
 
 def handle_challenge(client, msg):
@@ -1074,6 +1729,7 @@ def handle_rematch(client, msg):
     crossed = None
     invite = None
     guest = None
+    again = None
     with lock:
         prune_rematches()
         last = client.last_game
@@ -1096,33 +1752,58 @@ def handle_rematch(client, msg):
             client.send({"t": "error", "msg": "ranked play needs a signed-in account"})
             return
         other = last["opponent"]
-        if not other.alive or other.game or not last_game_is(other, game_id):
-            # They have left, or moved on to something else. Either way there
-            # is nobody sitting on the other side of that board any more.
-            client.send({"t": "rematch-gone", "game": game_id, "reason": "away"})
-            return
-
-        # Both pressed at nearly the same moment. The request that got here
-        # first stands and this press answers it, rather than leaving two
-        # invitations crossing in the air with neither one ever accepted.
-        theirs = next((r for r in rematches.values()
-                       if r.host is other and r.guest is client and r.game_id == game_id), None)
-        if theirs is not None:
-            crossed = theirs.id
+        if other.is_ai:
+            # There is nobody to ask. The fallback opponent was seated because
+            # the queue was empty, and it can answer a question the only way it
+            # answers anything — by being there. So a rematch of one is granted
+            # rather than put: the same name at the same rating, the same
+            # terms, colours swapped, and through start_game_between() like
+            # every other way into a Game. Asking would leave a box open until
+            # it lapsed at REMATCH_TTL, which is not a refusal and not a game.
+            # The rating is the one that game was played at rather than a fresh
+            # read: this is the same opponent again, and player_rating_of() may
+            # go to the network, which nothing holding this lock may do.
+            bot = BotClient(other.name, other.elo)
+            host_color = BLACK if last["color"] == WHITE else WHITE
+            game, again = start_game_between(
+                client, bot, host_color, last["mode"], last["minutes"],
+                last["inc"], kind=last["kind"],
+                ai={"name": bot.name, "elo": bot.elo, "bot": True})
         else:
-            # Pressed twice, or a duplicate of the same message arrived. The
-            # invitation already out is the answer to both: sending a second
-            # would leave the opponent with two boxes to answer.
-            mine = next((r for r in rematches.values()
-                         if r.host is client and r.game_id == game_id), None)
-            if mine is not None:
-                client.send({"t": "rematch-sent", "id": mine.id, "game": game_id})
+            if not other.alive or other.game or not last_game_is(other, game_id):
+                # They have left, or moved on to something else. Either way
+                # there is nobody sitting on the other side of that board.
+                client.send({"t": "rematch-gone", "game": game_id, "reason": "away"})
                 return
-            rem = Rematch(client, other, game_id, last["mode"], last["minutes"],
-                          last["inc"], last["kind"], last["color"])
-            rematches[rem.id] = rem
-            invite = dict(rem.public(), t="rematch-request")
-            guest = other
+
+            # Both pressed at nearly the same moment. The request that got here
+            # first stands and this press answers it, rather than leaving two
+            # invitations crossing in the air with neither one ever accepted.
+            theirs = next((r for r in rematches.values()
+                           if r.host is other and r.guest is client and r.game_id == game_id), None)
+            if theirs is not None:
+                crossed = theirs.id
+            else:
+                # Pressed twice, or a duplicate of the same message arrived. The
+                # invitation already out is the answer to both: sending a second
+                # would leave the opponent with two boxes to answer.
+                mine = next((r for r in rematches.values()
+                             if r.host is client and r.game_id == game_id), None)
+                if mine is not None:
+                    client.send({"t": "rematch-sent", "id": mine.id, "game": game_id})
+                    return
+                rem = Rematch(client, other, game_id, last["mode"], last["minutes"],
+                              last["inc"], last["kind"], last["color"])
+                rematches[rem.id] = rem
+                invite = dict(rem.public(), t="rematch-request")
+                guest = other
+    if again is not None:
+        for player, payload in again:
+            player.send(payload)
+        log("%s plays %s again — %s %s, %s"
+            % (client.id, last["opponent"].name, last["kind"], last["mode"],
+               time_label(last["minutes"], last["inc"])))
+        return
     if crossed is not None:
         handle_rematch_accept(client, {"id": crossed})
         return
@@ -1251,19 +1932,82 @@ def handle_message(client, raw):
         handle_rematch_cancel(client, msg)
     elif kind == "puzzleResult":
         handle_puzzle_result(client, msg)
+    elif kind == "live":
+        handle_live(client)
+    elif kind == "unlive":
+        handle_unlive(client)
+    elif kind == "watch":
+        handle_watch(client, msg)
+    elif kind == "unwatch":
+        handle_unwatch(client)
     elif kind == "ping":
         client.send({"t": "pong"})
     else:
         client.send({"t": "error", "msg": "unknown message %r" % (kind,)})
 
 
+def handle_live(client):
+    """Start watching the league's featured games, and get them as they stand.
+
+    Needs no hello: what is being watched is public, the same way the room
+    list is, and a home page should not have to claim a guest name to look at
+    a board. The subscription lives on the league rather than in `lobby_subs`
+    because it is pushed by the league's own thread, on every move, and the
+    room list is pushed by whoever changed a room.
+    """
+    if LEAGUE is None:
+        client.send(league.off_payload())
+        return
+    LEAGUE.subscribe(client)
+
+
+def handle_unlive(client):
+    if LEAGUE is not None:
+        LEAGUE.unsubscribe(client)
+
+
+def handle_watch(client, msg):
+    """Spectate one league game, by its id: its state now and every change.
+
+    Like `live`, it needs no hello and gives the connection nothing — no
+    seat, no colour, no `client.game` — which is the whole of the spectator
+    protection on this side. A move, a resignation, a result or a draw
+    offer from this connection meets the same "no game in progress" every
+    other seatless socket meets (handle_move and the rest), and a league
+    game is not a Game in `games` for anything to reach in the first place:
+    it is played on the league's thread, from the league's own state, and
+    the only way to change it is to be that thread.
+
+    The id is checked before it is looked up, because with a service key it
+    ends up in a query string.
+    """
+    game_id = str(msg.get("id") or "")
+    if not league.GAME_ID_RE.fullmatch(game_id):
+        client.send({"t": "error", "msg": "bad game id"})
+        return
+    if LEAGUE is None:
+        client.send({"t": "watch-game", "id": game_id, "at": int(time.time() * 1000),
+                     "game": None, "next": None, "off": True, "note": league.PUBLIC_NOTE["off"]})
+        return
+    LEAGUE.watch(client, game_id)
+
+
+def handle_unwatch(client):
+    if LEAGUE is not None:
+        LEAGUE.unwatch(client)
+
+
 def drop_client(client):
     client.alive = False
     dropped_room = False
+    if LEAGUE is not None:
+        LEAGUE.unsubscribe(client)
     with lock:
+        cancel_ai_fallback(client)   # a queue nobody is standing in owes nobody a game
         leave_lobby(client)
         lobby_subs.discard(client)
         unregister_user(client.user_id, client)
+        release_name(client)
         # A challenge is only worth anything while both ends are connected.
         # This client's own invitations go; invitations aimed at this account
         # go too, but only once its last connection has gone — another tab is
@@ -1314,9 +2058,27 @@ def drop_client(client):
 # type is not decoration — browsers refuse to stream-compile without it.
 ROOT = os.path.dirname(HERE)
 STATIC_FILES = {
+    "/assets/home-button-moon.jpg": ("assets/home-button-moon.jpg", "image/jpeg"),
+    "/assets/pieces/black-bishop.svg": ("assets/pieces/black-bishop.svg", "image/svg+xml"),
+    "/assets/pieces/black-king.svg": ("assets/pieces/black-king.svg", "image/svg+xml"),
+    "/assets/pieces/black-knight.svg": ("assets/pieces/black-knight.svg", "image/svg+xml"),
+    "/assets/pieces/black-pawn.svg": ("assets/pieces/black-pawn.svg", "image/svg+xml"),
+    "/assets/pieces/black-queen.svg": ("assets/pieces/black-queen.svg", "image/svg+xml"),
+    "/assets/pieces/black-rook.svg": ("assets/pieces/black-rook.svg", "image/svg+xml"),
+    "/assets/pieces/white-bishop.svg": ("assets/pieces/white-bishop.svg", "image/svg+xml"),
+    "/assets/pieces/white-king.svg": ("assets/pieces/white-king.svg", "image/svg+xml"),
+    "/assets/pieces/white-knight.svg": ("assets/pieces/white-knight.svg", "image/svg+xml"),
+    "/assets/pieces/white-pawn.svg": ("assets/pieces/white-pawn.svg", "image/svg+xml"),
+    "/assets/pieces/white-queen.svg": ("assets/pieces/white-queen.svg", "image/svg+xml"),
+    "/assets/pieces/white-rook.svg": ("assets/pieces/white-rook.svg", "image/svg+xml"),
+    "/assets/board-midnight.svg": ("assets/board-midnight.svg", "image/svg+xml"),
     "/engine/stockfish.wasm.js": ("engine/stockfish.wasm.js", "text/javascript; charset=utf-8"),
     "/engine/stockfish.wasm":    ("engine/stockfish.wasm",    "application/wasm"),
     "/assets/nox-logo.png":      ("assets/nox-logo.png",      "image/png"),
+    # the night sky every screen sits on (a JPEG, whatever the source was called)
+    "/assets/sky.jpg":           ("assets/sky.jpg",           "image/jpeg"),
+    # the moon behind the boxes down the right of the game screen (also a JPEG)
+    "/assets/moon.jpg":          ("assets/moon.jpg",          "image/jpeg"),
     # the seven rank badges the ranked screen shows, one per tier
     "/assets/tier-bronze.png":      ("assets/tier-bronze.png",      "image/png"),
     "/assets/tier-silver.png":      ("assets/tier-silver.png",      "image/png"),
@@ -1391,6 +2153,9 @@ def serve_static_file(sock, path):
     sock.sendall(head.encode() + body)
 
 
+SPECTATE_PATH = re.compile(r"/spectate/[A-Za-z0-9-]{1,64}/?$")
+
+
 def serve_http(sock, request_line):
     try:
         method, path, _ = request_line.split(" ", 2)
@@ -1401,7 +2166,12 @@ def serve_http(sock, request_line):
         sock.sendall(b"HTTP/1.1 405 Method Not Allowed\r\n\r\n")
         return
     path = path.split("?", 1)[0]
-    if path in ("/", "/index.html", "/blind-chess.html"):
+    # /spectate/<game id> is the page: the id is read off the URL by the
+    # page itself, which then asks the socket for that game — so a link to a
+    # game survives a refresh, and a link kept after the game has ended
+    # shows how it ended. The server serves the same file and looks nothing
+    # up; the socket is where the id is checked (handle_watch).
+    if path in ("/", "/index.html", "/blind-chess.html") or SPECTATE_PATH.match(path):
         try:
             with open(PAGE, "rb") as fh:
                 body = fh.read()
@@ -1420,15 +2190,32 @@ def serve_http(sock, request_line):
         serve_static_file(sock, path)
     elif path == "/health":
         with lock:
-            body = json.dumps({
+            status = {
                 "ok": True,
                 # players waiting, not queues with somebody in them — the
                 # queue holds a list per time control now
                 "waiting": sum(len(q) for q in lobby.values()),
                 "games": len(games),
-            }).encode()
+            }
+        # The league's own state, always: "off" is a state too, and the
+        # difference between off, starting, and stuck on a missing engine is
+        # exactly what somebody reading this endpoint is trying to learn.
+        status["league"] = LEAGUE.health() if LEAGUE is not None else \
+            {"state": "off", "note": league.PUBLIC_NOTE["off"]}
+        body = json.dumps(status).encode()
         sock.sendall(
             b"HTTP/1.1 200 OK\r\nContent-Type: application/json\r\nContent-Length: "
+            + str(len(body)).encode() + b"\r\n\r\n" + body
+        )
+    elif path == "/live.json":
+        # The same snapshot the socket pushes, for anybody polling — a
+        # debugging aid first, and the fallback for a viewer whose socket
+        # will not open. Never cached: it is wrong within seconds.
+        payload = LEAGUE.payload() if LEAGUE is not None else league.off_payload()
+        body = json.dumps(payload).encode()
+        sock.sendall(
+            b"HTTP/1.1 200 OK\r\nContent-Type: application/json\r\n"
+            b"Cache-Control: no-store\r\nContent-Length: "
             + str(len(body)).encode() + b"\r\n\r\n" + body
         )
     else:
@@ -1500,8 +2287,58 @@ def handle_connection(sock, addr):
             pass
 
 
+def start_league():
+    """Boot the AI league, and make sure a stop hands its games on cleanly.
+
+    Called once, from main(), before the port is bound: the league is a
+    thread of this process and nothing else — no command to run, no
+    endpoint to hit, no browser to connect. build() answers None only for
+    NOX_LEAGUE=off; everything that can go wrong after that (the database,
+    the migration, the engine, the players) is the league's own business,
+    retried on its thread and reported on /health, so this process never
+    decides at startup that it will have no league for the rest of its life.
+
+    Render replaces an instance by starting the next one and then sending
+    this one SIGTERM. Releasing the league's leases on the way out is what
+    lets the next instance sit down at the same boards straight away instead
+    of waiting for the leases to lapse — and it is the only thing the handler
+    does before exiting the way the default would have.
+    """
+    global LEAGUE
+    if LEAGUE is not None:
+        return                      # one league per process, whatever calls this twice
+    LEAGUE = league.build()
+    if LEAGUE is None:
+        return
+
+    def on_term(signum, frame):
+        log("SIGTERM — handing the league's games on")
+        LEAGUE.stop()
+        sys.exit(0)
+
+    try:
+        signal.signal(signal.SIGTERM, on_term)
+    except (ValueError, OSError):
+        pass                    # not the main thread, or a platform without it
+    LEAGUE.start()
+
+
 def main():
     load_puzzles()
+    # Which accounts are the system profiles, if the database can say. Read
+    # here so the very first hello already knows; refreshed when stale.
+    refresh_bot_ids()
+    with lock:
+        known = len(bot_ids)
+    if known:
+        log("%d system profiles known — none of them can sign in or be matched" % known)
+    # ...and those same accounts are the league's players: it reads the top
+    # twenty of each ladder out of the same flag, and is the one thing on this
+    # server that ever moves one of their ratings (through record_rated_game).
+    start_league()
+    # The friendly page's seven standing rooms. Before the socket opens, so the
+    # first lobby subscriber already sees them.
+    seed_house_rooms()
     # $PORT is what most hosts inject; --port wins when it is given explicitly
     port = int(os.environ.get("PORT") or 8787)
     if "--port" in sys.argv:
@@ -1527,6 +2364,8 @@ def main():
     except KeyboardInterrupt:
         log("shutting down")
     finally:
+        if LEAGUE is not None:
+            LEAGUE.stop()
         server.close()
 
 
