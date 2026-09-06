@@ -100,7 +100,7 @@ function makePage(path){
   const loc = { protocol:'http:', host:'127.0.0.1:8787', href:'http://127.0.0.1:8787' + (path || '/'),
                 pathname: path || '/', hash:'', search:'' };
   const history = { state:null, pushed:[], pushState(st, _t, p){ this.state = st; loc.pathname = p; this.pushed.push(p); },
-                    replaceState(st, _t, p){ this.state = st; loc.pathname = p; } };
+                    replaceState(st, _t, p){ this.state = st; if (p !== undefined) loc.pathname = p; } };
   const store = {};
   const storage = { getItem:k => (k in store ? store[k] : null),
                     setItem:(k,v)=>{ store[k] = String(v); }, removeItem:k => { delete store[k]; } };

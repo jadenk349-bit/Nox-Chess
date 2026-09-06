@@ -176,6 +176,7 @@ var account = null;
 var beeps = 0, screens = [], botTrips = 0, visionsPicked = [];
 function beep(){ beeps++; }
 function showScreen(n){ screens.push(n); }
+function navSync(){}                       // the history layer lives outside the section
 function goBot(){ botTrips++; }
 function selectMode(m){ visionsPicked.push(m); }
 
