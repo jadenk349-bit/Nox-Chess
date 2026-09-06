@@ -385,12 +385,41 @@ def finish_game(game, reason, winner=None, exclude=None):
 PUZZLE_RATINGS = {}
 
 def load_puzzles():
-    for track in ("opening", "middlegame", "endgame"):
-        path = os.path.join(ROOT, "puzzles", "%s.json" % track)
+    # Everything the page can put in front of a player, because this table is
+    # what handle_puzzle_result() checks an id against and an id that is not
+    # here is refused outright. Three groups, and the reason there are three is
+    # historical rather than principled:
+    #
+    #   the three phase ladders    the original layout. Still read, because a
+    #                              player's stored progress refers to them and
+    #                              enterTrack() can still reach them.
+    #   the five mode pools        what the Puzzle page actually serves now.
+    #                              These are dealt from a re-verified corpus, so
+    #                              211 of the 500 are ids this server had never
+    #                              seen — every one of them would have had its
+    #                              rating refused while the page happily played
+    #                              it. Adding them here is the whole fix.
+    #   the two practice sets      Opening and Middle Game Practices. They are
+    #                              walked by the same puzzle screen and priced
+    #                              the same way, so they answer to the same
+    #                              table. `reserve` is deliberately absent: it
+    #                              is not served, so it must not be rateable.
+    #
+    # A missing file is normal, not an error — a checkout without a generated
+    # corpus simply has less to rate.
+    sources = [("puzzles", t) for t in ("opening", "middlegame", "endgame")]
+    sources += [("puzzles/modes", m)
+                for m in ("sighted", "board", "blindfold", "fog", "rush")]
+    sources += [("practices", k) for k in ("opening", "middlegame")]
+    for folder, name in sources:
+        path = os.path.join(ROOT, folder, "%s.json" % name)
         try:
             with open(path, "r") as fh:
                 for puzzle in json.load(fh):
-                    PUZZLE_RATINGS[puzzle["id"]] = int(puzzle["seedRating"])
+                    # a practice carries no seedRating; price it at the middle
+                    # of the ladder rather than refusing to rate it at all
+                    rating = puzzle.get("seedRating")
+                    PUZZLE_RATINGS[puzzle["id"]] = int(rating) if rating else 1200
         except (OSError, ValueError, KeyError, TypeError):
             continue          # no puzzles installed: the mode simply has nothing to rate
     log("%d puzzles known" % len(PUZZLE_RATINGS))
@@ -1302,6 +1331,26 @@ STATIC_FILES = {
     "/puzzles/opening.json":     ("puzzles/opening.json",     "application/json; charset=utf-8"),
     "/puzzles/middlegame.json":  ("puzzles/middlegame.json",  "application/json; charset=utf-8"),
     "/puzzles/endgame.json":     ("puzzles/endgame.json",     "application/json; charset=utf-8"),
+    # The five mode pools behind the Puzzle page's five doors — Sighted, Only
+    # Board, Blindfold, Fog of War, Puzzle Rush. One verified corpus dealt out
+    # by tools/pool_assign.js so that a position is behind exactly one door;
+    # the three files above are what it is dealt *from*, and the page falls
+    # back to dealing them itself while these are still being generated.
+    #
+    # Listed one by one, like everything else here. There is no directory
+    # serving in this file and adding a prefix rule for these would be the
+    # first — five lines is a cheap price for the property that the allowlist
+    # is the whole answer to "what can be fetched".
+    "/puzzles/modes/sighted.json":   ("puzzles/modes/sighted.json",   "application/json; charset=utf-8"),
+    "/puzzles/modes/board.json":     ("puzzles/modes/board.json",     "application/json; charset=utf-8"),
+    "/puzzles/modes/blindfold.json": ("puzzles/modes/blindfold.json", "application/json; charset=utf-8"),
+    "/puzzles/modes/fog.json":       ("puzzles/modes/fog.json",       "application/json; charset=utf-8"),
+    "/puzzles/modes/rush.json":      ("puzzles/modes/rush.json",      "application/json; charset=utf-8"),
+    # Opening and Middle Game Practices, under Lesson -> Practice. A different
+    # standard from a puzzle (tools/practice_rules.js, not payoff_rules.js) and
+    # so a different directory, versioned separately in the page as PC_VERSION.
+    "/practices/opening.json":    ("practices/opening.json",    "application/json; charset=utf-8"),
+    "/practices/middlegame.json": ("practices/middlegame.json", "application/json; charset=utf-8"),
     # The Education System, which Study Board calls to name what a position is
     # about. The three library files are the SAME files education/tools/run_tests.py
     # runs its 973 assertions over — the page evaluates them rather than carrying a

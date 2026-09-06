@@ -2867,10 +2867,20 @@
 
         <div class="nav-item">
           <button class="nav-btn" id="navPuzzle" aria-haspopup="true">PUZZLE</button>
+          <!-- Five doors, and they are vision modes rather than phases.
+               The old three — Opening, Middle Game, End Game — sorted puzzles
+               by the part of the game they came from, which is a fact about
+               the chess and not a way to play. Opening and middlegame
+               *training* now lives under Lesson -> Practice, where the
+               standard can be educational instead of tactical; what is left
+               here is one corpus seen five ways. A puzzle's phase no longer
+               decides which door it is behind: each pool is a mixed sample of
+               the whole set (see tools/pool_assign.js). -->
           <div class="menu">
-            <button class="menu-btn" id="navOpening">Opening</button>
-            <button class="menu-btn" id="navMiddle">Middle Game</button>
-            <button class="menu-btn" id="navEnd">End Game</button>
+            <button class="menu-btn" id="navPzSighted">Sighted Puzzle</button>
+            <button class="menu-btn" id="navPzBoard">Only Board Puzzle</button>
+            <button class="menu-btn" id="navPzBlindfold">Blindfold Puzzle</button>
+            <button class="menu-btn" id="navPzFog">Fog of War Puzzle</button>
             <button class="menu-btn" id="navRush">Puzzle Rush</button>
           </div>
         </div>
@@ -3051,6 +3061,25 @@
         </div>
 
         <div class="pr-cards" id="prCards"></div>
+
+        <!-- Board practices, on the same page and deliberately not in
+             PR_MODES. The seven drills above are quiz exercises with a level
+             ladder, a per-mode difficulty and an accuracy store; an Opening or
+             Middle Game Practice is a position with an engine-verified answer.
+             Threading the second kind through the first kind's stats would
+             move the blindfold ladder every time somebody solved a middlegame,
+             so they render from their own table and keep their own progress. -->
+        <div class="pr-head pr-board-head">
+          <h2>Board Practices</h2>
+          <p>
+            Real positions, and one question: what is the best move? The
+            openings ask for a decision — development, safety, the centre —
+            and the middlegames ask you to find the move that decides the
+            game. Both are checked by Stockfish before they ever reach you,
+            and both explain themselves afterwards.
+          </p>
+        </div>
+        <div class="pr-cards" id="prBoardCards"></div>
       </div>
 
       <!-- a drill in progress -->
@@ -7229,6 +7258,14 @@ const PZ = {
   on: false,
   mode: 'ladder',      // 'ladder' walks a track in order; 'rush' is against the clock
   track: null,
+  /* Which door the player came through, and it is one of three shapes.
+     `pool` is one of the five vision modes on the Puzzle page; `practice` is
+     an Opening or Middle Game Practice under Lesson -> Practice; `track` is
+     the old phase ladder, still reachable from enterTrack() and from the
+     tests. Exactly one of the three is set, and pzScope() turns whichever it
+     is into the key progress is stored under. */
+  pool: null,
+  practice: null,
   list: [],            // the whole ladder, in difficulty order
   n: 0,                // which rung, 1-based — the number the player sees
   puzzle: null,
@@ -7376,9 +7413,46 @@ async function pzSync(){
   }
   if (PZ.on) pzRender();
 }
+/* The key this puzzle's progress belongs under. One function, because three
+   call sites used to read PZ.track directly and two of them would now be
+   reading null. */
+/* What to call the ladder on screen. Three doors reach pzOpen() now and only
+   one of them has a phase, so the label comes from whichever is set rather
+   than from PZ.track — which is null for four of the five Puzzle modes and
+   for both Practices, and printed "undefined" for a day. */
+function pzScopeName(){
+  if (PZ.practice) return (PC_CAT[PZ.practice] || {}).name || 'Practice';
+  if (PZ.pool) return (PZ_MODE[PZ.pool] || {}).name || 'Puzzle';
+  return PZ_TRACK_NAME[PZ.track] || 'Puzzle';
+}
+
+function pzScope(){
+  if (PZ.practice) return 'practice:' + PZ.practice;
+  if (PZ.pool) return 'mode:' + PZ.pool;
+  return PZ.track;
+}
+
 function pzDone(track){
   const prog = pzProgress(track);
-  return new Set(prog.solved.concat(prog.seen));
+  const out = new Set(prog.solved.concat(prog.seen));
+  /* A pool inherits what the phase ladders already recorded.
+   *
+   * Progress is stored per puzzle *id*, and the five mode pools are dealt
+   * from the same corpus the three phase ladders held — same positions, same
+   * ids, different door. Reading a pool's record on its own would therefore
+   * show a player who has solved forty middlegames forty unsolved puzzles,
+   * which is the one thing this project has promised regenerating never does.
+   * So a pool scope also reads the three legacy scopes. It never writes them:
+   * new solves land under the pool, and the legacy record is history that
+   * stops growing.
+   */
+  if (track && track.slice(0, 5) === 'mode:')
+    for (const t of PZ_TRACKS){
+      const old = pzProgress(t);
+      for (const id of old.solved) out.add(id);
+      for (const id of old.seen) out.add(id);
+    }
+  return out;
 }
 /** The rung to open a track at: the first one not yet finished. */
 function pzNextRung(list, done){
@@ -7583,6 +7657,94 @@ function enterTrack(track){
   }, () => alert('Could not load the ' + PZ_TRACK_NAME[track].toLowerCase() + ' puzzles.'));
 }
 
+/* ---- the five doors ----
+ *
+ * A vision mode and a puzzle pool, together, because on this page they are one
+ * choice. `vision` is the value G.mode takes while the puzzle is up, so this
+ * table is the only place the player-facing names ("Blindfold Puzzle") and the
+ * engine-facing ones ("total") meet. Puzzle Rush keeps whatever presentation
+ * it already had and takes no vision from here — only its source pool changed.
+ *
+ * The pools are non-overlapping by construction: tools/pool_assign.js deals
+ * one verified corpus out across the five, so a position is behind exactly one
+ * door. That is why this cannot be a filter over the old three track files.
+ */
+const PZ_MODES = [
+  { key:'sighted',   name:'Sighted Puzzle',    vision:'sighted' },
+  { key:'board',     name:'Only Board Puzzle', vision:'blind' },
+  { key:'blindfold', name:'Blindfold Puzzle',  vision:'total' },
+  { key:'fog',       name:'Fog of War Puzzle', vision:'fog' },
+  { key:'rush',      name:'Puzzle Rush',       vision:null }
+];
+const PZ_MODE = {};
+for (const m of PZ_MODES) PZ_MODE[m.key] = m;
+const PZ_MODE_KEYS = PZ_MODES.map(m => m.key);
+
+/* Loading a pool, with a fallback that exists for exactly one reason.
+ *
+ * The five pool files are written by the verifier, and until a generation run
+ * has produced them the Puzzle page would have five doors and nothing behind
+ * any of them. Rather than ship a dead page, an absent pool file is answered
+ * by dealing the *legacy* three-track corpus out the same way the generator
+ * will: sorted by rung and dealt round-robin, so the five interim pools are
+ * still non-overlapping and still evenly spread in difficulty. Delete nothing
+ * when the real files arrive — they simply win, because they are looked for
+ * first.
+ *
+ * This is a bridge, not a second source of truth. It reads the same three
+ * files the old ladders read and assigns nothing the verifier will not
+ * reassign.
+ */
+const pzPools = {};
+function pzFetchMode(key){
+  if (pzPools[key]) return Promise.resolve(pzPools[key]);
+  return fetch('puzzles/modes/' + key + '.json?v=' + PZ_VERSION)
+    .then(r => { if (!r.ok) throw new Error('no pool'); return r.json(); })
+    .then(list => (pzPools[key] = Array.isArray(list) ? list : []))
+    .catch(() => pzLegacyPools().then(all => (pzPools[key] = all[key] || [])));
+}
+
+let pzLegacyPromise = null;
+function pzLegacyPools(){
+  if (pzLegacyPromise) return pzLegacyPromise;
+  pzLegacyPromise = Promise.all(PZ_TRACKS.map(t => pzFetch(t).catch(() => [])))
+    .then(lists => {
+      const all = [];
+      lists.forEach((l, i) => l.forEach(p =>
+        all.push(Object.assign({}, p, { track: PZ_TRACKS[i] }))));
+      // rung order across the whole corpus, then dealt out one each
+      all.sort((a, b) => (a.seedRating || 0) - (b.seedRating || 0) || (a.n || 0) - (b.n || 0));
+      const pools = {};
+      for (const k of PZ_MODE_KEYS) pools[k] = [];
+      all.forEach((p, i) => {
+        const k = PZ_MODE_KEYS[i % PZ_MODE_KEYS.length];
+        pools[k].push(Object.assign({}, p, { mode:k, n: pools[k].length + 1 }));
+      });
+      return pools;
+    });
+  return pzLegacyPromise;
+}
+
+/* Entering a door. The vision mode is set from the table rather than left at
+   whatever the last game used, because the door is the choice — somebody who
+   pressed "Blindfold Puzzle" has asked for the pieces to be hidden, and a
+   sighted board would be answering a different question. The chess is
+   identical either way: the mode changes what is shown and never which line
+   is acceptable. */
+function enterPuzzleMode(key){
+  const m = PZ_MODE[key];
+  beep(700,.09);
+  pzFetchMode(key).then(list => {
+    if (!list.length){ alert('No ' + m.name.toLowerCase() + 's are installed yet.'); return; }
+    PZ.mode = 'ladder';
+    PZ.pool = key;
+    PZ.track = null;
+    PZ.list = list;
+    if (m.vision) G.mode = m.vision;
+    pzOpen(pzNextRung(list, pzDone('mode:' + key)));
+  }, () => alert('Could not load the ' + m.name.toLowerCase() + 's.'));
+}
+
 function pzFetch(track){
   if (pzLoaded[track]) return Promise.resolve(pzLoaded[track]);
   return fetch('puzzles/' + track + '.json?v=' + PZ_VERSION)
@@ -7602,7 +7764,7 @@ function pzOpen(n){
   PZ.wrong = PZ.shown = PZ.done = PZ.followed = PZ.busy = false;
   PZ.study = null;
   PZ.side = stateFromFEN(p.fen).turn;
-  PZ.wasDone = PZ.track ? pzDone(PZ.track).has(p.id) : false;   // a replay is not worth a rating
+  PZ.wasDone = pzScope() ? pzDone(pzScope()).has(p.id) : false;   // a replay is not worth a rating
   if (PZ.mode === 'rush') RUSH.at = n - 1;
   PZ.delta = null;
 
@@ -7707,7 +7869,7 @@ function pzFinish(clean){
     rushAdvance();
     return;
   }
-  pzMark(PZ.track, PZ.puzzle.id, first);
+  pzMark(pzScope(), PZ.puzzle.id, first);
   // only the first time through counts: a puzzle you have already finished is
   // practice, and practice does not move a rating
   if (!PZ.wasDone) PZ.delta = pzReport(PZ.puzzle, first);
@@ -8206,7 +8368,7 @@ function pzRender(){
   const side = PZ.side === W ? 'White' : 'Black';
 
   document.getElementById('pzTitle').textContent =
-    PZ_TRACK_NAME[PZ.track] + ' · Puzzle ' + PZ.n;
+    pzScopeName() + ' · ' + (PZ.practice ? 'Practice ' : 'Puzzle ') + PZ.n;
 
   const ask = document.getElementById('pzAsk');
   const say = document.getElementById('pzSay');
@@ -11297,6 +11459,119 @@ function prRenderDash(){
   document.getElementById('prFigBest').textContent = st.best;
   document.getElementById('prFigSessions').textContent = st.sessions;
   prRenderCards(st, idx);
+  // the two board-practice categories, below the drills and independent of
+  // the level ladder above — see PC_CATS
+  pcRenderCards();
+}
+
+/* ---- board practices ----
+ *
+ * Opening and Middle Game Practices: the same Practice page, a different kind
+ * of exercise, and deliberately their own table rather than two more entries
+ * in PR_MODES. The seven drills are quizzes with a shared level ladder, a
+ * per-drill difficulty that adapts, and one accuracy store; these are
+ * positions with an engine-verified answer. Putting them in PR_MODES would
+ * mean solving a middlegame moved the blindfold ladder, and unlocking "Mini
+ * Blindfold Challenge" depended on how many openings you had seen.
+ *
+ * They are also the only two categories on this page whose content is a file
+ * the verifier writes, so an absent file is a normal state and says so on the
+ * card instead of throwing.
+ */
+/* Versioned on their own, not with the puzzle files. The three puzzle JSONs
+   and these two are written by different tools on different runs, and
+   server.py serves both with a week of cache — so sharing one ?v= would mean
+   regenerating a ladder silently expired the practices as well, and a
+   practice-only run could not bust its own cache at all. */
+const PC_VERSION = 1;
+
+const PC_CATS = [
+  { key:'opening', name:'Opening Practices', hard:2,
+    desc:'A real opening position, and one decision: develop, castle, take the ' +
+         'centre, or stop what they are planning. The move has to be objectively ' +
+         'strong — it does not have to win anything.' },
+  { key:'middlegame', name:'Middle Game Practices', hard:3,
+    desc:'A middlegame where one move decides the game. Every one of these is ' +
+         'worth at least thirty-five percentage points of winning chances against ' +
+         'the best defence Stockfish can find.' }
+];
+const PC_CAT = {};
+for (const c of PC_CATS) PC_CAT[c.key] = c;
+
+const pcLoaded = {};
+function pcFetch(key){
+  if (pcLoaded[key]) return Promise.resolve(pcLoaded[key]);
+  return fetch('practices/' + key + '.json?v=' + PC_VERSION)
+    .then(r => { if (!r.ok) throw new Error('absent'); return r.json(); })
+    .then(list => (pcLoaded[key] = Array.isArray(list) ? list : []))
+    .catch(() => (pcLoaded[key] = []));
+}
+
+/* A practice is walked exactly like a puzzle rung — same board, same
+   puzzleStep(), same explanation card — so entering one hands the list to PZ
+   rather than growing a second player. What differs is the standard the file
+   was built to, and that lives in the file. `PZ.practice` is what the card
+   reads to know it should not promise a payoff. */
+function enterPracticeCat(key){
+  const c = PC_CAT[key];
+  beep(700,.09);
+  pcFetch(key).then(list => {
+    if (!list.length){ alert('No ' + c.name.toLowerCase() + ' are installed yet.'); return; }
+    PZ.mode = 'ladder';
+    PZ.pool = null;
+    PZ.track = null;
+    PZ.practice = key;
+    PZ.list = list;
+    G.mode = 'sighted';               // a practice is about the position, never hidden
+    pzOpen(pzNextRung(list, pzDone('practice:' + key)));
+  });
+}
+
+function pcRenderCards(){
+  const wrap = document.getElementById('prBoardCards');
+  if (!wrap) return;
+  wrap.innerHTML = '';
+  for (const c of PC_CATS){
+    const card = document.createElement('div');
+    card.className = 'card panel pr-card';
+    let dots = '';
+    for (let d = 1; d <= 3; d++) dots += '<i class="' + (d <= c.hard ? 'on' : '') + '"></i>';
+    const part = (cls, html) => {
+      const d = document.createElement('div');
+      d.className = cls;
+      d.innerHTML = html;
+      return d;
+    };
+    card.appendChild(part('pr-name', c.name));
+    card.appendChild(part('pr-dots', dots));
+    card.appendChild(part('pr-desc', c.desc));
+    const foot = part('pr-foot', '');
+    const score = part('pr-score', 'Checking what is installed…');
+    const go = document.createElement('button');
+    go.className = 'primary';
+    go.textContent = 'Start';
+    go.onclick = () => GUEST() ? toSignUp() : enterPracticeCat(c.key);
+    foot.appendChild(score);
+    foot.appendChild(go);
+    card.appendChild(foot);
+    wrap.appendChild(card);
+
+    /* How many are installed, and how many have been solved — read rather
+       than assumed, because the file is written by a verification run and its
+       length is however many positions cleared the standard. */
+    pcFetch(c.key).then(list => {
+      if (!list.length){
+        score.textContent = 'Not installed yet';
+        go.disabled = true;
+        card.classList.add('locked');
+        return;
+      }
+      const done = pzDone('practice:' + c.key);
+      let solved = 0;
+      for (const p of list) if (done.has(p.id)) solved++;
+      score.textContent = solved + ' of ' + list.length + ' solved';
+    });
+  }
 }
 
 function prRenderCards(st, level){
@@ -11598,7 +11873,7 @@ function syncOptions(){
   document.getElementById('gameChips').style.display = G.started ? '' : 'none';
   if (PUZZLE()){
     document.getElementById('visionChip').textContent =
-      PZ.mode === 'rush' ? 'Puzzle Rush' : PZ_TRACK_NAME[PZ.track];
+      PZ.mode === 'rush' ? 'Puzzle Rush' : pzScopeName();
     document.getElementById('setupChip').textContent =
       PZ.mode === 'rush'
         ? RUSH.solved + ' solved'
@@ -11689,11 +11964,16 @@ document.getElementById('navPractice').onclick = goPractice;
 // rather than nowhere. Puzzle Rush answers to the same rule: it is in
 // LOCKED_IDS with the rest, and a button painted locked must not quietly start
 // a run anyway.
-const goTrack = track => () => GUEST() ? toSignUp() : enterTrack(track);
-document.getElementById('navOpening').onclick = goTrack('opening');
-document.getElementById('navMiddle').onclick  = goTrack('middlegame');
-document.getElementById('navEnd').onclick     = goTrack('endgame');
-document.getElementById('navRush').onclick    = () => GUEST() ? toSignUp() : rushStart();
+/* The four laddered doors and the Rush one. enterTrack() is still here and
+   still works — the three phase files are what the interim pools are dealt
+   from, and test_puzzle_flow.js exercises it — but nothing on the home page
+   reaches it any more, because phase is no longer a way to play. */
+const goMode = key => () => GUEST() ? toSignUp() : enterPuzzleMode(key);
+document.getElementById('navPzSighted').onclick   = goMode('sighted');
+document.getElementById('navPzBoard').onclick     = goMode('board');
+document.getElementById('navPzBlindfold').onclick = goMode('blindfold');
+document.getElementById('navPzFog').onclick       = goMode('fog');
+document.getElementById('navRush').onclick        = () => GUEST() ? toSignUp() : rushStart();
 
 document.getElementById('btnSettings').onclick = () => { beep(560,.07); showScreen('settings'); };
 document.getElementById('btnSetBack').onclick  = () => showScreen('home');
@@ -12385,7 +12665,7 @@ const GUEST = () => accountsAvailable() && !account;
    buttons for exactly that reason: [disabled] would swallow the click that
    was the whole invitation. */
 const LOCKED_IDS = ['navRanked', 'navSocial', 'navPuzzle',
-                    'navOpening', 'navMiddle', 'navEnd', 'navRush'];
+                    'navPzSighted', 'navPzBoard', 'navPzBlindfold', 'navPzFog', 'navRush'];
 
 function lockedControls(){
   const out = LOCKED_IDS.map(id => document.getElementById(id)).filter(Boolean);

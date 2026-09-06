@@ -1,0 +1,55 @@
+[09:19:53] =========== pipeline start (branch Puzzle) ===========
+[09:19:53] STAGE 1 — re-verifying existing corpus (resuming from checkpoints)
+[13:02:34] STAGE 1 COMPLETE
+[13:02:34] STAGE 2 — deficit calculation
+=== STAGE 2 — deficit calculation ===
+
+existing corpus, re-verified against the complete new standard:
+
+  opening     scanned   58   kept   14   discarded   44
+  middlegame  scanned  465   kept  202   discarded  263
+  endgame     scanned  265   kept   98   discarded  167
+              scanned  788   kept  314   discarded  474
+
+why they were discarded:
+    314  payoff: no promotion, no mate, nothing captured
+     61  payoff: Q taken but not held
+     60  payoff: R taken but not held
+      5  payoff: R/Q taken but not held
+      3  payoff: only N and the game is not decided
+      3  payoff: only B and the game is not decided
+      2  payoff: Q/R taken but not held
+      2  payoff: only N, worth +22.5 points
+      2  payoff: only P and the game is not decided
+      1  payoff: only B, worth +23.5 points
+      1  payoff: only B/P and the game is not decided
+      1  payoff: only N, worth +21.7 points
+      1  payoff: only B, worth +24.9 points
+      1  payoff: only P, worth +19.9 points
+      1  payoff: only N, worth +22.3 points
+      1  payoff: only P, worth +24.2 points
+      1  payoff: only B, worth +22.1 points
+      1  payoff: only N, worth +22.7 points
+      1  payoff: only P, worth +23.4 points
+      1  payoff: only P, worth +22.3 points
+      1  payoff: only P, worth +20.7 points
+      1  payoff: only N, worth +24.6 points
+      1  payoff: only B, worth +22.0 points
+      1  payoff: only N, worth +22.0 points
+      1  payoff: only P, worth +20.5 points
+      1  payoff: only P/B, worth +22.6 points
+      1  payoff: only B/P, worth +22.7 points
+      1  payoff: only P/N, worth +20.9 points
+      1  payoff: only P, worth +22.7 points
+      1  payoff: only B, worth +24.3 points
+      1  payoff: only P/B, worth +24.5 points
+
+target 500 (100 x 5 pools)
+survivors 314  ->  deficit 186
+
+measured survival of a verified corpus: 39.8%
+implied shipped-per-game:              0.0503
+games to mine for the deficit:         3700  (clamped to 2000..20000)
+[13:02:34] STAGE 2 COMPLETE
+[13:02:34] STAGE 3 — mining 3700 games at 1600,1600,2000,2000,2000
+[12:32:27] STAGE 3 FAILED

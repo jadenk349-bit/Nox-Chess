@@ -1,0 +1,712 @@
+[
+ {
+  "n": 1,
+  "id": "op-b503fd1248",
+  "fen": "r1b1kb1r/1p3pp1/p1np1q2/1N2p3/4P3/5P2/PPP4P/RN1QKB1R w KQkq - 0 11",
+  "moves": [
+   "b5c7",
+   "e8d8",
+   "c7a8"
+  ],
+  "themes": [
+   "hangingPiece",
+   "fork",
+   "discoveredAttack",
+   "defensiveResource",
+   "longGame"
+  ],
+  "seedRating": 100,
+  "settleDepth": 1,
+  "kind": "save",
+  "prev": {
+   "fen": "r1bqkb1r/1p3pp1/p1np1B2/1N2p3/4P3/5P2/PPP4P/RN1QKB1R b KQkq - 0 10",
+   "move": "d8f6"
+  },
+  "alt": {
+   "uci": "b5c3",
+   "score": -384
+  },
+  "eval": {
+   "before": -369,
+   "best": 126,
+   "alt": -384,
+   "end": 121
+  },
+  "replies": {
+   "1": {
+    "legal": 3,
+    "clear": 81
+   }
+  },
+  "follow": {
+   "moves": [
+    "f6h4",
+    "e1d2",
+    "h4f4",
+    "d2c3",
+    "c8g4",
+    "f3g4"
+   ],
+   "cp": 106,
+   "swing": 830,
+   "startCp": 126
+  },
+  "payoff": {
+   "kind": "material",
+   "detail": {
+    "pieces": [
+     "R"
+    ],
+    "banked": 500
+   }
+  },
+  "why": {
+   "moves": [
+    {
+     "san": "Nc7+",
+     "uci": "b5c7",
+     "by": "you",
+     "text": "It leaves the rook on a8 hanging — it can simply be taken. It comes with check, so the reply is not a free move. The next best move, N5c3, only leaves White clearly worse. One piece attacks two or more enemy units at once, so only one can be saved.",
+     "concept": {
+      "id": "fork",
+      "name": "Fork",
+      "why": "The knight on c7 forks the rook on a8 and the king on e8.",
+      "wording": "One piece attacks two or more enemy units at once, so only one can be saved.",
+      "cautions": [
+       "A fork wins nothing if the forking piece can be taken, or if every target is adequately defended and cheaper than the forker.",
+       "A relative fork can be met by a zwischenzug; an absolute fork cannot."
+      ],
+      "confidence": "high"
+     }
+    },
+    {
+     "san": "Kd8",
+     "uci": "e8d8",
+     "by": "them",
+     "text": "The king is in check and has to answer it. It is the toughest try — nothing else does better."
+    },
+    {
+     "san": "Nxa8",
+     "uci": "c7a8",
+     "by": "you",
+     "text": "It wins the rook. The bishop pair: a single bishop is blind to half the board, and two together cover everything. Statistically worth about half a pawn beyond the two bishops separately, and strongest in open positions.",
+     "concept": {
+      "id": "bishop-pair",
+      "name": "The bishop pair",
+      "why": null,
+      "wording": "The bishop pair: a single bishop is blind to half the board, and two together cover everything. Statistically worth about half a pawn beyond the two bishops separately, and strongest in open positions.",
+      "cautions": [
+       "In a locked position the pair may be worth nothing and a knight may be better.",
+       "A bishop shut in by its own pawns does not contribute to the pair."
+      ],
+      "confidence": "medium"
+     }
+    }
+   ],
+   "mistake": "Black played Qxf6. Moving the queen from d8 took the last guard off c7.",
+   "swing": "The position was clearly worse for White before it and is slightly better after it, with best play.",
+   "point": "White comes out a rook up, though the engine calls the position only slightly better.",
+   "altConcept": {
+    "id": "bishop-pair",
+    "name": "The bishop pair",
+    "why": null,
+    "wording": "The bishop pair: a single bishop is blind to half the board, and two together cover everything. Statistically worth about half a pawn beyond the two bishops separately, and strongest in open positions.",
+    "cautions": [
+     "In a locked position the pair may be worth nothing and a knight may be better.",
+     "A bishop shut in by its own pawns does not contribute to the pair."
+    ],
+    "confidence": "medium",
+    "pct": 19.6
+   },
+   "concepts": [
+    {
+     "id": "fork",
+     "name": "Fork",
+     "why": "The knight on c7 forks the rook on a8 and the king on e8.",
+     "wording": "One piece attacks two or more enemy units at once, so only one can be saved.",
+     "cautions": [
+      "A fork wins nothing if the forking piece can be taken, or if every target is adequately defended and cheaper than the forker.",
+      "A relative fork can be met by a zwischenzug; an absolute fork cannot."
+     ],
+     "confidence": "high"
+    },
+    {
+     "id": "knight-fork",
+     "name": "Knight fork",
+     "why": null,
+     "wording": "A knight fork: one knight attacks two or more pieces, and neither interposition nor counter-attack defends, because a knight cannot be blocked and attacks the opposite colour to the one it occupies.",
+     "cautions": [
+      "The landing square must be safe. This base's fork controlled pair shows the same knight move at +7.39 and at +0.57 depending only on whether one bishop guards the square.",
+      "A knight fork on a guarded square wins nothing."
+     ],
+     "confidence": "high"
+    },
+    {
+     "id": "hanging-piece",
+     "name": "Hanging piece",
+     "why": "It leaves the rook on a8 hanging — it can simply be taken.",
+     "wording": "A piece that is attacked and can be captured for free — undefended, or defended fewer times than it is attacked.",
+     "cautions": [
+      "A hanging piece may be a sacrifice offered on purpose. SEE says the material is winnable; it does not say taking is right.",
+      "In a lost position, giving material to reach a fortress or a perpetual can be correct."
+     ],
+     "confidence": "high"
+    }
+   ]
+  }
+ },
+ {
+  "n": 2,
+  "id": "op-f635748f46",
+  "fen": "rnb1k1nr/pppp1ppp/8/8/1P1P1p1q/6P1/1P2P2P/RNBQKBNR b KQkq - 0 6",
+  "moves": [
+   "f4g3",
+   "f1g2",
+   "g3h2"
+  ],
+  "themes": [
+   "discoveredAttack",
+   "hangingPiece",
+   "defensiveResource",
+   "longGame"
+  ],
+  "seedRating": 100,
+  "settleDepth": 1,
+  "kind": "save",
+  "prev": {
+   "fen": "rnb1k1nr/pppp1ppp/8/8/1P1P1p1q/8/1P2P1PP/RNBQKBNR w KQkq - 1 6",
+   "move": "g2g3"
+  },
+  "alt": {
+   "uci": "h4e7",
+   "score": -376
+  },
+  "eval": {
+   "before": -252,
+   "best": 143,
+   "alt": -376,
+   "end": 150
+  },
+  "replies": {
+   "1": {
+    "legal": 31,
+    "clear": 92
+   }
+  },
+  "follow": {
+   "moves": [
+    "e1f1",
+    "h2g1r",
+    "f1g1",
+    "h4g4",
+    "h1h3",
+    "g8e7"
+   ],
+   "cp": 164,
+   "swing": 420,
+   "startCp": 143
+  },
+  "payoff": {
+   "kind": "material",
+   "detail": {
+    "pieces": [
+     "P"
+    ],
+    "banked": 200,
+    "swing": 35.1,
+    "saved": true
+   }
+  },
+  "why": {
+   "moves": [
+    {
+     "san": "fxg3",
+     "uci": "f4g3",
+     "by": "you",
+     "text": "Moving the pawn uncovers the queen on h4, which now attacks the pawn on d4. It wins the pawn. The next best move, Qe7, only leaves Black clearly worse. The bishop pair: a single bishop is blind to half the board, and two together cover everything. Statistically worth about half a pawn beyond the two bishops separately, and strongest in open positions.",
+     "concept": {
+      "id": "bishop-pair",
+      "name": "The bishop pair",
+      "why": null,
+      "wording": "The bishop pair: a single bishop is blind to half the board, and two together cover everything. Statistically worth about half a pawn beyond the two bishops separately, and strongest in open positions.",
+      "cautions": [
+       "In a locked position the pair may be worth nothing and a knight may be better.",
+       "A bishop shut in by its own pawns does not contribute to the pair."
+      ],
+      "confidence": "low"
+     }
+    },
+    {
+     "san": "Bg2",
+     "uci": "f1g2",
+     "by": "them",
+     "text": "It is the toughest try — nothing else does better."
+    },
+    {
+     "san": "gxh2+",
+     "uci": "g3h2",
+     "by": "you",
+     "text": "It leaves the knight on g1 hanging — it can simply be taken. It comes with check, so the reply is not a free move. It wins the pawn. A discovered attack: two attacks for one move — whatever the moving piece does, and whatever the piece behind it now hits. The moving piece is comparatively free, because the opponent has to deal with the revealed threat.",
+     "concept": {
+      "id": "discovered-attack",
+      "name": "Discovered attack",
+      "why": "Moving the pawn uncovers the queen on h4, which now checks the king.",
+      "wording": "A discovered attack: two attacks for one move — whatever the moving piece does, and whatever the piece behind it now hits. The moving piece is comparatively free, because the opponent has to deal with the revealed threat.",
+      "cautions": [
+       "A discovery is worthless if the unmasked line hits nothing of value.",
+       "In a discovered check the moving piece may stand en prise with impunity — normal safety reasoning does not apply to it."
+      ],
+      "confidence": "high"
+     }
+    }
+   ],
+   "mistake": "White played g3. It puts the pawn on g3 where it can simply be taken.",
+   "swing": "The position was clearly worse for Black before it and is slightly better after it, with best play.",
+   "point": "Black comes out the exchange up, though the engine calls the position only clearly better.",
+   "altConcept": {
+    "id": "pin",
+    "name": "Pin",
+    "why": "The pawn on e2 is pinned to the king behind it and cannot step aside.",
+    "wording": "A pin. The pinned piece is stuck and makes a poor defender, so you can pile up on it.",
+    "cautions": [
+     "A pinned piece still delivers check and still guards squares against non-king units.",
+     "A relative pin can be broken profitably when moving the front piece creates a bigger threat."
+    ],
+    "confidence": "high",
+    "pct": 20
+   },
+   "concepts": [
+    {
+     "id": "bishop-pair",
+     "name": "The bishop pair",
+     "why": null,
+     "wording": "The bishop pair: a single bishop is blind to half the board, and two together cover everything. Statistically worth about half a pawn beyond the two bishops separately, and strongest in open positions.",
+     "cautions": [
+      "In a locked position the pair may be worth nothing and a knight may be better.",
+      "A bishop shut in by its own pawns does not contribute to the pair."
+     ],
+     "confidence": "low"
+    },
+    {
+     "id": "pawn-break",
+     "name": "Pawn break",
+     "why": null,
+     "wording": "A pawn break: an advance into contact with an enemy pawn, played to open a file or a diagonal for the pieces behind it, or to force the opponent's structure to commit. It is not played to win a pawn.",
+     "cautions": [
+      "A break that opens lines for a better-developed opponent helps them.",
+      "Some positions are won by NOT breaking — keeping the tension is itself a plan, and the threat can be worth more than the move."
+     ],
+     "confidence": "low"
+    },
+    {
+     "id": "doubled-pawns",
+     "name": "Doubled pawns",
+     "why": null,
+     "wording": "Doubled pawns: two friendly pawns on one file. They cannot defend each other and the rear one is blocked, but the capture that created them usually bought something — a file, the bishop pair, or central control.",
+     "cautions": [
+      "Doubled central pawns frequently increase control and are an asset.",
+      "The exchange that doubles them often yields the bishop pair or a usable file, which is the whole point."
+     ],
+     "confidence": "low"
+    }
+   ]
+  }
+ },
+ {
+  "n": 3,
+  "id": "op-005398548c",
+  "fen": "r1bqkb1r/ppp1n1p1/2n2p2/3pp2p/B2P4/P1N1PQ2/1PP1NPPP/R1B1K2R b KQk - 0 9",
+  "moves": [
+   "c8g4",
+   "f3g3",
+   "e7f5",
+   "d4e5",
+   "f5g3"
+  ],
+  "themes": [
+   "hangingPiece",
+   "skewer",
+   "discoveredAttack",
+   "longGame"
+  ],
+  "seedRating": 1300,
+  "settleDepth": 1,
+  "kind": "punish",
+  "prev": {
+   "fen": "r1bqkb1r/ppp1n1p1/2n2p2/3pp2p/B7/P1NPPQ2/1PP1NPPP/R1B1K2R w KQk d6 0 9",
+   "move": "d3d4"
+  },
+  "alt": {
+   "uci": "e5e4",
+   "score": -31
+  },
+  "eval": {
+   "before": -18,
+   "best": 401,
+   "alt": -31,
+   "end": 426
+  },
+  "replies": {
+   "1": {
+    "legal": 36,
+    "clear": 17
+   },
+   "3": {
+    "legal": 34,
+    "clear": 14
+   }
+  },
+  "follow": {
+   "moves": [
+    "h2g3",
+    "f6e5",
+    "c1d2",
+    "a7a6",
+    "a4b3",
+    "e8d7"
+   ],
+   "cp": 414,
+   "swing": 580,
+   "startCp": 401
+  },
+  "payoff": {
+   "kind": "material",
+   "detail": {
+    "pieces": [
+     "Q"
+    ],
+    "banked": 480
+   }
+  },
+  "why": {
+   "moves": [
+    {
+     "san": "Bg4",
+     "uci": "c8g4",
+     "by": "you",
+     "text": "It leaves the queen on f3 hanging — it can simply be taken. The next best move, e4, only leaves Black level. A piece that is attacked and can be captured for free — undefended, or defended fewer times than it is attacked.",
+     "concept": {
+      "id": "hanging-piece",
+      "name": "Hanging piece",
+      "why": "It leaves the queen on f3 hanging — it can simply be taken.",
+      "wording": "A piece that is attacked and can be captured for free — undefended, or defended fewer times than it is attacked.",
+      "cautions": [
+       "A hanging piece may be a sacrifice offered on purpose. SEE says the material is winnable; it does not say taking is right.",
+       "In a lost position, giving material to reach a fortress or a perpetual can be correct."
+      ],
+      "confidence": "high"
+     }
+    },
+    {
+     "san": "Qg3",
+     "uci": "f3g3",
+     "by": "them",
+     "text": "It is the toughest try — nothing else does better."
+    },
+    {
+     "san": "Nf5",
+     "uci": "e7f5",
+     "by": "you",
+     "text": "It leaves the queen on g3 hanging — it can simply be taken. A bad bishop — its own pawns sit on the squares it travels on, so its diagonals are blocked from the inside and the squares they leave uncovered are ones the bishop cannot use either. The cures are a pawn break, a trade, or getting the bishop outside the chain.",
+     "concept": {
+      "id": "bad-bishop",
+      "name": "Bad bishop",
+      "why": null,
+      "wording": "A bad bishop — its own pawns sit on the squares it travels on, so its diagonals are blocked from the inside and the squares they leave uncovered are ones the bishop cannot use either. The cures are a pawn break, a trade, or getting the bishop outside the chain.",
+      "cautions": [
+       "Suba's active bad bishop: outside the pawn chain, a structurally bad bishop is often equal or better than a knight.",
+       "A bad bishop defending a colour complex is doing essential work and should not be traded off casually."
+      ],
+      "confidence": "low"
+     }
+    },
+    {
+     "san": "dxe5",
+     "uci": "d4e5",
+     "by": "them",
+     "text": "It takes the pawn back. It is the toughest try — nothing else does better."
+    },
+    {
+     "san": "Nxg3",
+     "uci": "f5g3",
+     "by": "you",
+     "text": "It wins the queen. Doubled pawns: two friendly pawns on one file. They cannot defend each other and the rear one is blocked, but the capture that created them usually bought something — a file, the bishop pair, or central control.",
+     "concept": {
+      "id": "doubled-pawns",
+      "name": "Doubled pawns",
+      "why": null,
+      "wording": "Doubled pawns: two friendly pawns on one file. They cannot defend each other and the rear one is blocked, but the capture that created them usually bought something — a file, the bishop pair, or central control.",
+      "cautions": [
+       "Doubled central pawns frequently increase control and are an asset.",
+       "The exchange that doubles them often yields the bishop pair or a usable file, which is the whole point."
+      ],
+      "confidence": "low"
+     }
+    }
+   ],
+   "mistake": "White played d4. The position was level for Black before it and is winning after it, with best play.",
+   "swing": null,
+   "point": "Black comes out a rook up, and the engine calls the position winning.",
+   "altConcept": {
+    "id": "hanging-piece",
+    "name": "Hanging piece",
+    "why": "It leaves the queen on f3 hanging — it can simply be taken.",
+    "wording": "A piece that is attacked and can be captured for free — undefended, or defended fewer times than it is attacked.",
+    "cautions": [
+     "A hanging piece may be a sacrifice offered on purpose. SEE says the material is winnable; it does not say taking is right.",
+     "In a lost position, giving material to reach a fortress or a perpetual can be correct."
+    ],
+    "confidence": "high",
+    "pct": 47.1
+   },
+   "concepts": [
+    {
+     "id": "hanging-piece",
+     "name": "Hanging piece",
+     "why": "It leaves the queen on f3 hanging — it can simply be taken.",
+     "wording": "A piece that is attacked and can be captured for free — undefended, or defended fewer times than it is attacked.",
+     "cautions": [
+      "A hanging piece may be a sacrifice offered on purpose. SEE says the material is winnable; it does not say taking is right.",
+      "In a lost position, giving material to reach a fortress or a perpetual can be correct."
+     ],
+     "confidence": "high"
+    },
+    {
+     "id": "restraint",
+     "name": "Restraint",
+     "why": null,
+     "wording": "Restraint: preventing enemy pawns and pieces from advancing, as progress in its own right. It is the first stage of Nimzowitsch's formula — first restrain, then blockade, finally destroy.",
+     "cautions": [
+      "Restraining an advance the opponent did not want is a wasted move.",
+      "In sharp positions speed beats restraint."
+     ],
+     "confidence": "low"
+    },
+    {
+     "id": "bad-bishop",
+     "name": "Bad bishop",
+     "why": null,
+     "wording": "A bad bishop — its own pawns sit on the squares it travels on, so its diagonals are blocked from the inside and the squares they leave uncovered are ones the bishop cannot use either. The cures are a pawn break, a trade, or getting the bishop outside the chain.",
+     "cautions": [
+      "Suba's active bad bishop: outside the pawn chain, a structurally bad bishop is often equal or better than a knight.",
+      "A bad bishop defending a colour complex is doing essential work and should not be traded off casually."
+     ],
+     "confidence": "low"
+    }
+   ]
+  }
+ },
+ {
+  "n": 4,
+  "id": "op-d131a20331",
+  "fen": "r1b1k1nr/pp1p1ppp/2nbp3/8/1q2P2P/2N2N2/PP2KPP1/R1BQ1B1R w kq - 2 9",
+  "moves": [
+   "a2a3",
+   "b4c4",
+   "e2e1",
+   "c4c5",
+   "c1e3",
+   "c5e3",
+   "f2e3"
+  ],
+  "themes": [
+   "hangingPiece",
+   "discoveredAttack",
+   "skewer",
+   "longGame"
+  ],
+  "seedRating": 2000,
+  "settleDepth": 1,
+  "kind": "punish",
+  "prev": {
+   "fen": "r1b1k1nr/pp1p1ppp/2nbp3/8/3qP2P/2N2N2/PP2KPP1/R1BQ1B1R b kq - 1 8",
+   "move": "d4b4"
+  },
+  "alt": {
+   "uci": "e2e1",
+   "score": -71
+  },
+  "eval": {
+   "before": -152,
+   "best": 439,
+   "alt": -71,
+   "end": 441
+  },
+  "replies": {
+   "1": {
+    "legal": 45,
+    "clear": 11
+   },
+   "3": {
+    "legal": 50,
+    "clear": 72
+   },
+   "5": {
+    "legal": 47,
+    "clear": 55
+   }
+  },
+  "follow": {
+   "moves": [
+    "d6g3",
+    "e1e2",
+    "g8h6",
+    "e4e5",
+    "e8g8",
+    "c3e4"
+   ],
+   "cp": 417,
+   "swing": 570,
+   "startCp": 439
+  },
+  "payoff": {
+   "kind": "material",
+   "detail": {
+    "pieces": [
+     "Q"
+    ],
+    "banked": 570
+   }
+  },
+  "why": {
+   "moves": [
+    {
+     "san": "a3",
+     "uci": "a2a3",
+     "by": "you",
+     "text": "It leaves the queen on b4 hanging — it can simply be taken. The next best move, Ke1, only leaves White slightly worse. A piece that is attacked and can be captured for free — undefended, or defended fewer times than it is attacked.",
+     "concept": {
+      "id": "hanging-piece",
+      "name": "Hanging piece",
+      "why": "It leaves the queen on b4 hanging — it can simply be taken.",
+      "wording": "A piece that is attacked and can be captured for free — undefended, or defended fewer times than it is attacked.",
+      "cautions": [
+       "A hanging piece may be a sacrifice offered on purpose. SEE says the material is winnable; it does not say taking is right.",
+       "In a lost position, giving material to reach a fortress or a perpetual can be correct."
+      ],
+      "confidence": "high"
+     }
+    },
+    {
+     "san": "Qc4+",
+     "uci": "b4c4",
+     "by": "them",
+     "text": "It is the toughest try — nothing else does better."
+    },
+    {
+     "san": "Ke1",
+     "uci": "e2e1",
+     "by": "you",
+     "text": "It leaves the queen on c4 hanging — it can simply be taken. A discovered attack: two attacks for one move — whatever the moving piece does, and whatever the piece behind it now hits. The moving piece is comparatively free, because the opponent has to deal with the revealed threat.",
+     "concept": {
+      "id": "discovered-attack",
+      "name": "Discovered attack",
+      "why": "Moving the king uncovers the bishop on f1, which now attacks the queen on c4.",
+      "wording": "A discovered attack: two attacks for one move — whatever the moving piece does, and whatever the piece behind it now hits. The moving piece is comparatively free, because the opponent has to deal with the revealed threat.",
+      "cautions": [
+       "A discovery is worthless if the unmasked line hits nothing of value.",
+       "In a discovered check the moving piece may stand en prise with impunity — normal safety reasoning does not apply to it."
+      ],
+      "confidence": "high"
+     }
+    },
+    {
+     "san": "Qc5",
+     "uci": "c4c5",
+     "by": "them",
+     "text": "It is the toughest try — nothing else does better."
+    },
+    {
+     "san": "Be3",
+     "uci": "c1e3",
+     "by": "you",
+     "text": "It leaves the queen on c5 hanging — it can simply be taken. Restraint: preventing enemy pawns and pieces from advancing, as progress in its own right. It is the first stage of Nimzowitsch's formula — first restrain, then blockade, finally destroy.",
+     "concept": {
+      "id": "restraint",
+      "name": "Restraint",
+      "why": null,
+      "wording": "Restraint: preventing enemy pawns and pieces from advancing, as progress in its own right. It is the first stage of Nimzowitsch's formula — first restrain, then blockade, finally destroy.",
+      "cautions": [
+       "Restraining an advance the opponent did not want is a wasted move.",
+       "In sharp positions speed beats restraint."
+      ],
+      "confidence": "low"
+     }
+    },
+    {
+     "san": "Qxe3+",
+     "uci": "c5e3",
+     "by": "them",
+     "text": "It takes the bishop back. It is the toughest try — nothing else does better."
+    },
+    {
+     "san": "fxe3",
+     "uci": "f2e3",
+     "by": "you",
+     "text": "It wins the queen. Check: the king is attacked, and the side to move has exactly three ways to answer — move the king, block the line, or capture the attacker. Nothing else is legal, which is why a check is the most forcing move there is.",
+     "concept": {
+      "id": "check",
+      "name": "Check",
+      "why": null,
+      "wording": "Check: the king is attacked, and the side to move has exactly three ways to answer — move the king, block the line, or capture the attacker. Nothing else is legal, which is why a check is the most forcing move there is.",
+      "cautions": [
+       "A check being available is not a reason to play it. Proven case: Ra7+ draws and Rg8+ loses in the same position.",
+       "A pinned piece still delivers check — being unable to legally move does not stop a piece attacking the king."
+      ],
+      "confidence": "high"
+     }
+    }
+   ],
+   "mistake": "Black played Qb4. It moves the queen to b4, which does not turn out to be a safe square.",
+   "swing": "The position was clearly worse for White before it and is winning after it, with best play.",
+   "point": "White comes out a rook up, and the engine calls the position winning.",
+   "altConcept": {
+    "id": "battery",
+    "name": "Battery",
+    "why": null,
+    "wording": "A battery: two long-range pieces on the same file, rank or diagonal, with nothing of their own between them. The front piece can capture and the rear one recaptures, so the pair attacks with more force than either alone.",
+    "cautions": [
+     "Ordering matters: queen in front of rook is usually worse than rook in front of queen, because the more valuable piece meets the defenders first.",
+     "Two line pieces on one line are only a battery if the line ARRIVES somewhere. Stacked behind their own pawns they combine nothing, and the bare geometry fires on nearly half of all positions."
+    ],
+    "confidence": "medium",
+    "pct": 43.5
+   },
+   "concepts": [
+    {
+     "id": "hanging-piece",
+     "name": "Hanging piece",
+     "why": "It leaves the queen on b4 hanging — it can simply be taken.",
+     "wording": "A piece that is attacked and can be captured for free — undefended, or defended fewer times than it is attacked.",
+     "cautions": [
+      "A hanging piece may be a sacrifice offered on purpose. SEE says the material is winnable; it does not say taking is right.",
+      "In a lost position, giving material to reach a fortress or a perpetual can be correct."
+     ],
+     "confidence": "high"
+    },
+    {
+     "id": "bad-bishop",
+     "name": "Bad bishop",
+     "why": null,
+     "wording": "A bad bishop — its own pawns sit on the squares it travels on, so its diagonals are blocked from the inside and the squares they leave uncovered are ones the bishop cannot use either. The cures are a pawn break, a trade, or getting the bishop outside the chain.",
+     "cautions": [
+      "Suba's active bad bishop: outside the pawn chain, a structurally bad bishop is often equal or better than a knight.",
+      "A bad bishop defending a colour complex is doing essential work and should not be traded off casually."
+     ],
+     "confidence": "low"
+    },
+    {
+     "id": "battery",
+     "name": "Battery",
+     "why": null,
+     "wording": "A battery: two long-range pieces on the same file, rank or diagonal, with nothing of their own between them. The front piece can capture and the rear one recaptures, so the pair attacks with more force than either alone.",
+     "cautions": [
+      "Ordering matters: queen in front of rook is usually worse than rook in front of queen, because the more valuable piece meets the defenders first.",
+      "Two line pieces on one line are only a battery if the line ARRIVES somewhere. Stacked behind their own pawns they combine nothing, and the bare geometry fires on nearly half of all positions."
+     ],
+     "confidence": "medium"
+    }
+   ]
+  }
+ }
+]

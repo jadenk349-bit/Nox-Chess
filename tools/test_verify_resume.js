@@ -97,6 +97,16 @@ const fake = () => ({ stopped:false, freed:false,
   const off = await V.withBudget(() => Promise.resolve({ puzzle:{id:'z'}, note:{} }), 0, e);
   check('budget 0 disables the rule entirely', off.puzzle.id, 'z');
 
+  /* ...and disables ONLY the rule. With no clock a puzzle can never be
+     rejected for being slow, which is the point — but a throw is still a
+     dropped puzzle rather than a dead run, and the engine still comes back.
+     This is what a multi-day unattended verification stands on. */
+  e = fake();
+  const threwNoBudget = await V.withBudget(() => Promise.reject(new Error('boom')), 0, e);
+  check('a throw with no budget is still caught', threwNoBudget, null);
+  check('and the engine is still released', e.freed, true);
+  check('without having been abandoned — nothing timed out', e.stopped, false);
+
   fs.rmSync(tmp, { recursive:true, force:true });
   console.log('\n' + passed + ' passed, ' + failed + ' failed\n');
   process.exit(failed ? 1 : 0);
