@@ -154,8 +154,8 @@ var FNS = ['startBoard','newState','cloneState','posKey','fenOf','stateFromFEN',
               progress is stored under, the name on the chip, and the token the
               address bar carries. pzOpen() and pzFinish() both call the first. */
            'pzScope','pzScopeName','pzRoute',
-           // what Fog of War is allowed to say in words — see "Fog of War" below
-           'pzHidesOpponent',
+           // what a fog puzzle withholds, and which panel it withholds it from
+           'pzHidesReplies',
            'pzShowSolution'];
 
 var bundle = [grab(/\nconst W = 'w', B = 'b';/, "const W/B")];
@@ -873,13 +873,123 @@ say('\nThe notations panel\n');
 })();
 
 /* ---------------------------------------------------------------------
-   Fog of War hides the opponent, and hiding is not only a matter of the
-   board. A written list of their men, or their reply spelled out in
-   notation, is the same information printed a foot above the board that is
-   refusing to draw it — so the panels answer to the same rule the squares do,
-   and all of them open at the one moment the puzzle is finished.
+   The two board Practices are installed, and every link in the chain that
+   has to agree for a card to say so.
+
+   REGRESSION. Both cards read "Not installed yet" in production while working
+   perfectly from a checkout. Nothing was wrong with the page: pcFetch() cannot
+   tell an absent file from an empty one, and the deployed image simply did not
+   carry practices/*.json — the Dockerfile copied puzzles/ and never these.
+   server/test_image_files.py is what catches that half. This half checks
+   everything else that could produce the same sentence: the file, its size, the
+   slug the page asks for, and the route the server is willing to answer.
    --------------------------------------------------------------------- */
-say('\nFog of War keeps the opponent to itself\n');
+say('\nThe two board Practices are installed\n');
+
+(function practices(){
+  var SERVER = '';
+  try { SERVER = slurp('server/server.py'); } catch (e){}
+
+  check('there are two categories', PC_CATS.length, 2);
+  check('and they are these two',
+        PC_CATS.map(function(c){ return c.key; }).join(','), 'opening,middlegame');
+
+  var want = { opening: 101, middlegame: 101 };
+  for (var i = 0; i < PC_CATS.length; i++){
+    var c = PC_CATS[i], list = [];
+    try { list = JSON.parse(slurp('practices/' + c.key + '.json')); } catch (e){}
+
+    check(c.name + ': the file the page asks for exists', list.length > 0, true);
+    check(c.name + ': and holds every record that was generated', list.length, want[c.key]);
+    // an empty list is the only thing that makes a card say "Not installed yet"
+    check(c.name + ': so the card cannot say "Not installed yet"', list.length === 0, false);
+    check(c.name + ': the rungs are a ladder, 1..n', 
+          list.length > 0 && list[0].n === 1 && list[list.length-1].n === list.length, true);
+    check(c.name + ': every record carries a position and a line',
+          list.every(function(r){ return r.fen && r.moves && r.moves.length; }), true);
+    /* No seedRating, on purpose — a Practice is graded by the standard its file
+       was built to, not by a rung, which is why it moves no rating. */
+    check(c.name + ': and no rung, because it is not rated',
+          list.some(function(r){ return r.seedRating != null; }), false);
+
+    // the slug has to survive three hops: card -> fetch URL -> server allowlist
+    check(c.name + ': the server will serve that exact path',
+          SERVER.indexOf('"/practices/' + c.key + '.json"') >= 0, true);
+  }
+
+  // the fetch URL the page builds, spelled out, against the allowlist
+  check('pcFetch asks for practices/<key>.json',
+        /fetch\('practices\/' \+ key \+ '\.json/.test(fn('pcFetch')), true);
+  check('and the practices have a cache key of their own, not the puzzles\u2019',
+        /PC_VERSION/.test(fn('pcFetch')) && !/PZ_VERSION/.test(fn('pcFetch')), true);
+
+  // entering one is the puzzle player with a different list, and its own scope
+  check('entering a Practice hands the list to PZ',
+        /PZ\.list = list/.test(fn('enterPracticeCat')), true);
+  check('and marks it as a Practice, not a pool',
+        /PZ\.practice = key/.test(fn('enterPracticeCat')) &&
+        /PZ\.pool = null/.test(fn('enterPracticeCat')), true);
+  check('a Practice is played sighted',
+        /PZ\.vision = 'sighted'/.test(fn('enterPracticeCat')), true);
+
+  // and its progress, name and address are its own
+  var was = { pool: PZ.pool, practice: PZ.practice, track: PZ.track };
+  PZ.pool = null; PZ.track = null;
+  PZ.practice = 'opening';
+  check('progress is filed under the category',   pzScope(), 'practice:opening');
+  check('the card names it',                      pzScopeName(), 'Opening Practices');
+  check('and the address bar can carry it',       pzRoute(), 'practice-opening');
+  PZ.practice = 'middlegame';
+  check('and the same for the other one',         pzScope(), 'practice:middlegame');
+  check('named as itself',                        pzScopeName(), 'Middle Game Practices');
+  check('with its own route',                     pzRoute(), 'practice-middlegame');
+  PZ.pool = was.pool; PZ.practice = was.practice; PZ.track = was.track;
+
+  /* Opening one really does put a position on the board. pzOpen() is the whole
+     of it — the same function the five pools go through — so this is the flow
+     the card starts, minus the fetch. */
+  var opening = [];
+  try { opening = JSON.parse(slurp('practices/opening.json')); } catch (e){}
+  if (opening.length){
+    PZ.mode = 'ladder'; PZ.pool = null; PZ.track = null; PZ.practice = 'opening';
+    PZ.vision = 'sighted'; PZ.list = opening;
+    timers = [];
+    pzOpen(1);
+    check('a Practice opens on the game screen', screens[screens.length-1], 'game');
+    check('with one of the 101 on the board', G.st !== null && PZ.puzzle === opening[0], true);
+    check('the position is the file\u2019s own', fenOf(G.st), opening[0].fen);
+    check('and it is playable', legalMoves(G.st, G.st.turn).length > 0, true);
+    pzRender();
+    check('the card names the Practice, not a puzzle track',
+          elements.pzTitle.textContent, 'Opening Practices \u00b7 Practice 1');
+    check('and the rung grid is 101 long', elements.pzGrid.innerHTML.split('data-n=').length - 1, 101);
+
+    // solving it moves no rating — a Practice has no rung to be priced against
+    var before = pzRating();
+    pzPlay(moveFor(opening[0].moves[0]));
+    flushTimers();
+    check('solving it finishes the Practice', PZ.done, true);
+    check('and the rating is untouched',      pzRating(), before);
+    check('nor is a delta claimed',           PZ.delta, null);
+    PZ.on = false; PZ.practice = null; PZ.list = [];
+  }
+})();
+
+/* ---------------------------------------------------------------------
+   Fog of War, and the two panels beside it that answer different questions.
+
+   The written position says where every man STANDS, both sides, in every
+   vision — that is the exercise, not a leak: the fog is a rule about the
+   board, and holding a position you have been told while looking at squares
+   that will not confirm it is the thing being trained. A version of this
+   screen printed "Hidden" for the opponent's row and it was wrong; these
+   checks are what keep it from coming back.
+
+   The notations panel answers the other question — what HAPPENED — and there
+   the opponent's replies are withheld, because a reply spelled out as "Rxb7"
+   is a move the solver never saw played.
+   --------------------------------------------------------------------- */
+say('\nFog of War: the position is told, the replies are not\n');
 
 (function fogging(){
   var track = null, many = null;
@@ -903,16 +1013,26 @@ say('\nFog of War keeps the opponent to itself\n');
   pzOpen(many.n);
   pzRender();
 
-  check('the rule holds for fog while the puzzle is unsolved', pzHidesOpponent(), true);
-  check('the solver keeps their own men in writing',
+  check('a fog puzzle withholds the replies while it is unsolved', pzHidesReplies(), true);
+
+  /* REGRESSION. The written position is both sides, always. This panel once
+     read "Hidden" for the opponent's row on a fog puzzle and shipped that way:
+     the board hid them and so did the only thing on screen that could have
+     said where they were, which is a different exercise from the one the mode
+     is for. */
+  check('the solver’s own men are written out',
         elements[rowOfC(mine)].textContent, pzPieceList(G.st, mine));
-  check('and is told nothing of the other side’s',
-        elements[rowOfC(theirs)].textContent, 'Hidden');
-  check('not one square of it',
-        /[a-h][1-8]/.test(elements[rowOfC(theirs)].textContent), false);
-  // "—" would be a claim about the position, and a false one
-  check('nor is the row simply left empty',
-        elements[rowOfC(theirs)].textContent.length > 0, true);
+  check('and so are the opponent’s — the panel is the position, both sides',
+        elements[rowOfC(theirs)].textContent, pzPieceList(G.st, theirs));
+  check('their squares are named outright',
+        /[a-h][1-8]/.test(elements[rowOfC(theirs)].textContent), true);
+  check('the row never says "Hidden" again',
+        /Hidden/.test(elements.pzPcW.textContent + elements.pzPcB.textContent), false);
+  check('both rows carry real men',
+        elements.pzPcW.textContent.length > 2 && elements.pzPcB.textContent.length > 2, true);
+  // and it is the live position, not the opening one: it follows every move
+  check('it is read off the board as it stands',
+        elements[rowOfC(theirs)].textContent, pzPieceList(stateFromFEN(many.p.fen), theirs));
 
   // their reply, played the way the page's own timer plays it
   pzPlay(moveFor(many.p.moves[0]));
@@ -932,12 +1052,12 @@ say('\nFog of War keeps the opponent to itself\n');
   check('with the fog lifted the very same panel names it', at(sans[1]), true);
   check('and carries no mask at all',
         elements.pzMoves.innerHTML.indexOf('pz-veil') >= 0, false);
-  check('their men are named too',
+  check('the written position is unchanged by the reveal — it was never masked',
         elements[rowOfC(theirs)].textContent, pzPieceList(G.st, theirs));
   G.revealed = false;
   pzRender();
-  check('and putting it back hides them again',
-        elements[rowOfC(theirs)].textContent, 'Hidden');
+  check('and putting the fog back leaves it alone too',
+        elements[rowOfC(theirs)].textContent, pzPieceList(G.st, theirs));
 
   // finishing is what opens it for real
   for (var k = G.uci.length; k < many.p.moves.length; k++){
@@ -948,10 +1068,10 @@ say('\nFog of War keeps the opponent to itself\n');
   }
   pzRender();
   check('solving it opens the position',   PZ.done && G.revealed, true);
-  check('so the rule stands down',         pzHidesOpponent(), false);
-  check('their men are in writing at last',
+  check('so the rule stands down',         pzHidesReplies(), false);
+  check('the written position is still both sides',
         elements[rowOfC(theirs)].textContent, pzPieceList(G.st, theirs));
-  check('and every reply is spelled out',
+  check('and every reply is spelled out now',
         elements.pzMoves.innerHTML.indexOf('pz-veil') >= 0, false);
 
   /* The other three visions are untouched. In Complete Blindfold and See the
@@ -964,14 +1084,29 @@ say('\nFog of War keeps the opponent to itself\n');
     timers = [];
     pzOpen(many.n);
     pzRender();
-    check(PZ_VISION_NAME[others[v]] + ': the rule does not fire', pzHidesOpponent(), false);
+    check(PZ_VISION_NAME[others[v]] + ': no reply is withheld', pzHidesReplies(), false);
     check(PZ_VISION_NAME[others[v]] + ': both sides are written out',
           elements[rowOfC(theirs)].textContent, pzPieceList(G.st, theirs));
   }
 
-  // a run is played sighted, so nothing is masked there either
+  // a run is played sighted, so nothing is withheld there either
   PZ.vision = 'sighted';
-  check('and a run masks nothing', pzHidesOpponent(), false);
+  check('and a run withholds nothing', pzHidesReplies(), false);
+
+  /* The two panels are separate concerns and the code says so: the rule is
+     asked in exactly one place, and it is not the written position. Comments
+     are stripped first — both functions *mention* the rule, on purpose, and a
+     test that cannot tell a call from a cross-reference would pass whatever
+     the code did. */
+  var code = function(src){
+    return src.replace(/\/\*[\s\S]*?\*\//g, '').replace(/\/\/[^\n]*/g, '');
+  };
+  check('the written position never asks the rule',
+        /pzHidesReplies\s*\(/.test(code(fn('pzRenderPieces'))), false);
+  check('the notations panel is the only thing that does',
+        /pzHidesReplies\s*\(/.test(code(fn('pzRenderNotes'))), true);
+  check('and pzPieceList itself takes no view of it',
+        /PZ\.|G\.revealed/.test(code(fn('pzPieceList'))), false);
 
   /* Everything else that could give the position away is gated on the puzzle
      being over, and was before this — checked here so the four stay together

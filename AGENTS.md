@@ -33,6 +33,7 @@ python3 server/test_ai_match.py          # seating one: the queue, the race; no 
 python3 server/test_names.py             # one name per player, guests included; no server needed
 python3 server/test_system_profiles.py   # the 21 leaderboard profiles: refused everywhere; no server needed
 python3 server/test_puzzle_rating.py     # the puzzle Elo handler; no server needed
+python3 server/test_image_files.py       # every allowlisted file is COPYed into the image; no server needed
 python3 server/test_visions.py           # the three vision ratings: what the migration seeds, what the server writes; no server needed
 node tools/test_generate_puzzles.js      # the generator's own decisions, no engine
 node tools/test_new_rules.js             # the payoff and education rules the corpus was re-cut by
@@ -132,6 +133,17 @@ the engine, not optional). Allowlisted assets are cached for a week, so every
 reference in the page carries `?v=N`; bump it when a file changes. Four of the
 entries are the Education System — see below — and they are the only part of
 `education/` that is served or copied into the image.
+
+An allowlist has one failure mode with no error anywhere in it: an entry whose
+file the **Dockerfile never copies**. That is not a build error (the Dockerfile
+does not know what the server serves), not a server error (`serve_static_file`
+answers a clean 404 on `OSError`), and not a page error either — it is a feature
+quietly reporting itself as missing, in its own words, to whoever opens it. Both
+board Practices shipped that way and said "Not installed yet" for a whole deploy
+while working perfectly from a checkout, because `practices/` had no `COPY`.
+`server/test_image_files.py` is the guard: it reads `STATIC_FILES` and the
+Dockerfile's `COPY` lines and fails when they disagree. Add an entry to the
+allowlist, add the file to the image.
 
 **Server state** is module-level dicts guarded by one `RLock`: `lobby` (quick
 match, keyed by `(mode, minutes, inc, kind)` — ranked and friendly are separate
@@ -611,9 +623,10 @@ unrevealed. Check is still *said* — `CHECK` beside the side-to-move line — w
 no attacker, no arrow and no path, in words or on the board.
 
 **The written position is generated, never stored.** `pzPieceList()` reads
-`G.st` on every render: in Complete Blindfold it is the position, in See the
-Board it is the half the board is refusing to draw, and in Sighted it is what is
-already on the board said again. A list checked into `puzzles/*.json` would be a second copy that has to be
+`G.st` on every render, both sides, in every vision: in Complete Blindfold it is
+the position, in See the Board and Fog of War it is the half the board is
+refusing to draw, and in Sighted it is what is already on the board said
+again. A list checked into `puzzles/*.json` would be a second copy that has to be
 kept in step with the first, and would be wrong the moment anything moved — as
 it is, a capture, a promotion and an en passant are right without any of the
 three being mentioned. Kings first and pawns last, and a pawn is named by its
@@ -621,21 +634,26 @@ square alone, because "Pa2" is not how anybody says it and the letters are what
 the eye is scanning for. Captured men are simply not on the board, so there is
 no separate record of them: the list says what is there, not what happened.
 
-**Fog of War is the one vision that may not have all of it, and hiding is not
-only a matter of the board.** A written list of the opponent's men, or their
-reply spelled out in notation, is exactly the information the squares are
-refusing to draw — printed a foot above them. `pzHidesOpponent()` is that rule
-in one place (fog, a puzzle, not yet revealed) and both panels ask it: the
-opponent's row of the written position reads **Hidden** rather than going blank,
-because an empty list is a claim about the position and a false one; and every
-odd ply of the notations panel — the fen's side to move is the solver, so the
-odd plies are theirs — is masked with a `?`. The solver's own men and own moves
-are never masked. Everything opens at the one moment `pzFinish()` sets
-`G.revealed`, which is the same moment the card, the swing, the themes, Show
-Follow Up and Study Alternatives arrive, so there is exactly one door and not
-six. The other three visions never mask: in Complete Blindfold and See the Board
-the written position *is* the position, and masking half of it would not make a
-harder puzzle but an unanswerable one.
+**Two panels stand beside a fog puzzle and they answer different questions.**
+The written position says where every man *stands*, and it is granted in every
+vision, both sides, Fog of War included. A version of it printed **Hidden** for
+the opponent's row, reasoning that a written list of the men the board is hiding
+gives back exactly what the fog is keeping. It does — and that is what the panel
+is for. The fog is a rule about the *board*; holding a position you have been
+told while looking at squares that will not confirm it is the exercise, and a
+panel showing half a position is not a harder version of it but a poorer one,
+with nothing left to visualise. That shipped and was reverted.
+
+The notations panel is the other question — what *happened* — and there the
+opponent's replies are withheld, because a reply spelled out as "Rxb7" is a move
+the solver never saw played. `pzHidesReplies()` is that rule, in one place, and
+`pzRenderNotes()` is the only caller: the fen's side to move is the solver, so
+the odd plies are theirs, masked with a `?`. It stands down the moment
+`pzFinish()` sets `G.revealed`, which is also when the card, the swing, the
+themes, Show Follow Up and Study Alternatives arrive. The name is the whole of
+the distinction — anything reading it from `pzRenderPieces()` has confused the
+two panels, and `test_puzzle_flow.js` asserts that neither drifts into the
+other's job.
 
 **The notations panel is walked from what was played, never from the file.**
 `pzSanLine()` replays `G.uci` from the puzzle's own fen. Reading `puzzle.moves`

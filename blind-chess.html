@@ -1565,15 +1565,6 @@
   }
   .pz-pc-row + .pz-pc-row{border-top:1px solid rgba(220,225,234,.22); padding-top:12px;}
   .pz-pc-row + .pz-pc-row .pz-pc-list{color:#ddd7c9;}
-  /* Fog of War: the side the solver cannot see. Set on whichever row is the
-     opponent's rather than on a fixed one, because either colour can be the
-     solver — see pzHidesOpponent(). It is deliberately quiet: this is the one
-     line on the panel that is not a fact about the position. */
-  .pz-pc-list.veiled,
-  .pz-pc-row + .pz-pc-row .pz-pc-list.veiled{
-    color:#7f8794; font-style:italic; letter-spacing:.12em;
-    font-size:20px; text-transform:uppercase;
-  }
   /* The written position and whichever play surface is active share one exact
      width, so the panel reads as the play surface's attached header. */
   #screen-game.puzzle-mode .board-frame,
@@ -4270,17 +4261,17 @@
       <div class="board-col">
         <div class="board-bar" id="barTop"></div>
 
-        <!-- puzzles only: where every man the solver may know about actually
-             is, in writing. Never stored in the puzzle file and never cached —
-             it is read off G.st on every render, so it is right after a
-             capture, a promotion or an en passant without any of those having
+        <!-- puzzles only: where every man on the board actually is, in
+             writing, both sides. Never stored in the puzzle file and never
+             cached — it is read off G.st on every render, so it is right after
+             a capture, a promotion or an en passant without any of those having
              to be special-cased. It stands in every vision on purpose: in
-             Complete Blindfold it is the whole position, in See the Board it is
-             the half the board is refusing to draw, and in Sighted it is what
-             is on the board said again. Fog of War is the exception, and the
-             one that had to be made — the opponent's row says "Hidden" until
-             the puzzle is finished, or this panel would hand back exactly what
-             the fog is keeping. See pzHidesOpponent(). -->
+             Complete Blindfold it is the whole position, in See the Board and
+             Fog of War it is the half the board is refusing to draw, and in
+             Sighted it is what is on the board said again. Fog of War is not an
+             exception to that — what a fog puzzle withholds is the opponent's
+             *reply*, in the notations panel, and nothing here. See
+             pzHidesReplies(). -->
         <div class="panel pz-pieces" id="pzPieces" style="display:none">
           <div class="pz-pc-row"><span class="pz-pc-tag">White Pieces</span><span class="pz-pc-list" id="pzPcW"></span></div>
           <div class="pz-pc-row"><span class="pz-pc-tag">Black Pieces</span><span class="pz-pc-list" id="pzPcB"></span></div>
@@ -9805,21 +9796,28 @@ const PZ_PIECE_RANK = {
   K:0, Q:1, R:2, B:3, N:4, P:5
 };
 
-/* Is the opponent being kept from the solver right now?
+/* Is the opponent's *move* being kept from the solver right now?
  *
- * Fog of War draws the solver's own men and nothing of the other side's, and
- * that is a rule about the *position*, not about the board element: a written
- * list of their men, or their reply spelled out in notation, is the same
- * information the board is refusing to draw, printed a foot above it. So this
- * one test guards every panel that could say it, and every one of them opens
- * at the same moment the board does — pzFinish() sets G.revealed, and after
- * that there is nothing left to give away.
+ * Two panels stand beside a fog puzzle and they answer different questions, so
+ * they answer to different rules. The distinction is the whole of this name and
+ * is worth keeping straight.
  *
- * It is deliberately false for the other three visions. In Complete Blindfold
- * and See the Board the written position *is* the position — hiding half of it
- * would not be a harder puzzle, it would be an unanswerable one — and Sighted
- * has every man on the board anyway. */
-function pzHidesOpponent(){
+ * The written position (pzRenderPieces) says where every man stands. It is
+ * granted, in every vision, both sides: in Complete Blindfold it *is* the
+ * position, in See the Board and Fog of War it is the half the board is
+ * refusing to draw, and in Sighted it is the board said again. That is not a
+ * leak, it is the exercise — the fog is a rule about the *board*, and holding a
+ * position you have been told while looking at squares that will not confirm it
+ * is the thing being trained.
+ *
+ * The notations panel is the other question: what has *happened*. A reply
+ * spelled out as "Rxb7" is a move the solver never saw played, and that is what
+ * this guards — that panel, and nothing else.
+ *
+ * False in the other three visions, and false the moment pzFinish() sets
+ * G.revealed, which is also when the card, the swing, the themes, Show Follow
+ * Up and Study Alternatives arrive. */
+function pzHidesReplies(){
   return PZ.on && PZ.vision === 'fog' && !G.revealed;
 }
 
@@ -9835,18 +9833,16 @@ function pzPieceList(st, color){
 }
 
 function pzRenderPieces(){
-  /* PZ.side is the solver — the colour to move in the puzzle's own fen — and
-     it stays the solver through the forced reply, when G.st.turn is briefly
-     the other side. Their row says "Hidden" rather than going blank, because
-     an empty list reads as "they have nothing left", which is a claim about
-     the position and a false one. */
-  const veil = pzHidesOpponent();
-  const el = { [W]: document.getElementById('pzPcW'), [B]: document.getElementById('pzPcB') };
-  for (const c of [W, B]){
-    const hide = veil && c !== PZ.side;
-    el[c].textContent = hide ? 'Hidden' : (pzPieceList(G.st, c) || '—');
-    el[c].classList.toggle('veiled', hide);
-  }
+  /* Both sides, in every vision, Fog of War included. A version of this panel
+     printed "Hidden" for the opponent's row on a fog puzzle, reasoning that a
+     written list of the men the board is hiding hands back exactly what the fog
+     is keeping. It does — and that is what this panel is for. The fog is a rule
+     about the board; a panel that shows half a position is not a harder
+     exercise, it is a poorer one, and it also leaves the solver nothing to
+     visualise. What the solver is not told is what the opponent *did*: see
+     pzHidesReplies(), which guards the notations panel and nothing else. */
+  document.getElementById('pzPcW').textContent = pzPieceList(G.st, W) || '—';
+  document.getElementById('pzPcB').textContent = pzPieceList(G.st, B) || '—';
 }
 
 /* ---- the notation panel ----
@@ -9890,7 +9886,7 @@ function pzRenderNotes(){
      the opponent's — masked while the fog holds, and printed with everything
      else once the puzzle is finished. The solver's own moves are never masked;
      they made them. */
-  const veil = pzHidesOpponent();
+  const veil = pzHidesReplies();
   const cell = k => (veil && k % 2 === 1)
     ? '<span class="pz-veil" title="Hidden — Fog of War" aria-label="hidden">?</span>'
     : pzEsc(sans[k]);
