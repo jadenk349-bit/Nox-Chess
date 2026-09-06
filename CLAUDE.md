@@ -1076,11 +1076,56 @@ Navigate by the `/* ==== TITLE ==== */` banners in the script — THE SKY,
 CONSTANTS & HELPERS, MOVE GENERATION, ENGINE, GAME / UI STATE, CLOCK, SOUND,
 COMPLETE BLINDFOLD, PLAYING MOVES, ONLINE PLAY, RESIGNING…, THE ENGINE, THE
 REVIEW, THE EDUCATION LAYER, THE PUZZLES, STUDY ALTERNATIVES, THE LESSONS,
-CONTROLS, PRACTICE, SCREENS, ACCOUNTS, SOCIAL.
+CONTROLS, PRACTICE, SCREENS, HISTORY, ACCOUNTS, SOCIAL.
 
 Screens are `<section class="screen" id="screen-NAME">` toggled by
 `showScreen(name)`; `screenName` is the current one and several handlers branch
-on it. `screen-pzvision` is the one every puzzle goes through — see "A puzzle is
+on it.
+
+**Every page is a browser history entry, and `showScreen()` is where it is
+written.** The page is one document, and for a long time that meant Chrome's
+Back button knew nothing about it: from three pages deep in Nox it went to
+whatever site came before. The HISTORY section fixes that with the smallest
+thing that fits — no router, no URLs on the server (`STATIC_FILES` is an
+allowlist, and a path like `/ranked` would 404 on refresh), just
+`history.pushState` with a hash naming the page (`#ranked`, `#friendly`,
+`#lessons/3`, `#practice/coord`, `#puzzle/opening`, `#play/bot`,
+`#game/ranked`, `#live/fog`) and a `popstate` handler. The rule is
+*describe, compare, push*: `navSync()` reads the page the globals say we are
+on (`navDescribe()`) and pushes only when that differs from the entry we are
+standing in, so a re-render, a rematch, or the next puzzle in a ladder only
+refreshes the entry and never duplicates it. `showScreen()` calls it last;
+so do the three view switches that are pages in their own right — a lesson
+(`lsnShow`/`lsnHub`/`lsnFinish`), a drill running (`prBegin`/`prShowDash`)
+and the spectator view (`liveOpenBig`/`liveCloseBig`). A step within a lesson
+is not a page: it refreshes the entry, so a refresh comes back to the step and
+Back does not walk every step twice. `showScreen(name, 'replace')` is for
+redirects — the username gate and "signing in finishes the login page" — so
+that Back is not a way past them.
+
+Arriving from history (`navApply()`) goes through the functions the buttons
+call — `goSocial()`, `enterRooms()`, `goPractice()`, `lsnEnter()` — because
+most screens need more than showing, and it first does what the screen's own
+Back button would have done on the way out (`leaveRooms()`, `stopHosting()`,
+`netClose()`). While that runs, `navRestoring` makes every `showScreen()`
+replace instead of push and mutes `beep()`, which is what makes a loop
+impossible. The one page that cannot be re-entered is a game somebody else
+started — the server's pairing starts a ranked, friendly or challenged game,
+and Back cannot ask it to again — so a dead game entry is stepped over on the
+way back (`history.go(-1)` once more) and, forwards, replaced by the page
+where that kind of game is arranged, the rule New Game already follows. A bot
+or local game's entry *is* the setup beside the board, and a puzzle's re-opens
+the ladder where it stands. A game in progress is protected exactly as the
+wordmark protects it: Back opens the leave box, the history is put back
+(`history.go` the other way, held in `NAV.pending`), and Confirm finishes the
+refused step rather than going home. `gameLive()` is the wordmark's test,
+shared. Pages a guest is sent to sign up for are gated on arrival too
+(`navGated()`), and at boot such a route waits for the account to be known
+(`navSettled`, after `initAuth()`); `navBoot()` leaves the URL untouched on
+purpose, because Supabase reads its own token out of the hash after Google.
+None of the test harnesses has a `history`, and under them the whole layer is
+inert (`NAV.hist` null) — `test_practice_flow.js` stubs `navSync` because it
+lifts the PRACTICE section on its own. `screen-pzvision` is the one every puzzle goes through — see "A puzzle is
 a category and a vision" above. There is only one account cluster (`#headRight`), and `showScreen()`
 moves it into whichever screen's header offers a `.head-mount` — home and
 social both do, so it sits in the same place on each. Don't duplicate it.

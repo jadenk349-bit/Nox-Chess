@@ -5788,8 +5788,13 @@ function flagFall(loser){
    SOUND
    ============================================================ */
 let actx = null;
+/* Arriving at a page from the browser's Back button goes through the same
+   functions the nav buttons call, and those click. A page that was asked for
+   with the browser's own button is not a button press, so the click is held
+   while it is being restored (set by navGo(), in HISTORY). */
+let navRestoring = false;
 function beep(freq, dur, type, vol){
-  if (!G.sound) return;
+  if (!G.sound || navRestoring) return;
   try{
     actx = actx || new (window.AudioContext || window.webkitAudioContext)();
     const o = actx.createOscillator(), g = actx.createGain();
@@ -10515,6 +10520,7 @@ function lsnFace(which){
 function lsnHub(){
   lsnResetStep();
   lsnFace('hub');
+  navSync();
   document.getElementById('lsnHeading').textContent = 'How to Play Blind Chess';
 
   const done = lsnDone(), reach = lsnReach();
@@ -10556,6 +10562,10 @@ function lsnShow(){
   if (s && s.setup) s.setup();
   lsnPaint();
   lsnRender();
+  // A lesson is a page of the course: Back goes to the lesson before it, or
+  // to the ladder. A step within one only refreshes the entry, so that a
+  // refresh comes back to the step and Back does not walk every step twice.
+  navSync();
 }
 
 function lsnOpen(n, step){
@@ -10585,6 +10595,7 @@ function lsnBack(){
 function lsnFinish(){
   lsnResetStep();
   lsnFace('done');
+  navSync();
   document.getElementById('lsnHeading').textContent = 'How to Play Blind Chess';
   beep(660, .1); setTimeout(() => beep(880, .14), 130);
 }
@@ -12742,6 +12753,7 @@ function prBegin(){
   PR.answered = false;
   PR.q = null; PR.click = null; PR.onSubmit = null; PR.mini = null;
   prLaid = null;                                   // relay the board for this drill's settings
+  navSync();                                       // a drill is a page: Back is the dashboard
   prClearPieces();
   prMarksClear();
   prSay(''); prSeq(''); prAnsClear(); prCtl([]);
@@ -12844,6 +12856,7 @@ function prRecommend(sessionAcc){
 function prShowDash(){
   prClearTimers();
   PR.view = 'dash';
+  navSync();
   PR.q = null; PR.click = null; PR.onSubmit = null; PR.mini = null;
   document.getElementById('prDoneOverlay').classList.remove('show');
   document.getElementById('prRun').style.display = 'none';
@@ -13036,7 +13049,7 @@ function resetChoices(){
   flagged = false;
 }
 
-function showScreen(name){
+function showScreen(name, how){
   // The ranked search lives on its own page as a state of its own button, so
   // walking off that page is giving it up — there is no longer a box standing
   // in the way to make that impossible.
@@ -13110,8 +13123,294 @@ function showScreen(name){
   if (name === 'game'){ startClock(); render(); }
   else stopClock();
   window.scrollTo({ top:0, behavior:'smooth' });
+  // And into the browser's history, as a page — see HISTORY below. A screen
+  // arrived at by a redirect ('replace') takes over the entry it was reached
+  // from rather than standing behind it.
+  navSync(how === 'replace' ? 'replace' : 'push');
 }
 const gameInProgress = () => G.sans.length > 0 && !G.over;
+// A game that leaving would abandon: the wordmark asks first, and so does the
+// browser's Back button.
+const gameLive = () => gameInProgress() || (ONLINE() && NET.state === 'playing' && !G.over);
+
+/* ============================================================
+   HISTORY — the browser's Back and Forward, over the screens above
+   ============================================================ */
+/* The page is one document and showScreen() is the whole of its navigation,
+   which left the browser's own history with nothing in it: Back from anywhere
+   in Nox went to whatever site came before it. Every page a player can stand
+   on is now a history entry, with a hash naming it (#ranked, #lessons/3,
+   #puzzle/opening), so a refresh, a bookmark and a link land on the page and
+   not on the home screen. The entries are pushed by showScreen() and by the
+   three view switches inside a screen that are pages in their own right — a
+   lesson, a drill running, the spectator view over the home page.
+
+   The rule is describe, compare, push. navSync() reads the page the globals
+   say we are on (navDescribe()) and pushes an entry only when that differs
+   from the entry we are standing in. A second render, a rematch showing the
+   game screen it is already showing, one puzzle after another: all describe
+   the same page and only refresh the entry, which is what stops a re-render
+   from becoming a duplicate entry. It is also what keeps the popstate
+   handler from chasing itself: while an entry is being restored, every
+   showScreen() it causes replaces rather than pushes, so restoring a page
+   cannot push the page it is restoring.
+
+   Arriving at an entry from history (navApply()) goes through the same
+   functions the buttons call — goSocial(), enterRooms(), goPractice(),
+   lsnEnter() — and not showScreen() alone, because most screens need more
+   than showing: the room list needs its socket, Practice needs PR.on, a
+   lesson needs its steps built. The one page that cannot be re-entered is a
+   game somebody else started: the server's pairing is what starts a ranked,
+   friendly or challenged game, and Back cannot ask it to again. A dead game
+   entry is stepped over on the way back (history.go(-1) once more) and, on
+   the way forward, replaced by the page where that kind of game is arranged —
+   the rule New Game already follows. A bot or local game is different: its
+   entry *is* the setup beside the board, and enterGameSetup() is the way back
+   into it. A puzzle re-opens the ladder where it stands, since the file has
+   it and nothing was invented to get there.
+
+   A game in progress is protected the way the wordmark protects it: Back
+   opens the leave box instead of leaving, and the history is put back where
+   it was (history.go the other way) until Confirm, which then finishes the
+   step that was refused rather than going home. Nothing here knows chess;
+   it asks gameLive(), the wordmark's own test.
+
+   Every one of the whole-page test harnesses runs without a `history`, and
+   under them all of this is inert: NAV.hist is null and navSync() returns. */
+const NAV = {
+  hist: (typeof history === 'object' && history && typeof history.pushState === 'function') ? history : null,
+  n: 0,            // ordinal of the entry we stand in; a popstate's direction is the sign of the difference
+  cur: null,       // what that entry describes
+  ready: false,    // navBoot() has run
+  pending: 0,      // the direction of a Back or Forward the leave box is holding up
+  deferred: null   // a route that has to wait for the account to be known
+};
+
+/** The page the globals say we are on. `s` is the screen, `v` the page within
+    it where a screen has several; the rest is what re-entering needs. */
+function navDescribe(){
+  const s = screenName;
+  if (s === 'home')     return { s, v: LIVE.big || '' };
+  if (s === 'lessons')  return { s, v: LSN.view === 'lesson' ? String(LSN.n) : LSN.view === 'done' ? 'done' : '',
+                                 step: LSN.step | 0 };
+  if (s === 'practice') return { s, v: PR.view === 'run' && PR.mode ? PR.mode.key : '', diff: PR.diff, len: PR.len };
+  if (s === 'pzvision') return { s, v: pzPick.rush ? 'rush' : (pzPick.track || '') };
+  if (s === 'setup')    return { s, v: HOSTING() ? 'host' : (G.opponent || '') };
+  if (s === 'game'){
+    if (PZ.on) return RUSH.on ? { s, v:'rush' } : { s, v:'puzzle', track: PZ.track || '' };
+    if (G.opponent === 'bot' || G.opponent === 'local') return { s, v: G.opponent };
+    if (CHAL.to && !G.started) return { s, v:'challenge' };
+    return { s, v:'online', kind: G.matchKind || '' };
+  }
+  return { s, v:'' };
+}
+const navSame = (a, b) => !!(a && b) && a.s === b.s && a.v === b.v && (a.track || '') === (b.track || '');
+
+/** The hash for a page, and the page for a hash — one table, read both ways. */
+function navHash(d){
+  switch (d.s){
+    case 'home':     return d.v ? 'live/' + d.v : '';
+    case 'rooms':    return 'friendly';
+    case 'pzvision': return 'puzzles' + (d.v ? '/' + d.v : '');
+    case 'game':
+      if (d.v === 'bot' || d.v === 'local') return 'play/' + d.v;
+      if (d.v === 'puzzle')   return 'puzzle' + (d.track ? '/' + d.track : '');
+      if (d.v === 'rush')     return 'puzzle/rush';
+      if (d.v === 'challenge') return 'challenge';
+      return 'game' + (d.kind ? '/' + d.kind : '');
+    default:         return d.s + (d.v ? '/' + d.v : '');
+  }
+}
+function navParse(hash){
+  const parts = String(hash || '').replace(/^#\/?/, '').split('/');
+  const head = parts[0] || '', tail = parts[1] || '';
+  switch (head){
+    case '':          return { s:'home', v:'' };
+    case 'live':      return { s:'home', v: tail };
+    case 'friendly':  return { s:'rooms', v:'' };
+    case 'puzzles':   return { s:'pzvision', v: tail };
+    case 'play':      return { s:'game', v: tail === 'local' ? 'local' : 'bot' };
+    case 'puzzle':    return tail === 'rush' ? { s:'game', v:'rush' } : { s:'game', v:'puzzle', track: tail };
+    case 'challenge': return { s:'game', v:'challenge' };
+    case 'game':      return { s:'game', v:'online', kind: tail };
+    default:
+      // anything else is a screen by name, or nothing we know — the token
+      // Supabase hands back in the hash after Google, for one
+      return /^[a-z]+$/.test(head) && document.getElementById('screen-' + head)
+        ? { s: head, v: tail } : { s:'home', v:'' };
+  }
+}
+const navURL = d => { const h = navHash(d); return location.pathname + location.search + (h ? '#' + h : ''); };
+
+/** The pages a guest is sent to sign up for instead — the same gate the
+    home page's buttons keep, so the address bar is not a way round it. */
+function navGated(d){
+  if (d.s === 'social' || d.s === 'ranked' || d.s === 'pzvision') return true;
+  return d.s === 'game' && (d.v === 'puzzle' || d.v === 'rush' || d.v === 'challenge' ||
+                            (d.v === 'online' && d.kind === 'ranked'));
+}
+
+/** Record the page we are on: a new entry if it is a new page, the same
+    entry refreshed if it is not. `how` is 'replace' for a redirect. */
+function navSync(how){
+  if (!NAV.hist || !NAV.ready) return;
+  const d = navDescribe();
+  const same = navSame(d, NAV.cur);
+  const push = !same && !navRestoring && how !== 'replace';
+  if (push) NAV.n++;
+  d.n = NAV.n;
+  NAV.cur = d;
+  try {
+    if (push) NAV.hist.pushState(d, '', navURL(d));
+    else NAV.hist.replaceState(d, '', navURL(d));
+  } catch (e){ /* a file: URL, or a browser that will not — the page still works */ }
+}
+
+/** Back or Forward was pressed: the browser has already moved to the entry,
+    and this is where the page catches up. */
+function navPop(e){
+  let d = e && e.state && typeof e.state === 'object' && e.state.s ? e.state : null;
+  let dir;
+  if (d){
+    if (d.n === NAV.n) return;             // where we already stand — put back after a refusal
+    dir = d.n > NAV.n ? 1 : -1;
+  } else {
+    // A hash typed into the address bar: the browser pushed it after us.
+    d = navParse(location.hash);
+    d.n = NAV.n + 1;
+    dir = 1;
+  }
+  navGo(d, dir);
+}
+
+function navGo(d, dir){
+  if (screenName === 'game' && gameLive()){
+    // A game in progress is asked about, not abandoned — the box the wordmark
+    // opens, holding the direction so that Confirm can finish the step.
+    NAV.pending = dir;
+    leaveOverlay.classList.add('show');
+    if (dir) NAV.hist.go(-dir);
+    return;
+  }
+  navRestoring = true;
+  let landed;
+  try { landed = navApply(d, dir); }
+  finally { navRestoring = false; }
+  if (landed === false) return;            // stepped over: the next popstate lands somewhere real
+  NAV.n = d.n;
+  NAV.cur = d;
+  // The entry is rewritten as the page actually reached, which differs from
+  // what it named when it was dead, gated, or gone. A puzzle arrives later
+  // (pzOpen, after its file) and describes itself then.
+  if (landed !== 'async') navSync('replace');
+}
+
+/** Arrive at the page an entry names. Returns false when it moved the
+    history itself instead, 'async' when the page is still on its way. */
+function navApply(d, dir){
+  if (GUEST() && navGated(d)) d = { s:'home', v:'', n:d.n };
+  // Leaving: what the Back button on the screen we are on would have done.
+  if (screenName === 'rooms' && d.s !== 'rooms') leaveRooms();
+  else if (screenName === 'setup' && searching) stopHosting();
+  else if (screenName === 'game'){ netClose(); G.started = false; }
+  switch (d.s){
+    case 'home':
+      if (screenName !== 'home') showScreen('home');
+      if (d.v) liveOpenBig(d.v);           // nothing happens if that game is no longer up
+      else if (LIVE.big) liveCloseBig();
+      break;
+    case 'settings': case 'signup': case 'login':
+      showScreen(d.s); break;
+    case 'name':
+      showScreen(needsName() ? 'name' : 'home'); break;
+    case 'social':
+      goSocial(); break;
+    case 'ranked':
+      showScreen('ranked'); break;
+    case 'rooms':
+      G.matchKind = 'friendly'; G.opponent = 'online'; G.hosting = false;
+      enterRooms(); break;
+    case 'setup':
+      if (d.v === 'host' || d.v === 'online'){ G.matchKind = 'friendly'; G.opponent = 'online'; G.hosting = true; }
+      else { G.hosting = false; if (d.v === 'bot' || d.v === 'local') G.opponent = d.v; }
+      showScreen('setup'); break;
+    case 'pzvision':
+      goPuzzleVision(d.v === 'rush' || PZ_TRACKS.indexOf(d.v) >= 0 ? d.v : 'opening'); break;
+    case 'lessons':
+      lsnEnter();
+      if (d.v === 'done') lsnFinish();
+      else if (+d.v > 0) lsnOpen(Math.min(+d.v, lsnReach()), d.step | 0);
+      break;
+    case 'practice': {
+      goPractice();
+      const mode = d.v && PR_MODES.find(m => m.key === d.v);
+      if (mode){
+        PR.mode = mode;
+        PR.diff = d.diff || 1;
+        PR.len = d.len != null ? d.len : (mode.key === 'mini' ? 0 : 10);
+        prBegin();
+      }
+      break;
+    }
+    case 'game':
+      if (d.v === 'bot' || d.v === 'local'){
+        G.opponent = d.v;
+        if (d.v === 'local') G.human = W;   // hot-seat opens from White's side, as goLocal() has it
+        else ensureGuestName();
+        enterGameSetup();
+        break;
+      }
+      if (d.v === 'rush'){ goPuzzleVision('rush'); break; }   // a run is not resumed, only started
+      if (d.v === 'puzzle'){
+        const track = PZ_TRACKS.indexOf(d.track) >= 0 ? d.track : 'opening';
+        if (PZ_VISIONS.indexOf(PZ.vision) >= 0){
+          pzPick.rush = false; pzPick.track = track;
+          pzChooseVision(PZ.vision);        // the ladder where it stands, after its file
+          return 'async';
+        }
+        goPuzzleVision(track);              // no vision chosen yet: the page that asks
+        break;
+      }
+      // Online, or the challenge form: a page the server made, and only ours
+      // to show while the game it made is still being played.
+      if (gameLive()){ showScreen('game'); break; }
+      if (dir < 0 && d.n > 0){ NAV.hist.go(-1); return false; }
+      if (d.v === 'challenge') goSocial();
+      else if (d.kind === 'ranked') showScreen('ranked');
+      else { G.matchKind = 'friendly'; G.opponent = 'online'; G.hosting = false; enterRooms(); }
+      break;
+    default:
+      showScreen('home');
+  }
+  return true;
+}
+
+/** At load: adopt the entry we are on. A reload or a return from another site
+    brings its state back; an address typed or followed brings a hash. The URL
+    is left exactly as it is here, because Supabase reads its own token out of
+    the hash after Google and has not yet had the chance. */
+function navBoot(){
+  if (!NAV.hist) return;
+  window.addEventListener('popstate', navPop);
+  const st = NAV.hist.state;
+  const d = st && typeof st === 'object' && st.s ? st : navParse(location.hash);
+  NAV.n = d.n | 0;
+  NAV.cur = { s:'home', v:'', n: NAV.n };
+  NAV.ready = true;
+  try { NAV.hist.replaceState(NAV.cur, ''); } catch (e){}
+  if (d.s === 'home' && !d.v) return;
+  d.n = NAV.n;
+  // A page an account has to be signed in for is not decided until the
+  // account is known (navSettled); anything else is shown at once.
+  const go = () => { if (screenName === 'home' && NAV.n === d.n) navGo(d, 0); };
+  if (navGated(d)) NAV.deferred = go; else go();
+}
+/** The account is known, one way or the other: the route that waited for it. */
+function navSettled(){
+  const go = NAV.deferred;
+  NAV.deferred = null;
+  if (go) go();
+}
 
 // every setting lives on the setup screen; the game screen only reports them
 function syncOptions(){
@@ -13302,7 +13601,8 @@ document.getElementById('btnHostRoom').onclick = () => {
 const leaveOverlay = document.getElementById('leaveOverlay');
 // the logo doubles as the way out; a game in progress asks first
 document.getElementById('btnMenu').onclick = () => {
-  if (gameInProgress() || (ONLINE() && NET.state === 'playing' && !G.over)){
+  if (gameLive()){
+    NAV.pending = 0;                 // the wordmark asked, not the browser
     leaveOverlay.classList.add('show');
   } else {
     netClose();
@@ -13310,13 +13610,17 @@ document.getElementById('btnMenu').onclick = () => {
     showScreen('home');
   }
 };
-document.getElementById('leaveCancel').onclick  = () => leaveOverlay.classList.remove('show');
+document.getElementById('leaveCancel').onclick  = () => { leaveOverlay.classList.remove('show'); NAV.pending = 0; };
 document.getElementById('leaveConfirm').onclick = () => {
   leaveOverlay.classList.remove('show');
   if (ONLINE() && NET.state === 'playing' && !G.over) netSend({ t:'resign' });
   netClose();
   G.started = false;
   newGame();               // drop the abandoned position
+  // The browser's Back (or Forward) opened this box: now that the game is
+  // given up, finish the step it was refused — to the page it was going to,
+  // not to the home page (navGo, in HISTORY).
+  if (NAV.pending){ const dir = NAV.pending; NAV.pending = 0; NAV.hist.go(dir); return; }
   showScreen('home');
 };
 
@@ -14150,13 +14454,16 @@ const needsName = () => !!account && !account.gameName;
 function decideFirstScreen(){
   const opening = ['home', 'signup', 'login', 'name'];
   if (opening.indexOf(screenName) === -1) return;
+  // Both of these are redirects rather than pages chosen, so neither leaves a
+  // history entry behind it: Back from the username screen would otherwise
+  // be a way past it, and Back after signing in would land on the login page.
   if (needsName()){
-    if (screenName !== 'name') showScreen('name');
+    if (screenName !== 'name') showScreen('name', 'replace');
     return;
   }
   // Signing in finishes whichever of the two pages you were on.
   if (account && (screenName === 'signup' || screenName === 'login' || screenName === 'name')){
-    showScreen('home');
+    showScreen('home', 'replace');
   }
 }
 
@@ -14775,6 +15082,7 @@ function liveOpenBig(mode){
   LIVE.big = mode;
   liveRenderBig();
   liveOverlay.classList.add('show');
+  navSync();                       // Back closes it, like the X
 }
 function liveRenderBig(){
   const g = LIVE.games.find(x => x.mode === LIVE.big);
@@ -14782,8 +15090,12 @@ function liveRenderBig(){
   box.innerHTML = g ? liveCardHTML(g, true) : '';
 }
 function liveCloseBig(){
+  const was = LIVE.big;
   LIVE.big = null;
   liveOverlay.classList.remove('show');
+  // Closed from the home page it is a step of its own; closed by leaving the
+  // home page (liveLeave) it is part of that step, which showScreen records.
+  if (was && screenName === 'home') navSync();
 }
 liveGrid.addEventListener('click', e => {
   const card = e.target.closest('.live-card');
@@ -15455,7 +15767,10 @@ document.getElementById('chalDecline').onclick = () => {
 /* ---- boot ---- */
 syncOptions();
 render();
-initAuth();          // arriving leads to the home page; nothing gates it
+navBoot();           // the page we are on, or the one the address bar names (HISTORY)
+initAuth().then(navSettled);   // arriving leads to the home page; nothing gates it —
+                               // except that a page an account has to be signed in
+                               // for waits until the account is known
 liveOpen();          // ...and the home page is where the live games are watched from
 </script>
 </body>
