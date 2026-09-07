@@ -15131,6 +15131,33 @@ function fillBoard(list, people){
   people.forEach((person, i) => list.appendChild(boardRow(person, i + 1)));
 }
 
+/* Where somebody stands on the leaderboard, if they stand on it at all: the
+   ladder, the place and the number the ladder prints for them. The Social
+   page asks this before it writes a rating beside a name, because a profile
+   row's `rating` is the Sighted number and nothing else — the system profiles
+   seeded onto the three vision ladders sit on the Sighted default, so a
+   search for Kasper21 used to say "100 Elo" under a name the leaderboard had
+   just shown at 2673. Somebody on more than one ladder is answered for the
+   one they stand highest on (the higher rating breaking a tie), which is the
+   place a reader would look them up by. Read off the rows the home page has
+   already drawn rather than asked of the database again: it is the same
+   twenty per ladder either way, and this way the two pages cannot disagree
+   about who is on it. A ladder not loaded, or in error, simply has nobody
+   on it here. */
+function ladderStanding(id){
+  let best = null;
+  for (const key in LB_VISIONS){
+    const rows = LB[key].rows;
+    if (!rows) continue;
+    const at = rows.findIndex(p => p.id === id);
+    if (at === -1 || rows[at].rating === null) continue;
+    const here = { key, place: at + 1, rating: rows[at].rating };
+    if (!best || here.place < best.place ||
+        (here.place === best.place && here.rating > best.rating)) best = here;
+  }
+  return best;
+}
+
 /* The tier's badge, the same file and the same naming the ranked screen uses,
    and read off the same TIERS ladder for every one of the four lists: a
    vision has no thresholds of its own yet, and until it does the ranked
@@ -15959,6 +15986,13 @@ function goSocial(){
   if (socialReady()){ socialSubscribe(); loadSocial(); }
   else renderSocial();
   startSocialPoll();
+  // The ratings on this page are read off the leaderboard's rows
+  // (socialElo), which the home page loads; a ladder that has not arrived
+  // yet is asked for here, and the rows are redrawn once it has.
+  if (sb) for (const key in LB_VISIONS){
+    if (LB[key].rows || LB[key].loading) continue;
+    loadLadder(key).then(() => { if (screenName === 'social') renderSocial(); });
+  }
 }
 
 /* ---- reading it ---- */
@@ -15979,8 +16013,21 @@ const asPerson = row => ({
   id: row.id,
   name: row.display_name || 'Player',
   avatar: row.avatar_url || '',
+  // `rating` is the Sighted column and only that; what a row prints beside
+  // the name is decided by socialElo(), which asks the leaderboard first
   rating: typeof row.rating === 'number' ? row.rating : null
 });
+
+/* The rating written under a name on this page. Somebody on the leaderboard
+   is shown the number the leaderboard shows them at — ladderStanding()'s,
+   with the ladder named unless it is the Sighted one, whose number a bare
+   "Elo" already means everywhere on the site. Anybody else is shown their
+   Sighted rating as before, or nothing if the row has none. */
+function socialElo(person){
+  const on = ladderStanding(person.id);
+  if (on) return on.rating + ' Elo' + (on.key === 'sighted' ? '' : ' · ' + MODE_NAME[on.key]);
+  return person.rating === null ? '' : person.rating + ' Elo';
+}
 // A friendship whose profile row has gone is still a friendship; show it as
 // somebody rather than dropping the row and losing the way to remove it.
 const unknownPerson = id => ({ id, name: 'Player', avatar: '', rating: null });
@@ -16208,7 +16255,7 @@ function searchRow(person){
   const row = document.createElement('div');
   row.className = 'social-row';
   row.appendChild(faceFor(person));
-  row.appendChild(whoBlock(person, person.rating === null ? '' : person.rating + ' Elo'));
+  row.appendChild(whoBlock(person, socialElo(person)));
 
   const friend = SOC.friends.some(f => f.id === person.id);
   const asked  = SOC.outgoing.has(person.id);
@@ -16243,7 +16290,7 @@ function friendRow(friend){
   const row = document.createElement('div');
   row.className = 'social-row';
   row.appendChild(faceFor(friend));
-  row.appendChild(whoBlock(friend, friend.rating === null ? '' : friend.rating + ' Elo'));
+  row.appendChild(whoBlock(friend, socialElo(friend)));
 
   const dots = document.createElement('button');
   dots.className = 'dots-btn';

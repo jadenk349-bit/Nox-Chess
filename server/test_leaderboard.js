@@ -72,7 +72,9 @@ var DOM = [
 var CODE = [
   line('LB_TOP'), decl('LB_VISIONS'), decl('LB'),
   fn('loadBoard'), fn('loadLadder'), fn('ratedPerson'), fn('ladderError'),
-  fn('renderLadder'), fn('renderBoard'), fn('fillBoard')
+  fn('renderLadder'), fn('renderBoard'), fn('fillBoard'),
+  // what the Social page reads off these ladders before it prints a rating
+  fn('ladderStanding'), line('MODE_NAME'), fn('socialElo')
 ].join('\n');
 
 /** A page with nothing having happened to it yet. */
@@ -82,6 +84,7 @@ function fresh(){
     'return { LB:LB, LB_VISIONS:LB_VISIONS, LB_TOP:LB_TOP, elements:elements,' +
     '  load:loadBoard, loadOne:loadLadder, redraw:renderBoard,' +
     '  setSb:function(x){ sb = x; }, settle:function(){ authSettled = true; },' +
+    '  standing:ladderStanding, elo:socialElo,' +
     '  panel:function(key){ var e = elements[LB_VISIONS[key].list];' +
     '    var last = e.children[e.children.length - 1];' +
     '    return { innerHTML:e.innerHTML, children:e.children, last:last }; },' +
@@ -281,6 +284,52 @@ async function main(){
     check('a ladder with rows is drawn again', page7.panel('fog').children.length === 3);
     check('a ladder in error still says so',
           page7.panel('blind').last.note === 'This ladder needs supabase-migrate-visions.sql to be run.');
+  }
+
+  say('\nThe Social page says what the leaderboard says');
+  {
+    /* Jaden's row is 1200 on the Sighted column and 100 on the other three:
+       a Social row reading `rating` would print 1200 under a name the fog
+       ladder shows at 100, and a row reading a vision column would print 100
+       under a name the Sighted ladder shows at 1200. The right answer is the
+       ladder they stand highest on. */
+    var page9 = fresh();
+    check('nobody stands anywhere before the ladders arrive', page9.standing('k') === null);
+    check('...and a row falls back to its own Sighted rating',
+          page9.elo({ id: 'k', rating: 2809 }) === '2809 Elo');
+    check('...or to nothing when it has none', page9.elo({ id: 'k', rating: null }) === '');
+    page9.setSb(fakeSb(everything));
+    page9.settle();
+    page9.load();
+    await tick();
+    var k = page9.standing('k');
+    check('Kasper21 is answered for the Sighted ladder, first place',
+          k && k.key === 'sighted' && k.place === 1 && k.rating === 2809, JSON.stringify(k));
+    check('...and the Social row prints that number, unlabelled',
+          page9.elo({ id: 'k', rating: 2809 }) === '2809 Elo');
+    var v = page9.standing('v');
+    check('Velmor stands first on Board Only and second everywhere else',
+          v && v.key === 'blind' && v.place === 1 && v.rating === 2762, JSON.stringify(v));
+    check('...so the Social row names that ladder',
+          page9.elo({ id: 'v', rating: 2742 }) === '2762 Elo \u00b7 Board Only');
+    var j = page9.standing('j');
+    check('Jaden is third on every ladder and answered for the highest rating',
+          j && j.key === 'sighted' && j.rating === 1200, JSON.stringify(j));
+    check('a name the ladders do not carry is not on the leaderboard', page9.standing('nobody') === null);
+    check('...and keeps its own rating on the Social page',
+          page9.elo({ id: 'nobody', rating: 640 }) === '640 Elo');
+    // a ladder in error has nobody on it, and the others still answer
+    var page10 = fresh();
+    page10.setSb(fakeSb(function(q){
+      if (columnOf(q) === 'rating') return { data: null, error: { message: 'boom' } };
+      return everything(q);
+    }));
+    page10.settle();
+    page10.load();
+    await tick();
+    var k2 = page10.standing('k');
+    check('with the Sighted ladder down, Kasper21 is answered for Fog of War',
+          k2 && k2.key === 'fog' && k2.rating === 2673, JSON.stringify(k2));
   }
 
   say('\nOne set of columns, three files');
