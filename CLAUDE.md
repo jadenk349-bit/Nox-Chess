@@ -1453,6 +1453,18 @@ panel beside the same board, with `CHALLENGING()` hiding the bot ladder,
 renaming Start Play to Challenge, and `NET.opponent` naming the friend on the
 strip above the board. `CHAL` holds the invitation in flight from either end.
 
+The rating under a name on that page is the leaderboard's, not the row's.
+`profiles.rating` is the Sighted column and only that, so a search for one of
+the system profiles seeded onto the three vision ladders used to print "100
+Elo" under a name the leaderboard had just shown at 2673. `socialElo()` asks
+`ladderStanding()` first — which of the four ladders the home page has drawn
+this id on, answered for the one they stand highest on, the higher rating
+breaking a tie — and prints that number, naming the ladder unless it is the
+Sighted one; only somebody on no ladder is shown their own `rating`. It reads
+the rows already loaded rather than querying again, so the two pages cannot
+disagree about who is on the board, and `goSocial()` asks for any ladder
+still missing and redraws when it lands. `test_leaderboard.js` covers it.
+
 There is deliberately no undo, no take-back, and no move history during play.
 Don't reintroduce them.
 
