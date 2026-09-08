@@ -11861,18 +11861,6 @@ const PR_MODES = [
 const PR_MODE = {};
 for (const m of PR_MODES) PR_MODE[m.key] = m;
 
-/* The ladder. Each rung wants three things at once — sessions finished,
-   accuracy across everything answered, and how many different drills have been
-   tried — so nobody climbs it by grinding one exercise. The numbers are
-   deliberately gentle: three sessions is twenty minutes, not a fortnight. */
-const PR_LEVELS = [
-  { name:'Beginner',        sessions:0,  acc:0,   modes:0 },
-  { name:'Visualizer',      sessions:3,  acc:.55, modes:2 },
-  { name:'Tracker',         sessions:8,  acc:.62, modes:3 },
-  { name:'Blindfold Ready', sessions:15, acc:.70, modes:4 },
-  { name:'Advanced',        sessions:24, acc:.76, modes:5 }
-];
-
 /* ---- what the practising has come to ----
    Kept in the browser and nowhere else. Practice is not a rating anybody
    compares, so there is nothing here the server has to be the one to write —
@@ -11882,63 +11870,97 @@ const PR_LEVELS = [
    go to Supabase: totals on the profile, a row per drill beside it.
 
    Stamped with whose it is, the way the puzzle cache is: two accounts sharing
-   a browser must not read each other's practice, and a guest's is their own. */
-const PR_STORE = 'nox.practice.';
-const PR_VERSION = 1;
-const prKey = () => PR_STORE + (account ? account.id : 'guest');
+   a browser must not read each other's practice, and a guest's is their own.
 
+   Version 2 drops the single five-rung ladder (Beginner … Advanced) in favour
+   of a level per drill — each one is its own thing to get good at, and a
+   player who has drilled coordinates for a fortnight and never touched
+   tracking was never well described by one number. */
+const PR_STORE = 'nox.practice.';
+const PR_VERSION = 2;
+const prKey = () => PR_STORE + (account ? account.id : 'guest');
+/* Where the seven drills of version 1 went. Two of them merged and one became
+   the tracker's opening levels; nothing anybody answered is thrown away. */
+const PR_V1_KEYS = { coord:'square', color:'square', vision:'piece', track:'tracker',
+                     memory:'hold', sequence:'tracker', mini:'progressive' };
+
+function prBlankMode(){ return { level:1, best:1, asked:0, correct:0, sessions:0, lastAt:0, stats:{} }; }
 function prBlank(){
   const modes = {};
-  for (const m of PR_MODES) modes[m.key] = { asked:0, correct:0, sessions:0, best:0, diff:1 };
-  return { v:PR_VERSION, asked:0, correct:0, sessions:0, streak:0, best:0, modes };
+  // PR_MODES still names today's seven drills, and PR_V1_KEYS' targets are
+  // tomorrow's five — Task 4 renames the modes so the two lists coincide, and
+  // until then a blank store carries a slot for both so a v1 upgrade always
+  // has somewhere to land.
+  for (const k of new Set(PR_MODES.map(m => m.key).concat(Object.values(PR_V1_KEYS)))) modes[k] = prBlankMode();
+  return { v:PR_VERSION, asked:0, correct:0, sessions:0, days:0, lastDay:'', best:0, modes };
+}
+function prUpgradeV1(raw){
+  const out = prBlank();
+  for (const k of ['asked','correct','sessions','best'])
+    if (typeof raw[k] === 'number' && raw[k] >= 0) out[k] = raw[k];
+  for (const old in (raw.modes || {})){
+    const nk = PR_V1_KEYS[old], src = raw.modes[old], m = out.modes[nk];
+    if (!m || !src) continue;
+    for (const k of ['asked','correct','sessions']) if (src[k] > 0) m[k] += src[k];
+    if (src.best > m.stats.streak) m.stats.streak = src.best;
+    m.level = Math.max(m.level, Math.min(3, src.diff || 1));
+    m.best = Math.max(m.best, m.level);
+  }
+  return out;
 }
 /* Merged into a blank rather than used as it stands: a drill added later must
    not read as a corrupt save, and a save from an older version is simply
-   dropped. Anything unreadable — private browsing, somebody editing it —
-   starts clean rather than throwing. */
+   dropped — except version 1, which is read through the key map above rather
+   than thrown away. Anything unreadable — private browsing, somebody editing
+   it — starts clean rather than throwing. */
 function prLoad(){
   const out = prBlank();
   let raw = null;
   try { raw = JSON.parse(localStorage.getItem(prKey())); } catch (e){ raw = null; }
-  if (!raw || raw.v !== PR_VERSION || !raw.modes) return out;
-  for (const k of ['asked','correct','sessions','streak','best'])
+  if (!raw || !raw.modes) return out;
+  if (raw.v === 1) return prUpgradeV1(raw);
+  if (raw.v !== PR_VERSION) return out;
+  for (const k of ['asked','correct','sessions','days','best'])
     if (typeof raw[k] === 'number' && raw[k] >= 0) out[k] = raw[k];
+  if (typeof raw.lastDay === 'string') out.lastDay = raw.lastDay;
   for (const m of PR_MODES){
     const src = raw.modes[m.key];
     if (!src) continue;
-    for (const k of ['asked','correct','sessions','best','diff'])
+    for (const k of ['level','best','asked','correct','sessions','lastAt'])
       if (typeof src[k] === 'number' && src[k] >= 0) out.modes[m.key][k] = src[k];
+    if (src.stats && typeof src.stats === 'object') out.modes[m.key].stats = src.stats;
   }
   return out;
 }
 function prSave(st){
   try { localStorage.setItem(prKey(), JSON.stringify(st)); } catch (e){ /* nowhere to keep it */ }
 }
-
 const prAcc = st => (st.asked ? st.correct / st.asked : 0);
-const prTried = st => PR_MODES.filter(m => st.modes[m.key].sessions > 0).length;
 
-/** The highest rung every requirement of which is met — and every one below it. */
-function prLevelIndex(st){
-  let idx = 0;
-  for (let i = 1; i < PR_LEVELS.length; i++){
-    const L = PR_LEVELS[i];
-    if (st.sessions >= L.sessions && prAcc(st) >= L.acc && prTried(st) >= L.modes) idx = i;
-    else break;
-  }
-  return idx;
+/* The last hundred questions, by signature, so a session does not ask the same
+   thing twice in a week. Per owner, like everything else here. */
+const PR_SEEN_MAX = 100;
+const prSeenKey = () => PR_STORE + 'seen.' + (account ? account.id : 'guest');
+function prSeen(){
+  try { const a = JSON.parse(localStorage.getItem(prSeenKey())); return Array.isArray(a) ? a : []; }
+  catch (e){ return []; }
 }
-/** How far along to the next rung — the least finished of its three demands. */
-function prLevelProgress(st, idx){
-  const next = PR_LEVELS[idx + 1];
-  if (!next) return 1;
-  const now = PR_LEVELS[idx];
-  const part = (have, from, to) => (to <= from ? 1 : Math.max(0, Math.min(1, (have - from) / (to - from))));
-  return Math.min(
-    part(st.sessions, now.sessions, next.sessions),
-    part(prAcc(st),   now.acc,      next.acc),
-    part(prTried(st), now.modes,    next.modes)
-  );
+function prSeenHas(sig){ return prSeen().indexOf(sig) >= 0; }
+function prSeenPush(sig){
+  const a = prSeen().filter(s => s !== sig);
+  a.push(sig);
+  while (a.length > PR_SEEN_MAX) a.shift();
+  try { localStorage.setItem(prSeenKey(), JSON.stringify(a)); } catch (e){}
+}
+
+/* Streaks count days practised, not answers, so one bad session breaks nothing. */
+function prToday(){ return new Date().toISOString().slice(0, 10); }
+function prTouchDay(st){
+  const today = prToday();
+  if (st.lastDay === today) return;
+  const y = new Date(Date.now() - 86400000).toISOString().slice(0, 10);
+  st.days = st.lastDay === y ? st.days + 1 : 1;
+  st.lastDay = today;
 }
 
 /* ---- the drill in progress ---- */
@@ -13079,11 +13101,13 @@ function prFinish(note){
   st.sessions++;
   const m = st.modes[PR.mode.key];
   m.sessions++;
-  m.diff = PR.diff;
-  if (PR.best > m.best) m.best = PR.best;
-  const before = prLevelIndex(prLoad());
+  m.level = PR.diff;
+  if (m.level > m.best) m.best = m.level;
+  // TASK 3 STUB: the five-rung player-wide ladder (before/after) is gone;
+  // Task 4/22 replace this with whatever per-drill milestone takes its place.
+  const before = 0;
   prSave(st);
-  const after = prLevelIndex(st);
+  const after = 0;
 
   const acc = PR.i ? PR.right / PR.i : 0;
   const rows = document.getElementById('prDoneRows');
@@ -13102,7 +13126,7 @@ function prFinish(note){
   const rec = prRecommend(acc);
   let text = '';
   if (note) text += note + ' ';
-  if (after > before) text += 'You have reached <b>' + PR_LEVELS[after].name + '</b>. ';
+  if (after > before) text += 'You have reached <b>' + '' + '</b>. ';   // TASK 3 STUB: see above
   if (rec) text += rec.why + ' <b>' + PR_MODE[rec.key].name + '</b> next.';
   tip.innerHTML = text || 'Steady work. Pick whichever drill you fancy next.';
 
@@ -13119,7 +13143,7 @@ function prFinish(note){
    never been tried, otherwise shore up the weakest thing. */
 function prRecommend(sessionAcc){
   const st = prLoad();
-  const level = prLevelIndex(st);
+  const level = 0;   // TASK 3 STUB: see prFinish above
   const open = m => m.needs === undefined || level >= m.needs;
   if (sessionAcc < .6)
     return { key: PR.mode.key, why: 'Under 60% this session, so more of the same is the quickest way to move it:' };
@@ -13155,15 +13179,11 @@ function prShowDash(){
 
 function prRenderDash(){
   const st = prLoad();
-  const idx = prLevelIndex(st);
-  const next = PR_LEVELS[idx + 1];
-  document.getElementById('prLevel').textContent = PR_LEVELS[idx].name;
-  document.getElementById('prLevelNow').textContent = PR_LEVELS[idx].name;
-  document.getElementById('prLevelNext').textContent = next ? next.name : 'Top of the ladder';
-  document.getElementById('prLevelFill').style.width =
-    Math.round(prLevelProgress(st, idx) * 100) + '%';
+  // TASK 3 STUB: the player-wide level display (prLevel/prLevelNow/prLevelNext/
+  // prLevelFill) read the old five-rung ladder and are dropped with it; Task 22
+  // rebuilds this dashboard. `idx` stays 0 so prRenderCards below still compiles.
+  const idx = 0;
   document.getElementById('prFigAcc').textContent = st.asked ? Math.round(prAcc(st) * 100) + '%' : '—';
-  document.getElementById('prFigStreak').textContent = st.streak;
   document.getElementById('prFigBest').textContent = st.best;
   document.getElementById('prFigSessions').textContent = st.sessions;
   prRenderCards(st, idx);
@@ -13182,7 +13202,7 @@ function prRenderCards(st, level){
     for (let d = 1; d <= 3; d++) dots += '<i class="' + (d <= m.hard ? 'on' : '') + '"></i>';
 
     const score = locked
-      ? 'Reach ' + PR_LEVELS[m.needs].name + ' to unlock'
+      ? 'Reach ' + '' + ' to unlock'   // TASK 3 STUB: see prFinish above
       : s.asked
         ? s.asked + ' answered · ' + Math.round(s.correct / s.asked * 100) + '% · best streak ' + s.best
         : 'Not tried yet';
@@ -13223,7 +13243,7 @@ let prSetMode = null, prSetLevel = 1, prSetCount = 10;
 function prOpenSetup(mode){
   const st = prLoad();
   prSetMode = mode;
-  prSetLevel = st.modes[mode.key].diff || 1;
+  prSetLevel = st.modes[mode.key].level || 1;
   prSetCount = prSetCount || 10;
   document.getElementById('prSetName').textContent = mode.name;
 

@@ -184,6 +184,10 @@ function selectMode(m){ visionsPicked.push(m); }
 var DECLS = ['VAL','FILES','rowOf','colOf','SQNAME','uciOf','sqName','onBoard','other',
              'idCounter','mk','DIR_N','DIR_B','DIR_R','DIR_K','PST','nodes','PIECE_NAME',
              'GLYPH','pieceHTML','W'];
+// Note: this suite lifts the whole PRACTICE section as one block below, so
+// PR_VERSION, PR_V1_KEYS, PR_SEEN_MAX, prBlankMode, prUpgradeV1, prSeen,
+// prSeenHas, prSeenPush, prSeenKey, prToday and prTouchDay all come along
+// with it rather than needing their own DECLS/FNS entries.
 var FNS = ['startBoard','newState','cloneState','fenOf','stateFromFEN',
            'slide','step','addPawn','pseudoMoves','isAttacked','kingSq','inCheck',
            'makeMove','legalMoves','toSAN','attackersOf','defendersOf','see',
@@ -309,15 +313,15 @@ head('The dashboard');
   ok('the drill list opens', byId.prRun.style.display, 'none');
   ok('and the dashboard is what is showing', byId.prDash.style.display, '');
   ok('every drill has a card', byId.prCards.children.length, PR_MODES.length);
-  ok('a fresh player is a Beginner', byId.prLevel.textContent, 'Beginner');
   ok('with nothing to report yet', byId.prFigAcc.textContent, '—');
   ok('no sessions', byId.prFigSessions.textContent, 0);
-  ok('and the level bar is empty', byId.prLevelFill.style.width, '0%');
-  ok('the next rung is named', byId.prLevelNext.textContent, 'Visualizer');
 
   var cards = byId.prCards.children;
   var mini = cards[cards.length - 1];
-  ok('the mini challenge is locked at Beginner', mini.classList.contains('locked'), true);
+  // the player-wide ladder that used to gate this card is gone (Task 3); until
+  // Task 4/22 replace it with something, prRenderDash's level is stubbed at 0
+  // and needs:2 can never be met, so the mini challenge stays locked
+  ok('the mini challenge is locked', mini.classList.contains('locked'), true);
   var miniGo = mini.children[2].children[1];
   ok('its button says so', miniGo.textContent, 'Locked');
   ok('and does nothing', miniGo.onclick, null);
@@ -646,17 +650,9 @@ head('Mini Blindfold Challenge');
 
 (function(){
   storage = {};
-  // earn it first: the card is locked below Tracker
-  var st = prBlank();
-  st.sessions = 10; st.asked = 100; st.correct = 80;
-  for (var k = 0; k < 4; k++) st.modes[PR_MODES[k].key].sessions = 2;
-  prSave(st);
-  prShowDash();
-  var cards = byId.prCards.children;
-  var mini = cards[cards.length - 1];
-  ok('at Tracker the mini challenge unlocks', mini.classList.contains('locked'), false);
-  ok('and its button starts it', mini.children[2].children[1].textContent, 'Start');
-
+  // The card shows locked (see "the mini challenge is locked" above), but
+  // starting it programmatically — as pressing an unlocked card's Start
+  // button would — goes straight through prOpenSetup regardless of the card.
   startDrill('mini', 1, 0);
   ok('the challenge sets its own length', PR.len, PR.q.target);
   ok('the position is there to learn', byId.prBoard.classList.contains('blind'), false);
@@ -816,16 +812,11 @@ head('Leaving a drill behind');
   st.modes.coord.sessions = 1; st.modes.color.sessions = 1;
   prSave(st);
   prShowDash();
-  ok('a part-finished ladder shows a part-filled bar',
-     byId.prLevelFill.style.width !== '0%' && byId.prLevelFill.style.width !== '100%', true);
   ok('accuracy is reported', byId.prFigAcc.textContent, '75%');
   ok('and the sessions', byId.prFigSessions.textContent, 2);
 
-  // one more session takes it over the Visualizer line
   startDrill('coord', 1, 5);
   while (PR.i < PR.len){ answerRight(); tick(1000); }
-  ok('the level moved up', byId.prLevel.textContent, 'Visualizer');
-  ok('and the box said so', /Visualizer/.test(byId.prDoneTip.innerHTML), true);
   byId.prToLessons.onclick();
   ok('Back to Lessons leads home', screens[screens.length - 1], 'home');
   ok('and closes the box', byId.prDoneOverlay.classList.contains('show'), false);
