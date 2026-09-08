@@ -5937,6 +5937,80 @@ function soundFor(m, checked){
    COMPLETE BLINDFOLD — the game as pure notation
    ============================================================ */
 const PIECE_NAME = { P:'pawn', N:'knight', B:'bishop', R:'rook', Q:'queen', K:'king' };
+
+/* The opening book the course has always tracked with, moved here so that
+   Practice reads the same one: a tracking exercise built out of a different
+   book would be a second idea of what a sane opening move is. */
+const OPENING_BOOK = [
+  'e4','d4','Nf3','c4','g3','b3',
+  'e5','c5','e6','d5','Nf6','Nc6','d6','g6','c6','b6',
+  'Bc4','Bb5','Bc5','Be7','Be2','Be3','Bd3','Bd6','Bg2','Bg7','Bf4','Bf5','Bg4',
+  'Nc3','Nbd2','Nb6','Nd4','Nd5','Nge2','Nge7',
+  'O-O','d3','a6','h6','a3','h3','Re1','Re8','Qc7','Qe7','Qd6'
+];
+/** One sane move for the side to move, or null. `rnd(n)` is the dice. */
+function bookMove(st, ply, rnd){
+  const legal = legalMoves(st, st.turn);
+  if (!legal.length) return null;
+  const r = rnd || (n => Math.floor(Math.random() * n));
+  const scored = legal.map(m => {
+    const san = toSAN(st, m, legal);
+    let s = OPENING_BOOK.indexOf(san) >= 0 ? 100 : 0;
+    if (m.p.t === 'Q' && ply < 8) s -= 45;
+    if (m.p.t === 'K' && !m.castle) s -= 60;
+    if (m.p.t === 'R' && ply < 6) s -= 30;
+    if (m.cap) s += 12;
+    if (san.endsWith('+') || san.endsWith('#')) s -= 25;
+    return { m, san, s: s + r(10) };
+  }).sort((a, b) => b.s - a.s);
+  return scored[r(Math.min(4, scored.length))];
+}
+/* Twenty real opening lines, ten plies each. Tracking from the start position
+   is the easiest holding there is — it is the one template everybody owns —
+   and these are what the tracker plays at its opening levels. */
+const OPENING_LINES = [
+  { name:'Italian Game',       sans:['e4','e5','Nf3','Nc6','Bc4','Bc5','c3','Nf6','d3','d6'] },
+  { name:'Ruy Lopez',          sans:['e4','e5','Nf3','Nc6','Bb5','a6','Ba4','Nf6','O-O','Be7'] },
+  { name:'Scotch Game',        sans:['e4','e5','Nf3','Nc6','d4','exd4','Nxd4','Nf6','Nxc6','bxc6'] },
+  { name:'Sicilian Najdorf',   sans:['e4','c5','Nf3','d6','d4','cxd4','Nxd4','Nf6','Nc3','a6'] },
+  { name:'French Classical',   sans:['e4','e6','d4','d5','Nc3','Nf6','Bg5','Be7','e5','Nfd7'] },
+  { name:'Caro-Kann',          sans:['e4','c6','d4','d5','Nc3','dxe4','Nxe4','Bf5','Ng3','Bg6'] },
+  { name:"Queen's Gambit Declined", sans:['d4','d5','c4','e6','Nc3','Nf6','Bg5','Be7','e3','O-O'] },
+  { name:"Queen's Gambit Accepted", sans:['d4','d5','c4','dxc4','Nf3','Nf6','e3','e6','Bxc4','c5'] },
+  { name:'Slav Defence',       sans:['d4','d5','c4','c6','Nf3','Nf6','Nc3','dxc4','a4','Bf5'] },
+  { name:"King's Indian",      sans:['d4','Nf6','c4','g6','Nc3','Bg7','e4','d6','Nf3','O-O'] },
+  { name:'Nimzo-Indian',       sans:['d4','Nf6','c4','e6','Nc3','Bb4','Qc2','O-O','a3','Bxc3+'] },
+  { name:'Grünfeld',           sans:['d4','Nf6','c4','g6','Nc3','d5','cxd5','Nxd5','e4','Nxc3'] },
+  { name:'English Opening',    sans:['c4','e5','Nc3','Nf6','Nf3','Nc6','g3','d5','cxd5','Nxd5'] },
+  { name:'London System',      sans:['d4','d5','Bf4','Nf6','e3','e6','Nf3','c5','c3','Nc6'] },
+  { name:'Scandinavian',       sans:['e4','d5','exd5','Qxd5','Nc3','Qa5','d4','Nf6','Nf3','c6'] },
+  { name:'Pirc Defence',       sans:['e4','d6','d4','Nf6','Nc3','g6','f4','Bg7','Nf3','O-O'] },
+  { name:'Four Knights',       sans:['e4','e5','Nf3','Nc6','Nc3','Nf6','Bb5','Bb4','O-O','O-O'] },
+  { name:'Vienna Game',        sans:['e4','e5','Nc3','Nf6','f4','d5','fxe5','Nxe4','Nf3','Be7'] },
+  { name:'Petroff Defence',    sans:['e4','e5','Nf3','Nf6','Nxe5','d6','Nf3','Nxe4','d4','d5'] },
+  { name:'Alekhine Defence',   sans:['e4','Nf6','e5','Nd5','d4','d6','Nf3','Bg4','Be2','e6'] }
+];
+/** The legal move that SAN names here, ignoring a trailing + or #. */
+function moveFromSAN(st, san){
+  const legal = legalMoves(st, st.turn);
+  const want = san.replace(/[+#]$/, '');
+  for (const m of legal) if (toSAN(st, m, legal).replace(/[+#]$/, '') === want) return m;
+  return null;
+}
+/** Line `idx`, the first `plies` of it, played out. */
+function openingPosition(idx, plies){
+  const L = OPENING_LINES[((idx % OPENING_LINES.length) + OPENING_LINES.length) % OPENING_LINES.length];
+  let st = newState();
+  const sans = [];
+  for (let k = 0; k < Math.min(plies, L.sans.length); k++){
+    const m = moveFromSAN(st, L.sans[k]);
+    if (!m) break;
+    sans.push(L.sans[k]);
+    st = makeMove(st, m);
+  }
+  return { st, sans, name: L.name };
+}
+
 const sqIndex = s => (8 - (+s[1])) * 8 + FILES.indexOf(s[0]);
 
 function logLine(text, cls){
@@ -10462,9 +10536,7 @@ function lsnPlayMove(m, quiet){
 
 /** A SAN out of a lesson's script, turned into the move it names. */
 function lsnMoveFor(st, san){
-  const legal = legalMoves(st, st.turn);
-  for (const m of legal) if (toSAN(st, m, legal) === san) return m;
-  return null;
+  return moveFromSAN(st, san);
 }
 
 /* ============================================================
@@ -10896,28 +10968,8 @@ function lsnPiecePos(type){
    from anywhere else. The book is a preference, not a rule: when none of it is
    available the highest-scoring legal move wins, and one of the top few is
    taken at random so the same sequence does not come round twice. */
-const LSN_BOOK = [
-  'e4','d4','Nf3','c4','g3','b3',
-  'e5','c5','e6','d5','Nf6','Nc6','d6','g6','c6','b6',
-  'Bc4','Bb5','Bc5','Be7','Be2','Be3','Bd3','Bd6','Bg2','Bg7','Bf4','Bf5','Bg4',
-  'Nc3','Nbd2','Nb6','Nd4','Nd5','Nge2','Nge7',
-  'O-O','d3','a6','h6','a3','h3','Re1','Re8','Qc7','Qe7','Qd6'
-];
-function lsnBookMove(st, ply){
-  const legal = legalMoves(st, st.turn);
-  if (!legal.length) return null;
-  const scored = legal.map(m => {
-    const san = toSAN(st, m, legal);
-    let s = LSN_BOOK.indexOf(san) >= 0 ? 100 : 0;
-    if (m.p.t === 'Q' && ply < 8) s -= 45;        // no early queen sortie to have to remember
-    if (m.p.t === 'K' && !m.castle) s -= 60;
-    if (m.p.t === 'R' && ply < 6) s -= 30;
-    if (m.cap) s += 12;
-    if (san.endsWith('+') || san.endsWith('#')) s -= 25;   // a check forces the reply
-    return { m, san, s: s + lsnRand(10) };
-  }).sort((a, b) => b.s - a.s);
-  return lsnAny(scored.slice(0, Math.min(4, scored.length)));
-}
+const LSN_BOOK = OPENING_BOOK;                         // one book, see CONSTANTS & HELPERS
+function lsnBookMove(st, ply){ return bookMove(st, ply, lsnRand); }
 
 /* ---- the three drills, each usable on its own ---- */
 

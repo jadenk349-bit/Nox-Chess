@@ -74,13 +74,14 @@ function prStatsRender(){}             // pixels; this suite is about the state 
 /* ---- the real half ---- */
 var DECLS = ['VAL','FILES','rowOf','colOf','SQNAME','uciOf','sqName','onBoard','other',
              'idCounter','mk','DIR_N','DIR_B','DIR_R','DIR_K','PST','nodes','PIECE_NAME',
+             'OPENING_BOOK','OPENING_LINES',
              'PR_MODES','PR_LEVELS','PR_STORE','PR_VERSION','prKey','prAcc','prTried',
              'PR','prRand','prPick','prSide','prMan','PR_MAKE','W'];
 var FNS = ['startBoard','newState','cloneState','fenOf','stateFromFEN',
            'slide','step','addPawn','pseudoMoves','isAttacked','kingSq','inCheck',
            'makeMove','legalMoves','toSAN','attackersOf','defendersOf','see',
            'mirror','evaluate','orderMoves','scoreMove','quiesce','negamax','bestMove',
-           'parseMoveIn',
+           'parseMoveIn','bookMove','moveFromSAN','openingPosition',
            'prBlank','prLoad','prSave','prLevelIndex','prLevelProgress',
            'prShuffle','prPosition','prMaterial','prColourWhy',
            'prMakeCoord','prMakeColor','prMakeVision','prMakeTrack','prMakeMemory',
@@ -668,6 +669,39 @@ head('What is open, and when');
   ok('the other six are open from the start', open, 6);
   ok('every drill offers three genuinely different settings',
      PR_MODES.every(function(m){ return m.tiers.length === 3; }), true);
+})();
+
+/* ============================================================
+   12 — the shared opening book and opening lines
+   ============================================================ */
+head('Opening book and lines');
+(function(){
+  var st = newState(), ok1 = true;
+  for (var p = 0; p < 12; p++){
+    var pick = bookMove(st, p, prRand);
+    // legalMoves() hands back a fresh array of move objects on every call, so a
+    // reference check against a second, separately-computed array never matches
+    // even a genuinely legal move; from/to/promo is what actually names a move.
+    var isLegal = pick && legalMoves(st, st.turn).some(function(m){
+      return m.from === pick.m.from && m.to === pick.m.to && (m.promo || '') === (pick.m.promo || '');
+    });
+    if (!isLegal){ ok1 = false; break; }
+    st = makeMove(st, pick.m);
+  }
+  ok('bookMove plays twelve legal plies from the start', ok1, true);
+  ok('there are at least twenty opening lines', OPENING_LINES.length >= 20, true);
+  var bad = 0;
+  OPENING_LINES.forEach(function(L){
+    var s = newState();
+    L.sans.forEach(function(san){
+      var m = moveFromSAN(s, san);
+      if (!m){ bad++; return; }
+      s = makeMove(s, m);
+    });
+  });
+  ok('every opening line is legal from move one', bad, 0);
+  var r = openingPosition(0, 6);
+  ok('openingPosition replays the asked plies', r.sans.length, 6);
 })();
 
 say('\n' + passed + ' passed, ' + failed + ' failed\n');
