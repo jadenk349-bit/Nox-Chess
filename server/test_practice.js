@@ -72,7 +72,7 @@ var account = null;                    // the guest path, which needs nothing co
 function prStatsRender(){}             // pixels; this suite is about the state behind them
 
 /* ---- the real half ---- */
-var DECLS = ['VAL','FILES','rowOf','colOf','SQNAME','uciOf','sqName','onBoard','other',
+var DECLS = ['VAL','FILES','rowOf','colOf','SQNAME','uciOf','sqName','sqIndex','onBoard','other',
              'idCounter','mk','DIR_N','DIR_B','DIR_R','DIR_K','PST','nodes','PIECE_NAME',
              'OPENING_BOOK','OPENING_LINES',
              'PR_MODES','PR_LEVELS','PR_STORE','PR_VERSION','prKey','prAcc','prTried',
@@ -82,6 +82,7 @@ var FNS = ['startBoard','newState','cloneState','fenOf','stateFromFEN',
            'makeMove','legalMoves','toSAN','attackersOf','defendersOf','see',
            'mirror','evaluate','orderMoves','scoreMove','quiesce','negamax','bestMove',
            'parseMoveIn','bookMove','moveFromSAN','openingPosition',
+           'lineBetween','linesThrough','knightRoute','sliderReaches','rebuildDiff','quadrantOf',
            'prBlank','prLoad','prSave','prLevelIndex','prLevelProgress',
            'prShuffle','prPosition','prMaterial','prColourWhy',
            'prMakeCoord','prMakeColor','prMakeVision','prMakeTrack','prMakeMemory',
@@ -702,6 +703,34 @@ head('Opening book and lines');
   ok('every opening line is legal from move one', bad, 0);
   var r = openingPosition(0, 6);
   ok('openingPosition replays the asked plies', r.sans.length, 6);
+})();
+
+head('Geometry helpers');
+(function(){
+  var a1 = sqIndex('a1'), a8 = sqIndex('a8'), h8 = sqIndex('h8'), e4 = sqIndex('e4'), b1 = sqIndex('b1');
+  ok('a1–a8 has six squares between', lineBetween(a1, a8).length, 6);
+  ok('a1–h8 has six squares between', lineBetween(a1, h8).length, 6);
+  // b1 and e4 are not the counter-example they look like: b1-c2-d3-e4 is a real
+  // diagonal, so a1 and e4 (sharing no rank, file, or diagonal) stand in instead.
+  ok('a1–e4 is not a line', lineBetween(a1, e4), null);
+  var L = linesThrough(e4);
+  ok('e4: seven on its rank', L.rank.length, 7);
+  ok('e4: seven on its file', L.file.length, 7);
+  ok('e4: both diagonals together hold thirteen', L.diag1.length + L.diag2.length, 13);
+  var route = knightRoute(b1, e4);
+  ok('b1→e4 is two knight moves', route.length - 1, 2);
+  ok('the route starts and ends where asked', route[0] === b1 && route[route.length - 1] === e4, true);
+  ok('a1→h8 by knight is six moves', knightRoute(a1, h8).length - 1, 6);
+  var b = Array(64).fill(null);
+  ok('an empty a-file: the rook reaches', sliderReaches(b, a1, a8, 'R'), true);
+  b[sqIndex('a4')] = mk(W, 'P');
+  ok('a pawn on a4 stops it', sliderReaches(b, a1, a8, 'R'), false);
+  ok('a bishop never reaches along a file', sliderReaches(Array(64).fill(null), a1, a8, 'B'), false);
+  var d = rebuildDiff([{sq:a1,c:W,t:'K'},{sq:e4,c:B,t:'N'}], [{sq:a1,c:W,t:'K'},{sq:h8,c:B,t:'K'}]);
+  ok('rebuildDiff: one right', d.right.length, 1);
+  ok('rebuildDiff: one wrong', d.wrong.length, 1);
+  ok('rebuildDiff: one missing', d.missing.length, 1);
+  ok('e4 is in the h1 quarter', quadrantOf(e4), 'h1');
 })();
 
 say('\n' + passed + ' passed, ' + failed + ' failed\n');

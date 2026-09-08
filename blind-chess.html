@@ -5956,11 +5956,11 @@ function bookMove(st, ply, rnd){
   const scored = legal.map(m => {
     const san = toSAN(st, m, legal);
     let s = OPENING_BOOK.indexOf(san) >= 0 ? 100 : 0;
-    if (m.p.t === 'Q' && ply < 8) s -= 45;
+    if (m.p.t === 'Q' && ply < 8) s -= 45;        // no early queen sortie to have to remember
     if (m.p.t === 'K' && !m.castle) s -= 60;
     if (m.p.t === 'R' && ply < 6) s -= 30;
     if (m.cap) s += 12;
-    if (san.endsWith('+') || san.endsWith('#')) s -= 25;
+    if (san.endsWith('+') || san.endsWith('#')) s -= 25;   // a check forces the reply
     return { m, san, s: s + r(10) };
   }).sort((a, b) => b.s - a.s);
   return scored[r(Math.min(4, scored.length))];
@@ -6009,6 +6009,76 @@ function openingPosition(idx, plies){
     st = makeMove(st, m);
   }
   return { st, sans, name: L.name };
+}
+
+/* Board geometry, as functions rather than tables, so the course and the
+   drills cannot disagree with each other about what lies between two squares.
+   Rows count from the top (rowOf(a8) === 0), as everywhere else in the file. */
+function lineBetween(a, b){
+  const nr = rowOf(b) - rowOf(a), nc = colOf(b) - colOf(a);
+  if ((nr === 0 && nc === 0) || !(nr === 0 || nc === 0 || Math.abs(nr) === Math.abs(nc))) return null;
+  const dr = Math.sign(nr), dc = Math.sign(nc), out = [];
+  let r = rowOf(a) + dr, c = colOf(a) + dc;
+  while (r !== rowOf(b) || c !== colOf(b)){ out.push(r * 8 + c); r += dr; c += dc; }
+  return out;
+}
+function linesThrough(sq){
+  const r = rowOf(sq), c = colOf(sq), rank = [], file = [], diag1 = [], diag2 = [];
+  for (let i = 0; i < 64; i++){
+    if (i === sq) continue;
+    const dr = rowOf(i) - r, dc = colOf(i) - c;
+    if (dr === 0) rank.push(i);
+    else if (dc === 0) file.push(i);
+    else if (dr === dc) diag1.push(i);
+    else if (dr === -dc) diag2.push(i);
+  }
+  return { rank, file, diag1, diag2 };
+}
+/** Shortest knight route, breadth-first; `from` and `to` inclusive. */
+function knightRoute(from, to){
+  if (from === to) return [from];
+  const prev = Array(64).fill(-1), queue = [from];
+  prev[from] = from;
+  while (queue.length){
+    const cur = queue.shift();
+    for (const [dr, dc] of DIR_N){
+      const r = rowOf(cur) + dr, c = colOf(cur) + dc;
+      if (r < 0 || r > 7 || c < 0 || c > 7) continue;
+      const nxt = r * 8 + c;
+      if (prev[nxt] >= 0) continue;
+      prev[nxt] = cur;
+      if (nxt === to){
+        const path = [to];
+        let at = to;
+        while (at !== from){ at = prev[at]; path.unshift(at); }
+        return path;
+      }
+      queue.push(nxt);
+    }
+  }
+  return null;
+}
+/** Can a slider of `type` on `from` reach `to` across this board? Geometry first, then emptiness. */
+function sliderReaches(board, from, to, type){
+  const between = lineBetween(from, to);
+  if (!between) return false;
+  const straight = rowOf(from) === rowOf(to) || colOf(from) === colOf(to);
+  if (type === 'R' && !straight) return false;
+  if (type === 'B' && straight) return false;
+  return between.every(i => !board[i]);
+}
+/** The corner naming the quarter of the board a square sits in. */
+function quadrantOf(sq){
+  return (colOf(sq) < 4 ? 'a' : 'h') + (rowOf(sq) < 4 ? '8' : '1');
+}
+/* What a rebuilt position got right, wrong and left out. Pure, so the practice
+   board and the lesson board — two boards on purpose — judge by one rule. */
+function rebuildDiff(placed, target){
+  const same = (x, y) => x.sq === y.sq && x.c === y.c && x.t === y.t;
+  const right = [], wrong = [], missing = [];
+  for (const p of placed) (target.some(t => same(t, p)) ? right : wrong).push(p);
+  for (const t of target) if (!placed.some(p => same(p, t))) missing.push(t);
+  return { right, wrong, missing };
 }
 
 const sqIndex = s => (8 - (+s[1])) * 8 + FILES.indexOf(s[0]);
