@@ -518,13 +518,41 @@ writes it with the service key, and without one the server keeps ratings in
 memory. Guests get neither and keep both locally. Run
 `supabase-migrate-puzzles.sql` once, by hand, like `supabase-setup.sql`.
 
-**Five doors, and each of them is a pool and a vision at once.** The Puzzle menu
-— in the header and on the home page, the same five buttons twice — is Sighted
-Puzzle, Only Board Puzzle, Blindfold Puzzle, Fog of War Puzzle and Puzzle Rush.
-`PZ_MODES` is the table: a `key`, the name a player reads, and the `vision`
-`G.mode` takes while the puzzle is up, which is the only place the two
-vocabularies meet. `enterPuzzleMode()` is the whole of entering one — it writes
-`PZ.pool` and `PZ.vision` and hands the list to `pzOpen()`.
+**Two doors on the menu, four pools behind them, and a setup page in between.**
+The Puzzle menu — in the header and on the home page, the same two buttons
+twice — is **Puzzle** and **Puzzle Rush**, and no vision is named on it. Puzzle
+opens a setup page that asks which vision; Rush brings its own clock and pool
+and asks nothing, so it still starts on the press.
+
+There are still five pools and `PZ_MODES` is still the table: a `key`, the name
+a player reads, and the `vision` `G.mode` takes while the puzzle is up, which is
+the only place the two vocabularies meet. `enterPuzzleMode()` is still the whole
+of entering one — it writes `PZ.pool` and `PZ.vision` and hands the list to
+`pzOpen()`. What changed is only who calls it: `pzModeForVision()` reads the
+table backwards, so the vision the player picks *is* the pool that opens, and
+`startPuzzleFromSetup()` is the one line between them. The menu used to name all
+four because a door was a pool and a vision at once; it still is, but a menu is
+a list of places to go and "Sighted Puzzle" and "Fog of War Puzzle" are one
+place seen two ways.
+
+**The setup page is the Play Bot panel, not a screen of its own.** `PZ.setup` is
+the whole of it: a puzzle that has not started yet, on `screen-game` with
+`#gameSetup` up. `enterPuzzleSetup()` mirrors `enterGameSetup()`, and every
+difference lives in `syncOptions()` behind that flag — the button reads **Start
+Puzzle**, `#secTime` is hidden (a puzzle is untimed, and the one that is not
+never comes through here), and `#gameSetup`/`#gamePuzzle` each say which of the
+two puzzle states they mean, because `PUZZLE()` is already true while `PZ.on` is
+still false. Opponent and colour need no rule at all: `BOT()` and `CHALLENGING()`
+are both false for a puzzle, so the two rules Play Bot already had hide them.
+`unanswered()` asks for the vision and nothing else, so Start Puzzle nudges
+`#secVision` exactly as Start Play nudges `#secOpponent`. A second copy of that
+panel would have been two designs to keep in step, which is why there is not
+one. The flag is cleared by `pzOpen()`, by `enterGameSetup()` and by
+`showScreen()` on the way anywhere else — `pzClose()` cannot do it, because it
+returns early while `PZ.on` is false.
+
+Its address is bare `#puzzle`; `#puzzle/<pool>` is still a ladder already open
+and `#puzzle/rush` still a run, and all three round-trip.
 
 It used to be two questions. Opening, Middle Game and End Game sorted puzzles by
 the part of the game they came from — a fact about the chess, not a way to play

@@ -1537,6 +1537,19 @@
      carry a game's names and clocks go, because a puzzle has neither; a rush
      is the exception, and it is the exception because it has a clock. */
   #screen-game.puzzle-mode .board-bar{display:none;}
+  /* The Puzzle setup page borrows Play Bot's preview board, and the two strips
+     framing it are a game's furniture: the seats, and the clocks. A puzzle has
+     neither — nobody is sitting opposite, and the ordinary puzzle is untimed —
+     so on this one page they say nothing, and "BLACK / WHITE / 10:00" says
+     something untrue.
+
+     visibility rather than display, which is the difference from the rule above:
+     the strips keep their 36px, so the board stays exactly where the setup panel
+     was drawn around it. Taking the space back would lift the board and shorten
+     the column, and this page's whole job is to look like Play Bot's. Scoped to
+     .puzzle-setup, which syncOptions() puts on only while PZ.setup is true, so
+     Play Bot itself never sees it. */
+  #screen-game.puzzle-setup .board-bar{visibility:hidden;}
   /* …except the run's clock, which goes where clocks go. The seat names beside
      it are a game's — there is nobody on the other side of a puzzle — so the
      strip carries the clock alone. */
@@ -3665,20 +3678,19 @@
 
         <div class="nav-item">
           <button class="nav-btn" id="navPuzzle" aria-haspopup="true">PUZZLE</button>
-          <!-- Five doors, and they are vision modes rather than phases.
-               The old three — Opening, Middle Game, End Game — sorted puzzles
-               by the part of the game they came from, which is a fact about
-               the chess and not a way to play. Opening and middlegame
-               *training* now lives under Lesson -> Practice, where the
-               standard can be educational instead of tactical; what is left
-               here is one corpus seen five ways. A puzzle's phase no longer
-               decides which door it is behind: each pool is a mixed sample of
-               the whole set (see tools/pool_assign.js). -->
+          <!-- Two doors, and the vision is not one of them.
+               The four vision modes used to stand here as four entries of
+               their own. They are still four separate pools — one corpus
+               dealt four ways, see tools/pool_assign.js — but a menu is a
+               list of places to go, and "Sighted Puzzle" and "Fog of War
+               Puzzle" are one place seen two ways. So the menu names the
+               place and the setup page asks how you want to see it, which is
+               the order Play Bot already asks in. Phases are long gone from
+               here: opening and middlegame *training* lives under Lesson ->
+               Practice, where the standard can be educational rather than
+               tactical. -->
           <div class="menu">
-            <button class="menu-btn" id="navPzSighted">Sighted Puzzle</button>
-            <button class="menu-btn" id="navPzBoard">Only Board Puzzle</button>
-            <button class="menu-btn" id="navPzBlindfold">Blindfold Puzzle</button>
-            <button class="menu-btn" id="navPzFog">Fog of War Puzzle</button>
+            <button class="menu-btn" id="navPuzzleGo">Puzzle</button>
             <button class="menu-btn" id="navRush">Puzzle Rush</button>
           </div>
         </div>
@@ -3742,15 +3754,12 @@
       <button class="home-shortcut" id="homePractice">Practice</button>
       <div class="nav-item">
         <button class="home-shortcut" id="homePuzzle" aria-haspopup="true">Puzzle</button>
-        <!-- The same five doors the header carries, and they have to stay the
-             same five: each button here only presses the one it names up in
+        <!-- The same two doors the header carries, and they have to stay the
+             same two: each button here only presses the one it names up in
              the nav, so a door added there and forgotten here is a door with
              half a shortcut. -->
         <div class="menu">
-          <button class="menu-btn" id="homePzSighted">Sighted Puzzle</button>
-          <button class="menu-btn" id="homePzBoard">Only Board Puzzle</button>
-          <button class="menu-btn" id="homePzBlindfold">Blindfold Puzzle</button>
-          <button class="menu-btn" id="homePzFog">Fog of War Puzzle</button>
+          <button class="menu-btn" id="homePuzzleGo">Puzzle</button>
           <button class="menu-btn" id="homeRush">Puzzle Rush</button>
         </div>
       </div>
@@ -8508,6 +8517,13 @@ const PZ = {
      is into the key progress is stored under. */
   pool: null,
   practice: null,
+  /* The setup page is up and no puzzle has started yet.
+     It is a state of the *puzzle*, not of the game, even though the page it
+     draws is the game's own setup panel — G.opponent is already 'puzzle' by
+     then, so PUZZLE() is true while PZ.on is still false, and this is what
+     tells those two apart. Cleared the moment a puzzle actually opens, and by
+     showScreen() on the way anywhere else. */
+  setup: false,
   list: [],            // the whole ladder, in difficulty order
   n: 0,                // which rung, 1-based — the number the player sees
   puzzle: null,
@@ -9039,6 +9055,46 @@ function pzLegacyPools(){
    sighted board would be answering a different question. The chess is
    identical either way: the mode changes what is shown and never which line
    is acceptable. */
+/* ---- the Puzzle setup page ----
+ *
+ * The same panel Play Bot uses, with the questions a puzzle does not have
+ * taken out. It is deliberately not a screen of its own: the board preview,
+ * the panel, the section styling and the start button are all the game's, and
+ * a second copy of them would be two designs to keep in step. syncOptions() is
+ * where the difference lives, and every branch there is gated on PZ.setup so
+ * Play Bot cannot notice this exists.
+ *
+ * The vision asked for here is one of the four the game already has, and the
+ * four puzzle pools are named by exactly those values — so the answer needs no
+ * translation table of its own beyond pzModeForVision().
+ */
+function enterPuzzleSetup(){
+  beep(700,.09);
+  pzClose();                 // a puzzle still on the board is not the setup page
+  PZ.setup = true;
+  G.opponent = 'puzzle';
+  G.started = false;
+  resetChoices();            // the vision is asked for afresh every time
+  newGame();                 // the board behind the panel is a preview, as Play Bot's is
+  showScreen('game');
+  syncOptions();
+}
+
+/** The pool whose vision this is — the reverse of PZ_MODES, which is the only
+    place the player-facing names and the engine-facing ones meet. Rush has no
+    vision and so can never be the answer here. */
+function pzModeForVision(vision){
+  return PZ_MODES.find(m => m.vision && m.vision === vision) || null;
+}
+
+/** Start Puzzle: the vision chosen is the pool opened. */
+function startPuzzleFromSetup(){
+  const m = pzModeForVision(G.mode);
+  if (!m) return;            // no vision picked yet — startGame() has already said so
+  PZ.setup = false;
+  enterPuzzleMode(m.key);
+}
+
 function enterPuzzleMode(key){
   const m = PZ_MODE[key];
   beep(700,.09);
@@ -9070,6 +9126,7 @@ function pzOpen(n){
   const p = PZ.list[n - 1];
   if (!p) return;
   reviewClose(false);                     // the review and a puzzle both want G.st
+  PZ.setup = false;                       // the setup page has been answered
   PZ.on = true;
   PZ.n = n;
   PZ.puzzle = p;
@@ -13440,6 +13497,7 @@ function showScreen(name, how){
   if (screenName === 'ranked' && name !== 'ranked' && searching) stopRankSearch();
   if (name !== 'game') reviewClose(false);
   if (name !== 'game') pzClose();
+  if (name !== 'game') PZ.setup = false;   // pzClose() returns early when PZ.on is false
   // A game being watched is let go of the same way: the socket closes, the
   // game goes on on the server, and the board is handed back to whatever
   // the next screen wants it for.
@@ -13589,6 +13647,7 @@ function navDescribe(){
   if (s === 'setup')    return { s, v: HOSTING() ? 'host' : (G.opponent || '') };
   if (s === 'game'){
     if (SPECTATING()) return { s, v:'spectate', id: SPEC.id || '', mode: G.mode };
+    if (PZ.setup) return { s, v:'pzsetup' };
     if (PZ.on) return RUSH.on ? { s, v:'rush' } : { s, v:'puzzle', track: pzRoute() };
     if (G.opponent === 'bot' || G.opponent === 'local') return { s, v: G.opponent };
     if (CHAL.to && !G.started) return { s, v:'challenge' };
@@ -13607,6 +13666,7 @@ function navHash(d){
     case 'game':
       if (d.v === 'spectate') return '';           // its address is the path, below
       if (d.v === 'bot' || d.v === 'local') return 'play/' + d.v;
+      if (d.v === 'pzsetup')  return 'puzzle';          // the vision has not been chosen yet
       if (d.v === 'puzzle')   return 'puzzle' + (d.track ? '/' + d.track : '');
       if (d.v === 'rush')     return 'puzzle/rush';
       if (d.v === 'challenge') return 'challenge';
@@ -13621,7 +13681,9 @@ function navParse(hash){
     case '':          return { s:'home', v:'' };
     case 'friendly':  return { s:'rooms', v:'' };
     case 'play':      return { s:'game', v: tail === 'local' ? 'local' : 'bot' };
-    case 'puzzle':    return tail === 'rush' ? { s:'game', v:'rush' } : { s:'game', v:'puzzle', track: tail };
+    case 'puzzle':    return tail === 'rush' ? { s:'game', v:'rush' }
+                          : tail ? { s:'game', v:'puzzle', track: tail }
+                          : { s:'game', v:'pzsetup' };
     case 'challenge': return { s:'game', v:'challenge' };
     case 'game':      return { s:'game', v:'online', kind: tail };
     default:
@@ -13645,7 +13707,7 @@ const navURL = d => { const h = navHash(d); return navPath(d) + location.search 
     home page's buttons keep, so the address bar is not a way round it. */
 function navGated(d){
   if (d.s === 'social' || d.s === 'ranked') return true;
-  return d.s === 'game' && (d.v === 'puzzle' || d.v === 'rush' || d.v === 'challenge' ||
+  return d.s === 'game' && (d.v === 'pzsetup' || d.v === 'puzzle' || d.v === 'rush' || d.v === 'challenge' ||
                             (d.v === 'online' && d.kind === 'ranked'));
 }
 
@@ -13762,6 +13824,7 @@ function navApply(d, dir){
         enterGameSetup();
         break;
       }
+      if (d.v === 'pzsetup'){ enterPuzzleSetup(); break; }  // asks the vision again, as the button does
       if (d.v === 'rush'){ rushStart(); return 'async'; }   // a run is not resumed, only started
       if (d.v === 'puzzle'){
         /* The door, re-opened. pzRoute() wrote which one it was, and each of
@@ -13859,7 +13922,8 @@ function syncOptions(){
   // The same form, sent to one particular person rather than begun on the spot.
   // Challenges never search — they are aimed at somebody — so this button has
   // no searching state to report.
-  document.getElementById('btnStartGame').textContent = CHALLENGING() ? 'Challenge' : 'Start Play';
+  document.getElementById('btnStartGame').textContent =
+    PZ.setup ? 'Start Puzzle' : CHALLENGING() ? 'Challenge' : 'Start Play';
 
   // the vision buttons and the colour squares on the game page
   document.querySelectorAll('.vis[data-mode]').forEach(b =>
@@ -13870,18 +13934,34 @@ function syncOptions(){
   // Colour is yours to pick against the engine and when you are the one
   // issuing the invitation — the friend answering it takes the other seat.
   document.getElementById('secYouPlay').style.display  = (BOT() || CHALLENGING()) ? '' : 'none';
+  /* A puzzle asks one question, and the other three are not questions it has.
+     There is no opponent to choose and no colour to take — the position names
+     the side to move — and no clock either: a puzzle is untimed, and the one
+     that is not (Puzzle Rush) brings its own three minutes and never comes
+     through here. Opponent and colour are already hidden by the two rules
+     above, since BOT() and CHALLENGING() are both false for a puzzle; the
+     clock is the only one that needs saying. */
+  document.getElementById('secTime').style.display = PZ.setup ? 'none' : '';
 
   // before the game: options showing, board a preview. After: notation and the
   // buttons you need mid-game.
   // a puzzle is neither being set up nor being played: it has its own panel,
   // and the chips name the track rather than the opponent
-  document.getElementById('gameSetup').style.display = (!PUZZLE() && !G.started) ? 'flex' : 'none';
+  /* PZ.setup is a puzzle that has not started, so it wants the setup panel
+     rather than the puzzle one — the whole point of the page is that it looks
+     like Play Bot's. PUZZLE() is already true by then, which is why each of
+     these three has to say which of the two puzzle states it means. */
+  document.getElementById('gameSetup').style.display = ((PZ.setup || !PUZZLE()) && !G.started) ? 'flex' : 'none';
   document.getElementById('gamePlay').style.display  = (!PUZZLE() && G.started) ? 'flex' : 'none';
-  document.getElementById('gamePuzzle').style.display = PUZZLE() ? 'flex' : 'none';
+  document.getElementById('gamePuzzle').style.display = (PUZZLE() && !PZ.setup) ? 'flex' : 'none';
+  // and the strips above and below the preview board, which a puzzle has no use
+  // for — toggled here rather than in enterPuzzleSetup() so it cannot fall out
+  // of step with the flag it is named after
+  document.getElementById('screen-game').classList.toggle('puzzle-setup', !!PZ.setup);
   // display, not visibility: the chips head a column now, and space held open
   // for them before the game starts reads as a hole above the first panel
   document.getElementById('gameChips').style.display = G.started ? '' : 'none';
-  if (PUZZLE()){
+  if (PUZZLE() && !PZ.setup){
     /* The door on the left, the place in it on the right. The door is now the
        vision as well — "Blindfold Puzzle" names both at once — so the chip
        names the ladder rather than the vision on its own, and pzScopeName() is
@@ -13988,25 +14068,22 @@ document.getElementById('navPractice').onclick = goPractice;
 // rather than nowhere. Puzzle Rush answers to the same rule: it is in
 // LOCKED_IDS with the rest, and a button painted locked must not quietly start
 // a run anyway.
-/* The four laddered doors and the Rush one. Each is a vision *and* a pool, so
-   pressing one is the whole choice — which is why the vision screen that used
-   to stand between the home page and the first position is gone: "Blindfold
-   Puzzle" has already answered the question it asked. enterTrack() is still
-   here and still works — the three phase files are what the interim pools are
-   dealt from, and test_puzzle_flow.js exercises it — but nothing on the home
-   page reaches it any more, because phase is no longer a way to play. */
-const goMode = key => () => GUEST() ? toSignUp() : enterPuzzleMode(key);
-document.getElementById('navPzSighted').onclick   = goMode('sighted');
-document.getElementById('navPzBoard').onclick     = goMode('board');
-document.getElementById('navPzBlindfold').onclick = goMode('blindfold');
-document.getElementById('navPzFog').onclick       = goMode('fog');
-document.getElementById('navRush').onclick        = () => GUEST() ? toSignUp() : rushStart();
+/* Two doors. Puzzle asks for the vision on a setup page of its own and then
+   opens the pool that vision names; Puzzle Rush brings its own clock and its
+   own pool and asks nothing, so it still starts on the press.
+
+   The four pools are unchanged and are still entered by enterPuzzleMode() —
+   the menu simply no longer names them one by one. enterTrack() is likewise
+   still here for the three legacy phase files and for test_puzzle_flow.js,
+   and nothing on the page reaches it. */
+document.getElementById('navPuzzleGo').onclick = () => GUEST() ? toSignUp() : enterPuzzleSetup();
+document.getElementById('navRush').onclick     = () => GUEST() ? toSignUp() : rushStart();
 
 // Homepage shortcuts use the same destinations and account gates as the header:
 // each one presses the nav button it names rather than growing a second
 // handler that could drift from it.
 for (const name of ['Ranked','Friendly','Bot','Social','Practice','Puzzle',
-                    'PzSighted','PzBoard','PzBlindfold','PzFog','Rush']){
+                    'PuzzleGo','Rush']){
   document.getElementById('home' + name).onclick = () => document.getElementById('nav' + name).click();
 }
 
@@ -14114,12 +14191,15 @@ function optionsAnswered(){
 }
 
 /** Everything the Start Play button waits for. */
-const allAnswered = () => picked.mode && optionsAnswered();
+// a puzzle's only question is the vision; a game's is that plus the settings
+const allAnswered = () => picked.mode && (PZ.setup || optionsAnswered());
 
 function unanswered(){
   const out = [];
   // on the game page each question is its own panel, so point at the one missing
   if (screenName === 'game'){
+    // a puzzle asks for the vision and nothing else — see syncOptions()
+    if (PZ.setup) return picked.mode ? [] : ['secVision'];
     if (BOT() && !chosen.level) out.push('secOpponent');
     if ((BOT() || CHALLENGING()) && !chosen.side) out.push('secYouPlay');
     if (!picked.mode)           out.push('secVision');
@@ -14147,6 +14227,11 @@ function startGame(){
     document.getElementById(missing[0]).scrollIntoView({ block:'center', behavior:'smooth' });
     return;
   }
+  /* A puzzle, once the vision has been answered. Placed after the gate above
+     rather than before it so that pressing Start Puzzle with nothing chosen
+     gets the same nudge on #secVision that Start Play gets on #secOpponent —
+     one refusal, written once. */
+  if (PZ.setup) return startPuzzleFromSetup();
   // A challenge is not a game yet: it is a question put to one person, and
   // nothing starts until they say yes.
   if (CHALLENGING()){ sendChallenge(); return; }
@@ -14164,6 +14249,7 @@ function startGame(){
 /* Walking into a game from the nav: a fresh board to look at while the
    questions beside it are answered. Nothing moves until Start Play. */
 function enterGameSetup(){
+  PZ.setup = false;          // Play Bot, Same Computer, hosting and challenges
   G.started = false;
   resetChoices();
   newGame();
@@ -14827,10 +14913,8 @@ const GUEST = () => accountsAvailable() && !account;
    nothing, so the lock is a door rather than a wall. They stay ordinary
    buttons for exactly that reason: [disabled] would swallow the click that
    was the whole invitation. */
-const LOCKED_IDS = ['homeRanked', 'homeSocial', 'homePuzzle',
-                    'homePzSighted', 'homePzBoard', 'homePzBlindfold', 'homePzFog', 'homeRush',
-                    'navRanked', 'navSocial', 'navPuzzle',
-                    'navPzSighted', 'navPzBoard', 'navPzBlindfold', 'navPzFog', 'navRush'];
+const LOCKED_IDS = ['homeRanked', 'homeSocial', 'homePuzzle', 'homePuzzleGo', 'homeRush',
+                    'navRanked', 'navSocial', 'navPuzzle', 'navPuzzleGo', 'navRush'];
 
 function lockedControls(){
   const out = LOCKED_IDS.map(id => document.getElementById(id)).filter(Boolean);
