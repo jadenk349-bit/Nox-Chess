@@ -76,7 +76,7 @@ var DECLS = ['VAL','FILES','rowOf','colOf','SQNAME','uciOf','sqName','sqIndex','
              'idCounter','mk','DIR_N','DIR_B','DIR_R','DIR_K','PST','nodes','PIECE_NAME',
              'OPENING_BOOK','OPENING_LINES',
              'PR_SQUARE_LEVELS','PR_QUADRANT_NAME','PR_DIRS','PR_LINES_LEVELS','PR_PIECE_LEVELS',
-             'PR_ATTACK_LEVELS','PR_HOLD_LEVELS',
+             'PR_ATTACK_LEVELS','PR_HOLD_LEVELS','PR_TRACKER_LEVELS',
              'PR_MODES','PR_MINUTES','PR_STORE','PR_VERSION','PR_V1_KEYS','PR_SEEN_MAX',
              'prKey','prAcc','prSeenKey',
              'PR','PR_STEP_UP','PR_STEP_DOWN','prRand','prPick','prSide','prMan','PR_MAKE','W',
@@ -92,7 +92,7 @@ var FNS = ['startBoard','newState','cloneState','fenOf','stateFromFEN',
            'prShuffle','prPosition','prMaterial','prColourWhy',
            'prMakeSquare','prMakeLines','prMakePiece',
            'prAttacked','prHanging','prPinned','prMakeAttack',
-           'prMakeTrack',
+           'prMakeTrack','prMakeTracker','prTrackerErr',
            'prPickMove','prAskAbout','prMakeSequence','prMakeMini','prRecipe','prMake',
            'prGamePosition','prCluster','prAskFine','prMakeHold',
            'prRecord','prScore','prStep','prNow','prTimeLeft','prRecommend','prMedianLat',
@@ -417,6 +417,51 @@ head('Piece Tracking walks are legal and land where they say');
   }
   ok('two tracked pieces are never the same shape', same, 0);
   ok('and the one asked about always moved', moved > 100, true);
+})();
+
+/* ============================================================
+   Move Tracker (Task 14a): the generator only, run over its own ladder.
+   PR_MODES.tracker.levels still holds the three provisional captions until
+   14b points it at PR_TRACKER_LEVELS and wires prMakeTracker up through
+   prRecipe/PR_MAKE, so this reads the table directly rather than through
+   prRecipe.
+   ============================================================ */
+head('Move Tracker');
+(function(){
+  var bad = 0, seenCaps = 0, seenChecks = 0;
+  for (var lv = 1; lv <= PR_TRACKER_LEVELS.length; lv++) for (var t = 0; t < 25; t++){
+    var r = Object.assign({level:lv}, PR_TRACKER_LEVELS[lv-1]), q = prMakeTracker(r);
+    if (!q){ bad++; continue; }
+    var st = q.start;
+    q.path.forEach(function(step, k){
+      var legal = legalMoves(st, st.turn);
+      var m = legal.filter(function(x){ return x.from === step.from && x.to === step.to && (!x.promo || x.promo === step.promo); })[0];
+      if (!m || toSAN(st, m, legal) !== step.san) bad++;
+      st = makeMove(st, m);
+      if (r.sides === 'one') st.turn = q.start.turn;
+      if (!sameBoard(st.b, q.frames[k + 1])) bad++;
+      if (step.cap) seenCaps++;
+    });
+    if (q.path.length !== r.plies) bad++;
+    var caps = q.path.filter(function(s){ return s.cap; }).length;
+    if (caps < (r.captures || 0)) bad++;
+    // sameBoard() also compares piece id, which is right for tracking one
+    // piece through a walk (the frames share the actual piece objects) and
+    // wrong here: q.frames[0] and this newState() are two unrelated calls, so
+    // their ids can never agree even when both are the starting position.
+    // Reading back only the placement field of a FEN is what "this is the
+    // opening position" actually means.
+    if (r.start === 'opening' && fenOf(stateOf(q.frames[0])).split(' ')[0] !== fenOf(newState()).split(' ')[0]) bad++;
+    if (r.checkEvery && q.checks.length !== Math.floor((r.plies - 1) / r.checkEvery)) bad++;
+    seenChecks += q.checks.length;
+    if (q.ask.t === 'where' && q.end !== q.ask.sq) bad++;
+  }
+  ok('every level generates a legal, replayable walk', bad, 0);
+  ok('captures happen where asked', seenCaps > 0, true);
+  ok('checkpoints appear on the levels that carry them', seenChecks > 0, true);
+  // the error typer
+  var q2 = prMakeTracker(Object.assign({level:2}, PR_TRACKER_LEVELS[1]));
+  ok('a click on an earlier square of the piece is "lost"', prTrackerErr(q2, q2.path[0].from) === 'lost' || q2.path[0].from === q2.end, true);
 })();
 
 /* ============================================================

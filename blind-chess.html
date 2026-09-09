@@ -12134,7 +12134,9 @@ const PR = {
   onSubmit: null,     // what the answer form's Enter means
   timers: [],
   mini: null,
-  rb: null            // a rebuild in progress — target, placed, current pick, stable ids
+  rb: null,           // a rebuild in progress — target, placed, current pick, stable ids
+  lastLine: -1        // Move Tracker: the opening line asked last, so two similar
+                       // lines never land back to back (Task 14)
 };
 
 /* The session clock. A separate function rather than Date.now() called
@@ -12737,6 +12739,120 @@ function prMakeTrack(diff){
     };
   }
   return null;
+}
+
+/* Move Tracker's own ladder (Task 14), built beside prMakeTrack rather than in
+   place of it: the drill still runs on the old generator (PR_MAKE.tracker,
+   PR_MODES.tracker.levels) until the presenter that reads this richer shape is
+   ready, so nothing here is reachable from the dashboard yet. */
+const PR_TRACKER_LEVELS = [
+  { cap:'One piece, two moves, the from-square lit', start:'random', pieces:1, plies:2,  sides:'one',  captures:0, aid:true,  fromTo:true,  asks:['where'] },
+  { cap:'The aid removed',                            start:'random', pieces:1, plies:2,  sides:'one',  captures:0, aid:false, fromTo:true,  asks:['where'] },
+  { cap:'The start position, two plies',              start:'opening', plies:2, sides:'both', captures:0, asks:['where','what'] },
+  { cap:'The start position, four plies',             start:'opening', plies:4, sides:'both', captures:0, asks:['where','what'] },
+  { cap:'A small position, captures',                 start:'random', pieces:3, plies:4,  sides:'both', captures:1, asks:['captured','what','count'] },
+  { cap:'Six plies with captures, count the men',     start:'random', pieces:3, plies:6,  sides:'both', captures:1, asks:['captured','count','where'] },
+  { cap:'Checkpoints every three plies',              start:'random', pieces:4, plies:8,  sides:'both', captures:1, checkEvery:3, asks:['where','what','count'] },
+  { cap:'Pawns, promotion, castling, checks',         start:'opening', plies:8, sides:'both', captures:1, checkEvery:3, promo:true, asks:['where','what','captured'] },
+  { cap:'The start position, ten plies, whole list',  start:'opening', plies:10, sides:'both', captures:0, whole:true, checkEvery:0, asks:['where','what','count'] },
+  { cap:'Fourteen plies',                              start:'opening', plies:14, sides:'both', captures:1, whole:true, checkEvery:0, asks:['where','what','count'] },
+  { cap:'Twenty plies, checkpoints every six',        start:'opening', plies:20, sides:'both', captures:2, whole:true, checkEvery:6, asks:['where','what','count'] },
+  { cap:'Twenty plies, then rebuild it',              start:'opening', plies:20, sides:'both', captures:2, whole:true, checkEvery:6, asks:['rebuild'] }
+];
+/* Every walk is played, never assembled: legalMoves() in the position, one of
+   them chosen, makeMove() applied. The opening levels come first on purpose —
+   the start position is the one template everybody already owns (Tisdall,
+   Soltis), so a real opening is easier to hold than six random men. */
+function prMakeTracker(r){
+  for (let t = 0; t < 60; t++){
+    let st, ids = [], types = [], line = null;
+    if (r.start === 'opening'){
+      st = newState();
+      // never the same opening as the question before: two similar lines back
+      // to back is exactly the interference Campitelli & Gobet measured
+      do { line = prRand(OPENING_LINES.length); } while (OPENING_LINES.length > 1 && line === PR.lastLine);
+    } else {
+      const bag = ['N','B','R','Q'], counts = [];
+      for (let k = 0; k < r.pieces; k++){ const ty = bag.splice(prRand(bag.length), 1)[0]; types.push(ty); counts.push([W, ty]); }
+      for (let k = 0; k < (r.sides === 'both' ? r.pieces : 2 + prRand(2)); k++) counts.push([B, prPick(['P','P','N','B','R'])]);
+      const built = prPosition(counts);
+      if (!built) continue;
+      st = built.st;
+      ids = types.map((ty, k) => st.b[built.at[k]].id);
+    }
+    const start = cloneState(st), frames = [st.b.slice()], path = [];
+    let ok = true, caps = 0;
+    for (let k = 0; k < r.plies; k++){
+      const all = legalMoves(st, st.turn);
+      let m = null;
+      if (line !== null && k < OPENING_LINES[line].sans.length) m = moveFromSAN(st, OPENING_LINES[line].sans[k]);
+      if (!m){
+        let pool = all;
+        if (r.sides === 'one') pool = all.filter(x => ids.indexOf(x.p.id) >= 0 && !inCheck(makeMove(st, x), B));
+        if (!r.promo) pool = pool.filter(x => !x.promo);
+        if (caps < r.captures && pool.some(x => x.cap)) pool = pool.filter(x => x.cap);
+        if (!pool.length){ ok = false; break; }
+        m = r.start === 'opening' ? (bookMove(st, k, prRand) || { m: prPick(pool) }).m : prPickMove(st, pool);
+        if (pool.indexOf(m) < 0) m = prPick(pool);
+      }
+      const capP = m.cap ? st.b[m.to] : null;
+      path.push({ san: toSAN(st, m, all), full: sqName(m.from) + '-' + sqName(m.to), from:m.from, to:m.to,
+                  id:m.p.id, cap:!!m.cap, capId: capP ? capP.id : -1, capType: capP ? capP.t : null, capC: capP ? capP.c : null, promo:m.promo || null });
+      if (m.cap) caps++;
+      st = makeMove(st, m);
+      if (r.sides === 'one') st.turn = W;
+      frames.push(st.b.slice());
+    }
+    if (!ok || caps < r.captures) continue;
+    if (!legalMoves(st, st.turn).length) continue;
+    // the question
+    const askKind = prPick(r.asks);
+    const q = { kind:'tracker', start, frames, path, ids, types, end:-1, askId:-1, askType:null, ask:null, checks:[], recipe:r,
+                sig:'tracker:' + fenOf(start).split(' ')[0] + ':' + path.map(s => s.san).join(' ') };
+    if (askKind === 'where'){
+      const movers = path.filter(s => { let now = -1; for (let i = 0; i < 64; i++) if (st.b[i] && st.b[i].id === s.id) now = i; return now >= 0; });
+      if (!movers.length) continue;
+      const s = prPick(movers);
+      for (let i = 0; i < 64; i++) if (st.b[i] && st.b[i].id === s.id) q.end = i;
+      q.askId = s.id; q.askType = st.b[q.end].t;
+      q.ask = { t:'where', sq:q.end, colour:st.b[q.end].c, type:q.askType, text:'Where is ' + prMan(st.b[q.end].c, q.askType) + ' now?' };
+    } else if (askKind === 'captured'){
+      const taken = path.filter(s => s.cap);
+      const truth = taken.length ? prMan(taken[taken.length - 1].capC, taken[taken.length - 1].capType) : 'Nothing';
+      q.ask = { t:'captured', truth, text:'What was the last man captured?' };
+    } else if (askKind === 'count'){
+      const c = Math.random() < .5 ? W : B; let n = 0;
+      for (let i = 0; i < 64; i++) if (st.b[i] && st.b[i].c === c) n++;
+      if (n > 16) continue;
+      q.ask = { t:'count', colour:c, type:null, n, text:'How many men does ' + prSide(c) + ' have now?' };
+    } else if (askKind === 'rebuild'){
+      q.ask = { t:'rebuild', want:[], text:'Rebuild the position as it stands.' };
+      for (let i = 0; i < 64; i++) if (st.b[i]) q.ask.want.push({ sq:i, c:st.b[i].c, t:st.b[i].t });
+    } else {
+      const sq = prPick(path).to, p = st.b[sq];
+      q.ask = { t:'what', sq, colour: p ? p.c : null, type: p ? p.t : null, text:'What stands on <b>' + sqName(sq) + '</b> now?' };
+    }
+    if (r.checkEvery) for (let k = r.checkEvery; k < r.plies; k += r.checkEvery){
+      const mid = { b: frames[k], turn: k % 2 ? B : W, cr:{wK:0,wQ:0,bK:0,bQ:0}, ep:-1, half:0, full:1 };
+      q.checks.push({ ply:k, ask: prAskFine(mid) });
+    }
+    q.final = st;
+    q.ply = r.plies;
+    if (line !== null) PR.lastLine = line;
+    return q;
+  }
+  return null;
+}
+/* Which kind of mistake a wrong square is: the piece's own earlier square is
+   "lost at ply k", the square of a man that was captured is a "ghost", and
+   anything else is simply the wrong square. */
+function prTrackerErr(q, sq){
+  for (let k = q.path.length - 1; k >= 0; k--){
+    const s = q.path[k];
+    if (s.id === q.askId && (s.from === sq || (k < q.path.length - 1 && s.to === sq))){ q.lostAt = k + 1; return 'lost'; }
+  }
+  if (q.path.some(s => s.cap && s.to === sq && !q.final.b[sq])) return 'ghost';
+  return 'square';
 }
 
 /* 4 — HOLD THE POSITION. A legal position, a few seconds to look at it, and
