@@ -13406,20 +13406,62 @@ document.getElementById('prBlindGame').onclick = () => {
 document.getElementById('prRestart').onclick = () => prBegin();
 document.getElementById('prExit').onclick    = () => prShowDash();
 
+/* A finished lesson sets where a mode's FIRST session starts, and nothing
+   more: understanding a thing once is not the same as being able to do it,
+   and the staircase takes over from the first answer. A mode that has never
+   been played opens at the floor its lesson earned; anything else — no
+   lesson finished, no floor for this mode yet (most of the keys below name
+   drills later tasks add) — opens at Level 1, the staircase's own start.
+   Once there is a measured level on file it always wins: a floor is a
+   starting line, not a ceiling replayed on every visit. */
+const PR_FLOORS = {
+  square:{lesson:1, level:2}, lines:{lesson:2, level:2}, piece:{lesson:4, level:2},
+  attack:{lesson:4, level:2}, hold:{lesson:5, level:2}, tracker:{lesson:5, level:3},
+  after:{lesson:6, level:2}, forcing:{lesson:7, level:2}, calc:{lesson:9, level:2},
+  branches:{lesson:9, level:1}, progressive:{lesson:10, level:1}
+};
+function prStartLevel(key){
+  const m = prLoad().modes[key];
+  if (m.sessions > 0) return m.level;
+  const fl = PR_FLOORS[key];
+  const done = typeof lsnDone === 'function' ? lsnDone() : [];
+  return fl && done.indexOf(fl.lesson) >= 0 ? fl.level : 1;
+}
+/* Starts a session directly, at the level asked for or — left unsaid —
+   wherever prStartLevel says this mode should open, with no setup box in
+   between. That is what a route into a specific drill (`#practice/tracker`,
+   a resumed link, Task 24's Daily Practice) needs: the two questions
+   prOpenSetup asks are for a player choosing where to begin, not for
+   somebody arriving already having chosen. */
+function prOpen(key, level, minutes){
+  const mode = PR_MODE[key];
+  if (!mode) return;
+  PR.mode = mode;
+  PR.level = Math.max(1, Math.min(mode.levels.length, level || prStartLevel(key)));
+  PR.budgetMs = (minutes || 5) * 60000;
+  prBegin();
+}
 /* ---- coming and going ----
    goPractice() is the whole of the way in, and it is a function rather than a
    handler on one button on purpose: the LESSON menu calls it today, and the
    How to Play page — when there is one — should finish by calling the same
    thing rather than growing a second entrance.
 
+   `target` is what to do once the dashboard is up: nothing (a plain visit),
+   `{mode, level}` to drop straight into a drill (the route below, and
+   whatever a card outside this screen ends up linking to), or `'daily'` —
+   accepted and ignored here, because Daily Practice does not exist until
+   Task 24 and a caller passing it today should not be refused for it.
+
    Walking off the page ends whatever was running: no timer left counting down
    over another screen, no square click still wired to a question nobody can
    see, no engine reply landing in a drill that is over. */
-function goPractice(){
+function goPractice(target){
   beep(700, .09);
   PR.on = true;
   prShowDash();
   showScreen('practice');
+  if (target && target.mode && PR_MODE[target.mode]) prOpen(target.mode, target.level, target.minutes);
 }
 function prLeave(){
   if (!PR.on) return;
@@ -13613,7 +13655,7 @@ function navDescribe(){
   if (s === 'home')     return { s, v:'' };
   if (s === 'lessons')  return { s, v: LSN.view === 'lesson' ? String(LSN.n) : LSN.view === 'done' ? 'done' : '',
                                  step: LSN.step | 0 };
-  if (s === 'practice') return { s, v: PR.view === 'run' && PR.mode ? PR.mode.key : '', level: PR.level, budgetMs: PR.budgetMs };
+  if (s === 'practice') return { s, v: PR.view === 'run' && PR.mode ? PR.mode.key : '', level: PR.level, min: Math.round(PR.budgetMs / 60000) };
   if (s === 'pzvision') return { s, v: pzPick.rush ? 'rush' : (pzPick.track || '') };
   if (s === 'setup')    return { s, v: HOSTING() ? 'host' : (G.opponent || '') };
   if (s === 'game'){
@@ -13774,12 +13816,7 @@ function navApply(d, dir){
     case 'practice': {
       goPractice();
       const mode = d.v && PR_MODES.find(m => m.key === d.v);
-      if (mode){
-        PR.mode = mode;
-        PR.level = d.level || 1;
-        PR.budgetMs = d.budgetMs || 300000;
-        prBegin();
-      }
+      if (mode) prOpen(mode.key, d.level || 1, d.min || 5);
       break;
     }
     case 'game':

@@ -195,6 +195,11 @@ function showScreen(n){ screens.push(n); }
 function navSync(){}                       // the history layer lives outside the section
 function goBot(){ botTrips++; }
 function selectMode(m){ visionsPicked.push(m); }
+// lsnDone() lives in the LESSONS section, outside the block this suite lifts;
+// prStartLevel asks it by name (guarded by typeof, since a page with no
+// LESSONS section loaded — this one — must not throw), so it is faked here.
+var lsnDoneStub = [];
+function lsnDone(){ return lsnDoneStub; }
 
 /* ---- the real half ---- */
 var DECLS = ['VAL','FILES','rowOf','colOf','SQNAME','uciOf','sqName','onBoard','other',
@@ -852,6 +857,21 @@ head('Leaving a drill behind');
   byId.prAnother.onclick();
   ok('Choose Another goes back to the list', byId.prDash.style.display, '');
   ok('and two sessions are on the record', prLoad().sessions, 2);
+})();
+
+head('goPractice with a target');
+(function(){
+  storage = {};
+  goPractice({ mode:'tracker', level:3 });
+  ok('the screen is practice', screens[screens.length - 1], 'practice');
+  ok('a run is in progress', PR.view, 'run');
+  ok('at the level asked', PR.level, 3);
+  prShowDash();
+  // a finished lesson floors the first session of its mode only
+  lsnDoneStub = [5];
+  ok('the tracker floor after lesson 5 is level 3', prStartLevel('tracker'), 3);
+  var st = prLoad(); st.modes.tracker.sessions = 1; st.modes.tracker.level = 1; prSave(st);
+  ok('but a measured level wins once there is one', prStartLevel('tracker'), 1);
 })();
 
 /* ============================================================

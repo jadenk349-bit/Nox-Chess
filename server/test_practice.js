@@ -78,7 +78,7 @@ var DECLS = ['VAL','FILES','rowOf','colOf','SQNAME','uciOf','sqName','sqIndex','
              'PR_MODES','PR_MINUTES','PR_STORE','PR_VERSION','PR_V1_KEYS','PR_SEEN_MAX',
              'prKey','prAcc','prSeenKey',
              'PR','PR_STEP_UP','PR_STEP_DOWN','prRand','prPick','prSide','prMan','PR_MAKE','W',
-             'PR_ERRS'];
+             'PR_ERRS','PR_FLOORS'];
 var FNS = ['startBoard','newState','cloneState','fenOf','stateFromFEN',
            'slide','step','addPawn','pseudoMoves','isAttacked','kingSq','inCheck',
            'makeMove','legalMoves','toSAN','attackersOf','defendersOf','see',
@@ -90,7 +90,8 @@ var FNS = ['startBoard','newState','cloneState','fenOf','stateFromFEN',
            'prShuffle','prPosition','prMaterial','prColourWhy',
            'prMakeCoord','prMakeColor','prMakeVision','prMakeTrack','prMakeMemory',
            'prPickMove','prAskAbout','prMakeSequence','prMakeMini','prRecipe','prMake',
-           'prRecord','prScore','prStep','prNow','prTimeLeft','prRecommend','prMedianLat'];
+           'prRecord','prScore','prStep','prNow','prTimeLeft','prRecommend','prMedianLat',
+           'prStartLevel','prOpen','goPractice'];
 
 var bundle = [grab(/\nconst W = 'w', B = 'b';/, "const W/B")];
 for (var d = 0; d < DECLS.length; d++) if (DECLS[d] !== 'W') bundle.push(decl(DECLS[d]));
