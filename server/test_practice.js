@@ -75,7 +75,7 @@ function prStatsRender(){}             // pixels; this suite is about the state 
 var DECLS = ['VAL','FILES','rowOf','colOf','SQNAME','uciOf','sqName','sqIndex','onBoard','other',
              'idCounter','mk','DIR_N','DIR_B','DIR_R','DIR_K','PST','nodes','PIECE_NAME',
              'OPENING_BOOK','OPENING_LINES',
-             'PR_SQUARE_LEVELS','PR_QUADRANT_NAME','PR_DIRS',
+             'PR_SQUARE_LEVELS','PR_QUADRANT_NAME','PR_DIRS','PR_LINES_LEVELS',
              'PR_MODES','PR_MINUTES','PR_STORE','PR_VERSION','PR_V1_KEYS','PR_SEEN_MAX',
              'prKey','prAcc','prSeenKey',
              'PR','PR_STEP_UP','PR_STEP_DOWN','prRand','prPick','prSide','prMan','PR_MAKE','W',
@@ -89,7 +89,7 @@ var FNS = ['startBoard','newState','cloneState','fenOf','stateFromFEN',
            'prBlankMode','prBlank','prUpgradeV1','prLoad','prSave',
            'prSeen','prSeenHas','prSeenPush','prToday','prTouchDay',
            'prShuffle','prPosition','prMaterial','prColourWhy',
-           'prMakeSquare','prMakeVision','prMakeTrack','prMakeMemory',
+           'prMakeSquare','prMakeLines','prMakeVision','prMakeTrack','prMakeMemory',
            'prPickMove','prAskAbout','prMakeSequence','prMakeMini','prRecipe','prMake',
            'prRecord','prScore','prStep','prNow','prTimeLeft','prRecommend','prMedianLat',
            'prStartLevel','prOpen','prRebuildStart','prRebuildFinish','prRbPaint','goPractice'];
@@ -195,6 +195,40 @@ head('Square Trainer');
   ok('all five question kinds appear across the ladder', Object.keys(kinds).length, 5);
   ok('level 5 has no board', prRecipe('square', 5).board, false);
   ok('level 7 is timed', prRecipe('square', 7).timed > 0, true);
+})();
+
+/* ============================================================
+   1c — Lines & Routes: squares between two others, the lines through a
+   square, whether a slider reaches past a blocker, and knight routes — four
+   question kinds re-derived from the geometry helpers themselves rather than
+   from anything the generator claims about them.
+   ============================================================ */
+head('Lines & Routes');
+(function(){
+  var bad = 0, kinds = {};
+  for (var lv = 1; lv <= PR_LINES_LEVELS.length; lv++) for (var t = 0; t < 60; t++){
+    var q = prMakeLines(prRecipe('lines', lv));
+    if (!q){ bad++; continue; }
+    kinds[q.ask] = 1;
+    if (q.ask === 'between'){
+      var want = lineBetween(q.a, q.b);
+      if (!want || want.length < 1 || want.join() !== q.answer.join()) bad++;
+    }
+    if (q.ask === 'through'){
+      var L = linesThrough(q.a);
+      q.choices.forEach(function(c){
+        var on = L.diag1.indexOf(c) >= 0 || L.diag2.indexOf(c) >= 0;
+        if (on !== (q.answer.indexOf(c) >= 0)) bad++;
+      });
+    }
+    if (q.ask === 'reach'){
+      var b = Array(64).fill(null); if (q.blocker >= 0) b[q.blocker] = mk(W, 'P');
+      if (sliderReaches(b, q.a, q.b, q.type) !== q.answer) bad++;
+    }
+    if (q.ask === 'knight' && knightRoute(q.a, q.b).length - 1 !== q.answer) bad++;
+  }
+  ok('every level generates and re-derives', bad, 0);
+  ok('all four question kinds appear', Object.keys(kinds).length, 4);
 })();
 
 /* ============================================================
@@ -662,7 +696,7 @@ head('Store v2');
   st.modes.square.sessions = 1;
   prSave(st);
   var next = prRecommend(0.9);
-  ok('a good one points somewhere new', next.key, 'piece');
+  ok('a good one points somewhere new', next.key, 'lines');
   // everything tried: the weakest drill is the one recommended
   st = prBlank();
   for (var k = 0; k < PR_MODES.length; k++){

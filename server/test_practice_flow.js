@@ -213,7 +213,7 @@ var FNS = ['startBoard','newState','cloneState','fenOf','stateFromFEN',
            'slide','step','addPawn','pseudoMoves','isAttacked','kingSq','inCheck',
            'makeMove','legalMoves','toSAN','attackersOf','defendersOf','see',
            'mirror','evaluate','orderMoves','scoreMove','quiesce','negamax','bestMove',
-           'parseMoveIn','rebuildDiff','quadrantOf'];
+           'parseMoveIn','rebuildDiff','quadrantOf','lineBetween','linesThrough','knightRoute','sliderReaches'];
 var bundle = [grab(/\nconst W = 'w', B = 'b';/, "const W/B")];
 // a multi-line string rather than an object, so neither shape of decl() fits it
 bundle.push(grab(/\nconst BISHOP_SVG =\n[\s\S]*?';\n/, 'BISHOP_SVG'));
@@ -600,6 +600,32 @@ head('Square Trainer');
   ok('a level 7 question is timed', PR.q.timed, 3000);
   tick(3000);
   ok('running out of time is judged wrong', /wrong/.test(byId.prSay.className), true);
+  prShowDash();
+})();
+
+/* ============================================================
+   2b — Lines & Routes: one deterministic pass through `between` at the
+   easiest level, which only ever asks it (PR_LINES_LEVELS[0].kinds has one
+   entry) with the board on. test_practice.js already re-derives all four
+   question kinds against the geometry helpers themselves; what the presenter
+   still has to prove on its own is that clicking `q.picks` together and
+   pressing Done turns into the same judgement the generator's `answer`
+   claims.
+   ============================================================ */
+head('Lines & Routes');
+
+(function(){
+  storage = {};
+  startDrill('lines', 1, 5);
+  var q = PR.q;
+  ok('the easiest level always asks between', q.ask, 'between');
+  ok('and shows the board', byId.prFrame.style.display, '');
+  q.answer.forEach(clickSquare);
+  ansButton('Done').onclick();
+  ok('every square on the line, clicked and Done, is marked right', /right/.test(byId.prSay.className), true);
+  ok('the endpoints are shown as the ends of the line', marked(q.a, 'pr-from') && marked(q.b, 'pr-from'), true);
+  ok('and the line itself in green', q.answer.every(function(s){ return marked(s, 'pr-right'); }), true);
+  tick(1000);
   prShowDash();
 })();
 

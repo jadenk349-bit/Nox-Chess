@@ -1860,10 +1860,12 @@
   .pr-ans.glyphs button{min-width:0; padding:5px 0; font-size:23px; line-height:1.15;}
   .pr-ans.glyphs button.wide{grid-column:1/-1; font-size:15.5px; padding:9px 0;}
   .pr-ans.glyphs .pc-svg{width:.86em; height:.86em; margin:0 auto;}
-  /* the rebuild palette's picked man, so pressing a glyph reads as picking it
-     up rather than as a plain button press — the only feedback that a click
-     on the board is about to place *this* man */
-  .pr-ans.glyphs button.active{outline:2px solid var(--gold);}
+  /* A picked answer button — the rebuild palette's picked man (so pressing a
+     glyph reads as picking it up rather than as a plain button press) and
+     Lines & Routes' `through` choices (so a square already toggled in reads
+     as chosen while the set is still being built). Not scoped to `.glyphs`:
+     both need the same feedback and neither is styled any other way. */
+  .pr-ans button.active{outline:2px solid var(--gold);}
   .pr-ans .g-w{color:#fbf6ea; -webkit-text-stroke:1.2px #2a2118;}
   .pr-ans .g-b{color:#2c2f3a; -webkit-text-stroke:1.2px #0a0b0e;}
   .pr-ans input{
@@ -11880,19 +11882,41 @@ const PR_DIRS = [
   ['right',  1, sq => colOf(sq) < 7]
 ];
 
+/* Lines & Routes' own ladder — declared ahead of PR_MODES for the same reason
+   Square Trainer's is: the recipe fields (`kinds`, `diag`, `board`,
+   `blockers`, `mid`) are what a level actually offers, and a bare caption
+   could not carry them. Four question kinds share the one ladder rather than
+   four dashboard cards, because they are one skill — reading the board's
+   geometry — asked four ways: what stands between two squares, what runs
+   through one, whether a slider gets past what is in its way, and how many
+   knight moves a route costs. */
+const PR_LINES_LEVELS = [
+  { cap:'Ranks and files, board shown',     kinds:['between'], diag:false, board:true },
+  { cap:'Diagonals, board shown',           kinds:['between'], diag:true,  board:true },
+  { cap:'Ranks and files from the name',    kinds:['between'], diag:false, board:false },
+  { cap:'Diagonals from the name',          kinds:['between','through'], diag:true, board:false },
+  { cap:'The lines through a square',       kinds:['through'], board:false },
+  { cap:'Blockers',                         kinds:['reach'],   board:true, blockers:true },
+  { cap:'Knight routes, board shown',       kinds:['knight'],  board:true },
+  { cap:'Knight routes from the name',      kinds:['knight'],  board:false, mid:true }
+];
+
 /* Each drill, in the order the dashboard lists them. `group` clusters related
    drills for the dashboard (Task 22); `lesson` is the course step it grows out
    of. `levels` replaces the old `tiers`/`hard`/`needs`: a mode's levels are a
    recipe ladder, not a difficulty label — what a session is actually worth is
    the level the staircase below settles it on, not a tier picked by hand.
-   Square Trainer's ladder is the real thing (above); the rest are still
-   provisional captions so the page runs, and `prMake` calls through today's
-   generators (PR_MAKE) until later phases give the blindfold-sequence drill an
-   entry of its own. */
+   Square Trainer's and Lines & Routes' ladders are the real thing (above);
+   the rest are still provisional captions so the page runs, and `prMake`
+   calls through today's generators (PR_MAKE) until later phases give the
+   blindfold-sequence drill an entry of its own. */
 const PR_MODES = [
   { key:'square', name:'Square Trainer', group:'board', skill:'Squares', lesson:1,
     desc:'Name, find and colour squares from either chair — the alphabet of the board.',
     levels: PR_SQUARE_LEVELS },
+  { key:'lines', name:'Lines & Routes', group:'board', skill:'Lines', lesson:2,
+    desc:'Trace ranks, files, diagonals and knight routes, blockers and all.',
+    levels: PR_LINES_LEVELS },
   { key:'piece', name:'Piece Vision', group:'vision', skill:'Piece movement', lesson:4,
     desc:'Where one piece reaches, with the board slowly taken away.',
     levels:[{cap:'Empty board'},{cap:'A blocker or two'},{cap:'A crowded board'}] },
@@ -12404,6 +12428,63 @@ function prMakeSquare(r){
   return q;
 }
 
+/* 1b — LINES & ROUTES. Four kinds of question about the board's geometry,
+   answered by the same helpers a game position would be — lineBetween(),
+   linesThrough(), sliderReaches() and knightRoute() — so a drill can never
+   claim a line the rules would not also draw. `between` picks a second
+   square off the first one's own rank/file or diagonal (`linesThrough`),
+   which is what guarantees a line exists between them at all; `through`
+   mixes real diagonal squares with off-line decoys so picking every right
+   one and no wrong one is a real test; `reach` drops a blocking pawn on the
+   line half the time, since "can it get there" is only interesting once
+   something might be in the way; `knight` is the shortest route BFS finds,
+   capped at four moves so a level-8 question still fits in the head. */
+function prMakeLines(r){
+  const ask = prPick(r.kinds);
+  const q = { kind:'lines', ask, board:!!r.board, a:-1, b:-1, answer:null, type:null, blocker:-1, choices:null, mid:!!r.mid };
+  if (ask === 'between'){
+    for (let t = 0; t < 40; t++){
+      const a = prRand(64), L = linesThrough(a);
+      const pool = r.diag ? L.diag1.concat(L.diag2) : L.rank.concat(L.file);
+      const b = prPick(pool);
+      const between = lineBetween(a, b);
+      if (!between || between.length < 2 || between.length > 6) continue;
+      q.a = a; q.b = b; q.answer = between; break;
+    }
+    if (q.a < 0) return null;
+  } else if (ask === 'through'){
+    const a = prRand(64), L = linesThrough(a);
+    const on = prShuffle(L.diag1.concat(L.diag2)), off = prShuffle(L.rank.concat(L.file).concat(
+      Array.from({ length:64 }, (_, i) => i).filter(i => i !== a && !lineBetween(a, i))));
+    if (on.length < 2) return null;
+    q.a = a; q.answer = on.slice(0, 2); q.choices = prShuffle(q.answer.concat(off.slice(0, 2)));
+  } else if (ask === 'reach'){
+    const type = prPick(['R','B','Q']);
+    for (let t = 0; t < 40; t++){
+      const a = prRand(64), L = linesThrough(a);
+      const pool = type === 'R' ? L.rank.concat(L.file) : type === 'B' ? L.diag1.concat(L.diag2)
+                 : L.rank.concat(L.file, L.diag1, L.diag2);
+      const b = prPick(pool), between = lineBetween(a, b);
+      if (!between || between.length < 1) continue;
+      q.a = a; q.b = b; q.type = type;
+      q.blocker = Math.random() < .5 ? prPick(between) : -1;
+      const board = Array(64).fill(null); if (q.blocker >= 0) board[q.blocker] = mk(W, 'P');
+      q.answer = sliderReaches(board, a, b, type); break;
+    }
+    if (q.a < 0) return null;
+  } else {
+    let a, b, route;
+    do { a = prRand(64); b = prRand(64); route = knightRoute(a, b); } while (a === b || route.length - 1 > 4);
+    q.a = a; q.b = b; q.answer = route.length - 1; q.route = route;
+    if (q.mid && route.length > 2){
+      const wrong = prShuffle(Array.from({ length:64 }, (_, i) => i).filter(i => route.indexOf(i) < 0)).slice(0, 3);
+      q.choices = prShuffle([route[1]].concat(wrong)); q.first = route[1];
+    }
+  }
+  q.sig = 'lines:' + ask + ':' + q.a + ':' + q.b + ':' + (q.type || '') + ':' + q.blocker;
+  return q;
+}
+
 /* 2 — PIECE VISUALIZATION. The answer is legalMoves(), not a second movement
    table — which is the point: a drill that disagreed with the game about where
    a bishop goes would be teaching the wrong board.
@@ -12623,15 +12704,15 @@ function prMakeMini(diff){
   return null;
 }
 
-/* PR_MODES names five drills today; the generators above still answer to
-   six keys, because prMakeSequence is not gone, only unreachable from the
+/* PR_MODES names six drills today; the generators above still answer to
+   seven keys, because prMakeSequence is not gone, only unreachable from the
    dashboard until Task 14 gives Blindfold Sequence an entry of its own. Square
-   Trainer's generator reads its whole recipe — `kinds`, `board`, `labels`,
-   `flash`, `timed`, `flipped` — rather than a bare difficulty number, because
-   a level is what question it offers as much as how hard it is; the rest
-   still take `r.level` alone. */
+   Trainer and Lines & Routes read their whole recipe — `kinds` and whatever
+   else their own ladder carries — rather than a bare difficulty number,
+   because a level is what question it offers as much as how hard it is; the
+   rest still take `r.level` alone. */
 const PR_MAKE = {
-  square: r => prMakeSquare(r), piece: r => prMakeVision(r.level),
+  square: r => prMakeSquare(r), lines: r => prMakeLines(r), piece: r => prMakeVision(r.level),
   tracker: r => prMakeTrack(r.level), hold: r => prMakeMemory(r.level),
   progressive: r => prMakeMini(r.level)
 };
@@ -12803,6 +12884,7 @@ function prPresent(){
   document.getElementById('prSkill').textContent = PR.mode.skill;
   switch (q.kind){
     case 'square':   return prShowSquare(q);
+    case 'lines':    return prShowLines(q);
     case 'vision':   return prShowVision(q);
     case 'track':    return prShowTrack(q);
     case 'memory':   return prShowMemory(q);
@@ -12860,6 +12942,172 @@ function prSquareWhy(q){
   if (q.ask === 'neighbour') return 'From <b>' + name + '</b>, ' + q.dir + ' is <b>' + sqName(q.answer) + '</b>: same ' + (q.dir === 'above' || q.dir === 'below' ? 'file, next rank' : 'rank, next file') + '.';
   if (q.ask === 'quadrant') return name + ' is file ' + (colOf(q.sq) + 1) + ', rank ' + (8 - rowOf(q.sq)) + ' — ' + PR_QUADRANT_NAME[q.answer] + '.';
   return 'It is <b>' + name + '</b>: file <b>' + FILES[colOf(q.sq)] + '</b>, rank <b>' + (8 - rowOf(q.sq)) + '</b>.';
+}
+
+/* ---- 1b: lines & routes ----
+   Four askers, one dispatcher, all four errors reported as 'square' — the
+   same catch-all a coordinate mistake in Square Trainer is filed under,
+   because a wrong square is a wrong square whichever question named it. */
+function prShowLines(q){
+  if (q.ask === 'between') return q.board ? prShowLinesBetweenBoard(q) : prShowLinesBetweenTyped(q);
+  if (q.ask === 'through') return prShowLinesThrough(q);
+  if (q.ask === 'reach')   return prShowLinesReach(q);
+  return prShowLinesKnight(q);
+}
+/* Toggle set membership and repaint the one candidate that changed — the
+   shape Piece Vision's own picks/Done pattern already has (`q.picks`, a
+   `pr-pick` mark, a `Done` control). Lines & Routes needs the same toggle
+   twice more — squares clicked on the board (`between`) and choices clicked
+   as buttons (`through`) — so it is factored out here rather than written a
+   third time; `paint` is the only thing that differs between the two. */
+function prLinesToggle(set, x, paint){
+  if (set.has(x)) set.delete(x); else set.add(x);
+  paint(x, set.has(x));
+}
+/* `between`, board shown: click every square on the line, then Done. */
+function prShowLinesBetweenBoard(q){
+  prBoardOn(true);
+  prLayout(false, true);
+  prMen(false); prClearPieces(); prMarksClear();
+  prMark(q.a, 'pr-from'); prMark(q.b, 'pr-from');
+  prQ('Click every square between <b>' + sqName(q.a) + '</b> and <b>' + sqName(q.b) + '</b>.');
+  prSub('Click each one, then Done.');
+  q.picks = new Set();
+  PR.click = i => {
+    if (PR.answered || i === q.a || i === q.b) return;
+    prLinesToggle(q.picks, i, (s, on) => {
+      if (on) prMark(s, 'pr-pick'); else prSqEls[prVisual(s)].classList.remove('pr-pick');
+    });
+  };
+  prAnsButton('Done', () => prAnswerLinesBetween(q, q.picks), 'primary');
+}
+/* `between`, no board: a typed list read the way any other console answer
+   is, with the same forgiving pattern as SAN parsing elsewhere — anything
+   that looks like a square counts, in any order, so a player is marked on
+   which squares they named rather than on the punctuation between them. */
+function prShowLinesBetweenTyped(q){
+  prBoardOn(false);
+  prQ('Which squares lie between <b>' + sqName(q.a) + '</b> and <b>' + sqName(q.b) + '</b>?');
+  prSub('Name every one, in any order — e.g. c3, d4, e5.');
+  prAnsInput('e.g. c3, d4, e5', 40, inp => {
+    const got = new Set((inp.value.toLowerCase().match(/[a-h][1-8]/g) || []).map(sqIndex));
+    prAnswerLinesBetween(q, got);
+  });
+}
+/* Shared by both `between` presenters: the board comes up (or stays up) for
+   the reveal either way, because a typed answer deserves to see the line it
+   was asked about as much as a clicked one does. */
+function prAnswerLinesBetween(q, got){
+  const want = new Set(q.answer);
+  const ok = got.size === want.size && q.answer.every(s => got.has(s));
+  prBoardOn(true);
+  prLayout(false, true);
+  prMen(false); prClearPieces(); prMarksClear();
+  prMark(q.a, 'pr-from'); prMark(q.b, 'pr-from');
+  for (const s of q.answer) prMark(s, 'pr-right');
+  for (const s of got) if (!want.has(s)) prMark(s, 'pr-wrong');
+  const names = q.answer.map(sqName).join(', ');
+  prJudge(ok, ok ? 'Yes — <b>' + names + '</b>.' : 'It runs through <b>' + names + '</b>.', [], 'square');
+}
+/* `through`: four square names, pick every one that lies on a diagonal
+   through `a` — never the board, since the point is reading the line off
+   the name alone. */
+function prShowLinesThrough(q){
+  prBoardOn(false);
+  prQ('Which of these lie on a diagonal through <b>' + sqName(q.a) + '</b>?');
+  prSub('Click every one that does, then Done.');
+  q.picks = new Set();
+  const btns = {};
+  for (const c of q.choices)
+    btns[c] = prAnsButton(sqName(c), () => prLinesToggle(q.picks, c, (s, on) => btns[s].classList.toggle('active', on)));
+  prAnsButton('Done', () => prAnswerLinesThrough(q), 'primary');
+}
+function prAnswerLinesThrough(q){
+  const want = new Set(q.answer);
+  const ok = q.picks.size === want.size && q.answer.every(s => q.picks.has(s));
+  const names = q.answer.map(sqName).join(', ');
+  prJudge(ok, ok ? 'Yes — <b>' + names + '</b>.' : 'The diagonal runs through <b>' + names + '</b>.', [], 'square');
+}
+/* `reach`: a slider on `a`, a blocker or not, asked whether it reaches `b` —
+   Yes or No, same as any other fact this drill checks in one press. */
+function prShowLinesReach(q){
+  prBoardOn(true);
+  prLayout(false, true);
+  prMen(true); prClearPieces();
+  const board = Array(64).fill(null);
+  board[q.a] = mk(W, q.type);
+  if (q.blocker >= 0) board[q.blocker] = mk(W, 'P');
+  prPaint(board);
+  prMarksClear();
+  prMark(q.a, 'pr-from');
+  prQ('Can the <b>' + PIECE_NAME[q.type] + '</b> on <b>' + sqName(q.a) + '</b> reach <b>' + sqName(q.b) + '</b>?');
+  prAnsButton('Yes', () => prAnswerLinesReach(q, true));
+  prAnsButton('No', () => prAnswerLinesReach(q, false));
+}
+function prAnswerLinesReach(q, said){
+  const ok = said === q.answer;
+  // prMakeLines only ever draws `b` from the piece's own rank/file/diagonal
+  // (the `pool` built by type), so a No answer is always a blocker's doing —
+  // the fallback sentence is only for a q built some other way, never this one.
+  const why = q.answer
+    ? 'the way to <b>' + sqName(q.b) + '</b> is clear.'
+    : (q.blocker >= 0 ? 'the pawn on <b>' + sqName(q.blocker) + '</b> is in the way.'
+                      : 'it does not move that way at all.');
+  prJudge(ok, (q.answer ? 'Yes — ' : 'No — ') + why, [], 'square');
+}
+/* `knight`: how many moves the shortest route costs, 1 to 6. A wrong answer
+   is followed by the route itself, played square by square, the same
+   cadence prTrackReveal() already uses for a tracked walk. At the last
+   level (`q.mid`) a second question — the first square the route actually
+   passes through — follows the first, and neither part scores anything on
+   its own: prJudge is called once, with both put together, because "6 moves,
+   but not by way of the square you named" is not a route anybody found. */
+function prShowLinesKnight(q){
+  prBoardOn(q.board);
+  if (q.board){
+    prLayout(false, true); prMen(false); prClearPieces(); prMarksClear();
+    prMark(q.a, 'pr-from'); prMark(q.b, 'pr-from');
+  }
+  prQ('How many knight moves from <b>' + sqName(q.a) + '</b> to <b>' + sqName(q.b) + '</b>?');
+  prSub('Count the shortest route.');
+  for (let n = 1; n <= 6; n++) prAnsButton(String(n), () => prAnswerLinesKnight(q, n));
+}
+function prAnswerLinesKnight(q, n){
+  const partOk = n === q.answer;
+  if (q.mid && q.choices){
+    prAnsClear();
+    prSub('And which square does it land on first?');
+    for (const c of q.choices) prAnsButton(sqName(c), () => prFinishLinesKnight(q, partOk && c === q.first));
+    return;
+  }
+  prFinishLinesKnight(q, partOk);
+}
+function prFinishLinesKnight(q, ok){
+  const moves = q.answer + (q.answer === 1 ? ' move' : ' moves');
+  // q.mid marks the level, not this particular question — a route of one
+  // knight move has no intermediate square to ask about (prMakeLines only
+  // sets q.choices/q.first when route.length > 2), so the second clause has
+  // to be asked of q.first itself, not of the level it came from.
+  const by = q.first !== undefined ? ', by way of <b>' + sqName(q.first) + '</b>' : '';
+  prJudge(ok, (ok ? 'Yes — ' : 'It takes ') + '<b>' + moves + '</b>' + by + '.', [], 'square');
+  if (!ok) prLinesKnightReplay(q);
+}
+/* The route, one square at a time — turning the board on for it even at the
+   no-board level, on the same reasoning prAnswerLinesBetween() already
+   follows: a player who got it wrong has earned the chance to see the line
+   they missed, not just be told a number. */
+function prLinesKnightReplay(q){
+  prBoardOn(true);
+  if (!q.board){ prLayout(false, true); prMen(false); prClearPieces(); }
+  let k = 1;
+  const step = () => {
+    prMarksClear();
+    prMark(q.a, 'pr-from'); prMark(q.b, 'pr-from');
+    if (k < q.route.length) prMark(q.route[k], 'pr-target');
+    k++;
+    if (k <= q.route.length) prTimer(step, 500);
+  };
+  prTimer(step, 500);
 }
 
 /* ---- 2: piece visualization ---- */
