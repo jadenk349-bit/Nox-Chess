@@ -11098,8 +11098,15 @@ function lsnOpenVisionPick(){
   lsnNoteFirstGame();
 }
 
-/* The one line under the Vision panel, and the only thing that writes it. It
-   names the vision the way the buttons beside it do — MODE_NAME's "Board
+/* The one line under the Vision panel. The rule is two-sided and both halves
+   matter: it is written here, by lsnOpenVisionPick() after goBot() and by
+   nothing else, and it is cleared by resetChoices() — which every route to
+   the setup panel passes through, the bot ladder, the hot seat and a friend
+   challenge alike. So the note lives exactly as long as the unanswered
+   vision question it is advising about, and cannot be carried into a later
+   visit that has nothing to do with the course.
+
+   It names the vision the way the buttons beside it do — MODE_NAME's "Board
    Only", not the host card's "See the Board", which is the same vision under
    the other of its two names and is not written anywhere on this screen. A
    note that points at a button nobody can find is worse than no note. */
@@ -11109,6 +11116,14 @@ function lsnNoteFirstGame(){
   note.innerHTML = 'Board Only first — you see the board, not the men. ' +
                    'Complete Blindfold when Progressive Blindfold’s last level is behind you.';
   note.style.display = '';
+}
+
+/** …and the other half. A no-op on a page that has no such element. */
+function lsnFirstNoteClear(){
+  const note = document.getElementById('lsnFirstNote');
+  if (!note) return;
+  note.innerHTML = '';
+  note.style.display = 'none';
 }
 
 /* ============================================================
@@ -16960,6 +16975,13 @@ function resetChoices(){
   picked.mode = false;
   chosen.level = chosen.side = chosen.minutes = false;
   flagged = false;
+  // The course's advice about which vision to take first is an answer to the
+  // vision question, so it goes out with the rest of the answers. This is the
+  // one place that clears it because this is the one function every route to
+  // the setup panel passes through — enterGameSetup() for the bot and the
+  // hot seat, challengeFriend() for an invitation — and a note cleared in
+  // only one of them is a note left standing on the other.
+  lsnFirstNoteClear();
 }
 
 function showScreen(name, how){
@@ -17674,15 +17696,14 @@ function startGame(){
    questions beside it are answered. Nothing moves until Start Play. */
 function enterGameSetup(){
   G.started = false;
+  // resetChoices() is what blanks the course's note under the Vision panel,
+  // rather than a line of its own here: challengeFriend() opens this same
+  // panel without coming through this function, and clearing the note in
+  // only one of the two routes is how it ends up standing over a challenge
+  // form. lsnOpenVisionPick() calls this first and writes the note after.
   resetChoices();
   newGame();
   showScreen('game');
-  // Arriving at the setup blanks the course's note under the Vision panel:
-  // it belongs to the one route that writes it (lsnOpenVisionPick), and left
-  // standing it would advise every later visit as if the player had just
-  // finished the course. That route calls this first and writes it after.
-  const note = document.getElementById('lsnFirstNote');
-  if (note){ note.innerHTML = ''; note.style.display = 'none'; }
   syncOptions();
 }
 document.getElementById('btnStart').onclick     = startGame;   // room host form

@@ -186,7 +186,7 @@ function makePage(store){
   const src = '"use strict";' + BODY.replace(/await import\([^)]*\)/g, 'await Promise.reject(new Error("no cdn"))') +
     '\n__expose({ G, LSN, LESSONS, el, showScreen, lsnEnter, lsnHub, lsnOpen, lsnNext, lsnBack,' +
     ' lsnDone, lsnReach, lsnSqEls, lsnVisual, lsnPositionHTML, lsnGauge, legalMoves, toSAN, sqName, sqIndex,' +
-    ' stateFromFEN, parseMoveIn, MODE_NAME, PR, PR_MODES, goPractice, prLoad,' +
+    ' stateFromFEN, parseMoveIn, MODE_NAME, PR, PR_MODES, goPractice, prLoad, resetChoices,' +
     ' screen:()=>screenName });';
   let out = null;
   new Function('document','window','location','localStorage','WebSocket','AudioContext',
@@ -454,11 +454,37 @@ async function walk(p, n){
         /Complete Blindfold when Progressive Blindfold/.test(again.by('lsnFirstNote').innerHTML || ''),
         again.by('lsnFirstNote').innerHTML);
   check('and no game started by it', again.G.started === false);
-  // the note belongs to that one route: arriving at the setup any other way
-  // must not still be advised as if the course had just been finished
+  // the note is advice about an unanswered vision, so it lasts exactly as
+  // long as that question does: arriving at the setup any other way must not
+  // still be advised as if the course had just been finished
   again.press('navBot');
   check('another visit to the setup carries no note left over',
         again.by('lsnFirstNote').style.display === 'none', again.by('lsnFirstNote').style.display);
+
+  head('The first-game note goes out with the rest of the answers');
+  // resetChoices() is the one function every route to the setup panel passes
+  // through, so it is the one place the note is cleared. A challenge form is
+  // the route that does NOT come through enterGameSetup(), and is why.
+  again.lsnOpen(10, 0);
+  again.press('lsnGoPlay');
+  check('the note is up to begin with',
+        (again.by('lsnFirstNote').innerHTML || '').length > 0);
+  again.resetChoices();
+  check('resetting the setup choices takes it down',
+        (again.by('lsnFirstNote').innerHTML || '') === '' &&
+        again.by('lsnFirstNote').style.display === 'none',
+        again.by('lsnFirstNote').innerHTML + ' / ' + again.by('lsnFirstNote').style.display);
+  // challengeFriend() needs an account and a socket, so its wiring is read
+  // rather than run: what matters is that it goes through resetChoices() like
+  // everything else, and does not clear the note some second way of its own.
+  const CHALFN = grab(/\nfunction challengeFriend\([\s\S]*?\n\}/, 'challengeFriend');
+  check('a friend challenge resets the choices, so the note goes with them',
+        /\bresetChoices\(\)/.test(CHALFN), CHALFN.slice(0, 160));
+  check('and it does not reach for the note itself',
+        CHALFN.indexOf('lsnFirstNote') < 0);
+  check('and exactly one place in the page clears it',
+        (SRC.match(/^\s*lsnFirstNoteClear\(\);/gm) || []).length === 1,
+        (SRC.match(/^\s*lsnFirstNoteClear\(\);/gm) || []).length + ' call sites');
 
   head('The course does not trap anybody');
   again.press('navHowTo');
