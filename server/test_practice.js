@@ -1066,5 +1066,38 @@ head('Error types and latency');
   PR.q = null;
 })();
 
+/* ============================================================
+   14 — every mode names the lesson that teaches it, and the floors agree
+   ============================================================ */
+head('Lesson numbers: PR_MODES and PR_FLOORS never disagree');
+(function(){
+  // The design's own table (docs/superpowers/specs/2026-09-09-blindfold-
+  // training-design.md, section 6): pinned here rather than read back off
+  // PR_MODES, so a stray edit to one entry is caught rather than silently
+  // matching itself.
+  var LESSON_OF = {
+    square:1, lines:2, piece:4, attack:4, hold:5, tracker:5,
+    after:6, forcing:7, calc:9, branches:9, progressive:10
+  };
+  var wrong = [];
+  for (var key in LESSON_OF)
+    if (PR_MODE[key].lesson !== LESSON_OF[key])
+      wrong.push(key + ': PR_MODES has ' + PR_MODE[key].lesson + ', wanted ' + LESSON_OF[key]);
+  ok('every PR_MODES entry names the lesson the design table gives it',
+     wrong.join('; '), '');
+
+  // PR_FLOORS floors a mode's first session on the strength of a lesson
+  // being finished; PR_MODES' own `lesson` field is what the setup box's
+  // link names. Two numbers for the same fact is how they drift apart, so
+  // this holds them to each other directly rather than to the table a
+  // second time.
+  var disagree = [];
+  for (var fkey in PR_FLOORS)
+    if (PR_FLOORS[fkey].lesson !== PR_MODE[fkey].lesson)
+      disagree.push(fkey + ': PR_FLOORS names lesson ' + PR_FLOORS[fkey].lesson +
+                     ', PR_MODES names ' + PR_MODE[fkey].lesson);
+  ok('every PR_FLOORS entry agrees with its mode\'s own lesson field', disagree.join('; '), '');
+})();
+
 say('\n' + passed + ' passed, ' + failed + ' failed\n');
 if (typeof process !== 'undefined' && failed) process.exit(1);
