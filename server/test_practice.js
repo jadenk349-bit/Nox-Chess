@@ -77,7 +77,7 @@ var DECLS = ['VAL','FILES','rowOf','colOf','SQNAME','uciOf','sqName','sqIndex','
              'OPENING_BOOK','OPENING_LINES',
              'PR_SQUARE_LEVELS','PR_QUADRANT_NAME','PR_DIRS','PR_LINES_LEVELS','PR_PIECE_LEVELS',
              'PR_ATTACK_LEVELS','PR_HOLD_LEVELS','PR_TRACKER_LEVELS','PR_AFTER_LEVELS','PR_FORCING_LEVELS',
-             'PR_CALC_LEVELS','PR_BRANCHES_LEVELS',
+             'PR_CALC_LEVELS','PR_BRANCHES_LEVELS','PR_PB_LEVELS',
              'PR_MODES','PR_MINUTES','PR_STORE','PR_VERSION','PR_V1_KEYS','PR_SEEN_MAX',
              'prKey','prAcc','prSeenKey',
              'PR','PR_STEP_UP','PR_STEP_DOWN','prRand','prPick','prSide','prMan','PR_MAKE','W',
@@ -97,7 +97,7 @@ var FNS = ['startBoard','newState','cloneState','fenOf','stateFromFEN',
            'prMoveFacts','prMakeAfter',
            'prPlaceAttackers','prMaterialOf','prExchangeLine','prMakeForcing',
            'prMatesIn1','prMatesIn2','prForks','prCalcHanging','prPuzzlePool','prCalcTrack','prMakeCalc','prCalcDraw',
-           'prPickMove','prAskAbout','prMakeMini','prMakeBranches','prRecipe','prMake',
+           'prPickMove','prAskAbout','prMakeProgressive','prMakeBranches','prRecipe','prMake',
            'prGamePosition','prCluster','prAskFine','prMakeHold',
            'prRecord','prScore','prStep','prNow','prTimeLeft','prRecommend','prMedianLat',
            'prStartLevel','prOpen','prRebuildStart','prRebuildFinish','prRbPaint','goPractice'];
@@ -617,8 +617,18 @@ head('Blind Calculation');
      about it: with one of two puzzles already asked, the other one is what
      comes back, every time. */
   var seenPool = pool.concat([{ id:'t-2', fen:'3r2k1/5ppp/8/8/8/8/5PPP/6K1 b - - 0 1', moves:['d8d1'] }]);
-  storage = {};
+  storage = {};                      // the week's seen-list starts empty, whatever ran before
   prSeenPush('calc:puzzle:t-1');
+  /* The draw from the pool is prPick's, and prCalcDraw only gets six tries at
+     it: with a pool of two, six coin flips all landing on the seen puzzle is
+     a one-in-sixty-four outcome, and six of these calls in a row made this
+     block fail about one run in twelve (measured: 171 of 2000). So the pick
+     is made round-robin for the length of the block — what is under test is
+     the "don't ask a seen one again" retry, not the dice, and a test that
+     asserts an exact count of six has to be handed a deterministic draw or it
+     is asserting the coin. Everything else in the suite keeps the real one. */
+  var realPick = prPick, pickAt = 0;
+  prPick = function(a){ return a === seenPool ? a[pickAt++ % a.length] : realPick(a); };
   var again = 0, fresh = 0;
   for (var d = 0; d < 6; d++){
     var drawn = prCalcDraw(prRecipe('calc', 7), seenPool);
@@ -631,6 +641,7 @@ head('Blind Calculation');
   prSeenPush('calc:puzzle:t-2');
   ok('a pool with nothing fresh in it still hands back a question',
      prCalcDraw(prRecipe('calc', 7), seenPool).task, 'puzzle');
+  prPick = realPick;
   storage = {};
 })();
 
@@ -703,29 +714,58 @@ head('Hold the Position');
 })();
 
 /* ============================================================
-   7 — the mini challenge is a game, played by the page's own engine
+   7 — Progressive Blindfold is a game, played by the page's own engine
    ============================================================ */
-head('Mini Blindfold Challenge');
+head('Progressive Blindfold positions');
 
 (function(){
-  var built = 0, band = { 1:[], 2:[], 3:[] }, stuck = 0, targets = {};
-  for (var diff = 1; diff <= 3; diff++){
-    for (var t = 0; t < 25; t++){
-      var q = prMakeMini(diff);
-      if (!q) continue;
-      built++;
-      band[diff].push(menOn(q.start.b));
-      targets[q.target] = 1;
-      if (legalMoves(q.start, W).length < 4) stuck++;
-    }
+  var bad = 0;
+  for (var lv = 1; lv <= PR_PB_LEVELS.length; lv++) for (var t = 0; t < 30; t++){
+    var q = prMakeProgressive(prRecipe('progressive', lv));
+    if (!q){ bad++; continue; }
+    var r = prRecipe('progressive', lv);
+    if (r.men && (menOn(q.st.b) !== 2 * r.men)) bad++;
+    /* The top level deals the game's own opening position, and the check is
+       made on the FEN's placement field rather than with sameBoard(): that
+       compares piece *ids*, and two newState() calls never share any — every
+       man is minted fresh by mk(). What is being asserted is that the men
+       stand where the start position puts them, which is exactly what the
+       placement field says and nothing more. */
+    if (!r.men && fenOf(q.st).split(' ')[0] !== fenOf(newState()).split(' ')[0]) bad++;
+    if (legalMoves(q.st, W).length < 4) bad++;
+    if (inCheck(q.st, W) || inCheck(q.st, B)) bad++;
   }
-  ok('every challenge built', built, 75);
-  ok('White always has moves to make', stuck, 0);
-  ok('two men a side at the easiest setting', band[1].every(function(n){ return n === 6; }), true);
-  ok('three a side in the middle', band[2].every(function(n){ return n === 8; }), true);
-  ok('four a side at the hardest', band[3].every(function(n){ return n === 10; }), true);
-  ok('and the three run to different lengths',
-     Object.keys(targets).sort().join(','), '4,6,8');
+  ok('every level deals a legal position with the men asked for', bad, 0);
+})();
+
+(function(){
+  var caps = {};
+  for (var lv = 1; lv <= PR_PB_LEVELS.length; lv++){
+    var r = prRecipe('progressive', lv);
+    caps[r.vis] = 1;
+    if (!(r.target > 0)) caps.badTarget = 1;
+  }
+  ok('the ladder walks the three visions in turn',
+     ['mine','squares','console'].every(function(v){ return caps[v]; }), true);
+  ok('and every rung runs to a target', caps.badTarget, undefined);
+  ok('the ladder is ten rungs', PR_PB_LEVELS.length, 10);
+  ok('and a level above the top is clamped to it', prRecipe('progressive', 99).level, 10);
+})();
+
+(function(){
+  /* A dealt rung stamps its position so the same one is not handed out twice
+     in a week; the top rung is the game's own opening and cannot, because
+     prMake's retry gives up on the level and falls back to the level ONE
+     recipe — which is a different exercise entirely, and would be dealt under
+     level ten's name. */
+  storage = {};
+  var one = prMake('progressive', 1);
+  ok('a dealt rung names the position it dealt', /^pb:1:/.test(one.sig), true);
+  var top = prMake('progressive', 10);
+  ok('the opening rung names nothing', top.sig, null);
+  if (top.sig) prSeenPush(top.sig);            // what prNextQuestion does with one
+  ok('and so can be asked again in the same week', prMake('progressive', 10).recipe.level, 10);
+  storage = {};
 })();
 
 (function(){
@@ -736,10 +776,10 @@ head('Mini Blindfold Challenge');
      a short game ended for a reason the rules gave, not that it ran long. */
   var illegal = 0, unread = 0, cutShort = 0, games = 0, total = 0;
   for (var g = 0; g < 6; g++){
-    var q = prMakeMini(1 + (g % 3));
+    var q = prMakeProgressive(prRecipe('progressive', 1 + (g % 3)));
     if (!q) continue;
     games++;
-    var st = q.start, plies = 0, ended = false;
+    var st = q.st, plies = 0, ended = false;
     for (var k = 0; k < 10; k++){
       var mine = legalMoves(st, st.turn);
       if (!mine.length){ ended = true; break; }
@@ -761,7 +801,7 @@ head('Mini Blindfold Challenge');
     total += plies;
     if (plies < 4 && !ended) cutShort++;
   }
-  ok('six challenges were played out', games, 6);
+  ok('six games were played out', games, 6);
   ok('every move the player typed read back as notation', unread, 0);
   ok('and every reply the engine gave was legal', illegal, 0);
   ok('a short game only ever ended because the rules ended it', cutShort, 0);
@@ -779,11 +819,9 @@ head('Generation never hands back something broken');
   // runs to level 7, and a fixed range would never reach it.
   var keys = PR_MODES.map(function(m){ return m.key; });
   var missing = 0, wrongKind = 0, total = 0;
-  // `kind` is the question's own shape and is not always the mode's key:
-  // progressive still hands back the old mini challenge (`kind:'mini'`, until
-  // Task 19 gives it a generator of its own), and is exempted from the kind
-  // check for exactly that reason. Every other drill now answers to its own.
-  var kindExempt = { progressive:1 };
+  // `kind` is the question's own shape, and every drill now answers to its
+  // mode's own key — Progressive Blindfold was the last exemption here, back
+  // when it handed out the old mini challenge's `kind:'mini'`.
   for (var k = 0; k < keys.length; k++){
     var key = keys[k], top = PR_MODE[key].levels.length;
     for (var level = 1; level <= top; level++){
@@ -791,7 +829,7 @@ head('Generation never hands back something broken');
         total++;
         var q = prMake(key, level);
         if (!q){ missing++; continue; }
-        if (!kindExempt[key] && q.kind !== key) wrongKind++;
+        if (q.kind !== key) wrongKind++;
       }
     }
   }

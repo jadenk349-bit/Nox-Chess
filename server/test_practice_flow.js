@@ -275,6 +275,19 @@ function typeAnswer(text){
   return input;
 }
 function marked(sq, cls){ return prSqEls[PR.flipped ? 63 - sq : sq].classList.contains(cls); }
+/** How many men of one colour a board carries — what a vision that draws one
+    side and hides the other is asserted against. */
+function menOf(b, c){ var n = 0; for (var i = 0; i < 64; i++) if (b[i] && b[i].c === c) n++; return n; }
+/** Run every timer that is pending right now, once, oldest first — and do not
+    move the clock on past them, which is what `tick` is for. A timer one of
+    these starts (Progressive Blindfold's reply schedules nothing, but a
+    checkpoint will) waits for the next call rather than running inside this
+    one, so a test can step a game a move at a time. */
+function fireTimers(){
+  var due = pending.slice().sort(function(a, b){ return a.at - b.at; });
+  pending = [];
+  due.forEach(function(t){ clockNow = Math.max(clockNow, t.at); t.fn(); });
+}
 /** `min` is the session's length in minutes, matching the setup box's own
     buttons — omitted, it keeps whatever the box was last set to. Sessions are
     time-boxed now, so this no longer names a question count; ending one on
@@ -1587,78 +1600,115 @@ head('Hold the Position');
 })();
 
 /* ============================================================
-   7 — the progressive blindfold challenge
+   7 — Progressive Blindfold
    ============================================================ */
-head('Progressive Blindfold Challenge');
+head('Progressive Blindfold: a game at level 1');
 
 (function(){
-  storage = {};
-  startDrill('progressive', 1, 0);
-  ok('the challenge sets its own length', PR.len, PR.q.target);
-  ok('the position is there to learn', byId.prBoard.classList.contains('blind'), false);
-  ok('and it says you are White', /you have White/.test(byId.prQ.innerHTML), true);
-  ok('no log until it begins', byId.prLog.style.display, 'none');
-
-  pressCtl('Ready');
-  ok('Ready darkens the board', byId.prBoard.classList.contains('blind'), true);
-  ok('the log opens', byId.prLog.style.display, '');
-  ok('with a word about what happens now', byId.prLog.children.length, 1);
-  ok('Reveal Position is offered', ctlButton('Reveal Position') !== null, true);
-  ok('and a Restart that means this position again', ctlButton('Restart Position') !== null, true);
+  /* Deal until the first exchange cannot end the game. Three men a side is a
+     small enough board that Black really can have mate in one after whatever
+     White's first legal move happens to be, and every assertion below is
+     about a game that is still going — so the dice are re-rolled rather than
+     the moves steered, and the condition is asked of *every* reply Black has
+     rather than of the one the search happened to pick, which is random. */
+  var legal = null;
+  for (var t = 0; t < 40; t++){
+    storage = {};
+    prOpen('progressive', 1, 5);
+    legal = legalMoves(PR.pb.st, W)[0];
+    var after = makeMove(PR.pb.st, legal), theirs = legalMoves(after, B);
+    if (theirs.length && theirs.every(function(m){ return legalMoves(makeMove(after, m), W).length > 0; })) break;
+  }
+  ok('a game is up', PR.pb && !PR.pb.over, true);
+  ok('level 1 shows only our men', prPieceEls.size, menOf(PR.pb.st.b, W));
+  ok('the board is there to click on', byId.prBoard.classList.contains('blind'), false);
+  ok('and the console opens with a word about what is hidden', byId.prLog.children.length, 1);
   ok('the counter counts moves, not questions', byId.prStatQCap.textContent, 'Move');
-
-  typeAnswer('Qz9');
-  ok('a move that is not there is refused', byId.prLog.children.length, 2);
-  ok('and counted, because that is the failure being measured', PR.i, 1);
-  ok('but nothing was played', PR.played, 0);
-
-  // play it out with legal moves until the run ends
-  var guard = 0;
-  while (!PR.mini.over && guard++ < 40){
-    var all = legalMoves(PR.mini.st, PR.mini.st.turn);
-    if (!all.length) break;
-    typeAnswer(toSAN(PR.mini.st, all[0], all));
-    tick(1000);                              // the reply comes after a beat
-  }
-  ok('the run ended', PR.mini.over, true);
-  ok('with moves actually played', PR.played > 0, true);
-  ok('the board comes back at the end', byId.prBoard.classList.contains('blind'), false);
-  ok('and the result box is up', byId.prDoneOverlay.classList.contains('show'), true);
-  ok('reporting the moves', /Moves played/.test(byId.prDoneRows.children[0].innerHTML), true);
-
-  if (PR.played >= PR.len){
-    ok('finishing it offers a blindfold game', byId.prBlindGame.style.display, '');
-    byId.prBlindGame.onclick();
-    ok('which goes to the setup that already exists', botTrips, 1);
-    ok('with complete blindfold chosen', visionsPicked[visionsPicked.length - 1], 'total');
-    ok('and the result box closed behind it', byId.prDoneOverlay.classList.contains('show'), false);
-  } else {
-    ok('a run that ended early does not offer the game', byId.prBlindGame.style.display, 'none');
-  }
-  storage = {};
+  clickSquare(legal.from); clickSquare(legal.to);
+  ok('our move was played', PR.pb.played, 1);
+  ok('the reply is pending', PR.pb.busy, true);
+  fireTimers();
+  ok('and arrives', PR.pb.st.turn, W);
+  ok('both plies are in the console', byId.prLog.children.length, 3);
+  // an illegal typed move is counted and refused
+  typeAnswer('Ka9');
+  ok('an illegal move is counted', PR.pb.illegal, 1);
+  ok('and does not move anything', PR.pb.played, 1);
 })();
 
 (function(){
   storage = {};
-  var st = prBlank();
-  st.sessions = 10; st.asked = 100; st.correct = 80;
-  for (var k = 0; k < 4; k++) st.modes[PR_MODES[k].key].sessions = 2;
-  prSave(st);
-  startDrill('progressive', 1, 0);
-  pressCtl('Ready');
-  pressCtl('Reveal Position');
-  ok('Reveal shows the position', byId.prBoard.classList.contains('blind'), false);
-  tick(3000);
-  ok('and it goes dark again on its own', byId.prBoard.classList.contains('blind'), true);
-  var before = PR.q;
-  typeAnswer(toSAN(PR.mini.st, legalMoves(PR.mini.st, 'w')[0], legalMoves(PR.mini.st, 'w')));
-  tick(1000);
-  ok('a move was played', PR.played, 1);
-  pressCtl('Restart Position');
-  ok('Restart Position replays the same position', PR.q, before);
-  ok('from the top', PR.played, 0);
-  ok('with the log cleared', byId.prLog.children.length, 0);
-  ok('and the board there to learn again', byId.prBoard.classList.contains('blind'), false);
+  prOpen('progressive', 3, 5);
+  ok('squares only: the board is there and the men are not',
+     byId.prBoard.classList.contains('blind'), true);
+  ok('and every man is painted, hidden or not', prPieceEls.size, menOf(PR.pb.st.b, W) + menOf(PR.pb.st.b, B));
+  pressCtl('Reveal and stop');
+  ok('the game is over', PR.pb.over, true);
+  ok('the men come back', byId.prBoard.classList.contains('blind'), false);
+  ok('a level given up on was not held', PR.pb.pass, false);
+  ok('the result box is up', byId.prDoneOverlay.classList.contains('show'), true);
+  ok('reporting the moves', /Moves played/.test(byId.prDoneRows.children[0].innerHTML), true);
+  var m = prLoad().modes.progressive;
+  ok('and the next session opens on the same rung', m.level, 3);
+  ok('with what the game cost kept per level', m.stats.pb[3].played, 0);
+  ok('a rung not held offers no blindfold game', byId.prBlindGame.style.display, 'none');
+})();
+
+(function(){
+  storage = {};
+  prOpen('progressive', 8, 5);
+  ok('console only: there is no board at all', byId.prFrame.style.display, 'none');
+  ok('and the console says so', byId.prNoBoard.style.display, '');
+  var all = legalMoves(PR.pb.st, W);
+  typeAnswer(toSAN(PR.pb.st, all[0], all));
+  ok('a move typed into it is played', PR.pb.played, 1);
+  fireTimers();
+  ok('and answered', PR.pb.st.turn, W);
+  pressCtl('Reveal and stop');
+  ok('and the position is there at the end of it', byId.prFrame.style.display, '');
+})();
+
+head('Progressive Blindfold: holding a level');
+
+(function(){
+  storage = {};
+  prOpen('progressive', 1, 5);
+  var guard = 0;
+  while (!PR.pb.over && guard++ < 60){
+    var all = legalMoves(PR.pb.st, W);
+    if (!all.length) break;
+    typeAnswer(toSAN(PR.pb.st, all[0], all));
+    fireTimers();                            // the reply comes after a beat
+  }
+  ok('the game ended', PR.pb.over, true);
+  ok('with moves actually played', PR.pb.played > 0, true);
+  ok('the board comes back at the end', byId.prBoard.classList.contains('blind'), false);
+  ok('and the result box is up', byId.prDoneOverlay.classList.contains('show'), true);
+  var m = prLoad().modes.progressive;
+  // whichever way it went — the target held, or mate along the way — the rung
+  // moves up only on a pass, and never on the staircase's three-in-a-row
+  ok('the rung moves up only when the level was held', m.level, PR.pb.pass ? 2 : 1);
+  ok('and what the game cost is on the record', m.stats.pb[1].played, PR.pb.played);
+})();
+
+(function(){
+  /* The last rung, held. Driven rather than played: twenty moves of the full
+     start position against the search is a minute of nothing this assertion
+     needs, and what is being checked is prFinish's rule — the ladder stops at
+     ten, and finishing it is the one result that leads off this page. */
+  storage = {};
+  prOpen('progressive', 10, 5);
+  ok('the top rung is the game\'s own opening position',
+     fenOf(PR.pb.st).split(' ')[0], fenOf(newState()).split(' ')[0]);
+  PR.pb.played = PR.pb.r.target;
+  pbEnd('You held it.');
+  ok('it counts as held', PR.pb.pass, true);
+  ok('and the ladder stops at ten', prLoad().modes.progressive.level, 10);
+  ok('finishing it offers a blindfold game', byId.prBlindGame.style.display, '');
+  byId.prBlindGame.onclick();
+  ok('which goes to the setup that already exists', botTrips, 1);
+  ok('with complete blindfold chosen', visionsPicked[visionsPicked.length - 1], 'total');
+  ok('and the result box closed behind it', byId.prDoneOverlay.classList.contains('show'), false);
   storage = {};
 })();
 

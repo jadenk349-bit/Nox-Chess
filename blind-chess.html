@@ -1896,7 +1896,8 @@
   .pr-exit{display:flex; gap:8px;}
   .pr-exit button{flex:1; padding:10px 6px; font-size:15.5px;}
 
-  /* the mini challenge types its moves, exactly as complete blindfold does */
+  /* Progressive Blindfold's console: it types its moves and reads them back,
+     exactly as complete blindfold does */
   .pr-log{
     height:min(30vh,232px); overflow-y:auto; margin-top:12px;
     padding:12px 13px; border-radius:10px;
@@ -12090,15 +12091,39 @@ const PR_BRANCHES_LEVELS = [
   { cap:'The root reached by tracking first',      count:2, plies:4, men:0, hidden:true, study:0, lead:6 }
 ];
 
+/* ---- PROGRESSIVE BLINDFOLD ----
+   Whole small games with the board taken away one step at a time: your men
+   first, then the squares alone, then the console — the game's own two
+   blindfold visions in miniature, against the page's small search. It is a
+   Practice mode and nothing else: same board, same store, same door.
+
+   Declared here rather than beside its own code below because PR_MODES reads
+   it by reference, and a `const` is not there to be read before the line that
+   makes it. `men` is men *a side*, kings included — `men:0` means the full
+   start position — `peeks` is how many looks the level allows (Task 20 spends
+   them), `checkEvery` how often it stops to ask what is where, and `target`
+   the number of moves that has to be held for the level to count as passed. */
+const PR_PB_LEVELS = [
+  { cap:'Your men shown, theirs hidden · 3 a side', vis:'mine',    men:3, peeks:Infinity, checkEvery:3, target:8 },
+  { cap:'Your men shown · 5 a side',                vis:'mine',    men:5, peeks:Infinity, checkEvery:3, target:10 },
+  { cap:'Squares only, unlimited peeks · 3 a side', vis:'squares', men:3, peeks:Infinity, checkEvery:3, target:8 },
+  { cap:'Squares only, unlimited peeks · 5 a side', vis:'squares', men:5, peeks:Infinity, checkEvery:3, target:10 },
+  { cap:'Squares only, three peeks · 5 a side',     vis:'squares', men:5, peeks:3, checkEvery:3, target:12 },
+  { cap:'Squares only, three peeks · 8 a side',     vis:'squares', men:8, peeks:3, checkEvery:3, target:14 },
+  { cap:'Squares only, no peeks · 8 a side',        vis:'squares', men:8, peeks:0, checkEvery:6, target:14 },
+  { cap:'Console only, three peeks · 5 a side',     vis:'console', men:5, peeks:3, checkEvery:6, target:12 },
+  { cap:'Console only, three peeks · 8 a side',     vis:'console', men:8, peeks:3, checkEvery:6, target:16 },
+  { cap:'Console only · the full start position',   vis:'console', men:0, peeks:3, checkEvery:6, target:20 }
+];
+
 /* Each drill, in the order the dashboard lists them. `group` clusters related
    drills for the dashboard (Task 22); `lesson` is the course step it grows out
    of. `levels` replaces the old `tiers`/`hard`/`needs`: a mode's levels are a
    recipe ladder, not a difficulty label — what a session is actually worth is
    the level the staircase below settles it on, not a tier picked by hand.
-   Ten of the eleven ladders above are the real thing; Progressive Blindfold
-   is still a provisional caption so the page runs, and `prMake` calls
-   through today's generator (PR_MAKE) until a later phase gives it a recipe
-   of its own. */
+   Progressive Blindfold is the one exception to the staircase, and says so
+   where it is scored: a level there is passed or it is not, and the next
+   session opens on the rung above only when the last one was held. */
 const PR_MODES = [
   { key:'square', name:'Square Trainer', group:'board', skill:'Squares', lesson:1,
     desc:'Name, find and colour squares from either chair — the alphabet of the board.',
@@ -12131,8 +12156,8 @@ const PR_MODES = [
     desc:'A small position, studied, then answered for with the men hidden.',
     levels: PR_HOLD_LEVELS },
   { key:'progressive', name:'Progressive Blindfold', group:'play', skill:'Blindfold play', lesson:10,
-    desc:'Whole small games with the board taken away one step at a time.',
-    levels:[{cap:'Two men each side'},{cap:'Three each'},{cap:'Four each'}] }
+    desc:'Whole small games with the board taken away one step at a time — the bridge to the real thing.',
+    levels:PR_PB_LEVELS }
 ];
 const PR_MODE = {};
 for (const m of PR_MODES) PR_MODE[m.key] = m;
@@ -12258,13 +12283,10 @@ const PR = {
   moved: false,       // whether the staircase actually moved this session
   startedAt: 0,       // prNow() when this session began
   budgetMs: 300000,   // how long the session is boxed to — five minutes, chosen at setup
-  len: 0,             // the progressive challenge's own target — moves to survive; nothing
-                       // else reads this now that a session ends on the clock, not a count
   i: 0,               // answered so far
   right: 0,
   streak: 0,
   best: 0,
-  played: 0,          // progressive challenge only: player moves made
   q: null,            // the question on screen
   shownAt: 0,         // prNow() when the question currently on screen went up,
                        // for the latency prRecord keeps — 0 means "don't know"
@@ -12273,7 +12295,9 @@ const PR = {
   click: null,        // what a click on a square means right now — null for nothing
   onSubmit: null,     // what the answer form's Enter means
   timers: [],
-  mini: null,
+  pb: null,           // Progressive Blindfold's game in progress — its own position,
+                       // its own move count and its own targets, kept apart from the
+                       // question-and-answer fields above because a game is not a question
   rb: null,           // a rebuild in progress — target, placed, current pick, stable ids
   lastLine: -1        // Move Tracker: the opening line asked last, so two similar
                        // lines never land back to back (Task 14)
@@ -13465,21 +13489,31 @@ function prAskAbout(st, allowRebuild){
   return null;
 }
 
-/* The mini challenge: reduced material, both kings, and a side to move that
-   has something to move. Not a game with the pieces turned off — a game small
-   enough that the position fits in the head to begin with. */
-function prMakeMini(diff){
-  const each = diff <= 1 ? 2 : diff === 2 ? 3 : 4;
+/* Progressive Blindfold's position: reduced material, both kings, and a side
+   to move that has something to move. Not a game with the pieces turned off —
+   a game small enough that the position fits in the head to begin with. The
+   level's `men` is men a side *including the king*, which prPosition puts down
+   on its own, so the loop asks for one fewer of each colour; `men:0` is the
+   top rung and deals the game's own opening position instead. */
+function prMakeProgressive(r){
   for (let t = 0; t < 60; t++){
-    const counts = [];
-    for (let k = 0; k < each; k++){
-      counts.push([W, prPick(['P','P','N','B','R'])]);
-      counts.push([B, prPick(['P','P','N','B','R'])]);
+    let st;
+    if (r.men === 0) st = newState();
+    else {
+      const counts = [];
+      for (let k = 0; k < r.men - 1; k++){ counts.push([W, prPick(['P','P','N','B','R','Q'])]); counts.push([B, prPick(['P','P','N','B','R','Q'])]); }
+      const built = prPosition(counts); if (!built) continue; st = built.st;
     }
-    const built = prPosition(counts);
-    if (!built) continue;
-    if (legalMoves(built.st, W).length < 4) continue;
-    return { kind:'mini', start: built.st, target: diff <= 1 ? 4 : diff === 2 ? 6 : 8 };
+    if (legalMoves(st, W).length < 4) continue;
+    /* No signature on the top rung, and this is not an oversight: its position
+       is the game's own opening and is the same every time, so a "don't ask
+       this again this week" stamp would make prMake exhaust its retries and
+       fall back to the LEVEL ONE recipe on the second visit — a player asking
+       for level ten and being dealt three men a side with the board in front
+       of them. Every other rung deals a fresh position, where the seen-list
+       does exactly what it says. */
+    return { kind:'progressive', st, recipe:r,
+             sig: r.men === 0 ? null : 'pb:' + r.level + ':' + fenOf(st).split(' ')[0] };
   }
   return null;
 }
@@ -13547,16 +13581,15 @@ function prMakeBranches(r){
 /* One generator per drill PR_MODES names, and no key that names nothing:
    Blindfold Sequence used to have a generator here with no card of its own,
    and it is now the tracker's opening levels rather than an eighth entry.
-   Every drill but Progressive Blindfold reads its whole recipe — `kinds`,
-   `modes`, `asks` and whatever else its own ladder carries — rather than a
-   bare difficulty number, because a level is what question it offers as much
-   as how hard it is; the mini challenge still takes `r.level` alone. */
+   Every drill reads its whole recipe — `kinds`, `modes`, `asks` and whatever
+   else its own ladder carries — rather than a bare difficulty number, because
+   a level is what question it offers as much as how hard it is. */
 const PR_MAKE = {
   square: r => prMakeSquare(r), lines: r => prMakeLines(r), piece: r => prMakePiece(r),
   attack: r => prMakeAttack(r),
   tracker: r => prMakeTracker(r), after: r => prMakeAfter(r), forcing: r => prMakeForcing(r),
   calc: r => prMakeCalc(r), branches: r => prMakeBranches(r), hold: r => prMakeHold(r),
-  progressive: r => prMakeMini(r.level)
+  progressive: r => prMakeProgressive(r)
 };
 
 /* Correctness beats variety: an exercise that will not generate is retried,
@@ -13579,17 +13612,21 @@ function prMake(key, level){
    ============================================================ */
 function prStatsRender(){
   const acc = PR.i ? Math.round(PR.right / PR.i * 100) + '%' : '—';
-  const mini = PR.mode && PR.mode.key === 'progressive';
-  // the challenge counts the moves it asked for and still runs to a target;
-  // every other drill is boxed to the session clock rather than a count, so
-  // its caption names the level the staircase has it on instead of "Question"
-  document.getElementById('prStatQCap').textContent = mini ? 'Move' : 'Level ' + PR.level;
+  /* Progressive Blindfold counts the moves it has held and runs to the level's
+     own target; every other drill is boxed to the session clock rather than a
+     count, so its caption names the level the staircase has it on instead of
+     "Question". The recipe is read from the ladder where PR.pb is not there
+     yet — prNextQuestion renders these figures once before the game it is
+     about has been built. */
+  const pb = PR.mode && PR.mode.key === 'progressive'
+    ? (PR.pb || { played:0, r:prRecipe('progressive', PR.level) }) : null;
+  document.getElementById('prStatQCap').textContent = pb ? 'Move' : 'Level ' + PR.level;
   document.getElementById('prStatQ').textContent =
-    mini ? PR.played + ' / ' + PR.len
-         : Math.ceil(prTimeLeft() / 1000) + 's';
+    pb ? pb.played + ' / ' + pb.r.target
+       : Math.ceil(prTimeLeft() / 1000) + 's';
   document.getElementById('prStatA').textContent = acc;
   document.getElementById('prStatS').textContent = PR.streak;
-  const done = mini ? PR.played / PR.len : 1 - prTimeLeft() / PR.budgetMs;
+  const done = pb ? pb.played / pb.r.target : 1 - prTimeLeft() / PR.budgetMs;
   document.getElementById('prBar').style.width = Math.round(Math.min(1, Math.max(0, done)) * 100) + '%';
 }
 
@@ -13732,6 +13769,7 @@ function prPresent(){
     case 'calc':     return prShowCalc(q);
     case 'branches': return prShowBranches(q);
     case 'hold':     return prShowHold(q);
+    case 'progressive': return prShowProgressive(q);
   }
 }
 
@@ -15544,123 +15582,111 @@ function prAnswerCaptured(c, t, ask, st, extra, opts){
     extra, ok ? undefined : (standing ? 'ghost' : 'square'));
 }
 /* ============================================================
-   THE MINI BLINDFOLD CHALLENGE
+   PROGRESSIVE BLINDFOLD
    Not a second game: a small legal position, the page's own move generator,
    the page's own notation reader, and the small JS search already in this
    file answering for the other side. Nothing here queues, rates or matches.
-   ============================================================ */
-function prMiniLine(text, cls){
-  const d = document.createElement('div');
-  if (cls) d.className = cls;
-  d.textContent = text;
-  prLogEl.appendChild(d);
-  prLogEl.scrollTop = prLogEl.scrollHeight;
-}
-function prShowMini(q){
-  PR.mini = { st: q.start, target: q.target, over: false, busy: false };
-  PR.len = q.target;
-  PR.played = 0;
-  prLogEl.style.display = 'none';
-  prLogEl.innerHTML = '';
-  prBoardOn(true);
-  prLayout(false, true);
-  prMen(true);
-  prPaint(q.start.b);
-  prMarksClear();
-  let men = 0;
-  for (let i = 0; i < 64; i++) if (q.start.b[i]) men++;
-  prQ('A small position — <b>' + men + '</b> men, and you have White.');
-  prSub('Learn it. When you press Ready the board goes dark and you play on in notation.');
-  prCtl([['Ready', () => prMiniPlay(), 'primary']]);
-  prStatsRender();
-}
-function prMiniPlay(){
-  prClearTimers();
-  prMen(false);
-  prMarksClear();
-  // Named apart from the Restart in the side panel on purpose: that one deals
-  // a new position, this one plays the same men again.
-  prCtl([['Reveal Position', () => prMiniReveal()],
-         ['Restart Position', () => prMiniRestart()]]);
-  prQ('Play it out — <b>' + PR.mini.target + '</b> moves, board dark.');
-  prSub('Standard notation: <b>e4</b> · <b>Nf3</b> · <b>exd5</b> · <b>O-O</b> · <b>e8=Q</b> — or plain squares, <b>e2e4</b>.');
-  prLogEl.style.display = '';
-  prMiniLine('The board is dark from here. You are White.', 'sys');
-  prAnsClear();
-  prAnsInput('your move…', 12, inp => prMiniSubmit(inp), 'Play');
-}
-/* This position again, from the top. Deliberately not a new one: half the
-   value of a challenge that went wrong is playing the same men a second time
-   knowing where they were. The Restart in the side panel is the other kind —
-   it starts the whole session over, and that one does deal a new position. */
-function prMiniRestart(){
-  prClearTimers();
-  PR.i = 0; PR.right = 0; PR.streak = 0; PR.best = 0;
-  prSay('');
-  prShowMini(PR.q);
-}
-function prMiniReveal(){
-  prMen(true);
-  prPaint(PR.mini.st.b);
-  prTimer(() => { if (PR.mini && !PR.mini.over) prMen(false); }, 2600);
-}
-function prMiniSubmit(inp){
-  const mini = PR.mini;
-  if (!mini || mini.over || mini.busy) return;
-  const res = parseMoveIn(mini.st, inp.value);
-  if (res.error){
-    // A move that is not there is exactly the failure this drill measures, so
-    // it counts — and costs nothing else.
-    prScore(false);
-    prMiniLine('✗  ' + res.error, 'err');
-    beep(140, .16, 'sawtooth', .08);
-    inp.classList.add('bad');
-    prTimer(() => inp.classList.remove('bad'), 380);
-    inp.select();
-    return;
-  }
-  const all = legalMoves(mini.st, mini.st.turn);
-  const san = toSAN(mini.st, res.move, all);
-  mini.st = makeMove(mini.st, res.move);
-  PR.played++;
-  prScore(true);
-  prMiniLine((PR.played) + '.  ' + san, 'you');
-  if (res.note) prMiniLine('     · ' + res.note, 'sys');
-  inp.value = '';
 
-  const theirs = legalMoves(mini.st, mini.st.turn);
-  if (!theirs.length){
-    prMiniEnd(inCheck(mini.st, mini.st.turn) ? 'Checkmate — you finished it.' : 'Stalemate. The position is a draw.');
-    return;
-  }
-  mini.busy = true;
-  inp.disabled = true;
-  prTimer(() => {
-    const reply = bestMove(mini.st, 2);
-    if (!reply){ mini.busy = false; inp.disabled = false; return; }
-    const replySan = toSAN(mini.st, reply, theirs);
-    mini.st = makeMove(mini.st, reply);
-    prMiniLine('    …  ' + replySan, 'them');
-    mini.busy = false;
-    inp.disabled = false;
-    prStatsRender();
-    if (PR.played >= mini.target){ prMiniEnd('You held the position for all ' + mini.target + ' moves.'); return; }
-    const mine = legalMoves(mini.st, mini.st.turn);
-    if (!mine.length){
-      prMiniEnd(inCheck(mini.st, mini.st.turn) ? 'Checkmate against you — the run ends here.' : 'Stalemate. The position is a draw.');
-      return;
-    }
-    inp.focus();
-  }, 520);
+   What the ladder takes away is the *drawing*, one step at a time — your men
+   shown and theirs hidden, then the squares with nobody on them, then no
+   board at all — which is the game's own `fog`, `blind` and `total` visions
+   said in Practice's own words. The position itself is complete throughout,
+   exactly as it is in a game: hiding is rendering and never anything else.
+   ============================================================ */
+
+/** A board with only one side's men on it — what `vis:'mine'` paints. Nothing
+    is removed from the position: this is a copy made for the painter, and the
+    game goes on being played on the whole board. */
+function pbMask(board, colour){ return board.map(p => (p && p.c === colour) ? p : null); }
+function pbPaint(){
+  const pb = PR.pb;
+  if (pb.r.vis === 'console'){ prBoardOn(false); return; }
+  prBoardOn(true); prMen(true);
+  prPaint(pb.r.vis === 'mine' ? pbMask(pb.st.b, W) : pb.st.b);
+  if (pb.r.vis === 'squares') prMen(false);
 }
-function prMiniEnd(why){
-  PR.mini.over = true;
-  prClearTimers();
-  prMen(true);
-  prPaint(PR.mini.st.b);
-  prMiniLine(why, 'sys');
+function pbLine(text, cls){
+  const d = document.createElement('div'); d.className = 'pr-log-line ' + (cls || ''); d.textContent = text;
+  prLogEl.appendChild(d); prLogEl.scrollTop = prLogEl.scrollHeight;
+}
+function prShowProgressive(q){
+  PR.pb = { st:q.st, r:q.recipe, sans:[], played:0, peeks:q.recipe.peeks, drifts:0, recoveries:0, checks:0, checksOk:0, illegal:0, over:false, busy:false, sel:-1 };
+  prLogEl.style.display = ''; prLogEl.innerHTML = '';
+  prLayout(false, false); prClearPieces(); prMarksClear();
+  pbPaint();
+  prQ('Level ' + q.recipe.level + ' — <b>' + q.recipe.target + '</b> moves. You are White.');
+  prSub(q.recipe.vis === 'console' ? 'Type your moves: <b>e4</b> · <b>Nf3</b> · <b>exd5</b> · <b>O-O</b> — or plain squares, <b>e2e4</b>.'
+                                   : 'Click a man’s square, then where it goes — or type the move.');
+  pbLine('The game begins. ' + (q.recipe.vis === 'mine' ? 'Their men are hidden.' : q.recipe.vis === 'squares' ? 'Every man is hidden.' : 'No board.'), 'sys');
+  pbInput();
+}
+/* The two ways a move comes in — typed, or two clicks on the empty board —
+   installed here and again after every checkpoint or recovery, which borrow
+   the answer row and the click for a moment. */
+function pbInput(){
   prAnsClear();
-  prCtl([]);
+  prAnsInput('your move…', 12, inp => { const res = parseMoveIn(PR.pb.st, inp.value); if (res.error){ pbIllegal(res.error, inp); return; } inp.value = ''; pbMove(res.move); }, 'Play');
+  PR.click = i => {
+    const pb = PR.pb; if (pb.over || pb.busy || pb.r.vis === 'console') return;
+    if (pb.sel < 0){ pb.sel = i; prMarksClear(); prMark(i, 'pr-from'); return; }
+    const from = pb.sel; pb.sel = -1; prMarksClear();
+    const m = legalMoves(pb.st, W).filter(x => x.from === from && x.to === i)[0];
+    if (!m){ pbIllegal('There is no move from ' + sqName(from) + ' to ' + sqName(i) + '.'); return; }
+    pbMove(m.promo ? legalMoves(pb.st, W).filter(x => x.from === from && x.to === i && x.promo === 'Q')[0] || m : m);
+  };
+  pbControls();
+}
+/* The row under the answer. Task 20 adds Peek and I've lost it to it; the one
+   thing it has always offered is the way out that shows the position. */
+function pbControls(){ prCtl([['Reveal and stop', () => pbEnd('Stopped.')]]); }
+/* A move that is not there is the failure this drill measures — the player's
+   picture of the board has drifted from the board. It is counted and refused,
+   and costs nothing else: PR.i is the session's own tally and a game is one
+   answer to it, settled at the end. */
+function pbIllegal(why, inp){
+  PR.pb.illegal++;
+  pbLine('✗  ' + why, 'err'); beep(140, .16, 'sawtooth', .08);
+  if (inp){ inp.classList.add('bad'); prTimer(() => inp.classList.remove('bad'), 380); inp.select(); }
+}
+function pbMove(m){
+  const pb = PR.pb, all = legalMoves(pb.st, pb.st.turn);
+  const san = toSAN(pb.st, m, all);
+  pb.prevSt = pb.st;                                   // the checkpoint's "last move" decoys come from here
+  pb.st = makeMove(pb.st, m); pb.sans.push(san); pb.played++;
+  pbLine(pb.played + '.  ' + san, 'you');
+  pbPaint(); prStatsRender();
+  if (!legalMoves(pb.st, B).length){ pbEnd(inCheck(pb.st, B) ? 'Checkmate — you finished it.' : 'Stalemate.'); return; }
+  pb.busy = true;
+  prTimer(pbReply, 520);
+}
+function pbReply(){
+  const pb = PR.pb; if (!pb || pb.over) return;
+  const theirs = legalMoves(pb.st, B), reply = bestMove(pb.st, 2) || prPick(theirs);
+  const san = toSAN(pb.st, reply, theirs);
+  pb.prevSt = pb.st;
+  pb.st = makeMove(pb.st, reply); pb.sans.push(san);
+  pbLine('    …  ' + san, 'them');
+  pb.busy = false;
+  pbPaint();
+  if (pb.played >= pb.r.target){ pbEnd('You held it for all ' + pb.r.target + ' moves.'); return; }
+  if (!legalMoves(pb.st, W).length){ pbEnd(inCheck(pb.st, W) ? 'Checkmate against you.' : 'Stalemate.'); return; }
+  if (pb.r.checkEvery && pb.played % pb.r.checkEvery === 0) pbCheckpoint();
+}
+/* The checkpoint — "what is standing on d4?", asked every few moves so a
+   player who has lost the position finds out before the game is over rather
+   than after it. Task 20 fills it in; declared here so pbReply can call it
+   at the cadence the ladder already carries. */
+function pbCheckpoint(){}
+/* The end of a game, however it came about. The board comes back whatever the
+   vision was — a position held for twelve moves is worth seeing — and the
+   level is passed only on all three counts: the target reached, the position
+   never badly lost, and no move attempted that was not there. */
+function pbEnd(why){
+  const pb = PR.pb; pb.over = true; prClearTimers(); PR.click = null; PR.onSubmit = null;
+  prBoardOn(true); prMen(true); prPaint(pb.st.b);
+  pbLine(why, 'sys');
+  pb.pass = pb.played >= pb.r.target && pb.drifts <= 1 && pb.illegal === 0;
+  prScore(pb.pass, pb.illegal ? 'square' : pb.drifts > 1 ? 'lost' : null);
   prFinish(why);
 }
 
@@ -15671,9 +15697,9 @@ function prBegin(){
   prClearTimers();
   document.getElementById('prDoneOverlay').classList.remove('show');
   PR.view = 'run';
-  PR.i = 0; PR.right = 0; PR.streak = 0; PR.best = 0; PR.played = 0;
+  PR.i = 0; PR.right = 0; PR.streak = 0; PR.best = 0;
   PR.answered = false;
-  PR.q = null; PR.click = null; PR.onSubmit = null; PR.mini = null;
+  PR.q = null; PR.click = null; PR.onSubmit = null; PR.pb = null;
   PR.startedAt = prNow(); PR.runUp = PR.runDown = 0; PR.moved = false;
   prLaid = null;                                   // relay the board for this drill's settings
   navSync();                                       // a drill is a page: Back is the dashboard
@@ -15686,24 +15712,12 @@ function prBegin(){
   document.getElementById('prRun').style.display = '';
   document.getElementById('prSkill').textContent = PR.mode.skill;
 
-  if (PR.mode.key === 'progressive'){
-    const q = prMake('progressive', PR.level);
-    if (!q){
-      prQ('The challenge could not build a position just now.');
-      prSub('Try it again, or pick another drill.');
-      prCtl([['Back to Practice', prShowDash, 'primary']]);
-      return;
-    }
-    PR.q = q;
-    prShowMini(q);
-    return;
-  }
   prStatsRender();
   prNextQuestion();
 }
 
-/* What the session was worth, and what to do next. `note` is the progressive
-   challenge's own ending; the drills have none. */
+/* What the session was worth, and what to do next. `note` is Progressive
+   Blindfold's own ending; the drills have none. */
 function prFinish(note){
   prClearTimers();
   PR.click = null;
@@ -15713,8 +15727,25 @@ function prFinish(note){
   st.sessions++; prTouchDay(st);
   const m = st.modes[PR.mode.key];
   m.sessions++; m.lastAt = prNow();
-  m.level = PR.level;
-  if (PR.level > m.best) m.best = PR.level;
+  /* Progressive Blindfold is the one mode the staircase does not settle: a
+     level there is a whole game held or not held, and three right answers in
+     a row is not a thing that happens inside one. So the rung is a ladder —
+     passed, and the next session opens one higher; not passed, and it opens
+     on the same one again — and what the game cost is kept per level rather
+     than folded into the session's tally, since "held twelve moves with two
+     checkpoints missed" is what a player wants back and an accuracy figure
+     is not. */
+  const pb = PR.mode.key === 'progressive' ? PR.pb : null;
+  if (pb){
+    m.stats.pb = m.stats.pb || {};
+    m.stats.pb[PR.level] = { pass: !!pb.pass, played: pb.played, checks: pb.checks, checksOk: pb.checksOk,
+                             drifts: pb.drifts,
+                             // an unlimited level spends nothing worth counting
+                             peeks: pb.r.peeks === Infinity ? 0 : pb.r.peeks - pb.peeks,
+                             recoveries: pb.recoveries };
+    m.level = pb.pass ? Math.min(PR_PB_LEVELS.length, PR.level + 1) : PR.level;
+  } else m.level = PR.level;
+  if (m.level > m.best) m.best = m.level;
   prSave(st);
 
   const acc = PR.i ? PR.right / PR.i : 0;
@@ -15725,7 +15756,7 @@ function prFinish(note){
     d.innerHTML = cap + '<b>' + val + '</b>';
     rows.appendChild(d);
   };
-  if (PR.mode.key === 'progressive') row('Moves played', PR.played + ' / ' + PR.len);
+  if (pb) row('Moves played', pb.played + ' / ' + pb.r.target);
   row('Accuracy', PR.right + ' / ' + PR.i + (PR.i ? '  ·  ' + Math.round(acc * 100) + '%' : ''));
   row('Best streak', PR.best);
   row('Skill practised', PR.mode.skill);
@@ -15741,10 +15772,11 @@ function prFinish(note){
   tip.innerHTML = text || 'Steady work. Pick whichever drill you fancy next.';
 
   document.getElementById('prDoneTitle').textContent = 'Practice Complete';
-  // Finishing a blindfold game in miniature is the one result that leads
-  // somewhere else on the site — into the game setup that already exists.
+  // Finishing the whole ladder is the one result that leads somewhere else on
+  // the site — into the game setup that already exists. Task 21 rewrites what
+  // this button offers; until then it is the top rung, held, that earns it.
   document.getElementById('prBlindGame').style.display =
-    PR.mode.key === 'progressive' && PR.played >= PR.len ? '' : 'none';
+    pb && pb.pass && PR.level >= PR_PB_LEVELS.length ? '' : 'none';
   document.getElementById('prDoneOverlay').classList.add('show');
   prRenderDash();
 }
@@ -15780,7 +15812,7 @@ function prShowDash(){
   prClearTimers();
   PR.view = 'dash';
   navSync();
-  PR.q = null; PR.click = null; PR.onSubmit = null; PR.mini = null;
+  PR.q = null; PR.click = null; PR.onSubmit = null; PR.pb = null;
   document.getElementById('prDoneOverlay').classList.remove('show');
   document.getElementById('prRun').style.display = 'none';
   document.getElementById('prDash').style.display = '';
@@ -15975,7 +16007,7 @@ function prLeave(){
   PR.on = false;
   prClearTimers();
   PR.view = 'dash';
-  PR.q = null; PR.click = null; PR.onSubmit = null; PR.mini = null;
+  PR.q = null; PR.click = null; PR.onSubmit = null; PR.pb = null;
   PR.answered = false;
   prSetOverlay.classList.remove('show');
   document.getElementById('prDoneOverlay').classList.remove('show');

@@ -945,8 +945,16 @@ with the board in front of you the whole time. Practice (`PR`,
 `screen-practice`, reached from LESSON → Practice) asks whether the board is
 there at all: name a square, colour it, see where a knight reaches, follow a
 piece through moves you never see, answer for a position with the men hidden.
-Six drills and a Mini Blindfold Challenge, each with three settings that change
-the exercise rather than a label on it. There is deliberately **no Elo**: what a
+Ten drills and Progressive Blindfold, each with a ladder of levels that change
+the exercise rather than a label on it. Progressive Blindfold (`PR.pb`,
+`PR_PB_LEVELS`) is the last of them and the only one that is a whole *game*: ten
+rungs that take the board away a step at a time — your men shown and theirs
+hidden, then the squares with nobody on them, then no board at all — which is
+`fog`, `blind` and `total` said in Practice's own words, and rendering is the
+whole of the difference (`pbMask`/`pbPaint`) exactly as it is in a game. It is
+also the one mode the staircase does not settle: a rung is held or it is not
+(`pbEnd` decides, on the target, the drifts and the moves that were not there),
+and the next session opens one higher only on a pass. There is deliberately **no Elo**: what a
 player's visualisation is worth is a level they climb (Beginner → Visualizer →
 Tracker → Blindfold Ready → Advanced), earned by sessions finished, by accuracy
 and by how many different drills have been tried — so nobody climbs it by
@@ -957,7 +965,7 @@ thrown back unless the rules accept them — two kings, not touching, no pawn on
 promotion rank, neither side already in check, no castling rights nobody earned.
 Movement answers are `legalMoves()`. Tracking walks and blindfold sequences are
 *played*, with `makeMove()`, and named with `toSAN()` — never assembled out of
-notation strings. The mini challenge reads what the player typed with
+notation strings. Progressive Blindfold reads what the player typed with
 `parseMoveIn()` and answers with the small JS search already in this file.
 `parseMove()` is now a one-line wrapper over `parseMoveIn(G.st, …)`: one
 notation reader, two pages. A generator that cannot produce a valid exercise
