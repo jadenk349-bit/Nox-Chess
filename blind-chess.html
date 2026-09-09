@@ -10496,7 +10496,7 @@ const LESSONS = [
    tick. Reaching the card is finishing the lesson. */
 function lsnHandoffStep(L){
   return {
-    title:'Train this', what:'<p>' + L.train.say + '</p>', ask:'', gate:false, handoff:true,
+    title:'Train this', what:'<p>' + L.train.say + '</p>', ask:'', gate:false, handoff:true, solve:'none',
     setup(){
       lsnMark(L.n);
       LSN.st = lsnEmpty(); LSN.mode = 'sighted';
@@ -11208,7 +11208,7 @@ function lsnDrillClick(flip, q){
     title:'Learn the Board',
     what:lsnQuizWhat(q, turned),
     ask:'Click <code>' + sqName(sq) + '</code>.',
-    gate:true, auto:900,
+    gate:true, auto:900, solve:'square',
     setup(){
       LSN.st = lsnEmpty();
       LSN.flip = turned;
@@ -11253,7 +11253,7 @@ function lsnDrillName(flip, q){
     title:'Learn the Board',
     what:lsnQuizWhat(q, turned),
     ask:'Which square is lit?',
-    gate:true, auto:1000,
+    gate:true, auto:1000, solve:'square',
     setup(){
       LSN.st = lsnEmpty();
       LSN.flip = turned;
@@ -11586,6 +11586,221 @@ function lsnCoordSet(total){
   });
 }
 
+/* ============================================================
+   TASK 30a — the seven step kinds lessons 1–3 (and later ones) are built
+   out of, on top of the four above. Every one of them answers the question
+   with the game's own helpers — legalMoves(), parseMoveIn(), the geometry
+   Lines & Routes already reads a position with — never a second copy of
+   what a square, a line or a legal move is, and every one sets `solve`,
+   the tag server/test_lessons.js's dispatcher reads to answer it by brute
+   force rather than by being told. The lesson bodies that assemble these
+   into lessons 1–3 are Task 30b; these seven are complete and exercised on
+   their own in the meantime.
+   ============================================================ */
+
+/** A step with nothing to answer: it lights squares, says something, and
+    waits for Continue. `gate` is false on purpose — Koltanowski's line and
+    the colour rule are read, not solved, and gating a demonstration would
+    only be one more click standing between the player and the thing the
+    demonstration is showing them. */
+function lsnStepDemo(o){
+  return {
+    title:o.title, what:o.what, ask:o.ask || '', gate:false, solve:'none',
+    setup(){
+      LSN.st = o.st || lsnEmpty();
+      LSN.flip = !!o.flip;
+      LSN.named = !!o.named;
+      LSN.mode = o.mode || 'sighted';
+      (o.marks || []).forEach(([sq, cls]) => LSN.marks.set(sq, cls));
+      if (o.say) lsnSay(o.say, 'tip');
+    }
+  };
+}
+
+/** Light or dark, from the name alone — Square Trainer's own `colour`
+    question (level 5, no board: `prMakeSquare(..., { kinds:['colour'] })`),
+    asked here with the board hidden the same way and answered with
+    `prColourWhy()`'s sentence either way, so a wrong guess still leaves the
+    rule stated rather than just a red button.
+
+    The board goes by setting `LSN.mode = 'total'` rather than by reaching
+    for `#lsnFrame` directly — lsnRender() decides that element's own
+    `display` from `LSN.mode` on every call ("Complete blindfold does away
+    with the board here exactly as it does in a game"), and it runs again
+    right after setup(), so a direct `style.display = 'none'` here would be
+    overwritten before the player ever saw it. Going through the mode is
+    the same single source of truth a real game's vision switch uses, and
+    it is also what correctly leaves the move console off: this is a
+    multiple-choice question, not Complete Blindfold, so `LSN.console`
+    stays false and nothing else takes the board's place. */
+function lsnStepColour(q){
+  return {
+    title:'Light or dark?',
+    what:'<p>Colour by the rule, not by looking: a1 is dark, and colour alternates.</p>',
+    ask:'Is <code>' + sqName(q.sq) + '</code> light or dark?', gate:true, auto:900, solve:'choices',
+    setup(){
+      LSN.st = lsnEmpty(); LSN.named = false; LSN.mode = 'total';
+      lsnChoices([{ label:'Light', right:!q.dark }, { label:'Dark', right:q.dark }], (c, b) => {
+        if (c.right){ b.classList.add('right'); lsnRight(prColourWhy(q.sq)); return; }
+        b.classList.add('wrong'); b.disabled = true; lsnWrong(prColourWhy(q.sq));
+      }, true);
+    }
+  };
+}
+
+/** Which quarter — Square Trainer's `quadrant` question, named the way
+    PR_QUADRANT_NAME already names it ("White's kingside"), not by compass
+    point, because that is how a player actually carries the board's
+    halves in their head. */
+function lsnStepQuadrant(q){
+  const names = PR_QUADRANT_NAME;
+  return {
+    title:'Which quarter?',
+    what:'<p>Four quarters, each with a corner to name it. Koltanowski taught these first.</p>',
+    ask:'Which quarter holds <code>' + sqName(q.sq) + '</code>?', gate:true, auto:900, solve:'choices',
+    setup(){
+      LSN.st = lsnEmpty(); LSN.named = true; LSN.marks.set(q.sq, 'lsn-lit');
+      lsnChoices(['a8', 'h8', 'a1', 'h1'].map(k => ({ label:names[k], right:k === q.answer })), (c, b) => {
+        if (c.right){ b.classList.add('right'); lsnRight('Yes — ' + names[q.answer] + '.'); return; }
+        b.classList.add('wrong'); b.disabled = true; lsnWrong('Not that quarter.');
+      }, true);
+    }
+  };
+}
+
+/** Every square between two — Lines & Routes' `between` question, marked on
+    the empty board a click at a time rather than chosen off a list, because
+    the point is to name a whole run of squares and not just recognise one
+    of them. A select-many has no natural "try again" the way a wrong click
+    on a single square does, so there is no third-strike here: Done marks
+    what was found and what was missed and moves on regardless —
+    `lsnRight()` on an exact match, `lsnConcede()` otherwise, both of which
+    leave the true line on the board rather than just a verdict.
+    `truth` rides along on the step for the page's own future use; the test
+    harness must not read it — see the note over solveStep(). */
+function lsnStepBetween(q){
+  return {
+    title:'The squares between',
+    what:'<p>Name every square a slider would cross.</p>',
+    ask:'Click every square between <code>' + sqName(q.a) + '</code> and <code>' + sqName(q.b) + '</code>, then press Done.',
+    gate:true, solve:'select', truth:q.answer,
+    setup(){
+      LSN.st = lsnEmpty(); LSN.named = true; LSN.marks.set(q.a, 'sel'); LSN.marks.set(q.b, 'sel');
+      LSN.onSquare = i => {
+        if (LSN.ok || i === q.a || i === q.b) return;
+        if (LSN.pick.has(i)) LSN.pick.delete(i); else LSN.pick.add(i);
+        lsnRender();
+      };
+      lsnUnder([{ label:'Done', cls:'primary wide', on(){
+        const want = new Set(q.answer), got = LSN.pick;
+        const missed = q.answer.filter(s => !got.has(s)), extra = Array.from(got).filter(s => !want.has(s));
+        q.answer.forEach(s => LSN.marks.set(s, got.has(s) ? 'lsn-right' : 'lsn-miss'));
+        extra.forEach(s => LSN.marks.set(s, 'lsn-wrong'));
+        LSN.onSquare = null; lsnRender();
+        if (!missed.length && !extra.length) lsnRight('All ' + q.answer.length + ' of them.');
+        else lsnConcede('The line runs ' + q.answer.map(sqName).join(', ') + '.');
+      } }]);
+    }
+  };
+}
+
+/** Which of these lie on a diagonal through it — Lines & Routes' `through`
+    question, put here as pick-both-and-stop rather than one choice among
+    four: the step is not answered until both of the two right squares are
+    found, which is what makes "not on either" worth telling apart from
+    "on the wrong one". The board is taken away through `LSN.mode`, not by
+    poking `#lsnFrame` — see the note over lsnStepColour(), the other step
+    that asks its question with no board to look at. */
+function lsnStepDiagPick(q){
+  return {
+    title:'On a diagonal?',
+    what:'<p>Two diagonals cross at every square. Which of these lie on one through it?</p>',
+    ask:'Pick every square on a diagonal through <code>' + sqName(q.a) + '</code>.', gate:true, solve:'choices',
+    setup(){
+      LSN.st = lsnEmpty(); LSN.named = false; LSN.mode = 'total';
+      let left = q.answer.length;
+      lsnChoices(q.choices.map(sq => ({ label:sqName(sq), right:q.answer.indexOf(sq) >= 0 })), (c, b) => {
+        if (c.right){ b.classList.add('right'); b.disabled = true; if (--left === 0) lsnRight('Both found.'); return; }
+        b.classList.add('wrong'); b.disabled = true; lsnWrong(c.label + ' is not on either diagonal.');
+      }, false);
+    }
+  };
+}
+
+/** legalMoves() refuses a board with no king to check, and a knight-route
+    question only cares about one man and one target square — so the two
+    kings are scenery, seated as far out of the way as the corners allow.
+    They default to a1 and h8, which is wrong exactly when the knight or its
+    target already sits on one of those, so each king is walked to the
+    nearest still-empty corner square instead of assumed to fit — and never
+    onto the knight's own square or the square the question names. One
+    helper rather than writing the placement twice, here and in lesson 2's
+    demo step, which shows the same board with every reachable square lit
+    instead of a single target. */
+function lsnKnightBoard(at, avoid){
+  const busy = new Set([at].concat(avoid || []));
+  const seat = (corner, near) => {
+    if (!busy.has(sqIndex(corner))) return sqIndex(corner);
+    for (const alt of near) if (!busy.has(sqIndex(alt))) return sqIndex(alt);
+    return sqIndex(corner);   // every alternative already taken: not reachable at these levels
+  };
+  const wk = seat('a1', ['b1', 'a2', 'b2']);
+  busy.add(wk);
+  const bk = seat('h8', ['g8', 'h7', 'g7']);
+  const b = Array(64).fill(null);
+  b[at] = mk(W, 'N'); b[wk] = mk(W, 'K'); b[bk] = mk(B, 'K');
+  return { b, turn:W, cr:{ wK:0, wQ:0, bK:0, bQ:0 }, ep:-1, half:0, full:1 };
+}
+
+/** Fewest knight moves — Lines & Routes' `knight` question, played back as
+    the actual route once found rather than just confirmed: "3" says
+    nothing on its own, and the squares it passes through are the whole of
+    what a blindfold player needs to carry away from the answer. */
+function lsnStepKnight(q){
+  return {
+    title:'How many knight moves?',
+    what:'<p>A knight changes colour every move and lands three squares away on the L.</p>',
+    ask:'Fewest moves from <code>' + sqName(q.a) + '</code> to <code>' + sqName(q.b) + '</code>?', gate:true, solve:'choices',
+    setup(){
+      LSN.st = lsnKnightBoard(q.a, [q.b]);
+      LSN.named = true; LSN.marks.set(q.b, 'lsn-lit');
+      lsnChoices([1, 2, 3, 4].map(n => ({ label:String(n), right:n === q.answer })), (c, b2) => {
+        if (c.right){
+          b2.classList.add('right');
+          q.route.forEach((sq, k) => lsnAt(() => { LSN.marks.set(sq, 'lsn-right'); lsnRender(); }, 350 * k));
+          lsnRight(q.answer + ' — the route is ' + q.route.map(sqName).join(' → ') + '.');
+          return;
+        }
+        b2.classList.add('wrong'); b2.disabled = true; lsnWrong('Not ' + c.label + '.');
+      }, true);
+    }
+  };
+}
+
+/** Type the move — the console open on a real position, judged the way a
+    game judges the console: parseMoveIn() first, so a typo is an error
+    rather than a wrong answer, and then whether the legal move it named is
+    the one asked for, so a legal-but-different move is told so by its own
+    name rather than just refused. Only the right SAN is ever played. */
+function lsnStepTypeMove(item){
+  return {
+    title:'Type the move',
+    what:'<p>In Complete Blindfold you type your moves. Type this one.</p>',
+    ask:'Type <code>' + item.san + '</code> and press Play.', gate:true, solve:'typed',
+    setup(){
+      LSN.st = stateFromFEN(item.fen); LSN.mode = 'sighted'; LSN.console = true; LSN.entry = true;
+      LSN.onEntry = text => {
+        if (LSN.ok) return;
+        const res = parseMoveIn(LSN.st, text);
+        if (res.error){ lsnWrong(res.error); return; }
+        const legal = legalMoves(LSN.st, LSN.st.turn);
+        if (toSAN(LSN.st, res.move, legal) === item.san){ lsnPlayMove(res.move); lsnRight('Played.'); }
+        else lsnWrong('That is a legal move, but not ' + item.san + '.');
+      };
+    }
+  };
+}
+
 function lsnLesson1(){
   return [lsnBoardSeat()].concat(lsnCoordSet(10)).concat([lsnHandoffStep(LESSONS[0])]);
 }
@@ -11642,7 +11857,7 @@ function lsnNotationStep(item, i){
     // No "move 3 of 10" here — the gauge above the board is already counting.
     what:'<p>' + item.why + '</p>',
     ask:'Play <code>' + item.san + '</code> — click the man, then the square.',
-    gate:true,
+    gate:true, solve:'move',
     setup(){
       LSN.st = stateFromFEN(item.fen);
       LSN.mode = 'sighted';

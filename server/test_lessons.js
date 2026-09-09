@@ -75,6 +75,23 @@ const forms = NOTATION.map(i => i.san).join(' ');
 ['e4','Nf3','Bxe5','exd5','O-O','O-O-O','e8=Q','Qh5+','Qf7#','Nbd2'].forEach(f =>
   check('the course teaches ' + f, forms.split(' ').indexOf(f) >= 0));
 
+/* The spec asks for the four forms below by shape rather than by name, so
+ * this checks the shape rather than the fixed list above: a regenerated
+ * ten that dropped, say, the disambiguated move but kept Nbd2's neighbour
+ * would still pass the literal-string check and would still be a course
+ * that never taught the form. Task 30's brief: if any of the four is
+ * missing, a duplicated form in LSN_NOTATION should be swapped for it — as
+ * it stands, all four are already covered by the existing ten. */
+check('LSN_NOTATION teaches a capture', NOTATION.some(i => i.san.indexOf('x') >= 0),
+      NOTATION.map(i => i.san).join(' '));
+check('LSN_NOTATION teaches a castle', NOTATION.some(i => i.san === 'O-O'),
+      NOTATION.map(i => i.san).join(' '));
+check('LSN_NOTATION teaches a promotion', NOTATION.some(i => i.san.indexOf('=') >= 0),
+      NOTATION.map(i => i.san).join(' '));
+check('LSN_NOTATION teaches a disambiguated move',
+      NOTATION.some(i => /^[NRQB][a-h1-8][a-h][1-8]/.test(i.san)),
+      NOTATION.map(i => i.san).join(' '));
+
 head('Every challenge line is playable from its own position');
 check('there are three of them', CHALLENGES.length === 3, CHALLENGES.length);
 CHALLENGES.forEach((spec, i) => {
@@ -187,6 +204,18 @@ function makePage(store){
     '\n__expose({ G, LSN, LESSONS, el, showScreen, lsnEnter, lsnHub, lsnOpen, lsnNext, lsnBack,' +
     ' lsnDone, lsnReach, lsnSqEls, lsnVisual, lsnPositionHTML, lsnGauge, legalMoves, toSAN, sqName, sqIndex,' +
     ' stateFromFEN, parseMoveIn, MODE_NAME, PR, PR_MODES, goPractice, prLoad, resetChoices,' +
+    // Task 30a: the seven new step factories, and the helpers a harness that
+    // builds a step itself — rather than reading it off a lesson body, which
+    // does not exist yet — needs to feed them the same kind of question
+    // Practice would (prMakeSquare/prMakeLines/prRecipe), to open a step the
+    // way lsnShow does without a lesson around it (lsnResetStep/lsnPaint/
+    // lsnRender), and to check a select-many answer the way lineBetween()
+    // would. kingSq/inCheck are not needed here: page state is plain data,
+    // so tools/page_chess.js's C already judges it, exactly as it does the
+    // fixed positions above.
+    ' lsnStepDemo, lsnStepColour, lsnStepQuadrant, lsnStepBetween, lsnStepDiagPick,' +
+    ' lsnStepKnight, lsnStepTypeMove, lsnKnightBoard, lsnResetStep, lsnPaint, lsnRender,' +
+    ' prMakeSquare, prMakeLines, prRecipe, lineBetween,' +
     ' screen:()=>screenName });';
   let out = null;
   new Function('document','window','location','localStorage','WebSocket','AudioContext',
@@ -224,6 +253,70 @@ async function solveStep(p, budget){
     }
     return false;
   };
+
+  // Task 30a's seven step kinds each carry `solve`, the tag their factory
+  // sets in blind-chess.html, and are answered by the strategy that tag
+  // names rather than by the generic loop below — which predates `solve`
+  // and still carries every step that has never set it (the drills, the
+  // notation steps, the handoff). A step's `truth` field, where one carries
+  // it, is for the PAGE's own use and is never read here: CLAUDE.md's rule
+  // is that this harness answers by brute force, the same as a player would
+  // have to, and a solver that read the answer off the step would stop
+  // being able to catch a factory that cannot actually be solved.
+  const step = p.LSN.steps[p.LSN.step];
+  const kind = step && step.solve;
+  if (kind === 'choices'){
+    // press an unanswered, un-disabled choice until the step is ok or none
+    // are left to try — right for a single-answer step, and for
+    // lsnStepDiagPick's two-of-four it presses every one in turn, which
+    // finds both of the right ones by the time the wrong ones are used up.
+    while (!p.LSN.ok && Date.now() < stop){
+      let pressed = false;
+      for (const b of choices()){
+        if (b.disabled || b.classList.contains('right') || b.classList.contains('wrong')) continue;
+        b.onclick(); pressed = true; break;
+      }
+      if (!pressed) break;
+      await sleep(60);
+    }
+    return p.LSN.ok;
+  }
+  if (kind === 'select'){
+    // lsnStepBetween names its two endpoints in the question itself
+    // (`Click every square between <code>a</code> and <code>b</code>…`), so
+    // the two squares are read off that sentence — not off the step's own
+    // `truth` — and the run between them is asked of the page's own
+    // lineBetween(), exactly the geometry a player would have to work out.
+    const ask = p.by('lsnAsk').innerHTML || '';
+    const squares = (ask.match(/<code>([a-h][1-8])<\/code>/g) || [])
+      .map(c => p.sqIndex(c.replace(/<\/?code>/g, '')));
+    if (squares.length < 2 || !p.LSN.onSquare) return false;
+    const between = p.lineBetween(squares[0], squares[1]) || [];
+    between.forEach(sq => p.LSN.onSquare(sq));
+    await sleep(20);
+    for (const b of under()) if (!b.disabled && b.textContent.indexOf('Done') === 0){ b.onclick(); break; }
+    await sleep(60);
+    return p.LSN.ok;
+  }
+  if (kind === 'typed'){
+    // lsnStepTypeMove is judged through parseMoveIn()/toSAN() exactly as a
+    // game's console is, so it is solved the same way solveTyped() would:
+    // walk every legal move in the position and type each one's own SAN
+    // until the step is ok, never the SAN the card happens to be asking for.
+    if (!p.LSN.onEntry || !p.LSN.st) return false;
+    const legal = p.legalMoves(p.LSN.st, p.LSN.st.turn);
+    for (const m of legal){
+      if (p.LSN.ok) break;
+      p.LSN.onEntry(p.toSAN(p.LSN.st, m, legal));
+      await sleep(20);
+    }
+    return p.LSN.ok;
+  }
+
+  // 'square' (lsnDrillClick/lsnDrillName), 'move' (lsnNotationStep), 'none'
+  // (lsnStepDemo/lsnHandoffStep, both gate-less and never asked to solve)
+  // and steps that set no `solve` at all fall through to the loop below,
+  // which already answers all of them.
   while (!p.LSN.ok && Date.now() < stop){
     if (pressUnder()){ await sleep(180); continue; }
     // multiple choice: press them until one of them is right
@@ -825,6 +918,248 @@ async function walk(p, n){
     const raw = JSON.parse(st['nox.lessons.howto'] || 'null');
     return !!raw && raw.v === 3 && raw.done.join(',') === '1,3,4';
   })());
+
+  /* ============================================================
+   * Task 30a: the seven new step kinds, exercised on their own.
+   *
+   * Lessons 1–3 (Task 30b) do not exist yet — `lsnLesson1`/`lsnLesson2` are
+   * still the old five-lesson content and the stub respectively — so there
+   * is no course walk to drive these through. Each factory is instead
+   * opened the way lsnShow() opens any step, with a one-step "lesson" built
+   * by hand: `LSN.steps` set to just it, lsnResetStep() to undo whatever
+   * the step before it left behind, then the step's own setup(), lsnPaint()
+   * and lsnRender() — the same three calls lsnShow() makes once a step is
+   * chosen. When 30b lands, every one of these is walked for real by
+   * walk(), and this section stays as the one place each kind is checked
+   * in isolation.
+   * ============================================================ */
+  head('The seven new step kinds are exercised on their own, ahead of the lessons that will use them');
+
+  function openBareStep(pg, step){
+    pg.LSN.steps = [step];
+    pg.LSN.step = 0;
+    pg.lsnResetStep();
+    if (step.setup) step.setup();
+    pg.lsnPaint();
+    pg.lsnRender();
+  }
+  /* prMakeLines() retries internally and can still come back null, or land
+   * on a question kind other than the one asked for (`between` and
+   * `through` share levels with `reach`/`knight` on some rungs) — so this
+   * retries from the outside too, capped rather than looped forever, so a
+   * generator that has actually broken fails the suite instead of hanging
+   * it (per the controller notes on Task 30). */
+  function untilQuestion(build, want, label){
+    for (let i = 0; i < 200; i++){
+      const q = build();
+      if (q && want(q)) return q;
+    }
+    throw new Error('test_lessons: could not build a ' + label + ' question in 200 tries');
+  }
+  const squareQ = (level, kind) => p.prMakeSquare(Object.assign({}, p.prRecipe('square', level), { kinds:[kind] }));
+  const linesQ = (level, ask, extra) => untilQuestion(
+    () => p.prMakeLines(p.prRecipe('lines', level)), q => q.ask === ask && (!extra || extra(q)), ask);
+  /* Presses each un-answered choice in turn, checking the wrong-answer
+   * contract (marked wrong, disabled, LSN.ok still false) on every one that
+   * is not the answer, and stops on the first that is. Only fits a step
+   * with exactly one right choice — lsnStepDiagPick, with two, is walked by
+   * hand below instead. */
+  function clickChoicesUntilRight(label){
+    const list = Array.from(p.by('lsnChoices').children);
+    let rightBtn = null;
+    for (const b of list){
+      b.onclick();
+      if (p.LSN.ok){ rightBtn = b; break; }
+      check(label + ': a wrong choice is marked wrong, disabled, and leaves LSN.ok false',
+            b.classList.contains('wrong') && b.disabled === true && p.LSN.ok === false,
+            b.textContent);
+    }
+    check(label + ': the right choice is found and marked right', !!rightBtn && rightBtn.classList.contains('right'));
+    return rightBtn;
+  }
+
+  head('lsnStepDemo is gate-less and shows what it is given');
+  {
+    const demo = p.lsnStepDemo({
+      title:'Know, don’t see', what:'<p>a demo</p>', ask:'Press Continue.',
+      named:true, flip:true, marks:[[p.sqIndex('a1'), 'lsn-lit']], say:'a tip'
+    });
+    check('gate is false', demo.gate === false);
+    check('solve is none', demo.solve === 'none');
+    openBareStep(p, demo);
+    check('the mark it was given is lit', p.LSN.marks.get(p.sqIndex('a1')) === 'lsn-lit');
+    check('flip and named are carried through', p.LSN.flip === true && p.LSN.named === true);
+    check('nothing is needed to move on', p.by('lsnNext').disabled === false);
+  }
+
+  head('lsnStepColour — Square Trainer’s colour question, from level 5, board hidden');
+  {
+    const q = squareQ(5, 'colour');
+    check('the question carries a square and a dark flag', q.sq >= 0 && typeof q.dark === 'boolean', JSON.stringify(q));
+    const step = p.lsnStepColour(q);
+    check('solve is choices', step.solve === 'choices');
+    openBareStep(p, step);
+    check('the board is hidden — this is answered from the name alone',
+          p.LSN.named === false && p.by('lsnFrame').style.display === 'none');
+    check('exactly Light and Dark are offered', p.by('lsnChoices').children.length === 2);
+    clickChoicesUntilRight('lsnStepColour');
+  }
+  {
+    // and answerable by the harness's own choices solver, cold
+    openBareStep(p, p.lsnStepColour(squareQ(5, 'colour')));
+    check('lsnStepColour is answerable by the choices solver', await solveStep(p, 3000));
+  }
+
+  head('lsnStepQuadrant — Square Trainer’s quadrant question, named in words');
+  {
+    const q = squareQ(5, 'quadrant');
+    check('the answer is one of the four corners', ['a1', 'h1', 'a8', 'h8'].indexOf(q.answer) >= 0, q.answer);
+    const step = p.lsnStepQuadrant(q);
+    check('solve is choices', step.solve === 'choices');
+    openBareStep(p, step);
+    check('the square asked about is lit on a named board',
+          p.LSN.named === true && p.LSN.marks.get(q.sq) === 'lsn-lit');
+    check('four quarters are offered', p.by('lsnChoices').children.length === 4);
+    clickChoicesUntilRight('lsnStepQuadrant');
+  }
+  {
+    openBareStep(p, p.lsnStepQuadrant(squareQ(5, 'quadrant')));
+    check('lsnStepQuadrant is answerable by the choices solver', await solveStep(p, 3000));
+  }
+
+  head('lsnStepBetween — Lines & Routes’ between question, clicked on an empty board');
+  {
+    const q = linesQ(1, 'between');
+    check('the question names two squares and a run between them',
+          q.a >= 0 && q.b >= 0 && Array.isArray(q.answer) && q.answer.length > 0, JSON.stringify(q));
+    const step = p.lsnStepBetween(q);
+    check('solve is select', step.solve === 'select');
+    openBareStep(p, step);
+    // The exact answer is brute-forced from the page's own lineBetween(),
+    // never read off q.answer or step.truth — the harness is not told.
+    const between = p.lineBetween(q.a, q.b);
+    check('lineBetween() agrees with what the question was built from',
+          JSON.stringify(between) === JSON.stringify(q.answer));
+    between.forEach(sq => p.LSN.onSquare(sq));
+    const done = () => Array.from(p.by('lsnUnder').children).find(b => b.textContent.indexOf('Done') === 0);
+    check('a Done button is offered', !!done());
+    done().onclick();
+    check('the exact set is accepted and every one of them is marked lsn-right',
+          p.LSN.ok === true && between.every(sq => p.LSN.marks.get(sq) === 'lsn-right'));
+  }
+  {
+    const q = linesQ(2, 'between', qq => qq.answer.length > 1);
+    const step = p.lsnStepBetween(q);
+    openBareStep(p, step);
+    const between = p.lineBetween(q.a, q.b);
+    between.slice(0, -1).forEach(sq => p.LSN.onSquare(sq));   // leave the last one out, on purpose
+    const missed = between[between.length - 1];
+    const done = () => Array.from(p.by('lsnUnder').children).find(b => b.textContent.indexOf('Done') === 0);
+    done().onclick();
+    check('a missed square still answers the step, by conceding rather than refusing', p.LSN.ok === true);
+    check('every truth square is marked, found or missed',
+          between.every(sq => ['lsn-right', 'lsn-miss'].indexOf(p.LSN.marks.get(sq)) >= 0));
+    check('the missed square specifically is marked lsn-miss', p.LSN.marks.get(missed) === 'lsn-miss');
+  }
+  {
+    openBareStep(p, p.lsnStepBetween(linesQ(1, 'between')));
+    check('lsnStepBetween is answerable by the select solver', await solveStep(p, 5000));
+  }
+
+  head('lsnStepDiagPick — Lines & Routes’ through question, two of four choices right');
+  {
+    const q = linesQ(4, 'through');
+    check('the question offers four choices with two right ones',
+          Array.isArray(q.answer) && q.answer.length === 2 && Array.isArray(q.choices) && q.choices.length === 4,
+          JSON.stringify(q));
+    const step = p.lsnStepDiagPick(q);
+    check('solve is choices', step.solve === 'choices');
+    openBareStep(p, step);
+    check('the board is hidden here too', p.by('lsnFrame').style.display === 'none');
+    // Every choice is clicked in turn — but lsnChoices() itself refuses a
+    // click once LSN.ok is true (`b.onclick = () => { if (!LSN.ok) … }`),
+    // so once the second right square lands, whichever wrong squares the
+    // shuffle happened to leave unclicked stay untouched. That is correct
+    // behaviour, not a gap in the loop, so the count checked below is only
+    // ever the two rights (both of them are always seen, since the step
+    // cannot reach ok without them) — not the wrongs, which is 0, 1 or 2
+    // depending on where the shuffle put them.
+    const list = Array.from(p.by('lsnChoices').children);
+    let rights = 0, wrongs = 0;
+    for (const b of list){
+      if (p.LSN.ok) break;
+      const isRight = q.answer.indexOf(p.sqIndex(b.textContent)) >= 0;
+      b.onclick();
+      if (isRight){ rights++; check('a right square is marked right and disabled', b.classList.contains('right') && b.disabled === true); }
+      else { wrongs++; check('a wrong square is marked wrong and disabled', b.classList.contains('wrong') && b.disabled === true); }
+    }
+    check('both right squares were found', rights === 2, rights);
+    check('no more wrong squares were seen than the two on offer', wrongs <= 2, wrongs);
+    check('the step is answered only once both right squares are found', p.LSN.ok === true);
+  }
+  {
+    openBareStep(p, p.lsnStepDiagPick(linesQ(4, 'through')));
+    check('lsnStepDiagPick is answerable by the choices solver', await solveStep(p, 5000));
+  }
+
+  head('lsnKnightBoard seats two kings without ever overwriting the knight or the target');
+  {
+    const st = p.lsnKnightBoard(p.sqIndex('a1'), [p.sqIndex('h8')]);
+    sane('lsnKnightBoard(a1, [h8])', st);
+    check('the knight sits on a1', st.b[p.sqIndex('a1')] && st.b[p.sqIndex('a1')].t === 'N');
+    check('the target square, h8, carries no man', st.b[p.sqIndex('h8')] === null);
+  }
+  {
+    const st = p.lsnKnightBoard(p.sqIndex('h8'), [p.sqIndex('a1')]);
+    sane('lsnKnightBoard(h8, [a1])', st);
+    check('the knight sits on h8', st.b[p.sqIndex('h8')] && st.b[p.sqIndex('h8')].t === 'N');
+    check('the target square, a1, carries no man', st.b[p.sqIndex('a1')] === null);
+  }
+
+  head('lsnStepKnight — Lines & Routes’ knight question, the route played back once found');
+  {
+    const q = linesQ(7, 'knight');
+    check('the question names two squares, a move count and a route',
+          q.a >= 0 && q.b >= 0 && q.answer >= 1 && Array.isArray(q.route), JSON.stringify(q));
+    const step = p.lsnStepKnight(q);
+    check('solve is choices', step.solve === 'choices');
+    openBareStep(p, step);
+    sane('lsnStepKnight’s board', p.LSN.st);
+    check('the knight sits where the question says', p.LSN.st.b[q.a] && p.LSN.st.b[q.a].t === 'N');
+    check('the target square carries no man of its own', p.LSN.st.b[q.b] === null);
+    check('1 to 4 move-count choices are offered', p.by('lsnChoices').children.length === 4);
+    clickChoicesUntilRight('lsnStepKnight');
+  }
+  {
+    openBareStep(p, p.lsnStepKnight(linesQ(7, 'knight')));
+    check('lsnStepKnight is answerable by the choices solver', await solveStep(p, 5000));
+  }
+
+  head('lsnStepTypeMove — the console, judged by parseMoveIn() exactly as a game is');
+  {
+    const item = NOTATION[0];   // e4, from the starting position
+    const step = p.lsnStepTypeMove(item);
+    check('solve is typed', step.solve === 'typed');
+    openBareStep(p, step);
+    sane('lsnStepTypeMove’s position', p.LSN.st);
+    check('the console is open for entry', p.LSN.console === true && p.LSN.entry === true);
+    const before = JSON.stringify(p.LSN.st.b);
+    const legal = p.legalMoves(p.LSN.st, p.LSN.st.turn);
+    const otherMove = legal.find(m => p.toSAN(p.LSN.st, m, legal) !== item.san);
+    const otherSan = p.toSAN(p.LSN.st, otherMove, legal);
+    p.LSN.onEntry(otherSan);
+    check('a legal move that is not the one asked for is refused, and names the wanted SAN',
+          p.LSN.ok === false && (p.by('lsnSay').innerHTML || '').indexOf(item.san) >= 0,
+          p.by('lsnSay').innerHTML);
+    check('the board has not moved', JSON.stringify(p.LSN.st.b) === before);
+    p.LSN.onEntry(item.san);
+    check('the right SAN is accepted and actually played',
+          p.LSN.ok === true && JSON.stringify(p.LSN.st.b) !== before);
+  }
+  {
+    openBareStep(p, p.lsnStepTypeMove(NOTATION[1]));   // Nf3, a different position
+    check('lsnStepTypeMove is answerable by the typed solver', await solveStep(p, 5000));
+  }
 
   console.log('\n' + passed + ' passed, ' + failed + ' failed');
   process.exit(failed ? 1 : 0);
