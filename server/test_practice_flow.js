@@ -712,6 +712,34 @@ head('Piece Vision');
 })();
 
 /* ============================================================
+   4b — attack vision: one deterministic pass through the easiest level,
+   which only ever asks 'attacks' — Yes or No, board up, nothing in the way
+   yet. test_practice.js already re-derives every question kind against an
+   independent reading of the position; what the presenter still has to
+   prove on its own is that pressing the right Yes/No button turns into the
+   judgement q.answer claims.
+   ============================================================ */
+head('Attack Vision');
+
+(function(){
+  storage = {};
+  startDrill('attack', 1, 5);
+  var q = prMakeAttack(prRecipe('attack', 1));
+  presentForced(q);
+  ok('level 1 only ever asks attacks', q.ask, 'attacks');
+  ok('the piece is named with its square', byId.prQ.innerHTML.indexOf(sqName(q.from)) >= 0, true);
+  ok('the target square is named too', byId.prQ.innerHTML.indexOf(sqName(q.target)) >= 0, true);
+  ok('and its own square is marked', marked(q.from, 'pr-from'), true);
+  ok('the men are showing — this is geometry, not blindfold',
+     byId.prBoard.classList.contains('blind'), false);
+
+  ansButton(q.answer ? 'Yes' : 'No').onclick();
+  ok('the right button is judged right', /right/.test(byId.prSay.className), true);
+  tick(1000);
+  prShowDash();
+})();
+
+/* ============================================================
    5 — move tracker
    ============================================================ */
 head('Move Tracker');

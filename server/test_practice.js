@@ -76,6 +76,7 @@ var DECLS = ['VAL','FILES','rowOf','colOf','SQNAME','uciOf','sqName','sqIndex','
              'idCounter','mk','DIR_N','DIR_B','DIR_R','DIR_K','PST','nodes','PIECE_NAME',
              'OPENING_BOOK','OPENING_LINES',
              'PR_SQUARE_LEVELS','PR_QUADRANT_NAME','PR_DIRS','PR_LINES_LEVELS','PR_PIECE_LEVELS',
+             'PR_ATTACK_LEVELS',
              'PR_MODES','PR_MINUTES','PR_STORE','PR_VERSION','PR_V1_KEYS','PR_SEEN_MAX',
              'prKey','prAcc','prSeenKey',
              'PR','PR_STEP_UP','PR_STEP_DOWN','prRand','prPick','prSide','prMan','PR_MAKE','W',
@@ -89,7 +90,9 @@ var FNS = ['startBoard','newState','cloneState','fenOf','stateFromFEN',
            'prBlankMode','prBlank','prUpgradeV1','prLoad','prSave',
            'prSeen','prSeenHas','prSeenPush','prToday','prTouchDay',
            'prShuffle','prPosition','prMaterial','prColourWhy',
-           'prMakeSquare','prMakeLines','prMakePiece','prMakeTrack','prMakeMemory',
+           'prMakeSquare','prMakeLines','prMakePiece',
+           'prAttacked','prHanging','prPinned','prMakeAttack',
+           'prMakeTrack','prMakeMemory',
            'prPickMove','prAskAbout','prMakeSequence','prMakeMini','prRecipe','prMake',
            'prRecord','prScore','prStep','prNow','prTimeLeft','prRecommend','prMedianLat',
            'prStartLevel','prOpen','prRebuildStart','prRebuildFinish','prRbPaint','goPractice'];
@@ -132,6 +135,22 @@ function sameBoard(a, b){
   }
   return true;
 }
+
+/* A second opinion on attack squares, deliberately not the page's own
+   prAttacked — a drill and its check that agree by construction prove
+   nothing. Sliders and jumpers alike are read off pseudoMoves() with the
+   opposing king lifted out of the way, which is what lets a line through
+   the king still count; a pawn's two forward diagonals are named directly,
+   since pseudoMoves() also carries its pushes and this is about capture
+   squares alone. */
+function attackedSquares(st, from){
+  var p = st.b[from];
+  if (p.t === 'P'){ var r = rowOf(from) + (p.c === W ? -1 : 1), out = [];
+    [-1, 1].forEach(function(dc){ var c = colOf(from) + dc; if (r >= 0 && r < 8 && c >= 0 && c < 8) out.push(r * 8 + c); }); return out; }
+  var s = stateOf(st.b, p.c); s.b[kingSq(st, other(p.c))] = null; // no check filtering
+  return pseudoMoves(s, p.c).filter(function(m){ return m.from === from; }).map(function(m){ return m.to; });
+}
+function isAttackedBy(st, target, from){ return attackedSquares(st, from).indexOf(target) >= 0; }
 
 /* ============================================================
    1 — square names and square colours
@@ -295,6 +314,37 @@ head('Piece Vision');
   ok('every level generates and the reach re-derives', bad, 0);
   ok('level 6 is notation only', prRecipe('piece', 6).notation, true);
   ok('level 8 asks about two pieces', prRecipe('piece', 8).two, true);
+})();
+
+/* ============================================================
+   3b — attack vision: every kind of question re-derives against an
+   independent reading of the position, not the page's own prAttacked —
+   attackedSquares() and isAttackedBy() above are a second implementation on
+   purpose, so a drill and its check cannot agree just because they share a
+   bug
+   ============================================================ */
+head('Attack Vision');
+(function(){
+  var bad = 0, kinds = {};
+  for (var lv = 1; lv <= PR_ATTACK_LEVELS.length; lv++) for (var t = 0; t < 40; t++){
+    var q = prMakeAttack(prRecipe('attack', lv));
+    if (!q){ bad++; continue; }
+    kinds[q.ask] = 1;
+    var st = q.st;
+    if (q.ask === 'attacks' && q.answer !== isAttackedBy(st, q.target, q.from)) bad++;
+    if (q.ask === 'attacked'){
+      var want = attackedSquares(st, q.from);
+      if (want.length !== q.answer.length || want.some(function(s){ return q.answer.indexOf(s) < 0; })) bad++;
+    }
+    if (q.ask === 'attackers'){
+      var byC = attackersOf(st, q.target, q.colour);
+      if (byC.length !== q.answer.length) bad++;
+    }
+    if (q.ask === 'hanging' && prHanging(st).join() !== q.answer.join()) bad++;
+    if (q.ask === 'pinned' && q.answer !== prPinned(st, q.target)) bad++;
+  }
+  ok('every level generates and re-derives', bad, 0);
+  ok('six question kinds appear', Object.keys(kinds).length, 6);
 })();
 
 /* ============================================================

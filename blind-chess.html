@@ -11920,6 +11920,27 @@ const PR_PIECE_LEVELS = [
   { cap:'Two pieces, every square either reaches', types:['R','B','N','Q'], blockers:[1,3], two:true }
 ];
 
+/* Attack Vision's own ladder — declared ahead of PR_MODES for the same reason
+   the other three are. Six question kinds share the one ladder because they
+   are one skill asked six ways — what a piece hits, who hits a square, what
+   is left hanging, what is pinned — and the board is taken away in the same
+   staged order the others use: a blocker introduced before the questions
+   multiply, the board kept through every one of them, and only then dropped
+   for the last two levels, which is where `kingZone` narrows "who attacks
+   this square" to the squares that actually matter over the board — the
+   ring around the king — rather than any of the sixty-four. */
+const PR_ATTACK_LEVELS = [
+  { cap:'Does it attack that square?',       kinds:['attacks'],  men:[0,0], board:true },
+  { cap:'Every square it attacks',           kinds:['attacked'], men:[0,1], board:true },
+  { cap:'A blocker in the way',              kinds:['attacks','attacked'], men:[1,2], board:true },
+  { cap:'Who attacks this square',           kinds:['attackers'], men:[2,3], board:true, kingZone:true },
+  { cap:'Is it defended?',                   kinds:['defended'], men:[2,4], board:true },
+  { cap:'What is hanging?',                  kinds:['hanging'],  men:[3,5], board:true },
+  { cap:'Is it pinned?',                     kinds:['pinned'],   men:[2,4], board:true },
+  { cap:'From the notation, three men',      kinds:['attacks','defended','hanging'], men:[1,1], board:false },
+  { cap:'From the notation, six men',        kinds:['attackers','hanging','pinned'], men:[3,4], board:false, kingZone:true }
+];
+
 /* Each drill, in the order the dashboard lists them. `group` clusters related
    drills for the dashboard (Task 22); `lesson` is the course step it grows out
    of. `levels` replaces the old `tiers`/`hard`/`needs`: a mode's levels are a
@@ -11939,6 +11960,9 @@ const PR_MODES = [
   { key:'piece', name:'Piece Vision', group:'vision', skill:'Piece movement', lesson:4,
     desc:'Where one piece reaches, with the board slowly taken away.',
     levels: PR_PIECE_LEVELS },
+  { key:'attack', name:'Attack Vision', group:'vision', skill:'Attacks and defence', lesson:4,
+    desc:'Who attacks what, what is hanging and what is pinned, down to notation alone.',
+    levels: PR_ATTACK_LEVELS },
   { key:'tracker', name:'Move Tracker', group:'holding', skill:'Tracking', lesson:5,
     desc:'Follow moves you never see, and say where things stand.',
     levels:[{cap:'One piece, two moves'},{cap:'Longer, with captures'},{cap:'Two pieces, five moves'}] },
@@ -12557,6 +12581,91 @@ function prMakePiece(r){
   return null;
 }
 
+/* 2b — ATTACK VISION. Six questions about one relation — what a piece can
+   take, and what can take it — asked from both ends: what a piece attacks,
+   who attacks a square, whether a man is defended, what is hanging, whether
+   a man is pinned. Every answer comes out of attackersOf(), see() and
+   legalMoves() rather than a second table of who-hits-whom, for the same
+   reason Piece Vision reads legalMoves() and nothing else: a drill that
+   disagreed with the game about an attack would be teaching the wrong
+   board. */
+
+/* Attacked squares of one man: its pseudo-moves with the opposing king lifted
+   off, so a line through the king counts, and a pawn's pushes left out. */
+function prAttacked(st, from){
+  const p = st.b[from];
+  if (p.t === 'P'){                                   // a pawn attacks its two forward diagonals, occupied or not
+    const r = rowOf(from) + (p.c === W ? -1 : 1), out = [];
+    for (const dc of [-1, 1]){ const c = colOf(from) + dc; if (r >= 0 && r < 8 && c >= 0 && c < 8) out.push(r * 8 + c); }
+    return out;
+  }
+  const s = cloneState(st);
+  s.turn = p.c;
+  const k = kingSq(s, other(p.c)); if (k >= 0) s.b[k] = null;
+  return pseudoMoves(s, p.c).filter(m => m.from === from).map(m => m.to);
+}
+/* Hanging: attacked, and either nobody of its own side answers back or the
+   exchange still favours the side taking it — see() is the review's own
+   arithmetic, asked here about the same square rather than reinvented. */
+function prHanging(st){
+  const out = [];
+  for (let i = 0; i < 64; i++){
+    const p = st.b[i];
+    if (!p || p.t === 'K') continue;
+    if (!attackersOf(st, i, other(p.c)).length) continue;
+    if (!attackersOf(st, i, p.c).length || see(st, i, other(p.c)) > 0) out.push(i);
+  }
+  return out;
+}
+/* Pinned: the same pseudo-vs-legal gap Piece Vision already throws a
+   question away over (prMakePiece, above) — here it is the question. */
+function prPinned(st, sq){
+  const p = st.b[sq]; if (!p || p.t === 'K') return false;
+  const s = cloneState(st); s.turn = p.c;
+  const ps = pseudoMoves(s, p.c).filter(m => m.from === sq).length;
+  const lg = legalMoves(s, p.c).filter(m => m.from === sq).length;
+  return ps > lg;
+}
+function prMakeAttack(r){
+  for (let t = 0; t < 80; t++){
+    const ask = prPick(r.kinds), colour = Math.random() < .5 ? W : B, foe = other(colour);
+    const n = r.men[0] + prRand(r.men[1] - r.men[0] + 1);
+    const counts = [[colour, prPick(['R','B','N','Q'])]];
+    for (let k = 0; k < n; k++) counts.push([Math.random() < .5 ? colour : foe, prPick(['P','P','N','B','R'])]);
+    const built = prPosition(counts);
+    if (!built) continue;
+    const st = built.st, from = built.at[0];
+    const q = { kind:'attack', ask, st, from, colour, target:-1, answer:null, board:!!r.board, kingZone:!!r.kingZone };
+    if (ask === 'attacks'){
+      const foes = []; for (let i = 0; i < 64; i++) if (st.b[i] && st.b[i].c === foe) foes.push(i);
+      q.target = prPick(foes); q.answer = prAttacked(st, from).indexOf(q.target) >= 0;
+    } else if (ask === 'attacked'){
+      q.answer = prAttacked(st, from); if (q.answer.length < 2) continue;
+    } else if (ask === 'attackers'){
+      const kz = r.kingZone ? kingSq(st, foe) : -1;
+      const cands = [];
+      for (let i = 0; i < 64; i++){
+        if (kz >= 0 && Math.max(Math.abs(rowOf(i) - rowOf(kz)), Math.abs(colOf(i) - colOf(kz))) > 1) continue;
+        if (attackersOf(st, i, colour).length) cands.push(i);
+      }
+      if (!cands.length) continue;
+      q.target = prPick(cands); q.answer = attackersOf(st, q.target, colour).slice();
+    } else if (ask === 'defended'){
+      const mine = []; for (let i = 0; i < 64; i++) if (st.b[i] && st.b[i].c === colour && st.b[i].t !== 'K') mine.push(i);
+      q.target = prPick(mine); q.answer = attackersOf(st, q.target, colour).length > 0;
+    } else if (ask === 'hanging'){
+      q.answer = prHanging(st); if (q.answer.length < 1 || q.answer.length > 2) continue;
+    } else {
+      const mine = []; for (let i = 0; i < 64; i++) if (st.b[i] && st.b[i].t !== 'K') mine.push(i);
+      q.target = prPick(mine); q.answer = prPinned(st, q.target);
+      if (!q.answer && Math.random() < .5) continue;      // keep pins common enough to be a question
+    }
+    q.sig = 'attack:' + ask + ':' + fenOf(st).split(' ')[0] + ':' + q.target;
+    return q;
+  }
+  return null;
+}
+
 /* 3 — PIECE TRACKING. One side moves and the other stands still: the exercise
    is following a piece, not playing a game, and alternating would put half the
    sequence on men the player was never asked to watch. Every move in the walk
@@ -12739,15 +12848,16 @@ function prMakeMini(diff){
   return null;
 }
 
-/* PR_MODES names six drills today; the generators above still answer to
-   seven keys, because prMakeSequence is not gone, only unreachable from the
+/* PR_MODES names seven drills today; the generators above still answer to
+   eight keys, because prMakeSequence is not gone, only unreachable from the
    dashboard until Task 14 gives Blindfold Sequence an entry of its own. Square
-   Trainer and Lines & Routes read their whole recipe — `kinds` and whatever
-   else their own ladder carries — rather than a bare difficulty number,
-   because a level is what question it offers as much as how hard it is; the
-   rest still take `r.level` alone. */
+   Trainer, Lines & Routes and Attack Vision read their whole recipe —
+   `kinds` and whatever else their own ladder carries — rather than a bare
+   difficulty number, because a level is what question it offers as much as
+   how hard it is; the rest still take `r.level` alone. */
 const PR_MAKE = {
   square: r => prMakeSquare(r), lines: r => prMakeLines(r), piece: r => prMakePiece(r),
+  attack: r => prMakeAttack(r),
   tracker: r => prMakeTrack(r.level), hold: r => prMakeMemory(r.level),
   progressive: r => prMakeMini(r.level)
 };
@@ -12921,6 +13031,7 @@ function prPresent(){
     case 'square':   return prShowSquare(q);
     case 'lines':    return prShowLines(q);
     case 'piece':    return prShowPiece(q);
+    case 'attack':   return prShowAttack(q);
     case 'track':    return prShowTrack(q);
     case 'memory':   return prShowMemory(q);
     case 'sequence': return prShowSequence(q);
@@ -13271,6 +13382,210 @@ function prAnswerPiece(q, got){
     const capNames = Array.from(want).sort((a, b) => a - b).map(sqName).join(', ') || 'none of them';
     prJudge(squareOk && capsOk, squareSay + ' Captures: <b>' + capNames + '</b>.', [], 'square');
   }, 'primary');
+}
+
+/* ---- 2b: attack vision ----
+   Six askers dispatched by q.ask: `attacks`, `defended` and `pinned` are one
+   square answered Yes or No; `attacked` and `attackers` are select-many with
+   a Done, on the board or typed; `hanging` is select-many with a second way
+   to answer — Nothing is hanging — since finding nothing is itself a real
+   answer, not the absence of one. All six errors are filed as 'square', the
+   same catch-all every other geometry mistake in Practice is filed under. */
+function prShowAttack(q){
+  if (q.ask === 'attacks')   return prShowAttackBool(q, 'attack');
+  if (q.ask === 'defended')  return prShowAttackBool(q, 'defended');
+  if (q.ask === 'pinned')    return prShowAttackBool(q, 'pinned');
+  if (q.ask === 'attacked' || q.ask === 'attackers') return prShowAttackSet(q);
+  return prShowAttackHanging(q);
+}
+/* Every man on the board, named and placed — the picture the notation
+   levels give in place of the board itself, on the same terms as Piece
+   Vision's prPieceWords, except nothing here is left off: which man matters
+   to an attack question is not settled until the question is read, so all
+   of them are named rather than all but the one asked about. */
+function prAttackWords(st){
+  const parts = [];
+  for (let i = 0; i < 64; i++){
+    const p = st.b[i];
+    if (p) parts.push(prMan(p.c, p.t) + ' on <b>' + sqName(i) + '</b>');
+  }
+  return parts;
+}
+/* The board, painted and ready — every asker ends a reveal here, whether it
+   started with the board up or the notation alone, on the same reasoning
+   prAnswerLinesBetween() already argues: a typed answer deserves to see the
+   position it was asked about as much as a clicked one does. */
+function prAttackBoardOn(q){
+  prBoardOn(true);
+  prLayout(false, true);
+  prMen(true);
+  prPaint(q.st.b);
+  prMarksClear();
+}
+/* The geometric line between two squares, drawn as feedback: pr-target on
+   every empty square it crosses, pr-from — the same mark a piece already on
+   the board gets everywhere else in Practice — on one that is actually in
+   the way. Off a straight line (a knight's attack, most of all) there is
+   nothing to draw, and this quietly draws nothing. */
+function prAttackRay(st, from, to){
+  const line = lineBetween(from, to);
+  if (!line) return;
+  for (const sq of line) prMark(sq, st.b[sq] ? 'pr-from' : 'pr-target');
+}
+/* The slider actually pinning a man, for the reveal only — prPinned() above
+   answers yes or no, this finds who is asking: lift the man off the board,
+   see who newly reaches its own king, and keep only an attacker whose line
+   to the king ran through the very square that was just cleared. */
+function prPinAttacker(st, sq){
+  const p = st.b[sq]; if (!p) return -1;
+  const king = kingSq(st, p.c); if (king < 0) return -1;
+  const work = { b: st.b.slice() };
+  work.b[sq] = null;
+  for (const a of attackersOf(work, king, other(p.c))){
+    const line = lineBetween(a, king);
+    if (line && line.indexOf(sq) >= 0) return a;
+  }
+  return -1;
+}
+/* `attacks`, `defended`, `pinned`: one square, Yes or No. */
+function prShowAttackBool(q, which){
+  const st = q.st;
+  let text;
+  if (which === 'attack') text = prMan(q.colour, st.b[q.from].t) + ' on <b>' + sqName(q.from) +
+    '</b> — does it attack <b>' + sqName(q.target) + '</b>?';
+  else if (which === 'defended') text = 'Is ' + prMan(q.colour, st.b[q.target].t) + ' on <b>' + sqName(q.target) + '</b> defended?';
+  else text = 'Is ' + prMan(st.b[q.target].c, st.b[q.target].t) + ' on <b>' + sqName(q.target) + '</b> pinned?';
+  if (q.board){
+    prAttackBoardOn(q);
+    prMark(which === 'attack' ? q.from : q.target, 'pr-from');
+    prQ(text);
+  } else {
+    prBoardOn(false);
+    prQ(prJoinWords(prAttackWords(st)) + '. ' + text);
+  }
+  prAnsButton('Yes', () => prAnswerAttackBool(q, which, true));
+  prAnsButton('No', () => prAnswerAttackBool(q, which, false));
+  PR.shownAt = prNow();
+}
+function prAnswerAttackBool(q, which, said){
+  const ok = said === q.answer, st = q.st;
+  prAttackBoardOn(q);
+  let why;
+  if (which === 'attack'){
+    prMark(q.from, 'pr-from');
+    prAttackRay(st, q.from, q.target);
+    if (q.answer) prMark(q.target, 'pr-right');
+    why = q.answer ? 'Yes — it reaches <b>' + sqName(q.target) + '</b>.' : 'No — that square is out of its reach.';
+  } else if (which === 'defended'){
+    prMark(q.target, 'pr-from');
+    const defenders = attackersOf(st, q.target, q.colour);
+    for (const d of defenders){ prAttackRay(st, d, q.target); prMark(d, 'pr-right'); }
+    why = q.answer ? 'Yes — covered by <b>' + defenders.map(sqName).join(', ') + '</b>.' : 'No — nothing of its own side reaches it.';
+  } else {
+    prMark(q.target, 'pr-from');
+    const attacker = q.answer ? prPinAttacker(st, q.target) : -1;
+    if (attacker >= 0) { prAttackRay(st, attacker, kingSq(st, st.b[q.target].c)); prMark(attacker, 'pr-right'); }
+    why = q.answer ? 'Yes — moving it exposes the king.' : 'No — it is free to move.';
+  }
+  prJudge(ok, (ok ? 'Correct. ' : 'No. ') + why, [], 'square');
+}
+/* `attacked`, `attackers`: select every square, then Done — clicked on the
+   board or, where the level has none, typed the way any other console
+   answer is, with the same forgiving pattern SAN parsing already uses. */
+function prShowAttackSet(q){
+  const st = q.st;
+  const label = q.ask === 'attacked'
+    ? 'Select every square ' + prMan(q.colour, st.b[q.from].t) + ' on <b>' + sqName(q.from) + '</b> attacks.'
+    : 'Select every square that attacks <b>' + sqName(q.target) + '</b>.';
+  if (q.board){
+    prAttackBoardOn(q);
+    prMark(q.ask === 'attacked' ? q.from : q.target, 'pr-from');
+    prQ(label);
+    prSub('Click each one, then Done.');
+    q.picks = new Set();
+    const anchor = q.ask === 'attacked' ? q.from : -1;
+    PR.click = i => {
+      if (PR.answered || i === anchor) return;
+      prLinesToggle(q.picks, i, (s, on) => { if (on) prMark(s, 'pr-pick'); else prSqEls[prVisual(s)].classList.remove('pr-pick'); });
+    };
+    prAnsButton('Done', () => prAnswerAttackSet(q, q.picks), 'primary');
+  } else {
+    prBoardOn(false);
+    prQ(prJoinWords(prAttackWords(st)) + '. ' + label);
+    prSub('Type them, e.g. f6 g5 c3.');
+    prAnsInput('e.g. f6 g5 c3', 60, inp => {
+      const got = new Set((inp.value.toLowerCase().match(/[a-h][1-8]/g) || []).map(sqIndex));
+      prAnswerAttackSet(q, got);
+    });
+  }
+  PR.shownAt = prNow();
+}
+function prAnswerAttackSet(q, got){
+  const want = new Set(q.answer);
+  const missed = q.answer.filter(sq => !got.has(sq)).sort((a, b) => a - b);
+  const wrong = Array.from(got).filter(sq => !want.has(sq)).sort((a, b) => a - b);
+  const ok = !missed.length && !wrong.length;
+  prAttackBoardOn(q);
+  if (q.ask === 'attacked'){
+    prMark(q.from, 'pr-from');
+    for (const sq of q.answer) prAttackRay(q.st, q.from, sq);
+  } else {
+    prMark(q.target, 'pr-from');
+    for (const sq of q.answer) prAttackRay(q.st, sq, q.target);
+  }
+  for (const sq of q.answer) prMark(sq, got.has(sq) ? 'pr-right' : 'pr-miss');
+  for (const sq of wrong) prMark(sq, 'pr-wrong');
+  const names = q.answer.slice().sort((a, b) => a - b).map(sqName).join(', ');
+  const say = ok
+    ? 'All ' + q.answer.length + ' of them: <b>' + names + '</b>.'
+    : (missed.length ? 'Missed <b>' + missed.map(sqName).join(', ') + '</b>. ' : '') +
+      (wrong.length ? 'Not <b>' + wrong.map(sqName).join(', ') + '</b>. ' : '') +
+      'The full answer is <b>' + names + '</b>.';
+  prJudge(ok, say, [], 'square');
+}
+/* `hanging`: select every square with something hanging on it, then Done —
+   or, since finding nothing is itself an answer, say so directly instead of
+   pressing Done over an empty board. */
+function prShowAttackHanging(q){
+  const st = q.st;
+  if (q.board){
+    prAttackBoardOn(q);
+    prQ('Select every square with something hanging on it.');
+    prSub('Click each one, then Done — or say Nothing is hanging.');
+    q.picks = new Set();
+    PR.click = i => {
+      if (PR.answered) return;
+      prLinesToggle(q.picks, i, (s, on) => { if (on) prMark(s, 'pr-pick'); else prSqEls[prVisual(s)].classList.remove('pr-pick'); });
+    };
+    prAnsButton('Done', () => prAnswerAttackHanging(q, q.picks), 'primary');
+    prAnsButton('Nothing is hanging', () => prAnswerAttackHanging(q, new Set()));
+  } else {
+    prBoardOn(false);
+    prQ(prJoinWords(prAttackWords(st)) + '. Which squares have something hanging on them?');
+    prSub('Name every one, or leave it blank if nothing is.');
+    prAnsInput('e.g. c3, e5', 40, inp => {
+      const got = new Set((inp.value.toLowerCase().match(/[a-h][1-8]/g) || []).map(sqIndex));
+      prAnswerAttackHanging(q, got);
+    });
+    prAnsButton('Nothing is hanging', () => prAnswerAttackHanging(q, new Set()));
+  }
+  PR.shownAt = prNow();
+}
+function prAnswerAttackHanging(q, got){
+  const want = new Set(q.answer);
+  const missed = q.answer.filter(sq => !got.has(sq)).sort((a, b) => a - b);
+  const wrong = Array.from(got).filter(sq => !want.has(sq)).sort((a, b) => a - b);
+  const ok = !missed.length && !wrong.length;
+  prAttackBoardOn(q);
+  for (const sq of q.answer) prMark(sq, got.has(sq) ? 'pr-right' : 'pr-miss');
+  for (const sq of wrong) prMark(sq, 'pr-wrong');
+  const names = q.answer.slice().sort((a, b) => a - b).map(sqName).join(', ');
+  const say = ok
+    ? (q.answer.length ? 'Yes — <b>' + names + '</b>.' : 'Right — nothing is hanging.')
+    : (missed.length ? 'Missed <b>' + missed.map(sqName).join(', ') + '</b>. ' : '') +
+      (wrong.length ? 'Not hanging: <b>' + wrong.map(sqName).join(', ') + '</b>. ' : '') +
+      (q.answer.length ? 'Hanging: <b>' + names + '</b>.' : 'Nothing was hanging.');
+  prJudge(ok, say, [], 'square');
 }
 
 /* ---- 3: piece tracking ---- */
