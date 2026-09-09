@@ -15865,13 +15865,13 @@ function prFinish(note){
      checkpoints missed" is what a player wants back and an accuracy figure
      is not. */
   const pb = PR.mode.key === 'progressive' ? PR.pb : null;
+  // an unlimited level spends nothing worth counting; read once and used
+  // below both for what is kept per level and for what the card shows
+  const peeksUsed = pb ? (pb.r.peeks === Infinity ? 0 : pb.r.peeks - pb.peeks) : 0;
   if (pb){
     m.stats.pb = m.stats.pb || {};
     m.stats.pb[PR.level] = { pass: !!pb.pass, played: pb.played, checks: pb.checks, checksOk: pb.checksOk,
-                             drifts: pb.drifts,
-                             // an unlimited level spends nothing worth counting
-                             peeks: pb.r.peeks === Infinity ? 0 : pb.r.peeks - pb.peeks,
-                             recoveries: pb.recoveries };
+                             drifts: pb.drifts, peeks: peeksUsed, recoveries: pb.recoveries };
     m.level = pb.pass ? Math.min(PR_PB_LEVELS.length, PR.level + 1) : PR.level;
   } else m.level = PR.level;
   if (m.level > m.best) m.best = m.level;
@@ -15891,7 +15891,7 @@ function prFinish(note){
     // pbEnd), so Accuracy and Best streak below are not what this session was
     // worth — these four are, and they are the same four kept per level above
     row('Checkpoints held', pb.checksOk + ' / ' + pb.checks);
-    row('Peeks used', pb.r.peeks === Infinity ? 0 : pb.r.peeks - pb.peeks);
+    row('Peeks used', peeksUsed);
     row('Recoveries', pb.recoveries);
     row('Drifts', pb.drifts);
   }
@@ -16947,13 +16947,16 @@ document.querySelectorAll('[data-time]').forEach(b => {
   b.onclick = () => pickBotTime(+b.dataset.time);
 });
 /* Progressive Blindfold's handoff into a real game does not want a setup box
-   asking twice what the drill just answered: the strongest bot on the ladder
-   below the top rung an account buys, and the slowest clock on offer, so the
-   game it lands on is a real test of what was just held rather than a blitz
-   mismatch. Reads the same setters the setup's own buttons call — see
-   pickBotLevel/pickBotTime above — rather than writing G.level/G.minutes
-   directly, so a rule that changes there (the guest ceiling, syncOptions)
-   changes here too. */
+   asking twice what the drill just answered. 1000 and the slowest clock are
+   the design's own choices, not derived from the ladder or from anything the
+   drill measured: 1000 is a mid-ladder rung, picked as a first real blindfold
+   opponent that will punish a dropped piece without out-calculating a
+   beginner — the top rung an account buys is 3200, more than triple it — and
+   the slowest clock is offered because every practitioner guide to playing
+   blind agrees a first blind game should be unhurried. Reads the same
+   setters the setup's own buttons call — see pickBotLevel/pickBotTime above
+   — rather than writing G.level/G.minutes directly, so a rule that changes
+   there (the guest ceiling, syncOptions) changes here too. */
 function prSuggestFirstBlindGame(){
   pickBotLevel(1000);
   pickBotTime(30);
