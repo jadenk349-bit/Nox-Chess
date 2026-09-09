@@ -12185,9 +12185,77 @@ function lsnStepCluster(q){
     gentler than Practice's rebuild, where only Clear removes a man, because
     a learner here should be able to fix a slip without hunting the palette
     for the Clear button first. */
+/** The mechanics of putting a position back a man at a time — a fresh empty
+    board, the twelve-glyph palette plus Clear a square, a click that places
+    or (on a second click of the same glyph) lifts a man, and Done judged
+    with rebuildDiff() — factored out of lsnStepRebuild so that lsnStepRecover
+    below can put a learner through the same rebuild without duplicating it:
+    the two steps differ only in what leads up to this moment (a studied
+    Position card for one, a played-out sequence for the other) and never in
+    what building the board back up actually asks of the player. `target` is
+    rebuildDiff()'s own shape, a list of `{sq, c, t}`; `onDone(res)` is
+    handed rebuildDiff()'s `{right, wrong, missing}` once Done is pressed, and
+    decides what finishing means for its own step. */
+function lsnRebuildUI(target, onDone){
+  let pick = null, ids = {};
+  // A fresh, empty board to build on — whatever position the caller studied
+  // stays untouched wherever it lives, so it can still be shown again if the
+  // rebuild falls short.
+  LSN.st = { b:Array(64).fill(null), turn:W, cr:{ wK:0, wQ:0, bK:0, bQ:0 }, ep:-1, half:0, full:1 };
+  LSN.mode = 'sighted';
+  lsnRender();
+  const palette = PR_PALETTE.map(p => ({ label:'<span class="g-' + p.c + '">' + pieceHTML(p.t) + '</span>', c:p.c, t:p.t }));
+  lsnChoices(palette.concat([{ label:'Clear a square', c:null, t:null }]), (c, b) => {
+    pick = c.c === null ? 'clear' : c;
+    Array.from(document.getElementById('lsnChoices').children).forEach(x => x.classList.remove('active'));
+    b.classList.add('active');
+  }, true, true);
+  LSN.onSquare = i => {
+    if (LSN.ok || !pick) return;
+    const there = LSN.st.b[i];
+    // The same glyph on a square that already carries it is the
+    // correction: a second click takes it back off rather than replacing
+    // it with an identical copy of itself.
+    if (pick !== 'clear' && there && there.c === pick.c && there.t === pick.t){
+      LSN.st.b[i] = null;
+      lsnRender();
+      return;
+    }
+    LSN.st.b[i] = null;
+    if (pick !== 'clear'){
+      const key = i + pick.c + pick.t;
+      if (!ids[key]) ids[key] = mk(pick.c, pick.t);
+      LSN.st.b[i] = ids[key];
+    }
+    lsnRender();
+  };
+  lsnUnder([{ label:'Done', cls:'primary wide', on(){
+    const placed = [];
+    for (let i = 0; i < 64; i++) if (LSN.st.b[i]) placed.push({ sq:i, c:LSN.st.b[i].c, t:LSN.st.b[i].t });
+    const res = rebuildDiff(placed, target);
+    LSN.onSquare = null;
+    LSN.marks = new Map();
+    res.right.forEach(p => LSN.marks.set(p.sq, 'lsn-right'));
+    res.wrong.forEach(p => LSN.marks.set(p.sq, 'lsn-wrong'));
+    res.missing.forEach(p => LSN.marks.set(p.sq, 'lsn-miss'));
+    lsnRender();
+    onDone(res);
+  } }]);
+  lsnPaint();
+}
+
+/** Hold the Position's `rebuild` mode — the same Position card as above,
+    then the board itself put back a man at a time from a twelve-glyph
+    palette (PR_PALETTE, Practice's own rebuild palette, reused rather than
+    redrawn) and judged with rebuildDiff(), the pure function the practice
+    board and this one now share. Pick a man, click its square; picking the
+    same man again and clicking its square once more takes it back off,
+    alongside picking Clear a square — the lesson's own toggle, one step
+    gentler than Practice's rebuild, where only Clear removes a man, because
+    a learner here should be able to fix a slip without hunting the palette
+    for the Clear button first. */
 function lsnStepRebuild(q){
   const target = q.want;
-  let pick = null, ids = {};
   const step = {
     title:'Rebuild it',
     what:'<p>Pick a man, then click its square. Pick it again and click to take it back off.</p>',
@@ -12202,53 +12270,12 @@ function lsnStepRebuild(q){
     }
   };
   function begin(){
-    // A fresh, empty board to build on — q.st (the studied position) stays
-    // untouched in the closure, so the Position card can still describe it
-    // by name if the rebuild falls short (see lsnConcede below).
-    LSN.st = { b:Array(64).fill(null), turn:W, cr:{ wK:0, wQ:0, bK:0, bQ:0 }, ep:-1, half:0, full:1 };
-    LSN.mode = 'sighted';
     lsnExtraHide();
-    lsnRender();
     step.ask = 'Place every man where it stood, then press Done.';
-    const palette = PR_PALETTE.map(p => ({ label:'<span class="g-' + p.c + '">' + pieceHTML(p.t) + '</span>', c:p.c, t:p.t }));
-    lsnChoices(palette.concat([{ label:'Clear a square', c:null, t:null }]), (c, b) => {
-      pick = c.c === null ? 'clear' : c;
-      Array.from(document.getElementById('lsnChoices').children).forEach(x => x.classList.remove('active'));
-      b.classList.add('active');
-    }, true, true);
-    LSN.onSquare = i => {
-      if (LSN.ok || !pick) return;
-      const there = LSN.st.b[i];
-      // The same glyph on a square that already carries it is the
-      // correction: a second click takes it back off rather than replacing
-      // it with an identical copy of itself.
-      if (pick !== 'clear' && there && there.c === pick.c && there.t === pick.t){
-        LSN.st.b[i] = null;
-        lsnRender();
-        return;
-      }
-      LSN.st.b[i] = null;
-      if (pick !== 'clear'){
-        const key = i + pick.c + pick.t;
-        if (!ids[key]) ids[key] = mk(pick.c, pick.t);
-        LSN.st.b[i] = ids[key];
-      }
-      lsnRender();
-    };
-    lsnUnder([{ label:'Done', cls:'primary wide', on(){
-      const placed = [];
-      for (let i = 0; i < 64; i++) if (LSN.st.b[i]) placed.push({ sq:i, c:LSN.st.b[i].c, t:LSN.st.b[i].t });
-      const res = rebuildDiff(placed, target);
-      LSN.onSquare = null;
-      LSN.marks = new Map();
-      res.right.forEach(p => LSN.marks.set(p.sq, 'lsn-right'));
-      res.wrong.forEach(p => LSN.marks.set(p.sq, 'lsn-wrong'));
-      res.missing.forEach(p => LSN.marks.set(p.sq, 'lsn-miss'));
-      lsnRender();
+    lsnRebuildUI(target, res => {
       if (!res.wrong.length && !res.missing.length) lsnRight('Every man where it stood.');
       else lsnConcede('It stood like this:' + lsnPositionHTML(q.st));
-    } }]);
-    lsnPaint();
+    });
   }
   return step;
 }
@@ -12863,14 +12890,351 @@ function lsnLesson7(){
   ];
 }
 
-/* ---- the two the course is still growing ----
-   Lessons 8 and 9 have no exercises of their own yet: Task 33 writes them.
-   Until then each is its own handoff card and nothing else, so the ladder is
-   ten rungs long, every one of them opens, and the drill each lesson trains
-   is already reachable from the course. A stub that hands off honestly is
-   worth more than a rung that says "coming soon" and does nothing. */
-function lsnLesson8(){ return [lsnHandoffStep(LESSONS[7])]; }   // Task 33
-function lsnLesson9(){ return [lsnHandoffStep(LESSONS[8])]; }   // Task 33
+/* ============================================================
+   TASK 33 — the four step kinds lessons 8 and 9 add, built from Move
+   Tracker forced to a longer walk (prMakeTracker), Blind Calculation's own
+   mate-in-one (prMakeCalc) and Branches (prMakeBranches) — the same
+   reasoning as Tasks 30a's, 31's and 32's own banners: the "make" function
+   is Practice's own, never copied, and every judgement below is either the
+   game's own rules (legalMoves/toSAN, asked again for the true king square,
+   the true count, the true last move) or Practice's own generator's answer
+   (q.answer, q.branches[i].ask/rootAsk), read rather than reinvented.
+   lsnStepCheckThree and lsnStepLineThenRoot are each one step with several
+   questions in it, answered in turn without ending the step until the last
+   one is right — `solve:'multi'` is their own tag, because the harness has
+   to re-read which of the questions is now on the card each pass, never
+   trusting the one it saw last. lsnStepRecover shares its rebuild mechanics
+   with lsnStepRebuild through lsnRebuildUI (above) rather than growing a
+   second copy of them.
+   ============================================================ */
+
+/** Fine's own habit, asked three times under one step: where is White's
+    king, how many men has Black, what was the last move — a Move Tracker
+    level-4 walk (four plies from the start, both sides), read out with the
+    men hidden the whole way through exactly as lsnStepCaptureSeq's own walk
+    is. A wrong answer marks itself and stays open, never ending the step:
+    the habit this teaches is catching a slip, not being sent back to answer
+    the whole thing again, so only the third right answer calls lsnRight().
+    The last-move choices are never read off q.path — they are built from
+    legalMoves() of the position the last move was actually played from
+    (`preLast`, a plain LSN.st snapshot taken the moment before that move is
+    played, on the same terms `LSN.last` already is a fact of the page and
+    not of the step), so every wrong choice on offer really was there to be
+    played. */
+function lsnStepCheckThree(){
+  const q = wantQ(() => prMakeTracker(prRecipe('tracker', 4)), x => !!x, 'a Move Tracker question');
+  let preLast = null;
+  const step = {
+    title:'Check yourself',
+    what:'<p>Every few moves, stop and ask: where is the king, how many men has the other side, what was the ' +
+         'last move? A wrong answer here is a drift caught early, not a game lost to it.</p>',
+    ask:'', gate:true, solve:'multi',
+    setup(){ begin(); }
+  };
+  // The same beat-then-a-move-a-beat cadence lsnDrillTrack and
+  // lsnStepCaptureSeq already read a walk out at.
+  function begin(){
+    LSN.st = q.start; LSN.mode = 'sighted'; LSN.named = true;
+    lsnCardKind = 'moves';
+    lsnGameCard();
+    step.ask = 'The starting position. Press <b>Hide the Board</b> and ' + q.path.length + ' moves follow.';
+    lsnUnder([{ label:'Hide the Board', cls:'primary wide', on:run }]);
+    lsnPaint();
+  }
+  function run(){
+    LSN.mode = 'blind';
+    lsnUnder([]);
+    step.ask = 'Follow the moves.';
+    lsnPaint();
+    lsnRender();
+    let n = 0;
+    const one = () => {
+      if (n === q.path.length - 1) preLast = cloneState(LSN.st);
+      if (n >= q.path.length){ askKing(); return; }
+      const s = q.path[n];
+      const legal = legalMoves(LSN.st, LSN.st.turn);
+      const m = legal.find(x => x.from === s.from && x.to === s.to);
+      if (m) lsnPlayMove(m);
+      n++;
+      lsnAt(one, 1200);
+    };
+    lsnAt(one, 700);
+  }
+  // A right answer that is not the last one: said and sounded exactly as
+  // lsnRight() says and sounds one, but LSN.ok stays false — there are more
+  // questions in this same step, and setting it would open the way on and
+  // stop every handler below from ever being asked again.
+  function advance(html, next){
+    lsnSay(html, 'good');
+    beep(880, .09);
+    next();
+  }
+  function askKing(){
+    lsnCap('');
+    step.ask = 'Where is White’s king?';
+    LSN.hint = () => lsnSay('Count the moves back — did it ever actually move?', 'tip');
+    const truth = kingSq(LSN.st, W);
+    LSN.onSquare = i => {
+      if (i === truth){
+        LSN.onSquare = null;
+        LSN.marks.set(i, 'lsn-right');
+        lsnRender();
+        advance('Yes — <b>' + sqName(truth) + '</b>.', askCount);
+        return;
+      }
+      lsnFlash(i);
+      lsnWrong('Not <b>' + sqName(i) + '</b>.');
+    };
+    lsnPaint();
+  }
+  function askCount(){
+    let n = 0;
+    for (let i = 0; i < 64; i++){ const p = LSN.st.b[i]; if (p && p.c === B) n++; }
+    step.ask = 'How many men does Black have now?';
+    LSN.hint = () => lsnSay('Start from what you last knew and follow the captures forward.', 'tip');
+    const labels = new Set([n]);
+    while (labels.size < 4) labels.add(Math.max(0, n + lsnRand(5) - 2));
+    lsnChoices(lsnShuffle(Array.from(labels)).map(v => ({ label:String(v), right:v === n })), (c, b) => {
+      if (c.right){
+        b.classList.add('right');
+        advance('Yes — ' + n + '.', askLast);
+        return;
+      }
+      b.classList.add('wrong'); b.disabled = true;
+      lsnWrong('Not that many.');
+    }, true);
+    lsnPaint();
+  }
+  function askLast(){
+    lsnCap('');
+    const last = q.path[q.path.length - 1];
+    const legal = legalMoves(preLast, preLast.turn);
+    const sameMove = m => m.from === last.from && m.to === last.to && (m.promo || null) === (last.promo || null);
+    const decoyPool = legal.filter(m => !sameMove(m)).map(m => toSAN(preLast, m, legal));
+    const decoys = new Set();
+    while (decoys.size < 3 && decoys.size < decoyPool.length) decoys.add(lsnAny(decoyPool));
+    const opts = lsnShuffle(Array.from(decoys).concat([last.san]));
+    step.ask = 'What was the last move?';
+    LSN.hint = () => lsnSay('It is the very last one that was read out.', 'tip');
+    lsnChoices(opts.map(l => ({ label:l, right:l === last.san })), (c, b) => {
+      if (c.right){
+        b.classList.add('right');
+        lsnRight('Yes — <b>' + last.san + '</b>.');
+        return;
+      }
+      b.classList.add('wrong'); b.disabled = true;
+      lsnWrong('Not that one.');
+    }, true);
+    lsnPaint();
+  }
+  return step;
+}
+
+/** Koltanowski's own remedy for a board that has gone dark on you: not a
+    guess, but a return to the score. Six plies from the start, read out
+    hidden exactly as lsnStepCheckThree's own walk above, and then — rather
+    than a question about the position — the position itself, put back from
+    nothing. The move list stays up throughout and afterward: it is the
+    score a player told to rebuild is meant to work from, not an answer key
+    withheld the way the Position card is. Judged with rebuildDiff() against
+    the walk's own end position, through lsnRebuildUI() — the palette
+    mechanics lsnStepRebuild already owns, asked here of a position arrived
+    at by moves instead of one simply studied. */
+function lsnStepRecover(){
+  const q = wantQ(
+    () => prMakeTracker({ start:'opening', plies:6, sides:'both', captures:0, asks:['where','what'] }),
+    x => !!x, 'a Move Tracker line');
+  const step = {
+    title:'Get it back',
+    what:'<p>A board that has gone dark on you is not fixed by guessing — that only cements a wrong one. Go ' +
+         'back to the moves you know were played and rebuild from them.</p>',
+    ask:'', gate:true, solve:'recover',
+    setup(){ begin(); }
+  };
+  function begin(){
+    LSN.st = q.start; LSN.mode = 'sighted'; LSN.named = true;
+    lsnCardKind = 'moves';
+    lsnGameCard();
+    step.ask = 'The starting position. Press <b>Hide the Board</b> and ' + q.path.length + ' moves follow.';
+    lsnUnder([{ label:'Hide the Board', cls:'primary wide', on:run }]);
+    lsnPaint();
+  }
+  function run(){
+    LSN.mode = 'blind';
+    lsnUnder([]);
+    step.ask = 'Follow the moves.';
+    lsnPaint();
+    lsnRender();
+    let n = 0;
+    const one = () => {
+      if (n >= q.path.length){ recover(); return; }
+      const s = q.path[n];
+      const legal = legalMoves(LSN.st, LSN.st.turn);
+      const m = legal.find(x => x.from === s.from && x.to === s.to);
+      if (m) lsnPlayMove(m);
+      n++;
+      lsnAt(one, 1200);
+    };
+    lsnAt(one, 700);
+  }
+  function recover(){
+    lsnCap('');
+    step.ask = 'You have lost the rook. Do not guess — rebuild from the score.';
+    lsnSay('The moves are still beside you. Play them through in your head, then place every man where they leave it.', 'tip');
+    const target = [];
+    for (let i = 0; i < 64; i++) if (q.final.b[i]) target.push({ sq:i, c:q.final.b[i].c, t:q.final.b[i].t });
+    lsnRebuildUI(target, res => {
+      if (!res.wrong.length && !res.missing.length) lsnRight('Every man where the moves leave it.');
+      else lsnConcede('The moves leave it like this:' + lsnPositionHTML(q.final));
+    });
+  }
+  return step;
+}
+
+/** Blind Calculation's own mate-in-one, level 1 — a position studied
+    sighted, then the men taken away exactly as every other hidden step here
+    takes them (I'm Ready, then LSN.mode, never a raw style change), and the
+    move found with lsnAskMove() — the same click-the-man-then-the-square
+    every notation drill and challenge in this course already asks with. `q`
+    is prMakeCalc()'s own answer, `{from, to, promo}`; `want` is the actual
+    legal move it names, found in legalMoves() exactly as prShowCalc's own
+    console arm already looks it up, so the move played and the SAN reported
+    are never assembled from the raw squares alone. A wrong move says only
+    that it is not mate — never what is, since Practice's own console answer
+    (prCalcAnswer) does not reveal it either, and revealing it here would
+    leave nothing to still find on a second try. */
+function lsnStepMate1(q){
+  const legal = legalMoves(q.st, q.st.turn);
+  const want = legal.find(m => m.from === q.answer.from && m.to === q.answer.to &&
+                                (m.promo || null) === (q.answer.promo || null));
+  const step = {
+    title:'Find the mate',
+    what:'<p>The forcing move first: is there a check that ends it? Hold the position, then look for it with ' +
+         'the men gone.</p>',
+    ask:'Study the position below.', gate:true, solve:'move',
+    setup(){
+      LSN.st = q.st; LSN.mode = 'sighted'; LSN.named = true;
+      lsnUnder([{ label:'I’m Ready', cls:'primary wide', on:begin }]);
+    }
+  };
+  function begin(){
+    LSN.mode = 'blind';
+    lsnUnder([]);
+    step.ask = (q.st.turn === W ? 'White' : 'Black') + ' to move — mate in one. Click the man, then the square.';
+    LSN.hint = () => lsnSay('A forcing move first — a check that leaves no reply at all.', 'tip');
+    lsnAskMove(want,
+      () => lsnRight('<b>' + toSAN(q.st, want, legal) + '</b> — mate.'),
+      () => lsnWrong('Not mate.'));
+    lsnPaint();
+    lsnRender();
+  }
+  return step;
+}
+
+/** Branches' own two-question shape, one branch of it: the root studied,
+    then one branch's line read out as notation — the men in plain sight,
+    level 1's own "root shown" — answered for at its end, and then, the line
+    let go and the root asked for again. The second question is the point:
+    a player who can hold a line has done half of what calculation asks, and
+    letting go of it cleanly enough to answer for the position that was
+    really there is the other half. Both questions are the same "what
+    stands here" choice Hold the Position already asks with (PR_PALETTE plus
+    Empty square), mirrored here — never reached into Practice's own
+    prAskShow(), which draws onto Practice's board rather than this
+    course's. Both right → lsnRight(); a wrong pick on either stays open
+    rather than ending the step, the same as every other choice question in
+    this course. */
+function lsnStepLineThenRoot(q){
+  const br = q.branches[0];
+  const step = {
+    title:'Walk out, and come back',
+    what:'<p>Hold a line to its end and answer for it, then let it go and answer for the root again — not for ' +
+         'wherever the line happened to leave off.</p>',
+    ask:'Study the root below.', gate:true, solve:'multi',
+    setup(){
+      LSN.st = q.root; LSN.mode = 'sighted'; LSN.named = true;
+      lsnUnder([{ label:'I’m Ready', cls:'primary wide', on:begin }]);
+    }
+  };
+  function askChoice(ask, onRight){
+    const palette = PR_PALETTE.map(p => ({ label:'<span class="g-' + p.c + '">' + pieceHTML(p.t) + '</span>', c:p.c, t:p.t }));
+    lsnChoices(palette.concat([{ label:'Empty square', c:null, t:null }]), (c, b) => {
+      const right = c.c === ask.colour && c.t === ask.type;
+      if (right){ b.classList.add('right'); onRight(); return; }
+      b.classList.add('wrong'); b.disabled = true;
+      lsnWrong(ask.type ? prMan(ask.colour, ask.type) + ' stood there.' : 'That square was empty.');
+    }, true, true);
+  }
+  function begin(){
+    LSN.mode = 'blind';
+    lsnUnder([]);
+    step.ask = 'Follow the line.';
+    lsnPaint();
+    lsnRender();
+    let n = 0;
+    const one = () => {
+      if (n >= br.sans.length){ askEnd(); return; }
+      const legal = legalMoves(LSN.st, LSN.st.turn);
+      const m = legal.find(x => toSAN(LSN.st, x, legal) === br.sans[n]);
+      if (m) lsnPlayMove(m);
+      n++;
+      lsnAt(one, 1200);
+    };
+    lsnAt(one, 700);
+  }
+  function askEnd(){
+    lsnCap('');
+    step.ask = br.ask.text;
+    LSN.hint = () => lsnSay('It is the square the line itself just finished on.', 'tip');
+    askChoice(br.ask, () => {
+      lsnSay('Yes.', 'good');
+      beep(880, .09);
+      askRoot();
+    });
+    lsnPaint();
+  }
+  function askRoot(){
+    LSN.st = q.root;
+    step.ask = br.rootAsk.text;
+    LSN.hint = () => lsnSay('Not the line — the root, before any of it was played.', 'tip');
+    askChoice(br.rootAsk, () => lsnRight('Yes.'));
+    lsnPaint();
+  }
+  return step;
+}
+
+/* The three demo captions below are trimmed from the brief's own wording to
+   respect "No caption runs past two sentences" (server/test_lessons.js), a
+   rule every other lesson's own captions already keep to — the brief's
+   three-questions-as-three-question-marks phrasing and its two three-sentence
+   demos each ran one sentence over, so the ideas are kept and the sentences
+   merged with an em dash rather than dropped. */
+function lsnLesson8(){
+  const L = LESSONS[7];
+  return [
+    lsnStepDemo({ title:'Three questions', what:'<p>Every few moves, stop and ask: <b>where are both kings, ' +
+                 'how many men each side, and what was the last move?</b> A wrong answer is a drift caught early.</p>',
+                 ask:'Press Continue.', named:true }),
+    lsnStepCheckThree(),
+    lsnStepDemo({ title:'When it slips', what:'<p>Do not guess — guessing cements a wrong board. Go back to the ' +
+                 'moves and rebuild — Koltanowski did exactly that when a board went dark on him.</p>',
+                 ask:'Press Continue.', named:true }),
+    lsnStepRecover(),
+    lsnHandoffStep(L)
+  ];
+}
+function lsnLesson9(){
+  const L = LESSONS[8];
+  return [
+    lsnStepDemo({ title:'Calculation is updating without being told the move',
+                 what:'<p>Forcing moves first — checks, captures, threats — one line at a time. Fix the ' +
+                 'position at its end like a stone in a stream, then step back to the root before the next ' +
+                 'line.</p>', ask:'Press Continue.', named:true }),
+    lsnStepMate1(prMakeCalc(prRecipe('calc', 1))), lsnStepMate1(prMakeCalc(prRecipe('calc', 1))),
+    lsnStepLineThenRoot(prMakeBranches(prRecipe('branches', 1))),
+    lsnHandoffStep(L)
+  ];
+}
 
 /* ============================================================
    CONTROLS

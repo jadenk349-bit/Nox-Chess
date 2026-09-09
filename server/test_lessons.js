@@ -239,6 +239,15 @@ function makePage(store){
     ' lsnStepChange, lsnStepAfter, lsnStepCaptureSeq, lsnStepExchange,' +
     ' prMakeAfter, prMakeTracker, prMakeForcing, prAttacked, prHanging, prMan,' +
     ' prForcingMaterialLabel, prForcingLineHTML,' +
+    // Task 33: the four step kinds lessons 8 and 9 add, and the two more
+    // Practice generators they are built from (prMakeCalc, prMakeBranches) —
+    // same reasoning as every banner above. kingSq is what the harness's own
+    // 'multi' solver (see solveStep below) asks independently for the true
+    // king square, rather than reading it off the step; newState/makeMove
+    // are what the 'recover' solver replays lsnStepRecover's own move list
+    // through, exactly as a learner rebuilding from the score would.
+    ' lsnStepCheckThree, lsnStepRecover, lsnStepMate1, lsnStepLineThenRoot, lsnRebuildUI,' +
+    ' prMakeCalc, prMakeBranches, kingSq, newState, makeMove,' +
     ' screen:()=>screenName });';
   let out = null;
   new Function('document','window','location','localStorage','WebSocket','AudioContext',
@@ -469,6 +478,70 @@ async function solveStep(p, budget){
     await sleep(30);
     return p.LSN.ok;
   }
+  if (kind === 'multi'){
+    // lsnStepCheckThree and lsnStepLineThenRoot are each one step with
+    // several questions inside it, and the step swaps `LSN.onSquare` for a
+    // fresh `lsnChoices()` (and back again) as it goes rather than ever
+    // showing both at once — so this re-reads which is currently on the
+    // card every pass instead of assuming either shape once. An initial
+    // under button ("Hide the Board", "I'm Ready") is pressed on the way in,
+    // the same patience the 'choices' branch above already has for one.
+    while (!p.LSN.ok && Date.now() < stop){
+      if (p.LSN.onSquare){
+        // the `&& p.LSN.onSquare` guard matters here: a right click can
+        // swap the question — and null this out — mid-loop, and the next
+        // iteration must not then call null(i).
+        for (let i = 0; i < 64 && !p.LSN.ok && Date.now() < stop && p.LSN.onSquare; i++){
+          p.LSN.onSquare(i);
+          await sleep(3);
+        }
+        continue;
+      }
+      let pressed = false;
+      for (const b of choices()){
+        if (b.disabled || b.classList.contains('right') || b.classList.contains('wrong')) continue;
+        b.onclick(); pressed = true; break;
+      }
+      if (!pressed) pressed = pressUnder();
+      await sleep(pressed ? 60 : 150);
+    }
+    return p.LSN.ok;
+  }
+  if (kind === 'recover'){
+    // lsnStepRecover carries no Position card at all — only the move list
+    // it played, which stays up rather than going down with the board — so
+    // there is nothing here for readPositionCard() to read. The honest
+    // brute force is the one a learner is actually told to do: replay the
+    // SANs the card shows through the page's own newState()/parseMoveIn()/
+    // makeMove() to arrive at the position, then place it exactly as the
+    // 'rebuild' branch above does. readMovesCard() reads the same markup
+    // lsnMovesHTML() renders LSN.sans into, never LSN.sans itself.
+    if (!pressUnder()) return false;                     // "Hide the Board"
+    const ready = await until(() => p.by('lsnChoices').children.length > 0, stop - Date.now());
+    if (!ready) return false;
+    const sans = readMovesCard(p.by('lsnExtraBody').innerHTML || '');
+    if (!sans.length) return false;
+    let st = p.newState();
+    for (const san of sans){
+      const res = p.parseMoveIn(st, san);
+      if (!res.move) return false;
+      st = p.makeMove(st, res.move);
+    }
+    for (let i = 0; i < 64; i++){
+      const man = st.b[i];
+      if (!man) continue;
+      const btn = Array.from(choices()).find(b => b.dataset.c === man.c && b.dataset.t === man.t);
+      if (!btn || !p.LSN.onSquare) return false;
+      btn.onclick();
+      p.LSN.onSquare(i);
+    }
+    await sleep(20);
+    const done = Array.from(under()).find(b => !b.disabled && b.textContent.indexOf('Done') === 0);
+    if (!done) return false;
+    done.onclick();
+    await sleep(30);
+    return p.LSN.ok;
+  }
 
   // 'square' (lsnDrillClick/lsnDrillName), 'move' (lsnNotationStep), 'none'
   // (lsnStepDemo/lsnHandoffStep, both gate-less and never asked to solve)
@@ -550,6 +623,16 @@ function readPositionCard(html, sqIndex){
     }
   }
   return men;
+}
+/** The Moves card, read the way lsnMovesHTML() actually renders it: every
+ * `<div class="m…">SAN</div>` in order, with the empty half of an unfinished
+ * pair (`<div></div>`) simply carrying no text and dropped rather than
+ * matched. Used by the 'recover' solver in place of readPositionCard() —
+ * lsnStepRecover shows the score, never the position. */
+function readMovesCard(html){
+  return (html.match(/<div class="m[^"]*">([^<]*)<\/div>/g) || [])
+    .map(s => s.replace(/<[^>]+>/g, ''))
+    .filter(Boolean);
 }
 
 /** Walk one lesson end to end, answering everything. */
@@ -1950,6 +2033,207 @@ async function walk(p, n){
   {
     openBareStep(p, p.lsnStepExchange(p.prMakeForcing(p.prRecipe('forcing', 2))));
     check('lsnStepExchange is answerable by the choices solver', await solveStep(p, 15000));
+  }
+
+  /* ============================================================
+   * Task 33: the four step kinds lessons 8 and 9 add, exercised on their
+   * own — the same reason Tasks 30a's, 31's and 32's own sections above
+   * exist: walk() already proves each one finishes a real lesson, this
+   * proves what each does with a right answer, a wrong one, and the edges
+   * the walk never has reason to hit (a wrong king square, a wrong count, a
+   * wrong last move, a non-mating move, a wrong rebuild).
+   * ============================================================ */
+  head('The four new step kinds for lessons 8 and 9 are exercised on their own');
+
+  head('lsnStepCheckThree — three questions under one step, none of them ending it early but the last');
+  {
+    const step = p.lsnStepCheckThree();
+    check('solve is multi', step.solve === 'multi');
+    openBareStep(p, step);
+    const hide = Array.from(p.by('lsnUnder').children).find(b => b.textContent.indexOf('Hide the Board') === 0);
+    check('Hide the Board is offered on the starting position', !!hide && p.LSN.mode === 'sighted');
+    hide.onclick();
+    check('the board goes dark for the walk', p.LSN.mode === 'blind');
+    const asked = await until(() => !!p.LSN.onSquare, 10000);
+    check('the walk finishes and the king question is asked first', asked, p.by('lsnAsk').innerHTML);
+    const truth = p.kingSq(p.LSN.st, 'w');
+    check('White does still have a king to ask about', truth >= 0);
+    let wrongSq = -1;
+    for (let i = 0; i < 64; i++) if (i !== truth){ wrongSq = i; break; }
+    p.LSN.onSquare(wrongSq);
+    check('a wrong king square is refused without ending the step',
+          p.LSN.ok === false && p.LSN.marks.get(wrongSq) !== 'lsn-right');
+    p.LSN.onSquare(truth);
+    check('the right square is marked right and moves on to a count question, rather than ending the step',
+          p.LSN.ok === false && p.LSN.marks.get(truth) === 'lsn-right' && p.by('lsnChoices').children.length > 0,
+          p.by('lsnAsk').innerHTML);
+    {
+      const list = Array.from(p.by('lsnChoices').children);
+      let rightBtn = null;
+      for (const b of list){
+        b.onclick();
+        if (b.classList.contains('right')){ rightBtn = b; break; }
+        check('a wrong count is marked wrong and leaves the step open',
+              b.classList.contains('wrong') && p.LSN.ok === false);
+      }
+      check('the count question is found', !!rightBtn);
+    }
+    check('the step is still open — the last-move question is still to come, with fresh choices',
+          p.LSN.ok === false && p.by('lsnChoices').children.length > 0, p.by('lsnAsk').innerHTML);
+    {
+      const list = Array.from(p.by('lsnChoices').children);
+      let rightBtn = null;
+      for (const b of list){
+        b.onclick();
+        if (p.LSN.ok){ rightBtn = b; break; }
+        check('a wrong last-move choice is marked wrong and leaves the step open', b.classList.contains('wrong'));
+      }
+      check('the third right answer, and only the third, finishes the step', p.LSN.ok === true && !!rightBtn);
+    }
+  }
+  {
+    openBareStep(p, p.lsnStepCheckThree());
+    check('lsnStepCheckThree is answerable by the multi solver', await solveStep(p, 15000));
+  }
+
+  head('lsnStepRecover — six plies read hidden, then rebuilt from the score alone, never a Position card');
+  {
+    const step = p.lsnStepRecover();
+    check('solve is recover', step.solve === 'recover');
+    openBareStep(p, step);
+    const hide = Array.from(p.by('lsnUnder').children).find(b => b.textContent.indexOf('Hide the Board') === 0);
+    check('Hide the Board is offered on the starting position', !!hide && p.LSN.mode === 'sighted');
+    hide.onclick();
+    const ready = await until(() => p.by('lsnChoices').children.length > 0, 12000);
+    check('the walk finishes and the rebuild palette comes up', ready, p.by('lsnAsk').innerHTML);
+    check('the card says not to guess, and to rebuild from the score',
+          (p.by('lsnAsk').innerHTML || '').indexOf('Do not guess') >= 0, p.by('lsnAsk').innerHTML);
+    check('the move list stays up rather than going down with the board',
+          p.by('lsnExtraTitle').textContent === 'The Moves' && p.by('lsnExtra').style.display !== 'none');
+    // Read the card's own SANs exactly as the 'recover' solver does, and
+    // replay them independently here to prove the target it rebuilds
+    // against really is the walk's own end position — never the step's own
+    // internal target read directly.
+    const sans = readMovesCard(p.by('lsnExtraBody').innerHTML || '');
+    check('the card lists six plies', sans.length === 6, sans.join(' '));
+    let st = p.newState();
+    sans.forEach(san => { const res = p.parseMoveIn(st, san); st = p.makeMove(st, res.move); });
+    for (let i = 0; i < 64; i++){
+      const man = st.b[i];
+      if (!man) continue;
+      const btn = Array.from(p.by('lsnChoices').children).find(b => b.dataset.c === man.c && b.dataset.t === man.t);
+      btn.onclick();
+      p.LSN.onSquare(i);
+    }
+    Array.from(p.by('lsnUnder').children).find(b => b.textContent.indexOf('Done') === 0).onclick();
+    check('the end position, rebuilt from the score alone, is accepted outright', p.LSN.ok === true);
+  }
+  {
+    // one man short concedes rather than passing, the same contract
+    // lsnStepRebuild's own rebuild already keeps.
+    const step = p.lsnStepRecover();
+    openBareStep(p, step);
+    Array.from(p.by('lsnUnder').children).find(b => b.textContent.indexOf('Hide the Board') === 0).onclick();
+    await until(() => p.by('lsnChoices').children.length > 0, 12000);
+    const sans = readMovesCard(p.by('lsnExtraBody').innerHTML || '');
+    let st = p.newState();
+    sans.forEach(san => { const res = p.parseMoveIn(st, san); st = p.makeMove(st, res.move); });
+    const men = [];
+    for (let i = 0; i < 64; i++) if (st.b[i]) men.push({ sq:i, c:st.b[i].c, t:st.b[i].t });
+    men.slice(0, -1).forEach(m => {
+      const btn = Array.from(p.by('lsnChoices').children).find(b => b.dataset.c === m.c && b.dataset.t === m.t);
+      btn.onclick();
+      p.LSN.onSquare(m.sq);
+    });
+    Array.from(p.by('lsnUnder').children).find(b => b.textContent.indexOf('Done') === 0).onclick();
+    check('one man short concedes rather than passing', p.LSN.ok === true);
+    const missing = men[men.length - 1];
+    check('the missing man is marked lsn-miss', p.LSN.marks.get(missing.sq) === 'lsn-miss');
+  }
+  {
+    openBareStep(p, p.lsnStepRecover());
+    check('lsnStepRecover is answerable by the recover solver', await solveStep(p, 15000));
+  }
+
+  head('lsnStepMate1 — Blind Calculation’s mate-in-one, found with the men gone, judged by lsnAskMove()');
+  {
+    const q = p.prMakeCalc(p.prRecipe('calc', 1));
+    check('the question carries a position and a mating move', !!q && !!q.st && !!q.answer, JSON.stringify(q && q.answer));
+    const step = p.lsnStepMate1(q);
+    check('solve is move', step.solve === 'move');
+    openBareStep(p, step);
+    check('the position is shown sighted first', p.LSN.st === q.st && p.LSN.mode === 'sighted');
+    const ready = Array.from(p.by('lsnUnder').children).find(b => b.textContent.indexOf('I’m Ready') === 0);
+    check('I’m Ready is offered', !!ready);
+    ready.onclick();
+    check('the men go dark with it', p.LSN.mode === 'blind');
+    const legal = p.legalMoves(q.st, q.st.turn);
+    const want = legal.find(m => m.from === q.answer.from && m.to === q.answer.to &&
+                                  (m.promo || null) === (q.answer.promo || null));
+    check('the answer is a legal move in the position', !!want, JSON.stringify(q.answer));
+    const other = legal.find(m => !(m.from === want.from && m.to === want.to));
+    check('there is a non-mating legal move to try first', !!other);
+    p.LSN.onSquare(other.from);
+    p.LSN.onSquare(other.to);
+    check('a move that is not mate says only that — never what is — and does not end the step',
+          p.LSN.ok === false && (p.by('lsnSay').innerHTML || '').indexOf('Not mate') >= 0,
+          p.by('lsnSay').innerHTML);
+    p.LSN.onSquare(want.from);
+    p.LSN.onSquare(want.to);
+    check('the mate is accepted', p.LSN.ok === true);
+  }
+  {
+    openBareStep(p, p.lsnStepMate1(p.prMakeCalc(p.prRecipe('calc', 1))));
+    check('lsnStepMate1 is answerable by the move solver', await solveStep(p, 8000));
+  }
+
+  head('lsnStepLineThenRoot — one branch walked to its end, then the root asked for again');
+  {
+    const q = p.prMakeBranches(p.prRecipe('branches', 1));
+    check('the question carries a branch with its own end question and root question',
+          !!q && Array.isArray(q.branches) && q.branches.length >= 1 &&
+          !!q.branches[0].ask && !!q.branches[0].rootAsk, JSON.stringify(q && q.branches && q.branches[0]));
+    const br = q.branches[0];
+    const step = p.lsnStepLineThenRoot(q);
+    check('solve is multi', step.solve === 'multi');
+    openBareStep(p, step);
+    check('the root is shown, men in plain sight — level 1 shows it', p.LSN.st === q.root && p.LSN.mode === 'sighted');
+    const ready = Array.from(p.by('lsnUnder').children).find(b => b.textContent.indexOf('I’m Ready') === 0);
+    check('I’m Ready is offered', !!ready);
+    ready.onclick();
+    check('the men go dark for the line', p.LSN.mode === 'blind');
+    const asked = await until(() => p.by('lsnChoices').children.length > 0, 8000);
+    check('the line plays and the branch’s own end question is asked', asked, p.by('lsnAsk').innerHTML);
+    check('it is exactly the question the branch carries',
+          (p.by('lsnAsk').innerHTML || '') === br.ask.text, p.by('lsnAsk').innerHTML);
+    {
+      const list = Array.from(p.by('lsnChoices').children);
+      let rightBtn = null;
+      for (const b of list){
+        b.onclick();
+        if (b.classList.contains('right')){ rightBtn = b; break; }
+        check('a wrong end-of-branch choice is marked wrong and leaves the step open',
+              b.classList.contains('wrong') && p.LSN.ok === false);
+      }
+      check('the branch’s end is found', !!rightBtn);
+    }
+    check('the step is not over — the root question is still to come', p.LSN.ok === false);
+    const asked2 = await until(() => (p.by('lsnAsk').innerHTML || '') === br.rootAsk.text, 2000);
+    check('the line is let go and the root question takes its place', asked2, p.by('lsnAsk').innerHTML);
+    {
+      const list = Array.from(p.by('lsnChoices').children);
+      let rightBtn = null;
+      for (const b of list){
+        b.onclick();
+        if (p.LSN.ok){ rightBtn = b; break; }
+        check('a wrong root choice is marked wrong and leaves the step open', b.classList.contains('wrong'));
+      }
+      check('the root is found too, and only now does the step end', p.LSN.ok === true && !!rightBtn);
+    }
+  }
+  {
+    openBareStep(p, p.lsnStepLineThenRoot(p.prMakeBranches(p.prRecipe('branches', 1))));
+    check('lsnStepLineThenRoot is answerable by the multi solver', await solveStep(p, 8000));
   }
 
   console.log('\n' + passed + ' passed, ' + failed + ' failed');
