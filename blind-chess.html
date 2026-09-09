@@ -11641,6 +11641,14 @@ function lsnStepDemo(o){
       LSN.flip = !!o.flip;
       LSN.named = !!o.named;
       LSN.mode = o.mode || 'sighted';
+      // A demo of Complete Blindfold's own console has to actually show the
+      // console — `LSN.mode = 'total'` alone only takes the board away
+      // (lsnPaint()'s own `#lsnConsole` toggle reads `LSN.console`, a
+      // separate flag on purpose: see lsnStepColour()'s note on the same
+      // pair, a step that wants the board gone but is not itself a console
+      // demo). `entry` is left off — there is nothing to type here, only to
+      // look at.
+      LSN.console = !!o.console;
       (o.marks || []).forEach(([sq, cls]) => LSN.marks.set(sq, cls));
       if (o.say) lsnSay(o.say, 'tip');
     }
@@ -12549,7 +12557,7 @@ function lsnLesson10(){
   return [
     lsnStepDemo({ title:'See the Board', what:'<p>Sixty-four empty squares to click, three peeks allowed — this is the empty board Krogius said to play on first.</p>', ask:'Press Continue.', st, mode:'blind' }),
     lsnStepDemo({ title:'Fog of War', what:'<p>Your men lit, everything else dark. A game vision, not a step on this path — the path runs through the two blindfold visions.</p>', ask:'Press Continue.', st, mode:'fog' }),
-    lsnStepDemo({ title:'Complete Blindfold', what:'<p>No board at all — you type your moves and read theirs, with three peeks to save you.</p>', ask:'Press Continue.', st, mode:'total' }),
+    lsnStepDemo({ title:'Complete Blindfold', what:'<p>No board at all — you type your moves and read theirs, with three peeks to save you.</p>', ask:'Press Continue.', st, mode:'total', console:true }),
     lsnStepDemo({ title:'How a first game goes', what:'<p>Short, with few men — check every three moves, and rebuild from the score if it slips. Peeks are a tool, not a failure.</p>', ask:'Press Continue.', named:true }),
     lsnStepMiniGame(),
     lsnHandoffStep(L)

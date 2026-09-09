@@ -243,12 +243,19 @@ function makePage(store){
     ' lsnStepCheckThree, lsnStepRecover, lsnStepMate1, lsnStepLineThenRoot, lsnRebuildUI,' +
     ' prMakeCalc, prMakeBranches, kingSq, newState, makeMove,' +
     // Task 34: lesson 10's own mini game. lsnStepMiniGame() builds its own
-    // position from prMakeProgressive() every time it is called, so there is
-    // nothing else to expose for it — legalMoves/kingSq above are what the
-    // harness already asks the page for the true answer with, and lsnPieceEls
-    // is what the 'mine' render check below reads to tell a man's own colour
-    // and whether it is currently drawn hidden.
-    ' lsnStepMiniGame, lsnPieceEls,' +
+    // position from prMakeProgressive() every time it is called and there is
+    // no way to hand it one — legalMoves/kingSq above are what the harness
+    // already asks the page for the true answer with, and lsnPieceEls is
+    // what the 'mine' render check below reads to tell a man's own colour
+    // and whether it is currently drawn hidden. prMakeProgressive, prRecipe
+    // (already exposed) and bestMove are what the review's fix for the
+    // isolated mini-game test deals a position with independently — a fast,
+    // pure pre-check of the same drive the real step plays (learner plays
+    // legal[0], the page replies with bestMove(st, 2)), used to keep only a
+    // deal that is expected to reach the checkpoint, or to hunt one that
+    // is expected to end before it — before ever spending a real step's own
+    // real timers confirming which one it actually is.
+    ' lsnStepMiniGame, lsnPieceEls, prMakeProgressive, bestMove,' +
     ' screen:()=>screenName });';
   let out = null;
   new Function('document','window','location','localStorage','WebSocket','AudioContext',
@@ -774,6 +781,20 @@ async function walk(p, n){
             p.LSN.mode === kinds[i], p.LSN.mode);
       check('lesson 10 step ' + (i + 1) + ' asks nothing — Continue is already open',
             p.LSN.steps[i].gate === false && p.by('lsnNext').disabled === false);
+      // See the Board and Fog of War both keep the board frame up — only
+      // Complete Blindfold, the one demo that is actually of the console,
+      // takes it away and shows the console in its place (the fix for the
+      // review's first finding: lsnStepDemo() left LSN.console false, so
+      // this demo showed neither board nor console).
+      if (kinds[i] === 'total'){
+        check('the Complete Blindfold demo hides the board frame',
+              p.by('lsnFrame').style.display === 'none', p.by('lsnFrame').style.display);
+        check('and shows the console in its place',
+              p.by('lsnConsole').classList.contains('show'));
+      } else {
+        check('the ' + titles[i] + ' demo keeps the board frame up',
+              p.by('lsnFrame').style.display !== 'none', p.by('lsnFrame').style.display);
+      }
     }
     p.lsnOpen(10, 3);
     check('lesson 10 step 4 is how a first game goes',
@@ -2284,65 +2305,163 @@ async function walk(p, n){
    * accepted rather than one fixed answer, a reply that waits on its own
    * timer rather than landing mid-click, the checkpoint's wrong answer that
    * costs nothing, and the fourth move that ends it.
+   *
+   * Review fix: `prMakeProgressive()` is unseeded, and the page's own
+   * `bestMove()` is not deterministic (it scores with `Math.random()` mixed
+   * in and breaks ties at random too), so an unscreened deal can have the
+   * page's own reply mate or stalemate the learner before the checkpoint
+   * ever comes up — the first run of this section did exactly that, and the
+   * hand-written wrong-square click below crashed the whole suite rather
+   * than failing one check. `simulateMiniGameDrive()` is a fast, pure
+   * pre-check of the very same drive the real step plays — the learner
+   * plays legal[0] (the same first legal move the generic solver's own
+   * move-branch would try first), the page replies with `bestMove(st, 2)` —
+   * so a deal can be screened for a shape without ever touching the DOM or
+   * a real timer. It is a filter, not a promise: `bestMove()`'s own
+   * randomness means a screened deal can still play out differently for
+   * real, which is why the checkpoint section below still guards the
+   * wrong-square click rather than assuming it is there, and why the
+   * early-finish section confirms every candidate for real before counting
+   * it found.
    * ============================================================ */
+  function simulateMiniGameDrive(st){
+    for (let mv = 0; mv < 2; mv++){
+      const legal = p.legalMoves(st, st.turn);
+      if (!legal.length) return 'the learner’s own move ' + (mv + 1);
+      st = p.makeMove(st, legal[0]);
+      const theirs = p.legalMoves(st, st.turn);
+      if (!theirs.length) return 'the page’s reply to move ' + (mv + 1);
+      st = p.makeMove(st, p.bestMove(st, 2) || theirs[0]);
+    }
+    return null;                                            // both rounds completed — the checkpoint is reached
+  }
+
   head('lsnStepMiniGame — Progressive Blindfold’s own first rung, played once with a checkpoint in the middle');
   {
-    const step = p.lsnStepMiniGame();
-    check('solve is multi', step.solve === 'multi');
-    openBareStep(p, step);
-    check('the position is three a side, mine vision, White’s own eye',
-          p.LSN.st.b.filter(Boolean).length === 6 && p.LSN.mode === 'mine' && p.LSN.eye === 'w',
-          p.LSN.st.b.filter(Boolean).length + ' men, ' + p.LSN.mode + ' / ' + p.LSN.eye);
-    check('the learner is asked to move first', !!p.LSN.onSquare &&
-          (p.by('lsnAsk').innerHTML || '').indexOf('Click a man') >= 0, p.by('lsnAsk').innerHTML);
+    // Dealt through a capped retry that keeps only a deal the simulation
+    // above expects to reach the checkpoint — an unscreened deal ending
+    // before it is exercised on its own, deliberately, in the section after
+    // this one, rather than crashing this one by surprise.
+    let dealt = null;
+    for (let t = 0; t < 60 && !dealt; t++){
+      const q = p.prMakeProgressive(p.prRecipe('progressive', 1));
+      if (q && !simulateMiniGameDrive(q.st)) dealt = q;
+    }
+    check('a deal that reaches the checkpoint is found within 60 tries', !!dealt);
+    // a bare `return` here would abort the whole suite (this section sits
+    // directly inside the top-level async run()), not just this block
+    if (dealt){
+      const step = p.lsnStepMiniGame();
+      check('solve is multi', step.solve === 'multi');
+      openBareStep(p, step);
+      p.LSN.st = dealt.st;              // the pre-screened deal, not the step's own fresh internal draw
+      check('the position is three a side, mine vision, White’s own eye',
+            p.LSN.st.b.filter(Boolean).length === 6 && p.LSN.mode === 'mine' && p.LSN.eye === 'w',
+            p.LSN.st.b.filter(Boolean).length + ' men, ' + p.LSN.mode + ' / ' + p.LSN.eye);
+      check('the learner is asked to move first', !!p.LSN.onSquare &&
+            (p.by('lsnAsk').innerHTML || '').indexOf('Click a man') >= 0, p.by('lsnAsk').innerHTML);
 
-    const awaitTurn = () => until(() =>
-      !!p.LSN.onSquare && (p.by('lsnAsk').innerHTML || '').indexOf('Click a man') >= 0, 5000);
-    const awaitCheckpoint = () => until(() =>
-      (p.by('lsnAsk').innerHTML || '').indexOf('Checkpoint') >= 0, 5000);
+      const awaitTurn = () => until(() =>
+        !!p.LSN.onSquare && (p.by('lsnAsk').innerHTML || '').indexOf('Click a man') >= 0, 5000);
+      const awaitCheckpoint = () => until(() =>
+        p.LSN.ok || (p.by('lsnAsk').innerHTML || '').indexOf('Checkpoint') >= 0, 5000);
 
-    // Move 1 — any legal move is right, the first one legalMoves() offers,
-    // never a fixed answer read off the step.
-    let legal = p.legalMoves(p.LSN.st, p.LSN.st.turn);
-    let before = p.LSN.st;
-    p.LSN.onSquare(legal[0].from);
-    p.LSN.onSquare(legal[0].to);
-    check('move 1 is accepted and the step is not over', p.LSN.st !== before && p.LSN.ok === false);
-    check('the reply waits on its own timer rather than landing mid-click', p.LSN.onSquare === null);
-    check('the second move is asked for once the reply lands', await awaitTurn());
+      // Move 1 — any legal move is right, the first one legalMoves() offers,
+      // never a fixed answer read off the step.
+      let legal = p.legalMoves(p.LSN.st, p.LSN.st.turn);
+      let before = p.LSN.st;
+      p.LSN.onSquare(legal[0].from);
+      p.LSN.onSquare(legal[0].to);
+      check('move 1 is accepted and the step is not over', p.LSN.st !== before && p.LSN.ok === false);
+      check('the reply waits on its own timer rather than landing mid-click', p.LSN.onSquare === null);
+      check('the second move is asked for once the reply lands', await awaitTurn());
 
-    // Move 2, then the checkpoint — lesson 8's own habit, asked for real.
-    legal = p.legalMoves(p.LSN.st, p.LSN.st.turn);
-    before = p.LSN.st;
-    p.LSN.onSquare(legal[0].from);
-    p.LSN.onSquare(legal[0].to);
-    check('move 2 is accepted', p.LSN.st !== before && p.LSN.ok === false);
-    check('the checkpoint interrupts after the second move', await awaitCheckpoint(), p.by('lsnAsk').innerHTML);
-
-    const truth = p.kingSq(p.LSN.st, 'w');
-    check('White does still have a king to ask about', truth >= 0);
-    let wrongSq = -1;
-    for (let i = 0; i < 64; i++) if (i !== truth){ wrongSq = i; break; }
-    p.LSN.onSquare(wrongSq);
-    check('a wrong king square is refused without ending the step', p.LSN.ok === false);
-    p.LSN.onSquare(truth);
-    check('the right square is accepted and the game resumes', await awaitTurn());
-
-    // Moves 3 and 4 finish the step — two more legal moves, the page
-    // replying to each, and the fourth ends it.
-    for (let n = 0; n < 2 && !p.LSN.ok; n++){
+      // Move 2, then the checkpoint — lesson 8's own habit, asked for real.
       legal = p.legalMoves(p.LSN.st, p.LSN.st.turn);
       before = p.LSN.st;
       p.LSN.onSquare(legal[0].from);
       p.LSN.onSquare(legal[0].to);
-      if (p.LSN.ok) break;
-      await until(() => p.LSN.st !== before && (p.LSN.onSquare || p.LSN.ok), 5000);
+      check('move 2 is accepted', p.LSN.st !== before && p.LSN.ok === false);
+      const atCheckpoint = await awaitCheckpoint();
+      check('the checkpoint interrupts after the second move', atCheckpoint && !p.LSN.ok, p.by('lsnAsk').innerHTML);
+
+      // Guarded rather than assumed: the pre-screen above is a filter, not a
+      // guarantee, so a missing handler here — the deal ending early despite
+      // it — is a failed check rather than a crash that takes the rest of
+      // the suite down with it (the review's second finding).
+      if (atCheckpoint && p.LSN.onSquare){
+        const truth = p.kingSq(p.LSN.st, 'w');
+        check('White does still have a king to ask about', truth >= 0);
+        let wrongSq = -1;
+        for (let i = 0; i < 64; i++) if (i !== truth){ wrongSq = i; break; }
+        p.LSN.onSquare(wrongSq);
+        check('a wrong king square is refused without ending the step', p.LSN.ok === false);
+        p.LSN.onSquare(truth);
+        check('the right square is accepted and the game resumes', await awaitTurn());
+      } else {
+        check('the checkpoint’s own click handler was there to click a wrong square against', false,
+              'the deal ended before the checkpoint despite the pre-screen — see the section below');
+      }
+
+      // Moves 3 and 4 finish the step — two more legal moves, the page
+      // replying to each, and the fourth ends it. Skipped if the checkpoint
+      // above never actually resumed the game.
+      for (let n = 0; n < 2 && !p.LSN.ok && p.LSN.onSquare; n++){
+        legal = p.legalMoves(p.LSN.st, p.LSN.st.turn);
+        before = p.LSN.st;
+        p.LSN.onSquare(legal[0].from);
+        p.LSN.onSquare(legal[0].to);
+        if (p.LSN.ok) break;
+        await until(() => p.LSN.st !== before && (p.LSN.onSquare || p.LSN.ok), 5000);
+      }
+      check('four moves finish the step', p.LSN.ok === true);
     }
-    check('four moves finish the step', p.LSN.ok === true);
   }
   {
     openBareStep(p, p.lsnStepMiniGame());
     check('lsnStepMiniGame is answerable by the multi solver, cold', await solveStep(p, 20000));
+  }
+
+  /* The review's second finding, the other half of the same bug: an
+   * unscreened deal can end in mate or stalemate before the checkpoint ever
+   * comes up, and the step has to finish there rather than leave a dead
+   * handler behind. Hunted rather than constructed — prMakeProgressive()
+   * takes no seed and there is no other way to ask it for exactly this
+   * shape — and capped, because most deals reach the checkpoint and do not
+   * end early: a genuine absence within the cap is recorded as a skip, not
+   * a failure, since it says nothing wrong happened, only that this run's
+   * draws did not turn one up. Every candidate the fast simulation flags is
+   * still confirmed for real, exactly as the section above does, since the
+   * simulation is a filter and not a promise. */
+  head('lsnStepMiniGame — the early-finish branch: mate or stalemate before the checkpoint ends the step there');
+  {
+    let confirmed = null, realTries = 0;
+    for (let t = 0; t < 300 && !confirmed && realTries < 20; t++){
+      const q = p.prMakeProgressive(p.prRecipe('progressive', 1));
+      if (!q) continue;
+      const endedAt = simulateMiniGameDrive(q.st);
+      if (!endedAt) continue;                     // this deal reaches the checkpoint — not this section's target
+
+      realTries++;
+      const step = p.lsnStepMiniGame();
+      openBareStep(p, step);
+      p.LSN.st = q.st;
+      for (let mv = 0; mv < 2 && !p.LSN.ok && p.LSN.onSquare; mv++){
+        const legal = p.legalMoves(p.LSN.st, p.LSN.st.turn);
+        if (!legal.length) break;
+        const before = p.LSN.st;
+        p.LSN.onSquare(legal[0].from);
+        p.LSN.onSquare(legal[0].to);
+        if (p.LSN.ok) break;
+        await until(() => p.LSN.st !== before && (p.LSN.onSquare || p.LSN.ok), 3000);
+      }
+      if (p.LSN.ok){
+        check('a deal ending before the checkpoint (' + endedAt + ') finishes the step, never reaching one', true);
+        confirmed = endedAt;
+      }
+    }
+    if (!confirmed)
+      check('SKIPPED — no deal ending before the checkpoint was confirmed within the cap this run', true);
   }
 
   console.log('\n' + passed + ' passed, ' + failed + ' failed');
