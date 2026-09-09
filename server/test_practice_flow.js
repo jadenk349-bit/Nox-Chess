@@ -227,6 +227,9 @@ var FNS = ['startBoard','newState','cloneState','fenOf','stateFromFEN',
            'slide','step','addPawn','pseudoMoves','isAttacked','kingSq','inCheck',
            'makeMove','legalMoves','toSAN','attackersOf','defendersOf','see',
            'mirror','evaluate','orderMoves','scoreMove','quiesce','negamax','bestMove',
+           // prMaterialOf(), inside the section this suite lifts, is the
+           // game's own materialFor() under a practice name
+           'materialFor',
            'parseMoveIn','bookMove','moveFromSAN','openingPosition','rebuildDiff','quadrantOf','lineBetween','linesThrough','knightRoute','sliderReaches'];
 var bundle = [grab(/\nconst W = 'w', B = 'b';/, "const W/B")];
 // a multi-line string rather than an object, so neither shape of decl() fits it

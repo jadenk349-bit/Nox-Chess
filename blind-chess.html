@@ -6195,11 +6195,14 @@ function focusEntry(){
   if (inp && !inp.disabled) inp.focus();
 }
 
-// spoken form of a move, for the log
-function announce(san, m){
-  const i = G.sans.length - 1;
-  const label = (Math.floor(i/2) + 1) + (i % 2 === 0 ? '.' : '…');
-  const mine = LOCAL() ? (m.p.c === W) : (m.p.c === G.human);
+/* The spoken form of a move, as one string: the numbered label, the notation,
+   and whatever about the move is worth saying out loud. A lesson's console
+   prints exactly this line — it is the game's console with a lesson behind it
+   rather than a second console — so the shape lives here once and the two
+   callers differ only in where their ply comes from and which log they write
+   to (announce() below, lsnAnnounce() in the lessons). */
+function announceLine(san, m, ply){
+  const label = (Math.floor(ply / 2) + 1) + (ply % 2 === 0 ? '.' : '…');
   let line = label.padEnd(6, ' ') + san;
   const notes = [];
   if (m.cap)    notes.push('takes a ' + PIECE_NAME[m.cap.t]);
@@ -6208,7 +6211,13 @@ function announce(san, m){
   if (san.endsWith('#'))      notes.push('CHECKMATE');
   else if (san.endsWith('+')) notes.push('check');
   if (notes.length) line += '   · ' + notes.join(', ');
-  logLine(line, mine ? 'you' : 'them');
+  return line;
+}
+// spoken form of a move, for the log
+function announce(san, m){
+  const i = G.sans.length - 1;
+  const mine = LOCAL() ? (m.p.c === W) : (m.p.c === G.human);
+  logLine(announceLine(san, m, i), mine ? 'you' : 'them');
 }
 
 /* Turn what the player typed into one of the legal moves — of the position
@@ -10722,18 +10731,10 @@ function lsnLog(text, cls){
 }
 function lsnLogClear(){ const l = document.getElementById('lsnLog'); if (l) l.innerHTML = ''; }
 
-/** announce(), for a lesson: the same line, in the same shape. */
+/** announce(), for a lesson: the same line, from the same writer — only the
+    ply and the log it lands in are the lesson's own. */
 function lsnAnnounce(san, m, ply){
-  const label = (Math.floor(ply / 2) + 1) + (ply % 2 === 0 ? '.' : '…');
-  let line = label.padEnd(6, ' ') + san;
-  const notes = [];
-  if (m.cap)    notes.push('takes a ' + PIECE_NAME[m.cap.t]);
-  if (m.castle) notes.push('castles ' + (m.castle === 'K' ? 'short' : 'long'));
-  if (m.promo)  notes.push('promotes to a ' + PIECE_NAME[m.promo]);
-  if (san.endsWith('#'))      notes.push('CHECKMATE');
-  else if (san.endsWith('+')) notes.push('check');
-  if (notes.length) line += '   · ' + notes.join(', ');
-  lsnLog(line, m.p.c === W ? 'you' : 'them');
+  lsnLog(announceLine(san, m, ply), m.p.c === W ? 'you' : 'them');
 }
 
 /** One move onto the lesson board. Everything a lesson plays comes through here. */
@@ -14947,12 +14948,10 @@ function prPlaceAttackers(sq, colour, n, board){
   }
   return n === 0 ? board : null;
 }
-/* The signed material count kept elsewhere for a single position (prMakeAfter
-   has never needed one of its own) — White's men positive, Black's negative,
-   kings excluded since a king is never actually taken. */
+// the game's own material count, read from White's side — White's men
+// positive, Black's negative, kings excluded, exactly as materialFor() has it
 function prMaterialOf(st){
-  let m = 0; for (let i = 0; i < 64; i++){ const p = st.b[i]; if (p && p.t !== 'K') m += (p.c === W ? 1 : -1) * VAL[p.t]; }
-  return m;
+  return materialFor(st, W);
 }
 /* The exchange, played: cheapest capture on the square while the side to
    capture does not lose by it — see() is the review's own arithmetic, and

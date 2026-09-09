@@ -100,6 +100,9 @@ var FNS = ['startBoard','newState','cloneState','fenOf','stateFromFEN',
            'slide','step','addPawn','pseudoMoves','isAttacked','kingSq','inCheck',
            'makeMove','legalMoves','toSAN','attackersOf','defendersOf','see',
            'mirror','evaluate','orderMoves','scoreMove','quiesce','negamax','bestMove',
+           // prMaterialOf() is the game's own materialFor() under a practice
+           // name, so the game's own has to come along with it
+           'materialFor',
            'parseMoveIn','bookMove','moveFromSAN','openingPosition',
            'lineBetween','linesThrough','knightRoute','sliderReaches','rebuildDiff','quadrantOf',
            'prBlankMode','prBlank','prUpgradeV1','prLoad','prSave',
