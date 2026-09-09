@@ -984,6 +984,155 @@ head('After the Move');
 })();
 
 /* ============================================================
+   5c — Forcing Lines: a level 1 question, forced to ask only `material` so
+   the deterministic pass can press one button rather than driving all four
+   ask kinds. test_practice.js already re-derives every claim a generated
+   question makes about its exchange (the line replays, the material and the
+   occupant are true of the position it reaches); what the presenter still
+   has to prove on its own is that the position is studied before the line
+   ever appears, that the men go dark once it does — even at level 1, which
+   carries no `hidden` of its own — and that pressing the right material
+   button is judged right only once the exchange has replayed on the board.
+   A short pass through each of the other three ask kinds, and through the
+   notation-only and timed-study levels, covers the wiring the generator
+   test cannot: it never drives a button.
+   ============================================================ */
+head('Forcing Lines');
+
+/** A Forcing Lines question at `level` for which `pred` is true — mirrors
+    forceHold/forceTracker above for the same reason: which asks a level
+    draws, and whether a particular ask kind is even on offer, is decided by
+    the recipe's own dice. */
+function forceForcing(level, pred){
+  for (var t = 0; t < 200; t++){
+    var q = prMakeForcing(prRecipe('forcing', level));
+    if (q && pred(q)) return q;
+  }
+  throw new Error('could not force a level ' + level + ' forcing question matching the predicate');
+}
+
+(function(){
+  storage = {};
+  startDrill('forcing', 1, 5);
+  var q = forceForcing(1, function(){ return true; });
+  q.asks = ['material'];
+  presentForced(q);
+  ok('the position is on the board to study', byId.prFrame.style.display, '');
+  ok('the men are up during study', byId.prBoard.classList.contains('blind'), false);
+  ok('nothing is asked before Ready', PR.click, null);
+  ok('the line is not read out yet', byId.prSeq.innerHTML, '');
+
+  pressCtl('Ready');
+  ok('Ready takes the men away, even at level 1', byId.prBoard.classList.contains('blind'), true);
+  ok('and reads the whole line out at once', byId.prSeq.innerHTML.indexOf(q.line[0].san) >= 0, true);
+  ok('every ply of it', byId.prSeq.innerHTML.indexOf(q.line[q.line.length - 1].san) >= 0, true);
+  ok('the question is answerable now', PR.click === null && ansButton(prForcingMaterialLabel(q.delta)) !== null, true);
+
+  ansButton(prForcingMaterialLabel(q.delta)).onclick();
+  ok('the verdict waits for the exchange to replay', PR.answered, false);
+  tick(700 * (q.line.length + 2));
+  ok('and once it has, the right button is judged right', /right/.test(byId.prSay.className), true);
+  ok('naming what each side carried off', /for.*:/.test(byId.prSay.innerHTML), true);
+  prShowDash();
+})();
+
+(function(){
+  // the mirror-image button — the same magnitude naming the other side — is
+  // always on offer and is always wrong; the fourth button is a coin flip
+  // between truth+100 and truth-100 so it is not a fixed target to click on
+  storage = {};
+  startDrill('forcing', 1, 5);
+  var q = forceForcing(1, function(q){ return q.delta !== 0; });
+  q.asks = ['material'];
+  presentForced(q);
+  pressCtl('Ready');
+  ansButton(prForcingMaterialLabel(-q.delta)).onclick();
+  tick(700 * (q.line.length + 2));
+  ok('the mirror-image answer is judged wrong', /wrong/.test(byId.prSay.className), true);
+  prShowDash();
+})();
+
+(function(){
+  // occupant: prAskShow's own glyph palette, asked of the square the whole
+  // exchange was fought over
+  storage = {};
+  startDrill('forcing', 1, 5);
+  var q = forceForcing(1, function(){ return true; });
+  q.asks = ['occupant'];
+  presentForced(q);
+  pressCtl('Ready');
+  ok('the question names the square', byId.prQ.innerHTML.indexOf(sqName(q.sq)) >= 0, true);
+  var order = ['K','Q','R','B','N','P'];
+  var at = (q.occupant.c === 'w' ? 0 : 6) + order.indexOf(q.occupant.t);
+  prAnsEl.children[at].onclick();
+  tick(700 * (q.line.length + 2));
+  ok('the right man on the right square is judged right', /right/.test(byId.prSay.className), true);
+  prShowDash();
+})();
+
+(function(){
+  // check: Yes or No, of the position the exchange actually reaches
+  storage = {};
+  startDrill('forcing', 1, 5);
+  var q = forceForcing(1, function(){ return true; });
+  q.asks = ['check'];
+  presentForced(q);
+  pressCtl('Ready');
+  ansButton(q.check ? 'Yes' : 'No').onclick();
+  tick(700 * (q.line.length + 2));
+  ok('the right check answer is judged right', /right/.test(byId.prSay.className), true);
+  prShowDash();
+})();
+
+(function(){
+  // hanging: select-many, or say Nothing — forced to a question where
+  // something really is hanging, so Done is worth pressing at all
+  storage = {};
+  startDrill('forcing', 5, 5);
+  var q = forceForcing(5, function(q){ return q.hanging.length > 0; });
+  q.asks = ['hanging'];
+  presentForced(q);
+  pressCtl('Ready');
+  q.hanging.forEach(clickSquare);
+  ansButton('Done').onclick();
+  tick(700 * (q.line.length + 2));
+  ok('every hanging square, clicked and Done, is judged right', /right/.test(byId.prSay.className), true);
+  prShowDash();
+})();
+
+(function(){
+  // level 6: the position from the notation alone — no board at all, not
+  // even to study, and the men it names are read straight out of q.st
+  storage = {};
+  startDrill('forcing', 6, 5);
+  var q = forceForcing(6, function(){ return true; });
+  presentForced(q);
+  ok('there is no board at this level', byId.prFrame.style.display, 'none');
+  ok('the position is spelled out in words', byId.prQ.innerHTML.indexOf(sqName(q.sq)) >= 0, true);
+  prShowDash();
+})();
+
+(function(){
+  // level 3: the first level with a study clock — Ready cuts it short, and
+  // running the countdown out gets there just the same. startDrill() has
+  // already opened its own (unforced) level 3 question with a countdown of
+  // its own running; prClearTimers() cancels that one before the forced
+  // question starts a second, or the two recursive countdowns race and
+  // whichever reaches zero first — not necessarily this one's — is the one
+  // that fires.
+  storage = {};
+  startDrill('forcing', 3, 5);
+  prClearTimers();
+  var q = forceForcing(3, function(){ return true; });
+  presentForced(q);
+  ok('a countdown is running', /go dark in/.test(byId.prSub.innerHTML), true);
+  tick(9000);
+  ok('and reaches the line on its own, without Ready', byId.prSeq.innerHTML.indexOf(q.line[0].san) >= 0, true);
+  ok('the men went dark with it', byId.prBoard.classList.contains('blind'), true);
+  prShowDash();
+})();
+
+/* ============================================================
    6 — hold the position: one deterministic pass through each of the three
    answer shapes. test_practice.js already re-derives every claim a generated
    question makes about its position; what the presenter still has to prove

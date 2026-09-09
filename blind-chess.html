@@ -12018,6 +12018,26 @@ const PR_AFTER_LEVELS = [
   { cap:'Real positions, four seconds',        men:10, asks:3, kinds:['attacks','hanging','opened','check'], hidden:true, study:4000, notation:true, realistic:true }
 ];
 
+/* Forcing Lines' own ladder — declared ahead of PR_MODES for the same reason
+   the other seven are. `att`/`def` are how many attackers and defenders
+   `prPlaceAttackers` drops on the square being fought over; `check` asks for
+   a line that gives check somewhere inside it, and `realistic` swaps the
+   built position for a cluster out of a real game the way After the Move's
+   own late levels do. `board:true` is documentation rather than a switch a
+   generator reads: every level shows the starting position (a board, or —
+   once `notation` is set — the men listed in words) before the line and the
+   questions arrive, and it is only `notation` that changes which. */
+const PR_FORCING_LEVELS = [
+  { cap:'Two attackers, one defender',         att:2, def:1, board:true },
+  { cap:'Equal numbers',                        att:2, def:2, board:true },
+  { cap:'Three against two',                    att:3, def:2, board:true, hidden:true, study:7000 },
+  { cap:'A check inside the sequence',          att:2, def:2, board:true, hidden:true, study:7000, check:true },
+  { cap:'Then what is now hanging',             att:3, def:2, hidden:true, study:6000, asks:['material','hanging'] },
+  { cap:'The position from the notation only',  att:2, def:2, notation:true, asks:['material','occupant'] },
+  { cap:'Eight plies from a real position',     att:3, def:3, hidden:true, study:6000, realistic:true, asks:['material','occupant'] },
+  { cap:'…and what is hanging afterwards',      att:3, def:3, hidden:true, study:5000, realistic:true, asks:['material','hanging','check'] }
+];
+
 /* Each drill, in the order the dashboard lists them. `group` clusters related
    drills for the dashboard (Task 22); `lesson` is the course step it grows out
    of. `levels` replaces the old `tiers`/`hard`/`needs`: a mode's levels are a
@@ -12046,6 +12066,9 @@ const PR_MODES = [
   { key:'after', name:'After the Move', group:'holding', skill:'Consequences', lesson:5,
     desc:'One move, and everything it changed — the square it left, the line it opened, what it left hanging.',
     levels: PR_AFTER_LEVELS },
+  { key:'forcing', name:'Forcing Lines', group:'holding', skill:'Calculation', lesson:5,
+    desc:'A capturing sequence played out in your head — who ends up ahead, and by how much.',
+    levels: PR_FORCING_LEVELS },
   { key:'hold', name:'Hold the Position', group:'holding', skill:'Holding', lesson:5,
     desc:'A small position, studied, then answered for with the men hidden.',
     levels: PR_HOLD_LEVELS },
@@ -12916,6 +12939,104 @@ function prMakeAfter(r){
   return null;
 }
 
+/* 3c — FORCING LINES. After the Move asks what one move changed; this asks
+   what a whole *exchange* changes — a square fought over by several men on
+   both sides, captured on cheapest-first until neither side wants to
+   continue, played entirely in the head. The line is never walked on the
+   board while it is being asked about (see prShowForcing below): it is read
+   as notation only, in `prSeq`, which is the whole of what makes tracking a
+   forced sequence a different skill from tracking one move.
+
+   Men that attack `sq`: each dropped on a random empty square from which its
+   line to `sq` is clear, or a knight's square. A pawn is placed one rank
+   behind `sq` on a neighbouring file, in front of its own side. */
+function prPlaceAttackers(sq, colour, n, board){
+  const types = ['P','N','B','R','Q'];
+  for (let t = 0; t < 200 && n > 0; t++){
+    const ty = prPick(types), cands = [];
+    if (ty === 'N'){ for (const [dr, dc] of DIR_N){ const r = rowOf(sq)+dr, c = colOf(sq)+dc; if (r>=0&&r<8&&c>=0&&c<8) cands.push(r*8+c); } }
+    else if (ty === 'P'){ const r = rowOf(sq) + (colour === W ? 1 : -1); for (const dc of [-1, 1]){ const c = colOf(sq)+dc; if (r>0&&r<7&&c>=0&&c<8) cands.push(r*8+c); } }
+    else { const L = linesThrough(sq); const pool = ty === 'R' ? L.rank.concat(L.file) : ty === 'B' ? L.diag1.concat(L.diag2) : L.rank.concat(L.file, L.diag1, L.diag2);
+           for (const i of pool) if (lineBetween(i, sq).every(x => !board[x])) cands.push(i); }
+    const free = cands.filter(i => !board[i]);
+    if (!free.length) continue;
+    board[prPick(free)] = mk(colour, ty);
+    n--;
+  }
+  return n === 0 ? board : null;
+}
+/* The signed material count kept elsewhere for a single position (prMakeAfter
+   has never needed one of its own) — White's men positive, Black's negative,
+   kings excluded since a king is never actually taken. */
+function prMaterialOf(st){
+  let m = 0; for (let i = 0; i < 64; i++){ const p = st.b[i]; if (p && p.t !== 'K') m += (p.c === W ? 1 : -1) * VAL[p.t]; }
+  return m;
+}
+/* The exchange, played: cheapest capture on the square while the side to
+   capture does not lose by it — see() is the review's own arithmetic, and
+   its sign is exactly what this reads: see(s, sq, side) is what `side` nets
+   by opening the exchange, so a side that would come out behind sees a
+   negative number and the sequence stops before that capture is played,
+   rather than one side spending a queen to win a pawn. */
+function prExchangeLine(st, sq){
+  const line = []; let s = st;
+  const mat0 = prMaterialOf(st);
+  for (let k = 0; k < 12; k++){
+    const legal = legalMoves(s, s.turn);
+    const caps = legal.filter(m => m.to === sq && m.cap).sort((a, b) => VAL[a.p.t] - VAL[b.p.t]);
+    if (!caps.length) break;
+    if (see(s, sq, s.turn) < 0) break;
+    const m = caps[0];
+    line.push({ san: toSAN(s, m, legal), from:m.from, to:m.to });
+    s = makeMove(s, m);
+  }
+  return { line, final:s, delta: prMaterialOf(s) - mat0 };
+}
+/* A built position (kings apart, one man on `sq`, attackers and defenders
+   dropped around it) for the early levels, or a square fought over in a real
+   game (`r.realistic`) for the late ones — the same choice After the Move's
+   own ladder already makes. Either way the exchange still has to be at least
+   two plies (a single capture is not a sequence to track) and, where the
+   level asks for one, a check has to fall somewhere inside it.
+
+   Two hundred tries rather than the eighty another ladder's generator gets
+   away with: nothing here steers the random kings onto a line the exchange
+   will open, so `r.check` is asking for a coincidence, and eighty draws left
+   it missing about one draw in twenty-five — rare enough to pass by hand and
+   common enough to flake a hundred-draw suite. Two hundred measures at zero
+   in three thousand. */
+function prMakeForcing(r){
+  for (let t = 0; t < 200; t++){
+    let st, sq;
+    if (r.realistic){
+      st = prGamePosition(14 + prRand(14));
+      const spots = []; for (let i = 0; i < 64; i++) if (st.b[i] && st.b[i].c !== st.turn && attackersOf(st, i, st.turn).length >= 2) spots.push(i);
+      if (!spots.length) continue;
+      sq = prPick(spots);
+    } else {
+      const board = Array(64).fill(null);
+      const wk = prRand(64), bk = prRand(64);
+      if (Math.max(Math.abs(rowOf(wk)-rowOf(bk)), Math.abs(colOf(wk)-colOf(bk))) <= 1) continue;
+      board[wk] = mk(W,'K'); board[bk] = mk(B,'K');
+      sq = prRand(64); if (board[sq] || rowOf(sq) === 0 || rowOf(sq) === 7) continue;
+      board[sq] = mk(B, prPick(['P','N','B','R']));
+      if (!prPlaceAttackers(sq, W, r.att, board)) continue;
+      if (!prPlaceAttackers(sq, B, r.def, board)) continue;
+      st = { b:board, turn:W, cr:{wK:0,wQ:0,bK:0,bQ:0}, ep:-1, half:0, full:1 };
+      if (inCheck(st, W) || inCheck(st, B)) continue;
+    }
+    const ex = prExchangeLine(st, sq);
+    if (ex.line.length < 2) continue;
+    const check = inCheck(ex.final, ex.final.turn);
+    if (r.check && !ex.line.some(s => /[+#]$/.test(s.san))) continue;
+    const occ = ex.final.b[sq];
+    return { kind:'forcing', st, sq, line:ex.line, final:ex.final, delta:ex.delta, occupant: occ ? { c:occ.c, t:occ.t } : null, check,
+             asks: r.asks || ['material','occupant'], hidden:!!r.hidden, study:r.study || 0, notation:!!r.notation,
+             hanging: prHanging(ex.final), ply: ex.line.length, sig:'forcing:' + fenOf(st).split(' ')[0] + ':' + sq };
+  }
+  return null;
+}
+
 /* 4 — HOLD THE POSITION. A legal position, a few seconds to look at it, and
    then one question about it with the men gone — or a change to catch, or the
    whole thing to rebuild from nothing.
@@ -13106,7 +13227,7 @@ function prMakeMini(diff){
 const PR_MAKE = {
   square: r => prMakeSquare(r), lines: r => prMakeLines(r), piece: r => prMakePiece(r),
   attack: r => prMakeAttack(r),
-  tracker: r => prMakeTracker(r), after: r => prMakeAfter(r), hold: r => prMakeHold(r),
+  tracker: r => prMakeTracker(r), after: r => prMakeAfter(r), forcing: r => prMakeForcing(r), hold: r => prMakeHold(r),
   progressive: r => prMakeMini(r.level)
 };
 
@@ -13279,6 +13400,7 @@ function prPresent(){
     case 'attack':   return prShowAttack(q);
     case 'tracker':  return prShowTracker(q);
     case 'after':    return prShowAfter(q);
+    case 'forcing':  return prShowForcing(q);
     case 'hold':     return prShowHold(q);
   }
 }
@@ -14199,6 +14321,238 @@ function prAfterFinish(q){
     ? 'Right on all ' + q.results.length + '.'
     : missedCount + ' of ' + q.results.length + ' missed — here is everything the move actually did.';
   prJudge(ok, say, [], err);
+}
+
+/* ---- 3c: forcing lines ----
+   The position is studied, exactly as it would be for any of the board
+   levels above — but what follows is never a walk on the board. The line is
+   read as notation, in `prSeq`, and the men go dark the moment it appears,
+   whether or not this level ever asked them to stay dark: the whole drill is
+   "play the exchange out in your head", and a board still showing the
+   capture happening would be answering the question for you. `q.hidden` and
+   `q.study` are not "does it ever hide" — every level does — they are
+   whether the study itself runs on a clock (Ready cutting it short) or waits
+   on Ready alone, the same distinction Hold the Position's own ladder draws
+   between its early and late rungs.
+
+   The four kinds of ask run one after another exactly as After the Move's
+   do: judged for itself as it is answered (`q.results`), nothing scored
+   until the last of them, because the thing being tested is whether the
+   whole final position was held at once. */
+function prShowForcing(q){
+  prLayout(false, true);
+  prMarksClear();
+  prSeq('');
+  q.results = [];
+  q.idx = 0;
+  const reveal = () => {
+    prMarksClear();
+    prCtl([]);
+    prMen(false);
+    prSeq(prForcingLineHTML(q.line));
+    prForcingAsk(q);
+  };
+  if (q.notation){
+    prBoardOn(false);
+    prQ(prForcingWords(q.st));
+    prSub('Read it once, then press Ready — the line comes next, and the position goes with it.');
+  } else {
+    prBoardOn(true);
+    prMen(true);
+    prPaint(q.st.b);
+    prQ('Study this position.');
+    prSub('Press Ready when you have it — the line comes next, and the men go with it.');
+  }
+  if (q.hidden) prStudyPhase(q.study, reveal);
+  else prCtl([['Ready', reveal, 'primary']]);
+}
+/* Every man, named by prMan() (which already says whose it is) and the
+   square it stands on — the study phase's own listing for a notation-only
+   level, in the same spirit as the tracker's own written-out position, in
+   place of the board that level never shows at all. */
+function prForcingWords(st){
+  const parts = [];
+  for (let i = 0; i < 64; i++){
+    const p = st.b[i];
+    if (p) parts.push(prMan(p.c, p.t) + ' on <b>' + sqName(i) + '</b>');
+  }
+  return prJoinWords(parts) + '.';
+}
+/* The line, read as one capture after another rather than in White/Black
+   pairs — both sides are fighting over the same square, so "move one" never
+   named a pair the way an ordinary game's does, and numbering by ply is
+   what actually matches the sequence being read. */
+function prForcingLineHTML(line){
+  let out = '';
+  line.forEach((step, i) => { out += (i ? '&nbsp; &nbsp;' : '') + '<b>' + (i + 1) + '.</b> ' + step.san; });
+  return out;
+}
+/* The dispatcher between one question and the next, and PR.shownAt set once
+   here — the study phase and the line just read are not what the player is
+   timed on, exactly as After the Move's own `prAfterAsk` reasons. */
+function prForcingAsk(q){
+  prAnsClear();
+  prMarksClear();
+  prCtl([]);
+  PR.click = null;
+  if (q.idx >= q.asks.length){ prForcingFinish(q); return; }
+  if (q.idx === 0) PR.shownAt = prNow();
+  const ask = q.asks[q.idx];
+  if (ask === 'material') return prForcingAskMaterial(q);
+  if (ask === 'occupant') return prForcingAskOccupant(q);
+  if (ask === 'check')    return prForcingAskCheck(q);
+  return prForcingAskHanging(q);
+}
+function prForcingRecord(q, ok, err){
+  q.results.push({ ok:!!ok, err: err || null });
+  q.idx++;
+  prForcingAsk(q);
+}
+/* `material`: four buttons built from the truth (`q.delta`, White's own
+   arithmetic, in centipawns) — Level, White up N and Black up N naming the
+   same magnitude either way round (only one of the pair is ever right), and
+   a fourth a single pawn off the truth, the miscount a player who nearly had
+   it makes. N is pawns rather than centipawns, since that is the unit a
+   player actually counts material in; a knight and a bishop differ by ten
+   centipawns, which is the one case that needs the decimal rather than a
+   bare count. Two labels can coincide (an exactly level truth turns "White
+   up 0" and "Black up 0" into "Level" too), so the buttons are de-duplicated
+   by their own text rather than assumed to number four. */
+function prForcingPawns(cp){
+  const n = Math.abs(cp) / 100;
+  return Number.isInteger(n) ? String(n) : n.toFixed(1);
+}
+function prForcingMaterialLabel(cp){
+  if (cp === 0) return 'Level';
+  return (cp > 0 ? 'White' : 'Black') + ' up ' + prForcingPawns(cp);
+}
+function prForcingAskMaterial(q){
+  prQ('Material now, after the exchange?');
+  prSub('');
+  const truth = q.delta, decoy = truth + (Math.random() < .5 ? 100 : -100);
+  const seen = {};
+  [0, truth, -truth, decoy].forEach(cp => {
+    const label = prForcingMaterialLabel(cp);
+    if (seen[label]) return;
+    seen[label] = 1;
+    prAnsButton(label, () => prForcingRecord(q, cp === truth), 'wide');
+  });
+}
+/* `occupant`: prAskShow's own `what` — the glyph palette Piece Vision and
+   After the Move already answer with, asked of the one square the whole
+   exchange was fought over rather than one a move happened to land on.
+   prAskShow's `what` case never types the wrong answer beyond "wrong", so a
+   miss here always reads as `square` — the ladder's other ask, `hanging`,
+   is where a `ghost` (naming a man that was actually captured along the
+   way) gets caught. */
+function prForcingAskOccupant(q){
+  const ask = { t:'what', sq:q.sq, colour:q.occupant.c, type:q.occupant.t,
+                text:'What stands on <b>' + sqName(q.sq) + '</b>, once the exchange is over?' };
+  prAskShow(ask, q.final, [], { judge: ok => prForcingRecord(q, ok, ok ? null : 'square') });
+}
+/* `check`: Yes or No, of the position the exchange actually reaches. */
+function prForcingAskCheck(q){
+  prQ('Is the side to move in check, once the exchange is over?');
+  prAnsButton('Yes', () => prForcingRecord(q, q.check === true));
+  prAnsButton('No',  () => prForcingRecord(q, q.check === false));
+}
+/* `hanging`: select every square with something loose on it now, or say
+   there is nothing — After the Move's own hanging question, asked of the
+   position the whole exchange reaches rather than one move. A square picked
+   that is empty in `q.final` is the mistake of pointing at where a man
+   fought over stood before it was carried off — `ghost`, the same name
+   After the Move's own version of this question gives it — rather than
+   merely the wrong square. */
+function prForcingAskHanging(q){
+  prQ('Anything hanging now? Select every square with something loose on it.');
+  prSub('Click each one, then Done — or say Nothing is hanging.');
+  q.picks = new Set();
+  PR.click = i => prLinesToggle(q.picks, i, (s, on) => { if (on) prMark(s, 'pr-pick'); else prSqEls[prVisual(s)].classList.remove('pr-pick'); });
+  const finish = got => {
+    const want = new Set(q.hanging);
+    const missed = q.hanging.some(sq => !got.has(sq));
+    const wrongSqs = Array.from(got).filter(sq => !want.has(sq));
+    const ok = !missed && !wrongSqs.length;
+    prForcingRecord(q, ok, ok ? null : (wrongSqs.some(sq => !q.final.b[sq]) ? 'ghost' : 'square'));
+  };
+  prAnsButton('Done', () => finish(q.picks), 'primary');
+  prAnsButton('Nothing is hanging', () => finish(new Set()));
+}
+/* What each side actually carried off, read out of the line and `q.st`
+   rather than kept as a second record: every piece in this exchange only
+   ever makes the one move that captures on `sq`, so the piece that took a
+   given ply is still standing where `q.st` first put it right up until that
+   ply, and the piece it removed is either the square's original occupant
+   (ply 0) or whoever the previous ply's capturer was (it was carried off in
+   turn). */
+function prForcingCaptures(q){
+  const by = { w:[], b:[] };
+  q.line.forEach((step, i) => {
+    const capper = q.st.b[step.from];
+    const victim = i === 0 ? q.st.b[q.sq] : q.st.b[q.line[i - 1].from];
+    by[capper.c].push(victim.t);
+  });
+  return by;
+}
+function prForcingWon(types){
+  return types.length ? prJoinWords(types.map(t => 'a ' + PIECE_NAME[t])) : 'nothing';
+}
+/* "Black is up a pawn" reads better than "Black is up 1 pawn" — the one
+   case this ever writes a bare number is a fraction, where "up a pawn" would
+   be a lie. */
+function prForcingNetWords(delta){
+  if (delta === 0) return 'the material is level';
+  const n = Math.abs(delta) / 100;
+  const amt = n === 1 ? 'a pawn' : prForcingPawns(delta) + ' pawns';
+  return (delta > 0 ? 'White' : 'Black') + ' is up ' + amt;
+}
+/* The count in words that closes the feedback — what White carried off, for
+   what Black carried off, and what that comes to: "A rook and a pawn for a
+   knight and a bishop: Black is up a pawn." */
+function prForcingSummary(q){
+  const caps = prForcingCaptures(q), won = prForcingWon(caps.w);
+  return won.charAt(0).toUpperCase() + won.slice(1) + ' for ' + prForcingWon(caps.b) + ': ' + prForcingNetWords(q.delta) + '.';
+}
+/* Feedback plays the whole exchange out on the board — the one time in this
+   drill the men are ever seen moving — at the tracker's own walk-back pace,
+   and the verdict (with the count in words that closes it) waits for the
+   replay to finish rather than racing ahead of what the player is being
+   shown. Every piece here only ever makes the one move `q.line` gives it, so
+   replaying is legalMoves() and makeMove() exactly as the generator test
+   above already checks, not a second implementation of the exchange. */
+function prForcingReplay(q, then){
+  prBoardOn(true);
+  prLayout(false, true);
+  prMen(true);
+  prPaint(q.st.b);
+  prMarksClear();
+  let s = q.st, k = 0;
+  const step = () => {
+    if (k >= q.line.length){ then(); return; }
+    const legal = legalMoves(s, s.turn);
+    const m = legal.filter(x => x.from === q.line[k].from && x.to === q.line[k].to)[0];
+    s = makeMove(s, m);
+    prPaint(s.b);
+    prMarksClear();
+    prMark(q.line[k].from, 'pr-from');
+    prMark(q.line[k].to, 'pr-target');
+    prSub('<b>' + (k + 1) + '.</b> ' + q.line[k].san);
+    k++;
+    prTimer(step, 700);
+  };
+  prTimer(step, 700);
+}
+/* The one judgement for the whole set, exactly as After the Move draws it:
+   `ok` is every question right, and the error handed to `prJudge` is `ghost`
+   if any wrong answer earned one and `square` otherwise. */
+function prForcingFinish(q){
+  const missedCount = q.results.filter(r => !r.ok).length, ok = missedCount === 0;
+  const err = ok ? null : (q.results.some(r => r.err === 'ghost') ? 'ghost' : 'square');
+  prForcingReplay(q, () => {
+    const say = (ok ? 'Right on all ' + q.results.length + '.' : missedCount + ' of ' + q.results.length + ' missed.') +
+                ' ' + prForcingSummary(q);
+    prJudge(ok, say, [], err);
+  });
 }
 
 /* ---- 4: hold the position ----

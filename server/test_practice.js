@@ -76,7 +76,7 @@ var DECLS = ['VAL','FILES','rowOf','colOf','SQNAME','uciOf','sqName','sqIndex','
              'idCounter','mk','DIR_N','DIR_B','DIR_R','DIR_K','PST','nodes','PIECE_NAME',
              'OPENING_BOOK','OPENING_LINES',
              'PR_SQUARE_LEVELS','PR_QUADRANT_NAME','PR_DIRS','PR_LINES_LEVELS','PR_PIECE_LEVELS',
-             'PR_ATTACK_LEVELS','PR_HOLD_LEVELS','PR_TRACKER_LEVELS','PR_AFTER_LEVELS',
+             'PR_ATTACK_LEVELS','PR_HOLD_LEVELS','PR_TRACKER_LEVELS','PR_AFTER_LEVELS','PR_FORCING_LEVELS',
              'PR_MODES','PR_MINUTES','PR_STORE','PR_VERSION','PR_V1_KEYS','PR_SEEN_MAX',
              'prKey','prAcc','prSeenKey',
              'PR','PR_STEP_UP','PR_STEP_DOWN','prRand','prPick','prSide','prMan','PR_MAKE','W',
@@ -94,6 +94,7 @@ var FNS = ['startBoard','newState','cloneState','fenOf','stateFromFEN',
            'prAttacked','prHanging','prPinned','prMakeAttack',
            'prMakeTracker','prTrackerErr',
            'prMoveFacts','prMakeAfter',
+           'prPlaceAttackers','prMaterialOf','prExchangeLine','prMakeForcing',
            'prPickMove','prAskAbout','prMakeMini','prRecipe','prMake',
            'prGamePosition','prCluster','prAskFine','prMakeHold',
            'prRecord','prScore','prStep','prNow','prTimeLeft','prRecommend','prMedianLat',
@@ -485,6 +486,40 @@ head('After the Move');
     if (q.asks.length < 1) bad++;
   }
   ok('every level generates, and every fact re-derives', bad, 0);
+})();
+
+/* ============================================================
+   5c — Forcing Lines: every level generates a capturing sequence that
+   replays, ply for ply, out of the move generator itself — the exchange
+   prExchangeLine claims is the exchange legalMoves()/toSAN() actually play,
+   the material it says the exchange nets is the material the board actually
+   holds afterward, and the square it names is left holding exactly what the
+   line leaves there.
+   ============================================================ */
+head('Forcing Lines');
+(function(){
+  var bad = 0;
+  for (var lv = 1; lv <= PR_FORCING_LEVELS.length; lv++) for (var t = 0; t < 30; t++){
+    var q = prMakeForcing(prRecipe('forcing', lv));
+    if (!q){ bad++; continue; }
+    var st = q.st, mat = 0;
+    q.line.forEach(function(step){
+      var legal = legalMoves(st, st.turn);
+      var m = legal.filter(function(x){ return x.from === step.from && x.to === step.to; })[0];
+      if (!m){ bad++; return; }
+      if (toSAN(st, m, legal) !== step.san) bad++;
+      st = makeMove(st, m);
+    });
+    if (!sameBoard(st.b, q.final.b)) bad++;
+    for (var i = 0; i < 64; i++){ var p = st.b[i]; if (p && p.t !== 'K') mat += (p.c === W ? 1 : -1) * VAL[p.t]; }
+    var mat0 = 0;
+    for (var j = 0; j < 64; j++){ var p0 = q.st.b[j]; if (p0 && p0.t !== 'K') mat0 += (p0.c === W ? 1 : -1) * VAL[p0.t]; }
+    if (mat - mat0 !== q.delta) bad++;
+    var occ = st.b[q.sq];
+    if ((occ ? occ.c + occ.t : null) !== (q.occupant ? q.occupant.c + q.occupant.t : null)) bad++;
+    if (q.line.length < 2) bad++;
+  }
+  ok('every level generates a legal, replayable exchange whose count is right', bad, 0);
 })();
 
 /* ============================================================
