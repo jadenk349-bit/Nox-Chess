@@ -10335,13 +10335,14 @@ document.getElementById('pzNext').onclick  = () => {
    ============================================================ */
 
 /* ---- what the player has already finished ----
-   Local, and deliberately so. There is no lessons table in Supabase, and
-   inventing one for five booleans would be a schema change to regret. The
-   store is keyed by owner exactly as the puzzle ladder is, so two accounts
-   sharing a browser cannot read each other's progress and a guest's is
-   adopted by whoever signs in on top of it. lsnPush() is the seam a cloud
-   copy goes through when there is one: everything above it already speaks of
-   "the owner's finished lessons" rather than "this browser's". */
+   Local first, and keyed by owner exactly as the puzzle ladder is, so two
+   accounts sharing a browser cannot read each other's progress and a guest's
+   is adopted by whoever signs in on top of it. There is still no lessons
+   table — inventing one for five booleans would be a schema change to regret
+   — so a signed-in player's copy rides in `practice_progress` under the
+   reserved mode name `course`, and lsnPush() is where it goes: everything
+   above it already speaks of "the owner's finished lessons" rather than
+   "this browser's". */
 const LSN_STORE  = 'nox.lessons.';
 const LSN_COURSE = 'howto';
 const lsnKey = owner => LSN_STORE + (owner ? owner + '.' : '') + LSN_COURSE;
@@ -10379,10 +10380,16 @@ function lsnMark(n){
   if (done.indexOf(n) < 0){ done.push(n); done.sort((a,b) => a - b); lsnWrite(done); }
   lsnPush(n);
 }
-/* Where a cloud copy would be written. Left empty on purpose rather than left
-   out: a reader looking for the sync finds the seam instead of concluding
-   there is nowhere for one to go. */
-function lsnPush(n){ /* no lessons table yet — see the note above */ }
+/* Where the cloud copy is written. There is no lessons table and there is not
+   going to be one for five booleans: the course rides in practice_progress
+   under the reserved mode name `course`, whose stats are the finished lessons
+   (prPushCourse, PRACTICE). Asked for by typeof because that is the other
+   side of a section boundary — the whole record is local until it answers,
+   which is exactly what a guest gets. `n` is the lesson just finished and is
+   not sent on its own: the row is the list, so what goes up is the list. */
+function lsnPush(n){
+  if (typeof prPushCourse === 'function') prPushCourse(lsnDone());
+}
 
 /* The furthest lesson that may be opened: everything finished, and the one
    after it. Finished lessons stay open, so the course can be walked back
@@ -12230,15 +12237,16 @@ function prRecipe(key, level){
 }
 
 /* ---- what the practising has come to ----
-   Kept in the browser and nowhere else. Practice is not a rating anybody
-   compares, so there is nothing here the server has to be the one to write —
-   and adding a table for it would be a schema change bought with nothing.
-   The shape is a flat record of totals plus one of the same record per drill,
-   which is exactly what a `practice_progress` row would be if this ever does
-   go to Supabase: totals on the profile, a row per drill beside it.
+   A flat record of totals plus one of the same record per drill. Practice is
+   not a rating anybody compares, so there is nothing here the *server* has to
+   be the one to write — which is why the browser writes it itself, under RLS,
+   exactly as it writes puzzle_progress: `practice_progress` is a row per
+   drill, and prSync/prPush below are the seam. This store is the record for a
+   guest and a cache for everybody else.
 
    Stamped with whose it is, the way the puzzle cache is: two accounts sharing
-   a browser must not read each other's practice, and a guest's is their own.
+   a browser must not read each other's practice, and a guest's is their own —
+   until they sign up, when the account that signs in on top of it adopts it.
 
    Version 2 drops the single five-rung ladder (Beginner … Advanced) in favour
    of a level per drill — each one is its own thing to get good at, and a
@@ -12276,11 +12284,15 @@ function prUpgradeV1(raw){
    not read as a corrupt save, and a save from an older version is simply
    dropped — except version 1, which is read through the key map above rather
    than thrown away. Anything unreadable — private browsing, somebody editing
-   it — starts clean rather than throwing. */
-function prLoad(){
+   it — starts clean rather than throwing.
+
+   `key` is for the one caller that wants somebody else's record: prSync()
+   reads the guest's while signed in, to adopt it. Everything else asks for
+   the owner's own and passes nothing. */
+function prLoad(key){
   const out = prBlank();
   let raw = null;
-  try { raw = JSON.parse(localStorage.getItem(prKey())); } catch (e){ raw = null; }
+  try { raw = JSON.parse(localStorage.getItem(key || prKey())); } catch (e){ raw = null; }
   if (!raw || !raw.modes) return out;
   if (raw.v === 1) return prUpgradeV1(raw);
   if (raw.v !== PR_VERSION) return out;
@@ -12299,6 +12311,210 @@ function prLoad(){
 function prSave(st){
   try { localStorage.setItem(prKey(), JSON.stringify(st)); } catch (e){ /* nowhere to keep it */ }
 }
+
+/* ---- and the account's copy of it ----
+   The bargain the puzzle ladder already makes, one table along: for a
+   signed-in player `practice_progress` is the record and the store above is a
+   cache, so a level earned on a laptop is the level the phone opens on and
+   clearing site data costs nothing; for a guest the cache is the whole of it,
+   under the `guest` key, and the first account to sign in on top of it adopts
+   it. One row per (user_id, mode), plus one reserved row — mode 'course' —
+   carrying the finished lessons, because five booleans are not worth a table
+   of their own and lsnPush() has been an empty seam waiting for one since it
+   was written.
+
+   Everything here is fire and forget. The cache is written first and is what
+   the screen reads, so a failed write costs the player nothing today and is
+   picked up by the next push; and until supabase-migrate-practice.sql has
+   been run there is no table at all, which is a console warning rather than a
+   broken drill. */
+const PR_COURSE = 'course';        // the reserved mode name the course row goes under
+
+/* The client to write through, or nothing: a guest, a page whose Supabase
+   never loaded, or the PRACTICE section lifted on its own into
+   test_practice_flow.js, which has no accounts half at all and where a bare
+   read of `sb` would throw rather than answer. `typeof` for the same reason
+   prFinish asks for lsnDone by typeof — a section boundary is not a
+   guarantee that the other side is there. */
+function prCloud(){
+  const client = (typeof sb === 'undefined') ? null : sb;
+  return (client && account) ? client : null;
+}
+
+/* One mode's record as the table keeps it. Every number is clamped to what
+   the column checks allow, because a row the database refuses is a warning in
+   the console and a player's level quietly not saved. `lastAt` rides inside
+   `stats`: the table has no column for it and adding one for a timestamp
+   nobody compares would be a schema change bought with nothing, while
+   everything that reads stats reads it by name (errs, lv, lat, ply, pb,
+   streak), so one more key is invisible to all of it. */
+function prRowOf(key, m){
+  const level = Math.max(1, Math.min(20, m.level | 0 || 1));
+  const asked = Math.max(0, m.asked | 0);
+  return { user_id: account.id, mode: key,
+           level, best: Math.max(level, Math.min(20, m.best | 0)),
+           asked, correct: Math.max(0, Math.min(asked, m.correct | 0)),
+           sessions: Math.max(0, m.sessions | 0),
+           stats: Object.assign({}, m.stats, { lastAt: m.lastAt || 0 }) };
+}
+/* And back the other way, for a row on its way in. */
+function prRecOf(row){
+  if (!row) return null;
+  const stats = (row.stats && typeof row.stats === 'object') ? row.stats : {};
+  return { level: row.level | 0 || 1, best: row.best | 0 || 1,
+           asked: row.asked | 0, correct: row.correct | 0, sessions: row.sessions | 0,
+           lastAt: stats.lastAt || 0, stats };
+}
+
+/* One mode's record on its way to the account, after prSave has already kept
+   it here. Read back out of the store rather than taken as an argument, so
+   there is one answer to "what does this mode stand at" and it is the one on
+   disk. */
+function prPush(key){
+  const db = prCloud();
+  if (!db) return;                       // a guest keeps their practice in this browser
+  const m = prLoad().modes[key];
+  if (!m) return;
+  try {
+    Promise.resolve(
+      db.from('practice_progress').upsert(prRowOf(key, m), { onConflict: 'user_id,mode' })
+    ).catch(err => console.warn('practice progress not saved:', err && err.message));
+  } catch (err){ console.warn('practice progress not saved:', err && err.message); }
+}
+
+/* The course, under the reserved mode name. The row's numbers mean nothing —
+   the check constraints want a level, so it gets the first one — and the
+   lessons are the whole payload. */
+function prPushCourse(done){
+  const db = prCloud();
+  if (!db) return;
+  try {
+    Promise.resolve(
+      db.from('practice_progress').upsert(
+        { user_id: account.id, mode: PR_COURSE, level: 1, best: 1,
+          asked: 0, correct: 0, sessions: 0, stats: { done: (done || []).slice() } },
+        { onConflict: 'user_id,mode' })
+    ).catch(err => console.warn('lesson progress not saved:', err && err.message));
+  } catch (err){ console.warn('lesson progress not saved:', err && err.message); }
+}
+
+/* Two records of the same mode, reconciled. A level is the furthest either
+   side got to, since nobody should be sent back down a ladder by signing in
+   on a browser that has not heard about it; the tallies and the stats come
+   whole from whichever side has answered more questions, because they
+   describe one history each and adding two histories together would count a
+   session on both sides of a sync twice. Ties go to the first, which is what
+   makes the caller's order — this browser, then the server — the tie-break.
+   Pure: neither argument is touched, and the stats are copied rather than
+   shared, since prRecord() writes into whatever the store hands it. */
+function prMerge(a, b){
+  if (!a && !b) return prBlankMode();
+  if (!a || !b){
+    const one = a || b;
+    return Object.assign(prBlankMode(), one, { stats: Object.assign({}, one.stats) });
+  }
+  const lead = (b.asked | 0) > (a.asked | 0) ? b : a;
+  const level = Math.max(a.level | 0, b.level | 0, 1);
+  return { level, best: Math.max(a.best | 0, b.best | 0, level),
+           asked: lead.asked | 0, correct: lead.correct | 0, sessions: lead.sessions | 0,
+           lastAt: lead.lastAt || 0, stats: Object.assign({}, lead.stats) };
+}
+/* Worth a row at all: an untouched mode is one of eleven a player has simply
+   never opened, and writing eleven blank rows on every sign-in would say
+   nothing the absence of a row does not already say. */
+function prNotable(m){
+  return !!(m && (m.asked > 0 || m.sessions > 0 || m.level > 1 || m.best > 1));
+}
+/* Worth writing: a merge that matches the row it came from is a round trip
+   for nothing. */
+function prSameRow(row, remote){
+  if (!remote) return false;
+  const was = prRowOf(row.mode, prRecOf(remote));
+  for (const k of ['level','best','asked','correct','sessions'])
+    if (row[k] !== was[k]) return false;
+  return JSON.stringify(row.stats) === JSON.stringify(was.stats);
+}
+
+/* Sign-in: read the account's rows, merge them with what this browser holds —
+   the account's own cache and whatever was practised as a guest, which
+   belongs to nobody until somebody claims it — write the result back here,
+   and push whatever the account did not have. The course record travels with
+   it, unioned the same way, so lessons finished before signing up stay
+   finished.
+
+   Every step is allowed to fail. Until supabase-migrate-practice.sql is run
+   there is no table to read, and practice carries on out of the cache exactly
+   as it did before any of this existed. */
+async function prSync(){
+  const db = prCloud();
+  if (!db) return;
+  let rows;
+  try {
+    const { data, error } = await db.from('practice_progress')
+      .select('mode, level, best, asked, correct, sessions, stats').eq('user_id', account.id);
+    if (error) throw error;
+    rows = data || [];
+  } catch (err){
+    console.warn('practice progress unavailable:', err && err.message);
+    return;
+  }
+
+  const remote = {};
+  for (const r of rows) if (r && r.mode) remote[r.mode] = r;
+
+  const mine  = prLoad();                       // account is set, so this is the account's own
+  const guest = prLoad(PR_STORE + 'guest');     // and this is what was done before signing up
+  const push  = [];
+  for (const m of PR_MODES){
+    const merged = prMerge(prMerge(mine.modes[m.key], guest.modes[m.key]), prRecOf(remote[m.key]));
+    mine.modes[m.key] = merged;
+    if (prNotable(merged) && !prSameRow(prRowOf(m.key, merged), remote[m.key])) push.push(m.key);
+  }
+  /* The totals are one record rather than one per mode, so they follow the
+     same rule the modes do — the busier of the two, whole. Summing them would
+     count a day practised on both sides of a sync twice, and the streak is
+     the one number here a player would notice being wrong. */
+  const lead = (guest.asked | 0) > (mine.asked | 0) ? guest : mine;
+  for (const k of ['asked','correct','sessions','days','best']) mine[k] = lead[k];
+  mine.lastDay = lead.lastDay;
+
+  /* The course: the account's row, the account's local record and the guest's,
+     unioned. Asked for by typeof because the LESSONS section is the other
+     side of a section boundary — test_practice_flow.js lifts this one alone. */
+  let done = null, remoteDone = [];
+  if (typeof lsnStored === 'function' && typeof lsnWrite === 'function'){
+    const rc = remote[PR_COURSE];
+    remoteDone = (rc && rc.stats && Array.isArray(rc.stats.done)) ? rc.stats.done : [];
+    done = [];
+    for (const list of [remoteDone, lsnStored(account.id), lsnStored('')])
+      for (const n of list) if (done.indexOf(n) < 0) done.push(n);
+    done.sort((a, b) => a - b);
+    // nothing finished anywhere is nothing to write: a player who has never
+    // opened the course should not come out of a sign-in with a record of it
+    if (done.length) lsnWrite(done);
+  }
+
+  prSave(mine);
+  for (const key of push) prPush(key);
+  if (done && done.length > remoteDone.length) prPushCourse(done);
+
+  /* The unclaimed records have been claimed, so they stop being unclaimed.
+     Without this the next account to sign in on this browser would adopt them
+     too, which on a shared machine hands one person's practice to another;
+     and for the player they belonged to nothing is lost, because all of it is
+     in the account's own cache above — which is also what the pushes are
+     written from, so an upload that failed just now is retried by the next
+     session rather than needing the guest copy kept. */
+  try {
+    localStorage.removeItem(PR_STORE + 'guest');
+    localStorage.removeItem(PR_STORE + 'seen.guest');    // prSeenKey()'s guest half
+    if (typeof lsnKey === 'function') localStorage.removeItem(lsnKey(''));
+  } catch (e){ /* private browsing: there was nothing kept there to remove */ }
+
+  // if the dashboard is up it is showing the record that has just changed
+  if (PR.on && PR.view === 'dash') prRenderDash();
+}
+
 const prAcc = st => (st.asked ? st.correct / st.asked : 0);
 
 /* The last hundred questions, by signature, so a session does not ask the same
@@ -16002,6 +16218,11 @@ function prFinish(note){
     if (m.level > m.best) m.best = m.level;
   }
   prSave(st);
+  /* And on to the account, one row per mode this session wrote — a mixed
+     session played several and each of them is its own row. Fire and forget:
+     the store above is what the screen reads, and a write that does not land
+     is picked up by the next session or the next sign-in. */
+  for (const key of (PR.mixed ? Object.keys(PR.mixedLevel) : [PR.mode.key])) prPush(key);
 
   const acc = PR.i ? PR.right / PR.i : 0;
   const rows = document.getElementById('prDoneRows');
@@ -17979,6 +18200,7 @@ async function setAccount(session){
   } catch (err){ /* the migration has not been run: the local rating stands */ }
 
   pzSync();                    // and bring this browser's ladder up to date
+  prSync();                    // ...and its practice, and the course with it
 }
 
 function updateAccountUI(){

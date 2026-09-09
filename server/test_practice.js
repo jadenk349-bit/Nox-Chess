@@ -69,7 +69,15 @@ var localStorage = {
   removeItem: function(k){ delete storage[k]; }
 };
 var account = null;                    // the guest path, which needs nothing configured
+var sb = null;                         // no Supabase client either, until section 15 fakes one
 function prStatsRender(){}             // pixels; this suite is about the state behind them
+function prRenderDash(){}              // pixels again: prSync redraws the dashboard when it is up
+/* lsnNormalise() clamps a stored lesson number to the length of the course,
+   and the course itself cannot be lifted into this harness — every entry in
+   LESSONS carries a build() that reaches half the page. Only `.length` is
+   read, so that is all this is, and it is generous on purpose: nothing here
+   is testing which lesson numbers exist, only that the record travels. */
+var LESSONS = { length: 20 };
 
 /* ---- the real half ---- */
 var DECLS = ['VAL','FILES','rowOf','colOf','SQNAME','uciOf','sqName','sqIndex','onBoard','other',
@@ -81,7 +89,9 @@ var DECLS = ['VAL','FILES','rowOf','colOf','SQNAME','uciOf','sqName','sqIndex','
              'PR_MODES','PR_GROUPS','PR_MINUTES','PR_STORE','PR_VERSION','PR_V1_KEYS','PR_SEEN_MAX',
              'prKey','prAcc','prSeenKey',
              'PR','PR_STEP_UP','PR_STEP_DOWN','prRand','prPick','prSide','prMan','PR_MAKE','W',
-             'PR_ERRS','PR_FLOORS','PR_AUTO_LEVEL','PR_PALETTE','PZ_VERSION','prPuzzleCache'];
+             'PR_ERRS','PR_FLOORS','PR_AUTO_LEVEL','PR_PALETTE','PZ_VERSION','prPuzzleCache',
+             // the course record prSync() adopts along with the practice one
+             'pzOwner','LSN_STORE','LSN_COURSE','LSN_V1_TO_V2','lsnKey','PR_COURSE'];
 var FNS = ['startBoard','newState','cloneState','fenOf','stateFromFEN',
            'slide','step','addPawn','pseudoMoves','isAttacked','kingSq','inCheck',
            'makeMove','legalMoves','toSAN','attackersOf','defendersOf','see',
@@ -101,9 +111,15 @@ var FNS = ['startBoard','newState','cloneState','fenOf','stateFromFEN',
            'prGamePosition','prCluster','prAskFine','prMakeHold',
            'prRecord','prScore','prStep','prNow','prTimeLeft','prMedianLat',
            'prAutomatic','prGroupOpen','prRecommendFrom','prRecommendNext',
-           'prStartLevel','prOpen','prRebuildStart','prRebuildFinish','prRbPaint','goPractice'];
+           'prStartLevel','prOpen','prRebuildStart','prRebuildFinish','prRbPaint','goPractice',
+           'prCloud','prRowOf','prRecOf','prPush','prPushCourse','prMerge','prNotable','prSameRow','prSync',
+           // the lessons record, read and written by prSync — the real ones,
+           // since all three are small and none of them touches the course
+           'lsnNormalise','lsnStored','lsnWrite'];
 
 var bundle = [grab(/\nconst W = 'w', B = 'b';/, "const W/B")];
+// one line, so the block-shaped fn() above does not match it
+bundle.push(grab(/\nfunction lsnDone\(\)[^\n]*/, 'function lsnDone'));
 for (var d = 0; d < DECLS.length; d++) if (DECLS[d] !== 'W') bundle.push(decl(DECLS[d]));
 for (var f = 0; f < FNS.length; f++) bundle.push(fn(FNS[f]));
 // PR_MODE is filled by a loop rather than written out, and prRecipe/prRecommendNext read it
@@ -1099,5 +1115,90 @@ head('Lesson numbers: PR_MODES and PR_FLOORS never disagree');
   ok('every PR_FLOORS entry agrees with its mode\'s own lesson field', disagree.join('; '), '');
 })();
 
-say('\n' + passed + ' passed, ' + failed + ' failed\n');
-if (typeof process !== 'undefined' && failed) process.exit(1);
+/* ============================================================
+   15 — the account's copy: merging, pushing, adopting a guest
+   ============================================================
+   The one asynchronous section, and the only one with a Supabase client at
+   all: `sb` is a fake whose from() answers a scripted set of rows and records
+   every upsert. What is being checked is the bargain the puzzle ladder
+   already makes — practising as a guest and then signing up keeps the
+   practice, on both records, and the guest's copy stops being the guest's. */
+head('Sync: a guest record adopted by the account that signs in over it');
+var syncTest = (async function(){
+  storage = {};
+  var upserts = [], selected = null;
+  // what the account already had: tracker practised a lot, at a lower level
+  var rows = [{ mode:'tracker', level:2, best:2, asked:30, correct:20, sessions:3, stats:{ ply:2 } }];
+  sb = {
+    from: function(table){
+      return {
+        select: function(cols){
+          return { eq: function(col, val){
+            selected = { table:table, cols:cols, col:col, val:val };
+            return Promise.resolve({ data: rows, error: null });
+          } };
+        },
+        upsert: function(row, opts){
+          upserts.push({ table:table, row:row, opts:opts });
+          return Promise.resolve({ error: null });
+        }
+      };
+    }
+  };
+  account = { id:'u1' };
+
+  // what this browser did before anybody signed in: tracker taken to level 4,
+  // one lesson finished, and a handful of questions it should not ask again
+  var guest = prBlank();
+  guest.modes.tracker = { level:4, best:4, asked:8, correct:7, sessions:1, lastAt:5, stats:{ streak:3 } };
+  storage[PR_STORE + 'guest'] = JSON.stringify(guest);
+  storage[PR_STORE + 'seen.guest'] = JSON.stringify(['sig']);
+  storage[lsnKey('')] = JSON.stringify({ v:3, done:[1] });
+
+  await prSync();
+
+  ok('the account is what was asked for', selected && selected.table + ':' + selected.val,
+     'practice_progress:u1');
+
+  var st = prLoad();                       // account is set, so this is the account's own key
+  ok('the higher level wins, whichever side it came from', st.modes.tracker.level, 4);
+  ok('and it is the best level too', st.modes.tracker.best, 4);
+  ok('the busier record keeps its tally', st.modes.tracker.asked, 30);
+  ok('...and its stats', JSON.stringify(st.modes.tracker.stats.ply), '2');
+
+  var tracker = upserts.filter(function(u){ return u.row.mode === 'tracker'; });
+  ok('the merged mode is pushed back, once', tracker.length, 1);
+  ok('at the level the merge settled on', tracker.length && tracker[0].row.level, 4);
+  ok('under the account it belongs to', tracker.length && tracker[0].row.user_id, 'u1');
+  ok('keyed on the row it replaces', tracker.length && tracker[0].opts.onConflict, 'user_id,mode');
+  var untouched = upserts.filter(function(u){ return u.row.mode === 'square'; });
+  ok('a mode nobody has practised writes no row', untouched.length, 0);
+
+  ok('the course the guest finished is now the account\'s',
+     JSON.stringify(lsnStored('u1')), '[1]');
+  var course = upserts.filter(function(u){ return u.row.mode === 'course'; });
+  ok('and is pushed as the reserved course row', course.length, 1);
+  ok('with the lessons in its stats', course.length && JSON.stringify(course[0].row.stats.done), '[1]');
+
+  ok('the guest practice record is claimed and gone',
+     storage[PR_STORE + 'guest'] === undefined, true);
+  ok('so is the guest question list', storage[PR_STORE + 'seen.guest'] === undefined, true);
+  ok('so is the guest course record', storage[lsnKey('')] === undefined, true);
+
+  // and a guest signs nothing anywhere: no client, no account, no writes
+  upserts.length = 0;
+  account = null; sb = null;
+  prPush('tracker'); prPushCourse([1]);
+  await prSync();
+  ok('a guest pushes nothing', upserts.length, 0);
+})();
+
+function report(){
+  say('\n' + passed + ' passed, ' + failed + ' failed\n');
+  if (typeof process !== 'undefined' && failed) process.exit(1);
+}
+syncTest.then(report, function(err){
+  failed++;
+  say('  FAIL  the sync section threw  ->  ' + (err && err.stack || err));
+  report();
+});

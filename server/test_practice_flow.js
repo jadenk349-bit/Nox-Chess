@@ -2294,6 +2294,32 @@ head('Daily training');
      mixed.every(function(m){ return st.modes[m].sessions === 1; }), true);
 })();
 
+head('The account\'s copy: inert where there is no account half at all');
+(function(){
+  /* prFinish hands every mode it wrote to prPush, which reaches for `sb` —
+     a name this harness does not have, because it lifts the PRACTICE section
+     on its own and the ACCOUNTS section is somebody else's block. Reading an
+     undeclared name throws, so prCloud()'s typeof guard is the whole of what
+     keeps a drill working on a page whose Supabase never loaded, and this is
+     the only suite in the repo that can tell the difference. */
+  storage = {};
+  lsnDoneStub = [];
+  ok('this harness really has no client', typeof sb, 'undefined');
+
+  goPractice();                      // back to the dashboard: the block above left a mix running
+  startDrill('square', 1, 5);
+  answerRight(); tick(1000);
+  finishSession();
+  answerRight(); tick(1000);
+  ok('a session still finishes', byId.prDoneOverlay.classList.contains('show'), true);
+  ok('and still lands on the record', prLoad().sessions, 1);
+
+  var threw = null;
+  try { prPush('square'); prPushCourse([1]); prSync(); }
+  catch (e){ threw = (e && e.message) || String(e); }
+  ok('and pushing by hand throws nothing either', threw, null);
+})();
+
 /* ============================================================
    9 — the rebuild interface
    One interface for every place a position is put back — Hold the Position,
