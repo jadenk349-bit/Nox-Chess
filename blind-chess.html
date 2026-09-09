@@ -11525,53 +11525,22 @@ function lsnAskMove(want, onRight, onWrong){
   };
 }
 
-/* ---- 1 · Learn the Board ----
-   The course opens on the board itself. One page to sit down at it, and then
-   ten coordinate questions — half of them from the chair the player is not
-   used to, because a square read from one side and not the other is a square
-   only half learnt. */
+/* ---- 1 · Know, Don’t See ----
+   The course opens on Koltanowski’s own line, not on a page to sit down at:
+   there is nothing here to configure before the lesson starts teaching. The
+   two chairs still matter — a square read from one side and not the other is
+   a square only half learnt — but they are shown rather than chosen, in the
+   two demo steps lsnLesson1() opens on, and then asked about by the
+   coordinate questions below. */
 
-/** The coordinate board, and the two chairs. Continue is shut until one of
-    them has been taken: the page is here to be sat at, not read. */
-function lsnBoardSeat(){
-  return {
-    title:'Learn the Board',
-    what:'<p>Files run <code>a</code>–<code>h</code> across, ranks <code>1</code>–<code>8</code> up. ' +
-         'A square is its file then its rank: <code>e4</code>.</p>',
-    ask:'Take a chair — the names never move, the board does.',
-    gate:true,
-    setup(){
-      LSN.st = lsnEmpty();
-      LSN.named = true;
-      LSN.marks.set(sqIndex('a1'), 'lsn-ask');
-      const sit = white => {
-        if (LSN.flip === !white && LSN.ok) return;      // already in that chair
-        LSN.flip = !white;
-        draw();
-        lsnRender();
-        const line = white
-          ? 'White’s chair: <code>a1</code> is the near left corner.'
-          : 'Black’s chair: <code>a1</code> is the far right corner — same square, same name.';
-        // The first sitting is what opens the way on; every one after it just
-        // says where a1 went, and leaves Continue where it is.
-        if (LSN.ok) lsnSay(line, 'good');
-        else lsnRight(line);
-      };
-      // The two chairs, as a pair of vision buttons — the same cut-in control
-      // the rest of the course changes what it is showing with.
-      const draw = () => lsnUnder([
-        { label:'Sit in White’s Chair', cls:'vis' + (LSN.flip ? '' : ' active'), on(){ sit(true); } },
-        { label:'Sit in Black’s Chair', cls:'vis' + (LSN.flip ? ' active' : ''), on(){ sit(false); } }
-      ]);
-      draw();
-    }
-  };
-}
-
-/* The ten. Both kinds of question and both chairs are guaranteed to turn up —
-   the four combinations are laid down first and the rest drawn at random — and
-   then the whole list is shuffled, so the White half is not always the first
-   half. Generated on every open, so nobody learns the answers. */
+/* Both kinds of question and both chairs are guaranteed to turn up regardless
+   of how many are asked — the four combinations are laid down first, any more
+   `total` calls for are drawn at random, and the whole list is then shuffled,
+   so the White half is not always the first half. Generated on every open, so
+   nobody learns the answers. Lesson 1 asks for exactly the four guaranteed
+   combinations (`lsnCoordSet(4)`), which is also why four is enough to prove
+   the guarantee in server/test_lessons.js: there is nothing left to the
+   random draw once `total` stops there. */
 function lsnCoordSet(total){
   const n = total || 10;
   const combos = [];
@@ -11801,8 +11770,122 @@ function lsnStepTypeMove(item){
   };
 }
 
+/* Two demos of the same square from both chairs, four coordinate questions
+   (both kinds, both chairs — lsnCoordSet(4) guarantees it), the colour rule
+   stated and asked twice, and the four quarters named and asked once. Every
+   demo lights what it is talking about rather than describing it in prose
+   alone, on the same board the questions that follow are asked on — a
+   player who has just watched a1 sit in the near corner is being asked
+   about the picture they were just shown, not a new one. */
 function lsnLesson1(){
-  return [lsnBoardSeat()].concat(lsnCoordSet(10)).concat([lsnHandoffStep(LESSONS[0])]);
+  const L = LESSONS[0];
+  const coordSet = lsnCoordSet(4);   // both chairs, both kinds — see lsnCoordSet's own comment
+  return [
+    lsnStepDemo({
+      title:'Know, don’t see',
+      what:'<p><b>George Koltanowski</b>, who played 34 games at once without a board, said: ' +
+           '“I don’t see the position — I just know it.” Nothing in this course needs a picture. ' +
+           'It needs you to <b>know where things are</b>.</p>',
+      ask:'a1 is the dark corner at White’s left. Press Continue.',
+      named:true, marks:[[sqIndex('a1'), 'lsn-lit']]
+    }),
+    lsnStepDemo({
+      title:'The same square from Black’s chair',
+      what:'<p>Turned round, a1 is at the far right. The names do not move; you do.</p>',
+      ask:'Press Continue.',
+      named:true, flip:true, marks:[[sqIndex('a1'), 'lsn-lit']]
+    }),
+    ...coordSet,
+    lsnStepDemo({
+      title:'The colour rule',
+      what:'<p>' + prColourWhy(sqIndex('e4')) + '</p>',
+      ask:'Every dark square shares that rule.',
+      named:true, marks:[[sqIndex('e4'), 'lsn-lit']]
+    }),
+    // Square Trainer's level 5 offers colour, neighbour and quadrant together
+    // (PR_SQUARE_LEVELS[4].kinds); a single-kind recipe is what keeps these
+    // two questions from occasionally drawing a neighbour question instead,
+    // and keeps prMakeSquare()'s own q.answer meaning what each step reads
+    // it to mean (a corner key only when the recipe asked for 'quadrant').
+    lsnStepColour(prMakeSquare(Object.assign({}, prRecipe('square', 5), { kinds:['colour'] }))),
+    lsnStepColour(prMakeSquare(Object.assign({}, prRecipe('square', 5), { kinds:['colour'] }))),
+    lsnStepDemo({
+      title:'Four quarters',
+      what:'<p>Koltanowski taught the board as four quarters, each named by its corner. Once one ' +
+           'quarter is yours, the others follow the same logic.</p>',
+      ask:'White’s kingside is lit.',
+      named:true,
+      marks:Array.from({ length:64 }, (_, i) => i).filter(i => quadrantOf(i) === 'h1').map(i => [i, 'lsn-lit'])
+    }),
+    lsnStepQuadrant(prMakeSquare(Object.assign({}, prRecipe('square', 5), { kinds:['quadrant'] }))),
+    lsnHandoffStep(L)
+  ];
+}
+
+/* ---- 2 · Lines and the Knight ----
+   Two demos of e4's own geometry (its rank and file, then both diagonals),
+   two between questions, one through question and a knight demo, then two
+   knight questions — the same four ideas Lines & Routes drills, in the order
+   Lines & Routes introduces them. */
+function lsnLesson2(){
+  const L = LESSONS[1], e4 = sqIndex('e4'), T = linesThrough(e4);
+  // prMakeLines() draws its question kind from the level's own `kinds` list
+  // and can hand back a kind other than the one this step wants — level 4
+  // offers both 'between' and 'through' — or nothing at all when its own
+  // internal retries run out (a 'between' pair with a run of 2–6 squares is
+  // not guaranteed on the first try). Retried from the outside too, capped
+  // rather than looped forever: a generator that has actually broken must
+  // fail the lesson loudly rather than hang it (per the Task 30 controller
+  // notes — the same cap server/test_lessons.js's own untilQuestion() uses
+  // to exercise these levels in isolation).
+  const wantLines = (level, ask, extra) => {
+    for (let i = 0; i < 200; i++){
+      const q = prMakeLines(prRecipe('lines', level));
+      if (q && q.ask === ask && (!extra || extra(q))) return q;
+    }
+    throw new Error('lsnLesson2: could not build a ' + ask + ' question at level ' + level + ' in 200 tries');
+  };
+  const between = lv => wantLines(lv, 'between');
+  const through = () => wantLines(4, 'through');
+  // A knight route of two moves or fewer: level 7 is knight-only, so `ask`
+  // is never in doubt here, but the route length still is — capped at four
+  // by the level itself, and cut down further so this lesson never asks for
+  // a route longer than the two-move standard its own handoff card sets.
+  const knight = () => wantLines(7, 'knight', q => q.answer <= 2);
+  return [
+    lsnStepDemo({
+      title:'The lines through a square',
+      what:'<p>Four lines cross at every square: its rank, its file, and two diagonals.</p>',
+      ask:'e4’s rank and file are lit.',
+      named:true,
+      marks:T.rank.concat(T.file).map(i => [i, 'lsn-lit']).concat([[e4, 'sel']])
+    }),
+    lsnStepDemo({
+      title:'The two diagonals',
+      what:'<p>A bishop lives on one colour forever; these are the squares a bishop on e4 could ever reach.</p>',
+      ask:'Both diagonals through e4.',
+      named:true,
+      marks:T.diag1.concat(T.diag2).map(i => [i, 'lsn-lit']).concat([[e4, 'sel']])
+    }),
+    lsnStepBetween(between(1)), lsnStepBetween(between(2)),
+    lsnStepDiagPick(through()),
+    lsnStepDemo({
+      title:'The knight',
+      what:'<p>Two squares one way and one the other. It always lands on the other colour, and it ' +
+           'never crosses anything.</p>',
+      ask:'Every square a knight on e4 reaches.',
+      named:true,
+      // The two scenery kings lsnKnightBoard() seats stay out of the way at
+      // a1/h8 here — e4's own knight moves never reach either corner — so
+      // this reuses the helper rather than re-deriving the same placement a
+      // second time, exactly as the comment over lsnKnightBoard() invites.
+      st:lsnKnightBoard(e4, []),
+      marks:DIR_N.map(([dr, dc]) => [(rowOf(e4) + dr) * 8 + colOf(e4) + dc, 'lsn-lit'])
+                 .filter(([i]) => i >= 0 && i < 64)
+    }),
+    lsnStepKnight(knight()), lsnStepKnight(knight()),
+    lsnHandoffStep(L)
+  ];
 }
 
 /* ---- 3 · Reading a Move ----
@@ -11878,9 +11961,36 @@ function lsnNotationStep(item, i){
 }
 
 /* Straight into the ten. The page that used to introduce them said what the
-   table beside them says. */
+   table beside them says. The first two are rewritten to show the full
+   from–to form before the shorthand — e2–e4 before e4, Ng1–f3 before Nf3 —
+   because the shorthand is a contraction of that and reads as an arbitrary
+   rule without having seen what it contracts. Three demos follow the ten:
+   a capture (on the position the capture item itself carries, so the man
+   that "leaves the board" really is there to leave it), castling, and one
+   typed move, judged by parseMoveIn() exactly as a game's console is. */
 function lsnLesson3(){
-  return LSN_NOTATION.map(lsnNotationStep).concat([lsnHandoffStep(LESSONS[2])]);
+  const L = LESSONS[2];
+  const steps = LSN_NOTATION.map(lsnNotationStep);
+  steps[0].what = '<p>A move is a piece, the square it leaves and the square it lands on — in full, ' +
+                  '<b>e2–e4</b>. Shortened, that is simply <b>e4</b>.</p>';
+  steps[1].what = '<p>In full, <b>Ng1–f3</b>. Shortened, <b>Nf3</b>: the piece and where it lands.</p>';
+  const cap = LSN_NOTATION.find(i => i.san.indexOf('x') >= 0), castle = LSN_NOTATION.find(i => i.san === 'O-O');
+  return steps.concat([
+    lsnStepDemo({
+      title:'A capture removes a man',
+      what:'<p><b>' + cap.san + '</b>: the man on ' + cap.san.slice(-2) + ' leaves the board. Strike ' +
+           'it off — a captured man still counted is the commonest blindfold mistake there is.</p>',
+      ask:'Press Continue.', st:stateFromFEN(cap.fen), named:true
+    }),
+    lsnStepDemo({
+      title:'Castling moves two men',
+      what:'<p><b>O-O</b>: the king two squares towards the rook, and the rook over it. Move both in ' +
+           'your head in one motion.</p>',
+      ask:'Press Continue.', st:stateFromFEN(castle.fen), named:true
+    }),
+    lsnStepTypeMove(LSN_NOTATION[2]),
+    lsnHandoffStep(L)
+  ]);
 }
 
 /* ---- 4 · Reach and Attack ---- */
@@ -12051,16 +12161,16 @@ function lsnLesson10(){
   return LSN_CHALLENGES.map(lsnChallengeStep).concat([lsnHandoffStep(LESSONS[9])]);
 }
 
-/* ---- the five the course is still growing ----
-   Lessons 2, 6, 7, 8 and 9 have no exercises of their own yet: Tasks 30–33
-   write them, and lessons 1, 3, 4, 5 and 10 above are the old five-lesson
-   course mapped onto the new numbering until those tasks replace them too.
-   Until then each of these is its own handoff card and nothing else, so the
-   ladder is ten rungs long, every one of them opens, and the drill each
-   lesson trains is already reachable from the course. A stub that hands off
+/* ---- the four the course is still growing ----
+   Lessons 6, 7, 8 and 9 have no exercises of their own yet: Tasks 32–33
+   write them, and lessons 4, 5 and 10 above are the old five-lesson course
+   mapped onto the new numbering until those tasks replace them too — lessons
+   1, 2 and 3 were the last of the old numbering to go, in Task 30. Until then
+   each of these four is its own handoff card and nothing else, so the ladder
+   is ten rungs long, every one of them opens, and the drill each lesson
+   trains is already reachable from the course. A stub that hands off
    honestly is worth more than a rung that says "coming soon" and does
    nothing. */
-function lsnLesson2(){ return [lsnHandoffStep(LESSONS[1])]; }   // Task 30
 function lsnLesson6(){ return [lsnHandoffStep(LESSONS[5])]; }   // Task 32
 function lsnLesson7(){ return [lsnHandoffStep(LESSONS[6])]; }   // Task 32
 function lsnLesson8(){ return [lsnHandoffStep(LESSONS[7])]; }   // Task 33

@@ -205,17 +205,20 @@ function makePage(store){
     ' lsnDone, lsnReach, lsnSqEls, lsnVisual, lsnPositionHTML, lsnGauge, legalMoves, toSAN, sqName, sqIndex,' +
     ' stateFromFEN, parseMoveIn, MODE_NAME, PR, PR_MODES, goPractice, prLoad, resetChoices,' +
     // Task 30a: the seven new step factories, and the helpers a harness that
-    // builds a step itself — rather than reading it off a lesson body, which
-    // does not exist yet — needs to feed them the same kind of question
-    // Practice would (prMakeSquare/prMakeLines/prRecipe), to open a step the
-    // way lsnShow does without a lesson around it (lsnResetStep/lsnPaint/
-    // lsnRender), and to check a select-many answer the way lineBetween()
-    // would. kingSq/inCheck are not needed here: page state is plain data,
-    // so tools/page_chess.js's C already judges it, exactly as it does the
-    // fixed positions above.
+    // builds a step itself — rather than reading it off a lesson body — needs
+    // to feed them the same kind of question Practice would
+    // (prMakeSquare/prMakeLines/prRecipe), to open a step the way lsnShow
+    // does without a lesson around it (lsnResetStep/lsnPaint/lsnRender), and
+    // to check an answer the way the page itself would (lineBetween() for a
+    // select-many, quadrantOf()/knightRoute()/linesThrough() for the demo
+    // boards in Task 30b's lsnLesson1/lsnLesson2 that light a square's
+    // quarter, a knight's reach, or a rank/file/diagonal without asking a
+    // question about it). kingSq/inCheck are not needed here: page state is
+    // plain data, so tools/page_chess.js's C already judges it, exactly as
+    // it does the fixed positions above.
     ' lsnStepDemo, lsnStepColour, lsnStepQuadrant, lsnStepBetween, lsnStepDiagPick,' +
     ' lsnStepKnight, lsnStepTypeMove, lsnKnightBoard, lsnResetStep, lsnPaint, lsnRender,' +
-    ' prMakeSquare, prMakeLines, prRecipe, lineBetween,' +
+    ' prMakeSquare, prMakeLines, prRecipe, lineBetween, quadrantOf, knightRoute, linesThrough,' +
     ' screen:()=>screenName });';
   let out = null;
   new Function('document','window','location','localStorage','WebSocket','AudioContext',
@@ -666,72 +669,189 @@ async function walk(p, n){
   check('and nothing empty was left where it stood',
         (SRC.match(/id="lsnExtra"/g) || []).length === 1);
 
-  head('Know, Don’t See opens on the board, and will not let you past it');
+  head('Know, Don’t See opens on Koltanowski’s line, not on a chair to sit at');
   g.lsnOpen(1, 0);
-  check('a board page, ten questions and the handoff', g.LSN.steps.length === 12, g.LSN.steps.length);
-  check('every square is wearing its name', g.LSN.named === true);
-  check('Continue is shut when the page opens', g.by('lsnNext').disabled === true);
-  const chair = re => Array.from(g.by('lsnUnder').children).find(b => re.test(b.textContent));
-  check('both chairs are offered here', !!chair(/White/) && !!chair(/Black/),
-        Array.from(g.by('lsnUnder').children).map(b => b.textContent).join(' | '));
-  chair(/Black/).onclick();
-  check('sitting in Black’s chair turns the board round', g.LSN.flip === true);
-  check('and opens Continue', g.by('lsnNext').disabled === false);
-  chair(/White/).onclick();
-  check('sitting back in White’s turns it back', g.LSN.flip === false);
-  check('and Continue stays open', g.by('lsnNext').disabled === false);
+  // Two demos (the line itself, then the same square from Black’s chair),
+  // four coordinate questions, the colour rule stated and asked twice, the
+  // four quarters named and asked once, and the handoff.
+  check('twelve steps: two demos, four coordinate questions, the colour rule ' +
+        'and two colour questions, the four quarters and one quadrant question, and the handoff',
+        g.LSN.steps.length === 12, g.LSN.steps.length);
+  check('it opens already lit — a demo gates nothing, Continue is open from the start',
+        g.by('lsnNext').disabled === false);
+  check('a1 is lit, not asked for', g.LSN.marks.get(g.sqIndex('a1')) === 'lsn-lit');
+  check('and Koltanowski is quoted, not paraphrased away',
+        /Koltanowski/.test(g.by('lsnWhat').innerHTML || ''), g.by('lsnWhat').innerHTML);
+  g.lsnOpen(1, 1);
+  check('the second step turns the board round, to show the same square from the other chair',
+        g.LSN.flip === true);
+  check('a1 is still lit there', g.LSN.marks.get(g.sqIndex('a1')) === 'lsn-lit');
+  check('and it still gates nothing', g.by('lsnNext').disabled === false);
 
-  head('The ten coordinate questions are made, not written');
-  // the board page in front of them and the handoff card behind them are not
-  // questions, so neither one is part of the shape being compared
-  const shape = () => g.LSN.steps.slice(1, -1).map(st =>
+  head('The four coordinate questions are made, not written, and both chairs and both kinds still turn up');
+  // Steps 0–1 are the two demos above and step 11 is the handoff, so the
+  // four coordinate questions are exactly steps 2–5 — lsnCoordSet(4) draws
+  // nothing but its four guaranteed combinations when asked for exactly
+  // four, so the "both kinds, both chairs" guarantee is proven on every run
+  // rather than merely likely, the same intent the old ten-question version
+  // of this lesson checked over a wider field.
+  const coordShape = () => g.LSN.steps.slice(2, 6).map(st =>
     (/^Click/.test(st.ask) ? 'c' : 'n') + (/Black/.test(st.what) ? 'b' : 'w')).join(' ');
-  const shapes = new Set();
-  for (let k = 0; k < 12; k++){ g.lsnOpen(1, 0); shapes.add(shape()); }
-  check('there are exactly ten of them every time', g.LSN.steps.length === 12, g.LSN.steps.length);
-  check('and they are not the same ten twice', shapes.size > 1, shapes.size + ' of 12 runs differed');
-  const covered = Array.from(shapes).every(sh => {
+  const coordShapes = new Set();
+  for (let k = 0; k < 12; k++){ g.lsnOpen(1, 0); coordShapes.add(coordShape()); }
+  check('twelve steps every time', g.LSN.steps.length === 12, g.LSN.steps.length);
+  check('and the four are not drawn in the same order every time',
+        coordShapes.size > 1, coordShapes.size + ' of 12 runs differed');
+  const coordCovered = Array.from(coordShapes).every(sh => {
     const qs = sh.split(' ');
-    return ['cw','cb','nw','nb'].every(want => qs.indexOf(want) >= 0);
+    return ['cw', 'cb', 'nw', 'nb'].every(want => qs.indexOf(want) >= 0);
   });
-  check('every run asks both kinds from both chairs', covered, Array.from(shapes)[0]);
-  const halves = Array.from(shapes).some(sh => {
-    const qs = sh.split(' ').map(q => q[1]);
-    return qs.slice(0, 5).join('') !== 'wwwww' || qs.slice(5).join('') !== 'bbbbb';
-  });
-  check('and not White first then Black every time', halves);
+  check('every run asks both kinds from both chairs', coordCovered, Array.from(coordShapes).join(' | '));
+  const coordNotFixed = Array.from(coordShapes).some(sh => sh.split(' ')[0][1] === 'b');
+  check('and White is not fixed to come first every time', coordNotFixed, Array.from(coordShapes).join(' | '));
 
-  head('Every one of the ten can be answered, and only with the right answer');
-  for (let i = 1; i <= 10; i++){
-    g.lsnOpen(1, i);
+  head('Every one of the four coordinate questions can be answered, and only with the right answer');
+  for (let idx = 2; idx <= 5; idx++){
+    g.lsnOpen(1, idx);
+    const n = idx - 1;
     const ask = g.by('lsnAsk').innerHTML || '';
     const litFor = () => { let sq = -1; g.LSN.marks.forEach((c, k) => { if (c === 'lsn-ask') sq = k; }); return sq; };
     if (/^Click/.test(ask)){
       const want = g.sqIndex((ask.match(/<code>([a-h][1-8])<\/code>/) || [])[1]);
-      check('question ' + i + ' names a square to click', want >= 0 && want < 64, ask);
+      check('question ' + n + ' names a square to click', want >= 0 && want < 64, ask);
       g.LSN.onSquare((want + 9) % 64);
-      check('question ' + i + ' refuses the wrong square', !g.LSN.ok);
+      check('question ' + n + ' refuses the wrong square', !g.LSN.ok);
       g.LSN.onSquare(want);
-      check('question ' + i + ' takes ' + g.sqName(want), g.LSN.ok === true);
+      check('question ' + n + ' takes ' + g.sqName(want), g.LSN.ok === true);
     } else {
       const lit = litFor();
-      check('question ' + i + ' lights a square', lit >= 0);
-      check('question ' + i + ' does not give the answer away',
+      check('question ' + n + ' lights a square', lit >= 0);
+      check('question ' + n + ' does not give the answer away',
             ask.indexOf(g.sqName(lit)) < 0, ask);
       const btns = Array.from(g.by('lsnChoices').children);
-      check('question ' + i + ' offers four names', btns.length === 4, btns.length);
+      check('question ' + n + ' offers four names', btns.length === 4, btns.length);
       const right = btns.filter(b => b.textContent === g.sqName(lit));
-      check('question ' + i + ': ' + g.sqName(lit) + ' is one of them, once', right.length === 1);
+      check('question ' + n + ': ' + g.sqName(lit) + ' is one of them, once', right.length === 1);
       const wrong = btns.find(b => b.textContent !== g.sqName(lit));
-      if (wrong){ wrong.onclick(); check('question ' + i + ' refuses the wrong name', !g.LSN.ok); }
-      if (right.length){ right[0].onclick(); check('question ' + i + ' takes the right one', g.LSN.ok === true); }
+      if (wrong){ wrong.onclick(); check('question ' + n + ' refuses the wrong name', !g.LSN.ok); }
+      if (right.length){ right[0].onclick(); check('question ' + n + ' takes the right one', g.LSN.ok === true); }
     }
-    check('question ' + i + ' opens the way on once answered', g.by('lsnNext').disabled === false);
+    check('question ' + n + ' opens the way on once answered', g.by('lsnNext').disabled === false);
   }
+
+  head('The colour rule is stated once, then asked twice, board hidden');
+  g.lsnOpen(1, 6);
+  check('the demo lights e4', g.LSN.marks.get(g.sqIndex('e4')) === 'lsn-lit');
+  check('and states the rule by parity, not just the answer',
+        /file|rank/.test(g.by('lsnWhat').innerHTML || ''), g.by('lsnWhat').innerHTML);
+  const colourSteps = g.LSN.steps.filter(st => st.title === 'Light or dark?');
+  check('exactly two colour questions follow the coordinate questions and the rule',
+        colourSteps.length === 2, colourSteps.length);
+  check('both are the choices kind', colourSteps.every(st => st.solve === 'choices'));
+  g.lsnOpen(1, 7);
+  check('a colour question hides the board — this is answered from the name alone',
+        g.LSN.named === false && g.by('lsnFrame').style.display === 'none');
+  check('offering exactly Light and Dark', g.by('lsnChoices').children.length === 2,
+        Array.from(g.by('lsnChoices').children).map(b => b.textContent).join(','));
+
+  head('The four quarters are named, then asked once');
+  g.lsnOpen(1, 9);
+  check('the demo lights every square of White’s kingside and no other quarter',
+        Array.from({ length:64 }, (_, i) => i).every(i =>
+          (g.quadrantOf(i) === 'h1') === (g.LSN.marks.get(i) === 'lsn-lit')));
+  check('and names it in words, not by compass point',
+        /kingside/.test(g.by('lsnAsk').innerHTML || ''), g.by('lsnAsk').innerHTML);
+  const quadrantSteps = g.LSN.steps.filter(st => st.title === 'Which quarter?');
+  check('exactly one quadrant question follows', quadrantSteps.length === 1, quadrantSteps.length);
+  g.lsnOpen(1, 10);
+  check('the quadrant question offers all four corners', g.by('lsnChoices').children.length === 4,
+        Array.from(g.by('lsnChoices').children).map(b => b.textContent).join(','));
+  check('lesson 1 ends on the handoff', !!g.LSN.steps[11].handoff);
+
+  head('Lines and the Knight opens on e4’s own geometry, then asks about it');
+  g.lsnOpen(2, 0);
+  // Two demos (rank/file, then both diagonals), two between questions, one
+  // through question, a knight demo, then two knight questions, and the
+  // handoff.
+  check('nine steps: two demos, two between questions, one diagonal pick, a ' +
+        'knight demo, two knight questions, and the handoff',
+        g.LSN.steps.length === 9, g.LSN.steps.length);
+  {
+    // linesThrough() is the page's own geometry — the same function the
+    // between/through/knight questions below are built from — so this checks
+    // the demo against the rule the questions are about to test, not a
+    // second reading of what a rank and file are.
+    const e4 = g.sqIndex('e4'), T = g.linesThrough(e4);
+    const want = new Set(T.rank.concat(T.file));
+    const lit = new Set();
+    g.LSN.marks.forEach((c, k) => { if (c === 'lsn-lit') lit.add(k); });
+    check('the first demo lights exactly e4’s rank and file, e4 itself marked selected',
+          lit.size === want.size && Array.from(want).every(sq => lit.has(sq)) && g.LSN.marks.get(e4) === 'sel',
+          lit.size + ' lit vs ' + want.size + ' wanted');
+  }
+  g.lsnOpen(2, 1);
+  {
+    const e4 = g.sqIndex('e4'), T = g.linesThrough(e4);
+    const want = new Set(T.diag1.concat(T.diag2));
+    const lit = new Set();
+    g.LSN.marks.forEach((c, k) => { if (c === 'lsn-lit') lit.add(k); });
+    check('the second demo lights exactly both diagonals through e4',
+          lit.size === want.size && Array.from(want).every(sq => lit.has(sq)),
+          lit.size + ' lit vs ' + want.size + ' wanted');
+  }
+
+  head('Two between questions, one diagonal pick, and two knight questions with a two-move-or-fewer route');
+  g.lsnOpen(2, 2);
+  check('a between question, selected on an empty board', g.LSN.steps[2].solve === 'select');
+  g.lsnOpen(2, 3);
+  check('and a second one', g.LSN.steps[3].solve === 'select');
+  const betweenSteps = g.LSN.steps.filter(st => st.solve === 'select');
+  check('exactly two between questions', betweenSteps.length === 2, betweenSteps.length);
+  g.lsnOpen(2, 4);
+  check('one diagonal-pick question, board hidden',
+        g.LSN.steps[4].title === 'On a diagonal?' && g.by('lsnFrame').style.display === 'none');
+  const diagSteps = g.LSN.steps.filter(st => st.title === 'On a diagonal?');
+  check('and only one', diagSteps.length === 1, diagSteps.length);
+  g.lsnOpen(2, 5);
+  {
+    const e4 = g.sqIndex('e4');
+    check('the knight sits on e4', g.LSN.st.b[e4] && g.LSN.st.b[e4].t === 'N');
+    sane('lsnLesson2’s knight demo', g.LSN.st);
+    // Every square one knight move away is lit, and only those — checked
+    // against the page’s own knightRoute(), the same function the two knight
+    // questions below are answered against, rather than a hand-rolled L-shape
+    // test of our own.
+    const lit = new Set();
+    g.LSN.marks.forEach((c, k) => { if (c === 'lsn-lit') lit.add(k); });
+    const want = new Set(Array.from({ length:64 }, (_, i) => i)
+      .filter(i => i !== e4 && g.knightRoute(e4, i).length - 1 === 1));
+    check('the demo lights every square a knight on e4 reaches, and no other',
+          lit.size === want.size && Array.from(want).every(sq => lit.has(sq)),
+          lit.size + ' lit vs ' + want.size + ' wanted');
+  }
+  const knightSteps = g.LSN.steps.filter(st => st.title === 'How many knight moves?');
+  check('exactly two knight questions', knightSteps.length === 2, knightSteps.length);
+  [6, 7].forEach(idx => {
+    g.lsnOpen(2, idx);
+    const ask = g.by('lsnAsk').innerHTML || '';
+    const names = (ask.match(/<code>([a-h][1-8])<\/code>/g) || []).map(c => c.replace(/<\/?code>/g, ''));
+    check('knight question names two squares', names.length === 2, ask);
+    if (names.length === 2){
+      // The lesson’s own knight() helper is trusted to have capped the route
+      // at two moves or fewer before this step was ever built — checked here
+      // against the page’s own knightRoute(), not a second BFS of our own,
+      // exactly as the between solver checks against the page’s lineBetween().
+      const route = g.knightRoute(g.sqIndex(names[0]), g.sqIndex(names[1]));
+      check('and the route between them really is two moves or fewer',
+            Array.isArray(route) && route.length - 1 <= 2, route && (route.length - 1));
+    }
+  });
+  check('lesson 2 ends on the handoff', !!g.LSN.steps[8].handoff);
 
   head('Reading a Move starts on a move, not on a page about moves');
   g.lsnOpen(3, 0);
-  check('ten moves, no introduction, and the handoff', g.LSN.steps.length === 11, g.LSN.steps.length);
+  check('ten notations, a capture demo, a castling demo, one typed move, and the handoff',
+        g.LSN.steps.length === 14, g.LSN.steps.length);
   check('the first step already asks for one',
         /Play <code>e4<\/code>/.test(g.by('lsnAsk').innerHTML || ''), g.by('lsnAsk').innerHTML);
   check('with the notation table beside it',
@@ -739,6 +859,36 @@ async function walk(p, n){
   check('and the table names every form the course teaches',
         ['Nf3','e4','Bxe5','exd5','O-O','O-O-O','e8=Q','Qh5+','Qf7#','Nbd2']
           .every(f => (g.by('lsnExtraBody').innerHTML || '').indexOf(f) >= 0));
+  check('the first step is shown in full, e2–e4, before the short form',
+        /e2.?e4/.test(g.by('lsnWhat').innerHTML || ''), g.by('lsnWhat').innerHTML);
+  g.lsnOpen(3, 1);
+  check('the second is shown in full too, Ng1–f3',
+        /Ng1.?f3/.test(g.by('lsnWhat').innerHTML || ''), g.by('lsnWhat').innerHTML);
+
+  head('A capture demo whose own board really has a capture on it, then castling, then one typed move');
+  const capItem = NOTATION.find(i => i.san.indexOf('x') >= 0);
+  const castleItem = NOTATION.find(i => i.san === 'O-O');
+  g.lsnOpen(3, 10);
+  {
+    // 30a already asserts LSN_NOTATION carries a capture; this asserts the
+    // demo built from it is shown on a position where that capture is
+    // actually legal, not merely on a FEN copied from elsewhere.
+    const { sans } = sansOf(C.stateFromFEN(capItem.fen));
+    check(capItem.san + ' really is legal on the capture demo’s own position', sans.indexOf(capItem.san) >= 0, sans.join(' '));
+  }
+  check('the demo names the square that empties', (g.by('lsnWhat').innerHTML || '').indexOf(capItem.san.slice(-2)) >= 0,
+        g.by('lsnWhat').innerHTML);
+  check('a demo gates nothing', g.by('lsnNext').disabled === false);
+  g.lsnOpen(3, 11);
+  {
+    const { sans } = sansOf(C.stateFromFEN(castleItem.fen));
+    check('O-O really is legal on the castling demo’s own position', sans.indexOf('O-O') >= 0, sans.join(' '));
+  }
+  g.lsnOpen(3, 12);
+  check('the last exercise opens the console for typing', g.LSN.console === true && g.LSN.entry === true);
+  check('and is judged the typed way', g.LSN.steps[12].solve === 'typed');
+  g.lsnOpen(3, 13);
+  check('lesson 3 ends on the handoff', !!g.LSN.steps[13].handoff);
 
   head('Reach and Attack hides the men when the player says so');
   g.lsnOpen(4, 3);
@@ -922,16 +1072,20 @@ async function walk(p, n){
   /* ============================================================
    * Task 30a: the seven new step kinds, exercised on their own.
    *
-   * Lessons 1–3 (Task 30b) do not exist yet — `lsnLesson1`/`lsnLesson2` are
-   * still the old five-lesson content and the stub respectively — so there
-   * is no course walk to drive these through. Each factory is instead
-   * opened the way lsnShow() opens any step, with a one-step "lesson" built
-   * by hand: `LSN.steps` set to just it, lsnResetStep() to undo whatever
-   * the step before it left behind, then the step's own setup(), lsnPaint()
-   * and lsnRender() — the same three calls lsnShow() makes once a step is
-   * chosen. When 30b lands, every one of these is walked for real by
-   * walk(), and this section stays as the one place each kind is checked
-   * in isolation.
+   * `walk()` (above, in "Every lesson can be walked end to end") and the
+   * lesson-shape sections above this one already drive every one of these
+   * seven factories for real, through `lsnLesson1()`/`lsnLesson2()`/
+   * `lsnLesson3()` (Task 30b). This section stays anyway, as the one place
+   * each kind is checked in isolation, on a question built straight from
+   * Practice's own generators rather than whatever a lesson happened to
+   * draw: `walk()` proves a lesson finishes, this proves what each kind of
+   * step does with a right answer, a wrong one, and the edges between (a
+   * missed square, a legal-but-different move, two of four choices right).
+   * Each factory is opened the way lsnShow() opens any step, with a
+   * one-step "lesson" built by hand: `LSN.steps` set to just it,
+   * lsnResetStep() to undo whatever the step before it left behind, then
+   * the step's own setup(), lsnPaint() and lsnRender() — the same three
+   * calls lsnShow() makes once a step is chosen.
    * ============================================================ */
   head('The seven new step kinds are exercised on their own, ahead of the lessons that will use them');
 
