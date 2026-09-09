@@ -217,7 +217,7 @@ var FNS = ['startBoard','newState','cloneState','fenOf','stateFromFEN',
            'slide','step','addPawn','pseudoMoves','isAttacked','kingSq','inCheck',
            'makeMove','legalMoves','toSAN','attackersOf','defendersOf','see',
            'mirror','evaluate','orderMoves','scoreMove','quiesce','negamax','bestMove',
-           'parseMoveIn','bookMove','moveFromSAN','rebuildDiff','quadrantOf','lineBetween','linesThrough','knightRoute','sliderReaches'];
+           'parseMoveIn','bookMove','moveFromSAN','openingPosition','rebuildDiff','quadrantOf','lineBetween','linesThrough','knightRoute','sliderReaches'];
 var bundle = [grab(/\nconst W = 'w', B = 'b';/, "const W/B")];
 // a multi-line string rather than an object, so neither shape of decl() fits it
 bundle.push(grab(/\nconst BISHOP_SVG =\n[\s\S]*?';\n/, 'BISHOP_SVG'));
@@ -1381,6 +1381,24 @@ function forceCalc(level, pred){
    set.
    ============================================================ */
 head('Branches');
+
+(function(){
+  // A generation smoke test, under this harness's own bundle rather than
+  // test_practice.js's — the two lift different slices of the page (this one
+  // the whole PRACTICE section, plus a short DECLS/FNS list of what it reads
+  // from outside that section), so a function Branches calls that lives
+  // outside the block and is missing from that list throws here even though
+  // test_practice.js, which pulls in its own copy of everything by name,
+  // never notices. Level 6 is exactly that case: prMakeBranches reaches for
+  // openingPosition() (CONSTANTS & HELPERS, not PRACTICE) when `r.lead` is
+  // set, and it was missing from this file's FNS for a while — every level
+  // is walked here so a gap like that fails loudly instead of only failing
+  // silently the day somebody actually plays level 6.
+  for (var lv = 1; lv <= PR_MODE.branches.levels.length; lv++){
+    var q = prMake('branches', lv);
+    ok('level ' + lv + ' builds a branches question', !!q && q.kind === 'branches', true);
+  }
+})();
 
 (function(){
   storage = {};
