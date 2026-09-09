@@ -4144,11 +4144,17 @@
     <div class="lsn-done panel" id="lsnDone" style="display:none">
       <div class="lsn-mark">♚</div>
       <h2>Blindfold Training Complete</h2>
-      <p>You can read a square, read a move, and hold a position in your head.
-         That is the whole of it — the rest is repetition.</p>
+      <!-- The course is over; the training is not. Every lesson has already
+           handed off to the drill that trains it, so this says where the work
+           carries on rather than telling anybody they are finished. -->
+      <p>That is the course. You have been shown every skill a blindfold game
+         asks for, and shown it once.</p>
+      <p>Holding them is what Practice is for — the drills keep score, and the
+         levels are where the work goes from here.</p>
       <div class="row">
-        <button class="primary" id="lsnGoPractice">Go to Practice</button>
-        <button class="ghost" id="lsnGoPlay">Play Blindfold</button>
+        <button class="primary" id="lsnGoTrain">Go to Practice</button>
+        <button class="ghost" id="lsnGoProgressive">Progressive Blindfold</button>
+        <button class="ghost" id="lsnGoPlay">Play a Game</button>
       </div>
       <div class="row">
         <button class="ghost" id="lsnDoneBack">Back to Lessons</button>
@@ -4536,6 +4542,10 @@
               <button class="vis" data-mode="fog">Fog of War</button>
               <button class="vis" data-mode="sighted">Sighted</button>
             </div>
+            <!-- The one line the end of the course leaves here, under the
+                 question it is about. Empty and hidden for everybody arriving
+                 any other way: this is the game's own setup, not the course's. -->
+            <p class="lsn-say tip" id="lsnFirstNote" style="display:none"></p>
           </div>
 
           <div class="panel sec" id="secTime">
@@ -10347,17 +10357,32 @@ const LSN_STORE  = 'nox.lessons.';
 const LSN_COURSE = 'howto';
 const lsnKey = owner => LSN_STORE + (owner ? owner + '.' : '') + LSN_COURSE;
 
-/* The course was seven lessons and is now five: "What Is Blind Chess?" and
-   "Playing in Nox" were both talk about the game rather than the game, and
-   they went. Anybody who had finished lessons under the old numbering still
-   has that record in this browser, so a v1 record is read through this map on
-   the way in — the two removed lessons simply have nowhere to land, and the
-   rest keep their place in the course rather than their old number. Written
-   back as v2, so the translation happens once. */
+/* The course was seven lessons, then five, and is now ten. Anybody who
+   finished lessons under either older numbering still has that record in this
+   browser, so a stored record is read forwards through as many of these maps
+   as it needs on the way in, and written back at the current version so the
+   translation happens once.
+
+   v1 → v2 dropped "What Is Blind Chess?" and "Playing in Nox", which were
+   talk about the game rather than the game.
+
+   v2 → v3 is not a removal but a splitting: the five became ten, and only
+   four of them survive as a lesson that teaches the same thing. Old 1 (Learn
+   the Board) is new 1; old 2 (Chess Notation) is new 3; old 3 (Visualize
+   Pieces) is new 4; old 4 (Track the Position) is new 5. Old 5, the first
+   blindfold challenge, has nowhere to land: new 10 asks for a whole game with
+   the men hidden, which is not a thing somebody who finished the old lesson 5
+   has already done. A lesson kept is a lesson whose new form asks no more
+   than its old one did — anything else would tick a box the player has not
+   earned, and the ladder would open on a lesson they have never seen. */
 const LSN_V1_TO_V2 = { 2:1, 3:2, 4:3, 5:4, 7:5 };
+const LSN_V2_TO_V3 = { 1:1, 2:3, 3:4, 4:5 };
 function lsnNormalise(raw){
   if (!raw || !Array.isArray(raw.done)) return [];
-  const list = (raw.v >= 2) ? raw.done : raw.done.map(n => LSN_V1_TO_V2[n]);
+  const v = raw.v >= 3 ? 3 : raw.v >= 2 ? 2 : 1;
+  const list = v === 3 ? raw.done
+             : v === 2 ? raw.done.map(n => LSN_V2_TO_V3[n])
+             : raw.done.map(n => LSN_V2_TO_V3[LSN_V1_TO_V2[n]]);
   const out = [];
   list.forEach(n => {
     if (!(n >= 1 && n <= LESSONS.length)) return;   // removed, or from a course we do not have
@@ -10373,7 +10398,7 @@ function lsnStored(owner){
 }
 function lsnDone(){ return lsnStored(pzOwner()); }
 function lsnWrite(done){
-  try { localStorage.setItem(lsnKey(pzOwner()), JSON.stringify({ v:2, done })); } catch (e){}
+  try { localStorage.setItem(lsnKey(pzOwner()), JSON.stringify({ v:3, done })); } catch (e){}
 }
 function lsnMark(n){
   const done = lsnDone();
@@ -10424,21 +10449,63 @@ const LSN = {
   timers: []
 };
 
-/* Five lessons, and every one of them a thing you do. The course opens on the
-   board rather than on an essay about the board, and it ends the first time
-   you find a move you could not see. */
+/* Ten lessons, and every one of them a thing you do. The course opens on the
+   board rather than on an essay about the board, and it ends with a game.
+
+   `train` is the half that makes it a course rather than ten exercises. A
+   lesson teaches a thing once, in order; the drill that trains it lives on
+   the Practice page, and the last step of every lesson is the handoff to it
+   (lsnHandoffStep). `mode` and `level` are what goPractice() is handed, so
+   they name a real PR_MODE key and a rung on its ladder — the same pairs
+   PR_FLOORS uses to decide where a mode's first session opens, read from the
+   other side. `say` is the sentence the card shows, and it is written for the
+   player rather than assembled out of the two fields, because "level 2" is
+   not what anybody needs told. */
 const LESSONS = [
-  { n:1, name:'Learn the Board',           blurb:'Files, ranks, and the same square from either chair.',
-    build:() => lsnLessonBoard() },
-  { n:2, name:'Chess Notation',            blurb:'Ten moves written down, played out on the board.',
-    build:() => lsnLessonNotation() },
-  { n:3, name:'Visualize Pieces',          blurb:'Where each man can reach, with the men hidden.',
-    build:() => lsnLessonVisualize() },
-  { n:4, name:'Track the Position',        blurb:'Follow a sequence in your head, then answer for it.',
-    build:() => lsnLessonTrack() },
-  { n:5, name:'First Blindfold Challenge', blurb:'Three small positions, played blind.',
-    build:() => lsnLessonChallenge() }
+  { n:1,  name:'Know, Don’t See',              blurb:'The board from either chair, its colours and quarters — and why nobody needs a picture.',
+    train:{ mode:'square', level:2, say:'Train Square Trainer until squares from either chair come in under two seconds with the labels off.' }, build:() => lsnLesson1() },
+  { n:2,  name:'Lines and the Knight',         blurb:'Ranks, files, the two diagonals through a square, and where a knight lands.',
+    train:{ mode:'lines', level:2, say:'Train Lines & Routes until both diagonals through any square, and a two-move knight route, come from the name alone.' }, build:() => lsnLesson2() },
+  { n:3,  name:'Reading a Move',               blurb:'From-square to to-square, captures that remove, castling that moves two men.',
+    train:{ mode:'tracker', level:1, say:'Train Move Tracker levels 1 and 2 until a written move lands on the right squares first time.' }, build:() => lsnLesson3() },
+  { n:4,  name:'Reach and Attack',             blurb:'Where a hidden piece reaches, what blocks it, and what it attacks or defends.',
+    train:{ mode:'piece', level:2, say:'Train Piece Vision to level 4, a crowded board, and Attack Vision to level 4, the attackers of a square.' }, build:() => lsnLesson4() },
+  { n:5,  name:'Holding a Small Position',     blurb:'The start position plus two moves, then four men held kings-first.',
+    train:{ mode:'tracker', level:3, say:'Train Move Tracker levels 3 and 4 — real openings from the start — until four plies feel steady. Then Hold the Position to level 3.' }, build:() => lsnLesson5() },
+  { n:6,  name:'Updating: Where, and What Changed', blurb:'The square a move leaves behind, and the line it opens.',
+    train:{ mode:'after', level:2, say:'Train After the Move to level 3, with the position hidden after study.' }, build:() => lsnLesson6() },
+  { n:7,  name:'Captures and Counting',        blurb:'A capture removes a man; a count catches the one you forgot.',
+    train:{ mode:'forcing', level:2, say:'Train Forcing Lines to level 3, three attackers against two, and Move Tracker levels 5 and 6.' }, build:() => lsnLesson7() },
+  { n:8,  name:'Check Yourself, and Get It Back', blurb:'Three questions every few moves, and rebuilding from the score when it slips.',
+    train:{ mode:'tracker', level:7, say:'Train Move Tracker from level 7, where the check questions come every few plies, until three sessions pass with no drift.' }, build:() => lsnLesson8() },
+  { n:9,  name:'Calculating Short Lines',      blurb:'Forcing moves first, one line, a stone at its end, and back to the root.',
+    train:{ mode:'calc', level:2, say:'Train Blind Calculation to level 3, then Branches level 1: two lines from one root.' }, build:() => lsnLesson9() },
+  { n:10, name:'Playing Without the Pieces',   blurb:'The visions, the peeks, and one small game with your men shown.',
+    train:{ mode:'progressive', level:1, say:'Start Progressive Blindfold at its first level.' }, build:() => lsnLesson10() }
 ];
+
+/* The last step of every lesson, and the same step in all ten: what to train
+   now, and the button that opens it. It is a step rather than a line at the
+   foot of the last exercise because the handoff is the point of the course —
+   a lesson understood is not a skill held, and the drill is where the second
+   half happens.
+
+   lsnMark() is called here, in setup(), rather than by lsnNext() at the end of
+   the lesson: a learner who reads this card and presses Train this has
+   finished the lesson, and walking off to Practice must not cost them the
+   tick. Reaching the card is finishing the lesson. */
+function lsnHandoffStep(L){
+  return {
+    title:'Train this', what:'<p>' + L.train.say + '</p>', ask:'', gate:false, handoff:true,
+    setup(){
+      lsnMark(L.n);
+      LSN.st = lsnEmpty(); LSN.mode = 'sighted';
+      lsnUnder([{ label:'Train this in Practice', cls:'primary wide',
+                  on(){ goPractice({ mode:L.train.mode, level:L.train.level }); } }]);
+      lsnSay('Or press Continue for the next lesson.', 'tip');
+    }
+  };
+}
 
 /* ---- small change ---- */
 const lsnRand = n => (Math.random() * n) | 0;
@@ -10876,7 +10943,7 @@ function lsnHub(){
   const done = lsnDone(), reach = lsnReach();
   document.getElementById('lsnLede').innerHTML = done.length === LESSONS.length
     ? 'Every lesson finished. They stay open — walk back through any of them, or take the drills.'
-    : 'Five lessons, from naming a square to playing a position you cannot see. ' +
+    : 'Ten lessons, from naming a square to a game with the men hidden. ' +
       'You are on <b>lesson ' + reach + '</b>.';
 
   const list = document.getElementById('lsnList');
@@ -10929,7 +10996,9 @@ function lsnNext(){
   const s = LSN.steps[LSN.step];
   if (s && s.gate && !LSN.ok) return;         // the button is disabled anyway
   if (LSN.step < LSN.steps.length - 1){ LSN.step++; lsnShow(); return; }
-  lsnMark(LSN.n);
+  // No lsnMark() here: the handoff card is the last step of every lesson and
+  // marks it on the way in, so that reading the card and walking off to
+  // Practice still counts as having finished the lesson.
   if (LSN.n < LESSONS.length) lsnOpen(LSN.n + 1, 0);
   else lsnFinish();
 }
@@ -10991,10 +11060,14 @@ function lsnLeave(){
   by('lsnHint').onclick  = () => { if (LSN.hint) LSN.hint(); };
   by('lsnStart').onclick = () => lsnOpen(lsnReach(), 0);
   by('lsnDoneBack').onclick   = lsnHub;
-  // The end of the course leads to Practice through goPractice() and no other
-  // door — the same one the LESSON menu opens.
-  by('lsnGoPractice').onclick = goPractice;
-  by('lsnGoPlay').onclick     = lsnPlayBlindfold;
+  // Three ways out of a finished course, and every one of them a place the
+  // work carries on: the drills, the bridge into a blind game, and a real
+  // game. All three lead through the doors that already exist — goPractice()
+  // for the first two and goBot() for the third — rather than growing a
+  // second entrance to any of them.
+  by('lsnGoTrain').onclick       = () => goPractice();
+  by('lsnGoProgressive').onclick = () => goPractice({ mode:'progressive', level:1 });
+  by('lsnGoPlay').onclick        = lsnOpenVisionPick;
   // Asked for twice on the button itself rather than behind an overlay: it is
   // seven booleans, not a game in progress.
   by('lsnReset').onclick = () => {
@@ -11005,17 +11078,37 @@ function lsnLeave(){
   };
 })();
 
-/* Play Blindfold leads into the game's own setup form with the vision the
-   course was about already answered — the same courtesy the ranked page does
-   after a ranked game. It starts no game of its own. */
-function lsnPlayBlindfold(){
-  beep(700, .09);
-  G.opponent = 'bot';
-  enterGameSetup();
-  G.mode = 'total';
-  picked.mode = true;
-  syncOptions();
-  render();
+/* Play a Game leads into the bot setup with the vision question standing
+   open and unanswered: which one to take is the one thing the end of the
+   course must not decide on somebody's behalf, because Board Only and
+   Complete Blindfold are a whole rung apart and only the player knows which
+   rung they are on. So this opens the form and advises; it chooses nothing,
+   and it starts no game.
+
+   It does not touch #cardBlind. That is the *host a room* form's split card,
+   on #screen-setup, and goBot() does not go there — enterGameSetup() shows
+   the game screen, where the question is #secVision's four plain buttons.
+   Worth saying because the card looks like the place a vision is chosen and
+   is only one of two: reaching for it here would have opened a card on a
+   screen nobody is looking at. (And it does not open by class in any case:
+   `.mode-card.split` splits on :hover and :focus-within, while `.active` is
+   the light saying a vision has been chosen, which syncOptions() owns.) */
+function lsnOpenVisionPick(){
+  goBot();                                   // beeps, names the guest, opens the setup
+  lsnNoteFirstGame();
+}
+
+/* The one line under the Vision panel, and the only thing that writes it. It
+   names the vision the way the buttons beside it do — MODE_NAME's "Board
+   Only", not the host card's "See the Board", which is the same vision under
+   the other of its two names and is not written anywhere on this screen. A
+   note that points at a button nobody can find is worse than no note. */
+function lsnNoteFirstGame(){
+  const note = document.getElementById('lsnFirstNote');
+  if (!note) return;
+  note.innerHTML = 'Board Only first — you see the board, not the men. ' +
+                   'Complete Blindfold when Progressive Blindfold’s last level is behind you.';
+  note.style.display = '';
 }
 
 /* ============================================================
@@ -11478,11 +11571,11 @@ function lsnCoordSet(total){
   });
 }
 
-function lsnLessonBoard(){
-  return [lsnBoardSeat()].concat(lsnCoordSet(10));
+function lsnLesson1(){
+  return [lsnBoardSeat()].concat(lsnCoordSet(10)).concat([lsnHandoffStep(LESSONS[0])]);
 }
 
-/* ---- 3 · Chess Notation ----
+/* ---- 3 · Reading a Move ----
    Ten fixed positions, one per thing notation has to be able to say. Fixed
    because each is here to show one particular form, and checked by
    server/test_lessons.js against the page's own move generator. */
@@ -11556,12 +11649,12 @@ function lsnNotationStep(item, i){
 
 /* Straight into the ten. The page that used to introduce them said what the
    table beside them says. */
-function lsnLessonNotation(){
-  return LSN_NOTATION.map(lsnNotationStep);
+function lsnLesson3(){
+  return LSN_NOTATION.map(lsnNotationStep).concat([lsnHandoffStep(LESSONS[2])]);
 }
 
-/* ---- 3 · Visualize Pieces ---- */
-function lsnLessonVisualize(){
+/* ---- 4 · Reach and Attack ---- */
+function lsnLesson4(){
   const intro = {
     title:'What a Knight Can Reach',
     what:'<p>A blindfold player pictures <b>lines</b>, not a board: what each man attacks, and what stands in the way.</p>',
@@ -11582,17 +11675,20 @@ function lsnLessonVisualize(){
   // Two in plain sight, then the men go out — when the player says so.
   return [intro,
           lsnDrillReach('R', false), lsnDrillReach('B', false),
-          lsnDrillReach('N', true),  lsnDrillReach('Q', true), lsnDrillReach('K', true)];
+          lsnDrillReach('N', true),  lsnDrillReach('Q', true), lsnDrillReach('K', true),
+          lsnHandoffStep(LESSONS[3])];
 }
 
-/* ---- 4 · Track the Position ----
+/* ---- 5 · Holding a Small Position ----
    No page in front of it: the first sequence is the first thing on screen,
-   with the one instruction it needs written on the button that starts it. */
-function lsnLessonTrack(){
-  return [lsnDrillTrack(2), lsnDrillTrack(4), lsnDrillTrack(6), lsnDrillTrack(8)];
+   with the one instruction it needs written on the button that starts it.
+   Two sequences rather than four: the long ones belong to Move Tracker, which
+   is where this lesson hands the player next. */
+function lsnLesson5(){
+  return [lsnDrillTrack(2), lsnDrillTrack(2), lsnHandoffStep(LESSONS[4])];
 }
 
-/* ---- 5 · Your First Blindfold Challenge ----
+/* ---- 10 · Playing Without the Pieces ----
    Reduced material on purpose: nobody's first blindfold position should have
    thirty-two men on it. Each of the three is a position, a sequence played out
    on a board that has already gone dark, and one move to find at the end of
@@ -11721,9 +11817,24 @@ function lsnChallengeStep(spec, i){
   return step;
 }
 
-function lsnLessonChallenge(){
-  return LSN_CHALLENGES.map(lsnChallengeStep);
+function lsnLesson10(){
+  return LSN_CHALLENGES.map(lsnChallengeStep).concat([lsnHandoffStep(LESSONS[9])]);
 }
+
+/* ---- the five the course is still growing ----
+   Lessons 2, 6, 7, 8 and 9 have no exercises of their own yet: Tasks 30–33
+   write them, and lessons 1, 3, 4, 5 and 10 above are the old five-lesson
+   course mapped onto the new numbering until those tasks replace them too.
+   Until then each of these is its own handoff card and nothing else, so the
+   ladder is ten rungs long, every one of them opens, and the drill each
+   lesson trains is already reachable from the course. A stub that hands off
+   honestly is worth more than a rung that says "coming soon" and does
+   nothing. */
+function lsnLesson2(){ return [lsnHandoffStep(LESSONS[1])]; }   // Task 30
+function lsnLesson6(){ return [lsnHandoffStep(LESSONS[5])]; }   // Task 32
+function lsnLesson7(){ return [lsnHandoffStep(LESSONS[6])]; }   // Task 32
+function lsnLesson8(){ return [lsnHandoffStep(LESSONS[7])]; }   // Task 33
+function lsnLesson9(){ return [lsnHandoffStep(LESSONS[8])]; }   // Task 33
 
 /* ============================================================
    CONTROLS
@@ -17566,6 +17677,12 @@ function enterGameSetup(){
   resetChoices();
   newGame();
   showScreen('game');
+  // Arriving at the setup blanks the course's note under the Vision panel:
+  // it belongs to the one route that writes it (lsnOpenVisionPick), and left
+  // standing it would advise every later visit as if the player had just
+  // finished the course. That route calls this first and writes it after.
+  const note = document.getElementById('lsnFirstNote');
+  if (note){ note.innerHTML = ''; note.style.display = 'none'; }
   syncOptions();
 }
 document.getElementById('btnStart').onclick     = startGame;   // room host form

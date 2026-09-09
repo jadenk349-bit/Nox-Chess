@@ -96,6 +96,22 @@ CHALLENGES.forEach((spec, i) => {
   check(label + ' ends on the move it asks for', spec.answer.length > 0);
 });
 
+/* The course is ten lessons now, and every one of them ends by handing the
+   player to the drill that trains what it just taught — so a lesson with no
+   Practice mode named is a lesson that dead-ends. The two removed lessons of
+   the five-lesson course have nowhere to land in the ten, exactly as the two
+   removed lessons of the seven had nowhere to land in the five. */
+head('The course is ten lessons that each hand off to Practice');
+const LESSONS_SRC = grab(/\nconst LESSONS = \[[\s\S]*?\n\];/, 'LESSONS');
+check('ten lessons are declared', (LESSONS_SRC.match(/\{ n:\d+/g) || []).length === 10,
+      (LESSONS_SRC.match(/\{ n:\d+/g) || []).length);
+check('every lesson names a Practice mode to train',
+      (LESSONS_SRC.match(/train:\{ mode:'[a-z]+'/g) || []).length === 10,
+      (LESSONS_SRC.match(/train:\{ mode:'[a-z]+'/g) || []).length);
+const V23 = new Function(grab(/\nconst LSN_V2_TO_V3 = \{[^\n]*\};/, 'LSN_V2_TO_V3') + '\nreturn LSN_V2_TO_V3;')();
+check('the old challenge lesson has nowhere to land', V23[5] === undefined);
+check('old lesson 2 (notation) becomes lesson 3', V23[2] === 3);
+
 /* ============================================================
    2 · the whole page, and the course walked through it
    ============================================================ */
@@ -306,13 +322,21 @@ async function walk(p, n){
   p.press('navHowTo');
   check('How to Play Blind Chess opens it', p.screen() === 'lessons', p.screen());
   check('and the ladder is what it shows', p.LSN.view === 'hub', p.LSN.view);
-  check('the five are listed', p.by('lsnList').children.length === 5,
+  check('the ten are listed', p.by('lsnList').children.length === 10,
         p.by('lsnList').children.length);
   check('only the first is open',
         !p.by('lsnList').children[0].disabled && p.by('lsnList').children[1].disabled);
-  check('the course names all five', p.LESSONS.length === 5);
-  check('and Learn the Board is the first of them',
-        p.LESSONS[0].name === 'Learn the Board', p.LESSONS[0].name);
+  check('the course names all ten', p.LESSONS.length === 10, p.LESSONS.length);
+  check('and Know, Don’t See is the first of them',
+        p.LESSONS[0].name === 'Know, Don’t See', p.LESSONS[0].name);
+  check('every one of them names the drill that trains it',
+        p.LESSONS.every(L => L.train && L.train.mode && L.train.level >= 1 && L.train.say),
+        p.LESSONS.map(L => L.train && L.train.mode).join(','));
+  check('and every drill it names is a Practice mode that exists',
+        p.LESSONS.every(L => p.PR_MODES.some(m => m.key === L.train.mode)),
+        p.LESSONS.map(L => L.train.mode).join(','));
+  check('the lede counts ten of them',
+        /Ten lessons/.test(p.by('lsnLede').innerHTML || ''), p.by('lsnLede').innerHTML);
   check('the removed lessons are not among them',
         !p.LESSONS.some(L => /What Is Blind Chess|Playing in Nox/.test(L.name)),
         p.LESSONS.map(L => L.name).join(' / '));
@@ -330,15 +354,38 @@ async function walk(p, n){
   check('e4 is where e4 is', p.sqName(p.sqIndex('e4')) === 'e4');
 
   head('Every lesson can be walked end to end');
-  for (let n = 1; n <= 5; n++){
+  for (let n = 1; n <= p.LESSONS.length; n++){
     const ok = await walk(p, n);
     check('lesson ' + n + ' finishes', ok);
     if (!ok) break;
   }
 
+  head('Every lesson ends by handing the player to a drill');
+  for (let n = 1; n <= p.LESSONS.length; n++){
+    const L = p.LESSONS[n - 1];
+    p.lsnOpen(n, 1e6);                                    // the last step, whatever it is
+    const last = p.LSN.steps[p.LSN.step];
+    check('lesson ' + n + ' ends on the handoff card', !!last.handoff && last.title === 'Train this',
+          last.title);
+    check('lesson ' + n + '’s card says what to train',
+          (p.by('lsnWhat').innerHTML || '').indexOf(L.train.say) >= 0, p.by('lsnWhat').innerHTML);
+    const b = Array.from(p.by('lsnUnder').children).find(x => /Train this/.test(x.textContent));
+    check('lesson ' + n + ' offers Train this in Practice', !!b,
+          Array.from(p.by('lsnUnder').children).map(x => x.textContent).join(' | '));
+    check('reaching the card is what finishes the lesson', p.lsnDone().indexOf(n) >= 0,
+          p.lsnDone().join(','));
+    check('and the way on is open — the card gates nothing', p.by('lsnNext').disabled === false);
+    if (!b) continue;
+    b.onclick();
+    check('lesson ' + n + '’s button opens Practice', p.screen() === 'practice', p.screen());
+    check('…at ' + L.train.mode, p.PR.mode && p.PR.mode.key === L.train.mode,
+          p.PR.mode && p.PR.mode.key);
+    p.showScreen('lessons');
+  }
+
   head('Each challenge accepts the move it is asking for');
   for (let i = 0; i < CHALLENGES.length; i++){
-    p.lsnOpen(5, i);
+    p.lsnOpen(10, i);
     const spec = CHALLENGES[i];
     let b = null;
     for (const c of p.by('lsnUnder').children) if (c.textContent.indexOf('I’m Ready') === 0) b = c;
@@ -357,7 +404,7 @@ async function walk(p, n){
     check('challenge ' + (i + 1) + ' accepts ' + spec.answer + ' first time',
           p.LSN.ok && p.LSN.tries === 0, 'tries ' + p.LSN.tries);
   }
-  p.lsnOpen(5, 0);
+  p.lsnOpen(10, 0);
   for (let i = 0; i < p.LSN.steps.length + 1; i++){
     if (p.LSN.view !== 'lesson') break;
     if (p.LSN.steps[p.LSN.step].gate) await solveStep(p);
@@ -365,34 +412,53 @@ async function walk(p, n){
     await sleep(40);
   }
 
-  head('Finishing the fifth finishes the course');
+  head('Finishing the tenth finishes the course');
   check('the completion state is up', p.LSN.view === 'done', p.LSN.view);
-  check('all five are recorded', p.lsnDone().length === 5, p.lsnDone().join(','));
+  check('all ten are recorded', p.lsnDone().length === 10, p.lsnDone().join(','));
   check('and written to this browser',
         Object.keys(store).some(k => k.indexOf('nox.lessons.') === 0), Object.keys(store).join(','));
 
   head('Progress survives a reload');
   const again = makePage(store);
   again.press('navHowTo');
-  check('the ladder remembers', again.lsnDone().length === 5, again.lsnDone().join(','));
+  check('the ladder remembers', again.lsnDone().length === 10, again.lsnDone().join(','));
   check('every row is ticked',
         Array.from(again.by('lsnList').children).every(b => b.classList.contains('done')));
   check('and none of them is locked',
         Array.from(again.by('lsnList').children).every(b => !b.disabled));
 
-  head('Neither button at the end is a dead one');
-  again.lsnOpen(5, 0);
-  again.press('lsnGoPractice');
+  head('None of the three buttons at the end is a dead one');
+  again.lsnOpen(10, 0);
+  again.press('lsnGoTrain');
   check('Go to Practice opens the Practice page', again.screen() === 'practice', again.screen());
   check('and it is the real one, running', again.PR.on === true);
   check('showing its dashboard', again.PR.view === 'dash', again.PR.view);
   check('the course did not follow it there', again.LSN.view !== 'lesson', again.LSN.view);
   again.showScreen('lessons');
-  again.lsnOpen(5, 0);
+  again.lsnOpen(10, 0);
+  again.press('lsnGoProgressive');
+  check('Progressive Blindfold opens the Practice page', again.screen() === 'practice', again.screen());
+  check('…in the bridge itself', again.PR.mode && again.PR.mode.key === 'progressive',
+        again.PR.mode && again.PR.mode.key);
+  check('…at its first level', again.PR.level === 1, again.PR.level);
+  again.showScreen('lessons');
+  again.lsnOpen(10, 0);
   again.press('lsnGoPlay');
-  check('Play Blindfold lands on the game setup', again.screen() === 'game', again.screen());
-  check('with Complete Blindfold already chosen', again.G.mode === 'total', again.G.mode);
+  check('Play a Game lands on the game setup', again.screen() === 'game', again.screen());
+  check('against the engine', again.G.opponent === 'bot', again.G.opponent);
+  // the vision is advised, not chosen: the note names which one to take
+  // first and the player presses it
+  check('with a note under the Vision panel rather than a vision chosen for them',
+        again.by('lsnFirstNote').style.display !== 'none' &&
+        /Board Only first/.test(again.by('lsnFirstNote').innerHTML || '') &&
+        /Complete Blindfold when Progressive Blindfold/.test(again.by('lsnFirstNote').innerHTML || ''),
+        again.by('lsnFirstNote').innerHTML);
   check('and no game started by it', again.G.started === false);
+  // the note belongs to that one route: arriving at the setup any other way
+  // must not still be advised as if the course had just been finished
+  again.press('navBot');
+  check('another visit to the setup carries no note left over',
+        again.by('lsnFirstNote').style.display === 'none', again.by('lsnFirstNote').style.display);
 
   head('The course does not trap anybody');
   again.press('navHowTo');
@@ -460,7 +526,7 @@ async function walk(p, n){
   })());
 
   /* ============================================================
-     3 · the revised course: five lessons, and what each one now opens on
+     3 · the revised course: ten lessons, and what each one now opens on
      ============================================================ */
   const MARKUP = SRC.slice(0, SRC.indexOf('<script>\n'));
   const g = makePage({});
@@ -469,21 +535,21 @@ async function walk(p, n){
   head('The gauge is the only map the stage has');
   g.lsnOpen(1, 0);
   const dots = () => Array.from(g.by('lsnDots').children);
-  check('a dot on the line for every lesson', dots().length === 5, dots().length);
+  check('a dot on the line for every lesson', dots().length === 10, dots().length);
   check('the one you are on is marked current', dots()[0].classList.contains('cur'));
   check('nothing behind you yet, so no dot is done',
         !dots().some(d => d.classList.contains('done')));
-  check('and the ones you have not reached are shut', dots()[4].disabled);
+  check('and the ones you have not reached are shut', dots()[9].disabled);
   check('the label above it names the lesson',
-        /Learn the Board/.test(g.by('lsnCount').innerHTML), g.by('lsnCount').innerHTML);
+        /Know, Don’t See/.test(g.by('lsnCount').innerHTML), g.by('lsnCount').innerHTML);
   check('the bottom-right course panel is gone',
         SRC.indexOf('lsnJumps') < 0 && SRC.indexOf('lsn-rail') < 0 && SRC.indexOf('lsnRail') < 0);
   check('and nothing empty was left where it stood',
         (SRC.match(/id="lsnExtra"/g) || []).length === 1);
 
-  head('Learn the Board opens on the board, and will not let you past it');
+  head('Know, Don’t See opens on the board, and will not let you past it');
   g.lsnOpen(1, 0);
-  check('a board page and ten questions', g.LSN.steps.length === 11, g.LSN.steps.length);
+  check('a board page, ten questions and the handoff', g.LSN.steps.length === 12, g.LSN.steps.length);
   check('every square is wearing its name', g.LSN.named === true);
   check('Continue is shut when the page opens', g.by('lsnNext').disabled === true);
   const chair = re => Array.from(g.by('lsnUnder').children).find(b => re.test(b.textContent));
@@ -497,11 +563,13 @@ async function walk(p, n){
   check('and Continue stays open', g.by('lsnNext').disabled === false);
 
   head('The ten coordinate questions are made, not written');
-  const shape = () => g.LSN.steps.slice(1).map(st =>
+  // the board page in front of them and the handoff card behind them are not
+  // questions, so neither one is part of the shape being compared
+  const shape = () => g.LSN.steps.slice(1, -1).map(st =>
     (/^Click/.test(st.ask) ? 'c' : 'n') + (/Black/.test(st.what) ? 'b' : 'w')).join(' ');
   const shapes = new Set();
   for (let k = 0; k < 12; k++){ g.lsnOpen(1, 0); shapes.add(shape()); }
-  check('there are exactly ten of them every time', g.LSN.steps.length === 11, g.LSN.steps.length);
+  check('there are exactly ten of them every time', g.LSN.steps.length === 12, g.LSN.steps.length);
   check('and they are not the same ten twice', shapes.size > 1, shapes.size + ' of 12 runs differed');
   const covered = Array.from(shapes).every(sh => {
     const qs = sh.split(' ');
@@ -542,9 +610,9 @@ async function walk(p, n){
     check('question ' + i + ' opens the way on once answered', g.by('lsnNext').disabled === false);
   }
 
-  head('Chess Notation starts on a move, not on a page about moves');
-  g.lsnOpen(2, 0);
-  check('ten moves and no introduction', g.LSN.steps.length === 10, g.LSN.steps.length);
+  head('Reading a Move starts on a move, not on a page about moves');
+  g.lsnOpen(3, 0);
+  check('ten moves, no introduction, and the handoff', g.LSN.steps.length === 11, g.LSN.steps.length);
   check('the first step already asks for one',
         /Play <code>e4<\/code>/.test(g.by('lsnAsk').innerHTML || ''), g.by('lsnAsk').innerHTML);
   check('with the notation table beside it',
@@ -553,8 +621,8 @@ async function walk(p, n){
         ['Nf3','e4','Bxe5','exd5','O-O','O-O-O','e8=Q','Qh5+','Qf7#','Nbd2']
           .every(f => (g.by('lsnExtraBody').innerHTML || '').indexOf(f) >= 0));
 
-  head('Visualize Pieces hides the men when the player says so');
-  g.lsnOpen(3, 3);
+  head('Reach and Attack hides the men when the player says so');
+  g.lsnOpen(4, 3);
   check('the men are still on the board', g.LSN.mode === 'sighted', g.LSN.mode);
   const startBtn = () => Array.from(g.by('lsnUnder').children).find(b => /Start/.test(b.textContent));
   check('a Start button is offered', !!startBtn(),
@@ -568,16 +636,16 @@ async function walk(p, n){
   check('with Check waiting under the board',
         Array.from(g.by('lsnUnder').children).some(b => b.textContent.indexOf('Check') === 0));
 
-  head('Track the Position starts on the sequence');
-  g.lsnOpen(4, 0);
-  check('four sequences and no introduction', g.LSN.steps.length === 4, g.LSN.steps.length);
+  head('Holding a Small Position starts on the sequence');
+  g.lsnOpen(5, 0);
+  check('two sequences, no introduction, and the handoff', g.LSN.steps.length === 3, g.LSN.steps.length);
   check('the first step offers Hide the Board straight away',
         Array.from(g.by('lsnUnder').children).some(b => /Hide the Board/.test(b.textContent)),
         Array.from(g.by('lsnUnder').children).map(b => b.textContent).join(' | '));
 
-  head('The First Blindfold Challenge says the position out loud');
+  head('Playing Without the Pieces says the position out loud');
   for (let i = 0; i < CHALLENGES.length; i++){
-    g.lsnOpen(5, i);
+    g.lsnOpen(10, i);
     check('challenge ' + (i + 1) + ' shows a Position card',
           g.by('lsnExtraTitle').textContent === 'Position', g.by('lsnExtraTitle').textContent);
     const body = g.by('lsnExtraBody').innerHTML || '';
@@ -633,7 +701,7 @@ async function walk(p, n){
   // In the markup and in what the course says — the migration note in the
   // script names both of them on purpose, because that is what it is for.
   const said = [];
-  for (let n = 1; n <= 5; n++)
+  for (let n = 1; n <= again.LESSONS.length; n++)
     again.LESSONS[n - 1].build().forEach(st => said.push(st.title, st.what, st.ask));
   said.push(MARKUP);
   again.LESSONS.forEach(L => said.push(L.name, L.blurb));
@@ -642,9 +710,11 @@ async function walk(p, n){
   check('no Playing in Nox anywhere the player looks',
         !said.some(t => String(t || '').indexOf('Playing in Nox') >= 0));
   check('no vision blurbs left behind them', SRC.indexOf('LSN_MODE_SAY') < 0);
-  check('no builder left without a lesson',
-        SRC.indexOf('lsnLesson1(') < 0 && SRC.indexOf('lsnLesson6(') < 0 &&
-        SRC.indexOf('lsnLesson7(') < 0);
+  check('every lesson has a builder of its own',
+        again.LESSONS.every((L, i) => new RegExp('function lsnLesson' + (i + 1) + '\\(').test(SRC)),
+        again.LESSONS.map((L, i) => 'lsnLesson' + (i + 1)).join(','));
+  check('and no builder is left over from the five-lesson course',
+        !/lsnLesson(Board|Notation|Visualize|Track|Challenge)/.test(SRC));
   check('and the real game still has all four visions',
         /const MODE_NAME\s*=\s*\{ blind:/.test(SRC));
   check('no conflict markers', !/^(?:<{7}|={7}|>{7})/m.test(SRC));
@@ -657,7 +727,7 @@ async function walk(p, n){
                                     .replace(/\s+/g, ' ').trim();
   const sentences = t => (t.match(/[.!?](?=\s|$)/g) || []).length;
   let longest = '', worst = 0;
-  for (let n = 1; n <= 5; n++){
+  for (let n = 1; n <= again.LESSONS.length; n++){
     const steps = again.LESSONS[n - 1].build();
     steps.forEach((st, i) => {
       [st.what, st.ask].forEach(t => {
@@ -669,7 +739,7 @@ async function walk(p, n){
   }
   check('the longest caption in the course is two sentences or fewer', worst <= 2, longest);
 
-  head('Old progress from the seven-lesson course still lands somewhere');
+  head('Old progress from the seven- and five-lesson courses still lands somewhere');
   const migrate = (done, v) => {
     const st = { 'nox.lessons.howto': JSON.stringify(v ? { v, done } : { done }),
                  'nox.practice.': JSON.stringify({ v:1, kept:true }) };
@@ -677,16 +747,23 @@ async function walk(p, n){
     q.press('navHowTo');
     return { done:q.lsnDone().join(','), reach:q.lsnReach(), store:st };
   };
-  check('the two lessons before Learn the Board and Notation become those two',
-        migrate([1, 2, 3], 1).done === '1,2', migrate([1, 2, 3], 1).done);
-  check('a finished old course is a finished new one',
-        migrate([1, 2, 3, 4, 5, 6, 7], 1).done === '1,2,3,4,5', migrate([1,2,3,4,5,6,7], 1).done);
+  // v1 → v2 → v3, in that order: old 2 and 3 are v2's 1 and 2, which are v3's
+  // 1 and 3. A v1 record therefore reads through both maps rather than one.
+  check('the two v1 lessons before Learn the Board and Notation land on 1 and 3',
+        migrate([1, 2, 3], 1).done === '1,3', migrate([1, 2, 3], 1).done);
+  check('a finished seven-lesson course is four of the ten',
+        migrate([1, 2, 3, 4, 5, 6, 7], 1).done === '1,3,4,5', migrate([1,2,3,4,5,6,7], 1).done);
   check('progress that was only in the removed lessons goes back to the start',
         migrate([1, 6], 1).done === '' && migrate([1, 6], 1).reach === 1);
-  check('a record with no version is read as an old one',
-        migrate([2, 3], 0).done === '1,2', migrate([2, 3], 0).done);
-  check('a v2 record is taken as it stands',
-        migrate([1, 2, 3, 4, 5], 2).done === '1,2,3,4,5');
+  check('a record with no version is read as the oldest one',
+        migrate([2, 3], 0).done === '1,3', migrate([2, 3], 0).done);
+  check('a finished five-lesson course is four of the ten',
+        migrate([1, 2, 3, 4, 5], 2).done === '1,3,4,5', migrate([1, 2, 3, 4, 5], 2).done);
+  check('the old first blindfold challenge has nowhere to land',
+        migrate([5], 2).done === '', migrate([5], 2).done);
+  check('a v3 record is taken as it stands',
+        migrate([1, 2, 3, 4, 5, 6, 7, 8, 9, 10], 3).done === '1,2,3,4,5,6,7,8,9,10',
+        migrate([1, 2, 3, 4, 5, 6, 7, 8, 9, 10], 3).done);
   check('nothing out of range survives either way',
         migrate([0, 9, 99], 2).done === '' && migrate([99], 1).done === '');
   check('and a corrupt record starts clean, rather than throwing', (function(){
@@ -702,27 +779,25 @@ async function walk(p, n){
     q.lsnOpen(1, 0);
     return JSON.parse(st['nox.practice.']).kept === true;
   })());
-  check('a lesson finished now is stored in the new numbering, as v2', (function(){
+  // Reaching the handoff card is what finishes a lesson now, so these open
+  // the last step rather than pressing Continue past it.
+  check('a lesson finished now is stored in the new numbering, as v3', (function(){
     const st = {};
     const q = makePage(st);
     q.press('navHowTo');
     q.lsnOpen(1, 0);
     q.lsnOpen(1, q.LSN.steps.length - 1);         // …now that the steps are built
-    q.LSN.ok = true;                              // as if the last question had been answered
-    q.lsnNext();
     const raw = JSON.parse(st['nox.lessons.howto'] || 'null');
-    return !!raw && raw.v === 2 && raw.done.join(',') === '1';
+    return !!raw && raw.v === 3 && raw.done.join(',') === '1';
   })());
-  check('an old record is rewritten as v2 the first time it is added to', (function(){
-    const st = { 'nox.lessons.howto':JSON.stringify({ v:1, done:[2,3] }) };
+  check('an old record is rewritten as v3 the first time it is added to', (function(){
+    const st = { 'nox.lessons.howto':JSON.stringify({ v:1, done:[2, 3] }) };   // → 1, 3
     const q = makePage(st);
     q.press('navHowTo');
-    q.lsnOpen(3, 0);
-    q.lsnOpen(3, q.LSN.steps.length - 1);
-    q.LSN.ok = true;
-    q.lsnNext();
+    q.lsnOpen(4, 0);
+    q.lsnOpen(4, q.LSN.steps.length - 1);
     const raw = JSON.parse(st['nox.lessons.howto'] || 'null');
-    return !!raw && raw.v === 2 && raw.done.join(',') === '1,2,3';
+    return !!raw && raw.v === 3 && raw.done.join(',') === '1,3,4';
   })());
 
   console.log('\n' + passed + ' passed, ' + failed + ' failed');
