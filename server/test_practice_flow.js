@@ -265,10 +265,17 @@ function ansButton(html){
     if (prAnsEl.children[k].innerHTML === html) return prAnsEl.children[k];
   return null;
 }
-function typeAnswer(text){
+/** The text box in the answer row, or null — which is also how a test asks
+    whether a move can be given at all, since a checkpoint and a recovery both
+    take the row away and a peek does not. */
+function answerBox(){
   var input = null;
   for (var k = 0; k < prAnsEl.children.length; k++)
     if (prAnsEl.children[k].tag === 'input') input = prAnsEl.children[k];
+  return input;
+}
+function typeAnswer(text){
+  var input = answerBox();
   if (!input) throw new Error('no answer box on screen');
   input.value = text;
   prAnsEl.fire('submit');
@@ -1816,6 +1823,27 @@ head('Progressive Blindfold: checkpoints, peeks, recovery');
   pressCtl('Peek (∞ left)');
   fireTimers();
   ok('and spends nothing', PR.pb.peeks, Infinity);
+  storage = {};
+})();
+
+(function(){
+  /* A peek is a look, not a pause — and it cannot be stacked. A second press
+     inside the two seconds would spend a second peek and start a second timer
+     whose predecessor takes the board away early, so the button is off the row
+     for as long as the look lasts, and pbPeek refuses one anyway. */
+  storage = {};
+  prOpen('progressive', 5, 5);
+  pressCtl('Peek (3 left)');
+  ok('a peek does not pause the game', PR.pb.busy, false);
+  ok('and leaves the move box up — a move may be played while the men are',
+     !!answerBox(), true);
+  ok('the Peek button is off the row while the look is on', ctlButton('Peek (2 left)'), null);
+  pbPeek();                                  // a second press, however it were reached
+  ok('a second look inside the first is refused', PR.pb.peeks, 2);
+  fireTimers();
+  ok('one look, one peek spent', PR.pb.peeks, 2);
+  ok('the men go again on the one timer', prBoardEl.classList.contains('blind'), true);
+  ok('and the button is back with one fewer on it', !!ctlButton('Peek (2 left)'), true);
   storage = {};
 })();
 

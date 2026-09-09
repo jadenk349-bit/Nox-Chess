@@ -970,10 +970,16 @@ Peek button rather than a dead one. And `pbRecover()` ("I've lost it") shows the
 `prRebuildStart` to be put together from the moves — which is what Koltanowski
 did and what every guide to the game says to do instead of guessing. It is
 counted (`pb.recoveries`) and costs the level nothing: a player who stops and
-works the position out again is doing the thing this drill teaches. All three
-run while `pb.busy` is set and borrow the answer row, so the move box comes down
-with `PR.onSubmit` and no move can be typed into a game that is standing still;
-`pbRestoreInput()` hands both the box and the board click back. There is
+works the position out again is doing the thing this drill teaches. A checkpoint
+and a recovery *pause* the game: both set `pb.busy` and borrow the answer row,
+so the move box comes down with `PR.onSubmit` and no move can be typed or
+clicked into a game that is standing still, and `pbRestoreInput()` hands the
+box, the instruction line and the board click back afterwards. A peek does not
+pause anything — it is a quick look, `pb.busy` is left alone, and a move may be
+played while the men are up. What it may not be is stacked: `pb.peeking` takes
+the Peek button off the row for the two seconds, because a second press would
+spend a second look and start a second timer whose predecessor would take the
+board away early. There is
 deliberately **no Elo**: what a
 player's visualisation is worth is a level they climb (Beginner → Visualizer →
 Tracker → Blindfold Ready → Advanced), earned by sessions finished, by accuracy

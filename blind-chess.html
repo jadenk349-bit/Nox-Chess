@@ -15609,14 +15609,22 @@ function pbLine(text, cls){
   const d = document.createElement('div'); d.className = 'pr-log-line ' + (cls || ''); d.textContent = text;
   prLogEl.appendChild(d); prLogEl.scrollTop = prLogEl.scrollHeight;
 }
+/* How a move is given on this rung. Written once because it is said twice —
+   when the game opens, and again every time a checkpoint or a recovery has
+   finished with the sub-line and the move box is handed back. A resumed game
+   left reading "Click its square." from the checkpoint that has just been
+   answered is telling the player to do the wrong thing. */
+function pbHowTo(r){
+  return r.vis === 'console' ? 'Type your moves: <b>e4</b> · <b>Nf3</b> · <b>exd5</b> · <b>O-O</b> — or plain squares, <b>e2e4</b>.'
+                             : 'Click a man’s square, then where it goes — or type the move.';
+}
 function prShowProgressive(q){
-  PR.pb = { st:q.st, r:q.recipe, sans:[], played:0, peeks:q.recipe.peeks, drifts:0, recoveries:0, checks:0, checksOk:0, illegal:0, over:false, busy:false, sel:-1 };
+  PR.pb = { st:q.st, r:q.recipe, sans:[], played:0, peeks:q.recipe.peeks, peeking:false, drifts:0, recoveries:0, checks:0, checksOk:0, illegal:0, over:false, busy:false, sel:-1 };
   prLogEl.style.display = ''; prLogEl.innerHTML = '';
   prLayout(false, false); prClearPieces(); prMarksClear();
   pbPaint();
   prQ('Level ' + q.recipe.level + ' — <b>' + q.recipe.target + '</b> moves. You are White.');
-  prSub(q.recipe.vis === 'console' ? 'Type your moves: <b>e4</b> · <b>Nf3</b> · <b>exd5</b> · <b>O-O</b> — or plain squares, <b>e2e4</b>.'
-                                   : 'Click a man’s square, then where it goes — or type the move.');
+  prSub(pbHowTo(q.recipe));
   pbLine('The game begins. ' + (q.recipe.vis === 'mine' ? 'Their men are hidden.' : q.recipe.vis === 'squares' ? 'Every man is hidden.' : 'No board.'), 'sys');
   pbInput();
 }
@@ -15640,10 +15648,12 @@ function pbInput(){
    one, the way back when the thread has gone entirely, and the way out that
    shows the position. A rung with no peeks left offers no Peek button at all
    rather than a dead one — the control *is* the allowance, and a button that
-   refuses is a worse account of what is left than no button. */
+   refuses is a worse account of what is left than no button. The same is true
+   of a peek that is already running: while `peeking` the button is off the row
+   rather than sitting there advertising a look the player is currently having. */
 function pbControls(){
   const pb = PR.pb, ctl = [];
-  if (pb.peeks > 0) ctl.push(['Peek (' + (pb.peeks === Infinity ? '∞' : pb.peeks) + ' left)', pbPeek]);
+  if (pb.peeks > 0 && !pb.peeking) ctl.push(['Peek (' + (pb.peeks === Infinity ? '∞' : pb.peeks) + ' left)', pbPeek]);
   ctl.push(["I've lost it", pbRecover]);
   ctl.push(['Reveal and stop', () => pbEnd('Stopped.')]);
   prCtl(ctl);
@@ -15658,11 +15668,23 @@ function pbShowTruth(ms, then){
   prBoardOn(true); prMen(true); prPaint(pb.st.b);
   prTimer(() => { pbPaint(); if (then) then(); }, ms);
 }
+/* A peek is a *look*, not a pause: play is not stopped (`busy` is left alone),
+   the move box and the board click stay live, and a move may be played while
+   the men are up — which is the whole of what a peek is for.
+
+   What it must not be is stackable. A second press inside the two seconds
+   would spend a second peek and start a second timer, and the *first* timer
+   firing would take the board away while the player still believed they had a
+   second left — a look cut short, paid for twice. `peeking` is the guard, and
+   it comes down inside pbShowTruth's own callback, before the controls are
+   redrawn with one fewer left on them. */
 function pbPeek(){
-  const pb = PR.pb; if (pb.over || pb.busy || pb.peeks <= 0) return;
+  const pb = PR.pb; if (pb.over || pb.busy || pb.peeking || pb.peeks <= 0) return;
   if (pb.peeks !== Infinity) pb.peeks--;
+  pb.peeking = true;
   pbLine('(peek)', 'sys');
-  pbShowTruth(2000, pbControls);                       // redrawn with one fewer left on it
+  pbControls();                                        // the Peek button goes while the look is on
+  pbShowTruth(2000, () => { pb.peeking = false; pbControls(); });
 }
 /* A move that is not there is the failure this drill measures — the player's
    picture of the board has drifted from the board. It is counted and refused,
@@ -15750,6 +15772,7 @@ function pbCheckpoint(){
 }
 function pbRestoreInput(){
   prQ('Level ' + PR.pb.r.level + ' — <b>' + PR.pb.r.target + '</b> moves. Your move.');
+  prSub(pbHowTo(PR.pb.r));                              // never the checkpoint's "Click its square." over a resumed game
   pbInput();                                            // the typed box AND the board click, both back
 }
 /* Lost the thread? The score is shown — never the board — and the position
