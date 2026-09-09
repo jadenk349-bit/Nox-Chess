@@ -12038,6 +12038,29 @@ const PR_FORCING_LEVELS = [
   { cap:'…and what is hanging afterwards',      att:3, def:3, hidden:true, study:5000, realistic:true, asks:['material','hanging','check'] }
 ];
 
+/* Blind Calculation's own ladder — declared ahead of PR_MODES for the same
+   reason the other eight are. `men` names pieces every position of that level
+   is built with (`[colour, type]` pairs, read by `prMakeCalc`); `extra` is how
+   many further random men — of either colour — are added on top, `[min,max]`
+   inclusive. The first five levels are this task's half: one queen for the
+   simplest mate, a hanging piece, a fork, two rooks for a busier mate in one,
+   then a mate in two. Levels 6-10 (`puzzle`, `line`, `visualise`) are a later
+   task's, and are listed here because the ladder is one thing a player climbs
+   even though it is built by two tasks — `prMakeCalc` answers `null` for them
+   until that task gives them a generator. */
+const PR_CALC_LEVELS = [
+  { cap:'Mate in one, a queen and little else', task:'mate1', men:[['W','Q']], extra:[0,1], study:8000 },
+  { cap:'A hanging piece to take',             task:'hanging', extra:[3,5], study:8000 },
+  { cap:'A fork or a check that wins material', task:'fork', extra:[3,5], study:8000 },
+  { cap:'Mate in one, more men',               task:'mate1', men:[['W','R'],['W','R']], extra:[2,4], study:7000 },
+  { cap:'Mate in two',                          task:'mate2', men:[['W','Q'],['W','R']], extra:[1,3], study:9000 },
+  { cap:'Puzzle positions of twelve men or fewer', task:'puzzle', maxMen:12, study:15000 },
+  { cap:'Full puzzle positions',                task:'puzzle', maxMen:32, study:15000 },
+  { cap:'Three to five plies, then the end position', task:'line', plies:[3,5], study:8000 },
+  { cap:'Given moves, then find the tactic',    task:'visualise', plies:[3,5], study:8000 },
+  { cap:'Given moves, then find it, console only', task:'visualise', plies:[4,6], study:8000, console:true }
+];
+
 /* Each drill, in the order the dashboard lists them. `group` clusters related
    drills for the dashboard (Task 22); `lesson` is the course step it grows out
    of. `levels` replaces the old `tiers`/`hard`/`needs`: a mode's levels are a
@@ -13033,6 +13056,101 @@ function prMakeForcing(r){
     return { kind:'forcing', st, sq, line:ex.line, final:ex.final, delta:ex.delta, occupant: occ ? { c:occ.c, t:occ.t } : null, check,
              asks: r.asks || ['material','occupant'], hidden:!!r.hidden, study:r.study || 0, notation:!!r.notation,
              hanging: prHanging(ex.final), ply: ex.line.length, sig:'forcing:' + fenOf(st).split(' ')[0] + ':' + sq };
+  }
+  return null;
+}
+
+/* BLIND CALCULATION (mates, hanging men and forks). Ten levels, of which this
+   half of the task only asks four kinds — `mate1`, `hanging`, `fork` and
+   `mate2` — of a position `prPosition` builds from `men` plus a handful of
+   `extra` material; the other three (`puzzle`, `line`, `visualise`) belong to
+   a later task and `prMakeCalc` below refuses them by name rather than by
+   silently doing nothing.
+
+   `prMatesIn1` is the same idea `prForks` and `prMatesIn2` both lean on: play
+   the candidate, and ask the position that results rather than pattern-match
+   the move. A move is mate in one exactly when the position after it has the
+   mover in check with no legal reply — no board-reading, no "is this a queen
+   near the king" heuristic that a benign check would also trip. */
+function prMatesIn1(st){
+  const out = [];
+  for (const m of legalMoves(st, st.turn)){
+    const a = makeMove(st, m);
+    if (inCheck(a, a.turn) && !legalMoves(a, a.turn).length) out.push(m);
+  }
+  return out;
+}
+/* Mate in two: a first move such that *every* legal reply walks into a mate
+   in one. A first move that is already mate in one is skipped (`!replies.length`
+   catches mate and stalemate alike — a reply-less position is not "two moves
+   away" from anything), and the `.every()` is what makes this genuinely forced
+   rather than merely "there exists a mating follow-up if they cooperate": a
+   defence that survives even one reply is not mate in two. It stays cheap
+   because the recipes that ask for it (`PR_CALC_LEVELS[4]`) build tiny
+   positions — a queen and a rook against a lone king plus a few pawns — so the
+   branching this walks is never more than a few dozen replies deep. */
+function prMatesIn2(st){
+  const out = [];
+  for (const m of legalMoves(st, st.turn)){
+    const a = makeMove(st, m);
+    const replies = legalMoves(a, a.turn);
+    if (!replies.length) continue;                      // that would be mate in one, or stalemate
+    if (replies.every(r => prMatesIn1(makeMove(a, r)).length > 0)) out.push(m);
+  }
+  return out;
+}
+/* A fork: a move by anything but the king or a pawn that lands somewhere the
+   mover is not simply recaptured from (`see(...) > 0` is the exchange coming
+   out badly for the forker) and that, once there, attacks two or more enemy
+   men that are not pawns and are each either the enemy king, undefended, or
+   worth more than the forking piece — a queen forking a defended knight and a
+   defended bishop is not winning either of them, and this is a tactics drill,
+   not an attacks-and-defence one. `prAttacked` (Task 12) is what answers "what
+   does the piece on this square hit" without re-deriving it from `pseudoMoves`
+   by hand. */
+function prForks(st){
+  const out = [];
+  for (const m of legalMoves(st, st.turn)){
+    if (m.p.t === 'K' || m.p.t === 'P') continue;
+    const a = makeMove(st, m);
+    if (see(a, m.to, a.turn) > 0) continue;              // the forker is simply taken
+    const hit = prAttacked(a, m.to).filter(sq => a.b[sq] && a.b[sq].c !== m.p.c && a.b[sq].t !== 'P' &&
+                                                  (a.b[sq].t === 'K' || !attackersOf(a, sq, a.b[sq].c).length || VAL[a.b[sq].t] > VAL[m.p.t]));
+    if (hit.length >= 2) out.push(m);
+  }
+  return out;
+}
+function prMakeCalc(r){
+  // 17b adds prPuzzlePool and generates these three from it (or, for `line`
+  // and `visualise`, from a played-out sequence); this half only builds the
+  // four verified-by-enumeration tasks above.
+  if (r.task === 'puzzle' || r.task === 'line' || r.task === 'visualise') return null;
+  /* 800 rather than a round hundred: a lone queen against a random king
+     (level 1's `mate1`) is mate in one on fewer than one random draw in
+     fifty — a king boxed in by nothing but its own board edge is rare, and
+     most of what this loop tries is not that. At a hundred tries that missed
+     often enough to flake the twenty-draw suite below; eight hundred measures
+     at zero in several thousand, and even at that count a single draw stays
+     well under the "a few hundred milliseconds" this drill promises — the
+     levels that build bigger positions (mate in two) succeed far sooner and
+     never feel the difference. */
+  for (let t = 0; t < 800; t++){
+    const counts = (r.men || []).map(x => [x[0] === 'W' ? W : B, x[1]]);
+    const extra = r.extra ? r.extra[0] + prRand(r.extra[1] - r.extra[0] + 1) : 0;
+    for (let k = 0; k < extra; k++) counts.push([Math.random() < .5 ? W : B, prPick(['P','P','N','B','R'])]);
+    const built = prPosition(counts);
+    if (!built) continue;
+    let st = built.st;
+    let found = null;
+    if (r.task === 'mate1'){ const ms = prMatesIn1(st); if (ms.length === 1) found = ms[0]; }
+    else if (r.task === 'mate2'){ if (prMatesIn1(st).length) continue; const ms = prMatesIn2(st); if (ms.length === 1) found = ms[0]; }
+    else if (r.task === 'hanging'){
+      const caps = legalMoves(st, st.turn).filter(m => m.cap && see(st, m.to, st.turn) > 0).sort((a, b) => VAL[st.b[b.to].t] - VAL[st.b[a.to].t]);
+      if (caps.length && (caps.length === 1 || VAL[st.b[caps[0].to].t] > VAL[st.b[caps[1].to].t]) && !prMatesIn1(st).length) found = caps[0];
+    } else if (r.task === 'fork'){ const fs = prForks(st); if (fs.length === 1 && !prMatesIn1(st).length) found = fs[0]; }
+    if (!found) continue;
+    return { kind:'calc', st, task:r.task, answer:{ from:found.from, to:found.to, promo:found.promo || null }, pre:[], endAsk:null,
+             study:r.study, hidden:true, console:!!r.console, fallback:!!r.fallback, sig:'calc:' + r.task + ':' + fenOf(st).split(' ')[0] };
   }
   return null;
 }

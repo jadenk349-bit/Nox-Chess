@@ -77,6 +77,7 @@ var DECLS = ['VAL','FILES','rowOf','colOf','SQNAME','uciOf','sqName','sqIndex','
              'OPENING_BOOK','OPENING_LINES',
              'PR_SQUARE_LEVELS','PR_QUADRANT_NAME','PR_DIRS','PR_LINES_LEVELS','PR_PIECE_LEVELS',
              'PR_ATTACK_LEVELS','PR_HOLD_LEVELS','PR_TRACKER_LEVELS','PR_AFTER_LEVELS','PR_FORCING_LEVELS',
+             'PR_CALC_LEVELS',
              'PR_MODES','PR_MINUTES','PR_STORE','PR_VERSION','PR_V1_KEYS','PR_SEEN_MAX',
              'prKey','prAcc','prSeenKey',
              'PR','PR_STEP_UP','PR_STEP_DOWN','prRand','prPick','prSide','prMan','PR_MAKE','W',
@@ -95,6 +96,7 @@ var FNS = ['startBoard','newState','cloneState','fenOf','stateFromFEN',
            'prMakeTracker','prTrackerErr',
            'prMoveFacts','prMakeAfter',
            'prPlaceAttackers','prMaterialOf','prExchangeLine','prMakeForcing',
+           'prMatesIn1','prMatesIn2','prForks','prMakeCalc',
            'prPickMove','prAskAbout','prMakeMini','prRecipe','prMake',
            'prGamePosition','prCluster','prAskFine','prMakeHold',
            'prRecord','prScore','prStep','prNow','prTimeLeft','prRecommend','prMedianLat',
@@ -520,6 +522,38 @@ head('Forcing Lines');
     if (q.line.length < 2) bad++;
   }
   ok('every level generates a legal, replayable exchange whose count is right', bad, 0);
+})();
+
+/* ============================================================
+   Blind Calculation (17a): mate in one, mate in two, a hanging piece and a
+   fork, each re-verified by enumeration rather than trusted from generation
+   — a mate-in-one claim is checked by asking prMatesIn1 again on the position
+   handed back, not by remembering what the generator thought while building
+   it. `calc` is not registered on PR_MODES until 17b, so `prRecipe` cannot be
+   asked for it yet; this stands in for the level lookup it will do once the
+   registration lands, exactly as Task 14a's tracker suite did before the
+   tracker was wired into PR_MODES.
+   ============================================================ */
+head('Blind Calculation');
+(function(){
+  var st = stateFromFEN('6k1/5ppp/8/8/8/8/5PPP/3R2K1 w - - 0 1');
+  ok('the back-rank position has exactly one mate in one', prMatesIn1(st).length, 1);
+  var bad = 0, tasks = {};
+  for (var lv = 1; lv <= 5; lv++) for (var t = 0; t < 20; t++){
+    // 17b switches this back to prRecipe('calc', lv) once PR_MODES carries it
+    var q = prMakeCalc(Object.assign({ level: lv }, PR_CALC_LEVELS[lv - 1]));
+    if (!q){ bad++; continue; }
+    tasks[q.task] = 1;
+    var s = q.st;
+    var legal = legalMoves(s, s.turn);
+    var m = legal.filter(function(x){ return x.from === q.answer.from && x.to === q.answer.to; })[0];
+    if (!m){ bad++; continue; }
+    if (q.task === 'mate1' && prMatesIn1(s).length !== 1) bad++;
+    if (q.task === 'hanging' && see(s, q.answer.to, s.turn) <= 0) bad++;
+    if (q.task === 'mate2' && prMatesIn2(s).length !== 1) bad++;
+  }
+  ok('levels one to five generate verified tactics', bad, 0);
+  ok('mate, hanging, fork and mate-in-two all appear', ['mate1','hanging','fork','mate2'].every(function(k){ return tasks[k]; }), true);
 })();
 
 /* ============================================================
