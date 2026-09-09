@@ -11901,6 +11901,25 @@ const PR_LINES_LEVELS = [
   { cap:'Knight routes from the name',      kinds:['knight'],  board:false, mid:true }
 ];
 
+/* Piece Vision's own ladder — declared ahead of PR_MODES for the same reason
+   the other two are: the recipe fields (`types`, `blockers`, `captures`,
+   `flash`, `notation`, `two`) are what a level actually asks, and a bare
+   caption could not carry them. The board is taken away in stages rather
+   than all at once — a blocker or two, then a crowded one with captures
+   asked apart, then a timed glance, then the board itself, then two pieces
+   at once with the board back — because "everything at once" is not a
+   staircase anybody climbs. */
+const PR_PIECE_LEVELS = [
+  { cap:'King, rook, bishop, knight — empty board', types:['K','R','B','N'], blockers:[0,0] },
+  { cap:'Queen and pawn too',                      types:['K','R','B','N','Q','P'], blockers:[0,0] },
+  { cap:'One or two blockers',                     types:['R','B','N','Q','P'], blockers:[1,2] },
+  { cap:'A crowded board, captures apart',         types:['R','B','N','Q','P'], blockers:[3,5], captures:true },
+  { cap:'Piece shown for two seconds',             types:['R','B','N','Q'], blockers:[1,3], flash:2000 },
+  { cap:'From the notation alone',                 types:['R','B','N','Q'], blockers:[0,2], notation:true },
+  { cap:'Notation, a crowded board',               types:['R','B','N','Q'], blockers:[3,5], notation:true },
+  { cap:'Two pieces, every square either reaches', types:['R','B','N','Q'], blockers:[1,3], two:true }
+];
+
 /* Each drill, in the order the dashboard lists them. `group` clusters related
    drills for the dashboard (Task 22); `lesson` is the course step it grows out
    of. `levels` replaces the old `tiers`/`hard`/`needs`: a mode's levels are a
@@ -11919,7 +11938,7 @@ const PR_MODES = [
     levels: PR_LINES_LEVELS },
   { key:'piece', name:'Piece Vision', group:'vision', skill:'Piece movement', lesson:4,
     desc:'Where one piece reaches, with the board slowly taken away.',
-    levels:[{cap:'Empty board'},{cap:'A blocker or two'},{cap:'A crowded board'}] },
+    levels: PR_PIECE_LEVELS },
   { key:'tracker', name:'Move Tracker', group:'holding', skill:'Tracking', lesson:5,
     desc:'Follow moves you never see, and say where things stand.',
     levels:[{cap:'One piece, two moves'},{cap:'Longer, with captures'},{cap:'Two pieces, five moves'}] },
@@ -12485,39 +12504,55 @@ function prMakeLines(r){
   return q;
 }
 
-/* 2 — PIECE VISUALIZATION. The answer is legalMoves(), not a second movement
-   table — which is the point: a drill that disagreed with the game about where
-   a bishop goes would be teaching the wrong board.
+/* 2 — PIECE VISION. The answer is legalMoves(), not a second movement table —
+   which is the point: a drill that disagreed with the game about where a
+   bishop goes would be teaching the wrong board.
 
    A pinned piece is thrown back rather than asked about (except for the king,
    whose legal moves ARE the answer): "where can this knight go" meaning
    "nowhere, it is pinned" is a fine chess question and a bad geometry one, and
-   geometry is what this drill is for. */
-function prMakeVision(diff){
+   geometry is what this drill is for. `two` asks about a second piece at the
+   same time — its own square is thrown in among the blockers a moment before
+   the main one, so `prPosition` places it exactly as it would any other man —
+   and the pinned check runs over both squares, because a pinned second piece
+   is exactly as bad a question as a pinned first one.
+
+   `captures` (asked apart, on its own Done, by the presenter) and `notation`
+   (no board at all, the position read out in words) do not change what is
+   generated here — the position is the position either way — only what the
+   presenter does with it, which is why they are carried on `q` as flags and
+   nothing else about this function reads them. */
+function prMakePiece(r){
   for (let t = 0; t < 80; t++){
     const colour = Math.random() < .5 ? W : B;
-    const type = diff <= 1 ? prPick(['N','B','R','K'])
-                           : prPick(['N','N','B','B','R','R','Q','K','P']);
-    const blockers = diff <= 1 ? 0 : diff === 2 ? 1 + prRand(2) : 3 + prRand(3);
+    const type = prPick(r.types);
+    const blockers = r.blockers[0] + prRand(r.blockers[1] - r.blockers[0] + 1);
     const counts = [];
-    for (let k = 0; k < blockers; k++)
-      counts.push([Math.random() < .5 ? W : B, prPick(['P','P','N','B','R'])]);
+    for (let k = 0; k < blockers; k++) counts.push([Math.random() < .5 ? W : B, prPick(['P','P','N','B','R'])]);
+    if (r.two) counts.push([colour, prPick(r.types.filter(x => x !== type))]);
     counts.push([colour, type]);
     const built = prPosition(counts);
     if (!built) continue;
+    const st = built.st; st.turn = colour;   // both kings are safe, so either may be to move
     const from = built.at[built.at.length - 1];
-    const st = built.st;
-    st.turn = colour;                      // both kings are safe, so either may be to move
-    const legal = legalMoves(st, colour).filter(m => m.from === from);
+    const second = r.two ? { from: built.at[built.at.length - 2], type: counts[counts.length - 2][1] } : null;
+    const mine = [from].concat(second ? [second.from] : []);
+    const legal = legalMoves(st, colour).filter(m => mine.indexOf(m.from) >= 0);
     if (!legal.length) continue;
-    if (type !== 'K'){
-      const pseudo = pseudoMoves(st, colour).filter(m => m.from === from);
-      if (pseudo.length !== legal.length) continue;      // pinned
+    let pinned = false;
+    for (const sq of mine) if (st.b[sq].t !== 'K'){
+      const ps = pseudoMoves(st, colour).filter(m => m.from === sq).length;
+      const lg = legal.filter(m => m.from === sq).length;
+      if (ps !== lg) pinned = true;
     }
+    if (pinned) continue;
     // a promotion is four moves to one square; the question is about squares
-    const targets = Array.from(new Set(legal.map(m => m.to)));
-    if (targets.length < 2) continue;
-    return { kind:'vision', st, from, type, colour, targets: new Set(targets), picks: new Set() };
+    const targets = new Set(legal.map(m => m.to));
+    if (targets.size < 2) continue;
+    const caps = new Set(legal.filter(m => m.cap).map(m => m.to));
+    return { kind:'piece', st, from, type, colour, targets, caps, picks:new Set(), second,
+             flash:r.flash || 0, notation:!!r.notation, askCaps:!!r.captures,
+             sig:'piece:' + type + ':' + from + ':' + fenOf(st).split(' ')[0] };
   }
   return null;
 }
@@ -12712,7 +12747,7 @@ function prMakeMini(diff){
    because a level is what question it offers as much as how hard it is; the
    rest still take `r.level` alone. */
 const PR_MAKE = {
-  square: r => prMakeSquare(r), lines: r => prMakeLines(r), piece: r => prMakeVision(r.level),
+  square: r => prMakeSquare(r), lines: r => prMakeLines(r), piece: r => prMakePiece(r),
   tracker: r => prMakeTrack(r.level), hold: r => prMakeMemory(r.level),
   progressive: r => prMakeMini(r.level)
 };
@@ -12885,7 +12920,7 @@ function prPresent(){
   switch (q.kind){
     case 'square':   return prShowSquare(q);
     case 'lines':    return prShowLines(q);
-    case 'vision':   return prShowVision(q);
+    case 'piece':    return prShowPiece(q);
     case 'track':    return prShowTrack(q);
     case 'memory':   return prShowMemory(q);
     case 'sequence': return prShowSequence(q);
@@ -13110,43 +13145,132 @@ function prLinesKnightReplay(q){
   prTimer(step, 500);
 }
 
-/* ---- 2: piece visualization ---- */
-function prShowVision(q){
+/* ---- 2: piece vision ---- */
+/* Every man on the board but the one or two asked about, in words — the
+   picture the notation levels give in place of the board itself. The piece
+   being asked about is already named on its own (prMan), so this only ever
+   describes what else is standing there. */
+function prPieceWords(q){
+  const mine = [q.from].concat(q.second ? [q.second.from] : []);
+  const parts = [];
+  for (let i = 0; i < 64; i++){
+    const p = q.st.b[i];
+    if (!p || mine.indexOf(i) >= 0) continue;
+    parts.push('a ' + PIECE_NAME[p.t] + ' on <b>' + sqName(i) + '</b>');
+  }
+  return parts;
+}
+/* "a, b and c" — read out nowhere else in this file, so kept beside its one
+   caller rather than promoted to a shared helper. */
+function prJoinWords(parts){
+  if (!parts.length) return '';
+  if (parts.length === 1) return parts[0];
+  return parts.slice(0, -1).join(', ') + ' and ' + parts[parts.length - 1];
+}
+
+function prShowPiece(q){
+  const mine = [q.from].concat(q.second ? [q.second.from] : []);
+  const who = q.second
+    ? prMan(q.colour, q.type) + ' on <b>' + sqName(q.from) + '</b>, and ' + prSide(q.colour) +
+      "'s <b>" + PIECE_NAME[q.second.type] + '</b> on <b>' + sqName(q.second.from) + '</b>'
+    : prMan(q.colour, q.type) + ' on <b>' + sqName(q.from) + '</b>';
+  /* What actually makes the question answerable: the click handler, the
+     Done button and PR.shownAt (the latency clock a flash level must not
+     start until the men are already gone — see the flash branch below). */
+  const arm = () => {
+    q.picks = new Set();
+    PR.shownAt = prNow();
+    PR.click = i => {
+      if (PR.answered || mine.indexOf(i) >= 0) return;
+      prLinesToggle(q.picks, i, (s, on) => { if (on) prMark(s, 'pr-pick'); else prSqEls[prVisual(s)].classList.remove('pr-pick'); });
+    };
+    prAnsButton('Done', () => prAnswerPiece(q, q.picks), 'primary');
+  };
+
+  if (q.notation){
+    prBoardOn(false);
+    const words = prPieceWords(q);
+    const askName = q.second ? 'either piece' : 'the ' + PIECE_NAME[q.type];
+    prQ(who + (words.length ? ', ' + prJoinWords(words) : '') + ': which squares can ' + askName + ' reach?');
+    prSub('Type them, e.g. f6 g5 c3.');
+    PR.shownAt = prNow();
+    prAnsInput('e.g. f6 g5 c3', 60, inp => {
+      const got = new Set((inp.value.toLowerCase().match(/[a-h][1-8]/g) || []).map(sqIndex));
+      prAnswerPiece(q, got);
+    });
+    return;
+  }
+
   prBoardOn(true);
   prLayout(false, true);
   prMen(true);
   prPaint(q.st.b);
   prMarksClear();
   prMark(q.from, 'pr-from');
-  prQ(prSide(q.colour) + "'s <b>" + PIECE_NAME[q.type] + '</b> on <b>' + sqName(q.from) +
-      '</b>. Select every square it could move to.');
-  prSub('Click each one, then Check. Squares its own men stand on do not count.');
-  q.picks = new Set();
-  PR.click = i => {
-    if (PR.answered || i === q.from) return;
-    if (q.picks.has(i)){ q.picks.delete(i); prSqEls[prVisual(i)].classList.remove('pr-pick'); }
-    else { q.picks.add(i); prMark(i, 'pr-pick'); }
-  };
-  prAnsButton('Check', () => prAnswerVision(), 'primary');
+  if (q.second) prMark(q.second.from, 'pr-from');
+  prQ(who + '. Select every square ' + (q.second ? 'either could move to' : 'it could move to') + '.');
+  prSub('Click each one, then Done. Squares its own men stand on do not count.');
+  // A flash level studies the position first and only asks once the men are
+  // gone — arm() is what makes the question answerable, so it waits for the
+  // timer rather than running now; without it the Done button would sit
+  // there while the men were still fully visible, answerable before the
+  // memory test has even begun.
+  if (q.flash) prTimer(() => { prMen(false); arm(); }, q.flash);
+  else arm();
 }
-function prAnswerVision(){
-  const q = PR.q;
+/* Shared by every way of naming the targets — clicked on the board, typed
+   from the notation, one piece or two — since what happens once the squares
+   are in hand does not care how they arrived. `askCaps` puts a second Done
+   in the way first: "which of those are captures" is asked only about the
+   squares actually named, because a square that was never picked cannot
+   answer for itself, and a wrongly picked empty square is unambiguously not
+   a capture without needing q.caps to say why. */
+function prAnswerPiece(q, got){
   const missed = [], wrong = [];
-  for (const sq of q.targets) if (!q.picks.has(sq)) missed.push(sq);
-  for (const sq of q.picks) if (!q.targets.has(sq)) wrong.push(sq);
-  const ok = !missed.length && !wrong.length;
+  for (const sq of q.targets) if (!got.has(sq)) missed.push(sq);
+  for (const sq of got) if (!q.targets.has(sq)) wrong.push(sq);
+  const squareOk = !missed.length && !wrong.length;
 
-  prMarksClear();
-  prMark(q.from, 'pr-from');
-  for (const sq of q.targets) prMark(sq, q.picks.has(sq) ? 'pr-right' : 'pr-miss');
-  for (const sq of wrong) prMark(sq, 'pr-wrong');
-
+  const reveal = () => {
+    prBoardOn(true);
+    prLayout(false, true);
+    prMen(true);
+    prPaint(q.st.b);
+    prMarksClear();
+    prMark(q.from, 'pr-from');
+    if (q.second) prMark(q.second.from, 'pr-from');
+    for (const sq of q.targets) prMark(sq, got.has(sq) ? 'pr-right' : 'pr-miss');
+    for (const sq of wrong) prMark(sq, 'pr-wrong');
+  };
   const names = Array.from(q.targets).sort((a, b) => a - b).map(sqName).join(', ');
-  prJudge(ok,
-    ok ? 'All ' + q.targets.size + ' of them: <b>' + names + '</b>.'
-       : (missed.length ? 'Missed <b>' + missed.sort((a,b)=>a-b).map(sqName).join(', ') + '</b>. ' : '') +
-         (wrong.length ? 'Not <b>' + wrong.sort((a,b)=>a-b).map(sqName).join(', ') + '</b>. ' : '') +
-         'The full answer is <b>' + names + '</b>.');
+  const squareSay = squareOk
+    ? 'All ' + q.targets.size + ' of them: <b>' + names + '</b>.'
+    : (missed.length ? 'Missed <b>' + missed.sort((a,b)=>a-b).map(sqName).join(', ') + '</b>. ' : '') +
+      (wrong.length ? 'Not <b>' + wrong.sort((a,b)=>a-b).map(sqName).join(', ') + '</b>. ' : '') +
+      'The full answer is <b>' + names + '</b>.';
+
+  if (!q.askCaps){
+    reveal();
+    prJudge(squareOk, squareSay, [], 'square');
+    return;
+  }
+
+  PR.click = null;
+  prAnsClear();
+  prQ('And which of those are captures?');
+  prSub('Click each one that is, then Done.');
+  const named = Array.from(got).sort((a, b) => a - b);
+  const want = new Set(named.filter(sq => q.caps.has(sq)));
+  const picks = new Set();
+  const btns = {};
+  for (const sq of named)
+    btns[sq] = prAnsButton(sqName(sq), () => prLinesToggle(picks, sq, (s, on) => btns[s].classList.toggle('active', on)));
+  prAnsButton('Done', () => {
+    const capsOk = picks.size === want.size && Array.from(want).every(sq => picks.has(sq));
+    reveal();
+    const capNames = Array.from(want).sort((a, b) => a - b).map(sqName).join(', ') || 'none of them';
+    prJudge(squareOk && capsOk, squareSay + ' Captures: <b>' + capNames + '</b>.', [], 'square');
+  }, 'primary');
 }
 
 /* ---- 3: piece tracking ---- */

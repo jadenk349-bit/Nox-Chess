@@ -302,9 +302,15 @@ function pastStudy(){
 function answerRight(){
   var q = PR.q;
   if (q.kind === 'square'){ answerSquareRight(q); return; }
-  if (q.kind === 'vision'){
+  if (q.kind === 'piece'){
     Array.from(q.targets).forEach(clickSquare);
-    ansButton('Check').onclick();
+    ansButton('Done').onclick();
+    // askCaps puts a second Done in the way, asking which of the (now every)
+    // named square is a capture — click the ones that really are, then Done.
+    if (q.askCaps){
+      Array.from(q.caps).forEach(function(sq){ ansButton(sqName(sq)).onclick(); });
+      ansButton('Done').onclick();
+    }
     return;
   }
   if (q.kind === 'track'){ clickSquare(q.end); return; }
@@ -654,14 +660,21 @@ head('A session is time-boxed');
 })();
 
 /* ============================================================
-   4 — piece vision
+   4 — piece vision: one deterministic pass through the easiest level, which
+   asks about a single simple piece on an otherwise empty board — no flash,
+   no notation, no captures apart. test_practice.js already re-derives every
+   level's targets and captures against legalMoves() itself; what the
+   presenter still has to prove on its own is that clicking board squares
+   together and pressing Done turns into the same judgement q.targets
+   claims, the way Lines & Routes' own presenter test does.
    ============================================================ */
 head('Piece Vision');
 
 (function(){
   storage = {};
-  startDrill('piece', 2, 5);
-  var q = PR.q;
+  startDrill('piece', 1, 5);
+  var q = prMakePiece(prRecipe('piece', 1));
+  presentForced(q);
   ok('the piece is named with its square', byId.prQ.innerHTML.indexOf(sqName(q.from)) >= 0, true);
   ok('and the square it stands on is marked', marked(q.from, 'pr-from'), true);
   ok('the men are showing — this is geometry, not blindfold',
@@ -678,7 +691,7 @@ head('Piece Vision');
   var stray = -1;
   for (var i = 0; i < 64; i++) if (!q.targets.has(i) && i !== q.from) { stray = i; break; }
   clickSquare(stray);
-  ansButton('Check').onclick();
+  ansButton('Done').onclick();
   ok('a partly-right answer is wrong', /wrong/.test(byId.prSay.className), true);
   ok('the square that was right is green', marked(targets[0], 'pr-right'), true);
   ok('the one that was not is red', marked(stray, 'pr-wrong'), true);
@@ -687,12 +700,14 @@ head('Piece Vision');
      byId.prSay.innerHTML.indexOf(sqName(targets[targets.length - 1])) >= 0, true);
   pressCtl('Next');
 
-  var q2 = PR.q;
+  var q2 = prMakePiece(prRecipe('piece', 1));
+  presentForced(q2);
   Array.from(q2.targets).forEach(clickSquare);
-  ansButton('Check').onclick();
+  ansButton('Done').onclick();
   ok('every square, and only those, is right', /right/.test(byId.prSay.className), true);
   ok('and it says how many there were',
      byId.prSay.innerHTML.indexOf('All ' + q2.targets.size) >= 0, true);
+  tick(1000);
   prShowDash();
 })();
 
@@ -937,11 +952,13 @@ head('Leaving a drill behind');
 })();
 
 (function(){
-  // the setup box, and what it remembers — piece rather than square, whose
-  // ladder now runs to seven rungs and would make "does not run past the
-  // top" below a test of the wrong number
+  // the setup box, and what it remembers — piece, whose ladder now runs to
+  // eight rungs of its own; `top` is read off it rather than hard-coded, so
+  // a rung added or dropped later does not silently untest "does not run
+  // past the top" below.
   storage = {};
   var mode = PR_MODE.piece;
+  var top = mode.levels.length;
   prOpenSetup(mode);
   ok('the setup box opens', byId.prSetOverlay.classList.contains('show'), true);
   ok('naming the drill', byId.prSetName.textContent, mode.name);
@@ -961,11 +978,11 @@ head('Leaving a drill behind');
   byId.prSetUp.onclick();
   ok('the + button steps the level up', byId.prSetLevelN.textContent, 3);
   ok('with the caption that goes with it', byId.prSetCap.textContent, mode.levels[2].cap);
-  byId.prSetUp.onclick();
-  ok('and does not run past the top of the ladder', byId.prSetLevelN.textContent, 3);
+  for (var up = 0; up < top; up++) byId.prSetUp.onclick();
+  ok('and does not run past the top of the ladder', byId.prSetLevelN.textContent, top);
   byId.prSetGo.onclick();
   ok('Begin closes the box', byId.prSetOverlay.classList.contains('show'), false);
-  ok('and runs the level that was chosen', PR.level, 3);
+  ok('and runs the level that was chosen', PR.level, top);
 
   // finish the session for real, so the level it settled at lands on the record
   finishSession();
@@ -973,12 +990,12 @@ head('Leaving a drill behind');
   ok('the session finished', byId.prDoneOverlay.classList.contains('show'), true);
 
   prOpenSetup(mode);
-  ok('and next time it opens on the level last used', byId.prSetLevelN.textContent, 3);
+  ok('and next time it opens on the level last used', byId.prSetLevelN.textContent, top);
   byId.prSetX.onclick();
   ok('the close button puts it away', byId.prSetOverlay.classList.contains('show'), false);
 
   byId.prSetDown.onclick();
-  ok('and the − button steps it back down', byId.prSetLevelN.textContent, 2);
+  ok('and the − button steps it back down', byId.prSetLevelN.textContent, top - 1);
 
   var progressive = PR_MODE.progressive;
   prOpenSetup(progressive);

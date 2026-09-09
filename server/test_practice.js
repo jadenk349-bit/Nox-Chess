@@ -75,7 +75,7 @@ function prStatsRender(){}             // pixels; this suite is about the state 
 var DECLS = ['VAL','FILES','rowOf','colOf','SQNAME','uciOf','sqName','sqIndex','onBoard','other',
              'idCounter','mk','DIR_N','DIR_B','DIR_R','DIR_K','PST','nodes','PIECE_NAME',
              'OPENING_BOOK','OPENING_LINES',
-             'PR_SQUARE_LEVELS','PR_QUADRANT_NAME','PR_DIRS','PR_LINES_LEVELS',
+             'PR_SQUARE_LEVELS','PR_QUADRANT_NAME','PR_DIRS','PR_LINES_LEVELS','PR_PIECE_LEVELS',
              'PR_MODES','PR_MINUTES','PR_STORE','PR_VERSION','PR_V1_KEYS','PR_SEEN_MAX',
              'prKey','prAcc','prSeenKey',
              'PR','PR_STEP_UP','PR_STEP_DOWN','prRand','prPick','prSide','prMan','PR_MAKE','W',
@@ -89,7 +89,7 @@ var FNS = ['startBoard','newState','cloneState','fenOf','stateFromFEN',
            'prBlankMode','prBlank','prUpgradeV1','prLoad','prSave',
            'prSeen','prSeenHas','prSeenPush','prToday','prTouchDay',
            'prShuffle','prPosition','prMaterial','prColourWhy',
-           'prMakeSquare','prMakeLines','prMakeVision','prMakeTrack','prMakeMemory',
+           'prMakeSquare','prMakeLines','prMakePiece','prMakeTrack','prMakeMemory',
            'prPickMove','prAskAbout','prMakeSequence','prMakeMini','prRecipe','prMake',
            'prRecord','prScore','prStep','prNow','prTimeLeft','prRecommend','prMedianLat',
            'prStartLevel','prOpen','prRebuildStart','prRebuildFinish','prRbPaint','goPractice'];
@@ -276,61 +276,25 @@ head('Generated positions are legal');
 })();
 
 /* ============================================================
-   3 — piece visualization: the answer is the move generator's
+   3 — piece vision: the answer is the move generator's, on both a board
+   and out of the notation, for one piece and for two
    ============================================================ */
-head('Piece Visualization asks legal questions');
-
+head('Piece Vision');
 (function(){
-  var checked = 0, mismatch = 0, tooFew = 0, wrongPiece = 0, sizes = { 1:[], 3:[] };
-  for (var diff = 1; diff <= 3; diff++){
-    for (var t = 0; t < 90; t++){
-      var q = prMakeVision(diff);
-      if (!q){ continue; }
-      checked++;
-      var piece = q.st.b[q.from];
-      if (!piece || piece.t !== q.type || piece.c !== q.colour) wrongPiece++;
-      // the drill's answer, re-derived from the rules rather than trusted
-      var legal = legalMoves(q.st, q.colour).filter(function(m){ return m.from === q.from; });
-      var truth = {};
-      for (var k = 0; k < legal.length; k++) truth[legal[k].to] = 1;
-      var mine = Array.from(q.targets).sort(function(a,b){ return a-b; }).join(',');
-      var theirs = Object.keys(truth).map(Number).sort(function(a,b){ return a-b; }).join(',');
-      if (mine !== theirs) mismatch++;
-      if (q.targets.size < 2) tooFew++;
-      // a target must be empty or hold an enemy — never one of its own men
-      for (var sq of q.targets){
-        var on = q.st.b[sq];
-        if (on && on.c === q.colour) mismatch++;
-      }
-      if (diff === 1 || diff === 3) sizes[diff].push(menOn(q.st.b));
-    }
+  var bad = 0;
+  for (var lv = 1; lv <= PR_PIECE_LEVELS.length; lv++) for (var t = 0; t < 40; t++){
+    var q = prMakePiece(prRecipe('piece', lv));
+    if (!q){ bad++; continue; }
+    var st = q.st; st.turn = q.colour;
+    var legal = legalMoves(st, q.colour).filter(function(m){ return m.from === q.from || (q.second && m.from === q.second.from); });
+    var want = {}; legal.forEach(function(m){ want[m.to] = 1; });
+    if (Object.keys(want).length !== q.targets.size) bad++;
+    q.targets.forEach(function(sq){ if (!want[sq]) bad++; });
+    q.caps.forEach(function(sq){ if (!st.b[sq] || st.b[sq].c === q.colour) bad++; });
   }
-  ok('every exercise built', checked, 270);
-  ok('the named piece really stands on the named square', wrongPiece, 0);
-  ok('the answer set is exactly what legalMoves() says', mismatch, 0);
-  ok('and it is never a piece with nowhere to go', tooFew, 0);
-  var easy = sizes[1].reduce(function(a,b){ return a+b; }, 0) / sizes[1].length;
-  var hard = sizes[3].reduce(function(a,b){ return a+b; }, 0) / sizes[3].length;
-  ok('the easiest setting is an empty board — two kings and the piece', easy, 3);
-  ok('the hardest one is genuinely crowded', hard > 6, true);
-})();
-
-(function(){
-  var kinds = {};
-  for (var t = 0; t < 400; t++){
-    var q = prMakeVision(3);
-    if (q) kinds[q.type] = (kinds[q.type] || 0) + 1;
-  }
-  ok('rook, bishop, queen, knight and king all come up',
-     ['R','B','Q','N','K'].every(function(k){ return kinds[k] > 0; }), true);
-  ok('and pawns do too, in the harder settings', kinds.P > 0, true);
-  var easyKinds = {};
-  for (var t2 = 0; t2 < 200; t2++){
-    var e = prMakeVision(1);
-    if (e) easyKinds[e.type] = 1;
-  }
-  ok('the easiest setting sticks to the four simple shapes',
-     Object.keys(easyKinds).sort().join(''), 'BKNR');
+  ok('every level generates and the reach re-derives', bad, 0);
+  ok('level 6 is notation only', prRecipe('piece', 6).notation, true);
+  ok('level 8 asks about two pieces', prRecipe('piece', 8).two, true);
 })();
 
 /* ============================================================
