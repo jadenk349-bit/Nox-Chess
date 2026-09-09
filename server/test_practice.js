@@ -75,6 +75,7 @@ function prStatsRender(){}             // pixels; this suite is about the state 
 var DECLS = ['VAL','FILES','rowOf','colOf','SQNAME','uciOf','sqName','sqIndex','onBoard','other',
              'idCounter','mk','DIR_N','DIR_B','DIR_R','DIR_K','PST','nodes','PIECE_NAME',
              'OPENING_BOOK','OPENING_LINES',
+             'PR_SQUARE_LEVELS','PR_QUADRANT_NAME','PR_DIRS',
              'PR_MODES','PR_MINUTES','PR_STORE','PR_VERSION','PR_V1_KEYS','PR_SEEN_MAX',
              'prKey','prAcc','prSeenKey',
              'PR','PR_STEP_UP','PR_STEP_DOWN','prRand','prPick','prSide','prMan','PR_MAKE','W',
@@ -88,7 +89,7 @@ var FNS = ['startBoard','newState','cloneState','fenOf','stateFromFEN',
            'prBlankMode','prBlank','prUpgradeV1','prLoad','prSave',
            'prSeen','prSeenHas','prSeenPush','prToday','prTouchDay',
            'prShuffle','prPosition','prMaterial','prColourWhy',
-           'prMakeCoord','prMakeColor','prMakeVision','prMakeTrack','prMakeMemory',
+           'prMakeSquare','prMakeVision','prMakeTrack','prMakeMemory',
            'prPickMove','prAskAbout','prMakeSequence','prMakeMini','prRecipe','prMake',
            'prRecord','prScore','prStep','prNow','prTimeLeft','prRecommend','prMedianLat',
            'prStartLevel','prOpen','prRebuildStart','prRebuildFinish','prRbPaint','goPractice'];
@@ -156,33 +157,44 @@ head('Coordinates and colours');
 })();
 
 (function(){
-  var seen = {}, wrong = 0;
-  for (var t = 0; t < 4000; t++){
-    var q = prMakeColor(1 + (t % 3));
-    seen[q.sq] = 1;
-    if (q.dark !== darkByName(sqName(q.sq))) wrong++;
-  }
-  ok('Square Colour never disagrees with the rule', wrong, 0);
-  ok('and it reaches every square of the board', Object.keys(seen).length, 64);
+  // prColourWhy still explains a square's colour on its own — it is what
+  // prSquareWhy reaches for when a Square Trainer colour question is missed —
+  // and is worth checking independently of any question that calls it.
   var why = prColourWhy(sqIndexOf('f6'));
   ok('the explanation names the square and its colour', /f6 is dark/.test(why), true);
   ok('and the explanation for a light one says light', /e4 is light/.test(prColourWhy(sqIndexOf('e4'))), true);
 })();
 function sqIndexOf(name){ return (8 - (+name[1])) * 8 + 'abcdefgh'.indexOf(name[0]); }
 
+/* ============================================================
+   1b — Square Trainer: coordinates, colours, neighbours and quadrants,
+   one ladder rather than the two drills (Coordinate Trainer, Square Colour)
+   it replaces. Every level generates, every answer re-derives from the
+   board's own geometry, and no level skips the kinds its caption promises.
+   ============================================================ */
+head('Square Trainer');
 (function(){
-  var labelled = 0, flipped = 0, easyFlipped = 0;
-  for (var t = 0; t < 600; t++){
-    if (prMakeCoord(1).labels) labelled++;
-    if (prMakeCoord(1).flipped) easyFlipped++;
-    if (prMakeCoord(3).flipped) flipped++;
+  var kinds = {}, bad = 0;
+  for (var lv = 1; lv <= PR_SQUARE_LEVELS.length; lv++){
+    for (var t = 0; t < 60; t++){
+      var q = prMakeSquare(prRecipe('square', lv));
+      if (!q){ bad++; continue; }
+      kinds[q.ask] = 1;
+      if (q.ask === 'colour' && q.dark !== darkByName(sqName(q.sq))) bad++;
+      if (q.ask === 'neighbour'){
+        var d = { above:-8, below:8, left:-1, right:1 }[q.dir];
+        if (q.answer !== q.sq + d) bad++;
+        if (q.dir === 'left' && colOf(q.sq) === 0) bad++;
+        if (q.dir === 'right' && colOf(q.sq) === 7) bad++;
+      }
+      if (q.ask === 'quadrant' && q.answer !== quadrantOf(q.sq)) bad++;
+      if (typeof q.sig !== 'string') bad++;
+    }
   }
-  ok('the easiest coordinate drill always labels the board', labelled, 600);
-  ok('and never turns it round', easyFlipped, 0);
-  ok('the hardest one does, sometimes', flipped > 100 && flipped < 500, true);
-  ok('and it never labels the board', prMakeCoord(3).labels, false);
-  ok('the middle setting drops the labels and keeps White below',
-     prMakeCoord(2).labels === false && prMakeCoord(2).flipped === false, true);
+  ok('every level generates, and every answer re-derives', bad, 0);
+  ok('all five question kinds appear across the ladder', Object.keys(kinds).length, 5);
+  ok('level 5 has no board', prRecipe('square', 5).board, false);
+  ok('level 7 is timed', prRecipe('square', 7).timed > 0, true);
 })();
 
 /* ============================================================

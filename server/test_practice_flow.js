@@ -213,7 +213,7 @@ var FNS = ['startBoard','newState','cloneState','fenOf','stateFromFEN',
            'slide','step','addPawn','pseudoMoves','isAttacked','kingSq','inCheck',
            'makeMove','legalMoves','toSAN','attackersOf','defendersOf','see',
            'mirror','evaluate','orderMoves','scoreMove','quiesce','negamax','bestMove',
-           'parseMoveIn','rebuildDiff'];
+           'parseMoveIn','rebuildDiff','quadrantOf'];
 var bundle = [grab(/\nconst W = 'w', B = 'b';/, "const W/B")];
 // a multi-line string rather than an object, so neither shape of decl() fits it
 bundle.push(grab(/\nconst BISHOP_SVG =\n[\s\S]*?';\n/, 'BISHOP_SVG'));
@@ -301,11 +301,7 @@ function pastStudy(){
 /* The right answer to whatever is on screen. */
 function answerRight(){
   var q = PR.q;
-  if (q.kind === 'coord'){
-    if (q.findIt) clickSquare(q.sq); else typeAnswer(sqName(q.sq));
-    return;
-  }
-  if (q.kind === 'color'){ ansButton(q.dark ? 'Dark' : 'Light').onclick(); return; }
+  if (q.kind === 'square'){ answerSquareRight(q); return; }
   if (q.kind === 'vision'){
     Array.from(q.targets).forEach(clickSquare);
     ansButton('Check').onclick();
@@ -313,6 +309,50 @@ function answerRight(){
   }
   if (q.kind === 'track'){ clickSquare(q.end); return; }
   answerAskRight(q.ask);
+}
+/* Square Trainer's `ask` is a plain string, not one of the {t:...} objects
+   answerAskRight reads — five kinds, five ways to give the right answer. */
+function answerSquareRight(q){
+  if (q.ask === 'find'){ clickSquare(q.sq); return; }
+  if (q.ask === 'name'){ typeAnswer(sqName(q.sq)); return; }
+  if (q.ask === 'colour'){ ansButton(q.dark ? 'Dark' : 'Light').onclick(); return; }
+  if (q.ask === 'neighbour'){ typeAnswer(sqName(q.answer)); return; }
+  if (q.ask === 'quadrant'){ ansButton(PR_QUADRANT_NAME[q.answer]).onclick(); return; }
+  throw new Error('unknown square question ' + q.ask);
+}
+/** A Square Trainer question at `level` for which `pred` is true — used where
+    the exercise itself, not just the level's difficulty, has to be forced:
+    a `neighbour` or `quadrant` question needs `dir`/`answer` derived from the
+    square that was drawn, which only prMakeSquare itself does, and a level
+    whose `flipped` is a coin flip needs to land heads before a test can rely
+    on it. The odds of any predicate here failing every one of five hundred
+    draws are astronomically small, so this waits for a match rather than
+    building one by hand — deterministic in outcome without duplicating
+    prMakeSquare's own logic a second time, badly, just for the tests. */
+function forceSquare(level, pred){
+  for (var t = 0; t < 500; t++){
+    var q = prMakeSquare(prRecipe('square', level));
+    if (pred(q)) return q;
+  }
+  throw new Error('could not force a level ' + level + ' question matching the predicate');
+}
+/** Put a chosen question on screen the way prNextQuestion() does, minus the
+    prMake() call this is standing in for. prNextQuestion is what ordinarily
+    clears PR.answered, PR.click, the answer row and every mark before a
+    fresh prPresent() — call prPresent() directly without doing the same and
+    the *previous* question's buttons are still sitting in prAnsEl, so
+    ansButton() can match one of them instead of the one this question just
+    built. That is exactly the kind of thing a coin flip turns into an
+    occasional, unreproducible failure. */
+function presentForced(q){
+  PR.answered = false;
+  PR.click = null;
+  PR.onSubmit = null;
+  prAnsClear();
+  prCtl([]);
+  prMarksClear();
+  PR.q = q;
+  prPresent();
 }
 function answerAskRight(ask){
   if (ask.t === 'where'){ clickSquare(ask.sq); return; }
@@ -375,6 +415,12 @@ head('The dashboard');
 
 /* ============================================================
    2 — the square trainer, start to finish
+   The dashboard flow at level 1 answers whatever comes up — find or name —
+   rather than steering toward one, so it does not care which the level's
+   own coin flip drew; everything that has to prove a *particular* kind of
+   question is forced with prMakeSquare + prRecipe directly (PR.q set, then
+   prPresent()), the way this suite drives every other question that a coin
+   flip would otherwise make an occasional, flaky failure of.
    ============================================================ */
 head('Square Trainer');
 
@@ -388,15 +434,11 @@ head('Square Trainer');
   ok('the level line reads back', byId.prStatQCap.textContent, 'Level 1');
   ok('the orientation is spelled out', /White's view/.test(byId.prOrient.textContent), true);
 
-  var asked = 0, both = {};
-  while (asked < 5){
-    both[PR.q.findIt ? 'find' : 'name'] = 1;
-    asked++;
+  for (var asked = 1; asked <= 5; asked++){
     answerRight();
     ok('answer ' + asked + ' was marked right', /right/.test(byId.prSay.className), true);
     tick(1000);                       // a right answer moves on by itself
   }
-  ok('both kinds of question came up along the way', !!(both.find && both.name), true);
 
   finishSession();
   answerRight();
@@ -412,56 +454,152 @@ head('Square Trainer');
 })();
 
 (function(){
-  // both exercise types, and a wrong answer in each
+  // find: a wrong click, then the right one
   storage = {};
-  startDrill('square', 2);
-  ok('the middle setting drops the coordinate labels',
-     prSqEls[56].innerHTML === '' && prSqEls[0].innerHTML === '', true);
+  startDrill('square', 1, 5);
+  var q = forceSquare(1, function(q){ return q.ask === 'find'; });
+  presentForced(q);
+  var wrong = elsewhere(q.sq);
+  clickSquare(wrong);
+  ok('clicking the wrong square is marked wrong', /wrong/.test(byId.prSay.className), true);
+  ok('and the right one is shown in green', marked(q.sq, 'pr-right'), true);
+  ok('the wrong one in red', marked(wrong, 'pr-wrong'), true);
+  ok('the answer names the square that was wanted',
+     byId.prSay.innerHTML.indexOf(sqName(q.sq)) >= 0, true);
+  ok('a wrong answer waits to be read rather than moving on', ctlButton('Next') !== null, true);
+  ok('and the streak went back to nothing', PR.streak, 0);
+  pressCtl('Next');
 
-  var sawFind = false, sawName = false;
-  for (var k = 0; k < 12 && !(sawFind && sawName); k++){
-    var q = PR.q;
-    if (q.findIt && !sawFind){
-      sawFind = true;
-      var wrong = elsewhere(q.sq);
-      clickSquare(wrong);
-      ok('clicking the wrong square is marked wrong', /wrong/.test(byId.prSay.className), true);
-      ok('and the right one is shown in green', marked(q.sq, 'pr-right'), true);
-      ok('the wrong one in red', marked(wrong, 'pr-wrong'), true);
-      ok('the answer names the square that was wanted',
-         byId.prSay.innerHTML.indexOf(sqName(q.sq)) >= 0, true);
-      ok('a wrong answer waits to be read rather than moving on', ctlButton('Next') !== null, true);
-      ok('and the streak went back to nothing', PR.streak, 0);
-      pressCtl('Next');
-    } else if (!q.findIt && !sawName){
-      sawName = true;
-      var input = typeAnswer('zz');
-      ok('nonsense in the box is refused, not counted', PR.i, PR.i);
-      ok('and it says what a square looks like', /told/.test(byId.prSay.className), true);
-      typeAnswer(sqName(q.sq));
-      ok('the right name is accepted', /right/.test(byId.prSay.className), true);
-      tick(1000);
-    } else {
-      answerRight();
-      tick(1000);
-      if (ctlButton('Next')) pressCtl('Next');
-    }
-  }
-  ok('both exercise types came up', sawFind && sawName, true);
+  q = forceSquare(1, function(q){ return q.ask === 'find'; });
+  presentForced(q);
+  clickSquare(q.sq);
+  ok('and clicking the right one is marked right', /right/.test(byId.prSay.className), true);
+  tick(1000);
+
+  // name: a wrong name, then the right one — Square Trainer's presenter marks
+  // the true square in green either way rather than refusing malformed input,
+  // unlike the coordinate console the old drill borrowed this exercise from
+  q = forceSquare(1, function(q){ return q.ask === 'name'; });
+  presentForced(q);
+  typeAnswer('zz');
+  ok('a wrong name is marked wrong', /wrong/.test(byId.prSay.className), true);
+  ok('and the right square is shown in green regardless', marked(q.sq, 'pr-right'), true);
+  pressCtl('Next');
+
+  q = forceSquare(1, function(q){ return q.ask === 'name'; });
+  presentForced(q);
+  typeAnswer(sqName(q.sq));
+  ok('the right name is accepted', /right/.test(byId.prSay.className), true);
+  tick(1000);
   prShowDash();
 })();
 
 (function(){
+  // level 2: labels come off, and the two exercises still both work
+  storage = {};
+  startDrill('square', 2);
+  ok('the middle setting drops the coordinate labels',
+     prSqEls[56].innerHTML === '' && prSqEls[0].innerHTML === '', true);
+  answerRight();
+  tick(1000);
+  ok('an answer at level 2 still lands right', PR.i > 0 && PR.right === PR.i, true);
+  prShowDash();
+})();
+
+(function(){
+  // colour: forced, right then wrong — this is the exercise Square Colour
+  // used to own on its own dashboard card
   storage = {};
   startDrill('square', 3);
-  var flipped = 0;
-  for (var k = 0; k < 40; k++){
-    if (PR.q.flipped) flipped++;
-    answerRight();
-    tick(1000);
-    if (ctlButton('Next')) pressCtl('Next');
-  }
-  ok('the hardest setting turns the board round sometimes', flipped > 0, true);
+  var q = prMakeSquare(prRecipe('square', 3));
+  q.ask = 'colour';
+  presentForced(q);
+  ansButton(q.dark ? 'Dark' : 'Light').onclick();
+  ok('a colour answer is marked right', /right/.test(byId.prSay.className), true);
+  tick(1000);
+
+  q = prMakeSquare(prRecipe('square', 3));
+  q.ask = 'colour';
+  presentForced(q);
+  ansButton(q.dark ? 'Light' : 'Dark').onclick();
+  ok('the wrong colour is marked wrong', /wrong/.test(byId.prSay.className), true);
+  ok('and the explanation names the square', byId.prSay.innerHTML.indexOf(sqName(q.sq)) >= 0, true);
+  pressCtl('Next');
+  prShowDash();
+})();
+
+(function(){
+  // level 4: a flash — the board is up, then taken away, then the question
+  // is answered from memory
+  storage = {};
+  startDrill('square', 4);
+  var q = forceSquare(4, function(q){ return q.ask === 'name'; });
+  presentForced(q);
+  ok('the board is up during the flash', byId.prFrame.style.display, '');
+  tick(1000);
+  ok('and taken away once the flash ends', byId.prFrame.style.display, 'none');
+  typeAnswer(sqName(q.sq));
+  ok('the right name is still accepted after the flash', /right/.test(byId.prSay.className), true);
+  tick(1000);
+
+  q = forceSquare(4, function(q){ return q.ask === 'colour'; });
+  presentForced(q);
+  ansButton(q.dark ? 'Dark' : 'Light').onclick();
+  ok('a colour answer during the flash is marked right', /right/.test(byId.prSay.className), true);
+  tick(1000);
+  prShowDash();
+})();
+
+(function(){
+  // level 5: no board at all — colour, neighbours and quadrants from the
+  // name alone
+  storage = {};
+  startDrill('square', 5);
+  ok('there is no board at this level', byId.prFrame.style.display, 'none');
+
+  var q = forceSquare(5, function(q){ return q.ask === 'neighbour'; });
+  presentForced(q);
+  typeAnswer(sqName(elsewhere(q.answer)));
+  ok('a wrong neighbour is marked wrong', /wrong/.test(byId.prSay.className), true);
+  ok('and the explanation names the square that really is', byId.prSay.innerHTML.indexOf(sqName(q.answer)) >= 0, true);
+  pressCtl('Next');
+
+  q = forceSquare(5, function(q){ return q.ask === 'neighbour'; });
+  presentForced(q);
+  typeAnswer(sqName(q.answer));
+  ok('the right neighbour is accepted', /right/.test(byId.prSay.className), true);
+  tick(1000);
+
+  q = forceSquare(5, function(q){ return q.ask === 'quadrant'; });
+  presentForced(q);
+  ansButton(PR_QUADRANT_NAME[q.answer]).onclick();
+  ok('a quadrant answer is marked right', /right/.test(byId.prSay.className), true);
+  tick(1000);
+  prShowDash();
+})();
+
+(function(){
+  // level 6: from Black's chair, sometimes
+  storage = {};
+  startDrill('square', 6);
+  var q = forceSquare(6, function(q){ return q.ask === 'find' && q.flipped; });
+  presentForced(q);
+  ok("the board turns round for Black's chair", /Black's view/.test(byId.prOrient.textContent), true);
+  clickSquare(q.sq);
+  ok('a find answer still lands on the right square once flipped', /right/.test(byId.prSay.className), true);
+  tick(1000);
+  prShowDash();
+})();
+
+(function(){
+  // level 7: no board, three seconds — running out of the clock is a wrong
+  // answer, the same as any other
+  storage = {};
+  startDrill('square', 7);
+  presentForced(prMakeSquare(prRecipe('square', 7)));
+  ok('a level 7 question is timed', PR.q.timed, 3000);
+  tick(3000);
+  ok('running out of time is judged wrong', /wrong/.test(byId.prSay.className), true);
   prShowDash();
 })();
 
@@ -490,20 +628,7 @@ head('A session is time-boxed');
 })();
 
 /* ============================================================
-   4 — square colour
-   The dashboard cannot reach this drill any more — prMake only answers to
-   the five PR_MODES keys — but the generator it would use is still here for
-   Task 9 to give a card of its own, so a direct call is still worth proving.
-   ============================================================ */
-head('Square Colour (generator only — no PR_MODES entry until Task 9)');
-
-(function(){
-  var q = prMakeColor(3);
-  ok('the hardest setting is still buildable directly', !!q, true);
-})();
-
-/* ============================================================
-   5 — piece vision
+   4 — piece vision
    ============================================================ */
 head('Piece Vision');
 
@@ -546,7 +671,7 @@ head('Piece Vision');
 })();
 
 /* ============================================================
-   6 — move tracker
+   5 — move tracker
    ============================================================ */
 head('Move Tracker');
 
@@ -599,7 +724,7 @@ head('Move Tracker');
 })();
 
 /* ============================================================
-   7 — hold the position
+   6 — hold the position
    ============================================================ */
 head('Hold the Position');
 
@@ -642,9 +767,10 @@ head('Hold the Position');
 })();
 
 /* ============================================================
-   8 — blindfold sequence
-   Same story as Square Colour above: no PR_MODES entry, no way in from the
-   dashboard, until Task 14 gives it one — the generator stays proven directly.
+   7 — blindfold sequence
+   No PR_MODES entry, no way in from the dashboard, until Task 14 gives it one
+   — the generator stays proven directly, the way Square Colour's did before
+   Square Trainer's ladder absorbed it.
    ============================================================ */
 head('Blindfold Sequence (generator only — no PR_MODES entry until Task 14)');
 
@@ -655,7 +781,7 @@ head('Blindfold Sequence (generator only — no PR_MODES entry until Task 14)');
 })();
 
 /* ============================================================
-   9 — the progressive blindfold challenge
+   8 — the progressive blindfold challenge
    ============================================================ */
 head('Progressive Blindfold Challenge');
 
@@ -731,7 +857,7 @@ head('Progressive Blindfold Challenge');
 })();
 
 /* ============================================================
-   10 — leaving, restarting, and the record
+   9 — leaving, restarting, and the record
    ============================================================ */
 head('Leaving a drill behind');
 
@@ -771,8 +897,8 @@ head('Leaving a drill behind');
   startDrill('square', 1, 5);
   answerRight(); tick(1000);
   var q = PR.q;
-  clickSquare(q.findIt ? elsewhere(q.sq) : q.sq);
-  if (!q.findIt) typeAnswer('a1' === sqName(q.sq) ? 'h8' : 'a1');
+  if (q.ask === 'find') clickSquare(elsewhere(q.sq));
+  else typeAnswer(sqName(elsewhere(q.sq)));
   if (ctlButton('Next')) pressCtl('Next');
   ok('one right, one wrong', PR.right + '/' + PR.i, '1/2');
   ok('the session accuracy reads back', byId.prStatA.textContent, '50%');
@@ -785,9 +911,11 @@ head('Leaving a drill behind');
 })();
 
 (function(){
-  // the setup box, and what it remembers
+  // the setup box, and what it remembers — piece rather than square, whose
+  // ladder now runs to seven rungs and would make "does not run past the
+  // top" below a test of the wrong number
   storage = {};
-  var mode = PR_MODES[0];                       // square
+  var mode = PR_MODE.piece;
   prOpenSetup(mode);
   ok('the setup box opens', byId.prSetOverlay.classList.contains('show'), true);
   ok('naming the drill', byId.prSetName.textContent, mode.name);
@@ -884,7 +1012,7 @@ head('goPractice with a target');
 })();
 
 /* ============================================================
-   11 — the rebuild interface
+   10 — the rebuild interface
    One interface for every place a position is put back — Hold the Position,
    the tracker's last level, Progressive Blindfold's recovery — driven
    directly rather than through a drill, since prRebuildStart takes its
@@ -910,7 +1038,7 @@ head('The rebuild interface');
 })();
 
 /* ============================================================
-   12 — the markup the code reaches for
+   11 — the markup the code reaches for
    The stub hands back an element for any id asked of it, which is what makes
    the flow above runnable and what makes it blind to a typo. So the ids are
    checked against the page itself.

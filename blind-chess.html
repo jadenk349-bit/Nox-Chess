@@ -11849,18 +11849,50 @@ document.getElementById('revDone').onclick = () => exitReview();
    a broken one on screen.
    ============================================================ */
 
+/* Square Trainer's own ladder — declared ahead of PR_MODES, which reads it by
+   reference rather than repeating it, because every other mode's levels are
+   still bare captions here and this one needs the recipe fields (`kinds`,
+   `board`, `labels`, `flipped`, `flash`, `timed`) a caption alone cannot
+   carry. It absorbs what used to be two drills, Coordinate Trainer and Square
+   Colour: same board, same squares, one ladder that asks both things (and two
+   more, `neighbour` and `quadrant`) rather than two dashboard cards that each
+   taught half the alphabet. */
+const PR_SQUARE_LEVELS = [
+  { cap:'Labels on, White below',        kinds:['find','name'],                   labels:true,  board:true },
+  { cap:'Labels off',                    kinds:['find','name'],                   labels:false, board:true },
+  { cap:'Colour, board shown',           kinds:['find','name','colour'],          labels:false, board:true },
+  { cap:'Board flashed for a second',    kinds:['name','colour'],                 labels:false, board:true, flash:1000 },
+  { cap:'No board: colour and neighbours', kinds:['colour','neighbour','quadrant'], board:false },
+  { cap:"From Black's chair",            kinds:['find','name','colour','neighbour'], labels:false, board:true, flipped:true },
+  { cap:'No board, three seconds',       kinds:['colour','neighbour'],            board:false, timed:3000 }
+];
+/* The corner naming the quarter of the board a `quadrant` question answers
+   with — words, not a compass point, because "queenside" and "kingside" are
+   how a player actually thinks about the board's halves. */
+const PR_QUADRANT_NAME = { a1:"White's queenside", h1:"White's kingside", a8:"Black's queenside", h8:"Black's kingside" };
+/* The four directions a `neighbour` question may ask about, each paired with
+   the board-index step that answers it and a guard that keeps the question
+   off the edge it would otherwise walk a square past. */
+const PR_DIRS = [
+  ['above', -8, sq => rowOf(sq) > 0],
+  ['below',  8, sq => rowOf(sq) < 7],
+  ['left',  -1, sq => colOf(sq) > 0],
+  ['right',  1, sq => colOf(sq) < 7]
+];
+
 /* Each drill, in the order the dashboard lists them. `group` clusters related
    drills for the dashboard (Task 22); `lesson` is the course step it grows out
    of. `levels` replaces the old `tiers`/`hard`/`needs`: a mode's levels are a
    recipe ladder, not a difficulty label — what a session is actually worth is
-   the level the staircase below settles it on, not a tier picked by hand. The
-   levels here are provisional captions so the page runs; `prMake` still calls
-   through today's seven generators (PR_MAKE) until later phases give the
-   square-colour and blindfold-sequence drills entries of their own. */
+   the level the staircase below settles it on, not a tier picked by hand.
+   Square Trainer's ladder is the real thing (above); the rest are still
+   provisional captions so the page runs, and `prMake` calls through today's
+   generators (PR_MAKE) until later phases give the blindfold-sequence drill an
+   entry of its own. */
 const PR_MODES = [
   { key:'square', name:'Square Trainer', group:'board', skill:'Squares', lesson:1,
     desc:'Name, find and colour squares from either chair — the alphabet of the board.',
-    levels:[{cap:'Labels on'},{cap:'Labels off'},{cap:'Colour, board shown'}] },
+    levels: PR_SQUARE_LEVELS },
   { key:'piece', name:'Piece Vision', group:'vision', skill:'Piece movement', lesson:4,
     desc:'Where one piece reaches, with the board slowly taken away.',
     levels:[{cap:'Empty board'},{cap:'A blocker or two'},{cap:'A crowded board'}] },
@@ -12350,33 +12382,29 @@ function prColourWhy(sq){
    below retries and then falls back before anything reaches the screen.
    ============================================================ */
 
-/* 1 — COORDINATE TRAINER. Two exercises, chosen by a coin: find the square you
-   are named, or name the square that lights up. */
-function prMakeCoord(diff){
-  return {
-    kind: 'coord',
-    findIt: Math.random() < .5,
-    sq: prRand(64),
-    labels: diff <= 1,
-    flipped: diff >= 3 && Math.random() < .45
-  };
+/* 1 — SQUARE TRAINER. One drill, five kinds of question, all of them answers
+   to arithmetic on the coordinate rather than a table: dark exactly when row
+   and column disagree in parity (the same rule layoutSquares() paints the
+   board with), a neighbour is a step of one rank or file, a quadrant is which
+   half of each axis the square falls on. `ask` is drawn from the level's own
+   `kinds`, so a level offers exactly the mix its caption promises and nothing
+   the ladder above it does. */
+function prMakeSquare(r){
+  const ask = prPick(r.kinds), sq = prRand(64);
+  const q = { kind:'square', ask, sq, labels:!!r.labels, board:!!r.board, flash:r.flash || 0,
+              timed:r.timed || 0, flipped: !!r.flipped && Math.random() < .5,
+              dark:(rowOf(sq) + colOf(sq)) % 2 === 1, answer:sq, dir:null };
+  if (ask === 'neighbour'){
+    const open = PR_DIRS.filter(d => d[2](sq));
+    const d = prPick(open);
+    q.dir = d[0]; q.answer = sq + d[1];
+  }
+  if (ask === 'quadrant') q.answer = quadrantOf(sq);
+  q.sig = 'square:' + ask + ':' + sq + (q.dir ? ':' + q.dir : '');
+  return q;
 }
 
-/* 2 — SQUARE COLOUR. The answer is arithmetic on the coordinate, never a
-   table: dark exactly when row and column disagree in parity, which is the
-   same rule layoutSquares() paints the board with. */
-function prMakeColor(diff){
-  const sq = prRand(64);
-  return {
-    kind: 'color',
-    sq,
-    dark: (rowOf(sq) + colOf(sq)) % 2 === 1,
-    labels: diff <= 1,
-    board: diff < 3
-  };
-}
-
-/* 3 — PIECE VISUALIZATION. The answer is legalMoves(), not a second movement
+/* 2 — PIECE VISUALIZATION. The answer is legalMoves(), not a second movement
    table — which is the point: a drill that disagreed with the game about where
    a bishop goes would be teaching the wrong board.
 
@@ -12413,7 +12441,7 @@ function prMakeVision(diff){
   return null;
 }
 
-/* 4 — PIECE TRACKING. One side moves and the other stands still: the exercise
+/* 3 — PIECE TRACKING. One side moves and the other stands still: the exercise
    is following a piece, not playing a game, and alternating would put half the
    sequence on men the player was never asked to watch. Every move in the walk
    still comes out of legalMoves() in the position it is played in, and moves
@@ -12465,7 +12493,7 @@ function prMakeTrack(diff){
   return null;
 }
 
-/* 5 — POSITION MEMORY. A legal position, a few seconds to look at it, and then
+/* 4 — POSITION MEMORY. A legal position, a few seconds to look at it, and then
    one question about it with the men gone. Beginners get four to six men on
    purpose: a full board memorised badly teaches nothing. */
 function prMakeMemory(diff){
@@ -12483,7 +12511,7 @@ function prMakeMemory(diff){
   return null;
 }
 
-/* 6 — BLINDFOLD SEQUENCE. A position, then moves the player only reads, then a
+/* 5 — BLINDFOLD SEQUENCE. A position, then moves the player only reads, then a
    question about the position those moves make. The moves are generated by
    playing them: legalMoves() in the position, one of them chosen, makeMove()
    applied — never by assembling notation and hoping. */
@@ -12596,13 +12624,14 @@ function prMakeMini(diff){
 }
 
 /* PR_MODES names five drills today; the generators above still answer to
-   seven keys, because prMakeColor and prMakeSequence are not gone, only
-   unreachable from the dashboard until Tasks 9 and 14 give Square Colour and
-   Blindfold Sequence entries of their own. Until then PR_MAKE maps the five
-   live keys onto the old generators, each fed a recipe rather than a bare
-   difficulty number. */
+   six keys, because prMakeSequence is not gone, only unreachable from the
+   dashboard until Task 14 gives Blindfold Sequence an entry of its own. Square
+   Trainer's generator reads its whole recipe — `kinds`, `board`, `labels`,
+   `flash`, `timed`, `flipped` — rather than a bare difficulty number, because
+   a level is what question it offers as much as how hard it is; the rest
+   still take `r.level` alone. */
 const PR_MAKE = {
-  square: r => prMakeCoord(r.level), piece: r => prMakeVision(r.level),
+  square: r => prMakeSquare(r), piece: r => prMakeVision(r.level),
   tracker: r => prMakeTrack(r.level), hold: r => prMakeMemory(r.level),
   progressive: r => prMakeMini(r.level)
 };
@@ -12713,8 +12742,13 @@ function prScore(ok, err){
 /* The drills whose answer is a single fact worth no lingering over: a right
    answer moves straight on, a wrong one waits so the correction can be read.
    Holding a position never auto-advances — comparing the board you imagined
-   with the one that was there is most of what it teaches. */
-const PR_BRISK = { square:1, piece:1, tracker:1 };
+   with the one that was there is most of what it teaches. `lines` is not a
+   PR_MODES key yet — Task 14 gives Blindfold Sequence its own dashboard entry
+   — but the drill it will name reads the same way, one fact at a time, so its
+   place here is set in advance rather than revisited when it arrives. Move
+   Tracker no longer auto-advances: a tracked walk is read back the way a
+   rebuilt position is, not rattled through the way a single square is. */
+const PR_BRISK = { square:1, piece:1, lines:1 };
 
 function prJudge(ok, say, extraCtl, err){
   if (PR.answered) return;
@@ -12768,8 +12802,7 @@ function prPresent(){
   PR.shownAt = prNow();
   document.getElementById('prSkill').textContent = PR.mode.skill;
   switch (q.kind){
-    case 'coord':    return prShowCoord(q);
-    case 'color':    return prShowColor(q);
+    case 'square':   return prShowSquare(q);
     case 'vision':   return prShowVision(q);
     case 'track':    return prShowTrack(q);
     case 'memory':   return prShowMemory(q);
@@ -12777,74 +12810,59 @@ function prPresent(){
   }
 }
 
-/* ---- 1: coordinates ---- */
-function prShowCoord(q){
-  prBoardOn(true);
-  prLayout(q.flipped, q.labels);
-  prClearPieces();
-  prMarksClear();
-  prMen(true);
-  if (q.findIt){
-    prQ('Find <b>' + sqName(q.sq) + '</b>');
-    prSub('Click it on the board.');
-    PR.click = i => prAnswerCoordFind(i);
-  } else {
-    prMark(q.sq, 'pr-target');
-    prQ('Which square is lit?');
-    prSub('Type its name — the file letter, then the rank number.');
-    prAnsInput('e4', 2, inp => prAnswerCoordName(inp));
+/* ---- 1: squares ---- */
+/* Square Trainer's own five presenters, one `ask` each, sharing one `judge`
+   so every one of them scores, sounds and advances the same way — the thing
+   that differs from question to question is what counts as an answer, never
+   what happens once it is given. `prSquareWhy` is the one explanation with
+   five shapes, read off `q.ask` exactly as `judge` is. */
+function prShowSquare(q){
+  prBoardOn(q.board);
+  if (q.board){ prLayout(q.flipped, q.labels); prMen(false); prClearPieces(); prMarksClear(); }
+  const name = sqName(q.sq);
+  const judge = (ok, err) => prJudge(ok, ok ? 'Yes — <b>' + name + '</b>.' : prSquareWhy(q), [], err || 'square');
+  const arm = () => {
+    PR.shownAt = prNow();
+    if (q.timed) prTimer(() => { if (!PR.answered) judge(false); }, q.timed);
+  };
+  if (q.ask === 'find'){
+    prQ('Click <b>' + name + '</b>.');
+    PR.click = i => { prMarksClear(); prMark(q.sq, 'pr-right'); if (i !== q.sq) prMark(i, 'pr-wrong'); judge(i === q.sq); };
+    arm(); return;
   }
-}
-function prAnswerCoordFind(i){
-  const q = PR.q, ok = i === q.sq;
-  prMarksClear();
-  if (!ok) prMark(i, 'pr-wrong');
-  prMark(q.sq, 'pr-right');
-  prJudge(ok,
-    ok ? 'Yes — that is <b>' + sqName(q.sq) + '</b>.'
-       : 'That was <b>' + sqName(i) + '</b>. <b>' + sqName(q.sq) + '</b> is the square in green.');
-}
-function prAnswerCoordName(inp){
-  const said = (inp.value || '').trim().toLowerCase();
-  if (!/^[a-h][1-8]$/.test(said)){
-    inp.classList.add('bad');
-    prTimer(() => inp.classList.remove('bad'), 380);
-    prSay('A file letter a–h and a rank number 1–8 — <b>e4</b>, say.', 'told');
+  if (q.ask === 'name'){
+    const show = () => { prMarksClear(); prMark(q.sq, 'pr-target'); };
+    show();
+    prQ('Which square is lit?');
+    const takeName = inp => { const said = inp.value.trim().toLowerCase(); prMarksClear(); prMark(q.sq, 'pr-right'); judge(said === name); };
+    if (q.flash){ prTimer(() => { prMarksClear(); prBoardOn(false); prAnsInput('e.g. e4', 2, takeName); arm(); }, q.flash); }
+    else { prAnsInput('e.g. e4', 2, takeName); arm(); }
     return;
   }
-  const q = PR.q, ok = said === sqName(q.sq);
-  prMarksClear();
-  prMark(q.sq, ok ? 'pr-right' : 'pr-wrong');
-  prJudge(ok,
-    ok ? 'Yes — <b>' + sqName(q.sq) + '</b>.'
-       : 'That was <b>' + sqName(q.sq) + '</b>, not <b>' + said + '</b>.');
+  if (q.ask === 'colour'){
+    if (q.flash){ prMarksClear(); prMark(q.sq, 'pr-target'); prTimer(() => prBoardOn(false), q.flash); }
+    prQ('Is <b>' + name + '</b> light or dark?');
+    prAnsButton('Light', () => judge(!q.dark)); prAnsButton('Dark', () => judge(q.dark));
+    arm(); return;
+  }
+  if (q.ask === 'neighbour'){
+    prQ('Which square is directly <b>' + q.dir + '</b> ' + name + '? (White’s view.)');
+    prAnsInput('e.g. e5', 2, inp => judge(inp.value.trim().toLowerCase() === sqName(q.answer)));
+    arm(); return;
+  }
+  prQ('Which quarter of the board holds <b>' + name + '</b>?');
+  for (const k of ['a8','h8','a1','h1']) prAnsButton(PR_QUADRANT_NAME[k], () => judge(k === q.answer));
+  arm();
+}
+function prSquareWhy(q){
+  const name = sqName(q.sq);
+  if (q.ask === 'colour') return prColourWhy(q.sq);
+  if (q.ask === 'neighbour') return 'From <b>' + name + '</b>, ' + q.dir + ' is <b>' + sqName(q.answer) + '</b>: same ' + (q.dir === 'above' || q.dir === 'below' ? 'file, next rank' : 'rank, next file') + '.';
+  if (q.ask === 'quadrant') return name + ' is file ' + (colOf(q.sq) + 1) + ', rank ' + (8 - rowOf(q.sq)) + ' — ' + PR_QUADRANT_NAME[q.answer] + '.';
+  return 'It is <b>' + name + '</b>: file <b>' + FILES[colOf(q.sq)] + '</b>, rank <b>' + (8 - rowOf(q.sq)) + '</b>.';
 }
 
-/* ---- 2: square colour ---- */
-function prShowColor(q){
-  prBoardOn(q.board);
-  prLayout(false, q.labels);
-  prClearPieces();
-  prMarksClear();
-  prMen(true);
-  prQ('Is <b>' + sqName(q.sq) + '</b> a light square or a dark one?');
-  prSub(q.board ? 'Answer before you go looking for it.'
-                : 'No board this time — work it out from the name.');
-  prAnsButton('Light', () => prAnswerColor(false));
-  prAnsButton('Dark',  () => prAnswerColor(true));
-}
-function prAnswerColor(saidDark){
-  const q = PR.q, ok = saidDark === q.dark;
-  prBoardOn(true);                       // hidden or not, the answer is shown on the board
-  prLayout(false, true);
-  prMarksClear();
-  prMark(q.sq, ok ? 'pr-right' : 'pr-wrong');
-  prJudge(ok,
-    (ok ? 'Yes. ' : '<b>' + sqName(q.sq) + '</b> is ' + (q.dark ? 'dark' : 'light') + '. ') +
-    prColourWhy(q.sq));
-}
-
-/* ---- 3: piece visualization ---- */
+/* ---- 2: piece visualization ---- */
 function prShowVision(q){
   prBoardOn(true);
   prLayout(false, true);
@@ -12883,7 +12901,7 @@ function prAnswerVision(){
          'The full answer is <b>' + names + '</b>.');
 }
 
-/* ---- 4: piece tracking ---- */
+/* ---- 3: piece tracking ---- */
 function prShowTrack(q){
   prBoardOn(true);
   prLayout(false, true);
@@ -12944,7 +12962,7 @@ function prTrackReveal(q){
   prTimer(step, 420);
 }
 
-/* ---- 5: position memory ---- */
+/* ---- 4: position memory ---- */
 function prShowMemory(q){
   prBoardOn(true);
   prLayout(false, true);
@@ -12981,7 +12999,7 @@ function prRevealPosition(st){
   prSub('The position as it actually stood.');
 }
 
-/* ---- 6: blindfold sequence ---- */
+/* ---- 5: blindfold sequence ---- */
 function prShowSequence(q){
   prBoardOn(true);
   prLayout(false, true);
