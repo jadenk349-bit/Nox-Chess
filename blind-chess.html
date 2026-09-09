@@ -10519,7 +10519,14 @@ function lsnHandoffStep(L){
       LSN.st = lsnEmpty(); LSN.mode = 'sighted';
       lsnUnder([{ label:'Train this in Practice', cls:'primary wide',
                   on(){ goPractice({ mode:L.train.mode, level:L.train.level }); } }]);
-      lsnSay('Or press Continue for the next lesson.', 'tip');
+      /* The other way on is named by whatever that button actually reads —
+         lsnNextLabel(), the same call lsnPaint makes to write it. The handoff
+         is always the LAST step of its lesson, so the button is never the
+         plain "Continue" this line used to promise: it says Next Lesson for
+         one to nine and Finish the Course for ten, where there is no next
+         lesson to send anybody to at all. A card that names a button nobody
+         can find is the mistake lsnNoteFirstGame is careful not to make. */
+      lsnSay('Or press <b>' + lsnNextLabel(L.n, true) + '</b> when you are ready.', 'tip');
     }
   };
 }
@@ -10903,6 +10910,14 @@ function lsnResetStep(){
   if (frame) frame.style.display = '';
 }
 
+/* What the way-on button reads. A function rather than three strings inline
+   because it is said twice: on the button, and in the handoff card's own line
+   about the button (lsnHandoffStep). Two copies of it is how the card comes to
+   name a button that is not there. */
+function lsnNextLabel(n, last){
+  return !last ? 'Continue' : n === LESSONS.length ? 'Finish the Course' : 'Next Lesson';
+}
+
 /** The card's chrome: what the step says, and which ways on are open. */
 function lsnPaint(){
   const s = LSN.steps[LSN.step];
@@ -10913,9 +10928,7 @@ function lsnPaint(){
 
   const last = LSN.step === LSN.steps.length - 1;
   const next = document.getElementById('lsnNext');
-  next.textContent = !last ? 'Continue'
-                   : LSN.n === LESSONS.length ? 'Finish the Course'
-                   : 'Next Lesson';
+  next.textContent = lsnNextLabel(LSN.n, last);
   const blocked = !!s.gate && !LSN.ok;
   next.disabled = blocked;
   next.classList.toggle('ready', !blocked && !!s.gate);
