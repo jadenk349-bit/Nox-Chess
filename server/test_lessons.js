@@ -1141,6 +1141,68 @@ async function walk(p, n){
   g.lsnOpen(5, 7);
   check('lesson 5 ends on the handoff', !!g.LSN.steps[7].handoff);
 
+  head('What a Move Leaves Behind: the change step, a demo, then After the Move’s four questions in order');
+  g.lsnOpen(6, 0);
+  check('seven steps: the change step, a demo, four after-the-move questions, and the handoff',
+        g.LSN.steps.length === 7, g.LSN.steps.length);
+  check('step 1 is the change step, judged the changed way',
+        g.LSN.steps[0].title === 'What changed?' && g.LSN.steps[0].solve === 'changed',
+        g.LSN.steps[0].title + ' / ' + g.LSN.steps[0].solve);
+  g.lsnOpen(6, 1);
+  check('step 2 is the two-things-change demo, and gates nothing',
+        g.LSN.steps[1].title === 'Two things change' && g.LSN.steps[1].solve === 'none' &&
+        g.by('lsnNext').disabled === false,
+        g.LSN.steps[1].title);
+  const afterTitles = g.LSN.steps.slice(2, 6).map(st => st.title);
+  check('steps 3–6 are all After the Move questions',
+        afterTitles.every(t => t === 'What did that move change?'), afterTitles.join(' | '));
+  const afterSolves = g.LSN.steps.slice(2, 6).map(st => st.solve);
+  check('and in the brief’s own kind order — vacated, attacks, hanging, check',
+        afterSolves.join(',') === 'changed,attacks,loose,choices', afterSolves.join(','));
+  g.lsnOpen(6, 6);
+  check('lesson 6 ends on the handoff', !!g.LSN.steps[6].handoff);
+
+  head('Captures and Counting: a demo, two capture walks, a demo, then two exchanges');
+  g.lsnOpen(7, 0);
+  check('seven steps: a demo, two capture-sequence steps, a demo, two exchange steps, and the handoff',
+        g.LSN.steps.length === 7, g.LSN.steps.length);
+  check('step 1 is the capture-is-a-removal demo, and gates nothing',
+        g.LSN.steps[0].title === 'A capture is a removal and a move' && g.LSN.steps[0].solve === 'none' &&
+        g.by('lsnNext').disabled === false,
+        g.LSN.steps[0].title);
+  const captureTitles = g.LSN.steps.slice(1, 3).map(st => st.title);
+  const captureSolves = g.LSN.steps.slice(1, 3).map(st => st.solve);
+  check('steps 2–3 are both capture-sequence steps',
+        captureTitles.every(t => t === 'Track the captures') && captureSolves.every(s => s === 'choices'),
+        captureTitles.join(' | '));
+  g.lsnOpen(7, 3);
+  check('step 4 is the counting-an-exchange demo, and gates nothing',
+        g.LSN.steps[3].title === 'Counting an exchange' && g.LSN.steps[3].solve === 'none' &&
+        g.by('lsnNext').disabled === false,
+        g.LSN.steps[3].title);
+  const exchangeTitles = g.LSN.steps.slice(4, 6).map(st => st.title);
+  const exchangeSolves = g.LSN.steps.slice(4, 6).map(st => st.solve);
+  check('steps 5–6 are both exchange steps',
+        exchangeTitles.every(t => t === 'Count the exchange') && exchangeSolves.every(s => s === 'choices'),
+        exchangeTitles.join(' | '));
+  // lsnStepExchange does not expose the level its question was built at (`q`
+  // is closed over, not stored on the step), so the two are told apart the
+  // way the brief allows when that is so: by what the level actually built —
+  // 2 kings, the man already on the fought-over square, and `att`+`def` more
+  // — level 1 (att:2, def:1) seats 6 men in all, level 2 (att:2, def:2)
+  // seats 7, so the level really did change between the two calls rather
+  // than the same question being asked twice.
+  g.lsnOpen(7, 4);
+  const exchangeMen4 = g.LSN.st.b.filter(Boolean).length;
+  g.lsnOpen(7, 5);
+  const exchangeMen5 = g.LSN.st.b.filter(Boolean).length;
+  check('the first exchange is built at level 1 (6 men: 2 kings, the occupant, 2 attackers, 1 defender)',
+        exchangeMen4 === 6, exchangeMen4);
+  check('the second is built at level 2, one defender more (7 men)',
+        exchangeMen5 === 7, exchangeMen5);
+  g.lsnOpen(7, 6);
+  check('lesson 7 ends on the handoff', !!g.LSN.steps[6].handoff);
+
   head('Playing Without the Pieces says the position out loud');
   for (let i = 0; i < CHALLENGES.length; i++){
     g.lsnOpen(10, i);
