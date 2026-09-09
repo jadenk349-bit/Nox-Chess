@@ -1572,13 +1572,14 @@ SOCIAL.
 
 The two biggest of those carry sub-banners, and one suite is anchored to where
 a section starts and stops. THE LESSONS runs through THE LESSON BOARD, THE
-STAGE, THE GENERATORS, THE FIVE and four banners named for the tasks that
-built the step factories under them (TASK 30a, 31, 32, 33). Several of those
-headings are stale and worth not trusting: the course is ten lessons rather
-than five, and a TASK banner says when a batch of step kinds arrived rather
-than what it holds — read the factories, not the heading. The same goes for
-THE SIX DRILLS — generation inside PRACTICE, which generates eleven. PRACTICE
-runs from its own banner through that one, RUNNING A DRILL, PROGRESSIVE
+STAGE, THE GENERATORS, THE TEN LESSONS and four banners named for the lessons
+whose step factories sit under them (THE STEP KINDS LESSONS 1–3 ARE BUILT OUT
+OF, and the three that lessons 4 and 5, 6 and 7, and 8 and 9 add). Those
+headings used to be named after the tasks that built them — THE FIVE for a
+course that is ten lessons long, TASK 30a/31/32/33 for batches of step kinds,
+THE SIX DRILLS for eleven — and each now says what it holds, so the heading
+can be read instead of counted past. PRACTICE runs from its own banner through
+THE ELEVEN DRILLS — generation, RUNNING A DRILL, PROGRESSIVE
 BLINDFOLD, A SESSION, START TO FINISH and THE DASHBOARD, and ends where
 SCREENS begins: `test_practice_flow.js` lifts exactly that span, so anything
 Practice needs at top level has to live inside it.

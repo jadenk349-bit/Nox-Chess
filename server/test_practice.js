@@ -277,6 +277,20 @@ head('Lines & Routes');
   }
   ok('every level generates and re-derives', bad, 0);
   ok('all four question kinds appear', Object.keys(kinds).length, 4);
+
+  // The rung captioned "Blockers" is the only one that sets `blockers`, and it
+  // has to mean it: a `reach` question with a clear line is the question the
+  // level before it already asked. (This used to be a coin flip inside
+  // prMakeLines, so the level shipped without a blocker half the time.)
+  var lv6 = 0, clear = 0;
+  for (var t2 = 0; t2 < 200; t2++){
+    var q6 = prMakeLines(prRecipe('lines', 6));
+    if (!q6) continue;
+    lv6++;
+    if (q6.ask !== 'reach' || q6.blocker < 0) clear++;
+  }
+  ok('level 6 deals a question at all', lv6 > 0, true);
+  ok('and every one of them puts something in the way', clear, 0);
 })();
 
 /* ============================================================

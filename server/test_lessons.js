@@ -85,9 +85,9 @@ const forms = NOTATION.map(i => i.san).join(' ');
  * this checks the shape rather than the fixed list above: a regenerated
  * ten that dropped, say, the disambiguated move but kept Nbd2's neighbour
  * would still pass the literal-string check and would still be a course
- * that never taught the form. Task 30's brief: if any of the four is
- * missing, a duplicated form in LSN_NOTATION should be swapped for it — as
- * it stands, all four are already covered by the existing ten. */
+ * that never taught the form. The rule the ten were written to: if any of
+ * the four is missing, a duplicated form in LSN_NOTATION should be swapped
+ * for it — as it stands, all four are already covered by the existing ten. */
 check('LSN_NOTATION teaches a capture', NOTATION.some(i => i.san.indexOf('x') >= 0),
       NOTATION.map(i => i.san).join(' '));
 check('LSN_NOTATION teaches a castle', NOTATION.some(i => i.san === 'O-O'),
@@ -228,14 +228,15 @@ function makePage(store){
     '\n__expose({ G, LSN, LESSONS, el, showScreen, lsnEnter, lsnHub, lsnOpen, lsnNext, lsnBack,' +
     ' lsnDone, lsnReach, lsnSqEls, lsnVisual, lsnPositionHTML, lsnGauge, legalMoves, toSAN, sqName, sqIndex,' +
     ' stateFromFEN, parseMoveIn, MODE_NAME, PR, PR_MODES, goPractice, prLoad, resetChoices,' +
-    // Task 30a: the seven new step factories, and the helpers a harness that
+    // Lessons 1–3: the seven step factories they are built out of, and the
+    // helpers a harness that
     // builds a step itself — rather than reading it off a lesson body — needs
     // to feed them the same kind of question Practice would
     // (prMakeSquare/prMakeLines/prRecipe), to open a step the way lsnShow
     // does without a lesson around it (lsnResetStep/lsnPaint/lsnRender), and
     // to check an answer the way the page itself would (lineBetween() for a
     // select-many, quadrantOf()/knightRoute()/linesThrough() for the demo
-    // boards in Task 30b's lsnLesson1/lsnLesson2 that light a square's
+    // boards in lsnLesson1/lsnLesson2 that light a square's
     // quarter, a knight's reach, or a rank/file/diagonal without asking a
     // question about it). kingSq/inCheck are not needed here: page state is
     // plain data, so tools/page_chess.js's C already judges it, exactly as
@@ -243,17 +244,17 @@ function makePage(store){
     ' lsnStepDemo, lsnStepColour, lsnStepQuadrant, lsnStepBetween, lsnStepDiagPick,' +
     ' lsnStepKnight, lsnStepTypeMove, lsnKnightBoard, lsnResetStep, lsnPaint, lsnRender,' +
     ' prMakeSquare, prMakeLines, prRecipe, lineBetween, quadrantOf, knightRoute, linesThrough,' +
-    // Task 31: the five step kinds lessons 4 and 5 add, and the two more
+    // Lessons 4 and 5: the five step kinds they add, and the two more
     // Practice generators they are built from (prMakeAttack, prMakeHold) —
-    // same reasoning as Task 30a's list above, plus rebuildDiff() and
+    // same reasoning as the lessons 1–3 list above, plus rebuildDiff() and
     // PR_PALETTE, which the rebuild solver needs to judge and to find a
     // palette button by the man it places rather than by reading the step's
     // own `truth`.
     ' lsnStepAttackYesNo, lsnStepHanging, lsnStepCluster, lsnStepRebuild,' +
     ' prMakeAttack, prMakeHold, rebuildDiff, PR_PALETTE,' +
-    // Task 32: the four step kinds lessons 6 and 7 add, and the three more
+    // Lessons 6 and 7: the four step kinds they add, and the three more
     // Practice generators they are built from (prMakeAfter, prMakeTracker,
-    // prMakeForcing) — same reasoning as Task 30a's and Task 31's lists
+    // prMakeForcing) — same reasoning as the two lists
     // above. prAttacked/prHanging/prMan are what the harness's own solvers
     // for `attacks` and `loose` (see solveStep below) ask the page itself
     // for the true answer, rather than reading it off the step; prRecipe is
@@ -263,7 +264,7 @@ function makePage(store){
     ' lsnStepChange, lsnStepAfter, lsnStepCaptureSeq, lsnStepExchange,' +
     ' prMakeAfter, prMakeTracker, prMakeForcing, prAttacked, prHanging, prMan,' +
     ' prForcingMaterialLabel, prForcingLineHTML,' +
-    // Task 33: the four step kinds lessons 8 and 9 add, and the two more
+    // Lessons 8 and 9: the four step kinds they add, and the two more
     // Practice generators they are built from (prMakeCalc, prMakeBranches) —
     // same reasoning as every banner above. kingSq is what the harness's own
     // 'multi' solver (see solveStep below) asks independently for the true
@@ -272,7 +273,7 @@ function makePage(store){
     // through, exactly as a learner rebuilding from the score would.
     ' lsnStepCheckThree, lsnStepRecover, lsnStepMate1, lsnStepLineThenRoot, lsnRebuildUI,' +
     ' prMakeCalc, prMakeBranches, kingSq, newState, makeMove,' +
-    // Task 34: lesson 10's own mini game. lsnStepMiniGame() builds its own
+    // Lesson 10: its own mini game. lsnStepMiniGame() builds its own
     // position from prMakeProgressive() every time it is called and there is
     // no way to hand it one — legalMoves/kingSq above are what the harness
     // already asks the page for the true answer with, and lsnPieceEls is
@@ -324,7 +325,7 @@ async function solveStep(p, budget){
     return false;
   };
 
-  // Task 30a's seven step kinds each carry `solve`, the tag their factory
+  // Lessons 1–3's seven step kinds each carry `solve`, the tag their factory
   // sets in blind-chess.html, and are answered by the strategy that tag
   // names rather than by the generic loop below — which predates `solve`
   // and still carries every step that has never set it (the drills, the
@@ -335,13 +336,14 @@ async function solveStep(p, budget){
   // being able to catch a factory that cannot actually be solved.
   const step = p.LSN.steps[p.LSN.step];
   const kind = step && step.solve;
+  if (kind) solveMet.add(kind);          // for the "no stale strategy" check at the end of the run
   if (kind === 'choices'){
     // press an unanswered, un-disabled choice until the step is ok or none
     // are left to try — right for a single-answer step, and for
     // lsnStepDiagPick's two-of-four it presses every one in turn, which
     // finds both of the right ones by the time the wrong ones are used up.
     //
-    // Task 32 added shapes this loop has to survive rather than give up on:
+    // Lessons 6 and 7 added shapes this loop has to survive rather than give up on:
     // lsnStepCaptureSeq opens on an under button ("Hide the Board") before any
     // choices exist at all, its own choices then do not appear until its walk
     // has finished playing several seconds later, and lsnStepExchange's right
@@ -369,7 +371,7 @@ async function solveStep(p, budget){
     // truly has nothing on it, which is wrong here (the square being asked
     // about is the one empty square on an otherwise full board), and 'square'
     // is already spoken for (lsnDrillClick's own click-a-named-square drill,
-    // Task 30) — so this is its own tag as well as its own strategy: this is
+    // lessons 1–3) — so this is its own tag as well as its own strategy: this is
     // its own brute force: every square, in turn, through LSN.onSquare,
     // until the step is ok. Both factories install `onSquare` after a timed
     // reveal rather than in setup(), so this waits for it to exist before
@@ -518,7 +520,7 @@ async function solveStep(p, budget){
   }
   if (kind === 'multi'){
     // lsnStepCheckThree and lsnStepLineThenRoot are each one step with
-    // several questions inside it, and lsnStepMiniGame (Task 34) is a third:
+    // several questions inside it, and lsnStepMiniGame (lesson 10) is a third:
     // all three swap `LSN.onSquare` between two different jobs as they go —
     // a single click judged on its own (a king or count question, and
     // lsnStepMiniGame's own checkpoint) and a select-then-target pair naming
@@ -702,6 +704,17 @@ function readMovesCard(html){
 // against SOLVE_STRATEGIES/SOLVE_FALLBACK above.
 let stepsSeen = 0, stepsTotal = 0;
 const solveSeen = new Set();
+// Every tag solveStep() actually dispatched on, anywhere in this run — the
+// walk above and the isolated per-factory sections at the bottom both. It is
+// the other half of the containment check below: solveSeen ⊆ SOLVE_KNOWN
+// catches a tag with no strategy, and SOLVE_STRATEGIES ⊆ solveMet catches a
+// strategy nothing on the page still writes. As the course stands the walk
+// alone meets all eleven, so solveSeen would do; the union is what is asserted
+// against anyway, because a factory the course has not yet assembled into a
+// lesson body is still exercised on its own in the isolated sections at the
+// bottom of this file, and its strategy is live even though no walk reaches
+// it. What is not worth keeping is a strategy nothing reaches at all.
+const solveMet = new Set();
 
 /** Walk one lesson end to end, answering everything. */
 async function walk(p, n){
@@ -1585,12 +1598,13 @@ async function walk(p, n){
   })());
 
   /* ============================================================
-   * Task 30a: the seven new step kinds, exercised on their own.
+   * Lessons 1–3: the seven step kinds they are built out of, exercised on
+   * their own.
    *
    * `walk()` (above, in "Every lesson can be walked end to end") and the
    * lesson-shape sections above this one already drive every one of these
    * seven factories for real, through `lsnLesson1()`/`lsnLesson2()`/
-   * `lsnLesson3()` (Task 30b). This section stays anyway, as the one place
+   * `lsnLesson3()`. This section stays anyway, as the one place
    * each kind is checked in isolation, on a question built straight from
    * Practice's own generators rather than whatever a lesson happened to
    * draw: `walk()` proves a lesson finishes, this proves what each kind of
@@ -1617,7 +1631,7 @@ async function walk(p, n){
    * `through` share levels with `reach`/`knight` on some rungs) — so this
    * retries from the outside too, capped rather than looped forever, so a
    * generator that has actually broken fails the suite instead of hanging
-   * it (per the controller notes on Task 30). */
+   * it. */
   function untilQuestion(build, want, label){
     for (let i = 0; i < 200; i++){
       const q = build();
@@ -1831,8 +1845,8 @@ async function walk(p, n){
   }
 
   /* ============================================================
-   * Task 31: the five step kinds lessons 4 and 5 add, exercised on their
-   * own — the same reason Task 30a's section above exists: `walk()` already
+   * Lessons 4 and 5: the five step kinds they add, exercised on their
+   * own — the same reason the lessons 1–3 section above exists: `walk()` already
    * proves each one finishes a real lesson, this proves what each does with
    * a right answer, a wrong one, and the edges the walk never has reason to
    * hit (a click on a man that is not hanging, a rebuild one man short).
@@ -1968,8 +1982,8 @@ async function walk(p, n){
   }
 
   /* ============================================================
-   * Task 32: the four step kinds lessons 6 and 7 add, exercised on their
-   * own — the same reason Task 30a's and Task 31's sections above exist:
+   * Lessons 6 and 7: the four step kinds they add, exercised on their
+   * own — the same reason the two sections above exist:
    * walk() already proves each one finishes a real lesson, this proves what
    * each does with a right answer, a wrong one, and the edges the walk never
    * has reason to hit (a wrong from-square, an extra square picked alongside
@@ -2150,9 +2164,8 @@ async function walk(p, n){
   }
 
   /* ============================================================
-   * Task 33: the four step kinds lessons 8 and 9 add, exercised on their
-   * own — the same reason Tasks 30a's, 31's and 32's own sections above
-   * exist: walk() already proves each one finishes a real lesson, this
+   * Lessons 8 and 9: the four step kinds they add, exercised on their
+   * own — the same reason the three sections above exist: walk() already proves each one finishes a real lesson, this
    * proves what each does with a right answer, a wrong one, and the edges
    * the walk never has reason to hit (a wrong king square, a wrong count, a
    * wrong last move, a non-mating move, a wrong rebuild).
@@ -2351,7 +2364,7 @@ async function walk(p, n){
   }
 
   /* ============================================================
-   * Task 34: lesson 10's own mini game, exercised on its own — the same
+   * Lesson 10: its own mini game, exercised on its own — the same
    * reason every banner above has its own section. walk() and the per-lesson
    * checks earlier already prove the whole course, including this step,
    * finishes; this proves what the step does move by move: any legal move
@@ -2521,6 +2534,20 @@ async function walk(p, n){
     if (!confirmed)
       check('SKIPPED — no deal ending before the checkpoint was confirmed within the cap this run', true);
   }
+
+  /* The other direction, and the last thing this file asks: every strategy
+     solveStep() carries was actually reached by something in this run. The
+     containment check after the walk catches a tag the harness cannot answer;
+     this catches the opposite — a strategy left behind by a step kind the page
+     no longer builds, which would sit here answering nothing and quietly
+     rotting. It is asserted against the union of the walk and the isolated
+     per-factory sections above (solveMet, written by solveStep itself),
+     because a factory the course has not yet assembled into a lesson body is
+     still exercised on its own down here and its strategy is still live. */
+  head('No strategy in this harness answers a step kind that no longer exists');
+  check('every strategy solveStep handles was met somewhere in this run',
+        SOLVE_STRATEGIES.every(k => solveMet.has(k)),
+        SOLVE_STRATEGIES.filter(k => !solveMet.has(k)).join(',') || 'all met');
 
   console.log('\n' + passed + ' passed, ' + failed + ' failed');
   process.exit(failed ? 1 : 0);

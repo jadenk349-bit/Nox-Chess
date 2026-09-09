@@ -1751,8 +1751,8 @@
     display:block; margin-top:5px; font-size:11.5px; letter-spacing:.16em;
     text-transform:uppercase; color:var(--muted);
   }
-  /* Daily Practice (Task 24) rides in the figures row rather than off on its
-     own — one more thing the numbers beside it are evidence for; centred
+  /* Daily Practice rides in the figures row rather than off on its own —
+     one more thing the numbers beside it are evidence for; centred
      rather than stretched, since a button that filled the row's full height
      would read as a fourth stat rather than a thing to press. */
   #prPath .pr-figs button{align-self:center;}
@@ -1848,6 +1848,12 @@
     color:var(--gold-soft); letter-spacing:.06em;
     font-family:var(--font);
   }
+  /* A word of guidance carried inside the question itself — the order to read
+     a position in, or what the level is asking for this time. It rides in
+     .pr-q, which is large and lit, so it says what .pr-sub says one line
+     lower and looks the way .pr-sub looks: smaller, and muted. Inline rather
+     than a block, because both writers put their own <br> beside it. */
+  .pr-hint{font-size:15.5px; line-height:1.6; color:var(--muted);}
   .pr-sub{margin-top:8px; font-size:15.5px; color:var(--muted); line-height:1.6;}
   .pr-sub:empty{display:none;}
   .pr-seq{
@@ -11542,7 +11548,7 @@ function lsnConcede(html){
 }
 
 /* ============================================================
-   THE FIVE
+   THE TEN LESSONS
    ============================================================ */
 
 /** "Play this move" — click the man, then the square. The notation drills and
@@ -11640,15 +11646,15 @@ function lsnCoordSet(total){
 }
 
 /* ============================================================
-   TASK 30a — the seven step kinds lessons 1–3 (and later ones) are built
-   out of, on top of the four above. Every one of them answers the question
-   with the game's own helpers — legalMoves(), parseMoveIn(), the geometry
-   Lines & Routes already reads a position with — never a second copy of
-   what a square, a line or a legal move is, and every one sets `solve`,
-   the tag server/test_lessons.js's dispatcher reads to answer it by brute
-   force rather than by being told. The lesson bodies that assemble these
-   into lessons 1–3 are Task 30b; these seven are complete and exercised on
-   their own in the meantime.
+   THE STEP KINDS LESSONS 1–3 ARE BUILT OUT OF — seven of them, on top of
+   the four above. Every one of them answers the question with the game's own
+   helpers — legalMoves(), parseMoveIn(), the geometry Lines & Routes already
+   reads a position with — never a second copy of what a square, a line or a
+   legal move is, and every one sets `solve`, the tag
+   server/test_lessons.js's dispatcher reads to answer it by brute force
+   rather than by being told. They are also exercised on their own, one
+   factory at a time, rather than only through the lesson bodies that
+   assemble them.
    ============================================================ */
 
 /** A step with nothing to answer: it lights squares, says something, and
@@ -12109,16 +12115,16 @@ function lsnLesson3(){
 }
 
 /* ============================================================
-   TASK 31 — the five step kinds lessons 4 and 5 add on top of Task 30's
-   seven, built from Attack Vision (prMakeAttack) and Hold the Position
+   THE STEP KINDS LESSONS 4 AND 5 ADD — five of them, on top of the seven
+   above, built from Attack Vision (prMakeAttack) and Hold the Position
    (prMakeHold) exactly as the seven before them are built from Square
    Trainer and Lines & Routes: the "make" function is Practice's own, never
    copied, and every judgement below is the game's own rule (attackersOf(),
-   see(), rebuildDiff()) asked again rather than reinvented. `lsnStepOpeningHold`
-   in the brief this task shipped from is not a sixth factory — it names what
-   lsnLesson5 already gets by asking Move Tracker's own lsnDrillTrack(2) for
-   the start position: two plies of a real opening, read with the men hidden,
-   then a question on whatever changed. Nothing new to write for it.
+   see(), rebuildDiff()) asked again rather than reinvented. There is no
+   sixth factory for the opening hold — lsnLesson5 already gets it by asking
+   Move Tracker's own lsnDrillTrack(2) for the start position: two plies of a
+   real opening, read with the men hidden, then a question on whatever
+   changed. Nothing new to write for it.
    ============================================================ */
 
 /** Attack Vision's two yes/no questions — level 1's `attacks` ("does this
@@ -12354,8 +12360,8 @@ function lsnStepRebuild(q){
 }
 
 /* ---- 4 · Reach and Attack ----
-   The reach drills first (Task 30's own lsnDrillReach, one sighted and one
-   blindfolded), then a slider blocked by the first man in its way, then
+   The reach drills first (lsnDrillReach above, one sighted and one blindfolded),
+   then a slider blocked by the first man in its way, then
    Attack Vision's own three questions in the order it introduces them:
    attacks, then defence read as the same line the other way, then hanging —
    attacked and unanswered — as the two combined. */
@@ -12387,7 +12393,7 @@ function lsnLesson4(){
 /* ---- 5 · Holding a Small Position ----
    The position you already own (the start of every game, after two plies of
    it) opens the lesson, then two Move Tracker sequences (lsnStepOpeningHold
-   in the brief this shipped from — see the Task 31 banner above), Fine's own
+   in the brief this shipped from — see the banner above), Fine's own
    order stated in words, two Hold the Position questions asked in that
    order, and one rebuild. */
 function lsnLesson5(){
@@ -12571,8 +12577,8 @@ function lsnStepMiniGame(){
 /* The four demo captions below are trimmed from an earlier draft that ran
    one or three sentences over "No caption runs past two sentences"
    (server/test_lessons.js), the same rule every other lesson's own captions
-   already keep to — Task 33 hit the identical shape in lesson 8 and merged
-   sentences with an em dash rather than dropping the idea, and this does the
+   already keep to — lesson 8 hit the identical shape and merged sentences
+   with an em dash rather than dropping the idea, and this does the
    same, so nothing said is lost, only how many stops it takes to say it. */
 function lsnLesson10(){
   const L = LESSONS[9];
@@ -12588,7 +12594,7 @@ function lsnLesson10(){
 }
 
 /* ============================================================
-   TASK 32 — the four step kinds lessons 6 and 7 add, built from Hold the
+   THE STEP KINDS LESSONS 6 AND 7 ADD — four of them, built from Hold the
    Position's own `change` mode, After the Move (prMakeAfter) and Forcing
    Lines (prMakeForcing) exactly as the ten before them are built from their
    own Practice generators: the "make" function is Practice's own, never
@@ -12984,11 +12990,11 @@ function lsnLesson7(){
 }
 
 /* ============================================================
-   TASK 33 — the four step kinds lessons 8 and 9 add, built from Move
+   THE STEP KINDS LESSONS 8 AND 9 ADD — four of them, built from Move
    Tracker forced to a longer walk (prMakeTracker), Blind Calculation's own
    mate-in-one (prMakeCalc) and Branches (prMakeBranches) — the same
-   reasoning as Tasks 30a's, 31's and 32's own banners: the "make" function
-   is Practice's own, never copied, and every judgement below is either the
+   reasoning as the three banners above: the "make" function is Practice's
+   own, never copied, and every judgement below is either the
    game's own rules (legalMoves/toSAN, asked again for the true king square,
    the true count, the true last move) or Practice's own generator's answer
    (q.answer, q.branches[i].ask/rootAsk), read rather than reinvented.
@@ -13731,7 +13737,7 @@ const PR_BRANCHES_LEVELS = [
    Declared here rather than beside its own code below because PR_MODES reads
    it by reference, and a `const` is not there to be read before the line that
    makes it. `men` is men *a side*, kings included — `men:0` means the full
-   start position — `peeks` is how many looks the level allows (Task 20 spends
+   start position — `peeks` is how many looks the level allows (pbPeek() spends
    them), `checkEvery` how often it stops to ask what is where, and `target`
    the number of moves that has to be held for the level to count as passed. */
 const PR_PB_LEVELS = [
@@ -13748,8 +13754,8 @@ const PR_PB_LEVELS = [
 ];
 
 /* Each drill, in the order the dashboard lists them. `group` clusters related
-   drills for the dashboard (Task 22); `lesson` is the course step it grows out
-   of. `levels` replaces the old `tiers`/`hard`/`needs`: a mode's levels are a
+   drills for the dashboard; `lesson` is the course step it grows out of.
+   `levels` replaces the old `tiers`/`hard`/`needs`: a mode's levels are a
    recipe ladder, not a difficulty label — what a session is actually worth is
    the level the staircase below settles it on, not a tier picked by hand.
    Progressive Blindfold is the one exception to the staircase, and says so
@@ -14180,7 +14186,7 @@ const PR = {
                        // question-and-answer fields above because a game is not a question
   rb: null,           // a rebuild in progress — target, placed, current pick, stable ids
   lastLine: -1,       // Move Tracker: the opening line asked last, so two similar
-                       // lines never land back to back (Task 14)
+                       // lines never land back to back
   mixed: null,        // Daily Practice: the mode keys this session rotates through in
                        // order, or null for an ordinary single-mode session — PR.mode is
                        // still which one is on screen right now, read off this array by
@@ -14532,7 +14538,7 @@ function prColourWhy(sq){
 }
 
 /* ============================================================
-   THE SIX DRILLS — generation
+   THE ELEVEN DRILLS — generation
    Every one of these returns null rather than something broken, and prMake()
    below retries and then falls back before anything reaches the screen.
    ============================================================ */
@@ -14567,9 +14573,12 @@ function prMakeSquare(r){
    which is what guarantees a line exists between them at all; `through`
    mixes real diagonal squares with off-line decoys so picking every right
    one and no wrong one is a real test; `reach` drops a blocking pawn on the
-   line half the time, since "can it get there" is only interesting once
-   something might be in the way; `knight` is the shortest route BFS finds,
-   capped at four moves so a level-8 question still fits in the head. */
+   line when the level asks for one (`blockers`, which only the rung captioned
+   "Blockers" sets) — a level that promises something in the way and deals a
+   clear line half the time is a level that lied, and "can it get there" with
+   nothing in the way is not the question that rung is asking; `knight` is the
+   shortest route BFS finds, capped at four moves so a level-8 question still
+   fits in the head. */
 function prMakeLines(r){
   const ask = prPick(r.kinds);
   const q = { kind:'lines', ask, board:!!r.board, a:-1, b:-1, answer:null, type:null, blocker:-1, choices:null, mid:!!r.mid };
@@ -14598,14 +14607,22 @@ function prMakeLines(r){
       const b = prPick(pool), between = lineBetween(a, b);
       if (!between || between.length < 1) continue;
       q.a = a; q.b = b; q.type = type;
-      q.blocker = Math.random() < .5 ? prPick(between) : -1;
+      q.blocker = r.blockers ? prPick(between) : -1;
       const board = Array(64).fill(null); if (q.blocker >= 0) board[q.blocker] = mk(W, 'P');
       q.answer = sliderReaches(board, a, b, type); break;
     }
     if (q.a < 0) return null;
   } else {
-    let a, b, route;
-    do { a = prRand(64); b = prRand(64); route = knightRoute(a, b); } while (a === b || route.length - 1 > 4);
+    // capped like the two branches above rather than spun until it lands: a
+    // generator with no way out is the one shape of bug this file's "return
+    // null and let prMake() retry" rule cannot rescue
+    let a = -1, b, route;
+    for (let t = 0; t < 40; t++){
+      const x = prRand(64), y = prRand(64), r2 = knightRoute(x, y);
+      if (x === y || r2.length - 1 > 4) continue;
+      a = x; b = y; route = r2; break;
+    }
+    if (a < 0) return null;
     q.a = a; q.b = b; q.answer = route.length - 1; q.route = route;
     if (q.mid && route.length > 2){
       const wrong = prShuffle(Array.from({ length:64 }, (_, i) => i).filter(i => route.indexOf(i) < 0)).slice(0, 3);
@@ -15073,7 +15090,7 @@ function prMatesIn2(st){
    men that are not pawns and are each either the enemy king, undefended, or
    worth more than the forking piece — a queen forking a defended knight and a
    defended bishop is not winning either of them, and this is a tactics drill,
-   not an attacks-and-defence one. `prAttacked` (Task 12) is what answers "what
+   not an attacks-and-defence one. `prAttacked` is what answers "what
    does the piece on this square hit" without re-deriving it from `pseudoMoves`
    by hand. */
 function prForks(st){
@@ -15600,7 +15617,7 @@ function prScore(ok, err){
     if (PR.streak > PR.best) PR.best = PR.streak;
   } else PR.streak = 0;
   // PR.shownAt is set when the question went up (prPresent, and again by a
-  // presenter that hides the board after a study phase — see Task 13
+  // presenter that hides the board after a study phase — see prShowHold
   // onward); an answer given before anything was ever shown has nothing to
   // time itself against, so latency is left unrecorded rather than guessed.
   prRecord(ok, err, PR.shownAt ? prNow() - PR.shownAt : undefined);
@@ -18349,7 +18366,7 @@ function prStartLevel(key, st){
 /* Starts a session directly, at the level asked for or — left unsaid —
    wherever prStartLevel says this mode should open, with no setup box in
    between. That is what a route into a specific drill (`#practice/tracker`,
-   a resumed link, Task 24's Quick button) needs: the two questions
+   a resumed link, the dashboard's Quick button) needs: the two questions
    prOpenSetup asks are for a player choosing where to begin, not for
    somebody arriving already having chosen — Daily Practice (below) is a
    third such caller, but for a whole rotation of drills rather than one, so
@@ -19009,7 +19026,9 @@ document.getElementById('navPuzzle').onclick = () => { if (GUEST()) toSignUp(); 
 // still the only door into Practice: the end of the course presses that same
 // button rather than growing a second entrance, exactly as it says above.
 document.getElementById('navHowTo').onclick   = () => { beep(700,.09); lsnEnter(); };
-document.getElementById('navPractice').onclick = goPractice;
+// wrapped, not passed: goPractice(target) reads a mode and level off its
+// argument, and a bare handler would hand it the click Event to read them from
+document.getElementById('navPractice').onclick = () => goPractice();
 
 // The three puzzle tracks, each its own ladder of a hundred — and a ladder is
 // a record of what you have solved, which has to belong to somebody. A guest's

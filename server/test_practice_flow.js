@@ -448,10 +448,29 @@ function answerAskWrong(ask){
    test can hold one or miss one on purpose rather than guessing at a glyph
    and hoping. Four shapes, since the checkpoint adds `last` and its own
    whole-side `count` to the two prAskFine hands back. */
+/** What the last move actually was, worked out from the two positions the
+    game itself holds — pb.prevSt is where it was played from and pb.st is
+    where it landed — rather than read off ask.truth. A harness that answered
+    a `last` checkpoint with the checkpoint's own answer would agree with a
+    wrong `truth` as happily as with a right one; this is the same rule
+    test_practice.js's tracker section already follows, and it also keeps
+    pb.sans honest, since the SAN derived here is the one that was logged. */
+function pbTrueLast(){
+  var pb = PR.pb, before = pb.prevSt;
+  var legal = legalMoves(before, before.turn), now = fenOf(pb.st);
+  for (var i = 0; i < legal.length; i++)
+    if (fenOf(makeMove(before, legal[i])) === now){
+      var san = toSAN(before, legal[i], legal);
+      if (san !== pb.sans[pb.sans.length - 1])
+        throw new Error('pb.sans says ' + pb.sans[pb.sans.length - 1] + ', the board says ' + san);
+      return san;
+    }
+  throw new Error('no legal move from pb.prevSt reaches the position on the board');
+}
 function pbAnswerRight(ask){
   if (ask.t === 'where'){ clickSquare(ask.sq); return; }
   if (ask.t === 'count'){ ansButton(String(ask.n)).onclick(); return; }
-  if (ask.t === 'last'){ ansButton(ask.truth).onclick(); return; }
+  if (ask.t === 'last'){ ansButton(pbTrueLast()).onclick(); return; }
   if (!ask.type){ ansButton('Empty square').onclick(); return; }
   var order = ['K','Q','R','B','N','P'];
   prAnsEl.children[(ask.colour === 'w' ? 0 : 6) + order.indexOf(ask.type)].onclick();
@@ -464,9 +483,10 @@ function pbWrongAnswer(ask){
   if (ask.t === 'where') return function(){ clickSquare(elsewhere(ask.sq)); };
   if (ask.t === 'count') return function(){ ansButton(String(ask.n === 0 ? 1 : 0)).onclick(); };
   if (ask.t === 'last'){
+    var truth = pbTrueLast();                 // the board's answer, not the ask's
     for (var k = 0; k < prAnsEl.children.length; k++){
       var b = prAnsEl.children[k];
-      if (b.innerHTML !== ask.truth) return (function(btn){ return function(){ btn.onclick(); }; })(b);
+      if (b.innerHTML !== truth) return (function(btn){ return function(){ btn.onclick(); }; })(b);
     }
     return null;
   }
@@ -522,7 +542,7 @@ head('The dashboard');
   ok('and opens on level one', square.children[3].innerHTML, 'Level 1 · ' + PR_SQUARE_LEVELS[0].cap);
   var squareFoot = square.children[2];
   ok('nothing is ahead of the first group', squareFoot.children.length, 1);
-  // Start and Quick (Task 24) sit together in one actions strip, which is
+  // Start and Daily Practice's Quick sit together in one actions strip, which is
   // the foot's only child once there is no tag ahead of it.
   var squareActions = squareFoot.children[0];
   ok('and its button starts it', squareActions.children[0].textContent, 'Start');
@@ -1898,7 +1918,7 @@ head('Progressive Blindfold: holding a level');
   storage = {};
 })();
 
-// the two handoffs into a real game (Task 21), and the "next level" button
+// the two handoffs into a real game, and the "next level" button
 // that meets them — checked against botTrips from a clean count, so the
 // clicks above must not have spent one already
 head('Progressive Blindfold: the end card');
@@ -2115,7 +2135,7 @@ head('Leaving a drill behind');
 
 head('Practice setup: the first-visit intro and the link back to a lesson');
 (function(){
-  // Move Tracker names lesson 5 (Task 25's own worked example), and a first
+  // Move Tracker names lesson 5, and a first
   // visit is `sessions === 0` on that mode's own record — nothing else about
   // the mode matters here.
   storage = {};
@@ -2383,7 +2403,9 @@ head('Every element the drills reach for is in the page');
      /#screen-game, #screen-practice\{position:relative; padding-left:var\(--rail\)/.test(SRC), true);
   ok('the Practice item in the LESSON menu is no longer marked unbuilt',
      /<button class="menu-btn" id="navPractice">/.test(SRC), true);
-  ok('and it is wired to the page', /navPractice'\)\.onclick = goPractice/.test(SRC), true);
+  // wrapped rather than passed: goPractice(target) reads a mode and a level
+  // off its argument, so a bare `= goPractice` would hand it the click Event
+  ok('and it is wired to the page', /navPractice'\)\.onclick = \(\) => goPractice\(\)/.test(SRC), true);
 })();
 
 
