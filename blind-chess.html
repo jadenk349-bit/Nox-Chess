@@ -4833,7 +4833,9 @@
     <div class="row pr-done-btns">
       <button class="primary" id="prAgain">Practice Again</button>
       <button class="ghost" id="prAnother">Choose Another Exercise</button>
-      <button class="ghost" id="prBlindGame" style="display:none">Play a Blindfold Game</button>
+      <button class="ghost" id="prNextLevel" style="display:none">Next level</button>
+      <button class="ghost" id="prBoardGame" style="display:none">Play a See the Board game</button>
+      <button class="ghost" id="prBlindGame" style="display:none">Play a real one</button>
       <button class="ghost" id="prToLessons">Back to Lessons</button>
     </div>
   </div>
@@ -13085,10 +13087,20 @@ function prExchangeLine(st, sq){
    away with: nothing here steers the random kings onto a line the exchange
    will open, so `r.check` is asking for a coincidence, and eighty draws left
    it missing about one draw in twenty-five — rare enough to pass by hand and
-   common enough to flake a hundred-draw suite. Two hundred measures at zero
-   in three thousand. */
+   common enough to flake a hundred-draw suite. Two hundred was enough for
+   every level but the one that actually asks for a check
+   (`PR_FORCING_LEVELS[3]`, the only built level with `check:true`): nothing
+   here steers a capture toward the enemy king either, so most trials never
+   give one and are thrown away below regardless of how many attackers and
+   defenders were asked for, and two hundred still missed about one draw in
+   two thousand — rare enough to pass by hand and, over a 30-draw suite run
+   at that level, still common enough to flake it roughly one run in sixty.
+   `r.check` alone gets a thousand tries, which measured at zero misses over
+   3000 consecutive calls; every other level keeps the two hundred that
+   already covers it, rather than every level paying for the one recipe that
+   needs more. */
 function prMakeForcing(r){
-  for (let t = 0; t < 200; t++){
+  for (let t = 0, tries = r.check ? 1000 : 200; t < tries; t++){
     let st, sq;
     if (r.realistic){
       st = prGamePosition(14 + prRand(14));
@@ -15873,7 +15885,16 @@ function prFinish(note){
     d.innerHTML = cap + '<b>' + val + '</b>';
     rows.appendChild(d);
   };
-  if (pb) row('Moves played', pb.played + ' / ' + pb.r.target);
+  if (pb){
+    row('Moves played', pb.played + ' / ' + pb.r.target);
+    // a whole game is one answer to the staircase (prScore is called once, in
+    // pbEnd), so Accuracy and Best streak below are not what this session was
+    // worth — these four are, and they are the same four kept per level above
+    row('Checkpoints held', pb.checksOk + ' / ' + pb.checks);
+    row('Peeks used', pb.r.peeks === Infinity ? 0 : pb.r.peeks - pb.peeks);
+    row('Recoveries', pb.recoveries);
+    row('Drifts', pb.drifts);
+  }
   row('Accuracy', PR.right + ' / ' + PR.i + (PR.i ? '  ·  ' + Math.round(acc * 100) + '%' : ''));
   row('Best streak', PR.best);
   row('Skill practised', PR.mode.skill);
@@ -15889,9 +15910,16 @@ function prFinish(note){
   tip.innerHTML = text || 'Steady work. Pick whichever drill you fancy next.';
 
   document.getElementById('prDoneTitle').textContent = 'Practice Complete';
-  // Finishing the whole ladder is the one result that leads somewhere else on
-  // the site — into the game setup that already exists. Task 21 rewrites what
-  // this button offers; until then it is the top rung, held, that earns it.
+  // Progressive Blindfold is the one drill whose result card points somewhere
+  // else on the site rather than back at itself: a held level earns the next
+  // one, and the harder visions it unlocks along the way earn an actual game
+  // in that vision — the bridge the drill's own description promises. Every
+  // other mode's session shows none of the three, because none of them ends
+  // anywhere but back on the dashboard.
+  document.getElementById('prNextLevel').style.display =
+    pb && pb.pass && PR.level < PR_PB_LEVELS.length ? '' : 'none';
+  document.getElementById('prBoardGame').style.display =
+    pb && PR.level >= 7 ? '' : 'none';
   document.getElementById('prBlindGame').style.display =
     pb && pb.pass && PR.level >= PR_PB_LEVELS.length ? '' : 'none';
   document.getElementById('prDoneOverlay').classList.add('show');
@@ -16050,13 +16078,27 @@ document.getElementById('prToLessons').onclick = () => {
   document.getElementById('prDoneOverlay').classList.remove('show');
   showScreen('home');
 };
-/* Straight into the game setup that already exists — a blindfold game against
-   the engine, with the vision it earned already chosen. No second setup, no
-   second matchmaker. */
+/* Held a level with more still ahead of it: straight back into the drill, one
+   rung up, at the same length just finished. There is no setup box for this
+   — a level a player has just earned is not a question to ask them again. */
+document.getElementById('prNextLevel').onclick = () => {
+  document.getElementById('prDoneOverlay').classList.remove('show');
+  prOpen('progressive', PR.level + 1, 5);
+};
+/* Straight into the game setup that already exists — a real game in the
+   vision Progressive Blindfold just proved out, with the rung and clock it
+   is worth already chosen. No second setup, no second matchmaker. */
+document.getElementById('prBoardGame').onclick = () => {
+  document.getElementById('prDoneOverlay').classList.remove('show');
+  goBot();
+  selectMode('blind');
+  prSuggestFirstBlindGame();
+};
 document.getElementById('prBlindGame').onclick = () => {
   document.getElementById('prDoneOverlay').classList.remove('show');
   goBot();
   selectMode('total');
+  prSuggestFirstBlindGame();
 };
 
 document.getElementById('prRestart').onclick = () => prBegin();
@@ -16878,21 +16920,44 @@ function enterGameSetup(){
 }
 document.getElementById('btnStart').onclick     = startGame;   // room host form
 document.getElementById('btnStartGame').onclick = startGame;   // beside the board
+/* The two setters behind the bot setup's own buttons, named so that
+   something other than a click — Progressive Blindfold's handoff into a real
+   game (prSuggestFirstBlindGame, below) — can choose for the player without
+   reaching into the DOM to fake one. Everything the buttons themselves did
+   stays here and only here: a guest steered off the top rung, the vision
+   buttons kept in sync, the ranked increment dropped in favour of a flat
+   clock. */
+function pickBotLevel(level){
+  // the top rung is the one an account buys; the rest of the ladder is open
+  if (GUEST() && level === 3200) return toSignUp();
+  G.level = level; chosen.level = true; syncOptions();
+}
+function pickBotTime(minutes){
+  // every clock on this screen is a flat one, so choosing here drops the
+  // increment a ranked game may have left behind
+  G.minutes = minutes; G.inc = 0; chosen.minutes = true; syncOptions();
+}
 document.querySelectorAll('[data-level]').forEach(b => {
-  b.onclick = () => {
-    // the top rung is the one an account buys; the rest of the ladder is open
-    if (GUEST() && +b.dataset.level === 3200) return toSignUp();
-    G.level = +b.dataset.level; chosen.level = true; syncOptions();
-  };
+  b.onclick = () => pickBotLevel(+b.dataset.level);
 });
 document.querySelectorAll('[data-side]').forEach(b => {
   b.onclick = () => { G.human = b.dataset.side; chosen.side = true; syncOptions(); };
 });
 document.querySelectorAll('[data-time]').forEach(b => {
-  // every clock on this screen is a flat one, so choosing here drops the
-  // increment a ranked game may have left behind
-  b.onclick = () => { G.minutes = +b.dataset.time; G.inc = 0; chosen.minutes = true; syncOptions(); };
+  b.onclick = () => pickBotTime(+b.dataset.time);
 });
+/* Progressive Blindfold's handoff into a real game does not want a setup box
+   asking twice what the drill just answered: the strongest bot on the ladder
+   below the top rung an account buys, and the slowest clock on offer, so the
+   game it lands on is a real test of what was just held rather than a blitz
+   mismatch. Reads the same setters the setup's own buttons call — see
+   pickBotLevel/pickBotTime above — rather than writing G.level/G.minutes
+   directly, so a rule that changes there (the guest ceiling, syncOptions)
+   changes here too. */
+function prSuggestFirstBlindGame(){
+  pickBotLevel(1000);
+  pickBotTime(30);
+}
 
 /* ---- the ranked screen ----
    A rating is the whole point of the page, so it leads with the badge that

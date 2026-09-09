@@ -195,6 +195,12 @@ function showScreen(n){ screens.push(n); }
 function navSync(){}                       // the history layer lives outside the section
 function goBot(){ botTrips++; }
 function selectMode(m){ visionsPicked.push(m); }
+// prSuggestFirstBlindGame lives in the SCREENS section, outside the PRACTICE
+// block this suite lifts — it picks the bot's rung and clock through that
+// screen's own setters, which this harness has none of, so it is stubbed
+// exactly as goBot and selectMode are: the two handoffs it rides along with
+// are what this suite checks, not what it itself does to the DOM.
+function prSuggestFirstBlindGame(){}
 // lsnDone() lives in the LESSONS section, outside the block this suite lifts;
 // prStartLevel asks it by name (guarded by typeof, since a page with no
 // LESSONS section loaded — this one — must not throw), so it is faked here.
@@ -1751,11 +1757,27 @@ head('Progressive Blindfold: holding a level');
   pbEnd('You held it.');
   ok('it counts as held', PR.pb.pass, true);
   ok('and the ladder stops at ten', prLoad().modes.progressive.level, 10);
-  ok('finishing it offers a blindfold game', byId.prBlindGame.style.display, '');
+  storage = {};
+})();
+
+// the two handoffs into a real game (Task 21), and the "next level" button
+// that meets them — checked against botTrips from a clean count, so the
+// clicks above must not have spent one already
+head('Progressive Blindfold: the end card');
+(function(){
+  storage = {};
+  prOpen('progressive', 10, 5);
+  PR.pb.played = PR.pb.r.target; pbEnd('done');
+  ok('level 10 passed offers a real game', byId.prBlindGame.style.display, '');
   byId.prBlindGame.onclick();
-  ok('which goes to the setup that already exists', botTrips, 1);
-  ok('with complete blindfold chosen', visionsPicked[visionsPicked.length - 1], 'total');
+  ok('which goes to the bot setup', botTrips, 1);
+  ok('with Complete Blindfold chosen', visionsPicked[visionsPicked.length - 1], 'total');
   ok('and the result box closed behind it', byId.prDoneOverlay.classList.contains('show'), false);
+  prOpen('progressive', 7, 5);
+  PR.pb.played = PR.pb.r.target; pbEnd('done');
+  ok('level 7 offers a See the Board game', byId.prBoardGame.style.display, '');
+  byId.prBoardGame.onclick();
+  ok('with the empty-board vision chosen', visionsPicked[visionsPicked.length - 1], 'blind');
   storage = {};
 })();
 
