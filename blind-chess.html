@@ -12002,6 +12002,8 @@ const PR = {
   best: 0,
   played: 0,          // progressive challenge only: player moves made
   q: null,            // the question on screen
+  shownAt: 0,         // prNow() when the question currently on screen went up,
+                       // for the latency prRecord keeps — 0 means "don't know"
   answered: false,
   flipped: false,
   click: null,        // what a click on a square means right now — null for nothing
@@ -12571,28 +12573,71 @@ function prStatsRender(){
   document.getElementById('prBar').style.width = Math.round(Math.min(1, Math.max(0, done)) * 100) + '%';
 }
 
+/* What a wrong answer was wrong about, kept by name rather than folded into
+   one wrong-answer count — a "lost the thread" miss on the tracker and a
+   square named one file over are not the same failure, and a player (or a
+   later drill picking on their weak spot) needs to tell them apart. Anything
+   that is not one of the first three lands under 'other' rather than being
+   refused, since a caller that passes nothing, or something this list has
+   never heard of, is still one wrong answer and still worth counting. */
+const PR_ERRS = ['square','ghost','lost','other'];
+
 /* One answer, counted. Written to storage as it happens rather than at the end
    of the session, so a reload mid-drill keeps what was actually answered — the
-   session count is the only thing that waits for the session to finish. */
-function prRecord(ok){
+   session count is the only thing that waits for the session to finish.
+   Per-mode `stats` grows three things beyond the plain asked/correct tally: an
+   error kept by kind (`errs`), the level it was answered at (`lv`, its own
+   asked/correct so accuracy can be read per rung rather than only for the
+   session's current one) and how long it took (`lat`, the last twenty
+   latencies — twenty because a running median only needs to be roughly
+   current, and keeping every answer ever given would make this the largest
+   thing in the record for no question it answers). `ply` is the deepest
+   line a mode with a `q.ply` (tracker, forcing, calc) has been answered
+   right on — "clear to ply N" the player can be told, and only a correct
+   answer moves it, since a wrong one proves nothing about how far they got. */
+function prRecord(ok, err, latMs){
   const st = prLoad();
   st.asked++;
-  st.modes[PR.mode.key].asked++;
+  const m = st.modes[PR.mode.key];
+  m.asked++;
   if (ok){
     st.correct++;
-    st.modes[PR.mode.key].correct++;
+    m.correct++;
   }
+  const s = m.stats;
+  s.errs = s.errs || { square:0, ghost:0, lost:0, other:0 };
+  if (!ok) s.errs[PR_ERRS.indexOf(err) >= 0 ? err : 'other']++;
+  s.lv = s.lv || {};
+  const lv = s.lv[String(PR.level)] || (s.lv[String(PR.level)] = { a:0, c:0 });
+  lv.a++;
+  if (ok) lv.c++;
+  if (typeof latMs === 'number' && latMs >= 0)
+    s.lat = (s.lat || []).concat([Math.round(latMs)]).slice(-20);
+  if (ok && PR.q && PR.q.ply > (s.ply || 0)) s.ply = PR.q.ply;
   prSave(st);
 }
 
-function prScore(ok){
+/* The middle of the last-twenty latencies — a median rather than a mean so
+   one very slow answer (a phone call, a hesitation) doesn't drag the number
+   the player sees around; null with nothing recorded yet rather than 0,
+   which would read as instant. */
+function prMedianLat(m){
+  const a = (m.stats.lat || []).slice().sort((x, y) => x - y);
+  return a.length ? a[a.length >> 1] : null;
+}
+
+function prScore(ok, err){
   PR.i++;
   if (ok){
     PR.right++;
     PR.streak++;
     if (PR.streak > PR.best) PR.best = PR.streak;
   } else PR.streak = 0;
-  prRecord(ok);
+  // PR.shownAt is set when the question went up (prPresent, and again by a
+  // presenter that hides the board after a study phase — see Task 13
+  // onward); an answer given before anything was ever shown has nothing to
+  // time itself against, so latency is left unrecorded rather than guessed.
+  prRecord(ok, err, PR.shownAt ? prNow() - PR.shownAt : undefined);
   prStep(ok);
   prStatsRender();
 }
@@ -12603,13 +12648,13 @@ function prScore(ok){
    with the one that was there is most of what it teaches. */
 const PR_BRISK = { square:1, piece:1, tracker:1 };
 
-function prJudge(ok, say, extraCtl){
+function prJudge(ok, say, extraCtl, err){
   if (PR.answered) return;
   PR.answered = true;
   PR.click = null;
   PR.onSubmit = null;
   prAnsClear();
-  prScore(ok);
+  prScore(ok, err);
   prSay(say, ok ? 'right' : 'wrong');
   if (ok) beep(760, .09); else beep(190, .16, 'sine', .09);
 
@@ -12652,6 +12697,7 @@ function prNextQuestion(){
 /* ---- putting a question on screen ---- */
 function prPresent(){
   const q = PR.q;
+  PR.shownAt = prNow();
   document.getElementById('prSkill').textContent = PR.mode.skill;
   switch (q.kind){
     case 'coord':    return prShowCoord(q);

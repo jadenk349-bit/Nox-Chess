@@ -77,7 +77,8 @@ var DECLS = ['VAL','FILES','rowOf','colOf','SQNAME','uciOf','sqName','sqIndex','
              'OPENING_BOOK','OPENING_LINES',
              'PR_MODES','PR_MINUTES','PR_STORE','PR_VERSION','PR_V1_KEYS','PR_SEEN_MAX',
              'prKey','prAcc','prSeenKey',
-             'PR','PR_STEP_UP','PR_STEP_DOWN','prRand','prPick','prSide','prMan','PR_MAKE','W'];
+             'PR','PR_STEP_UP','PR_STEP_DOWN','prRand','prPick','prSide','prMan','PR_MAKE','W',
+             'PR_ERRS'];
 var FNS = ['startBoard','newState','cloneState','fenOf','stateFromFEN',
            'slide','step','addPawn','pseudoMoves','isAttacked','kingSq','inCheck',
            'makeMove','legalMoves','toSAN','attackersOf','defendersOf','see',
@@ -89,7 +90,7 @@ var FNS = ['startBoard','newState','cloneState','fenOf','stateFromFEN',
            'prShuffle','prPosition','prMaterial','prColourWhy',
            'prMakeCoord','prMakeColor','prMakeVision','prMakeTrack','prMakeMemory',
            'prPickMove','prAskAbout','prMakeSequence','prMakeMini','prRecipe','prMake',
-           'prRecord','prScore','prStep','prNow','prTimeLeft','prRecommend'];
+           'prRecord','prScore','prStep','prNow','prTimeLeft','prRecommend','prMedianLat'];
 
 var bundle = [grab(/\nconst W = 'w', B = 'b';/, "const W/B")];
 for (var d = 0; d < DECLS.length; d++) if (DECLS[d] !== 'W') bundle.push(decl(DECLS[d]));
@@ -741,6 +742,27 @@ head('Geometry helpers');
   ok('rebuildDiff: one wrong', d.wrong.length, 1);
   ok('rebuildDiff: one missing', d.missing.length, 1);
   ok('e4 is in the h1 quarter', quadrantOf(e4), 'h1');
+})();
+
+/* ============================================================
+   13 — error types and latency in the record
+   ============================================================ */
+head('Error types and latency');
+(function(){
+  storage = {};
+  PR.mode = PR_MODE.tracker; PR.level = 4; PR.shownAt = 0;
+  prRecord(false, 'ghost', 1200);
+  prRecord(true, null, 800);
+  var m = prLoad().modes.tracker;
+  ok('a ghost-piece error is counted by name', m.stats.errs.ghost, 1);
+  ok('per-level accuracy is kept', m.stats.lv['4'].a === 2 && m.stats.lv['4'].c === 1, true);
+  ok('latency samples are kept', m.stats.lat.length, 2);
+  for (var i = 0; i < 30; i++) prRecord(true, null, 500);
+  ok('but only the last twenty', prLoad().modes.tracker.stats.lat.length, 20);
+  ok('median latency reads back', prMedianLat(prLoad().modes.tracker), 500);
+  PR.q = { ply:6 }; prRecord(true, null, 400);
+  ok('a right answer on a six-ply question sets the ply depth', prLoad().modes.tracker.stats.ply, 6);
+  PR.q = null;
 })();
 
 say('\n' + passed + ' passed, ' + failed + ' failed\n');
