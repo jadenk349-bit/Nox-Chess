@@ -11222,7 +11222,6 @@ function lsnPiecePos(type){
    from anywhere else. The book is a preference, not a rule: when none of it is
    available the highest-scoring legal move wins, and one of the top few is
    taken at random so the same sequence does not come round twice. */
-const LSN_BOOK = OPENING_BOOK;                         // one book, see CONSTANTS & HELPERS
 function lsnBookMove(st, ply){ return bookMove(st, ply, lsnRand); }
 
 /* ---- the three drills, each usable on its own ---- */
