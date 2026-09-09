@@ -11962,15 +11962,42 @@ const PR_HOLD_LEVELS = [
   { cap:'Twelve men, four seconds',          men:12, study:4000, modes:['change','rebuild'], realistic:true }
 ];
 
+/* Move Tracker's own ladder — declared ahead of PR_MODES for the same reason
+   the other five are. The opening levels come early on purpose: the start
+   position is the one template everybody already owns (Tisdall, Soltis), so
+   two plies of a real opening are easier to hold than a walk over six men
+   drawn out of a hat, and the Blindfold Sequence drill that used to ask for
+   exactly that is these levels rather than a seventh card. `start` is where
+   the walk begins, `sides` whether the other side answers or stands still,
+   `captures` how many men must come off, `aid` whether the square a move
+   leaves is lit, `fromTo` whether a move is read out as "b1-c3" rather than
+   as notation, `whole` whether the moves arrive one at a time or all at
+   once, `checkEvery` how often the read-out stops to ask whether the player
+   is still with it, and `asks` what may be asked at the end. */
+const PR_TRACKER_LEVELS = [
+  { cap:'One piece, two moves, the from-square lit', start:'random', pieces:1, plies:2,  sides:'one',  captures:0, aid:true,  fromTo:true,  asks:['where'] },
+  { cap:'The aid removed',                            start:'random', pieces:1, plies:2,  sides:'one',  captures:0, aid:false, fromTo:true,  asks:['where'] },
+  { cap:'The start position, two plies',              start:'opening', plies:2, sides:'both', captures:0, asks:['where','what'] },
+  { cap:'The start position, four plies',             start:'opening', plies:4, sides:'both', captures:0, asks:['where','what'] },
+  { cap:'A small position, captures',                 start:'random', pieces:3, plies:4,  sides:'both', captures:1, asks:['captured','what','count'] },
+  { cap:'Six plies with captures, count the men',     start:'random', pieces:3, plies:6,  sides:'both', captures:1, asks:['captured','count','where'] },
+  { cap:'Checkpoints every three plies',              start:'random', pieces:4, plies:8,  sides:'both', captures:1, checkEvery:3, asks:['where','what','count'] },
+  { cap:'Pawns, promotion, castling, checks',         start:'opening', plies:8, sides:'both', captures:1, checkEvery:3, promo:true, asks:['where','what','captured'] },
+  { cap:'The start position, ten plies, whole list',  start:'opening', plies:10, sides:'both', captures:0, whole:true, checkEvery:0, asks:['where','what','count'] },
+  { cap:'Fourteen plies',                             start:'opening', plies:14, sides:'both', captures:1, whole:true, checkEvery:0, asks:['where','what','count'] },
+  { cap:'Twenty plies, checkpoints every six',        start:'opening', plies:20, sides:'both', captures:2, whole:true, checkEvery:6, asks:['where','what','count'] },
+  { cap:'Twenty plies, then rebuild it',              start:'opening', plies:20, sides:'both', captures:2, whole:true, checkEvery:6, asks:['rebuild'] }
+];
+
 /* Each drill, in the order the dashboard lists them. `group` clusters related
    drills for the dashboard (Task 22); `lesson` is the course step it grows out
    of. `levels` replaces the old `tiers`/`hard`/`needs`: a mode's levels are a
    recipe ladder, not a difficulty label — what a session is actually worth is
    the level the staircase below settles it on, not a tier picked by hand.
-   Square Trainer's and Lines & Routes' ladders are the real thing (above);
-   the rest are still provisional captions so the page runs, and `prMake`
-   calls through today's generators (PR_MAKE) until later phases give the
-   blindfold-sequence drill an entry of its own. */
+   Six of the seven ladders above are the real thing; Progressive Blindfold
+   is still a provisional caption so the page runs, and `prMake` calls
+   through today's generator (PR_MAKE) until a later phase gives it a recipe
+   of its own. */
 const PR_MODES = [
   { key:'square', name:'Square Trainer', group:'board', skill:'Squares', lesson:1,
     desc:'Name, find and colour squares from either chair — the alphabet of the board.',
@@ -11986,7 +12013,7 @@ const PR_MODES = [
     levels: PR_ATTACK_LEVELS },
   { key:'tracker', name:'Move Tracker', group:'holding', skill:'Tracking', lesson:5,
     desc:'Follow moves you never see, and say where things stand.',
-    levels:[{cap:'One piece, two moves'},{cap:'Longer, with captures'},{cap:'Two pieces, five moves'}] },
+    levels: PR_TRACKER_LEVELS },
   { key:'hold', name:'Hold the Position', group:'holding', skill:'Holding', lesson:5,
     desc:'A small position, studied, then answered for with the men hidden.',
     levels: PR_HOLD_LEVELS },
@@ -12689,77 +12716,10 @@ function prMakeAttack(r){
   return null;
 }
 
-/* 3 — PIECE TRACKING. One side moves and the other stands still: the exercise
-   is following a piece, not playing a game, and alternating would put half the
-   sequence on men the player was never asked to watch. Every move in the walk
-   still comes out of legalMoves() in the position it is played in, and moves
-   that leave the enemy king attacked are dropped — a frozen side cannot be in
-   check, and that is also what keeps a king out of the capture list. */
-function prMakeTrack(diff){
-  const pieces = diff >= 3 ? 2 : 1;
-  const steps  = diff <= 1 ? 2 : diff === 2 ? 3 + prRand(2) : 5;
-  const shapes = diff <= 1 ? ['N','B','R'] : ['N','B','R','Q'];
-  const enemy  = diff <= 1 ? 0 : diff === 2 ? 2 + prRand(2) : 3 + prRand(2);
+/* 3 — MOVE TRACKER. Moves the player reads but never sees, and a question
+   about where things stand once they have all been played.
 
-  for (let t = 0; t < 60; t++){
-    const bag = shapes.slice(), types = [];
-    for (let k = 0; k < pieces; k++) types.push(bag.splice(prRand(bag.length), 1)[0]);
-    const counts = types.map(ty => [W, ty]);
-    for (let k = 0; k < enemy; k++) counts.push([B, prPick(['P','P','N','B','R'])]);
-
-    const built = prPosition(counts);
-    if (!built) continue;
-    let st = built.st;
-    const ids = types.map((ty, k) => st.b[built.at[k]].id);
-    const frames = [st.b.slice()];
-    const path = [];
-    let ok = true;
-    for (let k = 0; k < steps; k++){
-      st.turn = W;
-      const all = legalMoves(st, W);
-      const mine = all.filter(m => ids.indexOf(m.p.id) >= 0 && !inCheck(makeMove(st, m), B));
-      if (!mine.length){ ok = false; break; }
-      const m = prPick(mine);
-      path.push({ san: toSAN(st, m, all), from: m.from, to: m.to, id: m.p.id });
-      st = makeMove(st, m);
-      st.turn = W;                     // the frozen side never gets its turn
-      frames.push(st.b.slice());
-    }
-    if (!ok) continue;
-
-    const which = prRand(pieces);
-    const askId = ids[which];
-    if (!path.some(s => s.id === askId)) continue;   // a piece that never moved is not a question
-    let end = -1;
-    for (let i = 0; i < 64; i++){ const p = st.b[i]; if (p && p.id === askId) end = i; }
-    if (end < 0) continue;
-    return {
-      kind:'track', frames, path, ids, types, askType: types[which], askId, end,
-      startAt: built.at.slice(0, pieces)
-    };
-  }
-  return null;
-}
-
-/* Move Tracker's own ladder (Task 14), built beside prMakeTrack rather than in
-   place of it: the drill still runs on the old generator (PR_MAKE.tracker,
-   PR_MODES.tracker.levels) until the presenter that reads this richer shape is
-   ready, so nothing here is reachable from the dashboard yet. */
-const PR_TRACKER_LEVELS = [
-  { cap:'One piece, two moves, the from-square lit', start:'random', pieces:1, plies:2,  sides:'one',  captures:0, aid:true,  fromTo:true,  asks:['where'] },
-  { cap:'The aid removed',                            start:'random', pieces:1, plies:2,  sides:'one',  captures:0, aid:false, fromTo:true,  asks:['where'] },
-  { cap:'The start position, two plies',              start:'opening', plies:2, sides:'both', captures:0, asks:['where','what'] },
-  { cap:'The start position, four plies',             start:'opening', plies:4, sides:'both', captures:0, asks:['where','what'] },
-  { cap:'A small position, captures',                 start:'random', pieces:3, plies:4,  sides:'both', captures:1, asks:['captured','what','count'] },
-  { cap:'Six plies with captures, count the men',     start:'random', pieces:3, plies:6,  sides:'both', captures:1, asks:['captured','count','where'] },
-  { cap:'Checkpoints every three plies',              start:'random', pieces:4, plies:8,  sides:'both', captures:1, checkEvery:3, asks:['where','what','count'] },
-  { cap:'Pawns, promotion, castling, checks',         start:'opening', plies:8, sides:'both', captures:1, checkEvery:3, promo:true, asks:['where','what','captured'] },
-  { cap:'The start position, ten plies, whole list',  start:'opening', plies:10, sides:'both', captures:0, whole:true, checkEvery:0, asks:['where','what','count'] },
-  { cap:'Fourteen plies',                              start:'opening', plies:14, sides:'both', captures:1, whole:true, checkEvery:0, asks:['where','what','count'] },
-  { cap:'Twenty plies, checkpoints every six',        start:'opening', plies:20, sides:'both', captures:2, whole:true, checkEvery:6, asks:['where','what','count'] },
-  { cap:'Twenty plies, then rebuild it',              start:'opening', plies:20, sides:'both', captures:2, whole:true, checkEvery:6, asks:['rebuild'] }
-];
-/* Every walk is played, never assembled: legalMoves() in the position, one of
+   Every walk is played, never assembled: legalMoves() in the position, one of
    them chosen, makeMove() applied. The opening levels come first on purpose —
    the start position is the one template everybody already owns (Tisdall,
    Soltis), so a real opening is easier to hold than six random men. */
@@ -12957,40 +12917,6 @@ function prMakeHold(r){
   return null;
 }
 
-/* 5 — BLINDFOLD SEQUENCE. A position, then moves the player only reads, then a
-   question about the position those moves make. The moves are generated by
-   playing them: legalMoves() in the position, one of them chosen, makeMove()
-   applied — never by assembling notation and hoping. */
-function prMakeSequence(diff){
-  const plies = diff <= 1 ? 2 : diff === 2 ? 4 : 6 + 2 * prRand(2);
-  for (let t = 0; t < 30; t++){
-    let fromStart = true;
-    let st = newState();
-    if (diff >= 3 && Math.random() < .5){
-      const built = prPosition(prMaterial(8 + prRand(5)));
-      if (!built) continue;
-      st = built.st;
-      fromStart = false;
-    }
-    const start = st;
-    const sans = [];
-    let ok = true;
-    for (let k = 0; k < plies; k++){
-      const all = legalMoves(st, st.turn);
-      if (!all.length){ ok = false; break; }
-      const m = prPickMove(st, all);
-      sans.push(toSAN(st, m, all));
-      st = makeMove(st, m);
-    }
-    if (!ok) continue;
-    if (!legalMoves(st, st.turn).length) continue;   // never finish on mate or stalemate
-    const ask = prAskAbout(st, diff >= 3);
-    if (!ask) continue;
-    return { kind:'sequence', start, end: st, sans, ask, fromStart, study: diff <= 1 ? 5000 : 6500 };
-  }
-  return null;
-}
-
 /* Legal is the only requirement, but a line of legal nonsense is hard to hold
    in the head for reasons that have nothing to do with visualisation. Moves
    that simply hand a piece over are set aside when there is anything else to
@@ -13069,17 +12995,17 @@ function prMakeMini(diff){
   return null;
 }
 
-/* PR_MODES names seven drills today; the generators above still answer to
-   eight keys, because prMakeSequence is not gone, only unreachable from the
-   dashboard until Task 14 gives Blindfold Sequence an entry of its own. Square
-   Trainer, Lines & Routes, Attack Vision and Hold the Position read their
-   whole recipe — `kinds`/`modes` and whatever else their own ladder carries —
-   rather than a bare difficulty number, because a level is what question it
-   offers as much as how hard it is; the rest still take `r.level` alone. */
+/* One generator per drill PR_MODES names, and no key that names nothing:
+   Blindfold Sequence used to have a generator here with no card of its own,
+   and it is now the tracker's opening levels rather than an eighth entry.
+   Every drill but Progressive Blindfold reads its whole recipe — `kinds`,
+   `modes`, `asks` and whatever else its own ladder carries — rather than a
+   bare difficulty number, because a level is what question it offers as much
+   as how hard it is; the mini challenge still takes `r.level` alone. */
 const PR_MAKE = {
   square: r => prMakeSquare(r), lines: r => prMakeLines(r), piece: r => prMakePiece(r),
   attack: r => prMakeAttack(r),
-  tracker: r => prMakeTrack(r.level), hold: r => prMakeHold(r),
+  tracker: r => prMakeTracker(r), hold: r => prMakeHold(r),
   progressive: r => prMakeMini(r.level)
 };
 
@@ -13188,13 +13114,10 @@ function prScore(ok, err){
 
 /* The drills whose answer is a single fact worth no lingering over: a right
    answer moves straight on, a wrong one waits so the correction can be read.
-   Holding a position never auto-advances — comparing the board you imagined
-   with the one that was there is most of what it teaches. `lines` is not a
-   PR_MODES key yet — Task 14 gives Blindfold Sequence its own dashboard entry
-   — but the drill it will name reads the same way, one fact at a time, so its
-   place here is set in advance rather than revisited when it arrives. Move
-   Tracker no longer auto-advances: a tracked walk is read back the way a
-   rebuilt position is, not rattled through the way a single square is. */
+   Holding a position never auto-advances — comparing the board you held
+   against the one that was there is most of what it teaches. Move Tracker
+   does not either: a walk is read back the way a rebuilt position is, not
+   rattled through the way a single square is. */
 const PR_BRISK = { square:1, piece:1, lines:1 };
 
 function prJudge(ok, say, extraCtl, err){
@@ -13253,9 +13176,8 @@ function prPresent(){
     case 'lines':    return prShowLines(q);
     case 'piece':    return prShowPiece(q);
     case 'attack':   return prShowAttack(q);
-    case 'track':    return prShowTrack(q);
+    case 'tracker':  return prShowTracker(q);
     case 'hold':     return prShowHold(q);
-    case 'sequence': return prShowSequence(q);
   }
 }
 
@@ -13818,54 +13740,182 @@ function prAnswerAttackHanging(q, got){
   prJudge(ok, say, [], 'square');
 }
 
-/* ---- 3: piece tracking ---- */
-function prShowTrack(q){
+/* ---- 3: move tracker ---- */
+/** How long one move of the read-out stays up before the next arrives. */
+const PR_TRACKER_BEAT = 1100;
+/** How long the position is shown after a checkpoint has been missed. */
+const PR_TRACKER_SHOW = 1500;
+/* One presenter for every level of the ladder, because they are one drill
+   with pieces of scaffolding taken away rather than twelve exercises: the
+   men are shown and named, Ready hides them, the moves are read out, and a
+   question is asked about where things stand. What a level changes is which
+   of those is made easier — the square a move leaves lit (`aid`), a move
+   read as "b1-c3" rather than as notation (`fromTo`), the whole list at once
+   rather than one at a time (`whole`) — never the shape of the exercise. */
+function prShowTracker(q){
+  const r = q.recipe;
   prBoardOn(true);
   prLayout(false, true);
   prMen(true);
   prPaint(q.frames[0]);
   prMarksClear();
-  for (const sq of q.startAt) prMark(sq, 'pr-from');
-  const who = q.types.map((ty, k) => 'a <b>' + PIECE_NAME[ty] + '</b> on <b>' +
-                                     sqName(q.startAt[k]) + '</b>').join(' and ');
-  prQ('White has ' + who + '.');
-  prSub('Look at where they stand. Press Ready and the men go dark; the moves come after.');
-  prCtl([['Ready', () => prTrackAsk(q), 'primary']]);
+  prSeq('');
+  prQ(r.start === 'opening' ? 'The start position.' : prTrackerMen(q.frames[0]));
+  prSub('Hold where they stand. Press Ready and the men go dark; the moves are read out after.');
+  prCtl([['Ready', () => prTrackerRead(q), 'primary']]);
 }
-function prTrackAsk(q){
+/* The men, named where they stand — the written half of the position the
+   board is about to stop showing, in the same "White: ..., Black: ..." shape
+   the game's own Complete Blindfold list uses. An opening never needs it:
+   "the start position" is the whole description, and spelling out
+   thirty-two men would bury that. */
+function prTrackerMen(board){
+  const by = { w:[], b:[] };
+  for (let i = 0; i < 64; i++){
+    const p = board[i];
+    if (p) by[p.c].push(PIECE_NAME[p.t] + ' on <b>' + sqName(i) + '</b>');
+  }
+  return [W, B].filter(c => by[c].length)
+               .map(c => prSide(c) + ': ' + by[c].join(', '))
+               .join('. ') + '.';
+}
+/* The read-out. A walk both sides play is numbered the way a game is —
+   "1. e4 e5   2. Nf3" — because that is the numbering the player already
+   owns; a one-sided walk has no such pairing, so its plies are numbered one
+   by one. The from-to form ("b1-c3") is the first levels' aid: it names the
+   square left as well as the square reached, so the earliest walks do not
+   ask the player to read notation and hold a position at the same time. */
+function prTrackerLine(steps, r){
+  let out = '';
+  for (let i = 0; i < steps.length; i++){
+    const word = r.fromTo ? steps[i].full : steps[i].san;
+    if (r.sides === 'one'){ out += (i ? '&nbsp; &nbsp;' : '') + '<b>' + (i + 1) + '.</b> ' + word; }
+    else {
+      if (i % 2 === 0) out += (i ? '&nbsp; &nbsp;' : '') + '<b>' + (i / 2 + 1) + '.</b> ';
+      out += word + ' ';
+    }
+  }
+  return out;
+}
+/* Moves arrive one at a time, on a clock, because that is what makes this a
+   tracking drill rather than a reading one: a list sitting on the screen can
+   be re-read, and a player who re-reads it is holding nothing. The late
+   levels (`whole`) hand the whole line over at once on purpose — by then the
+   line is ten to twenty plies and reading it is no longer the easy half.
+
+   `k` is how many plies have been read, which is also the ply a checkpoint
+   names, so the pause is simply "is there a checkpoint at k". The resume is
+   this same `step`, handed to the checkpoint to call — a right answer calls
+   it after a beat, a wrong one after the position has been shown. */
+function prTrackerRead(q){
   prClearTimers();
+  const r = q.recipe;
   prMen(false);
   prMarksClear();
   prCtl([]);
-  prSeq(q.path.map((s, k) => '<b>' + (k + 1) + '.</b> ' + s.san).join('&nbsp; &nbsp;'));
-  prQ('Where does the <b>' + PIECE_NAME[q.askType] + '</b> finish?');
-  prSub('Only White moves; the black men stand still. Click the square you land on.');
-  PR.click = i => prAnswerTrack(i);
+  if (r.whole){
+    // the whole line at once, and straight on to the question — there is no
+    // pacing to do, and the ask writes its own instruction into prSub
+    prSeq(prTrackerLine(q.path, r));
+    prTrackerAsk(q);
+    return;
+  }
+  let k = 0;
+  const step = () => {
+    if (k >= q.path.length){ prTrackerAsk(q); return; }
+    const s = q.path[k];
+    k++;
+    prSeq(prTrackerLine(q.path.slice(0, k), r));
+    prMarksClear();
+    if (r.aid) prMark(s.from, 'pr-from');
+    // written every move rather than once, because a checkpoint puts its own
+    // question in this line and this is what takes the walk back over from it
+    prQ('Follow the moves.');
+    prSub('Move <b>' + k + '</b> of <b>' + q.path.length + '</b>.');
+    const chk = q.checks.filter(c => c.ply === k)[0];
+    prTimer(chk ? () => prTrackerCheck(q, chk, step) : step, PR_TRACKER_BEAT);
+  };
+  step();
 }
-function prAnswerTrack(i){
-  const q = PR.q, ok = i === q.end;
-  prMarksClear();
-  if (!ok) prMark(i, 'pr-wrong');
-  prMark(q.end, 'pr-right');
-  prJudge(ok,
-    ok ? 'Yes — the ' + PIECE_NAME[q.askType] + ' ends on <b>' + sqName(q.end) + '</b>.'
-       : 'It ends on <b>' + sqName(q.end) + '</b>, not <b>' + sqName(i) + '</b>.',
-    [['Reveal the path', () => prTrackReveal(q)]]);
+/* A checkpoint is a place to find out you have lost the thread while there
+   is still something to be done about it — so it is deliberately NOT scored:
+   prJudge is never called, the streak and the staircase never hear about it,
+   and a miss costs the player nothing but the position being shown to them.
+   Scoring it would make the checkpoints the drill, and a player who wanted a
+   score would learn to hope for the levels that have none.
+
+   The answer forms are prAskShow's own, because a checkpoint asks exactly
+   what the drill asks and typing a second set of buttons for it is how the
+   two would come to disagree. What a miss does cost is `drift`, kept on the
+   question so the walk-back and the record can tell "answered wrong at the
+   end" apart from "was already lost three plies in". */
+function prTrackerCheck(q, chk, resume){
+  let done = false;
+  prCtl([]);
+  prAskShow(chk.ask, { b: q.frames[chk.ply] }, [], {
+    heading: 'Checkpoint — ',
+    note: 'Nothing here is scored. It is a place to check you are still with it.',
+    judge: ok => {
+      if (done) return;
+      done = true;
+      PR.click = null;
+      PR.onSubmit = null;
+      prAnsClear();
+      prSay(ok ? 'Still with it.' : 'Not yet — here is where the men actually are.', ok ? 'right' : 'wrong');
+      if (ok){ prTimer(() => { prSay(''); resume(); }, 700); return; }
+      q.drift = (q.drift || 0) + 1;
+      prPaint(q.frames[chk.ply]);
+      prMen(true);
+      prTimer(() => { prMen(false); prMarksClear(); prSay(''); resume(); }, PR_TRACKER_SHOW);
+    }
+  });
 }
-/* The walk, played out square by square. The men are keyed by id, so a piece
-   that moves slides rather than reappearing — which is the whole animation. */
-function prTrackReveal(q){
+/* The question at the end, and the only part of the drill that is scored.
+   PR.shownAt is reset here rather than left where prPresent put it: the
+   latency worth keeping is how long the answer took, and the read-out that
+   came before it is time the drill spent, not time the player did.
+   `where` is the one ask whose wrong answers are worth telling apart, so it
+   is the one that carries an error typer; `captured` needs the men that
+   actually came off, which only the walk knows. */
+function prTrackerAsk(q){
   prClearTimers();
+  prMarksClear();
+  PR.shownAt = prNow();
+  prAskShow(q.ask, q.final, [['Walk it back', () => prTrackerReplay(q)]], {
+    err: q.ask.t === 'where' ? (i => prTrackerErr(q, i)) : null,
+    taken: q.path.filter(s => s.cap).map(s => ({ c:s.capC, t:s.capType })),
+    countTop: 16          // a colour has up to sixteen men, unlike Fine's pawn count
+  });
+}
+/* The walk, played out square by square with the men back. The pieces are
+   keyed by id, so one that moves slides rather than reappearing — which is
+   the whole of the animation, and the reason the frames keep the same piece
+   objects throughout.
+
+   A walk that was lost stops where it was lost. Playing on past that ply
+   would answer a question the player did not get wrong: they held the
+   position perfectly well until the move they missed, and what they need to
+   see is that move, not the twelve after it. */
+function prTrackerReplay(q){
+  prClearTimers();
+  prBoardOn(true);
   prMen(true);
   prPaint(q.frames[0]);
   prMarksClear();
-  for (const sq of q.startAt) prMark(sq, 'pr-from');
+  const stop = q.lostAt > 0 ? q.lostAt : q.path.length;
   let k = 0;
   const step = () => {
-    if (k >= q.path.length){
+    if (k >= stop){
+      if (q.lostAt > 0){
+        prSub('This is the ply you lost it: <b>' + q.path[q.lostAt - 1].san + '</b>.');
+        return;
+      }
       prMarksClear();
-      prMark(q.end, 'pr-right');
-      prSub('That is the path. The ' + PIECE_NAME[q.askType] + ' finishes on <b>' + sqName(q.end) + '</b>.');
+      if (q.end >= 0){
+        prMark(q.end, 'pr-right');
+        prSub('That is the walk. ' + prMan(q.final.b[q.end].c, q.askType) +
+              ' finishes on <b>' + sqName(q.end) + '</b>.');
+      } else prSub('That is the walk.');
       return;
     }
     prPaint(q.frames[k + 1]);
@@ -13972,99 +14022,131 @@ function prRevealPosition(st){
   prSub('The position as it actually stood.');
 }
 
-/* ---- 5: blindfold sequence ---- */
-function prShowSequence(q){
-  prBoardOn(true);
-  prLayout(false, true);
-  prMen(true);
-  prPaint(q.start.b);
-  prMarksClear();
-  prQ(q.fromStart ? 'The usual starting position.' : 'Study this position.');
-  prStudyPhase(q.study, () => {
-    prMen(false);
-    prMarksClear();
-    prSeq(prSanList(q.sans));
-    prAskShow(q.ask, q.end, [['Reveal the position', () => prRevealPosition(q.end)]]);
-  });
-}
-/** "1. e4 e5   2. Nf3 Nc6" — White always has the move in a generated position. */
-function prSanList(sans){
-  let out = '';
-  for (let i = 0; i < sans.length; i++){
-    if (i % 2 === 0) out += (i ? '&nbsp; &nbsp;' : '') + '<b>' + (i / 2 + 1) + '.</b> ';
-    out += sans[i] + ' ';
-  }
-  return out;
-}
+/* ---- asking one question about a position ----
+   `st` is the position the question is about — not every answer needs it,
+   but `captured` does: whether the man picked is still standing is what
+   tells a wrong prisoner from a capture that never happened.
 
-/* ---- asking one question about a position ---- */
-function prAskShow(ask, st, extraCtl){
-  prQ(ask.text);
+   `opts` is what a caller may change about the asking without a second copy
+   of the forms growing somewhere else. `judge` replaces prJudge for an
+   answer that is deliberately not scored (the tracker's checkpoints);
+   `err(i)` is a drill that can say more about a wrong square than "wrong
+   square"; `taken` is the men a `captured` question may offer; `countTop` is
+   how high a count runs, since a colour has up to sixteen men and Fine's
+   pawn count stops at six; and `heading`/`note` are what a caller may put
+   around the two lines this writes — which is why the question and the
+   instruction are built here and written once at the end rather than by each
+   arm as it goes: a caller that had to reach in and overwrite them
+   afterwards would be depending on the order the arms happen to run in. */
+function prAskShow(ask, st, extraCtl, opts){
+  const o = opts || {};
+  let how = '';
   switch (ask.t){
     case 'where':
-      prSub('Click the square it stands on.');
-      PR.click = i => prAnswerWhere(i, ask, extraCtl);
+      how = 'Click the square it stands on.';
+      PR.click = i => prAnswerWhere(i, ask, extraCtl, o);
       break;
     case 'what':
-      prSub('Pick the man — or say the square is empty.');
+      how = 'Pick the man — or say the square is empty.';
       prAnsEl.className = 'pr-ans glyphs';
       for (const c of [W, B])
         for (const ty of ['K','Q','R','B','N','P'])
           prAnsButton('<span class="g-' + c + '">' + pieceHTML(ty) + '</span>',
-                      () => prAnswerWhat(c, ty, ask, extraCtl));
-      prAnsButton('Empty square', () => prAnswerWhat(null, null, ask, extraCtl), 'wide');
+                      () => prAnswerWhat(c, ty, ask, extraCtl, o));
+      prAnsButton('Empty square', () => prAnswerWhat(null, null, ask, extraCtl, o), 'wide');
       break;
-    case 'count':
-      prSub('');
-      for (let n = 0; n <= 6; n++) prAnsButton(String(n), () => prAnswerCount(n, ask, extraCtl));
+    case 'count': {
+      const top = o.countTop || 6;
+      for (let n = 0; n <= top; n++) prAnsButton(String(n), () => prAnswerCount(n, ask, extraCtl, o));
       break;
+    }
     case 'occupied':
-      prSub('');
-      prAnsButton('Yes', () => prAnswerOccupied(true, ask, extraCtl));
-      prAnsButton('No',  () => prAnswerOccupied(false, ask, extraCtl));
+      prAnsButton('Yes', () => prAnswerOccupied(true, ask, extraCtl, o));
+      prAnsButton('No',  () => prAnswerOccupied(false, ask, extraCtl, o));
       break;
+    case 'captured': {
+      // one button per man that actually came off, and "Nothing" — the
+      // question is which of them was last, so a walk with one capture in it
+      // is an easy question and a walk with three is not. Named rather than
+      // drawn as a glyph, because two black knights are one answer here and
+      // the difference between them is nothing the player was asked to hold.
+      how = 'Pick the man that came off — or say nothing did.';
+      const seen = {};
+      for (const m of (o.taken || [])){
+        const name = prMan(m.c, m.t);
+        if (seen[name]) continue;
+        seen[name] = 1;
+        prAnsButton(name, () => prAnswerCaptured(m.c, m.t, ask, st, extraCtl, o), 'wide');
+      }
+      prAnsButton('Nothing', () => prAnswerCaptured(null, null, ask, st, extraCtl, o), 'wide');
+      break;
+    }
     case 'rebuild':
       prRebuildStart(ask.want.map(w => ({ sq:w.sq, c:w.colour, t:w.type })),
         { say: ask.text,
-          done: res => prJudge(res.wrong.length + res.missing.length === 0, 'Rebuilt.', extraCtl, 'square') });
+          done: res => (o.judge || prJudge)(res.wrong.length + res.missing.length === 0, 'Rebuilt.', extraCtl, 'square') });
       break;
   }
-  if (ask.t !== 'rebuild') prCtl(extraCtl || []);
+  // a rebuild writes its own two lines through prRebuildStart, and has its
+  // own Done rather than whatever the caller offered
+  if (ask.t === 'rebuild') return;
+  prQ((o.heading || '') + ask.text);
+  prSub(how + (o.note ? (how ? ' ' : '') + o.note : ''));
+  prCtl(extraCtl || []);
 }
-function prAnswerWhere(i, ask, extra){
+/* The error typer is asked about a wrong click and never about a right one:
+   working out what kind of mistake a square is can mean walking the whole
+   walk (prTrackerErr does), and a right answer has no mistake to name. */
+function prAnswerWhere(i, ask, extra, opts){
+  const o = opts || {};
   const ok = i === ask.sq;
   prMarksClear();
   if (!ok) prMark(i, 'pr-wrong');
   prMark(ask.sq, 'pr-right');
-  prJudge(ok,
+  (o.judge || prJudge)(ok,
     ok ? 'Yes — <b>' + sqName(ask.sq) + '</b>.'
        : prMan(ask.colour, ask.type) + ' was on <b>' + sqName(ask.sq) + '</b>.',
-    extra);
+    extra, ok || !o.err ? undefined : o.err(i));
 }
-function prAnswerWhat(c, ty, ask, extra){
+function prAnswerWhat(c, ty, ask, extra, opts){
   const ok = c === ask.colour && ty === ask.type;
   prMarksClear();
   prMark(ask.sq, ok ? 'pr-right' : 'pr-wrong');
   const truth = ask.type ? prMan(ask.colour, ask.type) : 'nothing at all';
-  prJudge(ok,
+  ((opts || {}).judge || prJudge)(ok,
     ok ? 'Yes — ' + truth + '.'
        : '<b>' + sqName(ask.sq) + '</b> had ' + truth + ' on it.',
     extra);
 }
-function prAnswerCount(n, ask, extra){
+function prAnswerCount(n, ask, extra, opts){
   const ok = n === ask.n;
-  prJudge(ok,
+  ((opts || {}).judge || prJudge)(ok,
     ok ? 'Yes — ' + ask.n + '.'
        : 'There ' + (ask.n === 1 ? 'was one' : 'were ' + ask.n) + '.',
     extra);
 }
-function prAnswerOccupied(said, ask, extra){
+function prAnswerOccupied(said, ask, extra, opts){
   const ok = said === ask.yes;
   prMarksClear();
   prMark(ask.sq, ok ? 'pr-right' : 'pr-wrong');
-  prJudge(ok,
+  ((opts || {}).judge || prJudge)(ok,
     (ok ? 'Yes. ' : 'No. ') + '<b>' + sqName(ask.sq) + '</b> was ' + (ask.yes ? 'occupied' : 'empty') + '.',
     extra);
+}
+/* Naming a man that is still on the board is its own mistake, and gets its
+   own name: the player is holding a capture that never happened, which is
+   the same ghost Hold the Position's `change` question already counts —
+   holding a board that has stopped being true. Naming a man that really did
+   come off, but not the last one, is the ordinary miss. */
+function prAnswerCaptured(c, t, ask, st, extra, opts){
+  const o = opts || {};
+  const said = c ? prMan(c, t) : 'Nothing';
+  const ok = said === ask.truth;
+  const standing = !!c && !!st && st.b.some(p => p && p.c === c && p.t === t);
+  (o.judge || prJudge)(ok,
+    ok ? 'Yes — ' + (ask.truth === 'Nothing' ? 'nothing came off.' : ask.truth + '.')
+       : (ask.truth === 'Nothing' ? 'Nothing came off at all.' : ask.truth + ' was the last man taken.'),
+    extra, ok ? undefined : (standing ? 'ghost' : 'square'));
 }
 /* ============================================================
    THE MINI BLINDFOLD CHALLENGE

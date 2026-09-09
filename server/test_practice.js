@@ -1,9 +1,9 @@
 /* The practice drills, without a browser.
  *
  * Practice is the one part of the page that MAKES chess rather than reading
- * it: it invents positions, movement questions, tracking walks and blindfold
- * sequences on the spot. Everything it invents is claimed to be legal, and a
- * claim like that is worth exactly what checks it. So this suite generates
+ * it: it invents positions, movement questions, tracking walks and the
+ * questions asked about them. Everything it invents is claimed to be legal,
+ * and a claim like that is worth exactly what checks it. So this suite generates
  * hundreds of exercises and re-derives every answer from the move generator
  * itself — the position is rebuilt, the walk is replayed, the notation is read
  * back with the page's own reader, and the answer the drill would have marked
@@ -92,8 +92,8 @@ var FNS = ['startBoard','newState','cloneState','fenOf','stateFromFEN',
            'prShuffle','prPosition','prMaterial','prColourWhy',
            'prMakeSquare','prMakeLines','prMakePiece',
            'prAttacked','prHanging','prPinned','prMakeAttack',
-           'prMakeTrack','prMakeTracker','prTrackerErr',
-           'prPickMove','prAskAbout','prMakeSequence','prMakeMini','prRecipe','prMake',
+           'prMakeTracker','prTrackerErr',
+           'prPickMove','prAskAbout','prMakeMini','prRecipe','prMake',
            'prGamePosition','prCluster','prAskFine','prMakeHold',
            'prRecord','prScore','prStep','prNow','prTimeLeft','prRecommend','prMedianLat',
            'prStartLevel','prOpen','prRebuildStart','prRebuildFinish','prRbPaint','goPractice'];
@@ -356,81 +356,17 @@ head('Attack Vision');
 })();
 
 /* ============================================================
-   4 — piece tracking: the walk replays, move for move
-   ============================================================ */
-head('Piece Tracking walks are legal and land where they say');
-
-(function(){
-  var built = 0, illegal = 0, sanWrong = 0, frameWrong = 0, endWrong = 0, checkGiven = 0;
-  var lens = { 1:[], 2:[], 3:[] }, pieces = { 1:[], 3:[] };
-  for (var diff = 1; diff <= 3; diff++){
-    for (var t = 0; t < 60; t++){
-      var q = prMakeTrack(diff);
-      if (!q) continue;
-      built++;
-      lens[diff].push(q.path.length);
-      if (diff === 1 || diff === 3) pieces[diff].push(q.ids.length);
-
-      // replay it: every step has to be a move the rules offer in the
-      // position it is played in, and has to reproduce the frame after it
-      var st = stateOf(q.frames[0], W);
-      for (var k = 0; k < q.path.length; k++){
-        var all = legalMoves(st, W);
-        var move = null;
-        for (var j = 0; j < all.length; j++)
-          if (all[j].from === q.path[k].from && all[j].to === q.path[k].to) move = all[j];
-        if (!move){ illegal++; break; }
-        if (toSAN(st, move, all) !== q.path[k].san) sanWrong++;
-        st = makeMove(st, move);
-        st.turn = W;                                     // one side moves; the other is frozen
-        if (inCheck(st, 'b')) checkGiven++;              // a frozen side cannot be left in check
-        if (!sameBoard(st.b, q.frames[k + 1])) frameWrong++;
-      }
-      var landed = -1;
-      for (var i = 0; i < 64; i++){ var p = st.b[i]; if (p && p.id === q.askId) landed = i; }
-      if (landed !== q.end) endWrong++;
-    }
-  }
-  ok('every walk built', built, 180);
-  ok('every move in every walk is legal where it is played', illegal, 0);
-  ok('and the notation shown is the notation of that move', sanWrong, 0);
-  ok('each frame is the position after its move', frameWrong, 0);
-  ok('the frozen side is never left in check', checkGiven, 0);
-  ok('the answer really is where the piece ends', endWrong, 0);
-
-  ok('the easiest setting is two moves', lens[1].every(function(n){ return n === 2; }), true);
-  ok('the middle one is three or four', lens[2].every(function(n){ return n >= 3 && n <= 4; }), true);
-  ok('the hardest is five', lens[3].every(function(n){ return n === 5; }), true);
-  ok('one piece to follow at first', pieces[1].every(function(n){ return n === 1; }), true);
-  ok('and two at the end', pieces[3].every(function(n){ return n === 2; }), true);
-})();
-
-(function(){
-  var same = 0, moved = 0;
-  for (var t = 0; t < 120; t++){
-    var q = prMakeTrack(3);
-    if (!q) continue;
-    if (q.types[0] === q.types[1]) same++;              // two of a shape makes the question ambiguous
-    var did = false;
-    for (var k = 0; k < q.path.length; k++) if (q.path[k].id === q.askId) did = true;
-    if (did) moved++;
-  }
-  ok('two tracked pieces are never the same shape', same, 0);
-  ok('and the one asked about always moved', moved > 100, true);
-})();
-
-/* ============================================================
-   Move Tracker (Task 14a): the generator only, run over its own ladder.
-   PR_MODES.tracker.levels still holds the three provisional captions until
-   14b points it at PR_TRACKER_LEVELS and wires prMakeTracker up through
-   prRecipe/PR_MAKE, so this reads the table directly rather than through
-   prRecipe.
+   4 — Move Tracker: every level of the ladder generates a walk that
+   replays, ply for ply, out of the move generator itself — and the
+   question asked at the end of it is true of the position it reaches.
+   The old Piece Tracking and Blindfold Sequence drills are these levels
+   now; nothing they proved is untested, it is proved here instead.
    ============================================================ */
 head('Move Tracker');
 (function(){
   var bad = 0, seenCaps = 0, seenChecks = 0;
   for (var lv = 1; lv <= PR_TRACKER_LEVELS.length; lv++) for (var t = 0; t < 25; t++){
-    var r = Object.assign({level:lv}, PR_TRACKER_LEVELS[lv-1]), q = prMakeTracker(r);
+    var r = prRecipe('tracker', lv), q = prMakeTracker(r);
     if (!q){ bad++; continue; }
     var st = q.start;
     q.path.forEach(function(step, k){
@@ -460,12 +396,66 @@ head('Move Tracker');
   ok('captures happen where asked', seenCaps > 0, true);
   ok('checkpoints appear on the levels that carry them', seenChecks > 0, true);
   // the error typer
-  var q2 = prMakeTracker(Object.assign({level:2}, PR_TRACKER_LEVELS[1]));
+  var q2 = prMakeTracker(prRecipe('tracker', 2));
   ok('a click on an earlier square of the piece is "lost"', prTrackerErr(q2, q2.path[0].from) === 'lost' || q2.path[0].from === q2.end, true);
 })();
 
 /* ============================================================
-   5 — Hold the Position: every level generates a legal, right-sized
+   5 — what a Move Tracker walk is asked about is true of it. The block
+   above proves the walk replays; this one re-derives the answer from the
+   position the replay reaches, for every kind of question the ladder can
+   draw. It is what the old Blindfold Sequence suite proved about its own
+   lines, asked of the levels that replaced it.
+   ============================================================ */
+head('Move Tracker questions are true of the position the walk reaches');
+
+(function(){
+  var bad = 0, kinds = {}, i, p;
+  for (var lv = 1; lv <= PR_TRACKER_LEVELS.length; lv++) for (var t = 0; t < 12; t++){
+    var q = prMakeTracker(prRecipe('tracker', lv));
+    if (!q){ bad++; continue; }
+    kinds[q.ask.t] = (kinds[q.ask.t] || 0) + 1;
+
+    // replay the walk from the position it started in, keeping the captures
+    // this suite saw for itself rather than the ones the record claims
+    var st = cloneState(q.start), taken = [];
+    for (var k = 0; k < q.path.length; k++){
+      var legal = legalMoves(st, st.turn);
+      var m = legal.filter(function(x){ return x.from === q.path[k].from && x.to === q.path[k].to; })[0];
+      if (!m){ bad++; break; }
+      if (st.b[m.to]) taken.push(prMan(st.b[m.to].c, st.b[m.to].t));
+      st = makeMove(st, m);
+      if (q.recipe.sides === 'one') st.turn = q.start.turn;
+    }
+
+    if (q.ask.t === 'where'){
+      p = st.b[q.ask.sq];
+      if (!p || p.id !== q.askId) bad++;                 // named by identity, not by shape
+    } else if (q.ask.t === 'what'){
+      p = st.b[q.ask.sq];
+      if (p ? (p.c !== q.ask.colour || p.t !== q.ask.type)
+            : (q.ask.colour !== null || q.ask.type !== null)) bad++;
+    } else if (q.ask.t === 'count'){
+      var n = 0;
+      for (i = 0; i < 64; i++) if (st.b[i] && st.b[i].c === q.ask.colour) n++;
+      if (n !== q.ask.n) bad++;
+    } else if (q.ask.t === 'captured'){
+      if ((taken.length ? taken[taken.length - 1] : 'Nothing') !== q.ask.truth) bad++;
+    } else if (q.ask.t === 'rebuild'){
+      if (q.ask.want.length !== menOn(st.b)) bad++;
+      q.ask.want.forEach(function(w){
+        var on = st.b[w.sq];
+        if (!on || on.c !== w.c || on.t !== w.t) bad++;
+      });
+    } else bad++;                                        // a kind nothing here can check
+  }
+  ok('every question is true of the position the walk reaches', bad, 0);
+  ok('and all five kinds of question come up', Object.keys(kinds).sort().join(','),
+     'captured,count,rebuild,what,where');
+})();
+
+/* ============================================================
+   6 — Hold the Position: every level generates a legal, right-sized
    position, in one of its three answer modes, and every claim the
    question makes about that position is true of it.
    ============================================================ */
@@ -493,89 +483,6 @@ head('Hold the Position');
   var c = prCluster(g, 6);
   ok('a cluster keeps both kings', kingSq(c, W) >= 0 && kingSq(c, B) >= 0, true);
   ok('and no more men than asked', menOn(c.b) <= 8, true);
-})();
-
-/* Re-derive the answer to a question straight from the board. */
-function askIsTrue(ask, st){
-  var men = [], i, p;
-  for (i = 0; i < 64; i++){ p = st.b[i]; if (p) men.push({ p:p, i:i }); }
-  if (ask.t === 'where'){
-    var here = st.b[ask.sq];
-    if (!here || here.c !== ask.colour || here.t !== ask.type) return false;
-    // and it has to be the only one of its kind, or the question is ambiguous
-    return men.filter(function(m){ return m.p.c === ask.colour && m.p.t === ask.type; }).length === 1;
-  }
-  if (ask.t === 'what'){
-    var on = st.b[ask.sq];
-    return on ? (on.c === ask.colour && on.t === ask.type) : (ask.colour === null && ask.type === null);
-  }
-  if (ask.t === 'count'){
-    return men.filter(function(m){ return m.p.c === ask.colour && m.p.t === ask.type; }).length === ask.n;
-  }
-  if (ask.t === 'occupied') return (!!st.b[ask.sq]) === ask.yes;
-  if (ask.t === 'rebuild'){
-    return ask.want.every(function(w){
-      var on = st.b[w.sq];
-      return on && on.c === w.colour && on.t === w.type &&
-             men.filter(function(m){ return m.p.c === w.colour && m.p.t === w.type; }).length === 1;
-    });
-  }
-  return false;
-}
-
-/* ============================================================
-   6 — blindfold sequence: the notation replays to the position asked about
-   ============================================================ */
-head('Blindfold Sequence lines are real lines');
-
-(function(){
-  var built = 0, unreadable = 0, wrongEnd = 0, wrongAnswer = 0, endedOnMate = 0;
-  var plies = { 1:[], 2:[], 3:[] }, kinds = {};
-  for (var diff = 1; diff <= 3; diff++){
-    for (var t = 0; t < 45; t++){
-      var q = prMakeSequence(diff);
-      if (!q) continue;
-      built++;
-      plies[diff].push(q.sans.length);
-      kinds[q.ask.t] = (kinds[q.ask.t] || 0) + 1;
-
-      // read the moves back with the page's own reader, in the position they
-      // were written for — a line that will not parse is a line nobody could play
-      var st = cloneState(q.start);
-      var broke = false;
-      for (var k = 0; k < q.sans.length; k++){
-        var res = parseMoveIn(st, q.sans[k]);
-        if (res.error){ unreadable++; broke = true; break; }
-        st = makeMove(st, res.move);
-      }
-      if (broke) continue;
-      if (fenOf(st) !== fenOf(q.end)) wrongEnd++;
-      if (!legalMoves(st, st.turn).length) endedOnMate++;
-      if (!askIsTrue(q.ask, q.end)) wrongAnswer++;
-    }
-  }
-  ok('every sequence built', built, 135);
-  ok('every move reads back as notation', unreadable, 0);
-  ok('and playing them reaches exactly the position asked about', wrongEnd, 0);
-  ok('no line ends on mate or stalemate', endedOnMate, 0);
-  ok('and every answer is true of the position the line makes', wrongAnswer, 0);
-  ok('two plies at the easiest setting', plies[1].every(function(n){ return n === 2; }), true);
-  ok('four in the middle', plies[2].every(function(n){ return n === 4; }), true);
-  ok('six or eight at the hardest', plies[3].every(function(n){ return n === 6 || n === 8; }), true);
-  ok('the hardest setting asks for a rebuild sometimes', kinds.rebuild > 0, true);
-})();
-
-(function(){
-  var fromStart = 0, fromNowhere = 0;
-  for (var t = 0; t < 80; t++){
-    var q = prMakeSequence(3);
-    if (!q) continue;
-    if (q.fromStart) fromStart++; else fromNowhere++;
-  }
-  ok('the hardest setting opens from the usual position sometimes', fromStart > 5, true);
-  ok('and from a position of its own the rest of the time', fromNowhere > 5, true);
-  var easy = prMakeSequence(1);
-  ok('the easiest one always starts from the usual position', easy.fromStart, true);
 })();
 
 /* ============================================================
@@ -657,10 +564,9 @@ head('Generation never hands back something broken');
   var missing = 0, wrongKind = 0, total = 0;
   // `kind` is the question's own shape and is not always the mode's key:
   // progressive still hands back the old mini challenge (`kind:'mini'`, until
-  // Task 19 gives it a generator of its own) and tracker still hands back the
-  // old sequence-era walk (`kind:'track'`, until Task 14 gives it one) — both
-  // are exempted from the kind check for exactly that reason.
-  var kindExempt = { progressive:1, tracker:1 };
+  // Task 19 gives it a generator of its own), and is exempted from the kind
+  // check for exactly that reason. Every other drill now answers to its own.
+  var kindExempt = { progressive:1 };
   for (var k = 0; k < keys.length; k++){
     var key = keys[k], top = PR_MODE[key].levels.length;
     for (var level = 1; level <= top; level++){

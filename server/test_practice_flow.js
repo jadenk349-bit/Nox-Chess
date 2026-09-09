@@ -204,7 +204,7 @@ function lsnDone(){ return lsnDoneStub; }
 /* ---- the real half ---- */
 var DECLS = ['VAL','FILES','rowOf','colOf','SQNAME','uciOf','sqName','sqIndex','onBoard','other',
              'idCounter','mk','DIR_N','DIR_B','DIR_R','DIR_K','PST','nodes','PIECE_NAME',
-             'GLYPH','pieceHTML','OPENING_BOOK','W'];
+             'GLYPH','pieceHTML','OPENING_BOOK','OPENING_LINES','W'];
 // Note: this suite lifts the whole PRACTICE section as one block below, so
 // PR_VERSION, PR_V1_KEYS, PR_SEEN_MAX, prBlankMode, prUpgradeV1, prSeen,
 // prSeenHas, prSeenPush, prSeenKey, prToday and prTouchDay all come along
@@ -213,7 +213,7 @@ var FNS = ['startBoard','newState','cloneState','fenOf','stateFromFEN',
            'slide','step','addPawn','pseudoMoves','isAttacked','kingSq','inCheck',
            'makeMove','legalMoves','toSAN','attackersOf','defendersOf','see',
            'mirror','evaluate','orderMoves','scoreMove','quiesce','negamax','bestMove',
-           'parseMoveIn','bookMove','rebuildDiff','quadrantOf','lineBetween','linesThrough','knightRoute','sliderReaches'];
+           'parseMoveIn','bookMove','moveFromSAN','rebuildDiff','quadrantOf','lineBetween','linesThrough','knightRoute','sliderReaches'];
 var bundle = [grab(/\nconst W = 'w', B = 'b';/, "const W/B")];
 // a multi-line string rather than an object, so neither shape of decl() fits it
 bundle.push(grab(/\nconst BISHOP_SVG =\n[\s\S]*?';\n/, 'BISHOP_SVG'));
@@ -313,7 +313,14 @@ function answerRight(){
     }
     return;
   }
-  if (q.kind === 'track'){ clickSquare(q.end); return; }
+  if (q.kind === 'tracker'){
+    // a tracker question is not on screen until the read-out has been sat
+    // through, so answering one means pressing Ready and driving the clock
+    if (ctlButton('Ready')) pressCtl('Ready');
+    trackerRun(q);
+    answerAskRight(q.ask);
+    return;
+  }
   answerAskRight(q.ask);
 }
 /* Square Trainer's `ask` is a plain string, not one of the {t:...} objects
@@ -775,54 +782,173 @@ head('Attack Vision');
 
 /* ============================================================
    5 — move tracker
+   The read-out is paced by prTimer, so every one of these drives the fake
+   clock rather than waiting: a move lands, 1100ms later the next one does,
+   and the question comes a beat after the last. Level 1 is the deterministic
+   one — one piece, two plies, one ask kind (`where`) — so it can be walked
+   end to end; the levels that carry checkpoints are driven through the
+   helper below, which answers each checkpoint as it comes up.
    ============================================================ */
 head('Move Tracker');
+
+/** A tracker question at `level` for which `pred` is true. Which of the
+    level's `asks` a question draws is a coin flip, and so is whether the
+    piece asked about ever stood on a square a test wants to click, so a
+    test that needs a particular shape waits for one — forceSquare and
+    forceHold above exist for exactly the same reason. */
+function forceTracker(level, pred){
+  for (var t = 0; t < 500; t++){
+    var q = prMakeTracker(prRecipe('tracker', level));
+    if (q && pred(q)) return q;
+  }
+  throw new Error('could not force a level ' + level + ' tracker question matching the predicate');
+}
+/** Tick the read-out along, answering every checkpoint right as it appears,
+    until the final question is on screen. `from` is which checkpoint comes
+    next, for a test that has already answered one by hand. Returns how many
+    this call answered. A checkpoint is told from the question by its own
+    prefix, which the page writes for exactly that reason. */
+function trackerRun(q, from){
+  var at = from || 0, answered = 0, guard = 0;
+  while (guard++ < 120){
+    if (/^Checkpoint/.test(byId.prQ.innerHTML)){
+      answerAskRight(q.checks[at].ask);
+      at++; answered++;
+    } else if (byId.prQ.innerHTML === q.ask.text) return answered;
+    tick(1200);
+  }
+  throw new Error('the read-out never reached the question');
+}
 
 (function(){
   storage = {};
   startDrill('tracker', 1, 5);
-  var q = PR.q;
+  var q = forceTracker(1, function(q){ return q.end !== q.path[0].from; });
+  presentForced(q);
   ok('the drill opens with the men in view', byId.prBoard.classList.contains('blind'), false);
-  ok('and the piece named on its square', byId.prQ.innerHTML.indexOf(sqName(q.startAt[0])) >= 0, true);
+  ok('and names one of them on its square',
+     byId.prQ.innerHTML.indexOf(sqName(q.path[0].from)) >= 0, true);
   ok('nothing is asked before Ready', PR.click, null);
-  ok('the moves are not shown yet', byId.prSeq.innerHTML, '');
+  ok('the moves are not read out yet', byId.prSeq.innerHTML, '');
 
   pressCtl('Ready');
   ok('Ready takes the men away', byId.prBoard.classList.contains('blind'), true);
-  ok('and puts the moves up', byId.prSeq.innerHTML.indexOf(q.path[0].san) >= 0, true);
-  ok('both of them', byId.prSeq.innerHTML.indexOf(q.path[1].san) >= 0, true);
-  ok('now a square can be clicked', PR.click !== null, true);
+  ok('the first move is read out at once', byId.prSeq.innerHTML.indexOf(q.path[0].full) >= 0, true);
+  ok('in from-to form at this level', q.recipe.fromTo, true);
+  ok('and the second is not there yet', byId.prSeq.innerHTML.indexOf(q.path[1].full) >= 0, false);
+  ok('with the square it left lit', marked(q.path[0].from, 'pr-from'), true);
 
-  var wrong = elsewhere(q.end);
-  clickSquare(wrong);
-  ok('the wrong square is marked wrong', /wrong/.test(byId.prSay.className), true);
-  ok('and the right one shown', marked(q.end, 'pr-right'), true);
-  ok('with a way to see the path', ctlButton('Reveal the path') !== null, true);
+  tick(1200);
+  ok('the second move follows on the clock', byId.prSeq.innerHTML.indexOf(q.path[1].full) >= 0, true);
+  ok('and nothing is asked while it is still being read', PR.click, null);
+  tick(1200);
+  ok('then the question arrives', PR.click !== null, true);
+  ok('asking where the piece stands now', /Where is/.test(byId.prQ.innerHTML), true);
 
-  pressCtl('Reveal the path');
-  tick(400);
-  ok('the reveal brings the men back', byId.prBoard.classList.contains('blind'), false);
-  tick(2500);
-  ok('and walks to the square the piece finished on', marked(q.end, 'pr-right'), true);
+  clickSquare(q.end);
+  ok('the right square is judged right', /right/.test(byId.prSay.className), true);
+  ok('and offers to walk the moves back', ctlButton('Walk it back') !== null, true);
+
+  pressCtl('Walk it back');
+  tick(420);
+  ok('the walk brings the men back', byId.prBoard.classList.contains('blind'), false);
+  tick(780 * 3);
+  ok('and finishes on the square the piece reached', marked(q.end, 'pr-right'), true);
   ok('saying so', byId.prSub.innerHTML.indexOf(sqName(q.end)) >= 0, true);
-
-  pressCtl('Next');
-  var q2 = PR.q;
-  pressCtl('Ready');
-  clickSquare(q2.end);
-  ok('the right square is marked right', /right/.test(byId.prSay.className), true);
   prShowDash();
 })();
 
+/* A wrong click is typed, not just counted: the piece's own earlier square
+   is losing the thread at a particular ply, and the walk-back stops there
+   rather than playing on past the moment it went wrong. */
 (function(){
   storage = {};
-  startDrill('tracker', 3, 5);
-  var q = PR.q;
-  ok('the hardest setting follows two pieces', q.ids.length, 2);
-  ok('over five moves', q.path.length, 5);
-  ok('and the question names which one',
-     byId.prQ.innerHTML.indexOf(PIECE_NAME[q.askType]) >= 0 ||
-     (pressCtl('Ready'), byId.prQ.innerHTML.indexOf(PIECE_NAME[q.askType]) >= 0), true);
+  startDrill('tracker', 1, 5);
+  var q = forceTracker(1, function(q){ return q.end !== q.path[0].from; });
+  presentForced(q);
+  pressCtl('Ready');
+  tick(3000);
+  clickSquare(q.path[0].from);
+  ok('the square the piece started on is wrong', /wrong/.test(byId.prSay.className), true);
+  ok('and is read as losing the thread at ply one', PR.q.lostAt, 1);
+  ok('which is what the record keeps', prLoad().modes.tracker.stats.errs.lost, 1);
+
+  pressCtl('Walk it back');
+  tick(420 + 780 * 4);
+  ok('the walk back stops at the ply it was lost',
+     byId.prSub.innerHTML.indexOf('lost it') >= 0, true);
+  ok('and names the move', byId.prSub.innerHTML.indexOf(q.path[0].san) >= 0, true);
+  prShowDash();
+})();
+
+/* Level 7 is the first with checkpoints: the read-out stops twice on the way
+   through, asks a question about the position as it then stands, and scores
+   none of it. */
+(function(){
+  storage = {};
+  startDrill('tracker', 7, 5);
+  var q = forceTracker(7, function(q){ return q.checks.length === 2; });
+  presentForced(q);
+  ok('eight plies carry two checkpoints', q.checks.length, 2);
+  ok('the first is three plies in', q.checks[0].ply, 3);
+
+  pressCtl('Ready');
+  tick(1100 * 3);
+  ok('the read-out stops for a checkpoint', /^Checkpoint/.test(byId.prQ.innerHTML), true);
+  ok('and asks its own question', byId.prQ.innerHTML.indexOf(q.checks[0].ask.text) >= 0, true);
+  ok('saying it is not scored', /Nothing here is scored/.test(byId.prSub.innerHTML), true);
+  ok('the men are still away', byId.prBoard.classList.contains('blind'), true);
+
+  answerAskRight(q.checks[0].ask);
+  ok('a checkpoint answer is not counted', PR.i, 0);
+  ok('and nothing is on the record', prLoad().modes.tracker.asked, 0);
+  tick(800);
+  ok('the read-out picks up again', /^Move/.test(byId.prSub.innerHTML), true);
+
+  var chks = trackerRun(q, 1);
+  ok('the second checkpoint was asked too', chks, 1);
+  ok('and the question waited for the end of the walk', byId.prQ.innerHTML, q.ask.text);
+  answerAskRight(q.ask);
+  ok('which is the answer that counts', PR.i, 1);
+  ok('and is judged right', /right/.test(byId.prSay.className), true);
+  prShowDash();
+})();
+
+/* A missed checkpoint costs nothing on the record and shows the position
+   instead — the point of stopping is to be put back on the walk, not to be
+   marked down for having fallen off it. */
+(function(){
+  storage = {};
+  startDrill('tracker', 7, 5);
+  var q = forceTracker(7, function(q){
+    return q.checks.length === 2 && q.checks[0].ask.t === 'where';
+  });
+  presentForced(q);
+  pressCtl('Ready');
+  tick(1100 * 3);
+  clickSquare(elsewhere(q.checks[0].ask.sq));
+  ok('a missed checkpoint is said to be missed', /wrong/.test(byId.prSay.className), true);
+  ok('and still costs nothing', PR.i, 0);
+  ok('the men come back so the walk can be picked up', byId.prBoard.classList.contains('blind'), false);
+  ok('and the drift is counted on the question', PR.q.drift, 1);
+  tick(1600);
+  ok('then they go away again', byId.prBoard.classList.contains('blind'), true);
+  ok('and the read-out carries on', /^Move/.test(byId.prSub.innerHTML), true);
+  prShowDash();
+})();
+
+/* The late levels hand the whole line over at once — by then it is fourteen
+   plies and reading it is no longer the easy half. */
+(function(){
+  storage = {};
+  startDrill('tracker', 10, 5);
+  var q = forceTracker(10, function(){ return true; });
+  presentForced(q);
+  ok('a whole-list level opens from the start position', /start position/.test(byId.prQ.innerHTML), true);
+  pressCtl('Ready');
+  ok('every move is read out at once', byId.prSeq.innerHTML.indexOf(q.path[q.path.length - 1].san) >= 0, true);
+  ok('in notation, not from-to', !q.recipe.fromTo, true);
+  ok('and the question is asked straight away', byId.prQ.innerHTML, q.ask.text);
   prShowDash();
 })();
 
@@ -963,21 +1089,7 @@ head('Hold the Position');
 })();
 
 /* ============================================================
-   7 — blindfold sequence
-   No PR_MODES entry, no way in from the dashboard, until Task 14 gives it one
-   — the generator stays proven directly, the way Square Colour's did before
-   Square Trainer's ladder absorbed it.
-   ============================================================ */
-head('Blindfold Sequence (generator only — no PR_MODES entry until Task 14)');
-
-(function(){
-  var q = prMakeSequence(1);
-  ok('the easiest setting is still buildable directly', !!q, true);
-  ok('and opens from the usual position', q.fromStart, true);
-})();
-
-/* ============================================================
-   8 — the progressive blindfold challenge
+   7 — the progressive blindfold challenge
    ============================================================ */
 head('Progressive Blindfold Challenge');
 
@@ -1053,7 +1165,7 @@ head('Progressive Blindfold Challenge');
 })();
 
 /* ============================================================
-   9 — leaving, restarting, and the record
+   8 — leaving, restarting, and the record
    ============================================================ */
 head('Leaving a drill behind');
 
@@ -1210,7 +1322,7 @@ head('goPractice with a target');
 })();
 
 /* ============================================================
-   10 — the rebuild interface
+   9 — the rebuild interface
    One interface for every place a position is put back — Hold the Position,
    the tracker's last level, Progressive Blindfold's recovery — driven
    directly rather than through a drill, since prRebuildStart takes its
@@ -1236,7 +1348,7 @@ head('The rebuild interface');
 })();
 
 /* ============================================================
-   11 — the markup the code reaches for
+   10 — the markup the code reaches for
    The stub hands back an element for any id asked of it, which is what makes
    the flow above runnable and what makes it blind to a typo. So the ids are
    checked against the page itself.
