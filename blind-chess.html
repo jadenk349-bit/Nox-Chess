@@ -3586,6 +3586,45 @@
     background:rgba(24,30,48,.75); border:1px solid var(--line); border-bottom-width:2px;
     border-radius:5px; padding:1px 5px; font-size:14.5px; font-family:inherit; color:var(--text);
   }
+/* Player rails share the board frame; the logo and side panel stay fixed. */
+#screen-game .board-col{gap:0;}
+#screen-game #boardFrame{border-radius:0;box-shadow:none;border-top:0;border-bottom:0;}
+#screen-game .board-bar{
+  position:relative;min-height:48px;padding:7px clamp(12px,2.4vw,26px);
+  background:linear-gradient(135deg,#344047 0%,#111d27 30%,#09121b 65%,#223440);
+  border:1px solid #74664e;box-shadow:inset 0 1px 0 rgba(255,255,255,.06);
+}
+#screen-game #barTop{margin:0;border-radius:7px 7px 0 0;border-bottom:1px solid rgba(196,170,118,.18);}
+#screen-game #barBottom{margin:0;border-radius:0 0 7px 7px;border-top:1px solid rgba(196,170,118,.18);}
+#screen-game .bar-name{display:flex;align-items:center;gap:10px;min-width:0;font-size:18px;letter-spacing:.06em;}
+#screen-game .rail-elo{color:#b9a681;font-size:15px;letter-spacing:.03em;}
+#screen-game .bar-name .sub{margin:0;font-size:11px;letter-spacing:.12em;border:1px solid rgba(196,170,118,.3);border-radius:3px;padding:3px 6px;}
+#screen-game .board-bar .clock{flex-shrink:0;padding-left:16px;border-left:1px solid rgba(196,170,118,.25);border-radius:0;min-width:82px;text-align:right;}
+#screen-game .board-bar .clock .time{font-size:28px;font-variant-numeric:tabular-nums;}
+#screen-game .board-bar:has(#clockW) .sub{color:#eee5d1;background:rgba(238,229,209,.07);}
+#screen-game .board-bar:has(#clockB) .sub{color:#b9a681;background:rgba(0,0,0,.22);}
+
+/* Move only the board column; the logo, grid and side panel retain their layout. */
+#screen-game .game-layout{--chrome:104px;}
+#screen-game .game-layout .board-col{align-items:flex-start;}
+@media(min-width:1101px){
+  #screen-game .game-layout .board-col{
+    margin-left:var(--board-shift);
+    width:calc(100% - var(--board-shift));
+  }
+}
+@media(min-width:600px) and (max-width:1100px){
+  #screen-game .game-layout .board-col{
+    --board-inset:calc(var(--logo-w) + 12px);
+    margin-left:var(--board-inset);
+    width:calc(100% - var(--board-inset));
+    margin-top:calc(0px - var(--logo-box) - 14px);
+    --chrome:114px;
+  }
+}
+@media(max-width:599px){
+  #screen-game .game-layout{--chrome:224px;}
+}
 </style>
 </head>
 <body>
