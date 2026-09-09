@@ -11989,6 +11989,35 @@ const PR_TRACKER_LEVELS = [
   { cap:'Twenty plies, then rebuild it',              start:'opening', plies:20, sides:'both', captures:2, whole:true, checkEvery:6, asks:['rebuild'] }
 ];
 
+/* After the Move's own ladder — declared ahead of PR_MODES for the same
+   reason the other six are. One move is played, and what is asked about is
+   not a static fact of a position (Attack Vision already asks those) but the
+   *consequences* of that particular move: the square it left (`vacated`),
+   what it now reaches from where it landed (`attacks`), what came loose
+   because of it (`hanging`), which of the mover's own side had a line opened
+   up behind it (`opened`), and whether it gives check. `asks` is how many of
+   those a level puts at once — judged one at a time, but scored only once,
+   at the end, because holding the whole picture a move left behind is the
+   point and getting four of five is not holding it. `hidden` and `study`
+   work exactly as Hold the Position's own do; `notation` drops the animated
+   walk across the board in favour of the move said as bare notation, which
+   is the harder half of "after the move" — there is nothing to watch
+   happen, only something to have been told. `both` (level 6) insists the
+   move leaves something hanging on each side, since a player who only ever
+   answers "what did I win" has never had to notice the other half of the
+   same exchange. `realistic` is prGamePosition cut down by prCluster, on the
+   same terms Hold the Position's own late levels use it. */
+const PR_AFTER_LEVELS = [
+  { cap:'One question, position shown',       men:5, asks:1, kinds:['vacated','attacks'] },
+  { cap:'Two questions',                       men:5, asks:2, kinds:['vacated','attacks','check'] },
+  { cap:'The position hidden after study',     men:5, asks:2, kinds:['vacated','attacks','hanging'], hidden:true, study:6000 },
+  { cap:'The move given as notation only',     men:6, asks:2, kinds:['vacated','attacks','hanging','opened'], hidden:true, study:6000, notation:true },
+  { cap:'Six to eight men',                    men:7, asks:2, kinds:['attacks','hanging','opened','check'], hidden:true, study:6000, notation:true },
+  { cap:'Both a friendly and an enemy consequence', men:8, asks:3, kinds:['hanging','opened','check','attacks'], hidden:true, study:5000, notation:true, both:true },
+  { cap:'Real positions',                      men:8, asks:3, kinds:['vacated','attacks','hanging','opened','check'], hidden:true, study:5000, notation:true, realistic:true },
+  { cap:'Real positions, four seconds',        men:10, asks:3, kinds:['attacks','hanging','opened','check'], hidden:true, study:4000, notation:true, realistic:true }
+];
+
 /* Each drill, in the order the dashboard lists them. `group` clusters related
    drills for the dashboard (Task 22); `lesson` is the course step it grows out
    of. `levels` replaces the old `tiers`/`hard`/`needs`: a mode's levels are a
@@ -12014,6 +12043,9 @@ const PR_MODES = [
   { key:'tracker', name:'Move Tracker', group:'holding', skill:'Tracking', lesson:5,
     desc:'Follow moves you never see, and say where things stand.',
     levels: PR_TRACKER_LEVELS },
+  { key:'after', name:'After the Move', group:'holding', skill:'Consequences', lesson:5,
+    desc:'One move, and everything it changed — the square it left, the line it opened, what it left hanging.',
+    levels: PR_AFTER_LEVELS },
   { key:'hold', name:'Hold the Position', group:'holding', skill:'Holding', lesson:5,
     desc:'A small position, studied, then answered for with the men hidden.',
     levels: PR_HOLD_LEVELS },
@@ -12815,6 +12847,75 @@ function prTrackerErr(q, sq){
   return 'square';
 }
 
+/* 3b — AFTER THE MOVE. One move played in a position, and what is asked is
+   not a static fact of the position but what that particular move changed:
+   the square it vacated, what it now attacks from where it landed, what
+   line it opened for a piece standing behind it, what came loose because of
+   it, whether it gives check. `prMoveFacts` is pure — a position and a move
+   in, the whole picture the move leaves out — so the generator and
+   test_practice.js both ask it the same question rather than the drill
+   trusting its own arithmetic.
+
+   A line is "opened" for a piece if the move cleared its own from-square out
+   of that piece's way: `lineBetween(piece, sq)` is the corridor between the
+   piece and a square it newly reaches, and the move's own from-square has to
+   be a square in that corridor — a piece that already reached `sq` before
+   the move, or reaches it now for some unrelated reason, does not count. */
+function prMoveFacts(st, m){
+  const after = makeMove(st, m);
+  const before = {};
+  for (let i = 0; i < 64; i++) if (st.b[i] && i !== m.from) before[i] = prAttacked(st, i);
+  const opened = [];
+  for (let i = 0; i < 64; i++){
+    const p = after.b[i];
+    if (!p || i === m.to || !before[i]) continue;
+    const gained = prAttacked(after, i).filter(sq => before[i].indexOf(sq) < 0 && lineBetween(i, sq) && lineBetween(i, sq).indexOf(m.from) >= 0);
+    if (gained.length) opened.push({ piece:i, gained });
+  }
+  return { vacated:m.from, attacks:prAttacked(after, m.to), opened, hanging:prHanging(after), check:inCheck(after, after.turn) };
+}
+/* A move is not drawn at random: the whole point of this drill is a move
+   worth asking about, so every legal candidate is scored by how much it
+   actually changes — an opened line worth twice a loose man, a loose man
+   worth a check — plus a coin flip so the choice is not the same one every
+   time two candidates tie. Two kinds of move are kept out of the running
+   entirely: a king move, which never opens a line and rarely leaves
+   anything interesting behind, and a promotion, which is four legal moves
+   sharing one from-square and one to-square (Q, R, B, N) — `q.move` names a
+   square pair, not one of the four, so a promotion chosen here would be a
+   question with more than one right board behind the same description.
+   `kinds` is trimmed to drop `opened` when nothing opened, since asking it
+   of a move that opened nothing is not a question with an answer; if what
+   is left is short of `asks`, the try is abandoned rather than asking the
+   same kind twice. `both` (level 6) is the one extra condition worth a
+   retry of its own: a move has to leave something hanging on each side, not
+   just one, or it is not the position that level promises. */
+function prMakeAfter(r){
+  for (let t = 0; t < 60; t++){
+    let st;
+    if (r.realistic){ st = prCluster(prGamePosition(12 + prRand(14)), r.men); if (!st) continue; }
+    else { const built = prPosition(prMaterial(r.men)); if (!built) continue; st = built.st; }
+    const legal = legalMoves(st, st.turn).filter(m => m.p.t !== 'K' && !m.promo);
+    if (!legal.length) continue;
+    // prefer a move that opens a line or leaves something loose: those are the questions worth asking
+    const scored = legal.map(m => { const f = prMoveFacts(st, m); return { m, f, s:(f.opened.length ? 2 : 0) + (f.hanging.length ? 1 : 0) + (f.check ? 1 : 0) + Math.random() }; })
+                        .sort((a, b) => b.s - a.s);
+    const { m, f } = scored[0];
+    const kinds = r.kinds.filter(k => k !== 'opened' || f.opened.length);
+    if (kinds.length < r.asks) continue;
+    const asks = prShuffle(kinds.slice()).slice(0, r.asks);
+    if (r.both){
+      const a = makeMove(st, m);
+      const mine = f.hanging.some(sq => a.b[sq] && a.b[sq].c === m.p.c), theirs = f.hanging.some(sq => a.b[sq] && a.b[sq].c !== m.p.c);
+      if (!(mine && theirs)) continue;
+    }
+    const all = legalMoves(st, st.turn);
+    return { kind:'after', st, after: makeMove(st, m), move:{ from:m.from, to:m.to, san: toSAN(st, m, all) }, facts:f, asks,
+             hidden:!!r.hidden, study:r.study || 0, notation:!!r.notation, sig:'after:' + fenOf(st).split(' ')[0] + ':' + m.from + m.to };
+  }
+  return null;
+}
+
 /* 4 — HOLD THE POSITION. A legal position, a few seconds to look at it, and
    then one question about it with the men gone — or a change to catch, or the
    whole thing to rebuild from nothing.
@@ -13005,7 +13106,7 @@ function prMakeMini(diff){
 const PR_MAKE = {
   square: r => prMakeSquare(r), lines: r => prMakeLines(r), piece: r => prMakePiece(r),
   attack: r => prMakeAttack(r),
-  tracker: r => prMakeTracker(r), hold: r => prMakeHold(r),
+  tracker: r => prMakeTracker(r), after: r => prMakeAfter(r), hold: r => prMakeHold(r),
   progressive: r => prMakeMini(r.level)
 };
 
@@ -13177,6 +13278,7 @@ function prPresent(){
     case 'piece':    return prShowPiece(q);
     case 'attack':   return prShowAttack(q);
     case 'tracker':  return prShowTracker(q);
+    case 'after':    return prShowAfter(q);
     case 'hold':     return prShowHold(q);
   }
 }
@@ -13927,6 +14029,176 @@ function prTrackerReplay(q){
     prTimer(step, 780);
   };
   prTimer(step, 420);
+}
+
+/* ---- 3b: after the move ----
+   One presenter for every level, because "what did that move leave behind"
+   is one question asked from up to five angles rather than five drills that
+   happen to share a ladder. The position is painted, studied where the
+   ladder has started hiding it, and the move itself is *stated* — walked
+   across the board with the men briefly back up while a level still shows
+   one, read as bare notation once a level has taken that away too — before
+   any question is put. `q.asks` then runs one at a time: each is judged for
+   itself (`ok`/`err` kept on `q.results`), but nothing is scored until the
+   last of them, because the thing this drill actually tests is whether the
+   whole picture was held at once, not any one fact in it on its own. */
+const PR_AFTER_SHOW = 1200;          // how long the move sits on the board before the men go away again
+function prShowAfter(q){
+  prBoardOn(true);
+  prLayout(false, true);
+  prMen(true);
+  prPaint(q.st.b);
+  prMarksClear();
+  q.results = [];
+  q.idx = 0;
+  const begin = () => prAfterState(q);
+  if (q.hidden) prStudyPhase(q.study, () => { prMen(false); begin(); });
+  else begin();
+}
+/* The move, said rather than asked about. `q.notation` drops the walk in
+   favour of the bare words — "Nc3, from b1 to c3" — which is the whole of
+   what makes that half of the ladder harder: there is nothing to watch
+   happen, only something to have been told. The animated half repaints the
+   board at `q.after` with the men lit for one beat regardless of whether
+   this level ordinarily hides them, since a move that is never seen to
+   happen is not a move that was stated at all; `q.hidden` only decides
+   whether the men go dark again once the beat is over. */
+function prAfterState(q){
+  prCtl([]);
+  prMarksClear();
+  if (q.notation){
+    prPaint(q.after.b);                  // the board quietly moves on with it, even unseen
+    prQ('The move played:');
+    prSub('');
+    prSeq(q.move.san + ', from <b>' + sqName(q.move.from) + '</b> to <b>' + sqName(q.move.to) + '</b>.');
+    prAfterAsk(q);
+    return;
+  }
+  prMen(true);
+  prPaint(q.after.b);
+  prMark(q.move.from, 'pr-from');
+  prMark(q.move.to, 'pr-target');
+  prQ(q.move.san + '.');
+  prSub('');
+  prTimer(() => {
+    if (q.hidden) prMen(false);
+    prMarksClear();
+    prAfterAsk(q);
+  }, PR_AFTER_SHOW);
+}
+/* The dispatcher between one question and the next. `PR.shownAt` is set once,
+   here, the moment the first question of the set becomes answerable — not
+   back in prShowAfter, which is still the study phase and the stated move,
+   neither of which the player is being timed on (Hold the Position resets it
+   at exactly this same seam, for exactly this same reason). Every answerer
+   below records itself through `prAfterRecord` rather than calling `prJudge`
+   directly, which is what makes "judged separately, scored once" possible at
+   all. */
+function prAfterAsk(q){
+  prAnsClear();
+  prMarksClear();
+  prCtl([]);
+  PR.click = null;
+  if (q.idx >= q.asks.length){ prAfterFinish(q); return; }
+  if (q.idx === 0) PR.shownAt = prNow();
+  const ask = q.asks[q.idx];
+  if (ask === 'vacated') return prAfterAskVacated(q);
+  if (ask === 'attacks')  return prAfterAskAttacks(q);
+  if (ask === 'hanging')  return prAfterAskHanging(q);
+  if (ask === 'opened')   return prAfterAskOpened(q);
+  return prAfterAskCheck(q);
+}
+/* Guards a single question's answer against being counted twice — a second
+   click after Done, say — without reaching for `PR.answered`, which stays
+   false for the whole set until the last question is judged. */
+function prAfterOnce(fn){
+  let done = false;
+  return function(){ if (done) return; done = true; fn.apply(null, arguments); };
+}
+function prAfterRecord(q, ok, err){
+  q.results.push({ ok:!!ok, err: err || null });
+  q.idx++;
+  prAfterAsk(q);
+}
+/* `vacated`: click the square the moved man left. */
+function prAfterAskVacated(q){
+  prQ('Which square did the man that moved leave?');
+  prSub('Click it.');
+  PR.click = prAfterOnce(i => prAfterRecord(q, i === q.facts.vacated));
+}
+/* `attacks`: select every square the man now reaches from where it landed,
+   then Done — Attack Vision's own `attacked` pattern, asked of the square a
+   move just put a piece on rather than one handed to the question outright. */
+function prAfterAskAttacks(q){
+  prQ('Every square the man that just moved now attacks.');
+  prSub('Click each one, then Done.');
+  q.picks = new Set();
+  PR.click = i => prLinesToggle(q.picks, i, (s, on) => { if (on) prMark(s, 'pr-pick'); else prSqEls[prVisual(s)].classList.remove('pr-pick'); });
+  prAnsButton('Done', prAfterOnce(() => {
+    const want = new Set(q.facts.attacks);
+    const missed = q.facts.attacks.some(sq => !q.picks.has(sq));
+    const wrong = Array.from(q.picks).some(sq => !want.has(sq));
+    prAfterRecord(q, !missed && !wrong);
+  }), 'primary');
+}
+/* `hanging`: select every square with something loose on it now, or say
+   there is nothing — Attack Vision's own hanging question, asked of the
+   position the move just reached rather than a position handed over whole.
+   `ghost` is the one error worth naming rather than filing under `square`:
+   a square picked that is empty in `q.after` is the mistake of pointing at
+   where a man used to stand, not merely the wrong man. */
+function prAfterAskHanging(q){
+  prQ('Anything hanging now? Select every square with something loose on it.');
+  prSub('Click each one, then Done — or say Nothing is hanging.');
+  q.picks = new Set();
+  PR.click = i => prLinesToggle(q.picks, i, (s, on) => { if (on) prMark(s, 'pr-pick'); else prSqEls[prVisual(s)].classList.remove('pr-pick'); });
+  const finish = prAfterOnce(got => {
+    const want = new Set(q.facts.hanging);
+    const missed = q.facts.hanging.some(sq => !got.has(sq));
+    const wrongSqs = Array.from(got).filter(sq => !want.has(sq));
+    const ok = !missed && !wrongSqs.length;
+    prAfterRecord(q, ok, ok ? null : (wrongSqs.some(sq => !q.after.b[sq]) ? 'ghost' : 'square'));
+  });
+  prAnsButton('Done', () => finish(q.picks), 'primary');
+  prAnsButton('Nothing is hanging', () => finish(new Set()));
+}
+/* `opened`: click the piece whose line the move opened — any one of them, on
+   a level where the move opened more than one, since the question is
+   whether one is seen at all, not which the generator happened to list
+   first. */
+function prAfterAskOpened(q){
+  prQ('Click the piece whose line the move just opened.');
+  prSub(q.facts.opened.length > 1 ? 'Any one of them is right.' : '');
+  PR.click = prAfterOnce(i => prAfterRecord(q, q.facts.opened.some(o => o.piece === i)));
+}
+/* `check`: Yes or No. */
+function prAfterAskCheck(q){
+  prQ('Is the side to move now in check?');
+  prAnsButton('Yes', prAfterOnce(() => prAfterRecord(q, q.facts.check === true)));
+  prAnsButton('No', prAfterOnce(() => prAfterRecord(q, q.facts.check === false)));
+}
+/* The one judgement for the whole set: the position as it actually stands,
+   every truth this move left behind marked on it at once — `pr-from` where
+   it was vacated, `pr-target` on every square a line opened onto, `pr-wrong`
+   on whatever is hanging — whether or not that particular fact was one of
+   the questions asked, because this is the picture the set was testing
+   whether the player already held. `ok` is every question right; the error
+   handed to `prJudge` is `ghost` if any wrong answer earned one and `square`
+   otherwise, on the same terms every other drill's feedback uses. */
+function prAfterFinish(q){
+  prBoardOn(true);
+  prMen(true);
+  prPaint(q.after.b);
+  prMarksClear();
+  prMark(q.facts.vacated, 'pr-from');
+  q.facts.opened.forEach(o => o.gained.forEach(sq => prMark(sq, 'pr-target')));
+  q.facts.hanging.forEach(sq => prMark(sq, 'pr-wrong'));
+  const missedCount = q.results.filter(r => !r.ok).length, ok = missedCount === 0;
+  const err = ok ? null : (q.results.some(r => r.err === 'ghost') ? 'ghost' : 'square');
+  const say = ok
+    ? 'Right on all ' + q.results.length + '.'
+    : missedCount + ' of ' + q.results.length + ' missed — here is everything the move actually did.';
+  prJudge(ok, say, [], err);
 }
 
 /* ---- 4: hold the position ----

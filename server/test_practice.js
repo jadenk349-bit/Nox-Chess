@@ -76,7 +76,7 @@ var DECLS = ['VAL','FILES','rowOf','colOf','SQNAME','uciOf','sqName','sqIndex','
              'idCounter','mk','DIR_N','DIR_B','DIR_R','DIR_K','PST','nodes','PIECE_NAME',
              'OPENING_BOOK','OPENING_LINES',
              'PR_SQUARE_LEVELS','PR_QUADRANT_NAME','PR_DIRS','PR_LINES_LEVELS','PR_PIECE_LEVELS',
-             'PR_ATTACK_LEVELS','PR_HOLD_LEVELS','PR_TRACKER_LEVELS',
+             'PR_ATTACK_LEVELS','PR_HOLD_LEVELS','PR_TRACKER_LEVELS','PR_AFTER_LEVELS',
              'PR_MODES','PR_MINUTES','PR_STORE','PR_VERSION','PR_V1_KEYS','PR_SEEN_MAX',
              'prKey','prAcc','prSeenKey',
              'PR','PR_STEP_UP','PR_STEP_DOWN','prRand','prPick','prSide','prMan','PR_MAKE','W',
@@ -93,6 +93,7 @@ var FNS = ['startBoard','newState','cloneState','fenOf','stateFromFEN',
            'prMakeSquare','prMakeLines','prMakePiece',
            'prAttacked','prHanging','prPinned','prMakeAttack',
            'prMakeTracker','prTrackerErr',
+           'prMoveFacts','prMakeAfter',
            'prPickMove','prAskAbout','prMakeMini','prRecipe','prMake',
            'prGamePosition','prCluster','prAskFine','prMakeHold',
            'prRecord','prScore','prStep','prNow','prTimeLeft','prRecommend','prMedianLat',
@@ -452,6 +453,38 @@ head('Move Tracker questions are true of the position the walk reaches');
   ok('every question is true of the position the walk reaches', bad, 0);
   ok('and all five kinds of question come up', Object.keys(kinds).sort().join(','),
      'captured,count,rebuild,what,where');
+})();
+
+/* ============================================================
+   5b — After the Move: every level generates a move worth asking about, and
+   every fact prMoveFacts hands back re-derives from the position it claims
+   to describe — the square vacated, the squares now attacked from the new
+   square, whether the mover is in check, what is left hanging, and (for
+   every piece the record says had a line opened onto a square) that the
+   line between that piece and the square really does run through the
+   square the mover just left.
+   ============================================================ */
+head('After the Move');
+(function(){
+  var bad = 0;
+  for (var lv = 1; lv <= PR_AFTER_LEVELS.length; lv++) for (var t = 0; t < 30; t++){
+    var q = prMakeAfter(prRecipe('after', lv));
+    if (!q){ bad++; continue; }
+    var legal = legalMoves(q.st, q.st.turn);
+    var m = legal.filter(function(x){ return x.from === q.move.from && x.to === q.move.to; })[0];
+    if (!m){ bad++; continue; }
+    var after = makeMove(q.st, m);
+    if (!sameBoard(after.b, q.after.b)) bad++;
+    if (q.facts.vacated !== m.from) bad++;
+    if (q.facts.check !== inCheck(after, after.turn)) bad++;
+    var hang = prHanging(after);
+    if (hang.join() !== q.facts.hanging.join()) bad++;
+    q.facts.opened.forEach(function(o){
+      o.gained.forEach(function(sq){ var line = lineBetween(o.piece, sq); if (!line || line.indexOf(m.from) < 0) bad++; });
+    });
+    if (q.asks.length < 1) bad++;
+  }
+  ok('every level generates, and every fact re-derives', bad, 0);
 })();
 
 /* ============================================================

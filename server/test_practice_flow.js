@@ -953,6 +953,37 @@ function trackerRun(q, from){
 })();
 
 /* ============================================================
+   5b — after the move: a level 1 question, forced to ask only `vacated` so
+   it can be driven end to end with one click rather than a dispatch table
+   for all five ask kinds. test_practice.js already re-derives every claim a
+   generated question makes about its move; what the presenter still has to
+   prove on its own is that the move is stated before anything is asked, and
+   that clicking the square the moved man left is judged right. Level 1
+   carries no study phase, so the men are up throughout; the move is still
+   animated (`q.notation` is unset at level 1), which is what the tick below
+   is waiting out.
+   ============================================================ */
+head('After the Move');
+
+(function(){
+  storage = {};
+  startDrill('after', 1, 5);
+  var q = null;
+  for (var t = 0; t < 20 && !q; t++) q = prMakeAfter(prRecipe('after', 1));
+  if (!q) throw new Error('could not generate a level 1 After the Move question');
+  q.asks = ['vacated'];
+  presentForced(q);
+  ok('the position is on the board, not hidden, at level 1', byId.prBoard.classList.contains('blind'), false);
+  ok('the move is stated first, nothing to click yet', PR.click, null);
+  tick(1300);
+  ok('and once it has been shown, the question is answerable', PR.click !== null, true);
+
+  clickSquare(q.facts.vacated);
+  ok('the vacated square is judged right', /right/.test(byId.prSay.className), true);
+  prShowDash();
+})();
+
+/* ============================================================
    6 — hold the position: one deterministic pass through each of the three
    answer shapes. test_practice.js already re-derives every claim a generated
    question makes about its position; what the presenter still has to prove
