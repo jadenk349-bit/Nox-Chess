@@ -81,7 +81,7 @@ var DECLS = ['VAL','FILES','rowOf','colOf','SQNAME','uciOf','sqName','sqIndex','
              'PR_MODES','PR_MINUTES','PR_STORE','PR_VERSION','PR_V1_KEYS','PR_SEEN_MAX',
              'prKey','prAcc','prSeenKey',
              'PR','PR_STEP_UP','PR_STEP_DOWN','prRand','prPick','prSide','prMan','PR_MAKE','W',
-             'PR_ERRS','PR_FLOORS','PR_PALETTE','PZ_VERSION'];
+             'PR_ERRS','PR_FLOORS','PR_PALETTE','PZ_VERSION','prPuzzleCache'];
 var FNS = ['startBoard','newState','cloneState','fenOf','stateFromFEN',
            'slide','step','addPawn','pseudoMoves','isAttacked','kingSq','inCheck',
            'makeMove','legalMoves','toSAN','attackersOf','defendersOf','see',
@@ -96,7 +96,7 @@ var FNS = ['startBoard','newState','cloneState','fenOf','stateFromFEN',
            'prMakeTracker','prTrackerErr',
            'prMoveFacts','prMakeAfter',
            'prPlaceAttackers','prMaterialOf','prExchangeLine','prMakeForcing',
-           'prMatesIn1','prMatesIn2','prForks','prMakeCalc',
+           'prMatesIn1','prMatesIn2','prForks','prCalcHanging','prPuzzlePool','prCalcTrack','prMakeCalc',
            'prPickMove','prAskAbout','prMakeMini','prRecipe','prMake',
            'prGamePosition','prCluster','prAskFine','prMakeHold',
            'prRecord','prScore','prStep','prNow','prTimeLeft','prRecommend','prMedianLat',
@@ -525,14 +525,19 @@ head('Forcing Lines');
 })();
 
 /* ============================================================
-   Blind Calculation (17a): mate in one, mate in two, a hanging piece and a
+   Blind Calculation: mate in one, mate in two, a hanging piece and a
    fork, each re-verified by enumeration rather than trusted from generation
    — a mate-in-one claim is checked by asking prMatesIn1 again on the position
    handed back, not by remembering what the generator thought while building
-   it. `calc` is not registered on PR_MODES until 17b, so `prRecipe` cannot be
-   asked for it yet; this stands in for the level lookup it will do once the
-   registration lands, exactly as Task 14a's tracker suite did before the
-   tracker was wired into PR_MODES.
+   it. The two uniqueness checks are the ones a drill that judges the *move*
+   cannot do without: a hanging piece is only one answer if no other capture
+   is worth as much (by see(), not by the value of the man standing there —
+   taking a defended rook with a queen is worth less than taking a loose
+   knight), and a fork is only one answer if prForks finds exactly one.
+   Levels 8 to 10 are lines rather than positions, so what is checked of them
+   is that the preamble actually plays from the position handed back and that
+   whatever the question then claims — a man on a square, a move to find — is
+   true of the position it arrives at.
    ============================================================ */
 head('Blind Calculation');
 (function(){
@@ -540,8 +545,7 @@ head('Blind Calculation');
   ok('the back-rank position has exactly one mate in one', prMatesIn1(st).length, 1);
   var bad = 0, tasks = {};
   for (var lv = 1; lv <= 5; lv++) for (var t = 0; t < 20; t++){
-    // 17b switches this back to prRecipe('calc', lv) once PR_MODES carries it
-    var q = prMakeCalc(Object.assign({ level: lv }, PR_CALC_LEVELS[lv - 1]));
+    var q = prMakeCalc(prRecipe('calc', lv));
     if (!q){ bad++; continue; }
     tasks[q.task] = 1;
     var s = q.st;
@@ -549,11 +553,63 @@ head('Blind Calculation');
     var m = legal.filter(function(x){ return x.from === q.answer.from && x.to === q.answer.to; })[0];
     if (!m){ bad++; continue; }
     if (q.task === 'mate1' && prMatesIn1(s).length !== 1) bad++;
-    if (q.task === 'hanging' && see(s, q.answer.to, s.turn) <= 0) bad++;
     if (q.task === 'mate2' && prMatesIn2(s).length !== 1) bad++;
+    if (q.task === 'hanging'){
+      var net = see(s, q.answer.to, s.turn);
+      if (net <= 0) bad++;
+      var rivals = legal.filter(function(x){
+        return x.cap && !(x.from === q.answer.from && x.to === q.answer.to);
+      });
+      if (!rivals.every(function(x){ return see(s, x.to, s.turn) < net; })) bad++;
+    }
+    if (q.task === 'fork' && prForks(s).length !== 1) bad++;
   }
   ok('levels one to five generate verified tactics', bad, 0);
   ok('mate, hanging, fork and mate-in-two all appear', ['mate1','hanging','fork','mate2'].every(function(k){ return tasks[k]; }), true);
+
+  var lies = 0;
+  for (var lv2 = 8; lv2 <= 10; lv2++) for (var t2 = 0; t2 < 10; t2++){
+    var q2 = prMakeCalc(prRecipe('calc', lv2));
+    if (!q2){ bad++; continue; }
+    var s2 = q2.st;
+    q2.pre.forEach(function(san){ var mm = moveFromSAN(s2, san); if (!mm) bad++; else s2 = makeMove(s2, mm); });
+    // and the question asked at the end of that line is true of where it ends
+    if (q2.task === 'line'){
+      var p = s2.b[q2.endAsk.sq];
+      if ((p ? p.c + p.t : null) !== (q2.endAsk.type ? q2.endAsk.colour + q2.endAsk.type : null)) lies++;
+    } else {
+      // the tactic is re-derived from the position the *notation* reaches,
+      // not from the one the generator was holding — a line whose written
+      // form plays out somewhere else is exactly the bug worth catching, and
+      // it would show up here as an answer that is no longer the answer
+      var end = legalMoves(s2, s2.turn).filter(function(x){
+        return x.from === q2.answer.from && x.to === q2.answer.to;
+      })[0];
+      var mates = prMatesIn1(s2);
+      var want = mates.length === 1 ? mates[0] : (mates.length ? null : prCalcHanging(s2));
+      if (!end || !want || want.from !== q2.answer.from || want.to !== q2.answer.to) lies++;
+    }
+  }
+  ok('the line levels carry legal preambles', bad, 0);
+  ok('and the question at the end of one is true of the position it reaches', lies, 0);
+
+  /* The two puzzle levels. With the shipped ladder in hand the position and
+     the move are the file's own, matched through the page's own uciOf rather
+     than trusted as a string; without it — a fetch that failed, and every
+     test harness here, which has no fetch at all — the level falls back to a
+     built position of its own kind and says so, which is what the presenter
+     puts on screen. */
+  var pool = [{ id:'t-1', fen:'6k1/5ppp/8/8/8/8/5PPP/3R2K1 w - - 0 1', moves:['d1d8'] }];
+  var pz = prMakeCalc(Object.assign(prRecipe('calc', 7), { pool: pool }));
+  ok('a puzzle level plays a position out of the shipped set', pz && pz.task, 'puzzle');
+  ok('and its answer is the move the file gives', uciOf({ from: pz.answer.from, to: pz.answer.to, promo: pz.answer.promo }), 'd1d8');
+  ok('named by the puzzle, so nobody is asked the same one twice', pz.sig, 'calc:puzzle:t-1');
+  var fb = prMakeCalc(prRecipe('calc', 6));
+  ok('a puzzle level with no puzzles falls back to a built position', fb.fallback, true);
+  ok('of the kind that level is worth', ['mate1','hanging','fork','mate2'].indexOf(fb.task) >= 0, true);
+  ok('the ladder a level reads is decided by the men it asks for', prCalcTrack(prRecipe('calc', 6)), 'endgame');
+  ok('the full positions coming from the middlegame set', prCalcTrack(prRecipe('calc', 7)), 'middlegame');
+  ok('and a track is fetched once and remembered', prPuzzlePool('endgame'), prPuzzlePool('endgame'));
 })();
 
 /* ============================================================

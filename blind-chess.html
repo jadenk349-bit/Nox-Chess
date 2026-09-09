@@ -12042,12 +12042,14 @@ const PR_FORCING_LEVELS = [
    reason the other eight are. `men` names pieces every position of that level
    is built with (`[colour, type]` pairs, read by `prMakeCalc`); `extra` is how
    many further random men — of either colour — are added on top, `[min,max]`
-   inclusive. The first five levels are this task's half: one queen for the
-   simplest mate, a hanging piece, a fork, two rooks for a busier mate in one,
-   then a mate in two. Levels 6-10 (`puzzle`, `line`, `visualise`) are a later
-   task's, and are listed here because the ladder is one thing a player climbs
-   even though it is built by two tasks — `prMakeCalc` answers `null` for them
-   until that task gives them a generator. */
+   inclusive. The first five are built positions with one tactic in them: one
+   queen for the simplest mate, a hanging piece, a fork, two rooks for a
+   busier mate in one, then a mate in two. Levels 6 and 7 name no material of
+   their own because their positions come out of the shipped puzzle ladders
+   rather than being built (`maxMen` is what tells the two apart, and which
+   ladder is read — see `prCalcTrack`), and 8 to 10 name none because a line's
+   men are a property of what a line is rather than of the level, and are
+   settled in `prMakeCalc` where the walk is. */
 const PR_CALC_LEVELS = [
   { cap:'Mate in one, a queen and little else', task:'mate1', men:[['W','Q']], extra:[0,1], study:8000 },
   { cap:'A hanging piece to take',             task:'hanging', extra:[3,5], study:8000 },
@@ -12066,7 +12068,7 @@ const PR_CALC_LEVELS = [
    of. `levels` replaces the old `tiers`/`hard`/`needs`: a mode's levels are a
    recipe ladder, not a difficulty label — what a session is actually worth is
    the level the staircase below settles it on, not a tier picked by hand.
-   Six of the seven ladders above are the real thing; Progressive Blindfold
+   Nine of the ten ladders above are the real thing; Progressive Blindfold
    is still a provisional caption so the page runs, and `prMake` calls
    through today's generator (PR_MAKE) until a later phase gives it a recipe
    of its own. */
@@ -12092,6 +12094,9 @@ const PR_MODES = [
   { key:'forcing', name:'Forcing Lines', group:'holding', skill:'Calculation', lesson:5,
     desc:'A capturing sequence played out in your head — who ends up ahead, and by how much.',
     levels: PR_FORCING_LEVELS },
+  { key:'calc', name:'Blind Calculation', group:'calc', skill:'Calculation', lesson:9,
+    desc:'Find the move in a position you are holding, not looking at.',
+    levels: PR_CALC_LEVELS },
   { key:'hold', name:'Hold the Position', group:'holding', skill:'Holding', lesson:5,
     desc:'A small position, studied, then answered for with the men hidden.',
     levels: PR_HOLD_LEVELS },
@@ -13120,11 +13125,54 @@ function prForks(st){
   }
   return out;
 }
+/* The one capture worth finding, or nothing. Ranked by what the exchange on
+   that square is actually worth (`see`) rather than by the value of the man
+   standing on it: taking a rook that three men are defending is worth less
+   than taking a loose knight, and a drill that told the player otherwise
+   would be teaching them to count the wrong thing.
+
+   The uniqueness rule is strict, and about the *move* rather than the
+   square, because that is what this drill judges: a second capture worth as
+   much — including a second man able to take on the very same square — is a
+   second right answer, and marking it wrong would be the drill's mistake and
+   not the player's. */
+function prCalcHanging(st){
+  const net = m => see(st, m.to, st.turn);
+  const caps = legalMoves(st, st.turn).filter(m => m.cap && net(m) > 0).sort((a, b) => net(b) - net(a));
+  if (!caps.length) return null;
+  if (caps.length > 1 && net(caps[1]) >= net(caps[0])) return null;
+  return caps[0];
+}
+
+/* The shipped puzzle ladders, read for the two levels that ask a real
+   position rather than a built one. Cached per track for the life of the
+   page — three files of a few hundred kilobytes that never change under a
+   `?v=`, so fetching one twice would only be slower. A failure of any kind
+   resolves to an empty list rather than throwing: the levels that want a
+   puzzle have a generated stand-in to fall back to, and a drill that could
+   not start because a file was missing would be a worse answer than a
+   drill that quietly says so. The `typeof fetch` guard is what lets the
+   test harnesses, which have no fetch at all, take that same path. */
+const prPuzzleCache = {};
+function prPuzzlePool(track){
+  if (prPuzzleCache[track]) return prPuzzleCache[track];
+  prPuzzleCache[track] = (typeof fetch === 'function'
+    ? fetch('puzzles/' + track + '.json?v=' + PZ_VERSION).then(r => r.ok ? r.json() : []).catch(() => [])
+    : Promise.resolve([]));
+  return prPuzzleCache[track];
+}
+/* Which ladder a puzzle level draws from. Level 6 wants twelve men or fewer,
+   and that is what decides it rather than the caption: of the 58 shipped
+   opening puzzles not one has fewer than twenty-six men, so an opening track
+   under a twelve-man cap would refuse every position it was ever offered and
+   the level would silently be the generated stand-in for ever. The endgame
+   ladder is where the small positions actually live (137 of its 265 are
+   twelve men or fewer); the middlegame ladder is where the full ones do.
+   Read off the recipe rather than off the level number, so the cap and the
+   file it is applied to can never drift apart. */
+function prCalcTrack(r){ return r.maxMen <= 12 ? 'endgame' : 'middlegame'; }
+
 function prMakeCalc(r){
-  // 17b adds prPuzzlePool and generates these three from it (or, for `line`
-  // and `visualise`, from a played-out sequence); this half only builds the
-  // four verified-by-enumeration tasks above.
-  if (r.task === 'puzzle' || r.task === 'line' || r.task === 'visualise') return null;
   /* 800 rather than a round hundred: a lone queen against a random king
      (level 1's `mate1`) is mate in one on fewer than one random draw in
      fifty — a king boxed in by nothing but its own board edge is rare, and
@@ -13135,18 +13183,89 @@ function prMakeCalc(r){
      levels that build bigger positions (mate in two) succeed far sooner and
      never feel the difference. */
   for (let t = 0; t < 800; t++){
+    if (r.task === 'puzzle'){
+      /* A position out of the shipped ladders, and the move that ladder was
+         built around — the one task here whose answer is not this file's own
+         to verify, because tools/verify_puzzles.js already did it against a
+         native engine. `pool` is filled by the presenter once the fetch has
+         come back (prShowCalc); an empty one means the file is not there, and
+         a puzzle level then falls back to a built position of its own kind
+         rather than refusing to run. The fallback is flagged rather than
+         silent, because the presenter has to say so on screen. */
+      const pool = r.pool || [];
+      if (!pool.length)
+        return prMakeCalc(Object.assign({}, prRecipe('calc', r.maxMen <= 12 ? 4 : 5), { study:r.study, fallback:true }));
+      const p = prPick(pool), st = stateFromFEN(p.fen);
+      let men = 0;
+      for (let i = 0; i < 64; i++) if (st.b[i]) men++;
+      if (men > r.maxMen) continue;
+      // matched through uciOf rather than played from the string: the answer
+      // has to be one of this page's own legal moves, or nothing on the
+      // screen — the click, the judgement, the notation — can use it
+      const legal = legalMoves(st, st.turn), m = legal.filter(x => uciOf(x) === p.moves[0])[0];
+      if (!m) continue;
+      return { kind:'calc', st, task:'puzzle', answer:{ from:m.from, to:m.to, promo:m.promo || null }, pre:[], endAsk:null,
+               study:r.study, hidden:true, console:!!r.console, sig:'calc:puzzle:' + p.id };
+    }
     const counts = (r.men || []).map(x => [x[0] === 'W' ? W : B, x[1]]);
-    const extra = r.extra ? r.extra[0] + prRand(r.extra[1] - r.extra[0] + 1) : 0;
+    /* A walk needs men to walk with: the last three levels name no material
+       of their own, and two lone kings shuffling about is neither a line
+       worth reading nor a position a tactic can appear in. Six to ten extra
+       men is roughly the endgame the rest of this drill works in, and it is
+       kept here rather than in PR_CALC_LEVELS because it is a property of
+       what a line *is*, not of how hard any one of those levels is. */
+    const spread = r.extra || (r.plies ? [6, 10] : null);
+    const extra = spread ? spread[0] + prRand(spread[1] - spread[0] + 1) : 0;
     for (let k = 0; k < extra; k++) counts.push([Math.random() < .5 ? W : B, prPick(['P','P','N','B','R'])]);
     const built = prPosition(counts);
     if (!built) continue;
     let st = built.st;
+    if (r.task === 'line' || r.task === 'visualise'){
+      /* The moves are played rather than written: `prPickMove` chooses each
+         one (it prefers a move that is not simply taken, which is what keeps
+         a walk from reading as nonsense), `toSAN` names it against the
+         position it was played in, and the position the line reaches is the
+         one every claim below is read off. Nothing is asserted about a board
+         that was not actually arrived at. */
+      const n = r.plies[0] + prRand(r.plies[1] - r.plies[0] + 1), pre = [], touched = [];
+      let s = st, walked = true;
+      for (let k = 0; k < n; k++){
+        const all = legalMoves(s, s.turn);
+        if (!all.length){ walked = false; break; }
+        const m = prPickMove(s, all);
+        pre.push(toSAN(s, m, all));
+        touched.push(m.from, m.to);
+        s = makeMove(s, m);
+      }
+      if (!walked) continue;
+      if (r.task === 'line'){
+        // a square the line touched: whatever stands there once it is over is
+        // the one thing the player could only know by having followed it
+        const sq = prPick(touched), p = s.b[sq];
+        return { kind:'calc', st, task:'line', pre, ply:n, after:s, answer:null,
+                 endAsk:{ t:'what', sq, colour:p ? p.c : null, type:p ? p.t : null,
+                          text:'After those moves, what stands on <b>' + sqName(sq) + '</b>?' },
+                 study:r.study, hidden:true, console:!!r.console,
+                 sig:'calc:line:' + fenOf(st).split(' ')[0] + pre.join('') };
+      }
+      // and here the line is only the way in: the tactic has to be at the end
+      // of it, and it has to be the only one, or "find the move" names two
+      const mates = prMatesIn1(s);
+      const m = mates.length === 1 ? mates[0] : (mates.length ? null : prCalcHanging(s));
+      if (!m) continue;
+      return { kind:'calc', st, task:'visualise', pre, ply:n, after:s,
+               answer:{ from:m.from, to:m.to, promo:m.promo || null }, endAsk:null,
+               study:r.study, hidden:true, console:!!r.console,
+               sig:'calc:vis:' + fenOf(st).split(' ')[0] + pre.join('') };
+    }
     let found = null;
     if (r.task === 'mate1'){ const ms = prMatesIn1(st); if (ms.length === 1) found = ms[0]; }
     else if (r.task === 'mate2'){ if (prMatesIn1(st).length) continue; const ms = prMatesIn2(st); if (ms.length === 1) found = ms[0]; }
     else if (r.task === 'hanging'){
-      const caps = legalMoves(st, st.turn).filter(m => m.cap && see(st, m.to, st.turn) > 0).sort((a, b) => VAL[st.b[b.to].t] - VAL[st.b[a.to].t]);
-      if (caps.length && (caps.length === 1 || VAL[st.b[caps[0].to].t] > VAL[st.b[caps[1].to].t]) && !prMatesIn1(st).length) found = caps[0];
+      // a mate on the board would be the better move than any capture, so a
+      // position with one in it is not a "take the loose man" question
+      const cap = prCalcHanging(st);
+      if (cap && !prMatesIn1(st).length) found = cap;
     } else if (r.task === 'fork'){ const fs = prForks(st); if (fs.length === 1 && !prMatesIn1(st).length) found = fs[0]; }
     if (!found) continue;
     return { kind:'calc', st, task:r.task, answer:{ from:found.from, to:found.to, promo:found.promo || null }, pre:[], endAsk:null,
@@ -13345,7 +13464,8 @@ function prMakeMini(diff){
 const PR_MAKE = {
   square: r => prMakeSquare(r), lines: r => prMakeLines(r), piece: r => prMakePiece(r),
   attack: r => prMakeAttack(r),
-  tracker: r => prMakeTracker(r), after: r => prMakeAfter(r), forcing: r => prMakeForcing(r), hold: r => prMakeHold(r),
+  tracker: r => prMakeTracker(r), after: r => prMakeAfter(r), forcing: r => prMakeForcing(r),
+  calc: r => prMakeCalc(r), hold: r => prMakeHold(r),
   progressive: r => prMakeMini(r.level)
 };
 
@@ -13519,6 +13639,7 @@ function prPresent(){
     case 'tracker':  return prShowTracker(q);
     case 'after':    return prShowAfter(q);
     case 'forcing':  return prShowForcing(q);
+    case 'calc':     return prShowCalc(q);
     case 'hold':     return prShowHold(q);
   }
 }
@@ -14689,6 +14810,253 @@ function prForcingFinish(q){
                 ' ' + prForcingSummary(q);
     prJudge(ok, say, [], err);
   });
+}
+
+/* ---- 3d: blind calculation ----
+   Every other drill on this screen asks the player to *hold* a position.
+   This one asks them to work inside one: the position is studied, the men go
+   dark, and the answer is a move — entered by clicking the square it comes
+   from and the square it goes to on an empty board, or typed in notation at
+   the one level that takes the board away altogether.
+
+   Three things are shared with the drills above rather than rebuilt here.
+   The study half is prStudyPhase's, exactly as Hold the Position's and
+   Forcing Lines' are. A line, where there is one, is read as notation in
+   `prSeq` through the tracker's own numbering (prTrackerLine) — a walk read
+   in pairs is a walk read the way a game is. And the `line` levels' question
+   is prAskShow's `what`, the same glyph palette Piece Vision and Forcing
+   Lines answer with, because "what stands on e4" is one question however it
+   was arrived at.
+
+   What is this drill's own is the judgement, and it is deliberately not
+   string comparison: the move is looked up among `legalMoves` of the
+   position actually being asked about, so "there is no such move" and "that
+   move exists and is not the answer" are told apart — the first says the
+   player's picture of the board is wrong, the second that their calculation
+   is, and only the rules can say which. They are counted apart too, as
+   `square` and `other`. */
+function prShowCalc(q){
+  /* Levels 6 and 7 ask for a shipped puzzle position, and the file behind
+     one is fetched rather than carried. prMakeCalc has already handed back
+     the generated stand-in it falls back to (`fallback`), and this is where
+     the real thing replaces it if the fetch comes back with anything —
+     regenerating here rather than making the generator wait on a network
+     round trip, which would leave prMake with nothing to retry and prNext-
+     Question with nothing to put on screen. */
+  if (q.fallback){
+    const r = prRecipe('calc', PR.level);
+    prQ('Fetching a puzzle position…');
+    prSub('');
+    prPuzzlePool(prCalcTrack(r)).then(pool => {
+      // the question this was loading for is still the one on screen — PR.q
+      // is nulled by both prShowDash and prLeave, so this covers a player who
+      // has walked off the drill as well as one who has moved on to the next
+      // question while the file was in the air
+      if (PR.q !== q) return;
+      const real = pool.length ? prMakeCalc(Object.assign(r, { pool })) : null;
+      if (real){
+        PR.q = real;
+        if (real.sig) prSeenPush(real.sig);
+        prCalcRun(real, null);
+        return;
+      }
+      // both sentences are true of the case they are written for: a set that
+      // never arrived and a set with nothing in it for this level are two
+      // different things, and neither is worth saying about the other
+      prCalcRun(q, pool.length
+        ? 'No position in the puzzle set fits this level, so this is a generated one instead.'
+        : 'The puzzle set could not be fetched, so this is a generated position instead.');
+    });
+    return;
+  }
+  prCalcRun(q, null);
+}
+/* Which chair the board is drawn from: the side that has to find the move.
+   Everything this file builds is White to move, so this only ever matters for
+   a position out of the puzzle set — and there it matters a lot, since a
+   player asked to calculate for Black on a board drawn for White is being
+   asked to do the drill upside down as well. */
+const prCalcView = q => q.st.turn === B;
+
+/* The study half: the position, up and visible, for as long as the level
+   allows or until Ready cuts it short. `note` is the one thing a caller may
+   put above it — today only the fetch that failed — and it goes in the
+   question line rather than the instruction, because prStudyPhase writes the
+   countdown into prSub and would paint straight over it. */
+function prCalcRun(q, note){
+  prClearTimers();
+  prBoardOn(true);
+  prLayout(prCalcView(q), true);
+  prMen(true);
+  prPaint(q.st.b);
+  prMarksClear();
+  prSeq('');
+  let men = 0;
+  for (let i = 0; i < 64; i++) if (q.st.b[i]) men++;
+  prQ((note ? '<span class="pr-hint">' + note + '</span><br>' : '') +
+      'Study this position — <b>' + men + '</b> men, ' + prSide(q.st.turn) + ' to move.');
+  prStudyPhase(q.study, () => prCalcAsk(q));
+}
+/* The men go dark (or the board goes with them, at the console-only level),
+   the line — if this level has one — is read out, and only then is the
+   question answerable: PR.shownAt is set here rather than left where
+   prPresent put it, because the study phase is time the drill spent and not
+   time the player did, exactly as the tracker's own read-out reasons. */
+function prCalcAsk(q){
+  prClearTimers();
+  prMarksClear();
+  prCtl([]);
+  if (q.console) prBoardOn(false);
+  prMen(false);
+  if (q.pre.length) prSeq(prTrackerLine(q.pre.map(san => ({ san })), {}));
+  PR.shownAt = prNow();
+  if (q.task === 'line'){
+    prAskShow(q.endAsk, q.after, [['Reveal the position', () => prRevealPosition(q.after)]]);
+    return;
+  }
+  const st = q.after || q.st;
+  const take = prOnce((m, problem) => prCalcAnswer(q, m, problem));
+  prQ(prCalcAskText(q, st));
+  if (q.console){
+    prSub('Answer in notation: <b>Nf3</b>, <b>exd5</b>, <b>O-O</b>, <b>e8=Q</b> — or plain squares, <b>e2e4</b>.');
+    prAnsInput('your move…', 12, inp => {
+      const res = parseMoveIn(st, inp.value);
+      take(res.error ? null : res.move, res.error);
+    }, 'Play');
+    return;
+  }
+  // two clicks on an empty board: the square it comes from, then the square
+  // it goes to. Clicking the first square again takes it back, since a
+  // half-entered move on a board with nothing drawn on it is easy to lose
+  // track of and there is nothing else this click could sensibly mean.
+  prSub('Click the square it comes from, then the square it goes to.');
+  let from = null;
+  PR.click = i => {
+    if (from === null){
+      from = i;
+      prMarksClear();
+      prMark(i, 'pr-from');
+      prSub('From <b>' + sqName(i) + '</b> — now the square it goes to.');
+      return;
+    }
+    if (i === from){
+      from = null;
+      prMarksClear();
+      prSub('Click the square it comes from, then the square it goes to.');
+      return;
+    }
+    const f = from;
+    from = null;
+    prMarksClear();
+    const legal = legalMoves(st, st.turn);
+    // the promotion the answer wants, where the board cannot say: two clicks
+    // name two squares and nothing else, so a promotion is judged by them
+    const said = legal.filter(m => m.from === f && m.to === i);
+    take(said.filter(m => m.promo === (q.answer.promo || null))[0] || said[0] || null,
+         'There is no legal move from <b>' + sqName(f) + '</b> to <b>' + sqName(i) + '</b>.');
+  };
+}
+function prCalcAskText(q, st){
+  const who = prSide(st.turn) + ' to move — ';
+  if (q.task === 'mate1') return who + 'mate in one.';
+  if (q.task === 'mate2') return who + 'mate in two.';
+  if (q.task === 'hanging') return who + 'something is loose. Take it.';
+  if (q.task === 'fork') return who + 'one move wins material. Find it.';
+  // the one question asked of a position nobody has seen: the line was read,
+  // and this is where it ends up
+  if (q.task === 'visualise') return 'After those moves it is ' + prSide(st.turn) + ' to move. Find the move.';
+  return who + 'find the best move.';       // a puzzle, whose claim is the ladder's
+}
+/* Whether the answer was the answer. The squares are what a click can say,
+   so they are what a click is judged on; a typed move that names a
+   promotion piece as well has to name the right one. */
+function prCalcSame(m, a){
+  return m.from === a.from && m.to === a.to && (!a.promo || !m.promo || m.promo === a.promo);
+}
+/* Why the move is the move — read off the position it is played in rather
+   than remembered from generation, and silent where there is nothing it can
+   honestly say. A mate is a mate because the position after it has no reply;
+   a capture wins the man that was standing there. Nothing here guesses at an
+   idea the board does not show. */
+function prCalcWhy(q, st){
+  const m = legalMoves(st, st.turn).filter(x => prCalcSame(x, q.answer))[0];
+  if (!m) return '';
+  const after = makeMove(st, m);
+  if (inCheck(after, after.turn) && !legalMoves(after, after.turn).length) return 'It is mate.';
+  if (q.task === 'mate2') return 'Mate next move, whatever they answer.';
+  const victim = st.b[q.answer.to];
+  if (victim) return 'It wins ' + prMan(victim.c, victim.t) + '.';
+  if (q.task === 'fork') return 'It attacks two men at once.';
+  return '';
+}
+function prCalcSan(st, mv){
+  const all = legalMoves(st, st.turn), m = all.filter(x => prCalcSame(x, mv))[0];
+  return m ? toSAN(st, m, all) : sqName(mv.from) + '-' + sqName(mv.to);
+}
+/* One answer, judged once. A move that is not there at all and a move that
+   is there and is not the answer are two different mistakes and are recorded
+   as two: `square` says the position being held was wrong, `other` says the
+   calculation was. */
+function prCalcAnswer(q, m, problem){
+  if (PR.answered) return;
+  PR.click = null;
+  PR.onSubmit = null;
+  prAnsClear();
+  prCtl([]);
+  prSub('');
+  const st = q.after || q.st;
+  const ok = !!m && prCalcSame(m, q.answer);
+  // the why is left off rather than trailing an empty sentence: there is
+  // nothing this can honestly say about every move, and saying less is the
+  // same bargain the puzzle cards make
+  const why = prCalcWhy(q, st);
+  const truth = '<b>' + prCalcSan(st, q.answer) + '</b>.' + (why ? ' ' + why : '');
+  const say = ok ? 'Yes — ' + truth
+                 : (m ? '<b>' + toSAN(st, m, legalMoves(st, st.turn)) + '</b> is not it. The move was '
+                      : (problem || 'That move is not there.') + ' The move was ') + truth;
+  prCalcDemo(q, st, ok ? null : m, () => prJudge(ok, say, [], ok ? null : (m ? 'other' : 'square')));
+}
+/* The board comes back and the moves are played on it — a wrong move that
+   was at least legal first, with the answer to it, because "what happens if
+   I play that" is the question a player who chose it is actually asking; then
+   the position again, and the move that was there. Paced at Forcing Lines'
+   own replay speed and judged only once it has finished, so the verdict does
+   not race ahead of what is being shown. Every frame is makeMove()'s, and
+   the pieces are keyed by id, so a man slides rather than blinking. */
+function prCalcDemo(q, st, wrong, then){
+  prBoardOn(true);
+  prLayout(prCalcView(q), true);
+  prMen(true);
+  prPaint(st.b);
+  prMarksClear();
+  prSeq('');
+  const frames = [];
+  if (wrong){
+    const after = makeMove(st, wrong);
+    frames.push({ b:after.b, from:wrong.from, to:wrong.to, say:'You played <b>' + toSAN(st, wrong, legalMoves(st, st.turn)) + '</b>.' });
+    const reply = bestMove(after, 3);
+    if (reply){
+      const replies = legalMoves(after, after.turn);
+      frames.push({ b:makeMove(after, reply).b, from:reply.from, to:reply.to,
+                    say:'They answer <b>' + toSAN(after, reply, replies) + '</b>.' });
+    }
+    frames.push({ b:st.b, from:-1, to:-1, say:'The position again.' });
+  }
+  const right = legalMoves(st, st.turn).filter(x => prCalcSame(x, q.answer))[0];
+  if (right) frames.push({ b:makeMove(st, right).b, from:right.from, to:right.to,
+                           say:'<b>' + toSAN(st, right, legalMoves(st, st.turn)) + '</b> was the move.' });
+  let k = 0;
+  const step = () => {
+    if (k >= frames.length){ then(); return; }
+    const f = frames[k++];
+    prPaint(f.b);
+    prMarksClear();
+    if (f.from >= 0){ prMark(f.from, 'pr-from'); prMark(f.to, 'pr-target'); }
+    prSub(f.say);
+    prTimer(step, 900);
+  };
+  if (!frames.length){ then(); return; }
+  prTimer(step, 600);
 }
 
 /* ---- 4: hold the position ----

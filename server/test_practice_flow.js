@@ -204,7 +204,11 @@ function lsnDone(){ return lsnDoneStub; }
 /* ---- the real half ---- */
 var DECLS = ['VAL','FILES','rowOf','colOf','SQNAME','uciOf','sqName','sqIndex','onBoard','other',
              'idCounter','mk','DIR_N','DIR_B','DIR_R','DIR_K','PST','nodes','PIECE_NAME',
-             'GLYPH','pieceHTML','OPENING_BOOK','OPENING_LINES','W'];
+             'GLYPH','pieceHTML','OPENING_BOOK','OPENING_LINES','W',
+             // prPuzzlePool names it in the URL it fetches — never reached
+             // here, since this harness has no fetch at all, but the section
+             // is lifted whole and a name it reads has to be in scope
+             'PZ_VERSION'];
 // Note: this suite lifts the whole PRACTICE section as one block below, so
 // PR_VERSION, PR_V1_KEYS, PR_SEEN_MAX, prBlankMode, prUpgradeV1, prSeen,
 // prSeenHas, prSeenPush, prSeenKey, prToday and prTouchDay all come along
@@ -1150,6 +1154,207 @@ function forceForcing(level, pred){
   tick(9000);
   ok('and reaches the line on its own, without Ready', byId.prSeq.innerHTML.indexOf(q.line[0].san) >= 0, true);
   ok('the men went dark with it', byId.prBoard.classList.contains('blind'), true);
+  prShowDash();
+})();
+
+/* ============================================================
+   5d — Blind Calculation: a level 1 mate in one entered the way the drill
+   asks for it (two clicks on a board with nothing drawn on it), a position
+   out of the puzzle set, a level 8 line answered through prAskShow's glyph
+   palette, and the console-only level typed at. test_practice.js already
+   re-verifies every tactic this drill invents; what the presenter has to
+   prove on its own is that the position is studied before anything is asked,
+   that the men are gone by the time it is, that a move entered as two
+   squares is judged against the rules rather than against a string, and that
+   the two ways of being wrong — a move that is not there at all, and a move
+   that is there and is not the answer — are told apart and counted apart.
+   ============================================================ */
+head('Blind Calculation');
+
+/** A calculation question at `level` for which `pred` is true — mirrors
+    forceForcing/forceHold above: which of the level's tasks a draw produces
+    (and, at the line levels, what the line ends up asking) is the recipe's
+    own dice, and a deterministic pass needs one particular shape. */
+function forceCalc(level, pred){
+  for (var t = 0; t < 200; t++){
+    var q = prMakeCalc(prRecipe('calc', level));
+    if (q && pred(q)) return q;
+  }
+  throw new Error('could not force a level ' + level + ' calculation question matching the predicate');
+}
+
+(function(){
+  storage = {};
+  startDrill('calc', 1, 5);
+  var q = forceCalc(1, function(q){ return q.task === 'mate1'; });
+  presentForced(q);
+  ok('the position is on the board to study', byId.prBoard.classList.contains('blind'), false);
+  ok('and says how many men are on it', /Study this position/.test(byId.prQ.innerHTML), true);
+  ok('nothing is answerable yet', PR.click, null);
+
+  pressCtl('Ready');
+  ok('Ready takes the men away', byId.prBoard.classList.contains('blind'), true);
+  ok('and asks for the move', /mate in one/.test(byId.prQ.innerHTML), true);
+  ok('the board takes clicks now', PR.click !== null, true);
+
+  clickSquare(q.answer.from);
+  ok('the first click is the square it comes from', marked(q.answer.from, 'pr-from'), true);
+  ok('and judges nothing on its own', PR.answered, false);
+  clickSquare(q.answer.to);
+  ok('the verdict waits for the move to be played out', PR.answered, false);
+  tick(4000);
+  ok('and once it has, the right move is judged right', /right/.test(byId.prSay.className), true);
+  ok('the men are back with the move on the board', byId.prBoard.classList.contains('blind'), false);
+  ok('naming it', byId.prSay.innerHTML.indexOf('mate') >= 0, true);
+  prShowDash();
+})();
+
+(function(){
+  // clicking the same square twice takes the half-entered move back, which
+  // on a board with nothing drawn on it is the only thing it could mean
+  storage = {};
+  startDrill('calc', 1, 5);
+  var q = forceCalc(1, function(q){ return q.task === 'mate1'; });
+  presentForced(q);
+  pressCtl('Ready');
+  clickSquare(q.answer.from);
+  clickSquare(q.answer.from);
+  ok('a second click on the same square takes it back', marked(q.answer.from, 'pr-from'), false);
+  clickSquare(q.answer.from);
+  clickSquare(q.answer.to);
+  tick(4000);
+  ok('and the move can then be entered as it was meant', /right/.test(byId.prSay.className), true);
+  prShowDash();
+})();
+
+(function(){
+  // two squares with no move between them: the picture of the board being
+  // held is wrong, which prRecord counts as `square` — a different mistake
+  // from a move that exists and is not the answer, counted as `other` below
+  storage = {};
+  startDrill('calc', 1, 5);
+  var q = forceCalc(1, function(q){ return q.task === 'mate1'; });
+  presentForced(q);
+  pressCtl('Ready');
+  var empties = [];
+  for (var i = 0; i < 64; i++) if (!q.st.b[i]) empties.push(i);
+  clickSquare(empties[0]);
+  clickSquare(empties[1]);
+  tick(4000);
+  ok('a move that is not there is judged wrong', /wrong/.test(byId.prSay.className), true);
+  ok('and says so', /no legal move/.test(byId.prSay.innerHTML), true);
+  ok('counted as the position being wrong', prLoad().modes.calc.stats.errs.square, 1);
+  ok('and the answer is given', byId.prSay.innerHTML.indexOf('The move was') >= 0, true);
+  prShowDash();
+})();
+
+(function(){
+  // a legal move that is not the answer: it is played out, answered by the
+  // engine, and only then is the real move shown
+  storage = {};
+  startDrill('calc', 1, 5);
+  var q = forceCalc(1, function(q){ return q.task === 'mate1'; });
+  presentForced(q);
+  pressCtl('Ready');
+  var other = legalMoves(q.st, q.st.turn).filter(function(m){
+    return !(m.from === q.answer.from && m.to === q.answer.to);
+  })[0];
+  clickSquare(other.from);
+  clickSquare(other.to);
+  tick(600);
+  ok('the move the player chose is played on the board', byId.prSub.innerHTML.indexOf('You played') >= 0, true);
+  tick(4000);
+  ok('a legal move that is not the answer is judged wrong', /wrong/.test(byId.prSay.className), true);
+  ok('and counted apart from a move that was never there', prLoad().modes.calc.stats.errs.other, 1);
+  prShowDash();
+})();
+
+(function(){
+  // levels 6 and 7 cannot say what the question is until the shipped puzzle
+  // file has come back. The fetch itself is not something this harness can
+  // drive — it has no fetch at all, and everything it asserts is synchronous
+  // — but the screen a player sees while it is in the air is, and a drill
+  // that quietly took clicks for a question it had not shown yet would be a
+  // real bug rather than a cosmetic one.
+  storage = {};
+  startDrill('calc', 6, 5);
+  ok('a puzzle level says it is fetching one', /Fetching a puzzle position/.test(byId.prQ.innerHTML), true);
+  ok('and asks nothing until it has', PR.click, null);
+  prShowDash();
+})();
+
+(function(){
+  // a position out of the shipped puzzle set — the one thing this drill ever
+  // asks that can be Black to move, and the reason the board is drawn from
+  // the chair of whoever has to find the move rather than always White's.
+  // The pool is handed in directly here: what prShowCalc does with a real one
+  // is fetch it, and this harness has no fetch at all.
+  storage = {};
+  startDrill('calc', 7, 5);
+  var q = prMakeCalc(Object.assign(prRecipe('calc', 7), {
+    pool: [{ id:'t-1', fen:'3r2k1/5ppp/8/8/8/8/5PPP/6K1 b - - 0 1', moves:['d8d1'] }]
+  }));
+  ok('the puzzle set is where the position came from', q.task, 'puzzle');
+  presentForced(q);
+  ok('and the board is drawn from the chair of the side to move', PR.flipped, true);
+  pressCtl('Ready');
+  clickSquare(q.answer.from);
+  clickSquare(q.answer.to);
+  tick(4000);
+  ok('the move the file gives is the right answer', /right/.test(byId.prSay.className), true);
+  prShowDash();
+})();
+
+(function(){
+  // level 8 is a line rather than a position: the moves are read out as
+  // notation with the men gone, and the question at the end of it is
+  // prAskShow's own `what` — answered with the glyph palette
+  storage = {};
+  startDrill('calc', 8, 5);
+  var q = forceCalc(8, function(q){ return q.task === 'line' && !!q.endAsk.type; });
+  presentForced(q);
+  ok('the line is not read out during study', byId.prSeq.innerHTML, '');
+  pressCtl('Ready');
+  ok('the men go dark with Ready', byId.prBoard.classList.contains('blind'), true);
+  ok('and the line is read out as notation', byId.prSeq.innerHTML.indexOf(q.pre[0]) >= 0, true);
+  ok('every ply of it', byId.prSeq.innerHTML.indexOf(q.pre[q.pre.length - 1]) >= 0, true);
+  ok('the question is what stands there at the end', /what stands on/.test(byId.prQ.innerHTML), true);
+  ok('with a way to see the position it reaches', ctlButton('Reveal the position') !== null, true);
+
+  answerAskRight(q.endAsk);
+  ok('the right man is judged right', /right/.test(byId.prSay.className), true);
+  ok('and the deepest line answered right is on the record', prLoad().modes.calc.stats.ply, q.ply);
+  pressCtl('Reveal the position');
+  ok('Reveal brings the end position back', byId.prBoard.classList.contains('blind'), false);
+  prShowDash();
+})();
+
+(function(){
+  // level 10 takes the board away altogether: the line is read as notation
+  // and the move is typed in the game's own, through parseMoveIn — the same
+  // reader the console in a Complete Blindfold game uses
+  storage = {};
+  startDrill('calc', 10, 5);
+  var q = forceCalc(10, function(q){ return q.task === 'visualise' && !q.answer.promo; });
+  presentForced(q);
+  pressCtl('Ready');
+  ok('there is no board at all at this level', byId.prFrame.style.display, 'none');
+  ok('and no clicking anything', PR.click, null);
+  ok('the moves are read out', byId.prSeq.innerHTML.indexOf(q.pre[0]) >= 0, true);
+
+  typeAnswer('Qz9');
+  tick(4000);
+  ok('notation that is not a move is judged wrong', /wrong/.test(byId.prSay.className), true);
+  ok('and counted as the position being wrong', prLoad().modes.calc.stats.errs.square, 1);
+  ok('the board comes back to show what the move was', byId.prFrame.style.display, '');
+
+  pressCtl('Next');
+  var q2 = forceCalc(10, function(q){ return q.task === 'visualise' && !q.answer.promo; });
+  presentForced(q2);
+  pressCtl('Ready');
+  typeAnswer(sqName(q2.answer.from) + sqName(q2.answer.to));
+  tick(4000);
+  ok('and plain squares are read as the move they name', /right/.test(byId.prSay.className), true);
   prShowDash();
 })();
 
