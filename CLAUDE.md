@@ -385,8 +385,10 @@ its own on `profiles`: `rating` is the Sighted ladder and has been since
 hand-run file, after the system profiles — shaped exactly like `rating`
 (`integer not null default 100`) and closed to the browser exactly like it:
 the file restates the column grant the setup file wrote, and
-`tools/check_supabase_visions.py` proves it against the real project. The
-keys that name them are `G.mode`'s — `LB_VISIONS` in the page and
+`tools/check_supabase_visions.py` proves it against the real project.
+`supabase-migrate-practice.sql` is the next hand-run file after them, adding
+the `practice_progress` table and nothing else, proved against the real
+project by `tools/check_supabase_practice.py`. The keys that name them are `G.mode`'s — `LB_VISIONS` in the page and
 `VISION_COLUMNS` in `server/supabase_db.py` are the same table twice, and the
 `CASE` inside `record_rated_game()` is it a third time; `test_visions.py` and
 `test_leaderboard.js` hold the three to each other, because a rating moved
@@ -431,10 +433,7 @@ visions file above, `rating`, `complete_blindfold_rating`,
 `board_only_rating` and `fog_of_war_rating`, read by `RATING_COL`, which *is*
 `supabase_db.VISION_COLUMNS` rather than a copy. `supabase-migrate-league.sql`
 owns no rating and seeds no player: it adds the league's memory (the two
-tables and three functions below) and refuses to run before the visions file.
-(`supabase-migrate-practice.sql` is unrelated to any of this — run once by
-hand like the rest, it only adds `practice_progress`, the drills' own
-progress table, owner-only.) The pool is the leaderboard itself:
+tables and three functions below) and refuses to run before the visions file. The pool is the leaderboard itself:
 `top()` ranks a ladder exactly as the home page does (rating descending, then
 name) and takes twenty, and `eligible()` keeps the `is_bot` accounts among
 them — re-read every minute and after every result, so an account that falls

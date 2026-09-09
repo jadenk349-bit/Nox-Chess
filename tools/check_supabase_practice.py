@@ -15,10 +15,11 @@ this asks for one access token and runs the checks that need it.
     3. SUPABASE_TEST_TOKEN='eyJ...' python3 tools/check_supabase_practice.py
 
 What it writes: one row in practice_progress under mode 'probe', which is not
-a real drill name (they are all `coord`, `piece`, `track`, `sequence`, `mini`,
-and the like) and so cannot be read as progress on any real drill. The row is
-left behind because the browser role has no DELETE grant on purpose; the
-command to remove it is printed at the end.
+a real mode key (they are `square`, `lines`, `piece`, `attack`, `hold`,
+`tracker`, `after`, `forcing`, `calc`, `branches`, `progressive`, and the
+reserved `course` row) and so cannot be read as progress on any real drill.
+The row is left behind because the browser role has no DELETE grant on
+purpose; the command to remove it is printed at the end.
 
 The project URL and publishable key are read out of blind-chess.html, so this
 cannot end up checking a different project from the one the game talks to.
