@@ -11941,6 +11941,27 @@ const PR_ATTACK_LEVELS = [
   { cap:'From the notation, more men',       kinds:['attackers','hanging','pinned'], men:[3,4], board:false, kingZone:true }
 ];
 
+/* Hold the Position's own ladder — declared ahead of PR_MODES for the same
+   reason the other four are. `men` is what a level is actually worth (both
+   kings are free, on top of it); `study` is how long the position stays up;
+   `modes` is which of the three answer shapes a level may draw from, since a
+   beginner asked to rebuild eight men has been given a different drill, not
+   a harder question. `realistic` switches the source position from random
+   material to a position that has actually arisen (prGamePosition, cut down
+   by prCluster) — see the note on prGamePosition below for why that matters
+   from level 4 on — and `hint` is when the "kings first" line is worth
+   printing, which is exactly the levels realistic enough for the order to be
+   worth following. */
+const PR_HOLD_LEVELS = [
+  { cap:'Two men, eight seconds',            men:2,  study:8000, modes:['question'] },
+  { cap:'Three men',                         men:3,  study:8000, modes:['question'] },
+  { cap:'Four men, spot the change',         men:4,  study:7000, modes:['question','change'] },
+  { cap:'Six men from a real game, kings first', men:6, study:7000, modes:['question','change','rebuild'], realistic:true, hint:true },
+  { cap:'Eight men, rebuild',                men:8,  study:6000, modes:['change','rebuild'], realistic:true, hint:true },
+  { cap:'Ten men',                           men:10, study:5000, modes:['question','rebuild'], realistic:true },
+  { cap:'Twelve men, four seconds',          men:12, study:4000, modes:['change','rebuild'], realistic:true }
+];
+
 /* Each drill, in the order the dashboard lists them. `group` clusters related
    drills for the dashboard (Task 22); `lesson` is the course step it grows out
    of. `levels` replaces the old `tiers`/`hard`/`needs`: a mode's levels are a
@@ -11968,7 +11989,7 @@ const PR_MODES = [
     levels:[{cap:'One piece, two moves'},{cap:'Longer, with captures'},{cap:'Two pieces, five moves'}] },
   { key:'hold', name:'Hold the Position', group:'holding', skill:'Holding', lesson:5,
     desc:'A small position, studied, then answered for with the men hidden.',
-    levels:[{cap:'4–6 men'},{cap:'7–12 men'},{cap:'13–20 men'}] },
+    levels: PR_HOLD_LEVELS },
   { key:'progressive', name:'Progressive Blindfold', group:'play', skill:'Blindfold play', lesson:10,
     desc:'Whole small games with the board taken away one step at a time.',
     levels:[{cap:'Two men each side'},{cap:'Three each'},{cap:'Four each'}] }
@@ -12718,20 +12739,104 @@ function prMakeTrack(diff){
   return null;
 }
 
-/* 4 — POSITION MEMORY. A legal position, a few seconds to look at it, and then
-   one question about it with the men gone. Beginners get four to six men on
-   purpose: a full board memorised badly teaches nothing. */
-function prMakeMemory(diff){
-  const men = diff <= 1 ? 2 + prRand(3) : diff === 2 ? 5 + prRand(6) : 11 + prRand(8);
+/* 4 — HOLD THE POSITION. A legal position, a few seconds to look at it, and
+   then one question about it with the men gone — or a change to catch, or the
+   whole thing to rebuild from nothing.
+
+   A position that has actually arisen: `plies` sane moves from the start.
+   Random men are not what a blindfold player ever holds (Saariluoma 1989),
+   so from level 4 the men come from here and are cut down around a king. */
+function prGamePosition(plies){
+  let st = newState();
+  for (let k = 0; k < plies; k++){
+    const pick = bookMove(st, k, prRand);
+    if (!pick) break;
+    st = makeMove(st, pick.m);
+  }
+  return st;
+}
+/* Both kings stay, however few `men` asks for — a position missing one is not
+   a position legalMoves() can even be asked about. The rest are kept by
+   distance from whichever king this pass is judging by, with a little jitter
+   so the cluster is not the same handful every time a hand of it is drawn.
+   Checking the man on the move (`inCheck`) before returning is what stops the
+   trim itself inventing a check nobody gave — a discovered "attack" made only
+   of pieces the trim removed is not a real position either. */
+function prCluster(st, men){
+  for (let t = 0; t < 20; t++){
+    const side = Math.random() < .5 ? W : B, k = kingSq(st, side);
+    const others = [];
+    for (let i = 0; i < 64; i++){
+      const p = st.b[i];
+      if (p && p.t !== 'K') others.push({ i, d: Math.max(Math.abs(rowOf(i) - rowOf(k)), Math.abs(colOf(i) - colOf(k))) + Math.random() * .5 });
+    }
+    others.sort((a, b) => a.d - b.d);
+    const keep = new Set(others.slice(0, men).map(o => o.i));
+    const b = Array(64).fill(null);
+    for (let i = 0; i < 64; i++) if (st.b[i] && (st.b[i].t === 'K' || keep.has(i))) b[i] = st.b[i];
+    const out = { b, turn: st.turn, cr:{ wK:0, wQ:0, bK:0, bQ:0 }, ep:-1, half:0, full:1 };
+    if (inCheck(out, other(out.turn))) continue;
+    return out;
+  }
+  return null;
+}
+/* Fine's order: the king, what stands beside it, the pawns, then the rest.
+   Reuben Fine's own claim about how a strong blindfold player actually holds
+   a position — locate the kings, take in what stands close to them, count
+   the pawns, and only then the rest — is the order this asks in, king and
+   "beside" shuffled against each other so the two are not always asked in the
+   same sequence relative to one another, pawns and the fallback always last.
+   Falling through to prAskAbout is what keeps every level answerable: a
+   two-man position has nothing "beside" a king to ask about and no pawns to
+   count, and the old, plainer question kinds still apply to it. */
+function prAskFine(st){
+  const men = []; for (let i = 0; i < 64; i++) if (st.b[i]) men.push({ p:st.b[i], i });
+  const order = ['king','beside','pawns','rest'];
+  for (const kind of prShuffle(order.slice(0, 2)).concat(order.slice(2))){
+    if (kind === 'king'){
+      const c = Math.random() < .5 ? W : B;
+      return { t:'where', sq:kingSq(st, c), colour:c, type:'K', text:'Where is ' + prMan(c, 'K') + '?' };
+    }
+    if (kind === 'beside'){
+      const c = Math.random() < .5 ? W : B, k = kingSq(st, c);
+      const near = men.filter(m => m.i !== k && Math.max(Math.abs(rowOf(m.i) - rowOf(k)), Math.abs(colOf(m.i) - colOf(k))) <= 1);
+      if (!near.length) continue;
+      const m = prPick(near);
+      return { t:'what', sq:m.i, colour:m.p.c, type:m.p.t, text:'What stands beside ' + prSide(c) + "'s king, on <b>" + sqName(m.i) + '</b>?' };
+    }
+    if (kind === 'pawns'){
+      const c = Math.random() < .5 ? W : B;
+      const n = men.filter(m => m.p.c === c && m.p.t === 'P').length;
+      if (n > 6) continue;
+      return { t:'count', colour:c, type:'P', n, text:'How many ' + prSide(c) + ' pawns are there?' };
+    }
+  }
+  return prAskAbout(st, false);
+}
+/* One generator for all three answer shapes, because they are one drill
+   asked three ways rather than three drills that happen to share a ladder:
+   `question` is Fine's order above; `change` swaps in one legal move so the
+   player is comparing what they held against what is really there;
+   `rebuild` hands the position back a man at a time. `sig` is the position
+   alone (not the mode or the question), so the same six men studied as a
+   `question` last week and a `change` today are still recognised as one
+   position for prSeenHas's sake. */
+function prMakeHold(r){
   for (let t = 0; t < 40; t++){
-    const built = prPosition(prMaterial(men));
-    if (!built) continue;
-    const ask = prAskAbout(built.st, false);
-    if (!ask) continue;
-    return {
-      kind:'memory', st: built.st, ask,
-      study: diff <= 1 ? 7000 : diff === 2 ? 6000 : 5000
-    };
+    let st;
+    if (r.realistic){ st = prCluster(prGamePosition(10 + prRand(16)), r.men); if (!st) continue; }
+    else { const built = prPosition(prMaterial(r.men)); if (!built) continue; st = built.st; }
+    const mode = prPick(r.modes);
+    const q = { kind:'hold', st, mode, study:r.study, hint:!!r.hint, sig:'hold:' + fenOf(st).split(' ')[0] };
+    if (mode === 'question'){ q.ask = prAskFine(st); if (!q.ask) continue; }
+    else if (mode === 'change'){
+      const legal = legalMoves(st, st.turn); if (!legal.length) continue;
+      const m = prPickMove(st, legal);
+      q.change = { from:m.from, to:m.to, cap:!!m.cap, after: makeMove(st, m) };
+    } else {
+      q.want = []; for (let i = 0; i < 64; i++) if (st.b[i]) q.want.push({ sq:i, c:st.b[i].c, t:st.b[i].t });
+    }
+    return q;
   }
   return null;
 }
@@ -12851,14 +12956,14 @@ function prMakeMini(diff){
 /* PR_MODES names seven drills today; the generators above still answer to
    eight keys, because prMakeSequence is not gone, only unreachable from the
    dashboard until Task 14 gives Blindfold Sequence an entry of its own. Square
-   Trainer, Lines & Routes and Attack Vision read their whole recipe —
-   `kinds` and whatever else their own ladder carries — rather than a bare
-   difficulty number, because a level is what question it offers as much as
-   how hard it is; the rest still take `r.level` alone. */
+   Trainer, Lines & Routes, Attack Vision and Hold the Position read their
+   whole recipe — `kinds`/`modes` and whatever else their own ladder carries —
+   rather than a bare difficulty number, because a level is what question it
+   offers as much as how hard it is; the rest still take `r.level` alone. */
 const PR_MAKE = {
   square: r => prMakeSquare(r), lines: r => prMakeLines(r), piece: r => prMakePiece(r),
   attack: r => prMakeAttack(r),
-  tracker: r => prMakeTrack(r.level), hold: r => prMakeMemory(r.level),
+  tracker: r => prMakeTrack(r.level), hold: r => prMakeHold(r),
   progressive: r => prMakeMini(r.level)
 };
 
@@ -13033,7 +13138,7 @@ function prPresent(){
     case 'piece':    return prShowPiece(q);
     case 'attack':   return prShowAttack(q);
     case 'track':    return prShowTrack(q);
-    case 'memory':   return prShowMemory(q);
+    case 'hold':     return prShowHold(q);
     case 'sequence': return prShowSequence(q);
   }
 }
@@ -13658,8 +13763,12 @@ function prTrackReveal(q){
   prTimer(step, 420);
 }
 
-/* ---- 4: position memory ---- */
-function prShowMemory(q){
+/* ---- 4: hold the position ----
+   One presenter for all three answer shapes prMakeHold hands back, because
+   the study half — paint the position, count the men down, let Ready cut it
+   short — is identical for all three and only what happens once the men go
+   dark differs. */
+function prShowHold(q){
   prBoardOn(true);
   prLayout(false, true);
   prMen(true);
@@ -13667,12 +13776,64 @@ function prShowMemory(q){
   prMarksClear();
   let men = 0;
   for (let i = 0; i < 64; i++) if (q.st.b[i]) men++;
-  prQ('Study this position — <b>' + men + '</b> men.');
+  prQ('Study this position — <b>' + men + '</b> men.' +
+      (q.hint ? '<br><span class="pr-hint">Kings first. Then what stands beside them. Then the pawns.</span>' : ''));
   prStudyPhase(q.study, () => {
+    if (q.mode === 'question'){
+      prMen(false);
+      prMarksClear();
+      PR.shownAt = prNow();
+      prAskShow(q.ask, q.st, [['Reveal the position', () => prRevealPosition(q.st)]]);
+      return;
+    }
+    if (q.mode === 'change'){
+      // the board goes dark the instant study ends, exactly as for a
+      // question, and stays dark for a beat longer: the man that is about to
+      // move must never be seen moving, or "what changed" answers itself.
+      prMen(false);
+      prMarksClear();
+      prTimer(() => {
+        prPaint(q.change.after.b);
+        prMen(true);
+        prMarksClear();
+        PR.shownAt = prNow();
+        prQ('What changed? Click the square the moved man came from.');
+        prSub('');
+        PR.click = i => prAnswerChange(i, q);
+      }, 1500);
+      return;
+    }
+    // rebuild
     prMen(false);
-    prMarksClear();
-    prAskShow(q.ask, q.st, [['Reveal the position', () => prRevealPosition(q.st)]]);
+    prClearPieces();
+    prRebuildStart(q.want, {
+      say: 'Rebuild it.',
+      done: res => prJudge(!res.wrong.length && !res.missing.length,
+        res.missing.length
+          ? 'Forgotten: ' + res.missing.map(p => prMan(p.c, p.t) + ' on ' + sqName(p.sq)).join(', ') + '.'
+          : 'Every man where it stood.',
+        [], 'square')
+    });
   });
+}
+/* A `change` question's answer is a square, exactly as `where` is, but what
+   it is checked against is a move rather than a static fact — so a click on
+   the square the man moved TO is not just any wrong square, it is the
+   specific mistake of trusting the ghost of where the man used to stand
+   (which now looks, to an eye that skipped the study, like where it still
+   is). That gets its own name, `ghost`, in PR_ERRS rather than falling into
+   the general `square` bucket every other missed click does. */
+function prAnswerChange(i, q){
+  const ok = i === q.change.from;
+  prMarksClear();
+  if (!ok) prMark(i, 'pr-wrong');
+  prMark(q.change.from, 'pr-right');
+  const took = q.change.cap ? ', and the man on <b>' + sqName(q.change.to) + '</b> was taken' : '';
+  prJudge(ok,
+    (ok ? 'Yes — the man moved from ' : 'It moved from ') +
+      '<b>' + sqName(q.change.from) + '</b> to <b>' + sqName(q.change.to) + '</b>' + took + '.',
+    [['Reveal the position', () => prRevealPosition(q.change.after)]],
+    i === q.change.to ? 'ghost' : 'square');
 }
 /* A countdown that can be cut short, and cannot fire twice. */
 function prStudyPhase(ms, then){

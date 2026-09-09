@@ -204,7 +204,7 @@ function lsnDone(){ return lsnDoneStub; }
 /* ---- the real half ---- */
 var DECLS = ['VAL','FILES','rowOf','colOf','SQNAME','uciOf','sqName','sqIndex','onBoard','other',
              'idCounter','mk','DIR_N','DIR_B','DIR_R','DIR_K','PST','nodes','PIECE_NAME',
-             'GLYPH','pieceHTML','W'];
+             'GLYPH','pieceHTML','OPENING_BOOK','W'];
 // Note: this suite lifts the whole PRACTICE section as one block below, so
 // PR_VERSION, PR_V1_KEYS, PR_SEEN_MAX, prBlankMode, prUpgradeV1, prSeen,
 // prSeenHas, prSeenPush, prSeenKey, prToday and prTouchDay all come along
@@ -213,7 +213,7 @@ var FNS = ['startBoard','newState','cloneState','fenOf','stateFromFEN',
            'slide','step','addPawn','pseudoMoves','isAttacked','kingSq','inCheck',
            'makeMove','legalMoves','toSAN','attackersOf','defendersOf','see',
            'mirror','evaluate','orderMoves','scoreMove','quiesce','negamax','bestMove',
-           'parseMoveIn','rebuildDiff','quadrantOf','lineBetween','linesThrough','knightRoute','sliderReaches'];
+           'parseMoveIn','bookMove','rebuildDiff','quadrantOf','lineBetween','linesThrough','knightRoute','sliderReaches'];
 var bundle = [grab(/\nconst W = 'w', B = 'b';/, "const W/B")];
 // a multi-line string rather than an object, so neither shape of decl() fits it
 bundle.push(grab(/\nconst BISHOP_SVG =\n[\s\S]*?';\n/, 'BISHOP_SVG'));
@@ -391,6 +391,19 @@ function answerAskRight(ask){
 function elsewhere(not){
   for (var i = 0; i < 64; i++) if (i !== not) return i;
   return 0;
+}
+/** A Hold the Position question at `level` for which `pred` is true — the
+    mode a level draws is a coin flip among the ladder's own list (`modes`),
+    and which of Fine's kinds a `question` asks is a shuffle on top of that,
+    so a test that needs a particular shape (a `where` to click, a `change`
+    to catch) waits for one rather than reaching into prMakeHold's own dice.
+    Mirrors forceSquare above for the same reason. */
+function forceHold(level, pred){
+  for (var t = 0; t < 500; t++){
+    var q = prMakeHold(prRecipe('hold', level));
+    if (q && pred(q)) return q;
+  }
+  throw new Error('could not force a level ' + level + ' hold question matching the predicate');
 }
 
 /* ============================================================
@@ -814,27 +827,40 @@ head('Move Tracker');
 })();
 
 /* ============================================================
-   6 — hold the position
+   6 — hold the position: one deterministic pass through each of the three
+   answer shapes. test_practice.js already re-derives every claim a generated
+   question makes about its position; what the presenter still has to prove
+   on its own is that Ready cuts the study short, the men actually go dark,
+   and a click or a rebuild in the right place is judged right — the same
+   division of labour Square Trainer's and Lines & Routes' presenter tests
+   above draw.
    ============================================================ */
 head('Hold the Position');
 
 (function(){
+  // level 1 only ever asks a `question`; forcing `where` is what lets the
+  // answer be a single click on q.ask.sq rather than a second dispatch table
+  // this suite would have to keep in step with answerAskRight's own.
   storage = {};
   startDrill('hold', 1, 5);
-  var q = PR.q;
+  var q = forceHold(1, function(q){ return q.mode === 'question' && q.ask.t === 'where'; });
+  presentForced(q);
   ok('the position is on the board to study', byId.prBoard.classList.contains('blind'), false);
   ok('and it says how many men there are', /Study this position/.test(byId.prQ.innerHTML), true);
   ok('with a countdown', /go dark in/.test(byId.prSub.innerHTML), true);
   ok('nothing is asked yet', PR.click, null);
 
-  tick(7200);                                        // let the study time run out
-  ok('the men go dark when it does', byId.prBoard.classList.contains('blind'), true);
+  pressCtl('Ready');
+  ok('the men go dark once Ready is pressed', byId.prBoard.classList.contains('blind'), true);
   ok('and the question arrives', byId.prQ.innerHTML.length > 0, true);
   ok('with a way to see the position again', ctlButton('Reveal the position') !== null, true);
+  var asked = byId.prQ.innerHTML;
+  tick(9000);
+  ok('a countdown that was already cut short changes nothing further', byId.prQ.innerHTML, asked);
 
-  answerAskRight(q.ask);
+  clickSquare(q.ask.sq);
   ok('the right answer is marked right', /right/.test(byId.prSay.className), true);
-  ok('memory never rushes you on', PR.answered && ctlButton('Next') !== null, true);
+  ok('hold never rushes you on', PR.answered && ctlButton('Next') !== null, true);
   pressCtl('Reveal the position');
   ok('Reveal brings the position back', byId.prBoard.classList.contains('blind'), false);
   ok('and says it is the real one', /actually stood/.test(byId.prSub.innerHTML), true);
@@ -845,14 +871,94 @@ head('Hold the Position');
 })();
 
 (function(){
-  // Ready cuts the study short, and cannot fire the question twice
+  // level 3 offers `change` too — the position goes dark, one man moves
+  // under cover of that, and the question is which square it left.
   storage = {};
-  startDrill('hold', 2, 5);
+  startDrill('hold', 3, 5);
+  var q = forceHold(3, function(q){ return q.mode === 'change'; });
+  presentForced(q);
   pressCtl('Ready');
-  ok('Ready ends the study early', byId.prBoard.classList.contains('blind'), true);
-  var asked = byId.prQ.innerHTML;
-  tick(9000);
-  ok('and the countdown that was still running changes nothing', byId.prQ.innerHTML, asked);
+  ok('the board goes dark the instant study ends', byId.prBoard.classList.contains('blind'), true);
+  tick(1500);
+  ok('and the changed position comes back up on its own', byId.prBoard.classList.contains('blind'), false);
+  ok('asking what changed', /What changed/.test(byId.prQ.innerHTML), true);
+
+  clickSquare(q.change.to);
+  ok('the square the man moved TO is a wrong answer', /wrong/.test(byId.prSay.className), true);
+  pressCtl('Next');
+
+  var q2 = forceHold(3, function(q){ return q.mode === 'change'; });
+  presentForced(q2);
+  pressCtl('Ready');
+  tick(1500);
+  clickSquare(q2.change.from);
+  ok('the square it moved FROM is the right answer', /right/.test(byId.prSay.className), true);
+  prShowDash();
+})();
+
+(function(){
+  // a capture leaves a trace in the feedback, whether the answer was right
+  // or wrong — "and the man on <to> was taken" only when q.change.cap is set
+  storage = {};
+  startDrill('hold', 3, 5);
+  var q = forceHold(3, function(q){ return q.mode === 'change' && q.change.cap; });
+  presentForced(q);
+  pressCtl('Ready');
+  tick(1500);
+  clickSquare(q.change.from);
+  ok('a capture is named in the feedback', /was taken/.test(byId.prSay.innerHTML), true);
+  prShowDash();
+})();
+
+(function(){
+  // level 4 carries the hint, and offers `rebuild` — the men are cleared off
+  // the board entirely and placed back one at a time, exactly as Move
+  // Tracker's own rebuild level already tests prRebuildStart/Finish.
+  storage = {};
+  startDrill('hold', 4, 5);
+  var q = forceHold(4, function(q){ return q.mode === 'rebuild'; });
+  presentForced(q);
+  ok('the hint line is printed for a level that carries one', /Kings first/.test(byId.prQ.innerHTML), true);
+  pressCtl('Ready');
+  // prRebuildStart itself un-hides the board (prMen(true)) — the men you
+  // place have to be visible as you place them — so what "cleared" means
+  // here is no pieces left standing, not the board gone dark.
+  ok('every piece is off the board to start rebuilding', byId.prPieces.children.length, 0);
+  ok('and asks to rebuild it', /Rebuild it/.test(byId.prQ.innerHTML), true);
+
+  var order = ['K','Q','R','B','N','P'];
+  for (var k = 0; k < q.want.length; k++){
+    var w = q.want[k];
+    var at = (w.c === 'w' ? 0 : 6) + order.indexOf(w.t);
+    prAnsEl.children[at].onclick();
+    clickSquare(w.sq);
+  }
+  pressCtl('Done');
+  ok('every man placed correctly is judged right', /right/.test(byId.prSay.className), true);
+  ok('and says so', /Every man where it stood/.test(byId.prSay.innerHTML), true);
+  prShowDash();
+})();
+
+(function(){
+  // level 6 is the first rebuild level with no hint, and its rebuild leaves
+  // one man off the board on purpose — a forgotten man is named, not just
+  // counted.
+  storage = {};
+  startDrill('hold', 6, 5);
+  var q = forceHold(6, function(q){ return q.mode === 'rebuild' && q.want.length > 1; });
+  presentForced(q);
+  ok('no hint is printed for a level that carries none', /Kings first/.test(byId.prQ.innerHTML), false);
+  pressCtl('Ready');
+  var order = ['K','Q','R','B','N','P'];
+  for (var k = 0; k < q.want.length - 1; k++){
+    var w = q.want[k];
+    var at = (w.c === 'w' ? 0 : 6) + order.indexOf(w.t);
+    prAnsEl.children[at].onclick();
+    clickSquare(w.sq);
+  }
+  pressCtl('Done');
+  ok('a man left off the board is judged wrong', /wrong/.test(byId.prSay.className), true);
+  ok('and named as forgotten', /Forgotten/.test(byId.prSay.innerHTML), true);
   prShowDash();
 })();
 

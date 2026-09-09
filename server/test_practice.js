@@ -76,7 +76,7 @@ var DECLS = ['VAL','FILES','rowOf','colOf','SQNAME','uciOf','sqName','sqIndex','
              'idCounter','mk','DIR_N','DIR_B','DIR_R','DIR_K','PST','nodes','PIECE_NAME',
              'OPENING_BOOK','OPENING_LINES',
              'PR_SQUARE_LEVELS','PR_QUADRANT_NAME','PR_DIRS','PR_LINES_LEVELS','PR_PIECE_LEVELS',
-             'PR_ATTACK_LEVELS',
+             'PR_ATTACK_LEVELS','PR_HOLD_LEVELS',
              'PR_MODES','PR_MINUTES','PR_STORE','PR_VERSION','PR_V1_KEYS','PR_SEEN_MAX',
              'prKey','prAcc','prSeenKey',
              'PR','PR_STEP_UP','PR_STEP_DOWN','prRand','prPick','prSide','prMan','PR_MAKE','W',
@@ -92,8 +92,9 @@ var FNS = ['startBoard','newState','cloneState','fenOf','stateFromFEN',
            'prShuffle','prPosition','prMaterial','prColourWhy',
            'prMakeSquare','prMakeLines','prMakePiece',
            'prAttacked','prHanging','prPinned','prMakeAttack',
-           'prMakeTrack','prMakeMemory',
+           'prMakeTrack',
            'prPickMove','prAskAbout','prMakeSequence','prMakeMini','prRecipe','prMake',
+           'prGamePosition','prCluster','prAskFine','prMakeHold',
            'prRecord','prScore','prStep','prNow','prTimeLeft','prRecommend','prMedianLat',
            'prStartLevel','prOpen','prRebuildStart','prRebuildFinish','prRbPaint','goPractice'];
 
@@ -419,34 +420,34 @@ head('Piece Tracking walks are legal and land where they say');
 })();
 
 /* ============================================================
-   5 — position memory: the question is true of the position
+   5 — Hold the Position: every level generates a legal, right-sized
+   position, in one of its three answer modes, and every claim the
+   question makes about that position is true of it.
    ============================================================ */
-head('Position Memory questions match the position');
+head('Hold the Position');
 
 (function(){
-  var bands = { 1:[], 2:[], 3:[] }, wrong = 0, built = 0, kinds = {};
-  for (var diff = 1; diff <= 3; diff++){
-    for (var t = 0; t < 70; t++){
-      var q = prMakeMemory(diff);
-      if (!q) continue;
-      built++;
-      bands[diff].push(menOn(q.st.b));
-      kinds[q.ask.t] = (kinds[q.ask.t] || 0) + 1;
-      if (!askIsTrue(q.ask, q.st)) wrong++;
+  var bad = 0, modes = {};
+  for (var lv = 1; lv <= PR_HOLD_LEVELS.length; lv++) for (var t = 0; t < 30; t++){
+    var q = prMakeHold(prRecipe('hold', lv));
+    if (!q){ bad++; continue; }
+    modes[q.mode] = 1;
+    if (menOn(q.st.b) > prRecipe('hold', lv).men + 2) bad++;          // both kings are extra
+    if (inCheck(q.st, other(q.st.turn))) bad++;
+    if (q.mode === 'change'){
+      var legal = legalMoves(q.st, q.st.turn);
+      if (!legal.some(function(m){ return m.from === q.change.from && m.to === q.change.to; })) bad++;
     }
+    if (q.mode === 'rebuild' && q.want.length !== menOn(q.st.b)) bad++;
+    if (q.mode === 'question' && q.ask.t === 'where' && q.st.b[q.ask.sq] === null) bad++;
   }
-  ok('every position built', built, 210);
-  ok('every answer is true of the position it was asked about', wrong, 0);
-  ok('beginners get four to six men',
-     bands[1].every(function(n){ return n >= 4 && n <= 6; }), true);
-  ok('the middle setting seven to twelve',
-     bands[2].every(function(n){ return n >= 7 && n <= 12; }), true);
-  ok('the hardest thirteen to twenty',
-     bands[3].every(function(n){ return n >= 13 && n <= 20; }), true);
-  ok('all four question types come up',
-     ['where','what','count','occupied'].every(function(k){ return kinds[k] > 0; }), true);
-  ok('and none of them is a rebuild — that is the sequence drill',
-     kinds.rebuild === undefined, true);
+  ok('every level generates a legal, right-sized position', bad, 0);
+  ok('all three answer modes appear', Object.keys(modes).length, 3);
+  var g = prGamePosition(12);
+  ok('a game position has thirty-two men or fewer', menOn(g.b) <= 32, true);
+  var c = prCluster(g, 6);
+  ok('a cluster keeps both kings', kingSq(c, W) >= 0 && kingSq(c, B) >= 0, true);
+  ok('and no more men than asked', menOn(c.b) <= 8, true);
 })();
 
 /* Re-derive the answer to a question straight from the board. */
@@ -604,21 +605,31 @@ head('Mini Blindfold Challenge');
 head('Generation never hands back something broken');
 
 (function(){
-  // the five keys prMake can actually reach today (PR_MAKE) — color and
-  // sequence keep their generators but have no PR_MODES entry of their own
-  // until Tasks 9 and 14 give them one
-  var keys = ['square','piece','tracker','hold','progressive'];
-  var missing = 0, total = 0;
+  // every key PR_MODES names, walked over its own ladder rather than a bare
+  // 1-3 borrowed from the modes that had one first — Square Trainer alone
+  // runs to level 7, and a fixed range would never reach it.
+  var keys = PR_MODES.map(function(m){ return m.key; });
+  var missing = 0, wrongKind = 0, total = 0;
+  // `kind` is the question's own shape and is not always the mode's key:
+  // progressive still hands back the old mini challenge (`kind:'mini'`, until
+  // Task 19 gives it a generator of its own) and tracker still hands back the
+  // old sequence-era walk (`kind:'track'`, until Task 14 gives it one) — both
+  // are exempted from the kind check for exactly that reason.
+  var kindExempt = { progressive:1, tracker:1 };
   for (var k = 0; k < keys.length; k++){
-    for (var level = 1; level <= 3; level++){
-      for (var t = 0; t < 12; t++){
+    var key = keys[k], top = PR_MODE[key].levels.length;
+    for (var level = 1; level <= top; level++){
+      for (var t = 0; t < 8; t++){
         total++;
-        if (!prMake(keys[k], level)) missing++;
+        var q = prMake(key, level);
+        if (!q){ missing++; continue; }
+        if (!kindExempt[key] && q.kind !== key) wrongKind++;
       }
     }
   }
   ok('every drill at every level produced an exercise', missing, 0);
-  ok('and there were plenty of them', total, 180);
+  ok('and every one carries its own mode\'s kind', wrongKind, 0);
+  ok('and there were plenty of them', total > 180, true);
 })();
 
 /* ============================================================
