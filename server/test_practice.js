@@ -91,7 +91,11 @@ var DECLS = ['VAL','FILES','rowOf','colOf','SQNAME','uciOf','sqName','sqIndex','
              'PR','PR_STEP_UP','PR_STEP_DOWN','prRand','prPick','prSide','prMan','PR_MAKE','W',
              'PR_ERRS','PR_FLOORS','PR_AUTO_LEVEL','PR_PALETTE','PZ_VERSION','prPuzzleCache',
              // the course record prSync() adopts along with the practice one
-             'pzOwner','LSN_STORE','LSN_COURSE','LSN_V1_TO_V2','lsnKey','PR_COURSE'];
+             // both version maps, not only the first: lsnNormalise() reads a
+             // stored record forward through whichever of them it needs, so a
+             // harness carrying one of the two throws on the very records the
+             // maps exist for
+             'pzOwner','LSN_STORE','LSN_COURSE','LSN_V1_TO_V2','LSN_V2_TO_V3','lsnKey','PR_COURSE'];
 var FNS = ['startBoard','newState','cloneState','fenOf','stateFromFEN',
            'slide','step','addPawn','pseudoMoves','isAttacked','kingSq','inCheck',
            'makeMove','legalMoves','toSAN','attackersOf','defendersOf','see',
@@ -1148,12 +1152,18 @@ var syncTest = (async function(){
   account = { id:'u1' };
 
   // what this browser did before anybody signed in: tracker taken to level 4,
-  // one lesson finished, and a handful of questions it should not ask again
+  // one lesson finished, and a handful of questions it should not ask again.
+  // The lesson record is written at v2 on purpose — the five-lesson course's
+  // own numbering, which is what a browser that has not been opened since
+  // still holds. prSync() reads it through lsnStored(), so the migration
+  // (LSN_V2_TO_V3: old 2, Chess Notation, is new 3, Reading a Move) has to
+  // run on the sign-in path as well as on the lessons screen, and the number
+  // that reaches the account and the cloud row has to be the new one.
   var guest = prBlank();
   guest.modes.tracker = { level:4, best:4, asked:8, correct:7, sessions:1, lastAt:5, stats:{ streak:3 } };
   storage[PR_STORE + 'guest'] = JSON.stringify(guest);
   storage[PR_STORE + 'seen.guest'] = JSON.stringify(['sig']);
-  storage[lsnKey('')] = JSON.stringify({ v:3, done:[1] });
+  storage[lsnKey('')] = JSON.stringify({ v:2, done:[2] });
 
   await prSync();
 
@@ -1174,11 +1184,11 @@ var syncTest = (async function(){
   var untouched = upserts.filter(function(u){ return u.row.mode === 'square'; });
   ok('a mode nobody has practised writes no row', untouched.length, 0);
 
-  ok('the course the guest finished is now the account\'s',
-     JSON.stringify(lsnStored('u1')), '[1]');
+  ok('the course the guest finished is now the account\'s, at its new number',
+     JSON.stringify(lsnStored('u1')), '[3]');
   var course = upserts.filter(function(u){ return u.row.mode === 'course'; });
   ok('and is pushed as the reserved course row', course.length, 1);
-  ok('with the lessons in its stats', course.length && JSON.stringify(course[0].row.stats.done), '[1]');
+  ok('with the lessons in its stats', course.length && JSON.stringify(course[0].row.stats.done), '[3]');
 
   ok('the guest practice record is claimed and gone',
      storage[PR_STORE + 'guest'] === undefined, true);

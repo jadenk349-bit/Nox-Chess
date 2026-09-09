@@ -1183,8 +1183,12 @@ click back afterwards.
 **The bridge ends somewhere other than itself.** Progressive Blindfold is the
 one drill whose result card points off the page, because that is what the
 ladder is for: `#prNextLevel` (a held rung with more ahead of it) goes
-straight back in one higher at the same length, with no setup box — a level
-just earned is not a question to ask again; `#prBoardGame` appears from level
+straight back in one higher with no setup box — a level just earned is not a
+question to ask again — and carries no length over from the session that has
+just ended, because a Progressive Blindfold session is a rung rather than a
+timed drill (`prOpenSetup` hides the length field for it and `pbEnd` is what
+finishes a game), so the handler simply passes the mode's own default;
+`#prBoardGame` appears from level
 7 and `#prBlindGame` once level 10 has been held, and both open the bot setup
 that already exists (`goBot()` + `selectMode('blind'|'total')`) rather than a
 second matchmaker. `prSuggestFirstBlindGame()` answers the rest of the form
@@ -1248,9 +1252,16 @@ what to train now, and one button that opens it through
 the last exercise because the handoff is the point of the course, and
 `lsnMark()` is called in its `setup()` rather than by `lsnNext()` at the end,
 so a learner who reads the card and walks off to Practice keeps the tick:
-reaching the card is finishing the lesson. The `mode`/`level` pairs are the
-same ones `PR_FLOORS` reads from the other side, which is what makes a finished
-lesson set where that mode's *first* session opens.
+reaching the card is finishing the lesson. `train` and `PR_FLOORS` are **two
+tables asking different questions**, and collapsing them is the easy mistake:
+`train` says where *this lesson* sends you next, and `PR_FLOORS` says, per
+mode, which finished lesson raises the floor of that mode's *first* session
+and to what rung. They disagree on purpose — lesson 8 hands to `tracker` level
+7, where the checkpoint questions live, while `PR_FLOORS.tracker` is still
+`{lesson:5, level:3}`, because a lesson may come back to a mode further up its
+ladder without moving where a newcomer starts — and `PR_FLOORS` names modes
+(`attack`, `hold`, `branches`) no `train` block hands to at all, since a lesson
+that teaches two of them can only hand off to one.
 
 **The course is built out of Practice's own generators, never a copy of
 them.** A lesson's exercises are made fresh each time — `lsnStepColour` and
@@ -1340,8 +1351,8 @@ therefore needs a `solve` tag and a strategy in that harness, plus its own name
 the page, the same way `test_practice.js` names everything it extracts in
 `DECLS`/`FNS`.
 
-**The course and Practice are two pages, and there is exactly one door each
-way.** They cover related ground — a coordinate step in lesson 1 and Square
+**The course and Practice are two pages, and every crossing between them goes
+through the other page's own front door.** They cover related ground — a coordinate step in lesson 1 and Square
 Trainer both ask you to name a square — and that is the point: the course
 *teaches* the skill once, in order, and Practice is where it is *drilled*
 afterwards, with levels and statistics the course has no business keeping. So
@@ -1358,11 +1369,17 @@ somebody's behalf. The note is written there and nowhere else, and cleared by
 `lsnFirstNoteClear()` from `resetChoices()`, which every route to the setup
 panel passes through — so it lives exactly as long as the unanswered vision
 question it is about and cannot stand over a friend challenge later. Back the
-other way there is one link and only one: a Practice card's setup box carries
-"How this works: Lesson N" (`prDrawIntro`, reading `m.lesson`) whenever that
-lesson is not in `lsnDone()` — first visit or not, because the question it
-answers is "has this player been taught the concept", and somebody three
-drills past the lesson that introduced this one is exactly who it is for. The
+other way there is exactly one link into a *particular lesson*: a Practice
+card's setup box carries "How this works: Lesson N" (`prDrawIntro`, reading
+`m.lesson`) whenever that lesson is not in `lsnDone()` — first visit or not,
+because the question it answers is "has this player been taught the concept",
+and somebody three drills past the lesson that introduced this one is exactly
+who it is for. Back to Lessons on a finished session's result box
+(`#prToLessons`) is not a second one: it presses `lsnEnter()`, the course's own
+front door, the same function LESSON → How to Play Blind Chess presses — a
+button whose label names a page has to open that page, and the end of a
+session is the moment somebody is deciding what to learn next rather than a
+moment to be dropped on the home screen. The
 two-line intro beside it (`m.intro`) is shown only on a mode's first visit,
 since the level caption says the rest once there is a session to measure.
 There is one Practice screen, one `goPractice()`, and no third set of drills

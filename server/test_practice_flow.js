@@ -192,6 +192,10 @@ var account = null;
 var beeps = 0, screens = [], botTrips = 0, visionsPicked = [];
 function beep(){ beeps++; }
 function showScreen(n){ screens.push(n); }
+// The course is the other side of the section boundary, and Back to Lessons
+// presses its front door — the same lsnEnter() LESSON → How to Play presses.
+// Stubbed as the screen it shows, so the assertion below reads like the rest.
+function lsnEnter(){ screens.push('lessons'); }
 function navSync(){}                       // the history layer lives outside the section
 function goBot(){ botTrips++; }
 function selectMode(m){ visionsPicked.push(m); }
@@ -2168,7 +2172,7 @@ head('Practice setup: the first-visit intro and the link back to a lesson');
   answerRight(); tick(1000);
   ok('the session finished', byId.prDoneOverlay.classList.contains('show'), true);
   byId.prToLessons.onclick();
-  ok('Back to Lessons leads home', screens[screens.length - 1], 'home');
+  ok('Back to Lessons opens the course', screens[screens.length - 1], 'lessons');
   ok('and closes the box', byId.prDoneOverlay.classList.contains('show'), false);
 })();
 

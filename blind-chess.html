@@ -10463,11 +10463,21 @@ const LSN = {
    lesson teaches a thing once, in order; the drill that trains it lives on
    the Practice page, and the last step of every lesson is the handoff to it
    (lsnHandoffStep). `mode` and `level` are what goPractice() is handed, so
-   they name a real PR_MODE key and a rung on its ladder — the same pairs
-   PR_FLOORS uses to decide where a mode's first session opens, read from the
-   other side. `say` is the sentence the card shows, and it is written for the
-   player rather than assembled out of the two fields, because "level 2" is
-   not what anybody needs told. */
+   they name a real PR_MODE key and a rung on its ladder.
+
+   They are NOT PR_FLOORS read from the other side, and the two must not be
+   collapsed into one table: this says where *this lesson* sends you next,
+   and PR_FLOORS says which finished lesson raises the floor of a mode's
+   *first* session and to what rung. A lesson may come back to a mode further
+   up its ladder — lesson 8 hands to tracker level 7, where the checkpoint
+   questions live, while PR_FLOORS.tracker still opens a newcomer's first
+   session at level 3 off lesson 5 — and PR_FLOORS names modes (attack, hold,
+   branches) that no lesson hands to at all, because a lesson that teaches
+   two of them can only hand off to one.
+
+   `say` is the sentence the card shows, and it is written for the player
+   rather than assembled out of the two fields, because "level 2" is not what
+   anybody needs told. */
 const LESSONS = [
   { n:1,  name:'Know, Don’t See',              blurb:'The board from either chair, its colours and quarters — and why nobody needs a picture.',
     train:{ mode:'square', level:2, say:'Train Square Trainer until squares from either chair come in under two seconds with the labels off.' }, build:() => lsnLesson1() },
@@ -18258,13 +18268,23 @@ document.getElementById('prSetGo').onclick = () => {
 /* ---- the results box ---- */
 document.getElementById('prAgain').onclick   = () => prBegin();
 document.getElementById('prAnother').onclick = () => prShowDash();
+/* The button says Back to Lessons, so it goes to the lessons: lsnEnter(), the
+   same function LESSON → How to Play Blind Chess presses, which is the one
+   door into the course. It used to show the home screen, which is a button
+   whose label names a page it does not open — and the way back to the course
+   from a finished session is exactly the moment a player is deciding what to
+   learn next, not a moment to be dropped two clicks away from it. */
 document.getElementById('prToLessons').onclick = () => {
   document.getElementById('prDoneOverlay').classList.remove('show');
-  showScreen('home');
+  lsnEnter();
 };
 /* Held a level with more still ahead of it: straight back into the drill, one
-   rung up, at the same length just finished. There is no setup box for this
-   — a level a player has just earned is not a question to ask them again. */
+   rung up. There is no setup box for this — a level a player has just earned
+   is not a question to ask them again — and no length carried over from the
+   session that has just ended either: a Progressive Blindfold session is a
+   rung rather than a timed drill (its own setup hides the length field, and
+   pbEnd is what finishes it), so what goes in here is the mode's own default
+   and the game runs until the target, the board or the player ends it. */
 document.getElementById('prNextLevel').onclick = () => {
   document.getElementById('prDoneOverlay').classList.remove('show');
   prOpen('progressive', PR.level + 1, 5);
