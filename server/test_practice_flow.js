@@ -2184,6 +2184,69 @@ head('Daily training');
   ok('in the mix\'s own order', kinds.join(','), PR.mixed.join(','));
 })();
 
+(function(){
+  // The staircase (prStep) measures a mode, not a session: it steps a level
+  // up on three RIGHT answers in a row and down on two WRONG ones, reading
+  // the one shared pair PR.runUp/PR.runDown. A Daily Practice session swaps
+  // modes every question, so those two counters have to be swapped out for
+  // the mode leaving the screen and back in for the mode arriving — without
+  // that, three rights spread across three different modes reads as three
+  // in a row for whichever mode happened to be showing on the third one, and
+  // steps ITS level up on the strength of one right answer of its own. This
+  // drives prScore directly rather than through prJudge — prJudge also
+  // touches prSay/beep/prCtl, none of which the staircase itself cares about
+  // — and prAdvance after each score, which is what a judged answer calls
+  // next and what actually walks PR.i (and so the rotation) forward.
+  storage = {};
+  lsnDoneStub = [];
+  goPractice('daily');
+  var mixed = PR.mixed.slice();
+  var start = {};
+  for (var k = 0; k < mixed.length; k++) start[mixed[k]] = prLoad().modes[mixed[k]].level;
+
+  prScore(true); prAdvance();   // mixed[0]: its own first right
+  prScore(true); prAdvance();   // mixed[1]: its own first right
+  prScore(true); prAdvance();   // mixed[2]: its own first right
+  // three rights given in a row, but never three of the SAME mode's own —
+  // nothing should have stepped up
+  ok('three rights spread across three modes step nothing up',
+     mixed.map(function(m){ return PR.mixedLevel[m]; }).join(','),
+     mixed.map(function(m){ return start[m]; }).join(','));
+
+  prScore(true); prAdvance();   // mixed[0] again: its own second right in a row
+  prScore(false); prAdvance();  // mixed[1]: wrong — breaks mixed[1]'s own run only
+  prScore(false); prAdvance();  // mixed[2]: wrong — breaks mixed[2]'s own run only
+  prScore(true); prAdvance();   // mixed[0]: its own THIRD right in a row — steps up
+
+  ok('the mode with three rights of its own in a row steps up',
+     PR.mixedLevel[mixed[0]], start[mixed[0]] + 1);
+  ok('the mode answered wrong in between does not',
+     PR.mixedLevel[mixed[1]], start[mixed[1]]);
+  ok('nor the other one', PR.mixedLevel[mixed[2]], start[mixed[2]]);
+})();
+
+(function(){
+  // Ending a Daily Practice session the same way any drill ends one — spend
+  // the budget (finishSession) and let the next judged answer call prFinish
+  // — has to write every mode that was actually played, once each, and the
+  // session/day totals once for the whole session, not once per mode.
+  storage = {};
+  lsnDoneStub = [];
+  goPractice('daily');
+  var mixed = PR.mixed.slice();
+  prScore(true); prAdvance();   // mixed[0]
+  prScore(true); prAdvance();   // mixed[1]
+  prScore(true); prAdvance();   // mixed[2] — all three modes played at least once
+
+  finishSession();
+  prScore(true); prAdvance();   // the next judged answer ends it
+
+  var st = prLoad();
+  ok('the session total is written once, not once per mode', st.sessions, 1);
+  ok('every mode actually played banked its own session',
+     mixed.every(function(m){ return st.modes[m].sessions === 1; }), true);
+})();
+
 /* ============================================================
    9 — the rebuild interface
    One interface for every place a position is put back — Hold the Position,

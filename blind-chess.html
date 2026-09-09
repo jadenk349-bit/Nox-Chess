@@ -12321,11 +12321,24 @@ const PR = {
   mixed: null,        // Daily Practice: the mode keys this session rotates through in
                        // order, or null for an ordinary single-mode session — PR.mode is
                        // still which one is on screen right now, read off this array by
-                       // prNextQuestion rather than fixed for the whole session
-  mixedLevel: {}       // Daily Practice: each mode's own place on its own staircase,
+                       // prNextQuestion rather than fixed for the whole session. Left set
+                       // (along with mixedLevel and mixedRun below) once a session ends —
+                       // prFinish does not clear it — so Practice Again on a Daily Practice
+                       // result replays the same rotation rather than dropping to one mode;
+                       // only prShowDash/prLeave, leaving the screen entirely, clear it.
+  mixedLevel: {},      // Daily Practice: each mode's own place on its own staircase,
                        // keyed by mode — PR.level is only ever one of these, the one
                        // for whichever mode is up, and prNextQuestion restores the right
                        // one when the rotation comes back around to it
+  mixedRun: {}         // Daily Practice: each mode's own PR.runUp/runDown, keyed by mode —
+                       // the staircase (prStep) measures three rights or two wrongs in a
+                       // row *of the same mode*, and PR.runUp/runDown are the one pair of
+                       // counters prStep reads, so a rotation through three modes has to
+                       // swap the right pair in before every question and bank it back out
+                       // after every answer, the same way PR.level does through mixedLevel —
+                       // otherwise a right answer in A, then B, then C would read as three
+                       // in a row and step C's level up on the strength of one of its own
+                       // questions.
 };
 
 /* The session clock. A separate function rather than Date.now() called
@@ -13733,11 +13746,15 @@ function prScore(ok, err){
   prStep(ok);
   // A Daily Practice session runs one staircase per mode rather than one for
   // the whole session, and this is the only place any of them moves — so the
-  // level prStep just settled PR.level on is banked under the mode it
-  // belongs to the moment it changes, and prNextQuestion hands it straight
-  // back when the rotation returns to this mode rather than restarting it at
-  // its floor.
-  if (PR.mixed) PR.mixedLevel[PR.mode.key] = PR.level;
+  // level prStep just settled PR.level on, and the run of rights or wrongs
+  // prStep just moved PR.runUp/PR.runDown by, are both banked under the mode
+  // they belong to the moment this answer is scored. prNextQuestion hands
+  // both straight back when the rotation returns to this mode, rather than
+  // restarting the level at its floor or the run at zero.
+  if (PR.mixed){
+    PR.mixedLevel[PR.mode.key] = PR.level;
+    PR.mixedRun[PR.mode.key] = { up: PR.runUp, down: PR.runDown };
+  }
   prStatsRender();
 }
 
@@ -13787,11 +13804,20 @@ function prNextQuestion(){
   // The level it opens on is wherever that mode's own staircase last left it
   // (PR.mixedLevel, written by prScore the moment any mode's level moves) or,
   // the first time this mode comes up, wherever prStartLevel says it should
-  // start — the same floor a plain session of it would open on.
+  // start — the same floor a plain session of it would open on. PR.runUp and
+  // PR.runDown are prStep's own counters, and there is only the one pair of
+  // them — so swapping the mode in without also swapping its run back in
+  // would let a right answer in one mode count toward a streak that belongs
+  // to whichever mode was up last, and step the wrong mode's level. Read
+  // from PR.mixedRun the same way the level is, and 0/0 the first time this
+  // mode comes up (a mode with no entry has run nothing yet).
   if (PR.mixed){
     const key = PR.mixed[PR.i % PR.mixed.length];
     PR.mode = PR_MODE[key];
     PR.level = PR.mixedLevel[key] || prStartLevel(key);
+    const run = PR.mixedRun[key];
+    PR.runUp = run ? run.up : 0;
+    PR.runDown = run ? run.down : 0;
   }
   PR.q = prMake(PR.mode.key, PR.level);
   if (!PR.q){
@@ -16141,7 +16167,7 @@ function prShowDash(){
   PR.view = 'dash';
   navSync();
   PR.q = null; PR.click = null; PR.onSubmit = null; PR.pb = null;
-  PR.mixed = null;
+  PR.mixed = null; PR.mixedRun = {};
   document.getElementById('prDoneOverlay').classList.remove('show');
   document.getElementById('prRun').style.display = 'none';
   document.getElementById('prDash').style.display = '';
@@ -16457,6 +16483,7 @@ function prStartDaily(){
 
   PR.mixed = picked;
   PR.mixedLevel = {};
+  PR.mixedRun = {};
   PR.mode = PR_MODE[picked[0]];
   PR.level = prStartLevel(picked[0], st);
   PR.budgetMs = 300000;
@@ -16492,7 +16519,7 @@ function prLeave(){
   PR.view = 'dash';
   PR.q = null; PR.click = null; PR.onSubmit = null; PR.pb = null;
   PR.answered = false;
-  PR.mixed = null;
+  PR.mixed = null; PR.mixedRun = {};
   prSetOverlay.classList.remove('show');
   document.getElementById('prDoneOverlay').classList.remove('show');
   document.getElementById('prRun').style.display = 'none';
