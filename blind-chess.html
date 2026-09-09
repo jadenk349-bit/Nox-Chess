@@ -1860,6 +1860,10 @@
   .pr-ans.glyphs button{min-width:0; padding:5px 0; font-size:23px; line-height:1.15;}
   .pr-ans.glyphs button.wide{grid-column:1/-1; font-size:15.5px; padding:9px 0;}
   .pr-ans.glyphs .pc-svg{width:.86em; height:.86em; margin:0 auto;}
+  /* the rebuild palette's picked man, so pressing a glyph reads as picking it
+     up rather than as a plain button press — the only feedback that a click
+     on the board is about to place *this* man */
+  .pr-ans.glyphs button.active{outline:2px solid var(--gold);}
   .pr-ans .g-w{color:#fbf6ea; -webkit-text-stroke:1.2px #2a2118;}
   .pr-ans .g-b{color:#2c2f3a; -webkit-text-stroke:1.2px #0a0b0e;}
   .pr-ans input{
@@ -12009,7 +12013,8 @@ const PR = {
   click: null,        // what a click on a square means right now — null for nothing
   onSubmit: null,     // what the answer form's Enter means
   timers: [],
-  mini: null
+  mini: null,
+  rb: null            // a rebuild in progress — target, placed, current pick, stable ids
 };
 
 /* The session clock. A separate function rather than Date.now() called
@@ -12187,6 +12192,69 @@ function prCtl(list){
     prCtlEl.appendChild(b);
   }
 }
+
+/* ---- rebuilding a position ----
+   One interface for every place a position is put back: Hold the Position,
+   the tracker's last level, Progressive Blindfold's recovery. Pick a man,
+   click a square; the judgement is rebuildDiff(), shared with the course. */
+const PR_PALETTE = [];
+for (const c of [W, B]) for (const t of ['K','Q','R','B','N','P']) PR_PALETTE.push({ c, t });
+
+function prRbPaint(){
+  const b = Array(64).fill(null);
+  for (const p of PR.rb.placed){
+    const key = p.sq + p.c + p.t;
+    // stable ids, so a man already placed does not blink when another is
+    if (!PR.rb.ids[key]) PR.rb.ids[key] = mk(p.c, p.t);
+    b[p.sq] = PR.rb.ids[key];
+  }
+  prPaint(b);
+}
+function prRebuildStart(target, opts){
+  PR.rb = { target, placed:[], pick:null, ids:{}, opts: opts || {} };
+  prBoardOn(true); prMen(true); prClearPieces(); prMarksClear();
+  prQ(opts && opts.say || 'Rebuild the position.');
+  prSub('Pick a man, then click its square. Pick it again and click to remove.');
+  prAnsClear();
+  prAnsEl.className = 'pr-ans glyphs';
+  const btns = PR_PALETTE.map(p =>
+    prAnsButton('<span class="g-' + p.c + '">' + pieceHTML(p.t) + '</span>', () => {
+      PR.rb.pick = p;
+      btns.forEach(b => b.classList.remove('active'));
+      btns[PR_PALETTE.indexOf(p)].classList.add('active');
+    }));
+  prAnsButton('Clear a square', () => { PR.rb.pick = 'clear'; btns.forEach(b => b.classList.remove('active')); }, 'wide');
+  PR.click = i => {
+    const pick = PR.rb.pick;
+    if (!pick) return;
+    PR.rb.placed = PR.rb.placed.filter(p => p.sq !== i);
+    if (pick !== 'clear') PR.rb.placed.push({ sq:i, c:pick.c, t:pick.t });
+    prRbPaint();
+  };
+  prCtl([['Done', prRebuildFinish, 'primary']]);
+}
+function prRebuildFinish(){
+  const rb = PR.rb;
+  if (!rb) return;
+  PR.click = null;
+  prAnsClear();
+  const res = rebuildDiff(rb.placed, rb.target);
+  const b = Array(64).fill(null);
+  for (const t of rb.target) b[t.sq] = rb.ids[t.sq + t.c + t.t] || mk(t.c, t.t);
+  prPaint(b);
+  prMarksClear();
+  res.right.forEach(p => prMark(p.sq, 'pr-right'));
+  res.wrong.forEach(p => prMark(p.sq, 'pr-wrong'));
+  res.missing.forEach(p => prMark(p.sq, 'pr-miss'));
+  const say = res.wrong.length + res.missing.length === 0
+    ? 'Every man where it stood.'
+    : (res.missing.length ? 'Forgotten: ' + res.missing.map(p => prMan(p.c, p.t) + ' on ' + sqName(p.sq)).join(', ') + '. ' : '') +
+      (res.wrong.length ? res.wrong.length + ' misplaced.' : '');
+  prSub(say);
+  PR.rb = null;
+  if (rb.opts.done) rb.opts.done(res);
+}
+
 prAnsEl.addEventListener('submit', e => { e.preventDefault(); if (PR.onSubmit) PR.onSubmit(); });
 prSquaresEl.addEventListener('click', e => {
   const d = e.target.closest('.sq');
@@ -12965,8 +13033,9 @@ function prAskShow(ask, st, extraCtl){
       prAnsButton('No',  () => prAnswerOccupied(false, ask, extraCtl));
       break;
     case 'rebuild':
-      ask.at = 0; ask.given = [];
-      prRebuildStep(ask, extraCtl);
+      prRebuildStart(ask.want.map(w => ({ sq:w.sq, c:w.colour, t:w.type })),
+        { say: ask.text,
+          done: res => prJudge(res.wrong.length + res.missing.length === 0, 'Rebuilt.', extraCtl, 'square') });
       break;
   }
   if (ask.t !== 'rebuild') prCtl(extraCtl || []);
@@ -13006,36 +13075,6 @@ function prAnswerOccupied(said, ask, extra){
     (ok ? 'Yes. ' : 'No. ') + '<b>' + sqName(ask.sq) + '</b> was ' + (ask.yes ? 'occupied' : 'empty') + '.',
     extra);
 }
-/* The reconstruction: the men are named one at a time and placed on a blank
-   board, and only when the last one is down is anything judged — a rebuild
-   marked square by square is three easy questions, not one hard one. */
-function prRebuildStep(ask, extra){
-  const want = ask.want[ask.at];
-  prQ('Rebuild the position. Place <b>' + prMan(want.colour, want.type) + '</b>' +
-      ' <span style="color:var(--muted)">(' + (ask.at + 1) + ' of ' + ask.want.length + ')</span>');
-  prSub('Click the square you believe it stands on.');
-  prCtl(extra || []);
-  PR.click = i => {
-    if (PR.answered) return;
-    ask.given.push(i);
-    prMark(i, 'pr-pick');
-    ask.at++;
-    if (ask.at < ask.want.length){ prRebuildStep(ask, extra); return; }
-    let hits = 0;
-    prMarksClear();
-    for (let k = 0; k < ask.want.length; k++){
-      const right = ask.given[k] === ask.want[k].sq;
-      if (right) hits++;
-      else prMark(ask.given[k], 'pr-wrong');
-      prMark(ask.want[k].sq, 'pr-right');
-    }
-    const list = ask.want.map(w => prMan(w.colour, w.type) + ' on <b>' + sqName(w.sq) + '</b>').join(', ');
-    prJudge(hits === ask.want.length,
-      (hits === ask.want.length ? 'All three, exactly. ' : hits + ' of ' + ask.want.length + ' right. ') + list + '.',
-      extra);
-  };
-}
-
 /* ============================================================
    THE MINI BLINDFOLD CHALLENGE
    Not a second game: a small legal position, the page's own move generator,

@@ -202,7 +202,7 @@ var lsnDoneStub = [];
 function lsnDone(){ return lsnDoneStub; }
 
 /* ---- the real half ---- */
-var DECLS = ['VAL','FILES','rowOf','colOf','SQNAME','uciOf','sqName','onBoard','other',
+var DECLS = ['VAL','FILES','rowOf','colOf','SQNAME','uciOf','sqName','sqIndex','onBoard','other',
              'idCounter','mk','DIR_N','DIR_B','DIR_R','DIR_K','PST','nodes','PIECE_NAME',
              'GLYPH','pieceHTML','W'];
 // Note: this suite lifts the whole PRACTICE section as one block below, so
@@ -213,7 +213,7 @@ var FNS = ['startBoard','newState','cloneState','fenOf','stateFromFEN',
            'slide','step','addPawn','pseudoMoves','isAttacked','kingSq','inCheck',
            'makeMove','legalMoves','toSAN','attackersOf','defendersOf','see',
            'mirror','evaluate','orderMoves','scoreMove','quiesce','negamax','bestMove',
-           'parseMoveIn'];
+           'parseMoveIn','rebuildDiff'];
 var bundle = [grab(/\nconst W = 'w', B = 'b';/, "const W/B")];
 // a multi-line string rather than an object, so neither shape of decl() fits it
 bundle.push(grab(/\nconst BISHOP_SVG =\n[\s\S]*?';\n/, 'BISHOP_SVG'));
@@ -327,7 +327,16 @@ function answerAskRight(ask){
     return;
   }
   if (ask.t === 'rebuild'){
-    for (var k = 0; k < ask.want.length; k++) clickSquare(ask.want[k].sq);
+    // one glyph, then one square, per man named — the same palette order
+    // PR_PALETTE builds ([W,B] x K,Q,R,B,N,P) — then Done judges the lot.
+    var order = ['K','Q','R','B','N','P'];
+    for (var k = 0; k < ask.want.length; k++){
+      var w = ask.want[k];
+      var at = (w.colour === 'w' ? 0 : 6) + order.indexOf(w.type);
+      prAnsEl.children[at].onclick();
+      clickSquare(w.sq);
+    }
+    pressCtl('Done');
     return;
   }
   throw new Error('unknown question type ' + ask.t);
@@ -875,7 +884,33 @@ head('goPractice with a target');
 })();
 
 /* ============================================================
-   11 — the markup the code reaches for
+   11 — the rebuild interface
+   One interface for every place a position is put back — Hold the Position,
+   the tracker's last level, Progressive Blindfold's recovery — driven
+   directly rather than through a drill, since prRebuildStart takes its
+   target and callback straight from the caller.
+   ============================================================ */
+head('The rebuild interface');
+(function(){
+  var done = null;
+  prRebuildStart([{sq:sqIndex('e1'),c:W,t:'K'},{sq:sqIndex('e8'),c:B,t:'K'},{sq:sqIndex('d4'),c:W,t:'N'}],
+                 { say:'Rebuild it', done:function(r){ done = r; } });
+  ok('a palette of twelve men and a clear button is up', prAnsEl.children.length, 13);
+  prAnsEl.children[0].onclick();               // white king
+  clickSquare(sqIndex('e1'));
+  prAnsEl.children[6].onclick();               // black king
+  clickSquare(sqIndex('e8'));
+  prAnsEl.children[1].onclick();               // white queen, wrongly
+  clickSquare(sqIndex('d4'));
+  pressCtl('Done');
+  ok('two right', done.right.length, 2);
+  ok('one wrong', done.wrong.length, 1);
+  ok('one missing', done.missing.length, 1);
+  ok('the missing man is marked on its square', prSqEls[sqIndex('d4')].classList.contains('pr-miss'), true);
+})();
+
+/* ============================================================
+   12 — the markup the code reaches for
    The stub hands back an element for any id asked of it, which is what makes
    the flow above runnable and what makes it blind to a typo. So the ids are
    checked against the page itself.
