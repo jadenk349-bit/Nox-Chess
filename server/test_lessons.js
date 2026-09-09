@@ -431,7 +431,12 @@ async function walk(p, n){
   again.press('navPractice');
   check('the Practice menu item opens the Practice page',
         again.screen() === 'practice', again.screen());
-  check('with all five of its own drills', again.PR_MODES.length === 5, again.PR_MODES.length);
+  // the mode count grows as Practice modes land; the course cares only that
+  // the drills its lessons hand off to are still there to be handed off to
+  check('with the drills the course hands off to',
+        ['square','piece','tracker','hold','progressive']
+          .every(k => again.PR_MODES.some(m => m.key === k)),
+        again.PR_MODES.map(m => m.key).join(','));
   check('the course has no practice mode of its own', !('practice' in again.LSN));
   check('and nothing in the lessons pretends to be one',
         SRC.indexOf('lsnPractice') < 0 && SRC.indexOf('lsnDrills') < 0);
