@@ -25,7 +25,7 @@ node server/test_study_education.js      # Study Board's concept card, and how i
 node server/test_puzzle_flow.js          # plays a shipped puzzle against a stub DOM
 node server/test_practice.js             # what the practice drills invent, re-checked
 node server/test_practice_flow.js        # and running one, against a stub DOM + clock
-node server/test_lessons.js              # walks the whole five-lesson course (~90s)
+node server/test_lessons.js              # walks the whole ten-lesson course (~3 min)
 node server/test_leaderboard.js          # the home page's four ladders, against a scripted account client
 node server/test_ai_fallback.js          # what the ranked fallback bot decides
 node server/test_ai_game.js              # and playing a whole game against it, stub DOM
@@ -63,15 +63,21 @@ docker build -t nox-chess . && docker run --rm -p 8787:8787 nox-chess
 
 The JS suites read the code under test out of `blind-chess.html` by name, so
 renaming or reformatting what they extract breaks them on purpose.
+`test_practice.js` names what it lifts in `DECLS` and `FNS`, so every level
+ladder, generator and store function it checks has to keep the name it has.
 `test_practice_flow.js` goes further and lifts the whole PRACTICE section out
-between its banner comments, so it runs the screen's own code rather than a
-copy — moving that banner moves the suite with it.
+between its banner comments — everything from `PRACTICE — the drills behind
+LESSON → Practice` down to the `SCREENS` banner, Progressive Blindfold
+included — so it runs the screen's own code rather than a copy. Moving either
+banner moves the suite with it, and a new top-level name in Practice has to be
+inside that block to be reachable at all.
 `test_lessons.js` boots the whole page too, and drives the course the way a
 player does — presses the buttons, clicks the squares, types into the console.
-It answers every task by brute force rather than by being told the answer, so a
-lesson step that cannot be finished fails there; and it asks the page's own move
-generator whether every fixed position in the course is legal. It takes a little
-over a minute because the lessons play their sequences at reading speed and it
+It answers every task by brute force rather than by being told the answer (a
+step's own `truth` is never read; see the lessons below), so a lesson step that
+cannot be finished fails there; and it asks the page's own move generator
+whether every fixed position in the course is legal. It takes a little under
+three minutes because the lessons play their sequences at reading speed and it
 waits for them, which is the point.
 `test_rematch_e2e.js` is the exception and the reason the others can stay
 narrow: it boots the *whole* page script twice under a dumb DOM shim, gives
@@ -651,6 +657,39 @@ writes it with the service key, and without one the server keeps ratings in
 memory. Guests get neither and keep both locally. Run
 `supabase-migrate-puzzles.sql` once, by hand, like `supabase-setup.sql`.
 
+**Practice makes the same bargain one table along, and the course rides in it.**
+`public.practice_progress` (`supabase-migrate-practice.sql`, hand-run, safe to
+re-run) is one row per `(user_id, mode)` — level, best, asked, correct,
+sessions and a `stats` jsonb — and the browser writes it itself under RLS,
+exactly as it writes `puzzle_progress`: what a player's visualisation is worth
+is not a rating anybody compares, so there is nothing here the *server* has to
+be the one to write. The policy is owner-only both ways, and the grant is
+select/insert/update with **no DELETE**, so a delete is refused by the grant
+rather than the policy — the same shape `puzzle_progress` has. A
+`practice_touch` trigger stamps `updated_at` and overwrites `user_id` with
+`auth.uid()` on every insert and update, so a row cannot be filed under
+somebody else even by a client that tries. `prRowOf()` clamps every number to
+what the column checks allow, because a row the database refuses is a console
+warning and a level quietly not saved; `lastAt` rides inside `stats` rather
+than earning a column, since nothing compares it. `prPush()` reads the mode
+back out of the local store rather than taking it as an argument, so there is
+one answer to what a mode stands at and it is the one on disk. `prSync()`, called
+from `setAccount()` right after `pzSync()`, reads the account's rows, merges
+them with this browser's cache *and* with whatever was practised as a guest,
+writes the result back locally, pushes what the account did not have, and then
+removes the guest copy — otherwise the next account to sign in on a shared
+machine would adopt it too. `prMerge()` is the rule: the higher level wins
+(nobody is sent back down a ladder by signing in on a browser that has not
+heard about it) and the tallies come *whole* from whichever side has answered
+more, because adding two histories together would count a session twice. The
+finished lessons are one more row under the reserved mode name `course`
+(`PR_COURSE`, `prPushCourse()`), unioned the same way, whose numbers mean
+nothing and whose `stats.done` is the payload. All of it is fire and forget:
+until the migration has been run there is no table at all, which is a console
+warning rather than a broken drill, and guests keep the whole record locally.
+`tools/check_supabase_practice.py` proves the RLS and the grants against the
+real project.
+
 **A puzzle is a category and a vision, and it needs both.** The home page's four
 puzzle entries — Opening, Middle Game, End Game and Puzzle Rush — no longer open
 a puzzle. Each opens `screen-pzvision` with its own category remembered in
@@ -946,79 +985,246 @@ verifier is supposed to catch.
 **Practice is not a second puzzle ladder.** Puzzles ask what the best move is,
 with the board in front of you the whole time. Practice (`PR`,
 `screen-practice`, reached from LESSON → Practice) asks whether the board is
-there at all: name a square, colour it, see where a knight reaches, follow a
-piece through moves you never see, answer for a position with the men hidden.
-Ten drills and Progressive Blindfold, each with a ladder of levels that change
-the exercise rather than a label on it. Progressive Blindfold (`PR.pb`,
-`PR_PB_LEVELS`) is the last of them and the only one that is a whole *game*: ten
-rungs that take the board away a step at a time — your men shown and theirs
-hidden, then the squares with nobody on them, then no board at all — which is
-`fog`, `blind` and `total` said in Practice's own words, and rendering is the
-whole of the difference (`pbMask`/`pbPaint`) exactly as it is in a game. It is
-also the one mode the staircase does not settle: a rung is held or it is not
-(`pbEnd` decides, on the target, the drifts and the moves that were not there),
-and the next session opens one higher only on a pass. Three things hold a game
-up short of that ending, and none of them is a second question the session
-scores. Every few moves (`checkEvery`) `pbCheckpoint()` stops and asks one thing
-about the position as it now stands — where a king is, what is beside it, how
-many men a side has, what the last move was — with the "last move" decoys drawn
-from `pb.prevSt`, the position that move was played *from*, so they are moves
-that really were available and never anything a book suggested. A miss is a
-drift and the true board is shown for two seconds, because catching the drift is
-the point and playing on from a picture that has already gone wrong is not a
-question anybody can answer. `pbPeek()` is the same two seconds bought
-deliberately, out of the rung's own allowance — a level with none left offers no
-Peek button rather than a dead one. And `pbRecover()` ("I've lost it") shows the
-*score* and never the board, and hands the position back through
-`prRebuildStart` to be put together from the moves — which is what Koltanowski
-did and what every guide to the game says to do instead of guessing. It is
-counted (`pb.recoveries`) and costs the level nothing: a player who stops and
-works the position out again is doing the thing this drill teaches. A checkpoint
-and a recovery *pause* the game: both set `pb.busy` and borrow the answer row,
-so the move box comes down with `PR.onSubmit` and no move can be typed or
-clicked into a game that is standing still, and `pbRestoreInput()` hands the
-box, the instruction line and the board click back afterwards. A peek does not
-pause anything — it is a quick look, `pb.busy` is left alone, and a move may be
-played while the men are up. What it may not be is stacked: `pb.peeking` takes
-the Peek button off the row for the two seconds, because a second press would
-spend a second look and start a second timer whose predecessor would take the
-board away early. There is
-deliberately **no Elo**: what a
-player's visualisation is worth is a level they climb (Beginner → Visualizer →
-Tracker → Blindfold Ready → Advanced), earned by sessions finished, by accuracy
-and by how many different drills have been tried — so nobody climbs it by
-grinding one. Ranked and puzzle ratings are untouched by all of it.
+there at all: name a square, trace a line, see where a knight reaches, follow
+moves you never see, say what one move changed, count a capturing sequence
+out, find the move in a position you are holding, and finally play a whole
+small game with nothing drawn. Eleven modes (`PR_MODES`, keyed `square`,
+`lines`, `piece`, `attack`, `tracker`, `after`, `forcing`, `calc`, `branches`,
+`hold`, `progressive`), each with a ladder of levels that change the exercise
+rather than a label on it.
 
-Nothing in it reimplements a rule. Positions come out of `prPosition()` and are
-thrown back unless the rules accept them — two kings, not touching, no pawn on a
-promotion rank, neither side already in check, no castling rights nobody earned.
-Movement answers are `legalMoves()`. Tracking walks and blindfold sequences are
-*played*, with `makeMove()`, and named with `toSAN()` — never assembled out of
-notation strings. Progressive Blindfold reads what the player typed with
-`parseMoveIn()` and answers with the small JS search already in this file.
-`parseMove()` is now a one-line wrapper over `parseMoveIn(G.st, …)`: one
-notation reader, two pages. A generator that cannot produce a valid exercise
-retries, then asks again at the easiest setting, and only then gives up — it
-never puts a broken one on screen.
+**The curriculum is `PR_GROUPS`, and it is read rather than described.** The
+eleven fall into six groups in the order they are climbed — The Board
+(`square`, `lines`), Piece Vision (`piece`, `attack`), Holding (`hold`,
+`tracker`), Updating (`after`, `forcing`), Calculation (`calc`, `branches`)
+and Blindfold Play (`progressive`) — and that array is the curriculum itself,
+not a set of headings the dashboard happens to use: `prGroupOpen(st, gi)`
+walks it and answers whether a group can be worked on at all, and both the
+dashboard's cards and `prRecommendNext()` go through that one function, so
+neither can disagree with the other about the same group. A group is open only
+once *every* group before it has cleared its own floor, not merely the one
+immediately before it — an earlier version asked only the immediate
+predecessor, which let a group two hops past an unopened one read as open. The
+Board group's floor is not a rung but `prAutomatic()`: Square Trainer at level
+5 or better with a median latency under 1500ms, since naming a square is a
+skill to outgrow rather than one to keep training, and once it is automatic
+nothing downstream sends anybody back to it. Each mode also names the `lesson`
+it grows out of, which is the other half of the contract with the course
+below.
+
+**A level is a recipe, and the session is what settles it.** Every mode has
+its own `*_LEVELS` array — `PR_SQUARE_LEVELS`, `PR_TRACKER_LEVELS`,
+`PR_CALC_LEVELS` and the rest, declared ahead of `PR_MODES` because it reads
+them by reference — and a level is not a difficulty label but the concrete
+variables the generator reads: which question kinds this rung may ask, how
+many men, how long the position stays up, whether the board is shown at all,
+whether the move arrives as notation. `prRecipe(key, level)` is the one place
+a level is clamped to its mode's ladder and handed back with its caption, and
+it is the same call the setup box makes and the staircase makes mid-session,
+so a level nobody has can never be named. The staircase is `prStep()`:
+`PR_STEP_UP` (3) right in a row steps up, `PR_STEP_DOWN` (2) wrong in a row
+steps down, and the level a session settles on is what the mode is worth —
+not the accuracy, which at an easy rung says nothing about how hard anybody
+was pushed. Progressive Blindfold is the one mode the staircase does not
+settle; see below.
+
+**A session is boxed by a clock, and the question in front of you is always
+finished.** `PR_MINUTES` is the three lengths a session may run (2, 5, 10; the
+setup box opens on 5), `PR.budgetMs` is what was chosen, and `prTimeLeft()` is
+read off `prNow()` — a function rather than `Date.now()` inline precisely so a
+test can drive a session's ending by hand. The clock is only ever consulted
+between questions (`prAdvance`), so running out never snatches a half-answered
+question away; the button under the answer reads Finish rather than Next when
+there is no time left. Daily Practice (`prDaily` → `goPractice('daily')` →
+`prStartDaily()`) is five minutes across *three* drills rather than one: the
+recommender picks the first, then `prRecommendFrom()` picks each of the next
+two out of whatever it has not already taken, and `PR.mixed` is the rotation
+`prNextQuestion()` reads one mode per question. Progressive Blindfold is never
+one of the three — a whole game is not a question a rotation can hand off
+mid-answer. A mixed session banks two things per mode rather than one:
+`PR.mixedLevel` holds each mode's own place on its own staircase and
+`PR.mixedRun` each mode's own run of rights and wrongs, because `prStep()`
+reads one pair of counters and a right answer in A, then B, then C would
+otherwise read as three in a row and step C's level up on the strength of one
+of its own questions.
+
+**Nothing is asked twice in a hundred questions.** Every generated question
+carries a `sig` — its position's FEN placement, plus whatever else makes it
+this question rather than that one — and `prMake()` draws up to six times,
+taking the first signature that is not in the last hundred (`prSeen`,
+`PR_SEEN_MAX`, kept per owner exactly as the store is). A drill that sets no
+`sig` is not ruled out by anything, and a mode that starts stamping its
+exercises gets the "not this week" treatment for free. Blind Calculation's
+puzzle levels are the one question built after the screen is already up — the
+file behind a shipped puzzle has to be fetched — so they get `prCalcDraw()`,
+which is `prMake()`'s own shape over the pool once it lands, rather than being
+the only questions in Practice that can repeat.
+
+**What is measured is what a wrong answer was wrong *about*.** `prRecord()`
+writes one answer as it happens (a reload mid-drill keeps what was actually
+answered; only the session count waits for the end), and per mode it keeps
+more than a tally: `errs` by kind — `PR_ERRS` is `square`, `ghost`, `lost`
+and `other`, because a square named one file over, a man that was captured and
+is still being counted (the tracker's own `ghost`, and in a spot-the-change
+question the square the man moved *to*) and a thread lost at ply k are three
+different failures, and a player — or a later drill picking on their weak spot
+— needs to tell them apart; anything a caller does not name lands in `other`
+rather than being refused, since it is still one wrong answer. `lv`,
+asked-and-correct per rung, so accuracy can be read at the
+level it was earned at; `lat`, the last twenty latencies, read back through
+`prMedianLat()` as a median so one phone call does not drag the figure the
+player sees; and `ply`, the deepest line a mode with a `q.ply` (tracker,
+forcing, calc) has been answered right on, moved by a correct answer only,
+since a wrong one proves nothing about how far anybody got. The record lives
+under `nox.practice.<account id | guest>` (`PR_STORE`, `prKey()`), stamped with
+whose it is the way the puzzle cache is — for a guest it is the whole of it,
+and for everybody else it is the cache in front of `practice_progress` above.
+`PR_VERSION` is 2,
+and version 1's single five-rung ladder (Beginner … Advanced) is gone — a
+player who has drilled coordinates for a fortnight and never touched tracking
+was never well described by one number. A version-1 save is read forward
+through `PR_V1_KEYS` rather than thrown away: two of the seven old drills
+merged into Square Trainer and one became the tracker's opening levels, so
+nothing anybody answered is lost. There is still deliberately **no Elo**:
+ranked and puzzle ratings are untouched by all of it.
+
+**The dashboard says where you stand and what to do next, and never locks a
+door.** `prReadiness(st)` is the shape it reads: a fraction per group
+(`prGroupLevel`, the mean of each mode's level over its own ladder length,
+since an eleven-rung ladder and a two-rung one do not otherwise compare), a
+milestone once tracker ≥ 9, hold ≥ 7, calc ≥ 5 and Progressive Blindfold's
+level 5 have all been held at once, and the one next thing to try.
+`prRecommendNext()` is that rule and it is deliberately small: the bridge
+first if its own three gates are open (tracker ≥ 5, attack ≥ 4, forcing ≥ 2)
+or lesson 10 is finished, since nobody should have to max out half the
+curriculum before trying a whole small game; otherwise walk `PR_GROUPS` in
+order and stop at the frontier — the first group that is open while the one
+after it is not — and inside it recommend whichever drill is furthest *behind*
+on its own ladder (`prRecommendFrom()`: the lowest ladder fraction, then the
+oldest `lastAt`, then `PR_MODES`' own order, which is not always the order a
+group names its modes in). A drill drops out of that pool once it is 60% up
+its own rungs, which is the same bar the Solid tag reads; the group's own
+floor test (level 2) is deliberately coarser, because it decides whether we
+have moved on to the *next* group rather than which drill inside this one
+still needs work. Falling off the end of that walk is not "nothing to
+recommend": a player really can clear every group's floor while nothing is
+solid and the bridge's gates are unmet, which is exactly who this exists for,
+so the fallback is the weakest mode across the whole curriculum, and only when
+every one of those is solid too does the bridge become the answer on its own
+terms. All of it is *soft*: a
+card carries a tag — Recommended now, Ahead of you, Solid — and Start always
+works. A tag is a hint about where to spend the next few minutes, never a
+lock, and `prGroupOpen()` is asked for the tag and for the recommendation by
+the same call so the two can never say different things. Beside Start on every
+card is Quick, the express lane: two minutes at `prStartLevel(key)` with no
+setup box in between.
+
+**`goPractice(target)` is the whole of the way in.** `target` is nothing (a
+plain visit), `{mode, level, minutes}` to drop straight into a drill — the
+history route, the Quick button, the course's own handoff — or `'daily'`.
+`prOpen()` is what a target names: it starts a session with no setup box,
+because the two questions `prOpenSetup()` asks are for somebody choosing where
+to begin and not for somebody arriving already having chosen. Where a mode's
+*first* session opens is `prStartLevel()`: a mode with a session on file opens
+where its staircase left it, and one with none opens at the floor its lesson
+earned (`PR_FLOORS`, a `{lesson, level}` per mode) or at 1. A floor is a
+starting line and never a ceiling — understanding a thing once is not being
+able to do it, and the staircase takes over from the first answer.
+`showScreen()` calls `prLeave()` on the way to any other screen, which is what
+stops a study countdown, a square click wired to a question nobody can see, or
+an engine reply from running on over another page.
+
+**Progressive Blindfold is a Practice mode and nothing else.** Same board,
+same store, same door — `PR_PB_LEVELS` is its ladder and `progressive` its
+key. It is the only one that is a whole *game*: ten rungs that take the board
+away a step at a time — your men shown and theirs hidden (`vis:'mine'`), then
+the squares with nobody on them (`'squares'`), then no board at all
+(`'console'`) — which is the game's own `fog`, `blind` and `total` said in
+Practice's own words, and rendering is the whole of the difference
+(`pbMask`/`pbPaint`) exactly as it is in a game: the position is complete
+throughout. `men` is men a side (`men:0` is the full start position), `peeks`
+the level's allowance, `checkEvery` how often it stops to ask, and `target`
+the moves that have to be held. It is also the one mode the staircase does not
+settle: a rung is held or it is not — `pbEnd()` decides, on the target, at
+most one drift and no move that was not there — and `prFinish()` opens the
+next session one rung higher only on a pass, keeping what the game cost
+(`stats.pb`, per level: moves played, checkpoints held, peeks, recoveries,
+drifts) rather than folding it into an accuracy figure a whole game is not
+described by.
+
+Three things hold a game up short of that ending, and none of them is a second
+question the session scores. Every few moves `pbCheckpoint()` stops and asks
+one thing about the position as it now stands — Fine's own order through
+`prAskFine()` (where a king is, what stands beside it), how many men a side
+has, or what the last move was — with the "last move" decoys drawn from
+`pb.prevSt`, the position that move was played *from*, so they are moves that
+really were available and never anything a book suggested. A miss is a drift
+and the true board is shown for two seconds, because catching the drift is the
+point and playing on from a picture that has already gone wrong is not a
+question anybody can answer. `pbPeek()` is the same two seconds bought
+deliberately out of the rung's own allowance — a level with none left offers
+no Peek button rather than a dead one, and neither does one whose look is
+already running: `pb.peeking` is what stops a second press spending a second
+peek and starting a second timer whose predecessor would take the board away
+early. A peek is a *look* and not a pause: `pb.busy` is left alone and a move
+may be played while the men are up. And `pbRecover()` ("I've lost it") shows
+the *score* and never the board, and hands the position back through
+`prRebuildStart()` to be put together from the moves — which is what
+Koltanowski did and what every guide to the game says to do instead of
+guessing. It is counted (`pb.recoveries`) and costs the level nothing: a
+player who stops and works the position out again is doing the thing this
+drill teaches. A checkpoint and a recovery *pause* the game: both set
+`pb.busy` and borrow the answer row, so the move box comes down with
+`PR.onSubmit` and nothing can be typed or clicked into a game that is standing
+still, and `pbRestoreInput()` hands the box, the instruction line
+(`pbHowTo()`, never the checkpoint's own "Click its square") and the board
+click back afterwards.
+
+**The bridge ends somewhere other than itself.** Progressive Blindfold is the
+one drill whose result card points off the page, because that is what the
+ladder is for: `#prNextLevel` (a held rung with more ahead of it) goes
+straight back in one higher at the same length, with no setup box — a level
+just earned is not a question to ask again; `#prBoardGame` appears from level
+7 and `#prBlindGame` once level 10 has been held, and both open the bot setup
+that already exists (`goBot()` + `selectMode('blind'|'total')`) rather than a
+second matchmaker. `prSuggestFirstBlindGame()` answers the rest of the form
+through `pickBotLevel(1000)` and `pickBotTime(30)` — the same setters the
+setup's own buttons call, so the guest ceiling and `syncOptions()` are not
+bypassed. Neither number is derived from anything the drill measured: 1000 is
+a mid-ladder rung chosen as a first blindfold opponent that punishes a dropped
+piece without out-calculating a beginner (the top rung an account buys is
+3200), and the slowest clock the setup offers — thirty minutes — is chosen
+because every practitioner guide agrees a first blind game should be
+unhurried. Every other mode's result card shows none of the three, since none
+of them ends anywhere but back on the dashboard.
+
+**Nothing in Practice reimplements a rule.** Positions come out of
+`prPosition()` and are thrown back unless the rules accept them — two kings,
+not touching, no pawn on a promotion rank, neither side already in check, no
+castling rights nobody earned. Movement answers are `legalMoves()`. Tracking
+walks and blindfold sequences are *played*, with `makeMove()`, and named with
+`toSAN()` — never assembled out of notation strings. Late levels of several
+modes take their positions from real games rather than a hat
+(`prGamePosition`, cut down by `prCluster`), because a random heap is not
+training material past small counts. Progressive Blindfold reads what the
+player typed with `parseMoveIn()` and answers with the small JS search already
+in this file. `parseMove()` is a one-line wrapper over `parseMoveIn(G.st, …)`:
+one notation reader, three pages. A generator that cannot produce a valid
+exercise retries, then asks again at the easiest setting, and only then gives
+up — it never puts a broken one on screen.
 
 The practice board is the game's board markup built a second time (`#prBoard`,
 `prSqEls`, `prPaint`) — same `.sq`, same `.piece`, same `.blind` that hides the
 men. The CSS is shared; only the element is not, because handing one board back
 and forth between two screens is how the two would come to disagree about what
-is on it. Progress is `localStorage` only
-(`nox.practice.<account id | guest>`), stamped with whose it is the way the
-puzzle cache is, and shaped so a `practice_progress` table could take it later
-without changing what the page writes. Every answer is written as it happens, so
-a refresh keeps what was answered; only the session count waits for the session
-to end. `showScreen()` calls `prLeave()` on the way out, which is what stops a
-study countdown running over another page. `goPractice()` is the only way in, on
-purpose — and now that the How to Play page exists, that is exactly what it
-does: the button at the end of the course presses `goPractice()` rather than
-growing a second entrance.
+is on it. Rebuilding a position is one interface for all three places that ask
+for one (Hold the Position, the tracker's last level, Progressive Blindfold's
+recovery): `prRebuildStart()`, judged by `rebuildDiff()`, which is shared with
+the course.
 
 **The lessons are the game with one thing taken away.** `screen-lessons` (the
 LESSONS section of the script, `LSN`, reached from LESSON → How to Play Blind
-Chess) is a five-lesson course, and it is deliberately made of the game rather
+Chess) is a ten-lesson course, and it is deliberately made of the game rather
 than about it: the same square and piece classes, the same four visions,
 `legalMoves()` refereeing every answer, and `parseMoveIn()` reading what is
 typed into its console — so anything the console accepts in a lesson it accepts
@@ -1027,40 +1233,72 @@ only because `render()` reads `G` and a lesson is not a game. One function took
 a parameter to make that possible — `visibleSet(s, me)` — and it still answers
 the game with no arguments at all.
 
-The five are Learn the Board, Chess Notation, Visualize Pieces, Track the
-Position and First Blindfold Challenge. Every one of them opens on something to
-do: an introduction that is only an introduction has been taken out of each,
-and two whole lessons that were *about* the game rather than made of it — "What
-Is Blind Chess?" and "Playing in Nox" — went with them. That is why `LESSONS`
-is read through `LSN_V1_TO_V2` on the way out of `localStorage`: a record
-written by the seven-lesson course still names lessons 6 and 7.
+The ten are Know, Don't See; Lines and the Knight; Reading a Move; Reach and
+Attack; Holding a Small Position; Updating: Where, and What Changed; Captures
+and Counting; Check Yourself, and Get It Back; Calculating Short Lines; and
+Playing Without the Pieces. Every one of them opens on something to do: an
+introduction that is only an introduction has been taken out of each, and the
+lessons that were *about* the game rather than made of it went with them.
 
-Three of the lessons are **generated, not written**: the coordinate drills, the
-piece-vision drills and the tracking sequences are made fresh out of
-`legalMoves()` each time, so the course cannot be learnt by heart. Learn the
-Board's ten questions come out of `lsnCoordSet()`, which lays down all four
-combinations of question-kind and chair before drawing the rest at random and
-shuffling the lot — so both kinds and both orientations are certain to be
-asked, and the White half is not always the first half. Generated
-positions carry both kings, because `legalMoves()` judges by check and a board
-with no king is not a question it can be asked; `lsnPiecePos()` throws a
-position away and makes another unless the piece's legal moves are exactly its
-geometric ones, since a pinned rook teaches the wrong lesson under the heading
-"where can it reach". What is fixed is fixed for a reason — the ten notations
-have to show ten particular forms, the three challenges have to be small — and
-`server/test_lessons.js` asks the page's own move generator whether every one of
-them is legal.
+**A lesson teaches once; the drill is where the second half happens.** Every
+`LESSONS` entry carries a `train` block — a `mode` key, a `level` and the
+sentence the card shows — and `lsnHandoffStep(L)` is the last step of all ten:
+what to train now, and one button that opens it through
+`goPractice({ mode, level })`. It is a step rather than a line at the foot of
+the last exercise because the handoff is the point of the course, and
+`lsnMark()` is called in its `setup()` rather than by `lsnNext()` at the end,
+so a learner who reads the card and walks off to Practice keeps the tick:
+reaching the card is finishing the lesson. The `mode`/`level` pairs are the
+same ones `PR_FLOORS` reads from the other side, which is what makes a finished
+lesson set where that mode's *first* session opens.
 
-**The player decides when the men go out, everywhere they go out.** Visualize
-Pieces waits on a Start Visualization button and the challenges wait on I'm
-Ready; neither hides a position on a timer, because a countdown tests reading
-speed rather than visualisation. The challenge's **Position** card
-(`lsnPositionHTML()`) is the same rule said in words — every man on the board,
-grouped by side and named by square — and it is read off `LSN.st` rather than
-written beside the FEN, so a position that changes cannot end up described as
-the one it used to be. It goes down with the board on I'm Ready, since left up
-it is simply the answer key, and Reveal builds it again from the position as it
-then stands.
+**The course is built out of Practice's own generators, never a copy of
+them.** A lesson's exercises are made fresh each time — `lsnStepColour` and
+`lsnStepQuadrant` from `prMakeSquare()` at a named recipe, `lsnStepBetween` and
+`lsnStepKnight` from `prMakeLines()`, `lsnStepAttackYesNo` and
+`lsnStepHanging` from `prMakeAttack()`, `lsnStepCluster` and `lsnStepRebuild`
+from `prMakeHold()`'s `question` and `rebuild` modes, `lsnStepChange` from its
+`change` mode, `lsnStepAfter` from `prMakeAfter()`, `lsnStepCaptureSeq`,
+`lsnStepCheckThree` and `lsnStepRecover` from `prMakeTracker()`,
+`lsnStepExchange` from `prMakeForcing()`, `lsnStepMate1` and
+`lsnStepLineThenRoot` from `prMakeCalc()` and `prMakeBranches()`, and
+`lsnStepMiniGame` from `prMakeProgressive(prRecipe('progressive', 1))` — so the
+course cannot be learnt by heart, and a lesson and the drill it hands off to
+cannot come to disagree about what the exercise is. `wantQ()` is the shared
+retry around a generator that can fail an unlucky draw; a generator that
+cannot produce one after two hundred tries throws rather than putting half a
+question on screen. `lsnStepDemo()` is the other kind of step: it lights
+squares, says something and waits for Continue, `gate:false` on purpose,
+because a demonstration is read rather than solved and gating one is only a
+click standing between the player and the thing being shown. What is fixed is
+fixed for a reason — the ten notation forms have to show ten particular
+shapes, `LSN_TEN_FEN` is the one position lesson 10's three vision demos share
+— and `server/test_lessons.js` asks the page's own move generator whether every
+fixed position in the course is legal.
+
+**The player decides when the men go out, everywhere they go out.** A step that
+takes the board away waits on a button — I'm Ready before a held position,
+Hide the Board before a sequence — and never hides anything on a timer, because
+a countdown tests reading speed rather than visualisation. The **Position**
+card (`lsnPositionHTML()`) is the position said in words, in Fine's own order
+— the king, what stands beside it, the pawns, then the rest — read off `LSN.st`
+rather than written out beside a FEN, so a position that changes cannot end up
+described as the one it used to be. It goes down with the board on I'm Ready,
+since left up it is simply the answer key, and it is built again from the
+position as it then stands when a step concedes.
+
+**Lesson 10 is the game's own visions, previewed.** Three demos on
+`LSN_TEN_FEN` — See the Board, Fog of War (named as what it is: a game vision,
+not a step on this path) and Complete Blindfold — and then one small game.
+That game is Progressive Blindfold's own first rung played once
+(`lsnStepMiniGame`): three men a side, four moves, the learner's men shown and
+the opponent's hidden, which is `LSN.mode = 'mine'` — Fog of War's men-only
+mask with the square fog left off, the picture `pbMask(board, W)` gives
+Practice, previewed on the lesson board rather than reimplemented there. Moves
+go through `lsnAskMove(null, …)`, where any legal move is right rather than one
+fixed answer, and the page replies at `pbReply()`'s own cadence. One checkpoint
+interrupts after the second move — lesson 8's habit asked for real — and a
+wrong square costs nothing.
 
 **One gauge, and no second list of lessons.** The stage carries a labelled
 progress line with a dot per lesson — done, current, ahead — and the dots are
@@ -1079,25 +1317,76 @@ is rebuilt from nothing each time it is drawn. One trap worth remembering —
 positioned, so a lesson class has to be `.lsn-`something even when the plain
 name looks free.
 
-**The course and Practice are two pages, and neither one is a door into the
-other.** They cover related ground — a coordinate drill in lesson 1 and the
-Coordinate Trainer both ask you to name a square — and that is the point: the
-course *teaches* the skill once, in order, and Practice is where it is *drilled*
+**The walk is the test, and it is answered by brute force.**
+`server/test_lessons.js` boots the whole page and drives the course the way a
+player does — presses the buttons, clicks the squares, types into the console —
+and it is never told an answer. Every step factory tags itself with a `solve`
+naming the *shape* of its question (`choices`, `select`, `typed`, `cluster`,
+`rebuild`, `multi`, `changed`, `hanging`, `recover`, `move`, `square`, `none`),
+and the harness's `solveStep()` dispatches on that tag to a strategy that works
+the answer out from what is on the page: reading the two endpoints out of the
+question's own sentence and asking `lineBetween()`, reading the Position card
+the same way a player reads it, pressing choices until one is right. A step's
+own `truth` field is for the page and is never read there — a solver that read
+the answer off the step would stop being able to catch a factory that cannot
+actually be solved. The check on the tags is containment rather than equality
+(every tag the page writes has a strategy), because `lsnStepAfter` picks its
+tag with a ternary and so carries tags (`attacks`, `loose`) that never appear
+as literal text in the file. The walk also counts itself — every step it
+passed against every step the ten lessons said they had — so a step that was
+silently never reached fails even when nothing else complains. A new step kind
+therefore needs a `solve` tag and a strategy in that harness, plus its own name
+— and any Practice generator it borrows — in the list the harness lifts out of
+the page, the same way `test_practice.js` names everything it extracts in
+`DECLS`/`FNS`.
+
+**The course and Practice are two pages, and there is exactly one door each
+way.** They cover related ground — a coordinate step in lesson 1 and Square
+Trainer both ask you to name a square — and that is the point: the course
+*teaches* the skill once, in order, and Practice is where it is *drilled*
 afterwards, with levels and statistics the course has no business keeping. So
 the course has no practice mode of its own; it hands off, and it hands off
-through `goPractice()`, the same function LESSON → Practice calls. There is one
-Practice screen, one `goPractice()`, and no third set of drills anywhere.
+through `goPractice(target)`, the same function LESSON → Practice calls — the
+lesson's own handoff card, and the three buttons on the finished course's done
+face: `#lsnGoTrain` (`goPractice()`), `#lsnGoProgressive`
+(`goPractice({ mode:'progressive', level:1 })`) and `#lsnGoPlay`, which is
+`lsnOpenVisionPick()` — `goBot()` plus `lsnNoteFirstGame()`, a line under the
+Vision panel advising Board Only first and Complete Blindfold once Progressive
+Blindfold's last level is behind you. It advises and chooses nothing, because
+which vision to take is the one thing the end of the course must not decide on
+somebody's behalf. The note is written there and nowhere else, and cleared by
+`lsnFirstNoteClear()` from `resetChoices()`, which every route to the setup
+panel passes through — so it lives exactly as long as the unanswered vision
+question it is about and cannot stand over a friend challenge later. Back the
+other way there is one link and only one: a Practice card's setup box carries
+"How this works: Lesson N" (`prDrawIntro`, reading `m.lesson`) whenever that
+lesson is not in `lsnDone()` — first visit or not, because the question it
+answers is "has this player been taught the concept", and somebody three
+drills past the lesson that introduced this one is exactly who it is for. The
+two-line intro beside it (`m.intro`) is shown only on a mode's first visit,
+since the level caption says the rest once there is a session to measure.
+There is one Practice screen, one `goPractice()`, and no third set of drills
+anywhere.
 
-**Lesson progress is local, and kept apart from Practice's.**
+**Lesson progress is local first, and kept apart from Practice's levels.**
 `nox.lessons.<owner>.howto` in `localStorage`, keyed by owner exactly as the
 puzzle ladder and `nox.practice.<owner>` are, so two accounts sharing a browser
 cannot read each other's. The two records are separate on purpose: finishing a
 lesson is something you did once and it stays done, while a practice level is
-something you currently are and can fall. There is no lessons table in Supabase
-and inventing one for five booleans would be a schema change to regret;
-`lsnPush()` is the seam a cloud copy goes through when there is one, and
-everything above it already speaks of "the owner's finished lessons" rather than
-"this browser's".
+something you currently are and can fall. There is still no lessons table and
+there is not going to be one for ten booleans — a signed-in player's copy rides
+in `practice_progress` under the reserved mode name `course`, whose `stats` are
+the finished lessons, and `lsnPush()` is where it goes (`prPushCourse()`, asked
+for by `typeof` because that is the other side of a section boundary). The
+record is a *version*: the course was seven lessons, then five, and is now ten,
+so a stored record is read forward through as many maps as it needs on the way
+in (`lsnNormalise`, `LSN_V1_TO_V2` then `LSN_V2_TO_V3`) and written back at v3
+so the translation happens once. `LSN_V2_TO_V3` is `{1:1, 2:3, 3:4, 4:5}` and
+deliberately drops old lesson 5, the first blindfold challenge: a lesson kept
+is a lesson whose new form asks no more than its old one did, and new 10 asks
+for a whole game with the men hidden, which is not something the old lesson 5
+had anybody do. Ticking it would open the ladder on a lesson they have never
+seen.
 
 **Study Board and Puzzles are separate features that share one library.**
 Study Board (`REV`, the review screen) explains *the game the player just
@@ -1261,7 +1550,21 @@ Navigate by the `/* ==== TITLE ==== */` banners in the script — THE SKY,
 CONSTANTS & HELPERS, MOVE GENERATION, ENGINE, GAME / UI STATE, CLOCK, SOUND,
 COMPLETE BLINDFOLD, PLAYING MOVES, ONLINE PLAY, RESIGNING…, THE ENGINE, THE
 REVIEW, THE EDUCATION LAYER, THE PUZZLES, STUDY ALTERNATIVES, THE LESSONS,
-CONTROLS, PRACTICE, SCREENS, HISTORY, ACCOUNTS, SOCIAL.
+CONTROLS, PRACTICE, SCREENS, HISTORY, ACCOUNTS, THE LIVE LEAGUE, SPECTATING,
+SOCIAL.
+
+The two biggest of those carry sub-banners, and one suite is anchored to where
+a section starts and stops. THE LESSONS runs through THE LESSON BOARD, THE
+STAGE, THE GENERATORS, THE FIVE and four banners named for the tasks that
+built the step factories under them (TASK 30a, 31, 32, 33). Several of those
+headings are stale and worth not trusting: the course is ten lessons rather
+than five, and a TASK banner says when a batch of step kinds arrived rather
+than what it holds — read the factories, not the heading. The same goes for
+THE SIX DRILLS — generation inside PRACTICE, which generates eleven. PRACTICE
+runs from its own banner through that one, RUNNING A DRILL, PROGRESSIVE
+BLINDFOLD, A SESSION, START TO FINISH and THE DASHBOARD, and ends where
+SCREENS begins: `test_practice_flow.js` lifts exactly that span, so anything
+Practice needs at top level has to live inside it.
 
 Screens are `<section class="screen" id="screen-NAME">` toggled by
 `showScreen(name)`; `screenName` is the current one and several handlers branch
@@ -1274,8 +1577,11 @@ whatever site came before. The HISTORY section fixes that with the smallest
 thing that fits — no router, no URLs on the server (`STATIC_FILES` is an
 allowlist, and a path like `/ranked` would 404 on refresh), just
 `history.pushState` with a hash naming the page (`#ranked`, `#friendly`,
-`#lessons/3`, `#practice/coord`, `#puzzle/opening`, `#play/bot`,
-`#game/ranked`) and a `popstate` handler. The one address that is a path
+`#lessons/3`, `#lessons/done`, `#practice/tracker`, `#puzzle/opening`,
+`#play/bot`, `#game/ranked`) and a `popstate` handler. A drill's entry is the
+mode's own key with the level and the length riding in the state beside it, so
+`navApply()` re-enters it through `goPractice()` and then `prOpen(key, level,
+minutes)` — the same door the Quick button and the course's handoff use. The one address that is a path
 rather than a hash is the spectator page, `/spectate/<id>`, because the
 server serves the page for it; `navPath()` writes it and puts `/` back on
 the way off. The rule is
