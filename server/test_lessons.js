@@ -123,6 +123,36 @@ const V23 = new Function(grab(/\nconst LSN_V2_TO_V3 = \{[^\n]*\};/, 'LSN_V2_TO_V
 check('the old challenge lesson has nowhere to land', V23[5] === undefined);
 check('old lesson 2 (notation) becomes lesson 3', V23[2] === 3);
 
+// Every step factory tags itself with a `solve` naming the shape of its
+// question (`solve:'choices'`, `solve:'typed'`, …), and solveStep() below is
+// the walk's whole answer to "how is that answered" — a strategy of its own
+// for most tags, or the generic loop at its foot for the three it names in
+// its own comment there ('square', 'move', 'none'). SOLVE_STRATEGIES is read
+// out of solveStep()'s own source (every `kind === '…'` it tests, which only
+// ever appears where it is dispatching) rather than typed out a second time
+// here, so a tag that gains a strategy — or a tag that never gets one — shows
+// up on both sides of the check below without anybody having to keep two
+// lists in step. solveStep is a hoisted function declaration, so reading its
+// source here, above its own definition, is safe. It comes out one entry
+// larger than a plain `grep -o "solve:'[a-z]*'" blind-chess.html` of the page
+// itself: lsnStepAfter's own `solve` is picked with a ternary rather than
+// written as a literal (`kind === 'vacated' ? 'changed' : kind === 'attacks'
+// ? 'attacks' : kind === 'hanging' ? 'loose' : 'choices'`), so 'attacks' and
+// 'loose' are real tags a step really carries at runtime — the walk meets
+// both, in lessons 6 and 7 — without ever appearing as `solve:'attacks'` text
+// anywhere on the page. The check below is therefore containment (every tag
+// the page writes has a strategy), not equality: solveStep is allowed to
+// know a tag the page's own literal text does not spell out.
+const SOLVE_STRATEGIES = Array.from(new Set(
+  Array.from(solveStep.toString().matchAll(/kind === '([a-z]+)'/g), m => m[1])));
+const SOLVE_FALLBACK = ['square', 'move', 'none'];
+const SOLVE_KNOWN = SOLVE_STRATEGIES.concat(SOLVE_FALLBACK);
+head('Every solve tag the page writes is one the walk’s solver can actually answer');
+const pageSolveTags = Array.from(new Set(Array.from(SRC.matchAll(/solve:'([a-z]*)'/g), m => m[1])));
+check('every tag the page writes has a strategy or is one of the fallback three',
+      pageSolveTags.every(t => SOLVE_KNOWN.includes(t)),
+      pageSolveTags.filter(t => !SOLVE_KNOWN.includes(t)).join(',') || 'all known');
+
 /* ============================================================
    2 · the whole page, and the course walked through it
    ============================================================ */
@@ -663,14 +693,27 @@ function readMovesCard(html){
     .filter(Boolean);
 }
 
+// How many steps the walk below actually got through, against how many each
+// lesson said it had, and every `solve` tag it met along the way — module
+// scope because walk() is the only writer and the assertions after "Every
+// lesson can be walked end to end" are the only reader. A step that silently
+// never ran (an early return nothing else here happened to notice) shows up
+// as stepsSeen falling short of stepsTotal; a tag with no strategy shows up
+// against SOLVE_STRATEGIES/SOLVE_FALLBACK above.
+let stepsSeen = 0, stepsTotal = 0;
+const solveSeen = new Set();
+
 /** Walk one lesson end to end, answering everything. */
 async function walk(p, n){
   p.lsnOpen(n, 0);
   const steps = p.LSN.steps.length;
   check('lesson ' + n + ' opens with steps', steps > 0, steps);
+  stepsTotal += steps;
   for (let i = 0; i < steps; i++){
     const at = p.LSN.step;
-    const gated = !!p.LSN.steps[at].gate;
+    const step = p.LSN.steps[at];
+    const gated = !!step.gate;
+    if (step.solve) solveSeen.add(step.solve);
     if (gated){
       const ok = await solveStep(p);
       if (!ok){
@@ -680,6 +723,7 @@ async function walk(p, n){
       }
     }
     check('lesson ' + n + ' step ' + (at + 1) + ' of ' + steps + (gated ? ' answered' : ' read'), true);
+    stepsSeen++;
     if (p.by('lsnNext').disabled){
       check('lesson ' + n + ' step ' + (at + 1) + ' opens the way on', false);
       return false;
@@ -745,6 +789,15 @@ async function walk(p, n){
     check('lesson ' + n + ' finishes', ok);
     if (!ok) break;
   }
+  // Every step the walk passed, and every `solve` tag it met doing it —
+  // checked against the counts and the sets above rather than trusted
+  // because the loop above did not itself report a failure: a step that was
+  // silently never reached would show up here even if nothing else did.
+  check('no step across the ten lessons went unwalked',
+        stepsSeen === stepsTotal, stepsSeen + ' of ' + stepsTotal);
+  check('every solve tag the walk actually met is one this harness handles',
+        Array.from(solveSeen).every(k => SOLVE_KNOWN.includes(k)),
+        Array.from(solveSeen).sort().join(','));
 
   head('Every lesson ends by handing the player to a drill');
   for (let n = 1; n <= p.LESSONS.length; n++){
