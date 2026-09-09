@@ -77,7 +77,7 @@ var DECLS = ['VAL','FILES','rowOf','colOf','SQNAME','uciOf','sqName','sqIndex','
              'OPENING_BOOK','OPENING_LINES',
              'PR_SQUARE_LEVELS','PR_QUADRANT_NAME','PR_DIRS','PR_LINES_LEVELS','PR_PIECE_LEVELS',
              'PR_ATTACK_LEVELS','PR_HOLD_LEVELS','PR_TRACKER_LEVELS','PR_AFTER_LEVELS','PR_FORCING_LEVELS',
-             'PR_CALC_LEVELS',
+             'PR_CALC_LEVELS','PR_BRANCHES_LEVELS',
              'PR_MODES','PR_MINUTES','PR_STORE','PR_VERSION','PR_V1_KEYS','PR_SEEN_MAX',
              'prKey','prAcc','prSeenKey',
              'PR','PR_STEP_UP','PR_STEP_DOWN','prRand','prPick','prSide','prMan','PR_MAKE','W',
@@ -97,7 +97,7 @@ var FNS = ['startBoard','newState','cloneState','fenOf','stateFromFEN',
            'prMoveFacts','prMakeAfter',
            'prPlaceAttackers','prMaterialOf','prExchangeLine','prMakeForcing',
            'prMatesIn1','prMatesIn2','prForks','prCalcHanging','prPuzzlePool','prCalcTrack','prMakeCalc','prCalcDraw',
-           'prPickMove','prAskAbout','prMakeMini','prRecipe','prMake',
+           'prPickMove','prAskAbout','prMakeMini','prMakeBranches','prRecipe','prMake',
            'prGamePosition','prCluster','prAskFine','prMakeHold',
            'prRecord','prScore','prStep','prNow','prTimeLeft','prRecommend','prMedianLat',
            'prStartLevel','prOpen','prRebuildStart','prRebuildFinish','prRbPaint','goPractice'];
@@ -632,6 +632,43 @@ head('Blind Calculation');
   ok('a pool with nothing fresh in it still hands back a question',
      prCalcDraw(prRecipe('calc', 7), seenPool).task, 'puzzle');
   storage = {};
+})();
+
+/* ============================================================
+   Branches: every branch replays out of the move generator itself, back to
+   back from the shared root rather than from wherever the branch before it
+   stopped — `s` restarts at `q.root` for each one below, exactly as
+   prMakeBranches restarts it. Two things beyond plain replay are checked of
+   the set as a whole: that every branch after the first actually shares a
+   square with the first one (`touched`, fixed the moment the first branch
+   is read and never grown after — the same anchor prMakeBranches itself
+   measures every later branch against), since a branch that touches
+   nothing the first branch touched could never be confused with it, and
+   that every branch's own `rootAsk` sits on a square that branch left
+   different from the root — the whole reason a wrong rewind is even
+   detectable — checked by comparing what actually stands there once the
+   branch has been replayed against what stood there in the root itself.
+   ============================================================ */
+head('Branches');
+(function(){
+  var bad = 0;
+  for (var lv = 1; lv <= PR_BRANCHES_LEVELS.length; lv++) for (var t = 0; t < 20; t++){
+    var q = prMakeBranches(prRecipe('branches', lv));
+    if (!q){ bad++; continue; }
+    if (q.branches.length !== prRecipe('branches', lv).count) bad++;
+    var touched = null;
+    q.branches.forEach(function(br){
+      var s = q.root, squares = {};
+      br.sans.forEach(function(san){ var m = moveFromSAN(s, san); if (!m){ bad++; return; } squares[m.from] = squares[m.to] = 1; s = makeMove(s, m); });
+      if (!sameBoard(s.b, br.end.b)) bad++;
+      if (touched && !Object.keys(squares).some(function(k){ return touched[k]; })) bad++;
+      touched = touched || squares;
+      // this branch's root question must be answerable differently at the root and at this end
+      var atRoot = q.root.b[br.rootAsk.sq], atEnd = s.b[br.rootAsk.sq];
+      if ((atRoot ? atRoot.c + atRoot.t : '') === (atEnd ? atEnd.c + atEnd.t : '')) bad++;
+    });
+  }
+  ok('every level generates branches that share a square and disagree with the root', bad, 0);
 })();
 
 /* ============================================================

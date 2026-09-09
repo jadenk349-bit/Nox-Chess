@@ -398,6 +398,16 @@ function answerAskRight(ask){
   }
   throw new Error('unknown question type ' + ask.t);
 }
+/** A guaranteed-wrong answer to a `what` ask — used where a test needs to
+    force a miss rather than assert one, which every ask this drill puts up
+    is: "Empty square" is never the truth when a man is named, and the
+    White king is never the truth when the square is bare (Branches, whose
+    `ask` and `rootAsk` are both prAskShow's own `what`). */
+function answerAskWrong(ask){
+  if (ask.t !== 'what') throw new Error('no wrong-answer form for ask type ' + ask.t);
+  if (ask.type){ ansButton('Empty square').onclick(); return; }
+  prAnsEl.children[0].onclick();
+}
 /** A square that is definitely not the answer. */
 function elsewhere(not){
   for (var i = 0; i < 64; i++) if (i !== not) return i;
@@ -1355,6 +1365,70 @@ function forceCalc(level, pred){
   typeAnswer(sqName(q2.answer.from) + sqName(q2.answer.to));
   tick(4000);
   ok('and plain squares are read as the move they name', /right/.test(byId.prSay.className), true);
+  prShowDash();
+})();
+
+/* ============================================================
+   5e — Branches: a level 1 question answered right the whole way through —
+   every branch's own end, then the root question that follows it, clearing
+   the line each time — and a second pass where the very first rewind is
+   wrong, to prove the miss is recorded as `lost` rather than the ordinary
+   `square` a wrong branch-end answer gets. test_practice.js already
+   re-derives every branch and every rootAsk against the move generator
+   itself; what the presenter still has to prove on its own is that the men
+   go dark before any of it is asked, that the line is off the screen before
+   the root is asked about, and that scoring really does wait for the whole
+   set.
+   ============================================================ */
+head('Branches');
+
+(function(){
+  storage = {};
+  startDrill('branches', 1, 5);
+  var q = null;
+  for (var t = 0; t < 20 && !q; t++) q = prMakeBranches(prRecipe('branches', 1));
+  if (!q) throw new Error('could not generate a level 1 Branches question');
+  presentForced(q);
+  ok('the root is on the board to study', byId.prBoard.classList.contains('blind'), false);
+  ok('nothing is asked before Ready', PR.click, null);
+
+  pressCtl('Ready');
+  ok('Ready takes the men away before the branches start', byId.prBoard.classList.contains('blind'), true);
+
+  q.branches.forEach(function(br){
+    ok("the branch's own line is read out", byId.prSeq.innerHTML.indexOf(br.sans[0]) >= 0, true);
+    ok('and it asks about its own end', byId.prQ.innerHTML.indexOf(sqName(br.ask.sq)) >= 0, true);
+    answerAskRight(br.ask);
+    ok('the line is cleared for the rewind', byId.prSeq.innerHTML, '');
+    ok('and the question is put about the root instead', /Back at the root/.test(byId.prQ.innerHTML), true);
+    answerAskRight(br.rootAsk);
+  });
+  ok('right on every branch and every rewind is judged right', /right/.test(byId.prSay.className), true);
+  ok('with the root and the last branch to compare', /The root\./.test(byId.prSub.innerHTML), true);
+  pressCtl('Compare');
+  ok('Compare swaps to where the last branch actually finished', /end of the last branch/.test(byId.prSub.innerHTML), true);
+  prShowDash();
+})();
+
+(function(){
+  // the first rewind wrong, everything else right: the miss this scores is
+  // `lost`, not the plain `square` a wrong branch-end answer gets
+  storage = {};
+  startDrill('branches', 1, 5);
+  var q = null;
+  for (var t = 0; t < 20 && !q; t++) q = prMakeBranches(prRecipe('branches', 1));
+  if (!q) throw new Error('could not generate a level 1 Branches question');
+  presentForced(q);
+  pressCtl('Ready');
+
+  answerAskRight(q.branches[0].ask);
+  answerAskWrong(q.branches[0].rootAsk);
+  for (var i = 1; i < q.branches.length; i++){
+    answerAskRight(q.branches[i].ask);
+    answerAskRight(q.branches[i].rootAsk);
+  }
+  ok('a wrong rewind is judged wrong', /wrong/.test(byId.prSay.className), true);
+  ok('and counted as having lost the root, not as a wrong square', prLoad().modes.branches.stats.errs.lost, 1);
   prShowDash();
 })();
 

@@ -12063,12 +12063,39 @@ const PR_CALC_LEVELS = [
   { cap:'Given moves, then find it, console only', task:'visualise', plies:[4,6], study:8000, console:true }
 ];
 
+/* Branches' own ladder — declared ahead of PR_MODES for the same reason the
+   ten before it are. A branch is a short line played out from a shared
+   root, and `count` of them share a handful of squares on purpose:
+   `prMakeBranches` below refuses a branch that touches none of the squares
+   the first one changed, because two branches that never cross are two
+   unrelated exercises rather than one drill about coming back to the same
+   root without losing it. Every branch also carries its own `rootAsk`, on a
+   square that branch itself changed, so a rewind that has drifted onto a
+   *different* branch's answer is caught rather than passed. `plies` is how
+   far each branch runs, `men` the root's own material (read exactly as Hold
+   the Position's own `men` is), and `captures` (from level 4) forces the
+   first ply of every branch to be a capture, so the branches are not merely
+   different but decisive. `hidden`/`study` are Forcing Lines' own pair: a
+   manual Ready before level 5, a countdown from it on. `lead`, on the last
+   level alone, replaces the built root with a real opening reached by
+   tracking the moves that get there rather than being handed it outright —
+   the hardest form of "find the root again" is finding it in the first
+   place. */
+const PR_BRANCHES_LEVELS = [
+  { cap:'Two branches of two plies, root shown',  count:2, plies:2, men:6 },
+  { cap:'Three branches',                          count:3, plies:2, men:6 },
+  { cap:'Four-ply branches',                       count:2, plies:4, men:7 },
+  { cap:'Captures inside the branches',            count:2, plies:4, men:8, captures:true },
+  { cap:'The root hidden after study',             count:3, plies:4, men:8, captures:true, hidden:true, study:8000 },
+  { cap:'The root reached by tracking first',      count:2, plies:4, men:0, hidden:true, study:0, lead:6 }
+];
+
 /* Each drill, in the order the dashboard lists them. `group` clusters related
    drills for the dashboard (Task 22); `lesson` is the course step it grows out
    of. `levels` replaces the old `tiers`/`hard`/`needs`: a mode's levels are a
    recipe ladder, not a difficulty label — what a session is actually worth is
    the level the staircase below settles it on, not a tier picked by hand.
-   Nine of the ten ladders above are the real thing; Progressive Blindfold
+   Ten of the eleven ladders above are the real thing; Progressive Blindfold
    is still a provisional caption so the page runs, and `prMake` calls
    through today's generator (PR_MAKE) until a later phase gives it a recipe
    of its own. */
@@ -12097,6 +12124,9 @@ const PR_MODES = [
   { key:'calc', name:'Blind Calculation', group:'calc', skill:'Calculation', lesson:9,
     desc:'Find the move in a position you are holding, not looking at.',
     levels: PR_CALC_LEVELS },
+  { key:'branches', name:'Branches', group:'calc', skill:'Rewinding', lesson:9,
+    desc:'Walk a line, answer for its end, then come back to the root and walk another.',
+    levels: PR_BRANCHES_LEVELS },
   { key:'hold', name:'Hold the Position', group:'holding', skill:'Holding', lesson:5,
     desc:'A small position, studied, then answered for with the men hidden.',
     levels: PR_HOLD_LEVELS },
@@ -13454,6 +13484,66 @@ function prMakeMini(diff){
   return null;
 }
 
+/* Branches: `count` short lines out of one shared root. Every branch is
+   grown from `root` itself — never from the end of the branch before it —
+   so `s` starts over at `root` each time, and every branch after the first
+   is kept only once it touches a square the *first* branch also touched
+   (`touched`, set once and left alone — every later branch is measured
+   against that same fixed anchor rather than a running union, which is
+   what actually makes any two branches in the set confusable with one
+   another and not merely each one with its neighbour). A branch is also
+   dropped if it repeats a line already kept (`branches.some(...)`), and —
+   once `r.captures` is set — unless it opens with a capture. `rootAsk` is
+   drawn from `changed`, the squares that particular branch actually left
+   different from the root, and never from the wider `squares` a branch
+   merely passed through: asking about a square nothing altered would be
+   answerable without the player ever having rewound anything at all. A
+   branch or a root question is dropped and the whole attempt retried rather
+   than patched, which is what `fine` guards — a level whose men are too few
+   to leave a branch with anything changed is a broken recipe, not a puzzle
+   worth asking. */
+function prMakeBranches(r){
+  for (let t = 0; t < 80; t++){
+    let root, lead = null;
+    if (r.lead){ const idx = prRand(OPENING_LINES.length); const o = openingPosition(idx, r.lead); root = o.st; lead = { sans:o.sans, name:o.name }; }
+    else { const built = prPosition(prMaterial(r.men)); if (!built) continue; root = built.st; }
+    const branches = [];
+    let touched = null, ok = true;
+    for (let b = 0; b < r.count; b++){
+      let made = null;
+      for (let u = 0; u < 30 && !made; u++){
+        let s = root; const sans = [], sq = {}; let caps = 0, good = true;
+        for (let k = 0; k < r.plies; k++){
+          const all = legalMoves(s, s.turn); if (!all.length){ good = false; break; }
+          let pool = all; if (r.captures && k === 0 && all.some(m => m.cap)) pool = all.filter(m => m.cap);
+          const m = prPickMove(s, pool); sans.push(toSAN(s, m, all)); sq[m.from] = sq[m.to] = 1; if (m.cap) caps++; s = makeMove(s, m);
+        }
+        if (!good || (r.captures && !caps)) continue;
+        if (touched && !Object.keys(sq).some(k => touched[k])) continue;
+        if (branches.some(x => x.sans.join() === sans.join())) continue;
+        made = { sans, end:s, squares:Object.keys(sq).map(Number) };
+      }
+      if (!made){ ok = false; break; }
+      touched = touched || made.squares.reduce((o, k) => (o[k] = 1, o), {});
+      branches.push(made);
+    }
+    if (!ok) continue;
+    // each branch asks at its end, then asks about the root on a square it changed
+    let fine = true;
+    for (const br of branches){
+      const esq = prPick(br.squares), ep = br.end.b[esq];
+      br.ask = { t:'what', sq:esq, colour: ep ? ep.c : null, type: ep ? ep.t : null, text:'At the end of this branch, what stands on <b>' + sqName(esq) + '</b>?' };
+      const changed = br.squares.filter(i => { const a = root.b[i], e = br.end.b[i]; return (a ? a.c + a.t : '') !== (e ? e.c + e.t : ''); });
+      if (!changed.length){ fine = false; break; }
+      const rsq = prPick(changed), rp = root.b[rsq];
+      br.rootAsk = { t:'what', sq:rsq, colour: rp ? rp.c : null, type: rp ? rp.t : null, text:'Back at the root: what stands on <b>' + sqName(rsq) + '</b>?' };
+    }
+    if (!fine) continue;
+    return { kind:'branches', root, branches, hidden:!!r.hidden, study:r.study || 0, lead, sig:'branches:' + fenOf(root).split(' ')[0] + branches.map(b => b.sans.join('')).join('|') };
+  }
+  return null;
+}
+
 /* One generator per drill PR_MODES names, and no key that names nothing:
    Blindfold Sequence used to have a generator here with no card of its own,
    and it is now the tracker's opening levels rather than an eighth entry.
@@ -13465,7 +13555,7 @@ const PR_MAKE = {
   square: r => prMakeSquare(r), lines: r => prMakeLines(r), piece: r => prMakePiece(r),
   attack: r => prMakeAttack(r),
   tracker: r => prMakeTracker(r), after: r => prMakeAfter(r), forcing: r => prMakeForcing(r),
-  calc: r => prMakeCalc(r), hold: r => prMakeHold(r),
+  calc: r => prMakeCalc(r), branches: r => prMakeBranches(r), hold: r => prMakeHold(r),
   progressive: r => prMakeMini(r.level)
 };
 
@@ -13640,6 +13730,7 @@ function prPresent(){
     case 'after':    return prShowAfter(q);
     case 'forcing':  return prShowForcing(q);
     case 'calc':     return prShowCalc(q);
+    case 'branches': return prShowBranches(q);
     case 'hold':     return prShowHold(q);
   }
 }
@@ -15081,6 +15172,156 @@ function prCalcDemo(q, st, wrong, then){
   };
   if (!frames.length){ then(); return; }
   prTimer(step, 600);
+}
+
+/* ---- 3e: branches ----
+   One drill, two questions per branch: what stands on a square at the end of
+   the line just walked, and then — back at the root, the line cleared off
+   the screen — what stands on a square that same branch actually changed.
+   The second question is the point: a player who can hold one line has done
+   half of what over-the-board calculation asks, and the other half is
+   letting go of it cleanly enough to start the next one from the position
+   that was really there, rather than from wherever the last line happened
+   to leave off. `prJudge` is called once, at the very end
+   (`prBranchesFinish`), on the same terms Forcing Lines and After the Move
+   already score a set of questions by — right only if every one of them
+   was, because the thing being tested is the whole cycle of walking out and
+   rewinding home, not any single fact along the way. */
+function prShowBranches(q){
+  q.results = [];
+  prBoardOn(true);
+  prLayout(false, true);
+  prMarksClear();
+  prSeq('');
+  const startBranches = () => prBranchesRun(q, 0);
+  if (q.lead){
+    // the root is reached by tracking rather than shown outright — the men
+    // are hidden the moment the line starts and stay that way straight into
+    // the branches, which is what q.hidden means at this level in place of
+    // a study phase of its own
+    prMen(true);
+    prPaint(startBoard());
+    prQ(q.lead.name + '.');
+    prSub('Hold the start position. Ready reads the moves out, men hidden, and they end on the root.');
+    prCtl([['Ready', () => prBranchesLeadRead(q, startBranches), 'primary']]);
+    return;
+  }
+  prMen(true);
+  prPaint(q.root.b);
+  let men = 0;
+  for (let i = 0; i < 64; i++) if (q.root.b[i]) men++;
+  prQ('Study the root — <b>' + men + '</b> men.');
+  prSub('Press Ready when you have it — the branches come next, and the men go with them.');
+  const reveal = () => { prMen(false); prMarksClear(); startBranches(); };
+  if (q.hidden) prStudyPhase(q.study, reveal);
+  else prCtl([['Ready', reveal, 'primary']]);
+}
+/* The lead-in for the last level: the moves that reach the root are read out
+   exactly as the tracker's own opening levels read theirs — one at a time, a
+   beat apart, men already dark — because the root here is not handed over,
+   it is arrived at. `prTrackerLine` is reused rather than copied so the two
+   drills cannot come to read a line two different ways. */
+function prBranchesLeadRead(q, then){
+  prClearTimers();
+  prMen(false);
+  prMarksClear();
+  prCtl([]);
+  const sans = q.lead.sans;
+  let k = 0;
+  const step = () => {
+    if (k >= sans.length){
+      prQ('This is the root.');
+      prSub('');
+      prTimer(then, 700);
+      return;
+    }
+    k++;
+    prSeq(prTrackerLine(sans.slice(0, k).map(san => ({ san })), {}));
+    prQ('Follow the moves.');
+    prSub('Move <b>' + k + '</b> of <b>' + sans.length + '</b>.');
+    prTimer(step, PR_TRACKER_BEAT);
+  };
+  step();
+}
+/* One branch: its line read out in `prSeq`, its own question at the far end
+   of it, then the list cleared and the root question asked in its place —
+   never both on screen together, since a player who can still see the line
+   is not rewinding anything. `PR.shownAt` is set once, on the very first ask
+   of the very first branch, on the same terms every other multi-question
+   drill in this file resets it: the study or the reading that came before it
+   is time the drill spent, not time the player did. */
+function prBranchesRun(q, idx){
+  if (idx >= q.branches.length){ prBranchesFinish(q); return; }
+  const br = q.branches[idx];
+  if (idx === 0) PR.shownAt = prNow();
+  prAnsClear();
+  prMarksClear();
+  prCtl([]);
+  PR.click = null;
+  prSeq(prForcingLineHTML(br.sans.map(san => ({ san }))));
+  prAskShow(br.ask, br.end, [], {
+    judge: prOnce(ok => {
+      q.results.push({ ok: !!ok, root:false });
+      prBranchesRootAsk(q, idx);
+    })
+  });
+}
+/* The rewind. `br.rootAsk.text` already opens with "Back at the root:" — see
+   prMakeBranches — so nothing here repeats it; the line is simply gone
+   (`prSeq('')`) rather than crossed out or greyed, because the whole point
+   is that the player is answering from memory of the root, not from
+   whatever is still legible on screen. */
+function prBranchesRootAsk(q, idx){
+  const br = q.branches[idx];
+  prAnsClear();
+  prMarksClear();
+  prCtl([]);
+  PR.click = null;
+  prSeq('');
+  prAskShow(br.rootAsk, q.root, [], {
+    judge: prOnce(ok => {
+      q.results.push({ ok: !!ok, root:true });
+      prBranchesRun(q, idx + 1);
+    })
+  });
+}
+/* Scored once, on the same "was every one of them right" rule Forcing Lines
+   and After the Move already use — and given one of PR_ERRS' own names
+   rather than the general `square` every other missed click falls into: the
+   first *root* answer that was wrong is what decides it, ahead of a miss on
+   any branch's own end, because losing the root itself is the specific
+   failure this drill is built to catch — `lost`, the same word the
+   tracker's own walk gives a thread it fell off of — while a miss that
+   never reaches a wrong rewind is the ordinary `square` every other missed
+   click already is. Feedback compares the root against where the last
+   branch actually finished: `diff` is every square the two disagree about,
+   marked on whichever of the two boards Compare is currently showing, so
+   the player can see exactly what the last branch changed and check their
+   own rewind against it. */
+function prBranchesFinish(q){
+  const ok = q.results.every(r => r.ok);
+  let err = null;
+  if (!ok) err = q.results.some(r => r.root && !r.ok) ? 'lost' : 'square';
+  const last = q.branches[q.branches.length - 1];
+  const diff = [];
+  for (let i = 0; i < 64; i++){
+    const a = q.root.b[i], b = last.end.b[i];
+    if ((a ? a.c + a.t : '') !== (b ? b.c + b.t : '')) diff.push(i);
+  }
+  let showingRoot = true;
+  const paint = () => {
+    prBoardOn(true);
+    prMen(true);
+    prPaint(showingRoot ? q.root.b : last.end.b);
+    prMarksClear();
+    diff.forEach(sq => prMark(sq, 'pr-target'));
+    prSub(showingRoot ? 'The root.' : 'The end of the last branch.');
+  };
+  paint();
+  const missed = q.results.filter(r => !r.ok).length;
+  const say = ok ? 'Right the whole way through.'
+                 : missed + ' of ' + q.results.length + ' missed — compare the root against where the last branch actually left things.';
+  prJudge(ok, say, [['Compare', () => { showingRoot = !showingRoot; paint(); }]], err);
 }
 
 /* ---- 4: hold the position ----
