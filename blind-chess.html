@@ -12180,10 +12180,11 @@ function lsnStepCluster(q){
     palette (PR_PALETTE, Practice's own rebuild palette, reused rather than
     redrawn) and judged with rebuildDiff(), the pure function the practice
     board and this one now share. Pick a man, click its square; picking the
-    same man again and clicking its square once more — or picking Clear a
-    square — takes it back off, the same correction prRebuildStart() already
-    lets a Practice session make, because a learner has to be able to fix a
-    slip before Done is pressed. */
+    same man again and clicking its square once more takes it back off,
+    alongside picking Clear a square — the lesson's own toggle, one step
+    gentler than Practice's rebuild, where only Clear removes a man, because
+    a learner here should be able to fix a slip without hunting the palette
+    for the Clear button first. */
 function lsnStepRebuild(q){
   const target = q.want;
   let pick = null, ids = {};
@@ -12466,18 +12467,408 @@ function lsnLesson10(){
   return LSN_CHALLENGES.map(lsnChallengeStep).concat([lsnHandoffStep(LESSONS[9])]);
 }
 
-/* ---- the four the course is still growing ----
-   Lessons 6, 7, 8 and 9 have no exercises of their own yet: Tasks 32–33
-   write them, and lessons 4, 5 and 10 above are the old five-lesson course
-   mapped onto the new numbering until those tasks replace them too — lessons
-   1, 2 and 3 were the last of the old numbering to go, in Task 30. Until then
-   each of these four is its own handoff card and nothing else, so the ladder
-   is ten rungs long, every one of them opens, and the drill each lesson
-   trains is already reachable from the course. A stub that hands off
-   honestly is worth more than a rung that says "coming soon" and does
-   nothing. */
-function lsnLesson6(){ return [lsnHandoffStep(LESSONS[5])]; }   // Task 32
-function lsnLesson7(){ return [lsnHandoffStep(LESSONS[6])]; }   // Task 32
+/* ============================================================
+   TASK 32 — the four step kinds lessons 6 and 7 add, built from Hold the
+   Position's own `change` mode, After the Move (prMakeAfter) and Forcing
+   Lines (prMakeForcing) exactly as the ten before them are built from their
+   own Practice generators: the "make" function is Practice's own, never
+   copied, and every judgement below is the game's own arithmetic
+   (prAttacked(), prHanging(), prMaterialOf() by way of prExchangeLine())
+   asked again rather than reinvented. `lsnStepCaptureSeq` is the one factory
+   here that takes no question of its own — Move Tracker's own generator can
+   fail its internal retries on a genuinely unlucky draw, so it is built
+   inside the factory, behind `wantQ`, exactly as `lsnLesson2`'s own
+   Lines & Routes questions already are.
+   ============================================================ */
+
+/** Hold the Position's `change` mode, forced from level 3 — a position
+    studied, then hidden for a beat, then shown again with one legal move
+    already played somewhere on it. The one thing to notice is a comparison
+    against what was there a moment ago, not a fresh read of the board.
+    `q.change` names the move (`from`, `to`, `cap`, `after` — the position
+    once it is played), on the same terms prShowHold()'s own `change` branch
+    reads it. `LSN.last` is left unset once the after-position comes up: a
+    gold last-move highlight would mark the very square being asked about,
+    which is the answer for free — the after-the-move questions below can
+    afford that highlight (the piece is still in plain sight where it
+    landed) and this one cannot, since the square in question is the empty
+    one. A wrong square says which man actually stands there rather than
+    ending the step: there is only one man that moved, and finding it is the
+    whole of the question, so a slip here is worth a second look rather than
+    a concession. */
+function lsnStepChange(q){
+  const step = {
+    title:'What changed?',
+    what:'<p>One man moved, and it left something behind: the square it stood on is empty now. Hold the ' +
+         'whole picture, then find the one square that changed.</p>',
+    ask:'Study the position below.',
+    gate:true, solve:'changed',
+    setup(){
+      LSN.st = q.st; LSN.mode = 'sighted'; LSN.named = true;
+      lsnSay('A move happens where you cannot see it.', 'tip');
+      lsnAt(reveal, 1500);
+    }
+  };
+  function reveal(){
+    LSN.st = q.change.after;
+    LSN.last = null;
+    lsnRender();
+    lsnSay('');
+    step.ask = 'What changed? Click the square the moved man left.';
+    LSN.hint = () => lsnSay('It is the square that used to have something on it, and does not now.', 'tip');
+    LSN.onSquare = i => {
+      if (LSN.ok) return;
+      if (i === q.change.from){
+        LSN.marks.set(i, 'lsn-right');
+        lsnRender();
+        lsnRight('Yes — it left <b>' + sqName(i) + '</b>' +
+                  (q.change.cap ? ', and took the man on <b>' + sqName(q.change.to) + '</b>' : '') + '.');
+        return;
+      }
+      lsnFlash(i);
+      const there = LSN.st.b[i];
+      lsnWrong(there ? lsnMan(there) + ' is on <b>' + sqName(i) + '</b> — that man has not moved.'
+                     : 'Nothing stands on <b>' + sqName(i) + '</b> either way.');
+    };
+    lsnPaint();
+  }
+  return step;
+}
+
+/** After the Move's own four questions — what one particular move changed,
+    not a static fact of the position (Attack Vision already asks those):
+    the square it vacated, what it now attacks from where it landed, what
+    came loose because of it, and whether it gives check. `kind` names which
+    of the four this call is; `lsnLesson6` asks all four in turn, one step
+    apiece, over the same level-1 recipe forced to that one kind each time
+    (`q.asks` is then exactly `[kind]`, since prMakeAfter never asks for more
+    than it is told to). Level 1 carries no `hidden`, so the position stays
+    in plain sight throughout — Practice's own level 1 is the same warm-up,
+    sighted the whole way through, because this is the first time the idea
+    is shown at all and not yet the drill that takes the board away for it.
+
+    `LSN.last` is set once the move has been played, and left lit for
+    `attacks`, `hanging` and `check` — naming the piece that just moved is
+    not the question being asked here, the board already says that on its
+    own — and cleared again for `vacated` alone, for the reason lsnStepChange
+    above already argues. The harness reads `LSN.last.to` back to ask
+    `prAttacked()` the same question this step just asked the player, which
+    is also why it is a plain object on `LSN` and not a local variable: the
+    truth this step is judged against has to be a fact of the page, never a
+    number read off the step. */
+function lsnStepAfter(q, kind){
+  const step = {
+    title:'What did that move change?',
+    what:'<p>A move puts a man on a new square and empties the one it left — and that can open a line for ' +
+         'another piece, or leave something loose that was safe a moment ago.</p>',
+    ask:'Study the position. <b>' + q.move.san + '</b> is about to be played.',
+    gate:true,
+    solve: kind === 'vacated' ? 'changed' : kind === 'attacks' ? 'attacks' : kind === 'hanging' ? 'loose' : 'choices',
+    setup(){
+      LSN.st = q.st; LSN.mode = 'sighted'; LSN.named = true;
+      lsnAt(play, 1200);
+    }
+  };
+  function play(){
+    LSN.st = q.after;
+    LSN.last = { from:q.move.from, to:q.move.to };
+    lsnRender();
+    lsnCap(q.move.san);
+    lsnAt(ask, 1200);
+  }
+  function ask(){
+    lsnCap('');
+    if (kind === 'vacated'){
+      LSN.last = null;
+      lsnRender();
+      step.ask = 'Which square did the man that moved leave? Click it.';
+      LSN.hint = () => lsnSay('The man is standing somewhere else now; the square it left is empty.', 'tip');
+      LSN.onSquare = i => {
+        if (LSN.ok) return;
+        if (i === q.move.from){ LSN.marks.set(i, 'lsn-right'); lsnRender(); lsnRight('Yes — <b>' + sqName(i) + '</b>.'); return; }
+        lsnFlash(i);
+        lsnWrong('Not <b>' + sqName(i) + '</b>.');
+      };
+    } else if (kind === 'attacks'){
+      const want = new Set(q.facts.attacks);
+      step.ask = 'Every square the man that just moved now attacks. Click each one, then press Done.';
+      LSN.hint = () => lsnSay('Picture the line it moves on from where it just landed.', 'tip');
+      LSN.onSquare = i => {
+        if (LSN.ok) return;
+        if (LSN.pick.has(i)) LSN.pick.delete(i); else LSN.pick.add(i);
+        lsnRender();
+      };
+      lsnUnder([{ label:'Done', cls:'primary wide', on(){
+        const missed = q.facts.attacks.some(sq => !LSN.pick.has(sq));
+        const extra = Array.from(LSN.pick).some(sq => !want.has(sq));
+        LSN.pick = new Set();
+        if (!missed && !extra){
+          q.facts.attacks.forEach(sq => LSN.marks.set(sq, 'lsn-right'));
+          lsnRender();
+          lsnRight(q.facts.attacks.length ? 'Every one of them.' : 'Nowhere — nothing is in its way and nothing to reach.');
+          return;
+        }
+        lsnRender();
+        lsnWrong('Not every square it reaches — try again.');
+      } }]);
+    } else if (kind === 'hanging'){
+      const want = new Set(q.facts.hanging);
+      step.ask = 'Anything hanging now? Click every square with something loose on it, then Done — or say nothing is.';
+      LSN.hint = () => lsnSay('Hanging: attacked, and nothing of its own side answers back.', 'tip');
+      LSN.onSquare = i => {
+        if (LSN.ok) return;
+        if (LSN.pick.has(i)) LSN.pick.delete(i); else LSN.pick.add(i);
+        lsnRender();
+      };
+      const finish = got => {
+        const missed = q.facts.hanging.some(sq => !got.has(sq));
+        const extra = Array.from(got).some(sq => !want.has(sq));
+        LSN.pick = new Set();
+        if (!missed && !extra){
+          q.facts.hanging.forEach(sq => LSN.marks.set(sq, 'lsn-right'));
+          lsnRender();
+          lsnRight(q.facts.hanging.length ? 'Yes.' : 'Nothing is — correct.');
+          return;
+        }
+        lsnRender();
+        lsnWrong('Not quite — try again.');
+      };
+      lsnUnder([
+        { label:'Done', cls:'primary wide', on(){ finish(LSN.pick); } },
+        { label:'Nothing is hanging', on(){ finish(new Set()); } }
+      ]);
+    } else {
+      step.ask = 'Is the side to move now in check?';
+      lsnChoices([{ label:'Yes', right:q.facts.check }, { label:'No', right:!q.facts.check }], (c, b) => {
+        if (c.right){ b.classList.add('right'); lsnRight(q.facts.check ? 'Yes.' : 'No.'); return; }
+        b.classList.add('wrong'); b.disabled = true; lsnWrong(q.facts.check ? 'Yes, it does.' : 'No, it does not.');
+      }, true);
+    }
+    lsnPaint();
+  }
+  return step;
+}
+
+/** Move Tracker's own `captured` question, forced from level 5 — three men a
+    side, four plies, at least one capture, read out with the board already
+    dark, and the one thing asked at the end is which man came off last (or
+    that nothing did). This is the one factory in the pair that takes no
+    question of its own: `prMakeTracker` can fail its own internal retries on
+    a genuinely unlucky draw, so `wantQ` — the capped retry every other
+    forced-kind question in this file already goes through — builds it here
+    rather than leaving that to whoever calls the factory. The walk itself is
+    lsnDrillTrack's own cadence (a beat to see the start, 1.2s a move), played
+    from `q.path` — the exact line the generator already chose — matched back
+    to a legal move by its own from/to the way prForcingReplay() already
+    does, never a second line invented for the board. */
+function lsnStepCaptureSeq(){
+  const q = wantQ(
+    () => prMakeTracker(Object.assign({}, prRecipe('tracker', 5), { asks:['captured'] })),
+    x => !!x, 'a Move Tracker capture question');
+  const step = {
+    title:'Track the captures',
+    what:'<p>A capture takes a man off the board for good — a running count is how you catch the one you ' +
+         'forgot.</p>',
+    ask:'', gate:true, solve:'choices',
+    setup(){ begin(); }
+  };
+  function begin(){
+    LSN.st = q.start; LSN.mode = 'sighted'; LSN.named = true;
+    lsnCardKind = 'moves';
+    lsnGameCard();
+    step.ask = 'The starting position. Press <b>Hide the Board</b> and the moves follow.';
+    lsnUnder([{ label:'Hide the Board', cls:'primary wide', on:run }]);
+    lsnPaint();
+  }
+  function run(){
+    LSN.mode = 'blind';
+    lsnUnder([]);
+    step.ask = 'Follow the moves.';
+    lsnPaint();
+    lsnRender();
+    let n = 0;
+    const one = () => {
+      if (n >= q.path.length){ ask(); return; }
+      const s = q.path[n];
+      const legal = legalMoves(LSN.st, LSN.st.turn);
+      const m = legal.find(x => x.from === s.from && x.to === s.to);
+      if (m) lsnPlayMove(m);
+      n++;
+      lsnAt(one, 1200);
+    };
+    lsnAt(one, 700);
+  }
+  function ask(){
+    lsnCap('');
+    step.ask = q.ask.text;
+    const taken = q.path.filter(s => s.cap);
+    const seen = {};
+    const opts = [];
+    taken.forEach(s => {
+      const name = prMan(s.capC, s.capType);
+      if (seen[name]) return;
+      seen[name] = 1;
+      opts.push({ label:name, right:name === q.ask.truth });
+    });
+    opts.push({ label:'Nothing', right:'Nothing' === q.ask.truth });
+    lsnChoices(opts, (c, b) => {
+      if (c.right){
+        b.classList.add('right');
+        lsnRight(c.label === 'Nothing' ? 'Nothing came off.' : c.label + ' — the last man taken.');
+        return;
+      }
+      b.classList.add('wrong'); b.disabled = true; lsnWrong('Not that one.');
+    }, true);
+    lsnPaint();
+  }
+  return step;
+}
+
+/** Forcing Lines' own material question, one level per call — the position
+    studied, then hidden (`lsnAt`, the same 1.5s beat lsnStepChange's own
+    reveal uses), the line laid out as notation in the card while the board
+    stays dark, and four material readings to choose from around the true
+    one — `prForcingMaterialLabel()`, Practice's own wording ("White up 1",
+    "Black up 1", "Level"), read here rather than grown a second time. A
+    wrong pick is marked wrong and stays disabled, exactly as Attack Vision's
+    yes/no questions already do, so the step is answered by finding the
+    right one rather than by being told it. The right one plays the whole
+    exchange out on the board it has just earned back — the one time in this
+    step the men are seen moving — at Move Tracker's own replay pace, and
+    only once that has finished does the step actually end: a right pick
+    that ended the instant it was clicked would let a player move on having
+    heard the answer rather than watched it happen. */
+function lsnStepExchange(q){
+  const step = {
+    title:'Count the exchange',
+    what:'<p>Attackers against defenders, cheapest capture first, on both sides, until neither wants to ' +
+         'continue. Play it out in your head, then count what is left.</p>',
+    ask:'Study the position below.',
+    gate:true, solve:'choices',
+    setup(){
+      LSN.st = q.st; LSN.mode = 'sighted'; LSN.named = true;
+      LSN.marks.set(q.sq, 'sel');
+      lsnAt(hide, 1500);
+    }
+  };
+  function hide(){
+    LSN.mode = 'blind';
+    lsnRender();
+    lsnCardKind = null;
+    lsnExtraShow('The Exchange', prForcingLineHTML(q.line));
+    step.ask = 'What is the material once the exchange is over?';
+    LSN.hint = () => lsnSay('Cheapest capture first, each side, until nobody wants to go on.', 'tip');
+    const truth = q.delta, decoy = truth + (Math.random() < .5 ? 100 : -100);
+    const seen = {};
+    const opts = [];
+    [0, truth, -truth, decoy].forEach(cp => {
+      const label = prForcingMaterialLabel(cp);
+      if (seen[label]) return;
+      seen[label] = 1;
+      opts.push({ label, right: cp === truth });
+    });
+    lsnChoices(opts, (c, b) => {
+      if (c.right){
+        b.classList.add('right');
+        Array.from(document.getElementById('lsnChoices').children).forEach(x => { x.disabled = true; });
+        play();
+        return;
+      }
+      b.classList.add('wrong'); b.disabled = true; lsnWrong('Not quite.');
+    }, true);
+    lsnPaint();
+  }
+  function play(){
+    LSN.reveal = true;
+    lsnExtraHide();
+    lsnRender();
+    let k = 0;
+    const one = () => {
+      if (k >= q.line.length){ lsnRight(prForcingMaterialLabel(q.delta) + '.'); return; }
+      const legal = legalMoves(LSN.st, LSN.st.turn);
+      const m = legal.find(x => x.from === q.line[k].from && x.to === q.line[k].to);
+      if (m) lsnPlayMove(m);
+      k++;
+      lsnAt(one, 780);
+    };
+    lsnAt(one, 420);
+  }
+  return step;
+}
+
+/* ---- 6 · What a Move Leaves Behind ----
+   Hold the Position's `change` mode first, a demo naming the two halves of
+   every move, then After the Move's own four questions in the order After
+   the Move's own ladder introduces them (level 1's two, then the two later
+   levels force on their own). `change` and `after` are both wrapped in
+   `wantQ` rather than the bare retry a first draft of this lesson used:
+   Hold the Position's own `modes` list can hand back `question` as easily as
+   `change` (level 3 offers both), and After the Move's generator can miss
+   its own internal budget on `check` or `hanging` before it ever gets back
+   here — both capped rather than looped forever, for the reason the note
+   over `wantQ` already gives. */
+function lsnLesson6(){
+  const L = LESSONS[5];
+  const change = () => wantQ(
+    () => prMakeHold(prRecipe('hold', 3)),
+    q => q.mode === 'change', 'a Hold the Position change');
+  const after = kind => wantQ(
+    () => prMakeAfter(Object.assign({}, prRecipe('after', 1), { kinds:[kind], asks:1 })),
+    q => !!q, 'an After the Move ' + kind + ' question');
+  return [
+    lsnStepChange(change()),
+    lsnStepDemo({
+      title:'Two things change',
+      what:'<p>A move puts a man on a new square <b>and</b> empties the one it left. The empty square is ' +
+           'where discovered lines and loose men come from.</p>',
+      ask:'Press Continue.', named:true
+    }),
+    lsnStepAfter(after('vacated'), 'vacated'),
+    lsnStepAfter(after('attacks'), 'attacks'),
+    lsnStepAfter(after('hanging'), 'hanging'),
+    lsnStepAfter(after('check'), 'check'),
+    lsnHandoffStep(L)
+  ];
+}
+
+/* ---- 7 · Captures and Counting ----
+   A demo naming what a capture actually is, two Move Tracker capture walks,
+   a demo naming what counting an exchange means, and two Forcing Lines
+   material questions, one level harder than the other. `lsnStepExchange` is
+   handed `prMakeForcing()`'s result directly, with no retry of its own:
+   levels 1 and 2 build a position and drop attackers and defenders around it
+   rather than searching a real game for one, and that construction succeeds
+   often enough — every draw in the sampling this task measured it against —
+   that a second layer of retry here would only be insurance against a
+   failure nothing has ever produced. */
+function lsnLesson7(){
+  const L = LESSONS[6];
+  return [
+    lsnStepDemo({
+      title:'A capture is a removal and a move',
+      what:'<p>When a man is taken it is gone. Say it: “the pawn on f7 is gone.” A running count of men is ' +
+           'how you catch the one you forgot.</p>',
+      ask:'Press Continue.', named:true
+    }),
+    lsnStepCaptureSeq(), lsnStepCaptureSeq(),
+    lsnStepDemo({
+      title:'Counting an exchange',
+      what:'<p>Attackers against defenders on one square, cheapest first. Play it out in your head and count ' +
+           'what is left.</p>',
+      ask:'Press Continue.', named:true
+    }),
+    lsnStepExchange(prMakeForcing(prRecipe('forcing', 1))),
+    lsnStepExchange(prMakeForcing(prRecipe('forcing', 2))),
+    lsnHandoffStep(L)
+  ];
+}
+
+/* ---- the two the course is still growing ----
+   Lessons 8 and 9 have no exercises of their own yet: Task 33 writes them.
+   Until then each is its own handoff card and nothing else, so the ladder is
+   ten rungs long, every one of them opens, and the drill each lesson trains
+   is already reachable from the course. A stub that hands off honestly is
+   worth more than a rung that says "coming soon" and does nothing. */
 function lsnLesson8(){ return [lsnHandoffStep(LESSONS[7])]; }   // Task 33
 function lsnLesson9(){ return [lsnHandoffStep(LESSONS[8])]; }   // Task 33
 

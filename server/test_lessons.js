@@ -227,6 +227,18 @@ function makePage(store){
     // own `truth`.
     ' lsnStepAttackYesNo, lsnStepHanging, lsnStepCluster, lsnStepRebuild,' +
     ' prMakeAttack, prMakeHold, rebuildDiff, PR_PALETTE,' +
+    // Task 32: the four step kinds lessons 6 and 7 add, and the three more
+    // Practice generators they are built from (prMakeAfter, prMakeTracker,
+    // prMakeForcing) — same reasoning as Task 30a's and Task 31's lists
+    // above. prAttacked/prHanging/prMan are what the harness's own solvers
+    // for `attacks` and `loose` (see solveStep below) ask the page itself
+    // for the true answer, rather than reading it off the step; prRecipe is
+    // already exposed, wantQ is not needed outside the page since the
+    // harness builds its own capped retries the same way test_practice.js's
+    // suite already does.
+    ' lsnStepChange, lsnStepAfter, lsnStepCaptureSeq, lsnStepExchange,' +
+    ' prMakeAfter, prMakeTracker, prMakeForcing, prAttacked, prHanging, prMan,' +
+    ' prForcingMaterialLabel, prForcingLineHTML,' +
     ' screen:()=>screenName });';
   let out = null;
   new Function('document','window','location','localStorage','WebSocket','AudioContext',
@@ -281,13 +293,86 @@ async function solveStep(p, budget){
     // are left to try — right for a single-answer step, and for
     // lsnStepDiagPick's two-of-four it presses every one in turn, which
     // finds both of the right ones by the time the wrong ones are used up.
+    //
+    // Task 32 added shapes this loop has to survive rather than give up on:
+    // lsnStepCaptureSeq opens on an under button ("Hide the Board") before any
+    // choices exist at all, its own choices then do not appear until its walk
+    // has finished playing several seconds later, and lsnStepExchange's right
+    // pick does not turn LSN.ok true until the whole exchange has replayed on
+    // the board afterwards — so "nothing pressable right now" is answered by
+    // trying the way in (`pressUnder()`, the same button the generic loop
+    // below presses) and then by waiting and looking again, never by
+    // breaking; only the caller's own budget (`stop`) ends the loop when a
+    // step is genuinely unsolvable.
     while (!p.LSN.ok && Date.now() < stop){
       let pressed = false;
       for (const b of choices()){
         if (b.disabled || b.classList.contains('right') || b.classList.contains('wrong')) continue;
         b.onclick(); pressed = true; break;
       }
-      if (!pressed) break;
+      if (!pressed) pressed = pressUnder();
+      await sleep(pressed ? 60 : 150);
+    }
+    return p.LSN.ok;
+  }
+  if (kind === 'changed'){
+    // lsnStepChange and lsnStepAfter's `vacated` question both ask for one
+    // square, clicked on a board that is not empty — the fallback loop's own
+    // "empty board, click everything" branch below only fires when the board
+    // truly has nothing on it, which is wrong here (the square being asked
+    // about is the one empty square on an otherwise full board), and 'square'
+    // is already spoken for (lsnDrillClick's own click-a-named-square drill,
+    // Task 30) — so this is its own tag as well as its own strategy: this is
+    // its own brute force: every square, in turn, through LSN.onSquare,
+    // until the step is ok. Both factories install `onSquare` after a timed
+    // reveal rather than in setup(), so this waits for it to exist before
+    // it starts clicking, the same patience the 'choices' branch above needs
+    // for the same reason.
+    while (!p.LSN.ok && Date.now() < stop){
+      if (!p.LSN.onSquare){ await sleep(60); continue; }
+      for (let i = 0; i < 64 && !p.LSN.ok && Date.now() < stop; i++){
+        p.LSN.onSquare(i);
+        await sleep(3);
+      }
+    }
+    return p.LSN.ok;
+  }
+  if (kind === 'attacks'){
+    // lsnStepAfter's `attacks` question: every square the man that just
+    // moved now reaches from its new square, picked and then Done. The true
+    // set is never read off the step — it is asked of the page's own
+    // prAttacked(), on the position and square the page itself is showing
+    // (`p.LSN.st`, already the after-move position by the time `onSquare` is
+    // installed, and `p.LSN.last.to`, the square the page's own last-move
+    // record says the man landed on) — exactly the fact `prMoveFacts()`
+    // itself would compute, asked independently rather than trusted.
+    while (!p.LSN.onSquare && Date.now() < stop) await sleep(60);
+    if (!p.LSN.onSquare || !p.LSN.last) return false;
+    const want = p.prAttacked(p.LSN.st, p.LSN.last.to);
+    while (!p.LSN.ok && Date.now() < stop){
+      p.LSN.pick = new Set();
+      want.forEach(sq => p.LSN.onSquare(sq));
+      await sleep(20);
+      for (const b of under()) if (!b.disabled && b.textContent.indexOf('Done') === 0){ b.onclick(); break; }
+      await sleep(60);
+    }
+    return p.LSN.ok;
+  }
+  if (kind === 'loose'){
+    // lsnStepAfter's `hanging` question, asked the same way Attack Vision's
+    // own hanging question already is (see the 'hanging' branch below) but
+    // with a Done-and-Nothing pair rather than a click that judges itself —
+    // the true set is prHanging() of the page's own current position, never
+    // the step's own facts.
+    while (!p.LSN.onSquare && Date.now() < stop) await sleep(60);
+    if (!p.LSN.onSquare) return false;
+    const want = p.prHanging(p.LSN.st);
+    while (!p.LSN.ok && Date.now() < stop){
+      p.LSN.pick = new Set();
+      want.forEach(sq => p.LSN.onSquare(sq));
+      await sleep(20);
+      const label = want.length ? 'Done' : 'Nothing';
+      for (const b of under()) if (!b.disabled && b.textContent.indexOf(label) === 0){ b.onclick(); break; }
       await sleep(60);
     }
     return p.LSN.ok;
@@ -1621,6 +1706,188 @@ async function walk(p, n){
   {
     openBareStep(p, p.lsnStepRebuild(holdQ(3, ['rebuild'], 'rebuild')));
     check('lsnStepRebuild is answerable by the rebuild solver', await solveStep(p, 8000));
+  }
+
+  /* ============================================================
+   * Task 32: the four step kinds lessons 6 and 7 add, exercised on their
+   * own — the same reason Task 30a's and Task 31's sections above exist:
+   * walk() already proves each one finishes a real lesson, this proves what
+   * each does with a right answer, a wrong one, and the edges the walk never
+   * has reason to hit (a wrong from-square, an extra square picked alongside
+   * the right ones, a wrong material reading, a wrong captured-man choice).
+   * ============================================================ */
+  head('The four new step kinds for lessons 6 and 7 are exercised on their own');
+
+  const changeQ = () => untilQuestion(
+    () => p.prMakeHold(p.prRecipe('hold', 3)), q => q.mode === 'change', 'a Hold the Position change');
+  const afterQ = kind => untilQuestion(
+    () => p.prMakeAfter(Object.assign({}, p.prRecipe('after', 1), { kinds:[kind], asks:1 })),
+    q => !!q, 'an After the Move ' + kind + ' question');
+
+  head('lsnStepChange — Hold the Position’s change mode, and a wrong square never ends the step');
+  {
+    const q = changeQ();
+    check('the question carries a move and the position it leaves behind',
+          q.change && q.change.from >= 0 && q.change.to >= 0 && !!q.change.after, JSON.stringify(q.change));
+    const step = p.lsnStepChange(q);
+    check('solve is changed', step.solve === 'changed');
+    openBareStep(p, step);
+    check('the position is shown sighted before anything is hidden',
+          p.LSN.st === q.st && p.LSN.mode === 'sighted' && p.LSN.named === true);
+    const revealed = await until(() => !!p.LSN.onSquare, 3000);
+    check('the after-position comes up and the question is asked', revealed);
+    check('the board switched to the position with the move already played', p.LSN.st === q.change.after);
+    check('no last-move highlight gives the vacated square away', p.LSN.last === null);
+    let wrongSq = -1;
+    for (let i = 0; i < 64; i++) if (i !== q.change.from){ wrongSq = i; break; }
+    p.LSN.onSquare(wrongSq);
+    check('a wrong square is refused without ending the step',
+          p.LSN.ok === false && p.LSN.marks.get(wrongSq) !== 'lsn-right');
+    p.LSN.onSquare(q.change.from);
+    check('the right square is accepted and marked right',
+          p.LSN.ok === true && p.LSN.marks.get(q.change.from) === 'lsn-right');
+  }
+  {
+    openBareStep(p, p.lsnStepChange(changeQ()));
+    check('lsnStepChange is answerable by the changed solver', await solveStep(p, 5000));
+  }
+
+  head('lsnStepAfter — After the Move’s four questions, judged the way Attack Vision already judges them');
+  {
+    const q = afterQ('vacated');
+    check('the question names the move and what it left behind', !!q.move && !!q.facts, JSON.stringify(q.move));
+    const step = p.lsnStepAfter(q, 'vacated');
+    check('solve is changed', step.solve === 'changed');
+    openBareStep(p, step);
+    const asked = await until(() => !!p.LSN.onSquare, 4000);
+    check('the move is stated and then the question is asked', asked, p.by('lsnAsk').innerHTML);
+    check('the board has moved on to the after-position', p.LSN.st === q.after);
+    check('no last-move highlight gives the vacated square away here either', p.LSN.last === null);
+    let wrongSq = -1;
+    for (let i = 0; i < 64; i++) if (i !== q.move.from){ wrongSq = i; break; }
+    p.LSN.onSquare(wrongSq);
+    check('a wrong square is refused without ending the step', p.LSN.ok === false);
+    p.LSN.onSquare(q.move.from);
+    check('the vacated square is accepted', p.LSN.ok === true);
+  }
+  {
+    const q = afterQ('attacks');
+    const step = p.lsnStepAfter(q, 'attacks');
+    check('solve is attacks', step.solve === 'attacks');
+    openBareStep(p, step);
+    await until(() => !!p.LSN.onSquare, 4000);
+    check('the last-move square is lit here, for the harness (and the player) to read',
+          !!p.LSN.last && p.LSN.last.to === q.move.to);
+    check('prAttacked() of the after-position agrees with q.facts.attacks',
+          JSON.stringify(p.prAttacked(q.after, q.move.to).slice().sort()) ===
+          JSON.stringify(q.facts.attacks.slice().sort()));
+    let extra = -1;
+    for (let i = 0; i < 64; i++) if (q.facts.attacks.indexOf(i) < 0){ extra = i; break; }
+    q.facts.attacks.forEach(sq => p.LSN.onSquare(sq));
+    if (extra >= 0) p.LSN.onSquare(extra);
+    let doneBtn = Array.from(p.by('lsnUnder').children).find(b => b.textContent.indexOf('Done') === 0);
+    doneBtn.onclick();
+    check('an extra square picked alongside the right ones is refused, and the step stays open',
+          p.LSN.ok === false);
+    q.facts.attacks.forEach(sq => p.LSN.onSquare(sq));
+    doneBtn = Array.from(p.by('lsnUnder').children).find(b => b.textContent.indexOf('Done') === 0);
+    doneBtn.onclick();
+    check('the exact set is then accepted', p.LSN.ok === true);
+  }
+  {
+    openBareStep(p, p.lsnStepAfter(afterQ('attacks'), 'attacks'));
+    check('lsnStepAfter (attacks) is answerable by the attacks solver', await solveStep(p, 6000));
+  }
+  {
+    const q = afterQ('hanging');
+    const step = p.lsnStepAfter(q, 'hanging');
+    check('solve is loose', step.solve === 'loose');
+    openBareStep(p, step);
+    await until(() => !!p.LSN.onSquare, 4000);
+    check('prHanging() of the after-position agrees with q.facts.hanging',
+          JSON.stringify(p.prHanging(q.after).slice().sort()) === JSON.stringify(q.facts.hanging.slice().sort()));
+    const nothingBtn = () => Array.from(p.by('lsnUnder').children).find(b => b.textContent.indexOf('Nothing') === 0);
+    if (q.facts.hanging.length){
+      nothingBtn().onclick();
+      check('claiming nothing is hanging when something is refuses without ending the step', p.LSN.ok === false);
+      q.facts.hanging.forEach(sq => p.LSN.onSquare(sq));
+      const doneBtn = Array.from(p.by('lsnUnder').children).find(b => b.textContent.indexOf('Done') === 0);
+      doneBtn.onclick();
+      check('the exact hanging squares are then accepted', p.LSN.ok === true);
+    } else {
+      nothingBtn().onclick();
+      check('nothing hanging is accepted by saying so', p.LSN.ok === true);
+    }
+  }
+  {
+    openBareStep(p, p.lsnStepAfter(afterQ('hanging'), 'hanging'));
+    check('lsnStepAfter (hanging) is answerable by the loose solver', await solveStep(p, 6000));
+  }
+  {
+    const q = afterQ('check');
+    const step = p.lsnStepAfter(q, 'check');
+    check('solve is choices', step.solve === 'choices');
+    openBareStep(p, step);
+    await until(() => p.by('lsnChoices').children.length > 0, 4000);
+    check('Yes and No are offered',
+          Array.from(p.by('lsnChoices').children).map(b => b.textContent).join(',') === 'Yes,No');
+    clickChoicesUntilRight('lsnStepAfter (check)');
+  }
+  {
+    openBareStep(p, p.lsnStepAfter(afterQ('check'), 'check'));
+    check('lsnStepAfter (check) is answerable by the choices solver', await solveStep(p, 6000));
+  }
+
+  head('lsnStepCaptureSeq — Move Tracker’s captured question, the walk played and then asked');
+  {
+    const step = p.lsnStepCaptureSeq();
+    check('solve is choices', step.solve === 'choices');
+    openBareStep(p, step);
+    const hide = Array.from(p.by('lsnUnder').children).find(b => b.textContent.indexOf('Hide the Board') === 0);
+    check('Hide the Board is offered on the starting position', !!hide && p.LSN.mode === 'sighted');
+    hide.onclick();
+    check('the board goes dark for the walk', p.LSN.mode === 'blind');
+    const asked = await until(() => p.by('lsnChoices').children.length > 0, 8000);
+    check('the walk finishes and the question is asked', asked, p.by('lsnAsk').innerHTML);
+    const list = Array.from(p.by('lsnChoices').children);
+    check('Nothing is one of the choices, alongside every man that actually came off',
+          list.some(b => b.textContent === 'Nothing'));
+    clickChoicesUntilRight('lsnStepCaptureSeq');
+  }
+  {
+    openBareStep(p, p.lsnStepCaptureSeq());
+    check('lsnStepCaptureSeq is answerable by the choices solver', await solveStep(p, 12000));
+  }
+
+  head('lsnStepExchange — Forcing Lines’ material question, the exchange replayed once it is found');
+  {
+    const q = p.prMakeForcing(p.prRecipe('forcing', 1));
+    check('the question carries a line of at least two plies and a material delta',
+          Array.isArray(q.line) && q.line.length >= 2 && typeof q.delta === 'number', JSON.stringify(q.line));
+    const step = p.lsnStepExchange(q);
+    check('solve is choices', step.solve === 'choices');
+    openBareStep(p, step);
+    const shown = await until(() => p.by('lsnChoices').children.length > 0, 3000);
+    check('the exchange is laid out as notation once the position is hidden', shown && p.LSN.mode === 'blind');
+    check('the card shows the line', (p.by('lsnExtraBody').innerHTML || '').indexOf(q.line[0].san) >= 0);
+    const list = Array.from(p.by('lsnChoices').children);
+    let rightBtn = null;
+    for (const b of list){
+      b.onclick();
+      if (b.classList.contains('right')){ rightBtn = b; break; }
+      check('a wrong material reading is marked wrong, disabled, and leaves the step open',
+            b.classList.contains('wrong') && b.disabled === true && p.LSN.ok === false);
+    }
+    check('the right reading is found', !!rightBtn);
+    check('but the step does not end the instant it is picked — the exchange has not played yet',
+          p.LSN.ok === false);
+    const finished = await until(() => p.LSN.ok === true, q.line.length * 900 + 2000);
+    check('the whole exchange plays out and only then does the step end', finished);
+    check('the board actually reflects the final position', JSON.stringify(p.LSN.st.b) === JSON.stringify(q.final.b));
+  }
+  {
+    openBareStep(p, p.lsnStepExchange(p.prMakeForcing(p.prRecipe('forcing', 2))));
+    check('lsnStepExchange is answerable by the choices solver', await solveStep(p, 15000));
   }
 
   console.log('\n' + passed + ' passed, ' + failed + ' failed');
