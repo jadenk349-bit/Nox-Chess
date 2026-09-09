@@ -1053,6 +1053,27 @@ function forceForcing(level, pred){
 })();
 
 (function(){
+  // a second press of the same button, before the replay has even started —
+  // prAnsClear() has already emptied prAnsEl by the time this fires, so the
+  // button reference is captured first, exactly the way a stray double-click
+  // event would still reach a handler the page itself has moved on from
+  storage = {};
+  startDrill('forcing', 1, 5);
+  var q = forceForcing(1, function(){ return true; });
+  q.asks = ['material'];
+  presentForced(q);
+  pressCtl('Ready');
+  var btn = ansButton(prForcingMaterialLabel(q.delta));
+  var iBefore = PR.i;
+  btn.onclick();
+  btn.onclick();
+  ok('pressing it twice records only the first press', q.results.length, 1);
+  tick(700 * (q.line.length + 2));
+  ok('and the score advances once, not twice', PR.i, iBefore + 1);
+  prShowDash();
+})();
+
+(function(){
   // occupant: prAskShow's own glyph palette, asked of the square the whole
   // exchange was fought over
   storage = {};

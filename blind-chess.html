@@ -14231,9 +14231,14 @@ function prAfterAsk(q){
   return prAfterAskCheck(q);
 }
 /* Guards a single question's answer against being counted twice — a second
-   click after Done, say — without reaching for `PR.answered`, which stays
-   false for the whole set until the last question is judged. */
-function prAfterOnce(fn){
+   click after Done, say, or two buttons of the same ask both firing before
+   the screen has had a chance to move on — without reaching for
+   `PR.answered`, which stays false for the whole set until the last
+   question is judged. Shared by every "several asks, judged separately,
+   scored once at the end" drill (After the Move, Forcing Lines): without
+   it, a double-fire on the last ask of a set does not just double-count
+   one answer, it runs the set's own finishing routine twice. */
+function prOnce(fn){
   let done = false;
   return function(){ if (done) return; done = true; fn.apply(null, arguments); };
 }
@@ -14246,7 +14251,7 @@ function prAfterRecord(q, ok, err){
 function prAfterAskVacated(q){
   prQ('Which square did the man that moved leave?');
   prSub('Click it.');
-  PR.click = prAfterOnce(i => prAfterRecord(q, i === q.facts.vacated));
+  PR.click = prOnce(i => prAfterRecord(q, i === q.facts.vacated));
 }
 /* `attacks`: select every square the man now reaches from where it landed,
    then Done — Attack Vision's own `attacked` pattern, asked of the square a
@@ -14256,7 +14261,7 @@ function prAfterAskAttacks(q){
   prSub('Click each one, then Done.');
   q.picks = new Set();
   PR.click = i => prLinesToggle(q.picks, i, (s, on) => { if (on) prMark(s, 'pr-pick'); else prSqEls[prVisual(s)].classList.remove('pr-pick'); });
-  prAnsButton('Done', prAfterOnce(() => {
+  prAnsButton('Done', prOnce(() => {
     const want = new Set(q.facts.attacks);
     const missed = q.facts.attacks.some(sq => !q.picks.has(sq));
     const wrong = Array.from(q.picks).some(sq => !want.has(sq));
@@ -14274,7 +14279,7 @@ function prAfterAskHanging(q){
   prSub('Click each one, then Done — or say Nothing is hanging.');
   q.picks = new Set();
   PR.click = i => prLinesToggle(q.picks, i, (s, on) => { if (on) prMark(s, 'pr-pick'); else prSqEls[prVisual(s)].classList.remove('pr-pick'); });
-  const finish = prAfterOnce(got => {
+  const finish = prOnce(got => {
     const want = new Set(q.facts.hanging);
     const missed = q.facts.hanging.some(sq => !got.has(sq));
     const wrongSqs = Array.from(got).filter(sq => !want.has(sq));
@@ -14291,13 +14296,13 @@ function prAfterAskHanging(q){
 function prAfterAskOpened(q){
   prQ('Click the piece whose line the move just opened.');
   prSub(q.facts.opened.length > 1 ? 'Any one of them is right.' : '');
-  PR.click = prAfterOnce(i => prAfterRecord(q, q.facts.opened.some(o => o.piece === i)));
+  PR.click = prOnce(i => prAfterRecord(q, q.facts.opened.some(o => o.piece === i)));
 }
 /* `check`: Yes or No. */
 function prAfterAskCheck(q){
   prQ('Is the side to move now in check?');
-  prAnsButton('Yes', prAfterOnce(() => prAfterRecord(q, q.facts.check === true)));
-  prAnsButton('No', prAfterOnce(() => prAfterRecord(q, q.facts.check === false)));
+  prAnsButton('Yes', prOnce(() => prAfterRecord(q, q.facts.check === true)));
+  prAnsButton('No', prOnce(() => prAfterRecord(q, q.facts.check === false)));
 }
 /* The one judgement for the whole set: the position as it actually stands,
    every truth this move left behind marked on it at once — `pr-from` where
@@ -14417,7 +14422,10 @@ function prForcingRecord(q, ok, err){
    centipawns, which is the one case that needs the decimal rather than a
    bare count. Two labels can coincide (an exactly level truth turns "White
    up 0" and "Black up 0" into "Level" too), so the buttons are de-duplicated
-   by their own text rather than assumed to number four. */
+   by their own text rather than assumed to number four. `finish` is built
+   once and shared by every button (`prOnce`), not one guard per button — two
+   of these pressed in the same tick, not just the same one pressed twice,
+   must still record only the first. */
 function prForcingPawns(cp){
   const n = Math.abs(cp) / 100;
   return Number.isInteger(n) ? String(n) : n.toFixed(1);
@@ -14431,11 +14439,12 @@ function prForcingAskMaterial(q){
   prSub('');
   const truth = q.delta, decoy = truth + (Math.random() < .5 ? 100 : -100);
   const seen = {};
+  const finish = prOnce(cp => prForcingRecord(q, cp === truth));
   [0, truth, -truth, decoy].forEach(cp => {
     const label = prForcingMaterialLabel(cp);
     if (seen[label]) return;
     seen[label] = 1;
-    prAnsButton(label, () => prForcingRecord(q, cp === truth), 'wide');
+    prAnsButton(label, () => finish(cp), 'wide');
   });
 }
 /* `occupant`: prAskShow's own `what` — the glyph palette Piece Vision and
@@ -14444,17 +14453,23 @@ function prForcingAskMaterial(q){
    prAskShow's `what` case never types the wrong answer beyond "wrong", so a
    miss here always reads as `square` — the ladder's other ask, `hanging`,
    is where a `ghost` (naming a man that was actually captured along the
-   way) gets caught. */
+   way) gets caught. `judge` is one function shared by all thirteen glyph
+   buttons `prAskShow` builds, so wrapping it in `prOnce` guards every one of
+   them at once rather than only a second press of whichever was pressed
+   first. */
 function prForcingAskOccupant(q){
   const ask = { t:'what', sq:q.sq, colour:q.occupant.c, type:q.occupant.t,
                 text:'What stands on <b>' + sqName(q.sq) + '</b>, once the exchange is over?' };
-  prAskShow(ask, q.final, [], { judge: ok => prForcingRecord(q, ok, ok ? null : 'square') });
+  prAskShow(ask, q.final, [], { judge: prOnce(ok => prForcingRecord(q, ok, ok ? null : 'square')) });
 }
-/* `check`: Yes or No, of the position the exchange actually reaches. */
+/* `check`: Yes or No, of the position the exchange actually reaches — one
+   shared `finish` rather than a separate guard per button, so a Yes and a No
+   both landing before the screen has moved on cannot both be recorded. */
 function prForcingAskCheck(q){
   prQ('Is the side to move in check, once the exchange is over?');
-  prAnsButton('Yes', () => prForcingRecord(q, q.check === true));
-  prAnsButton('No',  () => prForcingRecord(q, q.check === false));
+  const finish = prOnce(ok => prForcingRecord(q, ok));
+  prAnsButton('Yes', () => finish(q.check === true));
+  prAnsButton('No',  () => finish(q.check === false));
 }
 /* `hanging`: select every square with something loose on it now, or say
    there is nothing — After the Move's own hanging question, asked of the
@@ -14462,19 +14477,22 @@ function prForcingAskCheck(q){
    that is empty in `q.final` is the mistake of pointing at where a man
    fought over stood before it was carried off — `ghost`, the same name
    After the Move's own version of this question gives it — rather than
-   merely the wrong square. */
+   merely the wrong square. `finish` is wrapped in `prOnce` because it is
+   reached from two buttons (Done and Nothing is hanging), and either one
+   pressed twice — or both pressed before the screen moves on — must still
+   count for only the first press. */
 function prForcingAskHanging(q){
   prQ('Anything hanging now? Select every square with something loose on it.');
   prSub('Click each one, then Done — or say Nothing is hanging.');
   q.picks = new Set();
   PR.click = i => prLinesToggle(q.picks, i, (s, on) => { if (on) prMark(s, 'pr-pick'); else prSqEls[prVisual(s)].classList.remove('pr-pick'); });
-  const finish = got => {
+  const finish = prOnce(got => {
     const want = new Set(q.hanging);
     const missed = q.hanging.some(sq => !got.has(sq));
     const wrongSqs = Array.from(got).filter(sq => !want.has(sq));
     const ok = !missed && !wrongSqs.length;
     prForcingRecord(q, ok, ok ? null : (wrongSqs.some(sq => !q.final.b[sq]) ? 'ghost' : 'square'));
-  };
+  });
   prAnsButton('Done', () => finish(q.picks), 'primary');
   prAnsButton('Nothing is hanging', () => finish(new Set()));
 }
