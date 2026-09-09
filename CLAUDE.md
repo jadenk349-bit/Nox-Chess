@@ -38,6 +38,7 @@ python3 server/test_visions.py           # the three vision ratings: what the mi
 node tools/test_generate_puzzles.js      # the generator's own decisions, no engine
 python3 tools/check_supabase_puzzles.py  # RLS and column grants, against the real project
 python3 tools/check_supabase_visions.py  # the four ladders and their grants, against the real project
+python3 tools/check_supabase_practice.py # RLS and grants on practice_progress, against the real project
 python3 server/test_league.py           # the AI league: pairing, ratings, endings, restart, boot; no server, stub engine
 python3 server/test_league_boot.py      # the production startup path: runs server/server.py itself, needs a Stockfish
 node server/test_live_games.js            # the home page's live cards — what each vision may show
@@ -430,7 +431,10 @@ visions file above, `rating`, `complete_blindfold_rating`,
 `board_only_rating` and `fog_of_war_rating`, read by `RATING_COL`, which *is*
 `supabase_db.VISION_COLUMNS` rather than a copy. `supabase-migrate-league.sql`
 owns no rating and seeds no player: it adds the league's memory (the two
-tables and three functions below) and refuses to run before the visions file. The pool is the leaderboard itself:
+tables and three functions below) and refuses to run before the visions file.
+(`supabase-migrate-practice.sql` is unrelated to any of this — run once by
+hand like the rest, it only adds `practice_progress`, the drills' own
+progress table, owner-only.) The pool is the leaderboard itself:
 `top()` ranks a ladder exactly as the home page does (rating descending, then
 name) and takes twenty, and `eligible()` keeps the `is_bot` accounts among
 them — re-read every minute and after every result, so an account that falls
