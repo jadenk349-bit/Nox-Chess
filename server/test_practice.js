@@ -325,7 +325,7 @@ head('Piece Vision');
    ============================================================ */
 head('Attack Vision');
 (function(){
-  var bad = 0, kinds = {};
+  var bad = 0, kinds = {}, mixedSide = 0;
   for (var lv = 1; lv <= PR_ATTACK_LEVELS.length; lv++) for (var t = 0; t < 40; t++){
     var q = prMakeAttack(prRecipe('attack', lv));
     if (!q){ bad++; continue; }
@@ -339,12 +339,19 @@ head('Attack Vision');
     if (q.ask === 'attackers'){
       var byC = attackersOf(st, q.target, q.colour);
       if (byC.length !== q.answer.length) bad++;
+      // one-sided by construction (attackersOf is asked with q.colour), and
+      // this is the regression guard for it: a kingZone target sits beside
+      // the enemy king, which always attacks its own neighbours, so a bug
+      // that let the other side's men into q.answer would surface exactly
+      // there and nowhere else.
+      q.answer.forEach(function(sq){ if (st.b[sq] && st.b[sq].c !== q.colour) mixedSide++; });
     }
     if (q.ask === 'hanging' && prHanging(st).join() !== q.answer.join()) bad++;
     if (q.ask === 'pinned' && q.answer !== prPinned(st, q.target)) bad++;
   }
   ok('every level generates and re-derives', bad, 0);
   ok('six question kinds appear', Object.keys(kinds).length, 6);
+  ok('attackers answers hold only the asking side', mixedSide, 0);
 })();
 
 /* ============================================================

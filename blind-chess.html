@@ -11937,8 +11937,8 @@ const PR_ATTACK_LEVELS = [
   { cap:'Is it defended?',                   kinds:['defended'], men:[2,4], board:true },
   { cap:'What is hanging?',                  kinds:['hanging'],  men:[3,5], board:true },
   { cap:'Is it pinned?',                     kinds:['pinned'],   men:[2,4], board:true },
-  { cap:'From the notation, three men',      kinds:['attacks','defended','hanging'], men:[1,1], board:false },
-  { cap:'From the notation, six men',        kinds:['attackers','hanging','pinned'], men:[3,4], board:false, kingZone:true }
+  { cap:'From the notation, a few men',      kinds:['attacks','defended','hanging'], men:[1,1], board:false },
+  { cap:'From the notation, more men',       kinds:['attackers','hanging','pinned'], men:[3,4], board:false, kingZone:true }
 ];
 
 /* Each drill, in the order the dashboard lists them. `group` clusters related
@@ -13494,16 +13494,25 @@ function prAnswerAttackBool(q, which, said){
    answer is, with the same forgiving pattern SAN parsing already uses. */
 function prShowAttackSet(q){
   const st = q.st;
+  // `attackers` grades one side only (prMakeAttack asks attackersOf(...,
+  // q.colour)), and a kingZone target sits next to the enemy king — which
+  // always attacks its own neighbours, so a player reading "attacks" as
+  // either side would correctly pick it and be marked wrong. Naming the
+  // side is what makes the question the one it is actually graded against.
   const label = q.ask === 'attacked'
     ? 'Select every square ' + prMan(q.colour, st.b[q.from].t) + ' on <b>' + sqName(q.from) + '</b> attacks.'
-    : 'Select every square that attacks <b>' + sqName(q.target) + '</b>.';
+    : 'Select every square from which ' + prSide(q.colour) + ' attacks <b>' + sqName(q.target) + '</b>.';
   if (q.board){
     prAttackBoardOn(q);
     prMark(q.ask === 'attacked' ? q.from : q.target, 'pr-from');
     prQ(label);
     prSub('Click each one, then Done.');
     q.picks = new Set();
-    const anchor = q.ask === 'attacked' ? q.from : -1;
+    // Neither ask's own square can be a member of its own answer — a piece
+    // does not attack the square it stands on, and a target does not attack
+    // itself — so both are refused the same way `attacked` already refused
+    // q.from.
+    const anchor = q.ask === 'attacked' ? q.from : q.target;
     PR.click = i => {
       if (PR.answered || i === anchor) return;
       prLinesToggle(q.picks, i, (s, on) => { if (on) prMark(s, 'pr-pick'); else prSqEls[prVisual(s)].classList.remove('pr-pick'); });

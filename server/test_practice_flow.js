@@ -739,6 +739,27 @@ head('Attack Vision');
   prShowDash();
 })();
 
+/* `attackers` grades one side only, and level 4 puts the target beside the
+   enemy king — which always attacks its own neighbours, so a question that
+   did not say whose attackers it wanted would mark a player wrong for
+   correctly noticing the king. This checks the fix directly: the question
+   names a side, and the target square (which cannot attack itself) is
+   refused by the click handler exactly as `attacked` already refuses the
+   piece's own square. */
+(function(){
+  storage = {};
+  startDrill('attack', 4, 5);
+  var q = prMakeAttack(prRecipe('attack', 4));
+  presentForced(q);
+  ok('level 4 only ever asks attackers', q.ask, 'attackers');
+  ok('the question names the asking side', /White|Black/.test(byId.prQ.innerHTML), true);
+  var before = q.picks.size;
+  clickSquare(q.target);
+  ok('clicking the target itself picks nothing', q.picks.size, before);
+  tick(1000);
+  prShowDash();
+})();
+
 /* ============================================================
    5 — move tracker
    ============================================================ */
