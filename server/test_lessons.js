@@ -431,7 +431,7 @@ async function walk(p, n){
   again.press('navPractice');
   check('the Practice menu item opens the Practice page',
         again.screen() === 'practice', again.screen());
-  check('with all seven of its own drills', again.PR_MODES.length === 7, again.PR_MODES.length);
+  check('with all five of its own drills', again.PR_MODES.length === 5, again.PR_MODES.length);
   check('the course has no practice mode of its own', !('practice' in again.LSN));
   check('and nothing in the lessons pretends to be one',
         SRC.indexOf('lsnPractice') < 0 && SRC.indexOf('lsnDrills') < 0);

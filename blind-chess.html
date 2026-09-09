@@ -2560,6 +2560,16 @@
     border-color:var(--gold); color:var(--gold-soft); background:rgba(217,164,65,.12);
   }
 
+  /* the level line in a drill's setup box: a caption between two steppers,
+     rather than three named tiers — the staircase (prStep) is what actually
+     knows what a session is worth, this is only where it starts */
+  .pr-level-row{display:flex; align-items:center; gap:12px;}
+  .pr-level-btn{
+    width:38px; height:38px; flex:0 0 auto; padding:0; font-size:20px; line-height:1;
+  }
+  .pr-level-line{flex:1; font-size:16px; letter-spacing:.02em;}
+  .pr-level-line b{color:var(--gold-soft);}
+
   /* Ranked alone: the crest and controls share a grid directly on the sky.
      The outer panel is intentionally unpainted; its transparent border keeps
      the established positions unchanged. Grid areas reorder existing children
@@ -4789,14 +4799,18 @@
     <button class="modal-x" id="prSetX" aria-label="Close" title="Close">×</button>
     <div class="rank-field">
       <div class="rank-label" id="prSetName">Coordinate Trainer</div>
-      <div class="rank-opts col" id="prSetDiff"></div>
+      <div class="pr-level-row">
+        <button type="button" class="pr-level-btn" id="prSetDown" aria-label="Start one level lower">−</button>
+        <div class="pr-level-line">Start at level <b id="prSetLevelN">1</b> — <span id="prSetCap"></span></div>
+        <button type="button" class="pr-level-btn" id="prSetUp" aria-label="Start one level higher">+</button>
+      </div>
     </div>
     <div class="rank-field" id="prSetLenField">
-      <div class="rank-label">Questions:</div>
+      <div class="rank-label">Session length:</div>
       <div class="rank-opts row" id="prSetLen">
-        <button data-len="5">5</button>
-        <button data-len="10">10</button>
-        <button data-len="20">20</button>
+        <button data-min="2">2 min</button>
+        <button data-min="5">5 min</button>
+        <button data-min="10">10 min</button>
       </div>
     </div>
     <button class="primary rank-start" id="prSetGo">Begin</button>
@@ -11831,35 +11845,45 @@ document.getElementById('revDone').onclick = () => exitReview();
    a broken one on screen.
    ============================================================ */
 
-/* Each drill, in the order the dashboard lists them. `hard` is the card's
-   difficulty indicator — how demanding the drill is against the others, not
-   which setting is chosen for it. `needs` is the level index that unlocks it;
-   only the mini challenge has one. */
+/* Each drill, in the order the dashboard lists them. `group` clusters related
+   drills for the dashboard (Task 22); `lesson` is the course step it grows out
+   of. `levels` replaces the old `tiers`/`hard`/`needs`: a mode's levels are a
+   recipe ladder, not a difficulty label — what a session is actually worth is
+   the level the staircase below settles it on, not a tier picked by hand. The
+   levels here are provisional captions so the page runs; `prMake` still calls
+   through today's seven generators (PR_MAKE) until later phases give the
+   square-colour and blindfold-sequence drills entries of their own. */
 const PR_MODES = [
-  { key:'coord', name:'Coordinate Trainer', skill:'Coordinates', hard:1,
-    desc:'Find the square you are told, or name the one that lights up. The alphabet of the board.',
-    tiers:['Board labelled, White below', 'Labels off', 'Labels off, either side below'] },
-  { key:'color', name:'Square Colour', skill:'Square colour', hard:1,
-    desc:'Light or dark, from the name alone — the thing every blindfold player checks first.',
-    tiers:['Board shown, labelled', 'Board shown, no labels', 'No board at all'] },
-  { key:'vision', name:'Piece Visualization', skill:'Piece movement', hard:2,
-    desc:'One piece on a board. Select every square it can reach from where it stands.',
-    tiers:['Empty board', 'A blocker or two', 'A crowded board'] },
-  { key:'track', name:'Piece Tracking', skill:'Tracking', hard:2,
-    desc:'Watch a piece, then lose sight of it. Follow the moves in your head and say where it ends.',
-    tiers:['One piece, two moves', 'Longer, with captures', 'Two pieces, five moves'] },
-  { key:'memory', name:'Position Memory', skill:'Position memory', hard:3,
-    desc:'Study a position for a few seconds, then answer for it with the men hidden.',
-    tiers:['4–6 men', '7–12 men', '13–20 men, less time'] },
-  { key:'sequence', name:'Blindfold Sequence', skill:'Blindfold sequence', hard:3,
-    desc:'A position, then moves you only read. Answer for the position they make.',
-    tiers:['2 plies', '4 plies', '6–8 plies, and rebuild it'] },
-  { key:'mini', name:'Mini Blindfold Challenge', skill:'Blindfold play', hard:3, needs:2,
-    desc:'A handful of men each, played out in notation with the board dark. The real thing, small.',
-    tiers:['Two men each side', 'Three each', 'Four each'] }
+  { key:'square', name:'Square Trainer', group:'board', skill:'Squares', lesson:1,
+    desc:'Name, find and colour squares from either chair — the alphabet of the board.',
+    levels:[{cap:'Labels on'},{cap:'Labels off'},{cap:'Colour, board shown'}] },
+  { key:'piece', name:'Piece Vision', group:'vision', skill:'Piece movement', lesson:4,
+    desc:'Where one piece reaches, with the board slowly taken away.',
+    levels:[{cap:'Empty board'},{cap:'A blocker or two'},{cap:'A crowded board'}] },
+  { key:'tracker', name:'Move Tracker', group:'holding', skill:'Tracking', lesson:5,
+    desc:'Follow moves you never see, and say where things stand.',
+    levels:[{cap:'One piece, two moves'},{cap:'Longer, with captures'},{cap:'Two pieces, five moves'}] },
+  { key:'hold', name:'Hold the Position', group:'holding', skill:'Holding', lesson:5,
+    desc:'A small position, studied, then answered for with the men hidden.',
+    levels:[{cap:'4–6 men'},{cap:'7–12 men'},{cap:'13–20 men'}] },
+  { key:'progressive', name:'Progressive Blindfold', group:'play', skill:'Blindfold play', lesson:10,
+    desc:'Whole small games with the board taken away one step at a time.',
+    levels:[{cap:'Two men each side'},{cap:'Three each'},{cap:'Four each'}] }
 ];
 const PR_MODE = {};
 for (const m of PR_MODES) PR_MODE[m.key] = m;
+/* The lengths a session may be boxed to, in minutes; PR_MINUTES[1] (5) is the
+   default a fresh setup box opens on. */
+const PR_MINUTES = [2, 5, 10];
+
+/* A level clamped to the mode's own ladder, with the recipe that goes with it
+   — the caption today, and whatever a generator ends up reading off it once a
+   drill grows a real recipe of its own rather than the borrowed `diff` below. */
+function prRecipe(key, level){
+  const m = PR_MODE[key];
+  const n = Math.max(1, Math.min(m.levels.length, level | 0 || 1));
+  return Object.assign({ level:n }, m.levels[n - 1]);
+}
 
 /* ---- what the practising has come to ----
    Kept in the browser and nowhere else. Practice is not a rating anybody
@@ -11887,11 +11911,7 @@ const PR_V1_KEYS = { coord:'square', color:'square', vision:'piece', track:'trac
 function prBlankMode(){ return { level:1, best:1, asked:0, correct:0, sessions:0, lastAt:0, stats:{} }; }
 function prBlank(){
   const modes = {};
-  // PR_MODES still names today's seven drills, and PR_V1_KEYS' targets are
-  // tomorrow's five — Task 4 renames the modes so the two lists coincide, and
-  // until then a blank store carries a slot for both so a v1 upgrade always
-  // has somewhere to land.
-  for (const k of new Set(PR_MODES.map(m => m.key).concat(Object.values(PR_V1_KEYS)))) modes[k] = prBlankMode();
+  for (const m of PR_MODES) modes[m.key] = prBlankMode();
   return { v:PR_VERSION, asked:0, correct:0, sessions:0, days:0, lastDay:'', best:0, modes };
 }
 function prUpgradeV1(raw){
@@ -11968,13 +11988,19 @@ const PR = {
   on: false,          // the practice screen is up
   view: 'dash',       // 'dash' | 'run'
   mode: null,         // the PR_MODES entry being run
-  diff: 1,
-  len: 10,            // questions in this session (moves, for the mini challenge)
+  level: 1,           // where on the mode's own ladder this session sits
+  runUp: 0,           // right answers in a row, since the last move either way
+  runDown: 0,         // wrong answers in a row, since the last move either way
+  moved: false,       // whether the staircase actually moved this session
+  startedAt: 0,       // prNow() when this session began
+  budgetMs: 300000,   // how long the session is boxed to — five minutes, chosen at setup
+  len: 0,             // the progressive challenge's own target — moves to survive; nothing
+                       // else reads this now that a session ends on the clock, not a count
   i: 0,               // answered so far
   right: 0,
   streak: 0,
   best: 0,
-  played: 0,          // mini challenge only: player moves made
+  played: 0,          // progressive challenge only: player moves made
   q: null,            // the question on screen
   answered: false,
   flipped: false,
@@ -11983,6 +12009,29 @@ const PR = {
   timers: [],
   mini: null
 };
+
+/* The session clock. A separate function rather than Date.now() called
+   inline so a test can replace it and drive a session's ending by hand,
+   the way prTimer's setTimeout already lets one drive its pacing. */
+function prNow(){ return Date.now(); }
+function prTimeLeft(){ return Math.max(0, PR.budgetMs - (prNow() - PR.startedAt)); }
+
+/* The staircase. Three right in a row step the level up, two wrong in a row
+   step it down, and the level a session settles on is what the mode is worth
+   — not the accuracy, which at an easy level says nothing about how hard the
+   player was actually pushed. */
+const PR_STEP_UP = 3;
+const PR_STEP_DOWN = 2;
+function prStep(ok){
+  const top = PR.mode.levels.length;
+  if (ok){
+    PR.runUp++; PR.runDown = 0;
+    if (PR.runUp >= PR_STEP_UP && PR.level < top){ PR.level++; PR.runUp = 0; PR.moved = true; }
+  } else {
+    PR.runDown++; PR.runUp = 0;
+    if (PR.runDown >= PR_STEP_DOWN && PR.level > 1){ PR.level--; PR.runDown = 0; PR.moved = true; }
+  }
+}
 
 /* Every timer a drill starts goes in here, and walking away clears the lot.
    A session left behind must not keep counting down over whatever page the
@@ -12476,23 +12525,30 @@ function prMakeMini(diff){
   return null;
 }
 
+/* PR_MODES names five drills today; the generators above still answer to
+   seven keys, because prMakeColor and prMakeSequence are not gone, only
+   unreachable from the dashboard until Tasks 9 and 14 give Square Colour and
+   Blindfold Sequence entries of their own. Until then PR_MAKE maps the five
+   live keys onto the old generators, each fed a recipe rather than a bare
+   difficulty number. */
 const PR_MAKE = {
-  coord: prMakeCoord, color: prMakeColor, vision: prMakeVision,
-  track: prMakeTrack, memory: prMakeMemory, sequence: prMakeSequence, mini: prMakeMini
+  square: r => prMakeCoord(r.level), piece: r => prMakeVision(r.level),
+  tracker: r => prMakeTrack(r.level), hold: r => prMakeMemory(r.level),
+  progressive: r => prMakeMini(r.level)
 };
 
 /* Correctness beats variety: an exercise that will not generate is retried,
    then asked for at the easiest setting, and only then given up on. Nothing
-   half-built reaches the screen. */
-function prMake(key, diff){
-  for (let t = 0; t < 5; t++){
-    const q = PR_MAKE[key](diff);
-    if (q) return q;
+   half-built reaches the screen. A `sig` on the question is also weighed
+   against the last hundred asked (prSeen) — a signature nobody set yet
+   never rules a question out, but a drill that starts stamping its
+   exercises gets the same "don't repeat this week" treatment for free. */
+function prMake(key, level){
+  for (let t = 0; t < 6; t++){
+    const q = PR_MAKE[key](prRecipe(key, level));
+    if (q && (!q.sig || !prSeenHas(q.sig))) return q;
   }
-  for (let t = 0; t < 5; t++){
-    const q = PR_MAKE[key](1);
-    if (q) return q;
-  }
+  for (let t = 0; t < 5; t++){ const q = PR_MAKE[key](prRecipe(key, 1)); if (q) return q; }
   return null;
 }
 
@@ -12501,16 +12557,18 @@ function prMake(key, diff){
    ============================================================ */
 function prStatsRender(){
   const acc = PR.i ? Math.round(PR.right / PR.i * 100) + '%' : '—';
-  const mini = PR.mode && PR.mode.key === 'mini';
-  // the challenge counts the moves it asked for; the drills count questions
-  document.getElementById('prStatQCap').textContent = mini ? 'Move' : 'Question';
+  const mini = PR.mode && PR.mode.key === 'progressive';
+  // the challenge counts the moves it asked for and still runs to a target;
+  // every other drill is boxed to the session clock rather than a count, so
+  // its caption names the level the staircase has it on instead of "Question"
+  document.getElementById('prStatQCap').textContent = mini ? 'Move' : 'Level ' + PR.level;
   document.getElementById('prStatQ').textContent =
     mini ? PR.played + ' / ' + PR.len
-         : Math.min(PR.i + 1, PR.len) + ' / ' + PR.len;
+         : Math.ceil(prTimeLeft() / 1000) + 's';
   document.getElementById('prStatA').textContent = acc;
   document.getElementById('prStatS').textContent = PR.streak;
-  const done = PR.mode && PR.mode.key === 'mini' ? PR.played : PR.i;
-  document.getElementById('prBar').style.width = Math.round(Math.min(1, done / PR.len) * 100) + '%';
+  const done = mini ? PR.played / PR.len : 1 - prTimeLeft() / PR.budgetMs;
+  document.getElementById('prBar').style.width = Math.round(Math.min(1, Math.max(0, done)) * 100) + '%';
 }
 
 /* One answer, counted. Written to storage as it happens rather than at the end
@@ -12535,14 +12593,15 @@ function prScore(ok){
     if (PR.streak > PR.best) PR.best = PR.streak;
   } else PR.streak = 0;
   prRecord(ok);
+  prStep(ok);
   prStatsRender();
 }
 
 /* The drills whose answer is a single fact worth no lingering over: a right
    answer moves straight on, a wrong one waits so the correction can be read.
-   Memory and sequence never auto-advance — comparing the board you imagined
-   with the one that was there is most of what they teach. */
-const PR_BRISK = { coord:1, color:1, vision:1, track:1 };
+   Holding a position never auto-advances — comparing the board you imagined
+   with the one that was there is most of what it teaches. */
+const PR_BRISK = { square:1, piece:1, tracker:1 };
 
 function prJudge(ok, say, extraCtl){
   if (PR.answered) return;
@@ -12554,7 +12613,7 @@ function prJudge(ok, say, extraCtl){
   prSay(say, ok ? 'right' : 'wrong');
   if (ok) beep(760, .09); else beep(190, .16, 'sine', .09);
 
-  const last = PR.i >= PR.len;
+  const last = prTimeLeft() <= 0;
   const ctl = (extraCtl || []).concat([[last ? 'Finish' : 'Next', prAdvance, 'primary']]);
   prCtl(ctl);
   if (ok && PR_BRISK[PR.mode.key]) prTimer(prAdvance, 900);
@@ -12562,7 +12621,7 @@ function prJudge(ok, say, extraCtl){
 
 function prAdvance(){
   prClearTimers();
-  if (PR.i >= PR.len){ prFinish(); return; }
+  if (prTimeLeft() <= 0){ prFinish(); return; }
   prNextQuestion();
 }
 
@@ -12576,7 +12635,7 @@ function prNextQuestion(){
   prAnsClear();
   prCtl([]);
   prMarksClear();
-  PR.q = prMake(PR.mode.key, PR.diff);
+  PR.q = prMake(PR.mode.key, PR.level);
   if (!PR.q){
     // Nothing valid came out after every retry. Say so and leave rather than
     // showing an exercise that is not one.
@@ -12585,6 +12644,7 @@ function prNextQuestion(){
     prCtl([['Back to Practice', prShowDash, 'primary']]);
     return;
   }
+  if (PR.q.sig) prSeenPush(PR.q.sig);
   prStatsRender();
   prPresent();
 }
@@ -13061,6 +13121,7 @@ function prBegin(){
   PR.i = 0; PR.right = 0; PR.streak = 0; PR.best = 0; PR.played = 0;
   PR.answered = false;
   PR.q = null; PR.click = null; PR.onSubmit = null; PR.mini = null;
+  PR.startedAt = prNow(); PR.runUp = PR.runDown = 0; PR.moved = false;
   prLaid = null;                                   // relay the board for this drill's settings
   navSync();                                       // a drill is a page: Back is the dashboard
   prClearPieces();
@@ -13072,8 +13133,8 @@ function prBegin(){
   document.getElementById('prRun').style.display = '';
   document.getElementById('prSkill').textContent = PR.mode.skill;
 
-  if (PR.mode.key === 'mini'){
-    const q = prMake('mini', PR.diff);
+  if (PR.mode.key === 'progressive'){
+    const q = prMake('progressive', PR.level);
     if (!q){
       prQ('The challenge could not build a position just now.');
       prSub('Try it again, or pick another drill.');
@@ -13088,7 +13149,7 @@ function prBegin(){
   prNextQuestion();
 }
 
-/* What the session was worth, and what to do next. `note` is the mini
+/* What the session was worth, and what to do next. `note` is the progressive
    challenge's own ending; the drills have none. */
 function prFinish(note){
   prClearTimers();
@@ -13096,16 +13157,12 @@ function prFinish(note){
   PR.onSubmit = null;
 
   const st = prLoad();
-  st.sessions++;
+  st.sessions++; prTouchDay(st);
   const m = st.modes[PR.mode.key];
-  m.sessions++;
-  m.level = PR.diff;
-  if (m.level > m.best) m.best = m.level;
-  // TASK 3 STUB: the five-rung player-wide ladder (before/after) is gone;
-  // Task 4/22 replace this with whatever per-drill milestone takes its place.
-  const before = 0;
+  m.sessions++; m.lastAt = prNow();
+  m.level = PR.level;
+  if (PR.level > m.best) m.best = PR.level;
   prSave(st);
-  const after = 0;
 
   const acc = PR.i ? PR.right / PR.i : 0;
   const rows = document.getElementById('prDoneRows');
@@ -13115,7 +13172,7 @@ function prFinish(note){
     d.innerHTML = cap + '<b>' + val + '</b>';
     rows.appendChild(d);
   };
-  if (PR.mode.key === 'mini') row('Moves played', PR.played + ' / ' + PR.len);
+  if (PR.mode.key === 'progressive') row('Moves played', PR.played + ' / ' + PR.len);
   row('Accuracy', PR.right + ' / ' + PR.i + (PR.i ? '  ·  ' + Math.round(acc * 100) + '%' : ''));
   row('Best streak', PR.best);
   row('Skill practised', PR.mode.skill);
@@ -13124,7 +13181,9 @@ function prFinish(note){
   const rec = prRecommend(acc);
   let text = '';
   if (note) text += note + ' ';
-  if (after > before) text += 'You have reached <b>' + '' + '</b>. ';   // TASK 3 STUB: see above
+  // the level the staircase moved to is what the session was worth — not the
+  // level it opened on, which the player may not have earned this time
+  if (PR.moved) text += 'You settled at <b>Level ' + PR.level + '</b> this session. ';
   if (rec) text += rec.why + ' <b>' + PR_MODE[rec.key].name + '</b> next.';
   tip.innerHTML = text || 'Steady work. Pick whichever drill you fancy next.';
 
@@ -13132,7 +13191,7 @@ function prFinish(note){
   // Finishing a blindfold game in miniature is the one result that leads
   // somewhere else on the site — into the game setup that already exists.
   document.getElementById('prBlindGame').style.display =
-    PR.mode.key === 'mini' && PR.played >= PR.len ? '' : 'none';
+    PR.mode.key === 'progressive' && PR.played >= PR.len ? '' : 'none';
   document.getElementById('prDoneOverlay').classList.add('show');
   prRenderDash();
 }
@@ -13191,23 +13250,23 @@ function prRenderDash(){
   prRenderCards(st, idx);
 }
 
+// TASK 22 STUB: the difficulty dots (PR_MODES' old `hard`) and the mini
+// challenge's gate (`needs`) went with the tiered PR_MODES shape this task
+// replaces; the dashboard that names what the level a drill has settled on is
+// worth is Task 22's, so a card asks for nothing more than the score below
+// until then. `level` is accepted and unused for the same reason `idx` is
+// still passed in from prRenderDash — Task 22 is what gives it a job.
 function prRenderCards(st, level){
   const wrap = document.getElementById('prCards');
   wrap.innerHTML = '';
   for (const m of PR_MODES){
     const s = st.modes[m.key];
-    const locked = m.needs !== undefined && level < m.needs;
     const card = document.createElement('div');
-    card.className = 'card panel pr-card' + (locked ? ' locked' : '');
+    card.className = 'card panel pr-card';
 
-    let dots = '';
-    for (let d = 1; d <= 3; d++) dots += '<i class="' + (d <= m.hard ? 'on' : '') + '"></i>';
-
-    const score = locked
-      ? 'Reach ' + '' + ' to unlock'   // TASK 3 STUB: see prFinish above
-      : s.asked
-        ? s.asked + ' answered · ' + Math.round(s.correct / s.asked * 100) + '% · best streak ' + s.best
-        : 'Not tried yet';
+    const score = s.asked
+      ? s.asked + ' answered · ' + Math.round(s.correct / s.asked * 100) + '% · best streak ' + s.best
+      : 'Not tried yet';
 
     // Built rather than written out as one string: the Start button has to go
     // inside the foot, and fishing it back out of markup that was just
@@ -13219,15 +13278,12 @@ function prRenderCards(st, level){
       return d;
     };
     const foot = part('pr-foot', '');
-    const dotRow = part('pr-dots', dots);
-    dotRow.title = 'How demanding this drill is';
-    foot.appendChild(dotRow);
 
     const go = document.createElement('button');
     go.type = 'button';
-    go.className = 'pr-go' + (locked ? '' : ' primary');
-    go.textContent = locked ? 'Locked' : 'Start';
-    if (!locked) go.onclick = () => prOpenSetup(m);
+    go.className = 'pr-go primary';
+    go.textContent = 'Start';
+    go.onclick = () => prOpenSetup(m);
     foot.appendChild(go);
 
     card.appendChild(part('pr-name', m.name));
@@ -13238,50 +13294,49 @@ function prRenderCards(st, level){
   }
 }
 
-/* ---- the two questions a drill asks before it starts ---- */
+/* ---- the two questions a drill asks before it starts ----
+   A tier used to be picked by hand — Easy/Medium/Hard, three fixed labels.
+   The staircase (prStep) is what actually knows what a session is worth, so
+   the box now just says where the ladder starts and lets the session move
+   it; prRecipe supplies the caption and does the clamping, the same call the
+   staircase makes mid-session, so a setting typed in here can never name a
+   level the mode does not have. */
 const prSetOverlay = document.getElementById('prSetOverlay');
-let prSetMode = null, prSetLevel = 1, prSetCount = 10;
+let prSetMode = null, prSetLevel = 1, prSetCount = PR_MINUTES[1];
 
 function prOpenSetup(mode){
   const st = prLoad();
   prSetMode = mode;
   prSetLevel = st.modes[mode.key].level || 1;
-  prSetCount = prSetCount || 10;
   document.getElementById('prSetName').textContent = mode.name;
 
-  const diffBox = document.getElementById('prSetDiff');
-  diffBox.innerHTML = '';
-  mode.tiers.forEach((label, k) => {
-    const b = document.createElement('button');
-    b.type = 'button';
-    b.textContent = ['Easy', 'Medium', 'Hard'][k] + ' — ' + label;
-    b.onclick = () => { prSetLevel = k + 1; prDrawSetup(); };
-    diffBox.appendChild(b);
-  });
-
-  // The mini challenge sets its own length: how long it runs is what the
-  // position can stand, not a number to pick off a row.
-  document.getElementById('prSetLenField').style.display = mode.key === 'mini' ? 'none' : '';
+  // The progressive challenge sets its own length: how long it runs is what
+  // the position can stand, not a number of minutes to pick off a row.
+  document.getElementById('prSetLenField').style.display = mode.key === 'progressive' ? 'none' : '';
   prDrawSetup();
   prSetOverlay.classList.add('show');
   beep(700, .09);
 }
 function prDrawSetup(){
-  const diffBox = document.getElementById('prSetDiff');
-  Array.from(diffBox.children).forEach((b, k) => b.classList.toggle('active', k + 1 === prSetLevel));
+  const r = prRecipe(prSetMode.key, prSetLevel);
+  prSetLevel = r.level;                          // the recipe's own clamp, not a second one here
+  document.getElementById('prSetLevelN').textContent = r.level;
+  document.getElementById('prSetCap').textContent = r.cap;
   document.querySelectorAll('#prSetLen button').forEach(b =>
-    b.classList.toggle('active', +b.dataset.len === prSetCount));
+    b.classList.toggle('active', +b.dataset.min === prSetCount));
 }
+document.getElementById('prSetDown').onclick = () => { prSetLevel--; prDrawSetup(); };
+document.getElementById('prSetUp').onclick   = () => { prSetLevel++; prDrawSetup(); };
 document.querySelectorAll('#prSetLen button').forEach(b => {
-  b.onclick = () => { prSetCount = +b.dataset.len; prDrawSetup(); };
+  b.onclick = () => { prSetCount = +b.dataset.min; prDrawSetup(); };
 });
 document.getElementById('prSetX').onclick = () => prSetOverlay.classList.remove('show');
 document.getElementById('prSetGo').onclick = () => {
   if (!prSetMode) return;
   prSetOverlay.classList.remove('show');
   PR.mode = prSetMode;
-  PR.diff = prSetLevel;
-  PR.len = prSetMode.key === 'mini' ? 0 : prSetCount;   // the mini sets its own from the position
+  PR.level = prSetLevel;
+  PR.budgetMs = prSetCount * 60000;
   beep(760, .09);
   prBegin();
 };
@@ -13512,7 +13567,7 @@ function navDescribe(){
   if (s === 'home')     return { s, v:'' };
   if (s === 'lessons')  return { s, v: LSN.view === 'lesson' ? String(LSN.n) : LSN.view === 'done' ? 'done' : '',
                                  step: LSN.step | 0 };
-  if (s === 'practice') return { s, v: PR.view === 'run' && PR.mode ? PR.mode.key : '', diff: PR.diff, len: PR.len };
+  if (s === 'practice') return { s, v: PR.view === 'run' && PR.mode ? PR.mode.key : '', level: PR.level, budgetMs: PR.budgetMs };
   if (s === 'pzvision') return { s, v: pzPick.rush ? 'rush' : (pzPick.track || '') };
   if (s === 'setup')    return { s, v: HOSTING() ? 'host' : (G.opponent || '') };
   if (s === 'game'){
@@ -13675,8 +13730,8 @@ function navApply(d, dir){
       const mode = d.v && PR_MODES.find(m => m.key === d.v);
       if (mode){
         PR.mode = mode;
-        PR.diff = d.diff || 1;
-        PR.len = d.len != null ? d.len : (mode.key === 'mini' ? 0 : 10);
+        PR.level = d.level || 1;
+        PR.budgetMs = d.budgetMs || 300000;
         prBegin();
       }
       break;

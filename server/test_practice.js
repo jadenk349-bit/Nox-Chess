@@ -75,8 +75,9 @@ function prStatsRender(){}             // pixels; this suite is about the state 
 var DECLS = ['VAL','FILES','rowOf','colOf','SQNAME','uciOf','sqName','sqIndex','onBoard','other',
              'idCounter','mk','DIR_N','DIR_B','DIR_R','DIR_K','PST','nodes','PIECE_NAME',
              'OPENING_BOOK','OPENING_LINES',
-             'PR_MODES','PR_STORE','PR_VERSION','PR_V1_KEYS','PR_SEEN_MAX','prKey','prAcc','prSeenKey',
-             'PR','prRand','prPick','prSide','prMan','PR_MAKE','W'];
+             'PR_MODES','PR_MINUTES','PR_STORE','PR_VERSION','PR_V1_KEYS','PR_SEEN_MAX',
+             'prKey','prAcc','prSeenKey',
+             'PR','PR_STEP_UP','PR_STEP_DOWN','prRand','prPick','prSide','prMan','PR_MAKE','W'];
 var FNS = ['startBoard','newState','cloneState','fenOf','stateFromFEN',
            'slide','step','addPawn','pseudoMoves','isAttacked','kingSq','inCheck',
            'makeMove','legalMoves','toSAN','attackersOf','defendersOf','see',
@@ -87,13 +88,13 @@ var FNS = ['startBoard','newState','cloneState','fenOf','stateFromFEN',
            'prSeen','prSeenHas','prSeenPush','prToday','prTouchDay',
            'prShuffle','prPosition','prMaterial','prColourWhy',
            'prMakeCoord','prMakeColor','prMakeVision','prMakeTrack','prMakeMemory',
-           'prPickMove','prAskAbout','prMakeSequence','prMakeMini','prMake',
-           'prRecord','prScore','prRecommend'];
+           'prPickMove','prAskAbout','prMakeSequence','prMakeMini','prRecipe','prMake',
+           'prRecord','prScore','prStep','prNow','prTimeLeft','prRecommend'];
 
 var bundle = [grab(/\nconst W = 'w', B = 'b';/, "const W/B")];
 for (var d = 0; d < DECLS.length; d++) if (DECLS[d] !== 'W') bundle.push(decl(DECLS[d]));
 for (var f = 0; f < FNS.length; f++) bundle.push(fn(FNS[f]));
-// PR_MODE is filled by a loop rather than written out, and prRecommend reads it
+// PR_MODE is filled by a loop rather than written out, and prRecipe/prRecommend read it
 bundle.push('\nvar PR_MODE = {};\nfor (var _m of PR_MODES) PR_MODE[_m.key] = _m;');
 eval(bundle.join('\n').replace(/(^|\n)(?:const|let) /g, '$1var '));
 
@@ -534,18 +535,21 @@ head('Mini Blindfold Challenge');
 head('Generation never hands back something broken');
 
 (function(){
-  var keys = ['coord','color','vision','track','memory','sequence','mini'];
+  // the five keys prMake can actually reach today (PR_MAKE) — color and
+  // sequence keep their generators but have no PR_MODES entry of their own
+  // until Tasks 9 and 14 give them one
+  var keys = ['square','piece','tracker','hold','progressive'];
   var missing = 0, total = 0;
   for (var k = 0; k < keys.length; k++){
-    for (var diff = 1; diff <= 3; diff++){
+    for (var level = 1; level <= 3; level++){
       for (var t = 0; t < 12; t++){
         total++;
-        if (!prMake(keys[k], diff)) missing++;
+        if (!prMake(keys[k], level)) missing++;
       }
     }
   }
-  ok('every drill at every setting produced an exercise', missing, 0);
-  ok('and there were plenty of them', total, 252);
+  ok('every drill at every level produced an exercise', missing, 0);
+  ok('and there were plenty of them', total, 180);
 })();
 
 /* ============================================================
@@ -557,8 +561,6 @@ head('What is remembered, and for whom');
   storage = {};
   var blank = prLoad();
   ok('a browser that has never practised starts at nothing', blank.asked + blank.correct + blank.sessions, 0);
-  // today's seven drills plus the five v1-migration targets both get a slot
-  // (see PR_V1_KEYS) until Task 4 makes the two lists the same one
   ok('and knows about every drill', PR_MODES.every(function(m){ return !!blank.modes[m.key]; }), true);
 
   PR.mode = PR_MODES[0];
@@ -569,8 +571,8 @@ head('What is remembered, and for whom');
   // the running answer-streak is not part of what v2's store keeps between
   // reloads (prLoad's whitelist has no `streak`) — only `asked`/`correct`/
   // `best` survive a reload, which is what the rest of this block checks
-  ok('the drill keeps its own tally', st.modes.coord.asked, 4);
-  ok('and the other drills are untouched', st.modes.memory.asked, 0);
+  ok('the drill keeps its own tally', st.modes.square.asked, 4);
+  ok('and the other drills are untouched', st.modes.hold.asked, 0);
 
   // and it survives being read back — which is what a refresh does
   ok('accuracy reads back the same after a reload',
@@ -584,10 +586,10 @@ head('What is remembered, and for whom');
   storage[PR_STORE + 'guest'] = JSON.stringify({ v: 99, asked: 500, modes: {} });
   ok('and so does one from a version this page does not speak', prLoad().asked, 0);
   // a record missing a drill added later is merged, not thrown away
-  storage[PR_STORE + 'guest'] = JSON.stringify({ v: PR_VERSION, asked: 9, correct: 6, modes: { coord: { asked: 9, correct: 6 } } });
+  storage[PR_STORE + 'guest'] = JSON.stringify({ v: PR_VERSION, asked: 9, correct: 6, modes: { square: { asked: 9, correct: 6 } } });
   var merged = prLoad();
   ok('an older record keeps what it knew', merged.correct, 6);
-  ok('and gains the drills it had never heard of', merged.modes.mini.asked, 0);
+  ok('and gains the drills it had never heard of', merged.modes.progressive.asked, 0);
 })();
 
 (function(){
@@ -640,13 +642,13 @@ head('Store v2');
   storage = {};
   PR.mode = PR_MODES[0];
   var rec = prRecommend(0.4);
-  ok('a bad session is told to do the same drill again', rec.key, 'coord');
+  ok('a bad session is told to do the same drill again', rec.key, 'square');
   // a good session with untried drills points at the next untried one
   var st = prBlank();
-  st.modes.coord.sessions = 1;
+  st.modes.square.sessions = 1;
   prSave(st);
   var next = prRecommend(0.9);
-  ok('a good one points somewhere new', next.key, 'color');
+  ok('a good one points somewhere new', next.key, 'piece');
   // everything tried: the weakest drill is the one recommended
   st = prBlank();
   for (var k = 0; k < PR_MODES.length; k++){
@@ -654,30 +656,30 @@ head('Store v2');
     st.modes[PR_MODES[k].key].asked = 10;
     st.modes[PR_MODES[k].key].correct = 9;
   }
-  st.modes.track.correct = 4;
+  st.modes.tracker.correct = 4;
   st.sessions = 30; st.asked = 300; st.correct = 250;
   prSave(st);
-  ok('with everything tried, the weakest one is next', prRecommend(0.9).key, 'track');
+  ok('with everything tried, the weakest one is next', prRecommend(0.9).key, 'tracker');
   storage = {};
   account = null;
 })();
 
 /* ============================================================
-   11 — the mini challenge is locked until it is earned
+   11 — levels and the staircase
    ============================================================ */
-head('What is open, and when');
+head('Levels and the staircase');
 
 (function(){
-  var mini = null;
-  for (var k = 0; k < PR_MODES.length; k++) if (PR_MODES[k].key === 'mini') mini = PR_MODES[k];
-  ok('the mini challenge is the one drill with a gate', mini.needs, 2);
-  // the named rung it gated on (PR_LEVELS) is gone with the ladder; Task 4/22
-  // decide what gates it next
-  var open = 0;
-  for (var j = 0; j < PR_MODES.length; j++) if (PR_MODES[j].needs === undefined) open++;
-  ok('the other six are open from the start', open, 6);
-  ok('every drill offers three genuinely different settings',
-     PR_MODES.every(function(m){ return m.tiers.length === 3; }), true);
+  var r = prRecipe('square', 99);
+  ok('a level past the ladder is clamped', r.level, PR_MODE.square.levels.length);
+  ok('a recipe carries its caption', typeof r.cap, 'string');
+  PR.mode = PR_MODE.square; PR.level = 2; PR.runUp = 0; PR.runDown = 0;
+  prStep(true); prStep(true); ok('two right do not move the level', PR.level, 2);
+  prStep(true); ok('three right step up', PR.level, 3);
+  prStep(false); ok('one wrong holds', PR.level, 3);
+  prStep(false); ok('two wrong step down', PR.level, 2);
+  PR.level = 1; PR.runDown = 0; prStep(false); prStep(false);
+  ok('level one is the floor', PR.level, 1);
 })();
 
 /* ============================================================

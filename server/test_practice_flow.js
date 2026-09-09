@@ -60,9 +60,25 @@ var decl = function(n){
    The stub half
    ============================================================ */
 
-/* ---- a clock that only moves when this file moves it ---- */
+/* ---- a clock that only moves when this file moves it ----
+   Two independent clocks live in this suite: `clockNow` paces setTimeout, so
+   ticking it is how a study countdown or an auto-advance is made to fire.
+   `prNowFake` is the session clock a drill's budget is measured against —
+   left alone it never moves, so a session stays fresh across any number of
+   ticks, and a test ends one on purpose by assigning it forward past
+   PR.startedAt + PR.budgetMs (prNow() is reassigned to read it below, once
+   the PRACTICE section has been evaluated). */
 var clockNow = 0, timerId = 0, pending = [];
-var Date = { now: function(){ return clockNow; } };
+var prNowFake = 0;
+// prTouchDay reads `new Date()` for the calendar date, not just the clock, so
+// the stub has to still be a real Date underneath — a constructor that
+// explicitly returns an object hands `new` that object instead of `this`.
+// globalThis.Date is read rather than plain `Date`, because a same-named
+// function declaration below is hoisted ahead of everything in this scope
+// and would otherwise shadow itself.
+var RealDate = globalThis.Date;
+function Date(ms){ return new RealDate(ms === undefined ? clockNow : ms); }
+Date.now = function(){ return clockNow; };
 function setTimeout(fn, ms){
   var id = ++timerId;
   pending.push({ id: id, at: clockNow + (ms || 0), fn: fn });
@@ -159,9 +175,9 @@ var document = {
   querySelectorAll: function(sel){ return bySelector[sel] || []; }
 };
 // the three session-length buttons, which the practice code wires up by selector
-bySelector['#prSetLen button'] = [5, 10, 20].map(function(n){
+bySelector['#prSetLen button'] = [2, 5, 10].map(function(n){
   var b = new El('button');
-  b.dataset.len = String(n);
+  b.dataset.min = String(n);
   return b;
 });
 
@@ -202,6 +218,11 @@ for (var f = 0; f < FNS.length; f++) bundle.push(fn(FNS[f]));
 bundle.push(grab(/\n\/\* =+\n   PRACTICE — the drills behind LESSON[\s\S]*?\n(?=\/\* =+\n   SCREENS)/,
                  'the PRACTICE section'));
 eval(bundle.join('\n').replace(/(^|\n)(?:const|let) /g, '$1var '));
+// prNow() is Date.now() in the page; here it reads the fake clock above, so a
+// test ends a session by moving prNowFake past PR.startedAt + PR.budgetMs
+// rather than by ticking the setTimeout clock, which paces timers and nothing
+// else.
+prNow = function(){ return prNowFake; };
 
 /* ============================================================
    The scoreboard
@@ -245,14 +266,24 @@ function typeAnswer(text){
   return input;
 }
 function marked(sq, cls){ return prSqEls[PR.flipped ? 63 - sq : sq].classList.contains(cls); }
-function startDrill(key, diff, len){
+/** `min` is the session's length in minutes, matching the setup box's own
+    buttons — omitted, it keeps whatever the box was last set to. Sessions are
+    time-boxed now, so this no longer names a question count; ending one on
+    purpose is `finishSession()`, below. */
+function startDrill(key, level, min){
   storageOwner();
   var mode = null;
   for (var k = 0; k < PR_MODES.length; k++) if (PR_MODES[k].key === key) mode = PR_MODES[k];
   prOpenSetup(mode);
-  prSetLevel = diff;
-  if (len) prSetCount = len;
+  prSetLevel = level;
+  if (min) prSetCount = min;
   byId.prSetGo.onclick();
+}
+/** Spend the whole of a session's budget and let the next judged answer end
+    it — the fake session clock (prNowFake) only moves when a test moves it,
+    so this is how a test reaches Practice Complete on purpose. */
+function finishSession(){
+  prNowFake = PR.startedAt + PR.budgetMs + 1000;
 }
 function storageOwner(){ /* guest throughout; kept as a seam for readability */ }
 
@@ -316,51 +347,52 @@ head('The dashboard');
   ok('with nothing to report yet', byId.prFigAcc.textContent, '—');
   ok('no sessions', byId.prFigSessions.textContent, 0);
 
+  // there is no gate on any drill now — the old five-rung ladder that used to
+  // hold the mini challenge back is gone, and nothing in the new PR_MODES
+  // shape replaces it (Task 22 rebuilds this dashboard)
   var cards = byId.prCards.children;
-  var mini = cards[cards.length - 1];
-  // the player-wide ladder that used to gate this card is gone (Task 3); until
-  // Task 4/22 replace it with something, prRenderDash's level is stubbed at 0
-  // and needs:2 can never be met, so the mini challenge stays locked
-  ok('the mini challenge is locked', mini.classList.contains('locked'), true);
-  var miniGo = mini.children[2].children[1];
-  ok('its button says so', miniGo.textContent, 'Locked');
-  ok('and does nothing', miniGo.onclick, null);
+  var progressive = cards[cards.length - 1];
+  ok('the progressive challenge is open too', progressive.classList.contains('locked'), false);
   var first = cards[0];
-  ok('the coordinate drill is open', first.classList.contains('locked'), false);
-  ok('and its button starts it', first.children[2].children[1].textContent, 'Start');
-  ok('each card carries a difficulty indicator', /class="on"/.test(first.children[2].children[0].innerHTML), true);
+  ok('the square drill is open', first.classList.contains('locked'), false);
+  ok('and its button starts it', first.children[2].children[0].textContent, 'Start');
   ok('and says it has not been tried', first.children[3].innerHTML, 'Not tried yet');
 })();
 
 /* ============================================================
-   2 — the coordinate trainer, start to finish
+   2 — the square trainer, start to finish
    ============================================================ */
-head('Coordinate Trainer');
+head('Square Trainer');
 
 (function(){
   storage = {};
-  startDrill('coord', 1, 5);
+  startDrill('square', 1, 5);
   ok('the drill screen is up', byId.prRun.style.display, '');
   ok('and the dashboard is put away', byId.prDash.style.display, 'none');
-  ok('the panel names the skill', byId.prSkill.textContent, 'Coordinates');
+  ok('the panel names the skill', byId.prSkill.textContent, 'Squares');
   ok('the board is shown', byId.prFrame.style.display, '');
-  ok('and the session counter starts at one of five', byId.prStatQ.textContent, '1 / 5');
+  ok('the level line reads back', byId.prStatQCap.textContent, 'Level 1');
   ok('the orientation is spelled out', /White's view/.test(byId.prOrient.textContent), true);
 
   var asked = 0, both = {};
-  while (PR.i < 5){
+  while (asked < 5){
     both[PR.q.findIt ? 'find' : 'name'] = 1;
     asked++;
     answerRight();
     ok('answer ' + asked + ' was marked right', /right/.test(byId.prSay.className), true);
     tick(1000);                       // a right answer moves on by itself
   }
-  ok('five questions were asked', asked, 5);
+  ok('both kinds of question came up along the way', !!(both.find && both.name), true);
+
+  finishSession();
+  answerRight();
+  ok('once the budget is spent, the button says Finish', ctlButton('Finish') !== null, true);
+  tick(1000);                         // a right answer still moves on by itself
   ok('and the session finished', byId.prDoneOverlay.classList.contains('show'), true);
   ok('with the title it promises', byId.prDoneTitle.textContent, 'Practice Complete');
-  ok('accuracy on the result card', /5 \/ 5/.test(byId.prDoneRows.children[0].innerHTML), true);
-  ok('best streak too', /<b>5<\/b>/.test(byId.prDoneRows.children[1].innerHTML), true);
-  ok('and the skill it practised', /Coordinates/.test(byId.prDoneRows.children[2].innerHTML), true);
+  ok('accuracy on the result card', /6 \/ 6/.test(byId.prDoneRows.children[0].innerHTML), true);
+  ok('best streak too', /<b>6<\/b>/.test(byId.prDoneRows.children[1].innerHTML), true);
+  ok('and the skill it practised', /Squares/.test(byId.prDoneRows.children[2].innerHTML), true);
   ok('the dashboard behind it has the session', byId.prFigSessions.textContent, 1);
   ok('and 100% accuracy', byId.prFigAcc.textContent, '100%');
 })();
@@ -368,7 +400,7 @@ head('Coordinate Trainer');
 (function(){
   // both exercise types, and a wrong answer in each
   storage = {};
-  startDrill('coord', 2, 20);
+  startDrill('square', 2);
   ok('the middle setting drops the coordinate labels',
      prSqEls[56].innerHTML === '' && prSqEls[0].innerHTML === '', true);
 
@@ -407,13 +439,12 @@ head('Coordinate Trainer');
 
 (function(){
   storage = {};
-  startDrill('coord', 3, 20);
+  startDrill('square', 3);
   var flipped = 0;
   for (var k = 0; k < 40; k++){
     if (PR.q.flipped) flipped++;
     answerRight();
     tick(1000);
-    if (PR.i >= PR.len) break;
     if (ctlButton('Next')) pressCtl('Next');
   }
   ok('the hardest setting turns the board round sometimes', flipped > 0, true);
@@ -421,47 +452,50 @@ head('Coordinate Trainer');
 })();
 
 /* ============================================================
-   3 — square colour
+   3 — a session is time-boxed
    ============================================================ */
-head('Square Colour');
+head('A session is time-boxed');
 
 (function(){
+  // Hold the Position never auto-advances, so ending it on purpose has to go
+  // through the button rather than a brisk drill's own timer.
   storage = {};
-  startDrill('color', 3, 5);
-  ok('the hardest setting takes the board away', byId.prFrame.style.display, 'none');
-  ok('and the note in its place is shown', byId.prNoBoard.style.display, '');
-  ok('the orientation line goes with it', byId.prOrient.style.display, 'none');
-  var q = PR.q;
-  ansButton(q.dark ? 'Light' : 'Dark').onclick();
-  ok('a wrong colour is marked wrong', /wrong/.test(byId.prSay.className), true);
-  ok('and the board comes back to show it', byId.prFrame.style.display, '');
-  ok('with the square marked', marked(q.sq, 'pr-wrong'), true);
-  ok('and the rule explained', /parity/.test(byId.prSay.innerHTML), true);
+  startDrill('hold', 1, 2);
+  ok('the clock starts full', prTimeLeft(), PR.budgetMs);
+  pastStudy();
+  answerAskRight(PR.q.ask);
+  ok('with time left, the button says Next', ctlButton('Next') !== null, true);
   pressCtl('Next');
-  ok('the next question hides the board again', byId.prFrame.style.display, 'none');
-  var q2 = PR.q;
-  ansButton(q2.dark ? 'Dark' : 'Light').onclick();
-  ok('the right colour is marked right', /right/.test(byId.prSay.className), true);
-  ok('and the square is shown in green', marked(q2.sq, 'pr-right'), true);
-  prShowDash();
-})();
-
-(function(){
-  storage = {};
-  startDrill('color', 1, 5);
-  ok('the easiest setting shows the board', byId.prFrame.style.display, '');
-  ok('and labels it', prSqEls[56].innerHTML.indexOf('coord') >= 0, true);
+  finishSession();
+  pastStudy();
+  answerAskRight(PR.q.ask);
+  ok('once the budget is spent, the button says Finish', ctlButton('Finish') !== null, true);
+  pressCtl('Finish');
+  ok('and the session ends', byId.prDoneOverlay.classList.contains('show'), true);
   prShowDash();
 })();
 
 /* ============================================================
-   4 — piece visualization
+   4 — square colour
+   The dashboard cannot reach this drill any more — prMake only answers to
+   the five PR_MODES keys — but the generator it would use is still here for
+   Task 9 to give a card of its own, so a direct call is still worth proving.
    ============================================================ */
-head('Piece Visualization');
+head('Square Colour (generator only — no PR_MODES entry until Task 9)');
+
+(function(){
+  var q = prMakeColor(3);
+  ok('the hardest setting is still buildable directly', !!q, true);
+})();
+
+/* ============================================================
+   5 — piece vision
+   ============================================================ */
+head('Piece Vision');
 
 (function(){
   storage = {};
-  startDrill('vision', 2, 5);
+  startDrill('piece', 2, 5);
   var q = PR.q;
   ok('the piece is named with its square', byId.prQ.innerHTML.indexOf(sqName(q.from)) >= 0, true);
   ok('and the square it stands on is marked', marked(q.from, 'pr-from'), true);
@@ -498,13 +532,13 @@ head('Piece Visualization');
 })();
 
 /* ============================================================
-   5 — piece tracking
+   6 — move tracker
    ============================================================ */
-head('Piece Tracking');
+head('Move Tracker');
 
 (function(){
   storage = {};
-  startDrill('track', 1, 5);
+  startDrill('tracker', 1, 5);
   var q = PR.q;
   ok('the drill opens with the men in view', byId.prBoard.classList.contains('blind'), false);
   ok('and the piece named on its square', byId.prQ.innerHTML.indexOf(sqName(q.startAt[0])) >= 0, true);
@@ -540,7 +574,7 @@ head('Piece Tracking');
 
 (function(){
   storage = {};
-  startDrill('track', 3, 5);
+  startDrill('tracker', 3, 5);
   var q = PR.q;
   ok('the hardest setting follows two pieces', q.ids.length, 2);
   ok('over five moves', q.path.length, 5);
@@ -551,13 +585,13 @@ head('Piece Tracking');
 })();
 
 /* ============================================================
-   6 — position memory
+   7 — hold the position
    ============================================================ */
-head('Position Memory');
+head('Hold the Position');
 
 (function(){
   storage = {};
-  startDrill('memory', 1, 5);
+  startDrill('hold', 1, 5);
   var q = PR.q;
   ok('the position is on the board to study', byId.prBoard.classList.contains('blind'), false);
   ok('and it says how many men there are', /Study this position/.test(byId.prQ.innerHTML), true);
@@ -584,7 +618,7 @@ head('Position Memory');
 (function(){
   // Ready cuts the study short, and cannot fire the question twice
   storage = {};
-  startDrill('memory', 2, 5);
+  startDrill('hold', 2, 5);
   pressCtl('Ready');
   ok('Ready ends the study early', byId.prBoard.classList.contains('blind'), true);
   var asked = byId.prQ.innerHTML;
@@ -594,66 +628,26 @@ head('Position Memory');
 })();
 
 /* ============================================================
-   7 — blindfold sequence
+   8 — blindfold sequence
+   Same story as Square Colour above: no PR_MODES entry, no way in from the
+   dashboard, until Task 14 gives it one — the generator stays proven directly.
    ============================================================ */
-head('Blindfold Sequence');
+head('Blindfold Sequence (generator only — no PR_MODES entry until Task 14)');
 
 (function(){
-  storage = {};
-  startDrill('sequence', 1, 5);
-  var q = PR.q;
-  ok('the easiest one opens from the usual position', /usual starting position/.test(byId.prQ.innerHTML), true);
-  ok('with the men in view', byId.prBoard.classList.contains('blind'), false);
-  pressCtl('Ready');
-  ok('Ready hides them', byId.prBoard.classList.contains('blind'), true);
-  ok('and the moves appear in notation', byId.prSeq.innerHTML.indexOf(q.sans[0]) >= 0, true);
-  ok('numbered', /<b>1\.<\/b>/.test(byId.prSeq.innerHTML), true);
-  ok('both plies', byId.prSeq.innerHTML.indexOf(q.sans[1]) >= 0, true);
-  answerAskRight(q.ask);
-  ok('the answer is judged', PR.answered, true);
-  ok('and the position can be revealed', ctlButton('Reveal the position') !== null, true);
-  pressCtl('Reveal the position');
-  ok('which shows it', byId.prBoard.classList.contains('blind'), false);
-  prShowDash();
-})();
-
-(function(){
-  // the hardest setting, including a rebuild when one comes up
-  storage = {};
-  var rebuilt = false;
-  for (var t = 0; t < 25 && !rebuilt; t++){
-    startDrill('sequence', 3, 20);
-    if (PR.q.ask.t !== 'rebuild'){ prShowDash(); continue; }
-    rebuilt = true;
-    var q = PR.q;
-    ok('six plies or more at the hardest setting', q.sans.length >= 6, true);
-    pressCtl('Ready');
-    ok('a rebuild names the first man to place', /Place/.test(byId.prQ.innerHTML), true);
-    ok('and says how many there are', /1 of 3/.test(byId.prQ.innerHTML), true);
-    clickSquare(q.ask.want[0].sq);
-    ok('placing one moves to the next', /2 of 3/.test(byId.prQ.innerHTML), true);
-    ok('and nothing is judged yet', PR.answered, false);
-    clickSquare(q.ask.want[1].sq);
-    clickSquare(q.ask.want[2].sq);
-    ok('the third finishes it', PR.answered, true);
-    ok('all three right is right', /right/.test(byId.prSay.className), true);
-    ok('and it lists what stood where', /on <b>/.test(byId.prSay.innerHTML), true);
-  }
-  ok('a rebuild question came up at the hardest setting', rebuilt, true);
-  prShowDash();
+  var q = prMakeSequence(1);
+  ok('the easiest setting is still buildable directly', !!q, true);
+  ok('and opens from the usual position', q.fromStart, true);
 })();
 
 /* ============================================================
-   8 — the mini blindfold challenge
+   9 — the progressive blindfold challenge
    ============================================================ */
-head('Mini Blindfold Challenge');
+head('Progressive Blindfold Challenge');
 
 (function(){
   storage = {};
-  // The card shows locked (see "the mini challenge is locked" above), but
-  // starting it programmatically — as pressing an unlocked card's Start
-  // button would — goes straight through prOpenSetup regardless of the card.
-  startDrill('mini', 1, 0);
+  startDrill('progressive', 1, 0);
   ok('the challenge sets its own length', PR.len, PR.q.target);
   ok('the position is there to learn', byId.prBoard.classList.contains('blind'), false);
   ok('and it says you are White', /you have White/.test(byId.prQ.innerHTML), true);
@@ -704,7 +698,7 @@ head('Mini Blindfold Challenge');
   st.sessions = 10; st.asked = 100; st.correct = 80;
   for (var k = 0; k < 4; k++) st.modes[PR_MODES[k].key].sessions = 2;
   prSave(st);
-  startDrill('mini', 1, 0);
+  startDrill('progressive', 1, 0);
   pressCtl('Ready');
   pressCtl('Reveal Position');
   ok('Reveal shows the position', byId.prBoard.classList.contains('blind'), false);
@@ -723,14 +717,14 @@ head('Mini Blindfold Challenge');
 })();
 
 /* ============================================================
-   9 — leaving, restarting, and the record
+   10 — leaving, restarting, and the record
    ============================================================ */
 head('Leaving a drill behind');
 
 (function(){
   storage = {};
   PR.on = true;
-  startDrill('memory', 3, 20);
+  startDrill('hold', 3, 20);
   ok('a study countdown is running', pending.length > 0, true);
   prLeave();
   ok('walking away clears every timer', pending.length, 0);
@@ -746,7 +740,7 @@ head('Leaving a drill behind');
 
 (function(){
   storage = {};
-  startDrill('coord', 1, 10);
+  startDrill('square', 1, 10);
   answerRight(); tick(1000);
   answerRight(); tick(1000);
   ok('two answers in', PR.i, 2);
@@ -760,7 +754,7 @@ head('Leaving a drill behind');
 
 (function(){
   storage = {};
-  startDrill('coord', 1, 5);
+  startDrill('square', 1, 5);
   answerRight(); tick(1000);
   var q = PR.q;
   clickSquare(q.findIt ? elsewhere(q.sq) : q.sq);
@@ -779,29 +773,48 @@ head('Leaving a drill behind');
 (function(){
   // the setup box, and what it remembers
   storage = {};
-  var mode = PR_MODES[0];
+  var mode = PR_MODES[0];                       // square
   prOpenSetup(mode);
   ok('the setup box opens', byId.prSetOverlay.classList.contains('show'), true);
   ok('naming the drill', byId.prSetName.textContent, mode.name);
-  ok('with three settings to choose from', byId.prSetDiff.children.length, 3);
-  ok('each spelling out what changes', /Easy — /.test(byId.prSetDiff.children[0].textContent), true);
+  ok('opening on level one', byId.prSetLevelN.textContent, 1);
+  ok('with its caption', byId.prSetCap.textContent, mode.levels[0].cap);
   ok('and a length to pick', byId.prSetLenField.style.display, '');
-  byId.prSetDiff.children[2].onclick();
-  ok('the hardest one lights up', byId.prSetDiff.children[2].classList.contains('active'), true);
+
+  var lenBtns = bySelector['#prSetLen button'];
+  lenBtns[0].onclick();
+  ok('a length button sets the minutes', prSetCount, 2);
+  ok('and shows itself chosen', lenBtns[0].classList.contains('active'), true);
+  lenBtns[2].onclick();
+  ok('picking another one moves the highlight',
+     lenBtns[2].classList.contains('active') && !lenBtns[0].classList.contains('active'), true);
+
+  byId.prSetUp.onclick();
+  byId.prSetUp.onclick();
+  ok('the + button steps the level up', byId.prSetLevelN.textContent, 3);
+  ok('with the caption that goes with it', byId.prSetCap.textContent, mode.levels[2].cap);
+  byId.prSetUp.onclick();
+  ok('and does not run past the top of the ladder', byId.prSetLevelN.textContent, 3);
   byId.prSetGo.onclick();
   ok('Begin closes the box', byId.prSetOverlay.classList.contains('show'), false);
-  ok('and runs the setting that was chosen', PR.diff, 3);
-  while (PR.i < PR.len){ answerRight(); tick(1000); if (ctlButton('Next')) pressCtl('Next'); }
-  prShowDash();
+  ok('and runs the level that was chosen', PR.level, 3);
+
+  // finish the session for real, so the level it settled at lands on the record
+  finishSession();
+  answerRight(); tick(1000);
+  ok('the session finished', byId.prDoneOverlay.classList.contains('show'), true);
+
   prOpenSetup(mode);
-  ok('and next time it opens on the setting last used',
-     byId.prSetDiff.children[2].classList.contains('active'), true);
+  ok('and next time it opens on the level last used', byId.prSetLevelN.textContent, 3);
   byId.prSetX.onclick();
   ok('the close button puts it away', byId.prSetOverlay.classList.contains('show'), false);
 
-  var mini = PR_MODES[PR_MODES.length - 1];
-  prOpenSetup(mini);
-  ok('the mini challenge asks no length — it has its own', byId.prSetLenField.style.display, 'none');
+  byId.prSetDown.onclick();
+  ok('and the − button steps it back down', byId.prSetLevelN.textContent, 2);
+
+  var progressive = PR_MODE.progressive;
+  prOpenSetup(progressive);
+  ok('the progressive challenge asks no length — it has its own', byId.prSetLenField.style.display, 'none');
   byId.prSetX.onclick();
 })();
 
@@ -809,14 +822,16 @@ head('Leaving a drill behind');
   storage = {};
   var st = prBlank();
   st.sessions = 2; st.asked = 40; st.correct = 30;
-  st.modes.coord.sessions = 1; st.modes.color.sessions = 1;
+  st.modes.square.sessions = 1; st.modes.piece.sessions = 1;
   prSave(st);
   prShowDash();
   ok('accuracy is reported', byId.prFigAcc.textContent, '75%');
   ok('and the sessions', byId.prFigSessions.textContent, 2);
 
-  startDrill('coord', 1, 5);
-  while (PR.i < PR.len){ answerRight(); tick(1000); }
+  startDrill('square', 1, 5);
+  finishSession();
+  answerRight(); tick(1000);
+  ok('the session finished', byId.prDoneOverlay.classList.contains('show'), true);
   byId.prToLessons.onclick();
   ok('Back to Lessons leads home', screens[screens.length - 1], 'home');
   ok('and closes the box', byId.prDoneOverlay.classList.contains('show'), false);
@@ -824,21 +839,23 @@ head('Leaving a drill behind');
 
 (function(){
   storage = {};
-  startDrill('coord', 1, 5);
-  while (PR.i < PR.len){ answerRight(); tick(1000); }
+  startDrill('square', 1, 5);
+  finishSession();
+  answerRight(); tick(1000);
   ok('the results box offers another go', typeof byId.prAgain.onclick, 'function');
   byId.prAgain.onclick();
-  ok('Practice Again starts the same drill over', PR.mode.key, 'coord');
+  ok('Practice Again starts the same drill over', PR.mode.key, 'square');
   ok('from question one', PR.i, 0);
   ok('with the box closed', byId.prDoneOverlay.classList.contains('show'), false);
-  while (PR.i < PR.len){ answerRight(); tick(1000); }
+  finishSession();
+  answerRight(); tick(1000);
   byId.prAnother.onclick();
   ok('Choose Another goes back to the list', byId.prDash.style.display, '');
   ok('and two sessions are on the record', prLoad().sessions, 2);
 })();
 
 /* ============================================================
-   10 — the markup the code reaches for
+   11 — the markup the code reaches for
    The stub hands back an element for any id asked of it, which is what makes
    the flow above runnable and what makes it blind to a typo. So the ids are
    checked against the page itself.
@@ -855,10 +872,12 @@ head('Every element the drills reach for is in the page');
   ok('the drills name ' + ids.length + ' elements', ids.length > 25, true);
   ok('and every one of them is in the markup', missing.join(', '), '');
 
-  // the same for the one selector the code uses
-  ok('the session-length buttons exist', /id="prSetLen"/.test(SRC), true);
-  ok('and carry the lengths the code reads',
-     (SRC.match(/data-len="\d+"/g) || []).length, 3);
+  // the same for the one selector the code uses — scoped to prSetLen itself,
+  // since the ranked screen's own clock buttons carry data-min too
+  var lenMarkup = SRC.match(/<div class="rank-opts row" id="prSetLen">[\s\S]*?<\/div>/);
+  ok('the session-length buttons exist', !!lenMarkup, true);
+  ok('and carry the minutes the code reads',
+     ((lenMarkup && lenMarkup[0].match(/data-min="\d+"/g)) || []).length, 3);
   // the practice screen itself, and its place in the lane every other screen keeps
   ok('there is a practice screen', /id="screen-practice"/.test(SRC), true);
   ok('and it reserves the same lane as the rest', /#screen-practice\{?[^\n]*padding-left/.test(SRC) ||
