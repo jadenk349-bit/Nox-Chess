@@ -100,7 +100,7 @@ var FNS = ['startBoard','newState','cloneState','fenOf','stateFromFEN',
            'prPickMove','prAskAbout','prMakeProgressive','prMakeBranches','prRecipe','prMake',
            'prGamePosition','prCluster','prAskFine','prMakeHold',
            'prRecord','prScore','prStep','prNow','prTimeLeft','prMedianLat',
-           'prAutomatic','prGroupOpen','prRecommendNext',
+           'prAutomatic','prGroupOpen','prRecommendFrom','prRecommendNext',
            'prStartLevel','prOpen','prRebuildStart','prRebuildFinish','prRbPaint','goPractice'];
 
 var bundle = [grab(/\nconst W = 'w', B = 'b';/, "const W/B")];
@@ -937,6 +937,33 @@ head('The recommender');
   ok('the why names a level caption', /level \d/.test(r.why), true);
   st.modes.tracker.level = 5; st.modes.forcing.level = 2; st.modes.hold.level = 4;
   ok('the bridge is offered once its three gates are met', prRecommendNext(st, []).key === 'progressive' || prRecommendNext(st, [10]).key === 'progressive', true);
+})();
+
+(function(){
+  // every group's own ≥2 floor can clear — Board via prAutomatic, everyone
+  // else at level 2 — while nothing is anywhere near 60% and the bridge's
+  // own three gates are still unmet; the walk that finds nothing to stop
+  // at must still answer rather than say nothing, because this is a state
+  // a player reaches by following the recommender itself
+  storage = {};
+  var st = prLoad();
+  st.modes.square.level = 5; st.modes.square.stats.lat = [800];
+  // tracker and attack land at level 2 here too, well short of the bridge's
+  // own gates (tracker ≥5, attack ≥4)
+  PR_MODES.forEach(function(m){ if (m.key !== 'square' && m.key !== 'progressive') st.modes[m.key].level = 2; });
+  var r = prRecommendNext(st, []);
+  ok('every floor cleared still names something', r !== null, true);
+  ok('and it is not a Board drill', r && r.key !== 'square' && r.key !== 'lines', true);
+})();
+
+(function(){
+  // once every drill is at least 60% up its own ladder the bridge itself
+  // is the answer, rather than the walk having nothing left to recommend
+  storage = {};
+  var st = prLoad();
+  PR_MODES.forEach(function(m){ st.modes[m.key].level = m.levels.length; });
+  st.modes.square.stats.lat = [800];
+  ok('an all-maxed store points at the bridge', prRecommendNext(st, []).key, 'progressive');
 })();
 
 /* ============================================================
