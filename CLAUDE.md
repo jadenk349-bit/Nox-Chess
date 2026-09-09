@@ -954,7 +954,27 @@ hidden, then the squares with nobody on them, then no board at all — which is
 whole of the difference (`pbMask`/`pbPaint`) exactly as it is in a game. It is
 also the one mode the staircase does not settle: a rung is held or it is not
 (`pbEnd` decides, on the target, the drifts and the moves that were not there),
-and the next session opens one higher only on a pass. There is deliberately **no Elo**: what a
+and the next session opens one higher only on a pass. Three things hold a game
+up short of that ending, and none of them is a second question the session
+scores. Every few moves (`checkEvery`) `pbCheckpoint()` stops and asks one thing
+about the position as it now stands — where a king is, what is beside it, how
+many men a side has, what the last move was — with the "last move" decoys drawn
+from `pb.prevSt`, the position that move was played *from*, so they are moves
+that really were available and never anything a book suggested. A miss is a
+drift and the true board is shown for two seconds, because catching the drift is
+the point and playing on from a picture that has already gone wrong is not a
+question anybody can answer. `pbPeek()` is the same two seconds bought
+deliberately, out of the rung's own allowance — a level with none left offers no
+Peek button rather than a dead one. And `pbRecover()` ("I've lost it") shows the
+*score* and never the board, and hands the position back through
+`prRebuildStart` to be put together from the moves — which is what Koltanowski
+did and what every guide to the game says to do instead of guessing. It is
+counted (`pb.recoveries`) and costs the level nothing: a player who stops and
+works the position out again is doing the thing this drill teaches. All three
+run while `pb.busy` is set and borrow the answer row, so the move box comes down
+with `PR.onSubmit` and no move can be typed into a game that is standing still;
+`pbRestoreInput()` hands both the box and the board click back. There is
+deliberately **no Elo**: what a
 player's visualisation is worth is a level they climb (Beginner → Visualizer →
 Tracker → Blindfold Ready → Advanced), earned by sessions finished, by accuracy
 and by how many different drills have been tried — so nobody climbs it by

@@ -421,6 +421,41 @@ function answerAskWrong(ask){
   if (ask.type){ ansButton('Empty square').onclick(); return; }
   prAnsEl.children[0].onclick();
 }
+/* ---- Progressive Blindfold's checkpoints ----
+   A checkpoint is not one of the session's questions, so it is not answered
+   through answerAskRight above: it writes its own buttons and keeps its own
+   tally. `pb.check` is the ask itself, stored by pbCheckpoint exactly so a
+   test can hold one or miss one on purpose rather than guessing at a glyph
+   and hoping. Four shapes, since the checkpoint adds `last` and its own
+   whole-side `count` to the two prAskFine hands back. */
+function pbAnswerRight(ask){
+  if (ask.t === 'where'){ clickSquare(ask.sq); return; }
+  if (ask.t === 'count'){ ansButton(String(ask.n)).onclick(); return; }
+  if (ask.t === 'last'){ ansButton(ask.truth).onclick(); return; }
+  if (!ask.type){ ansButton('Empty square').onclick(); return; }
+  var order = ['K','Q','R','B','N','P'];
+  prAnsEl.children[(ask.colour === 'w' ? 0 : 6) + order.indexOf(ask.type)].onclick();
+}
+/** An answer that cannot be right — or null when the ask has none to give (a
+    `last` question in a position with one legal move offers one button, and it
+    is the truth). Returned as a thunk rather than pressed, so a test can ask
+    whether this deal is one it can miss on before it commits to it. */
+function pbWrongAnswer(ask){
+  if (ask.t === 'where') return function(){ clickSquare(elsewhere(ask.sq)); };
+  if (ask.t === 'count') return function(){ ansButton(String(ask.n === 0 ? 1 : 0)).onclick(); };
+  if (ask.t === 'last'){
+    for (var k = 0; k < prAnsEl.children.length; k++){
+      var b = prAnsEl.children[k];
+      if (b.innerHTML !== ask.truth) return (function(btn){ return function(){ btn.onclick(); }; })(b);
+    }
+    return null;
+  }
+  // a `what` ask: the twelve glyphs are [W,B] x K,Q,R,B,N,P, so any glyph of
+  // the other colour is wrong — and White's king is wrong when the truth is
+  // that the square is empty
+  var at = ask.colour === W ? 6 : 0;
+  return function(){ prAnsEl.children[at].onclick(); };
+}
 /** A square that is definitely not the answer. */
 function elsewhere(not){
   for (var i = 0; i < 64; i++) if (i !== not) return i;
@@ -1679,8 +1714,13 @@ head('Progressive Blindfold: holding a level');
     if (!all.length) break;
     typeAnswer(toSAN(PR.pb.st, all[0], all));
     fireTimers();                            // the reply comes after a beat
+    // every third move the game stops and asks; hold it, and the move box and
+    // the board click come straight back
+    if (!PR.pb.over && PR.pb.busy) pbAnswerRight(PR.pb.check);
   }
   ok('the game ended', PR.pb.over, true);
+  ok('and it was stopped and asked along the way', PR.pb.checks > 0, true);
+  ok('every checkpoint held', PR.pb.drifts, 0);
   ok('with moves actually played', PR.pb.played > 0, true);
   ok('the board comes back at the end', byId.prBoard.classList.contains('blind'), false);
   ok('and the result box is up', byId.prDoneOverlay.classList.contains('show'), true);
@@ -1709,6 +1749,73 @@ head('Progressive Blindfold: holding a level');
   ok('which goes to the setup that already exists', botTrips, 1);
   ok('with complete blindfold chosen', visionsPicked[visionsPicked.length - 1], 'total');
   ok('and the result box closed behind it', byId.prDoneOverlay.classList.contains('show'), false);
+  storage = {};
+})();
+
+head('Progressive Blindfold: checkpoints, peeks, recovery');
+
+(function(){
+  /* Level 5 is squares-only with three peeks, and stops to ask every third
+     move. Three moves is what it takes to reach that first checkpoint, and a
+     five-man game really can be over inside them — Black's reply is the page's
+     own search on a small board — so the deal is retried until the game is
+     still going when the checkpoint comes and the checkpoint has a wrong
+     answer to give, exactly as the level-1 game above retries its own. Every
+     assertion is then made once, about the deal that got there. */
+  var pb = null, wrong = null;
+  var peeksAtStart = 0, shown = null, hidden = null, peeksLeft = 0;
+  for (var t = 0; t < 40; t++){
+    storage = {};
+    prOpen('progressive', 5, 5);
+    pb = PR.pb;
+    peeksAtStart = pb.peeks;
+    pressCtl('Peek (3 left)');
+    shown = prBoardEl.classList.contains('blind');
+    fireTimers();
+    hidden = prBoardEl.classList.contains('blind');
+    peeksLeft = pb.peeks;
+    for (var k = 0; k < 3 && !pb.over; k++){
+      var m = legalMoves(pb.st, W)[0];
+      clickSquare(m.from); clickSquare(m.to); fireTimers();
+    }
+    wrong = (!pb.over && pb.checks === 1 && pb.check) ? pbWrongAnswer(pb.check) : null;
+    if (wrong) break;
+  }
+  ok('three peeks to start', peeksAtStart, 3);
+  ok('a peek shows the men', shown, false);
+  ok('and hides them again', hidden, true);
+  ok('one peek spent', peeksLeft, 2);
+  ok('a checkpoint is asked after three moves', pb.checks, 1);
+  ok('and the game is paused while it is up', pb.busy, true);
+  wrong();
+  ok('a wrong checkpoint counts a drift', pb.drifts, 1);
+  ok('and shows how it really stands', prBoardEl.classList.contains('blind'), false);
+  fireTimers();
+  ok('until the board goes again', prBoardEl.classList.contains('blind'), true);
+  ok('and the game is playable once more', pb.busy, false);
+  pressCtl("I've lost it");
+  ok('recovery shows the move list', prSeqEl.innerHTML.length > 0, true);
+  ok('and never the board', prBoardEl.classList.contains('blind') || prPieceEls.size === 0, true);
+  pressCtl('Done');
+  ok('a recovery is counted', pb.recoveries, 1);
+  fireTimers();
+  ok('and the game goes on with the men hidden again', prBoardEl.classList.contains('blind'), true);
+  ok('with the move list taken down', prSeqEl.innerHTML, '');
+})();
+
+(function(){
+  /* A rung with no peeks offers no peek button — the control is the allowance,
+     not a label on a dead button. */
+  storage = {};
+  prOpen('progressive', 7, 5);
+  ok('a level with no peeks offers none', ctlButton('Peek (0 left)'), null);
+  ok('but the way back is always there', !!ctlButton("I've lost it"), true);
+  storage = {};
+  prOpen('progressive', 1, 5);
+  ok('an unlimited level says so rather than counting', !!ctlButton('Peek (∞ left)'), true);
+  pressCtl('Peek (∞ left)');
+  fireTimers();
+  ok('and spends nothing', PR.pb.peeks, Infinity);
   storage = {};
 })();
 

@@ -15636,9 +15636,34 @@ function pbInput(){
   };
   pbControls();
 }
-/* The row under the answer. Task 20 adds Peek and I've lost it to it; the one
-   thing it has always offered is the way out that shows the position. */
-function pbControls(){ prCtl([['Reveal and stop', () => pbEnd('Stopped.')]]); }
+/* The row under the answer: a look at the board while the level still allows
+   one, the way back when the thread has gone entirely, and the way out that
+   shows the position. A rung with no peeks left offers no Peek button at all
+   rather than a dead one — the control *is* the allowance, and a button that
+   refuses is a worse account of what is left than no button. */
+function pbControls(){
+  const pb = PR.pb, ctl = [];
+  if (pb.peeks > 0) ctl.push(['Peek (' + (pb.peeks === Infinity ? '∞' : pb.peeks) + ' left)', pbPeek]);
+  ctl.push(["I've lost it", pbRecover]);
+  ctl.push(['Reveal and stop', () => pbEnd('Stopped.')]);
+  prCtl(ctl);
+}
+/* The whole position, drawn as it really stands, for `ms` — and then whatever
+   the level was showing, back again. Every look at the truth in this drill
+   goes through here: the peek the player spends and the two seconds a missed
+   checkpoint is answered with are the same thing seen for two different
+   reasons, and neither of them is a change to the position. */
+function pbShowTruth(ms, then){
+  const pb = PR.pb;
+  prBoardOn(true); prMen(true); prPaint(pb.st.b);
+  prTimer(() => { pbPaint(); if (then) then(); }, ms);
+}
+function pbPeek(){
+  const pb = PR.pb; if (pb.over || pb.busy || pb.peeks <= 0) return;
+  if (pb.peeks !== Infinity) pb.peeks--;
+  pbLine('(peek)', 'sys');
+  pbShowTruth(2000, pbControls);                       // redrawn with one fewer left on it
+}
 /* A move that is not there is the failure this drill measures — the player's
    picture of the board has drifted from the board. It is counted and refused,
    and costs nothing else: PR.i is the session's own tally and a game is one
@@ -15674,9 +15699,78 @@ function pbReply(){
 }
 /* The checkpoint — "what is standing on d4?", asked every few moves so a
    player who has lost the position finds out before the game is over rather
-   than after it. Task 20 fills it in; declared here so pbReply can call it
-   at the cadence the ladder already carries. */
-function pbCheckpoint(){}
+   than after it. A miss is a drift, and the true board is shown for two
+   seconds: catching the drift is the whole point, and a player left to play
+   on from a picture that has already gone wrong is being asked a question
+   nobody can answer.
+
+   Three shapes, and none of them is scored the way a drill's question is —
+   `prAskShow` is not used, and neither is `prJudge`: a checkpoint is not one
+   of the session's questions, it is the game asking whether the game is still
+   being followed. So the buttons are written out here, and the tally they
+   move is pb.checksOk / pb.drifts.
+
+   The answer row is the move box while the game runs, and a checkpoint
+   borrows it — prAnsClear() is what takes the box down, PR.onSubmit with it,
+   so a move cannot be typed into a game that is standing still. pb.busy says
+   the same thing to the board click, and pbRestoreInput() hands both back. */
+function pbCheckpoint(){
+  const pb = PR.pb; pb.busy = true; pb.checks++;
+  const kind = prPick(['fine','count','last']);
+  let ask;
+  if (kind === 'last') ask = { t:'last', truth: pb.sans[pb.sans.length - 1], text:'Checkpoint — what was the last move played?' };
+  else if (kind === 'count'){ const c = Math.random() < .5 ? W : B; let n = 0; for (let i = 0; i < 64; i++) if (pb.st.b[i] && pb.st.b[i].c === c) n++; ask = { t:'count', colour:c, type:null, n, text:'Checkpoint — how many men does ' + prSide(c) + ' have?' }; }
+  else { ask = prAskFine(pb.st); ask.text = 'Checkpoint — ' + ask.text; }
+  pb.check = ask;                                      // what was asked, for the flow suite to miss on purpose
+  const done = ok => {
+    prAnsClear(); PR.click = null;
+    if (ok){ pb.checksOk++; prSay('Held.', 'right'); beep(760, .09); pb.busy = false; pbRestoreInput(); }
+    else { pb.drifts++; prSay('Not quite — this is how it stands.', 'wrong'); beep(190, .16, 'sine', .09); pbShowTruth(2000, () => { pb.busy = false; pbRestoreInput(); }); }
+  };
+  prAnsClear();
+  prQ(ask.text);
+  if (ask.t === 'last'){
+    // decoys are moves that were legal in the position the last move was
+    // played from — never the opening book, which knows nothing about a
+    // position this game reached by itself
+    const before = pb.prevSt, legalThen = legalMoves(before, before.turn);
+    const others = prShuffle(legalThen.map(m => toSAN(before, m, legalThen)).filter(s => s !== ask.truth)).slice(0, 3);
+    const choices = prShuffle([ask.truth].concat(others));
+    for (const c of choices) prAnsButton(c, () => done(c === ask.truth));
+  } else if (ask.t === 'count'){
+    for (let n = 0; n <= 16; n++) prAnsButton(String(n), () => done(n === ask.n));
+  } else if (ask.t === 'where'){
+    prSub('Click its square.'); PR.click = i => done(i === ask.sq);
+  } else {
+    prAnsEl.className = 'pr-ans glyphs';
+    for (const c of [W, B]) for (const ty of ['K','Q','R','B','N','P'])
+      prAnsButton('<span class="g-' + c + '">' + pieceHTML(ty) + '</span>', () => done(ask.colour === c && ask.type === ty));
+    prAnsButton('Empty square', () => done(ask.colour === null), 'wide');
+  }
+}
+function pbRestoreInput(){
+  prQ('Level ' + PR.pb.r.level + ' — <b>' + PR.pb.r.target + '</b> moves. Your move.');
+  pbInput();                                            // the typed box AND the board click, both back
+}
+/* Lost the thread? The score is shown — never the board — and the position
+   is rebuilt from it, which is what Koltanowski did and what every guide to
+   the game says to do instead of guessing. Counted, not punished: a recovery
+   is on the record beside the drifts, and it costs the level nothing, because
+   a player who stops and works the position out again is doing the thing this
+   drill is teaching rather than failing at it. */
+function pbRecover(){
+  const pb = PR.pb; if (pb.over || pb.busy) return;
+  pb.busy = true;
+  prSeq(pb.sans.map((s, k) => (k % 2 === 0 ? '<b>' + (k / 2 + 1) + '.</b> ' : '') + s).join(' '));
+  const want = []; for (let i = 0; i < 64; i++) if (pb.st.b[i]) want.push({ sq:i, c:pb.st.b[i].c, t:pb.st.b[i].t });
+  prClearPieces();
+  prRebuildStart(want, { say:'Rebuild the position from the moves.', done(res){
+    pb.recoveries++;
+    // the diff stays up long enough to be read — what was forgotten is the
+    // whole return on having stopped — and then the game goes on, masked
+    prTimer(() => { prSeq(''); pbPaint(); pb.busy = false; pbRestoreInput(); }, 2500);
+  } });
+}
 /* The end of a game, however it came about. The board comes back whatever the
    vision was — a position held for twelve moves is worth seeing — and the
    level is passed only on all three counts: the target reached, the position
