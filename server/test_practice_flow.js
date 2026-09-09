@@ -2106,6 +2106,53 @@ head('Leaving a drill behind');
   byId.prSetX.onclick();
 })();
 
+head('Practice setup: the first-visit intro and the link back to a lesson');
+(function(){
+  // Move Tracker names lesson 5 (Task 25's own worked example), and a first
+  // visit is `sessions === 0` on that mode's own record — nothing else about
+  // the mode matters here.
+  storage = {};
+  var mode = PR_MODE.tracker;
+
+  lsnDoneStub = [];
+  prOpenSetup(mode);
+  ok('the first visit shows what the drill is training',
+     byId.prSetIntro.innerHTML.indexOf(mode.intro.what) >= 0, true);
+  ok('and how the session will ask for it',
+     byId.prSetIntro.innerHTML.indexOf(mode.intro.how) >= 0, true);
+  ok('with a link back to the lesson that teaches it',
+     byId.prSetIntro.innerHTML.indexOf('Lesson 5') >= 0, true);
+  byId.prSetX.onclick();
+
+  lsnDoneStub = [5];
+  prOpenSetup(mode);
+  ok('once that lesson is finished the link is gone',
+     byId.prSetIntro.innerHTML.indexOf('Lesson 5') >= 0, false);
+  ok('but this is still a first visit, so the intro lines stay',
+     byId.prSetIntro.innerHTML.indexOf(mode.intro.what) >= 0, true);
+  byId.prSetX.onclick();
+
+  lsnDoneStub = [];
+  var st = prLoad();
+  st.modes.tracker.sessions = 1;
+  prSave(st);
+  prOpenSetup(mode);
+  ok('after a session the two lines step aside for the level line\'s own caption',
+     byId.prSetIntro.innerHTML.indexOf(mode.intro.what) >= 0, false);
+  ok('but the lesson link stays — the lesson itself is still unfinished',
+     byId.prSetIntro.innerHTML.indexOf('Lesson 5') >= 0, true);
+
+  // The link is guarded rather than stubbed (LESSONS lives outside the
+  // PRACTICE section this suite lifts), so pressing it with no lsnOpen in
+  // scope must do nothing rather than throw or leave the box half-closed.
+  byId.prSetLesson.onclick();
+  ok('with no lsnOpen in scope, pressing it does nothing — the box stays open',
+     byId.prSetOverlay.classList.contains('show'), true);
+  byId.prSetX.onclick();
+
+  lsnDoneStub = [];
+})();
+
 (function(){
   storage = {};
   var st = prBlank();

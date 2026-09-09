@@ -2583,6 +2583,21 @@
   .pr-level-line{flex:1; font-size:16px; letter-spacing:.02em;}
   .pr-level-line b{color:var(--gold-soft);}
 
+  /* the setup box's first-visit intro (two lines, once) and the one link back
+     to the lesson that teaches this mode (shown for as long as that lesson is
+     unfinished, first visit or not) — see prDrawIntro. Empty and untouched by
+     margin when there is nothing to say, so a returning, lesson-graduated
+     player sees the level line exactly as before this box grew one. */
+  .pr-intro{margin-bottom:16px;}
+  .pr-intro:empty{display:none; margin:0;}
+  .pr-intro p{margin:0 0 8px; font-size:14.5px; line-height:1.6; color:var(--muted);}
+  .pr-intro p:last-of-type{margin-bottom:0;}
+  .pr-intro-lesson{
+    display:inline-block; margin-top:10px; padding:0; border:none; background:none;
+    font:inherit; font-size:14px; letter-spacing:.02em; color:var(--gold-soft);
+    text-decoration:underline; cursor:pointer;
+  }
+
   /* Ranked alone: the crest and controls share a grid directly on the sky.
      The outer panel is intentionally unpainted; its transparent border keeps
      the established positions unchanged. Grid areas reorder existing children
@@ -4803,6 +4818,7 @@
     <button class="modal-x" id="prSetX" aria-label="Close" title="Close">×</button>
     <div class="rank-field">
       <div class="rank-label" id="prSetName">Coordinate Trainer</div>
+      <div class="pr-intro" id="prSetIntro"></div>
       <div class="pr-level-row">
         <button type="button" class="pr-level-btn" id="prSetDown" aria-label="Start one level lower">−</button>
         <div class="pr-level-line">Start at level <b id="prSetLevelN">1</b> — <span id="prSetCap"></span></div>
@@ -12126,36 +12142,58 @@ const PR_PB_LEVELS = [
 const PR_MODES = [
   { key:'square', name:'Square Trainer', group:'board', skill:'Squares', lesson:1,
     desc:'Name, find and colour squares from either chair — the alphabet of the board.',
+    intro:{ what:'Blindfold players know every square by name, from either chair, without hunting for it. This trains that.',
+            how:'A square is named or shown; find it, name it, or say its colour — from White’s side and from Black’s.' },
     levels: PR_SQUARE_LEVELS },
   { key:'lines', name:'Lines & Routes', group:'board', skill:'Lines', lesson:2,
     desc:'Trace ranks, files, diagonals and knight routes, blockers and all.',
+    intro:{ what:'Blindfold players hold the board’s geometry — which squares a line or a knight actually connects. This trains that.',
+            how:'Trace a rank, file or diagonal from a square, or work out a knight’s route, with blockers counted in.' },
     levels: PR_LINES_LEVELS },
   { key:'piece', name:'Piece Vision', group:'vision', skill:'Piece movement', lesson:4,
     desc:'Where one piece reaches, with the board slowly taken away.',
+    intro:{ what:'Blindfold players know where a piece can move without the board in front of them. This trains that reach.',
+            how:'Say every square one piece reaches from where it stands, with the board taken away a step at a time.' },
     levels: PR_PIECE_LEVELS },
   { key:'attack', name:'Attack Vision', group:'vision', skill:'Attacks and defence', lesson:4,
     desc:'Who attacks what, what is hanging and what is pinned, down to notation alone.',
+    intro:{ what:'Blindfold players track who attacks what, and what is left hanging, without looking. This trains that.',
+            how:'Read a position in notation alone and say what is attacked, what hangs, and what is pinned.' },
     levels: PR_ATTACK_LEVELS },
   { key:'tracker', name:'Move Tracker', group:'holding', skill:'Tracking', lesson:5,
     desc:'Follow moves you never see, and say where things stand.',
+    intro:{ what:'Blindfold players update where every man stands after every move. This trains that updating.',
+            how:'Moves are read to you with the men hidden; say where a man ends up, or what stands on a square.' },
     levels: PR_TRACKER_LEVELS },
   { key:'after', name:'After the Move', group:'updating', skill:'Consequences', lesson:5,
     desc:'One move, and everything it changed — the square it left, the line it opened, what it left hanging.',
+    intro:{ what:'Blindfold players know everything one move changes, not only where it landed. This trains that.',
+            how:'One move is read out; say what square it left, what line it opened, or what it left hanging.' },
     levels: PR_AFTER_LEVELS },
   { key:'forcing', name:'Forcing Lines', group:'updating', skill:'Calculation', lesson:5,
     desc:'A capturing sequence played out in your head — who ends up ahead, and by how much.',
+    intro:{ what:'Blindfold players count out a capturing sequence before playing into it. This trains that counting.',
+            how:'A capturing sequence is read to you; work out who ends up ahead, and by how much, before it is shown.' },
     levels: PR_FORCING_LEVELS },
   { key:'calc', name:'Blind Calculation', group:'calc', skill:'Calculation', lesson:9,
     desc:'Find the move in a position you are holding, not looking at.',
+    intro:{ what:'Blindfold players find the move that works in a position they are holding, not looking at. This trains that.',
+            how:'A position is given and then taken away; find the best move for the side to move from what you are holding.' },
     levels: PR_CALC_LEVELS },
   { key:'branches', name:'Branches', group:'calc', skill:'Rewinding', lesson:9,
     desc:'Walk a line, answer for its end, then come back to the root and walk another.',
+    intro:{ what:'Blindfold players hold a position through one line, then come back to it and try another without losing it. This trains that.',
+            how:'Walk a line to its end and answer for it, then return to the same starting position and walk a different one.' },
     levels: PR_BRANCHES_LEVELS },
   { key:'hold', name:'Hold the Position', group:'holding', skill:'Holding', lesson:5,
     desc:'A small position, studied, then answered for with the men hidden.',
+    intro:{ what:'Blindfold players hold a whole small position, not just one piece, once the men are gone. This trains that.',
+            how:'Study a small position, then answer for it with the men hidden — what stands where, and what does not.' },
     levels: PR_HOLD_LEVELS },
   { key:'progressive', name:'Progressive Blindfold', group:'play', skill:'Blindfold play', lesson:10,
     desc:'Whole small games with the board taken away one step at a time — the bridge to the real thing.',
+    intro:{ what:'Blindfold players hold a whole game, not one position. This trains that, a step at a time.',
+            how:'Play a small game as the board is taken away in stages, with checkpoints along the way to prove you still hold it.' },
     levels:PR_PB_LEVELS }
 ];
 const PR_MODE = {};
@@ -16355,6 +16393,45 @@ function prDrawSetup(){
   document.getElementById('prSetCap').textContent = r.cap;
   document.querySelectorAll('#prSetLen button').forEach(b =>
     b.classList.toggle('active', +b.dataset.min === prSetCount));
+  prDrawIntro();
+}
+
+/* The setup box's own two doors onto the course, and neither is the other.
+   The first time a mode is opened (`sessions === 0` on its own record) it
+   gets a two-line intro — what the drill trains and how it asks for it — and
+   only then, because the level line beside it already carries a `cap` once
+   there is a session to measure, and repeating the idea in different words
+   right next to that caption would say it twice rather than say it well. The
+   "How this works: Lesson N" link answers a narrower question — has this
+   player actually been taught the concept? — so it is shown whenever the
+   linked lesson is not in `lsnDone()`, first visit or not: a player who
+   skipped the course, or is three drills past the lesson that introduced
+   this one, is exactly who it is for. `lsnDone`, `showScreen` and `lsnOpen`
+   all live in sections outside PRACTICE (the LESSONS section and, for
+   showScreen, SCREENS), so each is read through `typeof` rather than called
+   outright — the same guard `prStartLevel` already uses for `lsnDone` — which
+   is what lets this section keep running, and this suite keep testing it, on
+   a page with none of that loaded. */
+function prDrawIntro(){
+  const m = prSetMode;
+  const el = document.getElementById('prSetIntro');
+  const firstVisit = prLoad().modes[m.key].sessions === 0;
+  const done = typeof lsnDone === 'function' ? lsnDone() : [];
+  const needsLesson = done.indexOf(m.lesson) < 0;
+  let html = '';
+  if (firstVisit && m.intro) html += '<p>' + m.intro.what + '</p><p>' + m.intro.how + '</p>';
+  if (needsLesson)
+    html += '<button type="button" class="pr-intro-lesson" id="prSetLesson">How this works: Lesson ' +
+            m.lesson + '</button>';
+  el.innerHTML = html;
+  el.style.display = html ? '' : 'none';
+  if (!needsLesson) return;
+  document.getElementById('prSetLesson').onclick = () => {
+    if (typeof showScreen !== 'function' || typeof lsnOpen !== 'function') return;
+    prSetOverlay.classList.remove('show');
+    showScreen('lessons');
+    lsnOpen(m.lesson, 0);
+  };
 }
 document.getElementById('prSetDown').onclick = () => { prSetLevel--; prDrawSetup(); };
 document.getElementById('prSetUp').onclick   = () => { prSetLevel++; prDrawSetup(); };
