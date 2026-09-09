@@ -2333,6 +2333,11 @@ async function walk(p, n){
       if (!theirs.length) return 'the page’s reply to move ' + (mv + 1);
       st = p.makeMove(st, p.bestMove(st, 2) || theirs[0]);
     }
+    // reply()'s own gate, mirrored: after the second reply it checks whether
+    // the learner still has a legal move at all before ever deciding to
+    // checkpoint, so a second reply that mates or stalemates the learner is
+    // an early finish too, not a checkpoint deal.
+    if (!p.legalMoves(st, st.turn).length) return 'the page’s reply to move 2';
     return null;                                            // both rounds completed — the checkpoint is reached
   }
 
