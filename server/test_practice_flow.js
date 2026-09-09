@@ -498,20 +498,80 @@ head('The dashboard');
   prShowDash();
   ok('the drill list opens', byId.prRun.style.display, 'none');
   ok('and the dashboard is what is showing', byId.prDash.style.display, '');
-  ok('every drill has a card', byId.prCards.children.length, PR_MODES.length);
+  ok('six groups on the dashboard', byId.prCards.children.length, 6);
   ok('with nothing to report yet', byId.prFigAcc.textContent, '—');
-  ok('no sessions', byId.prFigSessions.textContent, 0);
+  ok('no answers yet', byId.prFigAsked.textContent, 0);
+  ok('no streak yet', byId.prFigDays.textContent, 0);
 
-  // there is no gate on any drill now — the old five-rung ladder that used to
-  // hold the mini challenge back is gone, and nothing in the new PR_MODES
-  // shape replaces it (Task 22 rebuilds this dashboard)
-  var cards = byId.prCards.children;
-  var progressive = cards[cards.length - 1];
-  ok('the progressive challenge is open too', progressive.classList.contains('locked'), false);
-  var first = cards[0];
-  ok('the square drill is open', first.classList.contains('locked'), false);
-  ok('and its button starts it', first.children[2].children[0].textContent, 'Start');
-  ok('and says it has not been tried', first.children[3].innerHTML, 'Not tried yet');
+  // every drill's Start button always works — a tag is a hint about where
+  // to spend the next few minutes, never a lock (the old five-rung ladder
+  // that used to hold the mini challenge back is long gone)
+  var groups = byId.prCards.children;
+  var board = groups[0];
+  ok('the first group is named', board.children[0].textContent, 'The Board');
+  var boardCards = board.children[1].children;
+  var square = boardCards[0];
+  ok('the square drill names itself', square.children[0].innerHTML, 'Square Trainer');
+  ok('and opens on level one', square.children[3].innerHTML, 'Level 1 · ' + PR_SQUARE_LEVELS[0].cap);
+  var squareFoot = square.children[2];
+  ok('nothing is ahead of the first group', squareFoot.children.length, 1);
+  ok('and its button starts it', squareFoot.children[0].textContent, 'Start');
+
+  var play = groups[groups.length - 1];
+  ok('the last group is Blindfold Play', play.children[0].textContent, 'Blindfold Play');
+  ok('and it holds one card', play.children[1].children.length, 1);
+  var progressive = play.children[1].children[0];
+  var progFoot = progressive.children[2];
+  ok('it is tagged as ahead of where the player stands', progFoot.children.length, 2);
+  ok('the tag says so', progFoot.children[0].textContent, 'Ahead of you');
+  ok('and Start still works even this far out', progFoot.children[1].textContent, 'Start');
+})();
+
+head('Readiness');
+
+(function(){
+  storage = {};
+  ok('a fresh player is not automatic yet', prAutomatic(prLoad()), false);
+  var st = prLoad(); st.modes.square.level = 6; st.modes.square.stats.lat = [900, 1000, 1100]; prSave(st);
+  ok('the Board group is automatic', prAutomatic(prLoad()), true);
+  var r = prReadiness(prLoad());
+  ok('six groups on the readiness line', r.groups.length, 6);
+  ok('no milestone yet', r.milestone, null);
+  ok('no recommendation before Task 23 lands', r.next, null);
+  prShowDash();
+  ok('cards are grouped', byId.prCards.children.length, 6);
+  ok('and Board no longer reads Ahead of you for the next group',
+     byId.prCards.children[1].children[1].children[0].children[2].children.length, 1);
+})();
+
+(function(){
+  // the mean of a group's own levels, each read as a fraction of its own
+  // ladder rather than the raw rung, so a two-rung drill and a twelve-rung
+  // one contribute the same way to the group they share
+  storage = {};
+  var st = prLoad();
+  st.modes.square.level = 4;   // 4 of PR_SQUARE_LEVELS.length
+  st.modes.lines.level = 2;    // 2 of PR_LINES_LEVELS.length
+  prSave(st);
+  var want = (4 / PR_SQUARE_LEVELS.length + 2 / PR_LINES_LEVELS.length) / 2;
+  ok('a group\'s level is the mean of its modes\' own fractions',
+     Math.abs(prGroupLevel(prLoad(), PR_GROUPS[0]) - want) < 1e-9, true);
+})();
+
+(function(){
+  // the three gates a whole blindfold game actually asks for at once
+  storage = {};
+  var st = prLoad();
+  st.modes.tracker.level = 9; st.modes.hold.level = 7; st.modes.calc.level = 5;
+  st.modes.progressive.stats.pb = { 5: { pass: true } };
+  prSave(st);
+  ok('the milestone fires once all three gates and the pass are met',
+     prReadiness(prLoad()).milestone, 'first blind game');
+
+  st.modes.progressive.stats.pb[5].pass = false;
+  prSave(st);
+  ok('and not while the fifth Progressive level is still unheld',
+     prReadiness(prLoad()).milestone, null);
 })();
 
 /* ============================================================
@@ -550,8 +610,9 @@ head('Square Trainer');
   ok('accuracy on the result card', /6 \/ 6/.test(byId.prDoneRows.children[0].innerHTML), true);
   ok('best streak too', /<b>6<\/b>/.test(byId.prDoneRows.children[1].innerHTML), true);
   ok('and the skill it practised', /Squares/.test(byId.prDoneRows.children[2].innerHTML), true);
-  ok('the dashboard behind it has the session', byId.prFigSessions.textContent, 1);
+  ok('the dashboard behind it shows what was answered', byId.prFigAsked.textContent, 6);
   ok('and 100% accuracy', byId.prFigAcc.textContent, '100%');
+  ok('and a day of it counted toward the streak', byId.prFigDays.textContent, 1);
 })();
 
 (function(){
@@ -1983,7 +2044,7 @@ head('Leaving a drill behind');
   prSave(st);
   prShowDash();
   ok('accuracy is reported', byId.prFigAcc.textContent, '75%');
-  ok('and the sessions', byId.prFigSessions.textContent, 2);
+  ok('and what was answered', byId.prFigAsked.textContent, 40);
 
   startDrill('square', 1, 5);
   finishSession();

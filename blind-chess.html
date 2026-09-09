@@ -1715,23 +1715,27 @@
   .pr-head{max-width:760px;}
   .pr-head p{margin:10px 0 0; color:var(--muted); font-size:17.5px; line-height:1.7;}
 
-  /* what the practising has come to: the level on the left, the numbers beside it */
-  .pr-summary{
-    margin-top:clamp(16px,2.6vh,26px); padding:20px 22px;
-    display:grid; grid-template-columns:minmax(0,1.05fr) minmax(0,1.55fr);
-    gap:clamp(18px,3vw,34px); align-items:center;
+  /* the readiness line: six stages of the curriculum in the order they are
+     climbed, a gauge each sunk the way the ranked one is, and — under the
+     row — the one sentence saying what to do about it (prRenderPath). */
+  #prPath{margin-top:clamp(16px,2.6vh,26px); padding:20px 22px;}
+  .pr-path{display:grid; grid-template-columns:repeat(6,1fr); gap:8px;}
+  @media (max-width:820px){ .pr-path{grid-template-columns:repeat(3,1fr); row-gap:16px;} }
+  @media (max-width:480px){ .pr-path{grid-template-columns:repeat(2,1fr);} }
+  .pr-stage-name{
+    margin-bottom:7px; font-size:11px; letter-spacing:.14em;
+    text-transform:uppercase; color:var(--muted); text-align:center;
   }
-  @media (max-width:820px){ .pr-summary{grid-template-columns:minmax(0,1fr);} }
-  .pr-level-name{
-    font-family:var(--font); font-size:clamp(27px,4.1vw,37px);
-    letter-spacing:.16em; color:var(--gold-soft);
+  .pr-stage .gauge-track{height:7px;}
+  .pr-stage-frac{
+    margin-top:6px; font-size:12px; text-align:center; color:var(--muted);
+    font-variant-numeric:tabular-nums;
   }
-  .pr-level-cap{
-    margin-top:6px; font-size:12px; letter-spacing:.26em;
-    text-transform:uppercase; color:var(--muted);
-  }
-  .pr-level .rank-gauge{margin-top:15px;}
-  .pr-figs{display:grid; grid-template-columns:repeat(4,1fr); gap:9px;}
+  /* held to one line's height even blank (no milestone, and Task 23 not
+     landed yet) so the figures under it do not jump the moment it has
+     something to say */
+  .pr-next{margin:16px 0 0; min-height:1.6em; font-size:15.5px; line-height:1.6; color:var(--gold-soft);}
+  .pr-figs{display:grid; grid-template-columns:repeat(4,1fr); gap:9px; margin-top:18px;}
   @media (max-width:520px){ .pr-figs{grid-template-columns:repeat(2,1fr);} }
   .pr-fig{
     padding:12px 8px; border-radius:11px; text-align:center;
@@ -1745,41 +1749,40 @@
     display:block; margin-top:5px; font-size:11.5px; letter-spacing:.16em;
     text-transform:uppercase; color:var(--muted);
   }
+  /* Daily Practice (Task 24) rides in the figures row rather than off on its
+     own — one more thing the numbers beside it are evidence for; centred
+     rather than stretched, since a button that filled the row's full height
+     would read as a fourth stat rather than a thing to press. */
+  #prPath .pr-figs button{align-self:center;}
 
-  /* the drills */
-  .pr-cards{
-    margin-top:clamp(16px,2.6vh,26px);
-    display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:14px;
-  }
+  /* the drills, one section per group named on the readiness line above it */
+  .pr-groups{margin-top:clamp(16px,2.6vh,26px); display:flex; flex-direction:column; gap:24px;}
+  .pr-group h3{letter-spacing:.2em; text-transform:uppercase; font-size:12px; color:var(--muted);}
+  .pr-group .pr-cards{margin-top:12px;}
+  .pr-cards{display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:14px;}
   @media (max-width:940px){ .pr-cards{grid-template-columns:repeat(2,minmax(0,1fr));} }
   @media (max-width:620px){ .pr-cards{grid-template-columns:minmax(0,1fr);} }
   .pr-card{display:flex; flex-direction:column; padding:18px 18px 16px; text-align:left;}
   /* The practice overview shares the supplied lunar material. The dark wash
      keeps descriptions readable without changing the cards or their controls. */
   #screen-practice .pr-card,
-  #screen-practice .pr-summary{
+  #screen-practice #prPath{
     background:linear-gradient(150deg,rgba(12,18,28,.64),rgba(7,12,21,.88)),
       url("assets/moon.jpg?v=1") center / cover no-repeat;
   }
   .pr-name{font-size:18.5px; font-weight:650; letter-spacing:.09em; color:var(--gold-soft);}
   .pr-desc{margin-top:8px; flex:1; color:var(--muted); font-size:16px; line-height:1.65;}
   .pr-foot{margin-top:15px; display:flex; align-items:center; justify-content:space-between; gap:10px;}
-  .pr-dots{display:flex; gap:4px; align-items:center;}
-  .pr-dots i{
-    width:7px; height:7px; border-radius:50%;
-    background:rgba(255,255,255,.10); border:1px solid var(--line);
-  }
-  .pr-dots i.on{background:var(--gold); border-color:var(--gold);}
   .pr-go{padding:8px 15px; font-size:14.5px; letter-spacing:.16em; font-weight:650;}
+  /* a hint about where to spend the next few minutes, never a lock — Start
+     works the same under every one of these, or under none */
+  .pr-tag{font-size:11px; letter-spacing:.1em; text-transform:uppercase; color:var(--muted);}
+  .pr-tag.now{color:var(--gold);}
+  .pr-tag.solid{color:var(--good);}
   .pr-score{
     margin-top:11px; font-size:12.5px; letter-spacing:.14em; text-transform:uppercase;
     color:#5c6070; font-variant-numeric:tabular-nums;
   }
-  /* locked reads as not-yet-earned, the way the unbuilt nav items read as
-     not-yet-built: quiet, and honest about why */
-  .pr-card.locked{opacity:.6;}
-  .pr-card.locked .pr-go{color:#6b7080; cursor:not-allowed;}
-  .pr-card.locked .pr-go:hover{border-color:var(--ctl-line); transform:none;}
 
   /* ---- a drill in progress ---- */
   .practice-run{
@@ -3966,33 +3969,24 @@
         <div class="pr-head">
           <p>
             Blindfold chess is not a harder kind of calculation — it is the board
-            itself, held in the head. These drills build that board: the names of
-            the squares, their colours, where a piece can reach, and where it ends
-            up after moves you never see. Nothing here touches your rating.
+            itself, held in the head, and the six groups below build it in order.<br>
+            Nothing here touches your rating; the line under them says where you
+            stand and what is worth trying next.
           </p>
         </div>
 
-        <div class="pr-summary panel">
-          <div class="pr-level">
-            <div class="pr-level-name" id="prLevel">Beginner</div>
-            <div class="pr-level-cap">Practice level</div>
-            <div class="rank-gauge">
-              <div class="gauge-track"><div class="gauge-fill" id="prLevelFill"></div></div>
-              <div class="gauge-ends">
-                <span id="prLevelNow">Beginner</span>
-                <span id="prLevelNext">Visualizer</span>
-              </div>
-            </div>
-          </div>
+        <div id="prPath" class="panel">
+          <div class="pr-path" id="prPathStages"></div>
+          <p class="pr-next" id="prNext"></p>
           <div class="pr-figs">
+            <div class="pr-fig"><b id="prFigDays">0</b><small>Day streak</small></div>
+            <div class="pr-fig"><b id="prFigAsked">0</b><small>Answered</small></div>
             <div class="pr-fig"><b id="prFigAcc">—</b><small>Accuracy</small></div>
-            <div class="pr-fig"><b id="prFigStreak">0</b><small>Streak</small></div>
-            <div class="pr-fig"><b id="prFigBest">0</b><small>Best streak</small></div>
-            <div class="pr-fig"><b id="prFigSessions">0</b><small>Sessions</small></div>
+            <button type="button" class="primary" id="prDaily">Daily Practice</button>
           </div>
         </div>
 
-        <div class="pr-cards" id="prCards"></div>
+        <div class="pr-groups" id="prCards"></div>
       </div>
 
       <!-- a drill in progress -->
@@ -12142,10 +12136,10 @@ const PR_MODES = [
   { key:'tracker', name:'Move Tracker', group:'holding', skill:'Tracking', lesson:5,
     desc:'Follow moves you never see, and say where things stand.',
     levels: PR_TRACKER_LEVELS },
-  { key:'after', name:'After the Move', group:'holding', skill:'Consequences', lesson:5,
+  { key:'after', name:'After the Move', group:'updating', skill:'Consequences', lesson:5,
     desc:'One move, and everything it changed — the square it left, the line it opened, what it left hanging.',
     levels: PR_AFTER_LEVELS },
-  { key:'forcing', name:'Forcing Lines', group:'holding', skill:'Calculation', lesson:5,
+  { key:'forcing', name:'Forcing Lines', group:'updating', skill:'Calculation', lesson:5,
     desc:'A capturing sequence played out in your head — who ends up ahead, and by how much.',
     levels: PR_FORCING_LEVELS },
   { key:'calc', name:'Blind Calculation', group:'calc', skill:'Calculation', lesson:9,
@@ -12163,6 +12157,22 @@ const PR_MODES = [
 ];
 const PR_MODE = {};
 for (const m of PR_MODES) PR_MODE[m.key] = m;
+
+/* The eleven drills fall into six groups, and this is the order a player
+   climbs them: the board itself, what a piece can do on it, holding a small
+   position in the head, what changes when one man moves, calculating a line
+   blind, and finally a whole game with no board at all. `group` on each
+   PR_MODES entry is a label a card could carry; this is the curriculum
+   itself, read by the dashboard (below) and by Task 23's recommender, which
+   walks it in order — a group is not "open" until the one before it is. */
+const PR_GROUPS = [
+  { key:'board',    name:'The Board',      modes:['square','lines'] },
+  { key:'vision',   name:'Piece Vision',   modes:['piece','attack'] },
+  { key:'holding',  name:'Holding',        modes:['hold','tracker'] },
+  { key:'updating', name:'Updating',       modes:['after','forcing'] },
+  { key:'calc',     name:'Calculation',    modes:['calc','branches'] },
+  { key:'play',     name:'Blindfold Play', modes:['progressive'] }
+];
 /* The lengths a session may be boxed to, in minutes; PR_MINUTES[1] (5) is the
    default a fresh setup box opens on. */
 const PR_MINUTES = [2, 5, 10];
@@ -15950,6 +15960,47 @@ function prRecommend(sessionAcc){
   return null;
 }
 
+/* A group's own level, read as a fraction of how far a player could take
+   every drill in it — the mean of each mode's level over its own ladder
+   length, not the raw level number, since an eleven-rung ladder and a
+   two-rung one would not otherwise compare on the same line. */
+function prGroupLevel(st, g){
+  let sum = 0;
+  for (const key of g.modes) sum += st.modes[key].level / PR_MODE[key].levels.length;
+  return sum / g.modes.length;
+}
+
+/* Square Trainer is the one drill a player is meant to outgrow rather than
+   keep training: once a square is answered at level 5 or better with a
+   median latency under a second and a half, naming one is no longer the
+   bottleneck, and nothing downstream — the recommender (Task 23), the tag
+   on the Board cards below — should keep sending anyone back to it. */
+const PR_AUTO_LEVEL = 5, PR_AUTO_LAT_MS = 1500;
+function prAutomatic(st){
+  const lat = prMedianLat(st.modes.square);
+  return st.modes.square.level >= PR_AUTO_LEVEL && lat !== null && lat < PR_AUTO_LAT_MS;
+}
+
+/* Where a player stands, in one shape the dashboard can read straight off:
+   a fraction per group, a milestone once three separate skills all clear a
+   bar at the same time (holding a position, tracking one, and finding a
+   move — the three a whole blindfold game actually asks for at once), and
+   the single next thing to try. `next` stays null until Task 23's
+   recommender exists — a dashboard that half-recommends something by
+   guessing is worse than one that says nothing, so this does not grow a
+   throwaway version of that rule just to fill the gap early. */
+function prReadiness(st){
+  const groups = PR_GROUPS.map(g => ({ key: g.key, name: g.name, frac: prGroupLevel(st, g) }));
+  const pb = st.modes.progressive.stats.pb || {};
+  const milestone =
+    st.modes.tracker.level >= 9 && st.modes.hold.level >= 7 && st.modes.calc.level >= 5 &&
+    pb[5] && pb[5].pass
+      ? 'first blind game' : null;
+  const done = typeof lsnDone === 'function' ? lsnDone() : [];
+  const next = typeof prRecommendNext === 'function' ? prRecommendNext(st, done) : null;
+  return { groups, milestone, next };
+}
+
 /* ============================================================
    THE DASHBOARD
    ============================================================ */
@@ -15966,63 +16017,142 @@ function prShowDash(){
 
 function prRenderDash(){
   const st = prLoad();
-  // TASK 3 STUB: the player-wide level display (prLevel/prLevelNow/prLevelNext/
-  // prLevelFill) read the old five-rung ladder and are dropped with it; Task 22
-  // rebuilds this dashboard. `idx` stays 0 so prRenderCards below still compiles.
-  const idx = 0;
+  const readiness = prReadiness(st);
+  prRenderPath(st, readiness);
+  document.getElementById('prFigDays').textContent = st.days;
+  document.getElementById('prFigAsked').textContent = st.asked;
   document.getElementById('prFigAcc').textContent = st.asked ? Math.round(prAcc(st) * 100) + '%' : '—';
-  // TASK 3 STUB: nothing writes st.best forward any more (prRecord dropped the
-  // dead top-level answer-streak it used to derive it from), so this only ever
-  // shows whatever a v1 record's best streak migrated in as. Task 22 replaces
-  // this figure with days practised.
-  document.getElementById('prFigBest').textContent = st.best;
-  document.getElementById('prFigSessions').textContent = st.sessions;
-  prRenderCards(st, idx);
+  prRenderCards(st, readiness);
 }
 
-// TASK 22 STUB: the difficulty dots (PR_MODES' old `hard`) and the mini
-// challenge's gate (`needs`) went with the tiered PR_MODES shape this task
-// replaces; the dashboard that names what the level a drill has settled on is
-// worth is Task 22's, so a card asks for nothing more than the score below
-// until then. `level` is accepted and unused for the same reason `idx` is
-// still passed in from prRenderDash — Task 22 is what gives it a job.
-function prRenderCards(st, level){
+/* The readiness line: six stages, each a name, a bar sunk to the same depth
+   as the ranked gauge, and the fraction that bar is standing for — and,
+   under the row, the one sentence saying what to do about it. The sentence
+   prefers the milestone over the recommendation, because "you are ready for
+   a whole game" is news and "try Move Tracker" is routine, and a player who
+   has just cleared every gate should be told that before anything else. */
+function prRenderPath(st, readiness){
+  const wrap = document.getElementById('prPathStages');
+  wrap.innerHTML = '';
+  for (const g of readiness.groups){
+    const stage = document.createElement('div');
+    stage.className = 'pr-stage';
+
+    const name = document.createElement('div');
+    name.className = 'pr-stage-name';
+    name.textContent = g.name;
+
+    const track = document.createElement('div');
+    track.className = 'gauge-track';
+    const fill = document.createElement('div');
+    fill.className = 'gauge-fill';
+    fill.style.width = Math.round(g.frac * 100) + '%';
+    track.appendChild(fill);
+
+    const frac = document.createElement('div');
+    frac.className = 'pr-stage-frac';
+    frac.textContent = Math.round(g.frac * 100) + '%';
+
+    stage.appendChild(name);
+    stage.appendChild(track);
+    stage.appendChild(frac);
+    wrap.appendChild(stage);
+  }
+
+  // readiness.next.why (Task 23) is already the whole sentence — "Try Move
+  // Tracker level 5: a small position, captures" — not a prefix waiting for
+  // a name appended after it, the way prRecommend's fragments are.
+  const next = document.getElementById('prNext');
+  next.textContent =
+    readiness.milestone === 'first blind game'
+      ? 'Every gate is open — a whole game with no board at all is ready when you are.'
+    : readiness.next
+      ? readiness.next.why
+      : '';
+}
+
+/* One section per group, headed and cased like the LESSON stage line, each
+   holding that group's own cards. A card names its drill, what it is for,
+   the level it opens on today and why — Recommended now if the recommender
+   (Task 23) points here, Ahead of you while the group before this one is
+   still closed, Solid once the drill itself is well past half its ladder —
+   and Start, which always works: a tag is a hint about where to spend the
+   next few minutes, never a lock. */
+function prRenderCards(st, readiness){
   const wrap = document.getElementById('prCards');
   wrap.innerHTML = '';
-  for (const m of PR_MODES){
-    const s = st.modes[m.key];
-    const card = document.createElement('div');
-    card.className = 'card panel pr-card';
 
-    const score = s.asked
-      ? s.asked + ' answered · ' + Math.round(s.correct / s.asked * 100) + '% · best streak ' + s.best
-      : 'Not tried yet';
+  // Built rather than written out as one string: the Start button has to go
+  // inside the foot, and fishing it back out of markup that was just
+  // stringified is a step that can only fail silently.
+  const part = (cls, html) => {
+    const d = document.createElement('div');
+    d.className = cls;
+    d.innerHTML = html;
+    return d;
+  };
 
-    // Built rather than written out as one string: the Start button has to go
-    // inside the foot, and fishing it back out of markup that was just
-    // stringified is a step that can only fail silently.
-    const part = (cls, html) => {
-      const d = document.createElement('div');
-      d.className = cls;
-      d.innerHTML = html;
-      return d;
-    };
-    const foot = part('pr-foot', '');
+  for (let gi = 0; gi < PR_GROUPS.length; gi++){
+    const g = PR_GROUPS[gi];
+    const section = document.createElement('div');
+    section.className = 'pr-group';
+    const h3 = document.createElement('h3');
+    h3.textContent = g.name;
+    section.appendChild(h3);
 
-    const go = document.createElement('button');
-    go.type = 'button';
-    go.className = 'pr-go primary';
-    go.textContent = 'Start';
-    go.onclick = () => prOpenSetup(m);
-    foot.appendChild(go);
+    // The group immediately before this one — Board is judged by prAutomatic
+    // rather than by level, the one thing about it that is not a ladder rung
+    // (see prReadiness above); every other group is open once every drill in
+    // it has moved off level 1.
+    const prev = gi > 0 ? PR_GROUPS[gi - 1] : null;
+    const prevOpen = !prev || (prev.key === 'board'
+      ? prAutomatic(st)
+      : prev.modes.every(k => st.modes[k].level >= 2));
 
-    card.appendChild(part('pr-name', m.name));
-    card.appendChild(part('pr-desc', m.desc));
-    card.appendChild(foot);
-    card.appendChild(part('pr-score', score));
-    wrap.appendChild(card);
+    const cardsWrap = document.createElement('div');
+    cardsWrap.className = 'pr-cards';
+    for (const key of g.modes){
+      const m = PR_MODE[key];
+      const s = st.modes[key];
+      const card = document.createElement('div');
+      card.className = 'card panel pr-card';
+
+      const foot = part('pr-foot', '');
+      let tag = null;
+      if (readiness.next && readiness.next.key === key) tag = ['now', 'Recommended now'];
+      else if (!prevOpen) tag = ['ahead', 'Ahead of you'];
+      else if (s.level / m.levels.length >= 0.6) tag = ['solid', 'Solid'];
+      if (tag){
+        const t = document.createElement('span');
+        t.className = 'pr-tag ' + tag[0];
+        t.textContent = tag[1];
+        foot.appendChild(t);
+      }
+
+      const go = document.createElement('button');
+      go.type = 'button';
+      go.className = 'pr-go primary';
+      go.textContent = 'Start';
+      go.onclick = () => prOpenSetup(m);
+      foot.appendChild(go);
+
+      const level = prStartLevel(key);
+      const cap = prRecipe(key, level).cap;
+
+      card.appendChild(part('pr-name', m.name));
+      card.appendChild(part('pr-desc', m.desc));
+      card.appendChild(foot);
+      card.appendChild(part('pr-score', 'Level ' + level + ' · ' + cap));
+      cardsWrap.appendChild(card);
+    }
+    section.appendChild(cardsWrap);
+    wrap.appendChild(section);
   }
 }
+// Daily Practice does not exist until Task 24 — goPractice('daily') already
+// accepts and ignores the target, which is what lets this button be wired up
+// ahead of the screen it will eventually open.
+document.getElementById('prDaily').onclick = () => goPractice('daily');
 
 /* ---- the two questions a drill asks before it starts ----
    A tier used to be picked by hand — Easy/Medium/Hard, three fixed labels.
