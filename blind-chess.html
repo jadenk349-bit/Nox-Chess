@@ -1775,6 +1775,7 @@
   .pr-name{font-size:18.5px; font-weight:650; letter-spacing:.09em; color:var(--gold-soft);}
   .pr-desc{margin-top:8px; flex:1; color:var(--muted); font-size:16px; line-height:1.65;}
   .pr-foot{margin-top:15px; display:flex; align-items:center; justify-content:space-between; gap:10px;}
+  .pr-actions{display:flex; align-items:center; gap:8px;}
   .pr-go{padding:8px 15px; font-size:14.5px; letter-spacing:.16em; font-weight:650;}
   /* a hint about where to spend the next few minutes, never a lock — Start
      works the same under every one of these, or under none */
@@ -12315,8 +12316,16 @@ const PR = {
                        // its own move count and its own targets, kept apart from the
                        // question-and-answer fields above because a game is not a question
   rb: null,           // a rebuild in progress — target, placed, current pick, stable ids
-  lastLine: -1        // Move Tracker: the opening line asked last, so two similar
+  lastLine: -1,       // Move Tracker: the opening line asked last, so two similar
                        // lines never land back to back (Task 14)
+  mixed: null,        // Daily Practice: the mode keys this session rotates through in
+                       // order, or null for an ordinary single-mode session — PR.mode is
+                       // still which one is on screen right now, read off this array by
+                       // prNextQuestion rather than fixed for the whole session
+  mixedLevel: {}       // Daily Practice: each mode's own place on its own staircase,
+                       // keyed by mode — PR.level is only ever one of these, the one
+                       // for whichever mode is up, and prNextQuestion restores the right
+                       // one when the rotation comes back around to it
 };
 
 /* The session clock. A separate function rather than Date.now() called
@@ -13722,6 +13731,13 @@ function prScore(ok, err){
   // time itself against, so latency is left unrecorded rather than guessed.
   prRecord(ok, err, PR.shownAt ? prNow() - PR.shownAt : undefined);
   prStep(ok);
+  // A Daily Practice session runs one staircase per mode rather than one for
+  // the whole session, and this is the only place any of them moves — so the
+  // level prStep just settled PR.level on is banked under the mode it
+  // belongs to the moment it changes, and prNextQuestion hands it straight
+  // back when the rotation returns to this mode rather than restarting it at
+  // its floor.
+  if (PR.mixed) PR.mixedLevel[PR.mode.key] = PR.level;
   prStatsRender();
 }
 
@@ -13765,6 +13781,18 @@ function prNextQuestion(){
   prAnsClear();
   prCtl([]);
   prMarksClear();
+  // Daily Practice rotates through PR.mixed one mode per question rather
+  // than one per session — PR.i is the running count of questions answered,
+  // so its remainder mod the mix's length is which mode this one belongs to.
+  // The level it opens on is wherever that mode's own staircase last left it
+  // (PR.mixedLevel, written by prScore the moment any mode's level moves) or,
+  // the first time this mode comes up, wherever prStartLevel says it should
+  // start — the same floor a plain session of it would open on.
+  if (PR.mixed){
+    const key = PR.mixed[PR.i % PR.mixed.length];
+    PR.mode = PR_MODE[key];
+    PR.level = PR.mixedLevel[key] || prStartLevel(key);
+  }
   PR.q = prMake(PR.mode.key, PR.level);
   if (!PR.q){
     // Nothing valid came out after every retry. Say so and leave rather than
@@ -15868,27 +15896,47 @@ function prFinish(note){
 
   const st = prLoad();
   st.sessions++; prTouchDay(st);
-  const m = st.modes[PR.mode.key];
-  m.sessions++; m.lastAt = prNow();
-  /* Progressive Blindfold is the one mode the staircase does not settle: a
-     level there is a whole game held or not held, and three right answers in
-     a row is not a thing that happens inside one. So the rung is a ladder —
-     passed, and the next session opens one higher; not passed, and it opens
-     on the same one again — and what the game cost is kept per level rather
-     than folded into the session's tally, since "held twelve moves with two
-     checkpoints missed" is what a player wants back and an accuracy figure
-     is not. */
-  const pb = PR.mode.key === 'progressive' ? PR.pb : null;
-  // an unlimited level spends nothing worth counting; read once and used
-  // below both for what is kept per level and for what the card shows
-  const peeksUsed = pb ? (pb.r.peeks === Infinity ? 0 : pb.r.peeks - pb.peeks) : 0;
-  if (pb){
-    m.stats.pb = m.stats.pb || {};
-    m.stats.pb[PR.level] = { pass: !!pb.pass, played: pb.played, checks: pb.checks, checksOk: pb.checksOk,
-                             drifts: pb.drifts, peeks: peeksUsed, recoveries: pb.recoveries };
-    m.level = pb.pass ? Math.min(PR_PB_LEVELS.length, PR.level + 1) : PR.level;
-  } else m.level = PR.level;
-  if (m.level > m.best) m.best = m.level;
+  /* A Daily Practice session played several modes in turn, so what each one
+     is worth is written for every mode PR.mixedLevel actually holds an entry
+     for — the level its own staircase settled at, and that it was practised
+     at all — rather than only for whichever mode happened to be on screen
+     when the clock ran out; the session and the day above are the whole
+     session's and are counted once, not once per mode played. Progressive
+     Blindfold never appears in a mix (prStartDaily excludes it on purpose,
+     since a whole game is not a question rotation can hand off mid-answer),
+     so `pb` and `peeksUsed` below are only ever set for an ordinary
+     single-mode session. */
+  let pb = null, peeksUsed = 0;
+  if (PR.mixed){
+    for (const key of Object.keys(PR.mixedLevel)){
+      const m = st.modes[key];
+      m.sessions++; m.lastAt = prNow();
+      m.level = PR.mixedLevel[key];
+      if (m.level > m.best) m.best = m.level;
+    }
+  } else {
+    const m = st.modes[PR.mode.key];
+    m.sessions++; m.lastAt = prNow();
+    /* Progressive Blindfold is the one mode the staircase does not settle: a
+       level there is a whole game held or not held, and three right answers in
+       a row is not a thing that happens inside one. So the rung is a ladder —
+       passed, and the next session opens one higher; not passed, and it opens
+       on the same one again — and what the game cost is kept per level rather
+       than folded into the session's tally, since "held twelve moves with two
+       checkpoints missed" is what a player wants back and an accuracy figure
+       is not. */
+    pb = PR.mode.key === 'progressive' ? PR.pb : null;
+    // an unlimited level spends nothing worth counting; read once and used
+    // below both for what is kept per level and for what the card shows
+    peeksUsed = pb ? (pb.r.peeks === Infinity ? 0 : pb.r.peeks - pb.peeks) : 0;
+    if (pb){
+      m.stats.pb = m.stats.pb || {};
+      m.stats.pb[PR.level] = { pass: !!pb.pass, played: pb.played, checks: pb.checks, checksOk: pb.checksOk,
+                               drifts: pb.drifts, peeks: peeksUsed, recoveries: pb.recoveries };
+      m.level = pb.pass ? Math.min(PR_PB_LEVELS.length, PR.level + 1) : PR.level;
+    } else m.level = PR.level;
+    if (m.level > m.best) m.best = m.level;
+  }
   prSave(st);
 
   const acc = PR.i ? PR.right / PR.i : 0;
@@ -16093,6 +16141,7 @@ function prShowDash(){
   PR.view = 'dash';
   navSync();
   PR.q = null; PR.click = null; PR.onSubmit = null; PR.pb = null;
+  PR.mixed = null;
   document.getElementById('prDoneOverlay').classList.remove('show');
   document.getElementById('prRun').style.display = 'none';
   document.getElementById('prDash').style.display = '';
@@ -16214,12 +16263,26 @@ function prRenderCards(st, readiness){
         foot.appendChild(t);
       }
 
+      const actions = part('pr-actions', '');
       const go = document.createElement('button');
       go.type = 'button';
       go.className = 'pr-go primary';
       go.textContent = 'Start';
       go.onclick = () => prOpenSetup(m);
-      foot.appendChild(go);
+      actions.appendChild(go);
+
+      // Quick is the express lane beside Start: two minutes, no setup box,
+      // straight into the drill wherever the staircase (or a finished
+      // lesson's own floor) already says today's session should open —
+      // exactly the level Start's own box would have offered first, without
+      // stopping to ask.
+      const quick = document.createElement('button');
+      quick.type = 'button';
+      quick.className = 'pr-go ghost';
+      quick.textContent = 'Quick';
+      quick.onclick = () => prOpen(key, prStartLevel(key), 2);
+      actions.appendChild(quick);
+      foot.appendChild(actions);
 
       const level = prStartLevel(key, st);
       const cap = prRecipe(key, level).cap;
@@ -16234,9 +16297,6 @@ function prRenderCards(st, readiness){
     wrap.appendChild(section);
   }
 }
-// Daily Practice does not exist until Task 24 — goPractice('daily') already
-// accepts and ignores the target, which is what lets this button be wired up
-// ahead of the screen it will eventually open.
 document.getElementById('prDaily').onclick = () => goPractice('daily');
 
 /* ---- the two questions a drill asks before it starts ----
@@ -16348,9 +16408,11 @@ function prStartLevel(key, st){
 /* Starts a session directly, at the level asked for or — left unsaid —
    wherever prStartLevel says this mode should open, with no setup box in
    between. That is what a route into a specific drill (`#practice/tracker`,
-   a resumed link, Task 24's Daily Practice) needs: the two questions
+   a resumed link, Task 24's Quick button) needs: the two questions
    prOpenSetup asks are for a player choosing where to begin, not for
-   somebody arriving already having chosen. */
+   somebody arriving already having chosen — Daily Practice (below) is a
+   third such caller, but for a whole rotation of drills rather than one, so
+   it goes straight to prBegin instead. */
 function prOpen(key, level, minutes){
   const mode = PR_MODE[key];
   if (!mode) return;
@@ -16359,6 +16421,48 @@ function prOpen(key, level, minutes){
   PR.budgetMs = (minutes || 5) * 60000;
   prBegin();
 }
+
+/* Daily Practice: five minutes across three drills rather than one, chosen
+   the same way the readiness line's own "Recommended now" is — prRecommendNext
+   for the first, then prRecommendFrom again for each of the next two, each
+   time over whatever the recommender has not already picked, so the three
+   are the three the player is furthest behind on rather than three at random.
+   Progressive Blindfold is never one of them: it is a whole game, not a
+   question, and PR.mixed's questions are answered one at a time and swapped
+   out from under each other every rotation — the middle of a blind game is
+   not a place to hand the board to a different drill and come back later.
+   That is also why the walk below discards prRecommendNext's own pick when
+   it names the bridge rather than a drill: the exclusion has to hold even
+   though prRecommendNext is the one caller allowed to recommend it at all
+   (once every gate is open, it is *all* prRecommendNext has left to suggest).
+   Falling short of three distinct picks — a brand new player has nothing on
+   file to distinguish drills by yet — is made up from PR_MODES' own order,
+   the same tie-break prRecommendFrom itself falls back on. */
+function prStartDaily(){
+  const st = prLoad();
+  const done = typeof lsnDone === 'function' ? lsnDone() : [];
+  const picked = [];
+  const first = prRecommendNext(st, done).key;
+  if (first !== 'progressive') picked.push(first);
+  while (picked.length < 3){
+    const pool = PR_MODES.map(mo => mo.key).filter(k => k !== 'progressive' && picked.indexOf(k) < 0);
+    const rec = pool.length ? prRecommendFrom(st, pool) : null;
+    if (!rec) break;
+    picked.push(rec.key);
+  }
+  for (const mo of PR_MODES){
+    if (picked.length >= 3) break;
+    if (mo.key !== 'progressive' && picked.indexOf(mo.key) < 0) picked.push(mo.key);
+  }
+
+  PR.mixed = picked;
+  PR.mixedLevel = {};
+  PR.mode = PR_MODE[picked[0]];
+  PR.level = prStartLevel(picked[0], st);
+  PR.budgetMs = 300000;
+  prBegin();
+}
+
 /* ---- coming and going ----
    goPractice() is the whole of the way in, and it is a function rather than a
    handler on one button on purpose: the LESSON menu calls it today, and the
@@ -16367,9 +16471,8 @@ function prOpen(key, level, minutes){
 
    `target` is what to do once the dashboard is up: nothing (a plain visit),
    `{mode, level}` to drop straight into a drill (the route below, and
-   whatever a card outside this screen ends up linking to), or `'daily'` —
-   accepted and ignored here, because Daily Practice does not exist until
-   Task 24 and a caller passing it today should not be refused for it.
+   whatever a card outside this screen ends up linking to), or `'daily'`,
+   which hands off to prStartDaily above rather than opening one drill.
 
    Walking off the page ends whatever was running: no timer left counting down
    over another screen, no square click still wired to a question nobody can
@@ -16379,7 +16482,8 @@ function goPractice(target){
   PR.on = true;
   prShowDash();
   showScreen('practice');
-  if (target && target.mode && PR_MODE[target.mode]) prOpen(target.mode, target.level, target.minutes);
+  if (target === 'daily') prStartDaily();
+  else if (target && target.mode && PR_MODE[target.mode]) prOpen(target.mode, target.level, target.minutes);
 }
 function prLeave(){
   if (!PR.on) return;
@@ -16388,6 +16492,7 @@ function prLeave(){
   PR.view = 'dash';
   PR.q = null; PR.click = null; PR.onSubmit = null; PR.pb = null;
   PR.answered = false;
+  PR.mixed = null;
   prSetOverlay.classList.remove('show');
   document.getElementById('prDoneOverlay').classList.remove('show');
   document.getElementById('prRun').style.display = 'none';

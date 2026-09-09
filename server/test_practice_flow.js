@@ -515,7 +515,11 @@ head('The dashboard');
   ok('and opens on level one', square.children[3].innerHTML, 'Level 1 · ' + PR_SQUARE_LEVELS[0].cap);
   var squareFoot = square.children[2];
   ok('nothing is ahead of the first group', squareFoot.children.length, 1);
-  ok('and its button starts it', squareFoot.children[0].textContent, 'Start');
+  // Start and Quick (Task 24) sit together in one actions strip, which is
+  // the foot's only child once there is no tag ahead of it.
+  var squareActions = squareFoot.children[0];
+  ok('and its button starts it', squareActions.children[0].textContent, 'Start');
+  ok('with Quick beside it for a two-minute go', squareActions.children[1].textContent, 'Quick');
 
   var play = groups[groups.length - 1];
   ok('the last group is Blindfold Play', play.children[0].textContent, 'Blindfold Play');
@@ -524,7 +528,23 @@ head('The dashboard');
   var progFoot = progressive.children[2];
   ok('it is tagged as ahead of where the player stands', progFoot.children.length, 2);
   ok('the tag says so', progFoot.children[0].textContent, 'Ahead of you');
-  ok('and Start still works even this far out', progFoot.children[1].textContent, 'Start');
+  ok('and Start still works even this far out', progFoot.children[1].children[0].textContent, 'Start');
+})();
+
+(function(){
+  // Quick is the express lane: no setup box, straight into the drill at
+  // wherever prStartLevel already says it should open, on a two-minute clock.
+  storage = {};
+  prShowDash();
+  var square = byId.prCards.children[0].children[1].children[0];
+  var quick = square.children[2].children[0].children[1];
+  ok('the Quick button is labelled', quick.textContent, 'Quick');
+  quick.onclick();
+  ok('it starts the drill directly, with no setup box', byId.prSetOverlay.classList.contains('show'), false);
+  ok('a run is in progress', PR.view, 'run');
+  ok('on the mode Quick was pressed for', PR.mode.key, 'square');
+  ok('at the level prStartLevel names', PR.level, prStartLevel('square'));
+  ok('on a two-minute clock', PR.budgetMs, 120000);
 })();
 
 head('Readiness');
@@ -1787,11 +1807,26 @@ head('Progressive Blindfold: a game at level 1');
 })();
 
 (function(){
-  storage = {};
-  prOpen('progressive', 8, 5);
+  // Deal until White's first legal move (all[0], same as below) leaves
+  // Black able to reply, and every reply Black could make leaves White able
+  // to move again — bestMove's own pick is not predictable from here (it
+  // breaks ties with Math.random(), see pbReply), so the condition is asked
+  // of every legal reply rather than of whichever one the search happens to
+  // pick. Without this a rare five-a-side deal answers White's very first
+  // move with checkmate or stalemate: pbMove ends the game before pbReply is
+  // ever scheduled, "and answered" below reads Black's turn instead of
+  // White's, and "Reveal and stop" no longer exists to press — the same
+  // reasoning as the level 1 deal-until-loop above, aimed at the move after.
+  var all = null;
+  for (var t = 0; t < 40; t++){
+    storage = {};
+    prOpen('progressive', 8, 5);
+    all = legalMoves(PR.pb.st, W);
+    var after = makeMove(PR.pb.st, all[0]), theirs = legalMoves(after, B);
+    if (theirs.length && theirs.every(function(m){ return legalMoves(makeMove(after, m), W).length > 0; })) break;
+  }
   ok('console only: there is no board at all', byId.prFrame.style.display, 'none');
   ok('and the console says so', byId.prNoBoard.style.display, '');
-  var all = legalMoves(PR.pb.st, W);
   typeAnswer(toSAN(PR.pb.st, all[0], all));
   ok('a move typed into it is played', PR.pb.played, 1);
   fireTimers();
@@ -2120,6 +2155,33 @@ head('goPractice with a target');
   ok('the tracker floor after lesson 5 is level 3', prStartLevel('tracker'), 3);
   var st = prLoad(); st.modes.tracker.sessions = 1; st.modes.tracker.level = 1; prSave(st);
   ok('but a measured level wins once there is one', prStartLevel('tracker'), 1);
+})();
+
+head('Daily training');
+(function(){
+  storage = {};
+  lsnDoneStub = [];
+  goPractice('daily');
+  ok('a daily session rotates three modes', PR.mixed && PR.mixed.length, 3);
+  ok('five minutes on the clock', PR.budgetMs, 300000);
+  ok('the first question belongs to the first mode', PR.q && PR.q.kind, PR.mixed[0]);
+  ok('progressive is never in the mix', PR.mixed.indexOf('progressive'), -1);
+})();
+
+(function(){
+  // Three questions, three modes: PR.i is the running count of answers
+  // given, so poking it directly and asking prNextQuestion to draw again is
+  // the whole rotation rule (PR.mixed[PR.i % PR.mixed.length]) without
+  // needing to actually answer each drill's own kind of question first.
+  storage = {};
+  lsnDoneStub = [];
+  goPractice('daily');
+  var kinds = [PR.q.kind];
+  PR.i = 1; prNextQuestion(); kinds.push(PR.q.kind);
+  PR.i = 2; prNextQuestion(); kinds.push(PR.q.kind);
+  ok('three questions in a row visit all three modes',
+     kinds.slice().sort().join(','), PR.mixed.slice().sort().join(','));
+  ok('in the mix\'s own order', kinds.join(','), PR.mixed.join(','));
 })();
 
 /* ============================================================
