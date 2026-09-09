@@ -78,10 +78,10 @@ var DECLS = ['VAL','FILES','rowOf','colOf','SQNAME','uciOf','sqName','sqIndex','
              'PR_SQUARE_LEVELS','PR_QUADRANT_NAME','PR_DIRS','PR_LINES_LEVELS','PR_PIECE_LEVELS',
              'PR_ATTACK_LEVELS','PR_HOLD_LEVELS','PR_TRACKER_LEVELS','PR_AFTER_LEVELS','PR_FORCING_LEVELS',
              'PR_CALC_LEVELS','PR_BRANCHES_LEVELS','PR_PB_LEVELS',
-             'PR_MODES','PR_MINUTES','PR_STORE','PR_VERSION','PR_V1_KEYS','PR_SEEN_MAX',
+             'PR_MODES','PR_GROUPS','PR_MINUTES','PR_STORE','PR_VERSION','PR_V1_KEYS','PR_SEEN_MAX',
              'prKey','prAcc','prSeenKey',
              'PR','PR_STEP_UP','PR_STEP_DOWN','prRand','prPick','prSide','prMan','PR_MAKE','W',
-             'PR_ERRS','PR_FLOORS','PR_PALETTE','PZ_VERSION','prPuzzleCache'];
+             'PR_ERRS','PR_FLOORS','PR_AUTO_LEVEL','PR_PALETTE','PZ_VERSION','prPuzzleCache'];
 var FNS = ['startBoard','newState','cloneState','fenOf','stateFromFEN',
            'slide','step','addPawn','pseudoMoves','isAttacked','kingSq','inCheck',
            'makeMove','legalMoves','toSAN','attackersOf','defendersOf','see',
@@ -99,13 +99,14 @@ var FNS = ['startBoard','newState','cloneState','fenOf','stateFromFEN',
            'prMatesIn1','prMatesIn2','prForks','prCalcHanging','prPuzzlePool','prCalcTrack','prMakeCalc','prCalcDraw',
            'prPickMove','prAskAbout','prMakeProgressive','prMakeBranches','prRecipe','prMake',
            'prGamePosition','prCluster','prAskFine','prMakeHold',
-           'prRecord','prScore','prStep','prNow','prTimeLeft','prRecommend','prMedianLat',
+           'prRecord','prScore','prStep','prNow','prTimeLeft','prMedianLat',
+           'prAutomatic','prGroupOpen','prRecommendNext',
            'prStartLevel','prOpen','prRebuildStart','prRebuildFinish','prRbPaint','goPractice'];
 
 var bundle = [grab(/\nconst W = 'w', B = 'b';/, "const W/B")];
 for (var d = 0; d < DECLS.length; d++) if (DECLS[d] !== 'W') bundle.push(decl(DECLS[d]));
 for (var f = 0; f < FNS.length; f++) bundle.push(fn(FNS[f]));
-// PR_MODE is filled by a loop rather than written out, and prRecipe/prRecommend read it
+// PR_MODE is filled by a loop rather than written out, and prRecipe/prRecommendNext read it
 bundle.push('\nvar PR_MODE = {};\nfor (var _m of PR_MODES) PR_MODE[_m.key] = _m;');
 eval(bundle.join('\n').replace(/(^|\n)(?:const|let) /g, '$1var '));
 
@@ -924,30 +925,18 @@ head('Store v2');
   ok('the same day again is still day one', d.days, 1);
 })();
 
+head('The recommender');
 (function(){
   storage = {};
-  PR.mode = PR_MODES[0];
-  var rec = prRecommend(0.4);
-  ok('a bad session is told to do the same drill again', rec.key, 'square');
-  // a good session with untried drills points at the next untried one
-  var st = prBlank();
-  st.modes.square.sessions = 1;
-  prSave(st);
-  var next = prRecommend(0.9);
-  ok('a good one points somewhere new', next.key, 'lines');
-  // everything tried: the weakest drill is the one recommended
-  st = prBlank();
-  for (var k = 0; k < PR_MODES.length; k++){
-    st.modes[PR_MODES[k].key].sessions = 1;
-    st.modes[PR_MODES[k].key].asked = 10;
-    st.modes[PR_MODES[k].key].correct = 9;
-  }
-  st.modes.tracker.correct = 4;
-  st.sessions = 30; st.asked = 300; st.correct = 250;
-  prSave(st);
-  ok('with everything tried, the weakest one is next', prRecommend(0.9).key, 'tracker');
-  storage = {};
-  account = null;
+  var st = prLoad();
+  ok('a fresh player is sent to the board', prRecommendNext(st, []).key === 'square' || prRecommendNext(st, []).key === 'lines', true);
+  ['square','lines','piece','attack'].forEach(function(k){ st.modes[k].level = 5; });
+  st.modes.square.stats.lat = [800];
+  var r = prRecommendNext(st, []);
+  ok('with the floor done, holding is next', ['hold','tracker'].indexOf(r.key) >= 0, true);
+  ok('the why names a level caption', /level \d/.test(r.why), true);
+  st.modes.tracker.level = 5; st.modes.forcing.level = 2; st.modes.hold.level = 4;
+  ok('the bridge is offered once its three gates are met', prRecommendNext(st, []).key === 'progressive' || prRecommendNext(st, [10]).key === 'progressive', true);
 })();
 
 /* ============================================================

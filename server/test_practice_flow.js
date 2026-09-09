@@ -537,11 +537,34 @@ head('Readiness');
   var r = prReadiness(prLoad());
   ok('six groups on the readiness line', r.groups.length, 6);
   ok('no milestone yet', r.milestone, null);
-  ok('no recommendation before Task 23 lands', r.next, null);
+  // Board is automatic, so the walk moves straight into Piece Vision — Attack
+  // Vision's own ladder is one rung longer than Piece Vision's, so at level 1
+  // apiece it is the weaker fraction and the one recommended
+  ok('the walk moves on to the next group once Board is automatic', r.next && r.next.key, 'attack');
   prShowDash();
   ok('cards are grouped', byId.prCards.children.length, 6);
   ok('and Board no longer reads Ahead of you for the next group',
      byId.prCards.children[1].children[1].children[0].children[2].children.length, 1);
+})();
+
+(function(){
+  /* The multi-hop case prGroupOpen exists for. Square Trainer and Lines &
+     Routes are untouched — Board has cleared nothing, automatic or
+     otherwise — but Piece Vision has moved well off level 1. Reading only
+     the group immediately before Holding (i.e. Piece Vision) would call
+     Holding open, since Piece Vision's own drills are past level 2; asking
+     every earlier group, as prGroupOpen now does, still finds Board
+     unopened two hops back and keeps Holding marked Ahead of you. */
+  storage = {};
+  var st = prLoad();
+  st.modes.piece.level = 5; st.modes.attack.level = 5;
+  prSave(st);
+  prShowDash();
+  var holding = byId.prCards.children[2];
+  ok('the third group is Holding', holding.children[0].textContent, 'Holding');
+  var holdFoot = holding.children[1].children[0].children[2];
+  ok('it still reads Ahead of you two groups past the group that never opened',
+     holdFoot.children[0].textContent, 'Ahead of you');
 })();
 
 (function(){
@@ -1780,17 +1803,29 @@ head('Progressive Blindfold: a game at level 1');
 head('Progressive Blindfold: holding a level');
 
 (function(){
-  storage = {};
-  prOpen('progressive', 1, 5);
-  var guard = 0;
-  while (!PR.pb.over && guard++ < 60){
-    var all = legalMoves(PR.pb.st, W);
-    if (!all.length) break;
-    typeAnswer(toSAN(PR.pb.st, all[0], all));
-    fireTimers();                            // the reply comes after a beat
-    // every third move the game stops and asks; hold it, and the move box and
-    // the board click come straight back
-    if (!PR.pb.over && PR.pb.busy) pbAnswerRight(PR.pb.check);
+  /* Level 1 checks every third move (checkEvery:3), and three men a side can
+     be mated, stalemated or left with no legal reply well inside that —
+     Black's replies are the page's own search, so which of those happens is
+     the dice, not the deal. A game that ends before a third of our own moves
+     is played never reaches a checkpoint, and PR.pb.checks stays 0 through no
+     fault of the checkpoint logic this block exists to exercise — so, exactly
+     as the level-1 deal at the top of this file retries until the game is
+     still going, the deal here is retried until a checkpoint actually fires. */
+  var guard;
+  for (var t = 0; t < 40; t++){
+    storage = {};
+    prOpen('progressive', 1, 5);
+    guard = 0;
+    while (!PR.pb.over && guard++ < 60){
+      var all = legalMoves(PR.pb.st, W);
+      if (!all.length) break;
+      typeAnswer(toSAN(PR.pb.st, all[0], all));
+      fireTimers();                            // the reply comes after a beat
+      // every third move the game stops and asks; hold it, and the move box and
+      // the board click come straight back
+      if (!PR.pb.over && PR.pb.busy) pbAnswerRight(PR.pb.check);
+    }
+    if (PR.pb.checks > 0) break;               // else the game never lasted to a checkpoint — deal again
   }
   ok('the game ended', PR.pb.over, true);
   ok('and it was stopped and asked along the way', PR.pb.checks > 0, true);

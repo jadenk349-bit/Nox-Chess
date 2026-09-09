@@ -1731,9 +1731,11 @@
     margin-top:6px; font-size:12px; text-align:center; color:var(--muted);
     font-variant-numeric:tabular-nums;
   }
-  /* held to one line's height even blank (no milestone, and Task 23 not
-     landed yet) so the figures under it do not jump the moment it has
-     something to say */
+  /* held to one line's height even blank (no milestone and nothing yet
+     recommended, which the walk in prRecommendNext can still return for a
+     player who has hand-cleared every group's floor without meeting the
+     Progressive bridge) so the figures under it do not jump the moment it
+     has something to say */
   .pr-next{margin:16px 0 0; min-height:1.6em; font-size:15.5px; line-height:1.6; color:var(--gold-soft);}
   .pr-figs{display:grid; grid-template-columns:repeat(4,1fr); gap:9px; margin-top:18px;}
   @media (max-width:520px){ .pr-figs{grid-template-columns:repeat(2,1fr);} }
@@ -12163,8 +12165,10 @@ for (const m of PR_MODES) PR_MODE[m.key] = m;
    position in the head, what changes when one man moves, calculating a line
    blind, and finally a whole game with no board at all. `group` on each
    PR_MODES entry is a label a card could carry; this is the curriculum
-   itself, read by the dashboard (below) and by Task 23's recommender, which
-   walks it in order — a group is not "open" until the one before it is. */
+   itself, read by the dashboard (below) and by prRecommendNext (the
+   recommender) — both through the shared prGroupOpen, which walks it in
+   order and treats a group as open only once every group before it, not
+   merely the one immediately before it, has cleared its own floor. */
 const PR_GROUPS = [
   { key:'board',    name:'The Board',      modes:['square','lines'] },
   { key:'vision',   name:'Piece Vision',   modes:['piece','attack'] },
@@ -15910,13 +15914,14 @@ function prFinish(note){
   row('Skill practised', PR.mode.skill);
 
   const tip = document.getElementById('prDoneTip');
-  const rec = prRecommend(acc);
+  const done = typeof lsnDone === 'function' ? lsnDone() : [];
+  const rec = prRecommendNext(st, done);
   let text = '';
   if (note) text += note + ' ';
   // the level the staircase moved to is what the session was worth — not the
   // level it opened on, which the player may not have earned this time
   if (PR.moved) text += 'You settled at <b>Level ' + PR.level + '</b> this session. ';
-  if (rec) text += rec.why + ' <b>' + PR_MODE[rec.key].name + '</b> next.';
+  if (rec) text += 'Next: ' + rec.why;
   tip.innerHTML = text || 'Steady work. Pick whichever drill you fancy next.';
 
   document.getElementById('prDoneTitle').textContent = 'Practice Complete';
@@ -15936,30 +15941,6 @@ function prFinish(note){
   prRenderDash();
 }
 
-/* Rule-based and deliberately small: repeat what is going badly, try what has
-   never been tried, otherwise shore up the weakest thing. */
-function prRecommend(sessionAcc){
-  const st = prLoad();
-  const level = 0;   // TASK 3 STUB: see prFinish above
-  const open = m => m.needs === undefined || level >= m.needs;
-  if (sessionAcc < .6)
-    return { key: PR.mode.key, why: 'Under 60% this session, so more of the same is the quickest way to move it:' };
-  for (const m of PR_MODES)
-    if (open(m) && !st.modes[m.key].sessions)
-      return { key: m.key, why: 'You have not tried this one yet:' };
-  let worst = null;
-  for (const m of PR_MODES){
-    const s = st.modes[m.key];
-    if (!open(m) || !s.asked) continue;
-    const a = s.correct / s.asked;
-    if (!worst || a < worst.acc) worst = { key: m.key, acc: a };
-  }
-  if (worst)
-    return { key: worst.key,
-             why: 'Your weakest drill so far is at ' + Math.round(worst.acc * 100) + '% —' };
-  return null;
-}
-
 /* A group's own level, read as a fraction of how far a player could take
    every drill in it — the mean of each mode's level over its own ladder
    length, not the raw level number, since an eleven-rung ladder and a
@@ -15973,22 +15954,87 @@ function prGroupLevel(st, g){
 /* Square Trainer is the one drill a player is meant to outgrow rather than
    keep training: once a square is answered at level 5 or better with a
    median latency under a second and a half, naming one is no longer the
-   bottleneck, and nothing downstream — the recommender (Task 23), the tag
-   on the Board cards below — should keep sending anyone back to it. */
+   bottleneck, and nothing downstream — the recommender below, the tag on the
+   Board cards further down — should keep sending anyone back to it. */
 const PR_AUTO_LEVEL = 5, PR_AUTO_LAT_MS = 1500;
 function prAutomatic(st){
   const lat = prMedianLat(st.modes.square);
   return st.modes.square.level >= PR_AUTO_LEVEL && lat !== null && lat < PR_AUTO_LAT_MS;
 }
 
+/* Whether a group can be worked on at all: every group strictly before `gi`
+   has cleared its own floor — every mode in it at level 2 or better, except
+   the Board group, whose two drills do not share one ladder length to
+   average and is instead judged by prAutomatic, the same test that retires
+   Square Trainer above. `prevOpen` in prRenderCards below used to ask this
+   of only the *immediate* predecessor, which is wrong two hops out: Piece
+   Vision moved off level 1 with Board still untouched left Holding reading as
+   open too, since its own check only ever looked at Piece Vision and never
+   asked whether Board itself had cleared. This is the one door both the
+   card and the recommender go through, so neither can ever disagree with the
+   other about the same group. */
+function prGroupOpen(st, gi){
+  for (let i = 0; i < gi; i++){
+    const g = PR_GROUPS[i];
+    const cleared = g.key === 'board' ? prAutomatic(st) : g.modes.every(k => st.modes[k].level >= 2);
+    if (!cleared) return false;
+  }
+  return true;
+}
+
+/* Rule-based and deliberately small: walk the curriculum in the order
+   PR_GROUPS lays it out, stop at the first group prGroupOpen will not yet
+   open the door to, and inside the one before that door — the frontier the
+   player has actually reached — recommend whichever drill is furthest from
+   its own ladder, ties going to whichever was practised longest ago and then
+   to PR_MODES' own order. "Furthest from its own ladder" only ever excludes
+   a drill once it is at least 60% up its own rungs, which is what "not all
+   ≥60%" below is for; the frontier group's own floor test (level 2) is a
+   coarser bar than that on purpose; it is what decides whether we have moved
+   on to the *next* group, not which drill inside this one still needs work.
+   Progressive Blindfold sits outside that walk entirely: it is a bridge with
+   its own three gates — tracker (holding a position), attack (reading what
+   is attacked) and forcing (finding a short forced line), the three things a
+   whole blind game actually asks for at once — or the course's own finish
+   (lesson 10), and offering it does not wait on Calculation or Branches ever
+   being touched; nobody should have to max out half the curriculum before
+   trying a whole small game. */
+function prRecommendNext(st, done){
+  const bridgeReady = (done && done.indexOf(10) >= 0) ||
+    (st.modes.tracker.level >= 5 && st.modes.attack.level >= 4 && st.modes.forcing.level >= 2);
+  if (bridgeReady){
+    const level = Math.max(1, prStartLevel('progressive'));
+    return { key: 'progressive', level, why: 'Start Progressive Blindfold at level ' + level };
+  }
+
+  for (let gi = 0; gi < PR_GROUPS.length - 1; gi++){    // 'play' is reached only above
+    const g = PR_GROUPS[gi];
+    if (!prGroupOpen(st, gi)) break;                     // out of reach until earlier groups clear
+    if (prGroupOpen(st, gi + 1)) continue;                // its own floor is cleared too — move on
+
+    const solid = k => st.modes[k].level / PR_MODE[k].levels.length >= 0.6;
+    let pool = g.modes.filter(k => !solid(k));
+    if (!pool.length) pool = g.modes;   // Board via latency alone can clear its floor with a mode still short of 60%
+
+    let best = null;
+    for (const k of pool){
+      const s = st.modes[k], frac = s.level / PR_MODE[k].levels.length;
+      if (!best || frac < best.frac || (frac === best.frac && s.lastAt < best.lastAt))
+        best = { key: k, frac, lastAt: s.lastAt };
+    }
+    const level = Math.max(1, prStartLevel(best.key));
+    const cap = prRecipe(best.key, level).cap;
+    return { key: best.key, level,
+             why: 'Try ' + PR_MODE[best.key].name + ' level ' + level + ': ' + cap.charAt(0).toLowerCase() + cap.slice(1) };
+  }
+  return null;
+}
+
 /* Where a player stands, in one shape the dashboard can read straight off:
    a fraction per group, a milestone once three separate skills all clear a
    bar at the same time (holding a position, tracking one, and finding a
    move — the three a whole blindfold game actually asks for at once), and
-   the single next thing to try. `next` stays null until Task 23's
-   recommender exists — a dashboard that half-recommends something by
-   guessing is worse than one that says nothing, so this does not grow a
-   throwaway version of that rule just to fill the gap early. */
+   the single next thing to try, from prRecommendNext above. */
 function prReadiness(st){
   const groups = PR_GROUPS.map(g => ({ key: g.key, name: g.name, frac: prGroupLevel(st, g) }));
   const pb = st.modes.progressive.stats.pb || {};
@@ -15997,7 +16043,7 @@ function prReadiness(st){
     pb[5] && pb[5].pass
       ? 'first blind game' : null;
   const done = typeof lsnDone === 'function' ? lsnDone() : [];
-  const next = typeof prRecommendNext === 'function' ? prRecommendNext(st, done) : null;
+  const next = prRecommendNext(st, done);
   return { groups, milestone, next };
 }
 
@@ -16059,9 +16105,10 @@ function prRenderPath(st, readiness){
     wrap.appendChild(stage);
   }
 
-  // readiness.next.why (Task 23) is already the whole sentence — "Try Move
-  // Tracker level 5: a small position, captures" — not a prefix waiting for
-  // a name appended after it, the way prRecommend's fragments are.
+  // readiness.next.why is already the whole sentence — "Try Move Tracker
+  // level 5: a small position, captures" — a name and a cap prRecommendNext
+  // has already stitched together, not a prefix waiting for one appended
+  // after it.
   const next = document.getElementById('prNext');
   next.textContent =
     readiness.milestone === 'first blind game'
@@ -16073,11 +16120,11 @@ function prRenderPath(st, readiness){
 
 /* One section per group, headed and cased like the LESSON stage line, each
    holding that group's own cards. A card names its drill, what it is for,
-   the level it opens on today and why — Recommended now if the recommender
-   (Task 23) points here, Ahead of you while the group before this one is
-   still closed, Solid once the drill itself is well past half its ladder —
-   and Start, which always works: a tag is a hint about where to spend the
-   next few minutes, never a lock. */
+   the level it opens on today and why — Recommended now if prRecommendNext
+   points here, Ahead of you while any group before this one is still
+   closed, Solid once the drill itself is well past half its ladder — and
+   Start, which always works: a tag is a hint about where to spend the next
+   few minutes, never a lock. */
 function prRenderCards(st, readiness){
   const wrap = document.getElementById('prCards');
   wrap.innerHTML = '';
@@ -16100,14 +16147,14 @@ function prRenderCards(st, readiness){
     h3.textContent = g.name;
     section.appendChild(h3);
 
-    // The group immediately before this one — Board is judged by prAutomatic
-    // rather than by level, the one thing about it that is not a ladder rung
-    // (see prReadiness above); every other group is open once every drill in
-    // it has moved off level 1.
-    const prev = gi > 0 ? PR_GROUPS[gi - 1] : null;
-    const prevOpen = !prev || (prev.key === 'board'
-      ? prAutomatic(st)
-      : prev.modes.every(k => st.modes[k].level >= 2));
+    // prGroupOpen is the same door prRecommendNext walks through — every
+    // group before this one, not merely the one immediately before it, has
+    // to have cleared its own floor (Board via prAutomatic rather than a
+    // ladder rung; every other group once each drill in it has moved off
+    // level 1). Reading only the immediate predecessor used to let a group
+    // two hops past an unopened one read as open, because its own check
+    // never looked back that far.
+    const groupOpen = prGroupOpen(st, gi);
 
     const cardsWrap = document.createElement('div');
     cardsWrap.className = 'pr-cards';
@@ -16120,7 +16167,7 @@ function prRenderCards(st, readiness){
       const foot = part('pr-foot', '');
       let tag = null;
       if (readiness.next && readiness.next.key === key) tag = ['now', 'Recommended now'];
-      else if (!prevOpen) tag = ['ahead', 'Ahead of you'];
+      else if (!groupOpen) tag = ['ahead', 'Ahead of you'];
       else if (s.level / m.levels.length >= 0.6) tag = ['solid', 'Solid'];
       if (tag){
         const t = document.createElement('span');
