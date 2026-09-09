@@ -219,6 +219,14 @@ function makePage(store){
     ' lsnStepDemo, lsnStepColour, lsnStepQuadrant, lsnStepBetween, lsnStepDiagPick,' +
     ' lsnStepKnight, lsnStepTypeMove, lsnKnightBoard, lsnResetStep, lsnPaint, lsnRender,' +
     ' prMakeSquare, prMakeLines, prRecipe, lineBetween, quadrantOf, knightRoute, linesThrough,' +
+    // Task 31: the five step kinds lessons 4 and 5 add, and the two more
+    // Practice generators they are built from (prMakeAttack, prMakeHold) —
+    // same reasoning as Task 30a's list above, plus rebuildDiff() and
+    // PR_PALETTE, which the rebuild solver needs to judge and to find a
+    // palette button by the man it places rather than by reading the step's
+    // own `truth`.
+    ' lsnStepAttackYesNo, lsnStepHanging, lsnStepCluster, lsnStepRebuild,' +
+    ' prMakeAttack, prMakeHold, rebuildDiff, PR_PALETTE,' +
     ' screen:()=>screenName });';
   let out = null;
   new Function('document','window','location','localStorage','WebSocket','AudioContext',
@@ -315,6 +323,67 @@ async function solveStep(p, budget){
     }
     return p.LSN.ok;
   }
+  if (kind === 'hanging'){
+    // lsnStepHanging judges one click at a time and never ends the step on a
+    // wrong one, so every square is tried in turn until the one or two right
+    // ones have both landed — the same brute force a blindfold player has no
+    // shortcut around either.
+    for (let i = 0; i < 64 && !p.LSN.ok && Date.now() < stop; i++){
+      if (p.LSN.onSquare) p.LSN.onSquare(i);
+      await sleep(3);
+    }
+    return p.LSN.ok;
+  }
+  if (kind === 'cluster'){
+    // I'm Ready first — the study card and the board go together, and
+    // pressUnder() is what a player presses too. What is left afterwards is
+    // either a square to click (a 'where' question) or a row of choices
+    // ('what', 'count', 'occupied'), never both, so which branch runs is
+    // read off the step itself rather than off q.ask.t, which this harness
+    // is not told.
+    while (!p.LSN.onSquare && !choices().length && Date.now() < stop){
+      if (!pressUnder()) break;
+      await sleep(20);
+    }
+    if (p.LSN.onSquare){
+      for (let i = 0; i < 64 && !p.LSN.ok && Date.now() < stop; i++){ p.LSN.onSquare(i); await sleep(3); }
+    } else {
+      while (!p.LSN.ok && Date.now() < stop){
+        let pressed = false;
+        for (const b of choices()){
+          if (b.disabled || b.classList.contains('right') || b.classList.contains('wrong')) continue;
+          b.onclick(); pressed = true; break;
+        }
+        if (!pressed) break;
+        await sleep(30);
+      }
+    }
+    return p.LSN.ok;
+  }
+  if (kind === 'rebuild'){
+    // The Position card the step showed before I'm Ready is on the page —
+    // the same information a player has — and is read here, never the
+    // step's own `truth`: CLAUDE.md's rule is that this harness answers by
+    // brute force, and reading the card is exactly what a player does too.
+    const men = readPositionCard(p.by('lsnExtraBody').innerHTML || '', p.sqIndex);
+    if (!pressUnder()) return false;                     // "I'm Ready"
+    await sleep(30);
+    const byType = {};
+    men.forEach(m => { const k = m.c + m.t; (byType[k] = byType[k] || []).push(m.sq); });
+    for (const k in byType){
+      const c = k[0], t = k.slice(1);
+      const btn = Array.from(choices()).find(b => b.dataset.c === c && b.dataset.t === t);
+      if (!btn || !p.LSN.onSquare) return false;
+      btn.onclick();
+      byType[k].forEach(sq => p.LSN.onSquare(sq));
+    }
+    await sleep(20);
+    const done = Array.from(under()).find(b => !b.disabled && b.textContent.indexOf('Done') === 0);
+    if (!done) return false;
+    done.onclick();
+    await sleep(30);
+    return p.LSN.ok;
+  }
 
   // 'square' (lsnDrillClick/lsnDrillName), 'move' (lsnNotationStep), 'none'
   // (lsnStepDemo/lsnHandoffStep, both gate-less and never asked to solve)
@@ -371,6 +440,31 @@ function firstPick(p){
   const ask = p.by('lsnAsk').innerHTML || '';
   const m = ask.match(/<code>([a-h][1-8])<\/code>/);
   return m ? p.sqIndex(m[1]) : -1;
+}
+/** The Position card, read the way a player reads it — lsnPositionHTML()'s
+ * own markup, walked back into a man-per-square list rather than assumed:
+ * "King" and "Pawns" rows carry no letter (the row's own name already says
+ * the type), "Beside the King" and "The Rest" always do, which is what a
+ * card built from a random Hold the Position draw is trusted to keep true
+ * of every man in those two rows, mixed types or not — see the note over
+ * lsnPositionHTML() itself. */
+function readPositionCard(html, sqIndex){
+  const men = [];
+  const blocks = html.split('<div class="lsn-subcap">').slice(1);
+  for (const block of blocks){
+    const c = block.slice(0, block.indexOf('<')) === 'White' ? 'w' : 'b';
+    const rows = block.match(/<span class="man">([^<]*)<\/span><span class="sqs">([^<]*)<\/span>/g) || [];
+    for (const raw of rows){
+      const m = raw.match(/<span class="man">([^<]*)<\/span><span class="sqs">([^<]*)<\/span>/);
+      const label = m[1], entries = m[2].split(',').map(s => s.trim()).filter(Boolean);
+      entries.forEach(entry => {
+        if (label === 'King') men.push({ sq:sqIndex(entry), c, t:'K' });
+        else if (label === 'Pawns') men.push({ sq:sqIndex(entry), c, t:'P' });
+        else men.push({ sq:sqIndex(entry.slice(1)), c, t:entry[0] });
+      });
+    }
+  }
+  return men;
 }
 
 /** Walk one lesson end to end, answering everything. */
@@ -890,27 +984,77 @@ async function walk(p, n){
   g.lsnOpen(3, 13);
   check('lesson 3 ends on the handoff', !!g.LSN.steps[13].handoff);
 
-  head('Reach and Attack hides the men when the player says so');
-  g.lsnOpen(4, 3);
-  check('the men are still on the board', g.LSN.mode === 'sighted', g.LSN.mode);
-  const startBtn = () => Array.from(g.by('lsnUnder').children).find(b => /Start/.test(b.textContent));
-  check('a Start button is offered', !!startBtn(),
-        Array.from(g.by('lsnUnder').children).map(b => b.textContent).join(' | '));
-  await sleep(3600);
-  check('and no timer takes them out while it waits', g.LSN.mode === 'sighted', g.LSN.mode);
-  startBtn().onclick();
-  check('pressing Start is what hides them', g.LSN.mode === 'blind', g.LSN.mode);
-  check('and the question is asked once they are gone',
-        /Select <b>every square<\/b>/.test(g.by('lsnAsk').innerHTML || ''), g.by('lsnAsk').innerHTML);
-  check('with Check waiting under the board',
-        Array.from(g.by('lsnUnder').children).some(b => b.textContent.indexOf('Check') === 0));
+  head('Reach and Attack: the reach drills, a blocker, then Attack Vision’s own three questions');
+  g.lsnOpen(4, 0);
+  check('nine steps: two reach drills, a blocker demo, two attacks yes/no, the ' +
+        'attack-and-defence demo, one defended yes/no, one hanging click, and the handoff',
+        g.LSN.steps.length === 9, g.LSN.steps.length);
+  check('the first reach drill keeps the men in plain sight', g.LSN.mode === 'sighted', g.LSN.mode);
+  g.lsnOpen(4, 1);
+  {
+    const startBtn = () => Array.from(g.by('lsnUnder').children).find(b => /Start/.test(b.textContent));
+    check('the second reach drill studies first', !!startBtn(),
+          Array.from(g.by('lsnUnder').children).map(b => b.textContent).join(' | '));
+    check('and does not hide the men on its own', g.LSN.mode === 'sighted', g.LSN.mode);
+    startBtn().onclick();
+    check('pressing Start is what hides them', g.LSN.mode === 'blind', g.LSN.mode);
+  }
+  g.lsnOpen(4, 2);
+  {
+    sane('lsnLesson4’s blocker demo', g.LSN.st);
+    check('the blocker demo shows a slider stopped at the first man in its way',
+          g.LSN.marks.get(g.sqIndex('c3')) === 'lsn-lit' && g.LSN.marks.get(g.sqIndex('d4')) === 'lsn-wrong');
+    check('a demo gates nothing', g.by('lsnNext').disabled === false);
+  }
+  [3, 4].forEach(idx => {
+    g.lsnOpen(4, idx);
+    check('step ' + (idx + 1) + ' is an attacks yes/no', g.LSN.steps[idx].title === 'Does it attack that square?');
+    check('step ' + (idx + 1) + ' offers exactly Yes and No',
+          Array.from(g.by('lsnChoices').children).map(b => b.textContent).join(',') === 'Yes,No');
+  });
+  check('exactly two attacks questions', g.LSN.steps.filter(s => s.title === 'Does it attack that square?').length === 2);
+  g.lsnOpen(4, 5);
+  check('the fifth step reads the same line the other way, as a demo — it gates nothing',
+        g.LSN.steps[5].title === 'Attack and defence are one line' && g.by('lsnNext').disabled === false);
+  g.lsnOpen(4, 6);
+  check('one defended yes/no follows', g.LSN.steps[6].title === 'Is it defended?');
+  check('and only one', g.LSN.steps.filter(s => s.title === 'Is it defended?').length === 1);
+  g.lsnOpen(4, 7);
+  check('the last question is the hanging click', g.LSN.steps[7].title === 'What is hanging?');
+  check('judged the hanging way', g.LSN.steps[7].solve === 'hanging');
+  g.lsnOpen(4, 8);
+  check('lesson 4 ends on the handoff', !!g.LSN.steps[8].handoff);
 
-  head('Holding a Small Position starts on the sequence');
+  head('Holding a Small Position opens on the position you already own');
   g.lsnOpen(5, 0);
-  check('two sequences, no introduction, and the handoff', g.LSN.steps.length === 3, g.LSN.steps.length);
-  check('the first step offers Hide the Board straight away',
+  check('eight steps: the start-position demo, two tracked sequences, the kings-first ' +
+        'demo, two cluster questions, one rebuild, and the handoff',
+        g.LSN.steps.length === 8, g.LSN.steps.length);
+  check('it really is the game’s own start position',
+        C.fenOf(g.LSN.st) === 'rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1', C.fenOf(g.LSN.st));
+  g.lsnOpen(5, 1);
+  check('the first tracked sequence offers Hide the Board straight away',
         Array.from(g.by('lsnUnder').children).some(b => /Hide the Board/.test(b.textContent)),
         Array.from(g.by('lsnUnder').children).map(b => b.textContent).join(' | '));
+  g.lsnOpen(5, 3);
+  check('the kings-first demo names Fine’s own order and gates nothing',
+        /king/i.test(g.by('lsnWhat').innerHTML || '') && g.by('lsnNext').disabled === false,
+        g.by('lsnWhat').innerHTML);
+  [4, 5].forEach(idx => {
+    g.lsnOpen(5, idx);
+    check('cluster question ' + (idx - 3) + ' shows the Position card before anything is asked',
+          g.by('lsnExtraTitle').textContent === 'Position' && /King/.test(g.by('lsnExtraBody').innerHTML || ''),
+          g.by('lsnExtraBody').innerHTML);
+    check('cluster question ' + (idx - 3) + ' offers I’m Ready',
+          Array.from(g.by('lsnUnder').children).some(b => b.textContent.indexOf('I’m Ready') === 0));
+    check('judged the cluster way', g.LSN.steps[idx].solve === 'cluster');
+  });
+  g.lsnOpen(5, 6);
+  check('the rebuild step also opens on the Position card',
+        g.by('lsnExtraTitle').textContent === 'Position' && /King/.test(g.by('lsnExtraBody').innerHTML || ''));
+  check('judged the rebuild way', g.LSN.steps[6].solve === 'rebuild');
+  g.lsnOpen(5, 7);
+  check('lesson 5 ends on the handoff', !!g.LSN.steps[7].handoff);
 
   head('Playing Without the Pieces says the position out loud');
   for (let i = 0; i < CHALLENGES.length; i++){
@@ -919,18 +1063,18 @@ async function walk(p, n){
           g.by('lsnExtraTitle').textContent === 'Position', g.by('lsnExtraTitle').textContent);
     const body = g.by('lsnExtraBody').innerHTML || '';
     const st = g.stateFromFEN(CHALLENGES[i].fen);
-    let all = true, men = 0;
-    const NAME = { P:'Pawn', N:'Knight', B:'Bishop', R:'Rook', Q:'Queen', K:'King' };
-    for (let sq = 0; sq < 64; sq++){
-      const pc = st.b[sq];
-      if (!pc) continue;
-      men++;
-      if (body.indexOf(g.sqName(sq)) < 0 || body.indexOf(NAME[pc.t]) < 0) all = false;
-    }
-    check('challenge ' + (i + 1) + ': every man on the board is in the list', all, body);
-    const listed = (body.match(/\b[a-h][1-8]\b/g) || []);
-    check('challenge ' + (i + 1) + ': and nothing that is not on it',
-          listed.length === men, listed.join(',') + ' vs ' + men + ' men');
+    // Read the card back into a man-per-square list (readPositionCard(), the
+    // same reading the rebuild solver does) and compare it to the board
+    // directly, rather than hunting for a piece-name substring: the card no
+    // longer spells "Knight" out — a mixed group names it "N" — so the round
+    // trip is what actually proves nothing is missing and nothing is extra.
+    const read = readPositionCard(body, g.sqIndex);
+    const board = [];
+    for (let sq = 0; sq < 64; sq++){ const pc = st.b[sq]; if (pc) board.push({ sq, c:pc.c, t:pc.t }); }
+    const same = (a, b) => a.sq === b.sq && a.c === b.c && a.t === b.t;
+    check('challenge ' + (i + 1) + ': every man on the board is in the list, and nothing that is not',
+          board.length === read.length && board.every(m => read.some(r => same(r, m))),
+          JSON.stringify(read) + ' vs ' + JSON.stringify(board));
     check('challenge ' + (i + 1) + ': both sides are named',
           body.indexOf('White') >= 0 && body.indexOf('Black') >= 0);
     check('challenge ' + (i + 1) + ': it is offered before the blindfold, not during',
@@ -958,13 +1102,40 @@ async function walk(p, n){
           g.by('lsnExtraBody').innerHTML === g.lsnPositionHTML(g.LSN.st));
   }
 
-  head('The position list is read off the board, not written beside it');
-  const made = g.lsnPositionHTML(g.stateFromFEN('8/8/4k3/8/2N5/8/5PPP/6K1 w - - 0 1'));
-  check('a position it has never seen is described too',
-        /Knight/.test(made) && /c4/.test(made) && /King/.test(made) &&
-        /e6/.test(made) && /g1/.test(made) && /f2, g2, h2/.test(made), made);
-  check('and the two sides are kept apart',
-        made.indexOf('White') < made.indexOf('c4') && made.indexOf('Black') < made.indexOf('e6'));
+  head('The position list is read off the board, not written beside it, in Fine’s own order');
+  {
+    // A pawn shield: every pawn beside the king is claimed by "Beside the
+    // King" rather than "Pawns" — computed here against the same king-
+    // distance rule lsnPositionHTML() uses, not assumed from the FEN's own
+    // shape, and the knight far from the king is what is left for "The
+    // Rest".
+    const st = g.stateFromFEN('8/8/4k3/8/2N5/8/5PPP/6K1 w - - 0 1');
+    const made = g.lsnPositionHTML(st);
+    const g1 = g.sqIndex('g1'), within1 = (a, b) =>
+      Math.max(Math.abs(C.rowOf(a) - C.rowOf(b)), Math.abs(C.colOf(a) - C.colOf(b))) <= 1;
+    const besideG1 = ['f2', 'g2', 'h2'].filter(s => within1(g.sqIndex(s), g1));
+    check('every pawn actually beside g1 is computed, not assumed', besideG1.length === 3, besideG1.join(','));
+    check('King is named before Beside the King',
+          made.indexOf('King') >= 0 && made.indexOf('King') < made.indexOf('Beside the King'), made);
+    check('the beside-the-king group lists exactly the pawns computed above',
+          /Beside the King<\/span><span class="sqs">Pf2, Pg2, Ph2<\/span>/.test(made), made);
+    check('the far knight falls to The Rest, lettered since that group can mix types',
+          /The Rest<\/span><span class="sqs">Nc4<\/span>/.test(made), made);
+    check('and the two sides are kept apart',
+          made.indexOf('White') < made.indexOf('c4') && made.indexOf('Black') < made.indexOf('e6'), made);
+  }
+  {
+    // A pawn nowhere near the king: this is what proves the "Pawns" group
+    // itself, in order after "Beside the King" and before "The Rest" —
+    // FEN2 above never exercises it, because its pawns are all claimed by
+    // the beside group first.
+    const st = g.stateFromFEN('4k3/8/8/8/8/8/P7/6K1 w - - 0 1');
+    const made = g.lsnPositionHTML(st);
+    check('a lone pawn far from the king gets its own Pawns row, unlettered',
+          /Pawns<\/span><span class="sqs">a2<\/span>/.test(made), made);
+    check('in Fine’s order: King, then Pawns, with no Beside the King row here',
+          made.indexOf('King') < made.indexOf('Pawns') && made.indexOf('Beside the King') < 0, made);
+  }
 
   head('Nothing anywhere still speaks of the two lessons that went');
   // In the markup and in what the course says — the migration note in the
@@ -1313,6 +1484,143 @@ async function walk(p, n){
   {
     openBareStep(p, p.lsnStepTypeMove(NOTATION[1]));   // Nf3, a different position
     check('lsnStepTypeMove is answerable by the typed solver', await solveStep(p, 5000));
+  }
+
+  /* ============================================================
+   * Task 31: the five step kinds lessons 4 and 5 add, exercised on their
+   * own — the same reason Task 30a's section above exists: `walk()` already
+   * proves each one finishes a real lesson, this proves what each does with
+   * a right answer, a wrong one, and the edges the walk never has reason to
+   * hit (a click on a man that is not hanging, a rebuild one man short).
+   * ============================================================ */
+  head('The five new step kinds for lessons 4 and 5 are exercised on their own');
+
+  const attackQ = (level, ask) => untilQuestion(
+    () => p.prMakeAttack(p.prRecipe('attack', level)), q => q.ask === ask, ask);
+  const holdQ = (level, modes, mode) => untilQuestion(
+    () => p.prMakeHold(Object.assign({}, p.prRecipe('hold', level), { modes })),
+    q => q.mode === mode, 'a Hold the Position ' + mode);
+
+  head('lsnStepAttackYesNo — attacks and defended, read as the same line either way');
+  {
+    const q = attackQ(1, 'attacks');
+    check('the question carries a piece, a target and a boolean answer',
+          q.from >= 0 && q.target >= 0 && typeof q.answer === 'boolean', JSON.stringify(q));
+    const step = p.lsnStepAttackYesNo(q);
+    check('solve is choices', step.solve === 'choices');
+    openBareStep(p, step);
+    check('the attacking piece is lit, not the target', p.LSN.marks.get(q.from) === 'lsn-lit');
+    check('exactly Yes and No are offered',
+          Array.from(p.by('lsnChoices').children).map(b => b.textContent).join(',') === 'Yes,No');
+    clickChoicesUntilRight('lsnStepAttackYesNo (attacks)');
+  }
+  {
+    const q = attackQ(5, 'defended');
+    const step = p.lsnStepAttackYesNo(q);
+    openBareStep(p, step);
+    check('a defended question lights the target rather than the piece asked about',
+          p.LSN.marks.get(q.target) === 'lsn-lit');
+    clickChoicesUntilRight('lsnStepAttackYesNo (defended)');
+  }
+  {
+    openBareStep(p, p.lsnStepAttackYesNo(attackQ(1, 'attacks')));
+    check('lsnStepAttackYesNo is answerable by the choices solver', await solveStep(p, 3000));
+  }
+
+  head('lsnStepHanging — click one or two men, and a wrong click never ends the step');
+  {
+    const q = attackQ(6, 'hanging');
+    check('the question names one or two hanging men',
+          Array.isArray(q.answer) && q.answer.length >= 1 && q.answer.length <= 2, JSON.stringify(q));
+    const step = p.lsnStepHanging(q);
+    check('solve is hanging', step.solve === 'hanging');
+    openBareStep(p, step);
+    let notHanging = -1;
+    for (let i = 0; i < 64; i++) if (q.answer.indexOf(i) < 0){ notHanging = i; break; }
+    p.LSN.onSquare(notHanging);
+    check('a square that is not hanging is refused without ending the step',
+          p.LSN.ok === false && p.LSN.marks.get(notHanging) !== 'lsn-right');
+    q.answer.forEach(sq => p.LSN.onSquare(sq));
+    check('every hanging man is marked right, and the step ends once they all are found',
+          p.LSN.ok === true && q.answer.every(sq => p.LSN.marks.get(sq) === 'lsn-right'));
+  }
+  {
+    openBareStep(p, p.lsnStepHanging(attackQ(6, 'hanging')));
+    check('lsnStepHanging is answerable by the hanging solver', await solveStep(p, 5000));
+  }
+
+  head('lsnStepCluster — Hold the Position’s question mode, Fine’s own order, whatever shape it asks in');
+  {
+    const q = holdQ(2, ['question'], 'question');
+    check('the question carries a position and one of Fine’s own asks', q.mode === 'question' && !!q.ask, JSON.stringify(q.ask));
+    const step = p.lsnStepCluster(q);
+    check('solve is cluster', step.solve === 'cluster');
+    openBareStep(p, step);
+    check('the Position card is up, in Fine’s order, before anything is asked',
+          p.by('lsnExtraTitle').textContent === 'Position' && /King/.test(p.by('lsnExtraBody').innerHTML || ''),
+          p.by('lsnExtraBody').innerHTML);
+    const ready = Array.from(p.by('lsnUnder').children).find(b => b.textContent.indexOf('I’m Ready') === 0);
+    check('I’m Ready is offered', !!ready);
+    ready.onclick();
+    check('the card and the board go dark together',
+          p.by('lsnExtra').style.display === 'none' && p.LSN.mode === 'blind');
+    check('the question itself is now on the card', (p.by('lsnAsk').innerHTML || '') === q.ask.text,
+          p.by('lsnAsk').innerHTML);
+  }
+  // Every one of the four shapes prAskFine()/prAskAbout() can hand back —
+  // 'where', 'what', 'count', 'occupied' — has to be answerable, and which
+  // one turns up on a given draw is chance, so this runs enough draws to
+  // give the shuffle a real chance at each of them rather than asking for
+  // just one.
+  for (let i = 0; i < 14; i++){
+    const q = holdQ(2, ['question'], 'question');
+    openBareStep(p, p.lsnStepCluster(q));
+    const ok = await solveStep(p, 4000);
+    check('lsnStepCluster (' + q.ask.t + ') is answerable by the cluster solver', ok, q.ask.text);
+  }
+
+  head('lsnStepRebuild — Hold the Position’s rebuild mode, judged with rebuildDiff()');
+  {
+    const q = holdQ(3, ['rebuild'], 'rebuild');
+    check('the question carries a target list of at least two men', Array.isArray(q.want) && q.want.length >= 2, JSON.stringify(q.want));
+    const step = p.lsnStepRebuild(q);
+    check('solve is rebuild', step.solve === 'rebuild');
+    openBareStep(p, step);
+    check('the Position card is up before I’m Ready',
+          p.by('lsnExtraTitle').textContent === 'Position' && /King/.test(p.by('lsnExtraBody').innerHTML || ''));
+    const ready = Array.from(p.by('lsnUnder').children).find(b => b.textContent.indexOf('I’m Ready') === 0);
+    ready.onclick();
+    check('the card comes down and a twelve-glyph palette goes up, plus Clear a square',
+          p.by('lsnExtra').style.display === 'none' && p.by('lsnChoices').children.length === 13);
+    // every man but the last one — left out on purpose
+    q.want.slice(0, -1).forEach(m => {
+      const btn = Array.from(p.by('lsnChoices').children).find(b => b.dataset.c === m.c && b.dataset.t === m.t);
+      btn.onclick();
+      p.LSN.onSquare(m.sq);
+    });
+    const done = Array.from(p.by('lsnUnder').children).find(b => b.textContent.indexOf('Done') === 0);
+    done.onclick();
+    check('one man short concedes rather than passing', p.LSN.ok === true);
+    const missing = q.want[q.want.length - 1];
+    check('the missing man is marked lsn-miss', p.LSN.marks.get(missing.sq) === 'lsn-miss');
+  }
+  {
+    const q = holdQ(3, ['rebuild'], 'rebuild');
+    openBareStep(p, p.lsnStepRebuild(q));
+    Array.from(p.by('lsnUnder').children).find(b => b.textContent.indexOf('I’m Ready') === 0).onclick();
+    q.want.forEach(m => {
+      const btn = Array.from(p.by('lsnChoices').children).find(b => b.dataset.c === m.c && b.dataset.t === m.t);
+      btn.onclick();
+      p.LSN.onSquare(m.sq);
+    });
+    Array.from(p.by('lsnUnder').children).find(b => b.textContent.indexOf('Done') === 0).onclick();
+    check('every man placed exactly is accepted outright, and every mark is lsn-right',
+          p.LSN.ok === true && p.LSN.marks.size === q.want.length &&
+          Array.from(p.LSN.marks.values()).every(c => c === 'lsn-right'));
+  }
+  {
+    openBareStep(p, p.lsnStepRebuild(holdQ(3, ['rebuild'], 'rebuild')));
+    check('lsnStepRebuild is answerable by the rebuild solver', await solveStep(p, 8000));
   }
 
   console.log('\n' + passed + ' passed, ' + failed + ' failed');

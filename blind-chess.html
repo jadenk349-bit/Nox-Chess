@@ -2124,6 +2124,13 @@
   .lsn-choice.wrong{
     color:#e7908a; border-color:rgba(224,90,77,.5); background:rgba(224,90,77,.12);
   }
+  /* the rebuild palette and a "what stands there" answer: a piece's own
+     glyph in place of a word, picked the way the board itself is read */
+  .lsn-choices.glyphs .lsn-choice{display:flex; align-items:center; justify-content:center; gap:8px; font-size:22px; padding:8px 0;}
+  .lsn-choices.glyphs .lsn-choice.active{border-color:var(--gold-soft); background:rgba(212,175,110,.14);}
+  .lsn-choices.glyphs .pc-svg{width:1.05em; height:1.05em;}
+  .lsn-choices.glyphs .g-w{color:#eee6d5; --piece-edge:#514538;}
+  .lsn-choices.glyphs .g-b{color:#252d38; --piece-edge:#b9a681;}
 
   .lsn-say{
     margin-top:11px; min-height:17px; font-size:16px; line-height:1.6;
@@ -10757,16 +10764,28 @@ function lsnUnder(list){
   });
 }
 
-/** Multiple choice, in the card. `onPick` is handed the option and its button. */
-function lsnChoices(list, onPick, col){
+/** Multiple choice, in the card. `onPick` is handed the option and its
+    button. `glyph` is for the one caller whose choices are pieces rather
+    than words — the rebuild palette, and Hold the Position's own "what
+    stands there" question — and does two things at once: the label is
+    written as markup (`pieceHTML()`'s own SVG) rather than escaped as text,
+    and `c.c`/`c.t` — a colour and a type, where the choice carries them —
+    are copied onto the button's `dataset`, which is how the rebuild step
+    finds "the queen" button again once a square is clicked for it. Every
+    other caller passes neither field, so the dataset stays empty and the
+    label stays plain text, exactly as before. */
+function lsnChoices(list, onPick, col, glyph){
   const box = document.getElementById('lsnChoices');
   if (!box) return;
   box.innerHTML = '';
   box.classList.toggle('col', !!col);
+  box.classList.toggle('glyphs', !!glyph);
   (list || []).forEach(c => {
     const b = document.createElement('button');
     b.className = 'lsn-choice';
-    b.textContent = c.label;
+    if (glyph) b.innerHTML = c.label; else b.textContent = c.label;
+    if (c.c !== undefined) b.dataset.c = c.c;
+    if (c.t !== undefined) b.dataset.t = c.t;
     b.onclick = () => { if (!LSN.ok) onPick(c, b); };
     box.appendChild(b);
   });
@@ -11822,6 +11841,27 @@ function lsnLesson1(){
   ];
 }
 
+/* A Practice generator retried from the OUTSIDE, capped rather than looped
+   forever: several of them (prMakeLines, prMakeAttack, prMakeHold with its
+   modes narrowed to one) can hand back the wrong kind of question, the wrong
+   mode, or nothing at all when their own internal retries run out — a
+   'between' pair with a run of 2–6 squares is not guaranteed on the first
+   try, and neither is a 'hanging' position with exactly one or two men loose.
+   A generator that has actually broken must fail the lesson loudly rather
+   than hang it, which is what the throw is for once 200 tries are spent —
+   the same cap server/test_lessons.js's own untilQuestion() uses to exercise
+   these levels in isolation. One helper rather than a copy per lesson:
+   lsnLesson2's own retry (formerly wantLines, kept as a thin wrapper below),
+   lsnLesson4's attack questions and lsnLesson5's hold questions all share it
+   now rather than each growing its own capped loop. */
+function wantQ(make, ok, label){
+  for (let i = 0; i < 200; i++){
+    const q = make();
+    if (q && ok(q)) return q;
+  }
+  throw new Error('wantQ: could not build ' + (label || 'a') + ' question in 200 tries');
+}
+
 /* ---- 2 · Lines and the Knight ----
    Two demos of e4's own geometry (its rank and file, then both diagonals),
    two between questions, one through question and a knight demo, then two
@@ -11831,20 +11871,12 @@ function lsnLesson2(){
   const L = LESSONS[1], e4 = sqIndex('e4'), T = linesThrough(e4);
   // prMakeLines() draws its question kind from the level's own `kinds` list
   // and can hand back a kind other than the one this step wants — level 4
-  // offers both 'between' and 'through' — or nothing at all when its own
-  // internal retries run out (a 'between' pair with a run of 2–6 squares is
-  // not guaranteed on the first try). Retried from the outside too, capped
-  // rather than looped forever: a generator that has actually broken must
-  // fail the lesson loudly rather than hang it (per the Task 30 controller
-  // notes — the same cap server/test_lessons.js's own untilQuestion() uses
-  // to exercise these levels in isolation).
-  const wantLines = (level, ask, extra) => {
-    for (let i = 0; i < 200; i++){
-      const q = prMakeLines(prRecipe('lines', level));
-      if (q && q.ask === ask && (!extra || extra(q))) return q;
-    }
-    throw new Error('lsnLesson2: could not build a ' + ask + ' question at level ' + level + ' in 200 tries');
-  };
+  // offers both 'between' and 'through'. wantQ() is the retry, capped rather
+  // than looped forever — see the note over it.
+  const wantLines = (level, ask, extra) => wantQ(
+    () => prMakeLines(prRecipe('lines', level)),
+    q => q.ask === ask && (!extra || extra(q)),
+    ask);
   const between = lv => wantLines(lv, 'between');
   const through = () => wantLines(4, 'through');
   // A knight route of two moves or fewer: level 7 is knight-only, so `ask`
@@ -11869,20 +11901,30 @@ function lsnLesson2(){
     }),
     lsnStepBetween(between(1)), lsnStepBetween(between(2)),
     lsnStepDiagPick(through()),
-    lsnStepDemo({
-      title:'The knight',
-      what:'<p>Two squares one way and one the other. It always lands on the other colour, and it ' +
-           'never crosses anything.</p>',
-      ask:'Every square a knight on e4 reaches.',
-      named:true,
+    (() => {
       // The two scenery kings lsnKnightBoard() seats stay out of the way at
       // a1/h8 here — e4's own knight moves never reach either corner — so
       // this reuses the helper rather than re-deriving the same placement a
       // second time, exactly as the comment over lsnKnightBoard() invites.
-      st:lsnKnightBoard(e4, []),
-      marks:DIR_N.map(([dr, dc]) => [(rowOf(e4) + dr) * 8 + colOf(e4) + dc, 'lsn-lit'])
-                 .filter(([i]) => i >= 0 && i < 64)
-    }),
+      // What is lit is the knight's own legal moves — legalMoves() filtered
+      // to the ones starting on e4 — rather than DIR_N's eight offsets read
+      // straight off the row and column: DIR_N has no edge guard of its own
+      // (it exists to be filtered by whatever asks it a question), and used
+      // directly here it used to light squares on the rank or file beyond
+      // the board's own edge. Reusing the generator is the reuse rule and
+      // costs one line; a demo that lit different squares than the rules
+      // would allow would be teaching the wrong shape.
+      const knightSt = lsnKnightBoard(e4, []);
+      return lsnStepDemo({
+        title:'The knight',
+        what:'<p>Two squares one way and one the other. It always lands on the other colour, and it ' +
+             'never crosses anything.</p>',
+        ask:'Every square a knight on e4 reaches.',
+        named:true,
+        st:knightSt,
+        marks:legalMoves(knightSt, W).filter(m => m.from === e4).map(m => [m.to, 'lsn-lit'])
+      });
+    })(),
     lsnStepKnight(knight()), lsnStepKnight(knight()),
     lsnHandoffStep(L)
   ];
@@ -11993,39 +12035,284 @@ function lsnLesson3(){
   ]);
 }
 
-/* ---- 4 · Reach and Attack ---- */
-function lsnLesson4(){
-  const intro = {
-    title:'What a Knight Can Reach',
-    what:'<p>A blindfold player pictures <b>lines</b>, not a board: what each man attacks, and what stands in the way.</p>',
-    ask:'A knight on <code>e4</code>, with its eight squares marked. Nothing blocks a knight.',
-    gate:false,
+/* ============================================================
+   TASK 31 — the five step kinds lessons 4 and 5 add on top of Task 30's
+   seven, built from Attack Vision (prMakeAttack) and Hold the Position
+   (prMakeHold) exactly as the seven before them are built from Square
+   Trainer and Lines & Routes: the "make" function is Practice's own, never
+   copied, and every judgement below is the game's own rule (attackersOf(),
+   see(), rebuildDiff()) asked again rather than reinvented. `lsnStepOpeningHold`
+   in the brief this task shipped from is not a sixth factory — it names what
+   lsnLesson5 already gets by asking Move Tracker's own lsnDrillTrack(2) for
+   the start position: two plies of a real opening, read with the men hidden,
+   then a question on whatever changed. Nothing new to write for it.
+   ============================================================ */
+
+/** Attack Vision's two yes/no questions — level 1's `attacks` ("does this
+    line reach that square?") and level 5's `defended` ("does anybody answer
+    back?") — put beside each other because they are the same question read
+    two ways: forward, a line reaches or it does not; backward, that same
+    line is what would answer for the square. Only the piece the question is
+    actually about is lit, exactly as Attack Vision's own prShowAttackBool()
+    marks only q.from or q.target and never both — the point is to hold the
+    line in your head, not to have it drawn for you. */
+function lsnStepAttackYesNo(q){
+  const st = q.st, onSq = q.ask === 'attacks' ? q.from : q.target;
+  const text = q.ask === 'attacks'
+    ? prMan(q.colour, st.b[q.from].t) + ' on <code>' + sqName(q.from) +
+      '</code> — does it attack <code>' + sqName(q.target) + '</code>?'
+    : 'Is ' + prMan(q.colour, st.b[q.target].t) + ' on <code>' + sqName(q.target) + '</code> defended?';
+  return {
+    title: q.ask === 'attacks' ? 'Does it attack that square?' : 'Is it defended?',
+    what: q.ask === 'attacks'
+      ? '<p>Picture the line it moves on, and ask whether the target square lies on it.</p>'
+      : '<p>Defended means one of its own side answers back on that square — its own line reversed.</p>',
+    ask:text, gate:true, auto:900, solve:'choices',
     setup(){
-      const b = Array(64).fill(null);
-      b[sqIndex('e4')] = mk(W, 'N');
-      b[sqIndex('a1')] = mk(W, 'K');
-      b[sqIndex('h8')] = mk(B, 'K');
-      LSN.st = { b, turn:W, cr:{wK:0,wQ:0,bK:0,bQ:0}, ep:-1, half:0, full:1 };
-      legalMoves(LSN.st, W)
-        .filter(m => m.from === sqIndex('e4'))
-        .forEach(m => LSN.marks.set(m.to, 'lsn-lit'));
-      LSN.marks.set(sqIndex('e4'), 'sel');
+      LSN.st = st; LSN.named = true;
+      LSN.marks.set(onSq, 'lsn-lit');
+      lsnChoices([{ label:'Yes', right:q.answer }, { label:'No', right:!q.answer }], (c, b) => {
+        if (c.right){ b.classList.add('right'); lsnRight(q.answer ? 'Yes.' : 'No.'); return; }
+        b.classList.add('wrong'); b.disabled = true; lsnWrong(q.answer ? 'Yes, it does.' : 'No, it does not.');
+      }, true);
     }
   };
-  // Two in plain sight, then the men go out — when the player says so.
-  return [intro,
-          lsnDrillReach('R', false), lsnDrillReach('B', false),
-          lsnDrillReach('N', true),  lsnDrillReach('Q', true), lsnDrillReach('K', true),
-          lsnHandoffStep(LESSONS[3])];
+}
+
+/** Attack Vision's `hanging` question, level 6 — one or two men, attacked
+    and not answered for (prHanging(), the same arithmetic the review's
+    see() already settles). Marked the instant one is found rather than
+    totalled up behind a Done button: a click on a man that is not hanging is
+    a fact about that one square and is said as one, and does not end the
+    step — the player still has the rest of the board to look at. */
+function lsnStepHanging(q){
+  const want = new Set(q.answer), found = new Set();
+  return {
+    title:'What is hanging?',
+    what:'<p>Hanging: attacked, and nothing of its own side answers back.</p>',
+    ask:'Click ' + (want.size > 1 ? 'both hanging men' : 'the hanging man') + '.',
+    gate:true, solve:'hanging', truth:q.answer,
+    setup(){
+      LSN.st = q.st; LSN.named = true;
+      LSN.onSquare = i => {
+        if (LSN.ok || found.has(i)) return;
+        if (want.has(i)){
+          found.add(i);
+          LSN.marks.set(i, 'lsn-right'); lsnRender();
+          if (found.size === want.size) lsnRight(want.size > 1 ? 'Both found.' : 'Yes — hanging.');
+          return;
+        }
+        lsnFlash(i);
+        lsnWrong(LSN.st.b[i] ? 'That one is not hanging.' : 'Nothing stands there.');
+      };
+    }
+  };
+}
+
+/** Hold the Position's `question` mode, asked in Fine's own order
+    (prAskFine): the king, what stands beside it, the pawns, then whatever is
+    left — study the Position card (lsnPositionHTML(), the same card a
+    challenge in lesson 10 already shows), I'm Ready takes the board and the
+    card away together, then the question. `ask.t` is one of the shapes
+    prAskShow() already answers in Practice ('where', 'what', 'count',
+    prAskFine's own fallback to prAskAbout can also hand back 'occupied') —
+    judged here the same way, in the lesson's own elements rather than
+    Practice's. */
+function lsnStepCluster(q){
+  const ask = q.ask;
+  const step = {
+    title:'Kings first',
+    what:'<p>The king, what stands beside it, the pawns, then the rest — hold it in that order.</p>',
+    ask:'Study the position below. Press <b>I’m Ready</b> and it goes dark.',
+    gate:true, solve:'cluster', truth:ask,
+    setup(){
+      LSN.st = q.st; LSN.mode = 'sighted'; LSN.named = true;
+      lsnCardKind = null;
+      lsnExtraShow('Position', lsnPositionHTML(LSN.st));
+      lsnUnder([{ label:'I’m Ready', cls:'primary wide', on:begin }]);
+      lsnSay('Kings first, then what stands beside them, the pawns, then the rest.', 'tip');
+    }
+  };
+  function begin(){
+    LSN.mode = 'blind';
+    lsnExtraHide();
+    lsnRender();
+    lsnUnder([]);
+    lsnSay('');
+    step.ask = ask.text;
+    askIt();
+    lsnPaint();
+  }
+  function askIt(){
+    if (ask.t === 'where'){
+      LSN.hint = () => lsnSay('Kings first — that is where this one stood.', 'tip');
+      LSN.onSquare = i => {
+        if (LSN.ok) return;
+        if (i === ask.sq){ LSN.marks.set(i, 'lsn-right'); lsnRender(); lsnRight('Yes — <b>' + sqName(ask.sq) + '</b>.'); return; }
+        lsnFlash(i);
+        lsnWrong(prMan(ask.colour, ask.type) + ' was on <b>' + sqName(ask.sq) + '</b>.');
+      };
+    } else if (ask.t === 'what'){
+      const palette = PR_PALETTE.map(p => ({ label:'<span class="g-' + p.c + '">' + pieceHTML(p.t) + '</span>', c:p.c, t:p.t }));
+      lsnChoices(palette.concat([{ label:'Empty square', c:null, t:null }]), (c, b) => {
+        const right = c.c === ask.colour && c.t === ask.type;
+        if (right){ b.classList.add('right'); LSN.marks.set(ask.sq, 'lsn-right'); lsnRender(); lsnRight('Yes.'); return; }
+        b.classList.add('wrong'); b.disabled = true;
+        lsnWrong(ask.type ? prMan(ask.colour, ask.type) + ' stood there.' : 'That square was empty.');
+      }, true, true);
+    } else if (ask.t === 'count'){
+      lsnChoices(Array.from({ length:7 }, (_, n) => ({ label:String(n), right:n === ask.n })), (c, b) => {
+        if (c.right){ b.classList.add('right'); lsnRight('Yes — ' + ask.n + '.'); return; }
+        b.classList.add('wrong'); b.disabled = true; lsnWrong('Not that many.');
+      }, true);
+    } else {
+      lsnChoices([{ label:'Yes', right:ask.yes }, { label:'No', right:!ask.yes }], (c, b) => {
+        if (c.right){ b.classList.add('right'); lsnRight(ask.yes ? 'Yes.' : 'No.'); return; }
+        b.classList.add('wrong'); b.disabled = true; lsnWrong(ask.yes ? 'Something stood there.' : 'That square was empty.');
+      }, true);
+    }
+  }
+  return step;
+}
+
+/** Hold the Position's `rebuild` mode — the same Position card as above,
+    then the board itself put back a man at a time from a twelve-glyph
+    palette (PR_PALETTE, Practice's own rebuild palette, reused rather than
+    redrawn) and judged with rebuildDiff(), the pure function the practice
+    board and this one now share. Pick a man, click its square; picking the
+    same man again and clicking its square once more — or picking Clear a
+    square — takes it back off, the same correction prRebuildStart() already
+    lets a Practice session make, because a learner has to be able to fix a
+    slip before Done is pressed. */
+function lsnStepRebuild(q){
+  const target = q.want;
+  let pick = null, ids = {};
+  const step = {
+    title:'Rebuild it',
+    what:'<p>Pick a man, then click its square. Pick it again and click to take it back off.</p>',
+    ask:'Study the position below. Press <b>I’m Ready</b>, then place every man where it stood.',
+    gate:true, solve:'rebuild', truth:target,
+    setup(){
+      LSN.st = q.st; LSN.mode = 'sighted'; LSN.named = true;
+      lsnCardKind = null;
+      lsnExtraShow('Position', lsnPositionHTML(LSN.st));
+      lsnUnder([{ label:'I’m Ready', cls:'primary wide', on:begin }]);
+      lsnSay('Kings first, then what stands beside them, the pawns, then the rest.', 'tip');
+    }
+  };
+  function begin(){
+    // A fresh, empty board to build on — q.st (the studied position) stays
+    // untouched in the closure, so the Position card can still describe it
+    // by name if the rebuild falls short (see lsnConcede below).
+    LSN.st = { b:Array(64).fill(null), turn:W, cr:{ wK:0, wQ:0, bK:0, bQ:0 }, ep:-1, half:0, full:1 };
+    LSN.mode = 'sighted';
+    lsnExtraHide();
+    lsnRender();
+    step.ask = 'Place every man where it stood, then press Done.';
+    const palette = PR_PALETTE.map(p => ({ label:'<span class="g-' + p.c + '">' + pieceHTML(p.t) + '</span>', c:p.c, t:p.t }));
+    lsnChoices(palette.concat([{ label:'Clear a square', c:null, t:null }]), (c, b) => {
+      pick = c.c === null ? 'clear' : c;
+      Array.from(document.getElementById('lsnChoices').children).forEach(x => x.classList.remove('active'));
+      b.classList.add('active');
+    }, true, true);
+    LSN.onSquare = i => {
+      if (LSN.ok || !pick) return;
+      const there = LSN.st.b[i];
+      // The same glyph on a square that already carries it is the
+      // correction: a second click takes it back off rather than replacing
+      // it with an identical copy of itself.
+      if (pick !== 'clear' && there && there.c === pick.c && there.t === pick.t){
+        LSN.st.b[i] = null;
+        lsnRender();
+        return;
+      }
+      LSN.st.b[i] = null;
+      if (pick !== 'clear'){
+        const key = i + pick.c + pick.t;
+        if (!ids[key]) ids[key] = mk(pick.c, pick.t);
+        LSN.st.b[i] = ids[key];
+      }
+      lsnRender();
+    };
+    lsnUnder([{ label:'Done', cls:'primary wide', on(){
+      const placed = [];
+      for (let i = 0; i < 64; i++) if (LSN.st.b[i]) placed.push({ sq:i, c:LSN.st.b[i].c, t:LSN.st.b[i].t });
+      const res = rebuildDiff(placed, target);
+      LSN.onSquare = null;
+      LSN.marks = new Map();
+      res.right.forEach(p => LSN.marks.set(p.sq, 'lsn-right'));
+      res.wrong.forEach(p => LSN.marks.set(p.sq, 'lsn-wrong'));
+      res.missing.forEach(p => LSN.marks.set(p.sq, 'lsn-miss'));
+      lsnRender();
+      if (!res.wrong.length && !res.missing.length) lsnRight('Every man where it stood.');
+      else lsnConcede('It stood like this:' + lsnPositionHTML(q.st));
+    } }]);
+    lsnPaint();
+  }
+  return step;
+}
+
+/* ---- 4 · Reach and Attack ----
+   The reach drills first (Task 30's own lsnDrillReach, one sighted and one
+   blindfolded), then a slider blocked by the first man in its way, then
+   Attack Vision's own three questions in the order it introduces them:
+   attacks, then defence read as the same line the other way, then hanging —
+   attacked and unanswered — as the two combined. */
+function lsnLesson4(){
+  const L = LESSONS[3];
+  const att = lv => wantQ(
+    () => prMakeAttack(prRecipe('attack', lv)),
+    q => lv === 1 ? q.ask === 'attacks' : lv === 5 ? q.ask === 'defended' : q.ask === 'hanging',
+    'an Attack Vision question at level ' + lv);
+  return [
+    lsnDrillReach('N', false), lsnDrillReach('B', true),
+    lsnStepDemo({
+      title:'A blocker', what:'<p>A slider stops at the first man in its way. A knight never does.</p>',
+      ask:'The bishop’s ray ends at the pawn.',
+      st:stateFromFEN('4k3/8/8/8/3p4/8/1B6/4K3 w - - 0 1'), named:true,
+      marks:[[sqIndex('c3'), 'lsn-lit'], [sqIndex('d4'), 'lsn-wrong']]
+    }),
+    lsnStepAttackYesNo(att(1)), lsnStepAttackYesNo(att(1)),
+    lsnStepDemo({
+      title:'Attack and defence are one line',
+      what:'<p>Read the same ray the other way and it is a defence. “Hanging” means attacked and not defended.</p>',
+      ask:'Press Continue.', named:true
+    }),
+    lsnStepAttackYesNo(att(5)), lsnStepHanging(att(6)),
+    lsnHandoffStep(L)
+  ];
 }
 
 /* ---- 5 · Holding a Small Position ----
-   No page in front of it: the first sequence is the first thing on screen,
-   with the one instruction it needs written on the button that starts it.
-   Two sequences rather than four: the long ones belong to Move Tracker, which
-   is where this lesson hands the player next. */
+   The position you already own (the start of every game, after two plies of
+   it) opens the lesson, then two Move Tracker sequences (lsnStepOpeningHold
+   in the brief this shipped from — see the Task 31 banner above), Fine's own
+   order stated in words, two Hold the Position questions asked in that
+   order, and one rebuild. */
 function lsnLesson5(){
-  return [lsnDrillTrack(2), lsnDrillTrack(2), lsnHandoffStep(LESSONS[4])];
+  const L = LESSONS[4];
+  const clusterQ = () => wantQ(
+    () => prMakeHold(Object.assign({}, prRecipe('hold', 2), { modes:['question'] })),
+    q => q.mode === 'question', 'a Hold the Position question');
+  const rebuildQ = () => wantQ(
+    () => prMakeHold(Object.assign({}, prRecipe('hold', 3), { modes:['rebuild'] })),
+    q => q.mode === 'rebuild', 'a Hold the Position rebuild');
+  return [
+    lsnStepDemo({
+      title:'The position you already own',
+      what:'<p>Every game starts here. After two moves, only two men have moved — so that is all there is to hold.</p>',
+      ask:'Press Continue.', st:newState(), named:true
+    }),
+    lsnDrillTrack(2), lsnDrillTrack(2),
+    lsnStepDemo({
+      title:'Kings first',
+      what:'<p>Reuben Fine held a position from the king outward: the king, what stands beside it, the pawns, then the rest. The Position card below says a position in that order.</p>',
+      ask:'Press Continue.', named:true
+    }),
+    lsnStepCluster(clusterQ()), lsnStepCluster(clusterQ()),
+    lsnStepRebuild(rebuildQ()),
+    lsnHandoffStep(L)
+  ];
 }
 
 /* ---- 10 · Playing Without the Pieces ----
@@ -12053,31 +12340,49 @@ const LSN_CHALLENGES = [
 
 /* ---- the Position list ----
    The position said in words, read off the board itself rather than written
-   out beside it: a challenge whose FEN changes cannot end up with a list that
-   describes the position it used to be. Squares of the same kind share a line
-   (Pawn — f2, g2, h2) because three lines saying "Pawn" are three lines to
-   read and one fact to learn. It is the position a blindfold player would say
-   to themselves, so it goes away the moment the board does — left up, it is
-   simply the answer key. */
-const LSN_POS_ORDER = ['K','Q','R','B','N','P'];
+   out beside it: a challenge — or a Hold the Position card — whose position
+   changes cannot end up with a list that describes the position it used to
+   be. Fine's own order (see the note over prAskFine() in Practice): the
+   king, what stands beside it, the pawns, then the rest — a pawn shielding
+   the king is read with the king, not filed a second time under Pawns, which
+   is what "not already listed" below means. A row's squares carry the man's
+   own letter (Nf3, Pf2) in the two groups whose own name does not already
+   say what stands there — King and Pawns need no letter, Beside the King and
+   The Rest always get one, because those two are exactly the groups that can
+   mix types and a bare square name would not say which man it was. It is the
+   position a blindfold player would say to themselves, so it goes away the
+   moment the board does — left up, it is simply the answer key. */
 function lsnPositionHTML(st){
   if (!st) return '';
-  const cap = s => s.charAt(0).toUpperCase() + s.slice(1);
+  const within1 = (a, b) => Math.max(Math.abs(rowOf(a) - rowOf(b)), Math.abs(colOf(a) - colOf(b))) <= 1;
+  const row = (label, list, lettered) => {
+    if (!list.length) return '';
+    const squares = list.slice()
+      .sort((a, b) => (sqName(a.i) < sqName(b.i) ? -1 : 1))
+      .map(m => (lettered ? m.t : '') + sqName(m.i))
+      .join(', ');
+    return '<div class="lsn-pos-row"><span class="man">' + label + '</span><span class="sqs">' + squares + '</span></div>';
+  };
   const side = c => {
-    const rows = [];
-    LSN_POS_ORDER.forEach(t => {
-      const on = [];
-      for (let i = 0; i < 64; i++){
-        const p = st.b[i];
-        if (p && p.c === c && p.t === t) on.push(sqName(i));
-      }
-      if (!on.length) return;
-      on.sort();
-      rows.push('<div class="lsn-pos-row"><span class="man">' + cap(PIECE_NAME[t]) +
-                '</span><span class="sqs">' + on.join(', ') + '</span></div>');
-    });
+    const men = [];
+    for (let i = 0; i < 64; i++){ const p = st.b[i]; if (p && p.c === c) men.push({ i, t:p.t }); }
+    const used = new Set();
+    let html = '';
+    const king = men.find(m => m.t === 'K');
+    if (king){
+      used.add(king.i);
+      html += row('King', [king], false);
+      const near = men.filter(m => !used.has(m.i) && within1(m.i, king.i));
+      near.forEach(m => used.add(m.i));
+      html += row('Beside the King', near, true);
+    }
+    const pawns = men.filter(m => m.t === 'P' && !used.has(m.i));
+    pawns.forEach(m => used.add(m.i));
+    html += row('Pawns', pawns, false);
+    const rest = men.filter(m => !used.has(m.i));
+    html += row('The Rest', rest, true);
     return '<div class="lsn-subcap">' + lsnSide(c) + '</div>' +
-           (rows.length ? rows.join('') : '<div class="lsn-pos-row"><span class="man">—</span></div>');
+           (html || '<div class="lsn-pos-row"><span class="man">—</span></div>');
   };
   return '<div class="lsn-pos">' + side(W) + side(B) + '</div>';
 }
