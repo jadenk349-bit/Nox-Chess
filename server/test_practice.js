@@ -622,6 +622,7 @@ head('Store v2');
   ok('v1 coord answers land on square', up.modes.square.asked, 20);
   ok('v1 track answers land on tracker', up.modes.tracker.asked, 20);
   ok('a v1 diff of 3 becomes level 3', up.modes.square.level, 3);
+  ok('a v1 record\'s best streak survives the merge into stats', up.modes.square.stats.streak, 5);
   ok('the totals survive', up.asked, 40);
   storage = {};
   prSeenPush('a'); prSeenPush('b');

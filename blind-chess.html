@@ -11902,7 +11902,7 @@ function prUpgradeV1(raw){
     const nk = PR_V1_KEYS[old], src = raw.modes[old], m = out.modes[nk];
     if (!m || !src) continue;
     for (const k of ['asked','correct','sessions']) if (src[k] > 0) m[k] += src[k];
-    if (src.best > m.stats.streak) m.stats.streak = src.best;
+    m.stats.streak = Math.max(m.stats.streak || 0, src.best || 0);
     m.level = Math.max(m.level, Math.min(3, src.diff || 1));
     m.best = Math.max(m.best, m.level);
   }
@@ -12523,9 +12523,7 @@ function prRecord(ok){
   if (ok){
     st.correct++;
     st.modes[PR.mode.key].correct++;
-    st.streak++;
-    if (st.streak > st.best) st.best = st.streak;
-  } else st.streak = 0;
+  }
   prSave(st);
 }
 
@@ -13184,6 +13182,10 @@ function prRenderDash(){
   // rebuilds this dashboard. `idx` stays 0 so prRenderCards below still compiles.
   const idx = 0;
   document.getElementById('prFigAcc').textContent = st.asked ? Math.round(prAcc(st) * 100) + '%' : '—';
+  // TASK 3 STUB: nothing writes st.best forward any more (prRecord dropped the
+  // dead top-level answer-streak it used to derive it from), so this only ever
+  // shows whatever a v1 record's best streak migrated in as. Task 22 replaces
+  // this figure with days practised.
   document.getElementById('prFigBest').textContent = st.best;
   document.getElementById('prFigSessions').textContent = st.sessions;
   prRenderCards(st, idx);
