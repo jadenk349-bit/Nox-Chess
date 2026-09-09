@@ -96,7 +96,7 @@ var FNS = ['startBoard','newState','cloneState','fenOf','stateFromFEN',
            'prMakeTracker','prTrackerErr',
            'prMoveFacts','prMakeAfter',
            'prPlaceAttackers','prMaterialOf','prExchangeLine','prMakeForcing',
-           'prMatesIn1','prMatesIn2','prForks','prCalcHanging','prPuzzlePool','prCalcTrack','prMakeCalc',
+           'prMatesIn1','prMatesIn2','prForks','prCalcHanging','prPuzzlePool','prCalcTrack','prMakeCalc','prCalcDraw',
            'prPickMove','prAskAbout','prMakeMini','prRecipe','prMake',
            'prGamePosition','prCluster','prAskFine','prMakeHold',
            'prRecord','prScore','prStep','prNow','prTimeLeft','prRecommend','prMedianLat',
@@ -610,6 +610,28 @@ head('Blind Calculation');
   ok('the ladder a level reads is decided by the men it asks for', prCalcTrack(prRecipe('calc', 6)), 'endgame');
   ok('the full positions coming from the middlegame set', prCalcTrack(prRecipe('calc', 7)), 'middlegame');
   ok('and a track is fetched once and remembered', prPuzzlePool('endgame'), prPuzzlePool('endgame'));
+
+  /* A puzzle level's question is built after the screen is already up, so it
+     never passes through prMake and its don't-ask-this-again retry.
+     prCalcDraw is that retry, and this is the only thing worth asserting
+     about it: with one of two puzzles already asked, the other one is what
+     comes back, every time. */
+  var seenPool = pool.concat([{ id:'t-2', fen:'3r2k1/5ppp/8/8/8/8/5PPP/6K1 b - - 0 1', moves:['d8d1'] }]);
+  storage = {};
+  prSeenPush('calc:puzzle:t-1');
+  var again = 0, fresh = 0;
+  for (var d = 0; d < 6; d++){
+    var drawn = prCalcDraw(prRecipe('calc', 7), seenPool);
+    if (drawn.sig === 'calc:puzzle:t-1') again++;
+    if (drawn.sig === 'calc:puzzle:t-2') fresh++;
+  }
+  ok('a puzzle asked this week is not asked again while another is free', again, 0);
+  ok('the one that has not been asked is what comes back', fresh, 6);
+  // ...and with both of them seen it still asks something rather than nothing
+  prSeenPush('calc:puzzle:t-2');
+  ok('a pool with nothing fresh in it still hands back a question',
+     prCalcDraw(prRecipe('calc', 7), seenPool).task, 'puzzle');
+  storage = {};
 })();
 
 /* ============================================================

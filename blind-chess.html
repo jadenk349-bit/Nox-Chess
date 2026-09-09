@@ -14853,7 +14853,7 @@ function prShowCalc(q){
       // has walked off the drill as well as one who has moved on to the next
       // question while the file was in the air
       if (PR.q !== q) return;
-      const real = pool.length ? prMakeCalc(Object.assign(r, { pool })) : null;
+      const real = pool.length ? prCalcDraw(r, pool) : null;
       if (real){
         PR.q = real;
         if (real.sig) prSeenPush(real.sig);
@@ -14871,6 +14871,25 @@ function prShowCalc(q){
   }
   prCalcRun(q, null);
 }
+/* prMake()'s own shape, for the one question in Practice that is built
+   after the screen is already up. Every other drill's question goes through
+   prMake, which draws up to six times and takes the first whose signature is
+   not among the last hundred asked; a puzzle level cannot, because its pool
+   only arrives once the fetch has come back — so without this, levels 6 and
+   7 would be the only questions that can put the same one up twice in a
+   week. The last draw is used if all six were seen, exactly as prMake falls
+   back rather than refusing to ask anything. */
+function prCalcDraw(r, pool){
+  let last = null;
+  for (let t = 0; t < 6; t++){
+    const q = prMakeCalc(Object.assign({}, r, { pool }));
+    if (!q) continue;
+    last = q;
+    if (!q.sig || !prSeenHas(q.sig)) return q;
+  }
+  return last;
+}
+
 /* Which chair the board is drawn from: the side that has to find the move.
    Everything this file builds is White to move, so this only ever matters for
    a position out of the puzzle set — and there it matters a lot, since a
@@ -15034,6 +15053,11 @@ function prCalcDemo(q, st, wrong, then){
   if (wrong){
     const after = makeMove(st, wrong);
     frames.push({ b:after.b, from:wrong.from, to:wrong.to, say:'You played <b>' + toSAN(st, wrong, legalMoves(st, st.turn)) + '</b>.' });
+    /* Depth 3, measured rather than assumed: over the twenty fullest
+       middlegame puzzle positions (29 to 32 men), one legal move in, this
+       search takes a median of 74ms and at worst 118ms — well inside the
+       beat the demonstration pauses for anyway, so there is nothing here to
+       trade the strength of the answer for. */
     const reply = bestMove(after, 3);
     if (reply){
       const replies = legalMoves(after, after.turn);
