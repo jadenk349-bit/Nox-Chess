@@ -1913,7 +1913,7 @@ head('Progressive Blindfold: the end card');
   ok('and the result box closed behind it', byId.prDoneOverlay.classList.contains('show'), false);
   prOpen('progressive', 7, 5);
   PR.pb.played = PR.pb.r.target; pbEnd('done');
-  ok('level 7 offers a See the Board game', byId.prBoardGame.style.display, '');
+  ok('level 7 offers a Board Only game', byId.prBoardGame.style.display, '');
   byId.prBoardGame.onclick();
   ok('with the empty-board vision chosen', visionsPicked[visionsPicked.length - 1], 'blind');
   storage = {};

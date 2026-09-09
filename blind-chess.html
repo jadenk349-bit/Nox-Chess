@@ -4864,7 +4864,7 @@
       <button class="primary" id="prAgain">Practice Again</button>
       <button class="ghost" id="prAnother">Choose Another Exercise</button>
       <button class="ghost" id="prNextLevel" style="display:none">Next level</button>
-      <button class="ghost" id="prBoardGame" style="display:none">Play a See the Board game</button>
+      <button class="ghost" id="prBoardGame" style="display:none">Play a Board Only game</button>
       <button class="ghost" id="prBlindGame" style="display:none">Play a real one</button>
       <button class="ghost" id="prToLessons">Back to Lessons</button>
     </div>
@@ -11337,7 +11337,7 @@ function lsnDrillReach(type, hide){
   const name = PIECE_NAME[pos.type];
   const home = sqName(pos.sq);
   return {
-    title:'Visualize Pieces',
+    title:'Piece Reach',
     what:'<p>A piece reaches the same squares whether you can see it or not.</p>',
     ask:'',
     gate:true,
@@ -11396,7 +11396,7 @@ function lsnDrillReach(type, hide){
         // reading is a test of reading speed, which is not the lesson.
         s.ask = 'The ' + name + ' is on <code>' + home + '</code>. Study it, then start.';
         lsnCap('study the position');
-        lsnUnder([{ label:'Start Visualization', cls:'primary wide', on(){
+        lsnUnder([{ label:'Start', cls:'primary wide', on(){
           LSN.mode = 'blind';
           lsnCap('');
           lsnSay('');
@@ -12138,7 +12138,7 @@ function lsnStepAttackYesNo(q){
   return {
     title: q.ask === 'attacks' ? 'Does it attack that square?' : 'Is it defended?',
     what: q.ask === 'attacks'
-      ? '<p>Picture the line it moves on, and ask whether the target square lies on it.</p>'
+      ? '<p>Hold the line it moves on, and ask whether the target square lies on it.</p>'
       : '<p>Defended means one of its own side answers back on that square — its own line reversed.</p>',
     ask:text, gate:true, auto:900, solve:'choices',
     setup(){
@@ -12712,7 +12712,7 @@ function lsnStepAfter(q, kind){
     } else if (kind === 'attacks'){
       const want = new Set(q.facts.attacks);
       step.ask = 'Every square the man that just moved now attacks. Click each one, then press Done.';
-      LSN.hint = () => lsnSay('Picture the line it moves on from where it just landed.', 'tip');
+      LSN.hint = () => lsnSay('Hold the line it moves on from where it just landed.', 'tip');
       LSN.onSquare = i => {
         if (LSN.ok) return;
         if (LSN.pick.has(i)) LSN.pick.delete(i); else LSN.pick.add(i);
@@ -13767,7 +13767,7 @@ const PR_MODES = [
             how:'Trace a rank, file or diagonal from a square, or work out a knight’s route, with blockers counted in.' },
     levels: PR_LINES_LEVELS },
   { key:'piece', name:'Piece Vision', group:'vision', skill:'Piece movement', lesson:4,
-    desc:'Where one piece reaches, with the board slowly taken away.',
+    desc:'Where a piece reaches — one at first, two by the last level — with the board slowly taken away.',
     intro:{ what:'Blindfold players know where a piece can move without the board in front of them. This trains that reach.',
             how:'Say every square one piece reaches from where it stands, with the board taken away a step at a time.' },
     levels: PR_PIECE_LEVELS },
