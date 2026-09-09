@@ -396,7 +396,7 @@
   /* blind mode hides the men */
   .board.blind .piece span{opacity:0; filter:blur(6px);}
   .board.blind.peek .piece span{opacity:1; filter:none;}
-  .board.fog .piece.hidden span{opacity:0; filter:blur(5px);}
+  .board.fog .piece.hidden span, .board.mine .piece.hidden span{opacity:0; filter:blur(5px);}
   .board.reveal .piece span{opacity:1 !important; filter:none !important;}
 
   /* ---------- the game page ---------- */
@@ -10623,6 +10623,7 @@ function lsnRender(){
   if (frame) frame.style.display = (view === 'total' && !open) ? 'none' : '';
   board.classList.toggle('blind',  BLINDISH(view) && !LSN.reveal);
   board.classList.toggle('fog',    view === 'fog' && !open);
+  board.classList.toggle('mine',   view === 'mine' && !open);
   board.classList.toggle('reveal', LSN.reveal);
   board.classList.toggle('peek',   LSN.peek);
   board.classList.toggle('named',  LSN.named);
@@ -10645,6 +10646,19 @@ function lsnRender(){
       if (!p) continue;
       const e = lsnPieceEls.get(p.id);
       if (e) e.classList.toggle('hidden', !vis.has(i));
+    }
+  } else if (view === 'mine' && !open){
+    // Fog of War's own men-only rule with the square fog left off: no square
+    // in lsnSqEls is ever marked 'hidden' here, so every square stays plain,
+    // and only the men on the far side from LSN.eye go dark — the picture
+    // pbMask(board, W) plus prPaint gives Progressive Blindfold's own first
+    // rung (PR_PB_LEVELS[0], vis:'mine'), previewed on the lesson board here
+    // rather than a second mask reimplementing the same rule.
+    for (let i = 0; i < 64; i++){
+      const p = LSN.st.b[i];
+      if (!p) continue;
+      const e = lsnPieceEls.get(p.id);
+      if (e) e.classList.toggle('hidden', p.c !== LSN.eye);
     }
   } else {
     for (const [, e] of lsnPieceEls) e.classList.remove('hidden');
@@ -11509,7 +11523,24 @@ function lsnConcede(html){
    ============================================================ */
 
 /** "Play this move" — click the man, then the square. The notation drills and
-    the challenges ask the same question, so they ask it with the same code. */
+    the mini game ask the same question, so they ask it with the same code.
+    `want` is normally one fixed move (`{from, to}`, compared by equality,
+    exactly as before — nothing that already passes one changes behaviour).
+    `want === null` means any legal move is right, for the mini game's own
+    play: the (from, to) pair is looked up in `legalMoves()` itself rather
+    than compared to a single answer, promoted to a queen when nothing else
+    is said — the same default `parseMoveIn()` reaches for on a bare pair of
+    squares — and the move actually played is handed to `onRight()`, since
+    there is no longer a `want` closure that already names it.
+
+    'mine' needs no special case here, and that is not an oversight: it is
+    Fog of War's own men-only mask (see lsnRender()) with the learner's own
+    men left in plain sight, so `!BLINDISH(LSN.mode)` — false for 'mine',
+    exactly as it is false for 'sighted' — already lets a player select and
+    reselect their own visible men by the ordinary sighted rule, and the
+    refusal message on a wrong square never differs between "truly empty"
+    and "an opponent's man is there but hidden", so nothing is given away
+    either way. */
 function lsnAskMove(want, onRight, onWrong){
   LSN.onSquare = i => {
     if (LSN.ok) return;
@@ -11527,11 +11558,22 @@ function lsnAskMove(want, onRight, onWrong){
       return;
     }
     if (LSN.sel === i){ LSN.marks.delete(i); LSN.sel = -1; lsnRender(); return; }
-    if (want && want.from === LSN.sel && want.to === i){
-      LSN.marks.delete(LSN.sel); LSN.sel = -1;
-      lsnPlayMove(want);
-      onRight();
-      return;
+    if (want){
+      if (want.from === LSN.sel && want.to === i){
+        LSN.marks.delete(LSN.sel); LSN.sel = -1;
+        lsnPlayMove(want);
+        onRight();
+        return;
+      }
+    } else {
+      const cands = legalMoves(LSN.st, LSN.st.turn).filter(m => m.from === LSN.sel && m.to === i);
+      if (cands.length){
+        const move = cands.find(m => m.promo === 'Q') || cands[0];
+        LSN.marks.delete(LSN.sel); LSN.sel = -1;
+        lsnPlayMove(move);
+        onRight(move);
+        return;
+      }
     }
     const from = LSN.sel, p = LSN.st.b[i];
     LSN.marks.delete(from); LSN.sel = -1;
@@ -12344,27 +12386,18 @@ function lsnLesson5(){
 }
 
 /* ---- 10 · Playing Without the Pieces ----
-   Reduced material on purpose: nobody's first blindfold position should have
-   thirty-two men on it. Each of the three is a position, a sequence played out
-   on a board that has already gone dark, and one move to find at the end of
-   it. All three lines are checked by server/test_lessons.js. */
-const LSN_CHALLENGES = [
-  { fen:'6k1/5ppp/8/8/8/8/5PPP/3R2K1 w - - 0 1',
-    pre:[], answer:'Rd8#',
-    what:'<p>Six men, and the black king is shut in behind its own pawns.</p>',
-    ask:'White to move. <b>Mate in one.</b>',
-    hint:'The eighth rank is empty, and the king cannot step off it — its own pawns are in the way.' },
-  { fen:'2r3k1/4q1pp/8/8/8/2N5/6PP/6K1 b - - 0 1',
-    pre:['Rc7'], answer:'Nd5',
-    what:'<p>A white knight against a black queen and rook. Black moves first.</p>',
-    ask:'Black has just played <b>…Rc8–c7</b>. White to move — <b>fork them</b>.',
-    hint:'One square attacks c7 and e7 at the same time, and nothing of Black’s covers it.' },
-  { fen:'2r3k1/5ppp/8/8/8/8/3R1PPP/3R2K1 w - - 0 1',
-    pre:['Rd8+','Rxd8'], answer:'Rxd8#',
-    what:'<p>Two white rooks stacked on the d-file against one black rook. Two moves are played first.</p>',
-    ask:'The front rook has gone in and been taken. <b>Finish it.</b>',
-    hint:'The second rook never moved. It is still on d1, and d8 is where the first one died.' }
-];
+   The course closes on the visions themselves, said and shown rather than
+   only mentioned — three demo steps, each the same six-man position, in the
+   two blindfold visions the path runs through (See the Board, Complete
+   Blindfold) and Fog of War beside them, named as what it is: a game vision,
+   not a step on this path. Then one small game, the men reduced on purpose —
+   nobody's first blindfold position should have thirty-two men on it — with
+   the learner's own men left in plain sight, which is Progressive
+   Blindfold's own first rung, previewed here before the handoff sends them
+   to train it for real. LSN_TEN_FEN is the demos' shared position, checked
+   by server/test_lessons.js the same way every other lesson's fixed
+   positions already are. */
+const LSN_TEN_FEN = '6k1/5ppp/8/8/8/8/5PPP/3R2K1 w - - 0 1';
 
 /* ---- the Position list ----
    The position said in words, read off the board itself rather than written
@@ -12415,83 +12448,112 @@ function lsnPositionHTML(st){
   return '<div class="lsn-pos">' + side(W) + side(B) + '</div>';
 }
 
-function lsnChallengeStep(spec, i){
+/** Progressive Blindfold's own first rung, played once before the handoff
+    sends the learner to train it for real: three men a side
+    (prMakeProgressive(prRecipe('progressive', 1)) — PR_PB_LEVELS[0]), the
+    learner's own men shown and the opponent's hidden (LSN.mode = 'mine',
+    LSN.eye = W — see lsnRender()'s own note on that vision), four moves
+    played through lsnAskMove(null, …): any legal move is right, there is no
+    single answer here. The page replies after every one of them, exactly
+    the cadence pbReply() already plays a Progressive Blindfold game at —
+    bestMove(st, 2), scheduled through lsnAt() rather than played at once, so
+    a reply timer left running past the step can never land on the next one.
+    One checkpoint interrupts, after the second move — "where is your
+    king?", a single click judged against kingSq(), lesson 8's own habit
+    asked for real rather than only taught — and a wrong square costs
+    nothing and does not end the step, exactly as lsnStepCheckThree's own
+    king question already works. Checkmate or stalemate, either side's,
+    before the fourth move ends the game there instead of waiting out the
+    count — a mini game is still a game. */
+function lsnStepMiniGame(){
+  const q = wantQ(() => prMakeProgressive(prRecipe('progressive', 1)), x => !!x,
+                  'a Progressive Blindfold position');
   const step = {
-    title:'Challenge ' + (i + 1) + ' of ' + LSN_CHALLENGES.length,
-    what: spec.what,
-    ask:'Study the board and the position list. Press <b>I’m Ready</b> and both go dark.',
-    gate:true,
+    title:'One small game',
+    what:'<p>Four moves, your men shown and theirs hidden — Progressive Blindfold’s own first rung, played once ' +
+         'before you train it. Every few moves, stop and find your king.</p>',
+    ask:'', gate:true, solve:'multi',
     setup(){
-      LSN.st = stateFromFEN(spec.fen);
-      LSN.mode = 'sighted';
-      lsnCardKind = null;
-      lsnExtraShow('Position', lsnPositionHTML(LSN.st));
-      lsnUnder([{ label:'I’m Ready', cls:'primary wide', on:begin }]);
-      lsnSay('Say the men to yourself, square by square, before you hide them.', 'tip');
+      LSN.st = q.st; LSN.mode = 'mine'; LSN.eye = W;
+      lsnRender();
+      move();
     }
   };
-
-  // Reveal puts back both of the things I'm Ready took away, and the list is
-  // built again rather than remembered: by now a move or two has been played.
-  function reveal(){
-    lsnUnder([{ label:'Reveal the Position', cls:'ghost wide',
-                on(){
-                  LSN.reveal = true;
-                  lsnRender();
-                  lsnExtraShow('Position', lsnPositionHTML(LSN.st));
-                  lsnCap('the real position');
-                } }]);
-  }
-
-  function begin(){
-    LSN.mode = 'blind';
-    LSN.sel = -1; LSN.marks = new Map();
-    lsnUnder([]);
-    lsnSay('');
-    lsnExtraHide();                 // the list is not an answer key
-    lsnRender();
-    if (!spec.pre.length){ ask(); return; }
-    step.ask = 'Follow the moves.';
+  let played = 0;
+  function move(){
+    step.ask = 'You are White. Click a man, then where it goes.';
     lsnPaint();
-    let n = 0;
-    const one = () => {
-      if (n >= spec.pre.length){ ask(); return; }
-      const m = lsnMoveFor(LSN.st, spec.pre[n]);
-      if (!m){ ask(); return; }
-      lsnPlayMove(m);
-      lsnCap(spec.pre[n]);
-      n++;
-      lsnAt(one, 1400);
+    lsnAskMove(null, () => onLearnerMove(), msg => lsnWrong(msg));
+  }
+  function onLearnerMove(){
+    played++;
+    // Nothing is asking anything while the reply is being thought about —
+    // pbMove()'s own `pb.busy` guard, said here by simply taking the click
+    // away, since a stale lsnAskMove() closure left wired up would still
+    // happily play a legal move for whichever side is actually on turn, and
+    // during this pause that is the page's own side, not the learner's.
+    LSN.onSquare = null;
+    // The learner's own move can already end the game — mate or stalemate
+    // handed to the opponent — and the page never gets to reply to that.
+    if (!legalMoves(LSN.st, LSN.st.turn).length){
+      lsnRight(inCheck(LSN.st, LSN.st.turn) ? 'Checkmate — you finished it.' : 'Stalemate — the game ends there.');
+      return;
+    }
+    step.ask = 'Thinking…';
+    lsnPaint();
+    lsnAt(reply, 700);
+  }
+  function reply(){
+    const theirs = legalMoves(LSN.st, LSN.st.turn);
+    lsnPlayMove(bestMove(LSN.st, 2) || lsnAny(theirs));
+    if (played >= 4){ lsnRight('Four moves, and you never once needed to see them.'); return; }
+    if (!legalMoves(LSN.st, LSN.st.turn).length){
+      lsnRight(inCheck(LSN.st, LSN.st.turn) ? 'Checkmate against you.' : 'Stalemate — the game ends there.');
+      return;
+    }
+    if (played === 2){ lsnAt(checkpoint, 700); return; }
+    move();
+  }
+  function checkpoint(){
+    const truth = kingSq(LSN.st, W);
+    step.ask = 'Checkpoint — where is your king?';
+    LSN.hint = () => lsnSay('It has not moved unless you moved it.', 'tip');
+    LSN.onSquare = i => {
+      if (i === truth){
+        LSN.onSquare = null;
+        LSN.marks.set(i, 'lsn-right');
+        lsnRender();
+        lsnSay('Yes — <b>' + sqName(truth) + '</b>.', 'good');
+        beep(880, .09);
+        lsnAt(() => { LSN.marks.delete(truth); lsnRender(); move(); }, 700);
+        return;
+      }
+      lsnFlash(i);
+      lsnWrong('Not <b>' + sqName(i) + '</b>.');
     };
-    lsnAt(one, 800);
+    lsnPaint();
+    lsnRender();
   }
-
-  function ask(){
-    lsnCap('');
-    step.ask = spec.ask + '<br>Play it on the board — click the man, then the square.';
-    const want = lsnMoveFor(LSN.st, spec.answer);
-    LSN.hint = () => lsnSay(spec.hint, 'tip');
-    lsnAskMove(want,
-      () => { lsnRight('<b>' + spec.answer + '</b>. Found without looking.'); reveal(); },
-      msg => {
-        lsnWrong(msg);
-        if (LSN.tries >= 3 && want){
-          LSN.marks.set(want.from, 'lsn-lit');
-          LSN.marks.set(want.to, 'lsn-right');
-          lsnRender();
-          lsnConcede('The move was <b>' + spec.answer + '</b> — from <b>' + sqName(want.from) +
-                     '</b> to <b>' + sqName(want.to) + '</b>. Reveal the board and see it.');
-          reveal();
-        }
-      });
-    lsnPaint();                 // …and only now, with the hint in place
-  }
-
   return step;
 }
 
+/* The four demo captions below are trimmed from an earlier draft that ran
+   one or three sentences over "No caption runs past two sentences"
+   (server/test_lessons.js), the same rule every other lesson's own captions
+   already keep to — Task 33 hit the identical shape in lesson 8 and merged
+   sentences with an em dash rather than dropping the idea, and this does the
+   same, so nothing said is lost, only how many stops it takes to say it. */
 function lsnLesson10(){
-  return LSN_CHALLENGES.map(lsnChallengeStep).concat([lsnHandoffStep(LESSONS[9])]);
+  const L = LESSONS[9];
+  const st = stateFromFEN(LSN_TEN_FEN);
+  return [
+    lsnStepDemo({ title:'See the Board', what:'<p>Sixty-four empty squares to click, three peeks allowed — this is the empty board Krogius said to play on first.</p>', ask:'Press Continue.', st, mode:'blind' }),
+    lsnStepDemo({ title:'Fog of War', what:'<p>Your men lit, everything else dark. A game vision, not a step on this path — the path runs through the two blindfold visions.</p>', ask:'Press Continue.', st, mode:'fog' }),
+    lsnStepDemo({ title:'Complete Blindfold', what:'<p>No board at all — you type your moves and read theirs, with three peeks to save you.</p>', ask:'Press Continue.', st, mode:'total' }),
+    lsnStepDemo({ title:'How a first game goes', what:'<p>Short, with few men — check every three moves, and rebuild from the score if it slips. Peeks are a tool, not a failure.</p>', ask:'Press Continue.', named:true }),
+    lsnStepMiniGame(),
+    lsnHandoffStep(L)
+  ];
 }
 
 /* ============================================================
@@ -12993,7 +13055,12 @@ function lsnStepCheckThree(){
     step.ask = 'How many men does Black have now?';
     LSN.hint = () => lsnSay('Start from what you last knew and follow the captures forward.', 'tip');
     const labels = new Set([n]);
-    while (labels.size < 4) labels.add(Math.max(0, n + lsnRand(5) - 2));
+    // n can be 0 or 1 early in a hidden game, where a fixed ±2 window
+    // collapses to fewer than four non-negative values (n=0 only ever offers
+    // {0,1,2}) and would spin forever — so the window widens with every miss,
+    // which still centres on n at first and always terminates.
+    let tries = 0;
+    while (labels.size < 4) labels.add(Math.max(0, n + lsnRand(5 + tries++) - 2));
     lsnChoices(lsnShuffle(Array.from(labels)).map(v => ({ label:String(v), right:v === n })), (c, b) => {
       if (c.right){
         b.classList.add('right');

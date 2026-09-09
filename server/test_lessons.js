@@ -46,8 +46,14 @@ function grab(re, what){
 }
 const NOTATION = new Function(
   grab(/\nconst LSN_NOTATION = \[[\s\S]*?\n\];/, 'LSN_NOTATION') + '\nreturn LSN_NOTATION;')();
-const CHALLENGES = new Function(
-  grab(/\nconst LSN_CHALLENGES = \[[\s\S]*?\n\];/, 'LSN_CHALLENGES') + '\nreturn LSN_CHALLENGES;')();
+// Lesson 10 no longer carries three challenge lines — it carries one shared
+// position for its three vision demos (LSN_TEN_FEN) and a mini game built
+// fresh every time from Practice's own prMakeProgressive(). The FEN is the
+// only fixed position left to check here; the mini game's own position is
+// generated, not stored, and is checked where it is built instead (below,
+// against the whole page).
+const TEN_FEN = new Function(
+  grab(/\nconst LSN_TEN_FEN = '[^\n]*';/, 'LSN_TEN_FEN') + "\nreturn LSN_TEN_FEN;")();
 
 function sansOf(st){
   const legal = C.legalMoves(st, st.turn);
@@ -92,26 +98,14 @@ check('LSN_NOTATION teaches a disambiguated move',
       NOTATION.some(i => /^[NRQB][a-h1-8][a-h][1-8]/.test(i.san)),
       NOTATION.map(i => i.san).join(' '));
 
-head('Every challenge line is playable from its own position');
-check('there are three of them', CHALLENGES.length === 3, CHALLENGES.length);
-CHALLENGES.forEach((spec, i) => {
-  const label = 'challenge ' + (i + 1);
-  let st = C.stateFromFEN(spec.fen);
-  check(label + "'s FEN survives a round trip", C.fenOf(st) === spec.fen, C.fenOf(st));
-  sane(label, st);
-  check(label + ' is reduced material, not a whole game',
+head('Lesson 10’s shared demo position is a real, sane one');
+{
+  const st = C.stateFromFEN(TEN_FEN);
+  check("LSN_TEN_FEN survives a round trip", C.fenOf(st) === TEN_FEN, C.fenOf(st));
+  sane('LSN_TEN_FEN', st);
+  check('LSN_TEN_FEN is reduced material, not a whole game',
         st.b.filter(Boolean).length <= 12, st.b.filter(Boolean).length + ' men');
-  let ok = true;
-  spec.pre.concat([spec.answer]).forEach(want => {
-    if (!ok) return;
-    const { legal, sans } = sansOf(st);
-    const at = sans.indexOf(want);
-    if (at < 0){ ok = false; check(label + ': ' + want + ' is legal', false, sans.join(' ')); return; }
-    st = C.makeMove(st, legal[at]);
-  });
-  if (ok) check(label + ' plays out: ' + spec.pre.concat([spec.answer]).join(' '), true);
-  check(label + ' ends on the move it asks for', spec.answer.length > 0);
-});
+}
 
 /* The course is ten lessons now, and every one of them ends by handing the
    player to the drill that trains what it just taught — so a lesson with no
@@ -248,6 +242,13 @@ function makePage(store){
     // through, exactly as a learner rebuilding from the score would.
     ' lsnStepCheckThree, lsnStepRecover, lsnStepMate1, lsnStepLineThenRoot, lsnRebuildUI,' +
     ' prMakeCalc, prMakeBranches, kingSq, newState, makeMove,' +
+    // Task 34: lesson 10's own mini game. lsnStepMiniGame() builds its own
+    // position from prMakeProgressive() every time it is called, so there is
+    // nothing else to expose for it — legalMoves/kingSq above are what the
+    // harness already asks the page for the true answer with, and lsnPieceEls
+    // is what the 'mine' render check below reads to tell a man's own colour
+    // and whether it is currently drawn hidden.
+    ' lsnStepMiniGame, lsnPieceEls,' +
     ' screen:()=>screenName });';
   let out = null;
   new Function('document','window','location','localStorage','WebSocket','AudioContext',
@@ -480,14 +481,34 @@ async function solveStep(p, budget){
   }
   if (kind === 'multi'){
     // lsnStepCheckThree and lsnStepLineThenRoot are each one step with
-    // several questions inside it, and the step swaps `LSN.onSquare` for a
-    // fresh `lsnChoices()` (and back again) as it goes rather than ever
-    // showing both at once — so this re-reads which is currently on the
-    // card every pass instead of assuming either shape once. An initial
-    // under button ("Hide the Board", "I'm Ready") is pressed on the way in,
-    // the same patience the 'choices' branch above already has for one.
+    // several questions inside it, and lsnStepMiniGame (Task 34) is a third:
+    // all three swap `LSN.onSquare` between two different jobs as they go —
+    // a single click judged on its own (a king or count question, and
+    // lsnStepMiniGame's own checkpoint) and a select-then-target pair naming
+    // a move (lsnStepMiniGame's own moves) — never both at once, and nothing
+    // out here says which is currently live. Both are tried every pass a
+    // full board is showing: every legal (from, to) pair off the page's own
+    // legalMoves() first, exactly as the generic move solver further below
+    // already tries them, which is what a select-then-target step needs and
+    // costs a single-click judge nothing (an extra click before or after the
+    // real one only cancels a selection nothing was using) — and then every
+    // square on its own, which is what a single-click judge needs and a
+    // move that already landed is unbothered by, since lsnStepMiniGame takes
+    // its own `onSquare` away while it is not the learner's turn to click
+    // anything. An initial under button ("Hide the Board", "I'm Ready") is
+    // pressed on the way in, the same patience the 'choices' branch above
+    // already has for one.
     while (!p.LSN.ok && Date.now() < stop){
       if (p.LSN.onSquare){
+        const before = p.LSN.st;
+        if (before && before.b.some(Boolean)){
+          for (const m of p.legalMoves(before, before.turn)){
+            if (p.LSN.ok || !p.LSN.onSquare || p.LSN.st !== before) break;
+            p.LSN.onSquare(m.from);
+            if (p.LSN.ok || !p.LSN.onSquare || p.LSN.st !== before) break;
+            p.LSN.onSquare(m.to);
+          }
+        }
         // the `&& p.LSN.onSquare` guard matters here: a right click can
         // swap the question — and null this out — mid-loop, and the next
         // iteration must not then call null(i).
@@ -741,26 +762,30 @@ async function walk(p, n){
     p.showScreen('lessons');
   }
 
-  head('Each challenge accepts the move it is asking for');
-  for (let i = 0; i < CHALLENGES.length; i++){
-    p.lsnOpen(10, i);
-    const spec = CHALLENGES[i];
-    let b = null;
-    for (const c of p.by('lsnUnder').children) if (c.textContent.indexOf('I’m Ready') === 0) b = c;
-    check('challenge ' + (i + 1) + ' offers I’m Ready', !!b);
-    if (!b) continue;
-    b.onclick();
-    const ready = await until(() => (p.by('lsnAsk').innerHTML || '').indexOf('Play it on the board') >= 0, 8000);
-    check('challenge ' + (i + 1) + ' plays its sequence and then asks', ready,
-          p.by('lsnAsk').innerHTML);
-    const legal = p.legalMoves(p.LSN.st, p.LSN.st.turn);
-    const want = legal.find(m => p.toSAN(p.LSN.st, m, legal) === spec.answer);
-    check('challenge ' + (i + 1) + ': ' + spec.answer + ' is on the board', !!want);
-    if (!want) continue;
-    p.LSN.onSquare(want.from);
-    p.LSN.onSquare(want.to);
-    check('challenge ' + (i + 1) + ' accepts ' + spec.answer + ' first time',
-          p.LSN.ok && p.LSN.tries === 0, 'tries ' + p.LSN.tries);
+  head('Lesson 10’s own six steps: the three visions shown, how a game goes, one small game, then the handoff');
+  {
+    const kinds = ['blind', 'fog', 'total'];
+    const titles = ['See the Board', 'Fog of War', 'Complete Blindfold'];
+    for (let i = 0; i < 3; i++){
+      p.lsnOpen(10, i);
+      check('lesson 10 step ' + (i + 1) + ' is the ' + titles[i] + ' demo',
+            p.by('lsnTitle').textContent === titles[i], p.by('lsnTitle').textContent);
+      check('lesson 10 step ' + (i + 1) + ' shows it in ' + kinds[i] + ' vision',
+            p.LSN.mode === kinds[i], p.LSN.mode);
+      check('lesson 10 step ' + (i + 1) + ' asks nothing — Continue is already open',
+            p.LSN.steps[i].gate === false && p.by('lsnNext').disabled === false);
+    }
+    p.lsnOpen(10, 3);
+    check('lesson 10 step 4 is how a first game goes',
+          p.by('lsnTitle').textContent === 'How a first game goes', p.by('lsnTitle').textContent);
+    check('and it is gate-less too, same as the three demos before it', p.LSN.steps[3].gate === false);
+    p.lsnOpen(10, 4);
+    check('lesson 10 step 5 is the mini game', p.by('lsnTitle').textContent === 'One small game',
+          p.by('lsnTitle').textContent);
+    check('the mini game gates the way on', p.LSN.steps[4].gate === true);
+    check('the mini game is answered by the multi solver', p.LSN.steps[4].solve === 'multi');
+    p.lsnOpen(10, 5);
+    check('lesson 10 step 6 is the handoff', !!p.LSN.steps[5].handoff, p.by('lsnTitle').textContent);
   }
   p.lsnOpen(10, 0);
   for (let i = 0; i < p.LSN.steps.length + 1; i++){
@@ -1286,50 +1311,65 @@ async function walk(p, n){
   g.lsnOpen(7, 6);
   check('lesson 7 ends on the handoff', !!g.LSN.steps[6].handoff);
 
-  head('Playing Without the Pieces says the position out loud');
-  for (let i = 0; i < CHALLENGES.length; i++){
-    g.lsnOpen(10, i);
-    check('challenge ' + (i + 1) + ' shows a Position card',
-          g.by('lsnExtraTitle').textContent === 'Position', g.by('lsnExtraTitle').textContent);
-    const body = g.by('lsnExtraBody').innerHTML || '';
-    const st = g.stateFromFEN(CHALLENGES[i].fen);
-    // Read the card back into a man-per-square list (readPositionCard(), the
-    // same reading the rebuild solver does) and compare it to the board
-    // directly, rather than hunting for a piece-name substring: the card no
-    // longer spells "Knight" out — a mixed group names it "N" — so the round
-    // trip is what actually proves nothing is missing and nothing is extra.
-    const read = readPositionCard(body, g.sqIndex);
-    const board = [];
-    for (let sq = 0; sq < 64; sq++){ const pc = st.b[sq]; if (pc) board.push({ sq, c:pc.c, t:pc.t }); }
-    const same = (a, b) => a.sq === b.sq && a.c === b.c && a.t === b.t;
-    check('challenge ' + (i + 1) + ': every man on the board is in the list, and nothing that is not',
-          board.length === read.length && board.every(m => read.some(r => same(r, m))),
-          JSON.stringify(read) + ' vs ' + JSON.stringify(board));
-    check('challenge ' + (i + 1) + ': both sides are named',
-          body.indexOf('White') >= 0 && body.indexOf('Black') >= 0);
-    check('challenge ' + (i + 1) + ': it is offered before the blindfold, not during',
-          g.by('lsnExtra').style.display !== 'none');
-    Array.from(g.by('lsnUnder').children).find(b => b.textContent.indexOf('I’m Ready') === 0).onclick();
-    check('challenge ' + (i + 1) + ': pressing I’m Ready takes it away',
-          g.by('lsnExtra').style.display === 'none');
-    check('challenge ' + (i + 1) + ': and the board with it', g.LSN.mode === 'blind', g.LSN.mode);
-    const ready = await until(() =>
-      (g.by('lsnAsk').innerHTML || '').indexOf('Play it on the board') >= 0, 8000);
-    check('challenge ' + (i + 1) + ': the sequence plays out', ready);
-    if (!ready) continue;
+  head('Playing Without the Pieces shows the same position in all three visions, and one small game with it shown');
+  {
+    const shared = g.stateFromFEN(TEN_FEN);
+    const kinds = ['blind', 'fog', 'total'];
+    for (let i = 0; i < 3; i++){
+      g.lsnOpen(10, i);
+      check('demo ' + (i + 1) + ' shows LSN_TEN_FEN’s own position',
+            C.fenOf(g.LSN.st) === C.fenOf(shared), C.fenOf(g.LSN.st));
+      check('demo ' + (i + 1) + ' is in ' + kinds[i] + ' vision', g.LSN.mode === kinds[i], g.LSN.mode);
+    }
+  }
+  {
+    // The mini game: 'mine' vision, the learner's own men shown and the
+    // opponent's hidden, no square darkened — read straight off the DOM the
+    // way a player's screen actually looks, never off LSN.st directly, since
+    // that would prove nothing about what render() actually painted.
+    g.lsnOpen(10, 4);
+    check('the mini game opens in mine vision, White’s own eye',
+          g.LSN.mode === 'mine' && g.LSN.eye === 'w', g.LSN.mode + ' / ' + g.LSN.eye);
+    check('no square carries hidden — mine has no square fog',
+          g.lsnSqEls.every(d => !d.classList.contains('hidden')));
+    let sawW = 0, sawB = 0;
+    for (let i = 0; i < 64; i++){
+      const man = g.LSN.st.b[i];
+      if (!man) continue;
+      const e = g.lsnPieceEls.get(man.id);
+      if (!e) continue;
+      if (man.c === 'w'){ sawW++; check('a white man is drawn, not hidden', !e.classList.contains('hidden')); }
+      else { sawB++; check('a black man is drawn hidden', e.classList.contains('hidden')); }
+    }
+    check('there really were men of both colours to check', sawW > 0 && sawB > 0, sawW + '/' + sawB);
+  }
+  {
+    // An illegal (from, to) pair is refused without ending the step, and any
+    // legal move — not one fixed answer — is accepted: lsnAskMove(null, …)'s
+    // own contract, exercised here rather than trusted from the source.
+    g.lsnOpen(10, 4);
+    const before = g.LSN.st;
     const legal = g.legalMoves(g.LSN.st, g.LSN.st.turn);
-    const want = legal.find(m => g.toSAN(g.LSN.st, m, legal) === CHALLENGES[i].answer);
-    g.LSN.onSquare(want.from); g.LSN.onSquare(want.to);
-    check('challenge ' + (i + 1) + ': ' + CHALLENGES[i].answer + ' is accepted', g.LSN.ok === true);
-    const rev = Array.from(g.by('lsnUnder').children).find(b => /Reveal/.test(b.textContent));
-    check('challenge ' + (i + 1) + ': Reveal is offered afterwards', !!rev);
-    if (!rev) continue;
-    rev.onclick();
-    check('challenge ' + (i + 1) + ': Reveal brings the position list back',
-          g.by('lsnExtra').style.display !== 'none' &&
-          /lsn-pos/.test(g.by('lsnExtraBody').innerHTML || ''));
-    check('challenge ' + (i + 1) + ': and it describes the position as it stands now',
-          g.by('lsnExtraBody').innerHTML === g.lsnPositionHTML(g.LSN.st));
+    // Not just any square the mover's piece cannot reach — one that also is
+    // not another of the mover's own men, or the click would reselect
+    // rather than refuse (the ordinary sighted-style rule 'mine' already
+    // follows — see lsnAskMove()'s own note), and this would then prove
+    // nothing about a refusal.
+    let illegalTo = -1;
+    for (let i = 0; i < 64 && illegalTo < 0; i++){
+      if (i === legal[0].from) continue;
+      const occ = g.LSN.st.b[i];
+      if (occ && occ.c === g.LSN.st.turn) continue;
+      if (!legal.some(m => m.from === legal[0].from && m.to === i)) illegalTo = i;
+    }
+    g.LSN.onSquare(legal[0].from);
+    g.LSN.onSquare(illegalTo);
+    check('an illegal pair is refused and does not end the step',
+          g.LSN.ok === false && g.LSN.st === before, g.LSN.ok);
+    g.LSN.onSquare(legal[0].from);
+    g.LSN.onSquare(legal[0].to);
+    check('a legal move — any legal move — is accepted', g.LSN.st !== before);
+    g.lsnResetStep();          // that move armed a reply timer — take it with the step, not with it firing later
   }
 
   head('The position list is read off the board, not written beside it, in Fine’s own order');
@@ -2234,6 +2274,75 @@ async function walk(p, n){
   {
     openBareStep(p, p.lsnStepLineThenRoot(p.prMakeBranches(p.prRecipe('branches', 1))));
     check('lsnStepLineThenRoot is answerable by the multi solver', await solveStep(p, 8000));
+  }
+
+  /* ============================================================
+   * Task 34: lesson 10's own mini game, exercised on its own — the same
+   * reason every banner above has its own section. walk() and the per-lesson
+   * checks earlier already prove the whole course, including this step,
+   * finishes; this proves what the step does move by move: any legal move
+   * accepted rather than one fixed answer, a reply that waits on its own
+   * timer rather than landing mid-click, the checkpoint's wrong answer that
+   * costs nothing, and the fourth move that ends it.
+   * ============================================================ */
+  head('lsnStepMiniGame — Progressive Blindfold’s own first rung, played once with a checkpoint in the middle');
+  {
+    const step = p.lsnStepMiniGame();
+    check('solve is multi', step.solve === 'multi');
+    openBareStep(p, step);
+    check('the position is three a side, mine vision, White’s own eye',
+          p.LSN.st.b.filter(Boolean).length === 6 && p.LSN.mode === 'mine' && p.LSN.eye === 'w',
+          p.LSN.st.b.filter(Boolean).length + ' men, ' + p.LSN.mode + ' / ' + p.LSN.eye);
+    check('the learner is asked to move first', !!p.LSN.onSquare &&
+          (p.by('lsnAsk').innerHTML || '').indexOf('Click a man') >= 0, p.by('lsnAsk').innerHTML);
+
+    const awaitTurn = () => until(() =>
+      !!p.LSN.onSquare && (p.by('lsnAsk').innerHTML || '').indexOf('Click a man') >= 0, 5000);
+    const awaitCheckpoint = () => until(() =>
+      (p.by('lsnAsk').innerHTML || '').indexOf('Checkpoint') >= 0, 5000);
+
+    // Move 1 — any legal move is right, the first one legalMoves() offers,
+    // never a fixed answer read off the step.
+    let legal = p.legalMoves(p.LSN.st, p.LSN.st.turn);
+    let before = p.LSN.st;
+    p.LSN.onSquare(legal[0].from);
+    p.LSN.onSquare(legal[0].to);
+    check('move 1 is accepted and the step is not over', p.LSN.st !== before && p.LSN.ok === false);
+    check('the reply waits on its own timer rather than landing mid-click', p.LSN.onSquare === null);
+    check('the second move is asked for once the reply lands', await awaitTurn());
+
+    // Move 2, then the checkpoint — lesson 8's own habit, asked for real.
+    legal = p.legalMoves(p.LSN.st, p.LSN.st.turn);
+    before = p.LSN.st;
+    p.LSN.onSquare(legal[0].from);
+    p.LSN.onSquare(legal[0].to);
+    check('move 2 is accepted', p.LSN.st !== before && p.LSN.ok === false);
+    check('the checkpoint interrupts after the second move', await awaitCheckpoint(), p.by('lsnAsk').innerHTML);
+
+    const truth = p.kingSq(p.LSN.st, 'w');
+    check('White does still have a king to ask about', truth >= 0);
+    let wrongSq = -1;
+    for (let i = 0; i < 64; i++) if (i !== truth){ wrongSq = i; break; }
+    p.LSN.onSquare(wrongSq);
+    check('a wrong king square is refused without ending the step', p.LSN.ok === false);
+    p.LSN.onSquare(truth);
+    check('the right square is accepted and the game resumes', await awaitTurn());
+
+    // Moves 3 and 4 finish the step — two more legal moves, the page
+    // replying to each, and the fourth ends it.
+    for (let n = 0; n < 2 && !p.LSN.ok; n++){
+      legal = p.legalMoves(p.LSN.st, p.LSN.st.turn);
+      before = p.LSN.st;
+      p.LSN.onSquare(legal[0].from);
+      p.LSN.onSquare(legal[0].to);
+      if (p.LSN.ok) break;
+      await until(() => p.LSN.st !== before && (p.LSN.onSquare || p.LSN.ok), 5000);
+    }
+    check('four moves finish the step', p.LSN.ok === true);
+  }
+  {
+    openBareStep(p, p.lsnStepMiniGame());
+    check('lsnStepMiniGame is answerable by the multi solver, cold', await solveStep(p, 20000));
   }
 
   console.log('\n' + passed + ' passed, ' + failed + ' failed');
