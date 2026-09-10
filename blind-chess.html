@@ -3383,6 +3383,89 @@
   .daily-card.locked:hover{border-color:transparent; transform:none; filter:none;}
   @media (max-width:560px){ .daily-grid{grid-template-columns:minmax(0,1fr);} }
 
+  /* ---- the four playable Daily widgets ----
+     Each is the puzzle itself rather than a link to it, so the card holds a
+     board (or, for Complete Blindfold, a console) small enough for four to sit
+     in the home column and large enough to click a knight on. The board markup
+     and every class inside it are the game's own — .board-frame, .board,
+     .squares, .sq, .pieces, .piece, .blind — so a widget is styled by the rules
+     that style the game, and a change to the board's look reaches all four
+     without being copied here. Only the size is local. */
+  .dw-card{
+    position:relative; display:flex; flex-direction:column; gap:8px;
+    padding:12px 12px 11px; border-radius:11px; text-align:left;
+    background:linear-gradient(180deg,rgba(15,19,26,.72),rgba(8,11,16,.86));
+    border:1px solid rgba(212,175,110,.20);
+    box-shadow:inset 0 1px 0 rgba(255,255,255,.05), 0 6px 18px rgba(0,0,0,.28);
+  }
+  .dw-card.done{border-color:rgba(122,192,132,.45);}
+  .dw-head{display:flex; align-items:baseline; justify-content:space-between; gap:8px;}
+  .dw-mode{
+    font-family:var(--font); font-weight:400; letter-spacing:.075em;
+    font-size:clamp(13px,1.05vw,15px); color:#fff; white-space:nowrap;
+    overflow:hidden; text-overflow:ellipsis;
+  }
+  .dw-card.done .dw-mode{color:var(--good,#7ac084);}
+  .dw-turn{font-size:11.5px; letter-spacing:.06em; color:var(--muted); white-space:nowrap;}
+  /* The board is square and sized by one number, so the four stay in step and
+     a narrow window shrinks them together rather than one at a time. */
+  .dw-board-wrap{width:100%; max-width:var(--dw-board,232px); margin:0 auto;}
+  .dw-card .board-frame{padding:5px; border-radius:7px;}
+  .dw-card .board{border-radius:4px;}
+  .dw-card .coord{display:none;}          /* no room, and the list says the squares */
+  /* Complete Blindfold has no board at all — the console stands in its place,
+     and is given the height a board would have had so the grid does not jump. */
+  .dw-console{
+    display:flex; flex-direction:column; gap:7px; justify-content:center;
+    min-height:150px;
+  }
+  .dw-console .entry{display:flex; gap:6px;}
+  .dw-console input{
+    flex:1 1 auto; min-width:0; padding:7px 9px; font-size:13.5px;
+    border-radius:6px; border:1px solid rgba(212,175,110,.28);
+    background:rgba(5,8,12,.7); color:var(--ink,#e8eaf0); font-family:inherit;
+  }
+  .dw-console input:focus{outline:none; border-color:rgba(212,175,110,.6);}
+  .dw-console button{padding:7px 12px; font-size:13px; letter-spacing:.05em;}
+  .dw-hint{margin:0; font-size:11px; color:var(--muted); line-height:1.45;}
+  /* The written position: the whole of Complete Blindfold, and the half the
+     board is refusing to draw in the other two hidden visions. */
+  .dw-men{margin:0; font-size:11.5px; line-height:1.6; color:#cfd3dc;}
+  .dw-men b{color:var(--gold-soft); font-weight:400; letter-spacing:.04em;}
+  .dw-say{margin:0; font-size:12px; min-height:1.2em; letter-spacing:.02em;}
+  .dw-say.bad{color:var(--bad,#e2777a);}
+  .dw-say.good{color:var(--good,#7ac084);}
+  .dw-say.calm{color:var(--muted);}
+  .dw-moves{margin:0; font-size:11.5px; color:var(--muted); word-break:break-word;}
+  .dw-acts{display:flex; flex-wrap:wrap; gap:6px;}
+  .dw-acts button{
+    padding:6px 10px; font-size:11.5px; letter-spacing:.05em; border-radius:6px;
+  }
+  /* The result, folded away behind a summary so a solved widget does not push
+     the other three off the screen. */
+  .dw-why{margin:0;}
+  .dw-why > summary{
+    cursor:pointer; font-size:12px; letter-spacing:.05em; color:var(--gold-soft);
+    padding:3px 0; list-style:none;
+  }
+  .dw-why > summary::-webkit-details-marker{display:none;}
+  .dw-why > summary::before{content:'\25B8 '; display:inline-block; transition:transform .15s;}
+  .dw-why[open] > summary::before{transform:rotate(90deg);}
+  .dw-why-body{
+    max-height:230px; overflow-y:auto; padding:4px 2px 2px;
+    font-size:11.5px; line-height:1.55;
+  }
+  .dw-why-body .pz-why-line{margin:5px 0; padding-left:18px;}
+  .dw-why-body p{margin:5px 0;}
+  .dw-empty{font-size:12px; color:var(--muted); padding:18px 4px; text-align:center;}
+  /* Three cards carry a board and one a console; below the fold of a phone the
+     grid goes to one column and the boards get the width back. */
+  @media (max-width:900px){ .dw-card{--dw-board:210px;} }
+  @media (max-width:560px){
+    .dw-card{--dw-board:280px;}
+    .dw-console{min-height:0;}
+  }
+
   .live-stack{
     align-self:flex-end;
     width:min(660px,54%); flex:none; min-width:0;
@@ -9868,58 +9951,499 @@ function dailyOpen(key){
   });
 }
 
-/* ---- the cards ---- */
+/* ---- the four widgets ----
 
+   A Daily Puzzle is played *here*, on the home page, and the card is the
+   puzzle rather than a link to it. Four of them are live at once, which is the
+   whole of why this section exists: `PZ` and `G` are one puzzle and one game,
+   and four boards cannot share them. Nothing about the chess is duplicated to
+   get around that — every judgement a widget makes is made by the same
+   function the Puzzle page calls:
+
+     puzzleStep()   whether the move is the move, and what the reply is
+     legalMoves()   what may be played, and whether the entry is legal at all
+     makeMove()     the position afterwards
+     parseMoveIn()  Complete Blindfold's notation, the game's own reader
+     visibleSet()   Fog of War, from the solver's chair
+     pzExplain()    the Education System card, already pure and already html
+     pzSwingHTML()  the two win-percentages, likewise
+     pzFollowOf()   the verified follow-up, either stored shape
+     pzMark()       the solve, into the same store under the same scope
+
+   What a widget owns is its own *state* and its own *painting*, and only
+   those. That is the same bargain the practice board (prPaint) and the lessons
+   board (lsnRender) already struck, for the same reason: render() reads `G`,
+   and these are not the game. The markup and every class inside it are the
+   game's, so the boards are styled by the rules that style the board. */
+
+const DW_REPLY_MS = 520;                  // the forced defence, at reading pace
+const DW = { boards: {} };
+
+/** The solver's colour: whoever is to move in the puzzle's own position. */
+const dwSolver = w => stateFromFEN(w.puzzle.fen).turn;
+
+/** Board orientation — the solver always sits at the bottom. */
+const dwVisual = (w, i) => (dwSolver(w) === B ? 63 - i : i);
+
+/** A widget, fresh, on today's puzzle for its vision. */
+function dwState(m, puzzle){
+  const st = stateFromFEN(puzzle.fen);
+  return {
+    key: m.key, vision: m.vision, name: m.name,
+    puzzle, st, ply: 0, uci: [],
+    sel: -1, wrong: false, busy: false, done: false, revealed: false,
+    followed: false, say: null,
+    sqEls: null, pieceEls: new Map(), els: {}
+  };
+}
+
+/* ---- what may be seen ----
+   The three hidden visions, and they are the puzzle screen's rules rather than
+   a second visibility system: Board Only fades every man, Fog of War draws the
+   solver's and not the opponent's, Complete Blindfold has no board at all. A
+   puzzle does not inherit fog of the *squares* — the board is granted here and
+   it is the opponent who is hidden — and it does not inherit peeking. */
+function dwShows(w, i){
+  if (w.revealed || w.vision === 'sighted') return true;
+  if (w.vision === 'blind') return false;
+  if (w.vision === 'fog'){
+    const p = w.st.b[i];
+    return !!p && p.c === dwSolver(w);
+  }
+  return false;
+}
+
+/* ---- painting ----
+   Keyed by piece id exactly as renderPieces() is, so a man that moves travels
+   rather than blinking out and back. */
+function dwPaint(w){
+  if (!w.els.pieces) return;
+  const seen = new Set();
+  for (let i = 0; i < 64; i++){
+    const p = w.st.b[i];
+    if (!p || !dwShows(w, i)) continue;
+    seen.add(p.id);
+    let e = w.pieceEls.get(p.id);
+    if (!e){
+      e = document.createElement('div');
+      e.innerHTML = '<span></span>';
+      w.els.pieces.appendChild(e);
+      w.pieceEls.set(p.id, e);
+    }
+    e.className = 'piece ' + p.c;
+    if (e.dataset.t !== p.t){ e.dataset.t = p.t; e.firstChild.innerHTML = pieceHTML(p.t); }
+    const v = dwVisual(w, i);
+    e.style.transform = 'translate(' + colOf(v) * 100 + '%, ' + rowOf(v) * 100 + '%)';
+  }
+  for (const [id, e] of w.pieceEls){
+    if (!seen.has(id)){ w.pieceEls.delete(id); e.remove(); }
+  }
+  /* The marks. The last-move highlight needs the position to be open, exactly
+     as it does in a game; the check ring is narrowed further — it lights
+     whichever king is in check, and during the forced defence that is *theirs*,
+     which on a hidden board is the most valuable square there is. So it is
+     drawn for the solver's own king alone until the puzzle is over. */
+  const open = w.revealed || w.vision === 'sighted';
+  for (const d of w.sqEls) d.className = 'sq ' + (d.dataset.base || '');
+  if (w.sel >= 0) w.sqEls[dwVisual(w, w.sel)].classList.add('sel');
+  if (open && w.last){
+    w.sqEls[dwVisual(w, w.last.from)].classList.add('from');
+    w.sqEls[dwVisual(w, w.last.to)].classList.add('to');
+  }
+  const me = dwSolver(w);
+  const side = w.st.turn;
+  if ((open || side === me) && inCheck(w.st, side)){
+    const k = w.st.b.findIndex(x => x && x.t === 'k' && x.c === side);
+    if (k >= 0) w.sqEls[dwVisual(w, k)].classList.add('check');
+  }
+  w.els.board.classList.toggle('blind', w.vision === 'blind' && !w.revealed);
+}
+
+/* ---- the written position ----
+   Generated from the board on every render, never stored: in Complete
+   Blindfold it *is* the position, in the two board visions it is the half the
+   board is refusing to draw, and it is granted for both sides in every vision
+   including Fog of War. Holding a position you have been told while looking at
+   squares that will not confirm it is the exercise; a panel showing half a
+   position is not a harder version of it but a poorer one. */
+function dwMenHTML(w){
+  const rows = [W, B].map(c =>
+    '<div><b>' + (c === W ? 'White' : 'Black') + '</b> ' +
+    pzEsc(pzPieceList(w.st, c) || '—') + '</div>');
+  return rows.join('');
+}
+
+/** What has been played, in the game's own numbering, off what actually
+    happened rather than off the file — the same rule pzSanLine() follows. */
+function dwLine(w){
+  let st = stateFromFEN(w.puzzle.fen);
+  const out = [];
+  let n = st.full || 1, white = st.turn === W;
+  for (const u of w.uci){
+    // toSAN needs the whole list beside the move: disambiguation is a fact
+    // about the other legal moves, not about this one
+    const all = legalMoves(st, st.turn);
+    const m = all.find(x => uciOf(x) === u);
+    if (!m) break;
+    const san = toSAN(st, m, all);
+    if (white) out.push(n + '. ' + san); else { out.push((out.length ? '' : n + '... ') + san); n++; }
+    white = !white;
+    st = makeMove(st, m);
+  }
+  return out.join(' ');
+}
+
+/* ---- playing ----
+   The referee is puzzleStep(), the same pure function the Puzzle page's
+   pzPlay() asks, so a move that is right here is right there. */
+function dwPlay(w, m){
+  if (w.busy || w.done) return;
+  const step = puzzleStep(w.puzzle.moves, w.ply, uciOf(m));
+  if (!step.ok){
+    // wrong: never applied, so the board is already where it should be
+    w.wrong = true;
+    w.sel = -1;
+    w.say = { text: 'Not the best move. Try again.', cls: 'bad' };
+    dwRender(w);
+    if (w.els.board) reject(w.sqEls[dwVisual(w, m.to)]);
+    return;
+  }
+  beep(760,.07);
+  w.say = null;
+  w.st = makeMove(w.st, m);
+  w.uci.push(uciOf(m));
+  w.last = m;
+  w.sel = -1;
+  w.ply = step.ply;
+
+  if (step.solved){ dwFinish(w, !w.wrong); return; }
+
+  w.busy = true;
+  dwRender(w);
+  setTimeout(() => {
+    const rm = legalMoves(w.st, w.st.turn).find(x => uciOf(x) === step.reply);
+    if (rm){
+      w.st = makeMove(w.st, rm);
+      w.uci.push(step.reply);
+      w.last = rm;
+      beep(420,.06);
+    }
+    w.busy = false;
+    dwRender(w);
+  }, DW_REPLY_MS);
+}
+
+/** Solved. Recorded through pzMark() under the Daily scope, so the store, the
+    key and the 24-hour reset are the ones dailyDone() already reads. */
+function dwFinish(w, clean){
+  w.done = true;
+  w.busy = false;
+  w.revealed = true;              // nothing left to give away
+  w.say = { text: clean ? 'Solved.' : 'Solved — with a wrong turn on the way.',
+            cls: clean ? 'good' : 'calm' };
+  pzMark(dailyScope(w.key), w.puzzle.id, clean);
+  beep(880,.12);
+  dwRender(w);
+}
+
+/** The verified follow-up, played out on the widget's own board at the same
+    cadence as the forced defence. The line is the file's, chosen by
+    verify_puzzles.js; nothing is searched here. */
+function dwFollow(w){
+  const f = pzFollowOf(w.puzzle);
+  if (!w.done || w.busy || w.followed || !f || !f.moves.length) return;
+  w.followed = true;
+  w.busy = true;
+  dwRender(w);
+  let i = 0;
+  const step = () => {
+    const u = f.moves[i];
+    const m = u && legalMoves(w.st, w.st.turn).find(x => uciOf(x) === u);
+    if (!m){ w.busy = false; dwRender(w); return; }
+    w.st = makeMove(w.st, m);
+    w.uci.push(u);
+    w.last = m;
+    i++;
+    beep(i % 2 ? 520 : 400, .05);
+    dwRender(w);
+    setTimeout(step, DW_REPLY_MS);
+  };
+  setTimeout(step, 200);
+}
+
+/* ---- entering a move ----
+   Two doors, and both end in dwPlay(). The board's is a click; Complete
+   Blindfold's is the console, read by parseMoveIn() — the game's own notation
+   reader, so anything the game accepts a lesson and a puzzle accept too, and
+   "not legal here" is told apart from "legal, and not the answer". Only the
+   rules can make that distinction, and the player needs it: one of the two
+   means their picture of the board is wrong. */
+function dwClick(w, i){
+  if (w.busy || w.done) return;
+  if (w.st.turn !== dwSolver(w)) return;
+  if (w.sel < 0){ w.sel = i; dwRender(w); return; }
+  if (w.sel === i){ w.sel = -1; dwRender(w); return; }
+  const ms = legalMoves(w.st, w.st.turn).filter(m => m.from === w.sel && m.to === i);
+  if (!ms.length){
+    const p = w.st.b[i];
+    // re-select another of your own men, where you can see them
+    if (p && p.c === dwSolver(w) && dwShows(w, i)){ w.sel = i; dwRender(w); return; }
+    w.sel = -1;
+    dwRender(w);
+    return;
+  }
+  // a promotion on a widget is always a queen: there is no room for a chooser,
+  // and a puzzle whose answer is an underpromotion would have it in its line
+  const m = ms.find(x => !x.promo || x.promo === 'q') || ms[0];
+  dwPlay(w, m);
+}
+
+function dwTyped(w){
+  const inp = w.els.input;
+  if (!inp) return;
+  const text = inp.value.trim();
+  if (!text) return;
+  if (w.busy || w.done){ inp.value = ''; return; }
+  const r = parseMoveIn(w.st, text);
+  if (r.error){
+    w.say = { text: r.error, cls: 'bad' };
+    dwRender(w);
+    return;
+  }
+  inp.value = '';
+  dwPlay(w, r.move);
+}
+
+/* ---- one widget, drawn ---- */
+function dwBuild(w){
+  /* A widget is rebuilt whenever the grid's membership changes — which it does
+     three times on the way in, as the four files arrive one after another. The
+     piece elements are cached by piece id so a man that moves travels rather
+     than blinking, and that cache belongs to the container it was appended to:
+     carried across a rebuild it would hold elements parented to a node no
+     longer on the page, dwPaint() would find them in the map and never append
+     them to the new one, and the board would come up empty. It did. */
+  w.pieceEls = new Map();
+  const card = document.createElement('div');
+  card.className = 'dw-card';
+  card.id = 'daily-' + w.key;
+  card.dataset.mode = w.key;
+
+  const head = document.createElement('div');
+  head.className = 'dw-head';
+  const mode = document.createElement('span');
+  mode.className = 'dw-mode';
+  mode.textContent = w.name;
+  const turn = document.createElement('span');
+  turn.className = 'dw-turn';
+  head.appendChild(mode); head.appendChild(turn);
+  card.appendChild(head);
+  w.els.card = card; w.els.turn = turn;
+
+  if (w.vision === 'total'){
+    // no board at all — the console stands where one would have been
+    const con = document.createElement('div');
+    con.className = 'dw-console';
+    const form = document.createElement('form');
+    form.className = 'entry';
+    form.autocomplete = 'off';
+    const inp = document.createElement('input');
+    inp.type = 'text';
+    inp.placeholder = 'Your move...';
+    inp.setAttribute('autocomplete','off');
+    inp.setAttribute('autocapitalize','off');
+    inp.spellcheck = false;
+    inp.setAttribute('aria-label', 'Your move, in notation');
+    inp.id = 'dwInput-' + w.key;
+    const go = document.createElement('button');
+    go.className = 'primary'; go.type = 'submit'; go.textContent = 'Play';
+    form.appendChild(inp); form.appendChild(go);
+    form.addEventListener('submit', e => { e.preventDefault(); dwTyped(w); });
+    con.appendChild(form);
+    const hint = document.createElement('p');
+    hint.className = 'dw-hint';
+    hint.innerHTML = 'Notation: <b>Nf3</b> · <b>Bxf7+</b> · <b>O-O</b> — or plain squares, <b>c4f7</b>.';
+    con.appendChild(hint);
+    card.appendChild(con);
+    w.els.input = inp;
+  } else {
+    const wrap = document.createElement('div');
+    wrap.className = 'dw-board-wrap';
+    const frame = document.createElement('div');
+    frame.className = 'board-frame panel';
+    const board = document.createElement('div');
+    board.className = 'board';
+    const squares = document.createElement('div');
+    squares.className = 'squares';
+    const pieces = document.createElement('div');
+    pieces.className = 'pieces';
+    board.appendChild(squares); board.appendChild(pieces);
+    frame.appendChild(board); wrap.appendChild(frame); card.appendChild(wrap);
+
+    w.sqEls = [];
+    for (let v = 0; v < 64; v++){
+      const d = document.createElement('div');
+      d.className = 'sq';
+      squares.appendChild(d);
+      w.sqEls.push(d);
+    }
+    for (let i = 0; i < 64; i++){
+      const v = dwVisual(w, i);
+      const d = w.sqEls[v];
+      d.dataset.sq = i;
+      d.dataset.base = (rowOf(i) + colOf(i)) % 2 === 1 ? 'dark' : 'light';
+    }
+    squares.addEventListener('click', e => {
+      const sq = e.target.closest('.sq');
+      if (sq) dwClick(w, +sq.dataset.sq);
+    });
+    w.els.board = board; w.els.pieces = pieces;
+  }
+
+  // the written position, and what has been played
+  const men = document.createElement('div');
+  men.className = 'dw-men';
+  card.appendChild(men);
+  w.els.men = men;
+
+  const say = document.createElement('p');
+  say.className = 'dw-say';
+  card.appendChild(say);
+  w.els.say = say;
+
+  const acts = document.createElement('div');
+  acts.className = 'dw-acts';
+  card.appendChild(acts);
+  w.els.acts = acts;
+
+  const why = document.createElement('div');
+  card.appendChild(why);
+  w.els.why = why;
+
+  return card;
+}
+
+function dwRender(w){
+  if (!w.els.card) return;
+  w.els.card.classList.toggle('done', w.done);
+
+  const me = dwSolver(w);
+  w.els.turn.textContent = w.done ? (w.followed ? 'follow-up' : 'solved')
+                         : w.busy ? '…'
+                         : (me === W ? 'White to play' : 'Black to play');
+
+  if (w.els.board) dwPaint(w);
+  w.els.men.innerHTML = dwMenHTML(w);
+
+  const line = dwLine(w);
+  w.els.say.className = 'dw-say' + (w.say ? ' ' + w.say.cls : ' calm');
+  w.els.say.textContent = w.say ? w.say.text : (line || '');
+
+  if (w.els.input) w.els.input.disabled = w.busy || w.done;
+
+  // the result controls, once there is nothing left to give away
+  w.els.acts.innerHTML = '';
+  if (w.done){
+    const f = pzFollowOf(w.puzzle);
+    if (f && f.moves && f.moves.length && !w.followed){
+      const b = document.createElement('button');
+      b.textContent = 'Show Follow Up';
+      b.onclick = () => dwFollow(w);
+      w.els.acts.appendChild(b);
+    }
+    /* Study Alternatives is the one thing here that genuinely needs the bigger
+       view: it boots an engine and hands the board back so any legal defence
+       can be tried and answered on that exact position. That is a board to
+       play on rather than a board to read, so it opens the puzzle screen —
+       the same puzzle, by the same door dailyOpen() already uses. Solving
+       never leaves this page; only this does. */
+    const s = document.createElement('button');
+    s.textContent = 'Study Alternatives';
+    s.onclick = () => dailyOpen(w.key);
+    w.els.acts.appendChild(s);
+  }
+
+  if (w.done){
+    if (!w.els.why.firstChild){
+      const d = document.createElement('details');
+      d.className = 'dw-why';
+      const sum = document.createElement('summary');
+      sum.textContent = 'Why this works';
+      const body = document.createElement('div');
+      body.className = 'dw-why-body';
+      body.innerHTML = pzSwingHTML(w.puzzle) + pzExplain(w.puzzle);
+      d.appendChild(sum); d.appendChild(body);
+      w.els.why.appendChild(d);
+    }
+  } else {
+    w.els.why.innerHTML = '';
+  }
+}
+
+/* ---- the section ---- */
 function dailyRender(){
   const wrap = document.getElementById('dailyGrid');
   if (!wrap) return;
-  wrap.innerHTML = '';
+
   for (const m of DAILY_MODES){
     const list = DAILY.lists[m.key];
     const p = list ? dailyPick(list, DAILY.index) : null;
-    const done = dailyDone(m.key, p);
+    let w = DW.boards[m.key];
 
-    const card = document.createElement('button');
-    card.className = 'daily-card' + (done ? ' done' : '') + (DAILY.failed[m.key] ? ' locked' : '');
-    card.id = 'daily-' + m.key;
-    card.dataset.mode = m.key;
-    card.setAttribute('aria-label', m.name + ' Daily Puzzle');
-
-    const head = document.createElement('span');
-    head.className = 'daily-mode';
-    head.textContent = m.name;
-    card.appendChild(head);
-
-    const note = document.createElement('span');
-    note.className = 'daily-note';
-    /* What the card is allowed to say. The difficulty is a fact about the
-       position and gives nothing away; the side to move is on the board the
-       moment it opens. Nothing about the solution, and no theme — those are
-       the answer, and the puzzle screen itself withholds them until it is
-       finished. */
-    note.textContent = DAILY.failed[m.key] ? 'Not installed yet'
-                     : !p                  ? 'Loading…'
-                     : done                ? 'Solved today'
-                     : (p.seedRating != null ? 'Difficulty ' + p.seedRating : 'Today’s puzzle');
-    card.appendChild(note);
-
-    if (done){
-      const tick = document.createElement('span');
-      tick.className = 'daily-tick';
-      tick.textContent = '\u2713';
-      card.appendChild(tick);
+    // a widget is built once per puzzle: rebuilt when the day's record changes
+    // (midnight, or the file arriving), left alone on every other redraw so a
+    // half-solved board is not thrown away by a neighbour finishing
+    if (!p){
+      if (w){ delete DW.boards[m.key]; }
+      continue;
     }
-    card.disabled = !!DAILY.failed[m.key];
-    card.onclick = () => GUEST() ? toSignUp() : dailyOpen(m.key);
-    wrap.appendChild(card);
+    if (!w || w.puzzle.id !== p.id){
+      w = DW.boards[m.key] = dwState(m, p);
+      w.els.card = null;
+    }
   }
+
+  // (re)lay the grid only when its membership changes, so a click on one board
+  // never rebuilds another
+  const want = DAILY_MODES.map(m => DW.boards[m.key] ? m.key : ('x-' + m.key)).join(',');
+  if (wrap.dataset.want !== want){
+    wrap.dataset.want = want;
+    wrap.innerHTML = '';
+    for (const m of DAILY_MODES){
+      const w = DW.boards[m.key];
+      if (w){
+        wrap.appendChild(dwBuild(w));
+        // a puzzle already solved today opens solved, with its card up
+        if (dailyDone(m.key, w.puzzle) && !w.done){
+          w.done = true; w.revealed = true;
+          w.say = { text: 'Solved today.', cls: 'good' };
+        }
+        dwRender(w);
+      } else {
+        const box = document.createElement('div');
+        box.className = 'dw-card';
+        box.id = 'daily-' + m.key;
+        box.dataset.mode = m.key;
+        box.innerHTML = '<div class="dw-head"><span class="dw-mode">' + pzEsc(m.name) +
+          '</span></div><div class="dw-empty">' +
+          (DAILY.failed[m.key] ? 'Not installed yet' : 'Loading…') + '</div>';
+        wrap.appendChild(box);
+      }
+    }
+  } else {
+    for (const m of DAILY_MODES){
+      const w = DW.boards[m.key];
+      if (w && w.els.card) dwRender(w);
+    }
+  }
+
   const say = document.getElementById('dailyNote');
   if (say) say.textContent = DAILY.index === null ? ''
-    : 'Four positions, one of each vision. They change at midnight UTC.';
+    : 'Four positions, one of each vision — played here. They change at midnight UTC.';
 }
 
 /** Called on the way into the home page: the day, then the four files, then
-    the cards. Every step redraws, so the section fills in as it arrives
+    the widgets. Every step redraws, so the section fills in as it arrives
     rather than appearing all at once at the end. */
 function dailyEnter(){
   dailyRender();
