@@ -295,8 +295,14 @@
     background:#081522 var(--board-art) center / 100% 100%;
     box-shadow:0 0 0 2px #b79b64, 0 0 0 4px #423a2e, 0 0 22px rgba(0,0,0,.65);
   }
-  .squares{position:absolute; inset:0; display:grid; grid-template-columns:repeat(8,1fr); grid-template-rows:repeat(8,1fr);}
+  /* touch-action:none is what lets a finger drag a man on a phone: without it
+     the browser reads the first few pixels as a scroll, takes the pointer for
+     itself (pointercancel) and the piece is left where it stood. The board is
+     the one place on the page where a drag means a move, so scrolling is given
+     up over it and nowhere else. */
+  .squares{position:absolute; inset:0; display:grid; grid-template-columns:repeat(8,1fr); grid-template-rows:repeat(8,1fr); touch-action:none;}
   .sq{position:relative; user-select:none; cursor:pointer;}
+  .squares.dragging{cursor:grabbing;}
   /* The art lies beneath the interactive squares, so fog and move markers keep
      their own layers. A half-turn preserves checkerboard parity in either seat. */
   .sq.light,.sq.dark{background:transparent;}
@@ -389,6 +395,10 @@
   .tray{--piece-edge:#514538;}
   #trayB{color:#252d38; --piece-edge:#b9a681;}
 
+  /* A man being dragged sits over the others and follows the pointer with no
+     easing: the transition that slides a played move would otherwise lag the
+     glyph a fifth of a second behind the finger. */
+  .piece.dragging{transition:none; z-index:5;}
   .piece.gone{opacity:0; transform-origin:center; }
   .piece.pop span{animation:pop .3s ease;}
   @keyframes pop{0%{transform:scale(.3) translateY(-2%);}70%{transform:scale(1.15) translateY(-2%);}100%{transform:scale(1) translateY(-2%);}}
@@ -5602,6 +5612,15 @@ function resetSquareClasses(){
 
 /* ---- pieces layer with identity-based animation ---- */
 const pieceEls = new Map();
+/* A man in the hand. `from` is the square the pointer went down on, `el` the
+   piece element following it (none when the square held nothing the viewer
+   may move — the drag still happens, it just shows nothing, which is what a
+   hidden board needs), and `moved` whether the pointer has travelled far
+   enough for this to be a drag rather than a click. It is declared here
+   rather than with the handlers because renderPieces() has to know which man
+   not to put back: a render mid-drag (a selection ring, the hints) would
+   otherwise slide the piece out of the hand and back to its square. */
+const DRAG = { from:-1, el:null, id:null, moved:false, x:0, y:0, swallow:false };
 function renderPieces(){
   const seen = new Set();
   for (let i=0;i<64;i++){
@@ -5624,7 +5643,7 @@ function renderPieces(){
       if (!e.dataset.fresh){ e.classList.add('pop'); setTimeout(()=>e.classList.remove('pop'), 320); }
     }
     const v = visualIndex(i);
-    e.style.transform = `translate(${colOf(v)*100}%, ${rowOf(v)*100}%)`;
+    if (e !== DRAG.el) e.style.transform = `translate(${colOf(v)*100}%, ${rowOf(v)*100}%)`;
     delete e.dataset.fresh;
   }
   for (const [id, e] of pieceEls){
@@ -6064,6 +6083,17 @@ function flagFall(loser){
   const winner = other(loser);
   const lname = loser  === W ? 'White' : 'Black';
   const wname = winner === W ? 'White' : 'Black';
+  /* THE RULES ARE THE RULES, including against the fallback opponent.
+   *
+   * This function briefly gave the player the half point when their own flag
+   * fell in an AI game, on the grounds that a flag is the one way an opponent
+   * meant to lose can win. That was the wrong lever and it is gone: a result
+   * is what the rules say it is, and a game whose ending is decided by who the
+   * opponent happens to be is not a game of chess. The tendency the fallback
+   * opponent is supposed to have belongs in how it PLAYS — see aiThinkMs(),
+   * which is what stops it banking a clock advantage in the first place, and
+   * the band and the escalation above it. Not in what happens after the clock
+   * hits zero. */
   if (!hasMatingMaterial(G.st, winner)){
     finish('Draw', `${lname} ran out of time, but ${wname} has no way to force mate.`,
            `Draw — ${lname} ran out of time`);
@@ -6645,6 +6675,239 @@ const AI_BAND  = { early:[0.40, 0.55], middle:[0.20, 0.40], late:[0.10, 0.30] };
    with a hanging queen. */
 const AI_SLACK = { early:90, middle:140, late:200 };
 
+/* ---- the match controller ------------------------------------------------
+
+   The band above is a fixed target per phase, which makes every game the same
+   game: the same ply turns the same corner, the opponent softens on schedule,
+   and a player who has met it twice has met it once. Worse, it says nothing
+   about the player. A band that hands the same fraction to somebody who is
+   finding every move and to somebody who is hanging pieces is not adapting to
+   either of them.
+
+   So the phase band becomes the DEFAULT that this varies around. Nothing
+   below removes a guarantee: `aiChoose` still refuses to mate, still refuses
+   to play outside the slack, and still plays its best move when it is behind.
+   What this decides is only where the target sits between those walls.
+
+   It costs no extra searching. The engine already runs once a turn, and the
+   difference between one turn's score and the next is what the player's move
+   was worth — so the measurement everything here steers by is a subtraction
+   of two numbers the page already had. */
+
+/* Four ways to be wrong, and none of them is named on screen. A style shifts
+   the band a little and the slack a little; it does not change what the
+   opponent is allowed to do. Aggressive play overreaches, so it is given more
+   rope and takes it sooner; a defensive player errs by being passive, so it
+   sits lower and waits longer between mistakes. */
+const AI_STYLES = {
+  aggressive: { band:  0.04, slack: 1.20, patience: 0.8 },
+  positional: { band: -0.02, slack: 0.90, patience: 1.2 },
+  tactical:   { band:  0.02, slack: 1.25, patience: 0.9 },
+  defensive:  { band: -0.04, slack: 0.85, patience: 1.3 },
+};
+const AI_STYLE_NAMES = ['aggressive', 'positional', 'tactical', 'defensive'];
+
+/* How far past its own handover ply the band may walk down, and how fast. A
+   quarter of the scale over about forty moves: slow enough that no single
+   move is where the game turned. */
+const AI_WALK_MAX = 0.18;
+const AI_WALK_PER_PLY = 0.006;
+/* What a human move has to gain before it counts as having taken the chance,
+   and what it has to cost before the bot reads the player as struggling. */
+const AI_TOOK_CP = 40;
+const AI_FORM_CP = 100;
+
+const AI = {
+  style: 'positional',   // which of AI_STYLES this game is
+  handover: 28,          // the ply its band starts walking down; drawn per game
+  last: null,            // the candidate it chose last turn, for reading the player
+  seen: null,            // and what the POSITION was worth, for reading itself
+  loss: [],              // centipawns the player has dropped, most recent last
+  opened: 0,             // chances it has deliberately left on the board
+  took: 0,               // ...and how many the player has taken
+  watch: 0,              // plies left to see whether this one is taken
+  cool: 0,               // plies of honest chess owed before offering another
+};
+
+/* A new game is a new opponent. Called from newGame(), which is the one place
+   that knows a game has started, and which already bumps G.token for the same
+   reason: nothing from the last game may leak into this one. */
+function aiReset(rnd){
+  rnd = rnd || Math.random;
+  AI.style = AI_STYLE_NAMES[(rnd() * AI_STYLE_NAMES.length) | 0];
+  // Somewhere in the twenties or thirties, never the same twice. This is the
+  // single number that stops two games sharing a shape.
+  AI.handover = 18 + Math.round(rnd() * 22);
+  AI.last = AI.seen = null;
+  AI.loss = [];
+  AI.opened = AI.took = AI.watch = AI.cool = 0;
+}
+
+/* How the player is doing, as one number: +1 they are finding everything, 0
+   they are playing like their rating, -1 they are falling apart. Read off the
+   last few moves rather than the whole game, because what the opponent should
+   do about it is a question about now. */
+function aiForm(){
+  if (!AI.loss.length) return 0;
+  const recent = AI.loss.slice(-6);
+  let sum = 0;
+  for (let i = 0; i < recent.length; i++) sum += recent[i];
+  return Math.max(-1, Math.min(1, 1 - (sum / recent.length) / AI_FORM_CP));
+}
+
+/* What the player's move cost, and whether it was the move this opponent was
+   hoping they would find.
+   
+   `score` is what the engine says the position is worth to the bot, at the
+   bot's turn, and `AI.last` is the same number one turn ago — with the bot's
+   own move in between, already accounted for, because what was stored was the
+   value of the candidate it actually chose. So the difference is the player's
+   move and nothing else. Up means they gave ground. */
+function aiNoteHuman(score){
+  if (AI.last === null || score === null || score === undefined) return;
+  const moved = score - AI.last;
+  AI.loss.push(Math.max(0, Math.min(600, moved)));
+  while (AI.loss.length > 12) AI.loss.shift();
+  if (AI.watch > 0){
+    if (moved <= -AI_TOOK_CP){
+      // They found it. Nothing is owed and nothing is offered: a player who is
+      // converting should be left to convert.
+      AI.took++; AI.watch = 0; AI.cool = 0;
+    } else if (--AI.watch === 0){
+      // They did not. The answer to a missed chance is not a bigger one — it
+      // is a stretch of honest chess, and then another chance later.
+      AI.cool = Math.round((6 + AI.opened * 2) * (AI_STYLES[AI.style] || {}).patience || 6);
+    }
+  } else if (AI.cool > 0) AI.cool--;
+}
+
+/* Where the target sits this turn. Everything that moves it is here, in the
+   order it is applied, so the whole policy can be read in one place. */
+function aiBandFor(phase, ply, form){
+  const base = AI_BAND[phase] || AI_BAND.middle;
+  const style = AI_STYLES[AI.style] || { band: 0 };
+  let lo = base[0], hi = base[1];
+  // 1. The handover. Past this game's own ply the target walks down, so the
+  //    player takes over gradually and at a different point every game.
+  const past = Math.max(0, ply - AI.handover);
+  const walk = Math.min(AI_WALK_MAX, past * AI_WALK_PER_PLY);
+  lo -= walk; hi -= walk;
+  // 2. The player. Finding everything earns a stronger opponent; struggling is
+  //    met by one that stops pressing. This is the whole of the adaptation.
+  lo += form * 0.06; hi += form * 0.06;
+  // 3. Honest chess owed. After a chance the player did not take, the target
+  //    goes back up and the game is a game again for a while.
+  if (AI.cool > 0){ lo += 0.10; hi += 0.10; }
+  /* 4. The chances that have gone by — and note what this does NOT do.
+   *
+   * The obvious move was to drop the target as well, and it was measured and
+   * thrown away: a lower target makes the opponent PASSIVE, passive games run
+   * long, and long games against a player who cannot convert end in the
+   * player's flag rather than the player's win. Over ninety-nine games it cost
+   * eleven wins and bought nothing — the games that would not end still would
+   * not end. What a missed chance earns is a BIGGER chance, not a quieter
+   * opponent, so the escalation lives in the slack (aiSlackFor) and the target
+   * is left where the rest of the policy put it. */
+  // 5. Who this opponent is.
+  lo += style.band; hi += style.band;
+  lo = Math.max(0.02, Math.min(0.90, lo));
+  hi = Math.max(lo + 0.05, Math.min(0.95, hi));
+  return [lo, hi];
+}
+
+/* How much a candidate that walks back into a position already on the board has
+   to give up before it is preferred anyway, in win-chance units. Small on
+   purpose: this is a tie-break and not a rule. A shuffle is what a target band
+   produces when nothing on the list makes progress toward it — the quiet move
+   that repeats sits nearest a low target, so it gets played, and then it gets
+   played again. Measured over ninety-nine games: 26 ended by repetition, and
+   on 154 of the 156 bot turns leading into one there was a move available that
+   did not repeat. It was choosing them.
+
+   It is not applied when the bot is WORSE, because there a repetition is a
+   real drawing resource and declining to take one would be throwing the game
+   — the same reason the band is never steered down from below. */
+const AI_REP_NUDGE = 0.05;
+
+/* And the same idea for a game that is not repeating but is not going
+   anywhere either. The fifty-move counter is the game's own measure of that:
+   no capture and no pawn move for twenty moves is a position nobody is trying
+   to win. An opponent whose target is a low win chance has no reason to force
+   matters, so it drifts — and drifting is not neutral, because it costs the
+   opponent about a second a move and the player whatever a person spends
+   thinking. Over a long game the player is the one who flags, and flagFall()
+   gives the point to whoever has mating material. Measured with a clock in the
+   harness: the opponent won ten of ninety-nine games on time.
+   
+   So when the game stops moving the opponent starts it moving again, by
+   preferring the moves that reset that counter — its own pawn moves, which
+   make progress without winning anything — and by conceding a little faster
+   while it does. Both only while it is not worse, for the usual reason. */
+/* WHEN THE CHANCES KEEP GOING BY.
+ *
+ * A player who does not take what is offered is not helped by being offered
+ * the same thing again. Measured over the games that never finished: 8.2
+ * chances left on the board each, 1.7 taken, and the player sitting a couple
+ * of pawns down while the opponent declined to press — nobody winning and
+ * nobody losing, for three hundred plies.
+ *
+ * So a missed chance makes the next one plainer. The ladder is the obvious
+ * one: something positional, then something tactical, then a trade that is
+ * clearly good, then a piece left where it can be taken. It is a ladder and
+ * not a cliff — nothing here hangs a queen, the top of it is a loose rook, and
+ * it takes several misses to climb. It also comes back down on its own the
+ * moment the player takes something, because what it counts is chances offered
+ * MINUS chances taken.
+ *
+ * This is the long game's answer and the cool-off is the short one: after a
+ * miss the opponent plays honest chess for a while (aiNoteHuman), and when it
+ * next offers something, this is what decides how plain that offer is. */
+const AI_ESCALATE_AT = 3;        // misses before it starts making them plainer
+const AI_ESCALATE_MAX = 9;       // ...and where the ladder tops out
+const AI_ESCALATE_SLACK = 2.4;   // how much more one move may cost at the top
+
+function aiEscalation(){
+  const missed = Math.max(0, AI.opened - AI.took);
+  if (missed <= AI_ESCALATE_AT) return 0;
+  return Math.min(1, (missed - AI_ESCALATE_AT) / (AI_ESCALATE_MAX - AI_ESCALATE_AT));
+}
+
+const AI_STALE_PLY = 40;         // halfmoves without progress before it minds
+const AI_PROG_NUDGE = 0.06;      // ...and how much it then prefers a pawn move
+const AI_STALE_BAND = 0.08;      // ...and how much lower it is willing to sit
+
+/* How many candidates to ask for. Four is plenty for a close game and far too
+   few for a won one: to come down off a winning position without hanging
+   anything, there have to be moves on the list that are merely worse rather
+   than catastrophic, and the engine's top four in a won position are all
+   winning. Asking for more is the difference between conceding a game and
+   throwing one, and it costs the same single search. */
+function aiPoolFor(win){
+  if (win > 0.80) return AI_POOL + 6;
+  if (win > 0.65) return AI_POOL + 3;
+  return AI_POOL;
+}
+
+/* And how much a move may cost while it is being chosen. Wider when the bot
+   is well ahead, because a large advantage cannot be walked back with moves
+   that are all nearly best — that is the difference between conceding a game
+   and throwing one. Still bounded, and still under a rook. */
+function aiSlackFor(phase, win){
+  const style = AI_STYLES[AI.style] || { slack: 1 };
+  let slack = (AI_SLACK[phase] || AI_SLACK.middle) * style.slack;
+  if (win > 0.75) slack *= 1.6;
+  else if (win > 0.62) slack *= 1.25;
+  /* A little wider once the plain chances are the ones being missed, but only a
+     little: playing WORSE moves was measured and it did not help. The games
+     that would not end were ones the opponent was AHEAD in and would not part
+     with, and a worse move is not the same thing as a smaller advantage. What
+     escalation really drives is the floor — see aiPick — which is how much of
+     its own position it is willing to give back. */
+  const esc = aiEscalation();
+  slack *= 1 + esc * (AI_ESCALATE_SLACK - 1) * 0.4;
+  return Math.round(Math.max(60, Math.min(esc > 0 ? 400 : 320, slack)));
+}
+
 /* Where the game has got to. Ply count on its own calls a queenless four-piece
    ending a middlegame if it arrived quickly, so the men left on the board get
    a say: whichever measure says the game is further along wins. */
@@ -6683,7 +6946,7 @@ function lineScore(line){
    clock is the game's clock and it can flag like anybody else. Skill Level
    comes down alongside it, so the fall-off is gradual on two dials at once
    rather than a cliff on either. */
-function aiSearch(elo, phase, left){
+function aiSearch(elo, phase, left, pool){
   const ease = phase === 'early' ? 1 : phase === 'middle' ? 0.75 : 0.55;
   let ms = Math.round(Math.min(700, 140 + elo / 6) * ease);
   // it cannot spend what it does not have
@@ -6692,7 +6955,7 @@ function aiSearch(elo, phase, left){
   const back = phase === 'early' ? 0 : phase === 'middle' ? 2 : 4;
   return {
     skill: Math.max(0, Math.min(20, Math.round(elo / 160) - back)),
-    multipv: AI_POOL,
+    multipv: pool || AI_POOL,
     movetime: Math.max(80, ms),
     nocache: true            // the same position twice should not answer twice the same
   };
@@ -6702,15 +6965,55 @@ function aiSearch(elo, phase, left){
    winning from. Pure and separate so that what it does with a set of numbers
    can be checked without a board, a worker or a game — server/test_ai_fallback
    .js is the caller that does it. */
-function aiChoose(cands, band, slack, rnd){
+function aiChoose(cands, band, slack, rnd, floor){
   rnd = rnd || Math.random;
   if (!cands.length) return null;
+  /* IT DOES NOT MATE THE PLAYER.
+   *
+   * This used to be the other way round, and the comment beside the test that
+   * pinned it read "giving up a mate to stay level is not on the table". It is
+   * now, and the reason is that the two rules were never really in tension:
+   * everything else here exists so that the player wins a game worth winning,
+   * and a mate delivered by the opponent ends that game the other way. A mate
+   * is not an inaccuracy the band can steer around either — `lineScore` puts
+   * it at a hundred thousand, so the slack filter below throws away every
+   * ordinary move as "too far from the best" and the mating move is the only
+   * one left standing. The band never gets a say. So the refusal has to come
+   * first, before the slack, or it does not come at all.
+   *
+   * Only when there is something else to play. A position where every legal
+   * move mates is a position the player has already lost, and declining to
+   * move is not a chess move. */
+  const quiet = cands.filter(c => c.score < 90000);
+  if (quiet.length) cands = quiet;
   const top = Math.max.apply(null, cands.map(c => c.score));
-  const near = cands.filter(c => top - c.score <= slack);
+  /* The slack asks "how much worse than the best move is this", which is the
+     right question about a mistake and the wrong one about a GIFT. When the
+     player hangs a queen, declining it scores nine hundred below best, the
+     slack throws it out, and the opponent is compelled to take everything it
+     is offered — then obliged to hand it back later with moves that really are
+     bad. Measured over a hundred games against a weak player: 70% of its turns
+     were spent already winning, giving up 69cp a move where 220 was on offer.
+     
+     So a second door, and it is narrower than it looks: a candidate is also
+     eligible if the position it leads to is still worth at least `floor` to
+     the bot. That can never admit a losing move — the floor is a win chance,
+     not a distance — and it is what lets an opponent quietly not notice a free
+     piece, which is a thing players do, instead of accepting it and hanging a
+     rook three moves later, which is not. Off unless a caller asks for it. */
+  const near = cands.filter(c => top - c.score <= slack ||
+                                 (floor !== undefined && c.win >= floor));
   const pool = near.length ? near : cands;
-  // how far outside the band a candidate sits; zero for anything inside it
-  const off = c => c.win < band[0] ? band[0] - c.win
-                 : c.win > band[1] ? c.win - band[1] : 0;
+  /* How far outside the band a candidate sits — zero for anything inside it —
+     plus a nudge for one that repeats a position already seen. A penalty and
+     not a filter: when the repeating move is genuinely the right one it is
+     still played, and when two moves are much of a muchness the one that keeps
+     the game moving wins. `rep` is set by the caller and is absent for callers
+     that do not track positions, in which case this is what it always was. */
+  const off = c => (c.win < band[0] ? band[0] - c.win
+                  : c.win > band[1] ? c.win - band[1] : 0)
+                 + (c.rep ? AI_REP_NUDGE : 0)
+                 - (c.prog ? AI_PROG_NUDGE : 0);
   const best = Math.min.apply(null, pool.map(off));
   // Everything equally close, which is every move inside the band when there
   // is more than one — and choosing between those at random is the whole of
@@ -6726,8 +7029,14 @@ function aiPick(){
   if (legal.length === 1) return Promise.resolve(legal[0]);
   const phase = aiPhase();
   const elo = (NET.ai && NET.ai.elo) || 1200;
-  return engineAsk(G.uci.slice(), aiSearch(elo, phase, G.clock[other(G.human)])).then(res => {
-    const cands = [];
+  /* What the last turn thought the game was worth decides how wide to look
+     this turn: a bot that is winning needs more to choose from than one that
+     is not. `AI.last` is its own previous valuation, which is the only honest
+     estimate available before the search has run. */
+  const ahead = AI.seen === null ? 0.5 : winChance(AI.seen, null);
+  return engineAsk(G.uci.slice(),
+                   aiSearch(elo, phase, G.clock[other(G.human)], aiPoolFor(ahead))).then(res => {
+    let cands = [];
     for (const line of (res && res.lines) || []){
       if (!line || !line.best) continue;
       const m = legal.find(x => uciOf(x) === line.best);
@@ -6736,11 +7045,123 @@ function aiPick(){
       // step with must not be able to put an illegal move on the board.
       if (m) cands.push({ m, score: lineScore(line), win: winChance(line.cp, line.mate) });
     }
-    const pick = aiChoose(cands, AI_BAND[phase], AI_SLACK[phase]);
+    /* AND IT DOES NOT MATE THE PLAYER, checked on the board rather than on the
+       score. `aiChoose` refuses a candidate the engine has SCORED as mate, and
+       that is most of it — but a stand-in for the engine, a shallow search, or
+       simply a player who walks into one can produce a move that mates without
+       the score saying so, and the promise has to hold there too. The move
+       generator is right here and knows exactly; this asks it.
+       
+       Deeper forced wins are not proved — that would be a search of its own.
+       They are steered by the band and bounded by the slack, and the honest
+       claim is that this refuses the mate itself, not every road to one. */
+    const quiet = cands.filter(c => {
+      let after;
+      try { after = makeMove(G.st, c.m); } catch (e) { return true; }
+      return legalMoves(after, after.turn).length > 0 || !inCheck(after, after.turn);
+    });
+    if (quiet.length) cands = quiet;
+    /* What the position is worth to the bot right now, and therefore what the
+       player's last move was worth. Read before anything is chosen, because
+       the controller's whole measurement is the gap between this number and
+       the one it stored last turn. */
+    const now = (res && res.lines && res.lines.length) ? lineScore(res.lines[0]) : null;
+    aiNoteHuman(now);
+    /* How far ahead it actually is, which is NOT the move it chose last turn.
+       Gauging its own advantage from its own softened choice is a feedback
+       loop that under-reacts: it concedes a little, thinks it is less far
+       ahead than it is, and concedes less next time. The position's own top
+       line is the honest number. */
+    AI.seen = now;
+
+    const form = aiForm();
+    // Is the game going anywhere? The fifty-move counter is its own answer.
+    const stale = (G.st.half || 0) >= AI_STALE_PLY;
+    let band = aiBandFor(phase, G.sans.length, form);
+    if (stale && winChance(now, null) >= 0.45)
+      band = [Math.max(0.02, band[0] - AI_STALE_BAND),
+              Math.max(0.07, band[1] - AI_STALE_BAND)];
+    const slack = aiSlackFor(phase, winChance(now, null));
+    /* Which candidates walk back into a position the game has already been in.
+       Counted from the page's own repetition table, the one checkEnd() reads,
+       so there is no second opinion about what a repetition is.
+       
+       Only while the bot is not worse. Behind, a repetition is the defence and
+       taking it is the right move; nudging away from it would be conceding on
+       purpose, which is the one thing this system never does. */
+    if (winChance(now, null) >= 0.45){
+      for (const c of cands){
+        let after;
+        try { after = makeMove(G.st, c.m); } catch (e) { continue; }
+        c.rep = G.reps[posKey(after)] || 0;
+        /* A pawn move resets the fifty-move counter and wins nothing, which is
+           exactly the shape of progress this wants: a capture would reset it
+           too and would also take material off the player, which is the wrong
+           direction. Only counted while the game is actually stuck. */
+        if (stale && c.m.p && c.m.p.t === 'P' && !c.m.cap) c.prog = 1;
+      }
+    }
+
+    /* The floor only exists while the bot is comfortably better than the game
+       is supposed to be: it is the mechanism for coming down off a winning
+       position, and it has no business in a close one. Never below the band's
+       own ceiling, so it cannot be used to steer into a worse position than
+       the target — that would be throwing the game rather than conceding it. */
+    /* How much of its own position it will part with, and the one dial the
+       missed chances really move. Ahead and unable to interest the player in
+       taking anything back, it comes down further and starts sooner — from
+       "still comfortable" toward "the player is better now". Never past the
+       band, so this concedes a game and never throws one. */
+    const esc = aiEscalation();
+    const trigger = 0.72 - esc * 0.14;
+    const floor = winChance(now, null) > trigger
+      ? Math.max(band[1], 0.5 - esc * 0.22) : undefined;
+    const pick = aiChoose(cands, band, slack, undefined, floor);
+
+    /* Remember what it is about to play, so next turn can tell the player's
+       move from its own — and notice when it has just left something on the
+       board on purpose, which is what starts the clock on whether the player
+       finds it. A chance is a move it chose that costs real ground against the
+       best one it had; anything smaller is just a move. */
+    if (pick){
+      const top = Math.max.apply(null, cands.map(c => c.score));
+      AI.last = pick.score;
+      if (AI.watch === 0 && AI.cool === 0 && top - pick.score >= AI_TOOK_CP){
+        AI.opened++;
+        AI.watch = 4;
+      }
+    } else AI.last = null;
+
     // No worker, or nothing usable came back: the built-in search still plays
     // chess, which is the only promise this has to keep.
-    return (pick && pick.m) || bestMove(G.st, phase === 'early' ? 3 : 2) || pickFrom(legal);
+    //
+    // THE REFUSAL IS APPLIED TO THE MOVE, not only to the candidate list, and
+    // this is the reason: both fallbacks below go round `aiChoose` entirely.
+    // `bestMove` is the page's own negamax and will mate happily; `pickFrom`
+    // is a random legal move and can mate by accident. Filtering the engine's
+    // candidates and then handing the turn to either of them was a hole worth
+    // one mate in ninety-nine games, which is the sort of number that only
+    // shows up when the games are actually played.
+    return aiNoMate(G.st, (pick && pick.m) ||
+                          bestMove(G.st, phase === 'early' ? 3 : 2) || pickFrom(legal), legal);
   });
+}
+
+/* The last word on it: whatever chose this move, it is not mate while there is
+   anything else to play. Board truth, from the page's own generator — no score
+   to misread and no engine to be out of step with. */
+function aiNoMate(st, m, legal){
+  if (!m) return m;
+  const mates = x => {
+    let nx;
+    try { nx = makeMove(st, x); } catch (e) { return false; }
+    return !legalMoves(nx, nx.turn).length && inCheck(nx, nx.turn);
+  };
+  if (!mates(m)) return m;
+  const rest = (legal || legalMoves(st, st.turn)).filter(x => !mates(x));
+  // Every move mates: the player is already lost and there is nothing to play
+  // instead. Declining to move is not a chess move.
+  return rest.length ? rest[(Math.random() * rest.length) | 0] : m;
 }
 
 /* The same two guards the ladder's turn has, for the same two reasons: the
@@ -6767,17 +7188,165 @@ function aiTurn(token){
    machine however good the move is, so there is a pause in front of it — and
    an uneven one, because a constant delay reads as a machine too. The engine's
    own thinking time is on top of this. */
+/* HOW LONG IT APPEARS TO THINK, and why this is not decoration.
+ *
+ * The pause used to be a quarter to three quarters of a second, there so a
+ * reply would not land on the same tick as the move it answered. That reads as
+ * a machine for a different reason: nobody moves that fast for a whole game.
+ * And it is not only a matter of looks — the clock is the same clock, so an
+ * opponent that spends a second a move while a person spends five or ten walks
+ * out of every long game with minutes in hand. flagFall() then gives the point
+ * to whoever has mating material, which is the opponent. Measured with a clock
+ * in the harness: it won ten of ninety-nine games on time, and sixteen once it
+ * was pushing pawns to make progress rather than shuffling.
+ *
+ * So it thinks like a player instead: longer out of the opening, shorter once
+ * the position is decided or forced, spread so no two moves take the same
+ * time, and never more than its own clock can afford. The shape is
+ * league.py's think_seconds(), which has been doing this for the AI-vs-AI
+ * games since before this feature existed — this is the same idea at a tenth
+ * of the length, because a fallback game has a ten-minute clock and not thirty.
+ */
+/* Where it aims to keep its own clock, as a fraction of the player's. Under
+   one on purpose — see the note in aiThinkMs. */
+const AI_CLOCK_MARK = 0.88;
+
+function aiThinkMs(left, ply, moves, theirs, checked){
+  // the opening is booked, the middlegame is where a person actually thinks
+  let base = ply < 12 ? 1400 : ply < 60 ? 4200 : 2600;
+  // a wider position takes longer; a forced one does not
+  base *= 0.7 + Math.min(moves || 20, 40) / 40 * 0.8;
+  // Passed in rather than read off G, so this stays a function of numbers and
+  // can be checked without a board — the same bargain aiChoose() makes.
+  if (checked) base *= 0.55;
+  // spread, so the pace is not a metronome
+  let ms = base * Math.exp((Math.random() + Math.random() + Math.random() - 1.5) * 0.6);
+  if (Math.random() < 0.06) ms *= 2.2;          // one move in fifteen is a long think
+  /* AND IT KEEPS PACE WITH THE PLAYER, which is the part that matters.
+     Thinking like a person is not enough on its own: a person who is quicker
+     than their opponent still banks time, and time banked against an opponent
+     you are trying to lose to is a win waiting to happen. A player sitting on
+     twice the clock relaxes and uses some of it; one who is behind hurries.
+     That is ordinary clock sense, and here it is also what stops the game
+     being decided by the one thing the opponent is better at. */
+  if (theirs > 0){
+    /* IT DOES NOT KEEP A CLOCK ADVANTAGE, and this is the whole of what stops
+       the clock deciding these games.
+     *
+     * Measured over the games the opponent won on time: the player was WINNING
+     * on the board in half of them and level in most of the rest, at a mean of
+     * two hundred and fifty-eight plies, with the opponent itself down to
+     * thirty-five seconds. They were races — long games where both clocks ran
+     * low and the opponent happened to be a little ahead. An opponent whose
+     * whole purpose is to be beaten should not be winning races.
+     *
+     * So it spends any surplus down toward the player's clock rather than
+     * sitting on it: enough of the difference each move that the gap closes
+     * over the next several, bounded by what a person would plausibly take.
+     * This is thinking, not conceding — it is the same move it would have
+     * played — and it turns a race the opponent wins into one it loses, which
+     * is an ordinary result of an ordinary rule.
+     *
+     * Deliberately keyed on the RATIO and never on the player being short of
+     * time: an opponent that started dawdling the moment the player's clock got
+     * low would be reading their clock, which is a different and much more
+     * obvious thing. */
+    /* Level is not enough: two clocks that arrive at zero together still hand
+       the game to whoever is not on move, and that came out as two more losses
+       for the player in a hundred. So the mark is a little UNDER the player's
+       clock rather than level with it — an opponent that is always the one
+       slightly shorter of time, which is a thing players are, and which means
+       any race is one it loses rather than one it wins by a second. */
+    const mark = theirs * AI_CLOCK_MARK;
+    const edge = left / theirs;
+    if (left > mark){
+      ms *= Math.min(3.0, 1 + Math.max(0, edge - 1) * 2.2);
+      // ...and enough of the surplus to actually close it, over about ten moves
+      ms = Math.max(ms, (left - mark) / 10);
+    } else if (edge < 0.85) ms *= Math.max(0.4, edge);
+  }
+  ms = Math.max(500, Math.min(35000, ms));
+  /* And it cannot spend what it has not got — but ONLY while it is not the one
+     with time to spare.
+     
+     This clamp used to be unconditional, and it was quietly the reason the
+     surplus above never actually drained: both clocks are low in the endgame,
+     so exactly when the race was on, the opponent was told to hurry and
+     preserve the very advantage it was supposed to be spending. It kept
+     thirty-five seconds in hand while the player's clock hit zero.
+     
+     Hoarding is what it must not do. Hurrying because it is genuinely short is
+     ordinary, and still happens — when the player has more time than it does. */
+  const spare = theirs > 0 && left > theirs * AI_CLOCK_MARK;
+  if (!spare){
+    if (left < 120000) ms = Math.min(ms, Math.max(600, left / 40));
+    if (left < 30000) ms = Math.min(ms, 900);
+  }
+  return Math.round(ms);
+}
+
 const scheduleAI = ms => {
   const t = G.token;
-  setTimeout(() => aiTurn(t), ms === undefined ? 240 + Math.random() * 520 : ms);
+  if (ms !== undefined) return void setTimeout(() => aiTurn(t), ms);
+  const left = (G.clock && G.clock[other(G.human)]) || 600000;
+  let moves = 20, checked = false;
+  try {
+    moves = legalMoves(G.st, G.st.turn).length;
+    checked = inCheck(G.st, G.st.turn);
+  } catch (e) {}
+  setTimeout(() => aiTurn(t),
+             aiThinkMs(left, G.sans.length, moves, (G.clock && G.clock[G.human]) || 0, checked));
 };
 
-/* ---- clicks ---- */
+/* ---- clicks, and drags ----
+   Two ways to put a man on a square, one rule. A click chooses a square and a
+   second click chooses where it goes; a drag is the same two choices made
+   with the pointer held down. Everything that decides whether the board may
+   be touched at all is boardOpen(), and everything that decides whether
+   from→to is a move is tryMove(), so the two inputs cannot disagree about
+   either — and a puzzle, a fog game and a hidden board get the drag for
+   free, with the same words for an illegal try. */
+function boardOpen(){
+  if (SPECTATING()) return false;               // a viewer's click is not a move begun
+  if (!G.started) return false;                 // nothing moves until Start Play
+  if (G.over || G.thinking || G.pendingPromo) return false;
+  return true;
+}
+
+/* The second half of a move: the man on `from` is going to `to`. Answers
+   true when a move was made (or a promotion asked for), false when there was
+   nothing legal there — in which case the target square is flashed, and a
+   puzzle is told in words as well. */
+function tryMove(from, to, sqEl){
+  const moves = legalMoves(G.st, G.st.turn).filter(m => m.from === from && m.to === to);
+  if (!moves.length){
+    G.sel = -1;
+    render();          // render first — it rewrites square classes
+    reject(sqEl);      // then flash, so the shake survives
+    /* On a puzzle board the flash is not enough on its own: in See the Board
+       and Fog of War the player is guessing at men they cannot see, and "there
+       is no piece of yours that can do that" is a different piece of news from
+       "that is not the move" — one of the two says their picture of the board
+       is wrong. It is not counted against the attempt, because no move was
+       made; PZ.wrong is for a move that existed and was not the answer. */
+    if (PZ.on && !PZ.done && !pzStudyOn()){
+      PZ.typed = { text:'That move is not legal in this position.', cls:'bad', illegal:true };
+      pzRender();
+    }
+    return false;
+  }
+  if (moves.length > 1 && moves[0].promo){ askPromotion(moves); return true; }
+  commitMove(moves[0]);
+  return true;
+}
+
 el.squares.addEventListener('click', e => {
+  /* The click a browser fires after a drag is the drop said twice: the
+     pointerup has already played (or refused) the move, and this would go on
+     to select the square the man landed on. */
+  if (DRAG.swallow) return;
   const sqEl = e.target.closest('.sq');
-  if (SPECTATING()) return;                     // a viewer's click is not a move begun
-  if (!G.started) return;                       // nothing moves until Start Play
-  if (!sqEl || G.over || G.thinking || G.pendingPromo) return;
+  if (!sqEl || !boardOpen()) return;
   // A peek is looking, not playing: the board has to be closed again before it
   // will take a move. Not even a selection — half a move is still a move begun.
   if (G.peeking){ peekBlocked(); return; }
@@ -6795,29 +7364,104 @@ el.squares.addEventListener('click', e => {
   }
   if (G.sel === i){ G.sel = -1; render(); return; }
 
-  const moves = legalMoves(G.st, G.st.turn).filter(m => m.from === G.sel && m.to === i);
-  if (!moves.length){
+  const from = G.sel;
+  if (!legalMoves(G.st, G.st.turn).some(m => m.from === from && m.to === i)){
     // re-select if the player clicked another of their own men (sighted/fog only)
     const p = G.st.b[i];
     if (p && p.c === viewer() && !BLINDISH(G.mode)){ G.sel = i; render(); return; }
-    G.sel = -1;
-    render();          // render first — it rewrites square classes
-    reject(sqEl);      // then flash, so the shake survives
-    /* On a puzzle board the flash is not enough on its own: in See the Board
-       and Fog of War the player is guessing at men they cannot see, and "there
-       is no piece of yours that can do that" is a different piece of news from
-       "that is not the move" — one of the two says their picture of the board
-       is wrong. It is not counted against the attempt, because no move was
-       made; PZ.wrong is for a move that existed and was not the answer. */
-    if (PZ.on && !PZ.done && !pzStudyOn()){
-      PZ.typed = { text:'That move is not legal in this position.', cls:'bad', illegal:true };
-      pzRender();
-    }
-    return;
   }
-  if (moves.length > 1 && moves[0].promo){ askPromotion(moves); return; }
-  commitMove(moves[0]);
+  tryMove(from, i, sqEl);
 });
+
+/* ---- dragging ----
+   The pieces layer takes no pointer events, so every press lands on a square
+   and the man is found through the position rather than under the pointer.
+   Only a man the viewer may move is picked up and drawn moving: in See the
+   Board every man is hidden and in Fog of War the opponent's are, and a
+   drag that showed where a hidden man was going would be a peek. A press on
+   any other square still begins a drag — it selects the square exactly as a
+   click would and the drop is judged the same way — it simply carries
+   nothing visible. The move itself is decided at the drop, by the rules and
+   nothing else. */
+const DRAG_SLOP = 6;   // px of travel before a press is a drag rather than a click
+
+function dragSquareAt(x, y){
+  const r = el.board.getBoundingClientRect();
+  if (!r.width || !r.height) return -1;
+  const c = Math.floor((x - r.left) / (r.width / 8)), w = Math.floor((y - r.top) / (r.height / 8));
+  if (c < 0 || c > 7 || w < 0 || w > 7) return -1;
+  return visualIndex(w * 8 + c);                // visualIndex is its own inverse
+}
+function dragFollow(x, y){
+  if (!DRAG.el) return;
+  const r = el.board.getBoundingClientRect();
+  const sq = r.width / 8;
+  DRAG.el.style.transform = `translate(${x - r.left - sq / 2}px, ${y - r.top - sq / 2}px)`;
+}
+/* Let go of the man without playing anything: the element is handed back to
+   renderPieces(), which puts it on whatever square the position says. */
+function dragRelease(){
+  if (DRAG.el){ DRAG.el.classList.remove('dragging'); DRAG.el = null; }
+  el.squares.classList.remove('dragging');
+  DRAG.from = -1; DRAG.id = null; DRAG.moved = false;
+}
+
+el.squares.addEventListener('pointerdown', e => {
+  if (e.button !== 0 || !e.isPrimary) return;
+  const sqEl = e.target.closest('.sq');
+  if (!sqEl || !boardOpen() || G.peeking) return;
+  if (!humanTurn() && !pzStudyOn()) return;
+  const i = +sqEl.dataset.sq, p = G.st.b[i];
+  DRAG.from = i; DRAG.id = e.pointerId; DRAG.moved = false; DRAG.x = e.clientX; DRAG.y = e.clientY;
+  DRAG.swallow = false;
+  // A man is drawn moving only when it is drawn at all: the viewer's own, on
+  // a board that shows them. See the Board hides every man and the drag of
+  // one would be a ring of nothing sliding about; what it selects still counts.
+  const shown = !BLINDISH(G.mode) || G.revealed;
+  DRAG.el = (shown && p && p.c === viewer() && pieceEls.get(p.id)) || null;
+});
+
+/* The travel and the drop are listened for on the document rather than the
+   board, so a pointer that wanders off the board mid-drag is still followed
+   and still let go of. Not pointer capture, which would do the same: a
+   captured pointer's click is retargeted to the capturing element, and the
+   click handler above, looking for the square under it, would find the
+   whole board instead — which is how click-to-move stopped working the
+   moment a drag had been made. */
+document.addEventListener('pointermove', e => {
+  if (DRAG.from < 0 || e.pointerId !== DRAG.id) return;
+  if (!DRAG.moved){
+    if (Math.hypot(e.clientX - DRAG.x, e.clientY - DRAG.y) < DRAG_SLOP) return;
+    DRAG.moved = true;
+    /* The first real movement is the first click of the pair: the square is
+       selected (its ring, and in Sighted the hints, are the same ones a
+       click draws) and the man leaves its square for the hand. */
+    G.sel = DRAG.from;
+    if (DRAG.el) DRAG.el.classList.add('dragging');
+    el.squares.classList.add('dragging');
+    render();
+  }
+  dragFollow(e.clientX, e.clientY);
+});
+
+function dragEnd(e, dropped){
+  if (DRAG.from < 0 || e.pointerId !== DRAG.id) return;
+  const from = DRAG.from, moved = DRAG.moved;
+  dragRelease();
+  if (!moved) return;                           // a press that never travelled: the click that follows is the move
+  /* The click that follows a drop arrives in the same task as the pointerup,
+     so a flag lowered on the next tick is exactly as long as it needs to be —
+     and no longer, since a cancelled drag has no click coming and would
+     otherwise leave the next real one swallowed. */
+  DRAG.swallow = true; setTimeout(() => { DRAG.swallow = false; }, 0);
+  const to = dropped ? dragSquareAt(e.clientX, e.clientY) : -1;
+  if (!boardOpen() || (!humanTurn() && !pzStudyOn())){ G.sel = -1; render(); return; }
+  if (to === from){ render(); return; }         // put back where it was picked up, and left selected
+  if (to < 0){ G.sel = -1; render(); return; }  // let go off the board: nothing chosen
+  tryMove(from, to, sqEls[visualIndex(to)]);
+}
+document.addEventListener('pointerup', e => dragEnd(e, true));
+document.addEventListener('pointercancel', e => dragEnd(e, false));
 
 /* A puzzle referees its own moves; a game plays them. Everything that lets a
    player choose a move on the board comes through here. */
@@ -7275,16 +7919,16 @@ function onNetMessage(msg){
       newGame();
       syncOptions();
       logLine('Matched — you are ' + (G.human === W ? 'White' : 'Black') + '.', 'sys');
-      // Said once in the log as well as worn on the bar: nobody should have to
-      // work out from the play whether the other side is a person. Only for
-      // the ranked fallback, which was seated *instead* of the game the player
-      // asked for and is owed an explanation. A house room on the friendly
-      // page is the game the player asked for — they read the card and
-      // pressed Join — and nothing on the board says any more about who is
-      // sitting there than it would for anybody else.
-      if (AI_MATCH() && G.matchKind === 'ranked')
-        logLine('Nobody was queueing, so ' + NET.ai.name +
-          ' — a Nox bot rated ' + NET.ai.elo + ' — took the board.', 'sys');
+      // Nothing here says who is on the other side. The ranked fallback used
+      // to announce itself, on the reasoning that a player seated with a
+      // machine instead of the game they queued for was owed an explanation;
+      // the friendly house rooms never did, because there the player read the
+      // card and pressed Join. The two are now the same, and the reason is
+      // that the opponent is one: an opponent that plays a competitive game
+      // and is beaten on the board has told the player everything the play
+      // itself will support. `opponentVerified` still goes over the wire and
+      // is still false, so the server has not started lying — the page simply
+      // does not turn it into a label.
       beep(760,.09); setTimeout(()=>beep(1010,.11), 90);
       break;
 
@@ -14375,6 +15019,11 @@ function newGame(){
   render();
   if (G.mode === 'total') setTimeout(() => LOCAL() ? focusLocalInput() : el.moveInput.focus(), 60);
   if (G.started && BOT() && G.st.turn !== G.human) scheduleEngine(420);
+  // A new game is a new opponent: a fresh style, a fresh handover ply, and no
+  // memory of what the last player did or did not find. Reset unconditionally
+  // rather than only for AI_MATCH(), for the same reason G.token is bumped
+  // unconditionally — the cheap thing to do is the one that cannot go stale.
+  aiReset();
   // Longer than the bot's, because this one is meant to have just sat down
   if (G.started && AI_MATCH() && G.st.turn !== G.human) scheduleAI(900);
 }

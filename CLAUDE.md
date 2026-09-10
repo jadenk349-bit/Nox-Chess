@@ -169,6 +169,7 @@ node server/test_practice.js             # what the practice drills invent, re-c
 node server/test_practice_flow.js        # and running one, against a stub DOM + clock
 node server/test_lessons.js              # walks the whole ten-lesson course (~3 min)
 node server/test_leaderboard.js          # the home page's four ladders, against a scripted account client
+node server/test_drag.js                 # dragging a man to a square, on the three visions that draw a board
 node server/test_ai_fallback.js          # what the ranked fallback bot decides
 node server/test_ai_game.js              # and playing a whole game against it, stub DOM
 python3 server/test_ai_match.py          # seating one: the queue, the race; no server needed
@@ -450,10 +451,71 @@ move generator in the server and never has been. `start` carries an `ai` block,
 the page's `AI_MATCH()` reads it and nothing else may set it, and `aiPick()`
 chooses the move. What it steers by is not a rung off `LEVELS` but the position:
 several candidates a ply, each score turned into a win chance, and the one
-nearest the phase's band (`AI_BAND`) played — near-even early, easing later —
-subject to `AI_SLACK`, which is what stops a target from ever being bought with
-a piece. Behind the band it simply plays its best move, because steering *down*
-onto a target is throwing the game. Moves are not relayed (`handle_move` drops
+nearest a target band played — subject to a slack, which is what stops a target
+from ever being bought with a piece. Behind the band it simply plays its best
+move, because steering *down* onto a target is throwing the game.
+
+**`AI_BAND` and `AI_SLACK` are the defaults, not the policy.** A fixed band per
+phase makes every game the same game — the same ply turns the same corner — and
+says nothing about who is playing. `AI` is the per-game controller: a style
+drawn from `AI_STYLES`, a handover ply drawn somewhere in the twenties or
+thirties, and a record of what the player has been doing. `aiReset()` is called
+from `newGame()` for the same reason `G.token` is bumped there. `aiBandFor()`
+moves the target — down past the handover, up for a player who is finding
+everything, up again while honest chess is owed after a chance nobody took —
+and `aiSlackFor()` and `aiPoolFor()` widen the search when it is winning,
+because a won position cannot be come down from with moves that are all nearly
+best. The measurement costs no extra search: the engine already runs once a
+turn, and the gap between one turn's score and the next is what the player's
+move was worth (`aiNoteHuman`).
+
+**Two refusals, and they are the point.** It does not mate the player: mate
+scores at ±100000 make the slack filter throw away every ordinary move, so the
+refusal is applied before the slack in `aiChoose` AND to the final move in
+`aiNoMate()` — because both fallbacks in `aiPick` (`bestMove`, `pickFrom`) go
+round `aiChoose` entirely, which was worth one mate in ninety-nine games. And
+when it is far ahead it may decline a gift: the slack asks "how much worse than
+best is this", which is the right question about a mistake and the wrong one
+about a hanging queen, so a `floor` admits a move whose own position is still
+good for it. A floor is a win chance, never a distance, so it cannot admit a
+losing move. `server/test_ai_behaviour.js` plays ninety-nine games against
+three kinds of simulated player and is where those claims are checked.
+
+**And the clock is not neutral, which is the least obvious thing here.** The
+opponent used to reply in about a second while a person thinks in seconds, so it
+walked out of every long game with minutes in hand — and `flagFall()` gives the
+point to whoever has mating material. With a clock in the harness it won ten of
+ninety-nine games on time, and sixteen once it was pushing pawns rather than
+shuffling. Three things answer that, in order of how much they matter:
+`aiThinkMs()` plays at a person's pace and SPENDS a time surplus rather than
+banking it; the `AI_STALE_*` dials restart a game the fifty-move counter says
+has stopped moving, by preferring its own pawn moves; and `aiEscalation()` raises the FLOOR — how much of its own
+position it will part with — each time a chance goes by unused, so a player who
+cannot convert a subtle one is eventually offered a plain one.
+
+**`flagFall()` is the ordinary rule for everybody**, and a version that handed
+the player the half point because their opponent was a bot was written,
+measured and reverted: a game whose ending depends on who is sitting opposite is
+not a game of chess. The protection against the clock is therefore entirely
+behavioural, and it is `AI_CLOCK_MARK`: the opponent keeps its own clock a
+little UNDER the player's rather than level with it, so a race is one it loses
+rather than one it wins by a second. Two things made that work and neither is
+obvious. The low-clock brake — "it cannot spend what it has not got" — had to
+stop applying while it is the one with time to spare, because both clocks are
+low in an endgame and it was being told to hurry exactly when it was supposed
+to be spending, keeping thirty-five seconds in hand as the player's clock hit
+zero. And level was not enough: two clocks arriving at zero together hand the
+game to whoever is not on move. The mark is keyed on the RATIO and never on the
+player being short of time — an opponent that started dawdling the moment your
+clock got low would be reading it, which is a different and much more obvious
+thing.
+
+Two things that were tried against the games that would not end and are
+recorded because they did not work: dropping the target band as escalation
+climbs (it makes the opponent passive, passive games run long, and a long game
+against somebody who cannot convert ends on their flag — eleven wins lost, and
+the long games stayed long), and simply widening the slack (a worse move is not
+the same thing as a smaller advantage). Moves are not relayed (`handle_move` drops
 them for an AI game and the page does not send them), a draw offered to it is
 accepted by the server through the ordinary `over` message, and resignation,
 checkmate, the clock and disconnection all run through the paths they already
@@ -1754,7 +1816,10 @@ in a forked process (Node needs `delete global.fetch` and a cwd of `engine/`,
 both explained there). Renaming anything in that file's DECLS/FNS lists breaks
 the tools loudly, which is the trade for having one implementation.
 
-**Three engines, and which one answers matters.** `engine/` is the vendored
+**Four engines, and which one answers matters.** (`server/league.py` drives a
+native Stockfish inside the server process for the AI-vs-AI league — the one
+place the server plays chess, and walled off from everything below.)
+**Three of them are the game's, and which one answers matters.** `engine/` is the vendored
 pre-NNUE WASM Stockfish: one thread, 16MB of hash, and it is what the *browser*
 runs. The bot ladder in `LEVELS` was tuned against it, so anything imitating a
 rung — `seedRating()`, and the self-play games the generator mines — must keep
@@ -1973,6 +2038,34 @@ Sighted one; only somebody on no ladder is shown their own `rating`. It reads
 the rows already loaded rather than querying again, so the two pages cannot
 disagree about who is on the board, and `goSocial()` asks for any ladder
 still missing and redraws when it lands. `test_leaderboard.js` covers it.
+
+**A man is moved by clicking twice or by dragging, and the two are one rule.**
+The click handler on `#squares` was the only way to move on a drawn board;
+the drag beside it (the `clicks, and drags` section, `DRAG`) is pointer
+events — the press on the board, the travel and the drop on the document —
+and it goes through the same two functions the click does: `boardOpen()`
+says whether the board takes a move at all, `tryMove(from, to)` says whether
+from→to is one, flashes the square and, in a puzzle, says why not. A press
+that travels under `DRAG_SLOP` is left to the click that follows it, so
+click-to-move is untouched; a press that travels further selects the square
+exactly as a first click does (ring, and in Sighted the hints) and the drop
+is the second. The browser's own click after a drop would select the landing
+square, so it is swallowed on a flag that lasts one tick (`DRAG.swallow`) —
+one tick because a cancelled drag has no click coming and a flag that waited
+for one would eat the next real click. Two things about how it is written
+matter. There is **no pointer capture**: a captured pointer's click is
+retargeted to the capturing element, and the click handler, looking for the
+square under it, found the whole board instead — click-to-move stopped
+working the moment a drag had been made, which the shim could not show and
+headless Chrome did. And only a man that is *drawn* is picked up and drawn
+moving — the viewer's own, on a board that shows them — because a hidden
+man sliding to its square would be a peek; the drag of any other square still
+selects it and the drop is still judged, so See the Board drags exactly as it
+clicks, with nothing to see. `renderPieces()` leaves the man in the hand
+where the pointer has it, since a render mid-drag (the selection ring) would
+otherwise slide it home. `.squares` gives up `touch-action`, which is what
+lets a finger drag on a phone instead of scrolling the page.
+`test_drag.js` drives the pointer events under the DOM shim.
 
 There is deliberately no undo, no take-back, and no move history during play.
 Don't reintroduce them.
