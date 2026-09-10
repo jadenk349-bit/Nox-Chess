@@ -114,12 +114,15 @@ var DECLS = ['VAL','FILES','rowOf','colOf','SQNAME','uciOf','sqName','onBoard','
              'idCounter','mk','DIR_N','DIR_B','DIR_R','DIR_K','PIECE_WORD',
              'G','NET','el','BLINDISH','BOT_NAME','LOCAL','ONLINE','HOSTING','CHAL',
              'CHALLENGE_TTL','CHALLENGING','BOT','SPECTATING','PUZZLE','AI_MATCH','humanTurn','viewer',
-             'CAN_PEEK','AI_POOL','AI_BAND','AI_SLACK','scheduleAI','W'];
+             'CAN_PEEK','AI_POOL','AI_BAND','AI_SLACK','scheduleAI','W',
+             'AI_STYLES','AI_STYLE_NAMES','AI_WALK_MAX','AI_WALK_PER_PLY',
+             'AI_TOOK_CP','AI_FORM_CP','AI'];
 var FNS = ['startBoard','newState','cloneState','posKey','slide','step','addPawn',
            'pseudoMoves','isAttacked','kingSq','inCheck','makeMove','legalMoves','toSAN',
            'myName','seatName','layoutBoardBars','pickFrom','bestMove','applyMove','checkEnd',
            'insufficient','resultTitle','finish','aiPhase','winChance','lineScore',
-           'aiSearch','aiChoose','aiPick','aiTurn'];
+           'aiSearch','aiChoose','aiPick','aiTurn',
+           'aiReset','aiForm','aiNoteHuman','aiBandFor','aiSlackFor','aiPoolFor','aiNoMate'];
 
 var bundle = [grab(/\nconst W = 'w', B = 'b';/, "const W/B")];
 for (var d = 0; d < DECLS.length; d++) if (DECLS[d] !== 'W') bundle.push(decl(DECLS[d]));
@@ -176,8 +179,13 @@ function engineAsk(moves, opt){
 /* Every call aiChoose was asked to make, kept so the game can be judged after
    it rather than a move at a time. The real one still does the choosing. */
 var realChoose = aiChoose, choices = [];
-aiChoose = function(cands, band, slack, rnd){
-  var out = realChoose(cands, band, slack, rnd);
+/* apply(), not four named parameters. A wrapper that lists the arguments it
+   knows about silently drops the ones it does not, and a new option added to
+   aiChoose then does nothing at all in here while doing something in the page
+   — which is a test that reports success for a feature it has disabled. */
+aiChoose = function(){
+  var cands = arguments[0], band = arguments[1], slack = arguments[2];
+  var out = realChoose.apply(null, arguments);
   choices.push({ cands: cands, band: band, slack: slack, out: out });
   return out;
 };

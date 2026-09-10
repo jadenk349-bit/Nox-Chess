@@ -295,10 +295,35 @@ move generator in the server and never has been. `start` carries an `ai` block,
 the page's `AI_MATCH()` reads it and nothing else may set it, and `aiPick()`
 chooses the move. What it steers by is not a rung off `LEVELS` but the position:
 several candidates a ply, each score turned into a win chance, and the one
-nearest the phase's band (`AI_BAND`) played — near-even early, easing later —
-subject to `AI_SLACK`, which is what stops a target from ever being bought with
-a piece. Behind the band it simply plays its best move, because steering *down*
-onto a target is throwing the game. Moves are not relayed (`handle_move` drops
+nearest a target band played — subject to a slack, which is what stops a target
+from ever being bought with a piece. Behind the band it simply plays its best
+move, because steering *down* onto a target is throwing the game.
+
+**`AI_BAND` and `AI_SLACK` are the defaults, not the policy.** A fixed band per
+phase makes every game the same game — the same ply turns the same corner — and
+says nothing about who is playing. `AI` is the per-game controller: a style
+drawn from `AI_STYLES`, a handover ply drawn somewhere in the twenties or
+thirties, and a record of what the player has been doing. `aiReset()` is called
+from `newGame()` for the same reason `G.token` is bumped there. `aiBandFor()`
+moves the target — down past the handover, up for a player who is finding
+everything, up again while honest chess is owed after a chance nobody took —
+and `aiSlackFor()` and `aiPoolFor()` widen the search when it is winning,
+because a won position cannot be come down from with moves that are all nearly
+best. The measurement costs no extra search: the engine already runs once a
+turn, and the gap between one turn's score and the next is what the player's
+move was worth (`aiNoteHuman`).
+
+**Two refusals, and they are the point.** It does not mate the player: mate
+scores at ±100000 make the slack filter throw away every ordinary move, so the
+refusal is applied before the slack in `aiChoose` AND to the final move in
+`aiNoMate()` — because both fallbacks in `aiPick` (`bestMove`, `pickFrom`) go
+round `aiChoose` entirely, which was worth one mate in ninety-nine games. And
+when it is far ahead it may decline a gift: the slack asks "how much worse than
+best is this", which is the right question about a mistake and the wrong one
+about a hanging queen, so a `floor` admits a move whose own position is still
+good for it. A floor is a win chance, never a distance, so it cannot admit a
+losing move. `server/test_ai_behaviour.js` plays ninety-nine games against
+three kinds of simulated player and is where those claims are checked. Moves are not relayed (`handle_move` drops
 them for an AI game and the page does not send them), a draw offered to it is
 accepted by the server through the ordinary `over` message, and resignation,
 checkmate, the clock and disconnection all run through the paths they already
@@ -1263,7 +1288,10 @@ in a forked process (Node needs `delete global.fetch` and a cwd of `engine/`,
 both explained there). Renaming anything in that file's DECLS/FNS lists breaks
 the tools loudly, which is the trade for having one implementation.
 
-**Three engines, and which one answers matters.** `engine/` is the vendored
+**Four engines, and which one answers matters.** (`server/league.py` drives a
+native Stockfish inside the server process for the AI-vs-AI league — the one
+place the server plays chess, and walled off from everything below.)
+**Three of them are the game's, and which one answers matters.** `engine/` is the vendored
 pre-NNUE WASM Stockfish: one thread, 16MB of hash, and it is what the *browser*
 runs. The bot ladder in `LEVELS` was tuned against it, so anything imitating a
 rung — `seedRating()`, and the self-play games the generator mines — must keep

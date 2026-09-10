@@ -38,8 +38,10 @@ function decl(name){
   return grab(new RegExp('\\n(?:const|let) ' + name + '\\b[^\\n]*?;'), name);
 }
 
-var DECLS = ['AI_POOL', 'AI_BAND', 'AI_SLACK'];
-var FNS   = ['aiPhase', 'winChance', 'lineScore', 'aiSearch', 'aiChoose'];
+var DECLS = ['AI_POOL', 'AI_BAND', 'AI_SLACK', 'AI_STYLES', 'AI_STYLE_NAMES',
+             'AI_WALK_MAX', 'AI_WALK_PER_PLY', 'AI_TOOK_CP', 'AI_FORM_CP', 'AI'];
+var FNS   = ['aiPhase', 'winChance', 'lineScore', 'aiSearch', 'aiChoose',
+             'aiReset', 'aiForm', 'aiNoteHuman', 'aiBandFor', 'aiSlackFor', 'aiPoolFor', 'aiNoMate'];
 
 var BUNDLE = [];
 DECLS.forEach(function(n){ BUNDLE.push(decl(n)); });
@@ -178,14 +180,44 @@ check('a won game is not handed back',
 check('and never by a move outside the slack',
       aiChoose([cand('best', 900), cand('gift', -100)], BAND, SLACK, fixed(0.99)).m, 'best');
 
-// mate is available and the band would rather it were not: taking it is still
-// the best move, and giving up a mate to stay level is not on the table
+/* Mate: THE RULE HERE IS THE REVERSE OF WHAT IT WAS.
+ *
+ * This block used to read "a mate in hand is not thrown away", on the
+ * reasoning that giving up a mate to stay level was not on the table. It is
+ * now, and deliberately: everything else in this file exists so that the
+ * player wins a game worth winning, and a mate delivered by the opponent ends
+ * that game the other way.
+ *
+ * It also could not be left to the band. `lineScore` puts mate at a hundred
+ * thousand, so the slack filter throws away every ordinary move as "too far
+ * from the best" and the mating move is the only one still standing — the
+ * band never gets a say. The refusal has to come before the slack. */
 var mateAvailable = [
   { m:'mate', score: lineScore({mate:2}), win: winChance(null, 2) },
   { m:'quiet', score: 10, win: winChance(10, null) }
 ];
-check('a mate in hand is not thrown away',
-      aiChoose(mateAvailable, BAND, SLACK, fixed(0.99)).m, 'mate');
+check('a mate on the board is not played',
+      aiChoose(mateAvailable, BAND, SLACK, fixed(0.99)).m, 'quiet');
+check('...and not at any point of the game',
+      [AI_BAND.early, AI_BAND.middle, AI_BAND.late].every(function(b){
+        return aiChoose(mateAvailable, b, AI_SLACK.late, fixed(0)).m === 'quiet';
+      }), true);
+// ...but refusing to move is not a chess move. A position where everything
+// mates is a position the player has already lost.
+check('unless every move mates',
+      aiChoose([{ m:'only', score: lineScore({mate:1}), win: 1 }], BAND, SLACK, fixed(0)).m,
+      'only');
+check('and a longer mate is no better',
+      aiChoose([{ m:'m1', score: lineScore({mate:1}), win: 1 },
+                { m:'m5', score: lineScore({mate:5}), win: 1 },
+                { m:'quiet', score: -20, win: winChance(-20, null) }],
+               BAND, SLACK, fixed(0.99)).m, 'quiet');
+// The other direction is untouched: being mated is still to be avoided, and
+// the best defence is still the move it plays.
+check('it still defends against being mated',
+      aiChoose([{ m:'mated', score: lineScore({mate:-2}), win: 0 },
+                { m:'holds', score: -700, win: winChance(-700, null) }],
+               BAND, 900, fixed(0.99)).m, 'holds');
 
 check('nothing on offer is nothing chosen', aiChoose([], BAND, SLACK, fixed(0)), null);
 check('one candidate is that candidate',
@@ -206,6 +238,110 @@ check('every band is a band',
 check('the slack widens as the game goes on',
       AI_SLACK.early < AI_SLACK.middle && AI_SLACK.middle < AI_SLACK.late, true);
 check('but never past a rook',  AI_SLACK.late < 500, true);
+
+say('\nThe match controller\n');
+
+/* A fixed coin, so a test about what the controller decides is not a test
+   about which random number it drew. */
+function seeded(list){ var i = 0; return function(){ return list[i++ % list.length]; }; }
+
+// ---- a new game is a new opponent ----
+aiReset(fixed(0));
+var first = { style: AI.style, handover: AI.handover };
+aiReset(fixed(0.99));
+check('a different game draws a different style', AI.style !== first.style, true);
+check('...and a different handover ply', AI.handover !== first.handover, true);
+var plies = {};
+for (var i = 0; i < 200; i++){ aiReset(seeded([i / 200])); plies[AI.handover] = 1; }
+check('the handover lands all over the twenties and thirties',
+      Object.keys(plies).length >= 15, true);
+check('but never in the opening', Object.keys(plies).every(function(p){ return +p >= 18; }), true);
+check('every style is a real one',
+      AI_STYLE_NAMES.every(function(n){ return !!AI_STYLES[n]; }), true);
+
+// ---- it forgets the last game ----
+aiReset(fixed(0));
+AI.loss = [400, 400]; AI.opened = 9; AI.took = 3; AI.watch = 2; AI.cool = 5; AI.last = 123;
+aiReset(fixed(0.5));
+check('the last player\'s form does not carry over', AI.loss.length, 0);
+check('nor the chances already offered',  AI.opened + AI.took + AI.watch + AI.cool, 0);
+check('nor what it last thought the board was worth', AI.last, null);
+check('nor how far ahead it thought it was', AI.seen, null);
+
+// ---- reading the player ----
+aiReset(fixed(0));
+check('nothing seen is nobody judged', aiForm(), 0);
+aiReset(fixed(0)); AI.last = 0;
+aiNoteHuman(0);                       // gave nothing away
+check('a flawless move reads as flawless', aiForm(), 1);
+aiReset(fixed(0)); AI.last = 0;
+aiNoteHuman(AI_FORM_CP);              // dropped a pawn's worth
+check('an average move reads as average', aiForm(), 0);
+aiReset(fixed(0)); AI.last = 0;
+aiNoteHuman(400);
+check('falling apart reads as falling apart', aiForm(), -1);
+aiReset(fixed(0)); AI.last = 0;
+for (var j = 0; j < 30; j++){ aiNoteHuman(50); AI.last = 50 * (j + 1); }
+check('it only remembers the recent past', AI.loss.length <= 12, true);
+
+// ---- did they take the chance ----
+aiReset(fixed(0));
+AI.last = 0; AI.opened = 1; AI.watch = 4;
+aiNoteHuman(-120);                    // the player gained: they found it
+check('a chance taken is counted', AI.took, 1);
+check('...and the watch stops', AI.watch, 0);
+check('...and nothing is owed', AI.cool, 0);
+
+aiReset(fixed(0));
+AI.last = 0; AI.opened = 1; AI.watch = 2;
+aiNoteHuman(0); AI.last = 0; aiNoteHuman(0);
+check('a chance missed is not counted', AI.took, 0);
+check('and the watch runs out', AI.watch, 0);
+check('and honest chess is owed for it', AI.cool > 0, true);
+
+// The whole point of the cool-off: the answer to a missed chance is a stretch
+// of real play, not a bigger giveaway.
+aiReset(fixed(0));
+var normal = aiBandFor('middle', 30, 0);
+AI.cool = 6;
+var owing = aiBandFor('middle', 30, 0);
+check('while it owes honest chess it plays harder', owing[0] > normal[0], true);
+
+// ---- the band moves for the right reasons ----
+aiReset(fixed(0)); AI.handover = 20;
+var atHandover = aiBandFor('middle', 20, 0);
+var wellPast   = aiBandFor('middle', 60, 0);
+check('the target walks down after the handover', wellPast[0] < atHandover[0], true);
+check('but only so far',
+      atHandover[0] - aiBandFor('middle', 400, 0)[0] <= AI_WALK_MAX + 1e-9, true);
+check('and not before it', aiBandFor('middle', 10, 0)[0], atHandover[0]);
+
+aiReset(fixed(0));
+check('a player who is finding everything gets a stronger opponent',
+      aiBandFor('middle', 10, 1)[0] > aiBandFor('middle', 10, -1)[0], true);
+check('and one who is struggling gets an easier one',
+      aiBandFor('middle', 10, -1)[0] < aiBandFor('middle', 10, 0)[0], true);
+
+check('a band is always a band',
+      [['early',0,0],['middle',40,1],['late',120,-1],['late',400,1]].every(function(c){
+        aiReset(fixed(0.3));
+        var b = aiBandFor(c[0], c[1], c[2]);
+        return b[0] < b[1] && b[0] >= 0 && b[1] <= 1;
+      }), true);
+
+// ---- and the slack ----
+aiReset(fixed(0));
+check('well ahead it is allowed to give more ground',
+      aiSlackFor('middle', 0.9) > aiSlackFor('middle', 0.5), true);
+check('but never past a rook',
+      [0.5, 0.7, 0.8, 0.99].every(function(w){
+        return AI_STYLE_NAMES.every(function(n){
+          aiReset(fixed(0)); AI.style = n;
+          return aiSlackFor('late', w) < 500;
+        });
+      }), true);
+check('and never so little that it cannot choose',
+      aiSlackFor('early', 0.1) >= 60, true);
 
 say('\nWhat the page is allowed to decide for itself\n');
 
