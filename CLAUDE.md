@@ -164,6 +164,7 @@ node server/test_ws_url.js               # unit tests for wsURLFrom(); no server
 node server/test_rematch_flow.js         # the page's rematch and New Game wiring, against scripted replies
 node server/test_review.js               # unit tests for the review's chess reasoning
 node server/test_study_education.js      # Study Board's concept card, and how it fails
+node server/test_study.js                # Study Board's marks, chances, arrows, words and share link; no engine
 node server/test_puzzle_flow.js          # plays a shipped puzzle against a stub DOM
 node server/test_practice.js             # what the practice drills invent, re-checked
 node server/test_practice_flow.js        # and running one, against a stub DOM + clock
@@ -1739,6 +1740,73 @@ for a whole game with the men hidden, which is not something the old lesson 5
 had anybody do. Ticking it would open the ladder on a lesson they have never
 seen.
 
+**Study Board analyses the whole game before it opens, and the button is the
+gauge.** Pressing Study Board on the end-of-game box does not open anything:
+`studyStart()` runs every position of the game through the one Stockfish
+worker, one after another (`studyStep`, `REVIEW_ASK` — two lines, full
+strength, `objective` so that contempt is off, see below), and the button
+fills left to right with positions answered over positions in the game
+(`studyButton()`, `--p` on `#endClose`). Only when every position has an
+answer does it read START ANALYSIS, and only pressing that opens the board
+(`enterReview()`); nothing navigates by itself. A pass that stalls or a
+browser with no engine leaves the button reading Analysis Failed with a retry,
+never stuck. Everything a finished pass produced is kept twice: the raw
+readings (`STUDY.evals`, one per position) and the records (`STUDY.recs`, one
+per move, `studyBuild()`), and the records are a pure function of the
+readings and the moves — which is what lets the cache (`nox.study.<key>` in
+`localStorage`, twelve games, keyed by `studyKey()` of the move list) and the
+share link both carry the readings alone. `finish()` calls `studyPrime()`, so a
+game analysed before reads START ANALYSIS the moment it ends.
+
+Two engine facts the pass is built around. This build applies Contempt 24
+from the side to move at the root, and the study compares a reading with the
+mover at the root against one with the opponent there, so with contempt on
+every move in every game looked like it lost half a pawn — `enginePump()`
+sets `Contempt 0` / `Analysis Contempt Off` for any job asking for
+`objective`, exactly as `tools/sf.js` does, and the bot keeps the default
+because a player should have contempt. And the build says nothing at all
+about a position with no legal moves — no `info`, no `bestmove` — so
+`studyTerminal()` writes the reading a mated or stalemated position would
+have had (`mate 0`, or level) rather than asking and waiting for the stall
+timer.
+
+**The marks are the engine's numbers in the currency of winning chances, and
+there are seven.** `judgeMove()` is the one rule: `!!` a sacrifice the engine
+confirms (`sacrificeDeficit()` — the mover a piece or more down once the
+engine's own reply has been made and the recapture on that square settled,
+the position not already won, and still clearly ahead after best defence), `!`
+the move the position turned on (the runner-up costs ten points of win% and
+the move is neither hanging nor a capture the exchange already justified — a
+hanging rook taken is not hard to find), `★` the engine's first choice or a
+move the deeper search after it rates just as well, `👍` under five points
+lost, `?` under ten, `✕` under twenty, `??` the rest, with mates compared as
+mates. `studyWinFor()` gives the two chances from the mover's chair, mates as
+100 or 0 and nothing else allowed to reach either. The board shades the
+move's two squares (`G.lastMove`, the game's own `.last`) and draws an arrow
+only for a threat the move made or a weakness it opened (`studyThreats()`:
+new by the exchange on the square, kept only if worth a piece or the engine's
+reply is about it, a mate in one either way first, three at most) — never for
+the move itself. The panel is MOVE beside BEST, never a sentence; the short
+reasons (`studyReasons()`, ten words each, four at most) and the long
+explanation behind EXPLAIN (`studyExplain()`) are written at render time from
+the record and the Education System's result, and every sentence is read off
+the board, a line the engine gave or a number it produced — "wins the rook"
+only when the rook is gone at the end of the engine's line, "threatens"
+otherwise. `server/test_study.js` holds all of it without an engine.
+
+**A study is shared as a link that carries it.** `#study/<payload>` is
+`studyPack()` — the moves, the names, the vision, the result and per
+position the score, two best moves, the runner-up's score and the top line —
+deflated and base64url'd (`studyEncode()`, plain JSON where the browser
+cannot deflate). The recipient's page rebuilds every record from that with
+the same pure functions, so the marks, chances, reasons and explanations are
+identical; nothing is stored on any server, no account is named, and the
+page cannot change the sender's analysis (`reviewAnalyse()` refuses to extend
+a shared study). `studyMount()` points `G` at the finished game with
+`G.opponent = 'study'` — `BOT()`, `LOCAL()` and `ONLINE()` all false, as a
+puzzle does — and the same mount is how the history layer re-enters our own
+study after Back has put the board away.
+
 **Study Board and Puzzles are separate features that share one library.**
 Study Board (`REV`, the review screen) explains *the game the player just
 finished*: it is reached only from the end-of-game overlay, replays `G.uci`,
@@ -1783,8 +1851,8 @@ shows that refusal rather than hiding it, because "nothing here matches a
 researched concept" is a true answer and a guess dressed as a concept is not.
 Do not add a fallback.
 
-`eduAnalyse()` is called from `reviewRender()` **above** the four `quiet()`
-returns, because all four are about the engine — it cannot run, it is starting,
+`eduAnalyse()` is called from `reviewRender()` **above** the engine's
+`quiet()` returns, because all of them are about the engine — it cannot run, it is starting,
 the game is over, the search has not answered — and none of them is a reason to
 stop naming what is on the board. The whole feature is additive: a failed fetch
 leaves `EDU.ready` false, `#conceptCard` hidden, and Study Board exactly what it
@@ -1943,7 +2011,7 @@ allowlist, and a path like `/ranked` would 404 on refresh), just
 `history.pushState` with a hash naming the page (`#ranked`, `#friendly`,
 `#lessons/3`, `#lessons/done`, `#practice/tracker`, `#puzzle` (the setup page),
 `#puzzle/fog`, `#puzzle/practice-opening`, `#play/bot`,
-`#game/ranked`) and a `popstate` handler. A drill's entry is the
+`#game/ranked`, `#study/<payload>`) and a `popstate` handler. A drill's entry is the
 mode's own key with the level and the length riding in the state beside it, so
 `navApply()` re-enters it through `goPractice()` and then `prOpen(key, level,
 minutes)` — the same door the Quick button and the course's handoff use. The one address that is a path

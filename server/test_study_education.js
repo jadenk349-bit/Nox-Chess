@@ -260,8 +260,10 @@ async function testNames(){
      Object.keys(p.EDU.matchers || {}).join(','));
   eq('and no matcher threw on a real game', (p.EDU.matchers.MATCHER_ERRORS || []).length, 0);
 
-  // A real middlegame-ish position from the game just played.
-  p.reviewGoto(8);
+  // A real middlegame-ish position from the game just played. Ply k on the
+  // board is the position AFTER move k, so goto(9) is move 8 under review:
+  // states[8] with uci[8] played from it.
+  p.reviewGoto(9);
   await wait(50);
   const html = p.by('conceptBody').innerHTML;
   ok('the card was written', html.length > 0);
@@ -279,7 +281,7 @@ async function testNames(){
   const NOTHING = 'r3kbnr/1pBbppp1/2p5/p6p/1q1PN3/5P2/PPPQ2PP/R3KB1R w KQkq a6 0 11';
   p.REV.states[2] = p.stateFromFEN(NOTHING);
   p.G.uci[2] = null;
-  p.reviewGoto(2);
+  p.reviewGoto(3);
   await wait(50);
   const bare = p.by('conceptBody').innerHTML;
   ok('a position it cannot label names no concept', !/class="cc-name"/.test(bare), bare.slice(0, 300));
@@ -290,7 +292,7 @@ async function testNames(){
 
   /* The card shows what the API returned and nothing else. This is the
      assertion that would catch a well-meaning fallback being added later. */
-  p.reviewGoto(8);
+  p.reviewGoto(9);
   await wait(20);
   const shown = (p.by('conceptBody').innerHTML.match(/class="cc-name">([^<]+)</g) || [])
     .map(x => x.replace(/.*>/, '').replace(/<$/, ''));
