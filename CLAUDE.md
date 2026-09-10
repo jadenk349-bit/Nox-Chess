@@ -169,6 +169,7 @@ node server/test_practice.js             # what the practice drills invent, re-c
 node server/test_practice_flow.js        # and running one, against a stub DOM + clock
 node server/test_lessons.js              # walks the whole ten-lesson course (~3 min)
 node server/test_leaderboard.js          # the home page's four ladders, against a scripted account client
+node server/test_drag.js                 # dragging a man to a square, on the three visions that draw a board
 node server/test_ai_fallback.js          # what the ranked fallback bot decides
 node server/test_ai_game.js              # and playing a whole game against it, stub DOM
 python3 server/test_ai_match.py          # seating one: the queue, the race; no server needed
@@ -2037,6 +2038,34 @@ Sighted one; only somebody on no ladder is shown their own `rating`. It reads
 the rows already loaded rather than querying again, so the two pages cannot
 disagree about who is on the board, and `goSocial()` asks for any ladder
 still missing and redraws when it lands. `test_leaderboard.js` covers it.
+
+**A man is moved by clicking twice or by dragging, and the two are one rule.**
+The click handler on `#squares` was the only way to move on a drawn board;
+the drag beside it (the `clicks, and drags` section, `DRAG`) is pointer
+events — the press on the board, the travel and the drop on the document —
+and it goes through the same two functions the click does: `boardOpen()`
+says whether the board takes a move at all, `tryMove(from, to)` says whether
+from→to is one, flashes the square and, in a puzzle, says why not. A press
+that travels under `DRAG_SLOP` is left to the click that follows it, so
+click-to-move is untouched; a press that travels further selects the square
+exactly as a first click does (ring, and in Sighted the hints) and the drop
+is the second. The browser's own click after a drop would select the landing
+square, so it is swallowed on a flag that lasts one tick (`DRAG.swallow`) —
+one tick because a cancelled drag has no click coming and a flag that waited
+for one would eat the next real click. Two things about how it is written
+matter. There is **no pointer capture**: a captured pointer's click is
+retargeted to the capturing element, and the click handler, looking for the
+square under it, found the whole board instead — click-to-move stopped
+working the moment a drag had been made, which the shim could not show and
+headless Chrome did. And only a man that is *drawn* is picked up and drawn
+moving — the viewer's own, on a board that shows them — because a hidden
+man sliding to its square would be a peek; the drag of any other square still
+selects it and the drop is still judged, so See the Board drags exactly as it
+clicks, with nothing to see. `renderPieces()` leaves the man in the hand
+where the pointer has it, since a render mid-drag (the selection ring) would
+otherwise slide it home. `.squares` gives up `touch-action`, which is what
+lets a finger drag on a phone instead of scrolling the page.
+`test_drag.js` drives the pointer events under the DOM shim.
 
 There is deliberately no undo, no take-back, and no move history during play.
 Don't reintroduce them.
