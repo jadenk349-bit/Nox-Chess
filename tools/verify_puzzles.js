@@ -115,6 +115,9 @@ const P = require('./page_chess.js');
 const R = require('./puzzle_rules.js');
 const WORDS = require('./puzzle_words.js');
 const { Pool } = require('./sf.js');
+const PAY = require('./payoff_rules.js');
+const EDU = require('./puzzle_education.js');
+const POOL = require('./pool_assign.js');
 const G = require('./generate_puzzles.js');
 
 const DEFAULTS = {
@@ -165,6 +168,18 @@ const DEFAULTS = {
   // rewrites the line.
   replySlack: 25,
   follow: 6,          // plies of best play past the end of the solution; --followup
+  /* The payoff rule: every Puzzle-page puzzle must force promotion,
+     significant material, or mate. On by default and switchable off for a
+     corpus that is not for the Puzzle page — the Practices answer to their
+     own standard, in tools/practice_rules.js, and must not be held to this
+     one. See tools/payoff_rules.js. */
+  payoff: true,
+  /* How long a solution may run *when it is running towards a payoff*. The
+     ordinary cap stops a line once its point has happened; this one exists
+     because the new rule moves the finish line further out, and a combination
+     that wins a rook on the sixth move needs the plies to show it. Still odd,
+     so a puzzle still ends on the solver's move. */
+  payoffPlies: 17,
   // A corrected puzzle was priced on the move it no longer plays, so its seed
   // rating is re-measured. --no-reseed skips the slow ladder replay when a run
   // is only after the follow-ups.
@@ -780,12 +795,60 @@ async function verifyOne(p, engine, cfg, rung){
     return { puzzle: null, note };
   }
 
+  /* And the payoff: promotion, significant material, or mate, forced against
+     best defence. See tools/payoff_rules.js for what each of those means and
+     why a knight is not automatically the second one.
+     *
+     * A line that has not reached one is *extended* before it is refused, and
+     * only when there is something there to extend towards — needsMore() is
+     * what tells a rook already won but still hanging apart from a quiet move
+     * that is never going to become a promotion. The extension runs on a
+     * longer cap than the ordinary one, because the whole point of this rule
+     * is that a combination which wins a rook on move six is allowed the plies
+     * it needs to show the rook actually coming off. Nothing about the
+     * standard is relaxed to fit inside a length; the length gives way.
+     *
+     * paidOff() still governs where buildLine() stops, and this is the gate
+     * above it: paidOff says "the point has happened", and this says "and the
+     * point was big enough to be worth showing". */
+  if (cfg.payoff){
+    let pay = PAY.payoffOf(out);
+    if (!pay.ok && PAY.needsMore(out) && out.moves.length + 2 <= cfg.payoffPlies){
+      const longer = Object.assign({}, cfg, { maxPlies: cfg.payoffPlies });
+      const grown = await extendFrom(engine, fen, out.moves, longer);
+      if (grown && grown.moves.length > out.moves.length && grown.moves.length % 2 === 1){
+        note.grewForPayoff = { from: out.moves.length, to: grown.moves.length };
+        out.moves = grown.moves;
+        delete out.replies;
+        // the line moved, so everything measured on its end moves with it
+        out.eval.end = await scoreAfter(engine, fen, out.moves, cfg, cfg.followDepth);
+        out.themes = G.themesFor(out);
+        pay = PAY.payoffOf(out);
+      }
+    }
+    if (!pay.ok){
+      note.dropped = pay.why;
+      return { puzzle: null, note };
+    }
+    out.payoff = { kind: pay.kind, detail: pay.detail };
+    note.payoff = pay.kind;
+  }
+
   /* Words last, and only once the line is locked. Everything the card says is
      derived from the final moves, the final score and the final follow-up —
      writing it any earlier is how a card ends up describing the line it was
      going to have. Then every promise in it is checked against the board the
      line actually reaches, and anything that cannot be justified is struck. */
   out.why = WORDS.explain(out);
+  /* Then the concepts, on the locked line and before the audit.
+   *
+   * Order is the whole of Stage 5. The Education System is asked about moves
+   * that will not change, and everything it says is appended into the same
+   * per-ply sentences auditClaims() is about to read — so a concept sentence
+   * that promises material the verified line never wins is struck exactly as
+   * one of puzzle_words' own would be. Education does not get a private
+   * channel to the player. */
+  note.concepts = EDU.educate(out, cfg);
   note.struck = WORDS.auditClaims(out);
   return { puzzle: out, note };
 }
@@ -903,17 +966,33 @@ const pending = (list, done) => list.filter(p => !done.has(p.id));
  * mid-search and the puzzle leaves the track. Anything that ships has met the
  * full standard at the full depth. */
 async function withBudget(fn, seconds, engine){
-  if (!seconds) return fn();
+  /* The timer is optional; catching is not.
+   *
+   * `--budget 0` turns the clock off, which is the whole point of it — a
+   * puzzle is never rejected for being slow. It used to turn off the error
+   * handling with it, because both lived inside the same `if (seconds)`: one
+   * `return fn()` and a throw from verifyOne walked out of pool.map, rejected
+   * the Promise.all, killed main() and left a dozen Stockfish processes
+   * running. On a run measured in days that is the difference between losing
+   * one puzzle and losing the night.
+   *
+   * So the two are separated. A throw is a dropped puzzle whatever the budget
+   * is, the engine is always released for the next one, and the clock is only
+   * armed when somebody asked for a clock. Nothing here is a quality rule:
+   * with seconds = 0 no puzzle can ever be rejected for time. */
   let timer = null;
-  const bell = new Promise(resolve => {
-    timer = setTimeout(() => { engine.abandon(); resolve('timeout'); }, seconds * 1000);
-  });
+  const bell = seconds
+    ? new Promise(resolve => {
+        timer = setTimeout(() => { engine.abandon(); resolve('timeout'); }, seconds * 1000);
+      })
+    : null;
+  const work = fn().catch(e => ({ __err: e }));
   try {
-    const r = await Promise.race([fn().catch(e => ({ __err: e })), bell]);
+    const r = await (bell ? Promise.race([work, bell]) : work);
     if (r === 'timeout' || (r && r.__err)) return null;
     return r;
   } finally {
-    clearTimeout(timer);
+    if (timer) clearTimeout(timer);
     engine.release();
   }
 }

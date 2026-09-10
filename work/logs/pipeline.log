@@ -1,0 +1,164 @@
+[09:19:53] =========== pipeline start (branch Puzzle) ===========
+[09:19:53] STAGE 1 — re-verifying existing corpus (resuming from checkpoints)
+[13:02:34] STAGE 1 COMPLETE
+[13:02:34] STAGE 2 — deficit calculation
+=== STAGE 2 — deficit calculation ===
+
+existing corpus, re-verified against the complete new standard:
+
+  opening     scanned   58   kept   14   discarded   44
+  middlegame  scanned  465   kept  202   discarded  263
+  endgame     scanned  265   kept   98   discarded  167
+              scanned  788   kept  314   discarded  474
+
+why they were discarded:
+    314  payoff: no promotion, no mate, nothing captured
+     61  payoff: Q taken but not held
+     60  payoff: R taken but not held
+      5  payoff: R/Q taken but not held
+      3  payoff: only N and the game is not decided
+      3  payoff: only B and the game is not decided
+      2  payoff: Q/R taken but not held
+      2  payoff: only N, worth +22.5 points
+      2  payoff: only P and the game is not decided
+      1  payoff: only B, worth +23.5 points
+      1  payoff: only B/P and the game is not decided
+      1  payoff: only N, worth +21.7 points
+      1  payoff: only B, worth +24.9 points
+      1  payoff: only P, worth +19.9 points
+      1  payoff: only N, worth +22.3 points
+      1  payoff: only P, worth +24.2 points
+      1  payoff: only B, worth +22.1 points
+      1  payoff: only N, worth +22.7 points
+      1  payoff: only P, worth +23.4 points
+      1  payoff: only P, worth +22.3 points
+      1  payoff: only P, worth +20.7 points
+      1  payoff: only N, worth +24.6 points
+      1  payoff: only B, worth +22.0 points
+      1  payoff: only N, worth +22.0 points
+      1  payoff: only P, worth +20.5 points
+      1  payoff: only P/B, worth +22.6 points
+      1  payoff: only B/P, worth +22.7 points
+      1  payoff: only P/N, worth +20.9 points
+      1  payoff: only P, worth +22.7 points
+      1  payoff: only B, worth +24.3 points
+      1  payoff: only P/B, worth +24.5 points
+
+target 500 (100 x 5 pools)
+survivors 314  ->  deficit 186
+
+measured survival of a verified corpus: 39.8%
+implied shipped-per-game:              0.0503
+games to mine for the deficit:         3700  (clamped to 2000..20000)
+[13:02:34] STAGE 2 COMPLETE
+[13:02:34] STAGE 3 — mining 3700 games at 1600,1600,2000,2000,2000
+[12:32:27] STAGE 3 FAILED
+[12:33:23] =========== pipeline start (branch Puzzle) ===========
+[12:33:23] stage 1 already done, skipping
+[12:33:23] stage 2 already done, skipping
+[12:33:23] stage 3 already done, skipping
+[12:33:23] STAGE 4 — full verification of new candidates
+[16:14:06] STAGE 4 COMPLETE
+[16:14:06] STAGE 5a — Opening Practices
+[19:42:28] STAGE 5a COMPLETE
+[19:42:28] STAGE 5b — Middle Game Practices
+[01:15:20] =========== pipeline start (branch Puzzle) ===========
+[01:15:20] stage 1 already done, skipping
+[01:15:20] stage 2 already done, skipping
+[01:15:20] stage 3 already done, skipping
+[01:15:20] stage 4 already done, skipping
+[01:15:20] stage 5a already done, skipping
+[01:15:20] STAGE 5b — Middle Game Practices
+[12:14:09] =========== pipeline start (branch Puzzle) ===========
+[12:14:09] stage 1 already done, skipping
+[12:14:09] stage 2 already done, skipping
+[12:14:09] stage 3 already done, skipping
+[12:14:09] stage 4 already done, skipping
+[12:14:09] stage 5a already done, skipping
+[12:14:09] stage 5b already done, skipping
+[12:14:09] STAGE 6 — building the five pools
+=== STAGE 6 — building the five pools ===
+
+  work/stage1/opening          14 verified
+  work/stage1/middlegame      202 verified
+  work/stage1/endgame          98 verified
+  work/gen/opening              4 verified
+  work/gen/middlegame         148 verified
+  work/gen/endgame             72 verified
+  total collected             538
+
+  deduplicated away: 0
+
+  integrity: no duplicate id, no duplicate position, pools even, numbering contiguous
+
+  final pools:
+    sighted     108
+    board       108
+    blindfold   108
+    fog         107
+    rush        107
+    TOTAL       538
+[12:14:10] STAGE 6 COMPLETE
+[12:14:10] STAGE 7 — integrity checks and full test suite
+=== STAGE 7 — full test suite ===
+  test_new_rules.js                      ok       80 passed, 0 failed  
+  test_generate_puzzles.js               ok       78 passed, 0 failed  
+  test_verify_resume.js                  ok       27 passed, 0 failed  
+  test_puzzle_nav.js                     ok       49 passed, 0 failed  
+  test_puzzle_flow.js                    ok       270 passed, 0 failed  
+  test_practice.js                       ok       112 passed, 0 failed  
+  test_practice_flow.js                  ok       202 passed, 0 failed  
+  test_lessons.js                        ok        322 passed, 0 failed 
+  test_review.js                         ok       63 passed, 0 failed  
+  test_ws_url.js                         ok       15 passed, 0 failed  
+  test_rematch_flow.js                   ok       80 passed, 0 failed  
+  test_study_education.js                ok       47 passed, 0 failed  
+  test_api.js                            ok        API  PASS 826   FAIL 0 
+  test_bundle.js                         ok       BUNDLE  PASS 8   FAIL 0  
+  test_explanations.js                   ok        EXPLANATION  PASS 3570   FAIL 0 
+  run_tests.py                           ok       PASS 974   FAIL 0   SKIP 108
+  validate_kb.py                         ok         warning concepts/pawn-play/pawn-break.json: prerequisite 'pawn-structures' does not exist yet
+
+=== corpus audit ===
+  practices/opening: 101 audited
+  practices/middlegame: 0 audited
+
+  audit clean: every shipped record satisfies every gate
+[12:15:42] STAGE 7 COMPLETE
+[12:15:42] =========== pipeline finished ===========
+[13:50:28] =========== pipeline start (branch Puzzle) ===========
+[13:50:28] stage 1 already done, skipping
+[13:50:28] stage 2 already done, skipping
+[13:50:28] stage 3 already done, skipping
+[13:50:28] stage 4 already done, skipping
+[13:50:28] stage 5a already done, skipping
+[13:50:28] STAGE 5b — Middle Game Practices
+[17:30:08] STAGE 5b COMPLETE
+[17:30:08] stage 6 already done, skipping
+[17:30:08] STAGE 7 — integrity checks and full test suite
+=== STAGE 7 — full test suite ===
+  test_new_rules.js                      ok       80 passed, 0 failed  
+  test_generate_puzzles.js               ok       78 passed, 0 failed  
+  test_verify_resume.js                  ok       27 passed, 0 failed  
+  test_puzzle_nav.js                     ok       49 passed, 0 failed  
+  test_puzzle_flow.js                    ok       270 passed, 0 failed  
+  test_practice.js                       ok       112 passed, 0 failed  
+  test_practice_flow.js                  ok       202 passed, 0 failed  
+  test_lessons.js                        ok        325 passed, 0 failed 
+  test_review.js                         ok       63 passed, 0 failed  
+  test_ws_url.js                         ok       15 passed, 0 failed  
+  test_rematch_flow.js                   ok       80 passed, 0 failed  
+  test_study_education.js                ok       47 passed, 0 failed  
+  test_api.js                            ok        API  PASS 826   FAIL 0 
+  test_bundle.js                         ok       BUNDLE  PASS 8   FAIL 0  
+  test_explanations.js                   ok        EXPLANATION  PASS 3570   FAIL 0 
+  run_tests.py                           ok       PASS 974   FAIL 0   SKIP 108
+  validate_kb.py                         ok         warning concepts/pawn-play/pawn-break.json: prerequisite 'pawn-structures' does not exist yet
+
+=== corpus audit ===
+  practices/opening: 101 audited
+  practices/middlegame: 101 audited
+
+  audit clean: every shipped record satisfies every gate
+[17:31:39] STAGE 7 COMPLETE
+[17:31:39] =========== pipeline finished ===========

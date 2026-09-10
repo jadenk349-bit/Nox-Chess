@@ -34,8 +34,12 @@ python3 server/test_house_rooms.py       # the friendly page's seven standing ro
 python3 server/test_names.py             # one name per player, guests included; no server needed
 python3 server/test_system_profiles.py   # the 21 leaderboard profiles: refused everywhere; no server needed
 python3 server/test_puzzle_rating.py     # the puzzle Elo handler; no server needed
+python3 server/test_image_files.py       # every allowlisted file is COPYed into the image; no server needed
 python3 server/test_visions.py           # the three vision ratings: what the migration seeds, what the server writes; no server needed
 node tools/test_generate_puzzles.js      # the generator's own decisions, no engine
+node tools/test_new_rules.js             # the payoff and education rules the corpus was re-cut by
+node tools/test_practice_scheduling.js   # what a board Practice has to clear to ship
+node tools/test_verify_resume.js         # the verifier picking up a run where it stopped
 python3 tools/check_supabase_puzzles.py  # RLS and column grants, against the real project
 python3 tools/check_supabase_visions.py  # the four ladders and their grants, against the real project
 python3 tools/check_supabase_practice.py # RLS and grants on practice_progress, against the real project
@@ -57,6 +61,9 @@ node tools/verify_puzzles.js --track opening               # audit a shipped lad
 node tools/verify_puzzles.js --track middlegame --write    # ...and repair, drop, explain and extend it in place
 node tools/verify_puzzles.js --track endgame --followup 6 --write   # ...with a longer follow-up
 node tools/verify_puzzles.js --track endgame --resort --write       # ...and re-rank the ladder with it
+node tools/merge_pools.js                # one pool out of two mining runs, deduped on the fen
+node tools/generate_practices.js --kind opening     # mine the board Practices (slow)
+node tools/diagnose_practices.js                    # ...and count every stage that refused one
 
 docker build -t nox-chess . && docker run --rm -p 8787:8787 nox-chess
 ```
@@ -136,6 +143,17 @@ the engine, not optional). Allowlisted assets are cached for a week, so every
 reference in the page carries `?v=N`; bump it when a file changes. Four of the
 entries are the Education System — see below — and they are the only part of
 `education/` that is served or copied into the image.
+
+An allowlist has one failure mode with no error anywhere in it: an entry whose
+file the **Dockerfile never copies**. That is not a build error (the Dockerfile
+does not know what the server serves), not a server error (`serve_static_file`
+answers a clean 404 on `OSError`), and not a page error either — it is a feature
+quietly reporting itself as missing, in its own words, to whoever opens it. Both
+board Practices shipped that way and said "Not installed yet" for a whole deploy
+while working perfectly from a checkout, because `practices/` had no `COPY`.
+`server/test_image_files.py` is the guard: it reads `STATIC_FILES` and the
+Dockerfile's `COPY` lines and fails when they disagree. Add an entry to the
+allowlist, add the file to the image.
 
 **Server state** is module-level dicts guarded by one `RLock`: `lobby` (quick
 match, keyed by `(mode, minutes, inc, kind)` — ranked and friendly are separate
@@ -657,6 +675,12 @@ writes it with the service key, and without one the server keeps ratings in
 memory. Guests get neither and keep both locally. Run
 `supabase-migrate-puzzles.sql` once, by hand, like `supabase-setup.sql`.
 
+**Two doors on the menu, four pools behind them, and a setup page in between.**
+The Puzzle menu — in the header and on the home page, the same two buttons
+twice — is **Puzzle** and **Puzzle Rush**, and no vision is named on it. Puzzle
+opens a setup page that asks which vision; Rush brings its own clock and pool
+and asks nothing, so it still starts on the press.
+
 **Practice makes the same bargain one table along, and the course rides in it.**
 `public.practice_progress` (`supabase-migrate-practice.sql`, hand-run, safe to
 re-run) is one row per `(user_id, mode)` — level, best, asked, correct,
@@ -690,25 +714,103 @@ warning rather than a broken drill, and guests keep the whole record locally.
 `tools/check_supabase_practice.py` proves the RLS and the grants against the
 real project.
 
-**A puzzle is a category and a vision, and it needs both.** The home page's four
-puzzle entries — Opening, Middle Game, End Game and Puzzle Rush — no longer open
-a puzzle. Each opens `screen-pzvision` with its own category remembered in
-`pzPick`, and the three cards there answer the other half: `pzChooseVision()`
-writes `PZ.vision` and only then calls `enterTrack()` or `rushStart()`. The
-category is held rather than passed through because the two answers have to
-arrive at `pzOpen()` together, and because a vision chosen for one track must
-not still be the answer for the next thing pressed on the home page. The guest
-lock stays on the home page rather than moving to the cards: a guest is sent to
-the account page instead of being asked a question they cannot act on.
+There are still five pools and `PZ_MODES` is still the table: a `key`, the name
+a player reads, and the `vision` `G.mode` takes while the puzzle is up, which is
+the only place the two vocabularies meet. `enterPuzzleMode()` is still the whole
+of entering one — it writes `PZ.pool` and `PZ.vision` and hands the list to
+`pzOpen()`. What changed is only who calls it: `pzModeForVision()` reads the
+table backwards, so the vision the player picks *is* the pool that opens, and
+`startPuzzleFromSetup()` is the one line between them. The menu used to name all
+four because a door was a pool and a vision at once; it still is, but a menu is
+a list of places to go and "Sighted Puzzle" and "Fog of War Puzzle" are one
+place seen two ways.
 
-**The three visions are the game's own, not a second visibility system.**
+**The setup page is the Play Bot panel, not a screen of its own.** `PZ.setup` is
+the whole of it: a puzzle that has not started yet, on `screen-game` with
+`#gameSetup` up. `enterPuzzleSetup()` mirrors `enterGameSetup()`, and every
+difference lives in `syncOptions()` behind that flag — the button reads **Start
+Puzzle**, `#secTime` is hidden (a puzzle is untimed, and the one that is not
+never comes through here), and `#gameSetup`/`#gamePuzzle` each say which of the
+two puzzle states they mean, because `PUZZLE()` is already true while `PZ.on` is
+still false. Opponent and colour need no rule at all: `BOT()` and `CHALLENGING()`
+are both false for a puzzle, so the two rules Play Bot already had hide them.
+`unanswered()` asks for the vision and nothing else, so Start Puzzle nudges
+`#secVision` exactly as Start Play nudges `#secOpponent`. A second copy of that
+panel would have been two designs to keep in step, which is why there is not
+one. The flag is cleared by `pzOpen()`, by `enterGameSetup()` and by
+`showScreen()` on the way anywhere else — `pzClose()` cannot do it, because it
+returns early while `PZ.on` is false.
+
+Its address is bare `#puzzle`; `#puzzle/<pool>` is still a ladder already open
+and `#puzzle/rush` still a run, and all three round-trip.
+
+It used to be two questions. Opening, Middle Game and End Game sorted puzzles by
+the part of the game they came from — a fact about the chess, not a way to play
+— and a screen of its own (`screen-pzvision`) then asked which vision to see
+them through. Both are gone: phase decides nothing, and "Blindfold Puzzle" has
+already answered the vision question, so there is nothing left for a chooser to
+ask. Opening and middlegame *training* moved to Lesson → Practice, where the
+standard can be educational instead of tactical. The guest lock stays on the
+menu, so a guest is sent to the account page rather than into a door that would
+have nothing to record.
+
+The pools are **non-overlapping by construction**: `tools/pool_assign.js` deals
+one verified corpus out across the five by round-robin over the generator's own
+difficulty ranking — so every pool is a mixed sample of the whole set, evenly
+spread from easiest to hardest, and a position is behind exactly one door.
+Dealing by a hash of the id would be one line and would give one pool the three
+hardest puzzles in the set; each pool is walked in order as its own ladder, so a
+pool that is randomly hard is a door that is randomly shut. Five files of a
+hundred in `puzzles/modes/`, plus `reserve.json`. `pzFetchMode()` reads them,
+and falls back to dealing the three legacy phase files the same way when a pool
+file is absent — a bridge, not a second source of truth, and the real files win
+because they are looked for first. `enterTrack()` is still there for those three
+files and for `test_puzzle_flow.js`; nothing on the page reaches it.
+
+**The visions are the game's own, not a second visibility system.**
 `PZ_VISION_NAME`'s keys are `G.mode`'s — `total` (Complete Blindfold, no board,
-moves typed), `blind` (See the Board, sixty-four empty squares, clicked) and
-`fog` (Fog of War, your men drawn and theirs not) — so the whole of "board
-hidden / pieces hidden / their pieces hidden" is `G.mode = PZ.vision` and
-nothing else. `render()` already knew how to draw each of those, in one place.
-A puzzle used to open as `sighted` with the board revealed, which is a fourth
-vision and the one nobody asked for.
+moves typed), `blind` (See the Board, sixty-four empty squares, clicked), `fog`
+(Fog of War, your men drawn and theirs not) and `sighted` (nothing hidden) — so
+the whole of "board hidden / pieces hidden / their pieces hidden" is
+`G.mode = PZ.vision` and nothing else. `render()` already knew how to draw each
+of those, in one place. `PZ_VISIONS` is deliberately only the three that *hide*
+something and is not the same list as those keys: Sighted is a door with a name
+to print and nothing for a list of hidden visions to say about it.
+
+`pzOpen()` is the one place `PZ.vision` reaches the board, which is why every
+door writes to `PZ` and never to `G` — `G.mode` set before `pzOpen()` is
+overwritten a line later, and that is exactly how four of the five doors once
+came to open a sighted board. Rush is the door that is only a pool
+(`PZ_MODES` gives it no vision), so `rushStart()` names `sighted` itself rather
+than inheriting whatever the last puzzle was.
+
+**Two board Practices, on the Practice page, walked by the puzzle player.**
+`PC_CATS` — Opening Practices and Middle Game Practices, 101 each in
+`practices/*.json` — are positions with an engine-verified answer, and
+deliberately their own table rather than two more entries in `PR_MODES`: the
+seven drills share one level ladder and one accuracy store, and solving a
+middlegame must not move a blindfold level. `enterPracticeCat()` hands the list
+to `PZ`, so a practice is walked with the same board, the same `puzzleStep()`
+and the same explanation card as a puzzle; `PZ.practice` is what the card reads
+to know it should not promise a payoff. The standard lives in the file — an
+opening move has to be objectively strong, and every middlegame is worth at
+least **thirty-five percentage points** of winning chances against the best
+defence Stockfish can find. They carry no `seedRating`, because there is no rung
+for them to sit on, and so **a Practice never moves the puzzle rating**:
+`pzElo()` priced against `undefined` is `NaN`, and that `NaN` reached
+`nox.puzzles.rating` and the server. `PC_VERSION` is their own `?v=`, separate
+from `PZ_VERSION`, because the two sets are written by different tools on
+different runs.
+
+**Which door a puzzle came through is said three ways.** `pzScope()` is the key
+its progress is stored under (`mode:fog`, `practice:middlegame`, or an old
+phase track); `pzScopeName()` is the name on the chip and the card; `pzRoute()`
+is the token the address bar carries (`#puzzle/fog`, `#puzzle/practice-opening`).
+The first two are storage and may never change spelling; the third is a URL, so
+it carries no colons and no key that means two things — "opening" is a phase
+ladder *and* a Practice category, and only the prefix tells them apart. Anything
+reading `PZ.track` directly is a bug: it is null for four of the five pools and
+for both Practices.
 
 Hiding is *rendering*, and never anything else: `G.st` is a complete position in
 every vision, which is what lets the written lists, the legality of a move, the
@@ -739,15 +841,37 @@ unrevealed. Check is still *said* — `CHECK` beside the side-to-move line — w
 no attacker, no arrow and no path, in words or on the board.
 
 **The written position is generated, never stored.** `pzPieceList()` reads
-`G.st` on every render, both sides, in all three visions: in Complete Blindfold
-it is the position, and in the other two it is the half the board is refusing to
-draw. A list checked into `puzzles/*.json` would be a second copy that has to be
+`G.st` on every render, both sides, in every vision: in Complete Blindfold it is
+the position, in See the Board and Fog of War it is the half the board is
+refusing to draw, and in Sighted it is what is already on the board said
+again. A list checked into `puzzles/*.json` would be a second copy that has to be
 kept in step with the first, and would be wrong the moment anything moved — as
 it is, a capture, a promotion and an en passant are right without any of the
 three being mentioned. Kings first and pawns last, and a pawn is named by its
 square alone, because "Pa2" is not how anybody says it and the letters are what
 the eye is scanning for. Captured men are simply not on the board, so there is
 no separate record of them: the list says what is there, not what happened.
+
+**Two panels stand beside a fog puzzle and they answer different questions.**
+The written position says where every man *stands*, and it is granted in every
+vision, both sides, Fog of War included. A version of it printed **Hidden** for
+the opponent's row, reasoning that a written list of the men the board is hiding
+gives back exactly what the fog is keeping. It does — and that is what the panel
+is for. The fog is a rule about the *board*; holding a position you have been
+told while looking at squares that will not confirm it is the exercise, and a
+panel showing half a position is not a harder version of it but a poorer one,
+with nothing left to visualise. That shipped and was reverted.
+
+The notations panel is the other question — what *happened* — and there the
+opponent's replies are withheld, because a reply spelled out as "Rxb7" is a move
+the solver never saw played. `pzHidesReplies()` is that rule, in one place, and
+`pzRenderNotes()` is the only caller: the fen's side to move is the solver, so
+the odd plies are theirs, masked with a `?`. It stands down the moment
+`pzFinish()` sets `G.revealed`, which is also when the card, the swing, the
+themes, Show Follow Up and Study Alternatives arrive. The name is the whole of
+the distinction — anything reading it from `pzRenderPieces()` has confused the
+two panels, and `test_puzzle_flow.js` asserts that neither drifts into the
+other's job.
 
 **The notations panel is walked from what was played, never from the file.**
 `pzSanLine()` replays `G.uci` from the puzzle's own fen. Reading `puzzle.moves`
@@ -1408,8 +1532,10 @@ seen.
 **Study Board and Puzzles are separate features that share one library.**
 Study Board (`REV`, the review screen) explains *the game the player just
 finished*: it is reached only from the end-of-game overlay, replays `G.uci`,
-and never reads a puzzle file. Puzzles (`PZ`) are three ladders in
-`puzzles/*.json`, walked in order, one unlocked by the last. What they share is
+and never reads a puzzle file. Puzzles (`PZ`) are the five pools in
+`puzzles/modes/*.json` — and the two board Practices in `practices/*.json`, and
+the three legacy phase ladders `puzzles/*.json` behind them — each walked in
+order, one rung unlocked by the last. What they share is
 the explaining — `findMotifs()`, `see()`, and `describeBest()` as the fallback
 card for a track written before `why` existed — which is why a puzzle tagged
 `fork` is explained with the word fork. Keep the dependency one-way: `PZ` may
@@ -1461,9 +1587,16 @@ that clock in the *top* strip itself rather than letting `layoutBoardBars()`
 file it by seat — a puzzle has no seats, and a clock that changes ends whenever a
 black-to-move puzzle comes up looks like a clock that has been reset. A run never
 records ladder progress and never moves the rating — it reads the rating to
-choose where to start and nothing else. It is chosen from the same vision screen
-as the three ladders and plays in whichever vision was picked, which is what
-lets Run Again keep it.
+choose where to start and nothing else. It is the fifth door on the same menu
+as the four ladders, and it is dealt from **its own pool** — `pzFetchMode('rush')`,
+the loader all five doors share. It used to flatten the three legacy phase files
+instead, which is the whole corpus, so every position in a run was also behind
+one of the four ladders and "non-overlapping" stopped at the door. `rushQueue()`
+takes that pool as a list, sorts it easiest first and rotates it to the player's
+own rating, wrapping rather than stopping. Rush is also the one door that is
+only a pool: `PZ_MODES` gives it no vision, so `rushStart()` names `sighted`
+itself rather than inheriting whatever the last puzzle happened to be, and Run
+Again keeps it.
 
 **`tools/` is offline, and reads the page rather than copying it.**
 `tools/page_chess.js` cuts the named declarations out of `blind-chess.html` and
@@ -1595,8 +1728,9 @@ whatever site came before. The HISTORY section fixes that with the smallest
 thing that fits — no router, no URLs on the server (`STATIC_FILES` is an
 allowlist, and a path like `/ranked` would 404 on refresh), just
 `history.pushState` with a hash naming the page (`#ranked`, `#friendly`,
-`#lessons/3`, `#lessons/done`, `#practice/tracker`, `#puzzle/opening`,
-`#play/bot`, `#game/ranked`) and a `popstate` handler. A drill's entry is the
+`#lessons/3`, `#lessons/done`, `#practice/tracker`, `#puzzle` (the setup page),
+`#puzzle/fog`, `#puzzle/practice-opening`, `#play/bot`,
+`#game/ranked`) and a `popstate` handler. A drill's entry is the
 mode's own key with the level and the length riding in the state beside it, so
 `navApply()` re-enters it through `goPractice()` and then `prOpen(key, level,
 minutes)` — the same door the Quick button and the course's handoff use. The one address that is a path
@@ -1638,8 +1772,10 @@ shared. Pages a guest is sent to sign up for are gated on arrival too
 purpose, because Supabase reads its own token out of the hash after Google.
 None of the test harnesses has a `history`, and under them the whole layer is
 inert (`NAV.hist` null) — `test_practice_flow.js` stubs `navSync` because it
-lifts the PRACTICE section on its own. `screen-pzvision` is the one every puzzle goes through — see "A puzzle is
-a category and a vision" above. There is only one account cluster (`#headRight`), and `showScreen()`
+lifts the PRACTICE section on its own. A puzzle's address is the door it came
+through, written by `pzRoute()` and read back by `navApply()` through
+`PZ_MODE`, `PC_CAT` and `PZ_TRACKS` in that order — see "Five doors" above.
+There is only one account cluster (`#headRight`), and `showScreen()`
 moves it into whichever screen's header offers a `.head-mount` — home and
 social both do, so it sits in the same place on each. Don't duplicate it.
 
@@ -1677,6 +1813,18 @@ socket. The challenge *form* is the Play Bot page — the same `#gameSetup`
 panel beside the same board, with `CHALLENGING()` hiding the bot ladder,
 renaming Start Play to Challenge, and `NET.opponent` naming the friend on the
 strip above the board. `CHAL` holds the invitation in flight from either end.
+
+The rating under a name on that page is the leaderboard's, not the row's.
+`profiles.rating` is the Sighted column and only that, so a search for one of
+the system profiles seeded onto the three vision ladders used to print "100
+Elo" under a name the leaderboard had just shown at 2673. `socialElo()` asks
+`ladderStanding()` first — which of the four ladders the home page has drawn
+this id on, answered for the one they stand highest on, the higher rating
+breaking a tie — and prints that number, naming the ladder unless it is the
+Sighted one; only somebody on no ladder is shown their own `rating`. It reads
+the rows already loaded rather than querying again, so the two pages cannot
+disagree about who is on the board, and `goSocial()` asks for any ladder
+still missing and redraws when it lands. `test_leaderboard.js` covers it.
 
 There is deliberately no undo, no take-back, and no move history during play.
 Don't reintroduce them.

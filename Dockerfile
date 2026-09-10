@@ -49,6 +49,17 @@ COPY assets/ ./assets/
 # tools/ itself is deliberately absent — it is a build-time thing, not a
 # serving one.
 COPY puzzles/ ./puzzles/
+# The two board Practices — Opening and Middle Game, 101 positions each, under
+# Lesson -> Practice. Generated and verified offline exactly as the puzzles
+# above are, and served off the same allowlist, so they need their own COPY.
+# Without this line the image has the page, the cards and the server route and
+# nothing behind them: STATIC_FILES is an allowlist, so a missing file is not a
+# build error and not a server error either, just a 404 that each feature
+# reports in its own words. pcFetch() cannot tell an absent file from an empty
+# one, so both cards read "Not installed yet" for a whole deploy while working
+# perfectly from a checkout. server/test_image_files.py is what now fails
+# instead, by asking the allowlist rather than trusting this list.
+COPY practices/ ./practices/
 # The Education System's runtime half, and only that half. lib/ is the three
 # files the page evaluates to name concepts; dist/ is the corpus as one bundle.
 # education/concepts/, education/state/ and education/tools/ are research and

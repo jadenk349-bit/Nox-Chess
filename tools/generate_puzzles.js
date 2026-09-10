@@ -1027,6 +1027,12 @@ module.exports = {
   // line has to be built the way the shipped ones were, and a corrected puzzle
   // re-rated by the same ladder replay
   uciFind, buildLine, seedRating,
+  // and what tools/generate_practices.js reuses: the self-play itself. A
+  // Practice is mined from the same games at the same rungs as a puzzle — the
+  // standard applied to the positions differs, the chess that produced them
+  // must not, or the two corpora would be drawn from two different games of
+  // chess and only one of them would be the one players meet.
+  playGame,
   PLAY_RUNGS, CLEAR_WIN, UNSOLVED_SEED, DEFAULTS
 };
 

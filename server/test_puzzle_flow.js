@@ -35,7 +35,11 @@ var fn = function(n){
    comments contain semicolons, and a lazy match to the first one cuts the
    object in half. */
 var decl = function(n){
-  var block = SRC.match(new RegExp('\\n(?:const|let) ' + n + '\\s*=\\s*[\\{\\[][\\s\\S]*?\\n[\\}\\]];'));
+  /* `= {};` and `= [];` are one-liners that happen to open a brace: PC_CAT
+     and PZ_MODE are declared empty and filled by a loop. Left to the block
+     matcher they would run on to whatever `};` the page next puts at column
+     zero, which is a different distance on every page they are lifted from. */
+  var block = SRC.match(new RegExp('\\n(?:const|let) ' + n + '\\s*=\\s*[\\{\\[](?![\\}\\]];)[\\s\\S]*?\\n[\\}\\]];'));
   if (block) return block[0];
   return grab(new RegExp('\\n(?:const|let) ' + n + '\\b[^\\n]*?;'), n);
 };
@@ -122,8 +126,11 @@ var DECLS = ['PZ_STUDY_DEPTH','PZ_STUDY_PAUSE','PZ_STUDY_SLACK',
              'G','PZ','PZ_TRACK_NAME','PZ_TRACKS','PZ_STORE','PZ_VERSION','PZ_REPLY_MS',
              'PZ_START_RATING','PZ_K','PZ_RATING_STORE','PZ_MATE_CP','pzOwner','pzKey',
              'RUSH','RUSH_MS','RUSH_LIVES','RUSH_GAP_MS','W',
-             'PZ_VISIONS','PZ_VISION_NAME','PZ_MENU_NAME','PZ_PIECE_RANK','sqIndex',
-             'pzPick'];
+             'PZ_VISIONS','PZ_VISION_NAME','PZ_PIECE_RANK','sqIndex',
+             /* The five doors, and the two board Practices. Both tables are a
+                list plus a map built from it by a loop, and decl() lifts only
+                the declaration — the loops are put back below. */
+             'PZ_MODES','PZ_MODE','PZ_MODE_KEYS','PC_CATS','PC_CAT'];
 var FNS = ['startBoard','newState','cloneState','posKey','fenOf','stateFromFEN',
            'slide','step','addPawn','pseudoMoves','isAttacked','kingSq','inCheck',
            'makeMove','legalMoves','toSAN','attackersOf','defendersOf','see',
@@ -147,7 +154,21 @@ var FNS = ['startBoard','newState','cloneState','posKey','fenOf','stateFromFEN',
               lessons and Practice read notation with the same reader, so the
               puzzle console needs both halves lifted out. */
            'parseMoveIn','parseMove','pzSubmitTyped',
-           'goPuzzleVision','pzChooseVision','pzShowSolution'];
+           /* Which door this puzzle came through, said three ways: the key its
+              progress is stored under, the name on the chip, and the token the
+              address bar carries. pzOpen() and pzFinish() both call the first. */
+           'pzScope','pzScopeName','pzRoute',
+           // what a fog puzzle withholds, and which panel it withholds it from
+           'pzHidesReplies',
+           // the setup page: the vision is asked for, then it names the pool
+           'pzModeForVision','startPuzzleFromSetup',
+           /* The address-bar half. These three are pure table lookups, so they
+              lift cleanly; the gating around them (unanswered, allAnswered)
+              reaches into BOT(), HOSTING() and the whole setup panel, and is
+              checked by reading the source instead — the same way this suite
+              already checks rushStart(). */
+           'navHash','navParse','navGated',
+           'pzShowSolution'];
 
 var bundle = [grab(/\nconst W = 'w', B = 'b';/, "const W/B")];
 for (var d = 0; d < DECLS.length; d++) if (DECLS[d] !== 'W') bundle.push(decl(DECLS[d]));
@@ -155,6 +176,12 @@ for (var f = 0; f < FNS.length; f++) bundle.push(fn(FNS[f]));
 // PZ_THEME_NAME is called by pzRender
 bundle.push(decl('PZ_THEME_WORDS'));
 bundle.push(fn('PZ_THEME_NAME'));
+/* The page fills these two maps with a loop after declaring them empty, and
+   decl() only ever lifts a declaration. Rebuilt here rather than lifted,
+   because a regex that could pick a bare for-loop out of the page by the name
+   it happens to mention is a regex that will pick up the wrong one. */
+bundle.push('for (var _m = 0; _m < PZ_MODES.length; _m++) PZ_MODE[PZ_MODES[_m].key] = PZ_MODES[_m];');
+bundle.push('for (var _c = 0; _c < PC_CATS.length; _c++) PC_CAT[PC_CATS[_c].key] = PC_CATS[_c];');
 eval(bundle.join('\n').replace(/(^|\n)(?:const|let) /g, '$1var '));
 
 var passed = 0, failed = 0;
@@ -175,6 +202,16 @@ var sets = {};
 for (var t = 0; t < TRACKS.length; t++){
   try { sets[TRACKS[t]] = JSON.parse(slurp('puzzles/' + TRACKS[t] + '.json')); }
   catch (e){ sets[TRACKS[t]] = []; }
+}
+
+/* The five mode pools the page actually deals from. The three above are the
+   legacy phase files: still shipped, still what the interim bridge deals out,
+   and no longer a door on the page. */
+var POOLS = ['sighted', 'board', 'blindfold', 'fog', 'rush'];
+var pools = {};
+for (var pl = 0; pl < POOLS.length; pl++){
+  try { pools[POOLS[pl]] = JSON.parse(slurp('puzzles/modes/' + POOLS[pl] + '.json')); }
+  catch (e){ pools[POOLS[pl]] = []; }
 }
 
 say('\nThe shipped ladders\n');
@@ -605,36 +642,194 @@ if (mated){
 }
 
 /* ---------------------------------------------------------------------
-   Choosing a category and choosing a vision are two decisions, and the
-   puzzle needs both. The home page makes the first and the vision screen
-   makes the second, so what is checked here is that neither of them loses
-   the other's answer.
+   The Puzzle menu asks where, and the setup page asks how.
+
+   The menu used to name all four visions. It now names two places — Puzzle
+   and Puzzle Rush — and the vision is chosen afterwards, on a setup page that
+   is the Play Bot panel with the questions a puzzle does not have taken out.
+   The four pools are untouched: the vision picked IS the pool opened, which
+   is what pzModeForVision() reads off PZ_MODES.
    --------------------------------------------------------------------- */
-say('\nCategory first, then vision\n');
+say('\nThe Puzzle menu, and the setup page behind it\n');
 
-(function picking(){
-  goPuzzleVision('middlegame');
-  check('a category opens the vision screen', screens[screens.length-1], 'pzvision');
-  /* the wording of the home page's own menu, not the track's name: this line
-     is quoting the button that was pressed back to the person who pressed it */
-  check('which names the category chosen', elements.pzvCategory.textContent, 'Middle Game');
-  check('and remembers it', pzPick.track, 'middlegame');
-  check('as a ladder, not a run', pzPick.rush, false);
+(function setup(){
+  /* The menu, read out of the page's own markup — two entries and no vision
+     among them. This is the check that fails if the four doors come back. */
+  var nav = SRC.match(/id="navPuzzle"[\s\S]*?<div class="menu">([\s\S]*?)<\/div>/);
+  var home = SRC.match(/id="homePuzzle"[\s\S]*?<div class="menu">([\s\S]*?)<\/div>/);
+  var items = function(m){
+    return m ? (m[1].match(/<button[^>]*>([^<]*)<\/button>/g) || [])
+                 .map(function(b){ return b.replace(/<[^>]*>/g, ''); }) : [];
+  };
+  check('the header menu has two entries',      items(nav).length, 2);
+  check('and they are Puzzle and Puzzle Rush',  items(nav).join(','), 'Puzzle,Puzzle Rush');
+  check('the home shortcut copies it exactly',  items(home).join(','), 'Puzzle,Puzzle Rush');
+  check('no vision is named in the menu',
+        /Sighted Puzzle|Only Board Puzzle|Blindfold Puzzle|Fog of War Puzzle/.test(
+          (nav ? nav[1] : '') + (home ? home[1] : '')), false);
+  check('Puzzle opens the setup page',
+        /navPuzzleGo'\)\.onclick[^\n]*enterPuzzleSetup\(\)/.test(SRC), true);
+  check('and Puzzle Rush still starts on the press',
+        /navRush'\)\.onclick[^\n]*rushStart\(\)/.test(SRC), true);
+  check('both are still behind the account lock',
+        /navPuzzleGo/.test(decl('LOCKED_IDS')) && /navRush/.test(decl('LOCKED_IDS')), true);
 
-  goPuzzleVision('rush');
-  check('Puzzle Rush comes through the same door', screens[screens.length-1], 'pzvision');
-  check('and is named as itself', elements.pzvCategory.textContent, 'Puzzle Rush');
-  check('with no ladder behind it', pzPick.track, null);
-  check('but marked as a run', pzPick.rush, true);
+  /* The vision is the pool. Every vision the setup page offers has to name one
+     of the four, and Rush — which has no vision — must never be reachable
+     this way, or Start Puzzle would open a run. */
+  check('Complete Blindfold names the blindfold pool', pzModeForVision('total').key, 'blindfold');
+  check('Board Only names the board pool',             pzModeForVision('blind').key, 'board');
+  check('Fog of War names the fog pool',               pzModeForVision('fog').key,   'fog');
+  check('Sighted names the sighted pool',              pzModeForVision('sighted').key, 'sighted');
+  check('and a vision nobody offers names nothing',    pzModeForVision('nonsense'), null);
+  check('Puzzle Rush is not reachable from a vision',
+        PZ_MODES.filter(function(m){ return m.vision === null; }).length, 1);
 
-  // a card press with nothing behind it still records the vision, which is the
-  // half of the answer this screen owns
-  pzPick.rush = false;
-  pzPick.track = null;
-  pzChooseVision('blind');
-  check('the card pressed is the vision kept', PZ.vision, 'blind');
-  pzChooseVision('nonsense');
-  check('and one that is not a vision is refused', PZ.vision, 'blind');
+  /* Every button on the setup page's Vision row has to be one of those four —
+     the row is the game's own, shared with Play Bot, so a vision added there
+     would silently become a puzzle door with no pool behind it. */
+  var row = SRC.match(/id="secVision"[\s\S]*?<\/div>/);
+  var modes = (row[0].match(/data-mode="([a-z]+)"/g) || [])
+                .map(function(d){ return d.replace(/data-mode="|"/g, ''); });
+  check('the Vision row offers four', modes.length, 4);
+  check('and every one of them has a pool',
+        modes.every(function(v){ return !!pzModeForVision(v); }), true);
+
+  /* Start Puzzle. The setup page is a state of PZ, not a screen of its own,
+     and it ends the moment a puzzle opens. */
+  check('the setup page is a flag on PZ', 'setup' in PZ, true);
+
+  /* The panel it draws. These read the source rather than the DOM because the
+     setup panel is the game's, shared with Play Bot, and every rule here is a
+     branch inside syncOptions() — the point of each check is that the branch
+     is gated on PZ.setup and therefore invisible to Play Bot. */
+  var sync = fn('syncOptions');
+  check('the button says Start Puzzle',
+        /PZ\.setup \? 'Start Puzzle'/.test(sync), true);
+  check('Play Bot still says Start Play',
+        /'Start Play'/.test(sync), true);
+  check('the clock is not asked for',
+        /secTime'\)\.style\.display = PZ\.setup \? 'none'/.test(sync), true);
+  check('the setup panel is shown rather than the puzzle one',
+        /gameSetup'\)\.style\.display = \(\(PZ\.setup \|\| !PUZZLE\(\)\)/.test(sync), true);
+  check('and the puzzle panel waits until a puzzle is actually open',
+        /gamePuzzle'\)\.style\.display = \(PUZZLE\(\) && !PZ\.setup\)/.test(sync), true);
+  /* Opponent and colour need no rule of their own: BOT() and CHALLENGING()
+     are both false for a puzzle, so the two rules Play Bot already has hide
+     them. Checked so that a later change to either is noticed here. */
+  /* The two strips framing the preview board — the seats and the clocks — are a
+     game's furniture and say nothing true on a puzzle setup page. Hidden with
+     visibility so the board does not move, and scoped to a class that is only
+     on while PZ.setup is, so Play Bot keeps its own. */
+  check('the setup page carries a class of its own',
+        /classList\.toggle\('puzzle-setup', !!PZ\.setup\)/.test(sync), true);
+  check('and that class hides the name strips and clocks',
+        /#screen-game\.puzzle-setup \.board-bar\{visibility:hidden;\}/.test(SRC), true);
+  check('by visibility, so the board does not move',
+        /#screen-game\.puzzle-setup \.board-bar\{display:none/.test(SRC), false);
+  check('while a puzzle in play still takes the space back',
+        /#screen-game\.puzzle-mode \.board-bar\{display:none;\}/.test(SRC), true);
+
+  check('opponent is still hidden by the rule Play Bot already had',
+        /secOpponent'\)\.style\.display = BOT\(\) \?/.test(sync), true);
+  check('and colour by its own',
+        /secYouPlay'\)\.style\.display  = \(BOT\(\) \|\| CHALLENGING\(\)\)/.test(sync), true);
+
+  check('the only question it can leave unanswered is the vision',
+        /if \(PZ\.setup\) return picked\.mode \? \[\] : \['secVision'\]/.test(fn('unanswered')), true);
+  check('and the button lights on that alone',
+        /PZ\.setup \|\| optionsAnswered\(\)/.test(decl('allAnswered')), true);
+  check('Start Puzzle is what the press reaches',
+        /if \(PZ\.setup\) return startPuzzleFromSetup\(\)/.test(fn('startGame')), true);
+  check('and it opens the pool the vision names',
+        /enterPuzzleMode\(m\.key\)/.test(fn('startPuzzleFromSetup')), true);
+  check('entering the setup page clears any puzzle on the board',
+        /pzClose\(\)/.test(fn('enterPuzzleSetup')), true);
+  check('and Play Bot clears the setup page',
+        /PZ\.setup = false/.test(fn('enterGameSetup')), true);
+
+  // starting it opens that vision's pool, through the same door the menu used to
+  PZ.setup = true;
+  PZ.on = false;
+  PZ.mode = 'ladder';
+  PZ.list = sets[TRACKS[0]];
+  PZ.track = TRACKS[0];
+  PZ.pool = null;
+  pzOpen(1);
+  check('opening a puzzle ends the setup page', PZ.setup, false);
+  PZ.on = false;
+
+  /* The address bar. Bare #puzzle is the setup page; #puzzle/<pool> is a
+     ladder already open; #puzzle/rush is a run. All three have to survive the
+     round trip or Back lands somewhere else. */
+  var trip = function(h){ return navHash(navParse(h)); };
+  check('#puzzle is the setup page',      JSON.stringify(navParse('puzzle')), '{"s":"game","v":"pzsetup"}');
+  check('and it round-trips',             trip('puzzle'), 'puzzle');
+  check('#puzzle/fog is still a ladder',  trip('puzzle/fog'), 'puzzle/fog');
+  check('#puzzle/rush is still a run',    trip('puzzle/rush'), 'puzzle/rush');
+  check('the setup page is account-gated', navGated({ s:'game', v:'pzsetup' }), true);
+
+  PZ.setup = false;
+  G.opponent = null;
+})();
+
+/* ---------------------------------------------------------------------
+   Five doors, and each of them is a pool and a vision at once. There used to
+   be a screen between the home page and the first position asking which
+   vision; there is nothing left for it to ask, because "Blindfold Puzzle" has
+   already answered. What is checked here is that the table still says both
+   things at once, that the three kinds of ladder file their progress apart,
+   and that each of them can be named in the address bar.
+   --------------------------------------------------------------------- */
+say('\nFive doors, each a pool and a vision\n');
+
+(function doors(){
+  check('there are five', PZ_MODES.length, 5);
+  check('and the page draws them in this order',
+        PZ_MODE_KEYS.join(','), 'sighted,board,blindfold,fog,rush');
+  check('Sighted hides nothing',            PZ_MODE.sighted.vision, 'sighted');
+  check('Only Board is the empty board',    PZ_MODE.board.vision, 'blind');
+  check('Blindfold is the one with none',   PZ_MODE.blindfold.vision, 'total');
+  check('Fog of War draws your own men',    PZ_MODE.fog.vision, 'fog');
+  /* Rush is the one door that is only a pool. It takes no vision from the
+     table, and rushStart() is what names the one a run is played in — left to
+     inherit, a run would open in whatever the last puzzle happened to be. */
+  check('and Puzzle Rush takes no vision from the table', PZ_MODE.rush.vision, null);
+  /* PZ_VISIONS is the three that hide something and Sighted is not one of
+     them, but it is a door and the card names its vision — read off a
+     three-key table, that line said "Vision undefined". */
+  check('the Sighted door still has a name to print', PZ_VISION_NAME.sighted, 'Sighted');
+  check('so the run names its own',
+        /PZ\.vision\s*=\s*'sighted'/.test(fn('rushStart')), true);
+
+  /* Three kinds of ladder reach pzOpen(), and each has to keep its progress,
+     its name and its address to itself — PZ.track is null for four of the five
+     pools and for both Practices, and reading it directly printed "undefined". */
+  var was = { pool: PZ.pool, practice: PZ.practice, track: PZ.track };
+  PZ.pool = 'fog'; PZ.practice = null; PZ.track = null;
+  check('a pool files its progress under itself', pzScope(), 'mode:fog');
+  check('and names itself on the chip',           pzScopeName(), 'Fog of War Puzzle');
+  check('and is one token in the address bar',    pzRoute(), 'fog');
+
+  PZ.pool = null; PZ.practice = 'middlegame';
+  check('a Practice is filed apart from it',  pzScope(), 'practice:middlegame');
+  check('and named as one',                   pzScopeName(), 'Middle Game Practices');
+  // "opening" is a phase ladder and a Practice category; only the prefix says which
+  check('with a route that cannot be a pool', pzRoute(), 'practice-middlegame');
+
+  PZ.practice = null; PZ.track = 'opening';
+  check('and the old phase ladder is untouched', pzScope(), 'opening');
+  check('and still named as it always was',      pzScopeName(), 'Opening');
+  PZ.pool = was.pool; PZ.practice = was.practice; PZ.track = was.track;
+
+  /* A Practice carries no seedRating — it is graded by the standard its file
+     was built to, not by a rung — so nothing may price a rating against one.
+     pzElo() against `undefined` is NaN, and that NaN went to localStorage and
+     to the server, costing a player their whole puzzle rating for solving one. */
+  check('a Practice never moves the puzzle rating',
+        /!PZ\.practice/.test(fn('pzFinish')), true);
+  check('and the card asks for a rung before printing one',
+        /seedRating != null/.test(fn('pzRenderInfo')), true);
 })();
 
 /* ---------------------------------------------------------------------
@@ -806,8 +1001,12 @@ say('\nThe notations panel\n');
   pzRetry();
   pzRender();
   check('retrying empties it', elements.pzMoves.innerHTML.indexOf('No moves yet') >= 0, true);
+  /* The solver's own row, named rather than assumed: this block runs in fog,
+     where the other row says "Hidden" — see "Fog of War" below. */
+  var solver = stateFromFEN(many.p.fen).turn;
   check('and the written position goes back with it',
-        elements.pzPcW.textContent, pzPieceList(stateFromFEN(many.p.fen), W));
+        elements[solver === W ? 'pzPcW' : 'pzPcB'].textContent,
+        pzPieceList(stateFromFEN(many.p.fen), solver));
 
   // and a revealed solution fills it in, because those moves happened too
   timers = [];
@@ -815,6 +1014,266 @@ say('\nThe notations panel\n');
   flushTimers();
   pzRender();
   check('a revealed solution is listed as well', cells(), many.p.moves.length);
+})();
+
+/* ---------------------------------------------------------------------
+   The two board Practices are installed, and every link in the chain that
+   has to agree for a card to say so.
+
+   REGRESSION. Both cards read "Not installed yet" in production while working
+   perfectly from a checkout. Nothing was wrong with the page: pcFetch() cannot
+   tell an absent file from an empty one, and the deployed image simply did not
+   carry practices/*.json — the Dockerfile copied puzzles/ and never these.
+   server/test_image_files.py is what catches that half. This half checks
+   everything else that could produce the same sentence: the file, its size, the
+   slug the page asks for, and the route the server is willing to answer.
+   --------------------------------------------------------------------- */
+say('\nThe two board Practices are installed\n');
+
+(function practices(){
+  var SERVER = '';
+  try { SERVER = slurp('server/server.py'); } catch (e){}
+
+  check('there are two categories', PC_CATS.length, 2);
+  check('and they are these two',
+        PC_CATS.map(function(c){ return c.key; }).join(','), 'opening,middlegame');
+
+  var want = { opening: 101, middlegame: 101 };
+  for (var i = 0; i < PC_CATS.length; i++){
+    var c = PC_CATS[i], list = [];
+    try { list = JSON.parse(slurp('practices/' + c.key + '.json')); } catch (e){}
+
+    check(c.name + ': the file the page asks for exists', list.length > 0, true);
+    check(c.name + ': and holds every record that was generated', list.length, want[c.key]);
+    // an empty list is the only thing that makes a card say "Not installed yet"
+    check(c.name + ': so the card cannot say "Not installed yet"', list.length === 0, false);
+    check(c.name + ': the rungs are a ladder, 1..n', 
+          list.length > 0 && list[0].n === 1 && list[list.length-1].n === list.length, true);
+    check(c.name + ': every record carries a position and a line',
+          list.every(function(r){ return r.fen && r.moves && r.moves.length; }), true);
+    /* No seedRating, on purpose — a Practice is graded by the standard its file
+       was built to, not by a rung, which is why it moves no rating. */
+    check(c.name + ': and no rung, because it is not rated',
+          list.some(function(r){ return r.seedRating != null; }), false);
+
+    // the slug has to survive three hops: card -> fetch URL -> server allowlist
+    check(c.name + ': the server will serve that exact path',
+          SERVER.indexOf('"/practices/' + c.key + '.json"') >= 0, true);
+  }
+
+  // the fetch URL the page builds, spelled out, against the allowlist
+  check('pcFetch asks for practices/<key>.json',
+        /fetch\('practices\/' \+ key \+ '\.json/.test(fn('pcFetch')), true);
+  check('and the practices have a cache key of their own, not the puzzles\u2019',
+        /PC_VERSION/.test(fn('pcFetch')) && !/PZ_VERSION/.test(fn('pcFetch')), true);
+
+  // entering one is the puzzle player with a different list, and its own scope
+  check('entering a Practice hands the list to PZ',
+        /PZ\.list = list/.test(fn('enterPracticeCat')), true);
+  check('and marks it as a Practice, not a pool',
+        /PZ\.practice = key/.test(fn('enterPracticeCat')) &&
+        /PZ\.pool = null/.test(fn('enterPracticeCat')), true);
+  check('a Practice is played sighted',
+        /PZ\.vision = 'sighted'/.test(fn('enterPracticeCat')), true);
+
+  // and its progress, name and address are its own
+  var was = { pool: PZ.pool, practice: PZ.practice, track: PZ.track };
+  PZ.pool = null; PZ.track = null;
+  PZ.practice = 'opening';
+  check('progress is filed under the category',   pzScope(), 'practice:opening');
+  check('the card names it',                      pzScopeName(), 'Opening Practices');
+  check('and the address bar can carry it',       pzRoute(), 'practice-opening');
+  PZ.practice = 'middlegame';
+  check('and the same for the other one',         pzScope(), 'practice:middlegame');
+  check('named as itself',                        pzScopeName(), 'Middle Game Practices');
+  check('with its own route',                     pzRoute(), 'practice-middlegame');
+  PZ.pool = was.pool; PZ.practice = was.practice; PZ.track = was.track;
+
+  /* Opening one really does put a position on the board. pzOpen() is the whole
+     of it — the same function the five pools go through — so this is the flow
+     the card starts, minus the fetch. */
+  var opening = [];
+  try { opening = JSON.parse(slurp('practices/opening.json')); } catch (e){}
+  if (opening.length){
+    PZ.mode = 'ladder'; PZ.pool = null; PZ.track = null; PZ.practice = 'opening';
+    PZ.vision = 'sighted'; PZ.list = opening;
+    timers = [];
+    pzOpen(1);
+    check('a Practice opens on the game screen', screens[screens.length-1], 'game');
+    check('with one of the 101 on the board', G.st !== null && PZ.puzzle === opening[0], true);
+    check('the position is the file\u2019s own', fenOf(G.st), opening[0].fen);
+    check('and it is playable', legalMoves(G.st, G.st.turn).length > 0, true);
+    pzRender();
+    check('the card names the Practice, not a puzzle track',
+          elements.pzTitle.textContent, 'Opening Practices \u00b7 Practice 1');
+    check('and the rung grid is 101 long', elements.pzGrid.innerHTML.split('data-n=').length - 1, 101);
+
+    // solving it moves no rating — a Practice has no rung to be priced against
+    var before = pzRating();
+    pzPlay(moveFor(opening[0].moves[0]));
+    flushTimers();
+    check('solving it finishes the Practice', PZ.done, true);
+    check('and the rating is untouched',      pzRating(), before);
+    check('nor is a delta claimed',           PZ.delta, null);
+    PZ.on = false; PZ.practice = null; PZ.list = [];
+  }
+})();
+
+/* ---------------------------------------------------------------------
+   Fog of War, and the two panels beside it that answer different questions.
+
+   The written position says where every man STANDS, both sides, in every
+   vision — that is the exercise, not a leak: the fog is a rule about the
+   board, and holding a position you have been told while looking at squares
+   that will not confirm it is the thing being trained. A version of this
+   screen printed "Hidden" for the opponent's row and it was wrong; these
+   checks are what keep it from coming back.
+
+   The notations panel answers the other question — what HAPPENED — and there
+   the opponent's replies are withheld, because a reply spelled out as "Rxb7"
+   is a move the solver never saw played.
+   --------------------------------------------------------------------- */
+say('\nFog of War: the position is told, the replies are not\n');
+
+(function fogging(){
+  var track = null, many = null;
+  for (var t = 0; t < TRACKS.length && !many; t++){
+    var list = sets[TRACKS[t]];
+    for (var i = 0; i < list.length && !many; i++)
+      if (list[i].moves.length >= 3) many = { n: i + 1, p: list[i] };
+    if (many) track = TRACKS[t];
+  }
+  if (!many){ say('  ..    no multi-move puzzle, skipping'); return; }
+
+  var mine   = stateFromFEN(many.p.fen).turn;      // the solver: the fen's side to move
+  var theirs = mine === W ? B : W;
+  var rowOfC = function(c){ return c === W ? 'pzPcW' : 'pzPcB'; };
+
+  PZ.mode = 'ladder';
+  PZ.track = track;
+  PZ.list = sets[track];
+  PZ.vision = 'fog';
+  timers = [];
+  pzOpen(many.n);
+  pzRender();
+
+  check('a fog puzzle withholds the replies while it is unsolved', pzHidesReplies(), true);
+
+  /* REGRESSION. The written position is both sides, always. This panel once
+     read "Hidden" for the opponent's row on a fog puzzle and shipped that way:
+     the board hid them and so did the only thing on screen that could have
+     said where they were, which is a different exercise from the one the mode
+     is for. */
+  check('the solver’s own men are written out',
+        elements[rowOfC(mine)].textContent, pzPieceList(G.st, mine));
+  check('and so are the opponent’s — the panel is the position, both sides',
+        elements[rowOfC(theirs)].textContent, pzPieceList(G.st, theirs));
+  check('their squares are named outright',
+        /[a-h][1-8]/.test(elements[rowOfC(theirs)].textContent), true);
+  check('the row never says "Hidden" again',
+        /Hidden/.test(elements.pzPcW.textContent + elements.pzPcB.textContent), false);
+  check('both rows carry real men',
+        elements.pzPcW.textContent.length > 2 && elements.pzPcB.textContent.length > 2, true);
+  // and it is the live position, not the opening one: it follows every move
+  check('it is read off the board as it stands',
+        elements[rowOfC(theirs)].textContent, pzPieceList(stateFromFEN(many.p.fen), theirs));
+
+  // their reply, played the way the page's own timer plays it
+  pzPlay(moveFor(many.p.moves[0]));
+  flushTimers();
+  pzRender();
+  check('the defence has been played', G.uci.length >= 2, true);
+
+  var sans = pzSanLine();
+  var at = function(san){ return elements.pzMoves.innerHTML.indexOf('>' + pzEsc(san) + '<') >= 0; };
+  check('the notation still shows the solver’s own move', at(sans[0]), true);
+  check('and does not name the reply',                    at(sans[1]), false);
+  check('it says a move was made and stops there',
+        elements.pzMoves.innerHTML.indexOf('pz-veil') >= 0, true);
+  // the same panel, drawn with the fog lifted, is the control for that pair
+  G.revealed = true;
+  pzRender();
+  check('with the fog lifted the very same panel names it', at(sans[1]), true);
+  check('and carries no mask at all',
+        elements.pzMoves.innerHTML.indexOf('pz-veil') >= 0, false);
+  check('the written position is unchanged by the reveal — it was never masked',
+        elements[rowOfC(theirs)].textContent, pzPieceList(G.st, theirs));
+  G.revealed = false;
+  pzRender();
+  check('and putting the fog back leaves it alone too',
+        elements[rowOfC(theirs)].textContent, pzPieceList(G.st, theirs));
+
+  // finishing is what opens it for real
+  for (var k = G.uci.length; k < many.p.moves.length; k++){
+    var mv = moveFor(many.p.moves[k]);
+    if (!mv) break;
+    pzPlay(mv);
+    flushTimers();
+  }
+  pzRender();
+  check('solving it opens the position',   PZ.done && G.revealed, true);
+  check('so the rule stands down',         pzHidesReplies(), false);
+  check('the written position is still both sides',
+        elements[rowOfC(theirs)].textContent, pzPieceList(G.st, theirs));
+  check('and every reply is spelled out now',
+        elements.pzMoves.innerHTML.indexOf('pz-veil') >= 0, false);
+
+  /* The other three visions are untouched. In Complete Blindfold and See the
+     Board the written position IS the position — masking half of it would not
+     make a harder puzzle, it would make an unanswerable one — and Sighted has
+     every man on the board anyway. */
+  var others = ['total', 'blind', 'sighted'];
+  for (var v = 0; v < others.length; v++){
+    PZ.vision = others[v];
+    timers = [];
+    pzOpen(many.n);
+    pzRender();
+    check(PZ_VISION_NAME[others[v]] + ': no reply is withheld', pzHidesReplies(), false);
+    check(PZ_VISION_NAME[others[v]] + ': both sides are written out',
+          elements[rowOfC(theirs)].textContent, pzPieceList(G.st, theirs));
+  }
+
+  // a run is played sighted, so nothing is withheld there either
+  PZ.vision = 'sighted';
+  check('and a run withholds nothing', pzHidesReplies(), false);
+
+  /* The two panels are separate concerns and the code says so: the rule is
+     asked in exactly one place, and it is not the written position. Comments
+     are stripped first — both functions *mention* the rule, on purpose, and a
+     test that cannot tell a call from a cross-reference would pass whatever
+     the code did. */
+  var code = function(src){
+    return src.replace(/\/\*[\s\S]*?\*\//g, '').replace(/\/\/[^\n]*/g, '');
+  };
+  check('the written position never asks the rule',
+        /pzHidesReplies\s*\(/.test(code(fn('pzRenderPieces'))), false);
+  check('the notations panel is the only thing that does',
+        /pzHidesReplies\s*\(/.test(code(fn('pzRenderNotes'))), true);
+  check('and pzPieceList itself takes no view of it',
+        /PZ\.|G\.revealed/.test(code(fn('pzPieceList'))), false);
+
+  /* Everything else that could give the position away is gated on the puzzle
+     being over, and was before this — checked here so the four stay together
+     with the two that changed. */
+  check('the swing waits for the puzzle to be over',
+        /PZ\.done \? pzSwingHTML/.test(fn('pzRender')), true);
+  check('so do the themes',
+        /PZ\.done \? p\.themes/.test(fn('pzRender')), true);
+  check('Show Follow Up is dead until then',
+        /follow\.disabled = !PZ\.done/.test(fn('pzRender')), true);
+  check('and Study Alternatives is not even offered',
+        /canStudy = PZ\.done/.test(fn('pzRender')), true);
+  check('the explanation card is written only for a finished puzzle',
+        /if \(PZ\.done\)\{[\s\S]*?pzExplain\(p\)/.test(fn('pzRender')), true);
+  /* The Education System is a Study Board card and never a puzzle one: nothing
+     on the puzzle path reaches eduAnalyse(), and pzOpen() closes the review
+     that owns it. */
+  check('and the Education System is never asked from a puzzle',
+        /eduAnalyse/.test(fn('pzOpen') + fn('pzRender') + fn('pzFinish') +
+                          fn('pzRenderLive') + fn('pzShowFollowUp')), false);
+
+  PZ.on = false;
+  PZ.vision = 'fog';
 })();
 
 /* ---------------------------------------------------------------------
@@ -913,22 +1372,59 @@ check('which is how the earlier solves moved it too', was !== PZ_START_RATING, f
 
 say('\nPuzzle Rush\n');
 
-// the queue is every track at once, easiest first, opened at the player's rating
-var everything = { opening: sets.opening, middlegame: sets.middlegame, endgame: sets.endgame };
-var q = rushQueue(everything, 1200);
+/* The pool a run is dealt from, and it is the Rush pool alone.
+   A run used to flatten the three legacy phase files — the whole corpus — so
+   every position in it was also behind one of the four ladders. */
+check('a run reads its own pool', /pzFetchMode\('rush'\)/.test(fn('rushStart')), true);
+check('and no longer the legacy phase files',
+      /PZ_TRACKS|pzFetch\(/.test(fn('rushStart')), false);
+check('the pool it names is a real file', pools.rush.length > 0, true);
+
+// the queue is that pool, easiest first, opened at the player's rating
+var q = rushQueue(pools.rush, 1200);
 var ordered = true;
 for (var r = 1; r < q.length; r++) if (q[r].seedRating < q[r-1].seedRating) { ordered = false; break; }
-check('a run draws on all three tracks',
-      q.length, sets.opening.length + sets.middlegame.length + sets.endgame.length);
+check('a run is exactly as long as its pool', q.length, pools.rush.length);
 check('and starts near the player rating', q[0].seedRating >= 1000 || q[0].seedRating === q[q.length-1].seedRating, true);
 // it wraps once, so it is sorted from the entry point rather than from the bottom
 check('it is not simply the whole set in order', ordered, false);
-var easyStart = rushQueue(everything, 0);
+var easyStart = rushQueue(pools.rush, 0);
 var easyOrdered = true;
 for (var e = 1; e < easyStart.length; e++)
   if (easyStart[e].seedRating < easyStart[e-1].seedRating) { easyOrdered = false; break; }
 check('from the bottom it is plain increasing order', easyOrdered, true);
-check('an empty library makes an empty run', rushQueue({}, 1200).length, 0);
+check('an empty pool makes an empty run', rushQueue([], 1200).length, 0);
+check('and so does no pool at all',        rushQueue(null, 1200).length, 0);
+check('the run leaves the pool it was handed alone', pools.rush.length, 100);
+
+/* Five pools, a hundred each, and no position behind two doors. This is the
+   property the whole five-door design rests on and the reason a run may not go
+   back to the phase files: dealt from those, every Rush puzzle was also a
+   Sighted or a Fog one. Checked on the fen as well as the id, because an id is
+   a hash of the position *and* the line — two runs that found the same
+   position and extended it differently make two ids and one position. */
+(function pools_(){
+  var ids = {}, fens = {}, dupId = 0, dupFen = 0, sizes = [];
+  for (var i = 0; i < POOLS.length; i++){
+    var list = pools[POOLS[i]];
+    sizes.push(list.length);
+    for (var j = 0; j < list.length; j++){
+      if (ids[list[j].id]) dupId++; else ids[list[j].id] = POOLS[i];
+      if (fens[list[j].fen]) dupFen++; else fens[list[j].fen] = POOLS[i];
+    }
+  }
+  check('five pools ship', POOLS.length, 5);
+  check('each of a hundred', sizes.join(','), '100,100,100,100,100');
+  check('no puzzle is behind two doors', dupId, 0);
+  check('and no position is either',     dupFen, 0);
+  // the reserve is not a door: it is what the verifier held back
+  var reserve = [];
+  try { reserve = JSON.parse(slurp('puzzles/modes/reserve.json')); } catch (e){}
+  check('the reserve stands apart from all five', reserve.length, 38);
+  var leaked = 0;
+  for (var k = 0; k < reserve.length; k++) if (ids[reserve[k].id]) leaked++;
+  check('and none of it is dealt into one', leaked, 0);
+})();
 
 // three wrong moves end it
 RUSH.on = true; RUSH.over = null; RUSH.strikes = 0;
