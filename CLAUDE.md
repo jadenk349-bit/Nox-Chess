@@ -333,12 +333,24 @@ ninety-nine games on time, and sixteen once it was pushing pawns rather than
 shuffling. Three things answer that, in order of how much they matter:
 `aiThinkMs()` plays at a person's pace and SPENDS a time surplus rather than
 banking it; the `AI_STALE_*` dials restart a game the fifty-move counter says
-has stopped moving, by preferring its own pawn moves; and `flagFall()` gives the
-half point rather than the win when the player's flag falls in an `AI_MATCH()` —
-a loss on somebody else's flag is a result no chess produces, and the wording is
-the one that function already used for a flag nobody can mate with. Only that
-way round: the opponent's own flag still loses, and a game between two people is
-untouched. Moves are not relayed (`handle_move` drops
+has stopped moving, by preferring its own pawn moves; and `aiEscalation()` raises the FLOOR — how much of its own
+position it will part with — each time a chance goes by unused, so a player who
+cannot convert a subtle one is eventually offered a plain one.
+
+**`flagFall()` is the ordinary rule for everybody**, and a version that handed
+the player the half point because their opponent was a bot was written,
+measured and reverted: a game whose ending depends on who is sitting opposite is
+not a game of chess. The opponent therefore still wins the occasional flag, and
+the protection is behavioural rather than a rule — it plays at a person's pace
+and spends a time edge instead of banking one. What it never does is win a game
+of chess: no checkmate, no resignation, nothing decided on the board.
+
+Two things that were tried against the games that would not end and are
+recorded because they did not work: dropping the target band as escalation
+climbs (it makes the opponent passive, passive games run long, and a long game
+against somebody who cannot convert ends on their flag — eleven wins lost, and
+the long games stayed long), and simply widening the slack (a worse move is not
+the same thing as a smaller advantage). Moves are not relayed (`handle_move` drops
 them for an AI game and the page does not send them), a draw offered to it is
 accepted by the server through the ordinary `over` message, and resignation,
 checkmate, the clock and disconnection all run through the paths they already

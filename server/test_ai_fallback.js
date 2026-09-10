@@ -39,9 +39,10 @@ function decl(name){
 }
 
 var DECLS = ['AI_POOL', 'AI_BAND', 'AI_SLACK', 'AI_STYLES', 'AI_STYLE_NAMES',
-             'AI_WALK_MAX', 'AI_WALK_PER_PLY', 'AI_TOOK_CP', 'AI_FORM_CP', 'AI_REP_NUDGE', 'AI_STALE_PLY', 'AI_PROG_NUDGE', 'AI_STALE_BAND', 'AI'];
-var FNS   = ['aiPhase', 'winChance', 'lineScore', 'aiSearch', 'aiChoose',
-             'aiReset', 'aiForm', 'aiNoteHuman', 'aiBandFor', 'aiSlackFor', 'aiPoolFor', 'aiNoMate', 'aiThinkMs'];
+             'AI_WALK_MAX', 'AI_WALK_PER_PLY', 'AI_TOOK_CP', 'AI_FORM_CP', 'AI_REP_NUDGE', 'AI_STALE_PLY', 'AI_PROG_NUDGE', 'AI_STALE_BAND',
+             'AI_ESCALATE_AT', 'AI_ESCALATE_MAX', 'AI_ESCALATE_SLACK', 'AI'];
+var FNS   = ['flagFall', 'aiPhase', 'winChance', 'lineScore', 'aiSearch', 'aiChoose',
+             'aiReset', 'aiForm', 'aiNoteHuman', 'aiBandFor', 'aiSlackFor', 'aiPoolFor', 'aiNoMate', 'aiThinkMs', 'aiEscalation'];
 
 var BUNDLE = [];
 DECLS.forEach(function(n){ BUNDLE.push(decl(n)); });
@@ -379,6 +380,61 @@ check('but never past a rook',
 check('and never so little that it cannot choose',
       aiSlackFor('early', 0.1) >= 60, true);
 
+say('\nWhen the chances keep going by\n');
+
+aiReset(fixed(0));
+check('nothing missed is nothing changed', aiEscalation(), 0);
+AI.opened = AI_ESCALATE_AT; AI.took = 0;
+check('and a few misses are still nothing', aiEscalation(), 0);
+AI.opened = AI_ESCALATE_AT + 1; AI.took = 0;
+check('past that it starts to climb', aiEscalation() > 0, true);
+AI.opened = 40; AI.took = 0;
+check('and it tops out', aiEscalation(), 1);
+check('the ladder is monotone', (function(){
+  var last = -1;
+  for (var m = 0; m <= 20; m++){
+    AI.opened = m; AI.took = 0;
+    var e = aiEscalation();
+    if (e < last) return false;
+    last = e;
+  }
+  return true;
+})(), true);
+
+/* It comes back down on its own: what it counts is chances offered minus
+   chances taken, so a player who starts converting stops being helped. */
+AI.opened = 12; AI.took = 0;
+var high = aiEscalation();
+AI.took = 11;
+check('a player who starts taking them is no longer helped', aiEscalation() < high, true);
+
+// what escalation actually does: a lower target and a bigger single concession
+aiReset(fixed(0)); AI.opened = 0; AI.took = 0;
+var calmBand = aiBandFor('middle', 40, 0), calmSlack = aiSlackFor('middle', 0.5);
+AI.opened = 40; AI.took = 0;
+var loudBand = aiBandFor('middle', 40, 0), loudSlack = aiSlackFor('middle', 0.5);
+/* Escalation buys a BIGGER chance, not a quieter opponent. Dropping the target
+   as well was measured and thrown away: it made the opponent passive, passive
+   games run long, and a long game against somebody who cannot convert ends on
+   their flag rather than in their win. */
+check('the target is not dropped as well', loudBand[0], calmBand[0]);
+check('what it buys is a bigger chance', loudSlack > calmSlack, true);
+/* The ceiling is the point: the top of this ladder is a rook left where it can
+   be taken, which happens in real games. It is never the queen. */
+check('but never more than a rook', (function(){
+  for (var i = 0; i < AI_STYLE_NAMES.length; i++){
+    aiReset(fixed(0)); AI.style = AI_STYLE_NAMES[i]; AI.opened = 99; AI.took = 0;
+    for (var w = 0; w <= 1; w += 0.1)
+      if (aiSlackFor('late', w) >= 500) return false;
+  }
+  return true;
+})(), true);
+check('and a band is still a band', (function(){
+  aiReset(fixed(0)); AI.opened = 99; AI.took = 0;
+  var b = aiBandFor('late', 200, -1);
+  return b[0] < b[1] && b[0] >= 0 && b[1] <= 1;
+})(), true);
+
 say('\nThe clock\n');
 
 /* It plays at a person's pace, and spends a surplus rather than banking one.
@@ -404,13 +460,15 @@ function meanThinkPly(ply){
   return sum / 400;
 }
 
-/* And the flag itself: the opponent does not take the point on the clock. The
-   source is checked rather than the behaviour, because flagFall() needs a
-   whole game around it — server/test_ai_behaviour.js is where it is played. */
-check('the undercover opponent does not win on time',
-      /AI_MATCH\(\) && loser === G\.human/.test(SRC), true);
-check('and a game between two people is untouched',
-      /hasMatingMaterial\(G\.st, winner\)/.test(SRC), true);
+/* And the flag: the rules are the rules. A version of this briefly gave the
+   player the half point when their own clock ran out against the fallback
+   opponent, and it is gone — a result is what the rules say it is, and the
+   tendency belongs in how the opponent plays rather than in what happens after
+   the clock hits zero. So flagFall() must have exactly one shape for everybody. */
+check('the flag rule does not ask who the opponent is',
+      /AI_MATCH\(\)/.test(fn('flagFall')), false);
+check('and still turns on mating material, for everybody',
+      /hasMatingMaterial\(G\.st, winner\)/.test(fn('flagFall')), true);
 
 say('\nWhat the page is allowed to decide for itself\n');
 

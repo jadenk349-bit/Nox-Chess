@@ -5866,27 +5866,17 @@ function flagFall(loser){
   const winner = other(loser);
   const lname = loser  === W ? 'White' : 'Black';
   const wname = winner === W ? 'White' : 'Black';
-  /* THE UNDERCOVER OPPONENT DOES NOT TAKE THE POINT ON THE CLOCK.
+  /* THE RULES ARE THE RULES, including against the fallback opponent.
    *
-   * Everything else about it is arranged so the player wins a game worth
-   * winning; a flag is the one way it can win without ever having outplayed
-   * them, and it is the way it would win most often, because it moves in
-   * seconds and a person thinks. aiThinkMs() closes most of that gap — it
-   * plays at a person's pace and spends a time surplus rather than banking it
-   * — but it cannot close all of it, and the games it still won were nine in
-   * ninety-nine.
-   *
-   * The half point rather than a loss, because a loss on somebody else's flag
-   * is a result no chess anywhere produces and the player would see it for
-   * what it was. The wording is the one this function already had for a flag
-   * nobody can mate with, so it is a sentence players have seen before.
-   *
-   * Only this way round: the opponent's own flag still loses, normally, and
-   * none of this touches a game between two people. */
-  if (AI_MATCH() && loser === G.human){
-    finish('Draw', `${lname} ran out of time.`, `Draw — ${lname} ran out of time`);
-    return;
-  }
+   * This function briefly gave the player the half point when their own flag
+   * fell in an AI game, on the grounds that a flag is the one way an opponent
+   * meant to lose can win. That was the wrong lever and it is gone: a result
+   * is what the rules say it is, and a game whose ending is decided by who the
+   * opponent happens to be is not a game of chess. The tendency the fallback
+   * opponent is supposed to have belongs in how it PLAYS — see aiThinkMs(),
+   * which is what stops it banking a clock advantage in the first place, and
+   * the band and the escalation above it. Not in what happens after the clock
+   * hits zero. */
   if (!hasMatingMaterial(G.st, winner)){
     finish('Draw', `${lname} ran out of time, but ${wname} has no way to force mate.`,
            `Draw — ${lname} ran out of time`);
@@ -6438,7 +6428,17 @@ function aiBandFor(phase, ply, form){
   // 3. Honest chess owed. After a chance the player did not take, the target
   //    goes back up and the game is a game again for a while.
   if (AI.cool > 0){ lo += 0.10; hi += 0.10; }
-  // 4. Who this opponent is.
+  /* 4. The chances that have gone by — and note what this does NOT do.
+   *
+   * The obvious move was to drop the target as well, and it was measured and
+   * thrown away: a lower target makes the opponent PASSIVE, passive games run
+   * long, and long games against a player who cannot convert end in the
+   * player's flag rather than the player's win. Over ninety-nine games it cost
+   * eleven wins and bought nothing — the games that would not end still would
+   * not end. What a missed chance earns is a BIGGER chance, not a quieter
+   * opponent, so the escalation lives in the slack (aiSlackFor) and the target
+   * is left where the rest of the policy put it. */
+  // 5. Who this opponent is.
   lo += style.band; hi += style.band;
   lo = Math.max(0.02, Math.min(0.90, lo));
   hi = Math.max(lo + 0.05, Math.min(0.95, hi));
@@ -6473,6 +6473,35 @@ const AI_REP_NUDGE = 0.05;
    preferring the moves that reset that counter — its own pawn moves, which
    make progress without winning anything — and by conceding a little faster
    while it does. Both only while it is not worse, for the usual reason. */
+/* WHEN THE CHANCES KEEP GOING BY.
+ *
+ * A player who does not take what is offered is not helped by being offered
+ * the same thing again. Measured over the games that never finished: 8.2
+ * chances left on the board each, 1.7 taken, and the player sitting a couple
+ * of pawns down while the opponent declined to press — nobody winning and
+ * nobody losing, for three hundred plies.
+ *
+ * So a missed chance makes the next one plainer. The ladder is the obvious
+ * one: something positional, then something tactical, then a trade that is
+ * clearly good, then a piece left where it can be taken. It is a ladder and
+ * not a cliff — nothing here hangs a queen, the top of it is a loose rook, and
+ * it takes several misses to climb. It also comes back down on its own the
+ * moment the player takes something, because what it counts is chances offered
+ * MINUS chances taken.
+ *
+ * This is the long game's answer and the cool-off is the short one: after a
+ * miss the opponent plays honest chess for a while (aiNoteHuman), and when it
+ * next offers something, this is what decides how plain that offer is. */
+const AI_ESCALATE_AT = 3;        // misses before it starts making them plainer
+const AI_ESCALATE_MAX = 9;       // ...and where the ladder tops out
+const AI_ESCALATE_SLACK = 2.4;   // how much more one move may cost at the top
+
+function aiEscalation(){
+  const missed = Math.max(0, AI.opened - AI.took);
+  if (missed <= AI_ESCALATE_AT) return 0;
+  return Math.min(1, (missed - AI_ESCALATE_AT) / (AI_ESCALATE_MAX - AI_ESCALATE_AT));
+}
+
 const AI_STALE_PLY = 40;         // halfmoves without progress before it minds
 const AI_PROG_NUDGE = 0.06;      // ...and how much it then prefers a pawn move
 const AI_STALE_BAND = 0.08;      // ...and how much lower it is willing to sit
@@ -6498,7 +6527,15 @@ function aiSlackFor(phase, win){
   let slack = (AI_SLACK[phase] || AI_SLACK.middle) * style.slack;
   if (win > 0.75) slack *= 1.6;
   else if (win > 0.62) slack *= 1.25;
-  return Math.round(Math.max(60, Math.min(320, slack)));
+  /* A little wider once the plain chances are the ones being missed, but only a
+     little: playing WORSE moves was measured and it did not help. The games
+     that would not end were ones the opponent was AHEAD in and would not part
+     with, and a worse move is not the same thing as a smaller advantage. What
+     escalation really drives is the floor — see aiPick — which is how much of
+     its own position it is willing to give back. */
+  const esc = aiEscalation();
+  slack *= 1 + esc * (AI_ESCALATE_SLACK - 1) * 0.4;
+  return Math.round(Math.max(60, Math.min(esc > 0 ? 400 : 320, slack)));
 }
 
 /* Where the game has got to. Ply count on its own calls a queenless four-piece
@@ -6700,7 +6737,15 @@ function aiPick(){
        position, and it has no business in a close one. Never below the band's
        own ceiling, so it cannot be used to steer into a worse position than
        the target — that would be throwing the game rather than conceding it. */
-    const floor = winChance(now, null) > 0.72 ? Math.max(band[1], 0.5) : undefined;
+    /* How much of its own position it will part with, and the one dial the
+       missed chances really move. Ahead and unable to interest the player in
+       taking anything back, it comes down further and starts sooner — from
+       "still comfortable" toward "the player is better now". Never past the
+       band, so this concedes a game and never throws one. */
+    const esc = aiEscalation();
+    const trigger = 0.72 - esc * 0.14;
+    const floor = winChance(now, null) > trigger
+      ? Math.max(band[1], 0.5 - esc * 0.22) : undefined;
     const pick = aiChoose(cands, band, slack, undefined, floor);
 
     /* Remember what it is about to play, so next turn can tell the player's
@@ -6812,10 +6857,17 @@ function aiThinkMs(left, ply, moves, theirs, checked){
      being decided by the one thing the opponent is better at. */
   if (theirs > 0){
     const edge = left / theirs;
-    if (edge > 1.15) ms *= Math.min(2.2, edge);
+    /* Firmly, because a small correction is not one. The opponent searches in
+       under a second and a person thinks in seconds, so left alone it ends
+       every long game minutes ahead — and against a player who cannot convert,
+       a long game ends on that player's flag. This is the honest way to stop
+       the clock deciding those: not a rule about who may win on time, but an
+       opponent that uses the time it has. A player sitting on a big edge does
+       exactly this. */
+    if (edge > 1.05) ms *= Math.min(3.0, 1 + (edge - 1) * 2.2);
     else if (edge < 0.85) ms *= Math.max(0.4, edge);
   }
-  ms = Math.max(500, Math.min(20000, ms));
+  ms = Math.max(500, Math.min(30000, ms));
   // and it cannot spend what it has not got
   if (left < 120000) ms = Math.min(ms, Math.max(600, left / 40));
   if (left < 30000) ms = Math.min(ms, 900);

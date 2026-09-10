@@ -116,13 +116,14 @@ var DECLS = ['VAL','FILES','rowOf','colOf','SQNAME','uciOf','sqName','onBoard','
              'CHALLENGE_TTL','CHALLENGING','BOT','SPECTATING','PUZZLE','AI_MATCH','humanTurn','viewer',
              'CAN_PEEK','AI_POOL','AI_BAND','AI_SLACK','scheduleAI','W',
              'AI_STYLES','AI_STYLE_NAMES','AI_WALK_MAX','AI_WALK_PER_PLY',
-             'AI_TOOK_CP','AI_FORM_CP','AI_REP_NUDGE','AI_STALE_PLY','AI_PROG_NUDGE','AI_STALE_BAND','AI'];
+             'AI_TOOK_CP','AI_FORM_CP','AI_REP_NUDGE','AI_STALE_PLY','AI_PROG_NUDGE','AI_STALE_BAND',
+             'AI_ESCALATE_AT','AI_ESCALATE_MAX','AI_ESCALATE_SLACK','AI'];
 var FNS = ['startBoard','newState','cloneState','posKey','slide','step','addPawn',
            'pseudoMoves','isAttacked','kingSq','inCheck','makeMove','legalMoves','toSAN',
            'myName','seatName','layoutBoardBars','pickFrom','bestMove','applyMove','checkEnd',
            'insufficient','resultTitle','finish','aiPhase','winChance','lineScore',
            'aiSearch','aiChoose','aiPick','aiTurn',
-           'aiReset','aiForm','aiNoteHuman','aiBandFor','aiSlackFor','aiPoolFor','aiNoMate','aiThinkMs'];
+           'aiReset','aiForm','aiNoteHuman','aiBandFor','aiSlackFor','aiPoolFor','aiNoMate','aiThinkMs','aiEscalation'];
 
 var bundle = [grab(/\nconst W = 'w', B = 'b';/, "const W/B")];
 for (var d = 0; d < DECLS.length; d++) if (DECLS[d] !== 'W') bundle.push(decl(DECLS[d]));
