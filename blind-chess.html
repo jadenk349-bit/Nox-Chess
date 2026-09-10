@@ -3290,6 +3290,48 @@
      Complete Blindfold draws no board at all — the notation IS the game
      there, so the card shows the console instead. Nothing is revealed here
      that the players themselves could not see. */
+  /* ---------- the Daily Puzzles ----------
+     Four cards at the head of the left-hand column, in the home page's own
+     vocabulary: the moon plate the shortcuts use, the heading size the Live and
+     Leaderboard sections use, and the gold the rest of the page keeps for the
+     one thing worth looking at. Nothing here is new design — it is the existing
+     furniture arranged for four buttons. */
+  .home-left{
+    align-self:stretch; width:min(660px,54%); flex:none; min-width:0;
+    display:flex; flex-direction:column; justify-content:space-between; gap:clamp(18px,4vh,44px);
+  }
+  .home-left .live-stack{width:100%; align-self:stretch;}
+  .daily-stack{display:flex; flex-direction:column; gap:10px; width:100%;}
+  .daily-title{
+    margin:0 0 2px; text-align:left;
+    font-family:var(--font); font-weight:400;
+    font-size:clamp(26px,2.6vw,32px); letter-spacing:.1em; color:var(--gold-soft);
+  }
+  .daily-grid{display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:10px;}
+  .daily-card{
+    display:flex; flex-direction:column; align-items:flex-start; justify-content:center; gap:4px;
+    min-height:76px; padding:12px 16px; border-radius:9px; text-align:left; position:relative;
+    background:linear-gradient(180deg,rgba(5,8,12,.18),rgba(5,8,12,.68)),url("assets/home-button-moon.jpg?v=1") center 48% / cover;
+    border:1px solid transparent; color:#fff; cursor:pointer;
+    text-shadow:0 2px 8px #000; box-shadow:inset 0 1px 0 rgba(255,255,255,.1),0 8px 24px rgba(0,0,0,.2);
+    transition:border-color .18s ease, transform .18s ease, filter .18s ease;
+  }
+  .daily-card:hover{border-color:rgba(212,175,110,.55); transform:translateY(-1px); filter:brightness(1.08);}
+  .daily-mode{
+    font-family:var(--font); font-size:clamp(15px,1.5vw,19px); letter-spacing:.06em;
+    white-space:nowrap; overflow:hidden; text-overflow:ellipsis; max-width:100%;
+  }
+  .daily-note{margin:0; font-size:13px; color:var(--muted); letter-spacing:.02em;}
+  .daily-card .daily-note{font-size:12.5px; color:#cfd3dc;}
+  /* Solved today: the card says so and steps back rather than going away — the
+     position is still there to look at again. */
+  .daily-card.done{border-color:rgba(122,192,132,.5);}
+  .daily-card.done .daily-mode{color:var(--good,#7ac084);}
+  .daily-tick{position:absolute; top:9px; right:12px; font-size:15px; color:var(--good,#7ac084);}
+  .daily-card.locked{opacity:.55; cursor:not-allowed;}
+  .daily-card.locked:hover{border-color:transparent; transform:none; filter:none;}
+  @media (max-width:560px){ .daily-grid{grid-template-columns:minmax(0,1fr);} }
+
   .live-stack{
     align-self:flex-end;
     width:min(660px,54%); flex:none; min-width:0;
@@ -3516,7 +3558,8 @@
     .home-body{flex-direction:column; align-items:stretch; min-height:0;}
     .home-ladder-area{order:1; width:100%;}
     .home-ladder-area .lb-stack{width:100%;}
-    .live-stack{order:2; align-self:stretch; width:100%;}
+    .home-left{order:2; align-self:stretch; width:100%;}
+    .live-stack{align-self:stretch; width:100%;}
   }
   @media (max-width:560px){ .live-grid{grid-template-columns:minmax(0,1fr);} }
   @media (max-width:380px){ .live-body{grid-template-columns:120px minmax(0,1fr);} }
@@ -3741,10 +3784,22 @@
          card opens that very game — by its id — on the game screen, full
          screen, to watch and nothing else; see SPECTATING in the script. -->
     <div class="home-body">
-      <div class="live-stack" id="liveStack" aria-labelledby="liveTitle">
-        <h2 class="live-title" id="liveTitle">Live Top Games</h2>
-        <div class="live-grid" id="liveGrid"></div>
-        <p class="live-note" id="liveNote"></p>
+      <!-- The left-hand column. The live games have always stood at the FOOT of
+           the page with the ladders hanging from its head, which left the top of
+           this side empty; the Daily Puzzles fill it. The column is what keeps
+           both true at once — Daily at the head, Live at the foot, and the space
+           between them given to whichever the window has room for. -->
+      <div class="home-left">
+        <div class="daily-stack" id="dailyStack" aria-labelledby="dailyTitle">
+          <h2 class="daily-title" id="dailyTitle">Daily Puzzle</h2>
+          <div class="daily-grid" id="dailyGrid"></div>
+          <p class="daily-note" id="dailyNote"></p>
+        </div>
+        <div class="live-stack" id="liveStack" aria-labelledby="liveTitle">
+          <h2 class="live-title" id="liveTitle">Live Top Games</h2>
+          <div class="live-grid" id="liveGrid"></div>
+          <p class="live-note" id="liveNote"></p>
+        </div>
       </div>
       <div class="home-ladder-area">
     <nav class="home-shortcuts" aria-label="Quick play and training">
@@ -8518,6 +8573,11 @@ const PZ = {
      is into the key progress is stored under. */
   pool: null,
   practice: null,
+  /* Which Daily Puzzle is on the board, if one is: 'blindfold' | 'board' |
+     'fog' | 'sighted'. A fourth kind of ladder, filed apart from the other
+     three so that a day's solve cannot touch a pool's progress and a pool's
+     cannot mark a day done. See THE DAILY PUZZLE. */
+  daily: null,
   /* The setup page is up and no puzzle has started yet.
      It is a state of the *puzzle*, not of the game, even though the page it
      draws is the game's own setup panel — G.opponent is already 'puzzle' by
@@ -8681,12 +8741,14 @@ async function pzSync(){
    than from PZ.track — which is null for four of the five Puzzle modes and
    for both Practices, and printed "undefined" for a day. */
 function pzScopeName(){
+  if (PZ.daily) return (DAILY_MODE[PZ.daily] || {}).name + ' Daily Puzzle';
   if (PZ.practice) return (PC_CAT[PZ.practice] || {}).name || 'Practice';
   if (PZ.pool) return (PZ_MODE[PZ.pool] || {}).name || 'Puzzle';
   return PZ_TRACK_NAME[PZ.track] || 'Puzzle';
 }
 
 function pzScope(){
+  if (PZ.daily) return dailyScope(PZ.daily);
   if (PZ.practice) return 'practice:' + PZ.practice;
   if (PZ.pool) return 'mode:' + PZ.pool;
   return PZ.track;
@@ -8700,6 +8762,7 @@ function pzScope(){
    tells them apart). navApply() reads it back through PZ_MODE, PC_CAT and
    PZ_TRACKS, in that order. */
 function pzRoute(){
+  if (PZ.daily) return 'daily-' + PZ.daily;
   if (PZ.practice) return 'practice-' + PZ.practice;
   if (PZ.pool) return PZ.pool;
   return PZ.track || '';
@@ -8891,6 +8954,7 @@ function rushStart(){
     PZ.track = null;
     PZ.pool = null;
     PZ.practice = null;
+    PZ.daily = null;
     /* A run is played sighted, and says so rather than inheriting. The other
        four doors are a vision and a pool at once; Rush is the one that is
        only a pool (PZ_MODES gives it no vision), so left alone it would open
@@ -8977,6 +9041,7 @@ function enterTrack(track){
     // progress is filed under the last one that was opened
     PZ.pool = null;
     PZ.practice = null;
+    PZ.daily = null;
     PZ.list = list;
     pzOpen(pzNextRung(list, pzDone(track)));
   }, () => alert('Could not load the ' + PZ_TRACK_NAME[track].toLowerCase() + ' puzzles.'));
@@ -9073,6 +9138,7 @@ function enterPuzzleSetup(){
   beep(700,.09);
   pzClose();                 // a puzzle still on the board is not the setup page
   PZ.setup = true;
+  PZ.daily = null;
   G.opponent = 'puzzle';
   G.started = false;
   resetChoices();            // the vision is asked for afresh every time
@@ -9105,6 +9171,7 @@ function enterPuzzleMode(key){
     PZ.pool = key;
     PZ.track = null;
     PZ.practice = null;
+    PZ.daily = null;
     PZ.list = list;
     /* Written to PZ rather than to G, because pzOpen() is the one place the
        vision reaches the board (G.mode = PZ.vision) and it runs after this.
@@ -9390,6 +9457,204 @@ function pzShowFollowUp(){
   setTimeout(step, 200);
 }
 
+
+/* ============================================================
+   THE DAILY PUZZLE — four positions a day, on the home page
+
+   A second corpus, and deliberately a second one. The Puzzle page's five
+   pools are a ladder you climb at your own pace; this is one position per
+   vision per day, the same position for everybody, gone tomorrow. Sharing a
+   corpus between the two would mean a player meeting today's Daily Puzzle
+   again three weeks later as rung 47 of Fog of War — so the four files in
+   puzzles/daily/ are positions that appear nowhere else, mined with
+   --excludeIn naming the whole existing corpus, and nothing on the Puzzle
+   page can reach them: pzFetchMode() reads puzzles/modes/, pzFetch() reads
+   puzzles/, and neither has a fallback that walks a directory.
+
+   The chess is the same standard. These were generated by
+   tools/generate_puzzles.js and verified by tools/verify_puzzles.js with the
+   payoff rule on, exactly as the Puzzle page's were — one clearly best move,
+   best defence spliced in, a line that runs to mate, promotion or real
+   material, obvious() applied, claims audited. Four categories, one bar. What
+   the category changes is what is drawn, which is PZ.vision and nothing else.
+
+   The rotation is `day % DAILY_CYCLE`, and the day comes from the server
+   (/daily.json) so that it is the same day for everybody. Falling back to the
+   browser's own UTC arithmetic gives the same answer for anybody whose clock
+   is right; the endpoint exists so it is not their clock that decides. */
+const DAILY_CYCLE = 100;          // must match DAILY_CYCLE in server/server.py
+const DAILY_VERSION = 1;          // ?v= on the four files; bump when they are regenerated
+
+/* The four doors, and the vision each one is seen through. Same shape and the
+   same `vision` vocabulary as PZ_MODES, on purpose — a Daily Puzzle is opened
+   through pzOpen() like any other, so the vision has to be one of G.mode's. It
+   is a table of its own rather than a filter over PZ_MODES because Rush has no
+   place here and the player-facing names differ: this page says "Complete
+   Blindfold", the Puzzle menu says "Blindfold Puzzle". */
+const DAILY_MODES = [
+  { key:'blindfold', name:'Complete Blindfold', vision:'total'   },
+  { key:'board',     name:'Board Only',         vision:'blind'   },
+  { key:'fog',       name:'Fog of War',         vision:'fog'     },
+  { key:'sighted',   name:'Sighted',            vision:'sighted' }
+];
+const DAILY_MODE = {};
+for (const m of DAILY_MODES) DAILY_MODE[m.key] = m;
+
+const DAILY = {
+  day: null,        // UTC days since the epoch, from the server where possible
+  index: null,      // day % DAILY_CYCLE — which rung of each file is today's
+  asked: false,     // the day has been asked for once; do not ask on every render
+  lists: {},        // key -> the parsed file
+  failed: {}        // key -> true when the file is absent, so the card says so
+};
+
+/** The day, from the server. One request, on the way into the home page.
+    Falling back to the browser's clock keeps the cards working offline and
+    for a page opened over file://, where there is no server to ask. */
+function dailyDay(){
+  if (DAILY.asked) return Promise.resolve(DAILY.index);
+  DAILY.asked = true;
+  const own = () => {
+    DAILY.day = Math.floor(Date.now() / 86400000);
+    DAILY.index = ((DAILY.day % DAILY_CYCLE) + DAILY_CYCLE) % DAILY_CYCLE;
+    return DAILY.index;
+  };
+  if (typeof fetch !== 'function') return Promise.resolve(own());
+  return fetch('daily.json')
+    .then(r => r.ok ? r.json() : Promise.reject(new Error('http ' + r.status)))
+    .then(d => {
+      if (typeof d.day !== 'number') throw new Error('no day');
+      DAILY.day = d.day;
+      DAILY.index = ((d.day % DAILY_CYCLE) + DAILY_CYCLE) % DAILY_CYCLE;
+      return DAILY.index;
+    })
+    .catch(own);
+}
+
+/** One of the four files. Kept once per load: the rotation only moves at
+    midnight UTC, so re-reading it on every visit to the home page would be
+    asking the same question all day. */
+function dailyFetch(key){
+  if (DAILY.lists[key]) return Promise.resolve(DAILY.lists[key]);
+  return fetch('puzzles/daily/' + key + '.json?v=' + DAILY_VERSION)
+    .then(r => { if (!r.ok) throw new Error('absent'); return r.json(); })
+    .then(list => (DAILY.lists[key] = Array.isArray(list) ? list : []))
+    .catch(() => { DAILY.failed[key] = true; return (DAILY.lists[key] = []); });
+}
+
+/** Today's puzzle out of one file. The modulo is over the file's own length
+    rather than DAILY_CYCLE, so a category that shipped fewer than a hundred
+    still rotates cleanly instead of pointing at nothing every few days. */
+function dailyPick(list, index){
+  if (!list || !list.length) return null;
+  const at = ((index % list.length) + list.length) % list.length;
+  return list[at];
+}
+
+/** The key today's solve is filed under. It carries the day, so yesterday's
+    solve does not mark today's card done and today's does not survive into
+    tomorrow — which is the whole of the 24-hour reset. It is a scope of its
+    own, so nothing here can touch the Puzzle page's ladders or the
+    Practices. */
+const dailyScope = key => 'daily:' + key;
+
+/** Has today's been solved? Asked of the id rather than of the day, because a
+    puzzle id is unique to the position and the line: the record itself is what
+    changes at midnight, so the answer changes with it and nothing has to be
+    cleared. */
+function dailyDone(key, puzzle){
+  return !!puzzle && pzDone(dailyScope(key)).has(puzzle.id);
+}
+
+/* ---- opening one ---- */
+
+/* A Daily Puzzle is walked by the puzzle player, exactly as a pool rung or a
+   Practice is — same board, same puzzleStep(), same forced defence, same
+   explanation card, same Show Follow Up and Study Alternatives. What differs
+   is only where the record came from and what it is filed under.
+
+   PZ.list is *today's puzzle alone* rather than the whole hundred. That is
+   deliberate: a list of a hundred would give the rung grid a hundred rungs and
+   Next Puzzle somewhere to go, and a player could walk the entire Daily corpus
+   in an afternoon. One a day means one on the board. */
+function dailyOpen(key){
+  const m = DAILY_MODE[key];
+  if (!m) return;
+  beep(700,.09);
+  return Promise.all([dailyDay(), dailyFetch(key)]).then(([index, list]) => {
+    const p = dailyPick(list, index);
+    if (!p){ alert('No ' + m.name + ' Daily Puzzle is installed yet.'); return; }
+    PZ.mode = 'ladder';
+    PZ.pool = null;
+    PZ.track = null;
+    PZ.practice = null;
+    PZ.daily = key;
+    PZ.vision = m.vision;
+    PZ.list = [p];
+    pzOpen(1);
+  });
+}
+
+/* ---- the cards ---- */
+
+function dailyRender(){
+  const wrap = document.getElementById('dailyGrid');
+  if (!wrap) return;
+  wrap.innerHTML = '';
+  for (const m of DAILY_MODES){
+    const list = DAILY.lists[m.key];
+    const p = list ? dailyPick(list, DAILY.index) : null;
+    const done = dailyDone(m.key, p);
+
+    const card = document.createElement('button');
+    card.className = 'daily-card' + (done ? ' done' : '') + (DAILY.failed[m.key] ? ' locked' : '');
+    card.id = 'daily-' + m.key;
+    card.dataset.mode = m.key;
+    card.setAttribute('aria-label', m.name + ' Daily Puzzle');
+
+    const head = document.createElement('span');
+    head.className = 'daily-mode';
+    head.textContent = m.name;
+    card.appendChild(head);
+
+    const note = document.createElement('span');
+    note.className = 'daily-note';
+    /* What the card is allowed to say. The difficulty is a fact about the
+       position and gives nothing away; the side to move is on the board the
+       moment it opens. Nothing about the solution, and no theme — those are
+       the answer, and the puzzle screen itself withholds them until it is
+       finished. */
+    note.textContent = DAILY.failed[m.key] ? 'Not installed yet'
+                     : !p                  ? 'Loading…'
+                     : done                ? 'Solved today'
+                     : (p.seedRating != null ? 'Difficulty ' + p.seedRating : 'Today’s puzzle');
+    card.appendChild(note);
+
+    if (done){
+      const tick = document.createElement('span');
+      tick.className = 'daily-tick';
+      tick.textContent = '\u2713';
+      card.appendChild(tick);
+    }
+    card.disabled = !!DAILY.failed[m.key];
+    card.onclick = () => GUEST() ? toSignUp() : dailyOpen(m.key);
+    wrap.appendChild(card);
+  }
+  const say = document.getElementById('dailyNote');
+  if (say) say.textContent = DAILY.index === null ? ''
+    : 'Four positions, one of each vision. They change at midnight UTC.';
+}
+
+/** Called on the way into the home page: the day, then the four files, then
+    the cards. Every step redraws, so the section fills in as it arrives
+    rather than appearing all at once at the end. */
+function dailyEnter(){
+  dailyRender();
+  dailyDay().then(() => {
+    dailyRender();
+    for (const m of DAILY_MODES) dailyFetch(m.key).then(dailyRender);
+  });
+}
 
 /* ============================================================
    STUDY ALTERNATIVES — "but couldn't they just play something else?"
@@ -13269,6 +13534,7 @@ function enterPracticeCat(key){
     PZ.pool = null;
     PZ.track = null;
     PZ.practice = key;
+    PZ.daily = null;
     PZ.list = list;
     PZ.vision = 'sighted';            // a practice is about the position, never hidden
     pzOpen(pzNextRung(list, pzDone('practice:' + key)));
@@ -13558,6 +13824,10 @@ function showScreen(name, how){
   // their socket opens with it and closes with it, so no other screen is
   // being pushed boards it has nowhere to draw.
   if (name === 'home') liveOpen(); else liveLeave();
+  // The Daily Puzzles are four static cards: they need the day and their four
+  // files, and nothing after that until midnight, so there is no socket to
+  // close and nothing to leave behind on the way off the page.
+  if (name === 'home') dailyEnter();
   // The ladder is on the home page itself, so coming back to it is the only
   // gesture there is for "show me where things stand now".
   if (name === 'home' && authSettled) loadBoard();
@@ -16701,6 +16971,7 @@ initAuth().then(navSettled);   // arriving leads to the home page; nothing gates
 // where navBoot() left us; a page named by the address bar has no cards to
 // push boards to, and showScreen() closes this socket on the way to any other
 if (screenName === 'home') liveOpen();
+if (screenName === 'home') dailyEnter();
 specBoot();          // ...unless the address names one of them: /spectate/<id>
                      // (navBoot() has usually opened it already, and this finds it open;
                      // under a harness with no history it is the way in)

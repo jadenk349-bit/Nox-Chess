@@ -98,6 +98,14 @@ CHALLENGE_TTL = 180
 # waiting to be asked again.
 REMATCH_TTL = 180
 
+# How many Daily Puzzles each mode ships, and therefore how long the rotation
+# runs before it comes round again. The four files hold this many records each
+# and `dailyIndex = day % DAILY_CYCLE` picks one; the page carries the same
+# number and server/test_daily.py holds the two to each other, because a cycle
+# that means one thing here and another there is a puzzle that changes at
+# midnight for half the players.
+DAILY_CYCLE = 100
+
 # ------------------------------------------------------- the fallback opponent
 #
 # A ranked queue with nobody else in it is a player watching a plate sweep until
@@ -2108,6 +2116,15 @@ STATIC_FILES = {
     "/puzzles/modes/blindfold.json": ("puzzles/modes/blindfold.json", "application/json; charset=utf-8"),
     "/puzzles/modes/fog.json":       ("puzzles/modes/fog.json",       "application/json; charset=utf-8"),
     "/puzzles/modes/rush.json":      ("puzzles/modes/rush.json",      "application/json; charset=utf-8"),
+    # The Daily Puzzles: a separate corpus, four files, one per vision. They are
+    # deliberately not under puzzles/modes/ — nothing that loads the Puzzle
+    # page's pools may reach them, and a directory of their own is the simplest
+    # way to make that true rather than merely intended. See THE DAILY PUZZLE in
+    # blind-chess.html.
+    "/puzzles/daily/blindfold.json": ("puzzles/daily/blindfold.json", "application/json; charset=utf-8"),
+    "/puzzles/daily/board.json":     ("puzzles/daily/board.json",     "application/json; charset=utf-8"),
+    "/puzzles/daily/fog.json":       ("puzzles/daily/fog.json",       "application/json; charset=utf-8"),
+    "/puzzles/daily/sighted.json":   ("puzzles/daily/sighted.json",   "application/json; charset=utf-8"),
     # Opening and Middle Game Practices, under Lesson -> Practice. A different
     # standard from a puzzle (tools/practice_rules.js, not payoff_rules.js) and
     # so a different directory, versioned separately in the page as PC_VERSION.
@@ -2207,6 +2224,38 @@ def serve_http(sock, request_line):
             b"HTTP/1.1 200 OK\r\nContent-Type: application/json\r\nContent-Length: "
             + str(len(body)).encode() + b"\r\n\r\n" + body
         )
+    elif path == "/daily.json":
+        # Which day it is, decided in one place.
+        #
+        # The Daily Puzzles rotate on a number, and the number has to be the
+        # same for everybody: two players opening the page in different
+        # timezones are doing the same day's puzzle, and a browser that has
+        # been left open overnight is not still on yesterday's. So the day is
+        # UTC days since the epoch, computed here rather than in the page —
+        # the server is the one clock every client already shares.
+        #
+        # Nothing about it is stateful: it is a pure function of the wall
+        # clock, so a restart, a redeploy or a second instance all answer the
+        # same. The page falls back to its own UTC arithmetic if this cannot
+        # be reached, which gives the same answer for anybody whose clock is
+        # right; this endpoint exists so that it is not *their* clock that
+        # decides. Never cached, for the obvious reason.
+        now = time.time()
+        day = int(now // 86400)
+        body = json.dumps({
+            "day": day,
+            "index": day % DAILY_CYCLE,
+            "cycle": DAILY_CYCLE,
+            # when this day ends, so a page left open can roll over on its own
+            "nextUtc": (day + 1) * 86400,
+            "utc": time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime(now)),
+        }).encode()
+        sock.sendall(
+            b"HTTP/1.1 200 OK\r\nContent-Type: application/json\r\n"
+            b"Cache-Control: no-store\r\nContent-Length: "
+            + str(len(body)).encode() + b"\r\n\r\n" + body
+        )
+
     elif path == "/live.json":
         # The same snapshot the socket pushes, for anybody polling — a
         # debugging aid first, and the fallback for a viewer whose socket

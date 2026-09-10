@@ -10,6 +10,148 @@ screen, practice drills, the lesson course — is one file, `blind-chess.html`. 
 Python server in `server/` is matchmaking and a move relay, nothing more. There is no build step
 and no package manager on either side.
 
+## Making puzzles: the standing rule
+
+**"Make puzzles", "generate puzzles", "add puzzles", or any new feature that
+contains puzzles means the production normal-Puzzle pipeline below, unless the
+request explicitly names a different standard.** It is not a starting point to
+be trimmed for speed or for a target count. Nothing here is optional, and
+nothing here is negotiated down to reach a number.
+
+The pipeline is two tools, in this order, and they are the same two that
+produced every puzzle the game already ships:
+
+```bash
+node tools/generate_puzzles.js --games N --out <dir> --poolsOut <checkpoint> --excludeIn <every existing corpus>
+node tools/verify_puzzles.js  --dir <dir> --tracks opening,middlegame,endgame --write
+```
+
+`--excludeIn` is **not optional** whenever the corpus being built is new or
+additional — see "Never mine a position we already ship" below.
+
+Run them with their **defaults**. The defaults *are* the standard: scan 14,
+confirm 20, reply 20, before 20 in the generator; sweep 18 at MultiPV 5, work
+22, verdict 24, tie-break 26, follow-up 20, `--payoff` on, `--budget 2700` in
+the verifier. Passing a depth, a tolerance or `--no-payoff` to make a run
+cheaper or a category fuller is the one thing this rule exists to forbid.
+
+What every accepted puzzle has cleared, and what may never be removed,
+weakened, bypassed or replaced:
+
+- one clearly superior solution, and ambiguous or multiple-best-move positions
+  rejected (MultiPV)
+- the obviousness rejection — a capture of the piece that just moved, a
+  position with nothing left to calculate
+- the opponent playing the strongest **verified** defence, spliced in and
+  re-searched, never assumed
+- no dependence on a later opponent mistake
+- the solution continued to its **actual payoff**, not to the end of the doubt
+- a payoff that is one of the accepted outcomes: mate, promotion, or material
+  won **and held** — a queen or rook, or a minor piece or pawn only where the
+  existing rules judge it to change the game
+- "won back" rejection: material recaptured at once is not a payoff
+- "already trivially winning" rejection: a tactic that adds nothing is not a
+  puzzle
+- depth and stability verification at the depths above
+- correct evaluation perspective (`objective: true` on every measuring search)
+- a verified follow-up, and with it Show Follow Up and Study Alternatives
+- Education System explanations written from the **locked verified line** and
+  never from a line the engine was not asked about
+- claim and evidence auditing, so no sentence survives that the final position
+  does not support
+- deduplication on the **fen**, not only the id — an id hashes the position
+  *and* the line, so one position can wear two ids
+- durable checkpointing and resume, per game while mining and per puzzle while
+  verifying
+
+### Never mine a position we already ship
+
+**Any new or additional corpus excludes every relevant existing one, by
+default and without being asked.** A puzzle that is meant to be a new puzzle and
+turns out to be one the player has already solved somewhere else is a broken
+promise, and it is broken silently: nothing errors, the counts all look right,
+and the player meets the same position twice.
+
+So before a run that supplements an existing corpus, or that is supposed to hold
+genuinely new puzzles, build the exclusion list from **every corpus the new one
+must not overlap** and pass it:
+
+```bash
+--excludeIn work/<run>/exclude.json        # or a comma-separated list of files
+```
+
+The list must cover, at minimum, whichever of these the new corpus must be
+distinct from: `puzzles/*.json` (the phase tracks), `puzzles/modes/*.json` (the
+five Puzzle-page pools **and** `reserve.json`), `puzzles/daily/*.json` (the
+Daily corpus) and `practices/*.json`. When in doubt, include all of them: a
+position excluded unnecessarily costs one candidate, and a duplicate that ships
+costs a player's trust in the set.
+
+Three things must be rejected, and the mechanism gets all three:
+
+- **duplicate starting position** — `--excludeIn` seeds the generator's `seen`
+  set with the fens, so a position already shipped is skipped *before* any
+  engine time is spent on it.
+- **duplicate underlying position across the new corpus itself** — `seen`
+  already does this within a run, and `tools/merge_pools.js` does it across
+  runs, both on the fen.
+- **duplicate id** — this comes free and is worth understanding why.
+  `puzzleId()` is `sha1(fen + '|' + moves)`, so **the same id implies the same
+  fen**: excluding on the fen necessarily excludes every duplicate id, *and*
+  catches the case matching on ids alone would miss — one position found twice
+  and extended differently, which is two ids and one position. Match on the
+  position, never only on the id.
+
+The deal is the second gate and re-asks all of it: `tools/daily_assign.js`
+refuses a duplicate id, a duplicate position, and any position the existing
+corpora already carry, and reports each refusal with its reason rather than
+dropping it silently. Belt and braces on purpose — mining is where it is cheap
+to avoid, the deal is where it is final.
+
+**Reuse is allowed only when it is explicitly asked for.** "Duplicates are
+fine", "reuse the existing positions", "this is a re-cut of the same corpus" —
+those are instructions, and a re-cut of an existing pool (`--poolsIn`) is the
+normal case for one. Absent that, assume exclusion.
+
+**Phase is metadata.** `opening`, `middlegame` and `endgame` are a label
+`bucketFor()` stamps on a record *after* it has already passed the whole
+standard, and three files so each gets its own resumable progress log. They are
+never a separate quality standard and never a quota. A run with a flat
+`--games` sets `need = 0`, which makes every bucket unconditionally wanted; do
+not reintroduce per-phase targets unless they are explicitly asked for.
+
+**Opening Practices and Middle Game Practices are a different system** with a
+different standard, in `tools/practice_rules.js`, reached only through
+`tools/generate_practices.js`. Their rules must never be applied to a normal
+puzzle. In particular **the Middle Game Practice `+35` rule
+(`MG_SWING_MIN`) must never apply to a puzzle merely because its position is a
+middlegame.** `verify_puzzles.js` does not require `practice_rules.js`, and it
+must stay that way.
+
+**Quality outranks speed and quantity, permanently.** If a hundred are asked
+for and sixty clear the standard, ship sixty and say why. A run that produces
+ten thousand candidates and keeps two hundred has worked correctly. One bad
+puzzle costs more than ten missing ones, because it teaches a player to look
+for something that is not there.
+
+**Infrastructure may improve; the chess may not get cheaper.** Faster mining,
+better checkpointing, more parallelism, a distributed queue, a different
+storage layout — all welcome, and all additive. Two examples already in the
+tree: `--excludeIn` seeds the duplicate set from an existing corpus so no
+engine time is spent on a position already shipped, and `--gameBudget` abandons
+a game's *remaining* candidates when it runs long. Both default to off, and
+both are checked **between** candidates so nothing is ever judged at reduced
+depth or on a partial search — a candidate gets the full standard or is not
+offered at all. That is the shape every future optimisation has to take.
+
+If the pipeline is later genuinely improved — same standard or higher — the
+improved pipeline becomes the default and **this section is updated to say so**.
+Rewrite it; do not leave two standards in the file.
+
+`tools/daily_run.js` is the worked example: an unattended supervisor that
+mines, verifies and deals in a loop, and that never judges a position itself —
+every stage shells out to the two tools above with their defaults.
+
 ## Commands
 
 ```bash
@@ -34,11 +176,14 @@ python3 server/test_names.py             # one name per player, guests included;
 python3 server/test_system_profiles.py   # the 21 leaderboard profiles: refused everywhere; no server needed
 python3 server/test_puzzle_rating.py     # the puzzle Elo handler; no server needed
 python3 server/test_image_files.py       # every allowlisted file is COPYed into the image; no server needed
+python3 server/test_daily.py            # the Daily rotation, the day endpoint and the corpus's separateness; no server needed
+node server/test_daily.js              # the Daily cards, the four visions and the 100-day cycle
 python3 server/test_visions.py           # the three vision ratings: what the migration seeds, what the server writes; no server needed
 node tools/test_generate_puzzles.js      # the generator's own decisions, no engine
 node tools/test_new_rules.js             # the payoff and education rules the corpus was re-cut by
 node tools/test_practice_scheduling.js   # what a board Practice has to clear to ship
 node tools/test_verify_resume.js         # the verifier picking up a run where it stopped
+node tools/test_engine_reclaim.js        # an engine that ignores `stop` must not wedge the pool
 python3 tools/check_supabase_puzzles.py  # RLS and column grants, against the real project
 python3 tools/check_supabase_visions.py  # the four ladders and their grants, against the real project
 python3 server/test_league.py           # the AI league: pairing, ratings, endings, restart; no server, stub engine
@@ -58,6 +203,9 @@ node tools/verify_puzzles.js --track middlegame --write    # ...and repair, drop
 node tools/verify_puzzles.js --track endgame --followup 6 --write   # ...with a longer follow-up
 node tools/verify_puzzles.js --track endgame --resort --write       # ...and re-rank the ladder with it
 node tools/merge_pools.js                # one pool out of two mining runs, deduped on the fen
+node tools/daily_run.js                  # the unattended Daily pipeline: mine -> verify -> deal, resumable
+node tools/daily_progress.js             # ...and where it has got to, read-only and safe to run any time
+node tools/daily_assign.js --in <dir> --write   # deal the verified Daily corpus into the four 100-puzzle pools
 node tools/generate_practices.js --kind opening     # mine the board Practices (slow)
 node tools/diagnose_practices.js                    # ...and count every stage that refused one
 
