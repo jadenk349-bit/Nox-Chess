@@ -295,8 +295,14 @@
     background:#081522 var(--board-art) center / 100% 100%;
     box-shadow:0 0 0 2px #b79b64, 0 0 0 4px #423a2e, 0 0 22px rgba(0,0,0,.65);
   }
-  .squares{position:absolute; inset:0; display:grid; grid-template-columns:repeat(8,1fr); grid-template-rows:repeat(8,1fr);}
+  /* touch-action:none is what lets a finger drag a man on a phone: without it
+     the browser reads the first few pixels as a scroll, takes the pointer for
+     itself (pointercancel) and the piece is left where it stood. The board is
+     the one place on the page where a drag means a move, so scrolling is given
+     up over it and nowhere else. */
+  .squares{position:absolute; inset:0; display:grid; grid-template-columns:repeat(8,1fr); grid-template-rows:repeat(8,1fr); touch-action:none;}
   .sq{position:relative; user-select:none; cursor:pointer;}
+  .squares.dragging{cursor:grabbing;}
   /* The art lies beneath the interactive squares, so fog and move markers keep
      their own layers. A half-turn preserves checkerboard parity in either seat. */
   .sq.light,.sq.dark{background:transparent;}
@@ -389,6 +395,10 @@
   .tray{--piece-edge:#514538;}
   #trayB{color:#252d38; --piece-edge:#b9a681;}
 
+  /* A man being dragged sits over the others and follows the pointer with no
+     easing: the transition that slides a played move would otherwise lag the
+     glyph a fifth of a second behind the finger. */
+  .piece.dragging{transition:none; z-index:5;}
   .piece.gone{opacity:0; transform-origin:center; }
   .piece.pop span{animation:pop .3s ease;}
   @keyframes pop{0%{transform:scale(.3) translateY(-2%);}70%{transform:scale(1.15) translateY(-2%);}100%{transform:scale(1) translateY(-2%);}}
@@ -5464,6 +5474,15 @@ function resetSquareClasses(){
 
 /* ---- pieces layer with identity-based animation ---- */
 const pieceEls = new Map();
+/* A man in the hand. `from` is the square the pointer went down on, `el` the
+   piece element following it (none when the square held nothing the viewer
+   may move — the drag still happens, it just shows nothing, which is what a
+   hidden board needs), and `moved` whether the pointer has travelled far
+   enough for this to be a drag rather than a click. It is declared here
+   rather than with the handlers because renderPieces() has to know which man
+   not to put back: a render mid-drag (a selection ring, the hints) would
+   otherwise slide the piece out of the hand and back to its square. */
+const DRAG = { from:-1, el:null, id:null, moved:false, x:0, y:0, swallow:false };
 function renderPieces(){
   const seen = new Set();
   for (let i=0;i<64;i++){
@@ -5486,7 +5505,7 @@ function renderPieces(){
       if (!e.dataset.fresh){ e.classList.add('pop'); setTimeout(()=>e.classList.remove('pop'), 320); }
     }
     const v = visualIndex(i);
-    e.style.transform = `translate(${colOf(v)*100}%, ${rowOf(v)*100}%)`;
+    if (e !== DRAG.el) e.style.transform = `translate(${colOf(v)*100}%, ${rowOf(v)*100}%)`;
     delete e.dataset.fresh;
   }
   for (const [id, e] of pieceEls){
@@ -6634,12 +6653,55 @@ const scheduleAI = ms => {
   setTimeout(() => aiTurn(t), ms === undefined ? 240 + Math.random() * 520 : ms);
 };
 
-/* ---- clicks ---- */
+/* ---- clicks, and drags ----
+   Two ways to put a man on a square, one rule. A click chooses a square and a
+   second click chooses where it goes; a drag is the same two choices made
+   with the pointer held down. Everything that decides whether the board may
+   be touched at all is boardOpen(), and everything that decides whether
+   from→to is a move is tryMove(), so the two inputs cannot disagree about
+   either — and a puzzle, a fog game and a hidden board get the drag for
+   free, with the same words for an illegal try. */
+function boardOpen(){
+  if (SPECTATING()) return false;               // a viewer's click is not a move begun
+  if (!G.started) return false;                 // nothing moves until Start Play
+  if (G.over || G.thinking || G.pendingPromo) return false;
+  return true;
+}
+
+/* The second half of a move: the man on `from` is going to `to`. Answers
+   true when a move was made (or a promotion asked for), false when there was
+   nothing legal there — in which case the target square is flashed, and a
+   puzzle is told in words as well. */
+function tryMove(from, to, sqEl){
+  const moves = legalMoves(G.st, G.st.turn).filter(m => m.from === from && m.to === to);
+  if (!moves.length){
+    G.sel = -1;
+    render();          // render first — it rewrites square classes
+    reject(sqEl);      // then flash, so the shake survives
+    /* On a puzzle board the flash is not enough on its own: in See the Board
+       and Fog of War the player is guessing at men they cannot see, and "there
+       is no piece of yours that can do that" is a different piece of news from
+       "that is not the move" — one of the two says their picture of the board
+       is wrong. It is not counted against the attempt, because no move was
+       made; PZ.wrong is for a move that existed and was not the answer. */
+    if (PZ.on && !PZ.done && !pzStudyOn()){
+      PZ.typed = { text:'That move is not legal in this position.', cls:'bad', illegal:true };
+      pzRender();
+    }
+    return false;
+  }
+  if (moves.length > 1 && moves[0].promo){ askPromotion(moves); return true; }
+  commitMove(moves[0]);
+  return true;
+}
+
 el.squares.addEventListener('click', e => {
+  /* The click a browser fires after a drag is the drop said twice: the
+     pointerup has already played (or refused) the move, and this would go on
+     to select the square the man landed on. */
+  if (DRAG.swallow) return;
   const sqEl = e.target.closest('.sq');
-  if (SPECTATING()) return;                     // a viewer's click is not a move begun
-  if (!G.started) return;                       // nothing moves until Start Play
-  if (!sqEl || G.over || G.thinking || G.pendingPromo) return;
+  if (!sqEl || !boardOpen()) return;
   // A peek is looking, not playing: the board has to be closed again before it
   // will take a move. Not even a selection — half a move is still a move begun.
   if (G.peeking){ peekBlocked(); return; }
@@ -6657,29 +6719,104 @@ el.squares.addEventListener('click', e => {
   }
   if (G.sel === i){ G.sel = -1; render(); return; }
 
-  const moves = legalMoves(G.st, G.st.turn).filter(m => m.from === G.sel && m.to === i);
-  if (!moves.length){
+  const from = G.sel;
+  if (!legalMoves(G.st, G.st.turn).some(m => m.from === from && m.to === i)){
     // re-select if the player clicked another of their own men (sighted/fog only)
     const p = G.st.b[i];
     if (p && p.c === viewer() && !BLINDISH(G.mode)){ G.sel = i; render(); return; }
-    G.sel = -1;
-    render();          // render first — it rewrites square classes
-    reject(sqEl);      // then flash, so the shake survives
-    /* On a puzzle board the flash is not enough on its own: in See the Board
-       and Fog of War the player is guessing at men they cannot see, and "there
-       is no piece of yours that can do that" is a different piece of news from
-       "that is not the move" — one of the two says their picture of the board
-       is wrong. It is not counted against the attempt, because no move was
-       made; PZ.wrong is for a move that existed and was not the answer. */
-    if (PZ.on && !PZ.done && !pzStudyOn()){
-      PZ.typed = { text:'That move is not legal in this position.', cls:'bad', illegal:true };
-      pzRender();
-    }
-    return;
   }
-  if (moves.length > 1 && moves[0].promo){ askPromotion(moves); return; }
-  commitMove(moves[0]);
+  tryMove(from, i, sqEl);
 });
+
+/* ---- dragging ----
+   The pieces layer takes no pointer events, so every press lands on a square
+   and the man is found through the position rather than under the pointer.
+   Only a man the viewer may move is picked up and drawn moving: in See the
+   Board every man is hidden and in Fog of War the opponent's are, and a
+   drag that showed where a hidden man was going would be a peek. A press on
+   any other square still begins a drag — it selects the square exactly as a
+   click would and the drop is judged the same way — it simply carries
+   nothing visible. The move itself is decided at the drop, by the rules and
+   nothing else. */
+const DRAG_SLOP = 6;   // px of travel before a press is a drag rather than a click
+
+function dragSquareAt(x, y){
+  const r = el.board.getBoundingClientRect();
+  if (!r.width || !r.height) return -1;
+  const c = Math.floor((x - r.left) / (r.width / 8)), w = Math.floor((y - r.top) / (r.height / 8));
+  if (c < 0 || c > 7 || w < 0 || w > 7) return -1;
+  return visualIndex(w * 8 + c);                // visualIndex is its own inverse
+}
+function dragFollow(x, y){
+  if (!DRAG.el) return;
+  const r = el.board.getBoundingClientRect();
+  const sq = r.width / 8;
+  DRAG.el.style.transform = `translate(${x - r.left - sq / 2}px, ${y - r.top - sq / 2}px)`;
+}
+/* Let go of the man without playing anything: the element is handed back to
+   renderPieces(), which puts it on whatever square the position says. */
+function dragRelease(){
+  if (DRAG.el){ DRAG.el.classList.remove('dragging'); DRAG.el = null; }
+  el.squares.classList.remove('dragging');
+  DRAG.from = -1; DRAG.id = null; DRAG.moved = false;
+}
+
+el.squares.addEventListener('pointerdown', e => {
+  if (e.button !== 0 || !e.isPrimary) return;
+  const sqEl = e.target.closest('.sq');
+  if (!sqEl || !boardOpen() || G.peeking) return;
+  if (!humanTurn() && !pzStudyOn()) return;
+  const i = +sqEl.dataset.sq, p = G.st.b[i];
+  DRAG.from = i; DRAG.id = e.pointerId; DRAG.moved = false; DRAG.x = e.clientX; DRAG.y = e.clientY;
+  DRAG.swallow = false;
+  // A man is drawn moving only when it is drawn at all: the viewer's own, on
+  // a board that shows them. See the Board hides every man and the drag of
+  // one would be a ring of nothing sliding about; what it selects still counts.
+  const shown = !BLINDISH(G.mode) || G.revealed;
+  DRAG.el = (shown && p && p.c === viewer() && pieceEls.get(p.id)) || null;
+});
+
+/* The travel and the drop are listened for on the document rather than the
+   board, so a pointer that wanders off the board mid-drag is still followed
+   and still let go of. Not pointer capture, which would do the same: a
+   captured pointer's click is retargeted to the capturing element, and the
+   click handler above, looking for the square under it, would find the
+   whole board instead — which is how click-to-move stopped working the
+   moment a drag had been made. */
+document.addEventListener('pointermove', e => {
+  if (DRAG.from < 0 || e.pointerId !== DRAG.id) return;
+  if (!DRAG.moved){
+    if (Math.hypot(e.clientX - DRAG.x, e.clientY - DRAG.y) < DRAG_SLOP) return;
+    DRAG.moved = true;
+    /* The first real movement is the first click of the pair: the square is
+       selected (its ring, and in Sighted the hints, are the same ones a
+       click draws) and the man leaves its square for the hand. */
+    G.sel = DRAG.from;
+    if (DRAG.el) DRAG.el.classList.add('dragging');
+    el.squares.classList.add('dragging');
+    render();
+  }
+  dragFollow(e.clientX, e.clientY);
+});
+
+function dragEnd(e, dropped){
+  if (DRAG.from < 0 || e.pointerId !== DRAG.id) return;
+  const from = DRAG.from, moved = DRAG.moved;
+  dragRelease();
+  if (!moved) return;                           // a press that never travelled: the click that follows is the move
+  /* The click that follows a drop arrives in the same task as the pointerup,
+     so a flag lowered on the next tick is exactly as long as it needs to be —
+     and no longer, since a cancelled drag has no click coming and would
+     otherwise leave the next real one swallowed. */
+  DRAG.swallow = true; setTimeout(() => { DRAG.swallow = false; }, 0);
+  const to = dropped ? dragSquareAt(e.clientX, e.clientY) : -1;
+  if (!boardOpen() || (!humanTurn() && !pzStudyOn())){ G.sel = -1; render(); return; }
+  if (to === from){ render(); return; }         // put back where it was picked up, and left selected
+  if (to < 0){ G.sel = -1; render(); return; }  // let go off the board: nothing chosen
+  tryMove(from, to, sqEls[visualIndex(to)]);
+}
+document.addEventListener('pointerup', e => dragEnd(e, true));
+document.addEventListener('pointercancel', e => dragEnd(e, false));
 
 /* A puzzle referees its own moves; a game plays them. Everything that lets a
    player choose a move on the board comes through here. */
