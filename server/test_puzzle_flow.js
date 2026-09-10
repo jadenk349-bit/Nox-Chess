@@ -35,7 +35,11 @@ var fn = function(n){
    comments contain semicolons, and a lazy match to the first one cuts the
    object in half. */
 var decl = function(n){
-  var block = SRC.match(new RegExp('\\n(?:const|let) ' + n + '\\s*=\\s*[\\{\\[][\\s\\S]*?\\n[\\}\\]];'));
+  /* `= {};` and `= [];` are one-liners that happen to open a brace: PC_CAT
+     and PZ_MODE are declared empty and filled by a loop. Left to the block
+     matcher they would run on to whatever `};` the page next puts at column
+     zero, which is a different distance on every page they are lifted from. */
+  var block = SRC.match(new RegExp('\\n(?:const|let) ' + n + '\\s*=\\s*[\\{\\[](?![\\}\\]];)[\\s\\S]*?\\n[\\}\\]];'));
   if (block) return block[0];
   return grab(new RegExp('\\n(?:const|let) ' + n + '\\b[^\\n]*?;'), n);
 };
