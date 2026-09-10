@@ -278,54 +278,41 @@ say('\nOpening one\n');
   /* One a day means one on the board: a list of the whole hundred would give
      the rung grid a hundred rungs and Next Puzzle somewhere to go. */
   check('and puts exactly today\'s puzzle on the board', /PZ\.list = \[p\]/.test(open), true);
-  check('a guest is sent to sign up rather than into it',
-        /GUEST\(\) \? toSignUp\(\)/.test(fn('dailyRender')), true);
+    /* There is no longer a redirect here to assert. The four Daily Puzzles are
+       played on the home page itself, so a press is a move rather than a
+       navigation, and a guest plays where anybody plays — their progress is
+       local, exactly as it is for a guest on the Puzzle page. dailyOpen() is
+       kept for Study Alternatives and for a direct link. */
+    check('opening one is still the way to the full screen', /pzOpen\(1\)/.test(open), true);
 })();
 
-say('\nThe cards\n');
-(function cards(){
-  DAILY.index = 3;
-  DAILY.lists = {};
-  for (var i = 0; i < MODES.length; i++)
-    DAILY.lists[MODES[i]] = [{ id: MODES[i] + '-0', seedRating: 700 }, { id: MODES[i] + '-1' },
-                             { id: MODES[i] + '-2' }, { id: MODES[i] + '-3', seedRating: 1500 }];
-  DAILY.failed = {};
-  storage = {};
-  elements.dailyGrid = fakeEl();
-  dailyRender();
-  var grid = elements.dailyGrid;
-  check('four cards are drawn', grid.children.length, 4);
-  check('each is named for its mode',
-        grid.children.map(function(c){ return c.children[0].textContent; }).join(','),
-        'Complete Blindfold,Board Only,Fog of War,Sighted');
-  check('each carries its key', grid.children.map(function(c){ return c.dataset.mode; }).join(','),
-        'blindfold,board,fog,sighted');
-  check('and each is a button with an id the tests can find',
-        grid.children.map(function(c){ return c.id; }).join(','),
-        'daily-blindfold,daily-board,daily-fog,daily-sighted');
-  /* The card may say how hard it is — that is a fact about the position — and
-     may not say anything about the answer. */
-  check('a card shows the difficulty', /Difficulty 1500/.test(grid.children[0].children[1].textContent), true);
-  check('and never a theme or a move',
-        /mate|fork|pin|[a-h][1-8][a-h][1-8]/i.test(grid.innerHTML + grid.children.map(function(c){
-          return c.children.map(function(x){ return x.textContent; }).join(' '); }).join(' ')), false);
+say('\nThe four widgets\n');
+(function widgets(){
+  /* The home page draws the puzzles rather than links to them, so what used to
+     be checked here — a card's label, its note, whether it can be pressed — is
+     now a question about a live board, and is asked in test_daily_home.js,
+     which has a DOM real enough to click. What belongs here is what this suite
+     is for: that the section is wired to the widget layer at all, and that the
+     layer refers its judgements to the Puzzle page's own functions rather than
+     growing a second set. */
+  var render = fn('dailyRender');
+  check('the section builds widgets, not navigation cards', /dwBuild\(w\)/.test(render), true);
+  check('one per mode, from the table the rotation uses',
+        /for \(const m of DAILY_MODES\)/.test(render), true);
+  check('a widget is rebuilt only when the day\'s record changes',
+        /w\.puzzle\.id !== p\.id/.test(render), true);
+  check('an absent file still says so rather than throwing', /Not installed yet/.test(render), true);
+  check('the ids the CSS and the tests use are unchanged', /'daily-' \+ m\.key/.test(render), true);
 
-  // solved today: the card says so
-  pzMark(dailyScope('fog'), 'fog-3', true);
-  elements.dailyGrid = fakeEl();
-  dailyRender();
-  check('a solved card says so',
-        elements.dailyGrid.children[2].children[1].textContent, 'Solved today');
-  check('and the others do not',
-        elements.dailyGrid.children[0].children[1].textContent === 'Solved today', false);
-
-  // a missing file is a normal state and says so rather than throwing
-  DAILY.failed = { board: true };
-  elements.dailyGrid = fakeEl();
-  dailyRender();
-  check('an absent file says it is not installed',
-        elements.dailyGrid.children[1].children[1].textContent, 'Not installed yet');
-  check('and that card cannot be pressed', elements.dailyGrid.children[1].disabled, true);
+  var play = fn('dwPlay');
+  check('a move is referred to puzzleStep, as the Puzzle page refers it',
+        /puzzleStep\(w\.puzzle\.moves, w\.ply, uciOf\(m\)\)/.test(play), true);
+  check('a wrong move is never applied to the board',
+        /if \(!step\.ok\)/.test(play) && /w\.wrong = true/.test(play), true);
+  check('the defence is the file\'s reply, played on a beat',
+        /step\.reply/.test(play) && /DW_REPLY_MS/.test(play), true);
+  check('a solve is recorded through pzMark under the Daily scope',
+        /pzMark\(dailyScope\(w\.key\), w\.puzzle\.id, clean\)/.test(fn('dwFinish')), true);
 })();
 
 say('\nThe page still says the Daily section is there\n');
