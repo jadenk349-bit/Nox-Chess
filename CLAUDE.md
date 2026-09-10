@@ -340,10 +340,19 @@ cannot convert a subtle one is eventually offered a plain one.
 **`flagFall()` is the ordinary rule for everybody**, and a version that handed
 the player the half point because their opponent was a bot was written,
 measured and reverted: a game whose ending depends on who is sitting opposite is
-not a game of chess. The opponent therefore still wins the occasional flag, and
-the protection is behavioural rather than a rule — it plays at a person's pace
-and spends a time edge instead of banking one. What it never does is win a game
-of chess: no checkmate, no resignation, nothing decided on the board.
+not a game of chess. The protection against the clock is therefore entirely
+behavioural, and it is `AI_CLOCK_MARK`: the opponent keeps its own clock a
+little UNDER the player's rather than level with it, so a race is one it loses
+rather than one it wins by a second. Two things made that work and neither is
+obvious. The low-clock brake — "it cannot spend what it has not got" — had to
+stop applying while it is the one with time to spare, because both clocks are
+low in an endgame and it was being told to hurry exactly when it was supposed
+to be spending, keeping thirty-five seconds in hand as the player's clock hit
+zero. And level was not enough: two clocks arriving at zero together hand the
+game to whoever is not on move. The mark is keyed on the RATIO and never on the
+player being short of time — an opponent that started dawdling the moment your
+clock got low would be reading it, which is a different and much more obvious
+thing.
 
 Two things that were tried against the games that would not end and are
 recorded because they did not work: dropping the target band as escalation

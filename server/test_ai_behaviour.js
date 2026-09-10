@@ -121,7 +121,7 @@ var DECLS = ['VAL','FILES','rowOf','colOf','SQNAME','uciOf','sqName','onBoard','
              'CAN_PEEK','AI_POOL','AI_BAND','AI_SLACK','scheduleAI','W',
              'AI_STYLES','AI_STYLE_NAMES','AI_WALK_MAX','AI_WALK_PER_PLY',
              'AI_TOOK_CP','AI_FORM_CP','AI_REP_NUDGE','AI_STALE_PLY','AI_PROG_NUDGE','AI_STALE_BAND',
-             'AI_ESCALATE_AT','AI_ESCALATE_MAX','AI_ESCALATE_SLACK','AI'];
+             'AI_CLOCK_MARK','AI_ESCALATE_AT','AI_ESCALATE_MAX','AI_ESCALATE_SLACK','AI'];
 var FNS = ['startBoard','newState','cloneState','posKey','slide','step','addPawn',
            'pseudoMoves','isAttacked','kingSq','inCheck','makeMove','legalMoves','toSAN',
            'myName','seatName','layoutBoardBars','pickFrom','bestMove','applyMove','checkEnd',
@@ -301,6 +301,7 @@ async function playGame(kind){
   var evals = [];                  // material from the player's side, per bot turn
   var forced = 0, declinable = 0;  // mate with no alternative, and with one
   var edgeSeen = 0;                // biggest clock edge the bot ever held
+  var flagAt = null;               // what was true when the player's clock ran out
   var repTurns = [];               // what was on offer, repetition-wise, each bot turn
   var guard = 0;
   /* No clock runs in here — tickClock() is not started — so a game that would
@@ -314,7 +315,11 @@ async function playGame(kind){
       if (!list.length) break;
       var spent = humanThinkMs(kind, G.clock[G.human]);
       G.clock[G.human] = Math.max(0, G.clock[G.human] - spent);
-      if (G.clock[G.human] === 0){ flagFall(G.human); break; }
+      if (G.clock[G.human] === 0){
+        flagAt = { ply: G.sans.length, mat: material(G.st, G.human),
+                   botLeft: G.clock[other(G.human)] };
+        flagFall(G.human); break;
+      }
       applyMove(PLAYERS[kind](list));
     } else {
       /* Was mate forced on this turn — every legal move mating — or merely
@@ -352,6 +357,7 @@ async function playGame(kind){
   }
   return { over: G.over, plies: G.sans.length, evals: evals,
            clockH: G.clock[G.human], clockB: G.clock[other(G.human)], edgeSeen: edgeSeen,
+           flagAt: flagAt,
            style: style, handover: handover, forced: forced, declinable: declinable,
            repTurns: repTurns,
            choices: choices.slice(), took: AI.took, opened: AI.opened };
@@ -498,7 +504,12 @@ var botWonOnBoard = games.filter(function(r){
   return r.over && /Black wins/.test(r.over.text || '')
          && !/on time/.test(r.over.text || ''); }).length;
 check('the opponent never wins a game of chess', botWonOnBoard, 0);
-say('  ..    it won ' + botWon + ' of ' + games.length + ', all of them flags');
+/* And now not on the clock either — without a word being changed about what a
+   timeout means. It aims to keep its own clock a little UNDER the player's, so
+   a race is one it loses rather than one it wins by a second. */
+check('nor on the clock', botWon - botWonOnBoard, 0);
+check('nor at all', botWon, 0);
+say('  ..    it won ' + botWon + ' of ' + games.length);
 var decided = games.filter(function(r){ return !!r.over; }).length;
 check('and the player wins most of the games that finish',
       wins(games) >= Math.round(decided * 0.6), true);
@@ -565,10 +576,24 @@ for (var i = 0; i < games.length; i++){
 var flagWins = games.filter(function(r){
   return r.over && /Black wins on time/.test(r.over.text || ''); }).length;
 say('  ..    it won ' + flagWins + ' on the clock');
+var fl = games.filter(function(r){ return r.flagAt; });
+if (fl.length){
+  var ahead = fl.filter(function(r){ return r.flagAt.mat < -100; }).length;
+  var behind = fl.filter(function(r){ return r.flagAt.mat > 100; }).length;
+  var mp = 0, mb = 0;
+  for (var i = 0; i < fl.length; i++){ mp += fl[i].flagAt.ply; mb += fl[i].flagAt.botLeft; }
+  say('  ..    at the flag: player was losing in ' + ahead + ', WINNING in ' + behind
+      + ', level in ' + (fl.length - ahead - behind)
+      + '; mean ply ' + Math.round(mp / fl.length)
+      + ', opponent had ' + Math.round(mb / fl.length / 1000) + 's left');
+}
 /* The flag rule is the ordinary one now, so the protection is that it does not
    BANK time, not that it declines to use it. */
 check('it does not walk out of games with minutes in hand',
-      cb2 / Math.max(1, ch2) < 1.6, true);
+      cb2 / Math.max(1, ch2) < 1.15, true);
+check('and is the one slightly shorter of time', cb2 <= ch2, true);
+var bigEdge = games.filter(function(r){ return r.edgeSeen > 3; }).length;
+check('it never sits on a large clock advantage', bigEdge, 0);
 say('  ..    mean clock left: player ' + Math.round(ch2 / games.length / 1000) + 's, opponent '
     + Math.round(cb2 / games.length / 1000) + 's; largest edge it held ' + maxEdge.toFixed(2) + 'x');
 

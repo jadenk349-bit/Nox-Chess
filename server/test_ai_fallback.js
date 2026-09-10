@@ -40,7 +40,7 @@ function decl(name){
 
 var DECLS = ['AI_POOL', 'AI_BAND', 'AI_SLACK', 'AI_STYLES', 'AI_STYLE_NAMES',
              'AI_WALK_MAX', 'AI_WALK_PER_PLY', 'AI_TOOK_CP', 'AI_FORM_CP', 'AI_REP_NUDGE', 'AI_STALE_PLY', 'AI_PROG_NUDGE', 'AI_STALE_BAND',
-             'AI_ESCALATE_AT', 'AI_ESCALATE_MAX', 'AI_ESCALATE_SLACK', 'AI'];
+             'AI_CLOCK_MARK', 'AI_ESCALATE_AT', 'AI_ESCALATE_MAX', 'AI_ESCALATE_SLACK', 'AI'];
 var FNS   = ['flagFall', 'aiPhase', 'winChance', 'lineScore', 'aiSearch', 'aiChoose',
              'aiReset', 'aiForm', 'aiNoteHuman', 'aiBandFor', 'aiSlackFor', 'aiPoolFor', 'aiNoMate', 'aiThinkMs', 'aiEscalation'];
 
@@ -449,6 +449,17 @@ var level = meanThink(300000, 300000);
 check('it thinks for seconds, not milliseconds', level > 1500, true);
 check('and not for minutes', level < 20000, true);
 check('sitting on a big clock edge it slows down', meanThink(400000, 120000) > level, true);
+/* The mark is under one on purpose: two clocks reaching zero together hand the
+   game to whoever is not on move, and that was two more losses for the player
+   in a hundred. It aims to be the one slightly shorter of time. */
+check('it aims below the player\'s clock, not level with it', AI_CLOCK_MARK < 1, true);
+check('but not absurdly below', AI_CLOCK_MARK > 0.7, true);
+check('with time to spare it does not hoard it',
+      aiThinkMs(200000, 40, 25, 60000, false) > aiThinkMs(60000, 40, 25, 200000, false), true);
+/* The low-clock brake still applies when it is the one genuinely short — that
+   is ordinary, and it is only hoarding that had to go. */
+check('genuinely short of time it still hurries',
+      aiThinkMs(20000, 40, 25, 300000, false) <= 900, true);
 check('and behind on the clock it speeds up',   meanThink(120000, 400000) < level, true);
 check('in time trouble it moves fast',          aiThinkMs(20000, 30, 25, 400000) <= 900, true);
 check('but never instantly',                    aiThinkMs(1000, 30, 25, 400000) >= 500, true);

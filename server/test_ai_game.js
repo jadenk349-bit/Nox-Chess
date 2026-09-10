@@ -117,7 +117,7 @@ var DECLS = ['VAL','FILES','rowOf','colOf','SQNAME','uciOf','sqName','onBoard','
              'CAN_PEEK','AI_POOL','AI_BAND','AI_SLACK','scheduleAI','W',
              'AI_STYLES','AI_STYLE_NAMES','AI_WALK_MAX','AI_WALK_PER_PLY',
              'AI_TOOK_CP','AI_FORM_CP','AI_REP_NUDGE','AI_STALE_PLY','AI_PROG_NUDGE','AI_STALE_BAND',
-             'AI_ESCALATE_AT','AI_ESCALATE_MAX','AI_ESCALATE_SLACK','AI'];
+             'AI_CLOCK_MARK','AI_ESCALATE_AT','AI_ESCALATE_MAX','AI_ESCALATE_SLACK','AI'];
 var FNS = ['startBoard','newState','cloneState','posKey','slide','step','addPawn',
            'pseudoMoves','isAttacked','kingSq','inCheck','makeMove','legalMoves','toSAN',
            'myName','seatName','layoutBoardBars','pickFrom','bestMove','applyMove','checkEnd',
