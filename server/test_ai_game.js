@@ -100,6 +100,7 @@ function stopClock(){}
 function startClock(){}
 function focusLocalInput(){}
 function reviewClose(){}
+function studyPrime(){}           // the Study Board button is primed by finish(); not this game's
 function resetLog(){}
 function scheduleEngine(){}         // the ladder's turn; not this game's
 var pieceEls = new Map();

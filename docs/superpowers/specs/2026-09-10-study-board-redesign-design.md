@@ -32,8 +32,9 @@ Pressing Study Board (`#endClose`) calls `studyStart()`:
 2. `key = studyKey(uci)` (a string hash of the move list).
 3. Cache hit (`nox.study.<key>`) → decode, `state = 'ready'` at once.
 4. Otherwise `state = 'analysing'`; positions 0..N are asked one at a time
-   (`engineAsk(uci.slice(0,i), STUDY_ASK)`, `STUDY_ASK = {skill:20, multipv:2}`
-   at `SF_MOVETIME`), `done/total` drives the button. A null answer (no
+   (`engineAsk(uci.slice(0,i), REVIEW_ASK)`, `REVIEW_ASK = {skill:20, multipv:2,
+   objective:true}` at `SF_MOVETIME`; terminal positions are answered by the
+   rules, since the engine is silent on them), `done/total` drives the button. A null answer (no
    WebAssembly, worker error) → `state = 'failed'`; the button offers Retry.
 5. All answered → `studyBuild()` → cache → `state = 'ready'`, button reads
    START ANALYSIS. Nothing navigates by itself.
@@ -66,11 +67,12 @@ that a function of the record can give.
 - `loss = winPct(cpBefore) − winPct(cpAfter)`, mover's side.
 - best: engine's first choice, or `loss < 1` (the deeper after-search rates
   it at least as well).
-- brilliant: best, `sacrificeSize ≥ 200`, position not already crushing
-  (`cpBefore < 700`), still fine after (`cpAfter ≥ −50`), and the sacrifice
-  is the point: `gap ≥ 100` or `cpAfter ≥ 150`.
-- great: best, `gap ≥ 150` (or the runner-up drops ≥ 10 win%), and the
-  landing square is not hanging.
+- brilliant: best, and a sacrifice the engine confirms — `sacrificeDeficit`
+  (the mover ≥ 200 down once the engine's reply is made and the recapture on
+  that square settled), position not already crushing (`cpBefore < 700`),
+  and clearly ahead after best defence (`cpAfter ≥ 50`).
+- great: best, the runner-up drops ≥ 10 win%, the landing square is not
+  hanging, and the move is not a capture SEE already justifies.
 - good `< 5`, inaccuracy `< 10`, mistake `< 20`, blunder otherwise.
 
 ## 4. Threats and vulnerabilities — `studyThreats(st, m, after, replyRes)`

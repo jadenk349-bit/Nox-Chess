@@ -482,11 +482,6 @@
     .game-layout .board-col{margin-top:0; margin-bottom:0; min-height:0; justify-content:flex-start;}
     .game-layout{--chrome:226px; --board-shift:0px;}
   }
-  /* Study Board opens a row of its own beneath the board. The board pays for it
-     out of its own height, rather than the page growing a scrollbar under a
-     game that fitted on screen a moment earlier — otherwise its ◀ ▶ land below
-     the fold. Off --chrome, so it still holds under the media query above. */
-  #screen-game.reviewing .game-layout{--board-max:min(100%, calc(100vh - var(--chrome) - 104px));}
 
   /* the slim name-and-clock strips clamped to the board's edges */
   .board-bar{
@@ -1278,16 +1273,6 @@
   }
 
   /* ---------- the engine's move, explained ---------- */
-  .coach-move{
-    font-family:var(--font); font-size:24.5px; letter-spacing:.06em;
-    color:var(--good); display:flex; align-items:baseline; gap:9px;
-  }
-  .coach-move .cm-eval{
-    font-family:inherit; font-size:15.5px; letter-spacing:.08em;
-    color:var(--muted); font-variant-numeric:tabular-nums;
-  }
-  .coach-why{margin-top:9px; font-size:16px; line-height:1.65; color:#c9cdd8;}
-  .coach-why em{color:var(--gold-soft); font-style:normal;}
 
   /* ---------- what the position is about ---------- */
   .cc-concept{margin-bottom:11px;}
@@ -1328,8 +1313,11 @@
   /* the default stroke-width of 1 is one whole square in this viewBox, which
      turns every arrowhead into a giant triangle — the head is fill only */
   .arrows polygon{stroke:none; stroke-width:0;}
-  .arrows .a-played{stroke:#e0864d; fill:#e0864d; opacity:.55;}
-  .arrows .a-best{stroke:#5fb96a; fill:#5fb96a; opacity:.62;}
+  /* a threat the move made (ours → theirs) and a weakness it opened (theirs →
+     ours); a mate either way is the same arrow, drawn heavier */
+  .arrows .a-threat{stroke:#e0a341; fill:#e0a341; opacity:.85;}
+  .arrows .a-vuln{stroke:#e05a4d; fill:#e05a4d; opacity:.85;}
+  .arrows .a-mate{opacity:.95;}
   .marks{position:absolute; inset:0; pointer-events:none;}
   .mark{
     position:absolute; left:0; top:0; width:12.5%; height:12.5%;
@@ -1346,48 +1334,89 @@
   .mark.m-brilliant b{background:#3fa4d8;}
   .mark.m-great b{background:#4fbfa8;}
   .mark.m-best b{background:#5fb96a;}
-  /* excellent and good share a tick and differ only in colour, the way the
-     board marks players already know do */
-  .mark.m-excellent b{background:#4e9c58;}
-  .mark.m-good b{background:#5fb96a; opacity:.72;}
+  .mark.m-good b{background:#5fb96a; opacity:.85;}
   .mark.m-inaccuracy b{background:#d8c35a; color:#2a2408;}
   .mark.m-mistake b{background:#e0a341; color:#2a1f08;}
   .mark.m-blunder b{background:#d0453c;}
 
-  /* ---------- post-game review ---------- */
-  .review{
-    width:min(100%,var(--board-max)); padding:14px 16px; margin-top:12px;
-    display:flex; align-items:center; gap:14px;
+  /* ---------- Study Board ----------
+     The board on the left as it is, and one panel on the right; everything a
+     game being played puts beside the board is taken down, because none of
+     it — captured men, a clock, Offer Draw, Resign, the chips naming the
+     settings — is about a game that is over. Wide, the grid the game already
+     uses is board | panel; under 900px it is already one column, and the
+     panel simply follows the board. */
+  #screen-game.reviewing #gameChips, #screen-game.reviewing #gameSetup, #screen-game.reviewing #gamePlay,
+  #screen-game.reviewing .board-bar, #screen-game.reviewing #console, #screen-game.reviewing .clock-pool{display:none !important;}
+  .study{display:flex; flex-direction:column; gap:12px;}
+  .study-card{padding:18px 20px;}
+  .study-top{
+    display:flex; justify-content:space-between; gap:10px; flex-wrap:wrap;
+    font-size:12.5px; letter-spacing:.18em; text-transform:uppercase; color:var(--muted);
   }
-  .rev-nav{display:flex; gap:6px; flex:none;}
-  .rev-nav button{padding:8px 13px; font-size:17px; line-height:1;}
-  .rev-body{flex:1; min-width:0;}
-  .rev-head{display:flex; align-items:center; gap:10px; flex-wrap:wrap;}
-  .rev-count{
-    font-size:13px; letter-spacing:.18em; text-transform:uppercase; color:var(--muted);
+  /* the mark, the move and its name on one plate — the first thing read */
+  .study-verdict{
+    display:flex; align-items:center; gap:14px; margin-top:12px; padding:12px 14px;
+    border-radius:var(--r-md); background:var(--well); border:1px solid var(--line);
   }
-  .rev-verdict{
-    font-size:12.5px; letter-spacing:.16em; text-transform:uppercase; font-weight:700;
-    padding:3px 9px; border-radius:999px;
+  .study-verdict .sv-sym{font-size:34px; line-height:1; font-weight:700; min-width:44px; text-align:center;}
+  .study-verdict .sv-san{font-size:30px; color:var(--gold-soft); letter-spacing:.03em;}
+  .study-verdict .sv-name{
+    margin-left:auto; font-size:12.5px; letter-spacing:.16em; text-transform:uppercase;
+    color:var(--muted); text-align:right;
   }
-  .rev-verdict.v-brilliant{color:#08222e; background:#3fa4d8;}
-  .rev-verdict.v-great{color:#062a25; background:#4fbfa8;}
-  .rev-verdict.v-best{color:#08240f; background:#5fb96a;}
-  .rev-verdict.v-excellent{color:var(--good); border:1px solid rgba(111,191,115,.55);}
-  .rev-verdict.v-good{color:var(--good); border:1px solid rgba(111,191,115,.4);}
-  .rev-verdict.v-inaccuracy{color:#d8c35a; border:1px solid rgba(216,195,90,.45);}
-  .rev-verdict.v-mistake{color:#e0a341; border:1px solid rgba(224,163,65,.5);}
-  .rev-verdict.v-blunder{color:#fff; background:var(--danger);}
-  .rev-line{margin-top:6px; font-size:17.5px; color:var(--text); line-height:1.5;}
-  .rev-line b{color:var(--gold-soft);}
-  .rev-eval{
-    margin-left:6px; font-variant-numeric:tabular-nums;
-    font-size:16px; color:var(--muted);
+  .study-verdict.quiet .sv-name{margin-left:0; text-transform:none; letter-spacing:0; font-size:15.5px; text-align:left;}
+  .v-brilliant .sv-sym{color:#3fa4d8;}
+  .v-great .sv-sym{color:#4fbfa8;}
+  .v-best .sv-sym{color:#5fb96a;}
+  .v-good .sv-sym{font-size:26px;}
+  .v-inaccuracy .sv-sym{color:#d8c35a;}
+  .v-mistake .sv-sym{color:#e0a341;}
+  .v-blunder .sv-sym{color:#e05a4d;}
+  /* MOVE and BEST, side by side and never as a sentence */
+  .study-pair{display:grid; grid-template-columns:1fr auto 1fr; align-items:center; gap:10px; margin-top:12px;}
+  .sp-cell{padding:10px 12px; border-radius:var(--r-md); background:rgba(0,0,0,.22); border:1px solid var(--line); min-width:0;}
+  .sp-tag{display:block; font-size:11px; letter-spacing:.2em; text-transform:uppercase; color:var(--muted);}
+  .sp-san{
+    display:block; margin-top:3px; font-size:24px; color:var(--text); letter-spacing:.03em;
+    overflow:hidden; text-overflow:ellipsis; white-space:nowrap;
   }
-  .rev-done{flex:none;}
-  @media (max-width:520px){
-    .review{flex-wrap:wrap;}
-    .rev-body{order:3; flex-basis:100%;}
+  .sp-cell.best .sp-san{color:#5fb96a;}
+  .sp-arrow{font-size:22px; color:var(--muted);}
+  .study-pair.same .sp-arrow{color:#5fb96a;}
+  .study-reasons{list-style:none; margin:14px 0 0; padding:0; display:flex; flex-direction:column; gap:6px;}
+  .study-reasons li{position:relative; padding-left:16px; font-size:16px; line-height:1.45; color:#d6d9e2;}
+  .study-reasons li::before{content:''; position:absolute; left:0; top:.6em; width:7px; height:7px; border-radius:50%; background:var(--gold);}
+  /* winning chances either side of the move, from the mover's chair */
+  .study-win{margin-top:16px; padding:12px 14px; border-radius:var(--r-md); background:var(--well); border:1px solid var(--line);}
+  .sw-head{display:flex; justify-content:space-between; gap:10px;}
+  .sw-tag{font-size:11px; letter-spacing:.2em; text-transform:uppercase; color:var(--muted);}
+  .sw-row{display:flex; align-items:baseline; gap:10px; margin-top:6px; font-variant-numeric:tabular-nums;}
+  .sw-row .sw-n{font-size:26px; color:var(--text);}
+  .sw-row .sw-arrow{color:var(--muted); font-size:18px;}
+  .sw-delta{margin-left:auto; font-size:20px; font-weight:700;}
+  .sw-delta.up{color:var(--good);}
+  .sw-delta.down{color:var(--danger);}
+  .sw-delta.flat{color:var(--muted);}
+  .sw-bar{position:relative; height:8px; margin-top:10px; border-radius:4px; background:rgba(255,255,255,.08); overflow:hidden;}
+  .sw-bar i{position:absolute; left:0; top:0; bottom:0; border-radius:4px; transition:width .35s var(--ease);}
+  .sw-bar .sw-before{background:rgba(240,199,117,.3);}
+  .sw-bar .sw-after{background:var(--gold-soft);}
+  .study-actions{display:flex; gap:8px; margin-top:14px;}
+  .study-explain{margin-top:12px; font-size:15px; line-height:1.6; color:#c9cdd8;}
+  .study-explain h3{
+    margin:14px 0 4px; font-family:var(--font); font-weight:400; font-size:13px;
+    letter-spacing:.18em; text-transform:uppercase; color:var(--gold-soft);
+  }
+  .study-explain h3:first-child{margin-top:4px;}
+  .study-explain p{margin:0 0 8px;}
+  .study-explain .concept-card{margin-top:12px;}
+  .study-nav{display:flex; gap:8px; align-items:center;}
+  .study-nav .nav-step{flex:1; font-size:24px; padding:9px 0; line-height:1;}
+  .study-nav .ghost{flex:none;}
+  .study-share-out{
+    font-size:12px; line-height:1.5; color:var(--muted); word-break:break-all; user-select:all;
+    padding:8px 10px; border-radius:6px; background:var(--well); border:1px solid var(--line);
   }
 
   /* ---------- puzzles ----------
@@ -3528,6 +3557,45 @@
     font-size:38.5px; letter-spacing:.1em; color:var(--gold-soft);
   }
   .modal p{margin:0 0 20px; color:var(--muted); font-size:18px; line-height:1.5;}
+  .end-modal{max-width:440px; padding:36px 30px 26px; overflow:hidden; background:linear-gradient(180deg,var(--surf-1),var(--surf-2)),url("assets/moon.jpg?v=1") center / cover no-repeat;}
+  .end-modal::before{
+    content:""; position:absolute; top:0; left:20%; right:20%; height:1px;
+    background:linear-gradient(90deg,transparent,var(--gold-soft),transparent);
+    opacity:.55;
+  }
+  .end-eyebrow{color:var(--muted); font-size:12px; letter-spacing:.24em; margin-bottom:14px;}
+  .end-modal h3{font-size:48px; line-height:1.1; letter-spacing:.08em; margin:0 0 10px;}
+  .end-modal #endText{font-size:17px; margin:0 0 26px;}
+  .end-actions{border-top:1px solid var(--line); padding-top:22px;}
+  .end-study{position:relative; overflow:hidden; display:flex; align-items:center; justify-content:center; width:100%; min-height:72px; padding:14px 22px; text-align:center;}
+  .end-study-title{font-size:26px; line-height:1.1; letter-spacing:.06em;}
+  /* The gauge. --p is set by studyButton() from positions answered over
+     positions in the game; the width eases so each step reads as movement.
+     The plate goes dark while it fills, because gold light on a gold ground
+     has no contrast to carry the movement — the ranked page's lesson. */
+  .end-study-fill{
+    position:absolute; left:0; top:0; bottom:0; width:var(--p,0%);
+    background:linear-gradient(90deg, rgba(240,199,117,.45), rgba(240,199,117,.8));
+    transition:width .35s var(--ease); pointer-events:none;
+  }
+  .end-study-text{position:relative; display:flex; flex-direction:column; align-items:center; gap:4px;}
+  .end-study-sub{font-size:12.5px; letter-spacing:.2em; text-transform:uppercase; opacity:.85; min-height:1em;}
+  #endClose[data-state="idle"] .end-study-fill, #endClose[data-state="ready"] .end-study-fill{display:none;}
+  #endClose[data-state="analysing"]{
+    background:linear-gradient(180deg,rgba(0,0,0,.52),rgba(0,0,0,.66)); color:#fff;
+    text-shadow:0 1px 3px rgba(0,0,0,.6); cursor:progress;
+  }
+  #endClose[data-state="analysing"]:hover{transform:none; filter:none;}
+  #endClose[data-state="failed"]{
+    background:linear-gradient(180deg,rgba(224,90,77,.35),rgba(224,90,77,.2)); color:var(--text);
+  }
+  @media (prefers-reduced-motion:reduce){ .end-study-fill{transition:none;} }
+  .end-secondary{display:flex; gap:10px; margin-top:12px;}
+  .end-secondary button{flex:1; min-width:0; min-height:46px; font-size:17px; letter-spacing:.06em;}
+  @media(max-width:420px){
+    .end-modal{padding:32px 20px 22px;}
+    .end-modal h3{font-size:42px;}
+  }
   /* small dismiss in the corner of the game-over box */
   .modal-x{
     position:absolute; top:10px; right:10px;
@@ -3545,6 +3613,45 @@
     background:rgba(24,30,48,.75); border:1px solid var(--line); border-bottom-width:2px;
     border-radius:5px; padding:1px 5px; font-size:14.5px; font-family:inherit; color:var(--text);
   }
+/* Player rails share the board frame; the logo and side panel stay fixed. */
+#screen-game .board-col{gap:0;}
+#screen-game #boardFrame{border-radius:0;box-shadow:none;border-top:0;border-bottom:0;}
+#screen-game .board-bar{
+  position:relative;min-height:48px;padding:7px clamp(12px,2.4vw,26px);
+  background:linear-gradient(135deg,#344047 0%,#111d27 30%,#09121b 65%,#223440);
+  border:1px solid #74664e;box-shadow:inset 0 1px 0 rgba(255,255,255,.06);
+}
+#screen-game #barTop{margin:0;border-radius:7px 7px 0 0;border-bottom:1px solid rgba(196,170,118,.18);}
+#screen-game #barBottom{margin:0;border-radius:0 0 7px 7px;border-top:1px solid rgba(196,170,118,.18);}
+#screen-game .bar-name{display:flex;align-items:center;gap:10px;min-width:0;font-size:18px;letter-spacing:.06em;}
+#screen-game .rail-elo{color:#b9a681;font-size:15px;letter-spacing:.03em;}
+#screen-game .bar-name .sub{margin:0;font-size:11px;letter-spacing:.12em;border:1px solid rgba(196,170,118,.3);border-radius:3px;padding:3px 6px;}
+#screen-game .board-bar .clock{flex-shrink:0;padding-left:16px;border-left:1px solid rgba(196,170,118,.25);border-radius:0;min-width:82px;text-align:right;}
+#screen-game .board-bar .clock .time{font-size:28px;font-variant-numeric:tabular-nums;}
+#screen-game .board-bar:has(#clockW) .sub{color:#eee5d1;background:rgba(238,229,209,.07);}
+#screen-game .board-bar:has(#clockB) .sub{color:#b9a681;background:rgba(0,0,0,.22);}
+
+/* Move only the board column; the logo, grid and side panel retain their layout. */
+#screen-game .game-layout{--chrome:104px;}
+#screen-game .game-layout .board-col{align-items:flex-start;}
+@media(min-width:1101px){
+  #screen-game .game-layout .board-col{
+    margin-left:var(--board-shift);
+    width:calc(100% - var(--board-shift));
+  }
+}
+@media(min-width:600px) and (max-width:1100px){
+  #screen-game .game-layout .board-col{
+    --board-inset:calc(var(--logo-w) + 12px);
+    margin-left:var(--board-inset);
+    width:calc(100% - var(--board-inset));
+    margin-top:calc(0px - var(--logo-box) - 14px);
+    --chrome:114px;
+  }
+}
+@media(max-width:599px){
+  #screen-game .game-layout{--chrome:224px;}
+}
 </style>
 </head>
 <body>
@@ -4323,7 +4430,7 @@
           <div class="board" id="board">
             <div class="squares" id="squares"></div>
             <div class="pieces" id="piecesLayer"></div>
-            <!-- review only: arrows for the two moves, and the ?/!! marks -->
+            <!-- review only: arrows for threats and weaknesses, and the ?/!! marks -->
             <svg class="arrows" id="arrows" viewBox="0 0 8 8" preserveAspectRatio="none" aria-hidden="true"></svg>
             <div class="marks" id="marks"></div>
           </div>
@@ -4354,25 +4461,62 @@
           <div class="clock" id="clockB"><span class="who">BLACK</span><span class="time">10:00</span></div>
         </div>
 
-        <!-- post-game review: appears when Study Board is pressed -->
-        <div class="review panel" id="reviewBar" style="display:none">
-          <div class="rev-nav">
-            <button id="revBack" aria-label="Previous move">◀</button>
-            <button id="revFwd" aria-label="Next move">▶</button>
-          </div>
-          <div class="rev-body">
-            <div class="rev-head">
-              <span class="rev-count" id="revCount"></span>
-              <span class="rev-verdict" id="revVerdict"></span>
-            </div>
-            <div class="rev-line" id="revLine"></div>
-          </div>
-          <button class="ghost rev-done" id="revDone">Done</button>
-        </div>
       </div>
 
       <!-- SIDE: the questions before the game, the game itself after it -->
       <aside class="game-side">
+        <!-- Study Board's panel: the whole of the side column while the game
+             is being reviewed (#screen-game.reviewing hides the rest). One
+             move at a time — its mark, MOVE beside BEST, the reasons, the
+             winning chances either side of it, and EXPLAIN — and nothing that
+             belongs to a game being played. -->
+        <div class="study" id="studyPanel" style="display:none">
+          <div class="panel study-card">
+            <div class="study-top">
+              <span id="stCount"></span>
+              <span id="stPlayers"></span>
+            </div>
+            <div class="study-verdict" id="stVerdict"></div>
+            <div class="study-pair" id="stPair">
+              <div class="sp-cell"><span class="sp-tag">Move</span><span class="sp-san" id="stMove"></span></div>
+              <div class="sp-arrow" id="stPairArrow" aria-hidden="true">→</div>
+              <div class="sp-cell best"><span class="sp-tag">Best</span><span class="sp-san" id="stBest"></span></div>
+            </div>
+            <ul class="study-reasons" id="stReasons"></ul>
+            <div class="study-win" id="stWin">
+              <div class="sw-head"><span class="sw-tag">Winning chances</span><span class="sw-tag" id="stWinSide"></span></div>
+              <div class="sw-row">
+                <span class="sw-n" id="stWinBefore"></span>
+                <span class="sw-arrow" aria-hidden="true">→</span>
+                <span class="sw-n" id="stWinAfter"></span>
+                <span class="sw-delta" id="stWinDelta"></span>
+              </div>
+              <div class="sw-bar" aria-hidden="true"><i class="sw-before" id="stWinBarBefore"></i><i class="sw-after" id="stWinBarAfter"></i></div>
+            </div>
+            <div class="study-actions">
+              <button class="ghost" id="stExplain" aria-controls="stExplainBody" aria-expanded="false">Explain</button>
+            </div>
+            <div class="study-explain" id="stExplainBody" hidden>
+              <div id="stExplainText"></div>
+              <!-- what the position is ABOUT, from the Education System. It is
+                   additive: if the concept library or its corpus fails to
+                   load, this card never shows and the explanation above is
+                   exactly what it was. -->
+              <div class="card panel concept-card" id="conceptCard" style="display:none">
+                <h2>What This Position Is About</h2>
+                <div class="cc-body" id="conceptBody"></div>
+              </div>
+            </div>
+          </div>
+          <div class="study-nav">
+            <button class="nav-step" id="stBack" aria-label="Previous move">←</button>
+            <button class="nav-step" id="stFwd" aria-label="Next move">→</button>
+            <button class="ghost" id="stShare">Share</button>
+            <button class="ghost" id="stDone">Done</button>
+          </div>
+          <div class="study-share-out" id="stShareOut" style="display:none"></div>
+        </div>
+
         <!-- these used to sit at the right-hand end of the header row; they are
              a few pixels from where they were, and the header row is gone -->
         <div class="chips" id="gameChips">
@@ -4464,24 +4608,6 @@
                      autocomplete="off" spellcheck="false" aria-label="Message your opponent">
               <button class="primary" type="submit">Send</button>
             </form>
-          </div>
-
-          <!-- review only: why the engine liked its own move -->
-          <div class="card panel coach-card" id="coachCard" style="display:none">
-            <h2>The Engine's Move</h2>
-            <div class="coach-move" id="coachMove"></div>
-            <div class="coach-why" id="coachWhy"></div>
-          </div>
-
-          <!-- review only: what the position is ABOUT, from the Education
-               System. Separate from the coach card on purpose. That one only
-               appears when there was a better move; this one has something to
-               say when the player found it too. And it is additive: if the
-               concept library or its corpus fails to load, this card never
-               shows and Study Board is exactly what it was before. -->
-          <div class="card panel concept-card" id="conceptCard" style="display:none">
-            <h2>What This Position Is About</h2>
-            <div class="cc-body" id="conceptBody"></div>
           </div>
 
           <div class="card panel rules-card" id="rulesCard">
@@ -4739,14 +4865,26 @@
 
 <!-- game over -->
 <div class="overlay" id="endOverlay">
-  <div class="modal">
+  <div class="modal end-modal" role="dialog" aria-modal="true" aria-labelledby="endTitle" aria-describedby="endText">
     <button class="modal-x" id="endX" aria-label="Close" title="Close">×</button>
+    <div class="end-eyebrow">Game Complete</div>
     <h3 id="endTitle">You Win</h3>
     <p id="endText"></p>
-    <div class="row" style="justify-content:center">
-      <button class="primary" id="endNew">New Game</button>
-      <button class="ghost" id="endRematch">Rematch</button>
-      <button class="ghost" id="endClose">Study Board</button>
+    <div class="end-actions">
+      <!-- Study Board, and the gauge for the analysis behind it: the plate
+           fills left to right as the engine answers each position, then
+           reads START ANALYSIS. See studyButton(). -->
+      <button class="primary end-study" id="endClose" data-state="idle">
+        <span class="end-study-fill" aria-hidden="true"></span>
+        <span class="end-study-text">
+          <span class="end-study-title" id="endStudyTitle">Study Board</span>
+          <span class="end-study-sub" id="endStudySub"></span>
+        </span>
+      </button>
+      <div class="end-secondary">
+        <button class="ghost" id="endNew">New Game</button>
+        <button class="ghost" id="endRematch">Rematch</button>
+      </div>
     </div>
   </div>
 </div>
@@ -5628,7 +5766,7 @@ function renderMoves(){
   if (!G.sans.length){ el.moves.innerHTML = '<div class="empty">No moves yet.</div>'; return; }
   // in review the list is how you get around, so each move carries its ply and
   // the one being examined is the one lit, rather than the last one played
-  const cur = REV.on ? REV.ply : G.sans.length - 1;
+  const cur = REV.on ? REV.ply - 1 : G.sans.length - 1;
   const cell = i => `<div class="m${i === cur ? ' cur' : ''}${REV.on ? ' pick' : ''}"` +
                     `${REV.on ? ` data-ply="${i}"` : ''}>${G.sans[i]}</div>`;
   let html = '';
@@ -5644,7 +5782,7 @@ function renderMoves(){
 // jumping straight to a move, rather than stepping to it
 el.moves.addEventListener('click', e => {
   const cell = e.target.closest('.m[data-ply]');
-  if (cell && REV.on) reviewGoto(+cell.dataset.ply);
+  if (cell && REV.on) reviewGoto(+cell.dataset.ply + 1);
 });
 
 function renderCaptures(){
@@ -6050,6 +6188,9 @@ function finish(title, text, status){
   // nobody left to put it to.
   document.getElementById('endRematch').style.display =
     (LOCAL() || (ONLINE() && NET.oppGone)) ? 'none' : '';
+  // the Study Board button: START ANALYSIS at once when this game has been
+  // analysed before, and the plain button otherwise
+  studyPrime();
   el.endOverlay.classList.add('show');
   beep(330,.2); setTimeout(()=>beep(262,.35),180);
   // tell the server how it ended — it only records the first word on the matter
@@ -7225,7 +7366,7 @@ const SF = {
   pending: null,        // the search in flight
   queue: [],
   cache: new Map(),     // key -> result; the key includes the strength settings
-  applied: { skill:null, multipv:null }   // what the engine is set to right now
+  applied: { skill:null, multipv:null, objective:null }   // what the engine is set to right now
 };
 
 const SF_MOVETIME = 500;   // per position; a game of 40 moves reviews in well under a minute
@@ -7241,7 +7382,7 @@ function engineStart(){
   try {
     SF.worker = new Worker('engine/stockfish.wasm.js');
   } catch(e){ SF.unavailable = true; return; }
-  SF.worker.onerror = () => { SF.unavailable = true; SF.ready = false; reviewRender(); };
+  SF.worker.onerror = () => { SF.unavailable = true; SF.ready = false; studyFail(STUDY.token); reviewRender(); };
   SF.worker.onmessage = ev => {
     const line = typeof ev.data === 'string' ? ev.data : (ev.data && ev.data.data) || '';
     engineLine(line);
@@ -7339,6 +7480,19 @@ function enginePump(){
     SF.worker.postMessage('setoption name MultiPV value ' + job.multipv);
     SF.applied.multipv = job.multipv;
   }
+  /* Contempt is a thumb on the scale, and this build applies it from the point
+     of view of whoever is to move at the root ("Analysis Contempt: Both", 24
+     by default). Right for the bot, which should prefer a fight to a draw;
+     ruinous for the study, which compares the reading before a move with the
+     reading after it — those two searches have opposite sides at the root, so
+     every move in every game looked like it lost half a pawn. Anything that
+     measures a position rather than plays one asks for `objective`, exactly as
+     tools/sf.js does for the puzzle generator. */
+  if (SF.applied.objective !== job.objective){
+    SF.worker.postMessage('setoption name Contempt value ' + (job.objective ? 0 : 24));
+    SF.worker.postMessage('setoption name Analysis Contempt value ' + (job.objective ? 'Off' : 'Both'));
+    SF.applied.objective = job.objective;
+  }
   SF.worker.postMessage('position ' + (job.fen ? 'fen ' + job.fen : 'startpos') +
                         (job.moves ? ' moves ' + job.moves : ''));
   SF.worker.postMessage(job.limit);
@@ -7363,20 +7517,21 @@ function engineKey(moves, opt){
   const limit   = opt.depth ? ('go depth ' + opt.depth)
                             : ('go movetime ' + (opt.movetime || SF_MOVETIME));
   const fen = opt.fen || '';
-  return { key: fen + '|' + moves.join(' ') + '|' + skill + '|' + multipv + '|' + limit,
-           moveStr: moves.join(' '), fen, skill, multipv, limit };
+  const objective = !!opt.objective;
+  return { key: fen + '|' + moves.join(' ') + '|' + skill + '|' + multipv + '|' + limit + (objective ? '|objective' : ''),
+           moveStr: moves.join(' '), fen, skill, multipv, limit, objective };
 }
 
 function engineAsk(moves, opt){
   opt = opt || {};
-  const { key, moveStr, fen, skill, multipv, limit } = engineKey(moves, opt);
+  const { key, moveStr, fen, skill, multipv, limit, objective } = engineKey(moves, opt);
   // bot moves skip the cache, so a repeated position is not answered identically
   if (!opt.nocache && SF.cache.has(key)) return Promise.resolve(SF.cache.get(key));
   if (SF.unavailable) return Promise.resolve(null);
   engineStart();
   if (SF.unavailable) return Promise.resolve(null);
   return new Promise(resolve => {
-    SF.queue.push({ key, moves: moveStr, fen, skill, multipv, limit,
+    SF.queue.push({ key, moves: moveStr, fen, skill, multipv, limit, objective,
                     nocache: !!opt.nocache, resolve });
     enginePump();
   });
@@ -7387,10 +7542,12 @@ function engineAsk(moves, opt){
    ============================================================ */
 const REV = {
   on: false,
-  ply: 0,              // 0 = before the first move, N = final position
+  ply: 0,              // 0 = the start position, k = the board after move k
   states: [],          // states[i] is the position before move i
   moves: [],           // the move actually played at each ply
-  liveState: null      // the final position, restored on leaving
+  liveState: null,     // the final position, restored on leaving
+  bestMove: null,
+  explain: false       // the long explanation is open — kept across moves on purpose
 };
 
 function reviewBuild(){
@@ -7407,22 +7564,34 @@ function reviewBuild(){
   REV.moves = moves;
 }
 
+/* Study Board proper. The ordinary way here is START ANALYSIS, by which time
+   the whole game has been through the engine and STUDY holds a record for
+   every move. A review opened any other way — a study that failed part-way,
+   the test harnesses, a browser with no WebAssembly — adopts whatever the
+   engine has answered so far and asks for the rest one move at a time
+   (reviewAnalyse), so the screen is never refused, only slower. */
 function enterReview(){
   if (!G.sans.length) return;         // nothing to look at
   el.endOverlay.classList.remove('show');
   REV.liveState = G.st;
   reviewBuild();
+  if (!STUDY.recs || STUDY.key !== studyKey(G.uci)) studyAdopt();
   REV.on = true;
   REV.ply = 0;
   G.revealed = true;                  // the board is open once the game is done
   G.peeking = false;
-  document.getElementById('reviewBar').style.display = 'flex';
+  // From the player's own chair — and from White's when the screen was shared,
+  // rather than however the last move left a board that turns to face whoever
+  // is to move. A shared study faces the chair of whoever shared it.
+  G.flipped = LOCAL() ? false : G.human === B;
+  document.getElementById('studyPanel').style.display = '';
   document.getElementById('screen-game').classList.add('reviewing');
-  engineStart();
+  studyShareSay('');
   // Start fetching the concept library now rather than on the first render:
   // it is 2.3MB of corpus and the player is about to read a card.
   eduLoad();
-  reviewGoto(0);
+  reviewGoto(G.sans.length ? 1 : 0);   // the first move, not the empty board before it
+  navSync();
 }
 
 /* The review borrows G.st to show old positions, so every way out of it has to
@@ -7434,46 +7603,71 @@ function reviewClose(restore){
   REV.bestMove = null;
   if (restore && REV.liveState) G.st = REV.liveState;
   REV.liveState = null;
-  document.getElementById('reviewBar').style.display = 'none';
+  document.getElementById('studyPanel').style.display = 'none';
   document.getElementById('screen-game').classList.remove('reviewing');
-  document.getElementById('coachCard').style.display = 'none';
   document.getElementById('conceptCard').style.display = 'none';
   document.getElementById('arrows').innerHTML = '';
   document.getElementById('marks').innerHTML = '';
 }
 
+/* Done. Somebody else's game has no board behind it, so it goes home; our own
+   brings back the box the study was started from, so New Game and Rematch are
+   where they were — and the button on it now reads START ANALYSIS. */
 function exitReview(){
+  const borrowed = !!STUDY.shared || G.opponent === 'study';
   reviewClose(true);
   G.lastMove = null;
   render();
+  if (borrowed){ showScreen('home'); return; }
+  if (G.over) el.endOverlay.classList.add('show');
+  navSync();
 }
 
 function reviewGoto(ply){
+  if (!REV.on || !REV.states.length) return;
   REV.ply = Math.max(0, Math.min(ply, REV.states.length - 1));
   G.st = REV.states[REV.ply];
+  // the board shows the position the move led to, with the move's two squares
+  // shaded by render() — the same .last shading the game uses
   G.lastMove = REV.ply > 0 ? REV.moves[REV.ply - 1] : null;
   G.sel = -1;
-  REV.bestMove = null;          // don't leave the previous arrow pointing
+  REV.bestMove = null;
   render();
   reviewRender();
   reviewAnalyse();
 }
 
-/* The position on screen, and the one after the move that was played from it,
-   are both wanted: the first gives the best move, the pair gives the verdict. */
-// full strength, two lines: the second is what tells !! from merely best
-const REVIEW_ASK = { skill: 20, multipv: 2 };
+/* Two lines, full strength, and objective — see enginePump() on contempt: the
+   second line is what tells !! from merely best, and what says how much the
+   runner-up would have cost. Shared with the study's own pass, so a position
+   answered there is not answered twice. */
+const REVIEW_ASK = { skill: 20, multipv: 2, objective: true };
 
 function reviewCached(ply){
   return SF.cache.get(engineKey(G.uci.slice(0, ply), REVIEW_ASK).key);
 }
 
+/* The move on screen needs the position before it and the one after it. Both
+   are normally in STUDY already; this fills a hole when they are not, and
+   never for a shared study, whose numbers are somebody else's to extend. */
 function reviewAnalyse(){
   const ply = REV.ply;
-  const again = () => { if (REV.on && REV.ply === ply) reviewRender(); };
-  engineAsk(G.uci.slice(0, ply), REVIEW_ASK).then(again);
-  if (ply < REV.moves.length){
-    engineAsk(G.uci.slice(0, ply + 1), REVIEW_ASK).then(again);
+  if (ply === 0 || !STUDY.recs || STUDY.shared) return;
+  const need = [ply - 1, ply].filter(i => !STUDY.evals[i]);
+  if (!need.length) return;
+  const token = STUDY.token;
+  for (const i of need){
+    studyAsk(i, REV.states[i]).then(res => {
+      if (token !== STUDY.token || !res || STUDY.evals[i]) return;
+      STUDY.evals[i] = res;
+      studyPatch(i);
+      if (STUDY.evals.length === STUDY.total && STUDY.evals.every(Boolean) && STUDY.state !== 'ready'){
+        STUDY.state = 'ready'; STUDY.done = STUDY.total;
+        studyStore(STUDY.key, STUDY.game, STUDY.evals);
+        studyButton();
+      }
+      if (REV.on && REV.ply === ply) reviewRender();
+    });
   }
 }
 
@@ -7495,7 +7689,7 @@ function fmtScore(res, turn){
   return (white > 0 ? '+' : '') + (white / 100).toFixed(2);
 }
 
-/* Eight judgements, and every move gets exactly one.
+/* Seven judgements, and every move gets exactly one.
 
    Centipawns are the wrong ruler for this. Dropping a pawn from a level
    position is a real error; dropping one while a queen up is not; both read as
@@ -7517,15 +7711,13 @@ function winPct(cp){
 }
 
 const VERDICT = {
-  brilliant:  { sym:'!!', text:'Brilliant',  cls:'v-brilliant',  mark:'m-brilliant' },
-  great:      { sym:'!',  text:'Great move', cls:'v-great',      mark:'m-great' },
-  best:       { sym:'\u2605', text:'Best move', cls:'v-best',      mark:'m-best' },
-  // excellent and good share the tick and differ by colour, as the marks do
-  excellent:  { sym:'\u2713', text:'Excellent', cls:'v-excellent', mark:'m-excellent' },
-  good:       { sym:'\u2713', text:'Good move', cls:'v-good',      mark:'m-good' },
-  inaccuracy: { sym:'?!', text:'Inaccuracy', cls:'v-inaccuracy', mark:'m-inaccuracy' },
-  mistake:    { sym:'?',  text:'Mistake',    cls:'v-mistake',    mark:'m-mistake' },
-  blunder:    { sym:'??', text:'Blunder',    cls:'v-blunder',    mark:'m-blunder' }
+  brilliant:  { key:'brilliant',  sym:'!!', text:'Brilliant',  cls:'v-brilliant',  mark:'m-brilliant' },
+  great:      { key:'great',      sym:'!',  text:'Great move', cls:'v-great',      mark:'m-great' },
+  best:       { key:'best',       sym:'★', text:'Best move', cls:'v-best',    mark:'m-best' },
+  good:       { key:'good',       sym:'👍', text:'Good move', cls:'v-good', mark:'m-good' },
+  inaccuracy: { key:'inaccuracy', sym:'?',  text:'Inaccuracy', cls:'v-inaccuracy', mark:'m-inaccuracy' },
+  mistake:    { key:'mistake',    sym:'✕', text:'Mistake', cls:'v-mistake',   mark:'m-mistake' },
+  blunder:    { key:'blunder',    sym:'??', text:'Blunder',    cls:'v-blunder',    mark:'m-blunder' }
 };
 
 /* What the move gave away, in material, by the board alone: the exchange the
@@ -7545,13 +7737,57 @@ function sacrificeSize(st, m, after){
   return most;
 }
 
+/* Material the mover is down once the opponent has made the engine's reply,
+   relative to before the move: the honest measure of a sacrifice. A piece left
+   where it can be taken is not given away if the engine does not take it, and
+   a capture that leaves something loose behind it is not a sacrifice when it
+   took more than it left — a knight fork that drops a knight elsewhere and
+   wins a rook is winning the exchange, which sacrificeSize() alone called a
+   sacrifice. */
+function sacrificeDeficit(st, played, after){
+  const me = st.turn;
+  const post = makeMove(st, played);
+  let s = post, r = null;
+  const reply = after && (after.best || (after.pv && after.pv[0]));
+  if (reply){
+    r = legalMoves(post, post.turn).find(x => uciOf(x) === reply) || null;
+    if (r) s = makeMove(post, r);
+  }
+  // the exchange the reply started is settled first — the recapture on the
+  // square it took on, and nothing else: a queen that takes a knight and is
+  // taken back has not been given a knight, while a pawn hanging somewhere
+  // else on the board is not what pays for the piece
+  const back = r && r.cap ? Math.max(0, see(s, r.to, me)) : 0;    // see() is negative for a capture that loses
+  return materialFor(st, me) - (materialFor(s, me) + back);
+}
+
 /* st and played are the position and the move under the microscope; before and
    after are the engine's two readings either side of it, each from the point
    of view of whoever is to move in them, so everything the mover is charged
    with is the second one flipped. gap is how far the engine's first line beat
-   its second. */
+   its second.
+
+   "Best" is not only the engine's first choice by name. The reading after the
+   move is a deeper look at that exact move than the two-line search before it
+   could afford, and when it rates the move at least as well as the first
+   choice was rated, the two are the same move for every purpose the player
+   has — the engine changed its mind, not the player.
+
+   Brilliant is a sacrifice that the engine confirms: the mover is a piece or
+   more down once the engine's own reply has been made (sacrificeDeficit),
+   the position was not already won (a queen given away while a rook up is
+   tidying), and it still stands clearly ahead after best defence — the
+   reading after the move IS the reading after best defence, so a plus there
+   is the compensation the sacrifice was for. Great is the move the position
+   turned on: the runner-up costs real winning chances, the piece that moved
+   is not simply hanging where it landed, and it is not a capture the
+   exchange on the square already justified — taking a hanging rook is not
+   hard to find. */
 function judgeMove(st, played, before, after, playedWasBest, gap){
   const num = v => (v === null || v === undefined) ? null : v;
+  // "mate 0" is the engine's word for a side that is already mated: the move
+  // was checkmate, and nothing outranks that
+  if (after && num(after.mate) === 0) return VERDICT.best;
   const mateBefore = before ? num(before.mate) : null;
   const mateAfter  = (after && num(after.mate) !== null) ? -after.mate : null;
   const cpBefore   = before ? num(before.cp) : null;
@@ -7563,7 +7799,7 @@ function judgeMove(st, played, before, after, playedWasBest, gap){
       const slower = mateAfter - mateBefore;
       if (slower <= 0) return VERDICT.best;
       if (slower <= 2) return VERDICT.good;
-      return VERDICT.mistake;
+      return VERDICT.inaccuracy;
     }
     // the mate is gone, and what is left decides how much that cost
     return (cpAfter !== null && cpAfter >= 300) ? VERDICT.mistake : VERDICT.blunder;
@@ -7574,33 +7810,37 @@ function judgeMove(st, played, before, after, playedWasBest, gap){
       return mateAfter <= mateBefore ? VERDICT.best : VERDICT.good;
     return VERDICT.blunder;                    // walked into a mate that was not there
   }
-  // escaping a mate, or an engine that has not answered yet: nothing to weigh
+  if (mateAfter !== null && mateAfter > 0){
+    // a forced mate the shallower search had not announced: found, not given
+    if (playedWasBest) return VERDICT.best;
+    return sacrificeDeficit(st, played, after) >= 200 ? VERDICT.brilliant : VERDICT.great;
+  }
+  // out of a mate the engine had called, or an engine that has not answered
+  // yet: nothing to weigh
+  if (mateBefore !== null && mateBefore < 0) return VERDICT.best;
   if (cpBefore === null || cpAfter === null)
     return playedWasBest ? VERDICT.best : VERDICT.good;
 
-  if (playedWasBest){
-    const secondCp = before.second ? sfScore(before.second) : null;
-    // brilliant is a sacrifice the engine still calls best, in a position that
-    // was not already won — giving up material while a rook up is only tidying
-    if (secondCp !== null && secondCp < 700 &&
-        sacrificeSize(st, played, makeMove(st, played)) >= 200)
+  const loss = winPct(cpBefore) - winPct(cpAfter);
+  if (playedWasBest || loss < 1){
+    const secondCp = before && before.second ? sfScore(before.second) : null;
+    const after_ = makeMove(st, played);
+    if (sacrificeDeficit(st, played, after) >= 200 && cpBefore < 700 && cpAfter >= 50)
       return VERDICT.brilliant;
-    // great is the only move that holds, played, and not hung in the process
-    if (gap !== null && gap >= 150 &&
-        see(makeMove(st, played), played.to, other(st.turn)) <= 0)
+    const secondDrop = secondCp !== null ? winPct(cpBefore) - winPct(secondCp) : null;
+    if (secondDrop !== null && secondDrop >= 10 &&
+        see(after_, played.to, other(st.turn)) <= 0 &&
+        !(played.cap && see(st, played.to, st.turn) > 0))
       return VERDICT.great;
     return VERDICT.best;
   }
-
-  const loss = winPct(cpBefore) - winPct(cpAfter);
-  if (loss < 2)  return VERDICT.excellent;
   if (loss < 5)  return VERDICT.good;
   if (loss < 10) return VERDICT.inaccuracy;
   if (loss < 20) return VERDICT.mistake;
   return VERDICT.blunder;
 }
 
-/* ---- the two arrows, and the mark on the square the piece landed on ---- */
+/* ---- an arrow, and the mark on the square the piece landed on ---- */
 const ARROW_HEAD = 0.26;      // measured in squares
 
 function drawArrow(svg, m, cls){
@@ -7632,27 +7872,28 @@ function drawArrow(svg, m, cls){
   svg.appendChild(head);
 }
 
-function drawReviewOverlay(played, best, judgement){
+/* The board says two things about the move on screen and nothing else. Its two
+   squares are shaded (render() does that, through G.lastMove), and an arrow is
+   drawn only for a threat the move made or a weakness it opened —
+   studyThreats() decides which, and an empty list is the usual answer. The
+   move itself is never drawn as an arrow: the shading already says where it
+   went, and an arrow for every move is what makes a threat arrow invisible. */
+function drawReviewOverlay(rec){
   const svg = document.getElementById('arrows');
   const marks = document.getElementById('marks');
   svg.innerHTML = '';
   marks.innerHTML = '';
-  if (!REV.on || !played) return;
+  if (!REV.on || !rec) return;
 
-  // when the player found the engine's move there is nothing to compare, so
-  // the board stays clean
-  const same = best && uciOf(played) === uciOf(best);
-  if (!same){
-    drawArrow(svg, played, 'a-played');
-    if (best) drawArrow(svg, best, 'a-best');
-  }
+  for (const t of rec.threats) drawArrow(svg, t, t.kind === 'mate' ? 'a-threat a-mate' : 'a-threat');
+  for (const t of rec.vulns)   drawArrow(svg, t, t.kind === 'mateIn1' ? 'a-vuln a-mate' : 'a-vuln');
 
-  if (judgement){
-    const v = visualIndex(played.to);
+  if (rec.verdict){
+    const v = visualIndex(rec.to);
     const d = document.createElement('div');
-    d.className = 'mark ' + judgement.mark;
+    d.className = 'mark ' + rec.verdict.mark;
     d.style.transform = `translate(${colOf(v)*100}%, ${rowOf(v)*100}%)`;
-    d.innerHTML = '<b>' + judgement.sym + '</b>';
+    d.innerHTML = '<b>' + rec.verdict.sym + '</b>';
     marks.appendChild(d);
   }
 }
@@ -7743,12 +7984,12 @@ function findMotifs(before, move, after, attackerColor){
       if (!p || p.c !== them) continue;
       if (attackersOf(after, i, attackerColor).indexOf(move.to) < 0) continue;
       if (VAL[p.t] > VAL[moved.t] || !defendersOf(after, i, them).length)
-        hit.push(word(p.t) + ' on ' + sqName(i));
+        hit.push({ sq:i, t:p.t, text: word(p.t) + ' on ' + sqName(i) });
     }
     if (hit.length >= 2)
-      out.push({ tag:'fork',
+      out.push({ tag:'fork', targets: hit,
                  text:'The ' + word(moved.t) + ' on ' + sqName(move.to) + ' forks the ' +
-                      hit.slice(0,-1).join(', the ') + ' and the ' + hit[hit.length-1] + '.' });
+                      hit.slice(0,-1).map(h => h.text).join(', the ') + ' and the ' + hit[hit.length-1].text + '.' });
   }
 
   // pins and skewers, but only the ones this move created: a pin that was
@@ -7757,11 +7998,11 @@ function findMotifs(before, move, after, attackerColor){
   for (const l of sliderLines(after, attackerColor)){
     if (had.some(x => x.from === l.from && x.front === l.front && x.back === l.back)) continue;
     if (VAL[l.backP.t] > VAL[l.frontP.t])
-      pins.push({ tag:'pin',
+      pins.push({ tag:'pin', front:{ sq:l.front, t:l.frontP.t }, back:{ sq:l.back, t:l.backP.t },
                   text:'The ' + word(l.frontP.t) + ' on ' + sqName(l.front) + ' is pinned to the ' +
                        word(l.backP.t) + ' behind it and cannot step aside.' });
     else if (VAL[l.frontP.t] > VAL[l.backP.t])
-      skewers.push({ tag:'skewer',
+      skewers.push({ tag:'skewer', front:{ sq:l.front, t:l.frontP.t }, back:{ sq:l.back, t:l.backP.t },
                      text:'The ' + word(l.frontP.t) + ' on ' + sqName(l.front) +
                           ' has to move, and the ' + word(l.backP.t) + ' on ' + sqName(l.back) +
                           ' behind it falls.' });
@@ -7794,7 +8035,7 @@ function findMotifs(before, move, after, attackerColor){
                  text:'It is double check — the ' + word(moved.t) + ' and the ' + word(disc.q.t) +
                       ' on ' + sqName(disc.from) + ' both hit the king, so only the king can move.' });
     else
-      out.push({ tag:'discoveredAttack',
+      out.push({ tag:'discoveredAttack', target:{ sq:disc.sq, t:disc.p.t },
                  text:'Moving the ' + word(move.p.t) + ' uncovers the ' + word(disc.q.t) + ' on ' +
                       sqName(disc.from) + ', which now ' +
                       (onKing ? 'checks the king' : 'attacks the ' + word(disc.p.t) + ' on ' + sqName(disc.sq)) +
@@ -7845,7 +8086,7 @@ function findMotifs(before, move, after, attackerColor){
     if (!trapped || VAL[p.t] > VAL[trapped.p.t]) trapped = { sq:i, p };
   }
   if (trapped && (!loose || trapped.sq !== loose.sq))
-    out.push({ tag:'trappedPiece',
+    out.push({ tag:'trappedPiece', sq:trapped.sq, p:trapped.p,
                text:'The ' + word(trapped.p.t) + ' on ' + sqName(trapped.sq) +
                     ' is trapped — every square it can reach loses it.' });
 
@@ -7950,103 +8191,988 @@ function describeBest(st, m, res, lossByPlayer, pvSan){
   return head.slice(0, Math.max(1, 3 - tail.length)).concat(tail).slice(0, 3).join(' ');
 }
 
+/* The panel beside the board, for the move the board is showing. Everything
+   on it is read off one record — studyBuild() made it from the engine's two
+   readings — and the two things written at render time, the reasons and the
+   long explanation, are functions of that record and of what the Education
+   System says about the position, so a shared study reads exactly as the
+   original did. */
 function reviewRender(){
   if (!REV.on) return;
   const ply = REV.ply, last = REV.states.length - 1;
-  const st = REV.states[ply];
+  const rec = ply > 0 && STUDY.recs ? STUDY.recs[ply - 1] : null;
 
-  /* What the position is ABOUT, from education/. Deliberately ABOVE the four
-     quiet() returns below: those are all about the ENGINE — it cannot run, it
-     is still starting, the game is over, the search has not answered yet — and
-     none of them is a reason to stop naming what is on the board. The
-     knowledge base does not need an engine and says so itself when it has
-     none, which is exactly the case a player on a browser without WebAssembly
-     is in. Additive and quiet on failure: if education/ is not there this does
-     nothing at all. */
+  /* What the position is ABOUT, from education/. Deliberately ABOVE the
+     engine checks below: those are all about the ENGINE — it cannot run, it
+     is still starting, the search has not answered yet — and none of them is
+     a reason to stop naming what is on the board. The knowledge base does not
+     need an engine and says so itself when it has none, which is exactly the
+     case a player on a browser without WebAssembly is in. Additive and quiet
+     on failure: if education/ is not there this does nothing at all. */
   eduAnalyse(ply);
-  // ply i is the position *before* move i, so it is move i under the microscope
-  // here: number (i>>1)+1, and White on even plies.
-  document.getElementById('revCount').textContent =
-    ply === last
-      ? 'Final position'
-      : 'Move ' + ((ply >> 1) + 1) + (ply % 2 ? ', Black' : ', White') +
-        '  \u00b7  ' + (ply + 1) + ' of ' + REV.moves.length;
 
-  document.getElementById('revBack').disabled = ply === 0;
-  document.getElementById('revFwd').disabled  = ply === last;
+  const $ = id => document.getElementById(id);
+  $('stCount').textContent =
+    ply === 0 ? 'Start of the game'
+              : 'Move ' + (((ply - 1) >> 1) + 1) + (ply % 2 ? ' · White' : ' · Black') +
+                (ply === last ? ' · Final position' : '');
+  $('stBack').disabled = ply === 0;
+  $('stFwd').disabled  = ply === last;
 
-  const line  = document.getElementById('revLine');
-  const badge = document.getElementById('revVerdict');
-  const coach = document.getElementById('coachCard');
+  const plate = $('stVerdict'), pair = $('stPair'), reasons = $('stReasons');
+  const win = $('stWin'), explainBtn = $('stExplain'), body = $('stExplainBody');
 
-  const quiet = (msg) => {
-    line.textContent = msg;
-    badge.className = 'rev-verdict'; badge.textContent = '';
-    coach.style.display = 'none';
-    drawReviewOverlay(null, null, null);
+  const quiet = msg => {
+    plate.className = 'study-verdict quiet';
+    plate.innerHTML = '<span class="sv-name">' + eduEsc(msg) + '</span>';
+    pair.style.display = 'none';
+    reasons.innerHTML = '';
+    win.style.display = 'none';
+    explainBtn.style.display = 'none';
+    body.hidden = true;
+    drawReviewOverlay(null);
   };
 
-  if (SF.unavailable) return quiet('This browser cannot run the analysis engine.');
-  if (!SF.ready)      return quiet('Starting the engine\u2026');
-  if (ply === last)   return quiet('End of the game.');
-
-  const before = reviewCached(ply);
-  const after  = reviewCached(ply + 1);
-  const played = REV.moves[ply];
-  const playedSan = G.sans[ply];
-
-  if (!before) return quiet('Thinking\u2026');
-
-  // the engine's move, named the way a player reads moves
-  const all = legalMoves(st, st.turn);
-  let bestSan = null, bestMove = null;
-  if (before.best){
-    bestMove = all.find(x => uciOf(x) === before.best) || null;
-    if (bestMove) bestSan = toSAN(st, bestMove, all);
-  }
-  REV.bestMove = bestMove;
-
-  const playedWasBest = !!(before.best && uciOf(played) === before.best);
-
-  // both scores are from the mover's side, so flipping the second gives what
-  // the move actually cost
-  let loss = null;
-  if (after && sfScore(before) !== null && sfScore(after) !== null){
-    loss = sfScore(before) - (-sfScore(after));
-  }
-  // how far ahead the top move was of the runner-up
-  let gap = null;
-  if (before.second && sfScore(before) !== null && sfScore(before.second) !== null){
-    gap = sfScore(before) - sfScore(before.second);
+  if (ply === 0)  return quiet(G.sans.length ? 'Press → to review the first move.' : 'No moves were played.');
+  if (!rec)       return quiet('This game could not be replayed.');
+  if (!rec.before || !rec.after || !rec.verdict){
+    if (SF.unavailable) return quiet('This browser cannot run the analysis engine.');
+    if (STUDY.shared)   return quiet('This move was not analysed in the shared study.');
+    if (!SF.ready)      return quiet('Starting the engine…');
+    return quiet('Analysing this move…');
   }
 
-  const v = judgeMove(st, played, before, after, playedWasBest, gap);
-  badge.className = 'rev-verdict ' + v.cls;
-  badge.textContent = v.sym + '  ' + v.text;
+  const v = rec.verdict;
+  const edu = (EDU.last && EDU.last.ply === ply) ? EDU.last.r : null;
+  REV.bestMove = rec.best ? rec.best.move : null;
 
-  line.innerHTML =
-    'You played <b>' + playedSan + '</b>' +
-    (playedWasBest
-      ? ' \u2014 the engine agrees.'
-      : (bestSan ? ' \u00b7 best was <b>' + bestSan + '</b>' : '')) +
-    '  <span class="rev-eval">' + fmtScore(before, st.turn) + '</span>';
+  plate.className = 'study-verdict ' + v.cls;
+  plate.innerHTML = '<b class="sv-sym">' + v.sym + '</b>' +
+                    '<span class="sv-san">' + eduEsc(rec.san) + '</span>' +
+                    '<span class="sv-name">' + v.text + '</span>';
 
-  // the coaching card only has something to add when there was a better move
-  if (bestMove && !playedWasBest){
-    coach.style.display = '';
-    document.getElementById('coachMove').innerHTML =
-      bestSan + ' <span class="cm-eval">' + fmtScore(before, st.turn) + '</span>';
-    // the engine's whole line, so the card can say what happens next and not
-    // only what to play
-    document.getElementById('coachWhy').textContent =
-      describeBest(st, bestMove, before, loss, pvLine(st, before.pv));
-  } else {
-    coach.style.display = 'none';
-    document.getElementById('coachMove').textContent = '';
-    document.getElementById('coachWhy').textContent = '';
+  // MOVE and BEST side by side, and never as a sentence
+  pair.style.display = '';
+  // the engine's first choice, or a move it rates just as well: either way
+  // there is nothing to point from one cell to the other
+  const same = rec.playedWasBest || (rec.best && rec.best.uci === rec.uci) || rec.verdict.key === 'best';
+  pair.classList.toggle('same', !!same);
+  $('stMove').textContent = rec.san;
+  $('stBest').textContent = rec.best ? rec.best.san : '—';
+  $('stPairArrow').textContent = same ? '=' : '→';
+
+  reasons.innerHTML = studyReasons(rec, edu).map(r => '<li>' + eduEsc(r) + '</li>').join('');
+
+  win.style.display = '';
+  $('stWinBefore').textContent = rec.winBefore + '%';
+  $('stWinAfter').textContent  = rec.winAfter + '%';
+  const d = rec.delta;
+  const delta = $('stWinDelta');
+  delta.textContent = (d > 0 ? '+' : d < 0 ? '−' : '±') + Math.abs(d) + '%';
+  delta.className = 'sw-delta ' + (d > 0 ? 'up' : d < 0 ? 'down' : 'flat');
+  $('stWinBarBefore').style.width = rec.winBefore + '%';
+  $('stWinBarAfter').style.width  = rec.winAfter + '%';
+  $('stWinSide').textContent = 'for ' + (rec.side === W ? 'White' : 'Black');
+
+  explainBtn.style.display = '';
+  explainBtn.textContent = REV.explain ? 'Hide' : 'Explain';
+  explainBtn.setAttribute('aria-expanded', REV.explain ? 'true' : 'false');
+  body.hidden = !REV.explain;
+  if (REV.explain){
+    $('stExplainText').innerHTML = studyExplain(rec, edu).map(sec =>
+      '<h3>' + eduEsc(sec.h) + '</h3>' + sec.p.map(p => '<p>' + eduEsc(p) + '</p>').join('')).join('');
   }
 
-  drawReviewOverlay(played, bestMove, v);
+  drawReviewOverlay(rec);
+}
+
+/* ============================================================
+   THE STUDY — the whole game through the engine before the board opens
+
+   Study Board used to ask the engine about each move as the player reached
+   it, so the verdict on move twelve was not there until move twelve was on
+   screen, and a player stepping quickly outran it. Now the game is analysed
+   in full behind the end-of-game box — the Study Board button fills as it
+   goes, one position at a time, and reads START ANALYSIS only when every
+   position has been answered — and the screen opens on finished numbers.
+
+   The engine is asked exactly what the review asked it (REVIEW_ASK, one
+   worker, one cache), one position after another rather than all at once, so
+   the progress the button shows is the number of positions actually
+   answered and nothing else, and so that a new game or a walk off the screen
+   can call the rest off (STUDY.token). What comes back is kept twice: as the
+   raw readings (STUDY.evals, one per position, what the cache and the share
+   link carry) and as records (STUDY.recs, one per move, what the panel
+   reads). The records are a pure function of the readings and the moves —
+   studyBuild() — which is what lets a shared study be rebuilt on somebody
+   else's browser from the readings alone and come out identical.
+
+   Two things are written at render time rather than stored: the short
+   reasons and the long explanation. Both are functions of the record and of
+   what the Education System says about the position, so storing them would
+   be a copy that could disagree with the numbers beside it. Every sentence in
+   either is read off the board or off a line the engine actually gave; where
+   a claim would need more than that, the sentence says less.
+   ============================================================ */
+const STUDY = {
+  key: null,          // studyKey() of the move list the records are about
+  game: null,         // { uci, sans, white, black, mode, result, human }
+  evals: [],          // one engine reading per position, 0..N; null until answered
+  recs: null,         // one record per move, from studyBuild()
+  state: 'idle',      // idle | analysing | ready | failed
+  done: 0, total: 0,  // positions answered, positions in the game
+  token: 0,           // bumped by anything that makes the running pass stale
+  watch: null,        // the stall timer while analysing
+  shared: null        // the payload this study arrived in, when it is somebody else's game
+};
+const STUDY_VERSION = 1;              // the shape of a packed study; bump when it changes
+const STUDY_STORE   = 'nox.study.';   // localStorage prefix; the list of keys is under STUDY_STORE + 'list'
+const STUDY_KEEP    = 12;             // finished studies kept, newest first
+const STUDY_STALL   = 30000;          // ms of silence from the engine before the pass is called off
+const SIDE_WORD = c => c === W ? 'White' : 'Black';
+
+function studyGameOf(){
+  return { uci: G.uci.slice(), sans: G.sans.slice(), white: seatName(W), black: seatName(B),
+           mode: G.mode, result: G.over ? G.over.text : '', human: G.human };
+}
+
+/* The move list, hashed. Two games with the same moves are the same study —
+   who played them, and how the clock stood, changes nothing the engine says. */
+function studyKey(uci){
+  const s = uci.join(' ');
+  let h = 0x811c9dc5;
+  for (let i = 0; i < s.length; i++){ h ^= s.charCodeAt(i); h = Math.imul(h, 0x01000193) >>> 0; }
+  return uci.length.toString(36) + '-' + h.toString(36);
+}
+
+/* ---- the pass ---- */
+
+/* The game has just ended: the button is put in the state the cache says.
+   A game analysed before reads START ANALYSIS at once. */
+function studyPrime(){
+  STUDY.token++;
+  clearTimeout(STUDY.watch);
+  const game = studyGameOf();
+  STUDY.key = studyKey(game.uci); STUDY.game = game; STUDY.shared = null;
+  STUDY.recs = null; STUDY.evals = []; STUDY.done = 0; STUDY.total = game.uci.length + 1;
+  const cached = studyLoad(STUDY.key, game.uci);
+  if (cached){
+    STUDY.evals = cached; STUDY.recs = studyBuild(game, cached);
+    STUDY.state = 'ready'; STUDY.done = STUDY.total;
+  } else STUDY.state = 'idle';
+  studyButton();
+}
+
+function studyStart(){
+  if (!G.sans.length) return;
+  const game = studyGameOf();
+  const token = ++STUDY.token;
+  STUDY.key = studyKey(game.uci); STUDY.game = game; STUDY.shared = null; STUDY.recs = null;
+  STUDY.total = game.uci.length + 1;
+  const cached = studyLoad(STUDY.key, game.uci);
+  if (cached){
+    STUDY.evals = cached; STUDY.recs = studyBuild(game, cached);
+    STUDY.state = 'ready'; STUDY.done = STUDY.total;
+    studyButton();
+    return;
+  }
+  STUDY.evals = new Array(STUDY.total).fill(null);
+  STUDY.done = 0; STUDY.state = 'analysing';
+  studyButton();
+  if (!engineAvailable() || SF.unavailable){ studyFail(token); return; }
+  engineStart();
+  studyStep(token, 0, newState());
+}
+
+/* A position with no legal moves is not a question for the engine: this
+   build says nothing at all when asked about one (no info, no bestmove), and
+   the pass would sit on the last move of a game that ended in mate until the
+   stall timer gave up on it. The rules already know the answer — mate 0 is
+   the engine's own word for a side that is mated, and a stalemate is level —
+   so it is written here, in the shape a search would have returned. */
+function studyTerminal(s){
+  if (legalMoves(s, s.turn).length) return null;
+  return inCheck(s, s.turn) ? { cp:null, mate:0, best:null, pv:null, second:null, lines:[] }
+                            : { cp:0, mate:null, best:null, pv:null, second:null, lines:[] };
+}
+function studyAsk(i, s){
+  const done = studyTerminal(s);
+  return done ? Promise.resolve(done) : engineAsk(STUDY.game.uci.slice(0, i), REVIEW_ASK);
+}
+
+/* One position, then the next: the queue would take them all at once, but
+   then a cancelled pass would still run to the end inside the worker. The
+   position is carried along, replayed a move at a time, for studyTerminal. */
+function studyStep(token, i, s){
+  if (token !== STUDY.token) return;
+  if (i >= STUDY.total){ studyFinish(token); return; }
+  clearTimeout(STUDY.watch);
+  STUDY.watch = setTimeout(() => { if (token === STUDY.token && STUDY.state === 'analysing') studyFail(token); }, STUDY_STALL);
+  studyAsk(i, s).then(res => {
+    if (token !== STUDY.token) return;
+    if (!res){ studyFail(token); return; }
+    STUDY.evals[i] = res;
+    STUDY.done = i + 1;
+    studyButton();
+    let next = s;
+    if (i < STUDY.game.uci.length){
+      const m = legalMoves(s, s.turn).find(x => uciOf(x) === STUDY.game.uci[i]);
+      if (!m){ studyFail(token); return; }       // a game that does not replay cannot be studied
+      next = makeMove(s, m);
+    }
+    studyStep(token, i + 1, next);
+  });
+}
+
+function studyFinish(token){
+  if (token !== STUDY.token) return;
+  clearTimeout(STUDY.watch);
+  STUDY.recs = studyBuild(STUDY.game, STUDY.evals);
+  STUDY.state = 'ready'; STUDY.done = STUDY.total;
+  studyStore(STUDY.key, STUDY.game, STUDY.evals);
+  studyButton();
+}
+
+function studyFail(token){
+  if (token !== STUDY.token || STUDY.state !== 'analysing') return;
+  clearTimeout(STUDY.watch);
+  STUDY.state = 'failed';
+  studyButton();
+}
+
+/* Anything that makes the game the pass is about go away. The readings
+   already answered stay in SF.cache, so trying again costs only the rest. */
+function studyCancel(){
+  if (STUDY.state !== 'analysing') return;
+  STUDY.token++;
+  clearTimeout(STUDY.watch);
+  STUDY.state = 'idle';
+  studyButton();
+}
+
+/* A review opened without a finished pass — a failed one, or a browser that
+   has no engine at all — takes whatever the cache holds and leaves the holes
+   for reviewAnalyse() to fill on the way through. */
+function studyAdopt(){
+  STUDY.token++;
+  clearTimeout(STUDY.watch);
+  const game = studyGameOf();
+  STUDY.key = studyKey(game.uci); STUDY.game = game; STUDY.shared = null;
+  STUDY.total = game.uci.length + 1;
+  STUDY.evals = [];
+  for (let i = 0; i < STUDY.total; i++)
+    STUDY.evals.push(reviewCached(i) || (REV.states[i] ? studyTerminal(REV.states[i]) : null) || null);
+  STUDY.recs = studyBuild(game, STUDY.evals);
+  STUDY.done = STUDY.evals.filter(Boolean).length;
+  STUDY.state = STUDY.done === STUDY.total ? 'ready' : 'idle';
+}
+
+/* The Study Board button, which is also the gauge. The fill is `--p` on the
+   button; the plate goes dark while it fills, because gold light on a gold
+   ground has no contrast to carry the movement (the ranked page learnt that
+   the hard way — see .rank-start). The percentage is positions answered over
+   positions in the game, and nothing else moves it. */
+function studyButton(){
+  const b = document.getElementById('endClose');
+  const title = document.getElementById('endStudyTitle');
+  const sub = document.getElementById('endStudySub');
+  const pct = STUDY.total ? Math.round(100 * STUDY.done / STUDY.total) : 0;
+  const s = STUDY.state;
+  if (b.dataset) b.dataset.state = s;
+  if (b.style && b.style.setProperty)
+    b.style.setProperty('--p', (s === 'analysing' ? pct : s === 'ready' ? 100 : 0) + '%');
+  if (s === 'analysing'){ title.textContent = 'Analyzing Game'; sub.textContent = pct + '%'; }
+  else if (s === 'ready'){ title.textContent = 'Start Analysis'; sub.textContent = 'Every move is analysed'; }
+  else if (s === 'failed'){ title.textContent = 'Analysis Failed'; sub.textContent = 'Press to try again'; }
+  else { title.textContent = 'Study Board'; sub.textContent = ''; }
+  if (b.setAttribute) b.setAttribute('aria-busy', s === 'analysing' ? 'true' : 'false');
+}
+
+/* ---- the records ---- */
+
+/* Winning chances from the mover's side. `flip` says the reading is from the
+   other chair — the position after the move has the opponent to move. A
+   forced mate is certainty and shows as 100 or 0; nothing else may, because a
+   position that is merely winning is not a game already over. "mate 0" is a
+   side already mated, which from the mover's chair is the game won. */
+function studyWinFor(res, flip){
+  if (!res) return null;
+  if (res.mate !== null && res.mate !== undefined){
+    if (res.mate === 0) return flip ? 100 : 0;
+    const mine = flip ? -res.mate : res.mate;
+    return mine > 0 ? 100 : 0;
+  }
+  if (res.cp === null || res.cp === undefined) return null;
+  return Math.max(1, Math.min(99, Math.round(winPct(flip ? -res.cp : res.cp))));
+}
+// a mate distance from the mover's side, or null; 0 is a mate delivered
+function studyMate(res, flip){
+  if (!res || res.mate === null || res.mate === undefined) return null;
+  return res.mate === 0 ? 0 : (flip ? -res.mate : res.mate);
+}
+
+/* The engine's line, replayed through the page's own generator: the moves
+   as a player reads them, the position at the end, and whether that end is
+   mate. pvLine() writes the review's old sentence from the same walk; this
+   hands the position back, because the study reads material off it. */
+function pvWalk(st, pv){
+  const sans = [];
+  let s = st;
+  for (const u of (pv || [])){
+    const all = legalMoves(s, s.turn);
+    const m = all.find(x => uciOf(x) === u);
+    if (!m) break;
+    sans.push(toSAN(s, m, all));
+    s = makeMove(s, m);
+  }
+  const mated = !legalMoves(s, s.turn).length && inCheck(s, s.turn);
+  return { sans, end: s, mated, matedSide: mated ? s.turn : null };
+}
+// the most a side could win by the exchange on any square, right now
+function bestSee(s, side){
+  let most = 0;
+  for (let i = 0; i < 64; i++){
+    const p = s.b[i];
+    if (!p || p.c === side || p.t === 'K') continue;
+    const g = see(s, i, side);
+    if (g > most) most = g;
+  }
+  return most;
+}
+/* Material for `me` at the end of a line, relative to `from` — with the
+   exchange still hanging at the line's end settled first, because a line the
+   engine cut off mid-sequence would otherwise count a rook that is about to
+   be recaptured as won. */
+function lineGain(from, line, me){
+  let gain = materialFor(line.end, me) - materialFor(from, me);
+  if (!line.mated) gain += line.end.turn === me ? bestSee(line.end, me) : -bestSee(line.end, other(me));
+  return gain;
+}
+
+/* Arrows. A threat is something of theirs the move made winnable; a weakness
+   is something of ours it made losable. Both are read off the exchange on the
+   square (see) and both must be NEW — what was hanging before the move is
+   not the move's doing — and both must matter: worth a piece, or something
+   the engine's own reply is about. That last test is what keeps a pawn that
+   nobody is going to take off the board. A mate in one either way is the
+   most important threat there is and goes first. Three arrows at most. */
+function studyThreats(st, m, after, next){
+  const me = m.p.c, them = other(me);
+  const threats = [], vulns = [];
+  const theirMoves = legalMoves(after, them);
+  if (!theirMoves.length) return { threats, vulns };      // the game is over: nothing is threatened
+  const sq = n => (n.charCodeAt(0) - 97) + (8 - +n[1]) * 8;
+  const reply = next && next.best && /^[a-h][1-8][a-h][1-8]/.test(next.best)
+              ? { from: sq(next.best.slice(0, 2)), to: sq(next.best.slice(2, 4)) } : null;
+  const cheapest = (s, atks) => atks.reduce((a, b) => VAL[s.b[a].t] <= VAL[s.b[b].t] ? a : b);
+
+  for (let i = 0; i < 64; i++){
+    const p = after.b[i];
+    if (!p || p.c !== them || p.t === 'K') continue;
+    const gain = see(after, i, me);
+    if (gain <= 0 || see(st, i, me) > 0) continue;
+    const atks = attackersOf(after, i, me);
+    if (!atks.length) continue;
+    let from;
+    if (atks.indexOf(m.to) >= 0) from = m.to;
+    else {
+      const was = attackersOf(st, i, me);
+      const fresh = atks.filter(a => was.indexOf(a) < 0);      // a discovery
+      from = fresh.length ? fresh[0] : cheapest(after, atks);
+    }
+    const engineSees = !!reply && (reply.from === i || reply.to === from || reply.to === i);
+    if (gain < 300 && !engineSees) continue;
+    threats.push({ kind:'threat', from, to:i, value:gain, piece:p.t });
+  }
+  // mate in one threatened: what the mover would play if it were their move again
+  if (!inCheck(after, them)){
+    const pass = cloneState(after); pass.turn = me; pass.ep = -1;
+    const mine = legalMoves(pass, me);
+    for (const mv of mine){
+      const nx = makeMove(pass, mv);
+      if (inCheck(nx, them) && !legalMoves(nx, them).length){
+        threats.push({ kind:'mate', from:mv.from, to:kingSq(after, them), sq:mv.to, value:20000,
+                       san: toSAN(pass, mv, mine) });
+        break;
+      }
+    }
+    // a pawn that just reached the seventh and can queen without being taken
+    if (m.p.t === 'P' && rowOf(m.to) === (me === W ? 1 : 6)){
+      for (const mv of mine){
+        if (mv.from !== m.to || !mv.promo || mv.promo !== 'Q') continue;
+        if (see(makeMove(pass, mv), mv.to, them) > 0) continue;
+        threats.push({ kind:'promo', from:m.to, to:mv.to, value:VAL.Q - VAL.P, piece:'P' });
+        break;
+      }
+    }
+  }
+
+  for (let i = 0; i < 64; i++){
+    const p = after.b[i];
+    if (!p || p.c !== me || p.t === 'K') continue;
+    const loss = see(after, i, them);
+    if (loss <= 0) continue;
+    const wasAt = i === m.to ? m.from : i;
+    if (st.b[wasAt] && see(st, wasAt, them) > 0) continue;   // was hanging already
+    const atks = attackersOf(after, i, them);
+    if (!atks.length) continue;
+    const engineTakes = !!reply && reply.to === i;
+    if (loss < 300 && !engineTakes) continue;
+    const from = engineTakes && atks.indexOf(reply.from) >= 0 ? reply.from : cheapest(after, atks);
+    vulns.push({ kind:'vuln', from, to:i, value:loss, piece:p.t, taken:engineTakes });
+  }
+  for (const mv of theirMoves){
+    const nx = makeMove(after, mv);
+    if (inCheck(nx, me) && !legalMoves(nx, me).length){
+      vulns.push({ kind:'mateIn1', from:mv.from, to:kingSq(after, me), sq:mv.to, value:20000,
+                   san: toSAN(after, mv, theirMoves) });
+      break;
+    }
+  }
+  threats.sort((a, b) => b.value - a.value);
+  vulns.sort((a, b) => b.value - a.value);
+  // three arrows at most, the most valuable of each kind first
+  while (threats.length + vulns.length > 3){
+    const lastT = threats[threats.length - 1], lastV = vulns[vulns.length - 1];
+    if (!lastV || (lastT && lastT.value <= lastV.value)) threats.pop(); else vulns.pop();
+  }
+  return { threats, vulns };
+}
+
+/* One record per move. `before` is the engine's reading of the position the
+   move was played from (the mover to move) and `after` its reading of the
+   position it led to (the opponent to move); everything from the mover's
+   side is the second one flipped. Records carry the positions themselves —
+   the reasons and the explanation read the board — but nothing that is
+   stored or shared, which is the readings and the moves alone. */
+function studyRec(game, i, s, all, m, before, next, prevSt){
+  const after = makeMove(s, m);
+  const rec = {
+    ply:i, side:s.turn, san: game.sans[i] || toSAN(s, m, all), uci: game.uci[i],
+    from:m.from, to:m.to, fenBefore: fenOf(s), fenAfter: fenOf(after),
+    before, after: next, move:m, st:s, post:after, prevSt: prevSt || null,
+    // taking back on the square the opponent just took on: material is then
+    // counted from before the exchange began, or every recapture "wins" a piece
+    recapture: !!(m.cap && i > 0 && game.uci[i - 1] && game.uci[i - 1].slice(2, 4) === SQNAME(m.to)),
+    best:null, second:null, reply:null, pv:null, replyPv:null
+  };
+  if (before && before.best){
+    const bm = all.find(x => uciOf(x) === before.best) || null;
+    if (bm) rec.best = { uci: before.best, san: toSAN(s, bm, all), move: bm };
+  }
+  if (before && before.second && before.second.best){
+    const sm = all.find(x => uciOf(x) === before.second.best) || null;
+    if (sm) rec.second = { uci: before.second.best, san: toSAN(s, sm, all), cp: before.second.cp, mate: before.second.mate };
+  }
+  if (next && next.best){
+    const theirs = legalMoves(after, after.turn);
+    const rm = theirs.find(x => uciOf(x) === next.best) || null;
+    if (rm) rec.reply = { uci: next.best, san: toSAN(after, rm, theirs), move: rm };
+  }
+  rec.pv = before && before.pv ? pvWalk(s, before.pv) : null;
+  rec.replyPv = next && next.pv ? pvWalk(after, next.pv) : null;
+  rec.playedWasBest = !!(before && before.best && before.best === game.uci[i]);
+  rec.gap = (before && before.second && sfScore(before) !== null && sfScore(before.second) !== null)
+          ? sfScore(before) - sfScore(before.second) : null;
+  rec.winBefore = studyWinFor(before, false);
+  rec.winAfter  = studyWinFor(next, true);
+  rec.delta = (rec.winBefore !== null && rec.winAfter !== null) ? rec.winAfter - rec.winBefore : null;
+  rec.verdict = (before && next) ? judgeMove(s, m, before, next, rec.playedWasBest, rec.gap) : null;
+  rec.sac = sacrificeSize(s, m, after);
+  rec.sacDown = sacrificeDeficit(s, m, next);
+  const tv = studyThreats(s, m, after, next);
+  rec.threats = tv.threats; rec.vulns = tv.vulns;
+  return rec;
+}
+
+function studyBuild(game, evals){
+  const recs = [];
+  let s = newState(), prev = null;
+  for (let i = 0; i < game.uci.length; i++){
+    const all = legalMoves(s, s.turn);
+    const m = all.find(x => uciOf(x) === game.uci[i]);
+    if (!m) break;                    // a game we cannot replay stops here
+    const rec = studyRec(game, i, s, all, m, evals[i] || null, evals[i + 1] || null, prev);
+    recs.push(rec);
+    prev = s;
+    s = rec.post;
+  }
+  return recs;
+}
+
+/* A reading for position i arrived late: the two moves it is a side of are
+   rebuilt from the positions their records already hold. */
+function studyPatch(i){
+  if (!STUDY.recs) return;
+  for (const k of [i - 1, i]){
+    const old = STUDY.recs[k];
+    if (!old) continue;
+    STUDY.recs[k] = studyRec(STUDY.game, k, old.st, legalMoves(old.st, old.st.turn), old.move,
+                             STUDY.evals[k] || null, STUDY.evals[k + 1] || null, old.prevSt);
+  }
+}
+
+/* ---- the words ---- */
+
+const wordCount = s => String(s).trim().split(/\s+/).filter(Boolean).length;
+const capFirst = s => s ? s[0].toUpperCase() + s.slice(1) : s;
+
+// the sentence a motif becomes when it has ten words to say it in
+// the two most valuable of a fork's targets, named
+function forkWords(targets){
+  const top = targets.slice().sort((a, b) => VAL[b.t] - VAL[a.t]).slice(0, 2);
+  if (top.length < 2) return null;
+  return top[0].t === top[1].t ? 'Forks both ' + PIECE_WORD[top[0].t] + 's'
+                               : 'Forks the ' + PIECE_WORD[top[0].t] + ' and the ' + PIECE_WORD[top[1].t];
+}
+function motifShort(mo){
+  const w = t => PIECE_WORD[t];
+  switch (mo.tag){
+    case 'fork':             return mo.targets ? forkWords(mo.targets) : 'Forks two pieces at once';
+    // a pinned pawn is a fact about most positions and a reason for none
+    case 'pin':              return mo.front ? (mo.front.t === 'P' ? null : 'Pins the ' + w(mo.front.t) + ' to the ' + w(mo.back.t)) : 'Creates a pin';
+    case 'skewer':           return mo.front ? (mo.front.t === 'P' ? null : 'Skewers the ' + w(mo.front.t) + ' and the ' + w(mo.back.t)) : 'Creates a skewer';
+    // a discovered attack on a pawn is a fact about most moves and a reason for none
+    case 'discoveredAttack': return mo.target ? (mo.target.t === 'P' ? null : 'Uncovers an attack on the ' + w(mo.target.t)) : 'Uncovers a discovered attack';
+    case 'doubleCheck':      return 'Gives double check';
+    case 'backRank':         return 'Threatens mate on the back rank';
+    case 'trappedPiece':     return mo.sq !== undefined ? 'Traps the ' + w(mo.p.t) + ' on ' + sqName(mo.sq) : 'Traps a piece';
+    default: return null;
+  }
+}
+
+// whether the piece standing on `sq` in `s` is still on the board at the end of a line
+function pieceSurvives(s, sq, line){
+  const p = s.b[sq];
+  return !!(p && line && line.end.b.some(q => q && q.id === p.id));
+}
+// a pawn with no enemy pawn ahead of it on its own file or the two beside it
+function isPassed(s, i){
+  const p = s.b[i];
+  if (!p || p.t !== 'P') return false;
+  const dir = p.c === W ? -1 : 1;
+  for (let r = rowOf(i) + dir; r >= 0 && r < 8; r += dir)
+    for (let c = colOf(i) - 1; c <= colOf(i) + 1; c++){
+      if (!onBoard(r, c)) continue;
+      const q = s.b[r * 8 + c];
+      if (q && q.t === 'P' && q.c !== p.c) return false;
+    }
+  return true;
+}
+
+/* The short reasons: why the move got the mark it got, in ten words or fewer
+   each, four at most, most important first. Nothing here is a judgement in
+   its own right — each line is a fact read off the board, off the engine's
+   line, or off the two winning chances — so a line is dropped rather than
+   softened when it cannot be justified. */
+function studyReasons(rec, edu){
+  const out = [];
+  const add = s => { if (s && wordCount(s) <= 10 && out.indexOf(s) < 0 && out.length < 4) out.push(s); };
+  const st = rec.st, m = rec.move, after = rec.post, me = rec.side, them = other(me);
+  const id = rec.verdict ? rec.verdict.key : 'good';
+  const bad = id === 'inaccuracy' || id === 'mistake' || id === 'blunder';
+  const w = t => PIECE_WORD[t];
+  const mateB = studyMate(rec.before, false), mateA = studyMate(rec.after, true);
+  const mated = !legalMoves(after, them).length && inCheck(after, them);
+
+  // what decides the game
+  const losing = mateA !== null && mateA < 0;          // the mover is getting mated
+  const winning = mated || (mateA !== null && mateA > 0);
+  if (mated) add('Delivers checkmate');
+  else if (mateA !== null && mateA > 0) add('Forces mate in ' + mateA);
+  if (losing && !(mateB !== null && mateB < 0)) add(mateA === -1 ? 'Allows mate in one' : 'Allows a forced mate in ' + (-mateA));
+  if (!mated && mateB !== null && mateB > 0 && !(mateA !== null && mateA > 0)) add('Misses a forced mate in ' + mateB);
+
+  // material, read off the engine's line and not off the capture alone — and
+  // from before the exchange began when this is the recapture that ends one
+  const base = rec.recapture && rec.prevSt ? rec.prevSt : st;
+  const net = rec.replyPv ? lineGain(base, rec.replyPv, me)
+            : materialFor(after, me) - materialFor(base, me) - bestSee(after, them);
+  if (!winning && !losing){
+    if (id === 'brilliant' && rec.sacDown >= 200)
+      add('Sacrifices the ' + w(m.p.t) + (rec.winAfter >= 70 ? ' for a winning attack' : ' for lasting pressure'));
+    else if (rec.recapture && Math.abs(net) < 90) add('Recaptures the ' + w(m.cap.t));
+    // a quiet move is not credited with what the line's tail happens to take:
+    // it wins something only if a piece it threatens is gone at the line's end
+    else if (net >= 90 && !bad && (m.cap || rec.threats.some(t => t.kind === 'threat' && !pieceSurvives(after, t.to, rec.replyPv))))
+      add('Wins ' + materialWord(net));
+    else if (net <= -90 && bad) add((rec.sacDown >= 200 && !m.cap ? 'Gives away ' : 'Loses ') + materialWord(-net));
+  }
+
+  // the move that was there instead
+  if (!rec.playedWasBest && rec.best && (bad || id === 'good')){
+    const b = rec.best.san;
+    const bnet = rec.pv ? lineGain(st, rec.pv, me) : 0;
+    if (rec.before && rec.before.mate > 0) add(b + ' forced mate in ' + rec.before.mate);
+    else if (rec.pv && rec.pv.mated && rec.pv.matedSide === them) add(b + ' led to checkmate');
+    else if (bnet >= 150 && bnet - net >= 90) add(b + ' won ' + materialWord(bnet));
+    else if (bad && rec.winBefore >= 65) add(b + ' kept the advantage');
+    else if (bad) add(b + ' was the better move');
+  }
+
+  // the arrows, in words — a threat is moot for a side that is being mated,
+  // and a weakness for one that is mating
+  const byPiece = {};
+  for (const t of rec.threats) if (t.kind === 'threat') (byPiece[t.from] = byPiece[t.from] || []).push(t);
+  if (!losing) for (const t of rec.threats){
+    if (t.kind === 'mate') add('Threatens checkmate on ' + sqName(t.sq));
+    else if (t.kind === 'promo') add('Threatens to promote on ' + sqName(t.to));
+    else if (byPiece[t.from].length >= 2){
+      if (byPiece[t.from][0] === t) add(forkWords(byPiece[t.from].map(x => ({ t: x.piece }))));
+    }
+    else add('Threatens the ' + w(t.piece) + ' on ' + sqName(t.to));
+  }
+  if (!winning) for (const t of rec.vulns){
+    if (t.kind === 'mateIn1') add('Allows mate in one');
+    else add((t.taken ? 'Hangs the ' : 'Leaves the ') + w(t.piece) + ' on ' + sqName(t.to) + (t.taken ? '' : ' hanging'));
+  }
+
+  // the motifs the move is built on
+  if (!winning && !losing) for (const mo of findMotifs(st, m, after, me)){
+    if (mo.tag === 'mate' || mo.tag === 'hangingPiece') continue;
+    add(motifShort(mo));
+  }
+
+  // what the numbers say
+  if (mated){ /* said */ }
+  else if (id === 'blunder' || id === 'mistake'){
+    if (rec.winBefore >= 75 && rec.winAfter <= 40) add('Throws away a winning position');
+    else if (rec.winBefore >= 75 && rec.winAfter < 60) add('Squanders most of the advantage');
+    else if (rec.winBefore >= 40 && rec.winBefore <= 60 && rec.winAfter <= 25) add('Turns an equal game into a lost one');
+    else if (rec.winBefore < 40 && rec.winAfter <= 15) add('Makes a difficult position hopeless');
+    else add('Gives up ' + (-rec.delta) + '% of the winning chances');
+  } else if (id === 'inaccuracy'){
+    if (rec.winBefore >= 60) add('Lets some of the advantage slip');
+    else if (rec.winBefore <= 40) add('Makes the defence harder');
+    else add('Hands the opponent a small edge');
+  } else if (id === 'great'){
+    const secondWin = rec.second ? studyWinFor({ cp: rec.second.cp, mate: rec.second.mate }, false) : null;
+    if (secondWin !== null && secondWin <= 45 && rec.winAfter >= 45) add('The only move that holds');
+    else if (rec.second) add('Clearly stronger than ' + rec.second.san);
+    else add('The move the position turned on');
+  } else if ((id === 'best' || id === 'brilliant') && out.length < 2){
+    // only where there is little else to say: a sound move with a tactic in it
+    // is explained by the tactic
+    if (rec.winAfter >= 75) add('Keeps the winning advantage');
+    else if (rec.winAfter >= 55) add('Keeps the upper hand');
+    else if (rec.winAfter >= 45) add('Holds the balance');
+    else add('The best defence available');
+  } else if (id === 'good'){
+    add(rec.best && !rec.playedWasBest ? 'Nearly as strong as ' + rec.best.san : 'Keeps the position sound');
+  }
+
+  // plain facts about the move
+  if (m.castle) add('Castles, bringing the king to safety');
+  else if (m.promo) add('Promotes to a ' + w(m.promo));
+  else if (m.cap && !rec.recapture && Math.abs(net) < 90 && !mated){
+    if (m.p.t !== 'K' && Math.abs(VAL[m.p.t] - VAL[m.cap.t]) < 150) add('Trades the ' + w(m.p.t) + ' for the ' + w(m.cap.t));
+    else add('Takes the ' + w(m.cap.t));
+  }
+  else if (inCheck(st, me)) add('Steps out of check');
+  else if (inCheck(after, them) && !mated) add('Gives check');
+  if (m.p.t === 'P' && isPassed(after, m.to) && !isPassed(st, m.from))
+    add('Creates a passed pawn on the ' + FILES[colOf(m.to)] + '-file');
+  // the quiet virtues of a move, which a mistake is not credited with
+  const centre = [27, 28, 35, 36];
+  if (bad){ /* what it cost is the point */ }
+  else if (m.p.t === 'P' && !m.cap && centre.indexOf(m.to) >= 0) add('Claims space in the centre');
+  else if ((m.p.t === 'N' || m.p.t === 'B') && !m.cap && rowOf(m.from) === (me === W ? 7 : 0)) add('Develops the ' + w(m.p.t));
+
+  // and what the position is about, in the knowledge base's own words
+  if (!mated && edu && edu.concepts && edu.concepts.length){
+    const c = edu.concepts[0];
+    const why = c.confidence !== 'low' ? (c.because || [])[0] : null;
+    if (why && wordCount(why) <= 10) add(capFirst(String(why).replace(/\.$/, '')));
+  }
+  return out;
+}
+
+// what a line comes to for `me`, in words — read off its last position
+function studyOutcome(from, line, me){
+  const Me = SIDE_WORD(me), Them = SIDE_WORD(other(me));
+  if (line.mated) return line.matedSide === me ? Me + ' is mated' : Them + ' is mated';
+  const gain = lineGain(from, line, me);
+  if (gain >= 90) return Me + ' comes out ' + materialWord(gain) + ' up';
+  if (gain <= -90) return Me + ' is ' + materialWord(-gain) + ' down';
+  return 'the material stays level';
+}
+
+/* The long explanation behind EXPLAIN: sections, each a few sentences. The
+   rule is the puzzle cards' rule — a sentence is read off the board, off a
+   line the engine gave, or off a number it produced, and a claim that needs
+   more than that is hedged ("threatens to win") or left out. In particular
+   "wins the rook" is said only when the rook is gone at the end of the
+   engine's own line, and "threatens" otherwise. */
+function studyExplain(rec, edu){
+  const S = [];
+  const st = rec.st, m = rec.move, after = rec.post, me = rec.side, them = other(me);
+  const Me = SIDE_WORD(me), Them = SIDE_WORD(them);
+  const w = t => PIECE_WORD[t];
+  const v = rec.verdict, id = v.key;
+  const mated = !legalMoves(after, them).length && inCheck(after, them);
+  const motifs = findMotifs(st, m, after, me);
+  const sign = rec.delta > 0 ? '+' : rec.delta < 0 ? '−' : '±';
+
+  // 1. what the move does
+  const p1 = [];
+  if (m.castle) p1.push(Me + ' castles ' + (m.castle === 'K' ? 'kingside' : 'queenside') + ', tucking the king away and bringing a rook towards the centre.');
+  else if (m.promo) p1.push(rec.san + ' promotes the pawn to a ' + w(m.promo) + (m.cap ? ', taking the ' + w(m.cap.t) + ' on the way' : '') + '.');
+  else if (m.cap) p1.push(rec.san + ' takes the ' + w(m.cap.t) + ' on ' + sqName(m.to) + ' with the ' + w(m.p.t) + '.');
+  else p1.push(rec.san + ' moves the ' + w(m.p.t) + ' from ' + sqName(m.from) + ' to ' + sqName(m.to) + '.');
+  if (mated) p1.push('It is checkmate.');
+  else {
+    const mo = motifs.find(x => x.tag !== 'mate' && x.tag !== 'hangingPiece' &&
+                                !(x.tag === 'discoveredAttack' && x.target && x.target.t === 'P'));
+    if (mo) p1.push(mo.text);
+    if (inCheck(after, them)) p1.push('It gives check.');
+  }
+  const called = { brilliant:'brilliant', great:'a great move', best:'the best move', good:'a good move',
+                   inaccuracy:'an inaccuracy', mistake:'a mistake', blunder:'a blunder' }[id];
+  p1.push(Me + "'s winning chances go from " + rec.winBefore + '% to ' + rec.winAfter + '% (' + sign + Math.abs(rec.delta) + '%), which is what makes it ' + called + '.');
+  S.push({ h:'What the move does', p:p1 });
+
+  // 2. the engine's line
+  const p2 = [];
+  const strong = id === 'best' || id === 'brilliant' || id === 'great';
+  if (strong || rec.playedWasBest){
+    p2.push(rec.playedWasBest ? "It is the engine's first choice."
+                              : 'The engine rates it as well as its own first choice, ' + (rec.best ? rec.best.san : 'the alternative') + '.');
+    if (rec.replyPv && rec.replyPv.sans.length)
+      p2.push('Best play continues ' + rec.replyPv.sans.join(' ') + ', and ' + studyOutcome(st, rec.replyPv, me) + '.');
+    if (rec.second && rec.gap !== null)
+      p2.push('The runner-up, ' + rec.second.san + ', is ' + (rec.gap >= 10000 ? 'losing by force' : (rec.gap / 100).toFixed(1) + ' of a pawn worse') + '.');
+  } else if (rec.best){
+    p2.push('The engine prefers ' + rec.best.san + '.');
+    const head = describeBest(st, rec.best.move, rec.before, null, null);
+    if (head) p2.push(head);
+    if (rec.pv && rec.pv.sans.length >= 2)
+      p2.push('After ' + rec.pv.sans.join(' ') + ', ' + studyOutcome(st, rec.pv, me) + '.');
+    if (rec.replyPv && rec.replyPv.sans.length)
+      p2.push('After ' + rec.san + ' instead, best play runs ' + rec.replyPv.sans.join(' ') + ', and ' + studyOutcome(st, rec.replyPv, me) + '.');
+  }
+  if (p2.length) S.push({ h:"The engine's line", p:p2 });
+
+  // 3. threats and weaknesses — the arrows, with their claims checked against the line
+  const p3 = [];
+  const survives = (pieceAt, line) => pieceSurvives(after, pieceAt, line);
+  for (const t of rec.threats){
+    if (t.kind === 'mate') p3.push('The ' + w(after.b[t.from].t) + ' on ' + sqName(t.from) + ' threatens ' + t.san + ', checkmate' + (rec.reply ? ', so ' + Them + ' has to answer it with ' + rec.reply.san + '.' : '.'));
+    else if (t.kind === 'promo') p3.push('The pawn on ' + sqName(t.from) + ' threatens to promote on ' + sqName(t.to) + '.');
+    else {
+      const gone = !survives(t.to, rec.replyPv);
+      p3.push('The ' + w(after.b[t.from].t) + ' on ' + sqName(t.from) + ' attacks the ' + w(t.piece) + ' on ' + sqName(t.to) +
+              (gone ? ", and in the engine's line it falls." : ', and ' + Them + (rec.reply ? ' answers with ' + rec.reply.san + '.' : ' has to deal with it.')));
+    }
+  }
+  for (const t of rec.vulns){
+    if (t.kind === 'mateIn1') p3.push('It allows ' + t.san + ', checkmate' + (rec.reply && rec.reply.uci === (rec.after && rec.after.best) ? '.' : ' — the engine sees it at once.'));
+    else p3.push('The ' + w(t.piece) + ' on ' + sqName(t.to) + ' can now be taken by the ' + w(after.b[t.from].t) + ' on ' + sqName(t.from) +
+                 (t.taken && rec.reply ? ', and ' + rec.reply.san + ' does exactly that.' : '.'));
+  }
+  if (!p3.length && !mated) p3.push('Nothing is newly attacked on either side: no piece is left hanging and no threat is made that was not there before.');
+  if (p3.length) S.push({ h:'Threats and weaknesses', p:p3 });
+
+  // 4. what the opponent should do
+  if (rec.reply && !mated){
+    const r = rec.reply.move;
+    let why = '';
+    if (r.cap) why = ', taking the ' + w(r.cap.t) + ' on ' + sqName(r.to);
+    else if (rec.threats.some(t => t.kind === 'threat' && t.to === r.from)) why = ', moving the threatened ' + w(r.p.t) + ' out of danger';
+    else if (inCheck(after, them)) why = ', answering the check';
+    else if (rec.threats.some(t => t.kind === 'mate')) why = ', covering the mate';
+    else if (inCheck(makeMove(after, r), me)) why = ', giving check';
+    S.push({ h:'What ' + Them + ' should do', p:[Them + "'s best reply is " + rec.reply.san + why + '.'] });
+  }
+
+  // 5. why the alternative is weaker
+  if (!strong && !rec.playedWasBest && rec.best){
+    const p5 = ['Against ' + rec.best.san + ' it costs ' + Math.abs(rec.delta) + '% in winning chances.'];
+    if (rec.pv && rec.replyPv && rec.pv.sans.length >= 2 && rec.replyPv.sans.length)
+      p5.push("At the end of the engine's line " + studyOutcome(st, rec.pv, me) + '; after ' + rec.san + ' ' + studyOutcome(st, rec.replyPv, me) + '.');
+    S.push({ h:'Why ' + rec.san + ' falls short', p:p5 });
+  } else if (rec.second && rec.gap !== null && rec.gap > 0){
+    const secondWin = studyWinFor({ cp: rec.second.cp, mate: rec.second.mate }, false);
+    S.push({ h:'Why ' + rec.second.san + ' is weaker',
+             p:[rec.second.san + ' was the engine\'s second choice' +
+                (secondWin !== null ? ', worth ' + secondWin + '% against ' + rec.winBefore + '% for ' + rec.san : '') + '.'] });
+  }
+
+  // 6. the lesson — the knowledge base's own, when it has one for the leading concept
+  const lead = edu && edu.concepts && edu.concepts[0];
+  let lesson = lead && lead.lesson && !/(sources? (disagree|differ)|this base|this record|tools\/)/i.test(lead.lesson) ? lead.lesson : null;
+  if (!lesson){
+    if (id === 'blunder' && rec.vulns.length) lesson = 'Before committing to a move, look at every capture the opponent gains from it.';
+    else if ((id === 'blunder' || id === 'mistake') && rec.before && rec.before.mate > 0) lesson = 'When the enemy king is exposed, look at every check and every capture before anything else.';
+    else if (id === 'blunder' || id === 'mistake') lesson = 'Ask what the opponent threatens after your move, not only what you threaten.';
+    else if (id === 'inaccuracy') lesson = 'Small slips add up: look for the move that keeps every piece protected.';
+    else if (id === 'brilliant') lesson = 'Material is a means to an end: a sacrifice is sound when best defence still leaves you ahead.';
+    else if (id === 'great') lesson = 'In sharp positions there is often exactly one move that holds, and finding it is the whole game.';
+    else lesson = 'Keep asking what the opponent threatens next; the sound move is the one that answers it.';
+  }
+  S.push({ h:'The lesson', p:[lesson] });
+  return S;
+}
+
+/* ---- the cache, and the share link ---- */
+
+/* A study packed for storage or for a link: the moves, the two names, the
+   vision and the result, and per position the score, the two best moves,
+   the runner-up's score and the top line. A score is centipawns, or 'm3'
+   for a mate. Nothing derived is packed — see studyBuild(). */
+function studyPack(game, evals){
+  const sc = r => (r.mate !== null && r.mate !== undefined) ? 'm' + r.mate
+                : ((r.cp === null || r.cp === undefined) ? null : r.cp);
+  return { v: STUDY_VERSION, u: game.uci, w: game.white, b: game.black, m: game.mode, r: game.result, h: game.human,
+           e: evals.map(r => r ? [sc(r), r.best || '', r.second ? (r.second.best || '') : '',
+                                  r.second ? sc(r.second) : null, (r.pv || []).join(' ')] : null) };
+}
+function studyUnpack(o){
+  const un = s => (typeof s === 'string' && s[0] === 'm') ? { cp:null, mate:+s.slice(1) }
+                : { cp:(s === null || s === undefined || s === '') ? null : +s, mate:null };
+  const evals = (o.e || []).map(e => {
+    if (!e) return null;
+    const a = un(e[0]);
+    const pv = e[4] ? String(e[4]).split(' ') : null;
+    const one = { cp:a.cp, mate:a.mate, best: e[1] || null, pv };
+    const second = e[2] ? Object.assign(un(e[3]), { best: e[2], pv: null }) : null;
+    return { cp:a.cp, mate:a.mate, best: one.best, pv, second, lines: second ? [one, second] : [one] };
+  });
+  const game = { uci: o.u.slice(), sans: [], white: o.w || 'White', black: o.b || 'Black',
+                 mode: o.m || 'sighted', result: o.r || '', human: o.h === B ? B : W };
+  return { game, evals };
+}
+
+function studyList(){
+  try { const l = JSON.parse(localStorage.getItem(STUDY_STORE + 'list')); return Array.isArray(l) ? l : []; }
+  catch (e){ return []; }
+}
+function studyStore(key, game, evals){
+  try {
+    localStorage.setItem(STUDY_STORE + key, JSON.stringify(studyPack(game, evals)));
+    const list = studyList().filter(k => k !== key);
+    list.unshift(key);
+    while (list.length > STUDY_KEEP) localStorage.removeItem(STUDY_STORE + list.pop());
+    localStorage.setItem(STUDY_STORE + 'list', JSON.stringify(list));
+  } catch (e){ /* nowhere to keep it; the study still works for this visit */ }
+}
+// the readings for exactly this move list, complete, or nothing
+function studyLoad(key, uci){
+  try {
+    const o = JSON.parse(localStorage.getItem(STUDY_STORE + key));
+    if (!o || o.v !== STUDY_VERSION || !Array.isArray(o.u) || o.u.join(' ') !== uci.join(' ')) return null;
+    const evals = studyUnpack(o).evals;
+    return evals.length === uci.length + 1 && evals.every(Boolean) ? evals : null;
+  } catch (e){ return null; }
+}
+
+/* The link carries the study itself: 'z' and deflated JSON in base64url, or
+   'j' and the JSON plain where the browser cannot deflate. So the link is
+   stable for as long as it is kept, works for a guest, stores nothing on any
+   server, names no account, and cannot be used to change anything — the
+   recipient's page rebuilds the records from the readings and reads them. */
+function studyB64(bytes){
+  let s = '';
+  for (let i = 0; i < bytes.length; i += 0x8000)
+    s += String.fromCharCode.apply(null, bytes.subarray(i, i + 0x8000));
+  return btoa(s).replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, '');
+}
+function studyUnB64(str){
+  const s = str.replace(/-/g, '+').replace(/_/g, '/');
+  const bin = atob(s + '='.repeat((4 - s.length % 4) % 4));
+  const out = new Uint8Array(bin.length);
+  for (let i = 0; i < bin.length; i++) out[i] = bin.charCodeAt(i);
+  return out;
+}
+async function studyEncode(obj){
+  const json = new TextEncoder().encode(JSON.stringify(obj));
+  if (typeof CompressionStream === 'function'){
+    try {
+      const cs = new CompressionStream('deflate-raw');
+      const wr = cs.writable.getWriter();
+      wr.write(json); wr.close();
+      return 'z' + studyB64(new Uint8Array(await new Response(cs.readable).arrayBuffer()));
+    } catch (e){ /* the plain form below */ }
+  }
+  return 'j' + studyB64(json);
+}
+async function studyDecode(str){
+  const kind = str[0];
+  let bytes = studyUnB64(str.slice(1));
+  if (kind === 'z'){
+    const ds = new DecompressionStream('deflate-raw');
+    const wr = ds.writable.getWriter();
+    wr.write(bytes); wr.close();
+    bytes = new Uint8Array(await new Response(ds.readable).arrayBuffer());
+  } else if (kind !== 'j') throw new Error('not a study link');
+  return JSON.parse(new TextDecoder().decode(bytes));
+}
+
+function studyShareSay(msg){
+  const out = document.getElementById('stShareOut');
+  out.textContent = msg || '';
+  out.style.display = msg ? '' : 'none';
+}
+async function studyShare(){
+  if (!STUDY.game || !STUDY.evals.length || !STUDY.evals.every(Boolean)){
+    studyShareSay('The analysis is not complete, so there is nothing to share yet.');
+    return;
+  }
+  const payload = STUDY.shared || await studyEncode(studyPack(STUDY.game, STUDY.evals));
+  const url = location.href.split('#')[0] + '#study/' + payload;
+  // The share sheet is the phone's way; on a desk a copied link is what is wanted.
+  const coarse = typeof matchMedia === 'function' && matchMedia('(pointer:coarse)').matches;
+  if (coarse && typeof navigator !== 'undefined' && navigator.share){
+    try { await navigator.share({ title:'Nox Chess — Study Board', url }); return; }
+    catch (e){ if (e && e.name === 'AbortError') return; }
+  }
+  try {
+    await navigator.clipboard.writeText(url);
+    const b = document.getElementById('stShare');
+    b.textContent = 'Link Copied';
+    setTimeout(() => { b.textContent = 'Share'; }, 2000);
+    studyShareSay('');
+  } catch (e){
+    studyShareSay(url);      // nothing to copy with: the link itself, to select
+  }
+}
+
+/* A study somebody sent: the board is theirs and nothing on it is ours to
+   change. Decoded, checked, and mounted below. */
+async function studyOpenShared(payload){
+  let o = null;
+  try { o = await studyDecode(payload); } catch (e){ o = null; }
+  if (!o || o.v !== STUDY_VERSION || !Array.isArray(o.u) || !o.u.length){ showScreen('home'); return false; }
+  const { game, evals } = studyUnpack(o);
+  const recs = studyBuild(game, evals);
+  if (recs.length !== game.uci.length){ showScreen('home'); return false; }   // a move list that does not replay
+  return studyMount(game, evals, recs, payload);
+}
+
+/* A study with no game behind it — a shared one, or our own reached again
+   through the browser's history after Back had put the board away. G is
+   pointed at the finished game with an opponent kind of its own — 'study',
+   so that BOT(), LOCAL() and ONLINE() are all false and none of the game's
+   machinery thinks it is running, exactly as a puzzle does. */
+function studyMount(game, evals, recs, payload){
+  game.sans = recs.map(r => r.san);
+  reviewClose(false);
+  G.token++;
+  G.opponent = 'study'; G.started = false; G.matchKind = 'friendly'; G.hosting = false;
+  G.mode = 'sighted'; G.human = game.human; G.flipped = false;
+  G.uci = game.uci.slice(); G.sans = game.sans.slice();
+  G.st = recs[recs.length - 1].post;
+  G.over = { text: game.result || 'Shared game' };
+  G.revealed = true; G.peeking = false; G.sel = -1; G.lastMove = null;
+  G.caps = { w: [], b: [] }; G.drawPending = false; G.thinking = false;
+  for (const [, e] of pieceEls) e.remove();
+  pieceEls.clear();
+  STUDY.token++;
+  clearTimeout(STUDY.watch);
+  STUDY.key = studyKey(game.uci); STUDY.game = game; STUDY.evals = evals; STUDY.recs = recs;
+  STUDY.state = 'ready'; STUDY.done = STUDY.total = evals.length; STUDY.shared = payload || null;
+  showScreen('game');
+  enterReview();
+  return true;
 }
 
 /* ============================================================
@@ -8094,7 +9220,8 @@ const EDU_VERSION = 1;             // ?v= on the library and the bundle; bump wh
 const EDU_LEVEL = 'intermediate';  // the reader the wording is written for
 const EDU_DEPTH = 'normal';
 const EDU_MAX_SECONDARY = 3;
-const EDU = { ready:false, failed:false, loading:null, api:null, matchers:null, errs:0 };
+const EDU = { ready:false, failed:false, loading:null, api:null, matchers:null, errs:0,
+              last:null };   // { ply, r } — the result for the move on screen, read by the reasons
 
 /* The page's own chess, under the names education/lib/features.js expects.
  *
@@ -8310,26 +9437,31 @@ function eduRender(r, st, before){
   card.style.display = '';
 }
 
-/* Called at the end of reviewRender(). Synchronous once the library is in;
- * before that it starts the fetch and leaves the card hidden, then renders
- * when it arrives — guarded on the ply, exactly as reviewAnalyse() is, so a
- * slow load cannot draw a card for a position the player has left. */
+/* Called from reviewRender(), for the move the board is showing: ply k on
+ * screen is the board after move k, so the position handed over is the one
+ * before that move and the move is the one played from it. Synchronous once
+ * the library is in; before that it starts the fetch and leaves the card
+ * hidden, then re-renders the panel when it arrives — guarded on the ply,
+ * exactly as reviewAnalyse() is, so a slow load cannot draw a card for a
+ * position the player has left. The result is kept on EDU.last so that the
+ * short reasons can quote the leading concept. */
 function eduAnalyse(ply){
   const card = document.getElementById('conceptCard');
   if (!card) return;
+  EDU.last = null;
   if (EDU.failed){ card.style.display = 'none'; return; }
   if (!EDU.ready){
     card.style.display = 'none';
     eduLoad().then(function(){
-      if (EDU.ready && REV.on && REV.ply === ply) eduAnalyse(ply);
+      if (EDU.ready && REV.on && REV.ply === ply) reviewRender();
     });
     return;
   }
-  const st = REV.states[ply];
-  const played = G.uci[ply] || null;
+  const st = ply > 0 ? REV.states[ply - 1] : null;
+  const played = ply > 0 ? (G.uci[ply - 1] || null) : null;
   if (!st){ card.style.display = 'none'; return; }
 
-  const before = reviewCached(ply);
+  const before = (STUDY.recs && STUDY.recs[ply - 1] && STUDY.recs[ply - 1].before) || reviewCached(ply - 1);
   // Refusal 2 is the API's, not this page's: with no engine result it says so
   // and claims nothing about the move. So the numbers are passed when they are
   // there and withheld when they are not, rather than being faked.
@@ -8365,6 +9497,7 @@ function eduAnalyse(ply){
     console.warn('education: a matcher threw — see MATCHER_ERRORS');
   }
 
+  EDU.last = { ply: ply, r: r };
   eduRender(r, st, before);
 }
 
@@ -11400,6 +12533,7 @@ function lsnLessonChallenge(){
    ============================================================ */
 function newGame(){
   reviewClose(false);        // a new game supplies its own position
+  studyCancel();             // and whatever the last one was still being asked about is stale
   G.st = newState();
   G.token++;
   G.drawPending = false;
@@ -11510,13 +12644,23 @@ document.getElementById('endRematch').onclick = () => {
   el.endOverlay.classList.remove('show');
   newGame();
 };
-// Study Board is the way into the review; the x just dismisses the box
-document.getElementById('endClose').onclick = () => enterReview();
+/* Study Board is the way into the review, in two presses: the first runs the
+   whole game through the engine and fills the button as it goes, the second —
+   START ANALYSIS, once every position has been answered — opens the board.
+   Nothing opens it by itself. A failed pass is a button that says so and
+   tries again when pressed; the x just dismisses the box. */
+document.getElementById('endClose').onclick = () => {
+  if (STUDY.state === 'analysing') return;
+  if (STUDY.state === 'ready' && STUDY.key === studyKey(G.uci)) enterReview();
+  else studyStart();
+};
 document.getElementById('endX').onclick     = () => el.endOverlay.classList.remove('show');
 
-document.getElementById('revBack').onclick = () => reviewGoto(REV.ply - 1);
-document.getElementById('revFwd').onclick  = () => reviewGoto(REV.ply + 1);
-document.getElementById('revDone').onclick = () => exitReview();
+document.getElementById('stBack').onclick = () => reviewGoto(REV.ply - 1);
+document.getElementById('stFwd').onclick  = () => reviewGoto(REV.ply + 1);
+document.getElementById('stDone').onclick = () => exitReview();
+document.getElementById('stShare').onclick = () => { studyShare(); };
+document.getElementById('stExplain').onclick = () => { REV.explain = !REV.explain; reviewRender(); };
 
 /* ============================================================
    PRACTICE — the drills behind LESSON → Practice
@@ -13055,6 +14199,7 @@ function showScreen(name, how){
   // in the way to make that impossible.
   if (screenName === 'ranked' && name !== 'ranked' && searching) stopRankSearch();
   if (name !== 'game') reviewClose(false);
+  if (name !== 'game') studyCancel();
   if (name !== 'game') pzClose();
   // A drill left behind stops with the page: its countdown, the click still
   // wired to a question nobody can see, the reply on its way from the engine.
@@ -13197,6 +14342,9 @@ function navDescribe(){
   if (s === 'pzvision') return { s, v: pzPick.rush ? 'rush' : (pzPick.track || '') };
   if (s === 'setup')    return { s, v: HOSTING() ? 'host' : (G.opponent || '') };
   if (s === 'game'){
+    // Study Board is a page: our own game's carries nothing (there is no
+    // game to come back to after a refresh), a shared one carries the study
+    if (REV.on) return { s, v:'study', data: STUDY.shared || '' };
     if (PZ.on) return RUSH.on ? { s, v:'rush' } : { s, v:'puzzle', track: PZ.track || '' };
     if (G.opponent === 'bot' || G.opponent === 'local') return { s, v: G.opponent };
     if (CHAL.to && !G.started) return { s, v:'challenge' };
@@ -13204,7 +14352,8 @@ function navDescribe(){
   }
   return { s, v:'' };
 }
-const navSame = (a, b) => !!(a && b) && a.s === b.s && a.v === b.v && (a.track || '') === (b.track || '');
+const navSame = (a, b) => !!(a && b) && a.s === b.s && a.v === b.v && (a.track || '') === (b.track || '') &&
+                          (a.data || '') === (b.data || '');
 
 /** The hash for a page, and the page for a hash — one table, read both ways. */
 function navHash(d){
@@ -13216,6 +14365,7 @@ function navHash(d){
       if (d.v === 'bot' || d.v === 'local') return 'play/' + d.v;
       if (d.v === 'puzzle')   return 'puzzle' + (d.track ? '/' + d.track : '');
       if (d.v === 'rush')     return 'puzzle/rush';
+      if (d.v === 'study')    return 'study' + (d.data ? '/' + d.data : '');
       if (d.v === 'challenge') return 'challenge';
       return 'game' + (d.kind ? '/' + d.kind : '');
     default:         return d.s + (d.v ? '/' + d.v : '');
@@ -13232,6 +14382,7 @@ function navParse(hash){
     case 'play':      return { s:'game', v: tail === 'local' ? 'local' : 'bot' };
     case 'puzzle':    return tail === 'rush' ? { s:'game', v:'rush' } : { s:'game', v:'puzzle', track: tail };
     case 'challenge': return { s:'game', v:'challenge' };
+    case 'study':     return { s:'game', v:'study', data: tail };
     case 'game':      return { s:'game', v:'online', kind: tail };
     default:
       // anything else is a screen by name, or nothing we know — the token
@@ -13361,6 +14512,18 @@ function navApply(d, dir){
         break;
       }
       if (d.v === 'rush'){ goPuzzleVision('rush'); break; }   // a run is not resumed, only started
+      if (d.v === 'study'){
+        // Somebody's study arrives whole in the link. Our own is re-entered
+        // from STUDY, which outlives the board Back put away — and after a
+        // refresh there is neither, so it goes home.
+        if (d.data){ studyOpenShared(d.data); return 'async'; }
+        if (STUDY.recs && STUDY.game && STUDY.evals.length && STUDY.evals.every(Boolean)){
+          if (G.over && G.sans.length && STUDY.key === studyKey(G.uci)){ showScreen('game'); enterReview(); }
+          else studyMount(STUDY.game, STUDY.evals, STUDY.recs, STUDY.shared);
+          break;
+        }
+        showScreen('home'); break;
+      }
       if (d.v === 'puzzle'){
         const track = PZ_TRACKS.indexOf(d.track) >= 0 ? d.track : 'opening';
         if (PZ_VISIONS.indexOf(PZ.vision) >= 0){
