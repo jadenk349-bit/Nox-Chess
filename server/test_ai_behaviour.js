@@ -120,13 +120,13 @@ var DECLS = ['VAL','FILES','rowOf','colOf','SQNAME','uciOf','sqName','onBoard','
              'CHALLENGE_TTL','CHALLENGING','BOT','SPECTATING','PUZZLE','AI_MATCH','humanTurn','viewer',
              'CAN_PEEK','AI_POOL','AI_BAND','AI_SLACK','scheduleAI','W',
              'AI_STYLES','AI_STYLE_NAMES','AI_WALK_MAX','AI_WALK_PER_PLY',
-             'AI_TOOK_CP','AI_FORM_CP','AI_REP_NUDGE','AI'];
+             'AI_TOOK_CP','AI_FORM_CP','AI_REP_NUDGE','AI_STALE_PLY','AI_PROG_NUDGE','AI_STALE_BAND','AI'];
 var FNS = ['startBoard','newState','cloneState','posKey','slide','step','addPawn',
            'pseudoMoves','isAttacked','kingSq','inCheck','makeMove','legalMoves','toSAN',
            'myName','seatName','layoutBoardBars','pickFrom','bestMove','applyMove','checkEnd',
-           'insufficient','resultTitle','finish','aiPhase','winChance','lineScore',
+           'insufficient','resultTitle','finish','flagFall','hasMatingMaterial','aiPhase','winChance','lineScore',
            'aiSearch','aiChoose','aiPick','aiTurn',
-           'aiReset','aiForm','aiNoteHuman','aiBandFor','aiSlackFor','aiPoolFor','aiNoMate'];
+           'aiReset','aiForm','aiNoteHuman','aiBandFor','aiSlackFor','aiPoolFor','aiNoMate','aiThinkMs'];
 
 var bundle = [grab(/\nconst W = 'w', B = 'b';/, "const W/B")];
 for (var d = 0; d < DECLS.length; d++) if (DECLS[d] !== 'W') bundle.push(decl(DECLS[d]));
@@ -167,7 +167,9 @@ function rank(st){
   out.sort(function(a, b){ return b.cp - a.cp; });
   return out;
 }
+var lastAsk = null;
 function engineAsk(moves, opt){
+  lastAsk = opt;
   var lines = rank(G.st).slice(0, opt.multipv || 1);
   return Promise.resolve({
     best: lines[0] && lines[0].best, cp: lines[0] ? lines[0].cp : 0, mate: null,
@@ -258,6 +260,38 @@ async function until(pred, tries){
   return false;
 }
 
+/* THE CLOCK, because without one this harness cannot tell a long game from an
+   endless one — and the clock is not neutral here.
+ *
+ * The opponent's move costs it `movetime` (80-700ms, from aiSearch) plus the
+ * pause in front of it (scheduleAI, 240-760ms): call it a second. A person
+ * thinks for seconds. So over a long game the opponent spends a fraction of
+ * what the player spends, and if a game drags the player is the one who flags
+ * — and flagFall() hands the point to whoever has mating material, which is
+ * the opponent. A bot that declines to convert is therefore not merely
+ * drawing games; it is winning them on the clock.
+ *
+ * That is the thing the harness could not see, so it models it: ten minutes a
+ * side, the opponent charged what the page would charge it, the player charged
+ * a think time that varies with how much of a hurry they are in. */
+var THINK = { strong: [4000, 14000], average: [2500, 9000], weak: [1200, 5000] };
+function humanThinkMs(kind, left){
+  var band = THINK[kind] || THINK.average;
+  var t = band[0] + Math.random() * (band[1] - band[0]);
+  // a person in time trouble moves faster, and is why this is not a constant
+  if (left < 120000) t = Math.min(t, 3000);
+  if (left < 30000) t = Math.min(t, 1200);
+  return t;
+}
+function botSpentMs(left){
+  /* What the page would have spent: the search it asked for, plus the page's
+     own think time in front of the reply. aiThinkMs() is read out of
+     blind-chess.html like everything else here, so this cannot model a pace
+     the page does not actually keep. */
+  var mt = (lastAsk && lastAsk.movetime) || 300;
+  return mt + aiThinkMs(left, G.sans.length, 20, G.clock[G.human], inCheck(G.st, G.st.turn));
+}
+
 /* One whole game. Returns what happened, not whether it was good. */
 async function playGame(kind){
   seat();
@@ -265,6 +299,7 @@ async function playGame(kind){
   var style = AI.style, handover = AI.handover;
   var evals = [];                  // material from the player's side, per bot turn
   var forced = 0, declinable = 0;  // mate with no alternative, and with one
+  var edgeSeen = 0;                // biggest clock edge the bot ever held
   var repTurns = [];               // what was on offer, repetition-wise, each bot turn
   var guard = 0;
   /* No clock runs in here — tickClock() is not started — so a game that would
@@ -276,6 +311,9 @@ async function playGame(kind){
     if (G.st.turn === G.human){
       var list = rank(G.st);
       if (!list.length) break;
+      var spent = humanThinkMs(kind, G.clock[G.human]);
+      G.clock[G.human] = Math.max(0, G.clock[G.human] - spent);
+      if (G.clock[G.human] === 0){ flagFall(G.human); break; }
       applyMove(PLAYERS[kind](list));
     } else {
       /* Was mate forced on this turn — every legal move mating — or merely
@@ -303,10 +341,16 @@ async function playGame(kind){
       var before = G.sans.length;
       aiTurn(G.token);
       if (!await until(function(){ return G.sans.length > before || G.over; }, 3000)) break;
+      var botSide = other(G.human);
+      var e = G.clock[G.human] > 0 ? G.clock[botSide] / G.clock[G.human] : 0;
+      if (e > edgeSeen) edgeSeen = e;
+      G.clock[botSide] = Math.max(0, G.clock[botSide] - botSpentMs(G.clock[botSide]));
+      if (G.clock[botSide] === 0 && !G.over){ flagFall(botSide); break; }
     }
     evals.push(material(G.st, G.human));
   }
   return { over: G.over, plies: G.sans.length, evals: evals,
+           clockH: G.clock[G.human], clockB: G.clock[other(G.human)], edgeSeen: edgeSeen,
            style: style, handover: handover, forced: forced, declinable: declinable,
            repTurns: repTurns,
            choices: choices.slice(), took: AI.took, opened: AI.opened };
@@ -490,6 +534,24 @@ for (var k = 0; k < kinds.length; k++){
   say('  ..    ' + kinds[k] + ': ' + kr + ' repetitions, ' + ku + ' unfinished, of '
       + byKind[kinds[k]].length);
 }
+
+var ch2 = 0, cb2 = 0, maxEdge = 0;
+for (var i = 0; i < games.length; i++){
+  ch2 += games[i].clockH; cb2 += games[i].clockB;
+  if (games[i].edgeSeen > maxEdge) maxEdge = games[i].edgeSeen;
+}
+/* The clock was the thing the harness could not see, and it was not neutral:
+   before aiThinkMs() the opponent moved in about a second while a person
+   thought in seconds, and it won ten of ninety-nine games on the flag. These
+   pin both halves of the answer — it no longer banks a large edge, and it does
+   not take the point even when the player does run out. */
+var flagWins = games.filter(function(r){
+  return r.over && /Black wins on time/.test(r.over.text || ''); }).length;
+check('it never wins on the clock', flagWins, 0);
+check('and does not walk out of games with minutes in hand',
+      cb2 / Math.max(1, ch2) < 1.6, true);
+say('  ..    mean clock left: player ' + Math.round(ch2 / games.length / 1000) + 's, opponent '
+    + Math.round(cb2 / games.length / 1000) + 's; largest edge it held ' + maxEdge.toFixed(2) + 'x');
 
 say('\nChances, and what happens when they are missed\n');
 

@@ -39,9 +39,9 @@ function decl(name){
 }
 
 var DECLS = ['AI_POOL', 'AI_BAND', 'AI_SLACK', 'AI_STYLES', 'AI_STYLE_NAMES',
-             'AI_WALK_MAX', 'AI_WALK_PER_PLY', 'AI_TOOK_CP', 'AI_FORM_CP', 'AI_REP_NUDGE', 'AI'];
+             'AI_WALK_MAX', 'AI_WALK_PER_PLY', 'AI_TOOK_CP', 'AI_FORM_CP', 'AI_REP_NUDGE', 'AI_STALE_PLY', 'AI_PROG_NUDGE', 'AI_STALE_BAND', 'AI'];
 var FNS   = ['aiPhase', 'winChance', 'lineScore', 'aiSearch', 'aiChoose',
-             'aiReset', 'aiForm', 'aiNoteHuman', 'aiBandFor', 'aiSlackFor', 'aiPoolFor', 'aiNoMate'];
+             'aiReset', 'aiForm', 'aiNoteHuman', 'aiBandFor', 'aiSlackFor', 'aiPoolFor', 'aiNoMate', 'aiThinkMs'];
 
 var BUNDLE = [];
 DECLS.forEach(function(n){ BUNDLE.push(decl(n)); });
@@ -378,6 +378,39 @@ check('but never past a rook',
       }), true);
 check('and never so little that it cannot choose',
       aiSlackFor('early', 0.1) >= 60, true);
+
+say('\nThe clock\n');
+
+/* It plays at a person's pace, and spends a surplus rather than banking one.
+   Both halves matter: the first is what it looks like, the second is what
+   stops the clock deciding a game the opponent is meant to lose. */
+function meanThink(left, theirs){
+  var sum = 0;
+  for (var i = 0; i < 400; i++) sum += aiThinkMs(left, 30, 25, theirs);
+  return sum / 400;
+}
+var level = meanThink(300000, 300000);
+check('it thinks for seconds, not milliseconds', level > 1500, true);
+check('and not for minutes', level < 20000, true);
+check('sitting on a big clock edge it slows down', meanThink(400000, 120000) > level, true);
+check('and behind on the clock it speeds up',   meanThink(120000, 400000) < level, true);
+check('in time trouble it moves fast',          aiThinkMs(20000, 30, 25, 400000) <= 900, true);
+check('but never instantly',                    aiThinkMs(1000, 30, 25, 400000) >= 500, true);
+check('the opening is quicker than the middlegame',
+      meanThinkPly(8) < meanThinkPly(30), true);
+function meanThinkPly(ply){
+  var sum = 0;
+  for (var i = 0; i < 400; i++) sum += aiThinkMs(300000, ply, 25, 300000);
+  return sum / 400;
+}
+
+/* And the flag itself: the opponent does not take the point on the clock. The
+   source is checked rather than the behaviour, because flagFall() needs a
+   whole game around it — server/test_ai_behaviour.js is where it is played. */
+check('the undercover opponent does not win on time',
+      /AI_MATCH\(\) && loser === G\.human/.test(SRC), true);
+check('and a game between two people is untouched',
+      /hasMatingMaterial\(G\.st, winner\)/.test(SRC), true);
 
 say('\nWhat the page is allowed to decide for itself\n');
 

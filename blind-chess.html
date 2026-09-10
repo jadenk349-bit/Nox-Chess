@@ -5866,6 +5866,27 @@ function flagFall(loser){
   const winner = other(loser);
   const lname = loser  === W ? 'White' : 'Black';
   const wname = winner === W ? 'White' : 'Black';
+  /* THE UNDERCOVER OPPONENT DOES NOT TAKE THE POINT ON THE CLOCK.
+   *
+   * Everything else about it is arranged so the player wins a game worth
+   * winning; a flag is the one way it can win without ever having outplayed
+   * them, and it is the way it would win most often, because it moves in
+   * seconds and a person thinks. aiThinkMs() closes most of that gap — it
+   * plays at a person's pace and spends a time surplus rather than banking it
+   * — but it cannot close all of it, and the games it still won were nine in
+   * ninety-nine.
+   *
+   * The half point rather than a loss, because a loss on somebody else's flag
+   * is a result no chess anywhere produces and the player would see it for
+   * what it was. The wording is the one this function already had for a flag
+   * nobody can mate with, so it is a sentence players have seen before.
+   *
+   * Only this way round: the opponent's own flag still loses, normally, and
+   * none of this touches a game between two people. */
+  if (AI_MATCH() && loser === G.human){
+    finish('Draw', `${lname} ran out of time.`, `Draw — ${lname} ran out of time`);
+    return;
+  }
   if (!hasMatingMaterial(G.st, winner)){
     finish('Draw', `${lname} ran out of time, but ${wname} has no way to force mate.`,
            `Draw — ${lname} ran out of time`);
@@ -6438,6 +6459,24 @@ function aiBandFor(phase, ply, form){
    — the same reason the band is never steered down from below. */
 const AI_REP_NUDGE = 0.05;
 
+/* And the same idea for a game that is not repeating but is not going
+   anywhere either. The fifty-move counter is the game's own measure of that:
+   no capture and no pawn move for twenty moves is a position nobody is trying
+   to win. An opponent whose target is a low win chance has no reason to force
+   matters, so it drifts — and drifting is not neutral, because it costs the
+   opponent about a second a move and the player whatever a person spends
+   thinking. Over a long game the player is the one who flags, and flagFall()
+   gives the point to whoever has mating material. Measured with a clock in the
+   harness: the opponent won ten of ninety-nine games on time.
+   
+   So when the game stops moving the opponent starts it moving again, by
+   preferring the moves that reset that counter — its own pawn moves, which
+   make progress without winning anything — and by conceding a little faster
+   while it does. Both only while it is not worse, for the usual reason. */
+const AI_STALE_PLY = 40;         // halfmoves without progress before it minds
+const AI_PROG_NUDGE = 0.06;      // ...and how much it then prefers a pawn move
+const AI_STALE_BAND = 0.08;      // ...and how much lower it is willing to sit
+
 /* How many candidates to ask for. Four is plenty for a close game and far too
    few for a won one: to come down off a winning position without hanging
    anything, there have to be moves on the list that are merely worse rather
@@ -6566,7 +6605,8 @@ function aiChoose(cands, band, slack, rnd, floor){
      that do not track positions, in which case this is what it always was. */
   const off = c => (c.win < band[0] ? band[0] - c.win
                   : c.win > band[1] ? c.win - band[1] : 0)
-                 + (c.rep ? AI_REP_NUDGE : 0);
+                 + (c.rep ? AI_REP_NUDGE : 0)
+                 - (c.prog ? AI_PROG_NUDGE : 0);
   const best = Math.min.apply(null, pool.map(off));
   // Everything equally close, which is every move inside the band when there
   // is more than one — and choosing between those at random is the whole of
@@ -6628,7 +6668,12 @@ function aiPick(){
     AI.seen = now;
 
     const form = aiForm();
-    const band = aiBandFor(phase, G.sans.length, form);
+    // Is the game going anywhere? The fifty-move counter is its own answer.
+    const stale = (G.st.half || 0) >= AI_STALE_PLY;
+    let band = aiBandFor(phase, G.sans.length, form);
+    if (stale && winChance(now, null) >= 0.45)
+      band = [Math.max(0.02, band[0] - AI_STALE_BAND),
+              Math.max(0.07, band[1] - AI_STALE_BAND)];
     const slack = aiSlackFor(phase, winChance(now, null));
     /* Which candidates walk back into a position the game has already been in.
        Counted from the page's own repetition table, the one checkEnd() reads,
@@ -6642,6 +6687,11 @@ function aiPick(){
         let after;
         try { after = makeMove(G.st, c.m); } catch (e) { continue; }
         c.rep = G.reps[posKey(after)] || 0;
+        /* A pawn move resets the fifty-move counter and wins nothing, which is
+           exactly the shape of progress this wants: a capture would reset it
+           too and would also take material off the player, which is the wrong
+           direction. Only counted while the game is actually stuck. */
+        if (stale && c.m.p && c.m.p.t === 'P' && !c.m.cap) c.prog = 1;
       }
     }
 
@@ -6723,9 +6773,66 @@ function aiTurn(token){
    machine however good the move is, so there is a pause in front of it — and
    an uneven one, because a constant delay reads as a machine too. The engine's
    own thinking time is on top of this. */
+/* HOW LONG IT APPEARS TO THINK, and why this is not decoration.
+ *
+ * The pause used to be a quarter to three quarters of a second, there so a
+ * reply would not land on the same tick as the move it answered. That reads as
+ * a machine for a different reason: nobody moves that fast for a whole game.
+ * And it is not only a matter of looks — the clock is the same clock, so an
+ * opponent that spends a second a move while a person spends five or ten walks
+ * out of every long game with minutes in hand. flagFall() then gives the point
+ * to whoever has mating material, which is the opponent. Measured with a clock
+ * in the harness: it won ten of ninety-nine games on time, and sixteen once it
+ * was pushing pawns to make progress rather than shuffling.
+ *
+ * So it thinks like a player instead: longer out of the opening, shorter once
+ * the position is decided or forced, spread so no two moves take the same
+ * time, and never more than its own clock can afford. The shape is
+ * league.py's think_seconds(), which has been doing this for the AI-vs-AI
+ * games since before this feature existed — this is the same idea at a tenth
+ * of the length, because a fallback game has a ten-minute clock and not thirty.
+ */
+function aiThinkMs(left, ply, moves, theirs, checked){
+  // the opening is booked, the middlegame is where a person actually thinks
+  let base = ply < 12 ? 1400 : ply < 60 ? 4200 : 2600;
+  // a wider position takes longer; a forced one does not
+  base *= 0.7 + Math.min(moves || 20, 40) / 40 * 0.8;
+  // Passed in rather than read off G, so this stays a function of numbers and
+  // can be checked without a board — the same bargain aiChoose() makes.
+  if (checked) base *= 0.55;
+  // spread, so the pace is not a metronome
+  let ms = base * Math.exp((Math.random() + Math.random() + Math.random() - 1.5) * 0.6);
+  if (Math.random() < 0.06) ms *= 2.2;          // one move in fifteen is a long think
+  /* AND IT KEEPS PACE WITH THE PLAYER, which is the part that matters.
+     Thinking like a person is not enough on its own: a person who is quicker
+     than their opponent still banks time, and time banked against an opponent
+     you are trying to lose to is a win waiting to happen. A player sitting on
+     twice the clock relaxes and uses some of it; one who is behind hurries.
+     That is ordinary clock sense, and here it is also what stops the game
+     being decided by the one thing the opponent is better at. */
+  if (theirs > 0){
+    const edge = left / theirs;
+    if (edge > 1.15) ms *= Math.min(2.2, edge);
+    else if (edge < 0.85) ms *= Math.max(0.4, edge);
+  }
+  ms = Math.max(500, Math.min(20000, ms));
+  // and it cannot spend what it has not got
+  if (left < 120000) ms = Math.min(ms, Math.max(600, left / 40));
+  if (left < 30000) ms = Math.min(ms, 900);
+  return Math.round(ms);
+}
+
 const scheduleAI = ms => {
   const t = G.token;
-  setTimeout(() => aiTurn(t), ms === undefined ? 240 + Math.random() * 520 : ms);
+  if (ms !== undefined) return void setTimeout(() => aiTurn(t), ms);
+  const left = (G.clock && G.clock[other(G.human)]) || 600000;
+  let moves = 20, checked = false;
+  try {
+    moves = legalMoves(G.st, G.st.turn).length;
+    checked = inCheck(G.st, G.st.turn);
+  } catch (e) {}
+  setTimeout(() => aiTurn(t),
+             aiThinkMs(left, G.sans.length, moves, (G.clock && G.clock[G.human]) || 0, checked));
 };
 
 /* ---- clicks ---- */

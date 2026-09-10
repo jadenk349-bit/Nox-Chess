@@ -323,7 +323,22 @@ best is this", which is the right question about a mistake and the wrong one
 about a hanging queen, so a `floor` admits a move whose own position is still
 good for it. A floor is a win chance, never a distance, so it cannot admit a
 losing move. `server/test_ai_behaviour.js` plays ninety-nine games against
-three kinds of simulated player and is where those claims are checked. Moves are not relayed (`handle_move` drops
+three kinds of simulated player and is where those claims are checked.
+
+**And the clock is not neutral, which is the least obvious thing here.** The
+opponent used to reply in about a second while a person thinks in seconds, so it
+walked out of every long game with minutes in hand — and `flagFall()` gives the
+point to whoever has mating material. With a clock in the harness it won ten of
+ninety-nine games on time, and sixteen once it was pushing pawns rather than
+shuffling. Three things answer that, in order of how much they matter:
+`aiThinkMs()` plays at a person's pace and SPENDS a time surplus rather than
+banking it; the `AI_STALE_*` dials restart a game the fifty-move counter says
+has stopped moving, by preferring its own pawn moves; and `flagFall()` gives the
+half point rather than the win when the player's flag falls in an `AI_MATCH()` —
+a loss on somebody else's flag is a result no chess produces, and the wording is
+the one that function already used for a flag nobody can mate with. Only that
+way round: the opponent's own flag still loses, and a game between two people is
+untouched. Moves are not relayed (`handle_move` drops
 them for an AI game and the page does not send them), a draw offered to it is
 accepted by the server through the ordinary `over` message, and resignation,
 checkmate, the clock and disconnection all run through the paths they already
