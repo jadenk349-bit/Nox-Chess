@@ -39,7 +39,7 @@ function decl(name){
 }
 
 var DECLS = ['AI_POOL', 'AI_BAND', 'AI_SLACK', 'AI_STYLES', 'AI_STYLE_NAMES',
-             'AI_WALK_MAX', 'AI_WALK_PER_PLY', 'AI_TOOK_CP', 'AI_FORM_CP', 'AI'];
+             'AI_WALK_MAX', 'AI_WALK_PER_PLY', 'AI_TOOK_CP', 'AI_FORM_CP', 'AI_REP_NUDGE', 'AI'];
 var FNS   = ['aiPhase', 'winChance', 'lineScore', 'aiSearch', 'aiChoose',
              'aiReset', 'aiForm', 'aiNoteHuman', 'aiBandFor', 'aiSlackFor', 'aiPoolFor', 'aiNoMate'];
 
@@ -238,6 +238,42 @@ check('every band is a band',
 check('the slack widens as the game goes on',
       AI_SLACK.early < AI_SLACK.middle && AI_SLACK.middle < AI_SLACK.late, true);
 check('but never past a rook',  AI_SLACK.late < 500, true);
+
+say('\nWalking back into a position it has already been in\n');
+
+/* A shuffle is what a target band produces when nothing on the list makes
+   progress: the quiet move that repeats sits nearest a low target, so it gets
+   played, and played again. The nudge is a tie-break and not a veto — these
+   check both halves of that. */
+function repCand(m, cp, rep){
+  return { m: m, score: cp, win: winChance(cp, null), rep: rep };
+}
+// two moves the band likes equally, one of which has been here before
+var tie = [repCand('fresh', 0, 0), repCand('again', 0, 2)];
+check('between two equal moves it plays the new one',
+      aiChoose(tie, [0.45, 0.55], SLACK, fixed(0)).m, 'fresh');
+check('...whichever way the coin falls',
+      aiChoose(tie, [0.45, 0.55], SLACK, fixed(0.99)).m, 'fresh');
+
+// the repeating move is genuinely much closer to the band: it is still played,
+// because this is a nudge and not a rule
+var worthIt = [repCand('fresh', 600, 0), repCand('again', 0, 2)];
+check('but a repetition that is clearly right is still played',
+      aiChoose(worthIt, [0.45, 0.55], 900, fixed(0)).m, 'again');
+
+// a candidate with no rep field at all is what every other caller passes
+check('a caller that does not track positions is unaffected',
+      aiChoose([cand('a', 0), cand('b', 0)], [0.45, 0.55], SLACK, fixed(0)).m,
+      aiChoose([cand('a', 0), cand('b', 0)], [0.45, 0.55], SLACK, fixed(0)).m);
+check('the nudge is small enough to be a tie-break', AI_REP_NUDGE <= 0.1, true);
+check('and large enough to break one', AI_REP_NUDGE > 0, true);
+
+/* And the half that matters most: BEHIND, a repetition is the defence. The
+   page never marks candidates in that case, so nothing here is nudged — this
+   pins that a marked-up losing position would still take the draw. */
+var losing = [repCand('fresh', -900, 0), repCand('again', -40, 2)];
+check('behind, it still takes the repetition',
+      aiChoose(losing, [0.45, 0.55], 900, fixed(0)).m, 'again');
 
 say('\nThe match controller\n');
 

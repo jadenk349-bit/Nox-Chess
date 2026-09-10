@@ -120,7 +120,7 @@ var DECLS = ['VAL','FILES','rowOf','colOf','SQNAME','uciOf','sqName','onBoard','
              'CHALLENGE_TTL','CHALLENGING','BOT','SPECTATING','PUZZLE','AI_MATCH','humanTurn','viewer',
              'CAN_PEEK','AI_POOL','AI_BAND','AI_SLACK','scheduleAI','W',
              'AI_STYLES','AI_STYLE_NAMES','AI_WALK_MAX','AI_WALK_PER_PLY',
-             'AI_TOOK_CP','AI_FORM_CP','AI'];
+             'AI_TOOK_CP','AI_FORM_CP','AI_REP_NUDGE','AI'];
 var FNS = ['startBoard','newState','cloneState','posKey','slide','step','addPawn',
            'pseudoMoves','isAttacked','kingSq','inCheck','makeMove','legalMoves','toSAN',
            'myName','seatName','layoutBoardBars','pickFrom','bestMove','applyMove','checkEnd',
@@ -196,9 +196,33 @@ aiChoose = function(){
    The three are not "good at chess" and "bad at chess" so much as three
    different distributions over the same ranked list, which is exactly what the
    controller is trying to read. */
+/* A PERSON DOES NOT REPLAY THE SAME MOVE IN THE SAME POSITION FOREVER, and a
+   simulated player that does will shuffle to a threefold every time the game
+   goes quiet. The first version of this file took list[0] unconditionally and
+   produced 17 repetitions in 33 games against the strong player and 0 against
+   the weak one — a difference that says everything about which side was doing
+   the repeating. Measuring the opponent against a player who is a pure
+   function measures the function.
+   
+   So each of the three declines a move that walks back into a position already
+   on the board, when something comparable is available. That is the one human
+   habit they need for this to be a measurement of the bot. */
+function notStale(list, take){
+  for (var i = 0; i < list.length && i < 6; i++){
+    var m = take(list, i);
+    if (!m) continue;
+    var after = makeMove(G.st, m);
+    if ((G.reps[posKey(after)] || 0) === 0) return m;
+  }
+  return take(list, 0);
+}
+
 var PLAYERS = {
-  strong:  function(list){ return list[0].m; },
-  average: function(list){ return list[Math.min(list.length - 1, (Math.random() * 3) | 0)].m; },
+  strong:  function(list){ return notStale(list, function(l, i){ return l[i] && l[i].m; }); },
+  average: function(list){
+    return notStale(list, function(l, i){
+      return l[Math.min(l.length - 1, i + ((Math.random() * 3) | 0))].m; });
+  },
   weak:    function(list){
     /* A weak player is not a random-move generator, and simulating one as
        though they were is how a test concludes the opponent is too strong when
@@ -208,7 +232,8 @@ var PLAYERS = {
        always take a clearly winning capture, otherwise often choose badly. */
     if (list.length && list[0].cp - (list[1] ? list[1].cp : 0) >= 200) return list[0].m;
     if (Math.random() < 0.35) return list[(Math.random() * list.length) | 0].m;
-    return list[Math.min(list.length - 1, (Math.random() * 5) | 0)].m;
+    return notStale(list, function(l, i){
+      return l[Math.min(l.length - 1, i + ((Math.random() * 5) | 0))].m; });
   }
 };
 
@@ -240,8 +265,14 @@ async function playGame(kind){
   var style = AI.style, handover = AI.handover;
   var evals = [];                  // material from the player's side, per bot turn
   var forced = 0, declinable = 0;  // mate with no alternative, and with one
+  var repTurns = [];               // what was on offer, repetition-wise, each bot turn
   var guard = 0;
-  while (!G.over && G.sans.length < 200 && ++guard < 400){
+  /* No clock runs in here — tickClock() is not started — so a game that would
+     have ended on time instead runs until this cap. Three hundred plies is a
+     hundred and fifty moves, past the length of nearly any real game, so a
+     game still going at the end of it is one that was never going to finish
+     rather than one this cut short. */
+  while (!G.over && G.sans.length < 300 && ++guard < 600){
     if (G.st.turn === G.human){
       var list = rank(G.st);
       if (!list.length) break;
@@ -259,6 +290,16 @@ async function playGame(kind){
       }
       if (mating && mating === all.length) forced++;
       if (mating && mating < all.length) declinable++;
+      /* DIAGNOSTIC: was a repetition chosen, or merely arrived at? For every
+         bot turn, how many of its legal moves reach a position already seen,
+         and how many do not. If it repeats while fresh moves were available,
+         that is a choice; if every move repeats, it is the position. */
+      var fresh = 0, repeats = 0;
+      for (var q2 = 0; q2 < all.length; q2++){
+        var nx2 = makeMove(G.st, all[q2]);
+        if ((G.reps[posKey(nx2)] || 0) >= 1) repeats++; else fresh++;
+      }
+      repTurns.push({ fresh: fresh, repeats: repeats, ply: G.sans.length });
       var before = G.sans.length;
       aiTurn(G.token);
       if (!await until(function(){ return G.sans.length > before || G.over; }, 3000)) break;
@@ -267,6 +308,7 @@ async function playGame(kind){
   }
   return { over: G.over, plies: G.sans.length, evals: evals,
            style: style, handover: handover, forced: forced, declinable: declinable,
+           repTurns: repTurns,
            choices: choices.slice(), took: AI.took, opened: AI.opened };
 }
 
@@ -418,6 +460,36 @@ for (var i = 0; i < byKind.weak.length; i++)
 function mean(a){ var s = 0; for (var i = 0; i < a.length; i++) s += a[i]; return a.length ? s / a.length : 0; }
 say('  ..    vs weak: ' + cost.length + ' choices, mean cost ' + mean(cost).toFixed(0) +
     'cp, mean spread on offer ' + mean(spread).toFixed(0) + 'cp, ' + aheadTurns + ' turns while winning');
+
+/* DIAGNOSTIC: the repetitions. */
+var repGames = games.filter(function(r){ return r.over && /repetition/.test(r.over.text || ''); });
+var choseRep = 0, hadToRep = 0, botAheadAtRep = 0;
+for (var i = 0; i < repGames.length; i++){
+  var tail = repGames[i].repTurns.slice(-6);
+  for (var t = 0; t < tail.length; t++){
+    if (tail[t].fresh > 0) choseRep++; else hadToRep++;
+  }
+  var last = repGames[i].evals[repGames[i].evals.length - 1];
+  if (last !== undefined && last < 0) botAheadAtRep++;
+}
+say('  ..    ' + repGames.length + ' repetition games; over their last six bot turns, '
+    + choseRep + ' had a non-repeating move available and ' + hadToRep + ' did not');
+say('  ..    the bot was materially ahead in ' + botAheadAtRep + ' of them');
+/* A shuffle is the least human-looking way for a game to end, and it used to be
+   how a quarter of them ended. Most of that was the harness — see notStale() —
+   but not all: on 154 of the 156 bot turns leading into one, a move that did
+   not repeat was available and was not played. Both halves are fixed and this
+   is what keeps them fixed. */
+check('games rarely end by shuffling',
+      repGames.length <= Math.round(games.length * 0.12), true);
+check('and never because it had nothing else to play', hadToRep <= 2, true);
+for (var k = 0; k < kinds.length; k++){
+  var kr = byKind[kinds[k]].filter(function(r){
+    return r.over && /repetition/.test(r.over.text || ''); }).length;
+  var ku = byKind[kinds[k]].filter(function(r){ return !r.over; }).length;
+  say('  ..    ' + kinds[k] + ': ' + kr + ' repetitions, ' + ku + ' unfinished, of '
+      + byKind[kinds[k]].length);
+}
 
 say('\nChances, and what happens when they are missed\n');
 

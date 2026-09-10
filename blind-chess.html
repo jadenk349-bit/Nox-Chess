@@ -6424,6 +6424,20 @@ function aiBandFor(phase, ply, form){
   return [lo, hi];
 }
 
+/* How much a candidate that walks back into a position already on the board has
+   to give up before it is preferred anyway, in win-chance units. Small on
+   purpose: this is a tie-break and not a rule. A shuffle is what a target band
+   produces when nothing on the list makes progress toward it — the quiet move
+   that repeats sits nearest a low target, so it gets played, and then it gets
+   played again. Measured over ninety-nine games: 26 ended by repetition, and
+   on 154 of the 156 bot turns leading into one there was a move available that
+   did not repeat. It was choosing them.
+
+   It is not applied when the bot is WORSE, because there a repetition is a
+   real drawing resource and declining to take one would be throwing the game
+   — the same reason the band is never steered down from below. */
+const AI_REP_NUDGE = 0.05;
+
 /* How many candidates to ask for. Four is plenty for a close game and far too
    few for a won one: to come down off a winning position without hanging
    anything, there have to be moves on the list that are merely worse rather
@@ -6544,9 +6558,15 @@ function aiChoose(cands, band, slack, rnd, floor){
   const near = cands.filter(c => top - c.score <= slack ||
                                  (floor !== undefined && c.win >= floor));
   const pool = near.length ? near : cands;
-  // how far outside the band a candidate sits; zero for anything inside it
-  const off = c => c.win < band[0] ? band[0] - c.win
-                 : c.win > band[1] ? c.win - band[1] : 0;
+  /* How far outside the band a candidate sits — zero for anything inside it —
+     plus a nudge for one that repeats a position already seen. A penalty and
+     not a filter: when the repeating move is genuinely the right one it is
+     still played, and when two moves are much of a muchness the one that keeps
+     the game moving wins. `rep` is set by the caller and is absent for callers
+     that do not track positions, in which case this is what it always was. */
+  const off = c => (c.win < band[0] ? band[0] - c.win
+                  : c.win > band[1] ? c.win - band[1] : 0)
+                 + (c.rep ? AI_REP_NUDGE : 0);
   const best = Math.min.apply(null, pool.map(off));
   // Everything equally close, which is every move inside the band when there
   // is more than one — and choosing between those at random is the whole of
@@ -6610,6 +6630,21 @@ function aiPick(){
     const form = aiForm();
     const band = aiBandFor(phase, G.sans.length, form);
     const slack = aiSlackFor(phase, winChance(now, null));
+    /* Which candidates walk back into a position the game has already been in.
+       Counted from the page's own repetition table, the one checkEnd() reads,
+       so there is no second opinion about what a repetition is.
+       
+       Only while the bot is not worse. Behind, a repetition is the defence and
+       taking it is the right move; nudging away from it would be conceding on
+       purpose, which is the one thing this system never does. */
+    if (winChance(now, null) >= 0.45){
+      for (const c of cands){
+        let after;
+        try { after = makeMove(G.st, c.m); } catch (e) { continue; }
+        c.rep = G.reps[posKey(after)] || 0;
+      }
+    }
+
     /* The floor only exists while the bot is comfortably better than the game
        is supposed to be: it is the mechanism for coming down off a winning
        position, and it has no business in a close one. Never below the band's
