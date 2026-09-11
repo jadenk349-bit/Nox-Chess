@@ -729,10 +729,14 @@ memory. Guests get neither and keep both locally. Run
 `supabase-migrate-puzzles.sql` once, by hand, like `supabase-setup.sql`.
 
 **Two doors on the menu, four pools behind them, and a setup page in between.**
-The Puzzle menu — in the header and on the home page, the same two buttons
-twice — is **Puzzle** and **Puzzle Rush**, and no vision is named on it. Puzzle
-opens a setup page that asks which vision; Rush brings its own clock and pool
-and asks nothing, so it still starts on the press.
+The Puzzle menu in the header is **Puzzle** and **Puzzle Rush**, and no vision
+is named on it. Puzzle opens a setup page that asks which vision; Rush brings
+its own clock and pool and asks nothing, so it still starts on the press. The
+home page's Puzzle shortcut is a button and not a menu: hovering it opens
+nothing, and pressing it presses the header's Puzzle door (`navPuzzleGo`), so
+it inherits that door's gate and goes nowhere the header does not. It used to
+carry the same two-item popup, so the mouse arriving on a shortcut was met
+with a question; `test_puzzle_nav.js` now asserts it carries none.
 
 **Practice makes the same bargain one table along, and the course rides in it.**
 `public.practice_progress` (`supabase-migrate-practice.sql`, hand-run, safe to

@@ -656,17 +656,21 @@ say('\nThe Puzzle menu, and the setup page behind it\n');
   /* The menu, read out of the page's own markup — two entries and no vision
      among them. This is the check that fails if the four doors come back. */
   var nav = SRC.match(/id="navPuzzle"[\s\S]*?<div class="menu">([\s\S]*?)<\/div>/);
-  var home = SRC.match(/id="homePuzzle"[\s\S]*?<div class="menu">([\s\S]*?)<\/div>/);
+  /* The home page's Puzzle is a shortcut to the first door and carries no
+     menu of its own: what stands between it and the next tag on the page is
+     nothing. */
+  var homeTag = SRC.match(/<button class="home-shortcut" id="homePuzzle">Puzzle<\/button>\s*<\/nav>/);
   var items = function(m){
     return m ? (m[1].match(/<button[^>]*>([^<]*)<\/button>/g) || [])
                  .map(function(b){ return b.replace(/<[^>]*>/g, ''); }) : [];
   };
   check('the header menu has two entries',      items(nav).length, 2);
   check('and they are Puzzle and Puzzle Rush',  items(nav).join(','), 'Puzzle,Puzzle Rush');
-  check('the home shortcut copies it exactly',  items(home).join(','), 'Puzzle,Puzzle Rush');
+  check('the home shortcut is a button with no menu', !!homeTag, true);
+  check('and presses the header\'s Puzzle door',
+        /homePuzzle'\)\.onclick[^\n]*navPuzzleGo'\)\.click\(\)/.test(SRC), true);
   check('no vision is named in the menu',
-        /Sighted Puzzle|Only Board Puzzle|Blindfold Puzzle|Fog of War Puzzle/.test(
-          (nav ? nav[1] : '') + (home ? home[1] : '')), false);
+        /Sighted Puzzle|Only Board Puzzle|Blindfold Puzzle|Fog of War Puzzle/.test(nav ? nav[1] : ''), false);
   check('Puzzle opens the setup page',
         /navPuzzleGo'\)\.onclick[^\n]*enterPuzzleSetup\(\)/.test(SRC), true);
   check('and Puzzle Rush still starts on the press',
