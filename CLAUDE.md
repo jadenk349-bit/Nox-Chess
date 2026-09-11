@@ -1918,9 +1918,13 @@ to everything.
 
 **Puzzle Rush borrows the game's clock.** `tickClock()` and `renderClocks()`
 each grow one branch for `RUSH.on`; there is no second timer. `rushClock()` puts
-that clock in the *top* strip itself rather than letting `layoutBoardBars()`
-file it by seat — a puzzle has no seats, and a clock that changes ends whenever a
-black-to-move puzzle comes up looks like a clock that has been reset. A run never
+that clock in the puzzle column beside the board (`#pzRushClock`, the first
+thing in `#gamePuzzle`) rather than letting `layoutBoardBars()` file it by
+seat — a puzzle has no seats, and a clock that changes ends whenever a
+black-to-move puzzle comes up looks like a clock that has been reset. It used
+to sit in the top strip over the board, which every other puzzle hides as a
+game's furniture; the column is where the run is described, so the clock stands
+there too, in the clock's full style rather than the strip's. A run never
 records ladder progress and never moves the rating — it reads the rating to
 choose where to start and nothing else. It is the fifth door on the same menu
 as the four ladders, and it is dealt from **its own pool** — `pzFetchMode('rush')`,

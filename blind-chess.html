@@ -1597,8 +1597,9 @@
   #screen-game.puzzle-mode .console,
   #screen-game.puzzle-mode .status,
   #screen-game.puzzle-mode .clock{display:none !important;}
-  /* a rush is the one puzzle mode with a clock, and it goes where clocks go */
-  #screen-game.puzzle-mode.rush #clockW{display:flex !important;}
+  /* a rush is the one puzzle mode with a clock, and it stands at the top of
+     the puzzle column beside the board — see #pzRushClock below */
+  #screen-game.puzzle-mode.rush #pzRushClock .clock{display:flex !important;}
   .pz-strikes{letter-spacing:.22em; color:#d0453c;}
   .pz-count{color:var(--gold-soft); font-variant-numeric:tabular-nums;}
   .puzzle-card .pz-ask{font-size:18px; color:var(--text); line-height:1.5;}
@@ -1722,11 +1723,18 @@
      .puzzle-setup, which syncOptions() puts on only while PZ.setup is true, so
      Play Bot itself never sees it. */
   #screen-game.puzzle-setup .board-bar{visibility:hidden;}
-  /* …except the run's clock, which goes where clocks go. The seat names beside
-     it are a game's — there is nobody on the other side of a puzzle — so the
-     strip carries the clock alone. */
-  #screen-game.puzzle-mode.rush #barTop{display:flex; justify-content:flex-end;}
   #screen-game.puzzle-mode .board-bar .bar-name{display:none;}
+  /* The run's clock is the one clock a puzzle has, and it sits in the side
+     column rather than in a strip over the board. It used to be filed into
+     the top strip, the way a game's clocks are, and there it read as a
+     seat's clock with no seat — the strips are a game's furniture, and every
+     other puzzle hides them. In the column it is the run's own box, above the
+     card that says how the run is going, drawn with the clock's full style
+     (the lit well, RUSH beside the time) rather than the strip's stripped-down
+     one. The slot takes no room at all except on a rush. */
+  .pz-rush-clock{display:none;}
+  #screen-game.puzzle-mode.rush .pz-rush-clock{display:block;}
+  .pz-rush-clock .clock{width:100%;}
   .pz-pieces{
     width:min(90%,calc(100vh - var(--chrome) - 86px)); padding:24px 27px 27px;
     display:flex; flex-direction:column; gap:12px;
@@ -5239,6 +5247,13 @@
 
         <!-- puzzles: the ladder, and what the position is asking for -->
         <div id="gamePuzzle" style="display:none">
+          <!-- Puzzle Rush only: the run's clock. It is the game's own #clockW,
+               filed here by rushClock() rather than into a strip over the
+               board, because a run's clock is not a seat's — it belongs to the
+               run, and the run is what this column is about. The slot is empty
+               for every other puzzle and the CSS shows it only on a rush. -->
+          <div class="pz-rush-clock" id="pzRushClock"></div>
+
           <!-- What the position is asking for, before anything about how it is
                going. Side to move is the one thing on this card a solver in
                Complete Blindfold cannot work out for themselves, so it is the
@@ -11502,12 +11517,17 @@ function rushClock(){
   layoutBoardBars();
   const box = document.getElementById('clockW');
   /* A run's clock belongs to the run, not to White. layoutBoardBars() files the
-     two clocks by seat and a puzzle has no seats, so this one is put in the top
-     strip whichever way the board is facing — otherwise it changes ends every
-     time a black-to-move puzzle comes up, which is a clock that looks like it
-     has been reset. */
-  const bar = document.getElementById('barTop');
-  if (box.parentElement !== bar) bar.appendChild(box);
+     two clocks by seat and a puzzle has no seats, so this one is taken back
+     out of whichever strip that gave it and put in the puzzle column, in the
+     slot at the top of #gamePuzzle — the same place whichever way the board
+     is facing, so it never changes ends when a black-to-move puzzle comes up,
+     which is a clock that looks like it has been reset. It used to go into
+     the strip over the board instead, where it was the one piece of a game's
+     furniture left on a page that hides the rest. The next game's
+     layoutBoardBars() files the box back by seat, so nothing has to put it
+     back on the way out. */
+  const slot = document.getElementById('pzRushClock');
+  if (box.parentElement !== slot) slot.appendChild(box);
   box.querySelector('.time').textContent = fmtClock(RUSH.left);
   box.querySelector('.who').textContent = 'RUSH';
   box.classList.add('active');
