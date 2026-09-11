@@ -208,9 +208,12 @@ def main():
     # A bot game with nobody in it is a game that must not still be a game.
     # Nothing on the far side will ever notice, so the only thing that can
     # clear it up is the same drop_client that clears up a game between two
-    # people — which is exactly why the bot is a Client at all.
+    # people — which is exactly why the bot is a Client at all. Like any
+    # other game it is held for AWAY_GRACE first, in case the player is only
+    # between networks, and let go when that lapses with nobody back.
     clear()
     server.AI_WAIT = 0.15
+    server.AWAY_GRACE = 0.3
     walker = FakeClient("W1", user_id="acct-w1")
     key = ("blind", 7, 0, "ranked")
     with server.lock:
@@ -219,8 +222,13 @@ def main():
         server.arm_ai_fallback(walker, key)
     time.sleep(0.6)
     check("the game is under way", len(server.games), 1)
+    held = list(server.games.values())[0]
     server.drop_client(walker)
-    check("dropping mid-game takes the game with it", server.games, {})
+    check("dropping mid-game holds the seat first", list(held.away), [walker.color])
+    check("and the game is still there to come back to", list(server.games.values()), [held])
+    time.sleep(0.6)
+    check("but once the grace lapses it takes the game with it", server.games, {})
+    check("as a loss, though nobody was there to hear it", held.over, "left")
     check("and the player is not left holding it", walker.game, None)
     check("nothing is left in the queue either", server.lobby, {})
     check("and no bot is left registered as anybody", server.by_user, {})

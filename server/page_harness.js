@@ -92,6 +92,17 @@ function makePage(){
                 matchMedia:()=>({ matches:false, addEventListener(){}, addListener(){} }),
                 innerWidth:1200, innerHeight:900, devicePixelRatio:1, location:loc, localStorage:storage };
   let out = null;
+  // The page's WebSocket, behind a gate a test can close: while `hold` is on
+  // every `new WebSocket()` throws, which the page reads as the network still
+  // being down and retries. A local server answers a reconnect in a few
+  // milliseconds, which is too fast to look at the reconnecting state at all
+  // without this.
+  let hold = false;
+  function GatedSocket(url){
+    if (hold) throw new Error('the harness is holding the network down');
+    return new WebSocket(url);
+  }
+  for (const k of ['CONNECTING', 'OPEN', 'CLOSING', 'CLOSED']) GatedSocket[k] = WebSocket[k];
   // Everything a test reaches into, by the page's own names. `fakeAuth` is
   // the one thing that is not a name the page has: a test standing in for
   // Supabase has to be able to hand the page a session (whose access_token
@@ -100,18 +111,19 @@ function makePage(){
   const src = '"use strict";' + BODY.replace(/await import\([^)]*\)/g, 'await Promise.reject(new Error("no cdn"))') +
     '\n__expose({ G, NET, REM, RANK, CHAL, chosen, picked, el, netConnect, netSend, showScreen, rematchTerms,' +
     ' startRanked, applyRankSettings, rankReady, netClose, hostGame, socialConnect, challengeFriend,' +
-    ' selectMode, pickBotTime, pickFriendMode, pickFriendTime, startGame, unanswered, tryMove,' +
+    ' selectMode, pickBotTime, pickFriendMode, pickFriendTime, startGame, unanswered, tryMove, boardOpen,' +
     ' screen:()=>screenName, resume:()=>rankResume,' +
     ' fakeAuth:(session, acc)=>{ authSession = session; account = acc; } });';
   new Function('document','window','location','localStorage','WebSocket','AudioContext',
                'webkitAudioContext','fetch','Image','requestAnimationFrame','cancelAnimationFrame',
                'getComputedStyle','navigator','console','__expose', src)(
-    doc, win, loc, storage, WebSocket, AudioCtx, AudioCtx,
+    doc, win, loc, storage, GatedSocket, AudioCtx, AudioCtx,
     () => Promise.resolve({ ok:false, status:404, json:()=>Promise.resolve(null), text:()=>Promise.resolve('') }),
     mk, cb => setTimeout(()=>cb(Date.now()), 16), clearTimeout,
     () => ({ getPropertyValue: () => '' }), { userAgent:'node' },
     { log(){}, warn(){}, error(){} }, o => { out = o; });
   out.doc = doc;
+  out.hold = on => { hold = on; };
   out.press = id => doc.getElementById(id).onclick();
   out.up = id => doc.getElementById(id).classList.contains('show');
   out.text = id => doc.getElementById(id).textContent;

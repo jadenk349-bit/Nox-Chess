@@ -6923,6 +6923,7 @@ function parseMove(text){ return parseMoveIn(G.st, text); }
 function submitEntry(inp, side){
   if (!G.started) return;                             // the board is still a preview
   if (G.mode !== 'total' || G.over || G.thinking) return;
+  if (ONLINE() && NET.state === 'reconnecting') return;   // as boardOpen(): nobody would get it
   if (G.peeking){ peekBlocked(); return; }             // close the board before you move
   if (side && G.st.turn !== side) return;              // not this player's turn
   if (!humanTurn()) return;
@@ -7817,6 +7818,7 @@ function boardOpen(){
   if (SPECTATING()) return false;               // a viewer's click is not a move begun
   if (!G.started) return false;                 // nothing moves until Start Play
   if (G.over || G.thinking || G.pendingPromo) return false;
+  if (ONLINE() && NET.state === 'reconnecting') return false;   // a move now would reach nobody
   return true;
 }
 
@@ -8016,7 +8018,12 @@ const NET = {
   // be a page that could claim its opponent was a bot after losing to one.
   ai: null,
   oppGone: false,       // set once the other side has dropped: there is nobody left to talk to
-  reported: false       // whether the server has been told how this game ended
+  reported: false,      // whether the server has been told how this game ended
+  // The seat's own secret from `start`, and how long the server keeps the seat
+  // for a dropped connection. Both are what a reconnect shows and waits on
+  // (see RECONNECT below); neither is written by anything but `start`.
+  seat: null,
+  grace: 10
 };
 
 /* The socket always lives on the origin that served the page: an https page gets
@@ -8117,6 +8124,7 @@ function stopHeartbeat(){
 }
 
 function netClose(){
+  reconnectStop();          // a socket given up on is not one to keep trying for
   NET.state = 'idle';
   NET.ai = null;            // whatever the next game is, it is not this one
   stopHeartbeat();
@@ -8168,26 +8176,163 @@ function netConnect(ready, onFail){
     onNetMessage(msg);
   };
   sock.onerror = () => fail('Could not reach the server.');
-  sock.onclose = () => {
-    if (NET.state === 'playing' && !G.over){
-      // there is nobody on the other end of a socket that has gone, so the
-      // end-of-game box must not offer to ask them for another game
-      NET.oppGone = true;
-      finish('Disconnected', 'The connection to the server was lost, so the game cannot go on.',
-             'Disconnected');
-    } else if (NET.state === 'hosting'){
-      waitingFailed('The connection closed, so the room is gone.');
-    } else if (NET.state === 'waiting'){
-      // queued for a ranked game: nothing is coming now, and a plate left
-      // sweeping would go on promising that something was
-      waitingFailed('The connection closed, so the search is over.');
-    } else if (NET.state === 'lobby'){
-      renderRooms(null);                  // say so rather than show a stale list
-    }
-    NET.state = 'idle';
-    NET.sock = null;
-    stopHeartbeat();
+  sock.onclose = socketClosed;
+}
+
+/* The socket has gone, whatever it was doing. Shared by the socket
+   netConnect() opens and the ones a reconnect opens, because both end the
+   same way and the one thing that differs — whether a game was up — is a
+   state of NET rather than of the socket. */
+function socketClosed(){
+  NET.sock = null;
+  stopHeartbeat();
+  if (NET.state === 'playing' && !G.over){
+    // Not over yet. The server keeps the seat for NET.grace seconds and so
+    // does this page: the board stays up and the socket is tried again.
+    netLost();
+    return;
+  }
+  if (NET.state === 'reconnecting'){
+    reconnectLater();                     // one attempt failed; the countdown decides when to stop
+    return;
+  }
+  if (NET.state === 'hosting'){
+    waitingFailed('The connection closed, so the room is gone.');
+  } else if (NET.state === 'waiting'){
+    // queued for a ranked game: nothing is coming now, and a plate left
+    // sweeping would go on promising that something was
+    waitingFailed('The connection closed, so the search is over.');
+  } else if (NET.state === 'lobby'){
+    renderRooms(null);                  // say so rather than show a stale list
+  }
+  NET.state = 'idle';
+}
+
+/* ---- a dropped connection mid-game ----
+   A blink of the network used to be a resignation: the socket closed, the
+   page put up "Disconnected", and the server handed the other side the win
+   the same instant. Neither end could tell a phone changing networks from a
+   player walking away, so both now wait. The server holds the seat for
+   NET.grace seconds (ten; it says the number in `start`) and this page spends
+   them trying to get back: a fresh socket, `hello` as always, then `resume`
+   naming the game and showing the seat's secret. The server answers with
+   everything played meanwhile, or with how the game ended without us, or the
+   countdown runs out and the result is the one it always was.
+
+   The board is kept up the whole time and refuses input (boardOpen() and
+   submitEntry() both ask), because a move made now would reach nobody. The
+   box over it is the waiting overlay — same box that says "Finding an
+   Opponent" — with its one button meaning Give Up. */
+const RECONNECT = { deadline: 0, retry: null, tick: null };
+
+function netLost(){
+  NET.state = 'reconnecting';
+  RECONNECT.deadline = Date.now() + NET.grace * 1000;
+  logLine('Connection lost — trying to get back to the game.', 'sys');
+  showWaiting('', 'Connection Lost');
+  document.getElementById('waitCancel').textContent = 'Give Up';
+  reconnectTick();
+  reconnectTry();
+}
+
+function reconnectTick(){
+  clearTimeout(RECONNECT.tick);
+  if (NET.state !== 'reconnecting') return;
+  const left = RECONNECT.deadline - Date.now();
+  if (left <= 0){ reconnectFailed(); return; }
+  document.getElementById('waitText').textContent =
+    'Trying to get back to the game — ' + Math.ceil(left / 1000) + 's left.';
+  RECONNECT.tick = setTimeout(reconnectTick, 250);
+}
+
+function reconnectTry(){
+  clearTimeout(RECONNECT.retry);
+  RECONNECT.retry = null;
+  if (NET.state !== 'reconnecting') return;
+  if (Date.now() >= RECONNECT.deadline){ reconnectFailed(); return; }
+  let sock;
+  try { sock = new WebSocket(serverURL()); }
+  catch(e){ reconnectLater(); return; }
+  NET.sock = sock;
+  sock.onopen = () => {
+    startHeartbeat();
+    netSend({ t:'hello', token: authToken(), name: G.playerName });
+    netSend({ t:'resume', game: NET.gameId, seat: NET.seat });
   };
+  sock.onmessage = ev => {
+    let msg;
+    try { msg = JSON.parse(ev.data); } catch(e){ return; }
+    onNetMessage(msg);
+  };
+  sock.onerror = () => {};                // the close that follows is what counts
+  sock.onclose = socketClosed;
+}
+
+function reconnectLater(){
+  if (NET.state !== 'reconnecting' || RECONNECT.retry) return;
+  RECONNECT.retry = setTimeout(reconnectTry, 700);
+}
+
+/* Timers down and the box away. The state is left to the caller: a resume
+   sets it back to playing, a failure to idle, netClose() to idle. */
+function reconnectStop(){
+  clearTimeout(RECONNECT.retry); RECONNECT.retry = null;
+  clearTimeout(RECONNECT.tick); RECONNECT.tick = null;
+  if (NET.state === 'reconnecting') hideWaiting();
+}
+
+/* The grace ran out, or the player gave up on it. This is the "Disconnected"
+   result the page used to reach the moment the socket closed. */
+function reconnectFailed(){
+  if (NET.state !== 'reconnecting') return;
+  reconnectStop();
+  NET.state = 'idle';
+  if (NET.sock){ const s = NET.sock; NET.sock = null; s.onclose = s.onerror = null; try { s.close(); } catch(e){} }
+  stopHeartbeat();
+  if (G.over) return;
+  // there is nobody on the other end of a socket that has gone, so the
+  // end-of-game box must not offer to ask them for another game
+  NET.oppGone = true;
+  finish('Disconnected', 'The connection to the server was lost, so the game cannot go on.',
+         'Disconnected');
+}
+
+/* Back in the seat. Whatever the server has that this board has not is
+   applied through receiveMove() — the opponent's moves, in order, exactly as
+   they would have arrived — and a move of ours the server never got is sent
+   again. Anything else is the two boards genuinely disagreeing. */
+function reconnectResumed(msg){
+  reconnectStop();
+  NET.state = 'playing';
+  NET.opponent = msg.opponent || NET.opponent;
+  logLine('Reconnected.', 'sys');
+  if (G.over){
+    // Our own rules ended it while we were out — the clock, most likely —
+    // and the report finish() sent went down a dead socket. Say it again.
+    netSend({ t:'result', status: G.over.text });
+    return;
+  }
+  const moves = Array.isArray(msg.moves) ? msg.moves : [];
+  const have = G.sans.length;
+  if (moves.length < have){
+    // The server is behind us. That is one thing only: our last move, sent
+    // as the socket went, never arrived. Anything more is out of step.
+    const m = G.lastMove;
+    if (moves.length === have - 1 && m && G.st.turn !== G.human && !AI_MATCH()){
+      netSend({ t:'move', ply: have - 1, from: m.from, to: m.to, promo: m.promo || null,
+                san: G.sans[have - 1] });
+      return;
+    }
+    if (!AI_MATCH()){
+      finish('Out of Step', 'The two boards no longer agree, so the game cannot continue.',
+             'Game abandoned — boards out of step');
+    }
+    return;
+  }
+  for (const m of moves.slice(have)){
+    if (G.over) break;
+    receiveMove(m);
+  }
 }
 
 /* ---- the room list ---- */
@@ -8378,8 +8523,11 @@ function onNetMessage(msg){
       break;
 
     case 'start':
+      reconnectStop();                          // a new game answers whatever this socket was retrying for
       NET.state = 'playing';
       NET.myRoom = null;
+      NET.seat = typeof msg.seat === 'string' ? msg.seat : null;
+      NET.grace = typeof msg.grace === 'number' && msg.grace > 0 ? msg.grace : 10;
       // whatever was in the air is now a game
       CHAL.to = null; CHAL.id = null; CHAL.pending = false;
       clearTimeout(CHAL.timer);
@@ -8459,6 +8607,41 @@ function onNetMessage(msg){
       receiveMove(msg);
       break;
 
+    /* ---- a dropped connection, either side's ---- */
+    case 'resume':
+      if (NET.state !== 'reconnecting' || msg.game !== NET.gameId) break;
+      reconnectResumed(msg);
+      break;
+
+    case 'resume-failed':
+      if (NET.state !== 'reconnecting' || msg.game !== NET.gameId) break;
+      if (msg.over && !G.over){
+        // It ended while we were out, and the server kept the result for us:
+        // the same news the `over` we missed would have carried. The game is
+        // gone from the server, so there is no rematch to be had of it.
+        reconnectStop();
+        NET.state = 'playing';
+        NET.oppGone = true;
+        onNetMessage({ t:'over', reason: msg.over.reason, winner: msg.over.winner });
+        break;
+      }
+      reconnectFailed();
+      break;
+
+    case 'opponent-away':
+      if (G.over || msg.game !== NET.gameId) break;
+      logLine((NET.opponent || 'Your opponent') + ' lost their connection — waiting ' +
+              Math.round(msg.seconds || NET.grace) + ' seconds for them to come back.', 'sys');
+      chatNote('Your opponent lost their connection — waiting for them.');
+      break;
+
+    case 'opponent-back':
+      if (G.over || msg.game !== NET.gameId) break;
+      if (msg.name && msg.name !== NET.opponent) NET.opponent = msg.name;   // a guest may have been renamed
+      logLine((NET.opponent || 'Your opponent') + ' is back.', 'sys');
+      chatNote('Your opponent is back.');
+      break;
+
     /* ---- playing the same opponent again ----
        Every one of these carries the id of the game it is about, and this side
        checks it before believing any of them: a duplicate, or a message left
@@ -8531,7 +8714,7 @@ function onNetMessage(msg){
         // nothing typed from here on could reach them, so stop offering
         NET.oppGone = true;
         chatNote('Your opponent has left.');
-        finish('You Win', 'Your opponent disconnected.', 'Opponent left — you win');
+        finish('You Win', 'Your opponent disconnected and did not come back.', 'Opponent left — you win');
       } else if (msg.reason === 'draw'){
         finish('Draw', 'Both players agreed to a draw.', 'Draw — agreed');
       }
@@ -21924,7 +22107,8 @@ const gameInProgress = () => G.sans.length > 0 && !G.over;
 // browser's Back button.
 // A game being watched (SPECTATING) is not ours to lose, so it is never live
 // in this sense: the logo, escape and the browser's Back all simply leave it.
-const gameLive = () => !SPECTATING() && (gameInProgress() || (ONLINE() && NET.state === 'playing' && !G.over));
+const gameLive = () => !SPECTATING() && (gameInProgress() ||
+  (ONLINE() && (NET.state === 'playing' || NET.state === 'reconnecting') && !G.over));
 
 /* ============================================================
    HISTORY — the browser's Back and Forward, over the screens above
@@ -22526,6 +22710,9 @@ document.getElementById('leaveConfirm').onclick = () => {
 };
 
 document.getElementById('waitCancel').onclick = () => {
+  // Give Up, on a connection being retried: the result the page would have
+  // reached anyway once the countdown ran out, reached now.
+  if (NET.state === 'reconnecting'){ reconnectFailed(); return; }
   // A room is given up on its own button now, so this only catches a host that
   // is somehow still up behind a failure box — take the room down with it.
   if (NET.state === 'hosting'){ stopHosting(); hideWaiting(); return; }
