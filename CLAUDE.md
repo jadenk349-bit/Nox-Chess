@@ -27,6 +27,7 @@ node server/test_practice.js             # what the practice drills invent, re-c
 node server/test_practice_flow.js        # and running one, against a stub DOM + clock
 node server/test_lessons.js              # walks the whole five-lesson course (~90s)
 node server/test_leaderboard.js          # the home page's four ladders, against a scripted account client
+node server/test_auth_flow.js            # the four doors into an account, against a scripted Supabase client
 node server/test_ai_fallback.js          # what the ranked fallback bot decides
 node server/test_ai_game.js              # and playing a whole game against it, stub DOM
 python3 server/test_ai_match.py          # seating one: the queue, the race; no server needed
@@ -1118,13 +1119,56 @@ Stockfish only, and loads it lazily.
 build was chosen and flags an unresolved licensing question about paid
 features.
 
-**Accounts are optional everywhere.** The browser signs in with Google through
-Supabase (`@supabase/supabase-js` imported from esm.sh at runtime; keys are
+**Accounts are optional everywhere.** The browser signs in through Supabase
+(`@supabase/supabase-js` imported from esm.sh at runtime; keys are
 inlined near the top of the script and are safe to publish). It hands the
 access token to the server on `{t:"hello"}`; `server/supabase_auth.py` verifies
 ES256 against the project's JWKS. A failed or absent token means guest, not
 rejection — guests play friendly games. Ranked play requires a verified account
 *only when* the server is actually able to verify anyone.
+
+**Four doors, one user.** Google, Apple, Facebook and an email address with a
+password are the ways in (`screen-signup`, `screen-login`, with
+`screen-forgot` and `screen-reset` behind the password), and every one of
+them ends in the same Supabase user: the account is `auth.users.id`, the
+profile row is made by the same signup trigger whichever door was used, and
+nothing downstream — the server, the ratings, the friends, the puzzles, the
+practice record — knows or asks which provider it was. There are no
+per-provider tables and there is no linking code of the page's own:
+Supabase links a second identity to an existing user itself, and only when
+the provider vouches for the address as verified; an email/password sign-up
+on an address that already has an account gets an obfuscated user with no
+identities and sends nothing, so the page cannot create a duplicate and
+does not try to tell a stranger whether an address is taken (`emailSignUp()`,
+and the one Check Your Email panel either way). `signInWithProvider()` is
+the one OAuth call site: Google keeps `prompt: select_account` exactly as it
+had it, Apple and Facebook get no such parameter, and all three send the
+player back to `authReturnURL()` — the page's own address with nothing
+after it — so the same file works on Render and on localhost, and the
+project's redirect allow-list is the only place those addresses are
+written. Apple returns the name only on the first sign-in and may return a
+relay address, so nothing depends on a provider supplying a name: an
+account without `game_name` meets the username screen whichever way it
+came in. A provider the project has not switched on is refused on the page
+with a sentence (`providerEnabled()`, which reads the public
+`/auth/v1/settings`) rather than sent to a bare Supabase error; Google is
+never checked, because it is the door that already works.
+
+**The password never leaves the client call.** `signUp`,
+`signInWithPassword`, `resetPasswordForEmail` and `updateUser` are the whole
+of it; nothing logs, stores or forwards a password, and the game server
+never sees one. Every way back into the page from Supabase — an OAuth round
+trip, a confirmation link, a reset link — lands with the answer in the URL
+fragment, which the client consumes, so `BOOT_HASH` copies it first and
+`AUTH` keeps two facts from it: `recovery` (the player followed a reset link
+and is owed `screen-reset` before the username and before the home page —
+`decideFirstScreen()` holds them there; a saved password is announced in
+place of the form — Password Changed — and `leaveReset()` is the one way
+off) and `arrived` (a link that failed, said on the log-in page). A wrong
+password and an unknown address are one sentence, on purpose. `PASSWORD_MIN`
+is the page's floor; the project's own password rule is quoted when it
+refuses. `test_auth_flow.js` boots the whole page against a scripted client
+and drives every door.
 
 **A verified player's name comes from their profile row, or failing that the
 token, never from the message** — otherwise signing in would be a way to wear
