@@ -627,6 +627,48 @@
     box-shadow:inset 0 1px 0 rgba(255,255,255,.06);
   }
 
+  /* ---------- one question, or one per player ----------
+     A friend challenge asks the vision and the clock twice: once for the
+     challenger and once for the friend. The section carries `.split` while
+     that is so — syncOptions() puts it there for CHALLENGING() and nowhere
+     else — and only then does the friend's column exist and the two get a
+     label each. Unsplit, the first column is the whole panel and looks
+     exactly as it always did: no label, one grid, the same buttons. */
+  .who-split{display:grid; grid-template-columns:minmax(0,1fr); gap:12px;}
+  .who-col.friend, .who-label{display:none;}
+  .sec.split .who-split{grid-template-columns:repeat(2,minmax(0,1fr));}
+  .sec.split .who-col.friend{display:block;}
+  .sec.split .who-label{
+    display:flex; align-items:center; gap:6px;
+    margin:0 0 8px; font-size:11.5px; letter-spacing:.18em; text-transform:uppercase;
+    color:var(--muted); font-weight:650; white-space:nowrap;
+  }
+  /* a small chip of the same gold before each label, so the two columns read
+     as two answers to the heading above them rather than two headings */
+  .sec.split .who-label::before{
+    content:""; flex:none; width:6px; height:6px; border-radius:50%;
+    background:var(--ctl-edge);
+  }
+  .sec.split .who-col.friend .who-label::before{background:var(--gold);}
+  /* The friend's column is the one with the different answer in it, so its
+     chosen button carries a hairline of gold on the outside as well: the
+     two "Sighted"s side by side must not read as one selection twice. */
+  .sec.split .who-col.friend .vis.active,
+  .sec.split .who-col.friend .tm.active{box-shadow:inset 0 1px 0 rgba(255,255,255,.06), 0 0 0 1px rgba(217,164,65,.35);}
+  /* Half the width is not room for "Complete Blindfold" at 16px on one line,
+     and six clocks three abreast are cramped: two columns of three, and the
+     vision buttons a size down and allowed to wrap. */
+  .sec.split .vis{font-size:14px; letter-spacing:.03em; padding:10px 10px; white-space:normal; line-height:1.25;}
+  .sec.split .time-grid{grid-template-columns:repeat(2,1fr);}
+  .sec.split .tm{font-size:14.5px; padding:10px 2px;}
+  /* Below a phone's width the side column is the page's width, and even that
+     will not seat two columns of "Complete Blindfold": the friend's answers go
+     under the challenger's rather than beside them, each still labelled. */
+  @media (max-width:400px){
+    .sec.split .who-split{grid-template-columns:minmax(0,1fr);}
+    .sec.split .who-col.friend{padding-top:10px; border-top:1px solid var(--line);}
+  }
+
   /* dark until every question is answered, then it lights up */
   #gameSetup .start-btn{
     width:100%; margin-top:2px; padding:15px 0;
@@ -4526,13 +4568,35 @@
             </div>
           </div>
 
+          <!-- Vision and time are each one question for a bot, the hot seat and
+               a hosted room, and two for a friend challenge: the challenger
+               may deal the two seats different visions and different clocks.
+               The friend's column (.who-col.friend) is only shown while
+               CHALLENGING() — syncOptions() puts `.split` on the section —
+               and the first column is the one every other game has always
+               had, so the four vision buttons and the six clocks keep the
+               data-mode / data-time names the rest of the page reads. -->
           <div class="panel sec" id="secVision">
-            <h2>Vision</h2>
-            <div class="vis-grid" data-seg="mode">
-              <button class="vis" data-mode="total">Complete Blindfold</button>
-              <button class="vis" data-mode="blind">Board Only</button>
-              <button class="vis" data-mode="fog">Fog of War</button>
-              <button class="vis" data-mode="sighted">Sighted</button>
+            <h2 id="secVisionTitle">Vision</h2>
+            <div class="who-split">
+              <div class="who-col mine">
+                <div class="who-label">My Vision</div>
+                <div class="vis-grid" data-seg="mode">
+                  <button class="vis" data-mode="total">Complete Blindfold</button>
+                  <button class="vis" data-mode="blind">Board Only</button>
+                  <button class="vis" data-mode="fog">Fog of War</button>
+                  <button class="vis" data-mode="sighted">Sighted</button>
+                </div>
+              </div>
+              <div class="who-col friend" id="visFriend">
+                <div class="who-label">Friend's Vision</div>
+                <div class="vis-grid" data-seg="oppMode">
+                  <button class="vis" data-opp-mode="total">Complete Blindfold</button>
+                  <button class="vis" data-opp-mode="blind">Board Only</button>
+                  <button class="vis" data-opp-mode="fog">Fog of War</button>
+                  <button class="vis" data-opp-mode="sighted">Sighted</button>
+                </div>
+              </div>
             </div>
             <!-- The one line the end of the course leaves here, under the
                  question it is about. Empty and hidden for everybody arriving
@@ -4541,14 +4605,30 @@
           </div>
 
           <div class="panel sec" id="secTime">
-            <h2>Time Each</h2>
-            <div class="time-grid" data-seg="time">
-              <button class="tm" data-time="1">1 min</button>
-              <button class="tm" data-time="3">3 min</button>
-              <button class="tm" data-time="5">5 min</button>
-              <button class="tm" data-time="10">10 min</button>
-              <button class="tm" data-time="15">15 min</button>
-              <button class="tm" data-time="30">30 min</button>
+            <h2 id="secTimeTitle">Time Each</h2>
+            <div class="who-split">
+              <div class="who-col mine">
+                <div class="who-label">My Time</div>
+                <div class="time-grid" data-seg="time">
+                  <button class="tm" data-time="1">1 min</button>
+                  <button class="tm" data-time="3">3 min</button>
+                  <button class="tm" data-time="5">5 min</button>
+                  <button class="tm" data-time="10">10 min</button>
+                  <button class="tm" data-time="15">15 min</button>
+                  <button class="tm" data-time="30">30 min</button>
+                </div>
+              </div>
+              <div class="who-col friend" id="timeFriend">
+                <div class="who-label">Friend's Time</div>
+                <div class="time-grid" data-seg="oppTime">
+                  <button class="tm" data-opp-time="1">1 min</button>
+                  <button class="tm" data-opp-time="3">3 min</button>
+                  <button class="tm" data-opp-time="5">5 min</button>
+                  <button class="tm" data-opp-time="10">10 min</button>
+                  <button class="tm" data-opp-time="15">15 min</button>
+                  <button class="tm" data-opp-time="30">30 min</button>
+                </div>
+              </div>
             </div>
           </div>
 
@@ -5400,8 +5480,19 @@ const G = {
   level: 1300,
   started: false,         // the board is only a preview until Start Play
   human: W,
-  minutes: 10,            // same allowance for both sides
+  minutes: 10,            // this player's starting clock (both sides', unless the two below say otherwise)
   inc: 0,                 // seconds added after each move; 0 is a plain clock
+  /* The far side's seat, when it differs from ours. A friend challenge may
+     deal the two players different visions and different clocks, and the
+     server's `start` says which is ours — under `mode`/`minutes`, as it
+     always has — and which is theirs, under opponentMode/opponentMinutes.
+     Null for every game that is not one: startingClocks() then reads
+     `minutes` for both sides, exactly as it did before these existed. The
+     vision itself needs nothing of the kind — render() has always drawn
+     from G.mode, and G.mode is this player's own seat — so theirMode is
+     only ever *said* (the chip, the log, the rematch box), never drawn. */
+  theirMode: null,
+  theirMinutes: null,
   clock: { w: 600000, b: 600000 },
   tickAt: 0,
   flipped: false,
@@ -5554,7 +5645,15 @@ const CHAL = {
   id: null,        // what the server called the invitation we sent
   pending: false,  // sent, and not yet answered
   incoming: null,  // the invitation on screen, waiting for our yes or no
-  timer: null      // gives up on an unanswered one, at the server's own deadline
+  timer: null,     // gives up on an unanswered one, at the server's own deadline
+  /* The friend's seat, as the challenger is setting it: their vision and
+     their starting clock. Our own are G.mode and G.minutes, as for any game
+     — the form's first column writes those — and these are what its second
+     column writes. They travel as opponentMode/opponentMinutes on the
+     `challenge` message and are the server's from then on; nothing here
+     reads them once the game has started. */
+  mode: null,
+  minutes: null
 };
 /* A rematch in flight, seen from both ends. It sits beside CHAL because it is
    the same shape of thing — an invitation carried on the game socket — and
@@ -7259,9 +7358,15 @@ function onNetMessage(msg){
       if (G.matchKind === 'ranked')
         rankedLast = { mode: G.mode, minutes: G.minutes, inc: G.inc };
       G.human = msg.color === 'w' ? W : B;      // colours are the server's call
+      // `mode` and `minutes` are *this* player's seat — the server writes
+      // every start from its reader's chair — so the vision the board is
+      // drawn through is ours whichever colour we were given, and the far
+      // side's is kept only to be said and to seed the other clock.
       G.mode = msg.mode;
       G.minutes = msg.minutes;
       G.inc = msg.inc || 0;
+      G.theirMode = MODE_NAME[msg.opponentMode] ? msg.opponentMode : null;
+      G.theirMinutes = typeof msg.opponentMinutes === 'number' ? msg.opponentMinutes : null;
       // Online there is no Start Play to press: the pairing is what starts the
       // game, so this is where the board stops being a preview. Without it the
       // side panel would go on asking its questions over a board that refuses
@@ -7274,6 +7379,16 @@ function onNetMessage(msg){
       newGame();
       syncOptions();
       logLine('Matched — you are ' + (G.human === W ? 'White' : 'Black') + '.', 'sys');
+      // A challenged game may have dealt the two seats differently, and a
+      // player who has just accepted "Sighted, ten minutes" is owed a line
+      // saying what the other side is on — the strip does not say it, and
+      // a clock that opens on a different number from ours would otherwise
+      // read as a bug.
+      if (G.theirMode && G.theirMinutes != null &&
+          (G.theirMode !== G.mode || G.theirMinutes !== G.minutes))
+        logLine('You play ' + MODE_NAME[G.mode] + ' · ' + timeLabel(G.minutes, G.inc) + '; ' +
+                (NET.opponent || 'your opponent') + ' plays ' + MODE_NAME[G.theirMode] +
+                ' · ' + timeLabel(G.theirMinutes, G.inc) + '.', 'sys');
       // Said once in the log as well as worn on the bar: nobody should have to
       // work out from the play whether the other side is a person. Only for
       // the ranked fallback, which was seated *instead* of the game the player
@@ -7457,8 +7572,11 @@ function remLeave(){
    already on screen. Saying yes to a ranked one puts a rating back on the
    table, so it is not a detail to leave to the player to remember. */
 function rematchTerms(msg){
+  // Written from this chair like the challenge box: our own seat, and the
+  // other player's after it when a challenged game gave them a different
+  // one — the colours swap in a rematch, the visions and clocks do not.
   return (msg.kind === 'ranked' ? 'Ranked · ' : '') +
-         (MODE_NAME[msg.mode] || msg.mode) + ' · ' + timeLabel(msg.minutes, msg.inc || 0) +
+         seatTermsText(msg, msg.from || 'your opponent') +
          ' — you play ' + (msg.color === 'w' ? 'White' : 'Black') + '.';
 }
 
@@ -13703,6 +13821,23 @@ function lsnLesson9(){
 /* ============================================================
    CONTROLS
    ============================================================ */
+/* What each side starts with on the clock, in milliseconds. One number for
+   both, as it always was — except in an online game that has begun and
+   whose `start` dealt the far side a different clock (G.theirMinutes; a
+   friend challenge is the only way that happens), where ours goes on our
+   colour and theirs on the other. It is keyed by *seat*, never by White:
+   the settings belong to the player, and the colour is only where they are
+   sitting. Gated on G.started because the preview board a form stands
+   beside is drawn through newGame() too, before any `start` has spoken.
+   Kept pure so test_challenge_flow.js can ask it directly. */
+function startingClocks(){
+  const mine = G.minutes * 60000;
+  if (!(ONLINE() && G.started && G.theirMinutes != null) || (G.human !== W && G.human !== B))
+    return { w: mine, b: mine };
+  const theirs = G.theirMinutes * 60000;
+  return G.human === W ? { w: mine, b: theirs } : { w: theirs, b: mine };
+}
+
 function newGame(){
   reviewClose(false);        // a new game supplies its own position
   G.st = newState();
@@ -13713,7 +13848,7 @@ function newGame(){
   G.reps = {}; G.over = null;
   G.revealed = false; G.peeking = false;
   G.peeksLeft = 3;
-  G.clock = { w: G.minutes * 60000, b: G.minutes * 60000 };
+  G.clock = startingClocks();
   startClock();
   G.flipped = LOCAL() ? false : (G.human === B);   // hot-seat always opens with White below
   for (const [,e] of pieceEls) e.remove();
@@ -18948,13 +19083,24 @@ let screenName = 'home';
 const picked = { mode:false };
 // the three settings below the cards, likewise — and whether Start Play has
 // already been pressed with any of them still unanswered
-const chosen = { level:false, side:false, minutes:false };
+const chosen = {
+  level:false, side:false, minutes:false,
+  // the friend's two answers, asked only by a challenge
+  oppMode:false, oppMinutes:false
+};
 let flagged = false;
 
 /** Every new trip through the setup panel starts with nothing answered. */
 function resetChoices(){
   picked.mode = false;
   chosen.level = chosen.side = chosen.minutes = false;
+  chosen.oppMode = chosen.oppMinutes = false;
+  // The friend's seat is asked afresh by every challenge form, and the
+  // other side's terms from a finished game must not leak into the next
+  // board: every route to the setup panel passes through here, and
+  // startingClocks() reads G.theirMinutes for any online game that starts.
+  CHAL.mode = CHAL.minutes = null;
+  G.theirMode = G.theirMinutes = null;
   flagged = false;
   // The course's advice about which vision to take first is an answer to the
   // vision question, so it goes out with the rest of the answers. This is the
@@ -19381,6 +19527,21 @@ function syncOptions(){
   document.querySelectorAll('[data-time]').forEach(b =>
     b.classList.toggle('active', chosen.minutes && +b.dataset.time === G.minutes));
 
+  // A challenge asks the vision and the clock once more, for the friend. The
+  // two sections split into a column each while it does, and the headings
+  // say so — "Vision" over My Vision / Friend's Vision, "Time" over My Time
+  // / Friend's Time — and go back to the one-question wording for
+  // everything else, where the second column does not exist.
+  const split = CHALLENGING();
+  document.getElementById('secVision').classList.toggle('split', split);
+  document.getElementById('secTime').classList.toggle('split', split);
+  document.getElementById('secVisionTitle').textContent = 'Vision';
+  document.getElementById('secTimeTitle').textContent = split ? 'Time' : 'Time Each';
+  document.querySelectorAll('.vis[data-opp-mode]').forEach(b =>
+    b.classList.toggle('active', chosen.oppMode && b.dataset.oppMode === CHAL.mode));
+  document.querySelectorAll('[data-opp-time]').forEach(b =>
+    b.classList.toggle('active', chosen.oppMinutes && +b.dataset.oppTime === CHAL.minutes));
+
   // strength and colour are meaningless sharing a board, and not yours to set online
   // engine strength is only the engine's business; colour is yours to pick when
   // you are hosting, because the room advertises which seat is left
@@ -19464,8 +19625,9 @@ function syncOptions(){
   };
   warn('modeGrid',  picked.mode);
   warn('setupOpts', optionsAnswered());
-  warn('secVision', picked.mode);
-  warn('secTime',   chosen.minutes);
+  // a challenge's sections are answered only once both columns are
+  warn('secVision', picked.mode && (!CHALLENGING() || chosen.oppMode));
+  warn('secTime',   chosen.minutes && (!CHALLENGING() || chosen.oppMinutes));
   warn('secOpponent', !BOT() || chosen.level);
   warn('secYouPlay',  !BOT() || chosen.side);
 
@@ -19478,7 +19640,11 @@ function syncOptions(){
       ? (G.matchKind === 'ranked' ? 'Ranked' : 'Friendly') +
         ' · ' + (G.human === W ? 'White' : 'Black')
       : G.level + ' Elo · ' + (G.human === W ? 'White' : 'Black'))
-    + ' · ' + timeLabel(G.minutes, G.inc);
+    + ' · ' + timeLabel(G.minutes, G.inc)
+    // a challenged game may have dealt the other side a different clock,
+    // and a chip that named only ours would read as the game's
+    + (ONLINE() && G.theirMinutes != null && G.theirMinutes !== G.minutes
+        ? ' vs ' + timeLabel(G.theirMinutes, G.inc) : '');
 
   syncSound();
 }
@@ -19650,6 +19816,17 @@ document.querySelectorAll('#modeGrid .half').forEach(half => {
 document.querySelectorAll('.vis[data-mode]').forEach(b => {
   b.onclick = () => { selectMode(b.dataset.mode); render(); };   // the board follows at once
 });
+/* ...and the four for the friend, on a challenge form. These write CHAL and
+   never G: the board beside the form is *our* preview, drawn through our own
+   vision, and the friend's choice is theirs to see on their own screen. */
+function pickFriendMode(mode){
+  CHAL.mode = mode; chosen.oppMode = true;
+  beep(660,.07);
+  syncOptions();
+}
+document.querySelectorAll('.vis[data-opp-mode]').forEach(b => {
+  b.onclick = () => pickFriendMode(b.dataset.oppMode);
+});
 
 // every choice is committed here, in one go
 // nothing here has a default — an unanswered option stops the launch and says so
@@ -19658,7 +19835,9 @@ function optionsAnswered(){
   if (!chosen.minutes) return false;
   if (BOT()) return chosen.level && chosen.side;
   if (HOSTING()) return chosen.side;      // the room advertises which seat is left
-  if (CHALLENGING()) return chosen.side;  // the invitation names the seat you kept
+  // the invitation names the seat you kept, and the friend's own vision and
+  // clock — two answers only a challenge asks for
+  if (CHALLENGING()) return chosen.side && chosen.oppMode && chosen.oppMinutes;
   return true;
 }
 
@@ -19674,8 +19853,10 @@ function unanswered(){
     if (PZ.setup) return picked.mode ? [] : ['secVision'];
     if (BOT() && !chosen.level) out.push('secOpponent');
     if ((BOT() || CHALLENGING()) && !chosen.side) out.push('secYouPlay');
-    if (!picked.mode)           out.push('secVision');
-    if (!chosen.minutes)        out.push('secTime');
+    // a challenge's vision and time panels each hold two questions, and
+    // either half left blank is the panel left blank
+    if (!picked.mode || (CHALLENGING() && !chosen.oppMode))       out.push('secVision');
+    if (!chosen.minutes || (CHALLENGING() && !chosen.oppMinutes)) out.push('secTime');
     return out;
   }
   if (!picked.mode)        out.push('modeGrid');
@@ -19760,6 +19941,15 @@ document.querySelectorAll('[data-side]').forEach(b => {
 });
 document.querySelectorAll('[data-time]').forEach(b => {
   b.onclick = () => pickBotTime(+b.dataset.time);
+});
+/* The friend's clock, on a challenge form. Flat like every clock on this
+   screen — the increment is the game's and pickBotTime() has already zeroed
+   it — and kept in CHAL rather than G for the same reason as their vision. */
+function pickFriendTime(minutes){
+  CHAL.minutes = minutes; chosen.oppMinutes = true; syncOptions();
+}
+document.querySelectorAll('[data-opp-time]').forEach(b => {
+  b.onclick = () => pickFriendTime(+b.dataset.oppTime);
 });
 /* Progressive Blindfold's handoff into a real game does not want a setup box
    asking twice what the drill just answered. 1000 and the slowest clock are
@@ -22139,9 +22329,28 @@ function sendChallenge(){
   showWaiting('Waiting for ' + CHAL.to.name + ' to accept your challenge…', 'Challenge Sent');
   netConnect(() => {
     if (NET.state === 'connecting') NET.state = 'social';
+    // Our seat under the plain names, the friend's as the opponent's — the
+    // one vocabulary every payload on this socket uses. The server turns it
+    // round for the friend's box and for each `start`, so nobody's page ever
+    // has to work out whose is whose from the colour.
     netSend({ t:'challenge', to:CHAL.to.id, mode:G.mode,
-              minutes:G.minutes, inc:G.inc, color:mine });
+              minutes:G.minutes, inc:G.inc, color:mine,
+              opponentMode: CHAL.mode || G.mode,
+              opponentMinutes: CHAL.minutes || G.minutes });
   });
+}
+
+/* Two seats said in one line — "Sighted · 10 min; Alex plays Complete
+   Blindfold · 3 min" — for the challenge box and the rematch box, both of
+   which are read from the answerer's chair: `mode`/`minutes` are theirs,
+   opponent* the other player's. When the two seats are the same the second
+   half is left off, which is every game that is not a challenge. */
+function seatTermsText(msg, who){
+  const mine = (MODE_NAME[msg.mode] || msg.mode) + ' · ' + timeLabel(msg.minutes, msg.inc || 0);
+  const oMode = msg.opponentMode || msg.mode;
+  const oMin  = typeof msg.opponentMinutes === 'number' ? msg.opponentMinutes : msg.minutes;
+  if (oMode === msg.mode && oMin === msg.minutes) return mine;
+  return mine + '; ' + who + ' plays ' + (MODE_NAME[oMode] || oMode) + ' · ' + timeLabel(oMin, msg.inc || 0);
 }
 
 /** No game, and a reason. The box's own button is the way back to the friends list. */
@@ -22156,9 +22365,13 @@ function showChallenge(msg){
   CHAL.incoming = msg;
   document.getElementById('chalTitle').textContent =
     (msg.fromName || 'A friend') + ' challenged you';
+  // The invitation is written from this chair: `mode` and `minutes` are what
+  // *you* would play, and the challenger's own seat is named after them when
+  // it differs — a friend who has set you Sighted against their own Complete
+  // Blindfold is telling you something worth reading before you press yes.
   document.getElementById('chalText').textContent =
-    (MODE_NAME[msg.mode] || msg.mode) + ' · ' + timeLabel(msg.minutes, msg.inc || 0) +
-    ' — you play ' + (msg.color === 'w' ? 'White' : 'Black') + '.';
+    'You play ' + (msg.color === 'w' ? 'White' : 'Black') + ' — ' +
+    seatTermsText(msg, msg.fromName || 'your friend') + '.';
   chalOverlay.classList.add('show');
   beep(880,.09); setTimeout(()=>beep(1180,.1), 110);
 }

@@ -20,6 +20,8 @@ python3 server/test_two_clients.py       # integration tests — REQUIRES a runn
 node server/test_rematch_e2e.js          # two whole pages on real sockets — REQUIRES a running server
 node server/test_ws_url.js               # unit tests for wsURLFrom(); no server needed
 node server/test_rematch_flow.js         # the page's rematch and New Game wiring, against scripted replies
+node server/test_challenge_flow.js       # a friend challenge with two seats set differently — the page's half, no server
+SUPABASE_JWT_SECRET=x PORT=8797 node server/test_challenge_e2e.js   # ...and two whole pages on real sockets — REQUIRES a server started with the same secret
 node server/test_review.js               # unit tests for the review's chess reasoning
 node server/test_study_education.js      # Study Board's concept card, and how it fails
 node server/test_puzzle_flow.js          # plays a shipped puzzle against a stub DOM
@@ -92,6 +94,14 @@ narrow: it boots the *whole* page script twice under a dumb DOM shim, gives
 each copy its own real WebSocket to the server, and presses the real buttons —
 the only thing in the repo that can catch the page and the server disagreeing
 about a message neither one of them is wrong about on its own.
+The shim and the page boot live in `server/page_harness.js`, which
+`test_challenge_e2e.js` shares: it runs the same two-page arrangement for a
+friend challenge, which needs a signed-in account on both ends, so it mints
+HS256 tokens with the harness's `mintToken()` from `SUPABASE_JWT_SECRET` —
+the same secret `test_two_clients.py` uses — and skips, saying so, without
+one. Locally that means starting a server with any `SUPABASE_JWT_SECRET` at
+all (no `SUPABASE_URL` needed): accounts switch on, HS256 tokens verify, and
+the challenge sections of both suites run instead of being skipped.
 
 `test_two_clients.py` has no test-case selection flag; it runs the whole
 sequence (matchmaking, turn order, a full game, resign/draw, rooms, rematch,
@@ -173,6 +183,48 @@ reach every tab that account has open and what lets the server refuse an answer
 from anyone else (`handle_challenge_accept`). It is
 deliberately not a database row: it means nothing once either side disconnects,
 so it lives in memory and dies with the session.
+
+**A friend challenge deals each seat its own vision and its own clock, and
+the terms belong to the player, not to the colour.** The challenge form —
+the Play Bot panel aimed at a friend — asks the Vision and Time questions
+twice while `CHALLENGING()`: `syncOptions()` puts `.split` on `#secVision`
+and `#secTime`, which is what shows the friend's column (`.who-col.friend`,
+buttons carrying `data-opp-mode` / `data-opp-time`) beside the challenger's
+own, the one every other game has always had. The challenger's picks go to
+`G.mode`/`G.minutes` as for any game; the friend's go to `CHAL.mode` /
+`CHAL.minutes` (`pickFriendMode()`, `pickFriendTime()`) and never to `G`,
+because the preview board is the challenger's own and is drawn through their
+vision. Both halves have to be answered before Challenge lights
+(`optionsAnswered()`, `unanswered()`).
+
+On the wire there is one vocabulary and every payload is written from its
+*reader's* chair, exactly as `color` already was: `mode` and `minutes` are
+what you play, `opponentMode` and `opponentMinutes` what the far side does.
+The page sends `challenge` that way; the server (`clean_mode()`,
+`clean_minutes()`, `seat_terms()`) turns it round for the friend's
+`challenged` box, and `start_game_between()` writes each `start` the same
+way, so `G.mode = msg.mode` on every page is that player's own seat whichever
+colour it was given — the vision needs nothing else, since `render()` has
+always drawn from `G.mode`. The far side's pair lands in `G.theirMode` /
+`G.theirMinutes`, which are only ever *said* (the setup chip, a line in the
+log, the boxes) and seed the other clock: `startingClocks()` is the one
+place the two starting times are keyed by seat, gated on `ONLINE() &&
+G.started` so the preview board and every game that is not a challenge seed
+one number as before, and `resetChoices()` clears both so a finished
+challenge's far side cannot leak into the next board. A `challenge` naming
+only `mode`/`minutes`, or naming terms the server does not recognise, deals
+the challenger's own to both seats — the one shared game every challenge
+used to be — and quick match, rooms, the fallback bot and the league are
+untouched: they hand `start_game_between()` no `guest_terms` and get both
+seats alike. `Game.terms` is the per-colour record; `game.mode`/`minutes`
+stay the headline pair the lobby key and the log lines read. `finish_game()`
+writes each player's *own* terms into `last_game` and the other's beside them
+as `opponentTerms`, so a rematch keeps each with its player while the
+colours swap (`Rematch.guest_terms`, and the bot branch passes them too). No
+database or Supabase change is involved: a challenge was never a row and
+still is not. `test_challenge_flow.js`, the challenge section of
+`test_two_clients.py` and `test_challenge_e2e.js` cover the four
+combinations, the swap, the rematch and the fallbacks.
 
 **A rematch is another invitation, not another kind of game.** Rematch
 used to walk away from the finished game and open the room list, which is not a
