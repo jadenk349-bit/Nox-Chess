@@ -3406,9 +3406,7 @@
   .home-shortcuts > :nth-child(3){background-position:center 75%;}
   .home-shortcuts > :nth-child(4){background-position:center 95%;}
   .home-shortcuts > :nth-child(5){background-position:center 60%;}
-  .home-shortcuts .menu{left:auto; right:0;}
   @media(max-width:900px){.home-shortcuts{gap:8px;} .home-shortcut{font-size:24px;}}
-  @media(max-width:620px){.home-shortcuts .menu{left:0; right:auto;}}
 
   .home-ladder-area{display:flex; flex-direction:column; align-items:flex-start; gap:28px; flex:1; min-width:0; max-width:100%;}
   .home-ladder-area .lb-stack{min-width:0; width:100%; display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:24px 22px;}
@@ -4418,17 +4416,14 @@
       <button class="home-shortcut" id="homeBot">Play Bot</button>
       <button class="home-shortcut" id="homeSocial">Social</button>
       <button class="home-shortcut" id="homePractice">Practice</button>
-      <div class="nav-item">
-        <button class="home-shortcut" id="homePuzzle" aria-haspopup="true">Puzzle</button>
-        <!-- The same two doors the header carries, and they have to stay the
-             same two: each button here only presses the one it names up in
-             the nav, so a door added there and forgotten here is a door with
-             half a shortcut. -->
-        <div class="menu">
-          <button class="menu-btn" id="homePuzzleGo">Puzzle</button>
-          <button class="menu-btn" id="homeRush">Puzzle Rush</button>
-        </div>
-      </div>
+      <!-- A shortcut, not a menu. The header's PUZZLE carries the two doors;
+           this one is the first of them said again — it presses navPuzzleGo
+           and opens the setup page, exactly as the other five press the nav
+           button they name. It used to carry the header's menu too, so a
+           mouse arriving here was met with a popup asking Puzzle or Puzzle
+           Rush; a shortcut that asks a question is not a shortcut. Rush is
+           still one hover away, up in the header. -->
+      <button class="home-shortcut" id="homePuzzle">Puzzle</button>
     </nav>
 
       <div class="lb-stack" aria-labelledby="lbTitleAll">
@@ -22450,10 +22445,15 @@ document.getElementById('navRush').onclick     = () => GUEST() ? toSignUp() : ru
 // Homepage shortcuts use the same destinations and account gates as the header:
 // each one presses the nav button it names rather than growing a second
 // handler that could drift from it.
-for (const name of ['Ranked','Friendly','Bot','Social','Practice','Puzzle',
-                    'PuzzleGo','Rush']){
+for (const name of ['Ranked','Friendly','Bot','Social','Practice']){
   document.getElementById('home' + name).onclick = () => document.getElementById('nav' + name).click();
 }
+// Puzzle is the exception only in which header button it presses: navPuzzle
+// is a menu opener and does nothing on a click once signed in, so the home
+// shortcut presses the menu's first door instead, and the account gate on
+// that door — sign-up for a guest, the setup page for anybody else — is
+// what this button inherits.
+document.getElementById('homePuzzle').onclick = () => document.getElementById('navPuzzleGo').click();
 
 
 document.getElementById('btnSettings').onclick = () => { beep(560,.07); showScreen('settings'); };
@@ -23387,7 +23387,7 @@ const GUEST = () => accountsAvailable() && !account;
    nothing, so the lock is a door rather than a wall. They stay ordinary
    buttons for exactly that reason: [disabled] would swallow the click that
    was the whole invitation. */
-const LOCKED_IDS = ['homeRanked', 'homeSocial', 'homePuzzle', 'homePuzzleGo', 'homeRush',
+const LOCKED_IDS = ['homeRanked', 'homeSocial', 'homePuzzle',
                     'navRanked', 'navSocial', 'navPuzzle', 'navPuzzleGo', 'navRush'];
 
 function lockedControls(){

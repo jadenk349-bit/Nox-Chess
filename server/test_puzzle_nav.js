@@ -64,14 +64,16 @@ check('the Puzzle door opens the setup page',
       /getElementById\('navPuzzleGo'\)\.onclick = \(\) => GUEST\(\) \? toSignUp\(\) : enterPuzzleSetup\(\);/.test(SRC), true);
 check('the Rush door starts a run on the press',
       /getElementById\('navRush'\)\s+= \(\) => GUEST\(\) \? toSignUp\(\) : rushStart\(\);/.test(SRC.replace(/\.onclick/g, '')), true);
-/* The home page's shortcuts press the header button they name rather than
-   carrying a handler of their own, so they can never go somewhere else. */
-const homeMenu = menuOf('homePuzzle') || [];
-check('the home page offers the same two doors',
-      homeMenu.map(p => [p[0], p[1]]), [['homePuzzleGo', 'Puzzle'], ['homeRush', 'Puzzle Rush']]);
-const relay = (SRC.match(/for \(const name of \[([^\]]*)\]\)\{\n\s*document\.getElementById\('home' \+ name\)\.onclick = \(\) => document\.getElementById\('nav' \+ name\)\.click\(\);/) || ['', ''])[1];
-check('and each presses the header button it names',
-      /'PuzzleGo'/.test(relay) && /'Rush'/.test(relay), true);
+/* The home page's Puzzle shortcut is a button and not a menu: hovering it
+   opens nothing, and pressing it presses the header's Puzzle door, so it can
+   never go somewhere the header does not. The menu is the header's alone. */
+const homeAt = SRC.indexOf('id="homePuzzle"');
+const homeTag = SRC.slice(SRC.lastIndexOf('<', homeAt), SRC.indexOf('>', homeAt) + 1);
+check('the home shortcut is a plain button', /^<button class="home-shortcut" id="homePuzzle">$/.test(homeTag), true);
+check('and opens no menu', /aria-haspopup/.test(homeTag), false);
+check('and no home button is a copy of a door', SRC.indexOf('"homePuzzleGo"') < 0 && SRC.indexOf('"homeRush"') < 0, true);
+check('it presses the header\'s Puzzle door',
+      /getElementById\('homePuzzle'\)\.onclick = \(\) => document\.getElementById\('navPuzzleGo'\)\.click\(\);/.test(SRC), true);
 check('the setup page starts the puzzle from the vision it was given',
       /function startPuzzleFromSetup\(/.test(SRC) && /function pzModeForVision\(/.test(SRC), true);
 
@@ -86,7 +88,7 @@ check('no Puzzle-menu entry mentions a phase',
 head('Every door is locked behind an account, and every locked id exists');
 
 const locked = (SRC.match(/const LOCKED_IDS = \[([\s\S]*?)\];/) || [])[1] || '';
-for (const id of ['navPuzzle', 'navPuzzleGo', 'navRush', 'homePuzzle', 'homePuzzleGo', 'homeRush'])
+for (const id of ['navPuzzle', 'navPuzzleGo', 'navRush', 'homePuzzle'])
   check(id + ' is in LOCKED_IDS', locked.indexOf("'" + id + "'") >= 0, true);
 for (const m of locked.match(/'([A-Za-z0-9]+)'/g) || []){
   const id = m.slice(1, -1);
