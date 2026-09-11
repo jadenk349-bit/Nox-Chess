@@ -22,6 +22,8 @@
  */
 const { makePage, until, wait, probe, counter, mintToken, signIn } = require('./page_harness');
 const { check, summary } = counter();
+// what the server holds a dropped seat for; NOX_AWAY_GRACE shortens both ends
+const GRACE = parseFloat(process.env.NOX_AWAY_GRACE || '10');
 
 const NAME = { total:'Complete Blindfold', blind:'Board Only', fog:'Fog of War', sighted:'Sighted' };
 const other = c => (c === 'w' ? 'b' : 'w');
@@ -211,9 +213,14 @@ async function main(){
   {
     const { a, b, bId, bName } = await pair();
     await challenge(a, b, bId, bName, { mode:'fog', minutes:5 }, { mode:'blind', minutes:15 }, 'w');
-    b.NET.sock.close();                          // the friend's tab goes
-    const left = await until(() => a.G.over, 6000);
-    check('a player who disconnects loses the game, as in any online game',
+    b.NET.sock.close();                          // the friend's connection blinks
+    await until(() => b.NET.state === 'reconnecting');
+    const back = await until(() => b.NET.state === 'playing', 5000);
+    check('a dropped connection is retried rather than resigned, as in any online game',
+          back && !a.G.over && !b.G.over, b.NET.state);
+    b.netClose();                                // and now the friend really goes
+    const left = await until(() => a.G.over, GRACE * 1000 + 4000);
+    check('a player who does not come back loses the game, as in any online game',
           left && /left/i.test((a.G.over && a.G.over.text) || ''), a.G.over && a.G.over.text);
     a.netClose();
   }

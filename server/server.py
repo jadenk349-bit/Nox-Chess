@@ -34,8 +34,10 @@ Run:  python3 server/server.py [--port 8787]
 
 import json
 import os
+import hmac
 import random
 import re
+import secrets
 import signal
 import socket
 import sys
@@ -117,6 +119,23 @@ try:
     # Only so the tests need not sit out five seconds a time. Not a setting
     # anybody is expected to change: the five seconds are part of the feature.
     AI_WAIT = max(0.2, float(os.environ.get("NOX_AI_WAIT") or AI_WAIT))
+except ValueError:
+    pass
+
+# How long a seat is kept for a player whose socket has gone. A game used to
+# end the instant either connection closed — the other side was handed the win
+# and told "your opponent disconnected" — which is the right answer for a
+# player who has walked away and the wrong one for a phone changing networks
+# or a laptop's wifi blinking, and the socket cannot tell those apart. So a
+# dropped player is not gone until they have been gone for this long: the
+# seat stays theirs, the game stays in `games`, moves the other side makes in
+# the meantime are kept for them, and a new connection that says `resume`
+# with the seat's own secret (see Game.seats) sits back down with everything
+# it missed. Only once the grace lapses is the game finished as "left", exactly
+# as before. Ten seconds is the feature; the variable is for the tests.
+AWAY_GRACE = 10.0
+try:
+    AWAY_GRACE = max(0.2, float(os.environ.get("NOX_AWAY_GRACE") or AWAY_GRACE))
 except ValueError:
     pass
 
@@ -332,6 +351,16 @@ class Game:
         self.turn = WHITE
         self.over = None
         self.started = time.time()
+        # One secret per seat, handed to that seat's page in its `start` and
+        # to nobody else. It is what lets a fresh socket prove it is the player
+        # whose connection just dropped — a guest has no account to prove it
+        # with, and even an account may have two tabs open, only one of which
+        # is at this board. It lives in the page's memory for the life of the
+        # game, so a reload is still a leave.
+        self.seats = {WHITE: secrets.token_hex(16), BLACK: secrets.token_hex(16)}
+        # Seats whose player has dropped and may still come back: colour to the
+        # timer that will finish the game if they do not (see hold_seat()).
+        self.away = {}
         # Pairing them is also what lets them talk. Both directions are set
         # here so every way of making a game — quick match and rooms alike —
         # gets chat without having to remember to wire it up.
@@ -718,6 +747,17 @@ def finish_game(game, reason, winner=None, exclude=None):
     if game.over:
         return
     game.over = reason
+    if game.away:
+        # Somebody is out and may yet come back to ask about this game. The
+        # `over` below goes to a dead socket, so the result is kept where
+        # handle_resume() can find it — long enough for their own grace to
+        # lapse and a little more — and the timers that would have called
+        # them gone are stood down, since the game is over either way.
+        for timer in game.away.values():
+            timer.cancel()
+        game.away.clear()
+        recent_results[game.id] = {"reason": reason, "winner": winner, "seats": dict(game.seats)}
+        later(AWAY_GRACE * 2 + 5, recent_results.pop, game.id, None)
     for client in game.players.values():
         if client is not exclude:
             client.send({"t": "over", "reason": reason, "winner": winner})
@@ -1309,6 +1349,10 @@ def handle_find(client, msg):
                     "kind": kind,
                     "opponent": other.name,
                     "opponentVerified": other.verified,
+                    # the seat's secret and the grace, as start_game_between()
+                    # writes them — see AWAY_GRACE
+                    "seat": game.seats[color],
+                    "grace": AWAY_GRACE,
                 })
             # and a rematch either of them left in the air is over
             for side, payload in rematches_cleared_for(white, black):
@@ -1541,6 +1585,110 @@ def handle_resign(client):
         finish_game(game, "resign", winner)
 
 
+# ------------------------------------------------- a dropped connection
+
+# Results of games that ended while one player was out, by game id, kept only
+# as long as that player could still come back and ask: see finish_game().
+recent_results = {}
+
+
+def hold_seat(game, client):
+    """A player's socket has gone; keep their seat for AWAY_GRACE. Caller holds the lock.
+
+    The dead Client stays in `game.players` — its send() is a no-op, so
+    nothing downstream needs to know — and a timer is armed to finish the game
+    as "left" if nobody has claimed the seat by then. Returns what to tell the
+    other side, for the caller to send outside the lock. A seat the bot is
+    facing is held the same way: the bot cannot be told and does not care, but
+    the player's page is still owed its ten seconds.
+    """
+    color = client.color
+    game.away[color] = later(AWAY_GRACE, seat_lapsed, game, color, client)
+    other = game.opponent_of(client)
+    log("%s dropped mid-game %s; seat held for %ss" % (client.id, game.id, AWAY_GRACE))
+    return [(other, {"t": "opponent-away", "game": game.id, "seconds": AWAY_GRACE})]
+
+
+def seat_lapsed(game, color, client):
+    """The grace ran out with nobody back in the seat: the game is lost as before."""
+    with lock:
+        # Anything that has happened since — the game ending some other way,
+        # the player sitting back down (which replaces `client` in the seat and
+        # cancels this timer, though a timer already firing cannot be) — means
+        # this is not the word on the matter.
+        if game.over or color not in game.away or game.players[color] is not client:
+            return
+        winner = BLACK if color == WHITE else WHITE
+        finish_game(game, "left", winner, exclude=client)
+
+
+def handle_resume(client, msg):
+    """A fresh socket asking for the seat its predecessor dropped.
+
+    The proof is the seat's own secret from `start`, compared in constant time.
+    A seat that is still occupied — the socket never dropped, or the player has
+    two tabs on one board — is refused: the seat is claimed only while it is
+    being held. A game that ended while the player was out answers with how,
+    from `recent_results`, so their page can show the result it missed rather
+    than a generic "disconnected".
+    """
+    game_id, seat = msg.get("game"), msg.get("seat")
+    if not isinstance(game_id, str) or not isinstance(seat, str):
+        client.send({"t": "resume-failed", "game": game_id})
+        return
+    with lock:
+        if client.game or client.room:
+            client.send({"t": "error", "msg": "already in a game"})
+            return
+        game = games.get(game_id)
+        if not game or game.over:
+            failed = {"t": "resume-failed", "game": game_id}
+            gone = recent_results.get(game_id)
+            if gone and any(hmac.compare_digest(s, seat) for s in gone["seats"].values()):
+                failed["over"] = {"reason": gone["reason"], "winner": gone["winner"]}
+            client.send(failed)
+            return
+        color = next((c for c, s in game.seats.items() if hmac.compare_digest(s, seat)), None)
+        if color is None or color not in game.away:
+            client.send({"t": "resume-failed", "game": game_id})
+            return
+        game.away.pop(color).cancel()
+        game.players[color] = client
+        client.game, client.color = game, color
+        # neither queueing nor watching the list any more — this is a board
+        cancel_ai_fallback(client)
+        leave_lobby(client)
+        lobby_subs.discard(client)
+        other = game.opponent_of(client)
+        client.chat_peer = (other, game.id)
+        other.chat_peer = (client, game.id)
+        mine, theirs = game.terms[color], game.terms[other.color]
+        payload = {
+            "t": "resume",
+            "game": game.id,
+            "color": color,
+            "mode": mine["mode"],
+            "minutes": mine["minutes"],
+            "inc": game.inc,
+            "kind": game.kind,
+            "opponent": other.name,
+            "opponentVerified": other.verified,
+            "opponentMode": theirs["mode"],
+            "opponentMinutes": theirs["minutes"],
+            "seat": seat,
+            "grace": AWAY_GRACE,
+            # Everything played so far, so the page can apply whatever it
+            # missed — and see whether a move of its own never arrived.
+            "moves": list(game.moves),
+            "turn": game.turn,
+        }
+        if game.ai and other.is_ai:
+            payload["ai"] = dict(game.ai)
+        log("%s resumed game %s as %s" % (client.id, game.id, color))
+    client.send(payload)
+    other.send({"t": "opponent-back", "game": game.id, "name": client.name})
+
+
 def handle_draw_offer(client):
     """Relayed, not decided: a draw needs the other player to agree."""
     with lock:
@@ -1675,6 +1823,10 @@ def start_game_between(host, guest, host_color, mode, minutes, inc, kind="friend
             # is decided here, because each page draws from its own `mode`.
             "opponentMode": theirs["mode"],
             "opponentMinutes": theirs["minutes"],
+            # What this page will show to get its seat back after a dropped
+            # connection, and how long it has to do it. See AWAY_GRACE.
+            "seat": game.seats[color],
+            "grace": AWAY_GRACE,
         }
         # Only ever true of the side facing the bot, and the bot's own copy is
         # thrown away by the caller — but say it of the opponent rather than of
@@ -2016,6 +2168,8 @@ def handle_message(client, raw):
         handle_cancel(client)
     elif kind == "move":
         handle_move(client, msg)
+    elif kind == "resume":
+        handle_resume(client, msg)
     elif kind == "result":
         handle_result(client, msg)
     elif kind == "resign":
@@ -2149,8 +2303,10 @@ def drop_client(client):
             dropped_room = True
         game = client.game
         if game and not game.over:
-            winner = BLACK if client.color == WHITE else WHITE
-            finish_game(game, "left", winner, exclude=client)
+            # Not lost yet: the seat is held for AWAY_GRACE and the other side
+            # is told to wait. hold_seat() is what finishes the game if
+            # nobody comes back for it.
+            told += hold_seat(game, client)
         client.game = None
         # the other side keeps its own reference until it disconnects too, but
         # sending to a dead socket is a no-op, so nothing piles up

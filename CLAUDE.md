@@ -112,7 +112,12 @@ a clock no other test asks for; reusing one is how a test ends up matched with
 the wrong stranger — and, on a ranked clock, how a test ends up matched with a
 bot. It really does sit out the fallback's five seconds, several times over —
 `NOX_AI_WAIT`, set on the server *and* on the harness, shortens a local run,
-and is not a knob anybody is meant to turn in production.
+and is not a knob anybody is meant to turn in production. `NOX_AWAY_GRACE`
+is the same arrangement for the ten seconds a dropped player's seat is held
+(see "A dropped connection" below): the Disconnects section, the drop
+checks in `test_challenge_e2e.js` and the "A connection that drops mid-game"
+section of `test_rematch_e2e.js` all sit it out at whatever length the
+server was started with, and read the variable to know how long that is.
 
 Environment: `PORT` (default 8787), `SUPABASE_URL` (enables token
 verification), `SUPABASE_JWT_SECRET` (only for legacy HS256 projects; also what
@@ -136,6 +141,64 @@ move generator in `blind-chess.html`. The server never validates chess: it
 enforces only whose turn it is and that `ply` arrives in sequence, then relays.
 A client rejects anything its own rules reject. Game end is *reported* by a
 client (`{t:"result"}`) and the server records the first word on the matter.
+
+**A dropped connection is not a resignation until it has lasted ten
+seconds.** A game used to end the instant either socket closed: the page put
+up "Disconnected", `drop_client()` handed the other side the win, and a phone
+changing networks lost exactly as a player walking away did, because a closed
+socket cannot say which it was. Now both ends wait. `drop_client()` calls
+`hold_seat()` instead of `finish_game()`: the dead `Client` stays in
+`game.players` (its `send()` is already a no-op, so nothing downstream
+notices), the game stays in `games`, the colour goes into `game.away` with a
+`later(AWAY_GRACE, seat_lapsed, …)` timer, and the other side is told
+`{t:"opponent-away", seconds}`. Moves the connected side makes meanwhile are
+accepted and kept in `game.moves` as always — they were only ever relayed to
+a socket that is now dead. `seat_lapsed()` is the old ending, ten seconds
+late: if the seat is still held by that same dead client it finishes the
+game as `left`, and `over` reaches the other side exactly as it did before.
+
+What lets a fresh socket claim the seat is a secret, not an identity:
+`Game.seats` holds one per colour, each `start` carries its reader's as
+`seat` (both `start_game_between()` and the copy `handle_find()` writes, plus
+`grace`, which is the number the page counts down from), and the page keeps
+it in `NET.seat` for the life of the game and nowhere else — so a reload is
+still a leave, on purpose, since the board it would come back to is gone
+with the page. A guest has nothing else to prove it with, and an account
+may have two tabs open of which only one is at this board.
+`handle_resume()` compares in constant time, refuses a seat that is not
+being held (the socket never dropped, or somebody is already back in it),
+and otherwise swaps the new client in, cancels the timer, re-pairs
+`chat_peer`, and answers `{t:"resume", …}` — the `start` fields again plus
+`moves` and `turn` — while the other side gets `opponent-back`. A game that
+ended while the player was out (the other side resigned into the empty
+seat, or its clock ran down) is not lost to them: `finish_game()` records
+the result in `recent_results` whenever a seat was away, and a late `resume`
+showing that seat's secret is answered `resume-failed` *with* `over`, so the
+page can show the result it missed instead of "Disconnected". A seat facing
+a bot is held the same way — the bot cannot be told and does not care, but
+the player is owed the same ten seconds — and `test_ai_match.py` checks
+that such a game is held and then let go.
+
+The page's half is the RECONNECT block in ONLINE PLAY. `socketClosed()` is
+the one close handler, shared by the socket `netConnect()` opens and every
+one a retry opens, and its first branch is the change: a socket lost while
+`NET.state` is `playing` calls `netLost()` rather than `finish()`. That
+holds the board up, opens the waiting overlay as "Connection Lost" with a
+countdown and its button reading Give Up, and tries a fresh socket at once
+and then every 700ms — `hello` as always, then `resume` — until the deadline
+`NET.grace` sets. `boardOpen()` and `submitEntry()` both refuse while
+reconnecting, because a move made now would reach nobody. `reconnectResumed()`
+applies whatever `moves` the server has that this board has not through
+`receiveMove()`, so they arrive exactly as they would have; a server one
+ply *behind* is the one thing it can be — our last move went down the
+socket as it closed — and that move is sent again; anything else is the two
+boards genuinely out of step. `reconnectFailed()` — the countdown, or Give
+Up — is the old "Disconnected" result, and `gameLive()` counts a game being
+reconnected as live so the wordmark and Back still ask before leaving it.
+`test_rematch_e2e.js` drives all of it on real sockets; the harness's
+`page.hold(on)` gates the page's `WebSocket` constructor so a test can look
+at the reconnecting state at all, since a local server has the seat back in
+a few milliseconds without it.
 
 **One port, two protocols.** `server/server.py` accepts a TCP connection and
 looks at the `Upgrade` header: `websocket` → the game socket at `/ws`,

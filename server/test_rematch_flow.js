@@ -74,6 +74,9 @@ var STUB = [
   'var receiveMove = note("receiveMove"), showDraw = note("showDraw");',
   'var hideDraw = note("hideDraw"), drawButton = note("drawButton"), finish = note("finish");',
   'var chatNote = note("chatNote"), chatLine = note("chatLine");',
+  // a dropped connection's own arms of onNetMessage, stubbed like the rest
+  'var reconnectStop = note("reconnectStop"), reconnectResumed = note("reconnectResumed");',
+  'var reconnectFailed = note("reconnectFailed");',
   'var showChallenge = note("showChallenge"), hideChallenge = note("hideChallenge");',
   'var challengeRefused = note("challengeRefused"), friendWord = note("friendWord");',
   'var renderRooms = note("renderRooms"), roomNote = note("roomNote");',

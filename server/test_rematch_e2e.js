@@ -292,6 +292,88 @@ async function main(){
         !nobody.NET.gameId, 'game=' + nobody.NET.gameId);
   nobody.press('btnRankStart');
 
+  console.log('\nA connection that drops mid-game');
+  // The server holds the seat for NOX_AWAY_GRACE seconds (ten by default) and
+  // the page spends them getting back in. Real sockets, so the drop is a
+  // real drop and the reconnect is the page's own — held down by the
+  // harness's gate (page.hold) for as long as a check needs to look at it,
+  // because a local server would otherwise have it back in a few
+  // milliseconds.
+  const GRACE = parseFloat(process.env.NOX_AWAY_GRACE || '10');
+  {
+    const [p, q] = await seated('sighted', 47);
+    const white = p.G.human === 'w' ? p : q, black = white === p ? q : p;
+    white.tryMove(52, 36);                                   // e4
+    check('(a move crosses before the drop)', await until(() => black.G.sans.length === 1));
+    // White has moved and it is Black's turn, so it is White whose network
+    // blinks: Black then has a move to make while they are out.
+    white.hold(true);
+    white.NET.sock.close();
+    const held = await until(() => white.NET.state === 'reconnecting');
+    check('the page does not give the game up', held && !white.G.over, white.NET.state);
+    check('and says what it is doing', white.up('waitOverlay') && white.text('waitTitle') === 'Connection Lost' &&
+          /\d+s left/.test(white.text('waitText')), white.text('waitTitle') + ' / ' + white.text('waitText'));
+    check('with the one button meaning Give Up', white.text('waitCancel') === 'Give Up', white.text('waitCancel'));
+    check('and the board takes no moves meanwhile', white.boardOpen() === false);
+    black.tryMove(12, 28);                                   // e5, while White is out
+    await wait(300);
+    check('the other side is told to wait, not handed the win', !black.G.over && white.NET.state === 'reconnecting');
+    white.hold(false);
+    const backIn = await until(() => white.NET.state === 'playing', GRACE * 1000 + 2000);
+    check('the seat is taken back within the grace', backIn, white.NET.state);
+    check('and the box goes', !white.up('waitOverlay'));
+    check('the other side was never told the game was over', !black.G.over);
+    check('a move made while they were out is on their board',
+          await until(() => white.G.sans.length === 2) && white.G.sans[1] === 'e5', white.G.sans.join(' '));
+    white.tryMove(62, 45);                                   // Nf3
+    check('and the relay works again', await until(() => black.G.sans.length === 3), black.G.sans.join(' '));
+    check('the board is open again', black.boardOpen() === true);
+    black.hold(true);
+    black.NET.sock.close();
+    const heldAgain = await until(() => black.NET.state === 'reconnecting');
+    black.hold(false);
+    check('a second drop, the other side\'s, is held again',
+          heldAgain && await until(() => black.NET.state === 'playing', GRACE * 1000 + 2000), black.NET.state);
+    black.netClose();                                        // and now Black really leaves
+    const left = await until(() => white.G.over, GRACE * 1000 + 4000);
+    check('a player who does not come back loses after the grace',
+          left && /left/i.test(white.G.over.text), white.G.over && white.G.over.text);
+    check('and the rematch button is not offered against nobody',
+          white.doc.getElementById('endRematch').style.display === 'none');
+    white.netClose();
+  }
+  {
+    const [p, q] = await seated('blind', 48);
+    p.hold(true);
+    p.NET.sock.close();
+    await until(() => p.NET.state === 'reconnecting');
+    p.press('waitCancel');                                   // Give Up
+    check('giving up is the old Disconnected result, at once',
+          !!p.G.over && /Disconnected/.test(p.G.over.text) && p.NET.state === 'idle', p.G.over && p.G.over.text);
+    check('and not a win for the other side until the grace lapses', !q.G.over);
+    const left = await until(() => q.G.over, GRACE * 1000 + 4000);
+    check('which it then is', left && /left/i.test(q.G.over.text), q.G.over && q.G.over.text);
+    p.hold(false);
+    q.netClose();
+  }
+  {
+    // A game that ends while a player is out: the result waits for them.
+    const [p, q] = await seated('fog', 49);
+    p.hold(true);
+    p.NET.sock.close();
+    await until(() => p.NET.state === 'reconnecting');
+    q.netSend({ t:'resign' });
+    check('the side still there may resign meanwhile', await until(() => q.G.over));
+    check('and the one who was out does not know yet', !p.G.over);
+    p.hold(false);
+    const told = await until(() => p.G.over, 5000);
+    check('the one who was out is told how it ended, once back',
+          told && /resigned/i.test(p.G.over.text), p.G.over && p.G.over.text);
+    check('as a win', told && /win/i.test(p.G.over.text), p.G.over && p.G.over.text);
+    check('with no rematch to be had of a game the server has let go', p.NET.oppGone === true);
+    p.netClose(); q.netClose();
+  }
+
   console.log('\nFriendly is untouched by any of it');
   let [f1, f2] = await seated('blind', 44);
   await finished(f1, f2);
