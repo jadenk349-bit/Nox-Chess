@@ -688,7 +688,10 @@ say('\nThe Puzzle menu, and the setup page behind it\n');
   /* Every button on the setup page's Vision row has to be one of those four —
      the row is the game's own, shared with Play Bot, so a vision added there
      would silently become a puzzle door with no pool behind it. */
-  var row = SRC.match(/id="secVision"[\s\S]*?<\/div>/);
+  // The row is the grid marked data-seg="mode" — the challenger's own
+  // column now that a friend challenge asks the question twice; the
+  // friend's column (data-opp-mode) is not a door into anything.
+  var row = SRC.match(/id="secVision"[\s\S]*?data-seg="mode"[\s\S]*?<\/div>/);
   var modes = (row[0].match(/data-mode="([a-z]+)"/g) || [])
                 .map(function(d){ return d.replace(/data-mode="|"/g, ''); });
   check('the Vision row offers four', modes.length, 4);

@@ -21,100 +21,12 @@
  *
  * Point it elsewhere with WS_TEST_HOST / PORT.
  */
-const fs = require('fs');
-const PAGE = require('path').join(__dirname, '..', 'blind-chess.html');
-const SRC = fs.readFileSync(PAGE, 'utf8');
-const HTML = SRC.split('<script>')[0];
-const BODY = SRC.match(/<script>\n"use strict";([\s\S]*?)<\/script>/)[1];
-const IDS = [...HTML.matchAll(/\bid="([^"]+)"/g)].map(m => m[1]);
-const HOST = process.env.WS_TEST_HOST || '127.0.0.1';
-const PORT = process.env.PORT || '8787';
-
-let passed = 0, failed = 0;
-const check = (label, ok, detail) => {
-  if (ok){ passed++; console.log('  PASS  ' + label); }
-  else { failed++; console.log('  FAIL  ' + label + (detail === undefined ? '' : '  ' + detail)); }
-};
-
-function classSet(){
-  const have = new Set();
-  return { add:c=>have.add(c), remove:c=>have.delete(c),
-           toggle:(c,on)=>{ if (on===undefined) have.has(c)?have.delete(c):have.add(c); else on?have.add(c):have.delete(c); },
-           contains:c=>have.has(c) };
-}
-function mk(tag){
-  const e = {
-    tagName:(tag||'div').toUpperCase(), textContent:'', innerHTML:'', value:'', className:'',
-    disabled:false, checked:false, style:{}, dataset:{}, children:[], parentElement:null,
-    offsetWidth:100, onclick:null, onsubmit:null, classList:classSet(),
-    appendChild(c){ this.children.push(c); c.parentElement = this; return c; },
-    removeChild(c){ return c; }, remove(){}, setAttribute(){}, getAttribute(){ return null; },
-    addEventListener(){}, removeEventListener(){}, focus(){}, blur(){}, click(){ this.onclick && this.onclick(); },
-    scrollIntoView(){}, getBoundingClientRect(){ return {top:0,left:0,width:100,height:100}; },
-    querySelectorAll(){ return []; }, closest(){ return null; },
-    getContext(){ return new Proxy({}, { get:(t,k)=> k in t ? t[k]
-        : (/create(Radial|Linear)Gradient/.test(k) ? () => ({ addColorStop(){} })
-          : k === 'measureText' ? () => ({ width:10 }) : () => undefined),
-      set:(t,k,v)=>{ t[k]=v; return true; } }); }
-  };
-  Object.defineProperty(e, 'firstChild', {
-    get(){ return this.children.length ? this.children[0] : (this.children[0] = mk('span')); } });
-  e.querySelector = sel => e.__qs || (e.__qs = mk());
-  return e;
-}
-function makeDoc(){
-  const pool = {}, seen = {};
-  for (const id of IDS) pool[id] = mk();
-  const qs = sel => seen[sel] || (seen[sel] = mk());
-  return {
-    getElementById: id => pool[id] || (pool[id] = mk()),
-    querySelector: qs, querySelectorAll: () => [], createElement: mk, createElementNS: mk,
-    addEventListener(){}, removeEventListener(){}, body: mk(), documentElement: mk(), head: mk()
-  };
-}
-
-const AudioCtx = function(){
-  return { createOscillator:()=>({ connect(){}, start(){}, stop(){}, frequency:{ setValueAtTime(){} }, type:'' }),
-           createGain:()=>({ connect(){}, gain:{ setValueAtTime(){}, exponentialRampToValueAtTime(){}, linearRampToValueAtTime(){} } }),
-           destination:{}, currentTime:0, resume:()=>Promise.resolve(), state:'running' }; };
-
-/** One whole page, with its own DOM and its own socket. */
-function makePage(){
-  const doc = makeDoc();
-  const loc = { protocol:'http:', host:HOST + ':' + PORT, href:'http://' + HOST + ':' + PORT + '/', hash:'', search:'' };
-  const store = {};
-  const storage = { getItem:k => (k in store ? store[k] : null),
-                    setItem:(k,v)=>{ store[k] = String(v); }, removeItem:k => { delete store[k]; } };
-  const win = { addEventListener(){}, removeEventListener(){}, scrollTo(){},
-                matchMedia:()=>({ matches:false, addEventListener(){}, addListener(){} }),
-                innerWidth:1200, innerHeight:900, devicePixelRatio:1, location:loc, localStorage:storage };
-  let out = null;
-  const src = '"use strict";' + BODY.replace(/await import\([^)]*\)/g, 'await Promise.reject(new Error("no cdn"))') +
-    '\n__expose({ G, NET, REM, RANK, el, netConnect, netSend, showScreen, rematchTerms,' +
-    ' startRanked, applyRankSettings, rankReady, netClose, hostGame,' +
-    ' screen:()=>screenName, resume:()=>rankResume });';
-  new Function('document','window','location','localStorage','WebSocket','AudioContext',
-               'webkitAudioContext','fetch','Image','requestAnimationFrame','cancelAnimationFrame',
-               'getComputedStyle','navigator','console','__expose', src)(
-    doc, win, loc, storage, WebSocket, AudioCtx, AudioCtx,
-    () => Promise.resolve({ ok:false, status:404, json:()=>Promise.resolve(null), text:()=>Promise.resolve('') }),
-    mk, cb => setTimeout(()=>cb(Date.now()), 16), clearTimeout,
-    () => ({ getPropertyValue: () => '' }), { userAgent:'node' },
-    { log(){}, warn(){}, error(){} }, o => { out = o; });
-  out.doc = doc;
-  out.press = id => doc.getElementById(id).onclick();
-  out.up = id => doc.getElementById(id).classList.contains('show');
-  out.text = id => doc.getElementById(id).textContent;
-  return out;
-}
-
-const wait = ms => new Promise(r => setTimeout(r, ms));
-/** Wait for something to become true, or give up. */
-async function until(cond, ms = 4000){
-  const stop = Date.now() + ms;
-  while (Date.now() < stop){ if (cond()) return true; await wait(25); }
-  return false;
-}
+/* The DOM shim, the page boot and the waiting helpers live in page_harness.js
+ * now, so that test_challenge_e2e.js — the same two-page arrangement, for a
+ * friend challenge that deals the seats different terms — runs the same page
+ * the same way rather than a second copy of this file's shim. */
+const { makePage, until, wait, HOST, PORT, probe, counter } = require('./page_harness');
+const { check, summary } = counter();
 
 /** Two pages, matched into one friendly game and played to a finish. */
 async function seated(mode = 'sighted', minutes = 5, inc = 0, kind = 'friendly'){
@@ -155,17 +67,7 @@ async function finished(a, b){
 }
 
 async function main(){
-  try {
-    await new Promise((ok, no) => {
-      const probe = require('net').createConnection({ host:HOST, port:+PORT }, () => { probe.end(); ok(); });
-      probe.on('error', no);
-      probe.setTimeout(2000, () => { probe.destroy(); no(new Error('timed out')); });
-    });
-  } catch (e){
-    console.log('No server on ' + HOST + ':' + PORT +
-                ' — start it with: python3 server/server.py');
-    process.exit(1);
-  }
+  await probe();
 
   console.log('\nA whole friendly game, and a rematch of it');
   let [a, b] = await seated('sighted', 40);
@@ -420,7 +322,7 @@ async function main(){
   h1.netSend({ t:'unhost' });
   await wait(200);
 
-  console.log('\n' + passed + ' passed, ' + failed + ' failed\n');
+  const failed = summary();
   await wait(200);            // let the server see the sockets go
   process.exit(failed ? 1 : 0);
 }
