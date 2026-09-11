@@ -846,28 +846,115 @@
 
   /* ---------- sign up / log in ----------
      The only two pages where the wordmark leaves the top-left corner. */
+  /* The wordmark is smaller here than it was when the page held one button:
+     three providers, a divider and a form stand under it now, and on a
+     laptop the whole of that should be in view without scrolling. */
   .auth-page{
     min-height:min(88vh,860px);
     display:flex; flex-direction:column; align-items:center;
-    text-align:center; padding:clamp(26px,7vh,84px) 0 40px;
+    text-align:center; padding:clamp(18px,4vh,48px) 0 40px;
   }
   .auth-logo{
     padding:0; background:transparent; border:0; line-height:0; border-radius:12px;
   }
-  .auth-logo img{width:clamp(210px,34vw,360px); height:auto; display:block;}
+  .auth-logo img{width:clamp(180px,26vw,260px); height:auto; display:block;}
   .auth-logo:hover{transform:none; filter:brightness(1.08);}
   .auth-caption{
     margin:clamp(18px,3vh,32px) 0 0;
     font-family:var(--font); font-weight:400; letter-spacing:.1em;
     font-size:clamp(24.5px,3.85vw,35px); color:var(--gold-soft);
   }
-  .auth-google{
-    margin-top:clamp(26px,4.4vh,44px);
-    padding:14px 26px; font-size:19px; border-radius:12px;
+  /* The three provider buttons stand in one column, all the same width, so
+     that the eye reads them as three answers to one question. Each wears its
+     own brand's colours — Google white, Apple black, Facebook blue — because
+     that is what each of those companies asks of a sign-in button and what a
+     player expects to recognise; the gold is kept for the site's own
+     controls beneath them. The column is as wide as the widest label wants
+     and no wider, capped for a phone. */
+  .auth-social{
+    margin-top:clamp(24px,4vh,40px);
+    display:flex; flex-direction:column; gap:12px;
+    width:min(100%, 340px);
+  }
+  .auth-social .acct-btn{
+    justify-content:center;
+    padding:14px 22px; font-size:18px; border-radius:12px;
     box-shadow:0 10px 30px rgba(0,0,0,.5);
   }
-  .auth-google svg{width:20px; height:20px;}
-  .auth-google-login{margin-top:clamp(30px,5vh,52px);}   /* no caption above it */
+  .auth-social .acct-btn svg{width:20px; height:20px;}
+  .auth-apple{background:#000; color:#fff; border-color:#000;}
+  .auth-apple:hover{background:#1c1c1e; border-color:#1c1c1e;}
+  .auth-facebook{background:#1877f2; color:#fff; border-color:#1877f2;}
+  .auth-facebook:hover{background:#166fe5; border-color:#166fe5;}
+
+  /* The divider between the providers and the address: the site's own rule,
+     the gold thread, with the word set in it. */
+  .auth-or{
+    margin:clamp(18px,3vh,28px) 0 0;
+    width:min(100%, 340px);
+    display:flex; align-items:center; gap:14px;
+    color:var(--gold); letter-spacing:.3em; font-size:15px; font-weight:600;
+  }
+  .auth-or span{flex:1; height:1px; background:linear-gradient(90deg,transparent,var(--gold),transparent); opacity:.55;}
+  .auth-or b{font-weight:600; padding-left:.3em;}
+
+  /* The address-and-password half, and the two smaller pages that go with
+     it. The fields are the username box's field — same shape, same focus
+     ring — set left rather than centred, because an address is read from its
+     first letter and a password is not read at all. */
+  .auth-form{
+    margin-top:clamp(16px,2.6vh,24px);
+    width:min(100%, 340px);
+    display:flex; flex-direction:column; gap:10px;
+  }
+  /* display:flex above would otherwise beat the hidden attribute, and the
+     form the script had hidden behind the Check Your Email panel would still
+     be standing there under it. */
+  .auth-form[hidden], .auth-sent[hidden]{display:none;}
+  .auth-field{
+    width:100%; box-sizing:border-box;
+    font:inherit; font-size:17px; letter-spacing:.04em;
+    padding:12px 16px; border-radius:12px;
+    background:rgba(255,255,255,.035);
+    border:1px solid var(--line); color:var(--text);
+    transition:border-color .2s, box-shadow .2s, background .2s;
+  }
+  .auth-field::placeholder{color:#b6bbc7; letter-spacing:.06em; opacity:1;}
+  .auth-field:hover{border-color:#4a5062;}
+  .auth-field:focus{
+    outline:none; border-color:var(--gold);
+    background:rgba(255,255,255,.05);
+    box-shadow:0 0 0 3px rgba(217,164,65,.14);
+  }
+  .auth-field.bad{border-color:var(--danger);}
+  .auth-note{
+    margin:0; min-height:1.4em; text-align:center;
+    font-size:15px; line-height:1.5; color:var(--muted);
+  }
+  .auth-note.bad{color:var(--danger);}
+  .auth-note.good{color:var(--good);}
+  .auth-submit{margin-top:4px; padding:13px 20px; font-size:17px; letter-spacing:.2em;}
+  .auth-submit:disabled{opacity:.4; cursor:not-allowed;}
+  .auth-lead{
+    margin:clamp(12px,2vh,20px) 0 0; max-width:360px;
+    font-size:16px; line-height:1.55; color:var(--muted);
+  }
+  .auth-links{margin-top:6px; display:flex; flex-direction:column; align-items:center; gap:2px;}
+  .auth-links .auth-swap{margin-top:8px;}
+  /* Once a link has gone out the form is replaced, not emptied: there is
+     nothing more to type here until the email has been opened. */
+  .auth-sent{
+    margin-top:clamp(16px,2.6vh,24px); width:min(100%, 360px);
+    padding:22px 22px 14px; border-radius:14px;
+    background:var(--bg-1); border:1px solid var(--line);
+  }
+  .auth-sent-title{
+    margin:0; font-family:var(--font); font-weight:400; letter-spacing:.12em;
+    font-size:26px; color:var(--gold-soft);
+  }
+  .auth-sent-text{margin:10px 0 0; font-size:16px; line-height:1.55; color:var(--text);}
+  .auth-sent-text b{color:var(--gold-soft); font-weight:600; word-break:break-all;}
+  .auth-sent-foot{margin:12px 0 0; font-size:14.5px; line-height:1.5; color:var(--muted);}
   .auth-swap{
     margin-top:20px; padding:6px 10px;
     background:transparent; border:0;
@@ -875,6 +962,9 @@
     text-decoration:underline; text-underline-offset:3px;
   }
   .auth-swap:hover{color:var(--gold-soft); transform:none;}
+  @media (max-width:420px){
+    .auth-social .acct-btn{font-size:16.5px; padding:13px 16px;}
+  }
 
   /* the way out, kept at the foot of the settings page */
   .set-foot{margin-top:26px; display:flex; justify-content:center;}
@@ -3876,23 +3966,72 @@
        The first thing a visitor arriving at the URL sees, unless they are
        already signed in or have chosen to play as a guest before. -->
   <!-- ============ SIGN UP ============
-       One of the only two pages where the wordmark leaves the top left. -->
+       One of the only two pages where the wordmark leaves the top left.
+       Four ways in — Google, Apple, Facebook, and an email address with a
+       password — and every one of them ends in the same Supabase user, the
+       same profile row and the same username step. The provider is how a
+       player proves who they are; it is never who they are. -->
   <section class="screen" id="screen-signup">
     <div class="auth-page">
       <button class="auth-logo" data-home aria-label="Nox Chess — back to the home page">
         <img src="assets/nox-logo.png?v=1" alt="Nox Chess" width="976" height="730">
       </button>
       <p class="auth-caption">Create Your Nox Chess Account</p>
-      <button class="acct-btn auth-google" id="btnSignUpGoogle">
-        <svg viewBox="0 0 48 48" aria-hidden="true">
+      <!-- Three accounts elsewhere that can stand for one here. All three end
+           in the same Supabase user and the same profile row — see
+           signInWithProvider() in the script — and none of them is
+           special-cased anywhere downstream of the sign-in itself. -->
+      <div class="auth-social">
+        <button class="acct-btn auth-google" id="btnSignUpGoogle" data-provider="google">
+          <svg viewBox="0 0 48 48" aria-hidden="true">
           <path fill="#EA4335" d="M24 9.5c3.54 0 6.71 1.22 9.21 3.6l6.85-6.85C35.9 2.38 30.47 0 24 0 14.62 0 6.51 5.38 2.56 13.22l7.98 6.19C12.43 13.72 17.74 9.5 24 9.5z"/>
           <path fill="#4285F4" d="M46.98 24.55c0-1.57-.15-3.09-.38-4.55H24v9.02h12.94c-.58 2.96-2.26 5.48-4.78 7.18l7.73 6c4.51-4.18 7.09-10.36 7.09-17.65z"/>
           <path fill="#FBBC05" d="M10.53 28.59c-.48-1.45-.76-2.99-.76-4.59s.27-3.14.76-4.59l-7.98-6.19C.92 16.46 0 20.12 0 24s.92 7.54 2.56 10.78l7.97-6.19z"/>
           <path fill="#34A853" d="M24 48c6.48 0 11.93-2.13 15.89-5.81l-7.73-6c-2.15 1.45-4.92 2.3-8.16 2.3-6.26 0-11.57-4.22-13.47-9.91l-7.98 6.19C6.51 42.62 14.62 48 24 48z"/>
         </svg>
-        <span>Continue with Google</span>
-      </button>
-      <button class="auth-swap" id="btnToLogIn">Do you already have an account? Click to Log in</button>
+          <span>Continue with Google</span>
+        </button>
+        <button class="acct-btn auth-apple" id="btnSignUpApple" data-provider="apple">
+          <svg viewBox="0 0 24 24" aria-hidden="true">
+          <path fill="currentColor" d="M16.365 1.43c0 1.14-.493 2.27-1.177 3.08-.744.9-1.99 1.57-2.987 1.57-.12 0-.23-.02-.3-.03-.01-.06-.04-.22-.04-.39 0-1.15.572-2.27 1.206-2.98.804-.94 2.142-1.64 3.248-1.68.03.13.05.28.05.43zm4.565 15.71c-.03.07-.463 1.58-1.518 3.12-.945 1.34-1.94 2.71-3.43 2.71-1.517 0-1.9-.88-3.63-.88-1.698 0-2.302.91-3.67.91-1.377 0-2.332-1.26-3.428-2.8-1.287-1.82-2.323-4.63-2.323-7.28 0-4.28 2.797-6.55 5.552-6.55 1.448 0 2.675.95 3.6.95.865 0 2.222-1.01 3.902-1.01.613 0 2.886.06 4.374 2.19-.13.09-2.383 1.37-2.383 4.19 0 3.26 2.854 4.42 2.955 4.45z"/>
+        </svg>
+          <span>Continue with Apple</span>
+        </button>
+        <button class="acct-btn auth-facebook" id="btnSignUpFacebook" data-provider="facebook">
+          <svg viewBox="0 0 24 24" aria-hidden="true">
+          <path fill="currentColor" d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z"/>
+        </svg>
+          <span>Continue with Facebook</span>
+        </button>
+      </div>
+      <div class="auth-or" aria-hidden="true"><span></span><b>OR</b><span></span></div>
+      <!-- novalidate: the page judges the fields itself so that the message
+           reads in the site's voice and lands in the same place every time,
+           rather than in whatever bubble the browser draws. -->
+      <form class="auth-form" id="signUpForm" novalidate>
+        <input class="auth-field" id="suEmail" type="email" placeholder="Email"
+               autocomplete="email" inputmode="email" autocapitalize="none" spellcheck="false"
+               aria-label="Email">
+        <input class="auth-field" id="suPassword" type="password" placeholder="Password"
+               autocomplete="new-password" aria-label="Password">
+        <input class="auth-field" id="suConfirm" type="password" placeholder="Confirm password"
+               autocomplete="new-password" aria-label="Confirm password">
+        <p class="auth-note" id="suNote" aria-live="polite"></p>
+        <button class="primary auth-submit" id="btnSignUpEmail" type="submit">Sign Up</button>
+      </form>
+      <!-- What replaces the form once the address has been sent a link. Said
+           the same way whether or not the address was new, on purpose: the
+           project refuses to say which addresses already have an account, and
+           so does this page. -->
+      <div class="auth-sent" id="suSent" hidden>
+        <h3 class="auth-sent-title">Check Your Email</h3>
+        <p class="auth-sent-text" id="suSentText"></p>
+        <p class="auth-sent-foot">Already have an account with this address? Log in instead, or reset your password.</p>
+        <div class="auth-links">
+          <button class="auth-swap" id="btnSignUpResend">Send the link again</button>
+        </div>
+      </div>
+      <button class="auth-swap" id="btnToLogIn">Already have an account? Log In</button>
     </div>
   </section>
 
@@ -3902,16 +4041,101 @@
       <button class="auth-logo" data-home aria-label="Nox Chess — back to the home page">
         <img src="assets/nox-logo.png?v=1" alt="Nox Chess" width="976" height="730">
       </button>
-      <button class="acct-btn auth-google auth-google-login" id="btnLogInGoogle">
-        <svg viewBox="0 0 48 48" aria-hidden="true">
+      <p class="auth-caption">Log In to Nox Chess</p>
+      <!-- Three accounts elsewhere that can stand for one here. All three end
+           in the same Supabase user and the same profile row — see
+           signInWithProvider() in the script — and none of them is
+           special-cased anywhere downstream of the sign-in itself. -->
+      <div class="auth-social">
+        <button class="acct-btn auth-google" id="btnLogInGoogle" data-provider="google">
+          <svg viewBox="0 0 48 48" aria-hidden="true">
           <path fill="#EA4335" d="M24 9.5c3.54 0 6.71 1.22 9.21 3.6l6.85-6.85C35.9 2.38 30.47 0 24 0 14.62 0 6.51 5.38 2.56 13.22l7.98 6.19C12.43 13.72 17.74 9.5 24 9.5z"/>
           <path fill="#4285F4" d="M46.98 24.55c0-1.57-.15-3.09-.38-4.55H24v9.02h12.94c-.58 2.96-2.26 5.48-4.78 7.18l7.73 6c4.51-4.18 7.09-10.36 7.09-17.65z"/>
           <path fill="#FBBC05" d="M10.53 28.59c-.48-1.45-.76-2.99-.76-4.59s.27-3.14.76-4.59l-7.98-6.19C.92 16.46 0 20.12 0 24s.92 7.54 2.56 10.78l7.97-6.19z"/>
           <path fill="#34A853" d="M24 48c6.48 0 11.93-2.13 15.89-5.81l-7.73-6c-2.15 1.45-4.92 2.3-8.16 2.3-6.26 0-11.57-4.22-13.47-9.91l-7.98 6.19C6.51 42.62 14.62 48 24 48z"/>
         </svg>
-        <span>Log in with Google</span>
+          <span>Continue with Google</span>
+        </button>
+        <button class="acct-btn auth-apple" id="btnLogInApple" data-provider="apple">
+          <svg viewBox="0 0 24 24" aria-hidden="true">
+          <path fill="currentColor" d="M16.365 1.43c0 1.14-.493 2.27-1.177 3.08-.744.9-1.99 1.57-2.987 1.57-.12 0-.23-.02-.3-.03-.01-.06-.04-.22-.04-.39 0-1.15.572-2.27 1.206-2.98.804-.94 2.142-1.64 3.248-1.68.03.13.05.28.05.43zm4.565 15.71c-.03.07-.463 1.58-1.518 3.12-.945 1.34-1.94 2.71-3.43 2.71-1.517 0-1.9-.88-3.63-.88-1.698 0-2.302.91-3.67.91-1.377 0-2.332-1.26-3.428-2.8-1.287-1.82-2.323-4.63-2.323-7.28 0-4.28 2.797-6.55 5.552-6.55 1.448 0 2.675.95 3.6.95.865 0 2.222-1.01 3.902-1.01.613 0 2.886.06 4.374 2.19-.13.09-2.383 1.37-2.383 4.19 0 3.26 2.854 4.42 2.955 4.45z"/>
+        </svg>
+          <span>Continue with Apple</span>
+        </button>
+        <button class="acct-btn auth-facebook" id="btnLogInFacebook" data-provider="facebook">
+          <svg viewBox="0 0 24 24" aria-hidden="true">
+          <path fill="currentColor" d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z"/>
+        </svg>
+          <span>Continue with Facebook</span>
+        </button>
+      </div>
+      <div class="auth-or" aria-hidden="true"><span></span><b>OR</b><span></span></div>
+      <form class="auth-form" id="logInForm" novalidate>
+        <input class="auth-field" id="liEmail" type="email" placeholder="Email"
+               autocomplete="email" inputmode="email" autocapitalize="none" spellcheck="false"
+               aria-label="Email">
+        <input class="auth-field" id="liPassword" type="password" placeholder="Password"
+               autocomplete="current-password" aria-label="Password">
+        <p class="auth-note" id="liNote" aria-live="polite"></p>
+        <button class="primary auth-submit" id="btnLogInEmail" type="submit">Log In</button>
+      </form>
+      <div class="auth-links">
+        <button class="auth-swap" id="btnToSignUp">Don't have an account? Sign Up</button>
+        <button class="auth-swap" id="btnForgot">Forgot password?</button>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ FORGOT PASSWORD ============
+       One address, one email. The link in it comes back to this page with a
+       recovery token, which is what opens the New Password screen below. -->
+  <section class="screen" id="screen-forgot">
+    <div class="auth-page">
+      <button class="auth-logo" data-home aria-label="Nox Chess — back to the home page">
+        <img src="assets/nox-logo.png?v=1" alt="Nox Chess" width="976" height="730">
       </button>
-      <button class="auth-swap" id="btnToSignUp">New to Nox Chess? Click to Sign Up</button>
+      <p class="auth-caption">Reset Your Password</p>
+      <p class="auth-lead">Enter the email you signed up with and we will send a link to choose a new one.</p>
+      <form class="auth-form" id="forgotForm" novalidate>
+        <input class="auth-field" id="fpEmail" type="email" placeholder="Email"
+               autocomplete="email" inputmode="email" autocapitalize="none" spellcheck="false"
+               aria-label="Email">
+        <p class="auth-note" id="fpNote" aria-live="polite"></p>
+        <button class="primary auth-submit" id="btnForgotSend" type="submit">Send Reset Link</button>
+      </form>
+      <button class="auth-swap" id="btnForgotBack">Back to Log In</button>
+    </div>
+  </section>
+
+  <!-- ============ NEW PASSWORD ============
+       Reached only by the link in a reset email: the address carries a
+       recovery token, Supabase signs the player in with it, and the page
+       holds them here until a password has been chosen — see AUTH.recovery. -->
+  <section class="screen" id="screen-reset">
+    <div class="auth-page">
+      <button class="auth-logo" data-home aria-label="Nox Chess — back to the home page">
+        <img src="assets/nox-logo.png?v=1" alt="Nox Chess" width="976" height="730">
+      </button>
+      <p class="auth-caption">Choose a New Password</p>
+      <form class="auth-form" id="resetForm" novalidate>
+        <input class="auth-field" id="rpPassword" type="password" placeholder="New password"
+               autocomplete="new-password" aria-label="New password">
+        <input class="auth-field" id="rpConfirm" type="password" placeholder="Confirm new password"
+               autocomplete="new-password" aria-label="Confirm new password">
+        <p class="auth-note" id="rpNote" aria-live="polite"></p>
+        <button class="primary auth-submit" id="btnResetSave" type="submit">Save Password</button>
+      </form>
+      <!-- What the form gives way to once Supabase has taken the new
+           password: said plainly, because a player who came here to change
+           it should not have to infer from a change of page that it worked. -->
+      <div class="auth-sent" id="rpDone" hidden>
+        <h3 class="auth-sent-title">Password Changed</h3>
+        <p class="auth-sent-text">Your password has been changed. You are logged in with it now, and it is the one to use next time.</p>
+        <div class="auth-links">
+          <button class="primary auth-submit" id="btnResetDone">Continue</button>
+        </div>
+      </div>
+      <button class="auth-swap" id="btnResetSkip">Keep my current password</button>
     </div>
   </section>
 
@@ -4910,15 +5134,15 @@
   </div>
 </div>
 
-<!-- what's still needed before Google sign-in works -->
+<!-- what's still needed before sign-in works -->
 <div class="overlay" id="authOverlay">
   <div class="modal" style="max-width:480px">
-    <h3>Connect Google Sign-In</h3>
-    <p>Accounts need a Supabase project and a hosted address — Google will not redirect back to a file on disk. Five steps:</p>
+    <h3>Connect Sign-In</h3>
+    <p>Accounts need a Supabase project and a hosted address — a provider will not redirect back to a file on disk. Five steps:</p>
     <ol class="auth-steps">
       <li>Create a free project at <b>supabase.com</b>.</li>
       <li>Open the SQL editor and run <b>supabase-setup.sql</b>, then <b>supabase-social.sql</b> (both next to this file).</li>
-      <li>Authentication → Providers → enable <b>Google</b>, using a Google Cloud OAuth client.</li>
+      <li>Authentication → Providers → enable <b>Email</b>, and <b>Google</b>, <b>Apple</b> and <b>Facebook</b> with each company's OAuth client.</li>
       <li>Paste your project URL and publishable key into <code>SUPABASE_URL</code> and <code>SUPABASE_ANON_KEY</code> near the top of this file's script.</li>
       <li>Host it (a Render Static Site works) and add that https address to Supabase's redirect allow-list.</li>
     </ol>
@@ -21652,8 +21876,11 @@ function navApply(d, dir){
     case 'home':
       if (screenName !== 'home') showScreen('home');
       break;
-    case 'settings': case 'signup': case 'login':
+    case 'settings': case 'signup': case 'login': case 'forgot':
       showScreen(d.s); break;
+    // ('reset' is deliberately not here: it is reached by a recovery link and
+    // left by leaveReset(), and an entry for it in the history is a stale
+    // one — so it falls through to home like anything else we do not know.)
     case 'name':
       showScreen(needsName() ? 'name' : 'home'); break;
     case 'social':
@@ -22452,6 +22679,16 @@ document.addEventListener('keydown', e => {
     if (k === 'escape') showScreen('home');
     return;
   }
+  if (screenName === 'forgot'){
+    if (k === 'escape') showScreen('login');
+    return;
+  }
+  if (screenName === 'reset'){
+    // Leaving without a new password is allowed, and it is a choice: the
+    // same one the button under the form offers.
+    if (k === 'escape') leaveReset();
+    return;
+  }
   if (screenName === 'rooms'){
     if (k === 'escape'){ leaveRooms(); showScreen('home'); }
     return;
@@ -22663,7 +22900,11 @@ document.getElementById('nameForm').addEventListener('submit', async e => {
 });
 
 /* ============================================================
-   ACCOUNTS — Google sign-in via Supabase
+   ACCOUNTS — sign-in via Supabase: Google, Apple, Facebook, or an
+   email address and a password. Four doors, one user: whichever way
+   a player proves who they are, the account is the Supabase user id
+   and nothing downstream — the profile row, the ratings, the friends,
+   the puzzles, the practice record — knows or asks which door it was.
    The whole thing is optional: with no keys, or with the CDN
    unreachable, the game still plays exactly as it does offline.
    ============================================================ */
@@ -22698,6 +22939,27 @@ const tierArt = name => 'assets/tier-' + name.toLowerCase() + '.png?v=1';
    different things to put in an empty panel. */
 let authSettled = false;
 
+/* ---- what the address said on arrival ----
+   Every way back into this page from Supabase — an OAuth round trip, the
+   link in a confirmation email, the link in a password-reset email — lands
+   with the answer in the fragment: tokens and a `type` on success, an
+   `error_description` on failure. The client reads the tokens and clears
+   them, so the fragment is copied here first, before the client exists, and
+   two things are kept from it. `recovery` says the player followed a reset
+   link and is owed the New Password screen before anything else; `arrived`
+   is what went wrong, if anything, said on the log-in page rather than lost.
+   Read once, at load: a fragment the page writes later (there are none) would
+   not be Supabase's. */
+const BOOT_HASH = (typeof location !== 'undefined' && location.hash) || '';
+const AUTH = (() => {
+  const q = new URLSearchParams(BOOT_HASH.replace(/^#/, ''));
+  const why = q.get('error_description') || (q.get('error') ? q.get('error').replace(/_/g, ' ') : '');
+  return {
+    recovery: q.get('type') === 'recovery',
+    arrived: why ? why.replace(/\+/g, ' ') : ''
+  };
+})();
+
 async function initAuth(){
   updateAccountUI();
   if (!SUPABASE_URL || !SUPABASE_ANON_KEY){             // not configured yet
@@ -22713,7 +22975,22 @@ async function initAuth(){
     loadBoard();
     const { data } = await sb.auth.getSession();
     await setAccount(data.session);
-    sb.auth.onAuthStateChange((_evt, session) => setAccount(session));
+    sb.auth.onAuthStateChange((evt, session) => {
+      // The client says so itself when the session came from a reset link;
+      // BOOT_HASH is the same fact read earlier, for the case where the
+      // client has already consumed the fragment by the time this is
+      // subscribed. Either is enough, and neither survives signing out.
+      if (evt === 'PASSWORD_RECOVERY') AUTH.recovery = true;
+      if (evt === 'SIGNED_OUT') AUTH.recovery = false;
+      setAccount(session);
+    });
+    // A link that did not work — expired, already used — comes back with the
+    // reason in the fragment and no session. Say it where the player can act
+    // on it, which is the log-in page, and only when nothing else is up.
+    if (AUTH.arrived && !data.session && screenName === 'home'){
+      showScreen('login');
+      authSay('liNote', linkFailureText(AUTH.arrived), true);
+    }
   } catch (err){
     sb = null;                                          // offline, or blocked
     authSettled = true;
@@ -22854,6 +23131,7 @@ function syncLocks(){
 /** Where every locked control leads. */
 function toSignUp(){
   beep(420,.09);
+  resetSignUpPage();
   showScreen('signup');
 }
 
@@ -22893,56 +23171,362 @@ const needsName = () => !!account && !account.gameName;
    visitor chooses from the header, not a gate they have to get past. The only
    redirect is the username, and only for an account that has none. Never moves
    anyone out of a menu or a game they have already walked into. */
+const AUTH_PAGES = ['signup', 'login', 'name', 'forgot', 'reset'];
 function decideFirstScreen(){
-  const opening = ['home', 'signup', 'login', 'name'];
+  const opening = ['home'].concat(AUTH_PAGES);
   if (opening.indexOf(screenName) === -1) return;
-  // Both of these are redirects rather than pages chosen, so neither leaves a
-  // history entry behind it: Back from the username screen would otherwise
-  // be a way past it, and Back after signing in would land on the login page.
+  // All three of these are redirects rather than pages chosen, so none of
+  // them leaves a history entry behind it: Back from the password screen or
+  // the username screen would otherwise be a way past it, and Back after
+  // signing in would land on the login page.
+  // A reset link signs the player in on the way to choosing a password, and
+  // the password comes first — before the username, before the home page —
+  // or a player who came to change it would be dropped on the home page
+  // signed in and never asked.
+  if (AUTH.recovery && account){
+    if (screenName !== 'reset') showScreen('reset', 'replace');
+    return;
+  }
   if (needsName()){
     if (screenName !== 'name') showScreen('name', 'replace');
     return;
   }
-  // Signing in finishes whichever of the two pages you were on.
-  if (account && (screenName === 'signup' || screenName === 'login' || screenName === 'name')){
+  // Signing in finishes whichever of the account pages you were on.
+  if (account && AUTH_PAGES.indexOf(screenName) !== -1){
     showScreen('home', 'replace');
   }
 }
 
-async function signIn(){
-  if (!sb){ document.getElementById('authOverlay').classList.add('show'); return; }
-  // `prompt: select_account` makes Google show its account chooser every time.
-  // Without it Google silently reuses whichever account the browser is already
-  // signed in to, so pressing the button looked like it did nothing — you were
-  // just inside the account, with no way to pick a different one and no sign
-  // that a choice had been made on your behalf. The round trip through Google
-  // is the point: the person should see which account they are entering with.
-  const { error } = await sb.auth.signInWithOAuth({
-    provider: 'google',
-    options: {
-      redirectTo: location.href.split('#')[0].split('?')[0],
-      queryParams: { prompt: 'select_account' }
-    }
-  });
-  if (error) console.warn('Google sign-in failed:', error.message);
+/* Where every provider sends the player back: this page, at its own address,
+   with nothing after it — the fragment Supabase adds is the answer and the
+   page reads it on arrival (BOOT_HASH). Derived from where the page is
+   rather than written down, so the same file works at
+   https://nox-chess.onrender.com/ and at http://localhost:8787/ without
+   either knowing about the other; both addresses have to be on the
+   project's redirect allow-list, and that list is the only place they are. */
+function authReturnURL(){
+  return location.href.split('#')[0].split('?')[0];
 }
 
+const PROVIDER_NAME = { google: 'Google', apple: 'Apple', facebook: 'Facebook' };
+
+/* Which providers the project has switched on. /auth/v1/settings is public
+   — it is what the client itself reads — and it lists them by name, so the
+   page can say "not set up yet" instead of sending the player to a bare
+   JSON error from Supabase. Read once, on the first press of a button that
+   needs it; a read that fails answers "unknown", and unknown is tried,
+   because the provider's own answer is the real one. */
+let providerSettings = null;
+async function providerEnabled(provider){
+  if (!providerSettings){
+    try {
+      const r = await fetch(SUPABASE_URL + '/auth/v1/settings', { headers: { apikey: SUPABASE_ANON_KEY } });
+      const body = r.ok ? await r.json() : null;
+      providerSettings = (body && body.external) || {};
+    } catch (err){ providerSettings = {}; }
+  }
+  return providerSettings[provider] !== false;
+}
+
+/* One call for the three companies. Google keeps the shape it has always
+   had — `prompt: select_account` makes Google show its account chooser
+   every time. Without it Google silently reuses whichever account the
+   browser is already signed in to, so pressing the button looked like it
+   did nothing — you were just inside the account, with no way to pick a
+   different one and no sign that a choice had been made on your behalf.
+   The round trip through Google is the point: the person should see which
+   account they are entering with. Apple and Facebook get no such parameter
+   because neither honours it; Apple in particular decides for itself
+   whether to ask, and asks for the name only the first time, which is why
+   nothing here depends on a name coming back — the username screen is what
+   a new account meets next, whichever way it came in.
+
+   Nothing here decides sign-up from log-in: a provider creates the Supabase
+   user if it has not seen this person before and signs them in if it has,
+   and if the address it vouches for already belongs to a user here, Supabase
+   links the new identity to that user rather than making another — its own
+   rule, applied only to an address the provider says is verified, and not
+   something this page tries to reproduce or second-guess. One user, however
+   many doors. */
+async function signInWithProvider(provider, noteId){
+  if (!sb){ document.getElementById('authOverlay').classList.add('show'); return; }
+  const name = PROVIDER_NAME[provider] || provider;
+  if (provider !== 'google' && !(await providerEnabled(provider))){
+    authSay(noteId, name + ' sign-in is not switched on for this project yet — use another way in for now.', true);
+    return;
+  }
+  const options = { redirectTo: authReturnURL() };
+  if (provider === 'google') options.queryParams = { prompt: 'select_account' };
+  const { error } = await sb.auth.signInWithOAuth({ provider, options });
+  if (error){
+    console.warn(name + ' sign-in failed:', error.message);
+    authSay(noteId, 'Could not start ' + name + ' sign-in — ' + error.message, true);
+  }
+}
+
+/** The Google door, by its old name; the button wiring below calls it. */
+function signIn(){ return signInWithProvider('google', 'liNote'); }
+
 async function signOut(){
+  AUTH.recovery = false;
   if (sb) await sb.auth.signOut();
   showScreen('home');
 }
 
-// The header pair only chooses which page to land on. Google itself makes no
-// distinction between signing up and logging in — it creates the account if it
-// has not seen this Google user before, and signs them in if it has — so both
-// pages end in the same call, and the username step is what tells a new
-// account apart from a returning one.
-document.getElementById('btnSignUp').onclick = () => { beep(620,.08); showScreen('signup'); };
+/* ---- an address and a password ----
+   The fourth door, and the only one the page has to referee itself: the
+   others hand the whole exchange to somebody else's page. The password goes
+   to Supabase and nowhere else — not into a log line, not into storage, not
+   into a message to the game server, which never sees it. Supabase keeps it
+   hashed and owns every rule about it beyond the length asked for here. */
+const EMAIL_SHAPE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+const PASSWORD_MIN = 8;
+
+/** '' when the address looks like one, otherwise why not. */
+function emailProblem(raw){
+  const email = (raw || '').trim();
+  if (!email) return 'Enter your email address.';
+  if (!EMAIL_SHAPE.test(email)) return 'That does not look like an email address.';
+  return '';
+}
+
+/** '' when a new password and its confirmation will do, otherwise why not. */
+function passwordProblem(password, confirm){
+  if (!password) return 'Choose a password.';
+  if (password.length < PASSWORD_MIN) return 'Use at least ' + PASSWORD_MIN + ' characters.';
+  if (confirm !== undefined && password !== confirm) return 'The two passwords do not match.';
+  return '';
+}
+
+/* What a failure is allowed to say. The one thing it must never do is tell
+   a stranger whether an address has an account: "wrong password" and "no
+   such account" are one sentence here, exactly as Supabase itself answers
+   both with one error. Everything else — a password the project's own rule
+   refuses, an address not yet confirmed, too many tries — is worth quoting,
+   because each of those is something the player can act on. */
+function authErrorText(err, doing){
+  // The message is what older clients carry; newer ones add a code
+  // ("invalid_credentials"), and either is enough to recognise the case.
+  const said = ((err && err.message) || '').trim();
+  const m = said + ' ' + ((err && err.code) || '');
+  if (/invalid login credentials|invalid_credentials|invalid grant/i.test(m))
+    return 'That email and password do not match.';
+  if (/email not confirmed|email_not_confirmed/i.test(m))
+    return 'Confirm your email first — the link is in your inbox.';
+  if (/rate limit|too many|over_email_send_rate/i.test(m))
+    return 'Too many attempts — wait a moment and try again.';
+  if (/password/i.test(m) && /should|must|at least|weak|different/i.test(m))
+    return said;
+  if (/already registered|already been registered|already exists/i.test(m))
+    return 'That email already has an account — log in instead.';
+  if (/signup.*disabled|signups not allowed/i.test(m))
+    return 'New accounts are not being taken right now.';
+  return 'Could not ' + doing + ' — ' + (said || 'try again in a moment.');
+}
+
+/** What a link that came back broken says, in the page's voice. */
+function linkFailureText(why){
+  if (/expired|invalid/i.test(why)) return 'That link has expired or was already used — log in, or ask for a new one.';
+  return 'Sign-in did not finish — ' + why;
+}
+
+/** One line under a form: what happened, in the colour of how it went. */
+function authSay(id, text, bad){
+  const el = document.getElementById(id);
+  if (!el) return;
+  el.textContent = text || '';
+  el.className = 'auth-note' + (text ? (bad ? ' bad' : ' good') : '');
+}
+
+/** A button is pressed once: it says what it is doing until the answer lands. */
+function authBusy(id, label){
+  const b = document.getElementById(id);
+  if (!b) return () => {};
+  const was = b.textContent;
+  b.disabled = true; b.textContent = label;
+  return () => { b.disabled = false; b.textContent = was; };
+}
+
+const field = id => document.getElementById(id);
+const fieldValue = id => (field(id).value || '');
+function markField(id, bad){ field(id).classList.toggle('bad', !!bad); }
+
+/* Signing up. Supabase makes the user at once and — with confirmation on,
+   as this project has it — no session: the address is sent a link, and the
+   link comes back to this page signed in, where the username screen is
+   waiting. With confirmation off a session arrives here directly and
+   onAuthStateChange takes it from there, which is why nothing below moves
+   the screen on success. An address that already has an account gets a
+   user with no identities and no email, deliberately, so that sign-up
+   cannot be used to find out who has one; the panel reads the same either
+   way and says what to do in both cases. */
+async function emailSignUp(email, password){
+  const { data, error } = await sb.auth.signUp({
+    email, password,
+    options: { emailRedirectTo: authReturnURL() }
+  });
+  if (error) throw error;
+  const user = data && data.user;
+  return {
+    session: (data && data.session) || null,
+    taken: !!user && Array.isArray(user.identities) && user.identities.length === 0
+  };
+}
+
+let signUpEmail = '';       // the address a link was sent to, for Send again
+
+document.getElementById('signUpForm').addEventListener('submit', async e => {
+  e.preventDefault();
+  if (!sb){ document.getElementById('authOverlay').classList.add('show'); return; }
+  const email = fieldValue('suEmail').trim();
+  const password = fieldValue('suPassword'), confirm = fieldValue('suConfirm');
+  const problem = emailProblem(email) || passwordProblem(password, confirm);
+  markField('suEmail', emailProblem(email));
+  markField('suPassword', !emailProblem(email) && passwordProblem(password));
+  markField('suConfirm', !emailProblem(email) && !passwordProblem(password) && passwordProblem(password, confirm));
+  if (problem){ authSay('suNote', problem, true); return; }
+  authSay('suNote', '');
+  const done = authBusy('btnSignUpEmail', 'Signing up…');
+  try {
+    const out = await emailSignUp(email, password);
+    if (out.session) return;                  // confirmation is off: signed in already
+    signUpEmail = email;
+    document.getElementById('signUpForm').hidden = true;
+    document.getElementById('suSentText').innerHTML =
+      'If <b></b> is new to Nox Chess, a confirmation link is on its way there. Open it to finish creating your account.';
+    document.getElementById('suSentText').querySelector('b').textContent = email;
+    document.getElementById('suSent').hidden = false;
+    field('suPassword').value = field('suConfirm').value = '';
+  } catch (err){
+    authSay('suNote', authErrorText(err, 'sign up'), true);
+  } finally { done(); }
+});
+
+document.getElementById('btnSignUpResend').onclick = async () => {
+  if (!sb || !signUpEmail) return;
+  const done = authBusy('btnSignUpResend', 'Sending…');
+  try {
+    const { error } = await sb.auth.resend({
+      type: 'signup', email: signUpEmail,
+      options: { emailRedirectTo: authReturnURL() }
+    });
+    if (error) throw error;
+    document.getElementById('suSentText').textContent = 'Sent again. Give it a minute, and check the spam folder too.';
+  } catch (err){
+    document.getElementById('suSentText').textContent = authErrorText(err, 'send it again');
+  } finally { done(); }
+};
+
+/** The sign-up page as it is first seen: the form, not the sent panel. */
+function resetSignUpPage(){
+  document.getElementById('signUpForm').hidden = false;
+  document.getElementById('suSent').hidden = true;
+  authSay('suNote', '');
+}
+
+document.getElementById('logInForm').addEventListener('submit', async e => {
+  e.preventDefault();
+  if (!sb){ document.getElementById('authOverlay').classList.add('show'); return; }
+  const email = fieldValue('liEmail').trim(), password = fieldValue('liPassword');
+  const problem = emailProblem(email) || (password ? '' : 'Enter your password.');
+  markField('liEmail', emailProblem(email));
+  markField('liPassword', !emailProblem(email) && !password);
+  if (problem){ authSay('liNote', problem, true); return; }
+  authSay('liNote', '');
+  const done = authBusy('btnLogInEmail', 'Logging in…');
+  try {
+    const { error } = await sb.auth.signInWithPassword({ email, password });
+    if (error) throw error;
+    // onAuthStateChange carries the session from here, as it does for every
+    // other door; the password is let go of with the form.
+    field('liPassword').value = '';
+  } catch (err){
+    authSay('liNote', authErrorText(err, 'log in'), true);
+    markField('liPassword', true);
+  } finally { done(); }
+});
+
+/* Forgot. One sentence whichever way it went, for the same reason sign-up
+   has one: the page does not say who has an account. The link comes back to
+   this page with a recovery token, and decideFirstScreen() holds the player
+   on the New Password screen until they have chosen one. */
+document.getElementById('forgotForm').addEventListener('submit', async e => {
+  e.preventDefault();
+  if (!sb){ document.getElementById('authOverlay').classList.add('show'); return; }
+  const email = fieldValue('fpEmail').trim();
+  const problem = emailProblem(email);
+  markField('fpEmail', problem);
+  if (problem){ authSay('fpNote', problem, true); return; }
+  const done = authBusy('btnForgotSend', 'Sending…');
+  try {
+    const { error } = await sb.auth.resetPasswordForEmail(email, { redirectTo: authReturnURL() });
+    if (error) throw error;
+    authSay('fpNote', 'If an account exists for that address, a link to choose a new password is on its way.', false);
+  } catch (err){
+    authSay('fpNote', authErrorText(err, 'send the link'), true);
+  } finally { done(); }
+});
+
+document.getElementById('resetForm').addEventListener('submit', async e => {
+  e.preventDefault();
+  if (!sb || !account){ authSay('rpNote', 'That link has expired — ask for a new one from Log In.', true); return; }
+  const password = fieldValue('rpPassword'), confirm = fieldValue('rpConfirm');
+  const problem = passwordProblem(password, confirm);
+  markField('rpPassword', passwordProblem(password));
+  markField('rpConfirm', !passwordProblem(password) && problem);
+  if (problem){ authSay('rpNote', problem, true); return; }
+  const done = authBusy('btnResetSave', 'Saving…');
+  try {
+    const { error } = await sb.auth.updateUser({ password });
+    if (error) throw error;
+    field('rpPassword').value = field('rpConfirm').value = '';
+    authSay('rpNote', '');
+    // Said, not implied: the form gives way to Password Changed, and the
+    // player goes on when they have read it. The recovery is over the
+    // moment the password is taken, so nothing can pull them back here.
+    AUTH.recovery = false;
+    document.getElementById('resetForm').hidden = true;
+    document.getElementById('btnResetSkip').hidden = true;
+    document.getElementById('rpDone').hidden = false;
+  } catch (err){
+    authSay('rpNote', authErrorText(err, 'save that password'), true);
+  } finally { done(); }
+});
+
+/* Done with the reset page, by saving or by declining: the session it came
+   with is an ordinary one from here on, so the rest of the account rules —
+   the username first, then the home page — take over. The page is put back
+   as it is first seen, for the next reset link this browser follows. */
+function leaveReset(){
+  AUTH.recovery = false;
+  document.getElementById('resetForm').hidden = false;
+  document.getElementById('btnResetSkip').hidden = false;
+  document.getElementById('rpDone').hidden = true;
+  showScreen(needsName() ? 'name' : 'home');
+}
+
+// The header pair only chooses which page to land on. No provider makes a
+// distinction between signing up and logging in — each creates the account
+// if it has not seen this person before, and signs them in if it has — so
+// both pages offer the same three, and the username step is what tells a new
+// account apart from a returning one. Only the address-and-password half
+// differs: sign-up asks for the password twice and sends a confirmation.
+document.getElementById('btnSignUp').onclick = () => { beep(620,.08); resetSignUpPage(); showScreen('signup'); };
 document.getElementById('btnLogIn').onclick  = () => { beep(560,.08); showScreen('login'); };
-document.getElementById('btnSignUpGoogle').onclick = signIn;
-document.getElementById('btnLogInGoogle').onclick  = signIn;
 document.getElementById('btnToLogIn').onclick  = () => showScreen('login');
-document.getElementById('btnToSignUp').onclick = () => showScreen('signup');
+document.getElementById('btnToSignUp').onclick = () => { resetSignUpPage(); showScreen('signup'); };
+document.getElementById('btnForgot').onclick     = () => { authSay('fpNote', ''); showScreen('forgot'); };
+document.getElementById('btnForgotBack').onclick = () => showScreen('login');
+document.getElementById('btnResetSkip').onclick  = leaveReset;
+document.getElementById('btnResetDone').onclick  = leaveReset;
+// The six provider buttons — three on each page — all press the same door,
+// and each reports under its own page's form.
+[['btnSignUpGoogle', 'google', 'suNote'], ['btnSignUpApple', 'apple', 'suNote'],
+ ['btnSignUpFacebook', 'facebook', 'suNote'], ['btnLogInGoogle', 'google', 'liNote'],
+ ['btnLogInApple', 'apple', 'liNote'], ['btnLogInFacebook', 'facebook', 'liNote']
+].forEach(([id, provider, noteId]) => {
+  document.getElementById(id).onclick = () => signInWithProvider(provider, noteId);
+});
 document.getElementById('btnLogOut').onclick   = signOut;
 document.querySelectorAll('[data-home]').forEach(b => {
   b.onclick = () => showScreen('home');
