@@ -4,9 +4,12 @@
  * Navigation is the one part of this revision with no engine behind it and no
  * data to check it against — the Puzzle menu is right or wrong by inspection,
  * and inspection is what stops happening once the feature works. So it is
- * asserted here: five doors on the Puzzle menu, none of them a phase, the
- * phases moved to Practice, and nothing left pointing at a button that no
- * longer exists.
+ * asserted here: two doors on the Puzzle menu — Puzzle, which opens the setup
+ * page that asks for the vision, and Puzzle Rush, which starts on the press —
+ * none of them a phase, the phases moved to Practice, and nothing left
+ * pointing at a button that no longer exists. (The menu was five vision doors
+ * for one revision; the setup page replaced them, and this file was written
+ * against the five and left saying so.)
  *
  * Reads blind-chess.html as text, like test_ws_url.js, because what is being
  * checked *is* the source: a handler wired to a removed id is a runtime error
@@ -44,17 +47,35 @@ function menuOf(navId){
   return out;
 }
 
-head('The Puzzle menu is five vision modes and nothing else');
+head('The Puzzle menu is two doors and nothing else');
 
 const puzzle = menuOf('navPuzzle');
-check('Sighted, Only Board, Blindfold, Fog of War, Puzzle Rush',
-      puzzle.map(p => p[1]),
-      ['Sighted Puzzle', 'Only Board Puzzle', 'Blindfold Puzzle',
-       'Fog of War Puzzle', 'Puzzle Rush']);
+check('Puzzle, and Puzzle Rush',
+      puzzle.map(p => p[1]), ['Puzzle', 'Puzzle Rush']);
 check('and their ids are the ones the handlers use',
-      puzzle.map(p => p[0]),
-      ['navPzSighted', 'navPzBoard', 'navPzBlindfold', 'navPzFog', 'navRush']);
-check('exactly five doors', puzzle.length, 5);
+      puzzle.map(p => p[0]), ['navPuzzleGo', 'navRush']);
+check('exactly two doors', puzzle.length, 2);
+check('no vision is named on the menu',
+      puzzle.some(p => /Sighted|Board|Blindfold|Fog/.test(p[1])), false);
+
+head('Puzzle asks the vision on a setup page; Rush asks nothing');
+
+check('the Puzzle door opens the setup page',
+      /getElementById\('navPuzzleGo'\)\.onclick = \(\) => GUEST\(\) \? toSignUp\(\) : enterPuzzleSetup\(\);/.test(SRC), true);
+check('the Rush door starts a run on the press',
+      /getElementById\('navRush'\)\s+= \(\) => GUEST\(\) \? toSignUp\(\) : rushStart\(\);/.test(SRC.replace(/\.onclick/g, '')), true);
+/* The home page's Puzzle shortcut is a button and not a menu: hovering it
+   opens nothing, and pressing it presses the header's Puzzle door, so it can
+   never go somewhere the header does not. The menu is the header's alone. */
+const homeAt = SRC.indexOf('id="homePuzzle"');
+const homeTag = SRC.slice(SRC.lastIndexOf('<', homeAt), SRC.indexOf('>', homeAt) + 1);
+check('the home shortcut is a plain button', /^<button class="home-shortcut" id="homePuzzle">$/.test(homeTag), true);
+check('and opens no menu', /aria-haspopup/.test(homeTag), false);
+check('and no home button is a copy of a door', SRC.indexOf('"homePuzzleGo"') < 0 && SRC.indexOf('"homeRush"') < 0, true);
+check('it presses the header\'s Puzzle door',
+      /getElementById\('homePuzzle'\)\.onclick = \(\) => document\.getElementById\('navPuzzleGo'\)\.click\(\);/.test(SRC), true);
+check('the setup page starts the puzzle from the vision it was given',
+      /function startPuzzleFromSetup\(/.test(SRC) && /function pzModeForVision\(/.test(SRC), true);
 
 head('Phase is no longer a way to play');
 
@@ -67,7 +88,7 @@ check('no Puzzle-menu entry mentions a phase',
 head('Every door is locked behind an account, and every locked id exists');
 
 const locked = (SRC.match(/const LOCKED_IDS = \[([\s\S]*?)\];/) || [])[1] || '';
-for (const id of ['navPzSighted', 'navPzBoard', 'navPzBlindfold', 'navPzFog', 'navRush'])
+for (const id of ['navPuzzle', 'navPuzzleGo', 'navRush', 'homePuzzle'])
   check(id + ' is in LOCKED_IDS', locked.indexOf("'" + id + "'") >= 0, true);
 for (const m of locked.match(/'([A-Za-z0-9]+)'/g) || []){
   const id = m.slice(1, -1);
@@ -88,9 +109,9 @@ const lesson = menuOf('navHowTo') || [];
 check('the Lesson menu still offers How to Play',
       SRC.indexOf('id="navHowTo"') >= 0, true);
 check('and Practice', SRC.indexOf('id="navPractice"') >= 0, true);
-check('the seven blindfold drills are untouched',
+check('the eleven blindfold drills are untouched',
       (SRC.match(/const PR_MODES = \[([\s\S]*?)\n\];/) || ['',''])[1]
-        .match(/key:'/g).length, 7);
+        .match(/key:'/g).length, 11);
 
 head('...and gains the two board-practice categories on the same page');
 

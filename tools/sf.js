@@ -18,6 +18,17 @@ const P = require('./page_chess.js');
 const ENGINE_DIR = path.join(__dirname, '..', 'engine');
 const ENGINE_JS = path.join(ENGINE_DIR, 'stockfish.wasm.js');
 
+/* How long an abandoned search is given to acknowledge its `stop` before the
+   engine is killed and replaced. Generous on purpose: a healthy Stockfish
+   answers a stop in milliseconds, so anything near this is already a sick one,
+   and the only cost of being wrong is one engine boot. See reclaim().
+
+   NOX_SF_STOP_GRACE_MS shortens it for the tests, the way NOX_LEAGUE_FAST
+   shortens the league's pauses. It is not a production knob: turning it down
+   only makes a sick engine be replaced sooner, and turning it up only makes a
+   run wait longer before doing so. Neither can change what is accepted. */
+const STOP_GRACE_MS = Number(process.env.NOX_SF_STOP_GRACE_MS) || 5000;
+
 /* The shallowest depth from which the search never changed its mind again.
    Answering at depth 3 and holding it is an easy move; flipping until depth 15
    is not. Falls back to the deepest depth seen when the final answer never
@@ -79,9 +90,22 @@ class NativeEngine {
     this.wdl = !!opt.wdl;
     this.names = new Set();
     this.id = '';
+    this.timeouts = 0;
+    this.restarts = 0;
+    this.dead = false;
+    this._boot();
+  }
+
+  /* Start (or restart) the engine process and wire its stdout. Split out of the
+     constructor because a wedged engine has to be replaced by an identical one
+     — see reclaim() — and the two must not be able to drift apart. */
+  _boot(){
     this.proc = spawn(this.bin, [], { stdio: ['pipe', 'pipe', 'ignore'] });
     this.buf = '';
     this.pending = null;
+    this.stopping = null;
+    this.names = new Set();
+    this.id = '';
     this.ready = new Promise(resolve => { this._ready = resolve; });
     this.proc.stdout.on('data', d => {
       this.buf += d;
@@ -113,6 +137,20 @@ class NativeEngine {
       return;
     }
     if (line === 'readyok'){ this._ready(); return; }
+    /* The bestmove nobody is waiting for. reclaim() has cleared `pending` and
+       sent `stop`; this line is the engine's acknowledgement that it really did
+       stop, and it is the ONLY proof of that available. `isready` is not one —
+       the UCI spec requires it to be answered while a search is running, so a
+       readyok says nothing about whether the search is over. Without this the
+       caller has to assume the stop worked, and an engine that ignored it goes
+       back into the pool still searching, refuses the next `position`/`go`, and
+       hangs that slot for the life of the run. */
+    if (line.startsWith('bestmove') && !this.pending && this.stopping){
+      const idle = this.stopping;
+      this.stopping = null;
+      idle();
+      return;
+    }
     const job = this.pending;
     if (!job) return;
     if (line.startsWith('info ')){
@@ -178,10 +216,101 @@ class NativeEngine {
     this.send(o.depth ? 'go depth ' + o.depth
             : o.nodes ? 'go nodes ' + o.nodes
             : 'go movetime ' + (o.movetime || 200));
-    return p;
+    /* An optional ceiling on one search, and it is a safety valve rather than a
+       setting.
+     *
+     * Left off (the default, and what every existing caller does) this is not
+     * reached and ask() behaves exactly as it always has — the verifier and
+     * every other caller are byte-for-byte unaffected.
+     *
+     * Given a `timeoutMs`, a search that has not answered by then is ABANDONED:
+     * the engine is told to stop, the position is thrown away, and the caller
+     * gets `null`. It never gets a partial result, a shallower answer or a
+     * best-so-far line — there is no such thing here, because a caller handed a
+     * weaker answer might accept a puzzle on it. `null` means "no answer", and
+     * the one caller that passes a timeout treats it as "no candidate".
+     *
+     * The 'stop' makes Stockfish print a bestmove for the search it was on, so
+     * `pending` is cleared first: that reply belongs to a question nobody is
+     * waiting for any more and must not be delivered to the next one. */
+    if (!o.timeoutMs) return p;
+    return new Promise(resolve => {
+      let settled = false;
+      const timer = setTimeout(async () => {
+        if (settled) return;
+        settled = true;
+        this.pending = null;        // orphan the reply before asking for it
+        this.timeouts = (this.timeouts || 0) + 1;
+        /* Answering `null` is not enough on its own: the caller is freed but
+           the ENGINE may still be searching, and the pool hands that same
+           engine the next question. So the slot is reclaimed before the caller
+           is told anything, and only then does this resolve. It is bounded by
+           STOP_GRACE_MS plus a boot, against a hang that is otherwise for ever. */
+        await this.reclaim();
+        resolve(null);
+      }, o.timeoutMs);
+      p.then(v => {
+        if (settled) return;
+        settled = true;
+        clearTimeout(timer);
+        resolve(v);
+      });
+    });
   }
 
-  quit(){ this.send('quit'); try { this.proc.kill(); } catch (e){ /* already gone */ } }
+  /* Get this engine back into a state where the next question can be asked of
+     it, and prove it rather than assume it.
+     *
+     * `stop` normally works: Stockfish prints the bestmove for the search it
+     * was on and goes idle, which costs nothing and keeps the hash table warm.
+     * Usually — and "usually" is the whole problem. A production run mined
+     * 15,491 positions with 130 searches abandoned this way; 129 of the engines
+     * came back, and one did not. That one sat at 100% CPU for five and a half
+     * hours holding the last game of a cycle while its eight peers idled at
+     * exactly 0.0%, because a Stockfish that is still searching will not accept
+     * the `position` and `go` for the next question, and the promise waiting on
+     * that answer is never resolved by anything.
+     *
+     * So the acknowledgement is waited for, and an engine that does not send
+     * one inside STOP_GRACE_MS is killed and replaced. A fresh process costs a
+     * boot and an empty hash table. A wedged one costs the run.
+     *
+     * Nothing here can affect what gets accepted. The candidate whose search
+     * timed out is already gone — ask() resolves `null`, and every caller that
+     * passes a timeoutMs drops the candidate on a null. This is only about the
+     * slot. */
+  async reclaim(){
+    if (this.dead) return false;
+    const idle = new Promise(resolve => { this.stopping = resolve; });
+    try { this.send('stop'); } catch (e){ /* engine already gone */ }
+    let timer;
+    const freed = await Promise.race([
+      idle.then(() => true),
+      new Promise(r => { timer = setTimeout(() => r(false), STOP_GRACE_MS); })
+    ]);
+    clearTimeout(timer);
+    this.stopping = null;
+    if (!freed) await this.restart();
+    return freed;
+  }
+
+  /* Replace the process, keeping the object — the pool holds engines by
+     reference and pairs them with a second pool by `slot`, so the engine that
+     comes back has to be the same engine as far as everyone else is concerned. */
+  async restart(){
+    if (this.dead) return;
+    this.restarts++;
+    try { this.proc.stdout.removeAllListeners('data'); } catch (e){}
+    try { this.proc.kill('SIGKILL'); } catch (e){ /* already gone */ }
+    this._boot();
+    await this.ready;
+  }
+
+  quit(){
+    this.dead = true;             // so a reclaim in flight does not respawn it
+    this.send('quit');
+    try { this.proc.kill(); } catch (e){ /* already gone */ }
+  }
 }
 
 class Engine {

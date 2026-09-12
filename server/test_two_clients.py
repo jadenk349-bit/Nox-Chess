@@ -36,6 +36,10 @@ PORT = int(os.environ.get("PORT", "8787"))
 # is the feature, so the tests really do sit them out — set NOX_AI_WAIT on both
 # the server and the harness to shorten a local run.
 AI_WAIT = float(os.environ.get("NOX_AI_WAIT") or 5.0)
+# How long the server keeps a dropped player's seat before the game is lost —
+# ten seconds, and like the five above the tests sit it out unless
+# NOX_AWAY_GRACE is set on the server and here.
+AWAY_GRACE = float(os.environ.get("NOX_AWAY_GRACE") or 10.0)
 AI_NAMES = [
     "cutydaeheech0", "TheNlEL", "goutham111", "Paradoxical_MovesbyJJ",
     "gaymonster", "jungjungkook", "676767",
@@ -318,18 +322,112 @@ def main():
     check("no moves are accepted after the end", err["msg"] == "no game in progress")
 
     print("\n\033[1mDisconnects\033[0m")
+    # A dropped socket is not a resignation any more: the seat is held for
+    # AWAY_GRACE, a new socket showing the seat's own secret sits back down
+    # with everything it missed, and only a seat nobody comes back for costs
+    # the game. Each pair below asks for a clock nothing else asks for.
     c = TestClient("C")
     d = TestClient("D")
     c.send(t="find", mode="fog", minutes=1)
     c.expect("waiting")
     d.send(t="find", mode="fog", minutes=1)
-    c.expect("start")
-    d.expect("start")
+    sc, sd = c.expect("start"), d.expect("start")
     check("a second pair matches on its own settings", True)
+    check("each start carries a seat secret of its own",
+          isinstance(sc.get("seat"), str) and isinstance(sd.get("seat"), str) and sc["seat"] != sd["seat"],
+          "(%s / %s)" % (sc.get("seat"), sd.get("seat")))
+    check("and says how long a dropped seat is held", sc.get("grace") == AWAY_GRACE, "(%s)" % sc.get("grace"))
+    game_cd = sc["game"]
+    # White moves first, then drops, so the other side has a move to make
+    # while they are out.
+    white, black = (c, d) if sc["color"] == "w" else (d, c)
+    white_seat, black_seat = (sc, sd)[white is d]["seat"], (sc, sd)[black is d]["seat"]
+    white.play(52, 36, "e4")
+    black.receive_move()
 
-    c.close()
-    over = d.expect("over", timeout=5)
-    check("a dropped connection ends the opponent's game", over["reason"] == "left", "(%s)" % over)
+    white.close()
+    away = black.expect("opponent-away", timeout=3)
+    check("the other side is told to wait, not handed the win",
+          away.get("game") == game_cd and away.get("seconds") == AWAY_GRACE, "(%s)" % away)
+    check("and no result arrives", black.nothing_arrives(0.3))
+    black.play(12, 28, "e5")
+    check("a move made while they are out is accepted", black.nothing_arrives(0.3))
+
+    back = TestClient("C-again")
+    back.send(t="resume", game=game_cd, seat="not-the-seat")
+    check("a wrong seat is refused", back.expect("resume-failed").get("game") == game_cd)
+    back.send(t="resume", game=game_cd, seat=black_seat)
+    check("an occupied seat is refused too", back.expect("resume-failed").get("game") == game_cd)
+    check("and the occupant hears nothing of it", black.nothing_arrives(0.3))
+    back.send(t="resume", game=game_cd, seat=white_seat)
+    res = back.expect("resume")
+    check("the right seat sits back down", res["game"] == game_cd and res["color"] == "w", "(%s)" % res)
+    check("with everything played meanwhile",
+          [(m["from"], m["to"], m["san"]) for m in res["moves"]] == [(52, 36, "e4"), (12, 28, "e5")],
+          "(%s)" % res.get("moves"))
+    check("and whose move it is", res.get("turn") == "w", "(%s)" % res.get("turn"))
+    check("on the seat's own terms", res.get("mode") == "fog" and res.get("minutes") == 1 and
+          res.get("seat") == white_seat, "(%s)" % res)
+    returned = black.expect("opponent-back")
+    check("the opponent is told they are back", returned.get("game") == game_cd and
+          isinstance(returned.get("name"), str), "(%s)" % returned)
+    back.timeline = list(white.timeline) + [(12, 28, "e5")]
+    back.play(62, 45, "Nf3")
+    check("and the relay works again, both ways",
+          black.receive_move()["san"] == "Nf3" and (black.play(1, 18, "Nc6") or back.receive_move()["san"] == "Nc6"))
+
+    # A game that ends while a player is out keeps its result for them.
+    back.close()
+    black.expect("opponent-away", timeout=3)
+    black.send(t="resign")
+    check("the side still there may resign into the empty seat", black.expect("over")["reason"] == "resign")
+    late = TestClient("C-late")
+    late.send(t="resume", game=game_cd, seat=white_seat)
+    refused = late.expect("resume-failed")
+    check("a game that ended while they were out says how",
+          refused.get("over") == {"reason": "resign", "winner": "w"}, "(%s)" % refused)
+    late.send(t="resume", game=game_cd, seat="not-the-seat")
+    check("but only to the seat it belonged to", "over" not in late.expect("resume-failed"))
+    late.close()
+    black.close()
+
+    # Nobody comes back: the dropped connection ends the game, as it always did.
+    g = TestClient("G")
+    h = TestClient("H")
+    g.send(t="find", mode="fog", minutes=1, inc=7)
+    g.expect("waiting")
+    h.send(t="find", mode="fog", minutes=1, inc=7)
+    sg, sh = g.expect("start"), h.expect("start")
+    g.close()
+    h.expect("opponent-away", timeout=3)
+    check("and no result before the grace is up", h.nothing_arrives(max(0.2, AWAY_GRACE - 0.5)))
+    over = h.expect("over", timeout=AWAY_GRACE + 3)
+    check("a dropped connection ends the opponent's game once the grace lapses",
+          over["reason"] == "left" and over["winner"] == sh["color"], "(%s)" % over)
+    late = TestClient("G-late")
+    late.send(t="resume", game=sg["game"], seat=sg["seat"])
+    check("and the seat, asked for too late, is told it was lost",
+          late.expect("resume-failed").get("over") == {"reason": "left", "winner": sh["color"]})
+    late.close()
+    h.close()
+
+    # Against a house bot the seat is held the same way, and the bot rides
+    # back in the resume so the page knows whose moves it is still playing.
+    j = TestClient("J")
+    j.send(t="lobby")
+    house_room = j.expect("rooms")["rooms"][0]
+    j.send(t="join", room=house_room["id"])
+    sj = j.expect("start")
+    check("(a house room seats a bot)", isinstance(sj.get("ai"), dict), "(%s)" % sj)
+    j.close()
+    j2 = TestClient("J-again")
+    j2.send(t="resume", game=sj["game"], seat=sj["seat"])
+    rj = j2.expect("resume")
+    check("a seat facing a bot is held and resumed like any other",
+          rj.get("game") == sj["game"] and rj.get("ai") == sj.get("ai"), "(%s)" % rj)
+    j2.send(t="resign")
+    j2.expect("over")
+    j2.close()
 
     print("\n\033[1mSeparate settings do not match\033[0m")
     e = TestClient("E")
@@ -687,6 +785,107 @@ def main():
         check("moves flow through a challenged game",
               c1.receive_move()["san"] == "e4")
 
+        # ---- two seats, set differently ----
+        # A challenger may deal the friend a different vision and a different
+        # clock. Every payload is written from its reader's chair — `mode` /
+        # `minutes` are what *you* play, opponentMode / opponentMinutes what
+        # the far side does — and the terms belong to the person, so they
+        # must follow each player into whichever colour they are given.
+        print("\n\033[1mA challenge with two seats set differently\033[0m")
+        p1 = TestClient("P1")
+        q1 = TestClient("Q1")
+        p1.send(t="challenge", to="test-Q1", mode="total", minutes=5,
+                opponentMode="sighted", opponentMinutes=15, color="w")
+        p1.expect("challenge-sent")
+        inv = q1.expect("challenged")
+        check("the friend's box is written from the friend's chair",
+              inv["mode"] == "sighted" and inv["minutes"] == 15 and inv["color"] == "b",
+              "(%s)" % inv)
+        check("and names the challenger's own seat as the opponent's",
+              inv["opponentMode"] == "total" and inv["opponentMinutes"] == 5, "(%s)" % inv)
+        q1.send(t="challenge-accept", id=inv["id"])
+        sp = p1.expect("start"); sq = q1.expect("start")
+        check("the challenger's start is their own seat: Complete Blindfold, 5 min, White",
+              sp["color"] == "w" and sp["mode"] == "total" and sp["minutes"] == 5, "(%s)" % sp)
+        check("and names the friend's: Sighted, 15 min",
+              sp["opponentMode"] == "sighted" and sp["opponentMinutes"] == 15, "(%s)" % sp)
+        check("the friend's start is theirs: Sighted, 15 min, Black",
+              sq["color"] == "b" and sq["mode"] == "sighted" and sq["minutes"] == 15, "(%s)" % sq)
+        check("and names the challenger's: Complete Blindfold, 5 min",
+              sq["opponentMode"] == "total" and sq["opponentMinutes"] == 5, "(%s)" % sq)
+        check("it is one game", sp["game"] == sq["game"])
+
+        # A rematch swaps the colours and keeps each player's own terms.
+        p1.send(t="resign")
+        p1.expect("over"); q1.expect("over")
+        q1.send(t="rematch")
+        q1.expect("rematch-sent")
+        ask = p1.expect("rematch-request")
+        check("the rematch box is written from the answerer's chair, with their own terms",
+              ask["mode"] == "total" and ask["minutes"] == 5 and ask["color"] == "b", "(%s)" % ask)
+        check("and names the asker's", ask["opponentMode"] == "sighted" and ask["opponentMinutes"] == 15,
+              "(%s)" % ask)
+        p1.send(t="rematch-accept", id=ask["id"])
+        rp = p1.expect("start"); rq = q1.expect("start")
+        check("the rematch swaps the colours",
+              rp["color"] == "b" and rq["color"] == "w", "(%s / %s)" % (rp, rq))
+        check("and each keeps their own vision and clock in the other seat",
+              rp["mode"] == "total" and rp["minutes"] == 5 and rp["opponentMode"] == "sighted"
+              and rp["opponentMinutes"] == 15 and rq["mode"] == "sighted" and rq["minutes"] == 15
+              and rq["opponentMode"] == "total" and rq["opponentMinutes"] == 5,
+              "(%s / %s)" % (rp, rq))
+        p1.close(); q1.close()
+
+        # The players swapped: the friend of a moment ago is the challenger,
+        # takes Black, and the terms come out the right way round for both.
+        p2 = TestClient("P2")
+        q2 = TestClient("Q2")
+        q2.send(t="challenge", to="test-P2", mode="fog", minutes=5,
+                opponentMode="blind", opponentMinutes=15, color="b")
+        q2.expect("challenge-sent")
+        inv2 = p2.expect("challenged")
+        check("swapped: the box offers White, Board Only, 15 min, against Fog of War, 5 min",
+              inv2["color"] == "w" and inv2["mode"] == "blind" and inv2["minutes"] == 15
+              and inv2["opponentMode"] == "fog" and inv2["opponentMinutes"] == 5, "(%s)" % inv2)
+        p2.send(t="challenge-accept", id=inv2["id"])
+        sp2 = p2.expect("start"); sq2 = q2.expect("start")
+        check("swapped: the challenger on Black has Fog of War and 5 min",
+              sq2["color"] == "b" and sq2["mode"] == "fog" and sq2["minutes"] == 5
+              and sq2["opponentMode"] == "blind" and sq2["opponentMinutes"] == 15, "(%s)" % sq2)
+        check("swapped: the friend on White has Board Only and 15 min",
+              sp2["color"] == "w" and sp2["mode"] == "blind" and sp2["minutes"] == 15
+              and sp2["opponentMode"] == "fog" and sp2["opponentMinutes"] == 5, "(%s)" % sp2)
+        # The colour is not what carries the terms: White here is the friend.
+        check("swapped: White's start is not the challenger's terms",
+              sp2["mode"] != sq2["mode"] and sp2["minutes"] != sq2["minutes"])
+        p2.close(); q2.close()
+
+        # The old shape — one vision, one clock — is both seats the same, and
+        # a message naming nonsense for the friend falls back to the same.
+        p3 = TestClient("P3")
+        q3 = TestClient("Q3")
+        p3.send(t="challenge", to="test-Q3", mode="blind", minutes=7, color="w")
+        p3.expect("challenge-sent")
+        inv3 = q3.expect("challenged")
+        check("a challenge naming one set of terms deals it to both seats",
+              inv3["mode"] == "blind" and inv3["minutes"] == 7
+              and inv3["opponentMode"] == "blind" and inv3["opponentMinutes"] == 7, "(%s)" % inv3)
+        q3.send(t="challenge-accept", id=inv3["id"])
+        sp3 = p3.expect("start"); sq3 = q3.expect("start")
+        check("and both starts say so",
+              sp3["mode"] == sq3["mode"] == "blind" and sp3["minutes"] == sq3["minutes"] == 7
+              and sp3["opponentMinutes"] == sq3["opponentMinutes"] == 7, "(%s / %s)" % (sp3, sq3))
+        p3.close(); q3.close()
+        p4 = TestClient("P4")
+        q4 = TestClient("Q4")
+        p4.send(t="challenge", to="test-Q4", mode="fog", minutes=3,
+                opponentMode="x-ray", opponentMinutes="lots", color="w")
+        p4.expect("challenge-sent")
+        inv4 = q4.expect("challenged")
+        check("terms the server does not recognise fall back to the challenger's",
+              inv4["mode"] == "fog" and inv4["minutes"] == 3, "(%s)" % inv4)
+        p4.close(); q4.close()
+
         # Nobody left to hand it to.
         lonely = TestClient("C4")
         lonely.send(t="challenge", to="nobody-at-all", mode="blind", minutes=5, color="w")
@@ -720,8 +919,11 @@ def main():
     check("the room carries its settings",
           seen and seen[0]["mode"] == "fog" and seen[0]["minutes"] == 15
           and seen[0]["inc"] == 0 and seen[0]["color"] == "b", "(%s)" % seen)
+    # With accounts on, the name is the token's ("Tester HOST"), not the
+    # one the socket offered: a verified player's name is never the message's.
     check("and names its host, with a rating",
-          seen and seen[0]["name"] == "HOST" and isinstance(seen[0]["rating"], int), "(%s)" % seen)
+          seen and seen[0]["name"] == ("Tester HOST" if host.verified else "HOST")
+          and isinstance(seen[0]["rating"], int), "(%s)" % seen)
     room_id = seen[0]["id"]
     host.expect("rooms")        # the host watches the list too, so it sees its own room
 

@@ -21,100 +21,12 @@
  *
  * Point it elsewhere with WS_TEST_HOST / PORT.
  */
-const fs = require('fs');
-const PAGE = require('path').join(__dirname, '..', 'blind-chess.html');
-const SRC = fs.readFileSync(PAGE, 'utf8');
-const HTML = SRC.split('<script>')[0];
-const BODY = SRC.match(/<script>\n"use strict";([\s\S]*?)<\/script>/)[1];
-const IDS = [...HTML.matchAll(/\bid="([^"]+)"/g)].map(m => m[1]);
-const HOST = process.env.WS_TEST_HOST || '127.0.0.1';
-const PORT = process.env.PORT || '8787';
-
-let passed = 0, failed = 0;
-const check = (label, ok, detail) => {
-  if (ok){ passed++; console.log('  PASS  ' + label); }
-  else { failed++; console.log('  FAIL  ' + label + (detail === undefined ? '' : '  ' + detail)); }
-};
-
-function classSet(){
-  const have = new Set();
-  return { add:c=>have.add(c), remove:c=>have.delete(c),
-           toggle:(c,on)=>{ if (on===undefined) have.has(c)?have.delete(c):have.add(c); else on?have.add(c):have.delete(c); },
-           contains:c=>have.has(c) };
-}
-function mk(tag){
-  const e = {
-    tagName:(tag||'div').toUpperCase(), textContent:'', innerHTML:'', value:'', className:'',
-    disabled:false, checked:false, style:{}, dataset:{}, children:[], parentElement:null,
-    offsetWidth:100, onclick:null, onsubmit:null, classList:classSet(),
-    appendChild(c){ this.children.push(c); c.parentElement = this; return c; },
-    removeChild(c){ return c; }, remove(){}, setAttribute(){}, getAttribute(){ return null; },
-    addEventListener(){}, removeEventListener(){}, focus(){}, blur(){}, click(){ this.onclick && this.onclick(); },
-    scrollIntoView(){}, getBoundingClientRect(){ return {top:0,left:0,width:100,height:100}; },
-    querySelectorAll(){ return []; }, closest(){ return null; },
-    getContext(){ return new Proxy({}, { get:(t,k)=> k in t ? t[k]
-        : (/create(Radial|Linear)Gradient/.test(k) ? () => ({ addColorStop(){} })
-          : k === 'measureText' ? () => ({ width:10 }) : () => undefined),
-      set:(t,k,v)=>{ t[k]=v; return true; } }); }
-  };
-  Object.defineProperty(e, 'firstChild', {
-    get(){ return this.children.length ? this.children[0] : (this.children[0] = mk('span')); } });
-  e.querySelector = sel => e.__qs || (e.__qs = mk());
-  return e;
-}
-function makeDoc(){
-  const pool = {}, seen = {};
-  for (const id of IDS) pool[id] = mk();
-  const qs = sel => seen[sel] || (seen[sel] = mk());
-  return {
-    getElementById: id => pool[id] || (pool[id] = mk()),
-    querySelector: qs, querySelectorAll: () => [], createElement: mk, createElementNS: mk,
-    addEventListener(){}, removeEventListener(){}, body: mk(), documentElement: mk(), head: mk()
-  };
-}
-
-const AudioCtx = function(){
-  return { createOscillator:()=>({ connect(){}, start(){}, stop(){}, frequency:{ setValueAtTime(){} }, type:'' }),
-           createGain:()=>({ connect(){}, gain:{ setValueAtTime(){}, exponentialRampToValueAtTime(){}, linearRampToValueAtTime(){} } }),
-           destination:{}, currentTime:0, resume:()=>Promise.resolve(), state:'running' }; };
-
-/** One whole page, with its own DOM and its own socket. */
-function makePage(){
-  const doc = makeDoc();
-  const loc = { protocol:'http:', host:HOST + ':' + PORT, href:'http://' + HOST + ':' + PORT + '/', hash:'', search:'' };
-  const store = {};
-  const storage = { getItem:k => (k in store ? store[k] : null),
-                    setItem:(k,v)=>{ store[k] = String(v); }, removeItem:k => { delete store[k]; } };
-  const win = { addEventListener(){}, removeEventListener(){}, scrollTo(){},
-                matchMedia:()=>({ matches:false, addEventListener(){}, addListener(){} }),
-                innerWidth:1200, innerHeight:900, devicePixelRatio:1, location:loc, localStorage:storage };
-  let out = null;
-  const src = '"use strict";' + BODY.replace(/await import\([^)]*\)/g, 'await Promise.reject(new Error("no cdn"))') +
-    '\n__expose({ G, NET, REM, RANK, el, netConnect, netSend, showScreen, rematchTerms,' +
-    ' startRanked, applyRankSettings, rankReady, netClose, hostGame,' +
-    ' screen:()=>screenName, resume:()=>rankResume });';
-  new Function('document','window','location','localStorage','WebSocket','AudioContext',
-               'webkitAudioContext','fetch','Image','requestAnimationFrame','cancelAnimationFrame',
-               'getComputedStyle','navigator','console','__expose', src)(
-    doc, win, loc, storage, WebSocket, AudioCtx, AudioCtx,
-    () => Promise.resolve({ ok:false, status:404, json:()=>Promise.resolve(null), text:()=>Promise.resolve('') }),
-    mk, cb => setTimeout(()=>cb(Date.now()), 16), clearTimeout,
-    () => ({ getPropertyValue: () => '' }), { userAgent:'node' },
-    { log(){}, warn(){}, error(){} }, o => { out = o; });
-  out.doc = doc;
-  out.press = id => doc.getElementById(id).onclick();
-  out.up = id => doc.getElementById(id).classList.contains('show');
-  out.text = id => doc.getElementById(id).textContent;
-  return out;
-}
-
-const wait = ms => new Promise(r => setTimeout(r, ms));
-/** Wait for something to become true, or give up. */
-async function until(cond, ms = 4000){
-  const stop = Date.now() + ms;
-  while (Date.now() < stop){ if (cond()) return true; await wait(25); }
-  return false;
-}
+/* The DOM shim, the page boot and the waiting helpers live in page_harness.js
+ * now, so that test_challenge_e2e.js — the same two-page arrangement, for a
+ * friend challenge that deals the seats different terms — runs the same page
+ * the same way rather than a second copy of this file's shim. */
+const { makePage, until, wait, HOST, PORT, probe, counter } = require('./page_harness');
+const { check, summary } = counter();
 
 /** Two pages, matched into one friendly game and played to a finish. */
 async function seated(mode = 'sighted', minutes = 5, inc = 0, kind = 'friendly'){
@@ -155,17 +67,7 @@ async function finished(a, b){
 }
 
 async function main(){
-  try {
-    await new Promise((ok, no) => {
-      const probe = require('net').createConnection({ host:HOST, port:+PORT }, () => { probe.end(); ok(); });
-      probe.on('error', no);
-      probe.setTimeout(2000, () => { probe.destroy(); no(new Error('timed out')); });
-    });
-  } catch (e){
-    console.log('No server on ' + HOST + ':' + PORT +
-                ' — start it with: python3 server/server.py');
-    process.exit(1);
-  }
+  await probe();
 
   console.log('\nA whole friendly game, and a rematch of it');
   let [a, b] = await seated('sighted', 40);
@@ -390,6 +292,88 @@ async function main(){
         !nobody.NET.gameId, 'game=' + nobody.NET.gameId);
   nobody.press('btnRankStart');
 
+  console.log('\nA connection that drops mid-game');
+  // The server holds the seat for NOX_AWAY_GRACE seconds (ten by default) and
+  // the page spends them getting back in. Real sockets, so the drop is a
+  // real drop and the reconnect is the page's own — held down by the
+  // harness's gate (page.hold) for as long as a check needs to look at it,
+  // because a local server would otherwise have it back in a few
+  // milliseconds.
+  const GRACE = parseFloat(process.env.NOX_AWAY_GRACE || '10');
+  {
+    const [p, q] = await seated('sighted', 47);
+    const white = p.G.human === 'w' ? p : q, black = white === p ? q : p;
+    white.tryMove(52, 36);                                   // e4
+    check('(a move crosses before the drop)', await until(() => black.G.sans.length === 1));
+    // White has moved and it is Black's turn, so it is White whose network
+    // blinks: Black then has a move to make while they are out.
+    white.hold(true);
+    white.NET.sock.close();
+    const held = await until(() => white.NET.state === 'reconnecting');
+    check('the page does not give the game up', held && !white.G.over, white.NET.state);
+    check('and says what it is doing', white.up('waitOverlay') && white.text('waitTitle') === 'Connection Lost' &&
+          /\d+s left/.test(white.text('waitText')), white.text('waitTitle') + ' / ' + white.text('waitText'));
+    check('with the one button meaning Give Up', white.text('waitCancel') === 'Give Up', white.text('waitCancel'));
+    check('and the board takes no moves meanwhile', white.boardOpen() === false);
+    black.tryMove(12, 28);                                   // e5, while White is out
+    await wait(300);
+    check('the other side is told to wait, not handed the win', !black.G.over && white.NET.state === 'reconnecting');
+    white.hold(false);
+    const backIn = await until(() => white.NET.state === 'playing', GRACE * 1000 + 2000);
+    check('the seat is taken back within the grace', backIn, white.NET.state);
+    check('and the box goes', !white.up('waitOverlay'));
+    check('the other side was never told the game was over', !black.G.over);
+    check('a move made while they were out is on their board',
+          await until(() => white.G.sans.length === 2) && white.G.sans[1] === 'e5', white.G.sans.join(' '));
+    white.tryMove(62, 45);                                   // Nf3
+    check('and the relay works again', await until(() => black.G.sans.length === 3), black.G.sans.join(' '));
+    check('the board is open again', black.boardOpen() === true);
+    black.hold(true);
+    black.NET.sock.close();
+    const heldAgain = await until(() => black.NET.state === 'reconnecting');
+    black.hold(false);
+    check('a second drop, the other side\'s, is held again',
+          heldAgain && await until(() => black.NET.state === 'playing', GRACE * 1000 + 2000), black.NET.state);
+    black.netClose();                                        // and now Black really leaves
+    const left = await until(() => white.G.over, GRACE * 1000 + 4000);
+    check('a player who does not come back loses after the grace',
+          left && /left/i.test(white.G.over.text), white.G.over && white.G.over.text);
+    check('and the rematch button is not offered against nobody',
+          white.doc.getElementById('endRematch').style.display === 'none');
+    white.netClose();
+  }
+  {
+    const [p, q] = await seated('blind', 48);
+    p.hold(true);
+    p.NET.sock.close();
+    await until(() => p.NET.state === 'reconnecting');
+    p.press('waitCancel');                                   // Give Up
+    check('giving up is the old Disconnected result, at once',
+          !!p.G.over && /Disconnected/.test(p.G.over.text) && p.NET.state === 'idle', p.G.over && p.G.over.text);
+    check('and not a win for the other side until the grace lapses', !q.G.over);
+    const left = await until(() => q.G.over, GRACE * 1000 + 4000);
+    check('which it then is', left && /left/i.test(q.G.over.text), q.G.over && q.G.over.text);
+    p.hold(false);
+    q.netClose();
+  }
+  {
+    // A game that ends while a player is out: the result waits for them.
+    const [p, q] = await seated('fog', 49);
+    p.hold(true);
+    p.NET.sock.close();
+    await until(() => p.NET.state === 'reconnecting');
+    q.netSend({ t:'resign' });
+    check('the side still there may resign meanwhile', await until(() => q.G.over));
+    check('and the one who was out does not know yet', !p.G.over);
+    p.hold(false);
+    const told = await until(() => p.G.over, 5000);
+    check('the one who was out is told how it ended, once back',
+          told && /resigned/i.test(p.G.over.text), p.G.over && p.G.over.text);
+    check('as a win', told && /win/i.test(p.G.over.text), p.G.over && p.G.over.text);
+    check('with no rematch to be had of a game the server has let go', p.NET.oppGone === true);
+    p.netClose(); q.netClose();
+  }
+
   console.log('\nFriendly is untouched by any of it');
   let [f1, f2] = await seated('blind', 44);
   await finished(f1, f2);
@@ -420,7 +404,7 @@ async function main(){
   h1.netSend({ t:'unhost' });
   await wait(200);
 
-  console.log('\n' + passed + ' passed, ' + failed + ' failed\n');
+  const failed = summary();
   await wait(200);            // let the server see the sockets go
   process.exit(failed ? 1 : 0);
 }

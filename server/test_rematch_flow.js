@@ -74,6 +74,9 @@ var STUB = [
   'var receiveMove = note("receiveMove"), showDraw = note("showDraw");',
   'var hideDraw = note("hideDraw"), drawButton = note("drawButton"), finish = note("finish");',
   'var chatNote = note("chatNote"), chatLine = note("chatLine");',
+  // a dropped connection's own arms of onNetMessage, stubbed like the rest
+  'var reconnectStop = note("reconnectStop"), reconnectResumed = note("reconnectResumed");',
+  'var reconnectFailed = note("reconnectFailed");',
   'var showChallenge = note("showChallenge"), hideChallenge = note("hideChallenge");',
   'var challengeRefused = note("challengeRefused"), friendWord = note("friendWord");',
   'var renderRooms = note("renderRooms"), roomNote = note("roomNote");',
@@ -111,7 +114,7 @@ var CODE = [
   decl('AI_MATCH'),
   decl('rematchOverlay'),
   fn('showRematch'), fn('hideRematch'), fn('remClear'), fn('remLeave'),
-  fn('rematchTerms'), fn('oppWord'), fn('askRematch'), fn('acceptRematch'),
+  fn('rematchTerms'), fn('seatTermsText'), fn('oppWord'), fn('askRematch'), fn('acceptRematch'),
   handler('rematchAccept'), handler('rematchDecline'),
   handler('endNew'), handler('endRematch'),
   fn('onNetMessage')
@@ -121,7 +124,7 @@ var CODE = [
 function fresh(){
   var api = new Function(
     DOM + '\n' + STUB + '\n' + CODE + '\n' +
-    'return { NET:NET, REM:REM, G:G, SENT:SENT, SCREENS:SCREENS, CALLED:CALLED,' +
+    'return { NET:NET, REM:REM, G:G, SENT:SENT, SCREENS:SCREENS, CALLED:CALLED, terms:rematchTerms,' +
     '  elements:elements, recv:onNetMessage, press:function(id){ elements[id].onclick(); },' +
     '  box:function(){ var by = document.getElementById, o = by("rematchOverlay");' +
     '    return { up:o.classList.contains("show"), mode:o.dataset.mode,' +
@@ -288,6 +291,21 @@ check('colours come from the server', p.G.human === 'b');
 check('nothing of the last game is carried over',
       p.NET.gameId === 'game-two' && p.NET.oppGone === false &&
       p.CALLED.indexOf('newGame') !== -1, p.CALLED.join(','));
+check('a start that names no clock for the far side leaves none',
+      p.G.theirMode === null && p.G.theirMinutes === null);
+p.recv({ t:'start', game:'game-three', color:'w', mode:'total', minutes:5, inc:0,
+         kind:'friendly', opponent:'Robin', opponentMode:'sighted', opponentMinutes:15 });
+check('one that does keeps our seat and theirs apart — ours under the plain names',
+      p.G.mode === 'total' && p.G.minutes === 5 && p.G.theirMode === 'sighted' && p.G.theirMinutes === 15,
+      p.G.mode + ' ' + p.G.minutes + ' / ' + p.G.theirMode + ' ' + p.G.theirMinutes);
+check('the rematch box says both seats when they differ',
+      p.terms({ mode:'total', minutes:5, inc:0, opponentMode:'sighted', opponentMinutes:15,
+                from:'Robin', color:'b', kind:'friendly' })
+        === 'Complete Blindfold · 5 min; Robin plays Sighted · 15 min — you play Black.',
+      p.terms({ mode:'total', minutes:5, inc:0, opponentMode:'sighted', opponentMinutes:15, from:'Robin', color:'b' }));
+check('and one seat when they do not',
+      p.terms({ mode:'fog', minutes:3, inc:2, kind:'ranked', color:'w' }) === 'Ranked · Fog of War · 3+2 — you play White.',
+      p.terms({ mode:'fog', minutes:3, inc:2, kind:'ranked', color:'w' }));
 
 say('\nWhere New Game goes');
 

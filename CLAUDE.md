@@ -10,6 +10,148 @@ screen, practice drills, the lesson course — is one file, `blind-chess.html`. 
 Python server in `server/` is matchmaking and a move relay, nothing more. There is no build step
 and no package manager on either side.
 
+## Making puzzles: the standing rule
+
+**"Make puzzles", "generate puzzles", "add puzzles", or any new feature that
+contains puzzles means the production normal-Puzzle pipeline below, unless the
+request explicitly names a different standard.** It is not a starting point to
+be trimmed for speed or for a target count. Nothing here is optional, and
+nothing here is negotiated down to reach a number.
+
+The pipeline is two tools, in this order, and they are the same two that
+produced every puzzle the game already ships:
+
+```bash
+node tools/generate_puzzles.js --games N --out <dir> --poolsOut <checkpoint> --excludeIn <every existing corpus>
+node tools/verify_puzzles.js  --dir <dir> --tracks opening,middlegame,endgame --write
+```
+
+`--excludeIn` is **not optional** whenever the corpus being built is new or
+additional — see "Never mine a position we already ship" below.
+
+Run them with their **defaults**. The defaults *are* the standard: scan 14,
+confirm 20, reply 20, before 20 in the generator; sweep 18 at MultiPV 5, work
+22, verdict 24, tie-break 26, follow-up 20, `--payoff` on, `--budget 2700` in
+the verifier. Passing a depth, a tolerance or `--no-payoff` to make a run
+cheaper or a category fuller is the one thing this rule exists to forbid.
+
+What every accepted puzzle has cleared, and what may never be removed,
+weakened, bypassed or replaced:
+
+- one clearly superior solution, and ambiguous or multiple-best-move positions
+  rejected (MultiPV)
+- the obviousness rejection — a capture of the piece that just moved, a
+  position with nothing left to calculate
+- the opponent playing the strongest **verified** defence, spliced in and
+  re-searched, never assumed
+- no dependence on a later opponent mistake
+- the solution continued to its **actual payoff**, not to the end of the doubt
+- a payoff that is one of the accepted outcomes: mate, promotion, or material
+  won **and held** — a queen or rook, or a minor piece or pawn only where the
+  existing rules judge it to change the game
+- "won back" rejection: material recaptured at once is not a payoff
+- "already trivially winning" rejection: a tactic that adds nothing is not a
+  puzzle
+- depth and stability verification at the depths above
+- correct evaluation perspective (`objective: true` on every measuring search)
+- a verified follow-up, and with it Show Follow Up and Study Alternatives
+- Education System explanations written from the **locked verified line** and
+  never from a line the engine was not asked about
+- claim and evidence auditing, so no sentence survives that the final position
+  does not support
+- deduplication on the **fen**, not only the id — an id hashes the position
+  *and* the line, so one position can wear two ids
+- durable checkpointing and resume, per game while mining and per puzzle while
+  verifying
+
+### Never mine a position we already ship
+
+**Any new or additional corpus excludes every relevant existing one, by
+default and without being asked.** A puzzle that is meant to be a new puzzle and
+turns out to be one the player has already solved somewhere else is a broken
+promise, and it is broken silently: nothing errors, the counts all look right,
+and the player meets the same position twice.
+
+So before a run that supplements an existing corpus, or that is supposed to hold
+genuinely new puzzles, build the exclusion list from **every corpus the new one
+must not overlap** and pass it:
+
+```bash
+--excludeIn work/<run>/exclude.json        # or a comma-separated list of files
+```
+
+The list must cover, at minimum, whichever of these the new corpus must be
+distinct from: `puzzles/*.json` (the phase tracks), `puzzles/modes/*.json` (the
+five Puzzle-page pools **and** `reserve.json`), `puzzles/daily/*.json` (the
+Daily corpus) and `practices/*.json`. When in doubt, include all of them: a
+position excluded unnecessarily costs one candidate, and a duplicate that ships
+costs a player's trust in the set.
+
+Three things must be rejected, and the mechanism gets all three:
+
+- **duplicate starting position** — `--excludeIn` seeds the generator's `seen`
+  set with the fens, so a position already shipped is skipped *before* any
+  engine time is spent on it.
+- **duplicate underlying position across the new corpus itself** — `seen`
+  already does this within a run, and `tools/merge_pools.js` does it across
+  runs, both on the fen.
+- **duplicate id** — this comes free and is worth understanding why.
+  `puzzleId()` is `sha1(fen + '|' + moves)`, so **the same id implies the same
+  fen**: excluding on the fen necessarily excludes every duplicate id, *and*
+  catches the case matching on ids alone would miss — one position found twice
+  and extended differently, which is two ids and one position. Match on the
+  position, never only on the id.
+
+The deal is the second gate and re-asks all of it: `tools/daily_assign.js`
+refuses a duplicate id, a duplicate position, and any position the existing
+corpora already carry, and reports each refusal with its reason rather than
+dropping it silently. Belt and braces on purpose — mining is where it is cheap
+to avoid, the deal is where it is final.
+
+**Reuse is allowed only when it is explicitly asked for.** "Duplicates are
+fine", "reuse the existing positions", "this is a re-cut of the same corpus" —
+those are instructions, and a re-cut of an existing pool (`--poolsIn`) is the
+normal case for one. Absent that, assume exclusion.
+
+**Phase is metadata.** `opening`, `middlegame` and `endgame` are a label
+`bucketFor()` stamps on a record *after* it has already passed the whole
+standard, and three files so each gets its own resumable progress log. They are
+never a separate quality standard and never a quota. A run with a flat
+`--games` sets `need = 0`, which makes every bucket unconditionally wanted; do
+not reintroduce per-phase targets unless they are explicitly asked for.
+
+**Opening Practices and Middle Game Practices are a different system** with a
+different standard, in `tools/practice_rules.js`, reached only through
+`tools/generate_practices.js`. Their rules must never be applied to a normal
+puzzle. In particular **the Middle Game Practice `+35` rule
+(`MG_SWING_MIN`) must never apply to a puzzle merely because its position is a
+middlegame.** `verify_puzzles.js` does not require `practice_rules.js`, and it
+must stay that way.
+
+**Quality outranks speed and quantity, permanently.** If a hundred are asked
+for and sixty clear the standard, ship sixty and say why. A run that produces
+ten thousand candidates and keeps two hundred has worked correctly. One bad
+puzzle costs more than ten missing ones, because it teaches a player to look
+for something that is not there.
+
+**Infrastructure may improve; the chess may not get cheaper.** Faster mining,
+better checkpointing, more parallelism, a distributed queue, a different
+storage layout — all welcome, and all additive. Two examples already in the
+tree: `--excludeIn` seeds the duplicate set from an existing corpus so no
+engine time is spent on a position already shipped, and `--gameBudget` abandons
+a game's *remaining* candidates when it runs long. Both default to off, and
+both are checked **between** candidates so nothing is ever judged at reduced
+depth or on a partial search — a candidate gets the full standard or is not
+offered at all. That is the shape every future optimisation has to take.
+
+If the pipeline is later genuinely improved — same standard or higher — the
+improved pipeline becomes the default and **this section is updated to say so**.
+Rewrite it; do not leave two standards in the file.
+
+`tools/daily_run.js` is the worked example: an unattended supervisor that
+mines, verifies and deals in a loop, and that never judges a position itself —
+every stage shells out to the two tools above with their defaults.
+
 ## Commands
 
 ```bash
@@ -20,13 +162,18 @@ python3 server/test_two_clients.py       # integration tests — REQUIRES a runn
 node server/test_rematch_e2e.js          # two whole pages on real sockets — REQUIRES a running server
 node server/test_ws_url.js               # unit tests for wsURLFrom(); no server needed
 node server/test_rematch_flow.js         # the page's rematch and New Game wiring, against scripted replies
+node server/test_challenge_flow.js       # a friend challenge with two seats set differently — the page's half, no server
+SUPABASE_JWT_SECRET=x PORT=8797 node server/test_challenge_e2e.js   # ...and two whole pages on real sockets — REQUIRES a server started with the same secret
 node server/test_review.js               # unit tests for the review's chess reasoning
 node server/test_study_education.js      # Study Board's concept card, and how it fails
+node server/test_study.js                # Study Board's marks, chances, arrows, words and share link; no engine
 node server/test_puzzle_flow.js          # plays a shipped puzzle against a stub DOM
 node server/test_practice.js             # what the practice drills invent, re-checked
 node server/test_practice_flow.js        # and running one, against a stub DOM + clock
-node server/test_lessons.js              # walks the whole five-lesson course (~90s)
+node server/test_lessons.js              # walks the whole ten-lesson course (~3 min)
 node server/test_leaderboard.js          # the home page's four ladders, against a scripted account client
+node server/test_drag.js                 # dragging a man to a square, on the three visions that draw a board
+node server/test_auth_flow.js            # the four doors into an account, against a scripted Supabase client
 node server/test_ai_fallback.js          # what the ranked fallback bot decides
 node server/test_ai_game.js              # and playing a whole game against it, stub DOM
 python3 server/test_ai_match.py          # seating one: the queue, the race; no server needed
@@ -35,13 +182,17 @@ python3 server/test_names.py             # one name per player, guests included;
 python3 server/test_system_profiles.py   # the 21 leaderboard profiles: refused everywhere; no server needed
 python3 server/test_puzzle_rating.py     # the puzzle Elo handler; no server needed
 python3 server/test_image_files.py       # every allowlisted file is COPYed into the image; no server needed
+python3 server/test_daily.py            # the Daily rotation, the day endpoint and the corpus's separateness; no server needed
+node server/test_daily.js              # the Daily cards, the four visions and the 100-day cycle
 python3 server/test_visions.py           # the three vision ratings: what the migration seeds, what the server writes; no server needed
 node tools/test_generate_puzzles.js      # the generator's own decisions, no engine
 node tools/test_new_rules.js             # the payoff and education rules the corpus was re-cut by
 node tools/test_practice_scheduling.js   # what a board Practice has to clear to ship
 node tools/test_verify_resume.js         # the verifier picking up a run where it stopped
+node tools/test_engine_reclaim.js        # an engine that ignores `stop` must not wedge the pool
 python3 tools/check_supabase_puzzles.py  # RLS and column grants, against the real project
 python3 tools/check_supabase_visions.py  # the four ladders and their grants, against the real project
+python3 tools/check_supabase_practice.py # RLS and grants on practice_progress, against the real project
 python3 server/test_league.py           # the AI league: pairing, ratings, endings, restart, boot; no server, stub engine
 python3 server/test_league_boot.py      # the production startup path: runs server/server.py itself, needs a Stockfish
 node server/test_live_games.js            # the home page's live cards — what each vision may show
@@ -61,6 +212,9 @@ node tools/verify_puzzles.js --track middlegame --write    # ...and repair, drop
 node tools/verify_puzzles.js --track endgame --followup 6 --write   # ...with a longer follow-up
 node tools/verify_puzzles.js --track endgame --resort --write       # ...and re-rank the ladder with it
 node tools/merge_pools.js                # one pool out of two mining runs, deduped on the fen
+node tools/daily_run.js                  # the unattended Daily pipeline: mine -> verify -> deal, resumable
+node tools/daily_progress.js             # ...and where it has got to, read-only and safe to run any time
+node tools/daily_assign.js --in <dir> --write   # deal the verified Daily corpus into the four 100-puzzle pools
 node tools/generate_practices.js --kind opening     # mine the board Practices (slow)
 node tools/diagnose_practices.js                    # ...and count every stage that refused one
 
@@ -69,21 +223,35 @@ docker build -t nox-chess . && docker run --rm -p 8787:8787 nox-chess
 
 The JS suites read the code under test out of `blind-chess.html` by name, so
 renaming or reformatting what they extract breaks them on purpose.
+`test_practice.js` names what it lifts in `DECLS` and `FNS`, so every level
+ladder, generator and store function it checks has to keep the name it has.
 `test_practice_flow.js` goes further and lifts the whole PRACTICE section out
-between its banner comments, so it runs the screen's own code rather than a
-copy — moving that banner moves the suite with it.
+between its banner comments — everything from `PRACTICE — the drills behind
+LESSON → Practice` down to the `SCREENS` banner, Progressive Blindfold
+included — so it runs the screen's own code rather than a copy. Moving either
+banner moves the suite with it, and a new top-level name in Practice has to be
+inside that block to be reachable at all.
 `test_lessons.js` boots the whole page too, and drives the course the way a
 player does — presses the buttons, clicks the squares, types into the console.
-It answers every task by brute force rather than by being told the answer, so a
-lesson step that cannot be finished fails there; and it asks the page's own move
-generator whether every fixed position in the course is legal. It takes a little
-over a minute because the lessons play their sequences at reading speed and it
+It answers every task by brute force rather than by being told the answer (a
+step's own `truth` is never read; see the lessons below), so a lesson step that
+cannot be finished fails there; and it asks the page's own move generator
+whether every fixed position in the course is legal. It takes a little under
+three minutes because the lessons play their sequences at reading speed and it
 waits for them, which is the point.
 `test_rematch_e2e.js` is the exception and the reason the others can stay
 narrow: it boots the *whole* page script twice under a dumb DOM shim, gives
 each copy its own real WebSocket to the server, and presses the real buttons —
 the only thing in the repo that can catch the page and the server disagreeing
 about a message neither one of them is wrong about on its own.
+The shim and the page boot live in `server/page_harness.js`, which
+`test_challenge_e2e.js` shares: it runs the same two-page arrangement for a
+friend challenge, which needs a signed-in account on both ends, so it mints
+HS256 tokens with the harness's `mintToken()` from `SUPABASE_JWT_SECRET` —
+the same secret `test_two_clients.py` uses — and skips, saying so, without
+one. Locally that means starting a server with any `SUPABASE_JWT_SECRET` at
+all (no `SUPABASE_URL` needed): accounts switch on, HS256 tokens verify, and
+the challenge sections of both suites run instead of being skipped.
 
 `test_two_clients.py` has no test-case selection flag; it runs the whole
 sequence (matchmaking, turn order, a full game, resign/draw, rooms, rematch,
@@ -94,7 +262,12 @@ a clock no other test asks for; reusing one is how a test ends up matched with
 the wrong stranger — and, on a ranked clock, how a test ends up matched with a
 bot. It really does sit out the fallback's five seconds, several times over —
 `NOX_AI_WAIT`, set on the server *and* on the harness, shortens a local run,
-and is not a knob anybody is meant to turn in production.
+and is not a knob anybody is meant to turn in production. `NOX_AWAY_GRACE`
+is the same arrangement for the ten seconds a dropped player's seat is held
+(see "A dropped connection" below): the Disconnects section, the drop
+checks in `test_challenge_e2e.js` and the "A connection that drops mid-game"
+section of `test_rematch_e2e.js` all sit it out at whatever length the
+server was started with, and read the variable to know how long that is.
 
 Environment: `PORT` (default 8787), `SUPABASE_URL` (enables token
 verification), `SUPABASE_JWT_SECRET` (only for legacy HS256 projects; also what
@@ -118,6 +291,64 @@ move generator in `blind-chess.html`. The server never validates chess: it
 enforces only whose turn it is and that `ply` arrives in sequence, then relays.
 A client rejects anything its own rules reject. Game end is *reported* by a
 client (`{t:"result"}`) and the server records the first word on the matter.
+
+**A dropped connection is not a resignation until it has lasted ten
+seconds.** A game used to end the instant either socket closed: the page put
+up "Disconnected", `drop_client()` handed the other side the win, and a phone
+changing networks lost exactly as a player walking away did, because a closed
+socket cannot say which it was. Now both ends wait. `drop_client()` calls
+`hold_seat()` instead of `finish_game()`: the dead `Client` stays in
+`game.players` (its `send()` is already a no-op, so nothing downstream
+notices), the game stays in `games`, the colour goes into `game.away` with a
+`later(AWAY_GRACE, seat_lapsed, …)` timer, and the other side is told
+`{t:"opponent-away", seconds}`. Moves the connected side makes meanwhile are
+accepted and kept in `game.moves` as always — they were only ever relayed to
+a socket that is now dead. `seat_lapsed()` is the old ending, ten seconds
+late: if the seat is still held by that same dead client it finishes the
+game as `left`, and `over` reaches the other side exactly as it did before.
+
+What lets a fresh socket claim the seat is a secret, not an identity:
+`Game.seats` holds one per colour, each `start` carries its reader's as
+`seat` (both `start_game_between()` and the copy `handle_find()` writes, plus
+`grace`, which is the number the page counts down from), and the page keeps
+it in `NET.seat` for the life of the game and nowhere else — so a reload is
+still a leave, on purpose, since the board it would come back to is gone
+with the page. A guest has nothing else to prove it with, and an account
+may have two tabs open of which only one is at this board.
+`handle_resume()` compares in constant time, refuses a seat that is not
+being held (the socket never dropped, or somebody is already back in it),
+and otherwise swaps the new client in, cancels the timer, re-pairs
+`chat_peer`, and answers `{t:"resume", …}` — the `start` fields again plus
+`moves` and `turn` — while the other side gets `opponent-back`. A game that
+ended while the player was out (the other side resigned into the empty
+seat, or its clock ran down) is not lost to them: `finish_game()` records
+the result in `recent_results` whenever a seat was away, and a late `resume`
+showing that seat's secret is answered `resume-failed` *with* `over`, so the
+page can show the result it missed instead of "Disconnected". A seat facing
+a bot is held the same way — the bot cannot be told and does not care, but
+the player is owed the same ten seconds — and `test_ai_match.py` checks
+that such a game is held and then let go.
+
+The page's half is the RECONNECT block in ONLINE PLAY. `socketClosed()` is
+the one close handler, shared by the socket `netConnect()` opens and every
+one a retry opens, and its first branch is the change: a socket lost while
+`NET.state` is `playing` calls `netLost()` rather than `finish()`. That
+holds the board up, opens the waiting overlay as "Connection Lost" with a
+countdown and its button reading Give Up, and tries a fresh socket at once
+and then every 700ms — `hello` as always, then `resume` — until the deadline
+`NET.grace` sets. `boardOpen()` and `submitEntry()` both refuse while
+reconnecting, because a move made now would reach nobody. `reconnectResumed()`
+applies whatever `moves` the server has that this board has not through
+`receiveMove()`, so they arrive exactly as they would have; a server one
+ply *behind* is the one thing it can be — our last move went down the
+socket as it closed — and that move is sent again; anything else is the two
+boards genuinely out of step. `reconnectFailed()` — the countdown, or Give
+Up — is the old "Disconnected" result, and `gameLive()` counts a game being
+reconnected as live so the wordmark and Back still ask before leaving it.
+`test_rematch_e2e.js` drives all of it on real sockets; the harness's
+`page.hold(on)` gates the page's `WebSocket` constructor so a test can look
+at the reconnecting state at all, since a local server has the seat back in
+a few milliseconds without it.
 
 **One port, two protocols.** `server/server.py` accepts a TCP connection and
 looks at the `Upgrade` header: `websocket` → the game socket at `/ws`,
@@ -165,6 +396,48 @@ reach every tab that account has open and what lets the server refuse an answer
 from anyone else (`handle_challenge_accept`). It is
 deliberately not a database row: it means nothing once either side disconnects,
 so it lives in memory and dies with the session.
+
+**A friend challenge deals each seat its own vision and its own clock, and
+the terms belong to the player, not to the colour.** The challenge form —
+the Play Bot panel aimed at a friend — asks the Vision and Time questions
+twice while `CHALLENGING()`: `syncOptions()` puts `.split` on `#secVision`
+and `#secTime`, which is what shows the friend's column (`.who-col.friend`,
+buttons carrying `data-opp-mode` / `data-opp-time`) beside the challenger's
+own, the one every other game has always had. The challenger's picks go to
+`G.mode`/`G.minutes` as for any game; the friend's go to `CHAL.mode` /
+`CHAL.minutes` (`pickFriendMode()`, `pickFriendTime()`) and never to `G`,
+because the preview board is the challenger's own and is drawn through their
+vision. Both halves have to be answered before Challenge lights
+(`optionsAnswered()`, `unanswered()`).
+
+On the wire there is one vocabulary and every payload is written from its
+*reader's* chair, exactly as `color` already was: `mode` and `minutes` are
+what you play, `opponentMode` and `opponentMinutes` what the far side does.
+The page sends `challenge` that way; the server (`clean_mode()`,
+`clean_minutes()`, `seat_terms()`) turns it round for the friend's
+`challenged` box, and `start_game_between()` writes each `start` the same
+way, so `G.mode = msg.mode` on every page is that player's own seat whichever
+colour it was given — the vision needs nothing else, since `render()` has
+always drawn from `G.mode`. The far side's pair lands in `G.theirMode` /
+`G.theirMinutes`, which are only ever *said* (the setup chip, a line in the
+log, the boxes) and seed the other clock: `startingClocks()` is the one
+place the two starting times are keyed by seat, gated on `ONLINE() &&
+G.started` so the preview board and every game that is not a challenge seed
+one number as before, and `resetChoices()` clears both so a finished
+challenge's far side cannot leak into the next board. A `challenge` naming
+only `mode`/`minutes`, or naming terms the server does not recognise, deals
+the challenger's own to both seats — the one shared game every challenge
+used to be — and quick match, rooms, the fallback bot and the league are
+untouched: they hand `start_game_between()` no `guest_terms` and get both
+seats alike. `Game.terms` is the per-colour record; `game.mode`/`minutes`
+stay the headline pair the lobby key and the log lines read. `finish_game()`
+writes each player's *own* terms into `last_game` and the other's beside them
+as `opponentTerms`, so a rematch keeps each with its player while the
+colours swap (`Rematch.guest_terms`, and the bot branch passes them too). No
+database or Supabase change is involved: a challenge was never a row and
+still is not. `test_challenge_flow.js`, the challenge section of
+`test_two_clients.py` and `test_challenge_e2e.js` cover the four
+combinations, the swap, the rematch and the fallbacks.
 
 **A rematch is another invitation, not another kind of game.** Rematch
 used to walk away from the finished game and open the room list, which is not a
@@ -295,10 +568,71 @@ move generator in the server and never has been. `start` carries an `ai` block,
 the page's `AI_MATCH()` reads it and nothing else may set it, and `aiPick()`
 chooses the move. What it steers by is not a rung off `LEVELS` but the position:
 several candidates a ply, each score turned into a win chance, and the one
-nearest the phase's band (`AI_BAND`) played — near-even early, easing later —
-subject to `AI_SLACK`, which is what stops a target from ever being bought with
-a piece. Behind the band it simply plays its best move, because steering *down*
-onto a target is throwing the game. Moves are not relayed (`handle_move` drops
+nearest a target band played — subject to a slack, which is what stops a target
+from ever being bought with a piece. Behind the band it simply plays its best
+move, because steering *down* onto a target is throwing the game.
+
+**`AI_BAND` and `AI_SLACK` are the defaults, not the policy.** A fixed band per
+phase makes every game the same game — the same ply turns the same corner — and
+says nothing about who is playing. `AI` is the per-game controller: a style
+drawn from `AI_STYLES`, a handover ply drawn somewhere in the twenties or
+thirties, and a record of what the player has been doing. `aiReset()` is called
+from `newGame()` for the same reason `G.token` is bumped there. `aiBandFor()`
+moves the target — down past the handover, up for a player who is finding
+everything, up again while honest chess is owed after a chance nobody took —
+and `aiSlackFor()` and `aiPoolFor()` widen the search when it is winning,
+because a won position cannot be come down from with moves that are all nearly
+best. The measurement costs no extra search: the engine already runs once a
+turn, and the gap between one turn's score and the next is what the player's
+move was worth (`aiNoteHuman`).
+
+**Two refusals, and they are the point.** It does not mate the player: mate
+scores at ±100000 make the slack filter throw away every ordinary move, so the
+refusal is applied before the slack in `aiChoose` AND to the final move in
+`aiNoMate()` — because both fallbacks in `aiPick` (`bestMove`, `pickFrom`) go
+round `aiChoose` entirely, which was worth one mate in ninety-nine games. And
+when it is far ahead it may decline a gift: the slack asks "how much worse than
+best is this", which is the right question about a mistake and the wrong one
+about a hanging queen, so a `floor` admits a move whose own position is still
+good for it. A floor is a win chance, never a distance, so it cannot admit a
+losing move. `server/test_ai_behaviour.js` plays ninety-nine games against
+three kinds of simulated player and is where those claims are checked.
+
+**And the clock is not neutral, which is the least obvious thing here.** The
+opponent used to reply in about a second while a person thinks in seconds, so it
+walked out of every long game with minutes in hand — and `flagFall()` gives the
+point to whoever has mating material. With a clock in the harness it won ten of
+ninety-nine games on time, and sixteen once it was pushing pawns rather than
+shuffling. Three things answer that, in order of how much they matter:
+`aiThinkMs()` plays at a person's pace and SPENDS a time surplus rather than
+banking it; the `AI_STALE_*` dials restart a game the fifty-move counter says
+has stopped moving, by preferring its own pawn moves; and `aiEscalation()` raises the FLOOR — how much of its own
+position it will part with — each time a chance goes by unused, so a player who
+cannot convert a subtle one is eventually offered a plain one.
+
+**`flagFall()` is the ordinary rule for everybody**, and a version that handed
+the player the half point because their opponent was a bot was written,
+measured and reverted: a game whose ending depends on who is sitting opposite is
+not a game of chess. The protection against the clock is therefore entirely
+behavioural, and it is `AI_CLOCK_MARK`: the opponent keeps its own clock a
+little UNDER the player's rather than level with it, so a race is one it loses
+rather than one it wins by a second. Two things made that work and neither is
+obvious. The low-clock brake — "it cannot spend what it has not got" — had to
+stop applying while it is the one with time to spare, because both clocks are
+low in an endgame and it was being told to hurry exactly when it was supposed
+to be spending, keeping thirty-five seconds in hand as the player's clock hit
+zero. And level was not enough: two clocks arriving at zero together hand the
+game to whoever is not on move. The mark is keyed on the RATIO and never on the
+player being short of time — an opponent that started dawdling the moment your
+clock got low would be reading it, which is a different and much more obvious
+thing.
+
+Two things that were tried against the games that would not end and are
+recorded because they did not work: dropping the target band as escalation
+climbs (it makes the opponent passive, passive games run long, and a long game
+against somebody who cannot convert ends on their flag — eleven wins lost, and
+the long games stayed long), and simply widening the slack (a worse move is not
+the same thing as a smaller advantage). Moves are not relayed (`handle_move` drops
 them for an AI game and the page does not send them), a draw offered to it is
 accepted by the server through the ordinary `over` message, and resignation,
 checkmate, the clock and disconnection all run through the paths they already
@@ -402,8 +736,10 @@ its own on `profiles`: `rating` is the Sighted ladder and has been since
 hand-run file, after the system profiles — shaped exactly like `rating`
 (`integer not null default 100`) and closed to the browser exactly like it:
 the file restates the column grant the setup file wrote, and
-`tools/check_supabase_visions.py` proves it against the real project. The
-keys that name them are `G.mode`'s — `LB_VISIONS` in the page and
+`tools/check_supabase_visions.py` proves it against the real project.
+`supabase-migrate-practice.sql` is the next hand-run file after them, adding
+the `practice_progress` table and nothing else, proved against the real
+project by `tools/check_supabase_practice.py`. The keys that name them are `G.mode`'s — `LB_VISIONS` in the page and
 `VISION_COLUMNS` in `server/supabase_db.py` are the same table twice, and the
 `CASE` inside `record_rated_game()` is it a third time; `test_visions.py` and
 `test_leaderboard.js` hold the three to each other, because a rating moved
@@ -666,13 +1002,78 @@ writes it with the service key, and without one the server keeps ratings in
 memory. Guests get neither and keep both locally. Run
 `supabase-migrate-puzzles.sql` once, by hand, like `supabase-setup.sql`.
 
-**Five doors, and each of them is a pool and a vision at once.** The Puzzle menu
-— in the header and on the home page, the same five buttons twice — is Sighted
-Puzzle, Only Board Puzzle, Blindfold Puzzle, Fog of War Puzzle and Puzzle Rush.
-`PZ_MODES` is the table: a `key`, the name a player reads, and the `vision`
-`G.mode` takes while the puzzle is up, which is the only place the two
-vocabularies meet. `enterPuzzleMode()` is the whole of entering one — it writes
-`PZ.pool` and `PZ.vision` and hands the list to `pzOpen()`.
+**Two doors on the menu, four pools behind them, and a setup page in between.**
+The Puzzle menu in the header is **Puzzle** and **Puzzle Rush**, and no vision
+is named on it. Puzzle opens a setup page that asks which vision; Rush brings
+its own clock and pool and asks nothing, so it still starts on the press. The
+home page's Puzzle shortcut is a button and not a menu: hovering it opens
+nothing, and pressing it presses the header's Puzzle door (`navPuzzleGo`), so
+it inherits that door's gate and goes nowhere the header does not. It used to
+carry the same two-item popup, so the mouse arriving on a shortcut was met
+with a question; `test_puzzle_nav.js` now asserts it carries none.
+
+**Practice makes the same bargain one table along, and the course rides in it.**
+`public.practice_progress` (`supabase-migrate-practice.sql`, hand-run, safe to
+re-run) is one row per `(user_id, mode)` — level, best, asked, correct,
+sessions and a `stats` jsonb — and the browser writes it itself under RLS,
+exactly as it writes `puzzle_progress`: what a player's visualisation is worth
+is not a rating anybody compares, so there is nothing here the *server* has to
+be the one to write. The policy is owner-only both ways, and the grant is
+select/insert/update with **no DELETE**, so a delete is refused by the grant
+rather than the policy — the same shape `puzzle_progress` has. A
+`practice_touch` trigger stamps `updated_at` and overwrites `user_id` with
+`auth.uid()` on every insert and update, so a row cannot be filed under
+somebody else even by a client that tries. `prRowOf()` clamps every number to
+what the column checks allow, because a row the database refuses is a console
+warning and a level quietly not saved; `lastAt` rides inside `stats` rather
+than earning a column, since nothing compares it. `prPush()` reads the mode
+back out of the local store rather than taking it as an argument, so there is
+one answer to what a mode stands at and it is the one on disk. `prSync()`, called
+from `setAccount()` right after `pzSync()`, reads the account's rows, merges
+them with this browser's cache *and* with whatever was practised as a guest,
+writes the result back locally, pushes what the account did not have, and then
+removes the guest copy — otherwise the next account to sign in on a shared
+machine would adopt it too. `prMerge()` is the rule: the higher level wins
+(nobody is sent back down a ladder by signing in on a browser that has not
+heard about it) and the tallies come *whole* from whichever side has answered
+more, because adding two histories together would count a session twice. The
+finished lessons are one more row under the reserved mode name `course`
+(`PR_COURSE`, `prPushCourse()`), unioned the same way, whose numbers mean
+nothing and whose `stats.done` is the payload. All of it is fire and forget:
+until the migration has been run there is no table at all, which is a console
+warning rather than a broken drill, and guests keep the whole record locally.
+`tools/check_supabase_practice.py` proves the RLS and the grants against the
+real project.
+
+There are still five pools and `PZ_MODES` is still the table: a `key`, the name
+a player reads, and the `vision` `G.mode` takes while the puzzle is up, which is
+the only place the two vocabularies meet. `enterPuzzleMode()` is still the whole
+of entering one — it writes `PZ.pool` and `PZ.vision` and hands the list to
+`pzOpen()`. What changed is only who calls it: `pzModeForVision()` reads the
+table backwards, so the vision the player picks *is* the pool that opens, and
+`startPuzzleFromSetup()` is the one line between them. The menu used to name all
+four because a door was a pool and a vision at once; it still is, but a menu is
+a list of places to go and "Sighted Puzzle" and "Fog of War Puzzle" are one
+place seen two ways.
+
+**The setup page is the Play Bot panel, not a screen of its own.** `PZ.setup` is
+the whole of it: a puzzle that has not started yet, on `screen-game` with
+`#gameSetup` up. `enterPuzzleSetup()` mirrors `enterGameSetup()`, and every
+difference lives in `syncOptions()` behind that flag — the button reads **Start
+Puzzle**, `#secTime` is hidden (a puzzle is untimed, and the one that is not
+never comes through here), and `#gameSetup`/`#gamePuzzle` each say which of the
+two puzzle states they mean, because `PUZZLE()` is already true while `PZ.on` is
+still false. Opponent and colour need no rule at all: `BOT()` and `CHALLENGING()`
+are both false for a puzzle, so the two rules Play Bot already had hide them.
+`unanswered()` asks for the vision and nothing else, so Start Puzzle nudges
+`#secVision` exactly as Start Play nudges `#secOpponent`. A second copy of that
+panel would have been two designs to keep in step, which is why there is not
+one. The flag is cleared by `pzOpen()`, by `enterGameSetup()` and by
+`showScreen()` on the way anywhere else — `pzClose()` cannot do it, because it
+returns early while `PZ.on` is false.
+
+Its address is bare `#puzzle`; `#puzzle/<pool>` is still a ladder already open
+and `#puzzle/rush` still a run, and all three round-trip.
 
 It used to be two questions. Opening, Middle Game and End Game sorted puzzles by
 the part of the game they came from — a fact about the chess, not a way to play
@@ -1039,45 +1440,250 @@ verifier is supposed to catch.
 **Practice is not a second puzzle ladder.** Puzzles ask what the best move is,
 with the board in front of you the whole time. Practice (`PR`,
 `screen-practice`, reached from LESSON → Practice) asks whether the board is
-there at all: name a square, colour it, see where a knight reaches, follow a
-piece through moves you never see, answer for a position with the men hidden.
-Six drills and a Mini Blindfold Challenge, each with three settings that change
-the exercise rather than a label on it. There is deliberately **no Elo**: what a
-player's visualisation is worth is a level they climb (Beginner → Visualizer →
-Tracker → Blindfold Ready → Advanced), earned by sessions finished, by accuracy
-and by how many different drills have been tried — so nobody climbs it by
-grinding one. Ranked and puzzle ratings are untouched by all of it.
+there at all: name a square, trace a line, see where a knight reaches, follow
+moves you never see, say what one move changed, count a capturing sequence
+out, find the move in a position you are holding, and finally play a whole
+small game with nothing drawn. Eleven modes (`PR_MODES`, keyed `square`,
+`lines`, `piece`, `attack`, `tracker`, `after`, `forcing`, `calc`, `branches`,
+`hold`, `progressive`), each with a ladder of levels that change the exercise
+rather than a label on it.
 
-Nothing in it reimplements a rule. Positions come out of `prPosition()` and are
-thrown back unless the rules accept them — two kings, not touching, no pawn on a
-promotion rank, neither side already in check, no castling rights nobody earned.
-Movement answers are `legalMoves()`. Tracking walks and blindfold sequences are
-*played*, with `makeMove()`, and named with `toSAN()` — never assembled out of
-notation strings. The mini challenge reads what the player typed with
-`parseMoveIn()` and answers with the small JS search already in this file.
-`parseMove()` is now a one-line wrapper over `parseMoveIn(G.st, …)`: one
-notation reader, two pages. A generator that cannot produce a valid exercise
-retries, then asks again at the easiest setting, and only then gives up — it
-never puts a broken one on screen.
+**The curriculum is `PR_GROUPS`, and it is read rather than described.** The
+eleven fall into six groups in the order they are climbed — The Board
+(`square`, `lines`), Piece Vision (`piece`, `attack`), Holding (`hold`,
+`tracker`), Updating (`after`, `forcing`), Calculation (`calc`, `branches`)
+and Blindfold Play (`progressive`) — and that array is the curriculum itself,
+not a set of headings the dashboard happens to use: `prGroupOpen(st, gi)`
+walks it and answers whether a group can be worked on at all, and both the
+dashboard's cards and `prRecommendNext()` go through that one function, so
+neither can disagree with the other about the same group. A group is open only
+once *every* group before it has cleared its own floor, not merely the one
+immediately before it — an earlier version asked only the immediate
+predecessor, which let a group two hops past an unopened one read as open. The
+Board group's floor is not a rung but `prAutomatic()`: Square Trainer at level
+5 or better with a median latency under 1500ms, since naming a square is a
+skill to outgrow rather than one to keep training, and once it is automatic
+nothing downstream sends anybody back to it. Each mode also names the `lesson`
+it grows out of, which is the other half of the contract with the course
+below.
+
+**A level is a recipe, and the session is what settles it.** Every mode has
+its own `*_LEVELS` array — `PR_SQUARE_LEVELS`, `PR_TRACKER_LEVELS`,
+`PR_CALC_LEVELS` and the rest, declared ahead of `PR_MODES` because it reads
+them by reference — and a level is not a difficulty label but the concrete
+variables the generator reads: which question kinds this rung may ask, how
+many men, how long the position stays up, whether the board is shown at all,
+whether the move arrives as notation. `prRecipe(key, level)` is the one place
+a level is clamped to its mode's ladder and handed back with its caption, and
+it is the same call the setup box makes and the staircase makes mid-session,
+so a level nobody has can never be named. The staircase is `prStep()`:
+`PR_STEP_UP` (3) right in a row steps up, `PR_STEP_DOWN` (2) wrong in a row
+steps down, and the level a session settles on is what the mode is worth —
+not the accuracy, which at an easy rung says nothing about how hard anybody
+was pushed. Progressive Blindfold is the one mode the staircase does not
+settle; see below.
+
+**A session is boxed by a clock, and the question in front of you is always
+finished.** `PR_MINUTES` is the three lengths a session may run (2, 5, 10; the
+setup box opens on 5), `PR.budgetMs` is what was chosen, and `prTimeLeft()` is
+read off `prNow()` — a function rather than `Date.now()` inline precisely so a
+test can drive a session's ending by hand. The clock is only ever consulted
+between questions (`prAdvance`), so running out never snatches a half-answered
+question away; the button under the answer reads Finish rather than Next when
+there is no time left. Daily Practice (`prDaily` → `goPractice('daily')` →
+`prStartDaily()`) is five minutes across *three* drills rather than one: the
+recommender picks the first, then `prRecommendFrom()` picks each of the next
+two out of whatever it has not already taken, and `PR.mixed` is the rotation
+`prNextQuestion()` reads one mode per question. Progressive Blindfold is never
+one of the three — a whole game is not a question a rotation can hand off
+mid-answer. A mixed session banks two things per mode rather than one:
+`PR.mixedLevel` holds each mode's own place on its own staircase and
+`PR.mixedRun` each mode's own run of rights and wrongs, because `prStep()`
+reads one pair of counters and a right answer in A, then B, then C would
+otherwise read as three in a row and step C's level up on the strength of one
+of its own questions.
+
+**Nothing is asked twice in a hundred questions.** Every generated question
+carries a `sig` — its position's FEN placement, plus whatever else makes it
+this question rather than that one — and `prMake()` draws up to six times,
+taking the first signature that is not in the last hundred (`prSeen`,
+`PR_SEEN_MAX`, kept per owner exactly as the store is). A drill that sets no
+`sig` is not ruled out by anything, and a mode that starts stamping its
+exercises gets the "not this week" treatment for free. Blind Calculation's
+puzzle levels are the one question built after the screen is already up — the
+file behind a shipped puzzle has to be fetched — so they get `prCalcDraw()`,
+which is `prMake()`'s own shape over the pool once it lands, rather than being
+the only questions in Practice that can repeat.
+
+**What is measured is what a wrong answer was wrong *about*.** `prRecord()`
+writes one answer as it happens (a reload mid-drill keeps what was actually
+answered; only the session count waits for the end), and per mode it keeps
+more than a tally: `errs` by kind — `PR_ERRS` is `square`, `ghost`, `lost`
+and `other`, because a square named one file over, a man that was captured and
+is still being counted (the tracker's own `ghost`, and in a spot-the-change
+question the square the man moved *to*) and a thread lost at ply k are three
+different failures, and a player — or a later drill picking on their weak spot
+— needs to tell them apart; anything a caller does not name lands in `other`
+rather than being refused, since it is still one wrong answer. `lv`,
+asked-and-correct per rung, so accuracy can be read at the
+level it was earned at; `lat`, the last twenty latencies, read back through
+`prMedianLat()` as a median so one phone call does not drag the figure the
+player sees; and `ply`, the deepest line a mode with a `q.ply` (tracker,
+forcing, calc) has been answered right on, moved by a correct answer only,
+since a wrong one proves nothing about how far anybody got. The record lives
+under `nox.practice.<account id | guest>` (`PR_STORE`, `prKey()`), stamped with
+whose it is the way the puzzle cache is — for a guest it is the whole of it,
+and for everybody else it is the cache in front of `practice_progress` above.
+`PR_VERSION` is 2,
+and version 1's single five-rung ladder (Beginner … Advanced) is gone — a
+player who has drilled coordinates for a fortnight and never touched tracking
+was never well described by one number. A version-1 save is read forward
+through `PR_V1_KEYS` rather than thrown away: two of the seven old drills
+merged into Square Trainer and one became the tracker's opening levels, so
+nothing anybody answered is lost. There is still deliberately **no Elo**:
+ranked and puzzle ratings are untouched by all of it.
+
+**The dashboard says where you stand and what to do next, and never locks a
+door.** `prReadiness(st)` is the shape it reads: a fraction per group
+(`prGroupLevel`, the mean of each mode's level over its own ladder length,
+since an eleven-rung ladder and a two-rung one do not otherwise compare), a
+milestone once tracker ≥ 9, hold ≥ 7, calc ≥ 5 and Progressive Blindfold's
+level 5 have all been held at once, and the one next thing to try.
+`prRecommendNext()` is that rule and it is deliberately small: the bridge
+first if its own three gates are open (tracker ≥ 5, attack ≥ 4, forcing ≥ 2)
+or lesson 10 is finished, since nobody should have to max out half the
+curriculum before trying a whole small game; otherwise walk `PR_GROUPS` in
+order and stop at the frontier — the first group that is open while the one
+after it is not — and inside it recommend whichever drill is furthest *behind*
+on its own ladder (`prRecommendFrom()`: the lowest ladder fraction, then the
+oldest `lastAt`, then `PR_MODES`' own order, which is not always the order a
+group names its modes in). A drill drops out of that pool once it is 60% up
+its own rungs, which is the same bar the Solid tag reads; the group's own
+floor test (level 2) is deliberately coarser, because it decides whether we
+have moved on to the *next* group rather than which drill inside this one
+still needs work. Falling off the end of that walk is not "nothing to
+recommend": a player really can clear every group's floor while nothing is
+solid and the bridge's gates are unmet, which is exactly who this exists for,
+so the fallback is the weakest mode across the whole curriculum, and only when
+every one of those is solid too does the bridge become the answer on its own
+terms. All of it is *soft*: a
+card carries a tag — Recommended now, Ahead of you, Solid — and Start always
+works. A tag is a hint about where to spend the next few minutes, never a
+lock, and `prGroupOpen()` is asked for the tag and for the recommendation by
+the same call so the two can never say different things. Beside Start on every
+card is Quick, the express lane: two minutes at `prStartLevel(key)` with no
+setup box in between.
+
+**`goPractice(target)` is the whole of the way in.** `target` is nothing (a
+plain visit), `{mode, level, minutes}` to drop straight into a drill — the
+history route, the Quick button, the course's own handoff — or `'daily'`.
+`prOpen()` is what a target names: it starts a session with no setup box,
+because the two questions `prOpenSetup()` asks are for somebody choosing where
+to begin and not for somebody arriving already having chosen. Where a mode's
+*first* session opens is `prStartLevel()`: a mode with a session on file opens
+where its staircase left it, and one with none opens at the floor its lesson
+earned (`PR_FLOORS`, a `{lesson, level}` per mode) or at 1. A floor is a
+starting line and never a ceiling — understanding a thing once is not being
+able to do it, and the staircase takes over from the first answer.
+`showScreen()` calls `prLeave()` on the way to any other screen, which is what
+stops a study countdown, a square click wired to a question nobody can see, or
+an engine reply from running on over another page.
+
+**Progressive Blindfold is a Practice mode and nothing else.** Same board,
+same store, same door — `PR_PB_LEVELS` is its ladder and `progressive` its
+key. It is the only one that is a whole *game*: ten rungs that take the board
+away a step at a time — your men shown and theirs hidden (`vis:'mine'`), then
+the squares with nobody on them (`'squares'`), then no board at all
+(`'console'`) — which is the game's own `fog`, `blind` and `total` said in
+Practice's own words, and rendering is the whole of the difference
+(`pbMask`/`pbPaint`) exactly as it is in a game: the position is complete
+throughout. `men` is men a side (`men:0` is the full start position), `peeks`
+the level's allowance, `checkEvery` how often it stops to ask, and `target`
+the moves that have to be held. It is also the one mode the staircase does not
+settle: a rung is held or it is not — `pbEnd()` decides, on the target, at
+most one drift and no move that was not there — and `prFinish()` opens the
+next session one rung higher only on a pass, keeping what the game cost
+(`stats.pb`, per level: moves played, checkpoints held, peeks, recoveries,
+drifts) rather than folding it into an accuracy figure a whole game is not
+described by.
+
+Three things hold a game up short of that ending, and none of them is a second
+question the session scores. Every few moves `pbCheckpoint()` stops and asks
+one thing about the position as it now stands — Fine's own order through
+`prAskFine()` (where a king is, what stands beside it), how many men a side
+has, or what the last move was — with the "last move" decoys drawn from
+`pb.prevSt`, the position that move was played *from*, so they are moves that
+really were available and never anything a book suggested. A miss is a drift
+and the true board is shown for two seconds, because catching the drift is the
+point and playing on from a picture that has already gone wrong is not a
+question anybody can answer. `pbPeek()` is the same two seconds bought
+deliberately out of the rung's own allowance — a level with none left offers
+no Peek button rather than a dead one, and neither does one whose look is
+already running: `pb.peeking` is what stops a second press spending a second
+peek and starting a second timer whose predecessor would take the board away
+early. A peek is a *look* and not a pause: `pb.busy` is left alone and a move
+may be played while the men are up. And `pbRecover()` ("I've lost it") shows
+the *score* and never the board, and hands the position back through
+`prRebuildStart()` to be put together from the moves — which is what
+Koltanowski did and what every guide to the game says to do instead of
+guessing. It is counted (`pb.recoveries`) and costs the level nothing: a
+player who stops and works the position out again is doing the thing this
+drill teaches. A checkpoint and a recovery *pause* the game: both set
+`pb.busy` and borrow the answer row, so the move box comes down with
+`PR.onSubmit` and nothing can be typed or clicked into a game that is standing
+still, and `pbRestoreInput()` hands the box, the instruction line
+(`pbHowTo()`, never the checkpoint's own "Click its square") and the board
+click back afterwards.
+
+**The bridge ends somewhere other than itself.** Progressive Blindfold is the
+one drill whose result card points off the page, because that is what the
+ladder is for: `#prNextLevel` (a held rung with more ahead of it) goes
+straight back in one higher with no setup box — a level just earned is not a
+question to ask again — and carries no length over from the session that has
+just ended, because a Progressive Blindfold session is a rung rather than a
+timed drill (`prOpenSetup` hides the length field for it and `pbEnd` is what
+finishes a game), so the handler simply passes the mode's own default;
+`#prBoardGame` appears from level
+7 and `#prBlindGame` once level 10 has been held, and both open the bot setup
+that already exists (`goBot()` + `selectMode('blind'|'total')`) rather than a
+second matchmaker. `prSuggestFirstBlindGame()` answers the rest of the form
+through `pickBotLevel(1000)` and `pickBotTime(30)` — the same setters the
+setup's own buttons call, so the guest ceiling and `syncOptions()` are not
+bypassed. Neither number is derived from anything the drill measured: 1000 is
+a mid-ladder rung chosen as a first blindfold opponent that punishes a dropped
+piece without out-calculating a beginner (the top rung an account buys is
+3200), and the slowest clock the setup offers — thirty minutes — is chosen
+because every practitioner guide agrees a first blind game should be
+unhurried. Every other mode's result card shows none of the three, since none
+of them ends anywhere but back on the dashboard.
+
+**Nothing in Practice reimplements a rule.** Positions come out of
+`prPosition()` and are thrown back unless the rules accept them — two kings,
+not touching, no pawn on a promotion rank, neither side already in check, no
+castling rights nobody earned. Movement answers are `legalMoves()`. Tracking
+walks and blindfold sequences are *played*, with `makeMove()`, and named with
+`toSAN()` — never assembled out of notation strings. Late levels of several
+modes take their positions from real games rather than a hat
+(`prGamePosition`, cut down by `prCluster`), because a random heap is not
+training material past small counts. Progressive Blindfold reads what the
+player typed with `parseMoveIn()` and answers with the small JS search already
+in this file. `parseMove()` is a one-line wrapper over `parseMoveIn(G.st, …)`:
+one notation reader, three pages. A generator that cannot produce a valid
+exercise retries, then asks again at the easiest setting, and only then gives
+up — it never puts a broken one on screen.
 
 The practice board is the game's board markup built a second time (`#prBoard`,
 `prSqEls`, `prPaint`) — same `.sq`, same `.piece`, same `.blind` that hides the
 men. The CSS is shared; only the element is not, because handing one board back
 and forth between two screens is how the two would come to disagree about what
-is on it. Progress is `localStorage` only
-(`nox.practice.<account id | guest>`), stamped with whose it is the way the
-puzzle cache is, and shaped so a `practice_progress` table could take it later
-without changing what the page writes. Every answer is written as it happens, so
-a refresh keeps what was answered; only the session count waits for the session
-to end. `showScreen()` calls `prLeave()` on the way out, which is what stops a
-study countdown running over another page. `goPractice()` is the only way in, on
-purpose — and now that the How to Play page exists, that is exactly what it
-does: the button at the end of the course presses `goPractice()` rather than
-growing a second entrance.
+is on it. Rebuilding a position is one interface for all three places that ask
+for one (Hold the Position, the tracker's last level, Progressive Blindfold's
+recovery): `prRebuildStart()`, judged by `rebuildDiff()`, which is shared with
+the course.
 
 **The lessons are the game with one thing taken away.** `screen-lessons` (the
 LESSONS section of the script, `LSN`, reached from LESSON → How to Play Blind
-Chess) is a five-lesson course, and it is deliberately made of the game rather
+Chess) is a ten-lesson course, and it is deliberately made of the game rather
 than about it: the same square and piece classes, the same four visions,
 `legalMoves()` refereeing every answer, and `parseMoveIn()` reading what is
 typed into its console — so anything the console accepts in a lesson it accepts
@@ -1086,40 +1692,79 @@ only because `render()` reads `G` and a lesson is not a game. One function took
 a parameter to make that possible — `visibleSet(s, me)` — and it still answers
 the game with no arguments at all.
 
-The five are Learn the Board, Chess Notation, Visualize Pieces, Track the
-Position and First Blindfold Challenge. Every one of them opens on something to
-do: an introduction that is only an introduction has been taken out of each,
-and two whole lessons that were *about* the game rather than made of it — "What
-Is Blind Chess?" and "Playing in Nox" — went with them. That is why `LESSONS`
-is read through `LSN_V1_TO_V2` on the way out of `localStorage`: a record
-written by the seven-lesson course still names lessons 6 and 7.
+The ten are Know, Don't See; Lines and the Knight; Reading a Move; Reach and
+Attack; Holding a Small Position; Updating: Where, and What Changed; Captures
+and Counting; Check Yourself, and Get It Back; Calculating Short Lines; and
+Playing Without the Pieces. Every one of them opens on something to do: an
+introduction that is only an introduction has been taken out of each, and the
+lessons that were *about* the game rather than made of it went with them.
 
-Three of the lessons are **generated, not written**: the coordinate drills, the
-piece-vision drills and the tracking sequences are made fresh out of
-`legalMoves()` each time, so the course cannot be learnt by heart. Learn the
-Board's ten questions come out of `lsnCoordSet()`, which lays down all four
-combinations of question-kind and chair before drawing the rest at random and
-shuffling the lot — so both kinds and both orientations are certain to be
-asked, and the White half is not always the first half. Generated
-positions carry both kings, because `legalMoves()` judges by check and a board
-with no king is not a question it can be asked; `lsnPiecePos()` throws a
-position away and makes another unless the piece's legal moves are exactly its
-geometric ones, since a pinned rook teaches the wrong lesson under the heading
-"where can it reach". What is fixed is fixed for a reason — the ten notations
-have to show ten particular forms, the three challenges have to be small — and
-`server/test_lessons.js` asks the page's own move generator whether every one of
-them is legal.
+**A lesson teaches once; the drill is where the second half happens.** Every
+`LESSONS` entry carries a `train` block — a `mode` key, a `level` and the
+sentence the card shows — and `lsnHandoffStep(L)` is the last step of all ten:
+what to train now, and one button that opens it through
+`goPractice({ mode, level })`. It is a step rather than a line at the foot of
+the last exercise because the handoff is the point of the course, and
+`lsnMark()` is called in its `setup()` rather than by `lsnNext()` at the end,
+so a learner who reads the card and walks off to Practice keeps the tick:
+reaching the card is finishing the lesson. `train` and `PR_FLOORS` are **two
+tables asking different questions**, and collapsing them is the easy mistake:
+`train` says where *this lesson* sends you next, and `PR_FLOORS` says, per
+mode, which finished lesson raises the floor of that mode's *first* session
+and to what rung. They disagree on purpose — lesson 8 hands to `tracker` level
+7, where the checkpoint questions live, while `PR_FLOORS.tracker` is still
+`{lesson:5, level:3}`, because a lesson may come back to a mode further up its
+ladder without moving where a newcomer starts — and `PR_FLOORS` names modes
+(`attack`, `hold`, `branches`) no `train` block hands to at all, since a lesson
+that teaches two of them can only hand off to one.
 
-**The player decides when the men go out, everywhere they go out.** Visualize
-Pieces waits on a Start Visualization button and the challenges wait on I'm
-Ready; neither hides a position on a timer, because a countdown tests reading
-speed rather than visualisation. The challenge's **Position** card
-(`lsnPositionHTML()`) is the same rule said in words — every man on the board,
-grouped by side and named by square — and it is read off `LSN.st` rather than
-written beside the FEN, so a position that changes cannot end up described as
-the one it used to be. It goes down with the board on I'm Ready, since left up
-it is simply the answer key, and Reveal builds it again from the position as it
-then stands.
+**The course is built out of Practice's own generators, never a copy of
+them.** A lesson's exercises are made fresh each time — `lsnStepColour` and
+`lsnStepQuadrant` from `prMakeSquare()` at a named recipe, `lsnStepBetween` and
+`lsnStepKnight` from `prMakeLines()`, `lsnStepAttackYesNo` and
+`lsnStepHanging` from `prMakeAttack()`, `lsnStepCluster` and `lsnStepRebuild`
+from `prMakeHold()`'s `question` and `rebuild` modes, `lsnStepChange` from its
+`change` mode, `lsnStepAfter` from `prMakeAfter()`, `lsnStepCaptureSeq`,
+`lsnStepCheckThree` and `lsnStepRecover` from `prMakeTracker()`,
+`lsnStepExchange` from `prMakeForcing()`, `lsnStepMate1` and
+`lsnStepLineThenRoot` from `prMakeCalc()` and `prMakeBranches()`, and
+`lsnStepMiniGame` from `prMakeProgressive(prRecipe('progressive', 1))` — so the
+course cannot be learnt by heart, and a lesson and the drill it hands off to
+cannot come to disagree about what the exercise is. `wantQ()` is the shared
+retry around a generator that can fail an unlucky draw; a generator that
+cannot produce one after two hundred tries throws rather than putting half a
+question on screen. `lsnStepDemo()` is the other kind of step: it lights
+squares, says something and waits for Continue, `gate:false` on purpose,
+because a demonstration is read rather than solved and gating one is only a
+click standing between the player and the thing being shown. What is fixed is
+fixed for a reason — the ten notation forms have to show ten particular
+shapes, `LSN_TEN_FEN` is the one position lesson 10's three vision demos share
+— and `server/test_lessons.js` asks the page's own move generator whether every
+fixed position in the course is legal.
+
+**The player decides when the men go out, everywhere they go out.** A step that
+takes the board away waits on a button — I'm Ready before a held position,
+Hide the Board before a sequence — and never hides anything on a timer, because
+a countdown tests reading speed rather than visualisation. The **Position**
+card (`lsnPositionHTML()`) is the position said in words, in Fine's own order
+— the king, what stands beside it, the pawns, then the rest — read off `LSN.st`
+rather than written out beside a FEN, so a position that changes cannot end up
+described as the one it used to be. It goes down with the board on I'm Ready,
+since left up it is simply the answer key, and it is built again from the
+position as it then stands when a step concedes.
+
+**Lesson 10 is the game's own visions, previewed.** Three demos on
+`LSN_TEN_FEN` — See the Board, Fog of War (named as what it is: a game vision,
+not a step on this path) and Complete Blindfold — and then one small game.
+That game is Progressive Blindfold's own first rung played once
+(`lsnStepMiniGame`): three men a side, four moves, the learner's men shown and
+the opponent's hidden, which is `LSN.mode = 'mine'` — Fog of War's men-only
+mask with the square fog left off, the picture `pbMask(board, W)` gives
+Practice, previewed on the lesson board rather than reimplemented there. Moves
+go through `lsnAskMove(null, …)`, where any legal move is right rather than one
+fixed answer, and the page replies at `pbReply()`'s own cadence. One checkpoint
+interrupts after the second move — lesson 8's habit asked for real — and a
+wrong square costs nothing.
 
 **One gauge, and no second list of lessons.** The stage carries a labelled
 progress line with a dot per lesson — done, current, ahead — and the dots are
@@ -1138,25 +1783,149 @@ is rebuilt from nothing each time it is drawn. One trap worth remembering —
 positioned, so a lesson class has to be `.lsn-`something even when the plain
 name looks free.
 
-**The course and Practice are two pages, and neither one is a door into the
-other.** They cover related ground — a coordinate drill in lesson 1 and the
-Coordinate Trainer both ask you to name a square — and that is the point: the
-course *teaches* the skill once, in order, and Practice is where it is *drilled*
+**The walk is the test, and it is answered by brute force.**
+`server/test_lessons.js` boots the whole page and drives the course the way a
+player does — presses the buttons, clicks the squares, types into the console —
+and it is never told an answer. Every step factory tags itself with a `solve`
+naming the *shape* of its question (`choices`, `select`, `typed`, `cluster`,
+`rebuild`, `multi`, `changed`, `hanging`, `recover`, `move`, `square`, `none`),
+and the harness's `solveStep()` dispatches on that tag to a strategy that works
+the answer out from what is on the page: reading the two endpoints out of the
+question's own sentence and asking `lineBetween()`, reading the Position card
+the same way a player reads it, pressing choices until one is right. A step's
+own `truth` field is for the page and is never read there — a solver that read
+the answer off the step would stop being able to catch a factory that cannot
+actually be solved. The check on the tags is containment rather than equality
+(every tag the page writes has a strategy), because `lsnStepAfter` picks its
+tag with a ternary and so carries tags (`attacks`, `loose`) that never appear
+as literal text in the file. The walk also counts itself — every step it
+passed against every step the ten lessons said they had — so a step that was
+silently never reached fails even when nothing else complains. A new step kind
+therefore needs a `solve` tag and a strategy in that harness, plus its own name
+— and any Practice generator it borrows — in the list the harness lifts out of
+the page, the same way `test_practice.js` names everything it extracts in
+`DECLS`/`FNS`.
+
+**The course and Practice are two pages, and every crossing between them goes
+through the other page's own front door.** They cover related ground — a coordinate step in lesson 1 and Square
+Trainer both ask you to name a square — and that is the point: the course
+*teaches* the skill once, in order, and Practice is where it is *drilled*
 afterwards, with levels and statistics the course has no business keeping. So
 the course has no practice mode of its own; it hands off, and it hands off
-through `goPractice()`, the same function LESSON → Practice calls. There is one
-Practice screen, one `goPractice()`, and no third set of drills anywhere.
+through `goPractice(target)`, the same function LESSON → Practice calls — the
+lesson's own handoff card, and the three buttons on the finished course's done
+face: `#lsnGoTrain` (`goPractice()`), `#lsnGoProgressive`
+(`goPractice({ mode:'progressive', level:1 })`) and `#lsnGoPlay`, which is
+`lsnOpenVisionPick()` — `goBot()` plus `lsnNoteFirstGame()`, a line under the
+Vision panel advising Board Only first and Complete Blindfold once Progressive
+Blindfold's last level is behind you. It advises and chooses nothing, because
+which vision to take is the one thing the end of the course must not decide on
+somebody's behalf. The note is written there and nowhere else, and cleared by
+`lsnFirstNoteClear()` from `resetChoices()`, which every route to the setup
+panel passes through — so it lives exactly as long as the unanswered vision
+question it is about and cannot stand over a friend challenge later. Back the
+other way there is exactly one link into a *particular lesson*: a Practice
+card's setup box carries "How this works: Lesson N" (`prDrawIntro`, reading
+`m.lesson`) whenever that lesson is not in `lsnDone()` — first visit or not,
+because the question it answers is "has this player been taught the concept",
+and somebody three drills past the lesson that introduced this one is exactly
+who it is for. Back to Lessons on a finished session's result box
+(`#prToLessons`) is not a second one: it presses `lsnEnter()`, the course's own
+front door, the same function LESSON → How to Play Blind Chess presses — a
+button whose label names a page has to open that page, and the end of a
+session is the moment somebody is deciding what to learn next rather than a
+moment to be dropped on the home screen. The
+two-line intro beside it (`m.intro`) is shown only on a mode's first visit,
+since the level caption says the rest once there is a session to measure.
+There is one Practice screen, one `goPractice()`, and no third set of drills
+anywhere.
 
-**Lesson progress is local, and kept apart from Practice's.**
+**Lesson progress is local first, and kept apart from Practice's levels.**
 `nox.lessons.<owner>.howto` in `localStorage`, keyed by owner exactly as the
 puzzle ladder and `nox.practice.<owner>` are, so two accounts sharing a browser
 cannot read each other's. The two records are separate on purpose: finishing a
 lesson is something you did once and it stays done, while a practice level is
-something you currently are and can fall. There is no lessons table in Supabase
-and inventing one for five booleans would be a schema change to regret;
-`lsnPush()` is the seam a cloud copy goes through when there is one, and
-everything above it already speaks of "the owner's finished lessons" rather than
-"this browser's".
+something you currently are and can fall. There is still no lessons table and
+there is not going to be one for ten booleans — a signed-in player's copy rides
+in `practice_progress` under the reserved mode name `course`, whose `stats` are
+the finished lessons, and `lsnPush()` is where it goes (`prPushCourse()`, asked
+for by `typeof` because that is the other side of a section boundary). The
+record is a *version*: the course was seven lessons, then five, and is now ten,
+so a stored record is read forward through as many maps as it needs on the way
+in (`lsnNormalise`, `LSN_V1_TO_V2` then `LSN_V2_TO_V3`) and written back at v3
+so the translation happens once. `LSN_V2_TO_V3` is `{1:1, 2:3, 3:4, 4:5}` and
+deliberately drops old lesson 5, the first blindfold challenge: a lesson kept
+is a lesson whose new form asks no more than its old one did, and new 10 asks
+for a whole game with the men hidden, which is not something the old lesson 5
+had anybody do. Ticking it would open the ladder on a lesson they have never
+seen.
+
+**Study Board analyses the whole game before it opens, and the button is the
+gauge.** Pressing Study Board on the end-of-game box does not open anything:
+`studyStart()` runs every position of the game through the one Stockfish
+worker, one after another (`studyStep`, `REVIEW_ASK` — two lines, full
+strength, `objective` so that contempt is off, see below), and the button
+fills left to right with positions answered over positions in the game
+(`studyButton()`, `--p` on `#endClose`). Only when every position has an
+answer does it read START ANALYSIS, and only pressing that opens the board
+(`enterReview()`); nothing navigates by itself. A pass that stalls or a
+browser with no engine leaves the button reading Analysis Failed with a retry,
+never stuck. Everything a finished pass produced is kept twice: the raw
+readings (`STUDY.evals`, one per position) and the records (`STUDY.recs`, one
+per move, `studyBuild()`), and the records are a pure function of the
+readings and the moves — which is what lets the cache (`nox.study.<key>` in
+`localStorage`, twelve games, keyed by `studyKey()` of the move list) and the
+share link both carry the readings alone. `finish()` calls `studyPrime()`, so a
+game analysed before reads START ANALYSIS the moment it ends.
+
+Two engine facts the pass is built around. This build applies Contempt 24
+from the side to move at the root, and the study compares a reading with the
+mover at the root against one with the opponent there, so with contempt on
+every move in every game looked like it lost half a pawn — `enginePump()`
+sets `Contempt 0` / `Analysis Contempt Off` for any job asking for
+`objective`, exactly as `tools/sf.js` does, and the bot keeps the default
+because a player should have contempt. And the build says nothing at all
+about a position with no legal moves — no `info`, no `bestmove` — so
+`studyTerminal()` writes the reading a mated or stalemated position would
+have had (`mate 0`, or level) rather than asking and waiting for the stall
+timer.
+
+**The marks are the engine's numbers in the currency of winning chances, and
+there are seven.** `judgeMove()` is the one rule: `!!` a sacrifice the engine
+confirms (`sacrificeDeficit()` — the mover a piece or more down once the
+engine's own reply has been made and the recapture on that square settled,
+the position not already won, and still clearly ahead after best defence), `!`
+the move the position turned on (the runner-up costs ten points of win% and
+the move is neither hanging nor a capture the exchange already justified — a
+hanging rook taken is not hard to find), `★` the engine's first choice or a
+move the deeper search after it rates just as well, `👍` under five points
+lost, `?` under ten, `✕` under twenty, `??` the rest, with mates compared as
+mates. `studyWinFor()` gives the two chances from the mover's chair, mates as
+100 or 0 and nothing else allowed to reach either. The board shades the
+move's two squares (`G.lastMove`, the game's own `.last`) and draws an arrow
+only for a threat the move made or a weakness it opened (`studyThreats()`:
+new by the exchange on the square, kept only if worth a piece or the engine's
+reply is about it, a mate in one either way first, three at most) — never for
+the move itself. The panel is MOVE beside BEST, never a sentence; the short
+reasons (`studyReasons()`, ten words each, four at most) and the long
+explanation behind EXPLAIN (`studyExplain()`) are written at render time from
+the record and the Education System's result, and every sentence is read off
+the board, a line the engine gave or a number it produced — "wins the rook"
+only when the rook is gone at the end of the engine's line, "threatens"
+otherwise. `server/test_study.js` holds all of it without an engine.
+
+**A study is shared as a link that carries it.** `#study/<payload>` is
+`studyPack()` — the moves, the names, the vision, the result and per
+position the score, two best moves, the runner-up's score and the top line —
+deflated and base64url'd (`studyEncode()`, plain JSON where the browser
+cannot deflate). The recipient's page rebuilds every record from that with
+the same pure functions, so the marks, chances, reasons and explanations are
+identical; nothing is stored on any server, no account is named, and the
+page cannot change the sender's analysis (`reviewAnalyse()` refuses to extend
+a shared study). `studyMount()` points `G` at the finished game with
+`G.opponent = 'study'` — `BOT()`, `LOCAL()` and `ONLINE()` all false, as a
+puzzle does — and the same mount is how the history layer re-enters our own
+study after Back has put the board away.
 
 **Study Board and Puzzles are separate features that share one library.**
 Study Board (`REV`, the review screen) explains *the game the player just
@@ -1202,8 +1971,8 @@ shows that refusal rather than hiding it, because "nothing here matches a
 researched concept" is a true answer and a guess dressed as a concept is not.
 Do not add a fallback.
 
-`eduAnalyse()` is called from `reviewRender()` **above** the four `quiet()`
-returns, because all four are about the engine — it cannot run, it is starting,
+`eduAnalyse()` is called from `reviewRender()` **above** the engine's
+`quiet()` returns, because all of them are about the engine — it cannot run, it is starting,
 the game is over, the search has not answered — and none of them is a reason to
 stop naming what is on the board. The whole feature is additive: a failed fetch
 leaves `EDU.ready` false, `#conceptCard` hidden, and Study Board exactly what it
@@ -1212,9 +1981,13 @@ to everything.
 
 **Puzzle Rush borrows the game's clock.** `tickClock()` and `renderClocks()`
 each grow one branch for `RUSH.on`; there is no second timer. `rushClock()` puts
-that clock in the *top* strip itself rather than letting `layoutBoardBars()`
-file it by seat — a puzzle has no seats, and a clock that changes ends whenever a
-black-to-move puzzle comes up looks like a clock that has been reset. A run never
+that clock in the puzzle column beside the board (`#pzRushClock`, the first
+thing in `#gamePuzzle`) rather than letting `layoutBoardBars()` file it by
+seat — a puzzle has no seats, and a clock that changes ends whenever a
+black-to-move puzzle comes up looks like a clock that has been reset. It used
+to sit in the top strip over the board, which every other puzzle hides as a
+game's furniture; the column is where the run is described, so the clock stands
+there too, in the clock's full style rather than the strip's. A run never
 records ladder progress and never moves the rating — it reads the rating to
 choose where to start and nothing else. It is the fifth door on the same menu
 as the four ladders, and it is dealt from **its own pool** — `pzFetchMode('rush')`,
@@ -1235,7 +2008,10 @@ in a forked process (Node needs `delete global.fetch` and a cwd of `engine/`,
 both explained there). Renaming anything in that file's DECLS/FNS lists breaks
 the tools loudly, which is the trade for having one implementation.
 
-**Three engines, and which one answers matters.** `engine/` is the vendored
+**Four engines, and which one answers matters.** (`server/league.py` drives a
+native Stockfish inside the server process for the AI-vs-AI league — the one
+place the server plays chess, and walled off from everything below.)
+**Three of them are the game's, and which one answers matters.** `engine/` is the vendored
 pre-NNUE WASM Stockfish: one thread, 16MB of hash, and it is what the *browser*
 runs. The bot ladder in `LEVELS` was tuned against it, so anything imitating a
 rung — `seedRating()`, and the self-play games the generator mines — must keep
@@ -1260,13 +2036,56 @@ Stockfish only, and loads it lazily.
 build was chosen and flags an unresolved licensing question about paid
 features.
 
-**Accounts are optional everywhere.** The browser signs in with Google through
-Supabase (`@supabase/supabase-js` imported from esm.sh at runtime; keys are
+**Accounts are optional everywhere.** The browser signs in through Supabase
+(`@supabase/supabase-js` imported from esm.sh at runtime; keys are
 inlined near the top of the script and are safe to publish). It hands the
 access token to the server on `{t:"hello"}`; `server/supabase_auth.py` verifies
 ES256 against the project's JWKS. A failed or absent token means guest, not
 rejection — guests play friendly games. Ranked play requires a verified account
 *only when* the server is actually able to verify anyone.
+
+**Four doors, one user.** Google, Apple, Facebook and an email address with a
+password are the ways in (`screen-signup`, `screen-login`, with
+`screen-forgot` and `screen-reset` behind the password), and every one of
+them ends in the same Supabase user: the account is `auth.users.id`, the
+profile row is made by the same signup trigger whichever door was used, and
+nothing downstream — the server, the ratings, the friends, the puzzles, the
+practice record — knows or asks which provider it was. There are no
+per-provider tables and there is no linking code of the page's own:
+Supabase links a second identity to an existing user itself, and only when
+the provider vouches for the address as verified; an email/password sign-up
+on an address that already has an account gets an obfuscated user with no
+identities and sends nothing, so the page cannot create a duplicate and
+does not try to tell a stranger whether an address is taken (`emailSignUp()`,
+and the one Check Your Email panel either way). `signInWithProvider()` is
+the one OAuth call site: Google keeps `prompt: select_account` exactly as it
+had it, Apple and Facebook get no such parameter, and all three send the
+player back to `authReturnURL()` — the page's own address with nothing
+after it — so the same file works on Render and on localhost, and the
+project's redirect allow-list is the only place those addresses are
+written. Apple returns the name only on the first sign-in and may return a
+relay address, so nothing depends on a provider supplying a name: an
+account without `game_name` meets the username screen whichever way it
+came in. A provider the project has not switched on is refused on the page
+with a sentence (`providerEnabled()`, which reads the public
+`/auth/v1/settings`) rather than sent to a bare Supabase error; Google is
+never checked, because it is the door that already works.
+
+**The password never leaves the client call.** `signUp`,
+`signInWithPassword`, `resetPasswordForEmail` and `updateUser` are the whole
+of it; nothing logs, stores or forwards a password, and the game server
+never sees one. Every way back into the page from Supabase — an OAuth round
+trip, a confirmation link, a reset link — lands with the answer in the URL
+fragment, which the client consumes, so `BOOT_HASH` copies it first and
+`AUTH` keeps two facts from it: `recovery` (the player followed a reset link
+and is owed `screen-reset` before the username and before the home page —
+`decideFirstScreen()` holds them there; a saved password is announced in
+place of the form — Password Changed — and `leaveReset()` is the one way
+off) and `arrived` (a link that failed, said on the log-in page). A wrong
+password and an unknown address are one sentence, on purpose. `PASSWORD_MIN`
+is the page's floor; the project's own password rule is quoted when it
+refuses. `test_auth_flow.js` boots the whole page against a scripted client
+and drives every door.
 
 **A verified player's name comes from their profile row, or failing that the
 token, never from the message** — otherwise signing in would be a way to wear
@@ -1329,7 +2148,22 @@ Navigate by the `/* ==== TITLE ==== */` banners in the script — THE SKY,
 CONSTANTS & HELPERS, MOVE GENERATION, ENGINE, GAME / UI STATE, CLOCK, SOUND,
 COMPLETE BLINDFOLD, PLAYING MOVES, ONLINE PLAY, RESIGNING…, THE ENGINE, THE
 REVIEW, THE EDUCATION LAYER, THE PUZZLES, STUDY ALTERNATIVES, THE LESSONS,
-CONTROLS, PRACTICE, SCREENS, HISTORY, ACCOUNTS, SOCIAL.
+CONTROLS, PRACTICE, SCREENS, HISTORY, ACCOUNTS, THE LIVE LEAGUE, SPECTATING,
+SOCIAL.
+
+The two biggest of those carry sub-banners, and one suite is anchored to where
+a section starts and stops. THE LESSONS runs through THE LESSON BOARD, THE
+STAGE, THE GENERATORS, THE TEN LESSONS and four banners named for the lessons
+whose step factories sit under them (THE STEP KINDS LESSONS 1–3 ARE BUILT OUT
+OF, and the three that lessons 4 and 5, 6 and 7, and 8 and 9 add). Those
+headings used to be named after the tasks that built them — THE FIVE for a
+course that is ten lessons long, TASK 30a/31/32/33 for batches of step kinds,
+THE SIX DRILLS for eleven — and each now says what it holds, so the heading
+can be read instead of counted past. PRACTICE runs from its own banner through
+THE ELEVEN DRILLS — generation, RUNNING A DRILL, PROGRESSIVE
+BLINDFOLD, A SESSION, START TO FINISH and THE DASHBOARD, and ends where
+SCREENS begins: `test_practice_flow.js` lifts exactly that span, so anything
+Practice needs at top level has to live inside it.
 
 Screens are `<section class="screen" id="screen-NAME">` toggled by
 `showScreen(name)`; `screenName` is the current one and several handlers branch
@@ -1342,9 +2176,12 @@ whatever site came before. The HISTORY section fixes that with the smallest
 thing that fits — no router, no URLs on the server (`STATIC_FILES` is an
 allowlist, and a path like `/ranked` would 404 on refresh), just
 `history.pushState` with a hash naming the page (`#ranked`, `#friendly`,
-`#lessons/3`, `#practice/coord`, `#puzzle/fog`, `#puzzle/practice-opening`,
-`#play/bot`,
-`#game/ranked`) and a `popstate` handler. The one address that is a path
+`#lessons/3`, `#lessons/done`, `#practice/tracker`, `#puzzle` (the setup page),
+`#puzzle/fog`, `#puzzle/practice-opening`, `#play/bot`,
+`#game/ranked`, `#study/<payload>`) and a `popstate` handler. A drill's entry is the
+mode's own key with the level and the length riding in the state beside it, so
+`navApply()` re-enters it through `goPractice()` and then `prOpen(key, level,
+minutes)` — the same door the Quick button and the course's handoff use. The one address that is a path
 rather than a hash is the spectator page, `/spectate/<id>`, because the
 server serves the page for it; `navPath()` writes it and puts `/` back on
 the way off. The rule is
@@ -1424,6 +2261,46 @@ socket. The challenge *form* is the Play Bot page — the same `#gameSetup`
 panel beside the same board, with `CHALLENGING()` hiding the bot ladder,
 renaming Start Play to Challenge, and `NET.opponent` naming the friend on the
 strip above the board. `CHAL` holds the invitation in flight from either end.
+
+The rating under a name on that page is the leaderboard's, not the row's.
+`profiles.rating` is the Sighted column and only that, so a search for one of
+the system profiles seeded onto the three vision ladders used to print "100
+Elo" under a name the leaderboard had just shown at 2673. `socialElo()` asks
+`ladderStanding()` first — which of the four ladders the home page has drawn
+this id on, answered for the one they stand highest on, the higher rating
+breaking a tie — and prints that number, naming the ladder unless it is the
+Sighted one; only somebody on no ladder is shown their own `rating`. It reads
+the rows already loaded rather than querying again, so the two pages cannot
+disagree about who is on the board, and `goSocial()` asks for any ladder
+still missing and redraws when it lands. `test_leaderboard.js` covers it.
+
+**A man is moved by clicking twice or by dragging, and the two are one rule.**
+The click handler on `#squares` was the only way to move on a drawn board;
+the drag beside it (the `clicks, and drags` section, `DRAG`) is pointer
+events — the press on the board, the travel and the drop on the document —
+and it goes through the same two functions the click does: `boardOpen()`
+says whether the board takes a move at all, `tryMove(from, to)` says whether
+from→to is one, flashes the square and, in a puzzle, says why not. A press
+that travels under `DRAG_SLOP` is left to the click that follows it, so
+click-to-move is untouched; a press that travels further selects the square
+exactly as a first click does (ring, and in Sighted the hints) and the drop
+is the second. The browser's own click after a drop would select the landing
+square, so it is swallowed on a flag that lasts one tick (`DRAG.swallow`) —
+one tick because a cancelled drag has no click coming and a flag that waited
+for one would eat the next real click. Two things about how it is written
+matter. There is **no pointer capture**: a captured pointer's click is
+retargeted to the capturing element, and the click handler, looking for the
+square under it, found the whole board instead — click-to-move stopped
+working the moment a drag had been made, which the shim could not show and
+headless Chrome did. And only a man that is *drawn* is picked up and drawn
+moving — the viewer's own, on a board that shows them — because a hidden
+man sliding to its square would be a peek; the drag of any other square still
+selects it and the drop is still judged, so See the Board drags exactly as it
+clicks, with nothing to see. `renderPieces()` leaves the man in the hand
+where the pointer has it, since a render mid-drag (the selection ring) would
+otherwise slide it home. `.squares` gives up `touch-action`, which is what
+lets a finger drag on a phone instead of scrolling the page.
+`test_drag.js` drives the pointer events under the DOM shim.
 
 There is deliberately no undo, no take-back, and no move history during play.
 Don't reintroduce them.

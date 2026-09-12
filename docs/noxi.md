@@ -8,13 +8,13 @@ The NOXI section in `blind-chess.html` owns `noxiDialogue(host, options)`. Optio
 
 ## Study Board
 
-`reviewRender()` calls `noxiStudy()` for the selected move and refreshes it when engine analysis arrives. `noxiStudyText()` consumes the played move, before/after positions, the existing `findMotifs()` results, and the existing classification code. It maps known motif tags to short conversational descriptions, with factual move descriptions as fallback. Classification can add a qualitative caution without changing any chess calculation.
+`reviewRender()` passes the selected `STUDY.recs[REV.ply - 1]` record to `noxiStudy()`. Noxi occupies the updated Study Board’s `stReasons` area instead of its former bullet list; the record uses the played move’s before/after positions, including on the final ply. `noxiStudyText()` consumes the played move, before/after positions, the existing `findMotifs()` results, and the existing classification code. It maps known motif tags to short conversational descriptions, with factual move descriptions as fallback. Classification can add a qualitative caution without changing any chess calculation.
 
-Noxi does not consume motif prose, engine variations, `describeBest()`, educational free text, numerical scores, or verdict labels. Those sources can legitimately contain suggestions or evaluations, so they cannot leak into the controlled dialogue. The original engine and education details remain in separate expandable sections; classification badges and review arrows are unchanged. The character remains in normal document flow at narrow widths.
+Noxi does not consume motif prose, engine variations, `describeBest()`, educational free text, numerical scores, or verdict labels. Those sources can legitimately contain suggestions or evaluations, so they cannot leak into the controlled dialogue. The current Study Board’s Move/Best pair, winning-chance display, classification badges, review arrows, Share controls, and Explain section remain unchanged. Noxi’s dialogue itself never includes those recommendations or numbers. The character remains in normal document flow at narrow widths.
 
 ## First-name introduction
 
-The existing username submit handler saves `noxi_intro: pending` alongside `game_name` through `sb.auth.updateUser()` only when the account has no chosen username and no previous Noxi state. A named account with no Noxi metadata is never enrolled retroactively. `setAccount()` reads this state from Supabase `user_metadata`.
+Google, Apple, Facebook, and email accounts all use the existing username flow. Password recovery takes priority over onboarding. The existing username submit handler saves `noxi_intro: pending` alongside `game_name` through `sb.auth.updateUser()` only when the account has no chosen username and no previous Noxi state. A named account with no Noxi metadata is never enrolled retroactively. `setAccount()` reads this state from Supabase `user_metadata`.
 
 On the homepage, a pending named account sees the three specified messages. Showing or skipping the introduction records `seen`; Start Learning records `completed`, closes the dialog, and calls the existing `lsnEnter()` entry point (`#lessons`, How to Play Blind Chess).
 

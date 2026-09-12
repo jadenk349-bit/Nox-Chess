@@ -35,7 +35,11 @@ var fn = function(n){
    comments contain semicolons, and a lazy match to the first one cuts the
    object in half. */
 var decl = function(n){
-  var block = SRC.match(new RegExp('\\n(?:const|let) ' + n + '\\s*=\\s*[\\{\\[][\\s\\S]*?\\n[\\}\\]];'));
+  /* `= {};` and `= [];` are one-liners that happen to open a brace: PC_CAT
+     and PZ_MODE are declared empty and filled by a loop. Left to the block
+     matcher they would run on to whatever `};` the page next puts at column
+     zero, which is a different distance on every page they are lifted from. */
+  var block = SRC.match(new RegExp('\\n(?:const|let) ' + n + '\\s*=\\s*[\\{\\[](?![\\}\\]];)[\\s\\S]*?\\n[\\}\\]];'));
   if (block) return block[0];
   return grab(new RegExp('\\n(?:const|let) ' + n + '\\b[^\\n]*?;'), n);
 };
@@ -156,6 +160,14 @@ var FNS = ['startBoard','newState','cloneState','posKey','fenOf','stateFromFEN',
            'pzScope','pzScopeName','pzRoute',
            // what a fog puzzle withholds, and which panel it withholds it from
            'pzHidesReplies',
+           // the setup page: the vision is asked for, then it names the pool
+           'pzModeForVision','startPuzzleFromSetup',
+           /* The address-bar half. These three are pure table lookups, so they
+              lift cleanly; the gating around them (unanswered, allAnswered)
+              reaches into BOT(), HOSTING() and the whole setup panel, and is
+              checked by reading the source instead — the same way this suite
+              already checks rushStart(). */
+           'navHash','navParse','navGated',
            'pzShowSolution'];
 
 var bundle = [grab(/\nconst W = 'w', B = 'b';/, "const W/B")];
@@ -628,6 +640,145 @@ if (mated){
 } else {
   say('  ..    every shipped puzzle carries a follow-up, nothing to skip');
 }
+
+/* ---------------------------------------------------------------------
+   The Puzzle menu asks where, and the setup page asks how.
+
+   The menu used to name all four visions. It now names two places — Puzzle
+   and Puzzle Rush — and the vision is chosen afterwards, on a setup page that
+   is the Play Bot panel with the questions a puzzle does not have taken out.
+   The four pools are untouched: the vision picked IS the pool opened, which
+   is what pzModeForVision() reads off PZ_MODES.
+   --------------------------------------------------------------------- */
+say('\nThe Puzzle menu, and the setup page behind it\n');
+
+(function setup(){
+  /* The menu, read out of the page's own markup — two entries and no vision
+     among them. This is the check that fails if the four doors come back. */
+  var nav = SRC.match(/id="navPuzzle"[\s\S]*?<div class="menu">([\s\S]*?)<\/div>/);
+  /* The home page's Puzzle is a shortcut to the first door and carries no
+     menu of its own: what stands between it and the next tag on the page is
+     nothing. */
+  var homeTag = SRC.match(/<button class="home-shortcut" id="homePuzzle">Puzzle<\/button>\s*<\/nav>/);
+  var items = function(m){
+    return m ? (m[1].match(/<button[^>]*>([^<]*)<\/button>/g) || [])
+                 .map(function(b){ return b.replace(/<[^>]*>/g, ''); }) : [];
+  };
+  check('the header menu has two entries',      items(nav).length, 2);
+  check('and they are Puzzle and Puzzle Rush',  items(nav).join(','), 'Puzzle,Puzzle Rush');
+  check('the home shortcut is a button with no menu', !!homeTag, true);
+  check('and presses the header\'s Puzzle door',
+        /homePuzzle'\)\.onclick[^\n]*navPuzzleGo'\)\.click\(\)/.test(SRC), true);
+  check('no vision is named in the menu',
+        /Sighted Puzzle|Only Board Puzzle|Blindfold Puzzle|Fog of War Puzzle/.test(nav ? nav[1] : ''), false);
+  check('Puzzle opens the setup page',
+        /navPuzzleGo'\)\.onclick[^\n]*enterPuzzleSetup\(\)/.test(SRC), true);
+  check('and Puzzle Rush still starts on the press',
+        /navRush'\)\.onclick[^\n]*rushStart\(\)/.test(SRC), true);
+  check('both are still behind the account lock',
+        /navPuzzleGo/.test(decl('LOCKED_IDS')) && /navRush/.test(decl('LOCKED_IDS')), true);
+
+  /* The vision is the pool. Every vision the setup page offers has to name one
+     of the four, and Rush — which has no vision — must never be reachable
+     this way, or Start Puzzle would open a run. */
+  check('Complete Blindfold names the blindfold pool', pzModeForVision('total').key, 'blindfold');
+  check('Board Only names the board pool',             pzModeForVision('blind').key, 'board');
+  check('Fog of War names the fog pool',               pzModeForVision('fog').key,   'fog');
+  check('Sighted names the sighted pool',              pzModeForVision('sighted').key, 'sighted');
+  check('and a vision nobody offers names nothing',    pzModeForVision('nonsense'), null);
+  check('Puzzle Rush is not reachable from a vision',
+        PZ_MODES.filter(function(m){ return m.vision === null; }).length, 1);
+
+  /* Every button on the setup page's Vision row has to be one of those four —
+     the row is the game's own, shared with Play Bot, so a vision added there
+     would silently become a puzzle door with no pool behind it. */
+  // The row is the grid marked data-seg="mode" — the challenger's own
+  // column now that a friend challenge asks the question twice; the
+  // friend's column (data-opp-mode) is not a door into anything.
+  var row = SRC.match(/id="secVision"[\s\S]*?data-seg="mode"[\s\S]*?<\/div>/);
+  var modes = (row[0].match(/data-mode="([a-z]+)"/g) || [])
+                .map(function(d){ return d.replace(/data-mode="|"/g, ''); });
+  check('the Vision row offers four', modes.length, 4);
+  check('and every one of them has a pool',
+        modes.every(function(v){ return !!pzModeForVision(v); }), true);
+
+  /* Start Puzzle. The setup page is a state of PZ, not a screen of its own,
+     and it ends the moment a puzzle opens. */
+  check('the setup page is a flag on PZ', 'setup' in PZ, true);
+
+  /* The panel it draws. These read the source rather than the DOM because the
+     setup panel is the game's, shared with Play Bot, and every rule here is a
+     branch inside syncOptions() — the point of each check is that the branch
+     is gated on PZ.setup and therefore invisible to Play Bot. */
+  var sync = fn('syncOptions');
+  check('the button says Start Puzzle',
+        /PZ\.setup \? 'Start Puzzle'/.test(sync), true);
+  check('Play Bot still says Start Play',
+        /'Start Play'/.test(sync), true);
+  check('the clock is not asked for',
+        /secTime'\)\.style\.display = PZ\.setup \? 'none'/.test(sync), true);
+  check('the setup panel is shown rather than the puzzle one',
+        /gameSetup'\)\.style\.display = \(\(PZ\.setup \|\| !PUZZLE\(\)\)/.test(sync), true);
+  check('and the puzzle panel waits until a puzzle is actually open',
+        /gamePuzzle'\)\.style\.display = \(PUZZLE\(\) && !PZ\.setup\)/.test(sync), true);
+  /* Opponent and colour need no rule of their own: BOT() and CHALLENGING()
+     are both false for a puzzle, so the two rules Play Bot already has hide
+     them. Checked so that a later change to either is noticed here. */
+  /* The two strips framing the preview board — the seats and the clocks — are a
+     game's furniture and say nothing true on a puzzle setup page. Hidden with
+     visibility so the board does not move, and scoped to a class that is only
+     on while PZ.setup is, so Play Bot keeps its own. */
+  check('the setup page carries a class of its own',
+        /classList\.toggle\('puzzle-setup', !!PZ\.setup\)/.test(sync), true);
+  check('and that class hides the name strips and clocks',
+        /#screen-game\.puzzle-setup \.board-bar\{visibility:hidden;\}/.test(SRC), true);
+  check('by visibility, so the board does not move',
+        /#screen-game\.puzzle-setup \.board-bar\{display:none/.test(SRC), false);
+  check('while a puzzle in play still takes the space back',
+        /#screen-game\.puzzle-mode \.board-bar\{display:none;\}/.test(SRC), true);
+
+  check('opponent is still hidden by the rule Play Bot already had',
+        /secOpponent'\)\.style\.display = BOT\(\) \?/.test(sync), true);
+  check('and colour by its own',
+        /secYouPlay'\)\.style\.display  = \(BOT\(\) \|\| CHALLENGING\(\)\)/.test(sync), true);
+
+  check('the only question it can leave unanswered is the vision',
+        /if \(PZ\.setup\) return picked\.mode \? \[\] : \['secVision'\]/.test(fn('unanswered')), true);
+  check('and the button lights on that alone',
+        /PZ\.setup \|\| optionsAnswered\(\)/.test(decl('allAnswered')), true);
+  check('Start Puzzle is what the press reaches',
+        /if \(PZ\.setup\) return startPuzzleFromSetup\(\)/.test(fn('startGame')), true);
+  check('and it opens the pool the vision names',
+        /enterPuzzleMode\(m\.key\)/.test(fn('startPuzzleFromSetup')), true);
+  check('entering the setup page clears any puzzle on the board',
+        /pzClose\(\)/.test(fn('enterPuzzleSetup')), true);
+  check('and Play Bot clears the setup page',
+        /PZ\.setup = false/.test(fn('enterGameSetup')), true);
+
+  // starting it opens that vision's pool, through the same door the menu used to
+  PZ.setup = true;
+  PZ.on = false;
+  PZ.mode = 'ladder';
+  PZ.list = sets[TRACKS[0]];
+  PZ.track = TRACKS[0];
+  PZ.pool = null;
+  pzOpen(1);
+  check('opening a puzzle ends the setup page', PZ.setup, false);
+  PZ.on = false;
+
+  /* The address bar. Bare #puzzle is the setup page; #puzzle/<pool> is a
+     ladder already open; #puzzle/rush is a run. All three have to survive the
+     round trip or Back lands somewhere else. */
+  var trip = function(h){ return navHash(navParse(h)); };
+  check('#puzzle is the setup page',      JSON.stringify(navParse('puzzle')), '{"s":"game","v":"pzsetup"}');
+  check('and it round-trips',             trip('puzzle'), 'puzzle');
+  check('#puzzle/fog is still a ladder',  trip('puzzle/fog'), 'puzzle/fog');
+  check('#puzzle/rush is still a run',    trip('puzzle/rush'), 'puzzle/rush');
+  check('the setup page is account-gated', navGated({ s:'game', v:'pzsetup' }), true);
+
+  PZ.setup = false;
+  G.opponent = null;
+})();
 
 /* ---------------------------------------------------------------------
    Five doors, and each of them is a pool and a vision at once. There used to

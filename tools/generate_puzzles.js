@@ -133,7 +133,52 @@ const DEFAULTS = {
      process that did the judging. When a set is cut from pools that two runs
      produced (a general one, and a second hunting whichever track was scarce),
      the tallies have to be merged and handed back in with them. */
-  tallyIn: ''
+  tallyIn: '',
+  /* Positions this run may not mine, as a JSON file of fens (an array, or any
+     object whose values are arrays of records carrying `fen`).
+   *
+   * The `seen` set already stops a run offering the same position twice. This
+   * seeds it from outside, which is what a *second* corpus needs: the Daily
+   * Puzzles are meant to be additional puzzles, so a position the Puzzle page
+   * already ships must never be mined again — and finding that out after the
+   * engine has spent twenty seconds on it is finding it out too late. Nothing
+   * about the standard changes; this only stops work that would be thrown
+   * away. Empty by default, so an ordinary run behaves exactly as before. */
+  excludeIn: '',
+  /* Seconds one game's mining may spend before the rest of its candidates are
+     abandoned. 0 is off, which is what every run before this one did.
+   *
+   * The verifier has had a per-puzzle budget for a while and rejects anything
+   * that exceeds it, on the principle that a search is abandoned rather than
+   * weakened. Mining had no equivalent and needs one for the same reason:
+   * buildLine() is up to eleven depth-20 searches, and a sharp enough position
+   * can hold one engine for a quarter of an hour while thousands of ordinary
+   * games wait behind it. What it costs is not a puzzle, it is engine-hours
+   * nobody gets back.
+   *
+   * Checked between candidates, never inside a search, so nothing is judged at
+   * a lower depth or on a partial result: a candidate is either given the full
+   * standard or not offered at all. Everything already found in the game is
+   * kept. `~budget` in the tally counts what this turned away. */
+  gameBudget: 0,
+  /* Seconds one individual judging search may take before it is ABANDONED.
+     0 is off, which is what every run before this one did.
+   *
+   * gameBudget above is checked between candidates, so a single search that
+   * never returns is never reached by it. One did: a depth-20 search held an
+   * engine for over an hour while eight others sat idle and the whole pipeline
+   * waited behind it. Measured over sixty real production positions the same
+   * search is 4.6s at the median, 9.6s at p90 and 23.8s at its slowest — so the
+   * one that wedged was more than 150x the worst healthy case, and a ceiling
+   * that rejects it comes nowhere near a legitimately hard position.
+   *
+   * WHAT IT IS NOT. It is not a depth, a movetime, or a quality setting. A
+   * search that exceeds it returns `null` and the candidate is DROPPED — never
+   * accepted, never judged on a partial result, never re-run shallower. The
+   * standard a puzzle must clear is untouched; the only thing that changes is
+   * that a pathological position costs one engine this many seconds instead of
+   * the rest of the run. `~search` in the tally counts what it turned away. */
+  searchBudget: 0
 };
 
 // Rungs to draw self-play from. The very weak ones produce noise rather than
@@ -356,8 +401,11 @@ async function buildLine(engine, startFen, first, cfg){
     // exact fault the verifier exists to correct, so it must not be the way
     // anything here searches.
     const reply = await engine.ask({
-      fen: startFen, moves, multipv: 2, depth: cfg.replyDepth, objective: true
+      fen: startFen, moves, multipv: 2, depth: cfg.replyDepth, objective: true,
+      timeoutMs: cfg.searchBudget ? cfg.searchBudget * 1000 : 0
     });
+    // abandoned: no answer, so no line and no candidate — never a weaker one
+    if (!reply) return null;
     const rl = (reply.lines || []);
     const best = (rl[0] && rl[0].best) || reply.best;
     if (!best) break;
@@ -369,8 +417,10 @@ async function buildLine(engine, startFen, first, cfg){
     if (!P.legalMoves(next, next.turn).length) break;
     const look = await engine.ask({
       fen: startFen, moves: moves.concat([best]), multipv: 2,
-      depth: cfg.confirmDepth, objective: true
+      depth: cfg.confirmDepth, objective: true,
+      timeoutMs: cfg.searchBudget ? cfg.searchBudget * 1000 : 0
     });
+    if (!look) return null;                        // as above: abandoned, not answered
     const ll = (look.lines || []);
     const a = R.lineScore(ll[0]), b = R.lineScore(ll[1]);
     /* Still one move to find? Past the head of the line the bar is lower than
@@ -473,15 +523,19 @@ async function minePuzzles(engine, game, cfg, seen, wanted, tally, rung){
     if (seen.has(fen)) continue;
 
     const scan = await engine.ask({
-      fen, multipv: 2, depth: cfg.scanDepth, objective: true
+      fen, multipv: 2, depth: cfg.scanDepth, objective: true,
+      timeoutMs: cfg.searchBudget ? cfg.searchBudget * 1000 : 0
     });
+    if (!scan){ note('~search'); continue; }        // abandoned: nominate nothing
     if (!sharpEnough(scan, cfg.nominate)) continue;
 
     // three lines, not two: the gap that matters is best against second, and a
     // third is what says whether the second was itself alone
     const deep = await engine.ask({
-      fen, multipv: 3, depth: cfg.confirmDepth, objective: true
+      fen, multipv: 3, depth: cfg.confirmDepth, objective: true,
+      timeoutMs: cfg.searchBudget ? cfg.searchBudget * 1000 : 0
     });
+    if (!deep){ note('~search'); continue; }
     const lines = (deep.lines || []).filter(Boolean);
     if (lines.length < 2){ note('one legal move'); continue; }
     const best = R.lineScore(lines[0]), alt = R.lineScore(lines[1]);
@@ -495,8 +549,13 @@ async function minePuzzles(engine, game, cfg, seen, wanted, tally, rung){
     // to move, which here is the opponent, so it is flipped on the way in.
     const prevFen = P.fenOf(game.states[i - 1]);
     const was = await engine.ask({
-      fen: prevFen, depth: cfg.beforeDepth, objective: true
+      fen: prevFen, depth: cfg.beforeDepth, objective: true,
+      timeoutMs: cfg.searchBudget ? cfg.searchBudget * 1000 : 0
     });
+    /* No `before` means the mistake cannot be priced, and judge() rests on it.
+       Dropped rather than guessed: a candidate whose B is unknown is not a
+       turning point that has been demonstrated. */
+    if (!was){ note('~search'); continue; }
     const before = R.asSolver((was.lines || [])[0] || was, false);
 
     const v = R.judge({ before, best, alt });
@@ -519,14 +578,21 @@ async function minePuzzles(engine, game, cfg, seen, wanted, tally, rung){
 
   const found = [];
   let lastPly = -99;
+  const t0 = Date.now();
   for (const h of order){
     if (found.length >= cfg.perGame) break;
+    /* Out of time for this game. Between candidates, never inside one: what has
+       been built was built to the full standard, and what has not is not offered
+       rather than offered cheaply. See gameBudget in DEFAULTS. */
+    if (cfg.gameBudget && Date.now() - t0 > cfg.gameBudget * 1000){ note('~budget'); break; }
     if (Math.abs(h.i - lastPly) < 4) continue;      // not the same moment twice
     if (seen.has(h.fen)) continue;
     const first = uciFind(h.st, h.first);
     if (!first) continue;
     note('~examined');
     const built = await buildLine(engine, h.fen, h.first, cfg);
+    // the line was abandoned mid-search; nothing about this position is known
+    if (!built){ note('~search'); continue; }
     const rec = {
       fen: h.fen,
       moves: built.moves,
@@ -678,6 +744,22 @@ async function main(){
       process.exit(130);
     });
   const seen = new Set();
+  /* Seeded before the first game when --excludeIn names a corpus this run must
+     not overlap. Read as fens, because an id is a hash of the position *and*
+     the line: two runs that find the same position and extend it differently
+     produce two ids and one position, and it is the position that would be a
+     duplicate to a player. */
+  if (cfg.excludeIn){
+    let n = 0;
+    for (const f of cfg.excludeIn.split(',')){
+      const raw = JSON.parse(fs.readFileSync(f.trim(), 'utf8'));
+      const lists = Array.isArray(raw) ? [raw] : Object.values(raw);
+      for (const list of lists)
+        if (Array.isArray(list)) for (const p of list) if (p && p.fen){ seen.add(p.fen); n++; }
+    }
+    console.log('  excluding %d positions already in the corpus', seen.size);
+    if (!seen.size) throw new Error('--excludeIn matched no positions: ' + cfg.excludeIn);
+  }
   // Why candidates were refused, counted. A run that looks at a hundred
   // thousand positions and keeps two hundred is only legible as a tally, and
   // the tally is how a threshold in puzzle_rules.js gets argued about: if

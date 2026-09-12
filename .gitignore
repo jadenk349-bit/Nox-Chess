@@ -11,3 +11,10 @@ venv/
 puzzles/pool*.json
 
 .DS_Store
+
+# The Daily pipeline's staging and checkpoint directories. Large, regenerable,
+# and not what the game serves — but `puzzles/daily/work/` sits inside a
+# directory that IS shipped, so one `git add puzzles/daily/` would otherwise
+# commit the generator's progress logs alongside the four pools.
+puzzles/daily/work/
+work/daily/

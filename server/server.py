@@ -34,8 +34,10 @@ Run:  python3 server/server.py [--port 8787]
 
 import json
 import os
+import hmac
 import random
 import re
+import secrets
 import signal
 import socket
 import sys
@@ -98,6 +100,14 @@ CHALLENGE_TTL = 180
 # waiting to be asked again.
 REMATCH_TTL = 180
 
+# How many Daily Puzzles each mode ships, and therefore how long the rotation
+# runs before it comes round again. The four files hold this many records each
+# and `dailyIndex = day % DAILY_CYCLE` picks one; the page carries the same
+# number and server/test_daily.py holds the two to each other, because a cycle
+# that means one thing here and another there is a puzzle that changes at
+# midnight for half the players.
+DAILY_CYCLE = 100
+
 # ------------------------------------------------------- the fallback opponent
 #
 # A ranked queue with nobody else in it is a player watching a plate sweep until
@@ -117,6 +127,23 @@ try:
     # Only so the tests need not sit out five seconds a time. Not a setting
     # anybody is expected to change: the five seconds are part of the feature.
     AI_WAIT = max(0.2, float(os.environ.get("NOX_AI_WAIT") or AI_WAIT))
+except ValueError:
+    pass
+
+# How long a seat is kept for a player whose socket has gone. A game used to
+# end the instant either connection closed — the other side was handed the win
+# and told "your opponent disconnected" — which is the right answer for a
+# player who has walked away and the wrong one for a phone changing networks
+# or a laptop's wifi blinking, and the socket cannot tell those apart. So a
+# dropped player is not gone until they have been gone for this long: the
+# seat stays theirs, the game stays in `games`, moves the other side makes in
+# the meantime are kept for them, and a new connection that says `resume`
+# with the seat's own secret (see Game.seats) sits back down with everything
+# it missed. Only once the grace lapses is the game finished as "left", exactly
+# as before. Ten seconds is the feature; the variable is for the tests.
+AWAY_GRACE = 10.0
+try:
+    AWAY_GRACE = max(0.2, float(os.environ.get("NOX_AWAY_GRACE") or AWAY_GRACE))
 except ValueError:
     pass
 
@@ -306,12 +333,19 @@ class BotClient(Client):
 
 
 class Game:
-    def __init__(self, white, black, mode, minutes, inc=0, kind="friendly", ai=None):
+    def __init__(self, white, black, mode, minutes, inc=0, kind="friendly", ai=None, terms=None):
         self.id = uuid.uuid4().hex[:8]
         self.players = {WHITE: white, BLACK: black}
         self.mode = mode
         self.minutes = minutes
         self.inc = inc           # seconds added after each move; 0 is a plain clock
+        # What each seat plays, by colour — see seat_terms(). `mode` and
+        # `minutes` above are still the game's headline terms (the challenger's,
+        # or the shared ones for every other way in) and are what the log
+        # lines and the lobby key read; these are what each player is actually
+        # dealt. Quick match, rooms and the bot hand both seats the same pair,
+        # so for them this says nothing the two fields above do not.
+        self.terms = terms or {WHITE: seat_terms(mode, minutes), BLACK: seat_terms(mode, minutes)}
         # ranked or friendly. Kept on the game because a rematch is offered on
         # the terms of the game it follows, and "which queue this was" is one
         # of them — a ranked game must never be played again as a friendly one.
@@ -325,6 +359,16 @@ class Game:
         self.turn = WHITE
         self.over = None
         self.started = time.time()
+        # One secret per seat, handed to that seat's page in its `start` and
+        # to nobody else. It is what lets a fresh socket prove it is the player
+        # whose connection just dropped — a guest has no account to prove it
+        # with, and even an account may have two tabs open, only one of which
+        # is at this board. It lives in the page's memory for the life of the
+        # game, so a reload is still a leave.
+        self.seats = {WHITE: secrets.token_hex(16), BLACK: secrets.token_hex(16)}
+        # Seats whose player has dropped and may still come back: colour to the
+        # timer that will finish the game if they do not (see hold_seat()).
+        self.away = {}
         # Pairing them is also what lets them talk. Both directions are set
         # here so every way of making a game — quick match and rooms alike —
         # gets chat without having to remember to wire it up.
@@ -378,14 +422,22 @@ class Challenge:
     tab that account has open and only that account can answer it.
     """
 
-    def __init__(self, host, to_user, mode, minutes, inc, color):
+    def __init__(self, host, to_user, mode, minutes, inc, color, guest_terms=None):
         self.id = uuid.uuid4().hex[:8]
         self.host = host          # the challenger's client
         self.to_user = to_user    # the account id of the person challenged
-        self.mode = mode
-        self.minutes = minutes
+        self.mode = mode          # what the challenger will play...
+        self.minutes = minutes    # ...and on what clock
         self.inc = inc
         self.color = color        # the colour the challenger takes; the friend gets the other
+        # What the friend will play. A challenger may set the two seats
+        # differently — Complete Blindfold for themselves against a friend
+        # who sees the board, three minutes against ten — and the terms
+        # belong to the *person*, not to the colour: whichever seat the
+        # friend ends up in, these are theirs. A challenge that names no
+        # separate terms for the friend is the same game both ways, which
+        # is what every challenge was before this existed.
+        self.guest_terms = guest_terms or seat_terms(mode, minutes)
         self.created = time.time()
 
     def public(self):
@@ -393,9 +445,17 @@ class Challenge:
             "id": self.id,
             "from": self.host.user_id,
             "fromName": self.host.name,
-            "mode": self.mode,
-            "minutes": self.minutes,
+            # Written from the chair of the person answering, as `color`
+            # already was: `mode` and `minutes` are what *they* will play,
+            # and the challenger's own are named as the opponent's. The page
+            # reads every payload the same way — its own terms under the
+            # plain names, the far side's under opponent* — so the box a
+            # friend reads and the `start` that follows it agree.
+            "mode": self.guest_terms["mode"],
+            "minutes": self.guest_terms["minutes"],
             "inc": self.inc,
+            "opponentMode": self.mode,
+            "opponentMinutes": self.minutes,
             # what the person answering will be playing, which is not what the
             # challenger picked for themselves
             "color": BLACK if self.color == WHITE else WHITE,
@@ -418,16 +478,22 @@ class Rematch:
     meant to begin.
     """
 
-    def __init__(self, host, guest, game_id, mode, minutes, inc, kind, host_color):
+    def __init__(self, host, guest, game_id, mode, minutes, inc, kind, host_color,
+                 guest_terms=None):
         self.id = uuid.uuid4().hex[:8]
         self.host = host          # the one who asked
         self.guest = guest        # the one who has to answer
         self.game_id = game_id    # the finished game this is about
-        self.mode = mode
+        self.mode = mode          # what the asker played, and will play again
         self.minutes = minutes
         self.inc = inc
         self.kind = kind          # ranked stays ranked; friendly stays friendly
         self.host_color = host_color   # what the asker played in that game
+        # What the answerer played, and will play again. A challenged game
+        # may have dealt the two seats different visions and clocks, and a
+        # rematch keeps each with the player it belonged to: the colours
+        # swap, the terms do not, because they were never the colour's.
+        self.guest_terms = guest_terms or seat_terms(mode, minutes)
         self.created = time.time()
 
     def public(self):
@@ -435,9 +501,13 @@ class Rematch:
             "id": self.id,
             "game": self.game_id,
             "from": self.host.name,
-            "mode": self.mode,
-            "minutes": self.minutes,
+            # From the answerer's chair, like a challenge: their own terms
+            # under the plain names, the asker's as the opponent's.
+            "mode": self.guest_terms["mode"],
+            "minutes": self.guest_terms["minutes"],
             "inc": self.inc,
+            "opponentMode": self.mode,
+            "opponentMinutes": self.minutes,
             "kind": self.kind,
             # Colours swap, which is what a rematch means, so the seat offered
             # to whoever answers is the one the asker has just got up from.
@@ -685,6 +755,17 @@ def finish_game(game, reason, winner=None, exclude=None):
     if game.over:
         return
     game.over = reason
+    if game.away:
+        # Somebody is out and may yet come back to ask about this game. The
+        # `over` below goes to a dead socket, so the result is kept where
+        # handle_resume() can find it — long enough for their own grace to
+        # lapse and a little more — and the timers that would have called
+        # them gone are stood down, since the game is over either way.
+        for timer in game.away.values():
+            timer.cancel()
+        game.away.clear()
+        recent_results[game.id] = {"reason": reason, "winner": winner, "seats": dict(game.seats)}
+        later(AWAY_GRACE * 2 + 5, recent_results.pop, game.id, None)
     for client in game.players.values():
         if client is not exclude:
             client.send({"t": "over", "reason": reason, "winner": winner})
@@ -692,14 +773,20 @@ def finish_game(game, reason, winner=None, exclude=None):
     # to be let go of, and overwritten by the next game either player finishes
     # — which is exactly what makes a request naming an older game stale.
     for color, client in game.players.items():
+        other = BLACK if color == WHITE else WHITE
         client.last_game = {
             "id": game.id,
-            "mode": game.mode,
-            "minutes": game.minutes,
+            # This player's own terms, not the game's headline ones: a
+            # challenged game may have dealt the two seats differently, and a
+            # rematch is played on what *this* player had, whichever colour
+            # they take next time.
+            "mode": game.terms[color]["mode"],
+            "minutes": game.terms[color]["minutes"],
             "inc": game.inc,
             "kind": game.kind,
             "color": color,
-            "opponent": game.players[BLACK if color == WHITE else WHITE],
+            "opponent": game.players[other],
+            "opponentTerms": dict(game.terms[other]),
         }
     # Let go of the players too. Without this they stay "in a game" for the life
     # of the connection, and every later host or join is refused — which only
@@ -869,6 +956,47 @@ def clean_inc(raw):
     except (TypeError, ValueError):
         return 0
     return min(max(inc, 0), 60)
+
+
+# The four visions the page draws. A challenge names one per seat, and the
+# name goes straight into the other player's `start`, so it is checked here
+# rather than relayed as whatever string arrived.
+VISIONS = ("total", "blind", "fog", "sighted")
+
+
+def clean_mode(raw, default="blind"):
+    """One of the four visions, or the default."""
+    return raw if raw in VISIONS else default
+
+
+def clean_minutes(raw, default=10):
+    """A starting clock in minutes, from a message we do not trust.
+
+    Bounded the same way the setup page bounds it — nothing under a minute,
+    nothing over three hours — and anything that is not a number is the
+    default rather than an error, since the page never sends one.
+    """
+    try:
+        minutes = float(raw)
+    except (TypeError, ValueError):
+        return default
+    if minutes != minutes:            # NaN
+        return default
+    minutes = min(max(minutes, 1), 180)
+    return int(minutes) if minutes == int(minutes) else minutes
+
+
+def seat_terms(mode, minutes):
+    """What one seat plays: its vision and its starting clock.
+
+    A game used to have one vision and one clock for both sides. A friend
+    challenge may now give each player their own, so a Game keeps one of
+    these per colour and every payload reads its own seat's and names the
+    other's — see start_game_between(). The increment is not here because it
+    is still the game's: a clock that adds seconds after a move adds the same
+    seconds to both.
+    """
+    return {"mode": mode, "minutes": minutes}
 
 
 def time_label(minutes, inc):
@@ -1229,6 +1357,10 @@ def handle_find(client, msg):
                     "kind": kind,
                     "opponent": other.name,
                     "opponentVerified": other.verified,
+                    # the seat's secret and the grace, as start_game_between()
+                    # writes them — see AWAY_GRACE
+                    "seat": game.seats[color],
+                    "grace": AWAY_GRACE,
                 })
             # and a rematch either of them left in the air is over
             for side, payload in rematches_cleared_for(white, black):
@@ -1461,6 +1593,110 @@ def handle_resign(client):
         finish_game(game, "resign", winner)
 
 
+# ------------------------------------------------- a dropped connection
+
+# Results of games that ended while one player was out, by game id, kept only
+# as long as that player could still come back and ask: see finish_game().
+recent_results = {}
+
+
+def hold_seat(game, client):
+    """A player's socket has gone; keep their seat for AWAY_GRACE. Caller holds the lock.
+
+    The dead Client stays in `game.players` — its send() is a no-op, so
+    nothing downstream needs to know — and a timer is armed to finish the game
+    as "left" if nobody has claimed the seat by then. Returns what to tell the
+    other side, for the caller to send outside the lock. A seat the bot is
+    facing is held the same way: the bot cannot be told and does not care, but
+    the player's page is still owed its ten seconds.
+    """
+    color = client.color
+    game.away[color] = later(AWAY_GRACE, seat_lapsed, game, color, client)
+    other = game.opponent_of(client)
+    log("%s dropped mid-game %s; seat held for %ss" % (client.id, game.id, AWAY_GRACE))
+    return [(other, {"t": "opponent-away", "game": game.id, "seconds": AWAY_GRACE})]
+
+
+def seat_lapsed(game, color, client):
+    """The grace ran out with nobody back in the seat: the game is lost as before."""
+    with lock:
+        # Anything that has happened since — the game ending some other way,
+        # the player sitting back down (which replaces `client` in the seat and
+        # cancels this timer, though a timer already firing cannot be) — means
+        # this is not the word on the matter.
+        if game.over or color not in game.away or game.players[color] is not client:
+            return
+        winner = BLACK if color == WHITE else WHITE
+        finish_game(game, "left", winner, exclude=client)
+
+
+def handle_resume(client, msg):
+    """A fresh socket asking for the seat its predecessor dropped.
+
+    The proof is the seat's own secret from `start`, compared in constant time.
+    A seat that is still occupied — the socket never dropped, or the player has
+    two tabs on one board — is refused: the seat is claimed only while it is
+    being held. A game that ended while the player was out answers with how,
+    from `recent_results`, so their page can show the result it missed rather
+    than a generic "disconnected".
+    """
+    game_id, seat = msg.get("game"), msg.get("seat")
+    if not isinstance(game_id, str) or not isinstance(seat, str):
+        client.send({"t": "resume-failed", "game": game_id})
+        return
+    with lock:
+        if client.game or client.room:
+            client.send({"t": "error", "msg": "already in a game"})
+            return
+        game = games.get(game_id)
+        if not game or game.over:
+            failed = {"t": "resume-failed", "game": game_id}
+            gone = recent_results.get(game_id)
+            if gone and any(hmac.compare_digest(s, seat) for s in gone["seats"].values()):
+                failed["over"] = {"reason": gone["reason"], "winner": gone["winner"]}
+            client.send(failed)
+            return
+        color = next((c for c, s in game.seats.items() if hmac.compare_digest(s, seat)), None)
+        if color is None or color not in game.away:
+            client.send({"t": "resume-failed", "game": game_id})
+            return
+        game.away.pop(color).cancel()
+        game.players[color] = client
+        client.game, client.color = game, color
+        # neither queueing nor watching the list any more — this is a board
+        cancel_ai_fallback(client)
+        leave_lobby(client)
+        lobby_subs.discard(client)
+        other = game.opponent_of(client)
+        client.chat_peer = (other, game.id)
+        other.chat_peer = (client, game.id)
+        mine, theirs = game.terms[color], game.terms[other.color]
+        payload = {
+            "t": "resume",
+            "game": game.id,
+            "color": color,
+            "mode": mine["mode"],
+            "minutes": mine["minutes"],
+            "inc": game.inc,
+            "kind": game.kind,
+            "opponent": other.name,
+            "opponentVerified": other.verified,
+            "opponentMode": theirs["mode"],
+            "opponentMinutes": theirs["minutes"],
+            "seat": seat,
+            "grace": AWAY_GRACE,
+            # Everything played so far, so the page can apply whatever it
+            # missed — and see whether a move of its own never arrived.
+            "moves": list(game.moves),
+            "turn": game.turn,
+        }
+        if game.ai and other.is_ai:
+            payload["ai"] = dict(game.ai)
+        log("%s resumed game %s as %s" % (client.id, game.id, color))
+    client.send(payload)
+    other.send({"t": "opponent-back", "game": game.id, "name": client.name})
+
+
 def handle_draw_offer(client):
     """Relayed, not decided: a draw needs the other player to agree."""
     with lock:
@@ -1537,7 +1773,8 @@ def handle_chat(client, msg):
 
 # ------------------------------------------------------- challenging a friend
 
-def start_game_between(host, guest, host_color, mode, minutes, inc, kind="friendly", ai=None):
+def start_game_between(host, guest, host_color, mode, minutes, inc, kind="friendly", ai=None,
+                       guest_terms=None):
     """Seat two named players at one board. Caller holds the lock.
 
     The same pairing handle_join does for a room, lifted out so a challenge
@@ -1549,9 +1786,22 @@ def start_game_between(host, guest, host_color, mode, minutes, inc, kind="friend
     into the game and into the payload, so the browser learns from the server
     alone that it is playing a bot, what the bot is called and what it is
     rated. Nothing a client says can put it there.
+
+    `mode` and `minutes` are the host's seat; `guest_terms` is the guest's,
+    and defaults to the same pair, which is every game but a challenge. Each
+    `start` is written from its reader's chair — `mode`/`minutes` are what
+    that player plays, `opponentMode`/`opponentMinutes` what the other does
+    — so the page seeds its own vision from the plain names as it always
+    has, and both clocks from the pair. The vision is settled by *whose*
+    seat it is and never by colour: the host's terms follow the host into
+    whichever colour `host_color` says.
     """
     white, black = (host, guest) if host_color == WHITE else (guest, host)
-    game = Game(white, black, mode, minutes, inc, kind, ai=ai)
+    host_terms = seat_terms(mode, minutes)
+    guest_terms = guest_terms or seat_terms(mode, minutes)
+    terms = {WHITE: host_terms, BLACK: guest_terms} if host_color == WHITE \
+        else {WHITE: guest_terms, BLACK: host_terms}
+    game = Game(white, black, mode, minutes, inc, kind, ai=ai, terms=terms)
     white.color, black.color = WHITE, BLACK
     white.game = black.game = game
     games[game.id] = game
@@ -1564,16 +1814,27 @@ def start_game_between(host, guest, host_color, mode, minutes, inc, kind="friend
     outgoing = []
     for color, player in game.players.items():
         other = game.opponent_of(player)
+        mine, theirs = game.terms[color], game.terms[other.color]
         payload = {
             "t": "start",
             "game": game.id,
             "color": color,
-            "mode": mode,
-            "minutes": minutes,
+            "mode": mine["mode"],
+            "minutes": mine["minutes"],
             "inc": inc,
             "kind": kind,
             "opponent": other.name,
             "opponentVerified": other.verified,
+            # The far side's seat, so this player's page can seed the other
+            # clock and say who is playing what. The vision's *name* is all
+            # that crosses: nothing about what the other board shows or hides
+            # is decided here, because each page draws from its own `mode`.
+            "opponentMode": theirs["mode"],
+            "opponentMinutes": theirs["minutes"],
+            # What this page will show to get its seat back after a dropped
+            # connection, and how long it has to do it. See AWAY_GRACE.
+            "seat": game.seats[color],
+            "grace": AWAY_GRACE,
         }
         # Only ever true of the side facing the bot, and the bot's own copy is
         # thrown away by the caller — but say it of the opponent rather than of
@@ -1601,9 +1862,14 @@ def handle_challenge(client, msg):
     if not isinstance(target, str) or not target or target == client.user_id:
         client.send({"t": "error", "msg": "no such player"})
         return
-    mode = msg.get("mode", "blind")
-    minutes = msg.get("minutes", 10)
+    # The challenger's own seat, and the friend's. The friend's is optional on
+    # the wire and falls back to the challenger's: a message that names only
+    # `mode` and `minutes` is the one shared game every challenge used to be.
+    mode = clean_mode(msg.get("mode"))
+    minutes = clean_minutes(msg.get("minutes"))
     inc = clean_inc(msg.get("inc"))
+    guest_terms = seat_terms(clean_mode(msg.get("opponentMode"), mode),
+                             clean_minutes(msg.get("opponentMinutes"), minutes))
     color = msg.get("color", WHITE)
     if color not in (WHITE, BLACK):
         color = WHITE
@@ -1626,7 +1892,7 @@ def handle_challenge(client, msg):
         if not free:
             client.send({"t": "challenge-busy"})
             return
-        ch = Challenge(client, target, mode, minutes, inc, color)
+        ch = Challenge(client, target, mode, minutes, inc, color, guest_terms)
         challenges[ch.id] = ch
         invite = dict(ch.public(), t="challenged")
         gone = [(c.id, list(by_user.get(c.to_user, ()))) for c in withdrawn]
@@ -1639,7 +1905,9 @@ def handle_challenge(client, msg):
     client.send({"t": "challenge-sent", "id": ch.id, "to": target})
     for c in free:
         c.send(invite)
-    log("%s challenged %s — %s, %s" % (client.id, target[:8], mode, time_label(minutes, inc)))
+    log("%s challenged %s — %s, %s (friend: %s, %s)"
+        % (client.id, target[:8], mode, time_label(minutes, inc),
+           guest_terms["mode"], time_label(guest_terms["minutes"], inc)))
 
 
 def handle_challenge_accept(client, msg):
@@ -1667,7 +1935,8 @@ def handle_challenge_accept(client, msg):
                 host.send({"t": "challenge-lapsed", "id": ch.id})
             return
         game, outgoing = start_game_between(host, client, ch.color,
-                                            ch.mode, ch.minutes, ch.inc)
+                                            ch.mode, ch.minutes, ch.inc,
+                                            guest_terms=ch.guest_terms)
         # Anything else either of them had in the air is moot now.
         dropped = take_challenges_of(host, host.user_id) + \
                   take_challenges_of(client, client.user_id)
@@ -1768,7 +2037,8 @@ def handle_rematch(client, msg):
             game, again = start_game_between(
                 client, bot, host_color, last["mode"], last["minutes"],
                 last["inc"], kind=last["kind"],
-                ai={"name": bot.name, "elo": bot.elo, "bot": True})
+                ai={"name": bot.name, "elo": bot.elo, "bot": True},
+                guest_terms=last["opponentTerms"])
         else:
             if not other.alive or other.game or not last_game_is(other, game_id):
                 # They have left, or moved on to something else. Either way
@@ -1793,7 +2063,8 @@ def handle_rematch(client, msg):
                     client.send({"t": "rematch-sent", "id": mine.id, "game": game_id})
                     return
                 rem = Rematch(client, other, game_id, last["mode"], last["minutes"],
-                              last["inc"], last["kind"], last["color"])
+                              last["inc"], last["kind"], last["color"],
+                              guest_terms=last["opponentTerms"])
                 rematches[rem.id] = rem
                 invite = dict(rem.public(), t="rematch-request")
                 guest = other
@@ -1842,8 +2113,11 @@ def handle_rematch_accept(client, msg):
         # takes the colour they did not have, and the answerer takes the one
         # the invitation already told them they would.
         host_color = BLACK if rem.host_color == WHITE else WHITE
+        # The terms do not swap with the colours: each player sits back down
+        # on the vision and the clock they had, in the other seat.
         game, outgoing = start_game_between(host, client, host_color,
-                                            rem.mode, rem.minutes, rem.inc, rem.kind)
+                                            rem.mode, rem.minutes, rem.inc, rem.kind,
+                                            guest_terms=rem.guest_terms)
         # start_game_between() has already dropped anything else either of
         # them had out, and put the notices in `outgoing` with the starts.
     for player, payload in outgoing:
@@ -1902,6 +2176,8 @@ def handle_message(client, raw):
         handle_cancel(client)
     elif kind == "move":
         handle_move(client, msg)
+    elif kind == "resume":
+        handle_resume(client, msg)
     elif kind == "result":
         handle_result(client, msg)
     elif kind == "resign":
@@ -2035,8 +2311,10 @@ def drop_client(client):
             dropped_room = True
         game = client.game
         if game and not game.over:
-            winner = BLACK if client.color == WHITE else WHITE
-            finish_game(game, "left", winner, exclude=client)
+            # Not lost yet: the seat is held for AWAY_GRACE and the other side
+            # is told to wait. hold_seat() is what finishes the game if
+            # nobody comes back for it.
+            told += hold_seat(game, client)
         client.game = None
         # the other side keeps its own reference until it disconnects too, but
         # sending to a dead socket is a no-op, so nothing piles up
@@ -2109,6 +2387,15 @@ STATIC_FILES = {
     "/puzzles/modes/blindfold.json": ("puzzles/modes/blindfold.json", "application/json; charset=utf-8"),
     "/puzzles/modes/fog.json":       ("puzzles/modes/fog.json",       "application/json; charset=utf-8"),
     "/puzzles/modes/rush.json":      ("puzzles/modes/rush.json",      "application/json; charset=utf-8"),
+    # The Daily Puzzles: a separate corpus, four files, one per vision. They are
+    # deliberately not under puzzles/modes/ — nothing that loads the Puzzle
+    # page's pools may reach them, and a directory of their own is the simplest
+    # way to make that true rather than merely intended. See THE DAILY PUZZLE in
+    # blind-chess.html.
+    "/puzzles/daily/blindfold.json": ("puzzles/daily/blindfold.json", "application/json; charset=utf-8"),
+    "/puzzles/daily/board.json":     ("puzzles/daily/board.json",     "application/json; charset=utf-8"),
+    "/puzzles/daily/fog.json":       ("puzzles/daily/fog.json",       "application/json; charset=utf-8"),
+    "/puzzles/daily/sighted.json":   ("puzzles/daily/sighted.json",   "application/json; charset=utf-8"),
     # Opening and Middle Game Practices, under Lesson -> Practice. A different
     # standard from a puzzle (tools/practice_rules.js, not payoff_rules.js) and
     # so a different directory, versioned separately in the page as PC_VERSION.
@@ -2208,6 +2495,38 @@ def serve_http(sock, request_line):
             b"HTTP/1.1 200 OK\r\nContent-Type: application/json\r\nContent-Length: "
             + str(len(body)).encode() + b"\r\n\r\n" + body
         )
+    elif path == "/daily.json":
+        # Which day it is, decided in one place.
+        #
+        # The Daily Puzzles rotate on a number, and the number has to be the
+        # same for everybody: two players opening the page in different
+        # timezones are doing the same day's puzzle, and a browser that has
+        # been left open overnight is not still on yesterday's. So the day is
+        # UTC days since the epoch, computed here rather than in the page —
+        # the server is the one clock every client already shares.
+        #
+        # Nothing about it is stateful: it is a pure function of the wall
+        # clock, so a restart, a redeploy or a second instance all answer the
+        # same. The page falls back to its own UTC arithmetic if this cannot
+        # be reached, which gives the same answer for anybody whose clock is
+        # right; this endpoint exists so that it is not *their* clock that
+        # decides. Never cached, for the obvious reason.
+        now = time.time()
+        day = int(now // 86400)
+        body = json.dumps({
+            "day": day,
+            "index": day % DAILY_CYCLE,
+            "cycle": DAILY_CYCLE,
+            # when this day ends, so a page left open can roll over on its own
+            "nextUtc": (day + 1) * 86400,
+            "utc": time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime(now)),
+        }).encode()
+        sock.sendall(
+            b"HTTP/1.1 200 OK\r\nContent-Type: application/json\r\n"
+            b"Cache-Control: no-store\r\nContent-Length: "
+            + str(len(body)).encode() + b"\r\n\r\n" + body
+        )
+
     elif path == "/live.json":
         # The same snapshot the socket pushes, for anybody polling — a
         # debugging aid first, and the fallback for a viewer whose socket

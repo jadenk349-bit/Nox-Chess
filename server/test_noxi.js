@@ -11,7 +11,7 @@ harness = harness.replace('addEventListener(){}, removeEventListener(){}, focus(
   'addEventListener(k, fn){ (this.events || (this.events = {}))[k] = fn; }, removeEventListener(){}, focus(){}');
 harness = harness.replace('function makePage(fetchImpl){', 'function makePage(fetchImpl, savedStore){').replace('const store = {};', 'const store = savedStore || {};').replace('out.doc = doc;', 'out.doc = doc; out.store = store;');
 harness = harness.replace('stateFromFEN, EDU_VERSION });',
-  'stateFromFEN, EDU_VERSION, SF, NOXI, setAccount, noxiDialogue, noxiStudyText, noxiMaybeIntroduce, noxiDismiss, decideFirstScreen, showScreen, LSN, VERDICT, engineKey, REVIEW_ASK, testScreen:()=>screenName, testIdentity:(a, client) => { account=a; sb=client; }, testAccount:()=>account });');
+  'stateFromFEN, EDU_VERSION, SF, STUDY, studyBuild, AUTH, NOXI, setAccount, noxiDialogue, noxiStudyText, noxiMaybeIntroduce, noxiDismiss, decideFirstScreen, showScreen, LSN, VERDICT, engineKey, REVIEW_ASK, testScreen:()=>screenName, testIdentity:(a, client) => { account=a; sb=client; }, testAccount:()=>account });');
 const cases = `
 (async function(){
  const p = makePage(only404);
@@ -112,21 +112,27 @@ const cases = `
    st=after;
  }
  p.G.uci=['e2e4','e7e5']; p.G.sans=['e4','e5']; p.reviewBuild();
- p.REV.on=true; p.SF.ready=false; p.reviewRender();
+ const evals=[{cp:30,mate:null,best:'e2e4',pv:['e2e4']},
+   {cp:300,mate:null,best:'c7c5',pv:['c7c5']},
+   {cp:300,mate:null,best:'g1f3',pv:['g1f3']}];
+ p.STUDY.recs=p.studyBuild({uci:p.G.uci,sans:p.G.sans},evals);
+ p.REV.on=true; p.REV.ply=1; p.SF.ready=true; p.reviewRender();
  const message=p.NOXI.study.message.textContent;
- p.REV.ply=1; p.reviewRender();
- ok('selected move refreshes dialogue',p.NOXI.study.message.textContent!==message);
- p.SF.ready=true;
- p.SF.cache.set(p.engineKey(p.G.uci.slice(0,1),p.REVIEW_ASK).key,{cp:300,mate:null,best:'c7c5',pv:['c7c5'],lines:[]});
- p.SF.cache.set(p.engineKey(p.G.uci.slice(0,2),p.REVIEW_ASK).key,{cp:300,mate:null,best:'g1f3',pv:[],lines:[]});
- p.reviewRender();
- ok('classification still rendered',p.by('revVerdict').textContent.length>0);
- ok('engine suggestions stay out of Noxi',!/(c5|300|best|better|percent|%|evaluation)/i.test(p.NOXI.study.message.textContent));
+ ok('first move speaks about White',/White/.test(message),message);
  p.REV.ply=2; p.reviewRender();
- ok('final position has no stale move',/end of the game/i.test(p.NOXI.study.message.textContent));
- p.reviewClose(false); eq('leaving review hides Noxi',p.by('noxiStudy').style.display,'none');
+ ok('selected move refreshes dialogue',p.NOXI.study.message.textContent!==message);
+ ok('final move explains Black move, not next nonexistent move',/Black/.test(p.NOXI.study.message.textContent));
+ ok('classification still rendered',p.by('stVerdict').innerHTML.length>0);
+ ok('best move still available outside Noxi',p.by('stBest').textContent==='c5');
+ ok('engine suggestions stay out of Noxi',!/(c5|300|best|better|percent|%|evaluation)/i.test(p.NOXI.study.message.textContent));
+ p.REV.ply=0; p.reviewRender();
+ ok('initial position has no stale move',/first move/.test(p.NOXI.study.message.textContent));
+ p.reviewClose(false); eq('leaving review hides study panel',p.by('studyPanel').style.display,'none');
+ p.showScreen('home'); p.testIdentity({id:'recovery',gameName:'Reset',noxiIntro:'pending'},client);
+ p.AUTH.recovery=true; p.noxiMaybeIntroduce();eq('password recovery is not interrupted',p.NOXI.owner,null);
+ p.AUTH.recovery=false;
  console.log('Noxi: '+pass+' passed, '+fail+' failed');
  process.exit(fail?1:0);
 })().catch(e=>{console.error(e);process.exit(1)});
 `;
-vm.runInNewContext(harness + cases, {require,__dirname,console,process,setTimeout,clearTimeout,setInterval,clearInterval,URL}, {filename:__filename});
+vm.runInNewContext(harness + cases, {require,__dirname,console,process,setTimeout,clearTimeout,setInterval,clearInterval,URL,URLSearchParams,TextEncoder,TextDecoder}, {filename:__filename});
