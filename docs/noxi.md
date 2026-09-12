@@ -16,15 +16,15 @@ Noxi does not consume motif prose, engine variations, `describeBest()`, educatio
 
 Google, Apple, Facebook, and email accounts all use the existing username flow. Password recovery takes priority over onboarding. The existing username submit handler saves `noxi_intro: pending` alongside `game_name` through `sb.auth.updateUser()` only when the account has no chosen username and no previous Noxi state. A named account with no Noxi metadata is never enrolled retroactively. `setAccount()` reads this state from Supabase `user_metadata`.
 
-On the homepage, a pending named account sees the three specified messages. Showing or skipping the introduction records `seen`; Start Learning records `completed`, closes the dialog, and calls the existing `lsnEnter()` entry point (`#lessons`, How to Play Blind Chess).
+On the homepage, a pending named account sees the three specified messages. Showing or closing the introduction records `seen`; Start Learning records `completed`, closes the dialog, and calls the existing `lsnEnter()` entry point (`#lessons`, How to Play Blind Chess).
 
-The browser also stores `nox.noxi.intro.<account-id>` in localStorage, with an in-memory fallback if storage is unavailable. This suppresses repeated renders and reloads when the account write fails. Supabase writes are serialized and recheck account identity before sending. If Supabase is unreachable, suppression is only guaranteed on that device until account persistence succeeds; cross-device persistence requires a successful account write. The dialog traps keyboard focus, makes the homepage inert, and supports Escape and Skip introduction.
+The browser also stores `nox.noxi.intro.<account-id>` in localStorage, with an in-memory fallback if storage is unavailable. This suppresses repeated renders and reloads when the account write fails. Supabase writes are serialized and recheck account identity before sending. If Supabase is unreachable, suppression is only guaranteed on that device until account persistence succeeds; cross-device persistence requires a successful account write. The dialog traps keyboard focus, makes the homepage inert, and supports Escape and the top-right Close button.
 
 No database migration or manual Supabase configuration is required. User metadata is already used by the username flow; no profile column, grant, or policy changes are needed. The server allowlists the PNG; the existing Docker `COPY assets/` includes it.
 
 ## Verification
 
-- `node server/test_noxi.js`: whole-page harness, real username submit, all intro steps, existing lesson navigation, reload and skip suppression, rejected usernames, failed/deferred persistence, identity changes, played-move dialogue, and retained classifications.
+- `node server/test_noxi.js`: whole-page harness, real username submit, all intro steps, existing lesson navigation, reload and close suppression, rejected usernames, failed/deferred persistence, identity changes, played-move dialogue, and retained classifications.
 - Existing review, Study Board education, lessons, rematch flow, leaderboard, and image-file suites.
 - Browser verification with simulated accounts (no real-account writes), real Stockfish Study Board analysis, desktop and 390px layouts, focus trapping, returning-home behavior, and loaded character images.
 - Actual server HTTP response compared byte-for-byte with the existing PNG.
@@ -36,3 +36,5 @@ Implementation is local; deployment is a separate action.
 `NOXI_POSES` is the shared asset registry. `noxiStudyPose()` uses the selected move record: brilliant/great → celebrating; blunder/mistake/inaccuracy or pending analysis → thinking; identified motifs → pointing; ordinary explanations and the initial position → explaining. This is a presentation rule, not a new chess classification or a claim that a legal move is unintelligible. Onboarding uses welcoming, explaining, then pointing. No pose adds suggestions or numerical speech.
 
 Five source poses were found in the workspace; the user refers to seven, so two remain to be identified. The jumping raised-fists pose is provisionally used for excitement.
+
+The introduction uses the approved portrait lunar design: existing moon texture, charcoal speech bubble, enlarged character, bottom-left Back (disabled on the first step), bottom-right Next/Start Learning, and top-right Close. It omits the Noxi name label; the compact Study Board renderer retains its label. Back updates both speech and pose without changing onboarding persistence.

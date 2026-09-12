@@ -35,9 +35,12 @@ const cases = `
  eq('new user introduced',p.NOXI.owner,'new');
  eq('first message',p.NOXI.dialogue.message.textContent,"Hi, I'm Noxi. Welcome to Nox Chess.");
  const first = p.NOXI.dialogue;
+ ok('intro begins with disabled Back',first.back && first.back.disabled);
  p.noxiMaybeIntroduce();
  ok('rerender keeps dialogue',p.NOXI.dialogue===first);
  p.NOXI.dialogue.action.click();
+ first.back.click();eq('Back restores greeting',first.message.textContent,"Hi, I'm Noxi. Welcome to Nox Chess.");
+ ok('Back restores welcoming pose',first.image.src.includes('welcoming'));first.action.click();
  eq('second message',p.NOXI.dialogue.message.textContent,'I will be your chess assistant.');
  p.NOXI.dialogue.action.click();
  eq('third message',p.NOXI.dialogue.message.textContent,"First, let's learn how to play blind chess!");
@@ -56,7 +59,7 @@ const cases = `
  p.testIdentity({id:'other',gameName:'Other',noxiIntro:'pending'},client);
  p.noxiMaybeIntroduce();
  eq('state is per account',p.NOXI.owner,'other');
- p.noxiDismiss(); await p.NOXI.saving;
+ p.by('noxiClose').click(); await p.NOXI.saving;
  p.noxiMaybeIntroduce(); eq('skip stays dismissed',p.NOXI.owner,null);
  p.testIdentity({id:'unnamed',gameName:'',noxiIntro:'pending'},client);
  p.noxiMaybeIntroduce(); eq('no intro before username',p.NOXI.owner,null);
@@ -69,7 +72,7 @@ const cases = `
  reloaded.noxiMaybeIntroduce(); eq('reload remembers completion',reloaded.NOXI.owner,null);
  const offline={auth:{updateUser:async()=>{throw new Error('offline');}}};
  p.showScreen('home'); p.testIdentity({id:'offline',gameName:'Offline',noxiIntro:'pending'},offline);
- p.noxiMaybeIntroduce(); p.noxiDismiss(); await p.NOXI.saving;
+ p.noxiMaybeIntroduce(); p.by('noxiClose').click(); await p.NOXI.saving;
  p.noxiMaybeIntroduce(); eq('save failure does not reopen',p.NOXI.owner,null);
  // A slow seen save cannot write completion onto the next signed-in account.
  let releaseSave; const deferredWrites=[];
@@ -100,7 +103,7 @@ const cases = `
  eq('username persisted with enrollment',nameWrites[0].noxi_intro,'pending');
  ok('username save reaches homepage',p.testScreen()==='home',String(p.nameError()));
  p.noxiMaybeIntroduce(); eq('real username flow opens Noxi',p.NOXI.owner,'signup');
- p.noxiDismiss(); await p.NOXI.saving;
+ p.by('noxiClose').click(); await p.NOXI.saving;
  const rejected={...nameClient,rpc:async()=>({data:false})};
  p.testIdentity({id:'rejected',gameName:'',name:'Player'},rejected);p.showScreen('name');
  p.by('gameName').value='TakenName';await p.by('nameForm').events.submit({preventDefault(){}});

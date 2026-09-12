@@ -4125,6 +4125,49 @@
 @media(max-width:599px){
   #screen-game .game-layout{--chrome:224px;}
 }
+
+
+.noxi-modal{position:relative;padding:48px 28px 24px;}
+.noxi-close{position:absolute;top:12px;right:12px;width:36px;height:36px;padding:0;font-size:28px;line-height:1;display:grid;place-items:center;}
+.noxi-intro{flex-wrap:wrap;}
+.noxi-controls{display:flex;justify-content:space-between;align-items:center;width:100%;flex:0 0 100%;margin-top:22px;gap:16px;}
+.noxi-controls button{min-width:100px;}
+.noxi-controls button:disabled{opacity:.35;cursor:default;}
+@media(max-width:560px){.noxi-controls{flex-basis:auto;}.noxi-modal{padding:48px 20px 20px;}}
+
+
+.modal.noxi-modal{width:min(440px,calc(100vw - 32px));max-width:440px;padding:54px 28px 24px;max-height:calc(100dvh - 24px);overflow-y:auto;}
+.noxi-intro{display:flex;flex-direction:column;flex-wrap:nowrap;gap:22px;}
+.noxi-intro .noxi-speech{order:0;flex:none;width:100%;text-align:center;position:relative;background:#eee8da;color:#211e1a;border:1px solid #cbb787;border-radius:22px;padding:20px 22px;box-sizing:border-box;box-shadow:0 8px 24px #0003;}
+.noxi-intro .noxi-speech::after{content:'';position:absolute;bottom:-11px;left:calc(50% - 10px);width:20px;height:20px;background:#eee8da;border-right:1px solid #cbb787;border-bottom:1px solid #cbb787;transform:rotate(45deg);}
+.noxi-intro .noxi-message{color:#211e1a;font-size:21px;line-height:1.5;min-height:64px;margin:0;display:flex;align-items:center;justify-content:center;}
+.noxi-intro .noxi-character{order:1;width:290px;height:290px;max-width:100%;flex:none;object-fit:contain;}
+.noxi-controls{order:2;flex:none;margin-top:0;width:100%;}
+@media(max-width:560px){.modal.noxi-modal{padding:50px 20px 20px;}.noxi-intro .noxi-character{width:260px;height:260px;}.noxi-intro .noxi-message{font-size:19px;}.noxi-intro .noxi-speech{padding:18px;}}
+
+
+/* Lunar introduction preview: the existing moon asset under charcoal glazing. */
+.modal.noxi-modal{
+ background:radial-gradient(ellipse at 50% 60%,rgba(240,199,117,.10),transparent 58%),linear-gradient(180deg,rgba(11,12,16,.89),rgba(17,19,25,.79) 55%,rgba(9,10,14,.96)),url('/assets/moon.jpg?v=1') center/cover;
+ border:1px solid rgba(240,199,117,.36);border-radius:28px;
+ box-shadow:0 30px 100px #000b,0 0 60px #d9a4410b,inset 0 1px 0 #f0c77528,inset 0 0 0 5px #0b0c1040;
+}
+.noxi-intro .noxi-speech{
+ background:linear-gradient(145deg,#282a32,#191c24);border-color:#b9985b80;
+ border-radius:20px;box-shadow:0 12px 28px #0005,inset 0 1px 0 #ffffff0d;
+}
+.noxi-intro .noxi-speech::after{background:#1c1f27;border-color:#b9985b80;}
+.noxi-intro .noxi-message{color:#f5efdf;text-shadow:0 1px 2px #0004;}
+.noxi-intro .noxi-character{filter:drop-shadow(0 12px 15px #0007);}
+.noxi-controls{padding-top:18px;border-top:1px solid #c7a26026;}
+.noxi-controls .primary{background:linear-gradient(180deg,#f1d49a,#d5ac61);color:#211a10;border:1px solid #f2d698;border-radius:12px;box-shadow:0 4px 15px #0004,inset 0 1px 0 #fff5;text-shadow:none;}
+.noxi-controls .ghost{background:#11141b9c;border:1px solid #c7b28b42;border-radius:12px;color:#eee4cf;}
+.noxi-controls button{min-height:44px;font-size:17px;}
+.noxi-controls button:focus-visible,.noxi-close:focus-visible{outline:2px solid #f0c775;outline-offset:4px;}
+.noxi-controls .primary:hover{filter:brightness(1.08);}
+.noxi-close{color:#d1c5ad;background:#0b0c1059;border:1px solid #c7a26030;border-radius:50%;font-size:25px;}
+.noxi-close:hover{color:#fff4dd;background:#292720;border-color:#c7a26080;}
+
 </style>
 </head>
 <body>
@@ -5344,7 +5387,7 @@
 <div class="overlay noxi-overlay" id="noxiOverlay" role="dialog" aria-modal="true" aria-label="Welcome to Nox Chess with Noxi">
   <div class="modal noxi-modal">
     <div id="noxiIntroBody"></div>
-    <button type="button" class="ghost noxi-skip" id="noxiSkip">Skip introduction</button>
+    <button type="button" class="ghost noxi-close" id="noxiClose" aria-label="Close introduction">×</button>
   </div>
 </div>
 
@@ -9323,10 +9366,15 @@ function noxiDialogue(host, options){
   message.setAttribute('aria-live', 'polite'); message.setAttribute('aria-atomic', 'true');
   const action = document.createElement('button'); action.type = 'button'; action.className = 'primary';
   const steps = options.sequence || [options.message || ''];
+  const back = document.createElement('button');
+  back.type = 'button'; back.className = 'ghost'; back.textContent = 'Back';
+  const controls = document.createElement('div'); controls.className = 'noxi-controls';
   let step = 0;
+  back.onclick = () => { if (step > 0) { step--; draw(); } };
   const setMessage = text => { message.textContent = text; };
   const draw = () => {
     setMessage(steps[step]);
+    back.disabled = step === 0;
     setPose(options.poses && options.poses[step] || options.pose || 'explaining');
     action.textContent = step < steps.length - 1 ? 'Next' : (options.actionLabel || 'Continue');
   };
@@ -9334,10 +9382,14 @@ function noxiDialogue(host, options){
     if (step < steps.length - 1) { step++; draw(); }
     else if (options.onAction) options.onAction();
   };
-  speech.appendChild(name); speech.appendChild(message);
-  if (options.onAction || steps.length > 1) speech.appendChild(action);
-  root.appendChild(image); root.appendChild(speech); host.appendChild(root); draw();
-  return { root, image, message, action, setMessage, setPose };
+  if (options.layout !== 'intro') speech.appendChild(name);
+  speech.appendChild(message);
+  root.appendChild(image); root.appendChild(speech);
+  if (options.layout === 'intro') {
+    controls.appendChild(back); controls.appendChild(action); root.appendChild(controls);
+  } else if (options.onAction || steps.length > 1) speech.appendChild(action);
+  host.appendChild(root); draw();
+  return { root, image, message, action, back, setMessage, setPose };
 }
 
 /* Only controlled descriptions of facts about the PLAYED move enter Noxi.
@@ -9458,14 +9510,15 @@ function noxiMaybeIntroduce(){
   noxiRemember(NOXI.owner, 'seen');
   NOXI.dialogue.action.focus();
 }
-document.getElementById('noxiSkip').onclick = () => noxiDismiss(false);
+document.getElementById('noxiClose').onclick = () => noxiDismiss(false);
 document.getElementById('noxiOverlay').addEventListener('keydown', e => {
   if (!NOXI.owner) return;
   if (e.key === 'Escape'){ e.preventDefault(); e.stopPropagation(); noxiDismiss(false); }
   if (e.key === 'Tab'){
-    const next = NOXI.dialogue.action, skip = document.getElementById('noxiSkip');
-    if (e.shiftKey && document.activeElement === next){ e.preventDefault(); skip.focus(); }
-    else if (!e.shiftKey && document.activeElement === skip){ e.preventDefault(); next.focus(); }
+    const first = NOXI.dialogue.back.disabled ? NOXI.dialogue.action : NOXI.dialogue.back;
+    const close = document.getElementById('noxiClose');
+    if (e.shiftKey && document.activeElement === first){ e.preventDefault(); close.focus(); }
+    else if (!e.shiftKey && document.activeElement === close){ e.preventDefault(); first.focus(); }
   }
 });
 
