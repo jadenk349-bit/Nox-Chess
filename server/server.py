@@ -2337,6 +2337,10 @@ def drop_client(client):
 ROOT = os.path.dirname(HERE)
 STATIC_FILES = {
     "/assets/characters/nox-guide-explaining-v1.png": ("assets/characters/nox-guide-explaining-v1.png", "image/png"),
+    "/assets/characters/nox-guide-welcoming-v1.png": ("assets/characters/nox-guide-welcoming-v1.png", "image/png"),
+    "/assets/characters/nox-guide-pointing-v1.png": ("assets/characters/nox-guide-pointing-v1.png", "image/png"),
+    "/assets/characters/nox-guide-thinking-v2.png": ("assets/characters/nox-guide-thinking-v2.png", "image/png"),
+    "/assets/characters/nox-guide-celebrating-v2.png": ("assets/characters/nox-guide-celebrating-v2.png", "image/png"),
     "/assets/home-button-moon.jpg": ("assets/home-button-moon.jpg", "image/jpeg"),
     "/assets/pieces/black-bishop.svg": ("assets/pieces/black-bishop.svg", "image/svg+xml"),
     "/assets/pieces/black-king.svg": ("assets/pieces/black-king.svg", "image/svg+xml"),

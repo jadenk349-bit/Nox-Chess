@@ -9301,12 +9301,21 @@ const NOXI_INTRO = [
 /* The renderer knows no chess or accounts. A caller supplies a message or a
    sequence, an optional action and a layout; all words enter as text, never
    HTML. Future Noxi appearances can use this same small interface. */
+const NOXI_POSES = Object.freeze({
+  explaining:'nox-guide-explaining-v1.png', welcoming:'nox-guide-welcoming-v1.png',
+  pointing:'nox-guide-pointing-v1.png', thinking:'nox-guide-thinking-v2.png',
+  celebrating:'nox-guide-celebrating-v2.png'
+});
 function noxiDialogue(host, options){
   host.innerHTML = '';
   const root = document.createElement('div');
   root.className = 'noxi-dialogue' + (options.layout === 'intro' ? ' noxi-intro' : '');
   const image = document.createElement('img');
-  image.src = '/assets/characters/nox-guide-explaining-v1.png?v=1';
+  const setPose = pose => {
+    const file = Object.prototype.hasOwnProperty.call(NOXI_POSES, pose) ? NOXI_POSES[pose] : NOXI_POSES.explaining;
+    const src = '/assets/characters/' + file + '?v=1';
+    if (image.getAttribute('src') !== src) image.src = src;
+  };
   image.alt = ''; image.className = 'noxi-character'; image.setAttribute('aria-hidden', 'true');
   const speech = document.createElement('div'); speech.className = 'noxi-speech';
   const name = document.createElement('div'); name.className = 'noxi-name'; name.textContent = 'Noxi';
@@ -9318,6 +9327,7 @@ function noxiDialogue(host, options){
   const setMessage = text => { message.textContent = text; };
   const draw = () => {
     setMessage(steps[step]);
+    setPose(options.poses && options.poses[step] || options.pose || 'explaining');
     action.textContent = step < steps.length - 1 ? 'Next' : (options.actionLabel || 'Continue');
   };
   action.onclick = () => {
@@ -9327,7 +9337,7 @@ function noxiDialogue(host, options){
   speech.appendChild(name); speech.appendChild(message);
   if (options.onAction || steps.length > 1) speech.appendChild(action);
   root.appendChild(image); root.appendChild(speech); host.appendChild(root); draw();
-  return { root, message, action, setMessage };
+  return { root, image, message, action, setMessage, setPose };
 }
 
 /* Only controlled descriptions of facts about the PLAYED move enter Noxi.
@@ -9377,11 +9387,23 @@ function noxiStudyText(before, move, after, verdict){
   // With no completed engine analysis, describe the fact without praising it.
   return fact;
 }
+// Pose is chosen from the same selected record as the speech, never from
+// evaluation numbers or suggested moves. Unresolved analysis is not praise.
+function noxiStudyPose(rec){
+  if (!rec) return 'explaining';
+  const cls = rec.verdict && rec.verdict.cls;
+  if (!cls || ['v-blunder','v-mistake','v-inaccuracy'].includes(cls)) return 'thinking';
+  if (cls === 'v-brilliant' || cls === 'v-great') return 'celebrating';
+  if (rec.st && rec.move && rec.post && findMotifs(rec.st, rec.move, rec.post, rec.st.turn).length)
+    return 'pointing';
+  return 'explaining';
+}
 function noxiStudy(rec, message){
   const host = document.getElementById('noxiStudy');
   if (!host || !REV.on) return;
   if (!NOXI.study) NOXI.study = noxiDialogue(host, {message:''});
   host.style.display = '';
+  NOXI.study.setPose(noxiStudyPose(rec));
   NOXI.study.setMessage(message || noxiStudyText(rec && rec.st, rec && rec.move,
     rec && rec.post, rec && rec.verdict));
 }
@@ -9429,7 +9451,7 @@ function noxiMaybeIntroduce(){
   NOXI.owner = account.id;
   NOXI.focus = document.activeElement;
   NOXI.dialogue = noxiDialogue(document.getElementById('noxiIntroBody'), {
-    layout:'intro', sequence:NOXI_INTRO, actionLabel:'Start Learning', onAction:() => noxiDismiss(true)
+    layout:'intro', sequence:NOXI_INTRO, poses:['welcoming','explaining','pointing'], actionLabel:'Start Learning', onAction:() => noxiDismiss(true)
   });
   document.getElementById('screen-home').inert = true;
   document.getElementById('noxiOverlay').classList.add('show');

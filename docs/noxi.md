@@ -1,10 +1,10 @@
 # Noxi
 
-Noxi is the official Nox Chess assistant. The first integration uses the existing `assets/characters/nox-guide-explaining-v1.png`, unchanged. No generated replacement or external dialogue service is involved.
+Noxi is the official Nox Chess assistant. Noxi uses the existing explaining, welcoming, pointing, thinking, and celebrating poses. The thinking and celebrating v2 files are transparent cutouts prepared from their existing v1 poses using the built-in imagegen tool. No external dialogue service is involved.
 
 ## Reusable dialogue
 
-The NOXI section in `blind-chess.html` owns `noxiDialogue(host, options)`. Options are `message` or `sequence`, `layout` (`intro` or the default compact row), `actionLabel`, and `onAction`. It returns the root, message and action elements plus `setMessage(text)` for later updates. The renderer only handles presentation and sequence navigation; chess and account logic live in separate functions. Text uses `textContent`.
+The NOXI section in `blind-chess.html` owns `noxiDialogue(host, options)`. Options are `message` or `sequence`, `layout` (`intro` or the default compact row), `actionLabel`, and `onAction`. It returns the root, message and action elements plus `image`, `setMessage(text)` and `setPose(name)` for later updates. `pose` sets a single pose; `poses` gives one pose per sequence step. Unknown names fall back to explaining. The renderer only handles presentation and sequence navigation; chess and account logic live in separate functions. Text uses `textContent`.
 
 ## Study Board
 
@@ -30,3 +30,9 @@ No database migration or manual Supabase configuration is required. User metadat
 - Actual server HTTP response compared byte-for-byte with the existing PNG.
 
 Implementation is local; deployment is a separate action.
+
+## Pose selection
+
+`NOXI_POSES` is the shared asset registry. `noxiStudyPose()` uses the selected move record: brilliant/great → celebrating; blunder/mistake/inaccuracy or pending analysis → thinking; identified motifs → pointing; ordinary explanations and the initial position → explaining. This is a presentation rule, not a new chess classification or a claim that a legal move is unintelligible. Onboarding uses welcoming, explaining, then pointing. No pose adds suggestions or numerical speech.
+
+Five source poses were found in the workspace; the user refers to seven, so two remain to be identified. The jumping raised-fists pose is provisionally used for excitement.

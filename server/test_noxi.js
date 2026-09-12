@@ -11,11 +11,20 @@ harness = harness.replace('addEventListener(){}, removeEventListener(){}, focus(
   'addEventListener(k, fn){ (this.events || (this.events = {}))[k] = fn; }, removeEventListener(){}, focus(){}');
 harness = harness.replace('function makePage(fetchImpl){', 'function makePage(fetchImpl, savedStore){').replace('const store = {};', 'const store = savedStore || {};').replace('out.doc = doc;', 'out.doc = doc; out.store = store;');
 harness = harness.replace('stateFromFEN, EDU_VERSION });',
-  'stateFromFEN, EDU_VERSION, SF, STUDY, studyBuild, AUTH, NOXI, setAccount, noxiDialogue, noxiStudyText, noxiMaybeIntroduce, noxiDismiss, decideFirstScreen, showScreen, LSN, VERDICT, engineKey, REVIEW_ASK, testScreen:()=>screenName, testIdentity:(a, client) => { account=a; sb=client; }, testAccount:()=>account });');
+  'stateFromFEN, EDU_VERSION, SF, STUDY, studyBuild, AUTH, NOXI, setAccount, noxiDialogue, noxiStudyText, noxiStudyPose, noxiMaybeIntroduce, noxiDismiss, decideFirstScreen, showScreen, LSN, VERDICT, engineKey, REVIEW_ASK, testScreen:()=>screenName, testIdentity:(a, client) => { account=a; sb=client; }, testAccount:()=>account });');
 const cases = `
 (async function(){
  const p = makePage(only404);
  await wait(30);
+ eq('brilliant celebrates',p.noxiStudyPose({verdict:{cls:'v-brilliant'}}),'celebrating');
+ eq('great celebrates',p.noxiStudyPose({verdict:{cls:'v-great'}}),'celebrating');
+ for(const cls of ['v-blunder','v-mistake','v-inaccuracy']) eq(cls+' thinks',p.noxiStudyPose({verdict:{cls}}),'thinking');
+ eq('pending analysis thinks',p.noxiStudyPose({move:{}}),'thinking');
+ eq('empty position explains',p.noxiStudyPose(null),'explaining');
+ const poseDialogue=p.noxiDialogue(p.doc.getElementById('poseTest'),{sequence:['Hello','Look here'],poses:['welcoming','pointing']});
+ ok('greeting waves',poseDialogue.image.src.includes('welcoming'));
+ poseDialogue.action.click();ok('next message points',poseDialogue.image.src.includes('pointing'));
+ poseDialogue.setPose('unknown');ok('unknown pose falls back',poseDialogue.image.src.includes('explaining'));
  const writes = [];
  const client = { auth:{ updateUser:async payload => { writes.push(payload.data); return {}; } } };
  p.testIdentity({id:'returning', gameName:'Veteran'}, client);
@@ -125,7 +134,12 @@ const cases = `
  ok('classification still rendered',p.by('stVerdict').innerHTML.length>0);
  ok('best move still available outside Noxi',p.by('stBest').textContent==='c5');
  ok('engine suggestions stay out of Noxi',!/(c5|300|best|better|percent|%|evaluation)/i.test(p.NOXI.study.message.textContent));
+ p.STUDY.recs[1].verdict.cls='v-brilliant';p.reviewRender();
+ ok('selected brilliant move celebrates',p.NOXI.study.image.src.includes('celebrating'));
+ p.STUDY.recs[1].verdict.cls='v-mistake';p.reviewRender();
+ ok('reclassified move switches to thinking',p.NOXI.study.image.src.includes('thinking'));
  p.REV.ply=0; p.reviewRender();
+ ok('initial position clears emotional pose',p.NOXI.study.image.src.includes('explaining'));
  ok('initial position has no stale move',/first move/.test(p.NOXI.study.message.textContent));
  p.reviewClose(false); eq('leaving review hides study panel',p.by('studyPanel').style.display,'none');
  p.showScreen('home'); p.testIdentity({id:'recovery',gameName:'Reset',noxiIntro:'pending'},client);
