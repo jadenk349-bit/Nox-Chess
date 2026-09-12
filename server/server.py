@@ -2058,6 +2058,7 @@ def drop_client(client):
 # type is not decoration — browsers refuse to stream-compile without it.
 ROOT = os.path.dirname(HERE)
 STATIC_FILES = {
+    "/assets/characters/nox-guide-explaining-v1.png": ("assets/characters/nox-guide-explaining-v1.png", "image/png"),
     "/assets/home-button-moon.jpg": ("assets/home-button-moon.jpg", "image/jpeg"),
     "/assets/pieces/black-bishop.svg": ("assets/pieces/black-bishop.svg", "image/svg+xml"),
     "/assets/pieces/black-king.svg": ("assets/pieces/black-king.svg", "image/svg+xml"),

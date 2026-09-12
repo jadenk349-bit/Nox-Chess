@@ -1177,6 +1177,16 @@ reason.
 
 ## Working in blind-chess.html
 
+Noxi is the official Nox Chess assistant. The `NOXI` banner contains the
+reusable `noxiDialogue(host, options)` renderer, the played-move dialogue
+adapter, and first-username onboarding. Reuse the existing explaining PNG.
+Only controlled fact templates may enter Noxi's Study Board speech; do not
+feed it engine suggestions, numerical evaluations, percentages, or free-form
+analysis prose. Detailed engine/education panels and classifications remain
+separate. First username save enrolls new users through Supabase user metadata
+`noxi_intro`; missing metadata on a named account must never enroll it.
+See `docs/noxi.md` and run `node server/test_noxi.js` when changing these flows.
+
 Navigate by the `/* ==== TITLE ==== */` banners in the script — THE SKY,
 CONSTANTS & HELPERS, MOVE GENERATION, ENGINE, GAME / UI STATE, CLOCK, SOUND,
 COMPLETE BLINDFOLD, PLAYING MOVES, ONLINE PLAY, RESIGNING…, THE ENGINE, THE

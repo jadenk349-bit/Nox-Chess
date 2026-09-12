@@ -3514,6 +3514,29 @@
     .lb-stack{width:100%;}
   }
 
+  /* Noxi shares the site's surfaces and typography; the character stays in
+     normal flow so it never overlaps the board or its controls. */
+  .noxi-dialogue{display:flex; align-items:center; gap:14px; min-width:0;}
+  .noxi-character{width:100px; flex:0 0 100px; height:auto; object-fit:contain;}
+  .noxi-speech{flex:1; min-width:0; text-align:left;}
+  .noxi-name{color:var(--gold-soft); font-family:var(--font); font-size:25px; letter-spacing:.06em;}
+  .noxi-message{margin:6px 0 14px; font-size:16px; line-height:1.55; overflow-wrap:anywhere;}
+  .overlay.noxi-overlay{z-index:90; overflow-y:auto;}
+  .modal.noxi-modal{max-width:620px; max-height:calc(100dvh - 40px); overflow-y:auto;}
+  .noxi-intro .noxi-character{width:180px; flex-basis:180px;}
+  .noxi-intro .noxi-message{font-size:19px; min-height:90px;}
+  .noxi-skip{margin-top:18px;}
+  .noxi-analysis-details summary{cursor:pointer; color:var(--gold-soft); font-size:17px;}
+  .noxi-analysis-details[open] summary{margin-bottom:14px;}
+  @media(max-width:560px){
+    .noxi-character{width:80px; flex-basis:80px;}
+    .noxi-intro{flex-direction:column; gap:10px;}
+    .noxi-intro .noxi-character{width:130px; flex-basis:auto;}
+    .noxi-intro .noxi-speech{text-align:center;}
+    .noxi-intro .noxi-message{min-height:60px; font-size:17px;}
+    .modal.noxi-modal{padding:20px;}
+  }
+
   /* ---------- overlays ---------- */
   .overlay{
     position:fixed; inset:0; z-index:50;
@@ -4461,11 +4484,15 @@
             </form>
           </div>
 
+          <div class="card panel" id="noxiStudy" style="display:none"></div>
+
           <!-- review only: why the engine liked its own move -->
           <div class="card panel coach-card" id="coachCard" style="display:none">
+            <details class="noxi-analysis-details"><summary>Engine analysis</summary>
             <h2>The Engine's Move</h2>
             <div class="coach-move" id="coachMove"></div>
             <div class="coach-why" id="coachWhy"></div>
+            </details>
           </div>
 
           <!-- review only: what the position is ABOUT, from the Education
@@ -4475,8 +4502,10 @@
                concept library or its corpus fails to load, this card never
                shows and Study Board is exactly what it was before. -->
           <div class="card panel concept-card" id="conceptCard" style="display:none">
+            <details class="noxi-analysis-details"><summary>Explore this position</summary>
             <h2>What This Position Is About</h2>
             <div class="cc-body" id="conceptBody"></div>
+            </details>
           </div>
 
           <div class="card panel rules-card" id="rulesCard">
@@ -4566,6 +4595,13 @@
 </div>
 
 <!-- promotion -->
+<div class="overlay noxi-overlay" id="noxiOverlay" role="dialog" aria-modal="true" aria-label="Welcome to Nox Chess with Noxi">
+  <div class="modal noxi-modal">
+    <div id="noxiIntroBody"></div>
+    <button type="button" class="ghost noxi-skip" id="noxiSkip">Skip introduction</button>
+  </div>
+</div>
+
 <div class="overlay" id="promoOverlay">
   <div class="modal">
     <h3>Promotion</h3>
@@ -7460,6 +7496,163 @@ const REV = {
   liveState: null      // the final position, restored on leaving
 };
 
+/* ============================================================
+   NOXI — shared character dialogue and first-username introduction
+   ============================================================ */
+const NOXI = { owner:null, dialogue:null, study:null, seen:new Set(), saving:Promise.resolve(), focus:null };
+const NOXI_INTRO = [
+  "Hi, I'm Noxi. Welcome to Nox Chess.",
+  'I will be your chess assistant.',
+  "First, let's learn how to play blind chess!"
+];
+
+/* The renderer knows no chess or accounts. A caller supplies a message or a
+   sequence, an optional action and a layout; all words enter as text, never
+   HTML. Future Noxi appearances can use this same small interface. */
+function noxiDialogue(host, options){
+  host.innerHTML = '';
+  const root = document.createElement('div');
+  root.className = 'noxi-dialogue' + (options.layout === 'intro' ? ' noxi-intro' : '');
+  const image = document.createElement('img');
+  image.src = '/assets/characters/nox-guide-explaining-v1.png?v=1';
+  image.alt = ''; image.className = 'noxi-character'; image.setAttribute('aria-hidden', 'true');
+  const speech = document.createElement('div'); speech.className = 'noxi-speech';
+  const name = document.createElement('div'); name.className = 'noxi-name'; name.textContent = 'Noxi';
+  const message = document.createElement('p'); message.className = 'noxi-message';
+  message.setAttribute('aria-live', 'polite'); message.setAttribute('aria-atomic', 'true');
+  const action = document.createElement('button'); action.type = 'button'; action.className = 'primary';
+  const steps = options.sequence || [options.message || ''];
+  let step = 0;
+  const setMessage = text => { message.textContent = text; };
+  const draw = () => {
+    setMessage(steps[step]);
+    action.textContent = step < steps.length - 1 ? 'Next' : (options.actionLabel || 'Continue');
+  };
+  action.onclick = () => {
+    if (step < steps.length - 1) { step++; draw(); }
+    else if (options.onAction) options.onAction();
+  };
+  speech.appendChild(name); speech.appendChild(message);
+  if (options.onAction || steps.length > 1) speech.appendChild(action);
+  root.appendChild(image); root.appendChild(speech); host.appendChild(root); draw();
+  return { root, message, action, setMessage };
+}
+
+/* Only controlled descriptions of facts about the PLAYED move enter Noxi.
+   In particular, motif.text, engine lines, education wording and verdict.text
+   are not interpolated: those may legitimately contain recommendations or
+   scores elsewhere in Study Board. Motif tags come from its existing chess
+   reasoning. No new evaluation or alternative-move search lives here. */
+function noxiStudyText(before, move, after, verdict){
+  if (!move || !after) return "We've reached the end of the game. Select a move to explore what happened.";
+  const motifs = findMotifs(before, move, after, before.turn);
+  const phrases = {
+    mate:'That is checkmate! The king is in check with no legal escape.',
+    doubleCheck:'This uncovers a double check, so the king has to respond to both attackers.',
+    fork:'This creates a fork, putting several opposing pieces under pressure at once.',
+    pin:'This creates a pin, tying an opposing piece to something more valuable behind it.',
+    skewer:'This lines up opposing pieces in a skewer, putting the piece behind the first target under pressure.',
+    discoveredAttack:'Moving this piece uncovers an attack from a piece behind it.',
+    hangingPiece:'This move creates a threat against a vulnerable opposing piece.',
+    trappedPiece:'This puts an opposing piece under pressure with no safe escape square of its own.',
+    backRank:'The opposing king is boxed in by its own pieces, creating a threat along the back rank.'
+  };
+  const motif = motifs.find(m => Object.prototype.hasOwnProperty.call(phrases, m.tag));
+  const piece = ({P:'pawn',N:'knight',B:'bishop',R:'rook',Q:'queen',K:'king'})[move.p.t] || 'piece';
+  const color = before.turn === W ? 'White' : 'Black';
+  let fact = motif ? phrases[motif.tag] : color + ' repositions the ' + piece + '.';
+  if (!motif){
+    if (move.castle) fact = 'Castling moves the king and rook together, changing how they can join the game.';
+    else if (move.promo) fact = 'The pawn promotes, giving its side a new piece to work with.';
+    else if (move.cap) fact = color + ' captures an opposing piece with the ' + piece + ', changing the material on the board.';
+    else if (inCheck(after, other(before.turn))) fact = 'This gives check, so the opponent must address the threat to the king.';
+    else if (move.p.t === 'P') fact = color + ' advances a pawn, changing which squares it controls.';
+    // These are the same positional observations used by describeBest(),
+    // applied to the actual move without importing that function's advice.
+    else if (move.p.t !== 'K' && isAttacked(before, move.from, other(before.turn)) &&
+             !isAttacked(after, move.to, other(before.turn)))
+      fact = 'This moves the ' + piece + ' out of attack, removing the immediate threat to it.';
+    else if (move.p.t !== 'K' && rowOf(move.from) === (before.turn === W ? 7 : 0) &&
+             rowOf(move.to) !== rowOf(move.from))
+      fact = color + ' develops the ' + piece + ' off the back rank, bringing it into play.';
+  }
+  if (motif && motif.tag === 'mate') return fact;
+  const cls = verdict && verdict.cls;
+  if (cls === 'v-blunder' || cls === 'v-mistake')
+    return fact + ' Be careful: this move weakens your position and makes the opponent’s task easier.';
+  if (cls === 'v-inaccuracy') return fact + ' There is a trade-off here: your position loses some strength.';
+  if (cls === 'v-brilliant' || cls === 'v-great') return fact + ' Nicely spotted—this is an important move for your position.';
+  // With no completed engine analysis, describe the fact without praising it.
+  return fact;
+}
+function noxiStudy(verdict){
+  const host = document.getElementById('noxiStudy');
+  if (!host || !REV.on) return;
+  if (!NOXI.study) NOXI.study = noxiDialogue(host, {message:''});
+  host.style.display = '';
+  NOXI.study.setMessage(noxiStudyText(REV.states[REV.ply], REV.moves[REV.ply], REV.states[REV.ply + 1], verdict));
+}
+function noxiLocalSeen(id){
+  if (NOXI.seen.has(id)) return true;
+  try { return !!localStorage.getItem('nox.noxi.intro.' + id); } catch (_) { return false; }
+}
+function noxiRemember(id, status){
+  NOXI.seen.add(id);
+  try { localStorage.setItem('nox.noxi.intro.' + id, status); } catch (_) {}
+  if (account && account.id === id) account.noxiIntro = status;
+  // Serialize seen/completed writes, so a slow seen response cannot overwrite
+  // completion. Recheck identity before sending: an old modal must never mark
+  // the next account on a shared browser as introduced.
+  NOXI.saving = NOXI.saving.catch(() => {}).then(async () => {
+    if (!sb || !account || account.id !== id) return;
+    try {
+      const result = await sb.auth.updateUser({data:{noxi_intro:status}});
+      if (result.error) throw result.error;
+    } catch (_) {
+      // The per-account local flag still prevents repeated interruptions here.
+      // No permission/rating decision depends on this optional preference.
+      console.warn('Noxi introduction saved on this device; account sync unavailable.');
+    }
+  });
+}
+function noxiDismiss(completed){
+  const id = NOXI.owner;
+  document.getElementById('noxiOverlay').classList.remove('show');
+  NOXI.owner = null;
+  const home = document.getElementById('screen-home');
+  home.inert = false;
+  if (id && account && account.id === id) noxiRemember(id, completed ? 'completed' : 'seen');
+  if (NOXI.focus && NOXI.focus.focus) NOXI.focus.focus();
+  NOXI.focus = null;
+  if (completed && id && account && account.id === id) lsnEnter();
+}
+function noxiMaybeIntroduce(){
+  if (NOXI.owner){
+    if (!account || account.id !== NOXI.owner || screenName !== 'home') noxiDismiss(false);
+    return;
+  }
+  if (screenName !== 'home' || !account || !account.gameName || account.noxiIntro !== 'pending' || noxiLocalSeen(account.id)) return;
+  NOXI.owner = account.id;
+  NOXI.focus = document.activeElement;
+  NOXI.dialogue = noxiDialogue(document.getElementById('noxiIntroBody'), {
+    layout:'intro', sequence:NOXI_INTRO, actionLabel:'Start Learning', onAction:() => noxiDismiss(true)
+  });
+  document.getElementById('screen-home').inert = true;
+  document.getElementById('noxiOverlay').classList.add('show');
+  noxiRemember(NOXI.owner, 'seen');
+  NOXI.dialogue.action.focus();
+}
+document.getElementById('noxiSkip').onclick = () => noxiDismiss(false);
+document.getElementById('noxiOverlay').addEventListener('keydown', e => {
+  if (!NOXI.owner) return;
+  if (e.key === 'Escape'){ e.preventDefault(); e.stopPropagation(); noxiDismiss(false); }
+  if (e.key === 'Tab'){
+    const next = NOXI.dialogue.action, skip = document.getElementById('noxiSkip');
+    if (e.shiftKey && document.activeElement === next){ e.preventDefault(); skip.focus(); }
+    else if (!e.shiftKey && document.activeElement === skip){ e.preventDefault(); next.focus(); }
+  }
+});
+
 function reviewBuild(){
   const states = [newState()], moves = [];
   let s = states[0];
@@ -7503,6 +7696,7 @@ function reviewClose(restore){
   REV.liveState = null;
   document.getElementById('reviewBar').style.display = 'none';
   document.getElementById('screen-game').classList.remove('reviewing');
+  document.getElementById('noxiStudy').style.display = 'none';
   document.getElementById('coachCard').style.display = 'none';
   document.getElementById('conceptCard').style.display = 'none';
   document.getElementById('arrows').innerHTML = '';
@@ -8030,6 +8224,7 @@ function reviewRender(){
      none, which is exactly the case a player on a browser without WebAssembly
      is in. Additive and quiet on failure: if education/ is not there this does
      nothing at all. */
+  noxiStudy(null);
   eduAnalyse(ply);
   // ply i is the position *before* move i, so it is move i under the microscope
   // here: number (i>>1)+1, and White on even plies.
@@ -8090,6 +8285,7 @@ function reviewRender(){
   const v = judgeMove(st, played, before, after, playedWasBest, gap);
   badge.className = 'rev-verdict ' + v.cls;
   badge.textContent = v.sym + '  ' + v.text;
+  noxiStudy(after ? v : null);
 
   line.innerHTML =
     'You played <b>' + playedSan + '</b>' +
@@ -13516,6 +13712,7 @@ function showScreen(name, how){
   // arrived at by a redirect ('replace') takes over the entry it was reached
   // from rather than standing behind it.
   navSync(how === 'replace' ? 'replace' : 'push');
+  setTimeout(noxiMaybeIntroduce, 0);
 }
 const gameInProgress = () => G.sans.length > 0 && !G.over;
 // A game that leaving would abandon: the wordmark asks first, and so does the
@@ -14626,6 +14823,8 @@ document.getElementById('nameForm').addEventListener('submit', async e => {
   nameSave.disabled = true;
   nameSave.textContent = 'Saving…';
   let clashed = false;
+  const namingId = account.id;
+  const firstName = !account.gameName;
   try {
     if (await nameAvailable(name) === false) throw { code: '23505' };
     // Into the profile first: that is the copy the unique index guards, so it
@@ -14634,7 +14833,7 @@ document.getElementById('nameForm').addEventListener('submit', async e => {
     // the name, or a name the database refused would still be in the token
     // the next time the page looked to see whether one had been chosen.
     const saved = await sb.from('profiles').update({ display_name: name })
-      .eq('id', account.id).select('display_name').maybeSingle();
+      .eq('id', namingId).select('display_name').maybeSingle();
     if (saved.error) throw saved.error;
     // The row may not exist yet — the trigger makes it a moment after signup
     // — in which case the update matched nothing and said so quietly. The
@@ -14644,8 +14843,15 @@ document.getElementById('nameForm').addEventListener('submit', async e => {
     // And into the token, which is what the server falls back to when it has
     // no service key to read the profile with, and what this page reads to
     // know whether a name has been chosen at all.
-    const { error } = await sb.auth.updateUser({ data: { game_name: name } });
+    if (!account || account.id !== namingId) return;
+    const data = { game_name:name };
+    // Only this successful first-name transition enrolls a user. Missing
+    // metadata on an already named account is not evidence of a new user.
+    if (firstName && !account.noxiIntro) data.noxi_intro = 'pending';
+    const { error } = await sb.auth.updateUser({ data });
     if (error) throw error;
+    if (!account || account.id !== namingId) return;
+    if (data.noxi_intro) account.noxiIntro = data.noxi_intro;
     account.gameName = account.name = G.playerName = name;
     updateAccountUI();
     showScreen('home');
@@ -14729,11 +14935,12 @@ async function initAuth(){
 async function setAccount(session){
   authSession = session || null;
   const u = session && session.user;
-  if (!u){ account = null; updateAccountUI(); return; }
+  if (!u){ account = null; updateAccountUI(); noxiMaybeIntroduce(); return; }
   const meta = u.user_metadata || {};
   const chosen = typeof meta.game_name === 'string' ? meta.game_name.trim() : '';
   account = {
     id: u.id,
+    noxiIntro: meta.noxi_intro || '',
     gameName: nameProblem(chosen) ? '' : chosen,   // '' means: still needs asking
     name: chosen || meta.full_name || meta.name || (u.email || '').split('@')[0] || 'Player',
     avatar: meta.avatar_url || meta.picture || '',
@@ -14741,6 +14948,7 @@ async function setAccount(session){
     tier: tierFor(START_ELO),
     puzzleRating: PZ_START_RATING
   };
+  noxiMaybeIntroduce();
   updateAccountUI();
   // the profile row is created by a trigger on signup; read it back for rating/tier
   try {
@@ -14898,6 +15106,7 @@ const needsName = () => !!account && !account.gameName;
    redirect is the username, and only for an account that has none. Never moves
    anyone out of a menu or a game they have already walked into. */
 function decideFirstScreen(){
+  noxiMaybeIntroduce();
   const opening = ['home', 'signup', 'login', 'name'];
   if (opening.indexOf(screenName) === -1) return;
   // Both of these are redirects rather than pages chosen, so neither leaves a
